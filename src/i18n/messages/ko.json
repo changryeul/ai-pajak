@@ -1,0 +1,156 @@
+{
+  "common": {
+    "appName": "AI PAJAK",
+    "loading": "로딩 중...",
+    "save": "저장",
+    "cancel": "취소",
+    "submit": "제출",
+    "delete": "삭제",
+    "edit": "수정",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "search": "검색",
+    "filter": "필터",
+    "download": "다운로드",
+    "upload": "업로드",
+    "success": "성공",
+    "error": "오류",
+    "warning": "경고",
+    "info": "정보",
+    "yes": "예",
+    "no": "아니오",
+    "confirm": "확인",
+    "close": "닫기"
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "register": "회원가입",
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "resetPassword": "비밀번호 재설정",
+    "fullName": "성명",
+    "phone": "전화번호",
+    "npwp": "납세자번호 (NPWP)",
+    "nik": "주민등록번호 (NIK)",
+    "loginSuccess": "로그인 성공!",
+    "loginError": "이메일 또는 비밀번호가 올바르지 않습니다",
+    "registerSuccess": "회원가입 성공! 이메일을 확인해주세요.",
+    "twoFactorAuth": "2단계 인증",
+    "enterOtp": "OTP 코드 입력",
+    "enableTwoFactor": "2FA 활성화",
+    "disableTwoFactor": "2FA 비활성화"
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "welcome": "환영합니다",
+    "overview": "개요",
+    "totalDocuments": "총 문서",
+    "pendingSubmissions": "대기 중인 제출",
+    "totalTaxPaid": "총 납부 세금",
+    "upcomingDeadlines": "다가오는 마감일",
+    "recentActivity": "최근 활동",
+    "quickActions": "빠른 작업",
+    "createNewDocument": "새 문서 작성",
+    "uploadDocument": "문서 업로드",
+    "viewReports": "보고서 보기"
+  },
+  "tax": {
+    "pph21": {
+      "title": "소득세 21조",
+      "description": "근로, 서비스, 활동 소득에 대한 세금",
+      "grossSalary": "총 급여",
+      "allowances": "수당",
+      "deductions": "공제",
+      "netSalary": "순 급여",
+      "taxAmount": "세금액",
+      "employee": "직원",
+      "period": "과세 기간"
+    },
+    "pph23": {
+      "title": "소득세 23조",
+      "description": "배당금, 이자, 로열티, 상금, 임대료 및 특정 서비스에 대한 세금",
+      "transactionType": "거래 유형",
+      "grossAmount": "총액",
+      "recipient": "수취인",
+      "taxRate": "세율"
+    },
+    "ppn": {
+      "title": "부가가치세",
+      "description": "과세 상품 및 과세 서비스 전달에 대한 세금",
+      "invoice": "세금계산서",
+      "dpp": "과세 기준",
+      "outputTax": "매출 세액",
+      "inputTax": "매입 세액",
+      "netTax": "납부할 세액"
+    },
+    "sptTahunan": {
+      "title": "연간 세금 신고",
+      "description": "연간 소득세 신고",
+      "taxYear": "과세 연도",
+      "formType": "양식 유형",
+      "totalIncome": "총 소득",
+      "totalDeductions": "총 공제",
+      "taxableIncome": "과세 소득",
+      "taxDue": "납부할 세금"
+    },
+    "common": {
+      "calculate": "세금 계산",
+      "generateReport": "보고서 생성",
+      "submitToDjp": "DJP에 제출",
+      "saveDraft": "임시 저장",
+      "taxPeriod": "과세 기간",
+      "dueDate": "마감일",
+      "status": "상태"
+    }
+  },
+  "documents": {
+    "title": "문서",
+    "uploadNew": "새 문서 업로드",
+    "scan": "문서 스캔",
+    "ocr": "OCR 추출",
+    "processing": "처리 중...",
+    "extractedData": "추출된 데이터",
+    "confidence": "신뢰도",
+    "documentType": "문서 유형",
+    "supportedFormats": "지원 형식: PDF, JPG, PNG"
+  },
+  "subscription": {
+    "title": "구독",
+    "currentPlan": "현재 플랜",
+    "upgrade": "업그레이드",
+    "plans": {
+      "free": "무료",
+      "basic": "기본",
+      "professional": "프로페셔널",
+      "enterprise": "기업"
+    },
+    "features": "기능",
+    "billingCycle": "결제 주기",
+    "monthly": "월간",
+    "yearly": "연간"
+  },
+  "settings": {
+    "title": "설정",
+    "profile": "프로필",
+    "security": "보안",
+    "notifications": "알림",
+    "language": "언어",
+    "theme": "테마",
+    "company": "회사",
+    "billing": "결제"
+  },
+  "errors": {
+    "required": "필수 입력 항목입니다",
+    "invalidEmail": "유효하지 않은 이메일 주소입니다",
+    "invalidNpwp": "NPWP 형식이 올바르지 않습니다",
+    "invalidNik": "NIK는 16자리여야 합니다",
+    "passwordTooShort": "비밀번호는 최소 8자 이상이어야 합니다",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다",
+    "serverError": "서버 오류가 발생했습니다",
+    "networkError": "네트워크 오류, 연결을 확인하세요"
+  }
+}

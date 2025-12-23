@@ -1,0 +1,156 @@
+{
+  "common": {
+    "appName": "AI PAJAK",
+    "loading": "Memuat...",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "submit": "Kirim",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "back": "Kembali",
+    "next": "Selanjutnya",
+    "previous": "Sebelumnya",
+    "search": "Cari",
+    "filter": "Filter",
+    "download": "Unduh",
+    "upload": "Unggah",
+    "success": "Berhasil",
+    "error": "Kesalahan",
+    "warning": "Peringatan",
+    "info": "Informasi",
+    "yes": "Ya",
+    "no": "Tidak",
+    "confirm": "Konfirmasi",
+    "close": "Tutup"
+  },
+  "auth": {
+    "login": "Masuk",
+    "logout": "Keluar",
+    "register": "Daftar",
+    "email": "Email",
+    "password": "Kata Sandi",
+    "confirmPassword": "Konfirmasi Kata Sandi",
+    "forgotPassword": "Lupa Kata Sandi?",
+    "resetPassword": "Atur Ulang Kata Sandi",
+    "fullName": "Nama Lengkap",
+    "phone": "Nomor Telepon",
+    "npwp": "NPWP",
+    "nik": "NIK",
+    "loginSuccess": "Berhasil masuk!",
+    "loginError": "Email atau kata sandi salah",
+    "registerSuccess": "Pendaftaran berhasil! Silakan cek email Anda.",
+    "twoFactorAuth": "Autentikasi Dua Faktor",
+    "enterOtp": "Masukkan kode OTP",
+    "enableTwoFactor": "Aktifkan 2FA",
+    "disableTwoFactor": "Nonaktifkan 2FA"
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "welcome": "Selamat datang",
+    "overview": "Ringkasan",
+    "totalDocuments": "Total Dokumen",
+    "pendingSubmissions": "Menunggu Pengiriman",
+    "totalTaxPaid": "Total Pajak Dibayar",
+    "upcomingDeadlines": "Tenggat Waktu Mendatang",
+    "recentActivity": "Aktivitas Terbaru",
+    "quickActions": "Aksi Cepat",
+    "createNewDocument": "Buat Dokumen Baru",
+    "uploadDocument": "Unggah Dokumen",
+    "viewReports": "Lihat Laporan"
+  },
+  "tax": {
+    "pph21": {
+      "title": "PPh Pasal 21",
+      "description": "Pajak Penghasilan atas penghasilan sehubungan dengan pekerjaan, jasa, atau kegiatan",
+      "grossSalary": "Gaji Bruto",
+      "allowances": "Tunjangan",
+      "deductions": "Potongan",
+      "netSalary": "Gaji Bersih",
+      "taxAmount": "Jumlah Pajak",
+      "employee": "Karyawan",
+      "period": "Masa Pajak"
+    },
+    "pph23": {
+      "title": "PPh Pasal 23",
+      "description": "Pajak Penghasilan atas dividen, bunga, royalti, hadiah, sewa, dan jasa tertentu",
+      "transactionType": "Jenis Transaksi",
+      "grossAmount": "Jumlah Bruto",
+      "recipient": "Penerima Penghasilan",
+      "taxRate": "Tarif Pajak"
+    },
+    "ppn": {
+      "title": "PPN",
+      "description": "Pajak Pertambahan Nilai atas penyerahan Barang Kena Pajak dan Jasa Kena Pajak",
+      "invoice": "Faktur Pajak",
+      "dpp": "Dasar Pengenaan Pajak",
+      "outputTax": "PPN Keluaran",
+      "inputTax": "PPN Masukan",
+      "netTax": "PPN yang Harus Dibayar"
+    },
+    "sptTahunan": {
+      "title": "SPT Tahunan",
+      "description": "Surat Pemberitahuan Tahunan Pajak Penghasilan",
+      "taxYear": "Tahun Pajak",
+      "formType": "Jenis Formulir",
+      "totalIncome": "Total Penghasilan",
+      "totalDeductions": "Total Pengurang",
+      "taxableIncome": "Penghasilan Kena Pajak",
+      "taxDue": "Pajak Terutang"
+    },
+    "common": {
+      "calculate": "Hitung Pajak",
+      "generateReport": "Buat Laporan",
+      "submitToDjp": "Kirim ke DJP",
+      "saveDraft": "Simpan Draf",
+      "taxPeriod": "Masa Pajak",
+      "dueDate": "Batas Waktu",
+      "status": "Status"
+    }
+  },
+  "documents": {
+    "title": "Dokumen",
+    "uploadNew": "Unggah Dokumen Baru",
+    "scan": "Pindai Dokumen",
+    "ocr": "Ekstraksi OCR",
+    "processing": "Memproses...",
+    "extractedData": "Data yang Diekstrak",
+    "confidence": "Tingkat Keyakinan",
+    "documentType": "Jenis Dokumen",
+    "supportedFormats": "Format yang didukung: PDF, JPG, PNG"
+  },
+  "subscription": {
+    "title": "Langganan",
+    "currentPlan": "Paket Saat Ini",
+    "upgrade": "Tingkatkan",
+    "plans": {
+      "free": "Gratis",
+      "basic": "Dasar",
+      "professional": "Profesional",
+      "enterprise": "Perusahaan"
+    },
+    "features": "Fitur",
+    "billingCycle": "Siklus Penagihan",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "profile": "Profil",
+    "security": "Keamanan",
+    "notifications": "Notifikasi",
+    "language": "Bahasa",
+    "theme": "Tema",
+    "company": "Perusahaan",
+    "billing": "Penagihan"
+  },
+  "errors": {
+    "required": "Kolom ini wajib diisi",
+    "invalidEmail": "Email tidak valid",
+    "invalidNpwp": "Format NPWP tidak valid",
+    "invalidNik": "NIK harus 16 digit",
+    "passwordTooShort": "Kata sandi minimal 8 karakter",
+    "passwordMismatch": "Kata sandi tidak cocok",
+    "serverError": "Terjadi kesalahan server",
+    "networkError": "Kesalahan jaringan, periksa koneksi Anda"
+  }
+}

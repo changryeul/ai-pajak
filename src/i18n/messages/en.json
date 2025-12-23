@@ -1,0 +1,156 @@
+{
+  "common": {
+    "appName": "AI PAJAK",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "download": "Download",
+    "upload": "Upload",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "npwp": "Tax ID (NPWP)",
+    "nik": "National ID (NIK)",
+    "loginSuccess": "Successfully logged in!",
+    "loginError": "Invalid email or password",
+    "registerSuccess": "Registration successful! Please check your email.",
+    "twoFactorAuth": "Two-Factor Authentication",
+    "enterOtp": "Enter OTP code",
+    "enableTwoFactor": "Enable 2FA",
+    "disableTwoFactor": "Disable 2FA"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "overview": "Overview",
+    "totalDocuments": "Total Documents",
+    "pendingSubmissions": "Pending Submissions",
+    "totalTaxPaid": "Total Tax Paid",
+    "upcomingDeadlines": "Upcoming Deadlines",
+    "recentActivity": "Recent Activity",
+    "quickActions": "Quick Actions",
+    "createNewDocument": "Create New Document",
+    "uploadDocument": "Upload Document",
+    "viewReports": "View Reports"
+  },
+  "tax": {
+    "pph21": {
+      "title": "Income Tax Article 21",
+      "description": "Tax on income from employment, services, or activities",
+      "grossSalary": "Gross Salary",
+      "allowances": "Allowances",
+      "deductions": "Deductions",
+      "netSalary": "Net Salary",
+      "taxAmount": "Tax Amount",
+      "employee": "Employee",
+      "period": "Tax Period"
+    },
+    "pph23": {
+      "title": "Income Tax Article 23",
+      "description": "Tax on dividends, interest, royalties, prizes, rent, and certain services",
+      "transactionType": "Transaction Type",
+      "grossAmount": "Gross Amount",
+      "recipient": "Recipient",
+      "taxRate": "Tax Rate"
+    },
+    "ppn": {
+      "title": "Value Added Tax",
+      "description": "Tax on delivery of Taxable Goods and Taxable Services",
+      "invoice": "Tax Invoice",
+      "dpp": "Tax Base",
+      "outputTax": "Output Tax",
+      "inputTax": "Input Tax",
+      "netTax": "Net Tax Payable"
+    },
+    "sptTahunan": {
+      "title": "Annual Tax Return",
+      "description": "Annual Income Tax Return",
+      "taxYear": "Tax Year",
+      "formType": "Form Type",
+      "totalIncome": "Total Income",
+      "totalDeductions": "Total Deductions",
+      "taxableIncome": "Taxable Income",
+      "taxDue": "Tax Due"
+    },
+    "common": {
+      "calculate": "Calculate Tax",
+      "generateReport": "Generate Report",
+      "submitToDjp": "Submit to DJP",
+      "saveDraft": "Save Draft",
+      "taxPeriod": "Tax Period",
+      "dueDate": "Due Date",
+      "status": "Status"
+    }
+  },
+  "documents": {
+    "title": "Documents",
+    "uploadNew": "Upload New Document",
+    "scan": "Scan Document",
+    "ocr": "OCR Extraction",
+    "processing": "Processing...",
+    "extractedData": "Extracted Data",
+    "confidence": "Confidence Level",
+    "documentType": "Document Type",
+    "supportedFormats": "Supported formats: PDF, JPG, PNG"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade",
+    "plans": {
+      "free": "Free",
+      "basic": "Basic",
+      "professional": "Professional",
+      "enterprise": "Enterprise"
+    },
+    "features": "Features",
+    "billingCycle": "Billing Cycle",
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "security": "Security",
+    "notifications": "Notifications",
+    "language": "Language",
+    "theme": "Theme",
+    "company": "Company",
+    "billing": "Billing"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidNpwp": "Invalid NPWP format",
+    "invalidNik": "NIK must be 16 digits",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordMismatch": "Passwords do not match",
+    "serverError": "Server error occurred",
+    "networkError": "Network error, check your connection"
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "common": {
+    "appName": "AI PAJAK",
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "submit": "提交",
+    "delete": "删除",
+    "edit": "编辑",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "search": "搜索",
+    "filter": "筛选",
+    "download": "下载",
+    "upload": "上传",
+    "success": "成功",
+    "error": "错误",
+    "warning": "警告",
+    "info": "信息",
+    "yes": "是",
+    "no": "否",
+    "confirm": "确认",
+    "close": "关闭"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出",
+    "register": "注册",
+    "email": "电子邮件",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "forgotPassword": "忘记密码？",
+    "resetPassword": "重置密码",
+    "fullName": "姓名",
+    "phone": "电话号码",
+    "npwp": "纳税人识别号 (NPWP)",
+    "nik": "身份证号 (NIK)",
+    "loginSuccess": "登录成功！",
+    "loginError": "电子邮件或密码不正确",
+    "registerSuccess": "注册成功！请检查您的电子邮件。",
+    "twoFactorAuth": "双因素认证",
+    "enterOtp": "输入OTP代码",
+    "enableTwoFactor": "启用2FA",
+    "disableTwoFactor": "禁用2FA"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "welcome": "欢迎",
+    "overview": "概览",
+    "totalDocuments": "总文档数",
+    "pendingSubmissions": "待提交",
+    "totalTaxPaid": "已缴税款总额",
+    "upcomingDeadlines": "即将到期",
+    "recentActivity": "最近活动",
+    "quickActions": "快捷操作",
+    "createNewDocument": "创建新文档",
+    "uploadDocument": "上传文档",
+    "viewReports": "查看报告"
+  },
+  "tax": {
+    "pph21": {
+      "title": "所得税第21条",
+      "description": "就业、服务或活动收入的税款",
+      "grossSalary": "总工资",
+      "allowances": "津贴",
+      "deductions": "扣除",
+      "netSalary": "净工资",
+      "taxAmount": "税额",
+      "employee": "员工",
+      "period": "纳税期"
+    },
+    "pph23": {
+      "title": "所得税第23条",
+      "description": "股息、利息、特许权使用费、奖金、租金和特定服务的税款",
+      "transactionType": "交易类型",
+      "grossAmount": "总金额",
+      "recipient": "收款人",
+      "taxRate": "税率"
+    },
+    "ppn": {
+      "title": "增值税",
+      "description": "应税商品和应税服务交付的税款",
+      "invoice": "税务发票",
+      "dpp": "计税基础",
+      "outputTax": "销项税",
+      "inputTax": "进项税",
+      "netTax": "应缴净税额"
+    },
+    "sptTahunan": {
+      "title": "年度税务申报",
+      "description": "年度所得税申报",
+      "taxYear": "纳税年度",
+      "formType": "表格类型",
+      "totalIncome": "总收入",
+      "totalDeductions": "总扣除",
+      "taxableIncome": "应税收入",
+      "taxDue": "应缴税款"
+    },
+    "common": {
+      "calculate": "计算税款",
+      "generateReport": "生成报告",
+      "submitToDjp": "提交至DJP",
+      "saveDraft": "保存草稿",
+      "taxPeriod": "纳税期",
+      "dueDate": "截止日期",
+      "status": "状态"
+    }
+  },
+  "documents": {
+    "title": "文档",
+    "uploadNew": "上传新文档",
+    "scan": "扫描文档",
+    "ocr": "OCR提取",
+    "processing": "处理中...",
+    "extractedData": "提取的数据",
+    "confidence": "置信度",
+    "documentType": "文档类型",
+    "supportedFormats": "支持格式: PDF, JPG, PNG"
+  },
+  "subscription": {
+    "title": "订阅",
+    "currentPlan": "当前计划",
+    "upgrade": "升级",
+    "plans": {
+      "free": "免费",
+      "basic": "基础",
+      "professional": "专业",
+      "enterprise": "企业"
+    },
+    "features": "功能",
+    "billingCycle": "计费周期",
+    "monthly": "月付",
+    "yearly": "年付"
+  },
+  "settings": {
+    "title": "设置",
+    "profile": "个人资料",
+    "security": "安全",
+    "notifications": "通知",
+    "language": "语言",
+    "theme": "主题",
+    "company": "公司",
+    "billing": "账单"
+  },
+  "errors": {
+    "required": "此字段为必填项",
+    "invalidEmail": "电子邮件地址无效",
+    "invalidNpwp": "NPWP格式无效",
+    "invalidNik": "NIK必须为16位数字",
+    "passwordTooShort": "密码至少需要8个字符",
+    "passwordMismatch": "密码不匹配",
+    "serverError": "服务器错误",
+    "networkError": "网络错误，请检查您的连接"
+  }
+}

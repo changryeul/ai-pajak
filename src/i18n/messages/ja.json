@@ -1,0 +1,156 @@
+{
+  "common": {
+    "appName": "AI PAJAK",
+    "loading": "読み込み中...",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "submit": "送信",
+    "delete": "削除",
+    "edit": "編集",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "search": "検索",
+    "filter": "フィルター",
+    "download": "ダウンロード",
+    "upload": "アップロード",
+    "success": "成功",
+    "error": "エラー",
+    "warning": "警告",
+    "info": "情報",
+    "yes": "はい",
+    "no": "いいえ",
+    "confirm": "確認",
+    "close": "閉じる"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "register": "登録",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード確認",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "resetPassword": "パスワードリセット",
+    "fullName": "氏名",
+    "phone": "電話番号",
+    "npwp": "納税者番号 (NPWP)",
+    "nik": "国民ID (NIK)",
+    "loginSuccess": "ログインに成功しました！",
+    "loginError": "メールアドレスまたはパスワードが正しくありません",
+    "registerSuccess": "登録が完了しました！メールをご確認ください。",
+    "twoFactorAuth": "二要素認証",
+    "enterOtp": "OTPコードを入力",
+    "enableTwoFactor": "2FAを有効化",
+    "disableTwoFactor": "2FAを無効化"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "welcome": "ようこそ",
+    "overview": "概要",
+    "totalDocuments": "総ドキュメント数",
+    "pendingSubmissions": "保留中の提出",
+    "totalTaxPaid": "総納税額",
+    "upcomingDeadlines": "今後の締め切り",
+    "recentActivity": "最近のアクティビティ",
+    "quickActions": "クイックアクション",
+    "createNewDocument": "新規ドキュメント作成",
+    "uploadDocument": "ドキュメントをアップロード",
+    "viewReports": "レポートを表示"
+  },
+  "tax": {
+    "pph21": {
+      "title": "所得税第21条",
+      "description": "雇用、サービス、活動からの所得に対する税金",
+      "grossSalary": "総給与",
+      "allowances": "手当",
+      "deductions": "控除",
+      "netSalary": "純給与",
+      "taxAmount": "税額",
+      "employee": "従業員",
+      "period": "課税期間"
+    },
+    "pph23": {
+      "title": "所得税第23条",
+      "description": "配当金、利子、ロイヤリティ、賞金、賃貸料、特定のサービスに対する税金",
+      "transactionType": "取引タイプ",
+      "grossAmount": "総額",
+      "recipient": "受取人",
+      "taxRate": "税率"
+    },
+    "ppn": {
+      "title": "付加価値税",
+      "description": "課税商品および課税サービスの引渡しに対する税金",
+      "invoice": "税金請求書",
+      "dpp": "課税基準",
+      "outputTax": "出力税",
+      "inputTax": "入力税",
+      "netTax": "支払うべき純税額"
+    },
+    "sptTahunan": {
+      "title": "年次税務申告",
+      "description": "年次所得税申告",
+      "taxYear": "課税年度",
+      "formType": "フォームタイプ",
+      "totalIncome": "総所得",
+      "totalDeductions": "総控除",
+      "taxableIncome": "課税所得",
+      "taxDue": "支払うべき税金"
+    },
+    "common": {
+      "calculate": "税金を計算",
+      "generateReport": "レポート生成",
+      "submitToDjp": "DJPに提出",
+      "saveDraft": "下書きを保存",
+      "taxPeriod": "課税期間",
+      "dueDate": "締め切り",
+      "status": "ステータス"
+    }
+  },
+  "documents": {
+    "title": "ドキュメント",
+    "uploadNew": "新しいドキュメントをアップロード",
+    "scan": "ドキュメントをスキャン",
+    "ocr": "OCR抽出",
+    "processing": "処理中...",
+    "extractedData": "抽出されたデータ",
+    "confidence": "信頼度",
+    "documentType": "ドキュメントタイプ",
+    "supportedFormats": "対応形式: PDF, JPG, PNG"
+  },
+  "subscription": {
+    "title": "サブスクリプション",
+    "currentPlan": "現在のプラン",
+    "upgrade": "アップグレード",
+    "plans": {
+      "free": "無料",
+      "basic": "ベーシック",
+      "professional": "プロフェッショナル",
+      "enterprise": "エンタープライズ"
+    },
+    "features": "機能",
+    "billingCycle": "請求サイクル",
+    "monthly": "月額",
+    "yearly": "年額"
+  },
+  "settings": {
+    "title": "設定",
+    "profile": "プロフィール",
+    "security": "セキュリティ",
+    "notifications": "通知",
+    "language": "言語",
+    "theme": "テーマ",
+    "company": "会社",
+    "billing": "請求"
+  },
+  "errors": {
+    "required": "この項目は必須です",
+    "invalidEmail": "無効なメールアドレスです",
+    "invalidNpwp": "NPWPの形式が正しくありません",
+    "invalidNik": "NIKは16桁である必要があります",
+    "passwordTooShort": "パスワードは8文字以上必要です",
+    "passwordMismatch": "パスワードが一致しません",
+    "serverError": "サーバーエラーが発生しました",
+    "networkError": "ネットワークエラー、接続を確認してください"
+  }
+}
