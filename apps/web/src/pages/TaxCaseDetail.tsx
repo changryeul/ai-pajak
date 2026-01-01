@@ -1,0 +1,1 @@
+import TaxCaseDetail from "../views/TaxCaseDetailView";

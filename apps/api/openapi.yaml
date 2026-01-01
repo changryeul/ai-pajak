@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: AI-Pajak API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+
+components:
+  securitySchemes:
+    UserIdHeader:
+      type: apiKey
+      in: header
+      name: x-user-id
+
+security:
+  - UserIdHeader: []
+
+paths:
+  /tax-cases/{taxCaseId}/overview:
+    get:
+      summary: Get Tax Case Overview
+      tags: [TaxCase Query]
+      parameters:
+        - name: taxCaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Tax case overview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  taxCase:
+                    $ref: '#/components/schemas/TaxCase'
+                  workflow:
+                    $ref: '#/components/schemas/Workflow'
+                  aiResult:
+                    $ref: '#/components/schemas/AIResult'
+                  humanReview:
+                    $ref: '#/components/schemas/HumanReview'
+                  filings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Filing'
+                  uiFlags:
+                    $ref: '#/components/schemas/UiFlags'
+  /tax-cases/{taxCaseId}/timeline:
+    get:
+      summary: Get Tax Case Timeline
+      tags: [TaxCase Query]
+      parameters:
+        - name: taxCaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Audit timeline
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    action:
+                      type: string
+                    actorId:
+                      type: integer
+                    at:
+                      type: string
+                      format: date-time
+
+  /companies/{companyId}/tax-cases:
+    get:
+      summary: List Tax Cases by Company
+      tags: [Company Query]
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Company tax case list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    taxType:
+                      type: string
+                    period:
+                      type: string
+                    stage:
+                      type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+
+  /tax-cases/{taxCaseId}/ai-result:
+    post:
+      summary: Apply AI Result
+      tags: [TaxCase Command]
+      parameters:
+        - name: taxCaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                suggestedTax:
+                  type: string
+                confidence:
+                  type: number
+                rawResponse:
+                  type: object
+      responses:
+        200:
+          description: AI result applied                                            
+  /tax-cases/{taxCaseId}/override:
+    post:
+      summary: Override AI Result
+      tags: [TaxCase Command]
+      parameters:
+        - name: taxCaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [finalTax, reason]
+              properties:
+                finalTax:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        200:
+          description: AI result overridden
+
+  /tax-cases/{taxCaseId}/approve:
+    post:
+      summary: Approve Review
+      tags: [TaxCase Command]
+      parameters:
+        - name: taxCaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Approved
+
+  /tax-cases/{taxCaseId}/file:
+    post:
+      summary: Submit Filing
+      tags: [Filing Command]
+      parameters:
+        - name: taxCaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Filing submitted
+          
+                    

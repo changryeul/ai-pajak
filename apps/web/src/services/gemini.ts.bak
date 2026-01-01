@@ -1,0 +1,87 @@
+
+import { GoogleGenAI, Type } from "@google/genai";
+
+export async function simulateTaxCalculation(payload: {
+  category: string;
+  lang?: string;
+  data: any;
+}) {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const userLang = payload.lang || 'English';
+    const isIndividual = payload.data.customerType === 'INDIVIDUAL';
+    const isEmployeeS = payload.data.customerType === 'INDIVIDUAL_S';
+    const isEmployeeSS = payload.data.customerType === 'INDIVIDUAL_SS';
+    const isUMKM = payload.data.taxRegime === 'UMKM_05';
+
+    let userRoleDesc = 'Corporate Taxpayer';
+    if (isIndividual) userRoleDesc = 'Individual Business/Professional (1770)';
+    if (isEmployeeS) userRoleDesc = 'Employee Taxpayer with Income > 60M IDR (1770S)';
+    if (isEmployeeSS) userRoleDesc = 'Employee Taxpayer with Income < 60M IDR (1770SS)';
+
+    const prompt = `You are a Senior Indonesian Tax Consultant for Jakarta Tax Consulting. 
+    Analyze the following financial data for a ${userRoleDesc} in Indonesia using the Mono Flip Global AI platform:
+    
+    Context:
+    - User Type: ${userRoleDesc}
+    - User Regime: ${payload.data.taxRegime}
+    - Business Sector: ${payload.data.businessSector}
+    - Monthly/Annual Amount: Rp ${payload.data.grossAmount}
+    - Description: ${payload.data.description}
+
+    Critical Legal Knowledge (UU HPP & PP 55/2022):
+    1. INDIVIDUAL UMKM (1770): First Rp 500M annual turnover is TAX-FREE for 0.5% regime.
+    2. EMPLOYEE (1770S/SS): Use Tiered Rates (Tarif Pasal 17) for net taxable income after PTKP (Non-Taxable Income).
+       - PTKP Standard (TK/0): Rp 54,000,000.
+       - 1770SS: For annual gross income < 60M IDR from one employer.
+       - 1770S: For annual gross income > 60M IDR or from multiple employers.
+    3. WITHHOLDING: Individuals (1770/S/SS) are GENERALLY NOT withholding agents for PPh 23.
+    4. PPh 4(2) Rent: Tenants usually don't withhold; landlord self-pays unless tenant is corporate.
+
+    Your Task:
+    1. Calculate potential tax liabilities based on these specific rules for ${userRoleDesc}.
+    2. For 1770S/SS, focus on verifying the 1721-A1/A2 forms and identifying other incomes or deductions.
+    3. Provide "aiAdvice" strictly in ${userLang}, mentioning Jakarta Tax Consulting's final review.
+
+    Output strictly in JSON format.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            totalTaxDue: { type: Type.NUMBER },
+            taxList: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  type: { type: Type.STRING },
+                  amount: { type: Type.NUMBER },
+                  rate: { type: Type.STRING },
+                  reason: { type: Type.STRING },
+                  legalBasis: { type: Type.STRING }
+                },
+                required: ["type", "amount", "rate", "reason"]
+              }
+            },
+            aiAdvice: { type: Type.STRING, description: `Tax advice translated into ${userLang}` }
+          },
+          required: ["totalTaxDue", "taxList", "aiAdvice"]
+        }
+      }
+    });
+
+    return JSON.parse(response.text || '{}');
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    return {
+      totalTaxDue: 0,
+      taxList: [],
+      aiAdvice: "System error. Please consult a manual advisor at Jakarta Tax Consulting."
+    };
+  }
+}

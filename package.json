@@ -1,0 +1,25 @@
+{
+  "name": "ai-pajak",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace apps/api run start:dev",
+    "build:api": "npm --workspace apps/api run build",
+    "start:api": "npm --workspace apps/api run start",
+
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio"
+  },
+  "devDependencies": {
+    "prisma": "^5.10.2",
+    "typescript": "^5.4.5",
+    "concurrently": "^8.2.2"
+  }
+}

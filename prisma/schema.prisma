@@ -1,0 +1,186 @@
+// =====================================================
+// Prisma Schema for AI-Pajak
+// DB: PostgreSQL
+// Prisma: v5.x
+// =====================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// ===================== ENUMS =====================
+//
+
+enum TaxType {
+  PPh21
+  PPh23
+  VAT
+  ANNUAL
+}
+
+enum WorkflowStage {
+  UPLOADED
+  AI_ANALYZED
+  HUMAN_REVIEW
+  APPROVED
+  FILED
+}
+
+enum SenderType {
+  HUMAN
+  AI
+}
+
+enum FilingStatus {
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+}
+
+//
+// ===================== CORE =====================
+//
+
+model User {
+  id        BigInt   @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  companyUsers CompanyUser[]
+  auditLogs   AuditLog[]   @relation("AuditActor")
+  reviews     HumanReview[]
+}
+
+model Company {
+  id        BigInt   @id @default(autoincrement())
+  name      String
+  npwp      String   @unique
+  createdAt DateTime @default(now())
+
+  users    CompanyUser[]
+  taxCases TaxCase[]
+}
+
+model CompanyUser {
+  companyId BigInt
+  userId    BigInt
+  role      String
+  joinedAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([companyId, userId])
+}
+
+//
+// ===================== TAX CASE =====================
+//
+
+model TaxCase {
+  id        BigInt   @id @default(autoincrement())
+  companyId BigInt
+  taxType   TaxType
+  period    String
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+
+  company   Company       @relation(fields: [companyId], references: [id])
+  workflow  WorkflowState?
+  aiResults AIResult[]
+  reviews   HumanReview[]
+  filings   TaxFiling[]
+  messages  Communication[]
+  audits    AuditLog[]
+}
+
+model WorkflowState {
+  taxCaseId BigInt @id
+  stage     WorkflowStage
+  updatedAt DateTime @updatedAt
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id])
+}
+
+//
+// ===================== AI / REVIEW =====================
+//
+
+model AIResult {
+  id           BigInt   @id @default(autoincrement())
+  taxCaseId    BigInt
+  suggestedTax String
+  confidence   Float
+  rawResponse  Json
+  createdAt    DateTime @default(now())
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id])
+}
+
+model HumanReview {
+  id           BigInt   @id @default(autoincrement())
+  taxCaseId    BigInt
+  reviewerId   BigInt
+  finalTax     String
+  overrideFlag Boolean  @default(false)
+  reason       String?
+  reviewedAt   DateTime @default(now())
+
+  taxCase  TaxCase @relation(fields: [taxCaseId], references: [id])
+  reviewer User    @relation(fields: [reviewerId], references: [id])
+}
+
+//
+// ===================== FILING =====================
+//
+
+model TaxFiling {
+  id            BigInt        @id @default(autoincrement())
+  taxCaseId     BigInt
+  filingStatus  FilingStatus
+  filedBy       BigInt?
+  filedAt       DateTime?
+  submissionRef String?
+  createdAt     DateTime @default(now())
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id])
+}
+
+//
+// ===================== COMMUNICATION =====================
+//
+
+model Communication {
+  id         BigInt     @id @default(autoincrement())
+  taxCaseId  BigInt
+  senderType SenderType
+  senderId   BigInt?
+  message    String
+  createdAt DateTime @default(now())
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id])
+}
+
+//
+// ===================== AUDIT =====================
+//
+
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  taxCaseId BigInt
+  actorId   BigInt?
+  action    String
+  createdAt DateTime @default(now())
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id])
+  actor   User?   @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([taxCaseId])
+}
