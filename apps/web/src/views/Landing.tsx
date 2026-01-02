@@ -1,15 +1,34 @@
 
+alert('🔥 landing.tsx is running')
 import React, { useContext, useState } from 'react';
-import { LanguageContext } from '../App';
-import { Button, Card, Badge } from '../apps/web/src/components/ui';
+// import { LanguageContext } from '../App';
+import { Button, Card, Badge } from '../components/ui';
 import { FORMATTER } from '../constants';
 
 interface LandingProps {
   onStart: () => void;
 }
 
+
+// 🔹 임시 다국어 객체 (나중에 Context로 교체 가능)
+const t = {
+  role_corporate: 'Corporate',
+  role_individual: 'Individual',
+  role_pro_mode: 'Professional',
+  pricing_monthly_tab: 'Monthly',
+  pricing_annual_tab: 'Annual',
+  pricing_pro_tab: 'Pro',
+  pro_pricing_title: 'Professional Plan',
+  pro_pricing_desc: 'For tax consultants and accounting firms',
+  pro_benefit_1: 'Multi-client management',
+  pro_benefit_2: 'Bulk filing',
+  pro_benefit_3: 'Priority review',
+  pro_benefit_4: 'Dedicated support',
+  pro_total_example: 'Example Total',
+};
+
 const Landing: React.FC<LandingProps> = ({ onStart }) => {
-  const { t } = useContext(LanguageContext);
+  // const { t } = useContext(LanguageContext);
   const [pricingTab, setPricingTab] = useState<'MONTHLY' | 'ANNUAL' | 'PRO'>('MONTHLY');
 
   const proClientsExample = [
