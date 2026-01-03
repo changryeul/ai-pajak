@@ -3,6 +3,14 @@
 // DB: PostgreSQL
 // Prisma: v5.x
 // =====================================================
+//
+// DELETION POLICY:
+// - Cascade: Child records deleted with parent (cache, logs, dependent data)
+// - Restrict: Prevent deletion if children exist (core business entities)
+// - SetNull: Clear FK when parent deleted (optional references like preparedBy)
+//
+// Default: Restrict (explicit Cascade/SetNull where appropriate)
+// =====================================================
 
 generator client {
   provider      = "prisma-client-js"
@@ -44,6 +52,27 @@ enum FilingStatus {
   REJECTED
 }
 
+// Phase 2 Enums
+enum SubmissionPrepStatus {
+  GENERATED
+  VALIDATED
+  READY_TO_FILE
+  MANUALLY_SUBMITTED
+  VALIDATION_FAILED
+}
+
+enum EfakturStatus {
+  GENERATED
+  DOWNLOADED
+  UPLOADED
+}
+
+enum OcrEngine {
+  PADDLEOCR
+  GEMINI
+  MANUAL
+}
+
 //
 // ===================== CORE =====================
 //
@@ -55,8 +84,13 @@ model User {
   createdAt DateTime @default(now())
 
   companyUsers CompanyUser[]
-  auditLogs   AuditLog[]   @relation("AuditActor")
-  reviews     HumanReview[]
+  auditLogs    AuditLog[]   @relation("AuditActor")
+  reviews      HumanReview[]
+
+  // Phase 2 Relations
+  preparedSubmissions SubmissionPrep[]  @relation("PreparedSubmissions")
+  uploadedBpes        BpeDocument[]     @relation("UploadedBpes")
+  customerPoas        PowerOfAttorney[] @relation("CustomerPoas")
 }
 
 model Company {
@@ -67,6 +101,9 @@ model Company {
 
   users    CompanyUser[]
   taxCases TaxCase[]
+
+  // Phase 2 Relations
+  poas PowerOfAttorney[]
 }
 
 model CompanyUser {
@@ -100,6 +137,12 @@ model TaxCase {
   filings   TaxFiling[]
   messages  Communication[]
   audits    AuditLog[]
+
+  // Phase 2 Relations
+  submissionPrep SubmissionPrep?
+  bpeDocuments   BpeDocument[]
+  efakturFiles   EfakturFile[]
+  billingPrep    BillingPrep?
 }
 
 model WorkflowState {
@@ -118,11 +161,20 @@ model AIResult {
   id           BigInt   @id @default(autoincrement())
   taxCaseId    BigInt
   suggestedTax String
-  confidence   Float
+  confidence   Float    // @deprecated Use confidenceScore for Phase 2+ (AI model confidence 0-1)
   rawResponse  Json
   createdAt    DateTime @default(now())
 
-  taxCase TaxCase @relation(fields: [taxCaseId], references: [id])
+  // Phase 2 OCR Fields
+  ocrEngine        OcrEngine?
+  confidenceScore  Decimal?  @db.Decimal(5, 2) // OCR confidence score (0.00-100.00)
+  processingTimeMs Int?
+  fallbackUsed     Boolean   @default(false)
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id], onDelete: Cascade)
+
+  @@index([taxCaseId])
+  @@index([taxCaseId, ocrEngine]) // Composite index for OCR queries by TaxCase
 }
 
 model HumanReview {
@@ -184,4 +236,125 @@ model AuditLog {
   actor   User?   @relation("AuditActor", fields: [actorId], references: [id])
 
   @@index([taxCaseId])
+}
+
+//
+// ===================== PHASE 2: SUBMISSION PREP =====================
+//
+
+model SubmissionPrep {
+  id                     BigInt               @id @default(autoincrement())
+  taxCaseId              BigInt               @unique
+  sptData                Json
+  operatorHelperData     Json?
+  status                 SubmissionPrepStatus @default(GENERATED)
+  validatedAt            DateTime?
+  validationErrors       Json?
+  preparedByConsultantId BigInt?
+  manuallySubmittedAt    DateTime?
+  djpReferenceId         String?              @db.VarChar(100)
+  createdAt              DateTime             @default(now())
+
+  taxCase    TaxCase @relation(fields: [taxCaseId], references: [id], onDelete: Cascade)
+  preparedBy User?   @relation("PreparedSubmissions", fields: [preparedByConsultantId], references: [id], onDelete: SetNull)
+
+  @@index([taxCaseId])
+  @@index([status])
+}
+
+//
+// ===================== PHASE 2: BPE DOCUMENTS =====================
+//
+
+model BpeDocument {
+  id                     BigInt    @id @default(autoincrement())
+  taxCaseId              BigInt
+  bpeNumber              String?   @unique @db.VarChar(50)
+  fileUrl                String
+  fileSize               Int?
+  uploadedByConsultantId BigInt?
+  uploadedAt             DateTime
+  sentToCustomerAt       DateTime?
+  createdAt              DateTime  @default(now())
+
+  taxCase    TaxCase @relation(fields: [taxCaseId], references: [id], onDelete: Cascade)
+  uploadedBy User?   @relation("UploadedBpes", fields: [uploadedByConsultantId], references: [id], onDelete: SetNull)
+
+  @@index([taxCaseId])
+}
+
+//
+// ===================== PHASE 2: EFAKTUR FILES =====================
+//
+
+model EfakturFile {
+  id                 BigInt        @id @default(autoincrement())
+  taxCaseId          BigInt
+  fileUrl            String
+  status             EfakturStatus @default(GENERATED)
+  downloadedAt       DateTime?
+  manuallyUploadedAt DateTime?
+  djpReferenceId     String?       @db.VarChar(100)
+  createdAt          DateTime      @default(now())
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id], onDelete: Cascade)
+
+  @@index([taxCaseId])
+  @@index([status])
+}
+
+//
+// ===================== PHASE 2: BILLING PREP =====================
+//
+
+model BillingPrep {
+  id          BigInt    @id @default(autoincrement())
+  taxCaseId   BigInt    @unique
+  billingData Json
+  amount      Decimal   @db.Decimal(15, 2)
+  ntpn        String?   @db.VarChar(50)
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  taxCase TaxCase @relation(fields: [taxCaseId], references: [id], onDelete: Cascade)
+
+  @@index([taxCaseId])
+}
+
+//
+// ===================== PHASE 2: POA (POWER OF ATTORNEY) =====================
+//
+
+model PowerOfAttorney {
+  id          BigInt    @id @default(autoincrement())
+  customerId  BigInt    // User who granted POA (customer)
+  companyId   BigInt
+  startDate   DateTime
+  endDate     DateTime
+  documentUrl String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  customer        User                 @relation("CustomerPoas", fields: [customerId], references: [id])
+  company         Company              @relation(fields: [companyId], references: [id])
+  validationCache PoaValidationCache[]
+
+  @@index([customerId])
+  @@index([companyId])
+  @@index([endDate])
+}
+
+model PoaValidationCache {
+  id                BigInt    @id @default(autoincrement())
+  poaId             BigInt
+  validatedAt       DateTime
+  isValid           Boolean
+  expiryWarningSent Boolean   @default(false)
+  nextValidationAt  DateTime?
+  createdAt         DateTime  @default(now())
+
+  poa PowerOfAttorney @relation(fields: [poaId], references: [id], onDelete: Cascade)
+
+  @@index([poaId])
 }

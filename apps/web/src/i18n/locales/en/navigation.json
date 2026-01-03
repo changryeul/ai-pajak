@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "taxFiling": "Tax Filing",
+    "uploadDocuments": "Upload Documents",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "customers": "Customers",
+    "taxProcessing": "Tax Processing",
+    "communication": "Communication",
+    "approvalQueue": "Approval Queue",
+    "bulkSubmit": "Bulk Submit",
+    "team": "Team",
+    "payment": "Payment",
+    "settings": "Settings",
+    "taxCases": "Tax Cases",
+    "documents": "Documents",
+    "clients": "Clients",
+    "reports": "Reports",
+    "help": "Help"
+  },
+  "header": {
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "user": "User"
+  },
+  "menu": {
+    "home": "Home",
+    "overview": "Overview",
+    "analytics": "Analytics",
+    "history": "History"
+  }
+}

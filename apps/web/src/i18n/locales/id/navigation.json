@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "dashboard": "Dasbor",
+    "taxFiling": "Pelaporan Pajak",
+    "uploadDocuments": "Unggah Dokumen",
+    "inProgress": "Sedang Berlangsung",
+    "completed": "Selesai",
+    "customers": "Pelanggan",
+    "taxProcessing": "Pemrosesan Pajak",
+    "communication": "Komunikasi",
+    "approvalQueue": "Antrian Persetujuan",
+    "bulkSubmit": "Kirim Massal",
+    "team": "Tim",
+    "payment": "Pembayaran",
+    "settings": "Pengaturan",
+    "taxCases": "Kasus Pajak",
+    "documents": "Dokumen",
+    "clients": "Klien",
+    "reports": "Laporan",
+    "help": "Bantuan"
+  },
+  "header": {
+    "notifications": "Notifikasi",
+    "profile": "Profil",
+    "settings": "Pengaturan",
+    "logout": "Keluar",
+    "user": "Pengguna"
+  },
+  "menu": {
+    "home": "Beranda",
+    "overview": "Ringkasan",
+    "analytics": "Analitik",
+    "history": "Riwayat"
+  }
+}

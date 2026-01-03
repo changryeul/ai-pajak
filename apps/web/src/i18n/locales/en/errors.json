@@ -1,0 +1,30 @@
+{
+  "general": {
+    "unknown": "An unknown error occurred",
+    "network": "Network error. Please check your connection.",
+    "timeout": "Request timed out. Please try again.",
+    "serverError": "Server error. Please try again later.",
+    "notFound": "The requested resource was not found.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "forbidden": "Access denied."
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be no more than {{max}} characters",
+    "invalidFormat": "Invalid format"
+  },
+  "auth": {
+    "invalidCredentials": "Invalid email or password",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "accountLocked": "Your account has been locked. Please contact support."
+  },
+  "file": {
+    "uploadFailed": "File upload failed",
+    "invalidType": "Invalid file type",
+    "tooLarge": "File is too large. Maximum size is {{max}}MB",
+    "processingFailed": "File processing failed"
+  }
+}

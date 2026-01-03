@@ -20,9 +20,11 @@ inputDocuments:
 
 **Author:** Chrishan (with Winston the Architect)
 **Date:** 2026-01-03
-**Version:** 1.0
+**Version:** 1.1
 **Project Type:** Brownfield - Phase 1 확장
-**Phase:** Phase 2 - DJP API 자동화 & 고급 문서 처리
+**Phase:** Phase 2 - 제출 준비 자동화 & 고급 문서 처리
+
+> **참고**: DJP API 자동 제출은 법적 검토 및 DJP 승인 후 별도 에픽으로 구현 예정입니다. 현재 Phase 2에서는 제출 준비 과정을 자동화하고, 실제 DJP 제출은 수동으로 수행합니다.
 
 ---
 
@@ -32,15 +34,17 @@ inputDocuments:
 
 **Functional Requirements:**
 
-AI Pajak Phase 2는 기존 Phase 1의 세금 계산 자동화 플랫폼을 DJP(인도네시아 국세청) API와 직접 통합하는 것이 핵심입니다.
+AI Pajak Phase 2는 기존 Phase 1의 세금 계산 자동화 플랫폼에 제출 준비 자동화 및 고급 문서 처리를 추가합니다.
 
 | FR ID | 기능 | 우선순위 | 아키텍처 영향 |
 |-------|------|---------|--------------|
-| FR-1 | DJP e-Filing API 통합 | P0 | 새 모듈 생성, OAuth 2.0, 큐 시스템 |
+| FR-1 | 제출 준비 자동화 | P0 | 새 모듈 생성 (submission-prep), 큐 시스템 |
 | FR-2 | PaddleOCR 통합 | P0 | Python 서비스 분리, 하이브리드 처리 |
-| FR-3 | e-Faktur PPN 지원 | P0 | DJP e-Faktur API 추가 통합 |
-| FR-4 | 워크플로우 자동화 | P1 | 스케줄러 모듈, 알림 시스템 확장 |
+| FR-3 | e-Faktur PPN 파일 생성 | P0 | e-Faktur 파일 생성 서비스 (수동 업로드용) |
+| FR-4 | 워크플로우 자동화 | P1 | 스케줄러 모듈, 알림 시스템 확장, READY_TO_FILE 상태 |
 | FR-5 | Audit & Compliance | P0 | 불변 로그, POA 검증 |
+
+> **TODO-EPIC**: DJP API 자동 제출 기능은 DJP 승인 후 별도 에픽으로 구현됩니다.
 
 **Non-Functional Requirements:**
 
@@ -137,31 +141,54 @@ AI Pajak Phase 2는 기존 Phase 1의 세금 계산 자동화 플랫폼을 DJP(�
 **신규 테이블:**
 
 ```sql
--- DJP Submission Log
-CREATE TABLE djp_submission (
+-- Submission Prep (제출 준비 데이터)
+CREATE TABLE submission_prep (
   id BIGSERIAL PRIMARY KEY,
   tax_case_id BIGINT REFERENCES tax_cases(id),
-  submission_type VARCHAR(20) NOT NULL,
-  djp_reference_id VARCHAR(100),
-  status VARCHAR(20) NOT NULL,
-  request_payload JSONB,
-  response_payload JSONB,
-  error_message TEXT,
-  submitted_at TIMESTAMPTZ,
-  submitted_by_consultant_id BIGINT,
-  retry_count INT DEFAULT 0,
+  spt_data JSONB NOT NULL,              -- 생성된 SPT 데이터
+  operator_helper_data JSONB,           -- Operator Helper용 데이터
+  status VARCHAR(20) NOT NULL,          -- GENERATED, READY_TO_FILE, MANUALLY_SUBMITTED
+  validated_at TIMESTAMPTZ,
+  validation_errors JSONB,
+  prepared_by_consultant_id BIGINT,
+  manually_submitted_at TIMESTAMPTZ,    -- 수동 제출 완료 시간
+  djp_reference_id VARCHAR(100),        -- 수동 입력된 DJP 참조 번호
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- BPE Documents
+-- BPE Documents (수동 업로드)
 CREATE TABLE bpe_documents (
   id BIGSERIAL PRIMARY KEY,
   tax_case_id BIGINT REFERENCES tax_cases(id),
-  bpe_number VARCHAR(50) UNIQUE NOT NULL,
-  file_url TEXT NOT NULL,
+  bpe_number VARCHAR(50),               -- 수동 입력
+  file_url TEXT NOT NULL,               -- S3 URL (수동 업로드)
   file_size INT,
-  received_at TIMESTAMPTZ NOT NULL,
+  uploaded_by_consultant_id BIGINT,     -- 업로드한 컨설턴트
+  uploaded_at TIMESTAMPTZ NOT NULL,
   sent_to_customer_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- e-Faktur Files (생성된 파일)
+CREATE TABLE efaktur_files (
+  id BIGSERIAL PRIMARY KEY,
+  tax_case_id BIGINT REFERENCES tax_cases(id),
+  file_url TEXT NOT NULL,               -- 생성된 CSV 파일 URL
+  status VARCHAR(20) NOT NULL,          -- GENERATED, DOWNLOADED, UPLOADED
+  downloaded_at TIMESTAMPTZ,
+  manually_uploaded_at TIMESTAMPTZ,
+  djp_reference_id VARCHAR(100),        -- 수동 입력
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Billing Prep (e-Billing 준비 데이터)
+CREATE TABLE billing_prep (
+  id BIGSERIAL PRIMARY KEY,
+  tax_case_id BIGINT REFERENCES tax_cases(id),
+  billing_data JSONB NOT NULL,          -- e-Billing 생성용 데이터
+  amount DECIMAL(15,2) NOT NULL,
+  ntpn VARCHAR(50),                     -- 수동 입력된 NTPN
+  paid_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -174,6 +201,14 @@ CREATE TABLE poa_validation_cache (
   expiry_warning_sent BOOLEAN DEFAULT FALSE,
   next_validation_at TIMESTAMPTZ
 );
+```
+
+**TaxCase 상태 확장:**
+
+```sql
+-- 기존 상태: UPLOADED, AI_ANALYZED, HUMAN_REVIEW, APPROVED, FILED
+-- 신규 상태: READY_TO_FILE (APPROVED와 FILED 사이)
+ALTER TYPE tax_case_status ADD VALUE 'READY_TO_FILE' AFTER 'APPROVED';
 ```
 
 **OCR 테이블 확장:**
@@ -235,14 +270,21 @@ ALTER TABLE ocr_results ADD COLUMN fallback_used BOOLEAN DEFAULT FALSE;
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/djp/efiling/submit` | SPT 제출 |
-| POST | `/api/djp/efiling/bulk-submit` | SPT 일괄 제출 |
-| GET | `/api/djp/efiling/status/:submissionId` | 제출 상태 조회 |
-| POST | `/api/djp/ebilling/create` | ID Billing 생성 |
-| GET | `/api/djp/bpe/:taxCaseId` | BPE 조회 |
-| POST | `/api/djp/efaktur/create` | e-Faktur 생성 |
+| POST | `/api/submission-prep/prepare` | SPT 제출 데이터 준비 |
+| POST | `/api/submission-prep/bulk-prepare` | SPT 일괄 제출 준비 |
+| GET | `/api/submission-prep/status/:taxCaseId` | 제출 준비 상태 조회 |
+| GET | `/api/submission-prep/operator-helper/:taxCaseId` | Operator Helper 데이터 조회 |
+| POST | `/api/submission-prep/mark-submitted` | 수동 제출 완료 기록 |
+| POST | `/api/billing-prep/generate` | e-Billing 데이터 준비 |
+| POST | `/api/bpe/upload` | BPE 수동 업로드 |
+| GET | `/api/bpe/:taxCaseId` | BPE 조회 |
+| POST | `/api/efaktur/generate` | e-Faktur 파일 생성 |
+| GET | `/api/efaktur/:id/download` | e-Faktur 파일 다운로드 |
+| POST | `/api/efaktur/:id/mark-uploaded` | e-Faktur 수동 업로드 완료 |
 | POST | `/api/ocr/process` | 문서 OCR 처리 |
 | GET | `/api/ocr/status/:jobId` | OCR 상태 조회 |
+
+> **참고**: DJP API 직접 호출 엔드포인트는 TODO-EPIC으로 이동됨 (DJP 승인 후 구현)
 
 #### Error Handling Standards
 
@@ -718,34 +760,66 @@ const taxCase = await this.prisma.taxCase.findUnique({ where: { id } });
 
 ### Process Patterns
 
-#### DJP API 호출 패턴
+#### 제출 준비 처리 패턴
 
 ```typescript
 // 1. POA 유효성 검증
 const isPoaValid = await this.poaService.validate(taxCase.customerId);
 if (!isPoaValid) throw new BadRequestException('POA expired or invalid');
 
-// 2. 큐에 제출 작업 추가
-await this.djpQueue.add('submit-efiling', {
+// 2. 큐에 제출 준비 작업 추가
+await this.submissionPrepQueue.add('prepare-spt', {
   taxCaseId: taxCase.id,
   consultantId: consultant.id,
-  submittedBy: 'JAKARTA_TAX_CONSULTING', // 법적 귀속
+  preparedBy: 'JAKARTA_TAX_CONSULTING', // 법적 귀속
 });
 
 // 3. 비동기 처리 (Worker)
-@Processor('djp-submission')
-async handleSubmission(job: Job<SubmissionPayload>) {
+@Processor('submission-prep')
+async handlePreparation(job: Job<PreparePayload>) {
   try {
-    const result = await this.djpClient.submitEfiling(job.data);
-    await this.updateSubmissionStatus(job.data.taxCaseId, 'SUBMITTED', result);
-    await this.notificationService.sendSuccess(job.data);
+    // SPT 데이터 생성
+    const sptData = await this.sptGenerator.generate(job.data.taxCaseId);
+
+    // Operator Helper 데이터 생성
+    const operatorData = await this.operatorHelper.generate(sptData);
+
+    // 데이터 검증
+    const validation = await this.validateSptData(sptData);
+
+    // 준비 완료 저장
+    await this.submissionPrepRepository.save({
+      taxCaseId: job.data.taxCaseId,
+      sptData,
+      operatorHelperData: operatorData,
+      status: 'READY_TO_FILE',
+      validatedAt: new Date(),
+    });
+
+    // Tax Case 상태 업데이트
+    await this.taxCaseService.updateStatus(job.data.taxCaseId, 'READY_TO_FILE');
+
+    // 알림 발송
+    await this.notificationService.sendPrepComplete(job.data);
   } catch (error) {
     if (job.attemptsMade < 3) throw error; // 재시도
-    await this.updateSubmissionStatus(job.data.taxCaseId, 'FAILED', error);
-    await this.notificationService.sendFailure(job.data, error);
+    await this.notificationService.sendPrepFailure(job.data, error);
   }
 }
+
+// 4. 수동 제출 완료 기록
+async markAsSubmitted(taxCaseId: bigint, djpReferenceId?: string) {
+  await this.submissionPrepRepository.update(taxCaseId, {
+    status: 'MANUALLY_SUBMITTED',
+    manuallySubmittedAt: new Date(),
+    djpReferenceId,
+  });
+
+  await this.taxCaseService.updateStatus(taxCaseId, 'FILED');
+}
 ```
+
+> **TODO-EPIC**: DJP API 자동 제출 패턴은 DJP 승인 후 별도 구현
 
 #### OCR 처리 패턴
 
@@ -865,21 +939,27 @@ ai-pajak/
 │   │   │   │   └── utils/
 │   │   │   │       └── workflow-actions.ts
 │   │   │   │
-│   │   │   ├── djp/                # 신규 - DJP API 통합
-│   │   │   │   ├── djp.module.ts
-│   │   │   │   ├── djp.controller.ts
-│   │   │   │   ├── djp.service.ts           # DJP API 클라이언트
-│   │   │   │   ├── efiling.service.ts       # e-Filing 제출
-│   │   │   │   ├── ebilling.service.ts      # e-Billing 생성
-│   │   │   │   ├── efaktur.service.ts       # e-Faktur 처리
-│   │   │   │   ├── bpe.service.ts           # BPE 다운로드
+│   │   │   ├── submission-prep/     # 신규 - 제출 준비 자동화
+│   │   │   │   ├── submission-prep.module.ts
+│   │   │   │   ├── submission-prep.controller.ts
+│   │   │   │   ├── spt-generator.service.ts     # SPT 데이터 생성
+│   │   │   │   ├── operator-helper.service.ts   # Operator Helper 데이터
+│   │   │   │   ├── billing-generator.service.ts # e-Billing 데이터 준비
+│   │   │   │   ├── efaktur-generator.service.ts # e-Faktur 파일 생성
+│   │   │   │   ├── bpe-upload.service.ts        # BPE 수동 업로드
 │   │   │   │   ├── dto/
-│   │   │   │   │   ├── submit-spt.dto.ts
-│   │   │   │   │   ├── bulk-submit.dto.ts
-│   │   │   │   │   ├── create-billing.dto.ts
-│   │   │   │   │   └── efaktur.dto.ts
+│   │   │   │   │   ├── prepare-spt.dto.ts
+│   │   │   │   │   ├── bulk-prepare.dto.ts
+│   │   │   │   │   ├── billing-data.dto.ts
+│   │   │   │   │   ├── efaktur-file.dto.ts
+│   │   │   │   │   └── bpe-upload.dto.ts
 │   │   │   │   └── types/
-│   │   │   │       └── djp-response.types.ts
+│   │   │   │       └── submission-prep.types.ts
+│   │   │   │
+│   │   │   │   # TODO-EPIC: DJP API 자동화 (DJP 승인 후)
+│   │   │   │   # ├── djp-api.client.ts          # DJP API 클라이언트
+│   │   │   │   # ├── auto-submit.service.ts     # 자동 제출
+│   │   │   │   # └── bpe-polling.service.ts     # BPE 자동 다운로드
 │   │   │   │
 │   │   │   ├── ocr/                # 리팩토링 - OCR 모듈
 │   │   │   │   ├── ocr.module.ts
@@ -893,9 +973,10 @@ ai-pajak/
 │   │   │   │
 │   │   │   ├── scheduler/          # 신규 - 스케줄러
 │   │   │   │   ├── scheduler.module.ts
-│   │   │   │   ├── deadline-reminder.service.ts
-│   │   │   │   ├── bulk-submit.processor.ts
-│   │   │   │   └── bpe-polling.service.ts
+│   │   │   │   ├── deadline-reminder.service.ts  # 마감일 알림
+│   │   │   │   ├── auto-prepare.processor.ts     # 자동 제출 준비
+│   │   │   │   ├── bpe-reminder.service.ts       # BPE 업로드 리마인더
+│   │   │   │   └── overdue-alert.service.ts      # 지연 건 알림
 │   │   │   │
 │   │   │   ├── notification/       # 확장 - 알림
 │   │   │   │   ├── notification.module.ts
@@ -911,8 +992,9 @@ ai-pajak/
 │   │   │   │
 │   │   │   ├── queue/              # 신규 - Bull Queue
 │   │   │   │   ├── queue.module.ts
-│   │   │   │   ├── djp-submission.queue.ts
-│   │   │   │   └── ocr-processing.queue.ts
+│   │   │   │   ├── submission-prep.queue.ts    # 제출 준비 큐
+│   │   │   │   ├── bulk-prepare.queue.ts       # 일괄 준비 큐
+│   │   │   │   └── ocr-processing.queue.ts     # OCR 처리 큐
 │   │   │   │
 │   │   │   ├── company/            # 기존
 │   │   │   ├── filing/             # 기존
@@ -1051,10 +1133,13 @@ ai-pajak/
 
 | 서비스 | 책임 | 의존성 |
 |--------|------|--------|
-| `DjpModule` | DJP API 통합 | TaxCaseModule, QueueModule |
+| `SubmissionPrepModule` | 제출 준비 자동화 | TaxCaseModule, QueueModule |
 | `OcrModule` | OCR 처리 | PaddleOCR Service, GeminiClient |
-| `SchedulerModule` | 스케줄 작업 | QueueModule, NotificationModule |
+| `SchedulerModule` | 스케줄 작업 (제출 준비, 알림) | QueueModule, NotificationModule |
 | `QueueModule` | 비동기 작업 | Redis |
+| `BpeModule` | BPE 업로드/관리 | TaxCaseModule, NotificationModule |
+
+> **TODO-EPIC**: `DjpApiModule` (DJP API 자동 제출) - DJP 승인 후 추가
 
 ### Integration Points
 
@@ -1112,11 +1197,13 @@ ai-pajak/
 
 | FR | 아키텍처 지원 |
 |----|-------------|
-| FR-1: DJP API 통합 | DjpModule, QueueModule |
+| FR-1: 제출 준비 자동화 | SubmissionPrepModule, QueueModule |
 | FR-2: PaddleOCR | OcrModule, PaddleOCR Service |
-| FR-3: e-Faktur | DjpModule.efakturService |
-| FR-4: 워크플로우 자동화 | SchedulerModule |
+| FR-3: e-Faktur 파일 생성 | SubmissionPrepModule.efakturGeneratorService |
+| FR-4: 워크플로우 자동화 | SchedulerModule, READY_TO_FILE 상태 |
 | FR-5: Audit & Compliance | 기존 AuditLog + 확장 |
+
+> **TODO-EPIC Coverage**: DJP API 자동 제출 → DjpApiModule (미구현)
 
 **Non-Functional Requirements Coverage:**
 
@@ -1214,10 +1301,11 @@ ai-pajak/
 
 **First Implementation Priority:**
 
-1. DJP 모듈 기본 구조 생성
+1. Submission-Prep 모듈 기본 구조 생성
 2. PaddleOCR 서비스 Docker 설정
 3. Bull Queue + Redis 통합
 4. shadcn/ui 컴포넌트 마이그레이션
+5. READY_TO_FILE 상태 워크플로우 구현
 
 ---
 
@@ -1226,3 +1314,12 @@ ai-pajak/
 **Next Phase:** Epic/Story 생성 → Sprint Planning → 구현
 
 **Document Maintenance:** 구현 중 주요 기술 결정 시 이 아키텍처 문서 업데이트
+
+---
+
+## 변경 이력
+
+| 날짜 | 버전 | 변경 내용 | 작성자 |
+|------|------|-----------|--------|
+| 2026-01-03 | 1.1 | DJP API 자동 제출 → TODO-EPIC 이동, 제출 준비 자동화로 범위 조정, SubmissionPrepModule 추가, READY_TO_FILE 상태 추가 | AI Pajak Team |
+| 2026-01-03 | 1.0 | 초기 아키텍처 문서 작성 | Chrishan (with Winston the Architect) |

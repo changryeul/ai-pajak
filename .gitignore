@@ -17,3 +17,13 @@ yarn-error.log*
 
 # prisma
 apps/api/prisma/dev.db
+
+# PaddleOCR models (large binary files)
+services/paddleocr/models/*
+!services/paddleocr/models/.gitkeep
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/

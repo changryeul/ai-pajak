@@ -19,15 +19,9 @@ const Landing: React.FC<LandingProps> = ({ onStart }) => {
           OCR → AI Analysis → Human Review → Filing
         </p>
 
-        <Button
-  size="lg"
-  onClick={() => {
-    alert('🔥 BUTTON CLICKED');
-    onStart();
-  }}
->
-  Start Filing
-</Button>
+        <Button size="lg" onClick={onStart}>
+          Start Filing
+        </Button>
       </Card>
     </div>
   );

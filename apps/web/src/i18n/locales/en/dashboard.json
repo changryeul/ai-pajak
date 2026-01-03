@@ -1,0 +1,65 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back",
+  "defaultUser": "User",
+  "welcomeCustomer": "Welcome, {{name}}! Check your tax filing status.",
+  "welcomeConsultant": "Review the tax processing status for your assigned customers.",
+  "welcomeAdvisor": "Review approval and submission status.",
+  "stats": {
+    "totalCases": "Total Cases",
+    "pendingReview": "Pending Review",
+    "approved": "Approved",
+    "filed": "Filed",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "inProgress": "In Progress",
+    "inProgressDesc": "Cases currently being processed",
+    "completed": "Completed",
+    "completedDesc": "Filed tax returns",
+    "upcomingDeadline": "Upcoming Deadline",
+    "upcomingDeadlineDesc": "Cases due soon",
+    "casesCount": "{{count}} cases",
+    "casesCount_one": "{{count}} case",
+    "none": "None",
+    "assignedCustomers": "Assigned Customers",
+    "assignedCustomersDesc": "Total customers assigned",
+    "pendingReviewDesc": "Cases awaiting review",
+    "aiAnalyzing": "AI Analyzing",
+    "aiAnalyzingDesc": "Auto-analysis in progress",
+    "filedDesc": "Submitted this month",
+    "pendingApproval": "Pending Approval",
+    "pendingApprovalDesc": "Cases awaiting approval",
+    "readyToFile": "Ready to File",
+    "readyToFileDesc": "Awaiting DJP submission",
+    "dueSoon": "Due Soon",
+    "dueSoonDesc": "Cases within D-3"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "noActivity": "No activity in the last 7 days.",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "urgentCases": {
+    "title": "Urgent Cases",
+    "noUrgent": "No urgent cases requiring immediate attention.",
+    "casesCount": "{{count}} cases",
+    "casesCount_one": "{{count}} case",
+    "dueToday": "Due Today",
+    "overdue": "{{count}} days overdue",
+    "overdue_one": "{{count}} day overdue",
+    "viewDetails": "View details for {{name}}"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "newCase": "New Tax Case",
+    "uploadDocument": "Upload Document",
+    "viewReports": "View Reports"
+  },
+  "deadlines": {
+    "title": "Upcoming Deadlines",
+    "noDeadlines": "No upcoming deadlines",
+    "dueIn": "Due in {{days}} days",
+    "overdue": "Overdue"
+  }
+}

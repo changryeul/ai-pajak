@@ -1,0 +1,65 @@
+{
+  "title": "대시보드",
+  "welcome": "다시 오신 것을 환영합니다",
+  "defaultUser": "사용자",
+  "welcomeCustomer": "환영합니다, {{name}}님! 세금 신고 현황을 확인하세요.",
+  "welcomeConsultant": "담당 고객의 세금 처리 현황을 검토하세요.",
+  "welcomeAdvisor": "승인 및 제출 현황을 검토하세요.",
+  "stats": {
+    "totalCases": "전체 케이스",
+    "pendingReview": "검토 대기",
+    "approved": "승인됨",
+    "filed": "제출됨",
+    "thisMonth": "이번 달",
+    "lastMonth": "지난 달",
+    "inProgress": "진행 중",
+    "inProgressDesc": "현재 처리 중인 케이스",
+    "completed": "완료됨",
+    "completedDesc": "제출된 세금 신고",
+    "upcomingDeadline": "다가오는 마감일",
+    "upcomingDeadlineDesc": "곧 마감되는 케이스",
+    "casesCount": "{{count}}건",
+    "casesCount_one": "{{count}}건",
+    "none": "없음",
+    "assignedCustomers": "담당 고객",
+    "assignedCustomersDesc": "총 담당 고객 수",
+    "pendingReviewDesc": "검토 대기 중인 케이스",
+    "aiAnalyzing": "AI 분석 중",
+    "aiAnalyzingDesc": "자동 분석 진행 중",
+    "filedDesc": "이번 달 제출됨",
+    "pendingApproval": "승인 대기",
+    "pendingApprovalDesc": "승인 대기 중인 케이스",
+    "readyToFile": "제출 준비 완료",
+    "readyToFileDesc": "DJP 제출 대기",
+    "dueSoon": "마감 임박",
+    "dueSoonDesc": "D-3 이내 케이스"
+  },
+  "recentActivity": {
+    "title": "최근 활동",
+    "noActivity": "최근 7일간 활동이 없습니다.",
+    "today": "오늘",
+    "yesterday": "어제"
+  },
+  "urgentCases": {
+    "title": "긴급 케이스",
+    "noUrgent": "즉각적인 주의가 필요한 긴급 케이스가 없습니다.",
+    "casesCount": "{{count}}건",
+    "casesCount_one": "{{count}}건",
+    "dueToday": "오늘 마감",
+    "overdue": "{{count}}일 초과",
+    "overdue_one": "{{count}}일 초과",
+    "viewDetails": "{{name}} 상세 보기"
+  },
+  "quickActions": {
+    "title": "빠른 작업",
+    "newCase": "새 세금 케이스",
+    "uploadDocument": "문서 업로드",
+    "viewReports": "보고서 보기"
+  },
+  "deadlines": {
+    "title": "다가오는 마감일",
+    "noDeadlines": "다가오는 마감일이 없습니다",
+    "dueIn": "{{days}}일 후 마감",
+    "overdue": "기한 초과"
+  }
+}

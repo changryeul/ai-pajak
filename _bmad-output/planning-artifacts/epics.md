@@ -28,25 +28,25 @@ This document provides the complete epic and story breakdown for AI Pajak Phase 
 
 ### Functional Requirements
 
-**FR-1: DJP API 통합 (P0)**
-- FR-1.1: DJP e-Filing API를 통한 SPT 직접 제출 (PPh 21, PPh 23, PPh Final, PPN)
-- FR-1.2: e-Billing API 연동 - ID Billing 자동 생성, 납부 코드 실시간 조회, NTPN 검증
-- FR-1.3: BPE 자동 처리 - 제출 후 BPE 자동 다운로드, PDF 저장, 이메일/WhatsApp 자동 발송
-- FR-1.4: 일괄 제출 - 35+ 고객 동시 제출, 병렬 처리, 실패 건 자동 재시도 (최대 3회)
+**FR-1: 제출 준비 자동화 (P0)** *(DJP API 직접 통합은 TODO-EPIC)*
+- FR-1.1: SPT 제출 데이터 준비 - 제출에 필요한 데이터 자동 생성 및 검증, Operator Helper 호환
+- FR-1.2: e-Billing 데이터 준비 - ID Billing 생성용 데이터 준비, NTPN 수동 입력 지원
+- FR-1.3: BPE 수동 업로드 및 관리 - 수동 제출 후 BPE 업로드, 저장, 자동 알림
+- FR-1.4: 일괄 제출 준비 - 35+ 고객 제출 데이터 일괄 준비, 체크리스트 생성
 
 **FR-2: PaddleOCR 통합 (P0)**
 - FR-2.1: 문서 인식 - 1721-A1 양식 OCR, e-Faktur PDF 파싱, 영수증/송장 텍스트 추출
 - FR-2.2: 테이블 추출 - PP-StructureV3 기반 테이블 인식, 급여 명세서/세금 계산서 파싱
 - FR-2.3: 하이브리드 Fallback - 신뢰도 < 85%시 Gemini Flash API 호출, 처리 불가 문서는 수동 검토 큐 이동
 
-**FR-3: e-Faktur PPN 지원 (P0)**
-- FR-3.1: e-Faktur 생성 - PPN 거래 데이터 기반 자동 생성, NPWP 자동 검증, QR 코드 생성
-- FR-3.2: e-Faktur 업로드 - DJP e-Faktur 시스템 연동, 승인 상태 자동 확인, 거부 시 오류 메시지 파싱
+**FR-3: e-Faktur PPN 생성 (P0)** *(DJP 업로드는 TODO-EPIC)*
+- FR-3.1: e-Faktur 파일 생성 - PPN 거래 데이터 기반 자동 생성, NPWP 로컬 검증, QR 코드 생성
+- FR-3.2: e-Faktur 관리 - 생성된 e-Faktur 목록 관리, 수동 업로드 후 상태 입력
 
 **FR-4: 워크플로우 자동화 (P1)**
-- FR-4.1: 자동 상태 전이 - AI_ANALYZED → HUMAN_REVIEW 자동 알림, APPROVED → FILED 자동 DJP 제출
-- FR-4.2: 스케줄 기반 처리 - 마감일 D-3 미승인 건 알림, D-1 긴급 처리 큐, 당일 최종 일괄 제출
-- FR-4.3: 알림 자동화 - 제출 완료/실패 알림, BPE 수신 시 고객 이메일/WhatsApp
+- FR-4.1: 자동 상태 전이 - AI_ANALYZED → HUMAN_REVIEW 자동 알림, APPROVED → READY_TO_FILE 준비 완료 알림
+- FR-4.2: 스케줄 기반 처리 - 마감일 D-3 미승인 건 알림, D-1 긴급 처리 큐, 당일 제출 체크리스트 최종 알림
+- FR-4.3: 알림 자동화 - 제출 준비 완료 알림, BPE 업로드 시 고객 이메일/WhatsApp
 
 **FR-5: Audit & Compliance (P0)**
 - FR-5.1: 제출 귀속 로깅 - 모든 DJP 제출은 Jakarta Tax Consulting 귀속, 컨설턴트 ID/POA ID 기록
@@ -104,20 +104,21 @@ This document provides the complete epic and story breakdown for AI Pajak Phase 
 
 | FR | Epic | 설명 |
 |----|------|------|
-| FR-1.1 | E3 | e-Filing API 연동 (SPT 직접 제출) |
-| FR-1.2 | E5 | e-Billing API 연동 (ID Billing 생성) |
-| FR-1.3 | E3 | BPE 자동 처리 (다운로드 및 저장) |
-| FR-1.4 | E4 | 일괄 제출 (35+ 고객 동시) |
+| FR-1.1 | E3 | SPT 제출 데이터 준비 (Operator Helper 호환) |
+| FR-1.2 | E5 | e-Billing 데이터 준비 |
+| FR-1.3 | E9 | BPE 수동 업로드 및 관리 |
+| FR-1.4 | E4 | 일괄 제출 준비 (35+ 고객 체크리스트) |
 | FR-2.1 | E2 | 문서 인식 (1721-A1, e-Faktur) |
 | FR-2.2 | E2 | 테이블 추출 (PP-StructureV3) |
 | FR-2.3 | E2 | 하이브리드 Fallback (Gemini) |
-| FR-3.1 | E6 | e-Faktur 생성 (QR 코드 포함) |
-| FR-3.2 | E6 | e-Faktur 업로드 (DJP 연동) |
-| FR-4.1 | E4 | 자동 상태 전이 |
+| FR-3.1 | E6 | e-Faktur 파일 생성 (QR 코드 포함) |
+| FR-3.2 | E6 | e-Faktur 관리 (수동 업로드 후 상태 입력) |
+| FR-4.1 | E4 | 자동 상태 전이 (READY_TO_FILE) |
 | FR-4.2 | E7 | 스케줄 기반 처리 |
 | FR-4.3 | E7, E9 | 알림 자동화 |
 | FR-5.1 | E8 | 제출 귀속 로깅 (Jakarta Tax Consulting) |
-| FR-5.2 | E8 | POA 자동 검증 |
+| FR-5.2 | E8 | POA 로컬 검증 |
+| **TODO** | **TODO-EPIC** | **DJP API 자동화 (승인 후 구현)** |
 
 ## Epic List
 
@@ -131,28 +132,28 @@ Tax Consultant가 고객 세금 문서를 업로드하면 PaddleOCR이 자동으
 
 **FRs covered:** FR-2.1, FR-2.2, FR-2.3
 
-### Epic 3: DJP 단일 케이스 제출
-Tax Advisor가 승인된 세금 케이스를 DJP e-Filing API를 통해 직접 제출하고, BPE(전자 접수증)를 자동으로 수신합니다. PPh 21, PPh 23, PPh Final, PPN 세금 유형을 지원합니다.
+### Epic 3: 단일 케이스 제출 준비
+Tax Advisor가 승인된 세금 케이스의 제출 데이터를 준비합니다. Operator Helper 호환 포맷으로 데이터를 내보내고, 수동 제출 후 상태를 업데이트합니다. PPh 21, PPh 23, PPh Final, PPN 세금 유형을 지원합니다.
 
-**FRs covered:** FR-1.1, FR-1.3
+**FRs covered:** FR-1.1
 
-### Epic 4: 일괄 제출 및 실시간 모니터링
-Tax Advisor가 35개 이상의 고객 케이스를 일괄 선택하여 DJP에 제출하고, 실시간으로 진행 상황을 모니터링합니다. 병렬 처리와 자동 재시도 기능을 포함합니다.
+### Epic 4: 일괄 제출 준비 및 체크리스트
+Tax Advisor가 35개 이상의 고객 케이스를 일괄 선택하여 제출 준비 데이터를 생성하고, 마감일별 체크리스트를 관리합니다. 준비 완료 시 알림을 발송합니다.
 
 **FRs covered:** FR-1.4, FR-4.1
 
-### Epic 5: e-Billing 생성 및 납부 관리
-Tax Consultant가 고객의 e-Billing을 일괄 생성하고 납부 상태를 추적합니다. ID Billing 자동 생성, NTPN 검증 기능을 포함합니다.
+### Epic 5: e-Billing 데이터 준비
+Tax Consultant가 고객의 e-Billing 생성에 필요한 데이터를 준비하고, 수동 생성 후 NTPN을 입력하여 납부 상태를 추적합니다.
 
 **FRs covered:** FR-1.2
 
-### Epic 6: e-Faktur PPN 자동 처리
-Tax Consultant가 PPN 거래 데이터를 기반으로 e-Faktur를 자동 생성하고 DJP e-Faktur 시스템에 업로드합니다. NPWP 자동 검증, QR 코드 생성, 승인/거부 상태 확인을 포함합니다.
+### Epic 6: e-Faktur PPN 파일 생성
+Tax Consultant가 PPN 거래 데이터를 기반으로 e-Faktur 파일을 자동 생성합니다. NPWP 로컬 검증, QR 코드 생성을 포함하며, 수동 업로드 후 상태를 관리합니다.
 
 **FRs covered:** FR-3.1, FR-3.2
 
 ### Epic 7: 스케줄 기반 워크플로우 자동화
-시스템이 마감일 기반으로 자동 알림을 발송하고 긴급 처리 큐를 관리합니다. D-3 미승인 건 알림, D-1 긴급 처리, 당일 최종 일괄 제출을 포함합니다.
+시스템이 마감일 기반으로 자동 알림을 발송하고 긴급 처리 큐를 관리합니다. D-3 미승인 건 알림, D-1 긴급 처리, 당일 제출 체크리스트 최종 알림을 포함합니다.
 
 **FRs covered:** FR-4.2, FR-4.3
 
@@ -161,10 +162,10 @@ Tax Consultant가 PPN 거래 데이터를 기반으로 e-Faktur를 자동 생성
 
 **FRs covered:** FR-5.1, FR-5.2
 
-### Epic 9: Customer BPE 확인 및 알림
-고객이 세금 신고 완료 알림과 BPE를 이메일/WhatsApp으로 자동 수신합니다. Customer Dashboard에서 BPE 다운로드 및 진행 상황 확인이 가능합니다.
+### Epic 9: BPE 업로드 및 Customer 알림
+Tax Advisor가 수동 제출 후 BPE를 업로드하면, 고객에게 이메일/WhatsApp으로 자동 알림이 발송됩니다. Customer Dashboard에서 BPE 다운로드 및 진행 상황 확인이 가능합니다.
 
-**FRs covered:** FR-4.3 (고객 측면)
+**FRs covered:** FR-1.3, FR-4.3 (고객 측면)
 
 ### Epic 10: Production Deployment & Infrastructure
 로컬 개발이 완료된 후 AWS 인프라를 구성하고 프로덕션 환경에 배포합니다. Terraform IaC, CI/CD 파이프라인, 모니터링 설정을 포함합니다.
@@ -352,204 +353,215 @@ So that 추출된 데이터의 정확성을 확인할 수 있습니다.
 
 ---
 
-## Epic 3: DJP 단일 케이스 제출
+## Epic 3: 단일 케이스 제출 준비
 
-Tax Advisor가 승인된 세금 케이스를 DJP e-Filing API를 통해 직접 제출하고 BPE를 자동 수신합니다.
+Tax Advisor가 승인된 세금 케이스의 제출 데이터를 준비하고, 수동 제출 후 상태를 업데이트합니다.
 
-### Story 3.1: DJP OAuth 2.0 인증 연동
-
-As a **Developer**,
-I want DJP OAuth 2.0 인증이 구현되도록,
-So that Jakarta Tax Consulting 자격증명으로 DJP API에 접근할 수 있습니다.
-
-**Acceptance Criteria:**
-
-**Given** DJP API 자격증명이 환경변수에 설정될 때
-**When** DjpService.authenticate()를 호출하면
-**Then** OAuth 2.0 access token을 획득합니다
-**And** token이 AES-256으로 암호화되어 저장됩니다
-**And** token 만료 시 자동으로 refresh됩니다
-**And** 인증 실패 시 명확한 에러 메시지가 반환됩니다
-
-### Story 3.2: DJP e-Filing API 클라이언트
+### Story 3.1: SPT 제출 데이터 생성 서비스
 
 As a **Developer**,
-I want DJP e-Filing API 클라이언트가 구현되도록,
-So that SPT 제출 요청을 DJP에 전송할 수 있습니다.
-
-**Acceptance Criteria:**
-
-**Given** DJP OAuth 인증이 완료되었을 때
-**When** EfilingService.submit()을 호출하면
-**Then** PPh 21, PPh 23, PPh Final, PPN 제출 요청을 생성합니다
-**And** 요청/응답 payload가 djp_submission 테이블에 기록됩니다
-**And** rate limit(100 req/min)을 준수합니다
-**And** 타임아웃(30초) 및 재시도 로직이 적용됩니다
-
-### Story 3.3: 단일 SPT 제출 기능
-
-As a **Tax Advisor**,
-I want 승인된 세금 케이스를 DJP에 제출하도록,
-So that 수동으로 DJP 웹사이트에 접속하지 않아도 됩니다.
+I want SPT 제출 데이터 생성 서비스가 구현되도록,
+So that 수동 제출에 필요한 모든 데이터를 자동 생성할 수 있습니다.
 
 **Acceptance Criteria:**
 
 **Given** APPROVED 상태의 세금 케이스가 있을 때
-**When** "DJP 제출" 버튼을 클릭하면
+**When** SptGeneratorService.generate()를 호출하면
+**Then** PPh 21, PPh 23, PPh Final, PPN 제출 데이터가 생성됩니다
+**And** 데이터 유효성 검증이 수행됩니다
+**And** 검증 실패 시 상세 오류 메시지가 반환됩니다
+**And** 생성된 데이터가 submission_prep 테이블에 저장됩니다
+
+### Story 3.2: Operator Helper 데이터 포맷팅
+
+As a **Developer**,
+I want Operator Helper 호환 포맷으로 데이터를 내보내도록,
+So that 기존 수동 제출 도구와 호환됩니다.
+
+**Acceptance Criteria:**
+
+**Given** SPT 제출 데이터가 생성되었을 때
+**When** OperatorHelperService.format()을 호출하면
+**Then** Operator Helper에서 복사-붙여넣기 가능한 형식으로 변환됩니다
+**And** 필드별로 구분된 텍스트 데이터가 생성됩니다
+**And** 복사 버튼 클릭 시 클립보드에 복사됩니다
+
+### Story 3.3: 제출 준비 완료 기능
+
+As a **Tax Advisor**,
+I want 승인된 세금 케이스를 제출 준비 완료 상태로 변경하도록,
+So that 수동 제출할 건을 쉽게 파악할 수 있습니다.
+
+**Acceptance Criteria:**
+
+**Given** APPROVED 상태의 세금 케이스가 있을 때
+**When** "제출 준비 완료" 버튼을 클릭하면
 **Then** POA 유효성이 먼저 확인됩니다
-**And** DJP e-Filing API로 SPT가 제출됩니다
-**And** 제출 성공 시 케이스 상태가 FILED로 변경됩니다
-**And** djp_submission에 Jakarta Tax Consulting 귀속으로 기록됩니다
+**And** SPT 제출 데이터가 생성 및 검증됩니다
+**And** 케이스 상태가 READY_TO_FILE로 변경됩니다
+**And** Operator Helper 데이터가 표시됩니다
 **And** 성공/실패 Toast 알림이 표시됩니다
 
-### Story 3.4: BPE 자동 다운로드 및 저장
+### Story 3.4: 수동 제출 완료 확인
 
 As a **Tax Advisor**,
-I want DJP 제출 후 BPE가 자동으로 다운로드되도록,
-So that 수동으로 BPE를 확인하지 않아도 됩니다.
+I want 수동 제출 후 시스템에 완료를 기록하도록,
+So that 제출 상태가 정확히 추적됩니다.
 
 **Acceptance Criteria:**
 
-**Given** DJP 제출이 성공했을 때
-**When** BPE 폴링 작업이 실행되면
-**Then** 5분 이내에 BPE PDF를 다운로드합니다
-**And** bpe_documents 테이블에 BPE 정보가 저장됩니다
-**And** PDF가 Cloud Storage에 저장됩니다
-**And** Tax Case와 BPE가 연결됩니다
+**Given** READY_TO_FILE 상태의 케이스가 있을 때
+**When** "수동 제출 완료" 버튼을 클릭하면
+**Then** DJP 참조 번호 입력 필드가 표시됩니다 (선택)
+**And** 제출 일시가 기록됩니다
+**And** 케이스 상태가 FILED로 변경됩니다
+**And** submission_prep에 수동 제출 완료로 기록됩니다
 
-### Story 3.5: 제출 상태 조회 UI
+### Story 3.5: 제출 준비 상태 조회 UI
 
 As a **Tax Advisor**,
-I want 제출 상태를 실시간으로 확인하도록,
-So that 제출 진행 상황을 파악할 수 있습니다.
+I want 제출 준비 상태를 확인하도록,
+So that 준비 진행 상황을 파악할 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** DJP 제출이 진행 중일 때
+**Given** 세금 케이스가 있을 때
 **When** Tax Case 상세 페이지를 열면
-**Then** 현재 제출 상태(PENDING/SUBMITTED/ACCEPTED/REJECTED)가 표시됩니다
-**And** DJP 참조 번호가 표시됩니다
-**And** 제출 시간과 담당 컨설턴트가 표시됩니다
-**And** BPE 다운로드 링크가 표시됩니다 (수신된 경우)
+**Then** 현재 상태(APPROVED/READY_TO_FILE/FILED)가 표시됩니다
+**And** 제출 준비 완료 시간이 표시됩니다
+**And** Operator Helper 데이터 복사 버튼이 표시됩니다
+**And** 수동 제출 완료 버튼이 표시됩니다
 
 ---
 
-## Epic 4: 일괄 제출 및 실시간 모니터링
+## Epic 4: 일괄 제출 준비 및 체크리스트
 
-Tax Advisor가 35개 이상의 고객 케이스를 일괄 제출하고 실시간 진행 상황을 모니터링합니다.
+Tax Advisor가 35개 이상의 고객 케이스를 일괄 선택하여 제출 준비 데이터를 생성하고, 마감일별 체크리스트를 관리합니다.
 
-### Story 4.1: 일괄 선택 UI (BulkSubmitPanel)
+### Story 4.1: 일괄 선택 UI (BulkPreparePanel)
 
 As a **Tax Advisor**,
 I want 여러 케이스를 체크박스로 선택하도록,
-So that 일괄 제출할 케이스를 쉽게 선택할 수 있습니다.
+So that 일괄 제출 준비할 케이스를 쉽게 선택할 수 있습니다.
 
 **Acceptance Criteria:**
 
 **Given** APPROVED 상태의 케이스 목록이 있을 때
-**When** 일괄 제출 페이지를 열면
+**When** 일괄 제출 준비 페이지를 열면
 **Then** 각 케이스 옆에 체크박스가 표시됩니다
 **And** "전체 선택" 체크박스가 있습니다
 **And** 선택된 케이스 수가 표시됩니다
-**And** "일괄 제출" 버튼이 활성화됩니다
+**And** "일괄 제출 준비" 버튼이 활성화됩니다
 **And** 선택 전 POA 유효성 미리보기가 표시됩니다
 
-### Story 4.2: 일괄 제출 큐 처리
+### Story 4.2: 일괄 제출 준비 처리
 
 As a **System**,
-I want 일괄 제출이 Bull Queue로 처리되도록,
-So that 안정적으로 대량 제출을 처리할 수 있습니다.
+I want 일괄 제출 준비가 Bull Queue로 처리되도록,
+So that 안정적으로 대량 준비 작업을 처리할 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** 35개 케이스가 일괄 제출 요청될 때
-**When** bulk-submit 큐에 작업이 추가되면
-**Then** 각 케이스가 개별 작업으로 큐에 추가됩니다
-**And** DJP rate limit(100 req/min)을 준수합니다
-**And** 병렬 처리(동시 5건)가 적용됩니다
-**And** 각 작업 완료 시 상태가 업데이트됩니다
+**Given** 35개 케이스가 일괄 준비 요청될 때
+**When** bulk-prepare 큐에 작업이 추가되면
+**Then** 각 케이스의 SPT 데이터가 생성됩니다
+**And** 데이터 검증이 수행됩니다
+**And** 병렬 처리(동시 10건)가 적용됩니다
+**And** 각 작업 완료 시 READY_TO_FILE로 상태 변경됩니다
 
-### Story 4.3: 실시간 진행률 표시
+### Story 4.3: 일괄 준비 진행률 표시
 
 As a **Tax Advisor**,
-I want 일괄 제출 진행률을 실시간으로 확인하도록,
+I want 일괄 준비 진행률을 실시간으로 확인하도록,
 So that 전체 진행 상황을 파악할 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** 일괄 제출이 진행 중일 때
+**Given** 일괄 제출 준비가 진행 중일 때
 **When** 진행률 모달이 표시되면
 **Then** 전체 진행률 바가 표시됩니다 (예: 60%)
-**And** 성공/실패 건수가 실시간 업데이트됩니다
+**And** 성공/검증실패 건수가 실시간 업데이트됩니다
 **And** 각 케이스의 상태 아이콘이 표시됩니다 (✅/❌/🔄/⏳)
-**And** 현재 처리 중인 케이스 이름이 표시됩니다
 **And** 완료 시 요약 통계가 표시됩니다
 
-### Story 4.4: 실패 건 자동 재시도
+### Story 4.4: 마감일별 제출 체크리스트 생성
 
-As a **System**,
-I want 제출 실패 건이 자동으로 재시도되도록,
-So that 일시적 오류로 인한 실패를 복구할 수 있습니다.
+As a **Tax Advisor**,
+I want 마감일별 제출 체크리스트가 자동 생성되도록,
+So that 마감일별로 수동 제출할 건을 관리할 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** DJP 제출이 실패했을 때
-**When** 재시도 로직이 트리거되면
-**Then** 지수 백오프(5초, 10초, 20초)로 최대 3회 재시도합니다
-**And** 재시도 횟수가 djp_submission.retry_count에 기록됩니다
-**And** 3회 실패 시 FAILED 상태로 확정됩니다
-**And** 실패 사유가 error_message에 기록됩니다
+**Given** READY_TO_FILE 상태의 케이스들이 있을 때
+**When** 체크리스트 페이지를 열면
+**Then** 마감일별로 그룹화된 체크리스트가 표시됩니다
+**And** 각 케이스에 체크박스가 있습니다 (수동 제출 완료 표시용)
+**And** 엑셀/CSV 내보내기 버튼이 있습니다
+**And** 체크 시 FILED 상태로 변경됩니다
+
+### Story 4.5: 제출 준비 데이터 일괄 내보내기
+
+As a **Tax Advisor**,
+I want 준비된 제출 데이터를 일괄 내보내도록,
+So that 오프라인에서도 수동 제출 작업이 가능합니다.
+
+**Acceptance Criteria:**
+
+**Given** READY_TO_FILE 상태의 케이스들이 있을 때
+**When** "엑셀 내보내기" 버튼을 클릭하면
+**Then** 선택된 케이스들의 제출 데이터가 엑셀 파일로 다운로드됩니다
+**And** Operator Helper 호환 포맷이 포함됩니다
+**And** 마감일, 고객명, 세금 유형이 정렬됩니다
 
 ---
 
-## Epic 5: e-Billing 생성 및 납부 관리
+## Epic 5: e-Billing 데이터 준비
 
-Tax Consultant가 고객의 e-Billing을 일괄 생성하고 납부 상태를 추적합니다.
+Tax Consultant가 고객의 e-Billing 생성에 필요한 데이터를 준비하고, 수동 생성 후 납부 상태를 추적합니다.
 
-### Story 5.1: DJP e-Billing API 연동
+### Story 5.1: e-Billing 데이터 생성 서비스
 
 As a **Developer**,
-I want DJP e-Billing API 클라이언트가 구현되도록,
-So that ID Billing 생성 요청을 DJP에 전송할 수 있습니다.
+I want e-Billing 생성에 필요한 데이터를 자동 생성하도록,
+So that 수동 e-Billing 생성이 용이합니다.
 
 **Acceptance Criteria:**
 
-**Given** DJP OAuth 인증이 완료되었을 때
-**When** EbillingService.createBilling()을 호출하면
-**Then** 세금 유형별 e-Billing 생성 요청을 전송합니다
-**And** ID Billing 코드를 수신합니다
-**And** 요청/응답이 로깅됩니다
-**And** 실패 시 에러 메시지가 반환됩니다
+**Given** 세금 케이스가 있을 때
+**When** BillingGeneratorService.prepare()를 호출하면
+**Then** 세금 유형별 e-Billing 데이터가 생성됩니다
+**And** 납부 금액이 자동 계산됩니다
+**And** 데이터 유효성이 검증됩니다
+**And** 생성된 데이터가 billing_prep 테이블에 저장됩니다
 
-### Story 5.2: ID Billing 자동 생성
+### Story 5.2: e-Billing 준비 데이터 표시
 
 As a **Tax Consultant**,
-I want 고객 세금 케이스에서 ID Billing을 자동 생성하도록,
-So that 수동으로 DJP에서 생성하지 않아도 됩니다.
+I want e-Billing 생성에 필요한 데이터를 확인하도록,
+So that 수동으로 DJP에서 e-Billing을 생성할 수 있습니다.
 
 **Acceptance Criteria:**
 
 **Given** AI_ANALYZED 또는 APPROVED 상태의 케이스가 있을 때
-**When** "e-Billing 생성" 버튼을 클릭하면
-**Then** DJP e-Billing API로 요청이 전송됩니다
-**And** ID Billing 코드가 케이스에 저장됩니다
-**And** 고객에게 납부 코드 알림이 발송됩니다
+**When** "e-Billing 데이터 보기" 버튼을 클릭하면
+**Then** e-Billing 생성에 필요한 모든 필드가 표시됩니다
+**And** 복사 버튼으로 각 필드를 클립보드에 복사할 수 있습니다
 **And** 성공/실패 Toast 알림이 표시됩니다
 
-### Story 5.3: NTPN 검증
+### Story 5.3: NTPN 수동 입력 및 저장
 
 As a **Tax Consultant**,
-I want 납부 완료 여부를 NTPN으로 검증하도록,
-So that 납부 상태를 정확히 확인할 수 있습니다.
+I want 납부 완료 후 NTPN을 수동 입력하도록,
+So that 납부 상태를 정확히 추적할 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** ID Billing이 생성된 케이스가 있을 때
-**When** NTPN 검증을 요청하면
-**Then** DJP API로 NTPN 유효성을 확인합니다
+**Given** e-Billing 데이터가 준비된 케이스가 있을 때
+**When** NTPN 입력 필드에 값을 입력하면
+**Then** NTPN 형식 유효성이 검증됩니다
 **And** 납부 완료 시 케이스에 NTPN이 저장됩니다
 **And** 납부 일시가 기록됩니다
-**And** 미납 시 "납부 대기" 상태가 표시됩니다
+**And** 저장 성공 Toast 알림이 표시됩니다
 
 ### Story 5.4: 납부 상태 추적 UI
 
@@ -561,82 +573,101 @@ So that 미납 고객을 쉽게 파악할 수 있습니다.
 
 **Given** Tax Consultant가 납부 관리 페이지에 있을 때
 **When** 페이지가 로드되면
-**Then** 고객별 ID Billing 코드가 표시됩니다
+**Then** 고객별 e-Billing 준비 상태가 표시됩니다
 **And** 납부 상태(대기/완료)가 색상으로 구분됩니다
 **And** 마감일까지 남은 일수가 표시됩니다
 **And** 미납 건 필터링이 가능합니다
 
 ---
 
-## Epic 6: e-Faktur PPN 자동 처리
+## Epic 6: e-Faktur PPN 파일 생성
 
-Tax Consultant가 PPN 거래 데이터 기반 e-Faktur를 자동 생성하고 DJP에 업로드합니다.
+Tax Consultant가 PPN 거래 데이터 기반 e-Faktur 파일을 자동 생성하고, 수동 DJP 업로드 후 상태를 관리합니다.
 
-### Story 6.1: e-Faktur 데이터 모델 및 생성 로직
+> **참고**: DJP e-Faktur API 자동 업로드는 TODO-EPIC으로 이동되었습니다 (DJP API 승인 후 구현).
+
+### Story 6.1: e-Faktur 데이터 모델 및 파일 생성
 
 As a **Developer**,
-I want e-Faktur 생성 로직이 구현되도록,
-So that PPN 거래 데이터에서 e-Faktur를 자동 생성할 수 있습니다.
+I want e-Faktur 파일 생성 로직이 구현되도록,
+So that PPN 거래 데이터에서 DJP 호환 e-Faktur 파일을 자동 생성할 수 있습니다.
 
 **Acceptance Criteria:**
 
 **Given** PPN 거래 데이터가 있을 때
-**When** EfakturService.generate()를 호출하면
-**Then** 규정에 맞는 e-Faktur 데이터가 생성됩니다
-**And** QR 코드가 포함됩니다
+**When** EfakturGeneratorService.generate()를 호출하면
+**Then** 규정에 맞는 e-Faktur CSV 파일이 생성됩니다
+**And** DJP e-Faktur 데스크탑 앱 호환 포맷입니다
 **And** 거래 항목별 세부 내역이 포함됩니다
-**And** 생성된 e-Faktur가 DB에 저장됩니다
+**And** 생성된 파일이 efaktur_files 테이블에 저장됩니다
 
-### Story 6.2: NPWP 자동 검증
+### Story 6.2: NPWP 형식 검증
 
 As a **System**,
-I want 거래처 NPWP가 자동으로 검증되도록,
+I want 거래처 NPWP 형식이 검증되도록,
 So that 유효하지 않은 NPWP로 e-Faktur가 생성되지 않습니다.
 
 **Acceptance Criteria:**
 
 **Given** e-Faktur 생성 요청이 있을 때
 **When** 거래처 NPWP 검증이 실행되면
-**Then** DJP API로 NPWP 유효성을 확인합니다
+**Then** NPWP 형식(15자리, 체크섬)이 검증됩니다
 **And** 유효하지 않은 NPWP는 오류로 표시됩니다
-**And** 검증 결과가 캐시됩니다 (24시간)
-**And** 검증 실패 사유가 표시됩니다
+**And** 검증 실패 사유가 명확히 표시됩니다
+**And** 형식이 올바른 경우 e-Faktur 생성이 진행됩니다
 
-### Story 6.3: DJP e-Faktur API 업로드
+### Story 6.3: e-Faktur 파일 다운로드 및 수동 업로드 안내
 
 As a **Tax Consultant**,
-I want 생성된 e-Faktur를 DJP에 업로드하도록,
-So that 공식적으로 e-Faktur가 등록됩니다.
+I want 생성된 e-Faktur 파일을 다운로드하고 수동 업로드 안내를 받도록,
+So that DJP e-Faktur 데스크탑에서 수동 업로드할 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** e-Faktur가 생성되었을 때
-**When** "DJP 업로드" 버튼을 클릭하면
-**Then** DJP e-Faktur 시스템에 업로드됩니다
-**And** 업로드 상태(PENDING/APPROVED/REJECTED)가 표시됩니다
-**And** DJP 참조 번호가 저장됩니다
-**And** 성공/실패 알림이 표시됩니다
+**Given** e-Faktur 파일이 생성되었을 때
+**When** "e-Faktur 다운로드" 버튼을 클릭하면
+**Then** CSV 파일이 다운로드됩니다
+**And** "DJP 수동 업로드 필요" 안내 메시지가 표시됩니다
+**And** DJP e-Faktur 데스크탑 사용 가이드 링크가 제공됩니다
+**And** 다운로드 시간이 기록됩니다
 
-### Story 6.4: e-Faktur 승인 상태 확인 UI
+### Story 6.4: e-Faktur 수동 업로드 완료 기록
 
 As a **Tax Consultant**,
-I want e-Faktur 승인 상태를 확인하도록,
-So that 거부된 e-Faktur를 수정할 수 있습니다.
+I want DJP 수동 업로드 완료 후 시스템에 기록하도록,
+So that e-Faktur 상태를 정확히 추적할 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** e-Faktur가 DJP에 업로드되었을 때
-**When** e-Faktur 목록 페이지를 열면
-**Then** 각 e-Faktur의 승인 상태가 표시됩니다
-**And** 거부된 경우 DJP 오류 메시지가 표시됩니다
-**And** 거부된 e-Faktur 수정 기능이 있습니다
-**And** 상태별 필터링이 가능합니다
+**Given** e-Faktur 파일을 DJP에 수동 업로드했을 때
+**When** "수동 업로드 완료" 버튼을 클릭하면
+**Then** DJP 참조 번호 입력 필드가 표시됩니다
+**And** 업로드 일시가 기록됩니다
+**And** 상태가 UPLOADED로 변경됩니다
+**And** e-Faktur 목록에 상태가 업데이트됩니다
+
+### Story 6.5: e-Faktur 상태 관리 UI
+
+As a **Tax Consultant**,
+I want e-Faktur 상태를 관리하도록,
+So that 모든 e-Faktur의 진행 상황을 파악할 수 있습니다.
+
+**Acceptance Criteria:**
+
+**Given** Tax Consultant가 e-Faktur 목록 페이지에 있을 때
+**When** 페이지가 로드되면
+**Then** 각 e-Faktur의 상태(GENERATED/DOWNLOADED/UPLOADED)가 표시됩니다
+**And** 다운로드 대기 건 필터링이 가능합니다
+**And** 수동 업로드 완료 대기 건 필터링이 가능합니다
+**And** 일괄 다운로드 버튼이 있습니다
 
 ---
 
 ## Epic 7: 스케줄 기반 워크플로우 자동화
 
-시스템이 마감일 기반으로 자동 알림을 발송하고 긴급 처리 큐를 관리합니다.
+시스템이 마감일 기반으로 알림을 발송하고, 제출 준비 자동화 및 긴급 처리 큐를 관리합니다.
+
+> **참고**: DJP 자동 제출은 TODO-EPIC으로 이동되었습니다. 현재는 제출 준비 자동화 및 수동 제출 추적에 집중합니다.
 
 ### Story 7.1: 마감일 알림 스케줄러 (D-3)
 
@@ -665,38 +696,52 @@ So that 우선적으로 처리할 수 있습니다.
 **When** 대시보드에 접속하면
 **Then** "긴급 처리 필요" 섹션이 상단에 표시됩니다
 **And** 빨간색 배경으로 강조됩니다
-**And** 케이스 수가 배지로 표시됩니다
-**And** 한 클릭으로 일괄 승인 페이지로 이동할 수 있습니다
+**And** 수동 제출 대기(READY_TO_FILE) 건수가 배지로 표시됩니다
+**And** 한 클릭으로 일괄 승인/제출 준비 페이지로 이동할 수 있습니다
 
-### Story 7.3: 자동 일괄 제출 (당일)
+### Story 7.3: 자동 일괄 제출 준비 (당일)
 
 As a **System**,
-I want 마감일 당일 승인된 케이스가 자동 제출되도록,
-So that 마감일 놓침을 방지할 수 있습니다.
+I want 마감일 당일 승인된 케이스가 자동으로 제출 준비되도록,
+So that Tax Advisor가 수동 제출할 데이터가 준비됩니다.
 
 **Acceptance Criteria:**
 
 **Given** 마감일 당일인 APPROVED 케이스가 있을 때
-**When** 스케줄러가 오전 10시에 실행되면
-**Then** APPROVED 케이스가 자동으로 DJP에 제출됩니다
-**And** 제출 결과가 Tax Advisor에게 알림됩니다
-**And** 실패 건은 수동 처리 목록에 추가됩니다
-**And** 자동 제출 로그가 기록됩니다
+**When** 스케줄러가 오전 8시에 실행되면
+**Then** APPROVED 케이스가 자동으로 제출 준비됩니다
+**And** 상태가 READY_TO_FILE로 변경됩니다
+**And** Tax Advisor에게 "수동 제출 필요" 알림이 발송됩니다
+**And** 자동 준비 로그가 기록됩니다
 
-### Story 7.4: 자동 상태 전이 (APPROVED → FILED)
+### Story 7.4: 수동 제출 완료 후 상태 전이
 
 As a **System**,
-I want DJP 제출 성공 시 상태가 자동으로 FILED로 변경되도록,
-So that 수동으로 상태를 변경하지 않아도 됩니다.
+I want 수동 제출 완료 기록 시 상태가 FILED로 변경되도록,
+So that 정확한 상태 추적이 가능합니다.
 
 **Acceptance Criteria:**
 
-**Given** DJP 제출이 성공했을 때
-**When** djp_submission 상태가 ACCEPTED로 변경되면
-**Then** Tax Case 상태가 FILED로 자동 변경됩니다
+**Given** READY_TO_FILE 상태의 케이스가 있을 때
+**When** Tax Advisor가 "수동 제출 완료" 버튼을 클릭하면
+**Then** Tax Case 상태가 FILED로 변경됩니다
 **And** WorkflowState에 전이 이력이 기록됩니다
-**And** 고객에게 완료 알림이 발송됩니다
+**And** 제출 일시와 DJP 참조 번호(선택)가 저장됩니다
 **And** Audit Log에 상태 변경이 기록됩니다
+
+### Story 7.5: 미제출 건 마감일 경과 알림
+
+As a **System**,
+I want 마감일이 경과한 미제출 건에 대해 알림을 발송하도록,
+So that Tax Advisor가 지연 건을 즉시 처리할 수 있습니다.
+
+**Acceptance Criteria:**
+
+**Given** 마감일이 경과한 READY_TO_FILE 상태 케이스가 있을 때
+**When** 스케줄러가 매일 오전 9시에 실행되면
+**Then** "마감일 경과" 긴급 알림이 발송됩니다
+**And** 대시보드에 "지연 건" 섹션이 빨간색으로 표시됩니다
+**And** 경과 일수가 표시됩니다
 
 ---
 
@@ -783,11 +828,28 @@ So that 만료 임박 POA를 쉽게 파악하고 조치할 수 있습니다.
 
 ---
 
-## Epic 9: Customer BPE 확인 및 알림
+## Epic 9: BPE 업로드 및 Customer 알림
 
-고객이 세금 신고 완료 알림과 BPE를 이메일/WhatsApp으로 자동 수신합니다.
+Tax Advisor가 DJP에서 받은 BPE를 수동 업로드하고, 고객에게 이메일/WhatsApp으로 알림을 발송합니다.
 
-### Story 9.1: 이메일 알림 서비스
+> **참고**: DJP API를 통한 BPE 자동 다운로드는 TODO-EPIC으로 이동되었습니다 (DJP API 승인 후 구현).
+
+### Story 9.1: BPE 수동 업로드
+
+As a **Tax Advisor**,
+I want DJP에서 다운로드한 BPE를 시스템에 업로드하도록,
+So that 고객에게 BPE를 전달할 수 있습니다.
+
+**Acceptance Criteria:**
+
+**Given** FILED 상태의 케이스가 있을 때
+**When** "BPE 업로드" 버튼을 클릭하면
+**Then** PDF 파일 선택 다이얼로그가 표시됩니다
+**And** 업로드된 PDF가 S3에 저장됩니다
+**And** bpe_documents 테이블에 기록됩니다
+**And** BPE 업로드 완료 알림 트리거가 실행됩니다
+
+### Story 9.2: 이메일 알림 서비스
 
 As a **Developer**,
 I want 이메일 알림 서비스가 구현되도록,
@@ -802,7 +864,7 @@ So that 고객에게 이메일 알림을 발송할 수 있습니다.
 **And** 발송 성공/실패가 로깅됩니다
 **And** 발송 이력이 DB에 저장됩니다
 
-### Story 9.2: WhatsApp 알림 서비스
+### Story 9.3: WhatsApp 알림 서비스
 
 As a **Developer**,
 I want WhatsApp 알림 서비스가 구현되도록,
@@ -817,22 +879,22 @@ So that 고객에게 WhatsApp 알림을 발송할 수 있습니다.
 **And** 발송 성공/실패가 로깅됩니다
 **And** 발송 이력이 DB에 저장됩니다
 
-### Story 9.3: BPE 자동 발송
+### Story 9.4: BPE 업로드 후 자동 알림 발송
 
 As a **Customer**,
-I want 세금 신고 완료 시 BPE가 자동으로 전송되도록,
+I want BPE가 업로드되면 자동으로 알림을 받도록,
 So that 별도로 요청하지 않아도 증빙을 받을 수 있습니다.
 
 **Acceptance Criteria:**
 
-**Given** BPE가 수신되었을 때
-**When** BPE 발송 작업이 트리거되면
+**Given** Tax Advisor가 BPE를 업로드했을 때
+**When** BPE 업로드가 완료되면
 **Then** 고객에게 이메일로 BPE PDF가 첨부 발송됩니다
 **And** 고객에게 WhatsApp으로 BPE 다운로드 링크가 발송됩니다
 **And** bpe_documents.sent_to_customer_at이 기록됩니다
 **And** 발송 실패 시 재시도됩니다
 
-### Story 9.4: Customer Dashboard BPE 다운로드
+### Story 9.5: Customer Dashboard BPE 다운로드
 
 As a **Customer**,
 I want 대시보드에서 BPE를 다운로드하도록,
@@ -843,9 +905,23 @@ So that 언제든지 증빙을 확인할 수 있습니다.
 **Given** Customer가 대시보드에 로그인했을 때
 **When** "신고 내역" 페이지를 열면
 **Then** 완료된 세금 신고 목록이 표시됩니다
-**And** 각 항목에 "BPE 다운로드" 버튼이 있습니다
+**And** BPE가 업로드된 항목에 "BPE 다운로드" 버튼이 있습니다
 **And** 클릭 시 BPE PDF가 다운로드됩니다
 **And** BPE 번호, 제출 일시, 담당 컨설턴트가 표시됩니다
+
+### Story 9.6: BPE 미업로드 알림
+
+As a **System**,
+I want FILED 상태에서 BPE 미업로드 건에 대해 알림을 발송하도록,
+So that Tax Advisor가 BPE 업로드를 놓치지 않습니다.
+
+**Acceptance Criteria:**
+
+**Given** FILED 상태이지만 BPE가 미업로드된 케이스가 있을 때
+**When** 24시간이 경과하면
+**Then** Tax Advisor에게 "BPE 업로드 필요" 알림이 발송됩니다
+**And** 대시보드에 "BPE 대기" 섹션이 표시됩니다
+**And** 미업로드 건수가 배지로 표시됩니다
 
 ---
 
@@ -909,6 +985,77 @@ So that 실제 사용자에게 안정적인 서비스를 제공할 수 있습니
 **Given** 프로덕션 배포가 완료되었을 때
 **When** E2E 테스트를 실행하면
 **Then** 모든 Critical Path가 통과합니다
-**And** DJP API 연동이 정상 동작합니다
+**And** 제출 준비 기능이 정상 동작합니다
 **And** OCR 처리가 정상 동작합니다
 **And** 성능 기준(API 5초, OCR 3초)을 충족합니다
+
+---
+
+## TODO-EPIC: DJP API 자동화 (DJP 승인 후 구현)
+
+> **상태**: 미구현 (법적 검토 및 DJP API 승인 후 구현 예정)
+>
+> **전제 조건**: DJP API 접근 승인, Jakarta Tax Consulting 법적 검토 완료
+
+본 에픽은 Phase 2 MVP 범위에서 제외되었으며, DJP API 공식 승인 후 별도 프로젝트로 구현됩니다.
+
+### 배경
+
+현재 DJP e-Filing 시스템은 브라우저 기반 수동 제출만 공식 지원합니다. API를 통한 자동 제출은 DJP의 명시적 승인이 필요하며, 무단 자동화는 법적 리스크가 있습니다.
+
+### 구현 예정 기능
+
+#### TODO Story 1: DJP API 통합 서비스
+
+- DjpApiService 구현 (공식 API 엔드포인트 연동)
+- OAuth 또는 DJP 인증 방식 구현
+- Rate limiting 및 재시도 로직
+- API 응답 파싱 및 오류 처리
+
+#### TODO Story 2: 자동 SPT 제출
+
+- READY_TO_FILE → DJP API 자동 제출
+- 제출 결과 실시간 확인
+- 성공 시 FILED 자동 상태 전이
+- 실패 시 오류 분류 및 재시도
+
+#### TODO Story 3: BPE 자동 다운로드
+
+- DJP API를 통한 BPE 자동 수신
+- PDF 자동 저장 및 고객 알림 트리거
+- 수동 업로드 프로세스 대체
+
+#### TODO Story 4: e-Faktur API 업로드
+
+- DJP e-Faktur API 연동
+- 자동 업로드 및 승인 상태 확인
+- NPWP 실시간 검증 (DJP API)
+
+#### TODO Story 5: 실시간 제출 상태 모니터링
+
+- DJP 제출 상태 폴링/웹훅
+- 실시간 상태 업데이트 UI
+- 제출 실패 자동 재시도
+
+### 구현 시 고려사항
+
+1. **법적 승인**: DJP API 사용 승인 문서 확보 필수
+2. **보안**: DJP 인증 정보 안전한 저장 (AWS Secrets Manager)
+3. **감사**: 모든 API 호출 Audit Log 기록
+4. **폴백**: API 장애 시 수동 제출 프로세스 유지
+5. **테스트**: DJP 테스트 환경에서 충분한 검증
+
+### 예상 일정
+
+- DJP API 승인: TBD
+- 개발 착수: 승인 후 2주 내
+- 예상 개발 기간: 4-6주
+
+---
+
+## 변경 이력
+
+| 날짜 | 버전 | 변경 내용 | 작성자 |
+|------|------|-----------|--------|
+| 2026-01-03 | 1.1 | DJP 자동 제출 → TODO-EPIC 이동, 제출 준비 자동화로 범위 조정 | AI Pajak Team |
+| - | 1.0 | 초기 에픽 작성 | AI Pajak Team |

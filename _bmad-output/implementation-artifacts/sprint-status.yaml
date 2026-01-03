@@ -1,101 +1,142 @@
-# Sprint Status - AI Pajak Phase 2
-# Generated: 2026-01-03
-#
-# STATUS DEFINITIONS:
-#   backlog: Not yet started
-#   ready-for-dev: Story created with full context, ready for dev agent
-#   in-progress: Currently being developed
-#   review: Code review in progress
-#   done: Completed and verified
-#
-# Epic status: backlog → in-progress → done
+# generated: 2026-01-03
+# project: ai-pajak
+# project_key: ai-pajak-phase2
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
 
-sprint_info:
-  project: ai-pajak
-  phase: Phase 2
-  total_epics: 10
-  total_stories: 45
-  created_at: 2026-01-03
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-01-03
+project: ai-pajak
+project_key: ai-pajak-phase2
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
 
 development_status:
   # Epic 1: Development Foundation & Infrastructure
+  # 개발 팀이 Phase 2 기능을 구현할 수 있는 기반 환경을 구축합니다.
   epic-1: in-progress
-  1-1-shadcn-ui-design-system: review
-  1-2-bull-queue-redis-integration: ready-for-dev
-  1-3-paddleocr-docker-service: backlog
-  1-4-db-schema-migration: backlog
-  1-5-layout-navigation-ui: backlog
-  1-6-consultant-dashboard-ui: backlog
+  1-1-shadcn-ui-design-system: done
+  1-2-bull-queue-redis-integration: done
+  1-3-paddleocr-docker-service: done
+  1-4-db-schema-migration: done
+  1-5-layout-navigation-ui: done
+  1-6-consultant-dashboard-ui: done
+  1-7-i18n-system-setup: done
+  epic-1-retrospective: optional
 
   # Epic 2: 문서 업로드 및 OCR 자동 처리
+  # Tax Consultant가 고객 세금 문서를 업로드하면 PaddleOCR이 자동으로 데이터를 추출합니다.
   epic-2: backlog
   2-1-paddleocr-api-integration: backlog
   2-2-document-upload-ui-api: backlog
   2-3-ocr-processing-backend: backlog
   2-4-gemini-fallback: backlog
   2-5-ocr-review-ui: backlog
+  epic-2-retrospective: optional
 
-  # Epic 3: DJP 단일 케이스 제출
+  # Epic 3: 단일 케이스 제출 준비
+  # Tax Advisor가 승인된 세금 케이스의 제출 데이터를 준비하고, 수동 제출 후 상태를 업데이트합니다.
   epic-3: backlog
-  3-1-djp-oauth-integration: backlog
-  3-2-djp-efiling-client: backlog
-  3-3-single-spt-submit: backlog
-  3-4-bpe-auto-download: backlog
-  3-5-submit-status-ui: backlog
+  3-1-spt-submission-data-generation: backlog
+  3-2-operator-helper-formatting: backlog
+  3-3-submission-prep-complete: backlog
+  3-4-manual-submission-confirm: backlog
+  3-5-submission-status-ui: backlog
+  epic-3-retrospective: optional
 
-  # Epic 4: 일괄 제출 및 실시간 모니터링
+  # Epic 4: 일괄 제출 준비 및 체크리스트
+  # Tax Advisor가 35개 이상의 고객 케이스를 일괄 선택하여 제출 준비 데이터를 생성합니다.
   epic-4: backlog
   4-1-bulk-select-ui: backlog
-  4-2-bulk-submit-queue: backlog
-  4-3-realtime-progress: backlog
-  4-4-auto-retry: backlog
+  4-2-bulk-prepare-queue: backlog
+  4-3-bulk-progress-display: backlog
+  4-4-deadline-checklist: backlog
+  4-5-bulk-export: backlog
+  epic-4-retrospective: optional
 
-  # Epic 5: e-Billing 생성 및 납부 관리
+  # Epic 5: e-Billing 데이터 준비
+  # Tax Consultant가 고객의 e-Billing 생성에 필요한 데이터를 준비합니다.
   epic-5: backlog
-  5-1-ebilling-api-integration: backlog
-  5-2-id-billing-auto-create: backlog
-  5-3-ntpn-validation: backlog
+  5-1-ebilling-data-generation: backlog
+  5-2-ebilling-data-display: backlog
+  5-3-ntpn-manual-input: backlog
   5-4-payment-status-ui: backlog
+  epic-5-retrospective: optional
 
-  # Epic 6: e-Faktur PPN 자동 처리
+  # Epic 6: e-Faktur PPN 파일 생성
+  # Tax Consultant가 PPN 거래 데이터 기반 e-Faktur 파일을 자동 생성합니다.
   epic-6: backlog
-  6-1-efaktur-data-model: backlog
-  6-2-npwp-auto-validation: backlog
-  6-3-efaktur-djp-upload: backlog
-  6-4-efaktur-status-ui: backlog
+  6-1-efaktur-file-generation: backlog
+  6-2-npwp-format-validation: backlog
+  6-3-efaktur-download-guide: backlog
+  6-4-efaktur-upload-record: backlog
+  6-5-efaktur-status-ui: backlog
+  epic-6-retrospective: optional
 
   # Epic 7: 스케줄 기반 워크플로우 자동화
+  # 시스템이 마감일 기반으로 알림을 발송하고, 제출 준비 자동화 및 긴급 처리 큐를 관리합니다.
   epic-7: backlog
   7-1-deadline-scheduler-d3: backlog
   7-2-urgent-queue-d1: backlog
-  7-3-auto-bulk-submit-sameday: backlog
-  7-4-auto-status-transition: backlog
+  7-3-auto-bulk-prepare-sameday: backlog
+  7-4-manual-submit-status-transition: backlog
+  7-5-overdue-alert: backlog
+  epic-7-retrospective: optional
 
   # Epic 8: POA 검증 및 Audit 추적
+  # 모든 DJP 제출에 대한 POA 유효성을 자동 검증하고 완전한 감사 추적을 수행합니다.
   epic-8: backlog
   8-1-poa-validation-service: backlog
   8-2-poa-expiry-alert: backlog
   8-3-expired-poa-block: backlog
   8-4-jtc-audit-log: backlog
   8-5-poa-dashboard-ui: backlog
+  epic-8-retrospective: optional
 
-  # Epic 9: Customer BPE 확인 및 알림
+  # Epic 9: BPE 업로드 및 Customer 알림
+  # Tax Advisor가 DJP에서 받은 BPE를 수동 업로드하고, 고객에게 알림을 발송합니다.
   epic-9: backlog
-  9-1-email-notification-service: backlog
-  9-2-whatsapp-notification-service: backlog
-  9-3-bpe-auto-send: backlog
-  9-4-customer-dashboard-bpe: backlog
+  9-1-bpe-manual-upload: backlog
+  9-2-email-notification-service: backlog
+  9-3-whatsapp-notification-service: backlog
+  9-4-bpe-upload-auto-notify: backlog
+  9-5-customer-dashboard-bpe: backlog
+  9-6-bpe-upload-reminder: backlog
+  epic-9-retrospective: optional
 
   # Epic 10: Production Deployment & Infrastructure
+  # 로컬 개발이 완료된 후 AWS 인프라를 구성하고 프로덕션 환경에 배포합니다.
   epic-10: backlog
-  10-1-gcp-terraform: backlog
+  10-1-aws-terraform: backlog
   10-2-cicd-pipeline: backlog
   10-3-monitoring-alerting: backlog
   10-4-production-validation: backlog
-
-progress_summary:
-  epics_completed: 0
-  epics_in_progress: 1
-  stories_completed: 0
-  stories_ready_for_dev: 1
-  stories_in_progress: 1
+  epic-10-retrospective: optional

@@ -1,0 +1,65 @@
+{
+  "title": "Dasbor",
+  "welcome": "Selamat datang kembali",
+  "defaultUser": "Pengguna",
+  "welcomeCustomer": "Selamat datang, {{name}}! Periksa status pelaporan pajak Anda.",
+  "welcomeConsultant": "Tinjau status pemrosesan pajak untuk pelanggan yang ditugaskan.",
+  "welcomeAdvisor": "Tinjau status persetujuan dan pengiriman.",
+  "stats": {
+    "totalCases": "Total Kasus",
+    "pendingReview": "Menunggu Tinjauan",
+    "approved": "Disetujui",
+    "filed": "Terkirim",
+    "thisMonth": "Bulan Ini",
+    "lastMonth": "Bulan Lalu",
+    "inProgress": "Sedang Berlangsung",
+    "inProgressDesc": "Kasus sedang diproses",
+    "completed": "Selesai",
+    "completedDesc": "SPT yang sudah dilaporkan",
+    "upcomingDeadline": "Tenggat Waktu Mendatang",
+    "upcomingDeadlineDesc": "Kasus yang akan jatuh tempo",
+    "casesCount": "{{count}} kasus",
+    "casesCount_one": "{{count}} kasus",
+    "none": "Tidak ada",
+    "assignedCustomers": "Pelanggan yang Ditugaskan",
+    "assignedCustomersDesc": "Total pelanggan yang ditugaskan",
+    "pendingReviewDesc": "Kasus menunggu tinjauan",
+    "aiAnalyzing": "AI Menganalisis",
+    "aiAnalyzingDesc": "Analisis otomatis sedang berlangsung",
+    "filedDesc": "Dikirim bulan ini",
+    "pendingApproval": "Menunggu Persetujuan",
+    "pendingApprovalDesc": "Kasus menunggu persetujuan",
+    "readyToFile": "Siap Dilaporkan",
+    "readyToFileDesc": "Menunggu pengiriman DJP",
+    "dueSoon": "Segera Jatuh Tempo",
+    "dueSoonDesc": "Kasus dalam D-3"
+  },
+  "recentActivity": {
+    "title": "Aktivitas Terbaru",
+    "noActivity": "Tidak ada aktivitas dalam 7 hari terakhir.",
+    "today": "Hari ini",
+    "yesterday": "Kemarin"
+  },
+  "urgentCases": {
+    "title": "Kasus Mendesak",
+    "noUrgent": "Tidak ada kasus mendesak yang memerlukan perhatian segera.",
+    "casesCount": "{{count}} kasus",
+    "casesCount_one": "{{count}} kasus",
+    "dueToday": "Jatuh Tempo Hari Ini",
+    "overdue": "{{count}} hari terlambat",
+    "overdue_one": "{{count}} hari terlambat",
+    "viewDetails": "Lihat detail untuk {{name}}"
+  },
+  "quickActions": {
+    "title": "Aksi Cepat",
+    "newCase": "Kasus Pajak Baru",
+    "uploadDocument": "Unggah Dokumen",
+    "viewReports": "Lihat Laporan"
+  },
+  "deadlines": {
+    "title": "Tenggat Waktu Mendatang",
+    "noDeadlines": "Tidak ada tenggat waktu mendatang",
+    "dueIn": "Jatuh tempo dalam {{days}} hari",
+    "overdue": "Terlambat"
+  }
+}

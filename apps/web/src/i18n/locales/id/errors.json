@@ -1,0 +1,30 @@
+{
+  "general": {
+    "unknown": "Terjadi kesalahan yang tidak diketahui",
+    "network": "Kesalahan jaringan. Silakan periksa koneksi Anda.",
+    "timeout": "Waktu permintaan habis. Silakan coba lagi.",
+    "serverError": "Kesalahan server. Silakan coba lagi nanti.",
+    "notFound": "Sumber daya yang diminta tidak ditemukan.",
+    "unauthorized": "Anda tidak memiliki izin untuk melakukan tindakan ini.",
+    "forbidden": "Akses ditolak."
+  },
+  "validation": {
+    "required": "Kolom ini wajib diisi",
+    "invalidEmail": "Silakan masukkan alamat email yang valid",
+    "invalidPhone": "Silakan masukkan nomor telepon yang valid",
+    "minLength": "Harus minimal {{min}} karakter",
+    "maxLength": "Maksimal {{max}} karakter",
+    "invalidFormat": "Format tidak valid"
+  },
+  "auth": {
+    "invalidCredentials": "Email atau kata sandi tidak valid",
+    "sessionExpired": "Sesi Anda telah berakhir. Silakan masuk kembali.",
+    "accountLocked": "Akun Anda telah dikunci. Silakan hubungi dukungan."
+  },
+  "file": {
+    "uploadFailed": "Gagal mengunggah file",
+    "invalidType": "Tipe file tidak valid",
+    "tooLarge": "File terlalu besar. Ukuran maksimal adalah {{max}}MB",
+    "processingFailed": "Gagal memproses file"
+  }
+}

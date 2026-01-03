@@ -1,0 +1,58 @@
+{
+  "buttons": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "confirm": "Konfirmasi",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "create": "Buat",
+    "submit": "Kirim",
+    "close": "Tutup",
+    "back": "Kembali",
+    "next": "Selanjutnya",
+    "previous": "Sebelumnya",
+    "search": "Cari",
+    "filter": "Filter",
+    "reset": "Reset",
+    "refresh": "Segarkan",
+    "export": "Ekspor",
+    "import": "Impor",
+    "upload": "Unggah",
+    "download": "Unduh"
+  },
+  "labels": {
+    "name": "Nama",
+    "email": "Email",
+    "phone": "Telepon",
+    "address": "Alamat",
+    "status": "Status",
+    "date": "Tanggal",
+    "actions": "Aksi",
+    "description": "Deskripsi",
+    "type": "Tipe",
+    "total": "Total",
+    "amount": "Jumlah",
+    "period": "Periode",
+    "year": "Tahun",
+    "month": "Bulan"
+  },
+  "messages": {
+    "loading": "Memuat...",
+    "saving": "Menyimpan...",
+    "saved": "Berhasil disimpan",
+    "deleted": "Berhasil dihapus",
+    "confirmDelete": "Apakah Anda yakin ingin menghapus item ini?",
+    "noData": "Tidak ada data",
+    "noResults": "Tidak ada hasil ditemukan"
+  },
+  "status": {
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
+    "pending": "Menunggu",
+    "completed": "Selesai",
+    "inProgress": "Sedang Berlangsung",
+    "draft": "Draf",
+    "approved": "Disetujui",
+    "rejected": "Ditolak"
+  }
+}

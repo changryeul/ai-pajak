@@ -42,6 +42,11 @@ services:
       NODE_ENV: production
       PORT: '3333'
       DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/ai_pajak?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+    depends_on:
+      redis:
+        condition: service_healthy
     # depends_on:
     #   postgres:
     #     condition: service_healthy
@@ -63,6 +68,11 @@ services:
       NODE_ENV: development
       PORT: '3333'
       DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/ai_pajak?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+    depends_on:
+      redis:
+        condition: service_healthy
     volumes:
       - .:/app
       - /app/node_modules
@@ -74,5 +84,45 @@ services:
     profiles:
       - dev
 
+  # Redis (Bull Queue)
+  # 이미 띄어져 있지 않는 경우는 밑의 uncomment 해서 사용하세요.
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: ai-pajak-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # PaddleOCR Service (PP-OCRv5)
+  paddleocr:
+    build:
+      context: ./services/paddleocr
+      dockerfile: Dockerfile
+    container_name: ai-pajak-paddleocr
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    environment:
+      LOG_LEVEL: info
+      PYTHONUNBUFFERED: '1'
+    volumes:
+      - paddleocr_models:/home/appuser/.paddleocr
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
 volumes:
   postgres_data:
+  redis_data:
+  paddleocr_models:

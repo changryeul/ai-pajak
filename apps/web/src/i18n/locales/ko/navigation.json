@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "dashboard": "대시보드",
+    "taxFiling": "세금 신고",
+    "uploadDocuments": "문서 업로드",
+    "inProgress": "진행 중",
+    "completed": "완료됨",
+    "customers": "고객",
+    "taxProcessing": "세금 처리",
+    "communication": "커뮤니케이션",
+    "approvalQueue": "승인 대기열",
+    "bulkSubmit": "일괄 제출",
+    "team": "팀",
+    "payment": "결제",
+    "settings": "설정",
+    "taxCases": "세금 케이스",
+    "documents": "문서",
+    "clients": "고객",
+    "reports": "보고서",
+    "help": "도움말"
+  },
+  "header": {
+    "notifications": "알림",
+    "profile": "프로필",
+    "settings": "설정",
+    "logout": "로그아웃",
+    "user": "사용자"
+  },
+  "menu": {
+    "home": "홈",
+    "overview": "개요",
+    "analytics": "분석",
+    "history": "기록"
+  }
+}

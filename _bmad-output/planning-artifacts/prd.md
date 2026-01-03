@@ -37,7 +37,9 @@ status: complete
 
 ### 비전 정렬
 
-AI Pajak Phase 2는 현재 수동 DJP 제출 워크플로우를 **완전 자동화된 세금 신고 시스템**으로 전환합니다. Phase 1에서 구축한 AI 분석 및 휴먼 리뷰 워크플로우를 기반으로, DJP API 직접 통합과 고급 OCR 처리를 통해 end-to-end 자동화를 실현합니다.
+AI Pajak Phase 2는 현재 수동 DJP 제출 워크플로우의 **제출 준비 과정을 완전 자동화**합니다. Phase 1에서 구축한 AI 분석 및 휴먼 리뷰 워크플로우를 기반으로, 고급 OCR 처리와 제출 준비 자동화를 통해 상담원 업무 효율을 극대화합니다.
+
+> **⚠️ 중요:** DJP e-Filing 실제 제출은 법적으로 사람이 수동으로 수행해야 합니다. DJP API 승인 후 자동 제출 기능은 TODO-EPIC으로 별도 관리됩니다.
 
 **현재 상태 (Phase 1 완료):**
 - 세금 계산 자동화 (PPh 21/23, PPN)
@@ -46,18 +48,23 @@ AI Pajak Phase 2는 현재 수동 DJP 제출 워크플로우를 **완전 자동�
 - 수동 DJP 제출 (Operator Helper 도구)
 
 **목표 상태 (Phase 2):**
-- DJP e-Filing API 직접 통합
 - PaddleOCR 기반 고급 문서 처리
-- e-Faktur PPN 자동 생성
-- BPE (Bukti Penerimaan Elektronik) 자동 다운로드 및 저장
-- 35+ 고객 일괄 제출 자동화
+- e-Faktur PPN 자동 생성 (업로드용 파일 생성)
+- 35+ 고객 일괄 제출 준비 자동화
+- BPE 수동 업로드 및 자동 알림
+- 제출 체크리스트 및 Operator Helper 지원
+
+**향후 계획 (DJP API 승인 후 - TODO-EPIC):**
+- DJP e-Filing API 직접 통합
+- BPE 자동 다운로드
+- e-Faktur DJP 자동 업로드
 
 ### What Makes This Special
 
-**1. 완전 자동화된 세금 신고 파이프라인**
-- 문서 업로드부터 DJP 제출까지 원클릭 프로세스
-- 상담원 개입은 검토 및 승인 단계에만 집중
-- 월별 마감일 전 자동 일괄 제출
+**1. 제출 준비 완전 자동화 파이프라인**
+- 문서 업로드부터 제출 준비 완료까지 원클릭 프로세스
+- 상담원 개입은 검토, 승인, 최종 수동 제출 단계에 집중
+- 월별 마감일 전 일괄 제출 준비 및 체크리스트 생성
 
 **2. 하이브리드 OCR 아키텍처**
 - PaddleOCR (PP-OCRv5) 기반 로컬 처리로 비용 절감
@@ -87,9 +94,9 @@ AI Pajak Phase 2는 현재 수동 DJP 제출 워크플로우를 **완전 자동�
 
 | 지표 | 현재 (Phase 1) | 목표 (Phase 2) | 측정 방법 |
 |------|---------------|----------------|----------|
-| **DJP 제출 자동화율** | 0% (수동) | 95%+ | 자동 제출 건수 / 총 제출 건수 |
-| **상담원 처리 시간** | 고객당 15분 | 고객당 5분 | 평균 처리 시간 |
-| **DJP 제출 성공률** | 98% | 99.5%+ | 성공 건수 / 시도 건수 |
+| **제출 준비 완료율** | 0% (수동) | 95%+ | 자동 준비 완료 건수 / 총 건수 |
+| **상담원 처리 시간** | 고객당 15분 | 고객당 5분 | 평균 처리 시간 (준비~수동제출) |
+| **데이터 정확도** | 90% | 99%+ | 검증 통과 건수 / 총 건수 |
 | **월간 처리 건수** | 1,000건 | 5,000건+ | 월간 총 제출 건수 |
 | **고객 이탈률** | 5% | 3% 이하 | 월간 이탈 고객 / 총 고객 |
 
@@ -99,7 +106,7 @@ AI Pajak Phase 2는 현재 수동 DJP 제출 워크플로우를 **완전 자동�
 |------|------|------|---------|
 | **OCR 정확도** | 90% (OpenAI Vision) | 95%+ (PaddleOCR) | P0 |
 | **API 응답 시간** | 500ms (p95) | 300ms (p95) | P1 |
-| **BPE 수신 시간** | 수동 확인 | 자동 5분 이내 | P0 |
+| **BPE 업로드 후 알림** | 수동 확인 | 업로드 후 5분 이내 자동 알림 | P0 |
 | **e-Faktur 생성 정확도** | N/A | 99%+ | P0 |
 
 ### 기술 KPI
@@ -198,27 +205,31 @@ AI Pajak Phase 2는 현재 수동 DJP 제출 워크플로우를 **완전 자동�
 
 ### Functional Requirements
 
-#### FR-1: DJP API 통합 (P0)
+#### FR-1: 제출 준비 자동화 (P0)
 
-**FR-1.1: e-Filing API 연동**
-- DJP e-Filing API를 통한 SPT 직접 제출
+> **참고:** DJP API 직접 통합은 DJP 승인 후 TODO-EPIC에서 구현 예정
+
+**FR-1.1: SPT 제출 데이터 준비**
+- SPT 제출에 필요한 모든 데이터 자동 생성 및 검증
 - 지원 세금 유형: PPh 21, PPh 23, PPh Final, PPN
-- OAuth 2.0 기반 인증 (Jakarta Tax Consulting 자격증명)
+- Operator Helper 호환 포맷으로 데이터 내보내기
+- 제출 전 데이터 유효성 검증
 
-**FR-1.2: e-Billing API 연동**
-- ID Billing 자동 생성
-- 납부 코드 실시간 조회
-- NTPN (Nomor Transaksi Penerimaan Negara) 검증
+**FR-1.2: e-Billing 데이터 준비**
+- ID Billing 생성에 필요한 데이터 준비
+- 납부 금액 자동 계산 및 검증
+- NTPN 수동 입력 및 저장 지원
 
-**FR-1.3: BPE 자동 처리**
-- 제출 후 BPE 자동 다운로드
-- PDF 저장 및 고객 계정 연동
-- 이메일/WhatsApp 자동 발송
+**FR-1.3: BPE 수동 업로드 및 관리**
+- 수동 제출 후 BPE PDF 업로드 인터페이스
+- 업로드된 BPE 저장 및 고객 계정 연동
+- 업로드 완료 시 이메일/WhatsApp 자동 발송
 
-**FR-1.4: 일괄 제출**
-- 35+ 고객 동시 제출
-- 병렬 처리 (rate limit 준수)
-- 실패 건 자동 재시도 (최대 3회)
+**FR-1.4: 일괄 제출 준비**
+- 35+ 고객 제출 데이터 일괄 준비
+- 제출 체크리스트 자동 생성 (마감일별)
+- 준비 완료 건 엑셀/CSV 내보내기
+- 수동 제출 완료 확인 기능
 
 #### FR-2: PaddleOCR 통합 (P0)
 
@@ -237,34 +248,35 @@ AI Pajak Phase 2는 현재 수동 DJP 제출 워크플로우를 **완전 자동�
 - 처리 불가 문서: 수동 검토 큐 이동
 - 처리 통계 로깅
 
-#### FR-3: e-Faktur PPN 지원 (P0)
+#### FR-3: e-Faktur PPN 생성 (P0)
 
-**FR-3.1: e-Faktur 생성**
+**FR-3.1: e-Faktur 파일 생성**
 - PPN 거래 데이터 기반 e-Faktur 자동 생성
-- NPWP 자동 검증 (DJP API)
+- NPWP 로컬 검증 (형식 및 체크섬)
 - QR 코드 생성
+- DJP e-Faktur 업로드용 파일 포맷 생성
 
-**FR-3.2: e-Faktur 업로드**
-- DJP e-Faktur 시스템 연동
-- 승인 상태 자동 확인
-- 거부 시 오류 메시지 파싱
+**FR-3.2: e-Faktur 관리** *(DJP 업로드는 TODO-EPIC)*
+- 생성된 e-Faktur 목록 관리
+- 수동 업로드 후 상태 입력 (승인/거부)
+- 거부 사유 기록 및 수정 지원
 
 #### FR-4: 워크플로우 자동화 (P1)
 
 **FR-4.1: 자동 상태 전이**
 - AI_ANALYZED → HUMAN_REVIEW: 자동 알림
-- APPROVED → FILED: 자동 DJP 제출
-- FILED: BPE 자동 저장
+- APPROVED → READY_TO_FILE: 제출 준비 완료 알림
+- 수동 제출 확인 → FILED: 상태 업데이트
 
 **FR-4.2: 스케줄 기반 처리**
 - 마감일 D-3: 미승인 건 알림
-- 마감일 D-1: 긴급 처리 큐
-- 마감일 당일: 최종 일괄 제출
+- 마감일 D-1: 긴급 처리 큐 및 제출 준비 완료 알림
+- 마감일 당일: 제출 체크리스트 최종 알림
 
 **FR-4.3: 알림 자동화**
-- 제출 완료: 고객 + 컨설턴트 알림
-- 제출 실패: 컨설턴트 즉시 알림
-- BPE 수신: 고객 이메일/WhatsApp
+- 제출 준비 완료: 컨설턴트 알림
+- BPE 업로드 완료: 고객 이메일/WhatsApp 자동 발송
+- 마감일 임박: 긴급 알림
 
 #### FR-5: Audit & Compliance (P0)
 
@@ -618,20 +630,29 @@ CREATE INDEX idx_ocr_results_engine ON ocr_results(ocr_engine);
 
 | 기능 | 설명 | 의존성 |
 |------|------|--------|
-| DJP e-Filing 제출 | PPh 21, PPh 23, PPh Final 자동 제출 | DJP API 계약 |
-| BPE 자동 다운로드 | 제출 후 BPE 자동 수신 및 저장 | DJP e-Filing |
 | PaddleOCR 통합 | 1721-A1 양식 OCR 처리 | PaddleOCR 서비스 |
-| 일괄 제출 | 35+ 고객 동시 제출 | DJP e-Filing |
-| 제출 상태 알림 | 성공/실패 즉시 알림 | 알림 시스템 |
+| SPT 제출 준비 자동화 | PPh 21, PPh 23, PPh Final 제출 데이터 생성 | - |
+| 일괄 제출 준비 | 35+ 고객 동시 제출 준비 및 체크리스트 | - |
+| BPE 수동 업로드 | 수동 제출 후 BPE 업로드 및 저장 | - |
+| 제출 준비 완료 알림 | 준비 완료 시 컨설턴트 알림 | 알림 시스템 |
 
 #### In Scope (P1 - Should Have)
 
 | 기능 | 설명 | 의존성 |
 |------|------|--------|
-| e-Faktur PPN 생성 | PPN 거래 기반 e-Faktur 자동 생성 | DJP e-Faktur API |
-| e-Billing 자동화 | ID Billing 자동 생성 | DJP e-Billing API |
-| WhatsApp 알림 | 고객 WhatsApp 알림 | WhatsApp Business API |
-| POA 자동 검증 | 제출 전 POA 유효성 확인 | POA 테이블 |
+| e-Faktur 파일 생성 | PPN 거래 기반 e-Faktur 파일 자동 생성 | - |
+| e-Billing 데이터 준비 | ID Billing 생성용 데이터 준비 | - |
+| WhatsApp 알림 | BPE 업로드 시 고객 WhatsApp 알림 | WhatsApp Business API |
+| POA 로컬 검증 | 제출 전 POA 유효성 확인 (만료 체크) | POA 테이블 |
+
+#### Out of Scope - TODO EPIC (DJP API 승인 후)
+
+| 기능 | 이유 |
+|------|------|
+| **DJP e-Filing 자동 제출** | DJP API 승인 필요 (법적 제약) |
+| **BPE 자동 다운로드** | DJP API 승인 필요 |
+| **e-Faktur DJP 자동 업로드** | DJP API 승인 필요 |
+| **NTPN 실시간 검증** | DJP API 승인 필요 |
 
 #### Out of Scope (Phase 3+)
 
@@ -646,20 +667,20 @@ CREATE INDEX idx_ocr_results_engine ON ocr_results(ocr_engine);
 
 | 기준 | 목표 | 측정 시점 |
 |------|------|----------|
-| DJP API 통합 완료 | 3개 세금 유형 제출 가능 | Phase 2 Week 4 |
+| 제출 준비 자동화 완료 | 3개 세금 유형 준비 데이터 생성 | Phase 2 Week 4 |
 | OCR 정확도 | 95%+ | Phase 2 Week 6 |
-| 일괄 제출 성공률 | 99%+ | Phase 2 Week 8 |
-| BPE 자동 수신 | 5분 이내 | Phase 2 Week 8 |
+| 일괄 제출 준비 완료율 | 99%+ | Phase 2 Week 8 |
+| BPE 업로드 후 알림 | 5분 이내 | Phase 2 Week 8 |
 
 ### MVP Timeline
 
 | Week | Milestone | Deliverables |
 |------|-----------|--------------|
-| 1-2 | DJP API 연동 기반 | 인증, 기본 API 호출 |
-| 3-4 | e-Filing 제출 | PPh 21 제출 완료 |
-| 5-6 | PaddleOCR 통합 | OCR 서비스 배포 |
-| 7-8 | 일괄 제출 & BPE | 일괄 처리, 자동 BPE |
-| 9-10 | e-Faktur & 안정화 | e-Faktur, 버그 수정 |
+| 1-2 | 기반 인프라 | shadcn/ui, Bull Queue, Redis |
+| 3-4 | PaddleOCR 통합 | OCR 서비스 배포, Gemini Fallback |
+| 5-6 | 제출 준비 자동화 | SPT 데이터 생성, 검증 |
+| 7-8 | 일괄 준비 & BPE 관리 | 체크리스트, BPE 업로드 |
+| 9-10 | e-Faktur 생성 & 안정화 | e-Faktur 파일 생성, 버그 수정 |
 | 11-12 | 출시 준비 | 테스트, 문서화, 배포 |
 
 ---
@@ -670,16 +691,15 @@ CREATE INDEX idx_ocr_results_engine ON ocr_results(ocr_engine);
 
 | 리스크 | 영향 | 확률 | 완화 전략 |
 |--------|------|------|----------|
-| **DJP API 불안정** | 제출 실패 | 중 | 큐잉 시스템, 자동 재시도, 수동 fallback |
 | **PaddleOCR 정확도 부족** | OCR 오류 | 중 | Gemini fallback, 수동 검토 큐 |
-| **Rate Limit 초과** | 일괄 처리 지연 | 저 | 지능적 스로틀링, 분산 제출 |
-| **DJP API 변경** | 통합 중단 | 저 | API 버전 추상화, 모니터링 |
+| **제출 데이터 검증 실패** | 수동 제출 시 오류 | 중 | 사전 검증 강화, 체크리스트 |
+| **BPE 업로드 누락** | 고객 알림 지연 | 저 | 업로드 리마인더, 대시보드 알림 |
 
 ### Business Risks
 
 | 리스크 | 영향 | 확률 | 완화 전략 |
 |--------|------|------|----------|
-| **DJP 계약 지연** | 출시 지연 | 중 | 조기 계약 추진, 수동 모드 유지 |
+| **DJP API 승인 지연** | 자동 제출 기능 지연 | 중 | 수동 제출 워크플로우로 MVP 진행 |
 | **PJAP 인증 문제** | 서비스 제공 불가 | 저 | Jakarta Tax Consulting 주도 |
 | **규제 변경** | 기능 수정 필요 | 중 | 분기별 규제 검토, 유연한 설계 |
 
@@ -687,21 +707,32 @@ CREATE INDEX idx_ocr_results_engine ON ocr_results(ocr_engine);
 
 | 리스크 | 영향 | 확률 | 완화 전략 |
 |--------|------|------|----------|
-| **마감일 집중 부하** | 시스템 지연 | 고 | 오토스케일링, 사전 제출 권장 |
-| **BPE 수신 지연** | 고객 불만 | 중 | 폴링 최적화, 수동 확인 옵션 |
+| **마감일 집중 부하** | 시스템 지연 | 고 | 오토스케일링, 사전 준비 권장 |
+| **수동 제출 지연** | 마감일 위험 | 중 | 마감일 알림 강화, 긴급 처리 큐 |
 | **OCR 서비스 장애** | 문서 처리 중단 | 저 | 다중 인스턴스, Gemini fallback |
 
 ### Contingency Plans
 
 | 시나리오 | 대응 계획 |
 |---------|----------|
-| DJP API 완전 장애 | 수동 제출 모드 활성화, 고객 사전 알림 |
+| 마감일 임박 미처리 건 | 긴급 알림, 우선순위 처리 큐 |
 | PaddleOCR 장애 | 100% Gemini fallback 전환 |
-| 일괄 제출 실패 | 개별 재시도, 수동 제출 옵션 |
+| 제출 준비 데이터 오류 | 수동 수정 인터페이스, 재검증 |
 
 ---
 
 ## Future Considerations
+
+### TODO-EPIC: DJP API 자동화 (DJP 승인 후)
+
+> **우선순위:** DJP API 승인 획득 즉시 구현
+
+| 기능 | 설명 | 예상 복잡도 |
+|------|------|------------|
+| **DJP e-Filing 자동 제출** | OAuth 2.0 인증, SPT 직접 제출 | 높음 |
+| **BPE 자동 다운로드** | 제출 후 BPE 자동 수신 | 중 |
+| **e-Faktur DJP 업로드** | e-Faktur 시스템 직접 연동 | 중 |
+| **NTPN 실시간 검증** | 납부 상태 실시간 확인 | 중 |
 
 ### Phase 3 Features (2026 Q3-Q4)
 
