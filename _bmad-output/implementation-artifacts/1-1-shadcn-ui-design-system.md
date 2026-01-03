@@ -1,6 +1,6 @@
 # Story 1.1: shadcn/ui 초기화 및 Design System 설정
 
-Status: review
+Status: done
 
 ## Story
 
@@ -141,7 +141,7 @@ Utils Alias: @/lib/utils
 ### File Structure Notes
 
 **기존 파일 수정 필요:**
-- `apps/web/src/styles/globals.css` - CSS 변수 추가
+- `apps/web/src/index.css` - CSS 변수 추가 (실제 경로)
 - `apps/web/tailwind.config.cjs` - 확장 설정 추가 (또는 .js/.ts 파일)
 
 **신규 파일 생성:**
@@ -334,18 +334,18 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - tailwind.config.cjs 확장 설정 완료 (colors, borderRadius, container, animations)
 - 20개 P0 컴포넌트 설치 완료 (button, card, input, label, badge, separator, form, select, checkbox, radio-group, textarea, dialog, alert-dialog, sonner, progress, skeleton, table, tabs, breadcrumb, dropdown-menu)
 - 빌드 검증 완료 (`npm run build` 성공, dev 서버 정상 시작)
+- **[Code Review 추가]** Vitest 테스트 프레임워크 설정 및 30개 테스트 작성 완료
+- **[Code Review 추가]** Badge 컴포넌트에 Stage/Tax/Confidence variants 추가
 
 ### File List
 
 **New Files:**
 - apps/web/components.json
+- apps/web/vitest.config.ts (테스트 설정)
 - apps/web/src/lib/utils.ts
-- apps/web/src/components/ui/index.ts
+- apps/web/src/test/setup.ts (테스트 설정)
 - apps/web/src/components/ui/alert-dialog.tsx
-- apps/web/src/components/ui/badge.tsx
 - apps/web/src/components/ui/breadcrumb.tsx
-- apps/web/src/components/ui/button.tsx
-- apps/web/src/components/ui/card.tsx
 - apps/web/src/components/ui/checkbox.tsx
 - apps/web/src/components/ui/dialog.tsx
 - apps/web/src/components/ui/dropdown-menu.tsx
@@ -361,14 +361,33 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - apps/web/src/components/ui/table.tsx
 - apps/web/src/components/ui/tabs.tsx
 - apps/web/src/components/ui/textarea.tsx
+- apps/web/src/components/ui/button.test.tsx (Button 테스트)
+- apps/web/src/components/ui/badge.test.tsx (Badge 테스트)
 
 **Modified Files:**
-- apps/web/package.json (dependencies added)
+- apps/web/package.json (dependencies + test scripts added)
 - apps/web/tsconfig.app.json (path aliases added)
 - apps/web/vite.config.ts (path aliases added)
 - apps/web/src/index.css (DJP theme CSS variables added)
 - apps/web/tailwind.config.cjs (shadcn extensions added)
+- apps/web/src/components/ui/button.tsx (기존 파일 교체)
+- apps/web/src/components/ui/card.tsx (기존 파일 교체)
+- apps/web/src/components/ui/index.ts (기존 파일 수정)
+- apps/web/src/components/ui/badge.tsx (Stage/Tax/Confidence variants 추가)
+
+**Deleted Files:**
+- apps/web/src/components/ui/ui.tsx (기존 UI 통합 파일 제거, index.ts로 대체)
 
 ## Change Log
 
 - 2026-01-03: Story 1-1 구현 완료 - shadcn/ui 초기화 및 Design System 설정
+- 2026-01-03: Code Review 수정 완료 (Amelia - Dev Agent)
+  - [CRITICAL] Button 컴포넌트 테스트 추가 (13 tests)
+  - [CRITICAL] Badge 컴포넌트 테스트 추가 (17 tests)
+  - [HIGH] Badge에 Stage/Tax/Confidence variants 추가
+  - [HIGH] 삭제된 파일(ui.tsx) 문서화
+  - [HIGH] 파일 상태(New/Modified) 정확히 분류
+  - [MEDIUM] @tailwindcss/postcss v4 충돌 제거
+  - [MEDIUM] Dev Notes 경로 수정 (styles/globals.css → src/index.css)
+  - Vitest 테스트 프레임워크 설정 추가
+  - 총 30개 테스트 통과

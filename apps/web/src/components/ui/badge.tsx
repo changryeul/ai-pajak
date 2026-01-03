@@ -8,6 +8,7 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
+        // Base variants
         default:
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
         secondary:
@@ -15,6 +16,36 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+
+        // Stage variants (Workflow stages)
+        uploaded:
+          "border-transparent bg-stage-uploaded text-stage-uploaded-foreground",
+        aiAnalyzed:
+          "border-transparent bg-stage-ai-analyzed text-stage-ai-analyzed-foreground",
+        humanReview:
+          "border-transparent bg-stage-human-review text-stage-human-review-foreground",
+        approved:
+          "border-transparent bg-stage-approved text-stage-approved-foreground",
+        filed:
+          "border-transparent bg-stage-filed text-stage-filed-foreground",
+
+        // Tax type variants
+        pph21:
+          "border-transparent bg-tax-pph21 text-tax-pph21-foreground",
+        pph23:
+          "border-transparent bg-tax-pph23 text-tax-pph23-foreground",
+        ppn:
+          "border-transparent bg-tax-ppn text-tax-ppn-foreground",
+        annual:
+          "border-transparent bg-tax-annual text-tax-annual-foreground",
+
+        // OCR Confidence variants
+        confidenceHigh:
+          "border-transparent bg-confidence-high text-confidence-high-foreground",
+        confidenceMedium:
+          "border-transparent bg-confidence-medium text-confidence-medium-foreground",
+        confidenceLow:
+          "border-transparent bg-confidence-low text-confidence-low-foreground",
       },
     },
     defaultVariants: {
