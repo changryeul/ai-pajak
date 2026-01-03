@@ -378,7 +378,7 @@ CREATE TABLE consultant_clients (
   customer_id UUID REFERENCES users(id),
   status VARCHAR(20) DEFAULT 'ACTIVE', -- 'ACTIVE' | 'SUSPENDED' | 'TERMINATED'
   authorized_at TIMESTAMP, -- When Surat Kuasa signed
-  authorization_document_url TEXT, -- S3/Supabase Storage URL
+  authorization_document_url TEXT, -- S3 URL
   created_at TIMESTAMP DEFAULT NOW(),
 
   UNIQUE(consultant_id, customer_id)

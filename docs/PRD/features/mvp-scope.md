@@ -37,8 +37,8 @@
 - [x] Real-time progress tracking
 
 ### Core Infrastructure
-- [x] Supabase Auth + RBAC (5 roles)
-- [x] PostgreSQL database
+- [ ] Auth + RBAC (5 roles) - 🟡 TBD: AWS Cognito / Supabase Auth / Clerk
+- [x] RDS PostgreSQL (AWS)
 - [x] DJP e-Filing integration
 - [x] DJP e-Billing integration
 - [x] OCR engine (OpenAI Vision)

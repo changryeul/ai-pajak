@@ -18,7 +18,7 @@ Complete guide for database migration files, how to run them, and troubleshootin
 
 ## Migration Files Overview
 
-All migration files are located in `/Users/tommy/git/ai-pajak/supabase/migrations/`.
+All migration files are located in `prisma/migrations/`.
 
 ### Migration Files
 
@@ -394,69 +394,61 @@ SELECT tgname FROM pg_trigger WHERE tgname LIKE '%poa%' ORDER BY tgname;
 
 ## How to Run Migrations
 
-### Option 1: Supabase CLI (Recommended)
+### Option 1: Prisma CLI (Recommended)
 
 #### Prerequisites
 ```bash
-# Install Supabase CLI
-npm install -g supabase
+# Install dependencies (Prisma is included in devDependencies)
+npm install
 
-# Verify installation
-supabase --version
+# Verify Prisma installation
+npx prisma --version
 ```
 
-#### Initialize Supabase Project
+#### Generate Prisma Client
 ```bash
-cd /Users/tommy/git/ai-pajak
-supabase init
-```
-
-#### Link to Remote Project (Production)
-```bash
-# Link to your Supabase project
-supabase link --project-ref <your-project-ref>
-
-# Verify link
-supabase projects list
+cd /path/to/ai-pajak
+npx prisma generate
 ```
 
 #### Run All Migrations
 ```bash
-# Reset database (WARNING: Destroys all data)
-supabase db reset
+# Apply all pending migrations (Production)
+npx prisma migrate deploy
 
-# Or apply pending migrations only
-supabase db push
+# Reset database and apply all migrations (Development - WARNING: Destroys all data)
+npx prisma migrate reset
 ```
 
-#### Run Specific Migration
+#### Create New Migration
 ```bash
-# Apply specific migration file
-psql $DATABASE_URL -f supabase/migrations/20251223000001_initial_schema.sql
+# Create a new migration from schema changes
+npx prisma migrate dev --name <migration_name>
 ```
 
 ### Option 2: Manual SQL Execution
 
-#### Using psql
+#### Using psql with RDS PostgreSQL
 ```bash
-# Connect to database
+# Connect to RDS PostgreSQL database
 psql $DATABASE_URL
 
 # Run migrations in order
-\i /Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql
-\i /Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql
-\i /Users/tommy/git/ai-pajak/supabase/migrations/20251223000003_seed_data.sql
-\i /Users/tommy/git/ai-pajak/supabase/migrations/20251223000004_power_of_attorney.sql
-\i /Users/tommy/git/ai-pajak/supabase/migrations/20251223000005_klu_codes.sql
-\i /Users/tommy/git/ai-pajak/supabase/migrations/20251223000006_luxury_items.sql
-\i /Users/tommy/git/ai-pajak/supabase/migrations/20251223000008_tax_law_ai_system.sql
+\i prisma/migrations/20251223000001_initial_schema.sql
+\i prisma/migrations/20251223000002_rls_policies.sql
+\i prisma/migrations/20251223000003_seed_data.sql
+\i prisma/migrations/20251223000004_power_of_attorney.sql
+\i prisma/migrations/20251223000005_klu_codes.sql
+\i prisma/migrations/20251223000006_luxury_items.sql
+\i prisma/migrations/20251223000008_tax_law_ai_system.sql
 ```
 
-#### Using Supabase Dashboard
-1. Navigate to Supabase Dashboard
-2. Go to SQL Editor
-3. Copy/paste each migration file content
-4. Execute in order
+#### Using AWS Console
+1. Navigate to AWS Console → RDS
+2. Connect to the database instance
+3. Use Query Editor or connect via bastion host
+4. Copy/paste each migration file content
+5. Execute in order
 
 ### Option 3: Automated Script
 
@@ -466,8 +458,8 @@ psql $DATABASE_URL
 
 set -e
 
-MIGRATIONS_DIR="/Users/tommy/git/ai-pajak/supabase/migrations"
-DATABASE_URL="your-database-url"
+MIGRATIONS_DIR="prisma/migrations"
+DATABASE_URL="your-cloud-sql-database-url"
 
 echo "Starting migrations..."
 
@@ -604,8 +596,8 @@ psql $DATABASE_URL -f test-migrations.sql
 ### Strategy 1: Database Reset (Development Only)
 
 ```bash
-# WARNING: Destroys all data
-supabase db reset
+# WARNING: Destroys all data (using Prisma)
+npx prisma migrate reset
 ```
 
 ### Strategy 2: Manual Rollback (Production)
@@ -688,11 +680,11 @@ DROP TYPE IF EXISTS user_role_type;
 
 #### Before Migration (Backup)
 ```bash
-# Create backup
+# Create backup from RDS PostgreSQL
 pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
 
-# Or using Supabase
-supabase db dump > backup.sql
+# Or using AWS CLI
+aws rds create-db-snapshot --db-instance-identifier INSTANCE_ID --db-snapshot-identifier backup-$(date +%Y%m%d)
 ```
 
 #### After Failed Migration (Restore)
@@ -700,9 +692,8 @@ supabase db dump > backup.sql
 # Restore from backup
 psql $DATABASE_URL < backup_20251223_100000.sql
 
-# Or using Supabase
-supabase db reset
-psql $DATABASE_URL < backup.sql
+# Or using AWS CLI
+aws rds restore-db-instance-from-db-snapshot --db-instance-identifier INSTANCE_ID-restored --db-snapshot-identifier backup-20251223
 ```
 
 ---
@@ -822,9 +813,9 @@ WHERE pronamespace = 'public'::regnamespace
 ORDER BY proname;
 ```
 
-#### Check Migration Status (Supabase)
+#### Check Migration Status (Prisma)
 ```bash
-supabase migration list
+npx prisma migrate status
 ```
 
 ---
@@ -833,16 +824,19 @@ supabase migration list
 
 ### Development Environment
 
-1. **Use Local Supabase Instance**
+1. **Use Local PostgreSQL Instance**
    ```bash
-   supabase start
-   supabase db reset  # Safe in local environment
+   # Start local PostgreSQL (Docker)
+   docker-compose up -d postgres
+
+   # Reset database with Prisma
+   npx prisma migrate reset  # Safe in local environment
    ```
 
 2. **Test Migrations Locally First**
    ```bash
    # Run migrations locally
-   supabase db reset
+   npx prisma migrate reset
 
    # Verify all tests pass
    psql $LOCAL_DB_URL -f test-migrations.sql

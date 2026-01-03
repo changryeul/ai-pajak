@@ -2,8 +2,8 @@
 
 **AI PAJAK** - Entity Relationship Diagram
 
-**Last Updated**: 2025-12-24
-**Database**: PostgreSQL 16+ (Supabase)
+**Last Updated**: 2026-01-03
+**Database**: RDS PostgreSQL 16+ (AWS)
 
 ---
 
@@ -75,7 +75,7 @@ erDiagram
 
 | 문서 | 내용 |
 |------|------|
-| [migrations/schema-migrations.md](migrations/schema-migrations.md) | Supabase 마이그레이션 스크립트 |
+| [migrations/schema-migrations.md](migrations/schema-migrations.md) | Prisma 마이그레이션 스크립트 |
 
 ---
 
@@ -87,7 +87,7 @@ erDiagram
 
 ```sql
 -- 주요 테이블
-users                    -- Supabase Auth 사용자
+users                    -- Auth 사용자 (TBD: Firebase/Supabase/Clerk)
 companies                -- 법인 정보
 tax_operators            -- 세무 상담원 (Phase 1)
 operator_client_assignments  -- 상담원-고객 배정
@@ -96,7 +96,7 @@ rbac_permissions         -- 권한 정의
 ```
 
 **핵심 특징**:
-- ✅ Supabase Auth 통합
+- 🟡 Auth 통합 (TBD: AWS Cognito / Supabase Auth / Clerk)
 - ✅ 멀티테넌시 (회사별 데이터 격리)
 - ✅ RBAC (역할 기반 접근 제어)
 - ✅ Tax Operator 워크플로우 (Phase 1)

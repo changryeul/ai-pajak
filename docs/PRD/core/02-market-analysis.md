@@ -242,7 +242,7 @@
 
 ### Low Barriers
 - **Technology**: SaaS infrastructure is commoditized
-  - **Advantage**: Next.js + Supabase = fast development
+  - **Advantage**: NestJS + React + AWS = fast development, scalable infrastructure
 
 ---
 

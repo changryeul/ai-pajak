@@ -361,7 +361,7 @@ Customers and consultants can configure:
 
 ### Encryption
 
-- **At Rest**: Database-level encryption (Supabase)
+- **At Rest**: Database-level encryption (RDS PostgreSQL)
 - **In Transit**: TLS 1.3
 - **Application Level**: Optional end-to-end encryption for sensitive messages
 
@@ -450,7 +450,7 @@ ORDER BY date DESC, message_type;
 
 **Real-time Messaging:**
 - WebSocket for real-time updates
-- Supabase Realtime for live message delivery
+- Firebase Realtime / Cloud Pub/Sub for live message delivery
 
 ### Next Steps
 

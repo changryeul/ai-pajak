@@ -136,7 +136,7 @@ Complete reference for all database tables, columns, data types, constraints, an
 
 **Purpose**: Multi-role authorization system linking users to organizations and permissions.
 
-**Authentication**: Integrates with Supabase `auth.users` table.
+**Authentication**: Integrates with Auth provider's users table (TBD: Firebase/Supabase/Clerk).
 
 | Column | Type | Nullable | Default | Constraints | Description |
 |--------|------|----------|---------|-------------|-------------|
@@ -304,7 +304,7 @@ Complete reference for all database tables, columns, data types, constraints, an
 - `auto_expire_poa()` - Auto-expires POA when current date > valid_to
 - `audit_poa_changes()` - Creates audit log entries
 
-**Migration File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000004_power_of_attorney.sql`
+**Migration File**: `prisma/migrations/20251223000004_power_of_attorney.sql`
 
 ---
 
@@ -715,23 +715,23 @@ CREATE TYPE accounting_status AS ENUM (
 
 All schema definitions are implemented in SQL migration files:
 
-1. `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql`
+1. `prisma/migrations/20251223000001_initial_schema.sql`
    - Core table definitions
    - Enums and type safety
    - Foreign key constraints
    - Indexes for performance
    - Triggers for audit trail
 
-2. `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql`
+2. `prisma/migrations/20251223000002_rls_policies.sql`
    - Row Level Security policies
    - Helper functions for role checking
    - Enforcement of all hard rules
 
-3. `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000003_seed_data.sql`
+3. `prisma/migrations/20251223000003_seed_data.sql`
    - Initial platform entities
    - Mono Flip Global, AI Pajak, Jakarta Tax Consulting
 
-4. `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000004_power_of_attorney.sql`
+4. `prisma/migrations/20251223000004_power_of_attorney.sql`
    - Power of Attorney table and workflows
    - POA status management
    - Validation triggers

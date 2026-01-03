@@ -236,7 +236,7 @@ Authentication and identity management for all platform users.
 - **Email Unique**: One account per email address
 - **Email Verification**: Must confirm email before full access
 - **Multi-Role Support**: One user can have multiple roles
-- **Authentication**: Managed by Supabase Auth
+- **Authentication**: TBD (AWS Cognito / Supabase Auth / Clerk)
 
 ### Schema
 

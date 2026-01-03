@@ -60,12 +60,13 @@ AI PAJAK's features are organized by user persona and tax filing type. All featu
 ## Technical Architecture
 
 ### Stack
-- **Frontend**: Next.js 15 (React 19, Tailwind CSS 4)
-- **Backend**: Next.js API Routes + Supabase
-- **Database**: PostgreSQL (Supabase)
-- **Auth**: Supabase Auth + RBAC
-- **Storage**: Supabase Storage (receipts, forms, BPE)
-- **OCR**: OpenAI Vision API
+- **Cloud**: Amazon Web Services (AWS)
+- **Frontend**: React + Vite + TailwindCSS
+- **Backend**: NestJS + Prisma
+- **Database**: RDS PostgreSQL
+- **Auth**: TBD (AWS Cognito / Supabase Auth / Clerk 검토 중) + RBAC
+- **Storage**: S3 (receipts, forms, BPE)
+- **OCR**: PaddleOCR + Gemini Vision (Fallback)
 - **Payments**: Midtrans
 - **Notifications**: WhatsApp Business API + Email
 
@@ -81,10 +82,11 @@ See: [Technical Architecture](../06-user-flows.md) for detailed system design
 
 ## Feature Development Roadmap
 
-### Phase 0: Infrastructure (Complete ✅)
-- Supabase setup
-- Authentication + RBAC
-- Database schema
+### Phase 0: Infrastructure (In Progress 🟡)
+- AWS 프로젝트 설정
+- Authentication 솔루션 결정 필요 (AWS Cognito / Supabase Auth / Clerk)
+- RBAC 구현
+- Database schema (RDS PostgreSQL)
 - Basic UI components
 
 ### Phase 1: MVP (Months 1-3)

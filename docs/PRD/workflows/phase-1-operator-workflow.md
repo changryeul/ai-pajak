@@ -115,7 +115,7 @@ interface TaxOperator {
 CREATE TABLE tax_operators (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   employee_id VARCHAR(20) UNIQUE NOT NULL,
-  user_id UUID REFERENCES auth.users(id), -- Supabase Auth 연동
+  user_id UUID REFERENCES auth.users(id), -- Auth 연동 (TBD: Firebase/Supabase/Clerk)
 
   name VARCHAR(100) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -666,11 +666,11 @@ export async function POST(request: Request) {
   const file = formData.get('file') as File;
   const eBillingId = formData.get('eBillingId') as string;
 
-  // 1. 파일 업로드 (Supabase Storage)
+  // 1. 파일 업로드 (S3)
   const filePath = `payment-proofs/${eBillingId}/${file.name}`;
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('tax-documents')
-    .upload(filePath, file);
+  const { data: uploadData, error: uploadError } = await storage.bucket('tax-documents')
+    .file(filePath)
+    .save(file);
 
   if (uploadError) throw uploadError;
 
@@ -1056,7 +1056,7 @@ CREATE TABLE submission_tasks (
   djp_submission_completed_at TIMESTAMP WITH TIME ZONE,
 
   bpe_number VARCHAR(100), -- BPE 번호
-  bpe_url VARCHAR(500), -- Supabase Storage URL
+  bpe_url VARCHAR(500), -- S3 URL
   bpe_uploaded_at TIMESTAMP WITH TIME ZONE,
 
   -- 실적 추적
@@ -1094,11 +1094,11 @@ export async function POST(request: Request) {
   const file = formData.get('file') as File;
   const taxDocumentId = formData.get('taxDocumentId') as string;
 
-  // 1. BPE PDF 업로드
+  // 1. BPE PDF 업로드 (S3)
   const filePath = `bpe/${taxDocumentId}/${file.name}`;
-  const { data: uploadData } = await supabase.storage
-    .from('tax-documents')
-    .upload(filePath, file);
+  const { data: uploadData } = await storage.bucket('tax-documents')
+    .file(filePath)
+    .save(file);
 
   // 2. DB 업데이트
   await db.submissionTasks.update({

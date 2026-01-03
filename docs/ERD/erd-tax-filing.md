@@ -257,7 +257,7 @@ WHEN (NEW.status IN ('FILED', 'UNDER_REVIEW'))
 EXECUTE FUNCTION check_active_poa();
 ```
 
-**File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000004_power_of_attorney.sql`
+**File**: `prisma/migrations/20251223000004_power_of_attorney.sql`
 
 ---
 

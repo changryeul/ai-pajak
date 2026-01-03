@@ -32,32 +32,36 @@ The `SYSTEM` role is used **EXCLUSIVELY** for automated billing operations and m
 #### **Authentication Method**
 
 ```typescript
+// ⚠️ NOTE: Auth 솔루션 TBD (AWS Cognito / Supabase Auth / Clerk)
+// 아래 코드는 Auth 결정 후 업데이트 필요
+
 // SYSTEM accounts use Service Role Key (NOT user login)
 // File: src/lib/auth/system.ts
 
-import { createClient } from '@supabase/supabase-js';
+// Auth 클라이언트 초기화 (예시 - 실제 구현은 선택된 Auth 솔루션에 따라 다름)
+import { initializeAdminAuth } from './auth-provider'; // TBD
 
 // ✅ CORRECT: Service role key for SYSTEM operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // ← Service role key
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+const authAdmin = initializeAdminAuth({
+  serviceAccountKey: process.env.AUTH_SERVICE_ROLE_KEY!, // ← Service role key
+  options: {
+    autoRefreshToken: false,
+    persistSession: false
   }
-);
+});
 
 // ❌ WRONG: SYSTEM should NEVER use regular user auth
-const supabase = createBrowserClient(...); // Never for SYSTEM
+const authClient = createBrowserClient(...); // Never for SYSTEM
 ```
 
 #### **Credential Storage**
 
 ```bash
+# ⚠️ NOTE: Auth 솔루션 TBD (AWS Cognito / Supabase Auth / Clerk)
+# 환경 변수명은 선택된 Auth 솔루션에 따라 변경됨
+
 # Environment Variables (REQUIRED)
-SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+AUTH_SERVICE_ROLE_KEY=<service-role-key>  # Auth provider service key
 
 # ✅ Storage Requirements:
 # - Stored in secure vault (AWS Secrets Manager, HashiCorp Vault, etc.)
@@ -81,8 +85,8 @@ Process Owner: DevOps Team
 Notification: 14 days before expiry
 
 Steps:
-1. Generate new service role key in Supabase dashboard
-2. Update key in secrets vault
+1. Generate new service role key in Auth provider dashboard (Cognito/Supabase/Clerk)
+2. Update key in AWS Secrets Manager
 3. Deploy to all environments (staging → production)
 4. Verify billing operations still work
 5. Revoke old key
@@ -91,8 +95,8 @@ Steps:
 
 #### **Key Rotation Checklist**
 
-- [ ] New key generated in Supabase dashboard
-- [ ] New key stored in secrets vault (AWS Secrets Manager/Vault)
+- [ ] New key generated in Auth provider dashboard
+- [ ] New key stored in AWS Secrets Manager
 - [ ] Environment variables updated (staging)
 - [ ] Billing operations tested (staging)
 - [ ] Environment variables updated (production)
@@ -135,9 +139,9 @@ async function systemBillingOperation(data: BillingData) {
 **If SYSTEM key is compromised:**
 
 1. **Immediate Actions** (within 1 hour)
-   - [ ] Revoke compromised key in Supabase dashboard
+   - [ ] Revoke compromised key in Auth provider dashboard (Cognito/Supabase/Clerk)
    - [ ] Generate new service role key
-   - [ ] Update production secrets vault
+   - [ ] Update production secrets in AWS Secrets Manager
    - [ ] Deploy emergency update to production
    - [ ] Verify billing operations restored
 
@@ -199,16 +203,17 @@ export function requireValidPOA() {
       );
     }
 
-    // Check for active POA
-    const { data: poa, error } = await supabase
-      .from('power_of_attorney')
-      .select('id, scope, valid_from, valid_to')
-      .eq('customer_id', customerId)
-      .eq('tax_partner_id', consultant.tax_partner_id)
-      .eq('status', 'ACTIVE')
-      .gte('valid_to', new Date().toISOString())
-      .lte('valid_from', new Date().toISOString())
-      .single();
+    // Check for active POA (using Prisma ORM)
+    const poa = await prisma.powerOfAttorney.findFirst({
+      where: {
+        customer_id: customerId,
+        tax_partner_id: consultant.tax_partner_id,
+        status: 'ACTIVE',
+        valid_to: { gte: new Date() },
+        valid_from: { lte: new Date() }
+      },
+      select: { id: true, scope: true, valid_from: true, valid_to: true }
+    });
 
     if (error || !poa) {
       console.warn('[POA] No active POA found', {
@@ -273,16 +278,15 @@ export async function POST(request: NextRequest) {
     // POA already validated - guaranteed to exist
     const { poa } = req;
 
-    const { data, error } = await supabase
-      .from('tax_filing')
-      .update({
+    // Update tax filing status (using Prisma ORM)
+    const data = await prisma.taxFiling.update({
+      where: { id: req.body.taxFilingId },
+      data: {
         status: 'FILED',
-        filed_at: new Date().toISOString(),
+        filed_at: new Date(),
         power_of_attorney_id: poa.id, // ← Use validated POA
-      })
-      .eq('id', req.body.taxFilingId)
-      .select()
-      .single();
+      }
+    });
 
     return NextResponse.json({ data });
   });
@@ -317,7 +321,7 @@ async function handler(req: RequestWithSession) {
 
 ```sql
 -- Database trigger (already implemented)
--- File: supabase/migrations/20251223000004_power_of_attorney.sql
+-- File: prisma/migrations/20251223000004_power_of_attorney.sql
 
 CREATE TRIGGER validate_tax_filing_poa_trigger
 BEFORE INSERT OR UPDATE ON tax_filing
@@ -461,10 +465,9 @@ export async function GET(request: NextRequest) {
     requireAuth,
     requireRole(UserRole.PLATFORM_ADMIN)
   )(request as RequestWithSession, async (req) => {
-    // ✅ ALLOWED: Aggregated metrics
-    const stats = await supabase.rpc('get_platform_stats', {
-      // RPC function returns aggregated data only
-    });
+    // ✅ ALLOWED: Aggregated metrics (using Prisma raw query)
+    const stats = await prisma.$queryRaw`SELECT * FROM get_platform_stats()`;
+    // RPC function returns aggregated data only
 
     return NextResponse.json({
       totalCustomers: stats.total_customers,
@@ -479,7 +482,7 @@ export async function GET(request: NextRequest) {
 
 ```sql
 -- Database function for platform admin dashboard
--- File: supabase/migrations/20251223000005_admin_functions.sql
+-- File: prisma/migrations/20251223000005_admin_functions.sql
 
 CREATE OR REPLACE FUNCTION get_platform_stats()
 RETURNS TABLE (
@@ -519,12 +522,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    // RLS policies allow PLATFORM_ADMIN to read audit logs
-    const { data: logs } = await supabase
-      .from('tax_activity_log')
-      .select('id, activity_type, actor_role, created_at, ip_address')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    // RLS policies allow PLATFORM_ADMIN to read audit logs (using Prisma ORM)
+    const logs = await prisma.taxActivityLog.findMany({
+      select: { id: true, activity_type: true, actor_role: true, created_at: true, ip_address: true },
+      orderBy: { created_at: 'desc' },
+      take: limit
+    });
 
     // Sanitize logs (remove customer identifiers)
     const sanitizedLogs = logs.map(log => ({

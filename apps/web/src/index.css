@@ -1,3 +1,172 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Primary - DJP Navy Blue #1E3A5F */
+    --primary: 217 91% 35%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Secondary */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    /* Accent */
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    /* Muted */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    /* Border/Input/Ring */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 217 91% 35%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Destructive */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Chart Colors */
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Stage Colors (Workflow) */
+    --stage-uploaded: 220 14.3% 95.9%;
+    --stage-uploaded-foreground: 220 13% 40%;
+    --stage-ai-analyzed: 213 93.9% 67.8%;
+    --stage-ai-analyzed-foreground: 213 93% 25%;
+    --stage-human-review: 47.9 95.8% 53.1%;
+    --stage-human-review-foreground: 48 96% 20%;
+    --stage-approved: 142.1 76.2% 36.3%;
+    --stage-approved-foreground: 142 76% 98%;
+    --stage-filed: 215 13.8% 34.1%;
+    --stage-filed-foreground: 215 14% 98%;
+
+    /* Tax Type Colors */
+    --tax-pph21: 142 76% 36%;
+    --tax-pph21-foreground: 142 76% 98%;
+    --tax-pph23: 25 95% 53%;
+    --tax-pph23-foreground: 25 95% 15%;
+    --tax-ppn: 217 91% 60%;
+    --tax-ppn-foreground: 217 91% 98%;
+    --tax-annual: 280 84% 55%;
+    --tax-annual-foreground: 280 84% 98%;
+
+    /* OCR Confidence Colors */
+    --confidence-high: 142 76% 36%;
+    --confidence-high-foreground: 142 76% 98%;
+    --confidence-medium: 47 95% 53%;
+    --confidence-medium-foreground: 47 95% 15%;
+    --confidence-low: 0 84% 60%;
+    --confidence-low-foreground: 0 84% 98%;
+
+    /* Sidebar */
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 217 91% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 35%;
+  }
+
+  .dark {
+    /* Background */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    /* Primary - DJP Navy (lighter for dark mode) */
+    --primary: 217 91% 60%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    /* Secondary */
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* Accent */
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    /* Muted */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    /* Popover */
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Card */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    /* Border/Input/Ring */
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    /* Destructive */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Chart Colors */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    /* Stage Colors (Dark mode) */
+    --stage-uploaded: 220 14% 25%;
+    --stage-uploaded-foreground: 220 13% 85%;
+    --stage-ai-analyzed: 213 80% 35%;
+    --stage-ai-analyzed-foreground: 213 93% 90%;
+    --stage-human-review: 48 80% 35%;
+    --stage-human-review-foreground: 48 96% 90%;
+    --stage-approved: 142 60% 30%;
+    --stage-approved-foreground: 142 76% 95%;
+    --stage-filed: 215 20% 45%;
+    --stage-filed-foreground: 215 14% 95%;
+
+    /* Sidebar */
+    --sidebar: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

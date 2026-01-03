@@ -41,7 +41,7 @@ TO authenticated
 USING (NOT is_platform_admin())
 WITH CHECK (NOT is_platform_admin());
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:237-241`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:237-241`
 - **Effect**: Platform admins cannot SELECT, INSERT, UPDATE, or DELETE tax filings
 - **Scope**: All operations blocked
 
@@ -53,7 +53,7 @@ TO authenticated
 USING (NOT is_platform_admin())
 WITH CHECK (NOT is_platform_admin());
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:317-321`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:317-321`
 - **Effect**: Platform admins cannot access tax documents
 - **Scope**: All operations blocked
 
@@ -82,7 +82,7 @@ RETURNS BOOLEAN AS $$
     );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:65-74`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:65-74`
 - **Purpose**: Efficiently detect PLATFORM_ADMIN role
 - **Security**: SECURITY DEFINER ensures consistent execution
 
@@ -95,7 +95,7 @@ ON tax_activity_log FOR SELECT
 TO authenticated
 USING (is_platform_admin());
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:374-377`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:374-377`
 - **Effect**: Platform admins can view anonymized audit logs
 - **Limitation**: No write access, customer data anonymized at application layer
 
@@ -148,7 +148,7 @@ CREATE TABLE consultant (
     -- ... other fields
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql:180-195`
+- **File**: `prisma/migrations/20251223000001_initial_schema.sql:180-195`
 - **Effect**: Every consultant MUST be linked to a tax partner
 - **Enforcement**: Database-level referential integrity
 
@@ -169,7 +169,7 @@ WITH CHECK (
     )
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:299-310`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:299-310`
 - **Effect**: Only active JTC consultants can be assigned to tax filings
 - **Validation**: Joins to verify tax partner is JTC
 
@@ -183,7 +183,7 @@ USING (
     consultant_id = get_consultant_id()
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:286-296`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:286-296`
 - **Effect**: Only the assigned JTC consultant can update filings
 
 #### 3. Helper Functions
@@ -201,7 +201,7 @@ RETURNS BOOLEAN AS $$
     );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:53-62`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:53-62`
 - **Purpose**: Efficiently verify JTC consultant role
 
 **Get Consultant ID**
@@ -215,7 +215,7 @@ RETURNS UUID AS $$
     LIMIT 1;
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:86-93`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:86-93`
 - **Purpose**: Get consultant ID for current user
 
 #### 4. Application-Level Validation
@@ -290,7 +290,7 @@ CREATE TABLE tax_filing (
     -- Consultant MUST be from JTC (enforced by Rule 2)
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql:258`
+- **File**: `prisma/migrations/20251223000001_initial_schema.sql:258`
 - **Effect**: All tax filings must have a consultant
 - **Chain**: consultant → tax_partner → Jakarta Tax Consulting
 
@@ -311,7 +311,7 @@ WITH CHECK (
     actor_organization_id NOT IN (SELECT id FROM platform)
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000002_rls_policies.sql:347-355`
+- **File**: `prisma/migrations/20251223000002_rls_policies.sql:347-355`
 - **Effect**: Platform organization cannot be logged as actor in tax activities
 
 #### 3. Row-Level Security (RLS)
@@ -380,7 +380,7 @@ CREATE TABLE billing_transaction (
     -- ... other fields
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql:338-355`
+- **File**: `prisma/migrations/20251223000001_initial_schema.sql:338-355`
 - **Effect**: Clearly separates collector from service provider
 - **Constraint**: Two distinct entities involved in each transaction
 
@@ -392,7 +392,7 @@ CONSTRAINT valid_amount_split CHECK (
     amount_total = platform_fee + tax_service_fee
 )
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql:354`
+- **File**: `prisma/migrations/20251223000001_initial_schema.sql:354`
 - **Effect**: Ensures transparent fee breakdown
 
 **Collector ≠ Provider Validation**
@@ -416,7 +416,7 @@ CREATE TABLE revenue_split (
     description TEXT
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql:367-378`
+- **File**: `prisma/migrations/20251223000001_initial_schema.sql:367-378`
 - **Effect**: Creates separate revenue records for each recipient
 - **Audit**: Clear accounting trail for revenue distribution
 
@@ -521,7 +521,7 @@ DECLARE
     v_actor_org_id UUID;
     v_activity_type activity_type;
 BEGIN
-    -- Get current user from Supabase auth context
+    -- Get current user from Auth context (TBD: Firebase/Supabase/Clerk)
     v_actor_user_id := auth.uid();
 
     -- Get user role and organization
@@ -578,7 +578,7 @@ CREATE TRIGGER tax_filing_audit_trigger
 AFTER INSERT OR UPDATE OR DELETE ON tax_filing
 FOR EACH ROW EXECUTE FUNCTION log_tax_filing_activity();
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql:480-543`
+- **File**: `prisma/migrations/20251223000001_initial_schema.sql:480-543`
 - **Effect**: Automatically creates audit log entries for all tax filing changes
 - **Scope**: INSERT, UPDATE, DELETE operations
 
@@ -686,7 +686,7 @@ CREATE TABLE tax_filing (
     -- Required for FILED status
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000001_initial_schema.sql:256-269`
+- **File**: `prisma/migrations/20251223000001_initial_schema.sql:256-269`
 - **Effect**: Links tax filings to POA
 
 **POA Table**
@@ -706,7 +706,7 @@ CREATE TABLE power_of_attorney (
     tax_partner_signed_at TIMESTAMP WITH TIME ZONE
 );
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000004_power_of_attorney.sql`
+- **File**: `prisma/migrations/20251223000004_power_of_attorney.sql`
 
 #### 2. Validation Triggers
 
@@ -729,7 +729,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000004_power_of_attorney.sql`
+- **File**: `prisma/migrations/20251223000004_power_of_attorney.sql`
 - **Purpose**: Check if customer has active POA for tax type
 
 **Filing Validation Trigger**
@@ -764,7 +764,7 @@ FOR EACH ROW
 WHEN (NEW.status IN ('FILED', 'UNDER_REVIEW'))
 EXECUTE FUNCTION validate_tax_filing_poa();
 ```
-- **File**: `/Users/tommy/git/ai-pajak/supabase/migrations/20251223000004_power_of_attorney.sql`
+- **File**: `prisma/migrations/20251223000004_power_of_attorney.sql`
 - **Effect**: Prevents tax filing submission without active POA
 
 #### 3. POA Status Management
