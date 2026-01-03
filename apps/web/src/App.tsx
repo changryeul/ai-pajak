@@ -1,18 +1,18 @@
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Landing from './views/Landing';
+import TaxCaseDetail from './views/TaxCaseDetail';
 
 function LandingWrapper() {
   const navigate = useNavigate();
 
   return (
     <Landing
-      onStart={() => navigate('/tax-cases/1')}
+      onStart={() => {
+        console.log('🚀 NAVIGATE TO TAX CASE');
+        navigate('/tax-cases/1');
+      }}
     />
   );
-}
-
-function TaxCase() {
-  return <h1 style={{ color: 'white' }}>📄 Tax Case OK</h1>;
 }
 
 export default function App() {
@@ -20,7 +20,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingWrapper />} />
-        <Route path="/tax-cases/:id" element={<TaxCase />} />
+        <Route path="/tax-cases/:id" element={<TaxCaseDetail />} />
       </Routes>
     </BrowserRouter>
   );

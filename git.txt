@@ -1,0 +1,20 @@
+ichang-yeol
+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
+
+
+## 전체 파일 git에 추가
+git add .  
+git status
+
+##첫 커밋
+git commit -m "init: ai-pajak monorepo (api + web)"
+
+#main 브랜치로 push
+git branch -M main
+git push -u origin main
+
+Username for 'https://github.com': ichang-yeol
+
+#확인
+https://github.com/ichang-yeol/ai-pajak
+git remote -v

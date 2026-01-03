@@ -47,4 +47,16 @@ export class TaxCaseRepository {
       },
     });
   }
+  // ⭐️ 여기 추가
+ async updateStage(taxCaseId: bigint, stage: string) {
+  console.log('[TaxCaseRepository] updateStage', {
+    taxCaseId,
+    stage,
+  });
+
+  return {
+    id: taxCaseId,
+    workflowStage: stage,
+  };
+}
 }
