@@ -26,7 +26,10 @@ import { QueueController } from './queue.controller';
       }),
       inject: [ConfigService],
     }),
-    BullModule.registerQueue({ name: 'test-queue' }),
+    BullModule.registerQueue(
+      { name: 'test-queue' },
+      { name: 'ocr-processing' },
+    ),
   ],
   controllers: [QueueController],
   providers: [TestQueueProcessor, TestQueueService],

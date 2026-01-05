@@ -54,12 +54,12 @@ development_status:
 
   # Epic 2: 문서 업로드 및 OCR 자동 처리
   # Tax Consultant가 고객 세금 문서를 업로드하면 PaddleOCR이 자동으로 데이터를 추출합니다.
-  epic-2: backlog
-  2-1-paddleocr-api-integration: backlog
-  2-2-document-upload-ui-api: backlog
-  2-3-ocr-processing-backend: backlog
-  2-4-gemini-fallback: backlog
-  2-5-ocr-review-ui: backlog
+  epic-2: in-progress
+  2-1-paddleocr-api-integration: done
+  2-2-document-upload-ui-api: done
+  2-3-ocr-processing-backend: done
+  2-4-gemini-fallback: done
+  2-5-ocr-review-ui: ready-for-dev
   epic-2-retrospective: optional
 
   # Epic 3: 단일 케이스 제출 준비

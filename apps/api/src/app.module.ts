@@ -7,6 +7,8 @@ import { CommunicationModule } from './communication/communication.module';
 import { CompanyModule } from './company/company.module';
 import { HealthModule } from './health/health.module';
 import { QueueModule } from './queue/queue.module';
+import { OcrModule } from './ocr/ocr.module';
+import { DocumentModule } from './document/document.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { QueueModule } from './queue/queue.module';
     CommunicationModule,
     CompanyModule,
     QueueModule,
+    OcrModule,
+    DocumentModule,
   ],
 })
 export class AppModule {}

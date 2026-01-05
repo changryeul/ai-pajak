@@ -139,6 +139,7 @@ model TaxCase {
   audits    AuditLog[]
 
   // Phase 2 Relations
+  documents      Document[]
   submissionPrep SubmissionPrep?
   bpeDocuments   BpeDocument[]
   efakturFiles   EfakturFile[]
@@ -236,6 +237,35 @@ model AuditLog {
   actor   User?   @relation("AuditActor", fields: [actorId], references: [id])
 
   @@index([taxCaseId])
+}
+
+//
+// ===================== PHASE 2: DOCUMENT =====================
+//
+
+/// Document model for file uploads and OCR processing
+/// TODO: Epic 10 (Production Deployment)에서 S3로 마이그레이션 예정
+/// - 현재: 로컬 uploads/ 디렉토리에 저장 (path 필드)
+/// - 변경: AWS S3 버킷으로 업로드 (path → S3 URL)
+/// - 참조: architecture.md#Infrastructure & Deployment - S3 Storage
+model Document {
+  id           BigInt   @id @default(autoincrement())
+  filename     String   // 저장된 파일명 (UUID 기반)
+  originalName String   // 원본 파일명
+  mimeType     String   // MIME type (image/jpeg, image/png, application/pdf)
+  size         Int      // 파일 크기 (bytes)
+  path         String   // 현재: 로컬 파일 경로, 추후: S3 URL
+  status       String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  ocrJobId     String?  // Bull Queue job ID
+  taxCaseId    BigInt?
+  uploadedBy   BigInt?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  taxCase TaxCase? @relation(fields: [taxCaseId], references: [id])
+
+  @@index([taxCaseId])
+  @@index([status])
 }
 
 //

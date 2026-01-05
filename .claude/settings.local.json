@@ -33,7 +33,15 @@
       "Bash(/Users/chrishan/work/lcr/ai-pajak/apps/web/src/views/OperatorHelper.tsx )",
       "Bash(/Users/chrishan/work/lcr/ai-pajak/apps/web/src/views/Partners.tsx )",
       "Bash(/Users/chrishan/work/lcr/ai-pajak/apps/web/src/views/TaxAdvisorQueue.tsx )",
-      "Bash(/Users/chrishan/work/lcr/ai-pajak/apps/web/src/views/Landing.full.tsx)"
+      "Bash(/Users/chrishan/work/lcr/ai-pajak/apps/web/src/views/Landing.full.tsx)",
+      "mcp__perplexity-ask__perplexity_ask"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "sequentialthinking",
+    "perplexity-ask",
+    "playwright",
+    "tavily-mcp",
+    "mcp-obsidian"
+  ]
 }

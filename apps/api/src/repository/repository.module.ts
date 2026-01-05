@@ -25,6 +25,7 @@ import { HumanReviewRepository } from './repositories/human-review.repository';
     HumanReviewRepository,
   ],
   exports: [
+    PrismaService,       // ✅ OcrService에서 사용
     CompanyRepository,   // ✅ 반드시 export
     WorkflowRepository,
     TaxCaseRepository,
