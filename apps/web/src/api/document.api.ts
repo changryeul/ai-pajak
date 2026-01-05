@@ -8,7 +8,7 @@ export interface UploadResponse {
   originalName: string;
   mimeType: string;
   size: number;
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'REVIEWED';
   taxCaseId?: string;
   ocrJobId?: string;
   createdAt: string;
@@ -16,8 +16,46 @@ export interface UploadResponse {
 
 export interface DocumentStatusResponse {
   id: string;
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'REVIEWED';
   ocrJobId?: string;
+}
+
+// Story 2-5: OCR Review Types
+export interface OcrResultItem {
+  text: string;
+  confidence: number | null;
+  bbox: number[][];
+  page: number;
+}
+
+export interface TableCell {
+  row: number;
+  col: number;
+  text: string;
+  confidence: number;
+}
+
+export interface TableResult {
+  page: number;
+  cells: TableCell[];
+}
+
+export interface OcrResultResponse {
+  documentId: string;
+  fileUrl: string;
+  mimeType: string;
+  status: string;
+  results: OcrResultItem[];
+  tables?: TableResult[];
+  engine: string;
+  fallbackUsed: boolean;
+  originalConfidence?: number;
+  processingTimeMs: number;
+}
+
+export interface OcrFieldUpdate {
+  index: number;
+  newValue: string;
 }
 
 /**
@@ -96,4 +134,68 @@ export async function getDocument(id: string): Promise<UploadResponse> {
     },
   );
   return response.data;
+}
+
+// Story 2-5: OCR Review API Functions
+
+/**
+ * Get OCR result for a document
+ * @param documentId - Document ID
+ * @returns OCR result with extracted data and document info
+ */
+export async function getOcrResult(documentId: string): Promise<OcrResultResponse> {
+  const response = await axios.get<OcrResultResponse>(
+    `${API_BASE_URL}/ocr/documents/${documentId}/result`,
+    {
+      headers: {
+        // TODO: Epic 3 - Replace with auth token from context
+        'x-user-id': '1',
+      },
+    },
+  );
+  return response.data;
+}
+
+/**
+ * Update a single OCR result field
+ * @param documentId - Document ID
+ * @param fieldIndex - Index of the field to update
+ * @param newValue - New value for the field
+ */
+export async function updateOcrField(
+  documentId: string,
+  fieldIndex: number,
+  newValue: string,
+): Promise<void> {
+  await axios.patch(
+    `${API_BASE_URL}/ocr/documents/${documentId}/result`,
+    { fieldIndex, newValue },
+    {
+      headers: {
+        // TODO: Epic 3 - Replace with auth token from context
+        'x-user-id': '1',
+      },
+    },
+  );
+}
+
+/**
+ * Confirm OCR review and update document status
+ * @param documentId - Document ID
+ * @param updates - List of field updates to apply
+ */
+export async function confirmOcrReview(
+  documentId: string,
+  updates: OcrFieldUpdate[],
+): Promise<void> {
+  await axios.post(
+    `${API_BASE_URL}/ocr/documents/${documentId}/confirm`,
+    { updates },
+    {
+      headers: {
+        // TODO: Epic 3 - Replace with auth token from context
+        'x-user-id': '1',
+      },
+    },
+  );
 }

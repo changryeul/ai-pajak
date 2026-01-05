@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-route
 import { useState, createContext, useContext } from 'react';
 import Landing from './views/Landing';
 import TaxCaseDetail from './views/TaxCaseDetail';
+import { OCRReview } from './views/OCRReview';
 import { DashboardLayout, MainLayout } from './components/layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { DocumentUploadPage } from './pages/DocumentUploadPage';
@@ -138,8 +139,8 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardContent />} />
           <Route path="/tax-cases" element={<div className="p-4">Tax Filing List</div>} />
           <Route path="/documents/upload" element={<DocumentUploadPage />} />
-          {/* TODO: Story 2-5 - OCR Review Page */}
-          <Route path="/documents/:id/review" element={<div className="p-4">OCR Review Page (Coming in Story 2-5)</div>} />
+          {/* Story 2-5 - OCR Review Page */}
+          <Route path="/documents/:documentId/review" element={<OCRReview />} />
           <Route path="/tax-cases/in-progress" element={<div className="p-4">Cases In Progress</div>} />
           <Route path="/tax-cases/completed" element={<div className="p-4">Completed Cases</div>} />
           <Route path="/tax-cases/:id" element={<TaxCaseDetail />} />

@@ -33,7 +33,7 @@ def get_ocr_processor() -> OcrProcessor:
     global _ocr_processor
     if _ocr_processor is None:
         logger.info("Initializing OCR processor...")
-        _ocr_processor = OcrProcessor(lang="en", use_textline_orientation=True)
+        _ocr_processor = OcrProcessor(lang="en")
     return _ocr_processor
 
 

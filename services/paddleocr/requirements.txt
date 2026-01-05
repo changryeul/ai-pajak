@@ -1,9 +1,10 @@
 # PaddleOCR Service Dependencies
 # Python 3.12+
 
-# PaddlePaddle & OCR (latest stable versions with Python 3.12 support)
-paddlepaddle>=3.0.0
-paddleocr>=2.9.0
+# PaddlePaddle & OCR - pinned versions tested for Docker compatibility
+# Reference: GitHub issue #76111 for segfault fixes
+paddlepaddle==3.0.0
+paddleocr==2.9.1
 
 # Web Framework
 fastapi==0.109.0

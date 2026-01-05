@@ -8,8 +8,8 @@ import {
   Body,
   ParseFilePipe,
   MaxFileSizeValidator,
-  FileTypeValidator,
 } from '@nestjs/common';
+import { CustomFileTypeValidator } from './validators/file-type.validator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Request } from 'express';
@@ -48,7 +48,9 @@ export class DocumentController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: MAX_FILE_SIZE }),
-          new FileTypeValidator({ fileType: /(jpeg|jpg|png|pdf)$/ }),
+          new CustomFileTypeValidator({
+            fileTypes: ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'],
+          }),
         ],
       }),
     )

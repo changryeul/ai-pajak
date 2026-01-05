@@ -1,10 +1,11 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../repository/prisma.service';
 import { PaddleOcrClient } from './paddleocr.client';
 import { GeminiClient } from './gemini.client';
 import { OcrResponse, OcrResultWithFallback } from './types/ocr.types';
 import { GeminiFallbackException } from './exceptions';
+import { DocumentOcrResultDto, OcrFieldUpdateDto } from './dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -376,6 +377,215 @@ export class OcrService {
         `[engine: ${engine}, fallback: ${ocrResult.fallbackUsed}, ` +
         `confidence: ${confidenceScore !== null ? `${confidenceScore.toFixed(2)}%` : 'N/A (Gemini)'}` +
         `${ocrResult.fallbackUsed ? `, original_paddle: ${ocrResult.originalPaddleConfidence.toFixed(2)}%` : ''}]`,
+    );
+  }
+
+  /**
+   * Get OCR result for a document (Story 2-5)
+   * @param documentId - Document ID
+   * @returns OCR result response with document info and results
+   */
+  async getOcrResult(documentId: string): Promise<DocumentOcrResultDto> {
+    const validDocumentId = this.validateDocumentId(documentId);
+
+    // Get document with OCR result
+    const document = await this.prisma.document.findUnique({
+      where: { id: validDocumentId },
+      select: {
+        id: true,
+        filename: true,
+        originalName: true,
+        mimeType: true,
+        path: true,
+        status: true,
+        taxCaseId: true,
+      },
+    });
+
+    if (!document) {
+      throw new NotFoundException(`Document ${documentId} not found`);
+    }
+
+    // Get AIResult for this document's taxCase
+    let aiResult = null;
+    if (document.taxCaseId) {
+      aiResult = await this.prisma.aIResult.findFirst({
+        where: { taxCaseId: document.taxCaseId },
+        orderBy: { createdAt: 'desc' },
+      });
+    }
+
+    if (!aiResult) {
+      throw new NotFoundException(`OCR result for document ${documentId} not found`);
+    }
+
+    // Parse rawResponse (cast through unknown due to Prisma JsonValue type)
+    const rawResponse = aiResult.rawResponse as unknown as OcrResultWithFallback;
+
+    // Build file URL (TODO: Epic 10 - Replace with S3 URL)
+    const fileUrl = `/api/documents/${documentId}/file`;
+
+    return {
+      documentId: document.id.toString(),
+      fileUrl,
+      mimeType: document.mimeType,
+      status: document.status,
+      results: rawResponse.results.map((r) => ({
+        text: r.text,
+        confidence: r.confidence,
+        bbox: r.bbox,
+        page: r.page,
+      })),
+      tables: rawResponse.tables?.map((t) => ({
+        page: t.page,
+        cells: t.cells.map((c) => ({
+          row: c.row,
+          col: c.col,
+          text: c.text,
+          confidence: c.confidence,
+        })),
+      })),
+      engine: rawResponse.engine,
+      fallbackUsed: rawResponse.fallbackUsed || false,
+      originalConfidence: rawResponse.originalPaddleConfidence,
+      processingTimeMs: aiResult.processingTimeMs || 0,
+    };
+  }
+
+  /**
+   * Update a single OCR result field (Story 2-5)
+   * @param documentId - Document ID
+   * @param fieldIndex - Index of the field to update
+   * @param newValue - New value for the field
+   */
+  async updateOcrField(
+    documentId: string,
+    fieldIndex: number,
+    newValue: string,
+  ): Promise<void> {
+    const validDocumentId = this.validateDocumentId(documentId);
+
+    // Get document with taxCaseId
+    const document = await this.prisma.document.findUnique({
+      where: { id: validDocumentId },
+      select: { taxCaseId: true },
+    });
+
+    if (!document?.taxCaseId) {
+      throw new NotFoundException(`Document ${documentId} not found or has no taxCase`);
+    }
+
+    // Get latest AIResult
+    const aiResult = await this.prisma.aIResult.findFirst({
+      where: { taxCaseId: document.taxCaseId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!aiResult) {
+      throw new NotFoundException(`OCR result for document ${documentId} not found`);
+    }
+
+    // Update the field in rawResponse (cast through unknown due to Prisma JsonValue type)
+    const rawResponse = aiResult.rawResponse as unknown as OcrResultWithFallback;
+    if (fieldIndex < 0 || fieldIndex >= rawResponse.results.length) {
+      throw new BadRequestException(`Invalid field index: ${fieldIndex}`);
+    }
+
+    rawResponse.results[fieldIndex].text = newValue;
+
+    // Save updated rawResponse
+    await this.prisma.aIResult.update({
+      where: { id: aiResult.id },
+      data: { rawResponse: rawResponse as any },
+    });
+
+    this.logger.log(
+      `OCR field ${fieldIndex} updated for document ${documentId}: "${newValue.substring(0, 50)}..."`,
+    );
+  }
+
+  /**
+   * Confirm OCR review and update document status to REVIEWED (Story 2-5)
+   * Task 2.5: Records modification history (who, when, which fields)
+   * @param documentId - Document ID
+   * @param updates - List of field updates
+   */
+  async confirmOcrReview(
+    documentId: string,
+    updates: OcrFieldUpdateDto[],
+  ): Promise<void> {
+    const validDocumentId = this.validateDocumentId(documentId);
+
+    // Get document with taxCaseId
+    const document = await this.prisma.document.findUnique({
+      where: { id: validDocumentId },
+      select: { taxCaseId: true, status: true },
+    });
+
+    if (!document) {
+      throw new NotFoundException(`Document ${documentId} not found`);
+    }
+
+    if (!document.taxCaseId) {
+      throw new BadRequestException(`Document ${documentId} has no taxCase`);
+    }
+
+    // Get latest AIResult
+    const aiResult = await this.prisma.aIResult.findFirst({
+      where: { taxCaseId: document.taxCaseId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!aiResult) {
+      throw new NotFoundException(`OCR result for document ${documentId} not found`);
+    }
+
+    // Apply all updates (cast through unknown due to Prisma JsonValue type)
+    const rawResponse = aiResult.rawResponse as unknown as OcrResultWithFallback;
+    const modificationDetails: string[] = [];
+
+    for (const update of updates) {
+      if (update.index >= 0 && update.index < rawResponse.results.length) {
+        const oldValue = rawResponse.results[update.index].text;
+        rawResponse.results[update.index].text = update.newValue;
+        modificationDetails.push(
+          `Field[${update.index}]: "${oldValue.substring(0, 30)}..." → "${update.newValue.substring(0, 30)}..."`
+        );
+      }
+    }
+
+    // Build audit action string with modification details
+    const auditAction = JSON.stringify({
+      type: 'OCR_REVIEW_CONFIRMED',
+      documentId,
+      fieldsModified: updates.length,
+      modifications: modificationDetails,
+      timestamp: new Date().toISOString(),
+      // TODO: Epic 3 - Add userId from JWT token
+    });
+
+    // Save updated rawResponse, update document status, and create audit log
+    await this.prisma.$transaction([
+      this.prisma.aIResult.update({
+        where: { id: aiResult.id },
+        data: { rawResponse: rawResponse as any },
+      }),
+      this.prisma.document.update({
+        where: { id: validDocumentId },
+        data: { status: 'REVIEWED' },
+      }),
+      // Task 2.5: Record modification history
+      this.prisma.auditLog.create({
+        data: {
+          taxCaseId: document.taxCaseId,
+          action: auditAction,
+          // actorId: TODO Epic 3 - get from JWT context
+        },
+      }),
+    ]);
+
+    this.logger.log(
+      `OCR review confirmed for document ${documentId}: ${updates.length} fields updated, status -> REVIEWED, audit logged`,
     );
   }
 }

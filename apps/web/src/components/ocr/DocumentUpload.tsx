@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useDropzone, FileRejection } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
+import type { FileRejection } from 'react-dropzone';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Upload, FileText, AlertCircle } from 'lucide-react';

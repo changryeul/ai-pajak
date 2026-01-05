@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { uploadDocument, UploadResponse } from '@/api/document.api';
+import { uploadDocument } from '@/api/document.api';
+import type { UploadResponse } from '@/api/document.api';
 
 interface UseDocumentUploadReturn {
   upload: (file: File, taxCaseId?: string) => Promise<UploadResponse>;

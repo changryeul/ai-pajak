@@ -39,7 +39,7 @@ export const menuConfig: MenuItem[] = [
       {
         id: 'upload',
         labelKey: 'sidebar.uploadDocuments',
-        path: '/tax-cases/upload',
+        path: '/documents/upload',
         icon: Upload,
         roles: ['CUSTOMER'],
       },

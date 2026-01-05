@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle2, XCircle, Clock, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getDocumentStatus, DocumentStatusResponse } from '@/api/document.api';
+import { getDocumentStatus } from '@/api/document.api';
+import type { DocumentStatusResponse } from '@/api/document.api';
 
 interface UploadStatusCardProps {
   documentId: string;

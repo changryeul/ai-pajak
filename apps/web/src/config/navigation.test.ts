@@ -123,8 +123,8 @@ describe('Navigation Config', () => {
     })
 
     it('returns true for nested path', () => {
-      expect(isPathActive('/tax-cases', '/tax-cases/upload')).toBe(true)
       expect(isPathActive('/tax-cases', '/tax-cases/in-progress')).toBe(true)
+      expect(isPathActive('/documents', '/documents/upload')).toBe(true)
     })
 
     it('returns false for unrelated path', () => {

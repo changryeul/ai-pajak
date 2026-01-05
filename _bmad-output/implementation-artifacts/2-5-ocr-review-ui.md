@@ -1,6 +1,6 @@
 # Story 2.5: OCR 결과 검토 UI
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -44,77 +44,77 @@ So that 추출된 데이터의 정확성을 확인할 수 있습니다.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend API - OCR 결과 조회 엔드포인트 (AC: #2, #6)
-  - [ ] 1.1: `GET /api/documents/:id/ocr-result` 엔드포인트 추가 (OcrController)
-  - [ ] 1.2: `getOcrResult(documentId)` 메서드 추가 (OcrService)
-  - [ ] 1.3: OCR 결과 + 문서 정보 + 원본 파일 URL 반환
-  - [ ] 1.4: `OcrResultResponseDto` DTO 정의
+- [x] Task 1: Backend API - OCR 결과 조회 엔드포인트 (AC: #2, #6)
+  - [x] 1.1: `GET /api/documents/:id/ocr-result` 엔드포인트 추가 (OcrController)
+  - [x] 1.2: `getOcrResult(documentId)` 메서드 추가 (OcrService)
+  - [x] 1.3: OCR 결과 + 문서 정보 + 원본 파일 URL 반환
+  - [x] 1.4: `OcrResultResponseDto` DTO 정의
 
-- [ ] Task 2: Backend API - OCR 결과 수정/확인 엔드포인트 (AC: #4, #5)
-  - [ ] 2.1: `PATCH /api/documents/:id/ocr-result` 엔드포인트 추가
-  - [ ] 2.2: `updateOcrResult(documentId, updates)` 메서드 추가
-  - [ ] 2.3: `POST /api/documents/:id/ocr-confirm` 확인 완료 엔드포인트 추가
-  - [ ] 2.4: Document 상태를 'REVIEWED'로 업데이트
-  - [ ] 2.5: 수정 이력 기록 (누가, 언제, 어떤 필드를 수정했는지)
+- [x] Task 2: Backend API - OCR 결과 수정/확인 엔드포인트 (AC: #4, #5)
+  - [x] 2.1: `PATCH /api/documents/:id/ocr-result` 엔드포인트 추가
+  - [x] 2.2: `updateOcrResult(documentId, updates)` 메서드 추가
+  - [x] 2.3: `POST /api/documents/:id/ocr-confirm` 확인 완료 엔드포인트 추가
+  - [x] 2.4: Document 상태를 'REVIEWED'로 업데이트
+  - [x] 2.5: 수정 이력 기록 (누가, 언제, 어떤 필드를 수정했는지)
 
-- [ ] Task 3: Frontend API 클라이언트 확장 (AC: #2, #4, #5)
-  - [ ] 3.1: `getOcrResult(documentId)` 함수 추가 (`document.api.ts`)
-  - [ ] 3.2: `updateOcrField(documentId, fieldIndex, newValue)` 함수 추가
-  - [ ] 3.3: `confirmOcrReview(documentId)` 함수 추가
-  - [ ] 3.4: `OcrResultResponse` 타입 정의
+- [x] Task 3: Frontend API 클라이언트 확장 (AC: #2, #4, #5)
+  - [x] 3.1: `getOcrResult(documentId)` 함수 추가 (`document.api.ts`)
+  - [x] 3.2: `updateOcrField(documentId, fieldIndex, newValue)` 함수 추가
+  - [x] 3.3: `confirmOcrReview(documentId)` 함수 추가
+  - [x] 3.4: `OcrResultResponse` 타입 정의
 
-- [ ] Task 4: OCRConfidenceIndicator 컴포넌트 (AC: #3)
-  - [ ] 4.1: `apps/web/src/components/ocr/OCRConfidenceIndicator.tsx` 생성
-  - [ ] 4.2: 신뢰도 레벨별 색상 표시 (녹색/주황색/빨간색)
-  - [ ] 4.3: 퍼센트 값 또는 아이콘 표시 옵션
-  - [ ] 4.4: Tooltip으로 상세 신뢰도 표시
+- [x] Task 4: OCRConfidenceIndicator 컴포넌트 (AC: #3)
+  - [x] 4.1: `apps/web/src/components/ocr/OCRConfidenceIndicator.tsx` 생성
+  - [x] 4.2: 신뢰도 레벨별 색상 표시 (녹색/주황색/빨간색)
+  - [x] 4.3: 퍼센트 값 또는 아이콘 표시 옵션
+  - [x] 4.4: Tooltip으로 상세 신뢰도 표시
 
-- [ ] Task 5: ExtractedDataField 컴포넌트 (AC: #2, #3, #4)
-  - [ ] 5.1: `apps/web/src/components/ocr/ExtractedDataField.tsx` 생성
-  - [ ] 5.2: 텍스트 + 신뢰도 표시기 결합
-  - [ ] 5.3: 저신뢰도 필드 강조 스타일 (빨간색 테두리, 수정 아이콘)
-  - [ ] 5.4: 인라인 편집 기능 (클릭 시 input으로 변환)
-  - [ ] 5.5: 수정 확인/취소 버튼
+- [x] Task 5: ExtractedDataField 컴포넌트 (AC: #2, #3, #4)
+  - [x] 5.1: `apps/web/src/components/ocr/ExtractedDataField.tsx` 생성
+  - [x] 5.2: 텍스트 + 신뢰도 표시기 결합
+  - [x] 5.3: 저신뢰도 필드 강조 스타일 (빨간색 테두리, 수정 아이콘)
+  - [x] 5.4: 인라인 편집 기능 (클릭 시 input으로 변환)
+  - [x] 5.5: 수정 확인/취소 버튼
 
-- [ ] Task 6: ExtractedDataTable 컴포넌트 (AC: #6)
-  - [ ] 6.1: `apps/web/src/components/ocr/ExtractedDataTable.tsx` 생성
-  - [ ] 6.2: 테이블 형식 OCR 결과 렌더링
-  - [ ] 6.3: 각 셀에 신뢰도 표시
-  - [ ] 6.4: 셀 편집 기능
+- [x] Task 6: ExtractedDataTable 컴포넌트 (AC: #6)
+  - [x] 6.1: `apps/web/src/components/ocr/ExtractedDataTable.tsx` 생성
+  - [x] 6.2: 테이블 형식 OCR 결과 렌더링
+  - [x] 6.3: 각 셀에 신뢰도 표시
+  - [x] 6.4: 셀 편집 기능
 
-- [ ] Task 7: DocumentPreview 컴포넌트 (AC: #1)
-  - [ ] 7.1: `apps/web/src/components/ocr/DocumentPreview.tsx` 생성
-  - [ ] 7.2: PDF 뷰어 통합 (`@react-pdf-viewer/core`)
-  - [ ] 7.3: 이미지 뷰어 (zoom, pan 기능)
-  - [ ] 7.4: 페이지 네비게이션 (다중 페이지 문서)
+- [x] Task 7: DocumentPreview 컴포넌트 (AC: #1)
+  - [x] 7.1: `apps/web/src/components/ocr/DocumentPreview.tsx` 생성
+  - [x] 7.2: PDF 뷰어 통합 (`@react-pdf-viewer/core`)
+  - [x] 7.3: 이미지 뷰어 (zoom, pan 기능)
+  - [x] 7.4: 페이지 네비게이션 (다중 페이지 문서)
 
-- [ ] Task 8: OCRReviewPanel 컴포넌트 (AC: #1, #2, #5)
-  - [ ] 8.1: `apps/web/src/components/ocr/OCRReviewPanel.tsx` 생성
-  - [ ] 8.2: 2-column 레이아웃 (왼쪽: DocumentPreview, 오른쪽: ExtractedData)
-  - [ ] 8.3: "확인" 버튼 및 검토 완료 처리
-  - [ ] 8.4: 로딩 상태 및 에러 처리
+- [x] Task 8: OCRReviewPanel 컴포넌트 (AC: #1, #2, #5)
+  - [x] 8.1: `apps/web/src/components/ocr/OCRReviewPanel.tsx` 생성
+  - [x] 8.2: 2-column 레이아웃 (왼쪽: DocumentPreview, 오른쪽: ExtractedData)
+  - [x] 8.3: "확인" 버튼 및 검토 완료 처리
+  - [x] 8.4: 로딩 상태 및 에러 처리
 
-- [ ] Task 9: useOcrResult 훅 (AC: #2, #4, #5)
-  - [ ] 9.1: `apps/web/src/hooks/useOcrResult.ts` 생성
-  - [ ] 9.2: React Query를 사용한 OCR 결과 페칭
-  - [ ] 9.3: 필드 수정 mutation
-  - [ ] 9.4: 검토 확인 mutation
+- [x] Task 9: useOcrResult 훅 (AC: #2, #4, #5)
+  - [x] 9.1: `apps/web/src/hooks/useOcrResult.ts` 생성
+  - [x] 9.2: React Query를 사용한 OCR 결과 페칭
+  - [x] 9.3: 필드 수정 mutation
+  - [x] 9.4: 검토 확인 mutation
 
-- [ ] Task 10: OCRReview 페이지 (AC: #1-6)
-  - [ ] 10.1: `apps/web/src/pages/OCRReview.tsx` 생성
-  - [ ] 10.2: 라우트 등록 (`/documents/:id/ocr-review`)
-  - [ ] 10.3: OCRReviewPanel 통합
-  - [ ] 10.4: 완료 후 리다이렉트 처리
+- [x] Task 10: OCRReview 페이지 (AC: #1-6)
+  - [x] 10.1: `apps/web/src/pages/OCRReview.tsx` 생성
+  - [x] 10.2: 라우트 등록 (`/documents/:id/ocr-review`)
+  - [x] 10.3: OCRReviewPanel 통합
+  - [x] 10.4: 완료 후 리다이렉트 처리
 
-- [ ] Task 11: 컴포넌트 export 및 인덱스 업데이트 (AC: 전체)
-  - [ ] 11.1: `apps/web/src/components/ocr/index.ts` 업데이트
-  - [ ] 11.2: App.tsx 라우트 추가
+- [x] Task 11: 컴포넌트 export 및 인덱스 업데이트 (AC: 전체)
+  - [x] 11.1: `apps/web/src/components/ocr/index.ts` 업데이트
+  - [x] 11.2: App.tsx 라우트 추가
 
-- [ ] Task 12: 테스트 작성 (AC: 전체)
-  - [ ] 12.1: OCRConfidenceIndicator 단위 테스트
-  - [ ] 12.2: ExtractedDataField 단위 테스트
-  - [ ] 12.3: OCRReviewPanel 통합 테스트
-  - [ ] 12.4: Backend API 테스트
+- [x] Task 12: 테스트 작성 (AC: 전체)
+  - [x] 12.1: OCRConfidenceIndicator 단위 테스트
+  - [x] 12.2: ExtractedDataField 단위 테스트
+  - [x] 12.3: OCRReviewPanel 통합 테스트
+  - [x] 12.4: Backend API 테스트
 
 ## Dev Notes
 
@@ -929,11 +929,47 @@ describe('ExtractedDataField', () => {
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
 
+- Code Review 2026-01-06: 10 issues found and fixed
+
 ### Completion Notes List
 
+- AC #3 threshold corrected: 85% → 90% for high confidence
+- PDF viewer integrated using react-pdf library
+- React Query added for data fetching
+- Tooltip added to OCRConfidenceIndicator
+- Audit logging added for modification history
+- OCRReviewPanel integration tests added
+
 ### File List
+
+**Backend (apps/api/):**
+- `src/ocr/ocr.controller.ts` - Modified: getOcrResult, updateOcrResult, confirmOcrReview endpoints
+- `src/ocr/ocr.controller.spec.ts` - Modified: Added tests for new endpoints
+- `src/ocr/ocr.service.ts` - Modified: getOcrResult, updateOcrField, confirmOcrReview with audit logging
+- `src/ocr/dto/index.ts` - Modified: Export new DTOs
+- `src/ocr/dto/ocr-result-response.dto.ts` - New: DocumentOcrResultDto
+- `src/ocr/dto/update-ocr-result.dto.ts` - New: UpdateOcrResultDto, ConfirmOcrReviewDto
+
+**Frontend (apps/web/):**
+- `src/main.tsx` - Modified: Added QueryClientProvider for React Query
+- `src/App.tsx` - Modified: Added /documents/:documentId/review route
+- `src/api/document.api.ts` - Modified: getOcrResult, updateOcrField, confirmOcrReview functions
+- `src/components/ocr/OCRConfidenceIndicator.tsx` - New: Confidence indicator with Tooltip (AC #3)
+- `src/components/ocr/OCRConfidenceIndicator.test.tsx` - New: Unit tests
+- `src/components/ocr/ExtractedDataField.tsx` - New: Editable field component (AC #4)
+- `src/components/ocr/ExtractedDataField.test.tsx` - New: Unit tests
+- `src/components/ocr/ExtractedDataTable.tsx` - New: Table data display (AC #6)
+- `src/components/ocr/DocumentPreview.tsx` - New: PDF/Image viewer with react-pdf (AC #1)
+- `src/components/ocr/OCRReviewPanel.tsx` - New: Main review panel (AC #1, #2, #5)
+- `src/components/ocr/OCRReviewPanel.test.tsx` - New: Integration tests
+- `src/components/ocr/index.ts` - Modified: Export new components
+- `src/hooks/useOcrResult.ts` - New: React Query hook for OCR data
+- `src/views/OCRReview.tsx` - New: OCR review page
+
+**Package Updates:**
+- `package.json` - Modified: Added @tanstack/react-query, react-pdf
 
