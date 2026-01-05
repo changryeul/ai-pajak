@@ -21,15 +21,6 @@
       "env": {
         "TAVILY_API_KEY": "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"
       }
-    },
-    "mcp-obsidian": {
-      "command": "/Users/chrishan/.local/bin/uvx",
-      "args": ["mcp-obsidian"],
-      "env": {
-        "OBSIDIAN_API_KEY": "49da2acd5b6fa5596dd9ce817a346f90bbf3c5fac68ae07a6eed057d494f45ea",
-        "OBSIDIAN_HOST": "127.0.0.1",
-        "OBSIDIAN_PORT": "27124"
-      }
     }
   },
   "globalShortcut": ""
