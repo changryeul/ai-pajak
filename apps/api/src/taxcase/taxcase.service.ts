@@ -195,7 +195,24 @@ export class ReviewWorkflowService {
   }
 
   // =====================================================
-  // 6️⃣ TaxCase 상세 조회 (UI용)
+  // 6️⃣ 전체 TaxCase 목록 조회
+  // =====================================================
+  async listAllTaxCases() {
+    const taxCases = await this.taxCaseRepo.listAll();
+    return taxCases.map((tc) => ({
+      id: tc.id.toString(),
+      companyId: tc.companyId.toString(),
+      companyName: tc.company.name,
+      taxType: tc.taxType,
+      period: tc.period,
+      status: tc.status,
+      workflowStage: tc.workflow?.stage ?? null,
+      createdAt: tc.createdAt,
+    }));
+  }
+
+  // =====================================================
+  // 7️⃣ TaxCase 상세 조회 (UI용)
   // =====================================================
   async getTaxCaseDetail(
     taxCaseId: bigint,

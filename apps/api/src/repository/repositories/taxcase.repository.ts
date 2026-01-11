@@ -26,6 +26,23 @@ export class TaxCaseRepository {
     });
   }
 
+  /**
+   * 전체 TaxCase 목록 조회 (Company 정보 포함)
+   */
+  listAll() {
+    return this.prisma.taxCase.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        company: {
+          select: { id: true, name: true },
+        },
+        workflow: {
+          select: { stage: true },
+        },
+      },
+    });
+  }
+
   // repository/repositories/taxcase.repository.ts
   async findDetail(id: bigint) {
     return this.prisma.taxCase.findUnique({

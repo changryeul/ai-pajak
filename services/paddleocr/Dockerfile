@@ -1,5 +1,6 @@
 # PaddleOCR Service Dockerfile
 # PP-OCRv5 with FastAPI on Python 3.12
+# Compatible with ARM64 (Apple Silicon) and x86_64
 
 FROM python:3.12-slim-bookworm
 
@@ -7,14 +8,11 @@ FROM python:3.12-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# PaddlePaddle critical settings to prevent segfaults (from GitHub issue #76111)
-# These disable problematic optimizations that cause SIGSEGV in Docker
-ENV FLAGS_use_mkldnn=0
-ENV FLAGS_use_xdnn=0
+# PaddlePaddle performance settings
+# Note: PaddlePaddle 3.2.x includes Apple Accelerate BLAS fix (PR #64408)
+# These settings are kept for compatibility but may not be needed
 ENV OMP_NUM_THREADS=1
 ENV MKL_NUM_THREADS=1
-ENV GOTOBLAS_NUM_THREADS=1
-ENV VECLIB_MAXIMUM_THREADS=1
 ENV OPENBLAS_NUM_THREADS=1
 ENV DISABLE_MODEL_SOURCE_CHECK=True
 
@@ -26,6 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
     libxrender-dev \
+    # PaddlePaddle dependencies (OpenMP for multithreading)
+    libgomp1 \
     # PDF processing (poppler for pdf2image)
     poppler-utils \
     # Health check
@@ -40,12 +40,18 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
+# PaddlePaddle 3.2.x and PaddleOCR 3.3.x with ARM64 support
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Pre-download PP-OCRv5 models to avoid first-request delay
-# Using new PaddleOCR 3.x initialization parameters
-RUN python -c "from paddleocr import PaddleOCR; PaddleOCR(use_doc_orientation_classify=False, use_doc_unwarping=False, use_textline_orientation=False, lang='en', device='cpu')"
+# Using PaddleOCR 3.3.x API
+RUN python -c "\
+import os; \
+os.environ['DISABLE_MODEL_SOURCE_CHECK'] = 'True'; \
+from paddleocr import PaddleOCR; \
+PaddleOCR(lang='en', use_doc_orientation_classify=False, use_doc_unwarping=False, use_textline_orientation=False) \
+" || echo "Model pre-download skipped, will download on first request"
 
 # Copy application code
 COPY main.py ocr_processor.py ./
@@ -69,6 +75,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
 # Run with uvicorn
-# Using single worker - PaddlePaddle is not fork-safe and segfaults with multiple workers
+# Using single worker - PaddlePaddle is not fork-safe
 # For production scaling, use container orchestration (k8s replicas) instead
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]

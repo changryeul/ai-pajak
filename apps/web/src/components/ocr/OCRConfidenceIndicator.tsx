@@ -28,6 +28,11 @@ export function OCRConfidenceIndicator({
   showPercentage = true,
   size = 'md',
 }: OCRConfidenceIndicatorProps) {
+  // Convert decimal (0-1) to percentage (0-100) if needed
+  const normalizedConfidence = confidence !== null && confidence <= 1
+    ? confidence * 100
+    : confidence;
+
   const getConfidenceLevel = (conf: number | null) => {
     if (conf === null) return 'unknown';
     if (conf >= 90) return 'high';
@@ -35,7 +40,7 @@ export function OCRConfidenceIndicator({
     return 'low';
   };
 
-  const level = getConfidenceLevel(confidence);
+  const level = getConfidenceLevel(normalizedConfidence);
 
   const levelStyles = {
     high: 'bg-green-100 text-green-800 border-green-200',
@@ -57,14 +62,14 @@ export function OCRConfidenceIndicator({
     unknown: 'AI 처리됨 (신뢰도 점수 없음)',
   };
 
-  const label = confidence !== null
+  const label = normalizedConfidence !== null
     ? showPercentage
-      ? `${Math.round(confidence)}%`
+      ? `${Math.round(normalizedConfidence)}%`
       : level.charAt(0).toUpperCase() + level.slice(1)
     : 'N/A';
 
-  const tooltipContent = confidence !== null
-    ? `신뢰도: ${confidence.toFixed(1)}% - ${levelLabels[level]}`
+  const tooltipContent = normalizedConfidence !== null
+    ? `신뢰도: ${normalizedConfidence.toFixed(1)}% - ${levelLabels[level]}`
     : levelLabels.unknown;
 
   return (

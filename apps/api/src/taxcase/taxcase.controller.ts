@@ -23,12 +23,20 @@ import { OverrideAIResultDto } from './dto/override-ai-result.dto';
 
 @ApiTags('tax-cases')
 @ApiHeader({ name: 'x-user-id', required: true })
-@Controller('api/tax-cases')
+@Controller('tax-cases')
 @UseGuards(AuthGuard)
 export class TaxCaseController {
   constructor(
     private readonly workflow: ReviewWorkflowService,
   ) {}
+
+  /**
+   * 전체 TaxCase 목록 조회
+   */
+  @Get()
+  listAllTaxCases() {
+    return this.workflow.listAllTaxCases();
+  }
 
   /**
    * TaxCase 생성

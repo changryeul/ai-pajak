@@ -13,6 +13,19 @@ export class CompanyService {
 
   
   /**
+   * 전체 회사 목록 조회
+   */
+  async listAllCompanies() {
+    const companies = await this.companyRepo.findAll();
+    return companies.map((c) => ({
+      id: c.id.toString(),
+      name: c.name,
+      npwp: c.npwp,
+      createdAt: c.createdAt.toISOString(),
+    }));
+  }
+
+  /**
    * 회사 생성
    */
   async createCompany(body: CreateCompanyDto) {

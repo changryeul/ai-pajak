@@ -22,7 +22,11 @@ export class OcrService {
     private readonly configService: ConfigService,
   ) {
     // Resolve upload directory to absolute path for security validation
-    this.uploadDir = path.resolve(process.env.UPLOAD_DIR || './uploads');
+    // Use __dirname to get the correct path relative to this file's location
+    // After compilation: dist/ocr/ocr.service.js -> ../../uploads
+    this.uploadDir = process.env.UPLOAD_DIR
+      ? path.resolve(process.env.UPLOAD_DIR)
+      : path.resolve(__dirname, '../../uploads');
     // Fallback threshold: 0.85 = 85%
     this.fallbackThreshold = this.configService.get<number>(
       'GEMINI_FALLBACK_THRESHOLD',

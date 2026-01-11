@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// Use relative URLs to work with Vite proxy
+const API_BASE_URL = '/api';
 
 export interface UploadResponse {
   id: string;

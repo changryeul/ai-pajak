@@ -66,19 +66,19 @@ development_status:
   # Tax Advisor가 승인된 세금 케이스의 제출 데이터를 준비하고, 수동 제출 후 상태를 업데이트합니다.
   epic-3: in-progress
   3-1-spt-submission-data-generation: ready-for-dev
-  3-2-operator-helper-formatting: backlog
-  3-3-submission-prep-complete: backlog
-  3-4-manual-submission-confirm: backlog
-  3-5-submission-status-ui: backlog
+  3-2-operator-helper-formatting: ready-for-dev
+  3-3-submission-prep-complete: ready-for-dev
+  3-4-manual-submission-confirm: ready-for-dev
+  3-5-submission-status-ui: ready-for-dev
   epic-3-retrospective: optional
 
   # Epic 4: 일괄 제출 준비 및 체크리스트
   # Tax Advisor가 35개 이상의 고객 케이스를 일괄 선택하여 제출 준비 데이터를 생성합니다.
-  epic-4: backlog
-  4-1-bulk-select-ui: backlog
-  4-2-bulk-prepare-queue: backlog
-  4-3-bulk-progress-display: backlog
-  4-4-deadline-checklist: backlog
+  epic-4: in-progress
+  4-1-bulk-select-ui: ready-for-dev
+  4-2-bulk-prepare-queue: ready-for-dev
+  4-3-bulk-progress-display: ready-for-dev
+  4-4-deadline-checklist: ready-for-dev
   4-5-bulk-export: backlog
   epic-4-retrospective: optional
 

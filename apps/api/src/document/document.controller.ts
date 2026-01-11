@@ -3,12 +3,16 @@ import {
   Post,
   Get,
   Param,
+  Res,
   UseInterceptors,
   UploadedFile,
   Body,
   ParseFilePipe,
   MaxFileSizeValidator,
+  NotFoundException,
 } from '@nestjs/common';
+import { Response } from 'express';
+import { createReadStream, existsSync } from 'fs';
 import { CustomFileTypeValidator } from './validators/file-type.validator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -21,6 +25,11 @@ import { MAX_FILE_SIZE } from './types/document.types';
 @Controller('documents')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
+
+  @Get()
+  async listDocuments() {
+    return this.documentService.listAll();
+  }
 
   @Post('upload')
   @UseInterceptors(
@@ -68,5 +77,20 @@ export class DocumentController {
   @Get(':id')
   async getDocument(@Param('id') id: string) {
     return this.documentService.findById(id);
+  }
+
+  @Get(':id/file')
+  async getDocumentFile(@Param('id') id: string, @Res() res: Response) {
+    const fileInfo = await this.documentService.getFileInfo(id);
+
+    if (!existsSync(fileInfo.path)) {
+      throw new NotFoundException('File not found on disk');
+    }
+
+    res.setHeader('Content-Type', fileInfo.mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${fileInfo.originalName}"`);
+
+    const fileStream = createReadStream(fileInfo.path);
+    fileStream.pipe(res);
   }
 }

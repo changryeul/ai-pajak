@@ -14,10 +14,19 @@ import { AuthGuard } from '../common/auth.guard';
 import { CreateCompanyDto } from './dto/create-company.dto';
 
 @ApiTags('companies')
-@Controller('api/companies')
+@Controller('companies')
 @UseGuards(AuthGuard)
 export class CompanyController {
   constructor(private readonly company: CompanyService) {}
+
+  /**
+   * 전체 회사 목록 조회
+   * GET /api/companies
+   */
+  @Get()
+  listAll() {
+    return this.company.listAllCompanies();
+  }
 
   /**
    * 회사 생성
@@ -28,7 +37,6 @@ export class CompanyController {
     return this.company.createCompany(body);
   }
 
-  /**
   /**
    * 회사 상세 조회 (기본 정보)
    * GET /api/companies/:id

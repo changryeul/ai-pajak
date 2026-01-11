@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, FileText, Upload, Clock, CheckCircle, CheckCircle2, Send, Users, MessageSquare, Settings, UserCheck, Shield, Wallet } from 'lucide-react';
+import { LayoutDashboard, FileText, Upload, Clock, CheckCircle, CheckCircle2, Send, Users, MessageSquare, Settings, UserCheck, Shield, Wallet, Files } from 'lucide-react';
 
 // User roles as defined in the PRD
 export type UserRole = 'CUSTOMER' | 'CONSULTANT_JTC' | 'TAX_ADVISOR_JTC' | 'PLATFORM_ADMIN' | 'SYSTEM';
@@ -42,6 +42,13 @@ export const menuConfig: MenuItem[] = [
         path: '/documents/upload',
         icon: Upload,
         roles: ['CUSTOMER'],
+      },
+      {
+        id: 'documents',
+        labelKey: 'sidebar.documents',
+        path: '/documents',
+        icon: Files,
+        roles: ['CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC'],
       },
       {
         id: 'in-progress',

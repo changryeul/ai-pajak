@@ -17,6 +17,12 @@ export class CompanyRepository {
     });
   }
 
+  async findAll() {
+    return this.prisma.company.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findTaxCases(companyId: bigint) {
     return this.prisma.taxCase.findMany({
       where: { companyId },

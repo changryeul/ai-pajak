@@ -1,7 +1,7 @@
 """
 PaddleOCR Wrapper for OCR Processing
-Handles image and PDF file processing with PaddleOCR 3.x API
-Updated for PaddleOCR 2.9.x / PaddlePaddle 3.x compatibility
+Handles image and PDF file processing with PaddleOCR 3.3.x API
+Compatible with PaddleOCR 3.3.x / PaddlePaddle 3.2.x on Apple Silicon
 """
 
 import io
@@ -16,42 +16,44 @@ from paddleocr import PaddleOCR
 
 logger = logging.getLogger(__name__)
 
+# Disable model source connectivity check for faster startup
+os.environ['DISABLE_MODEL_SOURCE_CHECK'] = 'True'
+
 
 class OcrProcessor:
     """
     PaddleOCR wrapper class for processing images and PDFs.
 
     Features:
-    - PaddleOCR 3.x API with predict() method
+    - PaddleOCR 3.3.x API with predict() method
     - Support for JPEG, PNG images
     - Support for PDF files (page-by-page conversion)
     - Structured output with text, bounding boxes, and confidence scores
+    - Optimized for Apple Silicon (M1/M2/M3) with Accelerate BLAS
     """
 
     def __init__(self, lang: str = "en"):
         """
-        Initialize PaddleOCR with configuration optimized for Docker/container environment.
+        Initialize PaddleOCR with configuration.
 
         Args:
             lang: Language for OCR (default: "en")
         """
-        logger.info(f"Initializing PaddleOCR with lang={lang}")
+        logger.info(f"Initializing PaddleOCR 3.3.x with lang={lang}")
 
-        # PaddleOCR 3.x initialization - disable problematic features
-        # These settings prevent segfaults in containerized environments
+        # PaddleOCR 3.3.x initialization
+        # Note: API has changed from 2.9.x
         self.ocr = PaddleOCR(
-            use_doc_orientation_classify=False,  # Disable document orientation
-            use_doc_unwarping=False,             # Disable document unwarping
-            use_textline_orientation=False,      # Disable textline orientation
             lang=lang,
-            device="cpu",  # CPU-only for portability
-            show_log=False,  # Reduce log noise
+            use_doc_orientation_classify=False,  # Disable for speed
+            use_doc_unwarping=False,             # Disable for speed
+            use_textline_orientation=False,      # Disable for speed
         )
 
         # Table recognition disabled - PPStructureV3 has compatibility issues
         self.enable_table = False
 
-        logger.info("PaddleOCR initialized successfully")
+        logger.info("PaddleOCR 3.3.x initialized successfully")
 
     def process(
         self,
@@ -78,7 +80,7 @@ class OcrProcessor:
 
     def _process_image(self, content: bytes, page: int = 1) -> List[dict]:
         """
-        Process a single image and extract OCR results using PaddleOCR 3.x API.
+        Process a single image and extract OCR results using PaddleOCR 3.3.x API.
 
         Args:
             content: Image bytes
@@ -88,15 +90,15 @@ class OcrProcessor:
             List of OCR result dictionaries
         """
         try:
-            # Save to temp file - PaddleOCR 3.x predict() works better with file paths
+            # Save to temp file - PaddleOCR works better with file paths
             with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
                 tmp.write(content)
                 tmp_path = tmp.name
 
             try:
-                # PaddleOCR 3.x API: use predict() method
-                result = self.ocr.predict(input=tmp_path)
-                return self._format_results(result, page)
+                # PaddleOCR 3.3.x API: use predict() method
+                result = self.ocr.predict(tmp_path)
+                return self._format_results_v3(result, page)
             finally:
                 # Clean up temp file
                 if os.path.exists(tmp_path):
@@ -140,15 +142,22 @@ class OcrProcessor:
             logger.error(f"PDF processing error: {str(e)}")
             raise
 
-    def _format_results(self, ocr_result: Any, page: int) -> List[dict]:
+    def _format_results_v3(self, ocr_result: Any, page: int) -> List[dict]:
         """
-        Format PaddleOCR 3.x results into structured output.
+        Format PaddleOCR 3.3.x results into structured output.
 
-        PaddleOCR 3.x predict() returns a list of PaddleOCR result objects.
-        Each result has rec_texts, rec_scores, and dt_polys attributes.
+        PaddleOCR 3.3.x predict() method returns:
+        [
+            {
+                'rec_texts': ['text1', 'text2', ...],
+                'rec_scores': [0.99, 0.98, ...],
+                'rec_polys': [array([[x1,y1], [x2,y2], [x3,y3], [x4,y4]]), ...],
+                ...
+            }
+        ]
 
         Args:
-            ocr_result: Raw PaddleOCR 3.x output from predict()
+            ocr_result: Raw PaddleOCR 3.3.x output from predict()
             page: Page number
 
         Returns:
@@ -159,59 +168,32 @@ class OcrProcessor:
         if not ocr_result:
             return formatted
 
-        # PaddleOCR 3.x returns list of result objects
-        for result_obj in ocr_result:
-            try:
-                # Access attributes from result object
-                # Different versions may have different attribute names
-                rec_texts = getattr(result_obj, 'rec_texts', None)
-                rec_scores = getattr(result_obj, 'rec_scores', None)
-                dt_polys = getattr(result_obj, 'dt_polys', None)
+        # PaddleOCR 3.3.x returns a list with one dict per image
+        for result_dict in ocr_result:
+            if result_dict is None:
+                continue
 
-                # Alternative attribute names
-                if rec_texts is None:
-                    rec_texts = getattr(result_obj, 'rec_text', [])
-                if rec_scores is None:
-                    rec_scores = getattr(result_obj, 'rec_score', [])
-                if dt_polys is None:
-                    dt_polys = getattr(result_obj, 'dt_poly', [])
+            texts = result_dict.get('rec_texts', [])
+            scores = result_dict.get('rec_scores', [])
+            polys = result_dict.get('rec_polys', [])
 
-                # If still None, try to access as dict
-                if rec_texts is None and hasattr(result_obj, '__dict__'):
-                    data = result_obj.__dict__
-                    rec_texts = data.get('rec_texts', data.get('rec_text', []))
-                    rec_scores = data.get('rec_scores', data.get('rec_score', []))
-                    dt_polys = data.get('dt_polys', data.get('dt_poly', []))
-
-                if not rec_texts:
-                    # Try to get from 'res' attribute if present
-                    if hasattr(result_obj, 'res') and result_obj.res:
-                        for item in result_obj.res:
-                            if isinstance(item, dict):
-                                text = item.get('text', '')
-                                score = item.get('score', 0.0)
-                                bbox = item.get('bbox', [[0,0], [0,0], [0,0], [0,0]])
-                                if text:
-                                    formatted.append({
-                                        "text": str(text),
-                                        "confidence": round(float(score), 4),
-                                        "bbox": [[int(c) for c in p] for p in bbox] if bbox else [[0,0]]*4,
-                                        "page": page
-                                    })
+            # Iterate through all recognized text items
+            for i, text in enumerate(texts):
+                if not text:
                     continue
 
-                # Process parallel arrays
-                for i, text in enumerate(rec_texts):
-                    if not text:
-                        continue
-
-                    confidence = rec_scores[i] if i < len(rec_scores) else 0.0
-                    bbox = dt_polys[i] if i < len(dt_polys) else [[0,0], [0,0], [0,0], [0,0]]
+                try:
+                    confidence = scores[i] if i < len(scores) else 0.0
+                    poly = polys[i] if i < len(polys) else None
 
                     # Convert bbox to integer coordinates
-                    try:
-                        bbox_int = [[int(coord) for coord in point] for point in bbox]
-                    except (TypeError, ValueError):
+                    if poly is not None:
+                        try:
+                            # poly is numpy array of shape (4, 2)
+                            bbox_int = [[int(coord) for coord in point] for point in poly]
+                        except (TypeError, ValueError):
+                            bbox_int = [[0, 0], [0, 0], [0, 0], [0, 0]]
+                    else:
                         bbox_int = [[0, 0], [0, 0], [0, 0], [0, 0]]
 
                     formatted.append({
@@ -221,41 +203,11 @@ class OcrProcessor:
                         "page": page
                     })
 
-            except Exception as e:
-                logger.warning(f"Error parsing result object: {e}, object type: {type(result_obj)}")
-                # Try fallback parsing
-                try:
-                    self._fallback_parse(result_obj, page, formatted)
-                except Exception as fallback_error:
-                    logger.warning(f"Fallback parsing also failed: {fallback_error}")
-                continue
+                except (IndexError, TypeError) as e:
+                    logger.warning(f"Error parsing result at index {i}: {e}")
+                    continue
 
         return formatted
-
-    def _fallback_parse(self, result_obj: Any, page: int, formatted: List[dict]) -> None:
-        """
-        Fallback parsing for different PaddleOCR result formats.
-        """
-        # Try treating as old-style list format
-        if isinstance(result_obj, list):
-            for item in result_obj:
-                if item is None:
-                    continue
-                if isinstance(item, list) and len(item) >= 2:
-                    bbox = item[0]
-                    text_info = item[1]
-                    if isinstance(text_info, tuple) and len(text_info) >= 2:
-                        text, confidence = text_info[0], text_info[1]
-                        try:
-                            bbox_int = [[int(coord) for coord in point] for point in bbox]
-                        except:
-                            bbox_int = [[0,0]]*4
-                        formatted.append({
-                            "text": str(text),
-                            "confidence": round(float(confidence), 4),
-                            "bbox": bbox_int,
-                            "page": page
-                        })
 
     def get_model_info(self) -> dict:
         """
@@ -267,7 +219,7 @@ class OcrProcessor:
         features = ["text_detection", "text_recognition"]
 
         return {
-            "version": "PaddleOCR-3.x",
+            "version": "PP-OCRv5",
             "languages": ["en", "ch", "id"],
             "features": features
         }

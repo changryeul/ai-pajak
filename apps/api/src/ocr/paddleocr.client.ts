@@ -28,9 +28,9 @@ export class PaddleOcrClient {
       'PADDLEOCR_SERVICE_URL',
       'http://localhost:8080',
     );
-    this.timeout = this.configService.get<number>(
-      'PADDLEOCR_TIMEOUT_MS',
-      30000,
+    // ConfigService returns string for env vars, must convert to number
+    this.timeout = Number(
+      this.configService.get<string>('PADDLEOCR_TIMEOUT_MS', '30000'),
     );
   }
 

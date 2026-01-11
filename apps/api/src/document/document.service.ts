@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import * as path from 'path';
 import { PrismaService } from '../repository/prisma.service';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 import { DocumentResponseDto, DocumentStatusResponseDto } from './dto/document-response.dto';
@@ -31,13 +32,15 @@ export class DocumentService {
     // - 참조: architecture.md#Infrastructure & Deployment - S3 Storage
 
     // 1. Document 레코드 생성
+    // Use absolute path for consistent file access
+    const absoluteFilePath = path.resolve(file.path);
     const document = await this.prisma.document.create({
       data: {
         filename: file.filename,
         originalName: file.originalname,
         mimeType: file.mimetype,
         size: file.size,
-        path: file.path,
+        path: absoluteFilePath,
         status: 'PENDING',
         taxCaseId: dto.taxCaseId ? BigInt(dto.taxCaseId) : null,
       },
@@ -46,7 +49,7 @@ export class DocumentService {
     // 2. OCR 큐에 작업 추가
     const jobData: OcrQueueJobData = {
       documentId: document.id.toString(),
-      filePath: file.path,
+      filePath: absoluteFilePath,
       mimeType: file.mimetype,
     };
 
@@ -137,5 +140,48 @@ export class DocumentService {
       ocrJobId: document.ocrJobId || undefined,
       createdAt: document.createdAt.toISOString(),
     };
+  }
+
+  /**
+   * Get document file info for streaming
+   * @param id - Document ID as string
+   * @returns File path and mime type
+   */
+  async getFileInfo(id: string): Promise<{ path: string; mimeType: string; originalName: string }> {
+    const document = await this.prisma.document.findUnique({
+      where: { id: BigInt(id) },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    return {
+      path: document.path,
+      mimeType: document.mimeType,
+      originalName: document.originalName,
+    };
+  }
+
+  /**
+   * List all documents
+   * @returns Array of documents
+   */
+  async listAll(): Promise<DocumentResponseDto[]> {
+    const documents = await this.prisma.document.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return documents.map((doc) => ({
+      id: doc.id.toString(),
+      filename: doc.filename,
+      originalName: doc.originalName,
+      mimeType: doc.mimeType,
+      size: doc.size,
+      status: doc.status as DocumentResponseDto['status'],
+      taxCaseId: doc.taxCaseId?.toString() || undefined,
+      ocrJobId: doc.ocrJobId || undefined,
+      createdAt: doc.createdAt.toISOString(),
+    }));
   }
 }

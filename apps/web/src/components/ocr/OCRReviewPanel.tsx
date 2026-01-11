@@ -30,16 +30,26 @@ export function OCRReviewPanel({
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [pendingUpdates, setPendingUpdates] = useState<Map<number, string>>(new Map());
 
+  // Helper to normalize confidence from decimal (0-1) to percentage (0-100)
+  const normalizeConfidence = (conf: number | null) => {
+    if (conf === null) return null;
+    return conf <= 1 ? conf * 100 : conf;
+  };
+
   // Calculate average confidence
   const avgConfidence = useMemo(() => {
     const validResults = ocrResult.results.filter(r => r.confidence !== null);
     if (validResults.length === 0) return null;
-    return validResults.reduce((sum, r) => sum + (r.confidence || 0), 0) / validResults.length;
+    const sum = validResults.reduce((acc, r) => acc + (normalizeConfidence(r.confidence) || 0), 0);
+    return sum / validResults.length;
   }, [ocrResult.results]);
 
-  // Count low confidence fields
+  // Count low confidence fields (< 70%)
   const lowConfidenceCount = useMemo(() => {
-    return ocrResult.results.filter(r => r.confidence !== null && r.confidence < 70).length;
+    return ocrResult.results.filter(r => {
+      const normalized = normalizeConfidence(r.confidence);
+      return normalized !== null && normalized < 70;
+    }).length;
   }, [ocrResult.results]);
 
   const handleFieldUpdate = (index: number, newValue: string) => {

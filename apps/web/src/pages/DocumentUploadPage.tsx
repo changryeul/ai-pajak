@@ -1,33 +1,57 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DocumentUpload, UploadStatusCard } from '@/components/ocr';
 import { toast } from 'sonner';
+import { fetchAllTaxCases, type TaxCaseSummary } from '@/api/taxcase';
 
 type UploadState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 
 /**
- * DocumentUploadPage - Page for uploading tax documents
- * Supports optional taxCaseId query parameter for association
+ * DocumentUploadPage - Simple document upload flow
+ * Auto-selects available TaxCase for linking OCR results
  */
 export function DocumentUploadPage() {
-  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const urlTaxCaseId = searchParams.get('taxCaseId') || undefined;
 
-  const taxCaseId = searchParams.get('taxCaseId') || undefined;
+  // Auto-select TaxCase for OCR result storage
+  const [taxCaseId, setTaxCaseId] = useState<string | undefined>(urlTaxCaseId);
+  const [isLoadingTaxCase, setIsLoadingTaxCase] = useState(!urlTaxCaseId);
 
+  // Upload state
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [documentId, setDocumentId] = useState<string | null>(null);
-  const [ocrJobId, setOcrJobId] = useState<string | null>(null);
+
+  // Auto-load first available TaxCase if not provided in URL
+  useEffect(() => {
+    if (urlTaxCaseId) {
+      setTaxCaseId(urlTaxCaseId);
+      setIsLoadingTaxCase(false);
+      return;
+    }
+
+    const loadTaxCase = async () => {
+      try {
+        const data = await fetchAllTaxCases();
+        if (data.length > 0) {
+          setTaxCaseId(data[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to load tax cases:', error);
+      } finally {
+        setIsLoadingTaxCase(false);
+      }
+    };
+    loadTaxCase();
+  }, [urlTaxCaseId]);
 
   const handleUploadComplete = useCallback(
     (docId: string, jobId?: string) => {
       setDocumentId(docId);
-      setOcrJobId(jobId || null);
       setUploadState('processing');
       toast.success('파일 업로드 완료', {
         description: 'OCR 처리를 시작합니다.',
@@ -60,15 +84,15 @@ export function DocumentUploadPage() {
   const handleReset = useCallback(() => {
     setUploadState('idle');
     setDocumentId(null);
-    setOcrJobId(null);
   }, []);
 
   const handleViewResult = useCallback(() => {
     if (documentId) {
-      // TODO: Navigate to OCR review page when implemented (Story 2-5)
       navigate(`/documents/${documentId}/review`);
     }
   }, [documentId, navigate]);
+
+  const canUpload = !isLoadingTaxCase;
 
   return (
     <div className="space-y-6">
@@ -93,17 +117,6 @@ export function DocumentUploadPage() {
         </div>
       </div>
 
-      {/* Tax Case Info (if linked) */}
-      {taxCaseId && (
-        <Card className="bg-muted/50">
-          <CardContent className="py-3">
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Tax Case ID:</span> {taxCaseId}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Upload Section */}
       {(uploadState === 'idle' || uploadState === 'uploading' || uploadState === 'error') && (
         <Card>
@@ -114,11 +127,17 @@ export function DocumentUploadPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DocumentUpload
-              taxCaseId={taxCaseId}
-              onUploadComplete={handleUploadComplete}
-              onUploadError={handleUploadError}
-            />
+            {isLoadingTaxCase ? (
+              <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground">
+                로딩 중...
+              </div>
+            ) : (
+              <DocumentUpload
+                taxCaseId={taxCaseId}
+                onUploadComplete={handleUploadComplete}
+                onUploadError={handleUploadError}
+              />
+            )}
           </CardContent>
         </Card>
       )}

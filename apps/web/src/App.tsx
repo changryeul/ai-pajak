@@ -6,6 +6,9 @@ import { OCRReview } from './views/OCRReview';
 import { DashboardLayout, MainLayout } from './components/layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { DocumentUploadPage } from './pages/DocumentUploadPage';
+import { DocumentsPage } from './pages/DocumentsPage';
+import { InProgressPage } from './pages/InProgressPage';
+import { CompletedPage } from './pages/CompletedPage';
 import { type UserRole } from './config/navigation';
 import {
   Select,
@@ -138,11 +141,12 @@ export default function App() {
         <Route element={<DashboardLayoutWithRole />}>
           <Route path="/dashboard" element={<DashboardContent />} />
           <Route path="/tax-cases" element={<div className="p-4">Tax Filing List</div>} />
+          <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/documents/upload" element={<DocumentUploadPage />} />
           {/* Story 2-5 - OCR Review Page */}
           <Route path="/documents/:documentId/review" element={<OCRReview />} />
-          <Route path="/tax-cases/in-progress" element={<div className="p-4">Cases In Progress</div>} />
-          <Route path="/tax-cases/completed" element={<div className="p-4">Completed Cases</div>} />
+          <Route path="/tax-cases/in-progress" element={<InProgressPage />} />
+          <Route path="/tax-cases/completed" element={<CompletedPage />} />
           <Route path="/tax-cases/:id" element={<TaxCaseDetail />} />
           <Route path="/customers" element={<div className="p-4">Customer Management</div>} />
           <Route path="/tax-processing" element={<div className="p-4">Tax Processing</div>} />

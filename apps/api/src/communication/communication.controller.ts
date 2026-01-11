@@ -12,7 +12,7 @@ import { CommunicationService } from './communication.service';
 import { AuthGuard } from '../common/auth.guard';
 
 @ApiTags('tax-cases')
-@Controller('api/tax-cases')
+@Controller('tax-cases')
 @UseGuards(AuthGuard)
 export class CommunicationController {
   constructor(private readonly communication: CommunicationService) {}

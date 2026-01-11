@@ -5,7 +5,7 @@ import { FilingService } from './filing.service';
 import { AuthGuard } from '../common/auth.guard';
 
 @ApiTags('tax-cases')
-@Controller('api/tax-cases')
+@Controller('tax-cases')
 @UseGuards(AuthGuard)
 export class FilingController {
   constructor(private readonly filing: FilingService) {}

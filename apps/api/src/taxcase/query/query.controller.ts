@@ -3,7 +3,7 @@ import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { TaxCaseQueryService } from './query.service';
 import { AuthGuard } from '../../common/auth.guard';
 
-@Controller('api/tax-cases')
+@Controller('tax-cases')
 @UseGuards(AuthGuard)
 export class TaxCaseQueryController {
   constructor(private readonly query: TaxCaseQueryService) {}

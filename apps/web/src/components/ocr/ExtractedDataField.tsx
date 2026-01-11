@@ -54,7 +54,11 @@ export function ExtractedDataField({
     }
   }, [handleSave, handleCancel]);
 
-  const isLowConfidence = confidence !== null && confidence < 70;
+  // Normalize confidence from decimal (0-1) to percentage (0-100) if needed
+  const normalizedConfidence = confidence !== null && confidence <= 1
+    ? confidence * 100
+    : confidence;
+  const isLowConfidence = normalizedConfidence !== null && normalizedConfidence < 70;
 
   return (
     <div
