@@ -98,7 +98,8 @@
       "Bash(source .env.local)",
       "Bash(supabase start:*)",
       "Bash(psql:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

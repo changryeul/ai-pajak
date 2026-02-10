@@ -310,15 +310,14 @@ async function handler(request: RequestWithSession): Promise<Response> {
   interface TaxFilingData {
     id: string;
     customer_id: string;
-    consultant: {
-      tax_partner_id: string;
-    };
+    consultant: { tax_partner_id: string }[] | { tax_partner_id: string } | null;
+    filing_number?: string;
   }
   let taxFiling: TaxFilingData | null = null;
   if (taxFilingId) {
     const { data: filing, error: filingError } = await supabase
       .from('tax_filing')
-      .select('id, customer_id, consultant:consultant_id(tax_partner_id)')
+      .select('id, customer_id, filing_number, consultant:consultant_id(tax_partner_id)')
       .eq('id', taxFilingId)
       .single();
 
@@ -346,8 +345,10 @@ async function handler(request: RequestWithSession): Promise<Response> {
     }
 
     // Get tax_partner_id through consultant relationship
-    const consultantData = filing.consultant as unknown as { tax_partner_id: string } | { tax_partner_id: string }[];
-    const taxPartnerIdFromFiling = Array.isArray(consultantData) ? consultantData[0]?.tax_partner_id : consultantData?.tax_partner_id;
+    const consultantData = filing.consultant as { tax_partner_id: string }[] | { tax_partner_id: string } | null;
+    const taxPartnerIdFromFiling = Array.isArray(consultantData)
+      ? consultantData[0]?.tax_partner_id
+      : consultantData?.tax_partner_id;
 
     if (taxPartnerIdFromFiling !== taxPartnerId) {
       return NextResponse.json(
@@ -502,7 +503,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
   if (taxFiling) {
     response.taxFiling = {
       taxFilingId: taxFiling.id,
-      filingNumber: taxFiling.filing_number,
+      filingNumber: taxFiling.filing_number || '',
     };
   }
 
