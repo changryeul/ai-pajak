@@ -48,7 +48,9 @@ export interface AuditContext {
   userAgent?: string;
 }
 
-export interface RequestWithSession extends Request {
+import { NextRequest } from 'next/server';
+
+export interface RequestWithSession extends NextRequest {
   session: SessionContext;
   audit?: AuditContext;
 }

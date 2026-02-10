@@ -34,15 +34,17 @@ export type Middleware = (
  *   });
  * }
  */
+type Handler = (req: RequestWithSession) => Promise<Response>;
+
 export function composeMiddleware(...middlewares: Middleware[]) {
   return async (
     request: RequestWithSession,
-    finalHandler: (req: RequestWithSession) => Promise<Response>
+    finalHandler: Handler
   ): Promise<Response> => {
     // Build middleware chain from right to left
     // This allows middlewares to be executed left to right (top to bottom)
-    const handler = middlewares.reduceRight(
-      (next, middleware) => (req: RequestWithSession) => middleware(req, next),
+    const handler = middlewares.reduceRight<Handler>(
+      (next: Handler, middleware: Middleware) => (req: RequestWithSession) => middleware(req, next),
       finalHandler
     );
 

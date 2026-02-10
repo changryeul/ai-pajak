@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -33,7 +32,7 @@ interface POACreateRequest {
   customScope?: string[]; // If scope = CUSTOM
   validFrom: string; // YYYY-MM-DD
   validTo: string; // YYYY-MM-DD
-  documentId: string; // POA document upload
+  documentUrl: string; // POA document URL (from Supabase Storage)
   notes?: string;
 }
 
@@ -54,7 +53,7 @@ interface POACreateResponse {
   scope: string;
   validFrom: string;
   validTo: string;
-  documentId: string;
+  documentUrl: string;
   createdAt: string;
   nextSteps: {
     step: number;
@@ -75,12 +74,12 @@ async function handler(request: RequestWithSession): Promise<Response> {
     customScope,
     validFrom,
     validTo,
-    documentId,
+    documentUrl,
     notes,
   } = body;
 
   // Validation
-  if (!taxPartnerId || !scope || !validFrom || !validTo || !documentId) {
+  if (!taxPartnerId || !scope || !validFrom || !validTo || !documentUrl) {
     return NextResponse.json(
       {
         error: 'Missing required fields',
@@ -89,7 +88,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
           'scope',
           'validFrom',
           'validTo',
-          'documentId',
+          'documentUrl',
         ],
       },
       { status: 400 }
@@ -121,19 +120,8 @@ async function handler(request: RequestWithSession): Promise<Response> {
     );
   }
 
-  // Get Supabase client
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  // Get Supabase client (supports both cookie-based and token-based auth)
+  const supabase = await createClient();
 
   // Get customer information
   const { data: customer, error: customerError } = await supabase
@@ -155,7 +143,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
   // Verify tax partner exists
   const { data: taxPartner, error: taxPartnerError } = await supabase
     .from('tax_partner')
-    .select('id, organization_name, license_number, is_active')
+    .select('id, name, tax_license_number, is_active')
     .eq('id', taxPartnerId)
     .single();
 
@@ -180,31 +168,14 @@ async function handler(request: RequestWithSession): Promise<Response> {
     );
   }
 
-  // Verify document exists and belongs to customer
-  const { data: document, error: documentError } = await supabase
-    .from('document')
-    .select('id, customer_id, document_type, file_name')
-    .eq('id', documentId)
-    .eq('customer_id', customer.id)
-    .single();
-
-  if (documentError || !document) {
+  // Validate documentUrl format (basic URL validation)
+  try {
+    new URL(documentUrl);
+  } catch {
     return NextResponse.json(
       {
-        error: 'Document not found',
-        message: 'Document must be uploaded before creating POA',
-        documentId,
-      },
-      { status: 404 }
-    );
-  }
-
-  if (document.document_type !== 'POA_DRAFT') {
-    return NextResponse.json(
-      {
-        error: 'Invalid document type',
-        message: 'Document must be of type POA_DRAFT',
-        actualType: document.document_type,
+        error: 'Invalid document URL',
+        message: 'documentUrl must be a valid URL',
       },
       { status: 400 }
     );
@@ -249,16 +220,11 @@ async function handler(request: RequestWithSession): Promise<Response> {
       customer_id: customer.id,
       tax_partner_id: taxPartnerId,
       scope,
-      custom_scope: scope === 'CUSTOM' ? customScope : null,
+      scope_details: scope === 'CUSTOM' ? customScope : null,
       valid_from: validFrom,
       valid_to: validTo,
       status: 'DRAFT',
-      document_id: documentId,
-      customer_signed_at: null, // Not signed yet
-      customer_signature: null,
-      partner_signed_at: null,
-      partner_signature: null,
-      signed_by_advisor_id: null,
+      document_url: documentUrl,
       notes,
     })
     .select(
@@ -304,7 +270,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       scope,
       validFrom,
       validTo,
-      documentId,
+      documentUrl,
     },
     ip_address: request.headers.get('x-forwarded-for') || 'unknown',
     user_agent: request.headers.get('user-agent') || 'unknown',
@@ -334,12 +300,12 @@ async function handler(request: RequestWithSession): Promise<Response> {
     },
     taxPartner: {
       taxPartnerId: taxPartner.id,
-      organizationName: taxPartner.organization_name,
+      organizationName: taxPartner.name,
     },
     scope: poa.scope,
     validFrom: poa.valid_from,
     validTo: poa.valid_to,
-    documentId,
+    documentUrl,
     createdAt: poa.created_at,
     nextSteps: [
       {

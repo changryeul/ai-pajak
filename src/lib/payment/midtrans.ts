@@ -1,4 +1,5 @@
-import { MIDTRANS_CONFIG, SUBSCRIPTION_PLANS, type SubscriptionPlan } from '@/config/constants';
+import crypto from 'crypto';
+import { MIDTRANS_CONFIG, type SubscriptionPlan } from '@/config/constants';
 
 interface MidtransTransaction {
   orderId: string;
@@ -193,7 +194,6 @@ export class MidtransService {
    * Verify notification from Midtrans webhook
    */
   static verifyNotification(notification: MidtransNotification): boolean {
-    const crypto = require('crypto');
     const expectedSignature = crypto
       .createHash('sha512')
       .update(

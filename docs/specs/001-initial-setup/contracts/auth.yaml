@@ -1,0 +1,362 @@
+openapi: 3.1.0
+info:
+  title: AI Pajak - Authentication API
+  version: 1.0.0
+  description: |
+    Supabase Auth 기반 인증 API.
+    모든 인증은 Supabase Auth를 통해 처리됩니다.
+
+servers:
+  - url: https://api.ai-pajak.com/v1
+    description: Production
+  - url: https://staging-api.ai-pajak.com/v1
+    description: Staging
+
+paths:
+  /auth/register:
+    post:
+      summary: 회원가입
+      operationId: register
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 회원가입 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: 이미 존재하는 이메일
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: 로그인
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      summary: 로그아웃
+      operationId: logout
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: 로그아웃 성공
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      summary: 토큰 갱신
+      operationId: refreshToken
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: 토큰 갱신 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/forgot-password:
+    post:
+      summary: 비밀번호 재설정 요청
+      operationId: forgotPassword
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: 재설정 이메일 발송
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/reset-password:
+    post:
+      summary: 비밀번호 재설정
+      operationId: resetPassword
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - password
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: 비밀번호 변경 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/me:
+    get:
+      summary: 현재 사용자 정보
+      operationId: getCurrentUser
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 사용자 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - full_name
+        - npwp
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          example: SecureP@ss123
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: John Doe
+        npwp:
+          type: string
+          pattern: ^\d{2}\.\d{3}\.\d{3}\.\d-\d{3}\.\d{3}$
+          example: "01.234.567.8-901.000"
+        phone:
+          type: string
+          example: "+6281234567890"
+        company_name:
+          type: string
+          example: PT Maju Jaya
+        customer_type:
+          type: string
+          enum: [INDIVIDUAL, UMKM, PT]
+          default: INDIVIDUAL
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            session:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                refresh_token:
+                  type: string
+                expires_at:
+                  type: integer
+                  description: Unix timestamp
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        role:
+          type: string
+          enum: [CUSTOMER, CONSULTANT_JTC, TAX_ADVISOR_JTC, PLATFORM_ADMIN, SYSTEM]
+        npwp:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  code:
+                    type: string
+                  message:
+                    type: string
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ResponseMeta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+
+  responses:
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: 인증 필요
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: 권한 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

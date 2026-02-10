@@ -42,8 +42,8 @@ export interface TaxLawAnalysisResult {
 export interface DetailedChange {
   section: string; // 조항 (Pasal X ayat Y)
   change_description: string;
-  before_value?: any;
-  after_value?: any;
+  before_value?: string | number | boolean | null;
+  after_value?: string | number | boolean | null;
   legal_basis: string;
   implementation_notes?: string;
 }
@@ -103,7 +103,7 @@ export class TaxLawAnalyzer {
    */
   private buildAnalysisPrompt(
     documentText: string,
-    metadata?: any
+    metadata?: { law_number?: string; law_title?: string; published_date?: string }
   ): string {
     return `당신은 인도네시아 세법 전문가입니다. 다음 세법 문서를 분석하여 변경사항을 추출하고,
 시스템 업데이트에 필요한 정보를 구조화된 JSON으로 제공하세요.

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -51,7 +50,7 @@ interface SPTMasaResponse {
     submissionDeadline: string;
     isOverdue: boolean;
   };
-  breakdown: any;
+  breakdown: Record<string, unknown>;
   createdAt: string;
   createdBy: {
     userId: string;
@@ -101,18 +100,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
   }
 
   // Get Supabase client
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  const supabase = await createClient();
 
   // Get consultant information
   const { data: consultant, error: consultantError } = await supabase
@@ -203,12 +191,13 @@ async function handler(request: RequestWithSession): Promise<Response> {
         { status: 400 }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('[SPT_MASA] Calculation error', { error, customerId, taxType, period });
     return NextResponse.json(
       {
         error: 'SPT Masa calculation failed',
-        message: error.message,
+        message: errorMessage,
       },
       { status: 500 }
     );
@@ -337,7 +326,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       submissionDeadline: sptMasaResult.submission_deadline.toISOString(),
       isOverdue,
     },
-    breakdown: sptMasaResult.breakdown,
+    breakdown: sptMasaResult.breakdown as Record<string, unknown>,
     createdAt: filing.created_at,
     createdBy: {
       userId: session.userId,

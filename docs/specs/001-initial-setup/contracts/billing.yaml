@@ -1,0 +1,586 @@
+openapi: 3.1.0
+info:
+  title: AI Pajak - Billing API
+  version: 1.0.0
+  description: |
+    결제 및 구독 관리 API.
+
+    **수익 구조**:
+    - Platform Fee → Mono Flip Global
+    - Tax Service Fee → Jakarta Tax Consulting (수금 대행)
+
+servers:
+  - url: https://api.ai-pajak.com/v1
+    description: Production
+
+security:
+  - bearerAuth: []
+
+paths:
+  /subscriptions:
+    get:
+      summary: 구독 목록
+      operationId: listSubscriptions
+      tags:
+        - Subscriptions
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, PAST_DUE, CANCELLED, TRIAL]
+      responses:
+        '200':
+          description: 구독 목록
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionListResponse'
+
+    post:
+      summary: 구독 생성
+      operationId: createSubscription
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: 구독 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponse'
+
+  /subscriptions/{subscription_id}:
+    get:
+      summary: 구독 상세
+      operationId: getSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionIdParam'
+      responses:
+        '200':
+          description: 구독 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponse'
+
+    patch:
+      summary: 구독 변경
+      operationId: updateSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: 변경 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponse'
+
+  /subscriptions/{subscription_id}/cancel:
+    post:
+      summary: 구독 취소
+      operationId: cancelSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cancel_at_period_end:
+                  type: boolean
+                  default: true
+                  description: true면 현재 기간 종료 시 취소
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: 취소 예약됨
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponse'
+
+  /invoices:
+    get:
+      summary: 청구서 목록
+      operationId: listInvoices
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - name: customer_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, PAID, OVERDUE, CANCELLED]
+        - name: created_at[gte]
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: created_at[lte]
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 청구서 목록
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceListResponse'
+
+  /invoices/{invoice_id}:
+    get:
+      summary: 청구서 상세
+      operationId: getInvoice
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+      responses:
+        '200':
+          description: 청구서 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+
+  /invoices/{invoice_id}/pay:
+    post:
+      summary: 결제 시작
+      operationId: initiatePayment
+      tags:
+        - Invoices
+        - Payments
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentRequest'
+      responses:
+        '200':
+          description: 결제 페이지 URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /payments/webhook:
+    post:
+      summary: Midtrans 웹훅
+      operationId: handlePaymentWebhook
+      tags:
+        - Payments
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MidtransWebhook'
+      responses:
+        '200':
+          description: 웹훅 처리 완료
+
+  /pricing:
+    get:
+      summary: 가격표 조회
+      operationId: getPricing
+      tags:
+        - Pricing
+      security: []
+      responses:
+        '200':
+          description: 가격표
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    SubscriptionIdParam:
+      name: subscription_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    InvoiceIdParam:
+      name: invoice_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+
+    PerPageParam:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 20
+
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        company_id:
+          type: string
+          format: uuid
+        company_name:
+          type: string
+        plan:
+          type: string
+          enum: [FREE, BASIC, PROFESSIONAL, ENTERPRISE]
+        status:
+          type: string
+          enum: [TRIAL, ACTIVE, PAST_DUE, CANCELLED]
+        current_period_start:
+          type: string
+          format: date
+        current_period_end:
+          type: string
+          format: date
+        cancel_at_period_end:
+          type: boolean
+        trial_end:
+          type: string
+          format: date
+        limits:
+          type: object
+          properties:
+            max_documents:
+              type: integer
+            max_ocr:
+              type: integer
+            max_clients:
+              type: integer
+              description: 컨설턴트용
+        usage:
+          type: object
+          properties:
+            documents_used:
+              type: integer
+            ocr_used:
+              type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - company_id
+        - plan
+      properties:
+        company_id:
+          type: string
+          format: uuid
+        plan:
+          type: string
+          enum: [FREE, BASIC, PROFESSIONAL, ENTERPRISE]
+        trial_days:
+          type: integer
+          default: 14
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum: [FREE, BASIC, PROFESSIONAL, ENTERPRISE]
+
+    SubscriptionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Subscription'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    SubscriptionListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_number:
+          type: string
+        customer_id:
+          type: string
+          format: uuid
+        customer_name:
+          type: string
+        subscription_id:
+          type: string
+          format: uuid
+        tax_filing_id:
+          type: string
+          format: uuid
+        line_items:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              amount:
+                type: number
+                format: decimal
+              type:
+                type: string
+                enum: [PLATFORM_FEE, TAX_SERVICE_FEE]
+        subtotal:
+          type: number
+          format: decimal
+        tax:
+          type: number
+          format: decimal
+        total:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          default: IDR
+        fee_breakdown:
+          type: object
+          properties:
+            platform_fee:
+              type: number
+              format: decimal
+              description: Mono Flip Global 수익
+            tax_service_fee:
+              type: number
+              format: decimal
+              description: Jakarta Tax Consulting 수익 (수금 대행)
+        status:
+          type: string
+          enum: [PENDING, PAID, OVERDUE, CANCELLED]
+        due_date:
+          type: string
+          format: date
+        paid_at:
+          type: string
+          format: date-time
+        payment_method:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    InvoiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Invoice'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    InvoiceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    InitiatePaymentRequest:
+      type: object
+      required:
+        - payment_method
+      properties:
+        payment_method:
+          type: string
+          enum: [bank_transfer, gopay, shopeepay, credit_card, qris]
+        bank:
+          type: string
+          enum: [bca, bni, bri, mandiri, permata]
+          description: Required for bank_transfer
+
+    PaymentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            payment_id:
+              type: string
+            redirect_url:
+              type: string
+              format: uri
+              description: Midtrans Snap URL
+            va_number:
+              type: string
+              description: Virtual Account number (for bank_transfer)
+            qr_code_url:
+              type: string
+              format: uri
+              description: QR code image (for QRIS)
+            expires_at:
+              type: string
+              format: date-time
+
+    MidtransWebhook:
+      type: object
+      properties:
+        order_id:
+          type: string
+        transaction_status:
+          type: string
+          enum: [capture, settlement, pending, deny, cancel, expire, refund]
+        payment_type:
+          type: string
+        gross_amount:
+          type: string
+        signature_key:
+          type: string
+
+    PricingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              plan:
+                type: string
+                enum: [FREE, BASIC, PROFESSIONAL, ENTERPRISE]
+              name:
+                type: string
+              price_monthly:
+                type: number
+                format: decimal
+              price_yearly:
+                type: number
+                format: decimal
+              currency:
+                type: string
+                default: IDR
+              features:
+                type: array
+                items:
+                  type: string
+              limits:
+                type: object
+                properties:
+                  max_documents:
+                    type: integer
+                  max_ocr:
+                    type: integer
+                  max_clients:
+                    type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+
+    ResponseMeta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer

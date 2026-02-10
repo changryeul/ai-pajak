@@ -1,9 +1,25 @@
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
+import { cookies, headers } from 'next/headers';
 import { SessionContext, UserRole, OrganizationType } from '@/types/auth';
 
 /**
+ * Check if a token is a service role key (SYSTEM account)
+ */
+function isServiceRoleKey(token: string): boolean {
+  // Service role keys are longer than regular JWTs and have a specific format
+  // Check against the actual service role key from environment
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return serviceRoleKey === token;
+}
+
+/**
  * Get session context for the current authenticated user
+ *
+ * Supports three authentication methods:
+ * 1. Cookie-based (browser sessions)
+ * 2. Authorization header (API tokens for E2E tests, mobile apps, etc.)
+ * 3. Service role key (SYSTEM account for billing and internal operations)
  *
  * Returns null if:
  * - No Supabase session exists
@@ -12,25 +28,82 @@ import { SessionContext, UserRole, OrganizationType } from '@/types/auth';
  * @returns SessionContext with user ID, role, and organization info
  */
 export async function getSessionContext(): Promise<SessionContext | null> {
-  const cookieStore = cookies();
+  const headerStore = await headers();
+  const cookieStore = await cookies();
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
+  // Check for Authorization header first (for API calls)
+  const authHeader = headerStore.get('authorization');
+
+  let supabase;
+  let userId: string | null = null;
+  let userEmail: string | null = null;
+
+  if (authHeader?.startsWith('Bearer ')) {
+    // Token-based authentication (E2E tests, API calls)
+    const token = authHeader.replace('Bearer ', '');
+
+    // CRITICAL: Check if this is a service role key (SYSTEM account)
+    if (isServiceRoleKey(token)) {
+      // Return SYSTEM session context
+      // SYSTEM account has special privileges for billing operations
+      return {
+        userId: 'system',
+        role: UserRole.SYSTEM,
+        organizationId: null,
+        organizationType: null,
+        email: 'system@aipajak.internal',
+      };
     }
-  );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
 
-  if (!session) {
+    // Get user from token
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      console.error('[AUTH] Token validation failed:', error?.message);
+      return null;
+    }
+
+    userId = user.id;
+    userEmail = user.email || null;
+  } else {
+    // Cookie-based authentication (browser sessions)
+    supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      return null;
+    }
+
+    userId = session.user.id;
+    userEmail = session.user.email || null;
+  }
+
+  if (!userId) {
     return null;
   }
 
@@ -38,7 +111,7 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   const { data: userRole, error } = await supabase
     .from('user_roles')
     .select('role, organization_id, organization_type')
-    .eq('user_id', session.user.id)
+    .eq('user_id', userId)
     .eq('is_active', true)
     .single();
 
@@ -48,11 +121,11 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   }
 
   return {
-    userId: session.user.id,
+    userId,
     role: userRole.role as UserRole,
     organizationId: userRole.organization_id,
     organizationType: userRole.organization_type as OrganizationType | null,
-    email: session.user.email!,
+    email: userEmail!,
   };
 }
 
@@ -109,7 +182,7 @@ export function canAccessBilling(session: SessionContext): boolean {
  * Get user's customer ID if they are a customer
  */
 export async function getCustomerId(userId: string): Promise<string | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -140,7 +213,7 @@ export async function getCustomerId(userId: string): Promise<string | null> {
  * Get user's consultant ID if they are a consultant
  */
 export async function getConsultantId(userId: string): Promise<string | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

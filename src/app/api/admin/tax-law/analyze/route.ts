@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { TaxLawAnalyzer } from '@/lib/ai/tax-law-analyzer';
 
 /**
@@ -19,18 +18,7 @@ import { TaxLawAnalyzer } from '@/lib/ai/tax-law-analyzer';
 export async function POST(req: NextRequest) {
   try {
     // 1. 인증 확인
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createClient();
 
     const {
       data: { session },
@@ -123,11 +111,12 @@ export async function POST(req: NextRequest) {
         ? 'This analysis requires human review before applying changes.'
         : 'Analysis is ready for automatic application.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[TAX_LAW_ANALYZE] Error:', error);
 
     // Anthropic API 오류 처리
-    if (error.status === 401) {
+    const apiError = error as { status?: number; message?: string };
+    if (apiError.status === 401) {
       return NextResponse.json(
         {
           error: 'Anthropic API authentication failed',
@@ -140,7 +129,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: 'Analysis failed',
-        message: error.message || 'Unknown error occurred',
+        message: apiError.message || 'Unknown error occurred',
       },
       { status: 500 }
     );
@@ -154,18 +143,7 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createClient();
 
     const {
       data: { session },
@@ -203,10 +181,11 @@ export async function GET(req: NextRequest) {
       analyses: analyses || [],
       count: analyses?.length || 0,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[TAX_LAW_ANALYZE] GET Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch analyses', message: error.message },
+      { error: 'Failed to fetch analyses', message: errorMessage },
       { status: 500 }
     );
   }

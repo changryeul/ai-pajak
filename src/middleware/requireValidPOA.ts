@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createAdminClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 
 /**
@@ -39,13 +38,18 @@ export function requireValidPOA() {
     const { session } = request;
 
     // Parse request body
-    let body: any;
+    interface RequestBody {
+      customerId?: string;
+      taxType?: string;
+      [key: string]: unknown;
+    }
+    let body: RequestBody;
     try {
       const text = await request.text();
-      body = JSON.parse(text);
+      body = JSON.parse(text) as RequestBody;
 
       // Re-attach body to request for handler
-      Object.defineProperty(request, 'body', {
+      Object.defineProperty(request, 'parsedBody', {
         value: body,
         writable: false,
       });
@@ -68,19 +72,12 @@ export function requireValidPOA() {
       );
     }
 
-    // Get Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    // Get Supabase admin client (bypasses RLS)
+    // SECURITY: Safe because:
+    // 1. User authentication verified by requireAuth middleware
+    // 2. User role verified by requireRole middleware
+    // 3. We only query consultant/POA data, not performing mutations
+    const supabase = createAdminClient();
 
     // Get consultant's tax partner
     const { data: consultant, error: consultantError } = await supabase
@@ -108,7 +105,7 @@ export function requireValidPOA() {
     // Check for active POA
     const today = new Date().toISOString().split('T')[0];
 
-    const { data: poa, error: poaError } = await supabase
+    const { data: poas, error: poaError } = await supabase
       .from('power_of_attorney')
       .select('id, poa_number, scope, valid_from, valid_to, status')
       .eq('customer_id', customerId)
@@ -116,7 +113,10 @@ export function requireValidPOA() {
       .eq('status', 'ACTIVE')
       .lte('valid_from', today)
       .gte('valid_to', today)
-      .single();
+      .limit(1);
+
+    // Get the first matching POA (multiple active POAs may exist)
+    const poa = poas?.[0];
 
     if (poaError || !poa) {
       console.warn('[POA] No active POA found', {
@@ -203,5 +203,5 @@ export interface RequestWithPOA extends RequestWithSession {
     valid_to: string;
     status: string;
   };
-  body: any;
+  parsedBody: Record<string, unknown>;
 }

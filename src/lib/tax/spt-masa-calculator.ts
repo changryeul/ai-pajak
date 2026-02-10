@@ -119,7 +119,13 @@ export class SPTMasaCalculator {
     let totalGrossSalary = 0;
     let totalDeductions = 0;
     let totalTaxableIncome = 0;
-    const employeeDetails: any[] = [];
+    interface EmployeeDetail {
+      employee_name: string;
+      employee_npwp: string;
+      gross_income: number;
+      tax_withheld: number;
+    }
+    const employeeDetails: EmployeeDetail[] = [];
 
     for (const calc of calculations) {
       const result = calc.calculation_result;
@@ -205,7 +211,15 @@ export class SPTMasaCalculator {
     // Aggregate calculations
     let totalGrossAmount = 0;
     let totalTaxWithheld = 0;
-    const transactionDetails: any[] = [];
+    interface TransactionDetail {
+      transaction_type: string;
+      recipient_name: string;
+      recipient_npwp: string;
+      gross_amount: number;
+      tax_rate: number;
+      tax_withheld: number;
+    }
+    const transactionDetails: TransactionDetail[] = [];
 
     for (const calc of calculations) {
       const result = calc.calculation_result;
@@ -297,7 +311,13 @@ export class SPTMasaCalculator {
 
     // Calculate output tax (sales)
     let outputTax = 0;
-    const salesDetails: any[] = [];
+    interface SaleDetail {
+      invoice_number: string;
+      customer_name: string;
+      dpp: number;
+      ppn_amount: number;
+    }
+    const salesDetails: SaleDetail[] = [];
     for (const sale of sales) {
       const ppnAmount = sale.calculation_result.calculatedTax || 0;
       outputTax += ppnAmount;
@@ -312,7 +332,13 @@ export class SPTMasaCalculator {
 
     // Calculate input tax (purchases)
     let inputTax = 0;
-    const purchaseDetails: any[] = [];
+    interface PurchaseDetail {
+      invoice_number: string;
+      supplier_name: string;
+      dpp: number;
+      ppn_amount: number;
+    }
+    const purchaseDetails: PurchaseDetail[] = [];
     for (const purchase of purchases) {
       const ppnAmount = purchase.calculation_result.calculatedTax || 0;
       inputTax += ppnAmount;

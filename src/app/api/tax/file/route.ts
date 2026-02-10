@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createAdminClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { RequestWithPOA } from '@/middleware/requireValidPOA';
 import { composeMiddleware } from '@/middleware/compose';
@@ -40,7 +39,7 @@ interface TaxFilingRequest {
     deductions?: number;
     credits?: number;
     netTaxDue: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   documentIds: string[]; // Supporting documents
   notes?: string;
@@ -80,7 +79,7 @@ interface TaxFilingResponse {
 }
 
 async function handler(request: RequestWithPOA): Promise<Response> {
-  const { session, poa, body } = request;
+  const { session, poa, parsedBody } = request;
 
   // Parse and validate request body
   const {
@@ -91,7 +90,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     taxData,
     documentIds,
     notes,
-  } = body as TaxFilingRequest;
+  } = parsedBody as unknown as TaxFilingRequest;
 
   // Validation
   if (!customerId || !taxType || !taxPeriod || !taxYear || !taxData) {
@@ -120,19 +119,13 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     );
   }
 
-  // Get Supabase client
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  // Get Supabase admin client (bypasses RLS)
+  // SECURITY: Safe because middleware has already verified:
+  // 1. User authentication (requireAuth)
+  // 2. Platform admin blocked (blockPlatformAdmin)
+  // 3. Role is TAX_ADVISOR_JTC (requireRole)
+  // 4. Valid POA exists (requireValidPOA)
+  const supabase = createAdminClient();
 
   // Get consultant information
   const { data: consultant, error: consultantError } = await supabase
@@ -144,8 +137,8 @@ async function handler(request: RequestWithPOA): Promise<Response> {
       tax_partner_id,
       tax_partner:tax_partner_id (
         id,
-        organization_name,
-        license_number
+        name,
+        tax_license_number
       )
     `
     )
@@ -185,28 +178,36 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     );
   }
 
-  // Generate filing number
+  // Generate filing number (for reference, stored in tax_data)
   const filingNumber = `TAX-${taxYear}-${taxType}-${Date.now()}`;
+
+  // Get tax_advisor_id for the consultant
+  const { data: taxAdvisor } = await supabase
+    .from('tax_advisor')
+    .select('id')
+    .eq('consultant_id', consultant.id)
+    .single();
 
   // Create tax filing record
   const { data: taxFiling, error: filingError } = await supabase
     .from('tax_filing')
     .insert({
-      filing_number: filingNumber,
       customer_id: customerId,
-      tax_partner_id: consultant.tax_partner_id,
       consultant_id: consultant.id,
-      poa_id: poa.id,
+      tax_advisor_id: taxAdvisor?.id || null,
       tax_type: taxType,
       tax_period: taxPeriod,
-      tax_year: taxYear,
-      tax_data: taxData,
-      filing_status: 'SUBMITTED',
-      submitted_at: new Date().toISOString(),
-      submitted_by_user_id: session.userId,
-      notes,
+      status: 'FILED',
+      tax_data: {
+        ...taxData,
+        filingNumber,
+        poaId: poa.id,
+        poaNumber: poa.poa_number,
+        notes,
+      },
+      filed_at: new Date().toISOString(),
     })
-    .select('id, filing_number, filing_status, submitted_at')
+    .select('id, status, filed_at, tax_data')
     .single();
 
   if (filingError) {
@@ -251,7 +252,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
       tax_type: taxType,
       tax_period: taxPeriod,
       activity_details: {
-        filingNumber: taxFiling.filing_number,
+        filingNumber: filingNumber,
         poaId: poa.id,
         poaNumber: poa.poa_number,
         consultantId: consultant.id,
@@ -266,7 +267,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
 
   console.info('[TAX_FILING] Tax filing submitted successfully', {
     taxFilingId: taxFiling.id,
-    filingNumber: taxFiling.filing_number,
+    filingNumber: filingNumber,
     customerId,
     taxType,
     consultantId: consultant.id,
@@ -278,14 +279,20 @@ async function handler(request: RequestWithPOA): Promise<Response> {
   const response: TaxFilingResponse = {
     success: true,
     taxFilingId: taxFiling.id,
-    filingNumber: taxFiling.filing_number,
+    filingNumber: filingNumber,
     status: 'SUBMITTED',
-    submittedAt: taxFiling.submitted_at,
+    submittedAt: taxFiling.filed_at,
     submittedBy: {
       userId: session.userId,
       consultantId: consultant.id,
       taxPartnerId: consultant.tax_partner_id,
-      taxPartnerName: (consultant.tax_partner as any).organization_name,
+      taxPartnerName: (() => {
+        const taxPartner = consultant.tax_partner;
+        if (Array.isArray(taxPartner)) {
+          return taxPartner[0]?.name || '';
+        }
+        return (taxPartner as { name?: string })?.name || '';
+      })(),
     },
     customer: {
       customerId: customer.id,
@@ -337,5 +344,5 @@ export async function POST(request: NextRequest) {
     requireRole(UserRole.TAX_ADVISOR_JTC),
     requireValidPOA(),
     withAudit('TAX_FILING_SUBMIT')
-  )(request as RequestWithSession, handler);
+  )(request as RequestWithSession, handler as unknown as (req: RequestWithSession) => Promise<Response>);
 }

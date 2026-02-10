@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -90,10 +89,14 @@ interface TaxCalculationResponse {
     effectiveRate: number;
   };
   breakdown: {
-    incomeBreakdown: any;
-    deductionBreakdown: any;
-    creditBreakdown: any;
-    taxBrackets?: any[];
+    incomeBreakdown: Record<string, number>;
+    deductionBreakdown: Record<string, number>;
+    creditBreakdown: Record<string, number>;
+    taxBrackets?: Array<{
+      bracket: string;
+      rate: number;
+      amount: number;
+    }>;
   };
   calculatedAt: string;
   calculatedBy: {
@@ -147,19 +150,8 @@ async function handler(request: RequestWithSession): Promise<Response> {
     );
   }
 
-  // Get Supabase client
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  // Get Supabase client (supports both cookie-based and token-based auth)
+  const supabase = await createClient();
 
   // Get consultant information
   const { data: consultant, error: consultantError } = await supabase
@@ -238,7 +230,15 @@ async function handler(request: RequestWithSession): Promise<Response> {
 
   // Calculate tax based on type
   let calculatedTax = 0;
-  let taxBrackets: any[] = [];
+  interface TaxBracketItem {
+    bracket: string;
+    rate: number;
+    amount: number;
+    tax?: number;
+    legal_basis?: string;
+    details?: Record<string, unknown>;
+  }
+  let taxBrackets: TaxBracketItem[] = [];
 
   if (taxType === 'PPh21') {
     // Progressive tax brackets for PPh21 (Indonesian personal income tax)
@@ -398,13 +398,14 @@ async function handler(request: RequestWithSession): Promise<Response> {
           details: pasal42Result.details,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const pphError = error as { message?: string; code?: string; details?: unknown };
       return NextResponse.json(
         {
           error: 'PPh Final calculation error',
-          message: error.message,
-          code: error.code,
-          details: error.details,
+          message: pphError.message || 'Unknown error',
+          code: pphError.code,
+          details: pphError.details,
         },
         { status: 400 }
       );

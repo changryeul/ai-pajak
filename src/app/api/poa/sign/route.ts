@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -49,7 +48,7 @@ interface POASignResponse {
     customer: {
       customerId: string;
       customerName: string;
-      npwp: string;
+      npwp: string | null;
       signedAt: string | null;
     };
     taxPartner: {
@@ -88,19 +87,8 @@ async function handler(request: RequestWithSession): Promise<Response> {
     );
   }
 
-  // Get Supabase client
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  // Get Supabase client (supports both cookie-based and token-based auth)
+  const supabase = await createClient();
 
   // Get POA with related data
   const { data: poa, error: poaError } = await supabase
@@ -116,10 +104,10 @@ async function handler(request: RequestWithSession): Promise<Response> {
       valid_to,
       status,
       customer_signed_at,
-      customer_signature,
-      partner_signed_at,
-      partner_signature,
-      signed_by_advisor_id,
+      customer_signature_url,
+      tax_partner_signed_at,
+      tax_partner_signature_url,
+      tax_partner_signed_by_user_id,
       customer:customer_id (
         id,
         user_id,
@@ -130,8 +118,8 @@ async function handler(request: RequestWithSession): Promise<Response> {
       ),
       tax_partner:tax_partner_id (
         id,
-        organization_name,
-        license_number
+        name,
+        tax_license_number
       )
     `
     )
@@ -152,10 +140,26 @@ async function handler(request: RequestWithSession): Promise<Response> {
   let newStatus = poa.status;
   let signerName = '';
 
+  // Define types for POA data
+  interface CustomerData {
+    id: string;
+    user_id: string;
+    full_name: string;
+    company_name: string | null;
+    npwp: string | null;
+    customer_type: 'INDIVIDUAL' | 'COMPANY';
+  }
+  interface TaxPartnerData {
+    id: string;
+    name: string;
+    tax_license_number: string;
+  }
+
   // Handle CUSTOMER signing
   if (session.role === UserRole.CUSTOMER) {
     // Verify customer owns this POA
-    const customer = poa.customer as any;
+    const customerData = poa.customer as CustomerData | CustomerData[];
+    const customer = Array.isArray(customerData) ? customerData[0] : customerData;
     if (customer.user_id !== session.userId) {
       return NextResponse.json(
         {
@@ -196,7 +200,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       .from('power_of_attorney')
       .update({
         customer_signed_at: new Date().toISOString(),
-        customer_signature: signatureData,
+        customer_signature_url: signatureData,
         status: 'PENDING_SIGNATURE', // Waiting for tax advisor signature
       })
       .eq('id', poaId);
@@ -220,7 +224,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     signerName =
       customer.customer_type === 'INDIVIDUAL'
         ? customer.full_name
-        : customer.company_name;
+        : customer.company_name || customer.full_name;
   }
   // Handle TAX_ADVISOR_JTC signing
   else if (session.role === UserRole.TAX_ADVISOR_JTC) {
@@ -279,25 +283,26 @@ async function handler(request: RequestWithSession): Promise<Response> {
     }
 
     // Check if already signed
-    if (poa.partner_signed_at) {
+    if (poa.tax_partner_signed_at) {
       return NextResponse.json(
         {
           error: 'Already signed',
           message: 'Tax partner has already signed this POA',
-          signedAt: poa.partner_signed_at,
-          signedBy: poa.signed_by_advisor_id,
+          signedAt: poa.tax_partner_signed_at,
+          signedBy: poa.tax_partner_signed_by_user_id,
         },
         { status: 400 }
       );
     }
 
     // Update POA with tax partner signature
+    // Note: We need user ID, not consultant ID for tax_partner_signed_by_user_id
     const { error: updateError } = await supabase
       .from('power_of_attorney')
       .update({
-        partner_signed_at: new Date().toISOString(),
-        partner_signature: signatureData,
-        signed_by_advisor_id: advisor.id,
+        tax_partner_signed_at: new Date().toISOString(),
+        tax_partner_signature_url: signatureData,
+        tax_partner_signed_by_user_id: session.userId, // User ID, not consultant ID
         status: 'ACTIVE', // POA is now active!
       })
       .eq('id', poaId);
@@ -336,8 +341,8 @@ async function handler(request: RequestWithSession): Promise<Response> {
     .select(
       `
       customer_signed_at,
-      partner_signed_at,
-      signed_by_advisor_id
+      tax_partner_signed_at,
+      tax_partner_signed_by_user_id
     `
     )
     .eq('id', poaId)
@@ -372,8 +377,10 @@ async function handler(request: RequestWithSession): Promise<Response> {
   });
 
   // Prepare response
-  const customer = poa.customer as any;
-  const taxPartner = poa.tax_partner as any;
+  const customerData = poa.customer as CustomerData | CustomerData[];
+  const customer = Array.isArray(customerData) ? customerData[0] : customerData;
+  const taxPartnerData = poa.tax_partner as TaxPartnerData | TaxPartnerData[];
+  const taxPartner = Array.isArray(taxPartnerData) ? taxPartnerData[0] : taxPartnerData;
 
   const response: POASignResponse = {
     success: true,
@@ -393,15 +400,15 @@ async function handler(request: RequestWithSession): Promise<Response> {
         customerName:
           customer.customer_type === 'INDIVIDUAL'
             ? customer.full_name
-            : customer.company_name,
+            : customer.company_name || customer.full_name,
         npwp: customer.npwp,
         signedAt: updatedPOA?.customer_signed_at || null,
       },
       taxPartner: {
         taxPartnerId: taxPartner.id,
-        organizationName: taxPartner.organization_name,
-        signedAt: updatedPOA?.partner_signed_at || null,
-        signedByAdvisorId: updatedPOA?.signed_by_advisor_id || null,
+        organizationName: taxPartner.name,
+        signedAt: updatedPOA?.tax_partner_signed_at || null,
+        signedByAdvisorId: updatedPOA?.tax_partner_signed_by_user_id || null,
       },
       scope: poa.scope,
       validFrom: poa.valid_from,

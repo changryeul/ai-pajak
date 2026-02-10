@@ -1,4 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables from .env.local
+const envPath = path.resolve(process.cwd(), '.env.local');
+dotenv.config({ path: envPath });
+
+// Store env vars for worker processes - these will be passed to test workers
+process.env.NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+process.env.TEST_SUPABASE_SERVICE_ROLE_KEY = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 
 /**
  * Playwright Configuration for AI Pajak E2E Tests
@@ -12,7 +24,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './src/tests/e2e',
+  globalSetup: './src/tests/e2e/global-setup.ts',
 
   /* Run tests in files in parallel */
   fullyParallel: true,

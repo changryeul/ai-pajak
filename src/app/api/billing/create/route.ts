@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -52,7 +51,7 @@ interface BillingCreateRequest {
   invoiceNumber?: string;
   dueDate: string; // YYYY-MM-DD
   metadata?: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -204,7 +203,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
 
   // Get Supabase client with service role key
   // CRITICAL: SYSTEM account uses service role key
-  const supabase = createServerClient(
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!, // ← Service role key for SYSTEM
     {
@@ -293,7 +292,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
   // Verify tax partner exists
   const { data: taxPartner, error: taxPartnerError } = await supabase
     .from('tax_partner')
-    .select('id, organization_name')
+    .select('id, name')
     .eq('id', taxPartnerId)
     .single();
 
@@ -308,11 +307,18 @@ async function handler(request: RequestWithSession): Promise<Response> {
   }
 
   // If tax filing specified, verify it exists
-  let taxFiling: any = null;
+  interface TaxFilingData {
+    id: string;
+    customer_id: string;
+    consultant: {
+      tax_partner_id: string;
+    };
+  }
+  let taxFiling: TaxFilingData | null = null;
   if (taxFilingId) {
     const { data: filing, error: filingError } = await supabase
       .from('tax_filing')
-      .select('id, filing_number, customer_id, tax_partner_id')
+      .select('id, customer_id, consultant:consultant_id(tax_partner_id)')
       .eq('id', taxFilingId)
       .single();
 
@@ -339,24 +345,45 @@ async function handler(request: RequestWithSession): Promise<Response> {
       );
     }
 
-    if (filing.tax_partner_id !== taxPartnerId) {
+    // Get tax_partner_id through consultant relationship
+    const consultantData = filing.consultant as unknown as { tax_partner_id: string } | { tax_partner_id: string }[];
+    const taxPartnerIdFromFiling = Array.isArray(consultantData) ? consultantData[0]?.tax_partner_id : consultantData?.tax_partner_id;
+
+    if (taxPartnerIdFromFiling !== taxPartnerId) {
       return NextResponse.json(
         {
           error: 'Tax filing mismatch',
           message: 'Tax filing does not belong to specified tax partner',
-          taxFilingTaxPartnerId: filing.tax_partner_id,
+          taxFilingTaxPartnerId: taxPartnerIdFromFiling,
           providedTaxPartnerId: taxPartnerId,
         },
         { status: 400 }
       );
     }
 
-    taxFiling = filing;
+    taxFiling = filing as TaxFilingData;
   }
 
   // Generate invoice number if not provided
   const finalInvoiceNumber =
     invoiceNumber || `INV-${new Date().getFullYear()}-${Date.now()}`;
+
+  // Get platform owner ID (required for billing transaction)
+  const { data: platformOwner } = await supabase
+    .from('platform_owner')
+    .select('id')
+    .limit(1)
+    .single();
+
+  if (!platformOwner) {
+    return NextResponse.json(
+      {
+        error: 'Platform owner not found',
+        message: 'System configuration error',
+      },
+      { status: 500 }
+    );
+  }
 
   // Create billing transaction
   const { data: transaction, error: transactionError } = await supabase
@@ -365,18 +392,21 @@ async function handler(request: RequestWithSession): Promise<Response> {
       idempotency_key: idempotencyKey, // Prevent duplicate billing
       customer_id: customerId,
       tax_partner_id: taxPartnerId,
-      tax_filing_id: taxFilingId || null,
+      platform_owner_id: platformOwner.id,
+      transaction_type: 'TAX_SERVICE',
       service_type: serviceType,
       description,
       amount_base: amountBase,
       amount_tax: amountTax,
       amount_total: amountTotal,
+      platform_fee: 0,
+      tax_service_fee: amountTotal,
       currency,
       invoice_number: finalInvoiceNumber,
       payment_status: 'PENDING',
       billing_period: billingPeriod || null,
       due_date: dueDate,
-      metadata,
+      metadata: taxFilingId ? { ...metadata, taxFilingId } : metadata,
     })
     .select(
       `
@@ -415,7 +445,6 @@ async function handler(request: RequestWithSession): Promise<Response> {
   // Note: SYSTEM account creates audit log with SYSTEM role
   await supabase.from('audit_log').insert({
     customer_id: customerId,
-    tax_filing_id: taxFilingId || null,
     actor_user_id: session.userId, // SYSTEM user ID
     actor_organization_id: null, // SYSTEM is not part of organization
     actor_role: 'SYSTEM',

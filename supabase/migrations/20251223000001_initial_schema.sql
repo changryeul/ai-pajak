@@ -396,13 +396,14 @@ CREATE TABLE subscription (
     is_active BOOLEAN DEFAULT true,
     cancelled_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    CONSTRAINT unique_active_subscription UNIQUE (customer_id) WHERE is_active = true
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_subscription_customer ON subscription(customer_id);
 CREATE INDEX idx_subscription_plan ON subscription(plan_type);
 CREATE INDEX idx_subscription_active ON subscription(is_active) WHERE is_active = true;
+-- Partial unique index: only one active subscription per customer
+CREATE UNIQUE INDEX unique_active_subscription ON subscription(customer_id) WHERE is_active = true;
 
 -- ============================================================================
 -- CONSULTATION & COMMUNICATION

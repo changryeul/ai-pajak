@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
 import { createClient } from '@/lib/supabase/client';
@@ -10,7 +10,6 @@ import { createClient } from '@/lib/supabase/client';
 export default function RegisterPage() {
   const t = useTranslations();
   const params = useParams();
-  const router = useRouter();
   const locale = params.locale as string;
 
   const [formData, setFormData] = useState({
@@ -185,8 +184,8 @@ export default function RegisterPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" isLoading={isLoading}>
-              {t('auth.register')}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Loading...' : t('auth.register')}
             </Button>
 
             <p className="text-center text-sm text-gray-600">

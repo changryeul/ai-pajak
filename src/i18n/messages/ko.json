@@ -116,7 +116,20 @@
     "extractedData": "추출된 데이터",
     "confidence": "신뢰도",
     "documentType": "문서 유형",
-    "supportedFormats": "지원 형식: PDF, JPG, PNG"
+    "supportedFormats": "지원 형식: PDF, JPG, PNG",
+    "searchPlaceholder": "문서 검색...",
+    "documentsFound": "개 문서 발견",
+    "noDocuments": "문서가 없습니다",
+    "fileName": "파일명",
+    "uploadDate": "업로드 날짜",
+    "status": "상태",
+    "actions": "작업",
+    "view": "보기",
+    "download": "다운로드",
+    "delete": "삭제",
+    "pending": "대기 중",
+    "completed": "완료",
+    "failed": "실패"
   },
   "subscription": {
     "title": "구독",

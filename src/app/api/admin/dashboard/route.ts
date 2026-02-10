@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -101,18 +100,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
   });
 
   // Get Supabase client
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  const supabase = await createClient();
 
   // Calculate date ranges
   const now = new Date();
@@ -129,7 +117,13 @@ async function handler(request: RequestWithSession): Promise<Response> {
     .eq('is_active', true);
 
   // Get user roles for consultant/tax advisor split
-  const consultantUserIds = consultants?.map((c) => (c as any).user_id) || [];
+  interface ConsultantWithUserId {
+    id: string;
+    is_active: boolean;
+    created_at: string;
+    user_id?: string;
+  }
+  const consultantUserIds = consultants?.map((c) => (c as ConsultantWithUserId).user_id).filter(Boolean) || [];
   const { data: userRoles } = await supabase
     .from('user_roles')
     .select('user_id, role')
@@ -267,9 +261,10 @@ async function handler(request: RequestWithSession): Promise<Response> {
   // CRITICAL: Validate no sensitive data leaked
   try {
     validateMaskedData(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('[PLATFORM_ADMIN_DASHBOARD] Data masking validation failed', {
-      error: error.message,
+      error: errorMessage,
       userId: session.userId,
     });
 

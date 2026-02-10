@@ -190,7 +190,7 @@ export interface AuditLog {
   activity_type: string;
   tax_type: string | null;
   tax_period: string | null;
-  activity_details: any;
+  activity_details: Record<string, unknown>;
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
@@ -253,10 +253,26 @@ export interface BillingAggregate {
  *
  * All amounts are bucketed, no individual customer data
  */
+interface CustomerData {
+  id: string;
+  created_at: string;
+  is_active: boolean;
+  customer_type: 'INDIVIDUAL' | 'COMPANY';
+}
+interface TransactionData {
+  id: string;
+  amount_total: number;
+  created_at: string;
+  payment_status: string;
+}
+interface FilingData {
+  id: string;
+}
+
 export function createDashboardData(data: {
-  customers: any[];
-  transactions: any[];
-  filings: any[];
+  customers: CustomerData[];
+  transactions: TransactionData[];
+  filings: FilingData[];
 }): {
   customerMetrics: CustomerAggregate;
   billingMetrics: BillingAggregate;
@@ -306,7 +322,7 @@ export function createDashboardData(data: {
  *
  * Throws error if any raw customer PII is detected
  */
-export function validateMaskedData(data: any): void {
+export function validateMaskedData(data: unknown): void {
   const sensitiveFields = [
     'npwp',
     'full_name',
@@ -316,12 +332,14 @@ export function validateMaskedData(data: any): void {
     'tax_data',
   ];
 
-  function checkObject(obj: any, path: string = ''): void {
+  function checkObject(obj: unknown, path: string = ''): void {
     if (typeof obj !== 'object' || obj === null) {
       return;
     }
 
-    for (const key of Object.keys(obj)) {
+    const record = obj as Record<string, unknown>;
+
+    for (const key of Object.keys(record)) {
       const currentPath = path ? `${path}.${key}` : key;
 
       if (sensitiveFields.includes(key)) {
@@ -331,8 +349,8 @@ export function validateMaskedData(data: any): void {
         );
       }
 
-      if (typeof obj[key] === 'object') {
-        checkObject(obj[key], currentPath);
+      if (typeof record[key] === 'object') {
+        checkObject(record[key], currentPath);
       }
     }
   }
