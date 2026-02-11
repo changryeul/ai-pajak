@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
+import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { withAudit } from '@/middleware/audit';
 import type { RequestWithSession, UserRole } from '@/types/auth';
 
@@ -10,6 +11,169 @@ const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+interface CreateFilingRequest {
+  customerId: string;
+  taxType: 'PPh21' | 'PPh23' | 'PPh_FINAL' | 'PPN' | 'SPT_MASA' | 'SPT_TAHUNAN';
+  taxPeriod: string;
+  taxYear: number;
+  status?: 'DRAFT' | 'UNDER_REVIEW';
+  taxData: {
+    calculatedTax?: number;
+    taxableIncome?: number;
+    grossIncome?: number;
+    deductions?: number;
+    netTaxDue?: number;
+    incomeData?: Record<string, unknown>;
+    deductionData?: Record<string, unknown>;
+    notes?: string;
+    [key: string]: unknown;
+  };
+  documentIds?: string[];
+}
+
+/**
+ * POST - Create a new tax filing (draft or under review)
+ */
+async function handleCreateFiling(request: RequestWithSession): Promise<Response> {
+  const { session } = request;
+  const body = (await request.json()) as CreateFilingRequest;
+
+  const {
+    customerId,
+    taxType,
+    taxPeriod,
+    taxYear,
+    status = 'DRAFT',
+    taxData,
+    documentIds,
+  } = body;
+
+  // Validation
+  if (!customerId || !taxType || !taxPeriod || !taxYear) {
+    return NextResponse.json(
+      {
+        error: 'Missing required fields',
+        requiredFields: ['customerId', 'taxType', 'taxPeriod', 'taxYear'],
+      },
+      { status: 400 }
+    );
+  }
+
+  // Get consultant information
+  const { data: consultant, error: consultantError } = await supabaseAdmin
+    .from('consultant')
+    .select('id, tax_partner_id')
+    .eq('user_id', session.userId)
+    .eq('is_active', true)
+    .single();
+
+  if (consultantError || !consultant) {
+    return NextResponse.json(
+      {
+        error: 'Consultant not found',
+        message: 'You must be an active consultant to create filings',
+      },
+      { status: 403 }
+    );
+  }
+
+  // Verify customer exists
+  const { data: customer, error: customerError } = await supabaseAdmin
+    .from('customer')
+    .select('id, full_name')
+    .eq('id', customerId)
+    .single();
+
+  if (customerError || !customer) {
+    return NextResponse.json(
+      { error: 'Customer not found', customerId },
+      { status: 404 }
+    );
+  }
+
+  // Check for existing draft for same customer/type/period
+  const { data: existingFiling } = await supabaseAdmin
+    .from('tax_filing')
+    .select('id')
+    .eq('customer_id', customerId)
+    .eq('tax_type', taxType)
+    .eq('tax_period', taxPeriod)
+    .eq('status', 'DRAFT')
+    .single();
+
+  if (existingFiling) {
+    // Update existing draft instead of creating new one
+    const { data: updatedFiling, error: updateError } = await supabaseAdmin
+      .from('tax_filing')
+      .update({
+        tax_data: taxData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', existingFiling.id)
+      .select('id, status, created_at, updated_at')
+      .single();
+
+    if (updateError) {
+      return NextResponse.json(
+        { error: 'Failed to update draft', message: updateError.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      filingId: updatedFiling.id,
+      status: updatedFiling.status,
+      isUpdate: true,
+      updatedAt: updatedFiling.updated_at,
+    });
+  }
+
+  // Create new filing
+  const { data: newFiling, error: createError } = await supabaseAdmin
+    .from('tax_filing')
+    .insert({
+      customer_id: customerId,
+      consultant_id: consultant.id,
+      tax_type: taxType,
+      tax_period: taxPeriod,
+      status: status,
+      tax_data: taxData,
+    })
+    .select('id, status, created_at')
+    .single();
+
+  if (createError) {
+    console.error('[TAX_FILINGS] Create failed:', createError);
+    return NextResponse.json(
+      { error: 'Failed to create filing', message: createError.message },
+      { status: 500 }
+    );
+  }
+
+  // Link documents if provided
+  if (documentIds && documentIds.length > 0) {
+    const links = documentIds.map((docId) => ({
+      tax_filing_id: newFiling.id,
+      document_id: docId,
+      relationship_type: 'SUPPORTING_DOCUMENT',
+    }));
+
+    await supabaseAdmin.from('tax_filing_documents').insert(links);
+  }
+
+  return NextResponse.json(
+    {
+      success: true,
+      filingId: newFiling.id,
+      status: newFiling.status,
+      isUpdate: false,
+      createdAt: newFiling.created_at,
+    },
+    { status: 201 }
+  );
+}
 
 async function handleGetFilings(req: RequestWithSession): Promise<Response> {
   const url = new URL(req.url);
@@ -166,4 +330,13 @@ export async function GET(request: NextRequest) {
     requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole, 'PLATFORM_ADMIN' as UserRole),
     withAudit('TAX_FILING_VIEW')
   )(request as RequestWithSession, handleGetFilings);
+}
+
+export async function POST(request: NextRequest) {
+  return composeMiddleware(
+    requireAuth,
+    blockPlatformAdmin,
+    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    withAudit('TAX_FILING_CREATE')
+  )(request as RequestWithSession, handleCreateFiling);
 }

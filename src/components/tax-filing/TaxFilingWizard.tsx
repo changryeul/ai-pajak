@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { useTaxFilingStore, FilingStep, TaxType } from '@/stores/tax-filing-store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,18 +35,33 @@ interface TaxFilingWizardProps {
 
 export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardProps) {
   const t = useTranslations();
+  const router = useRouter();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const {
     taxType,
+    taxPeriod,
+    taxYear,
     currentStep,
     isDirty,
     isSaving,
     lastSavedAt,
+    customer,
+    incomeData,
+    deductionData,
+    documents,
+    calculation,
+    notes,
     setTaxType,
     nextStep,
     prevStep,
     canProceed,
     resetFiling,
+    markAsSaving,
+    markAsSaved,
   } = useTaxFilingStore();
 
   useEffect(() => {
@@ -65,8 +81,124 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
   };
 
   const handleSubmit = async () => {
-    // TODO: Submit the filing
-    console.log('Submitting filing...');
+    if (!customer || !taxType || !calculation) {
+      setSubmitError(t('tax.errors.missingData'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    markAsSaving(true);
+
+    try {
+      // Prepare tax data
+      const taxData = {
+        calculatedTax: calculation.taxDue,
+        taxableIncome: calculation.taxableIncome,
+        grossIncome: calculation.grossIncome,
+        deductions: calculation.totalDeductions,
+        netTaxDue: calculation.taxDue,
+        breakdown: calculation.breakdown,
+        incomeData,
+        deductionData,
+        notes,
+      };
+
+      // Submit to API
+      const response = await fetch('/api/tax/file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: customer.id,
+          taxType,
+          taxPeriod: taxPeriod || `${taxYear}-01`,
+          taxYear,
+          taxData,
+          documentIds: documents.map((d) => d.id),
+          notes,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Handle specific errors
+        if (response.status === 403) {
+          throw new Error(t('tax.errors.noPermission'));
+        }
+        if (response.status === 400 && result.error === 'POA_REQUIRED') {
+          throw new Error(t('tax.errors.poaRequired'));
+        }
+        throw new Error(result.message || result.error || t('tax.errors.submitFailed'));
+      }
+
+      // Success
+      setSubmitSuccess(true);
+      markAsSaved();
+
+      // Show success message briefly, then redirect
+      setTimeout(() => {
+        resetFiling();
+        router.push(`/filings/${result.taxFilingId}`);
+      }, 2000);
+    } catch (error) {
+      console.error('Tax filing submission error:', error);
+      setSubmitError(error instanceof Error ? error.message : t('tax.errors.submitFailed'));
+    } finally {
+      setIsSubmitting(false);
+      markAsSaving(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!customer || !taxType) {
+      setSubmitError(t('tax.errors.selectCustomerFirst'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    markAsSaving(true);
+
+    try {
+      // Save as draft
+      const response = await fetch('/api/tax/filings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: customer.id,
+          taxType,
+          taxPeriod: taxPeriod || `${taxYear}-01`,
+          taxYear,
+          status: 'DRAFT',
+          taxData: {
+            calculatedTax: calculation?.taxDue || 0,
+            taxableIncome: calculation?.taxableIncome || 0,
+            grossIncome: calculation?.grossIncome || 0,
+            deductions: calculation?.totalDeductions || 0,
+            netTaxDue: calculation?.taxDue || 0,
+            incomeData,
+            deductionData,
+            notes,
+          },
+          documentIds: documents.map((d) => d.id),
+        }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || result.error || t('tax.errors.saveFailed'));
+      }
+
+      markAsSaved();
+      setSubmitError(null);
+    } catch (error) {
+      console.error('Draft save error:', error);
+      setSubmitError(error instanceof Error ? error.message : t('tax.errors.saveFailed'));
+    } finally {
+      setIsSubmitting(false);
+      markAsSaving(false);
+    }
   };
 
   const renderStep = () => {
@@ -162,6 +294,18 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
         </div>
       )}
 
+      {/* Error/Success Messages */}
+      {submitError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-800">{submitError}</p>
+        </div>
+      )}
+      {submitSuccess && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-800">{t('tax.submitSuccess')}</p>
+        </div>
+      )}
+
       {/* Step Content */}
       <Card>
         <CardHeader>
@@ -175,23 +319,35 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
 
       {/* Navigation Buttons */}
       <div className="mt-6 flex justify-between">
-        <div>
+        <div className="flex gap-2">
           {!isFirstStep && (
-            <Button variant="outline" onClick={prevStep}>
+            <Button variant="outline" onClick={prevStep} disabled={isSubmitting}>
               {t('common.back')}
             </Button>
           )}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={resetFiling}>
+          <Button variant="outline" onClick={resetFiling} disabled={isSubmitting}>
             {t('common.cancel')}
           </Button>
+          {isDirty && (
+            <Button
+              variant="outline"
+              onClick={handleSaveDraft}
+              disabled={isSubmitting || !customer}
+            >
+              {isSaving ? t('common.saving') : t('tax.saveDraft')}
+            </Button>
+          )}
           {isLastStep ? (
-            <Button onClick={handleSubmit} disabled={!canProceed()}>
-              {t('tax.submitFiling')}
+            <Button
+              onClick={handleSubmit}
+              disabled={!canProceed() || isSubmitting || submitSuccess}
+            >
+              {isSubmitting ? t('common.submitting') : t('tax.submitFiling')}
             </Button>
           ) : (
-            <Button onClick={handleNext} disabled={!canProceed()}>
+            <Button onClick={handleNext} disabled={!canProceed() || isSubmitting}>
               {t('common.next')}
             </Button>
           )}

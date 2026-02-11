@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import {
   FileText,
   Clock,
@@ -11,6 +12,7 @@ import {
   Upload,
   ArrowRight,
   AlertCircle,
+  Users,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { useSession, hasRole } from '@/hooks/useSession';
@@ -23,6 +25,13 @@ import {
   UrgentActionsPanel,
   PlatformStats,
 } from '@/components/dashboard';
+
+interface ConsultantStats {
+  activeClients: number;
+  pendingFilings: number;
+  submittedThisMonth: number;
+  pendingPOAs: number;
+}
 
 /**
  * Role-Based Dashboard Page
@@ -193,6 +202,26 @@ function ConsultantDashboard({
   locale: string;
   isTaxAdvisor: boolean;
 }) {
+  const [stats, setStats] = useState<ConsultantStats | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/dashboard/stats');
+        const result = await response.json();
+        if (result.success && result.data) {
+          setStats(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -225,18 +254,6 @@ function ConsultantDashboard({
         </div>
       </div>
 
-      {/* Urgent Actions (Priority) */}
-      <UrgentActionsPanel consultantId={session.consultantId} />
-
-      {/* Two-column layout */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Client List */}
-        <ClientList consultantId={session.consultantId} limit={8} />
-
-        {/* Deadlines */}
-        <DeadlineCalendar consultantId={session.consultantId} showAll />
-      </div>
-
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -244,10 +261,12 @@ function ConsultantDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">Active Clients</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">-</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900">
+                  {isLoadingStats ? '...' : stats?.activeClients ?? 0}
+                </p>
               </div>
               <div className="rounded-lg bg-blue-50 p-3">
-                <FileText className="h-6 w-6 text-blue-600" />
+                <Users className="h-6 w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
@@ -257,7 +276,9 @@ function ConsultantDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">Pending Filings</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">-</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900">
+                  {isLoadingStats ? '...' : stats?.pendingFilings ?? 0}
+                </p>
               </div>
               <div className="rounded-lg bg-yellow-50 p-3">
                 <Clock className="h-6 w-6 text-yellow-600" />
@@ -270,7 +291,9 @@ function ConsultantDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">Submitted This Month</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">-</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900">
+                  {isLoadingStats ? '...' : stats?.submittedThisMonth ?? 0}
+                </p>
               </div>
               <div className="rounded-lg bg-green-50 p-3">
                 <TrendingUp className="h-6 w-6 text-green-600" />
@@ -283,7 +306,9 @@ function ConsultantDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">POAs Pending</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">-</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900">
+                  {isLoadingStats ? '...' : stats?.pendingPOAs ?? 0}
+                </p>
               </div>
               <div className="rounded-lg bg-purple-50 p-3">
                 <FileText className="h-6 w-6 text-purple-600" />
@@ -291,6 +316,18 @@ function ConsultantDashboard({
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Urgent Actions (Priority) */}
+      <UrgentActionsPanel consultantId={session.consultantId} />
+
+      {/* Two-column layout */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Client List */}
+        <ClientList consultantId={session.consultantId} limit={8} />
+
+        {/* Deadlines */}
+        <DeadlineCalendar consultantId={session.consultantId} showAll />
       </div>
     </div>
   );
