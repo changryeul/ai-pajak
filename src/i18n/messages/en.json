@@ -369,5 +369,21 @@
     "passwordMismatch": "Passwords do not match",
     "serverError": "Server error occurred",
     "networkError": "Network error, check your connection"
+  },
+  "payment": {
+    "payNow": "Pay Now",
+    "processing": "Processing...",
+    "success": "Payment Successful",
+    "pending": "Payment Pending",
+    "retry": "Try Again",
+    "successMessage": "Your payment has been processed successfully. Thank you!",
+    "pendingMessage": "Payment is awaiting confirmation. Please complete your payment.",
+    "failedMessage": "Payment failed. Please try again or contact support.",
+    "selectMethod": "Select Payment Method",
+    "totalAmount": "Total Amount",
+    "invoiceNumber": "Invoice Number",
+    "dueDate": "Due Date",
+    "payBefore": "Pay before",
+    "securePayment": "Secure payment via Midtrans"
   }
 }

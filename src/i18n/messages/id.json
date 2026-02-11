@@ -369,5 +369,21 @@
     "passwordMismatch": "Kata sandi tidak cocok",
     "serverError": "Terjadi kesalahan server",
     "networkError": "Kesalahan jaringan, periksa koneksi Anda"
+  },
+  "payment": {
+    "payNow": "Bayar Sekarang",
+    "processing": "Memproses...",
+    "success": "Pembayaran Berhasil",
+    "pending": "Menunggu Pembayaran",
+    "retry": "Coba Lagi",
+    "successMessage": "Pembayaran Anda telah berhasil diproses. Terima kasih!",
+    "pendingMessage": "Pembayaran sedang menunggu konfirmasi. Silakan selesaikan pembayaran Anda.",
+    "failedMessage": "Pembayaran gagal. Silakan coba lagi atau hubungi dukungan.",
+    "selectMethod": "Pilih Metode Pembayaran",
+    "totalAmount": "Total Pembayaran",
+    "invoiceNumber": "Nomor Invoice",
+    "dueDate": "Batas Waktu",
+    "payBefore": "Bayar sebelum",
+    "securePayment": "Pembayaran aman melalui Midtrans"
   }
 }
