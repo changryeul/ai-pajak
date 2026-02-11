@@ -415,3 +415,143 @@ function mapNotification(data: {
     expiresAt: data.expires_at,
   };
 }
+
+/**
+ * NotificationService class for use with injected Supabase client
+ * Useful for cron jobs and background services
+ */
+export class NotificationService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private supabase: any;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(supabase: any) {
+    this.supabase = supabase;
+  }
+
+  /**
+   * Create a notification using injected Supabase client
+   */
+  async createNotification(params: {
+    userId: string;
+    type: NotificationType;
+    priority: NotificationPriority;
+    title: string;
+    message: string;
+    data?: Record<string, unknown>;
+    channels?: NotificationChannel[];
+    expiresAt?: string;
+  }): Promise<Notification | null> {
+    const { data, error } = await this.supabase
+      .from('notification')
+      .insert({
+        user_id: params.userId,
+        type: params.type,
+        priority: params.priority,
+        title: params.title,
+        message: params.message,
+        data: params.data,
+        channels: params.channels || ['IN_APP'],
+        read: false,
+        expires_at: params.expiresAt,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[NotificationService] Failed to create:', error);
+      return null;
+    }
+
+    return mapNotification(data);
+  }
+
+  /**
+   * Get user preferences using injected Supabase client
+   */
+  async getPreferences(userId: string): Promise<NotificationPreferences | null> {
+    const { data, error } = await this.supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      return {
+        userId,
+        emailEnabled: true,
+        inAppEnabled: true,
+        pushEnabled: false,
+        deadlineReminders: true,
+        filingUpdates: true,
+        paymentReminders: true,
+        marketingEmails: false,
+        reminderDaysBefore: [30, 14, 7, 1],
+      };
+    }
+
+    return {
+      userId: data.user_id,
+      emailEnabled: data.email_enabled,
+      inAppEnabled: data.in_app_enabled,
+      pushEnabled: data.push_enabled,
+      deadlineReminders: data.deadline_reminders,
+      filingUpdates: data.filing_updates,
+      paymentReminders: data.payment_reminders,
+      marketingEmails: data.marketing_emails,
+      reminderDaysBefore: data.reminder_days_before,
+    };
+  }
+
+  /**
+   * Send notification through all channels
+   */
+  async sendNotification(params: {
+    userId: string;
+    email?: string;
+    type: NotificationType;
+    priority: NotificationPriority;
+    title: string;
+    message: string;
+    data?: Record<string, unknown>;
+  }): Promise<void> {
+    const preferences = await this.getPreferences(params.userId);
+
+    // Create in-app notification
+    if (preferences?.inAppEnabled) {
+      await this.createNotification({
+        userId: params.userId,
+        type: params.type,
+        priority: params.priority,
+        title: params.title,
+        message: params.message,
+        data: params.data,
+        channels: ['IN_APP'],
+      });
+    }
+
+    // Send email if enabled and email provided
+    if (preferences?.emailEnabled && params.email) {
+      switch (params.type) {
+        case 'DEADLINE_REMINDER':
+          if (preferences.deadlineReminders) {
+            await sendDeadlineReminder(params.email, params.data as unknown as DeadlineReminderData);
+          }
+          break;
+        case 'FILING_STATUS':
+          if (preferences.filingUpdates) {
+            await sendFilingStatusUpdate(params.email, params.data as unknown as FilingStatusData);
+          }
+          break;
+        case 'POA_STATUS':
+          await sendPOAStatusUpdate(params.email, params.data as unknown as POAStatusData);
+          break;
+        case 'PAYMENT_DUE':
+          if (preferences.paymentReminders) {
+            await sendPaymentReminder(params.email, params.data as unknown as PaymentData);
+          }
+          break;
+      }
+    }
+  }
+}

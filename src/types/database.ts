@@ -401,6 +401,99 @@ export type Database = {
         }
         Relationships: []
       }
+      notification: {
+        Row: {
+          id: string
+          user_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          priority: Database["public"]["Enums"]["notification_priority"]
+          title: string
+          message: string
+          data: Json | null
+          channels: Database["public"]["Enums"]["notification_channel"][]
+          read: boolean
+          read_at: string | null
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          title: string
+          message: string
+          data?: Json | null
+          channels?: Database["public"]["Enums"]["notification_channel"][]
+          read?: boolean
+          read_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          title?: string
+          message?: string
+          data?: Json | null
+          channels?: Database["public"]["Enums"]["notification_channel"][]
+          read?: boolean
+          read_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          email_enabled: boolean
+          in_app_enabled: boolean
+          push_enabled: boolean
+          deadline_reminders: boolean
+          filing_updates: boolean
+          payment_reminders: boolean
+          marketing_emails: boolean
+          reminder_days_before: number[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          push_enabled?: boolean
+          deadline_reminders?: boolean
+          filing_updates?: boolean
+          payment_reminders?: boolean
+          marketing_emails?: boolean
+          reminder_days_before?: number[]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          push_enabled?: boolean
+          deadline_reminders?: boolean
+          filing_updates?: boolean
+          payment_reminders?: boolean
+          marketing_emails?: boolean
+          reminder_days_before?: number[]
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform: {
         Row: {
           created_at: string | null
@@ -1166,6 +1259,16 @@ export type Database = {
       billing_cycle: "MONTHLY" | "ANNUAL"
       customer_type: "INDIVIDUAL" | "COMPANY"
       item_category: "ESSENTIAL" | "LUXURY" | "SPECIAL"
+      notification_channel: "EMAIL" | "IN_APP" | "PUSH"
+      notification_priority: "HIGH" | "MEDIUM" | "LOW"
+      notification_type:
+        | "DEADLINE_REMINDER"
+        | "FILING_STATUS"
+        | "POA_STATUS"
+        | "DOCUMENT_PROCESSED"
+        | "PAYMENT_DUE"
+        | "PAYMENT_RECEIVED"
+        | "SYSTEM_ANNOUNCEMENT"
       organization_type: "PLATFORM_OWNER" | "PLATFORM" | "TAX_PARTNER"
       payment_status: "PENDING" | "PAID" | "FAILED" | "REFUNDED"
       poa_scope:
@@ -1346,6 +1449,17 @@ export const Constants = {
       billing_cycle: ["MONTHLY", "ANNUAL"],
       customer_type: ["INDIVIDUAL", "COMPANY"],
       item_category: ["ESSENTIAL", "LUXURY", "SPECIAL"],
+      notification_channel: ["EMAIL", "IN_APP", "PUSH"],
+      notification_priority: ["HIGH", "MEDIUM", "LOW"],
+      notification_type: [
+        "DEADLINE_REMINDER",
+        "FILING_STATUS",
+        "POA_STATUS",
+        "DOCUMENT_PROCESSED",
+        "PAYMENT_DUE",
+        "PAYMENT_RECEIVED",
+        "SYSTEM_ANNOUNCEMENT",
+      ],
       organization_type: ["PLATFORM_OWNER", "PLATFORM", "TAX_PARTNER"],
       payment_status: ["PENDING", "PAID", "FAILED", "REFUNDED"],
       poa_scope: [
