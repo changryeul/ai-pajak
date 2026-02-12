@@ -24,16 +24,32 @@ export function BPEDownload({ filingId, bpeInfo, status }: BPEDownloadProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
-    if (!bpeInfo?.receiptUrl) return;
+    if (!bpeInfo?.bpeNumber) return;
 
     setIsDownloading(true);
     try {
       const response = await fetch(`/api/tax/filings/${filingId}/bpe`);
-      const data = await response.json();
 
-      if (data.success && data.data.downloadUrl) {
-        window.open(data.data.downloadUrl, '_blank');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Download error:', errorData.error);
+        return;
       }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `BPE_${bpeInfo.bpeNumber.replace(/[/\\:*?"<>|]/g, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Download error:', error);
     } finally {
@@ -140,18 +156,16 @@ export function BPEDownload({ filingId, bpeInfo, status }: BPEDownloadProps) {
                 </div>
               )}
             </div>
-            {bpeInfo.receiptUrl && (
-              <Button
-                className="mt-4 w-full"
-                onClick={handleDownload}
-                disabled={isDownloading}
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                {isDownloading ? t('common.loading') : t('filings.downloadBpe')}
-              </Button>
-            )}
+            <Button
+              className="mt-4 w-full"
+              onClick={handleDownload}
+              disabled={isDownloading}
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              {isDownloading ? t('common.loading') : t('filings.downloadBpe')}
+            </Button>
           </div>
         </div>
       </div>

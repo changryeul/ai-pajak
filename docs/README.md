@@ -76,6 +76,8 @@ docs/
 | `authentication.md` | 인증 |
 | `billing-api.md` | 결제 API |
 | `tax-filing-api.md` | 세금 신고 API |
+| `customer-api.md` | 고객 API |
+| `implementation-status.md` | API 구현 상태 (NEW) |
 
 ---
 

@@ -67,8 +67,9 @@ erDiagram
 
 | 문서 | 내용 |
 |------|------|
-| [schemas/data-dictionary.md](schemas/data-dictionary.md) | 전체 테이블 데이터 사전 |
-| [schemas/hard-rules-enforcement.md](schemas/hard-rules-enforcement.md) | DB 레벨 규제 준수 강제 |
+| [data-dictionary.md](data-dictionary.md) | 전체 테이블 데이터 사전 |
+| [hard-rules-enforcement.md](hard-rules-enforcement.md) | DB 레벨 규제 준수 강제 |
+| [rls-policies.md](rls-policies.md) | Row Level Security 정책 (NEW) |
 
 ### 🔄 Migrations
 데이터베이스 마이그레이션 스크립트
@@ -362,9 +363,12 @@ CREATE TABLE activity_logs_2025_01 PARTITION OF activity_logs
 | Migration | Status | Date |
 |-----------|--------|------|
 | Initial Schema (67 tables) | ✅ Complete | 2025-12-23 |
-| RLS Policies | ✅ Complete | 2025-12-23 |
+| RLS Policies (Core) | ✅ Complete | 2025-12-23 |
+| RLS Policies (Extended) | ✅ Complete | 2026-02-12 |
+| Reference Tables RLS | ✅ Complete | 2026-02-12 |
 | Indexes | ✅ Complete | 2025-12-23 |
-| Withholding Tax Tables | 🟡 In Progress | 2025-12-24 |
+| Billing Idempotency | ✅ Complete | 2025-12-23 |
+| Midtrans Payment | ✅ Complete | 2025-12-23 |
 
 ---
 
