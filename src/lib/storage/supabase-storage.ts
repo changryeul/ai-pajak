@@ -6,7 +6,6 @@
 import { createClient } from '@/lib/supabase/server';
 import {
   StorageBucket,
-  DocumentType,
   FileMetadata,
   UploadOptions,
   UploadResult,

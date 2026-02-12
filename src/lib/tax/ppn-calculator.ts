@@ -78,7 +78,6 @@ export class PPNCalculator {
     isLuxury: boolean
   ): number {
     const year = transactionDate.getFullYear();
-    const month = transactionDate.getMonth() + 1;
 
     // Before 2025, always 11%
     if (year < 2025) {

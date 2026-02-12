@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -15,7 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import {
   SPT1770SSData,
   PTKPStatus,
-  PTKP_RATES,
 } from '@/lib/tax/spt-1770ss/types';
 
 interface SPT1770SSPreviewProps {
@@ -57,7 +55,6 @@ export function SPT1770SSPreview({
   onEdit,
   isLoading = false,
 }: SPT1770SSPreviewProps) {
-  const t = useTranslations();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {

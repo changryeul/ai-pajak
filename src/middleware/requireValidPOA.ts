@@ -53,7 +53,7 @@ export function requireValidPOA() {
         value: body,
         writable: false,
       });
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid request body' },
         { status: 400 }

@@ -64,7 +64,7 @@ export default function POADetailPage() {
       } else {
         setError(data.error || 'Failed to load POA');
       }
-    } catch (_err) {
+    } catch {
       setError('Network error');
     } finally {
       setIsLoading(false);
@@ -88,7 +88,7 @@ export default function POADetailPage() {
       } else {
         setError(data.error || 'Failed to sign POA');
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to sign POA');
     } finally {
       setIsSigningCustomer(false);
@@ -108,7 +108,7 @@ export default function POADetailPage() {
       } else {
         setError(data.error || 'Failed to sign POA');
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to sign POA');
     } finally {
       setIsSigningAdvisor(false);

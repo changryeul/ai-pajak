@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { loginAs, createAuthHeaders } from './auth/login.helper';
-import { TEST_USERS, TEST_TAX_FILING, TEST_POA, TEST_POA_DRAFT, TEST_POA_PENDING, TEST_POA_UNSIGNED_DRAFT, TEST_SCOPE_MISMATCH_CUSTOMER, getUniqueTaxFiling } from './fixtures/users';
+import { TEST_USERS, TEST_POA, TEST_POA_PENDING, TEST_POA_UNSIGNED_DRAFT, TEST_SCOPE_MISMATCH_CUSTOMER, getUniqueTaxFiling } from './fixtures/users';
 
 /**
  * TAX_ADVISOR_JTC Role E2E Tests

@@ -12,7 +12,6 @@ import {
 import {
   IncomeSource1721A1,
   TaxpayerData,
-  PTKPStatus,
   PTKP_RATES,
 } from '@/lib/tax/spt-1770ss/types';
 

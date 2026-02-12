@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -62,7 +61,6 @@ export function SPT1770SSGenerator({
   defaultPtkpStatus = 'TK/0',
   onComplete,
 }: SPT1770SSGeneratorProps) {
-  const t = useTranslations();
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 

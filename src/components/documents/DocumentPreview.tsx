@@ -127,6 +127,7 @@ export function DocumentPreview({ documentId, open, onClose }: DocumentPreviewPr
     if (document.fileType.includes('image')) {
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewUrl}
             alt={document.fileName}

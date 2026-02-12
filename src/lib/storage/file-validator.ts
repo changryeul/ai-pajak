@@ -178,7 +178,7 @@ export function generateSafeFileName(
  */
 export function inferDocumentType(
   fileName: string,
-  mimeType: string
+  _mimeType: string
 ): DocumentType {
   const lowerName = fileName.toLowerCase();
 

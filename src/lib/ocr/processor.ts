@@ -8,7 +8,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import {
   OCRResult,
-  OCRStatus,
   DocumentCategory,
   ExtractedData,
   DOCUMENT_KEYWORDS,
@@ -199,7 +198,6 @@ export function classifyDocument(text: string): {
   }
 
   // Calculate confidence
-  const totalKeywords = Object.values(DOCUMENT_KEYWORDS).flat().length;
   const confidence = maxScore > 0 ? Math.min(maxScore / 3, 1) : 0;
 
   return {

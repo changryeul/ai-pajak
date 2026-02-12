@@ -17,7 +17,7 @@ import type { RequestWithSession, UserRole } from '@/types/auth';
 async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
   try {
     const supabase = await createClient();
-    const { role, userId } = req.session;
+    const { userId } = req.session;
 
     // Get consultant ID
     const { data: consultant } = await supabase

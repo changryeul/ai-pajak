@@ -552,6 +552,7 @@ export function BPEPDF({ data }: BPEPDFProps) {
         {/* QR Code */}
         <View style={styles.qrCodeContainer}>
           {qrCodeDataUrl ? (
+            // eslint-disable-next-line jsx-a11y/alt-text
             <Image src={qrCodeDataUrl} style={styles.qrCodeImage} />
           ) : (
             <View style={styles.qrCodePlaceholder}>

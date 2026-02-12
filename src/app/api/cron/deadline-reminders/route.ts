@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 /**
  * GET endpoint for health check / manual trigger (requires admin)
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // For health check, just return status
   return NextResponse.json({
     status: 'ok',

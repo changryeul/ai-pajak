@@ -39,7 +39,7 @@ export function DocumentOCRUploader({
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
-  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [, setDocumentId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const acceptedTypes = {

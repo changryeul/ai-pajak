@@ -95,7 +95,7 @@ export default function SettingsPage() {
       } else {
         alert(data.error || 'Failed to save profile');
       }
-    } catch (error) {
+    } catch {
       alert('Failed to save profile');
     } finally {
       setIsSaving(false);

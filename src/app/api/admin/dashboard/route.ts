@@ -8,8 +8,6 @@ import { withAudit } from '@/middleware/audit';
 import { UserRole } from '@/types/auth';
 import {
   bucketAmount,
-  createDashboardData,
-  sanitizeAuditLog,
   validateMaskedData,
 } from '@/lib/admin/data-masking';
 

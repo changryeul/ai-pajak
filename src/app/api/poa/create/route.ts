@@ -97,7 +97,6 @@ async function handler(request: RequestWithSession): Promise<Response> {
   // Validate dates
   const fromDate = new Date(validFrom);
   const toDate = new Date(validTo);
-  const today = new Date();
 
   if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
     return NextResponse.json(

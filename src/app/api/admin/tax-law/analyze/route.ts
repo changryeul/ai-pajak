@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
  *
  * 대기 중인 분석 결과 목록 조회
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const supabase = await createClient();
 

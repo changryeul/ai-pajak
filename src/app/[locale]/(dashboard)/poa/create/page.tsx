@@ -59,7 +59,7 @@ export default function POACreatePage() {
       } else {
         setError(data.error || 'Failed to create POA');
       }
-    } catch (_err) {
+    } catch {
       setError('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);

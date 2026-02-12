@@ -238,7 +238,7 @@ export async function getPDFPageCount(pdfBytes: ArrayBuffer): Promise<number> {
  * Note: pdf-lib doesn't support text extraction directly
  * This would require a more advanced library like pdf-parse
  */
-export async function extractPDFText(pdfBytes: ArrayBuffer): Promise<string | null> {
+export async function extractPDFText(_pdfBytes: ArrayBuffer): Promise<string | null> {
   // pdf-lib doesn't support text extraction
   // In production, use pdf-parse or similar library
   console.warn('[PDF] Text extraction not implemented - use OCR for scanned documents');
