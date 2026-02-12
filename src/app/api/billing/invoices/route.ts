@@ -11,22 +11,22 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
 
   // Check authentication
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
     );
   }
 
-  // Get customer ID from user profile
-  const { data: profile } = await supabase
-    .from('user_profile')
-    .select('customer_id')
-    .eq('user_id', session.user.id)
+  // Get customer ID from customer table
+  const { data: customer } = await supabase
+    .from('customer')
+    .select('id')
+    .eq('user_id', user.id)
     .single();
 
-  if (!profile?.customer_id) {
+  if (!customer?.id) {
     return NextResponse.json({
       success: true,
       data: [],
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '20');
   const offset = parseInt(searchParams.get('offset') || '0');
 
-  const invoices = await getInvoices(profile.customer_id, { limit, offset });
+  const invoices = await getInvoices(customer.id, { limit, offset });
 
   return NextResponse.json({
     success: true,

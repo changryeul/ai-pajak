@@ -22,17 +22,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { MidtransService } from '@/lib/payment/midtrans';
+import {
+  sendPaymentConfirmation,
+  sendPaymentFailed,
+} from '@/lib/notifications/email-service';
 
 interface MidtransNotification {
   transaction_status: string;
   order_id: string;
+  status_code: string;
   gross_amount: string;
   payment_type: string;
   transaction_id: string;
   transaction_time: string;
   fraud_status?: string;
   signature_key: string;
-  status_code?: string;
   status_message?: string;
 }
 
@@ -66,18 +70,32 @@ export async function POST(request: NextRequest) {
 
     const transactionId = orderIdParts[1];
 
-    // Verify the notification with Midtrans (double-check)
-    const verificationResult = await MidtransService.getTransactionStatus(
-      notification.order_id
-    );
+    // Verify signature
+    const isValidSignature = MidtransService.verifyNotification(notification);
+    if (!isValidSignature) {
+      console.error('[WEBHOOK] Invalid signature - possible tampering', {
+        orderId: notification.order_id,
+        statusCode: notification.status_code,
+      });
 
-    if (
-      verificationResult.status_code &&
-      verificationResult.status_code !== '200' &&
-      verificationResult.status_code !== '201'
-    ) {
-      console.warn('[WEBHOOK] Transaction verification failed:', verificationResult);
-      // Continue processing but log warning - Midtrans may have delay
+      // Still try to verify with Midtrans API as fallback
+      const verificationResult = await MidtransService.getTransactionStatus(
+        notification.order_id
+      );
+
+      // If Midtrans API also fails, reject the notification
+      if (
+        !verificationResult.transaction_status ||
+        verificationResult.transaction_status !== notification.transaction_status
+      ) {
+        console.error('[WEBHOOK] Midtrans verification also failed');
+        return NextResponse.json(
+          { error: 'Invalid signature' },
+          { status: 401 }
+        );
+      }
+
+      console.info('[WEBHOOK] Signature invalid but Midtrans API verified');
     }
 
     // Process the notification
@@ -154,16 +172,17 @@ export async function POST(request: NextRequest) {
       user_agent: 'midtrans-webhook',
     });
 
-    // If payment successful, send notification to customer
-    if (paymentStatus === 'PAID') {
-      // Get customer's user_id for notification
-      const { data: customer } = await supabaseAdmin
-        .from('customer')
-        .select('user_id')
-        .eq('id', transaction.customer_id)
-        .single();
+    // Get customer details for notifications
+    const { data: customer } = await supabaseAdmin
+      .from('customer')
+      .select('user_id, full_name, email')
+      .eq('id', transaction.customer_id)
+      .single();
 
-      if (customer?.user_id) {
+    // Send notifications based on payment status
+    if (paymentStatus === 'PAID' && customer) {
+      // In-app notification
+      if (customer.user_id) {
         await supabaseAdmin.from('notification').insert({
           user_id: customer.user_id,
           type: 'PAYMENT_RECEIVED',
@@ -175,6 +194,62 @@ export async function POST(request: NextRequest) {
             transactionId: transaction.id,
             invoiceNumber: transaction.invoice_number,
             amountTotal: transaction.amount_total,
+          },
+        });
+      }
+
+      // Email notification
+      if (customer.email) {
+        try {
+          await sendPaymentConfirmation(customer.email, {
+            customerName: customer.full_name || 'Customer',
+            invoiceNumber: transaction.invoice_number,
+            amount: transaction.amount_total,
+            currency: 'IDR',
+            paymentMethod: notification.payment_type.replace(/_/g, ' ').toUpperCase(),
+            paidAt: new Date().toLocaleString('id-ID', {
+              dateStyle: 'full',
+              timeStyle: 'short',
+            }),
+            transactionId: notification.transaction_id,
+            serviceType: transaction.service_type.replace(/_/g, ' '),
+          });
+          console.log('[WEBHOOK] Payment confirmation email sent');
+        } catch (emailError) {
+          console.error('[WEBHOOK] Failed to send confirmation email:', emailError);
+          // Don't fail the webhook - email is non-critical
+        }
+      }
+    } else if (paymentStatus === 'FAILED' && customer?.email) {
+      // Send payment failed email
+      try {
+        await sendPaymentFailed(customer.email, {
+          customerName: customer.full_name || 'Customer',
+          invoiceNumber: transaction.invoice_number,
+          amount: transaction.amount_total,
+          currency: 'IDR',
+          reason: notification.status_message || 'Payment was declined or cancelled',
+          paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/billing/pay/${transaction.id}`,
+        });
+        console.log('[WEBHOOK] Payment failed email sent');
+      } catch (emailError) {
+        console.error('[WEBHOOK] Failed to send failure email:', emailError);
+      }
+
+      // In-app notification for failed payment
+      if (customer.user_id) {
+        await supabaseAdmin.from('notification').insert({
+          user_id: customer.user_id,
+          type: 'PAYMENT_DUE',
+          title: 'Pembayaran Gagal',
+          message: `Pembayaran untuk invoice ${transaction.invoice_number} gagal diproses. Silakan coba lagi.`,
+          priority: 'HIGH',
+          channel: 'IN_APP',
+          data: {
+            transactionId: transaction.id,
+            invoiceNumber: transaction.invoice_number,
+            amountTotal: transaction.amount_total,
+            paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/billing/pay/${transaction.id}`,
           },
         });
       }

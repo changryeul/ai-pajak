@@ -5,9 +5,17 @@
  * for customers and consultants.
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NotificationService } from './notification-service';
 import { DeadlineReminderData, NotificationPriority } from './types';
+
+// Type for tax filing query result
+interface TaxFilingRecord {
+  customer_id: string;
+  tax_type: string;
+  tax_period: string;
+  status: string;
+}
 
 // Tax deadlines in Indonesia (day of month)
 const TAX_DEADLINES: Record<string, { deadline: number; name: string }> = {
@@ -49,7 +57,8 @@ interface UpcomingDeadline {
  * Get upcoming tax deadlines for all customers
  */
 export async function getUpcomingDeadlines(
-  supabase: ReturnType<typeof createClient>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any>,
   daysAhead: number = 30
 ): Promise<UpcomingDeadline[]> {
   const today = new Date();
@@ -79,7 +88,8 @@ export async function getUpcomingDeadlines(
   const { data: filings, error: filingError } = await supabase
     .from('tax_filing')
     .select('customer_id, tax_type, tax_period, status')
-    .in('status', ['DRAFT', 'UNDER_REVIEW']);
+    .in('status', ['DRAFT', 'UNDER_REVIEW'])
+    .returns<TaxFilingRecord[]>();
 
   if (filingError) {
     console.error('[DeadlineReminder] Error fetching filings:', filingError);
@@ -87,11 +97,11 @@ export async function getUpcomingDeadlines(
 
   // Build a map of filed periods
   const filedPeriods = new Set(
-    (filings || []).map((f) => `${f.customer_id}-${f.tax_type}-${f.tax_period}`)
+    (filings || []).map((f: TaxFilingRecord) => `${f.customer_id}-${f.tax_type}-${f.tax_period}`)
   );
 
   // For each customer, check upcoming deadlines
-  for (const customer of customers as CustomerWithPreferences[]) {
+  for (const customer of customers as unknown as CustomerWithPreferences[]) {
     // Skip if customer has disabled deadline reminders
     if (customer.notification_preferences?.deadline_reminders === false) {
       continue;
@@ -210,7 +220,8 @@ function shouldSendReminder(
  * Process deadline reminders and create notifications
  */
 export async function processDeadlineReminders(
-  supabase: ReturnType<typeof createClient>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any>
 ): Promise<{
   processed: number;
   notificationsSent: number;
@@ -250,20 +261,22 @@ export async function processDeadlineReminders(
         continue; // Already sent this reminder
       }
 
-      // Create reminder data
+      // Create reminder data with full URL
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://aipajak.com';
       const reminderData: DeadlineReminderData = {
         customerName: deadline.customerName,
         taxType: deadline.taxTypeName,
         taxPeriod: deadline.taxPeriod,
         dueDate: deadline.dueDate.toISOString().split('T')[0],
         daysUntilDue: deadline.daysUntilDue,
-        filingUrl: `/tax/filing?type=${deadline.taxType}&period=${deadline.taxPeriod}`,
+        filingUrl: `${baseUrl}/tax/filing?type=${deadline.taxType}&period=${deadline.taxPeriod}`,
       };
 
       try {
-        // Create notification
+        // Create notification and send email
         await notificationService.sendNotification({
           userId: deadline.customerUserId,
+          email: deadline.customerEmail, // Include email for email notification
           type: 'DEADLINE_REMINDER',
           priority: getPriority(deadline.daysUntilDue),
           title: getDeadlineTitle(deadline.daysUntilDue, deadline.taxTypeName),

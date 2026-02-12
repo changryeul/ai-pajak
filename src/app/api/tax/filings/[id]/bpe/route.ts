@@ -13,6 +13,7 @@ import { createClient } from '@supabase/supabase-js';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { BPEPDF } from '@/lib/tax/bpe/pdf-generator';
 import { BPEData, TaxType, FilingType } from '@/lib/tax/bpe/types';
+import { generateBPEQRCode } from '@/lib/tax/bpe/qr-generator';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
@@ -161,6 +162,17 @@ async function handleGetBPE(
     // Parse tax year from tax_period (format: YYYY-MM or YYYY)
     const taxYear = parseInt(typedFiling.tax_period.split('-')[0], 10);
 
+    // Generate QR code for verification
+    const qrCodeDataUrl = await generateBPEQRCode({
+      bpeNumber: typedFiling.bpe_number,
+      filingId: typedFiling.id,
+      npwp: customer?.npwp || '-',
+      taxType: typedFiling.tax_type,
+      taxPeriod: typedFiling.tax_period,
+      taxYear,
+      filedAt: typedFiling.filed_at,
+    });
+
     const bpeData: BPEData = {
       filingId: typedFiling.id,
       bpeNumber: typedFiling.bpe_number,
@@ -195,6 +207,7 @@ async function handleGetBPE(
         npwp: taxPartner.npwp,
         licenseNumber: taxPartner.tax_license_number,
       } : undefined,
+      qrCodeDataUrl: qrCodeDataUrl || undefined,
     };
 
     // Generate PDF

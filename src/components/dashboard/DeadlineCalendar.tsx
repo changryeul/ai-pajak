@@ -1,10 +1,19 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+
+// Hook to safely detect client-side rendering without causing hydration issues
+function useIsMounted() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+}
 
 interface Deadline {
   taxType: string;
@@ -28,11 +37,23 @@ const TAX_DEADLINES = {
   PPh_FINAL: 15, // 15th of following month
 };
 
+// Helper function to format date consistently (avoids hydration mismatch)
+const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function formatShortDate(dateString: string): string {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = MONTH_NAMES_SHORT[date.getMonth()];
+  return `${day} ${month}`;
+}
+
 export function DeadlineCalendar({ showAll = false }: DeadlineCalendarProps) {
   const t = useTranslations();
+  const isMounted = useIsMounted();
 
   // Calculate deadlines using useMemo instead of useEffect
   const deadlines = useMemo(() => {
+    // Return empty array until mounted to prevent hydration mismatch
+    if (!isMounted) return [];
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
@@ -76,7 +97,7 @@ export function DeadlineCalendar({ showAll = false }: DeadlineCalendarProps) {
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
 
     return showAll ? sortedDeadlines : sortedDeadlines.slice(0, 6);
-  }, [showAll]);
+  }, [showAll, isMounted]);
 
   const getStatusIcon = (status: Deadline['status']) => {
     switch (status) {
@@ -106,6 +127,24 @@ export function DeadlineCalendar({ showAll = false }: DeadlineCalendarProps) {
   };
 
   const urgentCount = deadlines.filter(d => d.status === 'urgent' || d.status === 'overdue').length;
+
+  // Show loading state during hydration
+  if (!isMounted) {
+    return (
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-medium">
+            {t('dashboard.upcomingDeadlines') || 'Tax Deadlines'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -160,10 +199,7 @@ export function DeadlineCalendar({ showAll = false }: DeadlineCalendarProps) {
                     {formatDaysUntilDue(deadline.daysUntilDue)}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {new Date(deadline.dueDate).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'short',
-                    })}
+                    {formatShortDate(deadline.dueDate)}
                   </p>
                 </div>
               </div>

@@ -5,6 +5,7 @@
  */
 
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import {
   Subscription,
@@ -15,6 +16,12 @@ import {
   BillingCycle,
   PRICING_PLANS,
 } from './types';
+
+// Admin client for subscription management (bypasses RLS)
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 /**
  * Get customer subscription
@@ -37,6 +44,7 @@ export async function getSubscription(customerId: string): Promise<Subscription 
     .from('subscription')
     .select('*')
     .eq('customer_id', customerId)
+    .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
@@ -45,7 +53,7 @@ export async function getSubscription(customerId: string): Promise<Subscription 
     return null;
   }
 
-  return mapSubscription(data);
+  return mapSubscriptionFromDb(data);
 }
 
 /**
@@ -56,19 +64,6 @@ export async function createSubscription(params: {
   plan: SubscriptionPlan;
   billingCycle: BillingCycle;
 }): Promise<Subscription | null> {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
   const now = new Date();
   const periodEnd = new Date();
   if (params.billingCycle === 'MONTHLY') {
@@ -77,16 +72,32 @@ export async function createSubscription(params: {
     periodEnd.setFullYear(periodEnd.getFullYear() + 1);
   }
 
-  const { data, error } = await supabase
+  // Get price based on plan
+  const plan = PRICING_PLANS.find((p) => p.id === params.plan);
+  const price = plan
+    ? params.billingCycle === 'MONTHLY'
+      ? plan.monthlyPrice
+      : plan.yearlyPrice
+    : 0;
+
+  // Deactivate any existing active subscription first
+  await supabaseAdmin
+    .from('subscription')
+    .update({ is_active: false, updated_at: now.toISOString() })
+    .eq('customer_id', params.customerId)
+    .eq('is_active', true);
+
+  // Use admin client to bypass RLS for subscription management
+  const { data, error } = await supabaseAdmin
     .from('subscription')
     .insert({
       customer_id: params.customerId,
-      plan: params.plan,
-      status: 'ACTIVE',
+      plan_type: params.plan,
       billing_cycle: params.billingCycle,
+      price,
       current_period_start: now.toISOString(),
       current_period_end: periodEnd.toISOString(),
-      cancel_at_period_end: false,
+      is_active: true,
     })
     .select()
     .single();
@@ -96,7 +107,7 @@ export async function createSubscription(params: {
     return null;
   }
 
-  return mapSubscription(data);
+  return mapSubscriptionFromDb(data);
 }
 
 /**
@@ -106,35 +117,32 @@ export async function cancelSubscription(
   subscriptionId: string,
   immediately = false
 ): Promise<boolean> {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  const now = new Date().toISOString();
 
   if (immediately) {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('subscription')
       .update({
-        status: 'CANCELED',
-        updated_at: new Date().toISOString(),
+        is_active: false,
+        cancelled_at: now,
+        updated_at: now,
       })
       .eq('id', subscriptionId);
 
     return !error;
   } else {
-    const { error } = await supabase
+    // Set cancelled_at to period end date
+    const { data: sub } = await supabaseAdmin
+      .from('subscription')
+      .select('current_period_end')
+      .eq('id', subscriptionId)
+      .single();
+
+    const { error } = await supabaseAdmin
       .from('subscription')
       .update({
-        cancel_at_period_end: true,
-        updated_at: new Date().toISOString(),
+        cancelled_at: sub?.current_period_end || now,
+        updated_at: now,
       })
       .eq('id', subscriptionId);
 
@@ -225,19 +233,6 @@ export async function createInvoice(params: {
   plan: SubscriptionPlan;
   billingCycle: BillingCycle;
 }): Promise<Invoice | null> {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
   const plan = PRICING_PLANS.find((p) => p.id === params.plan);
   if (!plan) {
     return null;
@@ -263,7 +258,7 @@ export async function createInvoice(params: {
     },
   ];
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('invoice')
     .insert({
       customer_id: params.customerId,
@@ -295,20 +290,7 @@ export async function markInvoicePaid(
   invoiceId: string,
   transactionId?: string
 ): Promise<boolean> {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('invoice')
     .update({
       status: 'PAID',
@@ -323,7 +305,7 @@ export async function markInvoicePaid(
   // Record payment
   const invoice = await getInvoice(invoiceId);
   if (invoice) {
-    await supabase.from('payment').insert({
+    await supabaseAdmin.from('payment').insert({
       invoice_id: invoiceId,
       amount: invoice.total,
       currency: invoice.currency,
@@ -437,29 +419,37 @@ export async function getUsageMetrics(customerId: string): Promise<UsageMetrics>
 /**
  * Map database subscription to type
  */
-function mapSubscription(data: {
+function mapSubscriptionFromDb(data: {
   id: string;
   customer_id: string;
-  plan: string;
-  status: string;
-  billing_cycle: string;
-  current_period_start: string;
-  current_period_end: string;
-  cancel_at_period_end: boolean;
-  trial_end?: string;
+  plan_type: string;
+  billing_cycle: string | null;
+  price: number;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  is_active: boolean;
+  cancelled_at: string | null;
   created_at: string;
   updated_at: string;
 }): Subscription {
+  // Determine status based on is_active and cancelled_at
+  let status: Subscription['status'] = 'ACTIVE';
+  if (!data.is_active) {
+    status = 'CANCELED';
+  } else if (data.cancelled_at) {
+    status = 'CANCELING';
+  }
+
   return {
     id: data.id,
     customerId: data.customer_id,
-    plan: data.plan as SubscriptionPlan,
-    status: data.status as Subscription['status'],
-    billingCycle: data.billing_cycle as BillingCycle,
-    currentPeriodStart: data.current_period_start,
-    currentPeriodEnd: data.current_period_end,
-    cancelAtPeriodEnd: data.cancel_at_period_end,
-    trialEnd: data.trial_end,
+    plan: data.plan_type as SubscriptionPlan,
+    status,
+    billingCycle: (data.billing_cycle || 'MONTHLY') as BillingCycle,
+    currentPeriodStart: data.current_period_start || data.created_at,
+    currentPeriodEnd: data.current_period_end || data.created_at,
+    cancelAtPeriodEnd: !!data.cancelled_at && data.is_active,
+    trialEnd: undefined,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };

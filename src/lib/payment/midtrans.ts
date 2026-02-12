@@ -26,6 +26,7 @@ interface MidtransSnapResponse {
 interface MidtransNotification {
   transaction_status: string;
   order_id: string;
+  status_code: string;
   gross_amount: string;
   payment_type: string;
   transaction_id: string;
@@ -192,20 +193,35 @@ export class MidtransService {
 
   /**
    * Verify notification from Midtrans webhook
+   *
+   * Signature formula: SHA512(order_id + status_code + gross_amount + ServerKey)
+   * See: https://docs.midtrans.com/reference/handling-notifications
    */
   static verifyNotification(notification: MidtransNotification): boolean {
+    // Midtrans signature formula: SHA512(order_id + status_code + gross_amount + ServerKey)
+    const signatureInput =
+      notification.order_id +
+      notification.status_code +
+      notification.gross_amount +
+      this.serverKey;
+
     const expectedSignature = crypto
       .createHash('sha512')
-      .update(
-        notification.order_id +
-          notification.gross_amount.replace('.00', '') +
-          'pending' +
-          this.serverKey
-      )
+      .update(signatureInput)
       .digest('hex');
 
-    // Note: In production, implement proper signature verification
-    return notification.signature_key === expectedSignature;
+    const isValid = notification.signature_key === expectedSignature;
+
+    if (!isValid) {
+      console.warn('[Midtrans] Signature verification failed', {
+        orderId: notification.order_id,
+        statusCode: notification.status_code,
+        expectedLength: expectedSignature.length,
+        receivedLength: notification.signature_key?.length,
+      });
+    }
+
+    return isValid;
   }
 
   /**

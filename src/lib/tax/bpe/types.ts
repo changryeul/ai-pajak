@@ -49,6 +49,9 @@ export interface BPEData {
     npwp: string;
     licenseNumber: string;
   };
+
+  // QR Code data URL (generated before PDF rendering)
+  qrCodeDataUrl?: string;
 }
 
 export type TaxType = 'PPh21' | 'PPh23' | 'PPh_FINAL' | 'PPN' | 'SPT_MASA' | 'SPT_TAHUNAN';

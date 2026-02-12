@@ -6,6 +6,19 @@ This directory contains the complete database schema, migrations, and Row Level 
 
 **Key Design Principle**: Strict separation between Platform (AI Pajak) and Tax Service Provider (Jakarta Tax Consulting) to ensure legal compliance and data security.
 
+ ─────────────────┬──────────────────────────────────┬──────────────────┐                                                                                                        
+  │      역할       │              이메일              │     비밀번호     │                                                                                                        
+  ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
+  │ CUSTOMER        │ customer.test@example.com        │  TestPassword123!│                                                                                                        
+  ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
+  │ CONSULTANT_JTC  │ consultant.test@jakartatax.co.id │ TestPassword123! │                                                                                                        
+  ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
+  │ TAX_ADVISOR_JTC │ advisor.test@jakartatax.co.id    │ TestPassword123! │                                                                                                        
+  ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
+  │ PLATFORM_ADMIN  │ admin.test@aipajak.com           │ TestPassword123! │                                                                                                        
+  └─────────────────┴──────────────────────────────────┴──────────────────
+
+
 ## Directory Structure
 
 ```

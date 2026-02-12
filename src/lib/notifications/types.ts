@@ -87,3 +87,23 @@ export interface PaymentData {
   dueDate: string;
   paymentUrl: string;
 }
+
+export interface PaymentConfirmationData {
+  customerName: string;
+  invoiceNumber: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  paidAt: string;
+  transactionId: string;
+  serviceType: string;
+}
+
+export interface PaymentFailedData {
+  customerName: string;
+  invoiceNumber: string;
+  amount: number;
+  currency: string;
+  reason: string;
+  paymentUrl: string;
+}

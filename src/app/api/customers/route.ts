@@ -1,239 +1,126 @@
+/**
+ * Customers API
+ *
+ * GET /api/customers
+ *
+ * Returns the list of customers for the authenticated consultant/tax advisor.
+ * Only accessible by CONSULTANT_JTC and TAX_ADVISOR_JTC roles.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import {
-  listCustomers,
-  createCustomer,
-  ListCustomersParams,
-} from '@/lib/services/customer-service';
+import { composeMiddleware } from '@/middleware/compose';
+import { requireAuth } from '@/middleware/auth';
+import { requireRole } from '@/middleware/rbac';
+import type { RequestWithSession, UserRole } from '@/types/auth';
 
-/**
- * List Customers API
- *
- * Lists customers with pagination and filters.
- * - Consultants see only their assigned customers
- * - Platform admins can see all customers (but not tax data)
- *
- * @route GET /api/customers
- */
-export async function GET(request: NextRequest) {
+async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
   try {
-    const { searchParams } = new URL(request.url);
-
-    // Get authenticated user
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { role, userId } = req.session;
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role, organization_id')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
+    // Get consultant ID
+    const { data: consultant } = await supabase
+      .from('consultant')
+      .select('id, tax_partner_id')
+      .eq('user_id', userId)
       .single();
 
-    if (!userRole) {
+    if (!consultant) {
       return NextResponse.json(
-        { success: false, error: 'User role not found' },
-        { status: 403 }
+        { success: false, error: 'Consultant not found' },
+        { status: 404 }
       );
     }
 
-    // Build params
-    const params: ListCustomersParams = {
-      page: parseInt(searchParams.get('page') || '1', 10),
-      limit: Math.min(parseInt(searchParams.get('limit') || '20', 10), 100),
-      search: searchParams.get('search') || undefined,
-      customerType: searchParams.get('customerType') as 'INDIVIDUAL' | 'COMPANY' | undefined,
-      sortBy: searchParams.get('sortBy') as 'created_at' | 'full_name' | 'company_name' || 'created_at',
-      sortOrder: searchParams.get('sortOrder') as 'asc' | 'desc' || 'desc',
-    };
+    // Get customers with active POA for this consultant's tax partner
+    const { data: customers, error } = await supabase
+      .from('customer')
+      .select(`
+        id,
+        full_name,
+        company_name,
+        email,
+        phone,
+        npwp,
+        customer_type,
+        created_at,
+        power_of_attorney!customer_id (
+          id,
+          status
+        ),
+        tax_filing!customer_id (
+          id,
+          status
+        )
+      `)
+      .order('created_at', { ascending: false });
 
-    // If consultant, filter by assigned customers
-    if (userRole.role === 'CONSULTANT_JTC' || userRole.role === 'TAX_ADVISOR_JTC') {
-      const { data: consultant } = await supabase
-        .from('consultant')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (consultant) {
-        params.consultantId = consultant.id;
-      }
+    if (error) {
+      console.error('Failed to fetch customers:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch customers' },
+        { status: 500 }
+      );
     }
 
-    const result = await listCustomers(params);
+    // Transform customers with POA status and filing count
+    const transformedCustomers = (customers || []).map((customer) => {
+      const poas = customer.power_of_attorney || [];
+      const filings = customer.tax_filing || [];
+
+      // Determine POA status
+      let poaStatus: 'none' | 'pending' | 'active' = 'none';
+      const activePoa = poas.find((poa: { status: string }) => poa.status === 'ACTIVE');
+      const pendingPoa = poas.find((poa: { status: string }) =>
+        ['DRAFT', 'PENDING_SIGNATURE'].includes(poa.status)
+      );
+
+      if (activePoa) {
+        poaStatus = 'active';
+      } else if (pendingPoa) {
+        poaStatus = 'pending';
+      }
+
+      return {
+        id: customer.id,
+        full_name: customer.full_name,
+        company_name: customer.company_name,
+        email: customer.email,
+        phone: customer.phone,
+        npwp: customer.npwp,
+        customer_type: customer.customer_type,
+        created_at: customer.created_at,
+        poa_status: poaStatus,
+        filing_count: filings.length,
+      };
+    });
+
+    // Calculate stats
+    const stats = {
+      total: transformedCustomers.length,
+      active: transformedCustomers.filter((c) => c.poa_status === 'active').length,
+      activePoa: transformedCustomers.filter((c) => c.poa_status === 'active').length,
+      pendingFilings: transformedCustomers.reduce((acc, c) => acc + c.filing_count, 0),
+    };
 
     return NextResponse.json({
       success: true,
-      data: result.customers,
-      pagination: {
-        page: result.page,
-        limit: result.limit,
-        total: result.total,
-        totalPages: result.totalPages,
-      },
+      customers: transformedCustomers,
+      stats,
     });
   } catch (error) {
-    console.error('List customers error:', error);
+    console.error('Error fetching customers:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to list customers',
-      },
+      { success: false, error: 'Failed to fetch customers' },
       { status: 500 }
     );
   }
 }
 
-/**
- * Create Customer API
- *
- * Creates a new customer record.
- * - Only consultants and platform admins can create customers
- *
- * @route POST /api/customers
- */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-
-    // Get authenticated user
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
-
-    if (!userRole) {
-      return NextResponse.json(
-        { success: false, error: 'User role not found' },
-        { status: 403 }
-      );
-    }
-
-    // Only consultants and platform admins can create customers
-    const allowedRoles = ['CONSULTANT_JTC', 'TAX_ADVISOR_JTC', 'PLATFORM_ADMIN'];
-    if (!allowedRoles.includes(userRole.role)) {
-      return NextResponse.json(
-        { success: false, error: 'Only consultants and platform admins can create customers' },
-        { status: 403 }
-      );
-    }
-
-    // Validate required fields
-    const { full_name, email, customer_type, npwp, company_name, phone, address } = body;
-
-    if (!full_name || !email || !customer_type) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing required fields',
-          required: ['full_name', 'email', 'customer_type'],
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!['INDIVIDUAL', 'COMPANY'].includes(customer_type)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid customer_type. Must be INDIVIDUAL or COMPANY',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (customer_type === 'COMPANY' && !company_name) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'company_name is required for COMPANY type customers',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Check if email already exists
-    const { data: existingCustomer } = await supabase
-      .from('customer')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingCustomer) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'A customer with this email already exists',
-        },
-        { status: 409 }
-      );
-    }
-
-    // Create user account first (if not existing)
-    // For now, we'll create the customer with the creator's user_id
-    // In production, you'd want to invite the customer to create their own account
-    const customer = await createCustomer({
-      user_id: user.id, // Temporary - should be customer's own user_id
-      full_name,
-      email,
-      customer_type,
-      npwp: npwp || null,
-      company_name: company_name || null,
-      phone: phone || null,
-      address: address || null,
-    });
-
-    // If consultant created the customer, auto-assign them
-    if (userRole.role === 'CONSULTANT_JTC' || userRole.role === 'TAX_ADVISOR_JTC') {
-      const { data: consultant } = await supabase
-        .from('consultant')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (consultant) {
-        await supabase.from('customer_consultant').insert({
-          customer_id: customer.id,
-          consultant_id: consultant.id,
-          assigned_by_user_id: user.id,
-          is_active: true,
-        });
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: customer,
-    }, { status: 201 });
-  } catch (error) {
-    console.error('Create customer error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create customer',
-      },
-      { status: 500 }
-    );
-  }
+export async function GET(request: NextRequest) {
+  return composeMiddleware(
+    requireAuth,
+    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole)
+  )(request as RequestWithSession, handleGetCustomers);
 }

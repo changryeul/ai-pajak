@@ -6,7 +6,6 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import {
-  SPT1770SSData,
   TaxpayerData,
   IncomeSource1721A1,
   PTKPStatus,
@@ -194,14 +193,17 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     if (format === 'pdf') {
       // Generate PDF
       try {
-        const pdfBuffer = await renderToBuffer(
-          React.createElement(SPT1770SSPDF, {
-            data: sptData,
-            showWatermark: correctionNumber === 0,
-          })
-        );
+        const pdfElement = React.createElement(SPT1770SSPDF, {
+          data: sptData,
+          showWatermark: correctionNumber === 0,
+        });
+        // @ts-expect-error - renderToBuffer types are not fully compatible
+        const pdfBuffer = await renderToBuffer(pdfElement);
 
-        return new Response(pdfBuffer, {
+        // Convert Buffer to Uint8Array for Response compatibility
+        const pdfBytes = new Uint8Array(pdfBuffer);
+
+        return new Response(pdfBytes, {
           status: 200,
           headers: {
             'Content-Type': 'application/pdf',

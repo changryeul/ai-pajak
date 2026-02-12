@@ -6,3 +6,4 @@
 
 export * from './types';
 export * from './pdf-generator';
+export * from './qr-generator';

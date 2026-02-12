@@ -53,7 +53,7 @@ interface POACreateResponse {
   scope: string;
   validFrom: string;
   validTo: string;
-  documentUrl: string;
+  documentUrl?: string; // Optional for DRAFT status
   createdAt: string;
   nextSteps: {
     step: number;
@@ -78,8 +78,8 @@ async function handler(request: RequestWithSession): Promise<Response> {
     notes,
   } = body;
 
-  // Validation
-  if (!taxPartnerId || !scope || !validFrom || !validTo || !documentUrl) {
+  // Validation - documentUrl is optional for DRAFT status (can be added later before signing)
+  if (!taxPartnerId || !scope || !validFrom || !validTo) {
     return NextResponse.json(
       {
         error: 'Missing required fields',
@@ -88,7 +88,6 @@ async function handler(request: RequestWithSession): Promise<Response> {
           'scope',
           'validFrom',
           'validTo',
-          'documentUrl',
         ],
       },
       { status: 400 }
@@ -168,17 +167,19 @@ async function handler(request: RequestWithSession): Promise<Response> {
     );
   }
 
-  // Validate documentUrl format (basic URL validation)
-  try {
-    new URL(documentUrl);
-  } catch {
-    return NextResponse.json(
-      {
-        error: 'Invalid document URL',
-        message: 'documentUrl must be a valid URL',
-      },
-      { status: 400 }
-    );
+  // Validate documentUrl format (basic URL validation) - only if provided
+  if (documentUrl) {
+    try {
+      new URL(documentUrl);
+    } catch {
+      return NextResponse.json(
+        {
+          error: 'Invalid document URL',
+          message: 'documentUrl must be a valid URL',
+        },
+        { status: 400 }
+      );
+    }
   }
 
   // Check for existing active POA with same tax partner
@@ -224,7 +225,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       valid_from: validFrom,
       valid_to: validTo,
       status: 'DRAFT',
-      document_url: documentUrl,
+      document_url: documentUrl || null, // Optional for DRAFT, required before signing
       notes,
     })
     .select(
@@ -284,6 +285,48 @@ async function handler(request: RequestWithSession): Promise<Response> {
     scope,
   });
 
+  // Build next steps based on whether document is uploaded
+  const nextSteps = documentUrl
+    ? [
+        {
+          step: 1,
+          action: 'CUSTOMER_SIGN',
+          description: 'Customer must sign the POA document',
+        },
+        {
+          step: 2,
+          action: 'ADVISOR_REVIEW',
+          description: 'Tax Advisor will review the POA',
+        },
+        {
+          step: 3,
+          action: 'ADVISOR_SIGN',
+          description: 'Tax Advisor will sign to activate POA',
+        },
+      ]
+    : [
+        {
+          step: 1,
+          action: 'UPLOAD_DOCUMENT',
+          description: 'Upload the POA document',
+        },
+        {
+          step: 2,
+          action: 'CUSTOMER_SIGN',
+          description: 'Customer must sign the POA document',
+        },
+        {
+          step: 3,
+          action: 'ADVISOR_REVIEW',
+          description: 'Tax Advisor will review the POA',
+        },
+        {
+          step: 4,
+          action: 'ADVISOR_SIGN',
+          description: 'Tax Advisor will sign to activate POA',
+        },
+      ];
+
   // Prepare response
   const response: POACreateResponse = {
     success: true,
@@ -305,25 +348,9 @@ async function handler(request: RequestWithSession): Promise<Response> {
     scope: poa.scope,
     validFrom: poa.valid_from,
     validTo: poa.valid_to,
-    documentUrl,
+    documentUrl: documentUrl || undefined,
     createdAt: poa.created_at,
-    nextSteps: [
-      {
-        step: 1,
-        action: 'CUSTOMER_SIGN',
-        description: 'Customer must sign the POA document',
-      },
-      {
-        step: 2,
-        action: 'ADVISOR_REVIEW',
-        description: 'Tax Advisor will review the POA',
-      },
-      {
-        step: 3,
-        action: 'ADVISOR_SIGN',
-        description: 'Tax Advisor will sign to activate POA',
-      },
-    ],
+    nextSteps,
   };
 
   return NextResponse.json(response, { status: 201 });

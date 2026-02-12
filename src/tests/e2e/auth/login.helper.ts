@@ -28,6 +28,9 @@ try {
  * Handles login for different user roles and returns access tokens
  */
 
+// Token cache to avoid redundant logins
+const tokenCache: Map<string, { token: string; expiresAt: number }> = new Map();
+
 /**
  * Create a test user if they don't exist
  *
@@ -87,6 +90,12 @@ export async function loginAs(
   email: string,
   password: string
 ): Promise<string> {
+  // Check cache first
+  const cached = tokenCache.get(email);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.token;
+  }
+
   // First, ensure the user exists
   await ensureUserExists(request, email, password);
 
@@ -101,6 +110,7 @@ export async function loginAs(
         'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         'Content-Type': 'application/json',
       },
+      timeout: 30000, // 30 second timeout for login
     }
   );
 
@@ -110,7 +120,15 @@ export async function loginAs(
   }
 
   const body = await response.json();
-  return body.access_token;
+  const token = body.access_token;
+
+  // Cache token for 50 minutes (tokens usually expire in 1 hour)
+  tokenCache.set(email, {
+    token,
+    expiresAt: Date.now() + 50 * 60 * 1000,
+  });
+
+  return token;
 }
 
 /**

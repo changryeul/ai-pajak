@@ -10,7 +10,10 @@ function isServiceRoleKey(token: string): boolean {
   // Service role keys are longer than regular JWTs and have a specific format
   // Check against the actual service role key from environment
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return serviceRoleKey === token;
+  const testServiceRoleKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
+
+  // Support both production and test service role keys
+  return serviceRoleKey === token || testServiceRoleKey === token;
 }
 
 /**

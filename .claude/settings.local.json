@@ -99,7 +99,13 @@
       "Bash(supabase start:*)",
       "Bash(psql:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm run test:*)",
+      "Bash(xargs basename:*)",
+      "Bash(tee:*)",
+      "Bash(supabase status:*)",
+      "Bash(node -e:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

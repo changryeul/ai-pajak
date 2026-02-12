@@ -8,6 +8,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FileText, CheckCircle, Clock, AlertCircle, ArrowRight } from 'lucide-react';
 
+// Helper function to format currency consistently (avoids hydration mismatch)
+function formatCurrencyIDR(amount: number): string {
+  // Use pure JS formatting to avoid locale-dependent issues
+  const absValue = Math.abs(amount);
+  const parts = absValue.toString().split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `Rp ${amount < 0 ? '-' : ''}${parts.join(',')}`;
+}
+
 interface Filing {
   id: string;
   filingNumber: string;
@@ -102,12 +111,7 @@ export function FilingSummaryWidget({ customerId, limit = 5 }: FilingSummaryWidg
   };
 
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+    return formatCurrencyIDR(amount);
   };
 
   return (

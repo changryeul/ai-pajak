@@ -12,29 +12,29 @@ export async function GET() {
   const supabase = await createClient();
 
   // Check authentication
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
     );
   }
 
-  // Get customer ID from user profile
-  const { data: profile } = await supabase
-    .from('user_profile')
-    .select('customer_id')
-    .eq('user_id', session.user.id)
+  // Get customer ID from customer table
+  const { data: customer } = await supabase
+    .from('customer')
+    .select('id')
+    .eq('user_id', user.id)
     .single();
 
-  if (!profile?.customer_id) {
+  if (!customer?.id) {
     return NextResponse.json({
       success: true,
       data: null,
     });
   }
 
-  const subscription = await getSubscription(profile.customer_id);
+  const subscription = await getSubscription(customer.id);
 
   return NextResponse.json({
     success: true,
@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
   // Check authentication
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -73,40 +73,36 @@ export async function POST(request: NextRequest) {
   }
 
   // Get or create customer
-  const { data: profile } = await supabase
-    .from('user_profile')
-    .select('customer_id')
-    .eq('user_id', session.user.id)
+  const { data: existingCustomer } = await supabase
+    .from('customer')
+    .select('id')
+    .eq('user_id', user.id)
     .single();
 
-  let customerId = profile?.customer_id;
+  let customerId = existingCustomer?.id;
 
   if (!customerId) {
-    // Create customer record
+    // Create customer record with required fields
     const { data: customer, error: customerError } = await supabase
       .from('customer')
       .insert({
-        user_id: session.user.id,
-        full_name: session.user.user_metadata?.full_name || session.user.email,
-        email: session.user.email,
+        user_id: user.id,
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Customer',
+        email: user.email || '',
+        customer_type: 'INDIVIDUAL', // Default to individual
       })
       .select()
       .single();
 
     if (customerError) {
+      console.error('Failed to create customer:', customerError);
       return NextResponse.json(
-        { error: 'Failed to create customer' },
+        { error: 'Failed to create customer', details: customerError.message },
         { status: 500 }
       );
     }
 
     customerId = customer.id;
-
-    // Update user profile
-    await supabase
-      .from('user_profile')
-      .update({ customer_id: customerId })
-      .eq('user_id', session.user.id);
   }
 
   const subscription = await createSubscription({
@@ -137,8 +133,8 @@ export async function DELETE(request: NextRequest) {
   const supabase = await createClient();
 
   // Check authentication
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -149,20 +145,20 @@ export async function DELETE(request: NextRequest) {
   const immediately = searchParams.get('immediately') === 'true';
 
   // Get customer's subscription
-  const { data: profile } = await supabase
-    .from('user_profile')
-    .select('customer_id')
-    .eq('user_id', session.user.id)
+  const { data: customer } = await supabase
+    .from('customer')
+    .select('id')
+    .eq('user_id', user.id)
     .single();
 
-  if (!profile?.customer_id) {
+  if (!customer?.id) {
     return NextResponse.json(
       { error: 'No subscription found' },
       { status: 404 }
     );
   }
 
-  const subscription = await getSubscription(profile.customer_id);
+  const subscription = await getSubscription(customer.id);
   if (!subscription) {
     return NextResponse.json(
       { error: 'No subscription found' },

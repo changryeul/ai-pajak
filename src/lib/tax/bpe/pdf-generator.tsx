@@ -154,11 +154,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#166534',
   },
-  // QR Code placeholder
+  // QR Code
   qrCodeContainer: {
     alignItems: 'center',
     marginTop: 16,
     marginBottom: 16,
+  },
+  qrCodeImage: {
+    width: 80,
+    height: 80,
   },
   qrCodePlaceholder: {
     width: 80,
@@ -275,6 +279,7 @@ export function BPEPDF({ data }: BPEPDFProps) {
     taxSummary,
     submissionDetails,
     taxPartner,
+    qrCodeDataUrl,
   } = data;
 
   return (
@@ -546,10 +551,14 @@ export function BPEPDF({ data }: BPEPDFProps) {
 
         {/* QR Code */}
         <View style={styles.qrCodeContainer}>
-          <View style={styles.qrCodePlaceholder}>
-            <Text style={styles.qrCodeText}>QR Code</Text>
-            <Text style={styles.qrCodeText}>Verifikasi</Text>
-          </View>
+          {qrCodeDataUrl ? (
+            <Image src={qrCodeDataUrl} style={styles.qrCodeImage} />
+          ) : (
+            <View style={styles.qrCodePlaceholder}>
+              <Text style={styles.qrCodeText}>QR Code</Text>
+              <Text style={styles.qrCodeText}>Verifikasi</Text>
+            </View>
+          )}
           <Text style={[styles.qrCodeText, { marginTop: 4 }]}>
             Scan untuk verifikasi keaslian BPE
           </Text>

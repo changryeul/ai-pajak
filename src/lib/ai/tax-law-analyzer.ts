@@ -330,13 +330,26 @@ ${documentText}
 
 /**
  * PDF를 텍스트로 변환하는 유틸리티
- * (실제 구현 시 pdf-parse 또는 pdfjs-dist 사용)
  */
 export async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
-  // TODO: PDF 파싱 라이브러리 사용
-  // const pdf = require('pdf-parse');
-  // const data = await pdf(pdfBuffer);
-  // return data.text;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string; numpages: number; info: Record<string, unknown> }>;
+  const data = await pdfParse(pdfBuffer);
+  return data.text;
+}
 
-  throw new Error('PDF parsing not implemented yet. Use pdf-parse or pdfjs-dist.');
+/**
+ * PDF 파일에서 메타데이터 추출
+ */
+export async function extractPDFMetadata(pdfBuffer: Buffer): Promise<{
+  pages: number;
+  info: Record<string, unknown>;
+}> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string; numpages: number; info: Record<string, unknown> }>;
+  const data = await pdfParse(pdfBuffer);
+  return {
+    pages: data.numpages,
+    info: data.info || {}
+  };
 }

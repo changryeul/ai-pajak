@@ -8,14 +8,24 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FileCheck2, AlertTriangle, Clock, Plus } from 'lucide-react';
 
+// Helper function to format date consistently (ISO format to avoid hydration mismatch)
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  // Use a consistent format that won't differ between server and client
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${day}/${month}/${year}`;
+}
+
 interface POA {
   id: string;
   poaNumber: string;
   status: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'EXPIRED' | 'REVOKED';
-  scope: string;
+  scope?: string;
   validFrom: string;
   validTo: string;
-  taxPartner: {
+  taxPartner?: {
     id: string;
     organizationName: string;
   };
@@ -131,15 +141,15 @@ export function POAStatusWidget({ customerId }: POAStatusWidgetProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-gray-900">
-                      {activePOA.taxPartner.organizationName}
+                      {activePOA.taxPartner?.organizationName || 'Jakarta Tax Consulting'}
                     </span>
                     {getStatusBadge(activePOA.status)}
                   </div>
                   <p className="text-sm text-gray-600">
-                    {activePOA.poaNumber} | Valid until {new Date(activePOA.validTo).toLocaleDateString()}
+                    {activePOA.poaNumber} | Valid until {formatDate(activePOA.validTo)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Scope: {activePOA.scope.replace(/_/g, ' ')}
+                    Scope: {activePOA.scope?.replace(/_/g, ' ') || 'All Tax Types'}
                   </p>
                 </div>
               </div>
@@ -151,7 +161,7 @@ export function POAStatusWidget({ customerId }: POAStatusWidgetProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-gray-900">
-                      {pendingPOA.taxPartner.organizationName}
+                      {pendingPOA.taxPartner?.organizationName || 'Jakarta Tax Consulting'}
                     </span>
                     {getStatusBadge(pendingPOA.status)}
                   </div>

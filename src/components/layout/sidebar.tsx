@@ -5,14 +5,12 @@ import { useParams, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
-  FileText,
   Calculator,
   Upload,
   BarChart3,
   Settings,
   CreditCard,
   Users,
-  Building2,
   Receipt,
   FileSpreadsheet,
   LogOut,
@@ -44,7 +42,7 @@ const navItems = [
     section: 'account',
     label: 'Account',
     items: [
-      { href: '/subscription', icon: CreditCard, labelKey: 'subscription.title' },
+      { href: '/billing', icon: CreditCard, labelKey: 'subscription.title' },
       { href: '/settings', icon: Settings, labelKey: 'settings.title' },
     ],
   },

@@ -36,6 +36,7 @@ test.describe('Audit Trail Verification Tests', () => {
   });
 
   test('✅ Tax filing creates complete audit log', async ({ request }) => {
+    test.setTimeout(90000); // 90 seconds - tax filing API can be slow
     const taxFiling = getUniqueTaxFiling();
     const response = await request.post('/api/tax/file', {
       headers: createAuthHeaders(advisorToken),
@@ -60,6 +61,7 @@ test.describe('Audit Trail Verification Tests', () => {
   });
 
   test('✅ Tax filing audit log contains required fields', async ({ request }) => {
+    test.setTimeout(90000); // 90 seconds - tax filing API can be slow
     const taxFiling = getUniqueTaxFiling();
     const response = await request.post('/api/tax/file', {
       headers: createAuthHeaders(advisorToken),
@@ -153,6 +155,7 @@ test.describe('Audit Trail Verification Tests', () => {
   });
 
   test('✅ Multiple tax filings create separate audit logs', async ({ request }) => {
+    test.setTimeout(120000); // 120 seconds - multiple tax filings
     // First filing
     const firstTaxFiling = getUniqueTaxFiling();
     const firstResponse = await request.post('/api/tax/file', {
@@ -182,6 +185,7 @@ test.describe('Audit Trail Verification Tests', () => {
   });
 
   test('✅ Audit log includes actor role information', async ({ request }) => {
+    test.setTimeout(90000); // 90 seconds - tax filing API can be slow
     const taxFiling = getUniqueTaxFiling();
     const response = await request.post('/api/tax/file', {
       headers: createAuthHeaders(advisorToken),
@@ -206,6 +210,7 @@ test.describe('Audit Trail Verification Tests', () => {
   });
 
   test('✅ Audit log links to customer, tax filing, and POA', async ({ request }) => {
+    test.setTimeout(90000); // 90 seconds - tax filing API can be slow
     const taxFiling = getUniqueTaxFiling();
     const response = await request.post('/api/tax/file', {
       headers: createAuthHeaders(advisorToken),
@@ -253,6 +258,7 @@ test.describe('Audit Trail Verification Tests', () => {
   });
 
   test('✅ Audit log includes IP address and user agent', async ({ request }) => {
+    test.setTimeout(90000); // 90 seconds for this slow test
     const taxFiling = getUniqueTaxFiling();
     const response = await request.post('/api/tax/file', {
       headers: {

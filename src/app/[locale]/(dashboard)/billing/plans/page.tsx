@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 export default function PlansPage() {
   const t = useTranslations('billing');
   const router = useRouter();
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('YEARLY');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('ANNUAL');
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -72,10 +72,10 @@ export default function PlansPage() {
             {t('monthly')}
           </button>
           <button
-            onClick={() => setBillingCycle('YEARLY')}
+            onClick={() => setBillingCycle('ANNUAL')}
             className={cn(
               'flex items-center gap-2 rounded-full px-6 py-2 text-sm font-medium transition-colors',
-              billingCycle === 'YEARLY'
+              billingCycle === 'ANNUAL'
                 ? 'bg-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             )}
@@ -122,7 +122,7 @@ export default function PlansPage() {
                   /{billingCycle === 'MONTHLY' ? t('month') : t('year')}
                 </span>
               </div>
-              {billingCycle === 'YEARLY' && (
+              {billingCycle === 'ANNUAL' && (
                 <p className="mt-1 text-sm text-green-600">
                   {t('saveAmount', {
                     amount: formatCurrency(plan.monthlyPrice * 12 - plan.yearlyPrice),

@@ -20,7 +20,17 @@ interface RouteParams {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: poaId } = await params;
-    const body = await request.json();
+
+    // Parse body (may be empty for simple sign without signature upload)
+    let body: { signatureUrl?: string } = {};
+    try {
+      const text = await request.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch {
+      // Empty body is OK
+    }
 
     // Get authenticated user
     const supabase = await createClient();
@@ -48,14 +58,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Validate input
-    const { signatureUrl } = body;
-    if (!signatureUrl) {
-      return NextResponse.json(
-        { success: false, error: 'signatureUrl is required' },
-        { status: 400 }
-      );
-    }
+    // Validate input - signatureUrl is optional (digital signature)
+    // If not provided, use placeholder indicating signed via platform
+    const signatureUrl = body.signatureUrl || `digital-signature://advisor/${user.id}/${Date.now()}`;
 
     // Get current POA
     const poa = await getPOA(poaId);

@@ -2,15 +2,15 @@
  * Billing & Subscription Types
  */
 
-export type SubscriptionPlan = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+export type SubscriptionPlan = 'FREE' | 'BASIC' | 'PROFESSIONAL' | 'ENTERPRISE';
 
-export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'TRIALING';
+export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'CANCELING' | 'TRIALING';
 
 export type PaymentMethod = 'BANK_TRANSFER' | 'CREDIT_CARD' | 'VIRTUAL_ACCOUNT';
 
 export type InvoiceStatus = 'DRAFT' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELED';
 
-export type BillingCycle = 'MONTHLY' | 'YEARLY';
+export type BillingCycle = 'MONTHLY' | 'ANNUAL';
 
 export interface PlanFeatures {
   maxTaxFilings: number;
@@ -95,8 +95,26 @@ export interface UsageMetrics {
  */
 export const PRICING_PLANS: PricingPlan[] = [
   {
-    id: 'STARTER',
-    name: 'Starter',
+    id: 'FREE',
+    name: 'Free',
+    description: 'Get started with basic features',
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    currency: 'IDR',
+    features: {
+      maxTaxFilings: 3,
+      maxDocumentsPerMonth: 10,
+      maxStorageGB: 1,
+      ocrEnabled: false,
+      prioritySupport: false,
+      customReports: false,
+      apiAccess: false,
+      whiteLabel: false,
+    },
+  },
+  {
+    id: 'BASIC',
+    name: 'Basic',
     description: 'Perfect for individual taxpayers',
     monthlyPrice: 199000,
     yearlyPrice: 1990000,
