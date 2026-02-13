@@ -178,16 +178,16 @@
   },
   "active": "ee78e85da7d3b8c0",
   "lastOpenFiles": [
-    "src/lib/tax/spt-1770/pdf-generator.tsx",
-    "src/lib/tax/spt-1770s/pdf-generator.tsx",
-    "test-results/results.json",
-    "test-results",
-    "src/tests/e2e/spt-1771.spec.ts",
-    "src/lib/tax/spt-1771/pdf-generator.tsx",
-    "src/app/api/tax/spt/1771/debug/route.ts",
-    "src/app/api/tax/spt/1771/debug",
-    "src/app/[locale]/(dashboard)/tax/spt-1771/page.tsx",
-    "src/app/[locale]/(dashboard)/tax/spt-1771",
-    "src/components/spt/SPT1771Preview.tsx"
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1770/page.tsx",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1770s/page.tsx",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1771/page.tsx",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1770ss/page.tsx",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1771",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1770",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1770s",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/1770ss",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan/page.tsx",
+    "src/app/[locale]/(dashboard)/tax/spt-tahunan",
+    "src/lib/tax/spt-1770/pdf-generator.tsx"
   ]
 }
