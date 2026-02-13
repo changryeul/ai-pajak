@@ -47,3 +47,6 @@ export {
   formatNumber,
   type SPT1771Input,
 } from './calculator';
+
+// PDF Generator
+export { SPT1771PDF, generateSPT1771PDFBuffer } from './pdf-generator';

@@ -75,6 +75,8 @@
     "newFiling": "创建新税务申报",
     "editFiling": "编辑税务申报",
     "submitFiling": "提交申报",
+    "saveDraft": "保存草稿",
+    "submitSuccess": "税务申报提交成功！",
     "selectTaxType": "选择税种",
     "selectTaxTypeFirst": "请先选择税种",
     "selectCustomer": "选择客户",

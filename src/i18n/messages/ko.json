@@ -75,6 +75,8 @@
     "newFiling": "새 세금 신고 생성",
     "editFiling": "세금 신고 수정",
     "submitFiling": "신고서 제출",
+    "saveDraft": "임시 저장",
+    "submitSuccess": "세금 신고가 성공적으로 제출되었습니다!",
     "selectTaxType": "세금 유형 선택",
     "selectTaxTypeFirst": "먼저 세금 유형을 선택하세요",
     "selectCustomer": "고객 선택",

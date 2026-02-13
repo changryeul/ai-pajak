@@ -21,6 +21,7 @@ import {
   calculateSPT1771,
   validateSPT1771,
   calculateIncomeStatementTotals,
+  generateSPT1771PDFBuffer,
 } from '@/lib/tax/spt-1771';
 
 const supabaseAdmin = createClient(
@@ -140,20 +141,21 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     const { data: customer, error: customerError } = await supabaseAdmin
       .from('customer')
       .select(
-        'id, user_id, full_name, company_name, npwp, nik, address, phone, email, customer_type'
+        'id, user_id, full_name, company_name, npwp, address, phone, email, customer_type'
       )
       .eq('id', customerId)
       .single();
 
     if (customerError || !customer) {
+      console.error('Customer fetch error:', customerError);
       return NextResponse.json(
-        { error: 'Customer not found' },
+        { error: 'Customer not found', details: customerError?.message },
         { status: 404 }
       );
     }
 
-    // Validate customer is corporate
-    if (customer.customer_type !== 'CORPORATE') {
+    // Validate customer is corporate (COMPANY type in DB)
+    if (customer.customer_type !== 'COMPANY') {
       return NextResponse.json(
         {
           error: 'Customer is not a corporate entity',
@@ -246,13 +248,31 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     const validation = validateSPT1771(sptData);
 
     if (format === 'pdf') {
-      return NextResponse.json(
-        {
-          error: 'PDF generation not yet implemented for SPT 1771',
-          message: 'Please use format=json',
-        },
-        { status: 501 }
-      );
+      try {
+        const showWatermark = validation.errors.length > 0;
+        const pdfBuffer = await generateSPT1771PDFBuffer(sptData, showWatermark);
+
+        // Convert Buffer to Uint8Array for NextResponse compatibility
+        const uint8Array = new Uint8Array(pdfBuffer);
+
+        return new NextResponse(uint8Array, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="SPT-1771-${company.npwp}-${taxYear}.pdf"`,
+            'Content-Length': pdfBuffer.length.toString(),
+          },
+        });
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        return NextResponse.json(
+          {
+            error: 'PDF generation failed',
+            message: pdfError instanceof Error ? pdfError.message : 'Unknown error',
+          },
+          { status: 500 }
+        );
+      }
     }
 
     // Return JSON response
@@ -309,7 +329,7 @@ async function handleGetSPT(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
   }
 
-  if (customer.customer_type !== 'CORPORATE') {
+  if (customer.customer_type !== 'COMPANY') {
     return NextResponse.json(
       {
         error: 'Customer is not a corporate entity',

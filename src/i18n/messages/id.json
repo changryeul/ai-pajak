@@ -75,6 +75,8 @@
     "newFiling": "Buat Pelaporan Pajak Baru",
     "editFiling": "Edit Pelaporan Pajak",
     "submitFiling": "Kirim Pelaporan",
+    "saveDraft": "Simpan Draf",
+    "submitSuccess": "Pelaporan pajak berhasil dikirim!",
     "selectTaxType": "Pilih Jenis Pajak",
     "selectTaxTypeFirst": "Pilih jenis pajak terlebih dahulu",
     "selectCustomer": "Pilih Pelanggan",

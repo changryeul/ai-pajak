@@ -75,6 +75,8 @@
     "newFiling": "新規税務申告を作成",
     "editFiling": "税務申告を編集",
     "submitFiling": "申告を提出",
+    "saveDraft": "下書きを保存",
+    "submitSuccess": "税務申告が正常に提出されました！",
     "selectTaxType": "税種を選択",
     "selectTaxTypeFirst": "まず税種を選択してください",
     "selectCustomer": "顧客を選択",

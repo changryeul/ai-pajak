@@ -32,7 +32,7 @@ export async function GET() {
     if (userRole?.role === 'CUSTOMER') {
       const { data: customer } = await supabase
         .from('customer')
-        .select('id, full_name, company_name, npwp, nik, phone, address, customer_type')
+        .select('id, full_name, company_name, npwp, phone, address, customer_type')
         .eq('user_id', user.id)
         .single();
 
@@ -60,7 +60,6 @@ export async function GET() {
         fullName: customerInfo?.full_name || consultantInfo?.full_name || user.user_metadata?.full_name || '',
         companyName: customerInfo?.company_name || null,
         npwp: customerInfo?.npwp || '',
-        nik: customerInfo?.nik || '',
         phone: customerInfo?.phone || consultantInfo?.phone || '',
         address: customerInfo?.address || '',
         customerType: customerInfo?.customer_type || null,

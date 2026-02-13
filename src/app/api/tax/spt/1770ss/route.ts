@@ -77,7 +77,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     // Fetch customer data
     const { data: customer, error: customerError } = await supabaseAdmin
       .from('customer')
-      .select('id, user_id, full_name, npwp, nik, address, phone, email')
+      .select('id, user_id, full_name, npwp, address, phone, email')
       .eq('id', customerId)
       .single();
 
@@ -89,9 +89,10 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     }
 
     // Build taxpayer data
+    // Note: NIK is not stored in customer table, using empty string
     const taxpayer: TaxpayerData = {
       npwp: customer.npwp || '',
-      nik: customer.nik || '',
+      nik: '', // TODO: Add nik column to customer table if needed
       name: customer.full_name || '',
       address: customer.address || '',
       phone: customer.phone || '',

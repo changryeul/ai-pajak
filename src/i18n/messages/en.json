@@ -75,6 +75,8 @@
     "newFiling": "Create New Tax Filing",
     "editFiling": "Edit Tax Filing",
     "submitFiling": "Submit Filing",
+    "saveDraft": "Save Draft",
+    "submitSuccess": "Tax filing submitted successfully!",
     "selectTaxType": "Select Tax Type",
     "selectTaxTypeFirst": "Please select a tax type first",
     "selectCustomer": "Select Customer",
