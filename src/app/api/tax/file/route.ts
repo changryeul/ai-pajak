@@ -9,6 +9,9 @@ import { requireRole } from '@/middleware/rbac';
 import { requireValidPOA } from '@/middleware/requireValidPOA';
 import { withAudit } from '@/middleware/audit';
 import { UserRole } from '@/types/auth';
+import { queueDJPJob } from '@/lib/djp/queue';
+import { DJP_API } from '@/config/constants';
+import type { EFilingRequest, SPTType } from '@/lib/djp/types';
 
 /**
  * CRITICAL ENDPOINT
@@ -75,6 +78,11 @@ interface TaxFilingResponse {
   auditTrail: {
     auditLogId: string;
     timestamp: string;
+  };
+  djp?: {
+    jobId: string;
+    status: 'PENDING';
+    message: string;
   };
 }
 
@@ -275,6 +283,88 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     auditLogId: auditLog?.id,
   });
 
+  // Queue DJP e-Filing submission (async)
+  let djpJobId: string | null = null;
+
+  if (DJP_API.ENABLED) {
+    try {
+      // Map internal tax type to DJP SPT type
+      const sptTypeMap: Record<string, SPTType> = {
+        PPh21: 'SPT_MASA_PPH21',
+        PPh23: 'SPT_MASA_PPH23',
+        PPh_FINAL: 'SPT_MASA_PPH4_2',
+        PPN: 'SPT_MASA_PPN',
+        SPT_MASA: 'SPT_MASA_PPH21', // Default to PPh21 for SPT Masa
+        SPT_TAHUNAN: 'SPT_TAHUNAN_1770',
+      };
+
+      // Get tax partner info for submittedBy
+      const taxPartner = consultant.tax_partner;
+      const taxPartnerInfo = Array.isArray(taxPartner)
+        ? taxPartner[0]
+        : (taxPartner as { name?: string; tax_license_number?: string } | null);
+
+      const eFilingRequest: EFilingRequest = {
+        npwp: customer.npwp,
+        taxYear: taxYear,
+        taxPeriod: taxPeriod,
+        sptType: sptTypeMap[taxType] || 'SPT_MASA_PPH21',
+        correctionNumber: 0, // Normal submission
+        sptData: {
+          identitasWP: {
+            npwp: customer.npwp,
+            nama:
+              customer.customer_type === 'INDIVIDUAL'
+                ? customer.full_name!
+                : customer.company_name!,
+            alamat: '', // Will be filled from customer record if available
+            kota: '',
+            statusWP: customer.customer_type === 'INDIVIDUAL' ? 'OP' : 'BADAN',
+          },
+          periodeData: {
+            tahunPajak: taxYear,
+            masaPajak: taxPeriod.split('-')[1] || undefined,
+            pembetulanKe: 0,
+          },
+          detailData: taxData as unknown as EFilingRequest['sptData']['detailData'],
+        },
+        attachments: documentIds?.map((docId) => ({
+          documentType: 'SUPPORTING_DOC',
+          fileName: docId,
+          fileBase64: '', // Will be filled by queue processor
+          mimeType: 'application/pdf',
+        })),
+        poaNumber: poa.poa_number,
+        submittedBy: {
+          npwp: '', // Tax consultant NPWP - will be filled from consultant record
+          name: taxPartnerInfo?.name || '',
+          licenseNumber: taxPartnerInfo?.tax_license_number || '',
+        },
+      };
+
+      djpJobId = await queueDJPJob({
+        type: 'E_FILING',
+        taxFilingId: taxFiling.id,
+        customerId: customerId,
+        payload: eFilingRequest,
+        priority: 'NORMAL',
+        maxRetries: 3,
+      });
+
+      console.info('[TAX_FILING] DJP e-Filing job queued', {
+        taxFilingId: taxFiling.id,
+        djpJobId,
+        sptType: sptTypeMap[taxType],
+      });
+    } catch (djpError) {
+      // Log error but don't fail the request - DJP submission is async
+      console.error('[TAX_FILING] Failed to queue DJP job', {
+        taxFilingId: taxFiling.id,
+        error: djpError instanceof Error ? djpError.message : 'Unknown error',
+      });
+    }
+  }
+
   // Prepare response
   const response: TaxFilingResponse = {
     success: true,
@@ -316,6 +406,13 @@ async function handler(request: RequestWithPOA): Promise<Response> {
       auditLogId: auditLog?.id || '',
       timestamp: auditLog?.created_at || new Date().toISOString(),
     },
+    ...(djpJobId && {
+      djp: {
+        jobId: djpJobId,
+        status: 'PENDING' as const,
+        message: 'Tax filing queued for DJP submission. Check status via /api/djp/status/{jobId}',
+      },
+    }),
   };
 
   return NextResponse.json(response, { status: 201 });

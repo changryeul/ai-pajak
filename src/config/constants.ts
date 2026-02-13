@@ -86,13 +86,72 @@ export const PPH23_RATES = {
   SERVICE: 0.02,
 } as const;
 
-// DJP API endpoints (placeholder)
+// DJP (Direktorat Jenderal Pajak) API Configuration
 export const DJP_API = {
+  // Enable/disable DJP integration
+  ENABLED: process.env.DJP_ENABLED !== 'false', // Enabled by default
+
+  // Base URLs
   BASE_URL: process.env.DJP_API_URL || 'https://api.pajak.go.id',
-  EFILING: '/efiling',
-  EBILLING: '/ebilling',
-  NPWP_VALIDATION: '/npwp/validate',
+  SANDBOX_URL: process.env.DJP_SANDBOX_URL || 'https://api-sandbox.pajak.go.id',
+
+  // Use sandbox in development
+  USE_SANDBOX: process.env.DJP_USE_SANDBOX === 'true' || process.env.NODE_ENV !== 'production',
+
+  // API Endpoints
+  ENDPOINTS: {
+    AUTH: '/oauth/token',
+    E_FILING: {
+      SUBMIT: '/efiling/v1/submit',
+      STATUS: '/efiling/v1/status',
+      BPE: '/efiling/v1/bpe',
+    },
+    E_BILLING: {
+      CREATE: '/ebilling/v1/create',
+      STATUS: '/ebilling/v1/status',
+    },
+    NPWP: {
+      VALIDATE: '/npwp/v1/validate',
+    },
+  },
+
+  // Configuration
+  CONFIG: {
+    TIMEOUT_MS: 30000,
+    MAX_RETRIES: 3,
+    RETRY_DELAY_MS: 5000,
+  },
 };
+
+// DJP Tax Codes for e-Billing
+export const DJP_TAX_CODES = {
+  PPH21: {
+    JENIS_PAJAK: '411121',
+    JENIS_SETORAN: {
+      MONTHLY: '100',
+      ANNUAL: '200',
+    },
+  },
+  PPH23: {
+    JENIS_PAJAK: '411124',
+    JENIS_SETORAN: {
+      MONTHLY: '100',
+    },
+  },
+  PPH4_2: {
+    JENIS_PAJAK: '411128',
+    JENIS_SETORAN: {
+      FINAL: '420',
+    },
+  },
+  PPN: {
+    JENIS_PAJAK: '411211',
+    JENIS_SETORAN: {
+      MONTHLY: '100',
+      QUARTERLY: '300',
+    },
+  },
+} as const;
 
 // Midtrans configuration
 export const MIDTRANS_CONFIG = {
