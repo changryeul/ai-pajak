@@ -4,15 +4,20 @@
  * Calculates annual tax return data from Form 1721-A1 income sources
  */
 
-import {
+import type {
   SPT1770SSData,
   SPT1770SSSummary,
   IncomeSource1721A1,
   TaxpayerData,
   PTKPStatus,
-  PTKP_RATES,
-  TAX_BRACKETS,
 } from './types';
+import {
+  PTKP_RATES,
+  calculateProgressiveTax as sharedCalculateProgressiveTax,
+  formatRupiah as sharedFormatRupiah,
+  formatNumber as sharedFormatNumber,
+  getPTKPDescription as sharedGetPTKPDescription,
+} from '../shared';
 import { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
 
 /**
@@ -102,24 +107,10 @@ export function calculateSummary(
 
 /**
  * Calculate progressive tax based on PKP
+ * @deprecated Use calculateProgressiveTax from '../shared' instead
  */
 export function calculateProgressiveTax(taxableIncome: number): number {
-  if (taxableIncome <= 0) return 0;
-
-  let tax = 0;
-  let remaining = taxableIncome;
-  let previousLimit = 0;
-
-  for (const bracket of TAX_BRACKETS) {
-    const bracketAmount = Math.min(remaining, bracket.limit - previousLimit);
-    if (bracketAmount <= 0) break;
-
-    tax += bracketAmount * bracket.rate;
-    remaining -= bracketAmount;
-    previousLimit = bracket.limit;
-  }
-
-  return Math.round(tax);
+  return sharedCalculateProgressiveTax(taxableIncome);
 }
 
 /**
@@ -220,40 +211,24 @@ export function validateSPT1770SS(data: SPT1770SSData): {
 
 /**
  * Get PTKP description
+ * @deprecated Use getPTKPDescription from '../shared' instead
  */
 export function getPTKPDescription(status: PTKPStatus): string {
-  const descriptions: Record<PTKPStatus, string> = {
-    'TK/0': 'Tidak Kawin / Tanpa Tanggungan',
-    'TK/1': 'Tidak Kawin / 1 Tanggungan',
-    'TK/2': 'Tidak Kawin / 2 Tanggungan',
-    'TK/3': 'Tidak Kawin / 3 Tanggungan',
-    'K/0': 'Kawin / Tanpa Tanggungan',
-    'K/1': 'Kawin / 1 Tanggungan',
-    'K/2': 'Kawin / 2 Tanggungan',
-    'K/3': 'Kawin / 3 Tanggungan',
-    'K/I/0': 'Kawin + Penghasilan Istri Digabung / Tanpa Tanggungan',
-    'K/I/1': 'Kawin + Penghasilan Istri Digabung / 1 Tanggungan',
-    'K/I/2': 'Kawin + Penghasilan Istri Digabung / 2 Tanggungan',
-    'K/I/3': 'Kawin + Penghasilan Istri Digabung / 3 Tanggungan',
-  };
-  return descriptions[status];
+  return sharedGetPTKPDescription(status);
 }
 
 /**
  * Format currency in Indonesian Rupiah
+ * @deprecated Use formatRupiah from '../shared' instead
  */
 export function formatRupiah(amount: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return sharedFormatRupiah(amount);
 }
 
 /**
  * Format number with Indonesian thousand separator
+ * @deprecated Use formatNumber from '../shared' instead
  */
 export function formatNumber(amount: number): string {
-  return new Intl.NumberFormat('id-ID').format(Math.round(amount));
+  return sharedFormatNumber(amount);
 }
