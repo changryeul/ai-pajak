@@ -147,6 +147,7 @@ export function SPT1771Generator({
   });
 
   const [sptData, setSptData] = useState<SPT1771Data | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const updateIncomeStatement = (field: keyof IncomeStatementForm, value: string) => {
     setIncomeStatement((prev) => ({ ...prev, [field]: parseCurrency(value) }));
@@ -353,12 +354,173 @@ export function SPT1771Generator({
     onComplete,
   ]);
 
+  const handleDownloadPDF = useCallback(async () => {
+    if (!sptData) return;
+
+    setIsDownloading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/tax/spt/1771', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId,
+          taxYear,
+          fiscalYear: {
+            startDate: `${taxYear}-01-01`,
+            endDate: `${taxYear}-12-31`,
+            isCalendarYear: true,
+          },
+          correctionNumber,
+          company: {
+            entityType,
+            kluCode,
+          },
+          incomeStatement: {
+            grossRevenue: incomeStatement.grossRevenue,
+            salesReturns: incomeStatement.salesReturns,
+            salesDiscounts: incomeStatement.salesDiscounts,
+            costOfRevenue: {
+              totalCostOfRevenue: incomeStatement.costOfRevenue,
+              rawMaterials: 0,
+              directLabor: 0,
+              manufacturingOverhead: 0,
+              beginningInventory: 0,
+              endingInventory: 0,
+              purchasesOfGoods: incomeStatement.costOfRevenue,
+              freightIn: 0,
+              otherDirectCosts: 0,
+            },
+            operatingExpenses: {
+              salariesAndWages: incomeStatement.salariesAndWages,
+              employeeBenefits: 0,
+              bonusesAndIncentives: 0,
+              trainingAndDevelopment: 0,
+              rentExpense: incomeStatement.rentExpense,
+              utilitiesExpense: incomeStatement.utilitiesExpense,
+              maintenanceAndRepairs: 0,
+              insuranceExpense: 0,
+              securityExpense: 0,
+              officeSupplies: 0,
+              communicationExpense: 0,
+              travelExpense: 0,
+              entertainmentExpense: incomeStatement.entertainmentExpense,
+              advertisingExpense: 0,
+              transportationExpense: 0,
+              professionalFees: 0,
+              auditFees: 0,
+              legalFees: 0,
+              consultingFees: 0,
+              depreciation: incomeStatement.depreciation,
+              amortization: 0,
+              bankCharges: 0,
+              badDebtExpense: 0,
+              donationsAndCSR: 0,
+              researchAndDevelopment: 0,
+              otherOperatingExpenses: incomeStatement.otherOperatingExpenses,
+              totalOperatingExpenses: totalOpex,
+            },
+            otherIncome: {
+              interestIncome: incomeStatement.interestIncome,
+              dividendIncome: incomeStatement.dividendIncome,
+              rentalIncome: incomeStatement.rentalIncome,
+              gainOnAssetSale: 0,
+              foreignExchangeGain: 0,
+              otherIncome: 0,
+              total: otherIncomeTotal,
+            },
+            otherExpenses: {
+              interestIncome: 0,
+              dividendIncome: 0,
+              rentalIncome: 0,
+              gainOnAssetSale: 0,
+              foreignExchangeGain: 0,
+              otherIncome: 0,
+              total: 0,
+            },
+            incomeTaxExpense: incomeStatement.incomeTaxExpense,
+          },
+          balanceSheet: {
+            assets: {
+              currentAssets: balanceSheet.currentAssets,
+              fixedAssets: balanceSheet.fixedAssets,
+              accumulatedDepreciation: balanceSheet.accumulatedDepreciation,
+              netFixedAssets:
+                balanceSheet.fixedAssets - balanceSheet.accumulatedDepreciation,
+              otherAssets: balanceSheet.otherAssets,
+              totalAssets,
+            },
+            liabilities: {
+              currentLiabilities: balanceSheet.currentLiabilities,
+              longTermLiabilities: balanceSheet.longTermLiabilities,
+              totalLiabilities,
+            },
+            equity: {
+              paidInCapital: balanceSheet.paidInCapital,
+              retainedEarnings: balanceSheet.retainedEarnings,
+              currentYearProfit: incomeBeforeTax - incomeStatement.incomeTaxExpense,
+              otherEquity: 0,
+              totalEquity:
+                totalEquity +
+                (incomeBeforeTax - incomeStatement.incomeTaxExpense),
+            },
+          },
+          taxCredits: {
+            pph22Withheld: taxCredits.pph22Withheld,
+            pph23Withheld: taxCredits.pph23Withheld,
+            pph25Installments: taxCredits.pph25Installments,
+          },
+          format: 'pdf',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.message || 'PDF download failed');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `SPT-1771-${customerNpwp || customerId}-${taxYear}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('PDF download error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to download PDF');
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [
+    sptData,
+    customerId,
+    customerNpwp,
+    taxYear,
+    correctionNumber,
+    entityType,
+    kluCode,
+    incomeStatement,
+    balanceSheet,
+    taxCredits,
+    totalOpex,
+    otherIncomeTotal,
+    totalAssets,
+    totalLiabilities,
+    totalEquity,
+    incomeBeforeTax,
+  ]);
+
   if (step === 'preview' && sptData) {
     return (
       <SPT1771Preview
         data={sptData}
         onEdit={() => setStep('form')}
-        isLoading={isLoading}
+        onDownloadPDF={handleDownloadPDF}
+        isLoading={isLoading || isDownloading}
       />
     );
   }
