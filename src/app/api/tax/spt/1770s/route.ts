@@ -23,6 +23,7 @@ import {
   validateSPT1770S,
   checkSPT1770SEligibility,
 } from '@/lib/tax/spt-1770s/calculator';
+import { generateSPT1770SPDFBuffer } from '@/lib/tax/spt-1770s/pdf-generator';
 import { convertOCRToIncomeSource } from '@/lib/tax/spt-1770ss/calculator';
 import { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
 
@@ -243,14 +244,29 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     const validation = validateSPT1770S(sptData);
 
     if (format === 'pdf') {
-      // PDF generation to be implemented
-      return NextResponse.json(
-        {
-          error: 'PDF generation not yet implemented for SPT 1770 S',
-          message: 'Please use format=json',
-        },
-        { status: 501 }
-      );
+      try {
+        const showWatermark = validation.errors.length > 0;
+        const pdfBuffer = await generateSPT1770SPDFBuffer(sptData, showWatermark);
+        const uint8Array = new Uint8Array(pdfBuffer);
+
+        return new NextResponse(uint8Array, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="SPT-1770S-${taxpayer.npwp}-${taxYear}.pdf"`,
+            'Content-Length': pdfBuffer.length.toString(),
+          },
+        });
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        return NextResponse.json(
+          {
+            error: 'PDF generation failed',
+            message: pdfError instanceof Error ? pdfError.message : 'Unknown error',
+          },
+          { status: 500 }
+        );
+      }
     }
 
     // Return JSON response

@@ -26,6 +26,7 @@ import {
   isBookkeepingRequired,
   type BusinessIncomeInput,
 } from '@/lib/tax/spt-1770';
+import { generateSPT1770PDFBuffer } from '@/lib/tax/spt-1770/pdf-generator';
 import { convertOCRToIncomeSource } from '@/lib/tax/spt-1770ss/calculator';
 import { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
 
@@ -231,13 +232,29 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     const validation = validateSPT1770(sptData);
 
     if (format === 'pdf') {
-      return NextResponse.json(
-        {
-          error: 'PDF generation not yet implemented for SPT 1770',
-          message: 'Please use format=json',
-        },
-        { status: 501 }
-      );
+      try {
+        const showWatermark = validation.errors.length > 0;
+        const pdfBuffer = await generateSPT1770PDFBuffer(sptData, showWatermark);
+        const uint8Array = new Uint8Array(pdfBuffer);
+
+        return new NextResponse(uint8Array, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="SPT-1770-${taxpayer.npwp}-${taxYear}.pdf"`,
+            'Content-Length': pdfBuffer.length.toString(),
+          },
+        });
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        return NextResponse.json(
+          {
+            error: 'PDF generation failed',
+            message: pdfError instanceof Error ? pdfError.message : 'Unknown error',
+          },
+          { status: 500 }
+        );
+      }
     }
 
     // Return JSON response

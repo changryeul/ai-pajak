@@ -42,3 +42,6 @@ export {
   getPTKPAmount,
   type SPT1770Input,
 } from './calculator';
+
+// PDF Generator
+export { SPT1770PDF, generateSPT1770PDFBuffer } from './pdf-generator';

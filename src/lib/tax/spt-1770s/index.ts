@@ -20,3 +20,6 @@ export {
   getPTKPDescription,
   getPTKPAmount,
 } from './calculator';
+
+// PDF Generator
+export { SPT1770SPDF, generateSPT1770SPDFBuffer } from './pdf-generator';
