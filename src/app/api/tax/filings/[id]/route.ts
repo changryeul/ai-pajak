@@ -20,10 +20,10 @@ async function handleGetFiling(
   try {
     // Fetch filing with customer info
     const { data: filing, error } = await supabaseAdmin
-      .from('tax_filings')
+      .from('tax_filing')
       .select(`
         *,
-        customer:customers(
+        customer:customer(
           id,
           full_name,
           company_name,
@@ -44,13 +44,13 @@ async function handleGetFiling(
     const { role, userId } = req.session;
 
     if (role === 'CUSTOMER') {
-      const { data: customer } = await supabaseAdmin
-        .from('customers')
+      const { data: customerRecord } = await supabaseAdmin
+        .from('customer')
         .select('id')
         .eq('user_id', userId)
         .single();
 
-      if (!customer || customer.id !== filing.customer_id) {
+      if (!customerRecord || customerRecord.id !== filing.customer_id) {
         return NextResponse.json(
           { success: false, error: 'Access denied' },
           { status: 403 }
@@ -99,24 +99,29 @@ async function handleGetFiling(
       npwp: string | null;
     } | null;
 
+    // Extract data from tax_data JSONB
+    const taxData = (filing.tax_data || {}) as Record<string, unknown>;
+    const taxYear = filing.tax_period ? parseInt(filing.tax_period.split('-')[0]) : null;
+
     return NextResponse.json({
       success: true,
       data: {
         id: filing.id,
         taxType: filing.tax_type,
-        taxYear: filing.tax_year,
+        taxYear,
         taxPeriod: filing.tax_period,
         status: filing.status,
-        totalIncome: filing.total_income || 0,
-        totalDeductions: filing.total_deductions || 0,
-        taxableIncome: filing.taxable_income || 0,
-        taxDue: filing.tax_due || 0,
-        taxPaid: filing.tax_paid || 0,
-        incomeData: filing.income_data || {},
-        deductionData: filing.deduction_data || {},
-        notes: filing.notes,
-        dueDate: filing.due_date,
-        submittedAt: filing.submitted_at,
+        totalIncome: (taxData.grossIncome as number) || 0,
+        totalDeductions: (taxData.deductions as number) || 0,
+        taxableIncome: (taxData.taxableIncome as number) || 0,
+        taxDue: (taxData.taxDue as number) || (taxData.calculatedTax as number) || (taxData.netTaxDue as number) || 0,
+        taxPaid: 0,
+        taxData: taxData,
+        incomeData: (taxData.incomeData as Record<string, unknown>) || {},
+        deductionData: (taxData.deductionData as Record<string, unknown>) || {},
+        notes: (taxData.notes as string) || null,
+        dueDate: null,
+        submittedAt: filing.filed_at,
         bpeNumber: filing.bpe_number,
         createdAt: filing.created_at,
         updatedAt: filing.updated_at,
@@ -166,7 +171,7 @@ async function handleUpdateFiling(
   try {
     // Check current status
     const { data: current, error: fetchError } = await supabaseAdmin
-      .from('tax_filings')
+      .from('tax_filing')
       .select('status, customer_id')
       .eq('id', id)
       .single();
@@ -190,13 +195,13 @@ async function handleUpdateFiling(
     const { role, userId } = req.session;
 
     if (role === 'CUSTOMER') {
-      const { data: customer } = await supabaseAdmin
-        .from('customers')
+      const { data: customerRecord } = await supabaseAdmin
+        .from('customer')
         .select('id')
         .eq('user_id', userId)
         .single();
 
-      if (!customer || customer.id !== current.customer_id) {
+      if (!customerRecord || customerRecord.id !== current.customer_id) {
         return NextResponse.json(
           { success: false, error: 'Access denied' },
           { status: 403 }
@@ -218,7 +223,7 @@ async function handleUpdateFiling(
     if (body.notes !== undefined) updateData.notes = body.notes;
 
     const { data: updated, error: updateError } = await supabaseAdmin
-      .from('tax_filings')
+      .from('tax_filing')
       .update(updateData)
       .eq('id', id)
       .select()

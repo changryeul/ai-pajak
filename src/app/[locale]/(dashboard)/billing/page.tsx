@@ -144,8 +144,7 @@ export default function BillingPage() {
           </div>
           {subscription && (
             <p className="text-sm text-gray-500">
-              {t('dueOn')}{' '}
-              {new Date(subscription.currentPeriodEnd).toLocaleDateString('id-ID')}
+              {t('dueOn', { date: new Date(subscription.currentPeriodEnd).toLocaleDateString('id-ID') })}
             </p>
           )}
         </div>

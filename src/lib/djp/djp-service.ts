@@ -5,10 +5,19 @@
  * Handles e-Filing, e-Billing, NPWP validation, and BPE retrieval
  *
  * Pattern: Static methods like MidtransService
+ *
+ * Resilience Features:
+ * - Circuit Breaker: Prevents cascading failures when DJP is down
+ * - Timeout: 30s timeout for all API calls
+ * - Retry: Automatic retry with exponential backoff
+ * - Structured Logging: JSON logs with request context
  */
 
 import crypto from 'crypto';
 import { DJP_API } from '@/config/constants';
+import { circuitBreakers } from '@/lib/resilience/circuit-breaker';
+import { fetchWithTimeoutAndRetry, serviceTimeouts } from '@/lib/resilience/timeout';
+import { loggers } from '@/lib/logger';
 import {
   DJPAuthToken,
   DJPSubmissionStatus,
@@ -83,24 +92,30 @@ export class DJPService {
       throw new DJPAuthError('DJP credentials not configured', 'MISSING_CREDENTIALS');
     }
 
-    console.info('[DJP] Requesting new auth token');
+    loggers.djp.info('Requesting new auth token');
 
     try {
-      const response = await fetch(`${this.baseUrl}${DJP_API.ENDPOINTS.AUTH}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'client_credentials',
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
-          scope: 'efiling ebilling npwp',
-        }),
-      });
+      // Use circuit breaker and timeout for auth requests
+      const response = await circuitBreakers.djp.execute(() =>
+        fetchWithTimeoutAndRetry(`${this.baseUrl}${DJP_API.ENDPOINTS.AUTH}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
+            scope: 'efiling ebilling npwp',
+          }),
+          timeout: 15000, // 15s timeout for auth
+          maxRetries: 2,
+        })
+      );
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
+        loggers.djp.error({ errorCode: error.error }, 'Auth failed');
         throw new DJPAuthError(
           error.error_description || 'Failed to authenticate with DJP',
           error.error || 'AUTH_FAILED'
@@ -117,10 +132,11 @@ export class DJPService {
         scope: data.scope || '',
       };
 
-      console.info('[DJP] Auth token obtained successfully');
+      loggers.djp.info('Auth token obtained successfully');
       return cachedAuthToken;
     } catch (error) {
       if (error instanceof DJPError) throw error;
+      loggers.djp.error({ error }, 'Network error during authentication');
       throw new DJPAuthError(
         `Network error during authentication: ${error instanceof Error ? error.message : 'Unknown'}`,
         'NETWORK_ERROR'
@@ -144,36 +160,44 @@ export class DJPService {
    */
   static async submitFiling(request: EFilingRequest): Promise<EFilingResponse> {
     const token = await this.getAuthToken();
+    const requestId = crypto.randomUUID();
 
-    console.info('[DJP] Submitting e-Filing', {
+    loggers.djp.info({
+      requestId,
       npwp: this.maskNPWP(request.npwp),
       sptType: request.sptType,
       taxPeriod: request.taxPeriod,
       taxYear: request.taxYear,
-    });
+    }, 'Submitting e-Filing');
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${DJP_API.ENDPOINTS.E_FILING.SUBMIT}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `${token.tokenType} ${token.accessToken}`,
-            'X-Request-ID': crypto.randomUUID(),
-            'X-Timestamp': new Date().toISOString(),
-          },
-          body: JSON.stringify(this.transformToEFilingPayload(request)),
-        }
+      // Use circuit breaker and timeout for filing submission
+      const response = await circuitBreakers.djp.execute(() =>
+        fetchWithTimeoutAndRetry(
+          `${this.baseUrl}${DJP_API.ENDPOINTS.E_FILING.SUBMIT}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `${token.tokenType} ${token.accessToken}`,
+              'X-Request-ID': requestId,
+              'X-Timestamp': new Date().toISOString(),
+            },
+            body: JSON.stringify(this.transformToEFilingPayload(request)),
+            timeout: 30000, // 30s timeout
+            maxRetries: 2,
+          }
+        )
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('[DJP] e-Filing submission failed', {
+        loggers.djp.error({
+          requestId,
           status: response.status,
           errorCode: data.error_code,
-        });
+        }, 'e-Filing submission failed');
 
         return {
           success: false,
@@ -186,10 +210,11 @@ export class DJPService {
         };
       }
 
-      console.info('[DJP] e-Filing submitted successfully', {
+      loggers.djp.info({
+        requestId,
         transactionId: data.transaction_id,
         status: data.status,
-      });
+      }, 'e-Filing submitted successfully');
 
       return {
         success: true,
@@ -200,7 +225,7 @@ export class DJPService {
         bpeDate: data.bpe_date ? new Date(data.bpe_date) : undefined,
       };
     } catch (error) {
-      console.error('[DJP] e-Filing network error', error);
+      loggers.djp.error({ requestId, error }, 'e-Filing network error');
       throw new DJPError(
         `Network error during e-Filing: ${error instanceof Error ? error.message : 'Unknown'}`,
         'NETWORK_ERROR',
@@ -215,19 +240,25 @@ export class DJPService {
   static async checkFilingStatus(transactionId: string): Promise<EFilingResponse> {
     const token = await this.getAuthToken();
 
-    console.info('[DJP] Checking filing status', { transactionId });
+    loggers.djp.info({ transactionId }, 'Checking filing status');
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${DJP_API.ENDPOINTS.E_FILING.STATUS}/${transactionId}`,
-        {
-          headers: {
-            Authorization: `${token.tokenType} ${token.accessToken}`,
-          },
-        }
+      const response = await circuitBreakers.djp.execute(() =>
+        fetchWithTimeoutAndRetry(
+          `${this.baseUrl}${DJP_API.ENDPOINTS.E_FILING.STATUS}/${transactionId}`,
+          {
+            headers: {
+              Authorization: `${token.tokenType} ${token.accessToken}`,
+            },
+            timeout: 15000,
+            maxRetries: 2,
+          }
+        )
       );
 
       const data = await response.json();
+
+      loggers.djp.info({ transactionId, status: data.status }, 'Filing status retrieved');
 
       return {
         success: response.ok,
@@ -240,6 +271,7 @@ export class DJPService {
         errorMessage: data.error_message,
       };
     } catch (error) {
+      loggers.djp.error({ transactionId, error }, 'Error checking filing status');
       throw new DJPError(
         `Network error checking status: ${error instanceof Error ? error.message : 'Unknown'}`,
         'NETWORK_ERROR',
@@ -257,45 +289,47 @@ export class DJPService {
    */
   static async generateBilling(request: EBillingRequest): Promise<EBillingResponse> {
     const token = await this.getAuthToken();
+    const requestId = crypto.randomUUID();
 
-    console.info('[DJP] Generating e-Billing', {
+    loggers.djp.info({
+      requestId,
       npwp: this.maskNPWP(request.npwp),
       jenisPajak: request.jenisPajak,
       jumlahSetor: request.jumlahSetor,
-    });
+    }, 'Generating e-Billing');
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${DJP_API.ENDPOINTS.E_BILLING.CREATE}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `${token.tokenType} ${token.accessToken}`,
-            'X-Request-ID': crypto.randomUUID(),
-          },
-          body: JSON.stringify({
-            npwp: request.npwp,
-            jenis_pajak: request.jenisPajak,
-            jenis_setoran: request.jenisSetoran,
-            masa_pajak: request.masaPajak,
-            tahun_pajak: request.tahunPajak,
-            jumlah_setor: request.jumlahSetor,
-            uraian: request.uraian,
-          }),
-        }
+      const response = await circuitBreakers.djp.execute(() =>
+        fetchWithTimeoutAndRetry(
+          `${this.baseUrl}${DJP_API.ENDPOINTS.E_BILLING.CREATE}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `${token.tokenType} ${token.accessToken}`,
+              'X-Request-ID': requestId,
+            },
+            body: JSON.stringify({
+              npwp: request.npwp,
+              jenis_pajak: request.jenisPajak,
+              jenis_setoran: request.jenisSetoran,
+              masa_pajak: request.masaPajak,
+              tahun_pajak: request.tahunPajak,
+              jumlah_setor: request.jumlahSetor,
+              uraian: request.uraian,
+            }),
+            timeout: 30000,
+            maxRetries: 2,
+          }
+        )
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('[DJP] e-Billing generation failed', {
-          errorCode: data.error_code,
-        });
+        loggers.djp.error({ requestId, errorCode: data.error_code }, 'e-Billing generation failed');
       } else {
-        console.info('[DJP] e-Billing generated', {
-          kodeBilling: data.kode_billing,
-        });
+        loggers.djp.info({ requestId, kodeBilling: data.kode_billing }, 'e-Billing generated');
       }
 
       return {
@@ -307,6 +341,7 @@ export class DJPService {
         errorMessage: data.error_message,
       };
     } catch (error) {
+      loggers.djp.error({ requestId, error }, 'Network error during e-Billing');
       throw new DJPError(
         `Network error during e-Billing: ${error instanceof Error ? error.message : 'Unknown'}`,
         'NETWORK_ERROR',
@@ -327,24 +362,26 @@ export class DJPService {
   ): Promise<NPWPValidationResponse> {
     const token = await this.getAuthToken();
 
-    console.info('[DJP] Validating NPWP', {
-      npwp: this.maskNPWP(request.npwp),
-    });
+    loggers.djp.info({ npwp: this.maskNPWP(request.npwp) }, 'Validating NPWP');
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${DJP_API.ENDPOINTS.NPWP.VALIDATE}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `${token.tokenType} ${token.accessToken}`,
-          },
-          body: JSON.stringify({
-            npwp: request.npwp,
-            nik: request.nik,
-          }),
-        }
+      const response = await circuitBreakers.djp.execute(() =>
+        fetchWithTimeoutAndRetry(
+          `${this.baseUrl}${DJP_API.ENDPOINTS.NPWP.VALIDATE}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `${token.tokenType} ${token.accessToken}`,
+            },
+            body: JSON.stringify({
+              npwp: request.npwp,
+              nik: request.nik,
+            }),
+            timeout: 15000,
+            maxRetries: 2,
+          }
+        )
       );
 
       const data = await response.json();
@@ -363,13 +400,11 @@ export class DJPService {
         errorMessage: data.error_message,
       };
 
-      console.info('[DJP] NPWP validation result', {
-        valid: result.valid,
-        statusWP: result.statusWP,
-      });
+      loggers.djp.info({ valid: result.valid, statusWP: result.statusWP }, 'NPWP validation result');
 
       return result;
     } catch (error) {
+      loggers.djp.error({ error }, 'Network error during NPWP validation');
       throw new DJPError(
         `Network error during NPWP validation: ${error instanceof Error ? error.message : 'Unknown'}`,
         'NETWORK_ERROR',
@@ -390,21 +425,29 @@ export class DJPService {
   ): Promise<BPERetrievalResponse> {
     const token = await this.getAuthToken();
 
-    console.info('[DJP] Retrieving BPE', {
-      transactionId: request.transactionId,
-    });
+    loggers.djp.info({ transactionId: request.transactionId }, 'Retrieving BPE');
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${DJP_API.ENDPOINTS.E_FILING.BPE}/${request.transactionId}`,
-        {
-          headers: {
-            Authorization: `${token.tokenType} ${token.accessToken}`,
-          },
-        }
+      const response = await circuitBreakers.djp.execute(() =>
+        fetchWithTimeoutAndRetry(
+          `${this.baseUrl}${DJP_API.ENDPOINTS.E_FILING.BPE}/${request.transactionId}`,
+          {
+            headers: {
+              Authorization: `${token.tokenType} ${token.accessToken}`,
+            },
+            timeout: 30000, // BPE can include PDF, allow longer timeout
+            maxRetries: 2,
+          }
+        )
       );
 
       const data = await response.json();
+
+      loggers.djp.info({
+        transactionId: request.transactionId,
+        bpeNumber: data.bpe_number,
+        success: response.ok,
+      }, 'BPE retrieval completed');
 
       return {
         success: response.ok,
@@ -418,6 +461,7 @@ export class DJPService {
         errorMessage: data.error_message,
       };
     } catch (error) {
+      loggers.djp.error({ transactionId: request.transactionId, error }, 'Error during BPE retrieval');
       throw new DJPError(
         `Network error during BPE retrieval: ${error instanceof Error ? error.message : 'Unknown'}`,
         'NETWORK_ERROR',
@@ -439,7 +483,7 @@ export class DJPService {
     timestamp: string
   ): boolean {
     if (!this.webhookSecret) {
-      console.error('[DJP] Webhook secret not configured');
+      loggers.djp.error('Webhook secret not configured');
       return false;
     }
 
@@ -450,11 +494,18 @@ export class DJPService {
       .digest('hex');
 
     try {
-      return crypto.timingSafeEqual(
+      const isValid = crypto.timingSafeEqual(
         Buffer.from(signature),
         Buffer.from(expectedSignature)
       );
+
+      if (!isValid) {
+        loggers.djp.warn('Webhook signature verification failed');
+      }
+
+      return isValid;
     } catch {
+      loggers.djp.error('Error verifying webhook signature');
       return false;
     }
   }

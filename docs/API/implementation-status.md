@@ -1,6 +1,6 @@
 # API Implementation Status
 
-> Last Updated: 2026-02-12
+> Last Updated: 2026-02-14
 
 ---
 
@@ -12,15 +12,20 @@ This document tracks the implementation status of all API endpoints in the AI Pa
 
 | Category | Implemented | Total | Coverage |
 |----------|-------------|-------|----------|
-| Authentication | 4 | 4 | 100% |
-| Tax Filing | 6 | 6 | 100% |
-| Customer | 4 | 4 | 100% |
+| Authentication | 5 | 5 | 100% |
+| Tax Filing | 10 | 10 | 100% |
+| Customer | 7 | 7 | 100% |
 | Documents | 5 | 5 | 100% |
-| Billing | 2 | 2 | 100% |
+| Billing | 5 | 5 | 100% |
 | Power of Attorney | 6 | 6 | 100% |
 | Audit | 1 | 1 | 100% |
 | Notifications | 2 | 2 | 100% |
-| **Total** | **30** | **30** | **100%** |
+| Reports | 1 | 1 | 100% |
+| Settings | 2 | 2 | 100% |
+| DJP Integration | 1 | 1 | 100% |
+| Dashboard | 1 | 1 | 100% |
+| Webhooks | 2 | 2 | 100% |
+| **Total** | **48** | **48** | **100%** |
 
 ---
 
@@ -32,6 +37,7 @@ This document tracks the implementation status of all API endpoints in the AI Pa
 | `/api/auth/logout` | POST | Implemented | Auth |
 | `/api/auth/register` | POST | Implemented | Public |
 | `/api/auth/refresh` | POST | Implemented | Auth |
+| `/api/auth/me` | GET/PUT | Implemented | Auth |
 
 ---
 
@@ -45,7 +51,10 @@ This document tracks the implementation status of all API endpoints in the AI Pa
 | `/api/tax/filings/[id]/bpe` | GET | Implemented | Auth + RBAC + blockPlatformAdmin | Download BPE PDF |
 | `/api/tax/file` | POST | Implemented | Auth + RBAC + withAudit | Create filing |
 | `/api/tax/calculate` | POST | Implemented | Auth + RBAC | Calculate tax |
-| `/api/tax/spt/1770ss` | GET/POST | Implemented | Auth + blockPlatformAdmin | SPT 1770SS |
+| `/api/tax/spt/1770ss` | GET/POST | Implemented | Auth + blockPlatformAdmin | SPT 1770 SS |
+| `/api/tax/spt/1770s` | GET/POST | Implemented | Auth + blockPlatformAdmin | SPT 1770 S |
+| `/api/tax/spt/1770` | GET/POST | Implemented | Auth + blockPlatformAdmin | SPT 1770 |
+| `/api/tax/spt/1771` | GET/POST | Implemented | Auth + blockPlatformAdmin | SPT 1771 (Corporate) |
 | `/api/tax/spt-masa` | POST | Implemented | Auth + blockPlatformAdmin | SPT Masa |
 
 ### Hard Rules Applied
@@ -91,8 +100,11 @@ This document tracks the implementation status of all API endpoints in the AI Pa
 
 | Endpoint | Method | Status | Security | Notes |
 |----------|--------|--------|----------|-------|
+| `/api/billing/subscription` | GET | Implemented | Auth | Get subscription |
+| `/api/billing/invoices` | GET | Implemented | Auth | List invoices |
+| `/api/billing/usage` | GET | Implemented | Auth | Usage statistics |
 | `/api/billing/create` | POST | Implemented | Auth + SYSTEM only + withAudit | Create billing |
-| `/api/payment/initiate` | POST | Implemented | Auth + RBAC | Initiate payment |
+| `/api/payment/initiate` | POST | Implemented | Auth + RBAC | Initiate Midtrans payment |
 
 ### Idempotency
 - `idempotency_key` prevents duplicate billing
@@ -140,11 +152,53 @@ This document tracks the implementation status of all API endpoints in the AI Pa
 
 ---
 
+## Reports APIs
+
+| Endpoint | Method | Status | Security | Notes |
+|----------|--------|--------|----------|-------|
+| `/api/reports` | GET | Implemented | Auth | tax_summary, filing_history, payment_history, annual_summary |
+
+---
+
+## Settings APIs
+
+| Endpoint | Method | Status | Security | Notes |
+|----------|--------|--------|----------|-------|
+| `/api/settings/password` | PUT | Implemented | Auth | Change password |
+| `/api/settings/notifications` | GET/PUT | Implemented | Auth | Notification preferences |
+
+---
+
+## DJP Integration APIs
+
+| Endpoint | Method | Status | Security | Notes |
+|----------|--------|--------|----------|-------|
+| `/api/djp/status/[jobId]` | GET | Implemented | Auth | Check DJP submission status |
+
+---
+
+## Dashboard APIs
+
+| Endpoint | Method | Status | Security | Notes |
+|----------|--------|--------|----------|-------|
+| `/api/dashboard/stats` | GET | Implemented | Auth | Dashboard statistics |
+
+---
+
 ## Webhook APIs
 
 | Endpoint | Method | Status | Security | Notes |
 |----------|--------|--------|----------|-------|
 | `/api/webhooks/midtrans` | POST | Implemented | Signature verification | Payment callback |
+| `/api/webhooks/djp` | POST | Implemented | Signature verification | DJP status callback |
+
+---
+
+## Cron APIs
+
+| Endpoint | Method | Status | Security | Notes |
+|----------|--------|--------|----------|-------|
+| `/api/cron/deadline-reminders` | POST | Implemented | Cron secret | Send deadline reminders |
 
 ---
 
@@ -216,6 +270,6 @@ composeMiddleware(
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2026-02-12
+**Document Version:** 2.0
+**Last Updated:** 2026-02-14
 **Maintained By:** Development Team

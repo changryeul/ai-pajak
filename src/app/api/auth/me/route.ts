@@ -32,7 +32,7 @@ export async function GET() {
     if (userRole?.role === 'CUSTOMER') {
       const { data: customer } = await supabase
         .from('customer')
-        .select('id, full_name, company_name, npwp, phone, address, customer_type')
+        .select('id, full_name, company_name, npwp, nik, phone, address, customer_type')
         .eq('user_id', user.id)
         .single();
 
@@ -60,6 +60,7 @@ export async function GET() {
         fullName: customerInfo?.full_name || consultantInfo?.full_name || user.user_metadata?.full_name || '',
         companyName: customerInfo?.company_name || null,
         npwp: customerInfo?.npwp || '',
+        nik: customerInfo?.nik || '',
         phone: customerInfo?.phone || consultantInfo?.phone || '',
         address: customerInfo?.address || '',
         customerType: customerInfo?.customer_type || null,
@@ -96,7 +97,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { fullName, phone, address } = body;
+    const { fullName, phone, address, nik } = body;
 
     // Get user role
     const { data: userRole } = await supabase
@@ -108,14 +109,18 @@ export async function PUT(request: NextRequest) {
 
     // Update based on role
     if (userRole?.role === 'CUSTOMER') {
+      // Build update object, only include fields that are provided
+      const updateData: Record<string, unknown> = {
+        updated_at: new Date().toISOString(),
+      };
+      if (fullName !== undefined) updateData.full_name = fullName;
+      if (phone !== undefined) updateData.phone = phone;
+      if (address !== undefined) updateData.address = address;
+      if (nik !== undefined) updateData.nik = nik;
+
       const { error: updateError } = await supabase
         .from('customer')
-        .update({
-          full_name: fullName,
-          phone,
-          address,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('user_id', user.id);
 
       if (updateError) {

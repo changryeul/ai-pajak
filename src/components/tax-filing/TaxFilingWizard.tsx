@@ -1,19 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useTaxFilingStore, FilingStep, TaxType } from '@/stores/tax-filing-store';
+import { useTaxFilingStore, FilingStep, TaxType, CustomerData } from '@/stores/tax-filing-store';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SelectCustomerStep } from './steps/SelectCustomerStep';
+import { CustomerTaxTypeStep } from './steps/CustomerTaxTypeStep';
 import { IncomeDataStep } from './steps/IncomeDataStep';
 import { DeductionsStep } from './steps/DeductionsStep';
 import { DocumentsStep } from './steps/DocumentsStep';
 import { ReviewStep } from './steps/ReviewStep';
+import { Loader2 } from 'lucide-react';
 
-const STEPS: { id: FilingStep; labelKey: string }[] = [
+// Steps for tax advisors/consultants (full flow)
+const ADVISOR_STEPS: { id: FilingStep; labelKey: string }[] = [
   { id: 'select-customer', labelKey: 'tax.steps.selectCustomer' },
+  { id: 'income-data', labelKey: 'tax.steps.incomeData' },
+  { id: 'deductions', labelKey: 'tax.steps.deductions' },
+  { id: 'documents', labelKey: 'tax.steps.documents' },
+  { id: 'review', labelKey: 'tax.steps.review' },
+];
+
+// Steps for customers (skip customer selection)
+const CUSTOMER_STEPS: { id: FilingStep; labelKey: string }[] = [
+  { id: 'select-customer', labelKey: 'tax.steps.selectTaxType' }, // Repurposed as tax type selection
   { id: 'income-data', labelKey: 'tax.steps.incomeData' },
   { id: 'deductions', labelKey: 'tax.steps.deductions' },
   { id: 'documents', labelKey: 'tax.steps.documents' },
@@ -36,10 +50,15 @@ interface TaxFilingWizardProps {
 export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardProps) {
   const t = useTranslations();
   const router = useRouter();
+  const { session, isLoading: isSessionLoading } = useSession();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [customerError, setCustomerError] = useState<string | null>(null);
+  const [isLoadingFiling, setIsLoadingFiling] = useState(!!filingId);
+  const [filingLoadError, setFilingLoadError] = useState<string | null>(null);
 
   const {
     taxType,
@@ -56,6 +75,13 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
     calculation,
     notes,
     setTaxType,
+    setTaxYear,
+    setTaxPeriod,
+    setCustomer,
+    updateIncomeData,
+    updateDeductionData,
+    setNotes,
+    setCurrentStep,
     nextStep,
     prevStep,
     canProceed,
@@ -64,11 +90,117 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
     markAsSaved,
   } = useTaxFilingStore();
 
+  // Determine if user is a customer (not tax advisor/consultant)
+  const isCustomerRole = session?.role === UserRole.CUSTOMER;
+
+  // Use appropriate steps based on user role
+  const STEPS = useMemo(() => {
+    return isCustomerRole ? CUSTOMER_STEPS : ADVISOR_STEPS;
+  }, [isCustomerRole]);
+
+  // Fetch customer data for CUSTOMER role users
+  const fetchCustomerData = useCallback(async (customerId: string) => {
+    setIsLoadingCustomer(true);
+    setCustomerError(null);
+    try {
+      const response = await fetch(`/api/customers/${customerId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch customer data');
+      }
+      const data = await response.json();
+      if (data.success && data.data) {
+        const customerData: CustomerData = {
+          id: data.data.id,
+          fullName: data.data.full_name,
+          companyName: data.data.company_name,
+          npwp: data.data.npwp,
+          customerType: data.data.customer_type,
+          email: data.data.email,
+        };
+        setCustomer(customerData);
+      } else {
+        throw new Error(data.error || 'Failed to load customer data');
+      }
+    } catch (error) {
+      console.error('Error fetching customer data:', error);
+      setCustomerError(error instanceof Error ? error.message : 'Failed to load customer data');
+    } finally {
+      setIsLoadingCustomer(false);
+    }
+  }, [setCustomer]);
+
+  // Auto-set customer for CUSTOMER role
+  useEffect(() => {
+    if (isCustomerRole && session?.customerId && !customer) {
+      fetchCustomerData(session.customerId);
+    }
+  }, [isCustomerRole, session?.customerId, customer, fetchCustomerData]);
+
   useEffect(() => {
     if (initialTaxType && !taxType) {
       setTaxType(initialTaxType);
     }
   }, [initialTaxType, taxType, setTaxType]);
+
+  // Load existing filing data for editing
+  useEffect(() => {
+    if (!filingId) return;
+
+    const loadFiling = async () => {
+      setIsLoadingFiling(true);
+      setFilingLoadError(null);
+
+      try {
+        const response = await fetch(`/api/tax/filings/${filingId}`);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to load filing');
+        }
+
+        const filing = result.data;
+
+        // Set tax type and period
+        if (filing.taxType) setTaxType(filing.taxType as TaxType);
+        if (filing.taxYear) setTaxYear(filing.taxYear);
+        if (filing.taxPeriod) setTaxPeriod(filing.taxPeriod);
+
+        // Set customer data
+        if (filing.customer) {
+          setCustomer({
+            id: filing.customer.id,
+            fullName: filing.customer.fullName,
+            companyName: filing.customer.companyName,
+            npwp: filing.customer.npwp,
+            customerType: 'INDIVIDUAL',
+            email: '',
+          });
+        }
+
+        // Set income and deduction data from tax_data
+        if (filing.incomeData) {
+          updateIncomeData(filing.incomeData);
+        }
+        if (filing.deductionData) {
+          updateDeductionData(filing.deductionData);
+        }
+        if (filing.notes) {
+          setNotes(filing.notes);
+        }
+
+        // Skip to income-data step when editing (customer/tax type already set)
+        setCurrentStep('income-data');
+
+      } catch (error) {
+        console.error('Error loading filing:', error);
+        setFilingLoadError(error instanceof Error ? error.message : 'Failed to load filing');
+      } finally {
+        setIsLoadingFiling(false);
+      }
+    };
+
+    loadFiling();
+  }, [filingId, setTaxType, setTaxYear, setTaxPeriod, setCustomer, updateIncomeData, updateDeductionData, setNotes, setCurrentStep]);
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep);
   const isFirstStep = currentStepIndex === 0;
@@ -201,10 +333,73 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
     }
   };
 
+  // Request review from tax advisor (for CUSTOMER role)
+  const handleRequestReview = async () => {
+    if (!customer || !taxType || !calculation) {
+      setSubmitError(t('tax.errors.missingData'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    markAsSaving(true);
+
+    try {
+      // Save with UNDER_REVIEW status (pending tax advisor review)
+      const response = await fetch('/api/tax/filings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: customer.id,
+          taxType,
+          taxPeriod: taxPeriod || `${taxYear}-01`,
+          taxYear,
+          status: 'UNDER_REVIEW',
+          taxData: {
+            calculatedTax: calculation.taxDue,
+            taxableIncome: calculation.taxableIncome,
+            grossIncome: calculation.grossIncome,
+            deductions: calculation.totalDeductions,
+            netTaxDue: calculation.taxDue,
+            breakdown: calculation.breakdown,
+            incomeData,
+            deductionData,
+            notes,
+          },
+          documentIds: documents.map((d) => d.id),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || result.error || t('tax.errors.saveFailed'));
+      }
+
+      // Success
+      setSubmitSuccess(true);
+      markAsSaved();
+
+      // Show success message briefly, then redirect
+      setTimeout(() => {
+        resetFiling();
+        router.push(`/filings/${result.filingId}`);
+      }, 2000);
+    } catch (error) {
+      console.error('Request review error:', error);
+      setSubmitError(error instanceof Error ? error.message : t('tax.errors.saveFailed'));
+    } finally {
+      setIsSubmitting(false);
+      markAsSaving(false);
+    }
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'select-customer':
-        return <SelectCustomerStep />;
+        // For customers: show tax type selection only (customer is auto-set)
+        // For advisors: show full customer + tax type selection
+        return isCustomerRole ? <CustomerTaxTypeStep /> : <SelectCustomerStep />;
       case 'income-data':
         return <IncomeDataStep />;
       case 'deductions':
@@ -217,6 +412,44 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
         return null;
     }
   };
+
+  // Show loading while session or filing is being fetched
+  if (isSessionLoading || isLoadingCustomer || isLoadingFiling) {
+    return (
+      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
+        <p className="text-gray-600">{t('common.loading')}...</p>
+      </div>
+    );
+  }
+
+  // Show error if filing failed to load
+  if (filingLoadError) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-800 mb-4">{filingLoadError}</p>
+          <Button onClick={() => router.back()}>
+            {t('common.back')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if customer data failed to load
+  if (customerError) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-800 mb-4">{customerError}</p>
+          <Button onClick={() => session?.customerId && fetchCustomerData(session.customerId)}>
+            {t('common.retry')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -302,7 +535,9 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
       )}
       {submitSuccess && (
         <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-800">{t('tax.submitSuccess')}</p>
+          <p className="text-sm text-green-800">
+            {isCustomerRole ? t('tax.reviewRequestSuccess') : t('tax.submitSuccess')}
+          </p>
         </div>
       )}
 
@@ -340,12 +575,24 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
             </Button>
           )}
           {isLastStep ? (
-            <Button
-              onClick={handleSubmit}
-              disabled={!canProceed() || isSubmitting || submitSuccess}
-            >
-              {isSubmitting ? t('common.submitting') : t('tax.submitFiling')}
-            </Button>
+            isCustomerRole ? (
+              // Customer: Request Review button (cannot submit directly)
+              <Button
+                onClick={handleRequestReview}
+                disabled={!canProceed() || isSubmitting || submitSuccess}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isSubmitting ? t('common.submitting') : t('tax.requestReview')}
+              </Button>
+            ) : (
+              // Tax Advisor: Submit Filing button
+              <Button
+                onClick={handleSubmit}
+                disabled={!canProceed() || isSubmitting || submitSuccess}
+              >
+                {isSubmitting ? t('common.submitting') : t('tax.submitFiling')}
+              </Button>
+            )
           ) : (
             <Button onClick={handleNext} disabled={!canProceed() || isSubmitting}>
               {t('common.next')}
@@ -353,6 +600,15 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
           )}
         </div>
       </div>
+
+      {/* Info for customers about the review process */}
+      {isCustomerRole && isLastStep && (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            {t('tax.customerReviewInfo')}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

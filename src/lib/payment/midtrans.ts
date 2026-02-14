@@ -1,5 +1,8 @@
 import crypto from 'crypto';
 import { MIDTRANS_CONFIG, type SubscriptionPlan } from '@/config/constants';
+import { circuitBreakers } from '@/lib/resilience/circuit-breaker';
+import { fetchWithTimeoutAndRetry } from '@/lib/resilience/timeout';
+import { loggers } from '@/lib/logger';
 
 interface MidtransTransaction {
   orderId: string;
@@ -147,21 +150,48 @@ export class MidtransService {
       },
     };
 
-    const response = await fetch(this.snapUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${authString}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    loggers.payment.info({
+      orderId: transaction.orderId,
+      grossAmount: transaction.grossAmount,
+    }, 'Creating Snap transaction');
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error_messages?.[0] || 'Failed to create transaction');
+    try {
+      const response = await circuitBreakers.midtrans.execute(() =>
+        fetchWithTimeoutAndRetry(this.snapUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${authString}`,
+          },
+          body: JSON.stringify(payload),
+          timeout: 15000,
+          maxRetries: 2,
+        })
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        loggers.payment.error({
+          orderId: transaction.orderId,
+          error: error.error_messages,
+        }, 'Failed to create Snap transaction');
+        throw new Error(error.error_messages?.[0] || 'Failed to create transaction');
+      }
+
+      const result = await response.json();
+      loggers.payment.info({
+        orderId: transaction.orderId,
+        hasToken: !!result.token,
+      }, 'Snap transaction created successfully');
+
+      return result;
+    } catch (error) {
+      loggers.payment.error({
+        orderId: transaction.orderId,
+        error,
+      }, 'Error creating Snap transaction');
+      throw error;
     }
-
-    return response.json();
   }
 
   /**
@@ -213,12 +243,15 @@ export class MidtransService {
     const isValid = notification.signature_key === expectedSignature;
 
     if (!isValid) {
-      console.warn('[Midtrans] Signature verification failed', {
+      loggers.payment.warn({
         orderId: notification.order_id,
         statusCode: notification.status_code,
-        expectedLength: expectedSignature.length,
-        receivedLength: notification.signature_key?.length,
-      });
+      }, 'Signature verification failed');
+    } else {
+      loggers.payment.info({
+        orderId: notification.order_id,
+        status: notification.transaction_status,
+      }, 'Webhook signature verified');
     }
 
     return isValid;
@@ -262,13 +295,26 @@ export class MidtransService {
   static async getTransactionStatus(orderId: string): Promise<Record<string, unknown>> {
     const authString = Buffer.from(`${this.serverKey}:`).toString('base64');
 
-    const response = await fetch(`${this.baseUrl}/v2/${orderId}/status`, {
-      headers: {
-        Authorization: `Basic ${authString}`,
-      },
-    });
+    loggers.payment.info({ orderId }, 'Getting transaction status');
 
-    return response.json();
+    try {
+      const response = await circuitBreakers.midtrans.execute(() =>
+        fetchWithTimeoutAndRetry(`${this.baseUrl}/v2/${orderId}/status`, {
+          headers: {
+            Authorization: `Basic ${authString}`,
+          },
+          timeout: 10000,
+          maxRetries: 2,
+        })
+      );
+
+      const result = await response.json();
+      loggers.payment.info({ orderId, status: result.transaction_status }, 'Transaction status retrieved');
+      return result;
+    } catch (error) {
+      loggers.payment.error({ orderId, error }, 'Error getting transaction status');
+      throw error;
+    }
   }
 
   /**
@@ -277,14 +323,27 @@ export class MidtransService {
   static async cancelTransaction(orderId: string): Promise<Record<string, unknown>> {
     const authString = Buffer.from(`${this.serverKey}:`).toString('base64');
 
-    const response = await fetch(`${this.baseUrl}/v2/${orderId}/cancel`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${authString}`,
-      },
-    });
+    loggers.payment.info({ orderId }, 'Cancelling transaction');
 
-    return response.json();
+    try {
+      const response = await circuitBreakers.midtrans.execute(() =>
+        fetchWithTimeoutAndRetry(`${this.baseUrl}/v2/${orderId}/cancel`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${authString}`,
+          },
+          timeout: 15000,
+          maxRetries: 1, // Don't retry cancellations aggressively
+        })
+      );
+
+      const result = await response.json();
+      loggers.payment.info({ orderId, status: result.transaction_status }, 'Transaction cancelled');
+      return result;
+    } catch (error) {
+      loggers.payment.error({ orderId, error }, 'Error cancelling transaction');
+      throw error;
+    }
   }
 
   /**
@@ -301,15 +360,28 @@ export class MidtransService {
     if (amount) payload.refund_amount = amount;
     if (reason) payload.reason = reason;
 
-    const response = await fetch(`${this.baseUrl}/v2/${orderId}/refund`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${authString}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    loggers.payment.info({ orderId, amount, reason }, 'Processing refund');
 
-    return response.json();
+    try {
+      const response = await circuitBreakers.midtrans.execute(() =>
+        fetchWithTimeoutAndRetry(`${this.baseUrl}/v2/${orderId}/refund`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${authString}`,
+          },
+          body: JSON.stringify(payload),
+          timeout: 15000,
+          maxRetries: 1, // Don't retry refunds aggressively
+        })
+      );
+
+      const result = await response.json();
+      loggers.payment.info({ orderId, status: result.status_code }, 'Refund processed');
+      return result;
+    } catch (error) {
+      loggers.payment.error({ orderId, error }, 'Error processing refund');
+      throw error;
+    }
   }
 }

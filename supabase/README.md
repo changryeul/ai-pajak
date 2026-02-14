@@ -24,10 +24,34 @@ This directory contains the complete database schema, migrations, and Row Level 
 ```
 supabase/
 ├── migrations/
-│   ├── 20251223000001_initial_schema.sql    # Core tables and constraints
-│   ├── 20251223000002_rls_policies.sql      # Row Level Security policies
-│   └── 20251223000003_seed_data.sql         # Initial platform entities
-└── README.md                                  # This file
+│   ├── 20251223000001_initial_schema.sql        # Core tables and constraints
+│   ├── 20251223000002_rls_policies.sql          # Row Level Security policies
+│   ├── 20251223000003_seed_data.sql             # Initial platform entities
+│   ├── 20251223000004_poa_tables.sql            # Power of Attorney tables
+│   ├── 20251223000005_billing_tables.sql        # Billing and subscription
+│   ├── 20251223000006_tax_filing_tables.sql     # Tax filing tables
+│   ├── 20251223000007_add_test_users.sql        # Test user accounts
+│   ├── 20251223000008_tax_law_ai_system.sql     # Tax law AI system
+│   ├── 20251223000009_storage_buckets.sql       # Storage buckets
+│   ├── 20251223000010_customer_consultant.sql   # Customer-consultant relation
+│   ├── 20251223000015_fix_consultant_customer_access.sql
+│   ├── 20251223000016_fix_poa_trigger_for_service_role.sql
+│   ├── 20251223000017_add_tax_calculation_table.sql
+│   ├── 20251223000018_add_audit_log_table.sql
+│   ├── 20251223000019_add_document_table.sql
+│   ├── 20251223000020_fix_tax_filing_trigger_for_service_role.sql
+│   ├── 20251223000021_fix_tax_filing_poa_trigger.sql
+│   ├── 20251223000022_add_missing_activity_types.sql
+│   ├── 20251223000023_add_document_ocr_columns.sql
+│   ├── 20251223000024_notification_tables.sql   # Notification system
+│   ├── 20251223000025_add_midtrans_payment_columns.sql
+│   ├── 20251223000026_add_reference_tables_rls.sql
+│   ├── 20251223000027_poa_optional_document.sql
+│   ├── 20251223000028_fix_poa_trigger_for_customer_review.sql
+│   ├── 20251223000029_allow_null_consultant_id.sql
+│   ├── 20251230000001_djp_integration.sql       # DJP (tax authority) integration
+│   └── 20260214000001_add_nik_column.sql        # NIK (national ID) column
+└── README.md
 ```
 
 ## Database Architecture

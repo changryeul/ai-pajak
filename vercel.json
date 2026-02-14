@@ -1,9 +1,117 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "regions": ["sin1"],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/ingest/static/:path*",
+      "destination": "https://us-assets.i.posthog.com/static/:path*"
+    },
+    {
+      "source": "/ingest/:path*",
+      "destination": "https://us.i.posthog.com/:path*"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/deadline-reminders",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/payment-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-expired-tokens",
+      "schedule": "0 0 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/tax/spt/**": {
+      "maxDuration": 60
+    },
+    "api/documents/[id]/ocr": {
+      "maxDuration": 120,
+      "memory": 1024
+    },
+    "api/webhooks/**": {
+      "maxDuration": 30
+    },
+    "api/djp/**": {
+      "maxDuration": 60
+    }
+  }
 }

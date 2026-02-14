@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { SPT1770SGenerator } from '@/components/spt';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -11,10 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Loader2, FileText, Download, AlertCircle } from 'lucide-react';
-import type { PTKPStatus } from '@/lib/tax/shared/types';
-import { PTKP_RATES } from '@/lib/tax/shared/constants';
+import { ArrowLeft, Loader2, FileText, User, CheckCircle } from 'lucide-react';
 
 interface Customer {
   id: string;
@@ -23,42 +22,47 @@ interface Customer {
   customer_type: string;
 }
 
-const PTKP_OPTIONS: { value: PTKPStatus; label: string }[] = [
-  { value: 'TK/0', label: 'TK/0 - Tidak Kawin, 0 Tanggungan' },
-  { value: 'TK/1', label: 'TK/1 - Tidak Kawin, 1 Tanggungan' },
-  { value: 'TK/2', label: 'TK/2 - Tidak Kawin, 2 Tanggungan' },
-  { value: 'TK/3', label: 'TK/3 - Tidak Kawin, 3 Tanggungan' },
-  { value: 'K/0', label: 'K/0 - Kawin, 0 Tanggungan' },
-  { value: 'K/1', label: 'K/1 - Kawin, 1 Tanggungan' },
-  { value: 'K/2', label: 'K/2 - Kawin, 2 Tanggungan' },
-  { value: 'K/3', label: 'K/3 - Kawin, 3 Tanggungan' },
-];
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('id-ID').format(value);
-}
-
 export default function SPT1770SPage() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const { session, isLoading: isSessionLoading } = useSession();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [taxYear, setTaxYear] = useState(new Date().getFullYear() - 1);
-  const [ptkpStatus, setPtkpStatus] = useState<PTKPStatus>('TK/0');
   const [isLoading, setIsLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ success: boolean; data?: unknown; error?: string } | null>(null);
 
-  const taxYearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 1 - i);
+  // Check if user is a customer (not tax advisor/consultant)
+  const isCustomerRole = session?.role === UserRole.CUSTOMER;
 
-  useEffect(() => {
-    fetchCustomers();
+  // Fetch customer data for CUSTOMER role users
+  const fetchOwnCustomerData = useCallback(async (customerId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/customers/${customerId}`);
+      if (!response.ok) throw new Error('Failed to fetch customer data');
+      const data = await response.json();
+      if (data.success && data.data) {
+        setSelectedCustomer({
+          id: data.data.id,
+          full_name: data.data.full_name,
+          npwp: data.data.npwp || '',
+          customer_type: data.data.customer_type,
+        });
+      } else {
+        throw new Error(data.error || 'Failed to load customer data');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load customer data');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const fetchCustomers = async () => {
+  // Fetch customers list for tax advisors
+  const fetchCustomers = useCallback(async () => {
     try {
       const response = await fetch('/api/customers?type=INDIVIDUAL');
       if (!response.ok) throw new Error('Failed to fetch customers');
@@ -69,86 +73,36 @@ export default function SPT1770SPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isSessionLoading) return;
+
+    if (isCustomerRole && session?.customerId) {
+      // Customer role: auto-fetch own data
+      fetchOwnCustomerData(session.customerId);
+    } else if (!isCustomerRole) {
+      // Tax advisor role: fetch customer list
+      fetchCustomers();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isSessionLoading, isCustomerRole, session?.customerId, fetchOwnCustomerData, fetchCustomers]);
 
   const handleCustomerSelect = (customerId: string) => {
     const customer = customers.find((c) => c.id === customerId);
     setSelectedCustomer(customer || null);
-    setResult(null);
   };
 
-  const handleGenerate = async () => {
-    if (!selectedCustomer) return;
-
-    setIsGenerating(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      const response = await fetch('/api/tax/spt/1770s', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerId: selectedCustomer.id,
-          taxYear,
-          ptkpStatus,
-          format: 'json',
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || data.message || 'Generation failed');
-      }
-
-      setResult({ success: true, data });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate SPT');
-      setResult({ success: false, error: err instanceof Error ? err.message : 'Error' });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleDownloadPDF = async () => {
-    if (!selectedCustomer) return;
-
-    setIsGenerating(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/tax/spt/1770s', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerId: selectedCustomer.id,
-          taxYear,
-          ptkpStatus,
-          format: 'pdf',
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'PDF generation failed');
-      }
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `SPT-1770S-${selectedCustomer.npwp || selectedCustomer.id}-${taxYear}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to download PDF');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  // Show loading while session is being fetched
+  if (isSessionLoading) {
+    return (
+      <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
+        <p className="text-gray-600">Memuat...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -176,117 +130,117 @@ export default function SPT1770SPage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Generate SPT 1770 S</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Customer Selection */}
-          <div className="space-y-2">
-            <Label>Wajib Pajak</Label>
-            {isLoading ? (
-              <div className="flex items-center py-2">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Memuat...
+      {/* Customer Info for CUSTOMER role (read-only) */}
+      {isCustomerRole && selectedCustomer && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-full bg-blue-100">
+              <User className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-blue-900">{selectedCustomer.full_name}</span>
+                <CheckCircle className="h-4 w-4 text-green-600" />
               </div>
-            ) : (
-              <Select onValueChange={handleCustomerSelect} value={selectedCustomer?.id}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih wajib pajak..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map((customer) => (
-                    <SelectItem key={customer.id} value={customer.id}>
-                      {customer.full_name} ({customer.npwp || 'No NPWP'})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-
-          {/* Tax Year */}
-          <div className="space-y-2">
-            <Label>Tahun Pajak</Label>
-            <Select value={taxYear.toString()} onValueChange={(v) => setTaxYear(parseInt(v))}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {taxYearOptions.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* PTKP Status */}
-          <div className="space-y-2">
-            <Label>Status PTKP</Label>
-            <Select value={ptkpStatus} onValueChange={(v) => setPtkpStatus(v as PTKPStatus)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PTKP_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-gray-500">
-              PTKP: Rp {formatCurrency(PTKP_RATES[ptkpStatus])}
-            </p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex gap-3">
-            <Button
-              onClick={handleGenerate}
-              disabled={!selectedCustomer || isGenerating}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                'Generate SPT'
+              {selectedCustomer.npwp && (
+                <div className="text-sm text-blue-700 mt-1">NPWP: {selectedCustomer.npwp}</div>
               )}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleDownloadPDF}
-              disabled={!selectedCustomer || isGenerating}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download PDF
-            </Button>
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Result */}
-          {result?.success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800 font-medium">SPT berhasil digenerate!</p>
-              <pre className="mt-2 text-xs overflow-auto max-h-96 bg-white p-3 rounded border">
-                {JSON.stringify(result.data, null, 2)}
-              </pre>
+      {/* Customer Selection for Tax Advisors */}
+      {!isCustomerRole && !selectedCustomer && (
+        <div className="bg-white rounded-lg border p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-4">Pilih Wajib Pajak</h2>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <span className="ml-2 text-gray-600">Memuat data...</span>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+              {error}
+            </div>
+          ) : customers.length === 0 ? (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-yellow-800">
+                Belum ada data wajib pajak orang pribadi.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-3"
+                onClick={() => router.push(`/${locale}/customers/new`)}
+              >
+                Tambah Wajib Pajak Baru
+              </Button>
+            </div>
+          ) : (
+            <Select onValueChange={handleCustomerSelect}>
+              <SelectTrigger className="w-full max-w-md">
+                <SelectValue placeholder="Pilih wajib pajak..." />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.map((customer) => (
+                  <SelectItem key={customer.id} value={customer.id}>
+                    {customer.full_name} ({customer.npwp || 'No NPWP'})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      )}
+
+      {/* Loading state for CUSTOMER role */}
+      {isCustomerRole && isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <span className="ml-2 text-gray-600">Memuat data...</span>
+        </div>
+      )}
+
+      {/* Error state for CUSTOMER role */}
+      {isCustomerRole && error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 mb-6">
+          {error}
+          <Button
+            variant="outline"
+            className="mt-3"
+            onClick={() => session?.customerId && fetchOwnCustomerData(session.customerId)}
+          >
+            Coba Lagi
+          </Button>
+        </div>
+      )}
+
+      {/* SPT Generator */}
+      {selectedCustomer && (
+        <>
+          {/* Change button only for tax advisors */}
+          {!isCustomerRole && (
+            <div className="mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedCustomer(null)}
+              >
+                Ganti Wajib Pajak
+              </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
+
+          <SPT1770SGenerator
+            customerId={selectedCustomer.id}
+            customerName={selectedCustomer.full_name}
+            customerNpwp={selectedCustomer.npwp}
+            onComplete={(data) => {
+              console.log('SPT 1770 S Generated:', data);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

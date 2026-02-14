@@ -66,7 +66,21 @@ export function useSession(): UseSessionReturn {
         .single();
 
       if (roleError) {
-        throw roleError;
+        // PGRST116 = no rows found
+        if (roleError.code === 'PGRST116') {
+          console.warn('[useSession] No active role found for user:', authSession.user.id);
+          // User exists but has no role assigned - treat as logged out
+          setSession(null);
+          return;
+        }
+        console.error('[useSession] Role fetch error:', roleError.message, roleError.code);
+        throw new Error(`Failed to fetch user role: ${roleError.message}`);
+      }
+
+      if (!userRole) {
+        console.warn('[useSession] No role data returned for user:', authSession.user.id);
+        setSession(null);
+        return;
       }
 
       let fullName: string | undefined;
@@ -110,8 +124,13 @@ export function useSession(): UseSessionReturn {
         consultantId,
       });
     } catch (err) {
-      console.error('[useSession] Error:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch session'));
+      const errorMessage = err instanceof Error
+        ? err.message
+        : typeof err === 'object' && err !== null
+          ? JSON.stringify(err)
+          : 'Unknown error';
+      console.error('[useSession] Error:', errorMessage);
+      setError(err instanceof Error ? err : new Error(errorMessage));
       setSession(null);
     } finally {
       setIsLoading(false);

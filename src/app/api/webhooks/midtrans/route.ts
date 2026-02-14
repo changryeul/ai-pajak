@@ -26,6 +26,7 @@ import {
   sendPaymentConfirmation,
   sendPaymentFailed,
 } from '@/lib/notifications/email-service';
+import { loggers } from '@/lib/logger';
 
 interface MidtransNotification {
   transaction_status: string;
@@ -50,18 +51,18 @@ export async function POST(request: NextRequest) {
   try {
     const notification = (await request.json()) as MidtransNotification;
 
-    console.log('[WEBHOOK] Midtrans notification received:', {
+    loggers.payment.info({
       orderId: notification.order_id,
       status: notification.transaction_status,
       paymentType: notification.payment_type,
       amount: notification.gross_amount,
-    });
+    }, 'Midtrans webhook received');
 
     // Extract transaction ID from order_id
     // Format: PAY-{transactionId}-{timestamp}
     const orderIdParts = notification.order_id.split('-');
     if (orderIdParts.length < 2 || orderIdParts[0] !== 'PAY') {
-      console.error('[WEBHOOK] Invalid order_id format:', notification.order_id);
+      loggers.payment.error({ orderId: notification.order_id }, 'Invalid order_id format');
       return NextResponse.json(
         { error: 'Invalid order_id format' },
         { status: 400 }
@@ -73,10 +74,10 @@ export async function POST(request: NextRequest) {
     // Verify signature
     const isValidSignature = MidtransService.verifyNotification(notification);
     if (!isValidSignature) {
-      console.error('[WEBHOOK] Invalid signature - possible tampering', {
+      loggers.payment.warn({
         orderId: notification.order_id,
         statusCode: notification.status_code,
-      });
+      }, 'Invalid signature - attempting API verification');
 
       // Still try to verify with Midtrans API as fallback
       const verificationResult = await MidtransService.getTransactionStatus(
@@ -88,14 +89,14 @@ export async function POST(request: NextRequest) {
         !verificationResult.transaction_status ||
         verificationResult.transaction_status !== notification.transaction_status
       ) {
-        console.error('[WEBHOOK] Midtrans verification also failed');
+        loggers.payment.error({ orderId: notification.order_id }, 'Midtrans API verification also failed');
         return NextResponse.json(
           { error: 'Invalid signature' },
           { status: 401 }
         );
       }
 
-      console.info('[WEBHOOK] Signature invalid but Midtrans API verified');
+      loggers.payment.info({ orderId: notification.order_id }, 'Signature invalid but Midtrans API verified');
     }
 
     // Process the notification
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('[WEBHOOK] Failed to update transaction:', updateError);
+      loggers.payment.error({ transactionId, error: updateError }, 'Failed to update transaction');
       // Return 200 to Midtrans to prevent retry loops, but log error
       return NextResponse.json({
         success: false,
@@ -214,9 +215,9 @@ export async function POST(request: NextRequest) {
             transactionId: notification.transaction_id,
             serviceType: transaction.service_type.replace(/_/g, ' '),
           });
-          console.log('[WEBHOOK] Payment confirmation email sent');
+          loggers.payment.info({ transactionId, invoiceNumber: transaction.invoice_number }, 'Payment confirmation email sent');
         } catch (emailError) {
-          console.error('[WEBHOOK] Failed to send confirmation email:', emailError);
+          loggers.payment.error({ transactionId, error: emailError }, 'Failed to send confirmation email');
           // Don't fail the webhook - email is non-critical
         }
       }
@@ -231,9 +232,9 @@ export async function POST(request: NextRequest) {
           reason: notification.status_message || 'Payment was declined or cancelled',
           paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/billing/pay/${transaction.id}`,
         });
-        console.log('[WEBHOOK] Payment failed email sent');
+        loggers.payment.info({ transactionId, invoiceNumber: transaction.invoice_number }, 'Payment failed email sent');
       } catch (emailError) {
-        console.error('[WEBHOOK] Failed to send failure email:', emailError);
+        loggers.payment.error({ transactionId, error: emailError }, 'Failed to send failure email');
       }
 
       // In-app notification for failed payment
@@ -255,11 +256,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('[WEBHOOK] Payment processed successfully:', {
+    loggers.payment.info({
       transactionId,
       paymentStatus,
       invoiceNumber: transaction.invoice_number,
-    });
+    }, 'Payment webhook processed successfully');
 
     // Midtrans expects 200 OK response
     return NextResponse.json({
@@ -268,7 +269,7 @@ export async function POST(request: NextRequest) {
       paymentStatus,
     });
   } catch (error) {
-    console.error('[WEBHOOK] Error processing Midtrans notification:', error);
+    loggers.payment.error({ error }, 'Error processing Midtrans webhook notification');
 
     // Return 200 to prevent Midtrans retry loops
     // Log error for investigation

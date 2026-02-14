@@ -34,6 +34,10 @@ interface CreateFilingRequest {
 
 /**
  * POST - Create a new tax filing (draft or under review)
+ *
+ * Allowed roles:
+ * - CUSTOMER: Can create drafts and request review for their own filings
+ * - CONSULTANT_JTC/TAX_ADVISOR_JTC: Can create filings for any customer
  */
 async function handleCreateFiling(request: RequestWithSession): Promise<Response> {
   const { session } = request;
@@ -60,22 +64,49 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
     );
   }
 
-  // Get consultant information
-  const { data: consultant, error: consultantError } = await supabaseAdmin
-    .from('consultant')
-    .select('id, tax_partner_id')
-    .eq('user_id', session.userId)
-    .eq('is_active', true)
-    .single();
+  let consultantId: string | null = null;
 
-  if (consultantError || !consultant) {
-    return NextResponse.json(
-      {
-        error: 'Consultant not found',
-        message: 'You must be an active consultant to create filings',
-      },
-      { status: 403 }
-    );
+  // Handle based on user role
+  if (session.role === 'CUSTOMER') {
+    // Customers can only create filings for themselves
+    const { data: customerRecord } = await supabaseAdmin
+      .from('customer')
+      .select('id')
+      .eq('user_id', session.userId)
+      .single();
+
+    if (!customerRecord || customerRecord.id !== customerId) {
+      return NextResponse.json(
+        {
+          error: 'Access denied',
+          message: 'You can only create filings for your own account',
+        },
+        { status: 403 }
+      );
+    }
+
+    // For customer-created filings, consultant_id will be null until assigned
+    consultantId = null;
+  } else {
+    // Consultants/Tax Advisors - get their consultant record
+    const { data: consultant, error: consultantError } = await supabaseAdmin
+      .from('consultant')
+      .select('id, tax_partner_id')
+      .eq('user_id', session.userId)
+      .eq('is_active', true)
+      .single();
+
+    if (consultantError || !consultant) {
+      return NextResponse.json(
+        {
+          error: 'Consultant not found',
+          message: 'You must be an active consultant to create filings',
+        },
+        { status: 403 }
+      );
+    }
+
+    consultantId = consultant.id;
   }
 
   // Verify customer exists
@@ -135,7 +166,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
     .from('tax_filing')
     .insert({
       customer_id: customerId,
-      consultant_id: consultant.id,
+      consultant_id: consultantId, // null for customer-created filings
       tax_type: taxType,
       tax_period: taxPeriod,
       status: status,
@@ -188,19 +219,16 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
 
   try {
     let query = supabaseAdmin
-      .from('tax_filings')
+      .from('tax_filing')
       .select(`
         id,
         tax_type,
-        tax_year,
         tax_period,
         status,
-        total_income,
-        tax_due,
-        due_date,
-        submitted_at,
+        tax_data,
+        filed_at,
         created_at,
-        customer:customers!inner(
+        customer:customer!inner(
           id,
           full_name,
           company_name,
@@ -213,14 +241,14 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
 
     if (role === 'CUSTOMER') {
       // Customers can only see their own filings
-      const { data: customer } = await supabaseAdmin
-        .from('customers')
+      const { data: customerRecord } = await supabaseAdmin
+        .from('customer')
         .select('id')
         .eq('user_id', userId)
         .single();
 
-      if (customer) {
-        query = query.eq('customer_id', customer.id);
+      if (customerRecord) {
+        query = query.eq('customer_id', customerRecord.id);
       } else {
         return NextResponse.json({
           success: true,
@@ -280,21 +308,28 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
 
     // Transform data
     type CustomerData = { id: string; full_name: string; company_name: string | null; npwp: string | null };
+    type TaxData = { grossIncome?: number; taxDue?: number; calculatedTax?: number; netTaxDue?: number; [key: string]: unknown };
     const filings = data?.map((filing) => {
       // Handle both single object and array from Supabase join
       const customerData = filing.customer as unknown;
       const customer = Array.isArray(customerData) ? customerData[0] as CustomerData | undefined : customerData as CustomerData | null;
 
+      // Extract data from tax_data JSONB
+      const taxData = (filing.tax_data || {}) as TaxData;
+
+      // Extract year from tax_period (format: YYYY-MM)
+      const taxYear = filing.tax_period ? parseInt(filing.tax_period.split('-')[0]) : null;
+
       return {
         id: filing.id,
         taxType: filing.tax_type,
-        taxYear: filing.tax_year,
+        taxYear,
         taxPeriod: filing.tax_period,
         status: filing.status,
-        totalIncome: filing.total_income,
-        taxDue: filing.tax_due,
-        dueDate: filing.due_date,
-        submittedAt: filing.submitted_at,
+        totalIncome: taxData.grossIncome || 0,
+        taxDue: taxData.taxDue || taxData.calculatedTax || taxData.netTaxDue || 0,
+        dueDate: null,
+        submittedAt: filing.filed_at,
         createdAt: filing.created_at,
         customer: customer ? {
           id: customer.id,
@@ -336,7 +371,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
     withAudit('TAX_FILING_CREATE')
   )(request as RequestWithSession, handleCreateFiling);
 }

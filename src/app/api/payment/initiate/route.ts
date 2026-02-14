@@ -5,11 +5,17 @@
  *
  * Creates a Midtrans Snap payment token for a pending billing transaction.
  * Users can then complete payment through the Midtrans payment popup.
+ *
+ * Resilience Features:
+ * - Idempotency: Prevents duplicate payment initiation
+ * - Structured Logging: JSON logs with request context
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { MidtransService } from '@/lib/payment/midtrans';
+import { idempotencyManager } from '@/lib/resilience/idempotency';
+import { loggers } from '@/lib/logger';
 
 interface PaymentInitiateRequest {
   transactionId: string;
@@ -36,7 +42,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = (await request.json()) as PaymentInitiateRequest;
+  // Clone request to read body for idempotency check
+  const clonedRequest = request.clone();
+  const body = (await clonedRequest.json()) as PaymentInitiateRequest;
   const { transactionId } = body;
 
   if (!transactionId) {
@@ -45,6 +53,28 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  // Check idempotency key to prevent duplicate payment initiations
+  const idempotencyKey = request.headers.get('Idempotency-Key');
+  if (idempotencyKey) {
+    const cached = await idempotencyManager.get(idempotencyKey, body);
+    if (cached) {
+      loggers.payment.info({
+        transactionId,
+        idempotencyKey,
+      }, 'Returning cached payment initiation response');
+      return NextResponse.json(cached.response, {
+        status: cached.statusCode,
+        headers: { 'Idempotency-Replayed': 'true' },
+      });
+    }
+  }
+
+  loggers.payment.info({
+    transactionId,
+    userId: session.user.id,
+    idempotencyKey,
+  }, 'Initiating payment');
 
   // Get user's customer ID
   const { data: profile } = await supabase
@@ -187,15 +217,33 @@ export async function POST(request: NextRequest) {
       },
     };
 
+    loggers.payment.info({
+      transactionId: transaction.id,
+      paymentToken: midtransResponse.token,
+    }, 'Payment initiated successfully');
+
+    // Cache successful response for idempotency
+    if (idempotencyKey) {
+      await idempotencyManager.set(
+        idempotencyKey,
+        { response, statusCode: 200 },
+        body
+      );
+    }
+
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error('[PAYMENT] Midtrans transaction creation failed:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to create payment',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    loggers.payment.error({
+      transactionId,
+      error,
+    }, 'Payment initiation failed');
+
+    const errorResponse = {
+      error: 'Failed to create payment',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    };
+
+    // Don't cache error responses - allow retry
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }

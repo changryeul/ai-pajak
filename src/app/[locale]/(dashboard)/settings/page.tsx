@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
@@ -21,9 +21,18 @@ import {
   Globe,
   Save,
   Loader2,
+  Check,
+  AlertCircle,
 } from 'lucide-react';
 
-type SettingsTab = 'profile' | 'security' | 'notifications' | 'language' | 'company';
+type SettingsTab = 'profile' | 'security' | 'notifications' | 'language';
+
+interface NotificationPreferences {
+  email_enabled: boolean;
+  deadline_reminders: boolean;
+  payment_reminders: boolean;
+  marketing_emails: boolean;
+}
 
 export default function SettingsPage() {
   const t = useTranslations();
@@ -33,12 +42,34 @@ export default function SettingsPage() {
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Profile state
   const [profile, setProfile] = useState({
     fullName: '',
     email: '',
     phone: '',
     npwp: '',
+    nik: '',
   });
+
+  // Password state
+  const [passwords, setPasswords] = useState({
+    current: '',
+    new: '',
+    confirm: '',
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Notification state
+  const [notifications, setNotifications] = useState<NotificationPreferences>({
+    email_enabled: true,
+    deadline_reminders: true,
+    payment_reminders: true,
+    marketing_emails: false,
+  });
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
 
   const tabs = [
     { id: 'profile' as SettingsTab, label: t('settings.profile') || 'Profile', icon: User },
@@ -55,8 +86,8 @@ export default function SettingsPage() {
     { value: 'zh', label: '中文' },
   ];
 
+  // Load user profile
   useEffect(() => {
-    // Load user profile
     const loadProfile = async () => {
       try {
         const response = await fetch('/api/auth/me');
@@ -67,6 +98,7 @@ export default function SettingsPage() {
             email: data.user.email || '',
             phone: data.user.phone || '',
             npwp: data.user.npwp || '',
+            nik: data.user.nik || '',
           });
         }
       } catch (error) {
@@ -75,6 +107,37 @@ export default function SettingsPage() {
     };
     loadProfile();
   }, []);
+
+  // Load notification preferences
+  const loadNotifications = useCallback(async () => {
+    if (notificationsLoaded) return;
+    try {
+      const response = await fetch('/api/settings/notifications');
+      const data = await response.json();
+      if (data.success && data.data) {
+        setNotifications({
+          email_enabled: data.data.email_enabled ?? true,
+          deadline_reminders: data.data.deadline_reminders ?? true,
+          payment_reminders: data.data.payment_reminders ?? true,
+          marketing_emails: data.data.marketing_emails ?? false,
+        });
+        setNotificationsLoaded(true);
+      }
+    } catch (error) {
+      console.error('Failed to load notification preferences:', error);
+    }
+  }, [notificationsLoaded]);
+
+  useEffect(() => {
+    if (activeTab === 'notifications') {
+      loadNotifications();
+    }
+  }, [activeTab, loadNotifications]);
+
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3000);
+  };
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
@@ -85,20 +148,88 @@ export default function SettingsPage() {
         body: JSON.stringify({
           fullName: profile.fullName,
           phone: profile.phone,
+          nik: profile.nik,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        alert(t('common.success') || 'Profile saved successfully');
+        showMessage('success', t('settings.profileSaved') || 'Profile saved successfully');
       } else {
-        alert(data.error || 'Failed to save profile');
+        showMessage('error', data.error || 'Failed to save profile');
       }
     } catch {
-      alert('Failed to save profile');
+      showMessage('error', 'Failed to save profile');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // Validation
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      showMessage('error', t('settings.allFieldsRequired') || 'All password fields are required');
+      return;
+    }
+
+    if (passwords.new !== passwords.confirm) {
+      showMessage('error', t('errors.passwordMismatch') || 'Passwords do not match');
+      return;
+    }
+
+    if (passwords.new.length < 8) {
+      showMessage('error', t('errors.passwordTooShort') || 'Password must be at least 8 characters');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const response = await fetch('/api/settings/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwords.current,
+          newPassword: passwords.new,
+          confirmPassword: passwords.confirm,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage('success', t('settings.passwordChanged') || 'Password changed successfully');
+        setPasswords({ current: '', new: '', confirm: '' });
+      } else {
+        showMessage('error', data.error || 'Failed to change password');
+      }
+    } catch {
+      showMessage('error', 'Failed to change password');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setIsSavingNotifications(true);
+    try {
+      const response = await fetch('/api/settings/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notifications),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage('success', t('settings.notificationsSaved') || 'Notification preferences saved');
+      } else {
+        showMessage('error', data.error || 'Failed to save preferences');
+      }
+    } catch {
+      showMessage('error', 'Failed to save preferences');
+    } finally {
+      setIsSavingNotifications(false);
     }
   };
 
@@ -110,6 +241,20 @@ export default function SettingsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* Message Toast */}
+      {message && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg ${
+          message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
+        }`}>
+          {message.type === 'success' ? (
+            <Check className="h-4 w-4" />
+          ) : (
+            <AlertCircle className="h-4 w-4" />
+          )}
+          {message.text}
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">
@@ -199,6 +344,21 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="nik">{t('auth.nik') || 'NIK'}</Label>
+                    <Input
+                      id="nik"
+                      value={profile.nik}
+                      onChange={(e) => setProfile({ ...profile, nik: e.target.value })}
+                      placeholder="16-digit NIK"
+                      maxLength={16}
+                    />
+                    <p className="text-xs text-gray-500">
+                      {t('auth.nikDescription') || 'Nomor Induk Kependudukan (16 digits)'}
+                    </p>
+                  </div>
+                </div>
                 <div className="pt-4">
                   <Button onClick={handleSaveProfile} disabled={isSaving}>
                     {isSaving ? (
@@ -224,33 +384,55 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="font-medium">{t('auth.resetPassword') || 'Change Password'}</h3>
-                  <div className="space-y-3">
+                  <h3 className="font-medium">{t('settings.changePassword') || 'Change Password'}</h3>
+                  <div className="space-y-3 max-w-md">
                     <div className="space-y-2">
-                      <Label>Current Password</Label>
-                      <Input type="password" />
+                      <Label htmlFor="currentPassword">{t('settings.currentPassword') || 'Current Password'}</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={passwords.current}
+                        onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label>New Password</Label>
-                      <Input type="password" />
+                      <Label htmlFor="newPassword">{t('settings.newPassword') || 'New Password'}</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={passwords.new}
+                        onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t('auth.confirmPassword') || 'Confirm Password'}</Label>
-                      <Input type="password" />
+                      <Label htmlFor="confirmPassword">{t('auth.confirmPassword') || 'Confirm Password'}</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={passwords.confirm}
+                        onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                      />
                     </div>
                   </div>
-                  <Button>{t('common.change') || 'Change'} Password</Button>
+                  <Button onClick={handleChangePassword} disabled={isChangingPassword}>
+                    {isChangingPassword ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Shield className="h-4 w-4 mr-2" />
+                    )}
+                    {t('settings.changePassword') || 'Change Password'}
+                  </Button>
                 </div>
 
                 <hr />
 
                 <div className="space-y-4">
-                  <h3 className="font-medium">{t('auth.twoFactorAuth') || 'Two-Factor Authentication'}</h3>
+                  <h3 className="font-medium">{t('settings.twoFactorAuth') || 'Two-Factor Authentication'}</h3>
                   <p className="text-sm text-gray-500">
-                    Add an extra layer of security to your account
+                    {t('settings.twoFactorDescription') || 'Add an extra layer of security to your account'}
                   </p>
-                  <Button variant="outline">
-                    {t('auth.enableTwoFactor') || 'Enable 2FA'}
+                  <Button variant="outline" disabled>
+                    {t('settings.enable2FA') || 'Enable 2FA'} ({t('common.comingSoon') || 'Coming Soon'})
                   </Button>
                 </div>
               </CardContent>
@@ -269,31 +451,62 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b">
                   <div>
-                    <p className="font-medium">Email Notifications</p>
-                    <p className="text-sm text-gray-500">Receive updates via email</p>
+                    <p className="font-medium">{t('settings.emailNotifications') || 'Email Notifications'}</p>
+                    <p className="text-sm text-gray-500">{t('settings.emailNotificationsDesc') || 'Receive updates via email'}</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="h-4 w-4" />
+                  <input
+                    type="checkbox"
+                    checked={notifications.email_enabled}
+                    onChange={(e) => setNotifications({ ...notifications, email_enabled: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
                 </div>
                 <div className="flex items-center justify-between py-3 border-b">
                   <div>
-                    <p className="font-medium">Tax Filing Reminders</p>
-                    <p className="text-sm text-gray-500">Get notified before deadlines</p>
+                    <p className="font-medium">{t('settings.deadlineReminders') || 'Tax Filing Reminders'}</p>
+                    <p className="text-sm text-gray-500">{t('settings.deadlineRemindersDesc') || 'Get notified before deadlines'}</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="h-4 w-4" />
+                  <input
+                    type="checkbox"
+                    checked={notifications.deadline_reminders}
+                    onChange={(e) => setNotifications({ ...notifications, deadline_reminders: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
                 </div>
                 <div className="flex items-center justify-between py-3 border-b">
                   <div>
-                    <p className="font-medium">Payment Alerts</p>
-                    <p className="text-sm text-gray-500">Notifications about invoices and payments</p>
+                    <p className="font-medium">{t('settings.paymentAlerts') || 'Payment Alerts'}</p>
+                    <p className="text-sm text-gray-500">{t('settings.paymentAlertsDesc') || 'Notifications about invoices and payments'}</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="h-4 w-4" />
+                  <input
+                    type="checkbox"
+                    checked={notifications.payment_reminders}
+                    onChange={(e) => setNotifications({ ...notifications, payment_reminders: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
                 </div>
                 <div className="flex items-center justify-between py-3">
                   <div>
-                    <p className="font-medium">Marketing Updates</p>
-                    <p className="text-sm text-gray-500">News and promotional offers</p>
+                    <p className="font-medium">{t('settings.marketingUpdates') || 'Marketing Updates'}</p>
+                    <p className="text-sm text-gray-500">{t('settings.marketingUpdatesDesc') || 'News and promotional offers'}</p>
                   </div>
-                  <input type="checkbox" className="h-4 w-4" />
+                  <input
+                    type="checkbox"
+                    checked={notifications.marketing_emails}
+                    onChange={(e) => setNotifications({ ...notifications, marketing_emails: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <Button onClick={handleSaveNotifications} disabled={isSavingNotifications}>
+                    {isSavingNotifications ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    {t('common.save') || 'Save'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -310,7 +523,7 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Select Language</Label>
+                  <Label>{t('settings.selectLanguage') || 'Select Language'}</Label>
                   <Select value={locale} onValueChange={handleLanguageChange}>
                     <SelectTrigger className="w-[240px]">
                       <SelectValue />
@@ -324,7 +537,7 @@ export default function SettingsPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-gray-500">
-                    This will change the language across the entire application
+                    {t('settings.languageDescription') || 'This will change the language across the entire application'}
                   </p>
                 </div>
               </CardContent>

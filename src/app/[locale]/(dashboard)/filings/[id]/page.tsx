@@ -96,6 +96,46 @@ export default function FilingDetailPage({ params }: PageProps) {
     }).format(amount);
   };
 
+  // Format field names for display
+  const formatFieldName = (key: string) => {
+    const fieldLabels: Record<string, string> = {
+      // Income fields
+      employmentIncome: t('filings.fields.employmentIncome'),
+      businessIncome: t('filings.fields.businessIncome'),
+      rentalIncome: t('filings.fields.rentalIncome'),
+      interestIncome: t('filings.fields.interestIncome'),
+      dividendIncome: t('filings.fields.dividendIncome'),
+      capitalGains: t('filings.fields.capitalGains'),
+      otherIncome: t('filings.fields.otherIncome'),
+      grossIncome: t('filings.fields.grossIncome'),
+      // Deduction fields
+      personalDeduction: t('filings.fields.personalDeduction'),
+      dependentDeduction: t('filings.fields.dependentDeduction'),
+      pensionContribution: t('filings.fields.pensionContribution'),
+      healthInsurance: t('filings.fields.healthInsurance'),
+      educationExpenses: t('filings.fields.educationExpenses'),
+      charitableDonations: t('filings.fields.charitableDonations'),
+      otherDeductions: t('filings.fields.otherDeductions'),
+    };
+    return fieldLabels[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  };
+
+  // Render data object as formatted list
+  const renderDataList = (data: Record<string, unknown>) => {
+    return (
+      <div className="space-y-2">
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
+            <span className="text-gray-600 text-sm">{formatFieldName(key)}</span>
+            <span className="font-medium text-sm">
+              {typeof value === 'number' ? formatCurrency(value) : String(value)}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const getTaxTypeLabel = (type: string) => {
     const typeMap: Record<string, string> = {
       PPh21: 'PPh 21',
@@ -105,6 +145,18 @@ export default function FilingDetailPage({ params }: PageProps) {
       SPT_TAHUNAN: 'SPT Tahunan',
     };
     return typeMap[type] || type;
+  };
+
+  // Map taxType to URL path for editing
+  const getTaxTypeRoute = (type: string) => {
+    const routeMap: Record<string, string> = {
+      PPh21: 'pph21',
+      PPh23: 'pph23',
+      PPh_FINAL: 'pph-final',
+      PPN: 'ppn',
+      SPT_TAHUNAN: 'spt-tahunan',
+    };
+    return routeMap[type] || type.toLowerCase().replace(/_/g, '-');
   };
 
   const getStatusBadge = (status: string) => {
@@ -175,8 +227,8 @@ export default function FilingDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className="flex gap-2">
-          {filing.status === 'DRAFT' && (
-            <Button onClick={() => router.push(`/${locale}/tax/${filing.taxType.toLowerCase()}/${filing.id}`)}>
+          {(filing.status === 'DRAFT' || filing.status === 'UNDER_REVIEW') && (
+            <Button onClick={() => router.push(`/${locale}/tax/${getTaxTypeRoute(filing.taxType)}?filingId=${filing.id}`)}>
               {t('common.edit')}
             </Button>
           )}
@@ -232,9 +284,7 @@ export default function FilingDetailPage({ params }: PageProps) {
                   <h4 className="font-medium text-gray-900 mb-3">{t('filings.incomeData')}</h4>
                   <div className="bg-gray-50 rounded p-4">
                     {Object.keys(filing.incomeData).length > 0 ? (
-                      <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {JSON.stringify(filing.incomeData, null, 2)}
-                      </pre>
+                      renderDataList(filing.incomeData)
                     ) : (
                       <p className="text-gray-500 text-sm">{t('filings.noData')}</p>
                     )}
@@ -246,9 +296,7 @@ export default function FilingDetailPage({ params }: PageProps) {
                   <h4 className="font-medium text-gray-900 mb-3">{t('filings.deductionData')}</h4>
                   <div className="bg-gray-50 rounded p-4">
                     {Object.keys(filing.deductionData).length > 0 ? (
-                      <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {JSON.stringify(filing.deductionData, null, 2)}
-                      </pre>
+                      renderDataList(filing.deductionData)
                     ) : (
                       <p className="text-gray-500 text-sm">{t('filings.noData')}</p>
                     )}

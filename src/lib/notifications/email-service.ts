@@ -2,6 +2,11 @@
  * Email Notification Service
  *
  * Uses Resend for transactional emails
+ *
+ * Resilience Features:
+ * - Circuit Breaker: Prevents cascading failures when email service is down
+ * - Retry: Automatic retry with exponential backoff
+ * - Structured Logging: JSON logs with request context
  */
 
 import { Resend } from 'resend';
@@ -14,6 +19,9 @@ import {
   PaymentConfirmationData,
   PaymentFailedData,
 } from './types';
+import { circuitBreakers } from '@/lib/resilience/circuit-breaker';
+import { withRetry, withTimeout } from '@/lib/resilience/timeout';
+import { loggers } from '@/lib/logger';
 
 // Lazy-load Resend client to avoid build-time errors
 let resend: Resend | null = null;
@@ -33,34 +41,75 @@ const FROM_EMAIL = process.env.EMAIL_FROM || 'AI Pajak <noreply@aipajak.com>';
 const SUPPORT_EMAIL = process.env.EMAIL_SUPPORT || 'support@aipajak.com';
 
 /**
- * Send email notification
+ * Send email notification with resilience patterns
  */
 export async function sendEmail(notification: EmailNotification): Promise<boolean> {
-  try {
-    const client = getResendClient();
-    const { error } = await client.emails.send({
-      from: FROM_EMAIL,
-      to: notification.to,
-      subject: notification.subject,
-      html: notification.html,
-      text: notification.text,
-      replyTo: notification.replyTo || SUPPORT_EMAIL,
-      tags: notification.tags?.map((tag) => ({ name: tag, value: 'true' })),
-    });
+  const emailId = `${notification.to}-${Date.now()}`;
 
-    if (error) {
-      console.error('[Email] Failed to send:', error);
+  loggers.email.info({
+    emailId,
+    to: notification.to,
+    subject: notification.subject,
+    tags: notification.tags,
+  }, 'Sending email');
+
+  try {
+    // Use circuit breaker and retry for email sending
+    const result = await circuitBreakers.email.execute(() =>
+      withRetry(
+        async () => {
+          const client = getResendClient();
+          return withTimeout(
+            client.emails.send({
+              from: FROM_EMAIL,
+              to: notification.to,
+              subject: notification.subject,
+              html: notification.html,
+              text: notification.text,
+              replyTo: notification.replyTo || SUPPORT_EMAIL,
+              tags: notification.tags?.map((tag) => ({ name: tag, value: 'true' })),
+            }),
+            10000, // 10s timeout
+            'Email send timed out'
+          );
+        },
+        {
+          maxRetries: 2,
+          baseDelay: 1000,
+          shouldRetry: (error) => {
+            // Retry on network errors but not on validation errors
+            if (error instanceof Error) {
+              return !error.message.includes('validation') &&
+                     !error.message.includes('invalid');
+            }
+            return true;
+          },
+        }
+      )
+    );
+
+    if (result.error) {
+      loggers.email.error({
+        emailId,
+        to: notification.to,
+        error: result.error,
+      }, 'Failed to send email');
       return false;
     }
 
-    console.info('[Email] Sent successfully:', {
+    loggers.email.info({
+      emailId,
       to: notification.to,
-      subject: notification.subject,
-    });
+      messageId: result.data?.id,
+    }, 'Email sent successfully');
 
     return true;
   } catch (error) {
-    console.error('[Email] Error:', error);
+    loggers.email.error({
+      emailId,
+      to: notification.to,
+      error,
+    }, 'Error sending email');
     return false;
   }
 }
