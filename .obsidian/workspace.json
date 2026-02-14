@@ -178,6 +178,10 @@
   },
   "active": "ee78e85da7d3b8c0",
   "lastOpenFiles": [
+    "src/app/[locale]/(auth)/reset-password/page.tsx",
+    "src/app/[locale]/(auth)/reset-password",
+    "src/app/[locale]/(auth)/forgot-password/page.tsx",
+    "src/app/[locale]/(auth)/forgot-password",
     "docs/guides/architecture.md",
     "docs/API/api-reference.md",
     "docs/guides/resilience-patterns.md",
@@ -189,9 +193,6 @@
     "DEPLOYMENT.md",
     "src/tests/e2e/spt-tahunan.spec.ts",
     "src/tests/e2e/billing.spec.ts",
-    "src/tests/e2e/payment.spec.ts",
-    "src/lib/__tests__/logger.test.ts",
-    "src/lib/__tests__/request-context.test.ts",
     "node_modules/pino/SECURITY.md",
     "node_modules/pino/README.md",
     "node_modules/pino/CONTRIBUTING.md",
@@ -213,7 +214,6 @@
     "node_modules/pino-pretty/docs/help.md",
     "node_modules/pino-pretty/demo.png",
     "node_modules/pino-pretty/Readme.md",
-    "node_modules/@pinojs/redact/README.md",
-    "node_modules/secure-json-parse/README.md"
+    "node_modules/@pinojs/redact/README.md"
   ]
 }
