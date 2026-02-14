@@ -10,7 +10,7 @@ EXCEPTION
 END $$;
 
 CREATE TABLE audit_log (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID REFERENCES customer(id),
     tax_filing_id UUID REFERENCES tax_filing(id),
     actor_user_id UUID NOT NULL REFERENCES auth.users(id),

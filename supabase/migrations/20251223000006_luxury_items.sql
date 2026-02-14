@@ -9,7 +9,7 @@ CREATE TYPE item_category AS ENUM (
 );
 
 CREATE TABLE luxury_item_classifications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   item_name VARCHAR(255) NOT NULL,
   hs_code VARCHAR(10),  -- Harmonized System Code (for international classification)
   category item_category NOT NULL,

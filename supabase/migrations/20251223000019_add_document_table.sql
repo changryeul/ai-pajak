@@ -12,7 +12,7 @@ CREATE TYPE document_category AS ENUM (
 );
 
 CREATE TABLE document (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customer(id),
     uploaded_by_user_id UUID NOT NULL REFERENCES auth.users(id),
     document_type document_category NOT NULL,

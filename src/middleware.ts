@@ -116,21 +116,24 @@ export async function middleware(request: NextRequest) {
   // Skip auth check in development
   const isDev = process.env.NODE_ENV === 'development';
 
-  if (!isDev) {
-    // Update Supabase session
-    const { user } = await updateSession(request);
+  // Update Supabase session
+  const { supabaseResponse, user } = await updateSession(request);
 
-    // Redirect logic
-    if (isProtectedRoute && !user) {
-      const loginUrl = new URL(`/${locale}/login`, request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    if (isAuthRoute && user) {
-      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
-    }
+  // Redirect logic
+  if (isProtectedRoute && !user) {
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
   }
+
+  if (isAuthRoute && user) {
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+  }
+
+  // Merge cookies from supabase response to intl response
+  supabaseResponse.cookies.getAll().forEach((cookie) => {
+    intlResponse.cookies.set(cookie.name, cookie.value, cookie);
+  });
 
   // Add security headers to page responses
   return addSecurityHeaders(intlResponse);

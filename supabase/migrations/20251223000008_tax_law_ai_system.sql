@@ -3,7 +3,7 @@
 
 -- 법령 분석 결과 테이블
 CREATE TABLE tax_law_analyses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   law_type VARCHAR(20) NOT NULL, -- UU, PP, PMK, PERATURAN_DJP
   law_number VARCHAR(100) NOT NULL, -- PMK 131/2024
   law_title TEXT NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE tax_law_analyses (
 
 -- 법령 적용 기록 테이블
 CREATE TABLE tax_law_applications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   analysis_id UUID REFERENCES tax_law_analyses(id) ON DELETE CASCADE,
   applied_by UUID REFERENCES auth.users(id) NOT NULL,
   applied_migrations TEXT[] NOT NULL, -- SQL statements that were executed

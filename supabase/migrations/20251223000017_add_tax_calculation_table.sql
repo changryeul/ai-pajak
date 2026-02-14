@@ -2,7 +2,7 @@
 -- This table stores temporary calculation results before filing
 
 CREATE TABLE tax_calculation (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customer(id),
     consultant_id UUID NOT NULL REFERENCES consultant(id),
     tax_type tax_type NOT NULL,

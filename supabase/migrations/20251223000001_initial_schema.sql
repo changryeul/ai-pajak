@@ -99,7 +99,7 @@ CREATE TYPE accounting_status AS ENUM (
 
 -- Platform Owner (Mono Flip Global) - Billing Collector
 CREATE TABLE platform_owner (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL DEFAULT 'Mono Flip Global',
     legal_name VARCHAR(255) NOT NULL,
     npwp VARCHAR(16) NOT NULL,
@@ -115,7 +115,7 @@ CREATE UNIQUE INDEX idx_single_platform_owner ON platform_owner ((1));
 
 -- Platform (AI Pajak) - Software Platform
 CREATE TABLE platform (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     platform_owner_id UUID NOT NULL REFERENCES platform_owner(id),
     name VARCHAR(255) NOT NULL DEFAULT 'AI Pajak',
     domain VARCHAR(255) NOT NULL DEFAULT 'ai-pajak.com',
@@ -130,7 +130,7 @@ CREATE UNIQUE INDEX idx_single_platform ON platform ((1));
 
 -- Tax Partner (Jakarta Tax Consulting) - Tax Service Provider
 CREATE TABLE tax_partner (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     platform_id UUID NOT NULL REFERENCES platform(id),
     name VARCHAR(255) NOT NULL DEFAULT 'Jakarta Tax Consulting',
     legal_name VARCHAR(255) NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE tax_partner (
 
 -- User Roles - Links Supabase auth.users to our role system
 CREATE TABLE user_roles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     role user_role_type NOT NULL,
     organization_id UUID, -- References tax_partner or platform
@@ -178,7 +178,7 @@ CREATE INDEX idx_user_roles_organization ON user_roles(organization_id, organiza
 
 -- Consultant (Employee of Jakarta Tax Consulting)
 CREATE TABLE consultant (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tax_partner_id UUID NOT NULL REFERENCES tax_partner(id),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     employee_id VARCHAR(50),
@@ -204,7 +204,7 @@ CREATE INDEX idx_consultant_active ON consultant(is_active) WHERE is_active = tr
 
 -- Tax Advisor (Licensed Professional)
 CREATE TABLE tax_advisor (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     consultant_id UUID NOT NULL REFERENCES consultant(id),
     license_number VARCHAR(100) NOT NULL,
     license_type VARCHAR(100) NOT NULL, -- 'Brevet A', 'Brevet B', 'Brevet C', 'CPA', etc.
@@ -226,7 +226,7 @@ CREATE INDEX idx_tax_advisor_verified ON tax_advisor(is_verified) WHERE is_verif
 -- ============================================================================
 
 CREATE TABLE customer (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     customer_type customer_type NOT NULL,
     npwp VARCHAR(16),
@@ -253,7 +253,7 @@ CREATE INDEX idx_customer_type ON customer(customer_type);
 -- ============================================================================
 
 CREATE TABLE tax_filing (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customer(id),
     consultant_id UUID NOT NULL REFERENCES consultant(id), -- MUST be from JTC
     tax_advisor_id UUID REFERENCES tax_advisor(id), -- Optional licensed reviewer
@@ -284,7 +284,7 @@ CREATE INDEX idx_tax_filing_type ON tax_filing(tax_type);
 -- ============================================================================
 
 CREATE TABLE tax_document (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tax_filing_id UUID NOT NULL REFERENCES tax_filing(id) ON DELETE CASCADE,
     uploaded_by_user_id UUID NOT NULL REFERENCES auth.users(id),
     document_type VARCHAR(100) NOT NULL, -- 'INVOICE', 'RECEIPT', 'SALARY_SLIP', etc.
@@ -306,7 +306,7 @@ CREATE INDEX idx_tax_document_type ON tax_document(document_type);
 -- ============================================================================
 
 CREATE TABLE tax_activity_log (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customer(id),
     tax_filing_id UUID REFERENCES tax_filing(id),
     actor_user_id UUID NOT NULL REFERENCES auth.users(id), -- WHO did it
@@ -336,7 +336,7 @@ CREATE INDEX idx_tax_log_created_at ON tax_activity_log(created_at DESC);
 -- ============================================================================
 
 CREATE TABLE billing_transaction (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customer(id),
     platform_owner_id UUID NOT NULL REFERENCES platform_owner(id), -- Mono Flip (Collector)
     tax_partner_id UUID REFERENCES tax_partner(id), -- JTC (Provider) - nullable for subscriptions
@@ -365,7 +365,7 @@ CREATE INDEX idx_billing_created_at ON billing_transaction(created_at DESC);
 
 -- Revenue Split - Accounting Separation
 CREATE TABLE revenue_split (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     billing_transaction_id UUID NOT NULL REFERENCES billing_transaction(id),
     recipient_organization_id UUID NOT NULL, -- Points to platform_owner OR tax_partner
     recipient_type revenue_recipient_type NOT NULL,
@@ -386,7 +386,7 @@ CREATE INDEX idx_revenue_split_status ON revenue_split(accounting_status);
 -- ============================================================================
 
 CREATE TABLE subscription (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customer(id),
     plan_type subscription_plan DEFAULT 'FREE',
     billing_cycle billing_cycle,
@@ -410,7 +410,7 @@ CREATE UNIQUE INDEX unique_active_subscription ON subscription(customer_id) WHER
 -- ============================================================================
 
 CREATE TABLE consultation_message (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customer(id),
     consultant_id UUID REFERENCES consultant(id),
     tax_filing_id UUID REFERENCES tax_filing(id),
