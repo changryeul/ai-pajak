@@ -5,7 +5,7 @@
  */
 
 import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import {
   Subscription,
@@ -17,11 +17,19 @@ import {
   PRICING_PLANS,
 } from './types';
 
-// Admin client for subscription management (bypasses RLS)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-loaded admin client for subscription management (bypasses RLS)
+
+let _adminClient: SupabaseClient | null = null;
+
+function getSupabaseAdmin(): SupabaseClient {
+  if (!_adminClient) {
+    _adminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _adminClient;
+}
 
 /**
  * Get customer subscription
@@ -81,14 +89,14 @@ export async function createSubscription(params: {
     : 0;
 
   // Deactivate any existing active subscription first
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('subscription')
     .update({ is_active: false, updated_at: now.toISOString() })
     .eq('customer_id', params.customerId)
     .eq('is_active', true);
 
   // Use admin client to bypass RLS for subscription management
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('subscription')
     .insert({
       customer_id: params.customerId,
@@ -120,7 +128,7 @@ export async function cancelSubscription(
   const now = new Date().toISOString();
 
   if (immediately) {
-    const { error } = await supabaseAdmin
+    const { error } = await getSupabaseAdmin()
       .from('subscription')
       .update({
         is_active: false,
@@ -132,13 +140,13 @@ export async function cancelSubscription(
     return !error;
   } else {
     // Set cancelled_at to period end date
-    const { data: sub } = await supabaseAdmin
+    const { data: sub } = await getSupabaseAdmin()
       .from('subscription')
       .select('current_period_end')
       .eq('id', subscriptionId)
       .single();
 
-    const { error } = await supabaseAdmin
+    const { error } = await getSupabaseAdmin()
       .from('subscription')
       .update({
         cancelled_at: sub?.current_period_end || now,
@@ -258,7 +266,7 @@ export async function createInvoice(params: {
     },
   ];
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('invoice')
     .insert({
       customer_id: params.customerId,
@@ -290,7 +298,7 @@ export async function markInvoicePaid(
   invoiceId: string,
   transactionId?: string
 ): Promise<boolean> {
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('invoice')
     .update({
       status: 'PAID',
@@ -305,7 +313,7 @@ export async function markInvoicePaid(
   // Record payment
   const invoice = await getInvoice(invoiceId);
   if (invoice) {
-    await supabaseAdmin.from('payment').insert({
+    await getSupabaseAdmin().from('payment').insert({
       invoice_id: invoiceId,
       amount: invoice.total,
       currency: invoice.currency,
