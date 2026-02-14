@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
@@ -19,11 +19,6 @@ import {
 import { SPT1770SSPDF } from '@/lib/tax/spt-1770ss/pdf-generator';
 import { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
 import React from 'react';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 /**
  * POST /api/tax/spt/1770ss
@@ -75,7 +70,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     }
 
     // Fetch customer data
-    const { data: customer, error: customerError } = await supabaseAdmin
+    const { data: customer, error: customerError } = await getSupabaseAdmin()
       .from('customer')
       .select('id, user_id, full_name, npwp, nik, address, phone, email')
       .eq('id', customerId)
@@ -107,7 +102,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
       incomeSources = providedIncomeSources;
     } else {
       // Fetch from OCR-processed documents
-      const { data: documents, error: docError } = await supabaseAdmin
+      const { data: documents, error: docError } = await getSupabaseAdmin()
         .from('document')
         .select('id, ocr_result, form_type, created_at')
         .eq('customer_id', customerId)
@@ -134,7 +129,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
 
       // If no documents found, check tax_calculation table
       if (incomeSources.length === 0) {
-        const { data: calculations, error: calcError } = await supabaseAdmin
+        const { data: calculations, error: calcError } = await getSupabaseAdmin()
           .from('tax_calculation')
           .select('*')
           .eq('customer_id', customerId)
@@ -262,7 +257,7 @@ async function handleGetSPT(req: RequestWithSession): Promise<Response> {
   }
 
   // Check for existing saved SPT
-  const { data: existingSPT, error: sptError } = await supabaseAdmin
+  const { data: existingSPT, error: sptError } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('*')
     .eq('customer_id', customerId)

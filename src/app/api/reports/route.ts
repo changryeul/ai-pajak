@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { withAudit } from '@/middleware/audit';
 import type { RequestWithSession } from '@/types/auth';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 type ReportType = 'tax_summary' | 'filing_history' | 'payment_history' | 'annual_summary';
 
@@ -52,7 +47,7 @@ async function handleGetReport(req: RequestWithSession): Promise<Response> {
     let customerId: string | null = null;
 
     if (role === 'CUSTOMER') {
-      const { data: customer } = await supabaseAdmin
+      const { data: customer } = await getSupabaseAdmin()
         .from('customer')
         .select('id')
         .eq('user_id', userId)
@@ -138,7 +133,7 @@ function getEmptyReportData(reportType: ReportType): Record<string, unknown> {
 
 async function generateTaxSummary(customerId: string | null, year: number): Promise<Record<string, unknown>> {
   // Build query
-  let query = supabaseAdmin
+  let query = getSupabaseAdmin()
     .from('tax_filing')
     .select('*')
     .gte('tax_period', `${year}-01`)
@@ -199,7 +194,7 @@ async function generateTaxSummary(customerId: string | null, year: number): Prom
 }
 
 async function generateFilingHistory(customerId: string | null, year: number): Promise<Record<string, unknown>> {
-  let query = supabaseAdmin
+  let query = getSupabaseAdmin()
     .from('tax_filing')
     .select('*')
     .gte('tax_period', `${year}-01`)
@@ -257,7 +252,7 @@ async function generatePaymentHistory(customerId: string | null, year: number): 
   const startDate = `${year}-01-01`;
   const endDate = `${year}-12-31`;
 
-  let query = supabaseAdmin
+  let query = getSupabaseAdmin()
     .from('billing_transaction')
     .select('*')
     .gte('created_at', startDate)
@@ -301,7 +296,7 @@ async function generatePaymentHistory(customerId: string | null, year: number): 
 }
 
 async function generateAnnualSummary(customerId: string | null, year: number): Promise<Record<string, unknown>> {
-  let query = supabaseAdmin
+  let query = getSupabaseAdmin()
     .from('tax_filing')
     .select('*')
     .gte('tax_period', `${year}-01`)

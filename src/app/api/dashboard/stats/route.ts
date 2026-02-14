@@ -9,16 +9,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import type { RequestWithSession } from '@/types/auth';
 import { UserRole } from '@/types/auth';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 interface ConsultantStats {
   activeClients: number;
@@ -53,7 +48,7 @@ async function handleGetStats(request: RequestWithSession): Promise<Response> {
 
     if (role === UserRole.CUSTOMER) {
       // Get customer ID
-      const { data: customer } = await supabaseAdmin
+      const { data: customer } = await getSupabaseAdmin()
         .from('customer')
         .select('id')
         .eq('user_id', userId)
@@ -89,7 +84,7 @@ async function handleGetStats(request: RequestWithSession): Promise<Response> {
 
 async function getConsultantStats(userId: string): Promise<ConsultantStats> {
   // Get consultant ID
-  const { data: consultant } = await supabaseAdmin
+  const { data: consultant } = await getSupabaseAdmin()
     .from('consultant')
     .select('id, tax_partner_id')
     .eq('user_id', userId)
@@ -107,12 +102,12 @@ async function getConsultantStats(userId: string): Promise<ConsultantStats> {
   }
 
   // Get active clients count
-  const { count: activeClients } = await supabaseAdmin
+  const { count: activeClients } = await getSupabaseAdmin()
     .from('customer')
     .select('*', { count: 'exact', head: true });
 
   // Get pending filings count (DRAFT or UNDER_REVIEW)
-  const { count: pendingFilings } = await supabaseAdmin
+  const { count: pendingFilings } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('*', { count: 'exact', head: true })
     .eq('consultant_id', consultant.id)
@@ -123,7 +118,7 @@ async function getConsultantStats(userId: string): Promise<ConsultantStats> {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const { count: submittedThisMonth } = await supabaseAdmin
+  const { count: submittedThisMonth } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('*', { count: 'exact', head: true })
     .eq('consultant_id', consultant.id)
@@ -131,14 +126,14 @@ async function getConsultantStats(userId: string): Promise<ConsultantStats> {
     .gte('filed_at', startOfMonth.toISOString());
 
   // Get pending POAs
-  const { count: pendingPOAs } = await supabaseAdmin
+  const { count: pendingPOAs } = await getSupabaseAdmin()
     .from('power_of_attorney')
     .select('*', { count: 'exact', head: true })
     .eq('tax_partner_id', consultant.tax_partner_id)
     .in('status', ['DRAFT', 'PENDING_SIGNATURE']);
 
   // Get recent activity breakdown
-  const { data: recentFilings } = await supabaseAdmin
+  const { data: recentFilings } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('status')
     .eq('consultant_id', consultant.id)
@@ -165,7 +160,7 @@ async function getConsultantStats(userId: string): Promise<ConsultantStats> {
 
 async function getCustomerStats(customerId: string): Promise<CustomerStats> {
   // Get filing counts
-  const { data: filings } = await supabaseAdmin
+  const { data: filings } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('status')
     .eq('customer_id', customerId);
@@ -175,7 +170,7 @@ async function getCustomerStats(customerId: string): Promise<CustomerStats> {
   const completedFilings = filings?.filter((f) => f.status === 'FILED').length || 0;
 
   // Check for active POA
-  const { data: activePoa } = await supabaseAdmin
+  const { data: activePoa } = await getSupabaseAdmin()
     .from('power_of_attorney')
     .select('id')
     .eq('customer_id', customerId)
@@ -199,19 +194,19 @@ async function getCustomerStats(customerId: string): Promise<CustomerStats> {
 
 async function getPlatformStats() {
   // Platform-level anonymized stats
-  const { count: totalUsers } = await supabaseAdmin
+  const { count: totalUsers } = await getSupabaseAdmin()
     .from('user_roles')
     .select('*', { count: 'exact', head: true });
 
-  const { count: totalCustomers } = await supabaseAdmin
+  const { count: totalCustomers } = await getSupabaseAdmin()
     .from('customer')
     .select('*', { count: 'exact', head: true });
 
-  const { count: totalFilings } = await supabaseAdmin
+  const { count: totalFilings } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('*', { count: 'exact', head: true });
 
-  const { count: activeConsultants } = await supabaseAdmin
+  const { count: activeConsultants } = await getSupabaseAdmin()
     .from('consultant')
     .select('*', { count: 'exact', head: true })
     .eq('is_active', true);
@@ -220,7 +215,7 @@ async function getPlatformStats() {
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  const { data: monthlyFilings } = await supabaseAdmin
+  const { data: monthlyFilings } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('created_at')
     .gte('created_at', sixMonthsAgo.toISOString());

@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { withAudit } from '@/middleware/audit';
 import type { RequestWithSession, UserRole } from '@/types/auth';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 interface CreateFilingRequest {
   customerId: string;
@@ -69,7 +64,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
   // Handle based on user role
   if (session.role === 'CUSTOMER') {
     // Customers can only create filings for themselves
-    const { data: customerRecord } = await supabaseAdmin
+    const { data: customerRecord } = await getSupabaseAdmin()
       .from('customer')
       .select('id')
       .eq('user_id', session.userId)
@@ -89,7 +84,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
     consultantId = null;
   } else {
     // Consultants/Tax Advisors - get their consultant record
-    const { data: consultant, error: consultantError } = await supabaseAdmin
+    const { data: consultant, error: consultantError } = await getSupabaseAdmin()
       .from('consultant')
       .select('id, tax_partner_id')
       .eq('user_id', session.userId)
@@ -110,7 +105,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
   }
 
   // Verify customer exists
-  const { data: customer, error: customerError } = await supabaseAdmin
+  const { data: customer, error: customerError } = await getSupabaseAdmin()
     .from('customer')
     .select('id, full_name')
     .eq('id', customerId)
@@ -124,7 +119,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
   }
 
   // Check for existing draft for same customer/type/period
-  const { data: existingFiling } = await supabaseAdmin
+  const { data: existingFiling } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('id')
     .eq('customer_id', customerId)
@@ -135,7 +130,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
 
   if (existingFiling) {
     // Update existing draft instead of creating new one
-    const { data: updatedFiling, error: updateError } = await supabaseAdmin
+    const { data: updatedFiling, error: updateError } = await getSupabaseAdmin()
       .from('tax_filing')
       .update({
         tax_data: taxData,
@@ -162,7 +157,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
   }
 
   // Create new filing
-  const { data: newFiling, error: createError } = await supabaseAdmin
+  const { data: newFiling, error: createError } = await getSupabaseAdmin()
     .from('tax_filing')
     .insert({
       customer_id: customerId,
@@ -191,7 +186,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
       relationship_type: 'SUPPORTING_DOCUMENT',
     }));
 
-    await supabaseAdmin.from('tax_filing_documents').insert(links);
+    await getSupabaseAdmin().from('tax_filing_documents').insert(links);
   }
 
   return NextResponse.json(
@@ -218,7 +213,7 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
   const offset = (page - 1) * limit;
 
   try {
-    let query = supabaseAdmin
+    let query = getSupabaseAdmin()
       .from('tax_filing')
       .select(`
         id,
@@ -241,7 +236,7 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
 
     if (role === 'CUSTOMER') {
       // Customers can only see their own filings
-      const { data: customerRecord } = await supabaseAdmin
+      const { data: customerRecord } = await getSupabaseAdmin()
         .from('customer')
         .select('id')
         .eq('user_id', userId)
@@ -258,7 +253,7 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
       }
     } else if (role === 'CONSULTANT_JTC') {
       // Consultants can see filings for their assigned customers
-      const { data: assignedCustomers } = await supabaseAdmin
+      const { data: assignedCustomers } = await getSupabaseAdmin()
         .from('customer_consultant')
         .select('customer_id')
         .eq('consultant_id', userId)

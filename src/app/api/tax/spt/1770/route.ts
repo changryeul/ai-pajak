@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
@@ -29,11 +29,6 @@ import {
 import { generateSPT1770PDFBuffer } from '@/lib/tax/spt-1770/pdf-generator';
 import { convertOCRToIncomeSource } from '@/lib/tax/spt-1770ss/calculator';
 import { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 /**
  * Request body for SPT 1770 generation
@@ -159,7 +154,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     }
 
     // Fetch customer data
-    const { data: customer, error: customerError } = await supabaseAdmin
+    const { data: customer, error: customerError } = await getSupabaseAdmin()
       .from('customer')
       .select(
         'id, user_id, full_name, company_name, npwp, nik, address, phone, email, customer_type'
@@ -190,7 +185,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
 
     if (employmentIncome.length === 0) {
       // Try to fetch from documents
-      const { data: documents } = await supabaseAdmin
+      const { data: documents } = await getSupabaseAdmin()
         .from('document')
         .select('id, ocr_result, form_type')
         .eq('customer_id', customerId)
@@ -299,7 +294,7 @@ async function handleGetSPT(req: RequestWithSession): Promise<Response> {
   }
 
   // Check for existing saved SPT
-  const { data: existingSPT, error: sptError } = await supabaseAdmin
+  const { data: existingSPT, error: sptError } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('*')
     .eq('customer_id', customerId)
@@ -323,7 +318,7 @@ async function handleGetSPT(req: RequestWithSession): Promise<Response> {
   }
 
   // Check for loss carryforward from previous years
-  const { data: previousLosses } = await supabaseAdmin
+  const { data: previousLosses } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('tax_year, tax_data')
     .eq('customer_id', customerId)

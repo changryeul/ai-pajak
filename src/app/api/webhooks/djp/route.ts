@@ -8,16 +8,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { DJPService } from '@/lib/djp/djp-service';
 import { queueDJPJob } from '@/lib/djp/queue';
 import type { DJPWebhookEventType, DJPJobRow } from '@/lib/djp/types';
-
-// Admin client for webhook processing
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 interface WebhookPayload {
   event_type: string;
@@ -75,7 +69,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Find the job/filing by transaction ID
-    const { data: job } = await supabaseAdmin
+    const { data: job } = await getSupabaseAdmin()
       .from('djp_job')
       .select('id, tax_filing_id, customer_id, type')
       .eq('djp_transaction_id', transactionId)
@@ -111,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     // Create audit log
     if (job.customer_id || job.tax_filing_id) {
-      await supabaseAdmin.from('audit_log').insert({
+      await getSupabaseAdmin().from('audit_log').insert({
         customer_id: job.customer_id,
         tax_filing_id: job.tax_filing_id,
         actor_user_id: null,
@@ -175,7 +169,7 @@ async function handleFilingAccepted(
 
   // Update tax filing
   if (job.tax_filing_id) {
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('tax_filing')
       .update({
         status: 'FILED',
@@ -188,7 +182,7 @@ async function handleFilingAccepted(
   }
 
   // Update job
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('djp_job')
     .update({
       status: 'COMPLETED',
@@ -214,7 +208,7 @@ async function handleFilingRejected(
   const errorMessage = data.error_message as string | undefined;
 
   if (job.tax_filing_id) {
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('tax_filing')
       .update({
         status: 'DRAFT', // Revert to draft so user can fix
@@ -225,7 +219,7 @@ async function handleFilingRejected(
       .eq('id', job.tax_filing_id);
   }
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('djp_job')
     .update({
       status: 'FAILED',
@@ -278,7 +272,7 @@ async function handleBillingPaid(
   const paymentDate = data.payment_date as string | undefined;
 
   // Update billing record
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('djp_billing')
     .update({
       ntpn,
@@ -288,13 +282,13 @@ async function handleBillingPaid(
     .eq('djp_job_id', job.id);
 
   // Update job result
-  const { data: existingJob } = await supabaseAdmin
+  const { data: existingJob } = await getSupabaseAdmin()
     .from('djp_job')
     .select('result')
     .eq('id', job.id)
     .single<{ result: Record<string, unknown> | null }>();
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('djp_job')
     .update({
       result: {
@@ -324,7 +318,7 @@ async function logWebhook(
   error: string | null
 ): Promise<void> {
   try {
-    await supabaseAdmin.from('djp_webhook_log').insert({
+    await getSupabaseAdmin().from('djp_webhook_log').insert({
       event_type: payload?.event_type || 'UNKNOWN',
       transaction_id: payload?.transaction_id,
       payload: payload || { raw: rawBody.slice(0, 1000) },
@@ -347,7 +341,7 @@ async function sendFilingNotification(
 
   try {
     // Get filing with customer info
-    const { data: filing } = await supabaseAdmin
+    const { data: filing } = await getSupabaseAdmin()
       .from('tax_filing')
       .select(
         `
@@ -368,7 +362,7 @@ async function sendFilingNotification(
 
     // Create in-app notification
     if (customer.user_id) {
-      await supabaseAdmin.from('notification').insert({
+      await getSupabaseAdmin().from('notification').insert({
         user_id: customer.user_id,
         type: status === 'accepted' ? 'TAX_FILING_ACCEPTED' : 'TAX_FILING_REJECTED',
         title:

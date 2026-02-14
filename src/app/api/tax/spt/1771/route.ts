@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
@@ -23,11 +23,6 @@ import {
   calculateIncomeStatementTotals,
   generateSPT1771PDFBuffer,
 } from '@/lib/tax/spt-1771';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 /**
  * Request body for SPT 1771 generation
@@ -138,7 +133,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     }
 
     // Fetch customer data
-    const { data: customer, error: customerError } = await supabaseAdmin
+    const { data: customer, error: customerError } = await getSupabaseAdmin()
       .from('customer')
       .select(
         'id, user_id, full_name, company_name, npwp, address, phone, email, customer_type'
@@ -190,7 +185,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     let effectiveLossCarryforward = lossCarryforward;
 
     if (effectiveLossCarryforward.length === 0) {
-      const { data: previousFilings } = await supabaseAdmin
+      const { data: previousFilings } = await getSupabaseAdmin()
         .from('tax_filing')
         .select('tax_year, tax_data')
         .eq('customer_id', customerId)
@@ -319,7 +314,7 @@ async function handleGetSPT(req: RequestWithSession): Promise<Response> {
   }
 
   // Validate customer is corporate
-  const { data: customer, error: customerError } = await supabaseAdmin
+  const { data: customer, error: customerError } = await getSupabaseAdmin()
     .from('customer')
     .select('id, customer_type')
     .eq('id', customerId)
@@ -340,7 +335,7 @@ async function handleGetSPT(req: RequestWithSession): Promise<Response> {
   }
 
   // Check for existing saved SPT
-  const { data: existingSPT, error: sptError } = await supabaseAdmin
+  const { data: existingSPT, error: sptError } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('*')
     .eq('customer_id', customerId)
@@ -364,7 +359,7 @@ async function handleGetSPT(req: RequestWithSession): Promise<Response> {
   }
 
   // Check for loss carryforward from previous years (10 year period)
-  const { data: previousLosses } = await supabaseAdmin
+  const { data: previousLosses } = await getSupabaseAdmin()
     .from('tax_filing')
     .select('tax_year, tax_data')
     .eq('customer_id', customerId)

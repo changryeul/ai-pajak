@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
 import { withAudit } from '@/middleware/audit';
 import type { RequestWithSession, UserRole } from '@/types/auth';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 async function handleGetFiling(
   req: RequestWithSession,
@@ -19,7 +14,7 @@ async function handleGetFiling(
 
   try {
     // Fetch filing with customer info
-    const { data: filing, error } = await supabaseAdmin
+    const { data: filing, error } = await getSupabaseAdmin()
       .from('tax_filing')
       .select(`
         *,
@@ -44,7 +39,7 @@ async function handleGetFiling(
     const { role, userId } = req.session;
 
     if (role === 'CUSTOMER') {
-      const { data: customerRecord } = await supabaseAdmin
+      const { data: customerRecord } = await getSupabaseAdmin()
         .from('customer')
         .select('id')
         .eq('user_id', userId)
@@ -57,7 +52,7 @@ async function handleGetFiling(
         );
       }
     } else if (role === 'CONSULTANT_JTC') {
-      const { data: assignment } = await supabaseAdmin
+      const { data: assignment } = await getSupabaseAdmin()
         .from('customer_consultant')
         .select('id')
         .eq('customer_id', filing.customer_id)
@@ -74,7 +69,7 @@ async function handleGetFiling(
     }
 
     // Fetch history
-    const { data: history } = await supabaseAdmin
+    const { data: history } = await getSupabaseAdmin()
       .from('filing_history')
       .select(`
         id,
@@ -170,7 +165,7 @@ async function handleUpdateFiling(
 
   try {
     // Check current status
-    const { data: current, error: fetchError } = await supabaseAdmin
+    const { data: current, error: fetchError } = await getSupabaseAdmin()
       .from('tax_filing')
       .select('status, customer_id')
       .eq('id', id)
@@ -195,7 +190,7 @@ async function handleUpdateFiling(
     const { role, userId } = req.session;
 
     if (role === 'CUSTOMER') {
-      const { data: customerRecord } = await supabaseAdmin
+      const { data: customerRecord } = await getSupabaseAdmin()
         .from('customer')
         .select('id')
         .eq('user_id', userId)
@@ -222,7 +217,7 @@ async function handleUpdateFiling(
     if (body.taxDue !== undefined) updateData.tax_due = body.taxDue;
     if (body.notes !== undefined) updateData.notes = body.notes;
 
-    const { data: updated, error: updateError } = await supabaseAdmin
+    const { data: updated, error: updateError } = await getSupabaseAdmin()
       .from('tax_filing')
       .update(updateData)
       .eq('id', id)
@@ -238,7 +233,7 @@ async function handleUpdateFiling(
     }
 
     // Record history
-    await supabaseAdmin.from('filing_history').insert({
+    await getSupabaseAdmin().from('filing_history').insert({
       filing_id: id,
       action: 'UPDATED',
       status: updated.status,

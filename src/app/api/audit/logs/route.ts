@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 /**
  * Get Audit Logs
@@ -28,7 +23,7 @@ async function handleGetLogs(req: RequestWithSession): Promise<Response> {
 
   try {
     // Build query
-    let query = supabaseAdmin
+    let query = getSupabaseAdmin()
       .from('audit_log')
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
@@ -44,7 +39,7 @@ async function handleGetLogs(req: RequestWithSession): Promise<Response> {
 
     if (role === 'CUSTOMER') {
       // Customers can only see their own audit logs
-      const { data: customer } = await supabaseAdmin
+      const { data: customer } = await getSupabaseAdmin()
         .from('customer')
         .select('id')
         .eq('user_id', userId)
@@ -62,14 +57,14 @@ async function handleGetLogs(req: RequestWithSession): Promise<Response> {
       // Consultants can see logs for their assigned customers
       if (customerId) {
         // Verify consultant has access to this customer
-        const { data: consultant } = await supabaseAdmin
+        const { data: consultant } = await getSupabaseAdmin()
           .from('consultant')
           .select('id')
           .eq('user_id', userId)
           .single();
 
         if (consultant) {
-          const { data: assignment } = await supabaseAdmin
+          const { data: assignment } = await getSupabaseAdmin()
             .from('customer_consultant')
             .select('id')
             .eq('customer_id', customerId)

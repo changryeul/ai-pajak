@@ -178,6 +178,7 @@
   },
   "active": "ee78e85da7d3b8c0",
   "lastOpenFiles": [
+    "src/lib/supabase/admin.ts",
     "src/app/[locale]/(auth)/reset-password/page.tsx",
     "src/app/[locale]/(auth)/reset-password",
     "src/app/[locale]/(auth)/forgot-password/page.tsx",
@@ -192,7 +193,6 @@
     "src/app/api/admin/system-status",
     "DEPLOYMENT.md",
     "src/tests/e2e/spt-tahunan.spec.ts",
-    "src/tests/e2e/billing.spec.ts",
     "node_modules/pino/SECURITY.md",
     "node_modules/pino/README.md",
     "node_modules/pino/CONTRIBUTING.md",

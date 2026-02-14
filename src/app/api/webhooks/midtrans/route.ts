@@ -20,7 +20,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { MidtransService } from '@/lib/payment/midtrans';
 import {
   sendPaymentConfirmation,
@@ -40,12 +40,6 @@ interface MidtransNotification {
   signature_key: string;
   status_message?: string;
 }
-
-// Create Supabase client with service role for webhook
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export async function POST(request: NextRequest) {
   try {
@@ -135,7 +129,7 @@ export async function POST(request: NextRequest) {
       updateData.paid_at = paidAt;
     }
 
-    const { data: transaction, error: updateError } = await supabaseAdmin
+    const { data: transaction, error: updateError } = await getSupabaseAdmin()
       .from('billing_transaction')
       .update(updateData)
       .eq('id', transactionId)
@@ -153,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create audit log for payment event
-    await supabaseAdmin.from('audit_log').insert({
+    await getSupabaseAdmin().from('audit_log').insert({
       customer_id: transaction.customer_id,
       actor_user_id: null, // System action
       actor_organization_id: null,
@@ -174,7 +168,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Get customer details for notifications
-    const { data: customer } = await supabaseAdmin
+    const { data: customer } = await getSupabaseAdmin()
       .from('customer')
       .select('user_id, full_name, email')
       .eq('id', transaction.customer_id)
@@ -184,7 +178,7 @@ export async function POST(request: NextRequest) {
     if (paymentStatus === 'PAID' && customer) {
       // In-app notification
       if (customer.user_id) {
-        await supabaseAdmin.from('notification').insert({
+        await getSupabaseAdmin().from('notification').insert({
           user_id: customer.user_id,
           type: 'PAYMENT_RECEIVED',
           title: 'Pembayaran Berhasil',
@@ -239,7 +233,7 @@ export async function POST(request: NextRequest) {
 
       // In-app notification for failed payment
       if (customer.user_id) {
-        await supabaseAdmin.from('notification').insert({
+        await getSupabaseAdmin().from('notification').insert({
           user_id: customer.user_id,
           type: 'PAYMENT_DUE',
           title: 'Pembayaran Gagal',

@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { BPEPDF } from '@/lib/tax/bpe/pdf-generator';
 import { BPEData, TaxType, FilingType } from '@/lib/tax/bpe/types';
@@ -19,11 +19,6 @@ import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
 import { withAudit } from '@/middleware/audit';
 import type { RequestWithSession, UserRole } from '@/types/auth';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 interface TaxFilingWithRelations {
   id: string;
@@ -63,7 +58,7 @@ async function handleGetBPE(
 
   try {
     // Fetch the filing with customer and consultant info
-    const { data: filing, error } = await supabaseAdmin
+    const { data: filing, error } = await getSupabaseAdmin()
       .from('tax_filing')
       .select(`
         id,
@@ -126,7 +121,7 @@ async function handleGetBPE(
     const { role, userId } = req.session;
 
     if (role === 'CUSTOMER') {
-      const { data: customer } = await supabaseAdmin
+      const { data: customer } = await getSupabaseAdmin()
         .from('customer')
         .select('id')
         .eq('user_id', userId)
@@ -139,7 +134,7 @@ async function handleGetBPE(
         );
       }
     } else if (role === 'CONSULTANT_JTC' || role === 'TAX_ADVISOR_JTC') {
-      const { data: consultant } = await supabaseAdmin
+      const { data: consultant } = await getSupabaseAdmin()
         .from('consultant')
         .select('id')
         .eq('user_id', userId)
