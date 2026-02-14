@@ -628,5 +628,109 @@
     "monthlyBreakdown": "Rincian Bulanan",
     "income": "Penghasilan",
     "tax": "Pajak"
+  },
+  "legal": {
+    "backToLogin": "Kembali ke Login",
+    "privacyPolicy": {
+      "title": "Kebijakan Privasi",
+      "lastUpdated": "Terakhir diperbarui",
+      "introduction": {
+        "title": "Pendahuluan",
+        "content": "AI Pajak ('kami', 'kita', atau 'milik kami') berkomitmen untuk melindungi privasi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda ketika Anda menggunakan layanan pelaporan pajak kami."
+      },
+      "dataCollection": {
+        "title": "Informasi yang Kami Kumpulkan",
+        "intro": "Kami mengumpulkan informasi berikut untuk menyediakan layanan kami:",
+        "items": {
+          "identity": "Informasi identitas: Nama, NIK, NPWP, tanggal lahir",
+          "contact": "Informasi kontak: Alamat email, nomor telepon, alamat",
+          "tax": "Informasi pajak: Data penghasilan, pengurangan, dokumen pajak",
+          "financial": "Informasi keuangan: Detail rekening bank, riwayat pembayaran",
+          "usage": "Data penggunaan: Log akses, alamat IP, informasi perangkat"
+        }
+      },
+      "dataUsage": {
+        "title": "Bagaimana Kami Menggunakan Informasi Anda",
+        "intro": "Kami menggunakan informasi Anda untuk:",
+        "items": {
+          "taxServices": "Menyiapkan dan mengirimkan laporan pajak Anda ke DJP",
+          "communication": "Berkomunikasi dengan Anda tentang layanan kami",
+          "improvement": "Meningkatkan layanan dan pengalaman pengguna kami",
+          "legal": "Memenuhi kewajiban hukum dan peraturan perpajakan"
+        }
+      },
+      "dataProtection": {
+        "title": "Keamanan Data",
+        "content": "Kami menerapkan langkah-langkah keamanan teknis dan organisasi yang sesuai untuk melindungi informasi pribadi Anda dari akses tidak sah, pengubahan, pengungkapan, atau penghancuran. Ini termasuk enkripsi data, kontrol akses yang ketat, dan audit keamanan berkala."
+      },
+      "dataRetention": {
+        "title": "Penyimpanan Data",
+        "content": "Kami menyimpan informasi pajak Anda selama minimal 5 (lima) tahun sesuai dengan ketentuan perpajakan Indonesia. Data akan dihapus atau dianonimkan setelah periode penyimpanan berakhir, kecuali jika diperlukan untuk tujuan hukum."
+      },
+      "userRights": {
+        "title": "Hak Anda",
+        "intro": "Anda memiliki hak untuk:",
+        "items": {
+          "access": "Mengakses informasi pribadi yang kami simpan tentang Anda",
+          "correction": "Meminta koreksi atas informasi yang tidak akurat",
+          "deletion": "Meminta penghapusan data Anda (dengan batasan hukum)",
+          "objection": "Menolak pemrosesan data untuk tujuan tertentu"
+        }
+      },
+      "thirdParty": {
+        "title": "Berbagi dengan Pihak Ketiga",
+        "content": "Kami dapat berbagi informasi Anda dengan: Direktorat Jenderal Pajak (DJP) untuk pelaporan pajak, penyedia layanan pembayaran untuk memproses transaksi, dan mitra bisnis resmi (Jakarta Tax Consulting) untuk layanan konsultasi pajak. Kami tidak menjual informasi pribadi Anda kepada pihak ketiga."
+      },
+      "contact": {
+        "title": "Hubungi Kami",
+        "content": "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini atau ingin menggunakan hak Anda, silakan hubungi kami:"
+      }
+    },
+    "termsOfService": {
+      "title": "Syarat dan Ketentuan",
+      "lastUpdated": "Terakhir diperbarui",
+      "acceptance": {
+        "title": "Penerimaan Syarat",
+        "content": "Dengan mengakses dan menggunakan layanan AI Pajak, Anda setuju untuk terikat dengan Syarat dan Ketentuan ini. Jika Anda tidak setuju dengan syarat ini, harap tidak menggunakan layanan kami."
+      },
+      "services": {
+        "title": "Deskripsi Layanan",
+        "content": "AI Pajak menyediakan platform pelaporan pajak digital yang membantu Anda menyiapkan, menghitung, dan melaporkan pajak kepada DJP melalui kemitraan dengan Jakarta Tax Consulting (JTC)."
+      },
+      "userObligations": {
+        "title": "Kewajiban Pengguna",
+        "intro": "Anda setuju untuk:",
+        "items": {
+          "accurate": "Memberikan informasi yang akurat dan lengkap",
+          "confidential": "Menjaga kerahasiaan kredensial akun Anda",
+          "lawful": "Menggunakan layanan hanya untuk tujuan yang sah",
+          "compliance": "Mematuhi semua undang-undang dan peraturan perpajakan yang berlaku"
+        }
+      },
+      "poa": {
+        "title": "Surat Kuasa",
+        "content": "Untuk menggunakan layanan pelaporan pajak, Anda harus menandatangani Surat Kuasa yang memberikan wewenang kepada JTC untuk bertindak atas nama Anda dalam urusan perpajakan."
+      },
+      "fees": {
+        "title": "Biaya dan Pembayaran",
+        "content": "Biaya layanan akan ditampilkan sebelum Anda berlangganan. Pembayaran diproses melalui gateway pembayaran aman kami. Pengembalian dana tunduk pada kebijakan pembatalan kami."
+      },
+      "liability": {
+        "title": "Batasan Tanggung Jawab",
+        "content": "AI Pajak tidak bertanggung jawab atas kesalahan yang timbul dari informasi yang tidak akurat yang Anda berikan. Kami tidak menjamin hasil pelaporan pajak tertentu atau pengembalian pajak."
+      },
+      "termination": {
+        "title": "Penghentian",
+        "content": "Kami dapat menangguhkan atau menghentikan akses Anda ke layanan jika Anda melanggar Syarat dan Ketentuan ini atau atas permintaan Anda sendiri."
+      },
+      "changes": {
+        "title": "Perubahan Syarat",
+        "content": "Kami dapat memperbarui Syarat dan Ketentuan ini dari waktu ke waktu. Perubahan material akan diberitahukan melalui email atau notifikasi dalam aplikasi."
+      },
+      "contact": {
+        "title": "Hubungi Kami",
+        "content": "Untuk pertanyaan tentang Syarat dan Ketentuan ini, silakan hubungi:"
+      }
+    }
   }
 }

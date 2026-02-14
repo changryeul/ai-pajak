@@ -628,5 +628,109 @@
     "monthlyBreakdown": "Monthly Breakdown",
     "income": "Income",
     "tax": "Tax"
+  },
+  "legal": {
+    "backToLogin": "Back to Login",
+    "privacyPolicy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated",
+      "introduction": {
+        "title": "Introduction",
+        "content": "AI Pajak ('we', 'us', or 'our') is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our tax filing services."
+      },
+      "dataCollection": {
+        "title": "Information We Collect",
+        "intro": "We collect the following information to provide our services:",
+        "items": {
+          "identity": "Identity information: Name, NIK, NPWP, date of birth",
+          "contact": "Contact information: Email address, phone number, address",
+          "tax": "Tax information: Income data, deductions, tax documents",
+          "financial": "Financial information: Bank account details, payment history",
+          "usage": "Usage data: Access logs, IP address, device information"
+        }
+      },
+      "dataUsage": {
+        "title": "How We Use Your Information",
+        "intro": "We use your information to:",
+        "items": {
+          "taxServices": "Prepare and submit your tax returns to DJP",
+          "communication": "Communicate with you about our services",
+          "improvement": "Improve our services and user experience",
+          "legal": "Comply with legal obligations and tax regulations"
+        }
+      },
+      "dataProtection": {
+        "title": "Data Security",
+        "content": "We implement appropriate technical and organizational security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction. This includes data encryption, strict access controls, and regular security audits."
+      },
+      "dataRetention": {
+        "title": "Data Retention",
+        "content": "We retain your tax information for a minimum of 5 (five) years in accordance with Indonesian tax regulations. Data will be deleted or anonymized after the retention period ends, unless required for legal purposes."
+      },
+      "userRights": {
+        "title": "Your Rights",
+        "intro": "You have the right to:",
+        "items": {
+          "access": "Access the personal information we hold about you",
+          "correction": "Request correction of inaccurate information",
+          "deletion": "Request deletion of your data (subject to legal limitations)",
+          "objection": "Object to processing for certain purposes"
+        }
+      },
+      "thirdParty": {
+        "title": "Third-Party Sharing",
+        "content": "We may share your information with: Direktorat Jenderal Pajak (DJP) for tax reporting, payment service providers to process transactions, and authorized business partners (Jakarta Tax Consulting) for tax consulting services. We do not sell your personal information to third parties."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "content": "If you have questions about this Privacy Policy or wish to exercise your rights, please contact us:"
+      }
+    },
+    "termsOfService": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated",
+      "acceptance": {
+        "title": "Acceptance of Terms",
+        "content": "By accessing and using AI Pajak services, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services."
+      },
+      "services": {
+        "title": "Service Description",
+        "content": "AI Pajak provides a digital tax filing platform that helps you prepare, calculate, and report taxes to DJP through our partnership with Jakarta Tax Consulting (JTC)."
+      },
+      "userObligations": {
+        "title": "User Obligations",
+        "intro": "You agree to:",
+        "items": {
+          "accurate": "Provide accurate and complete information",
+          "confidential": "Keep your account credentials confidential",
+          "lawful": "Use the services only for lawful purposes",
+          "compliance": "Comply with all applicable tax laws and regulations"
+        }
+      },
+      "poa": {
+        "title": "Power of Attorney",
+        "content": "To use tax filing services, you must sign a Power of Attorney authorizing JTC to act on your behalf in tax matters."
+      },
+      "fees": {
+        "title": "Fees and Payment",
+        "content": "Service fees will be displayed before you subscribe. Payments are processed through our secure payment gateway. Refunds are subject to our cancellation policy."
+      },
+      "liability": {
+        "title": "Limitation of Liability",
+        "content": "AI Pajak is not responsible for errors arising from inaccurate information you provide. We do not guarantee specific tax filing results or refunds."
+      },
+      "termination": {
+        "title": "Termination",
+        "content": "We may suspend or terminate your access to services if you violate these Terms and Conditions or at your own request."
+      },
+      "changes": {
+        "title": "Changes to Terms",
+        "content": "We may update these Terms and Conditions from time to time. Material changes will be notified via email or in-app notification."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "content": "For questions about these Terms and Conditions, please contact:"
+      }
+    }
   }
 }

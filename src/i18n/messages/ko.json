@@ -628,5 +628,109 @@
     "monthlyBreakdown": "월별 내역",
     "income": "소득",
     "tax": "세금"
+  },
+  "legal": {
+    "backToLogin": "로그인으로 돌아가기",
+    "privacyPolicy": {
+      "title": "개인정보처리방침",
+      "lastUpdated": "최종 업데이트",
+      "introduction": {
+        "title": "소개",
+        "content": "AI Pajak('당사')은 귀하의 개인정보 보호에 최선을 다하고 있습니다. 본 개인정보처리방침은 세금 신고 서비스 이용 시 개인정보를 수집, 사용, 공개 및 보호하는 방법을 설명합니다."
+      },
+      "dataCollection": {
+        "title": "수집하는 정보",
+        "intro": "서비스 제공을 위해 다음 정보를 수집합니다:",
+        "items": {
+          "identity": "신원 정보: 이름, NIK, NPWP, 생년월일",
+          "contact": "연락처 정보: 이메일 주소, 전화번호, 주소",
+          "tax": "세금 정보: 소득 데이터, 공제, 세금 문서",
+          "financial": "금융 정보: 은행 계좌 정보, 결제 내역",
+          "usage": "사용 데이터: 접속 로그, IP 주소, 기기 정보"
+        }
+      },
+      "dataUsage": {
+        "title": "정보 사용 방법",
+        "intro": "귀하의 정보는 다음 목적으로 사용됩니다:",
+        "items": {
+          "taxServices": "DJP에 세금 신고서 준비 및 제출",
+          "communication": "서비스 관련 커뮤니케이션",
+          "improvement": "서비스 및 사용자 경험 개선",
+          "legal": "법적 의무 및 세금 규정 준수"
+        }
+      },
+      "dataProtection": {
+        "title": "데이터 보안",
+        "content": "당사는 개인정보를 무단 접근, 변경, 공개 또는 파기로부터 보호하기 위해 적절한 기술적, 조직적 보안 조치를 시행합니다."
+      },
+      "dataRetention": {
+        "title": "데이터 보관",
+        "content": "인도네시아 세금 규정에 따라 세금 정보를 최소 5년간 보관합니다."
+      },
+      "userRights": {
+        "title": "귀하의 권리",
+        "intro": "귀하는 다음과 같은 권리가 있습니다:",
+        "items": {
+          "access": "당사가 보유한 개인정보에 접근",
+          "correction": "부정확한 정보의 수정 요청",
+          "deletion": "데이터 삭제 요청 (법적 제한 적용)",
+          "objection": "특정 목적의 처리에 대한 이의 제기"
+        }
+      },
+      "thirdParty": {
+        "title": "제3자 공유",
+        "content": "세금 신고를 위해 DJP, 결제 처리를 위한 결제 서비스 제공업체, 세금 컨설팅 서비스를 위한 Jakarta Tax Consulting과 정보를 공유할 수 있습니다."
+      },
+      "contact": {
+        "title": "문의",
+        "content": "본 개인정보처리방침에 대한 문의는 아래로 연락해 주세요:"
+      }
+    },
+    "termsOfService": {
+      "title": "이용약관",
+      "lastUpdated": "최종 업데이트",
+      "acceptance": {
+        "title": "약관 동의",
+        "content": "AI Pajak 서비스에 접속하고 이용함으로써 본 이용약관에 동의하게 됩니다."
+      },
+      "services": {
+        "title": "서비스 설명",
+        "content": "AI Pajak은 Jakarta Tax Consulting(JTC)과의 파트너십을 통해 DJP에 세금을 준비, 계산 및 신고하는 디지털 세금 신고 플랫폼을 제공합니다."
+      },
+      "userObligations": {
+        "title": "사용자 의무",
+        "intro": "귀하는 다음에 동의합니다:",
+        "items": {
+          "accurate": "정확하고 완전한 정보 제공",
+          "confidential": "계정 자격 증명의 기밀 유지",
+          "lawful": "합법적인 목적으로만 서비스 사용",
+          "compliance": "모든 관련 세법 및 규정 준수"
+        }
+      },
+      "poa": {
+        "title": "위임장",
+        "content": "세금 신고 서비스를 이용하려면 JTC가 세금 문제에서 귀하를 대리할 수 있도록 위임장에 서명해야 합니다."
+      },
+      "fees": {
+        "title": "요금 및 결제",
+        "content": "서비스 요금은 구독 전에 표시됩니다. 결제는 안전한 결제 게이트웨이를 통해 처리됩니다."
+      },
+      "liability": {
+        "title": "책임 제한",
+        "content": "AI Pajak은 귀하가 제공한 부정확한 정보로 인한 오류에 대해 책임지지 않습니다."
+      },
+      "termination": {
+        "title": "종료",
+        "content": "본 이용약관을 위반하거나 귀하의 요청에 따라 서비스 접근을 일시 중지하거나 종료할 수 있습니다."
+      },
+      "changes": {
+        "title": "약관 변경",
+        "content": "본 이용약관을 수시로 업데이트할 수 있습니다. 중요한 변경 사항은 이메일 또는 앱 내 알림으로 통지됩니다."
+      },
+      "contact": {
+        "title": "문의",
+        "content": "본 이용약관에 대한 문의는 아래로 연락해 주세요:"
+      }
+    }
   }
 }

@@ -628,5 +628,109 @@
     "monthlyBreakdown": "月度明细",
     "income": "收入",
     "tax": "税款"
+  },
+  "legal": {
+    "backToLogin": "返回登录",
+    "privacyPolicy": {
+      "title": "隐私政策",
+      "lastUpdated": "最后更新",
+      "introduction": {
+        "title": "简介",
+        "content": "AI Pajak（'我们'）致力于保护您的隐私。本隐私政策说明了我们在您使用税务申报服务时如何收集、使用、披露和保护您的个人信息。"
+      },
+      "dataCollection": {
+        "title": "我们收集的信息",
+        "intro": "我们收集以下信息以提供服务：",
+        "items": {
+          "identity": "身份信息：姓名、NIK、NPWP、出生日期",
+          "contact": "联系信息：电子邮件地址、电话号码、地址",
+          "tax": "税务信息：收入数据、扣除项、税务文件",
+          "financial": "财务信息：银行账户详情、付款历史",
+          "usage": "使用数据：访问日志、IP地址、设备信息"
+        }
+      },
+      "dataUsage": {
+        "title": "我们如何使用您的信息",
+        "intro": "我们将您的信息用于：",
+        "items": {
+          "taxServices": "向DJP准备和提交您的税务申报",
+          "communication": "与您沟通我们的服务",
+          "improvement": "改善我们的服务和用户体验",
+          "legal": "遵守法律义务和税务法规"
+        }
+      },
+      "dataProtection": {
+        "title": "数据安全",
+        "content": "我们采取适当的技术和组织安全措施，保护您的个人信息免受未经授权的访问、更改、披露或销毁。"
+      },
+      "dataRetention": {
+        "title": "数据保留",
+        "content": "根据印度尼西亚税务法规，我们将您的税务信息至少保留5年。"
+      },
+      "userRights": {
+        "title": "您的权利",
+        "intro": "您有权：",
+        "items": {
+          "access": "访问我们持有的关于您的个人信息",
+          "correction": "要求更正不准确的信息",
+          "deletion": "要求删除您的数据（受法律限制）",
+          "objection": "反对某些目的的处理"
+        }
+      },
+      "thirdParty": {
+        "title": "第三方共享",
+        "content": "我们可能与以下方共享您的信息：用于税务申报的DJP、用于处理交易的支付服务提供商、以及用于税务咨询服务的Jakarta Tax Consulting。"
+      },
+      "contact": {
+        "title": "联系我们",
+        "content": "如果您对本隐私政策有任何疑问，请联系我们："
+      }
+    },
+    "termsOfService": {
+      "title": "服务条款",
+      "lastUpdated": "最后更新",
+      "acceptance": {
+        "title": "条款接受",
+        "content": "访问和使用AI Pajak服务即表示您同意受本服务条款的约束。"
+      },
+      "services": {
+        "title": "服务说明",
+        "content": "AI Pajak通过与Jakarta Tax Consulting (JTC)的合作提供数字税务申报平台，帮助您准备、计算并向DJP申报税款。"
+      },
+      "userObligations": {
+        "title": "用户义务",
+        "intro": "您同意：",
+        "items": {
+          "accurate": "提供准确完整的信息",
+          "confidential": "保持账户凭据的机密性",
+          "lawful": "仅将服务用于合法目的",
+          "compliance": "遵守所有适用的税法和法规"
+        }
+      },
+      "poa": {
+        "title": "委托书",
+        "content": "要使用税务申报服务，您必须签署授权JTC在税务事项中代表您行事的委托书。"
+      },
+      "fees": {
+        "title": "费用和付款",
+        "content": "服务费用将在您订阅前显示。付款通过我们安全的支付网关处理。"
+      },
+      "liability": {
+        "title": "责任限制",
+        "content": "AI Pajak对因您提供的不准确信息而产生的错误不承担责任。"
+      },
+      "termination": {
+        "title": "终止",
+        "content": "如果您违反本服务条款或应您的要求，我们可能会暂停或终止您对服务的访问。"
+      },
+      "changes": {
+        "title": "条款变更",
+        "content": "我们可能会不时更新本服务条款。重大变更将通过电子邮件或应用内通知告知您。"
+      },
+      "contact": {
+        "title": "联系我们",
+        "content": "如果您对本服务条款有任何疑问，请联系我们："
+      }
+    }
   }
 }
