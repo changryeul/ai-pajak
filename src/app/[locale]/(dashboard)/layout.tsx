@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 
+// Force dynamic rendering - dashboard requires authentication
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout({
   children,
 }: {
