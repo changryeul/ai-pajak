@@ -98,20 +98,5 @@
       "path": "/api/cron/cleanup-expired-tokens",
       "schedule": "0 0 * * *"
     }
-  ],
-  "functions": {
-    "api/tax/spt/**": {
-      "maxDuration": 60
-    },
-    "api/documents/[id]/ocr": {
-      "maxDuration": 120,
-      "memory": 1024
-    },
-    "api/webhooks/**": {
-      "maxDuration": 30
-    },
-    "api/djp/**": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
