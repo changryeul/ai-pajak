@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createCompany } from '../api/company.api';
+import { createCompany } from '../api/company';
 
 export default function CompanyPage() {
   const [name, setName] = useState('');

@@ -28,7 +28,6 @@ import { QueueController } from './queue.controller';
     }),
     BullModule.registerQueue(
       { name: 'test-queue' },
-      { name: 'ocr-processing' },
     ),
   ],
   controllers: [QueueController],

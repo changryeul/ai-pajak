@@ -1,5 +1,7 @@
 export async function fetchTaxCase(id: string) {
-  const res = await fetch(`/api/tax-cases/${id}`);
+  const res = await fetch(`/api/tax-cases/${id}`, {
+    headers: { 'x-user-id': '1' },
+  });
   if (!res.ok) throw new Error('Failed to fetch tax case');
   return res.json();
 }
@@ -10,7 +12,10 @@ export async function taxCaseAction(
 ) {
   const res = await fetch(`/api/tax-cases/${id}/action`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-id': '1',
+    },
     body: JSON.stringify({ action }),
   });
 

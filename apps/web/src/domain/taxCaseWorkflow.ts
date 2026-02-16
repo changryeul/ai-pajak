@@ -2,7 +2,7 @@ export const STAGE_ACTIONS: Record<string, {
   label: string;
   action: string;
   variant?: 'primary' | 'secondary' | 'danger';
-}>[] = {
+}[]> = {
   AI_ANALYZED: [
     {
       label: 'Move to Human Review',

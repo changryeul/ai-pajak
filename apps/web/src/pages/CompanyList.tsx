@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchCompanies, Company } from '../api/company';
+import { fetchAllCompanies, CompanySummary as Company } from '../api/company';
 import { Card, CardHeader, CardContent, Button } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ export function CompanyListPage() {
   const nav = useNavigate();
 
   useEffect(() => {
-    fetchCompanies().then(setCompanies);
+    fetchAllCompanies().then(setCompanies);
   }, []);
 
   return (
