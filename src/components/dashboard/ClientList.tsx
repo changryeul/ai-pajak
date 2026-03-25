@@ -87,7 +87,7 @@ export function ClientList({ consultantId, limit = 10, showSearch = true }: Clie
         }));
 
         setClients(clientsWithStats);
-        setTotalClients(data.pagination?.total || data.data.length);
+        setTotalClients(data.pagination?.total || clientsWithStats.length);
       }
     } catch (error) {
       console.error('Failed to fetch clients:', error);
