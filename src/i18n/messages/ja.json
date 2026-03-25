@@ -413,6 +413,7 @@
     "taxType": "税種",
     "period": "期間",
     "customer": "顧客",
+    "statusLabel": "ステータス",
     "status": {
       "draft": "下書き",
       "pending_review": "審査待ち",

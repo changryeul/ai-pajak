@@ -413,6 +413,7 @@
     "taxType": "税种",
     "period": "期间",
     "customer": "客户",
+    "statusLabel": "状态",
     "status": {
       "draft": "草稿",
       "pending_review": "待审核",

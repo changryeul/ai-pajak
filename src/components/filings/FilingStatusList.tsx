@@ -244,7 +244,7 @@ export function FilingStatusList({ customerId }: FilingStatusListProps) {
                 <TableHead>{t('filings.taxType')}</TableHead>
                 <TableHead>{t('filings.period')}</TableHead>
                 {!customerId && <TableHead>{t('filings.customer')}</TableHead>}
-                <TableHead>{t('filings.status')}</TableHead>
+                <TableHead>{t('filings.statusLabel')}</TableHead>
                 <TableHead className="text-right">{t('filings.taxDue')}</TableHead>
                 <TableHead>{t('filings.dueDate')}</TableHead>
                 <TableHead className="text-right">{t('common.actions')}</TableHead>

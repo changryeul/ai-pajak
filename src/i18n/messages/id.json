@@ -413,6 +413,7 @@
     "taxType": "Jenis Pajak",
     "period": "Masa",
     "customer": "Pelanggan",
+    "statusLabel": "Status",
     "status": {
       "draft": "Draf",
       "pending_review": "Menunggu Tinjauan",

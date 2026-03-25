@@ -413,6 +413,7 @@
     "taxType": "세금 유형",
     "period": "기간",
     "customer": "고객",
+    "statusLabel": "상태",
     "status": {
       "draft": "임시저장",
       "pending_review": "검토 대기",

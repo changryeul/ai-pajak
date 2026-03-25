@@ -413,6 +413,7 @@
     "taxType": "Tax Type",
     "period": "Period",
     "customer": "Customer",
+    "statusLabel": "Status",
     "status": {
       "draft": "Draft",
       "pending_review": "Pending Review",
