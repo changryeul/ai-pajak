@@ -418,12 +418,14 @@
     "statusLabel": "상태",
     "status": {
       "draft": "임시저장",
+      "under_review": "검토 중",
+      "filed": "제출 완료",
+      "rejected": "거부됨",
       "pending_review": "검토 대기",
       "in_review": "검토 중",
       "pending_submission": "제출 대기",
       "submitted": "제출됨",
       "accepted": "승인됨",
-      "rejected": "거부됨",
       "amended": "수정됨"
     },
     "taxDue": "납부할 세금",

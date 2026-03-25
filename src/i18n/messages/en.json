@@ -418,6 +418,8 @@
     "statusLabel": "Status",
     "status": {
       "draft": "Draft",
+      "under_review": "Under Review",
+      "filed": "Filed",
       "pending_review": "Pending Review",
       "in_review": "In Review",
       "pending_submission": "Pending Submission",

@@ -418,6 +418,8 @@
     "statusLabel": "Status",
     "status": {
       "draft": "Draf",
+      "under_review": "Dalam Tinjauan",
+      "filed": "Terlapor",
       "pending_review": "Menunggu Tinjauan",
       "in_review": "Dalam Tinjauan",
       "pending_submission": "Menunggu Pengiriman",

@@ -418,6 +418,8 @@
     "statusLabel": "状态",
     "status": {
       "draft": "草稿",
+      "under_review": "审核中",
+      "filed": "已申报",
       "pending_review": "待审核",
       "in_review": "审核中",
       "pending_submission": "待提交",

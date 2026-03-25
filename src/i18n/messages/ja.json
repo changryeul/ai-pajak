@@ -418,6 +418,8 @@
     "statusLabel": "ステータス",
     "status": {
       "draft": "下書き",
+      "under_review": "審査中",
+      "filed": "提出済み",
       "pending_review": "審査待ち",
       "in_review": "審査中",
       "pending_submission": "提出待ち",
