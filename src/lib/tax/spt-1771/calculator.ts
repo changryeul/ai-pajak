@@ -187,7 +187,7 @@ function calculateCorporateTax(
   incomeStatement: CorporateIncomeStatement,
   fiscalAdjustments: SPT1771FiscalAdjustments,
   lossCarryforward: SPT1771LossCarryforward[],
-  taxYear: number
+  _taxYear: number
 ): SPT1771TaxCalculation {
   // Commercial income (accounting)
   const commercialIncome = incomeStatement.incomeBeforeTax;

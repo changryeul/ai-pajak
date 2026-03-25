@@ -182,7 +182,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     const incomeStatement = calculateIncomeStatementTotals(incomeStatementInput);
 
     // Get loss carryforward from previous years if not provided
-    let effectiveLossCarryforward = lossCarryforward;
+    const effectiveLossCarryforward = lossCarryforward;
 
     if (effectiveLossCarryforward.length === 0) {
       const { data: previousFilings } = await getSupabaseAdmin()

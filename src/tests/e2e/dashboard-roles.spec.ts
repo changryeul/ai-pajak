@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { TEST_USERS } from './fixtures/users';
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
 
-async function loginAs(page: ReturnType<typeof test.step extends (...args: infer A) => infer R ? never : never>, role: keyof typeof TEST_USERS) {
+async function loginAs(page: Page, role: keyof typeof TEST_USERS) {
   const user = TEST_USERS[role];
   if (!('email' in user)) return;
 

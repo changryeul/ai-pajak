@@ -113,9 +113,6 @@ export async function middleware(request: NextRequest) {
     pathWithoutLocale.startsWith(route)
   );
 
-  // Skip auth check in development
-  const isDev = process.env.NODE_ENV === 'development';
-
   // Update Supabase session
   const { supabaseResponse, user } = await updateSession(request);
 

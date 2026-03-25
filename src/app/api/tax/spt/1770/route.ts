@@ -181,7 +181,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
     };
 
     // Get employment income if not provided
-    let employmentIncome: IncomeSource1721A1[] = providedEmploymentIncome || [];
+    const employmentIncome: IncomeSource1721A1[] = providedEmploymentIncome || [];
 
     if (employmentIncome.length === 0) {
       // Try to fetch from documents

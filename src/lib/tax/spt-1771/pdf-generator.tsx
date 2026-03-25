@@ -13,7 +13,7 @@ import {
   View,
   StyleSheet,
 } from '@react-pdf/renderer';
-import type { SPT1771Data, TaxStatus } from './types';
+import type { SPT1771Data } from './types';
 
 // PDF Styles
 const styles = StyleSheet.create({
@@ -299,7 +299,7 @@ export function SPT1771PDF({ data, showWatermark = false }: SPT1771PDFProps) {
     correctionNumber,
     submissionDate,
     incomeStatement,
-    balanceSheet,
+    balanceSheet: _balanceSheet,
     fiscalAdjustments,
     taxCalculation,
     taxCredits,
