@@ -1,12 +1,7 @@
-import nextDynamic from 'next/dynamic';
 import { createClient } from '@/lib/supabase/server';
+import { SidebarWrapper } from '@/components/layout/SidebarWrapper';
 import { Header } from '@/components/layout/header';
 import { MobileSidebarProvider } from '@/components/layout/mobile-sidebar';
-
-const Sidebar = nextDynamic(
-  () => import('@/components/layout/sidebar').then(m => ({ default: m.Sidebar })),
-  { ssr: false }
-);
 
 // Force dynamic rendering - dashboard requires authentication
 export const dynamic = 'force-dynamic';
@@ -24,7 +19,7 @@ export default async function DashboardLayout({
   return (
     <MobileSidebarProvider>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Sidebar />
+        <SidebarWrapper />
         <div className="lg:ml-64">
           <Header
             userEmail={user?.email}
