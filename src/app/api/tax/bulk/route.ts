@@ -15,7 +15,8 @@ import type { BulkFilingRequest } from '@/lib/bulk-filing';
 async function handleBulkCreate(request: RequestWithSession): Promise<Response> {
   const { session } = request;
 
-  if (!session.consultantId) {
+  const ext = session as Record<string, unknown>;
+  if (!ext.consultantId) {
     return NextResponse.json({ success: false, error: 'Consultant ID required' }, { status: 400 });
   }
 
@@ -34,7 +35,7 @@ async function handleBulkCreate(request: RequestWithSession): Promise<Response> 
   }
 
   const result = await BulkFilingService.createBulkDrafts(
-    session.consultantId,
+    ext.consultantId as string,
     session.userId,
     body,
   );
@@ -56,12 +57,13 @@ async function handleBulkCreate(request: RequestWithSession): Promise<Response> 
  */
 async function handleGetCustomers(request: RequestWithSession): Promise<Response> {
   const { session } = request;
+  const consultantId = (session as Record<string, unknown>).consultantId as string;
 
-  if (!session.consultantId) {
+  if (!consultantId) {
     return NextResponse.json({ success: false, error: 'Consultant ID required' }, { status: 400 });
   }
 
-  const customers = await BulkFilingService.getAssignedCustomers(session.consultantId);
+  const customers = await BulkFilingService.getAssignedCustomers(consultantId);
 
   return NextResponse.json({ success: true, data: customers });
 }

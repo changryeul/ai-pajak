@@ -15,7 +15,7 @@ async function handleList(request: RequestWithSession): Promise<Response> {
   const { session } = request;
   const { searchParams } = new URL(request.url);
 
-  const customerId = session.customerId || searchParams.get('customerId');
+  const customerId = (session as Record<string, unknown>).customerId as string || searchParams.get('customerId');
   if (!customerId) {
     return NextResponse.json({ success: false, error: 'Customer ID required' }, { status: 400 });
   }
@@ -38,7 +38,8 @@ async function handleCreate(request: RequestWithSession): Promise<Response> {
   const { session } = request;
   const body = await request.json() as CreateFakturRequest & { customerId?: string };
 
-  const customerId = session.customerId || body.customerId;
+  const ext = session as Record<string, unknown>;
+  const customerId = ext.customerId as string || body.customerId;
   if (!customerId) {
     return NextResponse.json({ success: false, error: 'Customer ID required' }, { status: 400 });
   }
@@ -47,7 +48,7 @@ async function handleCreate(request: RequestWithSession): Promise<Response> {
     return NextResponse.json({ success: false, error: 'At least one item required' }, { status: 400 });
   }
 
-  const faktur = await EFakturService.create(customerId, body, session.consultantId);
+  const faktur = await EFakturService.create(customerId, body, ext.consultantId as string);
   return NextResponse.json({ success: true, data: faktur }, { status: 201 });
 }
 
