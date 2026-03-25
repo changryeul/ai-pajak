@@ -150,6 +150,19 @@
     "noDocuments": "書類がありません",
     "noDocumentsDesc": "最初の書類をアップロードしましょう。"
   },
+  "login": {
+    "heroTitle": "インドネシアの確定申告をAIで簡単に",
+    "heroSubtitle": "5分で確定申告を完了。4000万人の納税者のためのスマート税務プラットフォーム。",
+    "feature1Title": "AI自動計算",
+    "feature1Desc": "書類をアップロードすればAIが税金を自動計算",
+    "feature2Title": "安全認証",
+    "feature2Desc": "DJP（インドネシア国税庁）連携、データ暗号化",
+    "feature3Title": "5分で完了",
+    "feature3Desc": "従来2時間かかっていた申告がわずか5分で完了",
+    "feature4Title": "電子申告",
+    "feature4Desc": "DJP e-Filingに直接提出、BPE即時発行",
+    "noAccount": "アカウントをお持ちでないですか？"
+  },
   "tax": {
     "newFiling": "新規税務申告を作成",
     "editFiling": "税務申告を編集",

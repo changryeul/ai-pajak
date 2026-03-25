@@ -150,6 +150,19 @@
     "noDocuments": "暂无文件",
     "noDocumentsDesc": "上传您的第一份文件开始使用。"
   },
+  "login": {
+    "heroTitle": "印尼报税，AI助力轻松搞定",
+    "heroSubtitle": "5分钟完成报税。为4000万纳税人打造的智能税务平台。",
+    "feature1Title": "AI自动计算",
+    "feature1Desc": "上传文件，AI自动计算您的税款",
+    "feature2Title": "安全认证",
+    "feature2Desc": "对接DJP（印尼税务局），数据加密",
+    "feature3Title": "5分钟完成",
+    "feature3Desc": "原来需要2小时的申报现在只需5分钟",
+    "feature4Title": "电子申报",
+    "feature4Desc": "直接提交至DJP e-Filing，即时获取BPE",
+    "noAccount": "还没有账号？"
+  },
   "tax": {
     "newFiling": "创建新税务申报",
     "editFiling": "编辑税务申报",

@@ -150,6 +150,19 @@
     "noDocuments": "문서가 없습니다",
     "noDocumentsDesc": "첫 번째 문서를 업로드해 보세요."
   },
+  "login": {
+    "heroTitle": "인도네시아 세금 신고, AI로 간편하게",
+    "heroSubtitle": "복잡한 세무를 5분 만에 해결하세요. 4천만 납세자를 위한 스마트 세금 플랫폼.",
+    "feature1Title": "AI 자동 계산",
+    "feature1Desc": "서류를 업로드하면 AI가 세금을 자동 계산합니다",
+    "feature2Title": "보안 인증",
+    "feature2Desc": "인도네시아 국세청(DJP) 연동, 데이터 암호화",
+    "feature3Title": "5분 완료",
+    "feature3Desc": "기존 2시간 걸리던 신고를 5분 만에 완료",
+    "feature4Title": "전자 신고",
+    "feature4Desc": "DJP e-Filing 직접 제출, BPE 즉시 발급",
+    "noAccount": "계정이 없으신가요?"
+  },
   "tax": {
     "newFiling": "새 세금 신고 생성",
     "editFiling": "세금 신고 수정",

@@ -150,6 +150,19 @@
     "noDocuments": "No documents",
     "noDocumentsDesc": "Upload your first document to get started."
   },
+  "login": {
+    "heroTitle": "Indonesian Tax Filing, Made Simple with AI",
+    "heroSubtitle": "Complete your tax filing in 5 minutes. A smart tax platform for 40 million taxpayers.",
+    "feature1Title": "AI Auto-Calculation",
+    "feature1Desc": "Upload documents and AI calculates your tax automatically",
+    "feature2Title": "Secure & Certified",
+    "feature2Desc": "Connected to DJP (Indonesia Tax Authority), encrypted data",
+    "feature3Title": "Done in 5 Minutes",
+    "feature3Desc": "What used to take 2 hours now takes just 5 minutes",
+    "feature4Title": "e-Filing Direct",
+    "feature4Desc": "Submit to DJP e-Filing directly, get BPE instantly",
+    "noAccount": "Don't have an account?"
+  },
   "tax": {
     "newFiling": "Create New Tax Filing",
     "editFiling": "Edit Tax Filing",

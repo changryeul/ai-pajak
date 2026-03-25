@@ -150,6 +150,19 @@
     "noDocuments": "Belum ada dokumen",
     "noDocumentsDesc": "Unggah dokumen pertama Anda untuk memulai."
   },
+  "login": {
+    "heroTitle": "Lapor Pajak Indonesia, Mudah dengan AI",
+    "heroSubtitle": "Selesaikan pelaporan pajak dalam 5 menit. Platform pajak cerdas untuk 40 juta wajib pajak.",
+    "feature1Title": "Perhitungan Otomatis AI",
+    "feature1Desc": "Unggah dokumen dan AI menghitung pajak Anda secara otomatis",
+    "feature2Title": "Aman & Tersertifikasi",
+    "feature2Desc": "Terhubung dengan DJP, data terenkripsi",
+    "feature3Title": "Selesai dalam 5 Menit",
+    "feature3Desc": "Yang biasanya 2 jam, kini hanya 5 menit",
+    "feature4Title": "e-Filing Langsung",
+    "feature4Desc": "Kirim ke DJP e-Filing langsung, BPE langsung terbit",
+    "noAccount": "Belum punya akun?"
+  },
   "tax": {
     "newFiling": "Buat Pelaporan Pajak Baru",
     "editFiling": "Edit Pelaporan Pajak",
