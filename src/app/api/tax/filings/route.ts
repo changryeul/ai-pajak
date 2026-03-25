@@ -357,7 +357,8 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
 export async function GET(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
-    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole, 'PLATFORM_ADMIN' as UserRole),
+    blockPlatformAdmin,
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
     withAudit('TAX_FILING_VIEW')
   )(request as RequestWithSession, handleGetFilings);
 }
