@@ -74,6 +74,34 @@
     "requestNewLink": "Minta Link Baru",
     "resetPasswordError": "Gagal mengatur ulang kata sandi. Silakan coba lagi."
   },
+  "nav": {
+    "dashboard": "Dasbor",
+    "customers": "Pelanggan",
+    "filings": "Pelaporan Pajak",
+    "documents": "Dokumen",
+    "reports": "Laporan",
+    "taxFiling": "Pelaporan Pajak",
+    "annualReturn": "SPT Tahunan",
+    "pph21": "PPh 21 (Karyawan)",
+    "pph23": "PPh 23 (Jasa)",
+    "ppn": "PPN",
+    "taxManagement": "Manajemen Pajak",
+    "newFiling": "Pelaporan Baru",
+    "poaSection": "Surat Kuasa",
+    "createPoa": "Buat Surat Kuasa",
+    "poaManage": "Kelola Surat Kuasa",
+    "administration": "Administrasi",
+    "monitoring": "Pemantauan Sistem",
+    "account": "Akun",
+    "billing": "Tagihan",
+    "settings": "Pengaturan",
+    "role": {
+      "CUSTOMER": "Wajib Pajak",
+      "CONSULTANT_JTC": "Konsultan Pajak",
+      "TAX_ADVISOR_JTC": "Kuasa Hukum Pajak",
+      "PLATFORM_ADMIN": "Admin Platform"
+    }
+  },
   "dashboard": {
     "title": "Dasbor",
     "welcome": "Selamat datang",
@@ -90,7 +118,19 @@
     "poaStatus": "Status Surat Kuasa",
     "taxFilings": "Pelaporan Pajak",
     "clients": "Klien",
-    "urgentActions": "Tindakan Mendesak"
+    "urgentActions": "Tindakan Mendesak",
+    "consultantDashboard": "Dasbor Konsultan",
+    "advisorDashboard": "Dasbor Kuasa Hukum",
+    "adminDashboard": "Administrasi Platform",
+    "welcomeBack": "Selamat datang kembali, {name}!",
+    "viewAllClients": "Lihat Semua Klien",
+    "bulkFiling": "Pelaporan Massal",
+    "activeClients": "Klien Aktif",
+    "pendingFilings": "Pelaporan Tertunda",
+    "submittedThisMonth": "Diajukan Bulan Ini",
+    "poasPending": "Surat Kuasa Tertunda",
+    "manageUsers": "Kelola Pengguna",
+    "viewAnalytics": "Lihat Analitik"
   },
   "tax": {
     "newFiling": "Buat Pelaporan Pajak Baru",

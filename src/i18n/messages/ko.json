@@ -74,6 +74,34 @@
     "requestNewLink": "새 링크 요청",
     "resetPasswordError": "비밀번호 재설정에 실패했습니다. 다시 시도해주세요."
   },
+  "nav": {
+    "dashboard": "대시보드",
+    "customers": "고객 관리",
+    "filings": "신고 관리",
+    "documents": "문서",
+    "reports": "보고서",
+    "taxFiling": "세금 신고",
+    "annualReturn": "연말정산 (SPT)",
+    "pph21": "근로소득세 (PPh 21)",
+    "pph23": "원천징수세 (PPh 23)",
+    "ppn": "부가가치세 (PPN)",
+    "taxManagement": "세금 업무",
+    "newFiling": "새 신고 작성",
+    "poaSection": "위임장",
+    "createPoa": "위임장 작성",
+    "poaManage": "위임장 관리",
+    "administration": "관리",
+    "monitoring": "시스템 모니터링",
+    "account": "계정",
+    "billing": "요금/결제",
+    "settings": "설정",
+    "role": {
+      "CUSTOMER": "납세자",
+      "CONSULTANT_JTC": "세무 컨설턴트",
+      "TAX_ADVISOR_JTC": "세무사",
+      "PLATFORM_ADMIN": "플랫폼 관리자"
+    }
+  },
   "dashboard": {
     "title": "대시보드",
     "welcome": "환영합니다",
@@ -90,7 +118,19 @@
     "poaStatus": "위임장 상태",
     "taxFilings": "세금 신고",
     "clients": "고객",
-    "urgentActions": "긴급 작업"
+    "urgentActions": "긴급 작업",
+    "consultantDashboard": "컨설턴트 대시보드",
+    "advisorDashboard": "세무사 대시보드",
+    "adminDashboard": "플랫폼 관리",
+    "welcomeBack": "{name}님, 환영합니다!",
+    "viewAllClients": "전체 고객 보기",
+    "bulkFiling": "대량 신고",
+    "activeClients": "활성 고객",
+    "pendingFilings": "대기 중인 신고",
+    "submittedThisMonth": "이번 달 제출",
+    "poasPending": "위임장 대기",
+    "manageUsers": "사용자 관리",
+    "viewAnalytics": "분석 보기"
   },
   "tax": {
     "newFiling": "새 세금 신고 생성",

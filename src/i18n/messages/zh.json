@@ -74,6 +74,34 @@
     "requestNewLink": "请求新链接",
     "resetPasswordError": "密码重置失败，请重试。"
   },
+  "nav": {
+    "dashboard": "仪表盘",
+    "customers": "客户管理",
+    "filings": "报税管理",
+    "documents": "文件",
+    "reports": "报告",
+    "taxFiling": "税务申报",
+    "annualReturn": "年度申报 (SPT)",
+    "pph21": "所得税 (PPh 21)",
+    "pph23": "预扣税 (PPh 23)",
+    "ppn": "增值税 (PPN)",
+    "taxManagement": "税务管理",
+    "newFiling": "新建申报",
+    "poaSection": "授权委托",
+    "createPoa": "创建委托书",
+    "poaManage": "管理委托书",
+    "administration": "管理",
+    "monitoring": "系统监控",
+    "account": "账户",
+    "billing": "账单",
+    "settings": "设置",
+    "role": {
+      "CUSTOMER": "纳税人",
+      "CONSULTANT_JTC": "税务顾问",
+      "TAX_ADVISOR_JTC": "税务师",
+      "PLATFORM_ADMIN": "平台管理员"
+    }
+  },
   "dashboard": {
     "title": "仪表板",
     "welcome": "欢迎",
@@ -90,7 +118,19 @@
     "poaStatus": "授权书状态",
     "taxFilings": "税务申报",
     "clients": "客户",
-    "urgentActions": "紧急操作"
+    "urgentActions": "紧急操作",
+    "consultantDashboard": "顾问仪表盘",
+    "advisorDashboard": "税务师仪表盘",
+    "adminDashboard": "平台管理",
+    "welcomeBack": "欢迎回来，{name}！",
+    "viewAllClients": "查看所有客户",
+    "bulkFiling": "批量申报",
+    "activeClients": "活跃客户",
+    "pendingFilings": "待处理申报",
+    "submittedThisMonth": "本月已提交",
+    "poasPending": "待处理委托",
+    "manageUsers": "用户管理",
+    "viewAnalytics": "查看分析"
   },
   "tax": {
     "newFiling": "创建新税务申报",

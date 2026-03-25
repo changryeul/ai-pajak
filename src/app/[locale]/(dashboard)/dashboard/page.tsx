@@ -202,6 +202,7 @@ function ConsultantDashboard({
   locale: string;
   isTaxAdvisor: boolean;
 }) {
+  const t = useTranslations();
   const [stats, setStats] = useState<ConsultantStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
@@ -228,39 +229,39 @@ function ConsultantDashboard({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {isTaxAdvisor ? 'Tax Advisor Dashboard' : 'Consultant Dashboard'}
+            {isTaxAdvisor ? t('dashboard.advisorDashboard') : t('dashboard.consultantDashboard')}
           </h1>
           <p className="text-gray-500">
-            Welcome back, {session.fullName || 'Consultant'}!
+            {t('dashboard.welcomeBack', { name: session.fullName || 'Consultant' })}
           </p>
         </div>
         <div className="flex gap-3">
           <Link
-            href={`/${locale}/consultant/clients`}
+            href={`/${locale}/customers`}
             className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            View All Clients
+            {t('dashboard.viewAllClients')}
             <ArrowRight className="h-4 w-4" />
           </Link>
           {isTaxAdvisor && (
             <Link
-              href={`/${locale}/consultant/bulk-actions`}
+              href={`/${locale}/tax/new`}
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
               <Plus className="h-4 w-4" />
-              Bulk Filing
+              {t('dashboard.bulkFiling')}
             </Link>
           )}
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Active Clients</p>
+                <p className="text-sm text-gray-500">{t('dashboard.activeClients')}</p>
                 <p className="mt-1 text-3xl font-bold text-gray-900">
                   {isLoadingStats ? '...' : stats?.activeClients ?? 0}
                 </p>
@@ -275,7 +276,7 @@ function ConsultantDashboard({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Pending Filings</p>
+                <p className="text-sm text-gray-500">{t('dashboard.pendingFilings')}</p>
                 <p className="mt-1 text-3xl font-bold text-gray-900">
                   {isLoadingStats ? '...' : stats?.pendingFilings ?? 0}
                 </p>
@@ -290,7 +291,7 @@ function ConsultantDashboard({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Submitted This Month</p>
+                <p className="text-sm text-gray-500">{t('dashboard.submittedThisMonth')}</p>
                 <p className="mt-1 text-3xl font-bold text-gray-900">
                   {isLoadingStats ? '...' : stats?.submittedThisMonth ?? 0}
                 </p>
@@ -305,7 +306,7 @@ function ConsultantDashboard({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">POAs Pending</p>
+                <p className="text-sm text-gray-500">{t('dashboard.poasPending')}</p>
                 <p className="mt-1 text-3xl font-bold text-gray-900">
                   {isLoadingStats ? '...' : stats?.pendingPOAs ?? 0}
                 </p>
@@ -341,30 +342,32 @@ function PlatformAdminDashboard({
   session: { fullName?: string };
   locale: string;
 }) {
+  const t = useTranslations();
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Platform Administration
+            {t('dashboard.adminDashboard')}
           </h1>
           <p className="text-gray-500">
-            Welcome, {session.fullName || 'Admin'}
+            {t('dashboard.welcomeBack', { name: session.fullName || 'Admin' })}
           </p>
         </div>
         <div className="flex gap-3">
           <Link
-            href={`/${locale}/admin/users`}
+            href={`/${locale}/admin/monitoring`}
             className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Manage Users
+            {t('dashboard.manageUsers')}
           </Link>
           <Link
-            href={`/${locale}/admin/analytics`}
+            href={`/${locale}/admin/monitoring`}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
-            View Analytics
+            {t('dashboard.viewAnalytics')}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

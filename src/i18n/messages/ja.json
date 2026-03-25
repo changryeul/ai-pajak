@@ -74,6 +74,34 @@
     "requestNewLink": "新しいリンクをリクエスト",
     "resetPasswordError": "パスワードのリセットに失敗しました。もう一度お試しください。"
   },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "customers": "顧客管理",
+    "filings": "申告管理",
+    "documents": "書類",
+    "reports": "レポート",
+    "taxFiling": "税務申告",
+    "annualReturn": "確定申告 (SPT)",
+    "pph21": "所得税 (PPh 21)",
+    "pph23": "源泉徴収税 (PPh 23)",
+    "ppn": "付加価値税 (PPN)",
+    "taxManagement": "税務管理",
+    "newFiling": "新規申告",
+    "poaSection": "委任状",
+    "createPoa": "委任状作成",
+    "poaManage": "委任状管理",
+    "administration": "管理",
+    "monitoring": "システム監視",
+    "account": "アカウント",
+    "billing": "請求",
+    "settings": "設定",
+    "role": {
+      "CUSTOMER": "納税者",
+      "CONSULTANT_JTC": "税務コンサルタント",
+      "TAX_ADVISOR_JTC": "税理士",
+      "PLATFORM_ADMIN": "プラットフォーム管理者"
+    }
+  },
   "dashboard": {
     "title": "ダッシュボード",
     "welcome": "ようこそ",
@@ -90,7 +118,19 @@
     "poaStatus": "委任状ステータス",
     "taxFilings": "税務申告",
     "clients": "顧客",
-    "urgentActions": "緊急対応"
+    "urgentActions": "緊急対応",
+    "consultantDashboard": "コンサルタントダッシュボード",
+    "advisorDashboard": "税理士ダッシュボード",
+    "adminDashboard": "プラットフォーム管理",
+    "welcomeBack": "{name}さん、おかえりなさい！",
+    "viewAllClients": "全クライアント表示",
+    "bulkFiling": "一括申告",
+    "activeClients": "アクティブクライアント",
+    "pendingFilings": "保留中の申告",
+    "submittedThisMonth": "今月の提出",
+    "poasPending": "委任状待ち",
+    "manageUsers": "ユーザー管理",
+    "viewAnalytics": "分析を見る"
   },
   "tax": {
     "newFiling": "新規税務申告を作成",

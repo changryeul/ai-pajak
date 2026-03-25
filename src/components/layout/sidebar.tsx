@@ -14,36 +14,90 @@ import {
   Receipt,
   FileSpreadsheet,
   LogOut,
+  FileText,
+  Shield,
+  Activity,
+  ClipboardList,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 
-const navItems = [
+interface NavItem {
+  href: string;
+  icon: LucideIcon;
+  labelKey: string;
+  roles?: UserRole[]; // undefined = all roles
+}
+
+interface NavSection {
+  section: string;
+  labelKey?: string;
+  roles?: UserRole[]; // undefined = all roles
+  items: NavItem[];
+}
+
+const allRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC, UserRole.PLATFORM_ADMIN];
+const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
+const consultantRoles = [UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
+
+const navItems: NavSection[] = [
   {
     section: 'main',
     items: [
-      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'dashboard.title' },
-      { href: '/documents', icon: Upload, labelKey: 'documents.title' },
-      { href: '/reports', icon: BarChart3, labelKey: 'dashboard.viewReports' },
+      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: allRoles },
+      { href: '/customers', icon: Users, labelKey: 'nav.customers', roles: consultantRoles },
+      { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
+      { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
+      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: [UserRole.CUSTOMER] },
     ],
   },
   {
     section: 'tax',
-    label: 'Tax Filing',
+    labelKey: 'nav.taxFiling',
+    roles: [UserRole.CUSTOMER],
     items: [
-      { href: '/tax/pph21', icon: Users, labelKey: 'tax.pph21.title' },
-      { href: '/tax/pph23', icon: Receipt, labelKey: 'tax.pph23.title' },
-      { href: '/tax/ppn', icon: Calculator, labelKey: 'tax.ppn.title' },
-      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'tax.sptTahunan.title' },
+      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn' },
+      { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21' },
+      { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.pph23' },
+      { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn' },
+    ],
+  },
+  {
+    section: 'consultant-tax',
+    labelKey: 'nav.taxManagement',
+    roles: consultantRoles,
+    items: [
+      { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling' },
+      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn' },
+    ],
+  },
+  {
+    section: 'poa',
+    labelKey: 'nav.poaSection',
+    roles: taxRoles,
+    items: [
+      { href: '/poa/create', icon: Shield, labelKey: 'nav.createPoa', roles: [UserRole.CUSTOMER] },
+      { href: '/filings', icon: ClipboardList, labelKey: 'nav.poaManage', roles: consultantRoles },
+    ],
+  },
+  {
+    section: 'admin',
+    labelKey: 'nav.administration',
+    roles: [UserRole.PLATFORM_ADMIN],
+    items: [
+      { href: '/admin/monitoring', icon: Activity, labelKey: 'nav.monitoring' },
     ],
   },
   {
     section: 'account',
-    label: 'Account',
+    labelKey: 'nav.account',
     items: [
-      { href: '/billing', icon: CreditCard, labelKey: 'subscription.title' },
-      { href: '/settings', icon: Settings, labelKey: 'settings.title' },
+      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER, UserRole.PLATFORM_ADMIN] },
+      { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: allRoles },
     ],
   },
 ];
@@ -53,7 +107,9 @@ export function Sidebar() {
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
+  const { session } = useSession();
   const locale = params.locale as string;
+  const userRole = session?.role;
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -62,8 +118,23 @@ export function Sidebar() {
     router.refresh();
   };
 
+  // Filter sections and items by role
+  const visibleSections = navItems
+    .filter((section) => {
+      if (!section.roles) return true;
+      return userRole && section.roles.includes(userRole);
+    })
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        if (!item.roles) return true;
+        return userRole && item.roles.includes(userRole);
+      }),
+    }))
+    .filter((section) => section.items.length > 0);
+
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white hidden lg:block">
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center border-b border-gray-200 px-6">
@@ -75,13 +146,28 @@ export function Sidebar() {
           </Link>
         </div>
 
+        {/* Role badge */}
+        {userRole && (
+          <div className="px-6 py-3 border-b border-gray-100">
+            <span className={cn(
+              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+              userRole === UserRole.CUSTOMER && 'bg-blue-50 text-blue-700',
+              userRole === UserRole.CONSULTANT_JTC && 'bg-green-50 text-green-700',
+              userRole === UserRole.TAX_ADVISOR_JTC && 'bg-purple-50 text-purple-700',
+              userRole === UserRole.PLATFORM_ADMIN && 'bg-orange-50 text-orange-700',
+            )}>
+              {t(`nav.role.${userRole}`)}
+            </span>
+          </div>
+        )}
+
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {navItems.map((section) => (
+          {visibleSections.map((section) => (
             <div key={section.section} className="mb-6">
-              {section.label && (
+              {section.labelKey && (
                 <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  {section.label}
+                  {t(section.labelKey)}
                 </h3>
               )}
               <ul className="space-y-1">
@@ -112,8 +198,11 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* Logout */}
+        {/* User info + Logout */}
         <div className="border-t border-gray-200 p-3">
+          {session?.fullName && (
+            <p className="px-3 pb-2 text-xs text-gray-500 truncate">{session.fullName}</p>
+          )}
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"

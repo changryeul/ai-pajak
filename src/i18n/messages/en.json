@@ -74,6 +74,34 @@
     "requestNewLink": "Request New Link",
     "resetPasswordError": "Failed to reset password. Please try again."
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "filings": "Tax Filings",
+    "documents": "Documents",
+    "reports": "Reports",
+    "taxFiling": "Tax Filing",
+    "annualReturn": "Annual Return (SPT)",
+    "pph21": "Income Tax (PPh 21)",
+    "pph23": "Withholding Tax (PPh 23)",
+    "ppn": "VAT (PPN)",
+    "taxManagement": "Tax Management",
+    "newFiling": "New Filing",
+    "poaSection": "Power of Attorney",
+    "createPoa": "Create POA",
+    "poaManage": "Manage POA",
+    "administration": "Administration",
+    "monitoring": "System Monitoring",
+    "account": "Account",
+    "billing": "Billing",
+    "settings": "Settings",
+    "role": {
+      "CUSTOMER": "Taxpayer",
+      "CONSULTANT_JTC": "Tax Consultant",
+      "TAX_ADVISOR_JTC": "Tax Advisor",
+      "PLATFORM_ADMIN": "Platform Admin"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome",
@@ -90,7 +118,19 @@
     "poaStatus": "Power of Attorney Status",
     "taxFilings": "Tax Filings",
     "clients": "Clients",
-    "urgentActions": "Urgent Actions"
+    "urgentActions": "Urgent Actions",
+    "consultantDashboard": "Consultant Dashboard",
+    "advisorDashboard": "Tax Advisor Dashboard",
+    "adminDashboard": "Platform Administration",
+    "welcomeBack": "Welcome back, {name}!",
+    "viewAllClients": "View All Clients",
+    "bulkFiling": "Bulk Filing",
+    "activeClients": "Active Clients",
+    "pendingFilings": "Pending Filings",
+    "submittedThisMonth": "Submitted This Month",
+    "poasPending": "POAs Pending",
+    "manageUsers": "Manage Users",
+    "viewAnalytics": "View Analytics"
   },
   "tax": {
     "newFiling": "Create New Tax Filing",
