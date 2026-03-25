@@ -18,6 +18,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import {
   POAStatusWidget,
   FilingSummaryWidget,
@@ -91,7 +92,27 @@ export default function DashboardPage() {
     );
   }
 
-  // Customer Dashboard (default)
+  // Customer Dashboard (default) — show onboarding for first-time users
+  return <CustomerDashboardWithOnboarding session={session} locale={locale} />;
+}
+
+// Customer Dashboard with Onboarding
+function CustomerDashboardWithOnboarding({
+  session,
+  locale,
+}: {
+  session: { customerId?: string; fullName?: string };
+  locale: string;
+}) {
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('ai-pajak-onboarded');
+  });
+
+  if (showOnboarding) {
+    return <OnboardingWizard onComplete={() => setShowOnboarding(false)} />;
+  }
+
   return <CustomerDashboard session={session} locale={locale} />;
 }
 
