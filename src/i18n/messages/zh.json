@@ -142,6 +142,14 @@
     "createPoa": "委托税务代理",
     "createPoaDesc": "让税务师代为申报"
   },
+  "empty": {
+    "noData": "暂无数据",
+    "noDataDesc": "还没有可显示的内容。",
+    "noResults": "未找到结果",
+    "noResultsDesc": "请尝试调整搜索条件。",
+    "noDocuments": "暂无文件",
+    "noDocumentsDesc": "上传您的第一份文件开始使用。"
+  },
   "tax": {
     "newFiling": "创建新税务申报",
     "editFiling": "编辑税务申报",

@@ -142,6 +142,14 @@
     "createPoa": "Buat Surat Kuasa",
     "createPoaDesc": "Kuasakan pelaporan ke konsultan pajak"
   },
+  "empty": {
+    "noData": "Belum ada data",
+    "noDataDesc": "Belum ada item yang ditampilkan.",
+    "noResults": "Tidak ditemukan",
+    "noResultsDesc": "Coba ubah kriteria pencarian Anda.",
+    "noDocuments": "Belum ada dokumen",
+    "noDocumentsDesc": "Unggah dokumen pertama Anda untuk memulai."
+  },
   "tax": {
     "newFiling": "Buat Pelaporan Pajak Baru",
     "editFiling": "Edit Pelaporan Pajak",

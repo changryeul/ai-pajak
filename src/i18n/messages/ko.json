@@ -142,6 +142,14 @@
     "createPoa": "세무 대리인 위임",
     "createPoaDesc": "세무사에게 신고를 맡기기"
   },
+  "empty": {
+    "noData": "데이터가 없습니다",
+    "noDataDesc": "아직 등록된 항목이 없습니다.",
+    "noResults": "검색 결과 없음",
+    "noResultsDesc": "검색 조건을 변경해 보세요.",
+    "noDocuments": "문서가 없습니다",
+    "noDocumentsDesc": "첫 번째 문서를 업로드해 보세요."
+  },
   "tax": {
     "newFiling": "새 세금 신고 생성",
     "editFiling": "세금 신고 수정",

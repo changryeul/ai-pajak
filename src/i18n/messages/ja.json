@@ -142,6 +142,14 @@
     "createPoa": "税理士に委任",
     "createPoaDesc": "税理士に申告を依頼します"
   },
+  "empty": {
+    "noData": "データがありません",
+    "noDataDesc": "まだ登録された項目がありません。",
+    "noResults": "検索結果なし",
+    "noResultsDesc": "検索条件を変更してみてください。",
+    "noDocuments": "書類がありません",
+    "noDocumentsDesc": "最初の書類をアップロードしましょう。"
+  },
   "tax": {
     "newFiling": "新規税務申告を作成",
     "editFiling": "税務申告を編集",

@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
+import { DashboardSkeleton } from '@/components/ui/skeleton';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import {
@@ -48,15 +49,9 @@ export default function DashboardPage() {
   const locale = params.locale as string;
   const { session, isLoading } = useSession();
 
-  // Loading state
+  // Loading state — skeleton instead of spinner
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // Not logged in

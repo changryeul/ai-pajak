@@ -142,6 +142,14 @@
     "createPoa": "Authorize Tax Agent",
     "createPoaDesc": "Let a tax advisor file for you"
   },
+  "empty": {
+    "noData": "No data yet",
+    "noDataDesc": "There are no items to display.",
+    "noResults": "No results found",
+    "noResultsDesc": "Try adjusting your search criteria.",
+    "noDocuments": "No documents",
+    "noDocumentsDesc": "Upload your first document to get started."
+  },
   "tax": {
     "newFiling": "Create New Tax Filing",
     "editFiling": "Edit Tax Filing",
