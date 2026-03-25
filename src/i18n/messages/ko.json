@@ -32,7 +32,9 @@
     "uploading": "업로드 중...",
     "retry": "재시도",
     "actions": "작업",
-    "view": "보기"
+    "view": "보기",
+    "darkMode": "다크 모드",
+    "lightMode": "라이트 모드"
   },
   "auth": {
     "login": "로그인",

@@ -32,7 +32,9 @@
     "uploading": "Uploading...",
     "retry": "Retry",
     "actions": "Actions",
-    "view": "View"
+    "view": "View",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode"
   },
   "auth": {
     "login": "Login",

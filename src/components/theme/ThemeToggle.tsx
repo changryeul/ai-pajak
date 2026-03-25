@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
+import { useTranslations } from 'next-intl';
 import { Moon, Sun } from 'lucide-react';
 
 // Avoid useEffect + setState pattern for mounting check
@@ -16,6 +17,7 @@ function useIsMounted() {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations('common');
   const mounted = useIsMounted();
 
   if (!mounted) return <div className="w-9 h-9" />;
@@ -24,7 +26,7 @@ export function ThemeToggle() {
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-      title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+      title={theme === 'dark' ? t('lightMode') : t('darkMode')}
     >
       {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </button>

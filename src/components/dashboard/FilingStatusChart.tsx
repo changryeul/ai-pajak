@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CardSkeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PieChartIcon } from 'lucide-react';
 
 interface StatusData {
   name: string;
@@ -60,12 +62,7 @@ export function FilingStatusChart({ customerId, consultantId }: FilingStatusChar
   }, [customerId, consultantId, t]);
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
-        <CardContent><Skeleton className="h-48 w-full" /></CardContent>
-      </Card>
-    );
+    return <CardSkeleton />;
   }
 
   return (
@@ -97,9 +94,7 @@ export function FilingStatusChart({ customerId, consultantId }: FilingStatusChar
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
-            {t('chart.noData')}
-          </div>
+          <EmptyState icon={PieChartIcon} titleKey="chart.noData" />
         )}
       </CardContent>
     </Card>

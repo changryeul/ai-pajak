@@ -106,6 +106,7 @@ export class EFakturService {
         updated_at: new Date().toISOString(),
       })
       .eq('id', fakturId)
+      .in('status', ['DRAFT', 'APPROVED', 'ISSUED'])
       .select()
       .single();
 
@@ -155,31 +156,27 @@ export class EFakturService {
   static async getMonthlySummary(customerId: string, taxPeriod: string): Promise<FakturSummary> {
     const admin = getSupabaseAdmin();
 
-    const { data: outputs } = await admin
+    // Single query for both OUTPUT and INPUT
+    const { data: rows } = await admin
       .from('faktur_pajak')
-      .select('ppn_amount')
+      .select('transaction_type, ppn_amount')
       .eq('customer_id', customerId)
       .eq('tax_period', taxPeriod)
-      .eq('transaction_type', 'OUTPUT')
       .neq('status', 'VOID');
 
-    const { data: inputs } = await admin
-      .from('faktur_pajak')
-      .select('ppn_amount')
-      .eq('customer_id', customerId)
-      .eq('tax_period', taxPeriod)
-      .eq('transaction_type', 'INPUT')
-      .neq('status', 'VOID');
-
-    const totalOutput = (outputs || []).reduce((sum, r) => sum + Number(r.ppn_amount), 0);
-    const totalInput = (inputs || []).reduce((sum, r) => sum + Number(r.ppn_amount), 0);
+    let totalOutput = 0, totalInput = 0, outputCount = 0, inputCount = 0;
+    for (const r of rows || []) {
+      const amount = Number(r.ppn_amount);
+      if (r.transaction_type === 'OUTPUT') { totalOutput += amount; outputCount++; }
+      else { totalInput += amount; inputCount++; }
+    }
 
     return {
       totalOutput,
       totalInput,
       netPayable: totalOutput - totalInput,
-      outputCount: outputs?.length || 0,
-      inputCount: inputs?.length || 0,
+      outputCount,
+      inputCount,
       period: taxPeriod,
     };
   }

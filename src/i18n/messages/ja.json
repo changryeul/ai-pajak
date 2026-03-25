@@ -32,7 +32,9 @@
     "uploading": "アップロード中...",
     "retry": "再試行",
     "actions": "アクション",
-    "view": "表示"
+    "view": "表示",
+    "darkMode": "ダークモード",
+    "lightMode": "ライトモード"
   },
   "auth": {
     "login": "ログイン",

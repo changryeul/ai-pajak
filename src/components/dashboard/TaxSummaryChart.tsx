@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CardSkeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { BarChart3 } from 'lucide-react';
 
 interface MonthlyData {
   month: string;
@@ -54,18 +56,7 @@ export function TaxSummaryChart({ customerId, consultantId }: TaxSummaryChartPro
     fetchData();
   }, [customerId, consultantId]);
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-40" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-64 w-full" />
-        </CardContent>
-      </Card>
-    );
-  }
+  if (isLoading) return <CardSkeleton />;
 
   const formatRupiah = (value: number) => {
     if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`;
@@ -97,9 +88,7 @@ export function TaxSummaryChart({ customerId, consultantId }: TaxSummaryChartPro
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
-            {t('chart.noData')}
-          </div>
+          <EmptyState icon={BarChart3} titleKey="chart.noData" />
         )}
       </CardContent>
     </Card>

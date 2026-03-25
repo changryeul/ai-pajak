@@ -42,7 +42,6 @@ interface NavSection {
   items: NavItem[];
 }
 
-const allRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC, UserRole.PLATFORM_ADMIN];
 const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
 const consultantRoles = [UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
 
@@ -50,7 +49,7 @@ const navItems: NavSection[] = [
   {
     section: 'main',
     items: [
-      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: allRoles },
+      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
       { href: '/customers', icon: Users, labelKey: 'nav.customers', roles: consultantRoles },
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
@@ -83,7 +82,6 @@ const navItems: NavSection[] = [
     roles: taxRoles,
     items: [
       { href: '/poa/create', icon: Shield, labelKey: 'nav.createPoa', roles: [UserRole.CUSTOMER] },
-      { href: '/filings', icon: ClipboardList, labelKey: 'nav.poaManage', roles: consultantRoles },
     ],
   },
   {
@@ -99,7 +97,7 @@ const navItems: NavSection[] = [
     labelKey: 'nav.account',
     items: [
       { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER, UserRole.PLATFORM_ADMIN] },
-      { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: allRoles },
+      { href: '/settings', icon: Settings, labelKey: 'nav.settings' },
     ],
   },
 ];

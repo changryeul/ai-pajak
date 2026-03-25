@@ -3,8 +3,8 @@ import type { BulkFilingJob, BulkFilingItem, BulkFilingRequest } from './types';
 
 export class BulkFilingService {
   /**
-   * Create bulk filing drafts for multiple customers
-   * Only TAX_ADVISOR_JTC can use this
+   * Create bulk filing drafts for multiple customers.
+   * Batched queries: ~4 queries total regardless of N (vs 3N before).
    */
   static async createBulkDrafts(
     consultantId: string,
@@ -12,29 +12,40 @@ export class BulkFilingService {
     request: BulkFilingRequest
   ): Promise<BulkFilingJob> {
     const admin = getSupabaseAdmin();
-    const items: BulkFilingItem[] = [];
+    const period = `${request.taxYear}-${request.taxPeriod}`;
 
-    // Fetch customer names
-    const { data: customers } = await admin
-      .from('customer')
-      .select('id, full_name, company_name')
-      .in('id', request.customerIds);
+    // Batch 1: fetch customer names + assignments + existing filings in parallel
+    const [customersResult, assignmentsResult, existingResult] = await Promise.all([
+      admin
+        .from('customer')
+        .select('id, full_name, company_name')
+        .in('id', request.customerIds),
+      admin
+        .from('customer_consultant')
+        .select('customer_id')
+        .eq('consultant_id', consultantId)
+        .eq('is_active', true)
+        .in('customer_id', request.customerIds),
+      admin
+        .from('tax_filing')
+        .select('id, customer_id')
+        .in('customer_id', request.customerIds)
+        .eq('tax_type', request.taxType)
+        .eq('tax_period', period),
+    ]);
 
     const customerMap = new Map(
-      (customers || []).map((c) => [c.id, c.full_name || c.company_name || 'Unknown'])
+      (customersResult.data || []).map((c) => [c.id, c.full_name || c.company_name || 'Unknown'])
+    );
+    const assignedSet = new Set((assignmentsResult.data || []).map((a) => a.customer_id));
+    const existingMap = new Map(
+      (existingResult.data || []).map((f) => [f.customer_id, f.id])
     );
 
-    // Verify consultant has assignment to all customers
-    const { data: assignments } = await admin
-      .from('customer_consultant')
-      .select('customer_id')
-      .eq('consultant_id', consultantId)
-      .eq('is_active', true)
-      .in('customer_id', request.customerIds);
+    // Classify items
+    const items: BulkFilingItem[] = [];
+    const toInsert: { customer_id: string; consultant_id: string; tax_type: string; tax_period: string; status: string; tax_data: object; updated_at: string }[] = [];
 
-    const assignedSet = new Set((assignments || []).map((a) => a.customer_id));
-
-    // Process each customer
     for (const customerId of request.customerIds) {
       const item: BulkFilingItem = {
         customerId,
@@ -45,74 +56,71 @@ export class BulkFilingService {
         status: 'pending',
       };
 
-      // Check assignment
       if (!assignedSet.has(customerId)) {
         item.status = 'error';
         item.error = 'Not assigned to this customer';
-        items.push(item);
-        continue;
-      }
-
-      // Check for existing filing (avoid duplicates)
-      const { data: existing } = await admin
-        .from('tax_filing')
-        .select('id')
-        .eq('customer_id', customerId)
-        .eq('tax_type', request.taxType)
-        .eq('tax_period', `${request.taxYear}-${request.taxPeriod}`)
-        .maybeSingle();
-
-      if (existing) {
+      } else if (existingMap.has(customerId)) {
         item.status = 'error';
         item.error = 'Filing already exists for this period';
-        item.filingId = existing.id;
-        items.push(item);
-        continue;
-      }
-
-      // Create draft filing
-      try {
-        const { data: filing, error } = await admin
-          .from('tax_filing')
-          .insert({
-            customer_id: customerId,
-            consultant_id: consultantId,
-            tax_type: request.taxType,
-            tax_period: `${request.taxYear}-${request.taxPeriod}`,
-            status: 'DRAFT',
-            tax_data: {},
-            updated_at: new Date().toISOString(),
-          })
-          .select('id')
-          .single();
-
-        if (error) {
-          item.status = 'error';
-          item.error = error.message;
-        } else {
-          item.status = 'success';
-          item.filingId = filing.id;
-        }
-      } catch (err) {
-        item.status = 'error';
-        item.error = err instanceof Error ? err.message : 'Unknown error';
+        item.filingId = existingMap.get(customerId);
+      } else {
+        toInsert.push({
+          customer_id: customerId,
+          consultant_id: consultantId,
+          tax_type: request.taxType,
+          tax_period: period,
+          status: 'DRAFT',
+          tax_data: {},
+          updated_at: new Date().toISOString(),
+        });
       }
 
       items.push(item);
+    }
 
-      // Audit log for each created filing
-      if (item.status === 'success') {
-        await admin.from('tax_activity_log').insert({
-          customer_id: customerId,
-          tax_filing_id: item.filingId,
+    // Batch 2: insert all valid filings at once
+    if (toInsert.length > 0) {
+      const { data: inserted, error } = await admin
+        .from('tax_filing')
+        .insert(toInsert)
+        .select('id, customer_id');
+
+      if (error) {
+        // Mark all pending as failed
+        for (const item of items) {
+          if (item.status === 'pending') {
+            item.status = 'error';
+            item.error = error.message;
+          }
+        }
+      } else if (inserted) {
+        const insertedMap = new Map(inserted.map((f) => [f.customer_id, f.id]));
+        for (const item of items) {
+          if (item.status === 'pending') {
+            const filingId = insertedMap.get(item.customerId);
+            if (filingId) {
+              item.status = 'success';
+              item.filingId = filingId;
+            } else {
+              item.status = 'error';
+              item.error = 'Insert succeeded but ID not returned';
+            }
+          }
+        }
+
+        // Batch 3: audit logs for all created filings
+        const auditRows = inserted.map((f) => ({
+          customer_id: f.customer_id,
+          tax_filing_id: f.id,
           actor_user_id: advisorUserId,
           actor_role: 'TAX_ADVISOR_JTC',
           activity_type: 'CREATE',
           tax_type: request.taxType,
-          tax_period: `${request.taxYear}-${request.taxPeriod}`,
+          tax_period: period,
           activity_details: { bulk: true, consultant_id: consultantId },
           created_at: new Date().toISOString(),
-        });
+        }));
+        await admin.from('tax_activity_log').insert(auditRows);
       }
     }
 
@@ -133,7 +141,7 @@ export class BulkFilingService {
   }
 
   /**
-   * Get summary of assigned customers for bulk filing selection
+   * Get assigned customers for bulk filing selection
    */
   static async getAssignedCustomers(consultantId: string): Promise<{
     id: string;
@@ -153,21 +161,14 @@ export class BulkFilingService {
 
     const customerIds = assignments.map((a) => a.customer_id);
 
-    const { data: customers } = await admin
-      .from('customer')
-      .select('id, full_name, company_name, npwp')
-      .in('id', customerIds);
+    const [customersResult, pendingResult] = await Promise.all([
+      admin.from('customer').select('id, full_name, company_name, npwp').in('id', customerIds),
+      admin.from('tax_filing').select('customer_id').in('customer_id', customerIds).eq('status', 'DRAFT'),
+    ]);
 
-    // Check pending filings
-    const { data: pendingFilings } = await admin
-      .from('tax_filing')
-      .select('customer_id')
-      .in('customer_id', customerIds)
-      .eq('status', 'DRAFT');
+    const pendingSet = new Set((pendingResult.data || []).map((f) => f.customer_id));
 
-    const pendingSet = new Set((pendingFilings || []).map((f) => f.customer_id));
-
-    return (customers || []).map((c) => ({
+    return (customersResult.data || []).map((c) => ({
       id: c.id,
       fullName: c.full_name || c.company_name || '',
       npwp: c.npwp || '',

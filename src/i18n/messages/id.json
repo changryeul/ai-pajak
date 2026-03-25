@@ -32,7 +32,9 @@
     "uploading": "Mengunggah...",
     "retry": "Coba Lagi",
     "actions": "Tindakan",
-    "view": "Lihat"
+    "view": "Lihat",
+    "darkMode": "Mode gelap",
+    "lightMode": "Mode terang"
   },
   "auth": {
     "login": "Masuk",

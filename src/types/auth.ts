@@ -36,6 +36,8 @@ export interface SessionContext {
   organizationId: string | null;
   organizationType: OrganizationType | null;
   email: string;
+  customerId?: string;
+  consultantId?: string;
 }
 
 export interface AuditContext {

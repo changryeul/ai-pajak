@@ -32,7 +32,9 @@
     "uploading": "上传中...",
     "retry": "重试",
     "actions": "操作",
-    "view": "查看"
+    "view": "查看",
+    "darkMode": "深色模式",
+    "lightMode": "浅色模式"
   },
   "auth": {
     "login": "登录",
