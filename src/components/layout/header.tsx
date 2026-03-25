@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useParams, useRouter, usePathname } from 'next/navigation';
-import { Bell, Globe, User, ChevronDown } from 'lucide-react';
+import { Bell, Globe, User, ChevronDown, Menu } from 'lucide-react';
 import { LOCALE_NAMES, LOCALES, type Locale } from '@/config/constants';
 import { cn } from '@/lib/utils';
+import { useMobileSidebar } from './mobile-sidebar';
 
 interface HeaderProps {
   userEmail?: string;
@@ -19,6 +20,7 @@ export function Header({ userEmail, userName }: HeaderProps) {
 
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { toggle } = useMobileSidebar();
 
   const handleLocaleChange = (newLocale: Locale) => {
     const newPath = pathname.replace(`/${currentLocale}`, `/${newLocale}`);
@@ -27,9 +29,16 @@ export function Header({ userEmail, userName }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
-      {/* Search or Breadcrumb can go here */}
-      <div className="flex-1" />
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-6">
+      {/* Mobile hamburger + spacer */}
+      <div className="flex items-center gap-3 flex-1">
+        <button
+          onClick={toggle}
+          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </div>
 
       {/* Right side actions */}
       <div className="flex items-center gap-4">

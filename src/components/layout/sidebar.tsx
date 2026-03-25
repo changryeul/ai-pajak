@@ -18,6 +18,7 @@ import {
   Shield,
   Activity,
   ClipboardList,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
+import { useMobileSidebar } from './mobile-sidebar';
 
 interface NavItem {
   href: string;
@@ -108,6 +110,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { session } = useSession();
+  const { isOpen, close } = useMobileSidebar();
   const locale = params.locale as string;
   const userRole = session?.role;
 
@@ -133,17 +136,19 @@ export function Sidebar() {
     }))
     .filter((section) => section.items.length > 0);
 
-  return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white hidden lg:block">
-      <div className="flex h-full flex-col">
-        {/* Logo */}
-        <div className="flex h-16 items-center border-b border-gray-200 px-6">
-          <Link href={`/${locale}/dashboard`} className="flex items-center gap-2">
+  const sidebarContent = (
+    <div className="flex h-full flex-col">
+      {/* Logo */}
+      <div className="flex h-16 items-center justify-between border-b border-gray-200 px-6">
+        <Link href={`/${locale}/dashboard`} className="flex items-center gap-2" onClick={close}>
             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
               <span className="text-sm font-bold text-white">AI</span>
             </div>
             <span className="text-xl font-bold text-gray-900">PAJAK</span>
           </Link>
+          <button onClick={close} className="lg:hidden rounded-lg p-1 text-gray-500 hover:bg-gray-100">
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Role badge */}
@@ -180,6 +185,7 @@ export function Sidebar() {
                     <li key={item.href}>
                       <Link
                         href={fullHref}
+                        onClick={close}
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                           isActive
@@ -212,6 +218,27 @@ export function Sidebar() {
           </button>
         </div>
       </div>
-    </aside>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white hidden lg:block">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile overlay */}
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            onClick={close}
+          />
+          <aside className="fixed left-0 top-0 z-50 h-screen w-64 border-r border-gray-200 bg-white lg:hidden animate-in slide-in-from-left duration-200">
+            {sidebarContent}
+          </aside>
+        </>
+      )}
+    </>
   );
 }
