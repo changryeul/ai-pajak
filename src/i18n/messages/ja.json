@@ -735,6 +735,14 @@
     "income": "収入",
     "tax": "税金"
   },
+  "trust": {
+    "djpPartner": "DJP公式パートナー",
+    "encrypted": "256ビット暗号化",
+    "secure": "データ保護",
+    "certified": "セキュリティ認証済",
+    "djpOfficialPartner": "インドネシア国税庁(DJP)公式e-Filingパートナー",
+    "djpOfficialDesc": "AI PajakはDJPに登録された公式電子申告サービスです"
+  },
   "legal": {
     "backToLogin": "ログインに戻る",
     "privacyPolicy": {

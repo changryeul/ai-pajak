@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Shield, Clock, FileCheck, Zap } from 'lucide-react';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
 import { createClient } from '@/lib/supabase/client';
+import { TrustBadges } from '@/components/trust/TrustBadges';
 
 export default function LoginPage() {
   const t = useTranslations();
@@ -155,6 +156,11 @@ export default function LoginPage() {
             </CardFooter>
           </form>
         </Card>
+
+        {/* Trust badges below form */}
+        <div className="mt-6">
+          <TrustBadges />
+        </div>
       </div>
     </div>
   );

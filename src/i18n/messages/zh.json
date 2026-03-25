@@ -735,6 +735,14 @@
     "income": "收入",
     "tax": "税款"
   },
+  "trust": {
+    "djpPartner": "DJP官方合作伙伴",
+    "encrypted": "256位加密",
+    "secure": "数据受保护",
+    "certified": "安全认证",
+    "djpOfficialPartner": "印尼税务局(DJP)官方电子申报合作伙伴",
+    "djpOfficialDesc": "AI Pajak是在DJP注册的官方电子申报服务"
+  },
   "legal": {
     "backToLogin": "返回登录",
     "privacyPolicy": {

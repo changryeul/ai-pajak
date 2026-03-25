@@ -735,6 +735,14 @@
     "income": "Penghasilan",
     "tax": "Pajak"
   },
+  "trust": {
+    "djpPartner": "Mitra Resmi DJP",
+    "encrypted": "Enkripsi 256-bit",
+    "secure": "Data Terlindungi",
+    "certified": "Tersertifikasi Keamanan",
+    "djpOfficialPartner": "Mitra Resmi e-Filing Direktorat Jenderal Pajak (DJP)",
+    "djpOfficialDesc": "AI Pajak adalah layanan e-Filing resmi terdaftar di DJP"
+  },
   "legal": {
     "backToLogin": "Kembali ke Login",
     "privacyPolicy": {

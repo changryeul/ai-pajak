@@ -735,6 +735,14 @@
     "income": "Income",
     "tax": "Tax"
   },
+  "trust": {
+    "djpPartner": "Official DJP Partner",
+    "encrypted": "256-bit Encryption",
+    "secure": "Data Protected",
+    "certified": "Security Certified",
+    "djpOfficialPartner": "Official e-Filing Partner of Indonesia Tax Authority (DJP)",
+    "djpOfficialDesc": "AI Pajak is a registered electronic filing service with DJP"
+  },
   "legal": {
     "backToLogin": "Back to Login",
     "privacyPolicy": {
