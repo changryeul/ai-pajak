@@ -73,6 +73,7 @@ export function UrgentActionsPanel({ consultantId, limit = 5 }: UrgentActionsPan
           tax_period: string;
         }) => {
           // Calculate if filing is near deadline
+          if (!filing.tax_period || !filing.tax_period.includes('-')) return;
           const [year, month] = filing.tax_period.split('-').map(Number);
           let deadlineDay = 10; // PPh21/PPh23
           if (filing.tax_type === 'PPN') deadlineDay = 31;
