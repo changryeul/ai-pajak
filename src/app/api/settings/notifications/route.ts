@@ -112,10 +112,10 @@ export async function PUT(request: NextRequest) {
     let result;
 
     if (existing) {
-      // Update existing preferences
+      // Update existing preferences (explicit updated_at - DB trigger removed)
       result = await supabase
         .from('notification_preferences')
-        .update(updateData)
+        .update({ ...updateData, updated_at: new Date().toISOString() })
         .eq('user_id', user.id)
         .select()
         .single();

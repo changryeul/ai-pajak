@@ -177,6 +177,7 @@ async function handleFilingAccepted(
         bpe_number: bpeNumber,
         bpe_date: bpeDate,
         filed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq('id', job.tax_filing_id);
   }
@@ -188,6 +189,7 @@ async function handleFilingAccepted(
       status: 'COMPLETED',
       result: data,
       completed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq('id', job.id);
 
@@ -215,6 +217,7 @@ async function handleFilingRejected(
         djp_submission_status: 'REJECTED',
         djp_error_code: errorCode,
         djp_error_message: errorMessage,
+        updated_at: new Date().toISOString(),
       })
       .eq('id', job.tax_filing_id);
   }

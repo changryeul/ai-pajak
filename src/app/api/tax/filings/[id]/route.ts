@@ -217,6 +217,9 @@ async function handleUpdateFiling(
     if (body.taxDue !== undefined) updateData.tax_due = body.taxDue;
     if (body.notes !== undefined) updateData.notes = body.notes;
 
+    // Explicit updated_at (DB trigger removed)
+    updateData.updated_at = new Date().toISOString();
+
     const { data: updated, error: updateError } = await getSupabaseAdmin()
       .from('tax_filing')
       .update(updateData)

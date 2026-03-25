@@ -193,6 +193,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Explicit updated_at (DB trigger removed)
+    updateData.updated_at = new Date().toISOString();
+
     const { data: updatedPOA, error } = await supabase
       .from('power_of_attorney')
       .update(updateData)

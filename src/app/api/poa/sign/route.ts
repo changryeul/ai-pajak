@@ -202,6 +202,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
         customer_signed_at: new Date().toISOString(),
         customer_signature_url: signatureData,
         status: 'PENDING_SIGNATURE', // Waiting for tax advisor signature
+        updated_at: new Date().toISOString(),
       })
       .eq('id', poaId);
 
@@ -304,6 +305,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
         tax_partner_signature_url: signatureData,
         tax_partner_signed_by_user_id: session.userId, // User ID, not consultant ID
         status: 'ACTIVE', // POA is now active!
+        updated_at: new Date().toISOString(),
       })
       .eq('id', poaId);
 

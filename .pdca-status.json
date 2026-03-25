@@ -1,0 +1,12 @@
+{
+  "go-backoffice-separation": {
+    "phase": "completed",
+    "matchRate": 96.1,
+    "iterationCount": 0,
+    "startedAt": "2026-03-25T00:00:00Z",
+    "planPath": "docs/01-plan/features/go-backoffice-separation.plan.md",
+    "designPath": "docs/02-design/features/go-backoffice-separation.design.md",
+    "analysisPath": "docs/03-analysis/go-backoffice-separation.analysis.md",
+    "reportPath": "docs/04-report/features/go-backoffice-separation.report.md"
+  }
+}
