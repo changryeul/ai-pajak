@@ -158,14 +158,20 @@ function CustomerDashboard({
           <CardTitle className="text-lg">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { href: '/tax/pph21', label: 'PPh 21', icon: FileText, desc: 'Employee tax' },
-              { href: '/tax/pph23', label: 'PPh 23', icon: FileText, desc: 'Service tax' },
-              { href: '/tax/ppn', label: 'PPN', icon: FileText, desc: 'VAT' },
-              { href: '/tax/spt-tahunan', label: 'SPT Tahunan', icon: TrendingUp, desc: 'Annual return' },
+              { href: '/tax/spt-tahunan', labelKey: 'quickAction.annualReturn', descKey: 'quickAction.annualReturnDesc', icon: TrendingUp, color: 'blue' },
+              { href: '/tax/pph21', labelKey: 'quickAction.salaryTax', descKey: 'quickAction.salaryTaxDesc', icon: Users, color: 'green' },
+              { href: '/documents', labelKey: 'quickAction.uploadDoc', descKey: 'quickAction.uploadDocDesc', icon: Upload, color: 'purple' },
+              { href: '/poa/create', labelKey: 'quickAction.createPoa', descKey: 'quickAction.createPoaDesc', icon: FileText, color: 'orange' },
             ].map((action) => {
               const Icon = action.icon;
+              const bgColor = {
+                blue: 'bg-blue-50', green: 'bg-green-50', purple: 'bg-purple-50', orange: 'bg-orange-50',
+              }[action.color];
+              const iconColor = {
+                blue: 'text-blue-600', green: 'text-green-600', purple: 'text-purple-600', orange: 'text-orange-600',
+              }[action.color];
               return (
                 <Link
                   key={action.href}
@@ -173,12 +179,12 @@ function CustomerDashboard({
                   className="flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:border-blue-300 hover:bg-blue-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <Icon className="h-5 w-5 text-blue-600" />
+                    <div className={`p-2 ${bgColor} rounded-lg`}>
+                      <Icon className={`h-5 w-5 ${iconColor}`} />
                     </div>
                     <div>
-                      <span className="font-medium text-gray-900">{action.label}</span>
-                      <p className="text-xs text-gray-500">{action.desc}</p>
+                      <span className="font-medium text-gray-900">{t(action.labelKey)}</span>
+                      <p className="text-xs text-gray-500">{t(action.descKey)}</p>
                     </div>
                   </div>
                   <ArrowRight className="h-5 w-5 text-gray-400" />

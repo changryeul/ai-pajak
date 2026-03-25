@@ -132,6 +132,16 @@
     "manageUsers": "Manage Users",
     "viewAnalytics": "View Analytics"
   },
+  "quickAction": {
+    "annualReturn": "File Annual Return",
+    "annualReturnDesc": "Calculate and submit your annual tax",
+    "salaryTax": "Calculate Salary Tax",
+    "salaryTaxDesc": "Check your income withholding tax",
+    "uploadDoc": "Upload Documents",
+    "uploadDocDesc": "Scan or photograph tax certificates",
+    "createPoa": "Authorize Tax Agent",
+    "createPoaDesc": "Let a tax advisor file for you"
+  },
   "tax": {
     "newFiling": "Create New Tax Filing",
     "editFiling": "Edit Tax Filing",

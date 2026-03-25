@@ -132,6 +132,16 @@
     "manageUsers": "Kelola Pengguna",
     "viewAnalytics": "Lihat Analitik"
   },
+  "quickAction": {
+    "annualReturn": "Lapor SPT Tahunan",
+    "annualReturnDesc": "Hitung dan laporkan pajak tahunan Anda",
+    "salaryTax": "Hitung Pajak Gaji",
+    "salaryTaxDesc": "Periksa potongan pajak penghasilan Anda",
+    "uploadDoc": "Unggah Dokumen",
+    "uploadDocDesc": "Pindai atau foto bukti potong pajak",
+    "createPoa": "Buat Surat Kuasa",
+    "createPoaDesc": "Kuasakan pelaporan ke konsultan pajak"
+  },
   "tax": {
     "newFiling": "Buat Pelaporan Pajak Baru",
     "editFiling": "Edit Pelaporan Pajak",

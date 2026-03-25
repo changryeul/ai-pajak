@@ -132,6 +132,16 @@
     "manageUsers": "用户管理",
     "viewAnalytics": "查看分析"
   },
+  "quickAction": {
+    "annualReturn": "年度报税",
+    "annualReturnDesc": "计算并提交年度所得税",
+    "salaryTax": "计算工资税",
+    "salaryTaxDesc": "查看您的工资预扣税",
+    "uploadDoc": "上传文件",
+    "uploadDocDesc": "扫描或拍摄税务凭证",
+    "createPoa": "委托税务代理",
+    "createPoaDesc": "让税务师代为申报"
+  },
   "tax": {
     "newFiling": "创建新税务申报",
     "editFiling": "编辑税务申报",

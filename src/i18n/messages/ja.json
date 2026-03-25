@@ -132,6 +132,16 @@
     "manageUsers": "ユーザー管理",
     "viewAnalytics": "分析を見る"
   },
+  "quickAction": {
+    "annualReturn": "確定申告をする",
+    "annualReturnDesc": "年間の所得税を計算・申告します",
+    "salaryTax": "給与の税金を計算",
+    "salaryTaxDesc": "源泉徴収税額を確認します",
+    "uploadDoc": "書類をアップロード",
+    "uploadDocDesc": "源泉徴収票をスキャン・撮影",
+    "createPoa": "税理士に委任",
+    "createPoaDesc": "税理士に申告を依頼します"
+  },
   "tax": {
     "newFiling": "新規税務申告を作成",
     "editFiling": "税務申告を編集",

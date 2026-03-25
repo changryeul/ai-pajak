@@ -132,6 +132,16 @@
     "manageUsers": "사용자 관리",
     "viewAnalytics": "분석 보기"
   },
+  "quickAction": {
+    "annualReturn": "연말정산 하기",
+    "annualReturnDesc": "1년치 소득세를 정산합니다",
+    "salaryTax": "급여 세금 계산",
+    "salaryTaxDesc": "월급에서 원천징수되는 세금 확인",
+    "uploadDoc": "서류 업로드",
+    "uploadDocDesc": "원천징수영수증 등 스캔/촬영",
+    "createPoa": "세무 대리인 위임",
+    "createPoaDesc": "세무사에게 신고를 맡기기"
+  },
   "tax": {
     "newFiling": "새 세금 신고 생성",
     "editFiling": "세금 신고 수정",
