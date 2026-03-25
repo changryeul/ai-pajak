@@ -735,6 +735,13 @@
     "income": "収入",
     "tax": "税金"
   },
+  "chart": {
+    "taxSummary": "月次所得・税金",
+    "income": "所得",
+    "taxPaid": "納付税額",
+    "filingStatus": "申告状況",
+    "noData": "まだ表示するデータがありません"
+  },
   "trust": {
     "djpPartner": "DJP公式パートナー",
     "encrypted": "256ビット暗号化",

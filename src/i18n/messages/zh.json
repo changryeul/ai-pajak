@@ -735,6 +735,13 @@
     "income": "收入",
     "tax": "税款"
   },
+  "chart": {
+    "taxSummary": "月度收入与税款",
+    "income": "收入",
+    "taxPaid": "已缴税款",
+    "filingStatus": "申报状态",
+    "noData": "暂无数据"
+  },
   "trust": {
     "djpPartner": "DJP官方合作伙伴",
     "encrypted": "256位加密",

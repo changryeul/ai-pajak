@@ -735,6 +735,13 @@
     "income": "Penghasilan",
     "tax": "Pajak"
   },
+  "chart": {
+    "taxSummary": "Pendapatan & Pajak Bulanan",
+    "income": "Pendapatan",
+    "taxPaid": "Pajak Dibayar",
+    "filingStatus": "Status Pelaporan",
+    "noData": "Belum ada data untuk ditampilkan"
+  },
   "trust": {
     "djpPartner": "Mitra Resmi DJP",
     "encrypted": "Enkripsi 256-bit",

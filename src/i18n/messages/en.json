@@ -735,6 +735,13 @@
     "income": "Income",
     "tax": "Tax"
   },
+  "chart": {
+    "taxSummary": "Monthly Income & Tax",
+    "income": "Income",
+    "taxPaid": "Tax Paid",
+    "filingStatus": "Filing Status",
+    "noData": "No data to display yet"
+  },
   "trust": {
     "djpPartner": "Official DJP Partner",
     "encrypted": "256-bit Encryption",

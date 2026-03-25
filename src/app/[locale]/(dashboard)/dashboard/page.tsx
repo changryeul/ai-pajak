@@ -27,6 +27,8 @@ import {
   UrgentActionsPanel,
   PlatformStats,
 } from '@/components/dashboard';
+import { TaxSummaryChart } from '@/components/dashboard/TaxSummaryChart';
+import { FilingStatusChart } from '@/components/dashboard/FilingStatusChart';
 
 interface ConsultantStats {
   activeClients: number;
@@ -166,6 +168,12 @@ function CustomerDashboard({
 
         {/* Deadlines */}
         <DeadlineCalendar customerId={session.customerId} />
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TaxSummaryChart customerId={session.customerId} />
+        <FilingStatusChart customerId={session.customerId} />
       </div>
 
       {/* Quick Actions */}
