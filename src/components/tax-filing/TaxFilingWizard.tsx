@@ -463,6 +463,34 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
         )}
       </div>
 
+      {/* Progress bar + Estimated tax */}
+      <div className="mb-4 flex items-center gap-4">
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-medium text-gray-700">
+              {t('tax.progress', { current: currentStepIndex + 1, total: STEPS.length })}
+            </span>
+            <span className="text-sm text-gray-500">
+              {Math.round(((currentStepIndex + 1) / STEPS.length) * 100)}%
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-gray-200">
+            <div
+              className="h-2 rounded-full bg-blue-600 transition-all duration-300"
+              style={{ width: `${((currentStepIndex + 1) / STEPS.length) * 100}%` }}
+            />
+          </div>
+        </div>
+        {calculation && (
+          <div className="text-right shrink-0 bg-blue-50 rounded-lg px-4 py-2">
+            <p className="text-xs text-blue-600 font-medium">{t('tax.estimatedTax')}</p>
+            <p className="text-lg font-bold text-blue-900">
+              Rp {(calculation.taxDue ?? 0).toLocaleString('id-ID')}
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">

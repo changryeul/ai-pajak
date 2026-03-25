@@ -201,6 +201,8 @@
     "submitFiling": "Submit Filing",
     "saveDraft": "Save Draft",
     "submitSuccess": "Tax filing submitted successfully!",
+    "progress": "Step {current}/{total}",
+    "estimatedTax": "Estimated Tax",
     "requestReview": "Request Review",
     "reviewRequestSuccess": "Review request submitted. Your tax advisor will review and process it.",
     "customerReviewInfo": "After requesting review, your tax advisor will verify the data and submit to DJP (tax authority). You will be notified when the submission is complete.",

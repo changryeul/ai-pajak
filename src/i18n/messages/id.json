@@ -201,6 +201,8 @@
     "submitFiling": "Kirim Pelaporan",
     "saveDraft": "Simpan Draf",
     "submitSuccess": "Pelaporan pajak berhasil dikirim!",
+    "progress": "Langkah {current}/{total}",
+    "estimatedTax": "Perkiraan Pajak",
     "requestReview": "Minta Tinjauan",
     "reviewRequestSuccess": "Permintaan tinjauan telah dikirim. Konsultan pajak Anda akan meninjau dan memprosesnya.",
     "customerReviewInfo": "Setelah meminta tinjauan, konsultan pajak Anda akan memverifikasi data dan mengirimkan ke DJP. Anda akan diberi tahu ketika pengiriman selesai.",

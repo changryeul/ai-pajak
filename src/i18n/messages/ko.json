@@ -201,6 +201,8 @@
     "submitFiling": "신고서 제출",
     "saveDraft": "임시 저장",
     "submitSuccess": "세금 신고가 성공적으로 제출되었습니다!",
+    "progress": "단계 {current}/{total}",
+    "estimatedTax": "예상 세액",
     "requestReview": "검토 요청",
     "reviewRequestSuccess": "검토 요청이 제출되었습니다. 세무사가 검토 후 처리합니다.",
     "customerReviewInfo": "검토 요청 후 세무사가 내용을 확인하고 DJP(세무서)에 제출합니다. 제출 완료 시 알림을 받으실 수 있습니다.",

@@ -201,6 +201,8 @@
     "submitFiling": "申告を提出",
     "saveDraft": "下書きを保存",
     "submitSuccess": "税務申告が正常に提出されました！",
+    "progress": "ステップ {current}/{total}",
+    "estimatedTax": "予想税額",
     "requestReview": "レビューをリクエスト",
     "reviewRequestSuccess": "レビューリクエストが送信されました。税理士が確認して処理します。",
     "customerReviewInfo": "レビューをリクエストした後、税理士がデータを確認してDJP（税務署）に提出します。提出完了時に通知されます。",

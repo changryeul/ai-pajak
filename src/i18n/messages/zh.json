@@ -201,6 +201,8 @@
     "submitFiling": "提交申报",
     "saveDraft": "保存草稿",
     "submitSuccess": "税务申报提交成功！",
+    "progress": "第 {current}/{total} 步",
+    "estimatedTax": "预估税额",
     "requestReview": "请求审核",
     "reviewRequestSuccess": "审核请求已提交。您的税务顾问将审核并处理。",
     "customerReviewInfo": "请求审核后，您的税务顾问将验证数据并提交给DJP（税务局）。提交完成后您将收到通知。",
