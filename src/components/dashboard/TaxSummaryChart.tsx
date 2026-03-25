@@ -87,7 +87,8 @@ export function TaxSummaryChart({ customerId, consultantId }: TaxSummaryChartPro
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis tickFormatter={formatRupiah} tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, '']}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter={(value: any) => [`Rp ${Number(value).toLocaleString('id-ID')}`, '']}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
               />
               <Legend />

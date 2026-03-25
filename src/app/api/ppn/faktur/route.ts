@@ -15,7 +15,7 @@ async function handleList(request: RequestWithSession): Promise<Response> {
   const { session } = request;
   const { searchParams } = new URL(request.url);
 
-  const customerId = (session as Record<string, unknown>).customerId as string || searchParams.get('customerId');
+  const customerId = (session as unknown as Record<string, unknown>).customerId as string || searchParams.get('customerId');
   if (!customerId) {
     return NextResponse.json({ success: false, error: 'Customer ID required' }, { status: 400 });
   }
@@ -38,7 +38,7 @@ async function handleCreate(request: RequestWithSession): Promise<Response> {
   const { session } = request;
   const body = await request.json() as CreateFakturRequest & { customerId?: string };
 
-  const ext = session as Record<string, unknown>;
+  const ext = session as unknown as Record<string, unknown>;
   const customerId = ext.customerId as string || body.customerId;
   if (!customerId) {
     return NextResponse.json({ success: false, error: 'Customer ID required' }, { status: 400 });
