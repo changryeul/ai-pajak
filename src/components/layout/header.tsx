@@ -6,6 +6,7 @@ import { Bell, Globe, User, ChevronDown, Menu } from 'lucide-react';
 import { LOCALE_NAMES, LOCALES, type Locale } from '@/config/constants';
 import { cn } from '@/lib/utils';
 import { useMobileSidebar } from './mobile-sidebar';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface HeaderProps {
   userEmail?: string;
@@ -29,7 +30,7 @@ export function Header({ userEmail, userName }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 px-4 lg:px-6">
       {/* Mobile hamburger + spacer */}
       <div className="flex items-center gap-3 flex-1">
         <button
@@ -42,8 +43,11 @@ export function Header({ userEmail, userName }: HeaderProps) {
 
       {/* Right side actions */}
       <div className="flex items-center gap-4">
+        {/* Theme Toggle */}
+        <ThemeToggle />
+
         {/* Notifications */}
-        <button className="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+        <button className="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">
           <Bell className="h-5 w-5" />
           <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
         </button>

@@ -223,7 +223,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white hidden lg:block">
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 hidden lg:block">
         {sidebarContent}
       </aside>
 
@@ -234,7 +234,7 @@ export function Sidebar() {
             className="fixed inset-0 z-40 bg-black/50 lg:hidden"
             onClick={close}
           />
-          <aside className="fixed left-0 top-0 z-50 h-screen w-64 border-r border-gray-200 bg-white lg:hidden animate-in slide-in-from-left duration-200">
+          <aside className="fixed left-0 top-0 z-50 h-screen w-64 border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 lg:hidden animate-in slide-in-from-left duration-200">
             {sidebarContent}
           </aside>
         </>
