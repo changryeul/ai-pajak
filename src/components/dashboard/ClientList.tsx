@@ -64,7 +64,7 @@ export function ClientList({ consultantId, limit = 10, showSearch = true }: Clie
 
       if (data.success) {
         // Map the response to include filing stats
-        const clientsWithStats = data.data.map((customer: {
+        const clientsWithStats = (data.data || data.customers || []).map((customer: {
           id: string;
           full_name: string;
           company_name: string | null;
