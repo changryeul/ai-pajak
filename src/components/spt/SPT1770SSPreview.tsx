@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Card,
   CardHeader,
@@ -11,10 +11,20 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   SPT1770SSData,
   PTKPStatus,
 } from '@/lib/tax/spt-1770ss/types';
+import {
+  ShieldCheck,
+  AlertTriangle,
+  AlertCircle,
+  Info,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 
 interface SPT1770SSPreviewProps {
   data: SPT1770SSData;
@@ -49,6 +59,25 @@ const PTKP_LABELS: Record<PTKPStatus, string> = {
   'K/I/3': 'Kawin + Istri Gabung / 3 Tanggungan',
 };
 
+interface ValidationIssue {
+  id: string;
+  severity: 'ERROR' | 'WARNING' | 'INFO';
+  category: string;
+  title: string;
+  description: string;
+  suggestion?: string;
+  expectedValue?: string;
+  actualValue?: string;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  score: number;
+  issues: ValidationIssue[];
+  counts: { errors: number; warnings: number; infos: number };
+  aiSummary?: string;
+}
+
 export function SPT1770SSPreview({
   data,
   onDownloadPDF,
@@ -56,6 +85,48 @@ export function SPT1770SSPreview({
   isLoading = false,
 }: SPT1770SSPreviewProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [showValidation, setShowValidation] = useState(true);
+
+  // Restore validation result from sessionStorage
+  const validationKey = `spt_validation_${data.taxYear}`;
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = sessionStorage.getItem(validationKey);
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+
+  const runValidation = useCallback(async () => {
+    setIsValidating(true);
+    try {
+      const response = await fetch('/api/tax/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sptType: '1770SS',
+          taxYear: data.taxYear,
+          ptkpStatus: data.ptkpStatus,
+          taxpayer: data.taxpayer,
+          incomeSources: data.incomeSources,
+          summary: data.summary,
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setValidationResult(result.data);
+        setShowValidation(true);
+        try {
+          sessionStorage.setItem(validationKey, JSON.stringify(result.data));
+        } catch { /* ignore */ }
+      }
+    } catch (err) {
+      console.error('Validation error:', err);
+    } finally {
+      setIsValidating(false);
+    }
+  }, [data]);
 
   const handleDownload = async () => {
     if (!onDownloadPDF) return;
@@ -287,11 +358,30 @@ export function SPT1770SSPreview({
           </div>
         </CardContent>
         <CardFooter className="bg-gray-50 flex justify-between">
-          {onEdit && (
-            <Button variant="outline" onClick={onEdit} disabled={isLoading}>
-              Edit Data
+          <div className="flex gap-2">
+            {onEdit && (
+              <Button variant="outline" onClick={onEdit} disabled={isLoading}>
+                Edit Data
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              onClick={runValidation}
+              disabled={isValidating}
+            >
+              {isValidating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Memvalidasi...
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="h-4 w-4 mr-2" />
+                  Validasi SPT
+                </>
+              )}
             </Button>
-          )}
+          </div>
           {onDownloadPDF && (
             <Button
               onClick={handleDownload}
@@ -339,6 +429,121 @@ export function SPT1770SSPreview({
               </table>
             </div>
           </CardContent>
+        </Card>
+      )}
+
+      {/* Validation Result */}
+      {validationResult && (
+        <Card className={`border-2 ${
+          validationResult.isValid ? 'border-green-300' : 'border-red-300'
+        }`}>
+          <CardHeader
+            className={`cursor-pointer ${
+              validationResult.isValid ? 'bg-green-50' : 'bg-red-50'
+            }`}
+            onClick={() => setShowValidation(!showValidation)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className={`h-5 w-5 ${
+                  validationResult.isValid ? 'text-green-600' : 'text-red-600'
+                }`} />
+                <div>
+                  <CardTitle className="text-lg">
+                    Hasil Validasi - Skor {validationResult.score}/100
+                  </CardTitle>
+                  <CardDescription className="flex gap-3 mt-1">
+                    {validationResult.counts.errors > 0 && (
+                      <span className="text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        {validationResult.counts.errors} Error
+                      </span>
+                    )}
+                    {validationResult.counts.warnings > 0 && (
+                      <span className="text-yellow-600 flex items-center gap-1">
+                        <AlertTriangle className="h-3.5 w-3.5" />
+                        {validationResult.counts.warnings} Warning
+                      </span>
+                    )}
+                    {validationResult.counts.infos > 0 && (
+                      <span className="text-blue-600 flex items-center gap-1">
+                        <Info className="h-3.5 w-3.5" />
+                        {validationResult.counts.infos} Info
+                      </span>
+                    )}
+                    {validationResult.issues.length === 0 && (
+                      <span className="text-green-600">Tidak ada masalah ditemukan</span>
+                    )}
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Progress value={validationResult.score} className="w-24" />
+                {showValidation ? (
+                  <ChevronUp className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                )}
+              </div>
+            </div>
+          </CardHeader>
+
+          {showValidation && (
+            <CardContent className="pt-4 space-y-4">
+              {/* AI Summary */}
+              {validationResult.aiSummary && (
+                <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                  {validationResult.aiSummary}
+                </div>
+              )}
+
+              {/* Issues list */}
+              {validationResult.issues.length > 0 && (
+                <div className="space-y-2">
+                  {validationResult.issues.map((issue) => {
+                    const severityConfig = {
+                      ERROR: { icon: AlertCircle, color: 'border-red-200 bg-red-50', text: 'text-red-800', badge: 'bg-red-100 text-red-700' },
+                      WARNING: { icon: AlertTriangle, color: 'border-yellow-200 bg-yellow-50', text: 'text-yellow-800', badge: 'bg-yellow-100 text-yellow-700' },
+                      INFO: { icon: Info, color: 'border-blue-200 bg-blue-50', text: 'text-blue-800', badge: 'bg-blue-100 text-blue-700' },
+                    };
+                    const config = severityConfig[issue.severity];
+                    const Icon = config.icon;
+
+                    return (
+                      <div key={issue.id} className={`border rounded-lg p-3 ${config.color}`}>
+                        <div className="flex items-start gap-2">
+                          <Icon className={`h-4 w-4 mt-0.5 flex-shrink-0 ${config.text}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`font-medium text-sm ${config.text}`}>
+                                {issue.title}
+                              </span>
+                              <Badge className={`text-xs ${config.badge}`}>
+                                {issue.category}
+                              </Badge>
+                            </div>
+                            <p className={`text-sm mt-1 ${config.text}`}>
+                              {issue.description}
+                            </p>
+                            {issue.expectedValue && issue.actualValue && (
+                              <p className="text-xs mt-1 opacity-75">
+                                Seharusnya: {issue.expectedValue} | Aktual: {issue.actualValue}
+                              </p>
+                            )}
+                            {issue.suggestion && (
+                              <p className="text-xs mt-1 font-medium">
+                                Saran: {issue.suggestion}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       )}
 

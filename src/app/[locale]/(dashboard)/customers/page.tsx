@@ -114,7 +114,7 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
             {t('customers.title')}
           </h1>
           <p className="text-gray-500 mt-1">
@@ -125,67 +125,33 @@ export default function CustomersPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Users className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                <p className="text-sm text-gray-500">{t('customers.totalCustomers')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                <UserCheck className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.activePoa}</p>
-                <p className="text-sm text-gray-500">{t('customers.activePOA')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.pendingFilings}</p>
-                <p className="text-sm text-gray-500">{t('customers.pendingFilings')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {customers.filter((c) => c.customer_type === 'COMPANY').length}
-                </p>
-                <p className="text-sm text-gray-500">{t('customers.company')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {[
+          { icon: Users, value: stats.total, label: t('customers.totalCustomers'), gradient: 'from-blue-500 to-blue-600' },
+          { icon: UserCheck, value: stats.activePoa, label: t('customers.activePOA'), gradient: 'from-green-500 to-emerald-600' },
+          { icon: FileText, value: stats.pendingFilings, label: t('customers.pendingFilings'), gradient: 'from-amber-500 to-orange-500' },
+          { icon: Building2, value: customers.filter((c) => c.customer_type === 'COMPANY').length, label: t('customers.company'), gradient: 'from-purple-500 to-violet-600' },
+        ].map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={i} className="group border-0 shadow-sm hover:shadow-md transition-all duration-300">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">{stat.label}</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                  </div>
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300`}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Search and Table */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardContent className="p-6">
           {/* Search */}
           <div className="flex items-center gap-4 mb-6">
@@ -195,7 +161,7 @@ export default function CustomersPage() {
                 placeholder={t('customers.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 rounded-xl"
               />
             </div>
             <p className="text-sm text-gray-500">
@@ -230,11 +196,15 @@ export default function CustomersPage() {
                   <TableRow key={customer.id} className="cursor-pointer hover:bg-gray-50">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                          customer.customer_type === 'COMPANY'
+                            ? 'bg-gradient-to-br from-purple-500 to-violet-600'
+                            : 'bg-gradient-to-br from-blue-500 to-indigo-600'
+                        }`}>
                           {customer.customer_type === 'COMPANY' ? (
-                            <Building2 className="h-4 w-4 text-gray-600" />
+                            <Building2 className="h-4 w-4 text-white" />
                           ) : (
-                            <User className="h-4 w-4 text-gray-600" />
+                            <User className="h-4 w-4 text-white" />
                           )}
                         </div>
                         <div>

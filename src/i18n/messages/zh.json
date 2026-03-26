@@ -84,6 +84,8 @@
     "reports": "报告",
     "taxFiling": "税务申报",
     "annualReturn": "年度申报 (SPT)",
+    "taxSavings": "节税建议 (AI)",
+    "clientReport": "客户报告 (AI)",
     "pph21": "所得税 (PPh 21)",
     "pph23": "预扣税 (PPh 23)",
     "ppn": "增值税 (PPN)",

@@ -18,6 +18,7 @@ import {
   Shield,
   Activity,
   ClipboardList,
+  Lightbulb,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -62,6 +63,7 @@ const navItems: NavSection[] = [
     roles: [UserRole.CUSTOMER],
     items: [
       { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn' },
+      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings' },
       { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21' },
       { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.pph23' },
       { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn' },
@@ -74,6 +76,8 @@ const navItems: NavSection[] = [
     items: [
       { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling' },
       { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn' },
+      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings' },
+      { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
     ],
   },
   {
@@ -134,94 +138,108 @@ export function Sidebar() {
     }))
     .filter((section) => section.items.length > 0);
 
-  const sidebarContent = (
-    <div className="flex h-full flex-col">
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-gray-200 px-6">
-        <Link href={`/${locale}/dashboard`} className="flex items-center gap-2" onClick={close}>
-            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <span className="text-sm font-bold text-white">AI</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">PAJAK</span>
-          </Link>
-          <button onClick={close} className="lg:hidden rounded-lg p-1 text-gray-500 hover:bg-gray-100">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+  // AI-powered menu items
+  const aiMenuPaths = ['/tax/savings', '/tax/report', '/tax/spt-tahunan/1770ss'];
 
-        {/* Role badge */}
-        {userRole && (
-          <div className="px-6 py-3 border-b border-gray-100">
-            <span className={cn(
-              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-              userRole === UserRole.CUSTOMER && 'bg-blue-50 text-blue-700',
-              userRole === UserRole.CONSULTANT_JTC && 'bg-green-50 text-green-700',
-              userRole === UserRole.TAX_ADVISOR_JTC && 'bg-purple-50 text-purple-700',
-              userRole === UserRole.PLATFORM_ADMIN && 'bg-orange-50 text-orange-700',
-            )}>
-              {t(`nav.role.${userRole}`)}
-            </span>
+  const sidebarContent = (
+    <div className="flex h-full flex-col bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950">
+      {/* Logo */}
+      <div className="flex h-16 items-center justify-between px-6">
+        <Link href={`/${locale}/dashboard`} className="flex items-center gap-2.5" onClick={close}>
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <span className="text-sm font-bold text-white">AI</span>
+          </div>
+          <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">PAJAK</span>
+        </Link>
+        <button onClick={close} className="lg:hidden rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Role badge */}
+      {userRole && (
+        <div className="px-6 pb-4">
+          <div className={cn(
+            'inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium',
+            userRole === UserRole.CUSTOMER && 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200',
+            userRole === UserRole.CONSULTANT_JTC && 'bg-gradient-to-r from-green-50 to-emerald-100 text-green-700 border border-green-200',
+            userRole === UserRole.TAX_ADVISOR_JTC && 'bg-gradient-to-r from-purple-50 to-violet-100 text-purple-700 border border-purple-200',
+            userRole === UserRole.PLATFORM_ADMIN && 'bg-gradient-to-r from-orange-50 to-amber-100 text-orange-700 border border-orange-200',
+          )}>
+            {t(`nav.role.${userRole}`)}
+          </div>
+        </div>
+      )}
+
+      <div className="mx-6 border-t border-gray-100 dark:border-gray-800" />
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        {visibleSections.map((section) => (
+          <div key={section.section} className="mb-5">
+            {section.labelKey && (
+              <h3 className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600">
+                {t(section.labelKey)}
+              </h3>
+            )}
+            <ul className="space-y-0.5">
+              {section.items.map((item) => {
+                const fullHref = `/${locale}${item.href}`;
+                const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
+                const Icon = item.icon;
+                const isAI = aiMenuPaths.some((p) => item.href.includes(p));
+
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={fullHref}
+                      onClick={close}
+                      className={cn(
+                        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                        isActive
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900'
+                      )}
+                    >
+                      <Icon className={cn('h-[18px] w-[18px]', isActive && 'text-white')} />
+                      <span className="flex-1">{t(item.labelKey)}</span>
+                      {isAI && !isActive && (
+                        <span className="flex h-5 items-center rounded-md bg-gradient-to-r from-amber-100 to-yellow-100 px-1.5 text-[10px] font-bold text-amber-700">
+                          AI
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      {/* User info + Logout */}
+      <div className="border-t border-gray-100 dark:border-gray-800 p-3">
+        {session?.fullName && (
+          <div className="px-3 pb-2">
+            <p className="text-xs font-medium text-gray-900 dark:text-gray-200 truncate">{session.fullName}</p>
+            <p className="text-[10px] text-gray-400 truncate">{session.email || ''}</p>
           </div>
         )}
-
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {visibleSections.map((section) => (
-            <div key={section.section} className="mb-6">
-              {section.labelKey && (
-                <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  {t(section.labelKey)}
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {section.items.map((item) => {
-                  const fullHref = `/${locale}${item.href}`;
-                  const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
-                  const Icon = item.icon;
-
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={fullHref}
-                        onClick={close}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                          isActive
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-700 hover:bg-gray-100'
-                        )}
-                      >
-                        <Icon className="h-5 w-5" />
-                        {t(item.labelKey)}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </nav>
-
-        {/* User info + Logout */}
-        <div className="border-t border-gray-200 p-3">
-          {session?.fullName && (
-            <p className="px-3 pb-2 text-xs text-gray-500 truncate">{session.fullName}</p>
-          )}
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            {t('auth.logout')}
-          </button>
-        </div>
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+        >
+          <LogOut className="h-[18px] w-[18px]" />
+          {t('auth.logout')}
+        </button>
       </div>
+    </div>
   );
 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 hidden lg:block">
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200/80 bg-white dark:bg-gray-900 dark:border-gray-800 hidden lg:block shadow-sm">
         {sidebarContent}
       </aside>
 

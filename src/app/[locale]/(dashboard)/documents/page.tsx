@@ -11,9 +11,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { DocumentList, DocumentUploader } from '@/components/documents';
+import { useSession } from '@/hooks/useSession';
 
 export default function DocumentsPage() {
   const t = useTranslations();
+  const { session } = useSession();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -47,11 +49,16 @@ export default function DocumentsPage() {
               <DialogTitle>{t('documents.uploadNew')}</DialogTitle>
             </DialogHeader>
             <DocumentUploader
+              customerId={session?.customerId}
               onUploadComplete={() => {
                 handleUploadComplete();
-                setIsUploadOpen(false);
               }}
             />
+            <div className="flex justify-end pt-2">
+              <Button variant="outline" onClick={() => setIsUploadOpen(false)}>
+                Tutup
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

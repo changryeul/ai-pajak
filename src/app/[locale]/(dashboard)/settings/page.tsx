@@ -257,7 +257,7 @@ export default function SettingsPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
           {t('settings.title') || 'Settings'}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -268,19 +268,19 @@ export default function SettingsPage() {
       <div className="flex gap-6">
         {/* Sidebar Tabs */}
         <div className="w-64 flex-shrink-0">
-          <Card>
+          <Card className="border-0 shadow-sm">
             <CardContent className="p-2">
-              <nav className="space-y-1">
+              <nav className="space-y-0.5">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all duration-200 ${
                         activeTab === tab.id
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-600 hover:bg-gray-50'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                          : 'text-gray-600 hover:bg-gray-100'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -297,10 +297,10 @@ export default function SettingsPage() {
         <div className="flex-1">
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <Card>
+            <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                  <User className="h-5 w-5 text-blue-600" />
                   {t('settings.profile') || 'Profile'}
                 </CardTitle>
               </CardHeader>
@@ -375,10 +375,10 @@ export default function SettingsPage() {
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <Card>
+            <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
+                  <Shield className="h-5 w-5 text-green-600" />
                   {t('settings.security') || 'Security'}
                 </CardTitle>
               </CardHeader>
@@ -441,10 +441,10 @@ export default function SettingsPage() {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <Card>
+            <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
+                  <Bell className="h-5 w-5 text-amber-500" />
                   {t('settings.notifications') || 'Notifications'}
                 </CardTitle>
               </CardHeader>
@@ -514,10 +514,10 @@ export default function SettingsPage() {
 
           {/* Language Tab */}
           {activeTab === 'language' && (
-            <Card>
+            <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
+                  <Globe className="h-5 w-5 text-purple-600" />
                   {t('settings.language') || 'Language'}
                 </CardTitle>
               </CardHeader>
