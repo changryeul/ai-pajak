@@ -86,6 +86,7 @@
     "annualReturn": "確定申告 (SPT)",
     "taxSavings": "節税アドバイス (AI)",
     "clientReport": "顧客レポート (AI)",
+    "pph21Bulk": "PPh 21 一括計算",
     "pph21": "所得税 (PPh 21)",
     "pph23": "源泉徴収税 (PPh 23)",
     "ppn": "付加価値税 (PPN)",

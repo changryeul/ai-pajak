@@ -31,6 +31,7 @@ import {
   ClientList,
   UrgentActionsPanel,
   PlatformStats,
+  GettingStartedGuide,
 } from '@/components/dashboard';
 import { TaxSummaryChart } from '@/components/dashboard/TaxSummaryChart';
 import { FilingStatusChart } from '@/components/dashboard/FilingStatusChart';
@@ -204,6 +205,9 @@ function CustomerDashboard({
           );
         })}
       </div>
+
+      {/* Getting Started Guide */}
+      <GettingStartedGuide customerId={session.customerId} userName={session.fullName} />
 
       {/* POA Status */}
       <POAStatusWidget customerId={session.customerId} />

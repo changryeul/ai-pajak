@@ -23,9 +23,12 @@ import {
   Loader2,
   Check,
   AlertCircle,
+  Link2,
+  ExternalLink,
+  RefreshCw,
 } from 'lucide-react';
 
-type SettingsTab = 'profile' | 'security' | 'notifications' | 'language';
+type SettingsTab = 'profile' | 'security' | 'notifications' | 'language' | 'integrations';
 
 interface NotificationPreferences {
   email_enabled: boolean;
@@ -76,6 +79,7 @@ export default function SettingsPage() {
     { id: 'security' as SettingsTab, label: t('settings.security') || 'Security', icon: Shield },
     { id: 'notifications' as SettingsTab, label: t('settings.notifications') || 'Notifications', icon: Bell },
     { id: 'language' as SettingsTab, label: t('settings.language') || 'Language', icon: Globe },
+    { id: 'integrations' as SettingsTab, label: 'Integrasi', icon: Link2 },
   ];
 
   const languages = [
@@ -543,8 +547,242 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           )}
+          {/* Integrations Tab */}
+          {activeTab === 'integrations' && (
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Link2 className="h-5 w-5 text-indigo-600" />
+                  Integrasi
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Accurate Online */}
+                <div className="border rounded-xl p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-sm">
+                        <span className="text-white font-bold text-xs">ACC</span>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">Accurate Online</h3>
+                        <p className="text-xs text-gray-500">Sinkronisasi data karyawan & gaji</p>
+                      </div>
+                    </div>
+                    <AccurateConnectButton />
+                  </div>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>Fitur yang tersedia setelah terhubung:</p>
+                    <ul className="list-disc list-inside text-xs text-gray-500 space-y-0.5">
+                      <li>Auto-import data karyawan (NPWP, NIK, PTKP)</li>
+                      <li>Sinkronisasi data gaji bulanan (PPh 21)</li>
+                      <li>Import laporan keuangan (Laba Rugi, Neraca)</li>
+                      <li>Rekonsiliasi faktur pajak (PPN)</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Bank Integration */}
+                <div className="border rounded-xl p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm">
+                        <span className="text-white font-bold text-xs">BNK</span>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">Rekening Bank</h3>
+                        <p className="text-xs text-gray-500">Auto-import revenue dari bank</p>
+                      </div>
+                    </div>
+                    <BankConnectButton />
+                  </div>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>Bank yang didukung:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {['BCA', 'Mandiri', 'BNI', 'BRI', 'CIMB', 'Danamon'].map(bank => (
+                        <span key={bank} className="text-xs bg-gray-100 px-2 py-1 rounded-md">{bank}</span>
+                      ))}
+                    </div>
+                    <ul className="list-disc list-inside text-xs text-gray-500 space-y-0.5 mt-2">
+                      <li>Tracking revenue otomatis untuk UMKM</li>
+                      <li>Hitung PPh Final 0.5% otomatis</li>
+                      <li>Kategorisasi transaksi (pendapatan/pengeluaran)</li>
+                      <li>Pembebasan Rp 500 juta pertama (PP 55/2022)</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Future integrations */}
+                <div className="border rounded-xl p-5 opacity-60">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-gray-200">
+                      <span className="text-gray-500 font-bold text-xs">JR</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Jurnal.id</h3>
+                      <p className="text-xs text-gray-500">Coming Soon</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-xl p-5 opacity-60">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-gray-200">
+                      <span className="text-gray-500 font-bold text-xs">XE</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Xero</h3>
+                      <p className="text-xs text-gray-500">Coming Soon</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function AccurateConnectButton() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionInfo, setConnectionInfo] = useState<string | null>(null);
+
+  useEffect(() => {
+    checkConnection();
+  }, []);
+
+  const checkConnection = async () => {
+    try {
+      const response = await fetch('/api/integrations/accurate');
+      const data = await response.json();
+      if (data.success) {
+        setIsConnected(data.data.isConnected);
+        if (data.data.connection) {
+          setConnectionInfo(data.data.connection.companyName);
+        }
+      }
+    } catch { /* ignore */ }
+  };
+
+  const handleConnect = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/integrations/accurate');
+      const data = await response.json();
+      if (data.success && data.data.authorizationUrl) {
+        window.location.href = data.data.authorizationUrl;
+      }
+    } catch (error) {
+      console.error('Connect error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    setIsLoading(true);
+    try {
+      await fetch('/api/integrations/accurate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'disconnect' }),
+      });
+      setIsConnected(false);
+      setConnectionInfo(null);
+    } catch { /* ignore */ }
+    finally { setIsLoading(false); }
+  };
+
+  if (isConnected) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+          <Check className="h-3 w-3" />
+          {connectionInfo || 'Terhubung'}
+        </span>
+        <Button variant="outline" size="sm" onClick={handleDisconnect} disabled={isLoading}>
+          Putuskan
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" onClick={handleConnect} disabled={isLoading} className="bg-gradient-to-r from-blue-600 to-indigo-600">
+      {isLoading ? (
+        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+      ) : (
+        <ExternalLink className="h-3 w-3 mr-1" />
+      )}
+      Hubungkan
+    </Button>
+  );
+}
+
+function BankConnectButton() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    checkBankConnection();
+  }, []);
+
+  const checkBankConnection = async () => {
+    try {
+      const response = await fetch('/api/integrations/banking');
+      const data = await response.json();
+      if (data.success) {
+        setIsConnected(data.data.hasConnection);
+      }
+    } catch { /* ignore */ }
+  };
+
+  const handleConnect = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/integrations/banking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get-widget-token' }),
+      });
+      const data = await response.json();
+      if (data.success && data.data.redirectUrl) {
+        window.location.href = data.data.redirectUrl;
+      } else {
+        alert('Bank connection requires Brick API credentials. Set BRICK_PUBLIC_KEY and BRICK_SECRET_KEY in .env.local');
+      }
+    } catch {
+      alert('Bank connection service not configured yet.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isConnected) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+          <Check className="h-3 w-3" />
+          Terhubung
+        </span>
+        <Button variant="outline" size="sm" disabled>
+          Kelola
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" onClick={handleConnect} disabled={isLoading} className="bg-gradient-to-r from-green-600 to-emerald-600">
+      {isLoading ? (
+        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+      ) : (
+        <ExternalLink className="h-3 w-3 mr-1" />
+      )}
+      Hubungkan
+    </Button>
   );
 }

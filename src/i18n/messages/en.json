@@ -86,6 +86,7 @@
     "annualReturn": "Annual Return (SPT)",
     "taxSavings": "Tax Savings (AI)",
     "clientReport": "Client Report (AI)",
+    "pph21Bulk": "PPh 21 Bulk",
     "pph21": "Income Tax (PPh 21)",
     "pph23": "Withholding Tax (PPh 23)",
     "ppn": "VAT (PPN)",

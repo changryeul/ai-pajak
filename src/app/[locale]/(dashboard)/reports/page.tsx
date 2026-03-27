@@ -22,6 +22,7 @@ import {
   PieChart,
   ArrowRight,
 } from 'lucide-react';
+import { MultiYearComparison } from '@/components/reports/MultiYearComparison';
 
 type ReportType = 'tax_summary' | 'filing_history' | 'payment_history' | 'annual_summary';
 
@@ -223,6 +224,11 @@ export default function ReportsPage() {
             );
           })}
         </div>
+      </div>
+
+      {/* Multi-Year Comparison */}
+      <div className="mb-8">
+        <MultiYearComparison />
       </div>
 
       {/* Recent Reports */}

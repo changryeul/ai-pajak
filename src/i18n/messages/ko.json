@@ -86,6 +86,7 @@
     "annualReturn": "연말정산 (SPT)",
     "taxSavings": "절세 추천 (AI)",
     "clientReport": "고객 리포트 (AI)",
+    "pph21Bulk": "PPh 21 일괄계산",
     "pph21": "근로소득세 (PPh 21)",
     "pph23": "원천징수세 (PPh 23)",
     "ppn": "부가가치세 (PPN)",
