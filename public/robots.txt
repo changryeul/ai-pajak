@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /*/dashboard
+Disallow: /*/settings
+Disallow: /*/tax/
+Disallow: /*/documents
+Disallow: /*/filings
+Disallow: /*/chat
+Disallow: /*/admin
+
+Sitemap: https://aipajak.com/sitemap.xml
