@@ -22,7 +22,8 @@ import {
   PieChart,
   ArrowRight,
 } from 'lucide-react';
-import { MultiYearComparison } from '@/components/reports/MultiYearComparison';
+import dynamic from 'next/dynamic';
+const MultiYearComparison = dynamic(() => import('@/components/reports/MultiYearComparison'), { ssr: false });
 
 type ReportType = 'tax_summary' | 'filing_history' | 'payment_history' | 'annual_summary';
 

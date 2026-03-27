@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import {
   FileText,
@@ -28,13 +29,15 @@ import {
   POAStatusWidget,
   FilingSummaryWidget,
   DeadlineCalendar,
-  ClientList,
-  UrgentActionsPanel,
-  PlatformStats,
   GettingStartedGuide,
 } from '@/components/dashboard';
-import { TaxSummaryChart } from '@/components/dashboard/TaxSummaryChart';
-import { FilingStatusChart } from '@/components/dashboard/FilingStatusChart';
+
+// Lazy load heavy components
+const ClientList = dynamic(() => import('@/components/dashboard/ClientList').then(m => ({ default: m.ClientList })), { ssr: false });
+const UrgentActionsPanel = dynamic(() => import('@/components/dashboard/UrgentActionsPanel').then(m => ({ default: m.UrgentActionsPanel })), { ssr: false });
+const PlatformStats = dynamic(() => import('@/components/dashboard/PlatformStats').then(m => ({ default: m.PlatformStats })), { ssr: false });
+const TaxSummaryChart = dynamic(() => import('@/components/dashboard/TaxSummaryChart').then(m => ({ default: m.TaxSummaryChart })), { ssr: false });
+const FilingStatusChart = dynamic(() => import('@/components/dashboard/FilingStatusChart').then(m => ({ default: m.FilingStatusChart })), { ssr: false });
 
 interface ConsultantStats {
   activeClients: number;
