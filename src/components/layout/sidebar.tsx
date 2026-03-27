@@ -78,6 +78,7 @@ const navItems: NavSection[] = [
       { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn' },
       { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk' },
       { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings' },
+      { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
       { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
     ],
   },

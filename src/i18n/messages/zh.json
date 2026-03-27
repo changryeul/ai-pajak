@@ -87,6 +87,7 @@
     "taxSavings": "节税建议 (AI)",
     "clientReport": "客户报告 (AI)",
     "pph21Bulk": "PPh 21 批量计算",
+    "anomalyDetection": "异常检测 (AI)",
     "pph21": "所得税 (PPh 21)",
     "pph23": "预扣税 (PPh 23)",
     "ppn": "增值税 (PPN)",
