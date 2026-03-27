@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { SidebarWrapper } from '@/components/layout/SidebarWrapper';
 import { Header } from '@/components/layout/header';
 import { MobileSidebarProvider } from '@/components/layout/mobile-sidebar';
+import { ChatbotWrapper } from '@/components/chat/ChatbotWrapper';
 
 // Force dynamic rendering - dashboard requires authentication
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,7 @@ export default async function DashboardLayout({
           />
           <main className="p-4 lg:p-6">{children}</main>
         </div>
+        <ChatbotWrapper />
       </div>
     </MobileSidebarProvider>
   );
