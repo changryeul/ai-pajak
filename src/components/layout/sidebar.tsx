@@ -55,6 +55,7 @@ const navItems: NavSection[] = [
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: [UserRole.CUSTOMER] },
+      { href: '/tax/calendar', icon: ClipboardList, labelKey: 'nav.taxCalendar', roles: taxRoles },
     ],
   },
   {
