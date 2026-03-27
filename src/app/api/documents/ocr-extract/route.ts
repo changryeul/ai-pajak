@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { processForm1721A1 } from '@/lib/ocr/form-1721-a1';
 import { processDocument } from '@/lib/ocr/processor';
+import { processReceipt } from '@/lib/ocr/receipt-processor';
 import type { DocumentCategory, OCRResult } from '@/lib/ocr/types';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const expectedCategory = (formData.get('expectedCategory') as DocumentCategory) || undefined;
+    const expectedCategory = formData.get('expectedCategory') as string | undefined;
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -57,8 +58,14 @@ export async function POST(request: NextRequest) {
     let result;
 
     if (file.type === 'application/pdf') {
-      // For PDF + BUKTI_POTONG, use specialized processor via Claude document API
-      result = await processPDFAs1721A1(documentId, arrayBuffer, expectedCategory);
+      if (expectedCategory === 'RECEIPT') {
+        result = await processReceipt(documentId, base64, 'application/pdf');
+      } else {
+        result = await processPDFAs1721A1(documentId, arrayBuffer, expectedCategory as DocumentCategory | undefined);
+      }
+    } else if (expectedCategory === 'RECEIPT') {
+      // Receipt OCR
+      result = await processReceipt(documentId, base64, file.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif');
     } else if (expectedCategory === 'BUKTI_POTONG') {
       // Use specialized 1721-A1 processor
       result = await processForm1721A1(
@@ -72,7 +79,7 @@ export async function POST(request: NextRequest) {
         documentId,
         base64,
         file.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif',
-        expectedCategory
+        expectedCategory as DocumentCategory | undefined
       );
     }
 

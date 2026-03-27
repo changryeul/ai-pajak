@@ -23,6 +23,7 @@ const DOCUMENT_TYPES = [
   { value: 'KTP', label: 'KTP' },
   { value: 'NPWP_CARD', label: 'Kartu NPWP' },
   { value: 'POA_DRAFT', label: 'Draft Surat Kuasa' },
+  { value: 'RECEIPT', label: 'Struk / Kwitansi (AI)' },
   { value: 'OTHER', label: 'Lainnya' },
 ];
 

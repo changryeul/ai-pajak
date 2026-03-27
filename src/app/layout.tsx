@@ -13,6 +13,16 @@ export const metadata: Metadata = {
   },
   description: APP_DESCRIPTION,
   keywords: ['tax', 'pajak', 'indonesia', 'ai', 'pph21', 'ppn', 'spt'],
+  manifest: '/manifest.json',
+  themeColor: '#2563eb',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: APP_NAME,
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
