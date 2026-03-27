@@ -30,6 +30,7 @@ import {
   FilingSummaryWidget,
   DeadlineCalendar,
   GettingStartedGuide,
+  ComplianceScoreWidget,
 } from '@/components/dashboard';
 
 // Lazy load heavy components
@@ -220,6 +221,9 @@ function CustomerDashboard({
         <FilingSummaryWidget customerId={session.customerId} />
         <DeadlineCalendar customerId={session.customerId} />
       </div>
+
+      {/* Compliance Score */}
+      <ComplianceScoreWidget />
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
