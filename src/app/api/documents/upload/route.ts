@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
     const documentType = (formData.get('documentType') as DocumentType) || 'OTHER';
     const taxFilingId = formData.get('taxFilingId') as string | null;
     const customerId = formData.get('customerId') as string | null;
+    const aiClassification = formData.get('aiClassification') as string | null;
 
     if (!file) {
       return NextResponse.json(
@@ -67,6 +68,48 @@ export async function POST(request: NextRequest) {
         { success: false, error: result.error },
         { status: 400 }
       );
+    }
+
+    // Save to document table with AI classification if customerId is provided
+    if (customerId && result.data) {
+      // Map documentType to document_category enum
+      const categoryMap: Record<string, string> = {
+        BUKTI_POTONG: 'TAX_REGISTRATION',
+        FAKTUR_PAJAK: 'TAX_REGISTRATION',
+        LAPORAN_KEUANGAN: 'COMPANY',
+        KTP: 'IDENTITY',
+        NPWP_CARD: 'IDENTITY',
+        TAX_DOCUMENT: 'TAX_REGISTRATION',
+        POA_DRAFT: 'POA_DRAFT',
+        OTHER: 'OTHER',
+      };
+      const dbCategory = categoryMap[documentType] || 'OTHER';
+
+      let classificationData = null;
+      if (aiClassification) {
+        try { classificationData = JSON.parse(aiClassification); } catch { /* ignore */ }
+      }
+
+      const { error: docInsertError } = await supabase
+        .from('document')
+        .insert({
+          customer_id: customerId,
+          uploaded_by_user_id: user.id,
+          document_type: dbCategory,
+          file_path: result.data.path,
+          file_name: result.data.originalName,
+          mime_type: result.data.mimeType,
+          file_size_bytes: result.data.size,
+          metadata: {
+            original_document_type: documentType,
+            ai_classification: classificationData,
+            storage_bucket: bucket,
+          },
+        });
+
+      if (docInsertError) {
+        console.error('Failed to create document record:', docInsertError);
+      }
     }
 
     // If taxFilingId is provided, create a tax_document record

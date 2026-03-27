@@ -23,3 +23,5 @@ export { DeadlineCalendar } from './DeadlineCalendar';
 export { ClientList } from './ClientList';
 export { UrgentActionsPanel } from './UrgentActionsPanel';
 export { PlatformStats } from './PlatformStats';
+export { GettingStartedGuide } from './GettingStartedGuide';
+export { ComplianceScoreWidget } from './ComplianceScoreWidget';

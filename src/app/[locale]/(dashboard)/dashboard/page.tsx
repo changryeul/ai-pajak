@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import {
   FileText,
@@ -13,6 +14,11 @@ import {
   ArrowRight,
   AlertCircle,
   Users,
+  Sparkles,
+  Lightbulb,
+  ShieldCheck,
+  BarChart3,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
@@ -23,12 +29,16 @@ import {
   POAStatusWidget,
   FilingSummaryWidget,
   DeadlineCalendar,
-  ClientList,
-  UrgentActionsPanel,
-  PlatformStats,
+  GettingStartedGuide,
+  ComplianceScoreWidget,
 } from '@/components/dashboard';
-import { TaxSummaryChart } from '@/components/dashboard/TaxSummaryChart';
-import { FilingStatusChart } from '@/components/dashboard/FilingStatusChart';
+
+// Lazy load heavy components
+const ClientList = dynamic(() => import('@/components/dashboard/ClientList').then(m => ({ default: m.ClientList })), { ssr: false });
+const UrgentActionsPanel = dynamic(() => import('@/components/dashboard/UrgentActionsPanel').then(m => ({ default: m.UrgentActionsPanel })), { ssr: false });
+const PlatformStats = dynamic(() => import('@/components/dashboard/PlatformStats').then(m => ({ default: m.PlatformStats })), { ssr: false });
+const TaxSummaryChart = dynamic(() => import('@/components/dashboard/TaxSummaryChart').then(m => ({ default: m.TaxSummaryChart })), { ssr: false });
+const FilingStatusChart = dynamic(() => import('@/components/dashboard/FilingStatusChart').then(m => ({ default: m.FilingStatusChart })), { ssr: false });
 
 interface ConsultantStats {
   activeClients: number;
@@ -37,27 +47,15 @@ interface ConsultantStats {
   pendingPOAs: number;
 }
 
-/**
- * Role-Based Dashboard Page
- *
- * Renders different dashboard views based on user role:
- * - CUSTOMER: POA status, filing summary, deadlines, quick actions
- * - CONSULTANT_JTC: Client list, urgent actions, deadlines
- * - TAX_ADVISOR_JTC: Client list, urgent actions, filing capabilities
- * - PLATFORM_ADMIN: Platform stats (NO tax data access)
- */
-
 export default function DashboardPage() {
   const params = useParams();
   const locale = params.locale as string;
   const { session, isLoading } = useSession();
 
-  // Loading state — skeleton instead of spinner
   if (isLoading) {
     return <DashboardSkeleton />;
   }
 
-  // Not logged in
   if (!session) {
     return (
       <div className="space-y-6">
@@ -78,12 +76,10 @@ export default function DashboardPage() {
     );
   }
 
-  // Platform Admin Dashboard
   if (hasRole(session, UserRole.PLATFORM_ADMIN)) {
     return <PlatformAdminDashboard session={session} locale={locale} />;
   }
 
-  // Consultant/Tax Advisor Dashboard
   if (hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC)) {
     return (
       <ConsultantDashboard
@@ -94,7 +90,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Customer Dashboard (default) — show onboarding for first-time users
   return <CustomerDashboardWithOnboarding session={session} locale={locale} />;
 }
 
@@ -118,7 +113,7 @@ function CustomerDashboardWithOnboarding({
   return <CustomerDashboard session={session} locale={locale} />;
 }
 
-// Customer Dashboard Component
+// Customer Dashboard
 function CustomerDashboard({
   session,
   locale,
@@ -130,45 +125,105 @@ function CustomerDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t('dashboard.title')}
-          </h1>
-          <p className="text-gray-500">
-            {t('dashboard.welcome')}, {session.fullName || 'Customer'}!
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            href={`/${locale}/documents`}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            <Upload className="h-4 w-4" />
-            {t('dashboard.uploadDocument')}
-          </Link>
-          <Link
-            href={`/${locale}/tax/new`}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4" />
-            {t('dashboard.createNewDocument')}
-          </Link>
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-6 md:p-8 text-white">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <p className="text-blue-200 text-sm font-medium">
+              {t('dashboard.welcome')} 👋
+            </p>
+            <h1 className="text-2xl md:text-3xl font-bold mt-1">
+              {session.fullName || 'Customer'}
+            </h1>
+            <p className="text-blue-200 mt-2 text-sm">
+              Kelola pajak Anda dengan mudah bersama AI Pajak
+            </p>
+          </div>
+          <div className="hidden md:flex gap-3">
+            <Link
+              href={`/${locale}/documents`}
+              className="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/20 transition-all"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Dokumen
+            </Link>
+            <Link
+              href={`/${locale}/tax/spt-tahunan`}
+              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-all shadow-lg shadow-blue-900/20"
+            >
+              <Plus className="h-4 w-4" />
+              Buat SPT
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* POA Status (Critical for customers) */}
+      {/* AI Features Quick Access */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          {
+            href: '/tax/spt-tahunan/1770ss',
+            icon: FileSpreadsheet,
+            label: 'SPT Auto-fill',
+            desc: 'Upload & otomatis isi SPT',
+            gradient: 'from-blue-500 to-cyan-500',
+            bg: 'bg-blue-50',
+          },
+          {
+            href: '/tax/savings',
+            icon: Lightbulb,
+            label: 'Hemat Pajak',
+            desc: 'Temukan peluang penghematan',
+            gradient: 'from-amber-500 to-orange-500',
+            bg: 'bg-amber-50',
+          },
+          {
+            href: '/documents',
+            icon: Sparkles,
+            label: 'AI Klasifikasi',
+            desc: 'Upload & otomatis deteksi',
+            gradient: 'from-purple-500 to-pink-500',
+            bg: 'bg-purple-50',
+          },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={`/${locale}${item.href}`}
+              className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shadow-sm`}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">{item.label}</p>
+                  <p className="text-xs text-gray-500">{item.desc}</p>
+                </div>
+              </div>
+              <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-1 transition-all" />
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Getting Started Guide */}
+      <GettingStartedGuide customerId={session.customerId} userName={session.fullName} />
+
+      {/* POA Status */}
       <POAStatusWidget customerId={session.customerId} />
 
       {/* Two-column layout */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Filing Summary */}
         <FilingSummaryWidget customerId={session.customerId} />
-
-        {/* Deadlines */}
         <DeadlineCalendar customerId={session.customerId} />
       </div>
+
+      {/* Compliance Score */}
+      <ComplianceScoreWidget />
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -177,41 +232,33 @@ function CustomerDashboard({
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="border-0 shadow-sm bg-gradient-to-br from-gray-50 to-white">
         <CardHeader>
           <CardTitle className="text-lg">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { href: '/tax/spt-tahunan', labelKey: 'quickAction.annualReturn', descKey: 'quickAction.annualReturnDesc', icon: TrendingUp, color: 'blue' },
-              { href: '/tax/pph21', labelKey: 'quickAction.salaryTax', descKey: 'quickAction.salaryTaxDesc', icon: Users, color: 'green' },
-              { href: '/documents', labelKey: 'quickAction.uploadDoc', descKey: 'quickAction.uploadDocDesc', icon: Upload, color: 'purple' },
-              { href: '/poa/create', labelKey: 'quickAction.createPoa', descKey: 'quickAction.createPoaDesc', icon: FileText, color: 'orange' },
+              { href: '/tax/spt-tahunan', labelKey: 'quickAction.annualReturn', descKey: 'quickAction.annualReturnDesc', icon: TrendingUp, gradient: 'from-blue-500 to-blue-600' },
+              { href: '/tax/pph21', labelKey: 'quickAction.salaryTax', descKey: 'quickAction.salaryTaxDesc', icon: Users, gradient: 'from-green-500 to-emerald-600' },
+              { href: '/documents', labelKey: 'quickAction.uploadDoc', descKey: 'quickAction.uploadDocDesc', icon: Upload, gradient: 'from-purple-500 to-violet-600' },
+              { href: '/poa/create', labelKey: 'quickAction.createPoa', descKey: 'quickAction.createPoaDesc', icon: FileText, gradient: 'from-orange-500 to-red-500' },
             ].map((action) => {
               const Icon = action.icon;
-              const bgColor = {
-                blue: 'bg-blue-50', green: 'bg-green-50', purple: 'bg-purple-50', orange: 'bg-orange-50',
-              }[action.color];
-              const iconColor = {
-                blue: 'text-blue-600', green: 'text-green-600', purple: 'text-purple-600', orange: 'text-orange-600',
-              }[action.color];
               return (
                 <Link
                   key={action.href}
                   href={`/${locale}${action.href}`}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  className="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 hover:shadow-md hover:border-transparent hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 ${bgColor} rounded-lg`}>
-                      <Icon className={`h-5 w-5 ${iconColor}`} />
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-900">{t(action.labelKey)}</span>
-                      <p className="text-xs text-gray-500">{t(action.descKey)}</p>
-                    </div>
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.gradient} shadow-sm group-hover:shadow-md transition-shadow`}>
+                    <Icon className="h-4 w-4 text-white" />
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400" />
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium text-gray-900 text-sm">{t(action.labelKey)}</span>
+                    <p className="text-xs text-gray-500 truncate">{t(action.descKey)}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" />
                 </Link>
               );
             })}
@@ -222,7 +269,7 @@ function CustomerDashboard({
   );
 }
 
-// Consultant/Tax Advisor Dashboard Component
+// Consultant Dashboard
 function ConsultantDashboard({
   session,
   locale,
@@ -253,118 +300,124 @@ function ConsultantDashboard({
     fetchStats();
   }, []);
 
+  const statCards = [
+    { label: t('dashboard.activeClients'), value: stats?.activeClients ?? 0, icon: Users, gradient: 'from-blue-500 to-blue-600', change: '+2 bulan ini' },
+    { label: t('dashboard.pendingFilings'), value: stats?.pendingFilings ?? 0, icon: Clock, gradient: 'from-amber-500 to-orange-500', change: 'perlu tindakan' },
+    { label: t('dashboard.submittedThisMonth'), value: stats?.submittedThisMonth ?? 0, icon: TrendingUp, gradient: 'from-green-500 to-emerald-600', change: 'bulan ini' },
+    { label: t('dashboard.poasPending'), value: stats?.pendingPOAs ?? 0, icon: FileText, gradient: 'from-purple-500 to-violet-600', change: 'menunggu' },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isTaxAdvisor ? t('dashboard.advisorDashboard') : t('dashboard.consultantDashboard')}
-          </h1>
-          <p className="text-gray-500">
-            {t('dashboard.welcomeBack', { name: session.fullName || 'Consultant' })}
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            href={`/${locale}/customers`}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            {t('dashboard.viewAllClients')}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          {isTaxAdvisor && (
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-gray-900 p-6 md:p-8 text-white">
+        <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-1/2 w-96 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full translate-y-1/2" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <p className="text-slate-400 text-sm font-medium">
+              {isTaxAdvisor ? t('dashboard.advisorDashboard') : t('dashboard.consultantDashboard')}
+            </p>
+            <h1 className="text-2xl md:text-3xl font-bold mt-1">
+              {t('dashboard.welcomeBack', { name: session.fullName || 'Consultant' })}
+            </h1>
+            <p className="text-slate-400 mt-2 text-sm">
+              Kelola klien dan laporan pajak Anda
+            </p>
+          </div>
+          <div className="hidden md:flex gap-3">
             <Link
-              href={`/${locale}/tax/new`}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              href={`/${locale}/customers`}
+              className="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/20 transition-all"
             >
-              <Plus className="h-4 w-4" />
-              {t('dashboard.bulkFiling')}
+              {t('dashboard.viewAllClients')}
+              <ArrowRight className="h-4 w-4" />
             </Link>
-          )}
+            {isTaxAdvisor && (
+              <Link
+                href={`/${locale}/tax/new`}
+                className="flex items-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-400 transition-all shadow-lg shadow-blue-500/20"
+              >
+                <Plus className="h-4 w-4" />
+                {t('dashboard.bulkFiling')}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{t('dashboard.activeClients')}</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats?.activeClients ?? 0}
-                </p>
-              </div>
-              <div className="rounded-lg bg-blue-50 p-3">
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{t('dashboard.pendingFilings')}</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats?.pendingFilings ?? 0}
-                </p>
-              </div>
-              <div className="rounded-lg bg-yellow-50 p-3">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{t('dashboard.submittedThisMonth')}</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats?.submittedThisMonth ?? 0}
-                </p>
-              </div>
-              <div className="rounded-lg bg-green-50 p-3">
-                <TrendingUp className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{t('dashboard.poasPending')}</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats?.pendingPOAs ?? 0}
-                </p>
-              </div>
-              <div className="rounded-lg bg-purple-50 p-3">
-                <FileText className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {statCards.map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={i} className="group border-0 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">{stat.label}</p>
+                    <p className="mt-2 text-3xl font-bold text-gray-900">
+                      {isLoadingStats ? (
+                        <span className="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse" />
+                      ) : stat.value}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{stat.change}</p>
+                  </div>
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300`}>
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Urgent Actions (Priority) */}
+      {/* AI Tools Quick Access */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          { href: '/tax/spt-tahunan', icon: FileSpreadsheet, label: 'SPT Auto-fill', desc: 'Upload & otomatis isi', gradient: 'from-blue-500 to-cyan-500' },
+          { href: '/tax/savings', icon: Lightbulb, label: 'Analisis Penghematan', desc: 'Temukan peluang klien', gradient: 'from-amber-500 to-orange-500' },
+          { href: '/tax/report', icon: BarChart3, label: 'Laporan AI', desc: 'Generate laporan klien', gradient: 'from-purple-500 to-pink-500' },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={`/${locale}${item.href}`}
+              className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shadow-sm`}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm flex items-center gap-1.5">
+                    {item.label}
+                    <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
+                  </p>
+                  <p className="text-xs text-gray-500">{item.desc}</p>
+                </div>
+              </div>
+              <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-1 transition-all" />
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Urgent Actions */}
       <UrgentActionsPanel consultantId={session.consultantId} />
 
       {/* Two-column layout */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Client List */}
         <ClientList consultantId={session.consultantId} limit={8} />
-
-        {/* Deadlines */}
         <DeadlineCalendar consultantId={session.consultantId} showAll />
       </div>
     </div>
   );
 }
 
-// Platform Admin Dashboard Component
+// Platform Admin Dashboard
 function PlatformAdminDashboard({
   session,
   locale,
@@ -376,34 +429,32 @@ function PlatformAdminDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t('dashboard.adminDashboard')}
-          </h1>
-          <p className="text-gray-500">
-            {t('dashboard.welcomeBack', { name: session.fullName || 'Admin' })}
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            href={`/${locale}/admin/monitoring`}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            {t('dashboard.manageUsers')}
-          </Link>
-          <Link
-            href={`/${locale}/admin/monitoring`}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            {t('dashboard.viewAnalytics')}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-600 via-red-600 to-rose-700 p-6 md:p-8 text-white">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <p className="text-orange-200 text-sm font-medium">{t('dashboard.adminDashboard')}</p>
+            <h1 className="text-2xl md:text-3xl font-bold mt-1">
+              {t('dashboard.welcomeBack', { name: session.fullName || 'Admin' })}
+            </h1>
+            <p className="text-orange-200 mt-2 text-sm flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              Platform Administration Mode
+            </p>
+          </div>
+          <div className="hidden md:flex gap-3">
+            <Link
+              href={`/${locale}/admin/monitoring`}
+              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-orange-700 hover:bg-orange-50 transition-all shadow-lg"
+            >
+              {t('dashboard.viewAnalytics')}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Platform Stats (Anonymized) */}
       <PlatformStats />
     </div>
   );

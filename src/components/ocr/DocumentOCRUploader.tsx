@@ -30,7 +30,7 @@ interface DocumentOCRUploaderProps {
 type UploadStatus = 'idle' | 'uploading' | 'processing' | 'completed' | 'failed';
 
 export function DocumentOCRUploader({
-  customerId,
+  customerId: _customerId,
   expectedCategory,
   onUploadComplete,
   onError,
@@ -39,7 +39,6 @@ export function DocumentOCRUploader({
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
-  const [, setDocumentId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const acceptedTypes = {
@@ -60,59 +59,46 @@ export function DocumentOCRUploader({
       setOcrResult(null);
 
       try {
-        // Create form data for upload
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('customerId', customerId);
-        if (expectedCategory) {
-          formData.append('documentType', expectedCategory);
-        }
-
-        // Simulate progress
+        // Simulate upload progress
         const progressInterval = setInterval(() => {
-          setUploadProgress((prev) => Math.min(prev + 10, 90));
+          setUploadProgress((prev) => Math.min(prev + 10, 40));
         }, 200);
 
-        // Upload file
-        const uploadResponse = await fetch('/api/documents/upload', {
+        // Send directly to OCR extract API (upload + OCR in one step)
+        const formData = new FormData();
+        formData.append('file', file);
+        if (expectedCategory) {
+          formData.append('expectedCategory', expectedCategory);
+        }
+
+        clearInterval(progressInterval);
+        setUploadProgress(50);
+        setUploadStatus('processing');
+
+        const response = await fetch('/api/documents/ocr-extract', {
           method: 'POST',
           body: formData,
         });
 
-        clearInterval(progressInterval);
+        setUploadProgress(90);
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || error.message || 'OCR processing failed');
+        }
+
+        const { data: result } = await response.json();
         setUploadProgress(100);
 
-        if (!uploadResponse.ok) {
-          const error = await uploadResponse.json();
-          throw new Error(error.message || 'Upload failed');
-        }
-
-        const { documentId: docId } = await uploadResponse.json();
-        setDocumentId(docId);
-        setUploadStatus('processing');
-
-        // Trigger OCR processing
-        const ocrResponse = await fetch(`/api/documents/${docId}/ocr`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ expectedCategory }),
-        });
-
-        if (!ocrResponse.ok) {
-          const error = await ocrResponse.json();
-          throw new Error(error.message || 'OCR processing failed to start');
-        }
-
-        // Poll for OCR completion
-        const result = await pollOCRStatus(docId);
-        setOcrResult(result);
-        setUploadStatus(result.status === 'COMPLETED' ? 'completed' : 'failed');
-
         if (result.status === 'COMPLETED') {
-          onUploadComplete?.(docId, result);
-        } else if (result.errorMessage) {
-          setErrorMessage(result.errorMessage);
-          onError?.(result.errorMessage);
+          setOcrResult(result);
+          setUploadStatus('completed');
+          onUploadComplete?.(result.documentId, result);
+        } else {
+          const msg = result.errorMessage || 'OCR processing failed';
+          setErrorMessage(msg);
+          setUploadStatus('failed');
+          onError?.(msg);
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
@@ -121,7 +107,7 @@ export function DocumentOCRUploader({
         onError?.(message);
       }
     },
-    [customerId, expectedCategory, onUploadComplete, onError]
+    [expectedCategory, onUploadComplete, onError]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -135,7 +121,6 @@ export function DocumentOCRUploader({
     setUploadStatus('idle');
     setUploadProgress(0);
     setOcrResult(null);
-    setDocumentId(null);
     setErrorMessage(null);
   };
 
@@ -199,10 +184,10 @@ export function DocumentOCRUploader({
               <span>
                 {uploadStatus === 'uploading'
                   ? 'Uploading...'
-                  : 'Processing OCR...'}
+                  : 'AI sedang membaca dokumen...'}
               </span>
             </div>
-            <Progress value={uploadStatus === 'uploading' ? uploadProgress : 100} />
+            <Progress value={uploadProgress} />
           </div>
         )}
 
@@ -229,39 +214,6 @@ export function DocumentOCRUploader({
       </CardContent>
     </Card>
   );
-}
-
-// Poll OCR status until completion
-async function pollOCRStatus(
-  documentId: string,
-  maxAttempts = 30,
-  intervalMs = 2000
-): Promise<OCRResult> {
-  for (let i = 0; i < maxAttempts; i++) {
-    const response = await fetch(`/api/documents/${documentId}/ocr`);
-    if (!response.ok) {
-      throw new Error('Failed to get OCR status');
-    }
-
-    const { data } = await response.json();
-
-    if (data.status === 'COMPLETED' || data.status === 'FAILED') {
-      return data.result || {
-        documentId,
-        status: data.status,
-        category: 'UNKNOWN',
-        confidence: 0,
-        extractedData: {},
-        rawText: '',
-        processingTimeMs: 0,
-        errorMessage: data.status === 'FAILED' ? 'OCR processing failed' : undefined,
-      };
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
-  }
-
-  throw new Error('OCR processing timed out');
 }
 
 // OCR Result Display Component

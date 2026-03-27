@@ -10,6 +10,10 @@ import {
   CheckCircle,
   ArrowRight,
   Star,
+  Sparkles,
+  FileSpreadsheet,
+  Lightbulb,
+  BarChart3,
 } from 'lucide-react';
 
 export default async function LandingPage({
@@ -22,10 +26,17 @@ export default async function LandingPage({
   const t = await getTranslations('landing');
 
   const features = [
-    { icon: Zap, titleKey: 'feature1Title', descKey: 'feature1Desc', color: 'bg-blue-100 text-blue-600' },
-    { icon: Shield, titleKey: 'feature2Title', descKey: 'feature2Desc', color: 'bg-green-100 text-green-600' },
-    { icon: Clock, titleKey: 'feature3Title', descKey: 'feature3Desc', color: 'bg-purple-100 text-purple-600' },
-    { icon: FileCheck, titleKey: 'feature4Title', descKey: 'feature4Desc', color: 'bg-orange-100 text-orange-600' },
+    { icon: Zap, titleKey: 'feature1Title', descKey: 'feature1Desc', gradient: 'from-blue-500 to-cyan-500' },
+    { icon: Shield, titleKey: 'feature2Title', descKey: 'feature2Desc', gradient: 'from-green-500 to-emerald-500' },
+    { icon: Clock, titleKey: 'feature3Title', descKey: 'feature3Desc', gradient: 'from-purple-500 to-violet-500' },
+    { icon: FileCheck, titleKey: 'feature4Title', descKey: 'feature4Desc', gradient: 'from-orange-500 to-red-500' },
+  ];
+
+  const aiFeatures = [
+    { icon: FileSpreadsheet, title: 'SPT Auto-fill', desc: 'Upload bukti potong, AI otomatis isi SPT Anda', gradient: 'from-blue-600 to-indigo-600' },
+    { icon: Lightbulb, title: 'Tax Savings Advisor', desc: 'AI menemukan peluang penghematan pajak Anda', gradient: 'from-amber-500 to-orange-500' },
+    { icon: Sparkles, title: 'Document Classification', desc: 'Upload dokumen, AI otomatis kenali jenisnya', gradient: 'from-purple-500 to-pink-500' },
+    { icon: BarChart3, title: 'Client Report Generator', desc: 'Laporan analisis pajak klien dengan satu klik', gradient: 'from-green-500 to-teal-500' },
   ];
 
   const plans = [
@@ -44,19 +55,19 @@ export default async function LandingPage({
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
-      <nav className="border-b border-gray-100 px-6 py-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 px-6 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
               <span className="text-sm font-bold text-white">AI</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">PAJAK</span>
+            <span className="text-xl font-bold text-gray-900 tracking-tight">PAJAK</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href={`/${locale}/login`} className="text-sm font-medium text-gray-700 hover:text-gray-900 px-4 py-2">
+            <Link href={`/${locale}/login`} className="text-sm font-medium text-gray-600 hover:text-gray-900 px-4 py-2 transition-colors">
               {t('login')}
             </Link>
-            <Link href={`/${locale}/register`} className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-4 py-2">
+            <Link href={`/${locale}/register`} className="text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl px-5 py-2.5 shadow-md shadow-blue-500/20 transition-all">
               {t('register')}
             </Link>
           </div>
@@ -64,24 +75,29 @@ export default async function LandingPage({
       </nav>
 
       {/* Hero */}
-      <section className="px-6 py-20 lg:py-28">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm text-blue-700 font-medium mb-6">
-            <Star className="h-4 w-4" />
+      <section className="relative overflow-hidden px-6 pt-32 pb-20 lg:pt-40 lg:pb-28">
+        {/* Background decorations */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-white" />
+        <div className="absolute top-20 left-1/4 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl" />
+        <div className="absolute top-40 right-1/4 w-96 h-96 bg-indigo-200/20 rounded-full blur-3xl" />
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-4 py-1.5 text-sm text-blue-700 font-medium mb-8 shadow-sm">
+            <Sparkles className="h-4 w-4 text-yellow-500" />
             {t('heroBadge')}
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
             {t('heroTitle')}
           </h1>
-          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10">
+          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
             {t('heroSubtitle')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href={`/${locale}/register`} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 text-white font-medium hover:bg-blue-700 transition-colors">
+            <Link href={`/${locale}/register`} className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-white font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/25">
               {t('heroCtaPrimary')}
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
-            <Link href={`/${locale}/login`} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-8 py-3.5 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+            <Link href={`/${locale}/login`} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-8 py-4 text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
               {t('heroCtaSecondary')}
             </Link>
           </div>
@@ -89,34 +105,66 @@ export default async function LandingPage({
       </section>
 
       {/* Stats */}
-      <section className="border-y border-gray-100 bg-gray-50 px-6 py-12">
+      <section className="border-y border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50/30 px-6 py-12">
         <div className="max-w-4xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="text-3xl font-bold text-blue-600">{stat.value}</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{stat.value}</p>
               <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="px-6 py-20" id="features">
+      {/* AI Features - NEW SECTION */}
+      <section className="px-6 py-20 bg-gradient-to-b from-white to-gray-50" id="ai-features">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('featuresTitle')}</h2>
+            <div className="inline-flex items-center gap-2 rounded-full bg-yellow-50 border border-yellow-200 px-4 py-1.5 text-sm text-yellow-700 font-medium mb-4">
+              <Sparkles className="h-4 w-4" />
+              Powered by AI
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">Fitur AI yang Memudahkan</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">Teknologi AI terdepan untuk mengotomatisasi pekerjaan pajak Anda</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {aiFeatures.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div key={f.title} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 hover:shadow-xl hover:border-gray-300 transition-all duration-300">
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${f.gradient} shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300`}>
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1 text-lg">{f.title}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="px-6 py-20 bg-gray-50" id="features">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">{t('featuresTitle')}</h2>
             <p className="text-gray-500 max-w-xl mx-auto">{t('featuresSubtitle')}</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((f) => {
               const Icon = f.icon;
               return (
-                <div key={f.titleKey} className="text-center">
-                  <div className={`inline-flex rounded-xl p-3 mb-4 ${f.color}`}>
-                    <Icon className="h-6 w-6" />
+                <div key={f.titleKey} className="text-center bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
+                  <div className={`inline-flex rounded-xl p-3 mb-4 bg-gradient-to-br ${f.gradient} shadow-sm`}>
+                    <Icon className="h-6 w-6 text-white" />
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-2">{t(f.titleKey)}</h3>
-                  <p className="text-sm text-gray-500">{t(f.descKey)}</p>
+                  <p className="text-sm text-gray-500 leading-relaxed">{t(f.descKey)}</p>
                 </div>
               );
             })}
@@ -125,17 +173,17 @@ export default async function LandingPage({
       </section>
 
       {/* Pricing */}
-      <section className="bg-gray-50 px-6 py-20" id="pricing">
+      <section className="px-6 py-20" id="pricing">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('pricingTitle')}</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">{t('pricingTitle')}</h2>
             <p className="text-gray-500">{t('pricingSubtitle')}</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <div key={plan.name} className={`rounded-2xl bg-white p-8 ${plan.popular ? 'ring-2 ring-blue-600 relative' : 'border border-gray-200'}`}>
+              <div key={plan.name} className={`rounded-2xl bg-white p-8 transition-all duration-300 hover:shadow-xl ${plan.popular ? 'ring-2 ring-blue-600 relative shadow-lg scale-105' : 'border border-gray-200 hover:-translate-y-1'}`}>
                 {plan.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-medium px-4 py-1 rounded-full shadow-md">
                     {t('mostPopular')}
                   </span>
                 )}
@@ -146,7 +194,7 @@ export default async function LandingPage({
                 </div>
                 <ul className="mt-6 space-y-3">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                       {f}
                     </li>
@@ -154,10 +202,10 @@ export default async function LandingPage({
                 </ul>
                 <Link
                   href={`/${locale}/register`}
-                  className={`mt-8 block w-full text-center rounded-lg py-2.5 text-sm font-medium transition-colors ${
+                  className={`mt-8 block w-full text-center rounded-xl py-3 text-sm font-medium transition-all ${
                     plan.popular
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/20'
+                      : 'border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
                   }`}
                 >
                   {plan.cta}
@@ -169,21 +217,23 @@ export default async function LandingPage({
       </section>
 
       {/* Who is it for */}
-      <section className="px-6 py-20">
+      <section className="px-6 py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12">{t('whoTitle')}</h2>
-          <div className="grid sm:grid-cols-3 gap-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-12 tracking-tight">{t('whoTitle')}</h2>
+          <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { icon: Users, titleKey: 'whoIndividual', descKey: 'whoIndividualDesc' },
-              { icon: Building2, titleKey: 'whoBusiness', descKey: 'whoBusinessDesc' },
-              { icon: Shield, titleKey: 'whoConsultant', descKey: 'whoConsultantDesc' },
+              { icon: Users, titleKey: 'whoIndividual', descKey: 'whoIndividualDesc', gradient: 'from-blue-500 to-cyan-500' },
+              { icon: Building2, titleKey: 'whoBusiness', descKey: 'whoBusinessDesc', gradient: 'from-green-500 to-emerald-500' },
+              { icon: Shield, titleKey: 'whoConsultant', descKey: 'whoConsultantDesc', gradient: 'from-purple-500 to-violet-500' },
             ].map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.titleKey} className="p-6 rounded-xl border border-gray-200">
-                  <Icon className="h-8 w-8 text-blue-600 mx-auto mb-4" />
+                <div key={item.titleKey} className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
+                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${item.gradient} shadow-sm mb-4`}>
+                    <Icon className="h-7 w-7 text-white" />
+                  </div>
                   <h3 className="font-semibold text-gray-900 mb-2">{t(item.titleKey)}</h3>
-                  <p className="text-sm text-gray-500">{t(item.descKey)}</p>
+                  <p className="text-sm text-gray-500 leading-relaxed">{t(item.descKey)}</p>
                 </div>
               );
             })}
@@ -192,24 +242,32 @@ export default async function LandingPage({
       </section>
 
       {/* CTA */}
-      <section className="bg-blue-600 px-6 py-16">
-        <div className="max-w-3xl mx-auto text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">{t('ctaTitle')}</h2>
-          <p className="text-blue-100 mb-8">{t('ctaSubtitle')}</p>
-          <Link href={`/${locale}/register`} className="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3.5 text-blue-600 font-medium hover:bg-blue-50 transition-colors">
+      <section className="relative overflow-hidden px-6 py-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+        <div className="max-w-3xl mx-auto text-center text-white relative z-10">
+          <h2 className="text-3xl font-bold mb-4 tracking-tight">{t('ctaTitle')}</h2>
+          <p className="text-blue-200 mb-8 text-lg">{t('ctaSubtitle')}</p>
+          <Link href={`/${locale}/register`} className="group inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-blue-700 font-medium hover:bg-blue-50 transition-all shadow-xl shadow-blue-900/20">
             {t('ctaButton')}
-            <ArrowRight className="h-5 w-5" />
+            <ArrowRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 px-6 py-8">
+      <footer className="border-t border-gray-100 px-6 py-8 bg-gray-50">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">© 2026 AI Pajak. All rights reserved.</p>
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+              <span className="text-[10px] font-bold text-white">AI</span>
+            </div>
+            <span className="text-sm text-gray-500">© 2026 AI Pajak. All rights reserved.</span>
+          </div>
           <div className="flex gap-6">
-            <Link href={`/${locale}/privacy`} className="text-sm text-gray-500 hover:text-gray-700">{t('privacy')}</Link>
-            <Link href={`/${locale}/terms`} className="text-sm text-gray-500 hover:text-gray-700">{t('terms')}</Link>
+            <Link href={`/${locale}/privacy`} className="text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('privacy')}</Link>
+            <Link href={`/${locale}/terms`} className="text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('terms')}</Link>
           </div>
         </div>
       </footer>

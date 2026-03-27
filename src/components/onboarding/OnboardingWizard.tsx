@@ -12,6 +12,10 @@ import {
   ArrowLeft,
   CheckCircle2,
   Sparkles,
+  Upload,
+  Lightbulb,
+  ShieldCheck,
+  BarChart3,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -36,7 +40,35 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     { key: 'welcome', title: t('step1Title') },
     { key: 'type', title: t('step2Title') },
     { key: 'goal', title: t('step3Title') },
+    { key: 'ai-features', title: 'Fitur AI' },
     { key: 'ready', title: t('step4Title') },
+  ];
+
+  const aiFeatures = [
+    {
+      icon: Upload,
+      title: 'OCR Auto-fill',
+      desc: 'Upload foto/PDF Bukti Potong (1721-A1), AI otomatis membaca dan mengisi SPT.',
+      gradient: 'from-blue-500 to-cyan-500',
+    },
+    {
+      icon: Lightbulb,
+      title: 'Tax Savings Advisor',
+      desc: 'AI menganalisis data Anda dan menemukan peluang penghematan pajak.',
+      gradient: 'from-amber-500 to-orange-500',
+    },
+    {
+      icon: Sparkles,
+      title: 'Auto-Classification',
+      desc: 'Upload dokumen apapun, AI otomatis mengenali jenisnya.',
+      gradient: 'from-purple-500 to-pink-500',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Filing Validation',
+      desc: 'AI memeriksa kesalahan SPT sebelum Anda submit ke DJP.',
+      gradient: 'from-green-500 to-emerald-500',
+    },
   ];
 
   const taxpayerOptions = [
@@ -184,8 +216,43 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         </div>
       )}
 
-      {/* Step 3: Ready */}
+      {/* Step 3: AI Features */}
       {step === 3 && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-100 to-amber-100 flex items-center justify-center mb-4">
+              <Sparkles className="h-7 w-7 text-yellow-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Fitur AI untuk Anda</h2>
+            <p className="text-gray-500 mt-1">AI Pajak menggunakan teknologi AI terdepan untuk memudahkan pekerjaan pajak</p>
+          </div>
+          <div className="grid gap-3">
+            {aiFeatures.map((feat) => {
+              const Icon = feat.icon;
+              return (
+                <div key={feat.title} className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 hover:shadow-sm transition-all">
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${feat.gradient} shadow-sm flex-shrink-0`}>
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm">{feat.title}</h3>
+                    <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{feat.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-gray-400">
+              Bukti Potong (1721-A1) adalah dokumen dari pemberi kerja yang berisi data gaji dan pajak Anda.
+              Biasanya diberikan di awal tahun atau bisa diminta ke HRD.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Ready */}
+      {step === 4 && (
         <div className="text-center space-y-6">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
@@ -217,7 +284,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       )}
 
       {/* Navigation */}
-      {step > 0 && step < 3 && (
+      {step > 0 && step < 4 && (
         <div className="flex items-center justify-between mt-8">
           <button
             onClick={() => setStep(step - 1)}
@@ -231,7 +298,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             disabled={(step === 1 && !taxpayerType) || (step === 2 && !filingGoal)}
             className={cn(
               'flex items-center gap-2 rounded-lg px-6 py-2.5 font-medium transition-colors',
-              ((step === 1 && taxpayerType) || (step === 2 && filingGoal))
+              ((step === 1 && taxpayerType) || (step === 2 && filingGoal) || step === 3)
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             )}

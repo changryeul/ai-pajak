@@ -30,6 +30,10 @@ interface Document {
   documentType: string;
   ocrStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | null;
   createdAt: string;
+  aiClassification?: {
+    category: string;
+    confidence: number;
+  } | null;
   customer?: {
     id: string;
     fullName: string;
@@ -95,7 +99,18 @@ export function DocumentList({ customerId, taxFilingId }: DocumentListProps) {
       const data = await response.json();
 
       if (data.success) {
-        setDocuments(data.data);
+        // Map API response to Document interface
+        const mapped = (data.data || []).map((doc: Record<string, unknown>) => ({
+          id: doc.id as string,
+          fileName: (doc.fileName || doc.file_name || '') as string,
+          fileType: (doc.mimeType || doc.mime_type || '') as string,
+          fileSize: (doc.size || doc.file_size_bytes || 0) as number,
+          documentType: (doc.documentType || doc.document_type || '') as string,
+          ocrStatus: (doc.hasOcrData ? 'COMPLETED' : null) as Document['ocrStatus'],
+          createdAt: (doc.uploadedAt || doc.created_at || '') as string,
+          aiClassification: doc.aiClassification as Document['aiClassification'],
+        }));
+        setDocuments(mapped);
         setTotalPages(data.pagination.totalPages);
         setTotal(data.pagination.total);
       }
@@ -270,7 +285,14 @@ export function DocumentList({ customerId, taxFilingId }: DocumentListProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{doc.documentType}</Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant="outline">{doc.documentType}</Badge>
+                      {doc.aiClassification && (
+                        <span className="text-xs text-yellow-600 flex items-center gap-1">
+                          AI: {doc.aiClassification.category} ({(doc.aiClassification.confidence * 100).toFixed(0)}%)
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-gray-500">
                     {formatFileSize(doc.fileSize)}
