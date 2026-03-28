@@ -33,73 +33,56 @@ interface SPTFormOption {
   iconBg: string;
 }
 
-const sptForms: SPTFormOption[] = [
-  {
-    id: '1770ss',
-    title: 'SPT 1770 SS',
-    description: 'Formulir Sangat Sederhana',
-    targetAudience: 'Karyawan dengan penghasilan bruto < Rp 60 juta/tahun dari satu pemberi kerja',
-    icon: User,
-    href: '/tax/spt-tahunan/1770ss',
-    features: [
-      'Penghasilan dari satu pemberi kerja',
-      'Penghasilan bruto < Rp 60 juta',
-      'Tidak ada penghasilan lain',
-    ],
-    gradient: 'from-green-500 to-emerald-600',
-    iconBg: 'bg-green-50',
-  },
-  {
-    id: '1770s',
-    title: 'SPT 1770 S',
-    description: 'Formulir Sederhana',
-    targetAudience: 'Karyawan dengan penghasilan bruto >= Rp 60 juta atau dari lebih dari satu pemberi kerja',
-    icon: FileText,
-    href: '/tax/spt-tahunan/1770s',
-    features: [
-      'Satu atau lebih pemberi kerja',
-      'Penghasilan bruto >= Rp 60 juta',
-      'Penghasilan lain (bunga, dividen, dll)',
-    ],
-    gradient: 'from-blue-500 to-indigo-600',
-    iconBg: 'bg-blue-50',
-  },
-  {
-    id: '1770',
-    title: 'SPT 1770',
-    description: 'Formulir Lengkap',
-    targetAudience: 'Wajib pajak dengan penghasilan dari usaha atau pekerjaan bebas',
-    icon: Briefcase,
-    href: '/tax/spt-tahunan/1770',
-    features: [
-      'Penghasilan dari usaha',
-      'Pekerjaan bebas (dokter, pengacara, dll)',
-      'Pembukuan atau Norma',
-      'Kompensasi kerugian',
-    ],
-    gradient: 'from-purple-500 to-violet-600',
-    iconBg: 'bg-purple-50',
-  },
-  {
-    id: '1771',
-    title: 'SPT 1771',
-    description: 'Formulir Badan',
-    targetAudience: 'Wajib pajak badan (PT, CV, Firma, Koperasi, Yayasan)',
-    icon: Building2,
-    href: '/tax/spt-tahunan/1771',
-    features: [
-      'Tarif PPh Badan 22%',
-      'Tarif UMKM 11% (omzet < Rp 50 miliar)',
-      'Koreksi fiskal',
-      'Kompensasi kerugian 10 tahun',
-    ],
-    gradient: 'from-orange-500 to-red-500',
-    iconBg: 'bg-orange-50',
-  },
-];
-
 export default function SPTTahunanPage() {
   const t = useTranslations('tax');
+  const ts = useTranslations('sptSelect');
+
+  const sptForms: SPTFormOption[] = [
+    {
+      id: '1770ss',
+      title: 'SPT 1770 SS',
+      description: ts('ss_desc'),
+      targetAudience: ts('ss_audience'),
+      icon: User,
+      href: '/tax/spt-tahunan/1770ss',
+      features: [ts('ss_f1'), ts('ss_f2'), ts('ss_f3')],
+      gradient: 'from-green-500 to-emerald-600',
+      iconBg: 'bg-green-50',
+    },
+    {
+      id: '1770s',
+      title: 'SPT 1770 S',
+      description: ts('s_desc'),
+      targetAudience: ts('s_audience'),
+      icon: FileText,
+      href: '/tax/spt-tahunan/1770s',
+      features: [ts('s_f1'), ts('s_f2'), ts('s_f3')],
+      gradient: 'from-blue-500 to-indigo-600',
+      iconBg: 'bg-blue-50',
+    },
+    {
+      id: '1770',
+      title: 'SPT 1770',
+      description: ts('full_desc'),
+      targetAudience: ts('full_audience'),
+      icon: Briefcase,
+      href: '/tax/spt-tahunan/1770',
+      features: [ts('full_f1'), ts('full_f2'), ts('full_f3'), ts('full_f4')],
+      gradient: 'from-purple-500 to-violet-600',
+      iconBg: 'bg-purple-50',
+    },
+    {
+      id: '1771',
+      title: 'SPT 1771',
+      description: ts('badan_desc'),
+      targetAudience: ts('badan_audience'),
+      icon: Building2,
+      href: '/tax/spt-tahunan/1771',
+      features: [ts('badan_f1'), ts('badan_f2'), ts('badan_f3'), ts('badan_f4')],
+      gradient: 'from-orange-500 to-red-500',
+      iconBg: 'bg-orange-50',
+    },
+  ];
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
@@ -116,7 +99,7 @@ export default function SPTTahunanPage() {
           {t('sptTahunan.title')}
         </h1>
         <p className="text-gray-500 mt-1">
-          Pilih jenis formulir SPT Tahunan yang sesuai dengan kondisi Anda
+          {ts('subtitle')}
         </p>
       </div>
 
@@ -171,10 +154,10 @@ export default function SPTTahunanPage() {
         <CardContent className="py-6 flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-gray-900 mb-1">
-              Tidak yakin formulir mana?
+              {ts('notSureForm')}
             </h3>
             <p className="text-sm text-gray-600">
-              Upload Bukti Potong (1721-A1) dan AI kami akan merekomendasikan formulir yang tepat.
+              {ts('uploadHint')}
             </p>
           </div>
           <Button
@@ -183,7 +166,7 @@ export default function SPTTahunanPage() {
             onClick={() => router.push(`/${locale}/documents`)}
           >
             <Upload className="h-4 w-4 mr-2" />
-            Upload Dokumen
+            {ts('uploadDoc')}
           </Button>
         </CardContent>
       </Card>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -121,6 +122,7 @@ export function TaxSavingsAdvisor({
   defaultPtkpStatus = 'TK/0',
   incomeSources,
 }: TaxSavingsAdvisorProps) {
+  const ts = useTranslations('taxSavingsPage');
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -180,7 +182,7 @@ export function TaxSavingsAdvisor({
             AI Tax Savings Advisor
           </CardTitle>
           <CardDescription>
-            Analisis cerdas untuk menemukan peluang penghematan pajak berdasarkan data Anda.
+            {ts('subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -228,12 +230,12 @@ export function TaxSavingsAdvisor({
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Menganalisis...
+                {ts('analyzing')}
               </>
             ) : (
               <>
                 <Lightbulb className="h-4 w-4 mr-2" />
-                Analisis Penghematan Pajak
+                {ts('analyze')}
               </>
             )}
           </Button>
@@ -248,28 +250,28 @@ export function TaxSavingsAdvisor({
             <CardContent className="pt-6">
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500 mb-1">PPh Saat Ini</p>
+                  <p className="text-xs text-gray-500 mb-1">{ts('currentTax')}</p>
                   <p className="text-lg font-bold text-gray-900">
                     {formatCurrency(result.currentTax)}
                   </p>
                   <p className="text-xs text-gray-500">
-                    Tarif efektif: {formatPercent(result.effectiveRate.current)}
+                    {ts('effectiveRate')}: {formatPercent(result.effectiveRate.current)}
                   </p>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <p className="text-xs text-green-600 mb-1">Potensi Hemat</p>
+                  <p className="text-xs text-green-600 mb-1">{ts('potentialSavings')}</p>
                   <p className="text-lg font-bold text-green-700">
                     {formatCurrency(result.totalPotentialSavings)}
                   </p>
                   <TrendingDown className="h-4 w-4 mx-auto mt-1 text-green-600" />
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-blue-600 mb-1">PPh Optimal</p>
+                  <p className="text-xs text-blue-600 mb-1">{ts('optimizedTax')}</p>
                   <p className="text-lg font-bold text-blue-700">
                     {formatCurrency(result.optimizedTax)}
                   </p>
                   <p className="text-xs text-blue-500">
-                    Tarif efektif: {formatPercent(result.effectiveRate.optimized)}
+                    {ts('effectiveRate')}: {formatPercent(result.effectiveRate.optimized)}
                   </p>
                 </div>
               </div>
@@ -278,9 +280,9 @@ export function TaxSavingsAdvisor({
               {result.currentTax > 0 && (
                 <div className="mb-4">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
-                    <span>Potensi Penghematan</span>
+                    <span>{ts('savingsPercent')}</span>
                     <span>
-                      {formatPercent(result.totalPotentialSavings / result.currentTax)} dari pajak saat ini
+                      {formatPercent(result.totalPotentialSavings / result.currentTax)} {ts('fromCurrentTax')}
                     </span>
                   </div>
                   <Progress
@@ -297,7 +299,7 @@ export function TaxSavingsAdvisor({
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-yellow-500" />
-                  Analisis AI
+                  {ts('aiAnalysis')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -312,7 +314,7 @@ export function TaxSavingsAdvisor({
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">
-                Rekomendasi ({result.recommendations.length})
+                {ts('recommendations')} ({result.recommendations.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -339,7 +341,7 @@ export function TaxSavingsAdvisor({
                           </Badge>
                         </div>
                         <p className="text-sm text-green-700 font-medium mt-1">
-                          Hemat {formatCurrency(rec.potentialSavings)}
+                          {ts('save')} {formatCurrency(rec.potentialSavings)}
                         </p>
                       </div>
                       {isExpanded ? (
@@ -355,7 +357,7 @@ export function TaxSavingsAdvisor({
 
                         <div>
                           <p className="text-xs font-medium text-gray-500 mb-1">
-                            Langkah yang harus dilakukan:
+                            {ts('stepsToTake')}:
                           </p>
                           <ul className="space-y-1">
                             {rec.actionItems.map((item, i) => (
@@ -368,7 +370,7 @@ export function TaxSavingsAdvisor({
                         </div>
 
                         <p className="text-xs text-gray-400">
-                          Dasar hukum: {rec.legalBasis}
+                          {ts('legalBasis')}: {rec.legalBasis}
                         </p>
                       </div>
                     )}
@@ -379,8 +381,8 @@ export function TaxSavingsAdvisor({
               {result.recommendations.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                  <p className="font-medium">Pajak Anda sudah optimal!</p>
-                  <p className="text-sm">Tidak ditemukan peluang penghematan tambahan.</p>
+                  <p className="font-medium">{ts('noSavings')}</p>
+                  <p className="text-sm">{ts('noSavingsDesc')}</p>
                 </div>
               )}
             </CardContent>
