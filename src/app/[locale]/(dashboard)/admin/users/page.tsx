@@ -36,7 +36,7 @@ export default function AdminUsersPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
     try {
       const p = new URLSearchParams();
       if (search) p.append('search', search);
-      if (roleFilter) p.append('role', roleFilter);
+      if (roleFilter && roleFilter !== 'all') p.append('role', roleFilter);
       const res = await fetch(`/api/admin/users?${p}`);
       const data = await res.json();
       if (data.success) { setUsers(data.data.users || []); setStats(data.data.stats || null); }
@@ -123,7 +123,7 @@ export default function AdminUsersPage() {
         <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-[160px]"><SelectValue placeholder="Semua Role" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Semua Role</SelectItem>
+            <SelectItem value="all">Semua Role</SelectItem>
             <SelectItem value="CUSTOMER">Customer</SelectItem>
             <SelectItem value="CONSULTANT_JTC">Consultant</SelectItem>
             <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor</SelectItem>
