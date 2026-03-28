@@ -106,6 +106,7 @@ const navItems: NavSection[] = [
     items: [
       { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER, UserRole.PLATFORM_ADMIN] },
       { href: '/settings', icon: Settings, labelKey: 'nav.settings' },
+      { href: '/help', icon: Lightbulb, labelKey: 'nav.help' },
     ],
   },
 ];
