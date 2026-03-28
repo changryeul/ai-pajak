@@ -96,6 +96,7 @@
     "clientReport": "客户报告 (AI)",
     "pph21Bulk": "PPh 21 批量计算",
     "anomalyDetection": "异常检测 (AI)",
+    "monthlyPayments": "月度税款缴纳",
     "taxCalendar": "税务日历",
     "taxTools": "税务工具",
     "help": "帮助",

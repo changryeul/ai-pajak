@@ -96,6 +96,7 @@
     "clientReport": "고객 리포트 (AI)",
     "pph21Bulk": "PPh 21 일괄계산",
     "anomalyDetection": "이상 감지 (AI)",
+    "monthlyPayments": "월별 세금 납부",
     "taxCalendar": "세금 달력",
     "taxTools": "세금 도구",
     "help": "도움말",
