@@ -100,6 +100,7 @@ const navItems: NavSection[] = [
     items: [
       { href: '/admin/monitoring', icon: Activity, labelKey: 'nav.monitoring' },
       { href: '/admin/users', icon: Users, labelKey: 'nav.userManagement' },
+      { href: '/admin/billing', icon: CreditCard, labelKey: 'nav.billingAdmin' },
       { href: '/admin/tax-rates', icon: Settings, labelKey: 'nav.taxRates' },
     ],
   },
