@@ -33,6 +33,8 @@ import {
   ComplianceScoreWidget,
 } from '@/components/dashboard';
 
+const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
+
 // Lazy load heavy components
 const ClientList = dynamic(() => import('@/components/dashboard/ClientList').then(m => ({ default: m.ClientList })), { ssr: false });
 const UrgentActionsPanel = dynamic(() => import('@/components/dashboard/UrgentActionsPanel').then(m => ({ default: m.UrgentActionsPanel })), { ssr: false });
@@ -160,6 +162,9 @@ function CustomerDashboard({
           </div>
         </div>
       </div>
+
+      {/* Next Steps Wizard */}
+      <NextStepsWizard customerId={session.customerId} />
 
       {/* AI Features Quick Access */}
       <div className="grid gap-3 sm:grid-cols-3">
