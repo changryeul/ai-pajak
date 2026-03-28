@@ -93,7 +93,7 @@ export default function AuditLogsPage() {
         <Select value={activityFilter} onValueChange={v => { setActivityFilter(v); setPagination(p => ({ ...p, page: 1 })); }}>
           <SelectTrigger className="w-[200px]"><SelectValue placeholder="Semua Aktivitas" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Semua Aktivitas</SelectItem>
+            <SelectItem value="all">Semua Aktivitas</SelectItem>
             <SelectItem value="TAX_FILING_CREATE">Filing Create</SelectItem>
             <SelectItem value="TAX_FILING_SUBMIT">Filing Submit</SelectItem>
             <SelectItem value="TAX_FILING_APPROVE">Filing Approve</SelectItem>
@@ -107,7 +107,7 @@ export default function AuditLogsPage() {
         <Select value={roleFilter} onValueChange={v => { setRoleFilter(v); setPagination(p => ({ ...p, page: 1 })); }}>
           <SelectTrigger className="w-[180px]"><SelectValue placeholder="Semua Role" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Semua Role</SelectItem>
+            <SelectItem value="all">Semua Role</SelectItem>
             <SelectItem value="CUSTOMER">Customer</SelectItem>
             <SelectItem value="CONSULTANT_JTC">Consultant</SelectItem>
             <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor</SelectItem>
