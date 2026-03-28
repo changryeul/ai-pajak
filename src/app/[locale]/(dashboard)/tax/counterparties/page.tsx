@@ -97,6 +97,9 @@ export default function CounterpartiesPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
+      {/* Debug: show if session loaded */}
+      {!session && <p className="text-xs text-gray-400 mb-2">Loading session...</p>}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
