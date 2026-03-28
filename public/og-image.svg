@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="50%" style="stop-color:#3b52d9"/>
+      <stop offset="100%" style="stop-color:#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1100" cy="100" r="200" fill="white" opacity="0.05"/>
+  <circle cx="100" cy="530" r="150" fill="white" opacity="0.05"/>
+  <circle cx="800" cy="350" r="100" fill="white" opacity="0.03"/>
+  <rect x="80" y="60" width="65" height="65" rx="16" fill="white" opacity="0.2"/>
+  <text x="94" y="105" font-family="Helvetica,Arial,sans-serif" font-weight="bold" font-size="32" fill="white">AI</text>
+  <text x="160" y="105" font-family="Helvetica,Arial,sans-serif" font-weight="bold" font-size="38" fill="white" letter-spacing="2">PAJAK</text>
+  <text x="80" y="220" font-family="Helvetica,Arial,sans-serif" font-weight="bold" font-size="52" fill="white">Platform Pajak Cerdas</text>
+  <text x="80" y="285" font-family="Helvetica,Arial,sans-serif" font-weight="bold" font-size="52" fill="white">Indonesia</text>
+  <text x="80" y="340" font-family="Helvetica,Arial,sans-serif" font-size="22" fill="#bfdbfe">Hitung, Lapor, dan Optimalkan Pajak dengan Teknologi AI</text>
+  <rect x="80" y="380" width="130" height="36" rx="8" fill="white" opacity="0.15"/>
+  <text x="100" y="404" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="white">SPT Auto-fill</text>
+  <rect x="222" y="380" width="90" height="36" rx="8" fill="white" opacity="0.15"/>
+  <text x="240" y="404" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="white">AI OCR</text>
+  <rect x="324" y="380" width="120" height="36" rx="8" fill="white" opacity="0.15"/>
+  <text x="342" y="404" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="white">Tax Savings</text>
+  <rect x="456" y="380" width="150" height="36" rx="8" fill="white" opacity="0.15"/>
+  <text x="472" y="404" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="white">Smart Validation</text>
+  <text x="850" y="180" font-family="Helvetica,Arial,sans-serif" font-weight="bold" font-size="56" fill="white">5</text>
+  <text x="850" y="210" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="#bfdbfe">Bahasa</text>
+  <text x="850" y="300" font-family="Helvetica,Arial,sans-serif" font-weight="bold" font-size="56" fill="white">62+</text>
+  <text x="850" y="330" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="#bfdbfe">Fitur</text>
+  <text x="850" y="420" font-family="Helvetica,Arial,sans-serif" font-weight="bold" font-size="56" fill="white">40M+</text>
+  <text x="850" y="450" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="#bfdbfe">WP Target</text>
+  <text x="80" y="580" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="white" opacity="0.6">aipajak.com</text>
+</svg>

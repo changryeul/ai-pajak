@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'Hitung, lapor, dan optimalkan pajak Anda dengan AI. SPT otomatis, OCR bukti potong, rekomendasi hemat pajak.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/og-image.svg',
         width: 1200,
         height: 630,
         alt: 'AI Pajak - Platform Pajak Cerdas Indonesia',
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: `${APP_NAME} - Platform Pajak Cerdas Indonesia`,
     description: 'Hitung, lapor, dan optimalkan pajak Anda dengan AI.',
-    images: ['/og-image.png'],
+    images: ['/og-image.svg'],
   },
   robots: {
     index: true,
