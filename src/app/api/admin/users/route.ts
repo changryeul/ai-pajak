@@ -31,8 +31,14 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(url.searchParams.get('limit') || '20');
 
     // Get auth users
-    const { data: authData } = await getSupabaseAdmin().auth.admin.listUsers({ page, perPage: limit });
-    const authUsers = authData?.users || [];
+    let authUsers: Array<{ id: string; email?: string; created_at: string; last_sign_in_at?: string; email_confirmed_at?: string; user_metadata?: Record<string, unknown> }> = [];
+    try {
+      const { data: authData } = await getSupabaseAdmin().auth.admin.listUsers({ page, perPage: limit });
+      authUsers = authData?.users || [];
+    } catch (err) {
+      console.error('Failed to list auth users:', err);
+      // Fall back to user_roles table
+    }
 
     // Get roles
     const { data: roles } = await getSupabaseAdmin()
@@ -49,22 +55,42 @@ export async function GET(request: NextRequest) {
     const customerMap = new Map((customers || []).map(c => [c.user_id, c]));
 
     // Build user list
-    let users = authUsers.map(u => {
-      const role = roleMap.get(u.id);
-      const customer = customerMap.get(u.id);
-      return {
-        id: u.id,
-        email: u.email || '',
-        fullName: customer?.full_name || u.user_metadata?.full_name || '',
-        npwp: customer?.npwp || '',
-        role: role?.role || 'UNKNOWN',
-        isActive: role?.is_active ?? true,
-        customerType: customer?.customer_type || null,
-        createdAt: u.created_at,
-        lastSignIn: u.last_sign_in_at,
-        emailConfirmed: !!u.email_confirmed_at,
-      };
-    });
+    let users;
+    if (authUsers.length > 0) {
+      users = authUsers.map(u => {
+        const role = roleMap.get(u.id);
+        const customer = customerMap.get(u.id);
+        return {
+          id: u.id,
+          email: u.email || '',
+          fullName: customer?.full_name || (u.user_metadata?.full_name as string) || '',
+          npwp: customer?.npwp || '',
+          role: role?.role || 'UNKNOWN',
+          isActive: role?.is_active ?? true,
+          customerType: customer?.customer_type || null,
+          createdAt: u.created_at || '',
+          lastSignIn: u.last_sign_in_at || null,
+          emailConfirmed: !!u.email_confirmed_at,
+        };
+      });
+    } else {
+      // Fallback: build from user_roles
+      users = (roles || []).map(r => {
+        const customer = customerMap.get(r.user_id);
+        return {
+          id: r.user_id,
+          email: customer?.full_name || r.user_id.slice(0, 8),
+          fullName: customer?.full_name || '',
+          npwp: customer?.npwp || '',
+          role: r.role || 'UNKNOWN',
+          isActive: r.is_active ?? true,
+          customerType: customer?.customer_type || null,
+          createdAt: '',
+          lastSignIn: null,
+          emailConfirmed: false,
+        };
+      });
+    }
 
     // Apply filters
     if (search) {

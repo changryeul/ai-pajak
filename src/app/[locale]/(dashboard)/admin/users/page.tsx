@@ -49,7 +49,8 @@ export default function AdminUsersPage() {
       if (roleFilter) p.append('role', roleFilter);
       const res = await fetch(`/api/admin/users?${p}`);
       const data = await res.json();
-      if (data.success) { setUsers(data.data.users); setStats(data.data.stats); }
+      if (data.success) { setUsers(data.data.users || []); setStats(data.data.stats || null); }
+      else { console.error('API error:', data.error); }
     } catch { /* */ }
     finally { setIsLoading(false); }
   }, [search, roleFilter]);
