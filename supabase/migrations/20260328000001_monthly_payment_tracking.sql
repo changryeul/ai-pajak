@@ -1,3 +1,11 @@
+-- Create function if not exists
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
 -- Monthly Tax Payment Tracking
 -- Tracks PPh 21, PPh 23, PPh 25, PPN, PPh Final monthly payments
 
