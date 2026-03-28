@@ -4,7 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,7 +15,7 @@ import { useSession } from '@/hooks/useSession';
 import {
   CreditCard, AlertTriangle, CheckCircle, Clock, Loader2,
   DollarSign, FileText, Calendar, ChevronRight, Sparkles,
-  TrendingUp, Shield, Receipt,
+  TrendingUp, Shield, Receipt, Users, Plus, Search, Edit2, Building2, User, Briefcase,
 } from 'lucide-react';
 
 interface Payment {
@@ -125,6 +128,8 @@ export default function MonthlyPaymentsPage() {
     finally { setIsSaving(false); }
   };
 
+  const [activeTab, setActiveTab] = useState<'payments' | 'counterparties' | 'transactions'>('payments');
+
   const totalPaid = summary.reduce((s, t) => s + t.totalPaid, 0);
   const totalDue = summary.reduce((s, t) => s + t.totalDue, 0);
   const activeSummary = summary.filter(s => s.totalMonths > 0);
@@ -178,7 +183,62 @@ export default function MonthlyPaymentsPage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
+        {[
+          { id: 'payments' as const, label: 'Pembayaran', icon: CreditCard },
+          { id: 'counterparties' as const, label: 'Lawan Transaksi', icon: Users },
+          { id: 'transactions' as const, label: 'Transaksi', icon: Receipt },
+        ].map(tab => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab: Counterparties */}
+      {activeTab === 'counterparties' && (
+        <CounterpartiesTab customerId={session?.customerId} />
+      )}
+
+      {/* Tab: Transactions */}
+      {activeTab === 'transactions' && (
+        <div className="space-y-4">
+          {['PPh23', 'PPN'].map(type => (
+            <Link key={type} href={`/${locale}/tax/monthly-payments/detail?type=${type}&period=${year}-${String(currentMonth).padStart(2, '0')}`}>
+              <Card className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer mb-3">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl bg-gradient-to-br ${type === 'PPh23' ? 'from-emerald-500 to-green-600' : 'from-orange-500 to-red-500'}`}>
+                      <Receipt className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{type === 'PPh23' ? 'PPh 23 - Jasa & Sewa' : 'PPN - Faktur Pajak'}</p>
+                      <p className="text-xs text-gray-500">{type === 'PPh23' ? 'Daftar pemotongan PPh 23 per lawan transaksi' : 'Faktur keluaran & masukan per lawan transaksi'}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-300" />
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Tab: Payments */}
+      {activeTab === 'payments' && (isLoading ? (
         <div className="text-center py-20"><Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" /></div>
       ) : !hasData ? (
         <Card className="border-0 shadow-sm">
@@ -267,9 +327,9 @@ export default function MonthlyPaymentsPage() {
             );
           })}
         </div>
-      )}
+      ))}
 
-      {hasData && (
+      {hasData && activeTab === 'payments' && (
         <div className="flex items-center justify-center gap-6 mt-6 text-xs text-gray-500">
           <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-500" /> Lunas</span>
           <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-200" /> Belum</span>
@@ -332,6 +392,107 @@ export default function MonthlyPaymentsPage() {
               </Button>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Inline CounterpartiesTab component
+function CounterpartiesTab({ customerId }: { customerId?: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [list, setList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ name: '', npwp: '', address: '', type: 'VENDOR' });
+  const [search, setSearch] = useState('');
+
+  useEffect(() => { loadList(); }, [customerId]);
+
+  const loadList = async () => {
+    setIsLoading(true);
+    try {
+      const p = new URLSearchParams();
+      if (customerId) p.append('customerId', customerId);
+      const res = await fetch(`/api/tax/counterparties?${p}`);
+      const d = await res.json();
+      if (d.success) setList(d.data.counterparties);
+    } catch { /* */ }
+    finally { setIsLoading(false); }
+  };
+
+  const handleSave = async () => {
+    if (!form.name) return;
+    await fetch('/api/tax/counterparties', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, customerId }),
+    });
+    setShowForm(false);
+    setForm({ name: '', npwp: '', address: '', type: 'VENDOR' });
+    loadList();
+  };
+
+  const filtered = list.filter(cp => !search || cp.name.toLowerCase().includes(search.toLowerCase()) || cp.npwp?.includes(search));
+  const typeIcons: Record<string, { icon: typeof Building2; gradient: string }> = {
+    VENDOR: { icon: Building2, gradient: 'from-blue-500 to-indigo-600' },
+    CLIENT: { icon: Briefcase, gradient: 'from-green-500 to-emerald-600' },
+    EMPLOYEE: { icon: User, gradient: 'from-purple-500 to-violet-600' },
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input placeholder="Cari nama atau NPWP..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
+        </div>
+        <Button onClick={() => setShowForm(!showForm)} className="bg-gradient-to-r from-blue-600 to-indigo-600">
+          <Plus className="h-4 w-4 mr-1" />Tambah
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-4 space-y-3">
+            <div className="grid grid-cols-3 gap-3">
+              <div><Label className="text-xs">Nama *</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="PT Example" /></div>
+              <div><Label className="text-xs">NPWP</Label><Input value={form.npwp} onChange={e => setForm({ ...form, npwp: e.target.value })} placeholder="XX.XXX.XXX.X-XXX.XXX" className="font-mono" /></div>
+              <div><Label className="text-xs">Alamat</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>Batal</Button>
+              <Button size="sm" onClick={handleSave} disabled={!form.name}>Simpan</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading ? (
+        <div className="text-center py-10"><Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" /></div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-10 text-gray-400">
+          <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
+          <p className="text-sm">{search ? 'Tidak ditemukan' : 'Belum ada lawan transaksi'}</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map((cp: { id: string; name: string; npwp?: string; address?: string; type: string; is_related_party: boolean }) => {
+            const tc = typeIcons[cp.type] || typeIcons.VENDOR;
+            const Icon = tc.icon;
+            return (
+              <Card key={cp.id} className="border-0 shadow-sm">
+                <CardContent className="p-3 flex items-center gap-3">
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${tc.gradient}`}><Icon className="h-4 w-4 text-white" /></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-gray-900 truncate">{cp.name}</p>
+                    <p className="text-xs text-gray-500 font-mono">{cp.npwp || '-'}</p>
+                  </div>
+                  <Badge variant="outline" className="text-[10px]">{cp.type}</Badge>
+                  {cp.is_related_party && <Badge className="text-[10px] bg-amber-100 text-amber-700">Related</Badge>}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
