@@ -139,7 +139,7 @@ function CustomerDashboard({
               {session.fullName || 'Customer'}
             </h1>
             <p className="text-blue-200 mt-2 text-sm">
-              Kelola pajak Anda dengan mudah bersama AI Pajak
+              {t('dashboardHero.customerSubtitle')}
             </p>
           </div>
           <div className="hidden md:flex gap-3">
@@ -148,14 +148,14 @@ function CustomerDashboard({
               className="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/20 transition-all"
             >
               <Upload className="h-4 w-4" />
-              Upload Dokumen
+              {t('dashboardHero.uploadDocument')}
             </Link>
             <Link
               href={`/${locale}/tax/spt-tahunan`}
               className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-all shadow-lg shadow-blue-900/20"
             >
               <Plus className="h-4 w-4" />
-              Buat SPT
+              {t('dashboardHero.createSpt')}
             </Link>
           </div>
         </div>
@@ -167,24 +167,24 @@ function CustomerDashboard({
           {
             href: '/tax/spt-tahunan/1770ss',
             icon: FileSpreadsheet,
-            label: 'SPT Auto-fill',
-            desc: 'Upload & otomatis isi SPT',
+            label: t('dashboardHero.sptAutofill'),
+            desc: t('dashboardHero.sptAutofillDesc'),
             gradient: 'from-blue-500 to-cyan-500',
             bg: 'bg-blue-50',
           },
           {
             href: '/tax/savings',
             icon: Lightbulb,
-            label: 'Hemat Pajak',
-            desc: 'Temukan peluang penghematan',
+            label: t('dashboardHero.taxSavings'),
+            desc: t('dashboardHero.taxSavingsDesc'),
             gradient: 'from-amber-500 to-orange-500',
             bg: 'bg-amber-50',
           },
           {
             href: '/documents',
             icon: Sparkles,
-            label: 'AI Klasifikasi',
-            desc: 'Upload & otomatis deteksi',
+            label: t('dashboardHero.aiClassification'),
+            desc: t('dashboardHero.aiClassificationDesc'),
             gradient: 'from-purple-500 to-pink-500',
             bg: 'bg-purple-50',
           },
@@ -302,10 +302,10 @@ function ConsultantDashboard({
   }, []);
 
   const statCards = [
-    { label: t('dashboard.activeClients'), value: stats?.activeClients ?? 0, icon: Users, gradient: 'from-blue-500 to-blue-600', change: '+2 bulan ini' },
-    { label: t('dashboard.pendingFilings'), value: stats?.pendingFilings ?? 0, icon: Clock, gradient: 'from-amber-500 to-orange-500', change: 'perlu tindakan' },
-    { label: t('dashboard.submittedThisMonth'), value: stats?.submittedThisMonth ?? 0, icon: TrendingUp, gradient: 'from-green-500 to-emerald-600', change: 'bulan ini' },
-    { label: t('dashboard.poasPending'), value: stats?.pendingPOAs ?? 0, icon: FileText, gradient: 'from-purple-500 to-violet-600', change: 'menunggu' },
+    { label: t('dashboard.activeClients'), value: stats?.activeClients ?? 0, icon: Users, gradient: 'from-blue-500 to-blue-600', change: t('dashboardHero.thisMonth') },
+    { label: t('dashboard.pendingFilings'), value: stats?.pendingFilings ?? 0, icon: Clock, gradient: 'from-amber-500 to-orange-500', change: t('dashboardHero.needAction') },
+    { label: t('dashboard.submittedThisMonth'), value: stats?.submittedThisMonth ?? 0, icon: TrendingUp, gradient: 'from-green-500 to-emerald-600', change: t('dashboardHero.thisMonth') },
+    { label: t('dashboard.poasPending'), value: stats?.pendingPOAs ?? 0, icon: FileText, gradient: 'from-purple-500 to-violet-600', change: t('dashboardHero.waiting') },
   ];
 
   return (
@@ -323,7 +323,7 @@ function ConsultantDashboard({
               {t('dashboard.welcomeBack', { name: session.fullName || 'Consultant' })}
             </h1>
             <p className="text-slate-400 mt-2 text-sm">
-              Kelola klien dan laporan pajak Anda
+              {t('dashboardHero.consultantSubtitle')}
             </p>
           </div>
           <div className="hidden md:flex gap-3">
@@ -377,9 +377,9 @@ function ConsultantDashboard({
       {/* AI Tools Quick Access */}
       <div className="grid gap-3 sm:grid-cols-3">
         {[
-          { href: '/tax/spt-tahunan', icon: FileSpreadsheet, label: 'SPT Auto-fill', desc: 'Upload & otomatis isi', gradient: 'from-blue-500 to-cyan-500' },
-          { href: '/tax/savings', icon: Lightbulb, label: 'Analisis Penghematan', desc: 'Temukan peluang klien', gradient: 'from-amber-500 to-orange-500' },
-          { href: '/tax/report', icon: BarChart3, label: 'Laporan AI', desc: 'Generate laporan klien', gradient: 'from-purple-500 to-pink-500' },
+          { href: '/tax/spt-tahunan', icon: FileSpreadsheet, label: t('dashboardHero.sptAutofill'), desc: t('dashboardHero.sptAutofillDesc'), gradient: 'from-blue-500 to-cyan-500' },
+          { href: '/tax/savings', icon: Lightbulb, label: t('dashboardHero.taxSavings'), desc: t('dashboardHero.analysisDesc'), gradient: 'from-amber-500 to-orange-500' },
+          { href: '/tax/report', icon: BarChart3, label: t('dashboardHero.aiReport'), desc: t('dashboardHero.aiReportDesc'), gradient: 'from-purple-500 to-pink-500' },
         ].map((item) => {
           const Icon = item.icon;
           return (
@@ -441,7 +441,7 @@ function PlatformAdminDashboard({
             </h1>
             <p className="text-orange-200 mt-2 text-sm flex items-center gap-2">
               <ShieldCheck className="h-4 w-4" />
-              Platform Administration Mode
+              {t('dashboardHero.adminMode')}
             </p>
           </div>
           <div className="hidden md:flex gap-3">

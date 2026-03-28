@@ -56,7 +56,7 @@ export default function DocumentsPage() {
             />
             <div className="flex justify-end pt-2">
               <Button variant="outline" onClick={() => setIsUploadOpen(false)}>
-                Tutup
+                {t('common.close')}
               </Button>
             </div>
           </DialogContent>

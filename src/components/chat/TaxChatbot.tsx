@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,17 +22,18 @@ interface Message {
   timestamp: Date;
 }
 
-const QUICK_QUESTIONS = [
-  'Bagaimana cara menghitung PPh 21?',
-  'Kapan deadline SPT Tahunan?',
-  'Apa itu PTKP dan berapa besarnya?',
-  'Bagaimana cara mengajukan restitusi?',
-  'Apa perbedaan SPT 1770 SS dan 1770 S?',
-];
+const QUICK_QUESTIONS: Record<string, string[]> = {
+  id: ['Bagaimana cara menghitung PPh 21?', 'Kapan deadline SPT Tahunan?', 'Apa itu PTKP dan berapa besarnya?', 'Bagaimana cara mengajukan restitusi?', 'Apa perbedaan SPT 1770 SS dan 1770 S?'],
+  en: ['How to calculate PPh 21?', 'When is the SPT deadline?', 'What is PTKP and how much?', 'How to request a tax refund?', 'Difference between SPT 1770 SS and 1770 S?'],
+  ko: ['PPh 21은 어떻게 계산하나요?', 'SPT 마감일은 언제인가요?', 'PTKP란 무엇이며 얼마인가요?', '세금 환급은 어떻게 신청하나요?', 'SPT 1770 SS와 1770 S의 차이는?'],
+  ja: ['PPh 21の計算方法は？', 'SPTの締め切りはいつ？', 'PTKPとは何で、いくらですか？', '還付申請の方法は？', 'SPT 1770 SSと1770 Sの違いは？'],
+  zh: ['如何计算PPh 21？', 'SPT截止日期是什么时候？', '什么是PTKP，金额是多少？', '如何申请退税？', 'SPT 1770 SS和1770 S有什么区别？'],
+};
 
 export function TaxChatbot() {
   const params = useParams();
   const locale = (params.locale as string) || 'id';
+  const questions = useMemo(() => QUICK_QUESTIONS[locale] || QUICK_QUESTIONS.id, [locale]);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -197,12 +198,12 @@ export function TaxChatbot() {
             <div className="mx-auto w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mb-3">
               <Sparkles className="h-6 w-6 text-blue-600" />
             </div>
-            <h4 className="font-semibold text-gray-900 text-sm">Halo! Saya Asisten Pajak AI</h4>
+            <h4 className="font-semibold text-gray-900 text-sm">{{ id: 'Halo! Saya Asisten Pajak AI', en: 'Hi! I\'m AI Tax Assistant', ko: '안녕하세요! AI 세금 어시스턴트입니다', ja: 'こんにちは！AI税務アシスタントです', zh: '你好！我是AI税务助手' }[locale] || 'Halo! Saya Asisten Pajak AI'}</h4>
             <p className="text-xs text-gray-500 mt-1 mb-4">
-              Tanyakan apapun tentang pajak Indonesia
+              {{ id: 'Tanyakan apapun tentang pajak Indonesia', en: 'Ask anything about Indonesian tax', ko: '인도네시아 세금에 대해 무엇이든 물어보세요', ja: 'インドネシアの税金について何でも聞いてください', zh: '询问任何关于印尼税务的问题' }[locale] || 'Ask anything about tax'}
             </p>
             <div className="space-y-2">
-              {QUICK_QUESTIONS.map((q) => (
+              {questions.map((q) => (
                 <button
                   key={q}
                   onClick={() => sendMessage(q)}
@@ -267,7 +268,7 @@ export function TaxChatbot() {
             onClick={clearChat}
             className="text-[10px] text-gray-400 hover:text-gray-600 mb-2 transition-colors"
           >
-            Hapus percakapan
+            {{ id: 'Hapus percakapan', en: 'Clear chat', ko: '대화 삭제', ja: '会話を削除', zh: '清除聊天' }[locale] || 'Clear chat'}
           </button>
         )}
         <div className="flex gap-2">
@@ -277,7 +278,7 @@ export function TaxChatbot() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-            placeholder="Tanyakan tentang pajak..."
+            placeholder={{ id: 'Tanyakan tentang pajak...', en: 'Ask about tax...', ko: '세금에 대해 물어보세요...', ja: '税金について聞く...', zh: '询问税务...' }[locale] || 'Ask about tax...'}
             className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
             disabled={isLoading}
           />
