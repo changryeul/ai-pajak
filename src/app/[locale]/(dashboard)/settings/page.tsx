@@ -612,16 +612,27 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Future integrations */}
-                <div className="border rounded-xl p-5 opacity-60">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gray-200">
-                      <span className="text-gray-500 font-bold text-xs">JR</span>
+                {/* Jurnal.id Integration */}
+                <div className="border rounded-xl p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 shadow-sm">
+                        <span className="text-white font-bold text-xs">JR</span>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">Jurnal.id (Mekari)</h3>
+                        <p className="text-xs text-gray-500">Sinkronisasi akuntansi & PPN</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Jurnal.id</h3>
-                      <p className="text-xs text-gray-500">Coming Soon</p>
-                    </div>
+                    <JurnalConnectButton />
+                  </div>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <ul className="list-disc list-inside text-xs text-gray-500 space-y-0.5">
+                      <li>Import Chart of Accounts</li>
+                      <li>Sinkronisasi faktur penjualan (PPN)</li>
+                      <li>Import Laporan Laba Rugi & Neraca</li>
+                      <li>Data kontak (pelanggan/vendor) + NPWP</li>
+                    </ul>
                   </div>
                 </div>
 
@@ -777,6 +788,38 @@ function BankConnectButton() {
 
   return (
     <Button size="sm" onClick={handleConnect} disabled={isLoading} className="bg-gradient-to-r from-green-600 to-emerald-600">
+      {isLoading ? (
+        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+      ) : (
+        <ExternalLink className="h-3 w-3 mr-1" />
+      )}
+      Hubungkan
+    </Button>
+  );
+}
+
+function JurnalConnectButton() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleConnect = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/integrations/jurnal');
+      const data = await response.json();
+      if (data.success && data.data.authorizationUrl) {
+        window.location.href = data.data.authorizationUrl;
+      } else {
+        alert('Jurnal.id connection requires API credentials. Set JURNAL_CLIENT_ID and JURNAL_CLIENT_SECRET in .env.local');
+      }
+    } catch {
+      alert('Jurnal.id connection service not configured yet.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Button size="sm" onClick={handleConnect} disabled={isLoading} className="bg-gradient-to-r from-teal-600 to-cyan-600">
       {isLoading ? (
         <Loader2 className="h-3 w-3 animate-spin mr-1" />
       ) : (
