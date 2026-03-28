@@ -34,6 +34,7 @@ import {
 } from '@/components/dashboard';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
+const SimpleMode = dynamic(() => import('@/components/dashboard/SimpleMode').then(m => ({ default: m.SimpleMode })), { ssr: false });
 
 // Lazy load heavy components
 const ClientList = dynamic(() => import('@/components/dashboard/ClientList').then(m => ({ default: m.ClientList })), { ssr: false });
@@ -162,6 +163,9 @@ function CustomerDashboard({
           </div>
         </div>
       </div>
+
+      {/* Simple Mode - "Foto dan Selesai" */}
+      <SimpleMode />
 
       {/* Next Steps Wizard */}
       <NextStepsWizard customerId={session.customerId} />
