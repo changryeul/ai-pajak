@@ -99,6 +99,7 @@ const navItems: NavSection[] = [
     roles: [UserRole.PLATFORM_ADMIN],
     items: [
       { href: '/admin/monitoring', icon: Activity, labelKey: 'nav.monitoring' },
+      { href: '/admin/users', icon: Users, labelKey: 'nav.userManagement' },
       { href: '/admin/tax-rates', icon: Settings, labelKey: 'nav.taxRates' },
     ],
   },
