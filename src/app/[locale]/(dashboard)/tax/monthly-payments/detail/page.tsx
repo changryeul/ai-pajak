@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useSession } from '@/hooks/useSession';
 import {
   ArrowLeft, Plus, Loader2, FileText, Users, DollarSign,
-  TrendingUp, TrendingDown, Minus, Receipt,
+  TrendingUp, TrendingDown, Minus, Receipt, AlertTriangle,
 } from 'lucide-react';
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
@@ -140,6 +140,14 @@ export default function MonthlyPaymentDetailPage() {
                 <Input className="text-sm font-mono" value={formData.counterpartyNpwp} onChange={e => setFormData({ ...formData, counterpartyNpwp: e.target.value })} placeholder="XX.XXX.XXX.X-XXX.XXX" />
               </div>
             </div>
+
+            {/* NPWP warning for PPh 23 */}
+            {taxType !== 'PPN' && !formData.counterpartyNpwp && formData.counterpartyName && (
+              <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-500" />
+                <span><strong>Tarif 2x lipat</strong> berlaku karena lawan transaksi tidak memiliki NPWP (Pasal 21 ayat 5a UU PPh). Contoh: Jasa 2% → 4%, Dividen 15% → 30%.</span>
+              </div>
+            )}
 
             {taxType === 'PPN' ? (
               <div className="grid grid-cols-3 gap-3">

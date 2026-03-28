@@ -51,7 +51,19 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     ).map(([type, total]) => ({ type, total })),
   };
 
-  return NextResponse.json({ success: true, data: { transactions: data || [], summary, serviceTypes: SERVICE_TYPES } });
+  return NextResponse.json({
+    success: true,
+    data: {
+      transactions: data || [],
+      summary,
+      serviceTypes: SERVICE_TYPES,
+      rateInfo: {
+        note: 'Tarif 2x berlaku jika lawan transaksi tidak memiliki NPWP (Pasal 21 ayat 5a UU PPh)',
+        withNpwp: 'Tarif normal',
+        withoutNpwp: 'Tarif 2x lipat',
+      },
+    },
+  });
 }
 
 async function handlePost(req: RequestWithSession): Promise<Response> {
@@ -66,8 +78,6 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     const typeInfo = SERVICE_TYPES[serviceType as keyof typeof SERVICE_TYPES];
     if (!typeInfo) return NextResponse.json({ error: 'Invalid serviceType' }, { status: 400 });
 
-    const taxAmount = Math.round(grossAmount * typeInfo.rate);
-
     // Get counterparty info
     let counterpartyName = body.counterpartyName || '';
     let counterpartyNpwp = body.counterpartyNpwp || '';
@@ -76,16 +86,21 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       if (cp) { counterpartyName = cp.name; counterpartyNpwp = cp.npwp || ''; }
     }
 
+    // NPWP check: No NPWP = 2x rate (Pasal 21 ayat 5a UU PPh)
+    const hasNpwp = !!counterpartyNpwp && counterpartyNpwp.trim().length >= 15;
+    const effectiveRate = hasNpwp ? typeInfo.rate : typeInfo.rate * 2;
+    const taxAmount = Math.round(grossAmount * effectiveRate);
+
     const { data, error } = await getSupabaseAdmin().from('pph23_transaction').insert({
       customer_id: customerId,
       counterparty_id: counterpartyId || null,
       tax_period: taxPeriod,
       transaction_date: transactionDate || new Date().toISOString().slice(0, 10),
-      description,
+      description: description || (hasNpwp ? '' : '[NPWP tidak ada - tarif 2x]'),
       service_type: serviceType,
       invoice_number: invoiceNumber,
       gross_amount: grossAmount,
-      tax_rate: typeInfo.rate,
+      tax_rate: effectiveRate,
       tax_amount: taxAmount,
       counterparty_name: counterpartyName,
       counterparty_npwp: counterpartyNpwp,
