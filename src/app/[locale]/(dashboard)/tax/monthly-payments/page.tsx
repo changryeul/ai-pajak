@@ -81,11 +81,24 @@ export default function MonthlyPaymentsPage() {
   useEffect(() => { loadPayments(); }, [loadPayments]);
 
   const generateSchedule = async () => {
-    if (!session?.customerId) return;
-    await fetch('/api/tax/monthly-payments', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'generate-schedule', customerId: session.customerId, year, taxTypes: ['PPh21', 'PPh23', 'PPN', 'PPh_FINAL'] }),
-    });
+    // For customer role, use session.customerId. For consultants, will need to select a client.
+    const cid = session?.customerId;
+    if (!cid) {
+      alert('Customer ID not available. Please select a client first.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/tax/monthly-payments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generate-schedule', customerId: cid, year, taxTypes: ['PPh21', 'PPh23', 'PPN', 'PPh_FINAL'] }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to generate schedule');
+      }
+    } catch (err) {
+      alert('Network error. Please try again.');
+    }
     loadPayments();
   };
 

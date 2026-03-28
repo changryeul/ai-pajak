@@ -25,12 +25,21 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   }
   if (!cid) return NextResponse.json({ error: 'customerId required' }, { status: 400 });
 
-  const { data: payments } = await getSupabaseAdmin()
+  const { data: payments, error: queryError } = await getSupabaseAdmin()
     .from('tax_monthly_payment')
     .select('*')
     .eq('customer_id', cid)
     .eq('tax_year', year)
     .order('tax_period', { ascending: true });
+
+  // Table might not exist yet on remote
+  if (queryError) {
+    console.error('Monthly payment query error:', queryError);
+    return NextResponse.json({
+      success: true,
+      data: { year, summary: [], totalOutstanding: 0, allPayments: [] },
+    });
+  }
 
   // Group by tax type
   const taxTypes = ['PPh21', 'PPh23', 'PPh25', 'PPN', 'PPh_FINAL'];
