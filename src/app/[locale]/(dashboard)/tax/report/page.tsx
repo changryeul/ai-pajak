@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Customer {
   id: string;
@@ -26,6 +27,7 @@ export default function ClientReportPage() {
   const router = useRouter();
   const locale = params.locale as string;
   const { session, isLoading: isSessionLoading } = useSession();
+  const t = useTranslations('pages');
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -77,17 +79,17 @@ export default function ClientReportPage() {
       <div className="mb-6">
         <Button variant="ghost" onClick={() => router.push(`/${locale}/dashboard`)} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali
+          {t('back')}
         </Button>
-        <h1 className="text-2xl font-bold text-gray-900">Laporan Klien (AI)</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('clientReportTitle')}</h1>
         <p className="text-gray-600 mt-1">
-          Buat laporan analisis pajak komprehensif untuk klien Anda
+          {t('clientReportDesc')}
         </p>
       </div>
 
       {!selectedCustomer && (
         <div className="bg-white rounded-lg border p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Pilih Klien</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('selectClient')}</h2>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -115,7 +117,7 @@ export default function ClientReportPage() {
         <>
           <div className="mb-4">
             <Button variant="outline" onClick={() => setSelectedCustomer(null)}>
-              Ganti Klien
+              {t('changeClient')}
             </Button>
           </div>
           <ClientReportGenerator

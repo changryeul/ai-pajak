@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Loader2, FileSpreadsheet, Download } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface EmpRow { id: string; name: string; npwp: string; nik: string; ptkp: string; salary: number; jht: number; jp: number; }
 function newEmp(): EmpRow { return { id: crypto.randomUUID(), name: '', npwp: '', nik: '', ptkp: 'TK0', salary: 0, jht: 0, jp: 0 }; }
 
 export default function EBupotPage() {
+  const t = useTranslations('pages');
   const [employees, setEmployees] = useState<EmpRow[]>([newEmp()]);
   const [companyNpwp, setCompanyNpwp] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -51,7 +53,7 @@ export default function EBupotPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <FileSpreadsheet className="h-6 w-6 text-blue-600" />Bulk e-Bupot 1721-A1
+        <FileSpreadsheet className="h-6 w-6 text-blue-600" />{t('ebupotTitle')}
       </h1>
 
       <Card className="border-0 shadow-sm mb-6">

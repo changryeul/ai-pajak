@@ -13,12 +13,14 @@ import {
   Calculator, TrendingUp, FileText, Loader2, Upload,
   Building2, MapPin, Sparkles, BarChart3, DollarSign,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 type ActiveTool = 'predict' | 'cashflow' | 'summarize' | 'customs' | 'regional' | 'benchmark' | null;
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
 export default function TaxToolsPage() {
+  const t = useTranslations('pages');
   const [activeTool, setActiveTool] = useState<ActiveTool>(null);
   const [isLoading, setIsLoading] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,9 +66,9 @@ export default function TaxToolsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
           <Calculator className="h-6 w-6 text-blue-600" />
-          Tax Tools
+          {t('taxToolsTitle')}
         </h1>
-        <p className="text-gray-500 mt-1">Kalkulator dan tools pajak Indonesia</p>
+        <p className="text-gray-500 mt-1">{t('taxToolsDesc')}</p>
       </div>
 
       {/* Tool Grid */}
@@ -105,7 +107,7 @@ export default function TaxToolsPage() {
       {/* Results */}
       {result && (
         <Card className="mt-6 border-0 shadow-sm">
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Sparkles className="h-4 w-4 text-yellow-500" />Hasil</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Sparkles className="h-4 w-4 text-yellow-500" />{t('result')}</CardTitle></CardHeader>
           <CardContent>
             {result.error ? (
               <p className="text-red-600 text-sm">{result.error}</p>

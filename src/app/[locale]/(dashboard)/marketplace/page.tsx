@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Users, Star, ShieldCheck, Loader2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
 
 interface Consultant { id: string; firmName: string; isLicensed: boolean; activeClients: number; rating: number; specializations: string[]; }
 
 export default function MarketplacePage() {
+  const t = useTranslations('pages');
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -24,9 +26,9 @@ export default function MarketplacePage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-        <Users className="h-6 w-6 text-blue-600" />Cari Konsultan Pajak
+        <Users className="h-6 w-6 text-blue-600" />{t('marketplaceTitle')}
       </h1>
-      <p className="text-gray-500 mb-6">Temukan konsultan pajak terpercaya untuk kebutuhan Anda</p>
+      <p className="text-gray-500 mb-6">{t('marketplaceDesc')}</p>
 
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -52,7 +54,7 @@ export default function MarketplacePage() {
                   </div>
                   <span className="text-xs text-gray-400">{c.activeClients} klien</span>
                 </div>
-                <Button size="sm" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600">Hubungi</Button>
+                <Button size="sm" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600">{t('contact')}</Button>
               </CardContent>
             </Card>
           ))}

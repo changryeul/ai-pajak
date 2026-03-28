@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { ShoppingCart, Upload, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { parseEcommerceCSV, calculateMonthlySummary, type EcommercePlatform, type EcommerceMonthlySummary } from '@/lib/ecommerce';
+import { useTranslations } from 'next-intl';
 
 export default function EcommercePage() {
+  const t = useTranslations('pages');
   const [platform, setPlatform] = useState<EcommercePlatform>('SHOPEE');
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState<EcommerceMonthlySummary | null>(null);
@@ -40,7 +42,7 @@ export default function EcommercePage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <ShoppingCart className="h-6 w-6 text-orange-500" />Import E-commerce
+        <ShoppingCart className="h-6 w-6 text-orange-500" />{t('ecommerceTitle')}
       </h1>
 
       <Card className="border-0 shadow-sm mb-6">

@@ -18,6 +18,7 @@ import {
   ArrowLeft, Loader2, ShieldAlert, AlertTriangle, AlertCircle,
   Info, CheckCircle, Sparkles, Shield,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface AnomalyAlert {
   id: string;
@@ -54,6 +55,7 @@ export default function AnomalyDetectionPage() {
   const router = useRouter();
   const locale = params.locale as string;
   const { session, isLoading: isSessionLoading } = useSession();
+  const t = useTranslations('pages');
   const currentYear = new Date().getFullYear();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -100,13 +102,13 @@ export default function AnomalyDetectionPage() {
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="mb-6">
         <Button variant="ghost" onClick={() => router.push(`/${locale}/dashboard`)} className="mb-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />Kembali
+          <ArrowLeft className="h-4 w-4 mr-2" />{t('back')}
         </Button>
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
           <ShieldAlert className="h-6 w-6 text-orange-500" />
-          Smart Anomaly Detection
+          {t('anomalyTitle')}
         </h1>
-        <p className="text-gray-500 mt-1">Deteksi risiko pemeriksaan pajak secara otomatis</p>
+        <p className="text-gray-500 mt-1">{t('anomalyDesc')}</p>
       </div>
 
       {/* Controls */}
@@ -114,7 +116,7 @@ export default function AnomalyDetectionPage() {
         <CardContent className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Klien</Label>
+              <Label>{t('selectClient')}</Label>
               <Select onValueChange={(v) => setSelectedCustomer(customers.find(c => c.id === v) || null)}>
                 <SelectTrigger><SelectValue placeholder="Pilih klien..." /></SelectTrigger>
                 <SelectContent>
@@ -141,7 +143,7 @@ export default function AnomalyDetectionPage() {
 
           <Button onClick={runCheck} disabled={isLoading || !selectedCustomer} className="w-full bg-gradient-to-r from-orange-500 to-red-500">
             {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menganalisis...</>
-              : <><Shield className="h-4 w-4 mr-2" />Jalankan Deteksi Anomali</>}
+              : <><Shield className="h-4 w-4 mr-2" />{t('runAnomaly')}</>}
           </Button>
         </CardContent>
       </Card>

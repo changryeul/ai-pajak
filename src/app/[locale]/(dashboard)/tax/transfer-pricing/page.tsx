@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Loader2, ArrowLeftRight, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface TxRow { id: string; relatedParty: string; transactionType: string; amount: number; marketPrice: number; description: string; }
 function newTx(): TxRow { return { id: crypto.randomUUID(), relatedParty: '', transactionType: 'Sale', amount: 0, marketPrice: 0, description: '' }; }
 
 export default function TransferPricingPage() {
+  const t = useTranslations('pages');
   const [transactions, setTransactions] = useState<TxRow[]>([newTx()]);
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +39,7 @@ export default function TransferPricingPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <ArrowLeftRight className="h-6 w-6 text-blue-600" />Transfer Pricing Analysis
+        <ArrowLeftRight className="h-6 w-6 text-blue-600" />{t('tpTitle')}
       </h1>
 
       <Card className="border-0 shadow-sm mb-6">
@@ -56,7 +58,7 @@ export default function TransferPricingPage() {
           <div className="flex justify-between">
             <Button variant="outline" size="sm" onClick={addRow}><Plus className="h-3.5 w-3.5 mr-1" />Tambah</Button>
             <Button onClick={analyze} disabled={isLoading} className="bg-gradient-to-r from-blue-600 to-indigo-600">
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}Analisis TP
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}{t('tpAnalyze')}
             </Button>
           </div>
         </CardContent>

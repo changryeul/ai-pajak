@@ -4,10 +4,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, Loader2, MessageCircle, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Message { id: string; sender_user_id: string; message_text: string; created_at: string; }
 
 export default function ChatPage() {
+  const t = useTranslations('pages');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +41,7 @@ export default function ChatPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <MessageCircle className="h-6 w-6 text-blue-600" />Pesan
+        <MessageCircle className="h-6 w-6 text-blue-600" />{t('messagesTitle')}
       </h1>
       <Card className="border-0 shadow-sm">
         <CardContent className="p-0">
@@ -47,7 +49,7 @@ export default function ChatPage() {
             {messages.length === 0 && (
               <div className="text-center py-20 text-gray-400">
                 <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Belum ada pesan</p>
+                <p className="text-sm">{t('noMessages')}</p>
               </div>
             )}
             {messages.map(m => (
@@ -64,7 +66,7 @@ export default function ChatPage() {
             <div ref={endRef} />
           </div>
           <div className="border-t p-3 flex gap-2">
-            <Input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder="Ketik pesan..." className="rounded-xl" disabled={isLoading} />
+            <Input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder={t('typeMessage')} className="rounded-xl" disabled={isLoading} />
             <Button onClick={sendMessage} disabled={isLoading || !input.trim()} size="sm" className="rounded-xl px-3">
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
