@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   Card, CardHeader, CardTitle, CardContent,
 } from '@/components/ui/card';
@@ -69,15 +70,17 @@ const categoryIcons: Record<string, typeof HelpCircle> = {
 };
 
 const GUIDES = [
-  { title: 'Panduan Pemula', desc: 'Langkah pertama menggunakan AI Pajak', icon: Sparkles, href: '#getting-started', gradient: 'from-blue-500 to-indigo-600' },
-  { title: 'Upload Bukti Potong', desc: 'Cara upload dan OCR dokumen', icon: Upload, href: '#upload', gradient: 'from-purple-500 to-violet-600' },
-  { title: 'SPT Auto-fill', desc: 'Isi SPT otomatis dengan AI', icon: FileSpreadsheet, href: '#spt', gradient: 'from-green-500 to-emerald-600' },
-  { title: 'Hemat Pajak', desc: 'Temukan peluang penghematan', icon: Lightbulb, href: '#savings', gradient: 'from-amber-500 to-orange-500' },
-  { title: 'Kalender Pajak', desc: 'Jangan lewatkan deadline', icon: Calendar, href: '#calendar', gradient: 'from-red-500 to-rose-500' },
-  { title: 'AI Chatbot', desc: 'Tanya AI kapan saja', icon: MessageCircle, href: '#chatbot', gradient: 'from-cyan-500 to-blue-500' },
+  { title: 'Panduan Pemula', desc: 'Langkah pertama menggunakan AI Pajak', icon: Sparkles, href: '/dashboard', gradient: 'from-blue-500 to-indigo-600' },
+  { title: 'Upload Bukti Potong', desc: 'Cara upload dan OCR dokumen', icon: Upload, href: '/documents', gradient: 'from-purple-500 to-violet-600' },
+  { title: 'SPT Auto-fill', desc: 'Isi SPT otomatis dengan AI', icon: FileSpreadsheet, href: '/tax/spt-tahunan/1770ss', gradient: 'from-green-500 to-emerald-600' },
+  { title: 'Hemat Pajak', desc: 'Temukan peluang penghematan', icon: Lightbulb, href: '/tax/savings', gradient: 'from-amber-500 to-orange-500' },
+  { title: 'Kalender Pajak', desc: 'Jangan lewatkan deadline', icon: Calendar, href: '/tax/calendar', gradient: 'from-red-500 to-rose-500' },
+  { title: 'AI Chatbot', desc: 'Tanya AI kapan saja', icon: MessageCircle, href: '/dashboard', gradient: 'from-cyan-500 to-blue-500' },
 ];
 
 export default function HelpPage() {
+  const params = useParams();
+  const locale = params.locale as string;
   const [search, setSearch] = useState('');
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -124,7 +127,7 @@ export default function HelpPage() {
           {GUIDES.map(g => {
             const Icon = g.icon;
             return (
-              <div key={g.title} className="group rounded-xl border border-gray-200 bg-white p-4 hover:shadow-md transition-all cursor-pointer">
+              <Link key={g.title} href={`/${locale}${g.href}`} className="group rounded-xl border border-gray-200 bg-white p-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${g.gradient} shadow-sm group-hover:scale-110 transition-transform`}>
                     <Icon className="h-4 w-4 text-white" />
@@ -134,7 +137,7 @@ export default function HelpPage() {
                     <p className="text-xs text-gray-500">{g.desc}</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
