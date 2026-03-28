@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -84,6 +85,7 @@ export function SPT1770SSPreview({
   onEdit,
   isLoading = false,
 }: SPT1770SSPreviewProps) {
+  const ts = useTranslations('spt');
   const [isDownloading, setIsDownloading] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [showValidation, setShowValidation] = useState(true);
@@ -174,7 +176,7 @@ export function SPT1770SSPreview({
       {/* Taxpayer Identity */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Identitas Wajib Pajak</CardTitle>
+          <CardTitle className="text-lg">{ts('taxpayerInfo')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,7 +220,7 @@ export function SPT1770SSPreview({
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            Daftar Penghasilan ({data.incomeSources.length} sumber)
+            {ts('incomeList')} ({data.incomeSources.length} sumber)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -261,7 +263,7 @@ export function SPT1770SSPreview({
       {/* Calculation Summary */}
       <Card className="border-2 border-blue-200">
         <CardHeader className="bg-blue-50">
-          <CardTitle className="text-lg">Ringkasan Perhitungan</CardTitle>
+          <CardTitle className="text-lg">{ts('calcSummary')}</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="space-y-4">
@@ -361,7 +363,7 @@ export function SPT1770SSPreview({
           <div className="flex gap-2">
             {onEdit && (
               <Button variant="outline" onClick={onEdit} disabled={isLoading}>
-                Edit Data
+                {ts('editData')}
               </Button>
             )}
             <Button
@@ -372,12 +374,12 @@ export function SPT1770SSPreview({
               {isValidating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Memvalidasi...
+                  {ts('validating')}
                 </>
               ) : (
                 <>
                   <ShieldCheck className="h-4 w-4 mr-2" />
-                  Validasi SPT
+                  {ts('validateSpt')}
                 </>
               )}
             </Button>
@@ -387,7 +389,7 @@ export function SPT1770SSPreview({
               onClick={handleDownload}
               disabled={isLoading || isDownloading}
             >
-              {isDownloading ? 'Mengunduh...' : 'Download PDF'}
+              {isDownloading ? (ts('downloading') || 'Downloading...') : ts('downloadPdf')}
             </Button>
           )}
         </CardFooter>
@@ -397,7 +399,7 @@ export function SPT1770SSPreview({
       {data.incomeSources.some((s) => s.buktiPotongNumber) && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Daftar Bukti Potong</CardTitle>
+            <CardTitle className="text-lg">{ts('buktiPotongList')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -450,7 +452,7 @@ export function SPT1770SSPreview({
                 }`} />
                 <div>
                   <CardTitle className="text-lg">
-                    Hasil Validasi - Skor {validationResult.score}/100
+                    {ts('validationResult')} - Skor {validationResult.score}/100
                   </CardTitle>
                   <CardDescription className="flex gap-3 mt-1">
                     {validationResult.counts.errors > 0 && (
@@ -551,10 +553,7 @@ export function SPT1770SSPreview({
       <Card className="bg-amber-50 border-amber-200">
         <CardContent className="pt-6">
           <p className="text-sm text-amber-800">
-            <strong>Perhatian:</strong> SPT ini dibuat berdasarkan data yang
-            tersedia. Pastikan semua informasi sudah benar sebelum melakukan
-            pelaporan ke DJP. Wajib Pajak bertanggung jawab atas kebenaran data
-            yang dilaporkan.
+            {ts('disclaimer')}
           </p>
         </CardContent>
       </Card>

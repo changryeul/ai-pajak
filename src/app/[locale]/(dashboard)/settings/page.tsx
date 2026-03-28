@@ -574,10 +574,10 @@ export default function SettingsPage() {
                   <div className="text-sm text-gray-600 space-y-1">
                     <p>Fitur yang tersedia setelah terhubung:</p>
                     <ul className="list-disc list-inside text-xs text-gray-500 space-y-0.5">
-                      <li>Auto-import data karyawan (NPWP, NIK, PTKP)</li>
-                      <li>Sinkronisasi data gaji bulanan (PPh 21)</li>
-                      <li>Import laporan keuangan (Laba Rugi, Neraca)</li>
-                      <li>Rekonsiliasi faktur pajak (PPN)</li>
+                      <li>{t('integrations.accurateFeature1')}</li>
+                      <li>{t('integrations.accurateFeature2')}</li>
+                      <li>{t('integrations.accurateFeature3')}</li>
+                      <li>{t('integrations.accurateFeature4')}</li>
                     </ul>
                   </div>
                 </div>
@@ -597,17 +597,17 @@ export default function SettingsPage() {
                     <BankConnectButton />
                   </div>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>Bank yang didukung:</p>
+                    <p>{t('integrations.supportedBanks')}:</p>
                     <div className="flex flex-wrap gap-2">
                       {['BCA', 'Mandiri', 'BNI', 'BRI', 'CIMB', 'Danamon'].map(bank => (
                         <span key={bank} className="text-xs bg-gray-100 px-2 py-1 rounded-md">{bank}</span>
                       ))}
                     </div>
                     <ul className="list-disc list-inside text-xs text-gray-500 space-y-0.5 mt-2">
-                      <li>Tracking revenue otomatis untuk UMKM</li>
-                      <li>Hitung PPh Final 0.5% otomatis</li>
-                      <li>Kategorisasi transaksi (pendapatan/pengeluaran)</li>
-                      <li>Pembebasan Rp 500 juta pertama (PP 55/2022)</li>
+                      <li>{t('integrations.bankFeature1')}</li>
+                      <li>{t('integrations.bankFeature2')}</li>
+                      <li>{t('integrations.bankFeature3')}</li>
+                      <li>{t('integrations.bankFeature4')}</li>
                     </ul>
                   </div>
                 </div>
@@ -628,10 +628,10 @@ export default function SettingsPage() {
                   </div>
                   <div className="text-sm text-gray-600 space-y-1">
                     <ul className="list-disc list-inside text-xs text-gray-500 space-y-0.5">
-                      <li>Import Chart of Accounts</li>
-                      <li>Sinkronisasi faktur penjualan (PPN)</li>
-                      <li>Import Laporan Laba Rugi & Neraca</li>
-                      <li>Data kontak (pelanggan/vendor) + NPWP</li>
+                      <li>{t('integrations.jurnalFeature1')}</li>
+                      <li>{t('integrations.jurnalFeature2')}</li>
+                      <li>{t('integrations.jurnalFeature3')}</li>
+                      <li>{t('integrations.jurnalFeature4')}</li>
                     </ul>
                   </div>
                 </div>

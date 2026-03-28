@@ -49,13 +49,10 @@ const taxTypeColors: Record<string, string> = {
   'SPT Tahunan Badan': 'from-red-500 to-rose-600',
 };
 
-const MONTHS_ID = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-];
-
 export default function TaxCalendarPage() {
   const tc = useTranslations('calendar');
+  const tm = useTranslations('months');
+  const MONTHS = tm('list').split(',');
   const params = useParams();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
@@ -161,7 +158,7 @@ export default function TaxCalendarPage() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <h2 className="font-bold text-lg min-w-[180px] text-center">
-                    {MONTHS_ID[selectedMonth]} {year}
+                    {MONTHS[selectedMonth]} {year}
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => {
                     if (selectedMonth === 11) { setSelectedMonth(0); setYear(y => y + 1); }
@@ -304,7 +301,7 @@ export default function TaxCalendarPage() {
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">
-                Deadline {MONTHS_ID[selectedMonth]} ({monthEvents.length})
+                Deadline {MONTHS[selectedMonth]} ({monthEvents.length})
               </CardTitle>
             </CardHeader>
             <CardContent>

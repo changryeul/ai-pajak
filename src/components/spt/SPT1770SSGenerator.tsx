@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -84,6 +85,7 @@ export function SPT1770SSGenerator({
   defaultPtkpStatus = 'TK/0',
   onComplete,
 }: SPT1770SSGeneratorProps) {
+  const ts = useTranslations('spt');
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -291,9 +293,9 @@ export function SPT1770SSGenerator({
   const StepIndicator = () => (
     <div className="flex items-center gap-2 mb-6">
       {[
-        { key: 'upload', label: 'Upload Dokumen', icon: Upload },
-        { key: 'form', label: 'Pengaturan SPT', icon: Settings },
-        { key: 'preview', label: 'Preview', icon: FileCheck },
+        { key: 'upload', label: ts('uploadStep'), icon: Upload },
+        { key: 'form', label: ts('settingsStep'), icon: Settings },
+        { key: 'preview', label: ts('previewStep'), icon: FileCheck },
       ].map(({ key, label, icon: Icon }, index) => {
         const stepOrder: Step[] = ['upload', 'form', 'preview'];
         const currentIndex = stepOrder.indexOf(step);
@@ -346,10 +348,9 @@ export function SPT1770SSGenerator({
         <StepIndicator />
         <Card>
           <CardHeader>
-            <CardTitle>Upload Bukti Potong (1721-A1)</CardTitle>
+            <CardTitle>{ts('uploadBuktiPotong')}</CardTitle>
             <CardDescription>
-              Upload dokumen Bukti Potong PPh 21 untuk mengisi SPT secara otomatis.
-              AI akan membaca dan mengekstrak data dari dokumen Anda.
+              {ts('uploadDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -609,7 +610,7 @@ export function SPT1770SSGenerator({
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline" onClick={proceedToForm}>
-              Lewati Upload
+              {ts('skipUpload')}
             </Button>
             <Button
               onClick={proceedToForm}
@@ -630,7 +631,7 @@ export function SPT1770SSGenerator({
       <StepIndicator />
       <Card>
         <CardHeader>
-          <CardTitle>Pengaturan SPT 1770 SS</CardTitle>
+          <CardTitle>{ts('settingsStep')} 1770 SS</CardTitle>
           <CardDescription>
             {extractedIncomes.length > 0
               ? `${extractedIncomes.length} sumber penghasilan dari dokumen siap digunakan.`
@@ -682,7 +683,7 @@ export function SPT1770SSGenerator({
                 className="mt-2 p-0 h-auto text-blue-600"
                 onClick={() => setStep('upload')}
               >
-                Ubah data dokumen
+                {ts('changeDocData')}
               </Button>
             </div>
           )}
@@ -772,7 +773,7 @@ export function SPT1770SSGenerator({
             Kembali
           </Button>
           <Button onClick={generateSPT} disabled={isLoading}>
-            {isLoading ? 'Generating...' : 'Generate SPT'}
+            {isLoading ? ts('generating') : ts('generateSpt')}
           </Button>
         </CardFooter>
       </Card>
