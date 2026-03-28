@@ -65,6 +65,9 @@ export default function MonthlyPaymentsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [summary, setSummary] = useState<TypeSummary[]>([]);
   const [totalOutstanding, setTotalOutstanding] = useState(0);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [ntpnInput, setNtpnInput] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const loadPayments = useCallback(async () => {
     setIsLoading(true);
@@ -100,6 +103,26 @@ export default function MonthlyPaymentsPage() {
       alert('Network error. Please try again.');
     }
     loadPayments();
+  };
+
+  const markPaid = async () => {
+    if (!selectedPayment) return;
+    setIsSaving(true);
+    try {
+      await fetch('/api/tax/monthly-payments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-payment', paymentId: selectedPayment.id,
+          ntpn: ntpnInput || undefined,
+          amountPaid: selectedPayment.amount_due,
+          paymentDate: new Date().toISOString().slice(0, 10),
+        }),
+      });
+      setSelectedPayment(null);
+      setNtpnInput('');
+      loadPayments();
+    } catch { /* */ }
+    finally { setIsSaving(false); }
   };
 
   const totalPaid = summary.reduce((s, t) => s + t.totalPaid, 0);
@@ -217,12 +240,14 @@ export default function MonthlyPaymentsPage() {
                         return (
                           <div key={payment.id} className="flex flex-col items-center gap-0.5">
                             <span className={`text-[10px] ${isNow ? 'font-bold text-blue-600' : 'text-gray-400'}`}>{MONTH_LABELS[month - 1]}</span>
-                            <div className={`w-full aspect-square rounded-lg ${sc.bg} ${sc.ring} flex items-center justify-center transition-all hover:scale-110 ${isNow ? 'ring-2 ring-blue-400 ring-offset-1' : ''}`}
+                            <button
+                              onClick={() => { if (payment.status !== 'PAID') setSelectedPayment(payment); }}
+                              className={`w-full aspect-square rounded-lg ${sc.bg} ${sc.ring} flex items-center justify-center transition-all hover:scale-110 ${payment.status !== 'PAID' ? 'cursor-pointer hover:opacity-80' : ''} ${isNow ? 'ring-2 ring-blue-400 ring-offset-1' : ''}`}
                               title={`${config.label} ${payment.tax_period}: ${payment.status} - ${fmt(payment.amount_due)}`}>
                               {payment.status === 'PAID' && <CheckCircle className={`h-3 w-3 ${sc.text}`} />}
                               {payment.status === 'OVERDUE' && <AlertTriangle className={`h-3 w-3 ${sc.text}`} />}
                               {payment.status === 'UNPAID' && month < currentMonth && year <= currentYear && <Clock className="h-3 w-3 text-gray-400" />}
-                            </div>
+                            </button>
                           </div>
                         );
                       })}
@@ -250,6 +275,63 @@ export default function MonthlyPaymentsPage() {
           <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-200" /> Belum</span>
           <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-red-500" /> Terlambat</span>
           <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded ring-2 ring-blue-400" /> Bulan Ini</span>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {selectedPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setSelectedPayment(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-gray-900 text-lg mb-1">
+              {taxTypeConfig[selectedPayment.tax_type]?.label || selectedPayment.tax_type}
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">{selectedPayment.tax_period}</p>
+
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Jumlah Terutang</span>
+                <span className="font-bold">{fmt(selectedPayment.amount_due)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Batas Setor</span>
+                <span>{selectedPayment.payment_deadline}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Batas Lapor</span>
+                <span>{selectedPayment.reporting_deadline}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Status</span>
+                <span className={`font-medium ${selectedPayment.status === 'OVERDUE' ? 'text-red-600' : 'text-gray-900'}`}>
+                  {selectedPayment.status}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3 border-t pt-4">
+              <div>
+                <label className="text-xs font-medium text-gray-700">NTPN (Nomor Transaksi Penerimaan Negara)</label>
+                <input
+                  type="text"
+                  className="w-full mt-1 px-3 py-2 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder="16 digit NTPN"
+                  value={ntpnInput}
+                  onChange={e => setNtpnInput(e.target.value)}
+                  maxLength={16}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-5">
+              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setSelectedPayment(null)}>
+                Batal
+              </Button>
+              <Button className="flex-1 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600" onClick={markPaid} disabled={isSaving}>
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckCircle className="h-4 w-4 mr-1" />}
+                Tandai Lunas
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
