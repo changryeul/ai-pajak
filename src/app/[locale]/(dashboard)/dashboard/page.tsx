@@ -48,6 +48,7 @@ interface ConsultantStats {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations();
   const params = useParams();
   const locale = params.locale as string;
   const { session, isLoading } = useSession();
@@ -62,13 +63,13 @@ export default function DashboardPage() {
         <Card>
           <CardContent className="p-6 text-center">
             <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Session Required</h2>
-            <p className="text-gray-600 mb-4">Please log in to access your dashboard.</p>
+            <h2 className="text-xl font-semibold mb-2">{t('dashboardHero.sessionRequired')}</h2>
+            <p className="text-gray-600 mb-4">{t('dashboardHero.pleaseLogin')}</p>
             <Link
               href={`/${locale}/login`}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Log In
+              {t('dashboardHero.logIn')}
             </Link>
           </CardContent>
         </Card>

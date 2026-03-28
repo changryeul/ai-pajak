@@ -34,7 +34,15 @@
     "actions": "작업",
     "view": "보기",
     "darkMode": "다크 모드",
-    "lightMode": "라이트 모드"
+    "lightMode": "라이트 모드",
+    "connect": "연결",
+    "disconnect": "연결 해제",
+    "connected": "연결됨",
+    "manage": "관리",
+    "allTypes": "모든 유형",
+    "all": "전체",
+    "notFound": "찾을 수 없음",
+    "settings": "설정"
   },
   "auth": {
     "login": "로그인",
@@ -922,5 +930,82 @@
         "content": "본 이용약관에 대한 문의는 아래로 연락해 주세요:"
       }
     }
+  },
+  "dashboardHero": {
+    "customerSubtitle": "AI Pajak과 함께 쉽게 세금을 관리하세요",
+    "uploadDocument": "문서 업로드",
+    "createSpt": "SPT 작성",
+    "sptAutofill": "SPT 자동 입력",
+    "sptAutofillDesc": "업로드 & SPT 자동 입력",
+    "taxSavings": "절세 추천",
+    "taxSavingsDesc": "절세 기회 찾기",
+    "aiClassification": "AI 분류",
+    "aiClassificationDesc": "업로드 & 자동 감지",
+    "consultantSubtitle": "고객과 세금 보고서를 관리하세요",
+    "analysisDesc": "고객 기회 찾기",
+    "aiReport": "AI 리포트",
+    "aiReportDesc": "고객 리포트 생성",
+    "adminMode": "플랫폼 관리 모드",
+    "sessionRequired": "세션 필요",
+    "pleaseLogin": "대시보드에 접속하려면 로그인하세요.",
+    "logIn": "로그인",
+    "thisMonth": "이번 달",
+    "needAction": "조치 필요",
+    "waiting": "대기 중"
+  },
+  "guide": {
+    "title": "AI Pajak 시작하기",
+    "completeProfile": "프로필 완성",
+    "completeProfileDesc": "NPWP, NIK, 개인 정보를 입력하세요",
+    "uploadBuktiPotong": "원천징수 영수증 업로드",
+    "uploadBuktiPotongDesc": "고용주로부터 1721-A1 양식 업로드",
+    "createSptTahunan": "연간 세금 신고서 작성",
+    "createSptDesc": "AI가 문서에서 자동으로 SPT를 작성합니다",
+    "checkSavings": "절세 기회 확인",
+    "checkSavingsDesc": "AI가 절세를 분석합니다",
+    "validateSpt": "SPT 검증",
+    "validateSptDesc": "제출 전 오류 확인"
+  },
+  "calendar": {
+    "title": "세금 달력",
+    "subtitle": "모든 세금 마감일을 한눈에",
+    "upcomingAlert": "14일 내 마감일",
+    "noDeadline": "마감일 없음",
+    "noDeadlineThisMonth": "이번 달 마감일 없음",
+    "highPriority": "높은 우선순위",
+    "medium": "중간",
+    "info": "정보",
+    "annual": "연간",
+    "penalty": "벌금",
+    "dayNames": "일,월,화,수,목,금,토"
+  },
+  "help": {
+    "title": "도움말 센터",
+    "subtitle": "질문에 대한 답변을 찾아보세요",
+    "searchPlaceholder": "질문 검색...",
+    "noResults": "찾을 수 없습니다. 다른 키워드를 시도하거나 AI 챗봇에 물어보세요.",
+    "stillNeedHelp": "아직 도움이 필요하신가요?",
+    "contactSupport": "우하단 AI 챗봇을 사용하거나 support@aipajak.com으로 이메일하세요"
+  },
+  "integrations": {
+    "title": "연동",
+    "accurateTitle": "Accurate Online",
+    "accurateDesc": "직원 & 급여 데이터 동기화",
+    "bankTitle": "은행 계좌",
+    "bankDesc": "은행에서 수입 자동 가져오기",
+    "jurnalTitle": "Jurnal.id (Mekari)",
+    "jurnalDesc": "회계 & 부가세 동기화"
+  },
+  "platformStats": {
+    "totalCustomers": "총 고객 수",
+    "totalFilings": "총 신고 건수",
+    "revenueRange": "매출 범위",
+    "activeConsultants": "활성 컨설턴트",
+    "currentlyActive": "현재 활성",
+    "dashboardTitle": "플랫폼 분석 대시보드",
+    "dashboardDisclaimer": "집계된 플랫폼 지표를 표시합니다. 이 보기에서는 고객 세금 데이터와 개인정보에 접근할 수 없습니다.",
+    "individual": "개인",
+    "company": "법인",
+    "customerDistribution": "고객 분포"
   }
 }

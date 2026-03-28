@@ -34,7 +34,15 @@
     "actions": "操作",
     "view": "查看",
     "darkMode": "深色模式",
-    "lightMode": "浅色模式"
+    "lightMode": "浅色模式",
+    "connect": "连接",
+    "disconnect": "断开",
+    "connected": "已连接",
+    "manage": "管理",
+    "allTypes": "所有类型",
+    "all": "全部",
+    "notFound": "未找到",
+    "settings": "设置"
   },
   "auth": {
     "login": "登录",
@@ -922,5 +930,82 @@
         "content": "如果您对本服务条款有任何疑问，请联系我们："
       }
     }
+  },
+  "dashboardHero": {
+    "customerSubtitle": "使用AI Pajak轻松管理您的税务",
+    "uploadDocument": "上传文件",
+    "createSpt": "创建SPT",
+    "sptAutofill": "SPT自动填写",
+    "sptAutofillDesc": "上传并自动填写SPT",
+    "taxSavings": "节税",
+    "taxSavingsDesc": "发现节税机会",
+    "aiClassification": "AI分类",
+    "aiClassificationDesc": "上传并自动检测",
+    "consultantSubtitle": "管理您的客户和税务报告",
+    "analysisDesc": "发现客户机会",
+    "aiReport": "AI报告",
+    "aiReportDesc": "生成客户报告",
+    "adminMode": "平台管理模式",
+    "sessionRequired": "需要会话",
+    "pleaseLogin": "请登录以访问您的仪表板。",
+    "logIn": "登录",
+    "thisMonth": "本月",
+    "needAction": "需要处理",
+    "waiting": "等待中"
+  },
+  "guide": {
+    "title": "开始使用AI Pajak",
+    "completeProfile": "完善资料",
+    "completeProfileDesc": "填写您的NPWP、NIK和个人信息",
+    "uploadBuktiPotong": "上传扣缴凭证",
+    "uploadBuktiPotongDesc": "上传雇主的1721-A1表格",
+    "createSptTahunan": "创建年度纳税申报表",
+    "createSptDesc": "AI从您的文件自动填写SPT",
+    "checkSavings": "查看节税机会",
+    "checkSavingsDesc": "AI分析您的节税",
+    "validateSpt": "验证SPT",
+    "validateSptDesc": "提交前检查错误"
+  },
+  "calendar": {
+    "title": "税务日历",
+    "subtitle": "所有税务截止日期一览",
+    "upcomingAlert": "未来14天内的截止日期",
+    "noDeadline": "无截止日期",
+    "noDeadlineThisMonth": "本月无截止日期",
+    "highPriority": "高优先级",
+    "medium": "中等",
+    "info": "信息",
+    "annual": "年度",
+    "penalty": "罚款",
+    "dayNames": "日,一,二,三,四,五,六"
+  },
+  "help": {
+    "title": "帮助中心",
+    "subtitle": "找到您问题的答案",
+    "searchPlaceholder": "搜索问题...",
+    "noResults": "未找到。尝试其他关键词或询问AI聊天机器人。",
+    "stillNeedHelp": "还需要帮助吗？",
+    "contactSupport": "使用右下角的AI聊天机器人或发送邮件至support@aipajak.com"
+  },
+  "integrations": {
+    "title": "集成",
+    "accurateTitle": "Accurate Online",
+    "accurateDesc": "同步员工和工资数据",
+    "bankTitle": "银行账户",
+    "bankDesc": "从银行自动导入收入",
+    "jurnalTitle": "Jurnal.id (Mekari)",
+    "jurnalDesc": "同步会计和增值税"
+  },
+  "platformStats": {
+    "totalCustomers": "总客户数",
+    "totalFilings": "总申报数",
+    "revenueRange": "收入范围",
+    "activeConsultants": "活跃顾问",
+    "currentlyActive": "当前活跃",
+    "dashboardTitle": "平台分析仪表板",
+    "dashboardDisclaimer": "显示汇总的平台指标。无法从此视图访问客户税务数据和个人信息。",
+    "individual": "个人",
+    "company": "企业",
+    "customerDistribution": "客户分布"
   }
 }

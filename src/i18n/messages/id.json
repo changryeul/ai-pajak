@@ -34,7 +34,15 @@
     "actions": "Tindakan",
     "view": "Lihat",
     "darkMode": "Mode gelap",
-    "lightMode": "Mode terang"
+    "lightMode": "Mode terang",
+    "connect": "Hubungkan",
+    "disconnect": "Putuskan",
+    "connected": "Terhubung",
+    "manage": "Kelola",
+    "allTypes": "Semua Jenis",
+    "all": "Semua",
+    "notFound": "Tidak ditemukan",
+    "settings": "Pengaturan"
   },
   "auth": {
     "login": "Masuk",
@@ -922,5 +930,82 @@
         "content": "Untuk pertanyaan tentang Syarat dan Ketentuan ini, silakan hubungi:"
       }
     }
+  },
+  "dashboardHero": {
+    "customerSubtitle": "Kelola pajak Anda dengan mudah bersama AI Pajak",
+    "uploadDocument": "Upload Dokumen",
+    "createSpt": "Buat SPT",
+    "sptAutofill": "SPT Auto-fill",
+    "sptAutofillDesc": "Upload & otomatis isi SPT",
+    "taxSavings": "Hemat Pajak",
+    "taxSavingsDesc": "Temukan peluang penghematan",
+    "aiClassification": "AI Klasifikasi",
+    "aiClassificationDesc": "Upload & otomatis deteksi",
+    "consultantSubtitle": "Kelola klien dan laporan pajak Anda",
+    "analysisDesc": "Temukan peluang klien",
+    "aiReport": "Laporan AI",
+    "aiReportDesc": "Generate laporan klien",
+    "adminMode": "Mode Administrasi Platform",
+    "sessionRequired": "Sesi Diperlukan",
+    "pleaseLogin": "Silakan login untuk mengakses dashboard Anda.",
+    "logIn": "Masuk",
+    "thisMonth": "bulan ini",
+    "needAction": "perlu tindakan",
+    "waiting": "menunggu"
+  },
+  "guide": {
+    "title": "Mulai Menggunakan AI Pajak",
+    "completeProfile": "Lengkapi Profil",
+    "completeProfileDesc": "Isi NPWP, NIK, dan data diri Anda",
+    "uploadBuktiPotong": "Upload Bukti Potong",
+    "uploadBuktiPotongDesc": "Upload Form 1721-A1 dari pemberi kerja",
+    "createSptTahunan": "Buat SPT Tahunan",
+    "createSptDesc": "AI otomatis mengisi SPT dari dokumen Anda",
+    "checkSavings": "Cek Peluang Hemat Pajak",
+    "checkSavingsDesc": "AI analisis penghematan pajak Anda",
+    "validateSpt": "Validasi SPT",
+    "validateSptDesc": "Periksa kesalahan sebelum submit"
+  },
+  "calendar": {
+    "title": "Kalender Pajak",
+    "subtitle": "Semua tenggat waktu pajak dalam satu tampilan",
+    "upcomingAlert": "deadline dalam 14 hari ke depan",
+    "noDeadline": "Tidak ada deadline",
+    "noDeadlineThisMonth": "Tidak ada deadline bulan ini",
+    "highPriority": "Prioritas Tinggi",
+    "medium": "Sedang",
+    "info": "Informasi",
+    "annual": "Tahunan",
+    "penalty": "Denda",
+    "dayNames": "Min,Sen,Sel,Rab,Kam,Jum,Sab"
+  },
+  "help": {
+    "title": "Pusat Bantuan",
+    "subtitle": "Temukan jawaban untuk pertanyaan Anda",
+    "searchPlaceholder": "Cari pertanyaan...",
+    "noResults": "Tidak ditemukan. Coba kata kunci lain atau tanya AI Chatbot.",
+    "stillNeedHelp": "Masih butuh bantuan?",
+    "contactSupport": "Gunakan AI Chatbot di pojok kanan bawah atau email ke support@aipajak.com"
+  },
+  "integrations": {
+    "title": "Integrasi",
+    "accurateTitle": "Accurate Online",
+    "accurateDesc": "Sinkronisasi data karyawan & gaji",
+    "bankTitle": "Rekening Bank",
+    "bankDesc": "Auto-import revenue dari bank",
+    "jurnalTitle": "Jurnal.id (Mekari)",
+    "jurnalDesc": "Sinkronisasi akuntansi & PPN"
+  },
+  "platformStats": {
+    "totalCustomers": "Total Pelanggan",
+    "totalFilings": "Total Pelaporan",
+    "revenueRange": "Kisaran Pendapatan",
+    "activeConsultants": "Konsultan Aktif",
+    "currentlyActive": "Saat ini aktif",
+    "dashboardTitle": "Dashboard Analitik Platform",
+    "dashboardDisclaimer": "Menampilkan metrik platform agregat. Data pajak dan PII pelanggan tidak dapat diakses dari tampilan ini.",
+    "individual": "Perorangan",
+    "company": "Perusahaan",
+    "customerDistribution": "Distribusi Pelanggan"
   }
 }

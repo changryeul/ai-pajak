@@ -34,7 +34,15 @@
     "actions": "アクション",
     "view": "表示",
     "darkMode": "ダークモード",
-    "lightMode": "ライトモード"
+    "lightMode": "ライトモード",
+    "connect": "接続",
+    "disconnect": "切断",
+    "connected": "接続済み",
+    "manage": "管理",
+    "allTypes": "すべてのタイプ",
+    "all": "すべて",
+    "notFound": "見つかりません",
+    "settings": "設定"
   },
   "auth": {
     "login": "ログイン",
@@ -922,5 +930,82 @@
         "content": "本利用規約に関するお問い合わせは以下までご連絡ください："
       }
     }
+  },
+  "dashboardHero": {
+    "customerSubtitle": "AI Pajakで簡単に税金を管理",
+    "uploadDocument": "書類アップロード",
+    "createSpt": "SPT作成",
+    "sptAutofill": "SPT自動入力",
+    "sptAutofillDesc": "アップロード＆SPT自動入力",
+    "taxSavings": "節税",
+    "taxSavingsDesc": "節税の機会を見つける",
+    "aiClassification": "AI分類",
+    "aiClassificationDesc": "アップロード＆自動検出",
+    "consultantSubtitle": "クライアントと税務レポートを管理",
+    "analysisDesc": "クライアントの機会を見つける",
+    "aiReport": "AIレポート",
+    "aiReportDesc": "クライアントレポート生成",
+    "adminMode": "プラットフォーム管理モード",
+    "sessionRequired": "セッションが必要です",
+    "pleaseLogin": "ダッシュボードにアクセスするにはログインしてください。",
+    "logIn": "ログイン",
+    "thisMonth": "今月",
+    "needAction": "対応必要",
+    "waiting": "待機中"
+  },
+  "guide": {
+    "title": "AI Pajakを始める",
+    "completeProfile": "プロフィール完成",
+    "completeProfileDesc": "NPWP、NIK、個人情報を入力",
+    "uploadBuktiPotong": "源泉徴収票アップロード",
+    "uploadBuktiPotongDesc": "雇用主からのForm 1721-A1をアップロード",
+    "createSptTahunan": "年次確定申告を作成",
+    "createSptDesc": "AIがあなたの書類からSPTを自動入力",
+    "checkSavings": "節税チャンスを確認",
+    "checkSavingsDesc": "AIが節税を分析",
+    "validateSpt": "SPT検証",
+    "validateSptDesc": "提出前にエラーを確認"
+  },
+  "calendar": {
+    "title": "税務カレンダー",
+    "subtitle": "すべての税務期限を一覧で",
+    "upcomingAlert": "14日以内の期限",
+    "noDeadline": "期限なし",
+    "noDeadlineThisMonth": "今月の期限なし",
+    "highPriority": "高優先度",
+    "medium": "中",
+    "info": "情報",
+    "annual": "年次",
+    "penalty": "罰金",
+    "dayNames": "日,月,火,水,木,金,土"
+  },
+  "help": {
+    "title": "ヘルプセンター",
+    "subtitle": "ご質問への回答を見つける",
+    "searchPlaceholder": "質問を検索...",
+    "noResults": "見つかりません。他のキーワードを試すか、AIチャットボットに聞いてください。",
+    "stillNeedHelp": "まだ助けが必要ですか？",
+    "contactSupport": "右下のAIチャットボットを使うか、support@aipajak.comにメールしてください"
+  },
+  "integrations": {
+    "title": "連携",
+    "accurateTitle": "Accurate Online",
+    "accurateDesc": "従業員＆給与データを同期",
+    "bankTitle": "銀行口座",
+    "bankDesc": "銀行から収入を自動インポート",
+    "jurnalTitle": "Jurnal.id (Mekari)",
+    "jurnalDesc": "会計＆消費税を同期"
+  },
+  "platformStats": {
+    "totalCustomers": "顧客合計",
+    "totalFilings": "申告合計",
+    "revenueRange": "売上範囲",
+    "activeConsultants": "アクティブコンサルタント",
+    "currentlyActive": "現在アクティブ",
+    "dashboardTitle": "プラットフォーム分析ダッシュボード",
+    "dashboardDisclaimer": "集計されたプラットフォーム指標を表示しています。顧客の税務データやPIIにはアクセスできません。",
+    "individual": "個人",
+    "company": "法人",
+    "customerDistribution": "顧客分布"
   }
 }

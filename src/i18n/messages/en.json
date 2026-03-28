@@ -34,7 +34,15 @@
     "actions": "Actions",
     "view": "View",
     "darkMode": "Dark mode",
-    "lightMode": "Light mode"
+    "lightMode": "Light mode",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connected": "Connected",
+    "manage": "Manage",
+    "allTypes": "All Types",
+    "all": "All",
+    "notFound": "Not found",
+    "settings": "Settings"
   },
   "auth": {
     "login": "Login",
@@ -922,5 +930,82 @@
         "content": "For questions about these Terms and Conditions, please contact:"
       }
     }
+  },
+  "dashboardHero": {
+    "customerSubtitle": "Manage your taxes easily with AI Pajak",
+    "uploadDocument": "Upload Document",
+    "createSpt": "Create SPT",
+    "sptAutofill": "SPT Auto-fill",
+    "sptAutofillDesc": "Upload & auto-fill SPT",
+    "taxSavings": "Tax Savings",
+    "taxSavingsDesc": "Find saving opportunities",
+    "aiClassification": "AI Classification",
+    "aiClassificationDesc": "Upload & auto-detect",
+    "consultantSubtitle": "Manage your clients and tax reports",
+    "analysisDesc": "Find client opportunities",
+    "aiReport": "AI Report",
+    "aiReportDesc": "Generate client report",
+    "adminMode": "Platform Administration Mode",
+    "sessionRequired": "Session Required",
+    "pleaseLogin": "Please log in to access your dashboard.",
+    "logIn": "Log In",
+    "thisMonth": "this month",
+    "needAction": "need action",
+    "waiting": "waiting"
+  },
+  "guide": {
+    "title": "Get Started with AI Pajak",
+    "completeProfile": "Complete Profile",
+    "completeProfileDesc": "Fill in your NPWP, NIK, and personal data",
+    "uploadBuktiPotong": "Upload Tax Slip",
+    "uploadBuktiPotongDesc": "Upload Form 1721-A1 from employer",
+    "createSptTahunan": "Create Annual Tax Return",
+    "createSptDesc": "AI auto-fills SPT from your documents",
+    "checkSavings": "Check Tax Savings",
+    "checkSavingsDesc": "AI analyzes your tax savings",
+    "validateSpt": "Validate SPT",
+    "validateSptDesc": "Check errors before submission"
+  },
+  "calendar": {
+    "title": "Tax Calendar",
+    "subtitle": "All tax deadlines in one view",
+    "upcomingAlert": "deadlines in the next 14 days",
+    "noDeadline": "No deadlines",
+    "noDeadlineThisMonth": "No deadlines this month",
+    "highPriority": "High Priority",
+    "medium": "Medium",
+    "info": "Information",
+    "annual": "Annual",
+    "penalty": "Penalty",
+    "dayNames": "Sun,Mon,Tue,Wed,Thu,Fri,Sat"
+  },
+  "help": {
+    "title": "Help Center",
+    "subtitle": "Find answers to your questions",
+    "searchPlaceholder": "Search questions...",
+    "noResults": "Not found. Try other keywords or ask AI Chatbot.",
+    "stillNeedHelp": "Still need help?",
+    "contactSupport": "Use AI Chatbot at bottom right or email support@aipajak.com"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "accurateTitle": "Accurate Online",
+    "accurateDesc": "Sync employee & payroll data",
+    "bankTitle": "Bank Account",
+    "bankDesc": "Auto-import revenue from bank",
+    "jurnalTitle": "Jurnal.id (Mekari)",
+    "jurnalDesc": "Sync accounting & VAT"
+  },
+  "platformStats": {
+    "totalCustomers": "Total Customers",
+    "totalFilings": "Total Filings",
+    "revenueRange": "Revenue Range",
+    "activeConsultants": "Active Consultants",
+    "currentlyActive": "Currently active",
+    "dashboardTitle": "Platform Analytics Dashboard",
+    "dashboardDisclaimer": "Showing aggregated platform metrics. Customer tax data and PII are not accessible from this view.",
+    "individual": "Individual",
+    "company": "Company",
+    "customerDistribution": "Customer Distribution"
   }
 }
