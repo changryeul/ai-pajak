@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
   Card, CardHeader, CardTitle, CardContent,
@@ -79,6 +80,7 @@ const GUIDES = [
 ];
 
 export default function HelpPage() {
+  const t = useTranslations('help');
   const params = useParams();
   const locale = params.locale as string;
   const [search, setSearch] = useState('');
@@ -106,15 +108,15 @@ export default function HelpPage() {
         <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mb-4">
           <HelpCircle className="h-7 w-7 text-blue-600" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Pusat Bantuan</h1>
-        <p className="text-gray-500 mt-1">Temukan jawaban untuk pertanyaan Anda</p>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{t('title')}</h1>
+        <p className="text-gray-500 mt-1">{t('subtitle')}</p>
       </div>
 
       {/* Search */}
       <div className="relative mb-8">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         <Input
-          placeholder="Cari pertanyaan..."
+          placeholder={t('searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="pl-12 h-12 rounded-xl text-base border-0 shadow-sm bg-white"
@@ -172,7 +174,7 @@ export default function HelpPage() {
           {filteredFAQ.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">Tidak ditemukan. Coba kata kunci lain atau tanya AI Chatbot.</p>
+              <p className="text-sm">{t('noResults')}</p>
             </div>
           ) : (
             filteredFAQ.map((faq, i) => {
@@ -206,8 +208,8 @@ export default function HelpPage() {
       <Card className="mt-6 border-0 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50">
         <CardContent className="p-6 text-center">
           <MessageCircle className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-          <h3 className="font-semibold text-gray-900">Masih butuh bantuan?</h3>
-          <p className="text-sm text-gray-600 mt-1">Gunakan AI Chatbot di pojok kanan bawah atau email ke support@aipajak.com</p>
+          <h3 className="font-semibold text-gray-900">{t('stillNeedHelp')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('contactSupport')}</p>
         </CardContent>
       </Card>
     </div>

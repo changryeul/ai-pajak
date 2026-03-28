@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Card, CardHeader, CardTitle, CardDescription, CardContent,
 } from '@/components/ui/card';
@@ -54,6 +55,7 @@ const MONTHS_ID = [
 ];
 
 export default function TaxCalendarPage() {
+  const tc = useTranslations('calendar');
   const params = useParams();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
@@ -114,9 +116,9 @@ export default function TaxCalendarPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
           <Calendar className="h-6 w-6 text-blue-600" />
-          Kalender Pajak {year}
+          {tc('title')} {year}
         </h1>
-        <p className="text-gray-500 mt-1">Semua tenggat waktu pajak dalam satu tampilan</p>
+        <p className="text-gray-500 mt-1">{tc('subtitle')}</p>
       </div>
 
       {/* Upcoming alerts */}
@@ -125,7 +127,7 @@ export default function TaxCalendarPage() {
           <CardContent className="p-4">
             <h3 className="font-semibold text-sm text-red-800 mb-2 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
-              {upcoming.length} deadline dalam 14 hari ke depan
+              {upcoming.length} {tc('upcomingAlert')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {upcoming.slice(0, 5).map(e => (
@@ -193,7 +195,7 @@ export default function TaxCalendarPage() {
                 <>
                   {/* Day headers */}
                   <div className="grid grid-cols-7 mb-2">
-                    {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(d => (
+                    {tc('dayNames').split(',').map(d => (
                       <div key={d} className="text-center text-xs font-medium text-gray-400 py-2">{d}</div>
                     ))}
                   </div>
@@ -245,9 +247,9 @@ export default function TaxCalendarPage() {
 
                   {/* Legend */}
                   <div className="flex items-center gap-4 mt-4 pt-4 border-t text-xs text-gray-500">
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500" /> Prioritas Tinggi</span>
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-500" /> Sedang</span>
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-500" /> Informasi</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500" /> {tc('highPriority')}</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-500" /> {tc('medium')}</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-500" /> {tc('info')}</span>
                   </div>
                 </>
               )}
@@ -267,7 +269,7 @@ export default function TaxCalendarPage() {
               </CardHeader>
               <CardContent>
                 {dateEvents.length === 0 ? (
-                  <p className="text-xs text-gray-400 py-4 text-center">Tidak ada deadline</p>
+                  <p className="text-xs text-gray-400 py-4 text-center">{tc('noDeadline')}</p>
                 ) : (
                   <div className="space-y-2">
                     {dateEvents.map(e => {
@@ -308,7 +310,7 @@ export default function TaxCalendarPage() {
             <CardContent>
               <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
                 {monthEvents.length === 0 ? (
-                  <p className="text-xs text-gray-400 py-4 text-center">Tidak ada deadline bulan ini</p>
+                  <p className="text-xs text-gray-400 py-4 text-center">{tc('noDeadlineThisMonth')}</p>
                 ) : (
                   monthEvents.map(e => {
                     const config = priorityConfig[e.priority];

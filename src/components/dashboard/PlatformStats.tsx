@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -62,6 +63,7 @@ interface PlatformMetrics {
 }
 
 export function PlatformStats() {
+  const t = useTranslations('platformStats');
   const [metrics, setMetrics] = useState<PlatformMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -132,28 +134,28 @@ export function PlatformStats() {
 
   const statCards = [
     {
-      title: 'Total Customers',
+      title: t('totalCustomers'),
       value: metrics.customers.total.toLocaleString(),
       change: `+${metrics.customers.newThisMonth} this month`,
       icon: Users,
       color: 'blue',
     },
     {
-      title: 'Total Filings',
+      title: t('totalFilings'),
       value: metrics.filings.total.toLocaleString(),
       change: `${metrics.filings.thisMonth} this month`,
       icon: FileText,
       color: 'green',
     },
     {
-      title: 'Revenue Range',
+      title: t('revenueRange'),
       value: metrics.revenue.bucket,
       change: `${metrics.revenue.trend === 'up' ? '+' : metrics.revenue.trend === 'down' ? '-' : ''}${metrics.revenue.transactionCount} transactions`,
       icon: DollarSign,
       color: 'purple',
     },
     {
-      title: 'Active Consultants',
+      title: t('activeConsultants'),
       value: `${metrics.consultants.active}/${metrics.consultants.total}`,
       change: 'Currently active',
       icon: Building2,
@@ -176,7 +178,7 @@ export function PlatformStats() {
           <div className="flex items-start gap-3">
             <Activity className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <p className="font-medium text-blue-900">Platform Analytics Dashboard</p>
+              <p className="font-medium text-blue-900">{t('dashboardTitle')}</p>
               <p className="text-sm text-blue-700">
                 Showing aggregated platform metrics. Customer tax data and PII are not accessible from this view.
               </p>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
   Card,
@@ -40,6 +41,7 @@ interface GettingStartedGuideProps {
 }
 
 export function GettingStartedGuide({ customerId, userName }: GettingStartedGuideProps) {
+  const t = useTranslations();
   const params = useParams();
   const locale = params.locale as string;
   const [dismissed, setDismissed] = useState(false);
@@ -50,40 +52,40 @@ export function GettingStartedGuide({ customerId, userName }: GettingStartedGuid
     {
       id: 'profile',
       icon: User,
-      title: 'Lengkapi Profil',
-      description: 'Isi NPWP, NIK, dan data diri Anda',
+      title: t('guide.completeProfile'),
+      description: t('guide.completeProfileDesc'),
       href: `/${locale}/settings`,
       gradient: 'from-blue-500 to-blue-600',
     },
     {
       id: 'upload',
       icon: Upload,
-      title: 'Upload Bukti Potong',
-      description: 'Upload Form 1721-A1 dari pemberi kerja',
+      title: t('guide.uploadBuktiPotong'),
+      description: t('guide.uploadBuktiPotongDesc'),
       href: `/${locale}/documents`,
       gradient: 'from-purple-500 to-violet-600',
     },
     {
       id: 'spt',
       icon: FileSpreadsheet,
-      title: 'Buat SPT Tahunan',
-      description: 'AI otomatis mengisi SPT dari dokumen Anda',
+      title: t('guide.createSptTahunan'),
+      description: t('guide.createSptDesc'),
       href: `/${locale}/tax/spt-tahunan/1770ss`,
       gradient: 'from-green-500 to-emerald-600',
     },
     {
       id: 'savings',
       icon: Lightbulb,
-      title: 'Cek Peluang Hemat Pajak',
-      description: 'AI analisis penghematan pajak Anda',
+      title: t('guide.checkSavings'),
+      description: t('guide.checkSavingsDesc'),
       href: `/${locale}/tax/savings`,
       gradient: 'from-amber-500 to-orange-500',
     },
     {
       id: 'validate',
       icon: ShieldCheck,
-      title: 'Validasi SPT',
-      description: 'Periksa kesalahan sebelum submit',
+      title: t('guide.validateSpt'),
+      description: t('guide.validateSptDesc'),
       href: `/${locale}/tax/spt-tahunan`,
       gradient: 'from-red-500 to-rose-600',
     },
@@ -167,7 +169,7 @@ export function GettingStartedGuide({ customerId, userName }: GettingStartedGuid
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-yellow-500" />
             <CardTitle className="text-base">
-              Mulai Menggunakan AI Pajak
+              {t('guide.title')}
             </CardTitle>
           </div>
           <Button variant="ghost" size="sm" onClick={handleDismiss} className="text-gray-400 hover:text-gray-600 -mr-2">
