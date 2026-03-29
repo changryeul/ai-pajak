@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import {
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
 export default function AdminBillingPage() {
+  const t = useTranslations('admin');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [overview, setOverview] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,8 +64,8 @@ export default function AdminBillingPage() {
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-600 via-red-600 to-rose-700 p-6 md:p-8 text-white mb-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
-          <p className="text-orange-200 text-sm flex items-center gap-2"><CreditCard className="h-4 w-4" />Admin</p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">Billing & Revenue</h1>
+          <p className="text-orange-200 text-sm flex items-center gap-2"><CreditCard className="h-4 w-4" />{t('admin')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('billingRevenue')}</h1>
         </div>
       </div>
 
@@ -72,8 +74,8 @@ export default function AdminBillingPage() {
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
         {[
-          { id: 'overview' as const, label: 'Overview', icon: BarChart3 },
-          { id: 'transactions' as const, label: 'Transaksi', icon: Receipt },
+          { id: 'overview' as const, label: t('overview'), icon: BarChart3 },
+          { id: 'transactions' as const, label: t('transactions'), icon: Receipt },
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -92,10 +94,10 @@ export default function AdminBillingPage() {
           {/* KPI Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { label: 'Total Revenue', value: fmt(overview.overview.totalRevenue), icon: DollarSign, gradient: 'from-green-500 to-emerald-600' },
+              { label: t('totalRevenue'), value: fmt(overview.overview.totalRevenue), icon: DollarSign, gradient: 'from-green-500 to-emerald-600' },
               { label: 'MRR', value: fmt(overview.overview.mrr), icon: TrendingUp, gradient: 'from-blue-500 to-indigo-600' },
               { label: 'ARPU', value: fmt(overview.overview.arpu), icon: Users, gradient: 'from-purple-500 to-violet-600' },
-              { label: 'Active Subs', value: overview.overview.activeSubscriptions.toString(), icon: CreditCard, gradient: 'from-amber-500 to-orange-500' },
+              { label: t('activeSubs'), value: overview.overview.activeSubscriptions.toString(), icon: CreditCard, gradient: 'from-amber-500 to-orange-500' },
             ].map((kpi, i) => {
               const Icon = kpi.icon;
               return (
@@ -118,24 +120,24 @@ export default function AdminBillingPage() {
 
           {/* Transaction Status */}
           <Card className="border-0 shadow-sm">
-            <CardHeader><CardTitle className="text-base">Status Transaksi</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{t('txStatus')}</CardTitle></CardHeader>
             <CardContent>
               <div className="grid grid-cols-4 gap-4">
                 <div className="text-center p-3 bg-green-50 rounded-xl">
                   <p className="text-2xl font-bold text-green-700">{overview.overview.paidCount}</p>
-                  <p className="text-xs text-gray-500">Paid</p>
+                  <p className="text-xs text-gray-500">{t('paid')}</p>
                 </div>
                 <div className="text-center p-3 bg-yellow-50 rounded-xl">
                   <p className="text-2xl font-bold text-yellow-700">{overview.overview.pendingCount}</p>
-                  <p className="text-xs text-gray-500">Pending</p>
+                  <p className="text-xs text-gray-500">{t('pending')}</p>
                 </div>
                 <div className="text-center p-3 bg-red-50 rounded-xl">
                   <p className="text-2xl font-bold text-red-700">{overview.overview.failedCount}</p>
-                  <p className="text-xs text-gray-500">Failed</p>
+                  <p className="text-xs text-gray-500">{t('failed')}</p>
                 </div>
                 <div className="text-center p-3 bg-orange-50 rounded-xl">
                   <p className="text-2xl font-bold text-orange-700">{fmt(overview.overview.pendingAmount)}</p>
-                  <p className="text-xs text-gray-500">Pending Amount</p>
+                  <p className="text-xs text-gray-500">{t('pendingAmount')}</p>
                 </div>
               </div>
             </CardContent>
@@ -143,7 +145,7 @@ export default function AdminBillingPage() {
 
           {/* Plan Distribution */}
           <Card className="border-0 shadow-sm">
-            <CardHeader><CardTitle className="text-base">Distribusi Plan</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{t('planDistribution')}</CardTitle></CardHeader>
             <CardContent>
               <div className="flex gap-4">
                 {Object.entries(overview.overview.planDistribution || {}).map(([plan, count]) => (
@@ -153,7 +155,7 @@ export default function AdminBillingPage() {
                   </div>
                 ))}
                 {Object.keys(overview.overview.planDistribution || {}).length === 0 && (
-                  <p className="text-gray-400 text-sm">Belum ada data subscription</p>
+                  <p className="text-gray-400 text-sm">{t('noSubData')}</p>
                 )}
               </div>
             </CardContent>
@@ -162,7 +164,7 @@ export default function AdminBillingPage() {
           {/* Monthly Revenue Chart (simple) */}
           {overview.monthlyRevenue.length > 0 && (
             <Card className="border-0 shadow-sm">
-              <CardHeader><CardTitle className="text-base">Revenue Bulanan</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('monthlyRevenue')}</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex items-end gap-2 h-40">
                   {overview.monthlyRevenue.map((m: { month: string; amount: number }, i: number) => {
@@ -182,21 +184,21 @@ export default function AdminBillingPage() {
         </div>
       ) : activeTab === 'transactions' ? (
         <Card className="border-0 shadow-sm">
-          <CardHeader><CardTitle className="text-base">Riwayat Transaksi ({transactions.length})</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('txHistory')} ({transactions.length})</CardTitle></CardHeader>
           <CardContent>
             {transactions.length === 0 ? (
-              <p className="text-center py-10 text-gray-400">Belum ada transaksi</p>
+              <p className="text-center py-10 text-gray-400">{t('noTransactions')}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-gray-500 text-xs">
-                      <th className="text-left py-2 px-2">Customer</th>
-                      <th className="text-left py-2 px-2">Deskripsi</th>
-                      <th className="text-right py-2 px-2">Jumlah</th>
-                      <th className="text-center py-2 px-2">Status</th>
-                      <th className="text-left py-2 px-2">Tanggal</th>
-                      <th className="text-center py-2 px-2">Aksi</th>
+                      <th className="text-left py-2 px-2">{t('customer')}</th>
+                      <th className="text-left py-2 px-2">{t('descriptionLabel')}</th>
+                      <th className="text-right py-2 px-2">{t('amountLabel')}</th>
+                      <th className="text-center py-2 px-2">{t('status')}</th>
+                      <th className="text-left py-2 px-2">{t('date')}</th>
+                      <th className="text-center py-2 px-2">{t('action')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -215,7 +217,7 @@ export default function AdminBillingPage() {
                         <td className="py-2 px-2 text-center">
                           {tx.status === 'PAID' && (
                             <Button size="sm" variant="ghost" className="text-[10px] h-6" onClick={() => processRefund(tx.id)}>
-                              <RefreshCw className="h-3 w-3 mr-0.5" />Refund
+                              <RefreshCw className="h-3 w-3 mr-0.5" />{t('refund')}
                             </Button>
                           )}
                         </td>

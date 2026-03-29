@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,7 @@ const categoryIcons: Record<string, typeof TrendingUp> = {
 };
 
 export default function TaxRatesAdmin() {
+  const t = useTranslations('admin');
   const [rates, setRates] = useState<TaxRate[]>([]);
   const [grouped, setGrouped] = useState<Record<string, TaxRate[]>>({});
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
@@ -86,12 +88,12 @@ export default function TaxRatesAdmin() {
       });
       const data = await res.json();
       if (data.success) {
-        setMessage('Berhasil disimpan');
+        setMessage(t('savedSuccess'));
         setTimeout(() => setMessage(null), 3000);
         setEditingId(null);
         loadRates();
       } else {
-        setMessage(data.error || 'Gagal menyimpan');
+        setMessage(data.error || t('saveFailed'));
       }
     } catch { setMessage('Error'); }
     finally { setIsSaving(false); }
@@ -106,11 +108,11 @@ export default function TaxRatesAdmin() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-orange-200 text-sm flex items-center gap-2">
-            <Settings className="h-4 w-4" />Admin - Konfigurasi Pajak
+            <Settings className="h-4 w-4" />{t('admin')} - {t('taxConfig')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">Tarif & Rate Pajak</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('taxRatesTitle')}</h1>
           <p className="text-orange-200 mt-2 text-sm">
-            Kelola tarif PPh, PPN, PTKP, dan batas limit sesuai peraturan terbaru
+            {t('taxRatesSubtitle')}
           </p>
         </div>
       </div>
@@ -126,7 +128,7 @@ export default function TaxRatesAdmin() {
       <div className="flex flex-wrap gap-2 mb-6">
         <button onClick={() => setSelectedCategory(null)}
           className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${!selectedCategory ? 'bg-orange-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-          Semua ({rates.length})
+          {t('allCategory')} ({rates.length})
         </button>
         {categories.map(cat => {
           const Icon = categoryIcons[cat.code] || Settings;
@@ -166,14 +168,14 @@ export default function TaxRatesAdmin() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b text-gray-500 text-xs">
-                          <th className="text-left py-2 px-2">Kode</th>
-                          <th className="text-left py-2 px-2">Keterangan</th>
-                          <th className="text-right py-2 px-2">Tarif</th>
-                          <th className="text-right py-2 px-2">Jumlah</th>
-                          <th className="text-right py-2 px-2">Batas Min</th>
-                          <th className="text-right py-2 px-2">Batas Max</th>
-                          <th className="text-left py-2 px-2">Dasar Hukum</th>
-                          <th className="text-center py-2 px-2">Aksi</th>
+                          <th className="text-left py-2 px-2">{t('code')}</th>
+                          <th className="text-left py-2 px-2">{t('description')}</th>
+                          <th className="text-right py-2 px-2">{t('rate')}</th>
+                          <th className="text-right py-2 px-2">{t('amount')}</th>
+                          <th className="text-right py-2 px-2">{t('minThreshold')}</th>
+                          <th className="text-right py-2 px-2">{t('maxThreshold')}</th>
+                          <th className="text-left py-2 px-2">{t('legalBasis')}</th>
+                          <th className="text-center py-2 px-2">{t('action')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y">
@@ -245,8 +247,8 @@ export default function TaxRatesAdmin() {
       <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
         <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-500" />
         <div>
-          <p className="font-medium">Perhatian</p>
-          <p>Perubahan tarif akan berlaku untuk perhitungan baru. Perhitungan yang sudah dilakukan tidak akan berubah secara otomatis. Pastikan perubahan sesuai dengan peraturan yang berlaku.</p>
+          <p className="font-medium">{t('taxRateWarningTitle')}</p>
+          <p>{t('taxRateWarningDesc')}</p>
         </div>
       </div>
     </div>

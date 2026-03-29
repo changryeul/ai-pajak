@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -38,14 +39,16 @@ interface SPT1771GeneratorProps {
 
 type EntityType = 'PT' | 'CV' | 'FIRMA' | 'KOPERASI' | 'YAYASAN' | 'OTHER';
 
-const ENTITY_TYPES: { value: EntityType; label: string }[] = [
-  { value: 'PT', label: 'PT (Perseroan Terbatas)' },
-  { value: 'CV', label: 'CV (Commanditaire Vennootschap)' },
-  { value: 'FIRMA', label: 'Firma' },
-  { value: 'KOPERASI', label: 'Koperasi' },
-  { value: 'YAYASAN', label: 'Yayasan' },
-  { value: 'OTHER', label: 'Lainnya' },
-];
+const ENTITY_TYPE_VALUES: EntityType[] = ['PT', 'CV', 'FIRMA', 'KOPERASI', 'YAYASAN', 'OTHER'];
+
+const ENTITY_TYPE_KEYS: Record<EntityType, string> = {
+  PT: 'entityPT',
+  CV: 'entityCV',
+  FIRMA: 'entityFirma',
+  KOPERASI: 'entityKoperasi',
+  YAYASAN: 'entityYayasan',
+  OTHER: 'entityOther',
+};
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('id-ID').format(value);
@@ -96,6 +99,7 @@ export function SPT1771Generator({
   defaultTaxYear = new Date().getFullYear() - 1,
   onComplete,
 }: SPT1771GeneratorProps) {
+  const t = useTranslations('sptCommon');
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -529,15 +533,15 @@ export function SPT1771Generator({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Generate SPT 1771</CardTitle>
+          <CardTitle>{t('generateSpt')} 1771</CardTitle>
           <CardDescription>
-            SPT Tahunan PPh Badan untuk Wajib Pajak Badan (PT, CV, dll)
+            {t('spt1771GenDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Company Info */}
           <div className="p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-medium text-gray-700 mb-2">Wajib Pajak Badan</h4>
+            <h4 className="font-medium text-gray-700 mb-2">{t('corporateTaxpayerLabel')}</h4>
             <p className="font-semibold">{customerName}</p>
             {customerNpwp && (
               <p className="text-sm text-gray-500 font-mono">{customerNpwp}</p>
@@ -547,7 +551,7 @@ export function SPT1771Generator({
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="taxYear">Tahun Pajak</Label>
+              <Label htmlFor="taxYear">{t('taxYear')}</Label>
               <Select
                 value={taxYear.toString()}
                 onValueChange={(v) => setTaxYear(parseInt(v))}
@@ -566,7 +570,7 @@ export function SPT1771Generator({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="entityType">Bentuk Badan</Label>
+              <Label htmlFor="entityType">{t('entityType')}</Label>
               <Select
                 value={entityType}
                 onValueChange={(v) => setEntityType(v as EntityType)}
@@ -575,9 +579,9 @@ export function SPT1771Generator({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ENTITY_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
+                  {ENTITY_TYPE_VALUES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {t(ENTITY_TYPE_KEYS[value])}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -585,7 +589,7 @@ export function SPT1771Generator({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="kluCode">Kode KLU</Label>
+              <Label htmlFor="kluCode">{t('kluCode')}</Label>
               <Input
                 id="kluCode"
                 value={kluCode}
@@ -602,9 +606,9 @@ export function SPT1771Generator({
         <Tabs defaultValue="income" className="w-full">
           <CardHeader>
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="income">Laba Rugi</TabsTrigger>
-              <TabsTrigger value="balance">Neraca</TabsTrigger>
-              <TabsTrigger value="credits">Kredit Pajak</TabsTrigger>
+              <TabsTrigger value="income">{t('incomeStatement')}</TabsTrigger>
+              <TabsTrigger value="balance">{t('balanceSheet')}</TabsTrigger>
+              <TabsTrigger value="credits">{t('taxCredits')}</TabsTrigger>
             </TabsList>
           </CardHeader>
 
@@ -614,11 +618,11 @@ export function SPT1771Generator({
                 {/* Revenue */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 border-b pb-2">
-                    Pendapatan
+                    {t('revenue')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Pendapatan Bruto</Label>
+                      <Label>{t('grossRevenueLabel')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.grossRevenue)}
                         onChange={(e) =>
@@ -628,7 +632,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Retur Penjualan</Label>
+                      <Label>{t('salesReturns')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.salesReturns)}
                         onChange={(e) =>
@@ -638,7 +642,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Diskon Penjualan</Label>
+                      <Label>{t('salesDiscounts')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.salesDiscounts)}
                         onChange={(e) =>
@@ -648,7 +652,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2 p-3 bg-blue-50 rounded">
-                      <Label className="text-blue-800">Pendapatan Neto</Label>
+                      <Label className="text-blue-800">{t('netRevenueLabel')}</Label>
                       <p className="font-mono font-semibold text-blue-900">
                         Rp {formatCurrency(netRevenue)}
                       </p>
@@ -659,11 +663,11 @@ export function SPT1771Generator({
                 {/* COGS */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 border-b pb-2">
-                    Harga Pokok Penjualan
+                    {t('cogsLabel')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>HPP / Beban Pokok</Label>
+                      <Label>{t('hppLabel')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.costOfRevenue)}
                         onChange={(e) =>
@@ -673,7 +677,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2 p-3 bg-blue-50 rounded">
-                      <Label className="text-blue-800">Laba Kotor</Label>
+                      <Label className="text-blue-800">{t('grossProfitLabel')}</Label>
                       <p className="font-mono font-semibold text-blue-900">
                         Rp {formatCurrency(grossProfit)}
                       </p>
@@ -684,11 +688,11 @@ export function SPT1771Generator({
                 {/* Operating Expenses */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 border-b pb-2">
-                    Beban Operasional
+                    {t('opExpenses')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>Gaji dan Upah</Label>
+                      <Label>{t('salariesWages')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.salariesAndWages)}
                         onChange={(e) =>
@@ -698,7 +702,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Sewa</Label>
+                      <Label>{t('rentExpense')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.rentExpense)}
                         onChange={(e) =>
@@ -708,7 +712,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Utilitas</Label>
+                      <Label>{t('utilities')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.utilitiesExpense)}
                         onChange={(e) =>
@@ -718,7 +722,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Penyusutan</Label>
+                      <Label>{t('depreciationLabel')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.depreciation)}
                         onChange={(e) =>
@@ -728,7 +732,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Entertainment</Label>
+                      <Label>{t('entertainment')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.entertainmentExpense)}
                         onChange={(e) =>
@@ -738,7 +742,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Beban Lainnya</Label>
+                      <Label>{t('otherExpenses')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.otherOperatingExpenses)}
                         onChange={(e) =>
@@ -753,13 +757,13 @@ export function SPT1771Generator({
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2 p-3 bg-gray-50 rounded">
-                      <Label className="text-gray-600">Total Beban Operasional</Label>
+                      <Label className="text-gray-600">{t('totalOpex')}</Label>
                       <p className="font-mono font-semibold">
                         Rp {formatCurrency(totalOpex)}
                       </p>
                     </div>
                     <div className="space-y-2 p-3 bg-blue-50 rounded">
-                      <Label className="text-blue-800">Laba Operasi</Label>
+                      <Label className="text-blue-800">{t('operatingIncomeLabel')}</Label>
                       <p className="font-mono font-semibold text-blue-900">
                         Rp {formatCurrency(operatingIncome)}
                       </p>
@@ -770,11 +774,11 @@ export function SPT1771Generator({
                 {/* Other Income */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 border-b pb-2">
-                    Pendapatan Lain-lain
+                    {t('otherIncomeSection')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>Bunga Bank</Label>
+                      <Label>{t('bankInterest')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.interestIncome)}
                         onChange={(e) =>
@@ -784,7 +788,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Dividen</Label>
+                      <Label>{t('dividendLabel')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.dividendIncome)}
                         onChange={(e) =>
@@ -794,7 +798,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Sewa</Label>
+                      <Label>{t('rentalLabel')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.rentalIncome)}
                         onChange={(e) =>
@@ -809,17 +813,17 @@ export function SPT1771Generator({
                 {/* Summary */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 border-b pb-2">
-                    Ringkasan
+                    {t('summary')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2 p-3 bg-green-50 rounded">
-                      <Label className="text-green-800">Laba Sebelum Pajak</Label>
+                      <Label className="text-green-800">{t('incomeBeforeTaxLabel')}</Label>
                       <p className="font-mono font-semibold text-green-900 text-lg">
                         Rp {formatCurrency(incomeBeforeTax)}
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Beban Pajak (Komersial)</Label>
+                      <Label>{t('taxExpenseComm')}</Label>
                       <Input
                         value={formatCurrency(incomeStatement.incomeTaxExpense)}
                         onChange={(e) =>
@@ -838,10 +842,10 @@ export function SPT1771Generator({
             <CardContent className="space-y-6">
                 {/* Assets */}
                 <div className="space-y-4">
-                  <h4 className="font-medium text-gray-700 border-b pb-2">Aset</h4>
+                  <h4 className="font-medium text-gray-700 border-b pb-2">{t('assets')}</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Aset Lancar</Label>
+                      <Label>{t('currentAssets')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.currentAssets)}
                         onChange={(e) =>
@@ -851,7 +855,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Aset Tetap (Bruto)</Label>
+                      <Label>{t('fixedAssets')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.fixedAssets)}
                         onChange={(e) =>
@@ -861,7 +865,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Akumulasi Penyusutan</Label>
+                      <Label>{t('accDepreciation')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.accumulatedDepreciation)}
                         onChange={(e) =>
@@ -871,7 +875,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Aset Lain-lain</Label>
+                      <Label>{t('otherAssets')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.otherAssets)}
                         onChange={(e) =>
@@ -882,7 +886,7 @@ export function SPT1771Generator({
                     </div>
                   </div>
                   <div className="p-3 bg-blue-50 rounded">
-                    <Label className="text-blue-800">Total Aset</Label>
+                    <Label className="text-blue-800">{t('totalAssets')}</Label>
                     <p className="font-mono font-semibold text-blue-900">
                       Rp {formatCurrency(totalAssets)}
                     </p>
@@ -892,11 +896,11 @@ export function SPT1771Generator({
                 {/* Liabilities */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 border-b pb-2">
-                    Kewajiban
+                    {t('liabilities')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Kewajiban Lancar</Label>
+                      <Label>{t('currentLiabilities')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.currentLiabilities)}
                         onChange={(e) =>
@@ -906,7 +910,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Kewajiban Jangka Panjang</Label>
+                      <Label>{t('longTermLiabilities')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.longTermLiabilities)}
                         onChange={(e) =>
@@ -917,7 +921,7 @@ export function SPT1771Generator({
                     </div>
                   </div>
                   <div className="p-3 bg-red-50 rounded">
-                    <Label className="text-red-800">Total Kewajiban</Label>
+                    <Label className="text-red-800">{t('totalLiabilities')}</Label>
                     <p className="font-mono font-semibold text-red-900">
                       Rp {formatCurrency(totalLiabilities)}
                     </p>
@@ -926,10 +930,10 @@ export function SPT1771Generator({
 
                 {/* Equity */}
                 <div className="space-y-4">
-                  <h4 className="font-medium text-gray-700 border-b pb-2">Ekuitas</h4>
+                  <h4 className="font-medium text-gray-700 border-b pb-2">{t('equity')}</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Modal Disetor</Label>
+                      <Label>{t('paidInCapital')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.paidInCapital)}
                         onChange={(e) =>
@@ -939,7 +943,7 @@ export function SPT1771Generator({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Laba Ditahan</Label>
+                      <Label>{t('retainedEarnings')}</Label>
                       <Input
                         value={formatCurrency(balanceSheet.retainedEarnings)}
                         onChange={(e) =>
@@ -950,7 +954,7 @@ export function SPT1771Generator({
                     </div>
                   </div>
                   <div className="p-3 bg-green-50 rounded">
-                    <Label className="text-green-800">Total Ekuitas</Label>
+                    <Label className="text-green-800">{t('totalEquity')}</Label>
                     <p className="font-mono font-semibold text-green-900">
                       Rp {formatCurrency(totalEquity)}
                     </p>
@@ -964,18 +968,18 @@ export function SPT1771Generator({
                   } border`}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">Status Neraca:</span>
+                    <span className="font-medium">{t('balanceStatus')}</span>
                     <span
                       className={`font-bold ${
                         isBalanced ? 'text-green-700' : 'text-red-700'
                       }`}
                     >
-                      {isBalanced ? 'BALANCE' : 'TIDAK BALANCE'}
+                      {isBalanced ? t('balanced') : t('notBalanced')}
                     </span>
                   </div>
                   {!isBalanced && (
                     <p className="text-sm text-red-600 mt-2">
-                      Selisih: Rp{' '}
+                      {t('difference')}{' '}
                       {formatCurrency(
                         Math.abs(totalAssets - (totalLiabilities + totalEquity))
                       )}
@@ -990,7 +994,7 @@ export function SPT1771Generator({
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>PPh 22 Dipungut</Label>
+                    <Label>{t('pph22Collected')}</Label>
                     <Input
                       value={formatCurrency(taxCredits.pph22Withheld)}
                       onChange={(e) =>
@@ -1000,7 +1004,7 @@ export function SPT1771Generator({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>PPh 23 Dipotong</Label>
+                    <Label>{t('pph23Deducted')}</Label>
                     <Input
                       value={formatCurrency(taxCredits.pph23Withheld)}
                       onChange={(e) =>
@@ -1010,7 +1014,7 @@ export function SPT1771Generator({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>PPh 25 (Angsuran)</Label>
+                    <Label>{t('pph25Installments')}</Label>
                     <Input
                       value={formatCurrency(taxCredits.pph25Installments)}
                       onChange={(e) =>
@@ -1036,9 +1040,7 @@ export function SPT1771Generator({
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="pt-6">
           <p className="text-sm text-blue-800">
-            <strong>Catatan:</strong> Sistem akan melakukan perhitungan koreksi fiskal
-            otomatis berdasarkan data yang diinput. Pajak akan dihitung dengan tarif
-            22% (atau 11% untuk UMKM dengan omzet &lt; Rp 50 Miliar).
+            {t('spt1771Note')}
           </p>
         </CardContent>
       </Card>
@@ -1047,7 +1049,7 @@ export function SPT1771Generator({
       <Card>
         <CardFooter className="flex justify-between pt-6">
           <div className="space-y-2">
-            <Label htmlFor="correctionNumber">Pembetulan ke-</Label>
+            <Label htmlFor="correctionNumber">{t('correctionPrefix')}</Label>
             <Select
               value={correctionNumber.toString()}
               onValueChange={(v) => setCorrectionNumber(parseInt(v))}
@@ -1064,7 +1066,7 @@ export function SPT1771Generator({
             </Select>
           </div>
           <Button onClick={generateSPT} disabled={isLoading} size="lg">
-            {isLoading ? 'Generating...' : 'Generate SPT 1771'}
+            {isLoading ? t('generating') : `${t('generateSpt')} 1771`}
           </Button>
         </CardFooter>
       </Card>

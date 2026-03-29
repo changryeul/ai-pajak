@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -33,20 +34,17 @@ interface SPT1770SGeneratorProps {
   onComplete?: (data: SPT1770SData) => void;
 }
 
-const PTKP_OPTIONS: { value: PTKPStatus; label: string }[] = [
-  { value: 'TK/0', label: 'TK/0 - Tidak Kawin, 0 Tanggungan' },
-  { value: 'TK/1', label: 'TK/1 - Tidak Kawin, 1 Tanggungan' },
-  { value: 'TK/2', label: 'TK/2 - Tidak Kawin, 2 Tanggungan' },
-  { value: 'TK/3', label: 'TK/3 - Tidak Kawin, 3 Tanggungan' },
-  { value: 'K/0', label: 'K/0 - Kawin, 0 Tanggungan' },
-  { value: 'K/1', label: 'K/1 - Kawin, 1 Tanggungan' },
-  { value: 'K/2', label: 'K/2 - Kawin, 2 Tanggungan' },
-  { value: 'K/3', label: 'K/3 - Kawin, 3 Tanggungan' },
-  { value: 'K/I/0', label: 'K/I/0 - Kawin + Istri Gabung, 0 Tanggungan' },
-  { value: 'K/I/1', label: 'K/I/1 - Kawin + Istri Gabung, 1 Tanggungan' },
-  { value: 'K/I/2', label: 'K/I/2 - Kawin + Istri Gabung, 2 Tanggungan' },
-  { value: 'K/I/3', label: 'K/I/3 - Kawin + Istri Gabung, 3 Tanggungan' },
+const PTKP_VALUES: PTKPStatus[] = [
+  'TK/0', 'TK/1', 'TK/2', 'TK/3',
+  'K/0', 'K/1', 'K/2', 'K/3',
+  'K/I/0', 'K/I/1', 'K/I/2', 'K/I/3',
 ];
+
+const PTKP_LABEL_KEYS: Record<PTKPStatus, string> = {
+  'TK/0': 'ptkpTK0', 'TK/1': 'ptkpTK1', 'TK/2': 'ptkpTK2', 'TK/3': 'ptkpTK3',
+  'K/0': 'ptkpK0', 'K/1': 'ptkpK1', 'K/2': 'ptkpK2', 'K/3': 'ptkpK3',
+  'K/I/0': 'ptkpKI0', 'K/I/1': 'ptkpKI1', 'K/I/2': 'ptkpKI2', 'K/I/3': 'ptkpKI3',
+};
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('id-ID').format(value);
@@ -77,6 +75,7 @@ export function SPT1770SGenerator({
   defaultPtkpStatus = 'TK/0',
   onComplete,
 }: SPT1770SGeneratorProps) {
+  const t = useTranslations('sptCommon');
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -225,15 +224,15 @@ export function SPT1770SGenerator({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Generate SPT 1770 S</CardTitle>
+        <CardTitle>{t('generateSpt')} 1770 S</CardTitle>
         <CardDescription>
-          SPT Tahunan PPh Wajib Pajak Orang Pribadi Sederhana
+          {t('spt1770SGenDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Customer Info */}
         <div className="p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-medium text-gray-700 mb-2">Wajib Pajak</h4>
+          <h4 className="font-medium text-gray-700 mb-2">{t('taxpayer')}</h4>
           <p className="font-semibold">{customerName}</p>
           {customerNpwp && (
             <p className="text-sm text-gray-500 font-mono">{customerNpwp}</p>
@@ -242,22 +241,22 @@ export function SPT1770SGenerator({
 
         <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="basic">Data Dasar</TabsTrigger>
-            <TabsTrigger value="otherIncome">Penghasilan Lain</TabsTrigger>
-            <TabsTrigger value="credits">Kredit Pajak</TabsTrigger>
+            <TabsTrigger value="basic">{t('basicData')}</TabsTrigger>
+            <TabsTrigger value="otherIncome">{t('otherIncome')}</TabsTrigger>
+            <TabsTrigger value="credits">{t('taxCredits')}</TabsTrigger>
           </TabsList>
 
           {/* Basic Info Tab */}
           <TabsContent value="basic" className="space-y-4 mt-4">
             {/* Tax Year Selection */}
             <div className="space-y-2">
-              <Label htmlFor="taxYear">Tahun Pajak</Label>
+              <Label htmlFor="taxYear">{t('taxYear')}</Label>
               <Select
                 value={taxYear.toString()}
                 onValueChange={(v) => setTaxYear(parseInt(v))}
               >
                 <SelectTrigger id="taxYear">
-                  <SelectValue placeholder="Pilih tahun pajak" />
+                  <SelectValue placeholder={t('selectTaxYear')} />
                 </SelectTrigger>
                 <SelectContent>
                   {taxYearOptions.map((year) => (
@@ -271,18 +270,18 @@ export function SPT1770SGenerator({
 
             {/* PTKP Status Selection */}
             <div className="space-y-2">
-              <Label htmlFor="ptkpStatus">Status PTKP</Label>
+              <Label htmlFor="ptkpStatus">{t('ptkpStatus')}</Label>
               <Select
                 value={ptkpStatus}
                 onValueChange={(v) => setPtkpStatus(v as PTKPStatus)}
               >
                 <SelectTrigger id="ptkpStatus">
-                  <SelectValue placeholder="Pilih status PTKP" />
+                  <SelectValue placeholder={t('selectPtkp')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {PTKP_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                  {PTKP_VALUES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {value} - {t(PTKP_LABEL_KEYS[value])}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -294,7 +293,7 @@ export function SPT1770SGenerator({
 
             {/* Correction Number */}
             <div className="space-y-2">
-              <Label htmlFor="correctionNumber">Pembetulan ke-</Label>
+              <Label htmlFor="correctionNumber">{t('correctionPrefix')}</Label>
               <Select
                 value={correctionNumber.toString()}
                 onValueChange={(v) => setCorrectionNumber(parseInt(v))}
@@ -314,8 +313,7 @@ export function SPT1770SGenerator({
             {/* Info */}
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Catatan:</strong> Penghasilan dari pekerjaan akan diambil
-                dari data Bukti Potong (Form 1721-A1) yang tersimpan untuk customer ini.
+                {t('spt1770SNote')}
               </p>
             </div>
           </TabsContent>
@@ -323,12 +321,12 @@ export function SPT1770SGenerator({
           {/* Other Income Tab */}
           <TabsContent value="otherIncome" className="space-y-4 mt-4">
             <p className="text-sm text-gray-600 mb-4">
-              Isi penghasilan lain di luar pekerjaan (opsional)
+              {t('fillOtherIncomeWork')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Bunga dari Bank (Rp)</Label>
+                <Label>{t('interestFromBank')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.interestFromBank || ''}
@@ -338,7 +336,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>Dividen (Rp)</Label>
+                <Label>{t('dividend')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.dividends || ''}
@@ -348,7 +346,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>Sewa (Rp)</Label>
+                <Label>{t('rental')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.rental || ''}
@@ -358,7 +356,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>Royalti (Rp)</Label>
+                <Label>{t('royalty')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.royalties || ''}
@@ -368,7 +366,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>Keuntungan Penjualan Harta (Rp)</Label>
+                <Label>{t('capitalGains')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.capitalGains || ''}
@@ -378,7 +376,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>Hadiah (Rp)</Label>
+                <Label>{t('prizes')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.prizes || ''}
@@ -388,7 +386,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>Penghasilan Lainnya (Rp)</Label>
+                <Label>{t('otherIncomeLabel')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.otherIncome || ''}
@@ -400,7 +398,7 @@ export function SPT1770SGenerator({
 
             <div className="p-3 bg-gray-100 rounded-lg mt-4">
               <div className="flex justify-between font-medium">
-                <span>Total Penghasilan Lain</span>
+                <span>{t('totalOtherIncomeSum')}</span>
                 <span className="font-mono">
                   Rp {formatCurrency(Object.values(otherIncome).reduce((a, b) => a + b, 0))}
                 </span>
@@ -411,12 +409,12 @@ export function SPT1770SGenerator({
           {/* Tax Credits Tab */}
           <TabsContent value="credits" className="space-y-4 mt-4">
             <p className="text-sm text-gray-600 mb-4">
-              Isi kredit pajak selain PPh 21 dari pekerjaan (opsional)
+              {t('fillTaxCredits')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>PPh 21 Tambahan (Rp)</Label>
+                <Label>{t('pph21Additional')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph21Withheld || ''}
@@ -424,12 +422,12 @@ export function SPT1770SGenerator({
                   placeholder="0"
                 />
                 <p className="text-xs text-gray-500">
-                  PPh 21 dari pekerjaan akan diambil otomatis dari bukti potong
+                  {t('pph21AutoNote')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label>PPh 22 (Impor, dll) (Rp)</Label>
+                <Label>{t('pph22Credit')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph22Withheld || ''}
@@ -439,7 +437,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>PPh 23 (Dividen, Bunga, Royalti) (Rp)</Label>
+                <Label>{t('pph23CreditDiv')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph23Withheld || ''}
@@ -449,7 +447,7 @@ export function SPT1770SGenerator({
               </div>
 
               <div className="space-y-2">
-                <Label>PPh 25 (Angsuran) (Rp)</Label>
+                <Label>{t('pph25Credit')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph25Installments || ''}
@@ -461,7 +459,7 @@ export function SPT1770SGenerator({
 
             <div className="p-3 bg-gray-100 rounded-lg mt-4">
               <div className="flex justify-between font-medium">
-                <span>Total Kredit Pajak Tambahan</span>
+                <span>{t('totalAdditionalCredits')}</span>
                 <span className="font-mono">
                   Rp {formatCurrency(Object.values(taxCredits).reduce((a, b) => a + b, 0))}
                 </span>
@@ -479,7 +477,7 @@ export function SPT1770SGenerator({
       </CardContent>
       <CardFooter className="flex justify-end gap-3">
         <Button onClick={generateSPT} disabled={isLoading}>
-          {isLoading ? 'Generating...' : 'Generate SPT'}
+          {isLoading ? t('generating') : t('generateSpt')}
         </Button>
       </CardFooter>
     </Card>

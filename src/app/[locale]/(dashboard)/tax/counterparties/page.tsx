@@ -20,14 +20,15 @@ interface Counterparty {
   type: string; is_related_party: boolean;
 }
 
-const typeConfig: Record<string, { label: string; icon: typeof User; color: string }> = {
-  VENDOR: { label: 'Vendor/Supplier', icon: Building2, color: 'bg-blue-100 text-blue-700' },
-  CLIENT: { label: 'Client/Customer', icon: Briefcase, color: 'bg-green-100 text-green-700' },
-  EMPLOYEE: { label: 'Employee', icon: User, color: 'bg-purple-100 text-purple-700' },
-};
-
 export default function CounterpartiesPage() {
   const t = useTranslations();
+  const tc = useTranslations('counterparties');
+
+  const typeConfig: Record<string, { label: string; icon: typeof User; color: string }> = {
+    VENDOR: { label: tc('vendor'), icon: Building2, color: 'bg-blue-100 text-blue-700' },
+    CLIENT: { label: tc('client'), icon: Briefcase, color: 'bg-green-100 text-green-700' },
+    EMPLOYEE: { label: tc('employee'), icon: User, color: 'bg-purple-100 text-purple-700' },
+  };
   const { session } = useSession();
 
   const [counterparties, setCounterparties] = useState<Counterparty[]>([]);
@@ -105,12 +106,12 @@ export default function CounterpartiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
             <Users className="h-6 w-6 text-blue-600" />
-            Lawan Transaksi
+            {tc('title')}
           </h1>
-          <p className="text-gray-500 mt-1">Kelola vendor, klien, dan karyawan untuk pelaporan pajak</p>
+          <p className="text-gray-500 mt-1">{tc('subtitle')}</p>
         </div>
         <Button onClick={() => { resetForm(); setShowForm(true); }} className="bg-gradient-to-r from-blue-600 to-indigo-600">
-          <Plus className="h-4 w-4 mr-2" />Tambah
+          <Plus className="h-4 w-4 mr-2" />{tc('add')}
         </Button>
       </div>
 
@@ -118,22 +119,22 @@ export default function CounterpartiesPage() {
       {showForm && (
         <Card className="border-0 shadow-md mb-6">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{editingId ? 'Edit' : 'Tambah'} Lawan Transaksi</CardTitle>
+            <CardTitle className="text-base">{editingId ? tc('update') : tc('add')} {tc('title')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs">Nama *</Label>
+                <Label className="text-xs">{tc('nameRequired')}</Label>
                 <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="PT Example Indonesia" />
               </div>
               <div>
-                <Label className="text-xs">Jenis</Label>
+                <Label className="text-xs">{tc('type')}</Label>
                 <Select value={form.type} onValueChange={v => setForm({ ...form, type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="VENDOR">Vendor / Supplier</SelectItem>
-                    <SelectItem value="CLIENT">Client / Customer</SelectItem>
-                    <SelectItem value="EMPLOYEE">Karyawan</SelectItem>
+                    <SelectItem value="VENDOR">{tc('vendor')}</SelectItem>
+                    <SelectItem value="CLIENT">{tc('client')}</SelectItem>
+                    <SelectItem value="EMPLOYEE">{tc('employee')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -144,7 +145,7 @@ export default function CounterpartiesPage() {
                 <Input value={form.npwp} onChange={e => setForm({ ...form, npwp: e.target.value })} placeholder="XX.XXX.XXX.X-XXX.XXX" className="font-mono" />
               </div>
               <div>
-                <Label className="text-xs">NIK (jika perorangan)</Label>
+                <Label className="text-xs">{tc('nikLabel')}</Label>
                 <Input value={form.nik} onChange={e => setForm({ ...form, nik: e.target.value })} placeholder="16 digit" className="font-mono" maxLength={16} />
               </div>
             </div>
@@ -154,7 +155,7 @@ export default function CounterpartiesPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs">Telepon</Label>
+                <Label className="text-xs">{tc('phone')}</Label>
                 <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="021-12345678" />
               </div>
               <div>
@@ -166,14 +167,14 @@ export default function CounterpartiesPage() {
               <input type="checkbox" id="related" checked={form.isRelatedParty} onChange={e => setForm({ ...form, isRelatedParty: e.target.checked })} className="rounded" />
               <label htmlFor="related" className="text-sm text-gray-700 flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                Pihak berelasi (untuk Transfer Pricing)
+                {tc('relatedParty')}
               </label>
             </div>
             <div className="flex gap-2 justify-end pt-2">
-              <Button variant="outline" onClick={resetForm}>Batal</Button>
+              <Button variant="outline" onClick={resetForm}>{tc('cancel')}</Button>
               <Button onClick={handleSave} disabled={isSaving || !form.name}>
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Check className="h-4 w-4 mr-1" />}
-                {editingId ? 'Update' : 'Simpan'}
+                {editingId ? tc('update') : tc('save')}
               </Button>
             </div>
           </CardContent>
@@ -184,15 +185,15 @@ export default function CounterpartiesPage() {
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input placeholder="Cari nama atau NPWP..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
+          <Input placeholder={tc('searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
         </div>
         <Select value={filterType} onValueChange={setFilterType}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Jenis</SelectItem>
-            <SelectItem value="VENDOR">Vendor</SelectItem>
-            <SelectItem value="CLIENT">Client</SelectItem>
-            <SelectItem value="EMPLOYEE">Karyawan</SelectItem>
+            <SelectItem value="all">{tc('allTypes')}</SelectItem>
+            <SelectItem value="VENDOR">{tc('vendor')}</SelectItem>
+            <SelectItem value="CLIENT">{tc('client')}</SelectItem>
+            <SelectItem value="EMPLOYEE">{tc('employee')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -204,10 +205,10 @@ export default function CounterpartiesPage() {
         <Card className="border-0 shadow-sm">
           <CardContent className="p-12 text-center">
             <Users className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">{search ? 'Tidak ditemukan' : 'Belum ada lawan transaksi'}</p>
+            <p className="text-gray-500">{search ? tc('notFound') : tc('noCounterparties')}</p>
             {!search && !showForm && (
               <Button variant="outline" className="mt-4" onClick={() => setShowForm(true)}>
-                <Plus className="h-4 w-4 mr-1" />Tambah Pertama
+                <Plus className="h-4 w-4 mr-1" />{tc('addFirst')}
               </Button>
             )}
           </CardContent>
@@ -215,8 +216,8 @@ export default function CounterpartiesPage() {
       ) : (
         <div className="space-y-2">
           {filtered.map(cp => {
-            const tc = typeConfig[cp.type] || typeConfig.VENDOR;
-            const Icon = tc.icon;
+            const tCfg = typeConfig[cp.type] || typeConfig.VENDOR;
+            const Icon = tCfg.icon;
             return (
               <Card key={cp.id} className="border-0 shadow-sm hover:shadow-md transition-all">
                 <CardContent className="p-4">
@@ -227,7 +228,7 @@ export default function CounterpartiesPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-gray-900 truncate">{cp.name}</h3>
-                        <Badge className={`text-[10px] ${tc.color}`}>{tc.label}</Badge>
+                        <Badge className={`text-[10px] ${tCfg.color}`}>{tCfg.label}</Badge>
                         {cp.is_related_party && (
                           <Badge className="text-[10px] bg-amber-100 text-amber-700">
                             <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />Related
@@ -252,7 +253,7 @@ export default function CounterpartiesPage() {
       )}
 
       <p className="text-center text-xs text-gray-400 mt-6">
-        {filtered.length} lawan transaksi
+        {tc('countLabel', { count: filtered.length })}
       </p>
     </div>
   );

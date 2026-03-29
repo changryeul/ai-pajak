@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ const roleColors: Record<string, string> = {
 };
 
 export default function AuditLogsPage() {
+  const t = useTranslations('admin');
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [stats, setStats] = useState<{ typeStats: Record<string, number>; totalLogs: number } | null>(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 0 });
@@ -74,14 +76,14 @@ export default function AuditLogsPage() {
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-600 via-red-600 to-rose-700 p-6 md:p-8 text-white mb-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
-          <p className="text-orange-200 text-sm flex items-center gap-2"><Shield className="h-4 w-4" />Admin - Security</p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">Audit Logs</h1>
-          <p className="text-orange-200 mt-1 text-sm">Semua aktivitas tercatat dan tidak dapat diubah (Hard Rule #5)</p>
+          <p className="text-orange-200 text-sm flex items-center gap-2"><Shield className="h-4 w-4" />{t('admin')} - {t('security')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('auditLogs')}</h1>
+          <p className="text-orange-200 mt-1 text-sm">{t('auditSubtitle')}</p>
           {stats && (
             <div className="flex gap-4 mt-4">
               <div className="bg-white/10 backdrop-blur rounded-xl px-4 py-2">
                 <span className="text-2xl font-bold">{stats.totalLogs}</span>
-                <span className="text-xs text-orange-200 ml-1">total logs</span>
+                <span className="text-xs text-orange-200 ml-1">{t('totalLogs')}</span>
               </div>
             </div>
           )}
@@ -91,9 +93,9 @@ export default function AuditLogsPage() {
       {/* Filters */}
       <div className="flex gap-3 mb-6">
         <Select value={activityFilter} onValueChange={v => { setActivityFilter(v); setPagination(p => ({ ...p, page: 1 })); }}>
-          <SelectTrigger className="w-[200px]"><SelectValue placeholder="Semua Aktivitas" /></SelectTrigger>
+          <SelectTrigger className="w-[200px]"><SelectValue placeholder={t('allActivities')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Aktivitas</SelectItem>
+            <SelectItem value="all">{t('allActivities')}</SelectItem>
             <SelectItem value="TAX_FILING_CREATE">Filing Create</SelectItem>
             <SelectItem value="TAX_FILING_SUBMIT">Filing Submit</SelectItem>
             <SelectItem value="TAX_FILING_APPROVE">Filing Approve</SelectItem>
@@ -105,9 +107,9 @@ export default function AuditLogsPage() {
           </SelectContent>
         </Select>
         <Select value={roleFilter} onValueChange={v => { setRoleFilter(v); setPagination(p => ({ ...p, page: 1 })); }}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Semua Role" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]"><SelectValue placeholder={t('allRoles')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Role</SelectItem>
+            <SelectItem value="all">{t('allRoles')}</SelectItem>
             <SelectItem value="CUSTOMER">Customer</SelectItem>
             <SelectItem value="CONSULTANT_JTC">Consultant</SelectItem>
             <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor</SelectItem>
@@ -124,7 +126,7 @@ export default function AuditLogsPage() {
         <Card className="border-0 shadow-sm">
           <CardContent className="p-12 text-center">
             <Shield className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Belum ada audit log</p>
+            <p className="text-gray-500">{t('noAuditLogs')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -198,8 +200,8 @@ export default function AuditLogsPage() {
       <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl text-xs text-green-800 flex items-start gap-2">
         <Shield className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-500" />
         <div>
-          <p className="font-medium">Hard Rule #5: Audit Trail Immutability</p>
-          <p>Semua log bersifat immutable (tidak dapat diubah atau dihapus). INSERT only - no UPDATE/DELETE.</p>
+          <p className="font-medium">{t('auditRuleTitle')}</p>
+          <p>{t('auditRuleDesc')}</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ interface Consultant {
 }
 
 export default function AdminConsultantsPage() {
+  const t = useTranslations('admin');
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [stats, setStats] = useState<{ totalConsultants: number; activeConsultants: number; licensedAdvisors: number; totalClients: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,15 +57,15 @@ export default function AdminConsultantsPage() {
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-600 via-red-600 to-rose-700 p-6 md:p-8 text-white mb-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
-          <p className="text-orange-200 text-sm flex items-center gap-2"><Briefcase className="h-4 w-4" />Admin</p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">Manajemen Konsultan</h1>
+          <p className="text-orange-200 text-sm flex items-center gap-2"><Briefcase className="h-4 w-4" />{t('admin')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('consultantMgmt')}</h1>
           {stats && (
             <div className="grid grid-cols-4 gap-3 mt-6">
               {[
-                { label: 'Total', value: stats.totalConsultants },
-                { label: 'Aktif', value: stats.activeConsultants },
-                { label: 'Licensed', value: stats.licensedAdvisors },
-                { label: 'Total Klien', value: stats.totalClients },
+                { label: t('totalLabel'), value: stats.totalConsultants },
+                { label: t('activeLabel'), value: stats.activeConsultants },
+                { label: t('licensedLabel'), value: stats.licensedAdvisors },
+                { label: t('totalClients'), value: stats.totalClients },
               ].map((s, i) => (
                 <div key={i} className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
                   <p className="text-2xl font-bold">{s.value}</p>
@@ -79,7 +81,7 @@ export default function AdminConsultantsPage() {
 
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input placeholder="Cari email atau firma..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
+        <Input placeholder={t('searchEmailFirm')} value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
       </div>
 
       {isLoading ? (
@@ -97,14 +99,14 @@ export default function AdminConsultantsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm text-gray-900">{c.email}</span>
                       <Badge className={c.isAdvisor ? 'bg-purple-100 text-purple-700 text-[10px]' : 'bg-green-100 text-green-700 text-[10px]'}>
-                        {c.isAdvisor ? 'Tax Advisor' : 'Consultant'}
+                        {c.isAdvisor ? t('taxAdvisor') : t('consultant')}
                       </Badge>
-                      {!c.isActive && <Badge className="bg-red-100 text-red-700 text-[10px]">Inactive</Badge>}
+                      {!c.isActive && <Badge className="bg-red-100 text-red-700 text-[10px]">{t('inactive')}</Badge>}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
                       <span className="flex items-center gap-1"><Building2 className="h-3 w-3" />{c.firmName}</span>
-                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{c.activeClients} klien aktif</span>
-                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{c.filingCount} filing</span>
+                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{c.activeClients} {t('activeClients')}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{c.filingCount} {t('filingLabel')}</span>
                       {c.licenseNumber && (
                         <span className="flex items-center gap-1 font-mono">
                           <ShieldCheck className="h-3 w-3 text-purple-500" />{c.licenseNumber}
@@ -124,17 +126,17 @@ export default function AdminConsultantsPage() {
                       </div>
                     ) : c.isAdvisor ? (
                       <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingLicense(c.id); setLicenseInput(c.licenseNumber || ''); }}>
-                        <Edit2 className="h-3 w-3 mr-1" />License
+                        <Edit2 className="h-3 w-3 mr-1" />{t('license')}
                       </Button>
                     ) : null}
 
                     {c.isActive ? (
                       <Button size="sm" variant="outline" className="h-7 text-xs text-red-600" onClick={() => doAction(c.id, 'deactivate')}>
-                        <UserX className="h-3 w-3 mr-1" />Nonaktifkan
+                        <UserX className="h-3 w-3 mr-1" />{t('deactivate')}
                       </Button>
                     ) : (
                       <Button size="sm" variant="outline" className="h-7 text-xs text-green-600" onClick={() => doAction(c.id, 'activate')}>
-                        <UserCheck className="h-3 w-3 mr-1" />Aktifkan
+                        <UserCheck className="h-3 w-3 mr-1" />{t('activate')}
                       </Button>
                     )}
                   </div>

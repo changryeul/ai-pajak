@@ -10,6 +10,7 @@ import {
   MessageCircle, FileText, ShieldCheck, TrendingUp, AlertTriangle,
   Brain, Camera, BarChart3,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface LimitItem {
   type: string; label: string; maxRequests: number;
@@ -24,6 +25,7 @@ const typeIcons: Record<string, typeof Sparkles> = {
 };
 
 export default function AIUsagePage() {
+  const t = useTranslations('aiUsage');
   const [limits, setLimits] = useState<LimitItem[]>([]);
   const [summary, setSummary] = useState<{ activeUsers: number; totalMonthlyCostEstimate: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +70,7 @@ export default function AIUsagePage() {
         <div className="relative z-10">
           <p className="text-violet-200 text-sm flex items-center gap-2"><Sparkles className="h-4 w-4" />Admin</p>
           <h1 className="text-2xl md:text-3xl font-bold mt-1">AI Usage & Rate Limits</h1>
-          <p className="text-violet-200 text-sm mt-1">Kelola batas penggunaan AI dan estimasi biaya</p>
+          <p className="text-violet-200 text-sm mt-1">{t('subtitle')}</p>
 
           {summary && (
             <div className="grid grid-cols-2 gap-4 mt-6">
@@ -77,7 +79,7 @@ export default function AIUsagePage() {
                   <Users className="h-5 w-5 text-violet-300" />
                   <div>
                     <p className="text-2xl font-bold">{summary.activeUsers}</p>
-                    <p className="text-xs text-violet-200">Active Users</p>
+                    <p className="text-xs text-violet-200">{t('activeUsers')}</p>
                   </div>
                 </div>
               </div>
@@ -86,7 +88,7 @@ export default function AIUsagePage() {
                   <DollarSign className="h-5 w-5 text-yellow-300" />
                   <div>
                     <p className="text-2xl font-bold">${summary.totalMonthlyCostEstimate}</p>
-                    <p className="text-xs text-violet-200">Est. Monthly Cost</p>
+                    <p className="text-xs text-violet-200">{t('estMonthlyCost')}</p>
                   </div>
                 </div>
               </div>
@@ -108,7 +110,7 @@ export default function AIUsagePage() {
           {limits.map(limit => {
             const Icon = typeIcons[limit.type] || Sparkles;
             const isEditing = editingType === limit.type;
-            const windowLabel = limit.window === 'hour' ? '/jam' : '/hari';
+            const windowLabel = limit.window === 'hour' ? t('perHour') : t('perDay');
 
             return (
               <Card key={limit.type} className="border-0 shadow-sm hover:shadow-md transition-all">
@@ -130,12 +132,12 @@ export default function AIUsagePage() {
                               onChange={e => setEditValue(e.target.value)}
                               min={1} max={1000}
                             />
-                            <span className="text-xs text-gray-500">{windowLabel}/user</span>
+                            <span className="text-xs text-gray-500">{windowLabel}{t('perUser')}</span>
                             <Button size="sm" className="h-8" onClick={() => saveLimit(limit.type)} disabled={isSaving}>
                               {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                             </Button>
                             <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setEditingType(null)}>
-                              Batal
+                              {t('cancelBtn')}
                             </Button>
                           </div>
                         ) : (
@@ -144,13 +146,13 @@ export default function AIUsagePage() {
                               {limit.maxRequests}{windowLabel}
                             </Badge>
                             <span className="text-xs text-gray-400">
-                              ${limit.costPerCall}/call
+                              ${limit.costPerCall}{t('perCall')}
                             </span>
                             <button
                               onClick={() => { setEditingType(limit.type); setEditValue(limit.maxRequests.toString()); }}
                               className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                             >
-                              Ubah
+                              {t('change')}
                             </button>
                           </>
                         )}
@@ -159,7 +161,7 @@ export default function AIUsagePage() {
 
                     <div className="text-right">
                       <p className="text-sm font-bold text-gray-900">${limit.estimatedMonthlyCost}</p>
-                      <p className="text-[10px] text-gray-400">est/bulan</p>
+                      <p className="text-[10px] text-gray-400">{t('estMonthly')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -172,7 +174,7 @@ export default function AIUsagePage() {
       {/* Cost Breakdown */}
       {!isLoading && limits.length > 0 && (
         <Card className="mt-6 border-0 shadow-sm">
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4 text-purple-600" />Estimasi Biaya</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4 text-purple-600" />{t('costBreakdown')}</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-2">
               {limits.sort((a, b) => b.estimatedMonthlyCost - a.estimatedMonthlyCost).map(l => {
@@ -190,7 +192,7 @@ export default function AIUsagePage() {
               })}
             </div>
             <p className="text-xs text-gray-400 mt-4">
-              * 추정치: 사용자당 한도의 30% 사용 가정, 하루 8시간 활동 기준
+              {t('costNote')}
             </p>
           </CardContent>
         </Card>
@@ -200,8 +202,8 @@ export default function AIUsagePage() {
       <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
         <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-500" />
         <div>
-          <p className="font-medium">주의사항</p>
-          <p>Rate limit 변경은 즉시 적용됩니다. 너무 낮게 설정하면 사용자 경험에 영향을 줄 수 있습니다. 서버 재시작 시 기본값으로 복원됩니다.</p>
+          <p className="font-medium">{t('warningTitle')}</p>
+          <p>{t('warningText')}</p>
         </div>
       </div>
     </div>

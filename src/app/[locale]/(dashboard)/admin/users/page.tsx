@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,15 +24,16 @@ interface Stats {
   active: number; inactive: number;
 }
 
-const roleConfig: Record<string, { label: string; color: string; gradient: string }> = {
-  CUSTOMER: { label: 'Customer', color: 'bg-blue-100 text-blue-700', gradient: 'from-blue-500 to-indigo-600' },
-  CONSULTANT_JTC: { label: 'Consultant', color: 'bg-green-100 text-green-700', gradient: 'from-green-500 to-emerald-600' },
-  TAX_ADVISOR_JTC: { label: 'Tax Advisor', color: 'bg-purple-100 text-purple-700', gradient: 'from-purple-500 to-violet-600' },
-  PLATFORM_ADMIN: { label: 'Admin', color: 'bg-orange-100 text-orange-700', gradient: 'from-orange-500 to-red-500' },
-  UNKNOWN: { label: 'Unknown', color: 'bg-gray-100 text-gray-500', gradient: 'from-gray-400 to-gray-500' },
-};
-
 export default function AdminUsersPage() {
+  const t = useTranslations('admin');
+
+  const roleConfig: Record<string, { label: string; color: string; gradient: string }> = {
+    CUSTOMER: { label: t('customer'), color: 'bg-blue-100 text-blue-700', gradient: 'from-blue-500 to-indigo-600' },
+    CONSULTANT_JTC: { label: t('consultant'), color: 'bg-green-100 text-green-700', gradient: 'from-green-500 to-emerald-600' },
+    TAX_ADVISOR_JTC: { label: t('taxAdvisor'), color: 'bg-purple-100 text-purple-700', gradient: 'from-purple-500 to-violet-600' },
+    PLATFORM_ADMIN: { label: t('admin'), color: 'bg-orange-100 text-orange-700', gradient: 'from-orange-500 to-red-500' },
+    UNKNOWN: { label: 'Unknown', color: 'bg-gray-100 text-gray-500', gradient: 'from-gray-400 to-gray-500' },
+  };
   const [users, setUsers] = useState<UserItem[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +81,7 @@ export default function AdminUsersPage() {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, role: newRole }),
       });
-      setMessage('Role updated');
+      setMessage(t('roleUpdated'));
       setTimeout(() => setMessage(null), 3000);
       loadUsers();
     } catch { /* */ }
@@ -92,13 +94,13 @@ export default function AdminUsersPage() {
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-600 via-red-600 to-rose-700 p-6 md:p-8 text-white mb-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
-          <p className="text-orange-200 text-sm flex items-center gap-2"><Users className="h-4 w-4" />Admin</p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">Manajemen Pengguna</h1>
+          <p className="text-orange-200 text-sm flex items-center gap-2"><Users className="h-4 w-4" />{t('admin')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('userMgmt')}</h1>
 
           {stats && (
             <div className="grid grid-cols-5 gap-3 mt-6">
               <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold">{stats.total}</p><p className="text-[10px] text-orange-200">Total</p>
+                <p className="text-2xl font-bold">{stats.total}</p><p className="text-[10px] text-orange-200">{t('totalLabel')}</p>
               </div>
               {Object.entries(stats.byRole).map(([role, count]) => (
                 <div key={role} className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
@@ -118,16 +120,16 @@ export default function AdminUsersPage() {
       <div className="flex gap-3 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input placeholder="Cari email, nama, atau NPWP..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
+          <Input placeholder={t('searchUsers')} value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Semua Role" /></SelectTrigger>
+          <SelectTrigger className="w-[160px]"><SelectValue placeholder={t('allRoles')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Role</SelectItem>
-            <SelectItem value="CUSTOMER">Customer</SelectItem>
-            <SelectItem value="CONSULTANT_JTC">Consultant</SelectItem>
-            <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor</SelectItem>
-            <SelectItem value="PLATFORM_ADMIN">Admin</SelectItem>
+            <SelectItem value="all">{t('allRoles')}</SelectItem>
+            <SelectItem value="CUSTOMER">{t('customer')}</SelectItem>
+            <SelectItem value="CONSULTANT_JTC">{t('consultant')}</SelectItem>
+            <SelectItem value="TAX_ADVISOR_JTC">{t('taxAdvisor')}</SelectItem>
+            <SelectItem value="PLATFORM_ADMIN">{t('admin')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -136,7 +138,7 @@ export default function AdminUsersPage() {
       {isLoading ? (
         <div className="text-center py-20"><Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-600" /></div>
       ) : users.length === 0 ? (
-        <div className="text-center py-20 text-gray-400"><Users className="h-10 w-10 mx-auto mb-2 opacity-30" /><p>No users found</p></div>
+        <div className="text-center py-20 text-gray-400"><Users className="h-10 w-10 mx-auto mb-2 opacity-30" /><p>{t('noUsersFound')}</p></div>
       ) : (
         <div className="space-y-2">
           {users.map(u => {
@@ -156,7 +158,7 @@ export default function AdminUsersPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm text-gray-900 truncate">{u.fullName || u.email}</span>
                         <Badge className={`text-[10px] ${rc.color}`}>{rc.label}</Badge>
-                        {!u.isActive && <Badge className="text-[10px] bg-red-100 text-red-700">Inactive</Badge>}
+                        {!u.isActive && <Badge className="text-[10px] bg-red-100 text-red-700">{t('inactive')}</Badge>}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
                         <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{u.email}</span>
@@ -165,7 +167,7 @@ export default function AdminUsersPage() {
                     </div>
                     <div className="text-right text-xs text-gray-400 hidden sm:block">
                       <p>{new Date(u.createdAt).toLocaleDateString()}</p>
-                      <p>{u.lastSignIn ? `Last: ${new Date(u.lastSignIn).toLocaleDateString()}` : 'Never logged in'}</p>
+                      <p>{u.lastSignIn ? `${t('lastLogin')} ${new Date(u.lastSignIn).toLocaleDateString()}` : t('neverLoggedIn')}</p>
                     </div>
                     {isExpanded ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
                   </button>
@@ -175,9 +177,9 @@ export default function AdminUsersPage() {
                     <div className="border-t bg-gray-50 p-4 space-y-3">
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                         <div><span className="text-gray-500">User ID</span><p className="font-mono text-[10px] truncate">{u.id}</p></div>
-                        <div><span className="text-gray-500">Gabung</span><p>{new Date(u.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
-                        <div><span className="text-gray-500">Login Terakhir</span><p>{u.lastSignIn ? new Date(u.lastSignIn).toLocaleString('id-ID') : '-'}</p></div>
-                        <div><span className="text-gray-500">Email Verified</span><p>{u.emailConfirmed ? '✅ Yes' : '❌ No'}</p></div>
+                        <div><span className="text-gray-500">{t('joined')}</span><p>{new Date(u.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
+                        <div><span className="text-gray-500">{t('lastLoginLabel')}</span><p>{u.lastSignIn ? new Date(u.lastSignIn).toLocaleString('id-ID') : '-'}</p></div>
+                        <div><span className="text-gray-500">{t('emailVerified')}</span><p>{u.emailConfirmed ? '✅ Yes' : '❌ No'}</p></div>
                       </div>
 
                       <div className="flex items-center gap-3 pt-2">
@@ -185,25 +187,25 @@ export default function AdminUsersPage() {
                         <Select value={u.role} onValueChange={v => changeRole(u.id, v)}>
                           <SelectTrigger className="w-[160px] text-xs h-8"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="CUSTOMER">Customer</SelectItem>
-                            <SelectItem value="CONSULTANT_JTC">Consultant</SelectItem>
-                            <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor</SelectItem>
-                            <SelectItem value="PLATFORM_ADMIN">Admin</SelectItem>
+                            <SelectItem value="CUSTOMER">{t('customer')}</SelectItem>
+                            <SelectItem value="CONSULTANT_JTC">{t('consultant')}</SelectItem>
+                            <SelectItem value="TAX_ADVISOR_JTC">{t('taxAdvisor')}</SelectItem>
+                            <SelectItem value="PLATFORM_ADMIN">{t('admin')}</SelectItem>
                           </SelectContent>
                         </Select>
 
                         {/* Actions */}
                         <Button size="sm" variant="outline" className="text-xs h-8" onClick={() => doAction('reset-password', u.id, u.email)} disabled={isActionLoading}>
-                          <KeyRound className="h-3 w-3 mr-1" />Reset Password
+                          <KeyRound className="h-3 w-3 mr-1" />{t('resetPassword')}
                         </Button>
 
                         {u.isActive ? (
                           <Button size="sm" variant="outline" className="text-xs h-8 text-red-600 hover:bg-red-50" onClick={() => doAction('deactivate', u.id)} disabled={isActionLoading}>
-                            <UserX className="h-3 w-3 mr-1" />Nonaktifkan
+                            <UserX className="h-3 w-3 mr-1" />{t('deactivate')}
                           </Button>
                         ) : (
                           <Button size="sm" variant="outline" className="text-xs h-8 text-green-600 hover:bg-green-50" onClick={() => doAction('activate', u.id)} disabled={isActionLoading}>
-                            <UserCheck className="h-3 w-3 mr-1" />Aktifkan
+                            <UserCheck className="h-3 w-3 mr-1" />{t('activate')}
                           </Button>
                         )}
 

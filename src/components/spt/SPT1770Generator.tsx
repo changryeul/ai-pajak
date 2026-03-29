@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -62,20 +63,17 @@ interface TaxCreditsForm {
   pph25Installments: number;
 }
 
-const PTKP_OPTIONS: { value: PTKPStatus; label: string }[] = [
-  { value: 'TK/0', label: 'TK/0 - Tidak Kawin, 0 Tanggungan' },
-  { value: 'TK/1', label: 'TK/1 - Tidak Kawin, 1 Tanggungan' },
-  { value: 'TK/2', label: 'TK/2 - Tidak Kawin, 2 Tanggungan' },
-  { value: 'TK/3', label: 'TK/3 - Tidak Kawin, 3 Tanggungan' },
-  { value: 'K/0', label: 'K/0 - Kawin, 0 Tanggungan' },
-  { value: 'K/1', label: 'K/1 - Kawin, 1 Tanggungan' },
-  { value: 'K/2', label: 'K/2 - Kawin, 2 Tanggungan' },
-  { value: 'K/3', label: 'K/3 - Kawin, 3 Tanggungan' },
-  { value: 'K/I/0', label: 'K/I/0 - Kawin + Istri Gabung, 0 Tanggungan' },
-  { value: 'K/I/1', label: 'K/I/1 - Kawin + Istri Gabung, 1 Tanggungan' },
-  { value: 'K/I/2', label: 'K/I/2 - Kawin + Istri Gabung, 2 Tanggungan' },
-  { value: 'K/I/3', label: 'K/I/3 - Kawin + Istri Gabung, 3 Tanggungan' },
+const PTKP_VALUES: PTKPStatus[] = [
+  'TK/0', 'TK/1', 'TK/2', 'TK/3',
+  'K/0', 'K/1', 'K/2', 'K/3',
+  'K/I/0', 'K/I/1', 'K/I/2', 'K/I/3',
 ];
+
+const PTKP_LABEL_KEYS: Record<PTKPStatus, string> = {
+  'TK/0': 'ptkpTK0', 'TK/1': 'ptkpTK1', 'TK/2': 'ptkpTK2', 'TK/3': 'ptkpTK3',
+  'K/0': 'ptkpK0', 'K/1': 'ptkpK1', 'K/2': 'ptkpK2', 'K/3': 'ptkpK3',
+  'K/I/0': 'ptkpKI0', 'K/I/1': 'ptkpKI1', 'K/I/2': 'ptkpKI2', 'K/I/3': 'ptkpKI3',
+};
 
 const emptyBusiness: BusinessIncomeForm = {
   businessName: '',
@@ -96,6 +94,7 @@ export function SPT1770Generator({
   defaultPtkpStatus = 'TK/0',
   onComplete,
 }: SPT1770GeneratorProps) {
+  const t = useTranslations('sptCommon');
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -179,7 +178,7 @@ export function SPT1770Generator({
       (b) => b.businessName && b.grossRevenue > 0
     );
     if (validBusiness.length === 0) {
-      setError('Minimal satu usaha harus diisi dengan benar');
+      setError(t('minOneBusiness'));
       return;
     }
 
@@ -248,7 +247,7 @@ export function SPT1770Generator({
       (b) => b.businessName && b.grossRevenue > 0
     );
     if (validBusiness.length === 0) {
-      setError('Minimal satu usaha harus diisi dengan benar');
+      setError(t('minOneBusiness'));
       return;
     }
 
@@ -329,16 +328,16 @@ export function SPT1770Generator({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Briefcase className="h-5 w-5 text-purple-600" />
-          Generate SPT 1770
+          {t('generateSpt')} 1770
         </CardTitle>
         <CardDescription>
-          SPT Tahunan PPh Wajib Pajak Orang Pribadi - Untuk usaha atau pekerjaan bebas
+          {t('spt1770GenDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Customer Info */}
         <div className="p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-medium text-gray-700 mb-2">Wajib Pajak</h4>
+          <h4 className="font-medium text-gray-700 mb-2">{t('taxpayer')}</h4>
           <p className="font-semibold">{customerName}</p>
           {customerNpwp && (
             <p className="text-sm text-gray-500 font-mono">{customerNpwp}</p>
@@ -347,10 +346,10 @@ export function SPT1770Generator({
 
         <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="basic">Data Dasar</TabsTrigger>
-            <TabsTrigger value="business">Usaha</TabsTrigger>
-            <TabsTrigger value="otherIncome">Penghasilan Lain</TabsTrigger>
-            <TabsTrigger value="credits">Kredit Pajak</TabsTrigger>
+            <TabsTrigger value="basic">{t('basicData')}</TabsTrigger>
+            <TabsTrigger value="business">{t('business')}</TabsTrigger>
+            <TabsTrigger value="otherIncome">{t('otherIncome')}</TabsTrigger>
+            <TabsTrigger value="credits">{t('taxCredits')}</TabsTrigger>
           </TabsList>
 
           {/* Basic Info Tab */}
@@ -358,13 +357,13 @@ export function SPT1770Generator({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Tax Year */}
               <div className="space-y-2">
-                <Label htmlFor="taxYear">Tahun Pajak</Label>
+                <Label htmlFor="taxYear">{t('taxYear')}</Label>
                 <Select
                   value={taxYear.toString()}
                   onValueChange={(v) => setTaxYear(parseInt(v))}
                 >
                   <SelectTrigger id="taxYear">
-                    <SelectValue placeholder="Pilih tahun pajak" />
+                    <SelectValue placeholder={t('selectTaxYear')} />
                   </SelectTrigger>
                   <SelectContent>
                     {taxYearOptions.map((year) => (
@@ -378,7 +377,7 @@ export function SPT1770Generator({
 
               {/* Correction Number */}
               <div className="space-y-2">
-                <Label htmlFor="correctionNumber">Pembetulan ke-</Label>
+                <Label htmlFor="correctionNumber">{t('correctionPrefix')}</Label>
                 <Select
                   value={correctionNumber.toString()}
                   onValueChange={(v) => setCorrectionNumber(parseInt(v))}
@@ -398,18 +397,18 @@ export function SPT1770Generator({
 
             {/* PTKP Status */}
             <div className="space-y-2">
-              <Label htmlFor="ptkpStatus">Status PTKP</Label>
+              <Label htmlFor="ptkpStatus">{t('ptkpStatus')}</Label>
               <Select
                 value={ptkpStatus}
                 onValueChange={(v) => setPtkpStatus(v as PTKPStatus)}
               >
                 <SelectTrigger id="ptkpStatus">
-                  <SelectValue placeholder="Pilih status PTKP" />
+                  <SelectValue placeholder={t('selectPtkp')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {PTKP_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                  {PTKP_VALUES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {value} - {t(PTKP_LABEL_KEYS[value])}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -422,9 +421,7 @@ export function SPT1770Generator({
             {/* Info */}
             <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
               <p className="text-sm text-purple-800">
-                <strong>SPT 1770</strong> digunakan untuk wajib pajak dengan
-                penghasilan dari usaha/pekerjaan bebas. Anda dapat memilih
-                metode Norma (sederhana) atau Pembukuan (lengkap).
+                {t('spt1770Note')}
               </p>
             </div>
           </TabsContent>
@@ -433,18 +430,18 @@ export function SPT1770Generator({
           <TabsContent value="business" className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
               <Label className="text-base font-semibold">
-                Penghasilan dari Usaha
+                {t('businessIncome')}
               </Label>
               <Button variant="outline" size="sm" onClick={addBusiness}>
                 <Plus className="h-4 w-4 mr-1" />
-                Tambah Usaha
+                {t('addBusiness')}
               </Button>
             </div>
 
             {businessIncome.map((business, index) => (
               <div key={index} className="border rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Usaha {index + 1}</h4>
+                  <h4 className="font-medium">{t('business')} {index + 1}</h4>
                   {businessIncome.length > 1 && (
                     <Button
                       variant="ghost"
@@ -458,18 +455,18 @@ export function SPT1770Generator({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Nama Usaha</Label>
+                    <Label>{t('businessName')}</Label>
                     <Input
                       value={business.businessName}
                       onChange={(e) =>
                         handleBusinessChange(index, 'businessName', e.target.value)
                       }
-                      placeholder="Nama usaha"
+                      placeholder={t('businessName')}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Kode KLU</Label>
+                    <Label>{t('kluCode')}</Label>
                     <Input
                       value={business.kluCode}
                       onChange={(e) =>
@@ -478,12 +475,12 @@ export function SPT1770Generator({
                       placeholder="47100"
                     />
                     <p className="text-xs text-gray-500">
-                      Kode Klasifikasi Lapangan Usaha (5 digit)
+                      {t('kluCodeDesc')}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Metode Pembukuan</Label>
+                    <Label>{t('bookkeepingMethod')}</Label>
                     <Select
                       value={business.bookkeepingMethod}
                       onValueChange={(v) =>
@@ -494,16 +491,16 @@ export function SPT1770Generator({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="NORMA">Norma (Sederhana)</SelectItem>
+                        <SelectItem value="NORMA">{t('bookkeepingNorma')}</SelectItem>
                         <SelectItem value="PEMBUKUAN">
-                          Pembukuan (Lengkap)
+                          {t('bookkeepingFull')}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Peredaran Bruto (Rp)</Label>
+                    <Label>{t('grossRevenue')} (Rp)</Label>
                     <Input
                       type="number"
                       value={business.grossRevenue || ''}
@@ -523,7 +520,7 @@ export function SPT1770Generator({
 
             <div className="p-3 bg-gray-100 rounded-lg">
               <div className="flex justify-between font-medium">
-                <span>Total Peredaran Bruto</span>
+                <span>{t('totalGrossRevenue')}</span>
                 <span className="font-mono">
                   Rp {formatCurrency(getTotalBusinessRevenue())}
                 </span>
@@ -533,8 +530,7 @@ export function SPT1770Generator({
             {getTotalBusinessRevenue() > 0 && getTotalBusinessRevenue() < 4_800_000_000 && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm text-green-800">
-                  <strong>Catatan:</strong> Omzet di bawah Rp 4,8 miliar memenuhi
-                  syarat untuk tarif PPh Final UMKM 0,5% (PP 23/2018).
+                  {t('umkmNote')}
                 </p>
               </div>
             )}
@@ -543,12 +539,12 @@ export function SPT1770Generator({
           {/* Other Income Tab */}
           <TabsContent value="otherIncome" className="space-y-4 mt-4">
             <p className="text-sm text-gray-600 mb-4">
-              Isi penghasilan lain di luar usaha (opsional)
+              {t('fillOtherIncome')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Bunga (Rp)</Label>
+                <Label>{t('interest')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.interestIncome || ''}
@@ -560,7 +556,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>Dividen (Rp)</Label>
+                <Label>{t('dividend')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.dividendIncome || ''}
@@ -572,7 +568,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>Royalti (Rp)</Label>
+                <Label>{t('royalty')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.royaltyIncome || ''}
@@ -584,7 +580,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>Sewa (Rp)</Label>
+                <Label>{t('rental')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.rentalIncome || ''}
@@ -596,7 +592,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>Keuntungan Penjualan Harta (Rp)</Label>
+                <Label>{t('capitalGains')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.capitalGains || ''}
@@ -608,7 +604,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>Hadiah (Rp)</Label>
+                <Label>{t('prizes')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.prizeIncome || ''}
@@ -620,7 +616,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>Penghasilan Lainnya (Rp)</Label>
+                <Label>{t('otherIncomeLabel')} (Rp)</Label>
                 <Input
                   type="number"
                   value={otherIncome.otherIncome || ''}
@@ -634,7 +630,7 @@ export function SPT1770Generator({
 
             <div className="p-3 bg-gray-100 rounded-lg mt-4">
               <div className="flex justify-between font-medium">
-                <span>Total Penghasilan Lain</span>
+                <span>{t('totalOtherIncomeSum')}</span>
                 <span className="font-mono">
                   Rp {formatCurrency(getTotalOtherIncome())}
                 </span>
@@ -645,12 +641,12 @@ export function SPT1770Generator({
           {/* Tax Credits Tab */}
           <TabsContent value="credits" className="space-y-4 mt-4">
             <p className="text-sm text-gray-600 mb-4">
-              Isi kredit pajak yang sudah dipotong/dibayar (opsional)
+              {t('fillTaxCredits')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>PPh 21 Dipotong (Rp)</Label>
+                <Label>{t('pph21Credit')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph21Withheld || ''}
@@ -660,12 +656,12 @@ export function SPT1770Generator({
                   placeholder="0"
                 />
                 <p className="text-xs text-gray-500">
-                  Dari pekerjaan sebagai karyawan (jika ada)
+                  {t('fromEmployment')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label>PPh 22 (Impor, dll) (Rp)</Label>
+                <Label>{t('pph22Credit')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph22Withheld || ''}
@@ -677,7 +673,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>PPh 23 (Jasa, dll) (Rp)</Label>
+                <Label>{t('pph23Credit')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph23Withheld || ''}
@@ -689,7 +685,7 @@ export function SPT1770Generator({
               </div>
 
               <div className="space-y-2">
-                <Label>PPh 25 (Angsuran) (Rp)</Label>
+                <Label>{t('pph25Credit')} (Rp)</Label>
                 <Input
                   type="number"
                   value={taxCredits.pph25Installments || ''}
@@ -703,7 +699,7 @@ export function SPT1770Generator({
 
             <div className="p-3 bg-gray-100 rounded-lg mt-4">
               <div className="flex justify-between font-medium">
-                <span>Total Kredit Pajak</span>
+                <span>{t('totalTaxCreditsSum')}</span>
                 <span className="font-mono">
                   Rp {formatCurrency(getTotalTaxCredits())}
                 </span>
@@ -721,7 +717,7 @@ export function SPT1770Generator({
       </CardContent>
       <CardFooter className="flex justify-end gap-3">
         <Button onClick={generateSPT} disabled={isLoading}>
-          {isLoading ? 'Generating...' : 'Generate SPT'}
+          {isLoading ? t('generating') : t('generateSpt')}
         </Button>
       </CardFooter>
     </Card>

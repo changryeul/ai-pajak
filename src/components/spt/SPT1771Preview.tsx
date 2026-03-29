@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -33,29 +34,34 @@ function formatPercent(value: number): string {
   return (value * 100).toFixed(2) + '%';
 }
 
-const ENTITY_TYPE_LABELS: Record<string, string> = {
-  PT: 'Perseroan Terbatas',
-  CV: 'Commanditaire Vennootschap',
-  FIRMA: 'Firma',
-  KOPERASI: 'Koperasi',
-  YAYASAN: 'Yayasan',
-  OTHER: 'Lainnya',
-};
-
 export function SPT1771Preview({
   data,
   onDownloadPDF,
   onEdit,
   isLoading = false,
 }: SPT1771PreviewProps) {
+  const t = useTranslations('sptCommon');
+
+  const getEntityLabel = (type: string): string => {
+    const map: Record<string, string> = {
+      PT: t('entityPT'),
+      CV: t('entityCV'),
+      FIRMA: t('entityFirma'),
+      KOPERASI: t('entityKoperasi'),
+      YAYASAN: t('entityYayasan'),
+      OTHER: t('entityOther'),
+    };
+    return map[type] || type;
+  };
+
   const statusBadge = () => {
     switch (data.summary.status) {
       case 'NIHIL':
         return <Badge className="bg-green-100 text-green-800">NIHIL</Badge>;
       case 'KURANG_BAYAR':
-        return <Badge className="bg-red-100 text-red-800">Kurang Bayar</Badge>;
+        return <Badge className="bg-red-100 text-red-800">{t('kurangBayar')}</Badge>;
       case 'LEBIH_BAYAR':
-        return <Badge className="bg-blue-100 text-blue-800">Lebih Bayar</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800">{t('lebihBayar')}</Badge>;
     }
   };
 
@@ -66,15 +72,15 @@ export function SPT1771Preview({
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle>SPT 1771 - Tahun Pajak {data.taxYear}</CardTitle>
+              <CardTitle>SPT 1771 - {t('taxYear')} {data.taxYear}</CardTitle>
               <CardDescription>
-                SPT Tahunan PPh Wajib Pajak Badan
+                {t('spt1771Desc')}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               {statusBadge()}
               {data.correctionNumber > 0 && (
-                <Badge variant="outline">Pembetulan ke-{data.correctionNumber}</Badge>
+                <Badge variant="outline">{t('correctionPrefix')}{data.correctionNumber}</Badge>
               )}
             </div>
           </div>
@@ -84,13 +90,13 @@ export function SPT1771Preview({
       {/* Company Identity */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Identitas Wajib Pajak Badan</CardTitle>
+          <CardTitle className="text-lg">{t('corporateTaxpayer')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-gray-500">Nama Perusahaan</span>
+                <span className="text-sm text-gray-500">{t('companyName')}</span>
                 <p className="font-medium">{data.company.companyName}</p>
               </div>
               <div>
@@ -100,25 +106,25 @@ export function SPT1771Preview({
                 </p>
               </div>
               <div>
-                <span className="text-sm text-gray-500">Bentuk Badan</span>
+                <span className="text-sm text-gray-500">{t('entityType')}</span>
                 <p className="font-medium">
-                  {ENTITY_TYPE_LABELS[data.company.entityType] || data.company.entityType}
+                  {getEntityLabel(data.company.entityType)}
                 </p>
               </div>
             </div>
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-gray-500">Alamat</span>
+                <span className="text-sm text-gray-500">{t('address')}</span>
                 <p className="font-medium">{data.company.address}</p>
               </div>
               <div>
-                <span className="text-sm text-gray-500">Kode KLU</span>
+                <span className="text-sm text-gray-500">{t('kluCode')}</span>
                 <p className="font-medium font-mono">
                   {data.company.kluCode || '-'}
                 </p>
               </div>
               <div>
-                <span className="text-sm text-gray-500">Periode Fiskal</span>
+                <span className="text-sm text-gray-500">{t('fiscalPeriod')}</span>
                 <p className="font-medium">
                   {data.fiscalYear.startDate} s.d. {data.fiscalYear.endDate}
                 </p>
@@ -131,31 +137,31 @@ export function SPT1771Preview({
       {/* Income Statement Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Ringkasan Laporan Laba Rugi</CardTitle>
+          <CardTitle className="text-lg">{t('incomeStatementSummary')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Pendapatan Neto</span>
+              <span className="text-gray-600">{t('netRevenue')}</span>
               <span className="font-mono font-medium">
                 Rp {formatCurrency(data.summary.netRevenue)}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Laba Kotor</span>
+              <span className="text-gray-600">{t('grossProfit')}</span>
               <span className="font-mono font-medium">
                 Rp {formatCurrency(data.summary.grossProfit)}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Laba Usaha</span>
+              <span className="text-gray-600">{t('operatingIncome')}</span>
               <span className="font-mono font-medium">
                 Rp {formatCurrency(data.summary.operatingIncome)}
               </span>
             </div>
             <div className="flex justify-between py-2 bg-blue-50 px-3 rounded">
               <span className="text-blue-800 font-medium">
-                Laba Sebelum Pajak (Komersial)
+                {t('incomeBeforeTax')}
               </span>
               <span className="font-mono font-bold text-blue-900">
                 Rp {formatCurrency(data.summary.commercialIncome)}
@@ -168,19 +174,19 @@ export function SPT1771Preview({
       {/* Fiscal Adjustments */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Koreksi Fiskal</CardTitle>
+          <CardTitle className="text-lg">{t('fiscalAdjustments')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {/* Positive Adjustments */}
             <div>
               <h4 className="font-medium text-gray-700 mb-2">
-                Koreksi Positif (Menambah Penghasilan Kena Pajak)
+                {t('positiveAdjustments')}
               </h4>
               <div className="bg-red-50 p-3 rounded space-y-2">
                 {data.fiscalAdjustments.positiveAdjustments.incomeTaxExpense > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span>Beban Pajak Penghasilan</span>
+                    <span>{t('incomeTaxExpense')}</span>
                     <span className="font-mono">
                       Rp{' '}
                       {formatCurrency(
@@ -192,7 +198,7 @@ export function SPT1771Preview({
                 {data.fiscalAdjustments.positiveAdjustments
                   .entertainmentWithoutDaftarNominatif > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span>Entertainment Tanpa Nominatif</span>
+                    <span>{t('entertainmentNoNominatif')}</span>
                     <span className="font-mono">
                       Rp{' '}
                       {formatCurrency(
@@ -204,7 +210,7 @@ export function SPT1771Preview({
                 )}
                 {data.fiscalAdjustments.positiveAdjustments.finesAndPenalties > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span>Denda dan Sanksi</span>
+                    <span>{t('finesAndPenalties')}</span>
                     <span className="font-mono">
                       Rp{' '}
                       {formatCurrency(
@@ -214,7 +220,7 @@ export function SPT1771Preview({
                   </div>
                 )}
                 <div className="flex justify-between font-medium border-t pt-2">
-                  <span>Total Koreksi Positif</span>
+                  <span>{t('totalPositiveAdj')}</span>
                   <span className="font-mono text-red-700">
                     + Rp{' '}
                     {formatCurrency(data.fiscalAdjustments.positiveAdjustments.total)}
@@ -226,12 +232,12 @@ export function SPT1771Preview({
             {/* Negative Adjustments */}
             <div>
               <h4 className="font-medium text-gray-700 mb-2">
-                Koreksi Negatif (Mengurangi Penghasilan Kena Pajak)
+                {t('negativeAdjustments')}
               </h4>
               <div className="bg-green-50 p-3 rounded space-y-2">
                 {data.fiscalAdjustments.negativeAdjustments.dividendFromDomestic > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span>Dividen dari Dalam Negeri</span>
+                    <span>{t('domesticDividend')}</span>
                     <span className="font-mono">
                       Rp{' '}
                       {formatCurrency(
@@ -242,7 +248,7 @@ export function SPT1771Preview({
                 )}
                 {data.fiscalAdjustments.negativeAdjustments.bankInterestFinalTax > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span>Bunga Bank (PPh Final)</span>
+                    <span>{t('bankInterestFinal')}</span>
                     <span className="font-mono">
                       Rp{' '}
                       {formatCurrency(
@@ -254,7 +260,7 @@ export function SPT1771Preview({
                 {data.fiscalAdjustments.negativeAdjustments.propertyRentalFinalTax >
                   0 && (
                   <div className="flex justify-between text-sm">
-                    <span>Sewa Tanah/Bangunan (PPh Final)</span>
+                    <span>{t('propertyRentalFinal')}</span>
                     <span className="font-mono">
                       Rp{' '}
                       {formatCurrency(
@@ -264,7 +270,7 @@ export function SPT1771Preview({
                   </div>
                 )}
                 <div className="flex justify-between font-medium border-t pt-2">
-                  <span>Total Koreksi Negatif</span>
+                  <span>{t('totalNegativeAdj')}</span>
                   <span className="font-mono text-green-700">
                     - Rp{' '}
                     {formatCurrency(data.fiscalAdjustments.negativeAdjustments.total)}
@@ -275,7 +281,7 @@ export function SPT1771Preview({
 
             {/* Net Adjustment */}
             <div className="flex justify-between p-3 bg-gray-100 rounded font-medium">
-              <span>Koreksi Fiskal Neto</span>
+              <span>{t('netFiscalAdj')}</span>
               <span
                 className={`font-mono ${
                   data.fiscalAdjustments.netAdjustment >= 0
@@ -294,22 +300,22 @@ export function SPT1771Preview({
       {/* Tax Calculation */}
       <Card className="border-2 border-blue-200">
         <CardHeader className="bg-blue-50">
-          <CardTitle className="text-lg">Perhitungan Pajak</CardTitle>
+          <CardTitle className="text-lg">{t('taxCalculation')}</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="space-y-4">
             {/* Fiscal Income Calculation */}
             <div className="space-y-2">
-              <h4 className="font-medium text-gray-700">A. Penghasilan Kena Pajak</h4>
+              <h4 className="font-medium text-gray-700">A. {t('taxableIncomeCalc')}</h4>
               <div className="pl-4 space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Laba Komersial</span>
+                  <span className="text-gray-600">{t('commercialProfit')}</span>
                   <span className="font-mono">
                     Rp {formatCurrency(data.taxCalculation.commercialIncome)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Koreksi Fiskal Neto</span>
+                  <span className="text-gray-600">{t('netFiscalAdjCalc')}</span>
                   <span
                     className={`font-mono ${
                       data.taxCalculation.netFiscalAdjustment >= 0
@@ -322,14 +328,14 @@ export function SPT1771Preview({
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-1">
-                  <span className="font-medium">Penghasilan Fiskal</span>
+                  <span className="font-medium">{t('fiscalIncome')}</span>
                   <span className="font-mono font-medium">
                     Rp {formatCurrency(data.taxCalculation.fiscalIncome)}
                   </span>
                 </div>
                 {data.taxCalculation.lossCarryforwardUsed > 0 && (
                   <div className="flex justify-between text-green-700">
-                    <span>Kompensasi Kerugian</span>
+                    <span>{t('lossCompensation')}</span>
                     <span className="font-mono">
                       - Rp {formatCurrency(data.taxCalculation.lossCarryforwardUsed)}
                     </span>
@@ -337,7 +343,7 @@ export function SPT1771Preview({
                 )}
                 <div className="flex justify-between bg-blue-50 p-2 rounded">
                   <span className="font-bold text-blue-800">
-                    Penghasilan Kena Pajak
+                    {t('taxableIncomeLabel')}
                   </span>
                   <span className="font-mono font-bold text-blue-900">
                     Rp {formatCurrency(data.taxCalculation.taxableIncome)}
@@ -348,13 +354,13 @@ export function SPT1771Preview({
 
             {/* Tax Rates */}
             <div className="space-y-2">
-              <h4 className="font-medium text-gray-700">B. Perhitungan PPh Badan</h4>
+              <h4 className="font-medium text-gray-700">B. {t('corpTaxCalc')}</h4>
               <div className="pl-4 space-y-1">
                 {data.taxCalculation.smePortionLimit > 0 && (
                   <>
                     <div className="flex justify-between">
                       <span className="text-gray-600">
-                        Bagian UMKM (Tarif {formatPercent(data.taxCalculation.smeRate)})
+                        {t('smePortionRate', { rate: formatPercent(data.taxCalculation.smeRate) })}
                       </span>
                       <span className="font-mono">
                         Rp {formatCurrency(data.taxCalculation.smePortionLimit)} x{' '}
@@ -364,8 +370,7 @@ export function SPT1771Preview({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">
-                        Bagian Reguler (Tarif{' '}
-                        {formatPercent(data.taxCalculation.corporateTaxRate)})
+                        {t('regularPortionRate', { rate: formatPercent(data.taxCalculation.corporateTaxRate) })}
                       </span>
                       <span className="font-mono">
                         Rp{' '}
@@ -382,7 +387,7 @@ export function SPT1771Preview({
                 {data.taxCalculation.smePortionLimit === 0 && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">
-                      Tarif {formatPercent(data.taxCalculation.corporateTaxRate)}
+                      {t('taxRate')} {formatPercent(data.taxCalculation.corporateTaxRate)}
                     </span>
                     <span className="font-mono">
                       Rp {formatCurrency(data.taxCalculation.taxableIncome)} x{' '}
@@ -392,7 +397,7 @@ export function SPT1771Preview({
                   </div>
                 )}
                 <div className="flex justify-between border-t pt-1">
-                  <span className="font-medium">PPh Terutang</span>
+                  <span className="font-medium">{t('pphDue')}</span>
                   <span className="font-mono font-medium">
                     Rp {formatCurrency(data.taxCalculation.grossTaxDue)}
                   </span>
@@ -402,11 +407,11 @@ export function SPT1771Preview({
 
             {/* Tax Credits */}
             <div className="space-y-2">
-              <h4 className="font-medium text-gray-700">C. Kredit Pajak</h4>
+              <h4 className="font-medium text-gray-700">C. {t('corpTaxCredits')}</h4>
               <div className="pl-4 space-y-1">
                 {data.taxCredits.pph22Withheld > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">PPh 22 Dipungut</span>
+                    <span className="text-gray-600">{t('pph22Collected')}</span>
                     <span className="font-mono text-green-600">
                       - Rp {formatCurrency(data.taxCredits.pph22Withheld)}
                     </span>
@@ -414,7 +419,7 @@ export function SPT1771Preview({
                 )}
                 {data.taxCredits.pph23Withheld > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">PPh 23 Dipotong</span>
+                    <span className="text-gray-600">{t('pph23Deducted')}</span>
                     <span className="font-mono text-green-600">
                       - Rp {formatCurrency(data.taxCredits.pph23Withheld)}
                     </span>
@@ -422,14 +427,14 @@ export function SPT1771Preview({
                 )}
                 {data.taxCredits.pph25Installments > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">PPh 25 Angsuran</span>
+                    <span className="text-gray-600">{t('pph25Installments')}</span>
                     <span className="font-mono text-green-600">
                       - Rp {formatCurrency(data.taxCredits.pph25Installments)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between border-t pt-1">
-                  <span className="font-medium">Total Kredit Pajak</span>
+                  <span className="font-medium">{t('totalTaxCredits')}</span>
                   <span className="font-mono font-medium text-green-700">
                     - Rp {formatCurrency(data.taxCredits.totalTaxCredits)}
                   </span>
@@ -442,7 +447,7 @@ export function SPT1771Preview({
               {data.summary.status === 'NIHIL' && (
                 <div className="flex justify-between items-center p-4 bg-green-100 rounded-lg">
                   <span className="text-lg font-bold text-green-700">
-                    Status: NIHIL
+                    {t('statusNihil')}
                   </span>
                   <span className="text-lg font-mono font-bold text-green-700">
                     Rp 0
@@ -451,7 +456,7 @@ export function SPT1771Preview({
               )}
               {data.summary.status === 'KURANG_BAYAR' && (
                 <div className="flex justify-between items-center p-4 bg-red-100 rounded-lg">
-                  <span className="text-lg font-bold text-red-700">PPh Kurang Bayar</span>
+                  <span className="text-lg font-bold text-red-700">{t('pphUnderpaid')}</span>
                   <span className="text-lg font-mono font-bold text-red-700">
                     Rp {formatCurrency(data.summary.taxPayable)}
                   </span>
@@ -460,7 +465,7 @@ export function SPT1771Preview({
               {data.summary.status === 'LEBIH_BAYAR' && (
                 <div className="flex justify-between items-center p-4 bg-blue-100 rounded-lg">
                   <span className="text-lg font-bold text-blue-700">
-                    PPh Lebih Bayar (Restitusi)
+                    {t('pphOverpaid')}
                   </span>
                   <span className="text-lg font-mono font-bold text-blue-700">
                     Rp {formatCurrency(data.summary.taxRefund)}
@@ -473,12 +478,12 @@ export function SPT1771Preview({
         <CardFooter className="bg-gray-50 flex justify-between">
           {onEdit && (
             <Button variant="outline" onClick={onEdit} disabled={isLoading}>
-              Edit Data
+              {t('editData')}
             </Button>
           )}
           {onDownloadPDF && (
             <Button onClick={onDownloadPDF} disabled={isLoading}>
-              Download PDF
+              {t('downloadPdf')}
             </Button>
           )}
         </CardFooter>
@@ -489,12 +494,12 @@ export function SPT1771Preview({
         <Card className="bg-amber-50 border-amber-200">
           <CardHeader>
             <CardTitle className="text-lg text-amber-800">
-              Angsuran PPh 25 Tahun Depan
+              {t('pph25NextYear')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center">
-              <span className="text-amber-700">Angsuran Bulanan</span>
+              <span className="text-amber-700">{t('monthlyInstallment')}</span>
               <span className="text-xl font-mono font-bold text-amber-800">
                 Rp {formatCurrency(data.summary.pph25MonthlyInstallment)} / bulan
               </span>
@@ -506,30 +511,30 @@ export function SPT1771Preview({
       {/* Statistics */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Statistik</CardTitle>
+          <CardTitle className="text-lg">{t('statistics')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-3 bg-gray-50 rounded">
-              <p className="text-sm text-gray-500">Pendapatan Bruto</p>
+              <p className="text-sm text-gray-500">{t('grossRevenueStats')}</p>
               <p className="font-mono font-semibold">
                 Rp {formatCurrency(data.incomeStatement.grossRevenue)}
               </p>
             </div>
             <div className="text-center p-3 bg-gray-50 rounded">
-              <p className="text-sm text-gray-500">Laba Fiskal</p>
+              <p className="text-sm text-gray-500">{t('fiscalProfit')}</p>
               <p className="font-mono font-semibold">
                 Rp {formatCurrency(data.taxCalculation.fiscalIncome)}
               </p>
             </div>
             <div className="text-center p-3 bg-gray-50 rounded">
-              <p className="text-sm text-gray-500">PPh Terutang</p>
+              <p className="text-sm text-gray-500">{t('pphDue')}</p>
               <p className="font-mono font-semibold">
                 Rp {formatCurrency(data.taxCalculation.grossTaxDue)}
               </p>
             </div>
             <div className="text-center p-3 bg-gray-50 rounded">
-              <p className="text-sm text-gray-500">Tarif Efektif</p>
+              <p className="text-sm text-gray-500">{t('effectiveTaxRate')}</p>
               <p className="font-mono font-semibold">
                 {formatPercent(data.summary.effectiveTaxRate)}
               </p>
@@ -542,10 +547,7 @@ export function SPT1771Preview({
       <Card className="bg-amber-50 border-amber-200">
         <CardContent className="pt-6">
           <p className="text-sm text-amber-800">
-            <strong>Perhatian:</strong> SPT ini dibuat berdasarkan data yang diinput.
-            Pastikan semua informasi sudah benar dan sesuai dengan laporan keuangan
-            yang telah diaudit (jika diperlukan) sebelum melakukan pelaporan ke DJP.
-            Wajib Pajak bertanggung jawab atas kebenaran data yang dilaporkan.
+            {t('disclaimerCorp')}
           </p>
         </CardContent>
       </Card>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -115,6 +116,7 @@ function formatLatency(ms: number): string {
 }
 
 export default function MonitoringDashboard() {
+  const t = useTranslations('admin');
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -202,11 +204,11 @@ export default function MonitoringDashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
-        <p className="text-lg font-medium">Failed to load system status</p>
+        <p className="text-lg font-medium">{t('failedToLoad')}</p>
         <p className="text-sm text-muted-foreground">{error}</p>
         <Button onClick={fetchStatus} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
-          Retry
+          {t('retry')}
         </Button>
       </div>
     );
@@ -217,9 +219,9 @@ export default function MonitoringDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">System Monitoring</h1>
+          <h1 className="text-2xl font-bold">{t('systemMonitoring')}</h1>
           <p className="text-muted-foreground">
-            Real-time system health and performance metrics
+            {t('monitoringSubtitle')}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -231,7 +233,7 @@ export default function MonitoringDashboard() {
             disabled={refreshing}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('refresh')}
           </Button>
         </div>
       </div>
@@ -242,7 +244,7 @@ export default function MonitoringDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Server className="h-4 w-4" />
-              System Status
+              {t('systemStatus')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -254,7 +256,7 @@ export default function MonitoringDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Uptime
+              {t('uptime')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -268,7 +270,7 @@ export default function MonitoringDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Database className="h-4 w-4" />
-              DB Latency
+              {t('dbLatency')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -284,7 +286,7 @@ export default function MonitoringDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Activity className="h-4 w-4" />
-              Version
+              {t('version')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -298,9 +300,9 @@ export default function MonitoringDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5" />
-            Services
+            {t('services')}
           </CardTitle>
-          <CardDescription>External service connectivity status</CardDescription>
+          <CardDescription>{t('servicesDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -345,9 +347,9 @@ export default function MonitoringDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Circuit Breakers
+            {t('circuitBreakers')}
           </CardTitle>
-          <CardDescription>Resilience pattern status for external services</CardDescription>
+          <CardDescription>{t('circuitBreakersDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -361,9 +363,9 @@ export default function MonitoringDashboard() {
                   <CircuitBreakerBadge state={breaker.state} />
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <p>Failures: {breaker.failures}</p>
+                  <p>{t('failures')}: {breaker.failures}</p>
                   {breaker.lastFailure && (
-                    <p>Last failure: {new Date(breaker.lastFailure).toLocaleString()}</p>
+                    <p>{t('lastFailure')}: {new Date(breaker.lastFailure).toLocaleString()}</p>
                   )}
                 </div>
               </div>
@@ -378,13 +380,13 @@ export default function MonitoringDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Server className="h-5 w-5" />
-              Memory Usage
+              {t('memoryUsage')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Heap Used</span>
+                <span>{t('heapUsed')}</span>
                 <span>
                   {systemStatus.metrics.memory.used}MB / {systemStatus.metrics.memory.total}MB
                 </span>
@@ -400,7 +402,7 @@ export default function MonitoringDashboard() {
 
       {/* Last Updated */}
       <div className="text-center text-sm text-muted-foreground">
-        Last updated: {systemStatus ? new Date(systemStatus.timestamp).toLocaleString() : '-'}
+        {t('lastUpdated')}: {systemStatus ? new Date(systemStatus.timestamp).toLocaleString() : '-'}
       </div>
     </div>
   );
