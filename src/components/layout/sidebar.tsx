@@ -102,6 +102,7 @@ const navItems: NavSection[] = [
       { href: '/admin/users', icon: Users, labelKey: 'nav.userManagement' },
       { href: '/admin/billing', icon: CreditCard, labelKey: 'nav.billingAdmin' },
       { href: '/admin/consultants', icon: ClipboardList, labelKey: 'nav.consultantAdmin' },
+      { href: '/admin/ai-usage', icon: Lightbulb, labelKey: 'nav.aiUsage' },
       { href: '/admin/audit-logs', icon: Shield, labelKey: 'nav.auditLogs' },
       { href: '/admin/tax-rates', icon: Settings, labelKey: 'nav.taxRates' },
     ],
