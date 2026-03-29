@@ -104,6 +104,30 @@ export interface PPh23Data {
   has_npwp?: boolean;
 }
 
+// PPh 22 specific types (Domestic Transaction Withholding Tax)
+export interface PPh22Data {
+  transaction_type: string; // GOVERNMENT_PROCUREMENT, CEMENT, STEEL, AUTOMOTIVE, etc.
+  gross_amount: number;
+  payer_name?: string;
+  payer_npwp?: string;
+  has_npwp?: boolean;
+  transaction_date?: string;
+  description?: string;
+}
+
+export interface PPh22Calculation {
+  gross_amount: number;
+  base_rate: number;
+  applied_rate: number;
+  tax_amount: number;
+  net_amount: number;
+  npwp_surcharge_applied: boolean;
+  transaction_label: string;
+  legal_basis: string;
+  /** Most PPh 22 is creditable against annual tax */
+  is_creditable: boolean;
+}
+
 // PPh 26 specific types (Non-Resident Withholding Tax)
 export interface PPh26Data {
   income_type: 'dividend' | 'interest' | 'royalty' | 'service' | 'salary' | 'pension' | 'insurance' | 'other';
