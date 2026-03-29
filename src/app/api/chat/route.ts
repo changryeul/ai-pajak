@@ -72,7 +72,9 @@ export async function POST(request: NextRequest) {
 
     const anthropic = new Anthropic({ apiKey });
 
-    const langSuffix = language ? `\n\nRespond in ${getLanguageName(language)}.` : '';
+    const langSuffix = language && language !== 'id'
+      ? `\n\nIMPORTANT: You MUST respond entirely in ${getLanguageName(language)}. All explanations, tax terms, and examples must be in ${getLanguageName(language)}. Only keep official Indonesian tax codes (e.g., PPh, PPN, NPWP, SPT) in their original form.`
+      : '';
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
