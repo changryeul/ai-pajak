@@ -20,65 +20,6 @@ interface FAQItem {
   category: string;
 }
 
-const FAQ_DATA: FAQItem[] = [
-  // Getting Started
-  { category: 'Memulai', question: 'Bagaimana cara mendaftar di AI Pajak?', answer: 'Klik "Daftar" di halaman utama, isi email dan password, lalu verifikasi email Anda. Setelah login, ikuti wizard onboarding untuk memilih jenis wajib pajak Anda.' },
-  { category: 'Memulai', question: 'Apa saja yang dibutuhkan untuk mulai menggunakan?', answer: 'Anda memerlukan: 1) NPWP (Nomor Pokok Wajib Pajak), 2) NIK (Nomor Induk Kependudukan), 3) Bukti Potong 1721-A1 dari pemberi kerja (untuk karyawan).' },
-  { category: 'Memulai', question: 'Apakah AI Pajak gratis?', answer: 'Ya, tersedia paket gratis dengan fitur dasar (5 dokumen, 2 pelaporan). Untuk fitur lengkap termasuk AI, tersedia paket Basic (Rp 199K/bulan) dan Pro (Rp 499K/bulan).' },
-
-  // SPT Filing
-  { category: 'SPT Tahunan', question: 'Apa perbedaan SPT 1770 SS, 1770 S, dan 1770?', answer: '1770 SS: Untuk karyawan dengan penghasilan <Rp 60 juta dari satu pemberi kerja.\n1770 S: Untuk karyawan dengan penghasilan ≥Rp 60 juta atau lebih dari satu pemberi kerja.\n1770: Untuk pengusaha atau pekerja bebas (dokter, pengacara, dll).' },
-  { category: 'SPT Tahunan', question: 'Bagaimana cara mengisi SPT otomatis?', answer: '1) Buka menu "SPT Tahunan" → pilih formulir\n2) Upload foto/PDF Bukti Potong 1721-A1\n3) AI akan otomatis membaca dan mengisi data\n4) Periksa data, sesuaikan jika perlu\n5) Klik "Generate SPT"' },
-  { category: 'SPT Tahunan', question: 'Kapan batas waktu pelaporan SPT?', answer: 'SPT Tahunan Orang Pribadi: 31 Maret tahun berikutnya.\nSPT Tahunan Badan: 30 April tahun berikutnya.\nKeterlambatan dikenai denda Rp 100.000 (OP) atau Rp 1.000.000 (Badan).' },
-  { category: 'SPT Tahunan', question: 'Apa itu Bukti Potong 1721-A1?', answer: 'Bukti Potong 1721-A1 adalah dokumen dari pemberi kerja yang berisi data gaji dan pajak yang sudah dipotong selama setahun. Biasanya diberikan di awal tahun atau bisa diminta ke bagian HRD/personalia.' },
-
-  // AI Features
-  { category: 'Fitur AI', question: 'Bagaimana AI OCR membaca dokumen?', answer: 'AI menggunakan teknologi Claude Vision untuk membaca teks dari foto/PDF dokumen pajak. Upload gambar yang jelas dan tidak terpotong untuk hasil terbaik. Akurasi rata-rata >95%.' },
-  { category: 'Fitur AI', question: 'Apa itu Tax Savings Advisor?', answer: 'Fitur AI yang menganalisis data pajak Anda dan menemukan peluang penghematan yang sah secara hukum. Misalnya: optimasi PTKP, pemanfaatan zakat sebagai pengurang, atau tarif UMKM 0.5%.' },
-  { category: 'Fitur AI', question: 'Bagaimana cara menggunakan AI Chatbot?', answer: 'Klik ikon chat (💬) di pojok kanan bawah halaman manapun. Tanyakan apapun tentang pajak Indonesia, dan AI akan menjawab berdasarkan peraturan terbaru.' },
-  { category: 'Fitur AI', question: 'Apakah data saya aman?', answer: 'Ya. Data dienkripsi end-to-end, disimpan di server yang aman, dan dilindungi oleh Row Level Security (RLS). Admin platform TIDAK dapat mengakses data pajak Anda (Hard Rule #1).' },
-
-  // UMKM
-  { category: 'UMKM', question: 'Bagaimana cara menghitung PPh Final UMKM?', answer: 'PPh Final UMKM = 0.5% x Omzet Bruto. Berlaku untuk WP dengan omzet <Rp 4.8 miliar/tahun. Per PP 55/2022, Rp 500 juta pertama dibebaskan dari pajak.' },
-  { category: 'UMKM', question: 'Kapan bayar PPh Final bulanan?', answer: 'PPh Final UMKM dibayar paling lambat tanggal 15 bulan berikutnya. Gunakan fitur Kalender Pajak untuk pengingat otomatis.' },
-  { category: 'UMKM', question: 'Bagaimana cara import data dari Shopee/Tokopedia?', answer: 'Buka menu "E-commerce Import" → pilih platform → download CSV dari Seller Dashboard → upload CSV. AI akan otomatis menghitung omzet dan PPh Final.' },
-
-  // Consultants
-  { category: 'Konsultan', question: 'Bagaimana cara menambah klien?', answer: 'Klien mendaftar sendiri di AI Pajak, lalu membuat Surat Kuasa (POA) yang menunjuk Anda sebagai konsultan. Setelah POA aktif, klien akan muncul di dashboard Anda.' },
-  { category: 'Konsultan', question: 'Apa itu Deteksi Anomali?', answer: 'Fitur AI yang menganalisis data klien untuk mendeteksi potensi risiko pemeriksaan pajak. Memeriksa 9 kategori: perubahan penghasilan, rasio pengurang, tarif efektif, dll.' },
-  { category: 'Konsultan', question: 'Bagaimana cara membuat laporan klien?', answer: 'Buka menu "Laporan Klien (AI)" → pilih klien → pilih tahun → klik "Generate Laporan". AI akan membuat laporan komprehensif dengan analisis dan rekomendasi.' },
-
-  // Payment
-  { category: 'Pembayaran', question: 'Metode pembayaran apa saja yang diterima?', answer: 'Kami menerima: Bank Transfer (BCA, Mandiri, BNI, BRI), GoPay, OVO, DANA, Kartu Kredit/Debit, dan Virtual Account melalui Midtrans.' },
-  { category: 'Pembayaran', question: 'Bagaimana cara upgrade paket?', answer: 'Buka menu "Billing" → pilih paket yang diinginkan → klik "Upgrade" → selesaikan pembayaran. Fitur baru langsung aktif setelah pembayaran berhasil.' },
-
-  // Technical
-  { category: 'Teknis', question: 'Browser apa yang didukung?', answer: 'Chrome, Firefox, Safari, Edge versi terbaru. Kami merekomendasikan Chrome untuk pengalaman terbaik.' },
-  { category: 'Teknis', question: 'Apakah bisa digunakan di HP?', answer: 'Ya, AI Pajak responsif dan bisa digunakan di semua perangkat. Anda juga bisa menambahkannya sebagai PWA (Progressive Web App) di home screen HP.' },
-  { category: 'Teknis', question: 'Bagaimana cara menghubungi support?', answer: 'Gunakan AI Chatbot untuk pertanyaan umum. Untuk bantuan teknis, email ke support@aipajak.com atau gunakan fitur Chat di menu "Pesan".' },
-];
-
-const CATEGORIES = [...new Set(FAQ_DATA.map(f => f.category))];
-
-const categoryIcons: Record<string, typeof HelpCircle> = {
-  'Memulai': Sparkles,
-  'SPT Tahunan': FileSpreadsheet,
-  'Fitur AI': Lightbulb,
-  'UMKM': Building2,
-  'Konsultan': Users,
-  'Pembayaran': CreditCard,
-  'Teknis': ShieldCheck,
-};
-
-const GUIDES = [
-  { title: 'Panduan Pemula', desc: 'Langkah pertama menggunakan AI Pajak', icon: Sparkles, href: '/dashboard', gradient: 'from-blue-500 to-indigo-600' },
-  { title: 'Upload Bukti Potong', desc: 'Cara upload dan OCR dokumen', icon: Upload, href: '/documents', gradient: 'from-purple-500 to-violet-600' },
-  { title: 'SPT Auto-fill', desc: 'Isi SPT otomatis dengan AI', icon: FileSpreadsheet, href: '/tax/spt-tahunan/1770ss', gradient: 'from-green-500 to-emerald-600' },
-  { title: 'Hemat Pajak', desc: 'Temukan peluang penghematan', icon: Lightbulb, href: '/tax/savings', gradient: 'from-amber-500 to-orange-500' },
-  { title: 'Kalender Pajak', desc: 'Jangan lewatkan deadline', icon: Calendar, href: '/tax/calendar', gradient: 'from-red-500 to-rose-500' },
-  { title: 'AI Chatbot', desc: 'Tanya AI kapan saja', icon: MessageCircle, href: '/dashboard', gradient: 'from-cyan-500 to-blue-500' },
-];
-
 export default function HelpPage() {
   const t = useTranslations('help');
   const params = useParams();
@@ -86,6 +27,65 @@ export default function HelpPage() {
   const [search, setSearch] = useState('');
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const FAQ_DATA: FAQItem[] = [
+    // Getting Started
+    { category: t('cat_getting_started'), question: t('faq1_q'), answer: t('faq1_a') },
+    { category: t('cat_getting_started'), question: t('faq2_q'), answer: t('faq2_a') },
+    { category: t('cat_getting_started'), question: t('faq3_q'), answer: t('faq3_a') },
+
+    // SPT Filing
+    { category: t('cat_spt'), question: t('faq4_q'), answer: t('faq4_a') },
+    { category: t('cat_spt'), question: t('faq5_q'), answer: t('faq5_a') },
+    { category: t('cat_spt'), question: t('faq6_q'), answer: t('faq6_a') },
+    { category: t('cat_spt'), question: t('faq7_q'), answer: t('faq7_a') },
+
+    // AI Features
+    { category: t('cat_ai'), question: t('faq8_q'), answer: t('faq8_a') },
+    { category: t('cat_ai'), question: t('faq9_q'), answer: t('faq9_a') },
+    { category: t('cat_ai'), question: t('faq10_q'), answer: t('faq10_a') },
+    { category: t('cat_ai'), question: t('faq11_q'), answer: t('faq11_a') },
+
+    // UMKM
+    { category: t('cat_umkm'), question: t('faq12_q'), answer: t('faq12_a') },
+    { category: t('cat_umkm'), question: t('faq13_q'), answer: t('faq13_a') },
+    { category: t('cat_umkm'), question: t('faq14_q'), answer: t('faq14_a') },
+
+    // Consultants
+    { category: t('cat_consultant'), question: t('faq15_q'), answer: t('faq15_a') },
+    { category: t('cat_consultant'), question: t('faq16_q'), answer: t('faq16_a') },
+    { category: t('cat_consultant'), question: t('faq17_q'), answer: t('faq17_a') },
+
+    // Payment
+    { category: t('cat_payment'), question: t('faq18_q'), answer: t('faq18_a') },
+    { category: t('cat_payment'), question: t('faq19_q'), answer: t('faq19_a') },
+
+    // Technical
+    { category: t('cat_technical'), question: t('faq20_q'), answer: t('faq20_a') },
+    { category: t('cat_technical'), question: t('faq21_q'), answer: t('faq21_a') },
+    { category: t('cat_technical'), question: t('faq22_q'), answer: t('faq22_a') },
+  ];
+
+  const CATEGORIES = [...new Set(FAQ_DATA.map(f => f.category))];
+
+  const categoryIcons: Record<string, typeof HelpCircle> = {
+    [t('cat_getting_started')]: Sparkles,
+    [t('cat_spt')]: FileSpreadsheet,
+    [t('cat_ai')]: Lightbulb,
+    [t('cat_umkm')]: Building2,
+    [t('cat_consultant')]: Users,
+    [t('cat_payment')]: CreditCard,
+    [t('cat_technical')]: ShieldCheck,
+  };
+
+  const GUIDES = [
+    { title: t('guide1_title'), desc: t('guide1_desc'), icon: Sparkles, href: '/dashboard', gradient: 'from-blue-500 to-indigo-600' },
+    { title: t('guide2_title'), desc: t('guide2_desc'), icon: Upload, href: '/documents', gradient: 'from-purple-500 to-violet-600' },
+    { title: t('guide3_title'), desc: t('guide3_desc'), icon: FileSpreadsheet, href: '/tax/spt-tahunan/1770ss', gradient: 'from-green-500 to-emerald-600' },
+    { title: t('guide4_title'), desc: t('guide4_desc'), icon: Lightbulb, href: '/tax/savings', gradient: 'from-amber-500 to-orange-500' },
+    { title: t('guide5_title'), desc: t('guide5_desc'), icon: Calendar, href: '/tax/calendar', gradient: 'from-red-500 to-rose-500' },
+    { title: t('guide6_title'), desc: t('guide6_desc'), icon: MessageCircle, href: '/dashboard', gradient: 'from-cyan-500 to-blue-500' },
+  ];
 
   const toggle = (index: number) => {
     setExpandedItems(prev => {
@@ -151,7 +151,7 @@ export default function HelpPage() {
           onClick={() => setActiveCategory(null)}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${!activeCategory ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
         >
-          Semua
+          {t('allCategories')}
         </button>
         {CATEGORIES.map(cat => {
           const Icon = categoryIcons[cat] || HelpCircle;
