@@ -1,3 +1,4 @@
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
