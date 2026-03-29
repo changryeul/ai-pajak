@@ -215,6 +215,49 @@ describe('PPh23Calculator', () => {
     });
   });
 
+  describe('NPWP Surcharge (Pasal 23(1a))', () => {
+    it('should apply 100% surcharge (double rate) when no NPWP', () => {
+      const withNpwp = createTestData({ has_npwp: true, gross_amount: 10_000_000 });
+      const withoutNpwp = createTestData({ has_npwp: false, gross_amount: 10_000_000 });
+
+      const resultWith = PPh23Calculator.calculate(withNpwp);
+      const resultWithout = PPh23Calculator.calculate(withoutNpwp);
+
+      expect(resultWith.npwp_surcharge_applied).toBe(false);
+      expect(resultWithout.npwp_surcharge_applied).toBe(true);
+      // Service: 2% → 4% without NPWP
+      expect(resultWithout.tax_amount).toBe(resultWith.tax_amount * 2);
+      expect(resultWithout.effective_rate).toBe(0.04);
+    });
+
+    it('should double 15% rate to 30% for dividends without NPWP', () => {
+      const data = createTestData({
+        transaction_type: 'dividend',
+        gross_amount: 100_000_000,
+        has_npwp: false,
+      });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.tax_amount).toBe(30_000_000); // 100M * 30%
+      expect(result.effective_rate).toBe(0.30);
+    });
+
+    it('should infer no NPWP from empty recipient_npwp', () => {
+      const data = createTestData({ recipient_npwp: '', gross_amount: 10_000_000 });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.npwp_surcharge_applied).toBe(true);
+    });
+
+    it('should NOT surcharge when recipient_npwp is provided', () => {
+      const data = createTestData({ recipient_npwp: '01.234.567.8-901.234', gross_amount: 10_000_000 });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.npwp_surcharge_applied).toBe(false);
+      expect(result.effective_rate).toBeUndefined();
+    });
+  });
+
   describe('Tax Rates Configuration', () => {
     it('should verify PPH23_RATES configuration matches expectations', () => {
       expect(PPH23_RATES.DIVIDEND).toBe(0.15);

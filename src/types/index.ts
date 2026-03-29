@@ -66,6 +66,8 @@ export interface PPh21Data {
   other_deductions: number;
   tax_period_start: string;
   tax_period_end: string;
+  /** If false/undefined and no NPWP, 20% surcharge applies per Pasal 21(5a) UU PPh */
+  has_npwp?: boolean;
 }
 
 export interface PPh21Calculation {
@@ -76,6 +78,10 @@ export interface PPh21Calculation {
   taxable_income: number;
   tax_amount: number;
   tax_breakdown: TaxBracketResult[];
+  /** True if 20% NPWP surcharge was applied (Pasal 21(5a)) */
+  npwp_surcharge_applied?: boolean;
+  /** Tax before surcharge (only set when surcharge applied) */
+  tax_before_surcharge?: number;
 }
 
 export interface TaxBracketResult {
@@ -94,6 +100,8 @@ export interface PPh23Data {
   recipient_npwp: string;
   transaction_date: string;
   description: string;
+  /** If false and no NPWP, 100% surcharge applies per Pasal 23(1a) UU PPh */
+  has_npwp?: boolean;
 }
 
 // PPh Final specific types

@@ -2,10 +2,28 @@ import { PPH21_BRACKETS, PTKP, type PTKPCategory } from '@/config/constants';
 import type { PPh21Data, PPh21Calculation, TaxBracketResult } from '@/types';
 
 /**
+ * NPWP Surcharge rate per Pasal 21 ayat (5a) UU PPh:
+ * Taxpayers without NPWP pay 20% higher than the standard rate.
+ */
+const NPWP_SURCHARGE_RATE = 0.20;
+
+/**
  * PPh 21 Calculator - Indonesian Income Tax Article 21
  * Calculates withholding tax on employment income
  */
 export class PPh21Calculator {
+  /**
+   * Determine if NPWP surcharge applies.
+   * Surcharge applies when employee has no NPWP (has_npwp explicitly false,
+   * or employee_npwp is empty/missing).
+   */
+  private static shouldApplyNpwpSurcharge(data: PPh21Data): boolean {
+    if (data.has_npwp === true) return false;
+    if (data.has_npwp === false) return true;
+    // Infer from employee_npwp field
+    return !data.employee_npwp || data.employee_npwp.trim() === '';
+  }
+
   /**
    * Calculate annual PPh 21 for an employee
    */
@@ -38,14 +56,22 @@ export class PPh21Calculator {
     // Calculate tax using progressive rates
     const { taxAmount, breakdown } = this.calculateProgressiveTax(taxableIncome);
 
+    // Apply NPWP surcharge if applicable (Pasal 21(5a) UU PPh)
+    const applyNpwpSurcharge = this.shouldApplyNpwpSurcharge(data);
+    const finalTaxAmount = applyNpwpSurcharge
+      ? Math.round(taxAmount * (1 + NPWP_SURCHARGE_RATE))
+      : taxAmount;
+
     return {
       gross_income: grossIncome,
       total_deductions: totalDeductions,
       net_income: netIncome,
       ptkp: ptkpAmount,
       taxable_income: taxableIncome,
-      tax_amount: taxAmount,
+      tax_amount: finalTaxAmount,
       tax_breakdown: breakdown,
+      npwp_surcharge_applied: applyNpwpSurcharge,
+      tax_before_surcharge: applyNpwpSurcharge ? taxAmount : undefined,
     };
   }
 

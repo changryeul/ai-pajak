@@ -220,6 +220,46 @@ describe('PPh21Calculator', () => {
     });
   });
 
+  describe('NPWP Surcharge (Pasal 21(5a))', () => {
+    it('should apply 20% surcharge when has_npwp is false', () => {
+      const withNpwp = createTestData({ has_npwp: true });
+      const withoutNpwp = createTestData({ has_npwp: false });
+
+      const resultWith = PPh21Calculator.calculateAnnual(withNpwp);
+      const resultWithout = PPh21Calculator.calculateAnnual(withoutNpwp);
+
+      expect(resultWithout.npwp_surcharge_applied).toBe(true);
+      expect(resultWith.npwp_surcharge_applied).toBe(false);
+      expect(resultWithout.tax_amount).toBe(Math.round(resultWith.tax_amount * 1.2));
+      expect(resultWithout.tax_before_surcharge).toBe(resultWith.tax_amount);
+    });
+
+    it('should apply surcharge when employee_npwp is empty', () => {
+      const data = createTestData({ employee_npwp: '' });
+      const result = PPh21Calculator.calculateAnnual(data);
+
+      expect(result.npwp_surcharge_applied).toBe(true);
+    });
+
+    it('should NOT apply surcharge when NPWP is provided', () => {
+      const data = createTestData({ employee_npwp: '01.234.567.8-901.234' });
+      const result = PPh21Calculator.calculateAnnual(data);
+
+      expect(result.npwp_surcharge_applied).toBe(false);
+      expect(result.tax_before_surcharge).toBeUndefined();
+    });
+
+    it('should apply surcharge to monthly calculation too', () => {
+      const withNpwp = createTestData({ has_npwp: true });
+      const withoutNpwp = createTestData({ has_npwp: false });
+
+      const monthlyWith = PPh21Calculator.calculateMonthly(withNpwp);
+      const monthlyWithout = PPh21Calculator.calculateMonthly(withoutNpwp);
+
+      expect(monthlyWithout.tax_amount).toBeCloseTo(monthlyWith.tax_amount * 1.2, 0);
+    });
+  });
+
   describe('Progressive Tax Calculation', () => {
     it('should correctly use PPH21_BRACKETS configuration', () => {
       // Verify our brackets match the 2024 regulations

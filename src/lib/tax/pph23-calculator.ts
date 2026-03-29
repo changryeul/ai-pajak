@@ -6,26 +6,51 @@ export interface PPh23Calculation {
   tax_rate: number;
   tax_amount: number;
   net_amount: number;
+  /** True if 100% NPWP surcharge was applied (Pasal 23(1a)) */
+  npwp_surcharge_applied?: boolean;
+  /** Effective rate after surcharge */
+  effective_rate?: number;
 }
 
 /**
  * PPh 23 Calculator - Indonesian Withholding Tax Article 23
  * Calculates tax on dividends, interest, royalties, prizes, rent, and services
+ *
+ * Per Pasal 23(1a) UU PPh: Recipients without NPWP are subject to
+ * 100% higher rate (effectively double the standard rate).
+ * - Dividend 15% → 30%, Interest 15% → 30%, Royalty 15% → 30%
+ * - Rent 2% → 4%, Service 2% → 4%
  */
 export class PPh23Calculator {
+  /**
+   * Determine if NPWP surcharge applies for PPh 23.
+   * Per Pasal 23(1a): no NPWP = 100% higher rate (double).
+   */
+  private static shouldApplyNpwpSurcharge(data: PPh23Data): boolean {
+    if (data.has_npwp === true) return false;
+    if (data.has_npwp === false) return true;
+    return !data.recipient_npwp || data.recipient_npwp.trim() === '';
+  }
+
   /**
    * Calculate PPh 23 for a transaction
    */
   static calculate(data: PPh23Data): PPh23Calculation {
-    const rate = this.getTaxRate(data.transaction_type);
-    const taxAmount = data.gross_amount * rate;
+    const baseRate = this.getTaxRate(data.transaction_type);
+    const applyNpwpSurcharge = this.shouldApplyNpwpSurcharge(data);
+
+    // No NPWP = 100% higher rate (Pasal 23(1a))
+    const effectiveRate = applyNpwpSurcharge ? baseRate * 2 : baseRate;
+    const taxAmount = Math.round(data.gross_amount * effectiveRate);
     const netAmount = data.gross_amount - taxAmount;
 
     return {
       gross_amount: data.gross_amount,
-      tax_rate: rate,
+      tax_rate: baseRate,
       tax_amount: taxAmount,
       net_amount: netAmount,
+      npwp_surcharge_applied: applyNpwpSurcharge,
+      effective_rate: applyNpwpSurcharge ? effectiveRate : undefined,
     };
   }
 
