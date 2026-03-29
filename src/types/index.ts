@@ -104,6 +104,36 @@ export interface PPh23Data {
   has_npwp?: boolean;
 }
 
+// PPh 26 specific types (Non-Resident Withholding Tax)
+export interface PPh26Data {
+  income_type: 'dividend' | 'interest' | 'royalty' | 'service' | 'salary' | 'pension' | 'insurance' | 'other';
+  gross_amount: number;
+  recipient_name: string;
+  /** Country code (ISO 3166-1 alpha-2) of the recipient */
+  recipient_country: string;
+  /** If true, treaty rate applies based on recipient_country */
+  apply_treaty?: boolean;
+  transaction_date: string;
+  description?: string;
+}
+
+export interface PPh26Calculation {
+  gross_amount: number;
+  /** Standard domestic rate (20%) */
+  standard_rate: number;
+  /** Treaty rate if applicable */
+  treaty_rate?: number;
+  /** Actually applied rate */
+  applied_rate: number;
+  tax_amount: number;
+  net_amount: number;
+  /** Treaty country name if treaty applied */
+  treaty_country?: string;
+  /** P3B (tax treaty) number */
+  treaty_reference?: string;
+  is_treaty_applied: boolean;
+}
+
 // PPh Final specific types
 export interface PPhFinalData {
   scheme: 'UMKM' | 'PASAL42';

@@ -86,6 +86,37 @@ export const PPH23_RATES = {
   SERVICE: 0.02,
 } as const;
 
+// PPh 26 Rate (Non-Resident Withholding - Pasal 26 UU PPh)
+export const PPH26_STANDARD_RATE = 0.20; // 20%
+
+// Tax Treaty (P3B) rates by country - major treaty partners
+// Source: DJP P3B list (simplified for common income types)
+export const TAX_TREATY_RATES: Record<string, {
+  country: string;
+  dividend: number;   // Typically 10-15%
+  interest: number;   // Typically 10%
+  royalty: number;    // Typically 10-15%
+  service: number;    // Branch profit / technical service
+  reference: string;  // Treaty reference
+}> = {
+  JP: { country: 'Japan', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-Japan (1982)' },
+  KR: { country: 'South Korea', dividend: 0.10, interest: 0.10, royalty: 0.15, service: 0.10, reference: 'P3B Indonesia-Korea (1988)' },
+  SG: { country: 'Singapore', dividend: 0.10, interest: 0.10, royalty: 0.15, service: 0.10, reference: 'P3B Indonesia-Singapore (1990)' },
+  MY: { country: 'Malaysia', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-Malaysia (1991)' },
+  CN: { country: 'China', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-China (2001)' },
+  US: { country: 'United States', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-USA (1988)' },
+  GB: { country: 'United Kingdom', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-UK (1993)' },
+  AU: { country: 'Australia', dividend: 0.15, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-Australia (1992)' },
+  NL: { country: 'Netherlands', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-Netherlands (2002)' },
+  DE: { country: 'Germany', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.075, reference: 'P3B Indonesia-Germany (1990)' },
+  TH: { country: 'Thailand', dividend: 0.10, interest: 0.15, royalty: 0.15, service: 0.10, reference: 'P3B Indonesia-Thailand (2001)' },
+  IN: { country: 'India', dividend: 0.10, interest: 0.10, royalty: 0.10, service: 0.10, reference: 'P3B Indonesia-India (2012)' },
+  HK: { country: 'Hong Kong', dividend: 0.05, interest: 0.10, royalty: 0.05, service: 0.10, reference: 'P3B Indonesia-Hong Kong (2010)' },
+  AE: { country: 'UAE', dividend: 0.10, interest: 0.05, royalty: 0.05, service: 0.10, reference: 'P3B Indonesia-UAE (1996)' },
+  PH: { country: 'Philippines', dividend: 0.15, interest: 0.15, royalty: 0.15, service: 0.15, reference: 'P3B Indonesia-Philippines (1981)' },
+  VN: { country: 'Vietnam', dividend: 0.15, interest: 0.15, royalty: 0.15, service: 0.15, reference: 'P3B Indonesia-Vietnam (1997)' },
+};
+
 // DJP (Direktorat Jenderal Pajak) API Configuration
 export const DJP_API = {
   // Enable/disable DJP integration
@@ -142,6 +173,12 @@ export const DJP_TAX_CODES = {
     JENIS_PAJAK: '411128',
     JENIS_SETORAN: {
       FINAL: '420',
+    },
+  },
+  PPH26: {
+    JENIS_PAJAK: '411127',
+    JENIS_SETORAN: {
+      MONTHLY: '100',
     },
   },
   PPN: {
