@@ -127,36 +127,31 @@ export function SimpleMode() {
   if (step === 'upload') {
     return (
       <div className="space-y-4">
-        {/* Main Upload Card */}
+        {/* Main Upload Card - entire area is clickable */}
         <Card className="border-0 shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-6 text-white text-center">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-4">
-              <Camera className="h-8 w-8" />
+          <label className="block cursor-pointer">
+            <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 text-white text-center hover:from-blue-500 hover:via-blue-600 hover:to-indigo-700 transition-all">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-4">
+                <Camera className="h-8 w-8" />
+              </div>
+              <h2 className="text-xl font-bold">{ts('photoTitle')}</h2>
+              <p className="text-blue-200 text-sm mt-1">{ts('photoDesc')}</p>
+              <div className="mt-6 border-2 border-dashed border-white/30 rounded-2xl p-6 hover:border-white/60 transition-all">
+                <Upload className="h-8 w-8 text-white/70 mx-auto mb-2" />
+                <p className="text-base font-semibold">{ts('takePhotoOrUpload')}</p>
+                <p className="text-sm text-blue-200 mt-1">{ts('takePhotoHint')}</p>
+              </div>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                capture="environment"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }}
+              />
             </div>
-            <h2 className="text-xl font-bold">{ts('photoTitle')}</h2>
-            <p className="text-blue-200 text-sm mt-1">
-              {ts('photoDesc')}
-            </p>
-          </div>
+          </label>
 
           <CardContent className="p-6">
-            {/* Drop Zone */}
-            <label className="block cursor-pointer">
-              <div className="border-2 border-dashed border-blue-300 rounded-2xl p-8 text-center hover:border-blue-500 hover:bg-blue-50 transition-all">
-                <Upload className="h-10 w-10 text-blue-400 mx-auto mb-3" />
-                <p className="text-lg font-semibold text-gray-900">{ts('takePhotoOrUpload')}</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {ts('takePhotoHint')}
-                </p>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  capture="environment"
-                  className="hidden"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }}
-                />
-              </div>
-            </label>
 
             {/* Processing */}
             {isProcessing && (
