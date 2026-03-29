@@ -158,7 +158,7 @@ export function SPT1770SSPreview({
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle>SPT 1770 SS - Tahun Pajak {data.taxYear}</CardTitle>
+              <CardTitle>SPT 1770 SS - {ts('taxYear')} {data.taxYear}</CardTitle>
               <CardDescription>
                 SPT Tahunan PPh Wajib Pajak Orang Pribadi Sangat Sederhana
               </CardDescription>
@@ -166,7 +166,7 @@ export function SPT1770SSPreview({
             <div className="flex items-center gap-2">
               {statusBadge()}
               {data.correctionNumber > 0 && (
-                <Badge variant="outline">Pembetulan ke-{data.correctionNumber}</Badge>
+                <Badge variant="outline">{ts('correctionNumber')} {data.correctionNumber}</Badge>
               )}
             </div>
           </div>

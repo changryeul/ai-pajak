@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useTranslations } from 'next-intl';
 import {
   Camera, Upload, CheckCircle, Loader2, AlertCircle,
   Download, Send, HelpCircle, ChevronRight, FileText,
@@ -59,6 +60,7 @@ export function SimpleMode() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const ts = useTranslations('simpleMode');
 
   const [step, setStep] = useState<SimpleStep>('upload');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -131,9 +133,9 @@ export function SimpleMode() {
             <div className="mx-auto w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-4">
               <Camera className="h-8 w-8" />
             </div>
-            <h2 className="text-xl font-bold">Foto Slip Gaji Tahunan</h2>
+            <h2 className="text-xl font-bold">{ts('photoTitle')}</h2>
             <p className="text-blue-200 text-sm mt-1">
-              Dari bagian HRD kantor Anda (disebut "Bukti Potong 1721-A1")
+              {ts('photoDesc')}
             </p>
           </div>
 
@@ -142,9 +144,9 @@ export function SimpleMode() {
             <label className="block cursor-pointer">
               <div className="border-2 border-dashed border-blue-300 rounded-2xl p-8 text-center hover:border-blue-500 hover:bg-blue-50 transition-all">
                 <Upload className="h-10 w-10 text-blue-400 mx-auto mb-3" />
-                <p className="text-lg font-semibold text-gray-900">Ambil Foto atau Upload File</p>
+                <p className="text-lg font-semibold text-gray-900">{ts('takePhotoOrUpload')}</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Foto dari kamera HP atau file PDF/gambar
+                  {ts('takePhotoHint')}
                 </p>
                 <input
                   type="file"
@@ -160,8 +162,8 @@ export function SimpleMode() {
             {isProcessing && (
               <div className="mt-6 text-center">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
-                <p className="font-medium text-gray-900">AI sedang membaca dokumen Anda...</p>
-                <p className="text-sm text-gray-500 mt-1">Tunggu sebentar ya, biasanya 10-30 detik</p>
+                <p className="font-medium text-gray-900">{ts('aiReading')}</p>
+                <p className="text-sm text-gray-500 mt-1">{ts('aiReadingHint')}</p>
                 <Progress value={66} className="mt-3 h-2" />
               </div>
             )}
@@ -172,7 +174,7 @@ export function SimpleMode() {
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-red-800">{error}</p>
-                  <p className="text-sm text-red-600 mt-1">Pastikan foto jelas dan tidak terpotong</p>
+                  <p className="text-sm text-red-600 mt-1">{ts('photoErrorHint')}</p>
                 </div>
               </div>
             )}
@@ -188,8 +190,8 @@ export function SimpleMode() {
             <div className="flex items-center gap-3">
               <HelpCircle className="h-5 w-5 text-blue-500" />
               <div>
-                <p className="font-medium text-sm text-gray-900">Tidak tahu slip gaji tahunan?</p>
-                <p className="text-xs text-gray-500">Klik untuk lihat contoh</p>
+                <p className="font-medium text-sm text-gray-900">{ts('dontKnowSlip')}</p>
+                <p className="text-xs text-gray-500">{ts('clickExample')}</p>
               </div>
             </div>
             <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform ${showExample ? 'rotate-90' : ''}`} />
@@ -201,14 +203,14 @@ export function SimpleMode() {
                 <div className="flex items-start gap-3">
                   <Image className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-yellow-800 space-y-2">
-                    <p className="font-medium">Slip gaji tahunan terlihat seperti ini:</p>
+                    <p className="font-medium">{ts('exampleTitle')}</p>
                     <ul className="space-y-1 text-xs">
                       <li>• Judul: <strong>"BUKTI PEMOTONGAN PAJAK PENGHASILAN PASAL 21"</strong></li>
                       <li>• Ada tulisan <strong>"FORMULIR 1721-A1"</strong></li>
                       <li>• Ada nama perusahaan dan nama Anda</li>
                       <li>• Ada angka gaji dan pajak yang dipotong</li>
                     </ul>
-                    <p className="font-medium mt-2">Cara mendapatkannya:</p>
+                    <p className="font-medium mt-2">{ts('howToGet')}</p>
                     <ul className="space-y-1 text-xs">
                       <li>• Minta ke <strong>bagian HRD/Personalia</strong> di kantor Anda</li>
                       <li>• Biasanya diberikan di <strong>awal tahun</strong> (Januari-Februari)</li>
@@ -227,7 +229,7 @@ export function SimpleMode() {
             onClick={() => router.push(`/${locale}/tax/spt-tahunan/1770ss`)}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
           >
-            Tidak punya slip gaji? → Isi data manual
+            {ts('noSlipManual')}
           </button>
         </div>
       </div>
@@ -241,8 +243,8 @@ export function SimpleMode() {
         <Card className="border-0 shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-5 text-white text-center">
             <Sparkles className="h-8 w-8 mx-auto mb-2" />
-            <h2 className="text-lg font-bold">AI Berhasil Membaca Data Anda!</h2>
-            <p className="text-green-100 text-sm">Periksa apakah data di bawah sudah benar</p>
+            <h2 className="text-lg font-bold">{ts('aiSuccess')}</h2>
+            <p className="text-green-100 text-sm">{ts('checkData')}</p>
           </div>
 
           <CardContent className="p-5 space-y-4">
@@ -286,10 +288,10 @@ export function SimpleMode() {
             <div className="space-y-3 pt-2">
               <Button onClick={handleConfirm} className="w-full h-12 text-base bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg">
                 <CheckCircle className="h-5 w-5 mr-2" />
-                Ya, Data Sudah Benar
+                {ts('dataCorrect')}
               </Button>
               <Button variant="outline" className="w-full" onClick={() => { setStep('upload'); setExtractedInfo(null); }}>
-                Foto Ulang
+                {ts('retakePhoto')}
               </Button>
             </div>
           </CardContent>
@@ -307,33 +309,33 @@ export function SimpleMode() {
             <div className="mx-auto w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4">
               <CheckCircle className="h-10 w-10" />
             </div>
-            <h2 className="text-2xl font-bold">SPT Anda Sudah Selesai! 🎉</h2>
-            <p className="text-green-100 mt-2">Laporan pajak tahunan Anda sudah dibuat</p>
+            <h2 className="text-2xl font-bold">{ts('sptDone')}</h2>
+            <p className="text-green-100 mt-2">{ts('sptDoneDesc')}</p>
           </div>
 
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Button className="h-12 bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => router.push(`/${locale}/tax/spt-tahunan/1770ss`)}>
                 <Download className="h-5 w-5 mr-2" />
-                Download PDF
+                {ts('downloadPdf')}
               </Button>
               <Button variant="outline" className="h-12" onClick={() => router.push(`/${locale}/filings`)}>
                 <Send className="h-5 w-5 mr-2" />
-                Lapor ke DJP
+                {ts('reportToDjp')}
               </Button>
             </div>
 
             <div className="p-4 bg-blue-50 rounded-xl">
               <p className="text-sm text-blue-800">
-                <strong>Langkah selanjutnya:</strong><br />
-                1. Download PDF untuk arsip Anda<br />
-                2. Klik "Lapor ke DJP" untuk mengirim ke kantor pajak<br />
-                3. Simpan nomor BPE sebagai bukti pelaporan
+                <strong>{ts('nextStepsTitle')}:</strong><br />
+                {ts('nextStep1')}<br />
+                {ts('nextStep2')}<br />
+                {ts('nextStep3')}
               </p>
             </div>
 
             <Button variant="ghost" className="w-full text-gray-500" onClick={() => { setStep('upload'); setExtractedInfo(null); }}>
-              Upload dokumen lain
+              {ts('uploadAnother')}
             </Button>
           </CardContent>
         </Card>

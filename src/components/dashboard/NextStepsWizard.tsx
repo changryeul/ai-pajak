@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { useTranslations } from 'next-intl';
 import {
   User, Upload, FileSpreadsheet, ShieldCheck, CreditCard, Send,
   CheckCircle2, Circle, ArrowRight, Sparkles, ChevronDown, ChevronUp,
@@ -33,6 +34,7 @@ interface Step {
 export function NextStepsWizard({ customerId }: { customerId?: string }) {
   const params = useParams();
   const locale = params.locale as string;
+  const tw = useTranslations('wizard');
   const [status, setStatus] = useState<StepStatus>({
     profile: false, upload: false, sptGenerated: false,
     validated: false, paid: false, filed: false,
@@ -160,11 +162,11 @@ export function NextStepsWizard({ customerId }: { customerId?: string }) {
         <CardContent className="p-5 flex items-center gap-4">
           <div className="p-3 rounded-xl bg-green-500"><CheckCircle2 className="h-6 w-6 text-white" /></div>
           <div className="flex-1">
-            <h3 className="font-bold text-green-900">Semua langkah selesai!</h3>
-            <p className="text-sm text-green-700">SPT Anda sudah dilaporkan. Simpan BPE sebagai bukti.</p>
+            <h3 className="font-bold text-green-900">{tw('allDone')}</h3>
+            <p className="text-sm text-green-700">{tw('allDoneDesc')}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => { setDismissed(true); localStorage.setItem('ai-pajak-wizard-dismissed', 'true'); }}>
-            Tutup
+            {tw('close')}
           </Button>
         </CardContent>
       </Card>
@@ -183,8 +185,8 @@ export function NextStepsWizard({ customerId }: { customerId?: string }) {
         <div className="flex items-center gap-3">
           <Sparkles className="h-5 w-5 text-yellow-300" />
           <div>
-            <h3 className="font-bold text-sm">Langkah Selanjutnya</h3>
-            <p className="text-blue-200 text-xs">{completedCount}/{steps.length} selesai</p>
+            <h3 className="font-bold text-sm">{tw('nextStep')}</h3>
+            <p className="text-blue-200 text-xs">{completedCount}/{steps.length} {tw('completed')}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">

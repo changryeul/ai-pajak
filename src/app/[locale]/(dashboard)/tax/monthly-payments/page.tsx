@@ -58,6 +58,7 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 export default function MonthlyPaymentsPage() {
   const t = useTranslations();
+  const tm = useTranslations('monthlyPayments');
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -186,9 +187,9 @@ export default function MonthlyPaymentsPage() {
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
         {[
-          { id: 'payments' as const, label: 'Pembayaran', icon: CreditCard },
-          { id: 'counterparties' as const, label: 'Lawan Transaksi', icon: Users },
-          { id: 'transactions' as const, label: 'Transaksi', icon: Receipt },
+          { id: 'payments' as const, label: tm('paymentsTab'), icon: CreditCard },
+          { id: 'counterparties' as const, label: tm('counterpartiesTab'), icon: Users },
+          { id: 'transactions' as const, label: tm('transactionsTab'), icon: Receipt },
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -246,12 +247,12 @@ export default function MonthlyPaymentsPage() {
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mb-4">
               <Calendar className="h-8 w-8 text-blue-600" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Belum Ada Jadwal Pembayaran</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">{tm('noSchedule')}</h2>
             <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
               Buat jadwal pembayaran pajak bulanan untuk tahun {year}
             </p>
             <Button onClick={generateSchedule} size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25">
-              <Sparkles className="h-4 w-4 mr-2" />Buat Jadwal {year}
+              <Sparkles className="h-4 w-4 mr-2" />{tm('createSchedule')} {year}
             </Button>
           </CardContent>
         </Card>
@@ -318,7 +319,7 @@ export default function MonthlyPaymentsPage() {
                     <div className="border-t px-5 py-3 bg-gray-50/50">
                       <Link href={`/${locale}/tax/monthly-payments/detail?type=${ts.taxType}&period=${year}-${String(currentMonth).padStart(2, '0')}`}
                         className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition-colors">
-                        Lihat Detail Transaksi <ChevronRight className="h-3 w-3" />
+                        {tm('viewDetail')} <ChevronRight className="h-3 w-3" />
                       </Link>
                     </div>
                   )}
@@ -331,10 +332,10 @@ export default function MonthlyPaymentsPage() {
 
       {hasData && activeTab === 'payments' && (
         <div className="flex items-center justify-center gap-6 mt-6 text-xs text-gray-500">
-          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-500" /> Lunas</span>
-          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-200" /> Belum</span>
-          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-red-500" /> Terlambat</span>
-          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded ring-2 ring-blue-400" /> Bulan Ini</span>
+          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-500" /> {tm('paid')}</span>
+          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-200" /> {tm('unpaid')}</span>
+          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-red-500" /> {tm('overdue')}</span>
+          <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded ring-2 ring-blue-400" /> {tm('thisMonth')}</span>
         </div>
       )}
 
@@ -349,15 +350,15 @@ export default function MonthlyPaymentsPage() {
 
             <div className="space-y-3 mb-4">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Jumlah Terutang</span>
+                <span className="text-gray-500">{tm('amountDue')}</span>
                 <span className="font-bold">{fmt(selectedPayment.amount_due)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Batas Setor</span>
+                <span className="text-gray-500">{tm('payDeadline')}</span>
                 <span>{selectedPayment.payment_deadline}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Batas Lapor</span>
+                <span className="text-gray-500">{tm('reportDeadline')}</span>
                 <span>{selectedPayment.reporting_deadline}</span>
               </div>
               <div className="flex justify-between text-sm">
@@ -384,11 +385,11 @@ export default function MonthlyPaymentsPage() {
 
             <div className="flex gap-2 mt-5">
               <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setSelectedPayment(null)}>
-                Batal
+                {tm('cancel')}
               </Button>
               <Button className="flex-1 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600" onClick={markPaid} disabled={isSaving}>
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckCircle className="h-4 w-4 mr-1" />}
-                Tandai Lunas
+                {tm('markPaid')}
               </Button>
             </div>
           </div>
@@ -400,6 +401,7 @@ export default function MonthlyPaymentsPage() {
 
 // Inline CounterpartiesTab component
 function CounterpartiesTab({ customerId }: { customerId?: string }) {
+  const tm = useTranslations('monthlyPayments');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [list, setList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -444,10 +446,10 @@ function CounterpartiesTab({ customerId }: { customerId?: string }) {
       <div className="flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input placeholder="Cari nama atau NPWP..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
+          <Input placeholder={tm('searchNameNpwp')} value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl" />
         </div>
         <Button onClick={() => setShowForm(!showForm)} className="bg-gradient-to-r from-blue-600 to-indigo-600">
-          <Plus className="h-4 w-4 mr-1" />Tambah
+          <Plus className="h-4 w-4 mr-1" />{tm('addCounterparty')}
         </Button>
       </div>
 
@@ -460,8 +462,8 @@ function CounterpartiesTab({ customerId }: { customerId?: string }) {
               <div><Label className="text-xs">Alamat</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>Batal</Button>
-              <Button size="sm" onClick={handleSave} disabled={!form.name}>Simpan</Button>
+              <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>{tm('cancel')}</Button>
+              <Button size="sm" onClick={handleSave} disabled={!form.name}>{tm('save')}</Button>
             </div>
           </CardContent>
         </Card>
@@ -472,7 +474,7 @@ function CounterpartiesTab({ customerId }: { customerId?: string }) {
       ) : filtered.length === 0 ? (
         <div className="text-center py-10 text-gray-400">
           <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">{search ? 'Tidak ditemukan' : 'Belum ada lawan transaksi'}</p>
+          <p className="text-sm">{search ? 'Tidak ditemukan' : tm('noCounterparties')}</p>
         </div>
       ) : (
         <div className="space-y-2">

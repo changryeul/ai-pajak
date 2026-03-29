@@ -86,6 +86,7 @@ export function SPT1770SSGenerator({
   onComplete,
 }: SPT1770SSGeneratorProps) {
   const ts = useTranslations('spt');
+  const tf = useTranslations('sptForm');
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -406,7 +407,7 @@ export function SPT1770SSGenerator({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-gray-900">
-                    Data Penghasilan Terekstrak ({extractedIncomes.length})
+                    {tf('extractedData')} ({extractedIncomes.length})
                   </h4>
                 </div>
 
@@ -431,7 +432,7 @@ export function SPT1770SSGenerator({
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
-                            <Label className="text-xs">Nama Pemberi Kerja</Label>
+                            <Label className="text-xs">{tf('employer')}</Label>
                             <input
                               className="w-full border rounded px-2 py-1 text-sm"
                               value={editForm.employerName}
@@ -441,7 +442,7 @@ export function SPT1770SSGenerator({
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">NPWP Pemberi Kerja</Label>
+                            <Label className="text-xs">{tf('employerNpwp')}</Label>
                             <input
                               className="w-full border rounded px-2 py-1 text-sm font-mono"
                               value={editForm.employerNpwp}
@@ -451,7 +452,7 @@ export function SPT1770SSGenerator({
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Penghasilan Bruto</Label>
+                            <Label className="text-xs">{tf('grossIncome')}</Label>
                             <input
                               className="w-full border rounded px-2 py-1 text-sm font-mono"
                               type="number"
@@ -462,7 +463,7 @@ export function SPT1770SSGenerator({
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Penghasilan Neto</Label>
+                            <Label className="text-xs">{tf('netIncome')}</Label>
                             <input
                               className="w-full border rounded px-2 py-1 text-sm font-mono"
                               type="number"
@@ -473,7 +474,7 @@ export function SPT1770SSGenerator({
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Biaya Jabatan</Label>
+                            <Label className="text-xs">{tf('positionCost')}</Label>
                             <input
                               className="w-full border rounded px-2 py-1 text-sm font-mono"
                               type="number"
@@ -484,7 +485,7 @@ export function SPT1770SSGenerator({
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">PPh Dipotong</Label>
+                            <Label className="text-xs">{tf('taxWithheld')}</Label>
                             <input
                               className="w-full border rounded px-2 py-1 text-sm font-mono"
                               type="number"
@@ -502,7 +503,7 @@ export function SPT1770SSGenerator({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm">
-                              {income.employerName || `Pemberi Kerja #${index + 1}`}
+                              {income.employerName || `${tf('employer')} #${index + 1}`}
                             </span>
                             <Badge
                               variant={income.confidence >= 0.8 ? 'default' : 'secondary'}
@@ -537,7 +538,7 @@ export function SPT1770SSGenerator({
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                           <div>
-                            <span className="text-gray-500 text-xs">NPWP Pemberi Kerja</span>
+                            <span className="text-gray-500 text-xs">{tf('employerNpwp')}</span>
                             <p className="font-mono">{income.employerNpwp || '-'}</p>
                           </div>
                           <div>
@@ -552,19 +553,19 @@ export function SPT1770SSGenerator({
                             <p className="font-mono text-xs">{income.buktiPotongNumber || '-'}</p>
                           </div>
                           <div>
-                            <span className="text-gray-500 text-xs">Penghasilan Bruto</span>
+                            <span className="text-gray-500 text-xs">{tf('grossIncome')}</span>
                             <p className="font-mono font-medium">
                               Rp {formatCurrency(income.grossIncome)}
                             </p>
                           </div>
                           <div>
-                            <span className="text-gray-500 text-xs">Penghasilan Neto</span>
+                            <span className="text-gray-500 text-xs">{tf('netIncome')}</span>
                             <p className="font-mono">
                               Rp {formatCurrency(income.netIncome)}
                             </p>
                           </div>
                           <div>
-                            <span className="text-gray-500 text-xs">PPh Dipotong</span>
+                            <span className="text-gray-500 text-xs">{tf('taxWithheld')}</span>
                             <p className="font-mono text-red-600">
                               Rp {formatCurrency(income.taxWithheld)}
                             </p>
@@ -585,7 +586,7 @@ export function SPT1770SSGenerator({
                 <div className="border-t pt-3">
                   <div className="grid grid-cols-3 gap-3 text-sm font-medium">
                     <div>
-                      <span className="text-gray-500 text-xs">Total Bruto</span>
+                      <span className="text-gray-500 text-xs">{tf('totalGross')}</span>
                       <p className="font-mono">
                         Rp{' '}
                         {formatCurrency(
@@ -594,7 +595,7 @@ export function SPT1770SSGenerator({
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 text-xs">Total Neto</span>
+                      <span className="text-gray-500 text-xs">{tf('totalNet')}</span>
                       <p className="font-mono">
                         Rp{' '}
                         {formatCurrency(
@@ -603,7 +604,7 @@ export function SPT1770SSGenerator({
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 text-xs">Total PPh Dipotong</span>
+                      <span className="text-gray-500 text-xs">{tf('totalTaxWithheld')}</span>
                       <p className="font-mono text-red-600">
                         Rp{' '}
                         {formatCurrency(
@@ -625,7 +626,7 @@ export function SPT1770SSGenerator({
                     <> Status PTKP: <strong>{extractedIncomes[0].ptkpStatus}</strong>.</>
                   )}
                   {extractedIncomes[0]?.taxYear && (
-                    <> Tahun Pajak: <strong>{extractedIncomes[0].taxYear}</strong>.</>
+                    <> {tf('detectedYear')}: <strong>{extractedIncomes[0].taxYear}</strong>.</>
                   )}
                   {' '}Silakan periksa data dan lanjutkan.
                 </p>
@@ -642,15 +643,15 @@ export function SPT1770SSGenerator({
             {showManualInput && (
               <div className="border-2 border-blue-200 rounded-xl p-5 bg-blue-50/50 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold text-sm text-blue-900">Isi Data Manual</h4>
+                  <h4 className="font-semibold text-sm text-blue-900">{tf('manualTitle')}</h4>
                   <Button variant="ghost" size="sm" onClick={() => setShowManualInput(false)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-xs text-blue-700">Isi data dari slip gaji tahunan Anda. Jika tidak tahu angka pastinya, tanyakan ke bagian HRD.</p>
+                <p className="text-xs text-blue-700">{tf('manualHint')}</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-gray-700">Nama Perusahaan *</label>
+                    <label className="text-xs font-medium text-gray-700">{tf('companyName')} *</label>
                     <input className="w-full mt-1 px-3 py-2 border rounded-lg text-sm" placeholder="PT Example Indonesia"
                       value={manualForm.employerName} onChange={e => setManualForm({ ...manualForm, employerName: e.target.value })} />
                   </div>
@@ -662,28 +663,28 @@ export function SPT1770SSGenerator({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-gray-700">Total Gaji Setahun (Bruto) *</label>
+                    <label className="text-xs font-medium text-gray-700">{tf('totalSalaryYear')} *</label>
                     <input type="number" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono" placeholder="120000000"
                       value={manualForm.grossIncome} onChange={e => setManualForm({ ...manualForm, grossIncome: e.target.value })} />
-                    <p className="text-[10px] text-gray-400 mt-0.5">Jumlah semua gaji + tunjangan + bonus + THR selama setahun</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{tf('salaryHint')}</p>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-gray-700">Pajak yang Sudah Dipotong *</label>
+                    <label className="text-xs font-medium text-gray-700">{tf('taxAlreadyDeducted')} *</label>
                     <input type="number" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono" placeholder="5000000"
                       value={manualForm.taxWithheld} onChange={e => setManualForm({ ...manualForm, taxWithheld: e.target.value })} />
-                    <p className="text-[10px] text-gray-400 mt-0.5">PPh 21 yang sudah dipotong perusahaan</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{tf('taxDeductedHint')}</p>
                   </div>
                 </div>
                 <details className="text-xs">
-                  <summary className="cursor-pointer text-blue-600 font-medium">Data tambahan (opsional)</summary>
+                  <summary className="cursor-pointer text-blue-600 font-medium">{tf('additionalData')}</summary>
                   <div className="grid grid-cols-3 gap-3 mt-3">
                     <div>
-                      <label className="text-xs text-gray-600">Biaya Jabatan</label>
+                      <label className="text-xs text-gray-600">{tf('positionCost')}</label>
                       <input type="number" className="w-full mt-1 px-2 py-1.5 border rounded text-xs font-mono" placeholder="Auto (5%)"
                         value={manualForm.positionCosts} onChange={e => setManualForm({ ...manualForm, positionCosts: e.target.value })} />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-600">Iuran Pensiun</label>
+                      <label className="text-xs text-gray-600">{tf('pension')}</label>
                       <input type="number" className="w-full mt-1 px-2 py-1.5 border rounded text-xs font-mono" placeholder="0"
                         value={manualForm.pensionContribution} onChange={e => setManualForm({ ...manualForm, pensionContribution: e.target.value })} />
                     </div>
@@ -695,9 +696,9 @@ export function SPT1770SSGenerator({
                   </div>
                 </details>
                 <div className="flex justify-end gap-2 pt-2">
-                  <Button variant="outline" size="sm" onClick={() => setShowManualInput(false)}>Batal</Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowManualInput(false)}>{tf('cancel')}</Button>
                   <Button size="sm" onClick={addManualIncome} disabled={!manualForm.employerName || !manualForm.grossIncome}>
-                    <Check className="h-3.5 w-3.5 mr-1" />Tambah
+                    <Check className="h-3.5 w-3.5 mr-1" />{tf('add')}
                   </Button>
                 </div>
               </div>
@@ -710,7 +711,7 @@ export function SPT1770SSGenerator({
               </Button>
               {!showManualInput && (
                 <Button variant="outline" onClick={() => setShowManualInput(true)}>
-                  <Edit2 className="h-3.5 w-3.5 mr-1" />Isi Manual
+                  <Edit2 className="h-3.5 w-3.5 mr-1" />{tf('manualInput')}
                 </Button>
               )}
             </div>
@@ -761,19 +762,19 @@ export function SPT1770SSGenerator({
               </div>
               <div className="grid grid-cols-3 gap-3 text-sm">
                 <div>
-                  <span className="text-blue-600 text-xs">Total Bruto</span>
+                  <span className="text-blue-600 text-xs">{tf('totalGross')}</span>
                   <p className="font-mono font-medium text-blue-900">
                     Rp {formatCurrency(extractedIncomes.reduce((s, i) => s + i.grossIncome, 0))}
                   </p>
                 </div>
                 <div>
-                  <span className="text-blue-600 text-xs">Total Neto</span>
+                  <span className="text-blue-600 text-xs">{tf('totalNet')}</span>
                   <p className="font-mono font-medium text-blue-900">
                     Rp {formatCurrency(extractedIncomes.reduce((s, i) => s + i.netIncome, 0))}
                   </p>
                 </div>
                 <div>
-                  <span className="text-blue-600 text-xs">Total PPh Dipotong</span>
+                  <span className="text-blue-600 text-xs">{tf('totalTaxWithheld')}</span>
                   <p className="font-mono font-medium text-blue-900">
                     Rp {formatCurrency(extractedIncomes.reduce((s, i) => s + i.taxWithheld, 0))}
                   </p>
@@ -792,7 +793,7 @@ export function SPT1770SSGenerator({
 
           {/* Tax Year Selection */}
           <div className="space-y-2">
-            <Label htmlFor="taxYear">Tahun Pajak</Label>
+            <Label htmlFor="taxYear">{tf('detectedYear')}</Label>
             <Select
               value={taxYear.toString()}
               onValueChange={(v) => setTaxYear(parseInt(v))}
@@ -835,7 +836,7 @@ export function SPT1770SSGenerator({
 
           {/* Correction Number */}
           <div className="space-y-2">
-            <Label htmlFor="correctionNumber">Pembetulan ke-</Label>
+            <Label htmlFor="correctionNumber">{tf('correction')}</Label>
             <Select
               value={correctionNumber.toString()}
               onValueChange={(v) => setCorrectionNumber(parseInt(v))}
