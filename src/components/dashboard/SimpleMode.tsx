@@ -220,6 +220,16 @@ export function SimpleMode() {
             </CardContent>
           )}
         </Card>
+
+        {/* Manual Input Option */}
+        <div className="text-center">
+          <button
+            onClick={() => router.push(`/${locale}/tax/spt-tahunan/1770ss`)}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+          >
+            Tidak punya slip gaji? → Isi data manual
+          </button>
+        </div>
       </div>
     );
   }

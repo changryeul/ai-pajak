@@ -114,6 +114,12 @@ export function SPT1770SSGenerator({
   const [extractedIncomes, setExtractedIncomes] = useState<OCRExtractedIncome[]>(storedState?.extractedIncomes || []);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<OCRExtractedIncome | null>(null);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualForm, setManualForm] = useState({
+    employerName: '', employerNpwp: '', grossIncome: '',
+    positionCosts: '', pensionContribution: '', netIncome: '',
+    taxWithheld: '', periodStart: '01', periodEnd: '12',
+  });
 
   // Save state to sessionStorage on changes
   useEffect(() => {
@@ -188,6 +194,30 @@ export function SPT1770SSGenerator({
     );
     setEditingIndex(null);
     setEditForm(null);
+  };
+
+  const addManualIncome = () => {
+    const gross = Number(manualForm.grossIncome) || 0;
+    const posCost = Number(manualForm.positionCosts) || Math.min(gross * 0.05, 6000000);
+    const pension = Number(manualForm.pensionContribution) || 0;
+    const net = Number(manualForm.netIncome) || (gross - posCost - pension);
+
+    const income: OCRExtractedIncome = {
+      employerName: manualForm.employerName || 'Pemberi Kerja',
+      employerNpwp: manualForm.employerNpwp,
+      periodStart: manualForm.periodStart,
+      periodEnd: manualForm.periodEnd,
+      grossIncome: gross,
+      positionCosts: posCost,
+      pensionContribution: pension,
+      netIncome: net,
+      taxWithheld: Number(manualForm.taxWithheld) || 0,
+      confidence: 1.0, // Manual = 100% confidence
+    };
+
+    setExtractedIncomes((prev) => [...prev, income]);
+    setManualForm({ employerName: '', employerNpwp: '', grossIncome: '', positionCosts: '', pensionContribution: '', netIncome: '', taxWithheld: '', periodStart: '01', periodEnd: '12' });
+    setShowManualInput(false);
   };
 
   const proceedToForm = () => {
@@ -607,11 +637,83 @@ export function SPT1770SSGenerator({
                 <p className="text-sm text-red-800">{error}</p>
               </div>
             )}
+
+            {/* Manual Input Form */}
+            {showManualInput && (
+              <div className="border-2 border-blue-200 rounded-xl p-5 bg-blue-50/50 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-sm text-blue-900">Isi Data Manual</h4>
+                  <Button variant="ghost" size="sm" onClick={() => setShowManualInput(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-blue-700">Isi data dari slip gaji tahunan Anda. Jika tidak tahu angka pastinya, tanyakan ke bagian HRD.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-gray-700">Nama Perusahaan *</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-lg text-sm" placeholder="PT Example Indonesia"
+                      value={manualForm.employerName} onChange={e => setManualForm({ ...manualForm, employerName: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-700">NPWP Perusahaan</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono" placeholder="XX.XXX.XXX.X-XXX.XXX"
+                      value={manualForm.employerNpwp} onChange={e => setManualForm({ ...manualForm, employerNpwp: e.target.value })} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-gray-700">Total Gaji Setahun (Bruto) *</label>
+                    <input type="number" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono" placeholder="120000000"
+                      value={manualForm.grossIncome} onChange={e => setManualForm({ ...manualForm, grossIncome: e.target.value })} />
+                    <p className="text-[10px] text-gray-400 mt-0.5">Jumlah semua gaji + tunjangan + bonus + THR selama setahun</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-700">Pajak yang Sudah Dipotong *</label>
+                    <input type="number" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono" placeholder="5000000"
+                      value={manualForm.taxWithheld} onChange={e => setManualForm({ ...manualForm, taxWithheld: e.target.value })} />
+                    <p className="text-[10px] text-gray-400 mt-0.5">PPh 21 yang sudah dipotong perusahaan</p>
+                  </div>
+                </div>
+                <details className="text-xs">
+                  <summary className="cursor-pointer text-blue-600 font-medium">Data tambahan (opsional)</summary>
+                  <div className="grid grid-cols-3 gap-3 mt-3">
+                    <div>
+                      <label className="text-xs text-gray-600">Biaya Jabatan</label>
+                      <input type="number" className="w-full mt-1 px-2 py-1.5 border rounded text-xs font-mono" placeholder="Auto (5%)"
+                        value={manualForm.positionCosts} onChange={e => setManualForm({ ...manualForm, positionCosts: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-600">Iuran Pensiun</label>
+                      <input type="number" className="w-full mt-1 px-2 py-1.5 border rounded text-xs font-mono" placeholder="0"
+                        value={manualForm.pensionContribution} onChange={e => setManualForm({ ...manualForm, pensionContribution: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-600">Gaji Bersih (Neto)</label>
+                      <input type="number" className="w-full mt-1 px-2 py-1.5 border rounded text-xs font-mono" placeholder="Auto"
+                        value={manualForm.netIncome} onChange={e => setManualForm({ ...manualForm, netIncome: e.target.value })} />
+                    </div>
+                  </div>
+                </details>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowManualInput(false)}>Batal</Button>
+                  <Button size="sm" onClick={addManualIncome} disabled={!manualForm.employerName || !manualForm.grossIncome}>
+                    <Check className="h-3.5 w-3.5 mr-1" />Tambah
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={proceedToForm}>
-              {ts('skipUpload')}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={proceedToForm}>
+                {ts('skipUpload')}
+              </Button>
+              {!showManualInput && (
+                <Button variant="outline" onClick={() => setShowManualInput(true)}>
+                  <Edit2 className="h-3.5 w-3.5 mr-1" />Isi Manual
+                </Button>
+              )}
+            </div>
             <Button
               onClick={proceedToForm}
               disabled={extractedIncomes.length === 0}
