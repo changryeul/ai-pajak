@@ -33,6 +33,7 @@ interface NavItem {
   href: string;
   icon: LucideIcon;
   labelKey: string;
+  descKey?: string; // Short description
   roles?: UserRole[]; // undefined = all roles
 }
 
@@ -50,14 +51,14 @@ const navItems: NavSection[] = [
   {
     section: 'main',
     items: [
-      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
-      { href: '/customers', icon: Users, labelKey: 'nav.customers', roles: consultantRoles },
-      { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
-      { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
-      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: [UserRole.CUSTOMER] },
-      { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', roles: taxRoles },
-      { href: '/tax/calendar', icon: ClipboardList, labelKey: 'nav.taxCalendar', roles: taxRoles },
-      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', roles: taxRoles },
+      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', descKey: 'navDesc.dashboard' },
+      { href: '/customers', icon: Users, labelKey: 'nav.customers', descKey: 'navDesc.customers', roles: consultantRoles },
+      { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', descKey: 'navDesc.filings', roles: taxRoles },
+      { href: '/documents', icon: Upload, labelKey: 'nav.documents', descKey: 'navDesc.documents', roles: taxRoles },
+      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', descKey: 'navDesc.reports', roles: [UserRole.CUSTOMER] },
+      { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', descKey: 'navDesc.monthlyPayments', roles: taxRoles },
+      { href: '/tax/calendar', icon: ClipboardList, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar', roles: taxRoles },
+      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', descKey: 'navDesc.taxTools', roles: taxRoles },
     ],
   },
   {
@@ -65,11 +66,11 @@ const navItems: NavSection[] = [
     labelKey: 'nav.taxFiling',
     roles: [UserRole.CUSTOMER],
     items: [
-      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn' },
-      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings' },
-      { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21' },
-      { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.pph23' },
-      { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn' },
+      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn', descKey: 'navDesc.annualReturn' },
+      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings', descKey: 'navDesc.taxSavings' },
+      { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21', descKey: 'navDesc.pph21' },
+      { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.pph23', descKey: 'navDesc.pph23' },
+      { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn', descKey: 'navDesc.ppn' },
     ],
   },
   {
@@ -77,12 +78,12 @@ const navItems: NavSection[] = [
     labelKey: 'nav.taxManagement',
     roles: consultantRoles,
     items: [
-      { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling' },
-      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn' },
-      { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk' },
-      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings' },
-      { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
-      { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
+      { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling', descKey: 'navDesc.newFiling' },
+      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn', descKey: 'navDesc.annualReturn' },
+      { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk', descKey: 'navDesc.pph21Bulk' },
+      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings', descKey: 'navDesc.taxSavings' },
+      { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection', descKey: 'navDesc.anomalyDetection' },
+      { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport', descKey: 'navDesc.clientReport' },
     ],
   },
   {
@@ -214,7 +215,12 @@ export function Sidebar() {
                       )}
                     >
                       <Icon className={cn('h-[18px] w-[18px]', isActive && 'text-white')} />
-                      <span className="flex-1">{t(item.labelKey)}</span>
+                      <span className="flex-1">
+                        <span>{t(item.labelKey)}</span>
+                        {item.descKey && !isActive && (
+                          <span className="block text-[10px] font-normal opacity-60 leading-tight mt-0.5">{t(item.descKey)}</span>
+                        )}
+                      </span>
                       {isAI && !isActive && (
                         <span className="flex h-5 items-center rounded-md bg-gradient-to-r from-amber-100 to-yellow-100 px-1.5 text-[10px] font-bold text-amber-700">
                           AI

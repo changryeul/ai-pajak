@@ -1190,5 +1190,24 @@
     "easy": "Mudah",
     "medium": "Sedang",
     "hard": "Sulit"
+  },
+  "navDesc": {
+    "dashboard": "Ringkasan pajak Anda",
+    "customers": "Kelola klien Anda",
+    "filings": "Cek status pelaporan",
+    "documents": "Upload & kelola dokumen",
+    "reports": "Laporan pajak tahunan",
+    "monthlyPayments": "Bayar PPh & PPN bulanan",
+    "taxCalendar": "Jangan sampai telat bayar",
+    "taxTools": "Kalkulator pajak & bea",
+    "annualReturn": "Buat SPT tahunan otomatis",
+    "taxSavings": "AI cari penghematan pajak",
+    "pph21": "Pajak gaji karyawan",
+    "pph23": "Pajak jasa & sewa",
+    "ppn": "Pajak pertambahan nilai",
+    "newFiling": "Mulai pelaporan baru",
+    "pph21Bulk": "Hitung semua karyawan",
+    "anomalyDetection": "Cek risiko pemeriksaan",
+    "clientReport": "Buat laporan untuk klien"
   }
 }

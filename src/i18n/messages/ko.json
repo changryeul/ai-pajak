@@ -1190,5 +1190,24 @@
     "easy": "쉬움",
     "medium": "보통",
     "hard": "어려움"
+  },
+  "navDesc": {
+    "dashboard": "세금 요약",
+    "customers": "고객 관리",
+    "filings": "신고 상태 확인",
+    "documents": "문서 업로드 & 관리",
+    "reports": "연간 세금 보고서",
+    "monthlyPayments": "월별 PPh & PPN 납부",
+    "taxCalendar": "마감일 놓치지 마세요",
+    "taxTools": "세금 & 관세 계산기",
+    "annualReturn": "연간 세금 신고서 작성",
+    "taxSavings": "AI가 절세 기회 찾기",
+    "pph21": "근로소득세",
+    "pph23": "서비스 & 임대 세금",
+    "ppn": "부가가치세",
+    "newFiling": "새 신고 시작",
+    "pph21Bulk": "전 직원 일괄 계산",
+    "anomalyDetection": "세무 조사 리스크 확인",
+    "clientReport": "고객 리포트 생성"
   }
 }

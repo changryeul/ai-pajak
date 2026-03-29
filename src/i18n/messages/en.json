@@ -1190,5 +1190,24 @@
     "easy": "Easy",
     "medium": "Medium",
     "hard": "Hard"
+  },
+  "navDesc": {
+    "dashboard": "Your tax overview",
+    "customers": "Manage your clients",
+    "filings": "Check filing status",
+    "documents": "Upload & manage documents",
+    "reports": "Annual tax reports",
+    "monthlyPayments": "Pay monthly PPh & VAT",
+    "taxCalendar": "Don't miss deadlines",
+    "taxTools": "Tax & duty calculators",
+    "annualReturn": "Create annual tax return",
+    "taxSavings": "AI finds tax savings",
+    "pph21": "Employee salary tax",
+    "pph23": "Service & rental tax",
+    "ppn": "Value added tax",
+    "newFiling": "Start new filing",
+    "pph21Bulk": "Calculate all employees",
+    "anomalyDetection": "Check audit risks",
+    "clientReport": "Generate client reports"
   }
 }

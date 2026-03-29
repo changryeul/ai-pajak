@@ -1190,5 +1190,24 @@
     "easy": "簡単",
     "medium": "中程度",
     "hard": "難しい"
+  },
+  "navDesc": {
+    "dashboard": "税務概要",
+    "customers": "クライアント管理",
+    "filings": "申告状況確認",
+    "documents": "書類アップロード＆管理",
+    "reports": "年次税務レポート",
+    "monthlyPayments": "月次PPh＆PPN納付",
+    "taxCalendar": "期限を逃さない",
+    "taxTools": "税金＆関税計算",
+    "annualReturn": "年次確定申告を作成",
+    "taxSavings": "AIが節税を発見",
+    "pph21": "給与所得税",
+    "pph23": "サービス＆賃貸税",
+    "ppn": "付加価値税",
+    "newFiling": "新規申告を開始",
+    "pph21Bulk": "全従業員を一括計算",
+    "anomalyDetection": "税務調査リスク確認",
+    "clientReport": "クライアントレポート作成"
   }
 }
