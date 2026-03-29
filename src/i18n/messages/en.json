@@ -1262,8 +1262,8 @@
   "simpleMode": {
     "photoTitle": "Photo Annual Salary Slip",
     "photoSubtitle": "From your company HR department (called \"Bukti Potong 1721-A1\")",
-    "takePhotoOrUpload": "Take Photo or Upload File",
-    "fromCameraOrFile": "Photo from phone camera or PDF/image file",
+    "takePhotoOrUpload": "Capture Payslip or Load Saved Photo",
+    "fromCameraOrFile": "Take a photo with camera or select a saved photo/PDF file",
     "aiReading": "AI is reading your document...",
     "waitAMoment": "Please wait, usually 10-30 seconds",
     "makeSurePhotoIsClear": "Make sure the photo is clear and not cropped",

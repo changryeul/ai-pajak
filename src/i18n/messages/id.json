@@ -1262,8 +1262,8 @@
   "simpleMode": {
     "photoTitle": "Foto Slip Gaji Tahunan",
     "photoSubtitle": "Dari bagian HRD kantor Anda (disebut \"Bukti Potong 1721-A1\")",
-    "takePhotoOrUpload": "Ambil Foto atau Upload File",
-    "fromCameraOrFile": "Foto dari kamera HP atau file PDF/gambar",
+    "takePhotoOrUpload": "Foto Slip Gaji atau Muat Foto Tersimpan",
+    "fromCameraOrFile": "Ambil foto dengan kamera atau pilih foto/PDF yang tersimpan",
     "aiReading": "AI sedang membaca dokumen Anda...",
     "waitAMoment": "Tunggu sebentar ya, biasanya 10-30 detik",
     "makeSurePhotoIsClear": "Pastikan foto jelas dan tidak terpotong",

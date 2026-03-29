@@ -1262,8 +1262,8 @@
   "simpleMode": {
     "photoTitle": "年間給与明細を撮影",
     "photoSubtitle": "会社の人事部から（源泉徴収票1721-A1）",
-    "takePhotoOrUpload": "写真を撮るかファイルをアップロード",
-    "fromCameraOrFile": "携帯カメラの写真またはPDF/画像ファイル",
+    "takePhotoOrUpload": "明細書を撮影または保存済み写真を読み込み",
+    "fromCameraOrFile": "カメラで撮影するか、保存済みの写真/PDFを選択",
     "aiReading": "AIが書類を読み取り中...",
     "waitAMoment": "お待ちください、通常10-30秒",
     "makeSurePhotoIsClear": "写真が鮮明で切れていないことを確認",

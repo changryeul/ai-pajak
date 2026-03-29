@@ -1262,8 +1262,8 @@
   "simpleMode": {
     "photoTitle": "연간 급여 명세서 촬영",
     "photoSubtitle": "회사 인사부에서 받는 서류 (원천징수 영수증 1721-A1)",
-    "takePhotoOrUpload": "사진 촬영 또는 파일 업로드",
-    "fromCameraOrFile": "폰 카메라 사진 또는 PDF/이미지 파일",
+    "takePhotoOrUpload": "명세서 촬영 또는 촬영된 명세서 로드",
+    "fromCameraOrFile": "카메라로 직접 촬영하거나 저장된 사진/PDF 파일 선택",
     "aiReading": "AI가 문서를 읽고 있습니다...",
     "waitAMoment": "잠시 기다려주세요, 보통 10-30초",
     "makeSurePhotoIsClear": "사진이 선명하고 잘리지 않았는지 확인하세요",

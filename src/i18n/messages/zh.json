@@ -1262,8 +1262,8 @@
   "simpleMode": {
     "photoTitle": "拍摄年度工资单",
     "photoSubtitle": "从公司人力资源部获取（扣缴凭证1721-A1）",
-    "takePhotoOrUpload": "拍照或上传文件",
-    "fromCameraOrFile": "手机拍照或PDF/图片文件",
+    "takePhotoOrUpload": "拍摄工资单或加载已保存的照片",
+    "fromCameraOrFile": "用相机拍照或选择已保存的照片/PDF文件",
     "aiReading": "AI正在读取您的文件...",
     "waitAMoment": "请稍候，通常10-30秒",
     "makeSurePhotoIsClear": "确保照片清晰且未裁剪",
