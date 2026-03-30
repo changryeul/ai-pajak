@@ -109,6 +109,10 @@
     "poaSection": "授权委托",
     "createPoa": "创建委托书",
     "poaManage": "管理委托书",
+    "operatorSection": "税务操作员",
+    "operatorDashboard": "操作员仪表板",
+    "submissionQueue": "提交队列",
+    "assignedClients": "分配的客户",
     "administration": "管理",
     "monitoring": "系统监控",
     "account": "账户",
@@ -118,7 +122,10 @@
       "CUSTOMER": "纳税人",
       "CONSULTANT_JTC": "税务顾问",
       "TAX_ADVISOR_JTC": "税务师",
-      "PLATFORM_ADMIN": "平台管理员"
+      "PLATFORM_ADMIN": "平台管理员",
+      "TAX_OPERATOR": "税务操作员",
+      "TAX_OPERATOR_LEAD": "操作员组长",
+      "TAX_OPERATOR_SUPERVISOR": "操作员主管"
     }
   },
   "dashboard": {
@@ -1272,7 +1279,10 @@
     "newFiling": "开始新的申报",
     "pph21Bulk": "批量计算所有员工",
     "anomalyDetection": "检查审计风险",
-    "clientReport": "生成客户报告"
+    "clientReport": "生成客户报告",
+    "operatorDashboard": "申报状态概览",
+    "submissionQueue": "DJP提交队列",
+    "assignedClients": "分配的客户列表"
   },
   "sptForm": {
     "aiAutofillSuccess": "文件读取成功",

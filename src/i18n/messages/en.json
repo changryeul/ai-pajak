@@ -109,6 +109,10 @@
     "poaSection": "Power of Attorney",
     "createPoa": "Create POA",
     "poaManage": "Manage POA",
+    "operatorSection": "Tax Operator",
+    "operatorDashboard": "Operator Dashboard",
+    "submissionQueue": "Submission Queue",
+    "assignedClients": "Assigned Clients",
     "administration": "Administration",
     "monitoring": "System Monitoring",
     "account": "Account",
@@ -118,7 +122,10 @@
       "CUSTOMER": "Taxpayer",
       "CONSULTANT_JTC": "Tax Consultant",
       "TAX_ADVISOR_JTC": "Tax Advisor",
-      "PLATFORM_ADMIN": "Platform Admin"
+      "PLATFORM_ADMIN": "Platform Admin",
+      "TAX_OPERATOR": "Tax Operator",
+      "TAX_OPERATOR_LEAD": "Operator Lead",
+      "TAX_OPERATOR_SUPERVISOR": "Operator Supervisor"
     }
   },
   "dashboard": {
@@ -1272,7 +1279,10 @@
     "newFiling": "Start new filing",
     "pph21Bulk": "Calculate all employees",
     "anomalyDetection": "Check audit risks",
-    "clientReport": "Generate client reports"
+    "clientReport": "Generate client reports",
+    "operatorDashboard": "Filing status overview",
+    "submissionQueue": "DJP submission queue",
+    "assignedClients": "Your assigned clients"
   },
   "sptForm": {
     "aiAutofillSuccess": "documents read successfully",

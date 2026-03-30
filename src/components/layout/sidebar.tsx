@@ -20,6 +20,9 @@ import {
   ClipboardList,
   Lightbulb,
   X,
+  Headphones,
+  ListChecks,
+  Calendar,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -46,6 +49,7 @@ interface NavSection {
 
 const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
 const consultantRoles = [UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
+const operatorRoles = [UserRole.TAX_OPERATOR, UserRole.TAX_OPERATOR_LEAD, UserRole.TAX_OPERATOR_SUPERVISOR];
 
 const navItems: NavSection[] = [
   {
@@ -92,6 +96,17 @@ const navItems: NavSection[] = [
     roles: taxRoles,
     items: [
       { href: '/poa/create', icon: Shield, labelKey: 'nav.createPoa', roles: [UserRole.CUSTOMER] },
+    ],
+  },
+  {
+    section: 'operator',
+    labelKey: 'nav.operatorSection',
+    roles: operatorRoles,
+    items: [
+      { href: '/operator/dashboard', icon: Headphones, labelKey: 'nav.operatorDashboard', descKey: 'navDesc.operatorDashboard' },
+      { href: '/operator/queue', icon: ListChecks, labelKey: 'nav.submissionQueue', descKey: 'navDesc.submissionQueue' },
+      { href: '/operator/clients', icon: Users, labelKey: 'nav.assignedClients', descKey: 'navDesc.assignedClients' },
+      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar' },
     ],
   },
   {
@@ -178,6 +193,7 @@ export function Sidebar() {
             userRole === UserRole.CONSULTANT_JTC && 'bg-gradient-to-r from-green-50 to-emerald-100 text-green-700 border border-green-200',
             userRole === UserRole.TAX_ADVISOR_JTC && 'bg-gradient-to-r from-purple-50 to-violet-100 text-purple-700 border border-purple-200',
             userRole === UserRole.PLATFORM_ADMIN && 'bg-gradient-to-r from-orange-50 to-amber-100 text-orange-700 border border-orange-200',
+            (userRole === UserRole.TAX_OPERATOR || userRole === UserRole.TAX_OPERATOR_LEAD || userRole === UserRole.TAX_OPERATOR_SUPERVISOR) && 'bg-gradient-to-r from-teal-50 to-cyan-100 text-teal-700 border border-teal-200',
           )}>
             {t(`nav.role.${userRole}`)}
           </div>

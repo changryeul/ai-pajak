@@ -109,6 +109,10 @@
     "poaSection": "Surat Kuasa",
     "createPoa": "Buat Surat Kuasa",
     "poaManage": "Kelola Surat Kuasa",
+    "operatorSection": "Operator Pajak",
+    "operatorDashboard": "Dasbor Operator",
+    "submissionQueue": "Antrian Pengajuan",
+    "assignedClients": "Klien Ditugaskan",
     "administration": "Administrasi",
     "monitoring": "Pemantauan Sistem",
     "account": "Akun",
@@ -118,7 +122,10 @@
       "CUSTOMER": "Wajib Pajak",
       "CONSULTANT_JTC": "Konsultan Pajak",
       "TAX_ADVISOR_JTC": "Kuasa Hukum Pajak",
-      "PLATFORM_ADMIN": "Admin Platform"
+      "PLATFORM_ADMIN": "Admin Platform",
+      "TAX_OPERATOR": "Operator Pajak",
+      "TAX_OPERATOR_LEAD": "Ketua Operator",
+      "TAX_OPERATOR_SUPERVISOR": "Supervisor Operator"
     }
   },
   "dashboard": {
@@ -1272,7 +1279,10 @@
     "newFiling": "Mulai pelaporan baru",
     "pph21Bulk": "Hitung semua karyawan",
     "anomalyDetection": "Cek risiko pemeriksaan",
-    "clientReport": "Buat laporan untuk klien"
+    "clientReport": "Buat laporan untuk klien",
+    "operatorDashboard": "Ringkasan status pelaporan",
+    "submissionQueue": "Antrian pengajuan DJP",
+    "assignedClients": "Klien yang ditugaskan"
   },
   "sptForm": {
     "aiAutofillSuccess": "dokumen berhasil dibaca",

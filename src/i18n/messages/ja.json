@@ -109,6 +109,10 @@
     "poaSection": "委任状",
     "createPoa": "委任状作成",
     "poaManage": "委任状管理",
+    "operatorSection": "税務オペレーター",
+    "operatorDashboard": "オペレーターダッシュボード",
+    "submissionQueue": "提出キュー",
+    "assignedClients": "担当クライアント",
     "administration": "管理",
     "monitoring": "システム監視",
     "account": "アカウント",
@@ -118,7 +122,10 @@
       "CUSTOMER": "納税者",
       "CONSULTANT_JTC": "税務コンサルタント",
       "TAX_ADVISOR_JTC": "税理士",
-      "PLATFORM_ADMIN": "プラットフォーム管理者"
+      "PLATFORM_ADMIN": "プラットフォーム管理者",
+      "TAX_OPERATOR": "税務オペレーター",
+      "TAX_OPERATOR_LEAD": "オペレーターリーダー",
+      "TAX_OPERATOR_SUPERVISOR": "オペレータースーパーバイザー"
     }
   },
   "dashboard": {
@@ -1272,7 +1279,10 @@
     "newFiling": "新規申告を開始",
     "pph21Bulk": "全従業員を一括計算",
     "anomalyDetection": "税務調査リスク確認",
-    "clientReport": "クライアントレポート作成"
+    "clientReport": "クライアントレポート作成",
+    "operatorDashboard": "申告状況の概要",
+    "submissionQueue": "DJP提出キュー",
+    "assignedClients": "担当クライアント一覧"
   },
   "sptForm": {
     "aiAutofillSuccess": "書類の読み取り成功",
