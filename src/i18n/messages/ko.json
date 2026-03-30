@@ -1331,7 +1331,10 @@
     "reportDeadline": "신고 마감",
     "addCounterparty": "추가",
     "searchNameNpwp": "이름 또는 NPWP 검색...",
-    "noCounterparties": "거래 상대방 없음"
+    "noCounterparties": "거래 상대방 없음",
+    "notFound": "검색 결과 없음",
+    "cancel": "취소",
+    "save": "저장"
   },
   "simpleMode": {
     "photoTitle": "연간 급여 명세서 촬영",
@@ -1753,5 +1756,50 @@
     "failedToLoad": "시스템 상태 로드 실패",
     "failures": "실패 횟수",
     "lastFailure": "마지막 실패"
+  },
+  "sptPages": {
+    "back": "돌아가기",
+    "selectTaxpayer": "납세자 선택",
+    "loadingData": "데이터 로드 중...",
+    "noTaxpayerData": "개인 납세자 데이터가 없습니다.",
+    "addNewTaxpayer": "새 납세자 추가",
+    "selectTaxpayerPlaceholder": "납세자 선택...",
+    "selectClient": "고객 선택...",
+    "changeClient": "고객 변경",
+    "noAnomalies": "이상 징후가 감지되지 않았습니다!",
+    "notFound": "찾을 수 없음",
+    "spt1770Title": "SPT 1770 - 완전 양식",
+    "spt1770Desc": "사업/자유직업 소득자용 납세자 신고서",
+    "spt1770STitle": "SPT 1770 S - 간편 양식",
+    "spt1770SDesc": "근로소득 6천만 루피아 이상 또는 복수 직장 직장인용",
+    "spt1770SSTitle": "SPT 1770 SS - 초간편 양식",
+    "spt1770SSDesc": "1개 직장, 연소득 6천만 루피아 미만 직장인용",
+    "spt1771Title": "SPT 1771 - 법인세",
+    "spt1771Desc": "PT, CV 등 법인 납세자용 연간 신고서",
+    "noCorpTaxpayer": "법인 납세자 데이터가 없습니다.",
+    "addNewCorp": "새 법인 추가"
+  },
+  "settingsIntegrations": {
+    "integrations": "연동",
+    "connect": "연결",
+    "disconnect": "연결 해제",
+    "connected": "연결됨",
+    "manageBtn": "관리",
+    "accurateOnline": "Accurate Online",
+    "accurateDesc": "직원 및 급여 데이터 동기화",
+    "bankAccount": "은행 계좌",
+    "bankDesc": "은행에서 매출 자동 가져오기",
+    "jurnalId": "Jurnal.id (Mekari)",
+    "jurnalDesc": "회계 및 PPN 동기화",
+    "xero": "Xero",
+    "comingSoon": "준비 중",
+    "featuresAfterConnect": "연결 후 사용 가능한 기능:",
+    "doubleRateWarning": "NPWP 미보유 거래처는 2배 세율이 적용됩니다 (Pasal 23(1a) UU PPh). 거래 전 NPWP를 확인하세요.",
+    "selectOrManual": "선택 또는 직접 입력"
+  },
+  "marketplace": {
+    "searchFirm": "법인명으로 검색...",
+    "noConsultants": "컨설턴트가 없습니다",
+    "clients": "고객"
   }
 }

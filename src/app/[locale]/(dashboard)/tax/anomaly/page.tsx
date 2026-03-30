@@ -56,6 +56,7 @@ export default function AnomalyDetectionPage() {
   const locale = params.locale as string;
   const { session, isLoading: isSessionLoading } = useSession();
   const t = useTranslations('pages');
+  const tp = useTranslations('sptPages');
   const currentYear = new Date().getFullYear();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -118,7 +119,7 @@ export default function AnomalyDetectionPage() {
             <div className="space-y-2">
               <Label>{t('selectClient')}</Label>
               <Select onValueChange={(v) => setSelectedCustomer(customers.find(c => c.id === v) || null)}>
-                <SelectTrigger><SelectValue placeholder="Pilih klien..." /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={tp('selectClient')} /></SelectTrigger>
                 <SelectContent>
                   {customers.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>
@@ -188,7 +189,7 @@ export default function AnomalyDetectionPage() {
               {result.alerts.length === 0 ? (
                 <div className="text-center py-6">
                   <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">Tidak ada anomali terdeteksi!</p>
+                  <p className="text-sm text-gray-500">{tp('noAnomalies')}</p>
                 </div>
               ) : (
                 result.alerts.map((alert) => {

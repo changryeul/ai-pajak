@@ -24,6 +24,7 @@ interface Customer {
 
 export default function SPT1771Page() {
   const t = useTranslations('tax');
+  const tp = useTranslations('sptPages');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
@@ -69,7 +70,7 @@ export default function SPT1771Page() {
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali
+          {tp('back')}
         </Button>
 
         <div className="flex items-center gap-3">
@@ -77,9 +78,9 @@ export default function SPT1771Page() {
             <Building2 className="h-6 w-6 text-orange-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">SPT 1771</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{tp('spt1771Title')}</h1>
             <p className="text-gray-600">
-              Formulir Badan - Untuk PT, CV, Firma, Koperasi, dan Yayasan
+              {tp('spt1771Desc')}
             </p>
           </div>
         </div>
@@ -96,12 +97,12 @@ export default function SPT1771Page() {
       {/* Customer Selection */}
       {!selectedCustomer && (
         <div className="bg-white rounded-lg border p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Pilih Wajib Pajak Badan</h2>
+          <h2 className="text-lg font-semibold mb-4">{tp('selectTaxpayer')}</h2>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-              <span className="ml-2 text-gray-600">Memuat data...</span>
+              <span className="ml-2 text-gray-600">{tp('loadingData')}</span>
             </div>
           ) : error ? (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
@@ -110,20 +111,20 @@ export default function SPT1771Page() {
           ) : customers.length === 0 ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <p className="text-yellow-800">
-                Belum ada data wajib pajak badan.
+                {tp('noCorpTaxpayer')}
               </p>
               <Button
                 variant="outline"
                 className="mt-3"
                 onClick={() => router.push(`/${locale}/customers/new`)}
               >
-                Tambah Wajib Pajak Badan Baru
+                {tp('addNewCorp')}
               </Button>
             </div>
           ) : (
             <Select onValueChange={handleCustomerSelect}>
               <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Pilih wajib pajak badan..." />
+                <SelectValue placeholder={tp('selectTaxpayerPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {customers.map((customer) => (
@@ -145,7 +146,7 @@ export default function SPT1771Page() {
               variant="outline"
               onClick={() => setSelectedCustomer(null)}
             >
-              Ganti Wajib Pajak
+              {tp('changeClient')}
             </Button>
           </div>
 

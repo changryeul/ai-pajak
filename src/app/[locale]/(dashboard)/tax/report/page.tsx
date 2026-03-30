@@ -28,6 +28,7 @@ export default function ClientReportPage() {
   const locale = params.locale as string;
   const { session, isLoading: isSessionLoading } = useSession();
   const t = useTranslations('pages');
+  const tp = useTranslations('sptPages');
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -99,7 +100,7 @@ export default function ClientReportPage() {
           ) : (
             <Select onValueChange={(v) => setSelectedCustomer(customers.find((c) => c.id === v) || null)}>
               <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Pilih klien..." />
+                <SelectValue placeholder={tp('selectClient')} />
               </SelectTrigger>
               <SelectContent>
                 {customers.map((c) => (

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Customer {
   id: string;
@@ -31,6 +32,7 @@ export default function TaxSavingsPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const tp = useTranslations('sptPages');
 
   const isCustomerRole = session?.role === UserRole.CUSTOMER;
 
@@ -96,7 +98,7 @@ export default function TaxSavingsPage() {
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali
+          {tp('back')}
         </Button>
 
         <h1 className="text-2xl font-bold text-gray-900">Tax Savings Advisor</h1>
@@ -108,7 +110,7 @@ export default function TaxSavingsPage() {
       {/* Customer Selection for Tax Advisors */}
       {!isCustomerRole && !selectedCustomer && (
         <div className="bg-white rounded-lg border p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Pilih Wajib Pajak</h2>
+          <h2 className="text-lg font-semibold mb-4">{tp('selectTaxpayer')}</h2>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -120,7 +122,7 @@ export default function TaxSavingsPage() {
           ) : (
             <Select onValueChange={(v) => setSelectedCustomer(customers.find((c) => c.id === v) || null)}>
               <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Pilih wajib pajak..." />
+                <SelectValue placeholder={tp('selectTaxpayerPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {customers.map((c) => (
@@ -140,7 +142,7 @@ export default function TaxSavingsPage() {
           {!isCustomerRole && (
             <div className="mb-4">
               <Button variant="outline" onClick={() => setSelectedCustomer(null)}>
-                Ganti Wajib Pajak
+                {tp('changeClient')}
               </Button>
             </div>
           )}

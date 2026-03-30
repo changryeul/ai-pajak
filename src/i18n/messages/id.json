@@ -1331,7 +1331,10 @@
     "reportDeadline": "Batas Lapor",
     "addCounterparty": "Tambah",
     "searchNameNpwp": "Cari nama atau NPWP...",
-    "noCounterparties": "Belum ada lawan transaksi"
+    "noCounterparties": "Belum ada lawan transaksi",
+    "notFound": "Tidak ditemukan",
+    "cancel": "Batal",
+    "save": "Simpan"
   },
   "simpleMode": {
     "photoTitle": "Foto Slip Gaji Tahunan",
@@ -1753,5 +1756,50 @@
     "failedToLoad": "Gagal memuat status sistem",
     "failures": "Kegagalan",
     "lastFailure": "Kegagalan terakhir"
+  },
+  "sptPages": {
+    "back": "Kembali",
+    "selectTaxpayer": "Pilih Wajib Pajak",
+    "loadingData": "Memuat data...",
+    "noTaxpayerData": "Belum ada data wajib pajak orang pribadi.",
+    "addNewTaxpayer": "Tambah Wajib Pajak Baru",
+    "selectTaxpayerPlaceholder": "Pilih wajib pajak...",
+    "selectClient": "Pilih klien...",
+    "changeClient": "Ganti Wajib Pajak",
+    "noAnomalies": "Tidak ada anomali terdeteksi!",
+    "notFound": "Tidak ditemukan",
+    "spt1770Title": "SPT 1770 - Formulir Lengkap",
+    "spt1770Desc": "Untuk wajib pajak dengan penghasilan dari usaha atau pekerjaan bebas",
+    "spt1770STitle": "SPT 1770 S - Formulir Sederhana",
+    "spt1770SDesc": "Untuk karyawan dengan penghasilan ≥Rp 60 juta atau lebih dari satu pemberi kerja",
+    "spt1770SSTitle": "SPT 1770 SS - Formulir Sangat Sederhana",
+    "spt1770SSDesc": "Untuk karyawan satu pemberi kerja dengan penghasilan <Rp 60 juta",
+    "spt1771Title": "SPT 1771 - PPh Badan",
+    "spt1771Desc": "SPT Tahunan PPh Badan untuk Wajib Pajak Badan (PT, CV, dll)",
+    "noCorpTaxpayer": "Belum ada data wajib pajak badan.",
+    "addNewCorp": "Tambah Badan Usaha Baru"
+  },
+  "settingsIntegrations": {
+    "integrations": "Integrasi",
+    "connect": "Hubungkan",
+    "disconnect": "Putuskan",
+    "connected": "Terhubung",
+    "manageBtn": "Kelola",
+    "accurateOnline": "Accurate Online",
+    "accurateDesc": "Sinkronisasi data karyawan & gaji",
+    "bankAccount": "Rekening Bank",
+    "bankDesc": "Auto-import revenue dari bank",
+    "jurnalId": "Jurnal.id (Mekari)",
+    "jurnalDesc": "Sinkronisasi akuntansi & PPN",
+    "xero": "Xero",
+    "comingSoon": "Coming Soon",
+    "featuresAfterConnect": "Fitur yang tersedia setelah terhubung:",
+    "doubleRateWarning": "Tarif 2x lipat berlaku karena lawan transaksi tidak memiliki NPWP (Pasal 23(1a) UU PPh). Pastikan NPWP sebelum transaksi.",
+    "selectOrManual": "Pilih atau isi manual"
+  },
+  "marketplace": {
+    "searchFirm": "Cari berdasarkan nama firma...",
+    "noConsultants": "Tidak ada konsultan ditemukan",
+    "clients": "klien"
   }
 }

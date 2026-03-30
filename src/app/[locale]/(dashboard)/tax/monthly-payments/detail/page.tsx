@@ -13,6 +13,7 @@ import {
   ArrowLeft, Plus, Loader2, FileText, Users, DollarSign,
   TrendingUp, TrendingDown, Minus, Receipt, AlertTriangle,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
@@ -22,6 +23,7 @@ export default function MonthlyPaymentDetailPage() {
   const router = useRouter();
   const locale = params.locale as string;
   const { session } = useSession();
+  const ti = useTranslations('settingsIntegrations');
 
   const taxType = searchParams.get('type') || 'PPh23';
   const period = searchParams.get('period') || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
@@ -127,7 +129,7 @@ export default function MonthlyPaymentDetailPage() {
                   const cp = counterparties.find((c: {id: string}) => c.id === v);
                   setFormData({ ...formData, counterpartyId: v, counterpartyName: cp?.name || '', counterpartyNpwp: cp?.npwp || '' });
                 }}>
-                  <SelectTrigger><SelectValue placeholder="Pilih atau isi manual" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={ti('selectOrManual')} /></SelectTrigger>
                   <SelectContent>
                     {counterparties.map((cp: {id: string; name: string; npwp?: string}) => (
                       <SelectItem key={cp.id} value={cp.id}>{cp.name} {cp.npwp ? `(${cp.npwp})` : ''}</SelectItem>
@@ -145,7 +147,7 @@ export default function MonthlyPaymentDetailPage() {
             {taxType !== 'PPN' && !formData.counterpartyNpwp && formData.counterpartyName && (
               <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
                 <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-500" />
-                <span><strong>Tarif 2x lipat</strong> berlaku karena lawan transaksi tidak memiliki NPWP (Pasal 21 ayat 5a UU PPh). Contoh: Jasa 2% → 4%, Dividen 15% → 30%.</span>
+                <span>{ti('doubleRateWarning')}</span>
               </div>
             )}
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { SPT1770SGenerator } from '@/components/spt';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
@@ -23,6 +24,7 @@ interface Customer {
 }
 
 export default function SPT1770SPage() {
+  const tp = useTranslations('sptPages');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
@@ -99,7 +101,7 @@ export default function SPT1770SPage() {
     return (
       <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-        <p className="text-gray-600">Memuat...</p>
+        <p className="text-gray-600">{tp('loadingData')}</p>
       </div>
     );
   }
@@ -114,7 +116,7 @@ export default function SPT1770SPage() {
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali
+          {tp('back')}
         </Button>
 
         <div className="flex items-center gap-3">
@@ -122,9 +124,9 @@ export default function SPT1770SPage() {
             <FileText className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">SPT 1770 S</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{tp('spt1770STitle')}</h1>
             <p className="text-gray-600">
-              Formulir Sederhana - Untuk karyawan dengan penghasilan &gt;= Rp 60 juta atau dari lebih dari satu pemberi kerja
+              {tp('spt1770SDesc')}
             </p>
           </div>
         </div>
@@ -153,12 +155,12 @@ export default function SPT1770SPage() {
       {/* Customer Selection for Tax Advisors */}
       {!isCustomerRole && !selectedCustomer && (
         <div className="bg-white rounded-lg border p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Pilih Wajib Pajak</h2>
+          <h2 className="text-lg font-semibold mb-4">{tp('selectTaxpayer')}</h2>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-              <span className="ml-2 text-gray-600">Memuat data...</span>
+              <span className="ml-2 text-gray-600">{tp('loadingData')}</span>
             </div>
           ) : error ? (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
@@ -167,20 +169,20 @@ export default function SPT1770SPage() {
           ) : customers.length === 0 ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <p className="text-yellow-800">
-                Belum ada data wajib pajak orang pribadi.
+                {tp('noTaxpayerData')}
               </p>
               <Button
                 variant="outline"
                 className="mt-3"
                 onClick={() => router.push(`/${locale}/customers/new`)}
               >
-                Tambah Wajib Pajak Baru
+                {tp('addNewTaxpayer')}
               </Button>
             </div>
           ) : (
             <Select onValueChange={handleCustomerSelect}>
               <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Pilih wajib pajak..." />
+                <SelectValue placeholder={tp('selectTaxpayerPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {customers.map((customer) => (
@@ -198,7 +200,7 @@ export default function SPT1770SPage() {
       {isCustomerRole && isLoading && (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Memuat data...</span>
+          <span className="ml-2 text-gray-600">{tp('loadingData')}</span>
         </div>
       )}
 
@@ -226,7 +228,7 @@ export default function SPT1770SPage() {
                 variant="outline"
                 onClick={() => setSelectedCustomer(null)}
               >
-                Ganti Wajib Pajak
+                {tp('changeClient')}
               </Button>
             </div>
           )}

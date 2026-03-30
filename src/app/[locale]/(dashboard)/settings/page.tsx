@@ -39,6 +39,7 @@ interface NotificationPreferences {
 
 export default function SettingsPage() {
   const t = useTranslations();
+  const ti = useTranslations('settingsIntegrations');
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
@@ -79,7 +80,7 @@ export default function SettingsPage() {
     { id: 'security' as SettingsTab, label: t('settings.security') || 'Security', icon: Shield },
     { id: 'notifications' as SettingsTab, label: t('settings.notifications') || 'Notifications', icon: Bell },
     { id: 'language' as SettingsTab, label: t('settings.language') || 'Language', icon: Globe },
-    { id: 'integrations' as SettingsTab, label: 'Integrasi', icon: Link2 },
+    { id: 'integrations' as SettingsTab, label: ti('integrations'), icon: Link2 },
   ];
 
   const languages = [
@@ -553,7 +554,7 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Link2 className="h-5 w-5 text-indigo-600" />
-                  Integrasi
+                  {ti('integrations')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -566,13 +567,13 @@ export default function SettingsPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">Accurate Online</h3>
-                        <p className="text-xs text-gray-500">Sinkronisasi data karyawan & gaji</p>
+                        <p className="text-xs text-gray-500">{ti('accurateDesc')}</p>
                       </div>
                     </div>
                     <AccurateConnectButton />
                   </div>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>Fitur yang tersedia setelah terhubung:</p>
+                    <p>{ti('featuresAfterConnect')}</p>
                     <ul className="list-disc list-inside text-xs text-gray-500 space-y-0.5">
                       <li>{t('integrations.accurateFeature1')}</li>
                       <li>{t('integrations.accurateFeature2')}</li>
@@ -591,7 +592,7 @@ export default function SettingsPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">Rekening Bank</h3>
-                        <p className="text-xs text-gray-500">Auto-import revenue dari bank</p>
+                        <p className="text-xs text-gray-500">{ti('bankDesc')}</p>
                       </div>
                     </div>
                     <BankConnectButton />
@@ -621,7 +622,7 @@ export default function SettingsPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">Jurnal.id (Mekari)</h3>
-                        <p className="text-xs text-gray-500">Sinkronisasi akuntansi & PPN</p>
+                        <p className="text-xs text-gray-500">{ti('jurnalDesc')}</p>
                       </div>
                     </div>
                     <JurnalConnectButton />
@@ -643,7 +644,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Xero</h3>
-                      <p className="text-xs text-gray-500">Coming Soon</p>
+                      <p className="text-xs text-gray-500">{ti('comingSoon')}</p>
                     </div>
                   </div>
                 </div>
@@ -657,6 +658,7 @@ export default function SettingsPage() {
 }
 
 function AccurateConnectButton() {
+  const ti = useTranslations('settingsIntegrations');
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionInfo, setConnectionInfo] = useState<string | null>(null);
@@ -712,10 +714,10 @@ function AccurateConnectButton() {
       <div className="flex items-center gap-2">
         <span className="text-xs text-green-600 font-medium flex items-center gap-1">
           <Check className="h-3 w-3" />
-          {connectionInfo || 'Terhubung'}
+          {connectionInfo || ti('connected')}
         </span>
         <Button variant="outline" size="sm" onClick={handleDisconnect} disabled={isLoading}>
-          Putuskan
+          {ti('disconnect')}
         </Button>
       </div>
     );
@@ -728,12 +730,13 @@ function AccurateConnectButton() {
       ) : (
         <ExternalLink className="h-3 w-3 mr-1" />
       )}
-      Hubungkan
+      {ti('connect')}
     </Button>
   );
 }
 
 function BankConnectButton() {
+  const ti = useTranslations('settingsIntegrations');
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -777,10 +780,10 @@ function BankConnectButton() {
       <div className="flex items-center gap-2">
         <span className="text-xs text-green-600 font-medium flex items-center gap-1">
           <Check className="h-3 w-3" />
-          Terhubung
+          {ti('connected')}
         </span>
         <Button variant="outline" size="sm" disabled>
-          Kelola
+          {ti('manageBtn')}
         </Button>
       </div>
     );
@@ -793,12 +796,13 @@ function BankConnectButton() {
       ) : (
         <ExternalLink className="h-3 w-3 mr-1" />
       )}
-      Hubungkan
+      {ti('connect')}
     </Button>
   );
 }
 
 function JurnalConnectButton() {
+  const ti = useTranslations('settingsIntegrations');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConnect = async () => {
@@ -825,7 +829,7 @@ function JurnalConnectButton() {
       ) : (
         <ExternalLink className="h-3 w-3 mr-1" />
       )}
-      Hubungkan
+      {ti('connect')}
     </Button>
   );
 }

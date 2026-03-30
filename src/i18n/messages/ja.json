@@ -1331,7 +1331,10 @@
     "reportDeadline": "申告期限",
     "addCounterparty": "追加",
     "searchNameNpwp": "名前またはNPWPで検索...",
-    "noCounterparties": "取引先がありません"
+    "noCounterparties": "取引先がありません",
+    "notFound": "見つかりません",
+    "cancel": "キャンセル",
+    "save": "保存"
   },
   "simpleMode": {
     "photoTitle": "年間給与明細を撮影",
@@ -1753,5 +1756,50 @@
     "failedToLoad": "システムステータスの読み込みに失敗",
     "failures": "失敗回数",
     "lastFailure": "最終失敗"
+  },
+  "sptPages": {
+    "back": "戻る",
+    "selectTaxpayer": "納税者を選択",
+    "loadingData": "データ読み込み中...",
+    "noTaxpayerData": "個人納税者データがありません。",
+    "addNewTaxpayer": "新規納税者を追加",
+    "selectTaxpayerPlaceholder": "納税者を選択...",
+    "selectClient": "クライアントを選択...",
+    "changeClient": "クライアント変更",
+    "noAnomalies": "異常は検出されませんでした！",
+    "notFound": "見つかりません",
+    "spt1770Title": "SPT 1770 - 完全フォーム",
+    "spt1770Desc": "事業・自由職業所得の納税者用",
+    "spt1770STitle": "SPT 1770 S - 簡易フォーム",
+    "spt1770SDesc": "年収6千万ルピア以上または複数雇用者の会社員用",
+    "spt1770SSTitle": "SPT 1770 SS - 超簡易フォーム",
+    "spt1770SSDesc": "1社雇用、年収6千万ルピア未満の会社員用",
+    "spt1771Title": "SPT 1771 - 法人税",
+    "spt1771Desc": "PT、CV等の法人納税者用年次申告書",
+    "noCorpTaxpayer": "法人納税者データがありません。",
+    "addNewCorp": "新規法人を追加"
+  },
+  "settingsIntegrations": {
+    "integrations": "連携",
+    "connect": "接続",
+    "disconnect": "切断",
+    "connected": "接続済み",
+    "manageBtn": "管理",
+    "accurateOnline": "Accurate Online",
+    "accurateDesc": "従業員・給与データの同期",
+    "bankAccount": "銀行口座",
+    "bankDesc": "銀行から売上を自動取込",
+    "jurnalId": "Jurnal.id (Mekari)",
+    "jurnalDesc": "会計・PPN同期",
+    "xero": "Xero",
+    "comingSoon": "準備中",
+    "featuresAfterConnect": "接続後に利用可能な機能：",
+    "doubleRateWarning": "NPWP未保有の取引先は2倍の税率が適用されます（Pasal 23(1a) UU PPh）。取引前にNPWPを確認してください。",
+    "selectOrManual": "選択または手入力"
+  },
+  "marketplace": {
+    "searchFirm": "法人名で検索...",
+    "noConsultants": "コンサルタントが見つかりません",
+    "clients": "クライアント"
   }
 }

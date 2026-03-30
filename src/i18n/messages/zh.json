@@ -1331,7 +1331,10 @@
     "reportDeadline": "申报截止",
     "addCounterparty": "添加",
     "searchNameNpwp": "搜索名称或NPWP...",
-    "noCounterparties": "暂无交易对方"
+    "noCounterparties": "暂无交易对方",
+    "notFound": "未找到",
+    "cancel": "取消",
+    "save": "保存"
   },
   "simpleMode": {
     "photoTitle": "拍摄年度工资单",
@@ -1753,5 +1756,50 @@
     "failedToLoad": "加载系统状态失败",
     "failures": "失败次数",
     "lastFailure": "最后失败"
+  },
+  "sptPages": {
+    "back": "返回",
+    "selectTaxpayer": "选择纳税人",
+    "loadingData": "加载数据中...",
+    "noTaxpayerData": "暂无个人纳税人数据。",
+    "addNewTaxpayer": "添加新纳税人",
+    "selectTaxpayerPlaceholder": "选择纳税人...",
+    "selectClient": "选择客户...",
+    "changeClient": "更换客户",
+    "noAnomalies": "未检测到异常！",
+    "notFound": "未找到",
+    "spt1770Title": "SPT 1770 - 完整表格",
+    "spt1770Desc": "适用于经营/自由职业所得纳税人",
+    "spt1770STitle": "SPT 1770 S - 简化表格",
+    "spt1770SDesc": "适用于收入≥6千万盾或多雇主的雇员",
+    "spt1770SSTitle": "SPT 1770 SS - 超简化表格",
+    "spt1770SSDesc": "适用于单一雇主、年收入<6千万盾的雇员",
+    "spt1771Title": "SPT 1771 - 企业税",
+    "spt1771Desc": "适用于法人纳税人（PT、CV等）的年度申报表",
+    "noCorpTaxpayer": "暂无法人纳税人数据。",
+    "addNewCorp": "添加新法人"
+  },
+  "settingsIntegrations": {
+    "integrations": "集成",
+    "connect": "连接",
+    "disconnect": "断开",
+    "connected": "已连接",
+    "manageBtn": "管理",
+    "accurateOnline": "Accurate Online",
+    "accurateDesc": "同步员工和薪资数据",
+    "bankAccount": "银行账户",
+    "bankDesc": "从银行自动导入收入",
+    "jurnalId": "Jurnal.id (Mekari)",
+    "jurnalDesc": "同步会计和PPN",
+    "xero": "Xero",
+    "comingSoon": "即将推出",
+    "featuresAfterConnect": "连接后可用功能：",
+    "doubleRateWarning": "NPWP缺失的交易对手适用双倍税率（Pasal 23(1a) UU PPh）。交易前请确认NPWP。",
+    "selectOrManual": "选择或手动输入"
+  },
+  "marketplace": {
+    "searchFirm": "按公司名搜索...",
+    "noConsultants": "未找到顾问",
+    "clients": "客户"
   }
 }

@@ -1331,7 +1331,10 @@
     "reportDeadline": "Report Deadline",
     "addCounterparty": "Add",
     "searchNameNpwp": "Search name or NPWP...",
-    "noCounterparties": "No counterparties yet"
+    "noCounterparties": "No counterparties yet",
+    "notFound": "Not found",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "simpleMode": {
     "photoTitle": "Photo Annual Salary Slip",
@@ -1753,5 +1756,50 @@
     "failedToLoad": "Failed to load system status",
     "failures": "Failures",
     "lastFailure": "Last failure"
+  },
+  "sptPages": {
+    "back": "Back",
+    "selectTaxpayer": "Select Taxpayer",
+    "loadingData": "Loading data...",
+    "noTaxpayerData": "No individual taxpayer data found.",
+    "addNewTaxpayer": "Add New Taxpayer",
+    "selectTaxpayerPlaceholder": "Select taxpayer...",
+    "selectClient": "Select client...",
+    "changeClient": "Change Client",
+    "noAnomalies": "No anomalies detected!",
+    "notFound": "Not found",
+    "spt1770Title": "SPT 1770 - Full Form",
+    "spt1770Desc": "For taxpayers with business or freelance income",
+    "spt1770STitle": "SPT 1770 S - Simplified Form",
+    "spt1770SDesc": "For employees with income ≥Rp 60M or multiple employers",
+    "spt1770SSTitle": "SPT 1770 SS - Ultra Simplified",
+    "spt1770SSDesc": "For single employer, annual income <Rp 60M",
+    "spt1771Title": "SPT 1771 - Corporate Tax",
+    "spt1771Desc": "Annual tax return for corporate taxpayers (PT, CV, etc.)",
+    "noCorpTaxpayer": "No corporate taxpayer data found.",
+    "addNewCorp": "Add New Corporation"
+  },
+  "settingsIntegrations": {
+    "integrations": "Integrations",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connected": "Connected",
+    "manageBtn": "Manage",
+    "accurateOnline": "Accurate Online",
+    "accurateDesc": "Sync employee & salary data",
+    "bankAccount": "Bank Account",
+    "bankDesc": "Auto-import revenue from bank",
+    "jurnalId": "Jurnal.id (Mekari)",
+    "jurnalDesc": "Sync accounting & PPN",
+    "xero": "Xero",
+    "comingSoon": "Coming Soon",
+    "featuresAfterConnect": "Features available after connecting:",
+    "doubleRateWarning": "Double rate applies for counterparties without NPWP (Pasal 23(1a) UU PPh). Verify NPWP before transactions.",
+    "selectOrManual": "Select or enter manually"
+  },
+  "marketplace": {
+    "searchFirm": "Search by firm name...",
+    "noConsultants": "No consultants found",
+    "clients": "clients"
   }
 }
