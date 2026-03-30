@@ -57,13 +57,15 @@ export function useSession(): UseSessionReturn {
         return;
       }
 
-      // Get user role
+      // Get user role (use maybeSingle + order to handle multiple roles)
       const { data: userRole, error: roleError } = await supabase
         .from('user_roles')
         .select('role, organization_id, organization_type')
         .eq('user_id', authSession.user.id)
         .eq('is_active', true)
-        .single();
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (roleError) {
         // PGRST116 = no rows found
@@ -98,6 +100,20 @@ export function useSession(): UseSessionReturn {
         if (customer) {
           customerId = customer.id;
           fullName = customer.full_name || customer.company_name;
+        }
+      } else if (
+        userRole.role === UserRole.TAX_OPERATOR ||
+        userRole.role === UserRole.TAX_OPERATOR_LEAD ||
+        userRole.role === UserRole.TAX_OPERATOR_SUPERVISOR
+      ) {
+        const { data: operator } = await supabase
+          .from('tax_operators')
+          .select('id, name')
+          .eq('user_id', authSession.user.id)
+          .maybeSingle();
+
+        if (operator) {
+          fullName = operator.name;
         }
       } else if (userRole.role === UserRole.CONSULTANT_JTC || userRole.role === UserRole.TAX_ADVISOR_JTC) {
         const { data: consultant } = await supabase

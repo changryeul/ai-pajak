@@ -84,6 +84,14 @@ export default function DashboardPage() {
     return <PlatformAdminDashboard session={session} locale={locale} />;
   }
 
+  if (hasRole(session, UserRole.TAX_OPERATOR, UserRole.TAX_OPERATOR_LEAD, UserRole.TAX_OPERATOR_SUPERVISOR)) {
+    // Redirect to operator dashboard
+    if (typeof window !== 'undefined') {
+      window.location.href = `/${locale}/operator/dashboard`;
+    }
+    return <DashboardSkeleton />;
+  }
+
   if (hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC)) {
     return (
       <ConsultantDashboard
