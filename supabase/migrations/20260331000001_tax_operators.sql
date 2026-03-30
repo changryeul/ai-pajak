@@ -1,3 +1,8 @@
+-- Add new operator roles to user_role_type enum
+ALTER TYPE user_role_type ADD VALUE IF NOT EXISTS 'TAX_OPERATOR';
+ALTER TYPE user_role_type ADD VALUE IF NOT EXISTS 'TAX_OPERATOR_LEAD';
+ALTER TYPE user_role_type ADD VALUE IF NOT EXISTS 'TAX_OPERATOR_SUPERVISOR';
+
 -- Tax Operators (상담원) for Phase 1 DJP manual submission
 CREATE TABLE IF NOT EXISTS tax_operators (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -76,20 +81,7 @@ CREATE INDEX IF NOT EXISTS idx_dsq_operator ON djp_submission_queue(operator_id)
 CREATE INDEX IF NOT EXISTS idx_dsq_status ON djp_submission_queue(status);
 CREATE INDEX IF NOT EXISTS idx_dsq_period ON djp_submission_queue(tax_period_year, tax_period_month);
 
--- Add TAX_OPERATOR roles to user_roles if not exists
--- (user_roles table may already have a check constraint, so we alter it)
-DO $$
-BEGIN
-  -- Try to add new role values - if check constraint exists, alter it
-  BEGIN
-    ALTER TABLE user_roles DROP CONSTRAINT IF EXISTS user_roles_role_check;
-    ALTER TABLE user_roles ADD CONSTRAINT user_roles_role_check
-      CHECK (role IN ('CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC', 'PLATFORM_ADMIN', 'TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'));
-  EXCEPTION WHEN OTHERS THEN
-    -- Constraint might not exist or table structure differs
-    NULL;
-  END;
-END $$;
+-- Note: user_roles.role uses user_role_type enum, new values added at top of this file
 
 -- RLS Policies
 ALTER TABLE tax_operators ENABLE ROW LEVEL SECURITY;
@@ -107,7 +99,7 @@ CREATE POLICY tax_operators_admin ON tax_operators FOR ALL
     EXISTS (
       SELECT 1 FROM user_roles
       WHERE user_id = auth.uid()
-      AND role IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
+      AND role::text IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
     )
   );
 
@@ -122,7 +114,7 @@ CREATE POLICY oca_admin ON operator_client_assignments FOR ALL
     EXISTS (
       SELECT 1 FROM user_roles
       WHERE user_id = auth.uid()
-      AND role IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
+      AND role::text IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
     )
   );
 
@@ -133,7 +125,7 @@ CREATE POLICY dsq_own ON djp_submission_queue FOR ALL
     OR EXISTS (
       SELECT 1 FROM user_roles
       WHERE user_id = auth.uid()
-      AND role IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
+      AND role::text IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
     )
   );
 
@@ -144,7 +136,7 @@ CREATE POLICY opl_own ON operator_performance_logs FOR SELECT
     OR EXISTS (
       SELECT 1 FROM user_roles
       WHERE user_id = auth.uid()
-      AND role IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
+      AND role::text IN ('PLATFORM_ADMIN', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR')
     )
   );
 
