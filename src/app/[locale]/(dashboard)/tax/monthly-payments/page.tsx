@@ -39,12 +39,12 @@ function fmtShort(n: number) {
 }
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
-const taxTypeConfig: Record<string, { label: string; gradient: string; icon: typeof FileText; desc: string }> = {
-  PPh21: { label: 'PPh 21', gradient: 'from-blue-500 to-indigo-600', icon: FileText, desc: 'Gaji Karyawan' },
-  PPh23: { label: 'PPh 23', gradient: 'from-emerald-500 to-green-600', icon: Receipt, desc: 'Jasa & Sewa' },
-  PPh25: { label: 'PPh 25', gradient: 'from-purple-500 to-violet-600', icon: TrendingUp, desc: 'Angsuran Bulanan' },
-  PPN: { label: 'PPN', gradient: 'from-orange-500 to-red-500', icon: DollarSign, desc: 'Pajak Pertambahan Nilai' },
-  PPh_FINAL: { label: 'PPh Final', gradient: 'from-amber-500 to-yellow-600', icon: Shield, desc: 'UMKM 0.5%' },
+const taxTypeConfig: Record<string, { label: string; gradient: string; icon: typeof FileText; descKey: string }> = {
+  PPh21: { label: 'PPh 21', gradient: 'from-blue-500 to-indigo-600', icon: FileText, descKey: 'PPh21Desc' },
+  PPh23: { label: 'PPh 23', gradient: 'from-emerald-500 to-green-600', icon: Receipt, descKey: 'PPh23Desc' },
+  PPh25: { label: 'PPh 25', gradient: 'from-purple-500 to-violet-600', icon: TrendingUp, descKey: 'PPh25Desc' },
+  PPN: { label: 'PPN', gradient: 'from-orange-500 to-red-500', icon: DollarSign, descKey: 'PPNDesc' },
+  PPh_FINAL: { label: 'PPh Final', gradient: 'from-amber-500 to-yellow-600', icon: Shield, descKey: 'PPh_FINALDesc' },
 };
 
 const statusConfig: Record<string, { bg: string; text: string; ring: string }> = {
@@ -59,6 +59,7 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 export default function MonthlyPaymentsPage() {
   const t = useTranslations();
   const tm = useTranslations('monthlyPayments');
+  const tt = useTranslations('taxTypes');
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -274,7 +275,7 @@ export default function MonthlyPaymentsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-gray-900">{config.label}</h3>
-                        <span className="text-xs text-gray-400">{config.desc}</span>
+                        <span className="text-xs text-gray-400">{tt(config.descKey)}</span>
                         {ts.overdueMonths > 0 && (
                           <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium">{ts.overdueMonths} terlambat</span>
                         )}

@@ -1292,6 +1292,20 @@
     "dec": "十二月",
     "list": "一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月"
   },
+  "taxTypes": {
+    "PPh21": "PPh 21",
+    "PPh21Desc": "员工工资所得税",
+    "PPh23": "PPh 23",
+    "PPh23Desc": "服务、特许权使用费、利息所得税",
+    "PPh_FINAL": "PPh Final",
+    "PPh_FINALDesc": "最终所得税（租赁、建筑）",
+    "PPN": "PPN",
+    "PPNDesc": "增值税",
+    "SPT_TAHUNAN": "SPT Tahunan",
+    "PPh25": "PPh 25",
+    "PPh25Desc": "月度分期付款",
+    "SPT_TAHUNANDesc": "年度纳税申报"
+  },
   "sptSelect": {
     "title": "年度纳税申报",
     "subtitle": "选择适合您情况的年度纳税申报表",
@@ -1861,7 +1875,8 @@
     "spt1771Title": "SPT 1771 - 企业税",
     "spt1771Desc": "适用于法人纳税人（PT、CV等）的年度申报表",
     "noCorpTaxpayer": "暂无法人纳税人数据。",
-    "addNewCorp": "添加新法人"
+    "addNewCorp": "添加新法人",
+    "retry": "重试"
   },
   "settingsIntegrations": {
     "integrations": "集成",

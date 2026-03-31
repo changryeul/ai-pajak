@@ -207,7 +207,7 @@ export default function SPT1770SSPage() {
             className="mt-3"
             onClick={() => session?.customerId && fetchOwnCustomerData(session.customerId)}
           >
-            Coba Lagi
+            {tp('retry')}
           </Button>
         </div>
       )}

@@ -33,6 +33,7 @@ export default function TaxSavingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const tp = useTranslations('sptPages');
+  const ts = useTranslations('taxSavingsPage');
 
   const isCustomerRole = session?.role === UserRole.CUSTOMER;
 
@@ -84,7 +85,7 @@ export default function TaxSavingsPage() {
     return (
       <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-        <p className="text-gray-600">Memuat...</p>
+        <p className="text-gray-600">{tp('loadingData')}</p>
       </div>
     );
   }
@@ -101,11 +102,33 @@ export default function TaxSavingsPage() {
           {tp('back')}
         </Button>
 
-        <h1 className="text-2xl font-bold text-gray-900">Tax Savings Advisor</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{ts('title')}</h1>
         <p className="text-gray-600 mt-1">
-          Temukan peluang penghematan pajak dengan analisis AI
+          {ts('subtitle')}
         </p>
       </div>
+
+      {/* Loading state for CUSTOMER role */}
+      {isCustomerRole && isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <span className="ml-2 text-gray-600">{tp('loadingData')}</span>
+        </div>
+      )}
+
+      {/* Error state for CUSTOMER role */}
+      {isCustomerRole && error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 mb-6">
+          {error}
+          <Button
+            variant="outline"
+            className="mt-3"
+            onClick={() => session?.customerId && fetchOwnCustomerData(session.customerId)}
+          >
+            {tp('retry')}
+          </Button>
+        </div>
+      )}
 
       {/* Customer Selection for Tax Advisors */}
       {!isCustomerRole && !selectedCustomer && (
@@ -114,10 +137,22 @@ export default function TaxSavingsPage() {
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <span className="ml-2 text-gray-600">{tp('loadingData')}</span>
             </div>
           ) : error ? (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
               {error}
+              <Button
+                variant="outline"
+                className="mt-3"
+                onClick={() => { setError(null); fetchCustomers(); }}
+              >
+                {tp('retry')}
+              </Button>
+            </div>
+          ) : customers.length === 0 ? (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-yellow-800">{tp('noTaxpayerData')}</p>
             </div>
           ) : (
             <Select onValueChange={(v) => setSelectedCustomer(customers.find((c) => c.id === v) || null)}>

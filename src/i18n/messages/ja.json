@@ -1292,6 +1292,20 @@
     "dec": "12月",
     "list": "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月"
   },
+  "taxTypes": {
+    "PPh21": "PPh 21",
+    "PPh21Desc": "給与所得税",
+    "PPh23": "PPh 23",
+    "PPh23Desc": "サービス・ロイヤリティ・利子の所得税",
+    "PPh_FINAL": "PPh Final",
+    "PPh_FINALDesc": "最終所得税（賃貸・建設）",
+    "PPN": "PPN",
+    "PPNDesc": "付加価値税",
+    "SPT_TAHUNAN": "SPT Tahunan",
+    "PPh25": "PPh 25",
+    "PPh25Desc": "月次分割納付",
+    "SPT_TAHUNANDesc": "年次確定申告"
+  },
   "sptSelect": {
     "title": "年次確定申告",
     "subtitle": "ご状況に合った年次確定申告書を選択",
@@ -1861,7 +1875,8 @@
     "spt1771Title": "SPT 1771 - 法人税",
     "spt1771Desc": "PT、CV等の法人納税者用年次申告書",
     "noCorpTaxpayer": "法人納税者データがありません。",
-    "addNewCorp": "新規法人を追加"
+    "addNewCorp": "新規法人を追加",
+    "retry": "再試行"
   },
   "settingsIntegrations": {
     "integrations": "連携",

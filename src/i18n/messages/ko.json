@@ -91,7 +91,7 @@
     "documents": "문서",
     "reports": "보고서",
     "taxFiling": "세금 신고",
-    "annualReturn": "연말정산 (SPT)",
+    "annualReturn": "연말결산 (SPT)",
     "taxSavings": "절세 추천 (AI)",
     "clientReport": "고객 리포트 (AI)",
     "pph21Bulk": "PPh 21 일괄계산",
@@ -159,7 +159,7 @@
     "viewAnalytics": "분석 보기"
   },
   "quickAction": {
-    "annualReturn": "연말정산 하기",
+    "annualReturn": "연말결산 하기",
     "annualReturnDesc": "1년치 소득세를 정산합니다",
     "salaryTax": "급여 세금 계산",
     "salaryTaxDesc": "월급에서 원천징수되는 세금 확인",
@@ -205,12 +205,12 @@
     "typeBusinessDesc": "사업 소득이 있습니다",
     "typeCompany": "법인 (회사)",
     "typeCompanyDesc": "법인으로 등록된 기업입니다",
-    "goalAnnual": "연말정산만",
+    "goalAnnual": "연말결산만",
     "goalAnnualDesc": "1년에 한 번 소득세를 신고합니다",
     "goalMonthly": "매월 신고만",
     "goalMonthlyDesc": "매월 원천징수세를 신고합니다",
     "goalBoth": "둘 다",
-    "goalBothDesc": "매월 신고 + 연말정산 모두 합니다",
+    "goalBothDesc": "매월 신고 + 연말결산 모두 합니다",
     "readyTitle": "준비가 완료되었습니다!",
     "readyDesc": "입력하신 정보를 바탕으로 최적의 신고 양식을 추천합니다.",
     "recommendation": "추천 양식",
@@ -810,7 +810,7 @@
     "planProF5": "25GB 저장공간",
     "whoTitle": "누구를 위한 서비스인가요?",
     "whoIndividual": "개인 납세자",
-    "whoIndividualDesc": "직장인, 프리랜서의 연말정산을 쉽게",
+    "whoIndividualDesc": "직장인, 프리랜서의 연말결산을 쉽게",
     "whoBusiness": "사업자 / UMKM",
     "whoBusinessDesc": "매월 세금 신고와 연간 결산을 자동화",
     "whoConsultant": "세무 컨설턴트",
@@ -1291,6 +1291,20 @@
     "nov": "11월",
     "dec": "12월",
     "list": "1월,2월,3월,4월,5월,6월,7월,8월,9월,10월,11월,12월"
+  },
+  "taxTypes": {
+    "PPh21": "PPh 21",
+    "PPh21Desc": "근로소득세 (급여)",
+    "PPh23": "PPh 23",
+    "PPh23Desc": "용역·로열티·이자 소득세",
+    "PPh_FINAL": "PPh Final",
+    "PPh_FINALDesc": "최종소득세 (임대·건설)",
+    "PPN": "PPN",
+    "PPNDesc": "부가가치세",
+    "SPT_TAHUNAN": "SPT Tahunan",
+    "PPh25": "PPh 25",
+    "PPh25Desc": "월별 분할납부",
+    "SPT_TAHUNANDesc": "연간 세금 신고"
   },
   "sptSelect": {
     "title": "연간 세금 신고",
@@ -1861,7 +1875,8 @@
     "spt1771Title": "SPT 1771 - 법인세",
     "spt1771Desc": "PT, CV 등 법인 납세자용 연간 신고서",
     "noCorpTaxpayer": "법인 납세자 데이터가 없습니다.",
-    "addNewCorp": "새 법인 추가"
+    "addNewCorp": "새 법인 추가",
+    "retry": "다시 시도"
   },
   "settingsIntegrations": {
     "integrations": "연동",

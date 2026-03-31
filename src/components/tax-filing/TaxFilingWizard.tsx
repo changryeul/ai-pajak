@@ -34,13 +34,7 @@ const CUSTOMER_STEPS: { id: FilingStep; labelKey: string }[] = [
   { id: 'review', labelKey: 'tax.steps.review' },
 ];
 
-const TAX_TYPE_LABELS: Record<TaxType, string> = {
-  PPh21: 'PPh 21 - Pajak Penghasilan Karyawan',
-  PPh23: 'PPh 23 - Pajak Penghasilan Jasa',
-  PPh_FINAL: 'PPh Final - Pajak Penghasilan Final',
-  PPN: 'PPN - Pajak Pertambahan Nilai',
-  SPT_TAHUNAN: 'SPT Tahunan - Laporan Tahunan',
-};
+// TAX_TYPE_LABELS removed — use useTranslations('taxTypes') instead
 
 interface TaxFilingWizardProps {
   initialTaxType?: TaxType;
@@ -49,6 +43,7 @@ interface TaxFilingWizardProps {
 
 export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardProps) {
   const t = useTranslations();
+  const tt = useTranslations('taxTypes');
   const router = useRouter();
   const { session, isLoading: isSessionLoading } = useSession();
 
@@ -459,7 +454,7 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
           {filingId ? t('tax.editFiling') : t('tax.newFiling')}
         </h1>
         {taxType && (
-          <p className="text-gray-600 mt-1">{TAX_TYPE_LABELS[taxType]}</p>
+          <p className="text-gray-600 mt-1">{tt(taxType)} - {tt(`${taxType}Desc`)}</p>
         )}
       </div>
 

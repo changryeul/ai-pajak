@@ -11,16 +11,9 @@ function formatCurrency(value: number): string {
   return new Intl.NumberFormat('id-ID').format(value);
 }
 
-const TAX_TYPE_LABELS: Record<string, string> = {
-  PPh21: 'PPh 21 - Pajak Penghasilan Karyawan',
-  PPh23: 'PPh 23 - Pajak Penghasilan Jasa',
-  PPh_FINAL: 'PPh Final',
-  PPN: 'PPN - Pajak Pertambahan Nilai',
-  SPT_TAHUNAN: 'SPT Tahunan',
-};
-
 export function ReviewStep() {
   const t = useTranslations();
+  const tt = useTranslations('taxTypes');
   const {
     taxType,
     taxPeriod,
@@ -170,7 +163,7 @@ export function ReviewStep() {
           {t('tax.review.summary')}
         </h3>
         <p className="text-gray-600">
-          {TAX_TYPE_LABELS[taxType || '']} - {periodLabel}
+          {taxType ? `${tt(taxType)} - ${tt(`${taxType}Desc`)}` : ''} - {periodLabel}
         </p>
       </div>
 

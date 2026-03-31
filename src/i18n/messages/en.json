@@ -1292,6 +1292,20 @@
     "dec": "December",
     "list": "January,February,March,April,May,June,July,August,September,October,November,December"
   },
+  "taxTypes": {
+    "PPh21": "PPh 21",
+    "PPh21Desc": "Employee income tax (salary)",
+    "PPh23": "PPh 23",
+    "PPh23Desc": "Income tax on services, royalties, interest",
+    "PPh_FINAL": "PPh Final",
+    "PPh_FINALDesc": "Final income tax (rent, construction)",
+    "PPN": "PPN",
+    "PPNDesc": "Value Added Tax",
+    "SPT_TAHUNAN": "SPT Tahunan",
+    "PPh25": "PPh 25",
+    "PPh25Desc": "Monthly Installment",
+    "SPT_TAHUNANDesc": "Annual Tax Return"
+  },
   "sptSelect": {
     "title": "Annual Tax Return",
     "subtitle": "Select the annual tax form that suits your situation",
@@ -1861,7 +1875,8 @@
     "spt1771Title": "SPT 1771 - Corporate Tax",
     "spt1771Desc": "Annual tax return for corporate taxpayers (PT, CV, etc.)",
     "noCorpTaxpayer": "No corporate taxpayer data found.",
-    "addNewCorp": "Add New Corporation"
+    "addNewCorp": "Add New Corporation",
+    "retry": "Try Again"
   },
   "settingsIntegrations": {
     "integrations": "Integrations",

@@ -14,33 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const TAX_TYPES: { value: TaxType; label: string; description: string }[] = [
-  {
-    value: 'PPh21',
-    label: 'PPh 21',
-    description: 'Pajak Penghasilan atas gaji karyawan',
-  },
-  {
-    value: 'PPh23',
-    label: 'PPh 23',
-    description: 'Pajak Penghasilan atas jasa, royalti, bunga',
-  },
-  {
-    value: 'PPh_FINAL',
-    label: 'PPh Final',
-    description: 'Pajak Penghasilan Final (sewa, konstruksi)',
-  },
-  {
-    value: 'PPN',
-    label: 'PPN',
-    description: 'Pajak Pertambahan Nilai',
-  },
-  {
-    value: 'SPT_TAHUNAN',
-    label: 'SPT Tahunan',
-    description: 'Laporan Pajak Tahunan',
-  },
-];
+const TAX_TYPE_VALUES: TaxType[] = ['PPh21', 'PPh23', 'PPh_FINAL', 'PPN', 'SPT_TAHUNAN'];
 
 export function SelectCustomerStep() {
   const t = useTranslations();
@@ -99,22 +73,16 @@ export function SelectCustomerStep() {
     return () => clearTimeout(debounce);
   }, [searchQuery]);
 
+  const tt = useTranslations('taxTypes');
+  const tm = useTranslations('months');
+
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-  const months = [
-    { value: '01', label: 'Januari' },
-    { value: '02', label: 'Februari' },
-    { value: '03', label: 'Maret' },
-    { value: '04', label: 'April' },
-    { value: '05', label: 'Mei' },
-    { value: '06', label: 'Juni' },
-    { value: '07', label: 'Juli' },
-    { value: '08', label: 'Agustus' },
-    { value: '09', label: 'September' },
-    { value: '10', label: 'Oktober' },
-    { value: '11', label: 'November' },
-    { value: '12', label: 'Desember' },
-  ];
+  const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
+  const months = monthKeys.map((key, i) => ({
+    value: String(i + 1).padStart(2, '0'),
+    label: tm(key),
+  }));
 
   return (
     <div className="space-y-6">
@@ -122,18 +90,18 @@ export function SelectCustomerStep() {
       <div className="space-y-4">
         <Label className="text-base font-semibold">{t('tax.selectTaxType')}</Label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {TAX_TYPES.map((type) => (
+          {TAX_TYPE_VALUES.map((type) => (
             <div
-              key={type.value}
-              onClick={() => setTaxType(type.value)}
+              key={type}
+              onClick={() => setTaxType(type)}
               className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                taxType === type.value
+                taxType === type
                   ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500'
                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
-              <div className="font-medium">{type.label}</div>
-              <div className="text-sm text-gray-500">{type.description}</div>
+              <div className="font-medium">{tt(type)}</div>
+              <div className="text-sm text-gray-500">{tt(`${type}Desc`)}</div>
             </div>
           ))}
         </div>

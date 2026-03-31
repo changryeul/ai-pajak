@@ -1292,6 +1292,20 @@
     "dec": "Desember",
     "list": "Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember"
   },
+  "taxTypes": {
+    "PPh21": "PPh 21",
+    "PPh21Desc": "Pajak Penghasilan atas gaji karyawan",
+    "PPh23": "PPh 23",
+    "PPh23Desc": "Pajak Penghasilan atas jasa, royalti, bunga",
+    "PPh_FINAL": "PPh Final",
+    "PPh_FINALDesc": "Pajak Penghasilan Final (sewa, konstruksi)",
+    "PPN": "PPN",
+    "PPNDesc": "Pajak Pertambahan Nilai",
+    "SPT_TAHUNAN": "SPT Tahunan",
+    "PPh25": "PPh 25",
+    "PPh25Desc": "Angsuran Bulanan",
+    "SPT_TAHUNANDesc": "Laporan Pajak Tahunan"
+  },
   "sptSelect": {
     "title": "SPT Tahunan",
     "subtitle": "Pilih jenis formulir SPT Tahunan yang sesuai dengan kondisi Anda",
@@ -1861,7 +1875,8 @@
     "spt1771Title": "SPT 1771 - PPh Badan",
     "spt1771Desc": "SPT Tahunan PPh Badan untuk Wajib Pajak Badan (PT, CV, dll)",
     "noCorpTaxpayer": "Belum ada data wajib pajak badan.",
-    "addNewCorp": "Tambah Badan Usaha Baru"
+    "addNewCorp": "Tambah Badan Usaha Baru",
+    "retry": "Coba Lagi"
   },
   "settingsIntegrations": {
     "integrations": "Integrasi",
