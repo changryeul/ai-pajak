@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { APP_NAME, APP_DESCRIPTION } from '@/config/constants';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import '@/app/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -122,6 +123,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+        <GoogleAnalytics />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

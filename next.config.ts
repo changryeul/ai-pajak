@@ -81,31 +81,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Sentry configuration options
-const sentryWebpackPluginOptions = {
-  // Suppress source map upload logs in production build
+// Wrap with Sentry
+export default withSentryConfig(withNextIntl(nextConfig), {
+  org: 'ai-pajak',
+  project: 'ai-pajak',
   silent: true,
-
-  // Organization and project in Sentry
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-
-  // Upload source maps only if auth token is provided
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-
-  // Hide source maps from client bundles
-  hideSourceMaps: true,
-
-  // Disable Sentry telemetry
-  telemetry: false,
-
-  // Automatically tree-shake Sentry SDK
+  widenClientFileUpload: true,
   disableLogger: true,
-};
-
-// Wrap with Sentry only if DSN is configured
-const finalConfig = process.env.NEXT_PUBLIC_SENTRY_DSN
-  ? withSentryConfig(withNextIntl(nextConfig), sentryWebpackPluginOptions)
-  : withNextIntl(nextConfig);
-
-export default finalConfig;
+});
