@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import {
   Users, Search, Loader2, Shield, UserCheck, UserX, KeyRound,
-  ChevronDown, ChevronUp, Mail, Calendar, Building2, User,
+  ChevronDown, ChevronUp, Mail, Calendar, Building2, User, Plus, X,
 } from 'lucide-react';
 
 interface UserItem {
@@ -42,6 +43,11 @@ export default function AdminUsersPage() {
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    email: '', password: '', fullName: '', role: 'CUSTOMER', npwp: '',
+  });
+  const [isCreating, setIsCreating] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -88,14 +94,53 @@ export default function AdminUsersPage() {
     finally { setActionLoading(null); }
   };
 
+  const handleCreateUser = async () => {
+    if (!createForm.email || !createForm.password) return;
+    setIsCreating(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-user',
+          userId: 'new',
+          email: createForm.email,
+          password: createForm.password,
+          fullName: createForm.fullName,
+          role: createForm.role,
+          npwp: createForm.npwp,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage(data.message);
+        setShowCreateForm(false);
+        setCreateForm({ email: '', password: '', fullName: '', role: 'CUSTOMER', npwp: '' });
+        loadUsers();
+      } else {
+        setMessage(data.error || 'Failed to create user');
+      }
+    } catch { setMessage('Error creating user'); }
+    finally { setIsCreating(false); setTimeout(() => setMessage(null), 5000); }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       {/* Header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-600 via-red-600 to-rose-700 p-6 md:p-8 text-white mb-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
-          <p className="text-orange-200 text-sm flex items-center gap-2"><Users className="h-4 w-4" />{t('admin')}</p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('userMgmt')}</h1>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-200 text-sm flex items-center gap-2"><Users className="h-4 w-4" />{t('admin')}</p>
+              <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('userMgmt')}</h1>
+            </div>
+            <Button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="bg-white/20 hover:bg-white/30 text-white border-0"
+            >
+              <Plus className="h-4 w-4 mr-2" />사용자 등록
+            </Button>
+          </div>
 
           {stats && (
             <div className="grid grid-cols-5 gap-3 mt-6">
@@ -114,6 +159,87 @@ export default function AdminUsersPage() {
 
       {message && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800">{message}</div>
+      )}
+
+      {/* Create User Form */}
+      {showCreateForm && (
+        <Card className="border-0 shadow-md mb-6">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">새 사용자 등록</CardTitle>
+              <button onClick={() => setShowCreateForm(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs">이메일 *</Label>
+                <Input
+                  type="email"
+                  value={createForm.email}
+                  onChange={e => setCreateForm({ ...createForm, email: e.target.value })}
+                  placeholder="user@example.com"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">비밀번호 *</Label>
+                <Input
+                  type="password"
+                  value={createForm.password}
+                  onChange={e => setCreateForm({ ...createForm, password: e.target.value })}
+                  placeholder="최소 8자"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label className="text-xs">이름</Label>
+                <Input
+                  value={createForm.fullName}
+                  onChange={e => setCreateForm({ ...createForm, fullName: e.target.value })}
+                  placeholder="홍길동"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">역할 *</Label>
+                <Select value={createForm.role} onValueChange={v => setCreateForm({ ...createForm, role: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CUSTOMER">Customer (납세자)</SelectItem>
+                    <SelectItem value="CONSULTANT_JTC">Consultant (컨설턴트)</SelectItem>
+                    <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor (세무사)</SelectItem>
+                    <SelectItem value="TAX_OPERATOR">Tax Operator (상담사)</SelectItem>
+                    <SelectItem value="TAX_OPERATOR_LEAD">Operator Lead</SelectItem>
+                    <SelectItem value="TAX_OPERATOR_SUPERVISOR">Operator Supervisor</SelectItem>
+                    <SelectItem value="PLATFORM_ADMIN">Admin (관리자)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">NPWP</Label>
+                <Input
+                  value={createForm.npwp}
+                  onChange={e => setCreateForm({ ...createForm, npwp: e.target.value })}
+                  placeholder="XX.XXX.XXX.X-XXX.XXX"
+                  className="font-mono"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowCreateForm(false)}>취소</Button>
+              <Button
+                onClick={handleCreateUser}
+                disabled={isCreating || !createForm.email || !createForm.password}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600"
+              >
+                {isCreating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                등록
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Search & Filter */}

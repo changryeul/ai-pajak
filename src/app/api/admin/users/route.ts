@@ -185,6 +185,61 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, message: 'User activated' });
       }
 
+      case 'create-user': {
+        const { email, password, fullName, role: newRole, npwp } = body;
+        if (!email || !password || !newRole) {
+          return NextResponse.json({ error: 'email, password, and role are required' }, { status: 400 });
+        }
+
+        const admin = getSupabaseAdmin();
+
+        // 1. Create auth user
+        const { data: newUser, error: createError } = await admin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true, // Auto-confirm
+        });
+
+        if (createError) {
+          return NextResponse.json({ error: createError.message }, { status: 500 });
+        }
+
+        // 2. Create user_roles entry
+        await admin.from('user_roles').insert({
+          user_id: newUser.user.id,
+          role: newRole,
+          is_active: true,
+        });
+
+        // 3. Create customer profile if CUSTOMER role
+        if (newRole === 'CUSTOMER') {
+          await admin.from('customer').insert({
+            user_id: newUser.user.id,
+            full_name: fullName || email.split('@')[0],
+            npwp: npwp || null,
+            customer_type: 'INDIVIDUAL',
+          });
+        }
+
+        // 4. Create operator profile if TAX_OPERATOR role
+        if (newRole.startsWith('TAX_OPERATOR')) {
+          await admin.from('tax_operators').insert({
+            user_id: newUser.user.id,
+            employee_id: `OP-${Date.now().toString(36).toUpperCase()}`,
+            name: fullName || email.split('@')[0],
+            email,
+            role: newRole.toLowerCase(),
+            hire_date: new Date().toISOString().split('T')[0],
+          });
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: `User ${email} created with role ${newRole}`,
+          data: { userId: newUser.user.id, email, role: newRole },
+        });
+      }
+
       default:
         return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }
