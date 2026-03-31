@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,8 @@ interface AssignedClient {
 }
 
 export default function OperatorClientsPage() {
+  const t = useTranslations('operator');
+
   const [clients, setClients] = useState<AssignedClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -52,13 +55,13 @@ export default function OperatorClientsPage() {
           <p className="text-teal-200 text-sm flex items-center gap-2">
             <Users className="h-4 w-4" />Operator
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">담당 고객</h1>
-          <p className="text-teal-200 text-sm mt-1">배정된 고객 목록 및 현황</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('clientsTitle')}</h1>
+          <p className="text-teal-200 text-sm mt-1">{t('clientsSubtitle')}</p>
 
           <div className="flex gap-4 mt-6">
             <div className="bg-white/10 backdrop-blur rounded-xl px-4 py-2">
               <span className="text-2xl font-bold">{clients.length}</span>
-              <span className="text-xs text-teal-200 ml-1">전체 고객</span>
+              <span className="text-xs text-teal-200 ml-1">{t('totalClients')}</span>
             </div>
           </div>
         </div>
@@ -68,7 +71,7 @@ export default function OperatorClientsPage() {
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="고객명 또는 NPWP 검색..."
+          placeholder={t('searchClients')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="pl-10 rounded-xl"
@@ -85,7 +88,7 @@ export default function OperatorClientsPage() {
           <CardContent className="p-12 text-center">
             <Users className="h-10 w-10 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">
-              {search ? '검색 결과가 없습니다' : '배정된 고객이 없습니다'}
+              {search ? t('noSearchResult') : t('noClients')}
             </p>
           </CardContent>
         </Card>
@@ -108,7 +111,7 @@ export default function OperatorClientsPage() {
                       {client.npwp && <span className="font-mono">{client.npwp}</span>}
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        배정일: {new Date(client.assigned_date).toLocaleDateString()}
+                        {t('assignedDate')}: {new Date(client.assigned_date).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -116,13 +119,13 @@ export default function OperatorClientsPage() {
                     {(client.pending_count || 0) > 0 && (
                       <Badge className="bg-yellow-100 text-yellow-700">
                         <AlertCircle className="h-3 w-3 mr-1" />
-                        {client.pending_count} 대기
+                        {client.pending_count} {t('pendingCount')}
                       </Badge>
                     )}
                     {(client.completed_count || 0) > 0 && (
                       <Badge className="bg-green-100 text-green-700">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        {client.completed_count} 완료
+                        {client.completed_count} {t('completedCount')}
                       </Badge>
                     )}
                   </div>
@@ -134,7 +137,7 @@ export default function OperatorClientsPage() {
       )}
 
       <p className="text-center text-xs text-gray-400 mt-6">
-        {filtered.length}명의 담당 고객
+        {t('clientCount', { count: filtered.length })}
       </p>
     </div>
   );

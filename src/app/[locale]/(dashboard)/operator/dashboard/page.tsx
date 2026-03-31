@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,31 +68,33 @@ interface DashboardData {
   };
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  PENDING:            { label: '대기',        color: 'text-gray-700',   bg: 'bg-gray-100' },
-  DATA_REVIEW:        { label: '데이터 검토', color: 'text-blue-700',   bg: 'bg-blue-100' },
-  EBILLING_GENERATED: { label: 'e-Billing',   color: 'text-indigo-700', bg: 'bg-indigo-100' },
-  PAYMENT_CONFIRMED:  { label: '납부 확인',   color: 'text-purple-700', bg: 'bg-purple-100' },
-  DJP_SUBMITTED:      { label: 'DJP 제출됨',  color: 'text-amber-700',  bg: 'bg-amber-100' },
-  BPE_UPLOADED:       { label: 'BPE 업로드',  color: 'text-teal-700',   bg: 'bg-teal-100' },
-  COMPLETED:          { label: '완료',        color: 'text-green-700',  bg: 'bg-green-100' },
-  FAILED:             { label: '실패',        color: 'text-red-700',    bg: 'bg-red-100' },
-};
-
-const ACTION_CONFIG: Record<string, { label: string; action: string; color: string }> = {
-  PENDING:            { label: '검토 시작',     action: 'review',            color: 'bg-blue-600 hover:bg-blue-700' },
-  DATA_REVIEW:        { label: 'e-Billing 생성', action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
-  EBILLING_GENERATED: { label: '납부 확인',     action: 'confirm-payment',   color: 'bg-purple-600 hover:bg-purple-700' },
-  PAYMENT_CONFIRMED:  { label: 'DJP 제출',     action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
-  DJP_SUBMITTED:      { label: 'BPE 업로드',   action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
-  BPE_UPLOADED:       { label: '완료',         action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
-};
-
 function fmt(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
 export default function OperatorDashboardPage() {
+  const t = useTranslations('operator');
+
+  const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    PENDING:            { label: t('statusPending'),           color: 'text-gray-700',   bg: 'bg-gray-100' },
+    DATA_REVIEW:        { label: t('statusDataReview'),        color: 'text-blue-700',   bg: 'bg-blue-100' },
+    EBILLING_GENERATED: { label: t('statusEbillingGenerated'), color: 'text-indigo-700', bg: 'bg-indigo-100' },
+    PAYMENT_CONFIRMED:  { label: t('statusPaymentConfirmed'),  color: 'text-purple-700', bg: 'bg-purple-100' },
+    DJP_SUBMITTED:      { label: t('statusDjpSubmitted'),      color: 'text-amber-700',  bg: 'bg-amber-100' },
+    BPE_UPLOADED:       { label: t('statusBpeUploaded'),       color: 'text-teal-700',   bg: 'bg-teal-100' },
+    COMPLETED:          { label: t('statusCompleted'),         color: 'text-green-700',  bg: 'bg-green-100' },
+    FAILED:             { label: t('statusFailed'),            color: 'text-red-700',    bg: 'bg-red-100' },
+  };
+
+  const ACTION_CONFIG: Record<string, { label: string; action: string; color: string }> = {
+    PENDING:            { label: t('actionReview'),           action: 'review',            color: 'bg-blue-600 hover:bg-blue-700' },
+    DATA_REVIEW:        { label: t('actionGenerateEbilling'), action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
+    EBILLING_GENERATED: { label: t('actionConfirmPayment'),   action: 'confirm-payment',   color: 'bg-purple-600 hover:bg-purple-700' },
+    PAYMENT_CONFIRMED:  { label: t('actionSubmitDjp'),        action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
+    DJP_SUBMITTED:      { label: t('actionUploadBpe'),        action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
+    BPE_UPLOADED:       { label: t('actionComplete'),         action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
+  };
+
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -167,13 +170,13 @@ export default function OperatorDashboardPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setMessage({ text: json.message || '상태가 업데이트되었습니다.', type: 'success' });
+        setMessage({ text: json.message || t('statusUpdated'), type: 'success' });
         loadData();
       } else {
-        setMessage({ text: json.error || '오류가 발생했습니다.', type: 'error' });
+        setMessage({ text: json.error || t('errorOccurred'), type: 'error' });
       }
     } catch {
-      setMessage({ text: '네트워크 오류가 발생했습니다.', type: 'error' });
+      setMessage({ text: t('networkError'), type: 'error' });
     } finally {
       setActionLoading(null);
       setModalState(prev => ({ ...prev, open: false }));
@@ -209,26 +212,26 @@ export default function OperatorDashboardPage() {
             <Headphones className="h-4 w-4" />
             Tax Operator
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">상담원 대시보드</h1>
-          <p className="text-blue-100 text-sm mt-2">세금 신고 접수 및 처리 현황을 관리합니다.</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('dashboardTitle')}</h1>
+          <p className="text-blue-100 text-sm mt-2">{t('dashboardSubtitle')}</p>
 
           {data && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
                 <p className="text-2xl font-bold">{data.summary.totalAssigned}</p>
-                <p className="text-xs text-blue-200">담당 고객</p>
+                <p className="text-xs text-blue-200">{t('assignedClients')}</p>
               </div>
               <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
                 <p className="text-2xl font-bold">{data.summary.pending}</p>
-                <p className="text-xs text-blue-200">대기 건</p>
+                <p className="text-xs text-blue-200">{t('pendingBadge')}</p>
               </div>
               <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
                 <p className="text-2xl font-bold">{data.summary.inProgress}</p>
-                <p className="text-xs text-blue-200">진행 중</p>
+                <p className="text-xs text-blue-200">{t('inProgress')}</p>
               </div>
               <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
                 <p className="text-2xl font-bold">{data.summary.completed}</p>
-                <p className="text-xs text-blue-200">완료</p>
+                <p className="text-xs text-blue-200">{t('completedBadge')}</p>
               </div>
             </div>
           )}
@@ -249,17 +252,17 @@ export default function OperatorDashboardPage() {
       {isLoading ? (
         <div className="text-center py-20">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-          <p className="text-sm text-gray-500 mt-2">데이터를 불러오는 중...</p>
+          <p className="text-sm text-gray-500 mt-2">{t('loadingData')}</p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Summary Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { label: '담당 고객', value: data?.stats.totalAssigned || 0, icon: Users, gradient: 'from-blue-500 to-cyan-600' },
-              { label: '대기 중', value: data?.stats.pending || 0, icon: Clock, gradient: 'from-amber-500 to-orange-500' },
-              { label: '진행 중', value: data?.stats.inProgress || 0, icon: ListChecks, gradient: 'from-indigo-500 to-purple-600' },
-              { label: '이번 달 완료', value: data?.stats.completedThisMonth || 0, icon: CheckCircle, gradient: 'from-green-500 to-emerald-600' },
+              { label: t('assignedClients'), value: data?.stats.totalAssigned || 0, icon: Users, gradient: 'from-blue-500 to-cyan-600' },
+              { label: t('pendingItems'), value: data?.stats.pending || 0, icon: Clock, gradient: 'from-amber-500 to-orange-500' },
+              { label: t('inProgress'), value: data?.stats.inProgress || 0, icon: ListChecks, gradient: 'from-indigo-500 to-purple-600' },
+              { label: t('completedThisMonth'), value: data?.stats.completedThisMonth || 0, icon: CheckCircle, gradient: 'from-green-500 to-emerald-600' },
             ].map((kpi, i) => {
               const Icon = kpi.icon;
               return (
@@ -286,9 +289,9 @@ export default function OperatorDashboardPage() {
               <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-red-800">
-                  이번 달 실패 건: {data?.stats.failedThisMonth}건
+                  {t('failedThisMonth', { count: data?.stats.failedThisMonth || 0 })}
                 </p>
-                <p className="text-xs text-red-600">실패한 건을 확인하고 재처리해 주세요.</p>
+                <p className="text-xs text-red-600">{t('failedRetryMessage')}</p>
               </div>
             </div>
           )}
@@ -298,7 +301,7 @@ export default function OperatorDashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                접수 대기열 ({activeItems.length}건)
+                {t('queueCount', { count: activeItems.length })}
               </CardTitle>
               <Button
                 size="sm"
@@ -307,26 +310,26 @@ export default function OperatorDashboardPage() {
                 className="text-xs"
               >
                 <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                새로고침
+                {t('refresh')}
               </Button>
             </CardHeader>
             <CardContent>
               {activeItems.length === 0 ? (
                 <div className="text-center py-12">
                   <CheckCircle className="h-12 w-12 mx-auto text-green-300 mb-3" />
-                  <p className="text-gray-400 text-sm">처리할 항목이 없습니다.</p>
+                  <p className="text-gray-400 text-sm">{t('noItemsToProcess')}</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-gray-500 text-xs">
-                        <th className="text-left py-3 px-3">고객명</th>
-                        <th className="text-left py-3 px-3">세금유형</th>
-                        <th className="text-left py-3 px-3">기간</th>
-                        <th className="text-right py-3 px-3">금액</th>
-                        <th className="text-center py-3 px-3">상태</th>
-                        <th className="text-center py-3 px-3">액션</th>
+                        <th className="text-left py-3 px-3">{t('customerName')}</th>
+                        <th className="text-left py-3 px-3">{t('taxType')}</th>
+                        <th className="text-left py-3 px-3">{t('period')}</th>
+                        <th className="text-right py-3 px-3">{t('amount')}</th>
+                        <th className="text-center py-3 px-3">{t('status')}</th>
+                        <th className="text-center py-3 px-3">{t('action')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -395,7 +398,7 @@ export default function OperatorDashboardPage() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  최근 완료 건
+                  {t('recentlyCompleted')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -437,19 +440,19 @@ export default function OperatorDashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-bold mb-4">
-              {modalState.action === 'generate-ebilling' ? 'e-Billing 코드 입력' : 'BPE 정보 입력'}
+              {modalState.action === 'generate-ebilling' ? t('ebillingCodeInput') : t('bpeInfoInput')}
             </h3>
 
             <div className="space-y-4">
               {modalState.action === 'generate-ebilling' && (
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">
-                    e-Billing 코드 *
+                    {t('ebillingCodeRequired')}
                   </label>
                   <input
                     type="text"
                     className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    placeholder="e-Billing 코드를 입력하세요"
+                    placeholder={t('enterEbillingCode')}
                     value={modalState.ebillingCode}
                     onChange={(e) => setModalState(prev => ({ ...prev, ebillingCode: e.target.value }))}
                   />
@@ -460,19 +463,19 @@ export default function OperatorDashboardPage() {
                 <>
                   <div>
                     <label className="text-sm font-medium text-gray-700 block mb-1">
-                      BPE 번호 *
+                      {t('bpeNumberRequired')}
                     </label>
                     <input
                       type="text"
                       className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      placeholder="BPE 번호를 입력하세요"
+                      placeholder={t('enterBpeNumber')}
                       value={modalState.bpeNumber}
                       onChange={(e) => setModalState(prev => ({ ...prev, bpeNumber: e.target.value }))}
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 block mb-1">
-                      BPE 날짜 *
+                      {t('bpeDateRequired')}
                     </label>
                     <input
                       type="date"
@@ -485,11 +488,11 @@ export default function OperatorDashboardPage() {
               )}
 
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">메모</label>
+                <label className="text-sm font-medium text-gray-700 block mb-1">{t('notes')}</label>
                 <textarea
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                   rows={2}
-                  placeholder="메모를 입력하세요 (선택사항)"
+                  placeholder={t('notesPlaceholder')}
                   value={modalState.notes}
                   onChange={(e) => setModalState(prev => ({ ...prev, notes: e.target.value }))}
                 />
@@ -502,7 +505,7 @@ export default function OperatorDashboardPage() {
                 className="flex-1"
                 onClick={() => setModalState(prev => ({ ...prev, open: false }))}
               >
-                취소
+                {t('cancel')}
               </Button>
               <Button
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
@@ -512,7 +515,7 @@ export default function OperatorDashboardPage() {
                   (modalState.action === 'upload-bpe' && (!modalState.bpeNumber || !modalState.bpeDate))
                 }
               >
-                확인
+                {t('confirm')}
               </Button>
             </div>
           </div>

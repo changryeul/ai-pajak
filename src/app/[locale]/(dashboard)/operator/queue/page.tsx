@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,31 +63,33 @@ const ALL_STATUSES = [
 
 const TAX_TYPES = ['PPh21', 'PPh23', 'PPh25', 'PPh29', 'PPN', 'SPT1770SS', 'SPT1770S', 'SPT1770', 'SPT1771'];
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
-  PENDING:            { label: '대기',          color: 'text-gray-700',   bg: 'bg-gray-100',    icon: Clock },
-  DATA_REVIEW:        { label: '데이터 검토',   color: 'text-blue-700',   bg: 'bg-blue-100',    icon: FileText },
-  EBILLING_GENERATED: { label: 'e-Billing 생성', color: 'text-indigo-700', bg: 'bg-indigo-100', icon: Building2 },
-  PAYMENT_CONFIRMED:  { label: '납부 확인',     color: 'text-purple-700', bg: 'bg-purple-100',  icon: CheckCircle },
-  DJP_SUBMITTED:      { label: 'DJP 제출됨',    color: 'text-amber-700',  bg: 'bg-amber-100',  icon: Upload },
-  BPE_UPLOADED:       { label: 'BPE 업로드됨',  color: 'text-teal-700',   bg: 'bg-teal-100',   icon: Upload },
-  COMPLETED:          { label: '완료',          color: 'text-green-700',  bg: 'bg-green-100',   icon: CheckCircle },
-  FAILED:             { label: '실패',          color: 'text-red-700',    bg: 'bg-red-100',     icon: AlertCircle },
-};
-
-const ACTION_CONFIG: Record<string, { label: string; action: string; color: string }> = {
-  PENDING:            { label: '검토 시작',       action: 'review',            color: 'bg-blue-600 hover:bg-blue-700' },
-  DATA_REVIEW:        { label: 'e-Billing 생성',  action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
-  EBILLING_GENERATED: { label: '납부 확인',       action: 'confirm-payment',   color: 'bg-purple-600 hover:bg-purple-700' },
-  PAYMENT_CONFIRMED:  { label: 'DJP 제출',       action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
-  DJP_SUBMITTED:      { label: 'BPE 업로드',     action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
-  BPE_UPLOADED:       { label: '완료 처리',       action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
-};
-
 function fmt(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
 export default function OperatorQueuePage() {
+  const t = useTranslations('operator');
+
+  const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
+    PENDING:            { label: t('statusPending'),           color: 'text-gray-700',   bg: 'bg-gray-100',    icon: Clock },
+    DATA_REVIEW:        { label: t('statusDataReview'),        color: 'text-blue-700',   bg: 'bg-blue-100',    icon: FileText },
+    EBILLING_GENERATED: { label: t('statusEbillingGenerated'), color: 'text-indigo-700', bg: 'bg-indigo-100',  icon: Building2 },
+    PAYMENT_CONFIRMED:  { label: t('statusPaymentConfirmed'),  color: 'text-purple-700', bg: 'bg-purple-100',  icon: CheckCircle },
+    DJP_SUBMITTED:      { label: t('statusDjpSubmitted'),      color: 'text-amber-700',  bg: 'bg-amber-100',  icon: Upload },
+    BPE_UPLOADED:       { label: t('statusBpeUploaded'),       color: 'text-teal-700',   bg: 'bg-teal-100',   icon: Upload },
+    COMPLETED:          { label: t('statusCompleted'),         color: 'text-green-700',  bg: 'bg-green-100',   icon: CheckCircle },
+    FAILED:             { label: t('statusFailed'),            color: 'text-red-700',    bg: 'bg-red-100',     icon: AlertCircle },
+  };
+
+  const ACTION_CONFIG: Record<string, { label: string; action: string; color: string }> = {
+    PENDING:            { label: t('actionReview'),           action: 'review',            color: 'bg-blue-600 hover:bg-blue-700' },
+    DATA_REVIEW:        { label: t('actionGenerateEbilling'), action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
+    EBILLING_GENERATED: { label: t('actionConfirmPayment'),   action: 'confirm-payment',   color: 'bg-purple-600 hover:bg-purple-700' },
+    PAYMENT_CONFIRMED:  { label: t('actionSubmitDjp'),        action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
+    DJP_SUBMITTED:      { label: t('actionUploadBpe'),        action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
+    BPE_UPLOADED:       { label: t('actionComplete'),         action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
+  };
+
   const [items, setItems] = useState<QueueItem[]>([]);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 50, total: 0, totalPages: 0 });
   const [isLoading, setIsLoading] = useState(true);
@@ -175,14 +178,14 @@ export default function OperatorQueuePage() {
       });
       const json = await res.json();
       if (json.success) {
-        setMessage({ text: json.message || '상태가 업데이트되었습니다.', type: 'success' });
+        setMessage({ text: json.message || t('statusUpdated'), type: 'success' });
         setExpandedId(null);
         loadData(pagination.page);
       } else {
-        setMessage({ text: json.error || '오류가 발생했습니다.', type: 'error' });
+        setMessage({ text: json.error || t('errorOccurred'), type: 'error' });
       }
     } catch {
-      setMessage({ text: '네트워크 오류가 발생했습니다.', type: 'error' });
+      setMessage({ text: t('networkError'), type: 'error' });
     } finally {
       setActionLoading(null);
       setTimeout(() => setMessage(null), 4000);
@@ -226,8 +229,8 @@ export default function OperatorQueuePage() {
             <Headphones className="h-4 w-4" />
             Tax Operator
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">접수 대기열</h1>
-          <p className="text-indigo-100 text-sm mt-2">세금 신고 접수 건을 상세하게 관리합니다.</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('queueTitle')}</h1>
+          <p className="text-indigo-100 text-sm mt-2">{t('queueSubtitle')}</p>
         </div>
       </div>
 
@@ -248,13 +251,13 @@ export default function OperatorQueuePage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {/* Status filter */}
             <div>
-              <label className="text-[10px] text-gray-500 font-medium block mb-1">상태</label>
+              <label className="text-[10px] text-gray-500 font-medium block mb-1">{t('filterStatus')}</label>
               <select
                 className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
-                <option value="">전체</option>
+                <option value="">{t('filterAll')}</option>
                 {ALL_STATUSES.map(s => (
                   <option key={s} value={s}>{STATUS_CONFIG[s]?.label || s}</option>
                 ))}
@@ -263,28 +266,28 @@ export default function OperatorQueuePage() {
 
             {/* Tax Type filter */}
             <div>
-              <label className="text-[10px] text-gray-500 font-medium block mb-1">세금 유형</label>
+              <label className="text-[10px] text-gray-500 font-medium block mb-1">{t('filterTaxType')}</label>
               <select
                 className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                 value={filterTaxType}
                 onChange={(e) => setFilterTaxType(e.target.value)}
               >
-                <option value="">전체</option>
-                {TAX_TYPES.map(t => (
-                  <option key={t} value={t}>{t}</option>
+                <option value="">{t('filterAll')}</option>
+                {TAX_TYPES.map(tt => (
+                  <option key={tt} value={tt}>{tt}</option>
                 ))}
               </select>
             </div>
 
             {/* Year filter */}
             <div>
-              <label className="text-[10px] text-gray-500 font-medium block mb-1">연도</label>
+              <label className="text-[10px] text-gray-500 font-medium block mb-1">{t('filterYear')}</label>
               <select
                 className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                 value={filterYear}
                 onChange={(e) => setFilterYear(e.target.value)}
               >
-                <option value="">전체</option>
+                <option value="">{t('filterAll')}</option>
                 {years.map(y => (
                   <option key={y} value={y}>{y}</option>
                 ))}
@@ -293,15 +296,15 @@ export default function OperatorQueuePage() {
 
             {/* Month filter */}
             <div>
-              <label className="text-[10px] text-gray-500 font-medium block mb-1">월</label>
+              <label className="text-[10px] text-gray-500 font-medium block mb-1">{t('filterMonth')}</label>
               <select
                 className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                 value={filterMonth}
                 onChange={(e) => setFilterMonth(e.target.value)}
               >
-                <option value="">전체</option>
+                <option value="">{t('filterAll')}</option>
                 {months.map(m => (
-                  <option key={m} value={m}>{m}월</option>
+                  <option key={m} value={m}>{m}</option>
                 ))}
               </select>
             </div>
@@ -314,7 +317,7 @@ export default function OperatorQueuePage() {
                 onClick={() => loadData()}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                검색
+                {t('searchButton')}
               </Button>
             </div>
           </div>
@@ -355,19 +358,19 @@ export default function OperatorQueuePage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <ListChecks className="h-4 w-4" />
-            대기열 ({pagination.total}건)
+            {t('queueListCount', { count: pagination.total })}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-16">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-              <p className="text-sm text-gray-500 mt-2">로딩 중...</p>
+              <p className="text-sm text-gray-500 mt-2">{t('loading')}</p>
             </div>
           ) : items.length === 0 ? (
             <div className="text-center py-16">
               <ListChecks className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-400 text-sm">해당하는 항목이 없습니다.</p>
+              <p className="text-gray-400 text-sm">{t('noItems')}</p>
             </div>
           ) : (
             <div className="space-y-0">
@@ -450,58 +453,58 @@ export default function OperatorQueuePage() {
                         <div className="grid md:grid-cols-2 gap-4 pt-4">
                           {/* Details */}
                           <div className="space-y-3">
-                            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">상세 정보</h4>
+                            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">{t('details')}</h4>
 
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div>
-                                <span className="text-gray-500">고객 유형:</span>
+                                <span className="text-gray-500">{t('customerType')}:</span>
                                 <p className="font-medium">{item.customer?.customer_type || '-'}</p>
                               </div>
                               <div>
-                                <span className="text-gray-500">접수일:</span>
+                                <span className="text-gray-500">{t('createdAt')}:</span>
                                 <p className="font-medium">{new Date(item.created_at).toLocaleDateString('ko-KR')}</p>
                               </div>
                               <div>
-                                <span className="text-gray-500">최종 업데이트:</span>
+                                <span className="text-gray-500">{t('updatedAt')}:</span>
                                 <p className="font-medium">{new Date(item.updated_at).toLocaleDateString('ko-KR')}</p>
                               </div>
                               <div>
-                                <span className="text-gray-500">금액:</span>
+                                <span className="text-gray-500">{t('amount')}:</span>
                                 <p className="font-medium font-mono">{fmt(item.amount || 0)}</p>
                               </div>
                             </div>
 
                             {item.ebilling_code && (
                               <div className="text-xs">
-                                <span className="text-gray-500">e-Billing 코드:</span>
+                                <span className="text-gray-500">{t('ebillingCode')}:</span>
                                 <p className="font-mono font-medium bg-white px-2 py-1 rounded mt-1">{item.ebilling_code}</p>
                               </div>
                             )}
 
                             {item.bpe_number && (
                               <div className="text-xs">
-                                <span className="text-gray-500">BPE 번호:</span>
+                                <span className="text-gray-500">{t('bpeNumber')}:</span>
                                 <p className="font-mono font-medium bg-white px-2 py-1 rounded mt-1">{item.bpe_number}</p>
                               </div>
                             )}
 
                             {item.bpe_date && (
                               <div className="text-xs">
-                                <span className="text-gray-500">BPE 날짜:</span>
+                                <span className="text-gray-500">{t('bpeDate')}:</span>
                                 <p className="font-medium">{new Date(item.bpe_date).toLocaleDateString('ko-KR')}</p>
                               </div>
                             )}
 
                             {item.notes && (
                               <div className="text-xs">
-                                <span className="text-gray-500">메모:</span>
+                                <span className="text-gray-500">{t('notes')}:</span>
                                 <p className="mt-1 bg-white p-2 rounded text-gray-700">{item.notes}</p>
                               </div>
                             )}
 
                             {item.failed_reason && (
                               <div className="text-xs">
-                                <span className="text-red-500">실패 사유:</span>
+                                <span className="text-red-500">{t('failReason')}:</span>
                                 <p className="mt-1 bg-red-50 p-2 rounded text-red-700">{item.failed_reason}</p>
                               </div>
                             )}
@@ -509,19 +512,19 @@ export default function OperatorQueuePage() {
 
                           {/* Action Form */}
                           <div className="space-y-3">
-                            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">액션</h4>
+                            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">{t('action')}</h4>
 
                             {/* e-Billing input for DATA_REVIEW status */}
                             {item.status === 'DATA_REVIEW' && (
                               <div className="space-y-2">
                                 <div>
                                   <label className="text-xs font-medium text-gray-700 block mb-1">
-                                    e-Billing 코드 *
+                                    {t('ebillingCodeRequired')}
                                   </label>
                                   <input
                                     type="text"
                                     className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="e-Billing 코드 입력"
+                                    placeholder={t('enterEbillingCodePlaceholder')}
                                     value={editState.itemId === item.id ? editState.ebillingCode : ''}
                                     onChange={(e) => setEditState(prev => ({ ...prev, itemId: item.id, ebillingCode: e.target.value }))}
                                   />
@@ -537,7 +540,7 @@ export default function OperatorQueuePage() {
                                   ) : (
                                     <Building2 className="h-3 w-3 mr-1" />
                                   )}
-                                  e-Billing 생성
+                                  {t('actionGenerateEbilling')}
                                 </Button>
                               </div>
                             )}
@@ -547,19 +550,19 @@ export default function OperatorQueuePage() {
                               <div className="space-y-2">
                                 <div>
                                   <label className="text-xs font-medium text-gray-700 block mb-1">
-                                    BPE 번호 *
+                                    {t('bpeNumberRequired')}
                                   </label>
                                   <input
                                     type="text"
                                     className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="BPE 번호 입력"
+                                    placeholder={t('enterBpeNumberPlaceholder')}
                                     value={editState.itemId === item.id ? editState.bpeNumber : ''}
                                     onChange={(e) => setEditState(prev => ({ ...prev, itemId: item.id, bpeNumber: e.target.value }))}
                                   />
                                 </div>
                                 <div>
                                   <label className="text-xs font-medium text-gray-700 block mb-1">
-                                    BPE 날짜 *
+                                    {t('bpeDateRequired')}
                                   </label>
                                   <input
                                     type="date"
@@ -579,18 +582,18 @@ export default function OperatorQueuePage() {
                                   ) : (
                                     <Upload className="h-3 w-3 mr-1" />
                                   )}
-                                  BPE 업로드
+                                  {t('actionUploadBpe')}
                                 </Button>
                               </div>
                             )}
 
                             {/* Notes field for all statuses */}
                             <div>
-                              <label className="text-xs font-medium text-gray-700 block mb-1">메모</label>
+                              <label className="text-xs font-medium text-gray-700 block mb-1">{t('notes')}</label>
                               <textarea
                                 className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                                 rows={2}
-                                placeholder="메모 입력 (선택사항)"
+                                placeholder={t('notesInputPlaceholder')}
                                 value={editState.itemId === item.id ? editState.notes : ''}
                                 onChange={(e) => setEditState(prev => ({ ...prev, itemId: item.id, notes: e.target.value }))}
                               />
@@ -600,11 +603,11 @@ export default function OperatorQueuePage() {
                             {!['COMPLETED', 'FAILED'].includes(item.status) && (
                               <div className="pt-2 border-t">
                                 <div className="mb-2">
-                                  <label className="text-xs font-medium text-red-600 block mb-1">실패 사유</label>
+                                  <label className="text-xs font-medium text-red-600 block mb-1">{t('failReason')}</label>
                                   <input
                                     type="text"
                                     className="w-full border border-red-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 outline-none"
-                                    placeholder="실패 사유 입력"
+                                    placeholder={t('enterFailReasonPlaceholder')}
                                     value={editState.itemId === item.id ? editState.failedReason : ''}
                                     onChange={(e) => setEditState(prev => ({ ...prev, itemId: item.id, failedReason: e.target.value }))}
                                   />
@@ -621,7 +624,7 @@ export default function OperatorQueuePage() {
                                   ) : (
                                     <AlertCircle className="h-3 w-3 mr-1" />
                                   )}
-                                  실패 처리
+                                  {t('actionFail')}
                                 </Button>
                               </div>
                             )}
@@ -639,8 +642,11 @@ export default function OperatorQueuePage() {
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between pt-4 mt-4 border-t">
               <p className="text-xs text-gray-500">
-                {pagination.total}건 중 {(pagination.page - 1) * pagination.limit + 1}-
-                {Math.min(pagination.page * pagination.limit, pagination.total)}
+                {t('itemsRange', {
+                  total: pagination.total,
+                  start: (pagination.page - 1) * pagination.limit + 1,
+                  end: Math.min(pagination.page * pagination.limit, pagination.total),
+                })}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -650,7 +656,7 @@ export default function OperatorQueuePage() {
                   onClick={() => loadData(pagination.page - 1)}
                   className="text-xs"
                 >
-                  이전
+                  {t('previous')}
                 </Button>
                 <span className="text-xs text-gray-500 flex items-center px-2">
                   {pagination.page} / {pagination.totalPages}
@@ -662,7 +668,7 @@ export default function OperatorQueuePage() {
                   onClick={() => loadData(pagination.page + 1)}
                   className="text-xs"
                 >
-                  다음
+                  {t('next')}
                 </Button>
               </div>
             </div>
