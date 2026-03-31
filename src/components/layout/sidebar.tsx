@@ -139,10 +139,11 @@ export function Sidebar() {
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
-  const { session } = useSession();
+  const { session, switchRole } = useSession();
   const { isOpen, close } = useMobileSidebar();
   const locale = params.locale as string;
   const userRole = session?.role;
+  const availableRoles = session?.availableRoles;
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -184,7 +185,7 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* Role badge */}
+      {/* Role badge with switcher */}
       {userRole && (
         <div className="px-6 pb-4">
           <div className={cn(
@@ -197,6 +198,20 @@ export function Sidebar() {
           )}>
             {t(`nav.role.${userRole}`)}
           </div>
+          {/* Role switcher - shown when user has multiple roles */}
+          {availableRoles && availableRoles.length > 1 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {availableRoles.filter(r => r !== userRole).map(role => (
+                <button
+                  key={role}
+                  onClick={() => { switchRole(role); router.push(`/${locale}/dashboard`); }}
+                  className="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-all"
+                >
+                  {t(`nav.role.${role}`)}로 전환
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

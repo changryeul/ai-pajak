@@ -13,6 +13,8 @@ export interface ClientSessionContext {
   fullName?: string;
   customerId?: string;
   consultantId?: string;
+  /** All available roles for this user (for role switching) */
+  availableRoles?: UserRole[];
 }
 
 interface UseSessionReturn {
@@ -20,7 +22,11 @@ interface UseSessionReturn {
   isLoading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
+  /** Switch to a different role (if user has multiple roles) */
+  switchRole: (role: UserRole) => void;
 }
+
+const ROLE_STORAGE_KEY = 'ai-pajak-active-role';
 
 /**
  * Client-side hook for getting current user session
@@ -57,21 +63,17 @@ export function useSession(): UseSessionReturn {
         return;
       }
 
-      // Get user role (use maybeSingle + order to handle multiple roles)
-      const { data: userRole, error: roleError } = await supabase
+      // Get ALL user roles
+      const { data: allRoles, error: roleError } = await supabase
         .from('user_roles')
         .select('role, organization_id, organization_type')
         .eq('user_id', authSession.user.id)
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
       if (roleError) {
-        // PGRST116 = no rows found
         if (roleError.code === 'PGRST116') {
           console.warn('[useSession] No active role found for user:', authSession.user.id);
-          // User exists but has no role assigned - treat as logged out
           setSession(null);
           return;
         }
@@ -79,11 +81,23 @@ export function useSession(): UseSessionReturn {
         throw new Error(`Failed to fetch user role: ${roleError.message}`);
       }
 
-      if (!userRole) {
+      if (!allRoles || allRoles.length === 0) {
         console.warn('[useSession] No role data returned for user:', authSession.user.id);
         setSession(null);
         return;
       }
+
+      const availableRoles = allRoles.map(r => r.role as UserRole);
+
+      // Check if user has a preferred role stored in sessionStorage
+      const storedRole = typeof window !== 'undefined'
+        ? sessionStorage.getItem(ROLE_STORAGE_KEY) as UserRole | null
+        : null;
+
+      // Use stored role if it's in the available roles, otherwise use first
+      const userRole = storedRole && availableRoles.includes(storedRole)
+        ? allRoles.find(r => r.role === storedRole)!
+        : allRoles[0];
 
       let fullName: string | undefined;
       let customerId: string | undefined;
@@ -138,6 +152,7 @@ export function useSession(): UseSessionReturn {
         fullName,
         customerId,
         consultantId,
+        availableRoles: availableRoles.length > 1 ? availableRoles : undefined,
       });
     } catch (err) {
       const errorMessage = err instanceof Error
@@ -168,11 +183,19 @@ export function useSession(): UseSessionReturn {
     };
   }, [fetchSession]);
 
+  const switchRole = useCallback((role: UserRole) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(ROLE_STORAGE_KEY, role);
+    }
+    fetchSession();
+  }, [fetchSession]);
+
   return {
     session,
     isLoading,
     error,
     refetch: fetchSession,
+    switchRole,
   };
 }
 
