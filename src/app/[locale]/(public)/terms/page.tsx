@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
                 <span className="text-xl font-bold text-gray-900">AI Pajak</span>
               </Link>
               <h1 className="text-3xl font-bold text-gray-900">{t('termsOfService.title')}</h1>
-              <p className="text-gray-500 mt-2">{t('termsOfService.lastUpdated')}: 14 Februari 2026</p>
+              <p className="text-gray-500 mt-2">{t('termsOfService.lastUpdated')}: 31 Maret 2026</p>
             </div>
 
             {/* Content */}
@@ -40,9 +40,17 @@ export default function TermsOfServicePage() {
               {/* Services */}
               <section className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.services.title')}</h2>
-                <p className="text-gray-600 leading-relaxed">
-                  {t('termsOfService.services.content')}
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  {t('termsOfService.services.intro')}
                 </p>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>{t('termsOfService.services.items.calculation')}</li>
+                  <li>{t('termsOfService.services.items.filing')}</li>
+                  <li>{t('termsOfService.services.items.document')}</li>
+                  <li>{t('termsOfService.services.items.optimization')}</li>
+                  <li>{t('termsOfService.services.items.consultation')}</li>
+                  <li>{t('termsOfService.services.items.notifications')}</li>
+                </ul>
               </section>
 
               {/* User Obligations */}
@@ -53,10 +61,50 @@ export default function TermsOfServicePage() {
                 </p>
                 <ul className="list-disc pl-6 text-gray-600 space-y-2">
                   <li>{t('termsOfService.userObligations.items.accurate')}</li>
+                  <li>{t('termsOfService.userObligations.items.npwp')}</li>
                   <li>{t('termsOfService.userObligations.items.confidential')}</li>
                   <li>{t('termsOfService.userObligations.items.lawful')}</li>
                   <li>{t('termsOfService.userObligations.items.compliance')}</li>
+                  <li>{t('termsOfService.userObligations.items.review')}</li>
+                  <li>{t('termsOfService.userObligations.items.age')}</li>
                 </ul>
+              </section>
+
+              {/* AI Disclaimer */}
+              <section className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.aiDisclaimer.title')}</h2>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  {t('termsOfService.aiDisclaimer.content')}
+                </p>
+                <ul className="list-disc pl-6 text-gray-600 space-y-3">
+                  <li className="font-medium">{t('termsOfService.aiDisclaimer.items.notAdvisor')}</li>
+                  <li>{t('termsOfService.aiDisclaimer.items.verification')}</li>
+                  <li>{t('termsOfService.aiDisclaimer.items.noGuarantee')}</li>
+                  <li>{t('termsOfService.aiDisclaimer.items.limitation')}</li>
+                  <li>{t('termsOfService.aiDisclaimer.items.humanReview')}</li>
+                </ul>
+              </section>
+
+              {/* Platform Limitations */}
+              <section className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.platformLimitations.title')}</h2>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  {t('termsOfService.platformLimitations.content')}
+                </p>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>{t('termsOfService.platformLimitations.items.scope')}</li>
+                  <li>{t('termsOfService.platformLimitations.items.availability')}</li>
+                  <li>{t('termsOfService.platformLimitations.items.djpDependency')}</li>
+                  <li>{t('termsOfService.platformLimitations.items.regulations')}</li>
+                </ul>
+              </section>
+
+              {/* Data Handling */}
+              <section className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.dataHandling.title')}</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {t('termsOfService.dataHandling.content')}
+                </p>
               </section>
 
               {/* POA */}
@@ -72,6 +120,14 @@ export default function TermsOfServicePage() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.fees.title')}</h2>
                 <p className="text-gray-600 leading-relaxed">
                   {t('termsOfService.fees.content')}
+                </p>
+              </section>
+
+              {/* Intellectual Property */}
+              <section className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.intellectualProperty.title')}</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {t('termsOfService.intellectualProperty.content')}
                 </p>
               </section>
 
@@ -91,11 +147,27 @@ export default function TermsOfServicePage() {
                 </p>
               </section>
 
+              {/* Dispute Resolution */}
+              <section className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.disputeResolution.title')}</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {t('termsOfService.disputeResolution.content')}
+                </p>
+              </section>
+
               {/* Changes */}
               <section className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.changes.title')}</h2>
                 <p className="text-gray-600 leading-relaxed">
                   {t('termsOfService.changes.content')}
+                </p>
+              </section>
+
+              {/* Severability */}
+              <section className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('termsOfService.severability.title')}</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {t('termsOfService.severability.content')}
                 </p>
               </section>
 
@@ -105,9 +177,15 @@ export default function TermsOfServicePage() {
                 <p className="text-gray-600 leading-relaxed">
                   {t('termsOfService.contact.content')}
                 </p>
-                <p className="text-gray-600 mt-4">
-                  Email: <a href="mailto:legal@aipajak.com" className="text-blue-600 hover:underline">legal@aipajak.com</a>
-                </p>
+                <div className="mt-4 space-y-2 text-gray-600">
+                  <p>
+                    Email: <a href={`mailto:${t('termsOfService.contact.supportEmail')}`} className="text-blue-600 hover:underline">{t('termsOfService.contact.supportEmail')}</a>
+                  </p>
+                  <p>
+                    Legal: <a href={`mailto:${t('termsOfService.contact.legalEmail')}`} className="text-blue-600 hover:underline">{t('termsOfService.contact.legalEmail')}</a>
+                  </p>
+                  <p>{t('termsOfService.contact.address')}</p>
+                </div>
               </section>
             </div>
 

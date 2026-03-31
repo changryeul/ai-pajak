@@ -843,100 +843,184 @@
       "lastUpdated": "Last updated",
       "introduction": {
         "title": "Introduction",
-        "content": "AI Pajak ('we', 'us', or 'our') is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our tax filing services."
+        "content": "AI Pajak ('we', 'us', or 'our') operates an AI-powered tax filing platform under Indonesian law. This Privacy Policy is prepared in compliance with Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP / Indonesian Personal Data Protection Law) and explains how we collect, process, store, and protect your personal data when you use our services."
       },
       "dataCollection": {
-        "title": "Information We Collect",
-        "intro": "We collect the following information to provide our services:",
+        "title": "Personal Data We Collect",
+        "intro": "We collect the following categories of personal data to provide our tax filing services:",
         "items": {
-          "identity": "Identity information: Name, NIK, NPWP, date of birth",
-          "contact": "Contact information: Email address, phone number, address",
-          "tax": "Tax information: Income data, deductions, tax documents",
-          "financial": "Financial information: Bank account details, payment history",
-          "usage": "Usage data: Access logs, IP address, device information"
+          "identity": "Identity data: Full legal name, Nomor Induk Kependudukan (NIK), Nomor Pokok Wajib Pajak (NPWP), date of birth, marital status, and number of dependents",
+          "contact": "Contact data: Email address, phone number, and residential address",
+          "tax": "Tax data: Income sources, salary information, tax withholding certificates (bukti potong), deduction details, and SPT form data (1770SS, 1770S, 1770, 1771)",
+          "financial": "Financial data: Bank account details for refund processing, payment transaction records, and subscription billing history",
+          "usage": "Technical data: Access logs, IP address, browser type, device information, and session data for security and service improvement purposes"
         }
       },
       "dataUsage": {
-        "title": "How We Use Your Information",
-        "intro": "We use your information to:",
+        "title": "Purpose of Data Processing",
+        "intro": "We process your personal data for the following lawful purposes:",
         "items": {
-          "taxServices": "Prepare and submit your tax returns to DJP",
-          "communication": "Communicate with you about our services",
-          "improvement": "Improve our services and user experience",
-          "legal": "Comply with legal obligations and tax regulations"
+          "taxServices": "Tax calculation and filing: To prepare, calculate, and submit your Surat Pemberitahuan (SPT) tax returns to Direktorat Jenderal Pajak (DJP)",
+          "aiProcessing": "AI-assisted analysis: To provide AI-powered tax calculations, deduction optimization suggestions, and document classification using Anthropic's AI technology",
+          "communication": "Service communication: To send tax deadline reminders, filing status updates, and respond to your support inquiries",
+          "improvement": "Service improvement: To analyze usage patterns (in anonymized/aggregated form) to improve platform features and user experience",
+          "legal": "Legal compliance: To fulfill our obligations under Indonesian tax law, anti-money laundering regulations, and other applicable laws",
+          "security": "Security: To detect, prevent, and respond to fraud, unauthorized access, and other security incidents"
         }
       },
+      "dataStorage": {
+        "title": "Data Storage and Infrastructure",
+        "content": "Your personal data is stored in Supabase (PostgreSQL) databases with encryption at rest and in transit. Our application is hosted on Vercel's serverless infrastructure. All tax data is protected by Row Level Security (RLS) policies, ensuring that only authorized users can access their own data. Platform administrators are strictly blocked from accessing customer tax data as a core security principle."
+      },
       "dataProtection": {
-        "title": "Data Security",
-        "content": "We implement appropriate technical and organizational security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction. This includes data encryption, strict access controls, and regular security audits."
+        "title": "Security Measures",
+        "content": "We implement comprehensive security measures in accordance with UU PDP requirements, including: end-to-end encryption for data in transit (TLS 1.3) and at rest; Row Level Security (RLS) at the database level ensuring data isolation between users; role-based access control (RBAC) with strict separation of duties; comprehensive audit trails for all tax-related operations; regular security assessments; and secure authentication through Supabase Auth with session management."
+      },
+      "thirdParty": {
+        "title": "Third-Party Data Sharing",
+        "intro": "We share your data with the following third parties only as necessary to provide our services:",
+        "items": {
+          "djp": "Direktorat Jenderal Pajak (DJP): Your tax data is submitted to DJP as required for tax filing through our authorized integration. This is a legal obligation under Indonesian tax law.",
+          "anthropic": "Anthropic (AI Provider): Tax document data may be processed by Anthropic's AI models for calculation, classification, and optimization purposes. Data sent to Anthropic is used solely for processing your request and is not used to train AI models.",
+          "midtrans": "Midtrans (Payment Gateway): Payment card details and transaction data are processed by Midtrans, a PCI DSS-compliant payment provider licensed by Bank Indonesia, to facilitate subscription payments.",
+          "jtc": "Jakarta Tax Consulting (JTC): As our authorized tax consulting partner, JTC consultants may access your tax data to provide professional tax advisory services under a Power of Attorney arrangement."
+        },
+        "noSale": "We do not sell, rent, or trade your personal data to any third party for marketing or other purposes."
       },
       "dataRetention": {
         "title": "Data Retention",
-        "content": "We retain your tax information for a minimum of 5 (five) years in accordance with Indonesian tax regulations. Data will be deleted or anonymized after the retention period ends, unless required for legal purposes."
+        "content": "We retain your tax information for a minimum of 5 (five) years from the end of the relevant tax year, in accordance with Indonesian tax regulations (UU KUP Pasal 28 ayat 11). After the retention period expires, your data will be securely deleted or anonymized, unless a longer retention period is required by law or ongoing legal proceedings. You may request earlier deletion of non-tax data at any time, subject to our legal obligations."
       },
       "userRights": {
-        "title": "Your Rights",
-        "intro": "You have the right to:",
+        "title": "Your Rights Under UU PDP",
+        "intro": "Under Indonesia's Personal Data Protection Law (UU PDP), you have the following rights:",
         "items": {
-          "access": "Access the personal information we hold about you",
-          "correction": "Request correction of inaccurate information",
-          "deletion": "Request deletion of your data (subject to legal limitations)",
-          "objection": "Object to processing for certain purposes"
-        }
+          "access": "Right to access: Obtain information about your personal data that we process, including the purpose of processing and the parties with whom it is shared",
+          "correction": "Right to correction: Request correction or update of inaccurate or incomplete personal data",
+          "deletion": "Right to deletion: Request deletion of your personal data when it is no longer necessary for the original purpose (subject to the 5-year tax retention requirement)",
+          "restriction": "Right to restrict processing: Request that we limit the processing of your data under certain circumstances",
+          "objection": "Right to object: Object to the processing of your personal data for specific purposes, including automated decision-making",
+          "portability": "Right to data portability: Receive your personal data in a structured, commonly used format and transfer it to another service provider",
+          "withdrawal": "Right to withdraw consent: Withdraw your consent at any time, without affecting the lawfulness of processing based on consent before its withdrawal"
+        },
+        "howTo": "To exercise any of these rights, please contact our Data Protection Officer at dpo@aipajak.com or through your account settings. We will respond to your request within 3x24 hours as required by UU PDP."
       },
-      "thirdParty": {
-        "title": "Third-Party Sharing",
-        "content": "We may share your information with: Direktorat Jenderal Pajak (DJP) for tax reporting, payment service providers to process transactions, and authorized business partners (Jakarta Tax Consulting) for tax consulting services. We do not sell your personal information to third parties."
+      "cookies": {
+        "title": "Cookies and Session Management",
+        "content": "We use cookies strictly for session management and authentication purposes. We do not use tracking cookies, advertising cookies, or third-party analytics cookies. Session cookies are automatically deleted when you log out or after your session expires. You can configure your browser to reject cookies, but this may affect your ability to use our services."
+      },
+      "children": {
+        "title": "Children's Data",
+        "content": "AI Pajak services are intended for individuals who are 17 years of age or older and who have tax obligations. We do not knowingly collect personal data from children under 17 years of age. If you become aware that a child has provided us with personal data, please contact us immediately."
+      },
+      "changes": {
+        "title": "Changes to This Policy",
+        "content": "We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. Material changes will be communicated via email and/or in-app notification at least 14 days before they take effect. Continued use of our services after the effective date constitutes your acceptance of the updated policy."
       },
       "contact": {
         "title": "Contact Us",
-        "content": "If you have questions about this Privacy Policy or wish to exercise your rights, please contact us:"
+        "content": "If you have questions about this Privacy Policy, wish to exercise your data rights, or have concerns about how we handle your personal data, please contact us:",
+        "dpo": "Data Protection Officer",
+        "dpoEmail": "dpo@aipajak.com",
+        "supportEmail": "support@aipajak.com",
+        "address": "Jakarta, Indonesia"
       }
     },
     "termsOfService": {
       "title": "Terms of Service",
       "lastUpdated": "Last updated",
       "acceptance": {
-        "title": "Acceptance of Terms",
-        "content": "By accessing and using AI Pajak services, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services."
+        "title": "1. Acceptance of Terms",
+        "content": "By accessing, registering for, or using AI Pajak services, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service ('Terms'). If you do not agree to these Terms, you must not access or use our services. These Terms constitute a legally binding agreement between you and PT AI Pajak Indonesia ('AI Pajak', 'we', 'us', or 'our')."
       },
       "services": {
-        "title": "Service Description",
-        "content": "AI Pajak provides a digital tax filing platform that helps you prepare, calculate, and report taxes to DJP through our partnership with Jakarta Tax Consulting (JTC)."
-      },
-      "userObligations": {
-        "title": "User Obligations",
-        "intro": "You agree to:",
+        "title": "2. Service Description",
+        "intro": "AI Pajak is an AI-powered digital tax filing platform that provides the following services:",
         "items": {
-          "accurate": "Provide accurate and complete information",
-          "confidential": "Keep your account credentials confidential",
-          "lawful": "Use the services only for lawful purposes",
-          "compliance": "Comply with all applicable tax laws and regulations"
+          "calculation": "AI-assisted tax calculation for Indonesian tax forms (SPT 1770SS, 1770S, 1770, and 1771)",
+          "filing": "Electronic tax filing and submission to Direktorat Jenderal Pajak (DJP) through our authorized integration",
+          "document": "AI-powered document classification and data extraction from tax documents (bukti potong, financial statements)",
+          "optimization": "Tax deduction optimization suggestions based on your financial data and applicable regulations",
+          "consultation": "Access to certified tax consultants through Jakarta Tax Consulting (JTC) partnership",
+          "notifications": "Tax deadline reminders and filing status notifications"
         }
       },
+      "userObligations": {
+        "title": "3. User Responsibilities",
+        "intro": "As a user of AI Pajak, you agree to:",
+        "items": {
+          "accurate": "Provide accurate, complete, and truthful information including your NIK, NPWP, income data, and all tax-relevant documents",
+          "npwp": "Hold a valid NPWP (Nomor Pokok Wajib Pajak) or be in the process of obtaining one if required by Indonesian tax law",
+          "confidential": "Maintain the confidentiality of your account credentials and immediately notify us of any unauthorized access",
+          "lawful": "Use the platform only for lawful tax filing purposes in accordance with Indonesian tax regulations",
+          "compliance": "Comply with all applicable Indonesian tax laws, including UU PPh, UU PPN, and UU KUP",
+          "review": "Review all AI-generated calculations and tax forms before submission to ensure accuracy and completeness",
+          "age": "Be at least 17 years of age or the legal age to have tax obligations in Indonesia"
+        }
+      },
+      "aiDisclaimer": {
+        "title": "4. AI Disclaimer and Limitations",
+        "content": "AI Pajak uses artificial intelligence technology (powered by Anthropic) to assist with tax calculations, document classification, and optimization suggestions. You acknowledge and agree that:",
+        "items": {
+          "notAdvisor": "AI Pajak is NOT a substitute for professional tax advice from a certified tax consultant (Konsultan Pajak). For complex tax situations, we strongly recommend consulting with a qualified tax professional.",
+          "verification": "All AI-generated tax calculations, suggestions, and classifications should be reviewed and verified by you before submission. You bear ultimate responsibility for the accuracy of your tax filings.",
+          "noGuarantee": "We do not guarantee the accuracy, completeness, or reliability of AI-generated outputs. AI models may produce errors, and tax laws are subject to change.",
+          "limitation": "AI recommendations are based on the data you provide and the AI model's understanding of Indonesian tax regulations. Results may vary based on data quality and completeness.",
+          "humanReview": "For tax filings processed through JTC, a certified tax consultant will review your submission before final filing with DJP."
+        }
+      },
+      "platformLimitations": {
+        "title": "5. Platform Limitations",
+        "content": "You acknowledge that AI Pajak has the following limitations:",
+        "items": {
+          "scope": "Our services are limited to Indonesian domestic tax obligations. International or cross-border tax matters may require additional professional consultation.",
+          "availability": "We strive for high availability but do not guarantee uninterrupted access. Planned maintenance and unexpected outages may occur.",
+          "djpDependency": "Tax filing success depends on the availability and proper functioning of DJP's e-filing systems, which are outside our control.",
+          "regulations": "Tax calculations are based on our understanding of current regulations. Changes in tax law may not be immediately reflected in our system."
+        }
+      },
+      "dataHandling": {
+        "title": "6. Data Handling and Security",
+        "content": "Your data security is our priority. All personal and tax data is encrypted both in transit and at rest. We implement Row Level Security (RLS) at the database level, ensuring strict data isolation between users. Platform administrators are blocked from accessing customer tax data. A comprehensive audit trail records all tax-related operations. For full details on how we handle your data, please refer to our Privacy Policy."
+      },
       "poa": {
-        "title": "Power of Attorney",
-        "content": "To use tax filing services, you must sign a Power of Attorney authorizing JTC to act on your behalf in tax matters."
+        "title": "7. Power of Attorney",
+        "content": "To use our tax filing services through Jakarta Tax Consulting (JTC), you must sign a digital Power of Attorney (Surat Kuasa) authorizing JTC's certified consultants to prepare, review, and submit your tax returns to DJP on your behalf. This Power of Attorney can be revoked at any time through your account settings, subject to any ongoing filing obligations."
       },
       "fees": {
-        "title": "Fees and Payment",
-        "content": "Service fees will be displayed before you subscribe. Payments are processed through our secure payment gateway. Refunds are subject to our cancellation policy."
+        "title": "8. Fees, Payment, and Subscriptions",
+        "content": "Service fees and subscription plans are displayed on our pricing page and within the platform before purchase. All payments are processed securely through Midtrans, a payment gateway licensed by Bank Indonesia. Prices are listed in Indonesian Rupiah (IDR) and are inclusive of applicable taxes (PPN). Subscription renewals are automatic unless cancelled before the renewal date. Refund requests must be submitted within 7 (seven) days of purchase and are subject to our refund policy. We reserve the right to change pricing with 30 days' advance notice to existing subscribers."
+      },
+      "intellectualProperty": {
+        "title": "9. Intellectual Property",
+        "content": "All content, features, technology, and intellectual property of AI Pajak (including but not limited to software, algorithms, user interfaces, trademarks, and documentation) are owned by or licensed to PT AI Pajak Indonesia. You are granted a limited, non-exclusive, non-transferable license to use the platform for its intended purpose. You may not copy, modify, distribute, sell, or create derivative works based on our platform without prior written consent."
       },
       "liability": {
-        "title": "Limitation of Liability",
-        "content": "AI Pajak is not responsible for errors arising from inaccurate information you provide. We do not guarantee specific tax filing results or refunds."
+        "title": "10. Limitation of Liability",
+        "content": "To the maximum extent permitted by Indonesian law: AI Pajak is not liable for any errors, penalties, or losses arising from inaccurate or incomplete information provided by you; we do not guarantee specific tax refund amounts or tax filing outcomes; our total liability for any claim shall not exceed the total service fees paid by you in the 12 months preceding the claim; we are not liable for indirect, incidental, special, consequential, or punitive damages; we are not responsible for losses arising from DJP system failures, internet connectivity issues, or other circumstances beyond our reasonable control (force majeure)."
       },
       "termination": {
-        "title": "Termination",
-        "content": "We may suspend or terminate your access to services if you violate these Terms and Conditions or at your own request."
+        "title": "11. Account Termination",
+        "content": "You may deactivate your account at any time through your account settings or by contacting support@aipajak.com. We reserve the right to suspend or terminate your account immediately if you: violate these Terms; provide fraudulent or misleading information; use the platform for illegal purposes; or fail to pay outstanding fees. Upon termination, your access to the platform will be revoked. However, we will retain your tax data for the legally required 5-year period. You may request a copy of your data before or after termination."
+      },
+      "disputeResolution": {
+        "title": "12. Governing Law and Dispute Resolution",
+        "content": "These Terms are governed by and construed in accordance with the laws of the Republic of Indonesia. Any disputes arising from or relating to these Terms or your use of AI Pajak services shall first be resolved through good-faith negotiation. If negotiation fails, disputes shall be submitted to the jurisdiction of the Central Jakarta District Court (Pengadilan Negeri Jakarta Pusat). Both parties agree to waive any objection to this venue."
       },
       "changes": {
-        "title": "Changes to Terms",
-        "content": "We may update these Terms and Conditions from time to time. Material changes will be notified via email or in-app notification."
+        "title": "13. Changes to Terms",
+        "content": "We may update these Terms from time to time. Material changes will be communicated via email and/or in-app notification at least 14 days before they take effect. Continued use of our services after the effective date constitutes your acceptance of the updated Terms. If you do not agree with the changes, you must stop using our services and may request account termination."
+      },
+      "severability": {
+        "title": "14. Severability",
+        "content": "If any provision of these Terms is found to be unenforceable or invalid by a court of competent jurisdiction, the remaining provisions shall continue in full force and effect. The unenforceable provision shall be modified to the minimum extent necessary to make it enforceable while preserving its original intent."
       },
       "contact": {
-        "title": "Contact Us",
-        "content": "For questions about these Terms and Conditions, please contact:"
+        "title": "15. Contact Information",
+        "content": "For questions, concerns, or feedback regarding these Terms of Service, please contact us:",
+        "supportEmail": "support@aipajak.com",
+        "legalEmail": "legal@aipajak.com",
+        "address": "Jakarta, Indonesia"
       }
     }
   },

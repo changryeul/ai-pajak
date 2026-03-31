@@ -843,100 +843,184 @@
       "lastUpdated": "Terakhir diperbarui",
       "introduction": {
         "title": "Pendahuluan",
-        "content": "AI Pajak ('kami', 'kita', atau 'milik kami') berkomitmen untuk melindungi privasi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda ketika Anda menggunakan layanan pelaporan pajak kami."
+        "content": "AI Pajak ('kami' atau 'milik kami') mengoperasikan platform pelaporan pajak berbasis kecerdasan buatan (AI) berdasarkan hukum Indonesia. Kebijakan Privasi ini disusun sesuai dengan Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP) dan menjelaskan bagaimana kami mengumpulkan, memproses, menyimpan, dan melindungi data pribadi Anda saat menggunakan layanan kami."
       },
       "dataCollection": {
-        "title": "Informasi yang Kami Kumpulkan",
-        "intro": "Kami mengumpulkan informasi berikut untuk menyediakan layanan kami:",
+        "title": "Data Pribadi yang Kami Kumpulkan",
+        "intro": "Kami mengumpulkan kategori data pribadi berikut untuk menyediakan layanan pelaporan pajak:",
         "items": {
-          "identity": "Informasi identitas: Nama, NIK, NPWP, tanggal lahir",
-          "contact": "Informasi kontak: Alamat email, nomor telepon, alamat",
-          "tax": "Informasi pajak: Data penghasilan, pengurangan, dokumen pajak",
-          "financial": "Informasi keuangan: Detail rekening bank, riwayat pembayaran",
-          "usage": "Data penggunaan: Log akses, alamat IP, informasi perangkat"
+          "identity": "Data identitas: Nama lengkap sesuai KTP, Nomor Induk Kependudukan (NIK), Nomor Pokok Wajib Pajak (NPWP), tanggal lahir, status perkawinan, dan jumlah tanggungan",
+          "contact": "Data kontak: Alamat email, nomor telepon, dan alamat tempat tinggal",
+          "tax": "Data pajak: Sumber penghasilan, informasi gaji, bukti potong, rincian pengurangan, dan data formulir SPT (1770SS, 1770S, 1770, 1771)",
+          "financial": "Data keuangan: Detail rekening bank untuk proses restitusi, catatan transaksi pembayaran, dan riwayat tagihan langganan",
+          "usage": "Data teknis: Log akses, alamat IP, jenis browser, informasi perangkat, dan data sesi untuk keamanan dan peningkatan layanan"
         }
       },
       "dataUsage": {
-        "title": "Bagaimana Kami Menggunakan Informasi Anda",
-        "intro": "Kami menggunakan informasi Anda untuk:",
+        "title": "Tujuan Pemrosesan Data",
+        "intro": "Kami memproses data pribadi Anda untuk tujuan sah berikut:",
         "items": {
-          "taxServices": "Menyiapkan dan mengirimkan laporan pajak Anda ke DJP",
-          "communication": "Berkomunikasi dengan Anda tentang layanan kami",
-          "improvement": "Meningkatkan layanan dan pengalaman pengguna kami",
-          "legal": "Memenuhi kewajiban hukum dan peraturan perpajakan"
+          "taxServices": "Perhitungan dan pelaporan pajak: Untuk menyiapkan, menghitung, dan menyampaikan Surat Pemberitahuan (SPT) pajak Anda kepada Direktorat Jenderal Pajak (DJP)",
+          "aiProcessing": "Analisis berbantuan AI: Untuk menyediakan perhitungan pajak berbasis AI, saran optimalisasi pengurangan, dan klasifikasi dokumen menggunakan teknologi AI dari Anthropic",
+          "communication": "Komunikasi layanan: Untuk mengirimkan pengingat tenggat waktu pajak, pembaruan status pelaporan, dan merespons pertanyaan dukungan Anda",
+          "improvement": "Peningkatan layanan: Untuk menganalisis pola penggunaan (dalam bentuk anonim/agregat) guna meningkatkan fitur platform dan pengalaman pengguna",
+          "legal": "Kepatuhan hukum: Untuk memenuhi kewajiban kami berdasarkan undang-undang perpajakan Indonesia, peraturan anti pencucian uang, dan hukum lain yang berlaku",
+          "security": "Keamanan: Untuk mendeteksi, mencegah, dan merespons penipuan, akses tidak sah, dan insiden keamanan lainnya"
         }
       },
+      "dataStorage": {
+        "title": "Penyimpanan Data dan Infrastruktur",
+        "content": "Data pribadi Anda disimpan dalam basis data Supabase (PostgreSQL) dengan enkripsi saat diam dan saat transit. Aplikasi kami dihosting di infrastruktur serverless Vercel. Semua data pajak dilindungi oleh kebijakan Row Level Security (RLS), memastikan hanya pengguna yang berwenang yang dapat mengakses data mereka sendiri. Administrator platform secara ketat diblokir dari mengakses data pajak pelanggan sebagai prinsip keamanan utama."
+      },
       "dataProtection": {
-        "title": "Keamanan Data",
-        "content": "Kami menerapkan langkah-langkah keamanan teknis dan organisasi yang sesuai untuk melindungi informasi pribadi Anda dari akses tidak sah, pengubahan, pengungkapan, atau penghancuran. Ini termasuk enkripsi data, kontrol akses yang ketat, dan audit keamanan berkala."
+        "title": "Langkah-Langkah Keamanan",
+        "content": "Kami menerapkan langkah-langkah keamanan komprehensif sesuai dengan persyaratan UU PDP, termasuk: enkripsi end-to-end untuk data dalam transit (TLS 1.3) dan saat diam; Row Level Security (RLS) di tingkat basis data yang memastikan isolasi data antar pengguna; kontrol akses berbasis peran (RBAC) dengan pemisahan tugas yang ketat; jejak audit komprehensif untuk semua operasi terkait pajak; penilaian keamanan berkala; dan autentikasi aman melalui Supabase Auth dengan manajemen sesi."
+      },
+      "thirdParty": {
+        "title": "Berbagi Data dengan Pihak Ketiga",
+        "intro": "Kami membagikan data Anda dengan pihak ketiga berikut hanya sejauh diperlukan untuk menyediakan layanan kami:",
+        "items": {
+          "djp": "Direktorat Jenderal Pajak (DJP): Data pajak Anda disampaikan kepada DJP sebagaimana diwajibkan untuk pelaporan pajak melalui integrasi resmi kami. Ini merupakan kewajiban hukum berdasarkan undang-undang perpajakan Indonesia.",
+          "anthropic": "Anthropic (Penyedia AI): Data dokumen pajak dapat diproses oleh model AI Anthropic untuk keperluan perhitungan, klasifikasi, dan optimalisasi. Data yang dikirim ke Anthropic hanya digunakan untuk memproses permintaan Anda dan tidak digunakan untuk melatih model AI.",
+          "midtrans": "Midtrans (Payment Gateway): Detail kartu pembayaran dan data transaksi diproses oleh Midtrans, penyedia pembayaran bersertifikat PCI DSS yang berlisensi dari Bank Indonesia, untuk memfasilitasi pembayaran langganan.",
+          "jtc": "Jakarta Tax Consulting (JTC): Sebagai mitra konsultan pajak resmi kami, konsultan JTC dapat mengakses data pajak Anda untuk memberikan layanan konsultasi pajak profesional berdasarkan pengaturan Surat Kuasa."
+        },
+        "noSale": "Kami tidak menjual, menyewakan, atau memperdagangkan data pribadi Anda kepada pihak ketiga mana pun untuk tujuan pemasaran atau tujuan lainnya."
       },
       "dataRetention": {
         "title": "Penyimpanan Data",
-        "content": "Kami menyimpan informasi pajak Anda selama minimal 5 (lima) tahun sesuai dengan ketentuan perpajakan Indonesia. Data akan dihapus atau dianonimkan setelah periode penyimpanan berakhir, kecuali jika diperlukan untuk tujuan hukum."
+        "content": "Kami menyimpan informasi pajak Anda selama minimal 5 (lima) tahun sejak akhir tahun pajak terkait, sesuai dengan peraturan perpajakan Indonesia (UU KUP Pasal 28 ayat 11). Setelah periode penyimpanan berakhir, data Anda akan dihapus secara aman atau dianonimkan, kecuali jika periode penyimpanan yang lebih lama diperlukan oleh hukum atau proses hukum yang sedang berlangsung. Anda dapat meminta penghapusan lebih awal untuk data non-pajak kapan saja, dengan tunduk pada kewajiban hukum kami."
       },
       "userRights": {
-        "title": "Hak Anda",
-        "intro": "Anda memiliki hak untuk:",
+        "title": "Hak Anda Berdasarkan UU PDP",
+        "intro": "Berdasarkan Undang-Undang Pelindungan Data Pribadi (UU PDP) Indonesia, Anda memiliki hak-hak berikut:",
         "items": {
-          "access": "Mengakses informasi pribadi yang kami simpan tentang Anda",
-          "correction": "Meminta koreksi atas informasi yang tidak akurat",
-          "deletion": "Meminta penghapusan data Anda (dengan batasan hukum)",
-          "objection": "Menolak pemrosesan data untuk tujuan tertentu"
-        }
+          "access": "Hak akses: Mendapatkan informasi tentang data pribadi Anda yang kami proses, termasuk tujuan pemrosesan dan pihak-pihak yang menerima data tersebut",
+          "correction": "Hak koreksi: Meminta koreksi atau pembaruan data pribadi yang tidak akurat atau tidak lengkap",
+          "deletion": "Hak penghapusan: Meminta penghapusan data pribadi Anda ketika tidak lagi diperlukan untuk tujuan awal (tunduk pada persyaratan retensi pajak 5 tahun)",
+          "restriction": "Hak pembatasan pemrosesan: Meminta kami membatasi pemrosesan data Anda dalam keadaan tertentu",
+          "objection": "Hak keberatan: Menolak pemrosesan data pribadi Anda untuk tujuan tertentu, termasuk pengambilan keputusan otomatis",
+          "portability": "Hak portabilitas data: Menerima data pribadi Anda dalam format terstruktur yang umum digunakan dan mentransfernya ke penyedia layanan lain",
+          "withdrawal": "Hak menarik persetujuan: Menarik persetujuan Anda kapan saja, tanpa mempengaruhi keabsahan pemrosesan berdasarkan persetujuan sebelum penarikannya"
+        },
+        "howTo": "Untuk menggunakan hak-hak ini, silakan hubungi Petugas Pelindungan Data kami di dpo@aipajak.com atau melalui pengaturan akun Anda. Kami akan merespons permintaan Anda dalam waktu 3x24 jam sebagaimana diwajibkan oleh UU PDP."
       },
-      "thirdParty": {
-        "title": "Berbagi dengan Pihak Ketiga",
-        "content": "Kami dapat berbagi informasi Anda dengan: Direktorat Jenderal Pajak (DJP) untuk pelaporan pajak, penyedia layanan pembayaran untuk memproses transaksi, dan mitra bisnis resmi (Jakarta Tax Consulting) untuk layanan konsultasi pajak. Kami tidak menjual informasi pribadi Anda kepada pihak ketiga."
+      "cookies": {
+        "title": "Cookie dan Manajemen Sesi",
+        "content": "Kami menggunakan cookie secara ketat untuk manajemen sesi dan autentikasi. Kami tidak menggunakan cookie pelacakan, cookie iklan, atau cookie analitik pihak ketiga. Cookie sesi secara otomatis dihapus ketika Anda keluar atau setelah sesi Anda berakhir. Anda dapat mengonfigurasi browser Anda untuk menolak cookie, tetapi ini dapat mempengaruhi kemampuan Anda untuk menggunakan layanan kami."
+      },
+      "children": {
+        "title": "Data Anak-Anak",
+        "content": "Layanan AI Pajak ditujukan untuk individu yang berusia 17 tahun ke atas dan memiliki kewajiban perpajakan. Kami tidak secara sengaja mengumpulkan data pribadi dari anak-anak di bawah 17 tahun. Jika Anda mengetahui bahwa seorang anak telah memberikan data pribadi kepada kami, silakan segera hubungi kami."
+      },
+      "changes": {
+        "title": "Perubahan Kebijakan Ini",
+        "content": "Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu untuk mencerminkan perubahan dalam praktik kami, teknologi, persyaratan hukum, atau faktor lainnya. Perubahan material akan dikomunikasikan melalui email dan/atau notifikasi dalam aplikasi setidaknya 14 hari sebelum berlaku. Penggunaan layanan kami yang berkelanjutan setelah tanggal efektif merupakan penerimaan Anda terhadap kebijakan yang diperbarui."
       },
       "contact": {
         "title": "Hubungi Kami",
-        "content": "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini atau ingin menggunakan hak Anda, silakan hubungi kami:"
+        "content": "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, ingin menggunakan hak data Anda, atau memiliki kekhawatiran tentang bagaimana kami menangani data pribadi Anda, silakan hubungi kami:",
+        "dpo": "Petugas Pelindungan Data",
+        "dpoEmail": "dpo@aipajak.com",
+        "supportEmail": "support@aipajak.com",
+        "address": "Jakarta, Indonesia"
       }
     },
     "termsOfService": {
       "title": "Syarat dan Ketentuan",
       "lastUpdated": "Terakhir diperbarui",
       "acceptance": {
-        "title": "Penerimaan Syarat",
-        "content": "Dengan mengakses dan menggunakan layanan AI Pajak, Anda setuju untuk terikat dengan Syarat dan Ketentuan ini. Jika Anda tidak setuju dengan syarat ini, harap tidak menggunakan layanan kami."
+        "title": "1. Penerimaan Syarat",
+        "content": "Dengan mengakses, mendaftar, atau menggunakan layanan AI Pajak, Anda menyatakan bahwa Anda telah membaca, memahami, dan setuju untuk terikat dengan Syarat dan Ketentuan ini ('Syarat'). Jika Anda tidak setuju dengan Syarat ini, Anda tidak boleh mengakses atau menggunakan layanan kami. Syarat ini merupakan perjanjian yang mengikat secara hukum antara Anda dan PT AI Pajak Indonesia ('AI Pajak', 'kami', atau 'milik kami')."
       },
       "services": {
-        "title": "Deskripsi Layanan",
-        "content": "AI Pajak menyediakan platform pelaporan pajak digital yang membantu Anda menyiapkan, menghitung, dan melaporkan pajak kepada DJP melalui kemitraan dengan Jakarta Tax Consulting (JTC)."
-      },
-      "userObligations": {
-        "title": "Kewajiban Pengguna",
-        "intro": "Anda setuju untuk:",
+        "title": "2. Deskripsi Layanan",
+        "intro": "AI Pajak adalah platform pelaporan pajak digital berbasis AI yang menyediakan layanan berikut:",
         "items": {
-          "accurate": "Memberikan informasi yang akurat dan lengkap",
-          "confidential": "Menjaga kerahasiaan kredensial akun Anda",
-          "lawful": "Menggunakan layanan hanya untuk tujuan yang sah",
-          "compliance": "Mematuhi semua undang-undang dan peraturan perpajakan yang berlaku"
+          "calculation": "Perhitungan pajak berbantuan AI untuk formulir pajak Indonesia (SPT 1770SS, 1770S, 1770, dan 1771)",
+          "filing": "Pelaporan dan penyampaian pajak elektronik kepada Direktorat Jenderal Pajak (DJP) melalui integrasi resmi kami",
+          "document": "Klasifikasi dokumen dan ekstraksi data berbasis AI dari dokumen pajak (bukti potong, laporan keuangan)",
+          "optimization": "Saran optimalisasi pengurangan pajak berdasarkan data keuangan Anda dan peraturan yang berlaku",
+          "consultation": "Akses ke konsultan pajak bersertifikat melalui kemitraan Jakarta Tax Consulting (JTC)",
+          "notifications": "Pengingat tenggat waktu pajak dan notifikasi status pelaporan"
         }
       },
+      "userObligations": {
+        "title": "3. Tanggung Jawab Pengguna",
+        "intro": "Sebagai pengguna AI Pajak, Anda setuju untuk:",
+        "items": {
+          "accurate": "Memberikan informasi yang akurat, lengkap, dan benar termasuk NIK, NPWP, data penghasilan, dan semua dokumen yang relevan dengan pajak",
+          "npwp": "Memiliki NPWP (Nomor Pokok Wajib Pajak) yang valid atau dalam proses mendapatkannya jika diwajibkan oleh undang-undang perpajakan Indonesia",
+          "confidential": "Menjaga kerahasiaan kredensial akun Anda dan segera memberitahu kami jika terjadi akses tidak sah",
+          "lawful": "Menggunakan platform hanya untuk tujuan pelaporan pajak yang sah sesuai dengan peraturan perpajakan Indonesia",
+          "compliance": "Mematuhi semua undang-undang perpajakan Indonesia yang berlaku, termasuk UU PPh, UU PPN, dan UU KUP",
+          "review": "Meninjau semua perhitungan dan formulir pajak yang dihasilkan AI sebelum penyampaian untuk memastikan keakuratan dan kelengkapan",
+          "age": "Berusia minimal 17 tahun atau usia legal untuk memiliki kewajiban perpajakan di Indonesia"
+        }
+      },
+      "aiDisclaimer": {
+        "title": "4. Penyangkalan AI dan Keterbatasan",
+        "content": "AI Pajak menggunakan teknologi kecerdasan buatan (didukung oleh Anthropic) untuk membantu perhitungan pajak, klasifikasi dokumen, dan saran optimalisasi. Anda mengakui dan menyetujui bahwa:",
+        "items": {
+          "notAdvisor": "AI Pajak BUKAN pengganti saran pajak profesional dari konsultan pajak bersertifikat (Konsultan Pajak). Untuk situasi pajak yang kompleks, kami sangat menyarankan untuk berkonsultasi dengan profesional pajak yang berkualifikasi.",
+          "verification": "Semua perhitungan pajak, saran, dan klasifikasi yang dihasilkan AI harus ditinjau dan diverifikasi oleh Anda sebelum penyampaian. Anda memikul tanggung jawab akhir atas keakuratan pelaporan pajak Anda.",
+          "noGuarantee": "Kami tidak menjamin keakuratan, kelengkapan, atau keandalan output yang dihasilkan AI. Model AI dapat menghasilkan kesalahan, dan undang-undang perpajakan dapat berubah.",
+          "limitation": "Rekomendasi AI didasarkan pada data yang Anda berikan dan pemahaman model AI terhadap peraturan perpajakan Indonesia. Hasil dapat bervariasi berdasarkan kualitas dan kelengkapan data.",
+          "humanReview": "Untuk pelaporan pajak yang diproses melalui JTC, konsultan pajak bersertifikat akan meninjau penyampaian Anda sebelum pelaporan akhir kepada DJP."
+        }
+      },
+      "platformLimitations": {
+        "title": "5. Keterbatasan Platform",
+        "content": "Anda mengakui bahwa AI Pajak memiliki keterbatasan berikut:",
+        "items": {
+          "scope": "Layanan kami terbatas pada kewajiban pajak domestik Indonesia. Urusan pajak internasional atau lintas batas mungkin memerlukan konsultasi profesional tambahan.",
+          "availability": "Kami berusaha untuk ketersediaan tinggi tetapi tidak menjamin akses tanpa gangguan. Pemeliharaan terjadwal dan gangguan yang tidak terduga dapat terjadi.",
+          "djpDependency": "Keberhasilan pelaporan pajak bergantung pada ketersediaan dan berfungsinya sistem e-filing DJP, yang berada di luar kendali kami.",
+          "regulations": "Perhitungan pajak didasarkan pada pemahaman kami tentang peraturan yang berlaku saat ini. Perubahan dalam undang-undang perpajakan mungkin tidak segera tercermin dalam sistem kami."
+        }
+      },
+      "dataHandling": {
+        "title": "6. Penanganan Data dan Keamanan",
+        "content": "Keamanan data Anda adalah prioritas kami. Semua data pribadi dan pajak dienkripsi baik saat transit maupun saat diam. Kami menerapkan Row Level Security (RLS) di tingkat basis data, memastikan isolasi data yang ketat antar pengguna. Administrator platform diblokir dari mengakses data pajak pelanggan. Jejak audit komprehensif mencatat semua operasi terkait pajak. Untuk detail lengkap tentang bagaimana kami menangani data Anda, silakan merujuk pada Kebijakan Privasi kami."
+      },
       "poa": {
-        "title": "Surat Kuasa",
-        "content": "Untuk menggunakan layanan pelaporan pajak, Anda harus menandatangani Surat Kuasa yang memberikan wewenang kepada JTC untuk bertindak atas nama Anda dalam urusan perpajakan."
+        "title": "7. Surat Kuasa",
+        "content": "Untuk menggunakan layanan pelaporan pajak kami melalui Jakarta Tax Consulting (JTC), Anda harus menandatangani Surat Kuasa digital yang memberikan wewenang kepada konsultan bersertifikat JTC untuk menyiapkan, meninjau, dan menyampaikan laporan pajak Anda kepada DJP atas nama Anda. Surat Kuasa ini dapat dicabut kapan saja melalui pengaturan akun Anda, dengan tunduk pada kewajiban pelaporan yang sedang berlangsung."
       },
       "fees": {
-        "title": "Biaya dan Pembayaran",
-        "content": "Biaya layanan akan ditampilkan sebelum Anda berlangganan. Pembayaran diproses melalui gateway pembayaran aman kami. Pengembalian dana tunduk pada kebijakan pembatalan kami."
+        "title": "8. Biaya, Pembayaran, dan Langganan",
+        "content": "Biaya layanan dan paket langganan ditampilkan di halaman harga dan dalam platform sebelum pembelian. Semua pembayaran diproses secara aman melalui Midtrans, payment gateway berlisensi dari Bank Indonesia. Harga tercantum dalam Rupiah Indonesia (IDR) dan sudah termasuk pajak yang berlaku (PPN). Perpanjangan langganan dilakukan secara otomatis kecuali dibatalkan sebelum tanggal perpanjangan. Permintaan pengembalian dana harus diajukan dalam waktu 7 (tujuh) hari setelah pembelian dan tunduk pada kebijakan pengembalian dana kami. Kami berhak mengubah harga dengan pemberitahuan 30 hari sebelumnya kepada pelanggan yang ada."
+      },
+      "intellectualProperty": {
+        "title": "9. Kekayaan Intelektual",
+        "content": "Semua konten, fitur, teknologi, dan kekayaan intelektual AI Pajak (termasuk tetapi tidak terbatas pada perangkat lunak, algoritma, antarmuka pengguna, merek dagang, dan dokumentasi) dimiliki oleh atau dilisensikan kepada PT AI Pajak Indonesia. Anda diberikan lisensi terbatas, non-eksklusif, dan tidak dapat dipindahtangankan untuk menggunakan platform sesuai tujuannya. Anda tidak boleh menyalin, memodifikasi, mendistribusikan, menjual, atau membuat karya turunan berdasarkan platform kami tanpa persetujuan tertulis sebelumnya."
       },
       "liability": {
-        "title": "Batasan Tanggung Jawab",
-        "content": "AI Pajak tidak bertanggung jawab atas kesalahan yang timbul dari informasi yang tidak akurat yang Anda berikan. Kami tidak menjamin hasil pelaporan pajak tertentu atau pengembalian pajak."
+        "title": "10. Batasan Tanggung Jawab",
+        "content": "Sejauh diizinkan oleh hukum Indonesia: AI Pajak tidak bertanggung jawab atas kesalahan, denda, atau kerugian yang timbul dari informasi yang tidak akurat atau tidak lengkap yang Anda berikan; kami tidak menjamin jumlah restitusi pajak tertentu atau hasil pelaporan pajak; total tanggung jawab kami untuk klaim apa pun tidak akan melebihi total biaya layanan yang Anda bayarkan dalam 12 bulan sebelum klaim; kami tidak bertanggung jawab atas kerugian tidak langsung, insidental, khusus, konsekuensial, atau hukuman; kami tidak bertanggung jawab atas kerugian yang timbul dari kegagalan sistem DJP, masalah konektivitas internet, atau keadaan lain di luar kendali wajar kami (force majeure)."
       },
       "termination": {
-        "title": "Penghentian",
-        "content": "Kami dapat menangguhkan atau menghentikan akses Anda ke layanan jika Anda melanggar Syarat dan Ketentuan ini atau atas permintaan Anda sendiri."
+        "title": "11. Penghentian Akun",
+        "content": "Anda dapat menonaktifkan akun Anda kapan saja melalui pengaturan akun atau dengan menghubungi support@aipajak.com. Kami berhak menangguhkan atau menghentikan akun Anda segera jika Anda: melanggar Syarat ini; memberikan informasi palsu atau menyesatkan; menggunakan platform untuk tujuan ilegal; atau gagal membayar biaya yang tertunggak. Setelah penghentian, akses Anda ke platform akan dicabut. Namun, kami akan menyimpan data pajak Anda selama periode 5 tahun yang diwajibkan secara hukum. Anda dapat meminta salinan data Anda sebelum atau setelah penghentian."
+      },
+      "disputeResolution": {
+        "title": "12. Hukum yang Berlaku dan Penyelesaian Sengketa",
+        "content": "Syarat ini diatur oleh dan ditafsirkan sesuai dengan hukum Republik Indonesia. Setiap sengketa yang timbul dari atau terkait dengan Syarat ini atau penggunaan Anda atas layanan AI Pajak terlebih dahulu akan diselesaikan melalui negosiasi dengan itikad baik. Jika negosiasi gagal, sengketa akan diajukan ke yurisdiksi Pengadilan Negeri Jakarta Pusat. Kedua pihak setuju untuk melepaskan keberatan terhadap tempat ini."
       },
       "changes": {
-        "title": "Perubahan Syarat",
-        "content": "Kami dapat memperbarui Syarat dan Ketentuan ini dari waktu ke waktu. Perubahan material akan diberitahukan melalui email atau notifikasi dalam aplikasi."
+        "title": "13. Perubahan Syarat",
+        "content": "Kami dapat memperbarui Syarat ini dari waktu ke waktu. Perubahan material akan dikomunikasikan melalui email dan/atau notifikasi dalam aplikasi setidaknya 14 hari sebelum berlaku. Penggunaan layanan kami yang berkelanjutan setelah tanggal efektif merupakan penerimaan Anda terhadap Syarat yang diperbarui. Jika Anda tidak setuju dengan perubahan tersebut, Anda harus berhenti menggunakan layanan kami dan dapat meminta penghentian akun."
+      },
+      "severability": {
+        "title": "14. Keterpisahan",
+        "content": "Jika ada ketentuan dari Syarat ini yang dinyatakan tidak dapat dilaksanakan atau tidak valid oleh pengadilan yang berwenang, ketentuan-ketentuan lainnya akan tetap berlaku sepenuhnya. Ketentuan yang tidak dapat dilaksanakan akan dimodifikasi seminimal mungkin agar dapat dilaksanakan dengan tetap mempertahankan maksud aslinya."
       },
       "contact": {
-        "title": "Hubungi Kami",
-        "content": "Untuk pertanyaan tentang Syarat dan Ketentuan ini, silakan hubungi:"
+        "title": "15. Informasi Kontak",
+        "content": "Untuk pertanyaan, kekhawatiran, atau umpan balik mengenai Syarat dan Ketentuan ini, silakan hubungi kami:",
+        "supportEmail": "support@aipajak.com",
+        "legalEmail": "legal@aipajak.com",
+        "address": "Jakarta, Indonesia"
       }
     }
   },
