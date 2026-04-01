@@ -76,23 +76,30 @@ export default function OperatorDashboardPage() {
   const t = useTranslations('operator');
 
   const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-    PENDING:            { label: t('statusPending'),           color: 'text-gray-700',   bg: 'bg-gray-100' },
-    DATA_REVIEW:        { label: t('statusDataReview'),        color: 'text-blue-700',   bg: 'bg-blue-100' },
-    EBILLING_GENERATED: { label: t('statusEbillingGenerated'), color: 'text-indigo-700', bg: 'bg-indigo-100' },
-    PAYMENT_CONFIRMED:  { label: t('statusPaymentConfirmed'),  color: 'text-purple-700', bg: 'bg-purple-100' },
-    DJP_SUBMITTED:      { label: t('statusDjpSubmitted'),      color: 'text-amber-700',  bg: 'bg-amber-100' },
-    BPE_UPLOADED:       { label: t('statusBpeUploaded'),       color: 'text-teal-700',   bg: 'bg-teal-100' },
-    COMPLETED:          { label: t('statusCompleted'),         color: 'text-green-700',  bg: 'bg-green-100' },
-    FAILED:             { label: t('statusFailed'),            color: 'text-red-700',    bg: 'bg-red-100' },
+    PENDING:            { label: t('statusPending'),           color: 'text-gray-700',    bg: 'bg-gray-100' },
+    DATA_REVIEW:        { label: t('statusDataReview'),        color: 'text-blue-700',    bg: 'bg-blue-100' },
+    PENDING_APPROVAL:   { label: t('statusPendingApproval'),   color: 'text-orange-700',  bg: 'bg-orange-100' },
+    APPROVED:           { label: t('statusApproved'),          color: 'text-emerald-700', bg: 'bg-emerald-100' },
+    EBILLING_GENERATED: { label: t('statusEbillingGenerated'), color: 'text-indigo-700',  bg: 'bg-indigo-100' },
+    PAYMENT_PENDING:    { label: t('statusPaymentPending'),    color: 'text-yellow-700',  bg: 'bg-yellow-100' },
+    PAYMENT_UPLOADED:   { label: t('statusPaymentUploaded'),   color: 'text-cyan-700',    bg: 'bg-cyan-100' },
+    PAYMENT_VERIFIED:   { label: t('statusPaymentVerified'),   color: 'text-purple-700',  bg: 'bg-purple-100' },
+    DJP_SUBMITTED:      { label: t('statusDjpSubmitted'),      color: 'text-amber-700',   bg: 'bg-amber-100' },
+    BPE_UPLOADED:       { label: t('statusBpeUploaded'),       color: 'text-teal-700',    bg: 'bg-teal-100' },
+    COMPLETED:          { label: t('statusCompleted'),         color: 'text-green-700',   bg: 'bg-green-100' },
+    FAILED:             { label: t('statusFailed'),            color: 'text-red-700',     bg: 'bg-red-100' },
   };
 
   const ACTION_CONFIG: Record<string, { label: string; action: string; color: string }> = {
-    PENDING:            { label: t('actionReview'),           action: 'review',            color: 'bg-blue-600 hover:bg-blue-700' },
-    DATA_REVIEW:        { label: t('actionGenerateEbilling'), action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
-    EBILLING_GENERATED: { label: t('actionConfirmPayment'),   action: 'confirm-payment',   color: 'bg-purple-600 hover:bg-purple-700' },
-    PAYMENT_CONFIRMED:  { label: t('actionSubmitDjp'),        action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
-    DJP_SUBMITTED:      { label: t('actionUploadBpe'),        action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
-    BPE_UPLOADED:       { label: t('actionComplete'),         action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
+    PENDING:            { label: t('actionReview'),            action: 'review',            color: 'bg-blue-600 hover:bg-blue-700' },
+    DATA_REVIEW:        { label: t('actionRequestApproval'),   action: 'request-approval',  color: 'bg-orange-600 hover:bg-orange-700' },
+    PENDING_APPROVAL:   { label: t('actionApprove'),           action: 'approve',           color: 'bg-emerald-600 hover:bg-emerald-700' },
+    APPROVED:           { label: t('actionGenerateEbilling'),  action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
+    EBILLING_GENERATED: { label: t('actionNotifyCustomer'),    action: 'notify-customer',   color: 'bg-yellow-600 hover:bg-yellow-700' },
+    PAYMENT_UPLOADED:   { label: t('actionVerifyPayment'),     action: 'verify-payment',    color: 'bg-purple-600 hover:bg-purple-700' },
+    PAYMENT_VERIFIED:   { label: t('actionSubmitDjp'),         action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
+    DJP_SUBMITTED:      { label: t('actionUploadBpe'),         action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
+    BPE_UPLOADED:       { label: t('actionComplete'),          action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
   };
 
   const [data, setData] = useState<DashboardData | null>(null);

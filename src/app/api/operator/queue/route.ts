@@ -3,26 +3,37 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
+const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
 
 type QueueStatus =
   | 'PENDING'
   | 'DATA_REVIEW'
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
   | 'EBILLING_GENERATED'
-  | 'PAYMENT_CONFIRMED'
+  | 'PAYMENT_PENDING'
+  | 'PAYMENT_UPLOADED'
+  | 'PAYMENT_VERIFIED'
   | 'DJP_SUBMITTED'
   | 'BPE_UPLOADED'
   | 'COMPLETED'
   | 'FAILED';
 
 const STATUS_TRANSITIONS: Record<string, { from: QueueStatus | QueueStatus[] | 'any'; to: QueueStatus }> = {
-  'review':            { from: 'PENDING',           to: 'DATA_REVIEW' },
-  'generate-ebilling': { from: 'DATA_REVIEW',       to: 'EBILLING_GENERATED' },
-  'confirm-payment':   { from: 'EBILLING_GENERATED', to: 'PAYMENT_CONFIRMED' },
-  'submit-djp':        { from: 'PAYMENT_CONFIRMED',  to: 'DJP_SUBMITTED' },
+  'review':            { from: 'PENDING',            to: 'DATA_REVIEW' },
+  'request-approval':  { from: 'DATA_REVIEW',        to: 'PENDING_APPROVAL' },
+  'approve':           { from: 'PENDING_APPROVAL',   to: 'APPROVED' },
+  'reject':            { from: 'PENDING_APPROVAL',   to: 'DATA_REVIEW' },
+  'generate-ebilling': { from: 'APPROVED',           to: 'EBILLING_GENERATED' },
+  'notify-customer':   { from: 'EBILLING_GENERATED', to: 'PAYMENT_PENDING' },
+  'verify-payment':    { from: 'PAYMENT_UPLOADED',   to: 'PAYMENT_VERIFIED' },
+  'submit-djp':        { from: 'PAYMENT_VERIFIED',   to: 'DJP_SUBMITTED' },
   'upload-bpe':        { from: 'DJP_SUBMITTED',      to: 'BPE_UPLOADED' },
   'complete':          { from: 'BPE_UPLOADED',        to: 'COMPLETED' },
   'fail':              { from: 'any',                 to: 'FAILED' },
 };
+
+const SUPERVISOR_ACTIONS = ['approve', 'reject'];
 
 async function getOperatorUser() {
   const supabase = await createClient();
@@ -49,19 +60,12 @@ async function getOperatorUser() {
  * GET /api/operator/queue
  *
  * List queue items for the operator, filtered by status and period.
- *
- * Query params:
- * - status: filter by queue status
- * - taxType: filter by tax type
- * - year: filter by tax year
- * - month: filter by tax period (month)
- * - page: page number (default 1)
- * - limit: items per page (default 50)
+ * Supervisors can see all items; operators see only their own.
  */
 export async function GET(request: NextRequest) {
   const auth = await getOperatorUser();
   if ('error' in auth && auth.error) return auth.error;
-  const { user, admin } = auth;
+  const { user, role, admin } = auth;
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
@@ -87,6 +91,16 @@ export async function GET(request: NextRequest) {
       bpe_date,
       notes,
       failed_reason,
+      approved_by,
+      approved_at,
+      approval_notes,
+      rejected_reason,
+      review_summary,
+      payment_proof_url,
+      payment_amount,
+      payment_date,
+      payment_verified_by,
+      payment_verified_at,
       created_at,
       updated_at,
       operator_id,
@@ -97,22 +111,18 @@ export async function GET(request: NextRequest) {
         customer_type
       )
     `, { count: 'exact' })
-    .eq('operator_id', user!.id)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (status) {
-    query = query.eq('status', status);
+  // Supervisors see all items; operators see only their own
+  if (!SUPERVISOR_ROLES.includes(role)) {
+    query = query.eq('operator_id', user!.id);
   }
-  if (taxType) {
-    query = query.eq('tax_type', taxType);
-  }
-  if (year) {
-    query = query.eq('tax_year', parseInt(year, 10));
-  }
-  if (month) {
-    query = query.eq('tax_period', parseInt(month, 10));
-  }
+
+  if (status) query = query.eq('status', status);
+  if (taxType) query = query.eq('tax_type', taxType);
+  if (year) query = query.eq('tax_year', parseInt(year, 10));
+  if (month) query = query.eq('tax_period', parseInt(month, 10));
 
   const { data: items, count, error } = await query;
 
@@ -141,20 +151,26 @@ export async function GET(request: NextRequest) {
  *
  * Body:
  * - id: queue item ID
- * - action: review | generate-ebilling | confirm-payment | submit-djp | upload-bpe | complete | fail
+ * - action: review | request-approval | approve | reject | generate-ebilling |
+ *           notify-customer | verify-payment | submit-djp | upload-bpe | complete | fail
  * - ebillingCode: required for generate-ebilling
  * - bpeNumber: required for upload-bpe
  * - bpeDate: required for upload-bpe
  * - notes: optional notes
+ * - approvalNotes: optional for approve
+ * - rejectedReason: required for reject
  * - failedReason: optional for fail action
  */
 export async function PUT(request: NextRequest) {
   const auth = await getOperatorUser();
   if ('error' in auth && auth.error) return auth.error;
-  const { user, admin } = auth;
+  const { user, role, admin } = auth;
 
   const body = await request.json();
-  const { id, action, ebillingCode, bpeNumber, bpeDate, notes, failedReason } = body;
+  const {
+    id, action, ebillingCode, bpeNumber, bpeDate,
+    notes, approvalNotes, rejectedReason, failedReason,
+  } = body;
 
   if (!id || !action) {
     return NextResponse.json(
@@ -171,6 +187,14 @@ export async function PUT(request: NextRequest) {
     );
   }
 
+  // Supervisor-only actions
+  if (SUPERVISOR_ACTIONS.includes(action) && !SUPERVISOR_ROLES.includes(role)) {
+    return NextResponse.json(
+      { error: 'This action requires supervisor privileges' },
+      { status: 403 }
+    );
+  }
+
   // Validate action-specific fields
   if (action === 'generate-ebilling' && !ebillingCode) {
     return NextResponse.json(
@@ -184,11 +208,17 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     );
   }
+  if (action === 'reject' && !rejectedReason) {
+    return NextResponse.json(
+      { error: 'rejectedReason is required for reject action' },
+      { status: 400 }
+    );
+  }
 
   // Get current queue item
   const { data: item, error: fetchError } = await admin
     .from('operator_submission_queue')
-    .select('id, status, operator_id')
+    .select('id, status, operator_id, customer_id')
     .eq('id', id)
     .single();
 
@@ -199,8 +229,9 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  // Verify operator owns this item
-  if (item.operator_id !== user!.id) {
+  // Access control: operators can only act on their own items,
+  // supervisors can act on any item (for approve/reject)
+  if (!SUPERVISOR_ACTIONS.includes(action) && item.operator_id !== user!.id) {
     return NextResponse.json(
       { error: 'You are not assigned to this queue item' },
       { status: 403 }
@@ -221,21 +252,39 @@ export async function PUT(request: NextRequest) {
   }
 
   // Build update payload
+  const now = new Date().toISOString();
   const updatePayload: Record<string, unknown> = {
     status: transition.to,
-    updated_at: new Date().toISOString(),
+    updated_at: now,
     updated_by: user!.id,
   };
 
+  // Action-specific fields
+  if (action === 'approve') {
+    updatePayload.approved_by = user!.id;
+    updatePayload.approved_at = now;
+    updatePayload.approval_notes = approvalNotes || null;
+    updatePayload.rejected_reason = null; // Clear previous rejection
+  }
+  if (action === 'reject') {
+    updatePayload.rejected_reason = rejectedReason;
+    updatePayload.approved_by = null;
+    updatePayload.approved_at = null;
+    updatePayload.approval_notes = null;
+  }
+  if (action === 'verify-payment') {
+    updatePayload.payment_verified_by = user!.id;
+    updatePayload.payment_verified_at = now;
+  }
   if (ebillingCode) updatePayload.ebilling_code = ebillingCode;
   if (bpeNumber) updatePayload.bpe_number = bpeNumber;
   if (bpeDate) updatePayload.bpe_date = bpeDate;
   if (notes) updatePayload.notes = notes;
   if (failedReason) updatePayload.failed_reason = failedReason;
 
-  // For completed/failed, set completion timestamp
+  // Completion timestamp
   if (transition.to === 'COMPLETED' || transition.to === 'FAILED') {
-    updatePayload.completed_at = new Date().toISOString();
+    updatePayload.completed_at = now;
   }
 
   const { data: updated, error: updateError } = await admin
@@ -249,7 +298,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  // Log the status transition
+  // Audit log
   await admin.from('audit_log').insert({
     user_id: user!.id,
     action: `OPERATOR_QUEUE_${action.toUpperCase().replace(/-/g, '_')}`,
@@ -260,8 +309,15 @@ export async function PUT(request: NextRequest) {
       newStatus: transition.to,
       notes,
     },
-    created_at: new Date().toISOString(),
+    created_at: now,
   });
+
+  // TODO: Send notifications based on status change
+  // - PENDING_APPROVAL → notify supervisors
+  // - APPROVED/reject → notify operator
+  // - PAYMENT_PENDING → notify customer with billing info
+  // - PAYMENT_UPLOADED → notify operator
+  // - COMPLETED → notify customer
 
   return NextResponse.json({
     success: true,

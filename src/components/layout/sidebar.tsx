@@ -23,6 +23,7 @@ import {
   Headphones,
   ListChecks,
   Calendar,
+  CheckCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -50,6 +51,7 @@ interface NavSection {
 const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
 const consultantRoles = [UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
 const operatorRoles = [UserRole.TAX_OPERATOR, UserRole.TAX_OPERATOR_LEAD, UserRole.TAX_OPERATOR_SUPERVISOR];
+const supervisorRoles = [UserRole.TAX_OPERATOR_LEAD, UserRole.TAX_OPERATOR_SUPERVISOR];
 
 const navItems: NavSection[] = [
   {
@@ -105,6 +107,7 @@ const navItems: NavSection[] = [
     items: [
       { href: '/operator/dashboard', icon: Headphones, labelKey: 'nav.operatorDashboard', descKey: 'navDesc.operatorDashboard' },
       { href: '/operator/queue', icon: ListChecks, labelKey: 'nav.submissionQueue', descKey: 'navDesc.submissionQueue' },
+      { href: '/operator/approvals', icon: CheckCircle, labelKey: 'nav.approvals', descKey: 'navDesc.approvals', roles: supervisorRoles },
       { href: '/operator/clients', icon: Users, labelKey: 'nav.assignedClients', descKey: 'navDesc.assignedClients' },
       { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar' },
     ],
