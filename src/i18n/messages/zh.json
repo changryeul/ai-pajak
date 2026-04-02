@@ -116,6 +116,7 @@
     "workloadManagement": "工作量管理",
     "operatorStatistics": "绩效统计",
     "complaints": "投诉管理",
+    "approvalRules": "审批规则",
     "assignedClients": "分配的客户",
     "administration": "管理",
     "monitoring": "系统监控",
@@ -1392,6 +1393,7 @@
     "workloadManagement": "操作员工作量分配",
     "operatorStatistics": "操作员绩效分析",
     "complaints": "客户投诉管理",
+    "approvalRules": "自动审批阈值设置",
     "assignedClients": "分配的客户列表"
   },
   "sptForm": {
@@ -2101,6 +2103,31 @@
     "reassignmentHistory": "重新分配历史",
     "reassignedFrom": "原操作员",
     "reassignedTo": "新操作员",
-    "reassignedAt": "重新分配日期"
+    "reassignedAt": "重新分配日期",
+    "approvalRulesTitle": "审批规则设置",
+    "approvalRulesSubtitle": "配置自动审批阈值和条件",
+    "autoApprovalEngine": "自动审批引擎",
+    "autoApprovalEngineDesc": "满足所有阈值条件时自动审批",
+    "enabled": "启用",
+    "disabled": "禁用",
+    "ocrConfidenceThreshold": "OCR置信度阈值",
+    "ocrConfidenceDesc": "文档OCR识别最低置信度",
+    "riskScoreThreshold": "风险评分阈值",
+    "riskScoreDesc": "允许的最大异常风险评分（越低越安全）",
+    "complianceScoreThreshold": "合规评分阈值",
+    "complianceScoreDesc": "客户税务合规最低评分",
+    "validationScoreThreshold": "验证评分阈值",
+    "validationScoreDesc": "税务数据验证最低评分",
+    "trustScoreThreshold": "信任评分阈值",
+    "trustScoreDesc": "基于客户历史的最低信任评分",
+    "maxAmountThreshold": "自动审批最大金额",
+    "maxAmountDesc": "超过此金额必须人工审核",
+    "minimum": "最小",
+    "maximum": "最大",
+    "saveRules": "保存规则",
+    "totalProcessed": "总处理量",
+    "autoApprovedCount": "自动审批数",
+    "autoApprovalRate": "自动审批率",
+    "autoApproved": "已自动审批"
   }
 }

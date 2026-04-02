@@ -116,6 +116,7 @@
     "workloadManagement": "ワークロード管理",
     "operatorStatistics": "パフォーマンス統計",
     "complaints": "苦情管理",
+    "approvalRules": "承認ルール",
     "assignedClients": "担当クライアント",
     "administration": "管理",
     "monitoring": "システム監視",
@@ -1392,6 +1393,7 @@
     "workloadManagement": "オペレーターのワークロード配分",
     "operatorStatistics": "オペレーターのパフォーマンス分析",
     "complaints": "顧客苦情管理",
+    "approvalRules": "自動承認しきい値設定",
     "assignedClients": "担当クライアント一覧"
   },
   "sptForm": {
@@ -2101,6 +2103,31 @@
     "reassignmentHistory": "再割当履歴",
     "reassignedFrom": "変更前",
     "reassignedTo": "変更後",
-    "reassignedAt": "再割当日"
+    "reassignedAt": "再割当日",
+    "approvalRulesTitle": "承認ルール設定",
+    "approvalRulesSubtitle": "自動承認のしきい値と条件を管理",
+    "autoApprovalEngine": "自動承認エンジン",
+    "autoApprovalEngineDesc": "全条件を満たす案件を自動承認",
+    "enabled": "有効",
+    "disabled": "無効",
+    "ocrConfidenceThreshold": "OCR信頼度しきい値",
+    "ocrConfidenceDesc": "文書OCR認識の最小信頼度",
+    "riskScoreThreshold": "リスクスコアしきい値",
+    "riskScoreDesc": "異常検知リスクの最大許容スコア",
+    "complianceScoreThreshold": "コンプライアンススコアしきい値",
+    "complianceScoreDesc": "顧客の税務コンプライアンス最小スコア",
+    "validationScoreThreshold": "検証スコアしきい値",
+    "validationScoreDesc": "税務データ検証の最小スコア",
+    "trustScoreThreshold": "信頼スコアしきい値",
+    "trustScoreDesc": "顧客履歴に基づく最小信頼スコア",
+    "maxAmountThreshold": "自動承認最大金額",
+    "maxAmountDesc": "この金額を超える場合は必ず手動レビュー",
+    "minimum": "最小",
+    "maximum": "最大",
+    "saveRules": "ルール保存",
+    "totalProcessed": "処理総数",
+    "autoApprovedCount": "自動承認数",
+    "autoApprovalRate": "自動承認率",
+    "autoApproved": "自動承認済"
   }
 }

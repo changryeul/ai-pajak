@@ -113,6 +113,7 @@ const navItems: NavSection[] = [
       { href: '/operator/workload', icon: BarChart3, labelKey: 'nav.workloadManagement', descKey: 'navDesc.workloadManagement', roles: supervisorRoles },
       { href: '/operator/statistics', icon: TrendingUp, labelKey: 'nav.operatorStatistics', descKey: 'navDesc.operatorStatistics', roles: supervisorRoles },
       { href: '/operator/complaints', icon: MessageSquareWarning, labelKey: 'nav.complaints', descKey: 'navDesc.complaints', roles: supervisorRoles },
+      { href: '/operator/approval-rules', icon: Settings, labelKey: 'nav.approvalRules', descKey: 'navDesc.approvalRules', roles: supervisorRoles },
       { href: '/operator/clients', icon: Users, labelKey: 'nav.assignedClients', descKey: 'navDesc.assignedClients' },
       { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar' },
     ],

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { evaluateAutoApproval } from '@/lib/ai/auto-approval-engine';
 
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
@@ -218,7 +219,7 @@ export async function PUT(request: NextRequest) {
   // Get current queue item
   const { data: item, error: fetchError } = await admin
     .from('operator_submission_queue')
-    .select('id, status, operator_id, customer_id')
+    .select('id, status, operator_id, customer_id, tax_type, tax_period_month, tax_period_year, amount')
     .eq('id', id)
     .single();
 
@@ -382,6 +383,49 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
+  // Auto-Approval: when transitioning to PENDING_APPROVAL, evaluate
+  let autoApprovalResult = null;
+  if (action === 'request-approval' && transition.to === 'PENDING_APPROVAL') {
+    try {
+      autoApprovalResult = await evaluateAutoApproval(admin, {
+        queueItemId: id,
+        customerId: item.customer_id,
+        taxType: item.tax_type,
+        taxYear: item.tax_period_year,
+        taxPeriodMonth: item.tax_period_month,
+        amount: item.amount || 0,
+      });
+
+      // Save review_summary and auto-approval details regardless of result
+      const autoUpdatePayload: Record<string, unknown> = {
+        review_summary: autoApprovalResult.reviewSummary,
+        auto_approval_score: autoApprovalResult.combinedScore,
+        auto_approval_details: {
+          scores: autoApprovalResult.scores,
+          checks: autoApprovalResult.checks,
+          reasons: autoApprovalResult.reasons,
+        },
+      };
+
+      if (autoApprovalResult.approved) {
+        // Auto-approve: skip PENDING_APPROVAL, go straight to APPROVED
+        autoUpdatePayload.status = 'APPROVED';
+        autoUpdatePayload.auto_approved = true;
+        autoUpdatePayload.approved_by = user!.id; // system acting on behalf
+        autoUpdatePayload.approved_at = new Date().toISOString();
+        autoUpdatePayload.approval_notes = 'Auto-approved by system (all thresholds met)';
+      }
+
+      await admin
+        .from('djp_submission_queue')
+        .update(autoUpdatePayload)
+        .eq('id', id);
+    } catch (err) {
+      // Auto-approval failure should not block the normal flow
+      console.error('Auto-approval evaluation failed:', err);
+    }
+  }
+
   // Audit log
   await admin.from('audit_log').insert({
     user_id: user!.id,
@@ -390,8 +434,12 @@ export async function PUT(request: NextRequest) {
     resource_id: id,
     details: {
       previousStatus: item.status,
-      newStatus: transition.to,
+      newStatus: autoApprovalResult?.approved ? 'APPROVED' : transition.to,
       notes,
+      autoApproval: autoApprovalResult ? {
+        approved: autoApprovalResult.approved,
+        combinedScore: autoApprovalResult.combinedScore,
+      } : undefined,
     },
     created_at: now,
   });
@@ -403,9 +451,18 @@ export async function PUT(request: NextRequest) {
   // - PAYMENT_UPLOADED → notify operator
   // - COMPLETED → notify customer
 
+  const finalStatus = autoApprovalResult?.approved ? 'APPROVED' : transition.to;
+
   return NextResponse.json({
     success: true,
-    data: updated,
-    message: `Status updated to ${transition.to}`,
+    data: { ...updated, status: finalStatus },
+    message: autoApprovalResult?.approved
+      ? `Auto-approved (score: ${autoApprovalResult.combinedScore})`
+      : `Status updated to ${finalStatus}`,
+    autoApproval: autoApprovalResult ? {
+      approved: autoApprovalResult.approved,
+      combinedScore: autoApprovalResult.combinedScore,
+      reasons: autoApprovalResult.reasons,
+    } : undefined,
   });
 }

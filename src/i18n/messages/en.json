@@ -116,6 +116,7 @@
     "workloadManagement": "Workload Management",
     "operatorStatistics": "Performance Statistics",
     "complaints": "Complaints",
+    "approvalRules": "Approval Rules",
     "assignedClients": "Assigned Clients",
     "administration": "Administration",
     "monitoring": "System Monitoring",
@@ -1392,6 +1393,7 @@
     "workloadManagement": "Operator workload distribution",
     "operatorStatistics": "Operator performance analysis",
     "complaints": "Customer complaint management",
+    "approvalRules": "Auto-approval threshold settings",
     "assignedClients": "Your assigned clients"
   },
   "sptForm": {
@@ -2101,6 +2103,31 @@
     "reassignmentHistory": "Reassignment History",
     "reassignedFrom": "From",
     "reassignedTo": "To",
-    "reassignedAt": "Reassigned At"
+    "reassignedAt": "Reassigned At",
+    "approvalRulesTitle": "Approval Rules",
+    "approvalRulesSubtitle": "Configure auto-approval thresholds and conditions",
+    "autoApprovalEngine": "Auto-Approval Engine",
+    "autoApprovalEngineDesc": "Automatically approve items that meet all thresholds",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "ocrConfidenceThreshold": "OCR Confidence Threshold",
+    "ocrConfidenceDesc": "Minimum document OCR recognition confidence",
+    "riskScoreThreshold": "Risk Score Threshold",
+    "riskScoreDesc": "Maximum allowed anomaly risk score (lower is safer)",
+    "complianceScoreThreshold": "Compliance Score Threshold",
+    "complianceScoreDesc": "Minimum customer tax compliance score",
+    "validationScoreThreshold": "Validation Score Threshold",
+    "validationScoreDesc": "Minimum tax data validation score",
+    "trustScoreThreshold": "Trust Score Threshold",
+    "trustScoreDesc": "Minimum customer history-based trust score",
+    "maxAmountThreshold": "Max Auto-Approve Amount",
+    "maxAmountDesc": "Amounts above this always require manual review",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "saveRules": "Save Rules",
+    "totalProcessed": "Total Processed",
+    "autoApprovedCount": "Auto-Approved",
+    "autoApprovalRate": "Auto-Approval Rate",
+    "autoApproved": "Auto-approved"
   }
 }

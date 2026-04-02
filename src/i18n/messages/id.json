@@ -116,6 +116,7 @@
     "workloadManagement": "Manajemen Beban Kerja",
     "operatorStatistics": "Statistik Kinerja",
     "complaints": "Keluhan Pelanggan",
+    "approvalRules": "Aturan Persetujuan",
     "assignedClients": "Klien Ditugaskan",
     "administration": "Administrasi",
     "monitoring": "Pemantauan Sistem",
@@ -1392,6 +1393,7 @@
     "workloadManagement": "Distribusi beban kerja operator",
     "operatorStatistics": "Analisis kinerja operator",
     "complaints": "Manajemen keluhan pelanggan",
+    "approvalRules": "Pengaturan ambang batas persetujuan otomatis",
     "assignedClients": "Klien yang ditugaskan"
   },
   "sptForm": {
@@ -2101,6 +2103,31 @@
     "reassignmentHistory": "Riwayat Penugasan Ulang",
     "reassignedFrom": "Dari",
     "reassignedTo": "Ke",
-    "reassignedAt": "Tanggal Penugasan Ulang"
+    "reassignedAt": "Tanggal Penugasan Ulang",
+    "approvalRulesTitle": "Aturan Persetujuan",
+    "approvalRulesSubtitle": "Konfigurasi ambang batas dan kondisi persetujuan otomatis",
+    "autoApprovalEngine": "Mesin Persetujuan Otomatis",
+    "autoApprovalEngineDesc": "Otomatis menyetujui item yang memenuhi semua ambang batas",
+    "enabled": "Aktif",
+    "disabled": "Nonaktif",
+    "ocrConfidenceThreshold": "Ambang Kepercayaan OCR",
+    "ocrConfidenceDesc": "Kepercayaan minimum pengenalan OCR dokumen",
+    "riskScoreThreshold": "Ambang Skor Risiko",
+    "riskScoreDesc": "Skor risiko anomali maksimum yang diizinkan",
+    "complianceScoreThreshold": "Ambang Skor Kepatuhan",
+    "complianceScoreDesc": "Skor kepatuhan pajak pelanggan minimum",
+    "validationScoreThreshold": "Ambang Skor Validasi",
+    "validationScoreDesc": "Skor validasi data pajak minimum",
+    "trustScoreThreshold": "Ambang Skor Kepercayaan",
+    "trustScoreDesc": "Skor kepercayaan minimum berdasarkan riwayat pelanggan",
+    "maxAmountThreshold": "Jumlah Maks Persetujuan Otomatis",
+    "maxAmountDesc": "Jumlah di atas ini selalu memerlukan tinjauan manual",
+    "minimum": "Minimum",
+    "maximum": "Maksimum",
+    "saveRules": "Simpan Aturan",
+    "totalProcessed": "Total Diproses",
+    "autoApprovedCount": "Disetujui Otomatis",
+    "autoApprovalRate": "Tingkat Persetujuan Otomatis",
+    "autoApproved": "Disetujui Otomatis"
   }
 }
