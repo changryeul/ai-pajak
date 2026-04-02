@@ -6,8 +6,9 @@
 CREATE OR REPLACE VIEW operator_submission_queue AS SELECT * FROM djp_submission_queue;
 CREATE OR REPLACE VIEW operator_assignments AS SELECT * FROM operator_client_assignments;
 
--- 2. Drop old CHECK constraint and add new one with expanded statuses
+-- 2. Drop old CHECK constraint first, then migrate data, then add new constraint
 ALTER TABLE djp_submission_queue DROP CONSTRAINT IF EXISTS djp_submission_queue_status_check;
+UPDATE djp_submission_queue SET status = 'PAYMENT_VERIFIED' WHERE status = 'PAYMENT_CONFIRMED';
 ALTER TABLE djp_submission_queue ADD CONSTRAINT djp_submission_queue_status_check
   CHECK (status IN (
     'PENDING',
@@ -47,8 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_dsq_pending_approval
 CREATE INDEX IF NOT EXISTS idx_dsq_payment_pending
   ON djp_submission_queue(status) WHERE status = 'PAYMENT_PENDING';
 
--- 7. Migrate existing PAYMENT_CONFIRMED data to PAYMENT_VERIFIED
-UPDATE djp_submission_queue SET status = 'PAYMENT_VERIFIED' WHERE status = 'PAYMENT_CONFIRMED';
+-- 7. (Data migration already done in step 2 above)
 
 -- 8. Recreate views after schema change (views need refresh)
 CREATE OR REPLACE VIEW operator_submission_queue AS SELECT * FROM djp_submission_queue;
