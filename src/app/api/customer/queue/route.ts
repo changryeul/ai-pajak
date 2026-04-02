@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     // Get customer record
     const { data: customer } = await admin
       .from('customer')
-      .select('id, customer_name, npwp')
+      .select('id, full_name, npwp')
       .eq('user_id', user.id)
       .maybeSingle();
 
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        customer: { id: customer.id, name: customer.customer_name, npwp: customer.npwp },
+        customer: { id: customer.id, name: customer.full_name, npwp: customer.npwp },
         items: all,
         summary,
       },

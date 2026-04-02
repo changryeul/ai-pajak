@@ -78,64 +78,62 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '50', 10);
   const offset = (page - 1) * limit;
 
+  // Get operator tax_operators.id for non-supervisors
+  let operatorProfileId: string | null = null;
+  if (!SUPERVISOR_ROLES.includes(role)) {
+    const { data: opProfile } = await admin
+      .from('tax_operators')
+      .select('id')
+      .eq('user_id', user!.id)
+      .maybeSingle();
+    operatorProfileId = opProfile?.id || null;
+  }
+
   let query = admin
     .from('operator_submission_queue')
     .select(`
-      id,
-      customer_id,
-      tax_type,
-      tax_period,
-      tax_year,
-      amount,
-      status,
-      ebilling_code,
-      bpe_number,
-      bpe_date,
-      notes,
-      failed_reason,
-      approved_by,
-      approved_at,
-      approval_notes,
-      rejected_reason,
-      review_summary,
-      payment_proof_url,
-      payment_amount,
-      payment_date,
-      payment_verified_by,
-      payment_verified_at,
-      created_at,
-      updated_at,
-      operator_id,
-      customer:customer_id (
-        id,
-        customer_name,
-        npwp,
-        customer_type
-      )
+      id, customer_id, tax_type, tax_period_month, tax_period_year, amount, status,
+      ebilling_code, bpe_number, bpe_date, notes, failed_reason,
+      approved_by, approved_at, approval_notes, rejected_reason, review_summary,
+      payment_proof_url, payment_amount, payment_date, payment_verified_by, payment_verified_at,
+      created_at, updated_at, operator_id
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
   // Supervisors see all items; operators see only their own
-  if (!SUPERVISOR_ROLES.includes(role)) {
-    query = query.eq('operator_id', user!.id);
+  if (operatorProfileId) {
+    query = query.eq('operator_id', operatorProfileId);
   }
 
   if (status) query = query.eq('status', status);
   if (taxType) query = query.eq('tax_type', taxType);
-  if (year) query = query.eq('tax_year', parseInt(year, 10));
-  if (month) query = query.eq('tax_period', parseInt(month, 10));
+  if (year) query = query.eq('tax_period_year', parseInt(year, 10));
+  if (month) query = query.eq('tax_period_month', parseInt(month, 10));
 
-  const { data: items, count, error } = await query;
+  const { data: rawItems, count, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Enrich with customer data
+  const customerIds = [...new Set((rawItems || []).map(i => i.customer_id).filter(Boolean))];
+  let customerMap: Record<string, { id: string; customer_name: string; npwp: string; customer_type: string }> = {};
+  if (customerIds.length > 0) {
+    const { data: customers } = await admin.from('customer').select('id, customer_name, npwp, customer_type').in('id', customerIds);
+    for (const c of customers || []) customerMap[c.id] = c;
+  }
+
+  const items = (rawItems || []).map(item => ({
+    ...item,
+    customer: customerMap[item.customer_id] || null,
+  }));
+
   return NextResponse.json({
     success: true,
     data: {
-      items: items || [],
+      items,
       pagination: {
         page,
         limit,

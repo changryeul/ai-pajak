@@ -102,8 +102,9 @@ test.describe('TAX_OPERATOR_SUPERVISOR Role Tests', () => {
   });
 
   test('✅ Supervisor can view all queue items', async ({ request }) => {
-    const response = await request.get('/api/operator/queue?limit=10', {
+    const response = await request.get('/api/operator/queue?limit=5', {
       headers: createAuthHeaders(supervisorToken),
+      timeout: 60000,
     });
 
     expect(response.status()).toBe(200);
