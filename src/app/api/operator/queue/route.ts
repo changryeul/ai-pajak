@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { evaluateAutoApproval } from '@/lib/ai/auto-approval-engine';
 import { notifyWorkflowStatusChange } from '@/lib/notifications/operator-workflow-notifications';
+import { submitQueueItemToDJP } from '@/lib/djp/operator-djp-submit';
 
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
@@ -362,6 +363,31 @@ export async function PUT(request: NextRequest) {
     updatePayload.payment_verified_by = user!.id;
     updatePayload.payment_verified_at = now;
   }
+
+  // DJP submission: queue E_FILING job
+  if (action === 'submit-djp') {
+    const djpResult = await submitQueueItemToDJP(admin, {
+      id,
+      customer_id: item.customer_id,
+      tax_type: item.tax_type,
+      tax_period_month: item.tax_period_month,
+      tax_period_year: item.tax_period_year,
+      amount: item.amount || 0,
+      operator_id: item.operator_id,
+    }, user!.id);
+
+    if (!djpResult.success) {
+      return NextResponse.json(
+        { error: `DJP submission failed: ${djpResult.error}` },
+        { status: 500 }
+      );
+    }
+
+    updatePayload.djp_job_id = djpResult.jobId;
+    updatePayload.tax_filing_id = djpResult.taxFilingId;
+    updatePayload.submitted_to_djp_at = now;
+  }
+
   if (ebillingCode) updatePayload.ebilling_code = ebillingCode;
   if (bpeNumber) updatePayload.bpe_number = bpeNumber;
   if (bpeDate) updatePayload.bpe_date = bpeDate;

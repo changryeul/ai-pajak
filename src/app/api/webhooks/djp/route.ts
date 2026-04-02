@@ -193,6 +193,20 @@ async function handleFilingAccepted(
     })
     .eq('id', job.id);
 
+  // Update operator queue if linked
+  if (job.tax_filing_id) {
+    await getSupabaseAdmin()
+      .from('djp_submission_queue')
+      .update({
+        bpe_number: bpeNumber,
+        bpe_date: bpeDate,
+        status: 'BPE_UPLOADED',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('tax_filing_id', job.tax_filing_id)
+      .eq('status', 'DJP_SUBMITTED');
+  }
+
   // Send notification
   await sendFilingNotification(job.tax_filing_id, 'accepted', bpeNumber);
 
