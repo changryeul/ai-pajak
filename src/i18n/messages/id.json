@@ -1470,7 +1470,19 @@
     "step3SaveBpe": "Simpan nomor BPE sebagai bukti pelaporan",
     "uploadOther": "Upload dokumen lain",
     "noSlip": "Tidak punya slip gaji? → Isi data manual",
-    "reportToDjp": "Lapor ke DJP"
+    "reportToDjp": "Lapor ke DJP",
+    "photoDesc": "Dari bagian HRD perusahaan Anda (Bukti Potong 1721-A1)",
+    "takePhotoHint": "Ambil foto dengan kamera atau pilih foto/PDF tersimpan",
+    "aiReadingHint": "Mohon tunggu, biasanya 10-30 detik",
+    "photoErrorHint": "Pastikan foto jelas dan tidak terpotong",
+    "dontKnowSlip": "Tidak tahu seperti apa slip gaji?",
+    "clickExample": "Klik di sini untuk melihat contoh",
+    "exampleTitle": "Contoh Slip Gaji (1721-A1)",
+    "howToGet": "Minta dari bagian HRD Anda",
+    "noSlipManual": "Isi manual tanpa slip gaji",
+    "downloadPdf": "Download PDF",
+    "nextStepsTitle": "Langkah Selanjutnya",
+    "uploadAnother": "Upload Dokumen Lain"
   },
   "wizard": {
     "nextStep": "Langkah Selanjutnya",

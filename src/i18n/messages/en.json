@@ -1470,7 +1470,19 @@
     "step3SaveBpe": "Save BPE number as filing proof",
     "uploadOther": "Upload another document",
     "noSlip": "Don't have salary slip? → Enter manually",
-    "reportToDjp": "Report to DJP"
+    "reportToDjp": "Report to DJP",
+    "photoDesc": "From your company HR department (Bukti Potong 1721-A1)",
+    "takePhotoHint": "Take a photo with camera or select a saved photo/PDF file",
+    "aiReadingHint": "Please wait, usually 10-30 seconds",
+    "photoErrorHint": "Make sure the photo is clear and not cropped",
+    "dontKnowSlip": "Don't know what a salary slip looks like?",
+    "clickExample": "Click here to see an example",
+    "exampleTitle": "Salary Slip Example (1721-A1)",
+    "howToGet": "Request from your HR department",
+    "noSlipManual": "Enter manually without salary slip",
+    "downloadPdf": "Download PDF",
+    "nextStepsTitle": "Next Steps",
+    "uploadAnother": "Upload Another Document"
   },
   "wizard": {
     "nextStep": "Next Step",

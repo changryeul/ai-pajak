@@ -1470,7 +1470,19 @@
     "step3SaveBpe": "BPE番号を申告証明として保存",
     "uploadOther": "別の書類をアップロード",
     "noSlip": "給与明細がない？→手動入力",
-    "reportToDjp": "DJPに申告"
+    "reportToDjp": "DJPに申告",
+    "photoDesc": "会社の人事部から受け取る書類（源泉徴収票 1721-A1）",
+    "takePhotoHint": "カメラで撮影または保存済みの写真/PDFを選択",
+    "aiReadingHint": "お待ちください、通常10〜30秒",
+    "photoErrorHint": "写真が鮮明で切れていないことを確認してください",
+    "dontKnowSlip": "給与明細がどのようなものかわからない？",
+    "clickExample": "こちらをクリックして例を確認",
+    "exampleTitle": "給与明細の例（1721-A1）",
+    "howToGet": "人事部にお問い合わせください",
+    "noSlipManual": "給与明細なしで手動入力",
+    "downloadPdf": "PDFダウンロード",
+    "nextStepsTitle": "次のステップ",
+    "uploadAnother": "他の書類をアップロード"
   },
   "wizard": {
     "nextStep": "次のステップ",

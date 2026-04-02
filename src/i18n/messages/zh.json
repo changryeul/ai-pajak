@@ -1470,7 +1470,19 @@
     "step3SaveBpe": "保存BPE号码作为申报凭证",
     "uploadOther": "上传其他文件",
     "noSlip": "没有工资单？→手动输入",
-    "reportToDjp": "向DJP申报"
+    "reportToDjp": "向DJP申报",
+    "photoDesc": "来自公司人事部的文件（扣缴凭证 1721-A1）",
+    "takePhotoHint": "用相机拍照或选择已保存的照片/PDF",
+    "aiReadingHint": "请稍等，通常需要10-30秒",
+    "photoErrorHint": "请确保照片清晰且未被裁剪",
+    "dontKnowSlip": "不知道工资单长什么样？",
+    "clickExample": "点击这里查看示例",
+    "exampleTitle": "工资单示例（1721-A1）",
+    "howToGet": "向人事部索取",
+    "noSlipManual": "无工资单手动输入",
+    "downloadPdf": "下载PDF",
+    "nextStepsTitle": "下一步",
+    "uploadAnother": "上传其他文件"
   },
   "wizard": {
     "nextStep": "下一步",
