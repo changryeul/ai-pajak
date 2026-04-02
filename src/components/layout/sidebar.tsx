@@ -64,6 +64,7 @@ const navItems: NavSection[] = [
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', descKey: 'navDesc.filings', roles: taxRoles },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents', descKey: 'navDesc.documents', roles: taxRoles },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', descKey: 'navDesc.reports', roles: [UserRole.CUSTOMER] },
+      { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', descKey: 'navDesc.paymentStatus', roles: [UserRole.CUSTOMER] },
       { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', descKey: 'navDesc.monthlyPayments', roles: taxRoles },
       { href: '/tax/calendar', icon: ClipboardList, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar', roles: taxRoles },
       { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', descKey: 'navDesc.taxTools', roles: taxRoles },
