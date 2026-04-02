@@ -6,6 +6,15 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
+import {
   ListChecks,
   Clock,
   CheckCircle,
@@ -17,6 +26,7 @@ import {
   Loader2,
   RefreshCw,
   Headphones,
+  Repeat2,
 } from 'lucide-react';
 
 interface QueueItem {
@@ -71,8 +81,16 @@ function fmt(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
+interface OperatorOption {
+  id: string;
+  name: string;
+  active_items: number;
+  max_clients: number;
+}
+
 export default function OperatorQueuePage() {
   const t = useTranslations('operator');
+  const { session } = useSession();
 
   const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
     PENDING:            { label: t('statusPending'),           color: 'text-gray-700',    bg: 'bg-gray-100',     icon: Clock },
@@ -130,6 +148,57 @@ export default function OperatorQueuePage() {
     notes: '',
     failedReason: '',
   });
+
+  // Reassign state (supervisor only)
+  const isSupervisor = session?.role === UserRole.TAX_OPERATOR_LEAD || session?.role === UserRole.TAX_OPERATOR_SUPERVISOR;
+  const [reassignItemId, setReassignItemId] = useState<string | null>(null);
+  const [reassignOperatorId, setReassignOperatorId] = useState('');
+  const [reassignReason, setReassignReason] = useState('');
+  const [operators, setOperators] = useState<OperatorOption[]>([]);
+
+  useEffect(() => {
+    if (isSupervisor) {
+      fetch('/api/operator/workload')
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) {
+            setOperators(json.data.operators.filter((op: OperatorOption & { status: string }) => op.status === 'active'));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isSupervisor]);
+
+  const handleReassign = async (itemId: string) => {
+    if (!reassignOperatorId || !reassignReason) return;
+    setActionLoading(itemId);
+    try {
+      const res = await fetch('/api/operator/queue', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: itemId,
+          action: 'reassign',
+          targetOperatorId: reassignOperatorId,
+          reassignmentReason: reassignReason,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setMessage({ text: t('reassignSuccess'), type: 'success' });
+        setReassignItemId(null);
+        setReassignOperatorId('');
+        setReassignReason('');
+        loadData();
+      } else {
+        setMessage({ text: json.error || t('errorOccurred'), type: 'error' });
+      }
+    } catch {
+      setMessage({ text: t('networkError'), type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const loadData = useCallback(async (page = 1) => {
     setIsLoading(true);
@@ -637,6 +706,60 @@ export default function OperatorQueuePage() {
                                   )}
                                   {t('actionFail')}
                                 </Button>
+                              </div>
+                            )}
+
+                            {/* Reassign - supervisor only, not COMPLETED/FAILED */}
+                            {isSupervisor && !['COMPLETED', 'FAILED'].includes(item.status) && (
+                              <div className="pt-2 border-t">
+                                {reassignItemId === item.id ? (
+                                  <div className="space-y-2">
+                                    <label className="text-xs font-medium text-violet-600 block">{t('reassignOperator')}</label>
+                                    <Select value={reassignOperatorId} onValueChange={setReassignOperatorId}>
+                                      <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue placeholder={t('selectOperator')} />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {operators.map(op => (
+                                          <SelectItem key={op.id} value={op.id}>
+                                            {op.name} ({op.active_items}/{op.max_clients})
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <input
+                                      type="text"
+                                      className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-violet-500 outline-none"
+                                      placeholder={t('reassignReason')}
+                                      value={reassignReason}
+                                      onChange={e => setReassignReason(e.target.value)}
+                                    />
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        className="flex-1 bg-violet-600 hover:bg-violet-700 text-xs"
+                                        disabled={!reassignOperatorId || !reassignReason || actionLoading === item.id}
+                                        onClick={() => handleReassign(item.id)}
+                                      >
+                                        {actionLoading === item.id ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Repeat2 className="h-3 w-3 mr-1" />}
+                                        {t('reassignConfirm')}
+                                      </Button>
+                                      <Button size="sm" variant="outline" className="text-xs" onClick={() => setReassignItemId(null)}>
+                                        {t('cancel')}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="w-full text-violet-600 border-violet-200 hover:bg-violet-50 text-xs"
+                                    onClick={() => setReassignItemId(item.id)}
+                                  >
+                                    <Repeat2 className="h-3 w-3 mr-1" />
+                                    {t('reassign')}
+                                  </Button>
+                                )}
                               </div>
                             )}
                           </div>

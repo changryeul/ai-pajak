@@ -23,7 +23,10 @@ npx vitest run src/lib/tax/spt-1770ss/calculator.test.ts
 npm run test:e2e                    # All Playwright tests
 npm run test:e2e:customer           # Customer role only
 npm run test:e2e:consultant         # Consultant role only
+npm run test:e2e:tax-advisor        # Tax advisor role only
 npm run test:e2e:platform-admin     # Platform admin role only
+npm run test:e2e:system             # System role only
+npm run test:e2e:audit              # Audit trail tests
 
 # Database
 supabase start             # Local Supabase
@@ -87,6 +90,47 @@ Each SPT form has its own directory under `src/lib/tax/`:
 
 Shared types/constants in `src/lib/tax/shared/` (PTKP rates, tax brackets, common types).
 Unit tests colocated: `src/lib/**/*.test.ts`.
+
+### Supabase Client Tiers
+Three client types in `src/lib/supabase/`:
+- **Browser** (`client.ts`) — `createBrowserClient()` for client components
+- **Server** (`server.ts`) — `createServerClient()` with dual-auth: checks `Authorization: Bearer` header first (for API/E2E), falls back to cookies
+- **Admin** (`admin.ts`) — `getSupabaseAdmin()` lazy singleton using service role key, bypasses RLS. Only use after middleware auth validation.
+
+### API Route Pattern
+Handlers receive `RequestWithSession` (extends `NextRequest` with `.session` and `.audit`). Middleware composition happens at the export level:
+
+```typescript
+async function handleCreate(req: RequestWithSession): Promise<Response> { /* ... */ }
+
+export async function POST(request: NextRequest) {
+  return composeMiddleware(
+    requireAuth, blockPlatformAdmin,
+    requireRole(UserRole.TAX_ADVISOR_JTC),
+    withAudit('ACTION_NAME')
+  )(request as RequestWithSession, handleCreate);
+}
+```
+
+### Operator Filing Workflow
+The `djp_submission_queue` table tracks a multi-step operator workflow:
+
+```
+PENDING → DATA_REVIEW → PENDING_APPROVAL → APPROVED → EBILLING_GENERATED
+→ PAYMENT_PENDING → PAYMENT_UPLOADED → PAYMENT_VERIFIED → DJP_SUBMITTED
+→ BPE_UPLOADED → COMPLETED (or FAILED from any state)
+```
+
+State transitions are role-gated: supervisor-only actions (`approve`/`reject` on `PENDING_APPROVAL`), operator actions for everything else. API: `PUT /api/operator/queue` with `action` + `itemId`.
+
+### Tax Filing UI Wizard (Zustand Store)
+`src/stores/tax-filing-store.ts` — persisted zustand store with 5-step wizard:
+1. `select-customer` → 2. `income-data` → 3. `deductions` → 4. `documents` → 5. `review`
+
+Navigation via `nextStep()`, `prevStep()`, `canProceed()` (validates prerequisites per step).
+
+### PDF Generation
+SPT form PDFs use `@react-pdf/renderer` with `renderToBuffer()` in API routes. PDF component files at `src/lib/tax/{form}/pdf-generator.tsx`. Canvas is externalized in webpack config to avoid native module issues.
 
 ### i18n
 - Config: `src/config/constants.ts` (LOCALES, DEFAULT_LOCALE)

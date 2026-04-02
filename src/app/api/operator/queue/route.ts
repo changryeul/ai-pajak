@@ -33,7 +33,7 @@ const STATUS_TRANSITIONS: Record<string, { from: QueueStatus | QueueStatus[] | '
   'fail':              { from: 'any',                 to: 'FAILED' },
 };
 
-const SUPERVISOR_ACTIONS = ['approve', 'reject'];
+const SUPERVISOR_ACTIONS = ['approve', 'reject', 'reassign'];
 
 async function getOperatorUser() {
   const supabase = await createClient();
@@ -170,6 +170,7 @@ export async function PUT(request: NextRequest) {
   const {
     id, action, ebillingCode, bpeNumber, bpeDate,
     notes, approvalNotes, rejectedReason, failedReason,
+    targetOperatorId, reassignmentReason,
   } = body;
 
   if (!id || !action) {
@@ -236,6 +237,90 @@ export async function PUT(request: NextRequest) {
       { error: 'You are not assigned to this queue item' },
       { status: 403 }
     );
+  }
+
+  // Handle reassignment (special action — no status change)
+  if (action === 'reassign') {
+    if (!targetOperatorId || !reassignmentReason) {
+      return NextResponse.json(
+        { error: 'targetOperatorId and reassignmentReason are required for reassign' },
+        { status: 400 }
+      );
+    }
+
+    // Validate target operator exists and is active
+    const { data: targetOp } = await admin
+      .from('tax_operators')
+      .select('id, name, max_clients, status')
+      .eq('id', targetOperatorId)
+      .single();
+
+    if (!targetOp || targetOp.status !== 'active') {
+      return NextResponse.json({ error: 'Target operator not found or inactive' }, { status: 400 });
+    }
+
+    // Check target operator capacity
+    const { count: activeCount } = await admin
+      .from('djp_submission_queue')
+      .select('id', { count: 'exact', head: true })
+      .eq('operator_id', targetOperatorId)
+      .not('status', 'in', '("COMPLETED","FAILED")');
+
+    if ((activeCount || 0) >= targetOp.max_clients) {
+      return NextResponse.json({ error: 'Target operator is at full capacity' }, { status: 400 });
+    }
+
+    const now = new Date().toISOString();
+
+    // Record reassignment history
+    await admin.from('queue_reassignment_history').insert({
+      queue_item_id: id,
+      from_operator_id: item.operator_id,
+      to_operator_id: targetOperatorId,
+      reassigned_by: user!.id,
+      reason: reassignmentReason,
+      status_at_reassignment: item.status,
+    });
+
+    // Update queue item
+    const { data: updated, error: updateError } = await admin
+      .from('djp_submission_queue')
+      .update({
+        operator_id: targetOperatorId,
+        reassigned_from: item.operator_id,
+        reassignment_reason: reassignmentReason,
+        reassigned_at: now,
+        reassigned_by: user!.id,
+        updated_at: now,
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+
+    // Audit log
+    await admin.from('audit_log').insert({
+      user_id: user!.id,
+      action: 'OPERATOR_QUEUE_REASSIGN',
+      resource_type: 'operator_submission_queue',
+      resource_id: id,
+      details: {
+        fromOperatorId: item.operator_id,
+        toOperatorId: targetOperatorId,
+        reason: reassignmentReason,
+        status: item.status,
+      },
+      created_at: now,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: `Reassigned to operator ${targetOp.name}`,
+    });
   }
 
   // Validate status transition

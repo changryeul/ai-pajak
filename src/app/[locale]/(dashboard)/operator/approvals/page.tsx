@@ -112,16 +112,16 @@ export default function ApprovalsPage() {
   };
 
   const updateForm = (itemId: string, field: string, value: string | boolean) => {
-    setFormState(prev => ({
-      ...prev,
-      [itemId]: {
-        approvalNotes: '',
-        rejectedReason: '',
-        showReject: false,
-        ...prev[itemId],
-        [field]: value,
-      },
-    }));
+    setFormState(prev => {
+      const existing = prev[itemId] || { approvalNotes: '', rejectedReason: '', showReject: false };
+      return {
+        ...prev,
+        [itemId]: {
+          ...existing,
+          [field]: value,
+        },
+      };
+    });
   };
 
   if (isLoading) {
