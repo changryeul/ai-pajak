@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from('customer_complaints')
-    .select('*, customer:customer_id(id, customer_name, npwp), operator:operator_id(id, name, employee_id)', { count: 'exact' });
+    .select('*', { count: 'exact' });
 
   // Access control: operators see only their own complaints
   if (!SUPERVISOR_ROLES.includes(role)) {
@@ -67,11 +67,33 @@ export async function GET(request: NextRequest) {
 
   query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
 
-  const { data: complaints, error, count } = await query;
+  const { data: complaintsRaw, error, count } = await query;
 
   if (error) {
     return NextResponse.json({ error: 'Failed to fetch complaints' }, { status: 500 });
   }
+
+  // Enrich with customer and operator names
+  const custIds = [...new Set((complaintsRaw || []).map(c => c.customer_id).filter(Boolean))];
+  const opIds = [...new Set((complaintsRaw || []).map(c => c.operator_id).filter(Boolean))];
+
+  let custMap: Record<string, { id: string; customer_name: string; npwp: string }> = {};
+  let opMap: Record<string, { id: string; name: string; employee_id: string }> = {};
+
+  if (custIds.length > 0) {
+    const { data: custs } = await admin.from('customer').select('id, customer_name, npwp').in('id', custIds);
+    for (const c of custs || []) custMap[c.id] = c;
+  }
+  if (opIds.length > 0) {
+    const { data: ops } = await admin.from('tax_operators').select('id, name, employee_id').in('id', opIds);
+    for (const o of ops || []) opMap[o.id] = o;
+  }
+
+  const complaints = (complaintsRaw || []).map(c => ({
+    ...c,
+    customer: custMap[c.customer_id] || null,
+    operator: opMap[c.operator_id] || null,
+  }));
 
   // Summary counts
   const { data: statusCounts } = await admin

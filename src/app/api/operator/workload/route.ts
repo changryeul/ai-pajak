@@ -83,9 +83,9 @@ export async function GET() {
   });
 
   // 3. Get unassigned queue items
-  const { data: unassigned, error: uaError } = await admin
+  const { data: unassignedRaw, error: uaError } = await admin
     .from('djp_submission_queue')
-    .select('id, customer_id, tax_type, tax_period_month, tax_period_year, amount, status, created_at, customer:customer_id(id, customer_name, npwp)')
+    .select('id, customer_id, tax_type, tax_period_month, tax_period_year, amount, status, created_at')
     .is('operator_id', null)
     .eq('status', 'PENDING')
     .order('created_at', { ascending: true });
@@ -93,6 +93,24 @@ export async function GET() {
   if (uaError) {
     return NextResponse.json({ error: 'Failed to fetch unassigned items' }, { status: 500 });
   }
+
+  // Fetch customer names for unassigned items
+  const customerIds = [...new Set((unassignedRaw || []).map(i => i.customer_id))];
+  let customerMap: Record<string, { id: string; customer_name: string; npwp: string }> = {};
+  if (customerIds.length > 0) {
+    const { data: customers } = await admin
+      .from('customer')
+      .select('id, customer_name, npwp')
+      .in('id', customerIds);
+    for (const c of customers || []) {
+      customerMap[c.id] = c;
+    }
+  }
+
+  const unassigned = (unassignedRaw || []).map(item => ({
+    ...item,
+    customer: customerMap[item.customer_id] || null,
+  }));
 
   // 4. Summary
   const activeOperators = operatorList.filter(op => op.status === 'active');
