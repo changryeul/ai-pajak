@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { evaluateAutoApproval } from '@/lib/ai/auto-approval-engine';
+import { notifyWorkflowStatusChange } from '@/lib/notifications/operator-workflow-notifications';
 
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
@@ -444,14 +445,27 @@ export async function PUT(request: NextRequest) {
     created_at: now,
   });
 
-  // TODO: Send notifications based on status change
-  // - PENDING_APPROVAL → notify supervisors
-  // - APPROVED/reject → notify operator
-  // - PAYMENT_PENDING → notify customer with billing info
-  // - PAYMENT_UPLOADED → notify operator
-  // - COMPLETED → notify customer
-
+  // Send notifications (non-blocking)
   const finalStatus = autoApprovalResult?.approved ? 'APPROVED' : transition.to;
+
+  notifyWorkflowStatusChange(admin, {
+    queueItem: {
+      id,
+      customer_id: item.customer_id,
+      operator_id: item.operator_id,
+      tax_type: item.tax_type,
+      tax_period_month: item.tax_period_month,
+      tax_period_year: item.tax_period_year,
+      amount: item.amount || 0,
+      ebilling_code: updated?.ebilling_code,
+      bpe_number: updated?.bpe_number,
+    },
+    previousStatus: item.status,
+    newStatus: finalStatus,
+    action,
+    actorUserId: user!.id,
+    autoApproved: autoApprovalResult?.approved,
+  }).catch(err => console.error('[Queue] Notification failed:', err));
 
   return NextResponse.json({
     success: true,
