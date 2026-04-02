@@ -11,14 +11,14 @@ async function getOperatorUser() {
   if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
 
   const admin = getSupabaseAdmin();
-  const { data: roleData } = await admin
+  const { data: allRoles } = await admin
     .from('user_roles')
     .select('role')
     .eq('user_id', user.id)
-    .single();
+    .eq('is_active', true);
 
-  const role = roleData?.role;
-  if (!OPERATOR_ROLES.includes(role)) {
+  const role = allRoles?.map(r => r.role).find(r => OPERATOR_ROLES.includes(r));
+  if (!role) {
     return { error: NextResponse.json({ error: 'Operator access required' }, { status: 403 }) };
   }
 
