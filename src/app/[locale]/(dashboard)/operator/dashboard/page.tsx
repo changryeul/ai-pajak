@@ -6,6 +6,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer,
+} from 'recharts';
+import {
   Headphones,
   Users,
   Clock,
@@ -16,6 +20,9 @@ import {
   Loader2,
   RefreshCw,
   ListChecks,
+  Zap,
+  TrendingUp,
+  Timer,
 } from 'lucide-react';
 
 interface QueueItem {
@@ -141,9 +148,38 @@ export default function OperatorDashboardPage() {
     }
   }, []);
 
+  // Realtime stats
+  const [realtimeStats, setRealtimeStats] = useState<{
+    statusDistribution: Record<string, number>;
+    hourlyThroughput: Array<{ hour: string; count: number }>;
+    metrics: {
+      totalItems: number; activeItems: number; completedToday: number;
+      avgProcessingHours: number; autoApprovalRate: number; slaBreaches: number;
+    };
+    agingItems: Array<{ id: string; status: string; taxType: string; ageHours: number; slaWarning: boolean }>;
+  } | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const loadRealtimeStats = useCallback(async () => {
+    try {
+      const res = await fetch('/api/operator/queue/realtime-stats');
+      const json = await res.json();
+      if (json.success) {
+        setRealtimeStats(json.data);
+        setLastUpdated(new Date());
+      }
+    } catch { /* silent */ }
+  }, []);
+
   useEffect(() => {
     loadData();
-  }, [loadData]);
+    loadRealtimeStats();
+    const interval = setInterval(() => {
+      loadData();
+      loadRealtimeStats();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loadData, loadRealtimeStats]);
 
   const handleAction = async (itemId: string, action: string) => {
     // Actions that need additional input
@@ -435,6 +471,137 @@ export default function OperatorDashboardPage() {
                         </div>
                       </div>
                     ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Real-time Analytics */}
+      {realtimeStats && (
+        <div className="space-y-6 mb-6">
+          {/* Last updated */}
+          {lastUpdated && (
+            <p className="text-xs text-gray-400 text-right">
+              <RefreshCw className="h-3 w-3 inline mr-1" />
+              {lastUpdated.toLocaleTimeString()} (30s auto)
+            </p>
+          )}
+
+          {/* KPI Cards Row */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <Card>
+              <CardContent className="pt-4 pb-3 text-center">
+                <TrendingUp className="h-5 w-5 mx-auto text-emerald-500 mb-1" />
+                <p className="text-2xl font-bold">{realtimeStats.metrics.completedToday}</p>
+                <p className="text-xs text-gray-500">오늘 완료</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3 text-center">
+                <Timer className="h-5 w-5 mx-auto text-blue-500 mb-1" />
+                <p className="text-2xl font-bold">{realtimeStats.metrics.avgProcessingHours}h</p>
+                <p className="text-xs text-gray-500">평균 처리시간</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3 text-center">
+                <Zap className="h-5 w-5 mx-auto text-amber-500 mb-1" />
+                <p className="text-2xl font-bold">{realtimeStats.metrics.autoApprovalRate}%</p>
+                <p className="text-xs text-gray-500">자동승인율</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3 text-center">
+                <ListChecks className="h-5 w-5 mx-auto text-indigo-500 mb-1" />
+                <p className="text-2xl font-bold">{realtimeStats.metrics.activeItems}</p>
+                <p className="text-xs text-gray-500">진행 중</p>
+              </CardContent>
+            </Card>
+            <Card className={realtimeStats.metrics.slaBreaches > 0 ? 'ring-2 ring-red-200' : ''}>
+              <CardContent className="pt-4 pb-3 text-center">
+                <AlertCircle className={`h-5 w-5 mx-auto mb-1 ${realtimeStats.metrics.slaBreaches > 0 ? 'text-red-500' : 'text-gray-300'}`} />
+                <p className={`text-2xl font-bold ${realtimeStats.metrics.slaBreaches > 0 ? 'text-red-600' : ''}`}>
+                  {realtimeStats.metrics.slaBreaches}
+                </p>
+                <p className="text-xs text-gray-500">SLA 경고</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Status Distribution PieChart */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">상태별 분포</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={Object.entries(realtimeStats.statusDistribution).map(([name, value]) => ({ name, value }))}
+                      cx="50%" cy="50%" outerRadius={70} innerRadius={40}
+                      dataKey="value" paddingAngle={2}
+                    >
+                      {Object.keys(realtimeStats.statusDistribution).map((status, i) => {
+                        const colors: Record<string, string> = {
+                          PENDING: '#9ca3af', DATA_REVIEW: '#3b82f6', PENDING_APPROVAL: '#f97316',
+                          APPROVED: '#10b981', EBILLING_GENERATED: '#6366f1', PAYMENT_PENDING: '#eab308',
+                          PAYMENT_UPLOADED: '#06b6d4', PAYMENT_VERIFIED: '#8b5cf6', DJP_SUBMITTED: '#f59e0b',
+                          BPE_UPLOADED: '#14b8a6', COMPLETED: '#22c55e', FAILED: '#ef4444',
+                        };
+                        return <Cell key={i} fill={colors[status] || '#9ca3af'} />;
+                      })}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value}건`, '']} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-wrap gap-2 mt-2 justify-center">
+                  {Object.entries(realtimeStats.statusDistribution)
+                    .filter(([, v]) => v > 0)
+                    .map(([status, count]) => (
+                      <Badge key={status} variant="outline" className="text-xs">
+                        {status.replace(/_/g, ' ')} ({count})
+                      </Badge>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Hourly Throughput AreaChart */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">24시간 처리량</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={realtimeStats.hourlyThroughput}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} interval={3} />
+                    <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                    <Tooltip formatter={(value) => [`${value}건`, '완료']} />
+                    <Area type="monotone" dataKey="count" fill="#10b981" fillOpacity={0.2} stroke="#10b981" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* SLA Aging Alert */}
+          {realtimeStats.agingItems.filter(i => i.slaWarning).length > 0 && (
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="pt-4">
+                <p className="text-sm font-medium text-red-700 flex items-center gap-2 mb-2">
+                  <AlertCircle className="h-4 w-4" /> SLA 경고 — 48시간 초과 건
+                </p>
+                <div className="space-y-1">
+                  {realtimeStats.agingItems.filter(i => i.slaWarning).map(item => (
+                    <p key={item.id} className="text-xs text-red-600">
+                      {item.taxType} [{item.status}] — {item.ageHours}시간 경과
+                    </p>
+                  ))}
                 </div>
               </CardContent>
             </Card>
