@@ -111,6 +111,26 @@ export const TEST_USERS = {
     serviceRoleKey: process.env.TEST_SUPABASE_SERVICE_ROLE_KEY!,
     role: 'SYSTEM',
   },
+
+  /**
+   * TAX_OPERATOR_SUPERVISOR - Operator supervisor (approvals, workload, statistics)
+   */
+  TAX_OPERATOR_SUPERVISOR: {
+    email: 'supervisor.test@jakartatax.co.id',
+    password: 'TestPassword123!',
+    role: 'TAX_OPERATOR_SUPERVISOR',
+    fullName: 'Kim Supervisor',
+  },
+
+  /**
+   * TAX_OPERATOR - Regular operator
+   */
+  TAX_OPERATOR: {
+    email: 'operator1.test@jakartatax.co.id',
+    password: 'TestPassword123!',
+    role: 'TAX_OPERATOR',
+    fullName: 'Lee Operator',
+  },
 };
 
 /**

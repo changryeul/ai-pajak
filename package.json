@@ -19,6 +19,7 @@
     "test:e2e:platform-admin": "playwright test tests/e2e/platform-admin.spec.ts",
     "test:e2e:system": "playwright test tests/e2e/system.spec.ts",
     "test:e2e:audit": "playwright test tests/e2e/audit.spec.ts",
+    "test:e2e:operator": "playwright test src/tests/e2e/operator.spec.ts",
     "test:e2e:report": "playwright show-report",
     "db:seed-test-users": "tsx scripts/seed-test-users.ts"
   },
