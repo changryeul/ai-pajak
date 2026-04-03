@@ -435,7 +435,7 @@ export default function PPNPage() {
       {activeTab === 'reconciliation' && (
         <div className="space-y-4">
           {/* Summary Cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="border-0 shadow-sm">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-3">
@@ -477,7 +477,7 @@ export default function PPNPage() {
           </div>
 
           {/* Detail Tables */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Keluaran */}
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">

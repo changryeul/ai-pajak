@@ -152,5 +152,17 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   }
 }
 
+async function handleDelete(req: RequestWithSession): Promise<Response> {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+    const { error } = await getSupabaseAdmin().from('pph26_transaction').delete().eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch { return NextResponse.json({ error: 'Failed' }, { status: 500 }); }
+}
+
 export async function GET(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handleGet); }
 export async function POST(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handlePost); }
+export async function DELETE(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handleDelete); }

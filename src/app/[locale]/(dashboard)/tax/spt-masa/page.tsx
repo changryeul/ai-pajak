@@ -102,15 +102,38 @@ export default function SPTMasaPage() {
   const [cpSearch, setCpSearch] = useState('');
   const [showCpDropdown, setShowCpDropdown] = useState(false);
 
+  // Customer selection (for consultants with multiple clients)
+  const [customers, setCustomers] = useState<Array<{ id: string; name: string; npwp: string }>>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
+
+  const effectiveCustomerId = selectedCustomerId || session?.customerId || '';
   const period = `${year}-${String(month).padStart(2, '0')}`;
+
+  // Load customer list for consultants
+  useEffect(() => {
+    if (!session || session.role === 'CUSTOMER') return;
+    (async () => {
+      try {
+        const res = await fetch('/api/customers');
+        const data = await res.json();
+        if (data.success) {
+          setCustomers((data.data || []).map((c: { id: string; full_name: string; company_name: string; npwp: string; customer_type: string }) => ({
+            id: c.id,
+            name: c.customer_type === 'INDIVIDUAL' ? c.full_name : c.company_name || c.full_name,
+            npwp: c.npwp,
+          })));
+        }
+      } catch { /* */ }
+    })();
+  }, [session]);
 
   // Load transactions
   const loadTransactions = useCallback(async () => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
     setIsLoading(true);
     try {
       const endpoint = taxType === 'PPh23' ? 'pph23-transactions' : 'pph26-transactions';
-      const res = await fetch(`/api/tax/${endpoint}?customerId=${session.customerId}&period=${period}`);
+      const res = await fetch(`/api/tax/${endpoint}?customerId=${effectiveCustomerId}&period=${period}`);
       const data = await res.json();
       if (data.success) {
         setTransactions(data.data.transactions || []);
@@ -118,19 +141,19 @@ export default function SPTMasaPage() {
       }
     } catch { /* */ }
     finally { setIsLoading(false); }
-  }, [session?.customerId, taxType, period]);
+  }, [effectiveCustomerId, taxType, period]);
 
   useEffect(() => { loadTransactions(); }, [loadTransactions]);
 
   // Load counterparties for autocomplete
   const loadCounterparties = useCallback(async () => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
     try {
-      const res = await fetch(`/api/tax/counterparties?customerId=${session.customerId}`);
+      const res = await fetch(`/api/tax/counterparties?customerId=${effectiveCustomerId}`);
       const data = await res.json();
       if (data.success) setCounterparties(data.data || []);
     } catch { /* */ }
-  }, [session?.customerId]);
+  }, [effectiveCustomerId]);
 
   useEffect(() => { loadCounterparties(); }, [loadCounterparties]);
 
@@ -179,7 +202,7 @@ export default function SPTMasaPage() {
 
   // Save transaction
   const saveTransaction = async () => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
 
     const validationError = validateForm();
     if (validationError) {
@@ -196,7 +219,7 @@ export default function SPTMasaPage() {
       const endpoint = taxType === 'PPh23' ? 'pph23-transactions' : 'pph26-transactions';
       const body = taxType === 'PPh23'
         ? {
-            customerId: session.customerId,
+            customerId: effectiveCustomerId,
             taxPeriod: period,
             serviceType: formData.serviceType,
             grossAmount: amount,
@@ -206,7 +229,7 @@ export default function SPTMasaPage() {
             description: formData.description,
           }
         : {
-            customerId: session.customerId,
+            customerId: effectiveCustomerId,
             taxPeriod: period,
             incomeType: formData.incomeType,
             grossAmount: amount,
@@ -251,7 +274,7 @@ export default function SPTMasaPage() {
         body: JSON.stringify({
           type: taxType,
           csvContent: text,
-          customerId: session.customerId,
+          customerId: effectiveCustomerId,
           taxPeriod: period,
         }),
       });
@@ -280,13 +303,13 @@ export default function SPTMasaPage() {
 
   // Generate Bukti Potong
   const generateBupot = async () => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
     setIsSaving(true);
     try {
       const res = await fetch('/api/tax/ebupot-pph23', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: session.customerId, period }),
+        body: JSON.stringify({ customerId: effectiveCustomerId, period }),
       });
       const data = await res.json();
       if (data.success) {
@@ -299,13 +322,13 @@ export default function SPTMasaPage() {
 
   // Create SPT Masa DRAFT
   const createSptMasaDraft = async (sptTaxType: string) => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
     setIsSaving(true);
     try {
       const res = await fetch('/api/tax/spt-masa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: session.customerId, taxType: sptTaxType, period }),
+        body: JSON.stringify({ customerId: effectiveCustomerId, taxType: sptTaxType, period }),
       });
       const data = await res.json();
       if (data.success) {
@@ -315,6 +338,31 @@ export default function SPTMasaPage() {
       }
     } catch { setMessage({ type: 'error', text: 'Error' }); }
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
+  };
+
+  // Export to Excel
+  const exportExcel = async () => {
+    if (!effectiveCustomerId) return;
+    try {
+      const res = await fetch('/api/tax/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: taxType, customerId: effectiveCustomerId, period }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${taxType}_${period}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const data = await res.json();
+        setMessage({ type: 'error', text: data.error || 'Export failed' });
+        setTimeout(() => setMessage(null), 3000);
+      }
+    } catch { /* */ }
   };
 
   // Delete transaction
@@ -345,7 +393,7 @@ export default function SPTMasaPage() {
       const res = await fetch('/api/tax/counterparties', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: session.customerId, name: newCpName, npwp: newCpNpwp, type: 'VENDOR' }),
+        body: JSON.stringify({ customerId: effectiveCustomerId, name: newCpName, npwp: newCpNpwp, type: 'VENDOR' }),
       });
       const data = await res.json();
       if (data.success) {
@@ -362,13 +410,13 @@ export default function SPTMasaPage() {
 
   // Download SPT Masa PDF
   const downloadSptMasaPDF = async (sptTaxType: string) => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
     setIsSaving(true);
     try {
       const res = await fetch('/api/tax/spt-masa-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: session.customerId, taxType: sptTaxType, period }),
+        body: JSON.stringify({ customerId: effectiveCustomerId, taxType: sptTaxType, period }),
       });
       if (res.ok) {
         const blob = await res.blob();
@@ -441,8 +489,18 @@ export default function SPTMasaPage() {
         </div>
       )}
 
-      {/* Period + Tax Type Selectors */}
+      {/* Period + Tax Type + Customer Selectors */}
       <div className="flex flex-wrap gap-3 mb-6">
+        {customers.length > 0 && (
+          <Select value={selectedCustomerId} onValueChange={v => setSelectedCustomerId(v)}>
+            <SelectTrigger className="w-52"><SelectValue placeholder="고객 선택..." /></SelectTrigger>
+            <SelectContent>
+              {customers.map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <Select value={taxType} onValueChange={(v) => setTaxType(v as TaxType)}>
           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -490,7 +548,10 @@ export default function SPTMasaPage() {
             <h2 className="font-semibold text-gray-900">
               {taxType === 'PPh23' ? 'PPh 23 Transactions' : 'PPh 26 Transactions'} — {period}
             </h2>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={exportExcel} disabled={transactions.length === 0}>
+                <Download className="h-3 w-3 mr-1" />Excel
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadTemplate}>
                 <Download className="h-3 w-3 mr-1" />Template
               </Button>

@@ -11,8 +11,9 @@ import { useSession } from '@/hooks/useSession';
 import {
   Loader2, CheckCircle, AlertTriangle, Clock, FileText,
   Receipt, DollarSign, Shield, TrendingUp, ArrowRight,
-  Sparkles, Calendar, BarChart3,
+  Sparkles, Calendar, BarChart3, PieChart,
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface MonthlyStatus {
   taxType: string;
@@ -132,7 +133,7 @@ export default function MonthlyDashboardPage() {
           <p className="text-slate-400 mt-2 text-sm">납부, 신고, e-Bupot 현황을 한눈에 확인합니다</p>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-slate-400 text-xs">총 납부 예정</p>
               <p className="font-bold text-lg">{fmt(totalDue)}</p>
@@ -152,6 +153,45 @@ export default function MonthlyDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Urgent Reminders */}
+      {(() => {
+        const now = new Date();
+        const urgent = payments.filter(p => {
+          if (p.status === 'PAID') return false;
+          const deadline = new Date(p.payment_deadline);
+          const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          return daysLeft >= 0 && daysLeft <= 3;
+        });
+        const overdue = payments.filter(p => p.status === 'OVERDUE');
+
+        if (urgent.length === 0 && overdue.length === 0) return null;
+
+        return (
+          <div className="mb-6 space-y-2">
+            {overdue.length > 0 && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                <span className="font-medium">{overdue.length}건 연체!</span>
+                <span className="text-red-600">{overdue.map(p => `${p.tax_type} (${p.tax_period})`).join(', ')}</span>
+              </div>
+            )}
+            {urgent.length > 0 && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                <span className="font-medium">납부 기한 임박 ({urgent.length}건)</span>
+                <span className="text-amber-600">
+                  {urgent.map(p => {
+                    const dl = new Date(p.payment_deadline);
+                    const days = Math.ceil((dl.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                    return `${p.tax_type} (D-${days})`;
+                  }).join(', ')}
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Year Selector */}
       <div className="flex justify-between items-center mb-6">
@@ -201,7 +241,7 @@ export default function MonthlyDashboardPage() {
 
                       {/* Month grid */}
                       <div className="flex-1 p-3">
-                        <div className="grid grid-cols-12 gap-1.5">
+                        <div className="grid grid-cols-6 md:grid-cols-12 gap-1.5">
                           {MONTHS.map((label, i) => {
                             const m = monthlyAmounts[i];
                             const isCurrent = i + 1 === currentMonth && year === currentYear;
@@ -254,6 +294,39 @@ export default function MonthlyDashboardPage() {
             <span className="flex items-center gap-1"><Badge className="text-[7px] bg-blue-100 text-blue-600 px-1 py-0">SPT</Badge> 신고</span>
             <span className="flex items-center gap-1"><Badge className="text-[7px] bg-green-100 text-green-600 px-1 py-0">OK</Badge> 수리</span>
           </div>
+
+          {/* Annual Tax Chart */}
+          {payments.length > 0 && (
+            <Card className="mt-6 border-0 shadow-sm">
+              <CardContent className="pt-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />월별 세금 추이 ({year})
+                </h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={MONTHS.map((label, i) => {
+                    const m = i + 1;
+                    const period = `${year}-${String(m).padStart(2, '0')}`;
+                    const byType: Record<string, number> = {};
+                    for (const p of payments) {
+                      if (p.tax_period === period) {
+                        byType[p.tax_type] = (byType[p.tax_type] || 0) + (p.amount_due || 0);
+                      }
+                    }
+                    return { month: label, PPh21: byType.PPh21 || 0, PPh23: byType.PPh23 || 0, PPN: byType.PPN || 0, PPh_FINAL: byType.PPh_FINAL || 0 };
+                  })}>
+                    <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
+                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Legend wrapperStyle={{ fontSize: 10 }} />
+                    <Bar dataKey="PPh21" fill="#6366f1" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="PPh23" fill="#10b981" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="PPN" fill="#f97316" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="PPh_FINAL" fill="#eab308" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>
