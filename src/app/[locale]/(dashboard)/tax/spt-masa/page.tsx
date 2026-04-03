@@ -13,8 +13,9 @@ import { useSession } from '@/hooks/useSession';
 import {
   FileText, Receipt, Loader2, CheckCircle, AlertTriangle,
   Plus, DollarSign, Globe, Shield, ClipboardList, Send,
-  Sparkles, BarChart3,
+  Sparkles, BarChart3, Upload, Download,
 } from 'lucide-react';
+import { generateTemplate } from '@/lib/tax/bulk-import/csv-parser';
 
 // Types
 interface Transaction {
@@ -91,6 +92,10 @@ export default function SPTMasaPage() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [resolution, setResolution] = useState<{ rate: number; reason: string } | null>(null);
+
+  // CSV Upload
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadResult, setUploadResult] = useState<{ totalRows: number; insertedCount: number; errorRows: number; errors?: Array<{ row: number; error: string }> } | null>(null);
 
   // Counterparty search
   const [counterparties, setCounterparties] = useState<Array<{ id: string; name: string; npwp: string }>>([]);
@@ -206,6 +211,48 @@ export default function SPTMasaPage() {
       }
     } catch { setMessage({ type: 'error', text: 'Error saving' }); }
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
+  };
+
+  // CSV Upload handler
+  const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !session?.customerId) return;
+
+    setIsSaving(true);
+    setUploadResult(null);
+    try {
+      const text = await file.text();
+      const res = await fetch('/api/tax/bulk-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: taxType,
+          csvContent: text,
+          customerId: session.customerId,
+          taxPeriod: period,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUploadResult(data.data);
+        setMessage({ type: 'success', text: `${data.data.insertedCount}건 등록 완료` });
+        loadTransactions();
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Upload failed' });
+      }
+    } catch { setMessage({ type: 'error', text: 'Error uploading' }); }
+    finally { setIsSaving(false); e.target.value = ''; setTimeout(() => setMessage(null), 5000); }
+  };
+
+  const downloadTemplate = () => {
+    const csv = generateTemplate(taxType);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `template_${taxType}_${period}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // Generate Bukti Potong
@@ -343,10 +390,39 @@ export default function SPTMasaPage() {
             <h2 className="font-semibold text-gray-900">
               {taxType === 'PPh23' ? 'PPh 23 Transactions' : 'PPh 26 Transactions'} — {period}
             </h2>
-            <Button size="sm" onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-1" />{t('addTransaction')}
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadTemplate}>
+                <Download className="h-3 w-3 mr-1" />Template
+              </Button>
+              <label className="cursor-pointer">
+                <Button size="sm" variant="outline" asChild>
+                  <span><Upload className="h-3 w-3 mr-1" />CSV Upload</span>
+                </Button>
+                <input type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
+              </label>
+              <Button size="sm" onClick={() => setShowForm(true)}>
+                <Plus className="h-4 w-4 mr-1" />{t('addTransaction')}
+              </Button>
+            </div>
           </div>
+
+          {/* Upload Result */}
+          {uploadResult && (
+            <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-xs">
+              <p className="font-medium text-indigo-800">
+                CSV Import: {uploadResult.insertedCount}/{uploadResult.totalRows}건 등록 완료
+                {uploadResult.errorRows > 0 && <span className="text-red-600 ml-2">({uploadResult.errorRows}건 오류)</span>}
+              </p>
+              {uploadResult.errors && uploadResult.errors.length > 0 && (
+                <div className="mt-2 max-h-20 overflow-y-auto">
+                  {uploadResult.errors.slice(0, 5).map((err, i) => (
+                    <p key={i} className="text-red-500">Row {err.row}: {err.error}</p>
+                  ))}
+                  {uploadResult.errors.length > 5 && <p className="text-gray-400">... +{uploadResult.errors.length - 5}건</p>}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Transaction Form */}
           {showForm && (
