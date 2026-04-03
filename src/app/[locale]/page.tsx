@@ -33,10 +33,12 @@ export default async function LandingPage({
   ];
 
   const aiFeatures = [
-    { icon: FileSpreadsheet, title: 'SPT Auto-fill', desc: 'Upload bukti potong, AI otomatis isi SPT Anda', gradient: 'from-blue-600 to-indigo-600' },
-    { icon: Lightbulb, title: 'Tax Savings Advisor', desc: 'AI menemukan peluang penghematan pajak Anda', gradient: 'from-amber-500 to-orange-500' },
-    { icon: Sparkles, title: 'Document Classification', desc: 'Upload dokumen, AI otomatis kenali jenisnya', gradient: 'from-purple-500 to-pink-500' },
-    { icon: BarChart3, title: 'Client Report Generator', desc: 'Laporan analisis pajak klien dengan satu klik', gradient: 'from-green-500 to-teal-500' },
+    { icon: Zap, title: 'Tax Resolution Engine', desc: 'Otomatis tentukan jenis pajak & tarif dari data transaksi — PPh 21/23/26/4(2), termasuk P3B 64 negara', gradient: 'from-blue-600 to-indigo-600' },
+    { icon: FileSpreadsheet, title: 'SPT Masa & e-Bupot', desc: 'Pelaporan bulanan PPh 21/23/26/PPN dengan e-Bupot otomatis dan PDF preview', gradient: 'from-emerald-500 to-green-600' },
+    { icon: Sparkles, title: 'AI Invoice Scanner', desc: 'Foto faktur/kwitansi, AI klasifikasi jenis jasa & hitung pajak otomatis', gradient: 'from-purple-500 to-pink-500' },
+    { icon: Lightbulb, title: 'Tax Savings Advisor', desc: 'AI analisis data Anda untuk menemukan peluang penghematan pajak', gradient: 'from-amber-500 to-orange-500' },
+    { icon: BarChart3, title: 'Annual Simulation', desc: 'Proyeksi pajak tahunan berdasarkan data bulanan dengan grafik real-time', gradient: 'from-green-500 to-teal-500' },
+    { icon: Shield, title: 'Override Rule Engine', desc: 'Aturan pajak kustom yang dikelola admin — prioritas tertinggi dalam penentuan tarif', gradient: 'from-red-500 to-rose-600' },
   ];
 
   const plans = [
