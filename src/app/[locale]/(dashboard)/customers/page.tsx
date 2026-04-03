@@ -16,6 +16,23 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Users,
   UserCheck,
   FileText,
@@ -24,6 +41,7 @@ import {
   Building2,
   User,
   Loader2,
+  Plus,
 } from 'lucide-react';
 
 interface Customer {
@@ -61,6 +79,17 @@ export default function CustomersPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    full_name: '',
+    company_name: '',
+    email: '',
+    phone: '',
+    npwp: '',
+    address: '',
+    customer_type: 'INDIVIDUAL' as 'INDIVIDUAL' | 'COMPANY',
+  });
 
   useEffect(() => {
     loadCustomers();
@@ -85,6 +114,27 @@ export default function CustomersPage() {
       console.error('Failed to load customers:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCreateCustomer = async () => {
+    setCreating(true);
+    try {
+      const res = await fetch('/api/customers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShowCreateDialog(false);
+        setCreateForm({ full_name: '', company_name: '', email: '', phone: '', npwp: '', address: '', customer_type: 'INDIVIDUAL' });
+        loadCustomers();
+      }
+    } catch (error) {
+      console.error('Failed to create customer:', error);
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -121,6 +171,86 @@ export default function CustomersPage() {
             {t('customers.description')}
           </p>
         </div>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-1" />
+              {t('customers.addCustomer')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[480px]">
+            <DialogHeader>
+              <DialogTitle>{t('customers.addCustomer')}</DialogTitle>
+              <DialogDescription>{t('customers.description')}</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label>{t('customers.customerType')}</Label>
+                <Select
+                  value={createForm.customer_type}
+                  onValueChange={(v) => setCreateForm({ ...createForm, customer_type: v as 'INDIVIDUAL' | 'COMPANY' })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="INDIVIDUAL">{t('customers.individual')}</SelectItem>
+                    <SelectItem value="COMPANY">{t('customers.company')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>{t('customers.name')} *</Label>
+                <Input
+                  value={createForm.full_name}
+                  onChange={(e) => setCreateForm({ ...createForm, full_name: e.target.value })}
+                  placeholder="Full name"
+                />
+              </div>
+              {createForm.customer_type === 'COMPANY' && (
+                <div className="grid gap-2">
+                  <Label>{t('customers.company')} *</Label>
+                  <Input
+                    value={createForm.company_name}
+                    onChange={(e) => setCreateForm({ ...createForm, company_name: e.target.value })}
+                    placeholder="Company name"
+                  />
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>{t('customers.email')}</Label>
+                  <Input
+                    type="email"
+                    value={createForm.email}
+                    onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>{t('customers.phone')}</Label>
+                  <Input
+                    value={createForm.phone}
+                    onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label>{t('customers.npwp')}</Label>
+                <Input
+                  value={createForm.npwp}
+                  onChange={(e) => setCreateForm({ ...createForm, npwp: e.target.value })}
+                  placeholder="XX.XXX.XXX.X-XXX.XXX"
+                  className="font-mono"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>{t('common.cancel')}</Button>
+              <Button onClick={handleCreateCustomer} disabled={creating || !createForm.full_name}>
+                {creating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                {t('customers.addCustomer')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}

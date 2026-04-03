@@ -1,9 +1,9 @@
 /**
  * Customers API
  *
- * GET /api/customers
+ * GET  /api/customers — List customers
+ * POST /api/customers — Create a new customer
  *
- * Returns the list of customers for the authenticated consultant/tax advisor.
  * Only accessible by CONSULTANT_JTC and TAX_ADVISOR_JTC roles.
  */
 
@@ -12,6 +12,9 @@ import { createClient } from '@/lib/supabase/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
+import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
+import { withAudit } from '@/middleware/audit';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import type { RequestWithSession, UserRole } from '@/types/auth';
 
@@ -124,4 +127,80 @@ export async function GET(request: NextRequest) {
     requireAuth,
     requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole)
   )(request as RequestWithSession, handleGetCustomers);
+}
+
+/**
+ * POST /api/customers — Create a new customer
+ */
+async function handleCreateCustomer(req: RequestWithSession): Promise<Response> {
+  try {
+    const body = await req.json();
+    const { full_name, company_name, email, phone, npwp, address, customer_type } = body;
+
+    if (!full_name) {
+      return NextResponse.json(
+        { success: false, error: 'full_name is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!customer_type || !['INDIVIDUAL', 'COMPANY'].includes(customer_type)) {
+      return NextResponse.json(
+        { success: false, error: 'customer_type must be INDIVIDUAL or COMPANY' },
+        { status: 400 }
+      );
+    }
+
+    if (customer_type === 'COMPANY' && !company_name) {
+      return NextResponse.json(
+        { success: false, error: 'company_name is required for COMPANY type' },
+        { status: 400 }
+      );
+    }
+
+    const admin = getSupabaseAdmin();
+    const { data: customer, error: insertError } = await admin
+      .from('customer')
+      .insert({
+        full_name,
+        company_name: company_name || null,
+        email: email || null,
+        phone: phone || null,
+        npwp: npwp || null,
+        address: address || null,
+        customer_type,
+      })
+      .select()
+      .single();
+
+    if (insertError || !customer) {
+      loggers.api.error({ err: insertError }, 'Failed to insert customer');
+      return NextResponse.json(
+        { success: false, error: insertError?.message || 'Failed to create customer' },
+        { status: 500 }
+      );
+    }
+
+    loggers.api.info({ customerId: customer.id, customerType: customer_type }, 'Customer created');
+
+    return NextResponse.json({
+      success: true,
+      data: customer,
+    }, { status: 201 });
+  } catch (error) {
+    loggers.api.error({ err: error }, 'Create customer error');
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Failed to create customer' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  return composeMiddleware(
+    requireAuth,
+    blockPlatformAdmin,
+    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    withAudit('CUSTOMER_CREATE')
+  )(request as RequestWithSession, handleCreateCustomer);
 }
