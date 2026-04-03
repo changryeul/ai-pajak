@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { listPOAs, POAStatus } from '@/lib/services/poa-service';
+import { loggers } from '@/lib/logger';
 
 /**
  * List Power of Attorney Records
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('List POAs error:', error);
+    loggers.api.error({ err: error }, 'List POAs error');
     return NextResponse.json(
       {
         success: false,

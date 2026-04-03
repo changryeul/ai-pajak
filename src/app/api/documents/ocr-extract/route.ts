@@ -6,6 +6,7 @@ import { processDocument } from '@/lib/ocr/processor';
 import { processReceipt } from '@/lib/ocr/receipt-processor';
 import type { DocumentCategory, OCRResult } from '@/lib/ocr/types';
 import Anthropic from '@anthropic-ai/sdk';
+import { loggers } from '@/lib/logger';
 
 /**
  * POST /api/documents/ocr-extract
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       data: result,
     });
   } catch (error) {
-    console.error('OCR extract error:', error);
+    loggers.ocr.error({ err: error }, 'OCR extract error');
     return NextResponse.json(
       {
         error: 'OCR processing failed',
@@ -232,7 +233,7 @@ category, confidence, rawText, extractedData (with documentNumber, npwp, taxAmou
       processingTimeMs: Date.now() - startTime,
     };
   } catch (error) {
-    console.error('[PDF OCR] Processing failed:', error);
+    loggers.ocr.error({ err: error }, 'PDF OCR processing failed');
     return {
       documentId,
       status: 'FAILED',

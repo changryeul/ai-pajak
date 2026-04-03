@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { GrossUpCalculator } from '@/lib/tax/grossup-calculator';
 
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error('Gross-up calculation error:', error);
+    loggers.tax.error({ err: error }, 'Gross-up calculation error');
     return NextResponse.json(
       { error: 'Calculation failed', message: error instanceof Error ? error.message : 'Unknown' },
       { status: 500 }

@@ -1,4 +1,5 @@
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
+import { loggers } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -144,7 +145,7 @@ async function handleAnomalyCheck(req: RequestWithSession): Promise<Response> {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error('Anomaly check error:', error);
+    loggers.tax.error({ err: error }, 'Anomaly check error');
     return NextResponse.json(
       { error: 'Anomaly detection failed' },
       { status: 500 }

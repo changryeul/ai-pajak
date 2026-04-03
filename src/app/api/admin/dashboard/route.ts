@@ -10,6 +10,7 @@ import {
   bucketAmount,
   validateMaskedData,
 } from '@/lib/admin/data-masking';
+import { loggers } from '@/lib/logger';
 
 /**
  * CRITICAL ENDPOINT - Platform Admin Dashboard
@@ -90,12 +91,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
   const { session } = request;
 
   // Log platform admin access
-  console.warn('[PLATFORM_ADMIN_ACCESS] Dashboard accessed', {
-    userId: session.userId,
-    email: session.email,
-    timestamp: new Date().toISOString(),
-    ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-  });
+  loggers.api.warn({ userId: session.userId, email: session.email, ipAddress: request.headers.get('x-forwarded-for') || 'unknown' }, 'Platform admin dashboard accessed');
 
   // Get Supabase client
   const supabase = await createClient();
@@ -261,10 +257,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     validateMaskedData(response);
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[PLATFORM_ADMIN_DASHBOARD] Data masking validation failed', {
-      error: errorMessage,
-      userId: session.userId,
-    });
+    loggers.api.error({ err: errorMessage, userId: session.userId }, 'Data masking validation failed');
 
     return NextResponse.json(
       {
@@ -276,12 +269,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     );
   }
 
-  console.info('[PLATFORM_ADMIN_DASHBOARD] Dashboard data generated', {
-    userId: session.userId,
-    totalCustomers: platformMetrics.totalCustomers,
-    totalFilings: filingMetrics.totalFilings,
-    transactionCount: billingMetrics.transactionCount,
-  });
+  loggers.api.info({ userId: session.userId, totalCustomers: platformMetrics.totalCustomers, totalFilings: filingMetrics.totalFilings, transactionCount: billingMetrics.transactionCount }, 'Platform admin dashboard data generated');
 
   return NextResponse.json(response);
 }

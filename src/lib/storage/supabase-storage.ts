@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { loggers } from '@/lib/logger';
 import {
   StorageBucket,
   FileMetadata,
@@ -49,7 +50,7 @@ export async function uploadFile(
       });
 
     if (error) {
-      console.error('Storage upload error:', error);
+      loggers.api.error({ err: error }, 'Storage upload error');
       return { success: false, error: error.message };
     }
 
@@ -80,7 +81,7 @@ export async function uploadFile(
       signedUrl: urlData?.signedUrl,
     };
   } catch (err) {
-    console.error('Upload error:', err);
+    loggers.api.error({ err }, 'Upload error');
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',
@@ -109,7 +110,7 @@ export async function getDownloadUrl(
 
     return { success: true, signedUrl: data.signedUrl };
   } catch (err) {
-    console.error('Download URL error:', err);
+    loggers.api.error({ err }, 'Download URL error');
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',
@@ -137,7 +138,7 @@ export async function deleteFile(
 
     return { success: true };
   } catch (err) {
-    console.error('Delete error:', err);
+    loggers.api.error({ err }, 'Delete error');
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',
@@ -170,7 +171,7 @@ export async function listFiles(
 
     return { success: true, data };
   } catch (err) {
-    console.error('List files error:', err);
+    loggers.api.error({ err }, 'List files error');
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',
@@ -209,7 +210,7 @@ export async function getFileMetadata(
 
     return { success: true, data: file };
   } catch (err) {
-    console.error('Get metadata error:', err);
+    loggers.api.error({ err }, 'Get metadata error');
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',
@@ -239,7 +240,7 @@ export async function copyFile(
 
     return { success: true, path: data.path };
   } catch (err) {
-    console.error('Copy error:', err);
+    loggers.api.error({ err }, 'Copy error');
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',
@@ -268,7 +269,7 @@ export async function moveFile(
 
     return { success: true, path: toPath };
   } catch (err) {
-    console.error('Move error:', err);
+    loggers.api.error({ err }, 'Move error');
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',

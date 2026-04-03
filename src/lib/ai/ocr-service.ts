@@ -1,4 +1,5 @@
 import type { OCRResult } from '@/types';
+import { loggers } from '@/lib/logger';
 
 /**
  * OCR Service - Document text extraction using AI
@@ -51,7 +52,7 @@ export class OCRService {
         processing_time_ms: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('Google Vision OCR error:', error);
+      loggers.ocr.error({ err: error }, 'Google Vision OCR error');
       return {
         success: false,
         document_type: 'unknown',
@@ -143,7 +144,7 @@ export class OCRService {
         processing_time_ms: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('OpenAI Vision OCR error:', error);
+      loggers.ocr.error({ err: error }, 'OpenAI Vision OCR error');
       return {
         success: false,
         document_type: 'unknown',

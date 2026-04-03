@@ -4,6 +4,7 @@ import {
   assignConsultant,
   unassignConsultant,
 } from '@/lib/services/customer-service';
+import { loggers } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Assign consultant error:', error);
+    loggers.api.error({ err: error }, 'Assign consultant error');
     return NextResponse.json(
       {
         success: false,
@@ -180,7 +181,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       message: 'Consultant unassigned successfully',
     });
   } catch (error) {
-    console.error('Unassign consultant error:', error);
+    loggers.api.error({ err: error }, 'Unassign consultant error');
     return NextResponse.json(
       {
         success: false,
@@ -242,7 +243,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       })) || [],
     });
   } catch (error) {
-    console.error('Get assignments error:', error);
+    loggers.api.error({ err: error }, 'Get assignments error');
     return NextResponse.json(
       {
         success: false,

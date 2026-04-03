@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BankingService } from '@/lib/banking';
+import { loggers } from '@/lib/logger';
 
 /**
  * GET /api/integrations/banking
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }
   } catch (error) {
-    console.error('Banking integration error:', error);
+    loggers.api.error({ err: error }, 'Banking integration error');
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Banking operation failed' },
       { status: 500 }

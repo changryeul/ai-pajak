@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -148,7 +149,7 @@ async function handleGetFiling(
       },
     });
   } catch (error) {
-    console.error('Error fetching filing:', error);
+    loggers.tax.error({ err: error }, 'Error fetching filing');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -228,7 +229,7 @@ async function handleUpdateFiling(
       .single();
 
     if (updateError) {
-      console.error('Error updating filing:', updateError);
+      loggers.tax.error({ err: updateError }, 'Error updating filing');
       return NextResponse.json(
         { success: false, error: 'Failed to update filing' },
         { status: 500 }
@@ -249,7 +250,7 @@ async function handleUpdateFiling(
       data: { id: updated.id },
     });
   } catch (error) {
-    console.error('Error in update filing:', error);
+    loggers.tax.error({ err: error }, 'Error in update filing');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

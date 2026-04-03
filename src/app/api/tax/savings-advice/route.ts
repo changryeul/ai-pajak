@@ -1,4 +1,5 @@
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
+import { loggers } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -137,7 +138,7 @@ async function handleSavingsAdvice(req: RequestWithSession): Promise<Response> {
       data: result,
     });
   } catch (error) {
-    console.error('Tax savings advice error:', error);
+    loggers.tax.error({ err: error }, 'Tax savings advice error');
     return NextResponse.json(
       { error: 'Failed to analyze tax savings', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

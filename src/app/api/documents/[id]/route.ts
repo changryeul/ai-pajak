@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { deleteFile, StorageBucket } from '@/lib/storage';
+import { loggers } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Get document error:', error);
+    loggers.api.error({ err: error }, 'Get document error');
     return NextResponse.json(
       {
         success: false,
@@ -189,7 +190,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const deleteResult = await deleteFile(bucket, document.file_path);
 
     if (!deleteResult.success) {
-      console.error('Storage delete failed:', deleteResult.error);
+      loggers.api.error({ err: deleteResult.error }, 'Storage delete failed');
       // Continue to delete database record even if storage delete fails
     }
 
@@ -211,7 +212,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       message: 'Document deleted successfully',
     });
   } catch (error) {
-    console.error('Delete document error:', error);
+    loggers.api.error({ err: error }, 'Delete document error');
     return NextResponse.json(
       {
         success: false,

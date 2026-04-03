@@ -8,6 +8,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { NotificationService } from './notification-service';
 import type { NotificationPriority } from './types';
+import { loggers } from '@/lib/logger';
 
 interface QueueItemContext {
   id: string;
@@ -232,7 +233,7 @@ export async function notifyWorkflowStatusChange(
       }
     }
   } catch (err) {
-    console.error('[WorkflowNotification] Failed to send notifications:', err);
+    loggers.email.error({ err }, 'Failed to send workflow notifications');
     // Non-blocking — don't throw
   }
 }

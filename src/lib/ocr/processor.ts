@@ -13,6 +13,7 @@ import {
   DOCUMENT_KEYWORDS,
   TAX_PATTERNS,
 } from './types';
+import { loggers } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -144,7 +145,7 @@ Important:
       processingTimeMs: Date.now() - startTime,
     };
   } catch (error) {
-    console.error('[OCR] Processing failed:', error);
+    loggers.ocr.error({ err: error }, 'Processing failed');
 
     return {
       documentId,

@@ -8,6 +8,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { PTKP_RATES } from '@/lib/tax/shared/constants';
 import type { PTKPStatus } from '@/lib/tax/shared/types';
+import { loggers } from '@/lib/logger';
 
 export interface ReportInput {
   customer: {
@@ -246,7 +247,7 @@ Gunakan data aktual dalam analisis. Jangan membuat data yang tidak ada.`,
     const content = response.content[0];
     return content.type === 'text' ? content.text : '';
   } catch (error) {
-    console.error('AI report generation error:', error);
+    loggers.api.error({ err: error }, 'AI report generation error');
     return generateFallbackAnalysis(input, calc);
   }
 }

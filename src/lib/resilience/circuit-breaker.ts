@@ -24,6 +24,8 @@
  * ```
  */
 
+import { loggers } from '@/lib/logger';
+
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
 export interface CircuitBreakerOptions {
@@ -175,16 +177,14 @@ export class CircuitBreaker {
     if (newState === 'OPEN') {
       this.nextAttemptTime = Date.now() + this.options.resetTimeout;
       this.successCount = 0;
-      console.warn(
-        `[CircuitBreaker] ${this.name}: OPEN - will retry after ${this.options.resetTimeout}ms`
-      );
+      loggers.api.warn({ service: this.name, resetTimeoutMs: this.options.resetTimeout }, 'Circuit breaker OPEN - will retry after timeout');
     } else if (newState === 'HALF_OPEN') {
       this.successCount = 0;
-      console.log(`[CircuitBreaker] ${this.name}: HALF_OPEN - testing service`);
+      loggers.api.info({ service: this.name }, 'Circuit breaker HALF_OPEN - testing service');
     } else if (newState === 'CLOSED') {
       this.failures = [];
       this.successCount = 0;
-      console.log(`[CircuitBreaker] ${this.name}: CLOSED - service recovered`);
+      loggers.api.info({ service: this.name }, 'Circuit breaker CLOSED - service recovered');
     }
 
     if (this.onStateChange && oldState !== newState) {
@@ -234,7 +234,7 @@ export const circuitBreakers = {
     failureWindow: 120000, // 2 minutes
     successThreshold: 2,
     onStateChange: (name, from, to) => {
-      console.log(`[CircuitBreaker] ${name}: ${from} -> ${to}`);
+      loggers.api.info({ service: name, from, to }, 'Circuit breaker state changed');
     },
   }),
 

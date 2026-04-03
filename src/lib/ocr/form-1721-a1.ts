@@ -19,6 +19,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { OCRResult, ExtractedData } from './types';
+import { loggers } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -171,7 +172,7 @@ Set confidence based on document clarity and how many fields were successfully e
       processingTimeMs: Date.now() - startTime,
     };
   } catch (error) {
-    console.error('[OCR] Form 1721-A1 processing failed:', error);
+    loggers.ocr.error({ err: error }, 'Form 1721-A1 processing failed');
 
     return {
       documentId,

@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { evaluateAutoApproval } from '@/lib/ai/auto-approval-engine';
 import { notifyWorkflowStatusChange } from '@/lib/notifications/operator-workflow-notifications';
 import { submitQueueItemToDJP } from '@/lib/djp/operator-djp-submit';
+import { loggers } from '@/lib/logger';
 
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
@@ -447,7 +448,7 @@ export async function PUT(request: NextRequest) {
         .eq('id', id);
     } catch (err) {
       // Auto-approval failure should not block the normal flow
-      console.error('Auto-approval evaluation failed:', err);
+      loggers.api.error({ err }, 'Auto-approval evaluation failed');
     }
   }
 
@@ -489,7 +490,7 @@ export async function PUT(request: NextRequest) {
     action,
     actorUserId: user!.id,
     autoApproved: autoApprovalResult?.approved,
-  }).catch(err => console.error('[Queue] Notification failed:', err));
+  }).catch(err => loggers.api.error({ err }, 'Queue notification failed'));
 
   return NextResponse.json({
     success: true,

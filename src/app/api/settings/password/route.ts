@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { loggers } from '@/lib/logger';
 
 /**
  * PUT /api/settings/password
@@ -63,7 +64,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (updateError) {
-      console.error('Password update error:', updateError);
+      loggers.api.error({ err: updateError }, 'Password update error');
       return NextResponse.json(
         { success: false, error: 'Failed to update password' },
         { status: 500 }
@@ -75,7 +76,7 @@ export async function PUT(request: NextRequest) {
       message: 'Password updated successfully',
     });
   } catch (error) {
-    console.error('Password change error:', error);
+    loggers.api.error({ err: error }, 'Password change error');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

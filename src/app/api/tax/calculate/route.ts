@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
@@ -456,11 +457,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     .single();
 
   if (calcError) {
-    console.error('[TAX_CALC] Failed to save calculation', {
-      error: calcError,
-      customerId,
-      taxType,
-    });
+    loggers.tax.error({ err: calcError, customerId, taxType }, 'Failed to save calculation');
   }
 
   // Create audit log
@@ -481,13 +478,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     user_agent: request.headers.get('user-agent') || 'unknown',
   });
 
-  console.info('[TAX_CALC] Tax calculation completed', {
-    calculationId: calculation?.id,
-    customerId,
-    taxType,
-    netTaxDue,
-    consultantId: consultant.id,
-  });
+  loggers.tax.info({ calculationId: calculation?.id, customerId, taxType, netTaxDue, consultantId: consultant.id }, 'Tax calculation completed');
 
   // Prepare response
   const response: TaxCalculationResponse = {

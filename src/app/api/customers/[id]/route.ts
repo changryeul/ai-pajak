@@ -5,6 +5,7 @@ import {
   updateCustomer,
   deleteCustomer,
 } from '@/lib/services/customer-service';
+import { loggers } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -112,7 +113,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       data: customer,
     });
   } catch (error) {
-    console.error('Get customer error:', error);
+    loggers.api.error({ err: error }, 'Get customer error');
     return NextResponse.json(
       {
         success: false,
@@ -208,7 +209,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       data: customer,
     });
   } catch (error) {
-    console.error('Update customer error:', error);
+    loggers.api.error({ err: error }, 'Update customer error');
     return NextResponse.json(
       {
         success: false,
@@ -273,7 +274,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         : 'Customer deactivated successfully',
     });
   } catch (error) {
-    console.error('Delete customer error:', error);
+    loggers.api.error({ err: error }, 'Delete customer error');
     return NextResponse.json(
       {
         success: false,

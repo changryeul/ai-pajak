@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { withAudit } from '@/middleware/audit';
+import { loggers } from '@/lib/logger';
 import type { RequestWithSession } from '@/types/auth';
 
 type ReportType = 'tax_summary' | 'filing_history' | 'payment_history' | 'annual_summary';
@@ -86,7 +87,7 @@ async function handleGetReport(req: RequestWithSession): Promise<Response> {
       data: reportData,
     });
   } catch (error) {
-    console.error('Error generating report:', error);
+    loggers.api.error({ err: error }, 'Error generating report');
     return NextResponse.json(
       { success: false, error: 'Failed to generate report' },
       { status: 500 }
@@ -146,7 +147,7 @@ async function generateTaxSummary(customerId: string | null, year: number): Prom
   const { data: filings, error } = await query;
 
   if (error) {
-    console.error('Error fetching filings for tax summary:', error);
+    loggers.api.error({ err: error }, 'Error fetching filings for tax summary');
     throw error;
   }
 
@@ -208,7 +209,7 @@ async function generateFilingHistory(customerId: string | null, year: number): P
   const { data: filings, error } = await query;
 
   if (error) {
-    console.error('Error fetching filings for history:', error);
+    loggers.api.error({ err: error }, 'Error fetching filings for history');
     throw error;
   }
 
@@ -267,7 +268,7 @@ async function generatePaymentHistory(customerId: string | null, year: number): 
   const { data: transactions, error } = await query;
 
   if (error) {
-    console.error('Error fetching payments:', error);
+    loggers.api.error({ err: error }, 'Error fetching payments');
     // If table doesn't exist or other error, return empty data
     return {
       totalPaid: 0,
@@ -309,7 +310,7 @@ async function generateAnnualSummary(customerId: string | null, year: number): P
   const { data: filings, error } = await query;
 
   if (error) {
-    console.error('Error fetching filings for annual summary:', error);
+    loggers.api.error({ err: error }, 'Error fetching filings for annual summary');
     throw error;
   }
 

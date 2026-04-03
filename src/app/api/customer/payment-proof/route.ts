@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
 
 /**
  * POST /api/customer/payment-proof
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
       message: 'Payment proof uploaded successfully',
     });
   } catch (error) {
-    console.error('Payment proof upload error:', error);
+    loggers.payment.error({ err: error }, 'Payment proof upload error');
     return NextResponse.json(
       { error: 'Failed to upload payment proof' },
       { status: 500 }

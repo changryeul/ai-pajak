@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
 
 /**
  * GET /api/customer/queue
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Customer queue error:', error);
+    loggers.api.error({ err: error }, 'Customer queue error');
     return NextResponse.json({ error: 'Failed to fetch queue' }, { status: 500 });
   }
 }

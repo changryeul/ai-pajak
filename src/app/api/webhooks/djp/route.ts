@@ -12,6 +12,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { DJPService } from '@/lib/djp/djp-service';
 import { queueDJPJob } from '@/lib/djp/queue';
 import type { DJPWebhookEventType, DJPJobRow } from '@/lib/djp/types';
+import { loggers } from '@/lib/logger';
 
 interface WebhookPayload {
   event_type: string;
@@ -34,11 +35,7 @@ export async function POST(request: NextRequest) {
     const timestamp = request.headers.get('X-DJP-Timestamp') || '';
 
     // Log webhook receipt
-    console.info('[DJP Webhook] Received', {
-      signature: signature.slice(0, 20) + '...',
-      timestamp,
-      bodyLength: rawBody.length,
-    });
+    loggers.djp.info({ signature: signature.slice(0, 20) + '...', timestamp, bodyLength: rawBody.length }, 'DJP webhook received');
 
     // Verify signature
     const isValid = DJPService.verifyWebhookSignature(rawBody, signature, timestamp);
@@ -48,7 +45,7 @@ export async function POST(request: NextRequest) {
     try {
       payload = JSON.parse(rawBody);
     } catch {
-      console.error('[DJP Webhook] Invalid JSON payload');
+      loggers.djp.error('DJP webhook invalid JSON payload');
       await logWebhook(null, rawBody, signature, false, 'INVALID_JSON');
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
@@ -56,17 +53,14 @@ export async function POST(request: NextRequest) {
     await logWebhook(payload, rawBody, signature, isValid, null);
 
     if (!isValid) {
-      console.error('[DJP Webhook] Invalid signature');
+      loggers.djp.error('DJP webhook invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     const eventType = payload.event_type as DJPWebhookEventType;
     const transactionId = payload.transaction_id;
 
-    console.info('[DJP Webhook] Processing', {
-      eventType,
-      transactionId,
-    });
+    loggers.djp.info({ eventType, transactionId }, 'DJP webhook processing');
 
     // Find the job/filing by transaction ID
     const { data: job } = await getSupabaseAdmin()
@@ -76,7 +70,7 @@ export async function POST(request: NextRequest) {
       .single<Pick<DJPJobRow, 'id' | 'tax_filing_id' | 'customer_id' | 'type'>>();
 
     if (!job) {
-      console.warn('[DJP Webhook] Job not found for transaction:', transactionId);
+      loggers.djp.warn({ transactionId }, 'DJP webhook job not found for transaction');
       // Still return success to prevent DJP from retrying
       return NextResponse.json({ received: true, warning: 'Job not found' });
     }
@@ -100,7 +94,7 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.warn('[DJP Webhook] Unknown event type:', eventType);
+        loggers.djp.warn({ eventType }, 'DJP webhook unknown event type');
     }
 
     // Create audit log
@@ -121,15 +115,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.info('[DJP Webhook] Processed successfully', {
-      eventType,
-      transactionId,
-      processingTimeMs: Date.now() - startTime,
-    });
+    loggers.djp.info({ eventType, transactionId, processingTimeMs: Date.now() - startTime }, 'DJP webhook processed successfully');
 
     return NextResponse.json({ received: true, eventType });
   } catch (error) {
-    console.error('[DJP Webhook] Error:', error);
+    loggers.djp.error({ err: error }, 'DJP webhook error');
 
     // Still return 200 to prevent DJP from retrying on our errors
     return NextResponse.json(
@@ -210,10 +200,7 @@ async function handleFilingAccepted(
   // Send notification
   await sendFilingNotification(job.tax_filing_id, 'accepted', bpeNumber);
 
-  console.info('[DJP Webhook] Filing accepted', {
-    taxFilingId: job.tax_filing_id,
-    bpeNumber,
-  });
+  loggers.djp.info({ taxFilingId: job.tax_filing_id, bpeNumber }, 'DJP webhook filing accepted');
 }
 
 async function handleFilingRejected(
@@ -249,10 +236,7 @@ async function handleFilingRejected(
   // Send notification
   await sendFilingNotification(job.tax_filing_id, 'rejected', undefined);
 
-  console.info('[DJP Webhook] Filing rejected', {
-    taxFilingId: job.tax_filing_id,
-    errorCode,
-  });
+  loggers.djp.info({ taxFilingId: job.tax_filing_id, errorCode }, 'DJP webhook filing rejected');
 }
 
 async function handleBPEReady(
@@ -275,9 +259,7 @@ async function handleBPEReady(
       maxRetries: 3,
     });
 
-    console.info('[DJP Webhook] BPE retrieval queued', {
-      taxFilingId: job.tax_filing_id,
-    });
+    loggers.djp.info({ taxFilingId: job.tax_filing_id }, 'DJP webhook BPE retrieval queued');
   }
 }
 
@@ -317,10 +299,7 @@ async function handleBillingPaid(
     })
     .eq('id', job.id);
 
-  console.info('[DJP Webhook] Billing payment recorded', {
-    jobId: job.id,
-    ntpn,
-  });
+  loggers.djp.info({ jobId: job.id, ntpn }, 'DJP webhook billing payment recorded');
 }
 
 // ============================================================================
@@ -345,7 +324,7 @@ async function logWebhook(
       error_message: error,
     });
   } catch (logError) {
-    console.error('[DJP Webhook] Failed to log webhook:', logError);
+    loggers.djp.error({ err: logError }, 'DJP webhook failed to log webhook');
   }
 }
 
@@ -394,13 +373,9 @@ async function sendFilingNotification(
       });
     }
 
-    console.info('[DJP Webhook] Notification sent', {
-      taxFilingId,
-      status,
-      userId: customer.user_id,
-    });
+    loggers.djp.info({ taxFilingId, status, userId: customer.user_id }, 'DJP webhook notification sent');
   } catch (error) {
     // Don't fail the webhook for notification errors
-    console.error('[DJP Webhook] Failed to send notification:', error);
+    loggers.djp.error({ err: error }, 'DJP webhook failed to send notification');
   }
 }

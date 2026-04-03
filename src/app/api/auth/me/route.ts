@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { loggers } from '@/lib/logger';
 
 /**
  * GET /api/auth/me
@@ -70,7 +71,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Get user profile error:', error);
+    loggers.auth.error({ err: error }, 'Get user profile error');
     return NextResponse.json(
       { success: false, error: 'Failed to get user profile' },
       { status: 500 }
@@ -124,7 +125,7 @@ export async function PUT(request: NextRequest) {
         .eq('user_id', user.id);
 
       if (updateError) {
-        console.error('Customer update error:', updateError);
+        loggers.auth.error({ err: updateError }, 'Customer update error');
         return NextResponse.json(
           { success: false, error: 'Failed to update profile' },
           { status: 500 }
@@ -141,7 +142,7 @@ export async function PUT(request: NextRequest) {
         .eq('user_id', user.id);
 
       if (updateError) {
-        console.error('Consultant update error:', updateError);
+        loggers.auth.error({ err: updateError }, 'Consultant update error');
         return NextResponse.json(
           { success: false, error: 'Failed to update profile' },
           { status: 500 }
@@ -159,7 +160,7 @@ export async function PUT(request: NextRequest) {
       message: 'Profile updated successfully',
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    loggers.auth.error({ err: error }, 'Update profile error');
     return NextResponse.json(
       { success: false, error: 'Failed to update profile' },
       { status: 500 }

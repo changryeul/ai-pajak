@@ -8,6 +8,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { queueDJPJob } from './queue';
+import { loggers } from '@/lib/logger';
 import type { EFilingRequest, SPTType } from './types';
 
 interface QueueItemForDJP {
@@ -210,7 +211,7 @@ export async function submitQueueItemToDJP(
     return { success: true, jobId, taxFilingId };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[OperatorDJPSubmit] Failed:', message);
+    loggers.djp.error({ err: message }, 'OperatorDJPSubmit failed');
     return { success: false, error: message };
   }
 }

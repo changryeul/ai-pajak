@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
@@ -34,7 +35,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 
   // Table might not exist yet on remote
   if (queryError) {
-    console.error('Monthly payment query error:', queryError);
+    loggers.tax.error({ err: queryError }, 'Monthly payment query error');
     return NextResponse.json({
       success: true,
       data: { year, summary: [], totalOutstanding: 0, allPayments: [] },
@@ -107,7 +108,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           .from('tax_monthly_payment')
           .upsert(schedule, { onConflict: 'customer_id,tax_type,tax_period', ignoreDuplicates: true });
 
-        if (error) console.error('Schedule generation error:', error);
+        if (error) loggers.tax.error({ err: error }, 'Schedule generation error');
 
         return NextResponse.json({ success: true, data: { created: schedule.length } });
       }
@@ -171,7 +172,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           .from('tax_monthly_payment')
           .upsert(installments, { onConflict: 'customer_id,tax_type,tax_period', ignoreDuplicates: false });
 
-        if (error) console.error('PPh25 error:', error);
+        if (error) loggers.tax.error({ err: error }, 'PPh25 installment upsert error');
 
         return NextResponse.json({
           success: true,

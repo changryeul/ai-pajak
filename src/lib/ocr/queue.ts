@@ -10,6 +10,7 @@ import { OCRJobRequest, OCRJobStatus, OCRResult, OCRStatus, DocumentCategory } f
 import { processDocument } from './processor';
 import { processForm1721A1 } from './form-1721-a1';
 import { processPDF } from './pdf-processor';
+import { loggers } from '@/lib/logger';
 
 // Create admin client for background processing
 function getAdminClient() {
@@ -38,7 +39,7 @@ export async function queueOCRJob(request: OCRJobRequest): Promise<string> {
   // In a production environment, this would queue to a job processor
   // For now, we process immediately in the background
   processOCRJob(request).catch((error) => {
-    console.error('[OCR Queue] Background processing failed:', error);
+    loggers.ocr.error({ err: error }, 'Background processing failed');
   });
 
   return request.documentId;
@@ -134,15 +135,15 @@ async function processOCRJob(request: OCRJobRequest): Promise<void> {
       })
       .eq('id', request.documentId);
 
-    console.info('[OCR] Processing completed:', {
+    loggers.ocr.info({
       documentId: request.documentId,
       category: result.category,
       formType,
       confidence: result.confidence,
       processingTimeMs: result.processingTimeMs,
-    });
+    }, 'Processing completed');
   } catch (error) {
-    console.error('[OCR] Processing failed:', error);
+    loggers.ocr.error({ err: error }, 'Processing failed');
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 

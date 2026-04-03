@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
@@ -111,7 +112,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
         .order('created_at', { ascending: false });
 
       if (docError) {
-        console.error('Error fetching documents:', docError);
+        loggers.tax.error({ err: docError }, 'Error fetching documents');
       }
 
       if (documents && documents.length > 0) {
@@ -206,7 +207,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
           },
         });
       } catch (pdfError) {
-        console.error('PDF generation error:', pdfError);
+        loggers.tax.error({ err: pdfError }, 'PDF generation error');
         return NextResponse.json(
           {
             error: 'PDF generation failed',
@@ -228,7 +229,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('SPT generation error:', error);
+    loggers.tax.error({ err: error }, 'SPT generation error');
     return NextResponse.json(
       {
         error: 'Internal server error',

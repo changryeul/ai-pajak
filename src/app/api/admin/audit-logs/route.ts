@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
 
 async function checkAdmin(userId: string): Promise<boolean> {
   const { data } = await getSupabaseAdmin().from('user_roles').select('role').eq('user_id', userId).single();
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     const { data: logs, count, error } = await query;
 
     if (error) {
-      console.error('Audit log query error:', error);
+      loggers.api.error({ err: error }, 'Audit log query error');
       return NextResponse.json({ success: true, data: { logs: [], stats: {}, pagination: { page, limit, total: 0 } } });
     }
 
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Audit logs error:', error);
+    loggers.api.error({ err: error }, 'Audit logs error');
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }

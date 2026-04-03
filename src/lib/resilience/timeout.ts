@@ -24,6 +24,8 @@
  * ```
  */
 
+import { loggers } from '@/lib/logger';
+
 export class TimeoutError extends Error {
   constructor(
     message: string,
@@ -198,10 +200,12 @@ export async function withRetry<T>(
           options.onRetry(lastError, attempt + 1, delay);
         }
 
-        console.log(
-          `[Retry] Attempt ${attempt + 1}/${opts.maxRetries} failed, ` +
-          `retrying in ${delay}ms: ${lastError.message}`
-        );
+        loggers.api.warn({
+          attempt: attempt + 1,
+          maxRetries: opts.maxRetries,
+          delayMs: delay,
+          err: lastError,
+        }, 'Retry attempt failed, retrying');
 
         await sleep(delay);
       } else {

@@ -14,6 +14,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import type { RequestWithSession } from '@/types/auth';
 import { UserRole } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 interface ConsultantStats {
   activeClients: number;
@@ -74,7 +75,7 @@ async function handleGetStats(request: RequestWithSession): Promise<Response> {
       data: null,
     });
   } catch (error) {
-    console.error('[DASHBOARD_STATS] Error:', error);
+    loggers.api.error({ err: error }, 'Dashboard stats error');
     return NextResponse.json(
       { success: false, error: 'Failed to fetch stats' },
       { status: 500 }

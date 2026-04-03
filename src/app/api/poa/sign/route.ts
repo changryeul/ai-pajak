@@ -6,6 +6,7 @@ import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
 import { withAudit } from '@/middleware/audit';
 import { UserRole } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * Power of Attorney (POA) Signing Endpoint
@@ -207,10 +208,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       .eq('id', poaId);
 
     if (updateError) {
-      console.error('[POA_SIGN] Failed to update POA', {
-        error: updateError,
-        poaId,
-      });
+      loggers.api.error({ err: updateError, poaId }, 'Failed to update POA for customer signature');
 
       return NextResponse.json(
         {
@@ -310,10 +308,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       .eq('id', poaId);
 
     if (updateError) {
-      console.error('[POA_SIGN] Failed to update POA', {
-        error: updateError,
-        poaId,
-      });
+      loggers.api.error({ err: updateError, poaId }, 'Failed to update POA for advisor signature');
 
       return NextResponse.json(
         {
@@ -370,13 +365,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     user_agent: request.headers.get('user-agent') || 'unknown',
   });
 
-  console.info('[POA_SIGN] POA signed successfully', {
-    poaId,
-    poaNumber: poa.poa_number,
-    signerRole: session.role,
-    previousStatus,
-    newStatus,
-  });
+  loggers.api.info({ poaId, poaNumber: poa.poa_number, signerRole: session.role, previousStatus, newStatus }, 'POA signed successfully');
 
   // Prepare response
   const customerData = poa.customer as CustomerData | CustomerData[];

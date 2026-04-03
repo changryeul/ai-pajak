@@ -7,6 +7,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { DJPService } from './djp-service';
+import { loggers } from '@/lib/logger';
 import {
   DJPJobType,
   DJPJobStatus,
@@ -60,11 +61,7 @@ export async function queueDJPJob(params: QueueJobParams): Promise<string> {
   const supabase = getAdminClient();
   const jobId = crypto.randomUUID();
 
-  console.info('[DJP Queue] Queuing job', {
-    jobId,
-    type: params.type,
-    taxFilingId: params.taxFilingId,
-  });
+  loggers.djp.info({ jobId, type: params.type, taxFilingId: params.taxFilingId }, 'Queuing job');
 
   // Insert job record
   const { error } = await supabase.from('djp_job').insert({
@@ -81,7 +78,7 @@ export async function queueDJPJob(params: QueueJobParams): Promise<string> {
   });
 
   if (error) {
-    console.error('[DJP Queue] Failed to queue job', { jobId, error });
+    loggers.djp.error({ jobId, err: error }, 'Failed to queue job');
     throw new Error(`Failed to queue DJP job: ${error.message}`);
   }
 
@@ -98,7 +95,7 @@ export async function queueDJPJob(params: QueueJobParams): Promise<string> {
 
   // Process immediately in background (non-blocking)
   processDJPJob(jobId).catch((error) => {
-    console.error('[DJP Queue] Background processing failed:', error);
+    loggers.djp.error({ err: error }, 'Background processing failed');
   });
 
   return jobId;
@@ -118,22 +115,19 @@ async function processDJPJob(jobId: string): Promise<void> {
     .single<DJPJobRow>();
 
   if (fetchError || !job) {
-    console.error('[DJP Queue] Job not found:', jobId);
+    loggers.djp.error({ jobId }, 'Job not found');
     return;
   }
 
   // Check if scheduled for later
   if (job.scheduled_at && new Date(job.scheduled_at) > new Date()) {
-    console.info('[DJP Queue] Job scheduled for later:', {
-      jobId,
-      scheduledAt: job.scheduled_at,
-    });
+    loggers.djp.info({ jobId, scheduledAt: job.scheduled_at }, 'Job scheduled for later');
     return;
   }
 
   // Check if already processing or completed
   if (job.status !== 'PENDING') {
-    console.info('[DJP Queue] Job not pending:', { jobId, status: job.status });
+    loggers.djp.info({ jobId, status: job.status }, 'Job not pending');
     return;
   }
 
@@ -146,7 +140,7 @@ async function processDJPJob(jobId: string): Promise<void> {
     })
     .eq('id', jobId);
 
-  console.info('[DJP Queue] Processing job', { jobId, type: job.type });
+  loggers.djp.info({ jobId, type: job.type }, 'Processing job');
 
   try {
     let result: unknown;
@@ -192,10 +186,7 @@ async function processDJPJob(jobId: string): Promise<void> {
       })
       .eq('id', jobId);
 
-    console.info('[DJP Queue] Job completed successfully', {
-      jobId,
-      type: job.type,
-    });
+    loggers.djp.info({ jobId, type: job.type }, 'Job completed successfully');
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
@@ -232,12 +223,7 @@ async function processDJPJob(jobId: string): Promise<void> {
         .eq('id', job.tax_filing_id);
     }
 
-    console.error('[DJP Queue] Job failed', {
-      jobId,
-      error: errorMessage,
-      willRetry: shouldRetry,
-      retryCount: newRetryCount,
-    });
+    loggers.djp.error({ jobId, error: errorMessage, willRetry: shouldRetry, retryCount: newRetryCount }, 'Job failed');
   }
 }
 
@@ -283,11 +269,7 @@ async function handleEFilingResult(
     .update(updateData)
     .eq('id', job.tax_filing_id);
 
-  console.info('[DJP Queue] e-Filing result saved', {
-    taxFilingId: job.tax_filing_id,
-    status: result.status,
-    bpeNumber: result.bpeNumber,
-  });
+  loggers.djp.info({ taxFilingId: job.tax_filing_id, status: result.status, bpeNumber: result.bpeNumber }, 'e-Filing result saved');
 }
 
 /**
@@ -317,9 +299,7 @@ async function handleEBillingResult(
     status: 'ACTIVE',
   });
 
-  console.info('[DJP Queue] e-Billing record created', {
-    kodeBilling: result.kodeBilling,
-  });
+  loggers.djp.info({ kodeBilling: result.kodeBilling }, 'e-Billing record created');
 }
 
 /**
@@ -342,10 +322,7 @@ async function handleBPERetrievalResult(
     })
     .eq('id', job.tax_filing_id);
 
-  console.info('[DJP Queue] BPE saved', {
-    taxFilingId: job.tax_filing_id,
-    bpeNumber: result.bpeNumber,
-  });
+  loggers.djp.info({ taxFilingId: job.tax_filing_id, bpeNumber: result.bpeNumber }, 'BPE saved');
 }
 
 // ============================================================================
@@ -415,10 +392,10 @@ export async function retryDJPJob(jobId: string): Promise<boolean> {
     })
     .eq('id', jobId);
 
-  console.info('[DJP Queue] Job reset for retry', { jobId });
+  loggers.djp.info({ jobId }, 'Job reset for retry');
 
   // Trigger processing
-  processDJPJob(jobId).catch(console.error);
+  processDJPJob(jobId).catch((err) => loggers.djp.error({ err }, 'Job retry processing failed'));
 
   return true;
 }
@@ -455,7 +432,7 @@ export async function cancelDJPJob(jobId: string): Promise<boolean> {
       .eq('id', job.tax_filing_id);
   }
 
-  console.info('[DJP Queue] Job cancelled', { jobId });
+  loggers.djp.info({ jobId }, 'Job cancelled');
   return true;
 }
 
@@ -475,11 +452,11 @@ export async function processPendingDJPJobs(limit = 10): Promise<number> {
     .limit(limit);
 
   if (error || !jobs) {
-    console.error('[DJP Queue] Failed to fetch pending jobs', error);
+    loggers.djp.error({ err: error }, 'Failed to fetch pending jobs');
     return 0;
   }
 
-  console.info('[DJP Queue] Processing pending jobs', { count: jobs.length });
+  loggers.djp.info({ count: jobs.length }, 'Processing pending jobs');
 
   // Process jobs concurrently
   await Promise.allSettled(jobs.map((job) => processDJPJob(job.id)));

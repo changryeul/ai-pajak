@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { TaxLawAnalyzer } from '@/lib/ai/tax-law-analyzer';
+import { loggers } from '@/lib/logger';
 
 /**
  * AI 기반 세법 문서 자동 분석 API
@@ -60,21 +61,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Claude AI로 분석
-    console.info('[TAX_LAW_ANALYZE] Starting AI analysis', {
-      metadata,
-      documentLength: document_text.length,
-      userId: session.user.id,
-    });
+    loggers.api.info({ metadata, documentLength: document_text.length, userId: session.user.id }, 'Starting tax law AI analysis');
 
     const analyzer = new TaxLawAnalyzer();
     const analysisResult = await analyzer.analyzeLawDocument(document_text, metadata);
 
-    console.info('[TAX_LAW_ANALYZE] Analysis completed', {
-      lawNumber: analysisResult.law_number,
-      changeTypes: analysisResult.change_type,
-      confidenceScore: analysisResult.confidence_score,
-      requiresReview: analysisResult.requires_human_review,
-    });
+    loggers.api.info({ lawNumber: analysisResult.law_number, changeTypes: analysisResult.change_type, confidenceScore: analysisResult.confidence_score, requiresReview: analysisResult.requires_human_review }, 'Tax law analysis completed');
 
     // 5. 감사 로그
     await supabase.from('audit_log').insert({
@@ -112,7 +104,7 @@ export async function POST(req: NextRequest) {
         : 'Analysis is ready for automatic application.',
     });
   } catch (error: unknown) {
-    console.error('[TAX_LAW_ANALYZE] Error:', error);
+    loggers.api.error({ err: error }, 'Tax law analysis error');
 
     // Anthropic API 오류 처리
     const apiError = error as { status?: number; message?: string };
@@ -182,7 +174,7 @@ export async function GET(_req: NextRequest) {
       count: analyses?.length || 0,
     });
   } catch (error: unknown) {
-    console.error('[TAX_LAW_ANALYZE] GET Error:', error);
+    loggers.api.error({ err: error }, 'Tax law analyses GET error');
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { error: 'Failed to fetch analyses', message: errorMessage },

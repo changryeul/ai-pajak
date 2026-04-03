@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { revokePOA, rejectPOA, getPOA } from '@/lib/services/poa-service';
+import { loggers } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -199,7 +200,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       { status: 403 }
     );
   } catch (error) {
-    console.error('Revoke POA error:', error);
+    loggers.api.error({ err: error }, 'Revoke POA error');
     return NextResponse.json(
       {
         success: false,

@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies, headers } from 'next/headers';
 import { SessionContext, UserRole, OrganizationType } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * Check if a token is a service role key (SYSTEM account)
@@ -74,7 +75,7 @@ export async function getSessionContext(): Promise<SessionContext | null> {
     const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error || !user) {
-      console.error('[AUTH] Token validation failed:', error?.message);
+      loggers.auth.error({ err: error }, 'Token validation failed');
       return null;
     }
 
@@ -119,7 +120,7 @@ export async function getSessionContext(): Promise<SessionContext | null> {
     .single();
 
   if (error || !userRole) {
-    console.error('[AUTH] Failed to get user role:', error);
+    loggers.auth.error({ err: error }, 'Failed to get user role');
     return null;
   }
 

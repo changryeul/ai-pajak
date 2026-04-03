@@ -1,6 +1,7 @@
 import { getPPNRate } from '@/config/tax-rates';
 import type { PPNData, PPNItem } from '@/types';
 import { createClient } from '@/lib/supabase/client';
+import { loggers } from '@/lib/logger';
 
 export interface PPNCalculation {
   original_dpp: number;
@@ -59,7 +60,7 @@ export class PPNCalculator {
       return data.category === 'LUXURY';
     } catch (error) {
       // On error, default to non-luxury (safer for taxpayer)
-      console.warn('Luxury item check failed:', error);
+      loggers.tax.warn({ err: error }, 'Luxury item check failed');
       return false;
     }
   }

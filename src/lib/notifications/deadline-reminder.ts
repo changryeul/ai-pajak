@@ -8,6 +8,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NotificationService } from './notification-service';
 import { DeadlineReminderData, NotificationPriority } from './types';
+import { loggers } from '@/lib/logger';
 
 // Type for tax filing query result
 interface TaxFilingRecord {
@@ -80,7 +81,7 @@ export async function getUpcomingDeadlines(
     .order('created_at', { ascending: false });
 
   if (error || !customers) {
-    console.error('[DeadlineReminder] Error fetching customers:', error);
+    loggers.email.error({ err: error }, 'Error fetching customers for deadline reminders');
     return [];
   }
 
@@ -92,7 +93,7 @@ export async function getUpcomingDeadlines(
     .returns<TaxFilingRecord[]>();
 
   if (filingError) {
-    console.error('[DeadlineReminder] Error fetching filings:', filingError);
+    loggers.email.error({ err: filingError }, 'Error fetching filings for deadline reminders');
   }
 
   // Build a map of filed periods
@@ -356,11 +357,11 @@ export async function runDeadlineReminders(): Promise<{
 
   const result = await processDeadlineReminders(supabase);
 
-  console.log('[DeadlineReminder] Completed:', {
+  loggers.email.info({
     processed: result.processed,
     sent: result.notificationsSent,
     errors: result.errors.length,
-  });
+  }, 'Deadline reminders completed');
 
   return {
     success: result.errors.length === 0,

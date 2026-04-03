@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { loggers } from '@/lib/logger';
 
 interface NotificationPreferences {
   email_enabled: boolean;
@@ -36,7 +37,7 @@ export async function GET() {
       .single();
 
     if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching notification preferences:', error);
+      loggers.api.error({ err: error }, 'Error fetching notification preferences');
       return NextResponse.json(
         { success: false, error: 'Failed to fetch preferences' },
         { status: 500 }
@@ -58,7 +59,7 @@ export async function GET() {
       data: preferences || defaultPreferences,
     });
   } catch (error) {
-    console.error('Get notification preferences error:', error);
+    loggers.api.error({ err: error }, 'Get notification preferences error');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -132,7 +133,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (result.error) {
-      console.error('Error updating notification preferences:', result.error);
+      loggers.api.error({ err: result.error }, 'Error updating notification preferences');
       return NextResponse.json(
         { success: false, error: 'Failed to update preferences' },
         { status: 500 }
@@ -145,7 +146,7 @@ export async function PUT(request: NextRequest) {
       message: 'Notification preferences updated successfully',
     });
   } catch (error) {
-    console.error('Update notification preferences error:', error);
+    loggers.api.error({ err: error }, 'Update notification preferences error');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

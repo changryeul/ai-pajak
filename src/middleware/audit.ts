@@ -1,4 +1,5 @@
 import { RequestWithSession, AuditContext } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * Audit trail middleware
@@ -52,28 +53,26 @@ export function withAudit(action: string) {
     request.audit = auditContext;
 
     // Log audit event
-    console.info('[AUDIT]', {
+    loggers.audit.info({
       action,
       userId: session.userId,
       role: session.role,
       organizationId: session.organizationId,
       ipAddress,
-      userAgent,
       timestamp: auditContext.timestamp.toISOString(),
       url: request.url,
       method: request.method,
-    });
+    }, `Audit: ${action}`);
 
     // Execute handler
     const response = await handler(request);
 
     // Log completion status
-    console.info('[AUDIT] Completed', {
+    loggers.audit.info({
       action,
       userId: session.userId,
       status: response.status,
-      timestamp: new Date().toISOString(),
-    });
+    }, `Audit completed: ${action}`);
 
     return response;
   };

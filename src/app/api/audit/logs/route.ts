@@ -4,6 +4,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * Get Audit Logs
@@ -87,7 +88,7 @@ async function handleGetLogs(req: RequestWithSession): Promise<Response> {
     const { data: logs, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching audit logs:', error);
+      loggers.audit.error({ err: error }, 'Error fetching audit logs');
       return NextResponse.json(
         { success: false, error: 'Failed to fetch audit logs' },
         { status: 500 }
@@ -106,7 +107,7 @@ async function handleGetLogs(req: RequestWithSession): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('Error in audit logs:', error);
+    loggers.audit.error({ err: error }, 'Error in audit logs');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

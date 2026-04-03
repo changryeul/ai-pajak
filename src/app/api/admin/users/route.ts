@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
 
 /**
  * GET /api/admin/users?search=xxx&role=CUSTOMER&page=1&limit=20
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
       const { data: authData } = await getSupabaseAdmin().auth.admin.listUsers({ page, perPage: limit });
       authUsers = authData?.users || [];
     } catch (err) {
-      console.error('Failed to list auth users:', err);
+      loggers.api.error({ err }, 'Failed to list auth users');
       // Fall back to user_roles table
     }
 

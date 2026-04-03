@@ -6,6 +6,7 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { loggers } from '@/lib/logger';
 import {
   Notification,
   NotificationType,
@@ -67,7 +68,7 @@ export async function createNotification(params: {
     .single();
 
   if (error) {
-    console.error('[Notification] Failed to create:', error);
+    loggers.email.error({ err: error }, 'Failed to create notification');
     return null;
   }
 
@@ -119,7 +120,7 @@ export async function getUserNotifications(
   const { data, error } = await query;
 
   if (error) {
-    console.error('[Notification] Failed to fetch:', error);
+    loggers.email.error({ err: error }, 'Failed to fetch notifications');
     return [];
   }
 
@@ -150,7 +151,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
     .eq('read', false);
 
   if (error) {
-    console.error('[Notification] Failed to count:', error);
+    loggers.email.error({ err: error }, 'Failed to count notifications');
     return 0;
   }
 
@@ -459,7 +460,7 @@ export class NotificationService {
       .single();
 
     if (error) {
-      console.error('[NotificationService] Failed to create:', error);
+      loggers.email.error({ err: error }, 'NotificationService failed to create notification');
       return null;
     }
 

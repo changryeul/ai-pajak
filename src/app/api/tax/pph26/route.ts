@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { PPh26Calculator } from '@/lib/tax/pph26-calculator';
 import type { PPh26Data } from '@/types';
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
       data: result,
     });
   } catch (error) {
-    console.error('PPh 26 calculation error:', error);
+    loggers.tax.error({ err: error }, 'PPh 26 calculation error');
     return NextResponse.json(
       { error: 'Calculation failed', message: error instanceof Error ? error.message : 'Unknown' },
       { status: 500 }
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid action. Use ?action=treaties or ?action=check&country=XX' }, { status: 400 });
   } catch (error) {
-    console.error('PPh 26 API error:', error);
+    loggers.tax.error({ err: error }, 'PPh 26 API error');
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }

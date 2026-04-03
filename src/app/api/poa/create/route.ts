@@ -6,6 +6,7 @@ import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
 import { withAudit } from '@/middleware/audit';
 import { UserRole } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * Power of Attorney (POA) Creation Endpoint
@@ -241,11 +242,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     .single();
 
   if (poaError) {
-    console.error('[POA_CREATE] Failed to create POA', {
-      error: poaError,
-      customerId: customer.id,
-      taxPartnerId,
-    });
+    loggers.api.error({ err: poaError, customerId: customer.id, taxPartnerId }, 'Failed to create POA');
 
     return NextResponse.json(
       {
@@ -276,13 +273,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     user_agent: request.headers.get('user-agent') || 'unknown',
   });
 
-  console.info('[POA_CREATE] POA created successfully', {
-    poaId: poa.id,
-    poaNumber: poa.poa_number,
-    customerId: customer.id,
-    taxPartnerId,
-    scope,
-  });
+  loggers.api.info({ poaId: poa.id, poaNumber: poa.poa_number, customerId: customer.id, taxPartnerId, scope }, 'POA created successfully');
 
   // Build next steps based on whether document is uploaded
   const nextSteps = documentUrl

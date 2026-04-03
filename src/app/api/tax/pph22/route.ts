@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { PPh22Calculator } from '@/lib/tax/pph22-calculator';
 import type { PPh22Data } from '@/types';
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     const result = PPh22Calculator.calculate(data);
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error('PPh 22 calculation error:', error);
+    loggers.tax.error({ err: error }, 'PPh 22 calculation error');
     return NextResponse.json(
       { error: 'Calculation failed', message: error instanceof Error ? error.message : 'Unknown' },
       { status: 500 }

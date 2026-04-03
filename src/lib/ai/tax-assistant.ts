@@ -2,6 +2,8 @@
  * AI Tax Assistant - Chatbot for tax-related queries
  * Uses Claude/GPT for natural language understanding
  */
+import { loggers } from '@/lib/logger';
+
 export class TaxAssistant {
   private static claudeApiKey = process.env.ANTHROPIC_API_KEY;
   private static openaiApiKey = process.env.OPENAI_API_KEY;
@@ -57,7 +59,7 @@ Important tax deadlines:
       const data = await response.json();
       return data.content?.[0]?.text || 'Sorry, I could not process your request.';
     } catch (error) {
-      console.error('Claude API error:', error);
+      loggers.api.error({ err: error }, 'Claude API error');
       return 'Sorry, there was an error processing your request.';
     }
   }
@@ -93,7 +95,7 @@ Important tax deadlines:
       const data = await response.json();
       return data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
     } catch (error) {
-      console.error('OpenAI API error:', error);
+      loggers.api.error({ err: error }, 'OpenAI API error');
       return 'Sorry, there was an error processing your request.';
     }
   }

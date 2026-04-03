@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { loggers } from '@/lib/logger';
 
 /**
  * List Documents
@@ -146,7 +147,7 @@ export async function GET(request: NextRequest) {
 
       const { data, error: queryError, count } = await query;
       if (queryError) {
-        console.error('List documents error:', queryError);
+        loggers.api.error({ err: queryError }, 'List documents query error');
       }
       documents = data || [];
       total = count || 0;
@@ -240,7 +241,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('List documents error:', error);
+    loggers.api.error({ err: error }, 'List documents error');
     return NextResponse.json(
       {
         success: false,

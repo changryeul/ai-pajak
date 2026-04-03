@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -142,7 +143,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
       .single();
 
     if (customerError || !customer) {
-      console.error('Customer fetch error:', customerError);
+      loggers.tax.error({ err: customerError }, 'Customer fetch error');
       return NextResponse.json(
         { error: 'Customer not found', details: customerError?.message },
         { status: 404 }
@@ -259,7 +260,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
           },
         });
       } catch (pdfError) {
-        console.error('PDF generation error:', pdfError);
+        loggers.tax.error({ err: pdfError }, 'PDF generation error');
         return NextResponse.json(
           {
             error: 'PDF generation failed',
@@ -285,7 +286,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('SPT 1771 generation error:', error);
+    loggers.tax.error({ err: error }, 'SPT 1771 generation error');
     return NextResponse.json(
       {
         error: 'Internal server error',

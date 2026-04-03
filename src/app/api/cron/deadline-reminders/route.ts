@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runDeadlineReminders } from '@/lib/notifications/deadline-reminder';
+import { loggers } from '@/lib/logger';
 
 // Cron secret for authentication
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
   const cronSecret = authHeader?.replace('Bearer ', '');
 
   if (!CRON_SECRET) {
-    console.warn('[Cron] CRON_SECRET not configured');
+    loggers.api.warn('CRON_SECRET not configured');
     return NextResponse.json(
       { error: 'Cron not configured' },
       { status: 503 }
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (cronSecret !== CRON_SECRET) {
-    console.warn('[Cron] Unauthorized cron request');
+    loggers.api.warn('Unauthorized cron request');
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -39,20 +40,20 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    console.log('[Cron] Starting deadline reminders job');
+    loggers.api.info('Starting deadline reminders job');
     const startTime = Date.now();
 
     const { success, result } = await runDeadlineReminders();
 
     const duration = Date.now() - startTime;
 
-    console.log('[Cron] Deadline reminders completed', {
+    loggers.api.info({
       success,
       duration: `${duration}ms`,
       processed: result.processed,
       sent: result.notificationsSent,
       errors: result.errors.length,
-    });
+    }, 'Deadline reminders completed');
 
     return NextResponse.json({
       success,
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       errors: result.errors,
     });
   } catch (error) {
-    console.error('[Cron] Deadline reminders failed:', error);
+    loggers.api.error({ err: error }, 'Deadline reminders failed');
     return NextResponse.json(
       {
         success: false,

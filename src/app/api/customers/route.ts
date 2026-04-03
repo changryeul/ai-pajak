@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
+import { loggers } from '@/lib/logger';
 import type { RequestWithSession, UserRole } from '@/types/auth';
 
 async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
@@ -57,7 +58,7 @@ async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Failed to fetch customers:', error);
+      loggers.api.error({ err: error }, 'Failed to fetch customers');
       return NextResponse.json(
         { success: false, error: 'Failed to fetch customers' },
         { status: 500 }
@@ -110,7 +111,7 @@ async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
       stats,
     });
   } catch (error) {
-    console.error('Error fetching customers:', error);
+    loggers.api.error({ err: error }, 'Error fetching customers');
     return NextResponse.json(
       { success: false, error: 'Failed to fetch customers' },
       { status: 500 }

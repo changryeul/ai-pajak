@@ -1,4 +1,5 @@
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
+import { loggers } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -26,7 +27,7 @@ async function handleValidate(req: RequestWithSession): Promise<Response> {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error('Validation error:', error);
+    loggers.tax.error({ err: error }, 'Validation error');
     return NextResponse.json(
       { error: 'Validation failed', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

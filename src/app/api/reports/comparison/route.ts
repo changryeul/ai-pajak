@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
 import { PTKP_RATES } from '@/lib/tax/shared/constants';
 
 interface YearData {
@@ -142,7 +143,7 @@ async function handleComparison(req: RequestWithSession): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('Comparison report error:', error);
+    loggers.api.error({ err: error }, 'Comparison report error');
     return NextResponse.json(
       { error: 'Failed to generate comparison' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSubscription, createSubscription, cancelSubscription } from '@/lib/billing';
 import type { SubscriptionPlan, BillingCycle } from '@/lib/billing/types';
+import { loggers } from '@/lib/logger';
 
 /**
  * GET /api/billing/subscription
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (customerError) {
-      console.error('Failed to create customer:', customerError);
+      loggers.billing.error({ err: customerError }, 'Failed to create customer');
       return NextResponse.json(
         { error: 'Failed to create customer', details: customerError.message },
         { status: 500 }

@@ -6,6 +6,7 @@ import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
 import { withAudit } from '@/middleware/audit';
 import { UserRole } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * CRITICAL ENDPOINT - Billing Transaction Creation
@@ -91,14 +92,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
 
   // CRITICAL: Only SYSTEM role can create billing
   if (session.role !== UserRole.SYSTEM) {
-    console.error(
-      '[BILLING] Unauthorized billing creation attempt',
-      {
-        userId: session.userId,
-        role: session.role,
-        timestamp: new Date().toISOString(),
-      }
-    );
+    loggers.billing.error({ userId: session.userId, role: session.role }, 'Unauthorized billing creation attempt');
 
     return NextResponse.json(
       {
@@ -236,11 +230,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     .single();
 
   if (existingTransaction) {
-    console.info('[BILLING] Idempotent request - returning existing transaction', {
-      idempotencyKey,
-      existingTransactionId: existingTransaction.id,
-      invoiceNumber: existingTransaction.invoice_number,
-    });
+    loggers.billing.info({ idempotencyKey, existingTransactionId: existingTransaction.id, invoiceNumber: existingTransaction.invoice_number }, 'Idempotent request - returning existing transaction');
 
     // Return existing transaction (not an error - this is idempotency working correctly)
     const response: BillingCreateResponse = {
@@ -427,11 +417,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     .single();
 
   if (transactionError) {
-    console.error('[BILLING] Failed to create transaction', {
-      error: transactionError,
-      customerId,
-      taxPartnerId,
-    });
+    loggers.billing.error({ err: transactionError, customerId, taxPartnerId }, 'Failed to create transaction');
 
     return NextResponse.json(
       {
@@ -462,14 +448,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     user_agent: request.headers.get('user-agent') || 'billing-service',
   });
 
-  console.info('[BILLING] Transaction created successfully', {
-    transactionId: transaction.id,
-    invoiceNumber: finalInvoiceNumber,
-    customerId,
-    taxPartnerId,
-    amountTotal,
-    taxFilingId: taxFilingId || null,
-  });
+  loggers.billing.info({ transactionId: transaction.id, invoiceNumber: finalInvoiceNumber, customerId, taxPartnerId, amountTotal, taxFilingId: taxFilingId || null }, 'Transaction created successfully');
 
   // Prepare response
   const response: BillingCreateResponse = {

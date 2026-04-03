@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis';
 import { createHash } from 'crypto';
+import { loggers } from '@/lib/logger';
 
 /**
  * Idempotency Key Manager
@@ -108,10 +109,11 @@ export class IdempotencyManager {
           if (requestBody && data.requestHash) {
             const currentHash = hashRequestBody(requestBody);
             if (currentHash !== data.requestHash) {
-              console.warn(
-                `[Idempotency] Request body mismatch for key ${key}. ` +
-                `Expected hash: ${data.requestHash}, got: ${currentHash}`
-              );
+              loggers.api.warn({
+                key,
+                expectedHash: data.requestHash,
+                actualHash: currentHash,
+              }, 'Idempotency request body mismatch');
               // Return 409 Conflict - same key but different request
               return {
                 response: {
@@ -134,7 +136,7 @@ export class IdempotencyManager {
         }
       }
     } catch (error) {
-      console.error('[Idempotency] Error getting cached response:', error);
+      loggers.api.error({ err: error }, 'Idempotency error getting cached response');
     }
 
     return null;
@@ -172,7 +174,7 @@ export class IdempotencyManager {
       }
       return true;
     } catch (error) {
-      console.error('[Idempotency] Error storing response:', error);
+      loggers.api.error({ err: error }, 'Idempotency error storing response');
       return false;
     }
   }
@@ -194,7 +196,7 @@ export class IdempotencyManager {
       }
       return true;
     } catch (error) {
-      console.error('[Idempotency] Error deleting key:', error);
+      loggers.api.error({ err: error }, 'Idempotency error deleting key');
       return false;
     }
   }
@@ -241,7 +243,7 @@ export function withIdempotency(
     // Check for cached response
     const cached = await idempotencyManager.get(idempotencyKey, requestBody);
     if (cached) {
-      console.log(`[Idempotency] Returning cached response for key: ${idempotencyKey}`);
+      loggers.api.info({ idempotencyKey }, 'Returning cached idempotency response');
       return new Response(JSON.stringify(cached.response), {
         status: cached.statusCode,
         headers: {

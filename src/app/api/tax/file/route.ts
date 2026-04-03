@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { createAdminClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { RequestWithPOA } from '@/middleware/requireValidPOA';
@@ -155,10 +156,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     .single();
 
   if (consultantError || !consultant) {
-    console.error('[TAX_FILING] Consultant not found', {
-      userId: session.userId,
-      error: consultantError,
-    });
+    loggers.tax.error({ err: consultantError, userId: session.userId }, 'Consultant not found');
 
     return NextResponse.json(
       {
@@ -219,11 +217,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     .single();
 
   if (filingError) {
-    console.error('[TAX_FILING] Failed to create tax filing', {
-      error: filingError,
-      customerId,
-      taxType,
-    });
+    loggers.tax.error({ err: filingError, customerId, taxType }, 'Failed to create tax filing');
 
     return NextResponse.json(
       {
@@ -273,15 +267,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     .select('id, created_at')
     .single();
 
-  console.info('[TAX_FILING] Tax filing submitted successfully', {
-    taxFilingId: taxFiling.id,
-    filingNumber: filingNumber,
-    customerId,
-    taxType,
-    consultantId: consultant.id,
-    poaId: poa.id,
-    auditLogId: auditLog?.id,
-  });
+  loggers.tax.info({ taxFilingId: taxFiling.id, filingNumber, customerId, taxType, consultantId: consultant.id, poaId: poa.id, auditLogId: auditLog?.id }, 'Tax filing submitted successfully');
 
   // Queue DJP e-Filing submission (async)
   let djpJobId: string | null = null;
@@ -351,17 +337,10 @@ async function handler(request: RequestWithPOA): Promise<Response> {
         maxRetries: 3,
       });
 
-      console.info('[TAX_FILING] DJP e-Filing job queued', {
-        taxFilingId: taxFiling.id,
-        djpJobId,
-        sptType: sptTypeMap[taxType],
-      });
+      loggers.tax.info({ taxFilingId: taxFiling.id, djpJobId, sptType: sptTypeMap[taxType] }, 'DJP e-Filing job queued');
     } catch (djpError) {
       // Log error but don't fail the request - DJP submission is async
-      console.error('[TAX_FILING] Failed to queue DJP job', {
-        taxFilingId: taxFiling.id,
-        error: djpError instanceof Error ? djpError.message : 'Unknown error',
-      });
+      loggers.tax.error({ err: djpError, taxFilingId: taxFiling.id }, 'Failed to queue DJP job');
     }
   }
 

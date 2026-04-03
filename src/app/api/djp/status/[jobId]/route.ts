@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getDJPJobStatus, retryDJPJob, cancelDJPJob } from '@/lib/djp/queue';
+import { loggers } from '@/lib/logger';
 
 interface RouteContext {
   params: Promise<{ jobId: string }>;
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       },
     });
   } catch (error) {
-    console.error('[DJP Status API] Error:', error);
+    loggers.djp.error({ err: error }, 'DJP status API error');
     return NextResponse.json(
       {
         success: false,
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       data: status,
     });
   } catch (error) {
-    console.error('[DJP Status API] Error:', error);
+    loggers.djp.error({ err: error }, 'DJP status API error');
     return NextResponse.json(
       {
         success: false,

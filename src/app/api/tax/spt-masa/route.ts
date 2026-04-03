@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
@@ -193,7 +194,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[SPT_MASA] Calculation error', { error, customerId, taxType, period });
+    loggers.tax.error({ err: error, customerId, taxType, period }, 'SPT Masa calculation error');
     return NextResponse.json(
       {
         error: 'SPT Masa calculation failed',
@@ -230,7 +231,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       .single();
 
     if (updateError) {
-      console.error('[SPT_MASA] Failed to update filing', { error: updateError });
+      loggers.tax.error({ err: updateError }, 'Failed to update SPT Masa filing');
       return NextResponse.json(
         {
           error: 'Failed to update SPT Masa filing',
@@ -259,7 +260,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
       .single();
 
     if (filingError) {
-      console.error('[SPT_MASA] Failed to create filing', { error: filingError });
+      loggers.tax.error({ err: filingError }, 'Failed to create SPT Masa filing');
       return NextResponse.json(
         {
           error: 'Failed to create SPT Masa filing',
@@ -292,14 +293,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     user_agent: request.headers.get('user-agent') || 'unknown',
   });
 
-  console.info('[SPT_MASA] SPT Masa created', {
-    filingId: filing.id,
-    customerId,
-    taxType,
-    period,
-    totalNetPayable: sptMasaResult.total_net_payable,
-    consultantId: consultant.id,
-  });
+  loggers.tax.info({ filingId: filing.id, customerId, taxType, period, totalNetPayable: sptMasaResult.total_net_payable, consultantId: consultant.id }, 'SPT Masa created');
 
   // Check if overdue
   const isOverdue = SPTMasaCalculator.isOverdue(period, taxType);

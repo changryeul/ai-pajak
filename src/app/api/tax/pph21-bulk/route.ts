@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
@@ -139,7 +140,7 @@ async function handleBulkCalc(req: RequestWithSession): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('Bulk PPh 21 calculation error:', error);
+    loggers.tax.error({ err: error }, 'Bulk PPh 21 calculation error');
     return NextResponse.json(
       { error: 'Bulk calculation failed', message: error instanceof Error ? error.message : 'Unknown' },
       { status: 500 }

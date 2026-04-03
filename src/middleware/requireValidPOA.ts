@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { RequestWithSession } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * CRITICAL MIDDLEWARE
@@ -88,10 +89,10 @@ export function requireValidPOA() {
       .single();
 
     if (consultantError || !consultant) {
-      console.error('[POA] Consultant not found', {
+      loggers.api.error({
         userId: session.userId,
-        error: consultantError,
-      });
+        err: consultantError,
+      }, 'POA consultant not found');
 
       return NextResponse.json(
         {
@@ -119,12 +120,12 @@ export function requireValidPOA() {
     const poa = poas?.[0];
 
     if (poaError || !poa) {
-      console.warn('[POA] No active POA found', {
+      loggers.api.warn({
         customerId,
         taxPartnerId: consultant.tax_partner_id,
         taxType,
-        error: poaError?.message,
-      });
+        err: poaError,
+      }, 'No active POA found');
 
       return NextResponse.json(
         {
@@ -149,11 +150,11 @@ export function requireValidPOA() {
     const validScopes = ['ALL_TAX_TYPES', `${taxType}_ONLY`, 'CUSTOM'];
 
     if (!validScopes.includes(poa.scope)) {
-      console.warn('[POA] POA scope mismatch', {
+      loggers.api.warn({
         poaId: poa.id,
         poaScope: poa.scope,
         requiredScope: taxType,
-      });
+      }, 'POA scope mismatch');
 
       return NextResponse.json(
         {
@@ -178,13 +179,13 @@ export function requireValidPOA() {
       writable: false,
     });
 
-    console.info('[POA] Validation successful', {
+    loggers.api.info({
       poaId: poa.id,
       poaNumber: poa.poa_number,
       customerId,
       taxType,
       scope: poa.scope,
-    });
+    }, 'POA validation successful');
 
     // Continue to handler
     return handler(request);

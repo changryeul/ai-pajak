@@ -11,6 +11,7 @@
 import { PDFDocument } from 'pdf-lib';
 import Anthropic from '@anthropic-ai/sdk';
 import { OCRResult, DocumentCategory } from './types';
+import { loggers } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -56,7 +57,7 @@ export async function processPDF(
 
     return result;
   } catch (error) {
-    console.error('[PDF] Processing failed:', error);
+    loggers.ocr.error({ err: error }, 'PDF processing failed');
 
     return {
       documentId,
@@ -186,7 +187,7 @@ Important:
     };
   } catch (error) {
     // If Claude doesn't support PDF directly, fall back to error message
-    console.error('[PDF] Claude processing failed:', error);
+    loggers.ocr.error({ err: error }, 'PDF Claude processing failed');
 
     return {
       documentId,
@@ -241,6 +242,6 @@ export async function getPDFPageCount(pdfBytes: ArrayBuffer): Promise<number> {
 export async function extractPDFText(_pdfBytes: ArrayBuffer): Promise<string | null> {
   // pdf-lib doesn't support text extraction
   // In production, use pdf-parse or similar library
-  console.warn('[PDF] Text extraction not implemented - use OCR for scanned documents');
+  loggers.ocr.warn('Text extraction not implemented - use OCR for scanned documents');
   return null;
 }

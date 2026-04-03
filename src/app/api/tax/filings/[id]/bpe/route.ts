@@ -9,6 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { BPEPDF } from '@/lib/tax/bpe/pdf-generator';
@@ -224,7 +225,7 @@ async function handleGetBPE(
       },
     });
   } catch (error) {
-    console.error('[BPE API] Error generating BPE:', error);
+    loggers.tax.error({ err: error }, 'Error generating BPE');
     return NextResponse.json(
       { success: false, error: 'Failed to generate BPE document' },
       { status: 500 }

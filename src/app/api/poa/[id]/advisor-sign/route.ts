@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { advisorSignPOA, getPOA } from '@/lib/services/poa-service';
+import { loggers } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Advisor sign POA error:', error);
+    loggers.api.error({ err: error }, 'Advisor sign POA error');
     return NextResponse.json(
       {
         success: false,

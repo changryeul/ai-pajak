@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCustomerFilings } from '@/lib/services/customer-service';
+import { loggers } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -113,7 +114,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Get customer filings error:', error);
+    loggers.api.error({ err: error }, 'Get customer filings error');
     return NextResponse.json(
       {
         success: false,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { uploadFile, StorageBucket, DocumentType } from '@/lib/storage';
+import { loggers } from '@/lib/logger';
 
 /**
  * Document Upload API
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
         });
 
       if (docInsertError) {
-        console.error('Failed to create document record:', docInsertError);
+        loggers.api.error({ err: docInsertError }, 'Failed to create document record');
       }
     }
 
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
         });
 
       if (docError) {
-        console.error('Failed to create tax_document record:', docError);
+        loggers.api.error({ err: docError }, 'Failed to create tax_document record');
         // Don't fail the upload, just log the error
       }
     }
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Document upload error:', error);
+    loggers.api.error({ err: error }, 'Document upload error');
     return NextResponse.json(
       {
         success: false,

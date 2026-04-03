@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/client';
+import { loggers } from '@/lib/logger';
 
 /**
  * AI-Powered Tax Law Analyzer
@@ -214,7 +215,7 @@ ${documentText}
     try {
       return JSON.parse(jsonString);
     } catch (error) {
-      console.error('JSON parsing error:', error);
+      loggers.api.error({ err: error }, 'JSON parsing error in tax law analysis');
       throw new Error('Invalid JSON in Claude response');
     }
   }
@@ -284,12 +285,12 @@ ${documentText}
         });
 
         if (migrationError) {
-          console.error('Migration failed:', migration, migrationError);
+          loggers.api.error({ err: migrationError, migration }, 'Migration failed');
         } else {
           appliedMigrations.push(migration);
         }
       } catch (err) {
-        console.error('Error executing migration:', err);
+        loggers.api.error({ err }, 'Error executing migration');
       }
     }
 

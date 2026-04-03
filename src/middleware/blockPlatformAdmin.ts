@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { RequestWithSession, UserRole } from '@/types/auth';
+import { loggers } from '@/lib/logger';
 
 /**
  * CRITICAL SECURITY MIDDLEWARE
@@ -36,20 +37,16 @@ export async function blockPlatformAdmin(
 
   if (session.role === UserRole.PLATFORM_ADMIN) {
     // Security logging
-    console.warn(
-      '[SECURITY] PLATFORM_ADMIN attempted to access tax data',
-      {
-        userId: session.userId,
-        email: session.email,
-        url: request.url,
-        method: request.method,
-        timestamp: new Date().toISOString(),
-        ipAddress: request.headers.get('x-forwarded-for') ||
-                   request.headers.get('x-real-ip') ||
-                   'unknown',
-        userAgent: request.headers.get('user-agent') || 'unknown',
-      }
-    );
+    loggers.api.warn({
+      userId: session.userId,
+      email: session.email,
+      url: request.url,
+      method: request.method,
+      ipAddress: request.headers.get('x-forwarded-for') ||
+                 request.headers.get('x-real-ip') ||
+                 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    }, 'SECURITY: PLATFORM_ADMIN attempted to access tax data');
 
     return NextResponse.json(
       {

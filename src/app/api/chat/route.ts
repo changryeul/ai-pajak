@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
+import { loggers } from '@/lib/logger';
 
 const SYSTEM_PROMPT = `You are "Asisten Pajak AI", an expert Indonesian tax assistant integrated into the AI Pajak platform.
 
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, reply });
   } catch (error) {
-    console.error('Chat error:', error);
+    loggers.api.error({ err: error }, 'Chat error');
     return NextResponse.json(
       { error: 'Chat failed', message: error instanceof Error ? error.message : 'Unknown' },
       { status: 500 }

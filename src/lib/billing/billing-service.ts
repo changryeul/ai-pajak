@@ -7,6 +7,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { loggers } from '@/lib/logger';
 import {
   Subscription,
   Invoice,
@@ -111,7 +112,7 @@ export async function createSubscription(params: {
     .single();
 
   if (error) {
-    console.error('[Billing] Failed to create subscription:', error);
+    loggers.billing.error({ err: error }, 'Failed to create subscription');
     return null;
   }
 
@@ -195,7 +196,7 @@ export async function getInvoices(
   const { data, error } = await query;
 
   if (error) {
-    console.error('[Billing] Failed to fetch invoices:', error);
+    loggers.billing.error({ err: error }, 'Failed to fetch invoices');
     return [];
   }
 
@@ -284,7 +285,7 @@ export async function createInvoice(params: {
     .single();
 
   if (error) {
-    console.error('[Billing] Failed to create invoice:', error);
+    loggers.billing.error({ err: error }, 'Failed to create invoice');
     return null;
   }
 
@@ -353,7 +354,7 @@ export async function getPaymentHistory(
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('[Billing] Failed to fetch payments:', error);
+    loggers.billing.error({ err: error }, 'Failed to fetch payments');
     return [];
   }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AccurateService } from '@/lib/accurate';
+import { loggers } from '@/lib/logger';
 
 /**
  * GET /api/integrations/accurate/callback
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
       `${appUrl}/settings?tab=integrations&accurate_connected=true&data=${callbackData}`
     );
   } catch (err) {
-    console.error('Accurate callback error:', err);
+    loggers.api.error({ err }, 'Accurate callback error');
     return NextResponse.redirect(
       `${appUrl}/settings?tab=integrations&error=auth_failed`
     );

@@ -11,6 +11,8 @@
  * - SPT completion notifications
  */
 
+import { loggers } from '@/lib/logger';
+
 const FONNTE_API_URL = 'https://api.fonnte.com/send';
 const FONNTE_TOKEN = process.env.FONNTE_API_TOKEN || '';
 
@@ -33,7 +35,7 @@ export interface WhatsAppResult {
  */
 export async function sendWhatsApp(message: WhatsAppMessage): Promise<WhatsAppResult> {
   if (!FONNTE_TOKEN) {
-    console.warn('[WhatsApp] FONNTE_API_TOKEN not configured');
+    loggers.email.warn('FONNTE_API_TOKEN not configured');
     return { success: false, error: 'WhatsApp not configured' };
   }
 

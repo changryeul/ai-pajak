@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { PPH42_CONSTRUCTION_RATES } from '@/config/constants';
+import { loggers } from '@/lib/logger';
 
 /**
  * PPh Final Calculator - Indonesian Final Income Tax
@@ -322,13 +323,13 @@ export class PPhFinalCalculator {
 
       if (error || !data) {
         // If KLU code not found, assume not exempted (safer for calculation)
-        console.warn(`KLU code ${kluCode} not found in database. Assuming not exempted.`);
+        loggers.tax.warn({ kluCode }, 'KLU code not found in database, assuming not exempted');
         return false;
       }
 
       return data.pph_final_exempt ?? false;
     } catch (error) {
-      console.error('Error checking KLU exemption:', error);
+      loggers.tax.error({ err: error }, 'Error checking KLU exemption');
       return false; // Default to not exempted on error
     }
   }

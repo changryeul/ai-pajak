@@ -1,4 +1,5 @@
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
+import { loggers } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -143,7 +144,7 @@ async function handleGenerateReport(req: RequestWithSession): Promise<Response> 
 
     return NextResponse.json({ success: true, data: report });
   } catch (error) {
-    console.error('Report generation error:', error);
+    loggers.tax.error({ err: error }, 'Report generation error');
     return NextResponse.json(
       { error: 'Report generation failed', message: error instanceof Error ? error.message : 'Unknown' },
       { status: 500 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loggers } from '@/lib/logger';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -171,7 +172,7 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
     .single();
 
   if (createError) {
-    console.error('[TAX_FILINGS] Create failed:', createError);
+    loggers.tax.error({ err: createError }, 'Tax filing create failed');
     return NextResponse.json(
       { error: 'Failed to create filing', message: createError.message },
       { status: 500 }
@@ -294,7 +295,7 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching filings:', error);
+      loggers.tax.error({ err: error }, 'Error fetching filings');
       return NextResponse.json(
         { success: false, error: 'Failed to fetch filings' },
         { status: 500 }
@@ -346,7 +347,7 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('Error in get filings:', error);
+    loggers.tax.error({ err: error }, 'Error in get filings');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

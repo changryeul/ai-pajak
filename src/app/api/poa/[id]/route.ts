@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getPOA } from '@/lib/services/poa-service';
+import { loggers } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       data: poa,
     });
   } catch (error) {
-    console.error('Get POA error:', error);
+    loggers.api.error({ err: error }, 'Get POA error');
     return NextResponse.json(
       {
         success: false,
@@ -212,7 +213,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       data: updatedPOA,
     });
   } catch (error) {
-    console.error('Update POA error:', error);
+    loggers.api.error({ err: error }, 'Update POA error');
     return NextResponse.json(
       {
         success: false,
@@ -304,7 +305,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       message: 'POA deleted successfully',
     });
   } catch (error) {
-    console.error('Delete POA error:', error);
+    loggers.api.error({ err: error }, 'Delete POA error');
     return NextResponse.json(
       {
         success: false,

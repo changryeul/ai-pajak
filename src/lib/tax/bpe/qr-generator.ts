@@ -5,6 +5,7 @@
  */
 
 import QRCode from 'qrcode';
+import { loggers } from '@/lib/logger';
 
 export interface BPEVerificationData {
   bpeNumber: string;
@@ -48,7 +49,7 @@ export async function generateBPEQRCode(data: BPEVerificationData): Promise<stri
 
     return qrCodeDataUrl;
   } catch (error) {
-    console.error('Failed to generate QR code:', error);
+    loggers.tax.error({ err: error }, 'Failed to generate QR code');
     // Return empty string if QR code generation fails
     return '';
   }
@@ -74,7 +75,7 @@ export async function generateBPEQRCodeSVG(data: BPEVerificationData): Promise<s
 
     return svgString;
   } catch (error) {
-    console.error('Failed to generate QR code SVG:', error);
+    loggers.tax.error({ err: error }, 'Failed to generate QR code SVG');
     return '';
   }
 }
