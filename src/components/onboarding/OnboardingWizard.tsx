@@ -93,8 +93,15 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     localStorage.setItem('ai-pajak-onboarded', 'true');
     onComplete();
 
-    const rec = getRecommendation();
-    if (filingGoal === 'annual' || filingGoal === 'both') {
+    if (filingGoal === 'monthly') {
+      // Monthly filing → go to monthly dashboard
+      router.push(`/${locale}/tax/monthly-dashboard`);
+    } else if (filingGoal === 'both') {
+      // Both → go to monthly dashboard (covers both flows)
+      router.push(`/${locale}/tax/monthly-dashboard`);
+    } else {
+      // Annual only → go to recommended SPT form
+      const rec = getRecommendation();
       router.push(`/${locale}${rec.href}`);
     }
   };
@@ -261,17 +268,30 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           <p className="text-gray-500 max-w-md mx-auto">{t('readyDesc')}</p>
 
           {/* Recommendation */}
-          <Card className="max-w-sm mx-auto border-blue-200 bg-blue-50">
-            <CardContent className="p-5 text-left">
-              <p className="text-sm font-medium text-blue-800 mb-1">{t('recommendation')}</p>
-              <p className="text-lg font-bold text-blue-900">{getRecommendation().form}</p>
-              <p className="text-sm text-blue-600 mt-1">
-                {taxpayerType === 'employee' && t('recEmployee')}
-                {taxpayerType === 'business' && t('recBusiness')}
-                {taxpayerType === 'company' && t('recCompany')}
-              </p>
-            </CardContent>
-          </Card>
+          {filingGoal === 'monthly' || filingGoal === 'both' ? (
+            <Card className="max-w-sm mx-auto border-indigo-200 bg-indigo-50">
+              <CardContent className="p-5 text-left">
+                <p className="text-sm font-medium text-indigo-800 mb-1">{t('recommendation')}</p>
+                <p className="text-lg font-bold text-indigo-900">SPT Masa (월 신고)</p>
+                <p className="text-sm text-indigo-600 mt-1">
+                  PPh 21/23/26, PPN 월별 신고를 시작합니다.
+                  {filingGoal === 'both' && ' 연말 결산도 함께 안내해 드립니다.'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="max-w-sm mx-auto border-blue-200 bg-blue-50">
+              <CardContent className="p-5 text-left">
+                <p className="text-sm font-medium text-blue-800 mb-1">{t('recommendation')}</p>
+                <p className="text-lg font-bold text-blue-900">{getRecommendation().form}</p>
+                <p className="text-sm text-blue-600 mt-1">
+                  {taxpayerType === 'employee' && t('recEmployee')}
+                  {taxpayerType === 'business' && t('recBusiness')}
+                  {taxpayerType === 'company' && t('recCompany')}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           <button
             onClick={handleFinish}
