@@ -8,6 +8,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { DJPService } from './djp-service';
 import { loggers } from '@/lib/logger';
+import { captureJobError } from '@/lib/sentry';
 import {
   DJPJobType,
   DJPJobStatus,
@@ -224,6 +225,15 @@ async function processDJPJob(jobId: string): Promise<void> {
     }
 
     loggers.djp.error({ jobId, error: errorMessage, willRetry: shouldRetry, retryCount: newRetryCount }, 'Job failed');
+
+    // Report to Sentry
+    captureJobError(error, {
+      jobType: job.type,
+      jobId,
+      willRetry: shouldRetry,
+      retryCount: newRetryCount,
+      extra: { taxFilingId: job.tax_filing_id, customerId: job.customer_id },
+    });
   }
 }
 

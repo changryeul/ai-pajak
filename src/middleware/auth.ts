@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionContext } from '@/lib/auth/session';
+import { setSentryUser } from '@/lib/sentry';
 import { RequestWithSession } from '@/types/auth';
 
 /**
@@ -29,6 +30,9 @@ export async function requireAuth(
   // Attach session to request
   const requestWithSession = request as RequestWithSession;
   requestWithSession.session = session;
+
+  // Set Sentry user context for error tracking
+  setSentryUser(session.userId, session.role, session.organizationId ?? undefined);
 
   return handler(requestWithSession);
 }

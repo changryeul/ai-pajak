@@ -25,6 +25,7 @@
  */
 
 import { loggers } from '@/lib/logger';
+import { captureCircuitBreakerEvent } from '@/lib/sentry';
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
@@ -185,6 +186,11 @@ export class CircuitBreaker {
       this.failures = [];
       this.successCount = 0;
       loggers.api.info({ service: this.name }, 'Circuit breaker CLOSED - service recovered');
+    }
+
+    // Report state changes to Sentry
+    if (oldState !== newState) {
+      captureCircuitBreakerEvent(this.name, oldState, newState);
     }
 
     if (this.onStateChange && oldState !== newState) {
