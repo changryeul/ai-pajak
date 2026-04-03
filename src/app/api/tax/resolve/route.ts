@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RequestWithSession } from '@/types/auth';
-import { taxDataRead } from '@/middleware/compose';
+import { composeMiddleware } from '@/middleware/compose';
+import { requireAuth } from '@/middleware/auth';
 import { TaxResolutionEngine } from '@/lib/tax/tax-resolution-engine';
 import type { OverrideRuleRow } from '@/lib/tax/tax-resolution-engine';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
@@ -94,6 +95,8 @@ async function handleResolve(req: RequestWithSession): Promise<Response> {
   });
 }
 
+// Allow both tax consultants AND platform admin (for rule testing)
+// No blockPlatformAdmin — this is a read-only calculation, not tax data access
 export async function POST(request: NextRequest) {
-  return taxDataRead()(request as RequestWithSession, handleResolve);
+  return composeMiddleware(requireAuth)(request as RequestWithSession, handleResolve);
 }
