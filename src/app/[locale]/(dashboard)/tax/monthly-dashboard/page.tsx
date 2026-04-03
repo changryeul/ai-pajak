@@ -45,7 +45,7 @@ function fmt(n: number) {
 }
 
 export default function MonthlyDashboardPage() {
-  const { session } = useSession();
+  const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
@@ -54,15 +54,18 @@ export default function MonthlyDashboardPage() {
   const currentMonth = new Date().getMonth() + 1;
 
   const [year, setYear] = useState(currentYear);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
   const [payments, setPayments] = useState<Array<{ tax_type: string; tax_period: string; status: string; amount_due: number; spt_masa_filed: boolean; payment_deadline: string; reporting_deadline: string }>>([]);
   const [filings, setFilings] = useState<Array<{ tax_type: string; tax_period: string; status: string }>>([]);
 
+  const isLoading = sessionLoading || dataLoading;
+
   const loadData = useCallback(async () => {
     if (!session?.customerId) return;
-    setIsLoading(true);
+    setDataLoading(true);
     try {
       const res = await fetch(`/api/tax/monthly-payments?year=${year}&customerId=${session.customerId}`);
+      if (!res.ok) throw new Error(`monthly-payments: ${res.status}`);
       const data = await res.json();
       if (data.success) {
         // Flatten all payments from all tax types
@@ -77,6 +80,7 @@ export default function MonthlyDashboardPage() {
 
       // Also load filing statuses
       const filingRes = await fetch(`/api/tax/filings?customerId=${session.customerId}&year=${year}`);
+      if (!filingRes.ok) throw new Error(`filings: ${filingRes.status}`);
       const filingData = await filingRes.json();
       if (filingData.success) {
         setFilings((filingData.data || []).map((f: { tax_type: string; tax_period: string; status: string }) => ({
@@ -86,7 +90,7 @@ export default function MonthlyDashboardPage() {
         })));
       }
     } catch { /* */ }
-    finally { setIsLoading(false); }
+    finally { setDataLoading(false); }
   }, [session?.customerId, year]);
 
   useEffect(() => { loadData(); }, [loadData]);
