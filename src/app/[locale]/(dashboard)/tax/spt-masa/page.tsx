@@ -294,6 +294,31 @@ export default function SPTMasaPage() {
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
   };
 
+  // Download SPT Masa PDF
+  const downloadSptMasaPDF = async (sptTaxType: string) => {
+    if (!session?.customerId) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/tax/spt-masa-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: session.customerId, taxType: sptTaxType, period }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `SPT_Masa_${sptTaxType}_${period}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        setMessage({ type: 'error', text: 'PDF generation failed' });
+      }
+    } catch { setMessage({ type: 'error', text: 'Error generating PDF' }); }
+    finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
+  };
+
   const tabs: Array<{ id: TabId; label: string; icon: typeof FileText }> = [
     { id: 'transactions', label: t('transactionsTab'), icon: Receipt },
     { id: 'ebupot', label: t('ebupotTab'), icon: ClipboardList },
@@ -679,6 +704,9 @@ export default function SPTMasaPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button size="sm" variant="ghost" onClick={() => downloadSptMasaPDF(sptType)} disabled={isSaving}>
+                      <Download className="h-3 w-3 mr-1" />PDF
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => createSptMasaDraft(sptType)} disabled={isSaving}>
                       {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <BarChart3 className="h-3 w-3 mr-1" />}
                       {t('createDraft')}
