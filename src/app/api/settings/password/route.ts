@@ -45,6 +45,19 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Password complexity: uppercase, lowercase, number, special char
+    const hasUpper = /[A-Z]/.test(newPassword);
+    const hasLower = /[a-z]/.test(newPassword);
+    const hasNumber = /[0-9]/.test(newPassword);
+    const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword);
+
+    if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+      return NextResponse.json(
+        { success: false, error: 'Password must include uppercase, lowercase, number, and special character' },
+        { status: 400 }
+      );
+    }
+
     // Verify current password by trying to sign in
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: user.email!,

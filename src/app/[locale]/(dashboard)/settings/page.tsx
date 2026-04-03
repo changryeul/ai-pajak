@@ -48,6 +48,22 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Login history state
+  const [loginHistory, setLoginHistory] = useState<Array<{
+    id: string;
+    action: string;
+    ipAddress: string | null;
+    device: string;
+    timestamp: string;
+  }>>([]);
+
+  // 2FA state
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaSetup, setMfaSetup] = useState<{ factorId: string; qrCode: string; secret: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+
   // Profile state
   const [profile, setProfile] = useState({
     fullName: '',
@@ -213,6 +229,91 @@ export default function SettingsPage() {
     } finally {
       setIsChangingPassword(false);
     }
+  };
+
+  // 2FA functions
+  const fetchMfaStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/mfa', { credentials: 'include' });
+      const json = await res.json();
+      if (json.success) {
+        setMfaEnabled(json.data.enabled);
+        setMfaFactorId(json.data.factorId);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const fetchLoginHistory = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/sessions', { credentials: 'include' });
+      const json = await res.json();
+      if (json.success) setLoginHistory(json.data.loginHistory || []);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => { fetchMfaStatus(); fetchLoginHistory(); }, [fetchMfaStatus, fetchLoginHistory]);
+
+  const handleEnroll2FA = async () => {
+    setMfaLoading(true);
+    try {
+      const res = await fetch('/api/auth/mfa', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'enroll' }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setMfaSetup({ factorId: json.data.factorId, qrCode: json.data.qrCode, secret: json.data.secret });
+      } else {
+        showMessage('error', json.error);
+      }
+    } catch { showMessage('error', 'Failed to start 2FA setup'); }
+    finally { setMfaLoading(false); }
+  };
+
+  const handleVerify2FA = async () => {
+    if (!mfaSetup || !mfaCode) return;
+    setMfaLoading(true);
+    try {
+      const res = await fetch('/api/auth/mfa', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', factorId: mfaSetup.factorId, code: mfaCode }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        showMessage('success', '2FA enabled successfully');
+        setMfaSetup(null);
+        setMfaCode('');
+        fetchMfaStatus();
+      } else {
+        showMessage('error', json.error || 'Invalid code');
+      }
+    } catch { showMessage('error', 'Verification failed'); }
+    finally { setMfaLoading(false); }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!mfaFactorId) return;
+    setMfaLoading(true);
+    try {
+      const res = await fetch('/api/auth/mfa', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'unenroll', factorId: mfaFactorId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        showMessage('success', '2FA disabled');
+        fetchMfaStatus();
+      } else {
+        showMessage('error', json.error);
+      }
+    } catch { showMessage('error', 'Failed to disable 2FA'); }
+    finally { setMfaLoading(false); }
   };
 
   const handleSaveNotifications = async () => {
@@ -436,9 +537,84 @@ export default function SettingsPage() {
                   <p className="text-sm text-gray-500">
                     {t('settings.twoFactorDescription') || 'Add an extra layer of security to your account'}
                   </p>
-                  <Button variant="outline" disabled>
-                    {t('settings.enable2FA') || 'Enable 2FA'} ({t('common.comingSoon') || 'Coming Soon'})
-                  </Button>
+
+                  {mfaEnabled ? (
+                    <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <Check className="h-5 w-5 text-green-600" />
+                      <div className="flex-1">
+                        <p className="font-medium text-green-800">2FA Active</p>
+                        <p className="text-sm text-green-600">Your account is protected with TOTP authenticator</p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={handleDisable2FA} disabled={mfaLoading}>
+                        {mfaLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Disable'}
+                      </Button>
+                    </div>
+                  ) : mfaSetup ? (
+                    <div className="space-y-4 max-w-md">
+                      <div className="p-4 border rounded-lg bg-white text-center">
+                        <p className="text-sm text-gray-600 mb-3">Scan this QR code with your authenticator app:</p>
+                        <img src={mfaSetup.qrCode} alt="2FA QR Code" className="mx-auto mb-3 w-48 h-48" />
+                        <p className="text-xs text-gray-400">Manual key: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">{mfaSetup.secret}</code></p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Enter the 6-digit code from your authenticator app:</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={mfaCode}
+                            onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            placeholder="000000"
+                            maxLength={6}
+                            className="font-mono text-center text-lg tracking-widest max-w-[180px]"
+                          />
+                          <Button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}>
+                            {mfaLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                            Verify
+                          </Button>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => { setMfaSetup(null); setMfaCode(''); }}>
+                        Cancel setup
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="outline" onClick={handleEnroll2FA} disabled={mfaLoading}>
+                      {mfaLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Shield className="h-4 w-4 mr-2" />}
+                      {t('settings.enable2FA') || 'Enable 2FA'}
+                    </Button>
+                  )}
+                </div>
+                <hr />
+
+                {/* Login History */}
+                <div className="space-y-4">
+                  <h3 className="font-medium">Recent Login Activity</h3>
+                  {loginHistory.length > 0 ? (
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      {loginHistory.slice(0, 20).map(entry => (
+                        <div key={entry.id} className="flex items-center justify-between p-2.5 border rounded-lg text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                              entry.action === 'LOGIN_SUCCESS' ? 'bg-green-500' :
+                              entry.action === 'LOGIN_FAILURE' ? 'bg-red-500' : 'bg-gray-400'
+                            }`} />
+                            <div>
+                              <p className="font-medium">
+                                {entry.action === 'LOGIN_SUCCESS' ? 'Login' :
+                                 entry.action === 'LOGIN_FAILURE' ? 'Failed login attempt' :
+                                 entry.action.replace(/_/g, ' ')}
+                              </p>
+                              <p className="text-xs text-gray-500">{entry.device}{entry.ipAddress ? ` · ${entry.ipAddress}` : ''}</p>
+                            </div>
+                          </div>
+                          <span className="text-xs text-gray-400">
+                            {new Date(entry.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No login activity recorded</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
