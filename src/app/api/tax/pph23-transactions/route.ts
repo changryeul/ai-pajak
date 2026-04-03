@@ -36,10 +36,14 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   }
   if (!cid) return NextResponse.json({ error: 'customerId required' }, { status: 400 });
 
-  let query = getSupabaseAdmin().from('pph23_transaction').select('*').eq('customer_id', cid).order('transaction_date', { ascending: false });
+  const page = parseInt(url.searchParams.get('page') || '1');
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '100'), 500);
+  const offset = (page - 1) * limit;
+
+  let query = getSupabaseAdmin().from('pph23_transaction').select('*', { count: 'exact' }).eq('customer_id', cid).order('transaction_date', { ascending: false }).range(offset, offset + limit - 1);
   if (period) query = query.eq('tax_period', period);
 
-  const { data } = await query;
+  const { data, count } = await query;
 
   const summary = {
     totalGross: (data || []).reduce((s, t) => s + Number(t.gross_amount), 0),
@@ -59,11 +63,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
       transactions: data || [],
       summary,
       serviceTypes: SERVICE_TYPES,
-      rateInfo: {
-        note: 'Tarif 2x berlaku jika lawan transaksi tidak memiliki NPWP (Pasal 21 ayat 5a UU PPh)',
-        withNpwp: 'Tarif normal',
-        withoutNpwp: 'Tarif 2x lipat',
-      },
+      pagination: { page, limit, total: count || 0, totalPages: Math.ceil((count || 0) / limit) },
     },
   });
 }
