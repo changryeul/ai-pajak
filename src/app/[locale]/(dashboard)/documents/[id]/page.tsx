@@ -168,6 +168,21 @@ export default function DocumentDetailPage({ params }: PageProps) {
     }
   };
 
+  // Create transaction from OCR data
+  const handleCreateTransaction = async () => {
+    if (!document?.ocrResult) return;
+    const ocr = document.ocrResult;
+    const router = (await import('next/navigation')).useRouter;
+
+    // Navigate to SPT Masa with pre-filled data from OCR
+    const params = new URLSearchParams();
+    if (ocr.grossAmount) params.set('amount', String(ocr.grossAmount));
+    if (ocr.entityName) params.set('counterparty', ocr.entityName);
+    if (ocr.npwp) params.set('npwp', ocr.npwp);
+
+    window.location.href = `/${locale}/tax/spt-masa?${params.toString()}`;
+  };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -415,10 +430,15 @@ export default function DocumentDetailPage({ params }: PageProps) {
             </div>
 
             {document.ocrStatus === 'COMPLETED' && document.ocrData ? (
-              <div className="bg-gray-50 rounded p-3">
-                <pre className="text-xs text-gray-700 whitespace-pre-wrap overflow-x-auto max-h-48">
-                  {JSON.stringify(document.ocrData, null, 2)}
-                </pre>
+              <div>
+                <div className="bg-gray-50 rounded p-3 mb-3">
+                  <pre className="text-xs text-gray-700 whitespace-pre-wrap overflow-x-auto max-h-48">
+                    {JSON.stringify(document.ocrData, null, 2)}
+                  </pre>
+                </div>
+                <Button size="sm" onClick={handleCreateTransaction} className="bg-indigo-600 hover:bg-indigo-700">
+                  → SPT Masa에 거래 생성
+                </Button>
               </div>
             ) : document.ocrStatus === 'PROCESSING' ? (
               <div className="flex items-center gap-2 text-blue-600">

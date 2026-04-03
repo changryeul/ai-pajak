@@ -18,6 +18,9 @@ interface Counterparty {
   id: string; name: string; npwp?: string; nik?: string;
   address?: string; phone?: string; email?: string;
   type: string; is_related_party: boolean;
+  kbli_code?: string; qualification_grade?: string;
+  country?: string; is_resident?: boolean;
+  has_cod?: boolean; vendor_is_property_owner?: boolean;
 }
 
 export default function CounterpartiesPage() {
@@ -42,6 +45,8 @@ export default function CounterpartiesPage() {
   const [form, setForm] = useState({
     name: '', npwp: '', nik: '', address: '', phone: '', email: '',
     type: 'VENDOR', isRelatedParty: false,
+    kbliCode: '', qualificationGrade: '', country: 'ID', isResident: true,
+    hasCod: false, vendorIsPropertyOwner: false,
   });
 
   const loadData = useCallback(async () => {
@@ -60,7 +65,7 @@ export default function CounterpartiesPage() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const resetForm = () => {
-    setForm({ name: '', npwp: '', nik: '', address: '', phone: '', email: '', type: 'VENDOR', isRelatedParty: false });
+    setForm({ name: '', npwp: '', nik: '', address: '', phone: '', email: '', type: 'VENDOR', isRelatedParty: false, kbliCode: '', qualificationGrade: '', country: 'ID', isResident: true, hasCod: false, vendorIsPropertyOwner: false });
     setEditingId(null);
     setShowForm(false);
   };
@@ -70,6 +75,9 @@ export default function CounterpartiesPage() {
       name: cp.name, npwp: cp.npwp || '', nik: cp.nik || '',
       address: cp.address || '', phone: cp.phone || '', email: cp.email || '',
       type: cp.type, isRelatedParty: cp.is_related_party,
+      kbliCode: cp.kbli_code || '', qualificationGrade: cp.qualification_grade || '',
+      country: cp.country || 'ID', isResident: cp.is_resident ?? true,
+      hasCod: cp.has_cod ?? false, vendorIsPropertyOwner: cp.vendor_is_property_owner ?? false,
     });
     setEditingId(cp.id);
     setShowForm(true);
@@ -82,7 +90,13 @@ export default function CounterpartiesPage() {
       await fetch('/api/tax/counterparties', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form, customerId: session?.customerId,
+          name: form.name, npwp: form.npwp, nik: form.nik,
+          address: form.address, phone: form.phone, email: form.email,
+          type: form.type, isRelatedParty: form.isRelatedParty,
+          kbliCode: form.kbliCode, qualificationGrade: form.qualificationGrade,
+          country: form.country, isResident: form.isResident,
+          hasCod: form.hasCod, vendorIsPropertyOwner: form.vendorIsPropertyOwner,
+          customerId: session?.customerId,
           ...(editingId ? { id: editingId } : {}),
         }),
       });
@@ -163,12 +177,50 @@ export default function CounterpartiesPage() {
                 <Input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="finance@example.com" />
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="related" checked={form.isRelatedParty} onChange={e => setForm({ ...form, isRelatedParty: e.target.checked })} className="rounded" />
-              <label htmlFor="related" className="text-sm text-gray-700 flex items-center gap-1">
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                {tc('relatedParty')}
-              </label>
+            {/* Tax Classification Fields */}
+            <div className="p-3 bg-gray-50 rounded-lg space-y-3">
+              <p className="text-xs font-semibold text-gray-600">Tax Classification (Resolution Engine)</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">KBLI Code</Label>
+                  <Input className="h-8 text-xs font-mono" value={form.kbliCode} onChange={e => setForm({ ...form, kbliCode: e.target.value })} placeholder="62010" />
+                </div>
+                <div>
+                  <Label className="text-xs">Qualification (SBU)</Label>
+                  <Select value={form.qualificationGrade} onValueChange={v => setForm({ ...form, qualificationGrade: v })}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="N/A" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">N/A</SelectItem>
+                      <SelectItem value="SMALL">Kecil (소규모)</SelectItem>
+                      <SelectItem value="MEDIUM_LARGE">Menengah/Besar</SelectItem>
+                      <SelectItem value="QUALIFIED">Berkualifikasi</SelectItem>
+                      <SelectItem value="NONE">Tanpa Kualifikasi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Country</Label>
+                  <Input className="h-8 text-xs" value={form.country} onChange={e => setForm({ ...form, country: e.target.value.toUpperCase() })} placeholder="ID" />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="related" checked={form.isRelatedParty} onChange={e => setForm({ ...form, isRelatedParty: e.target.checked })} className="rounded" />
+                  <label htmlFor="related" className="text-xs">관계사 (Related Party)</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="resident" checked={form.isResident} onChange={e => setForm({ ...form, isResident: e.target.checked })} className="rounded" />
+                  <label htmlFor="resident" className="text-xs">거주자 (Resident)</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="cod" checked={form.hasCod} onChange={e => setForm({ ...form, hasCod: e.target.checked })} className="rounded" />
+                  <label htmlFor="cod" className="text-xs">CoD 보유</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="owner" checked={form.vendorIsPropertyOwner} onChange={e => setForm({ ...form, vendorIsPropertyOwner: e.target.checked })} className="rounded" />
+                  <label htmlFor="owner" className="text-xs">Owner = Vendor</label>
+                </div>
+              </div>
             </div>
             <div className="flex gap-2 justify-end pt-2">
               <Button variant="outline" onClick={resetForm}>{tc('cancel')}</Button>
