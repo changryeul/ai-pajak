@@ -133,6 +133,7 @@ const navItems: NavSection[] = [
       { href: '/admin/audit-logs', icon: Shield, labelKey: 'nav.auditLogs' },
       { href: '/admin/tax-rates', icon: Settings, labelKey: 'nav.taxRates' },
       { href: '/admin/override-rules', icon: Shield, labelKey: 'nav.overrideRules' },
+      { href: '/admin/rule-test', icon: Activity, labelKey: 'nav.ruleTest' },
     ],
   },
   {
