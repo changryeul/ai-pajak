@@ -79,6 +79,12 @@ export default function CustomersPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<'ALL' | 'INDIVIDUAL' | 'COMPANY'>('ALL');
+  const [filterPoa, setFilterPoa] = useState<'ALL' | 'active' | 'pending' | 'none'>('ALL');
+  const [sortField, setSortField] = useState<'name' | 'created_at' | 'filings'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -138,15 +144,31 @@ export default function CustomersPage() {
     }
   };
 
-  const filteredCustomers = customers.filter((customer) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      customer.full_name?.toLowerCase().includes(query) ||
-      customer.company_name?.toLowerCase().includes(query) ||
-      customer.email?.toLowerCase().includes(query) ||
-      customer.npwp?.toLowerCase().includes(query)
-    );
-  });
+  const filteredCustomers = customers
+    .filter((customer) => {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = !query || (
+        customer.full_name?.toLowerCase().includes(query) ||
+        customer.company_name?.toLowerCase().includes(query) ||
+        customer.email?.toLowerCase().includes(query) ||
+        customer.npwp?.toLowerCase().includes(query)
+      );
+      const matchesType = filterType === 'ALL' || customer.customer_type === filterType;
+      const matchesPoa = filterPoa === 'ALL' || customer.poa_status === filterPoa;
+      return matchesSearch && matchesType && matchesPoa;
+    })
+    .sort((a, b) => {
+      const dir = sortOrder === 'asc' ? 1 : -1;
+      if (sortField === 'name') return dir * (a.full_name || '').localeCompare(b.full_name || '');
+      if (sortField === 'filings') return dir * (a.filing_count - b.filing_count);
+      return dir * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    });
+
+  const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+  const paginatedCustomers = filteredCustomers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterType, filterPoa, sortField, sortOrder]);
 
   const getPoaStatusBadge = (status: string) => {
     switch (status) {
@@ -283,9 +305,9 @@ export default function CustomersPage() {
       {/* Search and Table */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-6">
-          {/* Search */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1 max-w-md">
+          {/* Search + Filters */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="relative flex-1 min-w-[200px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder={t('customers.searchPlaceholder')}
@@ -294,7 +316,38 @@ export default function CustomersPage() {
                 className="pl-10 rounded-xl"
               />
             </div>
-            <p className="text-sm text-gray-500">
+            <Select value={filterType} onValueChange={(v) => setFilterType(v as typeof filterType)}>
+              <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">{t('customers.customerType')}: All</SelectItem>
+                <SelectItem value="INDIVIDUAL">{t('customers.individual')}</SelectItem>
+                <SelectItem value="COMPANY">{t('customers.company')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterPoa} onValueChange={(v) => setFilterPoa(v as typeof filterPoa)}>
+              <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">POA: All</SelectItem>
+                <SelectItem value="active">{t('customers.poaActive')}</SelectItem>
+                <SelectItem value="pending">{t('customers.poaPending')}</SelectItem>
+                <SelectItem value="none">{t('customers.noPoaYet')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={`${sortField}-${sortOrder}`} onValueChange={(v) => {
+              const [f, o] = v.split('-');
+              setSortField(f as typeof sortField);
+              setSortOrder(o as typeof sortOrder);
+            }}>
+              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_at-desc">Newest first</SelectItem>
+                <SelectItem value="created_at-asc">Oldest first</SelectItem>
+                <SelectItem value="name-asc">Name A-Z</SelectItem>
+                <SelectItem value="name-desc">Name Z-A</SelectItem>
+                <SelectItem value="filings-desc">Most filings</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-gray-500 ml-auto">
               {filteredCustomers.length} {t('customers.customersFound')}
             </p>
           </div>
@@ -304,7 +357,7 @@ export default function CustomersPage() {
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
-          ) : filteredCustomers.length === 0 ? (
+          ) : paginatedCustomers.length === 0 ? (
             <div className="text-center py-12">
               <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">{t('customers.noCustomers')}</p>
@@ -322,7 +375,7 @@ export default function CustomersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCustomers.map((customer) => (
+                {paginatedCustomers.map((customer) => (
                   <TableRow key={customer.id} className="cursor-pointer hover:bg-gray-50">
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -375,6 +428,46 @@ export default function CustomersPage() {
                 ))}
               </TableBody>
             </Table>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t mt-4">
+              <p className="text-sm text-gray-500">
+                {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, filteredCustomers.length)} of {filteredCustomers.length}
+              </p>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(p => p - 1)}
+                >
+                  Previous
+                </Button>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  const page = totalPages <= 5 ? i + 1 : Math.max(1, Math.min(currentPage - 2, totalPages - 4)) + i;
+                  return (
+                    <Button
+                      key={page}
+                      variant={page === currentPage ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

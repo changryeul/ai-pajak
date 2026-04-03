@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -32,6 +33,10 @@ import {
   X,
   Clock,
   AlertCircle,
+  MessageSquare,
+  Pin,
+  Send,
+  Trash2,
 } from 'lucide-react';
 
 interface CustomerDetail {
@@ -83,6 +88,16 @@ interface Consultant {
   };
 }
 
+interface Note {
+  id: string;
+  content: string;
+  is_pinned: boolean;
+  author_user_id: string;
+  author_role: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface ActivityLog {
   id: string;
   action: string;
@@ -105,6 +120,9 @@ export default function CustomerDetailPage() {
   const [poas, setPoas] = useState<POA[]>([]);
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [newNote, setNewNote] = useState('');
+  const [submittingNote, setSubmittingNote] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -151,6 +169,51 @@ export default function CustomerDetailPage() {
     } catch { /* ignore */ }
   }, [customerId]);
 
+  const fetchNotes = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/customers/${customerId}/notes`, { credentials: 'include' });
+      const json = await res.json();
+      if (json.success) setNotes(json.data || []);
+    } catch { /* ignore */ }
+  }, [customerId]);
+
+  const handleAddNote = async () => {
+    if (!newNote.trim()) return;
+    setSubmittingNote(true);
+    try {
+      const res = await fetch(`/api/customers/${customerId}/notes`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newNote }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNewNote('');
+        fetchNotes();
+      }
+    } catch { /* ignore */ }
+    finally { setSubmittingNote(false); }
+  };
+
+  const handleTogglePin = async (noteId: string, currentPin: boolean) => {
+    await fetch(`/api/customers/${customerId}/notes`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ noteId, is_pinned: !currentPin }),
+    });
+    fetchNotes();
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    await fetch(`/api/customers/${customerId}/notes?noteId=${noteId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    fetchNotes();
+  };
+
   const fetchActivities = useCallback(async () => {
     try {
       const res = await fetch(`/api/audit/logs?resourceId=${customerId}&limit=20`, { credentials: 'include' });
@@ -161,9 +224,9 @@ export default function CustomerDetailPage() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchCustomer(), fetchFilings(), fetchConsultants(), fetchPOAs(), fetchActivities()])
+    Promise.all([fetchCustomer(), fetchFilings(), fetchConsultants(), fetchPOAs(), fetchNotes(), fetchActivities()])
       .finally(() => setLoading(false));
-  }, [fetchCustomer, fetchFilings, fetchConsultants, fetchPOAs, fetchActivities]);
+  }, [fetchCustomer, fetchFilings, fetchConsultants, fetchPOAs, fetchNotes, fetchActivities]);
 
   const handleSave = async () => {
     if (!customer) return;
@@ -414,6 +477,10 @@ export default function CustomerDetailPage() {
             <Shield className="h-4 w-4" />
             {t('poaHistory')} ({poas.length})
           </TabsTrigger>
+          <TabsTrigger value="notes" className="flex items-center gap-1.5">
+            <MessageSquare className="h-4 w-4" />
+            Notes ({notes.length})
+          </TabsTrigger>
           <TabsTrigger value="activity" className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
             {t('recentActivity')} ({activities.length})
@@ -491,6 +558,74 @@ export default function CustomerDetailPage() {
                 <div className="text-center py-8">
                   <Shield className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">{t('noPoa')}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Notes Tab */}
+        <TabsContent value="notes">
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              {/* New note input */}
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Add a note..."
+                  value={newNote}
+                  onChange={e => setNewNote(e.target.value)}
+                  className="min-h-[80px] resize-none"
+                />
+                <Button
+                  onClick={handleAddNote}
+                  disabled={submittingNote || !newNote.trim()}
+                  size="sm"
+                  className="self-end"
+                >
+                  {submittingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </div>
+
+              {/* Notes list */}
+              {notes.length > 0 ? (
+                <div className="space-y-3">
+                  {notes.map(note => (
+                    <div key={note.id} className={`p-3 border rounded-lg ${note.is_pinned ? 'border-yellow-300 bg-yellow-50/50' : ''}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                            <span>{note.author_role.replace(/_/g, ' ')}</span>
+                            <span>·</span>
+                            <span>{formatDate(note.created_at)}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleTogglePin(note.id, note.is_pinned)}
+                          >
+                            <Pin className={`h-3.5 w-3.5 ${note.is_pinned ? 'text-yellow-600 fill-yellow-600' : 'text-muted-foreground'}`} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-red-600"
+                            onClick={() => handleDeleteNote(note.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <MessageSquare className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No notes yet</p>
                 </div>
               )}
             </CardContent>
