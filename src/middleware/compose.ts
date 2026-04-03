@@ -1,4 +1,6 @@
 import { RequestWithSession } from '@/types/auth';
+import { loggers } from '@/lib/logger';
+import { captureApiError } from '@/lib/sentry';
 
 /**
  * Middleware type definition
@@ -16,6 +18,9 @@ export type Middleware = (
  * - Modify the request
  * - Return early (authentication/authorization failures)
  * - Pass to next middleware in chain
+ *
+ * Automatically measures response time and logs it.
+ * 5xx errors are reported to Sentry.
  *
  * @param middlewares - Middleware functions to compose
  * @returns Composed middleware function
@@ -41,6 +46,11 @@ export function composeMiddleware(...middlewares: Middleware[]) {
     request: RequestWithSession,
     finalHandler: Handler
   ): Promise<Response> => {
+    const startTime = Date.now();
+    const method = request.method;
+    const url = new URL(request.url);
+    const route = url.pathname;
+
     // Build middleware chain from right to left
     // This allows middlewares to be executed left to right (top to bottom)
     const handler = middlewares.reduceRight<Handler>(
@@ -48,7 +58,39 @@ export function composeMiddleware(...middlewares: Middleware[]) {
       finalHandler
     );
 
-    return handler(request);
+    const response = await handler(request);
+    const duration = Date.now() - startTime;
+
+    // Log request with timing
+    const level = response.status >= 500 ? 'error' : response.status >= 400 ? 'warn' : 'info';
+    const userId = request.session?.userId;
+
+    loggers.api[level](
+      { method, route, status: response.status, duration, userId },
+      `${method} ${route} ${response.status} ${duration}ms`
+    );
+
+    // Report 5xx errors to Sentry
+    if (response.status >= 500) {
+      captureApiError(new Error(`${method} ${route} returned ${response.status}`), {
+        route,
+        method,
+        userId,
+        role: request.session?.role,
+        statusCode: response.status,
+        extra: { duration },
+      });
+    }
+
+    // Add Server-Timing header for DevTools
+    const headers = new Headers(response.headers);
+    headers.set('Server-Timing', `total;dur=${duration}`);
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   };
 }
 
