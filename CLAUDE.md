@@ -52,7 +52,7 @@ E2E tests live in `src/tests/e2e/` (Playwright, 60s timeout, 2 workers locally).
 - **next-intl** for i18n — 5 locales: `id` (default), `en`, `ko`, `ja`, `zh`
 - **Midtrans** for payments, **Resend** for email
 - **Anthropic SDK + OpenAI** for AI features (OCR, document processing)
-- **Sentry** for error monitoring, **pino** for structured logging
+- **Sentry** for error monitoring (API error capture, circuit breaker alerts, Web Vitals), **pino** for structured logging (all server code)
 - **Zod 4** for validation, **React Hook Form** + **@hookform/resolvers** for forms
 - **@tanstack/react-query** for data fetching, **zustand** for client state
 
@@ -80,6 +80,8 @@ composeMiddleware(requireAuth, blockPlatformAdmin, requireRole(UserRole.TAX_ADVI
 Pre-built stacks in `compose.ts`: `taxDataRead()`, `taxDataWrite(action)`, `taxFilingSubmit(action)`, `billingOperation(action)`, `platformAdminOperation()`, `customerOperation(action?)`.
 
 Available middleware: `requireAuth`, `blockPlatformAdmin`, `requireRole(…roles)`, `withAudit(action)`, `requireValidPOA()`, `rate-limit`, `request-id`.
+
+`composeMiddleware()` automatically measures response time, logs with pino (`method`, `route`, `status`, `duration`, `userId`), adds `Server-Timing` header, and reports 5xx errors to Sentry.
 
 ### RBAC & Auth
 Roles defined in `src/types/auth.ts`:
@@ -144,7 +146,24 @@ Navigation via `nextStep()`, `prevStep()`, `canProceed()` (validates prerequisit
 SPT form PDFs use `@react-pdf/renderer` with `renderToBuffer()` in API routes. PDF component files at `src/lib/tax/{form}/pdf-generator.tsx`. Canvas is externalized in webpack config to avoid native module issues.
 
 ### Resilience Patterns
-`src/lib/resilience/` provides circuit breaker, timeout with exponential backoff retry, and idempotency key management for external service calls (DJP, Midtrans).
+`src/lib/resilience/` provides circuit breaker, timeout with exponential backoff retry, and idempotency key management for external service calls (DJP, Midtrans). Circuit breaker state changes are reported to Sentry automatically.
+
+### Observability
+- **Logging**: All server code uses `loggers.*` from `src/lib/logger.ts` (pino). No `console.log` in server code.
+- **Sentry**: `src/lib/sentry.ts` provides `captureApiError()`, `captureJobError()`, `captureCircuitBreakerEvent()`, `setSentryUser()`.
+- **Web Vitals**: `src/components/analytics/WebVitals.tsx` collects LCP/FID/CLS/FCP/TTFB/INP → Sentry.
+- **Monitoring Dashboard**: `/admin/monitoring` — error stats, circuit breakers, memory, activity (API: `/api/admin/monitoring`).
+
+### Customer Management (CRM)
+- **Customer Detail Page**: `/customers/[id]` — profile edit, filings tab, POA tab, notes tab, activity tab.
+- **Customer Notes**: `customer_note` table + CRUD API (`/api/customers/[id]/notes`). Pin support.
+- **Customer List**: Filters (type, POA status), sort (name, date, filings), pagination.
+- **Customer Create**: `POST /api/customers` with dialog UI.
+
+### Authentication & Security
+- **2FA (TOTP)**: `/api/auth/mfa` — Supabase MFA enroll/verify/unenroll. Settings page UI.
+- **Login History**: `/api/auth/sessions` — audit_log based login/failure history.
+- **Password Policy**: 8+ chars, uppercase + lowercase + number + special character required.
 
 ### i18n
 - Config: `src/config/constants.ts` (LOCALES, DEFAULT_LOCALE)
@@ -170,7 +189,8 @@ SPT form PDFs use `@react-pdf/renderer` with `renderToBuffer()` in API routes. P
 - API routes must use `composeMiddleware()` — never skip auth/RBAC
 - All tax data endpoints must include `blockPlatformAdmin`
 - Database migrations in `supabase/migrations/` (sequential numbered SQL files)
-- Structured logging via `pino` — not `console.log`
+- Structured logging via `pino` (`loggers.*`) — never `console.log` in server code
+- Use `captureApiError()` from `src/lib/sentry.ts` for Sentry error reporting in API routes
 
 ## Test Accounts
 
