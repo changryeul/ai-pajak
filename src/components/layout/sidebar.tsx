@@ -91,6 +91,7 @@ const navItems: NavSection[] = [
       { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling', descKey: 'navDesc.newFiling' },
       { href: '/tax/spt-masa', icon: Receipt, labelKey: 'nav.sptMasa', descKey: 'navDesc.sptMasa' },
       { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn', descKey: 'navDesc.annualReturn' },
+      { href: '/tax/annual-simulation', icon: TrendingUp, labelKey: 'nav.annualSimulation', descKey: 'navDesc.annualSimulation' },
       { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk', descKey: 'navDesc.pph21Bulk' },
       { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings', descKey: 'navDesc.taxSavings' },
       { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection', descKey: 'navDesc.anomalyDetection' },

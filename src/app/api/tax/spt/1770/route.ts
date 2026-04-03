@@ -4,6 +4,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
+import { AnnualAggregator } from '@/lib/tax/annual-aggregator';
 import type {
   TaxpayerData,
   PTKPStatus,
@@ -204,6 +205,22 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
       }
     }
 
+    // Auto-fill tax credits from monthly filings if not provided
+    let effectiveTaxCredits = taxCredits;
+    if (!effectiveTaxCredits || Object.keys(effectiveTaxCredits).length === 0) {
+      try {
+        const annual = await AnnualAggregator.aggregate(customerId, taxYear);
+        if (annual.monthsWithData > 0) {
+          effectiveTaxCredits = {
+            pph21Withheld: annual.pph21.totalWithheld,
+            pph22Collected: annual.pph22.totalWithheld,
+            pph23Withheld: annual.pph23.totalWithheld,
+            pph25Installments: annual.pph25.totalInstallments,
+          };
+        }
+      } catch { /* fallback */ }
+    }
+
     // Calculate SPT 1770
     const sptData = calculateSPT1770({
       taxpayer,
@@ -216,7 +233,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
       finalTaxIncome,
       nonTaxableIncome,
       lossCarryforward,
-      taxCredits,
+      taxCredits: effectiveTaxCredits,
       assets,
       liabilities,
       familyMembers,
