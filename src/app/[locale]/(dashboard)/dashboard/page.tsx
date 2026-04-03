@@ -118,6 +118,13 @@ function CustomerDashboardWithOnboarding({
     return !localStorage.getItem('ai-pajak-onboarded');
   });
 
+  // Ensure customer record + role exists (fallback for email-verified users)
+  useEffect(() => {
+    if (!session.customerId) {
+      fetch('/api/auth/setup-account', { method: 'POST', credentials: 'include' }).catch(() => {});
+    }
+  }, [session.customerId]);
+
   if (showOnboarding) {
     return <OnboardingWizard onComplete={() => setShowOnboarding(false)} />;
   }

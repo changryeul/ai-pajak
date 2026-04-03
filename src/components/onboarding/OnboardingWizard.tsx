@@ -35,14 +35,37 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   const [step, setStep] = useState(0);
   const [taxpayerType, setTaxpayerType] = useState<TaxpayerType>(null);
   const [filingGoal, setFilingGoal] = useState<FilingGoal>(null);
+  const [npwpInput, setNpwpInput] = useState('');
+  const [npwpSaving, setNpwpSaving] = useState(false);
 
   const steps = [
     { key: 'welcome', title: t('step1Title') },
     { key: 'type', title: t('step2Title') },
+    { key: 'npwp', title: 'NPWP Registration' },
     { key: 'goal', title: t('step3Title') },
     { key: 'ai-features', title: 'Fitur AI' },
     { key: 'ready', title: t('step4Title') },
   ];
+
+  const saveNpwp = async () => {
+    if (!npwpInput.trim()) return;
+    setNpwpSaving(true);
+    try {
+      await fetch('/api/auth/setup-account', { method: 'POST', credentials: 'include' });
+      // Update customer NPWP
+      const meRes = await fetch('/api/auth/me', { credentials: 'include' });
+      const meData = await meRes.json();
+      if (meData.customerId) {
+        await fetch('/api/customers/' + meData.customerId, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ npwp: npwpInput }),
+        });
+      }
+    } catch { /* non-blocking */ }
+    finally { setNpwpSaving(false); }
+  };
 
   const aiFeatures = [
     {
@@ -182,8 +205,37 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         </div>
       )}
 
-      {/* Step 2: Filing Goal */}
+      {/* Step 2: NPWP Registration */}
       {step === 2 && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">Daftarkan NPWP Anda</h2>
+            <p className="text-gray-500 mt-1">NPWP diperlukan untuk pelaporan pajak. Bisa diisi nanti di pengaturan.</p>
+          </div>
+          <div className="max-w-sm mx-auto">
+            <label className="block text-sm font-medium text-gray-700 mb-2">NPWP (Nomor Pokok Wajib Pajak)</label>
+            <input
+              type="text"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-lg tracking-wider"
+              placeholder="XX.XXX.XXX.X-XXX.XXX"
+              value={npwpInput}
+              onChange={e => setNpwpInput(e.target.value)}
+            />
+            <p className="text-xs text-gray-400 mt-2">Contoh: 01.234.567.8-901.234</p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => { if (npwpInput.trim()) saveNpwp(); }}
+              className="text-sm text-gray-400 hover:text-gray-600 underline"
+            >
+              Lewati untuk sekarang →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Filing Goal */}
+      {step === 3 && (
         <div className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">{t('step3Title')}</h2>
@@ -223,8 +275,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         </div>
       )}
 
-      {/* Step 3: AI Features */}
-      {step === 3 && (
+      {/* Step 4: AI Features */}
+      {step === 4 && (
         <div className="space-y-6">
           <div className="text-center">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-100 to-amber-100 flex items-center justify-center mb-4">
@@ -258,8 +310,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         </div>
       )}
 
-      {/* Step 4: Ready */}
-      {step === 4 && (
+      {/* Step 5: Ready */}
+      {step === 5 && (
         <div className="text-center space-y-6">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center">
             <CheckCircle2 className="h-8 w-8 text-green-600" />

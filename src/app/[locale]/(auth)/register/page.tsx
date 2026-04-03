@@ -68,6 +68,11 @@ export default function RegisterPage() {
         return;
       }
 
+      // Auto-setup: create customer record + role + FREE subscription
+      try {
+        await fetch('/api/auth/setup-account', { method: 'POST', credentials: 'include' });
+      } catch { /* non-blocking — will retry on first login */ }
+
       setSuccess(true);
     } catch {
       setError(t('errors.serverError'));
