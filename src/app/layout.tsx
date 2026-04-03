@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { APP_NAME, APP_DESCRIPTION } from '@/config/constants';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
+import { WebVitals } from '@/components/analytics/WebVitals';
 import '@/app/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -124,6 +125,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <GoogleAnalytics />
+        <WebVitals />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
