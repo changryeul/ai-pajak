@@ -98,7 +98,9 @@ export function TaxFilingWizard({ initialTaxType, filingId }: TaxFilingWizardPro
     setIsLoadingCustomer(true);
     setCustomerError(null);
     try {
-      const response = await fetch(`/api/customers/${customerId}`);
+      const response = await fetch(`/api/customers/${customerId}`, {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch customer data');
       }

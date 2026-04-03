@@ -43,7 +43,7 @@ export default function SPT1770Page() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/customers/${customerId}`);
+      const response = await fetch(`/api/customers/${customerId}`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch customer data');
       const data = await response.json();
       if (data.success && data.data) {

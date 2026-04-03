@@ -40,7 +40,7 @@ export default function TaxSavingsPage() {
   const fetchOwnCustomerData = useCallback(async (customerId: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/customers/${customerId}`);
+      const response = await fetch(`/api/customers/${customerId}`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch customer data');
       const data = await response.json();
       if (data.success && data.data) {
