@@ -13,7 +13,7 @@ import { useSession } from '@/hooks/useSession';
 import {
   FileText, Receipt, Loader2, CheckCircle, AlertTriangle,
   Plus, DollarSign, Globe, Shield, ClipboardList, Send,
-  Sparkles, BarChart3, Upload, Download, Trash2, UserPlus,
+  Sparkles, BarChart3, Upload, Download, Trash2, UserPlus, Camera,
 } from 'lucide-react';
 import { generateTemplate } from '@/lib/tax/bulk-import/csv-parser';
 
@@ -365,6 +365,48 @@ export default function SPTMasaPage() {
     } catch { /* */ }
   };
 
+  // Scan invoice with AI
+  const [isScanning, setIsScanning] = useState(false);
+  const handleInvoiceScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsScanning(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(',')[1];
+        const res = await fetch('/api/tax/classify-invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: base64, mimeType: file.type }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          const c = data.data.classification;
+          setFormData({
+            ...formData,
+            grossAmount: String(c.grossAmount || ''),
+            counterpartyName: c.counterpartyName || '',
+            counterpartyNpwp: c.counterpartyNpwp || '',
+            description: c.description || '',
+            serviceType: c.serviceCode || 'JASA_LAINNYA',
+          });
+          if (data.data.resolution) {
+            setResolution({ rate: data.data.resolution.rate, reason: data.data.resolution.reason });
+          }
+          setShowForm(true);
+          setMessage({ type: 'success', text: `AI 분류 완료 (신뢰도: ${Math.round(c.confidence * 100)}%)` });
+        } else {
+          setMessage({ type: 'error', text: data.error || 'Scan failed' });
+        }
+        setIsScanning(false);
+        setTimeout(() => setMessage(null), 5000);
+      };
+      reader.readAsDataURL(file);
+    } catch { setIsScanning(false); setMessage({ type: 'error', text: 'Error' }); }
+    finally { e.target.value = ''; }
+  };
+
   // Delete transaction
   const deleteTransaction = async (txId: string) => {
     if (!confirm('이 거래를 삭제하시겠습니까?')) return;
@@ -560,6 +602,12 @@ export default function SPTMasaPage() {
                   <span><Upload className="h-3 w-3 mr-1" />CSV Upload</span>
                 </Button>
                 <input type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
+              </label>
+              <label className="cursor-pointer">
+                <Button size="sm" variant="outline" asChild disabled={isScanning}>
+                  <span>{isScanning ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Camera className="h-3 w-3 mr-1" />}AI Scan</span>
+                </Button>
+                <input type="file" accept="image/*,.pdf" className="hidden" onChange={handleInvoiceScan} capture="environment" />
               </label>
               <Button size="sm" onClick={() => setShowForm(true)}>
                 <Plus className="h-4 w-4 mr-1" />{t('addTransaction')}
