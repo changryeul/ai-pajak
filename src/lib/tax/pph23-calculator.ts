@@ -1,4 +1,5 @@
 import { PPH23_RATES } from '@/config/constants';
+import { getServiceCode, getAllServiceCodes } from '@/config/pph23-service-codes';
 import type { PPh23Data } from '@/types';
 
 export interface PPh23Calculation {
@@ -10,6 +11,10 @@ export interface PPh23Calculation {
   npwp_surcharge_applied?: boolean;
   /** Effective rate after surcharge */
   effective_rate?: number;
+  /** e-Bupot service code for DJP reporting (PMK 141/2015) */
+  ebupot_service_code?: string;
+  /** Service subtype label (Indonesian) */
+  service_subtype_label?: string;
 }
 
 /**
@@ -44,6 +49,17 @@ export class PPh23Calculator {
     const taxAmount = Math.round(data.gross_amount * effectiveRate);
     const netAmount = data.gross_amount - taxAmount;
 
+    // Resolve e-Bupot service code if service subtype is provided
+    let ebupotServiceCode: string | undefined;
+    let serviceSubtypeLabel: string | undefined;
+    if (data.transaction_type === 'service' && data.service_subtype) {
+      const serviceCode = getServiceCode(data.service_subtype);
+      if (serviceCode) {
+        ebupotServiceCode = serviceCode.ebupotCode;
+        serviceSubtypeLabel = serviceCode.descriptionId;
+      }
+    }
+
     return {
       gross_amount: data.gross_amount,
       tax_rate: baseRate,
@@ -51,6 +67,8 @@ export class PPh23Calculator {
       net_amount: netAmount,
       npwp_surcharge_applied: applyNpwpSurcharge,
       effective_rate: applyNpwpSurcharge ? effectiveRate : undefined,
+      ebupot_service_code: ebupotServiceCode,
+      service_subtype_label: serviceSubtypeLabel,
     };
   }
 
@@ -86,6 +104,17 @@ export class PPh23Calculator {
       { type: 'rent', description: 'Sewa (selain tanah/bangunan)', rate: PPH23_RATES.RENT },
       { type: 'service', description: 'Jasa Teknik, Manajemen, dll', rate: PPH23_RATES.SERVICE },
     ];
+  }
+
+  /**
+   * Get all 62 service subtypes per PMK 141/2015 for e-Bupot reporting
+   */
+  static getServiceSubtypes(): Array<{ code: string; label: string; ebupotCode: string }> {
+    return getAllServiceCodes().map(sc => ({
+      code: sc.code,
+      label: sc.descriptionId,
+      ebupotCode: sc.ebupotCode,
+    }));
   }
 
   /**

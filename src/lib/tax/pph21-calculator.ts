@@ -1,5 +1,6 @@
 import { PPH21_BRACKETS, PTKP, type PTKPCategory } from '@/config/constants';
-import type { PPh21Data, PPh21Calculation, TaxBracketResult } from '@/types';
+import { getTERCategory, lookupTERRate } from '@/config/pph21-ter-rates';
+import type { PPh21Data, PPh21Calculation, PPh21TERCalculation, TaxBracketResult } from '@/types';
 
 /**
  * NPWP Surcharge rate per Pasal 21 ayat (5a) UU PPh:
@@ -76,7 +77,64 @@ export class PPh21Calculator {
   }
 
   /**
-   * Calculate monthly PPh 21 for an employee
+   * Calculate monthly PPh 21 using TER (Tarif Efektif Rata-rata).
+   *
+   * Per PP 58/2023 & PMK 168/2023:
+   * - Months 1-11: gross_salary × TER_rate = monthly tax
+   * - Month 12: annual Pasal 17 progressive tax - cumulative Jan-Nov tax = December adjustment
+   *
+   * @param data Employee data with month (1-12) and cumulative_tax_paid (for month 12)
+   */
+  static calculateMonthlyTER(data: PPh21Data): PPh21TERCalculation {
+    const terCategory = getTERCategory(data.ptkp_category);
+    const month = data.month ?? 1;
+    const isDecember = month === 12;
+    const applyNpwpSurcharge = this.shouldApplyNpwpSurcharge(data);
+
+    if (isDecember) {
+      // December reconciliation: use annual Pasal 17 rates
+      const annualResult = this.calculateAnnual(data);
+      const annualTaxPasal17 = annualResult.tax_amount;
+      const cumulativeJanNov = data.cumulative_tax_paid ?? 0;
+      const decemberAdjustment = annualTaxPasal17 - cumulativeJanNov;
+
+      return {
+        gross_monthly: data.gross_salary,
+        ter_category: terCategory,
+        ter_rate: 0, // Not applicable for December
+        tax_amount: decemberAdjustment,
+        is_december_reconciliation: true,
+        annual_reconciliation: {
+          annual_tax_pasal17: annualTaxPasal17,
+          cumulative_jan_nov_tax: cumulativeJanNov,
+          december_adjustment: decemberAdjustment,
+        },
+        npwp_surcharge_applied: applyNpwpSurcharge,
+      };
+    }
+
+    // Months 1-11: apply TER rate
+    const terRate = lookupTERRate(terCategory, data.gross_salary);
+    let taxAmount = Math.round(data.gross_salary * terRate);
+
+    // Apply NPWP surcharge (20% higher) per Pasal 21(5a)
+    if (applyNpwpSurcharge) {
+      taxAmount = Math.round(taxAmount * (1 + NPWP_SURCHARGE_RATE));
+    }
+
+    return {
+      gross_monthly: data.gross_salary,
+      ter_category: terCategory,
+      ter_rate: terRate,
+      tax_amount: taxAmount,
+      is_december_reconciliation: false,
+      npwp_surcharge_applied: applyNpwpSurcharge,
+    };
+  }
+
+  /**
+   * Calculate monthly PPh 21 for an employee (simple annual / 12)
+   * @deprecated Use calculateMonthlyTER() for PP 58/2023 compliant monthly calculation
    */
   static calculateMonthly(data: PPh21Data): PPh21Calculation {
     const annualResult = this.calculateAnnual(data);

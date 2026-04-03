@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Settings, Save, Loader2, CheckCircle, AlertTriangle,
   TrendingUp, Percent, DollarSign, Shield, Building2, FileText,
+  Hammer, ClipboardList, BarChart3,
 } from 'lucide-react';
 
 interface TaxRate {
@@ -25,8 +26,9 @@ function fmt(n: number | null | undefined) { return n != null ? `Rp ${n.toLocale
 function pct(n: number | null | undefined) { return n != null ? `${(n * 100).toFixed(1)}%` : '-'; }
 
 const categoryIcons: Record<string, typeof TrendingUp> = {
-  PPH21_BRACKET: TrendingUp, PPH23: Percent, PTKP: DollarSign,
-  PPN: Percent, PPH_FINAL: Shield, CORPORATE: Building2,
+  PPH21_BRACKET: TrendingUp, PPH21_TER_A: BarChart3, PPH21_TER_B: BarChart3, PPH21_TER_C: BarChart3,
+  PPH23: Percent, PPH23_SERVICE: ClipboardList, PPH42_CONSTRUCTION: Hammer,
+  PTKP: DollarSign, PPN: Percent, PPH_FINAL: Shield, CORPORATE: Building2,
   PPH22: FileText, NPWP_SURCHARGE: AlertTriangle, LIMITS: Settings,
 };
 

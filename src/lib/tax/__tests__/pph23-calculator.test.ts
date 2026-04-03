@@ -268,4 +268,94 @@ describe('PPh23Calculator', () => {
       expect(PPH23_RATES.SERVICE).toBe(0.02);
     });
   });
+
+  describe('Service Subcategorization (PMK 141/2015)', () => {
+    it('should return ebupot_service_code when service_subtype is provided', () => {
+      const data = createTestData({
+        transaction_type: 'service',
+        gross_amount: 10_000_000,
+        service_subtype: 'JASA_AKUNTANSI',
+      });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.ebupot_service_code).toBe('24-104-03');
+      expect(result.service_subtype_label).toBe('Jasa akuntansi, pembukuan, dan atestasi laporan keuangan');
+      expect(result.tax_rate).toBe(0.02); // Rate unchanged
+    });
+
+    it('should return ebupot code for software services', () => {
+      const data = createTestData({
+        transaction_type: 'service',
+        service_subtype: 'JASA_SEHUBUNGAN_SOFTWARE',
+      });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.ebupot_service_code).toBe('24-104-21');
+      expect(result.service_subtype_label).toContain('software');
+    });
+
+    it('should work without service_subtype (backward compat)', () => {
+      const data = createTestData({
+        transaction_type: 'service',
+        gross_amount: 5_000_000,
+      });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.tax_amount).toBe(100_000);
+      expect(result.ebupot_service_code).toBeUndefined();
+      expect(result.service_subtype_label).toBeUndefined();
+    });
+
+    it('should ignore service_subtype for non-service transactions', () => {
+      const data = createTestData({
+        transaction_type: 'dividend',
+        gross_amount: 100_000_000,
+        service_subtype: 'JASA_HUKUM',
+      });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.ebupot_service_code).toBeUndefined();
+      expect(result.tax_rate).toBe(0.15);
+    });
+
+    it('should handle unknown service_subtype gracefully', () => {
+      const data = createTestData({
+        transaction_type: 'service',
+        service_subtype: 'UNKNOWN_CODE',
+      });
+      const result = PPh23Calculator.calculate(data);
+
+      expect(result.ebupot_service_code).toBeUndefined();
+      expect(result.service_subtype_label).toBeUndefined();
+      expect(result.tax_rate).toBe(0.02); // Rate still correct
+    });
+  });
+
+  describe('getServiceSubtypes', () => {
+    it('should return 62 service subtypes', () => {
+      const subtypes = PPh23Calculator.getServiceSubtypes();
+      expect(subtypes).toHaveLength(62);
+    });
+
+    it('should have correct structure for each subtype', () => {
+      const subtypes = PPh23Calculator.getServiceSubtypes();
+      subtypes.forEach(st => {
+        expect(st).toHaveProperty('code');
+        expect(st).toHaveProperty('label');
+        expect(st).toHaveProperty('ebupotCode');
+        expect(st.ebupotCode).toMatch(/^24-104-\d{2}$/);
+      });
+    });
+
+    it('should include key service types', () => {
+      const subtypes = PPh23Calculator.getServiceSubtypes();
+      const codes = subtypes.map(s => s.code);
+
+      expect(codes).toContain('JASA_AKUNTANSI');
+      expect(codes).toContain('JASA_HUKUM');
+      expect(codes).toContain('JASA_SEHUBUNGAN_SOFTWARE');
+      expect(codes).toContain('JASA_KEBERSIHAN');
+      expect(codes).toContain('JASA_PEMBUATAN_KATERING');
+    });
+  });
 });

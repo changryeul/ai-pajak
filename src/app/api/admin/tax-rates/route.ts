@@ -37,7 +37,12 @@ export async function GET(request: NextRequest) {
 
     const categories = [
       { code: 'PPH21_BRACKET', label: 'PPh 21 - Tarif Progresif', icon: 'progressive' },
+      { code: 'PPH21_TER_A', label: 'PPh 21 TER Kategori A (TK/0, TK/1, K/0)', icon: 'ter' },
+      { code: 'PPH21_TER_B', label: 'PPh 21 TER Kategori B (TK/2, TK/3, K/1, K/2)', icon: 'ter' },
+      { code: 'PPH21_TER_C', label: 'PPh 21 TER Kategori C (K/3)', icon: 'ter' },
       { code: 'PPH23', label: 'PPh 23 - Tarif Pemotongan', icon: 'withholding' },
+      { code: 'PPH23_SERVICE', label: 'PPh 23 - Jasa Lain 62 Jenis (PMK 141/2015)', icon: 'service' },
+      { code: 'PPH42_CONSTRUCTION', label: 'PPh 4(2) - Jasa Konstruksi (PP 9/2022)', icon: 'construction' },
       { code: 'PTKP', label: 'PTKP - Penghasilan Tidak Kena Pajak', icon: 'exemption' },
       { code: 'PPN', label: 'PPN - Pajak Pertambahan Nilai', icon: 'vat' },
       { code: 'PPH_FINAL', label: 'PPh Final', icon: 'final' },

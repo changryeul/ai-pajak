@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Language
+
+사용자와의 대화는 항상 **한국어**로 응답한다. 코드, 변수명, 커밋 메시지는 영어를 유지한다.
+
 ## What This Is
 
 AI Pajak — Indonesian tax filing automation platform for Jakarta Tax Consulting (JTC). Supports SPT forms 1770SS, 1770S, 1770, 1771. Written in Korean (README/docs) but the code is in English.
@@ -27,6 +31,7 @@ npm run test:e2e:tax-advisor        # Tax advisor role only
 npm run test:e2e:platform-admin     # Platform admin role only
 npm run test:e2e:system             # System role only
 npm run test:e2e:audit              # Audit trail tests
+npm run test:e2e:operator           # Operator workflow tests
 
 # Database
 supabase start             # Local Supabase
@@ -34,6 +39,9 @@ supabase migration up      # Apply migrations
 supabase db reset          # Reset & re-seed
 npm run db:seed-test-users # Seed test users via tsx
 ```
+
+Unit tests match: `src/lib/**/*.test.{ts,tsx}` and `src/middleware/**/*.test.{ts,tsx}`.
+E2E tests live in `src/tests/e2e/` (Playwright, 60s timeout, 2 workers locally).
 
 ## Architecture
 
@@ -47,6 +55,9 @@ npm run db:seed-test-users # Seed test users via tsx
 - **Sentry** for error monitoring, **pino** for structured logging
 - **Zod 4** for validation, **React Hook Form** + **@hookform/resolvers** for forms
 - **@tanstack/react-query** for data fetching, **zustand** for client state
+
+### Next.js Root Middleware
+`src/middleware.ts` handles i18n (next-intl), Supabase session refresh, rate limiting (skipped for `/api/health`), security headers (CSP, HSTS, X-Frame-Options), and request ID generation. Protected routes redirect unauthenticated users; auth routes redirect authenticated users to dashboard.
 
 ### Path Alias
 `@/*` → `src/*` (tsconfig)
@@ -132,10 +143,18 @@ Navigation via `nextStep()`, `prevStep()`, `canProceed()` (validates prerequisit
 ### PDF Generation
 SPT form PDFs use `@react-pdf/renderer` with `renderToBuffer()` in API routes. PDF component files at `src/lib/tax/{form}/pdf-generator.tsx`. Canvas is externalized in webpack config to avoid native module issues.
 
+### Resilience Patterns
+`src/lib/resilience/` provides circuit breaker, timeout with exponential backoff retry, and idempotency key management for external service calls (DJP, Midtrans).
+
 ### i18n
 - Config: `src/config/constants.ts` (LOCALES, DEFAULT_LOCALE)
 - Message files: `src/i18n/messages/{locale}/`
 - Use `useTranslations()` from `next-intl` in components
+
+### Webpack / Next.js Config Notes
+- `canvas` is externalized in `next.config.ts` to avoid native module issues with `@react-pdf/renderer`
+- Server actions body size limit: 10mb
+- Optimized package imports: `lucide-react`, `recharts`, `date-fns`, Radix UI components
 
 ## Security Rules (5 Hard Rules — Non-Negotiable)
 

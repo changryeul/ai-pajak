@@ -71,17 +71,18 @@ export default function SPTTahunanPage() {
       gradient: 'from-purple-500 to-violet-600',
       iconBg: 'bg-purple-50',
     },
-    {
-      id: '1771',
-      title: 'SPT 1771',
-      description: ts('badan_desc'),
-      targetAudience: ts('badan_audience'),
-      icon: Building2,
-      href: '/tax/spt-tahunan/1771',
-      features: [ts('badan_f1'), ts('badan_f2'), ts('badan_f3'), ts('badan_f4')],
-      gradient: 'from-orange-500 to-red-500',
-      iconBg: 'bg-orange-50',
-    },
+    // SPT 1771 (Corporate) — temporarily disabled
+    // {
+    //   id: '1771',
+    //   title: 'SPT 1771',
+    //   description: ts('badan_desc'),
+    //   targetAudience: ts('badan_audience'),
+    //   icon: Building2,
+    //   href: '/tax/spt-tahunan/1771',
+    //   features: [ts('badan_f1'), ts('badan_f2'), ts('badan_f3'), ts('badan_f4')],
+    //   gradient: 'from-orange-500 to-red-500',
+    //   iconBg: 'bg-orange-50',
+    // },
   ];
   const params = useParams();
   const router = useRouter();

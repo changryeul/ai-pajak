@@ -4,6 +4,8 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { TaxResolutionEngine } from '@/lib/tax/tax-resolution-engine';
+import type { ServiceCategory } from '@/types';
 
 const SERVICE_TYPES = {
   JASA_TEKNIK: { label: 'Jasa Teknik', rate: 0.02 },
@@ -71,12 +73,9 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     const body = await req.json();
     const { customerId, counterpartyId, taxPeriod, transactionDate, serviceType, grossAmount, invoiceNumber, description } = body;
 
-    if (!customerId || !taxPeriod || !serviceType || !grossAmount) {
-      return NextResponse.json({ error: 'customerId, taxPeriod, serviceType, grossAmount required' }, { status: 400 });
+    if (!customerId || !taxPeriod || !grossAmount) {
+      return NextResponse.json({ error: 'customerId, taxPeriod, grossAmount required' }, { status: 400 });
     }
-
-    const typeInfo = SERVICE_TYPES[serviceType as keyof typeof SERVICE_TYPES];
-    if (!typeInfo) return NextResponse.json({ error: 'Invalid serviceType' }, { status: 400 });
 
     // Get counterparty info
     let counterpartyName = body.counterpartyName || '';
@@ -86,18 +85,58 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       if (cp) { counterpartyName = cp.name; counterpartyNpwp = cp.npwp || ''; }
     }
 
-    // NPWP check: No NPWP = 2x rate (Pasal 21 ayat 5a UU PPh)
-    const hasNpwp = !!counterpartyNpwp && counterpartyNpwp.trim().length >= 15;
-    const effectiveRate = hasNpwp ? typeInfo.rate : typeInfo.rate * 2;
-    const taxAmount = Math.round(grossAmount * effectiveRate);
+    let effectiveRate: number;
+    let taxAmount: number;
+    let resolvedServiceType = serviceType;
+    let resolutionInfo: { ruleId: string; reason: string; legalBasis: string } | undefined;
+
+    // Option A: Use Resolution Engine for automatic rate determination
+    if (body.useResolution) {
+      const resolution = TaxResolutionEngine.resolve({
+        grossAmount,
+        transactionDate: transactionDate || new Date().toISOString().slice(0, 10),
+        serviceCategory: (body.serviceCategory || 'SERVICE') as ServiceCategory,
+        recipientType: 'RESIDENT',
+        recipientNpwp: counterpartyNpwp,
+        vendorIsPropertyOwner: body.vendorIsPropertyOwner,
+        kbliCode: body.kbliCode,
+        constructionType: body.constructionType,
+        qualification: body.qualification,
+      });
+
+      effectiveRate = resolution.rate;
+      taxAmount = resolution.taxAmount;
+      resolutionInfo = {
+        ruleId: resolution.ruleId,
+        reason: resolution.reason,
+        legalBasis: resolution.legalBasis,
+      };
+
+      // Map resolution to service type for DB storage
+      if (!resolvedServiceType) {
+        resolvedServiceType = effectiveRate >= 0.15 ? 'DIVIDEN' : 'JASA_LAINNYA';
+      }
+    }
+    // Option B: Manual service type + rate (existing behavior)
+    else {
+      if (!serviceType) {
+        return NextResponse.json({ error: 'serviceType required (or use useResolution: true)' }, { status: 400 });
+      }
+      const typeInfo = SERVICE_TYPES[serviceType as keyof typeof SERVICE_TYPES];
+      if (!typeInfo) return NextResponse.json({ error: 'Invalid serviceType' }, { status: 400 });
+
+      const hasNpwp = !!counterpartyNpwp && counterpartyNpwp.trim().length >= 15;
+      effectiveRate = hasNpwp ? typeInfo.rate : typeInfo.rate * 2;
+      taxAmount = Math.round(grossAmount * effectiveRate);
+    }
 
     const { data, error } = await getSupabaseAdmin().from('pph23_transaction').insert({
       customer_id: customerId,
       counterparty_id: counterpartyId || null,
       tax_period: taxPeriod,
       transaction_date: transactionDate || new Date().toISOString().slice(0, 10),
-      description: description || (hasNpwp ? '' : '[NPWP tidak ada - tarif 2x]'),
-      service_type: serviceType,
+      description: description || resolutionInfo?.reason || '',
+      service_type: resolvedServiceType,
       invoice_number: invoiceNumber,
       gross_amount: grossAmount,
       tax_rate: effectiveRate,
@@ -115,8 +154,12 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       });
     } catch { /* RPC may not exist yet */ }
 
-    return NextResponse.json({ success: true, data });
-  } catch (error) {
+    return NextResponse.json({
+      success: true,
+      data,
+      ...(resolutionInfo && { resolution: resolutionInfo }),
+    });
+  } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }

@@ -68,6 +68,10 @@ export interface PPh21Data {
   tax_period_end: string;
   /** If false/undefined and no NPWP, 20% surcharge applies per Pasal 21(5a) UU PPh */
   has_npwp?: boolean;
+  /** Month number (1-12) for TER calculation. 12 = December reconciliation. */
+  month?: number;
+  /** Cumulative PPh 21 tax paid Jan through previous month (for December reconciliation) */
+  cumulative_tax_paid?: number;
 }
 
 export interface PPh21Calculation {
@@ -92,6 +96,22 @@ export interface TaxBracketResult {
   tax: number;
 }
 
+/** PPh 21 TER (Tarif Efektif Rata-rata) monthly calculation result */
+export interface PPh21TERCalculation {
+  gross_monthly: number;
+  ter_category: 'A' | 'B' | 'C';
+  ter_rate: number;
+  tax_amount: number;
+  is_december_reconciliation: boolean;
+  /** Only populated for December (month 12) */
+  annual_reconciliation?: {
+    annual_tax_pasal17: number;
+    cumulative_jan_nov_tax: number;
+    december_adjustment: number;
+  };
+  npwp_surcharge_applied: boolean;
+}
+
 // PPh 23 specific types
 export interface PPh23Data {
   transaction_type: 'dividend' | 'interest' | 'royalty' | 'prize' | 'rent' | 'service';
@@ -102,6 +122,8 @@ export interface PPh23Data {
   description: string;
   /** If false and no NPWP, 100% surcharge applies per Pasal 23(1a) UU PPh */
   has_npwp?: boolean;
+  /** e-Bupot service subtype code (PMK 141/2015), required for 'service' type e-Bupot reporting */
+  service_subtype?: string;
 }
 
 // PPh 22 specific types (Domestic Transaction Withholding Tax)
@@ -167,7 +189,57 @@ export interface PPhFinalData {
   entity_type?: 'INDIVIDUAL' | 'PT' | 'CV' | 'FIRMA' | 'KOPERASI';
   klu_code?: string;
   // Pasal 4(2) params
-  income_type?: 'RENTAL' | 'CONSTRUCTION' | 'SHIP' | 'AIRCRAFT';
+  income_type?: 'RENTAL' | 'CONSTRUCTION' | 'CONSTRUCTION_WORK' | 'CONSTRUCTION_CONSULT' | 'CONSTRUCTION_INTEGRATED' | 'SHIP' | 'AIRCRAFT';
+  /** SBU grade for construction services (PP 9/2022) */
+  sbu_grade?: 'SMALL' | 'MEDIUM_LARGE' | 'HAS_SBU' | 'NONE';
+}
+
+// Tax Resolution Engine types
+export type ServiceCategory =
+  | 'EMPLOYMENT' | 'SERVICE' | 'RENTAL' | 'CONSTRUCTION'
+  | 'DIVIDEND' | 'INTEREST' | 'ROYALTY' | 'IMPORT' | 'SHIPPING' | 'OTHER';
+
+export type ConstructionType = 'WORK' | 'CONSULT' | 'INTEGRATED';
+export type QualificationGrade = 'SMALL' | 'MEDIUM_LARGE' | 'QUALIFIED' | 'NONE';
+export type RecipientType = 'RESIDENT' | 'NON_RESIDENT';
+export type ResolvedTaxType = 'PPh21' | 'PPh23' | 'PPh26' | 'PPh4_2' | 'PPh22' | 'PPh15' | 'PPN';
+
+export interface TransactionContext {
+  grossAmount: number;
+  transactionDate: string;
+  description?: string;
+
+  serviceCategory: ServiceCategory;
+  kbliCode?: string;
+
+  /** Construction details (when serviceCategory === 'CONSTRUCTION') */
+  constructionType?: ConstructionType;
+  qualification?: QualificationGrade;
+
+  /** Recipient/vendor info */
+  recipientType: RecipientType;
+  recipientNpwp?: string;
+  recipientCountry?: string;
+  hasCertificateOfDomicile?: boolean;
+
+  /** Ownership/relationship */
+  isRelatedParty?: boolean;
+  /** Building management case: vendor is also the property owner */
+  vendorIsPropertyOwner?: boolean;
+}
+
+export interface TaxResolution {
+  taxType: ResolvedTaxType;
+  rate: number;
+  taxAmount: number;
+  netAmount: number;
+  isFinal: boolean;
+  npwpSurchargeApplied: boolean;
+  reason: string;
+  legalBasis: string;
+  rulePriority: number;
+  ruleId: string;
+  alternativeRules?: Array<{ ruleId: string; reason: string }>;
 }
 
 // PPN specific types

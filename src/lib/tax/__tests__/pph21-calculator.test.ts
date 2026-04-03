@@ -288,4 +288,229 @@ describe('PPh21Calculator', () => {
       });
     });
   });
+
+  describe('calculateMonthlyTER', () => {
+    describe('TER Category Resolution', () => {
+      it('should resolve TK0 to Category A', () => {
+        const data = createTestData({ ptkp_category: 'TK0', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('A');
+      });
+
+      it('should resolve TK1 to Category A', () => {
+        const data = createTestData({ ptkp_category: 'TK1', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('A');
+      });
+
+      it('should resolve K0 to Category A', () => {
+        const data = createTestData({ ptkp_category: 'K0', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('A');
+      });
+
+      it('should resolve TK2 to Category B', () => {
+        const data = createTestData({ ptkp_category: 'TK2', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('B');
+      });
+
+      it('should resolve K1 to Category B', () => {
+        const data = createTestData({ ptkp_category: 'K1', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('B');
+      });
+
+      it('should resolve K2 to Category B', () => {
+        const data = createTestData({ ptkp_category: 'K2', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('B');
+      });
+
+      it('should resolve K3 to Category C', () => {
+        const data = createTestData({ ptkp_category: 'K3', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('C');
+      });
+
+      it('should resolve KI0 to Category A', () => {
+        const data = createTestData({ ptkp_category: 'KI0', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('A');
+      });
+
+      it('should resolve KI3 to Category C', () => {
+        const data = createTestData({ ptkp_category: 'KI3', gross_salary: 10_000_000 });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+        expect(result.ter_category).toBe('C');
+      });
+    });
+
+    describe('TER Rate Lookup (Months 1-11)', () => {
+      it('should return 0% for income below Cat A threshold (< 5.4M)', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 5_000_000,
+          month: 1,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.ter_rate).toBe(0);
+        expect(result.tax_amount).toBe(0);
+        expect(result.is_december_reconciliation).toBe(false);
+      });
+
+      it('should apply correct TER rate for 10M salary (Cat A)', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 10_000_000,
+          month: 3,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        // 10M falls in Cat A bracket: 9,650,000 - 10,050,000 → 2%
+        expect(result.ter_rate).toBe(0.02);
+        expect(result.tax_amount).toBe(200_000); // 10M × 2%
+        expect(result.gross_monthly).toBe(10_000_000);
+      });
+
+      it('should return 0% for income below Cat B threshold (< 6.2M)', () => {
+        const data = createTestData({
+          ptkp_category: 'TK2',
+          gross_salary: 6_000_000,
+          month: 5,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.ter_category).toBe('B');
+        expect(result.ter_rate).toBe(0);
+        expect(result.tax_amount).toBe(0);
+      });
+
+      it('should return 0% for income below Cat C threshold (< 6.6M)', () => {
+        const data = createTestData({
+          ptkp_category: 'K3',
+          gross_salary: 6_500_000,
+          month: 2,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.ter_category).toBe('C');
+        expect(result.ter_rate).toBe(0);
+        expect(result.tax_amount).toBe(0);
+      });
+
+      it('should default to month 1 when month is not provided', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 10_000_000,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.is_december_reconciliation).toBe(false);
+        expect(result.ter_rate).toBe(0.02);
+      });
+    });
+
+    describe('December Reconciliation (Month 12)', () => {
+      it('should use annual Pasal 17 for December and subtract cumulative', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 10_000_000,
+          month: 12,
+          cumulative_tax_paid: 1_500_000, // Jan-Nov cumulative
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.is_december_reconciliation).toBe(true);
+        expect(result.ter_rate).toBe(0); // TER not used for December
+        expect(result.annual_reconciliation).toBeDefined();
+        expect(result.annual_reconciliation!.cumulative_jan_nov_tax).toBe(1_500_000);
+        // annual_tax_pasal17 - 1_500_000 = december_adjustment
+        expect(result.annual_reconciliation!.december_adjustment).toBe(
+          result.annual_reconciliation!.annual_tax_pasal17 - 1_500_000
+        );
+        expect(result.tax_amount).toBe(result.annual_reconciliation!.december_adjustment);
+      });
+
+      it('should handle negative December adjustment (overpayment)', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 5_000_000, // Low salary, likely 0 annual tax after PTKP
+          month: 12,
+          cumulative_tax_paid: 500_000, // Overpaid during year
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.is_december_reconciliation).toBe(true);
+        // If annual tax is 0 but 500K was paid, adjustment should be negative
+        expect(result.tax_amount).toBeLessThanOrEqual(0);
+        expect(result.annual_reconciliation!.december_adjustment).toBeLessThanOrEqual(0);
+      });
+
+      it('should default cumulative_tax_paid to 0 when not provided', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 15_000_000,
+          month: 12,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.annual_reconciliation!.cumulative_jan_nov_tax).toBe(0);
+        expect(result.tax_amount).toBe(result.annual_reconciliation!.annual_tax_pasal17);
+      });
+    });
+
+    describe('NPWP Surcharge with TER', () => {
+      it('should apply 20% surcharge to TER result for months 1-11', () => {
+        const withNpwp = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 10_000_000,
+          month: 1,
+          has_npwp: true,
+        });
+        const withoutNpwp = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 10_000_000,
+          month: 1,
+          has_npwp: false,
+        });
+
+        const resultWith = PPh21Calculator.calculateMonthlyTER(withNpwp);
+        const resultWithout = PPh21Calculator.calculateMonthlyTER(withoutNpwp);
+
+        expect(resultWith.npwp_surcharge_applied).toBe(false);
+        expect(resultWithout.npwp_surcharge_applied).toBe(true);
+        // 20% surcharge: 200_000 * 1.2 = 240_000
+        expect(resultWithout.tax_amount).toBe(Math.round(resultWith.tax_amount * 1.2));
+      });
+    });
+
+    describe('Month boundary', () => {
+      it('month 11 should use TER', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 10_000_000,
+          month: 11,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.is_december_reconciliation).toBe(false);
+        expect(result.ter_rate).toBeGreaterThan(0);
+      });
+
+      it('month 12 should use reconciliation', () => {
+        const data = createTestData({
+          ptkp_category: 'TK0',
+          gross_salary: 10_000_000,
+          month: 12,
+          cumulative_tax_paid: 2_000_000,
+        });
+        const result = PPh21Calculator.calculateMonthlyTER(data);
+
+        expect(result.is_december_reconciliation).toBe(true);
+        expect(result.annual_reconciliation).toBeDefined();
+      });
+    });
+  });
 });

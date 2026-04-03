@@ -88,6 +88,7 @@ const navItems: NavSection[] = [
     roles: consultantRoles,
     items: [
       { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling', descKey: 'navDesc.newFiling' },
+      { href: '/tax/spt-masa', icon: Receipt, labelKey: 'nav.sptMasa', descKey: 'navDesc.sptMasa' },
       { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn', descKey: 'navDesc.annualReturn' },
       { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk', descKey: 'navDesc.pph21Bulk' },
       { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings', descKey: 'navDesc.taxSavings' },
@@ -131,6 +132,7 @@ const navItems: NavSection[] = [
       { href: '/admin/ai-usage', icon: Lightbulb, labelKey: 'nav.aiUsage' },
       { href: '/admin/audit-logs', icon: Shield, labelKey: 'nav.auditLogs' },
       { href: '/admin/tax-rates', icon: Settings, labelKey: 'nav.taxRates' },
+      { href: '/admin/override-rules', icon: Shield, labelKey: 'nav.overrideRules' },
     ],
   },
   {

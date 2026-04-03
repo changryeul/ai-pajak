@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client';
  */
 
 export interface SPTMasaResult {
-  tax_type: 'PPh21' | 'PPh23' | 'PPN';
+  tax_type: 'PPh21' | 'PPh23' | 'PPh4_2' | 'PPN';
   period: string; // 'YYYY-MM'
   total_gross_income: number;
   total_tax_withheld: number;
@@ -44,6 +44,17 @@ export interface SPTMasaBreakdown {
     gross_amount: number;
     tax_rate: number;
     tax_withheld: number;
+  }>;
+
+  // PPh 4(2) specific
+  final_tax_count?: number;
+  final_tax_details?: Array<{
+    income_type: string;
+    counterparty_name: string;
+    gross_amount: number;
+    tax_rate: number;
+    tax_withheld: number;
+    sbu_grade?: string;
   }>;
 
   // PPN specific
@@ -256,6 +267,93 @@ export class SPTMasaCalculator {
   }
 
   /**
+   * Calculate PPh 4(2) Final Tax monthly summary
+   *
+   * Aggregates construction, rental, and other final tax transactions
+   * Deadline: 20th of following month
+   */
+  static async calculatePPh42Masa(params: {
+    month: string;
+    customerId: string;
+  }): Promise<SPTMasaResult> {
+    const { month, customerId } = params;
+    const supabase = createClient();
+
+    // Fetch PPh Final calculations for this month
+    const { data: calculations, error } = await supabase
+      .from('tax_calculation')
+      .select('*')
+      .eq('customer_id', customerId)
+      .eq('tax_type', 'PPh_FINAL')
+      .like('tax_period', `${month}%`)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw new Error(`Failed to fetch PPh 4(2) calculations: ${error.message}`);
+    }
+
+    const deadline = this.getSubmissionDeadline(month, 'PPh4_2');
+
+    if (!calculations || calculations.length === 0) {
+      return {
+        tax_type: 'PPh4_2',
+        period: month,
+        total_gross_income: 0,
+        total_tax_withheld: 0,
+        total_net_payable: 0,
+        item_count: 0,
+        breakdown: { final_tax_count: 0, final_tax_details: [] },
+        submission_deadline: deadline,
+        legal_basis: 'PP 9/2022, PP 34/2017 - Final tax on construction, rental, and other income',
+      };
+    }
+
+    let totalGross = 0;
+    let totalTax = 0;
+    const details: Array<{
+      income_type: string;
+      counterparty_name: string;
+      gross_amount: number;
+      tax_rate: number;
+      tax_withheld: number;
+      sbu_grade?: string;
+    }> = [];
+
+    for (const calc of calculations) {
+      const result = calc.calculation_result;
+      const brackets = result.taxBrackets || [];
+      const bracket = brackets[0];
+
+      totalGross += result.grossIncome || 0;
+      totalTax += result.calculatedTax || 0;
+
+      details.push({
+        income_type: bracket?.bracket?.replace('Pasal 4(2) - ', '') || 'UNKNOWN',
+        counterparty_name: calc.income_data?.counterparty_name || 'Unknown',
+        gross_amount: result.grossIncome || 0,
+        tax_rate: bracket?.rate || 0,
+        tax_withheld: result.calculatedTax || 0,
+        sbu_grade: bracket?.details?.sbu_grade,
+      });
+    }
+
+    return {
+      tax_type: 'PPh4_2',
+      period: month,
+      total_gross_income: totalGross,
+      total_tax_withheld: totalTax,
+      total_net_payable: totalTax,
+      item_count: calculations.length,
+      breakdown: {
+        final_tax_count: calculations.length,
+        final_tax_details: details,
+      },
+      submission_deadline: deadline,
+      legal_basis: 'PP 9/2022, PP 34/2017 - Final tax on construction, rental, and other income',
+    };
+  }
+
+  /**
    * Calculate PPN monthly summary
    *
    * Aggregates all PPN calculations for a given month (sales - purchases)
@@ -385,7 +483,7 @@ export class SPTMasaCalculator {
    * - PPh21/PPh23: 20th of following month
    * - PPN: End of following month
    */
-  private static getSubmissionDeadline(month: string, taxType: 'PPh21' | 'PPh23' | 'PPN'): Date {
+  private static getSubmissionDeadline(month: string, taxType: 'PPh21' | 'PPh23' | 'PPh4_2' | 'PPN'): Date {
     const [year, monthNum] = month.split('-').map(Number);
 
     if (taxType === 'PPN') {
@@ -440,7 +538,7 @@ export class SPTMasaCalculator {
   /**
    * Helper: Check if period is overdue
    */
-  static isOverdue(period: string, taxType: 'PPh21' | 'PPh23' | 'PPN'): boolean {
+  static isOverdue(period: string, taxType: 'PPh21' | 'PPh23' | 'PPh4_2' | 'PPN'): boolean {
     const deadline = this.getSubmissionDeadline(period, taxType);
     return new Date() > deadline;
   }

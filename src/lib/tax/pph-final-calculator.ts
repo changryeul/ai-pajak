@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { PPH42_CONSTRUCTION_RATES } from '@/config/constants';
 
 /**
  * PPh Final Calculator - Indonesian Final Income Tax
@@ -6,15 +7,30 @@ import { createClient } from '@/lib/supabase/client';
  * Implements:
  * 1. PP 23/2018 (UMKM): 0.5% for SMEs with revenue < Rp 4.8B
  * 2. PP 34/2017 Pasal 4(2): Final tax on specific income types
+ * 3. PP 9/2022: Construction services with SBU grade differentiation
  */
 
 export type EntityType = 'INDIVIDUAL' | 'PT' | 'CV' | 'FIRMA' | 'KOPERASI';
 
 export type IncomeType =
-  | 'RENTAL'        // Sewa/Penghasilan dari Persewaan
-  | 'CONSTRUCTION'  // Jasa Konstruksi
-  | 'SHIP'         // Sewa Kapal
-  | 'AIRCRAFT';    // Sewa Pesawat
+  | 'RENTAL'                    // Sewa tanah/bangunan
+  | 'CONSTRUCTION'              // Legacy: resolves to CONSTRUCTION_WORK + NONE
+  | 'CONSTRUCTION_WORK'         // Jasa Pelaksana Konstruksi (PP 9/2022)
+  | 'CONSTRUCTION_CONSULT'      // Jasa Konsultansi Konstruksi (PP 9/2022)
+  | 'CONSTRUCTION_INTEGRATED'   // Pekerjaan Konstruksi Terintegrasi (PP 9/2022)
+  | 'SHIP'                      // Sewa Kapal
+  | 'AIRCRAFT';                 // Sewa Pesawat
+
+/**
+ * Construction qualification grade per PP 9/2022 + PMK 59/2022.
+ * Based on "kualifikasi" (qualification), not just license possession.
+ *
+ * - SMALL: Kualifikasi Kecil (SBU Grade 1-4 or SKK individual)
+ * - MEDIUM_LARGE: Kualifikasi Menengah/Besar (SBU Grade 5+)
+ * - HAS_SBU: Has any qualified certification (for consulting/integrated)
+ * - NONE: No qualification / no SBU/SKK
+ */
+export type SBUGrade = 'SMALL' | 'MEDIUM_LARGE' | 'HAS_SBU' | 'NONE';
 
 export interface PPhFinalUMKMParams {
   revenue: number;
@@ -26,6 +42,8 @@ export interface PPhFinalUMKMParams {
 export interface PPhFinalPasal42Params {
   incomeType: IncomeType;
   grossAmount: number;
+  /** Required for CONSTRUCTION_WORK/CONSULT/INTEGRATED (PP 9/2022) */
+  sbuGrade?: SBUGrade;
 }
 
 export interface PPhFinalCalculation {
@@ -42,6 +60,7 @@ export interface PPhFinalCalculation {
     years_elapsed?: number;
     period_limit?: number;
     income_type?: IncomeType;
+    sbu_grade?: SBUGrade;
   };
 }
 
@@ -160,32 +179,29 @@ export class PPhFinalCalculator {
   /**
    * Calculate PPh Final Pasal 4(2) for specific income types
    *
-   * Rates:
-   * - RENTAL: 10% (sewa tanah/bangunan)
-   * - CONSTRUCTION: 4% (jasa konstruksi)
+   * Non-construction rates:
+   * - RENTAL: 10% (sewa tanah/bangunan) - PP 34/2017
    * - SHIP: 3% (sewa kapal)
    * - AIRCRAFT: 2% (sewa pesawat)
+   *
+   * Construction rates (PP 9/2022):
+   * - CONSTRUCTION_WORK: 1.75% (SBU Kecil) / 2.65% (Menengah/Besar) / 4% (Tanpa SBU)
+   * - CONSTRUCTION_CONSULT: 3.5% (Dengan SBU) / 6% (Tanpa SBU)
+   * - CONSTRUCTION_INTEGRATED: 2.65% (Dengan SBU) / 4% (Tanpa SBU)
+   * - CONSTRUCTION (legacy): 4% (backward compat, same as WORK + NONE)
    */
   static calculatePasal42(params: PPhFinalPasal42Params): PPhFinalCalculation {
-    const { incomeType, grossAmount } = params;
+    const { incomeType, grossAmount, sbuGrade } = params;
 
-    // Rate mapping
-    const rates: Record<IncomeType, number> = {
-      RENTAL: 0.10,
-      CONSTRUCTION: 0.04,
-      SHIP: 0.03,
-      AIRCRAFT: 0.02
-    };
+    const isConstruction = incomeType.startsWith('CONSTRUCTION');
+    const taxRate = isConstruction
+      ? this.getConstructionRate(incomeType, sbuGrade)
+      : this.getSimpleRate(incomeType);
 
-    // Legal basis mapping
-    const legalBasis: Record<IncomeType, string> = {
-      RENTAL: 'PP 34/2017 Pasal 4 ayat (2) huruf d - Rental income 10%',
-      CONSTRUCTION: 'PP 51/2008 Pasal 4 ayat (2) huruf c - Construction services 4%',
-      SHIP: 'PP 34/2017 Pasal 4 ayat (2) huruf i - Ship rental 3%',
-      AIRCRAFT: 'PP 34/2017 Pasal 4 ayat (2) huruf j - Aircraft rental 2%'
-    };
+    const legalBasis = isConstruction
+      ? this.getConstructionLegalBasis(incomeType, sbuGrade)
+      : this.getSimpleLegalBasis(incomeType);
 
-    const taxRate = rates[incomeType];
     const taxAmount = Math.round(grossAmount * taxRate);
 
     return {
@@ -194,11 +210,94 @@ export class PPhFinalCalculator {
       tax_rate: taxRate,
       tax_amount: taxAmount,
       is_tax_exempt: false,
-      legal_basis: legalBasis[incomeType],
+      legal_basis: legalBasis,
       details: {
-        income_type: incomeType
+        income_type: incomeType,
+        sbu_grade: isConstruction ? (sbuGrade ?? 'NONE') : undefined,
       }
     };
+  }
+
+  /**
+   * Get rate for non-construction income types
+   */
+  private static getSimpleRate(incomeType: IncomeType): number {
+    const rates: Partial<Record<IncomeType, number>> = {
+      RENTAL: 0.10,
+      SHIP: 0.03,
+      AIRCRAFT: 0.02,
+    };
+    const rate = rates[incomeType];
+    if (rate === undefined) {
+      throw new TaxCalculationError('PPH_FINAL_010', `Unknown income type: ${incomeType}`);
+    }
+    return rate;
+  }
+
+  /**
+   * Get rate for construction services based on type and SBU grade (PP 9/2022)
+   */
+  private static getConstructionRate(incomeType: IncomeType, sbuGrade?: SBUGrade): number {
+    const grade = sbuGrade ?? 'NONE';
+
+    switch (incomeType) {
+      case 'CONSTRUCTION':
+        // Legacy backward compat: same as CONSTRUCTION_WORK + NONE
+        return PPH42_CONSTRUCTION_RATES.CONSTRUCTION_WORK.NONE;
+
+      case 'CONSTRUCTION_WORK': {
+        const rates = PPH42_CONSTRUCTION_RATES.CONSTRUCTION_WORK;
+        if (grade === 'SMALL') return rates.SMALL;
+        if (grade === 'MEDIUM_LARGE') return rates.MEDIUM_LARGE;
+        return rates.NONE;
+      }
+
+      case 'CONSTRUCTION_CONSULT': {
+        const rates = PPH42_CONSTRUCTION_RATES.CONSTRUCTION_CONSULT;
+        if (grade === 'HAS_SBU' || grade === 'SMALL' || grade === 'MEDIUM_LARGE') return rates.HAS_SBU;
+        return rates.NONE;
+      }
+
+      case 'CONSTRUCTION_INTEGRATED': {
+        const rates = PPH42_CONSTRUCTION_RATES.CONSTRUCTION_INTEGRATED;
+        if (grade === 'HAS_SBU' || grade === 'SMALL' || grade === 'MEDIUM_LARGE') return rates.HAS_SBU;
+        return rates.NONE;
+      }
+
+      default:
+        throw new TaxCalculationError('PPH_FINAL_011', `Invalid construction type: ${incomeType}`);
+    }
+  }
+
+  private static getSimpleLegalBasis(incomeType: IncomeType): string {
+    const basis: Partial<Record<IncomeType, string>> = {
+      RENTAL: 'PP 34/2017 Pasal 4 ayat (2) huruf d - Sewa tanah/bangunan 10%',
+      SHIP: 'PP 34/2017 Pasal 4 ayat (2) huruf i - Sewa kapal 3%',
+      AIRCRAFT: 'PP 34/2017 Pasal 4 ayat (2) huruf j - Sewa pesawat 2%',
+    };
+    return basis[incomeType] ?? `Pasal 4 ayat (2) UU PPh - ${incomeType}`;
+  }
+
+  private static getConstructionLegalBasis(incomeType: IncomeType, sbuGrade?: SBUGrade): string {
+    const grade = sbuGrade ?? 'NONE';
+    const prefix = 'PP 9/2022 Pasal 3';
+
+    switch (incomeType) {
+      case 'CONSTRUCTION':
+        return 'PP 51/2008 Pasal 4 ayat (2) huruf c - Jasa konstruksi 4% (legacy)';
+      case 'CONSTRUCTION_WORK':
+        if (grade === 'SMALL') return `${prefix} - Pelaksana konstruksi SBU Kecil 1.75%`;
+        if (grade === 'MEDIUM_LARGE') return `${prefix} - Pelaksana konstruksi SBU Menengah/Besar 2.65%`;
+        return `${prefix} - Pelaksana konstruksi tanpa SBU 4%`;
+      case 'CONSTRUCTION_CONSULT':
+        if (grade !== 'NONE') return `${prefix} - Konsultansi konstruksi dengan SBU 3.5%`;
+        return `${prefix} - Konsultansi konstruksi tanpa SBU 6%`;
+      case 'CONSTRUCTION_INTEGRATED':
+        if (grade !== 'NONE') return `${prefix} - Konstruksi terintegrasi dengan SBU 2.65%`;
+        return `${prefix} - Konstruksi terintegrasi tanpa SBU 4%`;
+      default:
+        return `PP 9/2022 - ${incomeType}`;
+    }
   }
 
   /**

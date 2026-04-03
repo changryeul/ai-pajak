@@ -75,7 +75,7 @@ const ALL_STATUSES = [
   'FAILED',
 ] as const;
 
-const TAX_TYPES = ['PPh21', 'PPh23', 'PPh25', 'PPh29', 'PPN', 'SPT1770SS', 'SPT1770S', 'SPT1770', 'SPT1771'];
+const TAX_TYPES = ['PPh21', 'PPh23', 'PPh25', 'PPh29', 'PPN', 'SPT1770SS', 'SPT1770S', 'SPT1770'];
 
 function fmt(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;

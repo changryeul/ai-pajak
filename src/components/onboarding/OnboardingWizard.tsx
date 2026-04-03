@@ -85,8 +85,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
 
   const getRecommendation = () => {
     if (taxpayerType === 'employee') return { form: 'SPT 1770SS', href: '/tax/spt-tahunan/1770ss' };
-    if (taxpayerType === 'business') return { form: 'SPT 1770', href: '/tax/spt-tahunan/1770' };
-    return { form: 'SPT 1771', href: '/tax/spt-tahunan/1771' };
+    // SPT 1771 (Corporate) temporarily disabled — redirect company users to SPT 1770
+    return { form: 'SPT 1770', href: '/tax/spt-tahunan/1770' };
   };
 
   const handleFinish = () => {
