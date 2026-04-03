@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +9,15 @@ import { Progress } from '@/components/ui/progress';
 import {
   Activity,
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
   Clock,
   Database,
+  HardDrive,
   RefreshCw,
   Server,
   Shield,
+  TrendingUp,
   Zap,
 } from 'lucide-react';
 
@@ -30,10 +33,10 @@ interface CircuitBreakerStatus {
   name: string;
   state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
   failures: number;
-  lastFailure?: string;
+  lastFailure?: string | null;
 }
 
-interface SystemStatus {
+interface MonitoringData {
   status: 'operational' | 'degraded' | 'down';
   timestamp: string;
   version: string;
@@ -41,16 +44,20 @@ interface SystemStatus {
   uptime: number;
   services: ServiceStatus[];
   circuitBreakers: CircuitBreakerStatus[];
-  metrics: {
-    memory: {
-      used: number;
-      total: number;
-      percentage: number;
-    };
-    database: {
-      connectionStatus: 'connected' | 'disconnected';
-      latency: number;
-    };
+  memory: {
+    heapUsed: number;
+    heapTotal: number;
+    rss: number;
+    percentage: number;
+  };
+  errorStats: {
+    lastHour: number;
+    last24Hours: number;
+    last7Days: number;
+  };
+  recentAuditStats: {
+    totalActions: number;
+    topActions: Array<{ action: string; count: number }>;
   };
 }
 
@@ -60,13 +67,11 @@ function StatusBadge({ status }: { status: 'operational' | 'degraded' | 'down' }
     degraded: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     down: 'bg-red-100 text-red-800 border-red-200',
   };
-
   const icons = {
     operational: <CheckCircle className="h-3 w-3" />,
     degraded: <AlertCircle className="h-3 w-3" />,
     down: <AlertCircle className="h-3 w-3" />,
   };
-
   return (
     <Badge variant="outline" className={`${variants[status]} flex items-center gap-1`}>
       {icons[status]}
@@ -81,13 +86,7 @@ function CircuitBreakerBadge({ state }: { state: 'CLOSED' | 'OPEN' | 'HALF_OPEN'
     OPEN: 'bg-red-100 text-red-800 border-red-200',
     HALF_OPEN: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   };
-
-  const labels = {
-    CLOSED: 'Closed',
-    OPEN: 'Open',
-    HALF_OPEN: 'Half-Open',
-  };
-
+  const labels = { CLOSED: 'Closed', OPEN: 'Open', HALF_OPEN: 'Half-Open' };
   return (
     <Badge variant="outline" className={variants[state]}>
       {labels[state]}
@@ -99,98 +98,51 @@ function formatUptime(seconds: number): string {
   const days = Math.floor(seconds / 86400);
   const hours = Math.floor((seconds % 86400) / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-
-  if (days > 0) {
-    return `${days}d ${hours}h ${minutes}m`;
-  }
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
   return `${minutes}m`;
 }
 
 function formatLatency(ms: number): string {
-  if (ms < 100) return `${ms}ms`;
   if (ms < 1000) return `${ms}ms`;
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
+function formatActionName(action: string): string {
+  return action
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export default function MonitoringDashboard() {
   const t = useTranslations('admin');
-  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+  const [data, setData] = useState<MonitoringData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchStatus = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setRefreshing(true);
-      const response = await fetch('/api/health');
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Transform health check response to system status format
-      const transformed: SystemStatus = {
-        status: data.status === 'healthy' ? 'operational' : data.status === 'degraded' ? 'degraded' : 'down',
-        timestamp: data.timestamp,
-        version: data.version || '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
-        uptime: data.uptime || 0,
-        services: [
-          {
-            name: 'Database (Supabase)',
-            status: data.checks?.database?.status === 'up' ? 'operational' : data.checks?.database?.status === 'degraded' ? 'degraded' : 'down',
-            latency: data.checks?.database?.latency,
-            message: data.checks?.database?.message,
-            lastChecked: data.timestamp,
-          },
-          ...(data.checks?.redis ? [{
-            name: 'Redis (Upstash)',
-            status: data.checks.redis.status === 'up' ? 'operational' as const : data.checks.redis.status === 'degraded' ? 'degraded' as const : 'down' as const,
-            latency: data.checks.redis.latency,
-            message: data.checks.redis.message,
-            lastChecked: data.timestamp,
-          }] : []),
-        ],
-        circuitBreakers: [
-          { name: 'DJP API', state: 'CLOSED', failures: 0 },
-          { name: 'Midtrans', state: 'CLOSED', failures: 0 },
-          { name: 'Email', state: 'CLOSED', failures: 0 },
-        ],
-        metrics: {
-          memory: {
-            used: 0,
-            total: 0,
-            percentage: 0,
-          },
-          database: {
-            connectionStatus: data.checks?.database?.status === 'up' ? 'connected' : 'disconnected',
-            latency: data.checks?.database?.latency || 0,
-          },
-        },
-      };
-
-      setSystemStatus(transformed);
+      const response = await fetch('/api/admin/monitoring', { credentials: 'include' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const json = await response.json();
+      setData(json);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch status');
+      setError(err instanceof Error ? err.message : 'Failed to fetch');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchStatus();
-
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchStatus, 30000);
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -200,13 +152,13 @@ export default function MonitoringDashboard() {
     );
   }
 
-  if (error && !systemStatus) {
+  if (error && !data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <p className="text-lg font-medium">{t('failedToLoad')}</p>
         <p className="text-sm text-muted-foreground">{error}</p>
-        <Button onClick={fetchStatus} variant="outline">
+        <Button onClick={fetchData} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
           {t('retry')}
         </Button>
@@ -214,24 +166,19 @@ export default function MonitoringDashboard() {
     );
   }
 
+  if (!data) return null;
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t('systemMonitoring')}</h1>
-          <p className="text-muted-foreground">
-            {t('monitoringSubtitle')}
-          </p>
+          <p className="text-muted-foreground">{t('monitoringSubtitle')}</p>
         </div>
         <div className="flex items-center gap-4">
-          {systemStatus && <StatusBadge status={systemStatus.status} />}
-          <Button
-            onClick={fetchStatus}
-            variant="outline"
-            size="sm"
-            disabled={refreshing}
-          >
+          <StatusBadge status={data.status} />
+          <Button onClick={fetchData} variant="outline" size="sm" disabled={refreshing}>
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             {t('refresh')}
           </Button>
@@ -239,7 +186,7 @@ export default function MonitoringDashboard() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -248,7 +195,7 @@ export default function MonitoringDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {systemStatus && <StatusBadge status={systemStatus.status} />}
+            <StatusBadge status={data.status} />
           </CardContent>
         </Card>
 
@@ -260,9 +207,7 @@ export default function MonitoringDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
-              {systemStatus ? formatUptime(systemStatus.uptime) : '-'}
-            </p>
+            <p className="text-2xl font-bold">{formatUptime(data.uptime)}</p>
           </CardContent>
         </Card>
 
@@ -275,9 +220,21 @@ export default function MonitoringDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              {systemStatus?.metrics.database.latency
-                ? formatLatency(systemStatus.metrics.database.latency)
-                : '-'}
+              {data.services[0]?.latency ? formatLatency(data.services[0].latency) : '-'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Errors (24h)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className={`text-2xl font-bold ${data.errorStats.last24Hours > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {data.errorStats.last24Hours}
             </p>
           </CardContent>
         </Card>
@@ -290,119 +247,203 @@ export default function MonitoringDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{systemStatus?.version || '-'}</p>
+            <p className="text-2xl font-bold">{data.version}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Services Status */}
+      {/* Error Statistics */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            {t('services')}
+            <AlertTriangle className="h-5 w-5" />
+            Error Statistics
           </CardTitle>
-          <CardDescription>{t('servicesDesc')}</CardDescription>
+          <CardDescription>Failed operations tracked from audit logs</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {systemStatus?.services.map((service) => (
-              <div
-                key={service.name}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`h-3 w-3 rounded-full ${
-                      service.status === 'operational'
-                        ? 'bg-green-500'
-                        : service.status === 'degraded'
-                        ? 'bg-yellow-500'
-                        : 'bg-red-500'
-                    }`}
-                  />
-                  <div>
-                    <p className="font-medium">{service.name}</p>
-                    {service.message && (
-                      <p className="text-sm text-muted-foreground">{service.message}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  {service.latency && (
-                    <span className="text-sm text-muted-foreground">
-                      {formatLatency(service.latency)}
-                    </span>
-                  )}
-                  <StatusBadge status={service.status} />
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-3 gap-6">
+            <div className="text-center p-4 border rounded-lg">
+              <p className="text-sm text-muted-foreground mb-1">Last Hour</p>
+              <p className={`text-3xl font-bold ${data.errorStats.lastHour > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                {data.errorStats.lastHour}
+              </p>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <p className="text-sm text-muted-foreground mb-1">Last 24 Hours</p>
+              <p className={`text-3xl font-bold ${data.errorStats.last24Hours > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                {data.errorStats.last24Hours}
+              </p>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <p className="text-sm text-muted-foreground mb-1">Last 7 Days</p>
+              <p className={`text-3xl font-bold ${data.errorStats.last7Days > 5 ? 'text-yellow-600' : 'text-green-600'}`}>
+                {data.errorStats.last7Days}
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Circuit Breakers */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            {t('circuitBreakers')}
-          </CardTitle>
-          <CardDescription>{t('circuitBreakersDesc')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {systemStatus?.circuitBreakers.map((breaker) => (
-              <div
-                key={breaker.name}
-                className="p-4 border rounded-lg space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{breaker.name}</p>
-                  <CircuitBreakerBadge state={breaker.state} />
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  <p>{t('failures')}: {breaker.failures}</p>
-                  {breaker.lastFailure && (
-                    <p>{t('lastFailure')}: {new Date(breaker.lastFailure).toLocaleString()}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Memory Usage */}
-      {systemStatus?.metrics?.memory?.percentage && systemStatus.metrics.memory.percentage > 0 && (
+      {/* Services + Circuit Breakers side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Services Status */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Server className="h-5 w-5" />
+              <Zap className="h-5 w-5" />
+              {t('services')}
+            </CardTitle>
+            <CardDescription>{t('servicesDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {data.services.map((service) => (
+                <div key={service.name} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-2.5 w-2.5 rounded-full ${
+                      service.status === 'operational' ? 'bg-green-500' :
+                      service.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
+                    }`} />
+                    <div>
+                      <p className="font-medium text-sm">{service.name}</p>
+                      {service.message && (
+                        <p className="text-xs text-muted-foreground">{service.message}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {service.latency != null && (
+                      <span className="text-xs text-muted-foreground">
+                        {formatLatency(service.latency)}
+                      </span>
+                    )}
+                    <StatusBadge status={service.status} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Circuit Breakers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              {t('circuitBreakers')}
+            </CardTitle>
+            <CardDescription>{t('circuitBreakersDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {data.circuitBreakers.map((breaker) => (
+                <div key={breaker.name} className="p-3 border rounded-lg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-sm capitalize">{breaker.name}</p>
+                    <CircuitBreakerBadge state={breaker.state} />
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    <span>{t('failures')}: {breaker.failures}</span>
+                    {breaker.lastFailure && (
+                      <span className="ml-3">
+                        {t('lastFailure')}: {new Date(breaker.lastFailure).toLocaleTimeString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {data.circuitBreakers.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No circuit breakers configured
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Memory + Recent Activity side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Memory Usage */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <HardDrive className="h-5 w-5" />
               {t('memoryUsage')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>{t('heapUsed')}</span>
-                <span>
-                  {systemStatus.metrics.memory.used}MB / {systemStatus.metrics.memory.total}MB
-                </span>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>{t('heapUsed')}</span>
+                  <span>{data.memory.heapUsed}MB / {data.memory.heapTotal}MB</span>
+                </div>
+                <Progress value={data.memory.percentage} />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {data.memory.percentage}% heap used
+                </p>
               </div>
-              <Progress value={systemStatus.metrics.memory.percentage} />
-              <p className="text-sm text-muted-foreground">
-                {systemStatus.metrics.memory.percentage}% used
-              </p>
+              <div className="pt-2 border-t">
+                <div className="flex justify-between text-sm">
+                  <span>RSS (Total Process)</span>
+                  <span className="font-medium">{data.memory.rss}MB</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Activity (24h)
+            </CardTitle>
+            <CardDescription>
+              {data.recentAuditStats.totalActions} total actions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {data.recentAuditStats.topActions.length > 0 ? (
+                data.recentAuditStats.topActions.map((item) => {
+                  const maxCount = data.recentAuditStats.topActions[0]?.count || 1;
+                  const pct = Math.round((item.count / maxCount) * 100);
+                  return (
+                    <div key={item.action} className="flex items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between text-xs mb-0.5">
+                          <span className="truncate">{formatActionName(item.action)}</span>
+                          <span className="text-muted-foreground ml-2">{item.count}</span>
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No activity recorded
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Last Updated */}
       <div className="text-center text-sm text-muted-foreground">
-        {t('lastUpdated')}: {systemStatus ? new Date(systemStatus.timestamp).toLocaleString() : '-'}
+        {t('lastUpdated')}: {new Date(data.timestamp).toLocaleString()}
+        <span className="mx-2">|</span>
+        Auto-refresh: 30s
       </div>
     </div>
   );
