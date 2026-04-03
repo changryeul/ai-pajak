@@ -87,6 +87,7 @@ const navItems: NavSection[] = [
     labelKey: 'nav.taxManagement',
     roles: consultantRoles,
     items: [
+      { href: '/tax/monthly-dashboard', icon: BarChart3, labelKey: 'nav.monthlyDashboard', descKey: 'navDesc.monthlyDashboard' },
       { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling', descKey: 'navDesc.newFiling' },
       { href: '/tax/spt-masa', icon: Receipt, labelKey: 'nav.sptMasa', descKey: 'navDesc.sptMasa' },
       { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn', descKey: 'navDesc.annualReturn' },
