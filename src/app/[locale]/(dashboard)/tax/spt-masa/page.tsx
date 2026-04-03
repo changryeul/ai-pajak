@@ -13,7 +13,7 @@ import { useSession } from '@/hooks/useSession';
 import {
   FileText, Receipt, Loader2, CheckCircle, AlertTriangle,
   Plus, DollarSign, Globe, Shield, ClipboardList, Send,
-  Sparkles, BarChart3, Upload, Download,
+  Sparkles, BarChart3, Upload, Download, Trash2, UserPlus,
 } from 'lucide-react';
 import { generateTemplate } from '@/lib/tax/bulk-import/csv-parser';
 
@@ -162,9 +162,32 @@ export default function SPTMasaPage() {
     } catch { /* */ }
   };
 
+  // Validate form
+  const validateForm = (): string | null => {
+    const amount = parseFloat(formData.grossAmount);
+    if (!amount || amount <= 0) return 'Jumlah bruto harus lebih dari 0';
+    if (amount > 999_999_999_999) return 'Jumlah bruto terlalu besar';
+    if (!formData.counterpartyName.trim()) return 'Nama lawan transaksi wajib diisi';
+    if (formData.counterpartyNpwp && !/^\d{2}\.\d{3}\.\d{3}\.\d{1}-\d{3}\.\d{3}$/.test(formData.counterpartyNpwp) && formData.counterpartyNpwp.length > 0 && formData.counterpartyNpwp.length < 15) {
+      return 'Format NPWP tidak valid (contoh: 01.234.567.8-901.234)';
+    }
+    if (taxType === 'PPh26') {
+      if (!formData.recipientCountry || formData.recipientCountry.length !== 2) return 'Kode negara harus 2 huruf (contoh: KR, SG)';
+    }
+    return null;
+  };
+
   // Save transaction
   const saveTransaction = async () => {
     if (!session?.customerId) return;
+
+    const validationError = validateForm();
+    if (validationError) {
+      setMessage({ type: 'error', text: validationError });
+      setTimeout(() => setMessage(null), 4000);
+      return;
+    }
+
     const amount = parseFloat(formData.grossAmount);
     if (!amount || amount <= 0) return;
 
@@ -294,6 +317,49 @@ export default function SPTMasaPage() {
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
   };
 
+  // Delete transaction
+  const deleteTransaction = async (txId: string) => {
+    if (!confirm('이 거래를 삭제하시겠습니까?')) return;
+    try {
+      const endpoint = taxType === 'PPh23' ? 'pph23-transactions' : 'pph26-transactions';
+      const res = await fetch(`/api/tax/${endpoint}?id=${txId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: '삭제 완료' });
+        loadTransactions();
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed' });
+      }
+    } catch { setMessage({ type: 'error', text: 'Error' }); }
+    finally { setTimeout(() => setMessage(null), 3000); }
+  };
+
+  // Add new counterparty inline
+  const [showNewCp, setShowNewCp] = useState(false);
+  const [newCpName, setNewCpName] = useState('');
+  const [newCpNpwp, setNewCpNpwp] = useState('');
+
+  const saveNewCounterparty = async () => {
+    if (!session?.customerId || !newCpName) return;
+    try {
+      const res = await fetch('/api/tax/counterparties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: session.customerId, name: newCpName, npwp: newCpNpwp, type: 'VENDOR' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFormData({ ...formData, counterpartyId: data.data?.id || '', counterpartyName: newCpName, counterpartyNpwp: newCpNpwp });
+        setShowNewCp(false);
+        setNewCpName('');
+        setNewCpNpwp('');
+        loadCounterparties();
+        setMessage({ type: 'success', text: '거래상대방 등록 완료' });
+        setTimeout(() => setMessage(null), 3000);
+      }
+    } catch { /* */ }
+  };
+
   // Download SPT Masa PDF
   const downloadSptMasaPDF = async (sptTaxType: string) => {
     if (!session?.customerId) return;
@@ -327,6 +393,15 @@ export default function SPTMasaPage() {
 
   const bupotGenerated = transactions.filter(tx => tx.bukti_potong_number).length;
   const bupotPending = transactions.filter(tx => !tx.bukti_potong_number).length;
+
+  if (!session) {
+    return (
+      <div className="container mx-auto py-20 px-4 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-indigo-600 mb-4" />
+        <p className="text-gray-500 text-sm">Loading session...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
@@ -516,7 +591,13 @@ export default function SPTMasaPage() {
                             </button>
                           ))}
                         {counterparties.filter(cp => cp.name.toLowerCase().includes(cpSearch.toLowerCase())).length === 0 && (
-                          <p className="px-3 py-2 text-xs text-gray-400">No match — will use manual name</p>
+                          <div className="px-3 py-2">
+                            <p className="text-xs text-gray-400 mb-1">No match found</p>
+                            <button className="text-xs text-indigo-600 font-medium flex items-center gap-1 hover:text-indigo-800"
+                              onClick={() => { setShowCpDropdown(false); setShowNewCp(true); setNewCpName(cpSearch); }}>
+                              <UserPlus className="h-3 w-3" />Register new counterparty
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
@@ -533,6 +614,21 @@ export default function SPTMasaPage() {
                   <div className="flex items-center gap-2">
                     <input type="checkbox" id="cod" checked={formData.hasCod} onChange={e => setFormData({ ...formData, hasCod: e.target.checked })} className="rounded" />
                     <Label htmlFor="cod" className="text-xs cursor-pointer">{t('hasCod')}</Label>
+                  </div>
+                )}
+
+                {/* Inline Counterparty Registration */}
+                {showNewCp && (
+                  <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg space-y-2">
+                    <p className="text-xs font-semibold text-indigo-700 flex items-center gap-1"><UserPlus className="h-3 w-3" />새 거래상대방 등록</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input className="h-8 text-xs" placeholder="Name" value={newCpName} onChange={e => setNewCpName(e.target.value)} />
+                      <Input className="h-8 text-xs font-mono" placeholder="NPWP" value={newCpNpwp} onChange={e => setNewCpNpwp(e.target.value)} />
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowNewCp(false)}>Cancel</Button>
+                      <Button size="sm" className="h-7 text-xs bg-indigo-600" onClick={saveNewCounterparty}>Register</Button>
+                    </div>
                   </div>
                 )}
 
@@ -581,6 +677,7 @@ export default function SPTMasaPage() {
                         <th className="text-right py-2.5 px-3">Rate</th>
                         <th className="text-right py-2.5 px-3">Tax</th>
                         <th className="text-center py-2.5 px-3">BP</th>
+                        <th className="text-center py-2.5 px-3 w-10"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -602,6 +699,11 @@ export default function SPTMasaPage() {
                             ) : (
                               <span className="text-gray-300 text-xs">—</span>
                             )}
+                          </td>
+                          <td className="py-2 px-3 text-center">
+                            <button onClick={() => deleteTransaction(tx.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                           </td>
                         </tr>
                       ))}

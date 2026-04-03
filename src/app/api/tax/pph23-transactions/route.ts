@@ -164,5 +164,47 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   }
 }
 
+async function handlePut(req: RequestWithSession): Promise<Response> {
+  try {
+    const body = await req.json();
+    const { id, grossAmount, serviceType, counterpartyName, counterpartyNpwp, description, transactionDate } = body;
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+
+    const updateData: Record<string, unknown> = {};
+    if (grossAmount !== undefined) {
+      const typeInfo = SERVICE_TYPES[(serviceType || 'JASA_LAINNYA') as keyof typeof SERVICE_TYPES];
+      const rate = typeInfo?.rate || 0.02;
+      const hasNpwp = !!counterpartyNpwp && counterpartyNpwp.trim().length >= 15;
+      const effectiveRate = hasNpwp ? rate : rate * 2;
+      updateData.gross_amount = grossAmount;
+      updateData.tax_rate = effectiveRate;
+      updateData.tax_amount = Math.round(grossAmount * effectiveRate);
+    }
+    if (serviceType) updateData.service_type = serviceType;
+    if (counterpartyName !== undefined) updateData.counterparty_name = counterpartyName;
+    if (counterpartyNpwp !== undefined) updateData.counterparty_npwp = counterpartyNpwp;
+    if (description !== undefined) updateData.description = description;
+    if (transactionDate) updateData.transaction_date = transactionDate;
+
+    const { error } = await getSupabaseAdmin().from('pph23_transaction').update(updateData).eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch { return NextResponse.json({ error: 'Failed' }, { status: 500 }); }
+}
+
+async function handleDelete(req: RequestWithSession): Promise<Response> {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+
+    const { error } = await getSupabaseAdmin().from('pph23_transaction').delete().eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch { return NextResponse.json({ error: 'Failed' }, { status: 500 }); }
+}
+
 export async function GET(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handleGet); }
 export async function POST(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handlePost); }
+export async function PUT(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handlePut); }
+export async function DELETE(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handleDelete); }

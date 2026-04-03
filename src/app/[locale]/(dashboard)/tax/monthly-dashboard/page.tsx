@@ -55,6 +55,7 @@ export default function MonthlyDashboardPage() {
   const [year, setYear] = useState(currentYear);
   const [isLoading, setIsLoading] = useState(true);
   const [payments, setPayments] = useState<Array<{ tax_type: string; tax_period: string; status: string; amount_due: number; spt_masa_filed: boolean; payment_deadline: string; reporting_deadline: string }>>([]);
+  const [filings, setFilings] = useState<Array<{ tax_type: string; tax_period: string; status: string }>>([]);
 
   const loadData = useCallback(async () => {
     if (!session?.customerId) return;
@@ -72,6 +73,17 @@ export default function MonthlyDashboardPage() {
         }
         setPayments(allPayments);
       }
+
+      // Also load filing statuses
+      const filingRes = await fetch(`/api/tax/filings?customerId=${session.customerId}&year=${year}`);
+      const filingData = await filingRes.json();
+      if (filingData.success) {
+        setFilings((filingData.data || []).map((f: { tax_type: string; tax_period: string; status: string }) => ({
+          tax_type: f.tax_type,
+          tax_period: f.tax_period,
+          status: f.status,
+        })));
+      }
     } catch { /* */ }
     finally { setIsLoading(false); }
   }, [session?.customerId, year]);
@@ -79,13 +91,15 @@ export default function MonthlyDashboardPage() {
   useEffect(() => { loadData(); }, [loadData]);
 
   // Build month × tax type grid
-  const getStatus = (taxType: string, month: number): { status: string; amount: number; sptFiled: boolean } => {
+  const getStatus = (taxType: string, month: number): { status: string; amount: number; sptFiled: boolean; filingStatus: string | null } => {
     const period = `${year}-${String(month).padStart(2, '0')}`;
     const p = payments.find(p => p.tax_type === taxType && p.tax_period === period);
+    const f = filings.find(f => f.tax_type === taxType && f.tax_period === period);
     return {
       status: p?.status || (month <= currentMonth && year === currentYear ? 'NONE' : 'FUTURE'),
       amount: p?.amount_due || 0,
       sptFiled: p?.spt_masa_filed || false,
+      filingStatus: f?.status || null,
     };
   };
 
@@ -208,8 +222,14 @@ export default function MonthlyDashboardPage() {
                                     {m.amount >= 1e6 ? `${(m.amount / 1e6).toFixed(0)}M` : `${(m.amount / 1e3).toFixed(0)}K`}
                                   </p>
                                 )}
-                                {m.sptFiled && (
+                                {m.filingStatus === 'DRAFT' && (
+                                  <Badge className="text-[7px] bg-yellow-100 text-yellow-700 px-1 py-0">DRAFT</Badge>
+                                )}
+                                {(m.filingStatus === 'FILED' || m.filingStatus === 'SUBMITTED') && (
                                   <Badge className="text-[7px] bg-blue-100 text-blue-600 px-1 py-0">SPT</Badge>
+                                )}
+                                {m.filingStatus === 'ACCEPTED' && (
+                                  <Badge className="text-[7px] bg-green-100 text-green-600 px-1 py-0">OK</Badge>
                                 )}
                               </div>
                             );
@@ -230,7 +250,9 @@ export default function MonthlyDashboardPage() {
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500 inline-block" /> 연체</span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400 inline-block" /> 부분납부</span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> 데이터 없음</span>
-            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-blue-100 text-blue-600 px-1 py-0">SPT</Badge> 신고 완료</span>
+            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-yellow-100 text-yellow-700 px-1 py-0">DRAFT</Badge> 초안</span>
+            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-blue-100 text-blue-600 px-1 py-0">SPT</Badge> 신고</span>
+            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-green-100 text-green-600 px-1 py-0">OK</Badge> 수리</span>
           </div>
         </>
       )}

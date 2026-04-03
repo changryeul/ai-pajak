@@ -130,8 +130,16 @@ export default function PPNPage() {
   // Save faktur
   const saveFaktur = async () => {
     if (!session?.customerId) return;
-    if (!formData.counterpartyName || formTotals.dpp <= 0) {
-      showMsg('error', 'Counterparty and amount required');
+    if (!formData.counterpartyName.trim()) {
+      showMsg('error', 'Nama lawan transaksi wajib diisi');
+      return;
+    }
+    if (formTotals.dpp <= 0) {
+      showMsg('error', 'DPP harus lebih dari 0 — periksa item');
+      return;
+    }
+    if (formData.counterpartyNpwp && formData.counterpartyNpwp.length > 0 && formData.counterpartyNpwp.length < 15) {
+      showMsg('error', 'Format NPWP tidak valid');
       return;
     }
 
@@ -178,6 +186,15 @@ export default function PPNPage() {
     { id: 'faktur', label: 'Faktur 관리', icon: FileText },
     { id: 'reconciliation', label: '월별 정산', icon: DollarSign },
   ];
+
+  if (!session) {
+    return (
+      <div className="container mx-auto py-20 px-4 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-600 mb-4" />
+        <p className="text-gray-500 text-sm">Loading session...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
