@@ -316,7 +316,7 @@ export default function MonthlyDashboardPage() {
                   })}>
                     <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
-                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Tooltip formatter={(v) => fmt(Number(v))} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
                     <Bar dataKey="PPh21" fill="#6366f1" radius={[2, 2, 0, 0]} />
                     <Bar dataKey="PPh23" fill="#10b981" radius={[2, 2, 0, 0]} />

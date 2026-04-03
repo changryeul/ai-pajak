@@ -5,6 +5,7 @@
  * into structured data for PPh21 salary, PPh23 transactions, and PPN faktur.
  */
 
+// @ts-expect-error papaparse has no type declarations
 import Papa from 'papaparse';
 
 export interface ParsedRow {

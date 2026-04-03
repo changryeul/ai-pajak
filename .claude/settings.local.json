@@ -117,7 +117,13 @@
       "Bash(supabase migration:*)",
       "Bash(vercel --version:*)",
       "Bash(vercel whoami:*)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(supabase --version)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+      "WebFetch(domain:ai-pajak.vercel.app)",
+      "Bash(git push:*)",
+      "WebSearch"
     ]
   }
 }

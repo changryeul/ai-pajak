@@ -169,16 +169,14 @@ export default function DocumentDetailPage({ params }: PageProps) {
   };
 
   // Create transaction from OCR data
-  const handleCreateTransaction = async () => {
-    if (!document?.ocrResult) return;
-    const ocr = document.ocrResult;
-    const router = (await import('next/navigation')).useRouter;
+  const handleCreateTransaction = () => {
+    if (!document?.ocrData) return;
+    const ocr = document.ocrData;
 
-    // Navigate to SPT Masa with pre-filled data from OCR
     const params = new URLSearchParams();
     if (ocr.grossAmount) params.set('amount', String(ocr.grossAmount));
-    if (ocr.entityName) params.set('counterparty', ocr.entityName);
-    if (ocr.npwp) params.set('npwp', ocr.npwp);
+    if (ocr.entityName) params.set('counterparty', String(ocr.entityName));
+    if (ocr.npwp) params.set('npwp', String(ocr.npwp));
 
     window.location.href = `/${locale}/tax/spt-masa?${params.toString()}`;
   };

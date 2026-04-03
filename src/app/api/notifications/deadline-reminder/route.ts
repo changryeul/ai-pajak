@@ -42,14 +42,13 @@ export async function POST(request: NextRequest) {
     const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     try {
-      await sendDeadlineReminder({
-        to: customer.email,
+      await sendDeadlineReminder(customer.email, {
         customerName: customer.full_name || 'Wajib Pajak',
         taxType: payment.tax_type,
         taxPeriod: payment.tax_period,
-        deadlineDate: payment.payment_deadline,
-        daysRemaining: daysLeft,
-        amountDue: payment.amount_due,
+        dueDate: payment.payment_deadline,
+        daysUntilDue: daysLeft,
+        filingUrl: `https://ai-pajak.vercel.app/id/tax/spt-masa`,
       });
       sent++;
     } catch {

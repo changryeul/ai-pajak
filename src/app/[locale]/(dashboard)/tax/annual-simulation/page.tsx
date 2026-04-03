@@ -171,7 +171,7 @@ export default function AnnualSimulationPage() {
                 <BarChart data={chartData}>
                   <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1e6 ? `${(v / 1e6).toFixed(0)}M` : ''} />
-                  <Tooltip formatter={(v: number) => fmt(v)} />
+                  <Tooltip formatter={(v) => fmt(Number(v))} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
                   <ReferenceLine x={MONTHS[data.monthsElapsed - 1]} stroke="#10b981" strokeDasharray="3 3" label={{ value: '현재', fontSize: 9 }} />
                   <Bar dataKey="소득 (실적)" fill="#6366f1" radius={[2, 2, 0, 0]} />

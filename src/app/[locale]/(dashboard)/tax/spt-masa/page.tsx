@@ -291,7 +291,7 @@ export default function SPTMasaPage() {
   };
 
   const downloadTemplate = () => {
-    const csv = generateTemplate(taxType);
+    const csv = generateTemplate(taxType as 'PPh23' | 'PPh21' | 'PPN');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

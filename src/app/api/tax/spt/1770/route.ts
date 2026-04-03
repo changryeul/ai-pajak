@@ -213,7 +213,7 @@ async function handleGenerateSPT(req: RequestWithSession): Promise<Response> {
         if (annual.monthsWithData > 0) {
           effectiveTaxCredits = {
             pph21Withheld: annual.pph21.totalWithheld,
-            pph22Collected: annual.pph22.totalWithheld,
+            pph22Withheld: annual.pph22.totalWithheld,
             pph23Withheld: annual.pph23.totalWithheld,
             pph25Installments: annual.pph25.totalInstallments,
           };
