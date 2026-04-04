@@ -80,31 +80,31 @@ export default function ReportsPage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     // In production, this would call an API endpoint
-    // For now, show alert
-    alert(`Report "${reportType}" for year ${selectedYear} would be generated here.`);
+    // For now, navigate to report detail
+    router.push(`/${locale}/reports/${reportType}?year=${selectedYear}`);
 
     setIsGenerating(null);
   };
 
   const quickStats = [
     {
-      label: t('reports.totalFilings') || 'Total Filings',
+      label: t('reports.totalFilings'),
       value: '12',
-      change: '+3 this year',
+      change: t('reports.changeThisYear', { count: '+3' }),
       icon: FileText,
       color: 'blue',
     },
     {
-      label: t('reports.totalTaxPaid') || 'Total Tax Paid',
+      label: t('reports.totalTaxPaid'),
       value: 'Rp 45.5M',
-      change: '+12% vs last year',
+      change: t('reports.changeVsLastYear', { percent: '+12%' }),
       icon: DollarSign,
       color: 'green',
     },
     {
-      label: t('reports.avgProcessingTime') || 'Avg Processing Time',
-      value: '2.3 days',
-      change: '-0.5 days',
+      label: t('reports.avgProcessingTime'),
+      value: t('reports.days', { count: '2.3' }),
+      change: t('reports.days', { count: '-0.5' }),
       icon: Calendar,
       color: 'purple',
     },
@@ -200,7 +200,7 @@ export default function ReportsPage() {
                           {isGeneratingThis ? (
                             <>
                               <span className="animate-spin mr-2">...</span>
-                              Generating...
+                              {t('reports.generating')}
                             </>
                           ) : (
                             <>
