@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ShieldCheck } from 'lucide-react';
@@ -13,6 +14,7 @@ interface ComplianceData {
 }
 
 export function ComplianceScoreWidget() {
+  const t = useTranslations('dashboard');
   const [data, setData] = useState<ComplianceData | null>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function ComplianceScoreWidget() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-blue-600" />
-            <span className="font-semibold text-sm text-gray-900">Skor Kepatuhan</span>
+            <span className="font-semibold text-sm text-gray-900">{t('complianceScore')}</span>
           </div>
           <span className={`text-2xl font-bold ${gradeColor}`}>{data.grade}</span>
         </div>
@@ -50,7 +52,7 @@ export function ComplianceScoreWidget() {
         </div>
         {data.improvements.length > 0 && (
           <div className="text-[10px] text-gray-500">
-            Tingkatkan: {data.improvements[0]}
+            {t('improve')}: {data.improvements[0]}
           </div>
         )}
       </CardContent>

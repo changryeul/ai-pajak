@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -27,6 +28,7 @@ import {
   TrendingUp,
   MessageSquareWarning,
   Sparkles,
+  ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -40,14 +42,15 @@ interface NavItem {
   href: string;
   icon: LucideIcon;
   labelKey: string;
-  descKey?: string; // Short description
-  roles?: UserRole[]; // undefined = all roles
+  descKey?: string;
+  roles?: UserRole[];
+  children?: NavItem[]; // Sub-menu items
 }
 
 interface NavSection {
   section: string;
   labelKey?: string;
-  roles?: UserRole[]; // undefined = all roles
+  roles?: UserRole[];
   items: NavItem[];
 }
 
@@ -60,33 +63,24 @@ const navItems: NavSection[] = [
   {
     section: 'main',
     items: [
-      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', descKey: 'navDesc.dashboard' },
-      { href: '/customers', icon: Users, labelKey: 'nav.customers', descKey: 'navDesc.customers', roles: consultantRoles },
-      { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', descKey: 'navDesc.filings', roles: taxRoles },
-      { href: '/documents', icon: Upload, labelKey: 'nav.documents', descKey: 'navDesc.documents', roles: taxRoles },
-      { href: '/submissions', icon: ListChecks, labelKey: 'nav.submissions', descKey: 'navDesc.submissions', roles: [UserRole.CUSTOMER] },
-      { href: '/invoice-capture', icon: Receipt, labelKey: 'nav.invoiceCapture', descKey: 'navDesc.invoiceCapture', roles: [UserRole.CUSTOMER] },
-      { href: '/tax/monthly-report', icon: Sparkles, labelKey: 'nav.monthlyReport', descKey: 'navDesc.monthlyReport', roles: [UserRole.CUSTOMER] },
-      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', descKey: 'navDesc.reports', roles: [UserRole.CUSTOMER] },
-      { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', descKey: 'navDesc.paymentStatus', roles: [UserRole.CUSTOMER] },
-      { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', descKey: 'navDesc.monthlyPayments', roles: taxRoles },
-      { href: '/tax/calendar', icon: ClipboardList, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar', roles: taxRoles },
-      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', descKey: 'navDesc.taxTools', roles: taxRoles },
-    ],
-  },
-  {
-    section: 'tax',
-    labelKey: 'nav.taxFiling',
-    roles: [UserRole.CUSTOMER],
-    items: [
-      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn', descKey: 'navDesc.annualReturn' },
-      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings', descKey: 'navDesc.taxSavings' },
-      { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21', descKey: 'navDesc.pph21' },
-      { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.pph23', descKey: 'navDesc.pph23' },
-      { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn', descKey: 'navDesc.ppn' },
-      { href: '/tax/efaktur-verify', icon: Shield, labelKey: 'nav.efakturVerify', descKey: 'navDesc.efakturVerify' },
-      { href: '/tax/umkm', icon: Receipt, labelKey: 'nav.umkm', descKey: 'navDesc.umkm' },
-      { href: '/chat', icon: Sparkles, labelKey: 'nav.aiChat', descKey: 'navDesc.aiChat' },
+      { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
+      { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', roles: taxRoles, children: [
+        { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21' },
+        { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTax' },
+        { href: '/tax/umkm', icon: Shield, labelKey: 'nav.corporateIncome' },
+        { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn' },
+      ]},
+      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: taxRoles, children: [
+        { href: '/tax/spt-tahunan/1771', icon: FileSpreadsheet, labelKey: 'nav.sptBadan' },
+        { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
+      ]},
+      { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
+      { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
+      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: [UserRole.CUSTOMER] },
+      { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', roles: [UserRole.CUSTOMER] },
+      { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', roles: taxRoles },
+      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', roles: taxRoles },
+      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', roles: taxRoles },
     ],
   },
   {
@@ -94,27 +88,14 @@ const navItems: NavSection[] = [
     labelKey: 'nav.taxManagement',
     roles: consultantRoles,
     items: [
-      { href: '/tax/monthly-dashboard', icon: BarChart3, labelKey: 'nav.monthlyDashboard', descKey: 'navDesc.monthlyDashboard' },
-      { href: '/tax/new', icon: FileText, labelKey: 'nav.newFiling', descKey: 'navDesc.newFiling' },
-      { href: '/tax/spt-masa', icon: Receipt, labelKey: 'nav.sptMasa', descKey: 'navDesc.sptMasa' },
-      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualReturn', descKey: 'navDesc.annualReturn' },
-      { href: '/tax/annual-simulation', icon: TrendingUp, labelKey: 'nav.annualSimulation', descKey: 'navDesc.annualSimulation' },
-      { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk', descKey: 'navDesc.pph21Bulk' },
-      { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings', descKey: 'navDesc.taxSavings' },
-      { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection', descKey: 'navDesc.anomalyDetection' },
-      { href: '/tax/audit-simulation', icon: Shield, labelKey: 'nav.auditSimulation', descKey: 'navDesc.auditSimulation' },
-      { href: '/tax/optimizer', icon: Sparkles, labelKey: 'nav.taxOptimizer', descKey: 'navDesc.taxOptimizer' },
-      { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing', descKey: 'navDesc.transferPricing' },
-      { href: '/tax/multi-entity', icon: Settings, labelKey: 'nav.multiEntity', descKey: 'navDesc.multiEntity' },
-      { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport', descKey: 'navDesc.clientReport' },
-    ],
-  },
-  {
-    section: 'poa',
-    labelKey: 'nav.poaSection',
-    roles: taxRoles,
-    items: [
-      { href: '/poa/create', icon: Shield, labelKey: 'nav.createPoa', roles: [UserRole.CUSTOMER] },
+      { href: '/customers', icon: Users, labelKey: 'nav.customers' },
+      { href: '/tax/monthly-dashboard', icon: BarChart3, labelKey: 'nav.monthlyDashboard' },
+      { href: '/tax/spt-masa', icon: Receipt, labelKey: 'nav.sptMasa' },
+      { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk' },
+      { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
+      { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing' },
+      { href: '/tax/multi-entity', icon: Settings, labelKey: 'nav.multiEntity' },
+      { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
     ],
   },
   {
@@ -170,6 +151,16 @@ export function Sidebar() {
   const { isOpen, close } = useMobileSidebar();
   const locale = params.locale as string;
   const userRole = session?.role;
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
+
+  const toggleSubmenu = (key: string) => {
+    setExpandedMenus(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
   const availableRoles = session?.availableRoles;
 
   const handleLogout = async () => {
@@ -256,9 +247,58 @@ export function Sidebar() {
             <ul className="space-y-0.5">
               {section.items.map((item) => {
                 const fullHref = `/${locale}${item.href}`;
-                const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
+                const isActive = item.href !== '#' && (pathname === fullHref || pathname.startsWith(`${fullHref}/`));
+                const hasChildren = item.children && item.children.length > 0;
+                const isChildActive = hasChildren && item.children!.some(c => pathname === `/${locale}${c.href}` || pathname.startsWith(`/${locale}${c.href}/`));
+                const isExpanded = expandedMenus.has(item.labelKey) || isChildActive;
                 const Icon = item.icon;
                 const isAI = aiMenuPaths.some((p) => item.href.includes(p));
+
+                if (hasChildren) {
+                  return (
+                    <li key={item.labelKey}>
+                      <button
+                        onClick={() => toggleSubmenu(item.labelKey)}
+                        className={cn(
+                          'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                          isChildActive
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        )}
+                      >
+                        <Icon className="h-[18px] w-[18px]" />
+                        <span className="flex-1 text-left">{t(item.labelKey)}</span>
+                        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', isExpanded && 'rotate-180')} />
+                      </button>
+                      {isExpanded && (
+                        <ul className="ml-7 mt-1 space-y-0.5 border-l-2 border-gray-100 pl-3">
+                          {item.children!.filter(c => !c.roles || (userRole && c.roles.includes(userRole))).map(child => {
+                            const childHref = `/${locale}${child.href}`;
+                            const childActive = pathname === childHref || pathname.startsWith(`${childHref}/`);
+                            const ChildIcon = child.icon;
+                            return (
+                              <li key={child.href}>
+                                <Link
+                                  href={childHref}
+                                  onClick={close}
+                                  className={cn(
+                                    'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-all',
+                                    childActive
+                                      ? 'bg-blue-600 text-white shadow-sm'
+                                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+                                  )}
+                                >
+                                  <ChildIcon className={cn('h-3.5 w-3.5', childActive && 'text-white')} />
+                                  {t(child.labelKey)}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                }
 
                 return (
                   <li key={item.href}>
@@ -273,12 +313,7 @@ export function Sidebar() {
                       )}
                     >
                       <Icon className={cn('h-[18px] w-[18px]', isActive && 'text-white')} />
-                      <span className="flex-1">
-                        <span>{t(item.labelKey)}</span>
-                        {item.descKey && !isActive && (
-                          <span className="block text-[10px] font-normal opacity-60 leading-tight mt-0.5">{t(item.descKey)}</span>
-                        )}
-                      </span>
+                      <span className="flex-1">{t(item.labelKey)}</span>
                       {isAI && !isActive && (
                         <span className="flex h-5 items-center rounded-md bg-gradient-to-r from-amber-100 to-yellow-100 px-1.5 text-[10px] font-bold text-amber-700">
                           AI

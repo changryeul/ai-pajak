@@ -149,104 +149,27 @@ function CustomerDashboard({
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-6 md:p-8 text-white">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <p className="text-blue-200 text-sm font-medium">
-              {t('dashboard.welcome')} 👋
-            </p>
-            <h1 className="text-2xl md:text-3xl font-bold mt-1">
-              {session.fullName || 'Customer'}
-            </h1>
-            <p className="text-blue-200 mt-2 text-sm">
-              {t('dashboardHero.customerSubtitle')}
-            </p>
-          </div>
-          <div className="hidden md:flex gap-3">
-            <Link
-              href={`/${locale}/documents`}
-              className="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/20 transition-all"
-            >
-              <Upload className="h-4 w-4" />
-              {t('dashboardHero.uploadDocument')}
-            </Link>
-            <Link
-              href={`/${locale}/tax/spt-tahunan`}
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-all shadow-lg shadow-blue-900/20"
-            >
-              <Plus className="h-4 w-4" />
-              {t('dashboardHero.createSpt')}
-            </Link>
-          </div>
+        <div className="relative z-10">
+          <p className="text-blue-200 text-sm font-medium">
+            {t('dashboard.welcome')} 👋
+          </p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">
+            {session.fullName || 'Customer'}
+          </h1>
+          <p className="text-blue-200 mt-2 text-sm">
+            {t('dashboardHero.customerSubtitle')}
+          </p>
         </div>
       </div>
 
-      {/* Simple Mode - "Foto dan Selesai" */}
-      <SimpleMode />
-
-      {/* Next Steps Wizard */}
-      <NextStepsWizard customerId={session.customerId} />
-
-      {/* AI Features Quick Access */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        {[
-          {
-            href: '/tax/spt-tahunan/1770ss',
-            icon: FileSpreadsheet,
-            label: t('dashboardHero.sptAutofill'),
-            desc: t('dashboardHero.sptAutofillDesc'),
-            gradient: 'from-blue-500 to-cyan-500',
-            bg: 'bg-blue-50',
-          },
-          {
-            href: '/tax/savings',
-            icon: Lightbulb,
-            label: t('dashboardHero.taxSavings'),
-            desc: t('dashboardHero.taxSavingsDesc'),
-            gradient: 'from-amber-500 to-orange-500',
-            bg: 'bg-amber-50',
-          },
-          {
-            href: '/invoice-capture',
-            icon: Camera,
-            label: '사진 신고',
-            desc: '인보이스 촬영 → AI 자동 분류',
-            gradient: 'from-purple-500 to-pink-500',
-            bg: 'bg-purple-50',
-          },
-        ].map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={`/${locale}${item.href}`}
-              className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shadow-sm`}>
-                  <Icon className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900 text-sm">{item.label}</p>
-                  <p className="text-xs text-gray-500">{item.desc}</p>
-                </div>
-              </div>
-              <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-1 transition-all" />
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Getting Started Guide */}
-      <GettingStartedGuide customerId={session.customerId} userName={session.fullName} />
-
-      {/* POA Status */}
-      <POAStatusWidget customerId={session.customerId} />
-
-      {/* Two-column layout */}
+      {/* Filing Summary — moved to top */}
       <div className="grid gap-6 lg:grid-cols-2">
         <FilingSummaryWidget customerId={session.customerId} />
         <DeadlineCalendar customerId={session.customerId} />
       </div>
+
+      {/* Getting Started Guide */}
+      <GettingStartedGuide customerId={session.customerId} userName={session.fullName} />
 
       {/* Compliance Score */}
       <ComplianceScoreWidget />
@@ -256,41 +179,6 @@ function CustomerDashboard({
         <TaxSummaryChart customerId={session.customerId} />
         <FilingStatusChart customerId={session.customerId} />
       </div>
-
-      {/* Quick Actions */}
-      <Card className="border-0 shadow-sm bg-gradient-to-br from-gray-50 to-white">
-        <CardHeader>
-          <CardTitle className="text-lg">{t('dashboard.quickActions')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { href: '/tax/spt-tahunan', labelKey: 'quickAction.annualReturn', descKey: 'quickAction.annualReturnDesc', icon: TrendingUp, gradient: 'from-blue-500 to-blue-600' },
-              { href: '/tax/pph21', labelKey: 'quickAction.salaryTax', descKey: 'quickAction.salaryTaxDesc', icon: Users, gradient: 'from-green-500 to-emerald-600' },
-              { href: '/documents', labelKey: 'quickAction.uploadDoc', descKey: 'quickAction.uploadDocDesc', icon: Upload, gradient: 'from-purple-500 to-violet-600' },
-              { href: '/poa/create', labelKey: 'quickAction.createPoa', descKey: 'quickAction.createPoaDesc', icon: FileText, gradient: 'from-orange-500 to-red-500' },
-            ].map((action) => {
-              const Icon = action.icon;
-              return (
-                <Link
-                  key={action.href}
-                  href={`/${locale}${action.href}`}
-                  className="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 hover:shadow-md hover:border-transparent hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.gradient} shadow-sm group-hover:shadow-md transition-shadow`}>
-                    <Icon className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="font-medium text-gray-900 text-sm">{t(action.labelKey)}</span>
-                    <p className="text-xs text-gray-500 truncate">{t(action.descKey)}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" />
-                </Link>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
