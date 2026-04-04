@@ -1,73 +1,168 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+import { useState, useRef, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Loader2, MessageCircle, User } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import {
+  Send, Loader2, Sparkles, User, Bot, MessageCircle,
+} from 'lucide-react';
 
-interface Message { id: string; sender_user_id: string; message_text: string; created_at: string; }
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+const QUICK_QUESTIONS = [
+  'PPh 21 세율이 어떻게 되나요?',
+  'UMKM PPh Final 0.5% 조건은?',
+  'SPT Tahunan 마감일이 언제인가요?',
+  'PPN 세율 변경사항 알려주세요',
+  'PPh 23 원천징수 대상은?',
+  'PTKP 2024 기준 금액은?',
+];
 
 export default function ChatPage() {
-  const t = useTranslations('pages');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetch('/api/messages?limit=50').then(r => r.json()).then(d => {
-      if (d.success) setMessages(d.data.messages || []);
-    }).catch(() => {});
-  }, []);
-
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const sendMessage = async (text?: string) => {
+    const messageText = text || input.trim();
+    if (!messageText) return;
+
+    const userMsg: ChatMessage = { role: 'user', content: messageText, timestamp: new Date() };
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
     setIsLoading(true);
+
     try {
-      // For demo, send to self (in production, select recipient)
-      const res = await fetch('/api/messages', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipientUserId: 'demo', message: input }),
+      const history = [...messages, userMsg].slice(-20).map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
       });
+
+      if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
-      if (data.success) { setMessages(prev => [...prev, data.data]); setInput(''); }
-    } catch { /* ignore */ }
-    finally { setIsLoading(false); }
+
+      const assistantMsg: ChatMessage = {
+        role: 'assistant',
+        content: data.data?.response || data.response || '답변을 생성할 수 없습니다.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMsg]);
+    } catch {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요.',
+        timestamp: new Date(),
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <MessageCircle className="h-6 w-6 text-blue-600" />{t('messagesTitle')}
-      </h1>
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-800 via-indigo-700 to-purple-900 p-6 text-white mb-6">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="relative z-10">
+          <p className="text-blue-300 text-sm flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />AI Tax Assistant
+          </p>
+          <h1 className="text-2xl font-bold mt-1">AI 세무 상담</h1>
+          <p className="text-blue-300 mt-1 text-sm">인도네시아 세법에 대해 무엇이든 물어보세요. 24시간 AI가 답변합니다.</p>
+        </div>
+      </div>
+
       <Card className="border-0 shadow-sm">
         <CardContent className="p-0">
-          <div className="h-[500px] overflow-y-auto p-4 space-y-3">
+          {/* Messages */}
+          <div className="h-[450px] overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && (
-              <div className="text-center py-20 text-gray-400">
-                <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">{t('noMessages')}</p>
+              <div className="text-center py-8">
+                <Bot className="h-12 w-12 text-blue-200 mx-auto mb-4" />
+                <p className="text-sm text-gray-500 mb-4">세금 관련 질문을 입력하세요</p>
+                <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
+                  {QUICK_QUESTIONS.map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => sendMessage(q)}
+                      className="text-xs text-left bg-blue-50 text-blue-700 rounded-lg px-3 py-2 hover:bg-blue-100 transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
-            {messages.map(m => (
-              <div key={m.id} className="flex gap-2">
-                <div className="p-1.5 bg-blue-100 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
-                  <User className="h-3.5 w-3.5 text-blue-600" />
+
+            {messages.map((m, i) => (
+              <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : ''}`}>
+                {m.role === 'assistant' && (
+                  <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
+                    <Bot className="h-3.5 w-3.5 text-white" />
+                  </div>
+                )}
+                <div className={`rounded-2xl px-4 py-2.5 max-w-[80%] ${
+                  m.role === 'user'
+                    ? 'bg-blue-600 text-white rounded-br-md'
+                    : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                }`}>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                  <p className={`text-[10px] mt-1 ${m.role === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>
+                    {m.timestamp.toLocaleTimeString()}
+                  </p>
                 </div>
-                <div className="bg-gray-100 rounded-2xl rounded-bl-md px-3.5 py-2 max-w-[80%]">
-                  <p className="text-sm">{m.message_text}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">{new Date(m.created_at).toLocaleTimeString()}</p>
-                </div>
+                {m.role === 'user' && (
+                  <div className="p-1.5 bg-gray-200 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
+                    <User className="h-3.5 w-3.5 text-gray-600" />
+                  </div>
+                )}
               </div>
             ))}
+
+            {isLoading && (
+              <div className="flex gap-2">
+                <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
+                  <Bot className="h-3.5 w-3.5 text-white" />
+                </div>
+                <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                </div>
+              </div>
+            )}
+
             <div ref={endRef} />
           </div>
+
+          {/* Input */}
           <div className="border-t p-3 flex gap-2">
-            <Input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder={t('typeMessage')} className="rounded-xl" disabled={isLoading} />
-            <Button onClick={sendMessage} disabled={isLoading || !input.trim()} size="sm" className="rounded-xl px-3">
+            <Input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              placeholder="세금 관련 질문을 입력하세요..."
+              className="rounded-xl"
+              disabled={isLoading}
+            />
+            <Button
+              onClick={() => sendMessage()}
+              disabled={isLoading || !input.trim()}
+              size="sm"
+              className="rounded-xl px-4 bg-blue-600 hover:bg-blue-700"
+            >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>

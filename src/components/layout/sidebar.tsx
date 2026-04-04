@@ -85,6 +85,8 @@ const navItems: NavSection[] = [
       { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.pph23', descKey: 'navDesc.pph23' },
       { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn', descKey: 'navDesc.ppn' },
       { href: '/tax/efaktur-verify', icon: Shield, labelKey: 'nav.efakturVerify', descKey: 'navDesc.efakturVerify' },
+      { href: '/tax/umkm', icon: Receipt, labelKey: 'nav.umkm', descKey: 'navDesc.umkm' },
+      { href: '/chat', icon: Sparkles, labelKey: 'nav.aiChat', descKey: 'navDesc.aiChat' },
     ],
   },
   {

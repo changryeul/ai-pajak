@@ -114,6 +114,8 @@
     "annualSimulation": "年間税シミュレーション",
     "sptMasa": "月次申告（SPT Masa）",
     "efakturVerify": "e-Faktur検証",
+    "umkm": "UMKM簡易申告",
+    "aiChat": "AI税務相談",
     "transferPricing": "移転価格",
     "multiEntity": "複数法人管理",
     "poaSection": "委任状",
