@@ -227,8 +227,8 @@ export default function MonthlyPaymentsPage() {
                       <Receipt className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{type === 'PPh23' ? 'PPh 23 - Jasa & Sewa' : 'PPN - Faktur Pajak'}</p>
-                      <p className="text-xs text-gray-500">{type === 'PPh23' ? 'Daftar pemotongan PPh 23 per lawan transaksi' : 'Faktur keluaran & masukan per lawan transaksi'}</p>
+                      <p className="font-semibold text-gray-900">{type === 'PPh23' ? tm('pph23JasaSewa') : tm('ppnFakturPajak')}</p>
+                      <p className="text-xs text-gray-500">{type === 'PPh23' ? tm('pph23Desc') : tm('ppnDesc')}</p>
                     </div>
                   </div>
                   <ChevronRight className="h-5 w-5 text-gray-300" />
@@ -250,7 +250,7 @@ export default function MonthlyPaymentsPage() {
             </div>
             <h2 className="text-lg font-bold text-gray-900 mb-2">{tm('noSchedule')}</h2>
             <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
-              Buat jadwal pembayaran pajak bulanan untuk tahun {year}
+              {tm('createScheduleDesc', { year })}
             </p>
             <Button onClick={generateSchedule} size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25">
               <Sparkles className="h-4 w-4 mr-2" />{tm('createSchedule')} {year}
@@ -277,7 +277,7 @@ export default function MonthlyPaymentsPage() {
                         <h3 className="font-bold text-gray-900">{config.label}</h3>
                         <span className="text-xs text-gray-400">{tt(config.descKey)}</span>
                         {ts.overdueMonths > 0 && (
-                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium">{ts.overdueMonths} terlambat</span>
+                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium">{ts.overdueMonths} {tm('lateCount')}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-1.5">
@@ -372,11 +372,11 @@ export default function MonthlyPaymentsPage() {
 
             <div className="space-y-3 border-t pt-4">
               <div>
-                <label className="text-xs font-medium text-gray-700">NTPN (Nomor Transaksi Penerimaan Negara)</label>
+                <label className="text-xs font-medium text-gray-700">{tm('ntpnLabel')}</label>
                 <input
                   type="text"
                   className="w-full mt-1 px-3 py-2 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="16 digit NTPN"
+                  placeholder={tm('ntpnPlaceholder')}
                   value={ntpnInput}
                   onChange={e => setNtpnInput(e.target.value)}
                   maxLength={16}
@@ -458,9 +458,9 @@ function CounterpartiesTab({ customerId }: { customerId?: string }) {
         <Card className="border-0 shadow-md">
           <CardContent className="p-4 space-y-3">
             <div className="grid grid-cols-3 gap-3">
-              <div><Label className="text-xs">Nama *</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="PT Example" /></div>
-              <div><Label className="text-xs">NPWP</Label><Input value={form.npwp} onChange={e => setForm({ ...form, npwp: e.target.value })} placeholder="XX.XXX.XXX.X-XXX.XXX" className="font-mono" /></div>
-              <div><Label className="text-xs">Alamat</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
+              <div><Label className="text-xs">{tm('nameLabel')}</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="PT Example" /></div>
+              <div><Label className="text-xs">{tm('npwpLabel')}</Label><Input value={form.npwp} onChange={e => setForm({ ...form, npwp: e.target.value })} placeholder="XX.XXX.XXX.X-XXX.XXX" className="font-mono" /></div>
+              <div><Label className="text-xs">{tm('addressLabel')}</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>{tm('cancel')}</Button>

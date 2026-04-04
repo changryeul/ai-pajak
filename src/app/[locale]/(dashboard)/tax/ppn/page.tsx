@@ -54,7 +54,7 @@ const PPN_RATE = 0.11;
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
 export default function PPNPage() {
-  const t = useTranslations();
+  const t = useTranslations('ppnPage');
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -131,15 +131,15 @@ export default function PPNPage() {
   const saveFaktur = async () => {
     if (!session?.customerId) return;
     if (!formData.counterpartyName.trim()) {
-      showMsg('error', 'Nama lawan transaksi wajib diisi');
+      showMsg('error', t('validationCounterpartyRequired'));
       return;
     }
     if (formTotals.dpp <= 0) {
-      showMsg('error', 'DPP harus lebih dari 0 — periksa item');
+      showMsg('error', t('validationDppPositive'));
       return;
     }
     if (formData.counterpartyNpwp && formData.counterpartyNpwp.length > 0 && formData.counterpartyNpwp.length < 15) {
-      showMsg('error', 'Format NPWP tidak valid');
+      showMsg('error', t('validationNpwpInvalid'));
       return;
     }
 
@@ -161,14 +161,14 @@ export default function PPNPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', 'Faktur saved');
+        showMsg('success', t('fakturSaved'));
         setShowForm(false);
         setFormData({ transactionType: 'OUTPUT', counterpartyName: '', counterpartyNpwp: '', fakturDate: new Date().toISOString().slice(0, 10), items: [{ description: '', quantity: 1, unitPrice: 0 }] });
         loadFakturs();
       } else {
-        showMsg('error', data.error || 'Failed');
+        showMsg('error', data.error || t('errorSave'));
       }
-    } catch { showMsg('error', 'Error'); }
+    } catch { showMsg('error', t('errorGeneral')); }
     finally { setIsSaving(false); }
   };
 
@@ -176,22 +176,22 @@ export default function PPNPage() {
 
   const netStatus = summary.netPpn > 0 ? 'KURANG_BAYAR' : summary.netPpn < 0 ? 'LEBIH_BAYAR' : 'NIHIL';
   const statusConfig = {
-    KURANG_BAYAR: { label: 'Kurang Bayar (납부)', color: 'bg-red-100 text-red-700', icon: TrendingUp },
-    LEBIH_BAYAR: { label: 'Lebih Bayar (환급)', color: 'bg-green-100 text-green-700', icon: TrendingDown },
-    NIHIL: { label: 'Nihil (0)', color: 'bg-gray-100 text-gray-600', icon: Minus },
+    KURANG_BAYAR: { label: t('statusKurangBayar'), color: 'bg-red-100 text-red-700', icon: TrendingUp },
+    LEBIH_BAYAR: { label: t('statusLebihBayar'), color: 'bg-green-100 text-green-700', icon: TrendingDown },
+    NIHIL: { label: t('statusNihil'), color: 'bg-gray-100 text-gray-600', icon: Minus },
   };
   const currentStatus = statusConfig[netStatus];
 
   const tabs: Array<{ id: TabId; label: string; icon: typeof FileText }> = [
-    { id: 'faktur', label: 'Faktur 관리', icon: FileText },
-    { id: 'reconciliation', label: '월별 정산', icon: DollarSign },
+    { id: 'faktur', label: t('tabFaktur'), icon: FileText },
+    { id: 'reconciliation', label: t('tabReconciliation'), icon: DollarSign },
   ];
 
   if (!session) {
     return (
       <div className="container mx-auto py-20 px-4 text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-600 mb-4" />
-        <p className="text-gray-500 text-sm">Loading session...</p>
+        <p className="text-gray-500 text-sm">{t('loadingSession')}</p>
       </div>
     );
   }
@@ -206,15 +206,15 @@ export default function PPNPage() {
             <Sparkles className="h-4 w-4" />PPN (Pajak Pertambahan Nilai)
           </p>
           <h1 className="text-2xl md:text-3xl font-bold mt-1">e-Faktur & PPN</h1>
-          <p className="text-orange-200 mt-2 text-sm">Faktur pajak 관리 및 PPN 월별 정산</p>
+          <p className="text-orange-200 mt-2 text-sm">{t('subtitle')}</p>
 
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-orange-200 text-xs flex items-center gap-1"><ArrowUpRight className="h-3 w-3" />PPN Keluaran</p>
+              <p className="text-orange-200 text-xs flex items-center gap-1"><ArrowUpRight className="h-3 w-3" />{t('ppnKeluaran')}</p>
               <p className="font-bold text-lg">{fmt(summary.outputTax)}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-orange-200 text-xs flex items-center gap-1"><ArrowDownLeft className="h-3 w-3" />PPN Masukan</p>
+              <p className="text-orange-200 text-xs flex items-center gap-1"><ArrowDownLeft className="h-3 w-3" />{t('ppnMasukan')}</p>
               <p className="font-bold text-lg">{fmt(summary.inputTax)}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
@@ -277,12 +277,12 @@ export default function PPNPage() {
               {(['ALL', 'OUTPUT', 'INPUT'] as FakturFilter[]).map(f => (
                 <button key={f} onClick={() => setFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                  {f === 'ALL' ? `All (${fakturs.length})` : f === 'OUTPUT' ? `Keluaran (${fakturs.filter(f => f.faktur_type === 'KELUARAN').length})` : `Masukan (${fakturs.filter(f => f.faktur_type === 'MASUKAN').length})`}
+                  {f === 'ALL' ? `${t('filterAll')} (${fakturs.length})` : f === 'OUTPUT' ? `${t('filterKeluaran')} (${fakturs.filter(f => f.faktur_type === 'KELUARAN').length})` : `${t('filterMasukan')} (${fakturs.filter(f => f.faktur_type === 'MASUKAN').length})`}
                 </button>
               ))}
             </div>
             <Button size="sm" onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-1" />Faktur Baru
+              <Plus className="h-4 w-4 mr-1" />{t('newFaktur')}
             </Button>
           </div>
 
@@ -292,17 +292,17 @@ export default function PPNPage() {
               <CardContent className="pt-4 space-y-3">
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <Label className="text-xs">Jenis Faktur</Label>
+                    <Label className="text-xs">{t('fakturType')}</Label>
                     <Select value={formData.transactionType} onValueChange={v => setFormData({ ...formData, transactionType: v as 'OUTPUT' | 'INPUT' })}>
                       <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="OUTPUT">Keluaran (매출)</SelectItem>
-                        <SelectItem value="INPUT">Masukan (매입)</SelectItem>
+                        <SelectItem value="OUTPUT">{t('typeKeluaran')}</SelectItem>
+                        <SelectItem value="INPUT">{t('typeMasukan')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs">{formData.transactionType === 'OUTPUT' ? 'Pembeli (매수자)' : 'Penjual (매도자)'}</Label>
+                    <Label className="text-xs">{formData.transactionType === 'OUTPUT' ? t('buyerLabel') : t('sellerLabel')}</Label>
                     <Input className="h-9" value={formData.counterpartyName} onChange={e => setFormData({ ...formData, counterpartyName: e.target.value })} placeholder="PT ABC" />
                   </div>
                   <div>
@@ -314,8 +314,8 @@ export default function PPNPage() {
                 {/* Line Items */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <Label className="text-xs font-semibold">Item</Label>
-                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={addItem}><Plus className="h-3 w-3 mr-1" />Add</Button>
+                    <Label className="text-xs font-semibold">{t('itemLabel')}</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={addItem}><Plus className="h-3 w-3 mr-1" />{t('addItem')}</Button>
                   </div>
                   <div className="space-y-2">
                     {formData.items.map((item, idx) => {
@@ -324,7 +324,7 @@ export default function PPNPage() {
                       return (
                         <div key={idx} className="grid grid-cols-12 gap-2 items-end">
                           <div className="col-span-4">
-                            {idx === 0 && <Label className="text-[10px] text-gray-400">Uraian</Label>}
+                            {idx === 0 && <Label className="text-[10px] text-gray-400">{t('uraian')}</Label>}
                             <Input className="h-8 text-xs" value={item.description} onChange={e => updateItem(idx, 'description', e.target.value)} placeholder="Barang/Jasa" />
                           </div>
                           <div className="col-span-1">
@@ -332,7 +332,7 @@ export default function PPNPage() {
                             <Input className="h-8 text-xs font-mono" type="number" value={item.quantity} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} />
                           </div>
                           <div className="col-span-2">
-                            {idx === 0 && <Label className="text-[10px] text-gray-400">Harga Satuan</Label>}
+                            {idx === 0 && <Label className="text-[10px] text-gray-400">{t('unitPrice')}</Label>}
                             <Input className="h-8 text-xs font-mono" type="number" value={item.unitPrice || ''} onChange={e => updateItem(idx, 'unitPrice', parseInt(e.target.value) || 0)} />
                           </div>
                           <div className="col-span-2">
@@ -356,24 +356,24 @@ export default function PPNPage() {
                   {/* Totals */}
                   <div className="mt-3 pt-3 border-t flex justify-end gap-6">
                     <div className="text-right">
-                      <p className="text-[10px] text-gray-400">Total DPP</p>
+                      <p className="text-[10px] text-gray-400">{t('totalDpp')}</p>
                       <p className="font-mono font-bold text-sm">{fmt(formTotals.dpp)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] text-gray-400">Total PPN</p>
+                      <p className="text-[10px] text-gray-400">{t('totalPpn')}</p>
                       <p className="font-mono font-bold text-sm text-orange-600">{fmt(formTotals.ppn)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] text-gray-400">Grand Total</p>
+                      <p className="text-[10px] text-gray-400">{t('grandTotal')}</p>
                       <p className="font-mono font-bold text-sm">{fmt(formTotals.dpp + formTotals.ppn)}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex gap-2 justify-end">
-                  <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}><X className="h-3 w-3 mr-1" />Batal</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}><X className="h-3 w-3 mr-1" />{t('cancel')}</Button>
                   <Button size="sm" onClick={saveFaktur} disabled={isSaving}>
-                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}Simpan
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}{t('save')}
                   </Button>
                 </div>
               </CardContent>
@@ -386,7 +386,7 @@ export default function PPNPage() {
           ) : filteredFakturs.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
               <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Faktur tidak ditemukan untuk periode ini</p>
+              <p className="text-sm">{t('noFaktur')}</p>
             </div>
           ) : (
             <Card className="border-0 shadow-sm">
@@ -395,10 +395,10 @@ export default function PPNPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-gray-500 text-xs">
-                        <th className="text-left py-2.5 px-3">No. Faktur</th>
-                        <th className="text-left py-2.5 px-3">Tanggal</th>
-                        <th className="text-center py-2.5 px-3">Jenis</th>
-                        <th className="text-left py-2.5 px-3">Lawan Transaksi</th>
+                        <th className="text-left py-2.5 px-3">{t('thFakturNo')}</th>
+                        <th className="text-left py-2.5 px-3">{t('thDate')}</th>
+                        <th className="text-center py-2.5 px-3">{t('thType')}</th>
+                        <th className="text-left py-2.5 px-3">{t('thCounterparty')}</th>
                         <th className="text-right py-2.5 px-3">DPP</th>
                         <th className="text-right py-2.5 px-3">PPN</th>
                         <th className="text-center py-2.5 px-3">Status</th>
@@ -441,9 +441,9 @@ export default function PPNPage() {
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-blue-100"><ArrowUpRight className="h-5 w-5 text-blue-600" /></div>
                   <div>
-                    <p className="text-xs text-gray-500">PPN Keluaran (매출세)</p>
+                    <p className="text-xs text-gray-500">{t('ppnKeluaran')}</p>
                     <p className="text-xl font-bold">{fmt(summary.outputTax)}</p>
-                    <p className="text-[10px] text-gray-400">{summary.keluaranCount} faktur</p>
+                    <p className="text-[10px] text-gray-400">{summary.keluaranCount} {t('fakturCount')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -453,9 +453,9 @@ export default function PPNPage() {
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-green-100"><ArrowDownLeft className="h-5 w-5 text-green-600" /></div>
                   <div>
-                    <p className="text-xs text-gray-500">PPN Masukan (매입세)</p>
+                    <p className="text-xs text-gray-500">{t('ppnMasukan')}</p>
                     <p className="text-xl font-bold">{fmt(summary.inputTax)}</p>
-                    <p className="text-[10px] text-gray-400">{summary.masukanCount} faktur</p>
+                    <p className="text-[10px] text-gray-400">{summary.masukanCount} {t('fakturCount')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -482,12 +482,12 @@ export default function PPNPage() {
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <ArrowUpRight className="h-4 w-4 text-blue-600" />Faktur Keluaran (매출)
+                  <ArrowUpRight className="h-4 w-4 text-blue-600" />{t('fakturKeluaran')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <table className="w-full text-xs">
-                  <thead><tr className="border-b text-gray-400"><th className="py-2 px-3 text-left">Pembeli</th><th className="py-2 px-3 text-right">DPP</th><th className="py-2 px-3 text-right">PPN</th></tr></thead>
+                  <thead><tr className="border-b text-gray-400"><th className="py-2 px-3 text-left">{t('buyerHeader')}</th><th className="py-2 px-3 text-right">DPP</th><th className="py-2 px-3 text-right">PPN</th></tr></thead>
                   <tbody className="divide-y">
                     {fakturs.filter(f => f.faktur_type === 'KELUARAN').map(f => (
                       <tr key={f.id} className="hover:bg-gray-50">
@@ -497,7 +497,7 @@ export default function PPNPage() {
                       </tr>
                     ))}
                     {fakturs.filter(f => f.faktur_type === 'KELUARAN').length === 0 && (
-                      <tr><td colSpan={3} className="py-4 text-center text-gray-300">No data</td></tr>
+                      <tr><td colSpan={3} className="py-4 text-center text-gray-300">{t('noData')}</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -508,12 +508,12 @@ export default function PPNPage() {
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <ArrowDownLeft className="h-4 w-4 text-green-600" />Faktur Masukan (매입)
+                  <ArrowDownLeft className="h-4 w-4 text-green-600" />{t('fakturMasukan')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <table className="w-full text-xs">
-                  <thead><tr className="border-b text-gray-400"><th className="py-2 px-3 text-left">Penjual</th><th className="py-2 px-3 text-right">DPP</th><th className="py-2 px-3 text-right">PPN</th></tr></thead>
+                  <thead><tr className="border-b text-gray-400"><th className="py-2 px-3 text-left">{t('sellerHeader')}</th><th className="py-2 px-3 text-right">DPP</th><th className="py-2 px-3 text-right">PPN</th></tr></thead>
                   <tbody className="divide-y">
                     {fakturs.filter(f => f.faktur_type === 'MASUKAN').map(f => (
                       <tr key={f.id} className="hover:bg-gray-50">
@@ -523,7 +523,7 @@ export default function PPNPage() {
                       </tr>
                     ))}
                     {fakturs.filter(f => f.faktur_type === 'MASUKAN').length === 0 && (
-                      <tr><td colSpan={3} className="py-4 text-center text-gray-300">No data</td></tr>
+                      <tr><td colSpan={3} className="py-4 text-center text-gray-300">{t('noData')}</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -535,8 +535,8 @@ export default function PPNPage() {
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-500" />
             <div>
-              <p className="font-medium">SPT Masa PPN 신고 기한: 매월 말일</p>
-              <p>PPN Keluaran - PPN Masukan = 납부세액. Kurang Bayar 시 e-Billing으로 납부 후 신고합니다.</p>
+              <p className="font-medium">{t('infoTitle')}</p>
+              <p>{t('infoDesc')}</p>
             </div>
           </div>
         </div>

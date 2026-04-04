@@ -40,6 +40,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 
 export default function MonthlyDashboardPage() {
+  const t = useTranslations('monthlyDashboard');
   const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const router = useRouter();
@@ -126,28 +127,28 @@ export default function MonthlyDashboardPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-slate-400 text-sm flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />Monthly Tax Dashboard
+            <BarChart3 className="h-4 w-4" />{t('headerLabel')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">월 신고 대시보드</h1>
-          <p className="text-slate-400 mt-2 text-sm">납부, 신고, e-Bupot 현황을 한눈에 확인합니다</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('title')}</h1>
+          <p className="text-slate-400 mt-2 text-sm">{t('subtitle')}</p>
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-slate-400 text-xs">총 납부 예정</p>
+              <p className="text-slate-400 text-xs">{t('totalDue')}</p>
               <p className="font-bold text-lg">{fmtRp(totalDue)}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-slate-400 text-xs flex items-center gap-1"><CheckCircle className="h-3 w-3 text-green-400" />납부 완료</p>
-              <p className="font-bold text-lg">{paidCount}건</p>
+              <p className="text-slate-400 text-xs flex items-center gap-1"><CheckCircle className="h-3 w-3 text-green-400" />{t('paidCount')}</p>
+              <p className="font-bold text-lg">{paidCount}{t('count')}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-slate-400 text-xs flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-red-400" />연체</p>
-              <p className="font-bold text-lg text-red-400">{overdueCount}건</p>
+              <p className="text-slate-400 text-xs flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-red-400" />{t('overdueCount')}</p>
+              <p className="font-bold text-lg text-red-400">{overdueCount}{t('count')}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-slate-400 text-xs flex items-center gap-1"><FileText className="h-3 w-3 text-blue-400" />SPT 신고</p>
-              <p className="font-bold text-lg">{sptFiledCount}건</p>
+              <p className="text-slate-400 text-xs flex items-center gap-1"><FileText className="h-3 w-3 text-blue-400" />{t('sptFiled')}</p>
+              <p className="font-bold text-lg">{sptFiledCount}{t('count')}</p>
             </div>
           </div>
         </div>
@@ -171,14 +172,14 @@ export default function MonthlyDashboardPage() {
             {overdue.length > 0 && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
-                <span className="font-medium">{overdue.length}건 연체!</span>
+                <span className="font-medium">{t('overdueAlert', { count: overdue.length })}</span>
                 <span className="text-red-600">{overdue.map(p => `${p.tax_type} (${p.tax_period})`).join(', ')}</span>
               </div>
             )}
             {urgent.length > 0 && (
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                <span className="font-medium">납부 기한 임박 ({urgent.length}건)</span>
+                <span className="font-medium">{t('deadlineAlert', { count: urgent.length })}</span>
                 <span className="text-amber-600">
                   {urgent.map(p => {
                     const dl = new Date(p.payment_deadline);
@@ -284,14 +285,14 @@ export default function MonthlyDashboardPage() {
 
           {/* Legend */}
           <div className="mt-6 flex items-center gap-4 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-500 inline-block" /> 납부 완료</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-300 inline-block" /> 미납</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500 inline-block" /> 연체</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400 inline-block" /> 부분납부</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> 데이터 없음</span>
-            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-yellow-100 text-yellow-700 px-1 py-0">DRAFT</Badge> 초안</span>
-            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-blue-100 text-blue-600 px-1 py-0">SPT</Badge> 신고</span>
-            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-green-100 text-green-600 px-1 py-0">OK</Badge> 수리</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-500 inline-block" /> {t('legendPaid')}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-300 inline-block" /> {t('legendUnpaid')}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500 inline-block" /> {t('legendOverdue')}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400 inline-block" /> {t('legendPartial')}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> {t('legendNoData')}</span>
+            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-yellow-100 text-yellow-700 px-1 py-0">DRAFT</Badge> {t('legendDraft')}</span>
+            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-blue-100 text-blue-600 px-1 py-0">SPT</Badge> {t('legendFiled')}</span>
+            <span className="flex items-center gap-1"><Badge className="text-[7px] bg-green-100 text-green-600 px-1 py-0">OK</Badge> {t('legendAccepted')}</span>
           </div>
 
           {/* Annual Tax Chart */}
@@ -299,7 +300,7 @@ export default function MonthlyDashboardPage() {
             <Card className="mt-6 border-0 shadow-sm">
               <CardContent className="pt-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />월별 세금 추이 ({year})
+                  <BarChart3 className="h-4 w-4" />{t('chartTitle')} ({year})
                 </h3>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={MONTHS.map((label, i) => {

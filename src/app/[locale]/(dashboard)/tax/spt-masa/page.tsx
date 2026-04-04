@@ -188,14 +188,14 @@ export default function SPTMasaPage() {
   // Validate form
   const validateForm = (): string | null => {
     const amount = parseFloat(formData.grossAmount);
-    if (!amount || amount <= 0) return 'Jumlah bruto harus lebih dari 0';
-    if (amount > 999_999_999_999) return 'Jumlah bruto terlalu besar';
-    if (!formData.counterpartyName.trim()) return 'Nama lawan transaksi wajib diisi';
+    if (!amount || amount <= 0) return t('validationGrossPositive');
+    if (amount > 999_999_999_999) return t('validationGrossTooLarge');
+    if (!formData.counterpartyName.trim()) return t('validationCounterpartyRequired');
     if (formData.counterpartyNpwp && !/^\d{2}\.\d{3}\.\d{3}\.\d{1}-\d{3}\.\d{3}$/.test(formData.counterpartyNpwp) && formData.counterpartyNpwp.length > 0 && formData.counterpartyNpwp.length < 15) {
-      return 'Format NPWP tidak valid (contoh: 01.234.567.8-901.234)';
+      return t('validationNpwpInvalid');
     }
     if (taxType === 'PPh26') {
-      if (!formData.recipientCountry || formData.recipientCountry.length !== 2) return 'Kode negara harus 2 huruf (contoh: KR, SG)';
+      if (!formData.recipientCountry || formData.recipientCountry.length !== 2) return t('validationCountryCode');
     }
     return null;
   };
@@ -247,15 +247,15 @@ export default function SPTMasaPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setMessage({ type: 'success', text: 'Transaction saved' });
+        setMessage({ type: 'success', text: t('transactionSaved') });
         setShowForm(false);
         setResolution(null);
         setFormData({ serviceType: 'JASA_TEKNIK', incomeType: 'service', grossAmount: '', counterpartyId: '', counterpartyName: '', counterpartyNpwp: '', recipientCountry: '', hasCod: false, description: '' });
         loadTransactions();
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed' });
+        setMessage({ type: 'error', text: data.error || t('errorSave') });
       }
-    } catch { setMessage({ type: 'error', text: 'Error saving' }); }
+    } catch { setMessage({ type: 'error', text: t('errorGeneral') }); }
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
   };
 
@@ -281,12 +281,12 @@ export default function SPTMasaPage() {
       const data = await res.json();
       if (data.success) {
         setUploadResult(data.data);
-        setMessage({ type: 'success', text: `${data.data.insertedCount}건 등록 완료` });
+        setMessage({ type: 'success', text: t('csvImportResult', { inserted: data.data.insertedCount, total: data.data.totalRows }) });
         loadTransactions();
       } else {
-        setMessage({ type: 'error', text: data.error || 'Upload failed' });
+        setMessage({ type: 'error', text: data.error || t('errorSave') });
       }
-    } catch { setMessage({ type: 'error', text: 'Error uploading' }); }
+    } catch { setMessage({ type: 'error', text: t('errorGeneral') }); }
     finally { setIsSaving(false); e.target.value = ''; setTimeout(() => setMessage(null), 5000); }
   };
 
@@ -316,7 +316,7 @@ export default function SPTMasaPage() {
         setMessage({ type: 'success', text: `${data.data.generated} Bukti Potong generated` });
         loadTransactions();
       }
-    } catch { setMessage({ type: 'error', text: 'Failed to generate' }); }
+    } catch { setMessage({ type: 'error', text: t('errorGeneral') }); }
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
   };
 
@@ -334,9 +334,9 @@ export default function SPTMasaPage() {
       if (data.success) {
         setMessage({ type: 'success', text: t('draftCreated') });
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed' });
+        setMessage({ type: 'error', text: data.error || t('errorSave') });
       }
-    } catch { setMessage({ type: 'error', text: 'Error' }); }
+    } catch { setMessage({ type: 'error', text: t('errorGeneral') }); }
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
   };
 
@@ -359,7 +359,7 @@ export default function SPTMasaPage() {
         URL.revokeObjectURL(url);
       } else {
         const data = await res.json();
-        setMessage({ type: 'error', text: data.error || 'Export failed' });
+        setMessage({ type: 'error', text: data.error || t('errorSave') });
         setTimeout(() => setMessage(null), 3000);
       }
     } catch { /* */ }
@@ -395,32 +395,32 @@ export default function SPTMasaPage() {
             setResolution({ rate: data.data.resolution.rate, reason: data.data.resolution.reason });
           }
           setShowForm(true);
-          setMessage({ type: 'success', text: `AI 분류 완료 (신뢰도: ${Math.round(c.confidence * 100)}%)` });
+          setMessage({ type: 'success', text: t('aiClassified', { confidence: Math.round(c.confidence * 100) }) });
         } else {
-          setMessage({ type: 'error', text: data.error || 'Scan failed' });
+          setMessage({ type: 'error', text: data.error || t('errorSave') });
         }
         setIsScanning(false);
         setTimeout(() => setMessage(null), 5000);
       };
       reader.readAsDataURL(file);
-    } catch { setIsScanning(false); setMessage({ type: 'error', text: 'Error' }); }
+    } catch { setIsScanning(false); setMessage({ type: 'error', text: t('errorGeneral') }); }
     finally { e.target.value = ''; }
   };
 
   // Delete transaction
   const deleteTransaction = async (txId: string) => {
-    if (!confirm('이 거래를 삭제하시겠습니까?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     try {
       const endpoint = taxType === 'PPh23' ? 'pph23-transactions' : 'pph26-transactions';
       const res = await fetch(`/api/tax/${endpoint}?id=${txId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        setMessage({ type: 'success', text: '삭제 완료' });
+        setMessage({ type: 'success', text: t('deleted') });
         loadTransactions();
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed' });
+        setMessage({ type: 'error', text: data.error || t('errorSave') });
       }
-    } catch { setMessage({ type: 'error', text: 'Error' }); }
+    } catch { setMessage({ type: 'error', text: t('errorGeneral') }); }
     finally { setTimeout(() => setMessage(null), 3000); }
   };
 
@@ -444,7 +444,7 @@ export default function SPTMasaPage() {
         setNewCpName('');
         setNewCpNpwp('');
         loadCounterparties();
-        setMessage({ type: 'success', text: '거래상대방 등록 완료' });
+        setMessage({ type: 'success', text: t('counterpartySaved') });
         setTimeout(() => setMessage(null), 3000);
       }
     } catch { /* */ }
@@ -469,9 +469,9 @@ export default function SPTMasaPage() {
         a.click();
         URL.revokeObjectURL(url);
       } else {
-        setMessage({ type: 'error', text: 'PDF generation failed' });
+        setMessage({ type: 'error', text: t('errorSave') });
       }
-    } catch { setMessage({ type: 'error', text: 'Error generating PDF' }); }
+    } catch { setMessage({ type: 'error', text: t('errorGeneral') }); }
     finally { setIsSaving(false); setTimeout(() => setMessage(null), 3000); }
   };
 
@@ -488,7 +488,7 @@ export default function SPTMasaPage() {
     return (
       <div className="container mx-auto py-20 px-4 text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto text-indigo-600 mb-4" />
-        <p className="text-gray-500 text-sm">Loading session...</p>
+        <p className="text-gray-500 text-sm">{t('loadingSession')}</p>
       </div>
     );
   }
@@ -535,7 +535,7 @@ export default function SPTMasaPage() {
       <div className="flex flex-wrap gap-3 mb-6">
         {customers.length > 0 && (
           <Select value={selectedCustomerId} onValueChange={v => setSelectedCustomerId(v)}>
-            <SelectTrigger className="w-52"><SelectValue placeholder="고객 선택..." /></SelectTrigger>
+            <SelectTrigger className="w-52"><SelectValue placeholder={t('selectCustomer')} /></SelectTrigger>
             <SelectContent>
               {customers.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -701,10 +701,10 @@ export default function SPTMasaPage() {
                           ))}
                         {counterparties.filter(cp => cp.name.toLowerCase().includes(cpSearch.toLowerCase())).length === 0 && (
                           <div className="px-3 py-2">
-                            <p className="text-xs text-gray-400 mb-1">No match found</p>
+                            <p className="text-xs text-gray-400 mb-1">{t('noMatchFound')}</p>
                             <button className="text-xs text-indigo-600 font-medium flex items-center gap-1 hover:text-indigo-800"
                               onClick={() => { setShowCpDropdown(false); setShowNewCp(true); setNewCpName(cpSearch); }}>
-                              <UserPlus className="h-3 w-3" />Register new counterparty
+                              <UserPlus className="h-3 w-3" />{t('registerNew')}
                             </button>
                           </div>
                         )}
@@ -729,7 +729,7 @@ export default function SPTMasaPage() {
                 {/* Inline Counterparty Registration */}
                 {showNewCp && (
                   <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg space-y-2">
-                    <p className="text-xs font-semibold text-indigo-700 flex items-center gap-1"><UserPlus className="h-3 w-3" />새 거래상대방 등록</p>
+                    <p className="text-xs font-semibold text-indigo-700 flex items-center gap-1"><UserPlus className="h-3 w-3" />{t('registerCounterparty')}</p>
                     <div className="grid grid-cols-2 gap-2">
                       <Input className="h-8 text-xs" placeholder="Name" value={newCpName} onChange={e => setNewCpName(e.target.value)} />
                       <Input className="h-8 text-xs font-mono" placeholder="NPWP" value={newCpNpwp} onChange={e => setNewCpNpwp(e.target.value)} />
@@ -932,8 +932,8 @@ export default function SPTMasaPage() {
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
             <Shield className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-500" />
             <div>
-              <p className="font-medium">DJP 제출은 TAX_ADVISOR_JTC 역할만 가능합니다</p>
-              <p>DRAFT 생성 후 세무사가 검토하여 DJP에 제출합니다.</p>
+              <p className="font-medium">{t('djpSubmitInfo')}</p>
+              <p>{t('djpSubmitDesc')}</p>
             </div>
           </div>
         </div>
