@@ -62,64 +62,94 @@ CRITICAL RULES:
 - Respond ONLY with the JSON object, no markdown`;
 
 export async function processArticleWithAI(article: RawArticle): Promise<ProcessedArticle> {
+  const client = new Anthropic();
+
+  // Step 1: Try structured analysis
+  let summaryKo = '';
+  let summaryId = '';
+  let summaryEn = '';
+  let impactAnalysis = '';
+  let category = 'GENERAL';
+  let tags: string[] = [];
+  let regulationNumber: string | null = null;
+  let importance = 'NORMAL';
+
   try {
-    const client = new Anthropic();
     const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: AI_PROMPT,
       messages: [{
         role: 'user',
-        content: `Title: ${article.title}\n\n${article.content && article.content !== article.title ? `Description: ${article.content.substring(0, 2000)}` : '(No additional content — generate summary based on the title and your tax knowledge)'}`,
+        content: `Title: ${article.title}\n\n${article.content && article.content !== article.title ? `Description: ${article.content.substring(0, 2000)}` : '(Generate based on title and your Indonesian tax knowledge)'}`,
       }],
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    loggers.api.info({ title: article.title, aiResponse: text.substring(0, 200) }, 'AI news raw response');
 
-    // Try to extract JSON from response
     let parsed;
     try {
       parsed = JSON.parse(text);
     } catch {
-      // Try extracting JSON from markdown code block
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
-      else throw new Error('No valid JSON in response');
     }
 
-    return {
-      source: article.source,
-      sourceUrl: article.sourceUrl,
-      originalTitle: article.title,
-      originalContent: article.content.substring(0, 5000),
-      summaryId: parsed.summary_id || article.title,
-      summaryKo: parsed.summary_ko || '',
-      summaryEn: parsed.summary_en || '',
-      impactAnalysis: parsed.impact_analysis || '',
-      category: parsed.category || 'GENERAL',
-      tags: parsed.tags || [],
-      regulationNumber: parsed.regulation_number || null,
-      importance: parsed.importance || 'NORMAL',
-      publishedAt: article.publishedAt || new Date().toISOString(),
-    };
+    if (parsed) {
+      summaryId = parsed.summary_id || parsed.summaryId || '';
+      summaryKo = parsed.summary_ko || parsed.summaryKo || '';
+      summaryEn = parsed.summary_en || parsed.summaryEn || '';
+      impactAnalysis = parsed.impact_analysis || parsed.impactAnalysis || '';
+      category = parsed.category || 'GENERAL';
+      tags = parsed.tags || [];
+      regulationNumber = parsed.regulation_number || parsed.regulationNumber || null;
+      importance = parsed.importance || 'NORMAL';
+    }
   } catch (error) {
-    loggers.api.error({ err: error, title: article.title }, 'AI news processing failed');
-    return {
-      source: article.source,
-      sourceUrl: article.sourceUrl,
-      originalTitle: article.title,
-      originalContent: article.content.substring(0, 5000),
-      summaryId: article.title,
-      summaryKo: '',
-      summaryEn: '',
-      impactAnalysis: '',
-      category: 'GENERAL',
-      tags: [],
-      regulationNumber: null,
-      importance: 'NORMAL',
-      publishedAt: article.publishedAt || new Date().toISOString(),
-    };
+    loggers.api.error({ err: error, title: article.title }, 'AI structured analysis failed');
   }
+
+  // Step 2: If Korean summary is still empty, do a separate translation call
+  if (!summaryKo) {
+    try {
+      const translateResponse = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: `다음 인도네시아 세금 뉴스 제목을 한국어로 2-3문장으로 요약해주세요. 제목만 보고 내용을 유추하여 설명해주세요.\n\n제목: ${article.title}\n${article.content !== article.title ? `설명: ${article.content.substring(0, 500)}` : ''}\n\n한국어 요약:`,
+        }],
+      });
+
+      summaryKo = translateResponse.content[0].type === 'text' ? translateResponse.content[0].text.trim() : '';
+      loggers.api.info({ title: article.title, summaryKo: summaryKo.substring(0, 50) }, 'Korean translation fallback');
+    } catch (error) {
+      loggers.api.error({ err: error }, 'Korean translation fallback failed');
+      summaryKo = article.title; // Last resort: use original title
+    }
+  }
+
+  // Step 3: If impact analysis is empty, generate it
+  if (!impactAnalysis && summaryKo) {
+    impactAnalysis = summaryKo;
+  }
+
+  return {
+    source: article.source,
+    sourceUrl: article.sourceUrl,
+    originalTitle: article.title,
+    originalContent: article.content.substring(0, 5000),
+    summaryId: summaryId || article.title,
+    summaryKo,
+    summaryEn: summaryEn || article.title,
+    impactAnalysis,
+    category,
+    tags,
+    regulationNumber,
+    importance,
+    publishedAt: article.publishedAt || new Date().toISOString(),
+  };
 }
 
 /**
