@@ -2610,5 +2610,32 @@
       "install": "Instal",
       "later": "Nanti"
     }
+  },
+  "pph21Page": {
+    "pageTitle": "Manajemen Daftar Gaji",
+    "pageDescription": "Registrasi karyawan + perhitungan PPh 21 TER bulanan",
+    "employeeCount": "Jumlah Karyawan",
+    "employeeCountValue": "{count} orang",
+    "totalSalary": "Total Gaji",
+    "employeeList": "Daftar Karyawan",
+    "newEmployee": "Karyawan Baru",
+    "calculatePph21": "Hitung PPh 21",
+    "employeeName": "Nama Karyawan *",
+    "monthlySalary": "Gaji Bulanan *",
+    "jhtEmployee": "JHT Karyawan",
+    "jpEmployee": "JP Karyawan",
+    "otherDeductions": "Potongan Lain",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "update": "Update",
+    "name": "Nama",
+    "salary": "Gaji",
+    "noEmployees": "Belum ada karyawan terdaftar",
+    "nameAndSalaryRequired": "Nama dan gaji wajib diisi",
+    "employeeUpdated": "Data karyawan diperbarui",
+    "employeeAdded": "Karyawan ditambahkan",
+    "deactivateConfirm": "Nonaktifkan karyawan ini?",
+    "employeeDeactivated": "Karyawan dinonaktifkan",
+    "calculationComplete": "Perhitungan PPh 21 selesai untuk {count} karyawan"
   }
 }

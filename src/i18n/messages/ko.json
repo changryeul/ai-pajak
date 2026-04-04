@@ -2611,5 +2611,32 @@
       "install": "설치하기",
       "later": "나중에"
     }
+  },
+  "pph21Page": {
+    "pageTitle": "급여 대장 관리",
+    "pageDescription": "직원 등록 + 월별 PPh 21 TER 계산",
+    "employeeCount": "직원 수",
+    "employeeCountValue": "{count}명",
+    "totalSalary": "총 급여",
+    "employeeList": "직원 목록",
+    "newEmployee": "직원 추가",
+    "calculatePph21": "PPh 21 계산",
+    "employeeName": "직원 이름 *",
+    "monthlySalary": "월급 *",
+    "jhtEmployee": "JHT 직원",
+    "jpEmployee": "JP 직원",
+    "otherDeductions": "기타 공제",
+    "cancel": "취소",
+    "save": "저장",
+    "update": "수정",
+    "name": "이름",
+    "salary": "급여",
+    "noEmployees": "등록된 직원이 없습니다",
+    "nameAndSalaryRequired": "이름과 급여는 필수입니다",
+    "employeeUpdated": "직원 정보가 수정되었습니다",
+    "employeeAdded": "직원이 추가되었습니다",
+    "deactivateConfirm": "이 직원을 비활성화하시겠습니까?",
+    "employeeDeactivated": "직원이 비활성화되었습니다",
+    "calculationComplete": "{count}명 PPh 21 계산 완료"
   }
 }

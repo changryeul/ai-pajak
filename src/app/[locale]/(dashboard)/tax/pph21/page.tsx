@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ export default function PPh21PayrollPage() {
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
+  const tp = useTranslations('pph21Page');
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [summary, setSummary] = useState({ totalEmployees: 0, totalGrossSalary: 0 });
@@ -93,7 +95,7 @@ export default function PPh21PayrollPage() {
 
   const saveEmployee = async () => {
     if (!customerId || !form.employeeName || !form.grossSalary) {
-      showMsg('error', 'Nama dan gaji wajib diisi');
+      showMsg('error', tp('nameAndSalaryRequired'));
       return;
     }
     setIsSaving(true);
@@ -116,7 +118,7 @@ export default function PPh21PayrollPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', form.id ? 'Data karyawan diperbarui' : 'Karyawan ditambahkan');
+        showMsg('success', form.id ? tp('employeeUpdated') : tp('employeeAdded'));
         setShowForm(false);
         setForm(emptyForm);
         loadEmployees();
@@ -128,10 +130,10 @@ export default function PPh21PayrollPage() {
   };
 
   const deleteEmployee = async (id: string) => {
-    if (!confirm('Nonaktifkan karyawan ini?')) return;
+    if (!confirm(tp('deactivateConfirm'))) return;
     try {
       const res = await fetch(`/api/tax/employees?id=${id}`, { method: 'DELETE' });
-      if ((await res.json()).success) { showMsg('success', 'Karyawan dinonaktifkan'); loadEmployees(); }
+      if ((await res.json()).success) { showMsg('success', tp('employeeDeactivated')); loadEmployees(); }
     } catch { /* */ }
   };
 
@@ -169,7 +171,7 @@ export default function PPh21PayrollPage() {
           }
         });
         setCalcResults(results);
-        showMsg('success', `${employees.length}명 PPh 21 계산 완료`);
+        showMsg('success', tp('calculationComplete', { count: employees.length }));
       }
     } catch { showMsg('error', 'Calculation failed'); }
     finally { setIsSaving(false); }
@@ -186,15 +188,15 @@ export default function PPh21PayrollPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-blue-200 text-sm flex items-center gap-2"><Sparkles className="h-4 w-4" />PPh 21</p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">급여 대장 관리</h1>
-          <p className="text-blue-200 mt-2 text-sm">직원 등록 + 월별 PPh 21 TER 계산</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{tp('pageTitle')}</h1>
+          <p className="text-blue-200 mt-2 text-sm">{tp('pageDescription')}</p>
           <div className="grid grid-cols-2 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-blue-200 text-xs flex items-center gap-1"><Users className="h-3 w-3" />직원 수</p>
-              <p className="font-bold text-lg">{summary.totalEmployees}명</p>
+              <p className="text-blue-200 text-xs flex items-center gap-1"><Users className="h-3 w-3" />{tp('employeeCount')}</p>
+              <p className="font-bold text-lg">{tp('employeeCountValue', { count: summary.totalEmployees })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-blue-200 text-xs flex items-center gap-1"><DollarSign className="h-3 w-3" />총 급여</p>
+              <p className="text-blue-200 text-xs flex items-center gap-1"><DollarSign className="h-3 w-3" />{tp('totalSalary')}</p>
               <p className="font-bold text-lg">{fmt(summary.totalGrossSalary)}</p>
             </div>
           </div>
@@ -210,13 +212,13 @@ export default function PPh21PayrollPage() {
 
       {/* Actions */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-semibold">Daftar Karyawan</h2>
+        <h2 className="font-semibold">{tp('employeeList')}</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={calculateAll} disabled={isSaving || employees.length === 0}>
-            <Calculator className="h-3 w-3 mr-1" />PPh 21 계산
+            <Calculator className="h-3 w-3 mr-1" />{tp('calculatePph21')}
           </Button>
           <Button size="sm" onClick={() => { setForm(emptyForm); setShowForm(true); }}>
-            <Plus className="h-4 w-4 mr-1" />Karyawan Baru
+            <Plus className="h-4 w-4 mr-1" />{tp('newEmployee')}
           </Button>
         </div>
       </div>
@@ -227,7 +229,7 @@ export default function PPh21PayrollPage() {
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <Label className="text-xs">Nama Karyawan *</Label>
+                <Label className="text-xs">{tp('employeeName')}</Label>
                 <Input className="h-9" value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} />
               </div>
               <div>
@@ -244,27 +246,27 @@ export default function PPh21PayrollPage() {
             </div>
             <div className="grid grid-cols-4 gap-3">
               <div>
-                <Label className="text-xs">Gaji Bulanan *</Label>
+                <Label className="text-xs">{tp('monthlySalary')}</Label>
                 <Input className="h-9 font-mono" type="number" value={form.grossSalary} onChange={e => setForm({ ...form, grossSalary: e.target.value })} />
               </div>
               <div>
-                <Label className="text-xs">JHT Karyawan</Label>
+                <Label className="text-xs">{tp('jhtEmployee')}</Label>
                 <Input className="h-9 font-mono" type="number" value={form.jhtEmployee} onChange={e => setForm({ ...form, jhtEmployee: e.target.value })} />
               </div>
               <div>
-                <Label className="text-xs">JP Karyawan</Label>
+                <Label className="text-xs">{tp('jpEmployee')}</Label>
                 <Input className="h-9 font-mono" type="number" value={form.jpEmployee} onChange={e => setForm({ ...form, jpEmployee: e.target.value })} />
               </div>
               <div>
-                <Label className="text-xs">Potongan Lain</Label>
+                <Label className="text-xs">{tp('otherDeductions')}</Label>
                 <Input className="h-9 font-mono" type="number" value={form.otherDeductions} onChange={e => setForm({ ...form, otherDeductions: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2 justify-end">
-              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}><X className="h-3 w-3 mr-1" />Batal</Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}><X className="h-3 w-3 mr-1" />{tp('cancel')}</Button>
               <Button size="sm" onClick={saveEmployee} disabled={isSaving}>
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-                {form.id ? 'Update' : 'Simpan'}
+                {form.id ? tp('update') : tp('save')}
               </Button>
             </div>
           </CardContent>
@@ -277,7 +279,7 @@ export default function PPh21PayrollPage() {
       ) : employees.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Belum ada karyawan terdaftar</p>
+          <p className="text-sm">{tp('noEmployees')}</p>
         </div>
       ) : (
         <Card className="border-0 shadow-sm">
@@ -286,10 +288,10 @@ export default function PPh21PayrollPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-gray-500 text-xs">
-                    <th className="text-left py-2.5 px-3">Nama</th>
+                    <th className="text-left py-2.5 px-3">{tp('name')}</th>
                     <th className="text-left py-2.5 px-3">NPWP</th>
                     <th className="text-center py-2.5 px-3">PTKP</th>
-                    <th className="text-right py-2.5 px-3">Gaji</th>
+                    <th className="text-right py-2.5 px-3">{tp('salary')}</th>
                     <th className="text-right py-2.5 px-3">PPh 21</th>
                     <th className="text-center py-2.5 px-3 w-20"></th>
                   </tr>

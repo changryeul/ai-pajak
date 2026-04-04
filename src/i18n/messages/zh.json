@@ -2610,5 +2610,32 @@
       "install": "安装",
       "later": "稍后"
     }
+  },
+  "pph21Page": {
+    "pageTitle": "工资单管理",
+    "pageDescription": "员工注册 + 每月PPh 21 TER计算",
+    "employeeCount": "员工数",
+    "employeeCountValue": "{count}人",
+    "totalSalary": "总工资",
+    "employeeList": "员工列表",
+    "newEmployee": "新员工",
+    "calculatePph21": "计算PPh 21",
+    "employeeName": "员工姓名 *",
+    "monthlySalary": "月薪 *",
+    "jhtEmployee": "JHT 员工",
+    "jpEmployee": "JP 员工",
+    "otherDeductions": "其他扣除",
+    "cancel": "取消",
+    "save": "保存",
+    "update": "更新",
+    "name": "姓名",
+    "salary": "工资",
+    "noEmployees": "尚无注册员工",
+    "nameAndSalaryRequired": "姓名和工资为必填项",
+    "employeeUpdated": "员工数据已更新",
+    "employeeAdded": "员工已添加",
+    "deactivateConfirm": "确定要停用此员工吗？",
+    "employeeDeactivated": "员工已停用",
+    "calculationComplete": "已完成{count}名员工的PPh 21计算"
   }
 }
