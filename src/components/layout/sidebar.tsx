@@ -247,7 +247,7 @@ export function Sidebar() {
             <ul className="space-y-0.5">
               {section.items.map((item) => {
                 const fullHref = `/${locale}${item.href}`;
-                const isActive = item.href !== '#' && (pathname === fullHref || pathname.startsWith(`${fullHref}/`));
+                const isActive = item.href !== '#' && (pathname === fullHref || (item.href !== '/settings' && pathname.startsWith(`${fullHref}/`)));
                 const hasChildren = item.children && item.children.length > 0;
                 const isChildActive = hasChildren && item.children!.some(c => pathname === `/${locale}${c.href}` || pathname.startsWith(`/${locale}${c.href}/`));
                 const isExpanded = expandedMenus.has(item.labelKey) || isChildActive;

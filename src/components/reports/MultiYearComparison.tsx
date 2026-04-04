@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -20,6 +21,7 @@ import {
   ArrowDownRight,
   Lightbulb,
 } from 'lucide-react';
+import { fmtRp } from '@/lib/utils';
 
 interface YearData {
   year: number;
@@ -54,15 +56,8 @@ interface MultiYearComparisonProps {
   customerId?: string;
 }
 
-function fmt(n: number): string {
+function fmtFull(n: number): string {
   return `Rp ${n.toLocaleString('id-ID')}`;
-}
-
-function fmtShort(n: number): string {
-  if (n >= 1_000_000_000) return `Rp ${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n >= 1_000_000) return `Rp ${(n / 1_000_000).toFixed(0)}M`;
-  if (n >= 1_000) return `Rp ${(n / 1_000).toFixed(0)}K`;
-  return `Rp ${n}`;
 }
 
 function ChangeIndicator({ value, suffix = '' }: { value: number; suffix?: string }) {
@@ -72,6 +67,7 @@ function ChangeIndicator({ value, suffix = '' }: { value: number; suffix?: strin
 }
 
 export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
+  const t = useTranslations('comparison');
   const currentYear = new Date().getFullYear();
   const availableYears = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -104,11 +100,17 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
       if (!response.ok) throw new Error(result.error || 'Failed to load');
       setData(result.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load comparison');
+      setError(err instanceof Error ? err.message : t('loadError'));
     } finally {
       setIsLoading(false);
     }
-  }, [selectedYears, customerId]);
+  }, [selectedYears, customerId, t]);
+
+  const statusLabel = (status: string) => {
+    if (status === 'NIHIL') return t('statusNihil');
+    if (status === 'KURANG_BAYAR') return t('statusUnderpaid');
+    return t('statusOverpaid');
+  };
 
   return (
     <div className="space-y-6">
@@ -117,11 +119,9 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-blue-600" />
-            Perbandingan Pajak Multi-Tahun
+            {t('title')}
           </CardTitle>
-          <CardDescription>
-            Pilih 2-4 tahun untuk membandingkan data perpajakan
-          </CardDescription>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
@@ -150,9 +150,9 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
             className="bg-gradient-to-r from-blue-600 to-indigo-600"
           >
             {isLoading ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Memuat...</>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t('loading')}</>
             ) : (
-              <><BarChart3 className="h-4 w-4 mr-2" />Bandingkan {selectedYears.length} Tahun</>
+              <><BarChart3 className="h-4 w-4 mr-2" />{t('compareYears', { count: selectedYears.length })}</>
             )}
           </Button>
         </CardContent>
@@ -175,23 +175,23 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
                         yr.status === 'KURANG_BAYAR' ? 'bg-red-100 text-red-700' :
                         'bg-blue-100 text-blue-700'
                       }>
-                        {yr.status === 'NIHIL' ? 'Nihil' : yr.status === 'KURANG_BAYAR' ? 'Kurang Bayar' : 'Lebih Bayar'}
+                        {statusLabel(yr.status)}
                       </Badge>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Bruto</span>
-                        <span className="font-mono font-medium">{fmtShort(yr.grossIncome)}</span>
+                        <span className="text-gray-500">{t('gross')}</span>
+                        <span className="font-mono font-medium">{fmtRp(yr.grossIncome)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">PPh</span>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-medium">{fmtShort(yr.taxDue)}</span>
+                          <span className="font-mono font-medium">{fmtRp(yr.taxDue)}</span>
                           {change && <ChangeIndicator value={change.taxDueChangePercent} suffix="%" />}
                         </div>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Tarif Efektif</span>
+                        <span className="text-gray-500">{t('effectiveRate')}</span>
                         <span className="font-mono">{(yr.effectiveRate * 100).toFixed(1)}%</span>
                       </div>
                     </div>
@@ -204,14 +204,14 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
           {/* Detailed Comparison Table */}
           <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base">Detail Perbandingan</CardTitle>
+              <CardTitle className="text-base">{t('detailComparison')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-3 text-gray-500 font-medium">Item</th>
+                      <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('item')}</th>
                       {data.years.sort((a, b) => b.year - a.year).map((yr) => (
                         <th key={yr.year} className="text-right py-3 px-3 font-bold">{yr.year}</th>
                       ))}
@@ -219,25 +219,25 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
                   </thead>
                   <tbody className="divide-y">
                     {[
-                      { label: 'Penghasilan Bruto', key: 'grossIncome' },
-                      { label: 'Pengurang', key: 'deductions' },
-                      { label: 'Penghasilan Neto', key: 'netIncome' },
+                      { label: t('grossIncome'), key: 'grossIncome' },
+                      { label: t('deductions'), key: 'deductions' },
+                      { label: t('netIncome'), key: 'netIncome' },
                       { label: 'PTKP', key: 'ptkp' },
                       { label: 'PKP', key: 'taxableIncome' },
-                      { label: 'PPh Terutang', key: 'taxDue' },
-                      { label: 'PPh Dipotong', key: 'taxWithheld' },
+                      { label: t('taxDue'), key: 'taxDue' },
+                      { label: t('taxWithheld'), key: 'taxWithheld' },
                     ].map((row) => (
                       <tr key={row.key} className={row.key === 'taxDue' ? 'bg-blue-50/50 font-medium' : ''}>
                         <td className="py-2.5 px-3 text-gray-600">{row.label}</td>
                         {data.years.sort((a, b) => b.year - a.year).map((yr) => (
                           <td key={yr.year} className="py-2.5 px-3 text-right font-mono">
-                            {fmt((yr as unknown as Record<string, number>)[row.key] || 0)}
+                            {fmtFull((yr as unknown as Record<string, number>)[row.key] || 0)}
                           </td>
                         ))}
                       </tr>
                     ))}
                     <tr className="border-t-2 font-bold">
-                      <td className="py-2.5 px-3 text-gray-900">Tarif Efektif</td>
+                      <td className="py-2.5 px-3 text-gray-900">{t('effectiveRate')}</td>
                       {data.years.sort((a, b) => b.year - a.year).map((yr) => (
                         <td key={yr.year} className="py-2.5 px-3 text-right font-mono">
                           {(yr.effectiveRate * 100).toFixed(2)}%
@@ -245,7 +245,7 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
                       ))}
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-3 text-gray-600">Jumlah Pemberi Kerja</td>
+                      <td className="py-2.5 px-3 text-gray-600">{t('employers')}</td>
                       {data.years.sort((a, b) => b.year - a.year).map((yr) => (
                         <td key={yr.year} className="py-2.5 px-3 text-right">
                           {yr.employers.length || '-'}
@@ -262,7 +262,7 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
           {data.changes && data.changes.length > 0 && (
             <Card className="border-0 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-base">Perubahan Tahun ke Tahun</CardTitle>
+                <CardTitle className="text-base">{t('yearOverYear')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -275,7 +275,7 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
                       </div>
                       <div className="flex-1 grid grid-cols-3 gap-4">
                         <div>
-                          <p className="text-xs text-gray-500">Penghasilan</p>
+                          <p className="text-xs text-gray-500">{t('income')}</p>
                           <div className="flex items-center gap-1">
                             {change.grossIncomeChangePercent > 0 ? (
                               <TrendingUp className="h-4 w-4 text-green-500" />
@@ -290,7 +290,7 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
                           </div>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">PPh Terutang</p>
+                          <p className="text-xs text-gray-500">{t('taxDue')}</p>
                           <div className="flex items-center gap-1">
                             {change.taxDueChangePercent > 0 ? (
                               <TrendingUp className="h-4 w-4 text-red-500" />
@@ -305,7 +305,7 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
                           </div>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">Tarif Efektif</p>
+                          <p className="text-xs text-gray-500">{t('effectiveRate')}</p>
                           <span className={`text-sm font-medium ${change.effectiveRateChange > 0 ? 'text-red-600' : change.effectiveRateChange < 0 ? 'text-green-600' : 'text-gray-500'}`}>
                             {change.effectiveRateChange > 0 ? '+' : ''}{(change.effectiveRateChange * 100).toFixed(2)}pp
                           </span>
@@ -324,7 +324,7 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Lightbulb className="h-4 w-4 text-yellow-500" />
-                  Insight
+                  {t('insights')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
