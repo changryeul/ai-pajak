@@ -67,6 +67,42 @@ export async function GET(request: NextRequest) {
 
     const totalMonthlyCost = costEstimates.reduce((s, e) => s + e.estimatedMonthlyCost, 0);
 
+    // ── Actual usage from ai_usage_log ──
+    const admin = getSupabaseAdmin();
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+    // This month totals
+    const { data: monthlyUsage } = await admin
+      .from('ai_usage_log')
+      .select('feature, input_tokens, output_tokens, cost_usd, success')
+      .gte('created_at', thisMonthStart);
+
+    // Today totals
+    const { data: todayUsage } = await admin
+      .from('ai_usage_log')
+      .select('feature, input_tokens, output_tokens, cost_usd')
+      .gte('created_at', todayStart);
+
+    // Aggregate by feature
+    const actualByFeature: Record<string, { calls: number; tokens: number; cost: number; errors: number }> = {};
+    for (const row of monthlyUsage || []) {
+      const f = row.feature || 'unknown';
+      if (!actualByFeature[f]) actualByFeature[f] = { calls: 0, tokens: 0, cost: 0, errors: 0 };
+      actualByFeature[f].calls++;
+      actualByFeature[f].tokens += (row.input_tokens || 0) + (row.output_tokens || 0);
+      actualByFeature[f].cost += row.cost_usd || 0;
+      if (!row.success) actualByFeature[f].errors++;
+    }
+
+    const actualMonthlyTotal = (monthlyUsage || []).reduce((s, r) => s + (r.cost_usd || 0), 0);
+    const actualMonthlyTokens = (monthlyUsage || []).reduce((s, r) => s + (r.input_tokens || 0) + (r.output_tokens || 0), 0);
+    const actualMonthlyCalls = (monthlyUsage || []).length;
+
+    const actualTodayTotal = (todayUsage || []).reduce((s, r) => s + (r.cost_usd || 0), 0);
+    const actualTodayCalls = (todayUsage || []).length;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -75,6 +111,18 @@ export async function GET(request: NextRequest) {
           activeUsers,
           totalMonthlyCostEstimate: Math.round(totalMonthlyCost * 100) / 100,
           currency: 'USD',
+        },
+        actual: {
+          monthly: {
+            totalCost: Math.round(actualMonthlyTotal * 10000) / 10000,
+            totalTokens: actualMonthlyTokens,
+            totalCalls: actualMonthlyCalls,
+            byFeature: actualByFeature,
+          },
+          today: {
+            totalCost: Math.round(actualTodayTotal * 10000) / 10000,
+            totalCalls: actualTodayCalls,
+          },
         },
       },
     });

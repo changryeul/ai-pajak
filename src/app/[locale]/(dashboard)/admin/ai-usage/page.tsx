@@ -28,6 +28,10 @@ export default function AIUsagePage() {
   const t = useTranslations('aiUsage');
   const [limits, setLimits] = useState<LimitItem[]>([]);
   const [summary, setSummary] = useState<{ activeUsers: number; totalMonthlyCostEstimate: number } | null>(null);
+  const [actual, setActual] = useState<{
+    monthly: { totalCost: number; totalTokens: number; totalCalls: number; byFeature: Record<string, { calls: number; tokens: number; cost: number; errors: number }> };
+    today: { totalCost: number; totalCalls: number };
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [editingType, setEditingType] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -41,7 +45,7 @@ export default function AIUsagePage() {
     try {
       const res = await fetch('/api/admin/ai-usage');
       const data = await res.json();
-      if (data.success) { setLimits(data.data.limits); setSummary(data.data.summary); }
+      if (data.success) { setLimits(data.data.limits); setSummary(data.data.summary); if (data.data.actual) setActual(data.data.actual); }
     } catch { /* */ }
     finally { setIsLoading(false); }
   };
@@ -73,24 +77,24 @@ export default function AIUsagePage() {
           <p className="text-violet-200 text-sm mt-1">{t('subtitle')}</p>
 
           {summary && (
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-violet-300" />
-                  <div>
-                    <p className="text-2xl font-bold">{summary.activeUsers}</p>
-                    <p className="text-xs text-violet-200">{t('activeUsers')}</p>
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3">
+                <p className="text-xs text-violet-300">{t('activeUsers')}</p>
+                <p className="text-xl font-bold">{summary.activeUsers}</p>
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-yellow-300" />
-                  <div>
-                    <p className="text-2xl font-bold">${summary.totalMonthlyCostEstimate}</p>
-                    <p className="text-xs text-violet-200">{t('estMonthlyCost')}</p>
-                  </div>
-                </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3">
+                <p className="text-xs text-violet-300">{t('estMonthlyCost')}</p>
+                <p className="text-xl font-bold">${summary.totalMonthlyCostEstimate}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3 border border-yellow-400/30">
+                <p className="text-xs text-yellow-300">이번 달 실제 비용</p>
+                <p className="text-xl font-bold text-yellow-300">${actual?.monthly.totalCost.toFixed(4) || '0'}</p>
+                <p className="text-[10px] text-violet-300">{actual?.monthly.totalCalls || 0}회 호출</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3">
+                <p className="text-xs text-violet-300">오늘 비용</p>
+                <p className="text-xl font-bold">${actual?.today.totalCost.toFixed(4) || '0'}</p>
+                <p className="text-[10px] text-violet-300">{actual?.today.totalCalls || 0}회 호출</p>
               </div>
             </div>
           )}
@@ -194,6 +198,58 @@ export default function AIUsagePage() {
             <p className="text-xs text-gray-400 mt-4">
               {t('costNote')}
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Actual Usage by Feature */}
+      {actual && Object.keys(actual.monthly.byFeature).length > 0 && (
+        <Card className="mt-6 border-0 shadow-sm border-l-4 border-l-yellow-400">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-yellow-500" />이번 달 실제 사용량
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 text-gray-500 font-medium">기능</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">호출</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">토큰</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">비용 (USD)</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">에러</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(actual.monthly.byFeature)
+                    .sort(([, a], [, b]) => b.cost - a.cost)
+                    .map(([feature, data]) => (
+                      <tr key={feature} className="border-b last:border-0">
+                        <td className="py-2 font-medium">{feature}</td>
+                        <td className="py-2 text-right font-mono">{data.calls}</td>
+                        <td className="py-2 text-right font-mono text-gray-400">{data.tokens.toLocaleString()}</td>
+                        <td className="py-2 text-right font-mono font-bold">${data.cost.toFixed(4)}</td>
+                        <td className="py-2 text-right">
+                          {data.errors > 0 ? (
+                            <Badge className="text-[10px] bg-red-100 text-red-600">{data.errors}</Badge>
+                          ) : (
+                            <span className="text-gray-300">0</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  <tr className="border-t-2 font-bold">
+                    <td className="py-2">합계</td>
+                    <td className="py-2 text-right font-mono">{actual.monthly.totalCalls}</td>
+                    <td className="py-2 text-right font-mono text-gray-400">{actual.monthly.totalTokens.toLocaleString()}</td>
+                    <td className="py-2 text-right font-mono text-yellow-600">${actual.monthly.totalCost.toFixed(4)}</td>
+                    <td className="py-2"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       )}
