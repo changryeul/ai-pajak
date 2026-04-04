@@ -99,6 +99,10 @@
       "schedule": "0 10 1 * *"
     },
     {
+      "path": "/api/cron/news-fetch",
+      "schedule": "0 */6 * * *"
+    },
+    {
       "path": "/api/cron/cleanup-expired-tokens",
       "schedule": "0 0 * * *"
     }

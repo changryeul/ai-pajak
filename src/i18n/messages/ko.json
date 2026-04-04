@@ -92,6 +92,7 @@
     "reports": "보고서",
     "submissions": "제출 현황",
     "invoiceCapture": "사진 신고",
+    "taxNews": "세금 뉴스",
     "monthlyFiling": "월 신고",
     "annualFiling": "연 신고 (SPT)",
     "withholdingTax": "원천세 (PPh 23/4(2))",
@@ -2610,6 +2611,23 @@
       "installDesc": "홈 화면에 추가하면 더 빠르게 접근할 수 있습니다",
       "install": "설치하기",
       "later": "나중에"
+    },
+    "news": {
+      "header": "Tax News",
+      "title": "세금 뉴스",
+      "subtitle": "인도네시아 세법 변경, 규정 업데이트, 세금 뉴스를 AI가 요약합니다",
+      "allCategories": "전체",
+      "empty": "아직 뉴스가 없습니다",
+      "emptyDesc": "곧 최신 세금 뉴스가 업데이트됩니다",
+      "impactAnalysis": "영향 분석",
+      "customerImpact": "고객 영향",
+      "justNow": "방금 전",
+      "hoursAgo": "{count}시간 전",
+      "daysAgo": "{count}일 전",
+      "importanceCritical": "긴급",
+      "importanceHigh": "중요",
+      "importanceNormal": "일반",
+      "importanceLow": "참고"
     }
   },
   "pph21Page": {

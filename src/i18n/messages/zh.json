@@ -92,6 +92,7 @@
     "reports": "报告",
     "submissions": "提交状态",
     "invoiceCapture": "拍照申报",
+    "taxNews": "税务新闻",
     "monthlyFiling": "月度申报",
     "annualFiling": "年度申报 (SPT)",
     "withholdingTax": "代扣税 (PPh 23/4(2))",
@@ -2609,6 +2610,23 @@
       "installDesc": "添加到主屏幕以便更快访问",
       "install": "安装",
       "later": "稍后"
+    },
+    "news": {
+      "header": "税务新闻",
+      "title": "税务新闻",
+      "subtitle": "AI总结印尼税法变更、法规更新和税务新闻",
+      "allCategories": "全部",
+      "empty": "暂无新闻",
+      "emptyDesc": "最新税务新闻即将更新",
+      "impactAnalysis": "影响分析",
+      "customerImpact": "客户影响",
+      "justNow": "刚刚",
+      "hoursAgo": "{count}小时前",
+      "daysAgo": "{count}天前",
+      "importanceCritical": "紧急",
+      "importanceHigh": "重要",
+      "importanceNormal": "一般",
+      "importanceLow": "参考"
     }
   },
   "pph21Page": {

@@ -92,6 +92,7 @@
     "reports": "レポート",
     "submissions": "申告状況",
     "invoiceCapture": "写真申告",
+    "taxNews": "税金ニュース",
     "monthlyFiling": "月次申告",
     "annualFiling": "年次申告 (SPT)",
     "withholdingTax": "源泉税 (PPh 23/4(2))",
@@ -2609,6 +2610,23 @@
       "installDesc": "ホーム画面に追加するとより素早くアクセスできます",
       "install": "インストール",
       "later": "後で"
+    },
+    "news": {
+      "header": "税金ニュース",
+      "title": "税金ニュース",
+      "subtitle": "AIがインドネシア税法の変更、規制更新、ニュースを要約",
+      "allCategories": "すべて",
+      "empty": "ニュースはまだありません",
+      "emptyDesc": "最新の税金ニュースがまもなく更新されます",
+      "impactAnalysis": "影響分析",
+      "customerImpact": "顧客への影響",
+      "justNow": "たった今",
+      "hoursAgo": "{count}時間前",
+      "daysAgo": "{count}日前",
+      "importanceCritical": "緊急",
+      "importanceHigh": "重要",
+      "importanceNormal": "通常",
+      "importanceLow": "参考"
     }
   },
   "pph21Page": {

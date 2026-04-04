@@ -92,6 +92,7 @@
     "reports": "Laporan",
     "submissions": "Status Pengajuan",
     "invoiceCapture": "Foto Faktur",
+    "taxNews": "Berita Pajak",
     "monthlyFiling": "Pelaporan Bulanan",
     "annualFiling": "Pelaporan Tahunan (SPT)",
     "withholdingTax": "PPh 23/4(2)",
@@ -2609,6 +2610,23 @@
       "installDesc": "Tambahkan ke layar utama untuk akses lebih cepat",
       "install": "Instal",
       "later": "Nanti"
+    },
+    "news": {
+      "header": "Berita Pajak",
+      "title": "Berita Pajak",
+      "subtitle": "AI merangkum perubahan UU, peraturan baru, dan berita perpajakan Indonesia",
+      "allCategories": "Semua",
+      "empty": "Belum ada berita",
+      "emptyDesc": "Berita pajak terbaru akan segera diperbarui",
+      "impactAnalysis": "Analisis Dampak",
+      "customerImpact": "Dampak Pelanggan",
+      "justNow": "Baru saja",
+      "hoursAgo": "{count} jam lalu",
+      "daysAgo": "{count} hari lalu",
+      "importanceCritical": "Darurat",
+      "importanceHigh": "Penting",
+      "importanceNormal": "Normal",
+      "importanceLow": "Info"
     }
   },
   "pph21Page": {

@@ -64,6 +64,7 @@ const navItems: NavSection[] = [
     section: 'main',
     items: [
       { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
+      { href: '/news', icon: ClipboardList, labelKey: 'nav.taxNews' },
       { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', roles: taxRoles, children: [
         { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21' },
         { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTax' },

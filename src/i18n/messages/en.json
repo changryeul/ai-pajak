@@ -92,6 +92,7 @@
     "reports": "Reports",
     "submissions": "My Submissions",
     "invoiceCapture": "Photo Filing",
+    "taxNews": "Tax News",
     "monthlyFiling": "Monthly Filing",
     "annualFiling": "Annual Filing (SPT)",
     "withholdingTax": "Withholding Tax (PPh 23/4(2))",
@@ -2609,6 +2610,23 @@
       "installDesc": "Add to home screen for faster access",
       "install": "Install",
       "later": "Later"
+    },
+    "news": {
+      "header": "Tax News",
+      "title": "Tax News",
+      "subtitle": "AI summarizes Indonesian tax law changes, regulation updates, and news",
+      "allCategories": "All",
+      "empty": "No news yet",
+      "emptyDesc": "Latest tax news will be updated soon",
+      "impactAnalysis": "Impact Analysis",
+      "customerImpact": "Customer Impact",
+      "justNow": "Just now",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago",
+      "importanceCritical": "Critical",
+      "importanceHigh": "Important",
+      "importanceNormal": "Normal",
+      "importanceLow": "Info"
     }
   },
   "pph21Page": {
