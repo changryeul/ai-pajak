@@ -33,12 +33,12 @@ export default async function LandingPage({
   ];
 
   const aiFeatures = [
-    { icon: Zap, title: 'Tax Resolution Engine', desc: 'Otomatis tentukan jenis pajak & tarif dari data transaksi — PPh 21/23/26/4(2), termasuk P3B 64 negara', gradient: 'from-blue-600 to-indigo-600' },
-    { icon: FileSpreadsheet, title: 'SPT Masa & e-Bupot', desc: 'Pelaporan bulanan PPh 21/23/26/PPN dengan e-Bupot otomatis dan PDF preview', gradient: 'from-emerald-500 to-green-600' },
-    { icon: Sparkles, title: 'AI Invoice Scanner', desc: 'Foto faktur/kwitansi, AI klasifikasi jenis jasa & hitung pajak otomatis', gradient: 'from-purple-500 to-pink-500' },
-    { icon: Lightbulb, title: 'Tax Savings Advisor', desc: 'AI analisis data Anda untuk menemukan peluang penghematan pajak', gradient: 'from-amber-500 to-orange-500' },
-    { icon: BarChart3, title: 'Annual Simulation', desc: 'Proyeksi pajak tahunan berdasarkan data bulanan dengan grafik real-time', gradient: 'from-green-500 to-teal-500' },
-    { icon: Shield, title: 'Override Rule Engine', desc: 'Aturan pajak kustom yang dikelola admin — prioritas tertinggi dalam penentuan tarif', gradient: 'from-red-500 to-rose-600' },
+    { icon: Zap, titleKey: 'aiFeature1Title', descKey: 'aiFeature1Desc', gradient: 'from-blue-600 to-indigo-600' },
+    { icon: FileSpreadsheet, titleKey: 'aiFeature2Title', descKey: 'aiFeature2Desc', gradient: 'from-emerald-500 to-green-600' },
+    { icon: Sparkles, titleKey: 'aiFeature3Title', descKey: 'aiFeature3Desc', gradient: 'from-purple-500 to-pink-500' },
+    { icon: Lightbulb, titleKey: 'aiFeature4Title', descKey: 'aiFeature4Desc', gradient: 'from-amber-500 to-orange-500' },
+    { icon: BarChart3, titleKey: 'aiFeature5Title', descKey: 'aiFeature5Desc', gradient: 'from-green-500 to-teal-500' },
+    { icon: Shield, titleKey: 'aiFeature6Title', descKey: 'aiFeature6Desc', gradient: 'from-red-500 to-rose-600' },
   ];
 
   const plans = [
@@ -124,23 +124,23 @@ export default async function LandingPage({
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 rounded-full bg-yellow-50 border border-yellow-200 px-4 py-1.5 text-sm text-yellow-700 font-medium mb-4">
               <Sparkles className="h-4 w-4" />
-              Powered by AI
+              {t('aiPowered')}
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">Fitur AI yang Memudahkan</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Teknologi AI terdepan untuk mengotomatisasi pekerjaan pajak Anda</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">{t('aiFeaturesTitle')}</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">{t('aiFeaturesSubtitle')}</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {aiFeatures.map((f) => {
               const Icon = f.icon;
               return (
-                <div key={f.title} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 hover:shadow-xl hover:border-gray-300 transition-all duration-300">
+                <div key={f.titleKey} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 hover:shadow-xl hover:border-gray-300 transition-all duration-300">
                   <div className="flex items-start gap-4">
                     <div className={`p-3 rounded-xl bg-gradient-to-br ${f.gradient} shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300`}>
                       <Icon className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-1 text-lg">{f.title}</h3>
-                      <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                      <h3 className="font-semibold text-gray-900 mb-1 text-lg">{t(f.titleKey)}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed">{t(f.descKey)}</p>
                     </div>
                   </div>
                 </div>
