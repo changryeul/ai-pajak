@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   BarChart3,
   FileSpreadsheet,
+  Camera,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
@@ -205,10 +206,10 @@ function CustomerDashboard({
             bg: 'bg-amber-50',
           },
           {
-            href: '/documents',
-            icon: Sparkles,
-            label: t('dashboardHero.aiClassification'),
-            desc: t('dashboardHero.aiClassificationDesc'),
+            href: '/invoice-capture',
+            icon: Camera,
+            label: '사진 신고',
+            desc: '인보이스 촬영 → AI 자동 분류',
             gradient: 'from-purple-500 to-pink-500',
             bg: 'bg-purple-50',
           },

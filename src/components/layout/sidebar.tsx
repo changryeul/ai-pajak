@@ -63,6 +63,8 @@ const navItems: NavSection[] = [
       { href: '/customers', icon: Users, labelKey: 'nav.customers', descKey: 'navDesc.customers', roles: consultantRoles },
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', descKey: 'navDesc.filings', roles: taxRoles },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents', descKey: 'navDesc.documents', roles: taxRoles },
+      { href: '/submissions', icon: ListChecks, labelKey: 'nav.submissions', descKey: 'navDesc.submissions', roles: [UserRole.CUSTOMER] },
+      { href: '/invoice-capture', icon: Receipt, labelKey: 'nav.invoiceCapture', descKey: 'navDesc.invoiceCapture', roles: [UserRole.CUSTOMER] },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', descKey: 'navDesc.reports', roles: [UserRole.CUSTOMER] },
       { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', descKey: 'navDesc.paymentStatus', roles: [UserRole.CUSTOMER] },
       { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', descKey: 'navDesc.monthlyPayments', roles: taxRoles },
