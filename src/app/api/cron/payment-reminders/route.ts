@@ -67,21 +67,24 @@ export async function POST(request: NextRequest) {
     let inAppSent = 0;
     const errors: string[] = [];
 
+    // Batch-fetch WhatsApp preferences for all unique user_ids (avoids N+1)
+    const userIds = [...new Set((items as unknown as QueueItem[])?.map(i => i.customer?.user_id).filter(Boolean) || [])];
+    const { data: allPrefs } = userIds.length > 0
+      ? await supabase.from('notification_preferences').select('user_id, whatsapp_enabled').in('user_id', userIds)
+      : { data: [] };
+    const prefsMap = new Map((allPrefs || []).map(p => [p.user_id, p.whatsapp_enabled]));
+
     for (const item of (items as unknown as QueueItem[]) || []) {
       const customer = item.customer;
       if (!customer) continue;
 
       const period = `${item.tax_period_year}-${String(item.tax_period_month).padStart(2, '0')}`;
 
-      // Check WhatsApp preference
+      // Check WhatsApp preference (from batch-fetched map)
       if (customer.phone_number) {
-        const { data: prefs } = await supabase
-          .from('notification_preferences')
-          .select('whatsapp_enabled')
-          .eq('user_id', customer.user_id)
-          .single();
+        const waEnabled = prefsMap.get(customer.user_id);
 
-        if (prefs?.whatsapp_enabled) {
+        if (waEnabled) {
           try {
             const result = await sendWaPaymentReminder(
               customer.phone_number,

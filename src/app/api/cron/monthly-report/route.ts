@@ -45,17 +45,29 @@ export async function POST(request: NextRequest) {
       `)
       .not('phone_number', 'is', null);
 
+    // Batch-fetch ALL tax calculations for the period (avoids N+1)
+    const customerIds = (customers || []).map(c => c.id);
+    const { data: allCalcs } = customerIds.length > 0
+      ? await supabase
+          .from('tax_calculation')
+          .select('customer_id, calculation_result, income_data')
+          .in('customer_id', customerIds)
+          .eq('tax_period', period)
+      : { data: [] };
+
+    // Group calculations by customer
+    const calcsByCustomer = new Map<string, typeof allCalcs>();
+    for (const calc of allCalcs || []) {
+      const existing = calcsByCustomer.get(calc.customer_id) || [];
+      existing.push(calc);
+      calcsByCustomer.set(calc.customer_id, existing);
+    }
+
     let waSent = 0;
     let inAppSent = 0;
 
     for (const customer of customers || []) {
-      // Get tax calculations for the period
-      const { data: calcs } = await supabase
-        .from('tax_calculation')
-        .select('calculation_result, income_data')
-        .eq('customer_id', customer.id)
-        .eq('tax_period', period);
-
+      const calcs = calcsByCustomer.get(customer.id);
       if (!calcs || calcs.length === 0) continue;
 
       const totalTax = calcs.reduce((sum: number, c: { calculation_result?: { calculatedTax?: number } }) =>
