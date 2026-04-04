@@ -141,6 +141,7 @@
     "assignedClients": "Klien Ditugaskan",
     "administration": "Administrasi",
     "monitoring": "Pemantauan Sistem",
+    "cronManagement": "Manajemen Cron",
     "userManagement": "Manajemen Pengguna",
     "billingAdmin": "Admin Tagihan",
     "consultantAdmin": "Admin Konsultan",

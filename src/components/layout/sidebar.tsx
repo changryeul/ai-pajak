@@ -121,6 +121,7 @@ const navItems: NavSection[] = [
     roles: [UserRole.PLATFORM_ADMIN],
     items: [
       { href: '/admin/monitoring', icon: Activity, labelKey: 'nav.monitoring' },
+      { href: '/admin/cron', icon: Calendar, labelKey: 'nav.cronManagement' },
       { href: '/admin/users', icon: Users, labelKey: 'nav.userManagement' },
       { href: '/admin/billing', icon: CreditCard, labelKey: 'nav.billingAdmin' },
       { href: '/admin/consultants', icon: ClipboardList, labelKey: 'nav.consultantAdmin' },

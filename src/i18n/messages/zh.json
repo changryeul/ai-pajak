@@ -141,6 +141,7 @@
     "assignedClients": "分配的客户",
     "administration": "管理",
     "monitoring": "系统监控",
+    "cronManagement": "Cron任务管理",
     "userManagement": "用户管理",
     "billingAdmin": "账单管理",
     "consultantAdmin": "顾问管理",

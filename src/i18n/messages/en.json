@@ -141,6 +141,7 @@
     "assignedClients": "Assigned Clients",
     "administration": "Administration",
     "monitoring": "System Monitoring",
+    "cronManagement": "Cron Jobs",
     "userManagement": "User Management",
     "billingAdmin": "Billing Admin",
     "consultantAdmin": "Consultant Admin",

@@ -141,6 +141,7 @@
     "assignedClients": "담당 고객",
     "administration": "관리",
     "monitoring": "시스템 모니터링",
+    "cronManagement": "Cron 작업 관리",
     "userManagement": "사용자 관리",
     "billingAdmin": "결제 관리",
     "consultantAdmin": "컨설턴트 관리",

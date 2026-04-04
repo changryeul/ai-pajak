@@ -141,6 +141,7 @@
     "assignedClients": "担当クライアント",
     "administration": "管理",
     "monitoring": "システム監視",
+    "cronManagement": "Cronジョブ管理",
     "userManagement": "ユーザー管理",
     "billingAdmin": "請求管理",
     "consultantAdmin": "コンサルタント管理",
