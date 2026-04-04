@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ClassificationReview } from './ClassificationReview';
@@ -40,6 +41,7 @@ interface SavedResult {
 }
 
 export function InvoiceCaptureFlow() {
+  const t = useTranslations('killer');
   const [step, setStep] = useState<Step>('capture');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -122,15 +124,15 @@ export function InvoiceCaptureFlow() {
             <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <Camera className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-lg font-bold">인보이스 촬영</h2>
-            <p className="text-sm text-gray-500 mt-1">인보이스나 영수증을 촬영하면 AI가 자동으로 분류합니다</p>
+            <h2 className="text-lg font-bold">{t('invoice.captureTitle')}</h2>
+            <p className="text-sm text-gray-500 mt-1">{t('invoice.captureDesc')}</p>
           </div>
 
           {isProcessing ? (
             <div className="text-center py-12">
               <Loader2 className="h-10 w-10 animate-spin mx-auto text-indigo-500 mb-3" />
-              <p className="text-sm font-medium text-gray-700">AI가 분석 중입니다...</p>
-              <p className="text-xs text-gray-400 mt-1">세목 분류 + 세율 계산 중</p>
+              <p className="text-sm font-medium text-gray-700">{t('invoice.analyzing')}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('invoice.analyzingDetail')}</p>
             </div>
           ) : (
             <>
@@ -142,8 +144,8 @@ export function InvoiceCaptureFlow() {
                 onClick={() => fileInputRef.current?.click()}
               >
                 <ImageIcon className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500">파일을 드래그하거나 클릭하여 업로드</p>
-                <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP, PDF (최대 10MB)</p>
+                <p className="text-sm text-gray-500">{t('invoice.dropzone')}</p>
+                <p className="text-xs text-gray-400 mt-1">{t('invoice.dropzoneHint')}</p>
               </div>
 
               {/* Action buttons */}
@@ -152,14 +154,14 @@ export function InvoiceCaptureFlow() {
                   className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
                   onClick={() => cameraInputRef.current?.click()}
                 >
-                  <Camera className="h-4 w-4 mr-2" />카메라로 촬영
+                  <Camera className="h-4 w-4 mr-2" />{t('invoice.camera')}
                 </Button>
                 <Button
                   variant="outline"
                   className="flex-1"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <Upload className="h-4 w-4 mr-2" />파일 선택
+                  <Upload className="h-4 w-4 mr-2" />{t('invoice.fileSelect')}
                 </Button>
               </div>
 
@@ -219,13 +221,13 @@ export function InvoiceCaptureFlow() {
         {/* Actions */}
         <div className="flex gap-3">
           <Button variant="outline" onClick={handleReset} className="flex-1">
-            <RotateCcw className="h-4 w-4 mr-2" />다시 촬영
+            <RotateCcw className="h-4 w-4 mr-2" />{t('invoice.retake')}
           </Button>
           <Button
             onClick={handleConfirm}
             className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
           >
-            <CheckCircle className="h-4 w-4 mr-2" />저장 완료
+            <CheckCircle className="h-4 w-4 mr-2" />{t('invoice.saveComplete')}
           </Button>
         </div>
       </div>
@@ -239,21 +241,21 @@ export function InvoiceCaptureFlow() {
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
-        <h2 className="text-lg font-bold text-gray-900">저장 완료!</h2>
+        <h2 className="text-lg font-bold text-gray-900">{t('invoice.saveComplete')}!</h2>
         <p className="text-sm text-gray-500 mt-1">
-          AI가 분류한 결과가 {savedResult?.period} 초안에 저장되었습니다
+          {t('invoice.savedMessage', { period: savedResult?.period || '' })}
         </p>
 
         <div className="flex gap-3 mt-6">
           <Button variant="outline" onClick={handleReset} className="flex-1">
-            <Plus className="h-4 w-4 mr-2" />다른 인보이스 추가
+            <Plus className="h-4 w-4 mr-2" />{t('invoice.addAnother')}
           </Button>
           <Button
             variant="default"
             className="flex-1"
             onClick={() => window.location.href = window.location.pathname.replace('/invoice-capture', '/tax/calculations')}
           >
-            <ArrowRight className="h-4 w-4 mr-2" />초안 목록 보기
+            <ArrowRight className="h-4 w-4 mr-2" />{t('invoice.viewDrafts')}
           </Button>
         </div>
       </CardContent>

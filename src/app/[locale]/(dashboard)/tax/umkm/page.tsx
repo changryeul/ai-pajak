@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ interface MonthlyData {
 }
 
 export default function UMKMPage() {
+  const t = useTranslations('killer');
   const currentYear = new Date().getFullYear();
   const [year] = useState(currentYear);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>(
@@ -86,20 +88,20 @@ export default function UMKMPage() {
           <p className="text-green-300 text-sm flex items-center gap-2">
             <Store className="h-4 w-4" />PPh Final UMKM
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">UMKM 간편 신고</h1>
-          <p className="text-green-300 mt-2 text-sm">매출 Rp 4.8B 이하 소규모 사업자 전용 — 0.5% 단순 세율 (PP 55/2022)</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('umkm.title')}</h1>
+          <p className="text-green-300 mt-2 text-sm">{t('umkm.subtitle')}</p>
 
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-green-300 text-xs">세율</p>
+              <p className="text-green-300 text-xs">{t('umkm.taxRate')}</p>
               <p className="font-bold text-xl">0.5%</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-green-300 text-xs">면세 한도</p>
+              <p className="text-green-300 text-xs">{t('umkm.exemptionLimit')}</p>
               <p className="font-bold text-lg">Rp 500M</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-green-300 text-xs">매출 상한</p>
+              <p className="text-green-300 text-xs">{t('umkm.revenueLimit')}</p>
               <p className="font-bold text-lg">Rp 4.8B</p>
             </div>
           </div>
@@ -110,7 +112,7 @@ export default function UMKMPage() {
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-5">
           <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
-            <Calculator className="h-4 w-4 text-green-600" />{year}년 월별 매출 입력
+            <Calculator className="h-4 w-4 text-green-600" />{t('umkm.monthlyInput', { year })}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {MONTHS.map((label, i) => (
@@ -127,7 +129,7 @@ export default function UMKMPage() {
             ))}
           </div>
           <Button onClick={calculate} className="w-full mt-4 bg-gradient-to-r from-green-600 to-emerald-600">
-            <Calculator className="h-4 w-4 mr-2" />세금 계산하기
+            <Calculator className="h-4 w-4 mr-2" />{t('umkm.calculate')}
           </Button>
         </CardContent>
       </Card>
@@ -142,16 +144,16 @@ export default function UMKMPage() {
                 <>
                   <CheckCircle className="h-6 w-6 text-green-500" />
                   <div>
-                    <p className="font-bold text-sm text-green-800">UMKM 자격 충족</p>
-                    <p className="text-xs text-gray-500">연 매출 {fmtRp(totalRevenue)} (한도: Rp 4.8B 이하)</p>
+                    <p className="font-bold text-sm text-green-800">{t('umkm.eligible')}</p>
+                    <p className="text-xs text-gray-500">{t('umkm.eligibleMsg', { amount: fmtRp(totalRevenue) })}</p>
                   </div>
                 </>
               ) : (
                 <>
                   <AlertTriangle className="h-6 w-6 text-red-500" />
                   <div>
-                    <p className="font-bold text-sm text-red-800">UMKM 한도 초과</p>
-                    <p className="text-xs text-gray-500">연 매출 {fmtRp(totalRevenue)} — 일반 세율 적용 필요</p>
+                    <p className="font-bold text-sm text-red-800">{t('umkm.exceeded')}</p>
+                    <p className="text-xs text-gray-500">{t('umkm.exceedMsg', { amount: fmtRp(totalRevenue) })}</p>
                   </div>
                 </>
               )}
@@ -162,21 +164,21 @@ export default function UMKMPage() {
           <div className="grid grid-cols-3 gap-3">
             <Card className="border-0 shadow-sm">
               <CardContent className="p-3 text-center">
-                <p className="text-xs text-gray-400">총 매출</p>
+                <p className="text-xs text-gray-400">{t('umkm.totalRevenue')}</p>
                 <p className="font-bold text-sm">{fmtRp(totalRevenue)}</p>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm">
               <CardContent className="p-3 text-center">
                 <p className="text-xs text-green-600 flex items-center justify-center gap-1">
-                  <Sparkles className="h-3 w-3" />면세 (Rp 500M)
+                  <Sparkles className="h-3 w-3" />{t('umkm.exemption')}
                 </p>
                 <p className="font-bold text-sm text-green-700">{fmtRp(totalExempt)}</p>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm border-l-4 border-l-blue-500">
               <CardContent className="p-3 text-center">
-                <p className="text-xs text-blue-600">연간 세금</p>
+                <p className="text-xs text-blue-600">{t('umkm.annualTax')}</p>
                 <p className="font-bold text-lg text-blue-700">{fmtRp(totalTax)}</p>
               </CardContent>
             </Card>
@@ -185,17 +187,17 @@ export default function UMKMPage() {
           {/* Monthly Breakdown */}
           <Card className="border-0 shadow-sm">
             <CardContent className="p-4">
-              <h3 className="font-bold text-sm mb-3">월별 상세</h3>
+              <h3 className="font-bold text-sm mb-3">{t('umkm.monthlyDetail')}</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-2 text-gray-500">월</th>
-                      <th className="text-right py-2 text-gray-500">매출</th>
-                      <th className="text-right py-2 text-gray-500">누적</th>
-                      <th className="text-right py-2 text-gray-500">과세 매출</th>
-                      <th className="text-right py-2 text-gray-500">PPh Final</th>
-                      <th className="text-center py-2 text-gray-500">상태</th>
+                      <th className="text-right py-2 text-gray-500">{t('umkm.revenue')}</th>
+                      <th className="text-right py-2 text-gray-500">{t('umkm.cumulative')}</th>
+                      <th className="text-right py-2 text-gray-500">{t('umkm.taxableRevenue')}</th>
+                      <th className="text-right py-2 text-gray-500">{t('umkm.pphFinal')}</th>
+                      <th className="text-center py-2 text-gray-500">{t('umkm.statusLabel')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -208,7 +210,7 @@ export default function UMKMPage() {
                         <td className="py-2 text-right font-mono font-bold">{fmtRp(r.tax)}</td>
                         <td className="py-2 text-center">
                           {r.exempt ? (
-                            <Badge className="text-[9px] bg-green-100 text-green-700">면세</Badge>
+                            <Badge className="text-[9px] bg-green-100 text-green-700">{t('umkm.exempt')}</Badge>
                           ) : (
                             <Badge className="text-[9px] bg-blue-100 text-blue-700">0.5%</Badge>
                           )}
@@ -225,7 +227,7 @@ export default function UMKMPage() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-4">
               <h3 className="font-bold text-sm mb-2 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-gray-400" />법적 근거
+                <TrendingUp className="h-4 w-4 text-gray-400" />{t('umkm.legalBasis')}
               </h3>
               <div className="text-xs text-gray-500 space-y-1">
                 <p>- **PP 55/2022**: PPh Final UMKM 0.5%, 연 매출 Rp 500M까지 면세</p>

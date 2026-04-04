@@ -1,9 +1,11 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { InvoiceCaptureFlow } from '@/components/invoice/InvoiceCaptureFlow';
 import { Camera, Sparkles } from 'lucide-react';
 
 export default function InvoiceCapturePage() {
+  const t = useTranslations('killer');
   return (
     <div className="container mx-auto py-8 px-4 max-w-2xl">
       {/* Header */}
@@ -11,12 +13,12 @@ export default function InvoiceCapturePage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-purple-300 text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />AI Invoice Scanner
+            <Sparkles className="h-4 w-4" />{t('invoice.header')}
           </p>
           <h1 className="text-2xl md:text-3xl font-bold mt-1 flex items-center gap-3">
-            <Camera className="h-7 w-7" />사진 신고
+            <Camera className="h-7 w-7" />{t('invoice.title')}
           </h1>
-          <p className="text-purple-300 mt-2 text-sm">인보이스를 촬영하면 AI가 세목과 세율을 자동으로 분류합니다</p>
+          <p className="text-purple-300 mt-2 text-sm">{t('invoice.subtitle')}</p>
         </div>
       </div>
 

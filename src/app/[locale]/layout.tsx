@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LOCALES, type Locale } from '@/config/constants';
+import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -27,6 +28,7 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider messages={messages}>
       {children}
+      <InstallPrompt />
     </NextIntlClientProvider>
   );
 }

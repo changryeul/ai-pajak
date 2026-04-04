@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,6 +41,7 @@ function fmtRp(n: number) {
 }
 
 export default function TaxCalculationsPage() {
+  const t = useTranslations('killer');
   const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const router = useRouter();
@@ -67,7 +69,7 @@ export default function TaxCalculationsPage() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('삭제하시겠습니까?')) return;
+    if (!confirm(t('calculations.deleteConfirm'))) return;
     try {
       const res = await fetch(`/api/customer/tax-calculations/${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -90,19 +92,19 @@ export default function TaxCalculationsPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-teal-300 text-sm flex items-center gap-2">
-            <FileText className="h-4 w-4" />Draft Calculations
+            <FileText className="h-4 w-4" />{t('calculations.header')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">초안 계산 목록</h1>
-          <p className="text-teal-300 mt-2 text-sm">AI가 분류한 인보이스 초안을 확인하고 관리합니다</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('calculations.title')}</h1>
+          <p className="text-teal-300 mt-2 text-sm">{t('calculations.subtitle')}</p>
 
           <div className="grid grid-cols-2 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-teal-300 text-xs">총 초안</p>
+              <p className="text-teal-300 text-xs">{t('calculations.totalDrafts')}</p>
               <p className="font-bold text-lg">{calculations.length}건</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-teal-300 text-xs flex items-center gap-1">
-                <Sparkles className="h-3 w-3" />AI 분류
+                <Sparkles className="h-3 w-3" />{t('calculations.aiClassified')}
               </p>
               <p className="font-bold text-lg">{calculations.filter(c => c.source === 'CUSTOMER_OCR').length}건</p>
             </div>
@@ -113,7 +115,7 @@ export default function TaxCalculationsPage() {
       {/* Add button */}
       <div className="flex justify-end mb-4">
         <Button onClick={() => router.push(`/${locale}/invoice-capture`)} className="bg-gradient-to-r from-purple-500 to-indigo-600">
-          <Camera className="h-4 w-4 mr-2" />인보이스 촬영
+          <Camera className="h-4 w-4 mr-2" />{t('calculations.captureInvoice')}
         </Button>
       </div>
 
@@ -125,13 +127,13 @@ export default function TaxCalculationsPage() {
       ) : calculations.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <Inbox className="h-10 w-10 mx-auto mb-3" />
-          <p className="text-sm">아직 초안이 없습니다</p>
+          <p className="text-sm">{t('calculations.empty')}</p>
           <Button
             variant="outline"
             className="mt-4"
             onClick={() => router.push(`/${locale}/invoice-capture`)}
           >
-            <Plus className="h-4 w-4 mr-2" />첫 인보이스 촬영하기
+            <Plus className="h-4 w-4 mr-2" />{t('calculations.firstCapture')}
           </Button>
         </div>
       ) : (

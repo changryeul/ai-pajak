@@ -22,6 +22,7 @@ function newTx(): TxRow { return { id: crypto.randomUUID(), relatedParty: '', tr
 
 export default function TransferPricingPage() {
   const t = useTranslations('pages');
+  const tk = useTranslations('killer');
   const [transactions, setTransactions] = useState<TxRow[]>([newTx()]);
   const [companyName, setCompanyName] = useState('');
   const [tpMethod, setTpMethod] = useState('CUP');
@@ -55,9 +56,9 @@ export default function TransferPricingPage() {
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div><Label className="text-xs">Nama Perusahaan</Label><Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="PT Example" /></div>
+            <div><Label className="text-xs">{tk('tp.companyName')}</Label><Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="PT Example" /></div>
             <div>
-              <Label className="text-xs">TP Method</Label>
+              <Label className="text-xs">{tk('tp.tpMethod')}</Label>
               <Select value={tpMethod} onValueChange={setTpMethod}>
                 <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -93,7 +94,7 @@ export default function TransferPricingPage() {
         <div className="space-y-4">
           {/* Summary */}
           <Card className="border-0 shadow-sm">
-            <CardHeader><CardTitle className="text-base">Hasil Analisis Transfer Pricing</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{tk('tp.resultTitle')}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div className="text-center p-3 bg-gray-50 rounded-lg"><p className="text-xs text-gray-500">Total Transaksi</p><p className="font-bold">{result.summary.totalTransactions}</p></div>
@@ -105,7 +106,7 @@ export default function TransferPricingPage() {
               {result.summary.adjustmentNeeded > 0 && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800 flex items-center gap-2">
                   <Shield className="h-4 w-4 text-red-500 flex-shrink-0" />
-                  <span>{result.summary.adjustmentNeeded}건의 거래에서 arm&apos;s length 기준 이탈이 감지되었습니다. TP Documentation 작성이 권고됩니다.</span>
+                  <span>{tk('tp.adjustmentWarning', { count: result.summary.adjustmentNeeded })}</span>
                 </div>
               )}
             </CardContent>
@@ -115,11 +116,11 @@ export default function TransferPricingPage() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-5">
               <h3 className="font-bold text-sm text-gray-900 mb-3 flex items-center gap-2">
-                <Globe className="h-4 w-4 text-blue-500" />적용 기준 및 법적 근거
+                <Globe className="h-4 w-4 text-blue-500" />{tk('tp.legalTitle')}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="font-medium text-blue-800">TP 방법론</p>
+                  <p className="font-medium text-blue-800">{tk('tp.tpMethod')}</p>
                   <p className="text-blue-600 mt-1">{TP_METHODS.find(m => m.id === tpMethod)?.label || tpMethod}</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3">
@@ -127,12 +128,12 @@ export default function TransferPricingPage() {
                   <p className="text-blue-600 mt-1">PMK 213/PMK.03/2016, UU PPh Pasal 18(3)</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="font-medium text-blue-800">Arm&apos;s Length 기준</p>
-                  <p className="text-blue-600 mt-1">독립기업 간 거래가격 ±25% 이내</p>
+                  <p className="font-medium text-blue-800">{tk('tp.armsLength')}</p>
+                  <p className="text-blue-600 mt-1">{tk('tp.armsLengthDesc')}</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="font-medium text-blue-800">문서화 의무</p>
-                  <p className="text-blue-600 mt-1">Master File + Local File + CbCR (PMK 213)</p>
+                  <p className="font-medium text-blue-800">{tk('tp.docObligation')}</p>
+                  <p className="text-blue-600 mt-1">{tk('tp.docObligationDesc')}</p>
                 </div>
               </div>
             </CardContent>
@@ -144,14 +145,14 @@ export default function TransferPricingPage() {
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-yellow-500" />AI TP Documentation 초안
+                    <Sparkles className="h-4 w-4 text-yellow-500" />{tk('tp.aiDocTitle')}
                   </h3>
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
                     const blob = new Blob([result.documentation], { type: 'text/plain' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a'); a.href = url; a.download = `TP_Doc_${companyName || 'Company'}.txt`; a.click();
                   }}>
-                    <Download className="h-3 w-3 mr-1" />다운로드
+                    <Download className="h-3 w-3 mr-1" />{tk('tp.download')}
                   </Button>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg text-sm whitespace-pre-line leading-relaxed max-h-[400px] overflow-y-auto">

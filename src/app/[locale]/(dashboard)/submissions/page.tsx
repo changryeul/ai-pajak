@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { SubmissionList } from '@/components/submissions/SubmissionList';
 import { type QueueItem } from '@/components/submissions/SubmissionCard';
@@ -15,6 +16,7 @@ interface Summary {
 }
 
 export default function SubmissionsPage() {
+  const t = useTranslations('killer');
   const { session, isLoading: sessionLoading } = useSession();
   const [items, setItems] = useState<QueueItem[]>([]);
   const [summary, setSummary] = useState<Summary>({ total: 0, paymentPending: 0, paymentUploaded: 0, completed: 0, inProgress: 0 });
@@ -41,7 +43,7 @@ export default function SubmissionsPage() {
 
   const handleUploadPayment = (itemId: string) => {
     // TODO: Open payment proof upload dialog
-    alert(`납부증빙 업로드: ${itemId}`);
+    alert(`${t('submissions.uploadPayment')}: ${itemId}`);
   };
 
   return (
@@ -51,34 +53,34 @@ export default function SubmissionsPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-indigo-300 text-sm flex items-center gap-2">
-            <ClipboardList className="h-4 w-4" />My Submissions
+            <ClipboardList className="h-4 w-4" />{t('submissions.header')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">제출 현황</h1>
-          <p className="text-indigo-300 mt-2 text-sm">신고 접수부터 완료까지 진행 상태를 확인합니다</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('submissions.title')}</h1>
+          <p className="text-indigo-300 mt-2 text-sm">{t('submissions.subtitle')}</p>
 
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-indigo-300 text-xs flex items-center gap-1">
-                <Clock className="h-3 w-3" />진행 중
+                <Clock className="h-3 w-3" />{t('submissions.inProgress')}
               </p>
               <p className="font-bold text-lg">{summary.inProgress}건</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-indigo-300 text-xs flex items-center gap-1">
-                <CreditCard className="h-3 w-3 text-amber-300" />납부 대기
+                <CreditCard className="h-3 w-3 text-amber-300" />{t('submissions.paymentWaiting')}
               </p>
               <p className="font-bold text-lg text-amber-300">{summary.paymentPending}건</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-indigo-300 text-xs flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-300" />완료
+                <CheckCircle className="h-3 w-3 text-green-300" />{t('submissions.completed')}
               </p>
               <p className="font-bold text-lg">{summary.completed}건</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-indigo-300 text-xs flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" />전체
+                <AlertTriangle className="h-3 w-3" />{t('submissions.total')}
               </p>
               <p className="font-bold text-lg">{summary.total}건</p>
             </div>

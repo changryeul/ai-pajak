@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +18,11 @@ interface SimMessage {
 }
 
 const AUDIT_SCENARIOS = [
-  { id: 'pph21', label: 'PPh 21 급여 감사', desc: 'Bukti Potong vs 급여 대장 대조', icon: '💼' },
-  { id: 'ppn', label: 'PPN Faktur 감사', desc: 'e-Faktur 일치 여부 확인', icon: '🧾' },
-  { id: 'tp', label: 'Transfer Pricing 감사', desc: '특수관계자 거래 arm\'s length 검증', icon: '🔄' },
-  { id: 'umkm', label: 'UMKM 매출 감사', desc: '실제 매출 vs 신고 매출 대조', icon: '🏪' },
-  { id: 'general', label: '일반 종합 감사', desc: '소득/공제/원천징수 전반 검토', icon: '📋' },
+  { id: 'pph21', labelKey: 'auditSim.scenarioPph21', descKey: 'auditSim.scenarioPph21Desc', icon: '💼' },
+  { id: 'ppn', labelKey: 'auditSim.scenarioPpn', descKey: 'auditSim.scenarioPpnDesc', icon: '🧾' },
+  { id: 'tp', labelKey: 'auditSim.scenarioTp', descKey: 'auditSim.scenarioTpDesc', icon: '🔄' },
+  { id: 'umkm', labelKey: 'auditSim.scenarioUmkm', descKey: 'auditSim.scenarioUmkmDesc', icon: '🏪' },
+  { id: 'general', labelKey: 'auditSim.scenarioGeneral', descKey: 'auditSim.scenarioGeneralDesc', icon: '📋' },
 ];
 
 const INITIAL_QUESTIONS: Record<string, string> = {
@@ -33,6 +34,7 @@ const INITIAL_QUESTIONS: Record<string, string> = {
 };
 
 export default function AuditSimulationPage() {
+  const t = useTranslations('killer');
   const [scenario, setScenario] = useState<string | null>(null);
   const [messages, setMessages] = useState<SimMessage[]>([]);
   const [input, setInput] = useState('');
@@ -46,7 +48,7 @@ export default function AuditSimulationPage() {
     setScenario(id);
     setScore(null);
     setMessages([
-      { role: 'system', content: `시나리오: ${AUDIT_SCENARIOS.find(s => s.id === id)?.label}` },
+      { role: 'system', content: `시나리오: ${AUDIT_SCENARIOS.find(s => s.id === id)?.labelKey ? t(AUDIT_SCENARIOS.find(s => s.id === id)!.labelKey) : id}` },
       { role: 'auditor', content: INITIAL_QUESTIONS[id] },
     ]);
   };
@@ -103,26 +105,26 @@ export default function AuditSimulationPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-red-300 text-sm flex items-center gap-2">
-            <Shield className="h-4 w-4" />Tax Audit Simulator
+            <Shield className="h-4 w-4" />{t('auditSim.header')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">세무조사 시뮬레이션</h1>
-          <p className="text-red-300 mt-2 text-sm">AI가 DJP 감사관 역할을 합니다. 실전처럼 연습하세요.</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('auditSim.title')}</h1>
+          <p className="text-red-300 mt-2 text-sm">{t('auditSim.subtitle')}</p>
         </div>
       </div>
 
       {/* Scenario Selection */}
       {!scenario ? (
         <div className="space-y-3">
-          <h3 className="font-bold text-sm text-gray-700">시나리오를 선택하세요</h3>
+          <h3 className="font-bold text-sm text-gray-700">{t('auditSim.selectScenario')}</h3>
           {AUDIT_SCENARIOS.map(s => (
             <Card key={s.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => startScenario(s.id)}>
               <CardContent className="p-4 flex items-center gap-4">
                 <span className="text-2xl">{s.icon}</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-sm">{s.label}</p>
-                  <p className="text-xs text-gray-500">{s.desc}</p>
+                  <p className="font-semibold text-sm">{t(s.labelKey)}</p>
+                  <p className="text-xs text-gray-500">{t(s.descKey)}</p>
                 </div>
-                <Badge variant="outline" className="text-xs">시작</Badge>
+                <Badge variant="outline" className="text-xs">{t('auditSim.start')}</Badge>
               </CardContent>
             </Card>
           ))}
@@ -136,12 +138,12 @@ export default function AuditSimulationPage() {
                 <div className="flex items-center gap-3">
                   {score >= 70 ? <CheckCircle className="h-6 w-6 text-green-500" /> : <AlertTriangle className="h-6 w-6 text-yellow-500" />}
                   <div>
-                    <p className="font-bold text-sm">대응 점수: {score}/100</p>
-                    <p className="text-xs text-gray-500">{score >= 70 ? '양호한 대응입니다' : score >= 40 ? '보완이 필요합니다' : '준비가 부족합니다'}</p>
+                    <p className="font-bold text-sm">{t('auditSim.score')}: {score}/100</p>
+                    <p className="text-xs text-gray-500">{score >= 70 ? t('auditSim.good') : score >= 40 ? t('auditSim.needImprovement') : t('auditSim.insufficient')}</p>
                   </div>
                 </div>
                 <Button size="sm" variant="outline" onClick={reset}>
-                  <RotateCcw className="h-3 w-3 mr-1" />다시 시작
+                  <RotateCcw className="h-3 w-3 mr-1" />{t('auditSim.restart')}
                 </Button>
               </CardContent>
             </Card>
@@ -197,7 +199,7 @@ export default function AuditSimulationPage() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && sendResponse()}
-                  placeholder="답변을 입력하세요 (인도네시아어/한국어)..."
+                  placeholder={t('auditSim.inputPlaceholder')}
                   disabled={isLoading}
                   className="rounded-xl"
                 />
@@ -212,13 +214,13 @@ export default function AuditSimulationPage() {
           <Card className="border-0 shadow-sm mt-4">
             <CardContent className="p-4">
               <h3 className="font-bold text-xs text-gray-700 mb-2 flex items-center gap-2">
-                <FileText className="h-3.5 w-3.5" />대응 팁
+                <FileText className="h-3.5 w-3.5" />{t('auditSim.tipsTitle')}
               </h3>
               <ul className="text-xs text-gray-500 space-y-1">
-                <li>- 서류를 준비하고 정확한 숫자를 제시하세요</li>
-                <li>- 모르는 것은 &quot;확인 후 답변드리겠습니다&quot;로 대응</li>
-                <li>- 감사관의 질문에 직접적으로 답변하세요</li>
-                <li>- 법적 근거를 인용하면 신뢰도가 올라갑니다</li>
+                <li>- {t('auditSim.tip1')}</li>
+                <li>- {t('auditSim.tip2')}</li>
+                <li>- {t('auditSim.tip3')}</li>
+                <li>- {t('auditSim.tip4')}</li>
               </ul>
             </CardContent>
           </Card>

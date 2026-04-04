@@ -57,6 +57,7 @@ export default function AnomalyDetectionPage() {
   const { session, isLoading: isSessionLoading } = useSession();
   const t = useTranslations('pages');
   const tp = useTranslations('sptPages');
+  const tk = useTranslations('killer');
   const currentYear = new Date().getFullYear();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -184,18 +185,18 @@ export default function AnomalyDetectionPage() {
           <Card className="border-0 shadow-sm border-l-4 border-l-orange-400">
             <CardContent className="p-5">
               <h3 className="font-bold text-sm text-orange-800 mb-3 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4" />DJP 감사 트리거 체크리스트
+                <ShieldAlert className="h-4 w-4" />{tk('anomaly.djpTriggerTitle')}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {[
-                  { label: 'SPT Lebih Bayar (환급 신청)', risk: result.alerts.some(a => a.category === 'LARGE_REFUND'), desc: 'Rp 10M 이상 환급' },
-                  { label: '매출 급변 (50%+ 변동)', risk: result.alerts.some(a => a.category === 'INCOME_SPIKE' || a.category === 'INCOME_DROP'), desc: '전년 대비 급증/급감' },
-                  { label: '비정상 공제율', risk: result.alerts.some(a => a.category === 'HIGH_DEDUCTIONS'), desc: '총소득 15% 초과' },
-                  { label: '원천징수 불일치', risk: result.alerts.some(a => a.category === 'WITHHOLDING_MISMATCH'), desc: '20% 이상 차이' },
-                  { label: '지연 신고 이력', risk: result.alerts.some(a => a.category === 'LATE_FILING'), desc: '2회 이상 지연' },
-                  { label: '서류 미비', risk: result.alerts.some(a => a.category === 'MISSING_DOCS'), desc: '필수 증빙 누락' },
-                  { label: '특수관계자 거래', risk: false, desc: 'Transfer Pricing 리스크' },
-                  { label: '다중 고용주', risk: result.alerts.some(a => a.category === 'MULTI_EMPLOYER'), desc: '소득 합산 누락 위험' },
+                  { label: tk('anomaly.sptLebihBayar'), risk: result.alerts.some(a => a.category === 'LARGE_REFUND'), desc: tk('anomaly.refundOver10m') },
+                  { label: tk('anomaly.revenueChange'), risk: result.alerts.some(a => a.category === 'INCOME_SPIKE' || a.category === 'INCOME_DROP'), desc: tk('anomaly.vsLastYear') },
+                  { label: tk('anomaly.abnormalDeduction'), risk: result.alerts.some(a => a.category === 'HIGH_DEDUCTIONS'), desc: tk('anomaly.deductionOver15') },
+                  { label: tk('anomaly.withholdingMismatch'), risk: result.alerts.some(a => a.category === 'WITHHOLDING_MISMATCH'), desc: tk('anomaly.mismatchOver20') },
+                  { label: tk('anomaly.lateFiling'), risk: result.alerts.some(a => a.category === 'LATE_FILING'), desc: tk('anomaly.lateOver2') },
+                  { label: tk('anomaly.missingDocs'), risk: result.alerts.some(a => a.category === 'MISSING_DOCS'), desc: tk('anomaly.missingProof') },
+                  { label: tk('anomaly.relatedParty'), risk: false, desc: tk('anomaly.tpRisk') },
+                  { label: tk('anomaly.multiEmployer'), risk: result.alerts.some(a => a.category === 'MULTI_EMPLOYER'), desc: tk('anomaly.incomeMergeRisk') },
                 ].map((item, i) => (
                   <div key={i} className={`flex items-center gap-2 rounded-lg p-2 text-xs ${item.risk ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
                     {item.risk ? <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> : <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" />}
@@ -206,7 +207,7 @@ export default function AnomalyDetectionPage() {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-gray-400 mt-3">기준: SE-15/PJ/2018, PER-22/PJ/2013, PMK 17/PMK.03/2013</p>
+              <p className="text-[10px] text-gray-400 mt-3">{tk('anomaly.legalBasis')}</p>
             </CardContent>
           </Card>
 
@@ -214,7 +215,7 @@ export default function AnomalyDetectionPage() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-5">
               <h3 className="font-bold text-sm text-gray-900 mb-3 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-blue-500" />세무조사 대비 체크리스트
+                <Shield className="h-4 w-4 text-blue-500" />{tk('anomaly.checklistTitle')}
               </h3>
               <div className="space-y-2">
                 {[

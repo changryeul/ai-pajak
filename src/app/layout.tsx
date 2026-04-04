@@ -5,7 +5,6 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { WebVitals } from '@/components/analytics/WebVitals';
 import { ServiceWorkerRegistration } from '@/components/pwa/ServiceWorkerRegistration';
-import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import '@/app/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -129,10 +128,7 @@ export default function RootLayout({
         <GoogleAnalytics />
         <WebVitals />
         <ServiceWorkerRegistration />
-        <ThemeProvider>
-          {children}
-          <InstallPrompt />
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

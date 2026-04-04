@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ interface ReferralData {
 }
 
 export default function ReferralPage() {
+  const t = useTranslations('killer');
   const { session, isLoading: sessionLoading } = useSession();
   const [data, setData] = useState<ReferralData | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
@@ -62,23 +64,23 @@ export default function ReferralPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-pink-200 text-sm flex items-center gap-2">
-            <Gift className="h-4 w-4" />Referral Program
+            <Gift className="h-4 w-4" />{t('referral.header')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">친구 추천 프로그램</h1>
-          <p className="text-pink-200 mt-2 text-sm">친구를 초대하면 양쪽 모두 크레딧을 받습니다</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('referral.title')}</h1>
+          <p className="text-pink-200 mt-2 text-sm">{t('referral.subtitle')}</p>
 
           {data && (
             <div className="grid grid-cols-3 gap-4 mt-6">
               <div className="bg-white/10 rounded-xl p-3">
-                <p className="text-pink-200 text-xs">추천인 보상</p>
+                <p className="text-pink-200 text-xs">{t('referral.referrerReward')}</p>
                 <p className="font-bold text-lg">{data.rewards.referrerReward}</p>
               </div>
               <div className="bg-white/10 rounded-xl p-3">
-                <p className="text-pink-200 text-xs">피추천인 보상</p>
+                <p className="text-pink-200 text-xs">{t('referral.refereeReward')}</p>
                 <p className="font-bold text-lg">{data.rewards.refereeReward}</p>
               </div>
               <div className="bg-white/10 rounded-xl p-3">
-                <p className="text-pink-200 text-xs">총 추천</p>
+                <p className="text-pink-200 text-xs">{t('referral.totalReferrals')}</p>
                 <p className="font-bold text-lg">{data?.stats.totalReferrals || 0}명</p>
               </div>
             </div>
@@ -93,7 +95,7 @@ export default function ReferralPage() {
           {/* Referral Link */}
           <Card className="border-0 shadow-sm">
             <CardContent className="p-5">
-              <h3 className="font-bold text-sm mb-3">내 추천 링크</h3>
+              <h3 className="font-bold text-sm mb-3">{t('referral.myLink')}</h3>
               <div className="flex gap-2">
                 <Input value={data.referralUrl} readOnly className="font-mono text-xs bg-gray-50" />
                 <Button onClick={copyCode} variant="outline" className="flex-shrink-0">
@@ -102,7 +104,7 @@ export default function ReferralPage() {
               </div>
               <div className="flex items-center gap-2 mt-3">
                 <Badge className="text-xs bg-pink-100 text-pink-700 font-mono">{data.referralCode}</Badge>
-                <span className="text-xs text-gray-400">추천 코드</span>
+                <span className="text-xs text-gray-400">{t('referral.referralCode')}</span>
               </div>
             </CardContent>
           </Card>
@@ -110,10 +112,10 @@ export default function ReferralPage() {
           {/* Share Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <Button onClick={shareWhatsApp} className="bg-green-600 hover:bg-green-700">
-              <MessageCircle className="h-4 w-4 mr-2" />WhatsApp 공유
+              <MessageCircle className="h-4 w-4 mr-2" />{t('referral.shareWhatsApp')}
             </Button>
             <Button onClick={copyCode} variant="outline">
-              <Copy className="h-4 w-4 mr-2" />{copied ? '복사됨!' : '링크 복사'}
+              <Copy className="h-4 w-4 mr-2" />{copied ? t('referral.copied') : t('referral.copyLink')}
             </Button>
           </div>
 
@@ -121,13 +123,13 @@ export default function ReferralPage() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-5">
               <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-yellow-500" />이용 방법
+                <Sparkles className="h-4 w-4 text-yellow-500" />{t('referral.howItWorks')}
               </h3>
               <div className="space-y-3">
                 {[
-                  { step: 1, icon: Share2, title: '링크 공유', desc: '추천 링크를 친구에게 공유합니다' },
-                  { step: 2, icon: Users, title: '친구 가입', desc: `친구가 링크로 가입하면 ${data.rewards.refereeReward} 지급` },
-                  { step: 3, icon: DollarSign, title: '보상 수령', desc: `친구가 첫 결제 시 추천인에게 ${data.rewards.referrerReward}` },
+                  { step: 1, icon: Share2, title: t('referral.step1'), desc: t('referral.step1Desc') },
+                  { step: 2, icon: Users, title: t('referral.step2'), desc: t('referral.step2Desc', { reward: data.rewards.refereeReward }) },
+                  { step: 3, icon: DollarSign, title: t('referral.step3'), desc: t('referral.step3Desc', { reward: data.rewards.referrerReward }) },
                 ].map(item => {
                   const Icon = item.icon;
                   return (
@@ -150,18 +152,18 @@ export default function ReferralPage() {
           {/* Stats */}
           <Card className="border-0 shadow-sm">
             <CardContent className="p-5">
-              <h3 className="font-bold text-sm mb-3">내 추천 현황</h3>
+              <h3 className="font-bold text-sm mb-3">{t('referral.myStats')}</h3>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-400">총 추천</p>
+                  <p className="text-xs text-gray-400">{t('referral.totalReferrals')}</p>
                   <p className="font-bold text-lg">{data.stats.totalReferrals}</p>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-3">
-                  <p className="text-xs text-yellow-600">대기 보상</p>
+                  <p className="text-xs text-yellow-600">{t('referral.pending')}</p>
                   <p className="font-bold text-lg">{data.stats.pendingRewards}</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-3">
-                  <p className="text-xs text-green-600">지급 완료</p>
+                  <p className="text-xs text-green-600">{t('referral.earned')}</p>
                   <p className="font-bold text-lg">{data.stats.earnedRewards}</p>
                 </div>
               </div>

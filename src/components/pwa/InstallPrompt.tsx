@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Download, X } from 'lucide-react';
 
@@ -10,6 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function InstallPrompt() {
+  const t = useTranslations('killer');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
 
@@ -51,14 +53,14 @@ export function InstallPrompt() {
           <Download className="h-5 w-5 text-white" />
         </div>
         <div className="flex-1">
-          <p className="font-semibold text-sm text-gray-900">AI Pajak 앱 설치</p>
-          <p className="text-xs text-gray-500 mt-0.5">홈 화면에 추가하면 더 빠르게 접근할 수 있습니다</p>
+          <p className="font-semibold text-sm text-gray-900">{t('pwa.installTitle')}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{t('pwa.installDesc')}</p>
           <div className="flex gap-2 mt-2">
             <Button size="sm" className="h-7 text-xs bg-blue-600" onClick={handleInstall}>
-              설치하기
+              {t('pwa.install')}
             </Button>
             <Button size="sm" variant="ghost" className="h-7 text-xs text-gray-400" onClick={handleDismiss}>
-              나중에
+              {t('pwa.later')}
             </Button>
           </div>
         </div>

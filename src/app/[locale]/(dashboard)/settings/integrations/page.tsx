@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,33 +29,33 @@ const INTEGRATIONS: Integration[] = [
   {
     id: 'accurate',
     name: 'Accurate Online',
-    description: '인도네시아 1위 회계 소프트웨어. 직원/급여/인보이스 자동 동기화.',
+    description: 'accurateDesc',
     icon: FileSpreadsheet,
     gradient: 'from-blue-600 to-blue-700',
     status: 'disconnected',
-    features: ['직원 목록 동기화', '월급여 → PPh 21 자동 계산', '매출 인보이스 → PPN 정산', '재무제표 조회'],
+    features: ['syncEmployees', 'syncPayroll', 'syncInvoices', 'syncFinancial'],
     connectAction: '/api/integrations/accurate?action=authorize',
     category: 'accounting',
   },
   {
     id: 'jurnal',
     name: 'Jurnal by Mekari',
-    description: 'Mekari 생태계 통합 회계. 거래처/인보이스/손익계산서 연동.',
+    description: 'jurnalDesc',
     icon: Building2,
     gradient: 'from-emerald-600 to-emerald-700',
     status: 'disconnected',
-    features: ['거래처 동기화', '매출 인보이스 조회', '손익계산서 조회', '대차대조표 조회'],
+    features: ['syncEmployees', 'syncInvoices', 'syncFinancial', 'syncFinancial'],
     connectAction: '/api/integrations/jurnal?action=authorize',
     category: 'accounting',
   },
   {
     id: 'banking',
     name: 'Open Banking',
-    description: 'BCA, Mandiri, BNI 등 인니 주요 은행 계좌 연동. 매출 자동 집계.',
+    description: 'bankingDesc',
     icon: Landmark,
     gradient: 'from-amber-600 to-orange-600',
     status: 'disconnected',
-    features: ['은행 거래내역 조회', '월 매출 자동 집계', 'PPh Final UMKM 계산', '거래 분류'],
+    features: ['syncEmployees', 'syncPayroll', 'syncInvoices', 'syncFinancial'],
     connectAction: '/api/integrations/banking?action=get-widget-token',
     category: 'banking',
   },
@@ -62,14 +63,15 @@ const INTEGRATIONS: Integration[] = [
 
 type SyncAction = 'sync-employees' | 'sync-payroll' | 'sync-invoices' | 'sync-financial';
 
-const SYNC_ACTIONS: { id: SyncAction; label: string; description: string; integrations: string[] }[] = [
-  { id: 'sync-employees', label: '직원 동기화', description: '직원 목록 + NPWP/NIK 가져오기', integrations: ['accurate'] },
-  { id: 'sync-payroll', label: '급여 동기화', description: '월 급여 데이터 → PPh 21 계산', integrations: ['accurate'] },
-  { id: 'sync-invoices', label: '인보이스 동기화', description: '매출 인보이스 → PPN 정산', integrations: ['accurate', 'jurnal'] },
-  { id: 'sync-financial', label: '재무제표 조회', description: '대차대조표/손익계산서', integrations: ['accurate', 'jurnal'] },
+const SYNC_ACTIONS: { id: SyncAction; labelKey: string; descKey: string; integrations: string[] }[] = [
+  { id: 'sync-employees', labelKey: 'integrations.syncEmployees', descKey: 'integrations.syncEmployeesDesc', integrations: ['accurate'] },
+  { id: 'sync-payroll', labelKey: 'integrations.syncPayroll', descKey: 'integrations.syncPayrollDesc', integrations: ['accurate'] },
+  { id: 'sync-invoices', labelKey: 'integrations.syncInvoices', descKey: 'integrations.syncInvoicesDesc', integrations: ['accurate', 'jurnal'] },
+  { id: 'sync-financial', labelKey: 'integrations.syncFinancial', descKey: 'integrations.syncFinancialDesc', integrations: ['accurate', 'jurnal'] },
 ];
 
 export default function IntegrationsPage() {
+  const t = useTranslations('killer');
   const params = useParams();
   const locale = params.locale as string;
   const [syncing, setSyncing] = useState<string | null>(null);
@@ -108,13 +110,13 @@ export default function IntegrationsPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <Button variant="ghost" size="sm" className="text-slate-400 mb-2 -ml-2" onClick={() => window.location.href = `/${locale}/settings`}>
-            <ArrowLeft className="h-3 w-3 mr-1" />설정으로 돌아가기
+            <ArrowLeft className="h-3 w-3 mr-1" />{t('integrations.backToSettings')}
           </Button>
           <p className="text-slate-400 text-sm flex items-center gap-2">
-            <Link2 className="h-4 w-4" />Integrations
+            <Link2 className="h-4 w-4" />{t('integrations.header')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">회계 소프트웨어 연동</h1>
-          <p className="text-slate-400 mt-2 text-sm">Accurate, Jurnal, 은행 계좌를 연결하면 데이터가 자동으로 동기화됩니다</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('integrations.title')}</h1>
+          <p className="text-slate-400 mt-2 text-sm">{t('integrations.subtitle')}</p>
         </div>
       </div>
 
@@ -138,19 +140,19 @@ export default function IntegrationsPage() {
                   <div className="flex-1 p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-sm text-gray-600">{integration.description}</p>
+                        <p className="text-sm text-gray-600">{t(`integrations.${integration.description}`)}</p>
                         <div className="flex items-center gap-1.5 mt-2">
                           {isConnected ? (
                             <Badge className="text-[10px] bg-green-100 text-green-700">
-                              <CheckCircle className="h-2.5 w-2.5 mr-0.5" />연결됨
+                              <CheckCircle className="h-2.5 w-2.5 mr-0.5" />{t('integrations.connected')}
                             </Badge>
                           ) : (
                             <Badge className="text-[10px] bg-gray-100 text-gray-500">
-                              <XCircle className="h-2.5 w-2.5 mr-0.5" />미연결
+                              <XCircle className="h-2.5 w-2.5 mr-0.5" />{t('integrations.disconnected')}
                             </Badge>
                           )}
                           {integration.lastSync && (
-                            <span className="text-[10px] text-gray-400">마지막 동기화: {integration.lastSync}</span>
+                            <span className="text-[10px] text-gray-400">{t('integrations.lastSync')}: {integration.lastSync}</span>
                           )}
                         </div>
                       </div>
@@ -161,9 +163,9 @@ export default function IntegrationsPage() {
                         onClick={() => handleConnect(integration)}
                       >
                         {isConnected ? (
-                          <><Settings className="h-3 w-3 mr-1" />관리</>
+                          <><Settings className="h-3 w-3 mr-1" />{t('integrations.manage')}</>
                         ) : (
-                          <><Link2 className="h-3 w-3 mr-1" />연결하기</>
+                          <><Link2 className="h-3 w-3 mr-1" />{t('integrations.connect')}</>
                         )}
                       </Button>
                     </div>
@@ -171,7 +173,7 @@ export default function IntegrationsPage() {
                     {/* Features */}
                     <div className="flex flex-wrap gap-1 mt-2">
                       {integration.features.map(f => (
-                        <span key={f} className="text-[10px] bg-gray-50 text-gray-500 rounded px-1.5 py-0.5">{f}</span>
+                        <span key={f} className="text-[10px] bg-gray-50 text-gray-500 rounded px-1.5 py-0.5">{t(`integrations.${f}`)}</span>
                       ))}
                     </div>
                   </div>
@@ -184,7 +186,7 @@ export default function IntegrationsPage() {
 
       {/* Sync Actions */}
       <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <RefreshCw className="h-5 w-5 text-blue-600" />데이터 동기화
+        <RefreshCw className="h-5 w-5 text-blue-600" />{t('integrations.syncTitle')}
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {SYNC_ACTIONS.map(action => {
@@ -194,8 +196,8 @@ export default function IntegrationsPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">{action.label}</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{action.description}</p>
+                    <p className="text-sm font-medium">{t(action.labelKey)}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{t(action.descKey)}</p>
                     <div className="flex gap-1 mt-1">
                       {action.integrations.map(i => (
                         <Badge key={i} variant="outline" className="text-[9px] px-1 py-0">{i}</Badge>
@@ -212,7 +214,7 @@ export default function IntegrationsPage() {
                     {syncing === action.id ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
                     ) : (
-                      <><RefreshCw className="h-3 w-3 mr-1" />동기화</>
+                      <><RefreshCw className="h-3 w-3 mr-1" />{t('integrations.sync')}</>
                     )}
                   </Button>
                 </div>

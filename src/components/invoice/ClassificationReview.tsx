@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TaxResolutionBadge } from './TaxResolutionBadge';
@@ -39,6 +40,7 @@ function fmtRp(n: number) {
 }
 
 export function ClassificationReview({ classification, resolution, onClassificationChange }: ClassificationReviewProps) {
+  const t = useTranslations('killer');
   const update = (field: keyof ClassificationData, value: string | number) => {
     onClassificationChange({ ...classification, [field]: value });
   };
@@ -51,10 +53,10 @@ export function ClassificationReview({ classification, resolution, onClassificat
       <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-purple-500" />
-          <span className="text-sm font-medium">AI 분류 결과</span>
+          <span className="text-sm font-medium">{t('invoice.aiResult')}</span>
         </div>
         <span className={`text-sm font-mono font-bold ${confidenceColor}`}>
-          {(classification.confidence * 100).toFixed(0)}% 신뢰도
+          {t('invoice.confidence', { value: (classification.confidence * 100).toFixed(0) })}
         </span>
       </div>
 
@@ -72,7 +74,7 @@ export function ClassificationReview({ classification, resolution, onClassificat
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <Label className="text-xs text-gray-500 flex items-center gap-1">
-            <Building2 className="h-3 w-3" />거래 상대방
+            <Building2 className="h-3 w-3" />{t('invoice.counterparty')}
           </Label>
           <Input
             value={classification.counterpartyName}
@@ -91,7 +93,7 @@ export function ClassificationReview({ classification, resolution, onClassificat
         </div>
         <div>
           <Label className="text-xs text-gray-500 flex items-center gap-1">
-            <DollarSign className="h-3 w-3" />금액 (DPP)
+            <DollarSign className="h-3 w-3" />{t('invoice.amount')}
           </Label>
           <Input
             type="number"
@@ -102,7 +104,7 @@ export function ClassificationReview({ classification, resolution, onClassificat
         </div>
         <div>
           <Label className="text-xs text-gray-500 flex items-center gap-1">
-            <Calendar className="h-3 w-3" />인보이스 날짜
+            <Calendar className="h-3 w-3" />{t('invoice.invoiceDate')}
           </Label>
           <Input
             type="date"
@@ -113,7 +115,7 @@ export function ClassificationReview({ classification, resolution, onClassificat
         </div>
         <div>
           <Label className="text-xs text-gray-500 flex items-center gap-1">
-            <FileText className="h-3 w-3" />인보이스 번호
+            <FileText className="h-3 w-3" />{t('invoice.invoiceNumber')}
           </Label>
           <Input
             value={classification.invoiceNumber || ''}
@@ -122,7 +124,7 @@ export function ClassificationReview({ classification, resolution, onClassificat
           />
         </div>
         <div>
-          <Label className="text-xs text-gray-500">서비스 유형</Label>
+          <Label className="text-xs text-gray-500">{t('invoice.serviceType')}</Label>
           <Input
             value={classification.serviceCategory}
             onChange={e => update('serviceCategory', e.target.value)}
@@ -133,7 +135,7 @@ export function ClassificationReview({ classification, resolution, onClassificat
 
       {/* Description */}
       <div>
-        <Label className="text-xs text-gray-500">설명</Label>
+        <Label className="text-xs text-gray-500">{t('invoice.description')}</Label>
         <Input
           value={classification.description}
           onChange={e => update('description', e.target.value)}

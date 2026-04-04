@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -68,15 +69,24 @@ const TAX_LABELS: Record<string, string> = {
   PPN: 'PPN (부가가치세)',
 };
 
-const FILING_STATUS: Record<string, { label: string; color: string }> = {
-  NOT_FILED: { label: '미신고', color: 'bg-gray-200 text-gray-600' },
-  DRAFT: { label: '초안', color: 'bg-yellow-100 text-yellow-700' },
-  SUBMITTED: { label: '신고완료', color: 'bg-blue-100 text-blue-700' },
-  ACCEPTED: { label: '수리', color: 'bg-green-100 text-green-700' },
-  FILED: { label: '신고', color: 'bg-blue-100 text-blue-700' },
+const FILING_STATUS_COLORS: Record<string, string> = {
+  NOT_FILED: 'bg-gray-200 text-gray-600',
+  DRAFT: 'bg-yellow-100 text-yellow-700',
+  SUBMITTED: 'bg-blue-100 text-blue-700',
+  ACCEPTED: 'bg-green-100 text-green-700',
+  FILED: 'bg-blue-100 text-blue-700',
+};
+
+const FILING_STATUS_KEYS: Record<string, string> = {
+  NOT_FILED: 'monthlyReport.notFiled',
+  DRAFT: 'monthlyReport.draft',
+  SUBMITTED: 'monthlyReport.submitted',
+  ACCEPTED: 'monthlyReport.accepted',
+  FILED: 'monthlyReport.filed',
 };
 
 export default function MonthlyReportPage() {
+  const t = useTranslations('killer');
   const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -118,20 +128,20 @@ export default function MonthlyReportPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-violet-300 text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />AI Monthly Report
+            <Sparkles className="h-4 w-4" />{t('monthlyReport.header')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">월간 세금 리포트</h1>
-          <p className="text-violet-300 mt-2 text-sm">AI가 분석한 세금 현황, 절세 기회, 리스크 알림</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('monthlyReport.title')}</h1>
+          <p className="text-violet-300 mt-2 text-sm">{t('monthlyReport.subtitle')}</p>
 
           {report && (
             <div className="grid grid-cols-3 gap-4 mt-6">
               <div className="bg-white/10 rounded-xl p-3">
-                <p className="text-violet-300 text-xs">총 세금</p>
+                <p className="text-violet-300 text-xs">{t('monthlyReport.totalTax')}</p>
                 <p className="font-bold text-lg">{fmtRp(report.totals.totalTax)}</p>
               </div>
               <div className="bg-white/10 rounded-xl p-3">
                 <p className="text-violet-300 text-xs flex items-center gap-1">
-                  <Lightbulb className="h-3 w-3 text-yellow-300" />절세 기회
+                  <Lightbulb className="h-3 w-3 text-yellow-300" />{t('monthlyReport.savingsOpportunity')}
                 </p>
                 <p className="font-bold text-lg text-yellow-300">
                   {report.totals.totalSavings > 0 ? fmtRp(report.totals.totalSavings) : '-'}
@@ -139,7 +149,7 @@ export default function MonthlyReportPage() {
               </div>
               <div className="bg-white/10 rounded-xl p-3">
                 <p className="text-violet-300 text-xs flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3 text-red-300" />알림
+                  <AlertTriangle className="h-3 w-3 text-red-300" />{t('monthlyReport.alerts')}
                 </p>
                 <p className="font-bold text-lg text-red-300">{report.alerts.length}건</p>
               </div>
@@ -182,7 +192,8 @@ export default function MonthlyReportPage() {
           {/* Tax Type Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {report.summary.filter(s => s.transactionCount > 0 || s.totalTax > 0).map(s => {
-              const filingInfo = FILING_STATUS[s.filingStatus] || FILING_STATUS.NOT_FILED;
+              const filingColor = FILING_STATUS_COLORS[s.filingStatus] || FILING_STATUS_COLORS.NOT_FILED;
+              const filingKey = FILING_STATUS_KEYS[s.filingStatus] || FILING_STATUS_KEYS.NOT_FILED;
               return (
                 <Card key={s.taxType} className="border-0 shadow-sm overflow-hidden">
                   <CardContent className="p-0">
@@ -190,20 +201,20 @@ export default function MonthlyReportPage() {
                     <div className="p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-sm">{TAX_LABELS[s.taxType] || s.taxType}</h3>
-                        <Badge className={cn('text-[10px]', filingInfo.color)}>{filingInfo.label}</Badge>
+                        <Badge className={cn('text-[10px]', filingColor)}>{t(filingKey)}</Badge>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div>
-                          <p className="text-[10px] text-gray-400">거래</p>
+                          <p className="text-[10px] text-gray-400">{t('monthlyReport.transactions')}</p>
                           <p className="font-bold text-sm">{s.transactionCount}건</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-gray-400">총 매출</p>
+                          <p className="text-[10px] text-gray-400">{t('monthlyReport.totalRevenue')}</p>
                           <p className="font-bold text-sm">{fmtRp(s.totalGross)}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-gray-400">세금</p>
+                          <p className="text-[10px] text-gray-400">{t('monthlyReport.tax')}</p>
                           <p className="font-bold text-sm">{fmtRp(s.totalTax)}</p>
                         </div>
                       </div>
@@ -217,7 +228,7 @@ export default function MonthlyReportPage() {
                             <TrendingDown className="h-3 w-3 text-green-500" />
                           )}
                           <span className={s.changePercent > 0 ? 'text-red-600' : 'text-green-600'}>
-                            전월 대비 {s.changePercent > 0 ? '+' : ''}{s.changePercent}%
+                            {t('monthlyReport.vsLastMonth')} {s.changePercent > 0 ? '+' : ''}{s.changePercent}%
                           </span>
                           <span className="text-gray-400">({fmtRp(s.prevMonthTax)})</span>
                         </div>
@@ -240,7 +251,7 @@ export default function MonthlyReportPage() {
             <Card className="border-0 shadow-sm">
               <CardContent className="p-8 text-center text-gray-400">
                 <FileText className="h-8 w-8 mx-auto mb-2" />
-                <p className="text-sm">{period} 기간의 거래 데이터가 없습니다</p>
+                <p className="text-sm">{t('monthlyReport.noData', { period })}</p>
               </CardContent>
             </Card>
           )}
@@ -250,7 +261,7 @@ export default function MonthlyReportPage() {
             <Card className="border-0 shadow-sm border-l-4 border-l-yellow-400">
               <CardContent className="p-4">
                 <h3 className="font-semibold text-sm flex items-center gap-2 mb-3">
-                  <Lightbulb className="h-4 w-4 text-yellow-500" />절세 기회
+                  <Lightbulb className="h-4 w-4 text-yellow-500" />{t('monthlyReport.savingsTitle')}
                 </h3>
                 <div className="space-y-3">
                   {report.savingsOpportunities.map((opp, i) => (
@@ -276,14 +287,14 @@ export default function MonthlyReportPage() {
               className="flex-1"
               onClick={() => window.location.href = `/${locale}/tax/savings`}
             >
-              <Lightbulb className="h-4 w-4 mr-2" />상세 절세 분석
+              <Lightbulb className="h-4 w-4 mr-2" />{t('monthlyReport.detailAnalysis')}
             </Button>
             <Button
               variant="outline"
               className="flex-1"
               onClick={() => window.location.href = `/${locale}/submissions`}
             >
-              <CheckCircle className="h-4 w-4 mr-2" />제출 현황
+              <CheckCircle className="h-4 w-4 mr-2" />{t('monthlyReport.submissionStatus')}
             </Button>
           </div>
         </div>

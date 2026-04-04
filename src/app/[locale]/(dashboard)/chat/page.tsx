@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ const QUICK_QUESTIONS = [
 ];
 
 export default function ChatPage() {
+  const t = useTranslations('killer');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +66,7 @@ export default function ChatPage() {
     } catch {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요.',
+        content: t('chat.errorMsg'),
         timestamp: new Date(),
       }]);
     } finally {
@@ -79,10 +81,10 @@ export default function ChatPage() {
         <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-blue-300 text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />AI Tax Assistant
+            <Sparkles className="h-4 w-4" />{t('chat.header')}
           </p>
-          <h1 className="text-2xl font-bold mt-1">AI 세무 상담</h1>
-          <p className="text-blue-300 mt-1 text-sm">인도네시아 세법에 대해 무엇이든 물어보세요. 24시간 AI가 답변합니다.</p>
+          <h1 className="text-2xl font-bold mt-1">{t('chat.title')}</h1>
+          <p className="text-blue-300 mt-1 text-sm">{t('chat.subtitle')}</p>
         </div>
       </div>
 
@@ -93,7 +95,7 @@ export default function ChatPage() {
             {messages.length === 0 && (
               <div className="text-center py-8">
                 <Bot className="h-12 w-12 text-blue-200 mx-auto mb-4" />
-                <p className="text-sm text-gray-500 mb-4">세금 관련 질문을 입력하세요</p>
+                <p className="text-sm text-gray-500 mb-4">{t('chat.emptyState')}</p>
                 <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
                   {QUICK_QUESTIONS.map((q, i) => (
                     <button
@@ -153,7 +155,7 @@ export default function ChatPage() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-              placeholder="세금 관련 질문을 입력하세요..."
+              placeholder={t('chat.placeholder')}
               className="rounded-xl"
               disabled={isLoading}
             />

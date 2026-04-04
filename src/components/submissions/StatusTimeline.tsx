@@ -1,14 +1,15 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { CheckCircle, Clock, FileText, CreditCard, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const STEPS = [
-  { key: 'received', icon: FileText, label: '접수', labelId: 'Diterima' },
-  { key: 'ebilling', icon: CreditCard, label: 'e-Billing', labelId: 'e-Billing' },
-  { key: 'payment', icon: Clock, label: '납부 대기', labelId: 'Menunggu Bayar' },
-  { key: 'verified', icon: CheckCircle, label: '검증', labelId: 'Diverifikasi' },
-  { key: 'completed', icon: Send, label: '완료', labelId: 'Selesai' },
+  { key: 'received', icon: FileText, tKey: 'submissions.stepReceived' as const },
+  { key: 'ebilling', icon: CreditCard, tKey: 'submissions.stepEbilling' as const },
+  { key: 'payment', icon: Clock, tKey: 'submissions.stepPayment' as const },
+  { key: 'verified', icon: CheckCircle, tKey: 'submissions.stepVerified' as const },
+  { key: 'completed', icon: Send, tKey: 'submissions.stepCompleted' as const },
 ] as const;
 
 const STATUS_TO_STEP: Record<string, number> = {
@@ -31,6 +32,7 @@ interface StatusTimelineProps {
 }
 
 export function StatusTimeline({ status }: StatusTimelineProps) {
+  const t = useTranslations('killer');
   const currentStep = STATUS_TO_STEP[status] ?? 0;
   const isFailed = status === 'FAILED';
 
@@ -65,7 +67,7 @@ export function StatusTimeline({ status }: StatusTimelineProps) {
                 'text-[9px] text-center leading-tight',
                 (isActive || isCompleted || isCompletedFinal) ? 'text-gray-700 font-medium' : 'text-gray-400'
               )}>
-                {step.label}
+                {t(step.tKey)}
               </span>
             </div>
             {i < STEPS.length - 1 && (

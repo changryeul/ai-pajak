@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,6 +83,7 @@ const DIFFICULTY_STYLES = {
 };
 
 export default function TaxOptimizerPage() {
+  const t = useTranslations('killer');
   const [grossIncome, setGrossIncome] = useState(0);
   const [ptkpStatus, setPtkpStatus] = useState('TK/0');
   const [hasBusinessIncome, setHasBusinessIncome] = useState(false);
@@ -187,10 +189,10 @@ export default function TaxOptimizerPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <p className="text-amber-200 text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />AI Tax Optimizer
+            <Sparkles className="h-4 w-4" />{t('optimizer.header')}
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">자동 세금 최적화</h1>
-          <p className="text-amber-200 mt-2 text-sm">AI가 PTKP, 공제, 사업 구조를 분석하여 최적의 절세 전략을 제안합니다</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('optimizer.title')}</h1>
+          <p className="text-amber-200 mt-2 text-sm">{t('optimizer.subtitle')}</p>
         </div>
       </div>
 
@@ -199,11 +201,11 @@ export default function TaxOptimizerPage() {
         <CardContent className="p-5 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label className="text-xs flex items-center gap-1"><DollarSign className="h-3 w-3" />연간 총 소득 (브루토)</Label>
+              <Label className="text-xs flex items-center gap-1"><DollarSign className="h-3 w-3" />{t('optimizer.annualIncome')}</Label>
               <Input type="number" value={grossIncome || ''} onChange={e => setGrossIncome(Number(e.target.value) || 0)} placeholder="0" className="font-mono mt-1" />
             </div>
             <div>
-              <Label className="text-xs flex items-center gap-1"><Users className="h-3 w-3" />PTKP 상태</Label>
+              <Label className="text-xs flex items-center gap-1"><Users className="h-3 w-3" />{t('optimizer.ptkpStatus')}</Label>
               <Select value={ptkpStatus} onValueChange={setPtkpStatus}>
                 <SelectTrigger className="mt-1 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -218,16 +220,16 @@ export default function TaxOptimizerPage() {
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={hasBusinessIncome} onChange={e => setHasBusinessIncome(e.target.checked)} className="rounded" />
-              <Building2 className="h-3.5 w-3.5 text-gray-400" />사업 소득 있음
+              <Building2 className="h-3.5 w-3.5 text-gray-400" />{t('optimizer.hasBusinessIncome')}
             </label>
             {hasBusinessIncome && (
-              <Input type="number" value={businessRevenue || ''} onChange={e => setBusinessRevenue(Number(e.target.value) || 0)} placeholder="연간 사업 매출" className="font-mono text-sm w-48" />
+              <Input type="number" value={businessRevenue || ''} onChange={e => setBusinessRevenue(Number(e.target.value) || 0)} placeholder={t('optimizer.businessRevenue')} className="font-mono text-sm w-48" />
             )}
           </div>
 
           <Button onClick={optimize} disabled={isLoading || grossIncome <= 0} className="w-full bg-gradient-to-r from-amber-500 to-orange-600">
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-            최적화 분석 시작
+            {t('optimizer.startOptimize')}
           </Button>
         </CardContent>
       </Card>
@@ -239,20 +241,20 @@ export default function TaxOptimizerPage() {
           <div className="grid grid-cols-3 gap-3">
             <Card className="border-0 shadow-sm">
               <CardContent className="p-3 text-center">
-                <p className="text-xs text-gray-400">현재 세금</p>
+                <p className="text-xs text-gray-400">{t('optimizer.currentTax')}</p>
                 <p className="font-bold text-lg">{fmtRp(result.currentTax)}</p>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm bg-green-50">
               <CardContent className="p-3 text-center">
-                <p className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />절세 금액</p>
+                <p className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />{t('optimizer.savings')}</p>
                 <p className="font-bold text-lg text-green-700">{fmtRp(result.savings)}</p>
                 <p className="text-[10px] text-green-500">-{result.savingsPercent}%</p>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm border-l-4 border-l-blue-500">
               <CardContent className="p-3 text-center">
-                <p className="text-xs text-blue-600">최적화 후</p>
+                <p className="text-xs text-blue-600">{t('optimizer.optimizedTax')}</p>
                 <p className="font-bold text-lg text-blue-700">{fmtRp(result.optimizedTax)}</p>
               </CardContent>
             </Card>
@@ -262,7 +264,7 @@ export default function TaxOptimizerPage() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-4">
               <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-yellow-500" />최적화 전략 ({result.recommendations.length}개)
+                <Sparkles className="h-4 w-4 text-yellow-500" />{t('optimizer.strategies')} ({result.recommendations.length})
               </h3>
               <div className="space-y-3">
                 {result.recommendations.map(rec => {

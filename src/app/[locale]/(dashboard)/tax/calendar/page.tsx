@@ -56,6 +56,7 @@ const taxTypeColors: Record<string, string> = {
 
 export default function TaxCalendarPage() {
   const tc = useTranslations('calendar');
+  const tk = useTranslations('killer');
   const tm = useTranslations('months');
   const MONTHS = tm('list').split(',');
   const params = useParams();
@@ -305,7 +306,7 @@ export default function TaxCalendarPage() {
                                     className="h-6 text-[10px] px-2"
                                     onClick={() => window.location.href = `/${locale}/tax/spt-masa`}
                                   >
-                                    <ArrowRight className="h-2.5 w-2.5 mr-1" />신고하기
+                                    <ArrowRight className="h-2.5 w-2.5 mr-1" />{tk('calendar.fileNow')}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -313,7 +314,7 @@ export default function TaxCalendarPage() {
                                     className="h-6 text-[10px] px-2"
                                     onClick={() => window.location.href = `/${locale}/submissions`}
                                   >
-                                    <CreditCard className="h-2.5 w-2.5 mr-1" />납부현황
+                                    <CreditCard className="h-2.5 w-2.5 mr-1" />{tk('calendar.paymentStatus')}
                                   </Button>
                                 </div>
                               )}
@@ -335,11 +336,11 @@ export default function TaxCalendarPage() {
                 <div className="flex items-center gap-2">
                   <MessageCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-green-800">WhatsApp 마감 알림</p>
-                    <p className="text-[10px] text-green-600">설정에서 활성화하면 마감 D-7/3/1 자동 알림</p>
+                    <p className="text-xs font-medium text-green-800">{tk('calendar.waReminder')}</p>
+                    <p className="text-[10px] text-green-600">{tk('calendar.waReminderDesc')}</p>
                   </div>
                   <Button size="sm" variant="outline" className="h-6 text-[10px] border-green-300 text-green-700" onClick={() => window.location.href = `/${locale}/settings`}>
-                    설정
+                    {tk('calendar.settings')}
                   </Button>
                 </div>
               </CardContent>

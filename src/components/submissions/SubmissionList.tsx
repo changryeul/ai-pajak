@@ -1,17 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { SubmissionCard, type QueueItem } from './SubmissionCard';
 import { Loader2, Inbox } from 'lucide-react';
 
-const FILTER_TABS = [
-  { key: 'all', label: '전체' },
-  { key: 'in_progress', label: '진행 중' },
-  { key: 'payment', label: '납부' },
-  { key: 'completed', label: '완료' },
-] as const;
+const FILTER_KEYS = ['all', 'in_progress', 'payment', 'completed'] as const;
 
-type FilterKey = (typeof FILTER_TABS)[number]['key'];
+type FilterKey = (typeof FILTER_KEYS)[number];
 
 function filterItems(items: QueueItem[], filter: FilterKey): QueueItem[] {
   if (filter === 'all') return items;
@@ -28,8 +24,16 @@ interface SubmissionListProps {
 }
 
 export function SubmissionList({ items, isLoading, onUploadPayment }: SubmissionListProps) {
+  const t = useTranslations('killer');
   const [filter, setFilter] = useState<FilterKey>('all');
   const filtered = filterItems(items, filter);
+
+  const FILTER_TABS = [
+    { key: 'all' as const, label: t('submissions.filterAll') },
+    { key: 'in_progress' as const, label: t('submissions.filterInProgress') },
+    { key: 'payment' as const, label: t('submissions.filterPayment') },
+    { key: 'completed' as const, label: t('submissions.filterCompleted') },
+  ];
 
   return (
     <div className="space-y-4">
@@ -63,7 +67,7 @@ export function SubmissionList({ items, isLoading, onUploadPayment }: Submission
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <Inbox className="h-8 w-8 mx-auto mb-2" />
-          <p className="text-sm">제출 내역이 없습니다</p>
+          <p className="text-sm">{t('submissions.empty')}</p>
         </div>
       ) : (
         <div className="space-y-3">

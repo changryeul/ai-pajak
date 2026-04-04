@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ function fmtRp(n: number) {
 }
 
 export function SubmissionCard({ item, onUploadPayment }: SubmissionCardProps) {
+  const t = useTranslations('killer');
   const period = `${item.tax_period_year}-${String(item.tax_period_month).padStart(2, '0')}`;
 
   return (
@@ -66,7 +68,7 @@ export function SubmissionCard({ item, onUploadPayment }: SubmissionCardProps) {
             <p className="text-sm font-bold">{fmtRp(item.amount || 0)}</p>
             {item.status === 'FAILED' && (
               <Badge variant="destructive" className="text-[10px]">
-                <AlertTriangle className="h-3 w-3 mr-1" />실패
+                <AlertTriangle className="h-3 w-3 mr-1" />{t('submissions.failed')}
               </Badge>
             )}
           </div>
@@ -89,7 +91,7 @@ export function SubmissionCard({ item, onUploadPayment }: SubmissionCardProps) {
           <div className="flex gap-2">
             {item.status === 'PAYMENT_PENDING' && onUploadPayment && (
               <Button size="sm" variant="default" className="h-7 text-xs" onClick={() => onUploadPayment(item.id)}>
-                <Upload className="h-3 w-3 mr-1" />납부증빙 업로드
+                <Upload className="h-3 w-3 mr-1" />{t('submissions.uploadPayment')}
               </Button>
             )}
             {item.bpe_number && (
