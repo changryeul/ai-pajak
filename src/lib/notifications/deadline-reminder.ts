@@ -7,6 +7,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NotificationService } from './notification-service';
+import { sendDeadlineReminder as sendWaDeadlineReminder } from './whatsapp-service';
 import { DeadlineReminderData, NotificationPriority } from './types';
 import { loggers } from '@/lib/logger';
 
@@ -289,6 +290,47 @@ export async function processDeadlineReminders(
         });
 
         result.notificationsSent++;
+
+        // Also send WhatsApp if customer opted in
+        try {
+          const { data: customer } = await supabase
+            .from('customer')
+            .select('phone_number')
+            .eq('id', deadline.customerId)
+            .single();
+
+          if (customer?.phone_number) {
+            const { data: prefs } = await supabase
+              .from('notification_preferences')
+              .select('whatsapp_enabled')
+              .eq('user_id', deadline.customerUserId)
+              .single();
+
+            if (prefs?.whatsapp_enabled) {
+              const waResult = await sendWaDeadlineReminder(
+                customer.phone_number,
+                deadline.customerName,
+                deadline.taxTypeName,
+                deadline.dueDate.toISOString().split('T')[0],
+                deadline.daysUntilDue
+              );
+
+              if (waResult.success) {
+                await supabase.from('whatsapp_message_log').insert({
+                  customer_id: deadline.customerId,
+                  user_id: deadline.customerUserId,
+                  message_type: 'DEADLINE_REMINDER',
+                  phone_number: customer.phone_number,
+                  message_text: `Deadline: ${deadline.taxTypeName} ${deadline.taxPeriod} D-${deadline.daysUntilDue}`,
+                  provider_message_id: waResult.messageId,
+                  status: 'SENT',
+                }).then(() => {}, () => {});
+              }
+            }
+          }
+        } catch {
+          // WhatsApp is best-effort, don't fail the whole process
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         result.errors.push(

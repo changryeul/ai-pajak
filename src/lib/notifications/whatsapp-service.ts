@@ -12,9 +12,16 @@
  */
 
 import { loggers } from '@/lib/logger';
+import { CircuitBreaker } from '@/lib/resilience/circuit-breaker';
 
 const FONNTE_API_URL = 'https://api.fonnte.com/send';
 const FONNTE_TOKEN = process.env.FONNTE_API_TOKEN || '';
+
+// Circuit breaker for WhatsApp API
+const waCircuitBreaker = new CircuitBreaker('whatsapp-fonnte', {
+  failureThreshold: 5,
+  resetTimeout: 60000,
+});
 
 export interface WhatsAppMessage {
   to: string; // Phone number (62xxx format)
@@ -40,33 +47,49 @@ export async function sendWhatsApp(message: WhatsAppMessage): Promise<WhatsAppRe
   }
 
   try {
-    const body: Record<string, string> = {
-      target: formatPhoneNumber(message.to),
-      message: message.text,
-    };
+    return await waCircuitBreaker.execute(async () => {
+      const body: Record<string, string> = {
+        target: formatPhoneNumber(message.to),
+        message: message.text,
+      };
 
-    if (message.url) {
-      body.url = message.url;
-      if (message.filename) body.filename = message.filename;
-    }
+      if (message.url) {
+        body.url = message.url;
+        if (message.filename) body.filename = message.filename;
+      }
 
-    const response = await fetch(FONNTE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': FONNTE_TOKEN,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(FONNTE_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': FONNTE_TOKEN,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      const data = await response.json();
+
+      const result = {
+        success: data.status === true,
+        messageId: data.id,
+        error: data.reason,
+      };
+
+      loggers.email.info({ to: message.to, success: result.success, messageId: result.messageId }, 'WhatsApp message sent');
+
+      if (!result.success) {
+        throw new Error(result.error || 'Fonnte API returned failure');
+      }
+
+      return result;
     });
-
-    const data = await response.json();
-
-    return {
-      success: data.status === true,
-      messageId: data.id,
-      error: data.reason,
-    };
   } catch (error) {
+    loggers.email.error({ err: error, to: message.to }, 'WhatsApp send failed');
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Send failed',
@@ -139,6 +162,32 @@ Halo ${customerName},
 Tagihan pajak Anda sebesar *Rp ${amount.toLocaleString('id-ID')}* jatuh tempo pada *${dueDate}*.
 
 Bayar sekarang untuk menghindari bunga keterlambatan.
+
+_Pesan otomatis dari AI Pajak_`;
+
+  return sendWhatsApp({ to: phone, text });
+}
+
+/**
+ * Send monthly tax savings report notification
+ */
+export async function sendSavingsReport(
+  phone: string,
+  customerName: string,
+  period: string,
+  totalSavings: number,
+  alertCount: number
+): Promise<WhatsAppResult> {
+  const text = `📊 *Laporan Pajak Bulanan - AI Pajak*
+
+Halo ${customerName},
+
+Laporan analisis pajak periode *${period}* sudah tersedia:
+
+${totalSavings > 0 ? `💡 Potensi penghematan: *Rp ${totalSavings.toLocaleString('id-ID')}*` : '✅ Tidak ada penghematan yang terdeteksi'}
+${alertCount > 0 ? `⚠️ ${alertCount} peringatan yang perlu perhatian` : ''}
+
+Lihat detail: ${process.env.NEXT_PUBLIC_APP_URL || 'https://aipajak.com'}/tax/savings
 
 _Pesan otomatis dari AI Pajak_`;
 

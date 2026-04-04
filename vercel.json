@@ -95,6 +95,10 @@
       "schedule": "0 9 * * *"
     },
     {
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 10 1 * *"
+    },
+    {
       "path": "/api/cron/cleanup-expired-tokens",
       "schedule": "0 0 * * *"
     }
