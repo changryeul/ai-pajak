@@ -84,6 +84,7 @@ const navItems: NavSection[] = [
       { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21', descKey: 'navDesc.pph21' },
       { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.pph23', descKey: 'navDesc.pph23' },
       { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppn', descKey: 'navDesc.ppn' },
+      { href: '/tax/efaktur-verify', icon: Shield, labelKey: 'nav.efakturVerify', descKey: 'navDesc.efakturVerify' },
     ],
   },
   {

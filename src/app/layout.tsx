@@ -4,6 +4,8 @@ import { APP_NAME, APP_DESCRIPTION } from '@/config/constants';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { WebVitals } from '@/components/analytics/WebVitals';
+import { ServiceWorkerRegistration } from '@/components/pwa/ServiceWorkerRegistration';
+import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import '@/app/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -126,7 +128,11 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <GoogleAnalytics />
         <WebVitals />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ServiceWorkerRegistration />
+        <ThemeProvider>
+          {children}
+          <InstallPrompt />
+        </ThemeProvider>
       </body>
     </html>
   );

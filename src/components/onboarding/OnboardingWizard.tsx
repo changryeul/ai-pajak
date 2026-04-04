@@ -16,6 +16,8 @@ import {
   Lightbulb,
   ShieldCheck,
   BarChart3,
+  Camera,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -37,6 +39,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   const [filingGoal, setFilingGoal] = useState<FilingGoal>(null);
   const [npwpInput, setNpwpInput] = useState('');
   const [npwpSaving, setNpwpSaving] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrResult, setOcrResult] = useState<{ name?: string; address?: string } | null>(null);
 
   const steps = [
     { key: 'welcome', title: t('step1Title') },
@@ -212,16 +216,54 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             <h2 className="text-2xl font-bold text-gray-900">Daftarkan NPWP Anda</h2>
             <p className="text-gray-500 mt-1">NPWP diperlukan untuk pelaporan pajak. Bisa diisi nanti di pengaturan.</p>
           </div>
-          <div className="max-w-sm mx-auto">
-            <label className="block text-sm font-medium text-gray-700 mb-2">NPWP (Nomor Pokok Wajib Pajak)</label>
-            <input
-              type="text"
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-lg tracking-wider"
-              placeholder="XX.XXX.XXX.X-XXX.XXX"
-              value={npwpInput}
-              onChange={e => setNpwpInput(e.target.value)}
-            />
-            <p className="text-xs text-gray-400 mt-2">Contoh: 01.234.567.8-901.234</p>
+          <div className="max-w-sm mx-auto space-y-4">
+            {/* OCR Upload */}
+            <div className="border-2 border-dashed border-blue-200 rounded-xl p-4 text-center bg-blue-50/50">
+              <Camera className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+              <p className="text-xs text-blue-700 font-medium mb-2">NPWP 카드 사진으로 자동 입력</p>
+              <label className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer">
+                {ocrLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                {ocrLoading ? 'AI 인식 중...' : '사진 촬영/업로드'}
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setOcrLoading(true);
+                  try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const res = await fetch('/api/customer/npwp-ocr', { method: 'POST', body: fd, credentials: 'include' });
+                    const data = await res.json();
+                    if (data.success && data.data.npwp) {
+                      setNpwpInput(data.data.npwp);
+                      setOcrResult({ name: data.data.name, address: data.data.address });
+                    }
+                  } catch { /* */ }
+                  finally { setOcrLoading(false); }
+                }} />
+              </label>
+            </div>
+
+            {/* OCR Result */}
+            {ocrResult?.name && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
+                <p className="font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />AI가 인식한 정보:</p>
+                <p className="mt-1">이름: {ocrResult.name}</p>
+                {ocrResult.address && <p>주소: {ocrResult.address}</p>}
+              </div>
+            )}
+
+            {/* Manual Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">NPWP (Nomor Pokok Wajib Pajak)</label>
+              <input
+                type="text"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-lg tracking-wider"
+                placeholder="XX.XXX.XXX.X-XXX.XXX"
+                value={npwpInput}
+                onChange={e => setNpwpInput(e.target.value)}
+              />
+              <p className="text-xs text-gray-400 mt-2">Contoh: 01.234.567.8-901.234</p>
+            </div>
           </div>
           <div className="text-center">
             <button
