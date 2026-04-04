@@ -307,7 +307,7 @@ export default function OperatorQueuePage() {
         <div className="relative z-10">
           <p className="text-indigo-200 text-sm flex items-center gap-2">
             <Headphones className="h-4 w-4" />
-            Tax Operator
+            {t('taxOperator')}
           </p>
           <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('queueTitle')}</h1>
           <p className="text-indigo-100 text-sm mt-2">{t('queueSubtitle')}</p>

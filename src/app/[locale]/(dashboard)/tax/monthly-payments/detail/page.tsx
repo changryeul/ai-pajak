@@ -24,6 +24,7 @@ export default function MonthlyPaymentDetailPage() {
   const locale = params.locale as string;
   const { session } = useSession();
   const ti = useTranslations('settingsIntegrations');
+  const td = useTranslations('monthlyPaymentDetail');
 
   const taxType = searchParams.get('type') || 'PPh23';
   const period = searchParams.get('period') || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
@@ -100,7 +101,7 @@ export default function MonthlyPaymentDetailPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <Button variant="ghost" onClick={() => router.push(`/${locale}/tax/monthly-payments`)} className="mb-4">
-        <ArrowLeft className="h-4 w-4 mr-2" />Kembali
+        <ArrowLeft className="h-4 w-4 mr-2" />{td('back')}
       </Button>
 
       <div className="flex items-center justify-between mb-6">
@@ -110,11 +111,11 @@ export default function MonthlyPaymentDetailPage() {
             {taxType === 'PPN' ? 'PPN Faktur' : 'PPh 23'} - {period}
           </h1>
           <p className="text-gray-500 mt-1">
-            {taxType === 'PPN' ? 'Faktur Pajak Keluaran & Masukan' : 'Daftar transaksi pemotongan PPh 23'}
+            {taxType === 'PPN' ? td('ppnFakturSubtitle') : td('pph23Subtitle')}
           </p>
         </div>
         <Button onClick={() => setShowForm(!showForm)} className="bg-gradient-to-r from-blue-600 to-indigo-600">
-          <Plus className="h-4 w-4 mr-2" />{taxType === 'PPN' ? 'Tambah Faktur' : 'Tambah Transaksi'}
+          <Plus className="h-4 w-4 mr-2" />{taxType === 'PPN' ? td('addFaktur') : td('addTransaction')}
         </Button>
       </div>
 
@@ -124,7 +125,7 @@ export default function MonthlyPaymentDetailPage() {
           <CardContent className="p-5 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Lawan Transaksi</Label>
+                <Label className="text-xs">{td('counterparty')}</Label>
                 <Select value={formData.counterpartyId} onValueChange={v => {
                   const cp = counterparties.find((c: {id: string}) => c.id === v);
                   setFormData({ ...formData, counterpartyId: v, counterpartyName: cp?.name || '', counterpartyNpwp: cp?.npwp || '' });
@@ -138,7 +139,7 @@ export default function MonthlyPaymentDetailPage() {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">NPWP Lawan</Label>
+                <Label className="text-xs">{td('counterpartyNpwp')}</Label>
                 <Input className="text-sm font-mono" value={formData.counterpartyNpwp} onChange={e => setFormData({ ...formData, counterpartyNpwp: e.target.value })} placeholder="XX.XXX.XXX.X-XXX.XXX" />
               </div>
             </div>
@@ -154,28 +155,28 @@ export default function MonthlyPaymentDetailPage() {
             {taxType === 'PPN' ? (
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs">Jenis Faktur</Label>
+                  <Label className="text-xs">{td('fakturType')}</Label>
                   <Select value={formData.fakturType} onValueChange={v => setFormData({ ...formData, fakturType: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="KELUARAN">Keluaran (Penjualan)</SelectItem>
-                      <SelectItem value="MASUKAN">Masukan (Pembelian)</SelectItem>
+                      <SelectItem value="KELUARAN">{td('outputSales')}</SelectItem>
+                      <SelectItem value="MASUKAN">{td('inputPurchase')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">No. Faktur</Label>
+                  <Label className="text-xs">{td('fakturNumber')}</Label>
                   <Input className="text-sm font-mono" value={formData.fakturNumber} onChange={e => setFormData({ ...formData, fakturNumber: e.target.value })} placeholder="010.000-24.00000001" />
                 </div>
                 <div>
-                  <Label className="text-xs">DPP (Rp)</Label>
+                  <Label className="text-xs">{td('dppLabel')}</Label>
                   <Input type="number" className="text-sm" value={formData.dpp} onChange={e => setFormData({ ...formData, dpp: e.target.value })} />
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs">Jenis Jasa</Label>
+                  <Label className="text-xs">{td('serviceType')}</Label>
                   <Select value={formData.serviceType} onValueChange={v => setFormData({ ...formData, serviceType: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -186,19 +187,19 @@ export default function MonthlyPaymentDetailPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Jumlah Bruto (Rp)</Label>
+                  <Label className="text-xs">{td('grossAmount')}</Label>
                   <Input type="number" className="text-sm" value={formData.grossAmount} onChange={e => setFormData({ ...formData, grossAmount: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-xs">No. Invoice</Label>
+                  <Label className="text-xs">{td('invoiceNumber')}</Label>
                   <Input className="text-sm" value={formData.invoiceNumber} onChange={e => setFormData({ ...formData, invoiceNumber: e.target.value })} />
                 </div>
               </div>
             )}
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>Batal</Button>
-              <Button size="sm" onClick={handleSubmit}>Simpan</Button>
+              <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>{td('cancel')}</Button>
+              <Button size="sm" onClick={handleSubmit}>{td('save')}</Button>
             </div>
           </CardContent>
         </Card>
@@ -211,21 +212,21 @@ export default function MonthlyPaymentDetailPage() {
             <div className="grid grid-cols-3 gap-4 mb-6">
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
-                  <p className="text-xs text-gray-500">PPN Keluaran (Penjualan)</p>
+                  <p className="text-xs text-gray-500">{td('ppnOutputSales')}</p>
                   <p className="text-lg font-bold text-blue-700 mt-1">{fmt(data.summary.outputTax.totalPpn)}</p>
-                  <p className="text-xs text-gray-400">{data.summary.outputTax.count} faktur</p>
+                  <p className="text-xs text-gray-400">{td('fakturCount', { count: data.summary.outputTax.count })}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
-                  <p className="text-xs text-gray-500">PPN Masukan (Pembelian)</p>
+                  <p className="text-xs text-gray-500">{td('ppnInputPurchase')}</p>
                   <p className="text-lg font-bold text-green-700 mt-1">{fmt(data.summary.inputTax.totalPpn)}</p>
-                  <p className="text-xs text-gray-400">{data.summary.inputTax.count} faktur</p>
+                  <p className="text-xs text-gray-400">{td('fakturCount', { count: data.summary.inputTax.count })}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
-                  <p className="text-xs text-gray-500">PPN Neto</p>
+                  <p className="text-xs text-gray-500">{td('ppnNet')}</p>
                   <p className={`text-lg font-bold mt-1 ${data.summary.netPpn > 0 ? 'text-red-700' : data.summary.netPpn < 0 ? 'text-green-700' : 'text-gray-500'}`}>
                     {fmt(Math.abs(data.summary.netPpn))}
                   </p>
@@ -238,15 +239,15 @@ export default function MonthlyPaymentDetailPage() {
           {taxType !== 'PPN' && data.summary && (
             <div className="grid grid-cols-3 gap-4 mb-6">
               <Card className="border-0 shadow-sm"><CardContent className="p-4">
-                <p className="text-xs text-gray-500">Total Bruto</p>
+                <p className="text-xs text-gray-500">{td('totalGross')}</p>
                 <p className="text-lg font-bold text-gray-900 mt-1">{fmt(data.summary.totalGross)}</p>
               </CardContent></Card>
               <Card className="border-0 shadow-sm"><CardContent className="p-4">
-                <p className="text-xs text-gray-500">Total PPh 23</p>
+                <p className="text-xs text-gray-500">{td('totalPph23')}</p>
                 <p className="text-lg font-bold text-red-700 mt-1">{fmt(data.summary.totalTax)}</p>
               </CardContent></Card>
               <Card className="border-0 shadow-sm"><CardContent className="p-4">
-                <p className="text-xs text-gray-500">Transaksi</p>
+                <p className="text-xs text-gray-500">{td('transactions')}</p>
                 <p className="text-lg font-bold text-blue-700 mt-1">{data.summary.transactionCount}</p>
               </CardContent></Card>
             </div>
@@ -254,24 +255,24 @@ export default function MonthlyPaymentDetailPage() {
 
           {/* Transaction List */}
           <Card className="border-0 shadow-sm">
-            <CardHeader><CardTitle className="text-base">{taxType === 'PPN' ? 'Daftar Faktur' : 'Daftar Transaksi'}</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{taxType === 'PPN' ? td('fakturList') : td('transactionList')}</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-gray-500">
-                      <th className="text-left py-2 px-2">Lawan Transaksi</th>
-                      <th className="text-left py-2 px-2">NPWP</th>
+                      <th className="text-left py-2 px-2">{td('counterparty')}</th>
+                      <th className="text-left py-2 px-2">{td('npwp')}</th>
                       {taxType === 'PPN' ? (
                         <>
-                          <th className="text-left py-2 px-2">Jenis</th>
+                          <th className="text-left py-2 px-2">{td('type')}</th>
                           <th className="text-right py-2 px-2">DPP</th>
                           <th className="text-right py-2 px-2">PPN</th>
                         </>
                       ) : (
                         <>
-                          <th className="text-left py-2 px-2">Jenis Jasa</th>
-                          <th className="text-right py-2 px-2">Bruto</th>
+                          <th className="text-left py-2 px-2">{td('serviceType')}</th>
+                          <th className="text-right py-2 px-2">{td('gross')}</th>
                           <th className="text-right py-2 px-2">PPh 23</th>
                         </>
                       )}

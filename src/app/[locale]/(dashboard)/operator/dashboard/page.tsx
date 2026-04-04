@@ -253,7 +253,7 @@ export default function OperatorDashboardPage() {
         <div className="relative z-10">
           <p className="text-blue-200 text-sm flex items-center gap-2">
             <Headphones className="h-4 w-4" />
-            Tax Operator
+            {t('taxOperator')}
           </p>
           <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('dashboardTitle')}</h1>
           <p className="text-blue-100 text-sm mt-2">{t('dashboardSubtitle')}</p>
@@ -495,28 +495,28 @@ export default function OperatorDashboardPage() {
               <CardContent className="pt-4 pb-3 text-center">
                 <TrendingUp className="h-5 w-5 mx-auto text-emerald-500 mb-1" />
                 <p className="text-2xl font-bold">{realtimeStats.metrics.completedToday}</p>
-                <p className="text-xs text-gray-500">오늘 완료</p>
+                <p className="text-xs text-gray-500">{t('completedToday')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-4 pb-3 text-center">
                 <Timer className="h-5 w-5 mx-auto text-blue-500 mb-1" />
                 <p className="text-2xl font-bold">{realtimeStats.metrics.avgProcessingHours}h</p>
-                <p className="text-xs text-gray-500">평균 처리시간</p>
+                <p className="text-xs text-gray-500">{t('avgProcessingTime')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-4 pb-3 text-center">
                 <Zap className="h-5 w-5 mx-auto text-amber-500 mb-1" />
                 <p className="text-2xl font-bold">{realtimeStats.metrics.autoApprovalRate}%</p>
-                <p className="text-xs text-gray-500">자동승인율</p>
+                <p className="text-xs text-gray-500">{t('autoApprovalRateLabel')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-4 pb-3 text-center">
                 <ListChecks className="h-5 w-5 mx-auto text-indigo-500 mb-1" />
                 <p className="text-2xl font-bold">{realtimeStats.metrics.activeItems}</p>
-                <p className="text-xs text-gray-500">진행 중</p>
+                <p className="text-xs text-gray-500">{t('activeItemsLabel')}</p>
               </CardContent>
             </Card>
             <Card className={realtimeStats.metrics.slaBreaches > 0 ? 'ring-2 ring-red-200' : ''}>
@@ -525,7 +525,7 @@ export default function OperatorDashboardPage() {
                 <p className={`text-2xl font-bold ${realtimeStats.metrics.slaBreaches > 0 ? 'text-red-600' : ''}`}>
                   {realtimeStats.metrics.slaBreaches}
                 </p>
-                <p className="text-xs text-gray-500">SLA 경고</p>
+                <p className="text-xs text-gray-500">{t('slaWarning')}</p>
               </CardContent>
             </Card>
           </div>
@@ -535,7 +535,7 @@ export default function OperatorDashboardPage() {
             {/* Status Distribution PieChart */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">상태별 분포</CardTitle>
+                <CardTitle className="text-sm">{t('statusDistribution')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
@@ -555,7 +555,7 @@ export default function OperatorDashboardPage() {
                         return <Cell key={i} fill={colors[status] || '#9ca3af'} />;
                       })}
                     </Pie>
-                    <Tooltip formatter={(value) => [`${value}건`, '']} />
+                    <Tooltip formatter={(value) => [`${value} ${t('items')}`, '']} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex flex-wrap gap-2 mt-2 justify-center">
@@ -573,7 +573,7 @@ export default function OperatorDashboardPage() {
             {/* Hourly Throughput AreaChart */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">24시간 처리량</CardTitle>
+                <CardTitle className="text-sm">{t('hourlyThroughput')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
@@ -581,7 +581,7 @@ export default function OperatorDashboardPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="hour" tick={{ fontSize: 10 }} interval={3} />
                     <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-                    <Tooltip formatter={(value) => [`${value}건`, '완료']} />
+                    <Tooltip formatter={(value) => [`${value} ${t('items')}`, t('completed')]} />
                     <Area type="monotone" dataKey="count" fill="#10b981" fillOpacity={0.2} stroke="#10b981" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -594,12 +594,12 @@ export default function OperatorDashboardPage() {
             <Card className="border-red-200 bg-red-50">
               <CardContent className="pt-4">
                 <p className="text-sm font-medium text-red-700 flex items-center gap-2 mb-2">
-                  <AlertCircle className="h-4 w-4" /> SLA 경고 — 48시간 초과 건
+                  <AlertCircle className="h-4 w-4" /> {t('slaWarningOver48h')}
                 </p>
                 <div className="space-y-1">
                   {realtimeStats.agingItems.filter(i => i.slaWarning).map(item => (
                     <p key={item.id} className="text-xs text-red-600">
-                      {item.taxType} [{item.status}] — {item.ageHours}시간 경과
+                      {item.taxType} [{item.status}] — {t('hoursElapsed', { hours: item.ageHours })}
                     </p>
                   ))}
                 </div>

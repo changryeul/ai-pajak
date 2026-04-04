@@ -90,7 +90,7 @@ export default function BillingPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{t('currentPlan')}</p>
-              <p className="font-semibold">{plan?.name || 'No active plan'}</p>
+              <p className="font-semibold">{plan?.name || t('noActivePlan')}</p>
             </div>
           </div>
           {subscription && (

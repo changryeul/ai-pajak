@@ -13,6 +13,7 @@ function newEmp(): EmpRow { return { id: crypto.randomUUID(), name: '', npwp: ''
 
 export default function EBupotPage() {
   const t = useTranslations('pages');
+  const te = useTranslations('ebupotPage');
   const [employees, setEmployees] = useState<EmpRow[]>([newEmp()]);
   const [companyNpwp, setCompanyNpwp] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -59,29 +60,29 @@ export default function EBupotPage() {
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-xs">Nama Perusahaan</Label><Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="PT Example" /></div>
-            <div><Label className="text-xs">NPWP Perusahaan</Label><Input value={companyNpwp} onChange={e => setCompanyNpwp(e.target.value)} placeholder="XX.XXX.XXX.X-XXX.XXX" className="font-mono" /></div>
+            <div><Label className="text-xs">{te('companyName')}</Label><Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="PT Example" /></div>
+            <div><Label className="text-xs">{te('companyNpwp')}</Label><Input value={companyNpwp} onChange={e => setCompanyNpwp(e.target.value)} placeholder="XX.XXX.XXX.X-XXX.XXX" className="font-mono" /></div>
           </div>
 
-          <div className="text-xs font-medium text-gray-500">Daftar Karyawan</div>
+          <div className="text-xs font-medium text-gray-500">{te('employeeList')}</div>
           {employees.map(emp => (
             <div key={emp.id} className="grid grid-cols-8 gap-1.5 items-end">
-              <Input className="col-span-2 text-xs" placeholder="Nama" value={emp.name} onChange={e => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, name: e.target.value } : x))} />
+              <Input className="col-span-2 text-xs" placeholder={te('name')} value={emp.name} onChange={e => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, name: e.target.value } : x))} />
               <Input className="text-xs font-mono" placeholder="NPWP" value={emp.npwp} onChange={e => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, npwp: e.target.value } : x))} />
               <Input className="text-xs font-mono" placeholder="NIK" value={emp.nik} onChange={e => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, nik: e.target.value } : x))} />
               <Select value={emp.ptkp} onValueChange={v => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, ptkp: v } : x))}>
                 <SelectTrigger className="text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>{['TK0','TK1','TK2','TK3','K0','K1','K2','K3'].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
               </Select>
-              <Input className="text-xs font-mono" type="number" placeholder="Gaji" value={emp.salary || ''} onChange={e => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, salary: Number(e.target.value) } : x))} />
+              <Input className="text-xs font-mono" type="number" placeholder={te('salary')} value={emp.salary || ''} onChange={e => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, salary: Number(e.target.value) } : x))} />
               <Input className="text-xs font-mono" type="number" placeholder="JHT" value={emp.jht || ''} onChange={e => setEmployees(p => p.map(x => x.id === emp.id ? { ...x, jht: Number(e.target.value) } : x))} />
               <Button variant="ghost" size="sm" onClick={() => { if (employees.length > 1) setEmployees(p => p.filter(x => x.id !== emp.id)); }}><Trash2 className="h-3 w-3 text-red-400" /></Button>
             </div>
           ))}
           <div className="flex justify-between">
-            <Button variant="outline" size="sm" onClick={() => setEmployees(p => [...p, newEmp()])}><Plus className="h-3.5 w-3.5 mr-1" />Tambah</Button>
+            <Button variant="outline" size="sm" onClick={() => setEmployees(p => [...p, newEmp()])}><Plus className="h-3.5 w-3.5 mr-1" />{te('addEmployee')}</Button>
             <Button onClick={generate} disabled={isLoading} className="bg-gradient-to-r from-blue-600 to-indigo-600">
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileSpreadsheet className="h-4 w-4 mr-2" />}Generate e-Bupot
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileSpreadsheet className="h-4 w-4 mr-2" />}{te('generate')}
             </Button>
           </div>
         </CardContent>
@@ -90,18 +91,18 @@ export default function EBupotPage() {
       {result && (
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Hasil ({result.summary.totalEmployees} karyawan)</CardTitle>
-            <Button variant="outline" size="sm" onClick={downloadCSV}><Download className="h-3.5 w-3.5 mr-1" />Download CSV</Button>
+            <CardTitle className="text-base">{te('result', { count: result.summary.totalEmployees })}</CardTitle>
+            <Button variant="outline" size="sm" onClick={downloadCSV}><Download className="h-3.5 w-3.5 mr-1" />{te('downloadCsv')}</Button>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 bg-gray-50 rounded-lg text-center"><p className="text-xs text-gray-500">Total Bruto</p><p className="font-bold text-sm">Rp {result.summary.totalGrossIncome.toLocaleString('id-ID')}</p></div>
-              <div className="p-3 bg-blue-50 rounded-lg text-center"><p className="text-xs text-gray-500">Total PPh</p><p className="font-bold text-sm">Rp {result.summary.totalTaxWithheld.toLocaleString('id-ID')}</p></div>
-              <div className="p-3 bg-green-50 rounded-lg text-center"><p className="text-xs text-gray-500">Karyawan</p><p className="font-bold text-sm">{result.summary.totalEmployees}</p></div>
+              <div className="p-3 bg-gray-50 rounded-lg text-center"><p className="text-xs text-gray-500">{te('totalGross')}</p><p className="font-bold text-sm">Rp {result.summary.totalGrossIncome.toLocaleString('id-ID')}</p></div>
+              <div className="p-3 bg-blue-50 rounded-lg text-center"><p className="text-xs text-gray-500">{te('totalPph')}</p><p className="font-bold text-sm">Rp {result.summary.totalTaxWithheld.toLocaleString('id-ID')}</p></div>
+              <div className="p-3 bg-green-50 rounded-lg text-center"><p className="text-xs text-gray-500">{te('employees')}</p><p className="font-bold text-sm">{result.summary.totalEmployees}</p></div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
-                <thead><tr className="border-b text-gray-500"><th className="text-left py-1.5 px-2">Nama</th><th className="text-left py-1.5 px-2">No. BP</th><th className="text-right py-1.5 px-2">Bruto</th><th className="text-right py-1.5 px-2">PPh</th></tr></thead>
+                <thead><tr className="border-b text-gray-500"><th className="text-left py-1.5 px-2">{te('name')}</th><th className="text-left py-1.5 px-2">{te('bpNumber')}</th><th className="text-right py-1.5 px-2">{te('gross')}</th><th className="text-right py-1.5 px-2">PPh</th></tr></thead>
                 <tbody>{result.items.slice(0, 20).map((item: { employeeName: string; buktiPotongNumber: string; grossIncome: number; taxWithheld: number }, i: number) => (
                   <tr key={i} className="border-b last:border-0"><td className="py-1.5 px-2">{item.employeeName}</td><td className="py-1.5 px-2 font-mono">{item.buktiPotongNumber}</td><td className="py-1.5 px-2 text-right font-mono">Rp {item.grossIncome.toLocaleString('id-ID')}</td><td className="py-1.5 px-2 text-right font-mono">Rp {item.taxWithheld.toLocaleString('id-ID')}</td></tr>
                 ))}</tbody>

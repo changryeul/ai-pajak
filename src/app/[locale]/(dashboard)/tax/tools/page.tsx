@@ -227,12 +227,12 @@ function RegionalForm({ onSubmit, isLoading }: { onSubmit: (b: Record<string, un
               <SelectContent>
                 <SelectItem value="PBB">PBB</SelectItem>
                 <SelectItem value="BPHTB">BPHTB</SelectItem>
-                <SelectItem value="RESTAURANT">Pajak Restoran</SelectItem>
-                <SelectItem value="HOTEL">Pajak Hotel</SelectItem>
-                <SelectItem value="PARKING">Pajak Parkir</SelectItem>
-                <SelectItem value="ADVERTISEMENT">Pajak Reklame</SelectItem>
+                <SelectItem value="RESTAURANT">{tt('pajakRestoran')}</SelectItem>
+                <SelectItem value="HOTEL">{tt('pajakHotel')}</SelectItem>
+                <SelectItem value="PARKING">{tt('pajakParkir')}</SelectItem>
+                <SelectItem value="ADVERTISEMENT">{tt('pajakReklame')}</SelectItem>
               </SelectContent></Select></div>
-          <div><Label className="text-xs">{taxType === 'PBB' ? 'NJOP' : taxType === 'BPHTB' ? 'Nilai Transaksi' : 'Revenue'} (Rp)</Label>
+          <div><Label className="text-xs">{taxType === 'PBB' ? tt('njop') : taxType === 'BPHTB' ? tt('transactionValue') : tt('revenue')}</Label>
             <Input type="number" value={value} onChange={e => setValue(e.target.value)} placeholder="500000000" /></div>
         </div>
         <Button onClick={() => {

@@ -607,7 +607,26 @@
     "paymentAlerts": "Payment Alerts",
     "paymentAlertsDesc": "Notifications about invoices and payments",
     "marketingUpdates": "Marketing Updates",
-    "marketingUpdatesDesc": "News and promotional offers"
+    "marketingUpdatesDesc": "News and promotional offers",
+    "twoFactorActive": "2FA Active",
+    "twoFactorActiveDesc": "Your account is protected with TOTP authenticator",
+    "disable": "Disable",
+    "scanQrCode": "Scan this QR code with your authenticator app:",
+    "manualKey": "Manual key",
+    "enterCode": "Enter the 6-digit code from your authenticator app:",
+    "verify": "Verify",
+    "cancelSetup": "Cancel setup",
+    "recentLoginActivity": "Recent Login Activity",
+    "loginSuccess": "Login",
+    "loginFailure": "Failed login attempt",
+    "noLoginActivity": "No login activity recorded",
+    "twoFactorEnabledSuccess": "2FA enabled successfully",
+    "invalidCode": "Invalid code",
+    "twoFactorDisabled": "2FA disabled",
+    "verificationFailed": "Verification failed",
+    "failedToSetup2FA": "Failed to start 2FA setup",
+    "failedToDisable2FA": "Failed to disable 2FA",
+    "noActivePlan": "No active plan"
   },
   "errors": {
     "required": "This field is required",
@@ -809,7 +828,8 @@
     "paid": "Paid",
     "pending": "Pending",
     "overdue": "Overdue",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "noActivePlan": "No active plan"
   },
   "reports": {
     "title": "Reports",
@@ -1942,7 +1962,14 @@
     "dutyRate": "Duty Rate (%)",
     "taxType": "Tax Type",
     "industry": "Industry",
-    "yourRate": "Your Effective Rate (%)"
+    "yourRate": "Your Effective Rate (%)",
+    "pajakRestoran": "Restaurant Tax (Pajak Restoran)",
+    "pajakHotel": "Hotel Tax (Pajak Hotel)",
+    "pajakParkir": "Parking Tax (Pajak Parkir)",
+    "pajakReklame": "Advertisement Tax (Pajak Reklame)",
+    "njop": "NJOP (Rp)",
+    "transactionValue": "Transaction Value (Rp)",
+    "revenue": "Revenue (Rp)"
   },
   "counterparties": {
     "title": "Counterparties",
@@ -2333,7 +2360,18 @@
     "totalProcessed": "Total Processed",
     "autoApprovedCount": "Auto-Approved",
     "autoApprovalRate": "Auto-Approval Rate",
-    "autoApproved": "Auto-approved"
+    "autoApproved": "Auto-approved",
+    "taxOperator": "Tax Operator",
+    "completedToday": "Completed Today",
+    "autoApprovalRateLabel": "Auto Approval Rate",
+    "activeItemsLabel": "Active Items",
+    "slaWarning": "SLA Warning",
+    "statusDistribution": "Status Distribution",
+    "hourlyThroughput": "24h Throughput",
+    "slaWarningOver48h": "SLA Warning -- Items exceeding 48 hours",
+    "hoursElapsed": "{hours} hours elapsed",
+    "items": "items",
+    "completed": "Completed"
   },
   "killer": {
     "submissions": {
@@ -2745,5 +2783,52 @@
     "legendAccepted": "Accepted",
     "chartTitle": "Monthly Tax Trend",
     "count": ""
+  },
+  "monthlyPaymentDetail": {
+    "back": "Back",
+    "ppnFakturSubtitle": "Output & Input Tax Invoice",
+    "pph23Subtitle": "PPh 23 Withholding Transaction List",
+    "addFaktur": "Add Faktur",
+    "addTransaction": "Add Transaction",
+    "counterparty": "Counterparty",
+    "counterpartyNpwp": "Counterparty NPWP",
+    "fakturType": "Faktur Type",
+    "fakturNumber": "Faktur No.",
+    "dppLabel": "DPP (Rp)",
+    "outputSales": "Output (Sales)",
+    "inputPurchase": "Input (Purchase)",
+    "serviceType": "Service Type",
+    "grossAmount": "Gross Amount (Rp)",
+    "invoiceNumber": "Invoice No.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "ppnOutputSales": "PPN Output (Sales)",
+    "ppnInputPurchase": "PPN Input (Purchase)",
+    "ppnNet": "PPN Net",
+    "fakturCount": "{count} faktur",
+    "totalGross": "Total Gross",
+    "totalPph23": "Total PPh 23",
+    "transactions": "Transactions",
+    "fakturList": "Faktur List",
+    "transactionList": "Transaction List",
+    "type": "Type",
+    "npwp": "NPWP",
+    "gross": "Gross"
+  },
+  "ebupotPage": {
+    "companyName": "Company Name",
+    "companyNpwp": "Company NPWP",
+    "employeeList": "Employee List",
+    "name": "Name",
+    "salary": "Salary",
+    "addEmployee": "Add",
+    "generate": "Generate e-Bupot",
+    "result": "Result ({count} employees)",
+    "downloadCsv": "Download CSV",
+    "totalGross": "Total Gross",
+    "totalPph": "Total PPh",
+    "employees": "Employees",
+    "bpNumber": "BP No.",
+    "gross": "Gross"
   }
 }

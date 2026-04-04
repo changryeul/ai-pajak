@@ -607,7 +607,26 @@
     "paymentAlerts": "Peringatan Pembayaran",
     "paymentAlertsDesc": "Notifikasi tentang faktur dan pembayaran",
     "marketingUpdates": "Pembaruan Marketing",
-    "marketingUpdatesDesc": "Berita dan penawaran promosi"
+    "marketingUpdatesDesc": "Berita dan penawaran promosi",
+    "twoFactorActive": "2FA Aktif",
+    "twoFactorActiveDesc": "Akun Anda dilindungi dengan autentikator TOTP",
+    "disable": "Nonaktifkan",
+    "scanQrCode": "Pindai kode QR ini dengan aplikasi autentikator Anda:",
+    "manualKey": "Kunci manual",
+    "enterCode": "Masukkan kode 6 digit dari aplikasi autentikator Anda:",
+    "verify": "Verifikasi",
+    "cancelSetup": "Batalkan pengaturan",
+    "recentLoginActivity": "Aktivitas Login Terbaru",
+    "loginSuccess": "Login",
+    "loginFailure": "Upaya login gagal",
+    "noLoginActivity": "Tidak ada aktivitas login tercatat",
+    "twoFactorEnabledSuccess": "2FA berhasil diaktifkan",
+    "invalidCode": "Kode tidak valid",
+    "twoFactorDisabled": "2FA dinonaktifkan",
+    "verificationFailed": "Verifikasi gagal",
+    "failedToSetup2FA": "Gagal memulai pengaturan 2FA",
+    "failedToDisable2FA": "Gagal menonaktifkan 2FA",
+    "noActivePlan": "Tidak ada paket aktif"
   },
   "errors": {
     "required": "Kolom ini wajib diisi",
@@ -809,7 +828,8 @@
     "paid": "Lunas",
     "pending": "Tertunda",
     "overdue": "Jatuh Tempo",
-    "cancelled": "Dibatalkan"
+    "cancelled": "Dibatalkan",
+    "noActivePlan": "Tidak ada paket aktif"
   },
   "reports": {
     "title": "Laporan",
@@ -1942,7 +1962,14 @@
     "dutyRate": "Bea Masuk (%)",
     "taxType": "Jenis Pajak",
     "industry": "Industri",
-    "yourRate": "Tarif Efektif Anda (%)"
+    "yourRate": "Tarif Efektif Anda (%)",
+    "pajakRestoran": "Pajak Restoran",
+    "pajakHotel": "Pajak Hotel",
+    "pajakParkir": "Pajak Parkir",
+    "pajakReklame": "Pajak Reklame",
+    "njop": "NJOP (Rp)",
+    "transactionValue": "Nilai Transaksi (Rp)",
+    "revenue": "Revenue (Rp)"
   },
   "counterparties": {
     "title": "Lawan Transaksi",
@@ -2333,7 +2360,18 @@
     "totalProcessed": "Total Diproses",
     "autoApprovedCount": "Disetujui Otomatis",
     "autoApprovalRate": "Tingkat Persetujuan Otomatis",
-    "autoApproved": "Disetujui Otomatis"
+    "autoApproved": "Disetujui Otomatis",
+    "taxOperator": "Operator Pajak",
+    "completedToday": "Selesai Hari Ini",
+    "autoApprovalRateLabel": "Tingkat Persetujuan Otomatis",
+    "activeItemsLabel": "Item Aktif",
+    "slaWarning": "Peringatan SLA",
+    "statusDistribution": "Distribusi Status",
+    "hourlyThroughput": "Throughput 24 Jam",
+    "slaWarningOver48h": "Peringatan SLA -- Item melebihi 48 jam",
+    "hoursElapsed": "{hours} jam berlalu",
+    "items": "item",
+    "completed": "Selesai"
   },
   "killer": {
     "submissions": {
@@ -2745,5 +2783,52 @@
     "legendAccepted": "Diterima",
     "chartTitle": "Tren Pajak Bulanan",
     "count": ""
+  },
+  "monthlyPaymentDetail": {
+    "back": "Kembali",
+    "ppnFakturSubtitle": "Faktur Pajak Keluaran & Masukan",
+    "pph23Subtitle": "Daftar transaksi pemotongan PPh 23",
+    "addFaktur": "Tambah Faktur",
+    "addTransaction": "Tambah Transaksi",
+    "counterparty": "Lawan Transaksi",
+    "counterpartyNpwp": "NPWP Lawan",
+    "fakturType": "Jenis Faktur",
+    "fakturNumber": "No. Faktur",
+    "dppLabel": "DPP (Rp)",
+    "outputSales": "Keluaran (Penjualan)",
+    "inputPurchase": "Masukan (Pembelian)",
+    "serviceType": "Jenis Jasa",
+    "grossAmount": "Jumlah Bruto (Rp)",
+    "invoiceNumber": "No. Invoice",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "ppnOutputSales": "PPN Keluaran (Penjualan)",
+    "ppnInputPurchase": "PPN Masukan (Pembelian)",
+    "ppnNet": "PPN Neto",
+    "fakturCount": "{count} faktur",
+    "totalGross": "Total Bruto",
+    "totalPph23": "Total PPh 23",
+    "transactions": "Transaksi",
+    "fakturList": "Daftar Faktur",
+    "transactionList": "Daftar Transaksi",
+    "type": "Jenis",
+    "npwp": "NPWP",
+    "gross": "Bruto"
+  },
+  "ebupotPage": {
+    "companyName": "Nama Perusahaan",
+    "companyNpwp": "NPWP Perusahaan",
+    "employeeList": "Daftar Karyawan",
+    "name": "Nama",
+    "salary": "Gaji",
+    "addEmployee": "Tambah",
+    "generate": "Generate e-Bupot",
+    "result": "Hasil ({count} karyawan)",
+    "downloadCsv": "Download CSV",
+    "totalGross": "Total Bruto",
+    "totalPph": "Total PPh",
+    "employees": "Karyawan",
+    "bpNumber": "No. BP",
+    "gross": "Bruto"
   }
 }

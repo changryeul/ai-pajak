@@ -39,6 +39,7 @@ interface NotificationPreferences {
 
 export default function SettingsPage() {
   const t = useTranslations();
+  const ts = useTranslations('settings');
   const ti = useTranslations('settingsIntegrations');
   const router = useRouter();
   const params = useParams();
@@ -268,7 +269,7 @@ export default function SettingsPage() {
       } else {
         showMessage('error', json.error);
       }
-    } catch { showMessage('error', 'Failed to start 2FA setup'); }
+    } catch { showMessage('error', ts('failedToSetup2FA')); }
     finally { setMfaLoading(false); }
   };
 
@@ -284,14 +285,14 @@ export default function SettingsPage() {
       });
       const json = await res.json();
       if (json.success) {
-        showMessage('success', '2FA enabled successfully');
+        showMessage('success', ts('twoFactorEnabledSuccess'));
         setMfaSetup(null);
         setMfaCode('');
         fetchMfaStatus();
       } else {
-        showMessage('error', json.error || 'Invalid code');
+        showMessage('error', json.error || ts('invalidCode'));
       }
-    } catch { showMessage('error', 'Verification failed'); }
+    } catch { showMessage('error', ts('verificationFailed')); }
     finally { setMfaLoading(false); }
   };
 
@@ -307,12 +308,12 @@ export default function SettingsPage() {
       });
       const json = await res.json();
       if (json.success) {
-        showMessage('success', '2FA disabled');
+        showMessage('success', ts('twoFactorDisabled'));
         fetchMfaStatus();
       } else {
         showMessage('error', json.error);
       }
-    } catch { showMessage('error', 'Failed to disable 2FA'); }
+    } catch { showMessage('error', ts('failedToDisable2FA')); }
     finally { setMfaLoading(false); }
   };
 
@@ -542,22 +543,22 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <Check className="h-5 w-5 text-green-600" />
                       <div className="flex-1">
-                        <p className="font-medium text-green-800">2FA Active</p>
-                        <p className="text-sm text-green-600">Your account is protected with TOTP authenticator</p>
+                        <p className="font-medium text-green-800">{ts('twoFactorActive')}</p>
+                        <p className="text-sm text-green-600">{ts('twoFactorActiveDesc')}</p>
                       </div>
                       <Button variant="outline" size="sm" onClick={handleDisable2FA} disabled={mfaLoading}>
-                        {mfaLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Disable'}
+                        {mfaLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : ts('disable')}
                       </Button>
                     </div>
                   ) : mfaSetup ? (
                     <div className="space-y-4 max-w-md">
                       <div className="p-4 border rounded-lg bg-white text-center">
-                        <p className="text-sm text-gray-600 mb-3">Scan this QR code with your authenticator app:</p>
+                        <p className="text-sm text-gray-600 mb-3">{ts('scanQrCode')}</p>
                         <img src={mfaSetup.qrCode} alt="2FA QR Code" className="mx-auto mb-3 w-48 h-48" />
-                        <p className="text-xs text-gray-400">Manual key: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">{mfaSetup.secret}</code></p>
+                        <p className="text-xs text-gray-400">{ts('manualKey')}: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">{mfaSetup.secret}</code></p>
                       </div>
                       <div className="space-y-2">
-                        <Label>Enter the 6-digit code from your authenticator app:</Label>
+                        <Label>{ts('enterCode')}</Label>
                         <div className="flex gap-2">
                           <Input
                             value={mfaCode}
@@ -568,12 +569,12 @@ export default function SettingsPage() {
                           />
                           <Button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}>
                             {mfaLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                            Verify
+                            {ts('verify')}
                           </Button>
                         </div>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => { setMfaSetup(null); setMfaCode(''); }}>
-                        Cancel setup
+                        {ts('cancelSetup')}
                       </Button>
                     </div>
                   ) : (
@@ -587,7 +588,7 @@ export default function SettingsPage() {
 
                 {/* Login History */}
                 <div className="space-y-4">
-                  <h3 className="font-medium">Recent Login Activity</h3>
+                  <h3 className="font-medium">{ts('recentLoginActivity')}</h3>
                   {loginHistory.length > 0 ? (
                     <div className="space-y-2 max-h-[300px] overflow-y-auto">
                       {loginHistory.slice(0, 20).map(entry => (
@@ -599,8 +600,8 @@ export default function SettingsPage() {
                             }`} />
                             <div>
                               <p className="font-medium">
-                                {entry.action === 'LOGIN_SUCCESS' ? 'Login' :
-                                 entry.action === 'LOGIN_FAILURE' ? 'Failed login attempt' :
+                                {entry.action === 'LOGIN_SUCCESS' ? ts('loginSuccess') :
+                                 entry.action === 'LOGIN_FAILURE' ? ts('loginFailure') :
                                  entry.action.replace(/_/g, ' ')}
                               </p>
                               <p className="text-xs text-gray-500">{entry.device}{entry.ipAddress ? ` · ${entry.ipAddress}` : ''}</p>
@@ -613,7 +614,7 @@ export default function SettingsPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">No login activity recorded</p>
+                    <p className="text-sm text-gray-500">{ts('noLoginActivity')}</p>
                   )}
                 </div>
               </CardContent>
@@ -767,7 +768,7 @@ export default function SettingsPage() {
                         <span className="text-white font-bold text-xs">BNK</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">Rekening Bank</h3>
+                        <h3 className="font-semibold text-gray-900">{ti('bankAccount')}</h3>
                         <p className="text-xs text-gray-500">{ti('bankDesc')}</p>
                       </div>
                     </div>

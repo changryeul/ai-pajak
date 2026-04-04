@@ -607,7 +607,26 @@
     "paymentAlerts": "支払いアラート",
     "paymentAlertsDesc": "請求書と支払いに関する通知",
     "marketingUpdates": "マーケティング更新",
-    "marketingUpdatesDesc": "ニュースとプロモーション情報"
+    "marketingUpdatesDesc": "ニュースとプロモーション情報",
+    "twoFactorActive": "2FA 有効",
+    "twoFactorActiveDesc": "TOTPオーセンティケーターでアカウントが保護されています",
+    "disable": "無効化",
+    "scanQrCode": "認証アプリでこのQRコードをスキャンしてください:",
+    "manualKey": "手動入力キー",
+    "enterCode": "認証アプリの6桁コードを入力してください:",
+    "verify": "検証",
+    "cancelSetup": "設定をキャンセル",
+    "recentLoginActivity": "最近のログイン活動",
+    "loginSuccess": "ログイン",
+    "loginFailure": "ログイン失敗",
+    "noLoginActivity": "ログイン活動の記録はありません",
+    "twoFactorEnabledSuccess": "2FAが有効化されました",
+    "invalidCode": "無効なコード",
+    "twoFactorDisabled": "2FAが無効化されました",
+    "verificationFailed": "検証に失敗しました",
+    "failedToSetup2FA": "2FA設定の開始に失敗しました",
+    "failedToDisable2FA": "2FAの無効化に失敗しました",
+    "noActivePlan": "有効なプランなし"
   },
   "errors": {
     "required": "この項目は必須です",
@@ -809,7 +828,8 @@
     "paid": "支払済み",
     "pending": "保留中",
     "overdue": "延滞",
-    "cancelled": "キャンセル"
+    "cancelled": "キャンセル",
+    "noActivePlan": "有効なプランなし"
   },
   "reports": {
     "title": "レポート",
@@ -1942,7 +1962,14 @@
     "dutyRate": "関税率（%）",
     "taxType": "税種",
     "industry": "業種",
-    "yourRate": "実効税率（%）"
+    "yourRate": "実効税率（%）",
+    "pajakRestoran": "レストラン税（Pajak Restoran）",
+    "pajakHotel": "ホテル税（Pajak Hotel）",
+    "pajakParkir": "駐車税（Pajak Parkir）",
+    "pajakReklame": "広告税（Pajak Reklame）",
+    "njop": "NJOP (Rp)",
+    "transactionValue": "取引金額 (Rp)",
+    "revenue": "売上 (Rp)"
   },
   "counterparties": {
     "title": "取引先",
@@ -2333,7 +2360,18 @@
     "totalProcessed": "処理総数",
     "autoApprovedCount": "自動承認数",
     "autoApprovalRate": "自動承認率",
-    "autoApproved": "自動承認済"
+    "autoApproved": "自動承認済",
+    "taxOperator": "税務オペレーター",
+    "completedToday": "本日完了",
+    "autoApprovalRateLabel": "自動承認率",
+    "activeItemsLabel": "進行中",
+    "slaWarning": "SLA警告",
+    "statusDistribution": "ステータス分布",
+    "hourlyThroughput": "24時間スループット",
+    "slaWarningOver48h": "SLA警告 -- 48時間超過案件",
+    "hoursElapsed": "{hours}時間経過",
+    "items": "件",
+    "completed": "完了"
   },
   "killer": {
     "submissions": {
@@ -2745,5 +2783,52 @@
     "legendAccepted": "受理",
     "chartTitle": "月別税額推移",
     "count": "件"
+  },
+  "monthlyPaymentDetail": {
+    "back": "戻る",
+    "ppnFakturSubtitle": "売上/仕入税額インボイス",
+    "pph23Subtitle": "PPh 23 源泉徴収取引リスト",
+    "addFaktur": "Faktur追加",
+    "addTransaction": "取引追加",
+    "counterparty": "取引先",
+    "counterpartyNpwp": "取引先NPWP",
+    "fakturType": "Faktur種類",
+    "fakturNumber": "Faktur番号",
+    "dppLabel": "DPP (Rp)",
+    "outputSales": "売上（Keluaran）",
+    "inputPurchase": "仕入（Masukan）",
+    "serviceType": "サービス種類",
+    "grossAmount": "総額 (Rp)",
+    "invoiceNumber": "請求書番号",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "ppnOutputSales": "PPN 売上（Keluaran）",
+    "ppnInputPurchase": "PPN 仕入（Masukan）",
+    "ppnNet": "PPN 純額",
+    "fakturCount": "{count}件 Faktur",
+    "totalGross": "総ブルート",
+    "totalPph23": "合計PPh 23",
+    "transactions": "取引",
+    "fakturList": "Fakturリスト",
+    "transactionList": "取引リスト",
+    "type": "種類",
+    "npwp": "NPWP",
+    "gross": "ブルート"
+  },
+  "ebupotPage": {
+    "companyName": "会社名",
+    "companyNpwp": "会社NPWP",
+    "employeeList": "従業員リスト",
+    "name": "名前",
+    "salary": "給与",
+    "addEmployee": "追加",
+    "generate": "e-Bupot生成",
+    "result": "結果（{count}名従業員）",
+    "downloadCsv": "CSVダウンロード",
+    "totalGross": "総ブルート",
+    "totalPph": "合計PPh",
+    "employees": "従業員",
+    "bpNumber": "BP番号",
+    "gross": "ブルート"
   }
 }

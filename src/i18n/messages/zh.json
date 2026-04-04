@@ -607,7 +607,26 @@
     "paymentAlerts": "付款提醒",
     "paymentAlertsDesc": "关于发票和付款的通知",
     "marketingUpdates": "营销更新",
-    "marketingUpdatesDesc": "新闻和促销优惠"
+    "marketingUpdatesDesc": "新闻和促销优惠",
+    "twoFactorActive": "2FA 已启用",
+    "twoFactorActiveDesc": "您的账户已通过TOTP认证器保护",
+    "disable": "禁用",
+    "scanQrCode": "使用您的认证器应用扫描此二维码:",
+    "manualKey": "手动密钥",
+    "enterCode": "输入认证器应用中的6位数代码:",
+    "verify": "验证",
+    "cancelSetup": "取消设置",
+    "recentLoginActivity": "最近登录活动",
+    "loginSuccess": "登录",
+    "loginFailure": "登录失败",
+    "noLoginActivity": "没有登录活动记录",
+    "twoFactorEnabledSuccess": "2FA 已成功启用",
+    "invalidCode": "无效的代码",
+    "twoFactorDisabled": "2FA 已禁用",
+    "verificationFailed": "验证失败",
+    "failedToSetup2FA": "启动2FA设置失败",
+    "failedToDisable2FA": "禁用2FA失败",
+    "noActivePlan": "无活动套餐"
   },
   "errors": {
     "required": "此字段为必填项",
@@ -809,7 +828,8 @@
     "paid": "已支付",
     "pending": "待处理",
     "overdue": "逾期",
-    "cancelled": "已取消"
+    "cancelled": "已取消",
+    "noActivePlan": "无活动套餐"
   },
   "reports": {
     "title": "报告",
@@ -1942,7 +1962,14 @@
     "dutyRate": "关税率（%）",
     "taxType": "税种",
     "industry": "行业",
-    "yourRate": "您的实际税率（%）"
+    "yourRate": "您的实际税率（%）",
+    "pajakRestoran": "餐饮税（Pajak Restoran）",
+    "pajakHotel": "酒店税（Pajak Hotel）",
+    "pajakParkir": "停车税（Pajak Parkir）",
+    "pajakReklame": "广告税（Pajak Reklame）",
+    "njop": "NJOP (Rp)",
+    "transactionValue": "交易金额 (Rp)",
+    "revenue": "收入 (Rp)"
   },
   "counterparties": {
     "title": "交易对手",
@@ -2333,7 +2360,18 @@
     "totalProcessed": "总处理量",
     "autoApprovedCount": "自动审批数",
     "autoApprovalRate": "自动审批率",
-    "autoApproved": "已自动审批"
+    "autoApproved": "已自动审批",
+    "taxOperator": "税务运营人员",
+    "completedToday": "今日完成",
+    "autoApprovalRateLabel": "自动审批率",
+    "activeItemsLabel": "进行中",
+    "slaWarning": "SLA警告",
+    "statusDistribution": "状态分布",
+    "hourlyThroughput": "24小时处理量",
+    "slaWarningOver48h": "SLA警告 -- 超过48小时的项目",
+    "hoursElapsed": "已过{hours}小时",
+    "items": "项",
+    "completed": "已完成"
   },
   "killer": {
     "submissions": {
@@ -2745,5 +2783,52 @@
     "legendAccepted": "已受理",
     "chartTitle": "月度税额趋势",
     "count": "笔"
+  },
+  "monthlyPaymentDetail": {
+    "back": "返回",
+    "ppnFakturSubtitle": "销项/进项税发票",
+    "pph23Subtitle": "PPh 23 预扣税交易列表",
+    "addFaktur": "添加Faktur",
+    "addTransaction": "添加交易",
+    "counterparty": "交易对方",
+    "counterpartyNpwp": "对方NPWP",
+    "fakturType": "Faktur类型",
+    "fakturNumber": "Faktur编号",
+    "dppLabel": "DPP (Rp)",
+    "outputSales": "销项（销售）",
+    "inputPurchase": "进项（采购）",
+    "serviceType": "服务类型",
+    "grossAmount": "总额 (Rp)",
+    "invoiceNumber": "发票编号",
+    "cancel": "取消",
+    "save": "保存",
+    "ppnOutputSales": "PPN 销项（销售）",
+    "ppnInputPurchase": "PPN 进项（采购）",
+    "ppnNet": "PPN 净额",
+    "fakturCount": "{count}张Faktur",
+    "totalGross": "总毛额",
+    "totalPph23": "总PPh 23",
+    "transactions": "交易",
+    "fakturList": "Faktur列表",
+    "transactionList": "交易列表",
+    "type": "类型",
+    "npwp": "NPWP",
+    "gross": "毛额"
+  },
+  "ebupotPage": {
+    "companyName": "公司名称",
+    "companyNpwp": "公司NPWP",
+    "employeeList": "员工列表",
+    "name": "姓名",
+    "salary": "工资",
+    "addEmployee": "添加",
+    "generate": "生成e-Bupot",
+    "result": "结果（{count}名员工）",
+    "downloadCsv": "下载CSV",
+    "totalGross": "总毛额",
+    "totalPph": "总PPh",
+    "employees": "员工",
+    "bpNumber": "BP编号",
+    "gross": "毛额"
   }
 }
