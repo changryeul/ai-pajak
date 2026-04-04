@@ -116,6 +116,8 @@
     "efakturVerify": "e-Faktur验证",
     "umkm": "UMKM简易申报",
     "aiChat": "AI税务咨询",
+    "auditSimulation": "税务稽查模拟",
+    "taxOptimizer": "AI税务优化",
     "transferPricing": "转让定价",
     "multiEntity": "多实体管理",
     "poaSection": "授权委托",

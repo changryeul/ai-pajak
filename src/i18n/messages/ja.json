@@ -116,6 +116,8 @@
     "efakturVerify": "e-Faktur検証",
     "umkm": "UMKM簡易申告",
     "aiChat": "AI税務相談",
+    "auditSimulation": "税務調査シミュレーション",
+    "taxOptimizer": "AI税金最適化",
     "transferPricing": "移転価格",
     "multiEntity": "複数法人管理",
     "poaSection": "委任状",

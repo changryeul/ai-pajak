@@ -116,6 +116,8 @@
     "efakturVerify": "e-Faktur Verify",
     "umkm": "UMKM Simple Filing",
     "aiChat": "AI Tax Chat",
+    "auditSimulation": "Audit Simulation",
+    "taxOptimizer": "AI Tax Optimizer",
     "transferPricing": "Transfer Pricing",
     "multiEntity": "Multi-Entity",
     "poaSection": "Power of Attorney",
