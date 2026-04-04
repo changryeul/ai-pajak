@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { SPT1771Generator } from '@/components/spt';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -28,15 +30,48 @@ export default function SPT1771Page() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const { session, isLoading: sessionLoading } = useSession();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const isCustomer = session?.role === UserRole.CUSTOMER;
+
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    if (sessionLoading) return;
+
+    if (isCustomer && session?.customerId) {
+      // Customer role: fetch own data directly
+      fetchOwnCustomer(session.customerId);
+    } else {
+      // Consultant/Advisor: fetch customer list
+      fetchCustomers();
+    }
+  }, [sessionLoading, session]);
+
+  const fetchOwnCustomer = async (customerId: string) => {
+    try {
+      const response = await fetch(`/api/customers/${customerId}`);
+      if (!response.ok) throw new Error('Failed to fetch customer data');
+      const data = await response.json();
+      if (data.success && data.data) {
+        const customer = {
+          id: data.data.id,
+          full_name: data.data.full_name,
+          company_name: data.data.company_name || data.data.full_name,
+          npwp: data.data.npwp || '',
+          customer_type: data.data.customer_type || 'CORPORATE',
+        };
+        setSelectedCustomer(customer);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchCustomers = async () => {
     try {
@@ -59,6 +94,14 @@ export default function SPT1771Page() {
   const getCustomerDisplayName = (customer: Customer) => {
     return customer.company_name || customer.full_name;
   };
+
+  if (sessionLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -94,8 +137,8 @@ export default function SPT1771Page() {
         </p>
       </div>
 
-      {/* Customer Selection */}
-      {!selectedCustomer && (
+      {/* Customer Selection (Consultant only) */}
+      {!isCustomer && !selectedCustomer && (
         <div className="bg-white rounded-lg border p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">{tp('selectTaxpayer')}</h2>
 
@@ -138,17 +181,33 @@ export default function SPT1771Page() {
         </div>
       )}
 
+      {/* Loading for customer role */}
+      {isCustomer && isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        </div>
+      )}
+
+      {/* Error for customer role */}
+      {isCustomer && error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 mb-6">
+          {error}
+        </div>
+      )}
+
       {/* SPT Generator */}
       {selectedCustomer && (
         <>
-          <div className="mb-4">
-            <Button
-              variant="outline"
-              onClick={() => setSelectedCustomer(null)}
-            >
-              {tp('changeClient')}
-            </Button>
-          </div>
+          {!isCustomer && (
+            <div className="mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedCustomer(null)}
+              >
+                {tp('changeClient')}
+              </Button>
+            </div>
+          )}
 
           <SPT1771Generator
             customerId={selectedCustomer.id}
