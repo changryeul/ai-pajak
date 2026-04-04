@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,17 @@ const SOURCE_STYLES: Record<string, string> = {
 
 export default function NewsPage() {
   const t = useTranslations('killer');
+  const params = useParams();
+  const locale = params.locale as string;
   const { session, isLoading: sessionLoading } = useSession();
+
+  // Get localized summary based on current locale
+  const getSummary = (article: NewsArticle) => {
+    if (locale === 'ko') return article.summary_ko || article.summary_en || article.summary_id;
+    if (locale === 'en') return article.summary_en || article.summary_id;
+    if (locale === 'ja' || locale === 'zh') return article.summary_en || article.summary_ko || article.summary_id;
+    return article.summary_id || article.summary_en; // Indonesian default
+  };
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [category, setCategory] = useState('');
@@ -160,7 +171,9 @@ export default function NewsPage() {
                           <Badge className="text-[10px] bg-yellow-100 text-yellow-700">{article.regulation_number}</Badge>
                         )}
                       </div>
-                      <h3 className="font-semibold text-sm text-gray-900 leading-snug">{article.original_title}</h3>
+                      <h3 className="font-semibold text-sm text-gray-900 leading-snug">
+                        {article.original_title}
+                      </h3>
                       <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
                         <Clock className="h-3 w-3" />{formatDate(article.published_at)}
                       </p>
@@ -175,7 +188,7 @@ export default function NewsPage() {
                   {/* Summary */}
                   <div className="mt-3 bg-blue-50/50 rounded-lg p-3">
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      {article.summary_ko || article.summary_id || article.summary_en}
+                      {getSummary(article)}
                     </p>
                   </div>
 
