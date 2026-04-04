@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { fetchDJPNews, fetchKontanNews, processArticleWithAI } from '@/lib/news/news-fetcher';
+import { fetchGoogleNewsRSS, fetchDJPNews, processArticleWithAI } from '@/lib/news/news-fetcher';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
 import { loggers } from '@/lib/logger';
 
@@ -32,13 +32,13 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Fetch from sources
-    const [djpArticles, kontanArticles] = await Promise.all([
+    // Fetch from sources (Google News RSS + DJP)
+    const [googleArticles, djpArticles] = await Promise.all([
+      fetchGoogleNewsRSS(),
       fetchDJPNews(),
-      fetchKontanNews(),
     ]);
 
-    const allArticles = [...djpArticles, ...kontanArticles];
+    const allArticles = [...googleArticles, ...djpArticles];
     let processed = 0;
     let skipped = 0;
     let waNotified = 0;
