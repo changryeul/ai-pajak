@@ -113,6 +113,8 @@
     "monthlyDashboard": "月次ダッシュボード",
     "annualSimulation": "年間税シミュレーション",
     "sptMasa": "月次申告（SPT Masa）",
+    "transferPricing": "移転価格",
+    "multiEntity": "複数法人管理",
     "poaSection": "委任状",
     "createPoa": "委任状作成",
     "poaManage": "委任状管理",

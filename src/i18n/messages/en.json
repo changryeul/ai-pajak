@@ -113,6 +113,8 @@
     "monthlyDashboard": "Monthly Dashboard",
     "annualSimulation": "Annual Tax Simulation",
     "sptMasa": "Monthly Filing (SPT Masa)",
+    "transferPricing": "Transfer Pricing",
+    "multiEntity": "Multi-Entity",
     "poaSection": "Power of Attorney",
     "createPoa": "Create POA",
     "poaManage": "Manage POA",

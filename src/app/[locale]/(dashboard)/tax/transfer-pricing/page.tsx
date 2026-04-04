@@ -5,16 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Loader2, ArrowLeftRight, Sparkles } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Trash2, Loader2, ArrowLeftRight, Sparkles, Shield, FileText, Globe, AlertTriangle, CheckCircle, Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-interface TxRow { id: string; relatedParty: string; transactionType: string; amount: number; marketPrice: number; description: string; }
-function newTx(): TxRow { return { id: crypto.randomUUID(), relatedParty: '', transactionType: 'Sale', amount: 0, marketPrice: 0, description: '' }; }
+const TP_METHODS = [
+  { id: 'CUP', label: 'CUP (Comparable Uncontrolled Price)', desc: '독립기업 간 비교가격' },
+  { id: 'COST_PLUS', label: 'Cost Plus Method', desc: '원가가산' },
+  { id: 'RESALE', label: 'Resale Price Method', desc: '재판매가격' },
+  { id: 'TNMM', label: 'TNMM (Transactional Net Margin)', desc: '거래순이익률' },
+  { id: 'PROFIT_SPLIT', label: 'Profit Split Method', desc: '이익분할' },
+];
+
+interface TxRow { id: string; relatedParty: string; transactionType: string; amount: number; marketPrice: number; description: string; country: string; }
+function newTx(): TxRow { return { id: crypto.randomUUID(), relatedParty: '', transactionType: 'Sale', amount: 0, marketPrice: 0, description: '', country: 'ID' }; }
 
 export default function TransferPricingPage() {
   const t = useTranslations('pages');
   const [transactions, setTransactions] = useState<TxRow[]>([newTx()]);
   const [companyName, setCompanyName] = useState('');
+  const [tpMethod, setTpMethod] = useState('CUP');
   const [isLoading, setIsLoading] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
@@ -44,7 +54,22 @@ export default function TransferPricingPage() {
 
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-5 space-y-4">
-          <div><Label className="text-xs">Nama Perusahaan</Label><Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="PT Example" /></div>
+          <div className="grid grid-cols-2 gap-4">
+            <div><Label className="text-xs">Nama Perusahaan</Label><Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="PT Example" /></div>
+            <div>
+              <Label className="text-xs">TP Method</Label>
+              <Select value={tpMethod} onValueChange={setTpMethod}>
+                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {TP_METHODS.map(m => (
+                    <SelectItem key={m.id} value={m.id}>
+                      <span className="text-xs">{m.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           {transactions.map((tx, i) => (
             <div key={tx.id} className="grid grid-cols-6 gap-2 items-end">
               <div><Label className="text-[10px]">Pihak Afiliasi</Label><Input value={tx.relatedParty} onChange={e => update(tx.id, 'relatedParty', e.target.value)} placeholder="PT Afiliasi" className="text-sm" /></div>
@@ -65,21 +90,77 @@ export default function TransferPricingPage() {
       </Card>
 
       {result && (
-        <Card className="border-0 shadow-sm">
-          <CardHeader><CardTitle className="text-base">Hasil Analisis</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div className="text-center p-3 bg-gray-50 rounded-lg"><p className="text-xs text-gray-500">Total Transaksi</p><p className="font-bold">{result.summary.totalTransactions}</p></div>
-              <div className="text-center p-3 bg-green-50 rounded-lg"><p className="text-xs text-gray-500">Arm's Length</p><p className="font-bold text-green-700">{result.summary.armLengthCount}</p></div>
-              <div className="text-center p-3 bg-red-50 rounded-lg"><p className="text-xs text-gray-500">Perlu Adjustment</p><p className="font-bold text-red-700">{result.summary.adjustmentNeeded}</p></div>
-            </div>
-            {result.documentation && (
-              <div className="p-4 bg-blue-50 rounded-lg"><p className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Sparkles className="h-3 w-3 text-yellow-500" />AI Documentation</p>
-                <div className="text-sm whitespace-pre-line">{result.documentation}</div>
+        <div className="space-y-4">
+          {/* Summary */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader><CardTitle className="text-base">Hasil Analisis Transfer Pricing</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="text-center p-3 bg-gray-50 rounded-lg"><p className="text-xs text-gray-500">Total Transaksi</p><p className="font-bold">{result.summary.totalTransactions}</p></div>
+                <div className="text-center p-3 bg-green-50 rounded-lg"><p className="text-xs text-gray-500 flex items-center justify-center gap-1"><CheckCircle className="h-3 w-3" />Arm&apos;s Length</p><p className="font-bold text-green-700">{result.summary.armLengthCount}</p></div>
+                <div className="text-center p-3 bg-red-50 rounded-lg"><p className="text-xs text-gray-500 flex items-center justify-center gap-1"><AlertTriangle className="h-3 w-3" />Adjustment</p><p className="font-bold text-red-700">{result.summary.adjustmentNeeded}</p></div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              {/* Risk Level */}
+              {result.summary.adjustmentNeeded > 0 && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800 flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-red-500 flex-shrink-0" />
+                  <span>{result.summary.adjustmentNeeded}건의 거래에서 arm&apos;s length 기준 이탈이 감지되었습니다. TP Documentation 작성이 권고됩니다.</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* TP Method & Legal Basis */}
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-5">
+              <h3 className="font-bold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                <Globe className="h-4 w-4 text-blue-500" />적용 기준 및 법적 근거
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="font-medium text-blue-800">TP 방법론</p>
+                  <p className="text-blue-600 mt-1">{TP_METHODS.find(m => m.id === tpMethod)?.label || tpMethod}</p>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="font-medium text-blue-800">법적 근거</p>
+                  <p className="text-blue-600 mt-1">PMK 213/PMK.03/2016, UU PPh Pasal 18(3)</p>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="font-medium text-blue-800">Arm&apos;s Length 기준</p>
+                  <p className="text-blue-600 mt-1">독립기업 간 거래가격 ±25% 이내</p>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="font-medium text-blue-800">문서화 의무</p>
+                  <p className="text-blue-600 mt-1">Master File + Local File + CbCR (PMK 213)</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Documentation */}
+          {result.documentation && (
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-yellow-500" />AI TP Documentation 초안
+                  </h3>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                    const blob = new Blob([result.documentation], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = `TP_Doc_${companyName || 'Company'}.txt`; a.click();
+                  }}>
+                    <Download className="h-3 w-3 mr-1" />다운로드
+                  </Button>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg text-sm whitespace-pre-line leading-relaxed max-h-[400px] overflow-y-auto">
+                  {result.documentation}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );

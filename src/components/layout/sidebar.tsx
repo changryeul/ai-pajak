@@ -99,6 +99,8 @@ const navItems: NavSection[] = [
       { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk', descKey: 'navDesc.pph21Bulk' },
       { href: '/tax/savings', icon: Lightbulb, labelKey: 'nav.taxSavings', descKey: 'navDesc.taxSavings' },
       { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection', descKey: 'navDesc.anomalyDetection' },
+      { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing', descKey: 'navDesc.transferPricing' },
+      { href: '/tax/multi-entity', icon: Settings, labelKey: 'nav.multiEntity', descKey: 'navDesc.multiEntity' },
       { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport', descKey: 'navDesc.clientReport' },
     ],
   },
