@@ -181,7 +181,7 @@ export default async function LandingPage({
             <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">{t('pricingTitle')}</h2>
             <p className="text-gray-500">{t('pricingSubtitle')}</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan) => (
               <div key={plan.name} className={`rounded-2xl bg-white p-8 transition-all duration-300 hover:shadow-xl ${plan.popular ? 'ring-2 ring-blue-600 relative shadow-lg scale-105' : 'border border-gray-200 hover:-translate-y-1'}`}>
                 {plan.popular && (

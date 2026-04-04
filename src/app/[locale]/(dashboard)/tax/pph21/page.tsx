@@ -227,7 +227,7 @@ export default function PPh21PayrollPage() {
       {showForm && (
         <Card className="mb-4 border-blue-200 shadow-md">
           <CardContent className="pt-4 space-y-3">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <Label className="text-xs">{tp('employeeName')}</Label>
                 <Input className="h-9" value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} />
@@ -244,7 +244,7 @@ export default function PPh21PayrollPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
                 <Label className="text-xs">{tp('monthlySalary')}</Label>
                 <Input className="h-9 font-mono" type="number" value={form.grossSalary} onChange={e => setForm({ ...form, grossSalary: e.target.value })} />

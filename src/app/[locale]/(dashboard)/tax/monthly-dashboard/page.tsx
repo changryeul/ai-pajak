@@ -241,7 +241,7 @@ export default function MonthlyDashboardPage() {
 
                       {/* Month grid */}
                       <div className="flex-1 p-3">
-                        <div className="grid grid-cols-6 md:grid-cols-12 gap-1.5">
+                        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-1.5">
                           {MONTHS.map((label, i) => {
                             const m = monthlyAmounts[i];
                             const isCurrent = i + 1 === currentMonth && year === currentYear;

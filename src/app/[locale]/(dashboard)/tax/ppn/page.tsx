@@ -208,7 +208,7 @@ export default function PPNPage() {
           <h1 className="text-2xl md:text-3xl font-bold mt-1">e-Faktur & PPN</h1>
           <p className="text-orange-200 mt-2 text-sm">{t('subtitle')}</p>
 
-          <div className="grid grid-cols-3 gap-4 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-orange-200 text-xs flex items-center gap-1"><ArrowUpRight className="h-3 w-3" />{t('ppnKeluaran')}</p>
               <p className="font-bold text-lg">{fmt(summary.outputTax)}</p>
@@ -290,7 +290,7 @@ export default function PPNPage() {
           {showForm && (
             <Card className="mb-4 border-orange-200 shadow-md">
               <CardContent className="pt-4 space-y-3">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <Label className="text-xs">{t('fakturType')}</Label>
                     <Select value={formData.transactionType} onValueChange={v => setFormData({ ...formData, transactionType: v as 'OUTPUT' | 'INPUT' })}>
@@ -317,12 +317,12 @@ export default function PPNPage() {
                     <Label className="text-xs font-semibold">{t('itemLabel')}</Label>
                     <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={addItem}><Plus className="h-3 w-3 mr-1" />{t('addItem')}</Button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 overflow-x-auto">
                     {formData.items.map((item, idx) => {
                       const dpp = item.quantity * item.unitPrice;
                       const ppn = Math.round(dpp * PPN_RATE);
                       return (
-                        <div key={idx} className="grid grid-cols-12 gap-2 items-end">
+                        <div key={idx} className="grid grid-cols-12 gap-2 items-end min-w-[600px]">
                           <div className="col-span-4">
                             {idx === 0 && <Label className="text-[10px] text-gray-400">{t('uraian')}</Label>}
                             <Input className="h-8 text-xs" value={item.description} onChange={e => updateItem(idx, 'description', e.target.value)} placeholder="Barang/Jasa" />
