@@ -136,6 +136,7 @@
     "overrideRules": "Override Rule 관리",
     "ruleTest": "Rule 테스트",
     "account": "계정",
+    "integrations": "회계SW 연동",
     "billing": "요금/결제",
     "settings": "설정",
     "role": {
@@ -1426,6 +1427,7 @@
     "monthlyPayments": "월별 PPh & PPN 납부",
     "taxCalendar": "마감일 놓치지 마세요",
     "taxTools": "세금 & 관세 계산기",
+    "integrations": "Accurate/Jurnal/은행 연동",
     "annualReturn": "연간 세금 신고서 작성",
     "taxSavings": "AI가 절세 기회 찾기",
     "pph21": "근로소득세",

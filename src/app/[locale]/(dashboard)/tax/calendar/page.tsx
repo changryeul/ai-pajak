@@ -21,7 +21,12 @@ import {
   Bell,
   Filter,
   Loader2,
+  CreditCard,
+  MessageCircle,
+  ArrowRight,
 } from 'lucide-react';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 
 interface TaxEvent {
   id: string;
@@ -54,6 +59,9 @@ export default function TaxCalendarPage() {
   const tm = useTranslations('months');
   const MONTHS = tm('list').split(',');
   const params = useParams();
+  const locale = params.locale as string;
+  const { session } = useSession();
+  const isCustomer = session?.role === UserRole.CUSTOMER;
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
 
@@ -99,6 +107,8 @@ export default function TaxCalendarPage() {
 
   // Get unique tax types for filter
   const taxTypes = [...new Set(events.map(e => e.taxType))];
+
+  const isPastDate = (dateStr: string) => new Date(dateStr) < today;
 
   // Upcoming events (next 14 days)
   const upcoming = events.filter(e => {
@@ -286,6 +296,27 @@ export default function TaxCalendarPage() {
                                 {e.isAnnual && <Badge className="text-[10px] px-1.5 py-0 bg-purple-100 text-purple-700">Tahunan</Badge>}
                               </div>
                               <p className="text-[10px] text-red-600 mt-1">Denda: {e.penalty}</p>
+                              {/* Quick action buttons */}
+                              {isCustomer && !isPastDate(e.date) && (
+                                <div className="flex gap-1.5 mt-2">
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-6 text-[10px] px-2"
+                                    onClick={() => window.location.href = `/${locale}/tax/spt-masa`}
+                                  >
+                                    <ArrowRight className="h-2.5 w-2.5 mr-1" />신고하기
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 text-[10px] px-2"
+                                    onClick={() => window.location.href = `/${locale}/submissions`}
+                                  >
+                                    <CreditCard className="h-2.5 w-2.5 mr-1" />납부현황
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -293,6 +324,24 @@ export default function TaxCalendarPage() {
                     })}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* WhatsApp reminder banner */}
+          {isCustomer && (
+            <Card className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-500">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-green-800">WhatsApp 마감 알림</p>
+                    <p className="text-[10px] text-green-600">설정에서 활성화하면 마감 D-7/3/1 자동 알림</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] border-green-300 text-green-700" onClick={() => window.location.href = `/${locale}/settings`}>
+                    설정
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
