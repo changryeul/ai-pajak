@@ -274,7 +274,13 @@ export function Sidebar() {
                         <ul className="ml-7 mt-1 space-y-0.5 border-l-2 border-gray-100 pl-3">
                           {item.children!.filter(c => !c.roles || (userRole && c.roles.includes(userRole))).map(child => {
                             const childHref = `/${locale}${child.href}`;
-                            const childActive = pathname === childHref || pathname.startsWith(`${childHref}/`);
+                            // Exact match or startsWith, but not if a longer sibling path also matches
+                            const longerSiblingMatches = item.children!.some(s =>
+                              s.href !== child.href &&
+                              s.href.startsWith(child.href) &&
+                              (pathname === `/${locale}${s.href}` || pathname.startsWith(`/${locale}${s.href}/`))
+                            );
+                            const childActive = !longerSiblingMatches && (pathname === childHref || pathname.startsWith(`${childHref}/`));
                             const ChildIcon = child.icon;
                             return (
                               <li key={child.href}>
