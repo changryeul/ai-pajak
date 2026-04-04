@@ -23,6 +23,25 @@ export function CardSkeleton() {
   );
 }
 
+/**
+ * Killer service page skeleton — header gradient + content cards
+ */
+export function KillerPageSkeleton() {
+  return (
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <Skeleton className="h-48 w-full rounded-2xl mb-6" />
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-full rounded-lg" />
+        <div className="grid grid-cols-2 gap-4">
+          <Skeleton className="h-32 w-full rounded-lg" />
+          <Skeleton className="h-32 w-full rounded-lg" />
+        </div>
+        <Skeleton className="h-48 w-full rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
 export function DashboardSkeleton() {
   return (
     <div className="space-y-6">

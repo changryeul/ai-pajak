@@ -11,18 +11,12 @@ import {
   Store, Calculator, CheckCircle, AlertTriangle, TrendingUp,
   Download, Sparkles, ArrowRight,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, fmtRp } from '@/lib/utils';
 
 const UMKM_RATE = 0.005; // 0.5%
 const EXEMPTION = 500_000_000; // Rp 500M (PP 55/2022)
 const THRESHOLD = 4_800_000_000; // Rp 4.8B
 
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `Rp ${(n / 1e3).toFixed(0)}K`;
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 interface MonthlyData {
   month: number;

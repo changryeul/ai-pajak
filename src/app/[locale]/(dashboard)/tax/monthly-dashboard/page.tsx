@@ -14,6 +14,7 @@ import {
   Sparkles, Calendar, BarChart3, PieChart,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { fmtRp } from '@/lib/utils';
 
 interface MonthlyStatus {
   taxType: string;
@@ -37,12 +38,6 @@ const TAX_TYPES = [
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-function fmt(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(0)}M`;
-  if (n >= 1e3) return `Rp ${(n / 1e3).toFixed(0)}K`;
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 export default function MonthlyDashboardPage() {
   const { session, isLoading: sessionLoading } = useSession();
@@ -89,7 +84,7 @@ export default function MonthlyDashboardPage() {
           status: f.status,
         })));
       }
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
   }, [session?.customerId, year]);
 
@@ -140,7 +135,7 @@ export default function MonthlyDashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-slate-400 text-xs">총 납부 예정</p>
-              <p className="font-bold text-lg">{fmt(totalDue)}</p>
+              <p className="font-bold text-lg">{fmtRp(totalDue)}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-slate-400 text-xs flex items-center gap-1"><CheckCircle className="h-3 w-3 text-green-400" />납부 완료</p>
@@ -240,7 +235,7 @@ export default function MonthlyDashboardPage() {
                           <span className="font-bold text-sm">{tax.label}</span>
                         </div>
                         <p className="text-[10px] opacity-75">{tax.desc}</p>
-                        <p className="font-mono text-xs mt-2 opacity-90">{fmt(yearTotal)}</p>
+                        <p className="font-mono text-xs mt-2 opacity-90">{fmtRp(yearTotal)}</p>
                       </div>
 
                       {/* Month grid */}
@@ -320,7 +315,7 @@ export default function MonthlyDashboardPage() {
                   })}>
                     <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
-                    <Tooltip formatter={(v) => fmt(Number(v))} />
+                    <Tooltip formatter={(v) => fmtRp(Number(v))} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
                     <Bar dataKey="PPh21" fill="#6366f1" radius={[2, 2, 0, 0]} />
                     <Bar dataKey="PPh23" fill="#10b981" radius={[2, 2, 0, 0]} />

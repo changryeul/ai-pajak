@@ -11,7 +11,7 @@ import { TaxResolutionBadge } from '@/components/invoice/TaxResolutionBadge';
 import {
   Loader2, Inbox, Camera, Trash2, FileText, Sparkles, Plus,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, fmtRp } from '@/lib/utils';
 
 interface TaxCalculation {
   id: string;
@@ -36,9 +36,6 @@ interface TaxCalculation {
   created_at: string;
 }
 
-function fmtRp(n: number) {
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 export default function TaxCalculationsPage() {
   const t = useTranslations('killer');
@@ -62,7 +59,7 @@ export default function TaxCalculationsPage() {
       if (data.success) {
         setCalculations(data.data || []);
       }
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
   }, [session]);
 
@@ -75,7 +72,7 @@ export default function TaxCalculationsPage() {
       if (res.ok) {
         setCalculations(prev => prev.filter(c => c.id !== id));
       }
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
   };
 
   // Group by period

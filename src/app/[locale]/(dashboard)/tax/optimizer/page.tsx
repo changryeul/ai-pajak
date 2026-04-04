@@ -12,7 +12,7 @@ import {
   Sparkles, Calculator, TrendingDown, CheckCircle, ArrowRight,
   Loader2, DollarSign, Users, Building2, Shield,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, fmtRp } from '@/lib/utils';
 
 interface OptimizationResult {
   currentTax: number;
@@ -47,12 +47,6 @@ const PTKP_OPTIONS = [
   { value: 'K/I/3', label: 'K/I/3 — 합산과세+3', amount: 126000000 },
 ];
 
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `Rp ${(n / 1e3).toFixed(0)}K`;
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 function calculateTax(taxableIncome: number): number {
   if (taxableIncome <= 0) return 0;

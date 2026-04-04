@@ -35,7 +35,7 @@ export default function SubmissionsPage() {
         setItems(data.data.items || []);
         setSummary(data.data.summary || { total: 0, paymentPending: 0, paymentUploaded: 0, completed: 0, inProgress: 0 });
       }
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
   }, [session]);
 

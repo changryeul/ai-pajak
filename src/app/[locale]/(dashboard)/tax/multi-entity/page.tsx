@@ -11,7 +11,7 @@ import {
   Loader2, Building2, FileText, AlertTriangle, CheckCircle,
   TrendingUp, ArrowRight, Plus, BarChart3,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, fmtRp } from '@/lib/utils';
 
 interface Entity {
   id: string;
@@ -32,12 +32,6 @@ interface EntityStats {
   totalTax: number;
 }
 
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(0)}M`;
-  if (n >= 1e3) return `Rp ${(n / 1e3).toFixed(0)}K`;
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 const TYPE_STYLES: Record<string, { bg: string; label: string }> = {
   INDIVIDUAL: { bg: 'from-blue-500 to-indigo-600', label: 'Orang Pribadi' },
@@ -69,7 +63,7 @@ export default function MultiEntityPage() {
       if (data.success) {
         setEntities(data.data || []);
       }
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
   }, [session]);
 

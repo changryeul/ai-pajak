@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { StatusTimeline } from './StatusTimeline';
 import { Upload, Download, AlertTriangle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, fmtRp } from '@/lib/utils';
 
 export interface QueueItem {
   id: string;
@@ -40,9 +40,6 @@ const TAX_COLORS: Record<string, string> = {
   PPN: 'bg-orange-100 text-orange-700',
 };
 
-function fmtRp(n: number) {
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 export function SubmissionCard({ item, onUploadPayment }: SubmissionCardProps) {
   const t = useTranslations('killer');

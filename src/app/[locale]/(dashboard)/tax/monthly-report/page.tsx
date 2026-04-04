@@ -12,7 +12,7 @@ import {
   Loader2, BarChart3, AlertTriangle, TrendingUp, TrendingDown,
   CheckCircle, Lightbulb, FileText, ArrowRight, Sparkles, DollarSign,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, fmtRp } from '@/lib/utils';
 
 interface TaxSummary {
   taxType: string;
@@ -48,12 +48,6 @@ interface ReportData {
   generatedAt: string;
 }
 
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(0)}M`;
-  if (n >= 1e3) return `Rp ${(n / 1e3).toFixed(0)}K`;
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 const TAX_GRADIENTS: Record<string, string> = {
   PPh21: 'from-blue-500 to-indigo-600',
@@ -109,7 +103,7 @@ export default function MonthlyReportPage() {
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       if (data.success) setReport(data.data);
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
   }, [session, period]);
 

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TaxResolutionBadge } from './TaxResolutionBadge';
 import { Sparkles, FileText, Building2, DollarSign, Calendar } from 'lucide-react';
+import { fmtRp } from '@/lib/utils';
 
 interface ClassificationData {
   serviceCategory: string;
@@ -35,9 +36,6 @@ interface ClassificationReviewProps {
   onClassificationChange: (updated: ClassificationData) => void;
 }
 
-function fmtRp(n: number) {
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
 
 export function ClassificationReview({ classification, resolution, onClassificationChange }: ClassificationReviewProps) {
   const t = useTranslations('killer');

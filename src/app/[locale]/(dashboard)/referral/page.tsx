@@ -36,7 +36,7 @@ export default function ReferralPage() {
       if (!res.ok) throw new Error(`${res.status}`);
       const json = await res.json();
       if (json.success) setData(json.data);
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
   }, [session]);
 
@@ -48,7 +48,7 @@ export default function ReferralPage() {
       await navigator.clipboard.writeText(data.referralUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch { /* */ }
+    } catch (err) { console.error(err); }
   };
 
   const shareWhatsApp = () => {
