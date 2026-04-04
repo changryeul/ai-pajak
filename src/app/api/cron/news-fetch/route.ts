@@ -9,7 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { fetchGoogleNewsRSS, fetchDJPNews, processArticleWithAI } from '@/lib/news/news-fetcher';
+import { fetchGoogleNewsRSS, fetchDJPNews, processArticlesBatch } from '@/lib/news/news-fetcher';
+import type { RawArticle } from '@/lib/news/news-fetcher';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
 import { loggers } from '@/lib/logger';
 
@@ -45,8 +46,9 @@ export async function POST(request: NextRequest) {
     const aiErrors: string[] = [];
     const sampleData: Array<{ title: string; summaryKo: string }> = [];
 
+    // Filter out duplicates first
+    const newArticles: RawArticle[] = [];
     for (const article of allArticles) {
-      // Check for duplicates by title
       const { data: existing } = await supabase
         .from('tax_news')
         .select('id')
@@ -55,40 +57,23 @@ export async function POST(request: NextRequest) {
 
       if (existing) {
         skipped++;
-        continue;
+      } else {
+        newArticles.push(article);
       }
+    }
 
-      // Process with AI
-      let result;
-      try {
-        result = await processArticleWithAI(article);
-        if (!result.summaryKo) {
-          aiErrors.push(`No KO summary for: ${article.title.substring(0, 50)}`);
-        }
-      } catch (aiErr) {
-        aiErrors.push(`AI error: ${aiErr instanceof Error ? aiErr.message : String(aiErr)}`);
-        result = {
-          source: article.source,
-          sourceUrl: article.sourceUrl,
-          originalTitle: article.title,
-          originalContent: article.content,
-          summaryId: article.title,
-          summaryKo: '',
-          summaryEn: '',
-          impactAnalysis: '',
-          category: 'GENERAL',
-          tags: [],
-          regulationNumber: null,
-          importance: 'NORMAL',
-          publishedAt: article.publishedAt,
-        };
-      }
+    // Batch process all new articles with AI in ONE call
+    const results = await processArticlesBatch(newArticles);
 
+    // Insert each result
+    for (const result of results) {
       if (sampleData.length < 3) {
         sampleData.push({ title: result.originalTitle.substring(0, 60), summaryKo: result.summaryKo.substring(0, 80) });
       }
+      if (!result.summaryKo) {
+        aiErrors.push(`No KO: ${result.originalTitle.substring(0, 50)}`);
+      }
 
-      // Insert
       const { error: insertError } = await supabase.from('tax_news').insert({
         source: result.source,
         source_url: result.sourceUrl,

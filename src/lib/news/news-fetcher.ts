@@ -61,95 +61,92 @@ CRITICAL RULES:
 - Even if input is just a title, generate meaningful summaries based on your tax knowledge
 - Respond ONLY with the JSON object, no markdown`;
 
-export async function processArticleWithAI(article: RawArticle): Promise<ProcessedArticle> {
-  const client = new Anthropic();
+/**
+ * Process multiple articles in a single AI call (batch mode)
+ * This avoids timeout issues on serverless functions
+ */
+export async function processArticlesBatch(articles: RawArticle[]): Promise<ProcessedArticle[]> {
+  if (articles.length === 0) return [];
 
-  // Step 1: Try structured analysis
-  let summaryKo = '';
-  let summaryId = '';
-  let summaryEn = '';
-  let impactAnalysis = '';
-  let category = 'GENERAL';
-  let tags: string[] = [];
-  let regulationNumber: string | null = null;
-  let importance = 'NORMAL';
+  const client = new Anthropic();
+  const titleList = articles.map((a, i) => `${i + 1}. ${a.title}${a.content !== a.title ? ` — ${a.content.substring(0, 200)}` : ''}`).join('\n');
 
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: AI_PROMPT,
+      max_tokens: 4096,
+      system: `You are an Indonesian tax news analyst. Process ALL articles below and return a JSON ARRAY.
+For EACH article, create an object with:
+- summary_ko: 2-3 sentence summary in KOREAN (한국어). MUST be Korean.
+- summary_id: 2-3 sentence summary in Indonesian
+- summary_en: 2-3 sentence summary in English
+- impact_ko: 1 sentence impact analysis in KOREAN (한국어)
+- category: PPh21, PPh23, PPN, UMKM, TP, SPT, REGULATION, or GENERAL
+- importance: CRITICAL, HIGH, NORMAL, or LOW
+- tags: 2-3 keywords
+
+Return ONLY a valid JSON array. No markdown.`,
       messages: [{
         role: 'user',
-        content: `Title: ${article.title}\n\n${article.content && article.content !== article.title ? `Description: ${article.content.substring(0, 2000)}` : '(Generate based on title and your Indonesian tax knowledge)'}`,
+        content: `Process these ${articles.length} Indonesian tax news articles:\n\n${titleList}`,
       }],
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    loggers.api.info({ title: article.title, aiResponse: text.substring(0, 200) }, 'AI news raw response');
+    const text = response.content[0].type === 'text' ? response.content[0].text : '[]';
+    loggers.api.info({ responseLength: text.length, preview: text.substring(0, 300) }, 'Batch AI response');
 
-    let parsed;
+    let parsed: Array<Record<string, unknown>>;
     try {
       parsed = JSON.parse(text);
     } catch {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
       if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+      else parsed = [];
     }
 
-    if (parsed) {
-      summaryId = parsed.summary_id || parsed.summaryId || '';
-      summaryKo = parsed.summary_ko || parsed.summaryKo || '';
-      summaryEn = parsed.summary_en || parsed.summaryEn || '';
-      impactAnalysis = parsed.impact_analysis || parsed.impactAnalysis || '';
-      category = parsed.category || 'GENERAL';
-      tags = parsed.tags || [];
-      regulationNumber = parsed.regulation_number || parsed.regulationNumber || null;
-      importance = parsed.importance || 'NORMAL';
-    }
+    return articles.map((article, i) => {
+      const ai = parsed[i] || {};
+      return {
+        source: article.source,
+        sourceUrl: article.sourceUrl,
+        originalTitle: article.title,
+        originalContent: article.content.substring(0, 5000),
+        summaryId: (ai.summary_id as string) || article.title,
+        summaryKo: (ai.summary_ko as string) || '',
+        summaryEn: (ai.summary_en as string) || '',
+        impactAnalysis: (ai.impact_ko as string) || (ai.summary_ko as string) || '',
+        category: (ai.category as string) || 'GENERAL',
+        tags: (ai.tags as string[]) || [],
+        regulationNumber: null,
+        importance: (ai.importance as string) || 'NORMAL',
+        publishedAt: article.publishedAt || new Date().toISOString(),
+      };
+    });
   } catch (error) {
-    loggers.api.error({ err: error, title: article.title }, 'AI structured analysis failed');
+    loggers.api.error({ err: error }, 'Batch AI processing failed');
+    // Return articles without AI processing
+    return articles.map(article => ({
+      source: article.source,
+      sourceUrl: article.sourceUrl,
+      originalTitle: article.title,
+      originalContent: article.content.substring(0, 5000),
+      summaryId: article.title,
+      summaryKo: '',
+      summaryEn: '',
+      impactAnalysis: '',
+      category: 'GENERAL',
+      tags: [],
+      regulationNumber: null,
+      importance: 'NORMAL',
+      publishedAt: article.publishedAt || new Date().toISOString(),
+    }));
   }
+}
 
-  // Step 2: If Korean summary is still empty, do a separate translation call
-  if (!summaryKo) {
-    try {
-      const translateResponse = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: `다음 인도네시아 세금 뉴스 제목을 한국어로 2-3문장으로 요약해주세요. 제목만 보고 내용을 유추하여 설명해주세요.\n\n제목: ${article.title}\n${article.content !== article.title ? `설명: ${article.content.substring(0, 500)}` : ''}\n\n한국어 요약:`,
-        }],
-      });
-
-      summaryKo = translateResponse.content[0].type === 'text' ? translateResponse.content[0].text.trim() : '';
-      loggers.api.info({ title: article.title, summaryKo: summaryKo.substring(0, 50) }, 'Korean translation fallback');
-    } catch (error) {
-      loggers.api.error({ err: error }, 'Korean translation fallback failed');
-      summaryKo = article.title; // Last resort: use original title
-    }
-  }
-
-  // Step 3: If impact analysis is empty, generate it
-  if (!impactAnalysis && summaryKo) {
-    impactAnalysis = summaryKo;
-  }
-
-  return {
-    source: article.source,
-    sourceUrl: article.sourceUrl,
-    originalTitle: article.title,
-    originalContent: article.content.substring(0, 5000),
-    summaryId: summaryId || article.title,
-    summaryKo,
-    summaryEn: summaryEn || article.title,
-    impactAnalysis,
-    category,
-    tags,
-    regulationNumber,
-    importance,
-    publishedAt: article.publishedAt || new Date().toISOString(),
-  };
+/** Single article processing (kept for compatibility) */
+export async function processArticleWithAI(article: RawArticle): Promise<ProcessedArticle> {
+  const results = await processArticlesBatch([article]);
+  return results[0];
 }
 
 /**
