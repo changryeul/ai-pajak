@@ -42,6 +42,8 @@ export async function POST(request: NextRequest) {
     let processed = 0;
     let skipped = 0;
     let waNotified = 0;
+    const aiErrors: string[] = [];
+    const sampleData: Array<{ title: string; summaryKo: string }> = [];
 
     for (const article of allArticles) {
       // Check for duplicates by title
@@ -57,7 +59,34 @@ export async function POST(request: NextRequest) {
       }
 
       // Process with AI
-      const result = await processArticleWithAI(article);
+      let result;
+      try {
+        result = await processArticleWithAI(article);
+        if (!result.summaryKo) {
+          aiErrors.push(`No KO summary for: ${article.title.substring(0, 50)}`);
+        }
+      } catch (aiErr) {
+        aiErrors.push(`AI error: ${aiErr instanceof Error ? aiErr.message : String(aiErr)}`);
+        result = {
+          source: article.source,
+          sourceUrl: article.sourceUrl,
+          originalTitle: article.title,
+          originalContent: article.content,
+          summaryId: article.title,
+          summaryKo: '',
+          summaryEn: '',
+          impactAnalysis: '',
+          category: 'GENERAL',
+          tags: [],
+          regulationNumber: null,
+          importance: 'NORMAL',
+          publishedAt: article.publishedAt,
+        };
+      }
+
+      if (sampleData.length < 3) {
+        sampleData.push({ title: result.originalTitle.substring(0, 60), summaryKo: result.summaryKo.substring(0, 80) });
+      }
 
       // Insert
       const { error: insertError } = await supabase.from('tax_news').insert({
@@ -128,6 +157,8 @@ export async function POST(request: NextRequest) {
       processed,
       skipped,
       waNotified,
+      aiErrors: aiErrors.length > 0 ? aiErrors : undefined,
+      sampleData: sampleData.length > 0 ? sampleData : undefined,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'News fetch cron failed');
