@@ -12,9 +12,11 @@ import { createClient } from '@supabase/supabase-js';
 import { fetchGoogleNewsRSS, fetchDJPNews, processArticlesBatch } from '@/lib/news/news-fetcher';
 import type { RawArticle } from '@/lib/news/news-fetcher';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
+import { isCronEnabled, logCronResult } from '@/lib/cron/cron-guard';
 import { loggers } from '@/lib/logger';
 
 const CRON_SECRET = process.env.CRON_SECRET;
+const CRON_ID = 'news-fetch';
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -25,6 +27,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // Check if this cron job is enabled
+    const enabled = await isCronEnabled(CRON_ID);
+    if (!enabled) {
+      await logCronResult(CRON_ID, 'skipped', 0, { reason: 'disabled' });
+      return NextResponse.json({ success: true, skipped: true, reason: 'Cron job is disabled' });
+    }
+
     loggers.api.info('Starting news fetch job');
     const startTime = Date.now();
 

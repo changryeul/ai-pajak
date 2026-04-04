@@ -10,9 +10,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendPaymentReminder as sendWaPaymentReminder } from '@/lib/notifications/whatsapp-service';
+import { isCronEnabled, logCronResult } from '@/lib/cron/cron-guard';
 import { loggers } from '@/lib/logger';
 
 const CRON_SECRET = process.env.CRON_SECRET;
+const CRON_ID = 'payment-reminders';
 
 interface QueueItem {
   id: string;
@@ -40,6 +42,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const enabled = await isCronEnabled(CRON_ID);
+    if (!enabled) {
+      await logCronResult(CRON_ID, 'skipped', 0, { reason: 'disabled' });
+      return NextResponse.json({ success: true, skipped: true, reason: 'Cron job is disabled' });
+    }
+
     loggers.api.info('Starting payment reminders job');
     const startTime = Date.now();
 

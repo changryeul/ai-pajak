@@ -13,10 +13,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runDeadlineReminders } from '@/lib/notifications/deadline-reminder';
+import { isCronEnabled, logCronResult } from '@/lib/cron/cron-guard';
 import { loggers } from '@/lib/logger';
 
-// Cron secret for authentication
 const CRON_SECRET = process.env.CRON_SECRET;
+const CRON_ID = 'deadline-reminders';
 
 export async function POST(request: NextRequest) {
   // Verify cron secret
@@ -40,6 +41,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const enabled = await isCronEnabled(CRON_ID);
+    if (!enabled) {
+      await logCronResult(CRON_ID, 'skipped', 0, { reason: 'disabled' });
+      return NextResponse.json({ success: true, skipped: true, reason: 'Cron job is disabled' });
+    }
+
     loggers.api.info('Starting deadline reminders job');
     const startTime = Date.now();
 

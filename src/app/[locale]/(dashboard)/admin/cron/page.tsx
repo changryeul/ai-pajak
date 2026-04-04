@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,9 +20,11 @@ interface CronJob {
   scheduleDesc: string;
   icon: typeof Clock;
   description: string;
-  lastStatus?: 'success' | 'error' | 'running' | null;
+  isEnabled: boolean;
+  lastStatus?: 'success' | 'error' | 'running' | 'skipped' | null;
   lastResult?: string;
   lastDuration?: string;
+  lastRunAt?: string;
 }
 
 const CRON_JOBS: CronJob[] = [
@@ -34,6 +36,7 @@ const CRON_JOBS: CronJob[] = [
     scheduleDesc: '매일 08:00',
     icon: Bell,
     description: '세금 마감일 D-30/14/7/3/1 알림 (이메일 + WhatsApp)',
+    isEnabled: true,
   },
   {
     id: 'payment-reminders',
@@ -43,6 +46,7 @@ const CRON_JOBS: CronJob[] = [
     scheduleDesc: '매일 09:00',
     icon: CreditCard,
     description: '미납 세금 납부 촉구 알림 (WhatsApp + in-app)',
+    isEnabled: true,
   },
   {
     id: 'monthly-report',
@@ -52,6 +56,7 @@ const CRON_JOBS: CronJob[] = [
     scheduleDesc: '매월 1일 10:00',
     icon: FileText,
     description: '월간 세금 분석 리포트 생성 + 알림',
+    isEnabled: true,
   },
   {
     id: 'news-fetch',
@@ -61,6 +66,7 @@ const CRON_JOBS: CronJob[] = [
     scheduleDesc: '매일 07:00',
     icon: Newspaper,
     description: 'Google News RSS → AI 요약 (한/영/인니) → DB 저장',
+    isEnabled: true,
   },
   {
     id: 'cleanup-expired-tokens',
@@ -70,6 +76,7 @@ const CRON_JOBS: CronJob[] = [
     scheduleDesc: '매일 00:00',
     icon: Trash2,
     description: '만료된 세션/인증 토큰 정리',
+    isEnabled: true,
   },
 ];
 
@@ -77,6 +84,48 @@ export default function AdminCronPage() {
   const [cronSecret, setCronSecret] = useState('');
   const [jobs, setJobs] = useState<CronJob[]>(CRON_JOBS);
   const [runningId, setRunningId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  // Load DB cron settings on mount
+  useEffect(() => {
+    fetch('/api/admin/cron')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setJobs(prev => prev.map(job => {
+            const dbSetting = data.data.find((s: { id: string }) => s.id === job.id);
+            if (dbSetting) {
+              return {
+                ...job,
+                isEnabled: dbSetting.is_enabled,
+                lastStatus: dbSetting.last_status || null,
+                lastDuration: dbSetting.last_duration_ms ? `${dbSetting.last_duration_ms}ms` : undefined,
+                lastRunAt: dbSetting.last_run_at || undefined,
+                lastResult: dbSetting.last_result ? JSON.stringify(dbSetting.last_result, null, 2) : undefined,
+              };
+            }
+            return job;
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const toggleJob = async (jobId: string, currentEnabled: boolean) => {
+    setTogglingId(jobId);
+    try {
+      const res = await fetch('/api/admin/cron', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: jobId, is_enabled: !currentEnabled }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, isEnabled: !currentEnabled } : j));
+      }
+    } catch { /* */ }
+    finally { setTogglingId(null); }
+  };
 
   const runJob = async (job: CronJob) => {
     if (!cronSecret) {
@@ -203,10 +252,33 @@ export default function AdminCronPage() {
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">{job.description}</p>
                       <p className="text-[10px] text-gray-300 font-mono mt-1">{job.endpoint}</p>
+                      {job.lastRunAt && (
+                        <p className="text-[10px] text-gray-400 mt-0.5">
+                          마지막 실행: {new Date(job.lastRunAt).toLocaleString('ko-KR')}
+                        </p>
+                      )}
+                      {!job.isEnabled && (
+                        <Badge className="text-[10px] bg-red-100 text-red-600 mt-1">비활성</Badge>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1.5 items-center">
+                    {/* Enable/Disable Toggle */}
+                    <button
+                      onClick={() => toggleJob(job.id, job.isEnabled)}
+                      disabled={togglingId === job.id}
+                      className={cn(
+                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                        job.isEnabled ? 'bg-green-500' : 'bg-gray-300',
+                        togglingId === job.id && 'opacity-50'
+                      )}
+                    >
+                      <span className={cn(
+                        'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
+                        job.isEnabled ? 'translate-x-6' : 'translate-x-1'
+                      )} />
+                    </button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -218,7 +290,7 @@ export default function AdminCronPage() {
                     <Button
                       size="sm"
                       className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
-                      disabled={isRunning || !cronSecret}
+                      disabled={isRunning || !cronSecret || !job.isEnabled}
                       onClick={() => runJob(job)}
                     >
                       {isRunning ? (
