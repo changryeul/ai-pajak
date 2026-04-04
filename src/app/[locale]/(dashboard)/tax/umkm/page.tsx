@@ -118,6 +118,7 @@ export default function UMKMPage() {
                   onChange={e => updateRevenue(i + 1, Number(e.target.value) || 0)}
                   placeholder="0"
                   className="text-sm font-mono h-9"
+                  aria-label={`${label} revenue`}
                 />
               </div>
             ))}

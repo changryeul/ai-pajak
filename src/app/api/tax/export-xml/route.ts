@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
+import { requireRole } from '@/middleware/rbac';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
-import type { RequestWithSession, UserRole } from '@/types/auth';
+import { UserRole } from '@/types/auth';
+import type { RequestWithSession } from '@/types/auth';
 
 /**
  * POST /api/tax/export-xml
@@ -32,6 +34,27 @@ async function handleExportXml(req: RequestWithSession): Promise<Response> {
 
     if (error || !filing) {
       return NextResponse.json({ error: 'Filing not found' }, { status: 404 });
+    }
+
+    // Verify ownership: customer can only export own filings, consultant must be assigned
+    const userId = req.session.userId;
+    const role = req.session.role;
+
+    if (role === UserRole.CUSTOMER) {
+      const { data: customer } = await admin.from('customer').select('id').eq('user_id', userId).single();
+      if (!customer || filing.customer_id !== customer.id) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
+    } else if (role === UserRole.CONSULTANT_JTC || role === UserRole.TAX_ADVISOR_JTC) {
+      const { data: consultant } = await admin.from('consultant').select('id').eq('user_id', userId).single();
+      if (!consultant) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
+      // Verify consultant is assigned to this customer
+      const { data: assignment } = await admin.from('customer').select('id').eq('id', filing.customer_id).eq('assigned_consultant_id', consultant.id).single();
+      if (!assignment) {
+        return NextResponse.json({ error: 'Not assigned to this customer' }, { status: 403 });
+      }
     }
 
     // Get customer info
@@ -154,6 +177,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
+    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC),
     withAudit('SPT_XML_EXPORT')
   )(request as RequestWithSession, handleExportXml);
 }

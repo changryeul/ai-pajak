@@ -139,6 +139,9 @@ export function InvoiceCaptureFlow() {
               {/* Drop zone */}
               <div
                 className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-indigo-300 transition-colors cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
                 onDrop={handleDrop}
                 onDragOver={e => e.preventDefault()}
                 onClick={() => fileInputRef.current?.click()}
@@ -172,6 +175,7 @@ export function InvoiceCaptureFlow() {
                 accept="image/*"
                 capture="environment"
                 className="hidden"
+                aria-label="Capture invoice with camera"
                 onChange={handleInputChange}
               />
               <input
@@ -179,6 +183,7 @@ export function InvoiceCaptureFlow() {
                 type="file"
                 accept="image/jpeg,image/png,image/webp,application/pdf"
                 className="hidden"
+                aria-label="Select invoice file"
                 onChange={handleInputChange}
               />
 

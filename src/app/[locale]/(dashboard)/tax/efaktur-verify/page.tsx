@@ -128,9 +128,10 @@ export default function EFakturVerifyPage() {
                 onChange={e => updateRow(i, e.target.value)}
                 placeholder="010.000-24.00000001"
                 className="font-mono"
+                aria-label={`Faktur number ${i + 1}`}
               />
               {numbers.length > 1 && (
-                <Button variant="ghost" size="sm" onClick={() => removeRow(i)}>
+                <Button variant="ghost" size="sm" onClick={() => removeRow(i)} aria-label="Remove">
                   <Trash2 className="h-4 w-4 text-red-400" />
                 </Button>
               )}

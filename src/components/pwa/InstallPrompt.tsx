@@ -47,7 +47,7 @@ export function InstallPrompt() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-xl shadow-lg border p-4 z-50 animate-in slide-in-from-bottom-4">
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-xl shadow-lg border p-4 z-50 animate-in slide-in-from-bottom-4" role="dialog" aria-label="Install app">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
           <Download className="h-5 w-5 text-white" />
@@ -64,7 +64,7 @@ export function InstallPrompt() {
             </Button>
           </div>
         </div>
-        <button onClick={handleDismiss} className="text-gray-300 hover:text-gray-500">
+        <button onClick={handleDismiss} className="text-gray-300 hover:text-gray-500" aria-label="Close">
           <X className="h-4 w-4" />
         </button>
       </div>

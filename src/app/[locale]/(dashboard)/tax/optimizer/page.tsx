@@ -217,7 +217,7 @@ export default function TaxOptimizerPage() {
               <Building2 className="h-3.5 w-3.5 text-gray-400" />{t('optimizer.hasBusinessIncome')}
             </label>
             {hasBusinessIncome && (
-              <Input type="number" value={businessRevenue || ''} onChange={e => setBusinessRevenue(Number(e.target.value) || 0)} placeholder={t('optimizer.businessRevenue')} className="font-mono text-sm w-48" />
+              <Input type="number" value={businessRevenue || ''} onChange={e => setBusinessRevenue(Number(e.target.value) || 0)} placeholder={t('optimizer.businessRevenue')} className="font-mono text-sm w-48" aria-label="Business revenue" />
             )}
           </div>
 

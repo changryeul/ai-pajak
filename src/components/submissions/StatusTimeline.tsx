@@ -37,15 +37,16 @@ export function StatusTimeline({ status }: StatusTimelineProps) {
   const isFailed = status === 'FAILED';
 
   return (
-    <div className="flex items-center gap-1 w-full">
+    <div className="flex items-center gap-1 w-full" role="list">
       {STEPS.map((step, i) => {
         const Icon = step.icon;
         const isActive = i === currentStep && !isFailed;
         const isCompleted = i < currentStep && !isFailed;
         const isCompletedFinal = currentStep === 4 && i === 4 && status === 'COMPLETED';
+        const stepStatus = (isCompleted || isCompletedFinal) ? 'completed' : isActive ? 'active' : 'pending';
 
         return (
-          <div key={step.key} className="flex items-center flex-1">
+          <div key={step.key} className="flex items-center flex-1" role="listitem" aria-label={`${t(step.tKey)} — ${stepStatus}`} {...(isActive ? { 'aria-current': 'step' as const } : {})}>
             <div className="flex flex-col items-center gap-1 flex-1">
               <div
                 className={cn(

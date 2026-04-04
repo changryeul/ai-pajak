@@ -91,7 +91,7 @@ export default function ChatPage() {
       <Card className="border-0 shadow-sm">
         <CardContent className="p-0">
           {/* Messages */}
-          <div className="h-[450px] overflow-y-auto p-4 space-y-4">
+          <div className="h-[450px] overflow-y-auto p-4 space-y-4" role="log" aria-live="polite" aria-label="Chat messages">
             {messages.length === 0 && (
               <div className="text-center py-8">
                 <Bot className="h-12 w-12 text-blue-200 mx-auto mb-4" />
@@ -156,6 +156,7 @@ export default function ChatPage() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
               placeholder={t('chat.placeholder')}
+              aria-label="Chat message input"
               className="rounded-xl"
               disabled={isLoading}
             />
@@ -164,6 +165,7 @@ export default function ChatPage() {
               disabled={isLoading || !input.trim()}
               size="sm"
               className="rounded-xl px-4 bg-blue-600 hover:bg-blue-700"
+              aria-label="Send message"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
