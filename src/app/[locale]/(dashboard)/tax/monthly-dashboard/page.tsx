@@ -204,12 +204,18 @@ export default function MonthlyDashboardPage() {
       )}
 
       {/* ── NEW: Work Queue (Priority Tasks) ── */}
-      {overview && overview.workQueue.length > 0 && (
+      {overview && (
         <Card className="border-0 shadow-sm mb-6">
           <CardContent className="p-5">
             <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
               <Clock className="h-4 w-4 text-blue-600" />{t('workQueueTitle')}
             </h3>
+            {overview.workQueue.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-400" />
+                <p className="text-sm">처리 중인 우선 업무가 없습니다</p>
+              </div>
+            ) : (
             <div className="space-y-2">
               {overview.workQueue.map((task) => {
                 const iconMap: Record<string, typeof Upload> = {
@@ -241,12 +247,13 @@ export default function MonthlyDashboardPage() {
                 );
               })}
             </div>
+            )}
           </CardContent>
         </Card>
       )}
 
       {/* ── NEW: Upcoming Deadlines + Risk Alerts (2-col) ── */}
-      {overview && (overview.upcomingDeadlines.length > 0 || overview.riskAlerts.length > 0) && (
+      {overview && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           {/* Upcoming Deadlines */}
           <Card className="border-0 shadow-sm">
