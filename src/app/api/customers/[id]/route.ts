@@ -1,11 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   getCustomer,
   updateCustomer,
   deleteCustomer,
 } from '@/lib/services/customer-service';
 import { loggers } from '@/lib/logger';
+
+/**
+ * Resolve user's role with robust fallback:
+ * - user_roles table (handle multiple rows)
+ * - consultant table (→ CONSULTANT_JTC)
+ * - customer table (→ CUSTOMER)
+ */
+async function resolveUserRole(supabase: SupabaseClient, userId: string): Promise<string | null> {
+  const { data: roles } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('is_active', true);
+
+  if (roles && roles.length > 0) {
+    const priority = ['TAX_ADVISOR_JTC', 'CONSULTANT_JTC', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR', 'CUSTOMER', 'PLATFORM_ADMIN'];
+    for (const p of priority) {
+      if (roles.find(r => r.role === p)) return p;
+    }
+    return roles[0].role;
+  }
+
+  const { data: consultant } = await supabase
+    .from('consultant')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (consultant) return 'CONSULTANT_JTC';
+
+  const { data: customer } = await supabase
+    .from('customer')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (customer) return 'CUSTOMER';
+
+  return null;
+}
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -31,20 +70,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust: handles multiple rows + fallback to consultant/customer tables)
+    const role = await resolveUserRole(supabase, user.id);
 
-    if (!userRole) {
+    if (!role) {
       return NextResponse.json(
         { success: false, error: 'User role not found' },
         { status: 403 }
       );
     }
+
+    const userRole = { role };
 
     // CRITICAL: Platform admins cannot access customer data (personal data protection)
     if (userRole.role === 'PLATFORM_ADMIN') {
@@ -145,20 +181,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust: handles multiple rows + fallback to consultant/customer tables)
+    const role = await resolveUserRole(supabase, user.id);
 
-    if (!userRole) {
+    if (!role) {
       return NextResponse.json(
         { success: false, error: 'User role not found' },
         { status: 403 }
       );
     }
+
+    const userRole = { role };
 
     // Check access
     const canUpdate = ['CONSULTANT_JTC', 'TAX_ADVISOR_JTC', 'PLATFORM_ADMIN'];
@@ -242,20 +275,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust: handles multiple rows + fallback to consultant/customer tables)
+    const role = await resolveUserRole(supabase, user.id);
 
-    if (!userRole) {
+    if (!role) {
       return NextResponse.json(
         { success: false, error: 'User role not found' },
         { status: 403 }
       );
     }
+
+    const userRole = { role };
 
     // Only platform admins can delete customers
     if (userRole.role !== 'PLATFORM_ADMIN') {

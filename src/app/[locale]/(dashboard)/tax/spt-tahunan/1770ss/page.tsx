@@ -168,7 +168,7 @@ export default function SPT1770SSPage() {
               <Button
                 variant="outline"
                 className="mt-3"
-                onClick={() => router.push(`/${locale}/customers/new`)}
+                onClick={() => router.push(`/${locale}/customers`)}
               >
                 {tp('addNewTaxpayer')}
               </Button>

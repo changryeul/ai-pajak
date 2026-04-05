@@ -159,7 +159,7 @@ export default function SPT1771Page() {
               <Button
                 variant="outline"
                 className="mt-3"
-                onClick={() => router.push(`/${locale}/customers/new`)}
+                onClick={() => router.push(`/${locale}/customers`)}
               >
                 {tp('addNewCorp')}
               </Button>
