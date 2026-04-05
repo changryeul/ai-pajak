@@ -164,7 +164,11 @@
       "TAX_OPERATOR_SUPERVISOR": "操作员主管"
     },
     "accurateIntegration": "Accurate 集成",
-    "teamManagement": "团队管理"
+    "teamManagement": "团队管理",
+    "pph21Label": "个人所得税 (PPh 21)",
+    "withholdingTaxLabel": "预扣税 (PPh 23/4(2))",
+    "prepaidCorporateTax": "预缴企业税 (PPh 25/UMKM)",
+    "ppnLabel": "增值税 (PPN)"
   },
   "dashboard": {
     "title": "仪表板",

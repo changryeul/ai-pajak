@@ -164,7 +164,11 @@
       "TAX_OPERATOR_SUPERVISOR": "상담원 감독관"
     },
     "accurateIntegration": "Accurate 연동",
-    "teamManagement": "직원 관리"
+    "teamManagement": "직원 관리",
+    "pph21Label": "개인소득세 (PPh 21)",
+    "withholdingTaxLabel": "원천세 (PPh 23/4(2))",
+    "prepaidCorporateTax": "선납법인세 (PPh 25, PPh Final UMKM)",
+    "ppnLabel": "부가세 (PPN)"
   },
   "dashboard": {
     "title": "대시보드",

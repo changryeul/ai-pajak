@@ -164,7 +164,11 @@
       "TAX_OPERATOR_SUPERVISOR": "オペレータースーパーバイザー"
     },
     "accurateIntegration": "Accurate 連携",
-    "teamManagement": "チーム管理"
+    "teamManagement": "チーム管理",
+    "pph21Label": "個人所得税 (PPh 21)",
+    "withholdingTaxLabel": "源泉税 (PPh 23/4(2))",
+    "prepaidCorporateTax": "前払法人税 (PPh 25/UMKM)",
+    "ppnLabel": "付加価値税 (PPN)"
   },
   "dashboard": {
     "title": "ダッシュボード",
