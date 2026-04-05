@@ -19,9 +19,10 @@ const JTC_AGREEMENT_VERSION = 'v1.0';
 
 const STEPS = [
   { id: 1, title: '회사 정보', desc: 'NPWP 및 기본 정보' },
-  { id: 2, title: '업종(KBLI) 등록', desc: '사업 업종 선택' },
-  { id: 3, title: '약관 동의', desc: 'JTC 세무 대행 동의' },
-  { id: 4, title: '계정 생성', desc: '이메일 및 비밀번호' },
+  { id: 2, title: '세무 프로필', desc: '매출/직원/사업 유형' },
+  { id: 3, title: '업종(KBLI) 등록', desc: '사업 업종 선택' },
+  { id: 4, title: '약관 동의', desc: 'JTC 세무 대행 동의' },
+  { id: 5, title: '계정 생성', desc: '이메일 및 비밀번호' },
 ];
 
 function formatNpwp(value: string): string {
@@ -56,7 +57,17 @@ export default function CompanyRegisterPage() {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
 
-  // Step 2: KBLI
+  // Step 2: Tax profile
+  const [annualRevenue, setAnnualRevenue] = useState('');
+  const [revenueYear, setRevenueYear] = useState(String(new Date().getFullYear() - 1));
+  const [hasEmployees, setHasEmployees] = useState(false);
+  const [employeeCount, setEmployeeCount] = useState('');
+  const [isPkp, setIsPkp] = useState(false);
+  const [paysServiceFees, setPaysServiceFees] = useState(false);
+  const [hasImportExport, setHasImportExport] = useState(false);
+  const [hasRentalBusiness, setHasRentalBusiness] = useState(false);
+
+  // Step 3: KBLI
   const [kbliSearch, setKbliSearch] = useState('');
   const [kbliResults, setKbliResults] = useState<KbliCode[]>([]);
   const [selectedKblis, setSelectedKblis] = useState<KbliCode[]>([]);
@@ -108,8 +119,9 @@ export default function CompanyRegisterPage() {
   };
 
   const canProceedStep1 = companyName && isValidNpwp(npwp) && representativeName;
-  const canProceedStep2 = selectedKblis.length > 0 && primaryKbli;
-  const canProceedStep3 = agreeJtc && agreeData && agreeTaxFiling;
+  const canProceedStep2 = true; // tax profile is optional but recommended
+  const canProceedStep3 = selectedKblis.length > 0 && primaryKbli;
+  const canProceedStep4 = agreeJtc && agreeData && agreeTaxFiling;
   const canSubmit = email && password && password === confirmPassword && password.length >= 8;
 
   const handleSubmit = async () => {
@@ -131,6 +143,16 @@ export default function CompanyRegisterPage() {
           address,
           kbliCodes: selectedKblis.map(k => k.code),
           primaryKbli,
+          taxProfile: {
+            annualRevenue: annualRevenue ? Number(annualRevenue) : undefined,
+            revenueYear: revenueYear ? Number(revenueYear) : undefined,
+            hasEmployees,
+            employeeCount: employeeCount ? Number(employeeCount) : undefined,
+            isPkp,
+            paysServiceFees,
+            hasImportExport,
+            hasRentalBusiness,
+          },
           jtcAgreement: {
             accepted: agreeJtc,
             version: JTC_AGREEMENT_VERSION,
@@ -254,8 +276,109 @@ export default function CompanyRegisterPage() {
               </>
             )}
 
-            {/* Step 2: KBLI */}
+            {/* Step 2: Tax profile */}
             {step === 2 && (
+              <>
+                <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
+                  <p className="font-medium">세무 프로필</p>
+                  <p className="mt-1">
+                    아래 정보는 세목(PPh/PPN) 적용 여부 판단에 사용됩니다. 모두 선택사항이지만 정확할수록 신고 정확도가 올라갑니다.
+                  </p>
+                </div>
+
+                {/* Annual revenue */}
+                <div>
+                  <label className="text-xs font-medium text-gray-700">연 매출 (IDR)</label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      type="number"
+                      value={annualRevenue}
+                      onChange={e => setAnnualRevenue(e.target.value)}
+                      placeholder="예: 5000000000 (50억)"
+                      className="font-mono flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={revenueYear}
+                      onChange={e => setRevenueYear(e.target.value)}
+                      placeholder="기준년도"
+                      className="w-24"
+                    />
+                  </div>
+                  {annualRevenue && Number(annualRevenue) < 4_800_000_000 && (
+                    <p className="text-[11px] text-green-600 mt-1">
+                      ✓ 연매출 48억 IDR 미만 — PP 23/2018 소규모 사업자 대상 (PPh Final 0.5%)
+                    </p>
+                  )}
+                </div>
+
+                {/* Employees */}
+                <div className="border rounded-lg p-3 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={hasEmployees} onChange={e => setHasEmployees(e.target.checked)} className="accent-emerald-600" />
+                    <div>
+                      <span className="text-sm font-medium">직원을 고용하고 있습니다</span>
+                      <p className="text-[11px] text-gray-500">→ 월 SPT Masa PPh 21 신고 의무</p>
+                    </div>
+                  </label>
+                  {hasEmployees && (
+                    <div className="ml-6">
+                      <Input
+                        type="number"
+                        value={employeeCount}
+                        onChange={e => setEmployeeCount(e.target.value)}
+                        placeholder="대략 직원 수"
+                        className="w-32 h-8 text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* PKP */}
+                <div className="border rounded-lg p-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={isPkp} onChange={e => setIsPkp(e.target.checked)} className="accent-emerald-600" />
+                    <div>
+                      <span className="text-sm font-medium">PKP 등록 (Pengusaha Kena Pajak)</span>
+                      <p className="text-[11px] text-gray-500">
+                        → VAT 등록 사업자 / 월 SPT Masa PPN 신고 의무 / Faktur Pajak 발행 가능
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Additional activities */}
+                <div>
+                  <p className="text-xs font-medium text-gray-700 mb-2">추가 정보</p>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                      <input type="checkbox" checked={paysServiceFees} onChange={e => setPaysServiceFees(e.target.checked)} className="accent-emerald-600" />
+                      <div className="text-xs">
+                        <span className="font-medium">서비스 비용 지급</span>
+                        <p className="text-gray-500 text-[11px]">→ PPh 23 원천징수 의무 (2% / 15%)</p>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                      <input type="checkbox" checked={hasImportExport} onChange={e => setHasImportExport(e.target.checked)} className="accent-emerald-600" />
+                      <div className="text-xs">
+                        <span className="font-medium">수입·수출 거래</span>
+                        <p className="text-gray-500 text-[11px]">→ PPh 22 및 수입 PPN 의무, PPh 26 적용 가능</p>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                      <input type="checkbox" checked={hasRentalBusiness} onChange={e => setHasRentalBusiness(e.target.checked)} className="accent-emerald-600" />
+                      <div className="text-xs">
+                        <span className="font-medium">임대 사업</span>
+                        <p className="text-gray-500 text-[11px]">→ PPh 4(2) Final 10% 적용</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Step 3: KBLI */}
+            {step === 3 && (
               <>
                 <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
                   <p className="font-medium">KBLI란?</p>
@@ -321,8 +444,8 @@ export default function CompanyRegisterPage() {
               </>
             )}
 
-            {/* Step 3: Terms */}
-            {step === 3 && (
+            {/* Step 4: Terms */}
+            {step === 4 && (
               <>
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
                   <div className="flex items-start gap-3 mb-3">
@@ -382,8 +505,8 @@ export default function CompanyRegisterPage() {
               </>
             )}
 
-            {/* Step 4: Account */}
-            {step === 4 && (
+            {/* Step 5: Account */}
+            {step === 5 && (
               <>
                 <div className="bg-emerald-50 rounded-lg p-3 text-xs text-emerald-800 flex items-center gap-2">
                   <FileCheck2 className="h-4 w-4" />
@@ -431,13 +554,14 @@ export default function CompanyRegisterPage() {
               </Link>
             )}
 
-            {step < 4 ? (
+            {step < 5 ? (
               <Button
                 onClick={() => setStep(step + 1)}
                 disabled={
                   (step === 1 && !canProceedStep1) ||
                   (step === 2 && !canProceedStep2) ||
-                  (step === 3 && !canProceedStep3)
+                  (step === 3 && !canProceedStep3) ||
+                  (step === 4 && !canProceedStep4)
                 }
               >
                 다음<ArrowRight className="h-4 w-4 ml-1" />

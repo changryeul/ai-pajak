@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       address,
       kbliCodes,
       primaryKbli,
+      taxProfile,
       jtcAgreement,
     } = body as {
       email: string;
@@ -43,6 +44,16 @@ export async function POST(request: NextRequest) {
       address?: string;
       kbliCodes?: string[];
       primaryKbli?: string;
+      taxProfile?: {
+        annualRevenue?: number;
+        revenueYear?: number;
+        hasEmployees?: boolean;
+        employeeCount?: number;
+        isPkp?: boolean;
+        paysServiceFees?: boolean;
+        hasImportExport?: boolean;
+        hasRentalBusiness?: boolean;
+      };
       jtcAgreement?: {
         accepted?: boolean;
         version?: string;
@@ -128,6 +139,15 @@ export async function POST(request: NextRequest) {
         jtc_agreement_accepted_at: new Date().toISOString(),
         data_processing_consent: !!jtcAgreement.dataProcessing,
         tax_filing_authorization: !!jtcAgreement.taxFilingAuthorization,
+        // Tax profile (all optional)
+        annual_revenue: taxProfile?.annualRevenue || null,
+        revenue_year: taxProfile?.revenueYear || null,
+        has_employees: !!taxProfile?.hasEmployees,
+        employee_count: taxProfile?.employeeCount || null,
+        is_pkp: !!taxProfile?.isPkp,
+        pays_service_fees: !!taxProfile?.paysServiceFees,
+        has_import_export: !!taxProfile?.hasImportExport,
+        has_rental_business: !!taxProfile?.hasRentalBusiness,
       })
       .select('id')
       .single();
