@@ -28,24 +28,37 @@ export async function GET(request: NextRequest) {
     const userId = user.id;
     const admin = getSupabaseAdmin();
 
-    // Get user role
-    const { data: userRole } = await admin
+    // Get user role(s) — user may have multiple roles
+    const { data: userRoles } = await admin
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .eq('is_active', true)
-      .single();
+      .eq('is_active', true);
 
-    if (!userRole) {
-      return NextResponse.json({ error: 'No active role' }, { status: 403 });
+    const roles = (userRoles || []).map(r => r.role as UserRole);
+
+    // Block platform admin (unless has other roles)
+    if (roles.length === 0) {
+      // No roles — try to infer from customer or consultant table
+      const { data: cust } = await admin.from('customer').select('id').eq('user_id', userId).maybeSingle();
+      const { data: cons } = await admin.from('consultant').select('id').eq('user_id', userId).maybeSingle();
+      if (cust) roles.push(UserRole.CUSTOMER);
+      if (cons) roles.push(UserRole.CONSULTANT_JTC);
     }
 
-    const role = userRole.role as UserRole;
+    if (roles.length === 0) {
+      return NextResponse.json({ error: 'No active role found', userId }, { status: 403 });
+    }
 
-    // Block platform admin
-    if (role === UserRole.PLATFORM_ADMIN) {
+    if (roles.includes(UserRole.PLATFORM_ADMIN) && roles.length === 1) {
       return NextResponse.json({ error: 'Platform admin blocked' }, { status: 403 });
     }
+
+    // Pick primary role (prefer consultant/advisor over customer)
+    const role = roles.find(r => r === UserRole.TAX_ADVISOR_JTC)
+      || roles.find(r => r === UserRole.CONSULTANT_JTC)
+      || roles.find(r => r === UserRole.CUSTOMER)
+      || roles[0];
 
     const isConsultant = role === UserRole.CONSULTANT_JTC || role === UserRole.TAX_ADVISOR_JTC;
 
