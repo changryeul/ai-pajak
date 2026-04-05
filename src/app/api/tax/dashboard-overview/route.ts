@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { composeMiddleware } from '@/middleware/compose';
-import { requireAuth } from '@/middleware/auth';
-import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
+import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { UserRole } from '@/types/auth';
-import type { RequestWithSession } from '@/types/auth';
 
 /**
  * GET /api/tax/dashboard-overview
@@ -18,10 +15,38 @@ import type { RequestWithSession } from '@/types/auth';
  * - Client status (consultant only)
  * - Recent submissions
  */
-async function handleGet(req: RequestWithSession): Promise<Response> {
+export async function GET(request: NextRequest) {
   try {
-    const { userId, role } = req.session;
+    // Auth via Supabase server client (cookie-based)
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = user.id;
     const admin = getSupabaseAdmin();
+
+    // Get user role
+    const { data: userRole } = await admin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .single();
+
+    if (!userRole) {
+      return NextResponse.json({ error: 'No active role' }, { status: 403 });
+    }
+
+    const role = userRole.role as UserRole;
+
+    // Block platform admin
+    if (role === UserRole.PLATFORM_ADMIN) {
+      return NextResponse.json({ error: 'Platform admin blocked' }, { status: 403 });
+    }
+
     const isConsultant = role === UserRole.CONSULTANT_JTC || role === UserRole.TAX_ADVISOR_JTC;
 
     // Determine scope: CUSTOMER sees own data, CONSULTANT sees assigned clients
@@ -308,11 +333,4 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     loggers.api.error({ err: error }, 'Dashboard overview error');
     return NextResponse.json({ error: 'Failed to load dashboard data' }, { status: 500 });
   }
-}
-
-export async function GET(request: NextRequest) {
-  return composeMiddleware(
-    requireAuth,
-    blockPlatformAdmin,
-  )(request as RequestWithSession, handleGet);
 }
