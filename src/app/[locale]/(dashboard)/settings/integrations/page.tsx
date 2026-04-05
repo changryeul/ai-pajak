@@ -34,7 +34,7 @@ const INTEGRATIONS: Integration[] = [
     gradient: 'from-blue-600 to-blue-700',
     status: 'disconnected',
     features: ['syncEmployees', 'syncPayroll', 'syncInvoices', 'syncFinancial'],
-    connectAction: '/api/integrations/accurate?action=authorize',
+    connectAction: '/settings/accurate',
     category: 'accounting',
   },
   {
@@ -78,7 +78,12 @@ export default function IntegrationsPage() {
   const [syncResults, setSyncResults] = useState<Record<string, { success: boolean; message: string }>>({});
 
   const handleConnect = async (integration: Integration) => {
-    // In production, this would redirect to OAuth
+    // If connectAction is an internal route (starts with /settings), prepend locale
+    if (integration.connectAction.startsWith('/settings')) {
+      window.location.href = `/${locale}${integration.connectAction}`;
+      return;
+    }
+    // Otherwise treat as external URL (e.g., OAuth authorize endpoint)
     window.location.href = integration.connectAction;
   };
 
