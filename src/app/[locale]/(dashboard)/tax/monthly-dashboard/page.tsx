@@ -11,7 +11,8 @@ import { useSession } from '@/hooks/useSession';
 import {
   Loader2, CheckCircle, AlertTriangle, Clock, FileText,
   Receipt, DollarSign, Shield, TrendingUp, ArrowRight,
-  Sparkles, Calendar, BarChart3, PieChart,
+  Sparkles, Calendar, BarChart3, PieChart, CalendarClock, Wallet,
+  Upload, Building2, Landmark, FileCheck2, ChevronDown, Users,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { fmtRp } from '@/lib/utils';
@@ -53,41 +54,61 @@ export default function MonthlyDashboardPage() {
   const [dataLoading, setDataLoading] = useState(false);
   const [payments, setPayments] = useState<Array<{ tax_type: string; tax_period: string; status: string; amount_due: number; spt_masa_filed: boolean; payment_deadline: string; reporting_deadline: string }>>([]);
   const [filings, setFilings] = useState<Array<{ tax_type: string; tax_period: string; status: string }>>([]);
+  const [showGrid, setShowGrid] = useState(true);
+  const [overview, setOverview] = useState<{
+    kpis: { deadlines: number; attention: number; expectedTax: number; submitted: number };
+    workQueue: Array<{ id: string; title: string; desc: string; priority: string; actionKey: string; count: number }>;
+    upcomingDeadlines: Array<{ tax: string; due: string; entity: string; status: string; daysLeft: number }>;
+    riskAlerts: Array<{ type: string; message: string; severity: string }>;
+    clientStatus: Array<{ id: string; name: string; health: string; open: number; done: number }>;
+    recentSubmissions: Array<{ taxType: string; company: string; status: string; amount: number }>;
+    isConsultant: boolean;
+  } | null>(null);
 
   const isLoading = sessionLoading || dataLoading;
 
   const loadData = useCallback(async () => {
-    if (!session?.customerId) return;
+    if (!session) return;
     setDataLoading(true);
     try {
-      const res = await fetch(`/api/tax/monthly-payments?year=${year}&customerId=${session.customerId}`);
-      if (!res.ok) throw new Error(`monthly-payments: ${res.status}`);
-      const data = await res.json();
-      if (data.success) {
-        // Flatten all payments from all tax types
-        const allPayments: typeof payments = [];
-        for (const summary of (data.data?.summary || [])) {
-          for (const p of (summary.payments || [])) {
-            allPayments.push(p);
-          }
-        }
-        setPayments(allPayments);
+      // Dashboard overview (KPIs, work queue, risks, etc.)
+      const overviewRes = await fetch('/api/tax/dashboard-overview');
+      if (overviewRes.ok) {
+        const ovData = await overviewRes.json();
+        if (ovData.success) setOverview(ovData.data);
       }
 
-      // Also load filing statuses
-      const filingRes = await fetch(`/api/tax/filings?customerId=${session.customerId}&year=${year}`);
-      if (!filingRes.ok) throw new Error(`filings: ${filingRes.status}`);
-      const filingData = await filingRes.json();
-      if (filingData.success) {
-        setFilings((filingData.data || []).map((f: { tax_type: string; tax_period: string; status: string }) => ({
-          tax_type: f.tax_type,
-          tax_period: f.tax_period,
-          status: f.status,
-        })));
+      // Legacy grid data (only if customer has customerId)
+      if (session.customerId) {
+        const res = await fetch(`/api/tax/monthly-payments?year=${year}&customerId=${session.customerId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            const allPayments: typeof payments = [];
+            for (const summary of (data.data?.summary || [])) {
+              for (const p of (summary.payments || [])) {
+                allPayments.push(p);
+              }
+            }
+            setPayments(allPayments);
+          }
+        }
+
+        const filingRes = await fetch(`/api/tax/filings?customerId=${session.customerId}&year=${year}`);
+        if (filingRes.ok) {
+          const filingData = await filingRes.json();
+          if (filingData.success) {
+            setFilings((filingData.data || []).map((f: { tax_type: string; tax_period: string; status: string }) => ({
+              tax_type: f.tax_type,
+              tax_period: f.tax_period,
+              status: f.status,
+            })));
+          }
+        }
       }
     } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
-  }, [session?.customerId, year]);
+  }, [session, year]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -154,6 +175,189 @@ export default function MonthlyDashboardPage() {
         </div>
       </div>
 
+      {/* ── NEW: KPI Cards (4 boxes) ── */}
+      {overview && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {[
+            { key: 'kpiDeadlines', value: `${overview.kpis.deadlines}${t('count')}`, desc: t('kpiDeadlinesDesc'), icon: CalendarClock, color: 'text-blue-600 bg-blue-50' },
+            { key: 'kpiAttention', value: `${overview.kpis.attention}${t('count')}`, desc: t('kpiAttentionDesc'), icon: AlertTriangle, color: 'text-red-600 bg-red-50' },
+            { key: 'kpiExpected', value: fmtRp(overview.kpis.expectedTax), desc: t('kpiExpectedDesc'), icon: Wallet, color: 'text-amber-600 bg-amber-50' },
+            { key: 'kpiSubmitted', value: `${overview.kpis.submitted}${t('count')}`, desc: t('kpiSubmittedDesc'), icon: CheckCircle, color: 'text-green-600 bg-green-50' },
+          ].map((kpi) => {
+            const Icon = kpi.icon;
+            return (
+              <Card key={kpi.key} className="border-0 shadow-sm hover:shadow-md transition-all">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="text-xs text-gray-500">{t(kpi.key)}</p>
+                    <div className={`p-1.5 rounded-lg ${kpi.color}`}>
+                      <Icon className="h-3.5 w-3.5" />
+                    </div>
+                  </div>
+                  <p className="text-xl md:text-2xl font-bold text-gray-900">{kpi.value}</p>
+                  <p className="text-[10px] text-gray-400 mt-1">{kpi.desc}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── NEW: Work Queue (Priority Tasks) ── */}
+      {overview && overview.workQueue.length > 0 && (
+        <Card className="border-0 shadow-sm mb-6">
+          <CardContent className="p-5">
+            <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-blue-600" />{t('workQueueTitle')}
+            </h3>
+            <div className="space-y-2">
+              {overview.workQueue.map((task) => {
+                const iconMap: Record<string, typeof Upload> = {
+                  'missing-docs': Upload,
+                  'ai-review': Receipt,
+                  'billing': Landmark,
+                  'e-filing': FileCheck2,
+                };
+                const Icon = iconMap[task.id] || FileText;
+                return (
+                  <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all">
+                    <div className="p-2 bg-gray-50 rounded-lg">
+                      <Icon className="h-4 w-4 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{t(task.title)}</p>
+                        <Badge className={task.priority === 'HIGH' ? 'text-[9px] bg-red-100 text-red-700' : 'text-[9px] bg-yellow-100 text-yellow-700'}>
+                          {task.priority === 'HIGH' ? t('priorityHigh') : t('priorityMedium')}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">{task.desc}</p>
+                    </div>
+                    <Button size="sm" variant="outline" className="h-7 text-xs flex-shrink-0">
+                      {t(task.actionKey)}
+                      <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── NEW: Upcoming Deadlines + Risk Alerts (2-col) ── */}
+      {overview && (overview.upcomingDeadlines.length > 0 || overview.riskAlerts.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {/* Upcoming Deadlines */}
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-5">
+              <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-indigo-600" />{t('upcomingDeadlinesTitle')}
+              </h3>
+              {overview.upcomingDeadlines.length === 0 ? (
+                <p className="text-xs text-gray-400 py-4 text-center">{t('noUpcomingDeadlines')}</p>
+              ) : (
+                <div className="space-y-2">
+                  {overview.upcomingDeadlines.map((d, i) => (
+                    <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Badge className="text-[10px] bg-blue-100 text-blue-700 font-mono">{d.tax}</Badge>
+                        <span className="text-xs text-gray-600 truncate">{d.entity}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-[10px] text-gray-400">{d.due}</span>
+                        <Badge className={
+                          d.status === 'urgent' ? 'text-[9px] bg-red-100 text-red-700' :
+                          d.status === 'filed' ? 'text-[9px] bg-green-100 text-green-700' :
+                          d.status === 'review' ? 'text-[9px] bg-yellow-100 text-yellow-700' :
+                          'text-[9px] bg-gray-100 text-gray-600'
+                        }>
+                          D-{d.daysLeft}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Risk Alerts */}
+          <Card className="border-0 shadow-sm border-l-4 border-l-red-400">
+            <CardContent className="p-5">
+              <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-500" />{t('riskAlertsTitle')}
+              </h3>
+              {overview.riskAlerts.length === 0 ? (
+                <div className="text-center py-6">
+                  <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1" />
+                  <p className="text-xs text-gray-400">{t('noRiskAlerts')}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {overview.riskAlerts.map((alert, i) => (
+                    <div key={i} className={`p-2.5 rounded-lg text-xs ${alert.severity === 'HIGH' ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${alert.severity === 'HIGH' ? 'text-red-500' : 'text-amber-500'}`} />
+                        <span>{alert.message}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ── NEW: Client Status (Consultant only) ── */}
+      {overview?.isConsultant && overview.clientStatus.length > 0 && (
+        <Card className="border-0 shadow-sm mb-6">
+          <CardContent className="p-5">
+            <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
+              <Users className="h-4 w-4 text-purple-600" />{t('clientStatusTitle')}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {overview.clientStatus.slice(0, 6).map((client) => (
+                <div key={client.id} className="p-3 rounded-xl border border-gray-100 hover:shadow-sm transition-all cursor-pointer"
+                  onClick={() => router.push(`/${locale}/customers/${client.id}`)}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="h-3 w-3 text-gray-400" />
+                        <p className="text-sm font-medium truncate">{client.name}</p>
+                      </div>
+                    </div>
+                    <Badge className={
+                      client.health === 'attention' ? 'text-[9px] bg-red-100 text-red-700' :
+                      client.health === 'review' ? 'text-[9px] bg-yellow-100 text-yellow-700' :
+                      'text-[9px] bg-green-100 text-green-700'
+                    }>
+                      {client.health === 'attention' ? t('healthAttention') : client.health === 'review' ? t('healthReview') : t('healthNormal')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-3 text-[10px] text-gray-500">
+                    <span>{t('openCount')}: <span className="font-bold text-gray-700">{client.open}</span></span>
+                    <span>•</span>
+                    <span>{t('doneCount')}: <span className="font-bold text-gray-700">{client.done}</span></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Grid Toggle ── */}
+      {payments.length > 0 && (
+        <div className="mb-4">
+          <Button variant="ghost" size="sm" onClick={() => setShowGrid(!showGrid)} className="text-xs text-gray-500">
+            <ChevronDown className={`h-3 w-3 mr-1 transition-transform ${showGrid ? '' : '-rotate-90'}`} />
+            {showGrid ? t('hideGrid') : t('showGrid')}
+          </Button>
+        </div>
+      )}
+
       {/* Urgent Reminders */}
       {(() => {
         const now = new Date();
@@ -216,7 +420,7 @@ export default function MonthlyDashboardPage() {
 
       {isLoading ? (
         <div className="text-center py-20"><Loader2 className="h-8 w-8 animate-spin mx-auto text-slate-400" /></div>
-      ) : (
+      ) : !showGrid ? null : (
         <>
           {/* Monthly Grid per Tax Type */}
           <div className="space-y-4">
