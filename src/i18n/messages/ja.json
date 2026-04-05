@@ -195,7 +195,8 @@
     "submittedThisMonth": "今月の提出",
     "poasPending": "委任状待ち",
     "manageUsers": "ユーザー管理",
-    "viewAnalytics": "分析を見る"
+    "viewAnalytics": "分析を見る",
+    "companyDashboard": "法人ダッシュボード"
   },
   "quickAction": {
     "annualReturn": "確定申告をする",
@@ -1199,7 +1200,8 @@
     "logIn": "ログイン",
     "thisMonth": "今月",
     "needAction": "対応必要",
-    "waiting": "待機中"
+    "waiting": "待機中",
+    "corporateSubtitle": "月次申告と法人税務を一括管理"
   },
   "guide": {
     "title": "AI Pajakを始める",

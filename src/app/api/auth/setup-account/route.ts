@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
+
+type AccountType = 'INDIVIDUAL' | 'COMPANY' | 'TAX_PARTNER';
 
 /**
  * POST /api/auth/setup-account
  *
- * Called after successful registration to:
- * 1. Create customer record
- * 2. Assign CUSTOMER role
- * 3. Create FREE subscription
+ * Called after registration to create the appropriate records based on accountType:
+ *
+ *   INDIVIDUAL → customer(INDIVIDUAL) + CUSTOMER role + FREE subscription
+ *   COMPANY    → customer(COMPANY, company_name) + CUSTOMER role + FREE subscription
+ *   TAX_PARTNER → tax_partner + consultant(self, PARTNER) + TAX_ADVISOR_JTC role
  *
  * Idempotent — safe to call multiple times.
+ * Falls back to INDIVIDUAL if accountType is missing (backward compat).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -21,83 +26,218 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const admin = getSupabaseAdmin();
-    const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+    // Parse body (may be empty — fallback to metadata)
+    let body: {
+      accountType?: AccountType;
+      fullName?: string;
+      phone?: string;
+      companyName?: string;
+      npwp?: string;
+      firmName?: string;
+      firmRegistrationNumber?: string;
+    } = {};
+    try { body = await request.json(); } catch { /* empty body allowed */ }
+
+    const metadata = user.user_metadata || {};
+    const accountType: AccountType = (body.accountType || metadata.account_type || 'INDIVIDUAL') as AccountType;
+    const fullName = body.fullName || metadata.full_name || user.email?.split('@')[0] || 'User';
+    const phone = body.phone || metadata.phone || null;
     const email = user.email || '';
 
-    // 1. Create customer record (idempotent)
-    const { data: existingCustomer } = await admin
-      .from('customer')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle();
+    const admin = getSupabaseAdmin();
 
-    let customerId: string;
-
-    if (existingCustomer) {
-      customerId = existingCustomer.id;
-    } else {
-      const { data: newCustomer, error: custError } = await admin
-        .from('customer')
-        .insert({
-          user_id: user.id,
-          customer_type: 'INDIVIDUAL',
-          full_name: fullName,
-          email,
-        })
-        .select('id')
-        .single();
-
-      if (custError) {
-        return NextResponse.json({ error: 'Failed to create customer: ' + custError.message }, { status: 500 });
-      }
-      customerId = newCustomer.id;
+    if (accountType === 'TAX_PARTNER') {
+      return await setupTaxPartner(admin, user.id, email, fullName, phone, body.firmName, body.firmRegistrationNumber);
     }
 
-    // 2. Assign CUSTOMER role (idempotent)
-    const { data: existingRole } = await admin
-      .from('user_roles')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('role', 'CUSTOMER')
-      .maybeSingle();
-
-    if (!existingRole) {
-      await admin.from('user_roles').insert({
-        user_id: user.id,
-        role: 'CUSTOMER',
-        is_active: true,
-      });
-    }
-
-    // 3. Create FREE subscription (idempotent)
-    const { data: existingSub } = await admin
-      .from('subscription')
-      .select('id')
-      .eq('customer_id', customerId)
-      .eq('is_active', true)
-      .maybeSingle();
-
-    if (!existingSub) {
-      const now = new Date();
-      const yearEnd = new Date(now.getFullYear(), 11, 31);
-
-      await admin.from('subscription').insert({
-        customer_id: customerId,
-        plan: 'free',
-        billing_cycle: 'ANNUAL',
-        price: 0,
-        is_active: true,
-        current_period_start: now.toISOString(),
-        current_period_end: yearEnd.toISOString(),
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: { customerId, role: 'CUSTOMER', plan: 'free' },
-    });
-  } catch {
+    // INDIVIDUAL or COMPANY → customer flow
+    return await setupCustomer(admin, user.id, email, fullName, phone, accountType, body.companyName, body.npwp);
+  } catch (error) {
+    loggers.api.error({ err: error }, 'setup-account error');
     return NextResponse.json({ error: 'Setup failed' }, { status: 500 });
   }
+}
+
+async function setupCustomer(
+  admin: ReturnType<typeof getSupabaseAdmin>,
+  userId: string,
+  email: string,
+  fullName: string,
+  phone: string | null,
+  customerType: 'INDIVIDUAL' | 'COMPANY',
+  companyName?: string,
+  npwp?: string
+) {
+  // 1. Upsert customer
+  const { data: existing } = await admin
+    .from('customer')
+    .select('id, customer_type')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  let customerId: string;
+  if (existing) {
+    // Update customer_type if it changed (user may have picked a different type)
+    if (existing.customer_type !== customerType || companyName || npwp) {
+      await admin.from('customer').update({
+        customer_type: customerType,
+        full_name: fullName,
+        ...(companyName ? { company_name: companyName } : {}),
+        ...(npwp ? { npwp } : {}),
+        ...(phone ? { phone } : {}),
+      }).eq('id', existing.id);
+    }
+    customerId = existing.id;
+  } else {
+    const { data: newCustomer, error: custError } = await admin
+      .from('customer')
+      .insert({
+        user_id: userId,
+        customer_type: customerType,
+        full_name: fullName,
+        email,
+        phone,
+        company_name: customerType === 'COMPANY' ? (companyName || null) : null,
+        npwp: npwp || null,
+      })
+      .select('id')
+      .single();
+
+    if (custError) {
+      return NextResponse.json({ error: 'Failed to create customer: ' + custError.message }, { status: 500 });
+    }
+    customerId = newCustomer.id;
+  }
+
+  // 2. Assign CUSTOMER role
+  const { data: existingRole } = await admin
+    .from('user_roles')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('role', 'CUSTOMER')
+    .maybeSingle();
+
+  if (!existingRole) {
+    await admin.from('user_roles').insert({
+      user_id: userId,
+      role: 'CUSTOMER',
+      is_active: true,
+    });
+  }
+
+  // 3. FREE subscription
+  const { data: existingSub } = await admin
+    .from('subscription')
+    .select('id')
+    .eq('customer_id', customerId)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (!existingSub) {
+    const now = new Date();
+    const yearEnd = new Date(now.getFullYear(), 11, 31);
+    await admin.from('subscription').insert({
+      customer_id: customerId,
+      plan: 'free',
+      billing_cycle: 'ANNUAL',
+      price: 0,
+      is_active: true,
+      current_period_start: now.toISOString(),
+      current_period_end: yearEnd.toISOString(),
+    });
+  }
+
+  return NextResponse.json({
+    success: true,
+    data: { accountType: customerType, customerId, role: 'CUSTOMER', plan: 'free' },
+  });
+}
+
+async function setupTaxPartner(
+  admin: ReturnType<typeof getSupabaseAdmin>,
+  userId: string,
+  email: string,
+  fullName: string,
+  phone: string | null,
+  firmName?: string,
+  firmRegistrationNumber?: string
+) {
+  // 1. Create tax_partner (idempotent by user_id via consultant lookup)
+  const { data: existingConsultant } = await admin
+    .from('consultant')
+    .select('id, tax_partner_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  let taxPartnerId: string;
+  let consultantId: string;
+
+  if (existingConsultant) {
+    taxPartnerId = existingConsultant.tax_partner_id;
+    consultantId = existingConsultant.id;
+  } else {
+    const { data: newTp, error: tpError } = await admin
+      .from('tax_partner')
+      .insert({
+        name: firmName || `${fullName}'s Firm`,
+        is_active: true,
+      })
+      .select('id')
+      .single();
+
+    if (tpError) {
+      return NextResponse.json({ error: 'Failed to create tax partner: ' + tpError.message }, { status: 500 });
+    }
+    taxPartnerId = newTp.id;
+
+    const { data: newConsultant, error: consError } = await admin
+      .from('consultant')
+      .insert({
+        user_id: userId,
+        tax_partner_id: taxPartnerId,
+        is_active: true,
+        full_name: fullName,
+        email,
+        phone: phone || null,
+        employment_start_date: new Date().toISOString().split('T')[0],
+      })
+      .select('id')
+      .single();
+
+    if (consError) {
+      return NextResponse.json({ error: 'Failed to create consultant: ' + consError.message }, { status: 500 });
+    }
+    consultantId = newConsultant.id;
+  }
+
+  // 2. Assign TAX_ADVISOR_JTC role (tax partner owners have full advisor privileges)
+  const { data: existingRole } = await admin
+    .from('user_roles')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('role', 'TAX_ADVISOR_JTC')
+    .maybeSingle();
+
+  if (!existingRole) {
+    await admin.from('user_roles').insert({
+      user_id: userId,
+      role: 'TAX_ADVISOR_JTC',
+      organization_id: taxPartnerId,
+      organization_type: 'TAX_PARTNER',
+      is_active: true,
+    });
+  }
+
+  loggers.api.info({ userId, taxPartnerId, firmName }, 'Tax partner setup completed');
+
+  return NextResponse.json({
+    success: true,
+    data: {
+      accountType: 'TAX_PARTNER',
+      taxPartnerId,
+      consultantId,
+      role: 'TAX_ADVISOR_JTC',
+      firmName: firmName || `${fullName}'s Firm`,
+    },
+  });
 }

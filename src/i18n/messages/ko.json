@@ -195,7 +195,8 @@
     "submittedThisMonth": "이번 달 제출",
     "poasPending": "위임장 대기",
     "manageUsers": "사용자 관리",
-    "viewAnalytics": "분석 보기"
+    "viewAnalytics": "분석 보기",
+    "companyDashboard": "법인 고객 대시보드"
   },
   "quickAction": {
     "annualReturn": "연말결산 하기",
@@ -1199,7 +1200,8 @@
     "logIn": "로그인",
     "thisMonth": "이번 달",
     "needAction": "조치 필요",
-    "waiting": "대기 중"
+    "waiting": "대기 중",
+    "corporateSubtitle": "월 신고 및 법인 세무를 한눈에 관리합니다"
   },
   "guide": {
     "title": "AI Pajak 시작하기",

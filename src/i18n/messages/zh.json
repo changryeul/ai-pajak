@@ -195,7 +195,8 @@
     "submittedThisMonth": "本月已提交",
     "poasPending": "待处理委托",
     "manageUsers": "用户管理",
-    "viewAnalytics": "查看分析"
+    "viewAnalytics": "查看分析",
+    "companyDashboard": "企业仪表板"
   },
   "quickAction": {
     "annualReturn": "年度报税",
@@ -1199,7 +1200,8 @@
     "logIn": "登录",
     "thisMonth": "本月",
     "needAction": "需要处理",
-    "waiting": "等待中"
+    "waiting": "等待中",
+    "corporateSubtitle": "一站式管理月度申报和企业税务"
   },
   "guide": {
     "title": "开始使用AI Pajak",

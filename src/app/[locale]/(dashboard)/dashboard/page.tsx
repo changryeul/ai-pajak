@@ -111,7 +111,7 @@ function CustomerDashboardWithOnboarding({
   session,
   locale,
 }: {
-  session: { customerId?: string; fullName?: string };
+  session: { customerId?: string; customerType?: 'INDIVIDUAL' | 'COMPANY'; fullName?: string };
   locale: string;
 }) {
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -130,7 +130,81 @@ function CustomerDashboardWithOnboarding({
     return <OnboardingWizard onComplete={() => setShowOnboarding(false)} />;
   }
 
+  // Branch by customer type — corporate customers focus on monthly filing
+  if (session.customerType === 'COMPANY') {
+    return <CorporateCustomerDashboard session={session} locale={locale} />;
+  }
   return <CustomerDashboard session={session} locale={locale} />;
+}
+
+// Corporate Customer Dashboard — monthly filing focus
+function CorporateCustomerDashboard({
+  session,
+  locale,
+}: {
+  session: { customerId?: string; fullName?: string };
+  locale: string;
+}) {
+  const t = useTranslations();
+
+  return (
+    <div className="space-y-6">
+      {/* Hero Header — corporate theme (emerald/green) */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-green-700 to-teal-800 p-6 md:p-8 text-white">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+        <div className="relative z-10">
+          <p className="text-emerald-200 text-sm font-medium flex items-center gap-2">
+            🏢 {t('dashboard.companyDashboard')}
+          </p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{session.fullName || 'Company'}</h1>
+          <p className="text-emerald-200 mt-2 text-sm">{t('dashboardHero.corporateSubtitle')}</p>
+        </div>
+      </div>
+
+      {/* Monthly filing quick access */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          { href: '/tax/monthly-dashboard', icon: BarChart3, label: '월 신고 현황', desc: 'PPh 21/23/PPN/PPh 4(2)', gradient: 'from-blue-500 to-cyan-500' },
+          { href: '/tax/pph21', icon: Users, label: '급여 & PPh 21', desc: '월별 급여 명세 + TER 계산', gradient: 'from-amber-500 to-orange-500' },
+          { href: '/tax/spt-tahunan/1771', icon: FileSpreadsheet, label: 'SPT Badan 1771', desc: '법인 연간 신고', gradient: 'from-purple-500 to-pink-500' },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={`/${locale}${item.href}`}
+              className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shadow-sm`}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">{item.label}</p>
+                  <p className="text-xs text-gray-500">{item.desc}</p>
+                </div>
+              </div>
+              <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-1 transition-all" />
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Filing Summary + Deadlines */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <FilingSummaryWidget customerId={session.customerId} />
+        <DeadlineCalendar customerId={session.customerId} />
+      </div>
+
+      {/* Compliance + Charts */}
+      <ComplianceScoreWidget />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TaxSummaryChart customerId={session.customerId} />
+        <FilingStatusChart customerId={session.customerId} />
+      </div>
+    </div>
+  );
 }
 
 // Customer Dashboard

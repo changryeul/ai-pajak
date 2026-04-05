@@ -195,7 +195,8 @@
     "submittedThisMonth": "Submitted This Month",
     "poasPending": "POAs Pending",
     "manageUsers": "Manage Users",
-    "viewAnalytics": "View Analytics"
+    "viewAnalytics": "View Analytics",
+    "companyDashboard": "Corporate Dashboard"
   },
   "quickAction": {
     "annualReturn": "File Annual Return",
@@ -1199,7 +1200,8 @@
     "logIn": "Log In",
     "thisMonth": "this month",
     "needAction": "need action",
-    "waiting": "waiting"
+    "waiting": "waiting",
+    "corporateSubtitle": "Manage monthly filings and corporate tax at a glance"
   },
   "guide": {
     "title": "Get Started with AI Pajak",

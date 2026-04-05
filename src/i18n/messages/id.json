@@ -195,7 +195,8 @@
     "submittedThisMonth": "Diajukan Bulan Ini",
     "poasPending": "Surat Kuasa Tertunda",
     "manageUsers": "Kelola Pengguna",
-    "viewAnalytics": "Lihat Analitik"
+    "viewAnalytics": "Lihat Analitik",
+    "companyDashboard": "Dasbor Perusahaan"
   },
   "quickAction": {
     "annualReturn": "Lapor SPT Tahunan",
@@ -1199,7 +1200,8 @@
     "logIn": "Masuk",
     "thisMonth": "bulan ini",
     "needAction": "perlu tindakan",
-    "waiting": "menunggu"
+    "waiting": "menunggu",
+    "corporateSubtitle": "Kelola SPT Masa dan pajak badan dalam satu tampilan"
   },
   "guide": {
     "title": "Mulai Menggunakan AI Pajak",

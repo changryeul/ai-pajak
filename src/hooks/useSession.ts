@@ -12,6 +12,7 @@ export interface ClientSessionContext {
   email: string;
   fullName?: string;
   customerId?: string;
+  customerType?: 'INDIVIDUAL' | 'COMPANY';
   consultantId?: string;
   /** All available roles for this user (for role switching) */
   availableRoles?: UserRole[];
@@ -101,19 +102,21 @@ export function useSession(): UseSessionReturn {
 
       let fullName: string | undefined;
       let customerId: string | undefined;
+      let customerType: 'INDIVIDUAL' | 'COMPANY' | undefined;
       let consultantId: string | undefined;
 
       // Get additional data based on role
       if (userRole.role === UserRole.CUSTOMER) {
         const { data: customer } = await supabase
           .from('customer')
-          .select('id, full_name, company_name')
+          .select('id, full_name, company_name, customer_type')
           .eq('user_id', authSession.user.id)
           .single();
 
         if (customer) {
           customerId = customer.id;
-          fullName = customer.full_name || customer.company_name;
+          customerType = customer.customer_type as 'INDIVIDUAL' | 'COMPANY';
+          fullName = customer.company_name || customer.full_name;
         }
       } else if (
         userRole.role === UserRole.TAX_OPERATOR ||
@@ -151,6 +154,7 @@ export function useSession(): UseSessionReturn {
         email: authSession.user.email!,
         fullName,
         customerId,
+        customerType,
         consultantId,
         availableRoles: availableRoles.length > 1 ? availableRoles : undefined,
       });
