@@ -65,13 +65,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'JTC 약관 동의가 필요합니다' }, { status: 400 });
     }
 
+    // Normalize NPWP: strip separators, keep only 15 digits (corporate NPWP format)
+    const npwpDigits = npwp.replace(/\D/g, '');
+    if (npwpDigits.length !== 15) {
+      return NextResponse.json({ error: 'NPWP는 15자리 숫자여야 합니다' }, { status: 400 });
+    }
+
     const admin = getSupabaseAdmin();
 
-    // Check duplicate NPWP
+    // Check duplicate NPWP (digits-only stored in DB)
     const { data: existingNpwp } = await admin
       .from('customer')
       .select('id')
-      .eq('npwp', npwp)
+      .eq('npwp', npwpDigits)
       .maybeSingle();
 
     if (existingNpwp) {
@@ -91,7 +97,7 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         account_type: 'COMPANY',
         company_name: companyName,
-        npwp,
+        npwp: npwpDigits,
       },
     });
 
@@ -115,7 +121,7 @@ export async function POST(request: NextRequest) {
         email,
         phone: phone || null,
         company_name: companyName,
-        npwp,
+        npwp: npwpDigits,
         address: address || null,
         jtc_agreement_accepted: true,
         jtc_agreement_version: jtcAgreement.version || 'v1.0',
