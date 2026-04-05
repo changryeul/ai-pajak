@@ -46,8 +46,18 @@ interface ImportedInvoice {
   classifications: Classification[];
 }
 
-export default function AccurateSettingsPage() {
+type ProviderId = 'ACCURATE' | 'MEKARI';
+
+const PROVIDERS: { id: ProviderId; name: string; requiresDb: boolean; hint: string }[] = [
+  { id: 'ACCURATE', name: 'Accurate Online', requiresDb: true, hint: 'OAuth access token 발급 후 DB 선택 필요' },
+  { id: 'MEKARI', name: 'Mekari Jurnal', requiresDb: false, hint: 'OAuth access token만 있으면 연결 가능 (DB 선택 불필요)' },
+];
+
+export default function AccountingSettingsPage() {
   useParams();
+
+  const [provider, setProvider] = useState<ProviderId>('ACCURATE');
+  const currentProvider = PROVIDERS.find(p => p.id === provider)!;
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string>('');
@@ -85,7 +95,7 @@ export default function AccurateSettingsPage() {
       .catch(() => {});
   }, []);
 
-  // Load connection status when customer changes
+  // Load connection status when customer or provider changes
   useEffect(() => {
     if (!selectedCustomer) {
       setConnection(null);
@@ -95,22 +105,23 @@ export default function AccurateSettingsPage() {
     }
     setLoading(true);
     Promise.all([
-      fetch(`/api/accurate/sync?customerId=${selectedCustomer}`).then(r => r.json()),
-      fetch(`/api/accurate/classify?customerId=${selectedCustomer}`).then(r => r.json()),
+      fetch(`/api/accounting/sync?customerId=${selectedCustomer}&provider=${provider}`).then(r => r.json()),
+      fetch(`/api/accounting/classify?customerId=${selectedCustomer}&provider=${provider}`).then(r => r.json()),
     ]).then(([status, classify]) => {
       if (status.success) {
-        setConnection(status.data.connection);
-        setCounts(status.data.counts);
+        const conn = (status.data.connections || []).find((c: { provider: string }) => c.provider === provider) || null;
+        setConnection(conn);
+        setCounts(status.data.counts?.[provider] || { sales: 0, purchase: 0 });
       }
       if (classify.success) {
         setInvoices(classify.data || []);
       }
     }).finally(() => setLoading(false));
-  }, [selectedCustomer]);
+  }, [selectedCustomer, provider]);
 
   const refreshInvoices = async () => {
     if (!selectedCustomer) return;
-    const res = await fetch(`/api/accurate/classify?customerId=${selectedCustomer}`);
+    const res = await fetch(`/api/accounting/classify?customerId=${selectedCustomer}&provider=${provider}`);
     const data = await res.json();
     if (data.success) setInvoices(data.data || []);
   };
@@ -122,7 +133,7 @@ export default function AccurateSettingsPage() {
     }
     setListingDbs(true);
     try {
-      const res = await fetch(`/api/accurate/connect?access_token=${encodeURIComponent(accessToken)}`);
+      const res = await fetch(`/api/accounting/connect?provider=${provider}&access_token=${encodeURIComponent(accessToken)}`);
       const data = await res.json();
       if (data.success) {
         setDatabases(data.data || []);
@@ -138,32 +149,37 @@ export default function AccurateSettingsPage() {
   };
 
   const handleConnect = async () => {
-    if (!selectedCustomer || !accessToken || !selectedDb) {
-      showMsg('error', '고객, Access Token, DB를 모두 선택해주세요');
+    if (!selectedCustomer || !accessToken) {
+      showMsg('error', '고객과 Access Token을 입력해주세요');
+      return;
+    }
+    if (currentProvider.requiresDb && !selectedDb) {
+      showMsg('error', 'DB를 선택해주세요');
       return;
     }
     setConnecting(true);
     try {
       const db = databases.find(d => d.id === selectedDb);
-      const res = await fetch('/api/accurate/connect', {
+      const res = await fetch('/api/accounting/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerId: selectedCustomer,
+          provider,
           accessToken,
-          databaseId: selectedDb,
-          databaseName: db?.alias || db?.dbName,
+          databaseId: selectedDb || undefined,
+          databaseName: db?.alias || db?.dbName || currentProvider.name,
         }),
       });
       const data = await res.json();
       if (data.success) {
         showMsg('success', data.message);
-        // Refresh connection info
-        const statusRes = await fetch(`/api/accurate/sync?customerId=${selectedCustomer}`);
+        const statusRes = await fetch(`/api/accounting/sync?customerId=${selectedCustomer}&provider=${provider}`);
         const statusData = await statusRes.json();
         if (statusData.success) {
-          setConnection(statusData.data.connection);
-          setCounts(statusData.data.counts);
+          const conn = (statusData.data.connections || []).find((c: { provider: string }) => c.provider === provider) || null;
+          setConnection(conn);
+          setCounts(statusData.data.counts?.[provider] || { sales: 0, purchase: 0 });
         }
       } else {
         showMsg('error', data.error);
@@ -179,11 +195,12 @@ export default function AccurateSettingsPage() {
     if (!selectedCustomer) return;
     setSyncing(true);
     try {
-      const res = await fetch('/api/accurate/sync', {
+      const res = await fetch('/api/accounting/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerId: selectedCustomer,
+          provider,
           fromDate,
           toDate,
           types: ['sales', 'purchase'],
@@ -195,13 +212,14 @@ export default function AccurateSettingsPage() {
       } else {
         showMsg('error', data.message || data.error || '동기화 실패');
       }
-      // Refresh
-      const statusRes = await fetch(`/api/accurate/sync?customerId=${selectedCustomer}`);
+      const statusRes = await fetch(`/api/accounting/sync?customerId=${selectedCustomer}&provider=${provider}`);
       const statusData = await statusRes.json();
       if (statusData.success) {
-        setConnection(statusData.data.connection);
-        setCounts(statusData.data.counts);
+        const conn = (statusData.data.connections || []).find((c: { provider: string }) => c.provider === provider) || null;
+        setConnection(conn);
+        setCounts(statusData.data.counts?.[provider] || { sales: 0, purchase: 0 });
       }
+      refreshInvoices();
     } catch {
       showMsg('error', '동기화 중 오류');
     } finally {
@@ -214,10 +232,10 @@ export default function AccurateSettingsPage() {
     if (!confirm('분류된 인보이스를 모두 세금 계산(tax_calculation)으로 적용하시겠습니까?')) return;
     setApplying(true);
     try {
-      const res = await fetch('/api/accurate/classify', {
+      const res = await fetch('/api/accounting/classify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: selectedCustomer, applyToCalculation: true }),
+        body: JSON.stringify({ customerId: selectedCustomer, provider, applyToCalculation: true }),
       });
       const data = await res.json();
       if (data.success) {
@@ -234,9 +252,9 @@ export default function AccurateSettingsPage() {
   };
 
   const handleDisconnect = async () => {
-    if (!selectedCustomer || !confirm('Accurate 연결을 해제하시겠습니까?')) return;
+    if (!selectedCustomer || !confirm(`${currentProvider.name} 연결을 해제하시겠습니까?`)) return;
     try {
-      const res = await fetch(`/api/accurate/connect?customerId=${selectedCustomer}`, { method: 'DELETE' });
+      const res = await fetch(`/api/accounting/connect?customerId=${selectedCustomer}&provider=${provider}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setConnection(null);
@@ -253,9 +271,27 @@ export default function AccurateSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Database className="h-6 w-6 text-blue-600" />
-          Accurate Online 연동
+          회계 S/W 연동
         </h1>
-        <p className="text-sm text-gray-500 mt-1">매출/매입 인보이스를 Accurate에서 AI Pajak으로 가져옵니다</p>
+        <p className="text-sm text-gray-500 mt-1">매출/매입 인보이스를 회계 소프트웨어에서 AI Pajak으로 가져옵니다</p>
+
+        {/* Provider tabs */}
+        <div className="mt-4 flex gap-2 border-b">
+          {PROVIDERS.map(p => (
+            <button
+              key={p.id}
+              onClick={() => setProvider(p.id)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                provider === p.id
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {p.name}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-gray-400 mt-2">{currentProvider.hint}</p>
       </div>
 
       {message && (
@@ -386,18 +422,20 @@ export default function AccurateSettingsPage() {
               <div className="flex gap-2 mt-1">
                 <Input
                   type="password"
-                  placeholder="aat.xxx..."
+                  placeholder={provider === 'ACCURATE' ? 'aat.xxx...' : 'Mekari Bearer token'}
                   value={accessToken}
                   onChange={e => setAccessToken(e.target.value)}
                   className="font-mono text-xs"
                 />
-                <Button size="sm" onClick={handleListDatabases} disabled={listingDbs || !accessToken}>
-                  {listingDbs ? <Loader2 className="h-3 w-3 animate-spin" /> : 'DB 조회'}
-                </Button>
+                {currentProvider.requiresDb && (
+                  <Button size="sm" onClick={handleListDatabases} disabled={listingDbs || !accessToken}>
+                    {listingDbs ? <Loader2 className="h-3 w-3 animate-spin" /> : 'DB 조회'}
+                  </Button>
+                )}
               </div>
             </div>
 
-            {databases.length > 0 && (
+            {currentProvider.requiresDb && databases.length > 0 && (
               <div>
                 <Label className="text-xs">데이터베이스 선택</Label>
                 <Select value={selectedDb ? String(selectedDb) : ''} onValueChange={v => setSelectedDb(Number(v))}>
@@ -413,9 +451,13 @@ export default function AccurateSettingsPage() {
               </div>
             )}
 
-            <Button onClick={handleConnect} disabled={connecting || !selectedDb} className="w-full">
+            <Button
+              onClick={handleConnect}
+              disabled={connecting || !accessToken || (currentProvider.requiresDb && !selectedDb)}
+              className="w-full"
+            >
               {connecting ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Link2 className="h-3 w-3 mr-2" />}
-              연결하기
+              {currentProvider.name} 연결하기
             </Button>
           </CardContent>
         </Card>

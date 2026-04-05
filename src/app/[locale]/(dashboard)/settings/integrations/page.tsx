@@ -45,7 +45,7 @@ const INTEGRATIONS: Integration[] = [
     gradient: 'from-emerald-600 to-emerald-700',
     status: 'disconnected',
     features: ['syncEmployees', 'syncInvoices', 'syncFinancial', 'syncFinancial'],
-    connectAction: '/api/integrations/jurnal?action=authorize',
+    connectAction: '/settings/accurate',
     category: 'accounting',
   },
   {

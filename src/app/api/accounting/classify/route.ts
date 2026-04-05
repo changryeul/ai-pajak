@@ -6,13 +6,9 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { classifyInvoice, toTaxPeriod } from '@/lib/accounting/accurate-classifier';
 
 /**
- * GET /api/accurate/classify?customerId=...
- *   → Returns imported invoices with classification preview
- *
- * POST /api/accurate/classify
- *   body: { customerId, invoiceIds?: string[], applyToCalculation?: boolean }
- *   → Classifies invoices (all IMPORTED if no ids provided)
- *   → If applyToCalculation=true, creates tax_calculation records
+ * Provider-agnostic classify endpoint.
+ * Reads from accounting_invoice table; classifier operates on normalized columns
+ * so it works for any provider.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -20,18 +16,22 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const customerId = new URL(request.url).searchParams.get('customerId');
+    const params = new URL(request.url).searchParams;
+    const customerId = params.get('customerId');
+    const providerFilter = params.get('provider');
     if (!customerId) return NextResponse.json({ error: 'customerId required' }, { status: 400 });
 
     const admin = getSupabaseAdmin();
-    const { data: invoices } = await admin
-      .from('accurate_invoice')
+    let q = admin
+      .from('accounting_invoice')
       .select('*')
       .eq('customer_id', customerId)
       .order('invoice_date', { ascending: false })
       .limit(500);
+    if (providerFilter) q = q.eq('provider', providerFilter);
 
-    // Attach classification preview
+    const { data: invoices } = await q;
+
     const withClassification = (invoices || []).map(inv => ({
       ...inv,
       classifications: classifyInvoice({
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: withClassification });
   } catch (error) {
-    loggers.api.error({ err: error }, 'Accurate classify GET error');
+    loggers.api.error({ err: error }, 'Accounting classify GET error');
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }
@@ -64,14 +64,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { customerId, invoiceIds, applyToCalculation = false } = body;
+    const { customerId, provider, invoiceIds, applyToCalculation = false } = body;
 
     if (!customerId) return NextResponse.json({ error: 'customerId required' }, { status: 400 });
 
     const admin = getSupabaseAdmin();
-
-    // Load invoices
-    let query = admin.from('accurate_invoice').select('*').eq('customer_id', customerId);
+    let query = admin.from('accounting_invoice').select('*').eq('customer_id', customerId);
+    if (provider) query = query.eq('provider', provider);
     if (invoiceIds && invoiceIds.length > 0) {
       query = query.in('id', invoiceIds);
     } else {
@@ -80,12 +79,15 @@ export async function POST(request: NextRequest) {
     const { data: invoices } = await query;
 
     if (!invoices || invoices.length === 0) {
-      return NextResponse.json({ success: true, data: { classified: 0, applied: 0 }, message: '대상 인보이스가 없습니다' });
+      return NextResponse.json({
+        success: true,
+        data: { classified: 0, applied: 0 },
+        message: '대상 인보이스가 없습니다',
+      });
     }
 
     let classified = 0;
     let applied = 0;
-    const created: string[] = [];
 
     for (const inv of invoices) {
       const classifications = classifyInvoice({
@@ -97,28 +99,23 @@ export async function POST(request: NextRequest) {
         total_amount: Number(inv.total_amount || 0),
         has_ppn: !!inv.has_ppn,
       });
-
       if (classifications.length === 0) continue;
       classified++;
 
       if (applyToCalculation) {
-        // Create tax_calculation record for each classification
         for (const cls of classifications) {
           if (cls.tax_type === 'NONE') continue;
-
-          // Map our classifier tax_type to tax_calculation.tax_type
           const tcTaxType =
             cls.tax_type === 'PPN_OUTPUT' || cls.tax_type === 'PPN_INPUT' ? 'PPN' :
             cls.tax_type === 'PPh23' ? 'PPh23' :
             cls.tax_type === 'PPh4_FINAL' ? 'PPh_FINAL' : null;
-
           if (!tcTaxType) continue;
 
           const { data: calc, error } = await admin.from('tax_calculation').insert({
             customer_id: customerId,
             tax_type: tcTaxType,
             tax_period: toTaxPeriod(inv.invoice_date),
-            source: 'CUSTOMER_OCR', // or new source 'ACCURATE_IMPORT'
+            source: 'CUSTOMER_OCR',
             calculation_result: {
               taxRate: cls.tax_rate,
               calculatedTax: cls.calculated_tax,
@@ -132,51 +129,39 @@ export async function POST(request: NextRequest) {
               recipient_npwp: inv.counterparty_npwp,
               invoice_number: inv.invoice_number,
               invoice_date: inv.invoice_date,
-              accurate_invoice_id: inv.id,
+              accounting_invoice_id: inv.id,
             },
             invoice_classification: {
-              source: 'ACCURATE',
+              source: inv.provider,
               type: cls.tax_type,
-              rawAccurateId: inv.accurate_id,
+              externalId: inv.external_id,
             },
           }).select().single();
 
           if (!error && calc) {
             applied++;
-            created.push(calc.id);
-
-            // Link the accurate_invoice to the created tax_calculation
-            await admin
-              .from('accurate_invoice')
-              .update({
-                status: 'APPLIED',
-                applied_to_calculation_id: calc.id,
-              })
+            await admin.from('accounting_invoice')
+              .update({ status: 'APPLIED', applied_to_calculation_id: calc.id })
               .eq('id', inv.id);
           }
         }
       } else {
-        // Just mark as classified
-        await admin
-          .from('accurate_invoice')
-          .update({ status: 'CLASSIFIED' })
-          .eq('id', inv.id);
+        await admin.from('accounting_invoice').update({ status: 'CLASSIFIED' }).eq('id', inv.id);
       }
     }
 
-    loggers.api.info({ customerId, classified, applied }, 'Accurate classify completed');
-
+    loggers.api.info({ customerId, classified, applied }, 'Accounting classify completed');
     return NextResponse.json({
       success: true,
-      data: { classified, applied, createdCalculationIds: created },
+      data: { classified, applied },
       message: applyToCalculation
         ? `${classified}건 분류 완료, ${applied}건이 세금 계산에 적용되었습니다`
         : `${classified}건이 분류되었습니다`,
     });
   } catch (error) {
-    loggers.api.error({ err: error }, 'Accurate classify POST error');
+    loggers.api.error({ err: error }, 'Accounting classify POST error');
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Classification failed' },
+      { error: error instanceof Error ? error.message : 'Failed' },
       { status: 500 }
     );
   }
