@@ -44,7 +44,7 @@ export default function TeamManagementPage() {
 
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<string>('TAX_OPERATOR');
-  const [inviteTeam, setInviteTeam] = useState<string>('');
+  const [inviteTeam, setInviteTeam] = useState<string>('none');
   const [inviteFullName, setInviteFullName] = useState('');
 
   const isMaster = session?.role === 'TAX_ADVISOR_JTC';
@@ -84,7 +84,7 @@ export default function TeamManagementPage() {
         body: JSON.stringify({
           email: inviteEmail,
           role: inviteRole,
-          team: inviteTeam || undefined,
+          team: inviteTeam && inviteTeam !== 'none' ? inviteTeam : undefined,
           fullName: inviteFullName || undefined,
         }),
       });
@@ -93,7 +93,7 @@ export default function TeamManagementPage() {
         showMsg('success', data.message);
         setInviteEmail('');
         setInviteFullName('');
-        setInviteTeam('');
+        setInviteTeam('none');
         setShowInviteForm(false);
         loadInvitations();
       } else {
@@ -200,7 +200,7 @@ export default function TeamManagementPage() {
                   <Select value={inviteTeam} onValueChange={setInviteTeam}>
                     <SelectTrigger><SelectValue placeholder="선택 안 함" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">선택 안 함</SelectItem>
+                      <SelectItem value="none">선택 안 함</SelectItem>
                       {TEAMS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                     </SelectContent>
                   </Select>
