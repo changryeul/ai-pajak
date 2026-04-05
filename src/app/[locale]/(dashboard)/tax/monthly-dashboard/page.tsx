@@ -250,7 +250,7 @@ export default function MonthlyDashboardPage() {
       )}
 
       {/* ── NEW: Work Queue (Priority Tasks) ── */}
-      {overview && overview.workQueue.length > 0 && (() => {
+      {overview && (() => {
         const tasks = overview.workQueue;
 
         return (
