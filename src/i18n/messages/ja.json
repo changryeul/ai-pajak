@@ -162,7 +162,8 @@
       "TAX_OPERATOR": "税務オペレーター",
       "TAX_OPERATOR_LEAD": "オペレーターリーダー",
       "TAX_OPERATOR_SUPERVISOR": "オペレータースーパーバイザー"
-    }
+    },
+    "accurateIntegration": "Accurate 連携"
   },
   "dashboard": {
     "title": "ダッシュボード",

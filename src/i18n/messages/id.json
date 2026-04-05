@@ -162,7 +162,8 @@
       "TAX_OPERATOR": "Operator Pajak",
       "TAX_OPERATOR_LEAD": "Ketua Operator",
       "TAX_OPERATOR_SUPERVISOR": "Supervisor Operator"
-    }
+    },
+    "accurateIntegration": "Integrasi Accurate"
   },
   "dashboard": {
     "title": "Dasbor",

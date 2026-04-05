@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Link2, CheckCircle, AlertTriangle, RefreshCw, Unlink, Database } from 'lucide-react';
+import { Loader2, Link2, CheckCircle, AlertTriangle, RefreshCw, Unlink, Database, FileText, Sparkles } from 'lucide-react';
+import { fmtRp } from '@/lib/utils';
 
 interface Database { id: number; alias: string; dbName: string; }
 interface Customer { id: string; full_name: string; company_name?: string; }
@@ -19,6 +20,30 @@ interface ConnectionInfo {
   last_sync_at: string | null;
   last_error: string | null;
   is_active: boolean;
+}
+
+interface Classification {
+  tax_type: string;
+  tax_rate: number;
+  tax_base: number;
+  calculated_tax: number;
+  warnings: string[];
+  confidence: string;
+}
+
+interface ImportedInvoice {
+  id: string;
+  invoice_type: 'SALES' | 'PURCHASE';
+  invoice_number: string;
+  invoice_date: string;
+  counterparty_name: string | null;
+  counterparty_npwp: string | null;
+  subtotal: number;
+  tax_amount: number;
+  total_amount: number;
+  has_ppn: boolean;
+  status: string;
+  classifications: Classification[];
 }
 
 export default function AccurateSettingsPage() {
@@ -36,6 +61,8 @@ export default function AccurateSettingsPage() {
   const [listingDbs, setListingDbs] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [invoices, setInvoices] = useState<ImportedInvoice[]>([]);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [fromDate, setFromDate] = useState(() => {
@@ -63,19 +90,30 @@ export default function AccurateSettingsPage() {
     if (!selectedCustomer) {
       setConnection(null);
       setCounts({ sales: 0, purchase: 0 });
+      setInvoices([]);
       return;
     }
     setLoading(true);
-    fetch(`/api/accurate/sync?customerId=${selectedCustomer}`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.success) {
-          setConnection(d.data.connection);
-          setCounts(d.data.counts);
-        }
-      })
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/accurate/sync?customerId=${selectedCustomer}`).then(r => r.json()),
+      fetch(`/api/accurate/classify?customerId=${selectedCustomer}`).then(r => r.json()),
+    ]).then(([status, classify]) => {
+      if (status.success) {
+        setConnection(status.data.connection);
+        setCounts(status.data.counts);
+      }
+      if (classify.success) {
+        setInvoices(classify.data || []);
+      }
+    }).finally(() => setLoading(false));
   }, [selectedCustomer]);
+
+  const refreshInvoices = async () => {
+    if (!selectedCustomer) return;
+    const res = await fetch(`/api/accurate/classify?customerId=${selectedCustomer}`);
+    const data = await res.json();
+    if (data.success) setInvoices(data.data || []);
+  };
 
   const handleListDatabases = async () => {
     if (!accessToken) {
@@ -168,6 +206,30 @@ export default function AccurateSettingsPage() {
       showMsg('error', '동기화 중 오류');
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleApplyAll = async () => {
+    if (!selectedCustomer) return;
+    if (!confirm('분류된 인보이스를 모두 세금 계산(tax_calculation)으로 적용하시겠습니까?')) return;
+    setApplying(true);
+    try {
+      const res = await fetch('/api/accurate/classify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: selectedCustomer, applyToCalculation: true }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', data.message);
+        refreshInvoices();
+      } else {
+        showMsg('error', data.error || '적용 실패');
+      }
+    } catch {
+      showMsg('error', '적용 중 오류');
+    } finally {
+      setApplying(false);
     }
   };
 
@@ -328,7 +390,7 @@ export default function AccurateSettingsPage() {
 
       {/* Step 3: Sync (only if connected) */}
       {selectedCustomer && connection?.is_active && (
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 shadow-sm mb-4">
           <CardContent className="p-5 space-y-3">
             <h2 className="font-bold text-sm">3. 인보이스 가져오기</h2>
             <div className="grid grid-cols-2 gap-3">
@@ -348,6 +410,73 @@ export default function AccurateSettingsPage() {
                 <><RefreshCw className="h-3 w-3 mr-2" />매출/매입 인보이스 가져오기</>
               )}
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 4: Imported Invoices + Auto-classify */}
+      {selectedCustomer && invoices.length > 0 && (
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4 text-indigo-600" />
+                4. 가져온 인보이스 및 자동 분류 ({invoices.length}건)
+              </h2>
+              <Button size="sm" onClick={handleApplyAll} disabled={applying}>
+                {applying ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                전체 세금계산 적용
+              </Button>
+            </div>
+
+            <div className="space-y-2 max-h-[600px] overflow-y-auto">
+              {invoices.map(inv => (
+                <div key={inv.id} className="p-3 rounded-lg border border-gray-100 hover:border-gray-200 text-xs">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Badge className={inv.invoice_type === 'SALES' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}>
+                          {inv.invoice_type === 'SALES' ? '매출' : '매입'}
+                        </Badge>
+                        <span className="font-mono font-medium">{inv.invoice_number}</span>
+                        <span className="text-gray-400">{inv.invoice_date}</span>
+                      </div>
+                      <p className="mt-1 text-gray-600 truncate">{inv.counterparty_name || '-'}</p>
+                      <p className="text-[10px] text-gray-400">NPWP: {inv.counterparty_npwp || '없음'}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-mono font-bold">{fmtRp(inv.total_amount)}</p>
+                      {inv.tax_amount > 0 && <p className="text-[10px] text-gray-400">세액 {fmtRp(inv.tax_amount)}</p>}
+                      <Badge className={
+                        inv.status === 'APPLIED' ? 'bg-green-100 text-green-700 text-[9px]' :
+                        inv.status === 'CLASSIFIED' ? 'bg-yellow-100 text-yellow-700 text-[9px]' :
+                        'bg-gray-100 text-gray-600 text-[9px]'
+                      }>{inv.status}</Badge>
+                    </div>
+                  </div>
+
+                  {/* Classification results */}
+                  {inv.classifications.length > 0 && (
+                    <div className="mt-2 pt-2 border-t space-y-1">
+                      {inv.classifications.map((cls, i) => (
+                        <div key={i} className="flex items-center gap-2 flex-wrap">
+                          <Badge className="bg-indigo-100 text-indigo-700 text-[9px]">
+                            {cls.tax_type} {(cls.tax_rate * 100).toFixed(1)}%
+                          </Badge>
+                          <span className="font-mono text-[10px]">{fmtRp(cls.calculated_tax)}</span>
+                          <span className="text-[9px] text-gray-400">신뢰도: {cls.confidence}</span>
+                          {cls.warnings.map((w, j) => (
+                            <span key={j} className="text-[9px] text-amber-600 flex items-center gap-1">
+                              <AlertTriangle className="h-2.5 w-2.5" />{w}
+                            </span>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
