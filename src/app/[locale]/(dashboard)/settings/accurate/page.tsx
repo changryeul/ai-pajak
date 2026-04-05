@@ -378,46 +378,98 @@ export default function AccountingSettingsPage() {
       {selectedCustomer && !connection?.is_active && (
         <Card className="mb-4 border-0 shadow-sm">
           <CardContent className="p-5 space-y-3">
-            <h2 className="font-bold text-sm">2. Accurate 연결</h2>
-            <details className="text-xs text-gray-500 bg-blue-50 rounded-lg p-3">
-              <summary className="cursor-pointer font-medium text-blue-700">
-                📖 Access Token 발급 방법 (클릭하여 펼치기)
-              </summary>
-              <ol className="mt-2 space-y-2 text-gray-700 list-decimal list-inside">
-                <li>
-                  <a href="https://account.accurate.id" target="_blank" rel="noreferrer" className="text-blue-600 underline">
-                    account.accurate.id
-                  </a> 접속 후 로그인
-                </li>
-                <li>우측 상단 프로필 → <b>Pengaturan</b> → <b>Aplikasi OAuth</b> 메뉴</li>
-                <li>
-                  <b>새 앱 등록</b> — Name: <code className="bg-white px-1">AI Pajak</code>, Redirect URI: <code className="bg-white px-1">https://ai-pajak.vercel.app/api/accurate/callback</code>
-                </li>
-                <li>발급된 <b>Client ID</b> / <b>Client Secret</b> 확인</li>
-                <li>
-                  브라우저에 다음 URL 입력 (YOUR_CLIENT_ID 교체):
-                  <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] break-all border">
-                    https://account.accurate.id/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri=https://ai-pajak.vercel.app/api/accurate/callback&amp;scope=item_view+sales_invoice_view+purchase_invoice_view
-                  </div>
-                </li>
-                <li>허용 클릭 → 리디렉트된 URL의 <code className="bg-white px-1">?code=xxx</code> 값 복사</li>
-                <li>
-                  터미널에서 curl 실행 (code/client_id/secret 교체):
-                  <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] border whitespace-pre">
+            <h2 className="font-bold text-sm">2. {currentProvider.name} 연결</h2>
+
+            {provider === 'ACCURATE' && (
+              <details className="text-xs text-gray-500 bg-blue-50 rounded-lg p-3">
+                <summary className="cursor-pointer font-medium text-blue-700">
+                  📖 Accurate Access Token 발급 방법 (클릭하여 펼치기)
+                </summary>
+                <ol className="mt-2 space-y-2 text-gray-700 list-decimal list-inside">
+                  <li>
+                    <a href="https://account.accurate.id" target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                      account.accurate.id
+                    </a> 접속 후 로그인
+                  </li>
+                  <li>우측 상단 프로필 → <b>Pengaturan</b> → <b>Aplikasi OAuth</b> 메뉴</li>
+                  <li>
+                    <b>새 앱 등록</b> — Name: <code className="bg-white px-1">AI Pajak</code>, Redirect URI: <code className="bg-white px-1">https://ai-pajak.vercel.app/api/accounting/callback</code>
+                  </li>
+                  <li>발급된 <b>Client ID</b> / <b>Client Secret</b> 확인</li>
+                  <li>
+                    브라우저에 다음 URL 입력 (YOUR_CLIENT_ID 교체):
+                    <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] break-all border">
+                      https://account.accurate.id/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback&amp;scope=item_view+sales_invoice_view+purchase_invoice_view
+                    </div>
+                  </li>
+                  <li>허용 클릭 → 리디렉트된 URL의 <code className="bg-white px-1">?code=xxx</code> 값 복사</li>
+                  <li>
+                    터미널에서 curl 실행:
+                    <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] border whitespace-pre">
 {`curl -X POST https://account.accurate.id/oauth/token \\
   -d "grant_type=authorization_code" \\
   -d "code=YOUR_CODE" \\
-  -d "redirect_uri=https://ai-pajak.vercel.app/api/accurate/callback" \\
+  -d "redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback" \\
   -d "client_id=YOUR_CLIENT_ID" \\
   -d "client_secret=YOUR_CLIENT_SECRET"`}
-                  </div>
-                </li>
-                <li>응답의 <code className="bg-white px-1">access_token</code> 값(<code>aat.</code>로 시작)을 아래에 붙여넣기</li>
-              </ol>
-              <p className="mt-2 text-[10px] text-amber-700">
-                ⚠️ Aplikasi OAuth 메뉴가 안 보이면 계정 플랜에 API가 포함되지 않은 것일 수 있습니다. 고객센터 문의 필요.
-              </p>
-            </details>
+                    </div>
+                  </li>
+                  <li>응답의 <code className="bg-white px-1">access_token</code> 값(<code>aat.</code>로 시작)을 아래에 붙여넣기</li>
+                </ol>
+                <p className="mt-2 text-[10px] text-amber-700">
+                  ⚠️ Aplikasi OAuth 메뉴가 안 보이면 계정 플랜에 API가 포함되지 않은 것일 수 있습니다.
+                </p>
+              </details>
+            )}
+
+            {provider === 'MEKARI' && (
+              <details className="text-xs text-gray-500 bg-emerald-50 rounded-lg p-3">
+                <summary className="cursor-pointer font-medium text-emerald-700">
+                  📖 Mekari Jurnal Access Token 발급 방법 (클릭하여 펼치기)
+                </summary>
+                <ol className="mt-2 space-y-2 text-gray-700 list-decimal list-inside">
+                  <li>
+                    <a href="https://mekari.com/developers" target="_blank" rel="noreferrer" className="text-emerald-600 underline">
+                      mekari.com/developers
+                    </a> 접속 후 Jurnal 계정으로 로그인
+                  </li>
+                  <li>
+                    <b>My Apps</b> 또는 <b>Applications</b> 메뉴 → <b>Create New App</b>
+                  </li>
+                  <li>
+                    앱 정보 입력 — Name: <code className="bg-white px-1">AI Pajak</code>, Redirect URI:{' '}
+                    <code className="bg-white px-1">https://ai-pajak.vercel.app/api/accounting/callback</code>
+                  </li>
+                  <li>
+                    Scopes 선택: <code className="bg-white px-1">sales_invoice:read</code>, <code className="bg-white px-1">purchase_invoice:read</code>, <code className="bg-white px-1">contact:read</code>
+                  </li>
+                  <li>발급된 <b>Client ID</b> / <b>Client Secret</b> 확인</li>
+                  <li>
+                    브라우저에 authorize URL 입력 (YOUR_CLIENT_ID 교체):
+                    <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] break-all border">
+                      https://api.mekari.com/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback&amp;scope=sales_invoice:read+purchase_invoice:read+contact:read
+                    </div>
+                  </li>
+                  <li>허용 클릭 → 리디렉트된 URL의 <code className="bg-white px-1">?code=xxx</code> 값 복사</li>
+                  <li>
+                    터미널에서 curl 실행:
+                    <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] border whitespace-pre">
+{`curl -X POST https://api.mekari.com/oauth/token \\
+  -H "Content-Type: application/x-www-form-urlencoded" \\
+  -d "grant_type=authorization_code" \\
+  -d "code=YOUR_CODE" \\
+  -d "redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback" \\
+  -d "client_id=YOUR_CLIENT_ID" \\
+  -d "client_secret=YOUR_CLIENT_SECRET"`}
+                    </div>
+                  </li>
+                  <li>응답의 <code className="bg-white px-1">access_token</code> 값을 아래에 붙여넣기</li>
+                </ol>
+                <p className="mt-2 text-[10px] text-amber-700">
+                  ⚠️ Mekari는 Jurnal 유료 플랜에서 API가 제공됩니다. API 미활성 시 고객센터 문의 필요.
+                </p>
+              </details>
+            )}
 
             <div>
               <Label className="text-xs">Access Token</Label>
