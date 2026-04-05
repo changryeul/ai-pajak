@@ -34,7 +34,7 @@ const INTEGRATIONS: Integration[] = [
     gradient: 'from-blue-600 to-blue-700',
     status: 'disconnected',
     features: ['syncEmployees', 'syncPayroll', 'syncInvoices', 'syncFinancial'],
-    connectAction: '/settings/accurate',
+    connectAction: '/settings/accurate?provider=ACCURATE',
     category: 'accounting',
   },
   {
@@ -45,7 +45,7 @@ const INTEGRATIONS: Integration[] = [
     gradient: 'from-emerald-600 to-emerald-700',
     status: 'disconnected',
     features: ['syncEmployees', 'syncInvoices', 'syncFinancial', 'syncFinancial'],
-    connectAction: '/settings/accurate',
+    connectAction: '/settings/accurate?provider=MEKARI',
     category: 'accounting',
   },
   {

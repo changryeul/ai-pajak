@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,8 +55,10 @@ const PROVIDERS: { id: ProviderId; name: string; requiresDb: boolean; hint: stri
 
 export default function AccountingSettingsPage() {
   useParams();
+  const searchParams = useSearchParams();
+  const initialProvider = (searchParams.get('provider') === 'MEKARI' ? 'MEKARI' : 'ACCURATE') as ProviderId;
 
-  const [provider, setProvider] = useState<ProviderId>('ACCURATE');
+  const [provider, setProvider] = useState<ProviderId>(initialProvider);
   const currentProvider = PROVIDERS.find(p => p.id === provider)!;
 
   const [customers, setCustomers] = useState<Customer[]>([]);
