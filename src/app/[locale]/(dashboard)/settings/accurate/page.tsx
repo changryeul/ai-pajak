@@ -89,6 +89,39 @@ export default function AccountingSettingsPage() {
     setTimeout(() => setMessage(null), 5000);
   };
 
+  // OAuth callback result feedback (from /api/accounting/callback redirect)
+  useEffect(() => {
+    const oauthStatus = searchParams.get('oauth');
+    const oauthMessage = searchParams.get('oauth_message');
+    if (oauthStatus === 'success') {
+      showMsg('success', '회계 소프트웨어 OAuth 연결이 완료되었습니다');
+    } else if (oauthStatus === 'error') {
+      showMsg('error', oauthMessage || 'OAuth 연결에 실패했습니다');
+    }
+  }, [searchParams]);
+
+  const handleOneClickOAuth = async () => {
+    if (!selectedCustomer) {
+      showMsg('error', '고객을 먼저 선택해주세요');
+      return;
+    }
+    try {
+      const res = await fetch('/api/accounting/authorize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: selectedCustomer, provider }),
+      });
+      const data = await res.json();
+      if (data.success && data.authorizeUrl) {
+        window.location.href = data.authorizeUrl;
+      } else {
+        showMsg('error', data.error || 'OAuth 시작 실패');
+      }
+    } catch {
+      showMsg('error', 'OAuth 시작 중 오류');
+    }
+  };
+
   // Load customers
   useEffect(() => {
     fetch('/api/customers?type=COMPANY')
@@ -379,6 +412,20 @@ export default function AccountingSettingsPage() {
         <Card className="mb-4 border-0 shadow-sm">
           <CardContent className="p-5 space-y-3">
             <h2 className="font-bold text-sm">2. {currentProvider.name} 연결</h2>
+
+            {/* One-click OAuth button (requires env vars) */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+              <p className="text-xs font-medium text-blue-900 mb-2">✨ 원클릭 OAuth 연결 (추천)</p>
+              <p className="text-[11px] text-blue-700 mb-2">
+                관리자가 환경변수에 Client ID/Secret을 설정한 경우 이용 가능합니다. 브라우저가 {currentProvider.name}로 이동하여 로그인 후 자동 연결됩니다.
+              </p>
+              <Button size="sm" onClick={handleOneClickOAuth} disabled={!selectedCustomer} className="w-full">
+                <Link2 className="h-3 w-3 mr-2" />{currentProvider.name}로 이동하여 연결
+              </Button>
+            </div>
+
+            <p className="text-[10px] text-gray-400 text-center">— 또는 수동으로 토큰 입력 —</p>
+
 
             {provider === 'ACCURATE' && (
               <details className="text-xs text-gray-500 bg-blue-50 rounded-lg p-3">
