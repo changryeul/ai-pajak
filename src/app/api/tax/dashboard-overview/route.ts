@@ -29,11 +29,12 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     if (isConsultant) {
       const { data: consultant } = await admin.from('consultant').select('id').eq('user_id', userId).single();
       if (consultant) {
-        const { data: custs } = await admin
-          .from('customer')
-          .select('id')
-          .eq('assigned_consultant_id', consultant.id);
-        customerIds = (custs || []).map(c => c.id);
+        const { data: assignments } = await admin
+          .from('customer_consultant')
+          .select('customer_id')
+          .eq('consultant_id', consultant.id)
+          .eq('is_active', true);
+        customerIds = (assignments || []).map(a => a.customer_id);
       }
     } else {
       const { data: customer } = await admin.from('customer').select('id').eq('user_id', userId).single();
