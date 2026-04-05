@@ -52,6 +52,7 @@ export default function MonthlyDashboardPage() {
 
   const [year, setYear] = useState(currentYear);
   const [dataLoading, setDataLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [payments, setPayments] = useState<Array<{ tax_type: string; tax_period: string; status: string; amount_due: number; spt_masa_filed: boolean; payment_deadline: string; reporting_deadline: string }>>([]);
   const [filings, setFilings] = useState<Array<{ tax_type: string; tax_period: string; status: string }>>([]);
   const [showGrid, setShowGrid] = useState(true);
@@ -113,6 +114,49 @@ export default function MonthlyDashboardPage() {
   }, [session, year]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  const handleWorkQueueAction = async (taskId: string) => {
+    const actionMap: Record<string, string> = {
+      'missing-docs': 'request-docs',
+      'ai-review': 'start-review',
+      'billing': 'create-billing',
+      'e-filing': 'submit-filing',
+    };
+    const action = actionMap[taskId];
+    if (!action) return;
+
+    setActionLoading(taskId);
+    try {
+      const res = await fetch('/api/tax/work-queue-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ action }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error || '작업 실행에 실패했습니다');
+        return;
+      }
+
+      alert(result.message || '처리되었습니다');
+
+      // start-review: navigate to calculations page
+      if (action === 'start-review' && result.redirectTo) {
+        router.push(`/${locale}${result.redirectTo}`);
+        return;
+      }
+
+      // Refresh dashboard
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      alert('작업 실행 중 오류가 발생했습니다');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   // Build month × tax type grid
   const getStatus = (taxType: string, month: number): { status: string; amount: number; sptFiled: boolean; filingStatus: string | null } => {
@@ -259,9 +303,17 @@ export default function MonthlyDashboardPage() {
                     </div>
 
                     {/* Action Button */}
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-all flex-shrink-0">
+                    <button
+                      onClick={() => handleWorkQueueAction(task.id)}
+                      disabled={actionLoading === task.id}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-all flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       <span className="text-sm font-medium text-gray-700">{isSample ? task.actionKey : t(task.actionKey)}</span>
-                      <ArrowRight className="h-4 w-4 text-gray-400" />
+                      {actionLoading === task.id ? (
+                        <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
+                      ) : (
+                        <ArrowRight className="h-4 w-4 text-gray-400" />
+                      )}
                     </button>
                   </div>
                 );
