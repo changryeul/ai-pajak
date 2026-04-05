@@ -27,8 +27,15 @@ export default function DashboardError({
           <p className="text-sm text-gray-500 mb-6">
             일시적인 오류가 발생했습니다. 다시 시도해주세요.
           </p>
-          {error.digest && (
-            <p className="text-xs text-gray-300 font-mono mb-4">Error: {error.digest}</p>
+          {error.message && (
+            <details className="text-left mb-4 text-xs bg-red-50 rounded p-2">
+              <summary className="cursor-pointer text-red-700 font-medium">에러 상세 정보</summary>
+              <p className="mt-2 text-red-800 font-mono break-all">{error.message}</p>
+              {error.stack && (
+                <pre className="mt-2 text-red-600 font-mono text-[10px] whitespace-pre-wrap overflow-auto max-h-48">{error.stack}</pre>
+              )}
+              {error.digest && <p className="mt-1 text-gray-400">Digest: {error.digest}</p>}
+            </details>
           )}
           <div className="flex gap-3 justify-center">
             <Button onClick={reset}>

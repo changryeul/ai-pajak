@@ -183,7 +183,7 @@ export function DeadlineCalendar({ showAll = false }: DeadlineCalendarProps) {
                   {getStatusIcon(deadline.status)}
                   <div>
                     <p className="font-medium text-gray-900">
-                      {deadline.taxType.replace(/_/g, ' ')}
+                      {deadline.taxType?.replace(/_/g, ' ') || '-'}
                     </p>
                     <p className="text-xs text-gray-500">
                       Period: {deadline.period}
