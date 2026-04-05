@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
-import { createClient } from '@/lib/supabase/client';
 import {
   Building2, ArrowLeft, ArrowRight, ShieldCheck, FileCheck2,
   Search, X, Loader2, CheckCircle,
@@ -118,34 +117,13 @@ export default function CompanyRegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const supabase = createClient();
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: representativeName,
-            phone,
-            account_type: 'COMPANY',
-            company_name: companyName,
-            npwp,
-          },
-          emailRedirectTo: `${window.location.origin}/${locale}/dashboard`,
-        },
-      });
-
-      if (signUpError) {
-        setError(signUpError.message);
-        return;
-      }
-
-      // Setup company account with all details
-      const res = await fetch('/api/auth/setup-account', {
+      // Server-side signup (bypasses client signUp → setup-account race condition)
+      const res = await fetch('/api/auth/signup-company', {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          accountType: 'COMPANY',
+          email,
+          password,
           fullName: representativeName,
           phone,
           companyName,
