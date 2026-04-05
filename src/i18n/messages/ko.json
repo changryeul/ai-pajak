@@ -163,7 +163,8 @@
       "TAX_OPERATOR_LEAD": "상담원 팀장",
       "TAX_OPERATOR_SUPERVISOR": "상담원 감독관"
     },
-    "accurateIntegration": "Accurate 연동"
+    "accurateIntegration": "Accurate 연동",
+    "teamManagement": "직원 관리"
   },
   "dashboard": {
     "title": "대시보드",

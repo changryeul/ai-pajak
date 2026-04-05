@@ -163,7 +163,8 @@
       "TAX_OPERATOR_LEAD": "オペレーターリーダー",
       "TAX_OPERATOR_SUPERVISOR": "オペレータースーパーバイザー"
     },
-    "accurateIntegration": "Accurate 連携"
+    "accurateIntegration": "Accurate 連携",
+    "teamManagement": "チーム管理"
   },
   "dashboard": {
     "title": "ダッシュボード",

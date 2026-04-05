@@ -163,7 +163,8 @@
       "TAX_OPERATOR_LEAD": "操作员组长",
       "TAX_OPERATOR_SUPERVISOR": "操作员主管"
     },
-    "accurateIntegration": "Accurate 集成"
+    "accurateIntegration": "Accurate 集成",
+    "teamManagement": "团队管理"
   },
   "dashboard": {
     "title": "仪表板",

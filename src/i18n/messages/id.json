@@ -163,7 +163,8 @@
       "TAX_OPERATOR_LEAD": "Ketua Operator",
       "TAX_OPERATOR_SUPERVISOR": "Supervisor Operator"
     },
-    "accurateIntegration": "Integrasi Accurate"
+    "accurateIntegration": "Integrasi Accurate",
+    "teamManagement": "Manajemen Tim"
   },
   "dashboard": {
     "title": "Dasbor",
