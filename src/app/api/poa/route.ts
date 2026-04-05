@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { listPOAs, POAStatus } from '@/lib/services/poa-service';
 import { loggers } from '@/lib/logger';
 
@@ -23,20 +24,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role, organization_id')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust)
+    const role = await resolveUserRole(supabase, user.id);
 
-    if (!userRole) {
+    if (!role) {
       return NextResponse.json(
         { success: false, error: 'User role not found' },
         { status: 403 }
       );
     }
+
+    const userRole = { role };
 
     // Build params based on role
     const page = parseInt(searchParams.get('page') || '1', 10);

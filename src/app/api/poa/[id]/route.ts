@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { getPOA } from '@/lib/services/poa-service';
 import { loggers } from '@/lib/logger';
 
@@ -27,20 +28,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role, organization_id')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust)
+    const role = await resolveUserRole(supabase, user.id);
 
-    if (!userRole) {
+    if (!role) {
       return NextResponse.json(
         { success: false, error: 'User role not found' },
         { status: 403 }
       );
     }
+
+    const userRole = { role };
 
     const poa = await getPOA(poaId);
 
@@ -118,13 +116,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust)
+    const role = await resolveUserRole(supabase, user.id);
+    const userRole = role ? { role } : null;
 
     if (!userRole || userRole.role !== 'CUSTOMER') {
       return NextResponse.json(
@@ -244,13 +238,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust)
+    const role = await resolveUserRole(supabase, user.id);
+    const userRole = role ? { role } : null;
 
     if (!userRole || userRole.role !== 'CUSTOMER') {
       return NextResponse.json(

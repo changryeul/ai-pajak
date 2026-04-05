@@ -1,50 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { resolveUserRole } from '@/lib/auth/resolve-role';
 import {
   getCustomer,
   updateCustomer,
   deleteCustomer,
 } from '@/lib/services/customer-service';
 import { loggers } from '@/lib/logger';
-
-/**
- * Resolve user's role with robust fallback:
- * - user_roles table (handle multiple rows)
- * - consultant table (→ CONSULTANT_JTC)
- * - customer table (→ CUSTOMER)
- */
-async function resolveUserRole(supabase: SupabaseClient, userId: string): Promise<string | null> {
-  const { data: roles } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .eq('is_active', true);
-
-  if (roles && roles.length > 0) {
-    const priority = ['TAX_ADVISOR_JTC', 'CONSULTANT_JTC', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR', 'CUSTOMER', 'PLATFORM_ADMIN'];
-    for (const p of priority) {
-      if (roles.find(r => r.role === p)) return p;
-    }
-    return roles[0].role;
-  }
-
-  const { data: consultant } = await supabase
-    .from('consultant')
-    .select('id')
-    .eq('user_id', userId)
-    .maybeSingle();
-  if (consultant) return 'CONSULTANT_JTC';
-
-  const { data: customer } = await supabase
-    .from('customer')
-    .select('id')
-    .eq('user_id', userId)
-    .maybeSingle();
-  if (customer) return 'CUSTOMER';
-
-  return null;
-}
 
 interface RouteParams {
   params: Promise<{ id: string }>;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCustomerFilings } from '@/lib/services/customer-service';
 import { loggers } from '@/lib/logger';
+import { resolveUserRole } from '@/lib/auth/resolve-role';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -33,20 +34,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Get user role
-    const { data: userRole } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+    // Get user role (robust: handles multiple rows + fallback)
+    const role = await resolveUserRole(supabase, user.id);
 
-    if (!userRole) {
+    if (!role) {
       return NextResponse.json(
         { success: false, error: 'User role not found' },
         { status: 403 }
       );
     }
+
+    const userRole = { role };
 
     // PLATFORM_ADMIN cannot access tax filing data (Hard Rule #1)
     if (userRole.role === 'PLATFORM_ADMIN') {
