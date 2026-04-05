@@ -164,8 +164,8 @@ export async function GET(request: NextRequest) {
         id: 'missing-docs',
         title: '미업로드 증빙 수집',
         desc: calcsWithoutNpwp > 0
-          ? `NPWP 누락 거래 ${calcsWithoutNpwp}건 — 자료 요청 필요`
-          : '누락된 증빙 자료가 없습니다',
+          ? `NPWP 누락 거래 ${calcsWithoutNpwp}건 — 고객에게 자료 요청을 보냅니다`
+          : '고객에게 부족한 증빙 자료(NPWP, 은행내역, 세금계산서 등) 업로드를 WhatsApp·알림으로 요청합니다',
         priority: calcsWithoutNpwp > 0 ? 'HIGH' : 'LOW',
         actionKey: '자료 요청 보내기',
         count: calcsWithoutNpwp,
@@ -174,8 +174,8 @@ export async function GET(request: NextRequest) {
         id: 'ai-review',
         title: 'AI 계산 결과 검토',
         desc: draftCalcs > 0
-          ? `고객이 생성한 초안 ${draftCalcs}건 검토 대기 중`
-          : '검토 대기 중인 AI 계산이 없습니다',
+          ? `고객이 생성한 초안 ${draftCalcs}건 — 세율·과세대상 최종 확인이 필요합니다`
+          : '고객이 OCR·AI로 생성한 세금 계산 초안을 검토하고 승인합니다 (세율, KBLI, 라이선스 조건 등)',
         priority: draftCalcs > 0 ? 'HIGH' : 'LOW',
         actionKey: '검토 시작',
         count: draftCalcs,
@@ -184,8 +184,8 @@ export async function GET(request: NextRequest) {
         id: 'billing',
         title: 'ID Billing 생성',
         desc: pendingBilling > 0
-          ? `승인 완료 ${pendingBilling}건 Billing 생성 대기`
-          : '생성 대기 중인 Billing이 없습니다',
+          ? `승인 완료 ${pendingBilling}건 — 납부용 Billing 코드를 생성합니다`
+          : '승인된 세금 계산에 대해 납부용 ID Billing(결제 코드)을 일괄 생성합니다',
         priority: pendingBilling > 0 ? 'MEDIUM' : 'LOW',
         actionKey: 'Billing 생성',
         count: pendingBilling,
@@ -194,8 +194,8 @@ export async function GET(request: NextRequest) {
         id: 'e-filing',
         title: 'e-Filing 제출',
         desc: readyForSubmit > 0
-          ? `납부 검증 완료 ${readyForSubmit}건 제출 가능`
-          : '제출 가능한 신고서가 없습니다',
+          ? `납부 검증 완료 ${readyForSubmit}건 — 신고서를 제출 처리합니다`
+          : '납부 검증이 완료된 신고서를 시스템에 제출 처리합니다 (DJP 제출은 별도 진행)',
         priority: readyForSubmit > 0 ? 'MEDIUM' : 'LOW',
         actionKey: '제출 진행',
         count: readyForSubmit,
