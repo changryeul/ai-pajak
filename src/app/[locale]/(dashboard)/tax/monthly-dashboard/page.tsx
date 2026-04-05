@@ -72,10 +72,12 @@ export default function MonthlyDashboardPage() {
     setDataLoading(true);
     try {
       // Dashboard overview (KPIs, work queue, risks, etc.)
-      const overviewRes = await fetch('/api/tax/dashboard-overview');
+      const overviewRes = await fetch('/api/tax/dashboard-overview', { credentials: 'include' });
       if (overviewRes.ok) {
         const ovData = await overviewRes.json();
         if (ovData.success) setOverview(ovData.data);
+      } else {
+        console.error('Dashboard overview failed:', overviewRes.status, await overviewRes.text());
       }
 
       // Legacy grid data (only if customer has customerId)
