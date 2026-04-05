@@ -111,26 +111,72 @@ export async function getSessionContext(): Promise<SessionContext | null> {
     return null;
   }
 
-  // Get user role and organization from database
-  const { data: userRole, error } = await supabase
+  // Get user role and organization from database (handle multiple rows)
+  const { data: userRoles } = await supabase
     .from('user_roles')
     .select('role, organization_id, organization_type')
     .eq('user_id', userId)
-    .eq('is_active', true)
-    .single();
+    .eq('is_active', true);
 
-  if (error || !userRole) {
-    loggers.auth.error({ err: error }, 'Failed to get user role');
-    return null;
+  if (userRoles && userRoles.length > 0) {
+    // Pick best role (prefer TAX_ADVISOR > CONSULTANT > CUSTOMER > others)
+    const roleOrder: UserRole[] = [
+      UserRole.TAX_ADVISOR_JTC,
+      UserRole.CONSULTANT_JTC,
+      UserRole.TAX_OPERATOR_SUPERVISOR,
+      UserRole.TAX_OPERATOR_LEAD,
+      UserRole.TAX_OPERATOR,
+      UserRole.CUSTOMER,
+      UserRole.PLATFORM_ADMIN,
+    ];
+    const best = roleOrder
+      .map(r => userRoles.find(ur => ur.role === r))
+      .find(Boolean) || userRoles[0];
+
+    return {
+      userId,
+      role: best.role as UserRole,
+      organizationId: best.organization_id,
+      organizationType: best.organization_type as OrganizationType | null,
+      email: userEmail!,
+    };
   }
 
-  return {
-    userId,
-    role: userRole.role as UserRole,
-    organizationId: userRole.organization_id,
-    organizationType: userRole.organization_type as OrganizationType | null,
-    email: userEmail!,
-  };
+  // Fallback: infer role from consultant/customer tables
+  const { data: consultant } = await supabase
+    .from('consultant')
+    .select('id, tax_partner_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (consultant) {
+    return {
+      userId,
+      role: UserRole.CONSULTANT_JTC,
+      organizationId: consultant.tax_partner_id,
+      organizationType: OrganizationType.TAX_PARTNER,
+      email: userEmail!,
+    };
+  }
+
+  const { data: customer } = await supabase
+    .from('customer')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (customer) {
+    return {
+      userId,
+      role: UserRole.CUSTOMER,
+      organizationId: null,
+      organizationType: null,
+      email: userEmail!,
+    };
+  }
+
+  loggers.auth.error({ userId }, 'No role found in user_roles, consultant, or customer tables');
+  return null;
 }
 
 /**
