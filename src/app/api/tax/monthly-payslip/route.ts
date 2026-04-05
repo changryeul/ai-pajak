@@ -202,9 +202,15 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
       Number(merged.transport_allowance || 0) +
       Number(merged.position_allowance || 0) +
       Number(merged.other_allowances || 0) +
+      Number(merged.laptop_allowance || 0) +
+      Number(merged.medical_allowance || 0) +
+      Number(merged.tax_allowance || 0) +
+      Number(merged.annual_leave_pay || 0) +
       Number(merged.bonus || 0) +
       Number(merged.thr || 0) +
-      Number(merged.commission || 0);
+      Number(merged.commission || 0) +
+      Number(merged.severance_allowance || 0) +
+      Number(merged.pkwt_compensation || 0);
 
     const totalDeduction =
       Number(merged.bpjs_kesehatan || 0) +

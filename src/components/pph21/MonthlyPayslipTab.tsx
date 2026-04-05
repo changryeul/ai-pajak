@@ -46,6 +46,14 @@ interface Payslip {
   jht_company: number;
   jp_company: number;
   personal_expense: number;
+  // Phase 2: Specific allowances
+  laptop_allowance: number;
+  medical_allowance: number;
+  tax_allowance: number;
+  annual_leave_pay: number;
+  // Phase 3: Special payments
+  severance_allowance: number;
+  pkwt_compensation: number;
   // Bank transfer info
   bank_name: string | null;
   bank_account_no: string | null;
@@ -306,6 +314,43 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                             <Label className="text-[10px] text-gray-400">기타 수당</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.other_allowances}
                               onBlur={e => updatePayslip(ps.id, { other_allowances: Number(e.target.value) })} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">노트북 수당</Label>
+                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.laptop_allowance}
+                              onBlur={e => updatePayslip(ps.id, { laptop_allowance: Number(e.target.value) })} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">의료 수당</Label>
+                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.medical_allowance}
+                              onBlur={e => updatePayslip(ps.id, { medical_allowance: Number(e.target.value) })} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">세금 수당 (Gross-up)</Label>
+                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.tax_allowance}
+                              onBlur={e => updatePayslip(ps.id, { tax_allowance: Number(e.target.value) })} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">연차 수당</Label>
+                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.annual_leave_pay}
+                              onBlur={e => updatePayslip(ps.id, { annual_leave_pay: Number(e.target.value) })} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 특수 지급 (퇴직/계약직) */}
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">특수 지급 <span className="text-[10px] text-gray-400 font-normal">(퇴직/계약 종료)</span></h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-[10px] text-gray-400">퇴직금 (Pesangon)</Label>
+                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.severance_allowance}
+                              onBlur={e => updatePayslip(ps.id, { severance_allowance: Number(e.target.value) })} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">PKWT 계약 보상</Label>
+                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.pkwt_compensation}
+                              onBlur={e => updatePayslip(ps.id, { pkwt_compensation: Number(e.target.value) })} />
                           </div>
                         </div>
                       </div>
