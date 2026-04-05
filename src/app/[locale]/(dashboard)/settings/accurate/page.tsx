@@ -341,12 +341,45 @@ export default function AccurateSettingsPage() {
         <Card className="mb-4 border-0 shadow-sm">
           <CardContent className="p-5 space-y-3">
             <h2 className="font-bold text-sm">2. Accurate 연결</h2>
-            <p className="text-xs text-gray-500">
-              Accurate OAuth로 발급받은 Access Token이 필요합니다.{' '}
-              <a href="https://api-doc.accurate.id/" target="_blank" rel="noreferrer" className="text-blue-600 underline">
-                발급 방법
-              </a>
-            </p>
+            <details className="text-xs text-gray-500 bg-blue-50 rounded-lg p-3">
+              <summary className="cursor-pointer font-medium text-blue-700">
+                📖 Access Token 발급 방법 (클릭하여 펼치기)
+              </summary>
+              <ol className="mt-2 space-y-2 text-gray-700 list-decimal list-inside">
+                <li>
+                  <a href="https://account.accurate.id" target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                    account.accurate.id
+                  </a> 접속 후 로그인
+                </li>
+                <li>우측 상단 프로필 → <b>Pengaturan</b> → <b>Aplikasi OAuth</b> 메뉴</li>
+                <li>
+                  <b>새 앱 등록</b> — Name: <code className="bg-white px-1">AI Pajak</code>, Redirect URI: <code className="bg-white px-1">https://ai-pajak.vercel.app/api/accurate/callback</code>
+                </li>
+                <li>발급된 <b>Client ID</b> / <b>Client Secret</b> 확인</li>
+                <li>
+                  브라우저에 다음 URL 입력 (YOUR_CLIENT_ID 교체):
+                  <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] break-all border">
+                    https://account.accurate.id/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri=https://ai-pajak.vercel.app/api/accurate/callback&amp;scope=item_view+sales_invoice_view+purchase_invoice_view
+                  </div>
+                </li>
+                <li>허용 클릭 → 리디렉트된 URL의 <code className="bg-white px-1">?code=xxx</code> 값 복사</li>
+                <li>
+                  터미널에서 curl 실행 (code/client_id/secret 교체):
+                  <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] border whitespace-pre">
+{`curl -X POST https://account.accurate.id/oauth/token \\
+  -d "grant_type=authorization_code" \\
+  -d "code=YOUR_CODE" \\
+  -d "redirect_uri=https://ai-pajak.vercel.app/api/accurate/callback" \\
+  -d "client_id=YOUR_CLIENT_ID" \\
+  -d "client_secret=YOUR_CLIENT_SECRET"`}
+                  </div>
+                </li>
+                <li>응답의 <code className="bg-white px-1">access_token</code> 값(<code>aat.</code>로 시작)을 아래에 붙여넣기</li>
+              </ol>
+              <p className="mt-2 text-[10px] text-amber-700">
+                ⚠️ Aplikasi OAuth 메뉴가 안 보이면 계정 플랜에 API가 포함되지 않은 것일 수 있습니다. 고객센터 문의 필요.
+              </p>
+            </details>
 
             <div>
               <Label className="text-xs">Access Token</Label>
