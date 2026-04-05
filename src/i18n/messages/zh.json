@@ -2702,6 +2702,8 @@
   "pph21Page": {
     "pageTitle": "工资单管理",
     "pageDescription": "员工注册 + 每月PPh 21 TER计算",
+    "tabMonthlyPayslip": "月度工资单",
+    "tabEmployeeMaster": "员工主档",
     "employeeCount": "员工数",
     "employeeCountValue": "{count}人",
     "totalSalary": "总工资",

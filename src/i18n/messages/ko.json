@@ -2703,6 +2703,8 @@
   "pph21Page": {
     "pageTitle": "급여 대장 관리",
     "pageDescription": "직원 등록 + 월별 PPh 21 TER 계산",
+    "tabMonthlyPayslip": "월별 급여 명세",
+    "tabEmployeeMaster": "직원 마스터",
     "employeeCount": "직원 수",
     "employeeCountValue": "{count}명",
     "totalSalary": "총 급여",

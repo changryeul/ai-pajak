@@ -9,11 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSession } from '@/hooks/useSession';
 import {
   Users, Plus, Loader2, CheckCircle, AlertTriangle, Save, X,
-  Edit2, Trash2, Calculator, Sparkles, DollarSign,
+  Edit2, Trash2, Calculator, Sparkles, DollarSign, FileText,
 } from 'lucide-react';
+import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 
 interface Employee {
   id: string;
@@ -39,7 +41,7 @@ const emptyForm = {
 };
 
 export default function PPh21PayrollPage() {
-  const { session } = useSession();
+  const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const locale = params.locale as string;
   const tp = useTranslations('pph21Page');
@@ -63,7 +65,10 @@ export default function PPh21PayrollPage() {
   };
 
   const loadEmployees = useCallback(async () => {
-    if (!customerId) return;
+    if (!customerId) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const res = await fetch(`/api/tax/employees?customerId=${customerId}`);
@@ -76,7 +81,10 @@ export default function PPh21PayrollPage() {
     finally { setIsLoading(false); }
   }, [customerId]);
 
-  useEffect(() => { loadEmployees(); }, [loadEmployees]);
+  useEffect(() => {
+    if (sessionLoading) return;
+    loadEmployees();
+  }, [sessionLoading, loadEmployees]);
 
   const startEdit = (emp: Employee) => {
     setForm({
@@ -210,6 +218,18 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
+      {/* Tabs: 직원 마스터 | 월별 급여 명세 */}
+      <Tabs defaultValue="monthly" className="mb-4">
+        <TabsList className="mb-4">
+          <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
+          <TabsTrigger value="master"><Users className="h-3 w-3 mr-1" />{tp('tabEmployeeMaster')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="monthly">
+          <MonthlyPayslipTab customerId={customerId} />
+        </TabsContent>
+
+        <TabsContent value="master">
       {/* Actions */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold">{tp('employeeList')}</h2>
@@ -325,6 +345,8 @@ export default function PPh21PayrollPage() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

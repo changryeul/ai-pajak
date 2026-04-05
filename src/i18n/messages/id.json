@@ -2702,6 +2702,8 @@
   "pph21Page": {
     "pageTitle": "Manajemen Daftar Gaji",
     "pageDescription": "Registrasi karyawan + perhitungan PPh 21 TER bulanan",
+    "tabMonthlyPayslip": "Slip Gaji Bulanan",
+    "tabEmployeeMaster": "Master Karyawan",
     "employeeCount": "Jumlah Karyawan",
     "employeeCountValue": "{count} orang",
     "totalSalary": "Total Gaji",

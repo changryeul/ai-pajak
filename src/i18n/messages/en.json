@@ -2702,6 +2702,8 @@
   "pph21Page": {
     "pageTitle": "Payroll Management",
     "pageDescription": "Employee registration + monthly PPh 21 TER calculation",
+    "tabMonthlyPayslip": "Monthly Payslip",
+    "tabEmployeeMaster": "Employee Master",
     "employeeCount": "Employees",
     "employeeCountValue": "{count}",
     "totalSalary": "Total Salary",
