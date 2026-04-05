@@ -79,16 +79,53 @@ export async function GET(request: NextRequest) {
       if (customer) customerIds = [customer.id];
     }
 
+    // Default work queue items (shown even with no customer assignments)
+    const defaultWorkQueue = [
+      {
+        id: 'missing-docs',
+        title: '미업로드 증빙 수집',
+        desc: '고객에게 부족한 증빙 자료(NPWP, 은행내역, 세금계산서 등) 업로드를 WhatsApp·알림으로 요청합니다',
+        priority: 'LOW',
+        actionKey: '자료 요청 보내기',
+        count: 0,
+      },
+      {
+        id: 'ai-review',
+        title: 'AI 계산 결과 검토',
+        desc: '고객이 OCR·AI로 생성한 세금 계산 초안을 검토하고 승인합니다 (세율, KBLI, 라이선스 조건 등)',
+        priority: 'LOW',
+        actionKey: '검토 시작',
+        count: 0,
+      },
+      {
+        id: 'billing',
+        title: 'ID Billing 생성',
+        desc: '승인된 세금 계산에 대해 납부용 ID Billing(결제 코드)을 일괄 생성합니다',
+        priority: 'LOW',
+        actionKey: 'Billing 생성',
+        count: 0,
+      },
+      {
+        id: 'e-filing',
+        title: 'e-Filing 제출',
+        desc: '납부 검증이 완료된 신고서를 시스템에 제출 처리합니다 (DJP 제출은 별도 진행)',
+        priority: 'LOW',
+        actionKey: '제출 진행',
+        count: 0,
+      },
+    ];
+
     if (customerIds.length === 0) {
       return NextResponse.json({
         success: true,
         data: {
           kpis: { deadlines: 0, attention: 0, expectedTax: 0, submitted: 0 },
-          workQueue: [],
+          workQueue: defaultWorkQueue,
           upcomingDeadlines: [],
           riskAlerts: [],
           clientStatus: [],
           recentSubmissions: [],
+          isConsultant,
         },
       });
     }
