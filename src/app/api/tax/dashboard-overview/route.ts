@@ -154,55 +154,53 @@ export async function GET(request: NextRequest) {
       q.status === 'COMPLETED' || q.status === 'DJP_SUBMITTED' || q.status === 'BPE_UPLOADED'
     ).length;
 
-    // ── Work Queue ──
-    const workQueue: Array<{ id: string; title: string; desc: string; priority: string; actionKey: string; count: number }> = [];
-
-    if (calcsWithoutNpwp > 0) {
-      workQueue.push({
-        id: 'missing-docs',
-        title: 'workQueue.missingDocs',
-        desc: `${calcsWithoutNpwp} ${calcsWithoutNpwp === 1 ? 'item' : 'items'} missing NPWP`,
-        priority: 'HIGH',
-        actionKey: 'workQueue.requestDocs',
-        count: calcsWithoutNpwp,
-      });
-    }
-
+    // ── Work Queue (always return 4 items with real counts) ──
     const draftCalcs = calcs.filter(c => c.source === 'CUSTOMER_OCR').length;
-    if (draftCalcs > 0) {
-      workQueue.push({
-        id: 'ai-review',
-        title: 'workQueue.aiReview',
-        desc: `${draftCalcs} AI calculations pending review`,
-        priority: 'HIGH',
-        actionKey: 'workQueue.startReview',
-        count: draftCalcs,
-      });
-    }
-
     const pendingBilling = queue.filter(q => q.status === 'APPROVED' || q.status === 'PENDING_APPROVAL').length;
-    if (pendingBilling > 0) {
-      workQueue.push({
-        id: 'billing',
-        title: 'workQueue.createBilling',
-        desc: `${pendingBilling} payments awaiting billing`,
-        priority: 'MEDIUM',
-        actionKey: 'workQueue.createBillingAction',
-        count: pendingBilling,
-      });
-    }
-
     const readyForSubmit = queue.filter(q => q.status === 'PAYMENT_VERIFIED').length;
-    if (readyForSubmit > 0) {
-      workQueue.push({
+
+    const workQueue: Array<{ id: string; title: string; desc: string; priority: string; actionKey: string; count: number }> = [
+      {
+        id: 'missing-docs',
+        title: '미업로드 증빙 수집',
+        desc: calcsWithoutNpwp > 0
+          ? `NPWP 누락 거래 ${calcsWithoutNpwp}건 — 자료 요청 필요`
+          : '누락된 증빙 자료가 없습니다',
+        priority: calcsWithoutNpwp > 0 ? 'HIGH' : 'LOW',
+        actionKey: '자료 요청 보내기',
+        count: calcsWithoutNpwp,
+      },
+      {
+        id: 'ai-review',
+        title: 'AI 계산 결과 검토',
+        desc: draftCalcs > 0
+          ? `고객이 생성한 초안 ${draftCalcs}건 검토 대기 중`
+          : '검토 대기 중인 AI 계산이 없습니다',
+        priority: draftCalcs > 0 ? 'HIGH' : 'LOW',
+        actionKey: '검토 시작',
+        count: draftCalcs,
+      },
+      {
+        id: 'billing',
+        title: 'ID Billing 생성',
+        desc: pendingBilling > 0
+          ? `승인 완료 ${pendingBilling}건 Billing 생성 대기`
+          : '생성 대기 중인 Billing이 없습니다',
+        priority: pendingBilling > 0 ? 'MEDIUM' : 'LOW',
+        actionKey: 'Billing 생성',
+        count: pendingBilling,
+      },
+      {
         id: 'e-filing',
-        title: 'workQueue.efilingSubmit',
-        desc: `${readyForSubmit} filings ready to submit`,
-        priority: 'MEDIUM',
-        actionKey: 'workQueue.submitAction',
+        title: 'e-Filing 제출',
+        desc: readyForSubmit > 0
+          ? `납부 검증 완료 ${readyForSubmit}건 제출 가능`
+          : '제출 가능한 신고서가 없습니다',
+        priority: readyForSubmit > 0 ? 'MEDIUM' : 'LOW',
+        actionKey: '제출 진행',
         count: readyForSubmit,
-      });
-    }
+      },
+    ];
 
     // ── Upcoming Deadlines (next 30 days) ──
     const deadlineMap = new Map<string, { day: number; name: string }>([

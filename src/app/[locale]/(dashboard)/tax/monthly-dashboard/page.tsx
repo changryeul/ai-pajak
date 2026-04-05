@@ -250,15 +250,8 @@ export default function MonthlyDashboardPage() {
       )}
 
       {/* ── NEW: Work Queue (Priority Tasks) ── */}
-      {overview && (() => {
-        // Use real data if available, otherwise show sample tasks
-        const tasks = overview.workQueue.length > 0 ? overview.workQueue : [
-          { id: 'missing-docs', title: '미업로드 증빙 수집', desc: '은행 내역 2건, 매입세금계산서 5건, 급여자료 1건 누락', priority: 'HIGH', actionKey: '자료 요청 보내기', count: 8 },
-          { id: 'ai-review', title: 'AI 계산 결과 검토', desc: 'PPh 23 세율 예외 2건, KBLI/라이선스 조건 확인 필요', priority: 'HIGH', actionKey: '검토 시작', count: 2 },
-          { id: 'billing', title: 'ID Billing 생성', desc: '납부 예정 4건 대기 중', priority: 'MEDIUM', actionKey: 'Billing 생성', count: 4 },
-          { id: 'e-filing', title: 'e-Filing 제출', desc: '검토 완료된 신고서 3건 제출 가능', priority: 'MEDIUM', actionKey: '제출 진행', count: 3 },
-        ];
-        const isSample = overview.workQueue.length === 0;
+      {overview && overview.workQueue.length > 0 && (() => {
+        const tasks = overview.workQueue;
 
         return (
           <div className="mb-6">
@@ -276,6 +269,7 @@ export default function MonthlyDashboardPage() {
                 };
                 const Icon = iconMap[task.id] || FileText;
                 const isHigh = task.priority === 'HIGH';
+                const isLow = task.priority === 'LOW';
 
                 return (
                   <div
@@ -290,14 +284,19 @@ export default function MonthlyDashboardPage() {
                     {/* Title + Badge + Description */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold text-base text-gray-900">{isSample ? task.title : t(task.title)}</h4>
+                        <h4 className="font-bold text-base text-gray-900">{task.title}</h4>
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${
                           isHigh
                             ? 'bg-red-50 text-red-600 border-red-200'
-                            : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                            : isLow
+                              ? 'bg-gray-50 text-gray-500 border-gray-200'
+                              : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                         }`}>
-                          {isHigh ? '높음' : '중간'}
+                          {isHigh ? '높음' : isLow ? '없음' : '중간'}
                         </span>
+                        {task.count > 0 && (
+                          <span className="text-xs text-gray-500">({task.count}건)</span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-400">{task.desc}</p>
                     </div>
@@ -305,10 +304,10 @@ export default function MonthlyDashboardPage() {
                     {/* Action Button */}
                     <button
                       onClick={() => handleWorkQueueAction(task.id)}
-                      disabled={actionLoading === task.id}
+                      disabled={actionLoading === task.id || task.count === 0}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-all flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span className="text-sm font-medium text-gray-700">{isSample ? task.actionKey : t(task.actionKey)}</span>
+                      <span className="text-sm font-medium text-gray-700">{task.actionKey}</span>
                       {actionLoading === task.id ? (
                         <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
                       ) : (
