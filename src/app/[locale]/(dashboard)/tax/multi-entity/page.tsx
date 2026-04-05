@@ -19,7 +19,7 @@ interface Entity {
   company_name: string | null;
   npwp: string | null;
   customer_type: string;
-  filing_count: number;
+  filingCount: number;
   created_at: string;
 }
 
@@ -61,7 +61,9 @@ export default function MultiEntityPage() {
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       if (data.success) {
-        setEntities(data.data || []);
+        // API returns { data: { entities: [...], totalEntities } }
+        const list = Array.isArray(data.data) ? data.data : (data.data?.entities || []);
+        setEntities(list);
       }
     } catch (err) { console.error(err); }
     finally { setDataLoading(false); }
@@ -71,7 +73,7 @@ export default function MultiEntityPage() {
 
   // Calculate totals
   const totalEntities = entities.length;
-  const totalFilings = entities.reduce((sum, e) => sum + (e.filing_count || 0), 0);
+  const totalFilings = entities.reduce((sum, e) => sum + (e.filingCount || 0), 0);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
@@ -156,7 +158,7 @@ export default function MultiEntityPage() {
                           <div className="text-right">
                             <div className="flex items-center gap-1.5">
                               <FileText className="h-3 w-3 text-gray-400" />
-                              <span className="text-sm font-bold">{entity.filing_count || 0}</span>
+                              <span className="text-sm font-bold">{entity.filingCount || 0}</span>
                               <span className="text-xs text-gray-400">{t('multiEntity.filings')}</span>
                             </div>
                           </div>
@@ -170,7 +172,7 @@ export default function MultiEntityPage() {
                         <span className="text-[10px] bg-green-50 text-green-600 rounded px-1.5 py-0.5 flex items-center gap-0.5">
                           <CheckCircle className="h-2.5 w-2.5" />{t('multiEntity.sptNormal')}
                         </span>
-                        {entity.filing_count === 0 && (
+                        {entity.filingCount === 0 && (
                           <span className="text-[10px] bg-amber-50 text-amber-600 rounded px-1.5 py-0.5 flex items-center gap-0.5">
                             <AlertTriangle className="h-2.5 w-2.5" />{t('multiEntity.noFilings')}
                           </span>
@@ -213,10 +215,10 @@ export default function MultiEntityPage() {
                           <Badge className="text-[9px]" variant="outline">{typeStyle.label}</Badge>
                         </td>
                         <td className="py-2 text-center font-mono text-gray-400">{entity.npwp || '-'}</td>
-                        <td className="py-2 text-center font-bold">{entity.filing_count || 0}</td>
+                        <td className="py-2 text-center font-bold">{entity.filingCount || 0}</td>
                         <td className="py-2 text-center">
-                          <Badge className={cn('text-[9px]', entity.filing_count > 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700')}>
-                            {entity.filing_count > 0 ? t('multiEntity.active') : t('multiEntity.waiting')}
+                          <Badge className={cn('text-[9px]', entity.filingCount > 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700')}>
+                            {entity.filingCount > 0 ? t('multiEntity.active') : t('multiEntity.waiting')}
                           </Badge>
                         </td>
                       </tr>
