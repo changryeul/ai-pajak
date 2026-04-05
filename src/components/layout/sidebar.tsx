@@ -137,6 +137,7 @@ const navItems: NavSection[] = [
     labelKey: 'nav.account',
     items: [
       { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER, UserRole.PLATFORM_ADMIN] },
+      { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: [...consultantRoles, UserRole.CUSTOMER] },
       { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: [...consultantRoles, UserRole.CUSTOMER] },
       { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR_JTC, UserRole.TAX_OPERATOR_SUPERVISOR] },
       { href: '/settings', icon: Settings, labelKey: 'nav.settings' },
