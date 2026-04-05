@@ -93,21 +93,58 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       return NextResponse.json({ error: '활성 직원이 없습니다' }, { status: 400 });
     }
 
+    // BPJS rate/cap constants (2024)
+    const BPJS_KES_CAP = 12_000_000; // BPJS Kesehatan salary cap
+    const BPJS_JP_CAP = 10_042_300;  // BPJS JP salary cap (2024)
+
     // Create payslip for each employee
-    const payslips = employees.map(emp => ({
-      customer_id: customerId,
-      employee_id: emp.id,
-      period,
-      base_salary: Number(emp.gross_salary || 0),
-      jht_employee: Number(emp.jht_employee || 0),
-      jp_employee: Number(emp.jp_employee || 0),
-      position_allowance: Number(emp.position_allowance || 0),
-      other_allowances: Number(emp.other_allowances || 0),
-      other_deductions: Number(emp.other_deductions || 0),
-      total_gross: Number(emp.gross_salary || 0) + Number(emp.position_allowance || 0) + Number(emp.other_allowances || 0),
-      total_deduction: Number(emp.jht_employee || 0) + Number(emp.jp_employee || 0) + Number(emp.other_deductions || 0),
-      status: 'DRAFT',
-    }));
+    const payslips = employees.map(emp => {
+      const gross = Number(emp.gross_salary || 0);
+      const bpjsKesBase = Math.min(gross, BPJS_KES_CAP);
+      const bpjsTkBase = Math.min(gross, BPJS_JP_CAP);
+
+      // Employer-paid BPJS (auto-calculated defaults)
+      const bpjsKesCompany = Math.round(bpjsKesBase * 0.04);
+      const jkkCompany = Math.round(bpjsTkBase * 0.0024);
+      const jkmCompany = Math.round(bpjsTkBase * 0.003);
+      const jhtCompany = Math.round(bpjsTkBase * 0.037);
+      const jpCompany = Math.round(bpjsTkBase * 0.02);
+
+      // Biaya Jabatan: 5% of gross, capped at 500k/month
+      const personalExpense = Math.min(Math.round(gross * 0.05), 500_000);
+
+      const positionAllowance = Number(emp.position_allowance || 0);
+      const otherAllowances = Number(emp.other_allowances || 0);
+      const jhtEmployee = Number(emp.jht_employee || 0);
+      const jpEmployee = Number(emp.jp_employee || 0);
+      const otherDeductions = Number(emp.other_deductions || 0);
+
+      return {
+        customer_id: customerId,
+        employee_id: emp.id,
+        period,
+        base_salary: gross,
+        base_salary_bpjs_kes: bpjsKesBase,
+        base_salary_bpjs_tk: bpjsTkBase,
+        jht_employee: jhtEmployee,
+        jp_employee: jpEmployee,
+        position_allowance: positionAllowance,
+        other_allowances: otherAllowances,
+        other_deductions: otherDeductions,
+        bpjs_kes_company: bpjsKesCompany,
+        jkk_company: jkkCompany,
+        jkm_company: jkmCompany,
+        jht_company: jhtCompany,
+        jp_company: jpCompany,
+        personal_expense: personalExpense,
+        bank_name: emp.bank_name || null,
+        bank_account_no: emp.bank_account_no || null,
+        bank_account_name: emp.bank_account_name || null,
+        total_gross: gross + positionAllowance + otherAllowances,
+        total_deduction: jhtEmployee + jpEmployee + otherDeductions,
+        status: 'DRAFT',
+      };
+    });
 
     const { data: inserted, error: insertError } = await admin
       .from('monthly_payslip')
@@ -207,7 +244,20 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
       loggers.api.warn({ err, ptkpCategory }, 'PPh 21 TER calculation fallback');
     }
 
-    const taxableIncome = Math.max(totalGross - totalDeduction, 0);
+    // Recalculate employer-paid BPJS + Biaya Jabatan based on merged base_salary
+    const BPJS_KES_CAP = 12_000_000;
+    const BPJS_JP_CAP = 10_042_300;
+    const baseForBpjs = Number(merged.base_salary || 0);
+    const bpjsKesBase = Math.min(baseForBpjs, BPJS_KES_CAP);
+    const bpjsTkBase = Math.min(baseForBpjs, BPJS_JP_CAP);
+    const bpjsKesCompany = Math.round(bpjsKesBase * 0.04);
+    const jkkCompany = Math.round(bpjsTkBase * 0.0024);
+    const jkmCompany = Math.round(bpjsTkBase * 0.003);
+    const jhtCompany = Math.round(bpjsTkBase * 0.037);
+    const jpCompany = Math.round(bpjsTkBase * 0.02);
+    const personalExpense = Math.min(Math.round(totalGross * 0.05), 500_000);
+
+    const taxableIncome = Math.max(totalGross - totalDeduction - personalExpense, 0);
     const netSalary = totalGross - totalDeduction - pph21Tax;
 
     // Update with calculated values
@@ -215,6 +265,14 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
       .from('monthly_payslip')
       .update({
         ...updates,
+        base_salary_bpjs_kes: bpjsKesBase,
+        base_salary_bpjs_tk: bpjsTkBase,
+        bpjs_kes_company: bpjsKesCompany,
+        jkk_company: jkkCompany,
+        jkm_company: jkmCompany,
+        jht_company: jhtCompany,
+        jp_company: jpCompany,
+        personal_expense: personalExpense,
         total_gross: totalGross,
         total_deduction: totalDeduction,
         taxable_income: taxableIncome,

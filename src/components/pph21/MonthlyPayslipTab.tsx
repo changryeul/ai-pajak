@@ -23,6 +23,8 @@ interface Payslip {
   absent_days: number;
   overtime_hours: number;
   base_salary: number;
+  base_salary_bpjs_kes: number;
+  base_salary_bpjs_tk: number;
   overtime_pay: number;
   meal_allowance: number;
   transport_allowance: number;
@@ -37,6 +39,17 @@ interface Payslip {
   jp_employee: number;
   loan_deduction: number;
   other_deductions: number;
+  // Employer-paid BPJS (read-only, auto-calculated)
+  bpjs_kes_company: number;
+  jkk_company: number;
+  jkm_company: number;
+  jht_company: number;
+  jp_company: number;
+  personal_expense: number;
+  // Bank transfer info
+  bank_name: string | null;
+  bank_account_no: string | null;
+  bank_account_name: string | null;
   total_gross: number;
   total_deduction: number;
   pph21_tax: number;
@@ -352,6 +365,64 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                             <Label className="text-[10px] text-gray-400">기타 공제</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.other_deductions}
                               onBlur={e => updatePayslip(ps.id, { other_deductions: Number(e.target.value) })} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 회사 부담 BPJS (자동 계산) */}
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">회사 부담 BPJS <span className="text-[10px] text-gray-400 font-normal">(자동 계산)</span></h4>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                          <div className="bg-white rounded p-2">
+                            <p className="text-[10px] text-gray-400">BPJS KES 4%</p>
+                            <p className="font-mono">{fmtRp(ps.bpjs_kes_company)}</p>
+                          </div>
+                          <div className="bg-white rounded p-2">
+                            <p className="text-[10px] text-gray-400">JKK 0.24%</p>
+                            <p className="font-mono">{fmtRp(ps.jkk_company)}</p>
+                          </div>
+                          <div className="bg-white rounded p-2">
+                            <p className="text-[10px] text-gray-400">JKM 0.30%</p>
+                            <p className="font-mono">{fmtRp(ps.jkm_company)}</p>
+                          </div>
+                          <div className="bg-white rounded p-2">
+                            <p className="text-[10px] text-gray-400">JHT 3.70%</p>
+                            <p className="font-mono">{fmtRp(ps.jht_company)}</p>
+                          </div>
+                          <div className="bg-white rounded p-2">
+                            <p className="text-[10px] text-gray-400">JP 2.00%</p>
+                            <p className="font-mono">{fmtRp(ps.jp_company)}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 비아야 자바탄 + 은행 정보 */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <h4 className="text-xs font-bold text-gray-600 mb-2">Biaya Jabatan (직책비)</h4>
+                          <div className="bg-white rounded p-2 text-xs">
+                            <p className="text-[10px] text-gray-400">PPh 21 공제 — 5% × 총지급, 월 50만 한도</p>
+                            <p className="font-mono font-bold">{fmtRp(ps.personal_expense)}</p>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-gray-600 mb-2">급여 이체 정보</h4>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <Label className="text-[10px] text-gray-400">은행</Label>
+                              <Input className="h-8 text-xs" defaultValue={ps.bank_name || ''}
+                                onBlur={e => updatePayslip(ps.id, { bank_name: e.target.value || null } as Partial<Payslip>)} />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-gray-400">계좌번호</Label>
+                              <Input className="h-8 text-xs font-mono" defaultValue={ps.bank_account_no || ''}
+                                onBlur={e => updatePayslip(ps.id, { bank_account_no: e.target.value || null } as Partial<Payslip>)} />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-gray-400">예금주</Label>
+                              <Input className="h-8 text-xs" defaultValue={ps.bank_account_name || ''}
+                                onBlur={e => updatePayslip(ps.id, { bank_account_name: e.target.value || null } as Partial<Payslip>)} />
+                            </div>
                           </div>
                         </div>
                       </div>
