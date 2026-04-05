@@ -15,7 +15,7 @@ export default function LoginPage() {
   const router = useRouter();
   const locale = params.locale as string;
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // email or NPWP
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,9 +26,25 @@ export default function LoginPage() {
     setError('');
 
     try {
+      // Check if identifier looks like NPWP (15 digits, possibly with separators)
+      const digitsOnly = identifier.replace(/\D/g, '');
+      let loginEmail = identifier;
+
+      if (digitsOnly.length === 15 && !identifier.includes('@')) {
+        // Resolve NPWP → email via public API
+        const resolveRes = await fetch(`/api/auth/resolve-npwp?npwp=${encodeURIComponent(digitsOnly)}`);
+        const resolveData = await resolveRes.json();
+        if (!resolveRes.ok || !resolveData.success || !resolveData.email) {
+          setError('해당 NPWP로 등록된 계정이 없습니다');
+          setIsLoading(false);
+          return;
+        }
+        loginEmail = resolveData.email;
+      }
+
       const supabase = createClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: loginEmail,
         password,
       });
 
@@ -117,13 +133,14 @@ export default function LoginPage() {
               )}
 
               <Input
-                label={t('auth.email')}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
+                label="이메일 또는 NPWP"
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="email@example.com 또는 00.000.000.0-000.000"
                 required
               />
+              <p className="text-[10px] text-gray-400 -mt-2">법인 고객은 NPWP로도 로그인 가능</p>
 
               <Input
                 label={t('auth.password')}

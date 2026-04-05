@@ -33,6 +33,15 @@ export async function POST(request: NextRequest) {
       phone?: string;
       companyName?: string;
       npwp?: string;
+      address?: string;
+      kbliCodes?: string[];
+      primaryKbli?: string;
+      jtcAgreement?: {
+        accepted?: boolean;
+        version?: string;
+        dataProcessing?: boolean;
+        taxFilingAuthorization?: boolean;
+      };
       firmName?: string;
       firmRegistrationNumber?: string;
     } = {};
@@ -51,7 +60,10 @@ export async function POST(request: NextRequest) {
     }
 
     // INDIVIDUAL or COMPANY → customer flow
-    return await setupCustomer(admin, user.id, email, fullName, phone, accountType, body.companyName, body.npwp);
+    return await setupCustomer(
+      admin, user.id, email, fullName, phone, accountType,
+      body.companyName, body.npwp, body.address, body.kbliCodes, body.primaryKbli, body.jtcAgreement
+    );
   } catch (error) {
     loggers.api.error({ err: error }, 'setup-account error');
     return NextResponse.json({ error: 'Setup failed' }, { status: 500 });
@@ -66,7 +78,16 @@ async function setupCustomer(
   phone: string | null,
   customerType: 'INDIVIDUAL' | 'COMPANY',
   companyName?: string,
-  npwp?: string
+  npwp?: string,
+  address?: string,
+  kbliCodes?: string[],
+  primaryKbli?: string,
+  jtcAgreement?: {
+    accepted?: boolean;
+    version?: string;
+    dataProcessing?: boolean;
+    taxFilingAuthorization?: boolean;
+  }
 ) {
   // 1. Upsert customer
   const { data: existing } = await admin
@@ -75,18 +96,27 @@ async function setupCustomer(
     .eq('user_id', userId)
     .maybeSingle();
 
+  const agreementFields = jtcAgreement && jtcAgreement.accepted
+    ? {
+        jtc_agreement_accepted: true,
+        jtc_agreement_version: jtcAgreement.version || 'v1.0',
+        jtc_agreement_accepted_at: new Date().toISOString(),
+        data_processing_consent: !!jtcAgreement.dataProcessing,
+        tax_filing_authorization: !!jtcAgreement.taxFilingAuthorization,
+      }
+    : {};
+
   let customerId: string;
   if (existing) {
-    // Update customer_type if it changed (user may have picked a different type)
-    if (existing.customer_type !== customerType || companyName || npwp) {
-      await admin.from('customer').update({
-        customer_type: customerType,
-        full_name: fullName,
-        ...(companyName ? { company_name: companyName } : {}),
-        ...(npwp ? { npwp } : {}),
-        ...(phone ? { phone } : {}),
-      }).eq('id', existing.id);
-    }
+    await admin.from('customer').update({
+      customer_type: customerType,
+      full_name: fullName,
+      ...(companyName ? { company_name: companyName } : {}),
+      ...(npwp ? { npwp } : {}),
+      ...(phone ? { phone } : {}),
+      ...(address ? { address } : {}),
+      ...agreementFields,
+    }).eq('id', existing.id);
     customerId = existing.id;
   } else {
     const { data: newCustomer, error: custError } = await admin
@@ -97,8 +127,10 @@ async function setupCustomer(
         full_name: fullName,
         email,
         phone,
+        address: address || null,
         company_name: customerType === 'COMPANY' ? (companyName || null) : null,
         npwp: npwp || null,
+        ...agreementFields,
       })
       .select('id')
       .single();
@@ -107,6 +139,18 @@ async function setupCustomer(
       return NextResponse.json({ error: 'Failed to create customer: ' + custError.message }, { status: 500 });
     }
     customerId = newCustomer.id;
+  }
+
+  // 1b. Upsert KBLI codes (company only)
+  if (customerType === 'COMPANY' && kbliCodes && kbliCodes.length > 0) {
+    // Remove existing, insert fresh
+    await admin.from('customer_kbli').delete().eq('customer_id', customerId);
+    const rows = kbliCodes.map(code => ({
+      customer_id: customerId,
+      kbli_code: code,
+      is_primary: code === primaryKbli,
+    }));
+    await admin.from('customer_kbli').insert(rows);
   }
 
   // 2. Assign CUSTOMER role

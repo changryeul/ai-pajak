@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
 import { createClient } from '@/lib/supabase/client';
@@ -47,6 +47,7 @@ const ACCOUNT_TYPES: Array<{
 export default function RegisterPage() {
   const t = useTranslations();
   const params = useParams();
+  const router = useRouter();
   const locale = params.locale as string;
 
   const [step, setStep] = useState<'select' | 'form'>('select');
@@ -179,7 +180,14 @@ export default function RegisterPage() {
                 <button
                   key={type.id}
                   type="button"
-                  onClick={() => { setAccountType(type.id); setStep('form'); }}
+                  onClick={() => {
+                    if (type.id === 'COMPANY') {
+                      router.push(`/${locale}/register/company`);
+                      return;
+                    }
+                    setAccountType(type.id);
+                    setStep('form');
+                  }}
                   className="text-left rounded-2xl border-2 border-gray-200 bg-white p-5 hover:border-blue-500 hover:shadow-lg transition-all group"
                 >
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${type.gradient} flex items-center justify-center mb-3 shadow-sm`}>
