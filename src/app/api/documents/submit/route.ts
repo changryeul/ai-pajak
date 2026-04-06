@@ -1,0 +1,211 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
+import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
+
+/**
+ * POST /api/documents/submit
+ * body: { customerId, period }
+ *
+ * 1. Creates/updates document_submission record
+ * 2. AI reviews completeness of uploaded documents
+ * 3. If incomplete → creates document_request + sends WhatsApp
+ * 4. If complete → moves to OPERATOR_REVIEWING
+ */
+
+// Required documents per customer profile
+function getRequiredDocTypes(customerProfile: {
+  has_employees?: boolean;
+  is_pkp?: boolean;
+  pays_service_fees?: boolean;
+  has_import_export?: boolean;
+  has_rental_business?: boolean;
+}): Array<{ type: string; description: string; condition: string }> {
+  const required: Array<{ type: string; description: string; condition: string }> = [];
+
+  // Base requirement — always needed
+  required.push({ type: 'BANK_STATEMENT', description: '은행 거래내역서 (월별)', condition: 'ALWAYS' });
+
+  if (customerProfile.has_employees) {
+    required.push({ type: 'SALARY_SLIP', description: '급여 명세서 또는 직원 급여 데이터', condition: 'PPh21' });
+  }
+
+  if (customerProfile.is_pkp) {
+    required.push({ type: 'FAKTUR_PAJAK', description: '매출 Faktur Pajak (Keluaran)', condition: 'PPN' });
+    required.push({ type: 'FAKTUR_PAJAK', description: '매입 Faktur Pajak (Masukan)', condition: 'PPN' });
+  }
+
+  if (customerProfile.pays_service_fees) {
+    required.push({ type: 'INVOICE', description: '서비스 비용 인보이스 (PPh 23 원천징수 대상)', condition: 'PPh23' });
+  }
+
+  if (customerProfile.has_import_export) {
+    required.push({ type: 'INVOICE', description: '수입/수출 인보이스 및 통관 서류', condition: 'PPh22/PPN' });
+  }
+
+  if (customerProfile.has_rental_business) {
+    required.push({ type: 'RECEIPT', description: '임대 수입 관련 영수증/계약서', condition: 'PPh4(2)' });
+  }
+
+  return required;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const body = await request.json();
+    const { customerId, period } = body;
+
+    if (!customerId || !period) {
+      return NextResponse.json({ error: 'customerId and period required' }, { status: 400 });
+    }
+
+    const admin = getSupabaseAdmin();
+
+    // Get customer profile for requirement determination
+    const { data: customer } = await admin
+      .from('customer')
+      .select('*, user_id')
+      .eq('id', customerId)
+      .single();
+
+    if (!customer) {
+      return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
+    }
+
+    // Get uploaded documents for this period
+    const { data: docs } = await admin
+      .from('document')
+      .select('document_type, ocr_status, form_type')
+      .eq('customer_id', customerId)
+      .gte('created_at', `${period}-01`)
+      .lt('created_at', nextMonth(period));
+
+    const uploadedTypes = new Set((docs || []).map(d => d.document_type));
+
+    // Determine required documents
+    const required = getRequiredDocTypes({
+      has_employees: customer.has_employees,
+      is_pkp: customer.is_pkp,
+      pays_service_fees: customer.pays_service_fees,
+      has_import_export: customer.has_import_export,
+      has_rental_business: customer.has_rental_business,
+    });
+
+    // Check completeness
+    const missing = required.filter(r => !uploadedTypes.has(r.type));
+    const complete = missing.length === 0;
+
+    // Suggestions
+    const suggestions: string[] = [];
+    if (!uploadedTypes.has('BANK_STATEMENT')) {
+      suggestions.push('은행 거래내역서는 매월 필수입니다. 모바일 뱅킹에서 PDF로 다운로드 가능합니다.');
+    }
+    if (customer.is_pkp && !uploadedTypes.has('FAKTUR_PAJAK')) {
+      suggestions.push('PKP 등록 사업자는 매월 Faktur Pajak(Keluaran + Masukan) 제출이 필요합니다.');
+    }
+
+    const aiResult = { complete, missing, suggestions };
+
+    // Upsert submission
+    const { data: submission } = await admin
+      .from('document_submission')
+      .upsert({
+        customer_id: customerId,
+        period,
+        status: complete ? 'OPERATOR_REVIEWING' : 'NEEDS_MORE',
+        submitted_at: new Date().toISOString(),
+        ai_reviewed_at: new Date().toISOString(),
+        ai_result: aiResult,
+      }, { onConflict: 'customer_id,period' })
+      .select()
+      .single();
+
+    // If incomplete → create document_request + send notification
+    if (!complete && missing.length > 0) {
+      const reqTitle = `${period} 추가 자료 요청`;
+      const reqMessage = `안녕하세요. ${period} 세금 신고를 위해 다음 자료가 추가로 필요합니다:`;
+
+      await admin.from('document_request').insert({
+        customer_id: customerId,
+        submission_id: submission?.id,
+        period,
+        requester_type: 'AI',
+        title: reqTitle,
+        message: reqMessage,
+        required_documents: missing.map(m => ({
+          type: m.type,
+          description: m.description,
+          priority: m.condition === 'ALWAYS' ? 'HIGH' : 'MEDIUM',
+        })),
+        sent_via_web: true,
+        sent_via_whatsapp: false,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+
+      // In-app notification
+      await admin.from('notification').insert({
+        user_id: customer.user_id,
+        type: 'SYSTEM_ANNOUNCEMENT',
+        title: reqTitle,
+        message: `${missing.length}개의 추가 자료가 필요합니다. 문서 페이지에서 업로드해 주세요.`,
+        priority: 'HIGH',
+        data: { action: 'document-request', period },
+      });
+
+      // WhatsApp notification
+      if (customer.phone_number) {
+        const { data: prefs } = await admin
+          .from('notification_preferences')
+          .select('whatsapp_enabled')
+          .eq('user_id', customer.user_id)
+          .maybeSingle();
+
+        if (prefs?.whatsapp_enabled) {
+          const missingList = missing.map(m => `• ${m.description}`).join('\n');
+          try {
+            await sendWhatsApp({
+              to: customer.phone_number,
+              text: `📋 *${period} 추가 자료 요청*\n\n${reqMessage}\n\n${missingList}\n\n아래 링크에서 업로드:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload\n\n_AI Pajak_`,
+            });
+            await admin.from('document_request')
+              .update({ sent_via_whatsapp: true, whatsapp_sent_at: new Date().toISOString() })
+              .eq('submission_id', submission?.id)
+              .eq('requester_type', 'AI')
+              .is('whatsapp_sent_at', null);
+          } catch { /* */ }
+        }
+      }
+    }
+
+    loggers.api.info(
+      { customerId, period, complete, missingCount: missing.length },
+      'Document submission reviewed'
+    );
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        aiResult,
+        submissionId: submission?.id,
+        status: complete ? 'OPERATOR_REVIEWING' : 'NEEDS_MORE',
+      },
+    });
+  } catch (error) {
+    loggers.api.error({ err: error }, 'Document submit error');
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed' },
+      { status: 500 }
+    );
+  }
+}
+
+function nextMonth(period: string): string {
+  const [y, m] = period.split('-').map(Number);
+  if (m === 12) return `${y + 1}-01-01`;
+  return `${y}-${String(m + 1).padStart(2, '0')}-01`;
+}

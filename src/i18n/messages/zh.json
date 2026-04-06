@@ -168,7 +168,8 @@
     "pph21Label": "个人所得税 (PPh 21)",
     "withholdingTaxLabel": "预扣税 (PPh 23/4(2))",
     "prepaidCorporateTax": "预缴企业税 (PPh 25/UMKM)",
-    "ppnLabel": "增值税 (PPN)"
+    "ppnLabel": "增值税 (PPN)",
+    "docUpload": "资料上传"
   },
   "dashboard": {
     "title": "仪表板",

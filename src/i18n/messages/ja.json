@@ -168,7 +168,8 @@
     "pph21Label": "個人所得税 (PPh 21)",
     "withholdingTaxLabel": "源泉税 (PPh 23/4(2))",
     "prepaidCorporateTax": "前払法人税 (PPh 25/UMKM)",
-    "ppnLabel": "付加価値税 (PPN)"
+    "ppnLabel": "付加価値税 (PPN)",
+    "docUpload": "資料アップロード"
   },
   "dashboard": {
     "title": "ダッシュボード",

@@ -168,7 +168,8 @@
     "pph21Label": "PPh 21 (Karyawan)",
     "withholdingTaxLabel": "PPh 23/4(2)",
     "prepaidCorporateTax": "PPh 25 / PPh Final UMKM",
-    "ppnLabel": "PPN"
+    "ppnLabel": "PPN",
+    "docUpload": "Unggah Dokumen"
   },
   "dashboard": {
     "title": "Dasbor",

@@ -168,7 +168,8 @@
     "pph21Label": "Income Tax (PPh 21)",
     "withholdingTaxLabel": "Withholding (PPh 23/4(2))",
     "prepaidCorporateTax": "Prepaid Corporate (PPh 25/UMKM)",
-    "ppnLabel": "VAT (PPN)"
+    "ppnLabel": "VAT (PPN)",
+    "docUpload": "Upload Documents"
   },
   "dashboard": {
     "title": "Dashboard",

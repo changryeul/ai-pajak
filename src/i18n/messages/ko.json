@@ -168,7 +168,8 @@
     "pph21Label": "개인소득세 (PPh 21)",
     "withholdingTaxLabel": "원천세 (PPh 23/4(2))",
     "prepaidCorporateTax": "선납법인세 (PPh 25, PPh Final UMKM)",
-    "ppnLabel": "부가세 (PPN)"
+    "ppnLabel": "부가세 (PPN)",
+    "docUpload": "자료 업로드"
   },
   "dashboard": {
     "title": "대시보드",
