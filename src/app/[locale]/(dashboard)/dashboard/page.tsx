@@ -146,9 +146,54 @@ function CorporateCustomerDashboard({
   locale: string;
 }) {
   const t = useTranslations();
+  const [companyInfo, setCompanyInfo] = useState<{
+    npwp?: string; business_category?: string; is_pkp?: boolean; is_umkm?: boolean;
+    tax_regime?: string; profile_completeness?: number; annual_revenue?: number;
+    has_employees?: boolean; pays_service_fees?: boolean; has_import_export?: boolean;
+    has_rental_business?: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!session.customerId) return;
+    fetch(`/api/company-profile?customerId=${session.customerId}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setCompanyInfo(d.data); })
+      .catch(() => {});
+  }, [session.customerId]);
+
+  // Determine applicable taxes for display
+  const applicableTaxes: string[] = [];
+  if (companyInfo) {
+    if (companyInfo.has_employees) applicableTaxes.push('PPh 21');
+    if (companyInfo.is_pkp) applicableTaxes.push('PPN');
+    if (companyInfo.pays_service_fees) applicableTaxes.push('PPh 23');
+    if (companyInfo.has_import_export) applicableTaxes.push('PPh 22');
+    if (companyInfo.has_rental_business) applicableTaxes.push('PPh 4(2)');
+    if (companyInfo.is_umkm) applicableTaxes.push('PPh Final 0.5%');
+    else applicableTaxes.push('PPh 25');
+  }
+
+  const profileReady = (companyInfo?.profile_completeness || 0) >= 80;
 
   return (
     <div className="space-y-6">
+      {/* Profile incomplete banner */}
+      {companyInfo && !profileReady && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-amber-600" />
+            <div>
+              <p className="font-medium text-sm text-amber-900">회사 정보가 불완전합니다 ({companyInfo.profile_completeness}%)</p>
+              <p className="text-xs text-amber-700">신고를 시작하려면 회사 정보를 완성해 주세요</p>
+            </div>
+          </div>
+          <Link href={`/${locale}/company-profile`}
+            className="px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700">
+            회사 정보 입력
+          </Link>
+        </div>
+      )}
+
       {/* Hero Header — corporate theme (emerald/green) */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-green-700 to-teal-800 p-6 md:p-8 text-white">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
@@ -159,10 +204,59 @@ function CorporateCustomerDashboard({
           </p>
           <h1 className="text-2xl md:text-3xl font-bold mt-1">{session.fullName || 'Company'}</h1>
           <p className="text-emerald-200 mt-2 text-sm">{t('dashboardHero.corporateSubtitle')}</p>
+
+          {/* Company info summary in header */}
+          {companyInfo && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {companyInfo.npwp && (
+                <span className="bg-white/15 px-2 py-1 rounded text-[11px] font-mono">NPWP: {companyInfo.npwp}</span>
+              )}
+              {companyInfo.business_category && (
+                <span className="bg-white/15 px-2 py-1 rounded text-[11px]">{companyInfo.business_category}</span>
+              )}
+              {applicableTaxes.map(tax => (
+                <span key={tax} className="bg-white/20 px-2 py-1 rounded text-[11px] font-medium">{tax}</span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Monthly filing quick access */}
+      {/* Filing action cards — monthly vs annual */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Link
+          href={`/${locale}/tax/monthly-dashboard`}
+          className="group relative overflow-hidden rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white p-5 hover:shadow-lg hover:border-blue-400 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-sm">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-gray-900">월 신고 (SPT Masa)</p>
+              <p className="text-xs text-gray-500 mt-0.5">PPh 21 · PPh 23 · PPN · PPh 4(2)</p>
+            </div>
+          </div>
+          <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+        </Link>
+        <Link
+          href={`/${locale}/tax/spt-tahunan/1771`}
+          className="group relative overflow-hidden rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white p-5 hover:shadow-lg hover:border-purple-400 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-sm">
+              <FileSpreadsheet className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-gray-900">연 신고 (SPT Tahunan)</p>
+              <p className="text-xs text-gray-500 mt-0.5">SPT Badan 1771 · 법인세</p>
+            </div>
+          </div>
+          <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-300 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
+        </Link>
+      </div>
+
+      {/* Quick access */}
       <div className="grid gap-3 sm:grid-cols-3">
         {[
           { href: '/tax/monthly-dashboard', icon: BarChart3, label: '월 신고 현황', desc: 'PPh 21/23/PPN/PPh 4(2)', gradient: 'from-blue-500 to-cyan-500' },

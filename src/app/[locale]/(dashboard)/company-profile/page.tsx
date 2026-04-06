@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,10 +104,12 @@ const LEGAL_FORMS = [
 
 export default function CompanyProfilePage() {
   const { session } = useSession();
+  const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [determining, setDetermining] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['business', 'income']));
 
@@ -145,43 +148,43 @@ export default function CompanyProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
+      // 1. 프로필 저장
       const res = await fetch('/api/company-profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile),
       });
       const data = await res.json();
-      if (data.success) {
-        showMsg('success', '저장되었습니다');
-        if (data.data) setProfile(data.data);
-      } else {
+      if (!data.success) {
         showMsg('error', data.error || '저장 실패');
+        return;
+      }
+
+      // 2. 세금 체제 자동 판정 (프로필 저장 후 항상 실행)
+      const taxRes = await fetch('/api/company-profile/determine-tax', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data.data),
+      });
+      const taxData = await taxRes.json();
+      if (taxData.success && taxData.data?.profile) {
+        setProfile(taxData.data.profile);
+      } else if (data.data) {
+        setProfile(data.data);
+      }
+
+      // 3. 완성도 80% 이상이면 대시보드로 이동 안내
+      const completeness = data.data?.profile_completeness || taxData.data?.profile?.profile_completeness || 0;
+      if (completeness >= 80) {
+        showMsg('success', '신고 준비가 완료되었습니다! 대시보드로 이동합니다.');
+        setTimeout(() => router.push(`/${locale}/dashboard`), 2000);
+      } else {
+        showMsg('success', `저장 완료 (완성도 ${completeness}%). 추가 정보를 입력하면 신고 준비가 완료됩니다.`);
       }
     } catch {
       showMsg('error', '서버 오류');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleDetermineTaxRegime = async () => {
-    if (!profile) return;
-    setDetermining(true);
-    try {
-      const res = await fetch('/api/company-profile/determine-tax', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setProfile(data.data.profile);
-        showMsg('success', `세금 체제 판별: ${data.data.regime}`);
-      }
-    } catch {
-      showMsg('error', '판별 실패');
-    } finally {
-      setDetermining(false);
     }
   };
 
@@ -259,24 +262,33 @@ export default function CompanyProfilePage() {
         </div>
       )}
 
-      {/* Tax regime banner */}
-      {profile.tax_regime && (
-        <div className={`mb-4 p-4 rounded-xl border-l-4 ${
-          profile.tax_regime === 'UMKM_FINAL' ? 'bg-green-50 border-l-green-500' :
-          profile.tax_regime === 'GENERAL_25' ? 'bg-blue-50 border-l-blue-500' :
-          'bg-amber-50 border-l-amber-500'
-        }`}>
-          <div className="flex items-start gap-2">
-            <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
+      {/* Status banner */}
+      {profile.profile_completeness >= 80 ? (
+        <div className="mb-4 p-4 rounded-xl border-l-4 border-l-green-500 bg-green-50">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
             <div>
-              <p className="font-bold text-sm">
-                세금 체제: {profile.tax_regime === 'UMKM_FINAL' ? 'PPh Final 0.5% (UMKM)' : profile.tax_regime === 'GENERAL_25' ? 'PPh Badan 22% (일반)' : profile.tax_regime}
+              <p className="font-bold text-sm text-green-900">신고 준비 완료</p>
+              <p className="text-xs text-green-700 mt-0.5">
+                모든 필수 정보가 입력되었습니다. 대시보드에서 월신고 또는 연신고를 시작할 수 있습니다.
               </p>
-              {profile.tax_regime_reason && <p className="text-xs text-gray-600 mt-1">{profile.tax_regime_reason}</p>}
+            </div>
+            <Button size="sm" onClick={() => router.push(`/${locale}/dashboard`)} className="ml-auto flex-shrink-0">
+              대시보드로 이동
+            </Button>
+          </div>
+        </div>
+      ) : profile.profile_completeness > 0 ? (
+        <div className="mb-4 p-4 rounded-xl border-l-4 border-l-amber-500 bg-amber-50">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+            <div>
+              <p className="font-bold text-sm text-amber-900">추가 정보가 필요합니다 ({profile.profile_completeness}%)</p>
+              <p className="text-xs text-amber-700 mt-0.5">아래 항목을 입력하면 세금 신고를 시작할 수 있습니다.</p>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="space-y-3">
         {/* Section 1: Business Type */}
@@ -469,15 +481,14 @@ export default function CompanyProfilePage() {
       </div>
 
       {/* Actions */}
-      <div className="mt-6 flex gap-3">
-        <Button onClick={handleSave} disabled={saving} className="flex-1">
+      <div className="mt-6">
+        <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-          프로필 저장
+          저장 및 신고 준비
         </Button>
-        <Button onClick={handleDetermineTaxRegime} disabled={determining} variant="outline">
-          {determining ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-          AI 세금 체제 판별
-        </Button>
+        <p className="text-[11px] text-gray-400 text-center mt-2">
+          저장 시 세금 체제가 자동 판정됩니다. 필수 정보가 모두 입력되면 대시보드로 이동합니다.
+        </p>
       </div>
     </div>
   );
