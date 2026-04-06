@@ -77,15 +77,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
     }
 
-    // Get uploaded documents for this period
+    // Get ALL uploaded documents for this customer (not date-filtered — customer selects period on UI)
     const { data: docs } = await admin
       .from('document')
-      .select('document_type, ocr_status, form_type')
+      .select('document_type, ocr_status, form_type, metadata')
       .eq('customer_id', customerId)
-      .gte('created_at', `${period}-01`)
-      .lt('created_at', nextMonth(period));
+      .order('created_at', { ascending: false })
+      .limit(200);
 
-    const uploadedTypes = new Set((docs || []).map(d => d.document_type));
+    // Check both document_type and metadata.original_document_type (enum fallback stores 'OTHER')
+    const uploadedTypes = new Set<string>();
+    for (const d of docs || []) {
+      uploadedTypes.add(d.document_type);
+      const originalType = (d.metadata as Record<string, unknown>)?.original_document_type;
+      if (typeof originalType === 'string') {
+        uploadedTypes.add(originalType);
+      }
+    }
 
     // Determine required documents
     const required = getRequiredDocTypes({
