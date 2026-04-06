@@ -26,25 +26,22 @@ async function getCustomerIdForUser(
 }
 
 function calculateCompleteness(profile: Record<string, unknown>): number {
+  // Essential fields only — tax_regime is auto-determined (not user input)
   const checks = [
-    !!profile.company_name,
-    !!profile.npwp,
-    !!profile.business_category,
-    !!profile.legal_form,
-    profile.annual_revenue != null,
-    profile.established_year != null,
-    profile.has_employees != null,
-    profile.is_pkp != null,
-    profile.is_umkm != null,
-    // Income sources (at least one answered)
-    profile.pays_service_fees != null || profile.has_import_export != null || profile.has_rental_business != null,
-    // Ownership
-    profile.has_foreign_shareholders != null,
-    // Tax regime determined
-    !!profile.tax_regime,
+    { filled: !!profile.company_name, weight: 2 },             // 필수
+    { filled: !!profile.npwp, weight: 2 },                     // 필수
+    { filled: !!profile.business_category, weight: 2 },         // 필수 — 세목 결정
+    { filled: !!profile.legal_form, weight: 1 },                // 권장
+    { filled: profile.annual_revenue != null && Number(profile.annual_revenue) > 0, weight: 1 }, // 권장
+    { filled: profile.established_year != null, weight: 0.5 },  // 선택
+    // Boolean fields — DEFAULT FALSE이므로 항상 "입력됨" 취급
+    { filled: true, weight: 1 },  // has_employees (always set via default)
+    { filled: true, weight: 1 },  // is_pkp (always set via default)
+    { filled: true, weight: 1 },  // income sources (always set via default)
   ];
-  const filled = checks.filter(Boolean).length;
-  return Math.round((filled / checks.length) * 100);
+  const totalWeight = checks.reduce((s, c) => s + c.weight, 0);
+  const filledWeight = checks.filter(c => c.filled).reduce((s, c) => s + c.weight, 0);
+  return Math.round((filledWeight / totalWeight) * 100);
 }
 
 export async function GET(request: NextRequest) {
