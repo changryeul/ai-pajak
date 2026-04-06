@@ -77,7 +77,7 @@ const navItems: NavSection[] = [
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
-      { href: '/documents/upload', icon: Camera, labelKey: 'nav.docUpload', roles: [UserRole.CUSTOMER] },
+      { href: '/documents/upload', icon: Camera, labelKey: 'nav.docUpload', roles: taxRoles },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: taxRoles },
       { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', roles: taxRoles },

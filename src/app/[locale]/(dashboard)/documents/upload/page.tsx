@@ -61,6 +61,26 @@ export default function DocumentUploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
+  const isConsultant = session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name?: string }>>([]);
+
+  // Resolve effective customerId: direct for CUSTOMER, selected for consultant
+  const effectiveCustomerId = isConsultant ? selectedCustomerId : session?.customerId;
+
+  // Load customer list for consultants
+  useEffect(() => {
+    if (!isConsultant) return;
+    fetch('/api/customers')
+      .then(r => r.json())
+      .then(d => {
+        const list = d.customers || [];
+        setCustomers(list);
+        if (list.length > 0 && !selectedCustomerId) setSelectedCustomerId(list[0].id);
+      })
+      .catch(() => {});
+  }, [isConsultant]);
+
   const [period, setPeriod] = useState(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
   const [docType, setDocType] = useState('INVOICE');
   const [uploading, setUploading] = useState(false);
@@ -82,31 +102,31 @@ export default function DocumentUploadPage() {
 
   // Load uploaded documents + pending requests for period
   const loadData = useCallback(async () => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
     try {
       const [docsRes, reqRes] = await Promise.all([
-        fetch(`/api/documents?customerId=${session.customerId}&period=${period}`),
-        fetch(`/api/documents/requests?customerId=${session.customerId}&period=${period}`),
+        fetch(`/api/documents?customerId=${effectiveCustomerId}&period=${period}`),
+        fetch(`/api/documents/requests?customerId=${effectiveCustomerId}&period=${period}`),
       ]);
       const docsData = await docsRes.json();
       const reqData = await reqRes.json();
       if (docsData.success) setDocuments(docsData.data || []);
       if (reqData.success) setRequests(reqData.data || []);
     } catch { /* */ }
-  }, [session?.customerId, period]);
+  }, [effectiveCustomerId, period]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
   // Upload handler (shared for file/photo/camera)
   const handleUpload = async (files: FileList | null, source: string) => {
-    if (!files || files.length === 0 || !session?.customerId) return;
+    if (!files || files.length === 0 || !effectiveCustomerId) return;
     setUploading(true);
 
     let successCount = 0;
     for (const file of Array.from(files)) {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('customerId', session.customerId);
+      formData.append('customerId', effectiveCustomerId);
       formData.append('documentType', docType);
       formData.append('period', period);
       formData.append('uploadSource', source);
@@ -136,7 +156,7 @@ export default function DocumentUploadPage() {
 
   // Submit for AI review
   const handleSubmit = async () => {
-    if (!session?.customerId) return;
+    if (!effectiveCustomerId) return;
     if (documents.length === 0) {
       showMsg('warning', '먼저 자료를 업로드해 주세요');
       return;
@@ -146,7 +166,7 @@ export default function DocumentUploadPage() {
       const res = await fetch('/api/documents/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: session.customerId, period }),
+        body: JSON.stringify({ customerId: effectiveCustomerId, period }),
       });
       const data = await res.json();
       if (data.success) {
@@ -197,6 +217,21 @@ export default function DocumentUploadPage() {
           영수증, 인보이스, 팍투르 파작 등을 업로드하면 AI가 자동으로 데이터를 추출합니다
         </p>
       </div>
+
+      {/* Consultant: customer selector */}
+      {isConsultant && (
+        <div className="mb-4">
+          <Label className="text-xs">고객 선택</Label>
+          <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+            <SelectTrigger className="w-72"><SelectValue placeholder="고객을 선택하세요" /></SelectTrigger>
+            <SelectContent>
+              {customers.map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.company_name || c.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Period + Type selector */}
       <div className="flex flex-wrap gap-3 mb-4">

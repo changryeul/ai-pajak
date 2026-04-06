@@ -76,14 +76,21 @@ export async function POST(request: NextRequest) {
       // Map documentType to document_category enum
       const categoryMap: Record<string, string> = {
         BUKTI_POTONG: 'TAX_REGISTRATION',
-        FAKTUR_PAJAK: 'TAX_REGISTRATION',
+        FAKTUR_PAJAK: 'FAKTUR_PAJAK',
         LAPORAN_KEUANGAN: 'COMPANY',
         KTP: 'IDENTITY',
         NPWP_CARD: 'IDENTITY',
         TAX_DOCUMENT: 'TAX_REGISTRATION',
         POA_DRAFT: 'POA_DRAFT',
+        INVOICE: 'INVOICE',
+        RECEIPT: 'RECEIPT',
+        BANK_STATEMENT: 'BANK_STATEMENT',
+        SALARY_SLIP: 'SALARY_SLIP',
+        EXPENSE_RECEIPT: 'EXPENSE_RECEIPT',
+        E_FAKTUR: 'FAKTUR_PAJAK',
         OTHER: 'OTHER',
       };
+      // Fallback to 'OTHER' if enum value doesn't exist in DB yet
       const dbCategory = categoryMap[documentType] || 'OTHER';
 
       let classificationData = null;
@@ -91,16 +98,19 @@ export async function POST(request: NextRequest) {
         try { classificationData = JSON.parse(aiClassification); } catch { /* ignore */ }
       }
 
+      // Try with specific category first, fallback to 'OTHER' if enum doesn't exist
+      let insertCategory = dbCategory;
       const { error: docInsertError } = await supabase
         .from('document')
         .insert({
           customer_id: customerId,
           uploaded_by_user_id: user.id,
-          document_type: dbCategory,
+          document_type: insertCategory,
           file_path: result.data.path,
           file_name: result.data.originalName,
           mime_type: result.data.mimeType,
           file_size_bytes: result.data.size,
+          upload_source: formData.get('uploadSource') as string || 'WEB',
           metadata: {
             original_document_type: documentType,
             ai_classification: classificationData,
@@ -109,7 +119,27 @@ export async function POST(request: NextRequest) {
         });
 
       if (docInsertError) {
-        loggers.api.error({ err: docInsertError }, 'Failed to create document record');
+        // Retry with 'OTHER' if enum value doesn't exist
+        if (docInsertError.message.includes('invalid input value for enum')) {
+          insertCategory = 'OTHER';
+          await supabase.from('document').insert({
+            customer_id: customerId,
+            uploaded_by_user_id: user.id,
+            document_type: 'OTHER',
+            file_path: result.data.path,
+            file_name: result.data.originalName,
+            mime_type: result.data.mimeType,
+            file_size_bytes: result.data.size,
+            upload_source: formData.get('uploadSource') as string || 'WEB',
+            metadata: {
+              original_document_type: documentType,
+              ai_classification: classificationData,
+              storage_bucket: bucket,
+            },
+          });
+        } else {
+          loggers.api.error({ err: docInsertError }, 'Failed to create document record');
+        }
       }
     }
 
