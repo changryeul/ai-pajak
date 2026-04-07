@@ -159,8 +159,8 @@ export default function PPh23Page() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerId,
-          period,
-          counterpartyId: fCounterparty,
+          taxPeriod: period,
+          counterpartyId: fCounterparty || undefined,
           serviceType: fServiceType,
           grossAmount: Number(fGrossAmount),
           invoiceNumber: fInvoiceNumber || undefined,
