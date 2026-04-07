@@ -11,7 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import {
   Store, CheckCircle, AlertTriangle, ArrowRight, ArrowLeft,
   Loader2, Shield, Calendar, DollarSign, FileText, Sparkles,
-  Download, HelpCircle,
+  Download, HelpCircle, Upload, Camera, FolderOpen, BookOpen,
+  ClipboardList,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -37,7 +38,22 @@ export default function PPhFinalAnnualPage() {
   const [monthlyRevenue, setMonthlyRevenue] = useState<number[]>(Array(12).fill(0));
   const [monthlyPaid, setMonthlyPaid] = useState<number[]>(Array(12).fill(0));
 
-  // Step 3: Additional income/deductions
+  // Step 2: Required documents checklist
+  const [docs, setDocs] = useState({
+    aktaPendirian: false,     // 최초 정관
+    aktaPerubahan: false,     // 최종 수정 정관
+    skMenteri: false,         // SK (Surat Keputusan Menteri)
+    fixedAssetList: false,    // 고정자산 리스트
+    contracts: false,         // 연중 계약서 사본
+    monthlyTaxRecords: false, // 매월 세무신고 자료
+  });
+
+  // Step 3: Financial statement path
+  const [fsPath, setFsPath] = useState<'JOURNAL' | 'BANK_PETTY' | null>(null);
+  // JOURNAL: 고객이 저널 제공 → 우리가 재무제표 작성
+  // BANK_PETTY: 은행거래내역 + petty cash → 우리가 저널+재무제표 작성
+
+  // Step 5: Additional income/deductions
   const [otherIncome, setOtherIncome] = useState('');
   const [interestIncome, setInterestIncome] = useState('');
   const [assetGainLoss, setAssetGainLoss] = useState('');
@@ -109,22 +125,24 @@ export default function PPhFinalAnnualPage() {
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 overflow-x-auto">
         {[
           { id: 1, label: '기본 정보' },
-          { id: 2, label: '월별 매출 입력' },
-          { id: 3, label: '기타 소득' },
-          { id: 4, label: '정산 결과' },
-          { id: 5, label: 'SPT 생성' },
+          { id: 2, label: '필요 서류' },
+          { id: 3, label: '재무제표' },
+          { id: 4, label: '월별 매출' },
+          { id: 5, label: '기타 소득' },
+          { id: 6, label: '정산 결과' },
+          { id: 7, label: 'SPT 생성' },
         ].map((s, i) => (
-          <div key={s.id} className="flex items-center flex-1">
+          <div key={s.id} className="flex items-center flex-1 min-w-0">
             <div className="flex flex-col items-center flex-1">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
                 step >= s.id ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'
-              }`}>{step > s.id ? <CheckCircle className="h-4 w-4" /> : s.id}</div>
-              <p className="text-[10px] mt-1 text-center">{s.label}</p>
+              }`}>{step > s.id ? <CheckCircle className="h-3 w-3" /> : s.id}</div>
+              <p className="text-[9px] mt-1 text-center">{s.label}</p>
             </div>
-            {i < 4 && <div className={`h-0.5 flex-1 ${step > s.id ? 'bg-green-500' : 'bg-gray-200'}`} />}
+            {i < 6 && <div className={`h-0.5 flex-1 ${step > s.id ? 'bg-green-500' : 'bg-gray-200'}`} />}
           </div>
         ))}
       </div>
@@ -182,8 +200,193 @@ export default function PPhFinalAnnualPage() {
         </Card>
       )}
 
-      {/* Step 2: Monthly revenue + paid */}
+      {/* Step 2: Required documents */}
       {step === 2 && (
+        <Card>
+          <CardContent className="p-5 space-y-4">
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-green-600" />
+              필요 서류 체크리스트
+            </h2>
+            <p className="text-xs text-gray-500">
+              연 결산 및 SPT 1771 작성에 필요한 서류입니다. 준비된 서류를 체크하고 업로드해 주세요.
+              <b> 미준비 항목은 JTC 담당자가 별도 요청</b>합니다.
+            </p>
+
+            <div className="space-y-2">
+              {[
+                { key: 'aktaPendirian', label: '최초 정관 (Akta Pendirian)', desc: '회사 설립 시 작성한 공증 정관 원본. Notaris 공증 포함.', required: true },
+                { key: 'aktaPerubahan', label: '최종 수정 정관 (Akta Perubahan Terakhir)', desc: '가장 최근 수정한 정관. 주주/이사 변경 등이 반영된 버전.', required: true },
+                { key: 'skMenteri', label: 'SK Menteri (법무부 승인서)', desc: 'Surat Keputusan Menteri Hukum & HAM. AHU 번호 포함.', required: true },
+                { key: 'fixedAssetList', label: '고정자산 리스트 (Daftar Aktiva Tetap)', desc: '보유 자산 목록: 취득일, 취득가, 감가상각 내역. 없으면 "없음" 체크.', required: false },
+                { key: 'contracts', label: '연중 체결 계약서 사본', desc: `${year}년 중 체결한 모든 계약서 (거래처/임대/서비스/고용 등).`, required: true },
+                { key: 'monthlyTaxRecords', label: '매월 세무신고 자료', desc: `${year}년 1~12월 SPT Masa 신고 내역 (PPh 21/23/4(2)/PPN). AI Pajak으로 신고했다면 자동 수집됨.`, required: true },
+              ].map(doc => (
+                <label key={doc.key}
+                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    docs[doc.key as keyof typeof docs] ? 'border-green-300 bg-green-50' : 'border-gray-200 hover:bg-gray-50'
+                  }`}>
+                  <input type="checkbox"
+                    checked={docs[doc.key as keyof typeof docs]}
+                    onChange={e => setDocs({ ...docs, [doc.key]: e.target.checked })}
+                    className="mt-0.5 accent-green-600" />
+                  <div className="flex-1 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{doc.label}</span>
+                      {doc.required && <Badge className="text-[8px] bg-red-100 text-red-700">필수</Badge>}
+                    </div>
+                    <p className="text-gray-500 mt-0.5">{doc.desc}</p>
+                  </div>
+                  {docs[doc.key as keyof typeof docs] && <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                </label>
+              ))}
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800 flex items-start gap-2">
+              <Upload className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">서류 업로드</p>
+                <p className="mt-0.5">
+                  "자료 업로드" 메뉴에서 위 서류를 업로드할 수 있습니다.
+                  업로드된 서류는 JTC 세무사가 검토합니다.
+                </p>
+                <a href={`/${locale}/documents/upload`} className="text-blue-600 hover:underline mt-1 inline-block">
+                  자료 업로드 페이지로 이동 →
+                </a>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-3 text-xs">
+              <p className="text-gray-600">
+                준비 상태: <b>{Object.values(docs).filter(Boolean).length}/6</b> 완료
+                {Object.values(docs).filter(Boolean).length < 4 && (
+                  <span className="text-amber-600 ml-2">— 미준비 서류는 JTC가 별도 요청합니다</span>
+                )}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 3: Financial statement preparation */}
+      {step === 3 && (
+        <Card>
+          <CardContent className="p-5 space-y-4">
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-green-600" />
+              재무제표 준비
+            </h2>
+
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+              <p className="text-xs font-bold text-amber-900 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                PPh Final도 SPT 1771에 재무제표가 필수입니다
+              </p>
+              <p className="text-xs text-amber-800 mt-1">
+                UMKM이라도 SPT Tahunan Badan 1771 제출 시 <b>Laporan Keuangan (재무제표)</b>가 반드시 첨부되어야 합니다.
+                재무제표에는 Neraca (재무상태표)와 Laporan Laba Rugi (손익계산서)가 포함됩니다.
+              </p>
+            </div>
+
+            <p className="text-sm font-medium">재무제표 준비 방법을 선택하세요:</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Path A: Customer has journal */}
+              <button type="button"
+                onClick={() => setFsPath('JOURNAL')}
+                className={`text-left p-5 rounded-xl border-2 transition-all ${
+                  fsPath === 'JOURNAL' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                }`}>
+                <BookOpen className={`h-8 w-8 mb-2 ${fsPath === 'JOURNAL' ? 'text-green-600' : 'text-gray-400'}`} />
+                <p className="font-bold text-sm">A. 저널(회계 장부)이 있습니다</p>
+                <p className="text-xs text-gray-600 mt-2">
+                  회사에서 작성한 회계 저널(Jurnal Umum)을 업로드하면
+                  JTC가 이를 기반으로 재무제표를 작성합니다.
+                </p>
+                <div className="mt-3 text-[10px] text-green-700 bg-green-100 rounded p-2">
+                  <p className="font-bold">필요한 것:</p>
+                  <p>• Jurnal Umum (일반 저널) — Excel 또는 회계SW 출력물</p>
+                  <p>• Buku Besar (총계정원장) — 있으면 추가</p>
+                </div>
+              </button>
+
+              {/* Path B: No journal — bank statements */}
+              <button type="button"
+                onClick={() => setFsPath('BANK_PETTY')}
+                className={`text-left p-5 rounded-xl border-2 transition-all ${
+                  fsPath === 'BANK_PETTY' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                }`}>
+                <FolderOpen className={`h-8 w-8 mb-2 ${fsPath === 'BANK_PETTY' ? 'text-blue-600' : 'text-gray-400'}`} />
+                <p className="font-bold text-sm">B. 저널이 없습니다</p>
+                <p className="text-xs text-gray-600 mt-2">
+                  회계 장부가 없는 경우, 법인 계좌 거래내역과 현금 출납(Petty Cash)을
+                  제출하면 JTC가 저널 + 재무제표를 대신 작성합니다.
+                </p>
+                <div className="mt-3 text-[10px] text-blue-700 bg-blue-100 rounded p-2">
+                  <p className="font-bold">필요한 것:</p>
+                  <p>• 법인 은행 계좌 거래내역서 (Rekening Koran) — {year}년 1~12월 전체</p>
+                  <p>• Petty Cash (현금 출납부) — 있으면 (Excel 또는 수기 노트 촬영)</p>
+                  <p>• 매출/매입 영수증 원본 (증빙)</p>
+                </div>
+              </button>
+            </div>
+
+            {fsPath && (
+              <div className={`rounded-xl p-4 border ${
+                fsPath === 'JOURNAL' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'
+              }`}>
+                <p className="text-xs font-bold mb-2">
+                  {fsPath === 'JOURNAL' ? '✅ 저널 기반 재무제표 작성' : '✅ 은행거래 기반 재무제표 작성'}
+                </p>
+                <p className="text-xs text-gray-700">
+                  {fsPath === 'JOURNAL'
+                    ? '저널 데이터를 "자료 업로드" 페이지에서 업로드해 주세요. JTC 세무사가 검토 후 Neraca + Laporan Laba Rugi를 작성합니다.'
+                    : '은행 거래내역서와 Petty Cash 내역을 "자료 업로드" 페이지에서 업로드해 주세요. JTC가 저널 작성 → 재무제표 작성을 대행합니다.'}
+                </p>
+                <a href={`/${locale}/documents/upload`}
+                  className={`mt-2 inline-flex items-center gap-1 text-xs font-medium ${
+                    fsPath === 'JOURNAL' ? 'text-green-700' : 'text-blue-700'
+                  } hover:underline`}>
+                  <Upload className="h-3 w-3" />자료 업로드 페이지로 이동
+                </a>
+
+                {fsPath === 'BANK_PETTY' && (
+                  <div className="mt-3 p-2 bg-amber-50 rounded border border-amber-200 text-[10px] text-amber-800">
+                    <p className="font-bold">💡 Petty Cash가 뭔가요?</p>
+                    <p className="mt-0.5">
+                      사무실에서 현금으로 소액 결제한 내역입니다 (교통비, 사무용품, 식대 등).
+                      Excel로 정리하거나, 수기 노트를 촬영하여 업로드해도 됩니다.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="bg-gray-50 rounded-lg p-3 text-xs">
+              <p className="font-bold text-gray-700 mb-1">JTC 재무제표 작성 프로세스</p>
+              <div className="flex items-center gap-2 text-[10px] text-gray-600">
+                <Badge className="bg-gray-200 text-gray-700">1</Badge>
+                <span>자료 접수</span>
+                <span>→</span>
+                <Badge className="bg-gray-200 text-gray-700">2</Badge>
+                <span>저널 정리</span>
+                <span>→</span>
+                <Badge className="bg-gray-200 text-gray-700">3</Badge>
+                <span>시산표</span>
+                <span>→</span>
+                <Badge className="bg-gray-200 text-gray-700">4</Badge>
+                <span>Neraca + L/R</span>
+                <span>→</span>
+                <Badge className="bg-gray-200 text-gray-700">5</Badge>
+                <span>고객 확인</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 4: Monthly revenue + paid */}
+      {step === 4 && (
         <Card>
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
@@ -286,8 +489,8 @@ export default function PPhFinalAnnualPage() {
         </Card>
       )}
 
-      {/* Step 3: Other income */}
-      {step === 3 && (
+      {/* Step 5: Other income */}
+      {step === 5 && (
         <Card>
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
@@ -333,8 +536,8 @@ export default function PPhFinalAnnualPage() {
         </Card>
       )}
 
-      {/* Step 4: Settlement result */}
-      {step === 4 && (
+      {/* Step 6: Settlement result */}
+      {step === 6 && (
         <div className="space-y-4">
           <Card className={`border-l-4 ${isBalanced ? 'border-l-green-500' : isOverpaid ? 'border-l-blue-500' : 'border-l-red-500'}`}>
             <CardContent className="p-5">
@@ -419,8 +622,8 @@ export default function PPhFinalAnnualPage() {
         </div>
       )}
 
-      {/* Step 5: SPT generation */}
-      {step === 5 && (
+      {/* Step 7: SPT generation */}
+      {step === 7 && (
         <div className="space-y-4">
           <Card className="border-green-200 bg-green-50">
             <CardContent className="p-5 text-center">
@@ -463,7 +666,7 @@ export default function PPhFinalAnnualPage() {
             <ArrowLeft className="h-4 w-4 mr-1" />이전
           </Button>
         ) : <div />}
-        {step < 5 ? (
+        {step < 7 ? (
           <Button onClick={() => setStep(step + 1)}>
             다음<ArrowRight className="h-4 w-4 ml-1" />
           </Button>
