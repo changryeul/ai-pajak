@@ -657,6 +657,8 @@ function PPh21FilingProcess({
   showMsg: (type: 'success' | 'error', text: string) => void;
 }) {
   const [creatingSPT, setCreatingSPT] = useState(false);
+  const [generatingBP, setGeneratingBP] = useState(false);
+  const [bpResult, setBpResult] = useState<Array<{ employeeName: string; bpNumber: string; pph21: number }>>([]);
   const [sptResult, setSptResult] = useState<{
     totalGrossIncome: number; totalTaxWithheld: number; itemCount: number;
     submissionDeadline: string; isOverdue: boolean;
@@ -718,13 +720,35 @@ function PPh21FilingProcess({
     }
   };
 
+  const handleGenerateBP = async () => {
+    setGeneratingBP(true);
+    try {
+      const res = await fetch('/api/tax/ebupot-pph21', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, period: currentPeriod }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBpResult(data.data?.buktiPotongs || []);
+        showMsg('success', data.message || 'e-Bupot 생성 완료');
+      } else {
+        showMsg('error', data.error || 'e-Bupot 생성 실패');
+      }
+    } catch {
+      showMsg('error', '서버 오류');
+    } finally {
+      setGeneratingBP(false);
+    }
+  };
+
   const steps = [
     { id: 1, label: '자료 입력', done: true, desc: '직원 급여 데이터' },
     { id: 2, label: '급여 생성', done: true, desc: '월별 급여 명세' },
     { id: 3, label: 'PPh 21 계산', done: true, desc: 'TER 자동 계산' },
-    { id: 4, label: 'SPT Masa', done: !!sptResult, desc: sptResult ? `마감 ${sptResult.submissionDeadline?.substring(0, 10)}` : '미생성' },
-    { id: 5, label: '납부', done: false, desc: '납부 페이지에서 진행' },
-    { id: 6, label: 'DJP 제출', done: false, desc: '납부 완료 후' },
+    { id: 4, label: 'e-Bupot', done: bpResult.length > 0, desc: bpResult.length > 0 ? `${bpResult.length}건` : '미생성' },
+    { id: 5, label: 'SPT Masa', done: !!sptResult, desc: sptResult ? `마감 ${sptResult.submissionDeadline?.substring(0, 10)}` : '미생성' },
+    { id: 6, label: '납부', done: false, desc: '납부 페이지' },
   ];
 
   return (
@@ -751,6 +775,42 @@ function PPh21FilingProcess({
           </div>
         ))}
       </div>
+
+      {/* e-Bupot 1721-A1 */}
+      {bpResult.length === 0 ? (
+        <Card className="border-purple-200 bg-purple-50">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="font-medium text-sm text-purple-900">e-Bupot 1721-A1 생성</p>
+              <p className="text-xs text-purple-700">직원별 Bukti Potong PPh 21을 일괄 생성합니다</p>
+            </div>
+            <Button onClick={handleGenerateBP} disabled={generatingBP} variant="outline">
+              {generatingBP ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
+              e-Bupot 생성
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <p className="font-medium text-sm text-green-900">e-Bupot 1721-A1 — {bpResult.length}건 생성 완료</p>
+            </div>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {bpResult.map((bp, i) => (
+                <div key={i} className="flex items-center justify-between text-xs p-1.5 bg-white rounded">
+                  <span>{bp.employeeName}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge className="font-mono text-[9px] bg-purple-100 text-purple-700">{bp.bpNumber}</Badge>
+                    <span className="font-mono text-blue-700">{fmtRp(bp.pph21)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* SPT Masa action */}
       {!sptResult ? (
