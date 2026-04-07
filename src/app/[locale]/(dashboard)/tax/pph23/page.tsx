@@ -607,6 +607,187 @@ export default function PPh23Page() {
           )}
         </CardContent>
       </Card>
+
+      {/* ══════════════════════════════════════════ */}
+      {/* Filing process steps — 5~7단계 통합       */}
+      {/* ══════════════════════════════════════════ */}
+      {transactions.length > 0 && (
+        <FilingSteps
+          customerId={customerId}
+          period={period}
+          transactions={transactions}
+          summary={summary}
+          pendingBP={pendingBP}
+          onRefresh={loadData}
+          showMsg={showMsg}
+          locale={locale}
+        />
+      )}
     </div>
+  );
+}
+
+// ── Filing Steps Sub-component ──
+function FilingSteps({
+  customerId, period, transactions, summary, pendingBP, onRefresh, showMsg, locale,
+}: {
+  customerId: string;
+  period: string;
+  transactions: Transaction[];
+  summary: Summary;
+  pendingBP: number;
+  onRefresh: () => void;
+  showMsg: (type: 'success' | 'error', text: string) => void;
+  locale: string;
+}) {
+  const [generating, setGenerating] = useState(false);
+  const [creatingSPT, setCreatingSPT] = useState(false);
+  const [sptResult, setSptResult] = useState<{
+    totalGrossIncome: number; totalTaxWithheld: number; itemCount: number;
+    submissionDeadline: string; isOverdue: boolean; filingId?: string;
+  } | null>(null);
+
+  // Check current SPT Masa status on load
+  useEffect(() => {
+    fetch(`/api/tax/spt-masa?customerId=${customerId}&taxType=PPh23&period=${period}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.success && d.data?.sptMasa) setSptResult(d.data.sptMasa);
+      })
+      .catch(() => {});
+  }, [customerId, period]);
+
+  const allBPGenerated = pendingBP === 0 && transactions.length > 0;
+  const sptCreated = !!sptResult;
+
+  // Step status
+  const steps = [
+    { id: 1, label: '거래 입력', done: transactions.length > 0, desc: `${summary.transactionCount}건 · ${fmtRp(summary.totalTax)}` },
+    { id: 2, label: 'e-Bupot 생성', done: allBPGenerated, desc: allBPGenerated ? '전체 부여 완료' : `${pendingBP}건 미부여` },
+    { id: 3, label: 'SPT Masa 생성', done: sptCreated, desc: sptCreated ? `마감 ${sptResult?.submissionDeadline?.substring(0, 10)}` : '미생성' },
+    { id: 4, label: '납부', done: false, desc: '납부 페이지에서 진행' },
+    { id: 5, label: 'DJP 제출', done: false, desc: '납부 완료 후 제출' },
+  ];
+
+  const handleCreateSPT = async () => {
+    setCreatingSPT(true);
+    try {
+      const res = await fetch('/api/tax/spt-masa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSptResult(data.data?.sptMasa || data.data);
+        showMsg('success', 'SPT Masa PPh 23 초안이 생성되었습니다');
+        onRefresh();
+      } else {
+        showMsg('error', data.error || 'SPT Masa 생성 실패');
+      }
+    } catch {
+      showMsg('error', '서버 오류');
+    } finally {
+      setCreatingSPT(false);
+    }
+  };
+
+  return (
+    <Card className="mt-4">
+      <CardContent className="p-5">
+        <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
+          <Shield className="h-4 w-4 text-indigo-600" />
+          {period} PPh 23 신고 진행 상황
+        </h3>
+
+        {/* Step indicators */}
+        <div className="flex items-center justify-between mb-6">
+          {steps.map((step, i) => (
+            <div key={step.id} className="flex items-center flex-1">
+              <div className="flex flex-col items-center flex-1">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                  step.done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {step.done ? <CheckCircle className="h-4 w-4" /> : step.id}
+                </div>
+                <p className={`text-[10px] mt-1 text-center font-medium ${step.done ? 'text-green-700' : 'text-gray-500'}`}>
+                  {step.label}
+                </p>
+                <p className="text-[9px] text-gray-400 text-center">{step.desc}</p>
+              </div>
+              {i < steps.length - 1 && (
+                <div className={`h-0.5 w-full ${step.done ? 'bg-green-400' : 'bg-gray-200'}`} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Action buttons for current step */}
+        <div className="space-y-3">
+          {/* Step 2: e-Bupot — already handled above, just show status */}
+          {!allBPGenerated && transactions.length > 0 && (
+            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <span>e-Bupot 미부여 {pendingBP}건. 위 목록 상단의 "e-Bupot 일괄 생성" 버튼을 클릭하세요.</span>
+            </div>
+          )}
+
+          {/* Step 3: SPT Masa generation */}
+          {allBPGenerated && !sptCreated && (
+            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-600" />
+                <div className="text-xs">
+                  <p className="font-medium text-blue-900">SPT Masa PPh 23 생성 가능</p>
+                  <p className="text-blue-700">{summary.transactionCount}건, 세액 {fmtRp(summary.totalTax)}</p>
+                </div>
+              </div>
+              <Button size="sm" onClick={handleCreateSPT} disabled={creatingSPT}>
+                {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
+                SPT Masa 생성
+              </Button>
+            </div>
+          )}
+
+          {/* Step 3 done → show SPT summary */}
+          {sptCreated && sptResult && (
+            <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <p className="text-xs font-medium text-green-900">SPT Masa PPh 23 생성 완료</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div><p className="text-gray-500">총 DPP</p><p className="font-mono font-bold">{fmtRp(sptResult.totalGrossIncome)}</p></div>
+                <div><p className="text-gray-500">세액 합계</p><p className="font-mono font-bold text-emerald-700">{fmtRp(sptResult.totalTaxWithheld)}</p></div>
+                <div>
+                  <p className="text-gray-500">신고 마감</p>
+                  <p className={sptResult.isOverdue ? 'text-red-600 font-bold' : ''}>
+                    {sptResult.submissionDeadline?.substring(0, 10)}
+                    {sptResult.isOverdue && ' (연체!)'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Payment link */}
+          {sptCreated && (
+            <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-indigo-600" />
+                <div className="text-xs">
+                  <p className="font-medium text-indigo-900">납부 진행</p>
+                  <p className="text-indigo-700">ID Billing 생성 후 은행에서 납부 → NTPN 입력</p>
+                </div>
+              </div>
+              <a href={`/${locale}/tax/monthly-payments`}
+                className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
+                납부 페이지로
+              </a>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
