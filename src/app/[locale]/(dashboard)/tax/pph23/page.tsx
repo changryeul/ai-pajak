@@ -647,12 +647,27 @@ function FilingSteps({
     submissionDeadline: string; isOverdue: boolean; filingId?: string;
   } | null>(null);
 
-  // Check current SPT Masa status on load
+  // Check current SPT Masa status on load (query tax_filing table directly)
   useEffect(() => {
-    fetch(`/api/tax/spt-masa?customerId=${customerId}&taxType=PPh23&period=${period}`)
+    if (!customerId) return;
+    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh23&period=${period}&status=DRAFT`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        if (d?.success && d.data?.sptMasa) setSptResult(d.data.sptMasa);
+        const filings = d?.data || d?.filings || [];
+        const existing = filings.find((f: { tax_type: string; tax_period: string }) =>
+          f.tax_type === 'PPh23' && f.tax_period === period
+        );
+        if (existing?.tax_data?.spt_masa_result) {
+          const r = existing.tax_data.spt_masa_result;
+          setSptResult({
+            totalGrossIncome: r.total_gross_income || 0,
+            totalTaxWithheld: r.total_tax_withheld || 0,
+            itemCount: r.item_count || 0,
+            submissionDeadline: r.submission_deadline || '',
+            isOverdue: false,
+            filingId: existing.id,
+          });
+        }
       })
       .catch(() => {});
   }, [customerId, period]);
@@ -678,12 +693,23 @@ function FilingSteps({
         body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
       });
       const data = await res.json();
-      if (data.success) {
-        setSptResult(data.data?.sptMasa || data.data);
+      if (data.success || data.sptMasa) {
+        // API returns { success, sptMasa, filingId, ... } at root level
+        const spt = data.sptMasa || data.data?.sptMasa;
+        if (spt) {
+          setSptResult({
+            totalGrossIncome: spt.totalGrossIncome || 0,
+            totalTaxWithheld: spt.totalTaxWithheld || 0,
+            itemCount: spt.itemCount || 0,
+            submissionDeadline: spt.submissionDeadline || '',
+            isOverdue: spt.isOverdue || false,
+            filingId: data.filingId,
+          });
+        }
         showMsg('success', 'SPT Masa PPh 23 초안이 생성되었습니다');
         onRefresh();
       } else {
-        showMsg('error', data.error || 'SPT Masa 생성 실패');
+        showMsg('error', data.error || data.message || 'SPT Masa 생성 실패');
       }
     } catch {
       showMsg('error', '서버 오류');
