@@ -14,7 +14,9 @@ import {
   FileText, Loader2, CheckCircle, AlertTriangle, Plus, Trash2,
   DollarSign, TrendingUp, TrendingDown, Minus, Sparkles,
   ArrowUpRight, ArrowDownLeft, Check, X, Ban,
+  Upload, Camera, Shield, Image, RefreshCw,
 } from 'lucide-react';
+import { useRef } from 'react';
 
 interface Faktur {
   id: string;
@@ -542,8 +544,302 @@ export default function PPNPage() {
         </div>
       )}
 
+      {/* Document Upload + Filing Process */}
+      <PPNFilingSection
+        customerId={session?.customerId || ''}
+        period={period}
+        summary={summary}
+        fakturCount={fakturs.length}
+        locale={locale}
+      />
+
       {/* PPN Refund Section */}
       <PPNRefundSection locale={locale} />
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+// PPN Filing Process (증빙 + SPT Masa + 납부 프로그래스)
+// ══════════════════════════════════════════════════════
+function PPNFilingSection({
+  customerId, period, summary, fakturCount, locale,
+}: {
+  customerId: string;
+  period: string;
+  summary: { outputTax: number; inputTax: number; netPpn: number; status: string };
+  fakturCount: number;
+  locale: string;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedDocs, setUploadedDocs] = useState<Array<{
+    id: string; file_name: string; ocr_status: string;
+    ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
+  }>>([]);
+  const [creatingSPT, setCreatingSPT] = useState(false);
+  const [sptResult, setSptResult] = useState<{
+    totalGrossIncome: number; totalTaxWithheld: number; itemCount: number;
+    submissionDeadline: string; isOverdue: boolean;
+  } | null>(null);
+
+  // Load docs
+  useEffect(() => {
+    if (!customerId) return;
+    fetch(`/api/documents?customerId=${customerId}&period=${period}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 10)); })
+      .catch(() => {});
+  }, [customerId, period]);
+
+  // Check existing SPT Masa PPN
+  useEffect(() => {
+    if (!customerId) return;
+    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPN&period=${period}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const filings = d?.data || [];
+        const existing = filings.find((f: { tax_type: string; tax_period: string }) =>
+          f.tax_type === 'PPN' && f.tax_period === period);
+        if (existing?.tax_data?.spt_masa_result) {
+          const r = existing.tax_data.spt_masa_result;
+          setSptResult({
+            totalGrossIncome: r.total_gross_income || 0,
+            totalTaxWithheld: r.total_tax_withheld || 0,
+            itemCount: r.item_count || 0,
+            submissionDeadline: r.submission_deadline || '',
+            isOverdue: false,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [customerId, period]);
+
+  const handleUpload = async (files: FileList | null) => {
+    if (!files || !customerId) return;
+    setUploading(true);
+    let count = 0;
+    for (const file of Array.from(files)) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('customerId', customerId);
+      fd.append('documentType', 'FAKTUR_PAJAK');
+      fd.append('uploadSource', 'WEB');
+      try {
+        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          count++;
+          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        }
+      } catch { /* */ }
+    }
+    if (count > 0) {
+      setTimeout(() => {
+        fetch(`/api/documents?customerId=${customerId}&period=${period}`)
+          .then(r => r.json())
+          .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 10)); })
+          .catch(() => {});
+      }, 2000);
+    }
+    setUploading(false);
+  };
+
+  const handleCreateSPT = async () => {
+    setCreatingSPT(true);
+    try {
+      const res = await fetch('/api/tax/spt-masa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxType: 'PPN', period }),
+      });
+      const data = await res.json();
+      if (data.success || data.sptMasa) {
+        const spt = data.sptMasa;
+        if (spt) {
+          setSptResult({
+            totalGrossIncome: spt.totalGrossIncome || 0,
+            totalTaxWithheld: spt.totalTaxWithheld || 0,
+            itemCount: spt.itemCount || 0,
+            submissionDeadline: spt.submissionDeadline || '',
+            isOverdue: spt.isOverdue || false,
+          });
+        }
+      }
+    } catch { /* */ }
+    finally { setCreatingSPT(false); }
+  };
+
+  const sptCreated = !!sptResult;
+  const netPpn = summary.netPpn;
+  const isLebihBayar = netPpn < 0;
+
+  const steps = [
+    { id: 1, label: 'Faktur 입력', done: fakturCount > 0, desc: `${fakturCount}건` },
+    { id: 2, label: '증빙 업로드', done: uploadedDocs.length > 0, desc: `${uploadedDocs.length}건` },
+    { id: 3, label: 'SPT Masa PPN', done: sptCreated, desc: sptCreated ? '생성됨' : '미생성' },
+    { id: 4, label: '납부', done: false, desc: netPpn > 0 ? fmt(netPpn) : netPpn < 0 ? '초과납부' : 'NIHIL' },
+    { id: 5, label: 'DJP 제출', done: false, desc: '납부 후' },
+  ];
+
+  return (
+    <div className="mt-6 space-y-4">
+      {/* Document upload section */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <Upload className="h-4 w-4 text-orange-600" />
+              Faktur Pajak 증빙 ({uploadedDocs.length}건)
+            </h3>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
+                Faktur 업로드
+              </Button>
+              <Button size="sm" variant="outline" disabled={uploading}
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
+                  input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files);
+                  input.click();
+                }}>
+                <Camera className="h-3 w-3 mr-1" />촬영
+              </Button>
+              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf" multiple
+                onChange={e => handleUpload(e.target.files)} />
+            </div>
+          </div>
+          {uploadedDocs.length === 0 ? (
+            <div className="text-center py-4 text-xs text-gray-400 border-2 border-dashed rounded-lg">
+              <Image className="h-6 w-6 mx-auto mb-1 opacity-30" />
+              <p>e-Faktur CSV, Faktur Pajak 이미지/PDF를 업로드하면 AI가 자동 인식합니다</p>
+            </div>
+          ) : (
+            <div className="space-y-1 max-h-28 overflow-y-auto">
+              {uploadedDocs.map(doc => (
+                <div key={doc.id} className="flex items-center gap-2 p-1.5 rounded border text-xs">
+                  <Badge className={
+                    doc.ocr_status === 'COMPLETED' ? 'text-[8px] bg-green-100 text-green-700' :
+                    doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
+                    'text-[8px] bg-gray-100 text-gray-600'
+                  }>
+                    {doc.ocr_status === 'COMPLETED' ? 'OCR완료' : doc.ocr_status === 'PROCESSING' ? '처리중' : '대기'}
+                  </Badge>
+                  <span className="truncate">{doc.file_name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Filing progress */}
+      <Card>
+        <CardContent className="p-5">
+          <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
+            <Shield className="h-4 w-4 text-orange-600" />
+            {period} PPN 신고 진행 상황
+          </h3>
+
+          <div className="flex items-center justify-between mb-6">
+            {steps.map((step, i) => (
+              <div key={step.id} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                    step.done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                  }`}>
+                    {step.done ? <CheckCircle className="h-4 w-4" /> : step.id}
+                  </div>
+                  <p className="text-[10px] mt-1 text-center font-medium">{step.label}</p>
+                  <p className="text-[9px] text-gray-400 text-center">{step.desc}</p>
+                </div>
+                {i < steps.length - 1 && <div className={`h-0.5 w-full ${step.done ? 'bg-green-400' : 'bg-gray-200'}`} />}
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            {/* SPT Masa PPN action */}
+            {fakturCount > 0 && !sptCreated && (
+              <div className="p-3 rounded-lg bg-orange-50 border border-orange-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-orange-600" />
+                  <div className="text-xs">
+                    <p className="font-medium text-orange-900">SPT Masa PPN 생성 가능</p>
+                    <p className="text-orange-700">
+                      PPN Keluaran: {fmt(summary.outputTax)} — PPN Masukan: {fmt(summary.inputTax)} —
+                      Selisih: <b>{fmt(Math.abs(netPpn))}</b> ({netPpn > 0 ? 'Kurang Bayar' : netPpn < 0 ? 'Lebih Bayar' : 'Nihil'})
+                    </p>
+                  </div>
+                </div>
+                <Button size="sm" onClick={handleCreateSPT} disabled={creatingSPT}>
+                  {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
+                  SPT Masa 생성
+                </Button>
+              </div>
+            )}
+
+            {/* SPT Masa PPN done */}
+            {sptCreated && sptResult && (
+              <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <p className="text-xs font-medium text-green-900">SPT Masa PPN 생성 완료</p>
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-xs">
+                  <div><p className="text-gray-500">PPN Keluaran</p><p className="font-mono font-bold">{fmt(summary.outputTax)}</p></div>
+                  <div><p className="text-gray-500">PPN Masukan</p><p className="font-mono font-bold">{fmt(summary.inputTax)}</p></div>
+                  <div>
+                    <p className="text-gray-500">Selisih</p>
+                    <p className={`font-mono font-bold ${netPpn > 0 ? 'text-red-700' : netPpn < 0 ? 'text-blue-700' : 'text-gray-700'}`}>
+                      {fmt(Math.abs(netPpn))} {netPpn > 0 ? '(납부)' : netPpn < 0 ? '(초과)' : '(NIHIL)'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">마감</p>
+                    <p>{sptResult.submissionDeadline?.substring(0, 10)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment / Lebih Bayar notice */}
+            {sptCreated && netPpn > 0 && (
+              <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-indigo-600" />
+                  <div className="text-xs">
+                    <p className="font-medium text-indigo-900">PPN 납부: {fmt(netPpn)}</p>
+                    <p className="text-indigo-700">ID Billing 생성 후 은행에서 납부 → NTPN 입력</p>
+                  </div>
+                </div>
+                <a href={`/${locale}/tax/monthly-payments`}
+                  className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
+                  납부 페이지로
+                </a>
+              </div>
+            )}
+
+            {sptCreated && isLebihBayar && (
+              <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-blue-600" />
+                <div>
+                  <p className="font-medium">PPN 초과 납부 (Lebih Bayar): {fmt(Math.abs(netPpn))}</p>
+                  <p>다음 월로 이월(Kompensasi) 또는 환급 신청(Restitusi) 가능 — 아래 환급 섹션 참고</p>
+                </div>
+              </div>
+            )}
+
+            {sptCreated && netPpn === 0 && (
+              <div className="p-3 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-gray-400" />
+                <span>PPN NIHIL — 납부/환급 없음. SPT Masa 제출만 하면 됩니다.</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
