@@ -172,7 +172,8 @@
     "docUpload": "資料アップロード",
     "companyProfile": "会社情報",
     "annualPPhFinal": "年次 — PPh Final (UMKM)",
-    "annualPPh25": "年次 — PPh 25 (一般)"
+    "annualPPh25": "年次 — PPh 25 (一般)",
+    "financialStatements": "財務諸表"
   },
   "dashboard": {
     "title": "ダッシュボード",

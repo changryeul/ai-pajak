@@ -380,6 +380,10 @@ export default function PPhFinalAnnualPage() {
                 <Badge className="bg-gray-200 text-gray-700">5</Badge>
                 <span>고객 확인</span>
               </div>
+              <a href={`/${locale}/tax/annual/financial-statements`}
+                className="inline-flex items-center gap-1 mt-2 text-indigo-700 font-medium hover:underline">
+                <BookOpen className="h-3 w-3" />재무제표 생성 페이지로 이동 →
+              </a>
             </div>
           </CardContent>
         </Card>

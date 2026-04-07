@@ -172,7 +172,8 @@
     "docUpload": "자료 업로드",
     "companyProfile": "회사 정보",
     "annualPPhFinal": "연 결산 — PPh Final (UMKM)",
-    "annualPPh25": "연 결산 — PPh 25 (일반)"
+    "annualPPh25": "연 결산 — PPh 25 (일반)",
+    "financialStatements": "재무제표"
   },
   "dashboard": {
     "title": "대시보드",

@@ -172,7 +172,8 @@
     "docUpload": "资料上传",
     "companyProfile": "公司信息",
     "annualPPhFinal": "年度 — PPh Final (UMKM)",
-    "annualPPh25": "年度 — PPh 25 (一般)"
+    "annualPPh25": "年度 — PPh 25 (一般)",
+    "financialStatements": "财务报表"
   },
   "dashboard": {
     "title": "仪表板",
