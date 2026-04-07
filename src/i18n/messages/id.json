@@ -170,7 +170,9 @@
     "prepaidCorporateTax": "PPh 25 / PPh Final UMKM",
     "ppnLabel": "PPN",
     "docUpload": "Unggah Dokumen",
-    "companyProfile": "Profil Perusahaan"
+    "companyProfile": "Profil Perusahaan",
+    "annualPPhFinal": "Tahunan — PPh Final (UMKM)",
+    "annualPPh25": "Tahunan — PPh 25 (Umum)"
   },
   "dashboard": {
     "title": "Dasbor",

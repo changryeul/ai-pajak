@@ -20,6 +20,7 @@ import {
   Activity,
   Building2,
   Camera,
+  Store,
   ClipboardList,
   Lightbulb,
   X,
@@ -74,7 +75,8 @@ const navItems: NavSection[] = [
         { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
       ]},
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: taxRoles, children: [
-        { href: '/tax/spt-tahunan/1771', icon: FileSpreadsheet, labelKey: 'nav.sptBadan' },
+        { href: '/tax/annual/pph-final', icon: Store, labelKey: 'nav.annualPPhFinal' },
+        { href: '/tax/annual/pph25', icon: Building2, labelKey: 'nav.annualPPh25' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },

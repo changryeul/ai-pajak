@@ -170,7 +170,9 @@
     "prepaidCorporateTax": "선납법인세 (PPh 25, PPh Final UMKM)",
     "ppnLabel": "부가세 (PPN)",
     "docUpload": "자료 업로드",
-    "companyProfile": "회사 정보"
+    "companyProfile": "회사 정보",
+    "annualPPhFinal": "연 결산 — PPh Final (UMKM)",
+    "annualPPh25": "연 결산 — PPh 25 (일반)"
   },
   "dashboard": {
     "title": "대시보드",

@@ -170,7 +170,9 @@
     "prepaidCorporateTax": "Prepaid Corporate (PPh 25/UMKM)",
     "ppnLabel": "VAT (PPN)",
     "docUpload": "Upload Documents",
-    "companyProfile": "Company Profile"
+    "companyProfile": "Company Profile",
+    "annualPPhFinal": "Annual — PPh Final (UMKM)",
+    "annualPPh25": "Annual — PPh 25 (General)"
   },
   "dashboard": {
     "title": "Dashboard",

@@ -170,7 +170,9 @@
     "prepaidCorporateTax": "前払法人税 (PPh 25/UMKM)",
     "ppnLabel": "付加価値税 (PPN)",
     "docUpload": "資料アップロード",
-    "companyProfile": "会社情報"
+    "companyProfile": "会社情報",
+    "annualPPhFinal": "年次 — PPh Final (UMKM)",
+    "annualPPh25": "年次 — PPh 25 (一般)"
   },
   "dashboard": {
     "title": "ダッシュボード",
