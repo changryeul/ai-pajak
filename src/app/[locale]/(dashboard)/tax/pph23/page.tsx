@@ -102,6 +102,12 @@ export default function PPh23Page() {
     taxType: string; rate: number; reason: string; legalBasis: string;
   } | null>(null);
 
+  // Quick-add counterparty
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [qName, setQName] = useState('');
+  const [qNpwp, setQNpwp] = useState('');
+  const [addingCp, setAddingCp] = useState(false);
+
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
@@ -331,16 +337,77 @@ export default function PPh23Page() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs">거래 상대방 *</Label>
-                  <Select value={fCounterparty} onValueChange={setFCounterparty}>
-                    <SelectTrigger><SelectValue placeholder="거래처 선택" /></SelectTrigger>
-                    <SelectContent>
-                      {counterparties.map(cp => (
-                        <SelectItem key={cp.id} value={cp.id}>
-                          {cp.name} {cp.npwp ? `(${cp.npwp})` : '(NPWP 없음)'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {counterparties.length > 0 ? (
+                    <Select value={fCounterparty} onValueChange={setFCounterparty}>
+                      <SelectTrigger><SelectValue placeholder="거래처 선택" /></SelectTrigger>
+                      <SelectContent>
+                        {counterparties.map(cp => (
+                          <SelectItem key={cp.id} value={cp.id}>
+                            {cp.name} {cp.npwp ? `(${cp.npwp})` : '(NPWP 없음)'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2 border border-amber-200">
+                      등록된 거래처가 없습니다. 아래에서 빠르게 추가하세요.
+                    </div>
+                  )}
+                  <button type="button" onClick={() => setShowQuickAdd(!showQuickAdd)}
+                    className="text-[11px] text-blue-600 hover:underline mt-1 flex items-center gap-1">
+                    <Plus className="h-3 w-3" />{showQuickAdd ? '닫기' : '새 거래처 빠른 등록'}
+                  </button>
+
+                  {/* Quick-add counterparty inline */}
+                  {showQuickAdd && (
+                    <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
+                      <p className="text-[10px] font-medium text-blue-800">거래처 빠른 등록</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input value={qName} onChange={e => setQName(e.target.value)}
+                          placeholder="회사명 *" className="h-8 text-xs" />
+                        <Input value={qNpwp} onChange={e => setQNpwp(e.target.value)}
+                          placeholder="NPWP (선택)" className="h-8 text-xs font-mono" />
+                      </div>
+                      <Button type="button" size="sm" variant="outline" disabled={!qName || addingCp}
+                        onClick={async () => {
+                          setAddingCp(true);
+                          try {
+                            const res = await fetch('/api/counterparties', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                customerId,
+                                name: qName,
+                                npwp: qNpwp || undefined,
+                                type: 'VENDOR',
+                              }),
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              // Reload counterparties and auto-select the new one
+                              const cpRes = await fetch(`/api/counterparties?customerId=${customerId}`);
+                              const cpData = await cpRes.json();
+                              if (cpData.success) {
+                                setCounterparties(cpData.data || []);
+                                if (data.data?.id) setFCounterparty(data.data.id);
+                              }
+                              setQName('');
+                              setQNpwp('');
+                              setShowQuickAdd(false);
+                              showMsg('success', `거래처 "${qName}" 등록 완료`);
+                            } else {
+                              showMsg('error', data.error || '등록 실패');
+                            }
+                          } catch { showMsg('error', '서버 오류'); }
+                          finally { setAddingCp(false); }
+                        }}
+                      >
+                        {addingCp ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+                        등록
+                      </Button>
+                    </div>
+                  )}
+
                   {fCounterparty && (() => {
                     const cp = counterparties.find(c => c.id === fCounterparty);
                     return cp && !cp.npwp ? (
