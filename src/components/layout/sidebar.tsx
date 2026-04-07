@@ -81,6 +81,7 @@ const navItems: NavSection[] = [
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
+      { href: '/submissions', icon: ClipboardList, labelKey: 'nav.submissions', roles: [UserRole.CUSTOMER] },
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
       { href: '/documents/upload', icon: Camera, labelKey: 'nav.docUpload', roles: taxRoles },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
