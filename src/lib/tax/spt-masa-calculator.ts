@@ -92,39 +92,69 @@ export class SPTMasaCalculator {
     const { month, customerId } = params;
     const supabase = createClient();
 
-    // Fetch all PPh21 calculations for this month
-    const { data: calculations, error } = await supabase
-      .from('tax_calculation')
-      .select('*')
+    // PRIMARY: Fetch from monthly_payslip (actual payroll data)
+    const { data: payslips, error: payslipError } = await supabase
+      .from('monthly_payslip')
+      .select('*, employee:employee_id(employee_name, employee_npwp)')
       .eq('customer_id', customerId)
-      .eq('tax_type', 'PPh21')
-      .like('tax_period', `${month}%`)
-      .order('created_at', { ascending: true });
+      .eq('period', month);
 
-    if (error) {
-      throw new Error(`Failed to fetch PPh21 calculations: ${error.message}`);
-    }
+    // FALLBACK: If no payslips, try tax_calculation (legacy/manual entries)
+    if (payslipError || !payslips || payslips.length === 0) {
+      const { data: calculations } = await supabase
+        .from('tax_calculation')
+        .select('*')
+        .eq('customer_id', customerId)
+        .eq('tax_type', 'PPh21')
+        .like('tax_period', `${month}%`);
 
-    if (!calculations || calculations.length === 0) {
-      // Return empty result
+      if (!calculations || calculations.length === 0) {
+        const deadline = this.getSubmissionDeadline(month, 'PPh21');
+        return {
+          tax_type: 'PPh21',
+          period: month,
+          total_gross_income: 0,
+          total_tax_withheld: 0,
+          total_net_payable: 0,
+          item_count: 0,
+          breakdown: { employee_count: 0, employee_details: [] },
+          submission_deadline: deadline,
+          legal_basis: 'UU HPP 2021 Pasal 21 - Monthly withholding tax on employment income'
+        };
+      }
+
+      // Use tax_calculation fallback
+      let tGross = 0, tTax = 0, tDeductions = 0, tTaxable = 0;
+      const empDetails: Array<{ employee_name: string; employee_npwp: string; gross_income: number; tax_withheld: number }> = [];
+      for (const calc of calculations) {
+        const r = calc.calculation_result || {};
+        tGross += r.grossIncome || 0;
+        tTax += r.calculatedTax || 0;
+        tDeductions += r.totalDeductions || 0;
+        tTaxable += r.taxableIncome || 0;
+        empDetails.push({
+          employee_name: calc.income_data?.employee_name || 'Unknown',
+          employee_npwp: calc.income_data?.employee_npwp || '',
+          gross_income: r.grossIncome || 0,
+          tax_withheld: r.calculatedTax || 0,
+        });
+      }
       const deadline = this.getSubmissionDeadline(month, 'PPh21');
       return {
-        tax_type: 'PPh21',
-        period: month,
-        total_gross_income: 0,
-        total_tax_withheld: 0,
-        total_net_payable: 0,
-        item_count: 0,
+        tax_type: 'PPh21', period: month,
+        total_gross_income: tGross, total_tax_withheld: tTax, total_net_payable: tTax,
+        item_count: calculations.length,
         breakdown: {
-          employee_count: 0,
-          employee_details: []
+          employee_count: calculations.length,
+          total_gross_salary: tGross, total_deductions: tDeductions, total_taxable_income: tTaxable,
+          employee_details: empDetails,
         },
         submission_deadline: deadline,
         legal_basis: 'UU HPP 2021 Pasal 21 - Monthly withholding tax on employment income'
       };
     }
 
-    // Aggregate calculations
+    // Use monthly_payslip data (primary path)
     let totalGrossIncome = 0;
     let totalTaxWithheld = 0;
     let totalGrossSalary = 0;
@@ -138,19 +168,23 @@ export class SPTMasaCalculator {
     }
     const employeeDetails: EmployeeDetail[] = [];
 
-    for (const calc of calculations) {
-      const result = calc.calculation_result;
-      totalGrossIncome += result.grossIncome || 0;
-      totalTaxWithheld += result.calculatedTax || 0;
-      totalGrossSalary += result.grossIncome || 0;
-      totalDeductions += result.totalDeductions || 0;
-      totalTaxableIncome += result.taxableIncome || 0;
+    for (const ps of payslips) {
+      const gross = Number(ps.total_gross || 0);
+      const tax = Number(ps.pph21_tax || 0);
+      const deduction = Number(ps.total_deduction || 0);
+      const taxable = Number(ps.taxable_income || 0);
+
+      totalGrossIncome += gross;
+      totalTaxWithheld += tax;
+      totalGrossSalary += gross;
+      totalDeductions += deduction;
+      totalTaxableIncome += taxable;
 
       employeeDetails.push({
-        employee_name: calc.income_data.employee_name || 'Unknown',
-        employee_npwp: calc.income_data.employee_npwp || '',
-        gross_income: result.grossIncome || 0,
-        tax_withheld: result.calculatedTax || 0
+        employee_name: ps.employee?.employee_name || 'Unknown',
+        employee_npwp: ps.employee?.employee_npwp || '',
+        gross_income: gross,
+        tax_withheld: tax,
       });
     }
 
@@ -161,10 +195,10 @@ export class SPTMasaCalculator {
       period: month,
       total_gross_income: totalGrossIncome,
       total_tax_withheld: totalTaxWithheld,
-      total_net_payable: totalTaxWithheld, // For PPh21, withheld = payable
-      item_count: calculations.length,
+      total_net_payable: totalTaxWithheld,
+      item_count: payslips.length,
       breakdown: {
-        employee_count: calculations.length,
+        employee_count: payslips.length,
         total_gross_salary: totalGrossSalary,
         total_deductions: totalDeductions,
         total_taxable_income: totalTaxableIncome,

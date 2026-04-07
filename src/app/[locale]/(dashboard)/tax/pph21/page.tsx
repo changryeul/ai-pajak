@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -14,8 +14,11 @@ import { useSession } from '@/hooks/useSession';
 import {
   Users, Plus, Loader2, CheckCircle, AlertTriangle, Save, X,
   Edit2, Trash2, Calculator, Sparkles, DollarSign, FileText,
+  Upload, Camera, Download, Shield, ChevronDown, ChevronRight,
+  Briefcase, Image,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
+import { fmtRp } from '@/lib/utils';
 
 interface Employee {
   id: string;
@@ -218,12 +221,19 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
-      {/* Tabs: 직원 마스터 | 월별 급여 명세 */}
-      <Tabs defaultValue="monthly" className="mb-4">
-        <TabsList className="mb-4">
+      <Tabs defaultValue="upload" className="mb-4">
+        <TabsList className="mb-4 flex-wrap">
+          <TabsTrigger value="upload"><Upload className="h-3 w-3 mr-1" />자료 입력</TabsTrigger>
           <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
           <TabsTrigger value="master"><Users className="h-3 w-3 mr-1" />{tp('tabEmployeeMaster')}</TabsTrigger>
+          <TabsTrigger value="freelancer"><Briefcase className="h-3 w-3 mr-1" />비정규직/프리랜서</TabsTrigger>
+          <TabsTrigger value="filing"><Shield className="h-3 w-3 mr-1" />신고 프로세스</TabsTrigger>
         </TabsList>
+
+        {/* ── Tab: 자료 입력 (3가지 방식) ── */}
+        <TabsContent value="upload">
+          <PPh21DataInputSection customerId={customerId} onComplete={loadEmployees} showMsg={showMsg} />
+        </TabsContent>
 
         <TabsContent value="monthly">
           <MonthlyPayslipTab customerId={customerId} />
@@ -346,7 +356,445 @@ export default function PPh21PayrollPage() {
         </Card>
       )}
         </TabsContent>
+
+        {/* ── Tab: 비정규직/프리랜서 ── */}
+        <TabsContent value="freelancer">
+          <FreelancerSection customerId={customerId} showMsg={showMsg} />
+        </TabsContent>
+
+        {/* ── Tab: 신고 프로세스 ── */}
+        <TabsContent value="filing">
+          <PPh21FilingProcess customerId={customerId} locale={locale} showMsg={showMsg} />
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+// Sub-component: 3가지 자료 입력 방식
+// ══════════════════════════════════════════════════════
+function PPh21DataInputSection({
+  customerId, onComplete, showMsg,
+}: {
+  customerId: string;
+  onComplete: () => void;
+  showMsg: (type: 'success' | 'error', text: string) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const excelInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedDocs, setUploadedDocs] = useState<Array<{
+    id: string; file_name: string; ocr_status: string;
+    ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
+  }>>([]);
+
+  useEffect(() => {
+    if (!customerId) return;
+    fetch(`/api/documents?customerId=${customerId}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 20)); })
+      .catch(() => {});
+  }, [customerId]);
+
+  const handleUpload = async (files: FileList | null, source: string, docType: string) => {
+    if (!files || !customerId) return;
+    setUploading(true);
+    let count = 0;
+    for (const file of Array.from(files)) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('customerId', customerId);
+      fd.append('documentType', docType);
+      fd.append('uploadSource', source);
+      try {
+        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          count++;
+          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        }
+      } catch { /* */ }
+    }
+    if (count > 0) {
+      showMsg('success', `${count}건 업로드 완료. OCR 처리 중...`);
+      setTimeout(() => {
+        fetch(`/api/documents?customerId=${customerId}`)
+          .then(r => r.json())
+          .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 20)); })
+          .catch(() => {});
+      }, 2000);
+    }
+    setUploading(false);
+  };
+
+  const downloadTemplate = () => {
+    const headers = ['employee_name', 'employee_npwp', 'employee_nik', 'ptkp_category', 'gross_salary', 'position_allowance', 'overtime_pay', 'meal_allowance', 'transport_allowance', 'other_allowances', 'bonus', 'thr', 'jht_employee', 'jp_employee', 'bpjs_kesehatan', 'other_deductions', 'worker_type'];
+    const sample = ['John Doe', '01.234.567.8-901.000', '3201234567890001', 'TK0', '15000000', '500000', '0', '300000', '200000', '0', '0', '0', '300000', '150000', '120000', '0', 'REGULAR'];
+    const csv = [headers.join(','), sample.join(','), ''].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pph21_employee_template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExcelUpload = async (files: FileList | null) => {
+    if (!files || !customerId) return;
+    setUploading(true);
+    const file = files[0];
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('customerId', customerId);
+    try {
+      const res = await fetch('/api/tax/employees/import', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', `${data.data?.imported || 0}명의 직원 데이터가 임포트되었습니다`);
+        onComplete();
+      } else {
+        showMsg('error', data.error || '임포트 실패');
+      }
+    } catch {
+      showMsg('error', '서버 오류');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+        <p className="text-sm font-bold text-blue-900 mb-2">급여 데이터 입력 방법을 선택하세요</p>
+        <p className="text-xs text-blue-700">세 가지 방식 중 편한 방법으로 직원 급여 데이터를 입력합니다</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Method 1: Template download + upload */}
+        <Card className="border-2 border-dashed hover:border-blue-400 transition-colors cursor-pointer">
+          <CardContent className="p-5 text-center">
+            <Download className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+            <p className="font-bold text-sm mb-1">1. 템플릿 다운로드</p>
+            <p className="text-[11px] text-gray-500 mb-3">CSV 템플릿을 다운로드하여 직원 급여 데이터를 입력하고 업로드</p>
+            <div className="space-y-2">
+              <Button size="sm" variant="outline" onClick={downloadTemplate} className="w-full">
+                <Download className="h-3 w-3 mr-1" />템플릿 다운로드 (.csv)
+              </Button>
+              <Button size="sm" onClick={() => excelInputRef.current?.click()} disabled={uploading} className="w-full">
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
+                작성한 파일 업로드
+              </Button>
+              <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
+                onChange={e => handleExcelUpload(e.target.files)} />
+            </div>
+            <p className="text-[10px] text-gray-400 mt-2">worker_type: REGULAR / CONTRACT / DAILY / FREELANCER</p>
+          </CardContent>
+        </Card>
+
+        {/* Method 2: Upload existing Excel/PDF */}
+        <Card className="border-2 border-dashed hover:border-emerald-400 transition-colors cursor-pointer">
+          <CardContent className="p-5 text-center">
+            <FileText className="h-8 w-8 text-emerald-600 mx-auto mb-3" />
+            <p className="font-bold text-sm mb-1">2. 기존 급여 자료 업로드</p>
+            <p className="text-[11px] text-gray-500 mb-3">회사에서 사용하는 급여 Excel, PDF, 이미지를 업로드하면 AI가 자동 파싱</p>
+            <div className="space-y-2">
+              <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="w-full">
+                <Upload className="h-3 w-3 mr-1" />파일 업로드 (Excel/PDF)
+              </Button>
+              <Button size="sm" variant="outline" disabled={uploading} className="w-full"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.capture = 'environment';
+                  input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files, 'CAMERA', 'SALARY_SLIP');
+                  input.click();
+                }}>
+                <Camera className="h-3 w-3 mr-1" />급여명세 촬영
+              </Button>
+              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
+                onChange={e => handleUpload(e.target.files, 'WEB', 'SALARY_SLIP')} />
+            </div>
+            <p className="text-[10px] text-gray-400 mt-2">JTC 급여명세서 양식도 OCR 인식 가능</p>
+          </CardContent>
+        </Card>
+
+        {/* Method 3: Manual entry */}
+        <Card className="border-2 border-dashed hover:border-purple-400 transition-colors cursor-pointer">
+          <CardContent className="p-5 text-center">
+            <Users className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+            <p className="font-bold text-sm mb-1">3. 직접 입력</p>
+            <p className="text-[11px] text-gray-500 mb-3">직원 마스터 탭에서 한 사람씩 직접 등록</p>
+            <p className="text-xs text-gray-600 mt-3 bg-gray-50 rounded p-2">
+              "직원 마스터" 탭 → "직원 추가" → 이름/NPWP/급여 입력
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Uploaded documents */}
+      {uploadedDocs.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-bold text-sm mb-2 flex items-center gap-2">
+              <Image className="h-4 w-4" />업로드된 증빙 ({uploadedDocs.length}건)
+            </h3>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {uploadedDocs.map(doc => (
+                <div key={doc.id} className="flex items-center gap-2 p-2 rounded border text-xs">
+                  <Badge className={
+                    doc.ocr_status === 'COMPLETED' ? 'text-[8px] bg-green-100 text-green-700' :
+                    doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
+                    'text-[8px] bg-gray-100 text-gray-600'
+                  }>
+                    {doc.ocr_status === 'COMPLETED' ? 'OCR완료' : doc.ocr_status === 'PROCESSING' ? '처리중' : '대기'}
+                  </Badge>
+                  <span className="truncate">{doc.file_name}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+// Sub-component: 비정규직/프리랜서 관리
+// ══════════════════════════════════════════════════════
+function FreelancerSection({
+  customerId, showMsg,
+}: {
+  customerId: string;
+  showMsg: (type: 'success' | 'error', text: string) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+        <p className="text-sm font-bold text-amber-900 mb-2">비정규직 & 프리랜서 관리</p>
+        <p className="text-xs text-amber-700">직원 유형에 따라 PPh 21 계산 방법이 다릅니다.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Worker type cards with explanation */}
+        {[
+          {
+            type: 'CONTRACT', label: '계약직 (PKWT)', icon: '📋',
+            desc: '정규직과 동일한 TER 방식 계산. 계약 기간 명시.',
+            calc: 'TER × 총급여 (월 1~11월) / 12월 연말정산',
+            color: 'border-blue-200 bg-blue-50',
+          },
+          {
+            type: 'DAILY', label: '일용직 (Harian Lepas)', icon: '🔨',
+            desc: '일급 Rp 450,000 초과분에 대해 과세.',
+            calc: '(일급 - 450,000) × 5% (일용직 비과세 한도)',
+            color: 'border-green-200 bg-green-50',
+          },
+          {
+            type: 'FREELANCER', label: '프리랜서 (Bukan Pegawai)', icon: '💼',
+            desc: '50% DPP 규정 적용. 연간 누적 소득/지출 추적 필수.',
+            calc: 'DPP = 50% × 총수입. 누적 PKP에 대해 누진세율 적용.',
+            color: 'border-purple-200 bg-purple-50',
+            warning: '⚠️ 프리랜서 비용은 연간 누적 관리가 필요합니다',
+          },
+          {
+            type: 'COMMISSIONER', label: '위원/감사위원 (Komisaris)', icon: '🏛️',
+            desc: '누적 방식으로 과세. PTKP 차감 후 누진세율.',
+            calc: '누적 총보수 - PTKP - 이전 과세표준 = 당월 PKP',
+            color: 'border-amber-200 bg-amber-50',
+          },
+        ].map(wt => (
+          <Card key={wt.type} className={`${wt.color}`}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">{wt.icon}</span>
+                <div>
+                  <p className="font-bold text-sm">{wt.label}</p>
+                  <Badge variant="outline" className="text-[9px]">{wt.type}</Badge>
+                </div>
+              </div>
+              <p className="text-xs text-gray-700 mb-2">{wt.desc}</p>
+              <div className="bg-white rounded p-2 text-[11px] text-gray-600">
+                <p className="font-medium">계산 방법:</p>
+                <p>{wt.calc}</p>
+              </div>
+              {wt.warning && (
+                <p className="text-[10px] text-red-600 mt-2">{wt.warning}</p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+        <p className="text-sm font-bold text-purple-900 flex items-center gap-2">
+          <Briefcase className="h-4 w-4" />프리랜서 비용 누적 관리
+        </p>
+        <p className="text-xs text-purple-700 mt-1">
+          직원 마스터 탭에서 worker_type을 FREELANCER로 등록하면, 매월 급여 명세 탭에서
+          지급 시 누적 소득/지출이 자동 추적됩니다. 연말정산 시 누적 DPP(50% × 총수입)에
+          대해 누진세율이 적용됩니다.
+        </p>
+        <p className="text-xs text-purple-700 mt-2">
+          <b>등록 방법:</b> 직원 마스터 → 직원 추가 → PTKP: TK0 (프리랜서), 급여란에 월 계약금액 입력
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+// Sub-component: PPh 21 신고 프로세스
+// ══════════════════════════════════════════════════════
+function PPh21FilingProcess({
+  customerId, locale, showMsg,
+}: {
+  customerId: string;
+  locale: string;
+  showMsg: (type: 'success' | 'error', text: string) => void;
+}) {
+  const [creatingSPT, setCreatingSPT] = useState(false);
+  const [sptResult, setSptResult] = useState<{
+    totalGrossIncome: number; totalTaxWithheld: number; itemCount: number;
+    submissionDeadline: string; isOverdue: boolean;
+  } | null>(null);
+
+  const currentPeriod = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+
+  // Check existing SPT Masa PPh21
+  useEffect(() => {
+    if (!customerId) return;
+    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh21&period=${currentPeriod}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const filings = d?.data || [];
+        const existing = filings.find((f: { tax_type: string; tax_period: string }) =>
+          f.tax_type === 'PPh21' && f.tax_period === currentPeriod);
+        if (existing?.tax_data?.spt_masa_result) {
+          const r = existing.tax_data.spt_masa_result;
+          setSptResult({
+            totalGrossIncome: r.total_gross_income || 0,
+            totalTaxWithheld: r.total_tax_withheld || 0,
+            itemCount: r.item_count || 0,
+            submissionDeadline: r.submission_deadline || '',
+            isOverdue: false,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [customerId, currentPeriod]);
+
+  const handleCreateSPT = async () => {
+    setCreatingSPT(true);
+    try {
+      const res = await fetch('/api/tax/spt-masa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxType: 'PPh21', period: currentPeriod }),
+      });
+      const data = await res.json();
+      if (data.success || data.sptMasa) {
+        const spt = data.sptMasa;
+        if (spt) {
+          setSptResult({
+            totalGrossIncome: spt.totalGrossIncome || 0,
+            totalTaxWithheld: spt.totalTaxWithheld || 0,
+            itemCount: spt.itemCount || 0,
+            submissionDeadline: spt.submissionDeadline || '',
+            isOverdue: spt.isOverdue || false,
+          });
+        }
+        showMsg('success', 'SPT Masa PPh 21 생성 완료');
+      } else {
+        showMsg('error', data.error || data.message || 'SPT 생성 실패');
+      }
+    } catch {
+      showMsg('error', '서버 오류');
+    } finally {
+      setCreatingSPT(false);
+    }
+  };
+
+  const steps = [
+    { id: 1, label: '자료 입력', done: true, desc: '직원 급여 데이터' },
+    { id: 2, label: '급여 생성', done: true, desc: '월별 급여 명세' },
+    { id: 3, label: 'PPh 21 계산', done: true, desc: 'TER 자동 계산' },
+    { id: 4, label: 'SPT Masa', done: !!sptResult, desc: sptResult ? `마감 ${sptResult.submissionDeadline?.substring(0, 10)}` : '미생성' },
+    { id: 5, label: '납부', done: false, desc: '납부 페이지에서 진행' },
+    { id: 6, label: 'DJP 제출', done: false, desc: '납부 완료 후' },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <h3 className="font-bold text-sm flex items-center gap-2">
+        <Shield className="h-4 w-4 text-blue-600" />
+        {currentPeriod} PPh 21 신고 진행 상황
+      </h3>
+
+      {/* Progress steps */}
+      <div className="flex items-center justify-between">
+        {steps.map((step, i) => (
+          <div key={step.id} className="flex items-center flex-1">
+            <div className="flex flex-col items-center flex-1">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                step.done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+              }`}>
+                {step.done ? <CheckCircle className="h-4 w-4" /> : step.id}
+              </div>
+              <p className="text-[10px] mt-1 text-center font-medium">{step.label}</p>
+              <p className="text-[9px] text-gray-400 text-center">{step.desc}</p>
+            </div>
+            {i < steps.length - 1 && <div className={`h-0.5 w-full ${step.done ? 'bg-green-400' : 'bg-gray-200'}`} />}
+          </div>
+        ))}
+      </div>
+
+      {/* SPT Masa action */}
+      {!sptResult ? (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="font-medium text-sm text-blue-900">SPT Masa PPh 21 생성</p>
+              <p className="text-xs text-blue-700">월별 급여 명세 데이터를 기반으로 SPT Masa를 생성합니다</p>
+            </div>
+            <Button onClick={handleCreateSPT} disabled={creatingSPT}>
+              {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
+              SPT Masa 생성
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <p className="font-medium text-sm text-green-900">SPT Masa PPh 21 생성 완료</p>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div><p className="text-gray-500">직원 수</p><p className="font-bold">{sptResult.itemCount}명</p></div>
+                <div><p className="text-gray-500">총 급여</p><p className="font-mono font-bold">{fmtRp(sptResult.totalGrossIncome)}</p></div>
+                <div><p className="text-gray-500">PPh 21 세액</p><p className="font-mono font-bold text-blue-700">{fmtRp(sptResult.totalTaxWithheld)}</p></div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-indigo-200 bg-indigo-50">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm text-indigo-900">납부 진행</p>
+                <p className="text-xs text-indigo-700">ID Billing 생성 후 은행에서 납부 → NTPN 입력</p>
+              </div>
+              <a href={`/${locale}/tax/monthly-payments`}
+                className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
+                납부 페이지로
+              </a>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
