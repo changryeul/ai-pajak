@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Loader2, Plus, Receipt, FileText, DollarSign, CheckCircle,
   AlertTriangle, Download, Sparkles, X, ChevronDown, ChevronRight,
-  Calculator, Shield,
+  Calculator, Shield, Upload, Camera, Image,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -251,6 +251,55 @@ export default function PPh23Page() {
   const pendingBP = transactions.filter(t => !t.bukti_potong_number).length;
   const completedBP = transactions.filter(t => !!t.bukti_potong_number).length;
 
+  // Document upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedDocs, setUploadedDocs] = useState<Array<{
+    id: string; file_name: string; document_type: string; ocr_status: string;
+    ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
+    created_at: string;
+  }>>([]);
+  const [uploading, setUploading] = useState(false);
+
+  // Load documents for this period
+  useEffect(() => {
+    if (!customerId) return;
+    fetch(`/api/documents?customerId=${customerId}&period=${period}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setUploadedDocs(d.data || []); })
+      .catch(() => {});
+  }, [customerId, period, transactions]);
+
+  const handleDocUpload = async (files: FileList | null) => {
+    if (!files || !customerId) return;
+    setUploading(true);
+    let count = 0;
+    for (const file of Array.from(files)) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('customerId', customerId);
+      fd.append('documentType', 'INVOICE');
+      fd.append('uploadSource', 'WEB');
+      try {
+        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          count++;
+          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        }
+      } catch { /* */ }
+    }
+    if (count > 0) {
+      showMsg('success', `${count}건 업로드 완료. OCR 처리 중...`);
+      setTimeout(() => {
+        fetch(`/api/documents?customerId=${customerId}&period=${period}`)
+          .then(r => r.json())
+          .then(d => { if (d.success) setUploadedDocs(d.data || []); })
+          .catch(() => {});
+      }, 2000);
+    }
+    setUploading(false);
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
       {/* Header */}
@@ -317,6 +366,73 @@ export default function PPh23Page() {
           </p>
         </CardContent></Card>
       </div>
+
+      {/* Document upload section */}
+      <Card className="mb-4">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <Upload className="h-4 w-4 text-blue-600" />
+              증빙 자료 ({uploadedDocs.length}건)
+            </h3>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || !customerId}>
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
+                파일 업로드
+              </Button>
+              <Button size="sm" variant="outline" disabled={uploading || !customerId}
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.capture = 'environment';
+                  input.onchange = (e) => handleDocUpload((e.target as HTMLInputElement).files);
+                  input.click();
+                }}>
+                <Camera className="h-3 w-3 mr-1" />촬영
+              </Button>
+              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
+                onChange={e => handleDocUpload(e.target.files)} />
+            </div>
+          </div>
+
+          {uploadedDocs.length === 0 ? (
+            <div className="text-center py-6 text-xs text-gray-400 border-2 border-dashed rounded-lg">
+              <Image className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p>인보이스, 영수증, Faktur Pajak 등 증빙을 업로드하세요</p>
+              <p className="text-[10px] mt-1">OCR이 자동으로 금액/거래처 정보를 추출합니다</p>
+            </div>
+          ) : (
+            <div className="space-y-1 max-h-40 overflow-y-auto">
+              {uploadedDocs.map(doc => (
+                <div key={doc.id} className="flex items-center justify-between p-2 rounded border text-xs hover:bg-gray-50">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Badge className={
+                      doc.ocr_status === 'COMPLETED' ? 'text-[8px] bg-green-100 text-green-700' :
+                      doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
+                      'text-[8px] bg-gray-100 text-gray-600'
+                    }>
+                      {doc.ocr_status === 'COMPLETED' ? 'OCR완료' : doc.ocr_status === 'PROCESSING' ? '처리중' : '대기'}
+                    </Badge>
+                    <span className="truncate">{doc.file_name}</span>
+                    {doc.ocr_result?.confidence && (
+                      <span className="text-[9px] text-gray-400">{(doc.ocr_result.confidence * 100).toFixed(0)}%</span>
+                    )}
+                  </div>
+                  {doc.ocr_status === 'COMPLETED' && doc.ocr_result?.extractedData && (
+                    <div className="flex items-center gap-2 text-[10px] text-green-700 flex-shrink-0">
+                      <Sparkles className="h-3 w-3" />
+                      {Object.entries(doc.ocr_result.extractedData).slice(0, 2).map(([k, v]) => (
+                        <span key={k}>{k}: {typeof v === 'number' ? fmtRp(v) : String(v)}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Add transaction form */}
       <Card className="mb-4">
