@@ -62,6 +62,43 @@ export default function TaxBillingPage() {
   const [uploading, setUploading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [ntpnInput, setNtpnInput] = useState<Record<string, { ntpn: string; amount: string; date: string }>>({});
+  const [submittingNtpn, setSubmittingNtpn] = useState<string | null>(null);
+
+  const handleSubmitNtpn = async (itemId: string) => {
+    const inp = ntpnInput[itemId];
+    if (!inp?.ntpn || inp.ntpn.length < 16) {
+      showMsg('error', 'NTPN은 16자리 숫자입니다');
+      return;
+    }
+    setSubmittingNtpn(itemId);
+    try {
+      const res = await fetch('/api/tax/monthly-payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-payment',
+          paymentId: itemId,
+          ntpn: inp.ntpn,
+          amount: Number(inp.amount) || 0,
+          paidDate: inp.date || new Date().toISOString().split('T')[0],
+          paymentMethod: 'BANK_TRANSFER',
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', 'NTPN이 등록되었습니다. AI가 납부를 확인합니다.');
+        setNtpnInput(prev => { const next = { ...prev }; delete next[itemId]; return next; });
+        loadItems();
+      } else {
+        showMsg('error', data.error || 'NTPN 등록 실패');
+      }
+    } catch {
+      showMsg('error', '서버 오류');
+    } finally {
+      setSubmittingNtpn(null);
+    }
+  };
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -261,6 +298,62 @@ export default function TaxBillingPage() {
                                 }}
                                 disabled={uploading === item.id}>
                                 <Camera className="h-3 w-3 mr-1" />촬영
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* NTPN input form */}
+                          {needsProof && (
+                            <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                              <p className="text-[10px] font-bold text-green-900 mb-2">납부 완료 후 NTPN 번호를 입력하세요</p>
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                <div className="md:col-span-2">
+                                  <Label className="text-[10px]">NTPN (16자리)</Label>
+                                  <Input
+                                    className="h-8 text-xs font-mono"
+                                    value={ntpnInput[item.id]?.ntpn || ''}
+                                    onChange={e => setNtpnInput(prev => ({
+                                      ...prev,
+                                      [item.id]: { ...prev[item.id], ntpn: e.target.value.replace(/\D/g, '').slice(0, 16) }
+                                    }))}
+                                    placeholder="1234567890123456"
+                                    maxLength={16}
+                                  />
+                                  <p className="text-[9px] text-gray-400 mt-0.5">
+                                    {(ntpnInput[item.id]?.ntpn || '').length}/16자리
+                                    {(ntpnInput[item.id]?.ntpn || '').length === 16 && ' ✓'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <Label className="text-[10px]">납부 금액 (Rp)</Label>
+                                  <Input type="number"
+                                    className="h-8 text-xs font-mono"
+                                    value={ntpnInput[item.id]?.amount || String(item.amount || '')}
+                                    onChange={e => setNtpnInput(prev => ({
+                                      ...prev,
+                                      [item.id]: { ...prev[item.id], amount: e.target.value }
+                                    }))}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px]">납부일</Label>
+                                  <Input type="date"
+                                    className="h-8 text-xs"
+                                    value={ntpnInput[item.id]?.date || new Date().toISOString().split('T')[0]}
+                                    onChange={e => setNtpnInput(prev => ({
+                                      ...prev,
+                                      [item.id]: { ...prev[item.id], date: e.target.value }
+                                    }))}
+                                  />
+                                </div>
+                              </div>
+                              <Button size="sm" className="mt-2"
+                                onClick={() => handleSubmitNtpn(item.id)}
+                                disabled={submittingNtpn === item.id || (ntpnInput[item.id]?.ntpn || '').length < 16}>
+                                {submittingNtpn === item.id
+                                  ? <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                  : <Send className="h-3 w-3 mr-1" />}
+                                NTPN 제출
                               </Button>
                             </div>
                           )}
