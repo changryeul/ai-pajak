@@ -132,7 +132,8 @@
       "Bash(npm audit:*)",
       "Bash(python3:*)",
       "WebFetch(domain:chatgpt.com)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   BookOpen, Loader2, CheckCircle, AlertTriangle, Sparkles,
-  FileText, DollarSign, TrendingUp, TrendingDown, ArrowRight, RefreshCw,
+  FileText, DollarSign, TrendingUp, TrendingDown, ArrowRight, RefreshCw, Download,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -192,10 +192,16 @@ export default function FinancialStatementsPage() {
           재무제표 생성
         </Button>
         {data && (
-          <Button variant="outline" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <FileText className="h-4 w-4 mr-1" />}
-            DB에 저장
-          </Button>
+          <>
+            <Button variant="outline" onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <FileText className="h-4 w-4 mr-1" />}
+              DB에 저장
+            </Button>
+            <Button variant="outline"
+              onClick={() => window.open(`/api/accounting/financial-statements/pdf?customerId=${customerId}&year=${year}`, '_blank')}>
+              <Download className="h-4 w-4 mr-1" />PDF 인쇄
+            </Button>
+          </>
         )}
       </div>
 
