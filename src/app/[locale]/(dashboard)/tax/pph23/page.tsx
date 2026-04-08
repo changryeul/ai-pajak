@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Loader2, Plus, Receipt, FileText, DollarSign, CheckCircle,
   AlertTriangle, Download, Sparkles, X, ChevronDown, ChevronRight,
-  Calculator, Shield, Upload, Camera, Image,
+  Calculator, Shield, Upload, Camera, Image, ArrowRight,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -434,13 +434,114 @@ export default function PPh23Page() {
         </CardContent>
       </Card>
 
+      {/* OCR → Auto-create transactions + NPWP validation + DGT Form */}
+      {uploadedDocs.filter(d => d.ocr_status === 'COMPLETED' && d.ocr_result?.extractedData).length > 0 && (
+        <Card className="mb-4 border-blue-200">
+          <CardContent className="p-4">
+            <h3 className="font-bold text-sm mb-2 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              AI 인식 결과 → 거래 자동 생성
+            </h3>
+            <p className="text-[11px] text-gray-500 mb-3">
+              업로드한 인보이스/Faktur Pajak에서 추출한 정보입니다. 확인 후 "거래로 추가"를 클릭하세요.
+            </p>
+            <div className="space-y-2">
+              {uploadedDocs.filter(d => d.ocr_status === 'COMPLETED' && d.ocr_result?.extractedData).map(doc => {
+                const ext = doc.ocr_result!.extractedData!;
+                const cpName = String(ext.counterpartyName || ext.vendorName || ext.customerName || ext.recipientName || '');
+                const cpNpwp = String(ext.counterpartyNpwp || ext.vendorNpwp || ext.npwp || '');
+                const amount = Number(ext.grossAmount || ext.dpp || ext.amount || ext.totalAmount || 0);
+                const isForeign = String(ext.country || '').length === 2 && String(ext.country || '') !== 'ID';
+                const hasNpwp = cpNpwp.replace(/\D/g, '').length >= 15;
+
+                return (
+                  <div key={doc.id} className="p-3 rounded-lg border bg-blue-50/50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 text-xs space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{cpName || '거래처 불명'}</span>
+                          {hasNpwp && <Badge className="text-[8px] bg-green-100 text-green-700">NPWP ✓</Badge>}
+                          {!hasNpwp && !isForeign && <Badge className="text-[8px] bg-red-100 text-red-700">NPWP 없음!</Badge>}
+                          {isForeign && <Badge className="text-[8px] bg-amber-100 text-amber-700">국외</Badge>}
+                        </div>
+                        {hasNpwp && <p className="font-mono text-[10px] text-gray-500">{cpNpwp}</p>}
+                        {amount > 0 && <p className="font-mono">DPP: {fmtRp(amount)}</p>}
+                        <p className="text-[10px] text-gray-400">{doc.file_name}</p>
+
+                        {/* NPWP missing warning — domestic company */}
+                        {!hasNpwp && !isForeign && (
+                          <div className="mt-1 p-2 bg-red-50 rounded border border-red-200 text-[10px] text-red-800">
+                            <p className="font-bold">⚠️ NPWP 필수 — 국내 기업은 반드시 NPWP가 있어야 합니다</p>
+                            <p className="mt-0.5">거래처에 NPWP를 요청하세요. NPWP 없이 거래를 등록하면 세율이 2배(100% 할증) 적용됩니다.</p>
+                          </div>
+                        )}
+
+                        {/* Foreign company — DGT Form required */}
+                        {isForeign && (
+                          <div className="mt-1 p-2 bg-amber-50 rounded border border-amber-200 text-[10px] text-amber-800">
+                            <p className="font-bold">🌍 국외 거래 — Tax Treaty 적용 시 추가 서류 필요</p>
+                            <ul className="mt-0.5 space-y-0.5">
+                              <li>• <b>DGT Form</b> (Directorate General of Taxes) — 조세조약 세율 적용 필수 서류</li>
+                              <li>• <b>해외 거주자 증명 (Certificate of Domicile / SKD)</b> — 상대국 세무당국 발급</li>
+                              <li>• 위 서류 없이는 PPh 26 표준 세율(20%) 적용</li>
+                              <li>• 서류는 "자료 업로드" 메뉴에서 업로드해 주세요</li>
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      <Button size="sm" variant="outline"
+                        onClick={() => {
+                          // Auto-fill the transaction form from OCR data
+                          setShowForm(true);
+                          setFGrossAmount(String(amount || ''));
+                          setFDescription(`${doc.file_name} — ${cpName}`);
+                          if (ext.invoiceNumber) setFInvoiceNumber(String(ext.invoiceNumber));
+                          if (ext.invoiceDate) setFTransactionDate(String(ext.invoiceDate));
+                          // Try to find existing counterparty by name
+                          const matchedCp = counterparties.find(c =>
+                            c.name.toLowerCase().includes(cpName.toLowerCase()) ||
+                            (c.npwp && cpNpwp && c.npwp === cpNpwp.replace(/\D/g, ''))
+                          );
+                          if (matchedCp) setFCounterparty(matchedCp.id);
+                          showMsg('success', `"${cpName}" 거래 정보가 자동 입력되었습니다. 확인 후 저장하세요.`);
+                        }}>
+                        <ArrowRight className="h-3 w-3 mr-1" />거래로 추가
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* NPWP missing transactions warning banner */}
+      {transactions.filter(t => !t.counterparty_npwp).length > 0 && (
+        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-red-900">
+              NPWP 미등록 거래 {transactions.filter(t => !t.counterparty_npwp).length}건 — 세율 2배 할증 적용 중
+            </p>
+            <p className="text-xs text-red-700 mt-0.5">
+              인도네시아 국내 기업은 모두 NPWP를 보유하고 있습니다. 거래처에 NPWP를 요청하여 업데이트하세요.
+              NPWP 미등록 시 PPh 23 세율이 2%→4%, 15%→30%로 가산됩니다 (Pasal 23(1a)).
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Add transaction form */}
       <Card className="mb-4">
         <CardContent className="p-4">
           {!showForm ? (
-            <Button onClick={() => setShowForm(true)} disabled={!customerId}>
-              <Plus className="h-4 w-4 mr-1" />거래 추가
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => setShowForm(true)} disabled={!customerId}>
+                <Plus className="h-4 w-4 mr-1" />수동 거래 추가
+              </Button>
+              <p className="text-[11px] text-gray-400">인보이스를 업로드하면 위에서 자동으로 거래 정보가 추출됩니다</p>
+            </div>
           ) : (
             <form onSubmit={handleAddTransaction} className="space-y-3">
               <div className="flex items-center justify-between mb-2">
