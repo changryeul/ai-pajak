@@ -554,11 +554,52 @@ export default function PPh25AnnualPage() {
           </CardContent></Card>
 
           {isUnderpaid && (
-            <div className="p-4 bg-red-50 rounded-xl border border-red-200 flex items-center gap-3">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-              <div>
-                <p className="font-bold text-red-900">추가 납부: {fmtRp(taxDue)}</p>
-                <p className="text-xs text-red-700">SPT Tahunan 제출 전까지 차액을 납부해야 합니다 (PPh 29).</p>
+            <div className="p-4 bg-red-50 rounded-xl border border-red-200 space-y-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0" />
+                <div>
+                  <p className="font-bold text-red-900 text-lg">추가 납부 필요: {fmtRp(taxDue)}</p>
+                  <p className="text-xs text-red-700 mt-1">SPT Tahunan 제출 전까지 납부해야 합니다 (PPh 29).</p>
+                </div>
+              </div>
+
+              {/* 차액 산출 내역 */}
+              <div className="bg-white rounded-lg p-3 text-xs space-y-1">
+                <p className="font-bold text-gray-700 mb-2">차액 산출 내역</p>
+                <div className="flex justify-between"><span>상업 이익</span><span className="font-mono">{fmtRp(commercial)}</span></div>
+                <div className="flex justify-between"><span>+ 가산 조정</span><span className="font-mono">{fmtRp(totalPositive)}</span></div>
+                <div className="flex justify-between"><span>- 차감 조정</span><span className="font-mono">{fmtRp(totalNegative)}</span></div>
+                <div className="flex justify-between border-t pt-1"><span>과세소득 (PKP)</span><span className="font-mono">{fmtRp(fiscalProfit)}</span></div>
+                <div className="flex justify-between"><span>PPh Badan 22%{hasSmeDiscount ? ' (SME 할인)' : ''}</span><span className="font-mono">{fmtRp(pphBadan)}</span></div>
+                <div className="flex justify-between"><span>- 세액 공제 합계</span><span className="font-mono">- {fmtRp(totalCredits)}</span></div>
+                <div className="flex justify-between border-t pt-1 font-bold text-red-700">
+                  <span>미납 차액 (PPh 29)</span><span className="font-mono">{fmtRp(taxDue)}</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-3 text-[11px] text-gray-600">
+                <p className="font-bold text-gray-700 mb-1">왜 차액이 발생하나요?</p>
+                <ul className="space-y-0.5">
+                  <li>• 실제 이익이 전년도 기준으로 납부한 PPh 25보다 높은 경우</li>
+                  <li>• 세무 조정(Koreksi Fiskal)으로 과세소득이 증가한 경우</li>
+                  <li>• PPh 25 월 분할 납부가 일부 누락된 경우</li>
+                </ul>
+              </div>
+
+              <div className="bg-red-100 rounded-lg p-3">
+                <p className="text-xs font-bold text-red-900 mb-2">납부 방법: AI가 ID Billing을 생성합니다</p>
+                <div className="flex items-center gap-2 text-xs text-red-800 mb-2">
+                  <span>세목: <b>PPh 29</b></span>
+                  <span>·</span>
+                  <span>금액: <b className="font-mono">{fmtRp(taxDue)}</b></span>
+                  <span>·</span>
+                  <span>기한: <b>{year + 1}년 4월 30일</b></span>
+                </div>
+                <a href={`/${locale}/tax/billing`}
+                  className="inline-flex items-center gap-1 px-4 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700">
+                  <DollarSign className="h-3 w-3" />
+                  청구서 · 납부 페이지에서 확인
+                </a>
               </div>
             </div>
           )}
