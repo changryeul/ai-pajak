@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   BookOpen, Loader2, CheckCircle, AlertTriangle, Sparkles,
-  FileText, DollarSign, TrendingUp, TrendingDown, ArrowRight, RefreshCw, Download,
+  FileText, DollarSign, TrendingUp, TrendingDown, ArrowRight, RefreshCw, Download, X,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -74,6 +74,25 @@ export default function FinancialStatementsPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Drill-down
+  const [drilldown, setDrilldown] = useState<{
+    accountCode: string; accountName: string;
+    transactions: Array<{ date: string; number: string; description: string; source: string; debit: number; credit: number }>;
+    totalDebit: number; totalCredit: number; balance: number; count: number;
+  } | null>(null);
+  const [drillLoading, setDrillLoading] = useState(false);
+
+  const handleDrilldown = async (code: string, name: string) => {
+    if (!customerId) return;
+    setDrillLoading(true);
+    try {
+      const res = await fetch(`/api/accounting/drilldown?customerId=${customerId}&year=${year}&accountCode=${code}`);
+      const d = await res.json();
+      if (d.success) setDrilldown({ accountCode: code, accountName: name, ...d.data });
+    } catch { /* */ }
+    finally { setDrillLoading(false); }
+  };
 
   const isConsultant = session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
 
@@ -181,11 +200,18 @@ export default function FinancialStatementsPage() {
         {items.map(item => {
           const prev = findPrevAmount(item.code, prevItems);
           return (
-            <div key={item.code} className="flex justify-between py-0.5 text-xs">
+            <div key={item.code} className="flex justify-between py-0.5 text-xs group">
               <span className="text-gray-700">{item.code} {item.name}</span>
               <div className="flex items-center gap-2">
                 {prev !== null && <span className="text-[9px] text-gray-400 font-mono">{fmtRp(prev)}</span>}
-                <span className="font-mono">{fmtRp(item.amount)}</span>
+                <button
+                  type="button"
+                  onClick={() => handleDrilldown(item.code, item.name)}
+                  className="font-mono text-blue-700 hover:text-blue-900 hover:underline cursor-pointer transition-colors"
+                  title={`${item.code} 상세 보기 (클릭)`}
+                >
+                  {fmtRp(item.amount)}
+                </button>
                 {changeIndicator(item.amount, prev)}
               </div>
             </div>
@@ -328,7 +354,10 @@ export default function FinancialStatementsPage() {
                             <td className="p-2 text-right font-mono">{e.totalDebit > 0 ? fmtRp(e.totalDebit) : ''}</td>
                             <td className="p-2 text-right font-mono">{e.totalCredit > 0 ? fmtRp(e.totalCredit) : ''}</td>
                             <td className={`p-2 text-right font-mono font-bold ${e.balance >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
-                              {fmtRp(e.balance)}
+                              <button type="button" onClick={() => handleDrilldown(e.accountCode, e.accountName)}
+                                className="hover:text-blue-700 hover:underline cursor-pointer">
+                                {fmtRp(e.balance)}
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -480,6 +509,77 @@ export default function FinancialStatementsPage() {
             </TabsContent>
           </Tabs>
         </>
+      )}
+
+      {/* Drill-down Modal */}
+      {(drilldown || drillLoading) && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !drillLoading && setDrilldown(null)}>
+          <div className="bg-white rounded-xl max-w-3xl max-h-[80vh] w-full overflow-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            {drillLoading ? (
+              <div className="p-12 text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+                <p className="text-sm text-gray-500 mt-2">거래 내역 로드 중...</p>
+              </div>
+            ) : drilldown ? (
+              <>
+                <div className="p-4 border-b flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <div>
+                    <h3 className="font-bold text-sm">
+                      {drilldown.accountCode} {drilldown.accountName}
+                    </h3>
+                    <p className="text-xs text-gray-500">{drilldown.count}건의 거래 — {year}년</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-[10px] text-gray-500">잔액</p>
+                      <p className="font-mono font-bold text-sm">{fmtRp(drilldown.balance)}</p>
+                    </div>
+                    <button onClick={() => setDrilldown(null)}><X className="h-5 w-5 text-gray-400 hover:text-gray-700" /></button>
+                  </div>
+                </div>
+                <div className="p-4">
+                  {drilldown.transactions.length === 0 ? (
+                    <p className="text-center text-sm text-gray-400 py-8">거래 내역이 없습니다</p>
+                  ) : (
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50 border-b">
+                          <th className="p-2 text-left">날짜</th>
+                          <th className="p-2 text-left">번호</th>
+                          <th className="p-2 text-left">설명</th>
+                          <th className="p-2 text-center">출처</th>
+                          <th className="p-2 text-right">차변</th>
+                          <th className="p-2 text-right">대변</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {drilldown.transactions.map((tx, i) => (
+                          <tr key={i} className="border-b hover:bg-blue-50/50">
+                            <td className="p-2 text-gray-500">{tx.date}</td>
+                            <td className="p-2 font-mono text-[10px] text-indigo-600">{tx.number}</td>
+                            <td className="p-2">{tx.description}</td>
+                            <td className="p-2 text-center">
+                              <Badge variant="outline" className="text-[8px]">{tx.source}</Badge>
+                            </td>
+                            <td className="p-2 text-right font-mono">{tx.debit > 0 ? fmtRp(tx.debit) : ''}</td>
+                            <td className="p-2 text-right font-mono">{tx.credit > 0 ? fmtRp(tx.credit) : ''}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot className="bg-indigo-50 font-bold">
+                        <tr>
+                          <td colSpan={4} className="p-2">합계</td>
+                          <td className="p-2 text-right font-mono">{fmtRp(drilldown.totalDebit)}</td>
+                          <td className="p-2 text-right font-mono">{fmtRp(drilldown.totalCredit)}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  )}
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
       )}
     </div>
   );
