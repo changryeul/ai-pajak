@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
+import { sendDocRequestTelegram } from '@/lib/notifications/telegram-service';
 
 /**
  * POST /api/documents/submit
@@ -187,6 +188,27 @@ export async function POST(request: NextRequest) {
               .is('whatsapp_sent_at', null);
           } catch { /* */ }
         }
+      }
+    }
+
+    // Telegram (AI auto-request)
+    if (!complete && missing.length > 0) {
+      const { data: telePrefs } = await admin
+        .from('notification_preferences')
+        .select('telegram_enabled, telegram_chat_id')
+        .eq('user_id', customer.user_id)
+        .maybeSingle();
+
+      if (telePrefs?.telegram_enabled && telePrefs?.telegram_chat_id) {
+        const customerName = customer.company_name || customer.full_name;
+        try {
+          await sendDocRequestTelegram(
+            telePrefs.telegram_chat_id,
+            customerName,
+            `${period} 추가 자료 요청`,
+            missing.map(m => ({ description: m.description }))
+          );
+        } catch { /* */ }
       }
     }
 

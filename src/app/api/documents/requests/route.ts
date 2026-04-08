@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { loggers } from '@/lib/logger';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
+import { sendDocRequestTelegram } from '@/lib/notifications/telegram-service';
 
 /**
  * GET /api/documents/requests?customerId=...&period=...
@@ -135,6 +136,30 @@ export async function POST(request: NextRequest) {
           .update({ whatsapp_sent_at: new Date().toISOString() })
           .eq('id', req.id);
       } catch { /* */ }
+    }
+
+    // Telegram
+    if (sendTelegram) {
+      const { data: telePrefs } = await admin
+        .from('notification_preferences')
+        .select('telegram_enabled, telegram_chat_id')
+        .eq('user_id', customer.user_id)
+        .maybeSingle();
+
+      if (telePrefs?.telegram_enabled && telePrefs?.telegram_chat_id) {
+        const customerName = customer.company_name || customer.full_name;
+        try {
+          await sendDocRequestTelegram(
+            telePrefs.telegram_chat_id,
+            customerName,
+            title,
+            requiredDocuments
+          );
+          await admin.from('document_request')
+            .update({ telegram_sent_at: new Date().toISOString() })
+            .eq('id', req.id);
+        } catch { /* */ }
+      }
     }
 
     loggers.api.info(
