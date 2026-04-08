@@ -11,7 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   BookOpen, Plus, Loader2, CheckCircle, AlertTriangle, Save, X, Trash2,
+  Upload, Sparkles, ArrowRight,
 } from 'lucide-react';
+import { useRef } from 'react';
 import { fmtRp } from '@/lib/utils';
 
 interface JournalEntry {
@@ -248,6 +250,9 @@ export default function JournalsPage() {
         </Card>
       )}
 
+      {/* Bank → Journal converter */}
+      <BankToJournalSection customerId={customerId} year={year} onSaved={loadData} showMsg={showMsg} />
+
       {/* Journal list */}
       <Card>
         <CardContent className="p-4">
@@ -288,5 +293,180 @@ export default function JournalsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// ── Bank → Journal Converter ──
+function BankToJournalSection({
+  customerId, year, onSaved, showMsg,
+}: {
+  customerId: string; year: number;
+  onSaved: () => void;
+  showMsg: (type: 'success' | 'error', text: string) => void;
+}) {
+  const [show, setShow] = useState(false);
+  const [csvData, setCsvData] = useState('');
+  const [preview, setPreview] = useState<Array<{
+    entryDate: string; description: string;
+    lines: Array<{ account_code: string; account_name: string; debit: number; credit: number }>;
+    confidence: string; matchedRule: string;
+  }> | null>(null);
+  const [summary, setSummary] = useState({ total: 0, high: 0, medium: 0, low: 0 });
+  const [processing, setProcessing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const parseCsv = (text: string) => {
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return [];
+    const txs: Array<{ date: string; description: string; debit: number; credit: number }> = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',');
+      if (cols.length < 4) continue;
+      txs.push({
+        date: cols[0]?.trim().replace(/['"]/g, '') || '',
+        description: cols[1]?.trim().replace(/['"]/g, '') || '',
+        debit: Math.abs(Number(cols[2]?.replace(/[^0-9.-]/g, '')) || 0),
+        credit: Math.abs(Number(cols[3]?.replace(/[^0-9.-]/g, '')) || 0),
+      });
+    }
+    return txs;
+  };
+
+  const handlePreview = async () => {
+    const txs = parseCsv(csvData);
+    if (txs.length === 0) { showMsg('error', 'CSV 데이터가 없거나 형식이 맞지 않습니다'); return; }
+    setProcessing(true);
+    try {
+      const res = await fetch('/api/accounting/bank-to-journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, fiscalYear: year, transactions: txs, action: 'preview' }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        setPreview(d.data.journals);
+        setSummary(d.data.summary);
+      } else { showMsg('error', d.error || '변환 실패'); }
+    } catch { showMsg('error', '서버 오류'); }
+    finally { setProcessing(false); }
+  };
+
+  const handleSave = async () => {
+    const txs = parseCsv(csvData);
+    setSaving(true);
+    try {
+      const res = await fetch('/api/accounting/bank-to-journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, fiscalYear: year, transactions: txs, action: 'save' }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        showMsg('success', d.message);
+        setPreview(null);
+        setCsvData('');
+        onSaved();
+      } else { showMsg('error', d.error || '저장 실패'); }
+    } catch { showMsg('error', '서버 오류'); }
+    finally { setSaving(false); }
+  };
+
+  const handleFileUpload = (files: FileList | null) => {
+    if (!files) return;
+    const reader = new FileReader();
+    reader.onload = (e) => setCsvData(e.target?.result as string || '');
+    reader.readAsText(files[0]);
+  };
+
+  return (
+    <Card className="mb-4 border-dashed border-blue-300">
+      <CardContent className="p-4">
+        <button type="button" onClick={() => setShow(!show)}
+          className="w-full flex items-center justify-between text-left">
+          <div className="flex items-center gap-2">
+            <Upload className="h-4 w-4 text-blue-600" />
+            <span className="font-bold text-sm">은행거래 → 저널 자동 변환</span>
+            <Badge className="bg-blue-100 text-blue-700 text-[9px]">AI</Badge>
+          </div>
+          <ArrowRight className={`h-4 w-4 text-gray-400 transition-transform ${show ? 'rotate-90' : ''}`} />
+        </button>
+
+        {show && (
+          <div className="mt-4 space-y-3">
+            <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
+              <p className="font-bold">사용 방법</p>
+              <p className="mt-1">은행 거래내역 CSV를 붙여넣거나 파일을 업로드하세요.</p>
+              <p className="mt-1 font-mono text-[10px]">CSV 형식: 날짜, 설명, 출금(Debit), 입금(Credit)</p>
+            </div>
+
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
+                <Upload className="h-3 w-3 mr-1" />CSV 파일
+              </Button>
+              <input ref={fileRef} type="file" className="hidden" accept=".csv,.txt"
+                onChange={e => handleFileUpload(e.target.files)} />
+            </div>
+
+            <textarea
+              className="w-full h-32 p-2 border rounded text-[10px] font-mono"
+              value={csvData}
+              onChange={e => setCsvData(e.target.value)}
+              placeholder="date,description,debit,credit
+2025-01-05,Pembayaran gaji karyawan,42500000,0
+2025-01-08,Transfer masuk PT ABC,0,85000000
+2025-01-10,Setor Pajak PPh 21,8750000,0"
+            />
+
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handlePreview} disabled={processing || !csvData.trim()}>
+                {processing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                미리보기
+              </Button>
+              {preview && (
+                <Button size="sm" onClick={handleSave} disabled={saving}>
+                  {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+                  전체 저장 ({preview.length}건)
+                </Button>
+              )}
+            </div>
+
+            {/* Preview */}
+            {preview && (
+              <div>
+                <div className="flex gap-2 mb-2 text-xs">
+                  <Badge className="bg-green-100 text-green-700">HIGH {summary.high}</Badge>
+                  <Badge className="bg-amber-100 text-amber-700">MEDIUM {summary.medium}</Badge>
+                  <Badge className="bg-red-100 text-red-700">LOW {summary.low}</Badge>
+                </div>
+                <div className="space-y-1 max-h-60 overflow-y-auto">
+                  {preview.map((j, i) => (
+                    <div key={i} className="p-2 rounded border text-[10px]">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-gray-500">{j.entryDate}</span>
+                        <span className="flex-1 truncate">{j.description}</span>
+                        <Badge className={
+                          j.confidence === 'HIGH' ? 'text-[8px] bg-green-100 text-green-700' :
+                          j.confidence === 'MEDIUM' ? 'text-[8px] bg-amber-100 text-amber-700' :
+                          'text-[8px] bg-red-100 text-red-700'
+                        }>{j.confidence}</Badge>
+                      </div>
+                      <div className="ml-3 text-[9px] text-gray-600">
+                        {j.lines.map((l, li) => (
+                          <span key={li}>
+                            {l.account_code} {l.account_name} {l.debit > 0 ? `Dr ${fmtRp(l.debit)}` : `Cr ${fmtRp(l.credit)}`}
+                            {li < j.lines.length - 1 ? ' / ' : ''}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
