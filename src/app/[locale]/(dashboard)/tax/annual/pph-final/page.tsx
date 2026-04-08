@@ -209,58 +209,91 @@ export default function PPhFinalAnnualPage() {
               필요 서류 체크리스트
             </h2>
             <p className="text-xs text-gray-500">
-              연 결산 및 SPT 1771 작성에 필요한 서류입니다. 준비된 서류를 체크하고 업로드해 주세요.
-              <b> 미준비 항목은 JTC 담당자가 별도 요청</b>합니다.
+              연 결산 및 SPT 1771 작성에 필요한 서류입니다. 각 항목을 확인하고 <b>업로드</b>해 주세요.
+              미준비 서류는 <b>AI가 자동으로 요청</b>합니다.
             </p>
 
             <div className="space-y-2">
               {[
-                { key: 'aktaPendirian', label: '최초 정관 (Akta Pendirian)', desc: '회사 설립 시 작성한 공증 정관 원본. Notaris 공증 포함.', required: true },
-                { key: 'aktaPerubahan', label: '최종 수정 정관 (Akta Perubahan Terakhir)', desc: '가장 최근 수정한 정관. 주주/이사 변경 등이 반영된 버전.', required: true },
-                { key: 'skMenteri', label: 'SK Menteri (법무부 승인서)', desc: 'Surat Keputusan Menteri Hukum & HAM. AHU 번호 포함.', required: true },
-                { key: 'fixedAssetList', label: '고정자산 리스트 (Daftar Aktiva Tetap)', desc: '보유 자산 목록: 취득일, 취득가, 감가상각 내역. 없으면 "없음" 체크.', required: false },
-                { key: 'contracts', label: '연중 체결 계약서 사본', desc: `${year}년 중 체결한 모든 계약서 (거래처/임대/서비스/고용 등).`, required: true },
-                { key: 'monthlyTaxRecords', label: '매월 세무신고 자료', desc: `${year}년 1~12월 SPT Masa 신고 내역 (PPh 21/23/4(2)/PPN). AI Pajak으로 신고했다면 자동 수집됨.`, required: true },
+                {
+                  key: 'aktaPendirian', label: '최초 정관 (Akta Pendirian)', required: true,
+                  desc: '회사를 처음 설립할 때 Notaris(공증인)가 작성한 공증 정관입니다.',
+                  detail: '어디서 찾나요? → 회사 설립 시 Notaris가 준 원본 또는 사본. 분실 시 해당 Notaris 사무실에 재발급 요청.',
+                  format: 'PDF 스캔 또는 사진 촬영',
+                },
+                {
+                  key: 'aktaPerubahan', label: '최종 수정 정관 (Akta Perubahan Terakhir)', required: true,
+                  desc: '가장 최근에 수정한 정관입니다. 주주 변경, 이사 변경, 자본금 변경 등이 반영됩니다.',
+                  detail: '설립 후 변경이 없다면 최초 정관과 동일합니다. "변경 없음"으로 체크해도 됩니다.',
+                  format: 'PDF 스캔 또는 사진 촬영',
+                },
+                {
+                  key: 'skMenteri', label: 'SK Menteri (법무인권부 승인서)', required: true,
+                  desc: 'Surat Keputusan Menteri Hukum dan HAM — 법무인권부 장관이 발행하는 법인 설립/변경 승인서입니다.',
+                  detail: 'AHU 번호가 포함된 문서입니다. 회사 설립 시 또는 정관 변경 시 법무부에서 발급됩니다. Notaris를 통해 받으며, AHU Online (ahu.go.id)에서도 확인 가능합니다.',
+                  format: 'PDF 또는 사진 (AHU 번호가 보이게)',
+                },
+                {
+                  key: 'fixedAssetList', label: '고정자산 리스트 (Daftar Aktiva Tetap)', required: false,
+                  desc: '회사가 보유한 자산 목록입니다: 차량, 컴퓨터, 가구, 건물 등.',
+                  detail: '각 자산의 취득일, 취득 가격, 감가상각 내역을 포함합니다. Excel로 작성하거나, 없으면 "자산 없음"으로 체크하세요.',
+                  format: 'Excel 또는 PDF',
+                },
+                {
+                  key: 'contracts', label: '연중 체결 계약서 사본', required: true,
+                  desc: `${year}년 중 체결한 모든 계약서입니다.`,
+                  detail: '거래처 계약, 사무실 임대차 계약, 서비스 계약, 고용 계약 등 금액이 포함된 모든 계약. 여러 건이면 모두 업로드하세요.',
+                  format: 'PDF 스캔 또는 사진 (여러 파일 가능)',
+                },
+                {
+                  key: 'monthlyTaxRecords', label: '매월 세무신고 자료', required: true,
+                  desc: `${year}년 1~12월 매월 신고한 세무 자료입니다.`,
+                  detail: '다음 중 해당하는 것을 모두 업로드하세요:\n• SPT Masa PPh 21 — 직원이 있는 경우 (급여 원천징수)\n• SPT Masa PPh 23 — 서비스 비용을 지급한 경우 (원천징수)\n• SPT Masa PPh 4(2) — 임대/건설 등 Final Tax\n• SPT Masa PPN — PKP 등록 사업자인 경우 (부가세)\n• PPh Final 0.5% 납부 영수증 (NTPN)\n\nAI Pajak으로 신고했다면 자동 수집되므로 별도 업로드가 불필요합니다.',
+                  format: 'PDF 또는 사진 (월별로 업로드)',
+                },
               ].map(doc => (
-                <label key={doc.key}
-                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                    docs[doc.key as keyof typeof docs] ? 'border-green-300 bg-green-50' : 'border-gray-200 hover:bg-gray-50'
+                <div key={doc.key}
+                  className={`p-3 rounded-lg border transition-all ${
+                    docs[doc.key as keyof typeof docs] ? 'border-green-300 bg-green-50' : 'border-gray-200'
                   }`}>
-                  <input type="checkbox"
-                    checked={docs[doc.key as keyof typeof docs]}
-                    onChange={e => setDocs({ ...docs, [doc.key]: e.target.checked })}
-                    className="mt-0.5 accent-green-600" />
-                  <div className="flex-1 text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{doc.label}</span>
-                      {doc.required && <Badge className="text-[8px] bg-red-100 text-red-700">필수</Badge>}
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox"
+                      checked={docs[doc.key as keyof typeof docs]}
+                      onChange={e => setDocs({ ...docs, [doc.key]: e.target.checked })}
+                      className="mt-0.5 accent-green-600" />
+                    <div className="flex-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{doc.label}</span>
+                        {doc.required && <Badge className="text-[8px] bg-red-100 text-red-700">필수</Badge>}
+                      </div>
+                      <p className="text-gray-600 mt-0.5">{doc.desc}</p>
+                      <details className="mt-1">
+                        <summary className="text-[10px] text-blue-600 cursor-pointer hover:underline">자세한 안내 보기</summary>
+                        <div className="mt-1 p-2 bg-white rounded text-[10px] text-gray-600 whitespace-pre-line">
+                          {doc.detail}
+                          <p className="mt-1 text-blue-700">📎 업로드 형식: {doc.format}</p>
+                        </div>
+                      </details>
                     </div>
-                    <p className="text-gray-500 mt-0.5">{doc.desc}</p>
-                  </div>
-                  {docs[doc.key as keyof typeof docs] && <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />}
-                </label>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {docs[doc.key as keyof typeof docs] && <CheckCircle className="h-4 w-4 text-green-600" />}
+                      <a href={`/${locale}/documents/upload`}
+                        onClick={e => e.stopPropagation()}
+                        className="p-1.5 rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
+                        title="이 서류 업로드">
+                        <Upload className="h-3 w-3 text-blue-600" />
+                      </a>
+                    </div>
+                  </label>
+                </div>
               ))}
-            </div>
-
-            <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800 flex items-start gap-2">
-              <Upload className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold">서류 업로드</p>
-                <p className="mt-0.5">
-                  "자료 업로드" 메뉴에서 위 서류를 업로드할 수 있습니다.
-                  업로드된 서류는 JTC 세무사가 검토합니다.
-                </p>
-                <a href={`/${locale}/documents/upload`} className="text-blue-600 hover:underline mt-1 inline-block">
-                  자료 업로드 페이지로 이동 →
-                </a>
-              </div>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-3 text-xs">
               <p className="text-gray-600">
                 준비 상태: <b>{Object.values(docs).filter(Boolean).length}/6</b> 완료
                 {Object.values(docs).filter(Boolean).length < 4 && (
-                  <span className="text-amber-600 ml-2">— 미준비 서류는 JTC가 별도 요청합니다</span>
+                  <span className="text-amber-600 ml-2">— 미준비 서류는 AI가 자동으로 요청합니다</span>
                 )}
               </p>
             </div>
