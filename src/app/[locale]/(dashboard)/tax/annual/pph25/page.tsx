@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Building2, CheckCircle, AlertTriangle, ArrowRight, ArrowLeft,
   Shield, DollarSign, FileText, Sparkles, HelpCircle, BookOpen,
-  Calculator, Calendar, Loader2, Plus, X,
+  Calculator, Calendar, Loader2, Plus, X, ClipboardList,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -56,11 +56,23 @@ export default function PPh25AnnualPage() {
   const [fsNetIncome, setFsNetIncome] = useState<number | null>(null);
   const [loadingFS, setLoadingFS] = useState(false);
 
-  // Step 3: Koreksi Fiskal
+  // Step 2: Required documents
+  const [docs, setDocs] = useState({
+    aktaPendirian: false, aktaPerubahan: false, skMenteri: false,
+    fixedAssetList: false, contracts: false, monthlyTaxRecords: false,
+    financialStatements: false, inventoryLedger: false, depreciationSchedule: false,
+  });
+
+  // Step 3: Inventory (재고관리대장)
+  const [inventoryItems, setInventoryItems] = useState<Array<{
+    name: string; beginning: string; purchases: string; ending: string;
+  }>>([{ name: '', beginning: '', purchases: '', ending: '' }]);
+
+  // Step 5: Koreksi Fiskal
   const [positiveCorr, setPositiveCorr] = useState<Record<string, string>>({});
   const [negativeCorr, setNegativeCorr] = useState<Record<string, string>>({});
 
-  // Step 4: Tax credits
+  // Step 6: Tax credits
   const [pph22Credit, setPph22Credit] = useState('');
   const [pph23Credit, setPph23Credit] = useState('');
   const [pph24Credit, setPph24Credit] = useState('');
@@ -101,6 +113,14 @@ export default function PPh25AnnualPage() {
     finally { setLoadingFS(false); }
   };
 
+  // HPP from inventory
+  const hppFromInventory = inventoryItems.reduce((s, item) => {
+    const b = Number(item.beginning) || 0;
+    const p = Number(item.purchases) || 0;
+    const e = Number(item.ending) || 0;
+    return s + (b + p - e);
+  }, 0);
+
   // Calculations
   const commercial = Number(commercialProfit) || 0;
   const totalPositive = Object.values(positiveCorr).reduce((s, v) => s + (Number(v) || 0), 0);
@@ -131,11 +151,13 @@ export default function PPh25AnnualPage() {
 
   const STEPS = [
     { id: 1, label: '기본 정보' },
-    { id: 2, label: '상업이익' },
-    { id: 3, label: '세무 조정' },
-    { id: 4, label: '세액 공제' },
-    { id: 5, label: '법인세 계산' },
-    { id: 6, label: 'PPh 25 산정' },
+    { id: 2, label: '필요 서류' },
+    { id: 3, label: '재고관리' },
+    { id: 4, label: '상업이익' },
+    { id: 5, label: '세무 조정' },
+    { id: 6, label: '세액 공제' },
+    { id: 7, label: '법인세 계산' },
+    { id: 8, label: 'PPh 25 산정' },
   ];
 
   return (
@@ -208,8 +230,116 @@ export default function PPh25AnnualPage() {
         </CardContent></Card>
       )}
 
-      {/* Step 2: Commercial profit */}
+      {/* Step 2: Required documents */}
       {step === 2 && (
+        <Card><CardContent className="p-5 space-y-4">
+          <h2 className="font-bold text-lg flex items-center gap-2"><ClipboardList className="h-5 w-5 text-indigo-600" />필요 서류 체크리스트</h2>
+          <p className="text-xs text-gray-500">PPh 25 연 결산에 필요한 서류입니다. PPh Final보다 더 많은 서류가 필요합니다.</p>
+          <div className="space-y-2">
+            {[
+              { key: 'aktaPendirian', label: '최초 정관 (Akta Pendirian)', required: true },
+              { key: 'aktaPerubahan', label: '최종 수정 정관 (Akta Perubahan Terakhir)', required: true },
+              { key: 'skMenteri', label: 'SK Menteri (법무부 승인서)', required: true },
+              { key: 'financialStatements', label: '재무제표 (Neraca + Laba Rugi)', required: true },
+              { key: 'inventoryLedger', label: '재고관리대장 (Kartu Persediaan)', required: false },
+              { key: 'depreciationSchedule', label: '감가상각 명세서 (Daftar Penyusutan)', required: true },
+              { key: 'fixedAssetList', label: '고정자산 리스트', required: true },
+              { key: 'contracts', label: '연중 체결 계약서 사본', required: true },
+              { key: 'monthlyTaxRecords', label: '매월 세무신고 자료 (SPT Masa)', required: true },
+            ].map(doc => (
+              <label key={doc.key}
+                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                  docs[doc.key as keyof typeof docs] ? 'border-green-300 bg-green-50' : 'border-gray-200 hover:bg-gray-50'
+                }`}>
+                <input type="checkbox" checked={docs[doc.key as keyof typeof docs]}
+                  onChange={e => setDocs({ ...docs, [doc.key]: e.target.checked })}
+                  className="mt-0.5 accent-green-600" />
+                <div className="text-xs">
+                  <span className="font-medium">{doc.label}</span>
+                  {doc.required && <Badge className="ml-1 text-[8px] bg-red-100 text-red-700">필수</Badge>}
+                </div>
+                {docs[doc.key as keyof typeof docs] && <CheckCircle className="h-4 w-4 text-green-600 ml-auto" />}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500">준비: {Object.values(docs).filter(Boolean).length}/9</p>
+        </CardContent></Card>
+      )}
+
+      {/* Step 3: Inventory ledger */}
+      {step === 3 && (
+        <Card><CardContent className="p-5 space-y-4">
+          <h2 className="font-bold text-lg flex items-center gap-2"><FileText className="h-5 w-5 text-indigo-600" />재고관리대장 (Kartu Persediaan)</h2>
+          <div className="bg-indigo-50 rounded-lg p-3 text-xs text-indigo-800">
+            <p className="font-bold">HPP (매출원가) 계산 공식</p>
+            <p className="font-mono mt-1">HPP = 기초재고 + 매입 - 기말재고</p>
+            <p className="mt-1">재고가 없는 서비스업은 이 단계를 건너뛰어도 됩니다.</p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="p-2 text-left border">품목명</th>
+                  <th className="p-2 text-right border w-32">기초재고 (Rp)</th>
+                  <th className="p-2 text-right border w-32">매입 (Rp)</th>
+                  <th className="p-2 text-right border w-32">기말재고 (Rp)</th>
+                  <th className="p-2 text-right border w-32">HPP (Rp)</th>
+                  <th className="p-2 border w-8"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {inventoryItems.map((item, i) => {
+                  const hpp = (Number(item.beginning) || 0) + (Number(item.purchases) || 0) - (Number(item.ending) || 0);
+                  return (
+                    <tr key={i}>
+                      <td className="p-0.5 border">
+                        <Input className="h-7 text-xs" value={item.name}
+                          onChange={e => { const next = [...inventoryItems]; next[i] = { ...next[i], name: e.target.value }; setInventoryItems(next); }}
+                          placeholder="품목명" />
+                      </td>
+                      <td className="p-0.5 border">
+                        <Input type="number" className="h-7 text-xs font-mono text-right" value={item.beginning}
+                          onChange={e => { const next = [...inventoryItems]; next[i] = { ...next[i], beginning: e.target.value }; setInventoryItems(next); }} />
+                      </td>
+                      <td className="p-0.5 border">
+                        <Input type="number" className="h-7 text-xs font-mono text-right" value={item.purchases}
+                          onChange={e => { const next = [...inventoryItems]; next[i] = { ...next[i], purchases: e.target.value }; setInventoryItems(next); }} />
+                      </td>
+                      <td className="p-0.5 border">
+                        <Input type="number" className="h-7 text-xs font-mono text-right" value={item.ending}
+                          onChange={e => { const next = [...inventoryItems]; next[i] = { ...next[i], ending: e.target.value }; setInventoryItems(next); }} />
+                      </td>
+                      <td className="p-2 border text-right font-mono font-bold">{fmtRp(hpp)}</td>
+                      <td className="p-0.5 border text-center">
+                        {inventoryItems.length > 1 && (
+                          <button onClick={() => setInventoryItems(inventoryItems.filter((_, j) => j !== i))}><X className="h-3 w-3 text-gray-400" /></button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot className="bg-indigo-50 font-bold">
+                <tr>
+                  <td className="p-2 border">합계</td>
+                  <td className="p-2 border text-right font-mono">{fmtRp(inventoryItems.reduce((s, i) => s + (Number(i.beginning) || 0), 0))}</td>
+                  <td className="p-2 border text-right font-mono">{fmtRp(inventoryItems.reduce((s, i) => s + (Number(i.purchases) || 0), 0))}</td>
+                  <td className="p-2 border text-right font-mono">{fmtRp(inventoryItems.reduce((s, i) => s + (Number(i.ending) || 0), 0))}</td>
+                  <td className="p-2 border text-right font-mono text-indigo-700">{fmtRp(hppFromInventory)}</td>
+                  <td className="p-2 border"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => setInventoryItems([...inventoryItems, { name: '', beginning: '', purchases: '', ending: '' }])}>
+            <Plus className="h-3 w-3 mr-1" />품목 추가
+          </Button>
+        </CardContent></Card>
+      )}
+
+      {/* Step 4: Commercial profit */}
+      {step === 4 && (
         <Card><CardContent className="p-5 space-y-4">
           <h2 className="font-bold text-lg flex items-center gap-2"><DollarSign className="h-5 w-5 text-indigo-600" />상업 이익 (Laba Komersial)</h2>
           <p className="text-xs text-gray-500">재무제표의 순이익(Laba Bersih)을 입력하세요. 재무제표가 시스템에 있으면 자동으로 불러옵니다.</p>
@@ -240,7 +370,7 @@ export default function PPh25AnnualPage() {
       )}
 
       {/* Step 3: Koreksi Fiskal */}
-      {step === 3 && (
+      {step === 5 && (
         <Card><CardContent className="p-5 space-y-4">
           <h2 className="font-bold text-lg flex items-center gap-2"><Calculator className="h-5 w-5 text-indigo-600" />세무 조정 (Koreksi Fiskal)</h2>
 
@@ -314,7 +444,7 @@ export default function PPh25AnnualPage() {
       )}
 
       {/* Step 4: Tax credits */}
-      {step === 4 && (
+      {step === 6 && (
         <Card><CardContent className="p-5 space-y-4">
           <h2 className="font-bold text-lg flex items-center gap-2"><Shield className="h-5 w-5 text-indigo-600" />세액 공제 (Kredit Pajak)</h2>
           <p className="text-xs text-gray-500">연중 이미 납부하거나 원천징수된 세액을 입력하세요. 이 금액이 법인세에서 공제됩니다.</p>
@@ -349,7 +479,7 @@ export default function PPh25AnnualPage() {
       )}
 
       {/* Step 5: Tax calculation result */}
-      {step === 5 && (
+      {step === 7 && (
         <div className="space-y-4">
           <Card className="border-l-4 border-l-indigo-500"><CardContent className="p-5">
             <h2 className="font-bold text-lg flex items-center gap-2 mb-4"><Calculator className="h-5 w-5 text-indigo-600" />{year}년 법인세 (PPh Badan) 계산</h2>
@@ -401,7 +531,7 @@ export default function PPh25AnnualPage() {
       )}
 
       {/* Step 6: Next year PPh 25 */}
-      {step === 6 && (
+      {step === 8 && (
         <div className="space-y-4">
           <Card className="border-l-4 border-l-green-500 bg-green-50"><CardContent className="p-5">
             <h2 className="font-bold text-lg flex items-center gap-2 mb-4"><Calendar className="h-5 w-5 text-green-600" />{year + 1}년 PPh 25 월 분할액 산정</h2>
@@ -455,7 +585,7 @@ export default function PPh25AnnualPage() {
         {step > 1 ? (
           <Button variant="outline" onClick={() => setStep(step - 1)}><ArrowLeft className="h-4 w-4 mr-1" />이전</Button>
         ) : <div />}
-        {step < 6 ? (
+        {step < 8 ? (
           <Button onClick={() => setStep(step + 1)}>다음<ArrowRight className="h-4 w-4 ml-1" /></Button>
         ) : null}
       </div>

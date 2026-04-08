@@ -133,7 +133,10 @@
       "Bash(python3:*)",
       "WebFetch(domain:chatgpt.com)",
       "Bash(gh run:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(sed -i '' 's/{step === 3 && \\(/{step === 5 \\\\&\\\\& \\(/' \"src/app/[locale]/\\(dashboard\\)/tax/annual/pph25/page.tsx\")",
+      "Bash(sed -i '' 's/{step === 4 && \\(/{step === 6 \\\\&\\\\& \\(/' \"src/app/[locale]/\\(dashboard\\)/tax/annual/pph25/page.tsx\")",
+      "Bash(sed -i '' 's/{step === 5 && \\(/{step === 7 \\\\&\\\\& \\(/' \"src/app/[locale]/\\(dashboard\\)/tax/annual/pph25/page.tsx\")"
     ]
   }
 }
