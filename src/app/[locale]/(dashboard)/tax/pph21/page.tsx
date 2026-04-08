@@ -441,24 +441,121 @@ function PPh21DataInputSection({
     URL.revokeObjectURL(url);
   };
 
+  // Column mapping state
+  const [mappingStep, setMappingStep] = useState<'idle' | 'mapping' | 'importing'>('idle');
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [csvPreview, setCsvPreview] = useState<string[][]>([]);
+  const [columnMappings, setColumnMappings] = useState<Array<{ sourceColumn: string; targetField: string; confidence: string }>>([]);
+  const [mappedFile, setMappedFile] = useState<File | null>(null);
+
+  const TARGET_FIELDS_LIST = [
+    { field: '', label: '— 매핑 안 함 —' },
+    { field: 'employee_name', label: '직원명 *' },
+    { field: 'employee_npwp', label: 'NPWP' },
+    { field: 'employee_nik', label: 'NIK' },
+    { field: 'ptkp_category', label: 'PTKP' },
+    { field: 'gross_salary', label: '기본급 *' },
+    { field: 'position_allowance', label: '직책수당' },
+    { field: 'overtime_pay', label: '초과근무' },
+    { field: 'meal_allowance', label: '식대' },
+    { field: 'transport_allowance', label: '교통비' },
+    { field: 'other_allowances', label: '기타수당' },
+    { field: 'bonus', label: '보너스' },
+    { field: 'thr', label: 'THR' },
+    { field: 'jht_employee', label: 'JHT' },
+    { field: 'jp_employee', label: 'JP' },
+    { field: 'bpjs_kesehatan', label: 'BPJS' },
+    { field: 'other_deductions', label: '기타공제' },
+    { field: 'worker_type', label: '직원유형' },
+  ];
+
   const handleExcelUpload = async (files: FileList | null) => {
     if (!files || !customerId) return;
-    setUploading(true);
     const file = files[0];
+    setMappedFile(file);
+
+    // Read CSV/Excel and extract headers for mapping
+    const text = await file.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) { showMsg('error', '데이터가 없습니다'); return; }
+
+    const headerRaw = lines[0].replace(/\uFEFF/, '');
+    const headers = headerRaw.split(',').map(h => h.trim().replace(/['"]/g, ''));
+    const preview = lines.slice(1, 4).map(l => l.split(',').map(c => c.trim().replace(/['"]/g, '')));
+
+    setCsvHeaders(headers);
+    setCsvPreview(preview);
+
+    // Auto-map using keyword matching
+    const KEYWORD_MAP: Record<string, string[]> = {
+      employee_name: ['nama', 'name', 'karyawan', 'pegawai', '이름', 'employee'],
+      employee_npwp: ['npwp', 'tax_id'],
+      employee_nik: ['nik', 'ktp'],
+      ptkp_category: ['ptkp', 'status'],
+      gross_salary: ['gaji', 'salary', 'basic', 'pokok', 'base', '기본급', 'gross', 'gapok'],
+      position_allowance: ['jabatan', 'position', '직책'],
+      overtime_pay: ['lembur', 'overtime', '초과'],
+      meal_allowance: ['makan', 'meal', '식대'],
+      transport_allowance: ['transport', '교통'],
+      other_allowances: ['tunjangan lain', 'allowance', '수당'],
+      bonus: ['bonus', '보너스'],
+      thr: ['thr', 'hari raya'],
+      jht_employee: ['jht', 'hari tua'],
+      jp_employee: ['jp', 'pensiun'],
+      bpjs_kesehatan: ['bpjs', 'kesehatan'],
+      other_deductions: ['potongan', 'deduction', '공제'],
+      worker_type: ['type', 'tipe', 'jenis', '유형'],
+    };
+
+    const usedTargets = new Set<string>();
+    const mappings = headers.map(h => {
+      const lower = h.toLowerCase();
+      for (const [field, keywords] of Object.entries(KEYWORD_MAP)) {
+        if (usedTargets.has(field)) continue;
+        if (keywords.some(kw => lower.includes(kw) || kw.includes(lower))) {
+          usedTargets.add(field);
+          return { sourceColumn: h, targetField: field, confidence: lower === keywords[0] ? 'HIGH' : 'MEDIUM' };
+        }
+      }
+      return { sourceColumn: h, targetField: '', confidence: 'NONE' };
+    });
+
+    setColumnMappings(mappings);
+    setMappingStep('mapping');
+  };
+
+  const handleConfirmMapping = async () => {
+    if (!mappedFile || !customerId) return;
+    setMappingStep('importing');
+    setUploading(true);
+
+    // Rebuild CSV with mapped headers
+    const text = await mappedFile.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    const dataRows = lines.slice(1);
+
+    const mappedHeaders = columnMappings.map(m => m.targetField || 'SKIP');
+    const mappedCsv = [mappedHeaders.join(','), ...dataRows].join('\n');
+
+    const blob = new Blob(['\uFEFF' + mappedCsv], { type: 'text/csv' });
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', blob, 'mapped.csv');
     fd.append('customerId', customerId);
+
     try {
       const res = await fetch('/api/tax/employees/import', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `${data.data?.imported || 0}명의 직원 데이터가 임포트되었습니다`);
+        showMsg('success', `${data.data?.imported || 0}명 임포트 완료${data.data?.skipped ? `, ${data.data.skipped}명 스킵` : ''}`);
         onComplete();
+        setMappingStep('idle');
       } else {
         showMsg('error', data.error || '임포트 실패');
+        setMappingStep('mapping');
       }
     } catch {
       showMsg('error', '서버 오류');
+      setMappingStep('mapping');
     } finally {
       setUploading(false);
     }
@@ -533,6 +630,88 @@ function PPh21DataInputSection({
           </CardContent>
         </Card>
       </div>
+
+      {/* Column mapping confirmation */}
+      {mappingStep === 'mapping' && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-sm flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-blue-600" />
+                컬럼 매핑 확인 — AI가 자동으로 매핑했습니다
+              </h3>
+              <Button size="sm" variant="ghost" onClick={() => setMappingStep('idle')}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+            <p className="text-[11px] text-blue-700">
+              고객사 Excel 컬럼을 우리 시스템 필드에 매핑합니다. 자동 매핑이 맞지 않으면 드롭다운에서 수정하세요.
+            </p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-white">
+                    <th className="p-2 text-left border">Excel 컬럼</th>
+                    <th className="p-2 text-left border">→ 매핑 대상</th>
+                    <th className="p-2 text-center border">신뢰도</th>
+                    <th className="p-2 text-left border">샘플 데이터</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvHeaders.map((header, i) => {
+                    const mapping = columnMappings[i];
+                    return (
+                      <tr key={i} className="border-b">
+                        <td className="p-2 border font-mono text-[11px]">{header}</td>
+                        <td className="p-1 border">
+                          <select
+                            value={mapping?.targetField || ''}
+                            onChange={e => {
+                              const next = [...columnMappings];
+                              next[i] = { ...next[i], targetField: e.target.value, confidence: e.target.value ? 'HIGH' : 'NONE' };
+                              setColumnMappings(next);
+                            }}
+                            className={`w-full h-7 px-1 text-[11px] border rounded ${
+                              mapping?.confidence === 'HIGH' ? 'bg-green-50 border-green-300' :
+                              mapping?.confidence === 'MEDIUM' ? 'bg-amber-50 border-amber-300' :
+                              mapping?.targetField ? 'bg-blue-50' : 'bg-gray-50'
+                            }`}>
+                            {TARGET_FIELDS_LIST.map(tf => (
+                              <option key={tf.field} value={tf.field}>{tf.label}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="p-2 border text-center">
+                          <Badge className={
+                            mapping?.confidence === 'HIGH' ? 'text-[8px] bg-green-100 text-green-700' :
+                            mapping?.confidence === 'MEDIUM' ? 'text-[8px] bg-amber-100 text-amber-700' :
+                            'text-[8px] bg-gray-100 text-gray-500'
+                          }>{mapping?.confidence || 'NONE'}</Badge>
+                        </td>
+                        <td className="p-2 border text-[10px] text-gray-500 font-mono">
+                          {csvPreview.slice(0, 2).map((row, ri) => row[i] || '').join(' | ')}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-gray-500">
+                필수: 직원명 + 기본급. 나머지는 선택.
+              </p>
+              <Button size="sm" onClick={handleConfirmMapping}
+                disabled={uploading || !columnMappings.some(m => m.targetField === 'employee_name') || !columnMappings.some(m => m.targetField === 'gross_salary')}>
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                매핑 확인 · 임포트 시작
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Uploaded documents */}
       {uploadedDocs.length > 0 && (
