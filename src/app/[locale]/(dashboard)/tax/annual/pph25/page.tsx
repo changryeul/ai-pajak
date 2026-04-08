@@ -21,20 +21,115 @@ const SME_BRACKET = 4_800_000_000; // Rp 4.8B
 
 // Koreksi Fiskal items (common corrections)
 const POSITIVE_CORRECTIONS = [
-  { key: 'entertainment', label: 'Biaya entertainment tanpa daftar nominatif', desc: '접대비 (명목 리스트 미작성)', hint: '접대비 전액은 세무 비용 불인정. 명목 리스트가 있으면 50%만 인정.', hasRate: false },
-  { key: 'donation', label: 'Sumbangan/donasi', desc: '기부금 (비용 불인정)', hint: '자연재해 기부금 등 일부만 인정. 일반 기부는 비용 불인정.', hasRate: false },
-  { key: 'taxPenalty', label: 'Denda & sanksi pajak', desc: '세금 벌금/가산금', hint: '세무 벌금은 세무상 비용으로 인정되지 않음.', hasRate: false },
-  { key: 'personalExpense', label: 'Biaya pribadi pemegang saham', desc: '주주 개인 비용', hint: '회사 비용으로 처리된 주주 개인 지출.', hasRate: false },
-  { key: 'pphBorne', label: 'PPh ditanggung perusahaan', desc: '회사 부담 PPh', hint: '직원의 PPh 21을 회사가 부담한 경우 (Gross-up 제외).', hasRate: false },
-  { key: 'provision', label: 'Cadangan/penyisihan', desc: '대손충당금 등 충당금', hint: '은행/보험 외 업종은 충당금 비용 불인정.', hasRate: false },
-  { key: 'depreciationDiff', label: 'Selisih penyusutan (komersial > fiskal)', desc: '감가상각 차이 (상업>세무)', hint: '회계 감가상각이 세무 감가상각보다 큰 차이.', hasRate: false },
-  { key: 'vehicleExpense', label: 'Biaya kendaraan dinas', desc: '업무용 차량 경비', hint: '업무 겸용 차량: 실비용의 50% 손금불산입 (SE-09/PJ.42/2002)', hasRate: true, defaultRate: 50 },
-  { key: 'phoneExpense', label: 'Biaya telepon/pulsa', desc: '통신비', hint: '업무 겸용 통신비: 50% 손금불산입', hasRate: true, defaultRate: 50 },
-  { key: 'travelExpense', label: 'Biaya perjalanan dinas', desc: '출장비', hint: '증빙 불비분. 비율 선택 가능.', hasRate: true, defaultRate: 40 },
-  { key: 'representExpense', label: 'Biaya representasi', desc: '교제비/접대비', hint: '명목 리스트 미비 시 손금불산입 비율 선택', hasRate: true, defaultRate: 50 },
-  { key: 'otherOpex1', label: '기타 운영비 1', desc: '손금불산입 대상 기타 비용', hint: '비율 선택하여 부분 불인정', hasRate: true, defaultRate: 50 },
-  { key: 'otherOpex2', label: '기타 운영비 2', desc: '손금불산입 대상 기타 비용', hint: '', hasRate: true, defaultRate: 60 },
-  { key: 'otherPositive', label: 'Koreksi positif lainnya', desc: '기타 가산 조정 (전액)', hint: '', hasRate: false },
+  // ── 전액 손금불산입 (100%) ──
+  {
+    key: 'entertainment', hasRate: false,
+    label: 'Biaya entertainment (접대비)',
+    desc: '접대비 — 전액 손금불산입',
+    hint: 'Pasal 9(1)(e) UU PPh — 접대비는 전액 세무상 비용으로 인정되지 않습니다. 다만, "Daftar Nominatif"(명목 리스트)를 첨부하면 50%까지 인정됩니다. 명목 리스트가 없으면 100% 불산입.',
+  },
+  {
+    key: 'welfare', hasRate: true, defaultRate: 100,
+    label: 'Biaya kesejahteraan karyawan (복리후생비)',
+    desc: '복리후생비 — 전직원 회식비 제외, 나머지 전액 불산입',
+    hint: '전 직원 대상 회식비(makan bersama seluruh karyawan)만 100% 손금산입. 개인 식대, 일부 직원 대상 혜택, 레크리에이션 등은 불산입. 회식 영수증에 참석자 명단이 있어야 인정됩니다.',
+  },
+  {
+    key: 'donation', hasRate: false,
+    label: 'Sumbangan/donasi (기부금)',
+    desc: '기부금 — 전액 손금불산입',
+    hint: 'Pasal 9(1)(g) UU PPh — 일반 기부금은 전액 불인정. 단, 국가 재난 기부금(PP 93/2010)과 교육/R&D/사회시설 기부금은 일부 인정.',
+  },
+  {
+    key: 'taxPenalty', hasRate: false,
+    label: 'Denda & sanksi pajak (세금 벌금)',
+    desc: '세금 벌금/가산금 — 전액 손금불산입',
+    hint: 'Pasal 9(1)(k) UU PPh — 세무 관련 벌금, 가산금, 이자 제재는 세무상 비용으로 인정되지 않습니다.',
+  },
+  {
+    key: 'personalExpense', hasRate: false,
+    label: 'Biaya pribadi (주주/경영진 개인비용)',
+    desc: '개인 비용 — 전액 손금불산입',
+    hint: 'Pasal 9(1)(b) UU PPh — 회사 비용으로 처리된 주주/이사 개인 지출(가족 여행, 개인 물품 등).',
+  },
+  {
+    key: 'pphBorne', hasRate: false,
+    label: 'PPh ditanggung perusahaan (회사부담 PPh)',
+    desc: '회사가 부담한 직원 소득세 — 전액 불산입',
+    hint: 'Pasal 9(1)(h) UU PPh — 회사가 직원 PPh 21을 대신 부담한 경우. 단, Gross-up 방식(세금을 수당으로 처리)이면 손금산입 가능.',
+  },
+  {
+    key: 'provision', hasRate: false,
+    label: 'Cadangan/penyisihan (충당금)',
+    desc: '충당금 — 전액 손금불산입',
+    hint: 'Pasal 9(1)(c) UU PPh — 대손충당금, 보증충당금 등. 은행/보험/리스/광업 업종만 일부 인정.',
+  },
+
+  // ── 감가상각 차이 ──
+  {
+    key: 'depreciationDiff', hasRate: false,
+    label: 'Selisih penyusutan (감가상각 차이)',
+    desc: '감가상각 — 세무 규정에 따라 전액 손금산입',
+    hint: 'Pasal 11 UU PPh — 감가상각은 세무 규정(Kelompok 1~4, 건물)에 따라 계산한 금액을 전액 손금산입합니다. 상업 감가상각이 세무보다 크면 그 차이만 가산 조정합니다.',
+  },
+
+  // ── 비율 선택 항목 ──
+  {
+    key: 'vehicleFuel', hasRate: true, defaultRate: 50,
+    label: 'Biaya BBM kendaraan (차량 연료비)',
+    desc: '차량 연료비 — 50% 손금산입 (영수증 100%시 전액)',
+    hint: 'SE-09/PJ.42/2002 — 업무 겸용 차량 연료비는 50%만 인정. 단, 업무 전용 차량임을 증명(운행일지)하면 100% 인정 가능.',
+  },
+  {
+    key: 'tollExpense', hasRate: true, defaultRate: 50,
+    label: 'Biaya tol (고속도로 톨비)',
+    desc: '톨비 — 기본 50%, 영수증 전부 첨부 시 100%',
+    hint: '톨 영수증(struk tol)을 모두 첨부하면 100% 손금산입. 영수증이 불완전하면 50%만 인정. e-Toll 이용내역서도 인정됩니다.',
+  },
+  {
+    key: 'vehicleMaint', hasRate: true, defaultRate: 50,
+    label: 'Biaya perawatan kendaraan (차량 유지비)',
+    desc: '차량 정비/보험/감가상각 — 50% 손금산입',
+    hint: 'SE-09/PJ.42/2002 — 업무 겸용 차량의 정비, 보험, 감가상각은 50%만 인정.',
+  },
+  {
+    key: 'phoneExpense', hasRate: true, defaultRate: 50,
+    label: 'Biaya telepon/pulsa (통신비)',
+    desc: '통신비 — 50% 손금산입',
+    hint: '업무 겸용 휴대폰/인터넷 비용은 50%만 인정. 회사 전용 회선이면 100%.',
+  },
+  {
+    key: 'housingRent', hasRate: true, defaultRate: 100,
+    label: 'Biaya sewa rumah karyawan (직원 주택 렌트비)',
+    desc: '직원 주택 — 세법에 따라 손금산입 여부 결정',
+    hint: 'Pasal 9(1)(e) & PMK-167/2018 — 직원 주택 렌트비는 "natura/kenikmatan"에 해당합니다.\n\n• 2024년 이후: PP 55/2022에 따라 직원 주택 제공이 과세 소득이 되므로 회사는 손금산입 가능.\n• 단, 직원의 PPh 21에 주택 혜택이 포함되어야 합니다.\n• 임원/이사 주택은 별도 검토 필요.',
+  },
+  {
+    key: 'educationFee', hasRate: true, defaultRate: 100,
+    label: 'Biaya pendidikan (직원 학자금)',
+    desc: '학자금 — 업무 관련성에 따라 손금산입',
+    hint: 'SE-27/PJ.22/1986 — 직원 교육/훈련비는 업무와 직접 관련된 경우 100% 손금산입.\n\n• 업무 관련 교육(세미나, 자격증, 직무 훈련): 100% 인정\n• 직원 자녀 학비: 불인정 (개인 비용)\n• 임원 MBA 등 일반 학위: 관련성 증빙 필요\n\n비율을 조정하여 업무 무관 부분을 불산입 처리하세요.',
+  },
+
+  // ── 기타 ──
+  {
+    key: 'travelExpense', hasRate: true, defaultRate: 40,
+    label: 'Biaya perjalanan dinas (출장비)',
+    desc: '출장비 — 증빙 불비분 불산입',
+    hint: '출장비 중 영수증/증빙이 없는 부분은 불인정. 비율을 조정하세요.',
+  },
+  {
+    key: 'otherOpex', hasRate: true, defaultRate: 50,
+    label: 'Biaya operasional lainnya (기타 운영비)',
+    desc: '기타 — 비율 선택하여 부분 불인정',
+    hint: '위 항목에 해당하지 않는 기타 비용. 불산입 비율을 선택하세요.',
+  },
+  {
+    key: 'otherPositive', hasRate: false,
+    label: 'Koreksi positif lainnya (기타 가산 전액)',
+    desc: '기타 가산 조정 — 전액',
+    hint: '',
+  },
 ];
 
 const NEGATIVE_CORRECTIONS = [
@@ -78,7 +173,9 @@ export default function PPh25AnnualPage() {
   const [positiveCorr, setPositiveCorr] = useState<Record<string, string>>({});
   const [positiveCorrRates, setPositiveCorrRates] = useState<Record<string, number>>(() => {
     const defaults: Record<string, number> = {};
-    POSITIVE_CORRECTIONS.filter(c => c.hasRate).forEach(c => { defaults[c.key] = (c as { defaultRate?: number }).defaultRate || 50; });
+    POSITIVE_CORRECTIONS.filter(c => c.hasRate).forEach(c => {
+      defaults[c.key] = (c as { defaultRate?: number }).defaultRate || 50;
+    });
     return defaults;
   });
   const [negativeCorr, setNegativeCorr] = useState<Record<string, string>>({});
