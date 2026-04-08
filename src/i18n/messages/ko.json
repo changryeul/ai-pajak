@@ -175,7 +175,8 @@
     "annualPPh25": "연 결산 — PPh 25 (일반)",
     "financialStatements": "재무제표",
     "documentReview": "자료 검토",
-    "journals": "저널 입력"
+    "journals": "저널 입력",
+    "taxBilling": "청구서 발행 · 납부증빙"
   },
   "dashboard": {
     "title": "대시보드",

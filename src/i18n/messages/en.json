@@ -175,7 +175,8 @@
     "annualPPh25": "Annual — PPh 25 (General)",
     "financialStatements": "Financial Statements",
     "documentReview": "Document Review",
-    "journals": "Journal Entry"
+    "journals": "Journal Entry",
+    "taxBilling": "Tax Billing & Payment"
   },
   "dashboard": {
     "title": "Dashboard",

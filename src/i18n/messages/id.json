@@ -175,7 +175,8 @@
     "annualPPh25": "Tahunan — PPh 25 (Umum)",
     "financialStatements": "Laporan Keuangan",
     "documentReview": "Review Dokumen",
-    "journals": "Jurnal Umum"
+    "journals": "Jurnal Umum",
+    "taxBilling": "Tagihan Pajak & Bukti Bayar"
   },
   "dashboard": {
     "title": "Dasbor",

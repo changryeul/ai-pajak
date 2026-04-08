@@ -175,7 +175,8 @@
     "annualPPh25": "年度 — PPh 25 (一般)",
     "financialStatements": "财务报表",
     "documentReview": "资料审核",
-    "journals": "分录录入"
+    "journals": "分录录入",
+    "taxBilling": "税单开具・缴费凭证"
   },
   "dashboard": {
     "title": "仪表板",

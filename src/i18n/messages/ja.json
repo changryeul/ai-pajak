@@ -175,7 +175,8 @@
     "annualPPh25": "年次 — PPh 25 (一般)",
     "financialStatements": "財務諸表",
     "documentReview": "資料レビュー",
-    "journals": "仕訳入力"
+    "journals": "仕訳入力",
+    "taxBilling": "請求書発行・納付証明"
   },
   "dashboard": {
     "title": "ダッシュボード",

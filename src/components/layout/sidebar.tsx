@@ -74,6 +74,7 @@ const navItems: NavSection[] = [
         { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
         { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
         { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
+        { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.taxBilling' },
       ]},
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: taxRoles, children: [
         { href: '/tax/annual/pph-final', icon: Store, labelKey: 'nav.annualPPhFinal' },
