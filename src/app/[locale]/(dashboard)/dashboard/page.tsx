@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { fmtRp } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import {
   FileText,
@@ -195,7 +196,25 @@ function CorporateCustomerDashboard({
         }
       })
       .catch(() => {});
+
+    // Load unpaid billings
+    fetch('/api/customer/queue')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          const all = d.data || [];
+          setUnpaidBillings(all.filter((i: { status: string; ebilling_code?: string }) =>
+            ['EBILLING_GENERATED', 'PAYMENT_PENDING'].includes(i.status) && i.ebilling_code
+          ));
+        }
+      })
+      .catch(() => {});
   }, [session.customerId]);
+
+  const [unpaidBillings, setUnpaidBillings] = useState<Array<{
+    id: string; tax_type: string; tax_period_month: number; tax_period_year: number;
+    amount: number; ebilling_code: string; status: string;
+  }>>([]);
 
   // Determine applicable taxes for display
   const applicableTaxes: string[] = [];
@@ -227,6 +246,38 @@ function CorporateCustomerDashboard({
             className="px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700">
             회사 정보 입력
           </Link>
+        </div>
+      )}
+
+      {/* Unpaid billing alert */}
+      {unpaidBillings.length > 0 && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-bold text-sm text-red-900">
+                미납 세금 {unpaidBillings.length}건 — 즉시 납부가 필요합니다
+              </p>
+              <div className="mt-2 space-y-1">
+                {unpaidBillings.map(b => (
+                  <div key={b.id} className="flex items-center justify-between text-xs bg-white rounded p-2 border border-red-100">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{b.tax_type}</span>
+                      <span className="text-gray-500">{b.tax_period_year}-{String(b.tax_period_month).padStart(2, '0')}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-red-700">{fmtRp(b.amount)}</span>
+                      <span className="font-mono text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded">{b.ebilling_code}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Link href={`/${locale}/tax/billing`}
+                className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-red-700 hover:underline">
+                청구서 · 납부 페이지로 이동 →
+              </Link>
+            </div>
+          </div>
         </div>
       )}
 

@@ -106,7 +106,7 @@ export default function TaxBillingPage() {
             body: JSON.stringify({ queueItemId: itemId, fileUrl: uploadData.data?.signedUrl || uploadData.data?.path }),
           });
         } catch { /* */ }
-        showMsg('success', '납부 증빙이 제출되었습니다. 상담원이 확인합니다.');
+        showMsg('success', '납부 증빙이 제출되었습니다. AI가 자동으로 확인 처리합니다.');
         loadItems();
       } else {
         showMsg('error', '업로드 실패');
@@ -134,7 +134,7 @@ export default function TaxBillingPage() {
           세금 청구서 발행 · 납부 증빙 제출
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          상담원이 Coretax에서 생성한 ID Billing을 확인하고, 납부 증빙을 제출합니다
+          AI가 생성한 ID Billing을 확인하고, 납부 증빙을 제출합니다
         </p>
       </div>
 
@@ -143,11 +143,11 @@ export default function TaxBillingPage() {
         <div className="text-xs text-indigo-900 space-y-1">
           <p className="font-bold">이 페이지의 절차:</p>
           <ol className="list-decimal list-inside space-y-0.5 text-indigo-800">
-            <li>자료 제출 완료 후 → 상담원이 계산·검토 수행 (고객 액션 불필요)</li>
-            <li>상담원이 <b>Coretax</b>에서 <b>ID Billing</b>을 생성하여 이곳에 등록합니다</li>
+            <li>자료 제출 완료 후 → <b>AI가 자동으로 계산·검토</b> 수행 (고객 액션 불필요)</li>
+            <li>AI가 <b>ID Billing</b>을 생성하여 이곳에 등록합니다</li>
             <li>고객님은 ID Billing 코드로 <b>은행/ATM/모바일뱅킹</b>에서 납부합니다</li>
             <li>납부 후 <b>납부 증빙(NTPN 영수증)</b>을 여기에 업로드합니다</li>
-            <li>상담원이 납부 확인 후 → DJP 제출 → BPE 수령 → 완료</li>
+            <li>AI가 납부 확인 후 → DJP 제출 → BPE 수령 → 완료</li>
           </ol>
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function TaxBillingPage() {
           <CardContent className="p-12 text-center text-gray-400">
             <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p className="text-sm">{year}년 청구 내역이 없습니다</p>
-            <p className="text-xs mt-1">자료 제출이 완료되면 상담원이 ID Billing을 생성합니다</p>
+            <p className="text-xs mt-1">자료 제출이 완료되면 AI가 ID Billing을 생성합니다</p>
           </CardContent>
         </Card>
       ) : (
