@@ -486,7 +486,24 @@ function PPh21DataInputSection({
     setCsvHeaders(headers);
     setCsvPreview(preview);
 
-    // Auto-map using keyword matching
+    // Check mapping memory first
+    try {
+      const memRes = await fetch(`/api/tax/employees/mapping?customerId=${customerId}&headers=${encodeURIComponent(JSON.stringify(headers))}`);
+      const memData = await memRes.json();
+      if (memData.success && memData.remembered && memData.data?.mappings) {
+        const saved = memData.data.mappings as Array<{ sourceColumn: string; targetField: string }>;
+        const autoMappings = headers.map(h => {
+          const s = saved.find(m => m.sourceColumn === h);
+          return { sourceColumn: h, targetField: s?.targetField || '', confidence: s ? 'HIGH' : 'NONE' };
+        });
+        setColumnMappings(autoMappings);
+        setMappingStep('mapping');
+        showMsg('success', `이전에 사용한 매핑이 자동 적용되었습니다 (${memData.data.used_count}회 사용). 확인 후 임포트하세요.`);
+        return;
+      }
+    } catch { /* fallback to keyword mapping */ }
+
+    // No memory — auto-map using keyword matching
     const KEYWORD_MAP: Record<string, string[]> = {
       employee_name: ['nama', 'name', 'karyawan', 'pegawai', '이름', 'employee'],
       employee_npwp: ['npwp', 'tax_id'],
@@ -549,6 +566,19 @@ function PPh21DataInputSection({
         showMsg('success', `${data.data?.imported || 0}명 임포트 완료${data.data?.skipped ? `, ${data.data.skipped}명 스킵` : ''}`);
         onComplete();
         setMappingStep('idle');
+
+        // Save mapping to memory for future auto-use
+        try {
+          await fetch('/api/tax/employees/mapping', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customerId,
+              headers: csvHeaders,
+              mappings: columnMappings.filter(m => m.targetField),
+            }),
+          });
+        } catch { /* non-blocking */ }
       } else {
         showMsg('error', data.error || '임포트 실패');
         setMappingStep('mapping');
