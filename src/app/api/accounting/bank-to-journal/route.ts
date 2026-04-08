@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { loggers } from '@/lib/logger';
-import { convertBankStatementToJournals, type BankTransaction } from '@/lib/accounting/bank-to-journal';
+import { convertBankStatementToJournals, extractPattern, type BankTransaction, type CoaMemoryEntry } from '@/lib/accounting/bank-to-journal';
 
 /**
  * POST /api/accounting/bank-to-journal
@@ -36,10 +36,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'customerId, fiscalYear, transactions required' }, { status: 400 });
     }
 
-    const result = convertBankStatementToJournals(transactions);
+    const admin = getSupabaseAdmin();
+
+    // Load customer's COA mapping memory
+    const { data: memoryRows } = await admin
+      .from('coa_mapping_memory')
+      .select('description_pattern, account_code, account_name, transaction_type')
+      .eq('customer_id', customerId);
+
+    const memory: CoaMemoryEntry[] = (memoryRows || []).map(r => ({
+      description_pattern: r.description_pattern,
+      account_code: r.account_code,
+      account_name: r.account_name || '',
+      transaction_type: r.transaction_type as 'DEBIT' | 'CREDIT',
+    }));
+
+    const result = convertBankStatementToJournals(transactions, memory);
 
     if (action === 'save') {
-      const admin = getSupabaseAdmin();
 
       // Get current sequence
       const { count } = await admin.from('journal_entry')
@@ -75,7 +89,31 @@ export async function POST(request: NextRequest) {
         seq++;
       }
 
-      loggers.api.info({ customerId, fiscalYear, saved, total: result.journals.length }, 'Bank→journal saved');
+      // Learn: save each mapping to COA memory for future auto-use
+      for (const j of result.journals) {
+        if (j.source === 'DEFAULT' || j.source === 'RULE') {
+          // Only learn non-memory mappings (RULE and DEFAULT get confirmed by saving)
+          const accountLine = j.lines.find(l => l.account_code !== '1200');
+          if (accountLine) {
+            const pattern = extractPattern(j.description);
+            if (pattern.length >= 3) {
+              try {
+                await admin.from('coa_mapping_memory').upsert({
+                  customer_id: customerId,
+                  description_pattern: pattern,
+                  account_code: accountLine.account_code,
+                  account_name: accountLine.account_name,
+                  transaction_type: accountLine.debit > 0 ? 'DEBIT' : 'CREDIT',
+                  used_count: 1,
+                  last_used_at: new Date().toISOString(),
+                }, { onConflict: 'customer_id,description_pattern,transaction_type' });
+              } catch { /* non-blocking */ }
+            }
+          }
+        }
+      }
+
+      loggers.api.info({ customerId, fiscalYear, saved, total: result.journals.length, learned: result.journals.filter(j => j.source !== 'MEMORY').length }, 'Bank→journal saved + learned');
 
       return NextResponse.json({
         success: true,

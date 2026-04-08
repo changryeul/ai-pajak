@@ -1,17 +1,10 @@
 /**
  * Bank Statement → Journal Entry Auto-Converter
  *
- * Converts bank transaction descriptions into journal entries
- * by matching keywords to chart of accounts.
- *
- * Rules (priority order):
- * 1. Tax payments (PPh/PPN) → 2200 Hutang Pajak
- * 2. Salary/payroll → 6100 Gaji & Upah
- * 3. BPJS → 6100 or 2200
- * 4. Rent → 6200 Sewa
- * 5. Utilities → 6300 Listrik/Air/Telepon
- * 6. Revenue (transfer masuk) → 4100/4200 Pendapatan
- * 7. Default expense → 6900 Biaya Lain-lain
+ * Resolution priority:
+ *   1. Customer memory (learned from previous corrections) → confidence LEARNED
+ *   2. Built-in keyword rules (15+ patterns) → confidence HIGH/MEDIUM
+ *   3. Default fallback (6900/4100) → confidence LOW
  */
 
 export interface BankTransaction {
@@ -27,8 +20,34 @@ export interface GeneratedJournal {
   entryDate: string;
   description: string;
   lines: Array<{ account_code: string; account_name: string; debit: number; credit: number }>;
-  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW' | 'LEARNED';
   matchedRule: string;
+  source: 'MEMORY' | 'RULE' | 'DEFAULT';
+}
+
+/** Learned mapping from customer corrections */
+export interface CoaMemoryEntry {
+  description_pattern: string;
+  account_code: string;
+  account_name: string;
+  transaction_type: 'DEBIT' | 'CREDIT';
+}
+
+/**
+ * Extract keywords from description for pattern matching
+ * Normalizes: lowercase, remove numbers/special chars, trim
+ */
+export function extractPattern(description: string): string {
+  return description
+    .toLowerCase()
+    .replace(/[0-9.,\-\/\\()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(w => w.length > 2) // skip short words
+    .slice(0, 5) // max 5 keywords
+    .sort()
+    .join(' ');
 }
 
 interface MatchRule {
@@ -78,11 +97,53 @@ function matchRule(description: string): MatchRule | null {
 
 /**
  * Convert a single bank transaction to a journal entry
+ * @param memory - learned mappings for this customer (optional)
  */
-export function bankTxToJournal(tx: BankTransaction): GeneratedJournal {
-  const rule = matchRule(tx.description);
+export function bankTxToJournal(tx: BankTransaction, memory?: CoaMemoryEntry[]): GeneratedJournal {
   const isExpense = tx.debit > 0;
   const amount = isExpense ? tx.debit : tx.credit;
+  const txType = isExpense ? 'DEBIT' : 'CREDIT';
+
+  // Priority 1: Check customer memory
+  if (memory && memory.length > 0) {
+    const pattern = extractPattern(tx.description);
+    const learned = memory.find(m =>
+      m.transaction_type === txType && pattern.includes(extractPattern(m.description_pattern))
+    );
+    if (!learned) {
+      // Try reverse: memory pattern included in description
+      const learned2 = memory.find(m =>
+        m.transaction_type === txType && extractPattern(m.description_pattern).split(' ').every(kw => pattern.includes(kw))
+      );
+      if (learned2) {
+        const lines = isExpense
+          ? [
+              { account_code: learned2.account_code, account_name: learned2.account_name, debit: amount, credit: 0 },
+              { account_code: '1200', account_name: 'Bank', debit: 0, credit: amount },
+            ]
+          : [
+              { account_code: '1200', account_name: 'Bank', debit: amount, credit: 0 },
+              { account_code: learned2.account_code, account_name: learned2.account_name, debit: 0, credit: amount },
+            ];
+        return { entryDate: tx.date, description: tx.description, lines, confidence: 'LEARNED', matchedRule: `${learned2.account_code} ${learned2.account_name} (학습됨)`, source: 'MEMORY' };
+      }
+    }
+    if (learned) {
+      const lines = isExpense
+        ? [
+            { account_code: learned.account_code, account_name: learned.account_name, debit: amount, credit: 0 },
+            { account_code: '1200', account_name: 'Bank', debit: 0, credit: amount },
+          ]
+        : [
+            { account_code: '1200', account_name: 'Bank', debit: amount, credit: 0 },
+            { account_code: learned.account_code, account_name: learned.account_name, debit: 0, credit: amount },
+          ];
+      return { entryDate: tx.date, description: tx.description, lines, confidence: 'LEARNED', matchedRule: `${learned.account_code} ${learned.account_name} (학습됨)`, source: 'MEMORY' };
+    }
+  }
+
+  // Priority 2: Built-in keyword rules
+  const rule = matchRule(tx.description);
 
   if (rule) {
     const lines = isExpense
@@ -101,10 +162,11 @@ export function bankTxToJournal(tx: BankTransaction): GeneratedJournal {
       lines,
       confidence: rule.confidence,
       matchedRule: `${rule.accountCode} ${rule.accountName}`,
+      source: 'RULE' as const,
     };
   }
 
-  // Default: unknown expense/revenue
+  // Priority 3: Default fallback
   const lines = isExpense
     ? [
         { account_code: '6900', account_name: 'Biaya Lain-lain', debit: amount, credit: 0 },
@@ -121,21 +183,23 @@ export function bankTxToJournal(tx: BankTransaction): GeneratedJournal {
     lines,
     confidence: 'LOW',
     matchedRule: isExpense ? '6900 Biaya Lain-lain (default)' : '4100 Pendapatan (default)',
+    source: 'DEFAULT' as const,
   };
 }
 
 /**
  * Convert multiple bank transactions to journal entries
  */
-export function convertBankStatementToJournals(transactions: BankTransaction[]): {
+export function convertBankStatementToJournals(transactions: BankTransaction[], memory?: CoaMemoryEntry[]): {
   journals: GeneratedJournal[];
-  summary: { total: number; high: number; medium: number; low: number };
+  summary: { total: number; learned: number; high: number; medium: number; low: number };
 } {
-  const journals = transactions.filter(tx => tx.debit > 0 || tx.credit > 0).map(bankTxToJournal);
+  const journals = transactions.filter(tx => tx.debit > 0 || tx.credit > 0).map(tx => bankTxToJournal(tx, memory));
   return {
     journals,
     summary: {
       total: journals.length,
+      learned: journals.filter(j => j.confidence === 'LEARNED').length,
       high: journals.filter(j => j.confidence === 'HIGH').length,
       medium: journals.filter(j => j.confidence === 'MEDIUM').length,
       low: journals.filter(j => j.confidence === 'LOW').length,
