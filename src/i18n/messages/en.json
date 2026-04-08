@@ -174,7 +174,8 @@
     "annualPPhFinal": "Annual — PPh Final (UMKM)",
     "annualPPh25": "Annual — PPh 25 (General)",
     "financialStatements": "Financial Statements",
-    "documentReview": "Document Review"
+    "documentReview": "Document Review",
+    "journals": "Journal Entry"
   },
   "dashboard": {
     "title": "Dashboard",

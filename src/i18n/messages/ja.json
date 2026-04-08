@@ -174,7 +174,8 @@
     "annualPPhFinal": "年次 — PPh Final (UMKM)",
     "annualPPh25": "年次 — PPh 25 (一般)",
     "financialStatements": "財務諸表",
-    "documentReview": "資料レビュー"
+    "documentReview": "資料レビュー",
+    "journals": "仕訳入力"
   },
   "dashboard": {
     "title": "ダッシュボード",

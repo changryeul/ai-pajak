@@ -78,6 +78,7 @@ const navItems: NavSection[] = [
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: taxRoles, children: [
         { href: '/tax/annual/pph-final', icon: Store, labelKey: 'nav.annualPPhFinal' },
         { href: '/tax/annual/pph25', icon: Building2, labelKey: 'nav.annualPPh25' },
+        { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
