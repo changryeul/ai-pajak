@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Building2, CheckCircle, AlertTriangle, ArrowRight, ArrowLeft,
   Shield, DollarSign, FileText, Sparkles, HelpCircle, BookOpen,
-  Calculator, Calendar, Loader2, Plus, X, ClipboardList,
+  Calculator, Calendar, Loader2, Plus, X, ClipboardList, Upload,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -345,39 +345,96 @@ export default function PPh25AnnualPage() {
         </CardContent></Card>
       )}
 
-      {/* Step 2: Required documents */}
+      {/* Step 2: Required documents (PPh Final과 동일 수준 상세) */}
       {step === 2 && (
         <Card><CardContent className="p-5 space-y-4">
           <h2 className="font-bold text-lg flex items-center gap-2"><ClipboardList className="h-5 w-5 text-indigo-600" />필요 서류 체크리스트</h2>
-          <p className="text-xs text-gray-500">PPh 25 연 결산에 필요한 서류입니다. PPh Final보다 더 많은 서류가 필요합니다.</p>
+          <p className="text-xs text-gray-500">
+            PPh 25 연 결산에 필요한 서류입니다. 각 항목을 확인하고 <b>업로드</b>해 주세요.
+            미준비 서류는 <b>AI가 자동으로 요청</b>합니다.
+          </p>
           <div className="space-y-2">
             {[
-              { key: 'aktaPendirian', label: '최초 정관 (Akta Pendirian)', required: true },
-              { key: 'aktaPerubahan', label: '최종 수정 정관 (Akta Perubahan Terakhir)', required: true },
-              { key: 'skMenteri', label: 'SK Menteri (법무부 승인서)', required: true },
-              { key: 'financialStatements', label: '재무제표 (Neraca + Laba Rugi)', required: true },
-              { key: 'inventoryLedger', label: '재고관리대장 (Kartu Persediaan)', required: false },
-              { key: 'depreciationSchedule', label: '감가상각 명세서 (Daftar Penyusutan)', required: true },
-              { key: 'fixedAssetList', label: '고정자산 리스트', required: true },
-              { key: 'contracts', label: '연중 체결 계약서 사본', required: true },
-              { key: 'monthlyTaxRecords', label: '매월 세무신고 자료 (SPT Masa)', required: true },
+              { key: 'aktaPendirian', label: '최초 정관 (Akta Pendirian)', required: true,
+                desc: '회사를 처음 설립할 때 Notaris(공증인)가 작성한 공증 정관입니다.',
+                detail: '어디서 찾나요? → 회사 설립 시 Notaris가 준 원본 또는 사본. 분실 시 해당 Notaris 사무실에 재발급 요청.',
+                format: 'PDF 스캔 또는 사진 촬영' },
+              { key: 'aktaPerubahan', label: '최종 수정 정관 (Akta Perubahan Terakhir)', required: true,
+                desc: '가장 최근에 수정한 정관입니다. 주주/이사 변경, 자본금 변경 등이 반영됩니다.',
+                detail: '설립 후 변경이 없다면 최초 정관과 동일합니다.',
+                format: 'PDF 스캔 또는 사진 촬영' },
+              { key: 'skMenteri', label: 'SK Menteri (법무인권부 승인서)', required: true,
+                desc: 'Surat Keputusan Menteri Hukum dan HAM — 법무인권부 장관이 발행하는 법인 설립/변경 승인서입니다.',
+                detail: 'AHU 번호가 포함된 문서입니다. Notaris를 통해 받으며, AHU Online (ahu.go.id)에서도 확인 가능합니다.',
+                format: 'PDF 또는 사진 (AHU 번호가 보이게)' },
+              { key: 'financialStatements', label: '재무제표 (Neraca + Laba Rugi)', required: true,
+                desc: '재무상태표(Neraca)와 손익계산서(Laporan Laba Rugi)입니다.',
+                detail: '회계사가 작성했거나 AI Pajak의 재무제표 생성 기능으로 만든 것을 사용하세요. 저널이 없으면 은행거래+Petty Cash로 생성 가능.',
+                format: 'PDF 또는 Excel' },
+              { key: 'inventoryLedger', label: '재고관리대장 (Kartu Persediaan)', required: false,
+                desc: '재고 품목별 기초재고/매입/기말재고 내역입니다. HPP(매출원가) 계산에 사용됩니다.',
+                detail: '서비스업(재고 없음)은 제출 불필요. 다음 단계(Step 3)에서 직접 입력할 수도 있습니다.',
+                format: 'Excel 또는 PDF' },
+              { key: 'depreciationSchedule', label: '감가상각 명세서 (Daftar Penyusutan Aktiva Tetap)', required: true,
+                desc: '고정자산별 감가상각 내역입니다. 세무 감가상각은 Kelompok 1~4 및 건물로 구분됩니다.',
+                detail: 'Kelompok 1: 4년(25%), Kelompok 2: 8년(12.5%), Kelompok 3: 16년(6.25%), Kelompok 4: 20년(5%), 건물(영구): 20년(5%), 건물(비영구): 10년(10%).',
+                format: 'Excel (취득일/취득가/내용연수/상각액)' },
+              { key: 'fixedAssetList', label: '고정자산 리스트 (Daftar Aktiva Tetap)', required: true,
+                desc: '회사가 보유한 모든 자산 목록입니다.',
+                detail: '차량, 컴퓨터, 가구, 건물, 기계 등. 각 자산의 취득일, 취득 가격을 포함합니다.',
+                format: 'Excel 또는 PDF' },
+              { key: 'contracts', label: '연중 체결 계약서 사본', required: true,
+                desc: `${year}년 중 체결한 모든 계약서입니다.`,
+                detail: '거래처 계약, 사무실 임대차 계약, 서비스 계약, 고용 계약 등 금액이 포함된 모든 계약.',
+                format: 'PDF 스캔 또는 사진 (여러 파일 가능)' },
+              { key: 'monthlyTaxRecords', label: '매월 세무신고 자료 (SPT Masa)', required: true,
+                desc: `${year}년 1~12월 매월 신고한 세무 자료입니다.`,
+                detail: '다음 중 해당하는 것을 모두 업로드하세요:\n• SPT Masa PPh 21 — 직원이 있는 경우 (급여 원천징수)\n• SPT Masa PPh 23 — 서비스 비용을 지급한 경우\n• SPT Masa PPh 4(2) — 임대/건설 등 Final Tax\n• SPT Masa PPN — PKP 등록 사업자인 경우\n• PPh 25 월 분할 납부 영수증 (NTPN)\n\nAI Pajak으로 신고했다면 자동 수집되므로 별도 업로드 불필요.',
+                format: 'PDF 또는 사진 (월별로 업로드)' },
             ].map(doc => (
-              <label key={doc.key}
-                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                  docs[doc.key as keyof typeof docs] ? 'border-green-300 bg-green-50' : 'border-gray-200 hover:bg-gray-50'
+              <div key={doc.key}
+                className={`p-3 rounded-lg border transition-all ${
+                  docs[doc.key as keyof typeof docs] ? 'border-green-300 bg-green-50' : 'border-gray-200'
                 }`}>
-                <input type="checkbox" checked={docs[doc.key as keyof typeof docs]}
-                  onChange={e => setDocs({ ...docs, [doc.key]: e.target.checked })}
-                  className="mt-0.5 accent-green-600" />
-                <div className="text-xs">
-                  <span className="font-medium">{doc.label}</span>
-                  {doc.required && <Badge className="ml-1 text-[8px] bg-red-100 text-red-700">필수</Badge>}
-                </div>
-                {docs[doc.key as keyof typeof docs] && <CheckCircle className="h-4 w-4 text-green-600 ml-auto" />}
-              </label>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" checked={docs[doc.key as keyof typeof docs]}
+                    onChange={e => setDocs({ ...docs, [doc.key]: e.target.checked })}
+                    className="mt-0.5 accent-green-600" />
+                  <div className="flex-1 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{doc.label}</span>
+                      {doc.required && <Badge className="text-[8px] bg-red-100 text-red-700">필수</Badge>}
+                    </div>
+                    <p className="text-gray-600 mt-0.5">{doc.desc}</p>
+                    <details className="mt-1">
+                      <summary className="text-[10px] text-blue-600 cursor-pointer hover:underline">자세한 안내 보기</summary>
+                      <div className="mt-1 p-2 bg-white rounded text-[10px] text-gray-600 whitespace-pre-line">
+                        {doc.detail}
+                        <p className="mt-1 text-blue-700">📎 업로드 형식: {doc.format}</p>
+                      </div>
+                    </details>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {docs[doc.key as keyof typeof docs] && <CheckCircle className="h-4 w-4 text-green-600" />}
+                    <a href={`/${locale}/documents/upload`}
+                      onClick={e => e.stopPropagation()}
+                      className="p-1.5 rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
+                      title="이 서류 업로드">
+                      <Upload className="h-3 w-3 text-blue-600" />
+                    </a>
+                  </div>
+                </label>
+              </div>
             ))}
           </div>
-          <p className="text-xs text-gray-500">준비: {Object.values(docs).filter(Boolean).length}/9</p>
+          <div className="bg-gray-50 rounded-lg p-3 text-xs">
+            <p className="text-gray-600">
+              준비 상태: <b>{Object.values(docs).filter(Boolean).length}/9</b> 완료
+              {Object.values(docs).filter(Boolean).length < 6 && (
+                <span className="text-amber-600 ml-2">— 미준비 서류는 AI가 자동으로 요청합니다</span>
+              )}
+            </p>
+          </div>
         </CardContent></Card>
       )}
 
