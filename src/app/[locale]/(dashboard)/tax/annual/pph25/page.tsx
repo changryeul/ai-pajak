@@ -21,14 +21,20 @@ const SME_BRACKET = 4_800_000_000; // Rp 4.8B
 
 // Koreksi Fiskal items (common corrections)
 const POSITIVE_CORRECTIONS = [
-  { key: 'entertainment', label: 'Biaya entertainment tanpa daftar nominatif', desc: '접대비 (명목 리스트 미작성)', hint: '접대비 전액은 세무 비용 불인정. 명목 리스트가 있으면 50%만 인정.' },
-  { key: 'donation', label: 'Sumbangan/donasi', desc: '기부금 (비용 불인정)', hint: '자연재해 기부금 등 일부만 인정. 일반 기부는 비용 불인정.' },
-  { key: 'taxPenalty', label: 'Denda & sanksi pajak', desc: '세금 벌금/가산금', hint: '세무 벌금은 세무상 비용으로 인정되지 않음.' },
-  { key: 'personalExpense', label: 'Biaya pribadi pemegang saham', desc: '주주 개인 비용', hint: '회사 비용으로 처리된 주주 개인 지출.' },
-  { key: 'pphBorne', label: 'PPh ditanggung perusahaan', desc: '회사 부담 PPh', hint: '직원의 PPh 21을 회사가 부담한 경우 (Gross-up 제외).' },
-  { key: 'provision', label: 'Cadangan/penyisihan', desc: '대손충당금 등 충당금', hint: '은행/보험 외 업종은 충당금 비용 불인정.' },
-  { key: 'depreciationDiff', label: 'Selisih penyusutan (komersial > fiskal)', desc: '감가상각 차이 (상업>세무)', hint: '회계 감가상각이 세무 감가상각보다 큰 차이.' },
-  { key: 'otherPositive', label: 'Koreksi positif lainnya', desc: '기타 가산 조정', hint: '' },
+  { key: 'entertainment', label: 'Biaya entertainment tanpa daftar nominatif', desc: '접대비 (명목 리스트 미작성)', hint: '접대비 전액은 세무 비용 불인정. 명목 리스트가 있으면 50%만 인정.', hasRate: false },
+  { key: 'donation', label: 'Sumbangan/donasi', desc: '기부금 (비용 불인정)', hint: '자연재해 기부금 등 일부만 인정. 일반 기부는 비용 불인정.', hasRate: false },
+  { key: 'taxPenalty', label: 'Denda & sanksi pajak', desc: '세금 벌금/가산금', hint: '세무 벌금은 세무상 비용으로 인정되지 않음.', hasRate: false },
+  { key: 'personalExpense', label: 'Biaya pribadi pemegang saham', desc: '주주 개인 비용', hint: '회사 비용으로 처리된 주주 개인 지출.', hasRate: false },
+  { key: 'pphBorne', label: 'PPh ditanggung perusahaan', desc: '회사 부담 PPh', hint: '직원의 PPh 21을 회사가 부담한 경우 (Gross-up 제외).', hasRate: false },
+  { key: 'provision', label: 'Cadangan/penyisihan', desc: '대손충당금 등 충당금', hint: '은행/보험 외 업종은 충당금 비용 불인정.', hasRate: false },
+  { key: 'depreciationDiff', label: 'Selisih penyusutan (komersial > fiskal)', desc: '감가상각 차이 (상업>세무)', hint: '회계 감가상각이 세무 감가상각보다 큰 차이.', hasRate: false },
+  { key: 'vehicleExpense', label: 'Biaya kendaraan dinas', desc: '업무용 차량 경비', hint: '업무 겸용 차량: 실비용의 50% 손금불산입 (SE-09/PJ.42/2002)', hasRate: true, defaultRate: 50 },
+  { key: 'phoneExpense', label: 'Biaya telepon/pulsa', desc: '통신비', hint: '업무 겸용 통신비: 50% 손금불산입', hasRate: true, defaultRate: 50 },
+  { key: 'travelExpense', label: 'Biaya perjalanan dinas', desc: '출장비', hint: '증빙 불비분. 비율 선택 가능.', hasRate: true, defaultRate: 40 },
+  { key: 'representExpense', label: 'Biaya representasi', desc: '교제비/접대비', hint: '명목 리스트 미비 시 손금불산입 비율 선택', hasRate: true, defaultRate: 50 },
+  { key: 'otherOpex1', label: '기타 운영비 1', desc: '손금불산입 대상 기타 비용', hint: '비율 선택하여 부분 불인정', hasRate: true, defaultRate: 50 },
+  { key: 'otherOpex2', label: '기타 운영비 2', desc: '손금불산입 대상 기타 비용', hint: '', hasRate: true, defaultRate: 60 },
+  { key: 'otherPositive', label: 'Koreksi positif lainnya', desc: '기타 가산 조정 (전액)', hint: '', hasRate: false },
 ];
 
 const NEGATIVE_CORRECTIONS = [
@@ -70,6 +76,11 @@ export default function PPh25AnnualPage() {
 
   // Step 5: Koreksi Fiskal
   const [positiveCorr, setPositiveCorr] = useState<Record<string, string>>({});
+  const [positiveCorrRates, setPositiveCorrRates] = useState<Record<string, number>>(() => {
+    const defaults: Record<string, number> = {};
+    POSITIVE_CORRECTIONS.filter(c => c.hasRate).forEach(c => { defaults[c.key] = (c as { defaultRate?: number }).defaultRate || 50; });
+    return defaults;
+  });
   const [negativeCorr, setNegativeCorr] = useState<Record<string, string>>({});
 
   // Step 6: Tax credits
@@ -123,7 +134,14 @@ export default function PPh25AnnualPage() {
 
   // Calculations
   const commercial = Number(commercialProfit) || 0;
-  const totalPositive = Object.values(positiveCorr).reduce((s, v) => s + (Number(v) || 0), 0);
+  const totalPositive = Object.entries(positiveCorr).reduce((s, [key, v]) => {
+    const amount = Number(v) || 0;
+    const corrItem = POSITIVE_CORRECTIONS.find(c => c.key === key);
+    if (corrItem?.hasRate && positiveCorrRates[key]) {
+      return s + Math.round(amount * positiveCorrRates[key] / 100);
+    }
+    return s + amount;
+  }, 0);
   const totalNegative = Object.values(negativeCorr).reduce((s, v) => s + (Number(v) || 0), 0);
   const fiscalProfit = commercial + totalPositive - totalNegative; // PKP (Penghasilan Kena Pajak)
 
@@ -386,21 +404,47 @@ export default function PPh25AnnualPage() {
               <Plus className="h-3 w-3" />가산 조정 (Koreksi Positif) — 비용 불인정
             </h3>
             <div className="space-y-2">
-              {POSITIVE_CORRECTIONS.map(item => (
+              {POSITIVE_CORRECTIONS.map(item => {
+                const hasRate = item.hasRate;
+                const rate = positiveCorrRates[item.key] || 100;
+                const rawAmount = Number(positiveCorr[item.key]) || 0;
+                const adjustedAmount = hasRate ? Math.round(rawAmount * rate / 100) : rawAmount;
+                return (
                 <div key={item.key} className="flex items-start gap-2 p-2 rounded border hover:bg-gray-50">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium">{item.label}</p>
                     <p className="text-[10px] text-gray-500">{item.desc}</p>
                     {item.hint && <p className="text-[9px] text-amber-600 mt-0.5">{item.hint}</p>}
                   </div>
-                  <Input type="number" className="w-40 h-8 text-xs font-mono text-right"
-                    value={positiveCorr[item.key] || ''}
-                    onChange={e => setPositiveCorr({ ...positiveCorr, [item.key]: e.target.value })}
-                    placeholder="0" />
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {hasRate && (
+                      <select value={rate}
+                        onChange={e => setPositiveCorrRates({ ...positiveCorrRates, [item.key]: Number(e.target.value) })}
+                        className="h-8 px-1 border rounded text-[10px] w-16">
+                        <option value="30">30%</option>
+                        <option value="40">40%</option>
+                        <option value="50">50%</option>
+                        <option value="60">60%</option>
+                        <option value="70">70%</option>
+                        <option value="80">80%</option>
+                        <option value="100">100%</option>
+                      </select>
+                    )}
+                    <Input type="number" className="w-32 h-8 text-xs font-mono text-right"
+                      value={positiveCorr[item.key] || ''}
+                      onChange={e => setPositiveCorr({ ...positiveCorr, [item.key]: e.target.value })}
+                      placeholder="총액" />
+                  </div>
+                  {hasRate && rawAmount > 0 && (
+                    <p className="text-[9px] text-red-600 flex-shrink-0 w-24 text-right">
+                      불산입: {fmtRp(adjustedAmount)}
+                    </p>
+                  )}
                 </div>
-              ))}
+                );
+              })}
               <div className="flex justify-between p-2 bg-red-50 rounded font-bold text-xs text-red-700">
-                <span>가산 소계</span><span className="font-mono">+ {fmtRp(totalPositive)}</span>
+                <span>가산 소계 (비율 적용 후)</span><span className="font-mono">+ {fmtRp(totalPositive)}</span>
               </div>
             </div>
           </div>

@@ -70,6 +70,7 @@ export default function FinancialStatementsPage() {
   const [customerId, setCustomerId] = useState('');
   const [customers, setCustomers] = useState<Array<{ id: string; company_name?: string; full_name: string }>>([]);
   const [data, setData] = useState<FSData | null>(null);
+  const [prevData, setPrevData] = useState<FSData | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -97,6 +98,7 @@ export default function FinancialStatementsPage() {
     if (!customerId) return;
     setLoading(true);
     try {
+      // Current year
       const res = await fetch('/api/accounting/financial-statements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -113,6 +115,18 @@ export default function FinancialStatementsPage() {
       } else {
         showMsg('error', d.error || '생성 실패');
       }
+
+      // Previous year (for comparison)
+      try {
+        const prevRes = await fetch('/api/accounting/financial-statements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customerId, fiscalYear: year - 1, action: 'generate' }),
+        });
+        const pd = await prevRes.json();
+        if (pd.success) setPrevData(pd.data);
+        else setPrevData(null);
+      } catch { setPrevData(null); }
     } catch {
       showMsg('error', '서버 오류');
     } finally {
@@ -143,16 +157,40 @@ export default function FinancialStatementsPage() {
     }
   };
 
-  const SectionRow = ({ items, label }: { items: FinancialItem[]; label: string }) => (
+  const findPrevAmount = (code: string, prevItems?: FinancialItem[]) => {
+    if (!prevItems) return null;
+    const found = prevItems.find(i => i.code === code);
+    return found ? found.amount : null;
+  };
+
+  const changeIndicator = (current: number, prev: number | null) => {
+    if (prev === null || prev === 0) return null;
+    const pct = ((current - prev) / Math.abs(prev)) * 100;
+    if (Math.abs(pct) < 0.5) return null;
+    return (
+      <span className={`text-[9px] ml-1 ${pct > 0 ? 'text-red-500' : 'text-green-600'}`}>
+        {pct > 0 ? '▲' : '▼'}{Math.abs(pct).toFixed(1)}%
+      </span>
+    );
+  };
+
+  const SectionRow = ({ items, label, prevItems }: { items: FinancialItem[]; label: string; prevItems?: FinancialItem[] }) => (
     items.length > 0 ? (
       <div className="mb-3">
         <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">{label}</p>
-        {items.map(item => (
-          <div key={item.code} className="flex justify-between py-0.5 text-xs">
-            <span className="text-gray-700">{item.code} {item.name}</span>
-            <span className="font-mono">{fmtRp(item.amount)}</span>
-          </div>
-        ))}
+        {items.map(item => {
+          const prev = findPrevAmount(item.code, prevItems);
+          return (
+            <div key={item.code} className="flex justify-between py-0.5 text-xs">
+              <span className="text-gray-700">{item.code} {item.name}</span>
+              <div className="flex items-center gap-2">
+                {prev !== null && <span className="text-[9px] text-gray-400 font-mono">{fmtRp(prev)}</span>}
+                <span className="font-mono">{fmtRp(item.amount)}</span>
+                {changeIndicator(item.amount, prev)}
+              </div>
+            </div>
+          );
+        })}
       </div>
     ) : null
   );
@@ -315,34 +353,73 @@ export default function FinancialStatementsPage() {
             <TabsContent value="income">
               <Card>
                 <CardContent className="p-5">
-                  <h3 className="font-bold text-sm mb-4">손익계산서 (Laporan Laba Rugi) — {year}년</h3>
-                  <div className="max-w-lg">
-                    <SectionRow items={data.incomeStatement.revenue} label="수익 (Pendapatan)" />
-                    <SectionRow items={data.incomeStatement.cogs} label="매출원가 (HPP)" />
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-sm">손익계산서 (Laporan Laba Rugi) — {year}년</h3>
+                    {prevData && <Badge className="bg-blue-100 text-blue-700 text-[9px]">{year-1}년 비교 표시</Badge>}
+                  </div>
+
+                  {/* Header row for comparison */}
+                  {prevData && (
+                    <div className="flex justify-end gap-2 mb-2 text-[9px] text-gray-400">
+                      <span className="w-24 text-right">{year-1}년</span>
+                      <span className="w-24 text-right">{year}년</span>
+                      <span className="w-10">변동</span>
+                    </div>
+                  )}
+
+                  <div className="max-w-2xl">
+                    <SectionRow items={data.incomeStatement.revenue} label="수익 (Pendapatan)" prevItems={prevData?.incomeStatement.revenue} />
+                    <SectionRow items={data.incomeStatement.cogs} label="매출원가 (HPP)" prevItems={prevData?.incomeStatement.cogs} />
                     <div className="flex justify-between py-1 border-t text-xs font-bold">
                       <span>매출총이익 (Laba Kotor)</span>
                       <span className="font-mono">{fmtRp(data.incomeStatement.grossProfit)}</span>
                     </div>
 
                     <div className="mt-3">
-                      <SectionRow items={data.incomeStatement.operatingExpenses} label="영업비용 (Biaya Operasional)" />
+                      <SectionRow items={data.incomeStatement.operatingExpenses} label="영업비용 (Biaya Operasional)" prevItems={prevData?.incomeStatement.operatingExpenses} />
                     </div>
                     <div className="flex justify-between py-1 border-t text-xs font-bold">
                       <span>영업이익 (Laba Operasional)</span>
                       <span className="font-mono">{fmtRp(data.incomeStatement.operatingIncome)}</span>
                     </div>
 
-                    <SectionRow items={data.incomeStatement.otherIncome} label="기타 손익" />
+                    <SectionRow items={data.incomeStatement.otherIncome} label="기타 손익" prevItems={prevData?.incomeStatement.otherIncome} />
                     <div className="flex justify-between py-1 border-t text-xs font-bold">
                       <span>세전이익 (Laba Sebelum Pajak)</span>
                       <span className="font-mono">{fmtRp(data.incomeStatement.incomeBeforeTax)}</span>
                     </div>
 
-                    <SectionRow items={data.incomeStatement.taxExpense} label="세금 (Pajak)" />
+                    <SectionRow items={data.incomeStatement.taxExpense} label="세금 (Pajak)" prevItems={prevData?.incomeStatement.taxExpense} />
                     <div className="flex justify-between py-2 border-t-2 border-green-500 text-sm font-bold text-green-700">
                       <span>순이익 (Laba Bersih)</span>
-                      <span className="font-mono">{fmtRp(data.incomeStatement.netIncome)}</span>
+                      <div className="flex items-center gap-2">
+                        {prevData && <span className="text-[10px] text-gray-400 font-mono">{fmtRp(prevData.incomeStatement.netIncome)}</span>}
+                        <span className="font-mono">{fmtRp(data.incomeStatement.netIncome)}</span>
+                        {prevData && changeIndicator(data.incomeStatement.netIncome, prevData.incomeStatement.netIncome)}
+                      </div>
                     </div>
+
+                    {/* Profitability ratios */}
+                    {data.incomeStatement.revenue.length > 0 && (
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                        <div>
+                          <p className="text-gray-500">매출총이익률</p>
+                          <p className="font-bold">{(data.incomeStatement.grossProfit / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">영업이익률</p>
+                          <p className="font-bold">{(data.incomeStatement.operatingIncome / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">순이익률</p>
+                          <p className="font-bold text-green-700">{(data.incomeStatement.netIncome / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">영업비용 비율</p>
+                          <p className="font-bold">{(data.incomeStatement.operatingExpenses.reduce((s,i) => s + i.amount, 0) / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -363,9 +440,9 @@ export default function FinancialStatementsPage() {
                     {/* Left: Assets */}
                     <div>
                       <h4 className="font-bold text-xs text-blue-700 border-b border-blue-200 pb-1 mb-2">자산 (AKTIVA)</h4>
-                      <SectionRow items={data.balanceSheet.assets.current} label="유동자산 (Aktiva Lancar)" />
-                      <SectionRow items={data.balanceSheet.assets.fixed} label="고정자산 (Aktiva Tetap)" />
-                      <SectionRow items={data.balanceSheet.assets.other} label="기타자산" />
+                      <SectionRow items={data.balanceSheet.assets.current} label="유동자산 (Aktiva Lancar)" prevItems={prevData?.balanceSheet.assets.current} />
+                      <SectionRow items={data.balanceSheet.assets.fixed} label="고정자산 (Aktiva Tetap)" prevItems={prevData?.balanceSheet.assets.fixed} />
+                      <SectionRow items={data.balanceSheet.assets.other} label="기타자산" prevItems={prevData?.balanceSheet.assets.other} />
                       <div className="flex justify-between py-2 border-t-2 border-blue-500 text-sm font-bold text-blue-700">
                         <span>총 자산</span>
                         <span className="font-mono">{fmtRp(data.balanceSheet.assets.totalAssets)}</span>
@@ -375,14 +452,14 @@ export default function FinancialStatementsPage() {
                     {/* Right: Liabilities + Equity */}
                     <div>
                       <h4 className="font-bold text-xs text-indigo-700 border-b border-indigo-200 pb-1 mb-2">부채 & 자본 (PASIVA)</h4>
-                      <SectionRow items={data.balanceSheet.liabilities.current} label="유동부채 (Kewajiban Lancar)" />
-                      <SectionRow items={data.balanceSheet.liabilities.longTerm} label="장기부채 (Kewajiban Jangka Panjang)" />
+                      <SectionRow items={data.balanceSheet.liabilities.current} label="유동부채 (Kewajiban Lancar)" prevItems={prevData?.balanceSheet.liabilities.current} />
+                      <SectionRow items={data.balanceSheet.liabilities.longTerm} label="장기부채 (Kewajiban Jangka Panjang)" prevItems={prevData?.balanceSheet.liabilities.longTerm} />
                       <div className="flex justify-between py-1 border-t text-xs font-bold mb-3">
                         <span>부채 소계</span>
                         <span className="font-mono">{fmtRp(data.balanceSheet.liabilities.totalLiabilities)}</span>
                       </div>
 
-                      <SectionRow items={data.balanceSheet.equity.items} label="자본 (Modal)" />
+                      <SectionRow items={data.balanceSheet.equity.items} label="자본 (Modal)" prevItems={prevData?.balanceSheet.equity.items} />
                       <div className="flex justify-between py-0.5 text-xs">
                         <span className="text-green-700 font-medium">당기순이익 (Laba Bersih)</span>
                         <span className="font-mono text-green-700 font-bold">{fmtRp(data.balanceSheet.equity.netIncome)}</span>
