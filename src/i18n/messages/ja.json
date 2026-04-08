@@ -173,7 +173,8 @@
     "companyProfile": "会社情報",
     "annualPPhFinal": "年次 — PPh Final (UMKM)",
     "annualPPh25": "年次 — PPh 25 (一般)",
-    "financialStatements": "財務諸表"
+    "financialStatements": "財務諸表",
+    "documentReview": "資料レビュー"
   },
   "dashboard": {
     "title": "ダッシュボード",

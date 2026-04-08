@@ -114,6 +114,7 @@ const navItems: NavSection[] = [
     items: [
       { href: '/operator/dashboard', icon: Headphones, labelKey: 'nav.operatorDashboard', descKey: 'navDesc.operatorDashboard' },
       { href: '/operator/queue', icon: ListChecks, labelKey: 'nav.submissionQueue', descKey: 'navDesc.submissionQueue' },
+      { href: '/operator/review', icon: FileText, labelKey: 'nav.documentReview' },
       { href: '/operator/approvals', icon: CheckCircle, labelKey: 'nav.approvals', descKey: 'navDesc.approvals', roles: supervisorRoles },
       { href: '/operator/workload', icon: BarChart3, labelKey: 'nav.workloadManagement', descKey: 'navDesc.workloadManagement', roles: supervisorRoles },
       { href: '/operator/statistics', icon: TrendingUp, labelKey: 'nav.operatorStatistics', descKey: 'navDesc.operatorStatistics', roles: supervisorRoles },

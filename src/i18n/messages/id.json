@@ -173,7 +173,8 @@
     "companyProfile": "Profil Perusahaan",
     "annualPPhFinal": "Tahunan — PPh Final (UMKM)",
     "annualPPh25": "Tahunan — PPh 25 (Umum)",
-    "financialStatements": "Laporan Keuangan"
+    "financialStatements": "Laporan Keuangan",
+    "documentReview": "Review Dokumen"
   },
   "dashboard": {
     "title": "Dasbor",
