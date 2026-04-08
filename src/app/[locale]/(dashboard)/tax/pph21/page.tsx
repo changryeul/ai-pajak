@@ -629,20 +629,153 @@ function FreelancerSection({
         ))}
       </div>
 
-      <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
-        <p className="text-sm font-bold text-purple-900 flex items-center gap-2">
-          <Briefcase className="h-4 w-4" />프리랜서 비용 누적 관리
-        </p>
-        <p className="text-xs text-purple-700 mt-1">
-          직원 마스터 탭에서 worker_type을 FREELANCER로 등록하면, 매월 급여 명세 탭에서
-          지급 시 누적 소득/지출이 자동 추적됩니다. 연말정산 시 누적 DPP(50% × 총수입)에
-          대해 누진세율이 적용됩니다.
-        </p>
-        <p className="text-xs text-purple-700 mt-2">
-          <b>등록 방법:</b> 직원 마스터 → 직원 추가 → PTKP: TK0 (프리랜서), 급여란에 월 계약금액 입력
-        </p>
-      </div>
+      {/* Freelancer cumulative tracker */}
+      <FreelancerCumulativeTracker customerId={customerId} showMsg={showMsg} />
     </div>
+  );
+}
+
+// ── Freelancer Cumulative Tracker ──
+function FreelancerCumulativeTracker({
+  customerId, showMsg,
+}: {
+  customerId: string;
+  showMsg: (type: 'success' | 'error', text: string) => void;
+}) {
+  const currentYear = new Date().getFullYear();
+  const [freelancers, setFreelancers] = useState<Array<{
+    id: string; employee_name: string; gross_salary: number;
+  }>>([]);
+  const [cumulatives, setCumulatives] = useState<Array<{
+    employee_id: string;
+    monthly_entries: Array<{ month: string; gross: number; expenses: number; net: number }>;
+    cumulative_gross: number;
+    cumulative_net: number;
+  }>>([]);
+  const [loading, setLoading] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  // Load freelancers + cumulative data
+  useEffect(() => {
+    if (!customerId) return;
+    setLoading(true);
+    Promise.all([
+      fetch(`/api/tax/employees?customerId=${customerId}`).then(r => r.json()),
+      fetch(`/api/tax/freelancer-cumulative?customerId=${customerId}&year=${currentYear}`).then(r => r.json()),
+    ]).then(([empData, cumData]) => {
+      const allEmps = empData.data?.employees || [];
+      setFreelancers(allEmps.filter((e: { worker_type?: string; is_active: boolean }) =>
+        e.worker_type === 'FREELANCER' && e.is_active
+      ));
+      if (cumData.success) setCumulatives(cumData.data || []);
+    }).finally(() => setLoading(false));
+  }, [customerId, currentYear]);
+
+  const handleSaveMonth = async (employeeId: string, month: number, gross: number, expenses: number) => {
+    setSavingId(employeeId);
+    try {
+      const res = await fetch('/api/tax/freelancer-cumulative', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, employeeId, taxYear: currentYear, month, gross, expenses }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', `${month}월 데이터 저장`);
+        // Refresh
+        const cumRes = await fetch(`/api/tax/freelancer-cumulative?customerId=${customerId}&year=${currentYear}`);
+        const cumData = await cumRes.json();
+        if (cumData.success) setCumulatives(cumData.data || []);
+      }
+    } catch { showMsg('error', '저장 실패'); }
+    finally { setSavingId(null); }
+  };
+
+  if (freelancers.length === 0) {
+    return (
+      <Card className="border-purple-200 bg-purple-50">
+        <CardContent className="p-4">
+          <p className="text-sm font-bold text-purple-900 flex items-center gap-2">
+            <Briefcase className="h-4 w-4" />프리랜서 누적 관리
+          </p>
+          <p className="text-xs text-purple-700 mt-2">
+            등록된 프리랜서가 없습니다. <b>직원 마스터</b> 탭에서 worker_type을 <b>FREELANCER</b>로 등록하세요.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-purple-200">
+      <CardContent className="p-4">
+        <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
+          <Briefcase className="h-4 w-4 text-purple-600" />
+          프리랜서 누적 관리 ({currentYear}년) — {freelancers.length}명
+        </h3>
+
+        <div className="bg-purple-50 rounded-lg p-2 text-[10px] text-purple-800 mb-3">
+          DPP = 50% × 총수입. 매월 입력하면 누적 과세표준이 자동 계산됩니다.
+        </div>
+
+        {loading ? (
+          <div className="text-center py-4"><Loader2 className="h-5 w-5 animate-spin mx-auto text-gray-400" /></div>
+        ) : (
+          <div className="space-y-4">
+            {freelancers.map(fl => {
+              const cum = cumulatives.find(c => c.employee_id === fl.id);
+              const entries = cum?.monthly_entries || [];
+              const MONTHS_SHORT = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+              return (
+                <div key={fl.id} className="border rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="font-medium text-sm">{fl.employee_name}</p>
+                      <p className="text-[10px] text-gray-500">기본 계약금: {fmtRp(fl.gross_salary)}/월</p>
+                    </div>
+                    <div className="text-right text-xs">
+                      <p className="text-gray-500">누적 수입</p>
+                      <p className="font-mono font-bold">{fmtRp(cum?.cumulative_gross || 0)}</p>
+                      <p className="text-purple-600 text-[10px]">DPP 50%: {fmtRp(cum?.cumulative_net || 0)}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-4 md:grid-cols-6 gap-1">
+                    {MONTHS_SHORT.map((label, i) => {
+                      const entry = entries.find((e: { month: string }) => e.month === String(i + 1).padStart(2, '0'));
+                      const [localGross, setLocalGross] = useState(String(entry?.gross || ''));
+
+                      return (
+                        <div key={i} className="text-center">
+                          <p className="text-[9px] text-gray-500">{label}</p>
+                          <Input
+                            type="number"
+                            className="h-7 text-[10px] font-mono text-center px-1"
+                            value={localGross}
+                            onChange={e => setLocalGross(e.target.value)}
+                            onBlur={() => {
+                              const val = Number(localGross) || 0;
+                              if (val !== (entry?.gross || 0)) {
+                                handleSaveMonth(fl.id, i + 1, val, 0);
+                              }
+                            }}
+                            placeholder="수입"
+                          />
+                          {entry && entry.gross > 0 && (
+                            <p className="text-[8px] text-purple-600">{fmtRp(entry.net)}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
