@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { getProvider, type AccountingProviderId, type ConnectionCredentials } from '@/lib/accounting';
+import { ensureFreshToken } from '@/lib/accounting/token-refresh';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 
 /**
@@ -57,8 +58,10 @@ export async function POST(request: NextRequest) {
       .eq('id', conn.id);
 
     const provider = getProvider(providerId as AccountingProviderId);
+    // Refresh token if expired
+    const freshToken = await ensureFreshToken(conn);
     const creds: ConnectionCredentials = {
-      accessToken: conn.access_token,
+      accessToken: freshToken,
       sessionKey: conn.session_key,
       host: conn.host,
       databaseId: conn.database_id || undefined,
