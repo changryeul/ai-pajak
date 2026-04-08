@@ -153,11 +153,47 @@ function CorporateCustomerDashboard({
     has_rental_business?: boolean;
   } | null>(null);
 
+  // Counterparty summary
+  const [cpSummary, setCpSummary] = useState<{
+    total: number; vendors: number; clients: number; foreign: number;
+    expiringLicenses: number;
+  }>({ total: 0, vendors: 0, clients: 0, foreign: 0, expiringLicenses: 0 });
+
   useEffect(() => {
     if (!session.customerId) return;
     fetch(`/api/company-profile?customerId=${session.customerId}`)
       .then(r => r.json())
       .then(d => { if (d.success) setCompanyInfo(d.data); })
+      .catch(() => {});
+
+    // Load counterparty summary
+    fetch('/api/counterparties')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          const list = d.data || [];
+          const now = Date.now();
+          const sixtyDays = 60 * 24 * 60 * 60 * 1000;
+          let expiring = 0;
+          list.forEach((cp: { licenses?: Array<{ expires_at?: string }> }) => {
+            if (Array.isArray(cp.licenses)) {
+              cp.licenses.forEach(lic => {
+                if (lic.expires_at) {
+                  const exp = new Date(lic.expires_at).getTime();
+                  if (exp > now && exp - now < sixtyDays) expiring++;
+                }
+              });
+            }
+          });
+          setCpSummary({
+            total: list.length,
+            vendors: list.filter((c: { type?: string }) => c.type === 'VENDOR').length,
+            clients: list.filter((c: { type?: string }) => c.type === 'CLIENT').length,
+            foreign: list.filter((c: { is_foreign?: boolean }) => c.is_foreign).length,
+            expiringLicenses: expiring,
+          });
+        }
+      })
       .catch(() => {});
   }, [session.customerId]);
 
@@ -255,6 +291,38 @@ function CorporateCustomerDashboard({
           <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-300 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
         </Link>
       </div>
+
+      {/* Counterparty summary widget */}
+      {cpSummary.total > 0 && (
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-sm flex items-center gap-2">
+                  <Users className="h-4 w-4 text-indigo-600" />
+                  거래 상대방 ({cpSummary.total}개사)
+                </h3>
+                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                  <span>공급자 {cpSummary.vendors}</span>
+                  <span>·</span>
+                  <span>고객 {cpSummary.clients}</span>
+                  {cpSummary.foreign > 0 && <><span>·</span><span>국외 {cpSummary.foreign}</span></>}
+                </div>
+                {cpSummary.expiringLicenses > 0 && (
+                  <p className="text-[11px] text-amber-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    라이센스 만료 임박 {cpSummary.expiringLicenses}건
+                  </p>
+                )}
+              </div>
+              <Link href={`/${locale}/counterparties`}
+                className="px-3 py-1.5 border border-gray-200 text-xs font-medium rounded-lg hover:bg-gray-50">
+                상세 →
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick access */}
       <div className="grid gap-3 sm:grid-cols-3">
