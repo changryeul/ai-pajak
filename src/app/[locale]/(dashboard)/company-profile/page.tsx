@@ -94,7 +94,7 @@ const BUSINESS_CATEGORIES = [
 ];
 
 const LEGAL_FORMS = [
-  { value: 'PT', label: 'PT (Perseroan Terbatas)', desc: '유한회사 — PPh Final 4년 한도' },
+  { value: 'PT', label: 'PT (Perseroan Terbatas)', desc: '유한회사 — PPh Final 3년 한도' },
   { value: 'CV', label: 'CV (Commanditaire Vennootschap)', desc: '합자회사 — PPh Final 4년 한도' },
   { value: 'UD', label: 'UD (Usaha Dagang)', desc: '개인사업체' },
   { value: 'FIRMA', label: 'Firma', desc: '합명회사' },
@@ -344,7 +344,7 @@ export default function CompanyProfilePage() {
           </div>
           <div className="space-y-2 mt-2">
             <Checkbox checked={profile.is_umkm} onChange={v => updateField('is_umkm', v)}
-              label="UMKM 등록 (PP 55/2022)" desc="연매출 48억 IDR 미만 → PPh Final 0.5%. PT: 4년, CV: 4년, 개인: 7년 한도" />
+              label="UMKM 등록 (PP 55/2022)" desc="연매출 48억 IDR 미만 → PPh Final 0.5%. PT: 3년, CV: 4년, 개인: 7년 한도" />
             {profile.is_umkm && (
               <div className="ml-6">
                 <Label className="text-[10px]">PPh Final 0.5% 시작 연도</Label>

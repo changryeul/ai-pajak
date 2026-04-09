@@ -136,7 +136,15 @@
       "Bash(git rm:*)",
       "Bash(sed -i '' 's/{step === 3 && \\(/{step === 5 \\\\&\\\\& \\(/' \"src/app/[locale]/\\(dashboard\\)/tax/annual/pph25/page.tsx\")",
       "Bash(sed -i '' 's/{step === 4 && \\(/{step === 6 \\\\&\\\\& \\(/' \"src/app/[locale]/\\(dashboard\\)/tax/annual/pph25/page.tsx\")",
-      "Bash(sed -i '' 's/{step === 5 && \\(/{step === 7 \\\\&\\\\& \\(/' \"src/app/[locale]/\\(dashboard\\)/tax/annual/pph25/page.tsx\")"
+      "Bash(sed -i '' 's/{step === 5 && \\(/{step === 7 \\\\&\\\\& \\(/' \"src/app/[locale]/\\(dashboard\\)/tax/annual/pph25/page.tsx\")",
+      "Bash(sed -i '' \"s/PPh Final 4년 한도/PPh Final 3년 한도/g\" \"src/app/[locale]/\\(dashboard\\)/company-profile/page.tsx\")",
+      "Bash(sed -i '' \"s/PT: 4년, CV: 4년/PT: 3년, CV: 4년/g\" \"src/app/[locale]/\\(dashboard\\)/company-profile/page.tsx\")",
+      "Bash(sed -i '' \"s/\\\\['PT'\\\\].includes\\(legalForm\\) ? 4/['PT'].includes\\(legalForm\\) ? 3/g\" \"src/app/api/company-profile/determine-tax/route.ts\")",
+      "Bash(sed -i '' \"s/\\\\['PT'\\\\].includes\\(legalForm\\) ? 4/['PT'].includes\\(legalForm\\) ? 3/g\" \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
+      "Bash(sed -i '' 's/fmtRp\\(EXEMPTION\\)/fmtRp\\(getExemption\\(legalForm\\)\\)/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
+      "Bash(sed -i '' 's/EXEMPTION - \\(cumulative/getExemption\\(legalForm\\) - \\(cumulative/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
+      "Bash(sed -i '' 's/Math.min\\(monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\), EXEMPTION\\)/Math.min\\(monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\), getExemption\\(legalForm\\)\\)/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
+      "Bash(sed -i '' 's/monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\) - EXEMPTION/monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\) - getExemption\\(legalForm\\)/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")"
     ]
   }
 }

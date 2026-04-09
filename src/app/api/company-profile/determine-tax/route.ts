@@ -36,7 +36,7 @@ function determineTaxRegime(profile: Record<string, unknown>): TaxDetermination 
 
   if (isUmkm && revenue > 0 && revenue < 4_800_000_000) {
     // Check UMKM period limit
-    const maxYears = ['PT'].includes(legalForm) ? 4 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
+    const maxYears = ['PT'].includes(legalForm) ? 3 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
     const yearsUsed = umkmStartYear > 0 ? currentYear - umkmStartYear : 0;
 
     if (yearsUsed < maxYears) {

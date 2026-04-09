@@ -17,10 +17,23 @@ import { fmtRp } from '@/lib/utils';
 
 // ── Constants ──
 const UMKM_RATE = 0.005;          // PPh Final 0.5%
-const EXEMPTION = 500_000_000;    // Rp 500M/year exemption (PP 55/2022)
+const EXEMPTION_INDIVIDUAL = 500_000_000; // Rp 500M — 개인(OP)만 비과세
 const THRESHOLD = 4_800_000_000;  // Rp 4.8B annual revenue threshold
 const CORPORATE_RATE = 0.22;      // PPh Badan 22%
 const SME_DISCOUNT = 0.50;        // 50% discount for revenue < 50B
+
+// PP 55/2022 UMKM 적용 기간 (정확)
+function getMaxUmkmYears(legalForm: string): number {
+  if (legalForm === 'PT') return 3;                    // PT: 3 Tahun Pajak
+  if (['CV', 'FIRMA', 'KOPERASI'].includes(legalForm)) return 4; // CV/Firma/Koperasi: 4 Tahun Pajak
+  return 7; // Orang Pribadi (개인): 7 Tahun Pajak
+}
+
+// 법인은 Rp 500M 비과세 없음 (개인만)
+function getExemption(legalForm: string): number {
+  if (['PT', 'CV', 'FIRMA', 'KOPERASI'].includes(legalForm)) return 0;
+  return EXEMPTION_INDIVIDUAL; // 개인만 Rp 500M 비과세
+}
 
 // ── Regime types ──
 type TaxRegime = 'UMKM_FINAL' | 'PPH25_GENERAL' | 'PPH25_NEW' | 'PPH25_LOSS' | null;
@@ -89,8 +102,10 @@ export default function CorporateTaxPage() {
     const estYear = Number(establishedYear) || 0;
     const yearsOperating = estYear > 0 ? currentYear - estYear : 0;
     const umkmStart = Number(umkmStartYear) || 0;
-    const maxUmkmYears = ['PT'].includes(legalForm) ? 4 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
+    const maxUmkmYears = getMaxUmkmYears(legalForm);
     const umkmYearsUsed = umkmStart > 0 ? currentYear - umkmStart : 0;
+    const exemption = getExemption(legalForm);
+    const isCompany = ['PT', 'CV', 'FIRMA', 'KOPERASI'].includes(legalForm);
 
     // Case 1: New company (< 2 years)
     if (yearsOperating < 2 && !isUmkm) {
@@ -107,12 +122,15 @@ export default function CorporateTaxPage() {
 
     // Case 2: UMKM (revenue < 4.8B, registered, period not expired)
     if (isUmkm && revenue > 0 && revenue < THRESHOLD && umkmYearsUsed < maxUmkmYears) {
-      const taxableRevenue = Math.max(revenue - EXEMPTION, 0);
+      const taxableRevenue = Math.max(revenue - exemption, 0);
       const annualTax = Math.round(taxableRevenue * UMKM_RATE);
+      const exemptionDesc = isCompany
+        ? '법인은 비과세 공제 없이 전액 과세'
+        : `개인 연 ${fmtRp(EXEMPTION_INDIVIDUAL)} 비과세 공제 후`;
       return {
         regime: 'UMKM_FINAL',
         title: 'PPh Final UMKM — 0.5%',
-        description: `연매출 ${fmtRp(revenue)} (< ${fmtRp(THRESHOLD)}). PP 55/2022 등록 ${umkmYearsUsed}/${maxUmkmYears}년차. 월 매출에서 연 ${fmtRp(EXEMPTION)} 비과세 공제 후 0.5% 납부.`,
+        description: `연매출 ${fmtRp(revenue)} (< ${fmtRp(THRESHOLD)}). PP 55/2022 등록 ${umkmYearsUsed}/${maxUmkmYears}년차. ${exemptionDesc} 0.5% 납부.`,
         monthlyAmount: Math.round(annualTax / 12),
         annualEstimate: annualTax,
         legalBasis: 'PP 55/2022 & PMK 164/2023 — UMKM PPh Final 0.5%',
@@ -188,7 +206,9 @@ export default function CorporateTaxPage() {
             <p className="font-bold mb-1">법인세 납부는 회사 상황에 따라 다릅니다</p>
             <ul className="space-y-1 text-blue-800">
               <li>• <b>신설 법인</b> (2년 미만): PPh 25 납부 의무 없음</li>
-              <li>• <b>소규모 법인</b> (연매출 48억 미만, UMKM 등록): 매월 매출의 <b>0.5%</b>만 납부 (PPh Final)</li>
+              <li>• <b>소규모 법인</b> (연매출 48억 미만, UMKM 등록): 매월 매출의 <b>0.5%</b>만 납부 (PPh Final)
+                <br/><span className="text-[10px] text-blue-600 ml-4">적용 기간: PT <b>3년</b>, CV/Firma <b>4년</b>, 개인 <b>7년</b>. 법인은 비과세 공제 없음 (개인만 연 5억 비과세)</span>
+              </li>
               <li>• <b>일반 법인</b> (연매출 48억 이상): 전년도 세금을 12등분하여 매월 분할 납부 (PPh 25)</li>
               <li>• <b>전기 결손</b>: PPh 25 = 0원 (연말 정산으로 대체)</li>
             </ul>
@@ -196,6 +216,26 @@ export default function CorporateTaxPage() {
           </div>
         </div>
       </div>
+
+      {/* UMKM eligibility auto-check — skip Step 2 if not eligible */}
+      {(() => {
+        const estYear = Number(establishedYear) || 0;
+        const yearsOp = estYear > 0 ? currentYear - estYear : 0;
+        const maxYears = getMaxUmkmYears(legalForm);
+        const revenue = Number(annualRevenue) || 0;
+        // UMKM 불가능 조건: 기간 초과 OR 매출 초과
+        const umkmExpired = estYear > 0 && yearsOp > maxYears;
+        const revenueTooHigh = revenue >= THRESHOLD;
+        const cannotBeUmkm = umkmExpired || revenueTooHigh;
+
+        // Step 1 → Step 2 넘어갈 때 자동 판정
+        if (step === 1 && cannotBeUmkm && isUmkm === null) {
+          // 자동으로 isUmkm = false 설정
+          // (UI에서 다음 버튼 클릭 시 Step 2 스킵)
+        }
+
+        return null;
+      })()}
 
       {/* Step indicator */}
       <div className="flex items-center justify-between mb-6">
@@ -250,6 +290,16 @@ export default function CorporateTaxPage() {
                 {establishedYear && currentYear - Number(establishedYear) < 2 && (
                   <p className="text-[11px] text-blue-600 mt-1">💡 설립 2년 미만 → 신설 법인 PPh 25 면제 대상</p>
                 )}
+                {establishedYear && legalForm && (() => {
+                  const yrs = currentYear - Number(establishedYear);
+                  const max = getMaxUmkmYears(legalForm);
+                  if (yrs > max) {
+                    return <p className="text-[11px] text-indigo-600 mt-1">
+                      ℹ️ 설립 {yrs}년차 — {legalForm} UMKM 기간({max}년) 초과. <b>자동으로 PPh 25(일반 법인세)</b>가 적용됩니다.
+                    </p>;
+                  }
+                  return null;
+                })()}
               </div>
               <div>
                 <Label className="text-xs">연간 매출 (Rp) — 최근 1년</Label>
@@ -279,8 +329,8 @@ export default function CorporateTaxPage() {
             <div className="bg-green-50 rounded-lg p-3 text-xs text-green-800">
               <p className="font-bold mb-1">UMKM이란?</p>
               <p>연매출 48억 IDR 미만인 소규모 사업자입니다. PP 55/2022에 따라 매월 매출의 <b>0.5%</b>만 납부하면 됩니다 (일반 법인세 22%가 아님).</p>
-              <p className="mt-1">단, PT는 <b>4년</b>, CV는 <b>4년</b>, 개인은 <b>7년</b> 한도로 적용됩니다.</p>
-              <p className="mt-1">또한 연매출 <b>5억 IDR까지 비과세</b>입니다 (PP 55/2022 신규).</p>
+              <p className="mt-1">적용 기간: PT는 <b>3년</b>(Tahun Pajak), CV/Firma는 <b>4년</b>, 개인은 <b>7년</b> 한도.</p>
+              <p className="mt-1"><b>개인(OP)만</b> 연매출 5억 IDR까지 비과세입니다. <b>법인(PT/CV)은 비과세 공제 없이 전액 과세</b>됩니다.</p>
             </div>
 
             <div className="space-y-3">
@@ -310,7 +360,7 @@ export default function CorporateTaxPage() {
                   <Input type="number" value={umkmStartYear} onChange={e => setUmkmStartYear(e.target.value)}
                     placeholder={`예: ${currentYear - 2}`} className="w-40" />
                   {umkmStartYear && (() => {
-                    const maxYears = ['PT'].includes(legalForm) ? 4 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
+                    const maxYears = ['PT'].includes(legalForm) ? 3 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
                     const used = currentYear - Number(umkmStartYear);
                     const remaining = maxYears - used;
                     return remaining > 0 ? (
@@ -449,13 +499,13 @@ export default function CorporateTaxPage() {
                     {currentYear}년 월별 매출 입력 (UMKM PPh Final)
                   </h3>
                   <p className="text-[11px] text-gray-500 mb-3">
-                    매월 매출을 입력하면 월별 PPh Final을 자동 계산합니다. 연 {fmtRp(EXEMPTION)}까지 비과세.
+                    매월 매출을 입력하면 월별 PPh Final을 자동 계산합니다. 연 {fmtRp(getExemption(legalForm))}까지 비과세.
                   </p>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {MONTHS.map((label, i) => {
                       const rev = monthlyRevenues[i];
                       const cumulative = monthlyRevenues.slice(0, i + 1).reduce((s, v) => s + v, 0);
-                      const exemptionLeft = Math.max(EXEMPTION - (cumulative - rev), 0);
+                      const exemptionLeft = Math.max(getExemption(legalForm) - (cumulative - rev), 0);
                       const taxable = Math.max(rev - exemptionLeft, 0);
                       const tax = Math.round(taxable * UMKM_RATE);
                       return (
@@ -483,12 +533,12 @@ export default function CorporateTaxPage() {
                     </div>
                     <div>
                       <p className="text-gray-600">비과세 공제</p>
-                      <p className="font-bold font-mono">{fmtRp(Math.min(monthlyRevenues.reduce((s, v) => s + v, 0), EXEMPTION))}</p>
+                      <p className="font-bold font-mono">{fmtRp(Math.min(monthlyRevenues.reduce((s, v) => s + v, 0), getExemption(legalForm)))}</p>
                     </div>
                     <div>
                       <p className="text-green-700">연간 PPh Final</p>
                       <p className="font-bold font-mono text-green-800">
-                        {fmtRp(Math.round(Math.max(monthlyRevenues.reduce((s, v) => s + v, 0) - EXEMPTION, 0) * UMKM_RATE))}
+                        {fmtRp(Math.round(Math.max(monthlyRevenues.reduce((s, v) => s + v, 0) - getExemption(legalForm), 0) * UMKM_RATE))}
                       </p>
                     </div>
                   </div>
@@ -530,7 +580,22 @@ export default function CorporateTaxPage() {
           </Button>
         ) : <div />}
         {step < 4 ? (
-          <Button onClick={() => setStep(step + 1)}>
+          <Button onClick={() => {
+            let nextStep = step + 1;
+            // Step 1 → UMKM 불가능하면 Step 2(UMKM 확인) 건너뛰기
+            if (step === 1) {
+              const estYear = Number(establishedYear) || 0;
+              const yearsOp = estYear > 0 ? currentYear - estYear : 0;
+              const maxYears = getMaxUmkmYears(legalForm);
+              const revenue = Number(annualRevenue) || 0;
+              const cannotBeUmkm = (estYear > 0 && yearsOp > maxYears) || revenue >= THRESHOLD;
+              if (cannotBeUmkm) {
+                setIsUmkm(false);
+                nextStep = 3; // Step 2 건너뛰고 바로 Step 3(전년 세금)
+              }
+            }
+            setStep(nextStep);
+          }}>
             다음<ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         ) : null}
