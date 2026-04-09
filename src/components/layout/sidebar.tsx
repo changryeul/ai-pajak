@@ -209,11 +209,8 @@ export function Sidebar() {
     <div className="flex h-full flex-col bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950">
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-6">
-        <Link href={`/${locale}/dashboard`} className="flex items-center gap-2.5" onClick={close}>
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-            <span className="text-sm font-bold text-white">AI</span>
-          </div>
-          <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">PAJAK</span>
+        <Link href={`/${locale}/dashboard`} className="flex items-center gap-2" onClick={close}>
+          <img src="/logo.png" alt="AI Pajak" className="h-9" />
         </Link>
         <button onClick={close} className="lg:hidden rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
           <X className="h-5 w-5" />

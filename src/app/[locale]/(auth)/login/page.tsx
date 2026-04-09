@@ -80,10 +80,7 @@ export default function LoginPage() {
 
         <div className="max-w-lg relative z-10">
           <div className="flex items-center gap-3 mb-8">
-            <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg">
-              <span className="text-2xl font-bold">AI</span>
-            </div>
-            <span className="text-3xl font-bold tracking-tight">PAJAK</span>
+            <img src="/logo.png" alt="AI Pajak" className="h-12 brightness-0 invert" />
           </div>
 
           <h1 className="text-4xl font-bold leading-tight mb-4">

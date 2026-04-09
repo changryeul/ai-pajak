@@ -166,8 +166,8 @@ export default function RegisterPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-10">
         <div className="w-full max-w-4xl">
           <div className="text-center mb-8">
-            <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">AI</span>
+            <div className="mx-auto mb-4">
+              <img src="/logo.png" alt="AI Pajak" className="h-10 mx-auto" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">AI Pajak에 오신 것을 환영합니다</h1>
             <p className="text-sm text-gray-500 mt-2">어떤 목적으로 이용하시나요? (1/2 단계)</p>
