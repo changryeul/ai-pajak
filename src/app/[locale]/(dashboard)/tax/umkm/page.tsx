@@ -57,6 +57,7 @@ export default function CorporateTaxPage() {
   // Wizard state
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showDontKnow, setShowDontKnow] = useState(false);
 
   // Company profile (pre-loaded if available)
   const [companyName, setCompanyName] = useState('');
@@ -359,76 +360,131 @@ export default function CorporateTaxPage() {
         </Card>
       )}
 
-      {/* Step 2: UMKM check */}
+      {/* Step 2: 과세 방식 확인 */}
       {step === 2 && (
         <Card>
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Store className="h-5 w-5 text-green-600" />
-              UMKM (소규모 사업자) 확인
+              과세 방식 확인
             </h2>
 
-            <div className="bg-green-50 rounded-lg p-3 text-xs text-green-800">
-              <p className="font-bold mb-1">UMKM이란?</p>
-              <p>연매출 48억 IDR 미만인 소규모 사업자입니다. PP 55/2022에 따라 매월 매출의 <b>0.5%</b>만 납부하면 됩니다 (일반 법인세 22%가 아님).</p>
-              <p className="mt-1">적용 기간: PT는 <b>3년</b>(Tahun Pajak), CV/Firma는 <b>4년</b>, 개인은 <b>7년</b> 한도.</p>
-              <p className="mt-1"><b>개인(OP)만</b> 연매출 5억 IDR까지 비과세입니다. <b>법인(PT/CV)은 비과세 공제 없이 전액 과세</b>됩니다.</p>
+            {/* 1. 안내 */}
+            <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
+              <p className="font-bold mb-1">안내</p>
+              <p>사업자의 매출, 사업 기간, 업종을 기반으로 현재 적용 가능한 세금 납부 방식을 자동으로 안내드립니다.</p>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-sm font-medium">PP 55/2022 (UMKM PPh Final)에 등록하셨나요?</p>
-              <div className="flex gap-3">
-                <button onClick={() => setIsUmkm(true)}
-                  className={`flex-1 p-4 rounded-xl border-2 text-center transition-all ${
-                    isUmkm === true ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+            {/* 2. 과세 방식 설명 */}
+            <div>
+              <p className="text-sm font-bold text-gray-900 mb-2">적용 가능한 과세 방식</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-3 bg-green-50 rounded-xl border border-green-200">
+                  <p className="font-bold text-sm text-green-900">1. UMKM (PPh Final 0.5%)</p>
+                  <ul className="mt-1 text-xs text-green-800 space-y-0.5">
+                    <li>• <b>매출</b> 기준 과세 (연매출 ≤ 4.8M IDR)</li>
+                    <li>• <b>0.5%</b> 단일 세율</li>
+                    <li>• 적용 기간: PT <b>3년</b>, CV <b>4년</b>, 개인 <b>7년</b></li>
+                    <li>• 법인은 비과세 공제 없음 (개인만 5억)</li>
+                  </ul>
+                </div>
+                <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-200">
+                  <p className="font-bold text-sm text-indigo-900">2. 일반 과세 (PPh 25 / 법인세)</p>
+                  <ul className="mt-1 text-xs text-indigo-800 space-y-0.5">
+                    <li>• <b>순이익</b> 기준 과세</li>
+                    <li>• 최대 <b>22%</b> 세율</li>
+                    <li>• 매월 분할 납부 (PPh 25)</li>
+                    <li>• 세무 조정(Koreksi Fiskal) 필요</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. 사용자 선택 */}
+            <div>
+              <p className="text-sm font-bold text-gray-900 mb-2">현재 귀사의 세금 납부 방식은 무엇입니까?</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <button onClick={() => { setIsUmkm(true); setStep(3); }}
+                  className={`p-4 rounded-xl border-2 text-center transition-all hover:shadow-md ${
+                    isUmkm === true ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'
                   }`}>
-                  <CheckCircle className={`h-6 w-6 mx-auto mb-2 ${isUmkm === true ? 'text-green-600' : 'text-gray-300'}`} />
-                  <p className="font-bold text-sm">예, 등록했습니다</p>
-                  <p className="text-[10px] text-gray-500 mt-1">세무서에 PP 55 신청함</p>
+                  <Store className={`h-8 w-8 mx-auto mb-2 ${isUmkm === true ? 'text-green-600' : 'text-gray-400'}`} />
+                  <p className="font-bold text-sm">PPh Final (UMKM)</p>
+                  <p className="text-[10px] text-gray-500 mt-1">매출 × 0.5%</p>
                 </button>
-                <button onClick={() => setIsUmkm(false)}
-                  className={`flex-1 p-4 rounded-xl border-2 text-center transition-all ${
-                    isUmkm === false ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
+                <button onClick={() => { setIsUmkm(false); setStep(3); }}
+                  className={`p-4 rounded-xl border-2 text-center transition-all hover:shadow-md ${
+                    isUmkm === false ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'
                   }`}>
-                  <AlertTriangle className={`h-6 w-6 mx-auto mb-2 ${isUmkm === false ? 'text-indigo-600' : 'text-gray-300'}`} />
-                  <p className="font-bold text-sm">아니오 / 모르겠음</p>
-                  <p className="text-[10px] text-gray-500 mt-1">일반 법인세로 진행</p>
+                  <Building2 className={`h-8 w-8 mx-auto mb-2 ${isUmkm === false ? 'text-indigo-600' : 'text-gray-400'}`} />
+                  <p className="font-bold text-sm">PPh 25 (일반 과세)</p>
+                  <p className="text-[10px] text-gray-500 mt-1">순이익 × 22%</p>
+                </button>
+                <button onClick={() => setShowDontKnow(true)}
+                  className="p-4 rounded-xl border-2 border-gray-200 text-center transition-all hover:border-amber-300 hover:shadow-md">
+                  <HelpCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                  <p className="font-bold text-sm">잘 모르겠습니다</p>
+                  <p className="text-[10px] text-gray-500 mt-1">추가 정보로 판별</p>
                 </button>
               </div>
-
-              {isUmkm === true && (
-                <div>
-                  <Label className="text-xs">UMKM PPh Final 적용 시작 연도</Label>
-                  <Input type="number" value={umkmStartYear} onChange={e => setUmkmStartYear(e.target.value)}
-                    placeholder={`예: ${currentYear - 2}`} className="w-40" />
-                  {umkmStartYear && (() => {
-                    const maxYears = ['PT'].includes(legalForm) ? 3 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
-                    const used = currentYear - Number(umkmStartYear);
-                    const remaining = maxYears - used;
-                    return remaining > 0 ? (
-                      <p className="text-[11px] text-green-600 mt-1">
-                        ✓ {used}/{maxYears}년차 — 앞으로 {remaining}년 더 적용 가능
-                      </p>
-                    ) : (
-                      <p className="text-[11px] text-red-600 mt-1">
-                        ⚠️ {maxYears}년 한도 초과 — 내년부터 일반 PPh Badan으로 전환됩니다
-                      </p>
-                    );
-                  })()}
-                </div>
-              )}
-
-              {isUmkm === false && Number(annualRevenue) < THRESHOLD && Number(annualRevenue) > 0 && (
-                <div className="bg-amber-50 rounded-lg p-3 text-xs text-amber-800">
-                  <p className="font-bold">💡 UMKM 등록을 추천합니다</p>
-                  <p className="mt-1">
-                    현재 연매출이 {fmtRp(Number(annualRevenue))}으로 48억 미만입니다.
-                    PP 55/2022에 등록하면 법인세를 22%가 아닌 <b>0.5%</b>만 납부합니다.
-                    JTC 컨설턴트에게 등록 대행을 요청하실 수 있습니다.
-                  </p>
-                </div>
-              )}
             </div>
+
+            {/* "잘 모르겠음" → 추가 정보 입력 */}
+            {showDontKnow && (
+              <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-3">
+                <p className="text-sm font-bold text-amber-900">추가 정보 입력</p>
+                <p className="text-xs text-amber-700">아래 정보를 입력하면 AI가 자동으로 과세 방식을 판별합니다.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">회사 설립연도 (NPWP 등록 기준)</Label>
+                    <Input type="number" value={establishedYear} onChange={e => setEstablishedYear(e.target.value)}
+                      placeholder="예: 2020" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">전년도 매출액 (IDR)</Label>
+                    <Input type="number" value={annualRevenue} onChange={e => setAnnualRevenue(e.target.value)}
+                      placeholder="예: 3000000000" className="font-mono" />
+                  </div>
+                </div>
+
+                {/* 자동 판별 결과 */}
+                {establishedYear && annualRevenue && (() => {
+                  const revenue = Number(annualRevenue) || 0;
+                  const yrs = currentYear - (Number(establishedYear) || currentYear);
+                  const maxYears = getMaxUmkmYears(legalForm);
+                  const canUmkm = revenue < THRESHOLD && yrs <= maxYears;
+
+                  return (
+                    <div className={`p-3 rounded-xl border ${canUmkm ? 'bg-green-50 border-green-300' : 'bg-indigo-50 border-indigo-300'}`}>
+                      <p className="font-bold text-sm">
+                        귀사는 다음 과세 방식이 적용됩니다:
+                      </p>
+                      {canUmkm ? (
+                        <div className="mt-2 text-xs text-green-800">
+                          <p className="font-bold text-green-900 text-base">✅ UMKM (PPh Final 0.5%)</p>
+                          <p className="mt-1">• 매출 기준 과세</p>
+                          <p>• 적용 가능 기간: <b>{maxYears - yrs}년 남음</b> ({yrs}/{maxYears}년차)</p>
+                          <Button size="sm" className="mt-2" onClick={() => { setIsUmkm(true); setStep(3); }}>
+                            UMKM으로 진행 <ArrowRight className="h-3 w-3 ml-1" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="mt-2 text-xs text-indigo-800">
+                          <p className="font-bold text-indigo-900 text-base">📋 일반 과세 (PPh 25)</p>
+                          <p className="mt-1">• 순이익 기준 과세</p>
+                          <p>• 월별 분할 납부 대상</p>
+                          {revenue >= THRESHOLD && <p className="text-[10px] mt-1">사유: 연매출 {fmtRp(revenue)} ≥ 48억 IDR</p>}
+                          {yrs > maxYears && <p className="text-[10px] mt-1">사유: 설립 {yrs}년차 — {legalForm} UMKM 기간({maxYears}년) 초과</p>}
+                          <Button size="sm" className="mt-2" onClick={() => { setIsUmkm(false); setStep(3); }}>
+                            일반 과세로 진행 <ArrowRight className="h-3 w-3 ml-1" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
