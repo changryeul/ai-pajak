@@ -313,6 +313,48 @@ export default function CorporateTaxPage() {
                 )}
               </div>
             </div>
+
+            {/* UMKM 마지막 해 / 임박 경고 */}
+            {establishedYear && legalForm && (() => {
+              const yrs = currentYear - Number(establishedYear);
+              const max = getMaxUmkmYears(legalForm);
+              const remaining = max - yrs;
+              if (remaining === 0) {
+                return (
+                  <div className="mt-3 p-3 bg-red-50 rounded-xl border border-red-200">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                      <div>
+                        <p className="font-bold text-sm text-red-900">⚠️ UMKM PPh Final 마지막 해입니다</p>
+                        <p className="text-xs text-red-700 mt-1">
+                          {legalForm} 적용 기간 {max}년 중 <b>{yrs}년차</b> — 올해가 마지막입니다.
+                        </p>
+                        <p className="text-xs text-red-800 mt-1 font-bold">
+                          📢 {currentYear + 1}년부터 PPh Badan 일반 세율(22%)이 적용됩니다.
+                        </p>
+                        <p className="text-[10px] text-red-600 mt-1">
+                          PPh 25 월 분할 납부가 시작되므로 재무 계획을 미리 준비하시기 바랍니다.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              if (remaining === 1 && yrs > 0) {
+                return (
+                  <div className="mt-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-amber-600" />
+                      <p className="text-xs text-amber-800">
+                        ℹ️ UMKM PPh Final 잔여 <b>1년</b>. {currentYear + 1}년이 마지막 → {currentYear + 2}년부터 일반 법인세(22%) 전환 예정.
+                      </p>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
           </CardContent>
         </Card>
       )}
