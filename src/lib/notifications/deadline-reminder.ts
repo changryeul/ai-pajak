@@ -19,9 +19,10 @@ interface TaxFilingRecord {
   status: string;
 }
 
-// Tax payment deadlines — Coretax / PMK 81/2024 (effective 2025-01-01)
-// All monthly PPh + PPN payments unified to 15th of following month.
-// Filing (SPT Masa) PPh = 20th, PPN = end of month.
+// Tax deadlines — Coretax / PMK 81/2024 (effective 2025-01-01)
+// All PPh payments: 15th of following month.
+// All SPT Masa PPh filings: 20th of following month.
+// PPN payment + SPT Masa PPN filing: BOTH end of following month (exception).
 const TAX_DEADLINES: Record<string, { deadline: number; name: string }> = {
   PPh21: { deadline: 15, name: 'PPh 21' },
   PPh23: { deadline: 15, name: 'PPh 23' },
@@ -29,7 +30,7 @@ const TAX_DEADLINES: Record<string, { deadline: number; name: string }> = {
   PPh25: { deadline: 15, name: 'PPh 25' },
   PPh26: { deadline: 15, name: 'PPh 26' },
   PPh_FINAL: { deadline: 15, name: 'PPh Final UMKM' },
-  PPN: { deadline: 15, name: 'PPN' },
+  PPN: { deadline: 31, name: 'PPN' }, // end of following month (payment + filing)
   SPT_MASA: { deadline: 20, name: 'SPT Masa PPh' },
   SPT_TAHUNAN: { deadline: 31, name: 'SPT Tahunan' }, // March 31 for individuals
 };

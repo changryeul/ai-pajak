@@ -63,8 +63,10 @@ describe('WhatsApp Service', () => {
   });
 
   describe('tax deadline constants (Coretax / PMK 81/2024)', () => {
-    // Under Coretax (2025~), all PPh + PPN payments unified to 15th of following month.
-    // SPT Masa PPh filing = 20th. SPT Masa PPN filing = end of following month.
+    // Under Coretax (2025~):
+    // - All PPh payments: 15th of following month
+    // - SPT Masa PPh filing: 20th of following month
+    // - PPN payment + SPT Masa PPN filing: BOTH end of following month (exception)
     const TAX_DEADLINES: Record<string, number> = {
       PPh21: 15,
       PPh23: 15,
@@ -72,7 +74,7 @@ describe('WhatsApp Service', () => {
       PPh25: 15,
       PPh26: 15,
       PPh_FINAL: 15,
-      PPN: 15,
+      PPN: 31, // end of following month
       SPT_MASA: 20,
     };
 
@@ -88,8 +90,8 @@ describe('WhatsApp Service', () => {
       expect(TAX_DEADLINES.PPh_FINAL).toBe(15);
     });
 
-    it('should have PPN payment deadline on 15th (unified under Coretax)', () => {
-      expect(TAX_DEADLINES.PPN).toBe(15);
+    it('should have PPN payment + filing deadline at end of month (PMK 81/2024 exception)', () => {
+      expect(TAX_DEADLINES.PPN).toBe(31);
     });
 
     it('should have SPT Masa PPh filing deadline on 20th', () => {

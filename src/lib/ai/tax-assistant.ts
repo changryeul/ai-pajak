@@ -29,14 +29,18 @@ Guidelines:
 
 Important tax deadlines (Coretax / PMK 81/2024 — effective 2025-01-01):
 - All PPh payments (PPh 21, 23, 4(2), 25, 26, Final UMKM): 15th of following month
-- PPN payment: 15th of following month (unified under Coretax)
 - SPT Masa PPh filing (21, 23, 4(2), 26): 20th of following month
-- SPT Masa PPN filing: end of following month
+- PPN payment AND SPT Masa PPN filing: BOTH at end of following month
+  (PPN has a separate rule — payment must precede filing, both by month-end)
 - SPT Tahunan Individual (OP): March 31st of following year
 - SPT Tahunan Corporate (Badan): April 30th of following year
 
-Note: The old pre-Coretax deadline of "10th of following month" for PPh 21/23 is NO LONGER VALID.
-Do not reference or use the 10th-of-month rule. All PPh payments are now unified to the 15th.`;
+IMPORTANT:
+- The old pre-Coretax deadline of "10th of following month" for PPh 21/23 is NO LONGER VALID.
+  Do not reference or use the 10th-of-month rule. All PPh payments are now unified to the 15th.
+- PPN is NOT unified to the 15th. Unlike PPh, PPN payment and filing both stay at end of month.
+  Source: PMK 81/2024 — "PPN dan PPnBM disetor paling lambat akhir bulan berikutnya setelah
+  masa pajak terakhir, sebelum pelaporan SPT Masa PPN."`;
 
   /**
    * Chat with the tax assistant using Claude

@@ -118,12 +118,13 @@ function generateTaxCalendar(year: number): TaxEvent[] {
       priority: 'MEDIUM',
     });
 
-    // PPN payment
+    // PPN payment — end of following month (NOT 15th; PPN has its own rule under PMK 81/2024)
+    const ppnLastDay = lastDayOfMonth(year, month);
     events.push({
       id: `ppn-pay-${month}`,
-      date: `${year}-${mm}-${String(MONTHLY_TAX_DEADLINES.PPN_PAYMENT).padStart(2, '0')}`,
+      date: `${year}-${mm}-${String(ppnLastDay).padStart(2, '0')}`,
       title: `Setor PPN - ${prevMonth}`,
-      description: `Batas setor PPN masa ${prevMonth} (Coretax: tanggal 15)`,
+      description: `Batas setor PPN masa ${prevMonth} — akhir bulan berikutnya, sebelum lapor SPT Masa PPN`,
       taxType: 'PPN',
       isAnnual: false,
       penalty: 'Bunga per bulan',
