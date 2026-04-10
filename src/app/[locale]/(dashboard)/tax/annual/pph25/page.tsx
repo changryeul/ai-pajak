@@ -616,10 +616,12 @@ export default function PPh25AnnualPage() {
                     <p className="text-[10px] text-gray-500">{item.desc}</p>
                     {item.hint && <p className="text-[9px] text-blue-600 mt-0.5">{item.hint}</p>}
                   </div>
-                  <Input type="number" className="w-40 h-8 text-xs font-mono text-right"
-                    value={negativeCorr[item.key] || ''}
-                    onChange={e => setNegativeCorr({ ...negativeCorr, [item.key]: e.target.value })}
-                    placeholder="0" />
+                  <div className="flex-shrink-0">
+                    <Input type="number" className="w-40 h-8 text-xs font-mono text-right"
+                      value={negativeCorr[item.key] || ''}
+                      onChange={e => setNegativeCorr({ ...negativeCorr, [item.key]: e.target.value })}
+                      placeholder="0" />
+                  </div>
                 </div>
               ))}
               <div className="flex justify-between p-2 bg-blue-50 rounded font-bold text-xs text-blue-700">
