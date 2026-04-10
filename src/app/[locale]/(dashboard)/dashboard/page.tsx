@@ -11,7 +11,6 @@ import {
   Clock,
   TrendingUp,
   Plus,
-  Upload,
   ArrowRight,
   AlertCircle,
   Users,
@@ -20,9 +19,8 @@ import {
   ShieldCheck,
   BarChart3,
   FileSpreadsheet,
-  Camera,
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
+import { Card, CardContent } from '@/components/ui';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
@@ -105,6 +103,101 @@ export default function DashboardPage() {
   }
 
   return <CustomerDashboardWithOnboarding session={session} locale={locale} />;
+}
+
+// LinkedIn-style Profile Completeness Banner
+function ProfileCompletenessBanner({
+  completeness,
+  locale,
+  companyInfo,
+}: {
+  completeness: number;
+  locale: string;
+  companyInfo: {
+    npwp?: string; business_category?: string;
+    annual_revenue?: number;
+  };
+}) {
+  const isReady = completeness >= 80;
+
+  // Next items to fill (LinkedIn-style recommendations)
+  const nextItems: Array<{ label: string; boost: string }> = [];
+  if (!companyInfo.npwp) nextItems.push({ label: 'NPWP 입력', boost: '+14%' });
+  if (!companyInfo.business_category) nextItems.push({ label: '사업 유형 선택', boost: '+14%' });
+  if (!companyInfo.annual_revenue || companyInfo.annual_revenue <= 0) nextItems.push({ label: '연 매출 입력', boost: '+7%' });
+
+  const gradient = isReady
+    ? 'from-emerald-50 via-teal-50 to-cyan-50 border-emerald-200'
+    : completeness >= 50
+    ? 'from-amber-50 via-orange-50 to-yellow-50 border-amber-200'
+    : 'from-red-50 via-rose-50 to-pink-50 border-red-200';
+  const progressColor = isReady ? 'bg-emerald-500' : completeness >= 50 ? 'bg-amber-500' : 'bg-red-500';
+  const ringColor = isReady ? '#10b981' : completeness >= 50 ? '#f59e0b' : '#ef4444';
+
+  return (
+    <div className={`p-5 rounded-2xl border-2 bg-gradient-to-br ${gradient}`}>
+      <div className="flex items-start gap-4">
+        {/* Circular progress */}
+        <div className="relative h-14 w-14 flex-shrink-0 flex items-center justify-center">
+          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#e5e7eb" strokeWidth="5" />
+            <circle cx="28" cy="28" r="24" fill="none"
+              stroke={ringColor}
+              strokeWidth="5"
+              strokeDasharray={`${(completeness / 100) * 150.8} 150.8`}
+              strokeLinecap="round"
+              className="transition-all duration-700" />
+          </svg>
+          <span className="text-sm font-bold text-gray-800">{completeness}%</span>
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <p className="font-bold text-sm text-gray-900">
+                {isReady ? '프로필 거의 완성! 100%까지 마무리하세요' : '회사 프로필을 완성하세요'}
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {isReady
+                  ? '신고는 시작할 수 있지만, 100%를 채우면 모든 세무 최적화를 받을 수 있습니다.'
+                  : '몇 가지 정보만 더 입력하면 세금 신고를 시작할 수 있습니다.'}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/company-profile`}
+              className={`flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition-colors ${
+                isReady ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
+              }`}
+            >
+              프로필 완성
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
+          {/* Progress bar */}
+          <div className="h-2 bg-white/70 rounded-full overflow-hidden mt-3">
+            <div className={`h-full ${progressColor} transition-all duration-700 ease-out`} style={{ width: `${completeness}%` }} />
+          </div>
+
+          {/* Next items — LinkedIn-style */}
+          {nextItems.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {nextItems.map((item, i) => (
+                <Link
+                  key={i}
+                  href={`/${locale}/company-profile`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/80 hover:bg-white border border-gray-200 rounded-full text-[11px] font-medium text-gray-700 hover:border-gray-300 transition-all"
+                >
+                  <span className="text-indigo-700 font-bold">{item.boost}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Customer Dashboard with Onboarding
@@ -232,21 +325,13 @@ function CorporateCustomerDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Profile incomplete banner */}
-      {companyInfo && !profileReady && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-amber-600" />
-            <div>
-              <p className="font-medium text-sm text-amber-900">회사 정보가 불완전합니다 ({companyInfo.profile_completeness}%)</p>
-              <p className="text-xs text-amber-700">신고를 시작하려면 회사 정보를 완성해 주세요</p>
-            </div>
-          </div>
-          <Link href={`/${locale}/company-profile`}
-            className="px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700">
-            회사 정보 입력
-          </Link>
-        </div>
+      {/* LinkedIn-style Profile Completeness Banner */}
+      {companyInfo && (companyInfo.profile_completeness || 0) < 100 && (
+        <ProfileCompletenessBanner
+          completeness={companyInfo.profile_completeness || 0}
+          locale={locale}
+          companyInfo={companyInfo}
+        />
       )}
 
       {/* Unpaid billing alert */}

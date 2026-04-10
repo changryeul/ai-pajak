@@ -12,7 +12,8 @@ import {
   Building2, Save, Loader2, CheckCircle, AlertTriangle,
   Sparkles, HelpCircle, ChevronDown, ChevronRight,
   Factory, Utensils, Home, Ship, Pickaxe, Globe,
-  Briefcase, Users, DollarSign, Shield,
+  Briefcase, Users, DollarSign, Shield, Camera, FileText,
+  Trophy,
 } from 'lucide-react';
 
 interface CompanyProfile {
@@ -110,8 +111,9 @@ export default function CompanyProfilePage() {
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['business', 'income']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic', 'business', 'income']));
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -142,6 +144,44 @@ export default function CompanyProfilePage() {
   const updateField = (field: string, value: unknown) => {
     if (!profile) return;
     setProfile({ ...profile, [field]: value } as CompanyProfile);
+  };
+
+  const handleNpwpOcr = async (file: File) => {
+    setOcrLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/customer/npwp-ocr', { method: 'POST', body: fd, credentials: 'include' });
+      const data = await res.json();
+      if (data.success && data.data?.npwp) {
+        setProfile(prev => prev ? {
+          ...prev,
+          npwp: data.data.npwp || prev.npwp,
+          company_name: data.data.name || prev.company_name,
+          address: data.data.address || prev.address,
+        } : prev);
+        showMsg('success', `NPWP 인식 완료 (신뢰도 ${Math.round((data.data.confidence || 0) * 100)}%)`);
+      } else {
+        showMsg('error', 'NPWP 인식 실패 — 직접 입력해주세요');
+      }
+    } catch {
+      showMsg('error', 'OCR 처리 중 오류 발생');
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  // LinkedIn-style: 다음 채울 항목 추천 (가중치 기반)
+  const getNextItems = (p: CompanyProfile): Array<{ label: string; boost: number; href?: string }> => {
+    const items: Array<{ label: string; boost: number }> = [];
+    if (!p.company_name) items.push({ label: '회사명 입력', boost: 14 });
+    if (!p.npwp) items.push({ label: 'NPWP 입력 (사진으로 자동 입력 가능)', boost: 14 });
+    if (!p.business_category) items.push({ label: '사업 유형 선택', boost: 14 });
+    if (!p.legal_form) items.push({ label: '법인 형태 선택 (PT/CV/UD 등)', boost: 7 });
+    if (!p.annual_revenue || p.annual_revenue <= 0) items.push({ label: '연 매출 입력', boost: 7 });
+    if (!p.established_year) items.push({ label: '설립 연도 입력', boost: 3 });
+    if (!p.address) items.push({ label: '주소 입력', boost: 3 });
+    return items.slice(0, 4);
   };
 
   const handleSave = async () => {
@@ -232,27 +272,96 @@ export default function CompanyProfilePage() {
     </label>
   );
 
+  const completeness = profile.profile_completeness || 0;
+  const isComplete = completeness >= 100;
+  const isReady = completeness >= 80;
+  const nextItems = getNextItems(profile);
+  const progressColor = isComplete ? 'bg-green-500' : isReady ? 'bg-emerald-500' : completeness >= 50 ? 'bg-amber-500' : 'bg-red-500';
+  const progressBg = isComplete ? 'from-green-50 to-emerald-50 border-green-200' : isReady ? 'from-emerald-50 to-teal-50 border-emerald-200' : completeness >= 50 ? 'from-amber-50 to-orange-50 border-amber-200' : 'from-red-50 to-rose-50 border-red-200';
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-indigo-600" />
-            회사 세무 프로필
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {profile.company_name || '회사명'} — 세목 결정에 필요한 모든 정보를 관리합니다
-          </p>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Building2 className="h-6 w-6 text-indigo-600" />
+          회사 세무 프로필
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          {profile.company_name || '회사명'} — 세목 결정에 필요한 모든 정보를 관리합니다
+        </p>
+      </div>
+
+      {/* LinkedIn-style Profile Completeness Card */}
+      <div className={`mb-6 p-5 rounded-2xl border-2 bg-gradient-to-br ${progressBg}`}>
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex items-center gap-3">
+            {isComplete ? (
+              <div className="p-2 rounded-full bg-green-500 shadow-lg shadow-green-500/30">
+                <Trophy className="h-5 w-5 text-white" />
+              </div>
+            ) : (
+              <div className="relative h-12 w-12 flex items-center justify-center">
+                <svg className="absolute inset-0 -rotate-90" viewBox="0 0 48 48">
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="#e5e7eb" strokeWidth="4" />
+                  <circle cx="24" cy="24" r="20" fill="none"
+                    stroke={isReady ? '#10b981' : completeness >= 50 ? '#f59e0b' : '#ef4444'}
+                    strokeWidth="4" strokeDasharray={`${(completeness / 100) * 125.66} 125.66`}
+                    strokeLinecap="round" className="transition-all duration-700" />
+                </svg>
+                <span className="text-xs font-bold text-gray-700">{completeness}%</span>
+              </div>
+            )}
+            <div>
+              <p className="font-bold text-base text-gray-900">
+                {isComplete ? '🎉 프로필 100% 완성!' : isReady ? '신고 준비 완료' : '프로필 완성도'}
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {isComplete
+                  ? '완벽합니다. 모든 세무 서비스를 이용할 수 있습니다.'
+                  : isReady
+                  ? '신고를 시작할 수 있습니다. 100%까지 조금만 더 채워보세요.'
+                  : '몇 가지만 더 입력하면 세금 신고를 시작할 수 있습니다.'}
+              </p>
+            </div>
+          </div>
+          {isReady && (
+            <Button size="sm" onClick={() => router.push(`/${locale}/dashboard`)} className="flex-shrink-0">
+              대시보드로
+            </Button>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <Badge className={profile.profile_completeness >= 80 ? 'bg-green-100 text-green-700' : profile.profile_completeness >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}>
-            완성도 {profile.profile_completeness}%
-          </Badge>
-          <Button onClick={handleSave} disabled={saving} size="sm">
-            {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-            저장
-          </Button>
+
+        {/* Progress bar */}
+        <div className="h-2.5 bg-white/60 rounded-full overflow-hidden mb-3">
+          <div className={`h-full ${progressColor} transition-all duration-700 ease-out`} style={{ width: `${completeness}%` }} />
         </div>
+
+        {/* Next items recommendation */}
+        {!isComplete && nextItems.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-2">다음 채울 항목</p>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {nextItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-2 p-2 bg-white/70 rounded-lg border border-white">
+                  <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[10px] font-bold text-indigo-700">+{item.boost}%</span>
+                  </div>
+                  <span className="text-xs text-gray-700 flex-1 truncate">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="mb-4 flex items-center justify-end gap-2">
+        <Badge className={isReady ? 'bg-green-100 text-green-700' : completeness >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}>
+          완성도 {completeness}%
+        </Badge>
+        <Button onClick={handleSave} disabled={saving} size="sm">
+          {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+          저장
+        </Button>
       </div>
 
       {message && (
@@ -262,35 +371,66 @@ export default function CompanyProfilePage() {
         </div>
       )}
 
-      {/* Status banner */}
-      {profile.profile_completeness >= 80 ? (
-        <div className="mb-4 p-4 rounded-xl border-l-4 border-l-green-500 bg-green-50">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
-            <div>
-              <p className="font-bold text-sm text-green-900">신고 준비 완료</p>
-              <p className="text-xs text-green-700 mt-0.5">
-                모든 필수 정보가 입력되었습니다. 대시보드에서 월신고 또는 연신고를 시작할 수 있습니다.
-              </p>
-            </div>
-            <Button size="sm" onClick={() => router.push(`/${locale}/dashboard`)} className="ml-auto flex-shrink-0">
-              대시보드로 이동
-            </Button>
-          </div>
-        </div>
-      ) : profile.profile_completeness > 0 ? (
-        <div className="mb-4 p-4 rounded-xl border-l-4 border-l-amber-500 bg-amber-50">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-            <div>
-              <p className="font-bold text-sm text-amber-900">추가 정보가 필요합니다 ({profile.profile_completeness}%)</p>
-              <p className="text-xs text-amber-700 mt-0.5">아래 항목을 입력하면 세금 신고를 시작할 수 있습니다.</p>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       <div className="space-y-3">
+        {/* Section 0: Basic Info (with NPWP OCR) */}
+        <Section id="basic" title="기본 정보 (Basic Info)" icon={FileText} badge="필수">
+          <p className="text-[11px] text-gray-500 mb-2">회사명과 NPWP는 세금 신고 필수 정보입니다. NPWP 카드 사진을 올리면 자동으로 채워집니다.</p>
+
+          {/* NPWP OCR Upload */}
+          <div className="border-2 border-dashed border-blue-200 rounded-xl p-3 text-center bg-blue-50/50">
+            <div className="flex items-center justify-center gap-2">
+              <Camera className="h-4 w-4 text-blue-500" />
+              <p className="text-xs text-blue-700 font-medium">NPWP 카드 사진으로 자동 입력</p>
+            </div>
+            <label className="inline-flex items-center gap-2 mt-2 rounded-lg bg-blue-600 px-4 py-1.5 text-white text-xs font-medium hover:bg-blue-700 transition-colors cursor-pointer">
+              {ocrLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
+              {ocrLoading ? 'AI 인식 중...' : '사진 촬영/업로드'}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                disabled={ocrLoading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleNpwpOcr(file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <div className="md:col-span-2">
+              <Label className="text-xs">회사명 <span className="text-red-500">*</span></Label>
+              <Input
+                value={profile.company_name || ''}
+                onChange={e => updateField('company_name', e.target.value)}
+                placeholder="PT. Example Indonesia"
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">NPWP <span className="text-red-500">*</span></Label>
+              <Input
+                value={profile.npwp || ''}
+                onChange={e => updateField('npwp', e.target.value)}
+                placeholder="XX.XXX.XXX.X-XXX.XXX"
+                className="font-mono text-sm tracking-wider"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">주소</Label>
+              <Input
+                value={profile.address || ''}
+                onChange={e => updateField('address', e.target.value)}
+                placeholder="Jl. Sudirman No. 1, Jakarta"
+                className="text-sm"
+              />
+            </div>
+          </div>
+        </Section>
+
         {/* Section 1: Business Type */}
         <Section id="business" title="사업 유형 (Business Type)" icon={Briefcase} badge="세금 체제 결정">
           <p className="text-[11px] text-gray-500 mb-2">사업 유형에 따라 적용되는 세목과 세율이 달라집니다.</p>
