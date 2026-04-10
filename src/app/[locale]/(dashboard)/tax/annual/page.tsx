@@ -21,7 +21,6 @@ export default function AnnualFilingRouterPage() {
 
   const [loading, setLoading] = useState(true);
   const [regime, setRegime] = useState<AnnualRegimeResult | null>(null);
-  const [autoRedirect, setAutoRedirect] = useState(true);
 
   useEffect(() => {
     if (sessionLoading || !session?.customerId) return;
@@ -47,15 +46,6 @@ export default function AnnualFilingRouterPage() {
       finally { setLoading(false); }
     })();
   }, [session, sessionLoading]);
-
-  // Auto-redirect after 3 seconds if regime is determined
-  useEffect(() => {
-    if (!regime || !regime.route || !autoRedirect) return;
-    const timer = setTimeout(() => {
-      router.push(`/${locale}${regime.route}`);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, [regime, autoRedirect, router, locale]);
 
   if (loading || sessionLoading) {
     return (
@@ -159,7 +149,6 @@ export default function AnnualFilingRouterPage() {
               <Button
                 size="lg"
                 onClick={() => {
-                  setAutoRedirect(false);
                   if (regime.route) router.push(`/${locale}${regime.route}`);
                 }}
                 className={`flex-1 bg-${color}-600 hover:bg-${color}-700`}
@@ -168,20 +157,11 @@ export default function AnnualFilingRouterPage() {
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
               <Link href={`/${locale}/company-profile`}>
-                <Button variant="outline" size="lg" onClick={() => setAutoRedirect(false)}>
+                <Button variant="outline" size="lg">
                   회사 정보 수정
                 </Button>
               </Link>
             </div>
-
-            {autoRedirect && (
-              <p className="text-[11px] text-gray-500 text-center">
-                2.5초 후 자동으로 신고 페이지로 이동합니다...
-                <button className="underline ml-2" onClick={() => setAutoRedirect(false)}>
-                  자동 이동 취소
-                </button>
-              </p>
-            )}
           </CardContent>
         </Card>
       )}
