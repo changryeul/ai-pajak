@@ -36,9 +36,13 @@ const ACCOUNT_TYPES: Array<{
   {
     id: 'TAX_PARTNER',
     icon: Briefcase,
-    title: '세무 컨설팅 법인',
-    description: '우리 세무법인의 고객을 관리합니다',
-    features: ['다수 고객 포트폴리오', '직원·세무사 관리', 'e-Filing 대행'],
+    title: '세무 컨설턴트 (외부 사무소)',
+    description: '내 사무소 고객을 AI Pajak으로 관리합니다',
+    features: [
+      '다수 고객 포트폴리오 관리',
+      '직원·세무사 팀 관리',
+      'e-Filing 대행 + 고객 청구',
+    ],
     gradient: 'from-purple-500 to-pink-600',
   },
 ];
@@ -254,15 +258,19 @@ export default function RegisterPage() {
             {accountType === 'TAX_PARTNER' && (
               <>
                 <Input
-                  label="세무법인명" name="firmName" type="text"
+                  label="사무소명 (Nama Kantor)" name="firmName" type="text"
                   value={formData.firmName} onChange={handleChange}
                   placeholder="Kantor Konsultan Pajak ABC" required
                 />
                 <Input
-                  label="사업자 등록번호" name="firmRegistrationNumber" type="text"
+                  label="세무사 라이센스 번호 (선택)" name="firmRegistrationNumber" type="text"
                   value={formData.firmRegistrationNumber} onChange={handleChange}
-                  placeholder="SIUP / NIB"
+                  placeholder="Nomor Izin Praktik Konsultan Pajak"
                 />
+                <p className="text-[10px] text-purple-600 bg-purple-50 rounded p-2">
+                  가입 후 사무소 상세 정보(NPWP, 주소, 직원 추가 등)는 설정에서
+                  언제든지 수정할 수 있습니다.
+                </p>
               </>
             )}
 

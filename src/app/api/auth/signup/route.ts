@@ -154,30 +154,71 @@ export async function POST(request: NextRequest) {
         is_active: true,
       });
     } else if (accountType === 'TAX_PARTNER') {
-      const { data: org, error: orgError } = await admin.from('organization').insert({
-        name: firmName,
-        type: 'TAX_PARTNER',
-        registration_number: firmRegistrationNumber || null,
-        is_active: true,
-      }).select('id').single();
+      // Look up the AI Pajak platform id (needed for tax_partner.platform_id FK)
+      const { data: platform } = await admin
+        .from('platform')
+        .select('id')
+        .eq('name', 'AI Pajak')
+        .maybeSingle();
 
-      if (orgError || !org) {
-        loggers.api.error({ err: orgError }, 'Signup: org record failed');
-        return NextResponse.json({ error: orgError?.message || '조직 생성 실패' }, { status: 500 });
+      if (!platform) {
+        loggers.api.error({}, 'Signup: platform row not found');
+        return NextResponse.json(
+          { error: '플랫폼 설정을 찾을 수 없습니다. 관리자에게 문의하세요.' },
+          { status: 500 }
+        );
       }
 
-      await admin.from('consultant').insert({
+      // Create a new external tax_partner row for this firm
+      const { data: partner, error: partnerError } = await admin
+        .from('tax_partner')
+        .insert({
+          platform_id: platform.id,
+          name: firmName,
+          legal_name: firmName,
+          partner_type: 'EXTERNAL',
+          is_platform_partner: false,
+          tax_license_number: firmRegistrationNumber || null,
+          email,
+          phone: phone || null,
+          is_active: true,
+        })
+        .select('id')
+        .single();
+
+      if (partnerError || !partner) {
+        loggers.api.error({ err: partnerError }, 'Signup: tax_partner record failed');
+        return NextResponse.json(
+          { error: partnerError?.message || '세무법인 등록 실패' },
+          { status: 500 }
+        );
+      }
+
+      // Create the representative consultant record (the founder/signup user)
+      const { error: consultantError } = await admin.from('consultant').insert({
         user_id: userId,
-        organization_id: org.id,
+        tax_partner_id: partner.id,
         full_name: fullName,
         email,
         phone: phone || null,
-        is_representative: true,
+        is_active: true,
       });
 
+      if (consultantError) {
+        loggers.api.error({ err: consultantError }, 'Signup: consultant record failed');
+        return NextResponse.json(
+          { error: consultantError.message },
+          { status: 500 }
+        );
+      }
+
+      // Grant TAX_ADVISOR_JTC role (name preserved for backward compat;
+      // role now covers both JTC staff and external consulting firm reps).
       await admin.from('user_roles').insert({
         user_id: userId,
         role: 'TAX_ADVISOR_JTC',
+        organization_id: partner.id,
+        organization_type: 'TAX_PARTNER',
         is_active: true,
       });
     }
