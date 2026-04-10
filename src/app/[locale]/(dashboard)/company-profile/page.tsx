@@ -15,6 +15,7 @@ import {
   Briefcase, Users, DollarSign, Shield, Camera, FileText,
   Trophy,
 } from 'lucide-react';
+import { ShareholderSection } from '@/components/company/ShareholderSection';
 
 interface CompanyProfile {
   // Basic (already exists from signup)
@@ -519,6 +520,9 @@ export default function CompanyProfilePage() {
             </div>
           )}
         </Section>
+
+        {/* Section 3.5: Shareholders (Akta Pendirian) */}
+        <ShareholderSection />
 
         {/* Section 4: Income Sources */}
         <Section id="income" title="수입원 및 지출 유형 (Income & Expenses)" icon={DollarSign} badge="세목 결정 핵심">
