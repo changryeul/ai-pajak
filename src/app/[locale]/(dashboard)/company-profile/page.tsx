@@ -44,6 +44,8 @@ interface CompanyProfile {
   // UMKM
   is_umkm: boolean;
   umkm_final_tax_start_year: number | null;
+  npwp_pph25_elected: boolean;
+  npwp_pph25_elected_at: string | null;
 
   // Construction
   has_construction_sbu: boolean;
@@ -493,6 +495,23 @@ export default function CompanyProfilePage() {
                   onChange={e => updateField('umkm_final_tax_start_year', e.target.value ? Number(e.target.value) : null)} />
               </div>
             )}
+
+            {/* PPh 25 election at NPWP creation (overrides UMKM default) */}
+            <div className="border-t pt-2 mt-2">
+              <Checkbox checked={profile.npwp_pph25_elected}
+                onChange={v => updateField('npwp_pph25_elected', v)}
+                label="NPWP 발행 시 PPh 25 선택"
+                desc="NPWP 등록 시점에 PPh 25 적용을 선택하신 경우 체크. 체크 시 설립 3년 이내라도 UMKM PPh Final 대신 일반 법인세(PPh 25)가 적용됩니다." />
+              {profile.npwp_pph25_elected && (
+                <div className="ml-6 mt-1">
+                  <Label className="text-[10px]">PPh 25 선택일 (NPWP 발행일)</Label>
+                  <Input type="date"
+                    value={profile.npwp_pph25_elected_at || ''}
+                    className="w-40 h-8 text-xs"
+                    onChange={e => updateField('npwp_pph25_elected_at', e.target.value || null)} />
+                </div>
+              )}
+            </div>
           </div>
         </Section>
 

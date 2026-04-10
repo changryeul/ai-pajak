@@ -82,8 +82,7 @@ const navItems: NavSection[] = [
       ]},
       // ── 법인 고객: 연신고 ──
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'], children: [
-        { href: '/tax/annual/pph-final', icon: Store, labelKey: 'nav.annualPPhFinal' },
-        { href: '/tax/annual/pph25', icon: Building2, labelKey: 'nav.annualPPh25' },
+        { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.annualSettlement' },
         { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
       ]},
@@ -101,8 +100,7 @@ const navItems: NavSection[] = [
       ]},
       // ── 세무 컨설턴트: 연신고 (법인 + 개인) ──
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: consultantRoles, children: [
-        { href: '/tax/annual/pph-final', icon: Store, labelKey: 'nav.annualPPhFinal' },
-        { href: '/tax/annual/pph25', icon: Building2, labelKey: 'nav.annualPPh25' },
+        { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.annualSettlement' },
         { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },

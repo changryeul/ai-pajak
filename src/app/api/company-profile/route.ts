@@ -83,6 +83,7 @@ export async function PUT(request: NextRequest) {
     // Whitelist updatable fields
     const allowedFields = [
       'company_name', 'npwp', 'address', 'phone',
+      'npwp_pph25_elected', 'npwp_pph25_elected_at',
       'business_category', 'legal_form', 'established_year', 'authorized_capital', 'paid_up_capital',
       'annual_revenue', 'revenue_year', 'has_employees', 'employee_count', 'is_pkp',
       'has_foreign_shareholders', 'foreign_ownership_pct', 'parent_company_name', 'parent_company_country',
