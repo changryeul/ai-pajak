@@ -86,38 +86,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '이미 등록된 NPWP입니다' }, { status: 409 });
     }
 
-    // Use anon client for signUp (GoTrue public endpoint)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const anonClient = createClient(supabaseUrl, anonKey);
+    // Try admin.createUser first (no email → no rate limit)
+    // Falls back to signUp() if admin API fails (local GoTrue ES256 issue)
+    const metadata = {
+      full_name: fullName,
+      phone: phone || null,
+      account_type: 'COMPANY',
+      company_name: companyName,
+      npwp: npwpDigits,
+    };
 
-    const { data: signUpData, error: signUpError } = await anonClient.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone: phone || null,
-          account_type: 'COMPANY',
-          company_name: companyName,
-          npwp: npwpDigits,
-        },
-      },
-    });
+    let userId: string | undefined;
 
-    if (signUpError) {
-      loggers.api.error({ err: signUpError }, 'Company signup: signUp failed');
-      const msg = signUpError.message;
-      if (msg.includes('already') || msg.includes('registered')) {
-        return NextResponse.json({ error: '이미 등록된 이메일입니다' }, { status: 409 });
+    try {
+      const { data, error } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: metadata,
+      });
+      if (!error && data?.user?.id) {
+        userId = data.user.id;
+      } else {
+        loggers.api.warn({ err: error }, 'Company signup: admin.createUser failed, trying signUp');
       }
-      if (msg.includes('rate')) {
-        return NextResponse.json({ error: '잠시 후 다시 시도해주세요 (rate limit)' }, { status: 429 });
-      }
-      return NextResponse.json({ error: msg }, { status: 500 });
+    } catch (err) {
+      loggers.api.warn({ err }, 'Company signup: admin.createUser threw, trying signUp');
     }
 
-    const userId = signUpData.user?.id;
+    // Fallback: public signUp
+    if (!userId) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const anonClient = createClient(supabaseUrl, anonKey);
+
+      const { data: signUpData, error: signUpError } = await anonClient.auth.signUp({
+        email,
+        password,
+        options: { data: metadata },
+      });
+
+      if (signUpError) {
+        loggers.api.error({ err: signUpError }, 'Company signup: signUp failed');
+        const msg = signUpError.message;
+        if (msg.includes('already') || msg.includes('registered')) {
+          return NextResponse.json({ error: '이미 등록된 이메일입니다' }, { status: 409 });
+        }
+        if (msg.includes('rate')) {
+          return NextResponse.json({ error: '잠시 후 다시 시도해주세요' }, { status: 429 });
+        }
+        return NextResponse.json({ error: msg }, { status: 500 });
+      }
+
+      userId = signUpData.user?.id;
+    }
+
     if (!userId) {
       return NextResponse.json({ error: '계정 생성에 실패했습니다' }, { status: 500 });
     }

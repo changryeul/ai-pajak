@@ -7,10 +7,67 @@ import { loggers } from '@/lib/logger';
  * POST /api/auth/signup
  *
  * Server-side signup for INDIVIDUAL and TAX_PARTNER accounts.
- * Uses supabase.auth.signUp() (not admin.createUser) for GoTrue compatibility.
- * Email confirmation is disabled in config.toml → users can login immediately.
- * DB records (customer, user_roles, etc.) are created via admin DB client.
+ *
+ * Strategy: admin.createUser (no email sent, no rate limit) → fallback to signUp().
+ * - Production Supabase: admin API works → no email, no rate limit
+ * - Local dev (GoTrue v2.188.1 ES256): admin may fail → fallback to signUp()
  */
+
+async function createAuthUser(
+  email: string,
+  password: string,
+  metadata: Record<string, unknown>,
+): Promise<{ userId: string; error?: string }> {
+  const admin = getSupabaseAdmin();
+
+  // Try admin API first (no email sent → no rate limit)
+  try {
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: metadata,
+    });
+
+    if (!error && data?.user?.id) {
+      return { userId: data.user.id };
+    }
+
+    // If admin fails (e.g., local GoTrue ES256 issue), fall through to signUp
+    loggers.api.warn({ err: error }, 'Signup: admin.createUser failed, trying signUp fallback');
+  } catch (err) {
+    loggers.api.warn({ err }, 'Signup: admin.createUser threw, trying signUp fallback');
+  }
+
+  // Fallback: public signUp (may send email, subject to rate limit)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const anonClient = createClient(supabaseUrl, anonKey);
+
+  const { data: signUpData, error: signUpError } = await anonClient.auth.signUp({
+    email,
+    password,
+    options: { data: metadata },
+  });
+
+  if (signUpError) {
+    const msg = signUpError.message;
+    if (msg.includes('already') || msg.includes('registered')) {
+      return { userId: '', error: '이미 등록된 이메일입니다' };
+    }
+    if (msg.includes('rate')) {
+      return { userId: '', error: '잠시 후 다시 시도해주세요' };
+    }
+    return { userId: '', error: msg };
+  }
+
+  if (!signUpData.user?.id) {
+    return { userId: '', error: '계정 생성에 실패했습니다' };
+  }
+
+  return { userId: signUpData.user.id };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -58,41 +115,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use anon client for signUp (GoTrue public endpoint)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const anonClient = createClient(supabaseUrl, anonKey);
-
-    const { data: signUpData, error: signUpError } = await anonClient.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone: phone || null,
-          account_type: accountType,
-        },
-      },
+    // Create auth user (admin first → signUp fallback)
+    const { userId, error: authError } = await createAuthUser(email, password, {
+      full_name: fullName,
+      phone: phone || null,
+      account_type: accountType,
+      ...(accountType === 'TAX_PARTNER' && {
+        firm_name: firmName,
+        firm_registration_number: firmRegistrationNumber,
+      }),
     });
 
-    if (signUpError) {
-      loggers.api.error({ err: signUpError }, 'Signup: signUp failed');
-      const msg = signUpError.message;
-      if (msg.includes('already') || msg.includes('registered')) {
-        return NextResponse.json({ error: '이미 등록된 이메일입니다' }, { status: 409 });
-      }
-      if (msg.includes('rate')) {
-        return NextResponse.json({ error: '잠시 후 다시 시도해주세요' }, { status: 429 });
-      }
-      return NextResponse.json({ error: msg }, { status: 500 });
+    if (authError) {
+      const status = authError.includes('이미') ? 409 : authError.includes('잠시') ? 429 : 500;
+      return NextResponse.json({ error: authError }, { status });
     }
 
-    const userId = signUpData.user?.id;
-    if (!userId) {
-      return NextResponse.json({ error: '계정 생성에 실패했습니다' }, { status: 500 });
-    }
-
-    // Use admin DB client (PostgREST) for DB records — this works fine
+    // Create DB records via admin client (PostgREST — always works)
     const admin = getSupabaseAdmin();
 
     if (accountType === 'INDIVIDUAL') {
@@ -127,7 +166,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: orgError?.message || '조직 생성 실패' }, { status: 500 });
       }
 
-      const { error: consultantError } = await admin.from('consultant').insert({
+      await admin.from('consultant').insert({
         user_id: userId,
         organization_id: org.id,
         full_name: fullName,
@@ -135,10 +174,6 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         is_representative: true,
       });
-
-      if (consultantError) {
-        loggers.api.warn({ err: consultantError }, 'Signup: consultant record failed (non-fatal)');
-      }
 
       await admin.from('user_roles').insert({
         user_id: userId,
