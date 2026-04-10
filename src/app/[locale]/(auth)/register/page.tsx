@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
-import { createClient } from '@/lib/supabase/client';
 import { User, Building2, Briefcase, ArrowRight, ArrowLeft } from 'lucide-react';
 
 type AccountType = 'INDIVIDUAL' | 'COMPANY' | 'TAX_PARTNER';
@@ -92,42 +91,26 @@ export default function RegisterPage() {
     }
 
     try {
-      const supabase = createClient();
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            phone: formData.phone,
-            account_type: accountType,
-          },
-          emailRedirectTo: `${window.location.origin}/${locale}/dashboard`,
-        },
+      // Server-side signup with email_confirm=true (즉시 로그인 가능)
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+          phone: formData.phone || undefined,
+          accountType,
+          firmName: formData.firmName || undefined,
+          firmRegistrationNumber: formData.firmRegistrationNumber || undefined,
+        }),
       });
 
-      if (signUpError) {
-        setError(signUpError.message);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || t('errors.serverError'));
         return;
       }
-
-      // Setup account with selected type
-      try {
-        await fetch('/api/auth/setup-account', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            accountType,
-            fullName: formData.fullName,
-            phone: formData.phone,
-            companyName: formData.companyName || undefined,
-            npwp: formData.npwp || undefined,
-            firmName: formData.firmName || undefined,
-            firmRegistrationNumber: formData.firmRegistrationNumber || undefined,
-          }),
-        });
-      } catch { /* non-blocking */ }
 
       setSuccess(true);
     } catch {

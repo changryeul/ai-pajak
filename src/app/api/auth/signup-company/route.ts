@@ -1,23 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 
 /**
  * POST /api/auth/signup-company
  *
- * Server-side signup flow for corporate customers. Bypasses the client-side
- * signUp → setup-account race condition (no session yet → 401).
- *
- * Uses admin client to:
- *   1. Create auth user with email_confirm=true (skip email verification for now)
- *   2. Create customer(COMPANY) record with NPWP, address, agreement fields
- *   3. Insert customer_kbli rows
- *   4. Assign CUSTOMER role
- *   5. Create FREE subscription
- *
- * Public endpoint (no auth required), but protected by:
- *   - rate-limit middleware (src/middleware.ts)
- *   - duplicate email / NPWP detection
+ * Server-side signup for corporate (COMPANY) customers.
+ * Uses supabase.auth.signUp() for GoTrue compatibility.
+ * Email confirmation is disabled in config.toml → users can login immediately.
+ * DB records created via admin DB client (PostgREST).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +17,7 @@ export async function POST(request: NextRequest) {
     const {
       email,
       password,
-      fullName,           // representative name
+      fullName,
       phone,
       companyName,
       npwp,
@@ -76,7 +68,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'JTC 약관 동의가 필요합니다' }, { status: 400 });
     }
 
-    // Normalize NPWP: strip separators, keep only 15 digits (corporate NPWP format)
     const npwpDigits = npwp.replace(/\D/g, '');
     if (npwpDigits.length !== 15) {
       return NextResponse.json({ error: 'NPWP는 15자리 숫자여야 합니다' }, { status: 400 });
@@ -84,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     const admin = getSupabaseAdmin();
 
-    // Check duplicate NPWP (digits-only stored in DB)
+    // Check duplicate NPWP
     const { data: existingNpwp } = await admin
       .from('customer')
       .select('id')
@@ -92,37 +83,46 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existingNpwp) {
-      return NextResponse.json(
-        { error: '이미 등록된 NPWP입니다' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: '이미 등록된 NPWP입니다' }, { status: 409 });
     }
 
-    // Create auth user (email pre-confirmed so user can log in immediately)
-    const { data: authUser, error: authError } = await admin.auth.admin.createUser({
+    // Use anon client for signUp (GoTrue public endpoint)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const anonClient = createClient(supabaseUrl, anonKey);
+
+    const { data: signUpData, error: signUpError } = await anonClient.auth.signUp({
       email,
       password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: fullName,
-        phone: phone || null,
-        account_type: 'COMPANY',
-        company_name: companyName,
-        npwp: npwpDigits,
+      options: {
+        data: {
+          full_name: fullName,
+          phone: phone || null,
+          account_type: 'COMPANY',
+          company_name: companyName,
+          npwp: npwpDigits,
+        },
       },
     });
 
-    if (authError || !authUser?.user) {
-      loggers.api.error({ err: authError }, 'Failed to create auth user');
-      return NextResponse.json(
-        { error: authError?.message || '계정 생성에 실패했습니다' },
-        { status: 500 }
-      );
+    if (signUpError) {
+      loggers.api.error({ err: signUpError }, 'Company signup: signUp failed');
+      const msg = signUpError.message;
+      if (msg.includes('already') || msg.includes('registered')) {
+        return NextResponse.json({ error: '이미 등록된 이메일입니다' }, { status: 409 });
+      }
+      if (msg.includes('rate')) {
+        return NextResponse.json({ error: '잠시 후 다시 시도해주세요 (rate limit)' }, { status: 429 });
+      }
+      return NextResponse.json({ error: msg }, { status: 500 });
     }
 
-    const userId = authUser.user.id;
+    const userId = signUpData.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: '계정 생성에 실패했습니다' }, { status: 500 });
+    }
 
-    // Create customer record
+    // Create customer record via admin DB client
     const { data: customer, error: custError } = await admin
       .from('customer')
       .insert({
@@ -139,7 +139,6 @@ export async function POST(request: NextRequest) {
         jtc_agreement_accepted_at: new Date().toISOString(),
         data_processing_consent: !!jtcAgreement.dataProcessing,
         tax_filing_authorization: !!jtcAgreement.taxFilingAuthorization,
-        // Tax profile (all optional)
         annual_revenue: taxProfile?.annualRevenue || null,
         revenue_year: taxProfile?.revenueYear || null,
         has_employees: !!taxProfile?.hasEmployees,
@@ -153,9 +152,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (custError || !customer) {
-      // Rollback auth user
-      await admin.auth.admin.deleteUser(userId);
-      loggers.api.error({ err: custError }, 'Failed to create customer');
+      loggers.api.error({ err: custError }, 'Company signup: customer record failed');
       return NextResponse.json(
         { error: custError?.message || '고객 정보 저장 실패' },
         { status: 500 }
@@ -197,7 +194,7 @@ export async function POST(request: NextRequest) {
       current_period_end: yearEnd.toISOString(),
     });
 
-    loggers.api.info({ userId, customerId, npwp }, 'Company signup completed');
+    loggers.api.info({ userId, customerId, npwp: npwpDigits }, 'Company signup completed');
 
     return NextResponse.json({
       success: true,
@@ -205,7 +202,7 @@ export async function POST(request: NextRequest) {
         userId,
         customerId,
         email,
-        npwp,
+        npwp: npwpDigits,
         companyName,
       },
       message: '법인 가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
