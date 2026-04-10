@@ -194,9 +194,10 @@ SPT form PDFs use `@react-pdf/renderer` with `renderToBuffer()` in API routes. P
 
 ## Test Accounts
 
-| Role | Email | Password |
-|------|-------|----------|
-| CUSTOMER | customer.test@example.com | TestPassword123! |
-| CONSULTANT_JTC | consultant.test@jakartatax.co.id | TestPassword123! |
-| TAX_ADVISOR_JTC | advisor.test@jakartatax.co.id | TestPassword123! |
-| PLATFORM_ADMIN | admin.test@aipajak.com | TestPassword123! |
+| Role | Type | Email | Password |
+|------|------|-------|----------|
+| CUSTOMER | INDIVIDUAL (개인) | customer.test@example.com | TestPassword123! |
+| CUSTOMER | COMPANY (법인) | company.test@example.com | TestPassword123! |
+| CONSULTANT_JTC | — | consultant.test@jakartatax.co.id | TestPassword123! |
+| TAX_ADVISOR_JTC | — | advisor.test@jakartatax.co.id | TestPassword123! |
+| PLATFORM_ADMIN | — | admin.test@aipajak.com | TestPassword123! |

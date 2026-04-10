@@ -4,7 +4,8 @@
  * Run with: npx tsx scripts/seed-test-users.ts
  *
  * Creates test users for RBAC E2E tests:
- * - CUSTOMER
+ * - CUSTOMER (INDIVIDUAL) — 개인 고객
+ * - CUSTOMER (COMPANY)    — 법인 고객
  * - CONSULTANT_JTC
  * - TAX_ADVISOR_JTC
  * - PLATFORM_ADMIN
@@ -39,6 +40,16 @@ const TEST_USERS = [
     user_metadata: {
       full_name: 'John Doe Test',
       role: 'CUSTOMER',
+      customer_type: 'INDIVIDUAL',
+    },
+  },
+  {
+    email: 'company.test@example.com',
+    password: 'TestPassword123!',
+    user_metadata: {
+      full_name: 'PT Example Indonesia',
+      role: 'CUSTOMER',
+      customer_type: 'COMPANY',
     },
   },
   {
@@ -154,10 +165,11 @@ async function createTestData() {
   // Get user IDs
   const { data: users } = await supabase.auth.admin.listUsers();
   const customerUser = users?.users?.find(u => u.email === 'customer.test@example.com');
+  const companyUser = users?.users?.find(u => u.email === 'company.test@example.com');
   const consultantUser = users?.users?.find(u => u.email === 'consultant.test@jakartatax.co.id');
   const advisorUser = users?.users?.find(u => u.email === 'advisor.test@jakartatax.co.id');
 
-  if (!customerUser || !consultantUser || !advisorUser) {
+  if (!customerUser || !companyUser || !consultantUser || !advisorUser) {
     console.error('❌ Users not found');
     return;
   }
@@ -213,7 +225,7 @@ async function createTestData() {
     console.log('✅ Tax partner created: Jakarta Tax Consulting');
   }
 
-  // Create customer record
+  // Create INDIVIDUAL customer record
   const customerId = '00000000-0000-0000-0000-000000000010';
   const { error: customerError } = await supabase.from('customer').upsert({
     id: customerId,
@@ -225,9 +237,39 @@ async function createTestData() {
   }, { onConflict: 'id' });
 
   if (customerError) {
-    console.error('❌ Customer creation error:', customerError.message);
+    console.error('❌ Individual customer creation error:', customerError.message);
   } else {
-    console.log('✅ Customer record created: John Doe Test');
+    console.log('✅ Individual customer record created: John Doe Test');
+  }
+
+  // Create COMPANY customer record (법인 고객 테스트용)
+  const companyCustomerId = '00000000-0000-0000-0000-000000000011';
+  const { error: companyError } = await supabase.from('customer').upsert({
+    id: companyCustomerId,
+    user_id: companyUser.id,
+    customer_type: 'COMPANY',
+    full_name: 'PT Example Indonesia',
+    company_name: 'PT Example Indonesia',
+    email: 'company.test@example.com',
+    npwp: '0123456789012000',
+    address: 'Jl. Sudirman No. 1, Jakarta Pusat',
+    // 기본 세무 프로필 — 완성도 50% 정도로 시작 (나머지는 UI에서 완성)
+    business_category: 'SERVICE',
+    legal_form: 'PT',
+    established_year: 2020,
+    annual_revenue: 5_000_000_000,
+    revenue_year: 2025,
+    has_employees: true,
+    employee_count: 10,
+    is_pkp: true,
+    is_umkm: false,
+    pays_service_fees: true,
+  }, { onConflict: 'id' });
+
+  if (companyError) {
+    console.error('❌ Company customer creation error:', companyError.message);
+  } else {
+    console.log('✅ Company customer record created: PT Example Indonesia');
   }
 
   // Create consultant record for CONSULTANT_JTC user
@@ -285,9 +327,9 @@ async function createTestData() {
   // Delete existing assignments before creating new ones
   await supabase.from('customer_consultant')
     .delete()
-    .eq('customer_id', customerId);
+    .in('customer_id', [customerId, companyCustomerId]);
 
-  // Create customer-consultant assignment
+  // Create customer-consultant assignment (개인 고객)
   const { error: assignmentError } = await supabase.from('customer_consultant').insert({
     customer_id: customerId,
     consultant_id: consultantId,
@@ -297,10 +339,10 @@ async function createTestData() {
   if (assignmentError) {
     console.error('❌ Assignment error:', assignmentError.message);
   } else {
-    console.log('✅ Customer-Consultant assignment created');
+    console.log('✅ Individual Customer-Consultant assignment created');
   }
 
-  // Create customer-advisor assignment
+  // Create customer-advisor assignment (개인 고객)
   const { error: advisorAssignmentError } = await supabase.from('customer_consultant').insert({
     customer_id: customerId,
     consultant_id: advisorConsultantId,
@@ -310,7 +352,19 @@ async function createTestData() {
   if (advisorAssignmentError) {
     console.error('❌ Advisor assignment error:', advisorAssignmentError.message);
   } else {
-    console.log('✅ Customer-Advisor assignment created');
+    console.log('✅ Individual Customer-Advisor assignment created');
+  }
+
+  // Create company customer-consultant assignments (법인 고객)
+  const { error: companyAssignmentError } = await supabase.from('customer_consultant').insert([
+    { customer_id: companyCustomerId, consultant_id: consultantId, is_active: true },
+    { customer_id: companyCustomerId, consultant_id: advisorConsultantId, is_active: true },
+  ]);
+
+  if (companyAssignmentError) {
+    console.error('❌ Company assignment error:', companyAssignmentError.message);
+  } else {
+    console.log('✅ Company Customer-Consultant/Advisor assignments created');
   }
 
   // Delete existing POAs before creating new ones
