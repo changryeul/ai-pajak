@@ -628,7 +628,7 @@ export function SPT1770SSGenerator({
                   {extractedIncomes[0]?.taxYear && (
                     <> {tf('detectedYear')}: <strong>{extractedIncomes[0].taxYear}</strong>.</>
                   )}
-                  {' '}Silakan periksa data dan lanjutkan.
+                  {' '}데이터를 확인하고 계속 진행하세요.
                 </p>
               </div>
             )}
@@ -799,7 +799,7 @@ export function SPT1770SSGenerator({
               onValueChange={(v) => setTaxYear(parseInt(v))}
             >
               <SelectTrigger id="taxYear">
-                <SelectValue placeholder="Pilih tahun pajak" />
+                <SelectValue placeholder="과세 연도 선택" />
               </SelectTrigger>
               <SelectContent>
                 {taxYearOptions.map((year) => (
@@ -813,13 +813,13 @@ export function SPT1770SSGenerator({
 
           {/* PTKP Status Selection */}
           <div className="space-y-2">
-            <Label htmlFor="ptkpStatus">Status PTKP</Label>
+            <Label htmlFor="ptkpStatus">PTKP 상태 (혼인/부양가족)</Label>
             <Select
               value={ptkpStatus}
               onValueChange={(v) => setPtkpStatus(v as PTKPStatus)}
             >
               <SelectTrigger id="ptkpStatus">
-                <SelectValue placeholder="Pilih status PTKP" />
+                <SelectValue placeholder="PTKP 상태 선택" />
               </SelectTrigger>
               <SelectContent>
                 {PTKP_OPTIONS.map((option) => (

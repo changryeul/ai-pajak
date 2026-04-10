@@ -54,7 +54,7 @@ export function GettingStartedGuide({ customerId, userName }: GettingStartedGuid
       icon: User,
       title: t('guide.completeProfile'),
       description: t('guide.completeProfileDesc'),
-      href: `/${locale}/settings`,
+      href: `/${locale}/my-profile`,
       gradient: 'from-blue-500 to-blue-600',
     },
     {
@@ -115,12 +115,13 @@ export function GettingStartedGuide({ customerId, userName }: GettingStartedGuid
     const completed = new Set<string>();
 
     try {
-      // Check profile
+      // Check profile — consider "complete" once basic signup fields (name + email) are set.
+      // NPWP is optional at signup and the user can add it later from the 내 정보 page.
       const profileRes = await fetch('/api/auth/me');
       const profileData = await profileRes.json();
       if (profileData.success && profileData.user) {
         const u = profileData.user;
-        if (u.npwp && u.fullName) {
+        if (u.fullName && u.email) {
           completed.add('profile');
         }
       }

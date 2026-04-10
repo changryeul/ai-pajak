@@ -21,6 +21,7 @@ interface Customer {
   full_name: string;
   npwp: string;
   customer_type: string;
+  ptkp_status?: string | null;
 }
 
 export default function SPT1770SSPage() {
@@ -53,6 +54,7 @@ export default function SPT1770SSPage() {
           full_name: data.data.full_name,
           npwp: data.data.npwp || '',
           customer_type: data.data.customer_type,
+          ptkp_status: data.data.ptkp_status || null,
         });
       } else {
         throw new Error(data.error || 'Failed to load customer data');
@@ -231,6 +233,12 @@ export default function SPT1770SSPage() {
             customerId={selectedCustomer.id}
             customerName={selectedCustomer.full_name}
             customerNpwp={selectedCustomer.npwp}
+            defaultPtkpStatus={
+              // Prefill from customer profile if valid PTKP code
+              selectedCustomer.ptkp_status && /^(TK|K)(\/I)?\/[0-3]$/.test(selectedCustomer.ptkp_status)
+                ? (selectedCustomer.ptkp_status as 'TK/0')
+                : undefined
+            }
             onComplete={(data) => {
               console.log('SPT 1770 SS Generated:', data);
             }}

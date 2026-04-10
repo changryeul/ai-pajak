@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   User, Save, Loader2, CheckCircle, AlertTriangle, Mail, Phone,
-  MapPin, FileText, IdCard, Trash2,
+  MapPin, FileText, IdCard, Trash2, Heart,
 } from 'lucide-react';
 
 interface PersonalProfile {
@@ -22,9 +22,25 @@ interface PersonalProfile {
   address: string | null;
   npwp: string | null;
   nik: string | null;
+  ptkp_status: string | null;
   customer_type: 'INDIVIDUAL' | 'COMPANY';
   created_at: string;
 }
+
+const PTKP_OPTIONS = [
+  { value: 'TK/0', label: 'TK/0 — 미혼, 부양가족 없음' },
+  { value: 'TK/1', label: 'TK/1 — 미혼, 부양가족 1명' },
+  { value: 'TK/2', label: 'TK/2 — 미혼, 부양가족 2명' },
+  { value: 'TK/3', label: 'TK/3 — 미혼, 부양가족 3명' },
+  { value: 'K/0',  label: 'K/0 — 기혼, 부양가족 없음' },
+  { value: 'K/1',  label: 'K/1 — 기혼, 부양가족 1명' },
+  { value: 'K/2',  label: 'K/2 — 기혼, 부양가족 2명' },
+  { value: 'K/3',  label: 'K/3 — 기혼, 부양가족 3명' },
+  { value: 'K/I/0', label: 'K/I/0 — 기혼(배우자 소득 합산), 부양가족 없음' },
+  { value: 'K/I/1', label: 'K/I/1 — 기혼(배우자 소득 합산), 부양가족 1명' },
+  { value: 'K/I/2', label: 'K/I/2 — 기혼(배우자 소득 합산), 부양가족 2명' },
+  { value: 'K/I/3', label: 'K/I/3 — 기혼(배우자 소득 합산), 부양가족 3명' },
+];
 
 export default function MyProfilePage() {
   const { session, isLoading: sessionLoading } = useSession();
@@ -43,6 +59,7 @@ export default function MyProfilePage() {
     address: '',
     npwp: '',
     nik: '',
+    ptkp_status: '',
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -77,6 +94,7 @@ export default function MyProfilePage() {
           address: p.address || '',
           npwp: p.npwp || '',
           nik: p.nik || '',
+          ptkp_status: p.ptkp_status || '',
         });
       } else {
         showMsg('error', data.error || '프로필을 불러올 수 없습니다');
@@ -111,6 +129,7 @@ export default function MyProfilePage() {
           address: form.address || null,
           npwp: form.npwp || null,
           nik: form.nik || null,
+          ptkp_status: form.ptkp_status || null,
         }),
       });
       const data = await res.json();
@@ -154,9 +173,9 @@ export default function MyProfilePage() {
   // Profile completeness calculation
   const filledCount = [
     profile.full_name, profile.email, profile.phone,
-    profile.address, profile.npwp, profile.nik,
+    profile.address, profile.npwp, profile.nik, profile.ptkp_status,
   ].filter(Boolean).length;
-  const totalFields = 6;
+  const totalFields = 7;
   const completeness = Math.round((filledCount / totalFields) * 100);
 
   return (
@@ -299,6 +318,40 @@ export default function MyProfilePage() {
             </div>
           </div>
 
+          {/* PTKP Status — marital/dependents for tax calculation */}
+          <div>
+            <Label className="text-xs flex items-center gap-1">
+              <Heart className="h-3 w-3" />
+              PTKP 상태 (혼인 / 부양가족)
+            </Label>
+            <div className="flex gap-2">
+              <select
+                value={form.ptkp_status}
+                onChange={e => { setForm({ ...form, ptkp_status: e.target.value }); setEditing(true); }}
+                className="flex-1 h-9 px-3 rounded-md border border-input text-sm bg-background"
+              >
+                <option value="">선택 안 함</option>
+                {PTKP_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              {form.ptkp_status && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setForm({ ...form, ptkp_status: '' }); setEditing(true); }}
+                  className="text-red-500 hover:bg-red-50 flex-shrink-0"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+            <p className="text-[10px] text-gray-500 mt-1">
+              연말 결산(SPT 1770SS)에서 자동으로 사용됩니다. 혼인 상태·부양가족 수가 바뀔 때 업데이트하세요.
+            </p>
+          </div>
+
           {/* Phone */}
           <div>
             <Label className="text-xs flex items-center gap-1">
@@ -376,6 +429,7 @@ export default function MyProfilePage() {
                     address: profile.address || '',
                     npwp: profile.npwp || '',
                     nik: profile.nik || '',
+                    ptkp_status: profile.ptkp_status || '',
                   });
                   setEditing(false);
                 }}

@@ -181,7 +181,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Validate update data
-    const allowedFields = ['full_name', 'company_name', 'email', 'phone', 'address', 'npwp', 'nik'];
+    const allowedFields = ['full_name', 'company_name', 'email', 'phone', 'address', 'npwp', 'nik', 'ptkp_status'];
     const updateData: Record<string, unknown> = {};
 
     for (const field of allowedFields) {
