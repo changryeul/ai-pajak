@@ -709,4 +709,191 @@ describe('TaxResolutionEngine', () => {
       expect(result.reason).toContain('portfolio');
     });
   });
+
+  // ─── Phase 3 edge cases — NPWP surcharge interactions ───
+  describe('Phase 3 edge cases: NPWP surcharge interactions', () => {
+    const noNpwpCtx: TransactionContext = {
+      grossAmount: 100_000_000,
+      transactionDate: '2025-06-15',
+      serviceCategory: 'SERVICE',
+      recipientType: 'RESIDENT',
+      recipientNpwp: undefined, // No NPWP
+    };
+
+    it('should NOT apply NPWP surcharge on EXEMPT corporate dividend', () => {
+      // Even without NPWP, a tax-exempt (0%) dividend should stay at 0% (no surcharge)
+      const result = TaxResolutionEngine.resolve({
+        ...noNpwpCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientIsEntity: true,
+      });
+      expect(result.rate).toBe(0);
+      expect(result.taxAmount).toBe(0);
+      expect(result.ruleId).toBe('CATEGORY_DIVIDEND_CORP_EXEMPT');
+    });
+
+    it('should NOT apply NPWP surcharge on PPh 4(2) Final dividend (individual non-reinvested)', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...noNpwpCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientIsEntity: false,
+        receivesReinvestedDividend: false,
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.10); // Final 10%, no surcharge
+      expect(result.npwpSurchargeApplied).toBe(false);
+    });
+
+    it('should NOT apply NPWP surcharge on PPh Final bank interest', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...noNpwpCtx,
+        serviceCategory: 'INTEREST',
+        interestSource: 'BANK_DEPOSIT',
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.20);
+      expect(result.npwpSurchargeApplied).toBe(false);
+    });
+
+    it('should apply NPWP surcharge on PPh 23 machine rental (not Final)', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...noNpwpCtx,
+        serviceCategory: 'RENTAL',
+        rentalAssetType: 'MACHINE',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.04); // 2% × 2 = 4% due to no NPWP
+      expect(result.npwpSurchargeApplied).toBe(true);
+    });
+
+    it('should apply NPWP surcharge on PPh 23 loan interest', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...noNpwpCtx,
+        serviceCategory: 'INTEREST',
+        interestSource: 'LOAN',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.30); // 15% × 2 = 30% due to no NPWP
+      expect(result.npwpSurchargeApplied).toBe(true);
+    });
+
+    it('should NOT apply NPWP surcharge on PPh 4(2) building rental (Final)', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...noNpwpCtx,
+        serviceCategory: 'RENTAL',
+        rentalAssetType: 'BUILDING_LAND',
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.10);
+      expect(result.npwpSurchargeApplied).toBe(false);
+    });
+  });
+
+  // ─── Phase 3: Edge cases around dividend with missing context ───
+  describe('Phase 3 edge cases: Dividend fallback scenarios', () => {
+    it('should use fallback rule when recipientIsEntity is undefined', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'RESIDENT',
+        // recipientIsEntity not provided
+      });
+      expect(result.ruleId).toBe('CATEGORY_DIVIDEND_FALLBACK');
+      expect(result.reason).toContain('⚠');
+    });
+
+    it('should handle individual with receivesReinvestedDividend=true but not=false explicitly', () => {
+      // Explicit false reinvestment → PPh Final 10%
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'RESIDENT',
+        recipientIsEntity: false,
+        receivesReinvestedDividend: false,
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.10);
+      expect(result.isFinal).toBe(true);
+    });
+  });
+
+  // ─── Phase 3: Rental edge cases ───
+  describe('Phase 3 edge cases: Rental default behavior', () => {
+    it('should default to BUILDING_LAND when rentalAssetType is undefined', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'RENTAL',
+        // rentalAssetType not provided
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.10);
+      expect(result.ruleId).toBe('CATEGORY_RENTAL_BUILDING');
+    });
+
+    it('should handle OTHER rental type as PPh 23 2%', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'RENTAL',
+        rentalAssetType: 'OTHER',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.02);
+      expect(result.ruleId).toBe('CATEGORY_RENTAL_OTHER');
+    });
+  });
+
+  // ─── Phase 3: Interest edge cases ───
+  describe('Phase 3 edge cases: Interest source behavior', () => {
+    it('should default to regular PPh 23 when interestSource is undefined', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'INTEREST',
+        // interestSource not provided
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.15);
+    });
+
+    it('should apply PPh 23 15% for BOND interest', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'INTEREST',
+        interestSource: 'BOND',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.15);
+      expect(result.reason).toContain('채권');
+    });
+  });
+
+  // ─── Phase 3: Non-resident dividend with borderline shareholding ───
+  describe('Phase 3 edge cases: Treaty shareholding boundary', () => {
+    it('should apply preferential rate at exactly 25% shareholding', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'NON_RESIDENT',
+        recipientCountry: 'JP',
+        hasCertificateOfDomicile: true,
+        hasDgtForm: true,
+        shareholdingPct: 25, // Exactly at threshold
+      });
+      expect(result.taxType).toBe('PPh26');
+      expect(result.rate).toBe(0.10); // Japan treaty preferential rate
+      expect(result.reason).toContain('≥25%');
+    });
+
+    it('should apply portfolio rate at 24.99% shareholding', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'NON_RESIDENT',
+        recipientCountry: 'JP',
+        hasCertificateOfDomicile: true,
+        hasDgtForm: true,
+        shareholdingPct: 24.99,
+      });
+      expect(result.rate).toBe(0.15); // Portfolio rate (raised from 10%)
+    });
+  });
 });

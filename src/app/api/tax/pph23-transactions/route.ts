@@ -5,6 +5,7 @@ import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { TaxResolutionEngine } from '@/lib/tax/tax-resolution-engine';
+import { SERVICE_TYPE_TO_CATEGORY, taxTypeToRegime, isDgtFormValid } from '@/lib/tax/withholding-helpers';
 import type { ServiceCategory } from '@/types';
 
 const SERVICE_TYPES = {
@@ -68,31 +69,6 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   });
 }
 
-// Map service_type (Indonesian label) → serviceCategory (engine enum)
-const SERVICE_TYPE_TO_CATEGORY: Record<string, ServiceCategory> = {
-  DIVIDEN: 'DIVIDEND',
-  BUNGA: 'INTEREST',
-  ROYALTI: 'ROYALTY',
-  HADIAH: 'OTHER',
-  SEWA: 'RENTAL',
-  JASA_TEKNIK: 'SERVICE',
-  JASA_MANAJEMEN: 'SERVICE',
-  JASA_KONSULTAN: 'SERVICE',
-  JASA_LAINNYA: 'SERVICE',
-};
-
-// Map engine taxType → DB tax_regime
-function taxTypeToRegime(taxType: string, rate: number): string {
-  if (rate === 0) return 'EXEMPT';
-  if (taxType === 'PPh23') return 'PPH23';
-  if (taxType === 'PPh4_2') return 'PPH4_2';
-  if (taxType === 'PPh26') return 'PPH26';
-  if (taxType === 'PPh21') return 'PPH23'; // fallback (shouldn't happen via this route)
-  if (taxType === 'PPh22') return 'PPH23';
-  if (taxType === 'PPh15') return 'PPH_FINAL';
-  return 'PPH23';
-}
-
 async function handlePost(req: RequestWithSession): Promise<Response> {
   try {
     const body = await req.json();
@@ -141,9 +117,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
 
     // Check DGT Form validity (not expired as of transaction date)
     const txDate = transactionDate || new Date().toISOString().slice(0, 10);
-    const hasDgtForm = cpRecord?.dgt_form_valid_until
-      ? new Date(cpRecord.dgt_form_valid_until) >= new Date(txDate)
-      : false;
+    const hasDgtForm = isDgtFormValid(cpRecord?.dgt_form_valid_until, txDate);
 
     let effectiveRate: number;
     let taxAmount: number;
