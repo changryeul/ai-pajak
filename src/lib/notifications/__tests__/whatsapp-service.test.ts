@@ -62,25 +62,37 @@ describe('WhatsApp Service', () => {
     });
   });
 
-  describe('tax deadline constants', () => {
+  describe('tax deadline constants (Coretax / PMK 81/2024)', () => {
+    // Under Coretax (2025~), all PPh + PPN payments unified to 15th of following month.
+    // SPT Masa PPh filing = 20th. SPT Masa PPN filing = end of following month.
     const TAX_DEADLINES: Record<string, number> = {
-      PPh21: 10,
-      PPh23: 10,
+      PPh21: 15,
+      PPh23: 15,
+      PPh_4_2: 15,
+      PPh25: 15,
+      PPh26: 15,
       PPh_FINAL: 15,
-      PPN: 15, // end of month typically, using 15 for SPT
+      PPN: 15,
       SPT_MASA: 20,
     };
 
-    it('should have PPh 21/23 deadline on 10th', () => {
-      expect(TAX_DEADLINES.PPh21).toBe(10);
-      expect(TAX_DEADLINES.PPh23).toBe(10);
+    it('should have all PPh payment deadlines unified to 15th (Coretax)', () => {
+      expect(TAX_DEADLINES.PPh21).toBe(15);
+      expect(TAX_DEADLINES.PPh23).toBe(15);
+      expect(TAX_DEADLINES.PPh_4_2).toBe(15);
+      expect(TAX_DEADLINES.PPh25).toBe(15);
+      expect(TAX_DEADLINES.PPh26).toBe(15);
     });
 
-    it('should have PPh Final deadline on 15th', () => {
+    it('should have PPh Final UMKM deadline on 15th', () => {
       expect(TAX_DEADLINES.PPh_FINAL).toBe(15);
     });
 
-    it('should have SPT Masa deadline on 20th', () => {
+    it('should have PPN payment deadline on 15th (unified under Coretax)', () => {
+      expect(TAX_DEADLINES.PPN).toBe(15);
+    });
+
+    it('should have SPT Masa PPh filing deadline on 20th', () => {
       expect(TAX_DEADLINES.SPT_MASA).toBe(20);
     });
   });

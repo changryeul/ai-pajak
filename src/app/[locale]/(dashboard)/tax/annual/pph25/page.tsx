@@ -791,7 +791,7 @@ export default function PPh25AnnualPage() {
             </div>
 
             <p className="text-xs text-green-800 mt-3">
-              {year + 1}년 1월부터 매월 <b>{fmtRp(nextYearMonthly)}</b>을 10일까지 납부합니다.
+              {year + 1}년 1월부터 매월 <b>{fmtRp(nextYearMonthly)}</b>을 <b>15일까지</b> 납부합니다 (Coretax / PMK 81/2024).
               매출 변동이 크면 PMK-44로 조정 신청이 가능합니다.
             </p>
           </CardContent></Card>

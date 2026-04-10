@@ -576,7 +576,7 @@ export default function CorporateTaxPage() {
                 <CardContent className="p-4 text-center">
                   <p className="text-xs text-gray-500">월 납부액 (예상)</p>
                   <p className="text-2xl font-bold font-mono mt-1">{fmtRp(r.monthlyAmount)}</p>
-                  <p className="text-[10px] text-gray-400">매월 10일까지 납부</p>
+                  <p className="text-[10px] text-gray-400">매월 15일까지 납부 (Coretax)</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm">

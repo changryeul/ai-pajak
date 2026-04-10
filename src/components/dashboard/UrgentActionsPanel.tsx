@@ -72,11 +72,13 @@ export function UrgentActionsPanel({ consultantId, limit = 5 }: UrgentActionsPan
           tax_type: string;
           tax_period: string;
         }) => {
-          // Calculate if filing is near deadline
+          // Calculate if filing is near deadline (Coretax / PMK 81/2024):
+          // - All PPh payments: 15th of following month
+          // - PPN payment: 15th of following month (filing = end of month, but this
+          //   uses the payment deadline for urgency calculation)
           if (!filing.tax_period || !filing.tax_period.includes('-')) return;
           const [year, month] = filing.tax_period.split('-').map(Number);
-          let deadlineDay = 10; // PPh21/PPh23
-          if (filing.tax_type === 'PPN') deadlineDay = 31;
+          const deadlineDay = filing.tax_type === 'PPN_FILING' ? 31 : 15;
 
           const deadline = new Date(year, month, deadlineDay);
           const daysUntilDue = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));

@@ -29,12 +29,17 @@ interface DeadlineCalendarProps {
   showAll?: boolean;
 }
 
-// Indonesian tax deadlines (fixed dates)
+// Indonesian tax payment deadlines (Coretax / PMK 81/2024, 2025~)
+// All PPh payments unified to 15th of following month.
+// PPN payment also 15th under Coretax; SPT Masa PPN filing (separate event) stays end of month.
 const TAX_DEADLINES = {
-  PPh21: 10, // 10th of following month
-  PPh23: 10, // 10th of following month
-  PPN: 31, // End of following month
-  PPh_FINAL: 15, // 15th of following month
+  PPh21: 15,    // Coretax: 15th (was 10th before PMK 81/2024)
+  PPh23: 15,    // Coretax: 15th (was 10th before PMK 81/2024)
+  PPh_4_2: 15,  // PPh 4(2) Final
+  PPh25: 15,    // PPh 25 installment
+  PPh26: 15,    // PPh 26 non-resident
+  PPh_FINAL: 15,
+  PPN: 15,      // Payment 15th (filing is end of month — separate event)
 };
 
 // Helper function to format date consistently (avoids hydration mismatch)

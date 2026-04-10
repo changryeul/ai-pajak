@@ -134,7 +134,7 @@ export const DEPRECIATION_RATES = {
 } as const;
 
 /**
- * SPT filing deadlines
+ * SPT filing deadlines (annual)
  */
 export const SPT_DEADLINES = {
   /** Individual SPT deadline - March 31st of following year */
@@ -142,6 +142,59 @@ export const SPT_DEADLINES = {
   /** Corporate SPT deadline - April 30th of following year */
   CORPORATE: { month: 4, day: 30 },
 } as const;
+
+/**
+ * Monthly tax deadlines (Coretax — PMK 81/2024, effective 2025-01-01)
+ *
+ * Historical (pre-Coretax): deadlines varied by tax type (PPh 21/23 = 10th, etc.)
+ * Current (Coretax): unified to 15th for payment, 20th for SPT Masa filing.
+ *
+ * Exception: PPN SPT Masa filing deadline remains end of the following month
+ * (PPN payment is still 15th along with other PPh).
+ *
+ * References:
+ * - PMK 81/PMK.03/2024 — Unification of tax deadlines
+ * - Coretax DJP roll-out (2025)
+ */
+export const MONTHLY_TAX_DEADLINES = {
+  /** PPh 21 payment — 15th of following month */
+  PPH21_PAYMENT: 15,
+  /** PPh 21 SPT Masa filing — 20th of following month */
+  PPH21_FILING: 20,
+
+  /** PPh 23 payment — 15th of following month */
+  PPH23_PAYMENT: 15,
+  /** PPh 23 SPT Masa filing — 20th of following month */
+  PPH23_FILING: 20,
+
+  /** PPh 4(2) Final payment — 15th of following month */
+  PPH4_2_PAYMENT: 15,
+  /** PPh 4(2) SPT Masa filing — 20th of following month */
+  PPH4_2_FILING: 20,
+
+  /** PPh 25 installment payment — 15th of following month (no separate filing) */
+  PPH25_PAYMENT: 15,
+
+  /** PPh 26 payment — 15th of following month */
+  PPH26_PAYMENT: 15,
+  /** PPh 26 SPT Masa filing — 20th of following month */
+  PPH26_FILING: 20,
+
+  /** PPh Final UMKM 0.5% payment — 15th of following month */
+  PPH_FINAL_UMKM_PAYMENT: 15,
+
+  /** PPN payment — 15th of following month (unified under Coretax) */
+  PPN_PAYMENT: 15,
+  /** PPN SPT Masa filing — end of following month (unchanged by PMK 81/2024) */
+  PPN_FILING_END_OF_MONTH: true,
+} as const;
+
+/**
+ * Last day of month helper (for PPN filing deadline)
+ */
+export function lastDayOfMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
+}
 
 /**
  * PTKP status descriptions in Indonesian
