@@ -297,6 +297,12 @@ export default function JournalsPage() {
 }
 
 // ── Bank → Journal Converter ──
+interface BankSource {
+  id: string;
+  label: string;
+  csvData: string;
+}
+
 function BankToJournalSection({
   customerId, year, onSaved, showMsg,
 }: {
@@ -305,7 +311,9 @@ function BankToJournalSection({
   showMsg: (type: 'success' | 'error', text: string) => void;
 }) {
   const [show, setShow] = useState(false);
-  const [csvData, setCsvData] = useState('');
+  const [sources, setSources] = useState<BankSource[]>([
+    { id: crypto.randomUUID(), label: '은행 계좌 1', csvData: '' },
+  ]);
   const [preview, setPreview] = useState<Array<{
     entryDate: string; description: string;
     lines: Array<{ account_code: string; account_name: string; debit: number; credit: number }>;
@@ -316,16 +324,18 @@ function BankToJournalSection({
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const parseCsv = (text: string) => {
+  const parseCsv = (text: string, sourceLabel: string) => {
     const lines = text.split('\n').filter(l => l.trim());
     if (lines.length < 2) return [];
     const txs: Array<{ date: string; description: string; debit: number; credit: number }> = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(',');
       if (cols.length < 4) continue;
+      const rawDesc = cols[1]?.trim().replace(/['"]/g, '') || '';
       txs.push({
         date: cols[0]?.trim().replace(/['"]/g, '') || '',
-        description: cols[1]?.trim().replace(/['"]/g, '') || '',
+        // Prepend source label so user can trace back to which account/source
+        description: sourceLabel ? `[${sourceLabel}] ${rawDesc}` : rawDesc,
         debit: Math.abs(Number(cols[2]?.replace(/[^0-9.-]/g, '')) || 0),
         credit: Math.abs(Number(cols[3]?.replace(/[^0-9.-]/g, '')) || 0),
       });
@@ -333,8 +343,19 @@ function BankToJournalSection({
     return txs;
   };
 
+  // Combine all non-empty sources into a single transaction list
+  const gatherAllTransactions = () => {
+    const all: Array<{ date: string; description: string; debit: number; credit: number }> = [];
+    for (const src of sources) {
+      if (src.csvData.trim()) {
+        all.push(...parseCsv(src.csvData, src.label));
+      }
+    }
+    return all;
+  };
+
   const handlePreview = async () => {
-    const txs = parseCsv(csvData);
+    const txs = gatherAllTransactions();
     if (txs.length === 0) { showMsg('error', 'CSV 데이터가 없거나 형식이 맞지 않습니다'); return; }
     setProcessing(true);
     try {
@@ -353,7 +374,7 @@ function BankToJournalSection({
   };
 
   const handleSave = async () => {
-    const txs = parseCsv(csvData);
+    const txs = gatherAllTransactions();
     setSaving(true);
     try {
       const res = await fetch('/api/accounting/bank-to-journal', {
@@ -365,19 +386,61 @@ function BankToJournalSection({
       if (d.success) {
         showMsg('success', d.message);
         setPreview(null);
-        setCsvData('');
+        setSources([{ id: crypto.randomUUID(), label: '은행 계좌 1', csvData: '' }]);
         onSaved();
       } else { showMsg('error', d.error || '저장 실패'); }
     } catch { showMsg('error', '서버 오류'); }
     finally { setSaving(false); }
   };
 
-  const handleFileUpload = (files: FileList | null) => {
-    if (!files) return;
-    const reader = new FileReader();
-    reader.onload = (e) => setCsvData(e.target?.result as string || '');
-    reader.readAsText(files[0]);
+  const handleFileUpload = (files: FileList | null, targetSourceId: string) => {
+    if (!files || files.length === 0) return;
+    // If multiple files selected, first replaces target source, rest become new sources
+    const fileArray = Array.from(files);
+
+    fileArray.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = (e.target?.result as string) || '';
+        // Strip extension to use as default label
+        const defaultLabel = file.name.replace(/\.[^.]+$/, '');
+        if (idx === 0) {
+          setSources(prev => prev.map(s => s.id === targetSourceId
+            ? { ...s, csvData: content, label: defaultLabel || s.label }
+            : s));
+        } else {
+          setSources(prev => [...prev, {
+            id: crypto.randomUUID(),
+            label: defaultLabel || `은행 계좌 ${prev.length + 1}`,
+            csvData: content,
+          }]);
+        }
+      };
+      reader.readAsText(file);
+    });
   };
+
+  const addSource = () => {
+    setSources(prev => [...prev, {
+      id: crypto.randomUUID(),
+      label: `은행 계좌 ${prev.length + 1}`,
+      csvData: '',
+    }]);
+  };
+
+  const removeSource = (id: string) => {
+    setSources(prev => prev.length > 1 ? prev.filter(s => s.id !== id) : prev);
+  };
+
+  const updateSourceLabel = (id: string, label: string) => {
+    setSources(prev => prev.map(s => s.id === id ? { ...s, label } : s));
+  };
+
+  const updateSourceCsv = (id: string, csvData: string) => {
+    setSources(prev => prev.map(s => s.id === id ? { ...s, csvData } : s));
+  };
+
+  const hasAnyData = sources.some(s => s.csvData.trim().length > 0);
 
   return (
     <Card className="mb-4 border-dashed border-blue-300">
@@ -396,32 +459,74 @@ function BankToJournalSection({
           <div className="mt-4 space-y-3">
             <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
               <p className="font-bold">사용 방법</p>
-              <p className="mt-1">은행 거래내역 CSV를 붙여넣거나 파일을 업로드하세요.</p>
+              <p className="mt-1">은행 계좌별로 소스를 나눠서 업로드하거나 붙여넣으세요 (Petty Cash, BCA, Mandiri 등).</p>
               <p className="mt-1 font-mono text-[10px]">CSV 형식: 날짜, 설명, 출금(Debit), 입금(Credit)</p>
+              <p className="mt-1 text-[10px]">각 소스 라벨은 거래 설명 앞에 <code className="bg-white px-1 rounded">[라벨]</code> 형태로 자동 추가되어 저널에서 추적 가능합니다.</p>
             </div>
 
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
-                <Upload className="h-3 w-3 mr-1" />CSV 파일
-              </Button>
-              <input ref={fileRef} type="file" className="hidden" accept=".csv,.txt"
-                onChange={e => handleFileUpload(e.target.files)} />
-            </div>
+            <input ref={fileRef} type="file" className="hidden" accept=".csv,.txt" multiple
+              data-target-source=""
+              onChange={e => {
+                const targetId = (e.target as HTMLInputElement).dataset.targetSource || '';
+                if (targetId) handleFileUpload(e.target.files, targetId);
+                e.target.value = '';
+              }} />
 
-            <textarea
-              className="w-full h-32 p-2 border rounded text-[10px] font-mono"
-              value={csvData}
-              onChange={e => setCsvData(e.target.value)}
-              placeholder="date,description,debit,credit
+            {/* Source list — multiple bank accounts / petty cash */}
+            <div className="space-y-3">
+              {sources.map((src, idx) => (
+                <div key={src.id} className="border border-gray-200 rounded-lg p-2 bg-gray-50/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="bg-blue-100 text-blue-700 text-[9px] flex-shrink-0">#{idx + 1}</Badge>
+                    <Input
+                      value={src.label}
+                      onChange={e => updateSourceLabel(src.id, e.target.value)}
+                      placeholder="소스 라벨 (예: BCA 1234, Mandiri Corp, Petty Cash)"
+                      className="h-7 text-xs flex-1"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (fileRef.current) {
+                          fileRef.current.dataset.targetSource = src.id;
+                          fileRef.current.click();
+                        }
+                      }}
+                      className="h-7 flex-shrink-0"
+                    >
+                      <Upload className="h-3 w-3 mr-1" />CSV
+                    </Button>
+                    {sources.length > 1 && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeSource(src.id)}
+                        className="h-7 px-2 flex-shrink-0 text-red-500 hover:bg-red-50"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <textarea
+                    className="w-full h-24 p-2 border rounded text-[10px] font-mono"
+                    value={src.csvData}
+                    onChange={e => updateSourceCsv(src.id, e.target.value)}
+                    placeholder={`date,description,debit,credit
 2025-01-05,Pembayaran gaji karyawan,42500000,0
-2025-01-08,Transfer masuk PT ABC,0,85000000
-2025-01-10,Setor Pajak PPh 21,8750000,0"
-            />
+2025-01-08,Transfer masuk PT ABC,0,85000000`}
+                  />
+                </div>
+              ))}
+            </div>
 
             <div className="flex gap-2">
-              <Button size="sm" onClick={handlePreview} disabled={processing || !csvData.trim()}>
+              <Button size="sm" variant="outline" onClick={addSource}>
+                <Plus className="h-3 w-3 mr-1" />소스 추가
+              </Button>
+              <Button size="sm" onClick={handlePreview} disabled={processing || !hasAnyData}>
                 {processing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
-                미리보기
+                전체 미리보기
               </Button>
               {preview && (
                 <Button size="sm" onClick={handleSave} disabled={saving}>
