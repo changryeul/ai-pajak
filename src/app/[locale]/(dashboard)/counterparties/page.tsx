@@ -89,6 +89,19 @@ export default function CounterpartiesPage() {
   const [treatyRate, setTreatyRate] = useState('');
   const [treatyNotes, setTreatyNotes] = useState('');
 
+  // Phase 2: DTA documents + shareholder withholding fields
+  const [formIsEntity, setFormIsEntity] = useState(true);
+  const [formCorValidUntil, setFormCorValidUntil] = useState('');
+  const [formCorDocUrl, setFormCorDocUrl] = useState('');
+  const [formDgtFormType, setFormDgtFormType] = useState<'' | 'DGT_1' | 'DGT_2'>('');
+  const [formDgtFormUrl, setFormDgtFormUrl] = useState('');
+  const [formDgtValidUntil, setFormDgtValidUntil] = useState('');
+  const [formIsShareholder, setFormIsShareholder] = useState(false);
+  const [formShareholdingPct, setFormShareholdingPct] = useState('');
+  const [formIsBeneficialOwner, setFormIsBeneficialOwner] = useState(false);
+  const [formReceivesReinvested, setFormReceivesReinvested] = useState(false);
+  const [formVendorIsOwner, setFormVendorIsOwner] = useState(false);
+
   // Registry search
   const [searchResults, setSearchResults] = useState<RegistryHit[]>([]);
   const [searching, setSearching] = useState(false);
@@ -179,6 +192,13 @@ export default function CounterpartiesPage() {
     setLicenses([]); setNewLicense({ type: '', number: '', expires_at: '' });
     setTreatyArticle(''); setTreatyRate(''); setTreatyNotes('');
     setSearchResults([]);
+    // Phase 2 fields
+    setFormIsEntity(true);
+    setFormCorValidUntil(''); setFormCorDocUrl('');
+    setFormDgtFormType(''); setFormDgtFormUrl(''); setFormDgtValidUntil('');
+    setFormIsShareholder(false); setFormShareholdingPct('');
+    setFormIsBeneficialOwner(false); setFormReceivesReinvested(false);
+    setFormVendorIsOwner(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -206,6 +226,18 @@ export default function CounterpartiesPage() {
           tax_treaty_info: treatyArticle || treatyRate || treatyNotes
             ? { article: treatyArticle, rate: treatyRate ? Number(treatyRate) : undefined, notes: treatyNotes }
             : undefined,
+          // Phase 2 withholding fields
+          is_entity: formIsEntity,
+          cor_valid_until: formCorValidUntil || undefined,
+          cor_document_url: formCorDocUrl || undefined,
+          dgt_form_type: formDgtFormType || undefined,
+          dgt_form_url: formDgtFormUrl || undefined,
+          dgt_form_valid_until: formDgtValidUntil || undefined,
+          is_shareholder: formIsShareholder,
+          shareholding_pct: formShareholdingPct ? Number(formShareholdingPct) : undefined,
+          is_beneficial_owner: formIsBeneficialOwner,
+          receives_reinvested_dividend: formReceivesReinvested,
+          vendor_is_property_owner: formVendorIsOwner,
         }),
       });
       const data = await res.json();
@@ -369,11 +401,29 @@ export default function CounterpartiesPage() {
                 </div>
               </div>
 
+              {/* Entity vs Individual */}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs font-bold text-gray-700 mb-2">법인/개인 구분</p>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-1 text-xs cursor-pointer">
+                    <input type="radio" checked={formIsEntity} onChange={() => setFormIsEntity(true)} />
+                    법인 (PT/CV/외국 법인)
+                  </label>
+                  <label className="flex items-center gap-1 text-xs cursor-pointer">
+                    <input type="radio" checked={!formIsEntity} onChange={() => setFormIsEntity(false)} />
+                    개인
+                  </label>
+                </div>
+                <p className="text-[10px] text-gray-500 mt-1">
+                  * 법인 간 국내 배당은 UU HPP 7/2021로 면제. 개인 수령은 PPh Final 10% (재투자 시 면제)
+                </p>
+              </div>
+
               {/* Foreign-specific fields */}
               {formIsForeign && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
                   <p className="text-xs font-bold text-amber-900 flex items-center gap-1">
-                    <Globe className="h-3 w-3" />국외 법인 — 조세조약 정보
+                    <Globe className="h-3 w-3" />국외 거래 상대방 — 조세조약 및 DTA 서류
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                     <div>
@@ -403,8 +453,92 @@ export default function CounterpartiesPage() {
                     <Input value={treatyNotes} onChange={e => setTreatyNotes(e.target.value)}
                       placeholder="특이사항 (적용 제한, 유효기간 등)" />
                   </div>
+
+                  {/* DTA documents — COR / DGT Form */}
+                  <div className="border-t border-amber-200 pt-3">
+                    <p className="text-[11px] font-bold text-amber-900 mb-2">DTA 적용 서류</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px]">CoR/CoD 만료일</Label>
+                        <Input type="date" value={formCorValidUntil}
+                          onChange={e => setFormCorValidUntil(e.target.value)} className="h-8 text-xs" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">CoR 문서 URL</Label>
+                        <Input value={formCorDocUrl} onChange={e => setFormCorDocUrl(e.target.value)}
+                          placeholder="https://..." className="h-8 text-xs" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">DGT Form 유형</Label>
+                        <select value={formDgtFormType}
+                          onChange={e => setFormDgtFormType(e.target.value as '' | 'DGT_1' | 'DGT_2')}
+                          className="w-full h-8 px-2 rounded border text-xs">
+                          <option value="">선택 안 함</option>
+                          <option value="DGT_1">DGT Form 1 (개인)</option>
+                          <option value="DGT_2">DGT Form 2 (법인)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">DGT Form 만료일</Label>
+                        <Input type="date" value={formDgtValidUntil}
+                          onChange={e => setFormDgtValidUntil(e.target.value)} className="h-8 text-xs" />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-[10px]">DGT Form 문서 URL</Label>
+                        <Input value={formDgtFormUrl} onChange={e => setFormDgtFormUrl(e.target.value)}
+                          placeholder="https://..." className="h-8 text-xs" />
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-amber-700 mt-2">
+                      * DGT Form 또는 CoR이 없으면 조세조약 감면을 적용할 수 없고 PPh 26 20%가 부과됩니다
+                    </p>
+                  </div>
                 </div>
               )}
+
+              {/* Shareholder / Withholding info */}
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 space-y-2">
+                <p className="text-xs font-bold text-purple-900 flex items-center gap-1">
+                  <Users className="h-3 w-3" />주주 정보 / 원천세 특별 조건
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <label className="flex items-center gap-1 text-xs">
+                    <input type="checkbox" checked={formIsShareholder}
+                      onChange={e => setFormIsShareholder(e.target.checked)} />
+                    이 회사/개인은 <b>우리 회사의 주주</b>입니다 (배당 수령)
+                  </label>
+                  {formIsShareholder && (
+                    <div>
+                      <Label className="text-[10px]">지분율 (%)</Label>
+                      <Input type="number" step="0.01" min="0" max="100"
+                        value={formShareholdingPct} onChange={e => setFormShareholdingPct(e.target.value)}
+                        placeholder="25" className="h-8 text-xs" />
+                      <p className="text-[10px] text-purple-700 mt-0.5">
+                        * 25% 이상이면 대부분 조세조약에서 낮은 배당 세율 적용
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {formIsShareholder && (
+                  <>
+                    <label className="flex items-center gap-1 text-xs">
+                      <input type="checkbox" checked={formIsBeneficialOwner}
+                        onChange={e => setFormIsBeneficialOwner(e.target.checked)} />
+                      수익적 소유자(Beneficial Owner) — nominee가 아님
+                    </label>
+                    <label className="flex items-center gap-1 text-xs">
+                      <input type="checkbox" checked={formReceivesReinvested}
+                        onChange={e => setFormReceivesReinvested(e.target.checked)} />
+                      배당을 국내에 재투자 (PMK 18/2021 개인 면제 조건)
+                    </label>
+                  </>
+                )}
+                <label className="flex items-center gap-1 text-xs border-t border-purple-200 pt-2">
+                  <input type="checkbox" checked={formVendorIsOwner}
+                    onChange={e => setFormVendorIsOwner(e.target.checked)} />
+                  이 거래처는 <b>부동산 소유자</b>입니다 (임대 PPh 4(2) Final 대상)
+                </label>
+              </div>
 
               {/* Licenses */}
               <div className="bg-gray-50 rounded-lg p-3 space-y-2">

@@ -98,6 +98,19 @@ export async function POST(request: NextRequest) {
       is_related_party,
       nickname,
       notes,
+      // Phase 2 withholding fields
+      cor_document_url,
+      cor_valid_from,
+      cor_valid_until,
+      dgt_form_type,
+      dgt_form_url,
+      dgt_form_valid_until,
+      is_shareholder,
+      shareholding_pct,
+      is_beneficial_owner,
+      receives_reinvested_dividend,
+      is_entity,
+      vendor_is_property_owner,
     } = body;
 
     if (!name) {
@@ -190,6 +203,19 @@ export async function POST(request: NextRequest) {
         is_related_party: !!is_related_party,
         nickname: nickname || null,
         notes: notes || null,
+        // Phase 2 withholding fields
+        cor_document_url: cor_document_url || null,
+        cor_valid_from: cor_valid_from || null,
+        cor_valid_until: cor_valid_until || null,
+        dgt_form_type: dgt_form_type || null,
+        dgt_form_url: dgt_form_url || null,
+        dgt_form_valid_until: dgt_form_valid_until || null,
+        is_shareholder: !!is_shareholder,
+        shareholding_pct: shareholding_pct != null ? Number(shareholding_pct) : null,
+        is_beneficial_owner: !!is_beneficial_owner,
+        receives_reinvested_dividend: !!receives_reinvested_dividend,
+        is_entity: is_entity !== undefined ? !!is_entity : true,
+        vendor_is_property_owner: !!vendor_is_property_owner,
       })
       .select()
       .single();
@@ -202,6 +228,88 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: counterparty });
   } catch (error) {
     loggers.api.error({ err: error }, 'Create counterparty error');
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PUT /api/counterparties — update counterparty (body must include `id`)
+ * Used for editing withholding fields (DGT, shareholder info, etc.)
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const role = await resolveUserRole(supabase, user.id);
+    if (!['CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC'].includes(role || '')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { id, ...rest } = body;
+    if (!id) {
+      return NextResponse.json({ error: 'id required' }, { status: 400 });
+    }
+
+    const admin = getSupabaseAdmin();
+
+    // Ownership check: the counterparty must belong to an accessible customer
+    const { data: existing } = await admin
+      .from('tax_counterparty')
+      .select('id, customer_id')
+      .eq('id', id)
+      .maybeSingle();
+    if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    if (role === 'CUSTOMER') {
+      const myCustomerId = await getCustomerId(supabase, user.id);
+      if (existing.customer_id !== myCustomerId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    }
+
+    // Whitelist updatable fields (including Phase 2 withholding fields)
+    const allowed = [
+      'name', 'npwp', 'address', 'phone', 'email', 'type', 'kbli_code',
+      'country', 'is_resident', 'is_foreign', 'qualification_grade',
+      'has_cod', 'licenses', 'tax_treaty_info', 'is_related_party',
+      'nickname', 'notes',
+      // Phase 2
+      'cor_document_url', 'cor_valid_from', 'cor_valid_until',
+      'dgt_form_type', 'dgt_form_url', 'dgt_form_valid_until',
+      'is_shareholder', 'shareholding_pct', 'is_beneficial_owner',
+      'receives_reinvested_dividend', 'is_entity', 'vendor_is_property_owner',
+    ];
+    const updates: Record<string, unknown> = {};
+    for (const field of allowed) {
+      if (rest[field] !== undefined) updates[field] = rest[field];
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+    }
+
+    const { data, error: updateError } = await admin
+      .from('tax_counterparty')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      loggers.api.error({ err: updateError }, 'Update counterparty failed');
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+
+    loggers.api.info({ counterpartyId: id, fields: Object.keys(updates) }, 'Counterparty updated');
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    loggers.api.error({ err: error }, 'Update counterparty error');
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed' },
       { status: 500 }
