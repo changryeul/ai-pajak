@@ -42,13 +42,16 @@ import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { useMobileSidebar } from './mobile-sidebar';
 
+type CustomerType = 'INDIVIDUAL' | 'COMPANY';
+
 interface NavItem {
   href: string;
   icon: LucideIcon;
   labelKey: string;
   descKey?: string;
   roles?: UserRole[];
-  children?: NavItem[]; // Sub-menu items
+  customerTypes?: CustomerType[]; // Filter by customer type (INDIVIDUAL/COMPANY)
+  children?: NavItem[];
 }
 
 interface NavSection {
@@ -69,14 +72,35 @@ const navItems: NavSection[] = [
     items: [
       { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
       { href: '/news', icon: ClipboardList, labelKey: 'nav.taxNews' },
-      { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', roles: taxRoles, children: [
+      // ── 법인 고객: 월신고 ──
+      { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'], children: [
         { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
         { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
         { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
         { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
         { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.taxBilling' },
       ]},
-      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: taxRoles, children: [
+      // ── 법인 고객: 연신고 ──
+      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'], children: [
+        { href: '/tax/annual/pph-final', icon: Store, labelKey: 'nav.annualPPhFinal' },
+        { href: '/tax/annual/pph25', icon: Building2, labelKey: 'nav.annualPPh25' },
+        { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
+        { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
+      ]},
+      // ── 개인 고객: 연신고만 ──
+      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'], children: [
+        { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
+      ]},
+      // ── 세무 컨설턴트: 월신고 (법인 고객용) ──
+      { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', roles: consultantRoles, children: [
+        { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
+        { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
+        { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
+        { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
+        { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.taxBilling' },
+      ]},
+      // ── 세무 컨설턴트: 연신고 (법인 + 개인) ──
+      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: consultantRoles, children: [
         { href: '/tax/annual/pph-final', icon: Store, labelKey: 'nav.annualPPhFinal' },
         { href: '/tax/annual/pph25', icon: Building2, labelKey: 'nav.annualPPh25' },
         { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
@@ -89,8 +113,8 @@ const navItems: NavSection[] = [
       { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload', roles: taxRoles },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: taxRoles },
-      { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', roles: taxRoles },
-      { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', roles: taxRoles },
+      { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
       { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', roles: taxRoles },
       { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', roles: taxRoles },
     ],
@@ -168,6 +192,7 @@ export function Sidebar() {
   const { isOpen, close } = useMobileSidebar();
   const locale = params.locale as string;
   const userRole = session?.role;
+  const customerType = session?.customerType;
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
 
   const toggleSubmenu = (key: string) => {
@@ -187,7 +212,13 @@ export function Sidebar() {
     router.refresh();
   };
 
-  // Filter sections and items by role
+  // Filter by role + customerType (INDIVIDUAL vs COMPANY)
+  const isItemVisible = (item: NavItem): boolean => {
+    if (item.roles && (!userRole || !item.roles.includes(userRole))) return false;
+    if (item.customerTypes && (!customerType || !item.customerTypes.includes(customerType))) return false;
+    return true;
+  };
+
   const visibleSections = navItems
     .filter((section) => {
       if (!section.roles) return true;
@@ -195,10 +226,7 @@ export function Sidebar() {
     })
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => {
-        if (!item.roles) return true;
-        return userRole && item.roles.includes(userRole);
-      }),
+      items: section.items.filter(isItemVisible),
     }))
     .filter((section) => section.items.length > 0);
 
