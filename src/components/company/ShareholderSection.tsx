@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Users, Plus, Trash2, Loader2, AlertTriangle,
   CheckCircle, X, Edit2, Building2, User,
+  Sparkles, FileText, Save,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
@@ -55,6 +56,31 @@ const emptyForm = {
   notes: '',
 };
 
+interface ExtractedShareholder {
+  name: string;
+  is_entity: boolean;
+  npwp: string | null;
+  nik: string | null;
+  country_code: string;
+  shareholding_pct: number;
+  capital_amount: number | null;
+  share_class: string | null;
+  is_director: boolean;
+  is_commissioner: boolean;
+  is_beneficial_owner: boolean;
+}
+
+interface OcrResult {
+  company_name: string | null;
+  incorporation_date: string | null;
+  notary_name: string | null;
+  total_authorized_capital: number | null;
+  total_paid_up_capital: number | null;
+  shareholders: ExtractedShareholder[];
+  confidence: number;
+  warnings: string[];
+}
+
 export function ShareholderSection({ customerId }: ShareholderSectionProps) {
   const [list, setList] = useState<Shareholder[]>([]);
   const [totalPct, setTotalPct] = useState(0);
@@ -64,6 +90,12 @@ export function ShareholderSection({ customerId }: ShareholderSectionProps) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Akta OCR state
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrResult, setOcrResult] = useState<OcrResult | null>(null);
+  const [ocrSelection, setOcrSelection] = useState<Set<number>>(new Set());
+  const [ocrSaving, setOcrSaving] = useState(false);
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -156,6 +188,100 @@ export function ShareholderSection({ customerId }: ShareholderSectionProps) {
     }
   };
 
+  const handleOcrUpload = async (file: File) => {
+    setOcrLoading(true);
+    setOcrResult(null);
+    setOcrSelection(new Set());
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/shareholders/ocr', {
+        method: 'POST',
+        body: fd,
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        const result = data.data as OcrResult;
+        setOcrResult(result);
+        // Pre-select all extracted shareholders
+        setOcrSelection(new Set(result.shareholders.map((_, i) => i)));
+        const count = result.shareholders.length;
+        if (count > 0) {
+          showMsg('success', `${count}명의 주주 정보를 추출했습니다. 검토 후 저장하세요.`);
+        } else {
+          showMsg('error', '주주 정보를 찾지 못했습니다. 수동으로 입력해주세요.');
+        }
+      } else {
+        showMsg('error', data.error || 'OCR 처리 실패');
+      }
+    } catch {
+      showMsg('error', '서버 오류 — OCR 실패');
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  const toggleOcrSelection = (idx: number) => {
+    setOcrSelection(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  const handleSaveOcrResults = async () => {
+    if (!ocrResult) return;
+    const selected = ocrResult.shareholders.filter((_, i) => ocrSelection.has(i));
+    if (selected.length === 0) {
+      showMsg('error', '저장할 주주를 선택하세요');
+      return;
+    }
+    setOcrSaving(true);
+    let successCount = 0;
+    let errorCount = 0;
+    for (const sh of selected) {
+      try {
+        const payload = {
+          name: sh.name,
+          is_entity: sh.is_entity,
+          npwp: sh.npwp || undefined,
+          nik: sh.nik || undefined,
+          country_code: sh.country_code || 'ID',
+          is_resident: (sh.country_code || 'ID').toUpperCase() === 'ID',
+          shareholding_pct: sh.shareholding_pct,
+          capital_amount: sh.capital_amount ?? undefined,
+          share_class: sh.share_class || undefined,
+          is_beneficial_owner: sh.is_beneficial_owner ?? true,
+          is_director: sh.is_director,
+          is_commissioner: sh.is_commissioner,
+          source: 'AKTA_OCR',
+          ...(customerId && { customerId }),
+        };
+        const res = await fetch('/api/shareholders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) successCount++;
+        else errorCount++;
+      } catch {
+        errorCount++;
+      }
+    }
+    setOcrSaving(false);
+    if (successCount > 0) {
+      showMsg('success', `${successCount}명 저장 완료${errorCount > 0 ? ` (실패 ${errorCount})` : ''}`);
+      setOcrResult(null);
+      setOcrSelection(new Set());
+      load();
+    } else {
+      showMsg('error', '모든 주주 저장 실패');
+    }
+  };
+
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`"${name}" 주주를 삭제하시겠습니까?`)) return;
     try {
@@ -188,10 +314,27 @@ export function ShareholderSection({ customerId }: ShareholderSectionProps) {
               정관(Akta Pendirian) 기준 주주 정보. 배당 PPh 처리에 사용됩니다 (25% 임계값, UU HPP 면제 등).
             </p>
           </div>
-          <Button size="sm" onClick={() => { resetForm(); setShowForm(!showForm); }}>
-            {showForm ? <X className="h-3 w-3 mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
-            {showForm ? '닫기' : '주주 추가'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <label className="inline-flex items-center gap-1 rounded-md border border-purple-300 bg-white px-3 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-50 cursor-pointer">
+              {ocrLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {ocrLoading ? 'AI 분석 중...' : '정관 OCR'}
+              <input
+                type="file"
+                accept="application/pdf,image/jpeg,image/png,image/webp"
+                className="hidden"
+                disabled={ocrLoading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleOcrUpload(file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+            <Button size="sm" onClick={() => { resetForm(); setShowForm(!showForm); }}>
+              {showForm ? <X className="h-3 w-3 mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+              {showForm ? '닫기' : '주주 추가'}
+            </Button>
+          </div>
         </div>
 
         {/* Total % summary */}
@@ -214,6 +357,124 @@ export function ShareholderSection({ customerId }: ShareholderSectionProps) {
           }`}>
             {message.type === 'success' ? <CheckCircle className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
             {message.text}
+          </div>
+        )}
+
+        {/* OCR extracted preview — review & save */}
+        {ocrResult && ocrResult.shareholders.length > 0 && (
+          <div className="border-2 border-purple-300 rounded-lg p-3 bg-gradient-to-br from-purple-50 to-indigo-50 space-y-2">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-purple-700" />
+              <p className="text-xs font-bold text-purple-900">정관 OCR 결과 — 검토 후 저장</p>
+              <Badge className="bg-purple-600 text-white text-[9px]">
+                신뢰도 {Math.round((ocrResult.confidence || 0) * 100)}%
+              </Badge>
+              <button
+                onClick={() => { setOcrResult(null); setOcrSelection(new Set()); }}
+                className="ml-auto text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+
+            {ocrResult.company_name && (
+              <p className="text-[11px] text-purple-800">
+                <b>회사:</b> {ocrResult.company_name}
+                {ocrResult.incorporation_date && ` · 설립 ${ocrResult.incorporation_date}`}
+                {ocrResult.notary_name && ` · 공증 ${ocrResult.notary_name}`}
+              </p>
+            )}
+            {(ocrResult.total_authorized_capital || ocrResult.total_paid_up_capital) && (
+              <p className="text-[11px] text-purple-700">
+                {ocrResult.total_authorized_capital && `수권자본 ${fmtRp(ocrResult.total_authorized_capital)}`}
+                {ocrResult.total_authorized_capital && ocrResult.total_paid_up_capital && ' · '}
+                {ocrResult.total_paid_up_capital && `납입자본 ${fmtRp(ocrResult.total_paid_up_capital)}`}
+              </p>
+            )}
+
+            {/* Warnings */}
+            {ocrResult.warnings && ocrResult.warnings.length > 0 && (
+              <div className="space-y-1">
+                {ocrResult.warnings.map((w, i) => (
+                  <div key={i} className="flex items-start gap-1 text-[10px] text-amber-700 bg-amber-50 rounded p-1.5 border border-amber-200">
+                    <AlertTriangle className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                    <span>{w}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Extracted shareholder list with checkboxes */}
+            <div className="space-y-1 max-h-80 overflow-y-auto">
+              {ocrResult.shareholders.map((sh, i) => (
+                <label
+                  key={i}
+                  className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-[11px] ${
+                    ocrSelection.has(i) ? 'bg-white border-purple-400' : 'bg-white/50 border-gray-200'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={ocrSelection.has(i)}
+                    onChange={() => toggleOcrSelection(i)}
+                    className="accent-purple-600"
+                  />
+                  {sh.is_entity ? (
+                    <Building2 className="h-3 w-3 text-blue-600 flex-shrink-0" />
+                  ) : (
+                    <User className="h-3 w-3 text-green-600 flex-shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold truncate">{sh.name}</span>
+                      <Badge className="bg-purple-100 text-purple-700 text-[9px]">
+                        {Number(sh.shareholding_pct).toFixed(2)}%
+                      </Badge>
+                      {sh.country_code !== 'ID' && (
+                        <Badge className="bg-amber-100 text-amber-700 text-[9px]">{sh.country_code}</Badge>
+                      )}
+                      {Number(sh.shareholding_pct) >= 25 && (
+                        <Badge className="bg-blue-100 text-blue-700 text-[9px]">≥25%</Badge>
+                      )}
+                      {sh.is_director && <Badge className="bg-gray-100 text-gray-700 text-[9px]">이사</Badge>}
+                      {sh.is_commissioner && <Badge className="bg-gray-100 text-gray-700 text-[9px]">감사</Badge>}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-gray-500 mt-0.5">
+                      {sh.capital_amount && <span>자본 {fmtRp(sh.capital_amount)}</span>}
+                      {sh.npwp && <span className="font-mono">{sh.npwp}</span>}
+                      {sh.nik && <span className="font-mono">NIK {sh.nik}</span>}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-purple-200">
+              <p className="text-[10px] text-purple-600">
+                선택 {ocrSelection.size}/{ocrResult.shareholders.length}명
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const allIdx = new Set(ocrResult.shareholders.map((_, i) => i));
+                    setOcrSelection(ocrSelection.size === allIdx.size ? new Set() : allIdx);
+                  }}
+                >
+                  {ocrSelection.size === ocrResult.shareholders.length ? '전체 해제' : '전체 선택'}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveOcrResults}
+                  disabled={ocrSaving || ocrSelection.size === 0}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {ocrSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+                  선택한 {ocrSelection.size}명 저장
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -349,7 +610,7 @@ export function ShareholderSection({ customerId }: ShareholderSectionProps) {
           <div className="text-center py-6"><Loader2 className="h-5 w-5 animate-spin mx-auto text-gray-400" /></div>
         ) : list.length === 0 ? (
           <div className="text-center py-6 text-xs text-gray-400">
-            등록된 주주가 없습니다. "주주 추가"로 정관상 주주 정보를 입력하세요.
+            등록된 주주가 없습니다. &quot;정관 OCR&quot;로 자동 추출하거나 &quot;주주 추가&quot;로 수동 입력하세요.
           </div>
         ) : (
           <div className="space-y-1">
