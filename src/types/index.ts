@@ -222,10 +222,39 @@ export interface TransactionContext {
   recipientCountry?: string;
   hasCertificateOfDomicile?: boolean;
 
+  /** Recipient legal form — true for entity (PT/CV/corporation), false for individual */
+  recipientIsEntity?: boolean;
+
   /** Ownership/relationship */
   isRelatedParty?: boolean;
   /** Building management case: vendor is also the property owner */
   vendorIsPropertyOwner?: boolean;
+
+  /**
+   * Phase 3 — dividend-specific
+   * shareholdingPct: counterparty's shareholding in the paying company (0~100)
+   * isBeneficialOwner: true if not a nominee (required for treaty benefits)
+   * receivesReinvestedDividend: true if individual recipient reinvests domestically (PMK 18/2021 exemption)
+   * hasDgtForm: true if DGT Form 1/2 was submitted (required for non-resident treaty)
+   */
+  shareholdingPct?: number;
+  isBeneficialOwner?: boolean;
+  receivesReinvestedDividend?: boolean;
+  hasDgtForm?: boolean;
+
+  /**
+   * Phase 3 — rental sub-type
+   * BUILDING_LAND → PPh 4(2) Final 10%
+   * MACHINE / EQUIPMENT / VEHICLE → PPh 23 2%
+   */
+  rentalAssetType?: 'BUILDING_LAND' | 'MACHINE' | 'VEHICLE' | 'OTHER';
+
+  /**
+   * Phase 3 — interest sub-type
+   * BANK_DEPOSIT → PPh Final 20%
+   * LOAN / BOND / OTHER → PPh 23 15%
+   */
+  interestSource?: 'BANK_DEPOSIT' | 'LOAN' | 'BOND' | 'OTHER';
 }
 
 export interface TaxResolution {

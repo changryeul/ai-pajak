@@ -33,6 +33,14 @@ async function handleResolve(req: RequestWithSession): Promise<Response> {
     hasCertificateOfDomicile,
     isRelatedParty,
     vendorIsPropertyOwner,
+    // Phase 3 fields
+    recipientIsEntity,
+    shareholdingPct,
+    isBeneficialOwner,
+    receivesReinvestedDividend,
+    hasDgtForm,
+    rentalAssetType,
+    interestSource,
   } = body as Partial<TransactionContext>;
 
   // Validate required fields
@@ -69,6 +77,14 @@ async function handleResolve(req: RequestWithSession): Promise<Response> {
     hasCertificateOfDomicile,
     isRelatedParty,
     vendorIsPropertyOwner,
+    // Phase 3
+    recipientIsEntity,
+    shareholdingPct,
+    isBeneficialOwner,
+    receivesReinvestedDividend,
+    hasDgtForm,
+    rentalAssetType,
+    interestSource,
   };
 
   // Load DB override rules

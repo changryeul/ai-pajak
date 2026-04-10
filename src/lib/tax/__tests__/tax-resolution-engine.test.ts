@@ -464,8 +464,8 @@ describe('TaxResolutionEngine', () => {
       );
 
       expect(result.taxType).toBe('PPh4_2');
-      expect(result.rate).toBe(0.10); // Rental category rule
-      expect(result.ruleId).toBe('CATEGORY_RENTAL');
+      expect(result.rate).toBe(0.10); // Rental category rule (default BUILDING_LAND)
+      expect(result.ruleId).toBe('CATEGORY_RENTAL_BUILDING');
     });
 
     it('should apply highest priority DB rule first', () => {
@@ -531,6 +531,182 @@ describe('TaxResolutionEngine', () => {
 
       expect(result.taxType).toBe('PPh23');
       expect(result.rate).toBe(0.02);
+    });
+  });
+
+  // ─── Phase 3: New domain rules ───
+  describe('Phase 3: Dividend — UU HPP exemption + reinvestment', () => {
+    it('should EXEMPT domestic corporate-to-corporate dividend (UU HPP 7/2021)', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'RESIDENT',
+        recipientIsEntity: true,
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0);
+      expect(result.taxAmount).toBe(0);
+      expect(result.ruleId).toBe('CATEGORY_DIVIDEND_CORP_EXEMPT');
+      expect(result.legalBasis).toContain('UU HPP');
+    });
+
+    it('should EXEMPT individual dividend when reinvested (PMK 18/2021)', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'RESIDENT',
+        recipientIsEntity: false,
+        receivesReinvestedDividend: true,
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0);
+      expect(result.ruleId).toBe('CATEGORY_DIVIDEND_INDIV_REINVESTED');
+      expect(result.legalBasis).toContain('PMK 18');
+    });
+
+    it('should apply PPh Final 10% for individual dividend without reinvestment', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'RESIDENT',
+        recipientIsEntity: false,
+        receivesReinvestedDividend: false,
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.10);
+      expect(result.isFinal).toBe(true);
+      expect(result.ruleId).toBe('CATEGORY_DIVIDEND_INDIV_FINAL');
+    });
+
+    it('should fallback to PPh 23 15% when recipientIsEntity not provided (legacy)', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'RESIDENT',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.15);
+      expect(result.ruleId).toBe('CATEGORY_DIVIDEND_FALLBACK');
+      expect(result.reason).toContain('법인/개인 구분 미입력');
+    });
+  });
+
+  describe('Phase 3: Rental — building/land vs machine', () => {
+    it('should apply PPh 4(2) 10% for building/land rental (default)', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'RENTAL',
+        rentalAssetType: 'BUILDING_LAND',
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.10);
+      expect(result.ruleId).toBe('CATEGORY_RENTAL_BUILDING');
+    });
+
+    it('should apply PPh 23 2% for machine rental', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'RENTAL',
+        rentalAssetType: 'MACHINE',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.02);
+      expect(result.ruleId).toBe('CATEGORY_RENTAL_MACHINE');
+    });
+
+    it('should apply PPh 23 2% for vehicle rental', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'RENTAL',
+        rentalAssetType: 'VEHICLE',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.02);
+      expect(result.ruleId).toBe('CATEGORY_RENTAL_VEHICLE');
+    });
+  });
+
+  describe('Phase 3: Interest — bank deposit vs loan', () => {
+    it('should apply PPh Final 20% for bank deposit interest', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'INTEREST',
+        interestSource: 'BANK_DEPOSIT',
+      });
+      expect(result.taxType).toBe('PPh4_2');
+      expect(result.rate).toBe(0.20);
+      expect(result.isFinal).toBe(true);
+      expect(result.ruleId).toBe('CATEGORY_INTEREST_BANK');
+    });
+
+    it('should apply PPh 23 15% for loan interest', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'INTEREST',
+        interestSource: 'LOAN',
+      });
+      expect(result.taxType).toBe('PPh23');
+      expect(result.rate).toBe(0.15);
+      expect(result.ruleId).toBe('CATEGORY_INTEREST_REGULAR');
+    });
+  });
+
+  describe('Phase 3: Treaty — beneficial owner + shareholding 25%', () => {
+    it('should deny treaty when DGT Form not submitted', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        recipientType: 'NON_RESIDENT',
+        recipientCountry: 'KR',
+        hasCertificateOfDomicile: true,
+        hasDgtForm: false,
+      });
+      expect(result.taxType).toBe('PPh26');
+      expect(result.rate).toBe(0.20);
+      expect(result.reason).toContain('DGT Form');
+    });
+
+    it('should deny treaty when recipient is not beneficial owner', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        recipientType: 'NON_RESIDENT',
+        recipientCountry: 'KR',
+        hasCertificateOfDomicile: true,
+        hasDgtForm: true,
+        isBeneficialOwner: false,
+      });
+      expect(result.taxType).toBe('PPh26');
+      expect(result.rate).toBe(0.20);
+      expect(result.ruleId).toBe('TREATY_NOT_BENEFICIAL_OWNER');
+    });
+
+    it('should apply preferential treaty rate for dividend with ≥25% shareholding', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'NON_RESIDENT',
+        recipientCountry: 'JP',
+        hasCertificateOfDomicile: true,
+        hasDgtForm: true,
+        shareholdingPct: 30,
+      });
+      expect(result.taxType).toBe('PPh26');
+      expect(result.rate).toBe(0.10); // Japan treaty dividend rate
+      expect(result.reason).toContain('≥25%');
+    });
+
+    it('should raise dividend rate to portfolio (15%) when shareholding <25%', () => {
+      const result = TaxResolutionEngine.resolve({
+        ...baseCtx,
+        serviceCategory: 'DIVIDEND',
+        recipientType: 'NON_RESIDENT',
+        recipientCountry: 'JP', // Treaty: 10%
+        hasCertificateOfDomicile: true,
+        hasDgtForm: true,
+        shareholdingPct: 10,
+      });
+      expect(result.taxType).toBe('PPh26');
+      expect(result.rate).toBe(0.15); // Raised to portfolio rate
+      expect(result.reason).toContain('portfolio');
     });
   });
 });

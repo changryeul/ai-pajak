@@ -174,11 +174,20 @@ export class TaxResolutionEngine {
     const countryCode = ctx.recipientCountry?.toUpperCase() || '';
     const treaty = TAX_TREATY_RATES[countryCode];
 
-    // No treaty or no CoD → standard PPh 26 at 20%
-    if (!treaty || !ctx.hasCertificateOfDomicile) {
-      const noCodReason = treaty && !ctx.hasCertificateOfDomicile
-        ? `Treaty exists with ${treaty.country} but no Certificate of Domicile provided`
-        : `No tax treaty with country code '${countryCode}'`;
+    // Treaty requires BOTH CoD (Certificate of Domicile) AND DGT Form
+    const dgtOk = ctx.hasDgtForm !== false; // default true for backward compat
+    const hasDtaDocs = ctx.hasCertificateOfDomicile && dgtOk;
+
+    // No treaty or missing documents → standard PPh 26 at 20%
+    if (!treaty || !hasDtaDocs) {
+      let noCodReason: string;
+      if (!treaty) {
+        noCodReason = `No tax treaty with country code '${countryCode}'`;
+      } else if (!ctx.hasCertificateOfDomicile) {
+        noCodReason = `Treaty exists with ${treaty.country} but no Certificate of Domicile provided`;
+      } else {
+        noCodReason = `Treaty exists with ${treaty.country} but DGT Form not submitted — treaty benefit denied`;
+      }
 
       return {
         taxType: 'PPh26',
@@ -191,6 +200,20 @@ export class TaxResolutionEngine {
       };
     }
 
+    // Beneficial owner check (required for treaty benefits)
+    // If shareholding info provided but NOT beneficial owner → deny treaty
+    if (ctx.isBeneficialOwner === false) {
+      return {
+        taxType: 'PPh26',
+        rate: PPH26_STANDARD_RATE,
+        isFinal: true,
+        reason: `${treaty.country} — recipient is not beneficial owner (nominee/intermediary), treaty denied`,
+        legalBasis: `Pasal 26 UU PPh + ${treaty.reference} — beneficial owner rule`,
+        rulePriority: 2,
+        ruleId: 'TREATY_NOT_BENEFICIAL_OWNER',
+      };
+    }
+
     // Map service category to treaty income type
     const incomeTypeMap: Record<string, keyof typeof treaty> = {
       DIVIDEND: 'dividend',
@@ -199,7 +222,23 @@ export class TaxResolutionEngine {
     };
 
     const treatyField = incomeTypeMap[ctx.serviceCategory] || 'service';
-    const treatyRate = treaty[treatyField as keyof typeof treaty] as number;
+    let treatyRate = treaty[treatyField as keyof typeof treaty] as number;
+    let rateNote = '';
+
+    // Dividend 25% shareholding threshold — most treaties apply a lower rate for qualified beneficial owners
+    // Our treaty table stores a single dividend rate (the preferential rate). If shareholding < 25%, apply portfolio rate (15%)
+    if (ctx.serviceCategory === 'DIVIDEND' && ctx.shareholdingPct !== undefined) {
+      if (ctx.shareholdingPct >= 25) {
+        rateNote = ` (beneficial owner ≥25% shareholding — qualified rate)`;
+      } else {
+        // Portfolio dividend — typically 15% per most Indonesia DTAs
+        const portfolioRate = Math.max(treatyRate, 0.15);
+        if (portfolioRate !== treatyRate) {
+          treatyRate = portfolioRate;
+          rateNote = ` (portfolio dividend <25% shareholding — rate raised from treaty preferential rate)`;
+        }
+      }
+    }
 
     // Only apply treaty rate if lower than 20%
     if (treatyRate >= PPH26_STANDARD_RATE) {
@@ -218,8 +257,8 @@ export class TaxResolutionEngine {
       taxType: 'PPh26',
       rate: treatyRate,
       isFinal: true,
-      reason: `Tax treaty with ${treaty.country} applied — ${(treatyRate * 100).toFixed(1)}% for ${treatyField}`,
-      legalBasis: `${treaty.reference} — beneficial owner with CoD`,
+      reason: `Tax treaty with ${treaty.country} applied — ${(treatyRate * 100).toFixed(1)}% for ${treatyField}${rateNote}`,
+      legalBasis: `${treaty.reference} — beneficial owner with CoD/DGT Form`,
       rulePriority: 2,
       ruleId: `TREATY_${countryCode}`,
     };
@@ -290,16 +329,31 @@ export class TaxResolutionEngine {
    */
   private static evaluateCategoryRule(ctx: TransactionContext): RuleResult | null {
     switch (ctx.serviceCategory) {
-      case 'RENTAL':
+      case 'RENTAL': {
+        // Rental sub-type split: building/land vs machine/vehicle
+        const assetType = ctx.rentalAssetType || 'BUILDING_LAND';
+        if (assetType === 'BUILDING_LAND') {
+          return {
+            taxType: 'PPh4_2',
+            rate: 0.10,
+            isFinal: true,
+            reason: '건물/토지 임대 — PPh 4(2) Final 10%',
+            legalBasis: 'PP 34/2017 Pasal 4 ayat (2) huruf d',
+            rulePriority: 4,
+            ruleId: 'CATEGORY_RENTAL_BUILDING',
+          };
+        }
+        // Machine/vehicle/equipment rental → PPh 23 2%
         return {
-          taxType: 'PPh4_2',
-          rate: 0.10,
-          isFinal: true,
-          reason: 'Sewa tanah dan/atau bangunan — 10% final tax',
-          legalBasis: 'PP 34/2017 Pasal 4 ayat (2) huruf d',
+          taxType: 'PPh23',
+          rate: PPH23_RATES.SERVICE,
+          isFinal: false,
+          reason: `${assetType === 'MACHINE' ? '기계/장비' : assetType === 'VEHICLE' ? '차량' : '기타'} 임대 — PPh 23 2%`,
+          legalBasis: 'Pasal 23(1)(c) UU PPh — sewa selain tanah/bangunan',
           rulePriority: 4,
-          ruleId: 'CATEGORY_RENTAL',
+          ruleId: `CATEGORY_RENTAL_${assetType}`,
         };
+      }
 
       case 'EMPLOYMENT':
         // PPh 21 — rate depends on salary/PTKP, return 0 as placeholder
@@ -336,27 +390,82 @@ export class TaxResolutionEngine {
           ruleId: 'CATEGORY_SHIPPING',
         };
 
-      case 'DIVIDEND':
+      case 'DIVIDEND': {
+        // UU HPP 7/2021 — Domestic corporate→corporate dividend EXEMPT
+        // Note: This rule only runs when recipientType === 'RESIDENT' (non-residents handled by treaty rule)
+        if (ctx.recipientIsEntity === true) {
+          return {
+            taxType: 'PPh23',
+            rate: 0,
+            isFinal: true,
+            reason: '국내 법인 간 배당 — 면제 (UU HPP 7/2021)',
+            legalBasis: 'UU 7/2021 (UU HPP) Pasal 4 ayat (3) huruf f — dividend received by domestic corporate taxpayer is exempt',
+            rulePriority: 4,
+            ruleId: 'CATEGORY_DIVIDEND_CORP_EXEMPT',
+          };
+        }
+
+        // Individual domestic recipient — reinvestment exemption (PMK 18/2021)
+        if (ctx.recipientIsEntity === false && ctx.receivesReinvestedDividend === true) {
+          return {
+            taxType: 'PPh23',
+            rate: 0,
+            isFinal: true,
+            reason: '개인 수령 배당 — 국내 재투자 조건 충족 면제 (PMK 18/2021)',
+            legalBasis: 'PMK 18/PMK.03/2021 — individual dividend exemption conditional on domestic reinvestment',
+            rulePriority: 4,
+            ruleId: 'CATEGORY_DIVIDEND_INDIV_REINVESTED',
+          };
+        }
+
+        // Individual domestic recipient — no reinvestment → PPh Final 10%
+        if (ctx.recipientIsEntity === false) {
+          return {
+            taxType: 'PPh4_2',
+            rate: 0.10,
+            isFinal: true,
+            reason: '개인 수령 배당 — 재투자 미충족, PPh Final 10%',
+            legalBasis: 'UU 7/2021 (UU HPP) Pasal 17 ayat (2d) — individual dividend final tax 10%',
+            rulePriority: 4,
+            ruleId: 'CATEGORY_DIVIDEND_INDIV_FINAL',
+          };
+        }
+
+        // recipientIsEntity undefined — legacy fallback (warn in reason)
         return {
           taxType: 'PPh23',
           rate: PPH23_RATES.DIVIDEND,
           isFinal: false,
-          reason: 'Dividen — PPh 23 at 15%',
-          legalBasis: 'Pasal 23(1)(a) UU PPh',
+          reason: '⚠ 배당 — 법인/개인 구분 미입력, 기본 PPh 23 15%. 거래 상대방 정보에서 법인/개인 구분을 설정하면 면제 규정 적용 가능',
+          legalBasis: 'Pasal 23(1)(a) UU PPh — fallback',
           rulePriority: 4,
-          ruleId: 'CATEGORY_DIVIDEND',
+          ruleId: 'CATEGORY_DIVIDEND_FALLBACK',
         };
+      }
 
-      case 'INTEREST':
+      case 'INTEREST': {
+        // Interest sub-type: bank deposit → PPh Final 20%
+        if (ctx.interestSource === 'BANK_DEPOSIT') {
+          return {
+            taxType: 'PPh4_2',
+            rate: 0.20,
+            isFinal: true,
+            reason: '은행 예금/저축 이자 — PPh Final 20%',
+            legalBasis: 'PP 131/2000 — interest on bank deposits',
+            rulePriority: 4,
+            ruleId: 'CATEGORY_INTEREST_BANK',
+          };
+        }
         return {
           taxType: 'PPh23',
           rate: PPH23_RATES.INTEREST,
           isFinal: false,
-          reason: 'Bunga — PPh 23 at 15%',
+          reason: `${ctx.interestSource === 'LOAN' ? '대여 이자' : ctx.interestSource === 'BOND' ? '채권 이자' : '이자'} — PPh 23 15%`,
           legalBasis: 'Pasal 23(1)(a) UU PPh',
           rulePriority: 4,
-          ruleId: 'CATEGORY_INTEREST',
+          ruleId: 'CATEGORY_INTEREST_REGULAR',
         };
+      }
 
       case 'ROYALTY':
         return {
