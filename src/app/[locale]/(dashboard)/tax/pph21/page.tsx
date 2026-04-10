@@ -56,6 +56,7 @@ export default function PPh21PayrollPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [activeTab, setActiveTab] = useState('upload');
 
   // TER calculation results
   const [calcResults, setCalcResults] = useState<Record<string, { taxAmount: number; terRate: number }>>({});
@@ -221,7 +222,7 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
-      <Tabs defaultValue="upload" className="mb-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
         <TabsList className="mb-4 flex-wrap">
           <TabsTrigger value="upload"><Upload className="h-3 w-3 mr-1" />자료 입력</TabsTrigger>
           <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
@@ -232,7 +233,12 @@ export default function PPh21PayrollPage() {
 
         {/* ── Tab: 자료 입력 (3가지 방식) ── */}
         <TabsContent value="upload">
-          <PPh21DataInputSection customerId={customerId} onComplete={loadEmployees} showMsg={showMsg} />
+          <PPh21DataInputSection
+            customerId={customerId}
+            onComplete={loadEmployees}
+            showMsg={showMsg}
+            onNavigateToMaster={() => setActiveTab('master')}
+          />
         </TabsContent>
 
         <TabsContent value="monthly">
@@ -375,15 +381,17 @@ export default function PPh21PayrollPage() {
 // Sub-component: 3가지 자료 입력 방식
 // ══════════════════════════════════════════════════════
 function PPh21DataInputSection({
-  customerId, onComplete, showMsg,
+  customerId, onComplete, showMsg, onNavigateToMaster,
 }: {
   customerId: string;
   onComplete: () => void;
   showMsg: (type: 'success' | 'error', text: string) => void;
+  onNavigateToMaster: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const excelInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [cameraAvailable, setCameraAvailable] = useState(false);
   const [uploadedDocs, setUploadedDocs] = useState<Array<{
     id: string; file_name: string; ocr_status: string;
     ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
@@ -396,6 +404,22 @@ function PPh21DataInputSection({
       .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 20)); })
       .catch(() => {});
   }, [customerId]);
+
+  // Detect camera availability: show on mobile OR when videoinput device is connected
+  useEffect(() => {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      setCameraAvailable(true);
+      return;
+    }
+    if (navigator.mediaDevices?.enumerateDevices) {
+      navigator.mediaDevices.enumerateDevices()
+        .then(devices => {
+          setCameraAvailable(devices.some(d => d.kind === 'videoinput'));
+        })
+        .catch(() => setCameraAvailable(false));
+    }
+  }, []);
 
   const handleUpload = async (files: FileList | null, source: string, docType: string) => {
     if (!files || !customerId) return;
@@ -630,17 +654,19 @@ function PPh21DataInputSection({
               <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="w-full">
                 <Upload className="h-3 w-3 mr-1" />파일 업로드 (Excel/PDF)
               </Button>
-              <Button size="sm" variant="outline" disabled={uploading} className="w-full"
-                onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'image/*';
-                  input.capture = 'environment';
-                  input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files, 'CAMERA', 'SALARY_SLIP');
-                  input.click();
-                }}>
-                <Camera className="h-3 w-3 mr-1" />급여명세 촬영
-              </Button>
+              {cameraAvailable && (
+                <Button size="sm" variant="outline" disabled={uploading} className="w-full"
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files, 'CAMERA', 'SALARY_SLIP');
+                    input.click();
+                  }}>
+                  <Camera className="h-3 w-3 mr-1" />급여명세 촬영
+                </Button>
+              )}
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
                 onChange={e => handleUpload(e.target.files, 'WEB', 'SALARY_SLIP')} />
             </div>
@@ -649,14 +675,19 @@ function PPh21DataInputSection({
         </Card>
 
         {/* Method 3: Manual entry */}
-        <Card className="border-2 border-dashed hover:border-purple-400 transition-colors cursor-pointer">
+        <Card className="border-2 border-dashed hover:border-purple-400 transition-colors">
           <CardContent className="p-5 text-center">
             <Users className="h-8 w-8 text-purple-600 mx-auto mb-3" />
             <p className="font-bold text-sm mb-1">3. 직접 입력</p>
-            <p className="text-[11px] text-gray-500 mb-3">직원 마스터 탭에서 한 사람씩 직접 등록</p>
-            <p className="text-xs text-gray-600 mt-3 bg-gray-50 rounded p-2">
-              "직원 마스터" 탭 → "직원 추가" → 이름/NPWP/급여 입력
-            </p>
+            <p className="text-[11px] text-gray-500 mb-3">직원 마스터에서 한 사람씩 직접 등록</p>
+            <div className="space-y-2">
+              <Button size="sm" onClick={onNavigateToMaster} className="w-full bg-purple-600 hover:bg-purple-700">
+                <Users className="h-3 w-3 mr-1" />직원 마스터로 이동
+              </Button>
+              <p className="text-[10px] text-gray-500 bg-gray-50 rounded p-2 text-left leading-relaxed">
+                "직원 추가" 버튼 → 이름/NPWP/급여/PTKP 등 입력 → 저장
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
