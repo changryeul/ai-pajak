@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
+import { useSession, hasRole } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -114,6 +116,16 @@ export default function CustomerDetailPage() {
   const params = useParams();
   const locale = params.locale as string;
   const customerId = params.id as string;
+  const { session, isLoading: sessionLoading } = useSession();
+
+  // Role guard: only consultants may view customer detail pages
+  useEffect(() => {
+    if (sessionLoading || !session) return;
+    const isConsultant = hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC);
+    if (!isConsultant) {
+      router.replace(`/${locale}/dashboard`);
+    }
+  }, [session, sessionLoading, router, locale]);
 
   const [customer, setCustomer] = useState<CustomerDetail | null>(null);
   const [filings, setFilings] = useState<Filing[]>([]);

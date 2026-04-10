@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
+import { useSession, hasRole } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { Card, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,6 +71,18 @@ export default function CustomersPage() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+  const { session, isLoading: sessionLoading } = useSession();
+
+  // Role guard: only consultants (CONSULTANT_JTC, TAX_ADVISOR_JTC) may view this page.
+  // Corporate and individual customers are redirected to their dashboard.
+  useEffect(() => {
+    if (sessionLoading) return;
+    if (!session) return;
+    const isConsultant = hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC);
+    if (!isConsultant) {
+      router.replace(`/${locale}/dashboard`);
+    }
+  }, [session, sessionLoading, router, locale]);
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [stats, setStats] = useState<CustomerStats>({
