@@ -11,12 +11,7 @@ import {
   Loader2, TrendingUp, DollarSign, Calculator, BarChart3, Sparkles,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
-
-function fmt(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(0)}M`;
-  return `Rp ${n.toLocaleString('id-ID')}`;
-}
+import { fmtRp as fmt } from '@/lib/utils';
 
 interface SimulationData {
   taxYear: number;
@@ -170,7 +165,7 @@ export default function AnnualSimulationPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData}>
                   <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1e6 ? `${(v / 1e6).toFixed(0)}M` : ''} />
+                  <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1 ? Math.round(v).toLocaleString('id-ID') : ''} />
                   <Tooltip formatter={(v) => fmt(Number(v))} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
                   <ReferenceLine x={MONTHS[data.monthsElapsed - 1]} stroke="#10b981" strokeDasharray="3 3" label={{ value: '현재', fontSize: 9 }} />

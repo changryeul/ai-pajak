@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
+import { fmtRp } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -96,7 +97,7 @@ export default function ReportsPage() {
     },
     {
       label: t('reports.totalTaxPaid'),
-      value: 'Rp 45.5M',
+      value: fmtRp(45500000),
       change: t('reports.changeVsLastYear', { percent: '+12%' }),
       icon: DollarSign,
       color: 'green',

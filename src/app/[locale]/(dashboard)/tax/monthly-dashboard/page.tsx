@@ -540,7 +540,7 @@ export default function MonthlyDashboardPage() {
                                 </div>
                                 {m.amount > 0 && (
                                   <p className="text-[8px] font-mono text-gray-500 mt-0.5">
-                                    {m.amount >= 1e6 ? `${(m.amount / 1e6).toFixed(0)}M` : `${(m.amount / 1e3).toFixed(0)}K`}
+                                    {Math.round(m.amount).toLocaleString('id-ID')}
                                   </p>
                                 )}
                                 {m.filingStatus === 'DRAFT' && (
@@ -596,7 +596,7 @@ export default function MonthlyDashboardPage() {
                     return { month: label, PPh21: byType.PPh21 || 0, PPh23: byType.PPh23 || 0, PPN: byType.PPN || 0, PPh_FINAL: byType.PPh_FINAL || 0 };
                   })}>
                     <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
+                    <YAxis tick={{ fontSize: 10 }} tickFormatter={v => Math.round(v).toLocaleString('id-ID')} />
                     <Tooltip formatter={(v) => fmtRp(Number(v))} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
                     <Bar dataKey="PPh21" fill="#6366f1" radius={[2, 2, 0, 0]} />

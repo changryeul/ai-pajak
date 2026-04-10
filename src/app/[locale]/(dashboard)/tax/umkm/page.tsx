@@ -17,8 +17,8 @@ import { fmtRp } from '@/lib/utils';
 
 // ── Constants ──
 const UMKM_RATE = 0.005;          // PPh Final 0.5%
-const EXEMPTION_INDIVIDUAL = 500_000_000; // Rp 500M — 개인(OP)만 비과세
-const THRESHOLD = 4_800_000_000;  // Rp 4.8B annual revenue threshold
+const EXEMPTION_INDIVIDUAL = 500_000_000; // Rp 500.000.000 — 개인(OP)만 비과세
+const THRESHOLD = 4_800_000_000;  // Rp 4.800.000.000 annual revenue threshold
 const CORPORATE_RATE = 0.22;      // PPh Badan 22%
 const SME_DISCOUNT = 0.50;        // 50% discount for revenue < 50B
 

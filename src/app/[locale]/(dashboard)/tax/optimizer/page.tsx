@@ -104,7 +104,7 @@ export default function TaxOptimizerPage() {
         recommendations.push({
           id: 'ptkp_marriage', category: 'PTKP',
           title: '혼인 상태 업데이트',
-          description: 'K/0 적용 시 PTKP Rp 4.5M 추가 공제. 배우자 소득이 있으면 K/I 합산과세로 더 큰 절세.',
+          description: 'K/0 적용 시 PTKP Rp 4.500.000 추가 공제. 배우자 소득이 있으면 K/I 합산과세로 더 큰 절세.',
           savings: calculateTax(taxableIncome) - calculateTax(Math.max(taxableIncome - 4500000, 0)),
           difficulty: 'EASY', legalBasis: 'UU PPh Pasal 7',
         });

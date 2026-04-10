@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
+import { fmtRp } from '@/lib/utils';
 import {
   CreditCard, AlertTriangle, CheckCircle, Clock, Loader2,
   DollarSign, FileText, Calendar, ChevronRight, Sparkles,
@@ -31,13 +32,9 @@ interface TypeSummary {
   outstanding: number; payments: Payment[];
 }
 
-function fmtShort(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(0)}M`;
-  if (n >= 1e3) return `Rp ${(n / 1e3).toFixed(0)}K`;
-  return `Rp ${n}`;
-}
-function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
+// All currency amounts are displayed in full (no M/B/K abbreviation)
+const fmt = fmtRp;
+const fmtShort = fmtRp;
 
 const taxTypeConfig: Record<string, { label: string; gradient: string; icon: typeof FileText; descKey: string }> = {
   PPh21: { label: 'PPh 21', gradient: 'from-blue-500 to-indigo-600', icon: FileText, descKey: 'PPh21Desc' },

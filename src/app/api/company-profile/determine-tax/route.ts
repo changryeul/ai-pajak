@@ -41,14 +41,14 @@ function determineTaxRegime(profile: Record<string, unknown>): TaxDetermination 
 
     if (yearsUsed < maxYears) {
       regime = 'UMKM_FINAL';
-      reason = `PP 55/2022 적용: 연매출 Rp ${(revenue / 1e9).toFixed(1)}B (< 4.8B), ${legalForm || '법인'} ${maxYears}년 한도 중 ${yearsUsed}년차`;
+      reason = `PP 55/2022 적용: 연매출 Rp ${Math.round(revenue).toLocaleString('id-ID')} (< Rp 4.800.000.000), ${legalForm || '법인'} ${maxYears}년 한도 중 ${yearsUsed}년차`;
     } else {
       regime = 'GENERAL_25';
       reason = `UMKM PPh Final 기간 만료: ${legalForm} ${maxYears}년 한도 초과 (${umkmStartYear}~${currentYear}). 일반 PPh Badan 22% 적용`;
     }
   } else if (revenue >= 4_800_000_000) {
     regime = 'GENERAL_25';
-    reason = `연매출 Rp ${(revenue / 1e9).toFixed(1)}B — 48억 IDR 이상이므로 일반 PPh Badan 22% 적용`;
+    reason = `연매출 Rp ${Math.round(revenue).toLocaleString('id-ID')} — Rp 4.800.000.000 이상이므로 일반 PPh Badan 22% 적용`;
   } else if (!isUmkm && revenue > 0 && revenue < 4_800_000_000) {
     followUpQuestions.push({ question: '연매출이 48억 IDR 미만입니다. PP 55/2022 (UMKM PPh Final 0.5%)에 등록되어 있나요?' });
     regime = 'GENERAL_25';
