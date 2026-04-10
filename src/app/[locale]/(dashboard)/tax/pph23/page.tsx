@@ -46,9 +46,15 @@ interface Counterparty {
   country: string | null;
   is_foreign: boolean | null;
   is_resident: boolean | null;
+  is_entity: boolean | null;
   has_cod: boolean | null;
   vendor_is_property_owner: boolean | null;
   is_related_party: boolean | null;
+  shareholding_pct: number | null;
+  is_beneficial_owner: boolean | null;
+  receives_reinvested_dividend: boolean | null;
+  dgt_form_valid_until: string | null;
+  is_shareholder: boolean | null;
 }
 
 // Service type → ResolveEngine serviceCategory mapping
@@ -131,6 +137,12 @@ export default function PPh23Page() {
   const [fDescription, setFDescription] = useState('');
   const [fUseResolution, setFUseResolution] = useState(true);
 
+  // Phase 4 — per-transaction context (additional questions)
+  const [fRentalAssetType, setFRentalAssetType] = useState<'BUILDING_LAND' | 'MACHINE' | 'VEHICLE' | 'OTHER'>('BUILDING_LAND');
+  const [fInterestSource, setFInterestSource] = useState<'BANK_DEPOSIT' | 'LOAN' | 'BOND' | 'OTHER'>('LOAN');
+  const [fShareholdingOverride, setFShareholdingOverride] = useState('');
+  const [fReinvestedOverride, setFReinvestedOverride] = useState<'' | 'yes' | 'no'>('');
+
   // Tax resolution preview (from /api/tax/resolve)
   const [resolutionPreview, setResolutionPreview] = useState<TaxResolutionResult | null>(null);
   const [resolvingTax, setResolvingTax] = useState(false);
@@ -201,6 +213,11 @@ export default function PPh23Page() {
           transactionDate: fTransactionDate,
           description: fDescription || undefined,
           useResolution: fUseResolution,
+          // Phase 4 per-transaction context
+          rentalAssetType: fServiceType === 'SEWA' ? fRentalAssetType : undefined,
+          interestSource: fServiceType === 'BUNGA' ? fInterestSource : undefined,
+          shareholdingPctAtTime: fShareholdingOverride ? Number(fShareholdingOverride) : undefined,
+          isReinvestedDomestically: fReinvestedOverride === 'yes' ? true : fReinvestedOverride === 'no' ? false : undefined,
         }),
       });
       const data = await res.json();
@@ -209,6 +226,8 @@ export default function PPh23Page() {
         setFGrossAmount('');
         setFInvoiceNumber('');
         setFDescription('');
+        setFShareholdingOverride('');
+        setFReinvestedOverride('');
         setResolutionPreview(null);
         loadData();
       } else {
@@ -286,6 +305,14 @@ export default function PPh23Page() {
             hasCertificateOfDomicile: cp.has_cod || false,
             isRelatedParty: cp.is_related_party || false,
             vendorIsPropertyOwner: cp.vendor_is_property_owner || false,
+            // Phase 3/4 context
+            recipientIsEntity: cp.is_entity ?? undefined,
+            shareholdingPct: fShareholdingOverride ? Number(fShareholdingOverride) : (cp.shareholding_pct ?? undefined),
+            isBeneficialOwner: cp.is_beneficial_owner ?? undefined,
+            receivesReinvestedDividend: fReinvestedOverride === 'yes' ? true : fReinvestedOverride === 'no' ? false : (cp.receives_reinvested_dividend ?? false),
+            hasDgtForm: cp.dgt_form_valid_until ? new Date(cp.dgt_form_valid_until) >= new Date(fTransactionDate) : false,
+            rentalAssetType: fServiceType === 'SEWA' ? fRentalAssetType : undefined,
+            interestSource: fServiceType === 'BUNGA' ? fInterestSource : undefined,
           }),
         });
         const data = await res.json();
@@ -307,7 +334,7 @@ export default function PPh23Page() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [fCounterparty, fServiceType, fGrossAmount, fTransactionDate, fDescription, fUseResolution, counterparties]);
+  }, [fCounterparty, fServiceType, fGrossAmount, fTransactionDate, fDescription, fUseResolution, counterparties, fRentalAssetType, fInterestSource, fShareholdingOverride, fReinvestedOverride]);
 
   // Detect camera availability (mobile or videoinput device)
   useEffect(() => {
@@ -754,6 +781,88 @@ export default function PPh23Page() {
                     <b>{SERVICE_TYPES.find(s => s.value === fServiceType)?.label}</b> —
                     {' '}{SERVICE_TYPES.find(s => s.value === fServiceType)?.note}
                   </span>
+                </div>
+              )}
+
+              {/* Conditional context questions — shown based on service type */}
+              {fServiceType === 'SEWA' && (
+                <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200 space-y-2">
+                  <p className="text-xs font-bold text-indigo-900">임대 자산 유형</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { v: 'BUILDING_LAND', label: '건물/토지', note: 'PPh 4(2) Final 10%' },
+                      { v: 'MACHINE', label: '기계/장비', note: 'PPh 23 2%' },
+                      { v: 'VEHICLE', label: '차량', note: 'PPh 23 2%' },
+                      { v: 'OTHER', label: '기타', note: 'PPh 23 2%' },
+                    ] as const).map(opt => (
+                      <label key={opt.v}
+                        className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-xs ${
+                          fRentalAssetType === opt.v ? 'border-indigo-500 bg-white' : 'border-gray-200 bg-white/50'
+                        }`}>
+                        <input type="radio" checked={fRentalAssetType === opt.v}
+                          onChange={() => setFRentalAssetType(opt.v)} />
+                        <div>
+                          <p className="font-medium">{opt.label}</p>
+                          <p className="text-[10px] text-gray-500">{opt.note}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {fServiceType === 'BUNGA' && (
+                <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200 space-y-2">
+                  <p className="text-xs font-bold text-indigo-900">이자 원천</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { v: 'BANK_DEPOSIT', label: '은행 예금/저축', note: 'PPh Final 20%' },
+                      { v: 'LOAN', label: '대여 이자', note: 'PPh 23 15%' },
+                      { v: 'BOND', label: '채권 이자', note: 'PPh 23 15%' },
+                      { v: 'OTHER', label: '기타 이자', note: 'PPh 23 15%' },
+                    ] as const).map(opt => (
+                      <label key={opt.v}
+                        className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-xs ${
+                          fInterestSource === opt.v ? 'border-indigo-500 bg-white' : 'border-gray-200 bg-white/50'
+                        }`}>
+                        <input type="radio" checked={fInterestSource === opt.v}
+                          onChange={() => setFInterestSource(opt.v)} />
+                        <div>
+                          <p className="font-medium">{opt.label}</p>
+                          <p className="text-[10px] text-gray-500">{opt.note}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {fServiceType === 'DIVIDEN' && (
+                <div className="bg-purple-50 rounded-lg p-3 border border-purple-200 space-y-2">
+                  <p className="text-xs font-bold text-purple-900">배당 추가 질문</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px]">거래 시점 지분율 (%) — 거래처 기본값 오버라이드</Label>
+                      <Input type="number" step="0.01" min="0" max="100"
+                        value={fShareholdingOverride}
+                        onChange={e => setFShareholdingOverride(e.target.value)}
+                        placeholder={`기본: ${counterparties.find(c => c.id === fCounterparty)?.shareholding_pct ?? '미설정'}%`}
+                        className="h-8 text-xs" />
+                      <p className="text-[10px] text-purple-700 mt-0.5">
+                        비거주자 치러티 25% 임계값 판정에 사용
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">이번 배당 국내 재투자 (PMK 18/2021)</Label>
+                      <select value={fReinvestedOverride}
+                        onChange={e => setFReinvestedOverride(e.target.value as '' | 'yes' | 'no')}
+                        className="w-full h-8 px-2 rounded border text-xs">
+                        <option value="">거래처 기본값 사용</option>
+                        <option value="yes">예 — 재투자 (면제)</option>
+                        <option value="no">아니오 — 재투자 안 함</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               )}
 

@@ -68,37 +68,118 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   });
 }
 
+// Map service_type (Indonesian label) → serviceCategory (engine enum)
+const SERVICE_TYPE_TO_CATEGORY: Record<string, ServiceCategory> = {
+  DIVIDEN: 'DIVIDEND',
+  BUNGA: 'INTEREST',
+  ROYALTI: 'ROYALTY',
+  HADIAH: 'OTHER',
+  SEWA: 'RENTAL',
+  JASA_TEKNIK: 'SERVICE',
+  JASA_MANAJEMEN: 'SERVICE',
+  JASA_KONSULTAN: 'SERVICE',
+  JASA_LAINNYA: 'SERVICE',
+};
+
+// Map engine taxType → DB tax_regime
+function taxTypeToRegime(taxType: string, rate: number): string {
+  if (rate === 0) return 'EXEMPT';
+  if (taxType === 'PPh23') return 'PPH23';
+  if (taxType === 'PPh4_2') return 'PPH4_2';
+  if (taxType === 'PPh26') return 'PPH26';
+  if (taxType === 'PPh21') return 'PPH23'; // fallback (shouldn't happen via this route)
+  if (taxType === 'PPh22') return 'PPH23';
+  if (taxType === 'PPh15') return 'PPH_FINAL';
+  return 'PPH23';
+}
+
 async function handlePost(req: RequestWithSession): Promise<Response> {
   try {
     const body = await req.json();
-    const { customerId, counterpartyId, taxPeriod, transactionDate, serviceType, grossAmount, invoiceNumber, description } = body;
+    const {
+      customerId, counterpartyId, taxPeriod, transactionDate, serviceType,
+      grossAmount, invoiceNumber, description,
+      // Phase 4 explicit context
+      rentalAssetType, interestSource, shareholdingPctAtTime, isReinvestedDomestically,
+    } = body;
 
     if (!customerId || !taxPeriod || !grossAmount) {
       return NextResponse.json({ error: 'customerId, taxPeriod, grossAmount required' }, { status: 400 });
     }
 
-    // Get counterparty info
+    // Fetch counterparty full profile for engine context
     let counterpartyName = body.counterpartyName || '';
     let counterpartyNpwp = body.counterpartyNpwp || '';
+    let cpRecord: {
+      name: string;
+      npwp: string | null;
+      country: string | null;
+      is_foreign: boolean | null;
+      is_resident: boolean | null;
+      is_entity: boolean | null;
+      has_cod: boolean | null;
+      shareholding_pct: number | null;
+      is_beneficial_owner: boolean | null;
+      receives_reinvested_dividend: boolean | null;
+      vendor_is_property_owner: boolean | null;
+      is_related_party: boolean | null;
+      dgt_form_valid_until: string | null;
+    } | null = null;
+
     if (counterpartyId) {
-      const { data: cp } = await getSupabaseAdmin().from('tax_counterparty').select('name, npwp').eq('id', counterpartyId).single();
-      if (cp) { counterpartyName = cp.name; counterpartyNpwp = cp.npwp || ''; }
+      const { data: cp } = await getSupabaseAdmin()
+        .from('tax_counterparty')
+        .select('name, npwp, country, is_foreign, is_resident, is_entity, has_cod, shareholding_pct, is_beneficial_owner, receives_reinvested_dividend, vendor_is_property_owner, is_related_party, dgt_form_valid_until')
+        .eq('id', counterpartyId)
+        .single();
+      if (cp) {
+        cpRecord = cp;
+        counterpartyName = cp.name;
+        counterpartyNpwp = cp.npwp || '';
+      }
     }
+
+    // Check DGT Form validity (not expired as of transaction date)
+    const txDate = transactionDate || new Date().toISOString().slice(0, 10);
+    const hasDgtForm = cpRecord?.dgt_form_valid_until
+      ? new Date(cpRecord.dgt_form_valid_until) >= new Date(txDate)
+      : false;
 
     let effectiveRate: number;
     let taxAmount: number;
     let resolvedServiceType = serviceType;
-    let resolutionInfo: { ruleId: string; reason: string; legalBasis: string } | undefined;
+    let resolutionInfo: { ruleId: string; reason: string; legalBasis: string; taxType: string; isFinal: boolean; npwpSurchargeApplied: boolean } | undefined;
 
     // Option A: Use Resolution Engine for automatic rate determination
-    if (body.useResolution) {
+    if (body.useResolution !== false) {
+      const serviceCategory = (
+        body.serviceCategory
+        || SERVICE_TYPE_TO_CATEGORY[serviceType]
+        || 'SERVICE'
+      ) as ServiceCategory;
+
+      const recipientType = cpRecord?.is_foreign || cpRecord?.is_resident === false ? 'NON_RESIDENT' : 'RESIDENT';
+
       const resolution = TaxResolutionEngine.resolve({
         grossAmount,
-        transactionDate: transactionDate || new Date().toISOString().slice(0, 10),
-        serviceCategory: (body.serviceCategory || 'SERVICE') as ServiceCategory,
-        recipientType: 'RESIDENT',
+        transactionDate: txDate,
+        description,
+        serviceCategory,
+        recipientType,
         recipientNpwp: counterpartyNpwp,
-        vendorIsPropertyOwner: body.vendorIsPropertyOwner,
+        recipientCountry: cpRecord?.country || undefined,
+        hasCertificateOfDomicile: cpRecord?.has_cod || false,
+        hasDgtForm,
+        recipientIsEntity: cpRecord?.is_entity ?? undefined,
+        // Shareholding: use override from request body if provided, else counterparty default
+        shareholdingPct: shareholdingPctAtTime ?? cpRecord?.shareholding_pct ?? undefined,
+        isBeneficialOwner: cpRecord?.is_beneficial_owner ?? undefined,
+        // Reinvestment: use override from request body if provided, else counterparty default
+        receivesReinvestedDividend: isReinvestedDomestically ?? cpRecord?.receives_reinvested_dividend ?? false,
+        rentalAssetType: rentalAssetType || undefined,
+        interestSource: interestSource || undefined,
+        vendorIsPropertyOwner: cpRecord?.vendor_is_property_owner || body.vendorIsPropertyOwner,
+        isRelatedParty: cpRecord?.is_related_party || false,
         kbliCode: body.kbliCode,
         constructionType: body.constructionType,
         qualification: body.qualification,
@@ -110,14 +191,17 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         ruleId: resolution.ruleId,
         reason: resolution.reason,
         legalBasis: resolution.legalBasis,
+        taxType: resolution.taxType,
+        isFinal: resolution.isFinal,
+        npwpSurchargeApplied: resolution.npwpSurchargeApplied,
       };
 
-      // Map resolution to service type for DB storage
+      // Keep original service_type for DB (for e-Bupot reporting)
       if (!resolvedServiceType) {
-        resolvedServiceType = effectiveRate >= 0.15 ? 'DIVIDEN' : 'JASA_LAINNYA';
+        resolvedServiceType = 'JASA_LAINNYA';
       }
     }
-    // Option B: Manual service type + rate (existing behavior)
+    // Option B: Manual service type + rate (legacy path)
     else {
       if (!serviceType) {
         return NextResponse.json({ error: 'serviceType required (or use useResolution: true)' }, { status: 400 });
@@ -130,11 +214,15 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       taxAmount = Math.round(grossAmount * effectiveRate);
     }
 
+    const taxRegime = resolutionInfo
+      ? taxTypeToRegime(resolutionInfo.taxType, effectiveRate)
+      : (resolvedServiceType === 'SEWA' ? 'PPH4_2' : 'PPH23');
+
     const { data, error } = await getSupabaseAdmin().from('pph23_transaction').insert({
       customer_id: customerId,
       counterparty_id: counterpartyId || null,
       tax_period: taxPeriod,
-      transaction_date: transactionDate || new Date().toISOString().slice(0, 10),
+      transaction_date: txDate,
       description: description || resolutionInfo?.reason || '',
       service_type: resolvedServiceType,
       invoice_number: invoiceNumber,
@@ -143,6 +231,21 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       tax_amount: taxAmount,
       counterparty_name: counterpartyName,
       counterparty_npwp: counterpartyNpwp,
+      // Phase 4 fields
+      tax_regime: taxRegime,
+      income_type: resolvedServiceType,
+      rental_asset_type: rentalAssetType || null,
+      interest_source: interestSource || null,
+      shareholding_pct_at_time: shareholdingPctAtTime ?? cpRecord?.shareholding_pct ?? null,
+      is_reinvested_domestically: !!(isReinvestedDomestically ?? cpRecord?.receives_reinvested_dividend),
+      recipient_is_entity: cpRecord?.is_entity ?? null,
+      recipient_country: cpRecord?.country || null,
+      treaty_applied: resolutionInfo?.taxType === 'PPh26' && effectiveRate < 0.20,
+      resolution_rule_id: resolutionInfo?.ruleId || null,
+      resolution_reason: resolutionInfo?.reason || null,
+      resolution_legal_basis: resolutionInfo?.legalBasis || null,
+      is_final: resolutionInfo?.isFinal || false,
+      npwp_surcharge_applied: resolutionInfo?.npwpSurchargeApplied || false,
     }).select().single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -159,8 +262,8 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       data,
       ...(resolutionInfo && { resolution: resolutionInfo }),
     });
-  } catch {
-    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed' }, { status: 500 });
   }
 }
 
