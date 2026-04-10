@@ -24,7 +24,6 @@ import { Card, CardContent } from '@/components/ui';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import {
   POAStatusWidget,
   FilingSummaryWidget,
@@ -208,10 +207,15 @@ function CustomerDashboardWithOnboarding({
   session: { customerId?: string; customerType?: 'INDIVIDUAL' | 'COMPANY'; fullName?: string };
   locale: string;
 }) {
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return !localStorage.getItem('ai-pajak-onboarded');
-  });
+  // OnboardingWizard intentionally removed — customers go straight to dashboard.
+  // Signup collects basic info, and the GettingStartedGuide card on the dashboard
+  // serves as a dismissible guided-tour replacement.
+  // The `ai-pajak-onboarded` localStorage flag is auto-set for backward compatibility.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('ai-pajak-onboarded')) {
+      localStorage.setItem('ai-pajak-onboarded', 'true');
+    }
+  }, []);
 
   // Ensure customer record + role exists (fallback for email-verified users)
   useEffect(() => {
@@ -219,10 +223,6 @@ function CustomerDashboardWithOnboarding({
       fetch('/api/auth/setup-account', { method: 'POST', credentials: 'include' }).catch(() => {});
     }
   }, [session.customerId]);
-
-  if (showOnboarding) {
-    return <OnboardingWizard onComplete={() => setShowOnboarding(false)} />;
-  }
 
   // Branch by customer type — corporate customers focus on monthly filing
   if (session.customerType === 'COMPANY') {

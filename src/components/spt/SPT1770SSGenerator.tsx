@@ -621,9 +621,9 @@ export function SPT1770SSGenerator({
             {extractedIncomes.length > 0 && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm text-green-800">
-                  <strong>AI Auto-fill:</strong> {extractedIncomes.length} dokumen berhasil dibaca.
+                  <strong>AI 자동 입력:</strong> {extractedIncomes.length}개 문서 인식 완료.
                   {extractedIncomes[0]?.ptkpStatus && (
-                    <> Status PTKP: <strong>{extractedIncomes[0].ptkpStatus}</strong>.</>
+                    <> PTKP 상태: <strong>{extractedIncomes[0].ptkpStatus}</strong>.</>
                   )}
                   {extractedIncomes[0]?.taxYear && (
                     <> {tf('detectedYear')}: <strong>{extractedIncomes[0].taxYear}</strong>.</>
@@ -719,7 +719,7 @@ export function SPT1770SSGenerator({
               onClick={proceedToForm}
               disabled={extractedIncomes.length === 0}
             >
-              Lanjutkan ({extractedIncomes.length} dokumen)
+              계속 ({extractedIncomes.length}개 문서)
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </CardFooter>
@@ -737,8 +737,8 @@ export function SPT1770SSGenerator({
           <CardTitle>{ts('settingsStep')} 1770 SS</CardTitle>
           <CardDescription>
             {extractedIncomes.length > 0
-              ? `${extractedIncomes.length} sumber penghasilan dari dokumen siap digunakan.`
-              : 'SPT akan digenerate berdasarkan data Bukti Potong yang tersimpan.'}
+              ? `${extractedIncomes.length}개 문서의 소득 정보 사용 준비 완료.`
+              : '저장된 원천징수영수증 데이터를 기반으로 SPT가 생성됩니다.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -864,16 +864,15 @@ export function SPT1770SSGenerator({
           {extractedIncomes.length === 0 && (
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Catatan:</strong> Tidak ada dokumen yang di-upload. SPT akan digenerate
-                berdasarkan data Bukti Potong (Form 1721-A1) yang telah tersimpan atau data
-                perhitungan pajak sebelumnya.
+                <strong>참고:</strong> 업로드된 문서가 없습니다. 이전에 저장된 원천징수영수증(Form 1721-A1)
+                또는 과거 세금 계산 데이터를 기반으로 SPT가 생성됩니다.
               </p>
             </div>
           )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={() => setStep('upload')}>
-            Kembali
+            이전으로
           </Button>
           <Button onClick={generateSPT} disabled={isLoading}>
             {isLoading ? ts('generating') : ts('generateSpt')}

@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface OCRResult {
@@ -40,6 +41,22 @@ export function DocumentOCRUploader({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [cameraAvailable, setCameraAvailable] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Detect camera availability (mobile device OR videoinput device connected)
+  useEffect(() => {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      setCameraAvailable(true);
+      return;
+    }
+    if (navigator.mediaDevices?.enumerateDevices) {
+      navigator.mediaDevices.enumerateDevices()
+        .then(devices => setCameraAvailable(devices.some(d => d.kind === 'videoinput')))
+        .catch(() => setCameraAvailable(false));
+    }
+  }, []);
 
   const acceptedTypes = {
     'image/jpeg': ['.jpg', '.jpeg'],
@@ -128,7 +145,7 @@ export function DocumentOCRUploader({
     <Card className={cn('w-full', className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Document OCR Upload
+          문서 OCR 업로드
           {uploadStatus === 'completed' && (
             <Badge variant="default" className="bg-green-500">
               Completed
@@ -141,39 +158,73 @@ export function DocumentOCRUploader({
       </CardHeader>
       <CardContent>
         {uploadStatus === 'idle' && (
-          <div
-            {...getRootProps()}
-            className={cn(
-              'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
-              isDragActive
-                ? 'border-primary bg-primary/5'
-                : 'border-muted-foreground/25 hover:border-primary/50'
-            )}
-          >
-            <input {...getInputProps()} />
-            <div className="flex flex-col items-center gap-2">
-              <svg
-                className="w-12 h-12 text-muted-foreground"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <p className="text-muted-foreground">
-                {isDragActive
-                  ? 'Drop the file here...'
-                  : 'Drag & drop a document, or click to select'}
-              </p>
-              <p className="text-sm text-muted-foreground/70">
-                Supported: JPEG, PNG, WebP, PDF (max 10MB)
-              </p>
+          <div className="space-y-3">
+            <div
+              {...getRootProps()}
+              className={cn(
+                'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
+                isDragActive
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted-foreground/25 hover:border-primary/50'
+              )}
+            >
+              <input {...getInputProps()} />
+              <div className="flex flex-col items-center gap-2">
+                <svg
+                  className="w-12 h-12 text-muted-foreground"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <p className="text-muted-foreground">
+                  {isDragActive
+                    ? '파일을 여기에 놓으세요...'
+                    : '문서를 드래그해서 놓거나 클릭해서 선택'}
+                </p>
+                <p className="text-sm text-muted-foreground/70">
+                  지원 형식: JPEG, PNG, WebP, PDF (최대 10MB)
+                </p>
+              </div>
             </div>
+
+            {/* Camera capture button — shown on mobile or when videoinput device detected */}
+            {cameraAvailable && (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-[11px] text-gray-400">또는</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => cameraInputRef.current?.click()}
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  카메라로 촬영
+                </Button>
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onDrop([file]);
+                    e.target.value = '';
+                  }}
+                />
+              </>
+            )}
           </div>
         )}
 
@@ -183,8 +234,8 @@ export function DocumentOCRUploader({
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
               <span>
                 {uploadStatus === 'uploading'
-                  ? 'Uploading...'
-                  : 'AI sedang membaca dokumen...'}
+                  ? '업로드 중...'
+                  : 'AI가 문서를 읽는 중...'}
               </span>
             </div>
             <Progress value={uploadProgress} />
@@ -195,7 +246,7 @@ export function DocumentOCRUploader({
           <div className="space-y-4">
             <OCRResultDisplay result={ocrResult} />
             <Button onClick={reset} variant="outline" className="w-full">
-              Upload Another Document
+              다른 문서 업로드
             </Button>
           </div>
         )}
@@ -203,11 +254,11 @@ export function DocumentOCRUploader({
         {uploadStatus === 'failed' && (
           <div className="space-y-4">
             <div className="p-4 bg-destructive/10 rounded-lg text-destructive">
-              <p className="font-medium">Processing Failed</p>
+              <p className="font-medium">처리 실패</p>
               <p className="text-sm">{errorMessage || 'An unknown error occurred'}</p>
             </div>
             <Button onClick={reset} variant="outline" className="w-full">
-              Try Again
+              다시 시도
             </Button>
           </div>
         )}
