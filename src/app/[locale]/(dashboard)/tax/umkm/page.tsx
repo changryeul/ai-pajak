@@ -108,12 +108,12 @@ export default function CorporateTaxPage() {
     const exemption = getExemption(legalForm);
     const isCompany = ['PT', 'CV', 'FIRMA', 'KOPERASI'].includes(legalForm);
 
-    // Case 1: New company (< 2 years)
-    if (yearsOperating < 2 && !isUmkm) {
+    // Case 1: New company (< 3 years)
+    if (yearsOperating < 3 && !isUmkm) {
       return {
         regime: 'PPH25_NEW',
         title: '신설 법인 — PPh 25 면제',
-        description: `설립 ${yearsOperating}년차. 신설 법인은 첫 2년간 PPh 25 납부 의무가 없습니다. 다만 사업 소득이 발생하면 연말 SPT Tahunan에서 정산합니다.`,
+        description: `설립 ${yearsOperating}년차. 신설 법인은 첫 3년간 PPh 25 납부 의무가 없습니다 (단, NPWP 발행 시 PPh 25를 선택한 경우 제외). 다만 사업 소득이 발생하면 연말 SPT Tahunan에서 정산합니다.`,
         monthlyAmount: 0,
         annualEstimate: 0,
         legalBasis: 'PMK 215/PMK.03/2018 — 신설 법인 PPh 25 면제',
@@ -206,7 +206,7 @@ export default function CorporateTaxPage() {
           <div className="text-xs text-blue-900">
             <p className="font-bold mb-1">법인세 납부는 회사 상황에 따라 다릅니다</p>
             <ul className="space-y-1 text-blue-800">
-              <li>• <b>신설 법인</b> (2년 미만): PPh 25 납부 의무 없음</li>
+              <li>• <b>신설 법인</b> (3년 미만): PPh 25 납부 의무 없음 <span className="text-[10px] text-blue-600">(단, NPWP 발행 시 PPh 25 선택한 경우 제외)</span></li>
               <li>• <b>소규모 법인</b> (연매출 48억 미만, UMKM 등록): 매월 매출의 <b>0.5%</b>만 납부 (PPh Final)
                 <br/><span className="text-[10px] text-blue-600 ml-4">적용 기간: PT <b>3년</b>, CV/Firma <b>4년</b>, 개인 <b>7년</b>. 법인은 비과세 공제 없음 (개인만 연 5억 비과세)</span>
               </li>
@@ -288,8 +288,8 @@ export default function CorporateTaxPage() {
                 <Label className="text-xs">설립 연도</Label>
                 <Input type="number" value={establishedYear} onChange={e => setEstablishedYear(e.target.value)}
                   placeholder="예: 2020" />
-                {establishedYear && currentYear - Number(establishedYear) < 2 && (
-                  <p className="text-[11px] text-blue-600 mt-1">💡 설립 2년 미만 → 신설 법인 PPh 25 면제 대상</p>
+                {establishedYear && currentYear - Number(establishedYear) < 3 && (
+                  <p className="text-[11px] text-blue-600 mt-1">💡 설립 3년 미만 → 신설 법인 PPh 25 면제 대상 (NPWP 발행 시 선택한 경우 제외)</p>
                 )}
                 {establishedYear && legalForm && (() => {
                   const yrs = currentYear - Number(establishedYear);
