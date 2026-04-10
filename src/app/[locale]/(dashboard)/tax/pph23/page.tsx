@@ -43,6 +43,40 @@ interface Counterparty {
   name: string;
   npwp: string | null;
   kbli_code: string | null;
+  country: string | null;
+  is_foreign: boolean | null;
+  is_resident: boolean | null;
+  has_cod: boolean | null;
+  vendor_is_property_owner: boolean | null;
+  is_related_party: boolean | null;
+}
+
+// Service type → ResolveEngine serviceCategory mapping
+type ServiceCategory =
+  | 'EMPLOYMENT' | 'SERVICE' | 'RENTAL' | 'CONSTRUCTION'
+  | 'DIVIDEND' | 'INTEREST' | 'ROYALTY' | 'IMPORT' | 'SHIPPING' | 'OTHER';
+
+const SERVICE_TYPE_TO_CATEGORY: Record<string, ServiceCategory> = {
+  DIVIDEN: 'DIVIDEND',
+  BUNGA: 'INTEREST',
+  ROYALTI: 'ROYALTY',
+  HADIAH: 'OTHER',         // Prize — handled by Other for now
+  SEWA: 'RENTAL',
+  JASA_TEKNIK: 'SERVICE',
+  JASA_MANAJEMEN: 'SERVICE',
+  JASA_KONSULTAN: 'SERVICE',
+  JASA_LAINNYA: 'SERVICE',
+};
+
+interface TaxResolutionResult {
+  taxType: 'PPh21' | 'PPh23' | 'PPh26' | 'PPh4_2' | 'PPh22' | 'PPh15' | 'PPN';
+  rate: number;
+  taxAmount: number;
+  netAmount: number;
+  isFinal: boolean;
+  npwpSurchargeApplied: boolean;
+  reason: string;
+  legalBasis: string;
 }
 
 interface Customer {
@@ -51,17 +85,17 @@ interface Customer {
   company_name?: string;
 }
 
-// ── Service types (PMK 141/2015) ──
-const SERVICE_TYPES = [
-  { value: 'DIVIDEN', label: '배당 (Dividen)', rate: '15%' },
-  { value: 'BUNGA', label: '이자 (Bunga)', rate: '15%' },
-  { value: 'ROYALTI', label: '로열티 (Royalti)', rate: '15%' },
-  { value: 'HADIAH', label: '상금 (Hadiah/Penghargaan)', rate: '15%' },
-  { value: 'SEWA', label: '임대 (Sewa)', rate: '2%' },
-  { value: 'JASA_TEKNIK', label: '기술 서비스 (Jasa Teknik)', rate: '2%' },
-  { value: 'JASA_MANAJEMEN', label: '경영 서비스 (Jasa Manajemen)', rate: '2%' },
-  { value: 'JASA_KONSULTAN', label: '컨설팅 (Jasa Konsultan)', rate: '2%' },
-  { value: 'JASA_LAINNYA', label: '기타 서비스 (Jasa Lainnya)', rate: '2%' },
+// ── Service types — 세율은 거래 상대방/조건에 따라 동적 결정됨 ──
+const SERVICE_TYPES: Array<{ value: string; label: string; note: string }> = [
+  { value: 'DIVIDEN', label: '배당 (Dividen)', note: '국적·지분율·재투자에 따라 0%~20%' },
+  { value: 'BUNGA', label: '이자 (Bunga)', note: 'PPh 23 15% 또는 treaty rate' },
+  { value: 'ROYALTI', label: '로열티 (Royalti)', note: 'PPh 23 15% 또는 treaty rate' },
+  { value: 'HADIAH', label: '상금 (Hadiah/Penghargaan)', note: 'PPh 23 15%' },
+  { value: 'SEWA', label: '임대 (Sewa)', note: '건물/토지→PPh 4(2) 10%, 기계→PPh 23 2%' },
+  { value: 'JASA_TEKNIK', label: '기술 서비스 (Jasa Teknik)', note: 'PPh 23 2%' },
+  { value: 'JASA_MANAJEMEN', label: '경영 서비스 (Jasa Manajemen)', note: 'PPh 23 2%' },
+  { value: 'JASA_KONSULTAN', label: '컨설팅 (Jasa Konsultan)', note: 'PPh 23 2%' },
+  { value: 'JASA_LAINNYA', label: '기타 서비스 (Jasa Lainnya)', note: 'PPh 23 2%' },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -97,10 +131,10 @@ export default function PPh23Page() {
   const [fDescription, setFDescription] = useState('');
   const [fUseResolution, setFUseResolution] = useState(true);
 
-  // Tax resolution preview
-  const [resolutionPreview, setResolutionPreview] = useState<{
-    taxType: string; rate: number; reason: string; legalBasis: string;
-  } | null>(null);
+  // Tax resolution preview (from /api/tax/resolve)
+  const [resolutionPreview, setResolutionPreview] = useState<TaxResolutionResult | null>(null);
+  const [resolvingTax, setResolvingTax] = useState(false);
+  const [cameraAvailable, setCameraAvailable] = useState(false);
 
   // Quick-add counterparty
   const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -220,28 +254,74 @@ export default function PPh23Page() {
     }
   };
 
-  // Preview tax resolution when counterparty changes
+  // Resolve tax via server ResolveEngine
   useEffect(() => {
-    if (!fCounterparty || !fGrossAmount || !fUseResolution) {
+    if (!fCounterparty || !fGrossAmount || !fUseResolution || Number(fGrossAmount) <= 0) {
       setResolutionPreview(null);
       return;
     }
     const cp = counterparties.find(c => c.id === fCounterparty);
     if (!cp) return;
 
-    // Simple client-side preview (actual resolution runs server-side)
-    const hasNpwp = !!cp.npwp;
-    const baseRate = ['DIVIDEN', 'BUNGA', 'ROYALTI', 'HADIAH'].includes(fServiceType) ? 0.15 : 0.02;
-    const rate = hasNpwp ? baseRate : baseRate * 2;
-    setResolutionPreview({
-      taxType: 'PPh 23',
-      rate,
-      reason: hasNpwp
-        ? `${fServiceType} 표준 세율 ${(baseRate * 100).toFixed(0)}%`
-        : `${fServiceType} — NPWP 미보유 할증 ${(rate * 100).toFixed(0)}% (Pasal 23(1a))`,
-      legalBasis: 'Pasal 23 UU PPh',
-    });
-  }, [fCounterparty, fServiceType, fGrossAmount, fUseResolution, counterparties]);
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setResolvingTax(true);
+      try {
+        const serviceCategory = SERVICE_TYPE_TO_CATEGORY[fServiceType] || 'SERVICE';
+        const recipientType = cp.is_foreign || cp.is_resident === false ? 'NON_RESIDENT' : 'RESIDENT';
+
+        const res = await fetch('/api/tax/resolve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          signal: controller.signal,
+          body: JSON.stringify({
+            grossAmount: Number(fGrossAmount),
+            transactionDate: fTransactionDate,
+            description: fDescription,
+            serviceCategory,
+            recipientType,
+            recipientNpwp: cp.npwp || undefined,
+            recipientCountry: cp.country || undefined,
+            hasCertificateOfDomicile: cp.has_cod || false,
+            isRelatedParty: cp.is_related_party || false,
+            vendorIsPropertyOwner: cp.vendor_is_property_owner || false,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data?.resolution) {
+          setResolutionPreview(data.data.resolution as TaxResolutionResult);
+        } else {
+          setResolutionPreview(null);
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          setResolutionPreview(null);
+        }
+      } finally {
+        setResolvingTax(false);
+      }
+    }, 300);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [fCounterparty, fServiceType, fGrossAmount, fTransactionDate, fDescription, fUseResolution, counterparties]);
+
+  // Detect camera availability (mobile or videoinput device)
+  useEffect(() => {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      setCameraAvailable(true);
+      return;
+    }
+    if (navigator.mediaDevices?.enumerateDevices) {
+      navigator.mediaDevices.enumerateDevices()
+        .then(devices => setCameraAvailable(devices.some(d => d.kind === 'videoinput')))
+        .catch(() => setCameraAvailable(false));
+    }
+  }, []);
 
   const months = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(currentYear, currentMonth - 1 - i, 1);
@@ -380,17 +460,19 @@ export default function PPh23Page() {
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
                 파일 업로드
               </Button>
-              <Button size="sm" variant="outline" disabled={uploading || !customerId}
-                onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'image/*';
-                  input.capture = 'environment';
-                  input.onchange = (e) => handleDocUpload((e.target as HTMLInputElement).files);
-                  input.click();
-                }}>
-                <Camera className="h-3 w-3 mr-1" />촬영
-              </Button>
+              {cameraAvailable && (
+                <Button size="sm" variant="outline" disabled={uploading || !customerId}
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.onchange = (e) => handleDocUpload((e.target as HTMLInputElement).files);
+                    input.click();
+                  }}>
+                  <Camera className="h-3 w-3 mr-1" />촬영
+                </Button>
+              )}
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
                 onChange={e => handleDocUpload(e.target.files)} />
             </div>
@@ -639,7 +721,7 @@ export default function PPh23Page() {
                     <SelectContent>
                       {SERVICE_TYPES.map(st => (
                         <SelectItem key={st.value} value={st.value}>
-                          {st.label} ({st.rate})
+                          {st.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -664,18 +746,59 @@ export default function PPh23Page() {
                 </div>
               </div>
 
-              {/* Tax resolution preview */}
-              {resolutionPreview && fGrossAmount && (
-                <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
-                  <div className="flex items-start gap-2">
-                    <Sparkles className="h-4 w-4 text-indigo-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-xs">
-                      <p className="font-bold text-indigo-900">
-                        세액 미리보기: {fmtRp(Number(fGrossAmount) * resolutionPreview.rate)}
-                        <span className="font-normal text-indigo-600 ml-2">({(resolutionPreview.rate * 100).toFixed(1)}%)</span>
+              {/* Service type note (variable rate info) */}
+              {fServiceType && (
+                <div className="bg-amber-50 rounded-lg p-2 border border-amber-200 text-[11px] text-amber-800 flex items-start gap-2">
+                  <AlertTriangle className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                  <span>
+                    <b>{SERVICE_TYPES.find(s => s.value === fServiceType)?.label}</b> —
+                    {' '}{SERVICE_TYPES.find(s => s.value === fServiceType)?.note}
+                  </span>
+                </div>
+              )}
+
+              {/* Tax resolution preview — from server engine */}
+              {resolvingTax && (
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center gap-2 text-xs text-gray-500">
+                  <Loader2 className="h-3 w-3 animate-spin" />세율 계산 중...
+                </div>
+              )}
+              {!resolvingTax && resolutionPreview && fGrossAmount && (
+                <div className="bg-indigo-50 rounded-xl p-4 border-2 border-indigo-200">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-indigo-100">
+                      <Calculator className="h-4 w-4 text-indigo-700" />
+                    </div>
+                    <div className="flex-1 text-xs">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <Badge className="bg-indigo-600 text-white text-[10px]">
+                          {resolutionPreview.taxType.replace('PPh4_2', 'PPh 4(2)').replace('PPh', 'PPh ')}
+                        </Badge>
+                        {resolutionPreview.isFinal && (
+                          <Badge className="bg-purple-600 text-white text-[10px]">Final</Badge>
+                        )}
+                        {resolutionPreview.npwpSurchargeApplied && (
+                          <Badge className="bg-amber-600 text-white text-[10px]">NPWP 미보유 할증</Badge>
+                        )}
+                        <span className="font-mono text-indigo-900 font-bold">
+                          {(resolutionPreview.rate * 100).toFixed(2)}%
+                        </span>
+                      </div>
+                      <p className="text-base font-bold text-indigo-900">
+                        세액 {fmtRp(resolutionPreview.taxAmount || Number(fGrossAmount) * resolutionPreview.rate)}
                       </p>
-                      <p className="text-indigo-700 mt-0.5">{resolutionPreview.reason}</p>
-                      <p className="text-indigo-500 text-[10px]">{resolutionPreview.legalBasis}</p>
+                      <p className="text-[11px] text-indigo-700 mt-1">
+                        지급 후 수령액: {fmtRp(resolutionPreview.netAmount || Number(fGrossAmount) * (1 - resolutionPreview.rate))}
+                      </p>
+                      <div className="mt-2 p-2 bg-white/60 rounded border border-indigo-100">
+                        <p className="text-indigo-900 font-medium">{resolutionPreview.reason}</p>
+                        <p className="text-indigo-500 text-[10px] mt-0.5">📖 {resolutionPreview.legalBasis}</p>
+                      </div>
+                      {resolutionPreview.taxType === 'PPh26' && (
+                        <p className="text-[10px] text-amber-700 mt-2">
+                          ⚠ 비거주자 거래 — Certificate of Domicile(CoD) 및 DGT Form 제출 확인 필요
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
