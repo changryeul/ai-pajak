@@ -231,13 +231,28 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  // Access control: operators can only act on their own items,
-  // supervisors can act on any item (for approve/reject)
-  if (!SUPERVISOR_ACTIONS.includes(action) && item.operator_id !== user!.id) {
-    return NextResponse.json(
-      { error: 'You are not assigned to this queue item' },
-      { status: 403 }
-    );
+  // Access control:
+  // - Supervisors (LEAD/SUPERVISOR) can act on any queue item, regardless
+  //   of whether it is assigned to a specific operator.
+  // - Regular operators can only act on items they are assigned to.
+  //
+  // BUG FIX: the previous version compared `item.operator_id` (a
+  // tax_operators.id FK) directly to `user.id` (auth.users.id) — two
+  // different tables, so the check was always true and **every** non-
+  // supervisor action was rejected. Resolve via the tax_operators row.
+  if (!SUPERVISOR_ROLES.includes(role)) {
+    const { data: opProfile } = await admin
+      .from('tax_operators')
+      .select('id')
+      .eq('user_id', user!.id)
+      .maybeSingle();
+
+    if (!opProfile || item.operator_id !== opProfile.id) {
+      return NextResponse.json(
+        { error: 'You are not assigned to this queue item' },
+        { status: 403 }
+      );
+    }
   }
 
   // Handle reassignment (special action — no status change)
