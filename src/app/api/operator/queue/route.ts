@@ -352,12 +352,13 @@ export async function PUT(request: NextRequest) {
     }
   }
 
-  // Build update payload
+  // Build update payload. Note: djp_submission_queue has no `updated_by`
+  // column — only `updated_at`. Per-action audit fields (approved_by,
+  // payment_verified_by) are set below where they exist.
   const now = new Date().toISOString();
   const updatePayload: Record<string, unknown> = {
     status: transition.to,
     updated_at: now,
-    updated_by: user!.id,
   };
 
   // Action-specific fields
