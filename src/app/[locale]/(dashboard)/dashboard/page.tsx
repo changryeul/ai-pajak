@@ -85,10 +85,22 @@ export default function DashboardPage() {
     return <PlatformAdminDashboard session={session} locale={locale} />;
   }
 
-  if (hasRole(session, UserRole.TAX_OPERATOR, UserRole.TAX_OPERATOR_LEAD, UserRole.TAX_OPERATOR_SUPERVISOR)) {
-    // Redirect to operator dashboard
+  if (hasRole(
+    session,
+    UserRole.TAX_OPERATOR,
+    UserRole.TAX_OPERATOR_LEAD,
+    UserRole.TAX_OPERATOR_SUPERVISOR,
+    UserRole.TAX_OPERATOR_MASTER,
+  )) {
+    // Redirect to the appropriate operator landing page.
+    // Master goes straight to the master KPI dashboard; the other operator
+    // tiers go to the per-operator queue dashboard.
     if (typeof window !== 'undefined') {
-      window.location.href = `/${locale}/operator/dashboard`;
+      const target =
+        session.role === UserRole.TAX_OPERATOR_MASTER
+          ? `/${locale}/admin/master`
+          : `/${locale}/operator/dashboard`;
+      window.location.href = target;
     }
     return <DashboardSkeleton />;
   }
