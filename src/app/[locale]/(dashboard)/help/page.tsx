@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import {
   HelpCircle, Search, ChevronDown, ChevronUp,
   FileSpreadsheet, Upload, Lightbulb, ShieldCheck, MessageCircle,
-  Calendar, Users, CreditCard, Building2, Sparkles,
+  Calendar, Users, CreditCard, Building2, Sparkles, BookOpen, ArrowRight,
 } from 'lucide-react';
 
 interface FAQItem {
@@ -122,6 +122,36 @@ export default function HelpPage() {
           className="pl-12 h-12 rounded-xl text-base border-0 shadow-sm bg-white"
         />
       </div>
+
+      {/* User Manuals — Role-based */}
+      {!search && !activeCategory && (
+        <Link
+          href={`/${locale}/help/manuals`}
+          className="group block mb-6"
+        >
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50 via-blue-50 to-white hover:shadow-md transition-all group-hover:-translate-y-0.5">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 shadow-sm group-hover:scale-110 transition-transform flex-shrink-0">
+                  <BookOpen className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-base text-gray-900">
+                      사용자 매뉴얼 (역할별 상세 가이드)
+                    </h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">NEW</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    법인 · 개인 · 외부 세무사무소 · JTC 세무사 · 운영팀 · 플랫폼 관리자 — 역할별 시나리오형 매뉴얼
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
 
       {/* Quick Guides */}
       {!search && !activeCategory && (

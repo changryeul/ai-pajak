@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
+  // Include role-based user manuals in the serverless function bundle so
+  // /help/manuals/[role] can read them via fs.readFile at runtime on Vercel.
+  outputFileTracingIncludes: {
+    '/[locale]/help/manuals/[role]': ['./docs/manuals/*.md'],
+  },
+
   // Image optimization configuration
   images: {
     remotePatterns: [
