@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
-const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
-const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
+const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
+const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
 async function getSupervisorUser() {
   const supabase = await createClient();
@@ -94,16 +94,26 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch unassigned items' }, { status: 500 });
   }
 
-  // Fetch customer names for unassigned items
+  // Fetch customer names for unassigned items.
+  // The customer table has `full_name` and `company_name` (Phase B-1) — there
+  // is no `customer_name` column. Coalesce to a single display name so the UI
+  // contract (`customer_name`) is preserved without changing the page.
   const customerIds = [...new Set((unassignedRaw || []).map(i => i.customer_id))];
-  let customerMap: Record<string, { id: string; customer_name: string; npwp: string }> = {};
+  const customerMap: Record<string, { id: string; customer_name: string; npwp: string }> = {};
   if (customerIds.length > 0) {
     const { data: customers } = await admin
       .from('customer')
-      .select('id, customer_name, npwp')
+      .select('id, full_name, company_name, npwp, customer_type')
       .in('id', customerIds);
     for (const c of customers || []) {
-      customerMap[c.id] = c;
+      customerMap[c.id] = {
+        id: c.id,
+        customer_name:
+          c.customer_type === 'COMPANY'
+            ? c.company_name || c.full_name || ''
+            : c.full_name || c.company_name || '',
+        npwp: c.npwp,
+      };
     }
   }
 

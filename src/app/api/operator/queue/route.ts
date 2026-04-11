@@ -6,8 +6,8 @@ import { notifyWorkflowStatusChange } from '@/lib/notifications/operator-workflo
 import { submitQueueItemToDJP } from '@/lib/djp/operator-djp-submit';
 import { loggers } from '@/lib/logger';
 
-const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
-const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR'];
+const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
+const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
 type QueueStatus =
   | 'PENDING'
