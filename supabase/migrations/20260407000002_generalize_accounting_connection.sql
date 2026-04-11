@@ -2,10 +2,19 @@
 -- Add provider column to support multiple accounting software (Accurate, Mekari Jurnal, etc.)
 
 -- ──────────────────────────────────────────────────────────
--- 1. Rename tables
+-- 1. Rename tables (only if source exists and target does not)
 -- ──────────────────────────────────────────────────────────
-ALTER TABLE IF EXISTS accurate_connection RENAME TO accounting_connection;
-ALTER TABLE IF EXISTS accurate_invoice RENAME TO accounting_invoice;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'accurate_connection')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'accounting_connection') THEN
+    ALTER TABLE accurate_connection RENAME TO accounting_connection;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'accurate_invoice')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'accounting_invoice') THEN
+    ALTER TABLE accurate_invoice RENAME TO accounting_invoice;
+  END IF;
+END $$;
 
 -- ──────────────────────────────────────────────────────────
 -- 2. Add provider column (default: ACCURATE for existing rows)
@@ -18,11 +27,24 @@ ALTER TABLE accounting_invoice
 
 -- Drop old unique constraint and recreate with provider
 ALTER TABLE accounting_connection DROP CONSTRAINT IF EXISTS accurate_connection_customer_id_key;
+ALTER TABLE accounting_connection DROP CONSTRAINT IF EXISTS accounting_connection_customer_provider_key;
 ALTER TABLE accounting_connection ADD CONSTRAINT accounting_connection_customer_provider_key
   UNIQUE (customer_id, provider);
 
 ALTER TABLE accounting_invoice DROP CONSTRAINT IF EXISTS accurate_invoice_customer_id_invoice_type_accurate_id_key;
-ALTER TABLE accounting_invoice RENAME COLUMN accurate_id TO external_id;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'accounting_invoice' AND column_name = 'accurate_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'accounting_invoice' AND column_name = 'external_id'
+  ) THEN
+    ALTER TABLE accounting_invoice RENAME COLUMN accurate_id TO external_id;
+  END IF;
+END $$;
+ALTER TABLE accounting_invoice DROP CONSTRAINT IF EXISTS accounting_invoice_unique;
 ALTER TABLE accounting_invoice ADD CONSTRAINT accounting_invoice_unique
   UNIQUE (customer_id, provider, invoice_type, external_id);
 
@@ -44,11 +66,19 @@ DROP POLICY IF EXISTS "Block admins on accurate" ON accounting_connection;
 DROP POLICY IF EXISTS "Customers view own accurate conn" ON accounting_connection;
 DROP POLICY IF EXISTS "JTC view assigned accurate conn" ON accounting_connection;
 DROP POLICY IF EXISTS "JTC manage accurate conn" ON accounting_connection;
+DROP POLICY IF EXISTS "Block admins on accounting conn" ON accounting_connection;
+DROP POLICY IF EXISTS "Customers view own accounting conn" ON accounting_connection;
+DROP POLICY IF EXISTS "JTC view assigned accounting conn" ON accounting_connection;
+DROP POLICY IF EXISTS "JTC manage accounting conn" ON accounting_connection;
 
 DROP POLICY IF EXISTS "Block admins on accurate inv" ON accounting_invoice;
 DROP POLICY IF EXISTS "Customers view own accurate inv" ON accounting_invoice;
 DROP POLICY IF EXISTS "JTC view assigned accurate inv" ON accounting_invoice;
 DROP POLICY IF EXISTS "JTC manage accurate inv" ON accounting_invoice;
+DROP POLICY IF EXISTS "Block admins on accounting inv" ON accounting_invoice;
+DROP POLICY IF EXISTS "Customers view own accounting inv" ON accounting_invoice;
+DROP POLICY IF EXISTS "JTC view assigned accounting inv" ON accounting_invoice;
+DROP POLICY IF EXISTS "JTC manage accounting inv" ON accounting_invoice;
 
 CREATE POLICY "Block admins on accounting conn" ON accounting_connection FOR ALL TO authenticated
 USING (NOT is_platform_admin()) WITH CHECK (NOT is_platform_admin());
@@ -84,6 +114,7 @@ USING (is_jtc_consultant()) WITH CHECK (is_jtc_consultant());
 -- 5. Rename trigger function
 -- ──────────────────────────────────────────────────────────
 DROP TRIGGER IF EXISTS trigger_accurate_conn_updated_at ON accounting_connection;
+DROP TRIGGER IF EXISTS trigger_accounting_conn_updated_at ON accounting_connection;
 CREATE TRIGGER trigger_accounting_conn_updated_at
 BEFORE UPDATE ON accounting_connection
 FOR EACH ROW EXECUTE FUNCTION update_accurate_conn_updated_at();

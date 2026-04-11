@@ -23,21 +23,23 @@ CREATE TABLE IF NOT EXISTS tax_news (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_tax_news_category ON tax_news(category);
-CREATE INDEX idx_tax_news_published ON tax_news(published_at DESC);
-CREATE INDEX idx_tax_news_importance ON tax_news(importance);
-CREATE INDEX idx_tax_news_active ON tax_news(is_active, published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tax_news_category ON tax_news(category);
+CREATE INDEX IF NOT EXISTS idx_tax_news_published ON tax_news(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tax_news_importance ON tax_news(importance);
+CREATE INDEX IF NOT EXISTS idx_tax_news_active ON tax_news(is_active, published_at DESC);
 
 -- Enable RLS
 ALTER TABLE tax_news ENABLE ROW LEVEL SECURITY;
 
 -- Everyone can read published news
+DROP POLICY IF EXISTS "Anyone can read active tax news" ON tax_news;
 CREATE POLICY "Anyone can read active tax news"
 ON tax_news FOR SELECT
 TO authenticated
 USING (is_active = true);
 
 -- Only admin can manage news
+DROP POLICY IF EXISTS "Admin can manage tax news" ON tax_news;
 CREATE POLICY "Admin can manage tax news"
 ON tax_news FOR ALL
 TO authenticated
@@ -45,6 +47,7 @@ USING (is_platform_admin())
 WITH CHECK (is_platform_admin());
 
 -- Auto-update timestamp
+DROP TRIGGER IF EXISTS update_tax_news_updated_at ON tax_news;
 CREATE TRIGGER update_tax_news_updated_at
 BEFORE UPDATE ON tax_news
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

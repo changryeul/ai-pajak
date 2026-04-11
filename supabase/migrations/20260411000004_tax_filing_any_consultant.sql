@@ -6,6 +6,7 @@
 -- at a higher level (customer_consultant assignment + consultant.tax_partner_id).
 
 DROP POLICY IF EXISTS "Only JTC consultants can be assigned" ON tax_filing;
+DROP POLICY IF EXISTS "Active consultants can be assigned to filings" ON tax_filing;
 
 CREATE POLICY "Active consultants can be assigned to filings"
 ON tax_filing FOR INSERT
