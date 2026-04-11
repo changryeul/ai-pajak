@@ -141,7 +141,7 @@ export function POAStatusWidget({ customerId }: POAStatusWidgetProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-gray-900">
-                      {activePOA.taxPartner?.organizationName || 'Jakarta Tax Consulting'}
+                      {activePOA.taxPartner?.organizationName || '세무 대행사'}
                     </span>
                     {getStatusBadge(activePOA.status)}
                   </div>
@@ -161,7 +161,7 @@ export function POAStatusWidget({ customerId }: POAStatusWidgetProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-gray-900">
-                      {pendingPOA.taxPartner?.organizationName || 'Jakarta Tax Consulting'}
+                      {pendingPOA.taxPartner?.organizationName || '세무 대행사'}
                     </span>
                     {getStatusBadge(pendingPOA.status)}
                   </div>

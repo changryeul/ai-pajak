@@ -131,7 +131,7 @@ export function requireValidPOA() {
         {
           error: 'No active Power of Attorney',
           message:
-            'Customer must authorize Jakarta Tax Consulting via Power of Attorney before tax filing.',
+            'Customer must authorize the tax consulting firm via Power of Attorney before tax filing.',
           details: {
             customerId,
             taxPartnerId: consultant.tax_partner_id,

@@ -20,15 +20,16 @@ import type { RequestWithSession, UserRole } from '@/types/auth';
 
 async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
   try {
-    const supabase = await createClient();
     const { userId } = req.session;
+    const admin = getSupabaseAdmin();
 
-    // Get consultant ID
-    const { data: consultant } = await supabase
+    // Get the caller's consultant row to determine their tax_partner scope
+    const { data: consultant } = await admin
       .from('consultant')
       .select('id, tax_partner_id')
       .eq('user_id', userId)
-      .single();
+      .eq('is_active', true)
+      .maybeSingle();
 
     if (!consultant) {
       return NextResponse.json(
@@ -37,8 +38,41 @@ async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
       );
     }
 
-    // Get customers with active POA for this consultant's tax partner
-    const { data: customers, error } = await supabase
+    // Scope customers by tax_partner: look up all active assignments whose
+    // consultant belongs to the caller's tax_partner, then fetch those customers.
+    // This mirrors the RLS policy but uses admin client for performance
+    // (joining customer_consultant + consultant).
+    const { data: assignments, error: assignError } = await admin
+      .from('customer_consultant')
+      .select('customer_id, consultant:consultant_id(tax_partner_id)')
+      .eq('is_active', true);
+
+    if (assignError) {
+      loggers.api.error({ err: assignError }, 'Failed to fetch customer assignments');
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch customers' },
+        { status: 500 }
+      );
+    }
+
+    // Filter to assignments where the consultant belongs to this user's tax_partner
+    const customerIds = (assignments || [])
+      .filter((row) => {
+        const cons = row.consultant as { tax_partner_id?: string } | { tax_partner_id?: string }[] | null;
+        const tp = Array.isArray(cons) ? cons[0]?.tax_partner_id : cons?.tax_partner_id;
+        return tp === consultant.tax_partner_id;
+      })
+      .map((row) => row.customer_id);
+
+    if (customerIds.length === 0) {
+      return NextResponse.json({
+        success: true,
+        customers: [],
+        stats: { total: 0, active: 0, activePoa: 0, pendingFilings: 0 },
+      });
+    }
+
+    const { data: customers, error } = await admin
       .from('customer')
       .select(`
         id,
@@ -58,6 +92,7 @@ async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
           status
         )
       `)
+      .in('id', customerIds)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -130,12 +165,18 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/customers — Create a new customer
+ * POST /api/customers — Create a new customer and link it to the caller's consultant.
+ *
+ * Atomically performs:
+ *   1. Insert customer row
+ *   2. Insert customer_consultant row (linking new customer to caller's consultant)
+ * If step 2 fails, step 1 is rolled back.
  */
 async function handleCreateCustomer(req: RequestWithSession): Promise<Response> {
   try {
     const body = await req.json();
     const { full_name, company_name, email, phone, npwp, address, customer_type } = body;
+    const { userId } = req.session;
 
     if (!full_name) {
       return NextResponse.json(
@@ -159,6 +200,23 @@ async function handleCreateCustomer(req: RequestWithSession): Promise<Response> 
     }
 
     const admin = getSupabaseAdmin();
+
+    // Look up the caller's active consultant row
+    const { data: consultant } = await admin
+      .from('consultant')
+      .select('id, tax_partner_id')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (!consultant) {
+      return NextResponse.json(
+        { success: false, error: '활성 컨설턴트 레코드가 없습니다' },
+        { status: 403 }
+      );
+    }
+
+    // Step 1: insert customer
     const { data: customer, error: insertError } = await admin
       .from('customer')
       .insert({
@@ -181,7 +239,30 @@ async function handleCreateCustomer(req: RequestWithSession): Promise<Response> 
       );
     }
 
-    loggers.api.info({ customerId: customer.id, customerType: customer_type }, 'Customer created');
+    // Step 2: link to caller's consultant (best-effort rollback on failure)
+    const { error: linkError } = await admin
+      .from('customer_consultant')
+      .insert({
+        customer_id: customer.id,
+        consultant_id: consultant.id,
+        assigned_by_user_id: userId,
+        is_active: true,
+      });
+
+    if (linkError) {
+      loggers.api.error({ err: linkError, customerId: customer.id }, 'Failed to link customer to consultant, rolling back');
+      // Best-effort rollback of the orphan customer
+      await admin.from('customer').delete().eq('id', customer.id);
+      return NextResponse.json(
+        { success: false, error: `고객 등록 실패: ${linkError.message}` },
+        { status: 500 }
+      );
+    }
+
+    loggers.api.info(
+      { customerId: customer.id, consultantId: consultant.id, taxPartnerId: consultant.tax_partner_id, customerType: customer_type },
+      'Customer created and linked to consultant'
+    );
 
     return NextResponse.json({
       success: true,
