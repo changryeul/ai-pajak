@@ -1262,7 +1262,7 @@
     "cat_payment": "Payment",
     "cat_technical": "Technical",
     "faq1_q": "How do I register on AI Pajak?",
-    "faq1_a": "Click \"Sign Up\" on the main page, enter your email and password, then verify your email. After logging in, follow the onboarding wizard to select your taxpayer type.",
+    "faq1_a": "Click \"Sign Up\" on the main page and choose your account type (Individual / Company / External tax firm) at signup. You'll be taken straight to the dashboard tailored to your role — there is no separate onboarding wizard.",
     "faq2_q": "What do I need to get started?",
     "faq2_a": "You need: 1) NPWP (Taxpayer Identification Number), 2) NIK (National ID Number), 3) Withholding Certificate 1721-A1 from your employer (for employees).",
     "faq3_q": "Is AI Pajak free?",
