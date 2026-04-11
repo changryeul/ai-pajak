@@ -159,10 +159,71 @@ async function testConsultantPlan() {
   }
 }
 
+async function testIndividualSpt() {
+  console.log('\n━━━━ 3. Individual SPT (1770S) ━━━━');
+  const email = 'customer.test@example.com';
+  const token = await login(email);
+  if (!token) return;
+  console.log(`   ✅ logged in as ${email}`);
+
+  const res = await fetch(`${baseUrl}/api/billing/individual-spt`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ sptType: 'SPT_1770S' }),
+  });
+
+  console.log(`   📡 POST /api/billing/individual-spt → ${res.status}`);
+  let body: { success?: boolean; data?: { transactionId?: string; invoiceNumber?: string; snapToken?: string | null; snapError?: string | null }; error?: string };
+  try {
+    body = await res.json();
+  } catch {
+    body = { error: await res.text() };
+  }
+
+  if (res.status !== 200) {
+    console.error(`   ❌ unexpected status: ${res.status}`);
+    console.error(`      body: ${JSON.stringify(body).slice(0, 300)}`);
+    return;
+  }
+
+  if (!body?.data?.transactionId) {
+    console.error('   ❌ response missing transactionId');
+    console.error(`      body: ${JSON.stringify(body).slice(0, 300)}`);
+    return;
+  }
+
+  console.log(`   ✅ transactionId: ${body.data.transactionId}`);
+  console.log(`   ✅ invoiceNumber: ${body.data.invoiceNumber}`);
+  if (body.data.snapToken) {
+    console.log(`   ✅ snapToken: ${body.data.snapToken.slice(0, 24)}…`);
+  } else {
+    console.log(`   ⏭️  snapToken: null (Midtrans graceful degrade — ${body.data.snapError ?? 'no error'})`);
+  }
+
+  // Verify the row exists in billing_transaction as PENDING
+  const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { data: row } = await admin
+    .from('billing_transaction')
+    .select('id, payment_status, service_type, amount_total, invoice_number, metadata')
+    .eq('id', body.data.transactionId)
+    .maybeSingle();
+  if (row?.payment_status === 'PENDING') {
+    console.log(`   ✅ DB row PENDING, service=${row.service_type}, amount=${row.amount_total}, invoice=${row.invoice_number}`);
+  } else {
+    console.error(`   ⚠️  DB row state: ${JSON.stringify(row)}`);
+  }
+}
+
 async function main() {
   console.log('💳 Billing flow smoke test\n');
   await testCorporatePlan();
   await testConsultantPlan();
+  await testIndividualSpt();
   console.log('\n✨ Done.');
   console.log('\nNote: PENDING_PAYMENT rows remain in DB. Use the snapToken in a browser');
   console.log('with Midtrans Snap to complete the payment, or the rows will time out.');
