@@ -16,7 +16,10 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 
 // Load environment variables
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+// SEED_TARGET=prod → .env.production.local, otherwise .env.local
+const envFile = process.env.SEED_TARGET === 'prod' ? '.env.production.local' : '.env.local';
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
+console.log(`📄 Loaded env from ${envFile}`);
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
