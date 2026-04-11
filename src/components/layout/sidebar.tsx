@@ -307,7 +307,23 @@ export function Sidebar() {
             <ul className="space-y-0.5">
               {section.items.map((item) => {
                 const fullHref = `/${locale}${item.href}`;
-                const isActive = item.href !== '#' && (pathname === fullHref || (item.href !== '/settings' && pathname.startsWith(`${fullHref}/`)));
+                // Longer-sibling guard: if another item in the same section
+                // has a more specific path that matches the current URL,
+                // do not light up this item via the prefix match. Without
+                // this, e.g. `/admin/master` and `/admin/master/custom-pricing`
+                // would both highlight when visiting the latter.
+                const longerSiblingMatches = section.items.some((s) =>
+                  s !== item &&
+                  s.href !== '#' &&
+                  s.href.startsWith(`${item.href}/`) &&
+                  (pathname === `/${locale}${s.href}` || pathname.startsWith(`/${locale}${s.href}/`))
+                );
+                const isActive =
+                  item.href !== '#' &&
+                  (
+                    pathname === fullHref ||
+                    (item.href !== '/settings' && !longerSiblingMatches && pathname.startsWith(`${fullHref}/`))
+                  );
                 const hasChildren = item.children && item.children.length > 0;
                 const isChildActive = hasChildren && item.children!.some(c => pathname === `/${locale}${c.href}` || pathname.startsWith(`/${locale}${c.href}/`));
                 const isExpanded = expandedMenus.has(item.labelKey) || isChildActive;
