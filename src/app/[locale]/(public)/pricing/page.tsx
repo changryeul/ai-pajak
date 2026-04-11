@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Check, Sparkles, Loader2, ArrowRight, Store, Building2,
-  FileText, User as UserIcon, Star,
+  FileText, User as UserIcon, Star, Briefcase, Users,
 } from 'lucide-react';
 import { CORPORATE_PLANS, formatPlanPrice, priceWithVat } from '@/config/corporate-pricing';
+import { CONSULTANT_TIERS, formatTierPrice, tierPriceWithVat } from '@/config/consultant-pricing';
 
 // Individual per-SPT pricing — not yet in the DB, defined here for the marketing page
 const INDIVIDUAL_PLANS = [
@@ -60,6 +61,16 @@ interface SubscriptionState {
   };
 }
 
+interface ConsultantState {
+  subscription: { tier_id: string; status: string } | null;
+  managedClientCount: number;
+  recommendation: {
+    tierId: string | null;
+    tierName: string | null;
+    reason: string;
+  };
+}
+
 export default function PricingPage() {
   const { session } = useSession();
   const params = useParams();
@@ -68,8 +79,13 @@ export default function PricingPage() {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [subState, setSubState] = useState<SubscriptionState | null>(null);
-  const [tab, setTab] = useState<'CORPORATE' | 'INDIVIDUAL'>(
-    session?.customerType === 'INDIVIDUAL' ? 'INDIVIDUAL' : 'CORPORATE'
+  const [consultantState, setConsultantState] = useState<ConsultantState | null>(null);
+  const isConsultant =
+    session?.role === UserRole.CONSULTANT_JTC || session?.role === UserRole.TAX_ADVISOR_JTC;
+  const [tab, setTab] = useState<'CORPORATE' | 'INDIVIDUAL' | 'CONSULTANT'>(
+    session?.customerType === 'INDIVIDUAL' ? 'INDIVIDUAL'
+    : isConsultant ? 'CONSULTANT'
+    : 'CORPORATE'
   );
 
   // Load current subscription + recommendation for logged-in corporate customers
@@ -82,6 +98,47 @@ export default function PricingPage() {
       })
       .catch(() => {});
   }, [session]);
+
+  // Load tier subscription for logged-in external consultants
+  useEffect(() => {
+    if (!session || !isConsultant) return;
+    fetch('/api/billing/consultant-plan')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setConsultantState(d.data);
+      })
+      .catch(() => {});
+  }, [session, isConsultant]);
+
+  const handleSubscribeConsultantTier = async (tierId: string) => {
+    if (!session) {
+      window.location.href = `/${locale}/register`;
+      return;
+    }
+    if (!isConsultant) {
+      setError('세무 사무소 컨설턴트만 이 플랜을 구독할 수 있습니다');
+      return;
+    }
+    setCheckoutLoading(tierId);
+    setError(null);
+    try {
+      const res = await fetch('/api/billing/consultant-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tierId, billingCycle: 'MONTHLY' }),
+      });
+      const d = await res.json();
+      if (d.success && d.data?.redirectUrl) {
+        window.location.href = d.data.redirectUrl;
+      } else {
+        setError(d.error || '결제 페이지 생성 실패');
+      }
+    } catch {
+      setError('서버 오류');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   const handleSubscribe = async (planId: string) => {
     if (!session) {
@@ -133,11 +190,11 @@ export default function PricingPage() {
 
         {/* Tab switch */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-xl bg-white border border-gray-200 p-1 shadow-sm">
+          <div className="inline-flex rounded-xl bg-white border border-gray-200 p-1 shadow-sm flex-wrap gap-1">
             <button
               type="button"
               onClick={() => setTab('CORPORATE')}
-              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 tab === 'CORPORATE' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -147,12 +204,22 @@ export default function PricingPage() {
             <button
               type="button"
               onClick={() => setTab('INDIVIDUAL')}
-              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 tab === 'INDIVIDUAL' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <UserIcon className="h-4 w-4" />
-              개인 고객 (건당 결제)
+              개인 (건당 결제)
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('CONSULTANT')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                tab === 'CONSULTANT' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Briefcase className="h-4 w-4" />
+              세무 사무소 (월 구독)
             </button>
           </div>
         </div>
@@ -319,6 +386,113 @@ export default function PricingPage() {
               );
             })}
           </div>
+        )}
+
+        {/* Consultant tier plans */}
+        {tab === 'CONSULTANT' && (
+          <>
+            <div className="mb-6 max-w-2xl mx-auto p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 text-center">
+              <p className="text-sm font-bold text-purple-900">세무 사무소 월 구독</p>
+              <p className="text-xs text-purple-700 mt-1">
+                AI Pajak을 사용해서 본인 사무소 고객을 관리하는 외부 세무사용 플랜.
+                본인 고객들에게는 별도 청구 가능합니다.
+              </p>
+            </div>
+
+            {consultantState && (
+              <div className="mb-6 max-w-2xl mx-auto p-4 rounded-xl bg-blue-50 border border-blue-200">
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-blue-900">
+                      현재 관리 고객 수: {consultantState.managedClientCount}명
+                    </p>
+                    <p className="text-xs text-blue-700 mt-0.5">{consultantState.recommendation.reason}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {CONSULTANT_TIERS.map((tier) => {
+                const isCurrent = consultantState?.subscription?.tier_id === tier.id;
+                const isRecommended =
+                  consultantState?.recommendation.tierId === tier.id && !isCurrent;
+                const gradient = tier.id === 'STARTER' ? 'from-emerald-500 to-green-600'
+                  : tier.id === 'GROWTH' ? 'from-indigo-500 to-purple-600'
+                  : 'from-pink-500 to-rose-600';
+                const Icon = tier.id === 'STARTER' ? Briefcase
+                  : tier.id === 'GROWTH' ? Users : Star;
+
+                return (
+                  <Card
+                    key={tier.id}
+                    className={`border-2 relative overflow-hidden ${
+                      isRecommended ? 'border-blue-500 shadow-lg ring-2 ring-blue-100'
+                      : isCurrent ? 'border-green-500 shadow-md'
+                      : 'border-gray-200'
+                    }`}
+                  >
+                    {isRecommended && (
+                      <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+                        AI 추천
+                      </div>
+                    )}
+                    {isCurrent && (
+                      <div className="absolute top-0 right-0 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+                        현재 티어
+                      </div>
+                    )}
+                    <CardContent className="p-6">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-sm`}>
+                        <Icon className="h-6 w-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">{tier.name}</h3>
+                      <p className="text-xs text-gray-500 mt-1 h-8">{tier.description}</p>
+
+                      <div className="mt-4">
+                        <p className="text-3xl font-bold text-gray-900">{formatTierPrice(tier)}</p>
+                        <p className="text-[11px] text-gray-500">
+                          월 · VAT 별도 (VAT 포함 Rp {tierPriceWithVat(tier).toLocaleString('id-ID')})
+                        </p>
+                      </div>
+
+                      <div className="mt-4 py-2 px-3 rounded-lg bg-purple-50 border border-purple-100">
+                        <p className="text-[11px] font-bold text-purple-900">
+                          {tier.maxClients >= 999_999 ? '무제한 고객' : `최대 ${tier.maxClients}명 고객`}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t space-y-2">
+                        {tier.features.map((f, i) => (
+                          <div key={i} className="flex items-start gap-2 text-xs text-gray-700">
+                            <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span>{f}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <Button
+                        className="w-full mt-6"
+                        disabled={isCurrent || checkoutLoading !== null}
+                        onClick={() => handleSubscribeConsultantTier(tier.id)}
+                      >
+                        {checkoutLoading === tier.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                        ) : isCurrent ? (
+                          '현재 이용 중'
+                        ) : session ? (
+                          <>구독하기 <ArrowRight className="h-4 w-4 ml-1" /></>
+                        ) : (
+                          '가입 후 구독'
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {/* Footer note */}

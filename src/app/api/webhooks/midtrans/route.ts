@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
     // Supported formats:
     //   PAY-{transactionId}-{timestamp}       — per-SPT billing (existing)
     //   CORP-{planId}-{subIdPrefix}-{timestamp} — corporate subscription (Phase K-2)
+    //   CONS-{tierId}-{subIdPrefix}-{timestamp} — consultant tier subscription (Phase B-3)
     const orderIdParts = notification.order_id.split('-');
     if (orderIdParts.length < 2) {
       loggers.payment.error({ orderId: notification.order_id }, 'Invalid order_id format');
@@ -68,6 +69,11 @@ export async function POST(request: NextRequest) {
     // ─── CORP-* corporate subscription branch ───
     if (orderIdParts[0] === 'CORP') {
       return await handleCorporateSubscriptionWebhook(notification);
+    }
+
+    // ─── CONS-* external consultant tier subscription branch ───
+    if (orderIdParts[0] === 'CONS') {
+      return await handleConsultantSubscriptionWebhook(notification);
     }
 
     if (orderIdParts[0] !== 'PAY') {
@@ -369,6 +375,86 @@ async function handleCorporateSubscriptionWebhook(notification: MidtransNotifica
     });
   } catch (error) {
     loggers.payment.error({ error }, 'Corporate subscription webhook error');
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+}
+
+/**
+ * Handle CONS-* external consultant tier subscription webhook — Phase B-3.
+ * Targets tax_partner_subscription instead of customer_subscription.
+ */
+async function handleConsultantSubscriptionWebhook(notification: MidtransNotification) {
+  try {
+    const orderId = notification.order_id;
+    const admin = getSupabaseAdmin();
+
+    const { data: subscription } = await admin
+      .from('tax_partner_subscription')
+      .select('id, tax_partner_id, tier_id, status')
+      .eq('midtrans_order_id', orderId)
+      .maybeSingle();
+
+    if (!subscription) {
+      loggers.payment.error({ orderId }, 'Consultant subscription not found for webhook');
+      return NextResponse.json({ success: false, error: 'Subscription not found' });
+    }
+
+    const isValidSignature = MidtransService.verifyNotification(notification);
+    if (!isValidSignature) {
+      const verificationResult = await MidtransService.getTransactionStatus(orderId);
+      if (verificationResult.transaction_status !== notification.transaction_status) {
+        loggers.payment.error({ orderId }, 'Consultant sub signature invalid + API mismatch');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    }
+
+    const result = await MidtransService.handleNotification(notification);
+
+    if (result.status === 'paid') {
+      // Supersede any other active subscription for the same partner
+      await admin
+        .from('tax_partner_subscription')
+        .update({ status: 'SUPERSEDED' })
+        .eq('tax_partner_id', subscription.tax_partner_id)
+        .eq('status', 'ACTIVE');
+
+      // Activate this subscription
+      await admin
+        .from('tax_partner_subscription')
+        .update({
+          status: 'ACTIVE',
+          midtrans_transaction_id: notification.transaction_id,
+          midtrans_payment_type: notification.payment_type,
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', subscription.id);
+
+      loggers.payment.info(
+        { subscriptionId: subscription.id, partnerId: subscription.tax_partner_id, tierId: subscription.tier_id },
+        'Consultant subscription activated'
+      );
+    } else if (result.status === 'failed') {
+      await admin
+        .from('tax_partner_subscription')
+        .update({
+          status: 'CANCELED',
+          midtrans_transaction_id: notification.transaction_id,
+        })
+        .eq('id', subscription.id);
+
+      loggers.payment.info({ subscriptionId: subscription.id }, 'Consultant subscription payment failed');
+    }
+
+    return NextResponse.json({
+      success: true,
+      subscriptionId: subscription.id,
+      status: result.status,
+    });
+  } catch (error) {
+    loggers.payment.error({ error }, 'Consultant subscription webhook error');
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
