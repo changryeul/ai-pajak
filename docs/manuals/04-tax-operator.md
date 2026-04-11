@@ -9,7 +9,7 @@
 
 ## 1. 운영팀이 담당하는 것
 
-법인·개인·외부 사무소 고객이 **AI Pajak 앱에서 "제출" 버튼**을 누르면, 해당 신고 건은 `djp_submission_queue` 테이블에 **PENDING** 상태로 들어옵니다. 그 후 **DJP에 실제로 납부되고 접수증(BPE)이 업로드되기까지**의 10단계 워크플로우 전체를 운영팀이 책임집니다.
+법인·개인·외부 사무소 고객이 **AI Pajak 앱에서 "제출" 버튼**을 누르면, 해당 신고 건은 `djp_submission_queue` 테이블에 **PENDING** 상태로 들어옵니다. 그 후 **DJP에 실제로 납부되고 접수증(BPE)이 업로드되기까지**의 11단계 워크플로우(완료 시점 `COMPLETED` 까지)를 운영팀이 책임집니다.
 
 운영팀은 고객의 "제출" 이후 사건의 모든 실무를 처리하므로, AI Pajak 전체의 신뢰와 납부 정확성이 이 팀에 달려 있습니다.
 
@@ -47,7 +47,7 @@
 
 ## 3. 제출 큐 워크플로우 (핵심)
 
-`djp_submission_queue` 는 10단계로 진행됩니다.
+`djp_submission_queue` 는 11단계로 진행됩니다 (`PENDING` → ... → `COMPLETED`).
 
 ```
 PENDING → DATA_REVIEW → PENDING_APPROVAL → APPROVED → EBILLING_GENERATED

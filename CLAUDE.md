@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
 ```
 
 ### Operator Filing Workflow
-The `djp_submission_queue` table tracks a multi-step operator workflow:
+The `djp_submission_queue` table tracks an 11-state operator workflow extended in `20260401000001_workflow_v2.sql`:
 
 ```
 PENDING → DATA_REVIEW → PENDING_APPROVAL → APPROVED → EBILLING_GENERATED
@@ -137,7 +137,12 @@ PENDING → DATA_REVIEW → PENDING_APPROVAL → APPROVED → EBILLING_GENERATED
 → BPE_UPLOADED → COMPLETED (or FAILED from any state)
 ```
 
-State transitions are role-gated: supervisor-only actions (`approve`/`reject` on `PENDING_APPROVAL`), operator actions for everything else. API: `PUT /api/operator/queue` with `action` + `itemId`.
+Role gating:
+- **Operator**: `review`, `request-approval`, `generate-ebilling`, `notify-customer`, `verify-payment`, `submit-djp`, `upload-bpe`, `complete`
+- **Supervisor only**: `approve`, `reject` (on `PENDING_APPROVAL`), `reassign`
+- **Customer side**: the `PAYMENT_PENDING → PAYMENT_UPLOADED` transition is NOT in the operator API. The customer uploads payment proof via `POST /api/customer/payment-proof` (UI at `/tax/billing`), which is the only state machine transition initiated by a non-operator.
+
+Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `extra` payload depends on the action (`ebillingCode`, `bpeNumber`, `bpeDate`, `rejectedReason`, `failedReason`).
 
 ### Tax Filing UI Wizard (Zustand Store)
 `src/stores/tax-filing-store.ts` — persisted zustand store with 5-step wizard:

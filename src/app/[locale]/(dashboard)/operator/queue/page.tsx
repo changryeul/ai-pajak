@@ -294,6 +294,20 @@ export default function OperatorQueuePage() {
     executeAction(itemId, 'fail', extra);
   };
 
+  // Supervisor reject for PENDING_APPROVAL rows. Uses window.prompt for the
+  // reason field — a richer inline form would be nicer but requires more
+  // state plumbing; the API requires `rejectedReason` so we capture the
+  // minimum here.
+  const handleReject = (itemId: string) => {
+    const reason = window.prompt('거절 사유를 입력해 주세요 (필수)');
+    if (!reason || !reason.trim()) {
+      setMessage({ text: '거절 사유는 필수입니다', type: 'error' });
+      setTimeout(() => setMessage(null), 4000);
+      return;
+    }
+    executeAction(itemId, 'reject', { rejectedReason: reason.trim() });
+  };
+
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -506,7 +520,7 @@ export default function OperatorQueuePage() {
                       </div>
 
                       {/* Action */}
-                      <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex-shrink-0 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                         {actionCfg && (
                           <Button
                             size="sm"
@@ -522,6 +536,18 @@ export default function OperatorQueuePage() {
                                 <ArrowRight className="h-3 w-3 ml-1" />
                               </>
                             )}
+                          </Button>
+                        )}
+                        {/* Supervisor-only reject button for PENDING_APPROVAL rows */}
+                        {item.status === 'PENDING_APPROVAL' && isSupervisor && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-[10px] h-7 border-red-200 text-red-700 hover:bg-red-50"
+                            disabled={actionLoading === item.id}
+                            onClick={() => handleReject(item.id)}
+                          >
+                            거절
                           </Button>
                         )}
                       </div>

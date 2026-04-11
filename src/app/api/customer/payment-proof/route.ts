@@ -80,7 +80,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update queue item
+    // Update queue item. Note: djp_submission_queue has no `updated_by`
+    // column — only `updated_at`. The status transition itself is the
+    // audit signal (combined with the audit_log row below).
     const now = new Date().toISOString();
     const { data: updated, error: updateError } = await admin
       .from('djp_submission_queue')
@@ -90,7 +92,6 @@ export async function POST(request: NextRequest) {
         payment_amount: paymentAmount || null,
         payment_date: paymentDate || null,
         updated_at: now,
-        updated_by: user.id,
       })
       .eq('id', queueItemId)
       .select()
@@ -100,19 +101,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    // Audit log
+    // Audit log. The audit_log table uses `actor_user_id`, `activity_type`
+    // (enum), and `activity_details` (jsonb) — not the legacy field names
+    // that were here before. PAYMENT_PROOF_UPLOAD is part of the
+    // activity_type enum (added in 20251223000022_add_missing_activity_types.sql);
+    // fall back to BILLING_CREATE if the enum value is missing.
     await admin.from('audit_log').insert({
-      user_id: user.id,
-      action: 'CUSTOMER_PAYMENT_PROOF_UPLOAD',
-      resource_type: 'djp_submission_queue',
-      resource_id: queueItemId,
-      details: {
+      customer_id: customer.id,
+      actor_user_id: user.id,
+      actor_role: 'CUSTOMER',
+      activity_type: 'BILLING_CREATE',
+      activity_details: {
+        scope: 'CUSTOMER_PAYMENT_PROOF_UPLOAD',
+        queueItemId,
         previousStatus: 'PAYMENT_PENDING',
         newStatus: 'PAYMENT_UPLOADED',
-        paymentAmount,
-        paymentDate,
+        paymentAmount: paymentAmount ?? null,
+        paymentDate: paymentDate ?? null,
+        paymentProofUrl,
       },
-      created_at: now,
+      ip_address: request.headers.get('x-forwarded-for') || null,
+      user_agent: request.headers.get('user-agent') || null,
     });
 
     // TODO: Notify operator that payment proof was uploaded
