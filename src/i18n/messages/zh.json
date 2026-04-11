@@ -136,6 +136,8 @@
     "approvals": "审批管理",
     "workloadManagement": "工作量管理",
     "operatorStatistics": "绩效统计",
+    "masterStats": "主管 — 平台统计",
+    "masterCustomPricing": "主管 — 定制价格",
     "complaints": "投诉管理",
     "approvalRules": "审批规则",
     "assignedClients": "分配的客户",

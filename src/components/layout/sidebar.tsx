@@ -64,8 +64,23 @@ interface NavSection {
 
 const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
 const consultantRoles = [UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
-const operatorRoles = [UserRole.TAX_OPERATOR, UserRole.TAX_OPERATOR_LEAD, UserRole.TAX_OPERATOR_SUPERVISOR];
-const supervisorRoles = [UserRole.TAX_OPERATOR_LEAD, UserRole.TAX_OPERATOR_SUPERVISOR];
+// 3-tier operator hierarchy (Phase K-1):
+//   TAX_OPERATOR             - 상담원
+//   TAX_OPERATOR_SUPERVISOR  - 수퍼바이저 (approvals, queue distribution)
+//   TAX_OPERATOR_MASTER      - 마스터 (platform-wide stats, custom pricing)
+// TAX_OPERATOR_LEAD kept in operatorRoles for legacy users but should not be assigned to new users.
+const operatorRoles = [
+  UserRole.TAX_OPERATOR,
+  UserRole.TAX_OPERATOR_LEAD,
+  UserRole.TAX_OPERATOR_SUPERVISOR,
+  UserRole.TAX_OPERATOR_MASTER,
+];
+const supervisorRoles = [
+  UserRole.TAX_OPERATOR_LEAD,
+  UserRole.TAX_OPERATOR_SUPERVISOR,
+  UserRole.TAX_OPERATOR_MASTER,
+];
+const masterRoles = [UserRole.TAX_OPERATOR_MASTER];
 
 const navItems: NavSection[] = [
   {
@@ -148,6 +163,9 @@ const navItems: NavSection[] = [
       { href: '/operator/approval-rules', icon: Settings, labelKey: 'nav.approvalRules', descKey: 'navDesc.approvalRules', roles: supervisorRoles },
       { href: '/operator/clients', icon: Users, labelKey: 'nav.assignedClients', descKey: 'navDesc.assignedClients' },
       { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar' },
+      // Master-only: platform-wide stats, custom pricing, special-service quotes
+      { href: '/admin/master', icon: TrendingUp, labelKey: 'nav.masterStats', roles: masterRoles },
+      { href: '/admin/master/custom-pricing', icon: Settings, labelKey: 'nav.masterCustomPricing', roles: masterRoles },
     ],
   },
   {

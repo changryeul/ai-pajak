@@ -21,9 +21,15 @@ export enum UserRole {
   CONSULTANT_JTC = 'CONSULTANT_JTC',
   TAX_ADVISOR_JTC = 'TAX_ADVISOR_JTC',
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
+  // Operator hierarchy (3 tiers):
+  //   TAX_OPERATOR             - 상담원: per-customer queue work
+  //   TAX_OPERATOR_SUPERVISOR  - 수퍼바이저: team approvals, queue distribution
+  //   TAX_OPERATOR_MASTER      - 마스터: platform-wide stats, custom pricing, special-service quotes
+  // TAX_OPERATOR_LEAD is retained for backward compatibility but should not be assigned to new users.
   TAX_OPERATOR = 'TAX_OPERATOR',
   TAX_OPERATOR_LEAD = 'TAX_OPERATOR_LEAD',
   TAX_OPERATOR_SUPERVISOR = 'TAX_OPERATOR_SUPERVISOR',
+  TAX_OPERATOR_MASTER = 'TAX_OPERATOR_MASTER',
   SYSTEM = 'SYSTEM',
 }
 

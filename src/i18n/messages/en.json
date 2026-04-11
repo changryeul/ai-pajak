@@ -136,6 +136,8 @@
     "approvals": "Approvals",
     "workloadManagement": "Workload Management",
     "operatorStatistics": "Performance Statistics",
+    "masterStats": "Master — Platform Stats",
+    "masterCustomPricing": "Master — Custom Pricing",
     "complaints": "Complaints",
     "approvalRules": "Approval Rules",
     "assignedClients": "Assigned Clients",

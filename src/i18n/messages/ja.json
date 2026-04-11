@@ -136,6 +136,8 @@
     "approvals": "承認管理",
     "workloadManagement": "ワークロード管理",
     "operatorStatistics": "パフォーマンス統計",
+    "masterStats": "マスター — 全体統計",
+    "masterCustomPricing": "マスター — カスタム料金",
     "complaints": "苦情管理",
     "approvalRules": "承認ルール",
     "assignedClients": "担当クライアント",

@@ -136,6 +136,8 @@
     "approvals": "승인 관리",
     "workloadManagement": "워크로드 관리",
     "operatorStatistics": "성과 통계",
+    "masterStats": "마스터 — 전체 통계",
+    "masterCustomPricing": "마스터 — 맞춤 가격 관리",
     "complaints": "민원 관리",
     "approvalRules": "승인 규칙",
     "assignedClients": "담당 고객",

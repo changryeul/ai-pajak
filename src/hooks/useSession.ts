@@ -121,7 +121,8 @@ export function useSession(): UseSessionReturn {
       } else if (
         userRole.role === UserRole.TAX_OPERATOR ||
         userRole.role === UserRole.TAX_OPERATOR_LEAD ||
-        userRole.role === UserRole.TAX_OPERATOR_SUPERVISOR
+        userRole.role === UserRole.TAX_OPERATOR_SUPERVISOR ||
+        userRole.role === UserRole.TAX_OPERATOR_MASTER
       ) {
         const { data: operator } = await supabase
           .from('tax_operators')

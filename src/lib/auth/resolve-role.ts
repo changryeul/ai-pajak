@@ -25,6 +25,7 @@ export async function resolveUserRole(
 
   if (roles && roles.length > 0) {
     const priority = [
+      'TAX_OPERATOR_MASTER',
       'TAX_ADVISOR_JTC',
       'CONSULTANT_JTC',
       'TAX_OPERATOR_SUPERVISOR',
