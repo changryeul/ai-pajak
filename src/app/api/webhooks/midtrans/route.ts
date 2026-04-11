@@ -53,12 +53,27 @@ export async function POST(request: NextRequest) {
     }, 'Midtrans webhook received');
 
     // Extract transaction ID from order_id
-    // Format: PAY-{transactionId}-{timestamp}
+    // Supported formats:
+    //   PAY-{transactionId}-{timestamp}       — per-SPT billing (existing)
+    //   CORP-{planId}-{subIdPrefix}-{timestamp} — corporate subscription (Phase K-2)
     const orderIdParts = notification.order_id.split('-');
-    if (orderIdParts.length < 2 || orderIdParts[0] !== 'PAY') {
+    if (orderIdParts.length < 2) {
       loggers.payment.error({ orderId: notification.order_id }, 'Invalid order_id format');
       return NextResponse.json(
         { error: 'Invalid order_id format' },
+        { status: 400 }
+      );
+    }
+
+    // ─── CORP-* corporate subscription branch ───
+    if (orderIdParts[0] === 'CORP') {
+      return await handleCorporateSubscriptionWebhook(notification);
+    }
+
+    if (orderIdParts[0] !== 'PAY') {
+      loggers.payment.error({ orderId: notification.order_id }, 'Unknown order_id prefix');
+      return NextResponse.json(
+        { error: 'Unknown order_id prefix' },
         { status: 400 }
       );
     }
@@ -271,6 +286,92 @@ export async function POST(request: NextRequest) {
       success: false,
       error: 'Internal error',
       message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+}
+
+/**
+ * Handle CORP-* subscription webhook — Phase K-2.
+ *
+ * On payment success: supersede any previously active subscription for the
+ * same customer, then mark this one ACTIVE.
+ * On failure: mark the pending row as CANCELED.
+ */
+async function handleCorporateSubscriptionWebhook(notification: MidtransNotification) {
+  try {
+    const orderId = notification.order_id;
+    const admin = getSupabaseAdmin();
+
+    // Look up the subscription row by midtrans_order_id
+    const { data: subscription } = await admin
+      .from('customer_subscription')
+      .select('id, customer_id, plan_id, status')
+      .eq('midtrans_order_id', orderId)
+      .maybeSingle();
+
+    if (!subscription) {
+      loggers.payment.error({ orderId }, 'Corporate subscription not found for webhook');
+      return NextResponse.json({ success: false, error: 'Subscription not found' });
+    }
+
+    // Verify signature (same as main branch)
+    const isValidSignature = MidtransService.verifyNotification(notification);
+    if (!isValidSignature) {
+      const verificationResult = await MidtransService.getTransactionStatus(orderId);
+      if (verificationResult.transaction_status !== notification.transaction_status) {
+        loggers.payment.error({ orderId }, 'Corporate sub signature invalid + API mismatch');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    }
+
+    const result = await MidtransService.handleNotification(notification);
+
+    if (result.status === 'paid') {
+      // Supersede any other active subscription for the same customer
+      await admin
+        .from('customer_subscription')
+        .update({ status: 'SUPERSEDED' })
+        .eq('customer_id', subscription.customer_id)
+        .eq('status', 'ACTIVE');
+
+      // Activate this subscription
+      await admin
+        .from('customer_subscription')
+        .update({
+          status: 'ACTIVE',
+          midtrans_transaction_id: notification.transaction_id,
+          midtrans_payment_type: notification.payment_type,
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', subscription.id);
+
+      loggers.payment.info(
+        { subscriptionId: subscription.id, customerId: subscription.customer_id, planId: subscription.plan_id },
+        'Corporate subscription activated'
+      );
+    } else if (result.status === 'failed') {
+      await admin
+        .from('customer_subscription')
+        .update({
+          status: 'CANCELED',
+          midtrans_transaction_id: notification.transaction_id,
+        })
+        .eq('id', subscription.id);
+
+      loggers.payment.info({ subscriptionId: subscription.id }, 'Corporate subscription payment failed');
+    }
+    // pending: do nothing, leave as PENDING_PAYMENT
+
+    return NextResponse.json({
+      success: true,
+      subscriptionId: subscription.id,
+      status: result.status,
+    });
+  } catch (error) {
+    loggers.payment.error({ error }, 'Corporate subscription webhook error');
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

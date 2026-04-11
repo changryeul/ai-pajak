@@ -31,6 +31,7 @@ import {
   GettingStartedGuide,
   ComplianceScoreWidget,
 } from '@/components/dashboard';
+import { CurrentPlanWidget } from '@/components/dashboard/CurrentPlanWidget';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
 const SimpleMode = dynamic(() => import('@/components/dashboard/SimpleMode').then(m => ({ default: m.SimpleMode })), { ssr: false });
@@ -325,6 +326,9 @@ function CorporateCustomerDashboard({
 
   return (
     <div className="space-y-6">
+      {/* Current subscription plan widget */}
+      <CurrentPlanWidget />
+
       {/* LinkedIn-style Profile Completeness Banner */}
       {companyInfo && (companyInfo.profile_completeness || 0) < 100 && (
         <ProfileCompletenessBanner
