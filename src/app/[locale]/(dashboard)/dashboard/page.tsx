@@ -32,6 +32,7 @@ import {
   ComplianceScoreWidget,
 } from '@/components/dashboard';
 import { CurrentPlanWidget } from '@/components/dashboard/CurrentPlanWidget';
+import { CustomPricingWidget } from '@/components/dashboard/CustomPricingWidget';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
 const SimpleMode = dynamic(() => import('@/components/dashboard/SimpleMode').then(m => ({ default: m.SimpleMode })), { ssr: false });
@@ -329,6 +330,9 @@ function CorporateCustomerDashboard({
       {/* Current subscription plan widget */}
       <CurrentPlanWidget />
 
+      {/* Custom pricing quote (only renders when there is something to act on) */}
+      <CustomPricingWidget />
+
       {/* LinkedIn-style Profile Completeness Banner */}
       {companyInfo && (companyInfo.profile_completeness || 0) < 100 && (
         <ProfileCompletenessBanner
@@ -543,6 +547,9 @@ function CustomerDashboard({
         <FilingSummaryWidget customerId={session.customerId} />
         <DeadlineCalendar customerId={session.customerId} />
       </div>
+
+      {/* Custom pricing quote (only renders when there is something to act on) */}
+      <CustomPricingWidget />
 
       {/* Getting Started Guide */}
       <GettingStartedGuide customerId={session.customerId} userName={session.fullName} />

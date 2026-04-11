@@ -256,8 +256,24 @@ export const DJP_TAX_CODES = {
 } as const;
 
 // Midtrans configuration
+//
+// IS_PRODUCTION must be opted into explicitly via MIDTRANS_IS_PRODUCTION=true.
+// Defaulting to sandbox prevents accidental real-money transactions when the
+// app is deployed to Vercel before a production payment gateway is wired up
+// (NODE_ENV is always 'production' on Vercel deployments — too dangerous to
+// use as the sole signal).
+//
+// CLIENT_KEY / SERVER_KEY are intentionally empty strings when unset so the
+// billing endpoints' graceful-degrade path can detect "no PG configured" and
+// keep PENDING_PAYMENT rows alive instead of crashing.
+const isMidtransProduction =
+  process.env.MIDTRANS_IS_PRODUCTION === 'true' ||
+  process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true';
+
 export const MIDTRANS_CONFIG = {
-  IS_PRODUCTION: process.env.NODE_ENV === 'production',
+  IS_PRODUCTION: isMidtransProduction,
   CLIENT_KEY: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '',
   SERVER_KEY: process.env.MIDTRANS_SERVER_KEY || '',
+  IS_CONFIGURED:
+    !!process.env.MIDTRANS_SERVER_KEY && !!process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY,
 };
