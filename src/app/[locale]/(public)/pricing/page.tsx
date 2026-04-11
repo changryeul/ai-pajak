@@ -14,43 +14,7 @@ import {
 } from 'lucide-react';
 import { CORPORATE_PLANS, formatPlanPrice, priceWithVat } from '@/config/corporate-pricing';
 import { CONSULTANT_TIERS, formatTierPrice, tierPriceWithVat } from '@/config/consultant-pricing';
-
-// Individual per-SPT pricing — not yet in the DB, defined here for the marketing page
-const INDIVIDUAL_PLANS = [
-  {
-    id: 'SPT_1770SS',
-    name: '1770SS (단순)',
-    priceIdr: 100_000,
-    description: '직장인 · 단일 소득원',
-    features: [
-      'A1 원천징수영수증 OCR 자동 입력',
-      '1770SS 자동 생성 및 검증',
-      '세금 환급 여부 자동 판정',
-    ],
-  },
-  {
-    id: 'SPT_1770S',
-    name: '1770S (표준)',
-    priceIdr: 200_000,
-    description: '다중 소득 · 부수입 있는 경우',
-    features: [
-      '여러 원천징수영수증 병합',
-      '기타 소득·자산·부채 자동 정리',
-      'PTKP 프로필 연동',
-    ],
-  },
-  {
-    id: 'SPT_1770',
-    name: '1770 (풀)',
-    priceIdr: 300_000,
-    description: '사업자 · 프리랜서 · 복잡 소득',
-    features: [
-      '사업 손익 자동 분류',
-      '연간 세무 최적화 추천',
-      '증빙 일괄 관리',
-    ],
-  },
-];
+import { INDIVIDUAL_SPT_PLANS } from '@/config/individual-pricing';
 
 interface SubscriptionState {
   subscription: { plan_id: string; status: string } | null;
@@ -132,6 +96,45 @@ export default function PricingPage() {
         window.location.href = d.data.redirectUrl;
       } else {
         setError(d.error || '결제 페이지 생성 실패');
+      }
+    } catch {
+      setError('서버 오류');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const handleStartIndividualSpt = async (sptType: string) => {
+    if (!session) {
+      window.location.href = `/${locale}/register`;
+      return;
+    }
+    if (session.customerType === 'COMPANY') {
+      setError('법인 고객은 SPT Pribadi가 아닌 법인 요금제를 이용해주세요');
+      return;
+    }
+    setCheckoutLoading(sptType);
+    setError(null);
+    try {
+      const res = await fetch('/api/billing/individual-spt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sptType }),
+      });
+      const d = await res.json();
+      if (!d.success) {
+        setError(d.error || '결제 준비 실패');
+        return;
+      }
+      // Snap token available → redirect to Midtrans payment page.
+      // No Snap token (Midtrans creds missing) → fall back to the
+      // billing pay page so the user can retry payment from the in-app UI.
+      if (d.data?.paymentUrl) {
+        window.location.href = d.data.paymentUrl;
+      } else if (d.data?.transactionId) {
+        window.location.href = `/${locale}/billing/pay/${d.data.transactionId}`;
+      } else {
+        setError('결제 준비 실패');
       }
     } catch {
       setError('서버 오류');
@@ -345,7 +348,7 @@ export default function PricingPage() {
         {/* Individual plans */}
         {tab === 'INDIVIDUAL' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {INDIVIDUAL_PLANS.map((plan, i) => {
+            {INDIVIDUAL_SPT_PLANS.map((plan, i) => {
               const gradient = i === 0 ? 'from-cyan-500 to-blue-600'
                 : i === 1 ? 'from-indigo-500 to-purple-600'
                 : 'from-pink-500 to-rose-600';
@@ -375,11 +378,22 @@ export default function PricingPage() {
                       ))}
                     </div>
 
-                    <Button className="w-full mt-6" asChild>
-                      <Link href={session ? `/${locale}/tax/spt-tahunan` : `/${locale}/register`}>
-                        {session ? 'SPT 시작하기' : '가입하고 시작'}
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </Link>
+                    <Button
+                      className="w-full mt-6"
+                      onClick={() => handleStartIndividualSpt(plan.id)}
+                      disabled={checkoutLoading === plan.id}
+                    >
+                      {checkoutLoading === plan.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          준비 중…
+                        </>
+                      ) : (
+                        <>
+                          {session ? '결제하고 시작' : '가입하고 시작'}
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
