@@ -54,7 +54,6 @@ async function testCorporatePlan() {
   if (!token) return;
   console.log(`   ✅ logged in as ${email}`);
 
-  // Hit the API
   const res = await fetch(`${baseUrl}/api/billing/corporate-plan`, {
     method: 'POST',
     headers: {
@@ -65,30 +64,26 @@ async function testCorporatePlan() {
   });
 
   console.log(`   📡 POST /api/billing/corporate-plan → ${res.status}`);
-  let body: { success?: boolean; data?: { subscriptionId?: string; orderId?: string; snapToken?: string }; error?: string };
+  let body: { success?: boolean; data?: { subscriptionId?: string; orderId?: string; snapToken?: string | null; redirectUrl?: string | null; snapError?: string | null }; error?: string };
   try {
     body = await res.json();
   } catch {
     body = { error: await res.text() };
   }
 
-  if (res.status !== 200) {
-    console.error(`   ❌ unexpected status: ${res.status}`);
-    console.error(`      body: ${JSON.stringify(body).slice(0, 200)}`);
-    return;
-  }
-
-  if (!body?.data?.snapToken) {
-    console.error('   ❌ response missing snapToken');
-    console.error(`      body: ${JSON.stringify(body).slice(0, 200)}`);
+  if (res.status !== 200 || !body?.success || !body.data?.subscriptionId) {
+    console.error(`   ❌ unexpected response: status=${res.status} body=${JSON.stringify(body).slice(0, 200)}`);
     return;
   }
 
   console.log(`   ✅ subscriptionId: ${body.data.subscriptionId}`);
   console.log(`   ✅ orderId: ${body.data.orderId}`);
-  console.log(`   ✅ snapToken: ${body.data.snapToken.slice(0, 24)}…`);
+  if (body.data.snapToken) {
+    console.log(`   ✅ snapToken: ${body.data.snapToken.slice(0, 24)}…`);
+  } else {
+    console.log(`   ⏭️  snapToken: null (graceful degrade — ${body.data.snapError ?? 'no PG configured'})`);
+  }
 
-  // Verify the row exists in customer_subscription as PENDING_PAYMENT
   const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -98,7 +93,7 @@ async function testCorporatePlan() {
     .eq('id', body.data.subscriptionId)
     .maybeSingle();
   if (row?.status === 'PENDING_PAYMENT') {
-    console.log(`   ✅ DB row PENDING_PAYMENT, plan_id=${row.plan_id}, midtrans_order_id=${row.midtrans_order_id}`);
+    console.log(`   ✅ DB row PENDING_PAYMENT (preserved), plan_id=${row.plan_id}, midtrans_order_id=${row.midtrans_order_id}`);
   } else {
     console.error(`   ⚠️  DB row state: ${JSON.stringify(row)}`);
   }
@@ -121,28 +116,25 @@ async function testConsultantPlan() {
   });
 
   console.log(`   📡 POST /api/billing/consultant-plan → ${res.status}`);
-  let body: { success?: boolean; data?: { subscriptionId?: string; orderId?: string; snapToken?: string }; error?: string };
+  let body: { success?: boolean; data?: { subscriptionId?: string; orderId?: string; snapToken?: string | null; redirectUrl?: string | null; snapError?: string | null }; error?: string };
   try {
     body = await res.json();
   } catch {
     body = { error: await res.text() };
   }
 
-  if (res.status !== 200) {
-    console.error(`   ❌ unexpected status: ${res.status}`);
-    console.error(`      body: ${JSON.stringify(body).slice(0, 200)}`);
-    return;
-  }
-
-  if (!body?.data?.snapToken) {
-    console.error('   ❌ response missing snapToken');
-    console.error(`      body: ${JSON.stringify(body).slice(0, 200)}`);
+  if (res.status !== 200 || !body?.success || !body.data?.subscriptionId) {
+    console.error(`   ❌ unexpected response: status=${res.status} body=${JSON.stringify(body).slice(0, 200)}`);
     return;
   }
 
   console.log(`   ✅ subscriptionId: ${body.data.subscriptionId}`);
   console.log(`   ✅ orderId: ${body.data.orderId}`);
-  console.log(`   ✅ snapToken: ${body.data.snapToken.slice(0, 24)}…`);
+  if (body.data.snapToken) {
+    console.log(`   ✅ snapToken: ${body.data.snapToken.slice(0, 24)}…`);
+  } else {
+    console.log(`   ⏭️  snapToken: null (graceful degrade — ${body.data.snapError ?? 'no PG configured'})`);
+  }
 
   const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -153,7 +145,7 @@ async function testConsultantPlan() {
     .eq('id', body.data.subscriptionId)
     .maybeSingle();
   if (row?.status === 'PENDING_PAYMENT') {
-    console.log(`   ✅ DB row PENDING_PAYMENT, tier_id=${row.tier_id}, midtrans_order_id=${row.midtrans_order_id}`);
+    console.log(`   ✅ DB row PENDING_PAYMENT (preserved), tier_id=${row.tier_id}, midtrans_order_id=${row.midtrans_order_id}`);
   } else {
     console.error(`   ⚠️  DB row state: ${JSON.stringify(row)}`);
   }
