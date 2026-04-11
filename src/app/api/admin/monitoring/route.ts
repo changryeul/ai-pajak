@@ -117,6 +117,12 @@ async function checkRedis() {
   }
 }
 
+// Audit-log activity_type values that represent failure events.
+// activity_type is a Postgres enum, so ilike '%FAIL%' against the enum
+// column does not work via supabase-js — we have to enumerate the values.
+// Add new failure types here as they're introduced.
+const FAILURE_ACTIVITY_TYPES = ['LOGIN_FAILURE'] as const;
+
 async function getErrorStats() {
   try {
     const supabase = createClient(
@@ -129,17 +135,18 @@ async function getErrorStats() {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Count error-related audit logs (failed actions)
+    // Count error-related audit logs (failed actions). Use the actual column
+    // name `activity_type` (was `action` — never existed on this table).
     const [hour, day, week] = await Promise.all([
       supabase.from('audit_log').select('id', { count: 'exact', head: true })
         .gte('created_at', oneHourAgo)
-        .ilike('action', '%FAIL%'),
+        .in('activity_type', FAILURE_ACTIVITY_TYPES as unknown as string[]),
       supabase.from('audit_log').select('id', { count: 'exact', head: true })
         .gte('created_at', oneDayAgo)
-        .ilike('action', '%FAIL%'),
+        .in('activity_type', FAILURE_ACTIVITY_TYPES as unknown as string[]),
       supabase.from('audit_log').select('id', { count: 'exact', head: true })
         .gte('created_at', sevenDaysAgo)
-        .ilike('action', '%FAIL%'),
+        .in('activity_type', FAILURE_ACTIVITY_TYPES as unknown as string[]),
     ]);
 
     return {
@@ -161,23 +168,27 @@ async function getRecentAuditStats() {
 
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    // Get action distribution for last 24h
+    // Get activity distribution for last 24h. The column is `activity_type`
+    // (an enum) — was previously querying a non-existent `action` column.
+    // We expose it to the dashboard as `action` to keep the wire format
+    // unchanged.
     const { data: logs } = await supabase
       .from('audit_log')
-      .select('action')
+      .select('activity_type')
       .gte('created_at', oneDayAgo);
 
     const actionCounts: Record<string, number> = {};
     let totalActions = 0;
 
     if (logs) {
-      for (const log of logs) {
-        actionCounts[log.action] = (actionCounts[log.action] || 0) + 1;
+      for (const log of logs as Array<{ activity_type: string }>) {
+        const key = log.activity_type;
+        actionCounts[key] = (actionCounts[key] || 0) + 1;
         totalActions++;
       }
     }
 
-    // Top 10 actions
+    // Top 10 activity types
     const topActions = Object.entries(actionCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
