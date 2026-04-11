@@ -26,6 +26,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
+import { recordAudit } from '@/middleware/audit';
 
 interface CustomPricingQuote {
   id: string;
@@ -149,6 +150,19 @@ export async function POST(request: NextRequest) {
         loggers.api.error({ err: updErr, quoteId }, 'Failed to reject custom pricing quote');
         return NextResponse.json({ error: updErr.message }, { status: 500 });
       }
+      await recordAudit({
+        action: 'BILLING_UPDATE',
+        actorUserId: user.id,
+        actorRole: 'CUSTOMER',
+        customerId,
+        details: {
+          scope: 'CUSTOM_PRICING_REJECT',
+          quoteId,
+          serviceType: quote.service_type,
+        },
+        ipAddress: request.headers.get('x-forwarded-for'),
+        userAgent: request.headers.get('user-agent'),
+      });
       return NextResponse.json({ success: true, data: { quoteId, status: 'REJECTED' } });
     }
 
@@ -193,6 +207,23 @@ export async function POST(request: NextRequest) {
         loggers.api.info({ quoteId, subscriptionId }, 'Custom subscription PENDING_PAYMENT created');
       }
     }
+
+    await recordAudit({
+      action: 'BILLING_UPDATE',
+      actorUserId: user.id,
+      actorRole: 'CUSTOMER',
+      customerId,
+      details: {
+        scope: 'CUSTOM_PRICING_ACCEPT',
+        quoteId,
+        serviceType: quote.service_type,
+        monthlyPriceIdr: quote.monthly_price_idr,
+        oneTimePriceIdr: quote.one_time_price_idr,
+        subscriptionId,
+      },
+      ipAddress: request.headers.get('x-forwarded-for'),
+      userAgent: request.headers.get('user-agent'),
+    });
 
     return NextResponse.json({
       success: true,

@@ -23,6 +23,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { loggers } from '@/lib/logger';
+import { recordAudit } from '@/middleware/audit';
 
 const VALID_SERVICE_TYPES = ['CORPORATE_PLAN', 'TAX_AUDIT', 'TRANSFER_PRICING', 'ADVISORY', 'OTHER'];
 const VALID_STATUSES = ['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CANCELED'];
@@ -153,6 +154,22 @@ export async function POST(request: NextRequest) {
       'Custom pricing quote created'
     );
 
+    await recordAudit({
+      action: 'BILLING_CREATE',
+      actorUserId: user.id,
+      actorRole: 'TAX_OPERATOR_MASTER',
+      customerId,
+      details: {
+        scope: 'MASTER_CUSTOM_PRICING_CREATE',
+        quoteId: data.id,
+        serviceType: svcType,
+        monthlyPriceIdr,
+        oneTimePriceIdr,
+      },
+      ipAddress: request.headers.get('x-forwarded-for'),
+      userAgent: request.headers.get('user-agent'),
+    });
+
     return NextResponse.json({ success: true, data });
   } catch (err) {
     loggers.api.error({ err }, 'POST /api/admin/master/custom-pricing error');
@@ -225,6 +242,22 @@ export async function PATCH(request: NextRequest) {
     }
 
     loggers.api.info({ quoteId: id, updatedBy: user.id, changedFields: Object.keys(updates) }, 'Custom pricing quote updated');
+
+    await recordAudit({
+      action: 'BILLING_UPDATE',
+      actorUserId: user.id,
+      actorRole: 'TAX_OPERATOR_MASTER',
+      customerId: data?.customer_id ?? null,
+      details: {
+        scope: 'MASTER_CUSTOM_PRICING_UPDATE',
+        quoteId: id,
+        changedFields: Object.keys(updates),
+        newStatus: updates.status ?? null,
+      },
+      ipAddress: request.headers.get('x-forwarded-for'),
+      userAgent: request.headers.get('user-agent'),
+    });
+
     return NextResponse.json({ success: true, data });
   } catch (err) {
     loggers.api.error({ err }, 'PATCH /api/admin/master/custom-pricing error');

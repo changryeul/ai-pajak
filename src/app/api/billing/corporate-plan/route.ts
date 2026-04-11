@@ -25,6 +25,7 @@ import {
 import { getPeakUsage } from '@/lib/billing/usage-query';
 import { suggestPlanForCustomer } from '@/lib/billing/plan-recommender';
 import { MidtransService } from '@/lib/payment/midtrans';
+import { recordAudit } from '@/middleware/audit';
 
 async function resolveCustomerId(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -179,6 +180,21 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    await recordAudit({
+      action: 'BILLING_CREATE',
+      actorUserId: user.id,
+      actorRole: 'CUSTOMER',
+      customerId,
+      details: {
+        scope: 'CORPORATE_PLAN_SUBSCRIBE',
+        planId: plan.id,
+        priceIdr: plan.priceIdr,
+        subscriptionId: subscription.id,
+      },
+      ipAddress: request.headers.get('x-forwarded-for'),
+      userAgent: request.headers.get('user-agent'),
+    });
 
     // Create Midtrans Snap transaction.
     // Graceful degrade: when Midtrans is not configured (or is temporarily

@@ -22,6 +22,7 @@ import {
   type ConsultantTierId,
 } from '@/config/consultant-pricing';
 import { MidtransService } from '@/lib/payment/midtrans';
+import { recordAudit } from '@/middleware/audit';
 
 /**
  * Resolve the caller's tax_partner context (only for EXTERNAL consultants).
@@ -202,6 +203,21 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    await recordAudit({
+      action: 'BILLING_CREATE',
+      actorUserId: user.id,
+      actorRole: 'CONSULTANT_JTC',
+      details: {
+        scope: 'CONSULTANT_TIER_SUBSCRIBE',
+        tierId: tier.id,
+        priceIdr: tier.priceIdr,
+        partnerId: partner.partnerId,
+        subscriptionId: subscription.id,
+      },
+      ipAddress: request.headers.get('x-forwarded-for'),
+      userAgent: request.headers.get('user-agent'),
+    });
 
     // Create Midtrans Snap transaction with CONS- prefix.
     // Graceful degrade: Snap failure does NOT cancel the row — it stays

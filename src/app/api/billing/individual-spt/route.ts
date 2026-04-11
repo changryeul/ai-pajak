@@ -23,6 +23,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { MidtransService } from '@/lib/payment/midtrans';
+import { recordAudit } from '@/middleware/audit';
 import {
   INDIVIDUAL_SPT_PLANS,
   getIndividualSptPlan,
@@ -246,6 +247,23 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    await recordAudit({
+      action: 'BILLING_CREATE',
+      actorUserId: user.id,
+      actorRole: 'CUSTOMER',
+      customerId: customer.id,
+      details: {
+        scope: 'INDIVIDUAL_SPT_CHECKOUT',
+        sptType: plan.id,
+        taxYear: year,
+        transactionId: transaction.id,
+        invoiceNumber: transaction.invoice_number,
+        amountTotal,
+      },
+      ipAddress: request.headers.get('x-forwarded-for'),
+      userAgent: request.headers.get('user-agent'),
+    });
 
     // Try Midtrans Snap creation — degrade gracefully if credentials are missing.
     let snapToken: string | null = null;
