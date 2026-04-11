@@ -44,7 +44,7 @@ const INTEGRATIONS: Integration[] = [
     icon: Building2,
     gradient: 'from-emerald-600 to-emerald-700',
     status: 'disconnected',
-    features: ['syncEmployees', 'syncInvoices', 'syncFinancial', 'syncFinancial'],
+    features: ['syncEmployees', 'syncInvoices', 'syncFinancial'],
     connectAction: '/settings/accurate?provider=MEKARI',
     category: 'accounting',
   },
