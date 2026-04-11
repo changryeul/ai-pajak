@@ -26,6 +26,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Guard: do NOT auto-create a customer/CUSTOMER role for users that
+    // already have a non-customer role (operator team, master, platform
+    // admin, JTC consultant, etc.). Without this guard the dashboard's
+    // fallback `useEffect(...setup-account)` would silently turn an
+    // operator into a "customer" the first time they visit /dashboard,
+    // and that ghost CUSTOMER row pollutes the sidebar with customer-only
+    // menus like 연신고/월신고.
+    const guardAdmin = getSupabaseAdmin();
+    const { data: existingRoles } = await guardAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+    const NON_CUSTOMER_ROLES = new Set([
+      'CONSULTANT_JTC',
+      'TAX_ADVISOR_JTC',
+      'TAX_OPERATOR',
+      'TAX_OPERATOR_LEAD',
+      'TAX_OPERATOR_SUPERVISOR',
+      'TAX_OPERATOR_MASTER',
+      'PLATFORM_ADMIN',
+      'SYSTEM',
+    ]);
+    if (existingRoles?.some((r) => NON_CUSTOMER_ROLES.has(r.role))) {
+      loggers.api.info(
+        { userId: user.id, roles: existingRoles.map((r) => r.role) },
+        'setup-account skipped — user already has a non-customer role',
+      );
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: 'User already has a non-customer role; no customer auto-creation',
+      });
+    }
+
     // Parse body (may be empty — fallback to metadata)
     let body: {
       accountType?: AccountType;
