@@ -92,10 +92,17 @@ export default function PricingPage() {
         body: JSON.stringify({ tierId, billingCycle: 'MONTHLY' }),
       });
       const d = await res.json();
-      if (d.success && d.data?.redirectUrl) {
+      if (!d.success) {
+        setError(d.error || '구독 신청 실패');
+        return;
+      }
+      // Same graceful degrade as corporate-plan
+      if (d.data?.redirectUrl) {
         window.location.href = d.data.redirectUrl;
+      } else if (d.data?.subscriptionId) {
+        window.location.href = `/${locale}/billing?pendingSubscriptionId=${d.data.subscriptionId}`;
       } else {
-        setError(d.error || '결제 페이지 생성 실패');
+        setError('결제 페이지 생성 실패');
       }
     } catch {
       setError('서버 오류');
@@ -162,10 +169,19 @@ export default function PricingPage() {
         body: JSON.stringify({ planId, billingCycle: 'MONTHLY' }),
       });
       const d = await res.json();
-      if (d.success && d.data?.redirectUrl) {
+      if (!d.success) {
+        setError(d.error || '구독 신청 실패');
+        return;
+      }
+      // Payment gateway available → redirect to Snap; otherwise the
+      // PENDING_PAYMENT subscription is created and the user is sent to
+      // the in-app billing page where they can retry payment later.
+      if (d.data?.redirectUrl) {
         window.location.href = d.data.redirectUrl;
+      } else if (d.data?.subscriptionId) {
+        window.location.href = `/${locale}/billing?pendingSubscriptionId=${d.data.subscriptionId}`;
       } else {
-        setError(d.error || '결제 페이지 생성 실패');
+        setError('결제 페이지 생성 실패');
       }
     } catch {
       setError('서버 오류');

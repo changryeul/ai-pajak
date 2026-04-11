@@ -47,6 +47,7 @@ export async function GET() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    loggers.api.info({ userId: user.id }, 'GET /api/billing/corporate-plan');
 
     const customerId = await resolveCustomerId(supabase, user.id);
     if (!customerId) {
@@ -115,6 +116,7 @@ export async function POST(request: NextRequest) {
       planId: CorporatePlanId;
       billingCycle?: 'MONTHLY';
     };
+    loggers.api.info({ userId: user.id, planId, billingCycle }, 'POST /api/billing/corporate-plan');
 
     if (!planId) {
       return NextResponse.json(
@@ -178,8 +180,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Midtrans Snap transaction
+    // Create Midtrans Snap transaction.
+    // Graceful degrade: when Midtrans is not configured (or is temporarily
+    // unavailable), the PENDING_PAYMENT row stays and the response includes
+    // snapToken=null + snapError. The user can resume from /billing later
+    // once a payment gateway becomes available.
     const orderId = `CORP-${plan.id}-${subscription.id.slice(0, 8)}-${Date.now()}`;
+    await admin
+      .from('customer_subscription')
+      .update({ midtrans_order_id: orderId })
+      .eq('id', subscription.id);
+
+    let snapToken: string | null = null;
+    let redirectUrl: string | null = null;
+    let snapError: string | null = null;
 
     try {
       const snap = await MidtransService.createSnapTransaction({
@@ -199,38 +213,31 @@ export async function POST(request: NextRequest) {
           },
         ],
       });
-
-      await admin
-        .from('customer_subscription')
-        .update({ midtrans_order_id: orderId })
-        .eq('id', subscription.id);
+      snapToken = snap.token;
+      redirectUrl = snap.redirect_url;
 
       loggers.api.info(
         { subscriptionId: subscription.id, orderId, planId: plan.id, customerId },
         'Corporate subscription payment initiated'
       );
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          subscriptionId: subscription.id,
-          orderId,
-          snapToken: snap.token,
-          redirectUrl: snap.redirect_url,
-        },
-      });
     } catch (payErr) {
-      // Rollback: mark subscription as canceled
-      loggers.api.error({ err: payErr, subscriptionId: subscription.id }, 'Midtrans error, canceling subscription');
-      await admin
-        .from('customer_subscription')
-        .update({ status: 'CANCELED' })
-        .eq('id', subscription.id);
-      return NextResponse.json(
-        { error: '결제 페이지 생성 실패. 잠시 후 다시 시도해주세요.' },
-        { status: 500 }
+      snapError = payErr instanceof Error ? payErr.message : 'Payment gateway error';
+      loggers.api.warn(
+        { err: payErr, subscriptionId: subscription.id },
+        'Midtrans Snap creation failed — subscription kept as PENDING_PAYMENT for manual retry'
       );
     }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        subscriptionId: subscription.id,
+        orderId,
+        snapToken,
+        redirectUrl,
+        snapError,
+      },
+    });
   } catch (err) {
     loggers.api.error({ err }, 'POST /api/billing/corporate-plan error');
     return NextResponse.json(
