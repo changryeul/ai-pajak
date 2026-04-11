@@ -45,7 +45,9 @@ async function handler(_req: RequestWithSession): Promise<Response> {
     percentage: Math.round((mem.heapUsed / mem.heapTotal) * 100),
   };
 
-  // Overall status
+  // Overall status. `not_configured` is intentionally NOT degradation —
+  // optional services like Upstash Redis can be absent without impacting
+  // user-facing functionality (memory fallback handles rate limiting).
   const isDown = dbCheck.status === 'down';
   const isDegraded = dbCheck.status === 'degraded'
     || redisCheck.status === 'degraded'
@@ -96,8 +98,15 @@ async function checkDatabase() {
 }
 
 async function checkRedis() {
+  // Upstash Redis is OPTIONAL — used by distributed rate limiting (memory
+  // fallback exists). Treat "not configured" as a distinct state so the
+  // overall monitoring status does not flip to "degraded" just because the
+  // optional dependency is absent.
   if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-    return { status: 'down' as const, message: 'Not configured' };
+    return {
+      status: 'not_configured' as const,
+      message: 'Optional — distributed rate limiting using in-memory fallback',
+    };
   }
   const start = Date.now();
   try {

@@ -23,7 +23,7 @@ import {
 
 interface ServiceStatus {
   name: string;
-  status: 'operational' | 'degraded' | 'down';
+  status: 'operational' | 'degraded' | 'down' | 'not_configured';
   latency?: number;
   message?: string;
   lastChecked: string;
@@ -61,21 +61,33 @@ interface MonitoringData {
   };
 }
 
-function StatusBadge({ status }: { status: 'operational' | 'degraded' | 'down' }) {
+function StatusBadge({
+  status,
+}: {
+  status: 'operational' | 'degraded' | 'down' | 'not_configured';
+}) {
   const variants = {
     operational: 'bg-green-100 text-green-800 border-green-200',
     degraded: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     down: 'bg-red-100 text-red-800 border-red-200',
+    not_configured: 'bg-gray-100 text-gray-600 border-gray-200',
   };
   const icons = {
     operational: <CheckCircle className="h-3 w-3" />,
     degraded: <AlertCircle className="h-3 w-3" />,
     down: <AlertCircle className="h-3 w-3" />,
+    not_configured: <AlertCircle className="h-3 w-3" />,
+  };
+  const labels = {
+    operational: 'Operational',
+    degraded: 'Degraded',
+    down: 'Down',
+    not_configured: 'Not configured',
   };
   return (
     <Badge variant="outline" className={`${variants[status]} flex items-center gap-1`}>
       {icons[status]}
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {labels[status]}
     </Badge>
   );
 }
