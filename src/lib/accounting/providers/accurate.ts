@@ -9,7 +9,9 @@ import type {
   ListDatabasesResult,
 } from '../types';
 
-const ACCURATE_PUBLIC_BASE = 'https://public.accurate.id';
+// account.accurate.id = OAuth + DB management (db-list, open-db)
+// Data APIs (invoices etc.) use the dynamic `host` returned by open-db.do
+const ACCURATE_ACCOUNT_BASE = 'https://account.accurate.id';
 
 async function callApi<T>(
   creds: ConnectionCredentials,
@@ -19,7 +21,8 @@ async function callApi<T>(
   const query = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) query.set(k, String(v));
 
-  const baseUrl = creds.host || ACCURATE_PUBLIC_BASE;
+  // Data API calls use the host from open-db (e.g. zeus.accurate.id)
+  const baseUrl = creds.host || ACCURATE_ACCOUNT_BASE;
   const url = `${baseUrl}/accurate/api/${path}${query.toString() ? '?' + query : ''}`;
 
   const res = await fetch(url, {
@@ -41,7 +44,7 @@ export const accurateProvider: AccountingProvider = {
   displayName: 'Accurate Online',
 
   async listDatabases(accessToken: string): Promise<ListDatabasesResult[]> {
-    const res = await fetch(`${ACCURATE_PUBLIC_BASE}/accurate/api/db-list.do`, {
+    const res = await fetch(`${ACCURATE_ACCOUNT_BASE}/api/db-list.do`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) throw new Error(`Accurate db-list failed: ${res.status}`);
@@ -56,7 +59,7 @@ export const accurateProvider: AccountingProvider = {
   async openSession(input) {
     if (!input.databaseId) throw new Error('databaseId required for Accurate');
     const res = await fetch(
-      `${ACCURATE_PUBLIC_BASE}/accurate/api/open-db.do?id=${input.databaseId}`,
+      `${ACCURATE_ACCOUNT_BASE}/api/open-db.do?id=${input.databaseId}`,
       { headers: { Authorization: `Bearer ${input.accessToken}` } }
     );
     if (!res.ok) throw new Error(`Accurate open-db failed: ${res.status}`);
