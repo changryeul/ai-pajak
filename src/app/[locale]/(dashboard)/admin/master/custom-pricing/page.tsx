@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
@@ -47,22 +48,8 @@ interface Quote {
   };
 }
 
-const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
-  CORPORATE_PLAN: '법인 맞춤 요금제',
-  TAX_AUDIT: '세무조사 대응',
-  TRANSFER_PRICING: '이전가격',
-  ADVISORY: '특별 자문',
-  OTHER: '기타',
-};
-
-const STATUS_LABELS: Record<QuoteStatus, string> = {
-  DRAFT: '작성 중',
-  SENT: '전달됨',
-  ACCEPTED: '수락됨',
-  REJECTED: '거절됨',
-  EXPIRED: '만료',
-  CANCELED: '취소됨',
-};
+// SERVICE_TYPE_LABELS and STATUS_LABELS are now inside the component
+// so they can use useTranslations(). See the component function body.
 
 const STATUS_COLORS: Record<QuoteStatus, string> = {
   DRAFT: 'bg-gray-100 text-gray-700',
@@ -89,6 +76,7 @@ export default function CustomPricingPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const t = useTranslations('customPricingAdmin');
   const locale = (params?.locale as string) || 'ko';
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -104,6 +92,23 @@ export default function CustomPricingPage() {
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 4000);
+  };
+
+  const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
+    CORPORATE_PLAN: t('svcCorporatePlan'),
+    TAX_AUDIT: t('svcTaxAudit'),
+    TRANSFER_PRICING: t('svcTransferPricing'),
+    ADVISORY: t('svcAdvisory'),
+    OTHER: t('svcOther'),
+  };
+
+  const STATUS_LABELS: Record<QuoteStatus, string> = {
+    DRAFT: t('stDraft'),
+    SENT: t('stSent'),
+    ACCEPTED: t('stAccepted'),
+    REJECTED: t('stRejected'),
+    EXPIRED: t('stExpired'),
+    CANCELED: t('stCanceled'),
   };
 
   // Role guard: master-only
@@ -131,7 +136,7 @@ export default function CustomPricingPage() {
       const data = await res.json();
       if (data.success) setQuotes(data.data || []);
     } catch {
-      showMsg('error', '견적 목록을 불러올 수 없습니다');
+      showMsg('error', t('loadError'));
     } finally {
       setLoading(false);
     }
@@ -163,11 +168,11 @@ export default function CustomPricingPage() {
 
   const handleSave = async () => {
     if (!form.customerId || !form.quoteTitle) {
-      showMsg('error', '고객 ID와 견적 제목은 필수입니다');
+      showMsg('error', t('requiredFields'));
       return;
     }
     if (!form.monthlyPriceIdr && !form.oneTimePriceIdr) {
-      showMsg('error', '월 요금 또는 일회성 요금 중 하나는 필수입니다');
+      showMsg('error', t('requiredPrice'));
       return;
     }
 
@@ -192,30 +197,30 @@ export default function CustomPricingPage() {
       const data = await res.json();
 
       if (data.success) {
-        showMsg('success', editingId ? '견적 수정 완료' : '견적 등록 완료');
+        showMsg('success', editingId ? t('editSuccess') : t('saveSuccess'));
         resetForm();
         setShowForm(false);
         loadQuotes();
       } else {
-        showMsg('error', data.error || '저장 실패');
+        showMsg('error', data.error || t('saveFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleStatusChange = async (id: string, newStatus: QuoteStatus) => {
-    const labels: Record<QuoteStatus, string> = {
-      DRAFT: '작성중',
-      SENT: '고객에게 전달',
-      ACCEPTED: '수락',
-      REJECTED: '거절',
-      EXPIRED: '만료',
-      CANCELED: '취소',
+    const transLabels: Record<QuoteStatus, string> = {
+      DRAFT: t('transitionDraft'),
+      SENT: t('transitionSent'),
+      ACCEPTED: t('transitionAccepted'),
+      REJECTED: t('transitionRejected'),
+      EXPIRED: t('transitionExpired'),
+      CANCELED: t('transitionCanceled'),
     };
-    if (!confirm(`이 견적을 "${labels[newStatus]}" 상태로 변경하시겠습니까?`)) return;
+    if (!confirm(t('confirmStatus', { status: transLabels[newStatus] }))) return;
 
     try {
       const res = await fetch('/api/admin/master/custom-pricing', {
@@ -225,13 +230,13 @@ export default function CustomPricingPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', '상태 변경 완료');
+        showMsg('success', t('statusChanged'));
         loadQuotes();
       } else {
-        showMsg('error', data.error || '상태 변경 실패');
+        showMsg('error', data.error || t('statusChangeFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     }
   };
 
@@ -251,20 +256,20 @@ export default function CustomPricingPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Link href={`/${locale}/admin/master`} className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" /> 마스터 대시보드
+              <ArrowLeft className="h-3 w-3" /> {t('backToMaster')}
             </Link>
           </div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <FileText className="h-6 w-6 text-indigo-600" />
-            맞춤 가격 관리
+            {t('title')}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Pro 초과 고객 · 세무조사 · 이전가격 · 특별 자문 등의 맞춤 견적 등록
+            {t('subtitle')}
           </p>
         </div>
         <Button onClick={() => { resetForm(); setShowForm(!showForm); }}>
           {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-          {showForm ? '닫기' : '신규 견적'}
+          {showForm ? t('closeForm') : t('newQuote')}
         </Button>
       </div>
 
@@ -284,12 +289,12 @@ export default function CustomPricingPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-sm flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-indigo-600" />
-              {editingId ? '견적 수정' : '신규 견적 등록'}
+              {editingId ? t('editQuote') : t('createQuote')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">고객 ID (UUID) *</Label>
+                <Label className="text-xs">{t('customerIdLabel')}</Label>
                 <Input
                   value={form.customerId}
                   onChange={(e) => setForm({ ...form, customerId: e.target.value })}
@@ -298,11 +303,11 @@ export default function CustomPricingPage() {
                   disabled={!!editingId}
                 />
                 <p className="text-[10px] text-gray-500 mt-1">
-                  마스터 대시보드의 Pro 초과 고객 리스트에서 자동으로 채워집니다
+                  {t('customerIdHint')}
                 </p>
               </div>
               <div>
-                <Label className="text-xs">서비스 유형 *</Label>
+                <Label className="text-xs">{t('serviceTypeLabel')}</Label>
                 <select
                   value={form.serviceType}
                   onChange={(e) => setForm({ ...form, serviceType: e.target.value as ServiceType })}
@@ -314,24 +319,24 @@ export default function CustomPricingPage() {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <Label className="text-xs">견적 제목 *</Label>
+                <Label className="text-xs">{t('quoteTitleLabel')}</Label>
                 <Input
                   value={form.quoteTitle}
                   onChange={(e) => setForm({ ...form, quoteTitle: e.target.value })}
-                  placeholder="예: PT XYZ 맞춤 Pro+ 플랜 (직원 2000명, 원천세 월 400건)"
+                  placeholder="{t('quoteTitlePlaceholder')}"
                 />
               </div>
               <div className="md:col-span-2">
-                <Label className="text-xs">상세 설명</Label>
+                <Label className="text-xs">{t('descriptionLabel')}</Label>
                 <Textarea
                   value={form.quoteDescription}
                   onChange={(e) => setForm({ ...form, quoteDescription: e.target.value })}
-                  placeholder="이 견적에 포함된 서비스 범위, SLA, 특이사항 등"
+                  placeholder="{t('descriptionPlaceholder')}"
                   rows={3}
                 />
               </div>
               <div>
-                <Label className="text-xs">월 요금 (IDR)</Label>
+                <Label className="text-xs">{t('monthlyPriceLabel')}</Label>
                 <Input
                   type="number"
                   value={form.monthlyPriceIdr}
@@ -341,17 +346,17 @@ export default function CustomPricingPage() {
                 />
               </div>
               <div>
-                <Label className="text-xs">일회성 요금 (IDR)</Label>
+                <Label className="text-xs">{t('oneTimePriceLabel')}</Label>
                 <Input
                   type="number"
                   value={form.oneTimePriceIdr}
                   onChange={(e) => setForm({ ...form, oneTimePriceIdr: e.target.value })}
-                  placeholder="예: 세무조사 15000000"
+                  placeholder="{t('oneTimePlaceholder')}"
                   className="font-mono"
                 />
               </div>
               <div>
-                <Label className="text-xs">유효 종료일</Label>
+                <Label className="text-xs">{t('validUntilLabel')}</Label>
                 <Input
                   type="date"
                   value={form.validUntil}
@@ -359,11 +364,11 @@ export default function CustomPricingPage() {
                 />
               </div>
               <div className="md:col-span-2">
-                <Label className="text-xs">내부 메모</Label>
+                <Label className="text-xs">{t('memoLabel')}</Label>
                 <Textarea
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  placeholder="내부용 메모 (고객에게 노출되지 않음)"
+                  placeholder="{t('memoPlaceholder')}"
                   rows={2}
                 />
               </div>
@@ -372,10 +377,10 @@ export default function CustomPricingPage() {
             <div className="flex gap-2 pt-2 border-t">
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-                {editingId ? '수정' : '등록 (DRAFT)'}
+                {editingId ? t('submitEdit') : t('submitCreate')}
               </Button>
               <Button variant="outline" onClick={() => { resetForm(); setShowForm(false); }}>
-                취소
+                {t('cancelForm')}
               </Button>
             </div>
           </CardContent>
@@ -389,7 +394,7 @@ export default function CustomPricingPage() {
           <Input
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="제목 또는 고객명 검색..."
+            placeholder="{t('searchPlaceholder')}"
             className="h-8 text-xs"
           />
         </div>
@@ -402,7 +407,7 @@ export default function CustomPricingPage() {
                 statusFilter === s ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {s === 'ALL' ? '전체' : STATUS_LABELS[s]}
+              {s === 'ALL' ? t('filterAll') : STATUS_LABELS[s]}
             </button>
           ))}
         </div>
@@ -417,7 +422,7 @@ export default function CustomPricingPage() {
         <Card className="border-0 shadow-sm">
           <CardContent className="p-8 text-center text-sm text-gray-400">
             <FileText className="h-10 w-10 mx-auto mb-2 opacity-30" />
-            조건에 맞는 견적이 없습니다
+            {t('emptyList')}
           </CardContent>
         </Card>
       ) : (
@@ -446,12 +451,12 @@ export default function CustomPricingPage() {
                     <div className="flex items-center gap-3 mt-2 text-[11px]">
                       {q.monthly_price_idr != null && q.monthly_price_idr > 0 && (
                         <span className="font-mono font-bold text-indigo-900">
-                          월 {fmtRp(q.monthly_price_idr)}
+                          {t('monthlyPrice', { amount: fmtRp(q.monthly_price_idr) })}
                         </span>
                       )}
                       {q.one_time_price_idr != null && q.one_time_price_idr > 0 && (
                         <span className="font-mono font-bold text-purple-900">
-                          일회 {fmtRp(q.one_time_price_idr)}
+                          {t('oneTimePrice', { amount: fmtRp(q.one_time_price_idr) })}
                         </span>
                       )}
                       {q.valid_until && (
@@ -463,17 +468,17 @@ export default function CustomPricingPage() {
                     {q.status === 'DRAFT' && (
                       <>
                         <Button size="sm" onClick={() => handleStatusChange(q.id, 'SENT')}>
-                          <Send className="h-3 w-3 mr-1" /> 전달
+                          <Send className="h-3 w-3 mr-1" /> {t('sendBtn')}
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => startEdit(q)}>
-                          <Edit2 className="h-3 w-3 mr-1" /> 수정
+                          <Edit2 className="h-3 w-3 mr-1" /> {t('editBtn')}
                         </Button>
                       </>
                     )}
                     {q.status === 'SENT' && (
                       <Button size="sm" variant="outline" onClick={() => handleStatusChange(q.id, 'CANCELED')}
                         className="text-red-600 hover:bg-red-50">
-                        <Ban className="h-3 w-3 mr-1" /> 취소
+                        <Ban className="h-3 w-3 mr-1" /> {t('cancelBtn')}
                       </Button>
                     )}
                   </div>
