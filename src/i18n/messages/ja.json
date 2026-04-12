@@ -3015,5 +3015,33 @@
     "glossaryTitle": "Glossary",
     "glossaryDesc": "Indonesian tax terms and platform terminology.",
     "glossaryLink": "View glossary →"
+  },
+  "masterDashboard": {
+    "title": "Master Dashboard",
+    "subtitle": "Platform-wide stats · Volume · Revenue · Pro-exceeding customers",
+    "customPricingLink": "Custom Pricing Management",
+    "loadError": "Failed to load statistics",
+    "totalCustomers": "Total Customers",
+    "recentSignups": "Last 30 days +{count}",
+    "activeSubscriptions": "{count} active subscriptions",
+    "proExceeding": "Pro-Exceeding",
+    "needsQuote": "Needs custom quote",
+    "openQuotes": "Open Quotes",
+    "customerDistribution": "Customer Type Distribution",
+    "corporateCustomers": "Corporate Customers",
+    "subscriptionCount": "{count} subscriptions",
+    "unsubscribedCorporate": "Unsubscribed corporate",
+    "individualCustomers": "Individual Customers",
+    "planDistribution": "Plan Distribution",
+    "countAndPct": "{count} ({pct}%)",
+    "volume": "Volume (This month {period})",
+    "activeEmployees": "Active Employees",
+    "pph21Target": "PPh 21 target",
+    "withholdingTx": "Withholding transactions",
+    "ppnInvoices": "PPN Invoices",
+    "proExceedingList": "Pro plan limit exceeded ({count} customers)",
+    "registerQuote": "Register custom quote →",
+    "registerQuoteBtn": "Register Quote",
+    "proExceedingNote": "Pro-exceeding detection covers top 50 corporate customers for the current month"
   }
 }

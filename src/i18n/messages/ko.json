@@ -3016,5 +3016,33 @@
     "glossaryTitle": "용어 사전",
     "glossaryDesc": "인도네시아어 세무 용어와 플랫폼 내부 용어를 모아 놓았습니다.",
     "glossaryLink": "용어 사전 보기 →"
+  },
+  "masterDashboard": {
+    "title": "마스터 대시보드",
+    "subtitle": "플랫폼 전체 통계 · 처리량 · 수익 · Pro 초과 고객",
+    "customPricingLink": "맞춤 가격 관리",
+    "loadError": "통계를 불러올 수 없습니다",
+    "totalCustomers": "총 고객",
+    "recentSignups": "최근 30일 +{count}",
+    "activeSubscriptions": "활성 구독 {count}건",
+    "proExceeding": "Pro 초과 고객",
+    "needsQuote": "맞춤 견적 필요",
+    "openQuotes": "오픈 견적",
+    "customerDistribution": "고객 유형별 분포",
+    "corporateCustomers": "법인 고객",
+    "subscriptionCount": "구독 {count}",
+    "unsubscribedCorporate": "미구독 법인",
+    "individualCustomers": "개인 고객",
+    "planDistribution": "플랜 분포",
+    "countAndPct": "{count}명 ({pct}%)",
+    "volume": "처리량 (이번 달 {period})",
+    "activeEmployees": "활성 직원",
+    "pph21Target": "PPh 21 대상",
+    "withholdingTx": "원천세 거래",
+    "ppnInvoices": "PPN 인보이스",
+    "proExceedingList": "Pro 플랜 한도 초과 고객 ({count}명)",
+    "registerQuote": "맞춤 견적 등록 →",
+    "registerQuoteBtn": "견적 등록",
+    "proExceedingNote": "Pro 초과 감지는 corporate 고객 상위 50개 대상 · 현재 달 기준"
   }
 }

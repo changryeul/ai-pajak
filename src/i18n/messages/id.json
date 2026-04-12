@@ -3015,5 +3015,33 @@
     "glossaryTitle": "Glosarium",
     "glossaryDesc": "Istilah perpajakan Indonesia dan terminologi platform.",
     "glossaryLink": "Lihat glosarium →"
+  },
+  "masterDashboard": {
+    "title": "Dashboard Master",
+    "subtitle": "Statistik platform · Volume · Pendapatan · Pelanggan melebihi Pro",
+    "customPricingLink": "Manajemen Harga Khusus",
+    "loadError": "Gagal memuat statistik",
+    "totalCustomers": "Total Pelanggan",
+    "recentSignups": "30 hari terakhir +{count}",
+    "activeSubscriptions": "{count} langganan aktif",
+    "proExceeding": "Melebihi Pro",
+    "needsQuote": "Perlu penawaran khusus",
+    "openQuotes": "Penawaran Terbuka",
+    "customerDistribution": "Distribusi Tipe Pelanggan",
+    "corporateCustomers": "Pelanggan Badan",
+    "subscriptionCount": "{count} langganan",
+    "unsubscribedCorporate": "Badan belum berlangganan",
+    "individualCustomers": "Pelanggan Pribadi",
+    "planDistribution": "Distribusi Paket",
+    "countAndPct": "{count} ({pct}%)",
+    "volume": "Volume (Bulan ini {period})",
+    "activeEmployees": "Karyawan Aktif",
+    "pph21Target": "Target PPh 21",
+    "withholdingTx": "Transaksi Potput",
+    "ppnInvoices": "Faktur PPN",
+    "proExceedingList": "Pelanggan melebihi batas Pro ({count})",
+    "registerQuote": "Daftarkan penawaran khusus →",
+    "registerQuoteBtn": "Daftar Penawaran",
+    "proExceedingNote": "Deteksi melebihi Pro mencakup 50 pelanggan badan teratas untuk bulan berjalan"
   }
 }

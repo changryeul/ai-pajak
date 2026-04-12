@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
@@ -53,6 +54,7 @@ export default function MasterDashboardPage() {
   const router = useRouter();
   const params = useParams();
   const locale = (params?.locale as string) || 'ko';
+  const t = useTranslations('masterDashboard');
 
   const [stats, setStats] = useState<MasterStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ export default function MasterDashboardPage() {
     return (
       <div className="container mx-auto py-16 text-center">
         <AlertTriangle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
-        <p className="text-sm text-gray-500">통계를 불러올 수 없습니다</p>
+        <p className="text-sm text-gray-500">{t('loadError')}</p>
       </div>
     );
   }
@@ -106,16 +108,16 @@ export default function MasterDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-indigo-600" />
-            마스터 대시보드
+            {t('title')}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            플랫폼 전체 통계 · 처리량 · 수익 · Pro 초과 고객
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button asChild>
             <Link href={`/${locale}/admin/master/custom-pricing`}>
-              맞춤 가격 관리
+              {t('customPricingLink')}
               <ArrowRight className="h-4 w-4 ml-1" />
             </Link>
           </Button>
@@ -130,11 +132,11 @@ export default function MasterDashboardPage() {
               <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600">
                 <Users className="h-4 w-4 text-white" />
               </div>
-              <p className="text-xs text-gray-500">총 고객</p>
+              <p className="text-xs text-gray-500">{t('totalCustomers')}</p>
             </div>
             <p className="text-2xl font-bold">{stats.customers.total}</p>
             <p className="text-[10px] text-gray-400 mt-1">
-              최근 30일 +{stats.customers.recentSignups30d}
+              {t('recentSignups', { count: stats.customers.recentSignups30d })}
             </p>
           </CardContent>
         </Card>
@@ -149,7 +151,7 @@ export default function MasterDashboardPage() {
             </div>
             <p className="text-2xl font-bold font-mono">{fmtRp(stats.subscriptions.mrrIdr)}</p>
             <p className="text-[10px] text-gray-400 mt-1">
-              활성 구독 {stats.subscriptions.active}건
+              {t('activeSubscriptions', { count: stats.subscriptions.active })}
             </p>
           </CardContent>
         </Card>
@@ -160,10 +162,10 @@ export default function MasterDashboardPage() {
               <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600">
                 <AlertTriangle className="h-4 w-4 text-white" />
               </div>
-              <p className="text-xs text-gray-500">Pro 초과 고객</p>
+              <p className="text-xs text-gray-500">{t('proExceeding')}</p>
             </div>
             <p className="text-2xl font-bold">{stats.proExceeding.count}</p>
-            <p className="text-[10px] text-gray-400 mt-1">맞춤 견적 필요</p>
+            <p className="text-[10px] text-gray-400 mt-1">{t('needsQuote')}</p>
           </CardContent>
         </Card>
 
@@ -173,7 +175,7 @@ export default function MasterDashboardPage() {
               <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600">
                 <FileText className="h-4 w-4 text-white" />
               </div>
-              <p className="text-xs text-gray-500">오픈 견적</p>
+              <p className="text-xs text-gray-500">{t('openQuotes')}</p>
             </div>
             <p className="text-2xl font-bold">{stats.customPricing.openQuotes}</p>
             <p className="text-[10px] text-gray-400 mt-1">SENT/ACCEPTED</p>
@@ -187,24 +189,24 @@ export default function MasterDashboardPage() {
           <CardContent className="p-5">
             <h3 className="font-bold text-sm flex items-center gap-2 mb-4">
               <Users className="h-4 w-4 text-indigo-600" />
-              고객 유형별 분포
+              {t('customerDistribution')}
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm">법인 고객</span>
+                  <span className="text-sm">{t('corporateCustomers')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold">{stats.customers.corporate}</span>
                   <Badge className="bg-blue-100 text-blue-700 text-[9px]">
-                    구독 {stats.subscriptions.active}
+                    {t('subscriptionCount', { count: stats.subscriptions.active })}
                   </Badge>
                 </div>
               </div>
               {stats.subscriptions.unsubscribedCorporate > 0 && (
                 <div className="flex items-center justify-between pl-6">
-                  <span className="text-[11px] text-amber-600">· 미구독 법인</span>
+                  <span className="text-[11px] text-amber-600">· {t('unsubscribedCorporate')}</span>
                   <span className="text-xs font-bold text-amber-600">
                     {stats.subscriptions.unsubscribedCorporate}
                   </span>
@@ -213,7 +215,7 @@ export default function MasterDashboardPage() {
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="flex items-center gap-2">
                   <UserIcon className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">개인 고객</span>
+                  <span className="text-sm">{t('individualCustomers')}</span>
                 </div>
                 <span className="font-bold">{stats.customers.individual}</span>
               </div>
@@ -225,7 +227,7 @@ export default function MasterDashboardPage() {
           <CardContent className="p-5">
             <h3 className="font-bold text-sm flex items-center gap-2 mb-4">
               <BarChart3 className="h-4 w-4 text-indigo-600" />
-              플랜 분포
+              {t('planDistribution')}
             </h3>
             <div className="space-y-3">
               {planOrder.map((plan) => {
@@ -237,7 +239,7 @@ export default function MasterDashboardPage() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium">{plan.label}</span>
                       <span className="text-xs text-gray-500">
-                        {count}명 ({pct}%)
+                        {t('countAndPct', { count, pct })}
                       </span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -259,21 +261,21 @@ export default function MasterDashboardPage() {
         <CardContent className="p-5">
           <h3 className="font-bold text-sm flex items-center gap-2 mb-4">
             <TrendingUp className="h-4 w-4 text-indigo-600" />
-            처리량 (이번 달 {stats.volume.currentPeriod})
+            {t('volume', { period: stats.volume.currentPeriod })}
           </h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-[11px] text-gray-500">활성 직원</p>
+              <p className="text-[11px] text-gray-500">{t('activeEmployees')}</p>
               <p className="text-2xl font-bold mt-1">{stats.volume.activeEmployees.toLocaleString('id-ID')}</p>
-              <p className="text-[10px] text-gray-400">PPh 21 대상</p>
+              <p className="text-[10px] text-gray-400">{t('pph21Target')}</p>
             </div>
             <div>
-              <p className="text-[11px] text-gray-500">원천세 거래</p>
+              <p className="text-[11px] text-gray-500">{t('withholdingTx')}</p>
               <p className="text-2xl font-bold mt-1">{stats.volume.withholdingTransactions.toLocaleString('id-ID')}</p>
               <p className="text-[10px] text-gray-400">PPh 22/23/4(2)</p>
             </div>
             <div>
-              <p className="text-[11px] text-gray-500">PPN 인보이스</p>
+              <p className="text-[11px] text-gray-500">{t('ppnInvoices')}</p>
               <p className="text-2xl font-bold mt-1">{stats.volume.ppnTransactions.toLocaleString('id-ID')}</p>
               <p className="text-[10px] text-gray-400">e-Faktur</p>
             </div>
@@ -288,11 +290,11 @@ export default function MasterDashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-sm flex items-center gap-2 text-amber-900">
                 <AlertTriangle className="h-4 w-4" />
-                Pro 플랜 한도 초과 고객 ({stats.proExceeding.count}명)
+                {t('proExceedingList', { count: stats.proExceeding.count })}
               </h3>
               <Button size="sm" asChild>
                 <Link href={`/${locale}/admin/master/custom-pricing`}>
-                  맞춤 견적 등록 →
+                  {t('registerQuote')}
                 </Link>
               </Button>
             </div>
@@ -316,7 +318,7 @@ export default function MasterDashboardPage() {
                   </div>
                   <Button size="sm" variant="outline" asChild>
                     <Link href={`/${locale}/admin/master/custom-pricing?customerId=${cand.customerId}`}>
-                      견적 등록
+                      {t('registerQuoteBtn')}
                     </Link>
                   </Button>
                 </div>
@@ -328,7 +330,7 @@ export default function MasterDashboardPage() {
 
       <p className="text-[10px] text-gray-400 text-center mt-6">
         <Calendar className="inline h-3 w-3 mr-1" />
-        Pro 초과 감지는 corporate 고객 상위 50개 대상 · 현재 달 기준
+        {t('proExceedingNote')}
       </p>
     </div>
   );
