@@ -117,8 +117,13 @@ test.describe('Operator queue workflow — 11 states', () => {
     }
   });
 
-  test('✅ supervisor drives through review → PENDING_APPROVAL → reject (regression for G2 role/column bugs)', async ({ request }) => {
-    // 1. review (PENDING → DATA_REVIEW)
+  // Combined into a single test because these 11 states form one
+  // sequential state machine. Splitting into separate Playwright tests
+  // would cause retry-isolation problems: if test 2 retries
+  // independently of test 1's side effects, the DB row is in the wrong
+  // state and the transition fails.
+  test('✅ full 11-state walk-through: review → reject → re-approve → customer payment-proof → verify-payment → submit-djp', async ({ request }) => {
+    // ── Phase 1: review → request-approval → reject (G2 regression) ──
     const r1 = await callQueueAction(request, supervisorToken, {
       id: queueItemId,
       action: 'review',
@@ -126,7 +131,6 @@ test.describe('Operator queue workflow — 11 states', () => {
     expect(r1.status).toBe(200);
     expect(r1.json.data?.status).toBe('DATA_REVIEW');
 
-    // 2. request-approval (DATA_REVIEW → PENDING_APPROVAL)
     const r2 = await callQueueAction(request, supervisorToken, {
       id: queueItemId,
       action: 'request-approval',
@@ -134,8 +138,6 @@ test.describe('Operator queue workflow — 11 states', () => {
     expect(r2.status).toBe(200);
     expect(r2.json.data?.status).toBe('PENDING_APPROVAL');
 
-    // 3. reject (PENDING_APPROVAL → DATA_REVIEW) — the action that the
-    //    queue page UI was missing entirely before G2. API-level coverage.
     const r3 = await callQueueAction(request, supervisorToken, {
       id: queueItemId,
       action: 'reject',
@@ -143,10 +145,8 @@ test.describe('Operator queue workflow — 11 states', () => {
     });
     expect(r3.status).toBe(200);
     expect(r3.json.data?.status).toBe('DATA_REVIEW');
-  });
 
-  test('✅ walk-through to PAYMENT_PENDING then customer uploads proof (full 11-state smoke)', async ({ request }) => {
-    // DATA_REVIEW → PENDING_APPROVAL → APPROVED → EBILLING_GENERATED → PAYMENT_PENDING
+    // ── Phase 2: re-walk to PAYMENT_PENDING ──
     await callQueueAction(request, supervisorToken, { id: queueItemId, action: 'request-approval' });
     await callQueueAction(request, supervisorToken, { id: queueItemId, action: 'approve' });
     await callQueueAction(request, supervisorToken, {
@@ -160,8 +160,7 @@ test.describe('Operator queue workflow — 11 states', () => {
     });
     expect(notify.json.data?.status).toBe('PAYMENT_PENDING');
 
-    // Customer uploads payment proof — exercises the G2 payment-proof fix
-    // (updated_by removed, audit_log columns corrected)
+    // ── Phase 3: customer payment proof (G2 column-mismatch regression) ──
     const proofRes = await request.post('/api/customer/payment-proof', {
       headers: createAuthHeaders(companyToken),
       data: {
@@ -173,18 +172,16 @@ test.describe('Operator queue workflow — 11 states', () => {
     });
     expect(proofRes.status()).toBe(200);
 
-    // DB verification: status flipped AND proof columns populated
-    const { data: finalRow } = await supabaseAdmin
+    const { data: proofRow } = await supabaseAdmin
       .from('djp_submission_queue')
       .select('status, payment_proof_url, payment_amount')
       .eq('id', queueItemId)
       .single();
-    expect(finalRow?.status).toBe('PAYMENT_UPLOADED');
-    expect(finalRow?.payment_proof_url).toBe('https://example.com/e2e-receipt.pdf');
-    expect(Number(finalRow?.payment_amount)).toBe(1_000_000);
-  });
+    expect(proofRow?.status).toBe('PAYMENT_UPLOADED');
+    expect(proofRow?.payment_proof_url).toBe('https://example.com/e2e-receipt.pdf');
+    expect(Number(proofRow?.payment_amount)).toBe(1_000_000);
 
-  test('✅ supervisor can complete the remaining states (verify-payment → COMPLETED)', async ({ request }) => {
+    // ── Phase 4: verify-payment → submit-djp ──
     const verify = await callQueueAction(request, supervisorToken, {
       id: queueItemId,
       action: 'verify-payment',
@@ -192,8 +189,6 @@ test.describe('Operator queue workflow — 11 states', () => {
     expect(verify.status).toBe(200);
     expect(verify.json.data?.status).toBe('PAYMENT_VERIFIED');
 
-    // submit-djp triggers the DJP pipeline — it may take longer and flip
-    // to DJP_SUBMITTED or fail based on DJP service stub. Tolerate either.
     const submit = await callQueueAction(request, supervisorToken, {
       id: queueItemId,
       action: 'submit-djp',
