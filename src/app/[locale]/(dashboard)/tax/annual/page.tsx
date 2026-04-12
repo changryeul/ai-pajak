@@ -23,7 +23,13 @@ export default function AnnualFilingRouterPage() {
   const [regime, setRegime] = useState<AnnualRegimeResult | null>(null);
 
   useEffect(() => {
-    if (sessionLoading || !session?.customerId) return;
+    if (sessionLoading) return;
+    if (!session?.customerId) {
+      // Consultants don't have their own customerId — they need to select
+      // a customer first. Stop the spinner and show the empty state.
+      setLoading(false);
+      return;
+    }
     (async () => {
       try {
         const res = await fetch(`/api/company-profile?customerId=${session.customerId}`);
@@ -52,6 +58,21 @@ export default function AnnualFilingRouterPage() {
       <div className="container mx-auto py-20 px-4 max-w-2xl text-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-3" />
         <p className="text-sm text-gray-500">연 결산 방식을 판별 중입니다...</p>
+      </div>
+    );
+  }
+
+  if (!session?.customerId) {
+    return (
+      <div className="container mx-auto py-20 px-4 max-w-2xl text-center">
+        <FileSpreadsheet className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">고객을 먼저 선택해주세요</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          연간정산은 고객별로 진행됩니다. 고객 목록에서 법인 고객을 선택한 후 다시 시도해주세요.
+        </p>
+        <a href={`/${locale}/customers`} className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+          고객 목록으로 이동 →
+        </a>
       </div>
     );
   }
