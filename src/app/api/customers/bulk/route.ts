@@ -182,7 +182,7 @@ async function handleBulkCreate(req: RequestWithSession): Promise<Response> {
         .insert({
           full_name: row.full_name.trim(),
           company_name: row.company_name?.trim() || null,
-          email: row.email?.trim() || null,
+          email: row.email?.trim() || '', // customer.email is NOT NULL in DB
           phone: row.phone?.trim() || null,
           npwp: cleanNpwp,
           address: row.address?.trim() || null,
