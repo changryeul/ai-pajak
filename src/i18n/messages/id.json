@@ -2990,5 +2990,30 @@
     "errorServer": "Kesalahan server",
     "acceptedMsg": "Penawaran telah diterima.",
     "rejectedMsg": "Penawaran telah ditolak."
+  },
+  "manuals": {
+    "pageTitle": "Panduan Pengguna",
+    "pageDesc": "Panduan berdasarkan peran. Pilih dokumen yang sesuai dengan Anda.",
+    "corporate_title": "Wajib Pajak Badan",
+    "corporate_desc": "Pendaftaran · SPT Masa PPh21/PPh23/PPN · Paket UMKM/Basic/Pro · Integrasi akuntansi",
+    "corporate_audience": "Penanggung jawab perusahaan (keuangan, akunting, direktur)",
+    "external_title": "Kantor Konsultan Pajak Eksternal",
+    "external_desc": "Pendaftaran kantor · Isolasi klien · Tier Starter/Growth/Enterprise · Manajemen tim",
+    "external_audience": "Konsultan dari kantor pajak non-JTC",
+    "individual_title": "Wajib Pajak Pribadi",
+    "individual_desc": "SPT Pribadi · 1770SS/1770S/1770 · OCR A1 · Restitusi · Bayar per lapor",
+    "individual_audience": "Pemilik NPWP pribadi, karyawan, freelancer",
+    "operator_title": "Tim Operasional",
+    "operator_desc": "Alur kerja djp_submission_queue 11 tahap · Operator/Supervisor/Master",
+    "operator_audience": "Tim Operasional JTC (TAX_OPERATOR, SUPERVISOR, MASTER)",
+    "jtc_title": "Konsultan Pajak JTC",
+    "jtc_desc": "Penugasan klien · PPh21 massal · Deteksi anomali · Transfer pricing · Manajemen tim",
+    "jtc_audience": "Internal JTC CONSULTANT_JTC, TAX_ADVISOR_JTC",
+    "admin_title": "Admin Platform",
+    "admin_desc": "Pengguna · Infrastruktur · Monitoring · Log audit · Tarif pajak (tanpa akses data pajak)",
+    "admin_audience": "PLATFORM_ADMIN",
+    "glossaryTitle": "Glosarium",
+    "glossaryDesc": "Istilah perpajakan Indonesia dan terminologi platform.",
+    "glossaryLink": "Lihat glosarium →"
   }
 }

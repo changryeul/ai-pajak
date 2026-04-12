@@ -2990,5 +2990,30 @@
     "errorServer": "Server error",
     "acceptedMsg": "Quote has been accepted.",
     "rejectedMsg": "Quote has been rejected."
+  },
+  "manuals": {
+    "pageTitle": "User Manuals",
+    "pageDesc": "Role-based guides. Select the document that applies to you.",
+    "corporate_title": "Corporate Taxpayer",
+    "corporate_desc": "Signup · Monthly PPh21/PPh23/PPN filing · UMKM/Basic/Pro plans · Accounting integration",
+    "corporate_audience": "Corporate client contacts (finance, accounting, CEO)",
+    "external_title": "External Tax Firm",
+    "external_desc": "Firm signup · Client isolation · Starter/Growth/Enterprise Tier · Team management",
+    "external_audience": "Consultants from non-JTC tax firms",
+    "individual_title": "Individual Taxpayer",
+    "individual_desc": "SPT Pribadi · 1770SS/1770S/1770 · A1 OCR · Refund · Per-filing payment",
+    "individual_audience": "Individual NPWP holders, employees, freelancers",
+    "operator_title": "Operations Team",
+    "operator_desc": "djp_submission_queue 11-step workflow · Operator/Supervisor/Master",
+    "operator_audience": "JTC Operations (TAX_OPERATOR, SUPERVISOR, MASTER)",
+    "jtc_title": "JTC Tax Consultant",
+    "jtc_desc": "Client assignment · Bulk PPh21 · Anomaly detection · Transfer pricing · Team mgmt",
+    "jtc_audience": "JTC internal CONSULTANT_JTC, TAX_ADVISOR_JTC",
+    "admin_title": "Platform Admin",
+    "admin_desc": "Users · Infrastructure · Monitoring · Audit logs · Tax rates (no tax data access)",
+    "admin_audience": "PLATFORM_ADMIN",
+    "glossaryTitle": "Glossary",
+    "glossaryDesc": "Indonesian tax terms and platform terminology.",
+    "glossaryLink": "View glossary →"
   }
 }

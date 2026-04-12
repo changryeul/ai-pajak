@@ -2991,5 +2991,30 @@
     "errorServer": "서버 오류",
     "acceptedMsg": "견적이 수락되었습니다.",
     "rejectedMsg": "견적이 거절되었습니다."
+  },
+  "manuals": {
+    "pageTitle": "사용자 매뉴얼",
+    "pageDesc": "역할별 상세 가이드입니다. 본인에게 해당하는 문서를 선택하세요.",
+    "corporate_title": "법인 납세자",
+    "corporate_desc": "가입 · 월 PPh21/PPh23/PPN 신고 · UMKM/Basic/Pro 요금제 · 회계 연동",
+    "corporate_audience": "법인 고객사 담당자 (재무, 경리, 대표)",
+    "external_title": "외부 세무 사무소",
+    "external_desc": "사무소 가입 · 고객 격리 · Starter/Growth/Enterprise Tier · 팀 관리",
+    "external_audience": "JTC 외 다른 세무 사무소 소속 컨설턴트",
+    "individual_title": "개인 납세자",
+    "individual_desc": "SPT Pribadi · 1770SS/1770S/1770 · A1 OCR · 환급 · 건당 결제",
+    "individual_audience": "개인 NPWP 보유자, 직장인, 프리랜서",
+    "operator_title": "운영팀",
+    "operator_desc": "djp_submission_queue 11단계 워크플로우 · Operator/Supervisor/Master",
+    "operator_audience": "JTC 운영팀 (TAX_OPERATOR, SUPERVISOR, MASTER)",
+    "jtc_title": "JTC 세무사",
+    "jtc_desc": "고객 배정 · 일괄 PPh21 · 이상 탐지 · 이전가격 · 팀 관리",
+    "jtc_audience": "JTC 내부 CONSULTANT_JTC, TAX_ADVISOR_JTC",
+    "admin_title": "플랫폼 관리자",
+    "admin_desc": "사용자 · 인프라 · 모니터링 · 감사 로그 · 세율 설정 (세무 데이터 접근 불가)",
+    "admin_audience": "PLATFORM_ADMIN",
+    "glossaryTitle": "용어 사전",
+    "glossaryDesc": "인도네시아어 세무 용어와 플랫폼 내부 용어를 모아 놓았습니다.",
+    "glossaryLink": "용어 사전 보기 →"
   }
 }
