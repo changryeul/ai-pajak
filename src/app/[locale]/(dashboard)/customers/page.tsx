@@ -27,6 +27,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { BulkImportDialog } from '@/components/customers/BulkImportDialog';
 import {
   Select,
   SelectContent,
@@ -207,13 +208,15 @@ export default function CustomersPage() {
             {t('customers.description')}
           </p>
         </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-1" />
-              {t('customers.addCustomer')}
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <BulkImportDialog onComplete={loadCustomers} />
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-1" />
+                {t('customers.addCustomer')}
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-[480px]">
             <DialogHeader>
               <DialogTitle>{t('customers.addCustomer')}</DialogTitle>
@@ -287,6 +290,7 @@ export default function CustomersPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards */}
