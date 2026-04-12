@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,6 +73,7 @@ interface Props {
 }
 
 export function MonthlyPayslipTab({ customerId }: Props) {
+  const tp = useTranslations('monthlyPayslip');
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
   const [period, setPeriod] = useState(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
@@ -104,7 +106,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
   useEffect(() => { loadPayslips(); }, [loadPayslips]);
 
   const generatePayslips = async () => {
-    if (!confirm(`${period} 급여 명세를 생성하시겠습니까? 활성 직원 전체가 복사됩니다.`)) return;
+    if (!confirm(tp('confirmGenerate', { period }))) return;
     setIsSaving(true);
     try {
       const res = await fetch('/api/tax/monthly-payslip', {
@@ -151,7 +153,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
       {/* Controls */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Label className="text-sm whitespace-nowrap">기간</Label>
+          <Label className="text-sm whitespace-nowrap">{tp('periodLabel')}</Label>
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -162,7 +164,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
         {payslips.length === 0 && (
           <Button size="sm" onClick={generatePayslips} disabled={isSaving || !customerId}>
             {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-            {period} 급여 생성
+            {tp('generateBtn', { period })}
           </Button>
         )}
       </div>
@@ -183,25 +185,25 @@ export function MonthlyPayslipTab({ customerId }: Props) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-3">
-              <p className="text-xs text-gray-500 flex items-center gap-1"><Users className="h-3 w-3" />직원 수</p>
-              <p className="font-bold text-lg">{summary.totalEmployees}명</p>
+              <p className="text-xs text-gray-500 flex items-center gap-1"><Users className="h-3 w-3" />{tp('employeeCount')}</p>
+              <p className="font-bold text-lg">{summary.totalEmployees}</p>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-sm">
             <CardContent className="p-3">
-              <p className="text-xs text-gray-500 flex items-center gap-1"><DollarSign className="h-3 w-3" />총 지급</p>
+              <p className="text-xs text-gray-500 flex items-center gap-1"><DollarSign className="h-3 w-3" />{tp('totalPay')}</p>
               <p className="font-bold text-sm">{fmtRp(summary.totalGross)}</p>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-sm border-l-4 border-l-blue-500">
             <CardContent className="p-3">
-              <p className="text-xs text-blue-600">PPh 21 합계</p>
+              <p className="text-xs text-blue-600">{tp('pph21Total')}</p>
               <p className="font-bold text-sm text-blue-700">{fmtRp(summary.totalPph21)}</p>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-sm border-l-4 border-l-green-500">
             <CardContent className="p-3">
-              <p className="text-xs text-green-600">실수령 합계</p>
+              <p className="text-xs text-green-600">{tp('netPayTotal')}</p>
               <p className="font-bold text-sm text-green-700">{fmtRp(summary.totalNet)}</p>
             </CardContent>
           </Card>
@@ -215,8 +217,8 @@ export function MonthlyPayslipTab({ customerId }: Props) {
         <Card className="border-dashed">
           <CardContent className="p-12 text-center text-gray-400">
             <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm mb-1">{period} 급여 명세가 없습니다</p>
-            <p className="text-xs">위 버튼으로 활성 직원의 급여 명세를 생성하세요</p>
+            <p className="text-sm mb-1">{tp('emptyTitle', { period })}</p>
+            <p className="text-xs">{tp('emptyHint')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -242,7 +244,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                     </div>
                     <div className="flex items-center gap-4 text-xs flex-shrink-0">
                       <div className="text-right">
-                        <p className="text-gray-400 text-[10px]">총 지급</p>
+                        <p className="text-gray-400 text-[10px]">{tp('totalPay')}</p>
                         <p className="font-mono">{fmtRp(ps.total_gross)}</p>
                       </div>
                       <div className="text-right">
@@ -475,7 +477,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                       {/* 계산 결과 */}
                       <div className="bg-blue-50 rounded-lg p-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                         <div>
-                          <p className="text-gray-500">총 지급</p>
+                          <p className="text-gray-500">{tp('totalPay')}</p>
                           <p className="font-bold text-sm">{fmtRp(ps.total_gross)}</p>
                         </div>
                         <div>
