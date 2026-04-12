@@ -26,6 +26,7 @@ import {
   Calculator,
   Loader2,
   Download,
+  Upload,
   AlertCircle,
   FileSpreadsheet,
 } from 'lucide-react';
@@ -89,14 +90,95 @@ function newEmployee(): EmployeeRow {
   };
 }
 
+const CSV_TEMPLATE_HEADER = 'name,npwp,ptkp,gross_salary,jht,jp';
+const CSV_TEMPLATE_SAMPLES = [
+  'Ahmad Wijaya,01.234.567.8-901.000,K1,15000000,300000,100000',
+  'Siti Nurhaliza,,TK0,8500000,170000,85000',
+  'Budi Santoso,98.765.432.1-098.000,K2,25000000,500000,200000',
+].join('\n');
+
+function downloadPayrollTemplate() {
+  const content = CSV_TEMPLATE_HEADER + '\n' + CSV_TEMPLATE_SAMPLES;
+  const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pph21-payroll-template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function parsePayrollCSV(text: string): EmployeeRow[] {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) return [];
+
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+  const rows: EmployeeRow[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',').map((v) => v.trim());
+    const get = (key: string) => {
+      const idx = headers.indexOf(key);
+      return idx >= 0 ? values[idx] || '' : '';
+    };
+
+    const name = get('name') || get('nama') || get('employee_name') || get('nama_karyawan');
+    if (!name) continue;
+
+    const ptkpRaw = (get('ptkp') || get('ptkp_category') || get('status_ptkp') || 'TK0').toUpperCase();
+    const ptkp = PTKP_OPTIONS.includes(ptkpRaw) ? ptkpRaw : 'TK0';
+
+    rows.push({
+      id: crypto.randomUUID(),
+      name,
+      npwp: get('npwp') || get('npwp_karyawan') || '',
+      ptkpCategory: ptkp,
+      grossSalary: Number(get('gross_salary') || get('gaji') || get('gaji_bruto') || 0),
+      jht: Number(get('jht') || get('jht_employee') || 0),
+      jp: Number(get('jp') || get('jp_employee') || 0),
+    });
+  }
+
+  return rows;
+}
+
 export function PPh21BulkCalculator() {
   const [employees, setEmployees] = useState<EmployeeRow[]>([newEmployee()]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<CalcResult[] | null>(null);
   const [summary, setSummary] = useState<BulkSummary | null>(null);
-
   const addEmployee = () => setEmployees((prev) => [...prev, newEmployee()]);
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setResults(null);
+    setSummary(null);
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target?.result as string;
+        const parsed = parsePayrollCSV(text);
+        if (parsed.length === 0) {
+          setError('CSV 파일이 비어 있거나 형식이 잘못되었습니다. 템플릿을 다운로드해서 확인하세요.');
+          return;
+        }
+        if (parsed.length > 500) {
+          setError('최대 500명까지 지원합니다');
+          return;
+        }
+        setEmployees(parsed);
+      } catch {
+        setError('CSV 파싱 실패');
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+    // Reset file input so the same file can be re-uploaded
+    e.target.value = '';
+  };
 
   const removeEmployee = (id: string) => {
     if (employees.length <= 1) return;
@@ -244,6 +326,39 @@ export function PPh21BulkCalculator() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* CSV Upload + Template Download */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+            <p className="text-xs font-medium text-green-900 mb-2">📊 Excel/CSV로 한 번에 입력</p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={downloadPayrollTemplate}>
+                <Download className="h-3.5 w-3.5 mr-1" />
+                CSV 템플릿 다운로드
+              </Button>
+              <label>
+                <Button variant="outline" size="sm" asChild>
+                  <span>
+                    <Upload className="h-3.5 w-3.5 mr-1" />
+                    CSV 파일 업로드
+                  </span>
+                </Button>
+                <input
+                  type="file"
+                  accept=".csv,.txt"
+                  className="hidden"
+                  onChange={handleCSVUpload}
+                />
+              </label>
+              {employees.length > 1 && (
+                <span className="text-xs text-green-700 self-center">
+                  ✅ {employees.length}명 로드됨
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-green-600 mt-1">
+              헤더: name, npwp, ptkp, gross_salary, jht, jp — 또는 인도네시아어(nama, gaji_bruto) 도 인식
+            </p>
           </div>
 
           <div className="flex items-center justify-between">
