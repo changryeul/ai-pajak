@@ -26,7 +26,39 @@ This test suite verifies that all **5 Hard Rules** are enforced across the AI Pa
 | **platform-admin.spec.ts** | 12 tests | 🚨 **CRITICAL** |
 | **system.spec.ts** | 9 tests | ⚠️ Medium |
 | **audit.spec.ts** | 11 tests | 🚨 High |
-| **Total** | **59 tests** | |
+| **billing-phases.spec.ts** (Phase B-3/K-2/D) | 7 tests | 🚨 High |
+| **billing-custom-pricing.spec.ts** (Phase K-3/E) | 3 tests | ⚠️ Medium |
+| **operator-queue-workflow.spec.ts** (Phase G2) | 6 tests | 🚨 High |
+| **Total** | **75 tests** | |
+
+### Phase B-3 / K / D / E / G2 suites (neue since 2026-04-11)
+
+- `billing-phases.spec.ts` — the three per-surface endpoints
+  (`corporate-plan`, `consultant-plan`, `individual-spt`) and their
+  graceful-degrade pattern when no Midtrans credentials are configured
+- `billing-custom-pricing.spec.ts` — master → customer handshake
+  (master creates DRAFT, marks SENT, customer accepts, subscription is
+  auto-materialized) + cross-customer guard + non-master block
+- `operator-queue-workflow.spec.ts` — supervisor drives a synthetic
+  queue item through the 11-state workflow (regression for the four
+  G2 bugs: role/column mismatch, `updated_by` phantom column,
+  payment-proof audit_log mismatch, reject API action)
+
+Prerequisites for the new suites:
+
+```bash
+npm run db:seed-test-users                                      # JTC side
+npx tsx scripts/seed-master-and-external.ts                     # operator team + EXTERNAL partner
+npx tsx scripts/seed-company-customer.ts                        # COMPANY customer record
+```
+
+Dedicated run commands:
+
+```bash
+npm run test:e2e:billing        # billing-phases + custom-pricing
+npm run test:e2e:operator-queue # operator-queue-workflow only
+npm run test:e2e:phase-b3-k-d   # all three new suites
+```
 
 ---
 

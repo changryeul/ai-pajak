@@ -114,22 +114,67 @@ export const TEST_USERS = {
 
   /**
    * TAX_OPERATOR_SUPERVISOR - Operator supervisor (approvals, workload, statistics)
+   *
+   * NOTE: the email was updated from @jakartatax.co.id to @aipajak.com to
+   * match `scripts/seed-master-and-external.ts` which is the canonical seed
+   * for the operator team on prod/staging.
    */
   TAX_OPERATOR_SUPERVISOR: {
-    email: 'supervisor.test@jakartatax.co.id',
+    email: 'supervisor.test@aipajak.com',
     password: 'TestPassword123!',
     role: 'TAX_OPERATOR_SUPERVISOR',
-    fullName: 'Kim Supervisor',
+    fullName: 'Sam Supervisor',
   },
 
   /**
    * TAX_OPERATOR - Regular operator
    */
   TAX_OPERATOR: {
-    email: 'operator1.test@jakartatax.co.id',
+    email: 'operator.test@aipajak.com',
     password: 'TestPassword123!',
     role: 'TAX_OPERATOR',
-    fullName: 'Lee Operator',
+    fullName: 'Olivia Operator',
+  },
+
+  /**
+   * TAX_OPERATOR_MASTER - Platform master (Phase K-1.3)
+   * Seeded by scripts/seed-master-and-external.ts
+   */
+  TAX_OPERATOR_MASTER: {
+    email: 'master.test@aipajak.com',
+    password: 'TestPassword123!',
+    role: 'TAX_OPERATOR_MASTER',
+    fullName: 'Mia Master',
+  },
+
+  /**
+   * CUSTOMER (COMPANY) - Corporate customer for corporate-plan tests.
+   * Seeded by scripts/seed-test-users.ts + scripts/seed-company-customer.ts
+   */
+  COMPANY_CUSTOMER: {
+    email: 'company.test@example.com',
+    password: 'TestPassword123!',
+    role: 'CUSTOMER',
+    customerType: 'COMPANY' as const,
+    fullName: 'PT Example Indonesia',
+    customerId: '00000000-0000-0000-0000-000000000011',
+    npwp: '0123456789012000',
+  },
+
+  /**
+   * EXTERNAL CONSULTANT - Consultant of a non-JTC tax_partner
+   * (PT Mitra Pajak Sentosa). Used to test Phase B-1 tenant isolation
+   * and Phase B-3 consultant tier subscriptions.
+   *
+   * Seeded by scripts/seed-master-and-external.ts.
+   */
+  EXTERNAL_CONSULTANT: {
+    email: 'external.consultant@mitrapajak.com',
+    password: 'TestPassword123!',
+    role: 'CONSULTANT_JTC',
+    fullName: 'Eddy External Consultant',
+    partnerId: '00000000-0000-0000-0000-000000000040',
+    partnerName: 'PT Mitra Pajak Sentosa',
   },
 };
 
