@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Check, X, Loader2, CheckCircle2 } from 'lucide-react';
@@ -20,17 +21,18 @@ interface Quote {
   accepted_at: string | null;
 }
 
-const SERVICE_TYPE_LABEL: Record<string, string> = {
-  CORPORATE_PLAN: '맞춤 법인 요금제',
-  TAX_AUDIT: '세무조사 대응',
-  TRANSFER_PRICING: '이전가격 (TP)',
-  ADVISORY: '특별 자문',
-  OTHER: '기타 서비스',
-};
-
 export function CustomPricingWidget() {
   const params = useParams();
   const locale = (params?.locale as string) || 'ko';
+  const t = useTranslations('customPricing');
+
+  const SERVICE_TYPE_LABEL: Record<string, string> = {
+    CORPORATE_PLAN: t('corporatePlan'),
+    TAX_AUDIT: t('taxAudit'),
+    TRANSFER_PRICING: t('transferPricing'),
+    ADVISORY: t('advisory'),
+    OTHER: t('other'),
+  };
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
@@ -66,19 +68,19 @@ export function CustomPricingWidget() {
       });
       const d = await res.json();
       if (!d.success) {
-        setError(d.error || '처리 실패');
+        setError(d.error || t('errorProcess'));
         return;
       }
       if (action === 'accept') {
         setSuccess(
-          d.data?.nextStep || '견적이 수락되었습니다.',
+          d.data?.nextStep || t('acceptedMsg'),
         );
       } else {
-        setSuccess('견적이 거절되었습니다.');
+        setSuccess(t('rejectedMsg'));
       }
       await refresh();
     } catch {
-      setError('서버 오류');
+      setError(t('errorServer'));
     } finally {
       setActing(null);
     }
@@ -98,9 +100,9 @@ export function CustomPricingWidget() {
           <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600">
             <Sparkles className="h-3.5 w-3.5 text-white" />
           </div>
-          <h3 className="font-semibold text-sm text-gray-900">맞춤 가격 견적</h3>
+          <h3 className="font-semibold text-sm text-gray-900">{t('title')}</h3>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 font-medium">
-            JTC 마스터
+            {t('badge')}
           </span>
         </div>
 
@@ -134,18 +136,18 @@ export function CustomPricingWidget() {
                 {q.monthly_price_idr != null && (
                   <span className="text-base font-bold text-gray-900">
                     {fmtRp(q.monthly_price_idr)}
-                    <span className="text-[10px] text-gray-500 ml-1">/월</span>
+                    <span className="text-[10px] text-gray-500 ml-1">{t('perMonth')}</span>
                   </span>
                 )}
                 {q.one_time_price_idr != null && (
                   <span className="text-base font-bold text-gray-900">
                     {fmtRp(q.one_time_price_idr)}
-                    <span className="text-[10px] text-gray-500 ml-1">1회</span>
+                    <span className="text-[10px] text-gray-500 ml-1">{t('oneTime')}</span>
                   </span>
                 )}
                 {q.valid_until && (
                   <span className="text-[10px] text-gray-500">
-                    유효기간 ~ {new Date(q.valid_until).toLocaleDateString('ko-KR')}
+                    {t('validUntil')} {new Date(q.valid_until).toLocaleDateString()}
                   </span>
                 )}
               </div>
@@ -162,7 +164,7 @@ export function CustomPricingWidget() {
                   ) : (
                     <>
                       <Check className="h-3.5 w-3.5 mr-1" />
-                      수락
+                      {t('accept')}
                     </>
                   )}
                 </Button>
@@ -177,7 +179,7 @@ export function CustomPricingWidget() {
                   ) : (
                     <>
                       <X className="h-3.5 w-3.5 mr-1" />
-                      거절
+                      {t('reject')}
                     </>
                   )}
                 </Button>
@@ -197,7 +199,7 @@ export function CustomPricingWidget() {
                 </p>
               </div>
               <p className="text-[11px] text-gray-600 mt-1">
-                {SERVICE_TYPE_LABEL[q.service_type] || q.service_type} · 수락 완료
+                {SERVICE_TYPE_LABEL[q.service_type] || q.service_type} · {t('accepted')}
                 {q.accepted_at && ` (${new Date(q.accepted_at).toLocaleDateString('ko-KR')})`}
               </p>
               {q.service_type === 'CORPORATE_PLAN' && (
@@ -205,7 +207,7 @@ export function CustomPricingWidget() {
                   href={`/${locale}/billing`}
                   className="inline-block mt-2 text-[11px] text-green-700 hover:text-green-800 font-medium"
                 >
-                  결제 페이지로 이동 →
+                  {t('goToBilling')}
                 </a>
               )}
             </div>
