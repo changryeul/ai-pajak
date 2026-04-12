@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -77,6 +78,7 @@ function csvRowToCustomer(row: Record<string, string>) {
 }
 
 export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
+  const t = useTranslations('bulkImport');
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<'upload' | 'preview' | 'importing' | 'result'>('upload');
   const [parsedRows, setParsedRows] = useState<ReturnType<typeof csvRowToCustomer>[]>([]);
@@ -102,18 +104,18 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
         const text = ev.target?.result as string;
         const rawRows = parseCSV(text);
         if (rawRows.length === 0) {
-          setError('CSV 파일이 비어 있거나 형식이 잘못되었습니다');
+          setError(t('errorEmpty'));
           return;
         }
         if (rawRows.length > 200) {
-          setError('한 번에 최대 200건까지 등록 가능합니다');
+          setError(t('errorMax'));
           return;
         }
         const customers = rawRows.map(csvRowToCustomer);
         setParsedRows(customers);
         setStep('preview');
       } catch {
-        setError('CSV 파싱 실패');
+        setError(t('errorParse'));
       }
     };
     reader.readAsText(file, 'utf-8');
@@ -136,11 +138,11 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
           onComplete?.();
         }
       } else {
-        setError(body.error || '등록 실패');
+        setError(body.error || t('errorProcess'));
         setStep('preview');
       }
     } catch {
-      setError('서버 오류');
+      setError(t('errorProcess'));
       setStep('preview');
     }
   };
@@ -150,14 +152,14 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Upload className="h-4 w-4 mr-1.5" />
-          일괄 등록 (CSV)
+          {t('button')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5" />
-            고객 일괄 등록
+            {t('title')}
           </DialogTitle>
         </DialogHeader>
 
@@ -165,14 +167,11 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
         {step === 'upload' && (
           <div className="space-y-4">
             <div className="bg-blue-50 rounded-lg p-4 text-sm">
-              <p className="font-medium text-blue-900 mb-2">CSV 파일 형식</p>
-              <p className="text-blue-700 text-xs">
-                첫 줄은 헤더, 이후 줄이 고객 데이터입니다. 필수 항목: <code className="bg-blue-100 px-1 rounded">full_name</code>, <code className="bg-blue-100 px-1 rounded">customer_type</code> (INDIVIDUAL 또는 COMPANY).
-                법인은 <code className="bg-blue-100 px-1 rounded">company_name</code>도 필수.
-              </p>
+              <p className="font-medium text-blue-900 mb-2">{t('csvFormat')}</p>
+              <p className="text-blue-700 text-xs">{t('csvFormatDesc')}</p>
               <Button variant="outline" size="sm" className="mt-2" onClick={downloadTemplate}>
                 <Download className="h-3.5 w-3.5 mr-1" />
-                CSV 템플릿 다운로드
+                {t('downloadTemplate')}
               </Button>
             </div>
 
@@ -181,8 +180,8 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">CSV 파일을 여기에 드래그하거나 클릭해서 선택</p>
-              <p className="text-xs text-gray-400 mt-1">최대 200건, UTF-8 인코딩</p>
+              <p className="text-sm text-gray-600">{t('dropzone')}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('dropzoneHint')}</p>
               <input
                 ref={fileRef}
                 type="file"
@@ -204,7 +203,7 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
         {step === 'preview' && (
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              <strong>{parsedRows.length}건</strong>의 고객을 등록합니다. 내용을 확인하세요.
+              {t('preview', { count: parsedRows.length })}
             </p>
 
             <div className="max-h-60 overflow-auto rounded border">
@@ -212,10 +211,10 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
                 <thead className="bg-gray-50 sticky top-0">
                   <tr>
                     <th className="px-2 py-1.5 text-left">#</th>
-                    <th className="px-2 py-1.5 text-left">이름/회사명</th>
-                    <th className="px-2 py-1.5 text-left">유형</th>
+                    <th className="px-2 py-1.5 text-left">{t('colName')}</th>
+                    <th className="px-2 py-1.5 text-left">{t('colType')}</th>
                     <th className="px-2 py-1.5 text-left">NPWP</th>
-                    <th className="px-2 py-1.5 text-left">이메일</th>
+                    <th className="px-2 py-1.5 text-left">{t('colEmail')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -225,7 +224,7 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
                       <td className="px-2 py-1 font-medium">{row.company_name || row.full_name}</td>
                       <td className="px-2 py-1">
                         <span className={`text-[10px] px-1.5 py-0.5 rounded ${row.customer_type === 'COMPANY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                          {row.customer_type === 'COMPANY' ? '법인' : '개인'}
+                          {row.customer_type === 'COMPANY' ? t('typeCorporate') : t('typeIndividual')}
                         </span>
                       </td>
                       <td className="px-2 py-1 font-mono text-[10px]">{row.npwp || '—'}</td>
@@ -243,10 +242,10 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
             )}
 
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={reset}>취소</Button>
+              <Button variant="outline" size="sm" onClick={reset}>{t('cancel')}</Button>
               <Button size="sm" onClick={handleImport}>
                 <Upload className="h-3.5 w-3.5 mr-1" />
-                {parsedRows.length}건 등록 시작
+                {t('startImport', { count: parsedRows.length })}
               </Button>
             </div>
           </div>
@@ -256,7 +255,7 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
         {step === 'importing' && (
           <div className="py-8 text-center">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
-            <p className="text-sm text-gray-600">{parsedRows.length}건 등록 중...</p>
+            <p className="text-sm text-gray-600">{t('importing', { count: parsedRows.length })}</p>
           </div>
         )}
 
@@ -266,27 +265,27 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
             <div className="bg-green-50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
-                <p className="font-semibold text-green-900">등록 완료</p>
+                <p className="font-semibold text-green-900">{t('resultTitle')}</p>
               </div>
               <div className="grid grid-cols-3 gap-3 text-center mt-3">
                 <div>
                   <p className="text-2xl font-bold text-green-700">{result.created}</p>
-                  <p className="text-[10px] text-green-600">신규 등록</p>
+                  <p className="text-[10px] text-green-600">{t('created')}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-yellow-600">{result.skipped}</p>
-                  <p className="text-[10px] text-yellow-600">기존 고객 (NPWP 중복)</p>
+                  <p className="text-[10px] text-yellow-600">{t('skipped')}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-red-600">{result.errors.length}</p>
-                  <p className="text-[10px] text-red-600">오류</p>
+                  <p className="text-[10px] text-red-600">{t('errorCount')}</p>
                 </div>
               </div>
             </div>
 
             {result.errors.length > 0 && (
               <div className="bg-red-50 rounded-lg p-3">
-                <p className="text-xs font-medium text-red-800 mb-2">오류 목록</p>
+                <p className="text-xs font-medium text-red-800 mb-2">{t('errorList')}</p>
                 <div className="space-y-1">
                   {result.errors.map((err, i) => (
                     <p key={i} className="text-[10px] text-red-700">
@@ -299,7 +298,7 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
 
             <div className="flex justify-end">
               <Button size="sm" onClick={() => { setOpen(false); reset(); }}>
-                닫기
+                {t('close')}
               </Button>
             </div>
           </div>
