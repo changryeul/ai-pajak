@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardHeader,
@@ -143,6 +144,7 @@ function parsePayrollCSV(text: string): EmployeeRow[] {
 }
 
 export function PPh21BulkCalculator() {
+  const t = useTranslations('pph21Bulk');
   const [employees, setEmployees] = useState<EmployeeRow[]>([newEmployee()]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -163,16 +165,16 @@ export function PPh21BulkCalculator() {
         const text = ev.target?.result as string;
         const parsed = parsePayrollCSV(text);
         if (parsed.length === 0) {
-          setError('CSV 파일이 비어 있거나 형식이 잘못되었습니다. 템플릿을 다운로드해서 확인하세요.');
+          setError(t('errorCsvEmpty'));
           return;
         }
         if (parsed.length > 500) {
-          setError('최대 500명까지 지원합니다');
+          setError(t('errorMax'));
           return;
         }
         setEmployees(parsed);
       } catch {
-        setError('CSV 파싱 실패');
+        setError(t('errorCsvParse'));
       }
     };
     reader.readAsText(file, 'utf-8');
@@ -194,7 +196,7 @@ export function PPh21BulkCalculator() {
   const calculate = useCallback(async () => {
     const validEmployees = employees.filter((e) => e.name && e.grossSalary > 0);
     if (validEmployees.length === 0) {
-      setError('Minimal satu karyawan dengan nama dan gaji harus diisi');
+      setError(t('errorEmpty'));
       return;
     }
 
@@ -252,20 +254,20 @@ export function PPh21BulkCalculator() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-blue-600" />
-            PPh 21 Bulk Calculator
+            {t('title')}
           </CardTitle>
           <CardDescription>
-            Hitung PPh 21 untuk banyak karyawan sekaligus (maks 500)
+            {t('description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Employee Rows */}
           <div className="space-y-3">
             <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 px-1">
-              <div className="col-span-3">Nama Karyawan</div>
-              <div className="col-span-2">NPWP</div>
-              <div className="col-span-1">PTKP</div>
-              <div className="col-span-2">Gaji Bulanan</div>
+              <div className="col-span-3">\{t('colName')}</div>
+              <div className="col-span-2">\{t('colNpwp')}</div>
+              <div className="col-span-1">\{t('colPtkp')}</div>
+              <div className="col-span-2">\{t('colSalary')}</div>
               <div className="col-span-1">JHT</div>
               <div className="col-span-1">JP</div>
               <div className="col-span-2"></div>
@@ -275,7 +277,7 @@ export function PPh21BulkCalculator() {
               <div key={emp.id} className="grid grid-cols-12 gap-2 items-center">
                 <Input
                   className="col-span-3 text-sm"
-                  placeholder="Nama"
+                  placeholder={t('namePlaceholder')}
                   value={emp.name}
                   onChange={(e) => updateEmployee(emp.id, 'name', e.target.value)}
                 />
@@ -330,17 +332,17 @@ export function PPh21BulkCalculator() {
 
           {/* CSV Upload + Template Download */}
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
-            <p className="text-xs font-medium text-green-900 mb-2">📊 Excel/CSV로 한 번에 입력</p>
+            <p className="text-xs font-medium text-green-900 mb-2">📊 {t('csvSection')}</p>
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={downloadPayrollTemplate}>
                 <Download className="h-3.5 w-3.5 mr-1" />
-                CSV 템플릿 다운로드
+                {t('downloadTemplate')}
               </Button>
               <label>
                 <Button variant="outline" size="sm" asChild>
                   <span>
                     <Upload className="h-3.5 w-3.5 mr-1" />
-                    CSV 파일 업로드
+                    {t('uploadCsv')}
                   </span>
                 </Button>
                 <input
@@ -352,21 +354,21 @@ export function PPh21BulkCalculator() {
               </label>
               {employees.length > 1 && (
                 <span className="text-xs text-green-700 self-center">
-                  ✅ {employees.length}명 로드됨
+                  ✅ {t('loaded', { count: employees.length })}
                 </span>
               )}
             </div>
             <p className="text-[10px] text-green-600 mt-1">
-              헤더: name, npwp, ptkp, gross_salary, jht, jp — 또는 인도네시아어(nama, gaji_bruto) 도 인식
+              {t('csvHint')}
             </p>
           </div>
 
           <div className="flex items-center justify-between">
             <Button variant="outline" size="sm" onClick={addEmployee}>
               <Plus className="h-3.5 w-3.5 mr-1" />
-              Tambah Karyawan
+              {t('addEmployee')}
             </Button>
-            <span className="text-xs text-gray-400">{employees.length} karyawan</span>
+            <span className="text-xs text-gray-400">{t('employeeCount', { count: employees.length })}</span>
           </div>
 
           {error && (
@@ -378,9 +380,9 @@ export function PPh21BulkCalculator() {
 
           <Button onClick={calculate} disabled={isLoading} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600">
             {isLoading ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menghitung...</>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t('calculating')}</>
             ) : (
-              <><Calculator className="h-4 w-4 mr-2" />Hitung PPh 21 ({employees.filter(e => e.name && e.grossSalary > 0).length} karyawan)</>
+              <><Calculator className="h-4 w-4 mr-2" />{t('calculate', { count: employees.filter(e => e.name && e.grossSalary > 0).length })}</>
             )}
           </Button>
         </CardContent>
@@ -392,10 +394,10 @@ export function PPh21BulkCalculator() {
           {/* Summary */}
           <div className="grid gap-4 sm:grid-cols-4">
             {[
-              { label: 'Total Karyawan', value: summary.totalEmployees, sub: `${summary.errorCount} error` },
-              { label: 'Total Gaji Bruto', value: `Rp ${fmt(summary.totalGrossIncome)}`, sub: 'per tahun' },
-              { label: 'Total PPh 21', value: `Rp ${fmt(summary.totalTaxAmount)}`, sub: `Rp ${fmt(summary.totalMonthlyTax)}/bulan` },
-              { label: 'Rata-rata Tarif', value: `${summary.averageEffectiveRate.toFixed(2)}%`, sub: 'efektif' },
+              { label: t('totalEmployees'), value: summary.totalEmployees, sub: `${summary.errorCount} ${t('errors')}` },
+              { label: t('totalGross'), value: `Rp ${fmt(summary.totalGrossIncome)}`, sub: t('perYear') },
+              { label: t('totalTax'), value: `Rp ${fmt(summary.totalTaxAmount)}`, sub: `Rp ${fmt(summary.totalMonthlyTax)}/${t('perMonth')}` },
+              { label: t('avgRate'), value: `${summary.averageEffectiveRate.toFixed(2)}%`, sub: t('effective') },
             ].map((stat, i) => (
               <Card key={i} className="border-0 shadow-sm">
                 <CardContent className="p-4">
@@ -410,10 +412,10 @@ export function PPh21BulkCalculator() {
           {/* Results Table */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Hasil Perhitungan</CardTitle>
+              <CardTitle className="text-base">{t('resultTitle')}</CardTitle>
               <Button variant="outline" size="sm" onClick={exportCSV}>
                 <Download className="h-3.5 w-3.5 mr-1" />
-                Export CSV
+                {t('exportCsv')}
               </Button>
             </CardHeader>
             <CardContent>
@@ -421,13 +423,13 @@ export function PPh21BulkCalculator() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-gray-500">
-                      <th className="text-left py-2 px-2">Nama</th>
-                      <th className="text-left py-2 px-2">PTKP</th>
-                      <th className="text-right py-2 px-2">Gaji Bruto</th>
-                      <th className="text-right py-2 px-2">Neto</th>
+                      <th className="text-left py-2 px-2">{t('colName')}</th>
+                      <th className="text-left py-2 px-2">\{t('colPtkp')}</th>
+                      <th className="text-right py-2 px-2">{t('colGross')}</th>
+                      <th className="text-right py-2 px-2">{t('colNet')}</th>
                       <th className="text-right py-2 px-2">PPh 21/Thn</th>
                       <th className="text-right py-2 px-2">PPh 21/Bln</th>
-                      <th className="text-right py-2 px-2">Tarif</th>
+                      <th className="text-right py-2 px-2">{t('colRate')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -450,7 +452,7 @@ export function PPh21BulkCalculator() {
                   </tbody>
                   <tfoot className="border-t-2 font-bold">
                     <tr>
-                      <td className="py-2 px-2" colSpan={2}>Total</td>
+                      <td className="py-2 px-2" colSpan={2}>{t('total')}</td>
                       <td className="py-2 px-2 text-right font-mono">Rp {fmt(summary.totalGrossIncome)}</td>
                       <td className="py-2 px-2"></td>
                       <td className="py-2 px-2 text-right font-mono">Rp {fmt(summary.totalTaxAmount)}</td>
