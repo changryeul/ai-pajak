@@ -85,17 +85,25 @@ export async function exchangeCodeForToken(
   code: string
 ): Promise<{ access_token: string; refresh_token?: string; expires_in?: number }> {
   const cfg = getOAuthConfig(provider);
+
+  // Accurate requires Basic Auth header (base64(client_id:client_secret))
+  // for the token exchange — sending credentials in the body is rejected.
+  // Mekari and other providers may accept either; Basic Auth is the safest
+  // universal approach per RFC 6749 §2.3.1.
+  const basicAuth = Buffer.from(`${cfg.clientId}:${cfg.clientSecret}`).toString('base64');
+
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
     redirect_uri: getRedirectUri(),
-    client_id: cfg.clientId,
-    client_secret: cfg.clientSecret,
   });
 
   const res = await fetch(cfg.tokenUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${basicAuth}`,
+    },
     body: body.toString(),
   });
 

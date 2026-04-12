@@ -46,16 +46,20 @@ export async function ensureFreshToken(connection: ConnectionRow): Promise<strin
     const providerId = connection.provider as AccountingProviderId;
     const cfg = getOAuthConfig(providerId);
 
+    // Accurate requires Basic Auth header for token operations
+    const basicAuth = Buffer.from(`${cfg.clientId}:${cfg.clientSecret}`).toString('base64');
+
     const body = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: connection.refresh_token,
-      client_id: cfg.clientId,
-      client_secret: cfg.clientSecret,
     });
 
     const res = await fetch(cfg.tokenUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${basicAuth}`,
+      },
       body: body.toString(),
     });
 
