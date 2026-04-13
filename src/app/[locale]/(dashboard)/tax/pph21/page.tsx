@@ -224,11 +224,11 @@ export default function PPh21PayrollPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
         <TabsList className="mb-4 flex-wrap">
-          <TabsTrigger value="upload"><Upload className="h-3 w-3 mr-1" />자료 입력</TabsTrigger>
+          <TabsTrigger value="upload"><Upload className="h-3 w-3 mr-1" />{tp('l0_bcefd6')}</TabsTrigger>
           <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
           <TabsTrigger value="master"><Users className="h-3 w-3 mr-1" />{tp('tabEmployeeMaster')}</TabsTrigger>
-          <TabsTrigger value="freelancer"><Briefcase className="h-3 w-3 mr-1" />비정규직/프리랜서</TabsTrigger>
-          <TabsTrigger value="filing"><Shield className="h-3 w-3 mr-1" />신고 프로세스</TabsTrigger>
+          <TabsTrigger value="freelancer"><Briefcase className="h-3 w-3 mr-1" />{tp('l1_c148d4')}</TabsTrigger>
+          <TabsTrigger value="filing"><Shield className="h-3 w-3 mr-1" />{tp('l2_38b7db')}</TabsTrigger>
         </TabsList>
 
         {/* ── Tab: 자료 입력 (3가지 방식) ── */}
@@ -388,6 +388,7 @@ function PPh21DataInputSection({
   showMsg: (type: 'success' | 'error', text: string) => void;
   onNavigateToMaster: () => void;
 }) {
+  const tp = useTranslations('pph21Page');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const excelInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -441,7 +442,7 @@ function PPh21DataInputSection({
       } catch { /* */ }
     }
     if (count > 0) {
-      showMsg('success', `${count}건 업로드 완료. OCR 처리 중...`);
+      showMsg('success', `${count}${tp('l3_4c0fb1')}`);
       setTimeout(() => {
         fetch(`/api/documents?customerId=${customerId}`)
           .then(r => r.json())
@@ -473,24 +474,24 @@ function PPh21DataInputSection({
   const [mappedFile, setMappedFile] = useState<File | null>(null);
 
   const TARGET_FIELDS_LIST = [
-    { field: '', label: '— 매핑 안 함 —' },
-    { field: 'employee_name', label: '직원명 *' },
+    { field: '', label: `— ${tp('l4_98adeb')} —` },
+    { field: 'employee_name', label: `${tp('l5_59ec33')} *` },
     { field: 'employee_npwp', label: 'NPWP' },
     { field: 'employee_nik', label: 'NIK' },
     { field: 'ptkp_category', label: 'PTKP' },
-    { field: 'gross_salary', label: '기본급 *' },
-    { field: 'position_allowance', label: '직책수당' },
-    { field: 'overtime_pay', label: '초과근무' },
-    { field: 'meal_allowance', label: '식대' },
-    { field: 'transport_allowance', label: '교통비' },
-    { field: 'other_allowances', label: '기타수당' },
-    { field: 'bonus', label: '보너스' },
+    { field: 'gross_salary', label: `${tp('l6_34d71f')} *` },
+    { field: 'position_allowance', label: tp('l7_8188f9') },
+    { field: 'overtime_pay', label: tp('l8_34c079') },
+    { field: 'meal_allowance', label: tp('l9_dfe00f') },
+    { field: 'transport_allowance', label: tp('l10_d0b2e2') },
+    { field: 'other_allowances', label: tp('l11_cafd07') },
+    { field: 'bonus', label: tp('l12_e7fffe') },
     { field: 'thr', label: 'THR' },
     { field: 'jht_employee', label: 'JHT' },
     { field: 'jp_employee', label: 'JP' },
     { field: 'bpjs_kesehatan', label: 'BPJS' },
-    { field: 'other_deductions', label: '기타공제' },
-    { field: 'worker_type', label: '직원유형' },
+    { field: 'other_deductions', label: tp('l13_2289a4') },
+    { field: 'worker_type', label: tp('l14_67e774') },
   ];
 
   const handleExcelUpload = async (files: FileList | null) => {
@@ -501,7 +502,7 @@ function PPh21DataInputSection({
     // Read CSV/Excel and extract headers for mapping
     const text = await file.text();
     const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) { showMsg('error', '데이터가 없습니다'); return; }
+    if (lines.length < 2) { showMsg('error', tp('l15_5d59d2')); return; }
 
     const headerRaw = lines[0].replace(/\uFEFF/, '');
     const headers = headerRaw.split(',').map(h => h.trim().replace(/['"]/g, ''));
@@ -522,7 +523,7 @@ function PPh21DataInputSection({
         });
         setColumnMappings(autoMappings);
         setMappingStep('mapping');
-        showMsg('success', `이전에 사용한 매핑이 자동 적용되었습니다 (${memData.data.used_count}회 사용). 확인 후 임포트하세요.`);
+        showMsg('success', `${tp('l16_3884de')} (${memData.data.used_count}${tp('l17_66d39a')}`);
         return;
       }
     } catch { /* fallback to keyword mapping */ }
@@ -587,7 +588,7 @@ function PPh21DataInputSection({
       const res = await fetch('/api/tax/employees/import', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `${data.data?.imported || 0}명 임포트 완료${data.data?.skipped ? `, ${data.data.skipped}명 스킵` : ''}`);
+        showMsg('success', `${data.data?.imported || 0}${tp('l18_2f5df1')}${data.data?.skipped ? `, ${data.data.skipped}${tp('l19_e2954a')}` : ''}`);
         onComplete();
         setMappingStep('idle');
 
@@ -604,11 +605,11 @@ function PPh21DataInputSection({
           });
         } catch { /* non-blocking */ }
       } else {
-        showMsg('error', data.error || '임포트 실패');
+        showMsg('error', data.error || tp('l20_ceee68'));
         setMappingStep('mapping');
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', tp('l21_175c5f'));
       setMappingStep('mapping');
     } finally {
       setUploading(false);
@@ -618,8 +619,8 @@ function PPh21DataInputSection({
   return (
     <div className="space-y-4">
       <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-        <p className="text-sm font-bold text-blue-900 mb-2">급여 데이터 입력 방법을 선택하세요</p>
-        <p className="text-xs text-blue-700">세 가지 방식 중 편한 방법으로 직원 급여 데이터를 입력합니다</p>
+        <p className="text-sm font-bold text-blue-900 mb-2">{tp('l22_643eb4')}</p>
+        <p className="text-xs text-blue-700">{tp('l23_5c33c2')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -635,7 +636,7 @@ function PPh21DataInputSection({
               </Button>
               <Button size="sm" onClick={() => excelInputRef.current?.click()} disabled={uploading} className="w-full">
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                작성한 파일 업로드
+                {tp('l27_c3feb8')}
               </Button>
               <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
                 onChange={e => handleExcelUpload(e.target.files)} />
@@ -649,7 +650,7 @@ function PPh21DataInputSection({
           <CardContent className="p-5 text-center">
             <FileText className="h-8 w-8 text-emerald-600 mx-auto mb-3" />
             <p className="font-bold text-sm mb-1">2. 기존 급여 자료 업로드</p>
-            <p className="text-[11px] text-gray-500 mb-3">회사에서 사용하는 급여 Excel, PDF, 이미지를 업로드하면 AI가 자동 파싱</p>
+            <p className="text-[11px] text-gray-500 mb-3">{tp('l29_354dd1')}</p>
             <div className="space-y-2">
               <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="w-full">
                 <Upload className="h-3 w-3 mr-1" />파일 업로드 (Excel/PDF)
@@ -679,13 +680,13 @@ function PPh21DataInputSection({
           <CardContent className="p-5 text-center">
             <Users className="h-8 w-8 text-purple-600 mx-auto mb-3" />
             <p className="font-bold text-sm mb-1">3. 직접 입력</p>
-            <p className="text-[11px] text-gray-500 mb-3">직원 마스터에서 한 사람씩 직접 등록</p>
+            <p className="text-[11px] text-gray-500 mb-3">{tp('l34_b7a3ab')}</p>
             <div className="space-y-2">
               <Button size="sm" onClick={onNavigateToMaster} className="w-full bg-purple-600 hover:bg-purple-700">
                 <Users className="h-3 w-3 mr-1" />직원 마스터로 이동
               </Button>
               <p className="text-[10px] text-gray-500 bg-gray-50 rounded p-2 text-left leading-relaxed">
-                "직원 추가" 버튼 → 이름/NPWP/급여/PTKP 등 입력 → 저장
+                "{tp('l36_5558f6')}" {tp('l37_9e4142')}
               </p>
             </div>
           </CardContent>
@@ -699,14 +700,14 @@ function PPh21DataInputSection({
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-600" />
-                컬럼 매핑 확인 — AI가 자동으로 매핑했습니다
+                {tp('l38_f14ec9')} — AI{tp('l39_b33aa4')}
               </h3>
               <Button size="sm" variant="ghost" onClick={() => setMappingStep('idle')}>
                 <X className="h-3 w-3" />
               </Button>
             </div>
             <p className="text-[11px] text-blue-700">
-              고객사 Excel 컬럼을 우리 시스템 필드에 매핑합니다. 자동 매핑이 맞지 않으면 드롭다운에서 수정하세요.
+              {tp('l40_2e3d2f')}
             </p>
 
             <div className="overflow-x-auto">
@@ -715,8 +716,8 @@ function PPh21DataInputSection({
                   <tr className="bg-white">
                     <th className="p-2 text-left border">Excel 컬럼</th>
                     <th className="p-2 text-left border">→ 매핑 대상</th>
-                    <th className="p-2 text-center border">신뢰도</th>
-                    <th className="p-2 text-left border">샘플 데이터</th>
+                    <th className="p-2 text-center border">{tp('l43_fc4409')}</th>
+                    <th className="p-2 text-left border">{tp('l44_b12106')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -762,12 +763,12 @@ function PPh21DataInputSection({
 
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-gray-500">
-                필수: 직원명 + 기본급. 나머지는 선택.
+                {tp('l45_b43f85')} + {tp('l46_e3b66d')}
               </p>
               <Button size="sm" onClick={handleConfirmMapping}
                 disabled={uploading || !columnMappings.some(m => m.targetField === 'employee_name') || !columnMappings.some(m => m.targetField === 'gross_salary')}>
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-                매핑 확인 · 임포트 시작
+                {tp('l47_b8a4a8')}
               </Button>
             </div>
           </CardContent>
@@ -789,7 +790,7 @@ function PPh21DataInputSection({
                     doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
                     'text-[8px] bg-gray-100 text-gray-600'
                   }>
-                    {doc.ocr_status === 'COMPLETED' ? 'OCR완료' : doc.ocr_status === 'PROCESSING' ? '처리중' : '대기'}
+                    {doc.ocr_status === 'COMPLETED' ? 'OCR완료' : doc.ocr_status === 'PROCESSING' ? tp('l51_95d1e4') : tp('l52_65905a')}
                   </Badge>
                   <span className="truncate">{doc.file_name}</span>
                 </div>
@@ -811,39 +812,40 @@ function FreelancerSection({
   customerId: string;
   showMsg: (type: 'success' | 'error', text: string) => void;
 }) {
+  const tp = useTranslations('pph21Page');
   return (
     <div className="space-y-4">
       <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
         <p className="text-sm font-bold text-amber-900 mb-2">비정규직 & 프리랜서 관리</p>
-        <p className="text-xs text-amber-700">직원 유형에 따라 PPh 21 계산 방법이 다릅니다.</p>
+        <p className="text-xs text-amber-700">{tp('l55_e44dbc')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Worker type cards with explanation */}
         {[
           {
-            type: 'CONTRACT', label: '계약직 (PKWT)', icon: '📋',
-            desc: '정규직과 동일한 TER 방식 계산. 계약 기간 명시.',
-            calc: 'TER × 총급여 (월 1~11월) / 12월 연말정산',
+            type: 'CONTRACT', label: tp('l56_1ed7ef'), icon: '📋',
+            desc: tp('l57_8ffa3f'),
+            calc: `TER × ${tp('l58_277101')}`,
             color: 'border-blue-200 bg-blue-50',
           },
           {
-            type: 'DAILY', label: '일용직 (Harian Lepas)', icon: '🔨',
-            desc: '일급 Rp 450,000 초과분에 대해 과세.',
-            calc: '(일급 - 450,000) × 5% (일용직 비과세 한도)',
+            type: 'DAILY', label: tp('l59_ab78f2'), icon: '🔨',
+            desc: tp('l60_bd695b'),
+            calc: `(${tp('l61_e0b3b7')} × 5% (${tp('l62_841e25')}`,
             color: 'border-green-200 bg-green-50',
           },
           {
-            type: 'FREELANCER', label: '프리랜서 (Bukan Pegawai)', icon: '💼',
-            desc: '50% DPP 규정 적용. 연간 누적 소득/지출 추적 필수.',
-            calc: 'DPP = 50% × 총수입. 누적 PKP에 대해 누진세율 적용.',
+            type: 'FREELANCER', label: tp('l63_fff243'), icon: '💼',
+            desc: `50% DPP ${tp('l64_7fede2')}`,
+            calc: `DPP = 50% × ${tp('l65_a52335')}`,
             color: 'border-purple-200 bg-purple-50',
-            warning: '⚠️ 프리랜서 비용은 연간 누적 관리가 필요합니다',
+            warning: `⚠️ ${tp('l66_da242e')}`,
           },
           {
-            type: 'COMMISSIONER', label: '위원/감사위원 (Komisaris)', icon: '🏛️',
-            desc: '누적 방식으로 과세. PTKP 차감 후 누진세율.',
-            calc: '누적 총보수 - PTKP - 이전 과세표준 = 당월 PKP',
+            type: 'COMMISSIONER', label: tp('l67_3e8f6a'), icon: '🏛️',
+            desc: tp('l68_6b99e2'),
+            calc: `${tp('l69_6e150b')} = ${tp('l70_ecd09e')}`,
             color: 'border-amber-200 bg-amber-50',
           },
         ].map(wt => (
@@ -882,6 +884,7 @@ function FreelancerCumulativeTracker({
   customerId: string;
   showMsg: (type: 'success' | 'error', text: string) => void;
 }) {
+  const tp = useTranslations('pph21Page');
   const currentYear = new Date().getFullYear();
   const [freelancers, setFreelancers] = useState<Array<{
     id: string; employee_name: string; gross_salary: number;
@@ -921,13 +924,13 @@ function FreelancerCumulativeTracker({
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `${month}월 데이터 저장`);
+        showMsg('success', `${month}${tp('l72_43f9aa')}`);
         // Refresh
         const cumRes = await fetch(`/api/tax/freelancer-cumulative?customerId=${customerId}&year=${currentYear}`);
         const cumData = await cumRes.json();
         if (cumData.success) setCumulatives(cumData.data || []);
       }
-    } catch { showMsg('error', '저장 실패'); }
+    } catch { showMsg('error', tp('l73_5f3ec4')); }
     finally { setSavingId(null); }
   };
 
@@ -939,7 +942,7 @@ function FreelancerCumulativeTracker({
             <Briefcase className="h-4 w-4" />프리랜서 누적 관리
           </p>
           <p className="text-xs text-purple-700 mt-2">
-            등록된 프리랜서가 없습니다. <b>직원 마스터</b> 탭에서 worker_type을 <b>FREELANCER</b>로 등록하세요.
+            등록된 프리랜서가 없습니다. <b>{tp('l76_db07a6')}</b> 탭에서 worker_type을 <b>FREELANCER</b>로 등록하세요.
           </p>
         </CardContent>
       </Card>
@@ -951,7 +954,7 @@ function FreelancerCumulativeTracker({
       <CardContent className="p-4">
         <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
           <Briefcase className="h-4 w-4 text-purple-600" />
-          프리랜서 누적 관리 ({currentYear}년) — {freelancers.length}명
+          {tp('l74_3e7eca')} ({currentYear}{tp('l79_05e1f0')} — {freelancers.length}명
         </h3>
 
         <div className="bg-purple-50 rounded-lg p-2 text-[10px] text-purple-800 mb-3">
@@ -975,7 +978,7 @@ function FreelancerCumulativeTracker({
                       <p className="text-[10px] text-gray-500">기본 계약금: {fmtRp(fl.gross_salary)}/월</p>
                     </div>
                     <div className="text-right text-xs">
-                      <p className="text-gray-500">누적 수입</p>
+                      <p className="text-gray-500">{tp('l82_90271c')}</p>
                       <p className="font-mono font-bold">{fmtRp(cum?.cumulative_gross || 0)}</p>
                       <p className="text-purple-600 text-[10px]">DPP 50%: {fmtRp(cum?.cumulative_net || 0)}</p>
                     </div>
@@ -1000,7 +1003,7 @@ function FreelancerCumulativeTracker({
                                 handleSaveMonth(fl.id, i + 1, val, 0);
                               }
                             }}
-                            placeholder="수입"
+                            placeholder={tp('l83_d25373')}
                           />
                           {entry && entry.gross > 0 && (
                             <p className="text-[8px] text-purple-600">{fmtRp(entry.net)}</p>
@@ -1029,6 +1032,7 @@ function PPh21FilingProcess({
   locale: string;
   showMsg: (type: 'success' | 'error', text: string) => void;
 }) {
+  const tp = useTranslations('pph21Page');
   const [creatingSPT, setCreatingSPT] = useState(false);
   const [generatingBP, setGeneratingBP] = useState(false);
   const [bpResult, setBpResult] = useState<Array<{ employeeName: string; bpNumber: string; pph21: number }>>([]);
@@ -1082,12 +1086,12 @@ function PPh21FilingProcess({
             isOverdue: spt.isOverdue || false,
           });
         }
-        showMsg('success', 'SPT Masa PPh 21 생성 완료');
+        showMsg('success', `SPT Masa PPh 21 ${tp('l84_f3bc85')}`);
       } else {
-        showMsg('error', data.error || data.message || 'SPT 생성 실패');
+        showMsg('error', data.error || data.message || `SPT ${tp('l85_cbbcb4')}`);
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', tp('l21_175c5f'));
     } finally {
       setCreatingSPT(false);
     }
@@ -1104,31 +1108,31 @@ function PPh21FilingProcess({
       const data = await res.json();
       if (data.success) {
         setBpResult(data.data?.buktiPotongs || []);
-        showMsg('success', data.message || 'e-Bupot 생성 완료');
+        showMsg('success', data.message || `e-Bupot ${tp('l84_f3bc85')}`);
       } else {
-        showMsg('error', data.error || 'e-Bupot 생성 실패');
+        showMsg('error', data.error || `e-Bupot ${tp('l85_cbbcb4')}`);
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', tp('l21_175c5f'));
     } finally {
       setGeneratingBP(false);
     }
   };
 
   const steps = [
-    { id: 1, label: '자료 입력', done: true, desc: '직원 급여 데이터' },
-    { id: 2, label: '급여 생성', done: true, desc: '월별 급여 명세' },
-    { id: 3, label: 'PPh 21 계산', done: true, desc: 'TER 자동 계산' },
-    { id: 4, label: 'e-Bupot', done: bpResult.length > 0, desc: bpResult.length > 0 ? `${bpResult.length}건` : '미생성' },
-    { id: 5, label: 'SPT Masa', done: !!sptResult, desc: sptResult ? `마감 ${sptResult.submissionDeadline?.substring(0, 10)}` : '미생성' },
-    { id: 6, label: '납부', done: false, desc: '납부 페이지' },
+    { id: 1, label: tp('l0_bcefd6'), done: true, desc: tp('l86_c7547e') },
+    { id: 2, label: tp('l87_40851c'), done: true, desc: tp('l88_9dcc47') },
+    { id: 3, label: `PPh 21 ${tp('l89_4e9509')}`, done: true, desc: `TER ${tp('l90_773723')}` },
+    { id: 4, label: 'e-Bupot', done: bpResult.length > 0, desc: bpResult.length > 0 ? `${bpResult.length}건` : tp('l91_ac6176') },
+    { id: 5, label: 'SPT Masa', done: !!sptResult, desc: sptResult ? `${tp('l92_df2337')} ${sptResult.submissionDeadline?.substring(0, 10)}` : tp('l91_ac6176') },
+    { id: 6, label: tp('l93_b303e6'), done: false, desc: tp('l94_a3adc9') },
   ];
 
   return (
     <div className="space-y-4">
       <h3 className="font-bold text-sm flex items-center gap-2">
         <Shield className="h-4 w-4 text-blue-600" />
-        {currentPeriod} PPh 21 신고 진행 상황
+        {currentPeriod} PPh 21 {tp('l95_aa38cd')}
       </h3>
 
       {/* Progress steps */}
@@ -1155,11 +1159,11 @@ function PPh21FilingProcess({
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="font-medium text-sm text-purple-900">e-Bupot 1721-A1 생성</p>
-              <p className="text-xs text-purple-700">직원별 Bukti Potong PPh 21을 일괄 생성합니다</p>
+              <p className="text-xs text-purple-700">{tp('l97_00866c')}</p>
             </div>
             <Button onClick={handleGenerateBP} disabled={generatingBP} variant="outline">
               {generatingBP ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-              e-Bupot 생성
+              e-Bupot {tp('l96_4169bb')}
             </Button>
           </CardContent>
         </Card>
@@ -1191,11 +1195,11 @@ function PPh21FilingProcess({
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="font-medium text-sm text-blue-900">SPT Masa PPh 21 생성</p>
-              <p className="text-xs text-blue-700">월별 급여 명세 데이터를 기반으로 SPT Masa를 생성합니다</p>
+              <p className="text-xs text-blue-700">{tp('l99_b88336')}</p>
             </div>
             <Button onClick={handleCreateSPT} disabled={creatingSPT}>
               {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-              SPT Masa 생성
+              SPT Masa {tp('l96_4169bb')}
             </Button>
           </CardContent>
         </Card>
@@ -1208,8 +1212,8 @@ function PPh21FilingProcess({
                 <p className="font-medium text-sm text-green-900">SPT Masa PPh 21 생성 완료</p>
               </div>
               <div className="grid grid-cols-3 gap-3 text-xs">
-                <div><p className="text-gray-500">직원 수</p><p className="font-bold">{sptResult.itemCount}명</p></div>
-                <div><p className="text-gray-500">총 급여</p><p className="font-mono font-bold">{fmtRp(sptResult.totalGrossIncome)}</p></div>
+                <div><p className="text-gray-500">{tp('l100_00c733')}</p><p className="font-bold">{sptResult.itemCount}명</p></div>
+                <div><p className="text-gray-500">{tp('l101_6a76ba')}</p><p className="font-mono font-bold">{fmtRp(sptResult.totalGrossIncome)}</p></div>
                 <div><p className="text-gray-500">PPh 21 세액</p><p className="font-mono font-bold text-blue-700">{fmtRp(sptResult.totalTaxWithheld)}</p></div>
               </div>
             </CardContent>
@@ -1217,12 +1221,12 @@ function PPh21FilingProcess({
           <Card className="border-indigo-200 bg-indigo-50">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="font-medium text-sm text-indigo-900">납부 진행</p>
+                <p className="font-medium text-sm text-indigo-900">{tp('l103_25e8b8')}</p>
                 <p className="text-xs text-indigo-700">ID Billing 생성 후 은행에서 납부 → NTPN 입력</p>
               </div>
               <a href={`/${locale}/tax/monthly-payments`}
                 className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
-                납부 페이지로
+                {tp('l105_d76082')}
               </a>
             </CardContent>
           </Card>
