@@ -285,7 +285,7 @@ export function Sidebar() {
                   onClick={() => { switchRole(role); router.push(`/${locale}/dashboard`); }}
                   className="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-all"
                 >
-                  {t(`nav.role.${role}`)}로 전환
+                  {t('nav.switchRole', { role: t(`nav.role.${role}`) })}
                 </button>
               ))}
             </div>

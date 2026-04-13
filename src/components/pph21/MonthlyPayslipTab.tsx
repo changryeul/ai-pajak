@@ -238,7 +238,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                       <div className="text-left min-w-0">
                         <p className="font-medium text-sm truncate">{ps.employee?.employee_name}</p>
                         <p className="text-[10px] text-gray-400">
-                          {ps.employee?.ptkp_category} • {ps.employee?.employee_npwp || 'NPWP 없음'}
+                          {ps.employee?.ptkp_category} • {ps.employee?.employee_npwp || tp('noNpwp')}
                         </p>
                       </div>
                     </div>
@@ -252,7 +252,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                         <p className="font-mono text-blue-600 font-medium">{fmtRp(ps.pph21_tax)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-green-500 text-[10px]">실수령</p>
+                        <p className="text-green-500 text-[10px]">{tp('netPay')}</p>
                         <p className="font-mono text-green-600 font-bold">{fmtRp(ps.net_salary)}</p>
                       </div>
                     </div>
@@ -263,20 +263,20 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                     <div className="border-t p-4 bg-gray-50/50 space-y-4">
                       {/* 근태 */}
                       <div>
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">근태</h4>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('attendance')}</h4>
                         <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <Label className="text-[10px] text-gray-400">근무일</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('workDays')}</Label>
                             <Input type="number" className="h-8 text-xs" defaultValue={ps.working_days}
                               onBlur={e => updatePayslip(ps.id, { working_days: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">결근일</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('absentDays')}</Label>
                             <Input type="number" className="h-8 text-xs" defaultValue={ps.absent_days}
                               onBlur={e => updatePayslip(ps.id, { absent_days: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">초과근무 (시간)</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('overtime')}</Label>
                             <Input type="number" className="h-8 text-xs" defaultValue={ps.overtime_hours}
                               onBlur={e => updatePayslip(ps.id, { overtime_hours: Number(e.target.value) })} />
                           </div>
@@ -285,55 +285,55 @@ export function MonthlyPayslipTab({ customerId }: Props) {
 
                       {/* 기본급 + 수당 */}
                       <div>
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">기본급 + 수당</h4>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('baseSalary')}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           <div>
-                            <Label className="text-[10px] text-gray-400">기본급</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('base')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.base_salary}
                               onBlur={e => updatePayslip(ps.id, { base_salary: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">초과근무 수당</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('overtimePay')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.overtime_pay}
                               onBlur={e => updatePayslip(ps.id, { overtime_pay: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">식대</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('mealAllowance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.meal_allowance}
                               onBlur={e => updatePayslip(ps.id, { meal_allowance: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">교통비</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('transportAllowance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.transport_allowance}
                               onBlur={e => updatePayslip(ps.id, { transport_allowance: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">직책수당</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('positionAllowance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.position_allowance}
                               onBlur={e => updatePayslip(ps.id, { position_allowance: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">기타 수당</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('otherAllowance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.other_allowances}
                               onBlur={e => updatePayslip(ps.id, { other_allowances: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">노트북 수당</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('laptopAllowance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.laptop_allowance}
                               onBlur={e => updatePayslip(ps.id, { laptop_allowance: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">의료 수당</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('medicalAllowance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.medical_allowance}
                               onBlur={e => updatePayslip(ps.id, { medical_allowance: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">세금 수당 (Gross-up)</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('taxAllowance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.tax_allowance}
                               onBlur={e => updatePayslip(ps.id, { tax_allowance: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">연차 수당</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('annualLeavePay')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.annual_leave_pay}
                               onBlur={e => updatePayslip(ps.id, { annual_leave_pay: Number(e.target.value) })} />
                           </div>
@@ -342,15 +342,15 @@ export function MonthlyPayslipTab({ customerId }: Props) {
 
                       {/* 특수 지급 (퇴직/계약직) */}
                       <div>
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">특수 지급 <span className="text-[10px] text-gray-400 font-normal">(퇴직/계약 종료)</span></h4>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('specialPay')} <span className="text-[10px] text-gray-400 font-normal">({tp('specialPaySub')})</span></h4>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label className="text-[10px] text-gray-400">퇴직금 (Pesangon)</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('severance')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.severance_allowance}
                               onBlur={e => updatePayslip(ps.id, { severance_allowance: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">PKWT 계약 보상</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('pkwtCompensation')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.pkwt_compensation}
                               onBlur={e => updatePayslip(ps.id, { pkwt_compensation: Number(e.target.value) })} />
                           </div>
@@ -359,20 +359,20 @@ export function MonthlyPayslipTab({ customerId }: Props) {
 
                       {/* 보너스 */}
                       <div>
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">보너스</h4>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('bonusSection')}</h4>
                         <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <Label className="text-[10px] text-gray-400">보너스</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('bonusSection')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.bonus}
                               onBlur={e => updatePayslip(ps.id, { bonus: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">THR (명절)</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('thr')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.thr}
                               onBlur={e => updatePayslip(ps.id, { thr: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">커미션</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('commission')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.commission}
                               onBlur={e => updatePayslip(ps.id, { commission: Number(e.target.value) })} />
                           </div>
@@ -381,15 +381,15 @@ export function MonthlyPayslipTab({ customerId }: Props) {
 
                       {/* 공제 */}
                       <div>
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">공제</h4>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('deductions')}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           <div>
-                            <Label className="text-[10px] text-gray-400">BPJS 건강</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('bpjsHealth')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.bpjs_kesehatan}
                               onBlur={e => updatePayslip(ps.id, { bpjs_kesehatan: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">BPJS 고용</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('bpjsEmployment')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.bpjs_ketenagakerjaan}
                               onBlur={e => updatePayslip(ps.id, { bpjs_ketenagakerjaan: Number(e.target.value) })} />
                           </div>
@@ -399,26 +399,26 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                               onBlur={e => updatePayslip(ps.id, { jht_employee: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">JP (연금)</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('pension')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.jp_employee}
                               onBlur={e => updatePayslip(ps.id, { jp_employee: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">대출 상환</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('loanRepayment')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.loan_deduction}
                               onBlur={e => updatePayslip(ps.id, { loan_deduction: Number(e.target.value) })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">기타 공제</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('otherDeduction')}</Label>
                             <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.other_deductions}
                               onBlur={e => updatePayslip(ps.id, { other_deductions: Number(e.target.value) })} />
                           </div>
                         </div>
                       </div>
 
-                      {/* 회사 부담 BPJS (자동 계산) */}
+                      {/* 회사 부담 BPJS ({tp('companyBpjsSub')}) */}
                       <div>
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">회사 부담 BPJS <span className="text-[10px] text-gray-400 font-normal">(자동 계산)</span></h4>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('companyBpjs')} <span className="text-[10px] text-gray-400 font-normal">({tp('companyBpjsSub')})</span></h4>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                           <div className="bg-white rounded p-2">
                             <p className="text-[10px] text-gray-400">BPJS KES 4%</p>
@@ -446,27 +446,27 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                       {/* 비아야 자바탄 + 은행 정보 */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <h4 className="text-xs font-bold text-gray-600 mb-2">Biaya Jabatan (직책비)</h4>
+                          <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('biayaJabatan')}</h4>
                           <div className="bg-white rounded p-2 text-xs">
-                            <p className="text-[10px] text-gray-400">PPh 21 공제 — 5% × 총지급, 월 50만 한도</p>
+                            <p className="text-[10px] text-gray-400">{tp('biayaJabatanDesc')}</p>
                             <p className="font-mono font-bold">{fmtRp(ps.personal_expense)}</p>
                           </div>
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-gray-600 mb-2">급여 이체 정보</h4>
+                          <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('bankInfo')}</h4>
                           <div className="grid grid-cols-3 gap-2">
                             <div>
-                              <Label className="text-[10px] text-gray-400">은행</Label>
+                              <Label className="text-[10px] text-gray-400">{tp('bank')}</Label>
                               <Input className="h-8 text-xs" defaultValue={ps.bank_name || ''}
                                 onBlur={e => updatePayslip(ps.id, { bank_name: e.target.value || null } as Partial<Payslip>)} />
                             </div>
                             <div>
-                              <Label className="text-[10px] text-gray-400">계좌번호</Label>
+                              <Label className="text-[10px] text-gray-400">{tp('accountNo')}</Label>
                               <Input className="h-8 text-xs font-mono" defaultValue={ps.bank_account_no || ''}
                                 onBlur={e => updatePayslip(ps.id, { bank_account_no: e.target.value || null } as Partial<Payslip>)} />
                             </div>
                             <div>
-                              <Label className="text-[10px] text-gray-400">예금주</Label>
+                              <Label className="text-[10px] text-gray-400">{tp('accountName')}</Label>
                               <Input className="h-8 text-xs" defaultValue={ps.bank_account_name || ''}
                                 onBlur={e => updatePayslip(ps.id, { bank_account_name: e.target.value || null } as Partial<Payslip>)} />
                             </div>
@@ -481,7 +481,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                           <p className="font-bold text-sm">{fmtRp(ps.total_gross)}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">총 공제</p>
+                          <p className="text-gray-500">{tp('totalDeduction')}</p>
                           <p className="font-bold text-sm">{fmtRp(ps.total_deduction)}</p>
                         </div>
                         <div>
@@ -489,7 +489,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                           <p className="font-bold text-sm text-blue-700">{fmtRp(ps.pph21_tax)}</p>
                         </div>
                         <div>
-                          <p className="text-green-600">실수령액</p>
+                          <p className="text-green-600">{tp('netPayAmount')}</p>
                           <p className="font-bold text-sm text-green-700">{fmtRp(ps.net_salary)}</p>
                         </div>
                       </div>
