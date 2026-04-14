@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
@@ -92,22 +93,24 @@ interface Customer {
 }
 
 // ── Service types — 세율은 거래 상대방/조건에 따라 동적 결정됨 ──
-const SERVICE_TYPES: Array<{ value: string; label: string; note: string }> = [
-  { value: 'DIVIDEN', label: '배당 (Dividen)', note: '국적·지분율·재투자에 따라 0%~20%' },
-  { value: 'BUNGA', label: '이자 (Bunga)', note: 'PPh 23 15% 또는 treaty rate' },
-  { value: 'ROYALTI', label: '로열티 (Royalti)', note: 'PPh 23 15% 또는 treaty rate' },
-  { value: 'HADIAH', label: '상금 (Hadiah/Penghargaan)', note: 'PPh 23 15%' },
-  { value: 'SEWA', label: '임대 (Sewa)', note: '건물/토지→PPh 4(2) 10%, 기계→PPh 23 2%' },
-  { value: 'JASA_TEKNIK', label: '기술 서비스 (Jasa Teknik)', note: 'PPh 23 2%' },
-  { value: 'JASA_MANAJEMEN', label: '경영 서비스 (Jasa Manajemen)', note: 'PPh 23 2%' },
-  { value: 'JASA_KONSULTAN', label: '컨설팅 (Jasa Konsultan)', note: 'PPh 23 2%' },
-  { value: 'JASA_LAINNYA', label: '기타 서비스 (Jasa Lainnya)', note: 'PPh 23 2%' },
-];
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
 
 export default function PPh23Page() {
+  const t = useTranslations('pph23Page');
+
+  const SERVICE_TYPES: Array<{ value: string; label: string; note: string }> = [
+    { value: 'DIVIDEN', label: t('k0_9674d4'), note: t('k1_5d2319') },
+    { value: 'BUNGA', label: t('k2_fd9ed5'), note: 'PPh 23 15% ' + t('k3_f73a0b') },
+    { value: 'ROYALTI', label: t('k4_6541ff'), note: 'PPh 23 15% ' + t('k3_f73a0b') },
+    { value: 'HADIAH', label: t('k5_c6db78'), note: 'PPh 23 15%' },
+    { value: 'SEWA', label: t('k6_d77ffe'), note: t('k7_839529') },
+    { value: 'JASA_TEKNIK', label: t('k8_574f1a'), note: 'PPh 23 2%' },
+    { value: 'JASA_MANAJEMEN', label: t('k9_6f5885'), note: 'PPh 23 2%' },
+    { value: 'JASA_KONSULTAN', label: t('k10_9cacbd'), note: 'PPh 23 2%' },
+    { value: 'JASA_LAINNYA', label: t('k11_7e90a0'), note: 'PPh 23 2%' },
+  ];
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -222,7 +225,7 @@ export default function PPh23Page() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `거래 추가 완료 — 세액 ${fmtRp(data.data?.tax_amount || 0)}`);
+        showMsg('success', `' + t('k12_c05543') + ' — ' + t('k13_e2bf5c') + ' ${fmtRp(data.data?.tax_amount || 0)}`);
         setFGrossAmount('');
         setFInvoiceNumber('');
         setFDescription('');
@@ -231,10 +234,10 @@ export default function PPh23Page() {
         setResolutionPreview(null);
         loadData();
       } else {
-        showMsg('error', data.error || '추가 실패');
+        showMsg('error', data.error || t('k14_5cf2ad'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('k15_175c5f'));
     } finally {
       setSaving(false);
     }
@@ -242,7 +245,7 @@ export default function PPh23Page() {
 
   // Delete transaction
   const handleDelete = async (id: string) => {
-    if (!confirm('거래를 삭제하시겠습니까?')) return;
+    if (!confirm('' + t('k16_4cb4ca') + '?')) return;
     try {
       await fetch(`/api/tax/pph23-transactions?id=${id}`, { method: 'DELETE' });
       loadData();
@@ -261,13 +264,13 @@ export default function PPh23Page() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `e-Bupot ${data.data?.generated || 0}건 생성 완료`);
+        showMsg('success', `e-Bupot ${data.data?.generated || 0}' + t('k17_e7186b') + '`);
         loadData();
       } else {
-        showMsg('error', data.error || 'e-Bupot 생성 실패');
+        showMsg('error', data.error || 'e-Bupot ' + t('k18_cbbcb4') + '');
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('k15_175c5f'));
     } finally {
       setGeneratingBP(false);
     }
@@ -396,7 +399,7 @@ export default function PPh23Page() {
       } catch { /* */ }
     }
     if (count > 0) {
-      showMsg('success', `${count}건 업로드 완료. OCR 처리 중...`);
+      showMsg('success', `${count}' + t('k19_4c0fb1') + '`);
       setTimeout(() => {
         fetch(`/api/documents?customerId=${customerId}&period=${period}`)
           .then(r => r.json())
@@ -413,10 +416,10 @@ export default function PPh23Page() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Receipt className="h-6 w-6 text-emerald-600" />
-          원천세 PPh 23 / PPh 4(2)
+          {t('k20_5ee3c0')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          거래 입력 → 자동 세액 계산 → e-Bupot 생성 → SPT Masa 제출
+          {t('k21_df1a82')}
         </p>
       </div>
 
@@ -424,9 +427,9 @@ export default function PPh23Page() {
       <div className="flex flex-wrap gap-3 mb-4">
         {isConsultant && (
           <div>
-            <Label className="text-xs">고객</Label>
+            <Label className="text-xs">{t('k22_1edd91')}</Label>
             <Select value={customerId} onValueChange={setCustomerId}>
-              <SelectTrigger className="w-56"><SelectValue placeholder="고객 선택" /></SelectTrigger>
+              <SelectTrigger className="w-56"><SelectValue placeholder={t('k23_935894')} /></SelectTrigger>
               <SelectContent>
                 {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name || c.full_name}</SelectItem>)}
               </SelectContent>
@@ -434,7 +437,7 @@ export default function PPh23Page() {
           </div>
         )}
         <div>
-          <Label className="text-xs">기간</Label>
+          <Label className="text-xs">{t('k24_7bc7c5')}</Label>
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -454,22 +457,22 @@ export default function PPh23Page() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Card className="border-0 shadow-sm"><CardContent className="p-3">
-          <p className="text-[10px] text-gray-500">거래 건수</p>
+          <p className="text-[10px] text-gray-500">{t('k25_e29066')}</p>
           <p className="text-xl font-bold">{summary.transactionCount}건</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm"><CardContent className="p-3">
-          <p className="text-[10px] text-gray-500">총 지급액</p>
+          <p className="text-[10px] text-gray-500">{t('k26_f17d2d')}</p>
           <p className="text-sm font-bold font-mono">{fmtRp(summary.totalGross)}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm border-l-4 border-l-emerald-500"><CardContent className="p-3">
-          <p className="text-[10px] text-emerald-600">원천징수 세액 합계</p>
+          <p className="text-[10px] text-emerald-600">{t('k27_4becc9')}</p>
           <p className="text-sm font-bold font-mono text-emerald-700">{fmtRp(summary.totalTax)}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm"><CardContent className="p-3">
           <p className="text-[10px] text-gray-500">e-Bupot</p>
           <p className="text-sm font-bold">
             <span className="text-green-600">{completedBP}</span>
-            {pendingBP > 0 && <span className="text-amber-600"> / {pendingBP} 대기</span>}
+            {pendingBP > 0 && <span className="text-amber-600"> / {pendingBP} {t('k28_65905a')}</span>}
           </p>
         </CardContent></Card>
       </div>
@@ -480,12 +483,12 @@ export default function PPh23Page() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-sm flex items-center gap-2">
               <Upload className="h-4 w-4 text-blue-600" />
-              증빙 자료 ({uploadedDocs.length}건)
+              {t('k29_5d7277')} ({uploadedDocs.length}{t('k30_bcbcd4')}
             </h3>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || !customerId}>
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                파일 업로드
+                {t('k31_6c03f0')}
               </Button>
               {cameraAvailable && (
                 <Button size="sm" variant="outline" disabled={uploading || !customerId}
@@ -497,7 +500,7 @@ export default function PPh23Page() {
                     input.onchange = (e) => handleDocUpload((e.target as HTMLInputElement).files);
                     input.click();
                   }}>
-                  <Camera className="h-3 w-3 mr-1" />촬영
+                  <Camera className="h-3 w-3 mr-1" />{t('k32_8383f9')}
                 </Button>
               )}
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
@@ -508,8 +511,8 @@ export default function PPh23Page() {
           {uploadedDocs.length === 0 ? (
             <div className="text-center py-6 text-xs text-gray-400 border-2 border-dashed rounded-lg">
               <Image className="h-8 w-8 mx-auto mb-2 opacity-30" />
-              <p>인보이스, 영수증, Faktur Pajak 등 증빙을 업로드하세요</p>
-              <p className="text-[10px] mt-1">OCR이 자동으로 금액/거래처 정보를 추출합니다</p>
+              <p>{t('k33_d006ac')}</p>
+              <p className="text-[10px] mt-1">OCR{t('k34_425c07')}</p>
             </div>
           ) : (
             <div className="space-y-1 max-h-40 overflow-y-auto">
@@ -521,7 +524,7 @@ export default function PPh23Page() {
                       doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
                       'text-[8px] bg-gray-100 text-gray-600'
                     }>
-                      {doc.ocr_status === 'COMPLETED' ? 'OCR완료' : doc.ocr_status === 'PROCESSING' ? '처리중' : '대기'}
+                      {doc.ocr_status === 'COMPLETED' ? 'OCR ' + t('k35_4f8e30') : doc.ocr_status === 'PROCESSING' ? t('k36_95d1e4') : t('k28_65905a')}
                     </Badge>
                     <span className="truncate">{doc.file_name}</span>
                     {doc.ocr_result?.confidence && (
@@ -549,10 +552,10 @@ export default function PPh23Page() {
           <CardContent className="p-4">
             <h3 className="font-bold text-sm mb-2 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-blue-600" />
-              AI 인식 결과 → 거래 자동 생성
+              AI {t('k37_b8e205')}
             </h3>
             <p className="text-[11px] text-gray-500 mb-3">
-              업로드한 인보이스/Faktur Pajak에서 추출한 정보입니다. 확인 후 "거래로 추가"를 클릭하세요.
+              {t('k38_38bd8a')} "{t('k39_7c6f9f')}"{t('k40_7672d5')}
             </p>
             <div className="space-y-2">
               {uploadedDocs.filter(d => d.ocr_status === 'COMPLETED' && d.ocr_result?.extractedData).map(doc => {
@@ -568,10 +571,10 @@ export default function PPh23Page() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1 text-xs space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{cpName || '거래처 불명'}</span>
+                          <span className="font-medium">{cpName || t('k41_3e472d')}</span>
                           {hasNpwp && <Badge className="text-[8px] bg-green-100 text-green-700">NPWP ✓</Badge>}
-                          {!hasNpwp && !isForeign && <Badge className="text-[8px] bg-red-100 text-red-700">NPWP 없음!</Badge>}
-                          {isForeign && <Badge className="text-[8px] bg-amber-100 text-amber-700">국외</Badge>}
+                          {!hasNpwp && !isForeign && <Badge className="text-[8px] bg-red-100 text-red-700">NPWP {t('k42_a245e6')}!</Badge>}
+                          {isForeign && <Badge className="text-[8px] bg-amber-100 text-amber-700">{t('k43_90ed66')}</Badge>}
                         </div>
                         {hasNpwp && <p className="font-mono text-[10px] text-gray-500">{cpNpwp}</p>}
                         {amount > 0 && <p className="font-mono">DPP: {fmtRp(amount)}</p>}
@@ -580,20 +583,20 @@ export default function PPh23Page() {
                         {/* NPWP missing warning — domestic company */}
                         {!hasNpwp && !isForeign && (
                           <div className="mt-1 p-2 bg-red-50 rounded border border-red-200 text-[10px] text-red-800">
-                            <p className="font-bold">⚠️ NPWP 필수 — 국내 기업은 반드시 NPWP가 있어야 합니다</p>
-                            <p className="mt-0.5">거래처에 NPWP를 요청하세요. NPWP 없이 거래를 등록하면 세율이 2배(100% 할증) 적용됩니다.</p>
+                            <p className="font-bold">⚠️ NPWP {t('k44_b63c09')} — {t('k45_eeb28a')}</p>
+                            <p className="mt-0.5">{t('k46_60751f')}</p>
                           </div>
                         )}
 
                         {/* Foreign company — DGT Form required */}
                         {isForeign && (
                           <div className="mt-1 p-2 bg-amber-50 rounded border border-amber-200 text-[10px] text-amber-800">
-                            <p className="font-bold">🌍 국외 거래 — Tax Treaty 적용 시 추가 서류 필요</p>
+                            <p className="font-bold">🌍 {t('k47_3e209d')} — Tax Treaty {t('k48_924910')}</p>
                             <ul className="mt-0.5 space-y-0.5">
-                              <li>• <b>DGT Form</b> (Directorate General of Taxes) — 조세조약 세율 적용 필수 서류</li>
-                              <li>• <b>해외 거주자 증명 (Certificate of Domicile / SKD)</b> — 상대국 세무당국 발급</li>
-                              <li>• 위 서류 없이는 PPh 26 표준 세율(20%) 적용</li>
-                              <li>• 서류는 "자료 업로드" 메뉴에서 업로드해 주세요</li>
+                              <li>• <b>DGT Form</b> (Directorate General of Taxes) — {t('k49_853bb3')}</li>
+                              <li>• <b>{t('k50_d59e63')}</b> — {t('k51_52cc75')}</li>
+                              <li>• {t('k52_7f17f7')}</li>
+                              <li>• {t('k53_b64454')} "{t('k54_f47999')}" {t('k55_129210')}</li>
                             </ul>
                           </div>
                         )}
@@ -612,9 +615,9 @@ export default function PPh23Page() {
                             (c.npwp && cpNpwp && c.npwp === cpNpwp.replace(/\D/g, ''))
                           );
                           if (matchedCp) setFCounterparty(matchedCp.id);
-                          showMsg('success', `"${cpName}" 거래 정보가 자동 입력되었습니다. 확인 후 저장하세요.`);
+                          showMsg('success', `"${cpName}" ' + t('k56_ccb9ad') + '`);
                         }}>
-                        <ArrowRight className="h-3 w-3 mr-1" />거래로 추가
+                        <ArrowRight className="h-3 w-3 mr-1" />{t('k39_7c6f9f')}
                       </Button>
                     </div>
                   </div>
@@ -631,11 +634,11 @@ export default function PPh23Page() {
           <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-red-900">
-              NPWP 미등록 거래 {transactions.filter(t => !t.counterparty_npwp).length}건 — 세율 2배 할증 적용 중
+              NPWP {t('k57_9a67d8')} {transactions.filter(t => !t.counterparty_npwp).length}건 — {t('k58_1280cc')}
             </p>
             <p className="text-xs text-red-700 mt-0.5">
-              인도네시아 국내 기업은 모두 NPWP를 보유하고 있습니다. 거래처에 NPWP를 요청하여 업데이트하세요.
-              NPWP 미등록 시 PPh 23 세율이 2%→4%, 15%→30%로 가산됩니다 (Pasal 23(1a)).
+              {t('k59_a0ec00')}
+              NPWP {t('k60_2c6b6c')}
             </p>
           </div>
         </div>
@@ -647,14 +650,14 @@ export default function PPh23Page() {
           {!showForm ? (
             <div className="flex items-center gap-3">
               <Button onClick={() => setShowForm(true)} disabled={!customerId}>
-                <Plus className="h-4 w-4 mr-1" />수동 거래 추가
+                <Plus className="h-4 w-4 mr-1" />{t('k61_c0c4eb')}
               </Button>
-              <p className="text-[11px] text-gray-400">인보이스를 업로드하면 위에서 자동으로 거래 정보가 추출됩니다</p>
+              <p className="text-[11px] text-gray-400">{t('k62_cdba0c')}</p>
             </div>
           ) : (
             <form onSubmit={handleAddTransaction} className="space-y-3">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-bold text-sm">새 거래 입력</h3>
+                <h3 className="font-bold text-sm">{t('k63_b9054b')}</h3>
                 <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)}>
                   <X className="h-4 w-4" />
                 </Button>
@@ -662,37 +665,37 @@ export default function PPh23Page() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs">거래 상대방 *</Label>
+                  <Label className="text-xs">{t('k64_587e34')} *</Label>
                   {counterparties.length > 0 ? (
                     <Select value={fCounterparty} onValueChange={setFCounterparty}>
-                      <SelectTrigger><SelectValue placeholder="거래처 선택" /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder={t('k65_7d5e07')} /></SelectTrigger>
                       <SelectContent>
                         {counterparties.map(cp => (
                           <SelectItem key={cp.id} value={cp.id}>
-                            {cp.name} {cp.npwp ? `(${cp.npwp})` : '(NPWP 없음)'}
+                            {cp.name} {cp.npwp ? '(' + cp.npwp + ')' : '(NPWP ' + t('k66_843812') + ')'}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
                     <div className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2 border border-amber-200">
-                      등록된 거래처가 없습니다. 아래에서 빠르게 추가하세요.
+                      {t('k67_73de21')}
                     </div>
                   )}
                   <button type="button" onClick={() => setShowQuickAdd(!showQuickAdd)}
                     className="text-[11px] text-blue-600 hover:underline mt-1 flex items-center gap-1">
-                    <Plus className="h-3 w-3" />{showQuickAdd ? '닫기' : '새 거래처 빠른 등록'}
+                    <Plus className="h-3 w-3" />{showQuickAdd ? t('k68_218e2a') : t('k69_9b168e')}
                   </button>
 
                   {/* Quick-add counterparty inline */}
                   {showQuickAdd && (
                     <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
-                      <p className="text-[10px] font-medium text-blue-800">거래처 빠른 등록</p>
+                      <p className="text-[10px] font-medium text-blue-800">{t('k70_9bb911')}</p>
                       <div className="grid grid-cols-2 gap-2">
                         <Input value={qName} onChange={e => setQName(e.target.value)}
-                          placeholder="회사명 *" className="h-8 text-xs" />
+                          placeholder={t('k71_2e47c1') + ' *'} className="h-8 text-xs" />
                         <Input value={qNpwp} onChange={e => setQNpwp(e.target.value)}
-                          placeholder="NPWP (선택)" className="h-8 text-xs font-mono" />
+                          placeholder={'NPWP (' + t('k72_906224')} className="h-8 text-xs font-mono" />
                       </div>
                       <Button type="button" size="sm" variant="outline" disabled={!qName || addingCp}
                         onClick={async () => {
@@ -720,16 +723,16 @@ export default function PPh23Page() {
                               setQName('');
                               setQNpwp('');
                               setShowQuickAdd(false);
-                              showMsg('success', `거래처 "${qName}" 등록 완료`);
+                              showMsg('success', `' + t('k73_c81261') + ' "${qName}" ' + t('k74_9230b3') + '`);
                             } else {
-                              showMsg('error', data.error || '등록 실패');
+                              showMsg('error', data.error || t('k75_71bfca'));
                             }
-                          } catch { showMsg('error', '서버 오류'); }
+                          } catch { showMsg('error', t('k15_175c5f')); }
                           finally { setAddingCp(false); }
                         }}
                       >
                         {addingCp ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
-                        등록
+                        {t('k76_212496')}
                       </Button>
                     </div>
                   )}
@@ -737,12 +740,12 @@ export default function PPh23Page() {
                   {fCounterparty && (() => {
                     const cp = counterparties.find(c => c.id === fCounterparty);
                     return cp && !cp.npwp ? (
-                      <p className="text-[10px] text-red-600 mt-1">⚠️ NPWP 미보유 — 세율 2배 할증</p>
+                      <p className="text-[10px] text-red-600 mt-1">⚠️ NPWP {t('k77_127921')} — {t('k78_924a1b')}</p>
                     ) : null;
                   })()}
                 </div>
                 <div>
-                  <Label className="text-xs">거래 유형 *</Label>
+                  <Label className="text-xs">{t('k79_521c49')} *</Label>
                   <Select value={fServiceType} onValueChange={setFServiceType}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -755,21 +758,21 @@ export default function PPh23Page() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">총 지급액 (DPP) *</Label>
+                  <Label className="text-xs">{t('k80_b6c7a9')} *</Label>
                   <Input type="number" value={fGrossAmount} onChange={e => setFGrossAmount(e.target.value)}
                     placeholder="100000000" className="font-mono" required />
                 </div>
                 <div>
-                  <Label className="text-xs">거래일</Label>
+                  <Label className="text-xs">{t('k81_ba7c2c')}</Label>
                   <Input type="date" value={fTransactionDate} onChange={e => setFTransactionDate(e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs">인보이스 번호</Label>
+                  <Label className="text-xs">{t('k82_d6e98c')}</Label>
                   <Input value={fInvoiceNumber} onChange={e => setFInvoiceNumber(e.target.value)} placeholder="INV/2026/03/001" />
                 </div>
                 <div>
-                  <Label className="text-xs">설명</Label>
-                  <Input value={fDescription} onChange={e => setFDescription(e.target.value)} placeholder="거래 내용" />
+                  <Label className="text-xs">{t('k83_4c70f7')}</Label>
+                  <Input value={fDescription} onChange={e => setFDescription(e.target.value)} placeholder={t('k84_7f8fca')} />
                 </div>
               </div>
 
@@ -787,13 +790,13 @@ export default function PPh23Page() {
               {/* Conditional context questions — shown based on service type */}
               {fServiceType === 'SEWA' && (
                 <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200 space-y-2">
-                  <p className="text-xs font-bold text-indigo-900">임대 자산 유형</p>
+                  <p className="text-xs font-bold text-indigo-900">{t('k85_706372')}</p>
                   <div className="grid grid-cols-2 gap-2">
                     {([
-                      { v: 'BUILDING_LAND', label: '건물/토지', note: 'PPh 4(2) Final 10%' },
-                      { v: 'MACHINE', label: '기계/장비', note: 'PPh 23 2%' },
-                      { v: 'VEHICLE', label: '차량', note: 'PPh 23 2%' },
-                      { v: 'OTHER', label: '기타', note: 'PPh 23 2%' },
+                      { v: 'BUILDING_LAND', label: t('k86_8a16d8'), note: 'PPh 4(2) Final 10%' },
+                      { v: 'MACHINE', label: t('k87_5dc281'), note: 'PPh 23 2%' },
+                      { v: 'VEHICLE', label: t('k88_22a345'), note: 'PPh 23 2%' },
+                      { v: 'OTHER', label: t('k89_7f598d'), note: 'PPh 23 2%' },
                     ] as const).map(opt => (
                       <label key={opt.v}
                         className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-xs ${
@@ -813,13 +816,13 @@ export default function PPh23Page() {
 
               {fServiceType === 'BUNGA' && (
                 <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200 space-y-2">
-                  <p className="text-xs font-bold text-indigo-900">이자 원천</p>
+                  <p className="text-xs font-bold text-indigo-900">{t('k90_27795e')}</p>
                   <div className="grid grid-cols-2 gap-2">
                     {([
-                      { v: 'BANK_DEPOSIT', label: '은행 예금/저축', note: 'PPh Final 20%' },
-                      { v: 'LOAN', label: '대여 이자', note: 'PPh 23 15%' },
-                      { v: 'BOND', label: '채권 이자', note: 'PPh 23 15%' },
-                      { v: 'OTHER', label: '기타 이자', note: 'PPh 23 15%' },
+                      { v: 'BANK_DEPOSIT', label: t('k91_4cec9d'), note: 'PPh Final 20%' },
+                      { v: 'LOAN', label: t('k92_cbb863'), note: 'PPh 23 15%' },
+                      { v: 'BOND', label: t('k93_8bf1a5'), note: 'PPh 23 15%' },
+                      { v: 'OTHER', label: t('k94_7c2f39'), note: 'PPh 23 15%' },
                     ] as const).map(opt => (
                       <label key={opt.v}
                         className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-xs ${
@@ -839,27 +842,27 @@ export default function PPh23Page() {
 
               {fServiceType === 'DIVIDEN' && (
                 <div className="bg-purple-50 rounded-lg p-3 border border-purple-200 space-y-2">
-                  <p className="text-xs font-bold text-purple-900">배당 추가 질문</p>
+                  <p className="text-xs font-bold text-purple-900">{t('k95_3ea292')}</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
-                      <Label className="text-[10px]">거래 시점 지분율 (%) — 거래처 기본값 오버라이드</Label>
+                      <Label className="text-[10px]">{t('k96_06a3ac')} — {t('k97_3ed37a')}</Label>
                       <Input type="number" step="0.01" min="0" max="100"
                         value={fShareholdingOverride}
                         onChange={e => setFShareholdingOverride(e.target.value)}
-                        placeholder={`기본: ${counterparties.find(c => c.id === fCounterparty)?.shareholding_pct ?? '미설정'}%`}
+                        placeholder={`{t('k98_81d783')}: ${counterparties.find(c => c.id === fCounterparty)?.shareholding_pct ?? t('k99_bfa691')}%`}
                         className="h-8 text-xs" />
                       <p className="text-[10px] text-purple-700 mt-0.5">
-                        비거주자 치러티 25% 임계값 판정에 사용
+                        {t('k100_831ae0')}
                       </p>
                     </div>
                     <div>
-                      <Label className="text-[10px]">이번 배당 국내 재투자 (PMK 18/2021)</Label>
+                      <Label className="text-[10px]">{t('k101_8519d2')}</Label>
                       <select value={fReinvestedOverride}
                         onChange={e => setFReinvestedOverride(e.target.value as '' | 'yes' | 'no')}
                         className="w-full h-8 px-2 rounded border text-xs">
-                        <option value="">거래처 기본값 사용</option>
-                        <option value="yes">예 — 재투자 (면제)</option>
-                        <option value="no">아니오 — 재투자 안 함</option>
+                        <option value="">{t('k102_5e939b')}</option>
+                        <option value="yes">예 — {t('k103_fc0ca6')}</option>
+                        <option value="no">{t('k104_b1e759')} — {t('k105_ee14ce')}</option>
                       </select>
                     </div>
                   </div>
@@ -869,7 +872,7 @@ export default function PPh23Page() {
               {/* Tax resolution preview — from server engine */}
               {resolvingTax && (
                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center gap-2 text-xs text-gray-500">
-                  <Loader2 className="h-3 w-3 animate-spin" />세율 계산 중...
+                  <Loader2 className="h-3 w-3 animate-spin" />{t('k106_3d95f6')}
                 </div>
               )}
               {!resolvingTax && resolutionPreview && fGrossAmount && (
@@ -887,17 +890,17 @@ export default function PPh23Page() {
                           <Badge className="bg-purple-600 text-white text-[10px]">Final</Badge>
                         )}
                         {resolutionPreview.npwpSurchargeApplied && (
-                          <Badge className="bg-amber-600 text-white text-[10px]">NPWP 미보유 할증</Badge>
+                          <Badge className="bg-amber-600 text-white text-[10px]">NPWP {t('k107_7c649c')}</Badge>
                         )}
                         <span className="font-mono text-indigo-900 font-bold">
                           {(resolutionPreview.rate * 100).toFixed(2)}%
                         </span>
                       </div>
                       <p className="text-base font-bold text-indigo-900">
-                        세액 {fmtRp(resolutionPreview.taxAmount || Number(fGrossAmount) * resolutionPreview.rate)}
+                        {t('k13_e2bf5c')} {fmtRp(resolutionPreview.taxAmount || Number(fGrossAmount) * resolutionPreview.rate)}
                       </p>
                       <p className="text-[11px] text-indigo-700 mt-1">
-                        지급 후 수령액: {fmtRp(resolutionPreview.netAmount || Number(fGrossAmount) * (1 - resolutionPreview.rate))}
+                        {t('k108_8b5175')}: {fmtRp(resolutionPreview.netAmount || Number(fGrossAmount) * (1 - resolutionPreview.rate))}
                       </p>
                       <div className="mt-2 p-2 bg-white/60 rounded border border-indigo-100">
                         <p className="text-indigo-900 font-medium">{resolutionPreview.reason}</p>
@@ -905,7 +908,7 @@ export default function PPh23Page() {
                       </div>
                       {resolutionPreview.taxType === 'PPh26' && (
                         <p className="text-[10px] text-amber-700 mt-2">
-                          ⚠ 비거주자 거래 — Certificate of Domicile(CoD) 및 DGT Form 제출 확인 필요
+                          ⚠ {t('k109_7382d2')} — Certificate of Domicile(CoD) {t('k110_0bc04e')}
                         </p>
                       )}
                     </div>
@@ -917,16 +920,16 @@ export default function PPh23Page() {
                 <label className="flex items-center gap-1 text-xs">
                   <input type="checkbox" checked={fUseResolution} onChange={e => setFUseResolution(e.target.checked)}
                     className="accent-indigo-600" />
-                  AI 자동 세율 판별 (Tax Resolution Engine)
+                  AI {t('k111_ecc3a2')}
                 </label>
               </div>
 
               <div className="flex gap-2">
                 <Button type="submit" disabled={saving || !fCounterparty || !fGrossAmount}>
                   {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Calculator className="h-3 w-3 mr-1" />}
-                  계산 및 저장
+                  {t('k112_cf7d46')}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>취소</Button>
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>{t('k113_d9de21')}</Button>
               </div>
             </form>
           )}
@@ -939,12 +942,12 @@ export default function PPh23Page() {
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-amber-600" />
             <p className="text-xs text-amber-800">
-              <b>{pendingBP}건</b>의 거래에 e-Bupot 번호가 미부여입니다
+              <b>{pendingBP}건</b>{t('k114_5cb06f')}
             </p>
           </div>
           <Button size="sm" onClick={handleGenerateBP} disabled={generatingBP}>
             {generatingBP ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-            e-Bupot 일괄 생성
+            e-Bupot {t('k115_2daf49')}
           </Button>
         </div>
       )}
@@ -954,7 +957,7 @@ export default function PPh23Page() {
         <CardContent className="p-4">
           <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
-            {period} 거래 내역 ({transactions.length}건)
+            {period} {t('k116_c663ec')} ({transactions.length}{t('k30_bcbcd4')}
           </h3>
 
           {loading ? (
@@ -962,7 +965,7 @@ export default function PPh23Page() {
           ) : transactions.length === 0 ? (
             <div className="text-center py-12 text-sm text-gray-400">
               <Receipt className="h-10 w-10 mx-auto mb-2 opacity-30" />
-              거래 내역이 없습니다. 위 "거래 추가" 버튼으로 시작하세요.
+              {t('k117_0b6c6c')} "{t('k118_85e500')}" {t('k119_eeb60e')}
             </div>
           ) : (
             <div className="space-y-2">
@@ -1009,34 +1012,34 @@ export default function PPh23Page() {
                       <div className="border-t p-3 bg-gray-50/50 space-y-2">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                           <div>
-                            <p className="text-gray-500">거래 상대방 NPWP</p>
-                            <p className="font-mono">{tx.counterparty_npwp || '미등록'}</p>
+                            <p className="text-gray-500">{t('k120_a55135')}</p>
+                            <p className="font-mono">{tx.counterparty_npwp || t('k121_42b3cf')}</p>
                           </div>
                           <div>
-                            <p className="text-gray-500">세율</p>
+                            <p className="text-gray-500">{t('k122_6803af')}</p>
                             <p className="font-bold">{(tx.tax_rate * 100).toFixed(1)}%</p>
                           </div>
                           <div>
-                            <p className="text-gray-500">e-Bupot 번호</p>
-                            <p className="font-mono">{tx.bukti_potong_number || '미생성'}</p>
+                            <p className="text-gray-500">e-Bupot {t('k123_5ca2f7')}</p>
+                            <p className="font-mono">{tx.bukti_potong_number || t('k124_ac6176')}</p>
                           </div>
                           <div>
-                            <p className="text-gray-500">e-Bupot 날짜</p>
+                            <p className="text-gray-500">e-Bupot {t('k125_2d95a4')}</p>
                             <p>{tx.bukti_potong_date || '-'}</p>
                           </div>
                         </div>
                         {tx.description && (
-                          <div className="text-xs"><p className="text-gray-500">설명</p><p>{tx.description}</p></div>
+                          <div className="text-xs"><p className="text-gray-500">{t('k83_4c70f7')}</p><p>{tx.description}</p></div>
                         )}
 
                         {/* Tax determination reason */}
                         <div className="bg-indigo-50 rounded p-2 text-xs flex items-start gap-2">
                           <Shield className="h-3 w-3 text-indigo-600 flex-shrink-0 mt-0.5" />
                           <div>
-                            <p className="font-medium text-indigo-900">세율 결정 근거</p>
+                            <p className="font-medium text-indigo-900">{t('k126_90cd85')}</p>
                             <p className="text-indigo-700">
-                              {tx.service_type} — {tx.counterparty_npwp ? '표준' : 'NPWP 미보유 할증'} 세율 {(tx.tax_rate * 100).toFixed(1)}%
-                              {!tx.counterparty_npwp && ' (Pasal 23(1a) 100% 가산)'}
+                              {tx.service_type} — {tx.counterparty_npwp ? t('k127_76ed88') : 'NPWP ' + t('k107_7c649c')} {t('k122_6803af')} {(tx.tax_rate * 100).toFixed(1)}%
+                              {!tx.counterparty_npwp && ' (Pasal 23(1a) 100% ' + t('k128_dfd2b7')}
                             </p>
                             <p className="text-indigo-500 text-[10px]">Pasal 23 UU PPh / PMK 141/PMK.03/2015</p>
                           </div>
@@ -1044,7 +1047,7 @@ export default function PPh23Page() {
 
                         <div className="flex gap-2 pt-1">
                           <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => handleDelete(tx.id)}>
-                            <X className="h-3 w-3 mr-1" />삭제
+                            <X className="h-3 w-3 mr-1" />{t('k129_30e15a')}
                           </Button>
                         </div>
                       </div>
@@ -1089,6 +1092,7 @@ function FilingSteps({
   showMsg: (type: 'success' | 'error', text: string) => void;
   locale: string;
 }) {
+  const t = useTranslations('pph23Page');
   const [generating, setGenerating] = useState(false);
   const [creatingSPT, setCreatingSPT] = useState(false);
   const [sptResult, setSptResult] = useState<{
@@ -1126,11 +1130,11 @@ function FilingSteps({
 
   // Step status
   const steps = [
-    { id: 1, label: '거래 입력', done: transactions.length > 0, desc: `${summary.transactionCount}건 · ${fmtRp(summary.totalTax)}` },
-    { id: 2, label: 'e-Bupot 생성', done: allBPGenerated, desc: allBPGenerated ? '전체 부여 완료' : `${pendingBP}건 미부여` },
-    { id: 3, label: 'SPT Masa 생성', done: sptCreated, desc: sptCreated ? `마감 ${sptResult?.submissionDeadline?.substring(0, 10)}` : '미생성' },
-    { id: 4, label: '납부', done: false, desc: '납부 페이지에서 진행' },
-    { id: 5, label: 'DJP 제출', done: false, desc: '납부 완료 후 제출' },
+    { id: 1, label: t('k130_e6ba7a'), done: transactions.length > 0, desc: `${summary.transactionCount}건 · ${fmtRp(summary.totalTax)}` },
+    { id: 2, label: 'e-Bupot ' + t('k131_4169bb'), done: allBPGenerated, desc: allBPGenerated ? t('k132_c7b5eb') : `${pendingBP}{t('k133_c84140')}` },
+    { id: 3, label: 'SPT Masa ' + t('k131_4169bb'), done: sptCreated, desc: sptCreated ? `{t('k134_df2337')} ${sptResult?.submissionDeadline?.substring(0, 10)}` : t('k124_ac6176') },
+    { id: 4, label: t('k135_b303e6'), done: false, desc: t('k136_85d0f9') },
+    { id: 5, label: 'DJP ' + t('k137_d6ed72'), done: false, desc: t('k138_48e2fc') },
   ];
 
   const handleCreateSPT = async () => {
@@ -1155,13 +1159,13 @@ function FilingSteps({
             filingId: data.filingId,
           });
         }
-        showMsg('success', 'SPT Masa PPh 23 초안이 생성되었습니다');
+        showMsg('success', 'SPT Masa PPh 23 ' + t('k139_f2eaf5') + '');
         onRefresh();
       } else {
-        showMsg('error', data.error || data.message || 'SPT Masa 생성 실패');
+        showMsg('error', data.error || data.message || 'SPT Masa ' + t('k18_cbbcb4') + '');
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('k15_175c5f'));
     } finally {
       setCreatingSPT(false);
     }
@@ -1172,7 +1176,7 @@ function FilingSteps({
       <CardContent className="p-5">
         <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
           <Shield className="h-4 w-4 text-indigo-600" />
-          {period} PPh 23 신고 진행 상황
+          {period} PPh 23 {t('k140_aa38cd')}
         </h3>
 
         {/* Step indicators */}
@@ -1203,7 +1207,7 @@ function FilingSteps({
           {!allBPGenerated && transactions.length > 0 && (
             <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <span>e-Bupot 미부여 {pendingBP}건. 위 목록 상단의 "e-Bupot 일괄 생성" 버튼을 클릭하세요.</span>
+              <span>e-Bupot {t('k141_fbbdd4')} {pendingBP}{t('k142_004ba2')} "e-Bupot {t('k115_2daf49')}" {t('k143_b53d8b')}</span>
             </div>
           )}
 
@@ -1213,13 +1217,13 @@ function FilingSteps({
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-blue-600" />
                 <div className="text-xs">
-                  <p className="font-medium text-blue-900">SPT Masa PPh 23 생성 가능</p>
-                  <p className="text-blue-700">{summary.transactionCount}건, 세액 {fmtRp(summary.totalTax)}</p>
+                  <p className="font-medium text-blue-900">SPT Masa PPh 23 {t('k144_b0b7b5')}</p>
+                  <p className="text-blue-700">{summary.transactionCount}{t('k145_17756e')} {fmtRp(summary.totalTax)}</p>
                 </div>
               </div>
               <Button size="sm" onClick={handleCreateSPT} disabled={creatingSPT}>
                 {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-                SPT Masa 생성
+                SPT Masa {t('k131_4169bb')}
               </Button>
             </div>
           )}
@@ -1229,16 +1233,16 @@ function FilingSteps({
             <div className="p-3 rounded-lg bg-green-50 border border-green-200">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <p className="text-xs font-medium text-green-900">SPT Masa PPh 23 생성 완료</p>
+                <p className="text-xs font-medium text-green-900">SPT Masa PPh 23 {t('k146_f3bc85')}</p>
               </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
-                <div><p className="text-gray-500">총 DPP</p><p className="font-mono font-bold">{fmtRp(sptResult.totalGrossIncome)}</p></div>
-                <div><p className="text-gray-500">세액 합계</p><p className="font-mono font-bold text-emerald-700">{fmtRp(sptResult.totalTaxWithheld)}</p></div>
+                <div><p className="text-gray-500">{t('k147_235812')}</p><p className="font-mono font-bold">{fmtRp(sptResult.totalGrossIncome)}</p></div>
+                <div><p className="text-gray-500">{t('k148_18ab52')}</p><p className="font-mono font-bold text-emerald-700">{fmtRp(sptResult.totalTaxWithheld)}</p></div>
                 <div>
-                  <p className="text-gray-500">신고 마감</p>
+                  <p className="text-gray-500">{t('k149_d655cc')}</p>
                   <p className={sptResult.isOverdue ? 'text-red-600 font-bold' : ''}>
                     {sptResult.submissionDeadline?.substring(0, 10)}
-                    {sptResult.isOverdue && ' (연체!)'}
+                    {sptResult.isOverdue && ' (' + t('k150_26422a')}
                   </p>
                 </div>
               </div>
@@ -1251,13 +1255,13 @@ function FilingSteps({
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-indigo-600" />
                 <div className="text-xs">
-                  <p className="font-medium text-indigo-900">납부 진행</p>
-                  <p className="text-indigo-700">ID Billing 생성 후 은행에서 납부 → NTPN 입력</p>
+                  <p className="font-medium text-indigo-900">{t('k151_25e8b8')}</p>
+                  <p className="text-indigo-700">ID Billing {t('k152_d85864')}</p>
                 </div>
               </div>
               <a href={`/${locale}/tax/monthly-payments`}
                 className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
-                납부 페이지로
+                {t('k153_d76082')}
               </a>
             </div>
           )}
