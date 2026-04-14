@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,6 +60,7 @@ interface RegistryHit {
 }
 
 export default function CounterpartiesPage() {
+  const t = useTranslations('counterparties');
   const { session } = useSession();
   const [list, setList] = useState<Counterparty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,7 +135,7 @@ export default function CounterpartiesPage() {
           const data = await res.json();
           if (data.success && data.data.length > 0) {
             autofillFromRegistry(data.data[0]);
-            showMsg('success', `기존 등록된 회사 정보를 자동 입력했습니다 (이전 이용자 ${data.data[0].usage_count}명)`);
+            showMsg('success', t('autoFilled', { count: data.data[0].usage_count }));
           }
         } catch { /* */ }
         finally { setSearching(false); }
@@ -242,15 +244,15 @@ export default function CounterpartiesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', '거래 상대방이 등록되었습니다');
+        showMsg('success', t('k2_844fe2'));
         resetForm();
         setShowForm(false);
         loadList();
       } else {
-        showMsg('error', data.error || '등록 실패');
+        showMsg('error', data.error || t('k3_71bfca'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('k4_175c5f'));
     } finally {
       setSubmitting(false);
     }
@@ -265,15 +267,15 @@ export default function CounterpartiesPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users className="h-6 w-6 text-indigo-600" />
-            거래 상대방 회사
+            {t('k5_09c6ec')}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            원천세/부가세 계산에 필요한 거래처 정보를 관리합니다
+            {t('k6_28455f')}
           </p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
           {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-          {showForm ? '닫기' : '거래처 추가'}
+          {showForm ? t('k7_218e2a') : t('k8_da7845')}
         </Button>
       </div>
 
@@ -290,10 +292,10 @@ export default function CounterpartiesPage() {
       <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 text-xs text-blue-900 flex items-start gap-2">
         <Sparkles className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="font-medium">AI Pajak 글로벌 거래처 레지스트리</p>
+          <p className="font-medium">AI Pajak {t('k9_a0256c')}</p>
           <p className="text-[11px] text-blue-700 mt-0.5">
-            NPWP나 회사명을 입력하면 다른 이용자가 먼저 등록한 거래처 정보를 자동으로 불러옵니다.
-            본인이 등록한 정보도 다른 이용자에게 공유되어 인도네시아 세무 커뮤니티 품질을 향상시킵니다.
+            NPWP{t('k10_6614ed')}
+            {t('k11_21a5af')}
           </p>
         </div>
       </div>
@@ -303,27 +305,27 @@ export default function CounterpartiesPage() {
         <Card className="mb-6">
           <CardContent className="p-5">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <h3 className="font-bold text-sm">거래처 추가</h3>
+              <h3 className="font-bold text-sm">{t('k8_da7845')}</h3>
 
               {/* Basic info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs">회사명 *</Label>
+                  <Label className="text-xs">{t('k12_2e47c1')} *</Label>
                   <Input value={formName} onChange={e => setFormName(e.target.value)}
-                    placeholder="PT / CV / 회사 이름" required />
+                    placeholder={`PT / CV / ${t('k13_559343')}`} required />
                 </div>
                 <div>
-                  <Label className="text-xs">NPWP (15자리)</Label>
+                  <Label className="text-xs">NPWP (15{t('k14_0821ab')}</Label>
                   <Input value={formNpwp} onChange={e => setFormNpwp(e.target.value)}
                     placeholder="00.000.000.0-000.000" className="font-mono" />
-                  {searching && <p className="text-[10px] text-gray-400 mt-1">🔍 레지스트리 검색 중...</p>}
+                  {searching && <p className="text-[10px] text-gray-400 mt-1">🔍 {t('k15_f87ec2')}</p>}
                 </div>
               </div>
 
               {/* Registry search suggestions */}
               {searchResults.length > 0 && !formNpwp && (
                 <div className="border border-blue-200 rounded-lg bg-blue-50 p-2">
-                  <p className="text-[10px] font-medium text-blue-700 mb-1">✨ 레지스트리 추천 (클릭하여 자동 입력)</p>
+                  <p className="text-[10px] font-medium text-blue-700 mb-1">✨ {t('k16_a64d93')}</p>
                   <div className="space-y-1 max-h-40 overflow-y-auto">
                     {searchResults.map(hit => (
                       <button
@@ -333,11 +335,11 @@ export default function CounterpartiesPage() {
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium">{hit.name}</span>
-                          {hit.verified && <Badge className="bg-green-100 text-green-700 text-[9px]">검증됨</Badge>}
+                          {hit.verified && <Badge className="bg-green-100 text-green-700 text-[9px]">{t('k17_a17157')}</Badge>}
                         </div>
                         <div className="text-[10px] text-gray-500">
                           {hit.npwp && <span className="font-mono">NPWP: {hit.npwp} · </span>}
-                          {hit.is_foreign ? '🌍 국외' : '🇮🇩 국내'} · 이용자 {hit.usage_count}명
+                          {hit.is_foreign ? '🌍 ' + t('foreignTag') : '🇮🇩 ' + t('domesticTag')} · {t('usageCount', { count: hit.usage_count })}
                         </div>
                       </button>
                     ))}
@@ -347,40 +349,40 @@ export default function CounterpartiesPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs">주소</Label>
+                  <Label className="text-xs">{t('k21_45f790')}</Label>
                   <Input value={formAddress} onChange={e => setFormAddress(e.target.value)}
-                    placeholder="회사 주소" />
+                    placeholder={t('companyAddress')} />
                 </div>
                 <div>
-                  <Label className="text-xs">KBLI 코드 (5자리)</Label>
+                  <Label className="text-xs">{t('kbliCode')}</Label>
                   <Input value={formKbli} onChange={e => setFormKbli(e.target.value)}
-                    placeholder="예: 62010" className="font-mono" />
+                    placeholder={t('exampleKbli')} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-xs">전화번호</Label>
+                  <Label className="text-xs">{t('k24_ba8df0')}</Label>
                   <Input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder="+62 ..." />
                 </div>
                 <div>
-                  <Label className="text-xs">이메일</Label>
+                  <Label className="text-xs">{t('k25_af9b1e')}</Label>
                   <Input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="info@..." />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <Label className="text-xs">거래 유형</Label>
+                  <Label className="text-xs">{t('k26_521c49')}</Label>
                   <select value={formType} onChange={e => setFormType(e.target.value as 'VENDOR' | 'CLIENT' | 'BOTH')}
                     className="w-full h-9 px-3 rounded-md border border-input text-sm">
-                    <option value="VENDOR">공급자 (매입)</option>
-                    <option value="CLIENT">고객 (매출)</option>
-                    <option value="BOTH">양방향</option>
+                    <option value="VENDOR">{t('k27_d76136')}</option>
+                    <option value="CLIENT">{t('k28_4a773e')}</option>
+                    <option value="BOTH">{t('k29_37a73c')}</option>
                   </select>
                 </div>
                 <div>
-                  <Label className="text-xs">자격 등급 (건설)</Label>
+                  <Label className="text-xs">{t('k30_bfb537')}</Label>
                   <select value={formQualification} onChange={e => setFormQualification(e.target.value)}
                     className="w-full h-9 px-3 rounded-md border border-input text-sm">
-                    <option value="">해당 없음</option>
+                    <option value="">{t('k31_61408f')}</option>
                     <option value="SMALL">SMALL</option>
                     <option value="MEDIUM_LARGE">MEDIUM_LARGE</option>
                     <option value="QUALIFIED">QUALIFIED</option>
@@ -390,32 +392,32 @@ export default function CounterpartiesPage() {
                 <div className="flex items-end gap-2">
                   <label className="flex items-center gap-1 text-xs">
                     <input type="checkbox" checked={formIsForeign} onChange={e => setFormIsForeign(e.target.checked)} />
-                    국외 법인
+                    {t('foreignEntity')}
                   </label>
                 </div>
                 <div className="flex items-end gap-2">
                   <label className="flex items-center gap-1 text-xs">
                     <input type="checkbox" checked={formRelatedParty} onChange={e => setFormRelatedParty(e.target.checked)} />
-                    관계사 (TP)
+                    {t('k33_6afe8d')}
                   </label>
                 </div>
               </div>
 
               {/* Entity vs Individual */}
               <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs font-bold text-gray-700 mb-2">법인/개인 구분</p>
+                <p className="text-xs font-bold text-gray-700 mb-2">{t('k34_b57ec6')}</p>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-1 text-xs cursor-pointer">
                     <input type="radio" checked={formIsEntity} onChange={() => setFormIsEntity(true)} />
-                    법인 (PT/CV/외국 법인)
+                    {t('k35_ae355f')}
                   </label>
                   <label className="flex items-center gap-1 text-xs cursor-pointer">
                     <input type="radio" checked={!formIsEntity} onChange={() => setFormIsEntity(false)} />
-                    개인
+                    {t('k36_06e76f')}
                   </label>
                 </div>
                 <p className="text-[10px] text-gray-500 mt-1">
-                  * 법인 간 국내 배당은 UU HPP 7/2021로 면제. 개인 수령은 PPh Final 10% (재투자 시 면제)
+                  * {t('dividendExemptNote')}
                 </p>
               </div>
 
@@ -423,74 +425,74 @@ export default function CounterpartiesPage() {
               {formIsForeign && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
                   <p className="text-xs font-bold text-amber-900 flex items-center gap-1">
-                    <Globe className="h-3 w-3" />국외 거래 상대방 — 조세조약 및 DTA 서류
+                    <Globe className="h-3 w-3" />{t('foreignCounterparty')}
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                     <div>
-                      <Label className="text-[10px]">국가 (ISO 2)</Label>
+                      <Label className="text-[10px]">{t('k39_14c7e6')}</Label>
                       <Input value={formCountry} onChange={e => setFormCountry(e.target.value.toUpperCase())}
                         placeholder="KR / US / SG ..." className="font-mono" maxLength={2} />
                     </div>
                     <div>
-                      <Label className="text-[10px]">조세조약 조항</Label>
+                      <Label className="text-[10px]">{t('k40_c16332')}</Label>
                       <Input value={treatyArticle} onChange={e => setTreatyArticle(e.target.value)}
-                        placeholder="예: Article 12" />
+                        placeholder={t('exampleArticle')} />
                     </div>
                     <div>
-                      <Label className="text-[10px]">적용 세율 (%)</Label>
+                      <Label className="text-[10px]">{t('k41_fe1e6c')}</Label>
                       <Input type="number" step="0.01" value={treatyRate} onChange={e => setTreatyRate(e.target.value)}
                         placeholder="10" />
                     </div>
                     <div className="flex items-end">
                       <label className="flex items-center gap-1 text-xs">
                         <input type="checkbox" checked={formHasCod} onChange={e => setFormHasCod(e.target.checked)} />
-                        COD 보유
+                        COD {t('k42_286f58')}
                       </label>
                     </div>
                   </div>
                   <div>
-                    <Label className="text-[10px]">조약 비고</Label>
+                    <Label className="text-[10px]">{t('k43_f6aff4')}</Label>
                     <Input value={treatyNotes} onChange={e => setTreatyNotes(e.target.value)}
-                      placeholder="특이사항 (적용 제한, 유효기간 등)" />
+                      placeholder={t('k44_eddbd1')} />
                   </div>
 
                   {/* DTA documents — COR / DGT Form */}
                   <div className="border-t border-amber-200 pt-3">
-                    <p className="text-[11px] font-bold text-amber-900 mb-2">DTA 적용 서류</p>
+                    <p className="text-[11px] font-bold text-amber-900 mb-2">DTA {t('k45_52e787')}</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <div>
-                        <Label className="text-[10px]">CoR/CoD 만료일</Label>
+                        <Label className="text-[10px]">CoR/CoD {t('k46_a37db9')}</Label>
                         <Input type="date" value={formCorValidUntil}
                           onChange={e => setFormCorValidUntil(e.target.value)} className="h-8 text-xs" />
                       </div>
                       <div>
-                        <Label className="text-[10px]">CoR 문서 URL</Label>
+                        <Label className="text-[10px]">CoR {t('k47_dede63')}</Label>
                         <Input value={formCorDocUrl} onChange={e => setFormCorDocUrl(e.target.value)}
                           placeholder="https://..." className="h-8 text-xs" />
                       </div>
                       <div>
-                        <Label className="text-[10px]">DGT Form 유형</Label>
+                        <Label className="text-[10px]">DGT Form {t('k48_d38ee7')}</Label>
                         <select value={formDgtFormType}
                           onChange={e => setFormDgtFormType(e.target.value as '' | 'DGT_1' | 'DGT_2')}
                           className="w-full h-8 px-2 rounded border text-xs">
-                          <option value="">선택 안 함</option>
-                          <option value="DGT_1">DGT Form 1 (개인)</option>
-                          <option value="DGT_2">DGT Form 2 (법인)</option>
+                          <option value="">{t('k49_8c45d5')}</option>
+                          <option value="DGT_1">DGT Form 1 ({t('k36_06e76f')})</option>
+                          <option value="DGT_2">DGT Form 2 ({t('k51_0ab428')}</option>
                         </select>
                       </div>
                       <div>
-                        <Label className="text-[10px]">DGT Form 만료일</Label>
+                        <Label className="text-[10px]">DGT Form {t('k46_a37db9')}</Label>
                         <Input type="date" value={formDgtValidUntil}
                           onChange={e => setFormDgtValidUntil(e.target.value)} className="h-8 text-xs" />
                       </div>
                       <div className="md:col-span-2">
-                        <Label className="text-[10px]">DGT Form 문서 URL</Label>
+                        <Label className="text-[10px]">DGT Form {t('k47_dede63')}</Label>
                         <Input value={formDgtFormUrl} onChange={e => setFormDgtFormUrl(e.target.value)}
                           placeholder="https://..." className="h-8 text-xs" />
                       </div>
                     </div>
                     <p className="text-[10px] text-amber-700 mt-2">
-                      * DGT Form 또는 CoR이 없으면 조세조약 감면을 적용할 수 없고 PPh 26 20%가 부과됩니다
+                      * {t('dgtWarning')}
                     </p>
                   </div>
                 </div>
@@ -499,22 +501,22 @@ export default function CounterpartiesPage() {
               {/* Shareholder / Withholding info */}
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 space-y-2">
                 <p className="text-xs font-bold text-purple-900 flex items-center gap-1">
-                  <Users className="h-3 w-3" />주주 정보 / 원천세 특별 조건
+                  <Users className="h-3 w-3" />{t('k52_16e603')}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <label className="flex items-center gap-1 text-xs">
                     <input type="checkbox" checked={formIsShareholder}
                       onChange={e => setFormIsShareholder(e.target.checked)} />
-                    이 회사/개인은 <b>우리 회사의 주주</b>입니다 (배당 수령)
+                    {t('isShareholder')}
                   </label>
                   {formIsShareholder && (
                     <div>
-                      <Label className="text-[10px]">지분율 (%)</Label>
+                      <Label className="text-[10px]">{t('k56_e704b3')}</Label>
                       <Input type="number" step="0.01" min="0" max="100"
                         value={formShareholdingPct} onChange={e => setFormShareholdingPct(e.target.value)}
                         placeholder="25" className="h-8 text-xs" />
                       <p className="text-[10px] text-purple-700 mt-0.5">
-                        * 25% 이상이면 대부분 조세조약에서 낮은 배당 세율 적용
+                        * {t('shareholdingNote')}
                       </p>
                     </div>
                   )}
@@ -524,26 +526,26 @@ export default function CounterpartiesPage() {
                     <label className="flex items-center gap-1 text-xs">
                       <input type="checkbox" checked={formIsBeneficialOwner}
                         onChange={e => setFormIsBeneficialOwner(e.target.checked)} />
-                      수익적 소유자(Beneficial Owner) — nominee가 아님
+                      {t('beneficialOwner')}
                     </label>
                     <label className="flex items-center gap-1 text-xs">
                       <input type="checkbox" checked={formReceivesReinvested}
                         onChange={e => setFormReceivesReinvested(e.target.checked)} />
-                      배당을 국내에 재투자 (PMK 18/2021 개인 면제 조건)
+                      {t('reinvestDividend')}
                     </label>
                   </>
                 )}
                 <label className="flex items-center gap-1 text-xs border-t border-purple-200 pt-2">
                   <input type="checkbox" checked={formVendorIsOwner}
                     onChange={e => setFormVendorIsOwner(e.target.checked)} />
-                  이 거래처는 <b>부동산 소유자</b>입니다 (임대 PPh 4(2) Final 대상)
+                  {t('isPropertyOwner')}
                 </label>
               </div>
 
               {/* Licenses */}
               <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                 <p className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                  <FileText className="h-3 w-3" />라이센스 / 인허가
+                  <FileText className="h-3 w-3" />{t('k63_d178a8')}
                 </p>
                 {licenses.length > 0 && (
                   <div className="space-y-1">
@@ -551,7 +553,7 @@ export default function CounterpartiesPage() {
                       <div key={i} className="flex items-center gap-2 bg-white p-2 rounded text-xs">
                         <Badge className="bg-indigo-100 text-indigo-700">{lic.type}</Badge>
                         <span className="font-mono">{lic.number}</span>
-                        {lic.expires_at && <span className="text-gray-500">만료 {lic.expires_at}</span>}
+                        {lic.expires_at && <span className="text-gray-500">{t('k64_0c9d60')} {lic.expires_at}</span>}
                         {lic.issuer && <span className="text-gray-400">({lic.issuer})</span>}
                         <button type="button" onClick={() => removeLicense(i)} className="ml-auto">
                           <X className="h-3 w-3 text-gray-400" />
@@ -562,17 +564,17 @@ export default function CounterpartiesPage() {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
                   <Input value={newLicense.type} onChange={e => setNewLicense({ ...newLicense, type: e.target.value })}
-                    placeholder="유형 (SIUP, NIB, SBU...)" className="h-8 text-xs" />
+                    placeholder="{t('k48_d38ee7')} (SIUP, NIB, SBU...)" className="h-8 text-xs" />
                   <Input value={newLicense.number} onChange={e => setNewLicense({ ...newLicense, number: e.target.value })}
-                    placeholder="번호" className="h-8 text-xs font-mono" />
+                    placeholder={t('k66_5ca2f7')} className="h-8 text-xs font-mono" />
                   <Input value={newLicense.issuer || ''} onChange={e => setNewLicense({ ...newLicense, issuer: e.target.value })}
-                    placeholder="발급 기관" className="h-8 text-xs" />
+                    placeholder={t('k67_3159d6')} className="h-8 text-xs" />
                   <Input type="date" value={newLicense.expires_at || ''}
                     onChange={e => setNewLicense({ ...newLicense, expires_at: e.target.value })}
                     className="h-8 text-xs" />
                   <Button type="button" size="sm" variant="outline" onClick={addLicense}
                     disabled={!newLicense.type || !newLicense.number}>
-                    <Plus className="h-3 w-3 mr-1" />추가
+                    <Plus className="h-3 w-3 mr-1" />{t('k68_ebe4aa')}
                   </Button>
                 </div>
               </div>
@@ -580,10 +582,10 @@ export default function CounterpartiesPage() {
               <div className="flex gap-2">
                 <Button type="submit" disabled={submitting || !formName}>
                   {submitting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-                  저장
+                  {t('k69_9d0a47')}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => { resetForm(); setShowForm(false); }}>
-                  취소
+                  {t('k70_d9de21')}
                 </Button>
               </div>
             </form>
@@ -594,13 +596,13 @@ export default function CounterpartiesPage() {
       {/* List */}
       <Card>
         <CardContent className="p-5">
-          <h3 className="font-bold text-sm mb-3">등록된 거래처 ({filteredList.length})</h3>
+          <h3 className="font-bold text-sm mb-3">{t('k71_71d3cf')} ({filteredList.length})</h3>
           {loading ? (
             <div className="text-center py-8"><Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" /></div>
           ) : filteredList.length === 0 ? (
             <div className="text-center py-12 text-sm text-gray-400">
               <Building2 className="h-10 w-10 mx-auto mb-2 opacity-30" />
-              등록된 거래처가 없습니다
+              {t('noRegistered')}
             </div>
           ) : (
             <div className="space-y-2">
@@ -624,24 +626,24 @@ export default function CounterpartiesPage() {
                             cp.type === 'CLIENT' ? 'text-[9px] bg-blue-100 text-blue-700' :
                             'text-[9px] bg-gray-100 text-gray-700'
                           }>
-                            {cp.type === 'VENDOR' ? '공급자' : cp.type === 'CLIENT' ? '고객' : cp.type}
+                            {cp.type === 'VENDOR' ? t('k73_5da4af') : cp.type === 'CLIENT' ? t('k74_1edd91') : cp.type}
                           </Badge>
                           {cp.is_foreign && <Badge className="text-[9px] bg-amber-100 text-amber-700"><Globe className="h-2.5 w-2.5 mr-0.5 inline" />{cp.country}</Badge>}
                           {cp.has_cod && <Badge className="text-[9px] bg-green-100 text-green-700">COD</Badge>}
-                          {cp.is_related_party && <Badge className="text-[9px] bg-red-100 text-red-700">관계사</Badge>}
-                          {cp.registry?.verified && <Badge className="text-[9px] bg-emerald-100 text-emerald-700">검증</Badge>}
+                          {cp.is_related_party && <Badge className="text-[9px] bg-red-100 text-red-700">{t('k75_6c8ca0')}</Badge>}
+                          {cp.registry?.verified && <Badge className="text-[9px] bg-emerald-100 text-emerald-700">{t('k76_0a4c43')}</Badge>}
                         </div>
                         <div className="text-[11px] text-gray-500 space-y-0.5">
                           {cp.npwp && <div>NPWP: <span className="font-mono">{cp.npwp}</span></div>}
                           {cp.kbli_code && <div>KBLI: <span className="font-mono">{cp.kbli_code}</span></div>}
-                          {cp.address && <div className="truncate">주소: {cp.address}</div>}
+                          {cp.address && <div className="truncate">{t('k21_45f790')}: {cp.address}</div>}
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0 ml-2">
                         {licenseCount > 0 && (
                           <div className="text-[10px] text-gray-500 flex items-center gap-1">
                             <FileText className="h-2.5 w-2.5" />
-                            라이센스 {licenseCount}개
+                            {t('licenseCount', { count: licenseCount })}
                             {expiringSoon && <AlertTriangle className="h-2.5 w-2.5 text-amber-500" />}
                           </div>
                         )}
