@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
@@ -83,30 +84,33 @@ interface CompanyProfile {
   profile_completeness: number;
 }
 
-const BUSINESS_CATEGORIES = [
-  { value: 'SERVICE', label: '서비스업 (Jasa)', icon: Briefcase, desc: 'IT, 컨설팅, 법률, 회계 등', taxNote: 'PPh 23 원천징수 대상' },
-  { value: 'TRADING', label: '무역/유통 (Perdagangan)', icon: DollarSign, desc: '상품 매매, 도소매', taxNote: 'PPh 22 수입 시' },
-  { value: 'MANUFACTURING', label: '제조업 (Manufaktur)', icon: Factory, desc: '공장/생산', taxNote: 'PPh 22 산업체' },
-  { value: 'CONSTRUCTION', label: '건설업 (Konstruksi)', icon: Building2, desc: '건축, 토목, 설비', taxNote: 'PPh 4(2) Final — SBU 등급별 세율' },
-  { value: 'REAL_ESTATE', label: '부동산 (Real Estate)', icon: Home, desc: '부동산 매매/개발', taxNote: 'PPh 4(2) 2.5%' },
-  { value: 'FNB_RESTAURANT', label: '식당 (Restoran)', icon: Utensils, desc: '식당/카페', taxNote: 'PPN 면제 (지역세 적용)' },
-  { value: 'FNB_CATERING', label: '케이터링 (Katering)', icon: Utensils, desc: '출장 요리', taxNote: 'PPh 23 2%' },
-  { value: 'TRANSPORTATION', label: '운송/해운 (Transportasi)', icon: Ship, desc: '운송, 해운, 항공', taxNote: 'PPh 15 1.2~2.64%' },
-  { value: 'MINING', label: '광업 (Pertambangan)', icon: Pickaxe, desc: '광산, 자원 채굴', taxNote: 'PPh 22 Mining' },
-  { value: 'DIGITAL_PLATFORM', label: '디지털 플랫폼 (PMSE)', icon: Globe, desc: 'e-Commerce, SaaS, 앱', taxNote: 'PPN PMSE' },
-  { value: 'OTHER', label: '기타', icon: Building2, desc: '', taxNote: '' },
-];
 
-const LEGAL_FORMS = [
-  { value: 'PT', label: 'PT (Perseroan Terbatas)', desc: '유한회사 — PPh Final 3년 한도' },
-  { value: 'CV', label: 'CV (Commanditaire Vennootschap)', desc: '합자회사 — PPh Final 4년 한도' },
-  { value: 'UD', label: 'UD (Usaha Dagang)', desc: '개인사업체' },
-  { value: 'FIRMA', label: 'Firma', desc: '합명회사' },
-  { value: 'KOPERASI', label: 'Koperasi', desc: '협동조합' },
-  { value: 'YAYASAN', label: 'Yayasan', desc: '재단/비영리' },
-];
 
 export default function CompanyProfilePage() {
+  const t = useTranslations('companyProfile');
+
+  const LEGAL_FORMS = [
+    { value: 'PT', label: 'PT (Perseroan Terbatas)', desc: t('k25_b27f8d') + ' — PPh Final 3' + t('k26_73a335') },
+    { value: 'CV', label: 'CV (Commanditaire Vennootschap)', desc: t('k27_91f8c1') + ' — PPh Final 4' + t('k26_73a335') },
+    { value: 'UD', label: 'UD (Usaha Dagang)', desc: t('k28_0a0ce6') },
+    { value: 'FIRMA', label: 'Firma', desc: t('k29_ded89b') },
+    { value: 'KOPERASI', label: 'Koperasi', desc: t('k30_1a70cf') },
+    { value: 'YAYASAN', label: 'Yayasan', desc: t('k31_0ae069') },
+  ];
+
+  const BUSINESS_CATEGORIES = [
+    { value: 'SERVICE', label: t('k0_6f2592'), icon: Briefcase, desc: 'IT, ' + t('k1_677110'), taxNote: 'PPh 23 ' + t('k2_3f6978') },
+    { value: 'TRADING', label: t('k3_0b7b8d'), icon: DollarSign, desc: t('k4_9122c8'), taxNote: 'PPh 22 ' + t('k5_a58c1c') },
+    { value: 'MANUFACTURING', label: t('k6_df4760'), icon: Factory, desc: t('k7_8ea43b'), taxNote: 'PPh 22 ' + t('k8_aefb63') },
+    { value: 'CONSTRUCTION', label: t('k9_16c3b5'), icon: Building2, desc: t('k10_b417c5'), taxNote: 'PPh 4(2) Final — SBU ' + t('k11_f66f54') },
+    { value: 'REAL_ESTATE', label: t('k12_73053f'), icon: Home, desc: t('k13_ab53e5'), taxNote: 'PPh 4(2) 2.5%' },
+    { value: 'FNB_RESTAURANT', label: t('k14_3643aa'), icon: Utensils, desc: t('k15_abb477'), taxNote: 'PPN ' + t('k16_07263e') },
+    { value: 'FNB_CATERING', label: t('k17_53650e'), icon: Utensils, desc: t('k18_ac50b9'), taxNote: 'PPh 23 2%' },
+    { value: 'TRANSPORTATION', label: t('k19_06615f'), icon: Ship, desc: t('k20_f4cef4'), taxNote: 'PPh 15 1.2~2.64%' },
+    { value: 'MINING', label: t('k21_078b0b'), icon: Pickaxe, desc: t('k22_afc290'), taxNote: 'PPh 22 Mining' },
+    { value: 'DIGITAL_PLATFORM', label: t('k23_bd14ba'), icon: Globe, desc: 'e-Commerce, SaaS, 앱', taxNote: 'PPN PMSE' },
+    { value: 'OTHER', label: t('k24_7f598d'), icon: Building2, desc: '', taxNote: '' },
+  ];
   const { session } = useSession();
   const router = useRouter();
   const params = useParams();
@@ -163,12 +167,12 @@ export default function CompanyProfilePage() {
           company_name: data.data.name || prev.company_name,
           address: data.data.address || prev.address,
         } : prev);
-        showMsg('success', `NPWP 인식 완료 (신뢰도 ${Math.round((data.data.confidence || 0) * 100)}%)`);
+        showMsg('success', 'NPWP ' + t('k32_140b4c') + ' (' + Math.round((data.data.confidence || 0) * 100) + '%)');
       } else {
-        showMsg('error', 'NPWP 인식 실패 — 직접 입력해주세요');
+        showMsg('error', 'NPWP ' + t('k33_e67af7') + ' — ' + t('k34_3020c1'));
       }
     } catch {
-      showMsg('error', 'OCR 처리 중 오류 발생');
+      showMsg('error', 'OCR ' + t('k35_7bc738'));
     } finally {
       setOcrLoading(false);
     }
@@ -177,13 +181,13 @@ export default function CompanyProfilePage() {
   // LinkedIn-style: 다음 채울 항목 추천 (가중치 기반)
   const getNextItems = (p: CompanyProfile): Array<{ label: string; boost: number; href?: string }> => {
     const items: Array<{ label: string; boost: number }> = [];
-    if (!p.company_name) items.push({ label: '회사명 입력', boost: 14 });
-    if (!p.npwp) items.push({ label: 'NPWP 입력 (사진으로 자동 입력 가능)', boost: 14 });
-    if (!p.business_category) items.push({ label: '사업 유형 선택', boost: 14 });
-    if (!p.legal_form) items.push({ label: '법인 형태 선택 (PT/CV/UD 등)', boost: 7 });
-    if (!p.annual_revenue || p.annual_revenue <= 0) items.push({ label: '연 매출 입력', boost: 7 });
-    if (!p.established_year) items.push({ label: '설립 연도 입력', boost: 3 });
-    if (!p.address) items.push({ label: '주소 입력', boost: 3 });
+    if (!p.company_name) items.push({ label: t('k36_b75e2f'), boost: 14 });
+    if (!p.npwp) items.push({ label: `NPWP $' + t('k37_73b781') + '`, boost: 14 });
+    if (!p.business_category) items.push({ label: t('k38_a419a9'), boost: 14 });
+    if (!p.legal_form) items.push({ label: t('k39_aad46d'), boost: 7 });
+    if (!p.annual_revenue || p.annual_revenue <= 0) items.push({ label: t('k40_85ce9e'), boost: 7 });
+    if (!p.established_year) items.push({ label: t('k41_c33f93'), boost: 3 });
+    if (!p.address) items.push({ label: t('k42_6cced3'), boost: 3 });
     return items.slice(0, 4);
   };
 
@@ -199,7 +203,7 @@ export default function CompanyProfilePage() {
       });
       const data = await res.json();
       if (!data.success) {
-        showMsg('error', data.error || '저장 실패');
+        showMsg('error', data.error || t('k43_5f3ec4'));
         return;
       }
 
@@ -219,13 +223,13 @@ export default function CompanyProfilePage() {
       // 3. 완성도 80% 이상이면 대시보드로 이동 안내
       const completeness = data.data?.profile_completeness || taxData.data?.profile?.profile_completeness || 0;
       if (completeness >= 80) {
-        showMsg('success', '신고 준비가 완료되었습니다! 대시보드로 이동합니다.');
+        showMsg('success', t('k44_489111'));
         setTimeout(() => router.push(`/${locale}/dashboard`), 2000);
       } else {
-        showMsg('success', `저장 완료 (완성도 ${completeness}%). 추가 정보를 입력하면 신고 준비가 완료됩니다.`);
+        showMsg('success', `$' + t('k45_a50494') + ' ${completeness}%). ${t('k46_b1a005')}`);
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('k47_175c5f'));
     } finally {
       setSaving(false);
     }
@@ -239,7 +243,7 @@ export default function CompanyProfilePage() {
     return (
       <div className="container mx-auto py-16 px-4 max-w-md text-center">
         <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-sm text-gray-500">회사 프로필을 불러올 수 없습니다</p>
+        <p className="text-sm text-gray-500">' + t('k48_6d5980') + '</p>
       </div>
     );
   }
@@ -287,10 +291,10 @@ export default function CompanyProfilePage() {
       <div className="mb-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Building2 className="h-6 w-6 text-indigo-600" />
-          회사 세무 프로필
+          ' + t('k49_f0bca1') + '
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          {profile.company_name || '회사명'} — 세목 결정에 필요한 모든 정보를 관리합니다
+          {profile.company_name || t('k50_2e47c1')} — ' + t('k51_ce793a') + '
         </p>
       </div>
 
@@ -316,20 +320,20 @@ export default function CompanyProfilePage() {
             )}
             <div>
               <p className="font-bold text-base text-gray-900">
-                {isComplete ? '🎉 프로필 100% 완성!' : isReady ? '신고 준비 완료' : '프로필 완성도'}
+                {isComplete ? '🎉 ' + t('k52_367729') + '!' : isReady ? t('k53_669bdc') : t('k54_7c9d02')}
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
                 {isComplete
-                  ? '완벽합니다. 모든 세무 서비스를 이용할 수 있습니다.'
+                  ? t('k55_dc489b')
                   : isReady
-                  ? '신고를 시작할 수 있습니다. 100%까지 조금만 더 채워보세요.'
-                  : '몇 가지만 더 입력하면 세금 신고를 시작할 수 있습니다.'}
+                  ? t('k56_63989b')
+                  : t('k57_77d952')}
               </p>
             </div>
           </div>
           {isReady && (
             <Button size="sm" onClick={() => router.push(`/${locale}/dashboard`)} className="flex-shrink-0">
-              대시보드로
+              ' + t('k58_bbcea4') + '
             </Button>
           )}
         </div>
@@ -342,7 +346,7 @@ export default function CompanyProfilePage() {
         {/* Next items recommendation */}
         {!isComplete && nextItems.length > 0 && (
           <div>
-            <p className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-2">다음 채울 항목</p>
+            <p className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-2">{t('k59_776c06')}</p>
             <div className="grid sm:grid-cols-2 gap-2">
               {nextItems.map((item, i) => (
                 <div key={i} className="flex items-center gap-2 p-2 bg-white/70 rounded-lg border border-white">
@@ -359,11 +363,11 @@ export default function CompanyProfilePage() {
 
       <div className="mb-4 flex items-center justify-end gap-2">
         <Badge className={isReady ? 'bg-green-100 text-green-700' : completeness >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}>
-          완성도 {completeness}%
+          ' + t('k60_262eb0') + ' {completeness}%
         </Badge>
         <Button onClick={handleSave} disabled={saving} size="sm">
           {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-          저장
+          {t('k61_9d0a47')}
         </Button>
       </div>
 
@@ -376,18 +380,18 @@ export default function CompanyProfilePage() {
 
       <div className="space-y-3">
         {/* Section 0: Basic Info (with NPWP OCR) */}
-        <Section id="basic" title="기본 정보 (Basic Info)" icon={FileText} badge="필수">
-          <p className="text-[11px] text-gray-500 mb-2">회사명과 NPWP는 세금 신고 필수 정보입니다. NPWP 카드 사진을 올리면 자동으로 채워집니다.</p>
+        <Section id="basic" title="' + t('k62_2b51db') + '" icon={FileText} badge="{t('k63_b63c09')}">
+          <p className="text-[11px] text-gray-500 mb-2">' + t('k50_2e47c1') + '과 NPWP는 세금 신고 {t('k63_b63c09')} 정보입니다. NPWP 카드 사진을 올리면 자동으로 채워집니다.</p>
 
           {/* NPWP OCR Upload */}
           <div className="border-2 border-dashed border-blue-200 rounded-xl p-3 text-center bg-blue-50/50">
             <div className="flex items-center justify-center gap-2">
               <Camera className="h-4 w-4 text-blue-500" />
-              <p className="text-xs text-blue-700 font-medium">NPWP 카드 사진으로 자동 입력</p>
+              <p className="text-xs text-blue-700 font-medium">NPWP ' + t('k65_633b57') + '</p>
             </div>
             <label className="inline-flex items-center gap-2 mt-2 rounded-lg bg-blue-600 px-4 py-1.5 text-white text-xs font-medium hover:bg-blue-700 transition-colors cursor-pointer">
               {ocrLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
-              {ocrLoading ? 'AI 인식 중...' : '사진 촬영/업로드'}
+              {ocrLoading ? 'AI ' + t('k66_4f1c1b') : t('k67_d15ce8')}
               <input
                 type="file"
                 accept="image/*"
@@ -405,7 +409,7 @@ export default function CompanyProfilePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
             <div className="md:col-span-2">
-              <Label className="text-xs">회사명 <span className="text-red-500">*</span></Label>
+              <Label className="text-xs">' + t('k50_2e47c1') + ' <span className="text-red-500">*</span></Label>
               <Input
                 value={profile.company_name || ''}
                 onChange={e => updateField('company_name', e.target.value)}
@@ -423,7 +427,7 @@ export default function CompanyProfilePage() {
               />
             </div>
             <div>
-              <Label className="text-xs">주소</Label>
+              <Label className="text-xs">' + t('k68_45f790') + '</Label>
               <Input
                 value={profile.address || ''}
                 onChange={e => updateField('address', e.target.value)}
@@ -435,8 +439,8 @@ export default function CompanyProfilePage() {
         </Section>
 
         {/* Section 1: Business Type */}
-        <Section id="business" title="사업 유형 (Business Type)" icon={Briefcase} badge="세금 체제 결정">
-          <p className="text-[11px] text-gray-500 mb-2">사업 유형에 따라 적용되는 세목과 세율이 달라집니다.</p>
+        <Section id="business" title="' + t('k69_2aa9e2') + '" icon={Briefcase} badge="{t('k70_3cec60')}">
+          <p className="text-[11px] text-gray-500 mb-2">' + t('k71_ffc082') + '</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {BUSINESS_CATEGORIES.map(cat => {
               const Icon = cat.icon;
@@ -456,41 +460,41 @@ export default function CompanyProfilePage() {
         </Section>
 
         {/* Section 2: Legal / UMKM */}
-        <Section id="legal" title="법인 형태 및 UMKM" icon={Shield} badge="PPh 25 vs PPh Final">
+        <Section id="legal" title="' + t('k72_45d02a') + '" icon={Shield} badge="PPh 25 vs PPh Final">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs">법인 형태</Label>
+              <Label className="text-xs">{t('k73_c2e5a1')}</Label>
               <select value={profile.legal_form || ''} onChange={e => updateField('legal_form', e.target.value || null)}
                 className="w-full h-9 px-3 rounded-md border border-input text-xs">
-                <option value="">선택하세요</option>
+                <option value="">' + t('k74_f1d7fb') + '</option>
                 {LEGAL_FORMS.map(lf => <option key={lf.value} value={lf.value}>{lf.label}</option>)}
               </select>
             </div>
             <div>
-              <Label className="text-xs">설립 연도</Label>
+              <Label className="text-xs">{t('k75_7f0fd8')}</Label>
               <Input type="number" value={profile.established_year || ''} onChange={e => updateField('established_year', e.target.value ? Number(e.target.value) : null)}
                 placeholder="2020" className="text-xs" />
             </div>
             <div>
-              <Label className="text-xs">연 매출 (Rp)</Label>
+              <Label className="text-xs">' + t('k76_6e882c') + '</Label>
               <Input type="number" value={profile.annual_revenue || ''} onChange={e => updateField('annual_revenue', e.target.value ? Number(e.target.value) : null)}
                 placeholder="5000000000" className="font-mono text-xs" />
               {profile.annual_revenue && profile.annual_revenue < 4_800_000_000 && (
-                <p className="text-[11px] text-green-600 mt-1">✓ 48억 IDR 미만 — UMKM PPh Final 0.5% 대상 가능</p>
+                <p className="text-[11px] text-green-600 mt-1">✓ 48' + t('k77_5e4cf0') + ' — UMKM PPh Final 0.5% {t('k78_ddaf1c')}</p>
               )}
             </div>
             <div>
-              <Label className="text-xs">납입 자본금 (Rp)</Label>
+              <Label className="text-xs">' + t('k79_79d9cf') + '</Label>
               <Input type="number" value={profile.paid_up_capital || ''} onChange={e => updateField('paid_up_capital', e.target.value ? Number(e.target.value) : null)}
                 className="font-mono text-xs" />
             </div>
           </div>
           <div className="space-y-2 mt-2">
             <Checkbox checked={profile.is_umkm} onChange={v => updateField('is_umkm', v)}
-              label="UMKM 등록 (PP 55/2022)" desc="연매출 48억 IDR 미만 → PPh Final 0.5%. PT: 3년, CV: 4년, 개인: 7년 한도" />
+              label="UMKM ' + t('k80_7eb57f') + '" desc="연매출 48{t('k77_5e4cf0')} → PPh Final 0.5%. PT: 3' + t('k82_be832d') + ': 4{t('k83_06df20')}: 7' + t('k26_73a335') + '" />
             {profile.is_umkm && (
               <div className="ml-6">
-                <Label className="text-[10px]">PPh Final 0.5% 시작 연도</Label>
+                <Label className="text-[10px]">PPh Final 0.5% {t('k84_e71351')}</Label>
                 <Input type="number" value={profile.umkm_final_tax_start_year || ''} className="w-32 h-8 text-xs"
                   onChange={e => updateField('umkm_final_tax_start_year', e.target.value ? Number(e.target.value) : null)} />
               </div>
@@ -500,11 +504,11 @@ export default function CompanyProfilePage() {
             <div className="border-t pt-2 mt-2">
               <Checkbox checked={profile.npwp_pph25_elected}
                 onChange={v => updateField('npwp_pph25_elected', v)}
-                label="NPWP 발행 시 PPh 25 선택"
-                desc="NPWP 등록 시점에 PPh 25 적용을 선택하신 경우 체크. 체크 시 설립 3년 이내라도 UMKM PPh Final 대신 일반 법인세(PPh 25)가 적용됩니다." />
+                label="NPWP ' + t('k85_ea9b00') + '"
+                desc="NPWP {t('k86_fc3b9e')}" />
               {profile.npwp_pph25_elected && (
                 <div className="ml-6 mt-1">
-                  <Label className="text-[10px]">PPh 25 선택일 (NPWP 발행일)</Label>
+                  <Label className="text-[10px]">PPh 25 ' + t('k87_79bb85') + '</Label>
                   <Input type="date"
                     value={profile.npwp_pph25_elected_at || ''}
                     className="w-40 h-8 text-xs"
@@ -516,23 +520,23 @@ export default function CompanyProfilePage() {
         </Section>
 
         {/* Section 3: Ownership */}
-        <Section id="ownership" title="소유 구조 (Ownership)" icon={Users}>
+        <Section id="ownership" title="' + t('k88_0f43fb') + '" icon={Users}>
           <Checkbox checked={profile.has_foreign_shareholders} onChange={v => updateField('has_foreign_shareholders', v)}
-            label="외국인/외국법인 주주가 있습니다" desc="→ PPh 26 배당 원천징수, Transfer Pricing 이슈 가능" />
+            label="' + t('k89_b46f1f') + '" desc="→ PPh 26 {t('k90_7955d0')}" />
           {profile.has_foreign_shareholders && (
             <div className="ml-6 grid grid-cols-3 gap-2">
               <div>
-                <Label className="text-[10px]">외국인 지분율 (%)</Label>
+                <Label className="text-[10px]">' + t('k91_cf8318') + '</Label>
                 <Input type="number" value={profile.foreign_ownership_pct || ''} className="h-8 text-xs"
                   onChange={e => updateField('foreign_ownership_pct', e.target.value ? Number(e.target.value) : null)} />
               </div>
               <div>
-                <Label className="text-[10px]">모회사명</Label>
+                <Label className="text-[10px]">모' + t('k50_2e47c1') + '</Label>
                 <Input value={profile.parent_company_name || ''} className="h-8 text-xs"
                   onChange={e => updateField('parent_company_name', e.target.value || null)} />
               </div>
               <div>
-                <Label className="text-[10px]">모회사 국가 (ISO)</Label>
+                <Label className="text-[10px]">' + t('k93_df9baf') + '</Label>
                 <Input value={profile.parent_company_country || ''} className="h-8 text-xs font-mono" maxLength={2}
                   onChange={e => updateField('parent_company_country', e.target.value.toUpperCase() || null)} />
               </div>
@@ -544,60 +548,60 @@ export default function CompanyProfilePage() {
         <ShareholderSection />
 
         {/* Section 4: Income Sources */}
-        <Section id="income" title="수입원 및 지출 유형 (Income & Expenses)" icon={DollarSign} badge="세목 결정 핵심">
-          <p className="text-[11px] text-gray-500 mb-2">해당되는 항목을 모두 선택하세요. 세목(PPh 21/22/23/26/4(2), PPN) 적용 여부를 판단합니다.</p>
+        <Section id="income" title="' + t('k94_7c846a') + ' & Expenses)" icon={DollarSign} badge="{t('k95_8a337a')}">
+          <p className="text-[11px] text-gray-500 mb-2">해당되는 항목을 모두 ' + t('k74_f1d7fb') + '. 세목(PPh 21/22/23/26/4(2), PPN) 적용 여부를 판단합니다.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <Checkbox checked={profile.has_employees} onChange={v => updateField('has_employees', v)}
-              label="직원 고용" desc="→ PPh 21 월 신고" />
+              label="' + t('k97_b59235') + '" desc="→ PPh 21 {t('k98_f68dad')}" />
             <Checkbox checked={profile.is_pkp} onChange={v => updateField('is_pkp', v)}
-              label="PKP 등록 (VAT)" desc="→ PPN 11% 월 신고" />
+              label="PKP ' + t('k99_c35e34') + '" desc="→ PPN 11% {t('k98_f68dad')}" />
             <Checkbox checked={profile.pays_service_fees} onChange={v => updateField('pays_service_fees', v)}
-              label="서비스 비용 지급" desc="→ PPh 23 원천징수 (2%)" />
+              label="' + t('k100_72a7fc') + '" desc="→ PPh 23 {t('k101_a260fe')}" />
             <Checkbox checked={profile.has_import_export} onChange={v => updateField('has_import_export', v)}
-              label="수입/수출 거래" desc="→ PPh 22 + 수입 PPN" />
+              label="' + t('k102_3c83e0') + '" desc="→ PPh 22 + {t('k103_90fe7f')}" />
             <Checkbox checked={profile.has_rental_business} onChange={v => updateField('has_rental_business', v)}
-              label="임대 수입 (건물/토지)" desc="→ PPh 4(2) Final 10%" />
+              label="' + t('k104_180391') + '" desc="→ PPh 4(2) Final 10%" />
             <Checkbox checked={profile.pays_rent} onChange={v => updateField('pays_rent', v)}
-              label="임차료 지급" desc="→ PPh 4(2) 원천징수 10%" />
+              label="' + t('k105_06030b') + '" desc="→ PPh 4(2) {t('k106_1e146b')}" />
             <Checkbox checked={profile.receives_dividends} onChange={v => updateField('receives_dividends', v)}
-              label="배당 수입" desc="→ PPh 23 15% (국내) / PPh 26 (국외)" />
+              label="' + t('k107_b8a139') + '" desc="→ PPh 23 15% ({t('k108_780901')}" />
             <Checkbox checked={profile.receives_interest} onChange={v => updateField('receives_interest', v)}
-              label="이자 수입" desc="→ PPh 23 15% / PPh 4(2)" />
+              label="' + t('k109_f3d368') + '" desc="→ PPh 23 15% / PPh 4(2)" />
             <Checkbox checked={profile.receives_royalties} onChange={v => updateField('receives_royalties', v)}
-              label="로열티 수입" desc="→ PPh 23 15% (국내) / PPh 26 (국외)" />
+              label="' + t('k110_351231') + '" desc="→ PPh 23 15% ({t('k108_780901')}" />
             <Checkbox checked={profile.has_franchise} onChange={v => updateField('has_franchise', v)}
-              label="프랜차이즈 사업" desc="→ PPh 23 로열티" />
+              label="' + t('k111_43b93b') + '" desc="→ PPh 23 {t('k112_a9c8d4')}" />
             <Checkbox checked={profile.sells_property} onChange={v => updateField('sells_property', v)}
-              label="부동산 매매/양도" desc="→ PPh 4(2) Final 2.5%" />
+              label="' + t('k113_3bdbdb') + '" desc="→ PPh 4(2) Final 2.5%" />
             <Checkbox checked={profile.has_shipping_business} onChange={v => updateField('has_shipping_business', v)}
-              label="해운/항공 운송" desc="→ PPh 15" />
+              label="' + t('k114_7c23cc') + '" desc="→ PPh 15" />
           </div>
         </Section>
 
         {/* Section 5: Construction (conditional) */}
         {(profile.business_category === 'CONSTRUCTION' || profile.has_construction_sbu) && (
-          <Section id="construction" title="건설업 상세 (Konstruksi)" icon={Building2} badge="PPh 4(2)">
+          <Section id="construction" title="' + t('k115_4b74db') + '" icon={Building2} badge="PPh 4(2)">
             <Checkbox checked={profile.has_construction_sbu} onChange={v => updateField('has_construction_sbu', v)}
-              label="SBU (Sertifikat Badan Usaha) 보유" desc="PP 9/2022 건설 PPh Final 세율 결정" />
+              label="SBU (Sertifikat Badan Usaha) ' + t('k116_286f58') + '" desc="PP 9/2022 {t('k117_8dee5d')}" />
             {profile.has_construction_sbu && (
               <div className="grid grid-cols-3 gap-2 ml-6">
                 <div>
-                  <Label className="text-[10px]">SBU 등급</Label>
+                  <Label className="text-[10px]">SBU ' + t('k118_0e1cd4') + '</Label>
                   <select value={profile.sbu_qualification || ''} onChange={e => updateField('sbu_qualification', e.target.value || null)}
                     className="w-full h-8 px-2 rounded border text-xs">
-                    <option value="">선택</option>
+                    <option value="">' + t('k119_3828fa') + '</option>
                     <option value="SMALL">Kecil (1.75%)</option>
                     <option value="MEDIUM">Menengah (2.65%)</option>
                     <option value="LARGE">Besar (4%)</option>
                   </select>
                 </div>
                 <div>
-                  <Label className="text-[10px]">SBU 번호</Label>
+                  <Label className="text-[10px]">SBU {t('k120_5ca2f7')}</Label>
                   <Input value={profile.sbu_number || ''} className="h-8 text-xs font-mono"
                     onChange={e => updateField('sbu_number', e.target.value || null)} />
                 </div>
                 <div>
-                  <Label className="text-[10px]">만료일</Label>
+                  <Label className="text-[10px]">' + t('k121_a37db9') + '</Label>
                   <Input type="date" value={profile.sbu_expires_at || ''} className="h-8 text-xs"
                     onChange={e => updateField('sbu_expires_at', e.target.value || null)} />
                 </div>
@@ -608,17 +612,17 @@ export default function CompanyProfilePage() {
 
         {/* Section 6: F&B (conditional) */}
         {(profile.business_category === 'FNB_RESTAURANT' || profile.business_category === 'FNB_CATERING' || profile.is_restaurant || profile.is_catering) && (
-          <Section id="fnb" title="F&B 상세" icon={Utensils}>
+          <Section id="fnb" title="F&B ' + t('k122_b70e98') + '" icon={Utensils}>
             <Checkbox checked={profile.is_restaurant} onChange={v => updateField('is_restaurant', v)}
-              label="식당 운영 (Restoran)" desc="지역세(Pajak Restoran) 적용, PPN 면제" />
+              label="' + t('k123_12daf7') + '" desc="{t('k124_e051d4')}" />
             <Checkbox checked={profile.is_catering} onChange={v => updateField('is_catering', v)}
-              label="케이터링 서비스 (Jasa Katering)" desc="PPh 23 2% 원천징수 대상" />
+              label="' + t('k125_78c265') + '" desc="PPh 23 2% {t('k2_3f6978')}" />
           </Section>
         )}
 
         {/* AI Questions */}
         {profile.ai_profile_questions && profile.ai_profile_questions.length > 0 && (
-          <Section id="ai" title="AI 추가 질문" icon={Sparkles}>
+          <Section id="ai" title="AI ' + t('k126_8932d6') + '" icon={Sparkles}>
             <div className="space-y-3">
               {profile.ai_profile_questions.map((q, i) => (
                 <div key={i} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -633,7 +637,7 @@ export default function CompanyProfilePage() {
                       updated[i] = { ...updated[i], answer: e.target.value };
                       updateField('ai_profile_questions', updated);
                     }}
-                    placeholder="답변을 입력하세요"
+                    placeholder={t('k127_e7a792')}
                     className="h-8 text-xs"
                   />
                 </div>
@@ -647,10 +651,10 @@ export default function CompanyProfilePage() {
       <div className="mt-6">
         <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-          저장 및 신고 준비
+          {t('k61_9d0a47')} 및 신고 준비
         </Button>
         <p className="text-[11px] text-gray-400 text-center mt-2">
-          저장 시 세금 체제가 자동 판정됩니다. 필수 정보가 모두 입력되면 대시보드로 이동합니다.
+          ' + t('k61_9d0a47') + ' 시 세금 체제가 자동 판정됩니다. {t('k63_b63c09')} 정보가 모두 입력되면 {t('k58_bbcea4')} 이동합니다.
         </p>
       </div>
     </div>
