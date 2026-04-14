@@ -3330,6 +3330,10 @@
     "employeeDeactivated": "Karyawan dinonaktifkan",
     "deactivateConfirm": "Nonaktifkan karyawan ini?",
     "cancel": "Batal",
-    "employeeCountValue": "{count} orang"
+    "employeeCountValue": "{count} orang",
+    "step1_upload": "Upload Data",
+    "step2_ai": "Proses AI",
+    "step3_calculate": "Hitung Pajak",
+    "step4_billing": "Billing"
   }
 }

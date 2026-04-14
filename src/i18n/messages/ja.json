@@ -3330,6 +3330,10 @@
     "employeeDeactivated": "Employee deactivated",
     "deactivateConfirm": "Deactivate this employee?",
     "cancel": "Cancel",
-    "employeeCountValue": "{count}"
+    "employeeCountValue": "{count}",
+    "step1_upload": "Data Upload",
+    "step2_ai": "AI Processing",
+    "step3_calculate": "Tax Calculation",
+    "step4_billing": "Billing"
   }
 }

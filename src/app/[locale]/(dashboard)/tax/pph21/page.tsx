@@ -215,6 +215,42 @@ export default function PPh21PayrollPage() {
         </div>
       </div>
 
+      {/* Step Progress Indicator */}
+      <div className="mb-6 flex items-center gap-1 overflow-x-auto pb-1">
+        {[
+          { step: 1, label: tp('step1_upload'), tab: 'upload' },
+          { step: 2, label: tp('step2_ai'), tab: 'monthly' },
+          { step: 3, label: tp('step3_calculate'), tab: 'master' },
+          { step: 4, label: tp('step4_billing'), tab: 'filing' },
+        ].map((s, i, arr) => {
+          const tabOrder = ['upload', 'monthly', 'master', 'freelancer', 'filing'];
+          const currentIdx = tabOrder.indexOf(activeTab);
+          const stepIdx = tabOrder.indexOf(s.tab);
+          const isActive = activeTab === s.tab || (s.step === 3 && activeTab === 'freelancer');
+          const isDone = stepIdx < currentIdx;
+          return (
+            <div key={s.step} className="flex items-center">
+              <button
+                onClick={() => setActiveTab(s.tab)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap border ${
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-sm border-blue-600'
+                    : isDone
+                    ? 'bg-green-50 text-green-700 border-green-200'
+                    : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                <span className="font-bold">{s.step}.</span> {s.label}
+                {isDone && <CheckCircle className="h-3 w-3 ml-1" />}
+              </button>
+              {i < arr.length - 1 && (
+                <div className={`mx-1.5 w-6 h-0.5 flex-shrink-0 ${isDone ? 'bg-green-300' : 'bg-gray-200'}`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
       {/* Message */}
       {message && (
         <div className={`mb-4 p-3 rounded-xl text-sm flex items-center gap-2 ${message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
