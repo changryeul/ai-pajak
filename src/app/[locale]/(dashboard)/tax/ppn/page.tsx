@@ -279,7 +279,7 @@ export default function PPNPage() {
               {(['ALL', 'OUTPUT', 'INPUT'] as FakturFilter[]).map(f => (
                 <button key={f} onClick={() => setFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                  {f === 'ALL' ? `${t('filterAll')} (${fakturs.length})` : f === 'OUTPUT' ? `${t('filterKeluaran')} (${fakturs.filter(f => f.faktur_type === 'KELUARAN').length})` : `${t('filterMasukan')} (${fakturs.filter(f => f.faktur_type === 'MASUKAN').length})`}
+                  {f === 'ALL' ? t('filterAll') + ' (' + fakturs.length + ')' : f === 'OUTPUT' ? t('filterKeluaran') + ' (' + fakturs.filter(x => x.faktur_type === 'KELUARAN').length + ')' : t('filterMasukan') + ' (' + fakturs.filter(x => x.faktur_type === 'MASUKAN').length + ')'}
                 </button>
               ))}
             </div>
@@ -571,6 +571,7 @@ function PPNFilingSection({
   fakturCount: number;
   locale: string;
 }) {
+  const t = useTranslations('ppnPage');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedDocs, setUploadedDocs] = useState<Array<{
@@ -675,11 +676,11 @@ function PPNFilingSection({
   const isLebihBayar = netPpn < 0;
 
   const steps = [
-    { id: 1, label: 'Faktur 입력', done: fakturCount > 0, desc: `${fakturCount}건` },
-    { id: 2, label: '증빙 업로드', done: uploadedDocs.length > 0, desc: `${uploadedDocs.length}건` },
-    { id: 3, label: 'SPT Masa PPN', done: sptCreated, desc: sptCreated ? '생성됨' : '미생성' },
-    { id: 4, label: '납부', done: false, desc: netPpn > 0 ? fmt(netPpn) : netPpn < 0 ? '초과납부' : 'NIHIL' },
-    { id: 5, label: 'DJP 제출', done: false, desc: '납부 후' },
+    { id: 1, label: 'Faktur ' + t('k0_7bb79c'), done: fakturCount > 0, desc: `${fakturCount}건` },
+    { id: 2, label: t('k1_32a33a'), done: uploadedDocs.length > 0, desc: `${uploadedDocs.length}건` },
+    { id: 3, label: 'SPT Masa PPN', done: sptCreated, desc: sptCreated ? t('k2_b93104') : t('k3_ac6176') },
+    { id: 4, label: t('k4_b303e6'), done: false, desc: netPpn > 0 ? fmt(netPpn) : netPpn < 0 ? '초과' + t('k4_b303e6') : 'NIHIL' },
+    { id: 5, label: 'DJP ' + t('k6_d6ed72'), done: false, desc: t('k4_b303e6') + ' 후' },
   ];
 
   return (
@@ -690,12 +691,12 @@ function PPNFilingSection({
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-sm flex items-center gap-2">
               <Upload className="h-4 w-4 text-orange-600" />
-              Faktur Pajak 증빙 ({uploadedDocs.length}건)
+              Faktur Pajak {t('k8_c219cc')} ({uploadedDocs.length}{t('k9_bcbcd4')}
             </h3>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                Faktur 업로드
+                Faktur {t('k10_a45c31')}
               </Button>
               <Button size="sm" variant="outline" disabled={uploading}
                 onClick={() => {
@@ -704,7 +705,7 @@ function PPNFilingSection({
                   input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files);
                   input.click();
                 }}>
-                <Camera className="h-3 w-3 mr-1" />촬영
+                <Camera className="h-3 w-3 mr-1" />{t('k11_8383f9')}
               </Button>
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf" multiple
                 onChange={e => handleUpload(e.target.files)} />
@@ -713,7 +714,7 @@ function PPNFilingSection({
           {uploadedDocs.length === 0 ? (
             <div className="text-center py-4 text-xs text-gray-400 border-2 border-dashed rounded-lg">
               <Image className="h-6 w-6 mx-auto mb-1 opacity-30" />
-              <p>e-Faktur CSV, Faktur Pajak 이미지/PDF를 업로드하면 AI가 자동 인식합니다</p>
+              <p>e-Faktur CSV, Faktur Pajak 이미지/PDF를 {t('k10_a45c31')}하면 AI가 자동 인식합니다</p>
             </div>
           ) : (
             <div className="space-y-1 max-h-28 overflow-y-auto">
@@ -724,7 +725,7 @@ function PPNFilingSection({
                     doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
                     'text-[8px] bg-gray-100 text-gray-600'
                   }>
-                    {doc.ocr_status === 'COMPLETED' ? 'OCR완료' : doc.ocr_status === 'PROCESSING' ? '처리중' : '대기'}
+                    {doc.ocr_status === 'COMPLETED' ? 'OCR' + t('k13_4f8e30') : doc.ocr_status === 'PROCESSING' ? t('k14_95d1e4') : t('k15_65905a')}
                   </Badge>
                   <span className="truncate">{doc.file_name}</span>
                 </div>
@@ -739,7 +740,7 @@ function PPNFilingSection({
         <CardContent className="p-5">
           <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
             <Shield className="h-4 w-4 text-orange-600" />
-            {period} PPN 신고 진행 상황
+            {period} PPN {t('k16_aa38cd')}
           </h3>
 
           <div className="flex items-center justify-between mb-6">
@@ -766,7 +767,7 @@ function PPNFilingSection({
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-orange-600" />
                   <div className="text-xs">
-                    <p className="font-medium text-orange-900">SPT Masa PPN 생성 가능</p>
+                    <p className="font-medium text-orange-900">SPT Masa PPN {t('k17_b0b7b5')}</p>
                     <p className="text-orange-700">
                       PPN Keluaran: {fmt(summary.outputTax)} — PPN Masukan: {fmt(summary.inputTax)} —
                       Selisih: <b>{fmt(Math.abs(netPpn))}</b> ({netPpn > 0 ? 'Kurang Bayar' : netPpn < 0 ? 'Lebih Bayar' : 'Nihil'})
@@ -775,7 +776,7 @@ function PPNFilingSection({
                 </div>
                 <Button size="sm" onClick={handleCreateSPT} disabled={creatingSPT}>
                   {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-                  SPT Masa 생성
+                  SPT Masa {t('k18_4169bb')}
                 </Button>
               </div>
             )}
@@ -785,7 +786,7 @@ function PPNFilingSection({
               <div className="p-3 rounded-lg bg-green-50 border border-green-200">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <p className="text-xs font-medium text-green-900">SPT Masa PPN 생성 완료</p>
+                  <p className="text-xs font-medium text-green-900">SPT Masa PPN {t('k18_4169bb')} {t('k13_4f8e30')}</p>
                 </div>
                 <div className="grid grid-cols-4 gap-2 text-xs">
                   <div><p className="text-gray-500">PPN Keluaran</p><p className="font-mono font-bold">{fmt(summary.outputTax)}</p></div>
@@ -793,11 +794,11 @@ function PPNFilingSection({
                   <div>
                     <p className="text-gray-500">Selisih</p>
                     <p className={`font-mono font-bold ${netPpn > 0 ? 'text-red-700' : netPpn < 0 ? 'text-blue-700' : 'text-gray-700'}`}>
-                      {fmt(Math.abs(netPpn))} {netPpn > 0 ? '(납부)' : netPpn < 0 ? '(초과)' : '(NIHIL)'}
+                      {fmt(Math.abs(netPpn))} {netPpn > 0 ? '(' + t('k4_b303e6') + ')' : netPpn < 0 ? '(' + t('k21_d003cd') : '(NIHIL)'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-500">마감</p>
+                    <p className="text-gray-500">{t('k22_df2337')}</p>
                     <p>{sptResult.submissionDeadline?.substring(0, 10)}</p>
                   </div>
                 </div>
@@ -811,12 +812,12 @@ function PPNFilingSection({
                   <DollarSign className="h-4 w-4 text-indigo-600" />
                   <div className="text-xs">
                     <p className="font-medium text-indigo-900">PPN 납부: {fmt(netPpn)}</p>
-                    <p className="text-indigo-700">ID Billing 생성 후 은행에서 납부 → NTPN 입력</p>
+                    <p className="text-indigo-700">ID Billing {t('k18_4169bb')} 후 은행에서 납부 → NTPN 입력</p>
                   </div>
                 </div>
                 <a href={`/${locale}/tax/monthly-payments`}
                   className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
-                  납부 페이지로
+                  {t('k24_d76082')}
                 </a>
               </div>
             )}
@@ -825,8 +826,8 @@ function PPNFilingSection({
               <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-600" />
                 <div>
-                  <p className="font-medium">PPN 초과 납부 (Lebih Bayar): {fmt(Math.abs(netPpn))}</p>
-                  <p>다음 월로 이월(Kompensasi) 또는 환급 신청(Restitusi) 가능 — 아래 환급 섹션 참고</p>
+                  <p className="font-medium">PPN {t('k25_7fd5d5')}: {fmt(Math.abs(netPpn))}</p>
+                  <p>{t('k26_a4897c')} — {t('k27_f960de')}</p>
                 </div>
               </div>
             )}
@@ -834,7 +835,7 @@ function PPNFilingSection({
             {sptCreated && netPpn === 0 && (
               <div className="p-3 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600 flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-gray-400" />
-                <span>PPN NIHIL — 납부/환급 없음. SPT Masa 제출만 하면 됩니다.</span>
+                <span>PPN NIHIL — {t('k28_c33073')}</span>
               </div>
             )}
           </div>
@@ -849,6 +850,7 @@ function PPNFilingSection({
 // ══════════════════════════════════════════════════════
 function PPNRefundSection({ locale }: { locale: string }) {
   const [showRefund, setShowRefund] = useState(false);
+  const t = useTranslations('ppnPage');
   const [refundStep, setRefundStep] = useState(1);
   const [agreedFees, setAgreedFees] = useState(false);
   const [agreedAudit, setAgreedAudit] = useState(false);
@@ -873,12 +875,12 @@ function PPNRefundSection({ locale }: { locale: string }) {
                 <TrendingUp className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
-                <p className="font-bold text-sm">PPN 환급 신청 (Restitusi PPN)</p>
-                <p className="text-xs text-gray-500">매입세(PPN Masukan)가 매출세(PPN Keluaran)보다 큰 경우 환급 신청이 가능합니다</p>
+                <p className="font-bold text-sm">PPN {t('k29_789ddc')}</p>
+                <p className="text-xs text-gray-500">{t('k30_96e0f6')}</p>
               </div>
             </div>
             <Button onClick={() => setShowRefund(true)} variant="outline">
-              환급 절차 확인 <ArrowUpRight className="h-3 w-3 ml-1" />
+              {t('k31_1a2b6d')} <ArrowUpRight className="h-3 w-3 ml-1" />
             </Button>
           </div>
         </CardContent>
@@ -895,9 +897,9 @@ function PPNRefundSection({ locale }: { locale: string }) {
             <div>
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                PPN 환급 신청 (Restitusi PPN)
+                PPN {t('k29_789ddc')}
               </h2>
-              <p className="text-sm text-emerald-100 mt-1">Jakarta Tax Consulting 세무 감사 대행 서비스</p>
+              <p className="text-sm text-emerald-100 mt-1">Jakarta Tax Consulting {t('k32_6e2104')}</p>
             </div>
             <button onClick={() => setShowRefund(false)} className="text-white/70 hover:text-white">
               <X className="h-5 w-5" />
@@ -909,10 +911,10 @@ function PPNRefundSection({ locale }: { locale: string }) {
           {/* Step indicator */}
           <div className="flex items-center justify-between mb-2">
             {[
-              { id: 1, label: '환급 안내' },
-              { id: 2, label: '비용 확인' },
-              { id: 3, label: '신청 정보' },
-              { id: 4, label: '완료' },
+              { id: 1, label: t('k33_7844a2') },
+              { id: 2, label: t('k34_aae1bf') },
+              { id: 3, label: t('k35_829a90') },
+              { id: 4, label: t('k13_4f8e30') },
             ].map((s, i) => (
               <div key={s.id} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
@@ -930,37 +932,37 @@ function PPNRefundSection({ locale }: { locale: string }) {
           {refundStep === 1 && (
             <div className="space-y-3">
               <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-                <p className="font-bold text-sm text-emerald-900 mb-2">PPN 환급이란?</p>
+                <p className="font-bold text-sm text-emerald-900 mb-2">PPN {t('k36_09f6dc')}?</p>
                 <p className="text-xs text-emerald-800">
-                  매입세(PPN Masukan)가 매출세(PPN Keluaran)보다 많은 경우, 차액을 DJP(세무서)에서 돌려받는 것입니다.
-                  이를 <b>"Restitusi PPN"</b>이라 합니다.
+                  {t('k37_be38dd')}
+                  {t('k38_445cc6')} <b>"Restitusi PPN"</b>{t('k39_081b53')}
                 </p>
               </div>
 
               <div className="bg-red-50 rounded-xl p-4 border border-red-200">
                 <p className="font-bold text-sm text-red-900 flex items-center gap-2 mb-2">
                   <AlertTriangle className="h-4 w-4 text-red-600" />
-                  중요: 세무조사 수반
+                  {t('k40_1766bd')}: {t('k41_f6b4c4')}
                 </p>
                 <p className="text-xs text-red-800">
-                  PPN 환급을 신청하면 DJP가 <b>세무조사(Pemeriksaan Pajak)</b>를 실시합니다.
-                  이는 법적 의무이며, 모든 거래 증빙과 장부를 검토합니다.
+                  PPN {t('k42_0eac31')} <b>{t('k43_cbf9a9')}</b>{t('k44_63354a')}
+                  이는 법적 의무이며, 모든 거래 {t('k8_c219cc')}과 장부를 검토합니다.
                 </p>
                 <p className="text-xs text-red-800 mt-1">
-                  세무조사 기간은 통상 <b>3~12개월</b>이며, JTC가 전 과정을 대행합니다.
+                  {t('k46_d7dee2')} <b>3~12{t('k47_f667f2')}</b>{t('k48_ce06b2')}
                 </p>
               </div>
 
               <div className="bg-white rounded-xl p-4 border">
-                <p className="font-bold text-sm mb-3">환급 절차 (6단계)</p>
+                <p className="font-bold text-sm mb-3">{t('k49_55fa8f')}</p>
                 <div className="space-y-2 text-xs">
                   {[
-                    { step: '1', title: '사전 분석', desc: 'JTC 세무사가 Faktur Pajak, 장부, 증빙을 사전 검토하여 환급 가능성을 평가합니다.', duration: '1~2주' },
-                    { step: '2', title: '환급 신청서 제출', desc: 'SPT Masa PPN에 "Lebih Bayar — Restitusi" 표시하여 DJP에 제출합니다.', duration: '1일' },
-                    { step: '3', title: 'DJP 세무조사 통보', desc: 'DJP에서 조사 일정을 통보합니다. JTC가 모든 서류를 준비합니다.', duration: '1~3개월' },
-                    { step: '4', title: '세무조사 실시', desc: 'DJP 조사관이 사무실을 방문하거나 서류 제출을 요구합니다. JTC가 전 과정에 동행합니다.', duration: '1~6개월' },
-                    { step: '5', title: '조사 결과 통보', desc: 'DJP가 SKPLB(환급결정서) 또는 SKPKB(추가납부결정)를 발행합니다.', duration: '1~2주' },
-                    { step: '6', title: '환급금 수령', desc: '결정된 금액이 고객 계좌로 이체됩니다 (SKPLB 발행 후 1개월 이내).', duration: '1개월' },
+                    { step: '1', title: t('k50_e0cc70'), desc: t('k50_e0cc70'), duration: '1~2' + t('k47_f667f2') },
+                    { step: '2', title: t('k113_5fd53c') + ' ' + t('k6_d6ed72'), desc: 'SPT Masa PPN Lebih Bayar — Restitusi → DJP ' + t('k6_d6ed72'), duration: '1' + t('k56_1d0584') },
+                    { step: '3', title: 'DJP ' + t('k54_ee04da'), desc: 'DJP ' + t('k55_b63cd9'), duration: '1~3' + t('k47_f667f2') },
+                    { step: '4', title: t('k56_d6fa73'), desc: 'DJP 조사관이 사무실을 방문하거나 서류 ' + t('k6_d6ed72') + '을 요구합니다. JTC가 전 과정에 동행합니다.', duration: '1~6' + t('k47_f667f2') },
+                    { step: '5', title: t('k58_a43bd6'), desc: 'DJP가 SKPLB(환급결정서) 또는 SKPKB(추가' + t('k4_b303e6') + '결정)를 발행합니다.', duration: '1~2주' },
+                    { step: '6', title: t('k60_6345b9'), desc: t('k60_6345b9'), duration: '1' + t('k47_f667f2') },
                   ].map(item => (
                     <div key={item.step} className="flex gap-3 items-start">
                       <Badge className="bg-emerald-100 text-emerald-700 flex-shrink-0">{item.step}</Badge>
@@ -984,52 +986,52 @@ function PPNRefundSection({ locale }: { locale: string }) {
               <div className="bg-white rounded-xl p-4 border">
                 <p className="font-bold text-sm mb-3 flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-emerald-600" />
-                  JTC 세무조사 대행 비용
+                  JTC {t('k62_db9d38')}
                 </p>
 
                 <div className="space-y-3">
                   {/* Operating cost */}
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-bold text-blue-900">오퍼레이팅 비용 (고정)</p>
+                      <p className="text-sm font-bold text-blue-900">{t('k63_2b3c5e')}</p>
                       <p className="text-lg font-bold font-mono text-blue-700">Rp 20,000,000</p>
                     </div>
                     <p className="text-[11px] text-blue-700">
-                      세무조사 대행에 필요한 기본 비용입니다. 조사 결과에 관계없이 선불로 청구됩니다.
+                      {t('k64_bc4bdb')}
                     </p>
                     <ul className="text-[10px] text-blue-600 mt-2 space-y-0.5">
-                      <li>• Faktur Pajak / 장부 사전 검토</li>
-                      <li>• DJP 서류 준비 및 제출</li>
-                      <li>• 세무 조사관 대응 (사무실 방문 동행)</li>
-                      <li>• 조사 기간 중 추가 자료 요청 대응</li>
+                      <li>• Faktur Pajak / {t('k65_3418e5')}</li>
+                      <li>• DJP {t('k66_d7896e')}</li>
+                      <li>• {t('k67_6a481d')}</li>
+                      <li>• {t('k68_f9fd91')}</li>
                     </ul>
                   </div>
 
                   {/* Success fee */}
                   <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-bold text-emerald-900">성공 보수</p>
-                      <p className="text-lg font-bold font-mono text-emerald-700">환급액의 7%</p>
+                      <p className="text-sm font-bold text-emerald-900">{t('k69_b31bb9')}</p>
+                      <p className="text-lg font-bold font-mono text-emerald-700">{t('k70_69edb3')}</p>
                     </div>
                     <p className="text-[11px] text-emerald-700">
-                      환급이 확정된 금액에 대해서만 청구됩니다. 환급이 거부되면 성공 보수는 0원입니다.
+                      환급이 확정된 금액에 대해서만 청구됩니다. 환급이 거부되면 {t('k69_b31bb9')}는 0원입니다.
                     </p>
                   </div>
 
                   {/* Estimate calculator */}
                   <div className="p-3 bg-gray-50 rounded-lg border">
-                    <p className="text-xs font-bold mb-2">예상 비용 계산</p>
+                    <p className="text-xs font-bold mb-2">{t('k72_a4a9a0')}</p>
                     <div>
-                      <Label className="text-[10px]">예상 환급 금액 (Rp)</Label>
+                      <Label className="text-[10px]">{t('k73_ab8f53')}</Label>
                       <Input type="number" value={refundAmount} onChange={e => setRefundAmount(e.target.value)}
                         placeholder="500000000" className="font-mono h-8 text-xs" />
                     </div>
                     {estimatedRefund > 0 && (
                       <div className="mt-2 space-y-1 text-xs">
-                        <div className="flex justify-between"><span>오퍼레이팅 비용</span><span className="font-mono">Rp 20,000,000</span></div>
-                        <div className="flex justify-between"><span>성공 보수 (7% × {new Intl.NumberFormat('id-ID').format(estimatedRefund)})</span><span className="font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(estimatedSuccessFee)}</span></div>
-                        <div className="flex justify-between font-bold border-t pt-1"><span>예상 총 비용</span><span className="font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalEstimatedCost)}</span></div>
-                        <div className="flex justify-between text-emerald-700 font-bold"><span>예상 실수령 환급액</span><span className="font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(estimatedRefund - totalEstimatedCost)}</span></div>
+                        <div className="flex justify-between"><span>{t('k74_d089c1')}</span><span className="font-mono">Rp 20,000,000</span></div>
+                        <div className="flex justify-between"><span>{t('k69_b31bb9')} (7% × {new Intl.NumberFormat('id-ID').format(estimatedRefund)})</span><span className="font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(estimatedSuccessFee)}</span></div>
+                        <div className="flex justify-between font-bold border-t pt-1"><span>{t('k76_2db159')}</span><span className="font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalEstimatedCost)}</span></div>
+                        <div className="flex justify-between text-emerald-700 font-bold"><span>{t('k77_594f62')}</span><span className="font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(estimatedRefund - totalEstimatedCost)}</span></div>
                       </div>
                     )}
                   </div>
@@ -1042,16 +1044,16 @@ function PPNRefundSection({ locale }: { locale: string }) {
                   <input type="checkbox" checked={agreedFees} onChange={e => setAgreedFees(e.target.checked)}
                     className="mt-0.5 accent-emerald-600" />
                   <div className="text-xs">
-                    <p className="font-medium">비용 조건에 동의합니다 <span className="text-red-500">*</span></p>
-                    <p className="text-gray-500">오퍼레이팅 비용 Rp 20,000,000 (선불) + 환급액의 7% 성공 보수</p>
+                    <p className="font-medium">{t('k78_77194a')} <span className="text-red-500">*</span></p>
+                    <p className="text-gray-500">{t('k74_d089c1')} Rp 20,000,000 (선불) + {t('k70_69edb3')} {t('k69_b31bb9')}</p>
                   </div>
                 </label>
                 <label className="flex items-start gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                   <input type="checkbox" checked={agreedAudit} onChange={e => setAgreedAudit(e.target.checked)}
                     className="mt-0.5 accent-emerald-600" />
                   <div className="text-xs">
-                    <p className="font-medium">세무조사 동의 <span className="text-red-500">*</span></p>
-                    <p className="text-gray-500">PPN 환급 신청 시 DJP 세무조사가 수반됨을 이해하고 동의합니다</p>
+                    <p className="font-medium">{t('k81_e0de89')} <span className="text-red-500">*</span></p>
+                    <p className="text-gray-500">PPN {t('k82_441317')}</p>
                   </div>
                 </label>
               </div>
@@ -1063,48 +1065,48 @@ function PPNRefundSection({ locale }: { locale: string }) {
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs">환급 신청 기간 (SPT Masa PPN)</Label>
+                  <Label className="text-xs">{t('k83_98cd0b')}</Label>
                   <Input value={refundPeriod} onChange={e => setRefundPeriod(e.target.value)}
                     placeholder="예: 2026-01 ~ 2026-03" />
                 </div>
                 <div>
-                  <Label className="text-xs">예상 환급 금액 (Rp)</Label>
+                  <Label className="text-xs">{t('k73_ab8f53')}</Label>
                   <Input type="number" value={refundAmount} onChange={e => setRefundAmount(e.target.value)}
                     className="font-mono" placeholder="500000000" />
                 </div>
               </div>
               <div>
-                <Label className="text-xs">환급 사유</Label>
+                <Label className="text-xs">{t('k84_19e87b')}</Label>
                 <select value={refundReason} onChange={e => setRefundReason(e.target.value)}
                   className="w-full h-9 px-3 rounded-md border text-sm">
-                  <option value="">선택하세요</option>
-                  <option value="EXCESS_INPUT">매입세 초과 (PPN Masukan {'>'} Keluaran)</option>
-                  <option value="EXPORT">수출 거래 (PPN 0%)</option>
-                  <option value="CAPITAL_GOODS">자본재 취득</option>
-                  <option value="PKP_TERMINATION">PKP 등록 해제</option>
-                  <option value="OTHER">기타</option>
+                  <option value="">{t('k85_f1d7fb')}</option>
+                  <option value="EXCESS_INPUT">{t('k86_d00397')} {'>'} Keluaran)</option>
+                  <option value="EXPORT">{t('k87_eb6282')}</option>
+                  <option value="CAPITAL_GOODS">{t('k88_5266a8')}</option>
+                  <option value="PKP_TERMINATION">PKP {t('k89_d53d30')}</option>
+                  <option value="OTHER">{t('k90_7f598d')}</option>
                 </select>
               </div>
 
               <div className="bg-amber-50 rounded-lg p-3 text-xs text-amber-800 border border-amber-200">
-                <p className="font-bold flex items-center gap-1"><AlertTriangle className="h-3 w-3" />환급 신청 전 준비 사항</p>
+                <p className="font-bold flex items-center gap-1"><AlertTriangle className="h-3 w-3" />{t('k91_84f2f6')}</p>
                 <ul className="mt-1 space-y-0.5">
-                  <li>• 해당 기간 모든 Faktur Pajak (Keluaran + Masukan) 원본 보관</li>
-                  <li>• 매입/매출 거래 증빙 (인보이스, 계약서, 납품서)</li>
-                  <li>• 은행 거래내역서 (해당 기간)</li>
-                  <li>• 회계 장부 (Buku Besar, Jurnal)</li>
-                  <li>• e-Faktur 데이터 백업 (CSV/XML)</li>
+                  <li>• {t('k92_0d7003')} + Masukan) {t('k93_d47e1e')}</li>
+                  <li>• 매입/매출 거래 {t('k8_c219cc')} (인보이스, 계약서, 납품서)</li>
+                  <li>• {t('k95_b95354')}</li>
+                  <li>• {t('k96_197524')}</li>
+                  <li>• e-Faktur {t('k97_f6f0cc')}</li>
                 </ul>
               </div>
 
               <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                <p className="text-xs font-bold text-emerald-900">JTC 담당자가 다음을 수행합니다:</p>
+                <p className="text-xs font-bold text-emerald-900">JTC {t('k98_3eba7d')}:</p>
                 <ul className="text-[11px] text-emerald-800 mt-1 space-y-0.5">
-                  <li>✓ 사전 Faktur 분석 — 불일치/오류 사전 수정</li>
+                  <li>✓ {t('k99_93c016')} — {t('k100_b7e27c')}</li>
                   <li>✓ SPT Masa PPN "Lebih Bayar — Restitusi" 제출</li>
-                  <li>✓ DJP 조사관 대응 — 모든 서류 준비 + 방문 동행</li>
-                  <li>✓ 추가 자료 요청 시 즉시 대응</li>
-                  <li>✓ SKPLB(환급결정) 또는 SKPKB(추가납부) 결과 분석 및 이의신청 검토</li>
+                  <li>✓ DJP {t('k101_bb490b')} — {t('k102_7441f9')} + {t('k103_4aac74')}</li>
+                  <li>✓ {t('k104_2a6e81')}</li>
+                  <li>✓ SKPLB(환급결정) 또는 SKPKB(추가{t('k20_2c6f99')} 결과 분석 및 이의신청 검토</li>
                 </ul>
               </div>
             </div>
@@ -1116,21 +1118,21 @@ function PPNRefundSection({ locale }: { locale: string }) {
               <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle className="h-8 w-8 text-emerald-600" />
               </div>
-              <p className="font-bold text-lg">환급 신청 접수 완료</p>
+              <p className="font-bold text-lg">{t('k113_5fd53c')} 접수 {t('k13_4f8e30')}</p>
               <p className="text-sm text-gray-600 mt-2">
-                JTC 담당 세무사가 1영업일 이내에 연락드립니다.
+                JTC {t('k107_04e227')}
               </p>
               <div className="mt-4 bg-gray-50 rounded-lg p-3 text-xs text-left max-w-md mx-auto">
-                <p className="font-medium mb-1">신청 정보 요약</p>
+                <p className="font-medium mb-1">{t('k108_ed1d88')}</p>
                 <div className="space-y-0.5">
-                  <p>기간: {refundPeriod || '-'}</p>
-                  <p>예상 환급: {estimatedRefund > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(estimatedRefund) : '-'}</p>
-                  <p>오퍼레이팅 비용: Rp 20,000,000</p>
-                  <p>성공 보수: 환급액의 7%</p>
+                  <p>{t('k109_7bc7c5')}: {refundPeriod || '-'}</p>
+                  <p>{t('k110_38e8ae')}: {estimatedRefund > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(estimatedRefund) : '-'}</p>
+                  <p>{t('k74_d089c1')}: Rp 20,000,000</p>
+                  <p>{t('k69_b31bb9')}: {t('k70_69edb3')}</p>
                 </div>
               </div>
               <Button className="mt-6" onClick={() => { setShowRefund(false); setRefundStep(1); }}>
-                닫기
+                {t('k111_218e2a')}
               </Button>
             </div>
           )}
@@ -1140,7 +1142,7 @@ function PPNRefundSection({ locale }: { locale: string }) {
             <div className="flex justify-between pt-2">
               {refundStep > 1 ? (
                 <Button variant="outline" size="sm" onClick={() => setRefundStep(refundStep - 1)}>
-                  이전
+                  {t('k112_cb1dc9')}
                 </Button>
               ) : <div />}
               <Button size="sm"
@@ -1155,7 +1157,7 @@ function PPNRefundSection({ locale }: { locale: string }) {
                   setRefundStep(refundStep + 1);
                 }}
               >
-                {refundStep === 3 ? '환급 신청' : '다음'}
+                {refundStep === 3 ? t('k113_5fd53c') : t('k114_fe6879')}
                 <ArrowUpRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
