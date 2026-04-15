@@ -11,6 +11,7 @@ import {
   Sparkles, Loader2, CheckCircle, ArrowRight, Shield,
   Globe, Building2, FileText, AlertTriangle, Zap,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Resolution {
   taxType: string;
@@ -26,31 +27,14 @@ interface Resolution {
   alternativeRules?: Array<{ ruleId: string; reason: string }>;
 }
 
-const SERVICE_CATEGORIES = [
-  { value: 'SERVICE', label: 'Service (일반 용역)', icon: '🔧' },
-  { value: 'CONSTRUCTION', label: 'Construction (건설)', icon: '🏗️' },
-  { value: 'RENTAL', label: 'Rental (임대)', icon: '🏠' },
-  { value: 'EMPLOYMENT', label: 'Employment (근로)', icon: '👤' },
-  { value: 'DIVIDEND', label: 'Dividend (배당)', icon: '💰' },
-  { value: 'INTEREST', label: 'Interest (이자)', icon: '🏦' },
-  { value: 'ROYALTY', label: 'Royalty (로열티)', icon: '©️' },
-  { value: 'IMPORT', label: 'Import (수입)', icon: '📦' },
-  { value: 'SHIPPING', label: 'Shipping (해운)', icon: '🚢' },
-  { value: 'OTHER', label: 'Other (기타)', icon: '📋' },
-];
+const SERVICE_CATEGORY_KEYS = ['SERVICE', 'CONSTRUCTION', 'RENTAL', 'EMPLOYMENT', 'DIVIDEND', 'INTEREST', 'ROYALTY', 'IMPORT', 'SHIPPING', 'OTHER'] as const;
+const SERVICE_CATEGORY_ICONS: Record<string, string> = {
+  SERVICE: '🔧', CONSTRUCTION: '🏗️', RENTAL: '🏠', EMPLOYMENT: '👤',
+  DIVIDEND: '💰', INTEREST: '🏦', ROYALTY: '©️', IMPORT: '📦', SHIPPING: '🚢', OTHER: '📋',
+};
 
-const CONSTRUCTION_TYPES = [
-  { value: 'WORK', label: 'Pelaksana (시공)' },
-  { value: 'CONSULT', label: 'Konsultansi (컨설팅)' },
-  { value: 'INTEGRATED', label: 'Terintegrasi (통합)' },
-];
-
-const QUALIFICATIONS = [
-  { value: 'SMALL', label: 'Kecil (소규모)' },
-  { value: 'MEDIUM_LARGE', label: 'Menengah/Besar (중/대규모)' },
-  { value: 'QUALIFIED', label: 'Berkualifikasi (자격보유)' },
-  { value: 'NONE', label: 'Tanpa Kualifikasi (자격없음)' },
-];
+const CONSTRUCTION_TYPE_KEYS = ['WORK', 'CONSULT', 'INTEGRATED'] as const;
+const QUALIFICATION_KEYS = ['SMALL', 'MEDIUM_LARGE', 'QUALIFIED', 'NONE'] as const;
 
 const PRIORITY_LABELS: Record<number, { label: string; color: string }> = {
   1: { label: 'Override Rule', color: 'bg-red-100 text-red-700' },
@@ -63,34 +47,43 @@ const PRIORITY_LABELS: Record<number, { label: string; color: string }> = {
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 function pct(n: number) { return `${(n * 100).toFixed(n * 100 % 1 === 0 ? 0 : 2)}%`; }
 
-// Preset scenarios
-const PRESETS = [
-  { name: '일반 서비스 (NPWP 有)', data: { grossAmount: '100000000', serviceCategory: 'SERVICE', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-  { name: '일반 서비스 (NPWP 無)', data: { grossAmount: '100000000', serviceCategory: 'SERVICE', recipientType: 'RESIDENT', recipientNpwp: '', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-  { name: '관리사무소 (Owner=Vendor)', data: { grossAmount: '50000000', serviceCategory: 'SERVICE', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: true, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-  { name: '건설 시공 (소규모)', data: { grossAmount: '1000000000', serviceCategory: 'CONSTRUCTION', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: 'WORK', qualification: 'SMALL', kbliCode: '' } },
-  { name: '건설 컨설팅 (자격없음)', data: { grossAmount: '200000000', serviceCategory: 'CONSTRUCTION', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: 'CONSULT', qualification: 'NONE', kbliCode: '' } },
-  { name: '비거주자 한국 (CoD 有)', data: { grossAmount: '500000000', serviceCategory: 'SERVICE', recipientType: 'NON_RESIDENT', recipientNpwp: '', recipientCountry: 'KR', hasCod: true, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-  { name: '비거주자 한국 (CoD 無)', data: { grossAmount: '500000000', serviceCategory: 'SERVICE', recipientType: 'NON_RESIDENT', recipientNpwp: '', recipientCountry: 'KR', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-  { name: '비거주자 싱가포르 로열티', data: { grossAmount: '300000000', serviceCategory: 'ROYALTY', recipientType: 'NON_RESIDENT', recipientNpwp: '', recipientCountry: 'SG', hasCod: true, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-  { name: '토지/건물 임대', data: { grossAmount: '120000000', serviceCategory: 'RENTAL', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-  { name: '배당 (NPWP 無)', data: { grossAmount: '1000000000', serviceCategory: 'DIVIDEND', recipientType: 'RESIDENT', recipientNpwp: '', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' } },
-];
+const DEFAULT_FORM = {
+  grossAmount: '100000000',
+  serviceCategory: 'SERVICE',
+  recipientType: 'RESIDENT',
+  recipientNpwp: '',
+  recipientCountry: '',
+  hasCod: false,
+  vendorIsPropertyOwner: false,
+  isRelatedParty: false,
+  constructionType: '',
+  qualification: '',
+  kbliCode: '',
+};
+
+// Preset scenarios — keys reference ruleTest.presets.*
+const PRESET_KEYS = [
+  'serviceWithNpwp', 'serviceWithoutNpwp', 'ownerVendor', 'constructionSmall',
+  'constructionNoQual', 'nonResidentKrCod', 'nonResidentKrNoCod',
+  'nonResidentSgRoyalty', 'landRental', 'dividendNoNpwp',
+] as const;
+
+const PRESET_DATA: Record<string, typeof DEFAULT_FORM> = {
+  serviceWithNpwp: { grossAmount: '100000000', serviceCategory: 'SERVICE', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+  serviceWithoutNpwp: { grossAmount: '100000000', serviceCategory: 'SERVICE', recipientType: 'RESIDENT', recipientNpwp: '', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+  ownerVendor: { grossAmount: '50000000', serviceCategory: 'SERVICE', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: true, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+  constructionSmall: { grossAmount: '1000000000', serviceCategory: 'CONSTRUCTION', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: 'WORK', qualification: 'SMALL', kbliCode: '' },
+  constructionNoQual: { grossAmount: '200000000', serviceCategory: 'CONSTRUCTION', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: 'CONSULT', qualification: 'NONE', kbliCode: '' },
+  nonResidentKrCod: { grossAmount: '500000000', serviceCategory: 'SERVICE', recipientType: 'NON_RESIDENT', recipientNpwp: '', recipientCountry: 'KR', hasCod: true, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+  nonResidentKrNoCod: { grossAmount: '500000000', serviceCategory: 'SERVICE', recipientType: 'NON_RESIDENT', recipientNpwp: '', recipientCountry: 'KR', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+  nonResidentSgRoyalty: { grossAmount: '300000000', serviceCategory: 'ROYALTY', recipientType: 'NON_RESIDENT', recipientNpwp: '', recipientCountry: 'SG', hasCod: true, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+  landRental: { grossAmount: '120000000', serviceCategory: 'RENTAL', recipientType: 'RESIDENT', recipientNpwp: '01.234.567.8-901.234', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+  dividendNoNpwp: { grossAmount: '1000000000', serviceCategory: 'DIVIDEND', recipientType: 'RESIDENT', recipientNpwp: '', recipientCountry: '', hasCod: false, vendorIsPropertyOwner: false, isRelatedParty: false, constructionType: '', qualification: '', kbliCode: '' },
+};
 
 export default function RuleTestPage() {
-  const [form, setForm] = useState({
-    grossAmount: '100000000',
-    serviceCategory: 'SERVICE',
-    recipientType: 'RESIDENT',
-    recipientNpwp: '',
-    recipientCountry: '',
-    hasCod: false,
-    vendorIsPropertyOwner: false,
-    isRelatedParty: false,
-    constructionType: '',
-    qualification: '',
-    kbliCode: '',
-  });
+  const t = useTranslations('ruleTest');
+  const [form, setForm] = useState(DEFAULT_FORM);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<Resolution | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,8 +124,8 @@ export default function RuleTestPage() {
     finally { setIsLoading(false); }
   };
 
-  const loadPreset = (preset: typeof PRESETS[0]) => {
-    setForm(preset.data);
+  const loadPreset = (key: string) => {
+    setForm(PRESET_DATA[key]);
     setResult(null);
   };
 
@@ -147,9 +140,9 @@ export default function RuleTestPage() {
           <p className="text-cyan-200 text-sm flex items-center gap-2">
             <Zap className="h-4 w-4" />Admin — Tax Rule Tester
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">Rule Test (세율 판정 테스트)</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('title')}</h1>
           <p className="text-cyan-200 mt-2 text-sm">
-            거래 조건을 입력하면 Resolution Engine이 어떤 Rule을 적용하여 세율을 결정하는지 실시간으로 확인합니다.
+            {t('description')}
           </p>
         </div>
       </div>
@@ -166,9 +159,9 @@ export default function RuleTestPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {PRESETS.map((preset, i) => (
-                  <Button key={i} size="sm" variant="outline" className="text-xs h-7" onClick={() => loadPreset(preset)}>
-                    {preset.name}
+                {PRESET_KEYS.map((key) => (
+                  <Button key={key} size="sm" variant="outline" className="text-xs h-7" onClick={() => loadPreset(key)}>
+                    {t('presets.' + key)}
                   </Button>
                 ))}
               </div>
@@ -191,7 +184,7 @@ export default function RuleTestPage() {
                   <Select value={form.serviceCategory} onValueChange={v => setForm({ ...form, serviceCategory: v })}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {SERVICE_CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.icon} {c.label}</SelectItem>)}
+                      {SERVICE_CATEGORY_KEYS.map(key => <SelectItem key={key} value={key}>{SERVICE_CATEGORY_ICONS[key]} {t('serviceCategories.' + key)}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -205,16 +198,16 @@ export default function RuleTestPage() {
                     <Select value={form.constructionType} onValueChange={v => setForm({ ...form, constructionType: v })}>
                       <SelectTrigger className="h-9"><SelectValue placeholder="Select..." /></SelectTrigger>
                       <SelectContent>
-                        {CONSTRUCTION_TYPES.map(ct => <SelectItem key={ct.value} value={ct.value}>{ct.label}</SelectItem>)}
+                        {CONSTRUCTION_TYPE_KEYS.map(key => <SelectItem key={key} value={key}>{t('constructionTypes.' + key)}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs">Qualification (자격등급)</Label>
+                    <Label className="text-xs">{t('qualificationLabel')}</Label>
                     <Select value={form.qualification} onValueChange={v => setForm({ ...form, qualification: v })}>
                       <SelectTrigger className="h-9"><SelectValue placeholder="Select..." /></SelectTrigger>
                       <SelectContent>
-                        {QUALIFICATIONS.map(q => <SelectItem key={q.value} value={q.value}>{q.label}</SelectItem>)}
+                        {QUALIFICATION_KEYS.map(key => <SelectItem key={key} value={key}>{t('qualifications.' + key)}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -227,14 +220,14 @@ export default function RuleTestPage() {
                   <Select value={form.recipientType} onValueChange={v => setForm({ ...form, recipientType: v })}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="RESIDENT">Resident (거주자)</SelectItem>
-                      <SelectItem value="NON_RESIDENT">Non-Resident (비거주자)</SelectItem>
+                      <SelectItem value="RESIDENT">{t('recipientResident')}</SelectItem>
+                      <SelectItem value="NON_RESIDENT">{t('recipientNonResident')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label className="text-xs">Recipient NPWP</Label>
-                  <Input className="h-9 font-mono" value={form.recipientNpwp} onChange={e => setForm({ ...form, recipientNpwp: e.target.value })} placeholder="비어있으면 NPWP 없음" />
+                  <Input className="h-9 font-mono" value={form.recipientNpwp} onChange={e => setForm({ ...form, recipientNpwp: e.target.value })} placeholder={t('npwpPlaceholder')} />
                 </div>
               </div>
 
@@ -242,13 +235,13 @@ export default function RuleTestPage() {
               {form.recipientType === 'NON_RESIDENT' && (
                 <div className="grid grid-cols-2 gap-3 p-3 bg-blue-50 rounded-lg">
                   <div>
-                    <Label className="text-xs">Country (ISO 2자리)</Label>
+                    <Label className="text-xs">{t('countryLabel')}</Label>
                     <Input className="h-9" value={form.recipientCountry} onChange={e => setForm({ ...form, recipientCountry: e.target.value.toUpperCase() })} placeholder="KR, SG, JP..." />
                   </div>
                   <div className="flex items-end gap-3">
                     <div className="flex items-center gap-2">
                       <input type="checkbox" id="cod" checked={form.hasCod} onChange={e => setForm({ ...form, hasCod: e.target.checked })} className="rounded" />
-                      <Label htmlFor="cod" className="text-xs cursor-pointer">CoD (거주지증명서) 보유</Label>
+                      <Label htmlFor="cod" className="text-xs cursor-pointer">{t('codLabel')}</Label>
                     </div>
                   </div>
                 </div>
@@ -324,7 +317,7 @@ export default function RuleTestPage() {
               {/* Reasoning */}
               <Card className="border-0 shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs text-gray-500">판단 근거</CardTitle>
+                  <CardTitle className="text-xs text-gray-500">{t('reasoning')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-800">{result.reason}</p>
@@ -336,7 +329,7 @@ export default function RuleTestPage() {
               {result.alternativeRules && result.alternativeRules.length > 0 && (
                 <Card className="border-0 shadow-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-xs text-gray-500">건너뛴 Rule ({result.alternativeRules.length})</CardTitle>
+                    <CardTitle className="text-xs text-gray-500">{t('skippedRules', { count: result.alternativeRules.length })}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-1.5">
@@ -357,8 +350,8 @@ export default function RuleTestPage() {
             <Card className="border-0 shadow-sm">
               <CardContent className="pt-6 text-center">
                 <Zap className="h-12 w-12 mx-auto text-gray-200 mb-3" />
-                <p className="text-sm text-gray-400">조건을 입력하고 Run을 클릭하세요</p>
-                <p className="text-xs text-gray-300 mt-1">또는 Preset을 선택하세요</p>
+                <p className="text-sm text-gray-400">{t('emptyStateMain')}</p>
+                <p className="text-xs text-gray-300 mt-1">{t('emptyStateSub')}</p>
               </CardContent>
             </Card>
           )}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,7 @@ export default function JournalsPage() {
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
+  const t = useTranslations('journals');
   const currentYear = new Date().getFullYear();
 
   const [year, setYear] = useState(currentYear - 1);
@@ -93,10 +95,10 @@ export default function JournalsPage() {
   const isBalanced = Math.abs(formDebit - formCredit) < 1;
 
   const handleSave = async () => {
-    if (!fDesc.trim()) { showMsg('error', '설명을 입력하세요'); return; }
-    if (!isBalanced) { showMsg('error', '차변과 대변이 일치하지 않습니다'); return; }
+    if (!fDesc.trim()) { showMsg('error', t('errorDescriptionRequired')); return; }
+    if (!isBalanced) { showMsg('error', t('errorNotBalanced')); return; }
     const validLines = fLines.filter(l => l.account_code && (Number(l.debit) > 0 || Number(l.credit) > 0));
-    if (validLines.length < 2) { showMsg('error', '최소 2줄 이상 입력하세요'); return; }
+    if (validLines.length < 2) { showMsg('error', t('errorMinTwoLines')); return; }
 
     setSaving(true);
     try {
@@ -118,16 +120,16 @@ export default function JournalsPage() {
       });
       const d = await res.json();
       if (d.success) {
-        showMsg('success', '저널 저장 완료');
+        showMsg('success', t('saveSuccess'));
         setShowForm(false);
         setFDesc('');
         setFLines([{ account_code: '', debit: '', credit: '' }, { account_code: '', debit: '', credit: '' }]);
         loadData();
       } else {
-        showMsg('error', d.error || '저장 실패');
+        showMsg('error', d.error || t('saveFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setSaving(false);
     }
@@ -138,16 +140,16 @@ export default function JournalsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <BookOpen className="h-6 w-6 text-indigo-600" />
-          저널 입력 (Jurnal Umum)
+          {t('pageTitle')}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">복식부기 저널 입력 → 재무제표 자동 생성</p>
+        <p className="text-sm text-gray-500 mt-1">{t('pageDescription')}</p>
       </div>
 
       {/* Controls */}
       <div className="flex flex-wrap gap-3 mb-4">
         {isConsultant && (
           <Select value={customerId} onValueChange={setCustomerId}>
-            <SelectTrigger className="w-56"><SelectValue placeholder="고객" /></SelectTrigger>
+            <SelectTrigger className="w-56"><SelectValue placeholder={t('customerPlaceholder')} /></SelectTrigger>
             <SelectContent>
               {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name || c.full_name}</SelectItem>)}
             </SelectContent>
@@ -157,13 +159,13 @@ export default function JournalsPage() {
           <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
           <SelectContent>
             {[currentYear - 2, currentYear - 1, currentYear].map(y => (
-              <SelectItem key={y} value={String(y)}>{y}년</SelectItem>
+              <SelectItem key={y} value={String(y)}>{t('yearLabel', { year: y })}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Button onClick={() => setShowForm(!showForm)}>
           {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-          {showForm ? '닫기' : '저널 추가'}
+          {showForm ? t('close') : t('addJournal')}
         </Button>
       </div>
 
@@ -178,26 +180,26 @@ export default function JournalsPage() {
       {showForm && (
         <Card className="mb-4 border-indigo-200">
           <CardContent className="p-4 space-y-3">
-            <h3 className="font-bold text-sm">새 저널 입력</h3>
+            <h3 className="font-bold text-sm">{t('newJournalEntry')}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">날짜</Label>
+                <Label className="text-xs">{t('date')}</Label>
                 <Input type="date" value={fDate} onChange={e => setFDate(e.target.value)} />
               </div>
               <div>
-                <Label className="text-xs">설명 (Keterangan)</Label>
-                <Input value={fDesc} onChange={e => setFDesc(e.target.value)} placeholder="예: Penjualan jasa konsultasi" />
+                <Label className="text-xs">{t('descriptionLabel')}</Label>
+                <Input value={fDesc} onChange={e => setFDesc(e.target.value)} placeholder={t('descriptionPlaceholder')} />
               </div>
             </div>
 
             <div>
-              <Label className="text-xs">상세 (차변/대변)</Label>
+              <Label className="text-xs">{t('detailDebitCredit')}</Label>
               <table className="w-full text-xs border-collapse mt-1">
                 <thead>
                   <tr className="bg-gray-50">
-                    <th className="p-1 text-left border">계정</th>
-                    <th className="p-1 text-right border w-32">차변 (Debit)</th>
-                    <th className="p-1 text-right border w-32">대변 (Credit)</th>
+                    <th className="p-1 text-left border">{t('account')}</th>
+                    <th className="p-1 text-right border w-32">{t('debit')}</th>
+                    <th className="p-1 text-right border w-32">{t('credit')}</th>
                     <th className="p-1 border w-8"></th>
                   </tr>
                 </thead>
@@ -208,7 +210,7 @@ export default function JournalsPage() {
                         <select value={line.account_code}
                           onChange={e => { const next = [...fLines]; next[i] = { ...next[i], account_code: e.target.value }; setFLines(next); }}
                           className="w-full h-7 px-1 text-xs border-0">
-                          <option value="">계정 선택</option>
+                          <option value="">{t('selectAccount')}</option>
                           {coa.map(a => <option key={a.code} value={a.code}>{a.code} {a.name_id}</option>)}
                         </select>
                       </td>
@@ -230,7 +232,7 @@ export default function JournalsPage() {
                 </tbody>
                 <tfoot>
                   <tr className={isBalanced ? 'bg-green-50' : 'bg-red-50'}>
-                    <td className="p-1 border font-bold">합계</td>
+                    <td className="p-1 border font-bold">{t('total')}</td>
                     <td className="p-1 border text-right font-mono font-bold">{fmtRp(formDebit)}</td>
                     <td className="p-1 border text-right font-mono font-bold">{fmtRp(formCredit)}</td>
                     <td className="p-1 border text-center">{isBalanced ? '✓' : '✗'}</td>
@@ -238,13 +240,13 @@ export default function JournalsPage() {
                 </tfoot>
               </table>
               <Button size="sm" variant="outline" className="mt-1" onClick={() => setFLines([...fLines, { account_code: '', debit: '', credit: '' }])}>
-                <Plus className="h-3 w-3 mr-1" />행 추가
+                <Plus className="h-3 w-3 mr-1" />{t('addRow')}
               </Button>
             </div>
 
             <Button onClick={handleSave} disabled={saving || !isBalanced}>
               {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-              저장
+              {t('save')}
             </Button>
           </CardContent>
         </Card>
@@ -256,13 +258,13 @@ export default function JournalsPage() {
       {/* Journal list */}
       <Card>
         <CardContent className="p-4">
-          <h3 className="font-bold text-sm mb-3">{year}년 저널 ({journals.length}건)</h3>
+          <h3 className="font-bold text-sm mb-3">{t('journalListTitle', { year, count: journals.length })}</h3>
           {loading ? (
             <div className="text-center py-8"><Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" /></div>
           ) : journals.length === 0 ? (
             <div className="text-center py-12 text-sm text-gray-400">
               <BookOpen className="h-10 w-10 mx-auto mb-2 opacity-30" />
-              <p>저널이 없습니다. "저널 추가" 버튼으로 시작하세요.</p>
+              <p>{t('noJournals')}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -310,9 +312,10 @@ function BankToJournalSection({
   onSaved: () => void;
   showMsg: (type: 'success' | 'error', text: string) => void;
 }) {
+  const t = useTranslations('journals');
   const [show, setShow] = useState(false);
   const [sources, setSources] = useState<BankSource[]>([
-    { id: crypto.randomUUID(), label: '은행 계좌 1', csvData: '' },
+    { id: crypto.randomUUID(), label: t('bankAccountDefault', { num: 1 }), csvData: '' },
   ]);
   const [preview, setPreview] = useState<Array<{
     entryDate: string; description: string;
@@ -356,7 +359,7 @@ function BankToJournalSection({
 
   const handlePreview = async () => {
     const txs = gatherAllTransactions();
-    if (txs.length === 0) { showMsg('error', 'CSV 데이터가 없거나 형식이 맞지 않습니다'); return; }
+    if (txs.length === 0) { showMsg('error', t('errorCsvEmpty')); return; }
     setProcessing(true);
     try {
       const res = await fetch('/api/accounting/bank-to-journal', {
@@ -368,8 +371,8 @@ function BankToJournalSection({
       if (d.success) {
         setPreview(d.data.journals);
         setSummary(d.data.summary);
-      } else { showMsg('error', d.error || '변환 실패'); }
-    } catch { showMsg('error', '서버 오류'); }
+      } else { showMsg('error', d.error || t('convertFailed')); }
+    } catch { showMsg('error', t('serverError')); }
     finally { setProcessing(false); }
   };
 
@@ -386,10 +389,10 @@ function BankToJournalSection({
       if (d.success) {
         showMsg('success', d.message);
         setPreview(null);
-        setSources([{ id: crypto.randomUUID(), label: '은행 계좌 1', csvData: '' }]);
+        setSources([{ id: crypto.randomUUID(), label: t('bankAccountDefault', { num: 1 }), csvData: '' }]);
         onSaved();
-      } else { showMsg('error', d.error || '저장 실패'); }
-    } catch { showMsg('error', '서버 오류'); }
+      } else { showMsg('error', d.error || t('saveFailed')); }
+    } catch { showMsg('error', t('serverError')); }
     finally { setSaving(false); }
   };
 
@@ -411,7 +414,7 @@ function BankToJournalSection({
         } else {
           setSources(prev => [...prev, {
             id: crypto.randomUUID(),
-            label: defaultLabel || `은행 계좌 ${prev.length + 1}`,
+            label: defaultLabel || t('bankAccountDefault', { num: prev.length + 1 }),
             csvData: content,
           }]);
         }
@@ -423,7 +426,7 @@ function BankToJournalSection({
   const addSource = () => {
     setSources(prev => [...prev, {
       id: crypto.randomUUID(),
-      label: `은행 계좌 ${prev.length + 1}`,
+      label: t('bankAccountDefault', { num: prev.length + 1 }),
       csvData: '',
     }]);
   };
@@ -449,7 +452,7 @@ function BankToJournalSection({
           className="w-full flex items-center justify-between text-left">
           <div className="flex items-center gap-2">
             <Upload className="h-4 w-4 text-blue-600" />
-            <span className="font-bold text-sm">은행거래 → 저널 자동 변환</span>
+            <span className="font-bold text-sm">{t('bankToJournalTitle')}</span>
             <Badge className="bg-blue-100 text-blue-700 text-[9px]">AI</Badge>
           </div>
           <ArrowRight className={`h-4 w-4 text-gray-400 transition-transform ${show ? 'rotate-90' : ''}`} />
@@ -458,10 +461,10 @@ function BankToJournalSection({
         {show && (
           <div className="mt-4 space-y-3">
             <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
-              <p className="font-bold">사용 방법</p>
-              <p className="mt-1">은행 계좌별로 소스를 나눠서 업로드하거나 붙여넣으세요 (Petty Cash, BCA, Mandiri 등).</p>
-              <p className="mt-1 font-mono text-[10px]">CSV 형식: 날짜, 설명, 출금(Debit), 입금(Credit)</p>
-              <p className="mt-1 text-[10px]">각 소스 라벨은 거래 설명 앞에 <code className="bg-white px-1 rounded">[라벨]</code> 형태로 자동 추가되어 저널에서 추적 가능합니다.</p>
+              <p className="font-bold">{t('howToUse')}</p>
+              <p className="mt-1">{t('howToUseDesc')}</p>
+              <p className="mt-1 font-mono text-[10px]">{t('csvFormat')}</p>
+              <p className="mt-1 text-[10px]">{t('labelTrackingNote')}</p>
             </div>
 
             <input ref={fileRef} type="file" className="hidden" accept=".csv,.txt" multiple
@@ -481,7 +484,7 @@ function BankToJournalSection({
                     <Input
                       value={src.label}
                       onChange={e => updateSourceLabel(src.id, e.target.value)}
-                      placeholder="소스 라벨 (예: BCA 1234, Mandiri Corp, Petty Cash)"
+                      placeholder={t('sourceLabelPlaceholder')}
                       className="h-7 text-xs flex-1"
                     />
                     <Button
@@ -522,16 +525,16 @@ function BankToJournalSection({
 
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={addSource}>
-                <Plus className="h-3 w-3 mr-1" />소스 추가
+                <Plus className="h-3 w-3 mr-1" />{t('addSource')}
               </Button>
               <Button size="sm" onClick={handlePreview} disabled={processing || !hasAnyData}>
                 {processing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
-                전체 미리보기
+                {t('previewAll')}
               </Button>
               {preview && (
                 <Button size="sm" onClick={handleSave} disabled={saving}>
                   {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-                  전체 저장 ({preview.length}건)
+                  {t('saveAll', { count: preview.length })}
                 </Button>
               )}
             </div>

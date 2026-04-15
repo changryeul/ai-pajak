@@ -13,6 +13,7 @@ import {
   Upload, Camera, Image, FileText, Loader2, CheckCircle, AlertTriangle,
   X, Send, Eye, Trash2, Plus, Sparkles, MessageCircle,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { fmtRp } from '@/lib/utils';
 
 interface UploadedDoc {
@@ -40,16 +41,6 @@ interface DocRequest {
   created_at: string;
 }
 
-const DOC_TYPES = [
-  { value: 'INVOICE', label: '인보이스 (Invoice)', desc: '매출/매입 거래 청구서' },
-  { value: 'RECEIPT', label: '영수증 (Receipt)', desc: '결제 증빙' },
-  { value: 'FAKTUR_PAJAK', label: '팍투르 파작 (Faktur Pajak)', desc: 'PPN 세금계산서' },
-  { value: 'BANK_STATEMENT', label: '은행 거래내역', desc: '월별 은행 명세서' },
-  { value: 'SALARY_SLIP', label: '급여 명세서', desc: '직원 급여 내역' },
-  { value: 'EXPENSE_RECEIPT', label: '경비 영수증', desc: '사업 경비 증빙' },
-  { value: 'OTHER', label: '기타 서류', desc: '' },
-];
-
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
 
@@ -60,6 +51,17 @@ export default function DocumentUploadPage() {
   const locale = params.locale as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations('documentUpload');
+
+  const DOC_TYPES = [
+    { value: 'INVOICE', label: t('docTypeInvoice'), desc: t('docTypeInvoiceDesc') },
+    { value: 'RECEIPT', label: t('docTypeReceipt'), desc: t('docTypeReceiptDesc') },
+    { value: 'FAKTUR_PAJAK', label: t('docTypeFakturPajak'), desc: t('docTypeFakturPajakDesc') },
+    { value: 'BANK_STATEMENT', label: t('docTypeBankStatement'), desc: t('docTypeBankStatementDesc') },
+    { value: 'SALARY_SLIP', label: t('docTypeSalarySlip'), desc: t('docTypeSalarySlipDesc') },
+    { value: 'EXPENSE_RECEIPT', label: t('docTypeExpenseReceipt'), desc: t('docTypeExpenseReceiptDesc') },
+    { value: 'OTHER', label: t('docTypeOther'), desc: '' },
+  ];
 
   const isConsultant = session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -145,11 +147,11 @@ export default function DocumentUploadPage() {
     }
 
     if (successCount > 0) {
-      showMsg('success', `${successCount}개 파일 업로드 완료. OCR 처리 중...`);
+      showMsg('success', successCount + t('uploadSuccessOcr'));
       // Reload after short delay (OCR needs time)
       setTimeout(loadData, 2000);
     } else {
-      showMsg('error', '업로드 실패');
+      showMsg('error', t('uploadFailed'));
     }
     setUploading(false);
   };
@@ -158,7 +160,7 @@ export default function DocumentUploadPage() {
   const handleSubmit = async () => {
     if (!effectiveCustomerId) return;
     if (documents.length === 0) {
-      showMsg('warning', '먼저 자료를 업로드해 주세요');
+      showMsg('warning', t('uploadFirst'));
       return;
     }
     setSubmitting(true);
@@ -172,16 +174,16 @@ export default function DocumentUploadPage() {
       if (data.success) {
         setAiReview(data.data.aiResult);
         if (data.data.aiResult?.complete) {
-          showMsg('success', '모든 자료가 완비되었습니다! 담당자가 검토 후 처리됩니다.');
+          showMsg('success', t('allDocsComplete'));
         } else {
-          showMsg('warning', '부족한 자료가 있습니다. 아래 AI 안내를 확인해 주세요.');
+          showMsg('warning', t('missingDocs'));
         }
         loadData();
       } else {
-        showMsg('error', data.error || '제출 실패');
+        showMsg('error', data.error || t('submitFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setSubmitting(false);
     }
@@ -189,7 +191,7 @@ export default function DocumentUploadPage() {
 
   // Delete document
   const handleDelete = async (docId: string) => {
-    if (!confirm('이 자료를 삭제하시겠습니까?')) return;
+    if (!confirm(t('confirmDelete'))) return;
     try {
       const res = await fetch(`/api/documents/${docId}`, { method: 'DELETE' });
       if (res.ok) loadData();
@@ -211,19 +213,19 @@ export default function DocumentUploadPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Upload className="h-6 w-6 text-blue-600" />
-          자료 업로드
+          {t('pageTitle')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          영수증, 인보이스, 팍투르 파작 등을 업로드하면 AI가 자동으로 데이터를 추출합니다
+          {t('pageDescription')}
         </p>
       </div>
 
       {/* Consultant: customer selector */}
       {isConsultant && (
         <div className="mb-4">
-          <Label className="text-xs">고객 선택</Label>
+          <Label className="text-xs">{t('selectCustomer')}</Label>
           <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
-            <SelectTrigger className="w-72"><SelectValue placeholder="고객을 선택하세요" /></SelectTrigger>
+            <SelectTrigger className="w-72"><SelectValue placeholder={t('selectCustomerPlaceholder')} /></SelectTrigger>
             <SelectContent>
               {customers.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.company_name || c.full_name}</SelectItem>
@@ -236,7 +238,7 @@ export default function DocumentUploadPage() {
       {/* Period + Type selector */}
       <div className="flex flex-wrap gap-3 mb-4">
         <div>
-          <Label className="text-xs">기간</Label>
+          <Label className="text-xs">{t('period')}</Label>
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -245,7 +247,7 @@ export default function DocumentUploadPage() {
           </Select>
         </div>
         <div>
-          <Label className="text-xs">서류 유형</Label>
+          <Label className="text-xs">{t('docTypeLabel')}</Label>
           <Select value={docType} onValueChange={setDocType}>
             <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -313,8 +315,8 @@ export default function DocumentUploadPage() {
             >
               <Upload className="h-8 w-8 text-blue-600" />
               <div className="text-center">
-                <p className="font-medium text-sm text-blue-900">파일 업로드</p>
-                <p className="text-[11px] text-blue-600">PDF, 이미지, Excel</p>
+                <p className="font-medium text-sm text-blue-900">{t('fileUpload')}</p>
+                <p className="text-[11px] text-blue-600">{t('fileUploadDesc')}</p>
               </div>
             </button>
             <input
@@ -342,8 +344,8 @@ export default function DocumentUploadPage() {
             >
               <Image className="h-8 w-8 text-emerald-600" />
               <div className="text-center">
-                <p className="font-medium text-sm text-emerald-900">사진 업로드</p>
-                <p className="text-[11px] text-emerald-600">갤러리에서 선택</p>
+                <p className="font-medium text-sm text-emerald-900">{t('photoUpload')}</p>
+                <p className="text-[11px] text-emerald-600">{t('photoUploadDesc')}</p>
               </div>
             </button>
 
@@ -356,8 +358,8 @@ export default function DocumentUploadPage() {
             >
               <Camera className="h-8 w-8 text-amber-600" />
               <div className="text-center">
-                <p className="font-medium text-sm text-amber-900">사진 찍기</p>
-                <p className="text-[11px] text-amber-600">카메라로 촬영 (모바일)</p>
+                <p className="font-medium text-sm text-amber-900">{t('cameraCapture')}</p>
+                <p className="text-[11px] text-amber-600">{t('cameraCaptureDesc')}</p>
               </div>
             </button>
             <input
@@ -373,7 +375,7 @@ export default function DocumentUploadPage() {
           {uploading && (
             <div className="text-center mt-4">
               <Loader2 className="h-5 w-5 animate-spin mx-auto text-blue-600" />
-              <p className="text-xs text-gray-500 mt-1">업로드 + OCR 처리 중...</p>
+              <p className="text-xs text-gray-500 mt-1">{t('uploadingOcr')}</p>
             </div>
           )}
         </CardContent>
@@ -383,15 +385,15 @@ export default function DocumentUploadPage() {
       {documents.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-white rounded-xl border p-3 text-center">
-            <p className="text-xs text-gray-500">총 업로드</p>
+            <p className="text-xs text-gray-500">{t('totalUploaded')}</p>
             <p className="text-xl font-bold">{documents.length}</p>
           </div>
           <div className="bg-white rounded-xl border p-3 text-center">
-            <p className="text-xs text-green-600">OCR 완료</p>
+            <p className="text-xs text-green-600">{t('ocrComplete')}</p>
             <p className="text-xl font-bold text-green-700">{ocrComplete}</p>
           </div>
           <div className="bg-white rounded-xl border p-3 text-center">
-            <p className="text-xs text-amber-600">처리 대기</p>
+            <p className="text-xs text-amber-600">{t('ocrPending')}</p>
             <p className="text-xl font-bold text-amber-700">{ocrPending}</p>
           </div>
         </div>
@@ -403,7 +405,7 @@ export default function DocumentUploadPage() {
           <CardContent className="p-5">
             <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              업로드된 자료 ({documents.length}건)
+              {t('uploadedDocs', { count: documents.length })}
             </h3>
             <div className="space-y-2">
               {documents.map(doc => (
@@ -418,9 +420,9 @@ export default function DocumentUploadPage() {
                           doc.ocr_status === 'FAILED' ? 'text-[9px] bg-red-100 text-red-700' :
                           'text-[9px] bg-gray-100 text-gray-600'
                         }>
-                          {doc.ocr_status === 'COMPLETED' ? 'OCR 완료' :
-                           doc.ocr_status === 'PROCESSING' ? 'OCR 처리중' :
-                           doc.ocr_status === 'FAILED' ? 'OCR 실패' : 'OCR 대기'}
+                          {doc.ocr_status === 'COMPLETED' ? t('ocrStatusComplete') :
+                           doc.ocr_status === 'PROCESSING' ? t('ocrStatusProcessing') :
+                           doc.ocr_status === 'FAILED' ? t('ocrStatusFailed') : t('ocrStatusPending')}
                         </Badge>
                         <Badge className="text-[9px] bg-gray-100 text-gray-600">{doc.upload_source}</Badge>
                         <span className="text-[10px] text-gray-400">{doc.file_name}</span>
@@ -430,10 +432,10 @@ export default function DocumentUploadPage() {
                       {doc.ocr_status === 'COMPLETED' && doc.ocr_result?.extractedData && (
                         <div className="mt-2 bg-green-50 rounded-lg p-2 text-xs space-y-1">
                           <p className="font-medium text-green-800 flex items-center gap-1">
-                            <Sparkles className="h-3 w-3" />AI 추출 결과
+                            <Sparkles className="h-3 w-3" />{t('aiExtractResult')}
                             {doc.ocr_result.confidence && (
                               <span className="text-[10px] text-green-600">
-                                (신뢰도 {(doc.ocr_result.confidence * 100).toFixed(0)}%)
+                                ({t('confidence')} {(doc.ocr_result.confidence * 100).toFixed(0)}%)
                               </span>
                             )}
                           </p>
@@ -477,7 +479,7 @@ export default function DocumentUploadPage() {
               <Sparkles className={`h-5 w-5 flex-shrink-0 ${aiReview.complete ? 'text-green-600' : 'text-amber-600'}`} />
               <div className="flex-1">
                 <p className={`font-bold text-sm ${aiReview.complete ? 'text-green-900' : 'text-amber-900'}`}>
-                  {aiReview.complete ? '자료 검토 완료' : '추가 자료가 필요합니다'}
+                  {aiReview.complete ? t('reviewComplete') : t('additionalDocsNeeded')}
                 </p>
                 {!aiReview.complete && aiReview.missing.length > 0 && (
                   <div className="mt-2 space-y-1">
@@ -491,7 +493,7 @@ export default function DocumentUploadPage() {
                 )}
                 {aiReview.suggestions.length > 0 && (
                   <div className="mt-2 text-xs text-gray-600">
-                    <p className="font-medium">제안:</p>
+                    <p className="font-medium">{t('suggestions')}:</p>
                     {aiReview.suggestions.map((s, i) => <p key={i}>· {s}</p>)}
                   </div>
                 )}
@@ -505,7 +507,7 @@ export default function DocumentUploadPage() {
       <div className="flex gap-3">
         <Button onClick={handleSubmit} disabled={submitting || documents.length === 0} className="flex-1">
           {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-          {period} 자료 제출 (AI 검증)
+          {period + ' ' + t('submitBtn')}
         </Button>
       </div>
 
@@ -525,13 +527,13 @@ export default function DocumentUploadPage() {
               ) : previewDoc.mime_type === 'application/pdf' ? (
                 <iframe src={previewDoc.file_url!} className="w-full h-[60vh] rounded" />
               ) : (
-                <p className="text-sm text-gray-500 text-center py-8">미리보기를 지원하지 않는 형식입니다</p>
+                <p className="text-sm text-gray-500 text-center py-8">{t('previewNotSupported')}</p>
               )}
 
               {/* OCR data below preview */}
               {previewDoc.ocr_status === 'COMPLETED' && previewDoc.ocr_result?.extractedData && (
                 <div className="mt-4 bg-green-50 rounded-lg p-4">
-                  <p className="font-bold text-sm text-green-800 mb-2">AI 추출 데이터</p>
+                  <p className="font-bold text-sm text-green-800 mb-2">{t('aiExtractData')}</p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {Object.entries(previewDoc.ocr_result.extractedData).map(([key, val]) => (
                       <div key={key} className="flex justify-between bg-white p-2 rounded">

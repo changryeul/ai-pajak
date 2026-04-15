@@ -14,6 +14,7 @@ import {
   FileText, DollarSign, Clock, Eye, Camera, Send,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface BillingItem {
   id: string;
@@ -32,29 +33,33 @@ interface BillingItem {
   created_at: string;
 }
 
-const STATUS_MAP: Record<string, { label: string; color: string; step: number }> = {
-  PENDING: { label: '접수 대기', color: 'bg-gray-100 text-gray-700', step: 0 },
-  DATA_REVIEW: { label: '자료 검토중', color: 'bg-blue-100 text-blue-700', step: 1 },
-  PENDING_APPROVAL: { label: '승인 대기', color: 'bg-amber-100 text-amber-700', step: 1 },
-  APPROVED: { label: '승인 완료', color: 'bg-green-100 text-green-700', step: 2 },
-  EBILLING_GENERATED: { label: 'ID Billing 발급', color: 'bg-indigo-100 text-indigo-700', step: 2 },
-  PAYMENT_PENDING: { label: '납부 대기', color: 'bg-orange-100 text-orange-700', step: 3 },
-  PAYMENT_UPLOADED: { label: '납부증빙 제출', color: 'bg-cyan-100 text-cyan-700', step: 3 },
-  PAYMENT_VERIFIED: { label: '납부 확인', color: 'bg-teal-100 text-teal-700', step: 4 },
-  DJP_SUBMITTED: { label: 'DJP 제출완료', color: 'bg-purple-100 text-purple-700', step: 5 },
-  BPE_UPLOADED: { label: 'BPE 수령', color: 'bg-emerald-100 text-emerald-700', step: 5 },
-  COMPLETED: { label: '완료', color: 'bg-green-200 text-green-800', step: 5 },
-  FAILED: { label: '실패', color: 'bg-red-100 text-red-700', step: 0 },
-};
-
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
+
+function getStatusMap(t: ReturnType<typeof useTranslations<'taxBilling'>>): Record<string, { label: string; color: string; step: number }> {
+  return {
+    PENDING: { label: t('statusPending'), color: 'bg-gray-100 text-gray-700', step: 0 },
+    DATA_REVIEW: { label: t('statusDataReview'), color: 'bg-blue-100 text-blue-700', step: 1 },
+    PENDING_APPROVAL: { label: t('statusPendingApproval'), color: 'bg-amber-100 text-amber-700', step: 1 },
+    APPROVED: { label: t('statusApproved'), color: 'bg-green-100 text-green-700', step: 2 },
+    EBILLING_GENERATED: { label: t('statusEbillingGenerated'), color: 'bg-indigo-100 text-indigo-700', step: 2 },
+    PAYMENT_PENDING: { label: t('statusPaymentPending'), color: 'bg-orange-100 text-orange-700', step: 3 },
+    PAYMENT_UPLOADED: { label: t('statusPaymentUploaded'), color: 'bg-cyan-100 text-cyan-700', step: 3 },
+    PAYMENT_VERIFIED: { label: t('statusPaymentVerified'), color: 'bg-teal-100 text-teal-700', step: 4 },
+    DJP_SUBMITTED: { label: t('statusDjpSubmitted'), color: 'bg-purple-100 text-purple-700', step: 5 },
+    BPE_UPLOADED: { label: t('statusBpeUploaded'), color: 'bg-emerald-100 text-emerald-700', step: 5 },
+    COMPLETED: { label: t('statusCompleted'), color: 'bg-green-200 text-green-800', step: 5 },
+    FAILED: { label: t('statusFailed'), color: 'bg-red-100 text-red-700', step: 0 },
+  };
+}
 
 export default function TaxBillingPage() {
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
   const proofInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations('taxBilling');
+  const STATUS_MAP = getStatusMap(t);
 
   const [year, setYear] = useState(currentYear);
   const [items, setItems] = useState<BillingItem[]>([]);
@@ -68,7 +73,7 @@ export default function TaxBillingPage() {
   const handleSubmitNtpn = async (itemId: string) => {
     const inp = ntpnInput[itemId];
     if (!inp?.ntpn || inp.ntpn.length < 16) {
-      showMsg('error', 'NTPN은 16자리 숫자입니다');
+      showMsg('error', t('ntpnValidationError'));
       return;
     }
     setSubmittingNtpn(itemId);
@@ -87,14 +92,14 @@ export default function TaxBillingPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', 'NTPN이 등록되었습니다. AI가 납부를 확인합니다.');
+        showMsg('success', t('ntpnSubmitSuccess'));
         setNtpnInput(prev => { const next = { ...prev }; delete next[itemId]; return next; });
         loadItems();
       } else {
-        showMsg('error', data.error || 'NTPN 등록 실패');
+        showMsg('error', data.error || t('ntpnSubmitFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setSubmittingNtpn(null);
     }
@@ -143,13 +148,13 @@ export default function TaxBillingPage() {
             body: JSON.stringify({ queueItemId: itemId, fileUrl: uploadData.data?.signedUrl || uploadData.data?.path }),
           });
         } catch { /* */ }
-        showMsg('success', '납부 증빙이 제출되었습니다. AI가 자동으로 확인 처리합니다.');
+        showMsg('success', t('proofUploadSuccess'));
         loadItems();
       } else {
-        showMsg('error', '업로드 실패');
+        showMsg('error', t('uploadFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setUploading(null);
     }
@@ -168,23 +173,23 @@ export default function TaxBillingPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <CreditCard className="h-6 w-6 text-indigo-600" />
-          세금 청구서 발행 · 납부 증빙 제출
+          {t('pageTitle')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          AI가 생성한 ID Billing을 확인하고, 납부 증빙을 제출합니다
+          {t('pageDescription')}
         </p>
       </div>
 
       {/* Educational banner */}
       <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200">
         <div className="text-xs text-indigo-900 space-y-1">
-          <p className="font-bold">이 페이지의 절차:</p>
+          <p className="font-bold">{t('bannerTitle')}</p>
           <ol className="list-decimal list-inside space-y-0.5 text-indigo-800">
-            <li>자료 제출 완료 후 → <b>AI가 자동으로 계산·검토</b> 수행 (고객 액션 불필요)</li>
-            <li>AI가 <b>ID Billing</b>을 생성하여 이곳에 등록합니다</li>
-            <li>고객님은 ID Billing 코드로 <b>은행/ATM/모바일뱅킹</b>에서 납부합니다</li>
-            <li>납부 후 <b>납부 증빙(NTPN 영수증)</b>을 여기에 업로드합니다</li>
-            <li>AI가 납부 확인 후 → DJP 제출 → BPE 수령 → 완료</li>
+            <li dangerouslySetInnerHTML={{ __html: t('bannerStep1') }} />
+            <li dangerouslySetInnerHTML={{ __html: t('bannerStep2') }} />
+            <li dangerouslySetInnerHTML={{ __html: t('bannerStep3') }} />
+            <li dangerouslySetInnerHTML={{ __html: t('bannerStep4') }} />
+            <li dangerouslySetInnerHTML={{ __html: t('bannerStep5') }} />
           </ol>
         </div>
       </div>
@@ -199,16 +204,16 @@ export default function TaxBillingPage() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <Card className="border-0 shadow-sm"><CardContent className="p-3">
-          <p className="text-[10px] text-gray-500">전체 건수</p>
-          <p className="text-xl font-bold">{items.length}건</p>
+          <p className="text-[10px] text-gray-500">{t('totalCount')}</p>
+          <p className="text-xl font-bold">{t('countUnit', { count: items.length })}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm border-l-4 border-l-orange-500"><CardContent className="p-3">
-          <p className="text-[10px] text-orange-600">납부 대기</p>
-          <p className="text-xl font-bold text-orange-700">{billingPending}건</p>
+          <p className="text-[10px] text-orange-600">{t('paymentPending')}</p>
+          <p className="text-xl font-bold text-orange-700">{t('countUnit', { count: billingPending })}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm border-l-4 border-l-green-500"><CardContent className="p-3">
-          <p className="text-[10px] text-green-600">완료</p>
-          <p className="text-xl font-bold text-green-700">{completed}건</p>
+          <p className="text-[10px] text-green-600">{t('completedLabel')}</p>
+          <p className="text-xl font-bold text-green-700">{t('countUnit', { count: completed })}</p>
         </CardContent></Card>
       </div>
 
@@ -217,7 +222,7 @@ export default function TaxBillingPage() {
         <Select value={String(year)} onValueChange={v => setYear(Number(v))}>
           <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
           <SelectContent>
-            {[currentYear - 1, currentYear].map(y => <SelectItem key={y} value={String(y)}>{y}년</SelectItem>)}
+            {[currentYear - 1, currentYear].map(y => <SelectItem key={y} value={String(y)}>{t('yearUnit', { year: y })}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -229,8 +234,8 @@ export default function TaxBillingPage() {
         <Card className="border-dashed">
           <CardContent className="p-12 text-center text-gray-400">
             <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">{year}년 청구 내역이 없습니다</p>
-            <p className="text-xs mt-1">자료 제출이 완료되면 AI가 ID Billing을 생성합니다</p>
+            <p className="text-sm">{t('noBillingItems', { year })}</p>
+            <p className="text-xs mt-1">{t('noBillingItemsHint')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -265,11 +270,10 @@ export default function TaxBillingPage() {
                           {/* ID Billing display */}
                           {item.ebilling_code && (
                             <div className="p-2 bg-indigo-50 rounded-lg mb-2">
-                              <p className="text-[10px] text-indigo-600">ID Billing (Kode Billing)</p>
+                              <p className="text-[10px] text-indigo-600">{t('ebillingCodeLabel')}</p>
                               <p className="font-mono font-bold text-lg text-indigo-900">{item.ebilling_code}</p>
                               <p className="text-[10px] text-indigo-700 mt-1">
-                                이 코드로 은행/ATM/모바일뱅킹에서 납부하세요.
-                                납부 후 NTPN 영수증을 아래에서 업로드하세요.
+                                {t('ebillingInstruction')}
                               </p>
                             </div>
                           )}
@@ -286,7 +290,7 @@ export default function TaxBillingPage() {
                                 {uploading === item.id
                                   ? <Loader2 className="h-3 w-3 animate-spin mr-1" />
                                   : <Upload className="h-3 w-3 mr-1" />}
-                                납부 증빙 업로드
+                                {t('uploadProof')}
                               </Button>
                               <Button size="sm" variant="outline"
                                 onClick={() => {
@@ -297,7 +301,7 @@ export default function TaxBillingPage() {
                                   input.click();
                                 }}
                                 disabled={uploading === item.id}>
-                                <Camera className="h-3 w-3 mr-1" />촬영
+                                <Camera className="h-3 w-3 mr-1" />{t('takePhoto')}
                               </Button>
                             </div>
                           )}
@@ -305,10 +309,10 @@ export default function TaxBillingPage() {
                           {/* NTPN input form */}
                           {needsProof && (
                             <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                              <p className="text-[10px] font-bold text-green-900 mb-2">납부 완료 후 NTPN 번호를 입력하세요</p>
+                              <p className="text-[10px] font-bold text-green-900 mb-2">{t('ntpnInputTitle')}</p>
                               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                                 <div className="md:col-span-2">
-                                  <Label className="text-[10px]">NTPN (16자리)</Label>
+                                  <Label className="text-[10px]">{t('ntpnLabel')}</Label>
                                   <Input
                                     className="h-8 text-xs font-mono"
                                     value={ntpnInput[item.id]?.ntpn || ''}
@@ -320,12 +324,12 @@ export default function TaxBillingPage() {
                                     maxLength={16}
                                   />
                                   <p className="text-[9px] text-gray-400 mt-0.5">
-                                    {(ntpnInput[item.id]?.ntpn || '').length}/16자리
+                                    {t('ntpnDigitCount', { count: (ntpnInput[item.id]?.ntpn || '').length })}
                                     {(ntpnInput[item.id]?.ntpn || '').length === 16 && ' ✓'}
                                   </p>
                                 </div>
                                 <div>
-                                  <Label className="text-[10px]">납부 금액 (Rp)</Label>
+                                  <Label className="text-[10px]">{t('paymentAmountLabel')}</Label>
                                   <Input type="number"
                                     className="h-8 text-xs font-mono"
                                     value={ntpnInput[item.id]?.amount || String(item.amount || '')}
@@ -336,7 +340,7 @@ export default function TaxBillingPage() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-[10px]">납부일</Label>
+                                  <Label className="text-[10px]">{t('paymentDateLabel')}</Label>
                                   <Input type="date"
                                     className="h-8 text-xs"
                                     value={ntpnInput[item.id]?.date || new Date().toISOString().split('T')[0]}
@@ -353,7 +357,7 @@ export default function TaxBillingPage() {
                                 {submittingNtpn === item.id
                                   ? <Loader2 className="h-3 w-3 animate-spin mr-1" />
                                   : <Send className="h-3 w-3 mr-1" />}
-                                NTPN 제출
+                                {t('submitNtpn')}
                               </Button>
                             </div>
                           )}
@@ -362,8 +366,8 @@ export default function TaxBillingPage() {
                           {item.payment_verified_at && (
                             <div className="text-[10px] text-green-700 mt-1 flex items-center gap-1">
                               <CheckCircle className="h-3 w-3" />
-                              납부 확인 완료 {item.payment_date && `(${item.payment_date})`}
-                              {item.payment_amount && ` — ${fmtRp(item.payment_amount)}`}
+                              {t('paymentVerifiedConfirm')} {item.payment_date && '(' + item.payment_date + ')'}
+                              {item.payment_amount && ' — ' + fmtRp(item.payment_amount)}
                             </div>
                           )}
 
@@ -378,7 +382,7 @@ export default function TaxBillingPage() {
                           {/* Completed */}
                           {item.status === 'COMPLETED' && (
                             <div className="text-[10px] text-green-700 mt-1 flex items-center gap-1">
-                              <CheckCircle className="h-3 w-3" />신고 완료
+                              <CheckCircle className="h-3 w-3" />{t('filingComplete')}
                             </div>
                           )}
                         </div>

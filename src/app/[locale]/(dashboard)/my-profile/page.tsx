@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,26 +28,27 @@ interface PersonalProfile {
   created_at: string;
 }
 
-const PTKP_OPTIONS = [
-  { value: 'TK/0', label: 'TK/0 — 미혼, 부양가족 없음' },
-  { value: 'TK/1', label: 'TK/1 — 미혼, 부양가족 1명' },
-  { value: 'TK/2', label: 'TK/2 — 미혼, 부양가족 2명' },
-  { value: 'TK/3', label: 'TK/3 — 미혼, 부양가족 3명' },
-  { value: 'K/0',  label: 'K/0 — 기혼, 부양가족 없음' },
-  { value: 'K/1',  label: 'K/1 — 기혼, 부양가족 1명' },
-  { value: 'K/2',  label: 'K/2 — 기혼, 부양가족 2명' },
-  { value: 'K/3',  label: 'K/3 — 기혼, 부양가족 3명' },
-  { value: 'K/I/0', label: 'K/I/0 — 기혼(배우자 소득 합산), 부양가족 없음' },
-  { value: 'K/I/1', label: 'K/I/1 — 기혼(배우자 소득 합산), 부양가족 1명' },
-  { value: 'K/I/2', label: 'K/I/2 — 기혼(배우자 소득 합산), 부양가족 2명' },
-  { value: 'K/I/3', label: 'K/I/3 — 기혼(배우자 소득 합산), 부양가족 3명' },
-];
-
 export default function MyProfilePage() {
+  const t = useTranslations('myProfile');
   const { session, isLoading: sessionLoading } = useSession();
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+
+  const PTKP_OPTIONS = [
+    { value: 'TK/0', label: 'TK/0 — ' + t('ptkpSingleNoDep') },
+    { value: 'TK/1', label: 'TK/1 — ' + t('ptkpSingle1Dep') },
+    { value: 'TK/2', label: 'TK/2 — ' + t('ptkpSingle2Dep') },
+    { value: 'TK/3', label: 'TK/3 — ' + t('ptkpSingle3Dep') },
+    { value: 'K/0',  label: 'K/0 — ' + t('ptkpMarriedNoDep') },
+    { value: 'K/1',  label: 'K/1 — ' + t('ptkpMarried1Dep') },
+    { value: 'K/2',  label: 'K/2 — ' + t('ptkpMarried2Dep') },
+    { value: 'K/3',  label: 'K/3 — ' + t('ptkpMarried3Dep') },
+    { value: 'K/I/0', label: 'K/I/0 — ' + t('ptkpMarriedCombinedNoDep') },
+    { value: 'K/I/1', label: 'K/I/1 — ' + t('ptkpMarriedCombined1Dep') },
+    { value: 'K/I/2', label: 'K/I/2 — ' + t('ptkpMarriedCombined2Dep') },
+    { value: 'K/I/3', label: 'K/I/3 — ' + t('ptkpMarriedCombined3Dep') },
+  ];
 
   const [profile, setProfile] = useState<PersonalProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,10 +99,10 @@ export default function MyProfilePage() {
           ptkp_status: p.ptkp_status || '',
         });
       } else {
-        showMsg('error', data.error || '프로필을 불러올 수 없습니다');
+        showMsg('error', data.error || t('errorLoadProfile'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('errorServer'));
     } finally {
       setLoading(false);
     }
@@ -113,7 +115,7 @@ export default function MyProfilePage() {
   const handleSave = async () => {
     if (!profile) return;
     if (!form.full_name.trim()) {
-      showMsg('error', '이름은 필수입니다');
+      showMsg('error', t('errorNameRequired'));
       return;
     }
     setSaving(true);
@@ -134,21 +136,22 @@ export default function MyProfilePage() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', '프로필이 저장되었습니다');
+        showMsg('success', t('successSaved'));
         setEditing(false);
         loadProfile();
       } else {
-        showMsg('error', data.error || '저장 실패');
+        showMsg('error', data.error || t('errorSaveFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('errorServer'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteField = (field: 'phone' | 'address' | 'npwp' | 'nik') => {
-    if (!confirm(`${field === 'phone' ? '전화번호' : field === 'address' ? '주소' : field === 'npwp' ? 'NPWP' : 'NIK'}를 삭제하시겠습니까?`)) return;
+    const fieldName = field === 'phone' ? t('labelPhone') : field === 'address' ? t('labelAddress') : field === 'npwp' ? 'NPWP' : 'NIK';
+    if (!confirm(t('confirmDeleteField', { field: fieldName }))) return;
     setForm({ ...form, [field]: '' });
     if (!editing) setEditing(true);
   };
@@ -165,7 +168,7 @@ export default function MyProfilePage() {
     return (
       <div className="container mx-auto py-16 px-4 max-w-md text-center">
         <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-        <p className="text-sm text-gray-500">프로필을 불러올 수 없습니다</p>
+        <p className="text-sm text-gray-500">{t('errorLoadProfile')}</p>
       </div>
     );
   }
@@ -184,10 +187,10 @@ export default function MyProfilePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <User className="h-6 w-6 text-blue-600" />
-          내 정보
+          {t('pageTitle')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          가입 시 입력하신 개인 정보를 관리합니다. 필요한 항목을 추가하거나 삭제할 수 있습니다.
+          {t('pageDescription')}
         </p>
       </div>
 
@@ -206,18 +209,18 @@ export default function MyProfilePage() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-blue-900 font-medium">프로필 완성도</p>
+              <p className="text-xs text-blue-900 font-medium">{t('profileCompleteness')}</p>
               <p className="text-2xl font-bold text-blue-900 mt-1">{completeness}%</p>
               <p className="text-[11px] text-blue-700 mt-0.5">
-                {filledCount}/{totalFields} 항목 입력됨
+                {t('fieldsFilledCount', { filled: filledCount, total: totalFields })}
               </p>
             </div>
             <div className="text-right">
               <Badge className="bg-blue-600 text-white">
-                {profile.customer_type === 'INDIVIDUAL' ? '개인' : '법인'}
+                {profile.customer_type === 'INDIVIDUAL' ? t('individual') : t('corporate')}
               </Badge>
               <p className="text-[10px] text-blue-600 mt-1">
-                가입일: {new Date(profile.created_at).toLocaleDateString('ko-KR')}
+                {t('joinedDate', { date: new Date(profile.created_at).toLocaleDateString(locale) })}
               </p>
             </div>
           </div>
@@ -237,12 +240,12 @@ export default function MyProfilePage() {
           <div>
             <Label className="text-xs flex items-center gap-1">
               <User className="h-3 w-3" />
-              이름 <span className="text-red-500">*</span>
+              {t('labelName')} <span className="text-red-500">*</span>
             </Label>
             <Input
               value={form.full_name}
               onChange={e => { setForm({ ...form, full_name: e.target.value }); setEditing(true); }}
-              placeholder="홍길동"
+              placeholder={t('placeholderName')}
               className="text-sm"
             />
           </div>
@@ -251,7 +254,7 @@ export default function MyProfilePage() {
           <div>
             <Label className="text-xs flex items-center gap-1">
               <Mail className="h-3 w-3" />
-              이메일
+              {t('labelEmail')}
             </Label>
             <Input
               type="email"
@@ -266,7 +269,7 @@ export default function MyProfilePage() {
           <div>
             <Label className="text-xs flex items-center gap-1">
               <FileText className="h-3 w-3" />
-              NPWP (세금 번호)
+              {t('labelNpwp')}
             </Label>
             <div className="flex gap-2">
               <Input
@@ -287,20 +290,20 @@ export default function MyProfilePage() {
                 </Button>
               )}
             </div>
-            <p className="text-[10px] text-gray-500 mt-1">SPT 신고에 필요합니다. 미발급 시 비워두셔도 됩니다.</p>
+            <p className="text-[10px] text-gray-500 mt-1">{t('npwpHint')}</p>
           </div>
 
           {/* NIK */}
           <div>
             <Label className="text-xs flex items-center gap-1">
               <IdCard className="h-3 w-3" />
-              NIK (주민증 번호, 16자리)
+              {t('labelNik')}
             </Label>
             <div className="flex gap-2">
               <Input
                 value={form.nik}
                 onChange={e => { setForm({ ...form, nik: e.target.value }); setEditing(true); }}
-                placeholder="16자리 숫자"
+                placeholder={t('placeholderNik')}
                 maxLength={16}
                 className="text-sm font-mono tracking-wider flex-1"
               />
@@ -322,7 +325,7 @@ export default function MyProfilePage() {
           <div>
             <Label className="text-xs flex items-center gap-1">
               <Heart className="h-3 w-3" />
-              PTKP 상태 (혼인 / 부양가족)
+              {t('labelPtkpStatus')}
             </Label>
             <div className="flex gap-2">
               <select
@@ -330,7 +333,7 @@ export default function MyProfilePage() {
                 onChange={e => { setForm({ ...form, ptkp_status: e.target.value }); setEditing(true); }}
                 className="flex-1 h-9 px-3 rounded-md border border-input text-sm bg-background"
               >
-                <option value="">선택 안 함</option>
+                <option value="">{t('ptkpNotSelected')}</option>
                 {PTKP_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
@@ -348,7 +351,7 @@ export default function MyProfilePage() {
               )}
             </div>
             <p className="text-[10px] text-gray-500 mt-1">
-              연말 결산(SPT 1770SS)에서 자동으로 사용됩니다. 혼인 상태·부양가족 수가 바뀔 때 업데이트하세요.
+              {t('ptkpHint')}
             </p>
           </div>
 
@@ -356,7 +359,7 @@ export default function MyProfilePage() {
           <div>
             <Label className="text-xs flex items-center gap-1">
               <Phone className="h-3 w-3" />
-              전화번호
+              {t('labelPhone')}
             </Label>
             <div className="flex gap-2">
               <Input
@@ -384,7 +387,7 @@ export default function MyProfilePage() {
           <div>
             <Label className="text-xs flex items-center gap-1">
               <MapPin className="h-3 w-3" />
-              주소
+              {t('labelAddress')}
             </Label>
             <div className="flex gap-2">
               <Input
@@ -415,7 +418,7 @@ export default function MyProfilePage() {
               className="flex-1"
             >
               {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-              저장
+              {t('save')}
             </Button>
             {editing && (
               <Button
@@ -434,7 +437,7 @@ export default function MyProfilePage() {
                   setEditing(false);
                 }}
               >
-                취소
+                {t('cancel')}
               </Button>
             )}
           </div>
@@ -442,7 +445,7 @@ export default function MyProfilePage() {
       </Card>
 
       <p className="text-[11px] text-gray-400 text-center mt-4">
-        * NPWP와 NIK는 세금 신고 시 자동으로 반영됩니다. 필요한 시점에 언제든지 입력/수정/삭제할 수 있습니다.
+        {t('footerNote')}
       </p>
     </div>
   );
