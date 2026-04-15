@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ const EXEMPTION = 500_000_000;
 const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
 export default function PPhFinalAnnualPage() {
+  const t = useTranslations('pphFinal');
   const { session } = useSession();
   const params = useParams();
   const router = useRouter();
@@ -28,7 +30,7 @@ export default function PPhFinalAnnualPage() {
   const currentYear = new Date().getFullYear();
 
   const [step, setStep] = useState(1);
-  const [year, setYear] = useState(currentYear - 1); // 전년도 결산
+  const [year, setYear] = useState(currentYear - 1);
   const [loading, setLoading] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [npwp, setNpwp] = useState('');
@@ -40,18 +42,16 @@ export default function PPhFinalAnnualPage() {
 
   // Step 2: Required documents checklist
   const [docs, setDocs] = useState({
-    aktaPendirian: false,     // 최초 정관
-    aktaPerubahan: false,     // 최종 수정 정관
-    skMenteri: false,         // SK (Surat Keputusan Menteri)
-    fixedAssetList: false,    // 고정자산 리스트
-    contracts: false,         // 연중 계약서 사본
-    monthlyTaxRecords: false, // 매월 세무신고 자료
+    aktaPendirian: false,
+    aktaPerubahan: false,
+    skMenteri: false,
+    fixedAssetList: false,
+    contracts: false,
+    monthlyTaxRecords: false,
   });
 
   // Step 3: Financial statement path
   const [fsPath, setFsPath] = useState<'JOURNAL' | 'BANK_PETTY' | null>(null);
-  // JOURNAL: 고객이 저널 제공 → 우리가 재무제표 작성
-  // BANK_PETTY: 은행거래내역 + petty cash → 우리가 저널+재무제표 작성
 
   // Step 5: Additional income/deductions
   const [otherIncome, setOtherIncome] = useState('');
@@ -94,16 +94,67 @@ export default function PPhFinalAnnualPage() {
     return Math.round(Math.max(taxable, 0) * UMKM_RATE);
   };
 
+  const exemptionFormatted = fmtRp(EXEMPTION);
+
+  const docItems = [
+    {
+      key: 'aktaPendirian', label: t('docAktaPendirianLabel'), required: true,
+      desc: t('docAktaPendirianDesc'),
+      detail: t('docAktaPendirianDetail'),
+      format: t('docAktaPendirianFormat'),
+    },
+    {
+      key: 'aktaPerubahan', label: t('docAktaPerubahanLabel'), required: true,
+      desc: t('docAktaPerubahanDesc'),
+      detail: t('docAktaPerubahanDetail'),
+      format: t('docAktaPerubahanFormat'),
+    },
+    {
+      key: 'skMenteri', label: t('docSkMenteriLabel'), required: true,
+      desc: t('docSkMenteriDesc'),
+      detail: t('docSkMenteriDetail'),
+      format: t('docSkMenteriFormat'),
+    },
+    {
+      key: 'fixedAssetList', label: t('docFixedAssetLabel'), required: false,
+      desc: t('docFixedAssetDesc'),
+      detail: t('docFixedAssetDetail'),
+      format: t('docFixedAssetFormat'),
+    },
+    {
+      key: 'contracts', label: t('docContractsLabel'), required: true,
+      desc: t('docContractsDesc', { year }),
+      detail: t('docContractsDetail'),
+      format: t('docContractsFormat'),
+    },
+    {
+      key: 'monthlyTaxRecords', label: t('docMonthlyTaxLabel'), required: true,
+      desc: t('docMonthlyTaxDesc', { year }),
+      detail: t('docMonthlyTaxDetail'),
+      format: t('docMonthlyTaxFormat'),
+    },
+  ];
+
+  const steps = [
+    { id: 1, label: t('stepBasicInfo') },
+    { id: 2, label: t('stepDocuments') },
+    { id: 3, label: t('stepFinancialStatements') },
+    { id: 4, label: t('stepMonthlyRevenue') },
+    { id: 5, label: t('stepOtherIncome') },
+    { id: 6, label: t('stepSettlement') },
+    { id: 7, label: t('stepSptGeneration') },
+  ];
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Store className="h-6 w-6 text-green-600" />
-          연 결산 — PPh Final UMKM
+          {t('pageTitle')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          {year}년 UMKM 법인세 연간 정산 및 SPT Tahunan Badan 1771 작성
+          {t('pageDescription', { year })}
         </p>
       </div>
 
@@ -112,13 +163,13 @@ export default function PPhFinalAnnualPage() {
         <div className="flex items-start gap-3">
           <HelpCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div className="text-xs text-green-900">
-            <p className="font-bold mb-1">PPh Final UMKM 연 결산이란?</p>
+            <p className="font-bold mb-1">{t('educationalTitle')}</p>
             <ul className="space-y-0.5 text-green-800">
-              <li>• 매월 납부한 PPh Final 0.5%의 <b>연간 합계</b>를 정리합니다</li>
-              <li>• 연 매출 <b>{fmtRp(EXEMPTION)} (5억)</b>까지 비과세 (PP 55/2022)</li>
-              <li>• 과부족이 있으면 추가 납부 또는 이월 처리합니다</li>
-              <li>• SPT Tahunan Badan 1771 양식으로 DJP에 제출합니다</li>
-              <li>• <b>제출 기한</b>: 다음 해 4월 30일</li>
+              <li dangerouslySetInnerHTML={{ __html: '• ' + t.raw('educationalItem1') }} />
+              <li dangerouslySetInnerHTML={{ __html: '• ' + t.raw('educationalItem2').replace('{exemption}', exemptionFormatted + ' (5억)') }} />
+              <li>• {t('educationalItem3')}</li>
+              <li>• {t('educationalItem4')}</li>
+              <li dangerouslySetInnerHTML={{ __html: '• ' + t.raw('educationalItem5') }} />
             </ul>
           </div>
         </div>
@@ -126,15 +177,7 @@ export default function PPhFinalAnnualPage() {
 
       {/* Step indicator */}
       <div className="flex items-center justify-between mb-6 overflow-x-auto">
-        {[
-          { id: 1, label: '기본 정보' },
-          { id: 2, label: '필요 서류' },
-          { id: 3, label: '재무제표' },
-          { id: 4, label: '월별 매출' },
-          { id: 5, label: '기타 소득' },
-          { id: 6, label: '정산 결과' },
-          { id: 7, label: 'SPT 생성' },
-        ].map((s, i) => (
+        {steps.map((s, i) => (
           <div key={s.id} className="flex items-center flex-1 min-w-0">
             <div className="flex flex-col items-center flex-1">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
@@ -148,16 +191,17 @@ export default function PPhFinalAnnualPage() {
       </div>
 
       {/* Step 1: Basic info */}
+
       {step === 1 && (
         <Card>
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Shield className="h-5 w-5 text-green-600" />
-              기본 정보 확인
+              {t('basicInfoTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">회사명</Label>
+                <Label className="text-xs">{t('companyName')}</Label>
                 <Input value={companyName} readOnly className="bg-gray-50" />
               </div>
               <div>
@@ -165,35 +209,33 @@ export default function PPhFinalAnnualPage() {
                 <Input value={npwp} readOnly className="bg-gray-50 font-mono" />
               </div>
               <div>
-                <Label className="text-xs">결산 연도</Label>
+                <Label className="text-xs">{t('fiscalYear')}</Label>
                 <select value={year} onChange={e => setYear(Number(e.target.value))}
                   className="w-full h-9 px-3 rounded-md border text-sm">
                   {[currentYear - 1, currentYear - 2, currentYear].map(y => (
-                    <option key={y} value={y}>{y}년</option>
+                    <option key={y} value={y}>{t('yearSuffix', { year: y })}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <Label className="text-xs">UMKM PPh Final 시작 연도</Label>
-                <Input value={umkmStartYear || '미등록'} readOnly className="bg-gray-50" />
+                <Label className="text-xs">{t('umkmStartYear')}</Label>
+                <Input value={umkmStartYear || t('notRegistered')} readOnly className="bg-gray-50" />
               </div>
             </div>
 
             <div className="bg-green-50 rounded-lg p-3 text-xs text-green-800">
-              <p className="font-bold">적용 세율</p>
+              <p className="font-bold">{t('appliedTaxRate')}</p>
+              <p className="mt-1" dangerouslySetInnerHTML={{ __html: t.raw('taxRateFormula') }} />
               <p className="mt-1">
-                PPh Final <b>0.5%</b> × (월 매출 - 비과세 공제)
-              </p>
-              <p className="mt-1">
-                비과세: 연 {fmtRp(EXEMPTION)} (누적 기준, 초과분부터 과세)
+                {t('exemptionNote', { exemption: exemptionFormatted })}
               </p>
             </div>
 
             <div className="bg-amber-50 rounded-lg p-3 text-xs text-amber-800 flex items-start gap-2">
               <Calendar className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold">제출 기한</p>
-                <p>{year + 1}년 4월 30일 — 이 날까지 SPT Tahunan Badan 1771을 DJP에 제출해야 합니다</p>
+                <p className="font-bold">{t('deadlineTitle')}</p>
+                <p>{t('deadlineDescription', { nextYear: year + 1 })}</p>
               </div>
             </div>
           </CardContent>
@@ -206,52 +248,12 @@ export default function PPhFinalAnnualPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-green-600" />
-              필요 서류 체크리스트
+              {t('documentsTitle')}
             </h2>
-            <p className="text-xs text-gray-500">
-              연 결산 및 SPT 1771 작성에 필요한 서류입니다. 각 항목을 확인하고 <b>업로드</b>해 주세요.
-              미준비 서류는 <b>AI가 자동으로 요청</b>합니다.
-            </p>
+            <p className="text-xs text-gray-500" dangerouslySetInnerHTML={{ __html: t.raw('documentsDescription') }} />
 
             <div className="space-y-2">
-              {[
-                {
-                  key: 'aktaPendirian', label: '최초 정관 (Akta Pendirian)', required: true,
-                  desc: '회사를 처음 설립할 때 Notaris(공증인)가 작성한 공증 정관입니다.',
-                  detail: '어디서 찾나요? → 회사 설립 시 Notaris가 준 원본 또는 사본. 분실 시 해당 Notaris 사무실에 재발급 요청.',
-                  format: 'PDF 스캔 또는 사진 촬영',
-                },
-                {
-                  key: 'aktaPerubahan', label: '최종 수정 정관 (Akta Perubahan Terakhir)', required: true,
-                  desc: '가장 최근에 수정한 정관입니다. 주주 변경, 이사 변경, 자본금 변경 등이 반영됩니다.',
-                  detail: '설립 후 변경이 없다면 최초 정관과 동일합니다. "변경 없음"으로 체크해도 됩니다.',
-                  format: 'PDF 스캔 또는 사진 촬영',
-                },
-                {
-                  key: 'skMenteri', label: 'SK Menteri (법무인권부 승인서)', required: true,
-                  desc: 'Surat Keputusan Menteri Hukum dan HAM — 법무인권부 장관이 발행하는 법인 설립/변경 승인서입니다.',
-                  detail: 'AHU 번호가 포함된 문서입니다. 회사 설립 시 또는 정관 변경 시 법무부에서 발급됩니다. Notaris를 통해 받으며, AHU Online (ahu.go.id)에서도 확인 가능합니다.',
-                  format: 'PDF 또는 사진 (AHU 번호가 보이게)',
-                },
-                {
-                  key: 'fixedAssetList', label: '고정자산 리스트 (Daftar Aktiva Tetap)', required: false,
-                  desc: '회사가 보유한 자산 목록입니다: 차량, 컴퓨터, 가구, 건물 등.',
-                  detail: '각 자산의 취득일, 취득 가격, 감가상각 내역을 포함합니다. Excel로 작성하거나, 없으면 "자산 없음"으로 체크하세요.',
-                  format: 'Excel 또는 PDF',
-                },
-                {
-                  key: 'contracts', label: '연중 체결 계약서 사본', required: true,
-                  desc: `${year}년 중 체결한 모든 계약서입니다.`,
-                  detail: '거래처 계약, 사무실 임대차 계약, 서비스 계약, 고용 계약 등 금액이 포함된 모든 계약. 여러 건이면 모두 업로드하세요.',
-                  format: 'PDF 스캔 또는 사진 (여러 파일 가능)',
-                },
-                {
-                  key: 'monthlyTaxRecords', label: '매월 세무신고 자료', required: true,
-                  desc: `${year}년 1~12월 매월 신고한 세무 자료입니다.`,
-                  detail: '다음 중 해당하는 것을 모두 업로드하세요:\n• SPT Masa PPh 21 — 직원이 있는 경우 (급여 원천징수)\n• SPT Masa PPh 23 — 서비스 비용을 지급한 경우 (원천징수)\n• SPT Masa PPh 4(2) — 임대/건설 등 Final Tax\n• SPT Masa PPN — PKP 등록 사업자인 경우 (부가세)\n• PPh Final 0.5% 납부 영수증 (NTPN)\n\nAI Pajak으로 신고했다면 자동 수집되므로 별도 업로드가 불필요합니다.',
-                  format: 'PDF 또는 사진 (월별로 업로드)',
-                },
-              ].map(doc => (
+              {docItems.map(doc => (
                 <div key={doc.key}
                   className={`p-3 rounded-lg border transition-all ${
                     docs[doc.key as keyof typeof docs] ? 'border-green-300 bg-green-50' : 'border-gray-200'
@@ -264,14 +266,14 @@ export default function PPhFinalAnnualPage() {
                     <div className="flex-1 text-xs">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{doc.label}</span>
-                        {doc.required && <Badge className="text-[8px] bg-red-100 text-red-700">필수</Badge>}
+                        {doc.required && <Badge className="text-[8px] bg-red-100 text-red-700">{t('required')}</Badge>}
                       </div>
                       <p className="text-gray-600 mt-0.5">{doc.desc}</p>
                       <details className="mt-1">
-                        <summary className="text-[10px] text-blue-600 cursor-pointer hover:underline">자세한 안내 보기</summary>
+                        <summary className="text-[10px] text-blue-600 cursor-pointer hover:underline">{t('viewDetails')}</summary>
                         <div className="mt-1 p-2 bg-white rounded text-[10px] text-gray-600 whitespace-pre-line">
                           {doc.detail}
-                          <p className="mt-1 text-blue-700">📎 업로드 형식: {doc.format}</p>
+                          <p className="mt-1 text-blue-700">{t('uploadFormat', { format: doc.format })}</p>
                         </div>
                       </details>
                     </div>
@@ -280,7 +282,7 @@ export default function PPhFinalAnnualPage() {
                       <a href={`/${locale}/documents/upload`}
                         onClick={e => e.stopPropagation()}
                         className="p-1.5 rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
-                        title="이 서류 업로드">
+                        title={t('uploadThisDoc')}>
                         <Upload className="h-3 w-3 text-blue-600" />
                       </a>
                     </div>
@@ -290,12 +292,12 @@ export default function PPhFinalAnnualPage() {
             </div>
 
             <div className="bg-gray-50 rounded-lg p-3 text-xs">
-              <p className="text-gray-600">
-                준비 상태: <b>{Object.values(docs).filter(Boolean).length}/6</b> 완료
-                {Object.values(docs).filter(Boolean).length < 4 && (
-                  <span className="text-amber-600 ml-2">— 미준비 서류는 AI가 자동으로 요청합니다</span>
-                )}
-              </p>
+              <p className="text-gray-600" dangerouslySetInnerHTML={{
+                __html: t.raw('preparationStatus').replace('{count}', String(Object.values(docs).filter(Boolean).length))
+                  + (Object.values(docs).filter(Boolean).length < 4
+                    ? '<span class="text-amber-600 ml-2">' + t.raw('unpreparedAutoRequest') + '</span>'
+                    : '')
+              }} />
             </div>
           </CardContent>
         </Card>
@@ -307,21 +309,18 @@ export default function PPhFinalAnnualPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-green-600" />
-              재무제표 준비
+              {t('financialStatementsTitle')}
             </h2>
 
             <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
               <p className="text-xs font-bold text-amber-900 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
-                PPh Final도 SPT 1771에 재무제표가 필수입니다
+                {t('fsRequiredNotice')}
               </p>
-              <p className="text-xs text-amber-800 mt-1">
-                UMKM이라도 SPT Tahunan Badan 1771 제출 시 <b>Laporan Keuangan (재무제표)</b>가 반드시 첨부되어야 합니다.
-                재무제표에는 Neraca (재무상태표)와 Laporan Laba Rugi (손익계산서)가 포함됩니다.
-              </p>
+              <p className="text-xs text-amber-800 mt-1" dangerouslySetInnerHTML={{ __html: t.raw('fsRequiredDescription') }} />
             </div>
 
-            <p className="text-sm font-medium">재무제표 준비 방법을 선택하세요:</p>
+            <p className="text-sm font-medium">{t('fsSelectMethod')}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Path A: Customer has journal */}
@@ -331,15 +330,14 @@ export default function PPhFinalAnnualPage() {
                   fsPath === 'JOURNAL' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
                 }`}>
                 <BookOpen className={`h-8 w-8 mb-2 ${fsPath === 'JOURNAL' ? 'text-green-600' : 'text-gray-400'}`} />
-                <p className="font-bold text-sm">A. 저널(회계 장부)이 있습니다</p>
+                <p className="font-bold text-sm">{t('fsJournalTitle')}</p>
                 <p className="text-xs text-gray-600 mt-2">
-                  회사에서 작성한 회계 저널(Jurnal Umum)을 업로드하면
-                  JTC가 이를 기반으로 재무제표를 작성합니다.
+                  {t('fsJournalDesc')}
                 </p>
                 <div className="mt-3 text-[10px] text-green-700 bg-green-100 rounded p-2">
-                  <p className="font-bold">필요한 것:</p>
-                  <p>• Jurnal Umum (일반 저널) — Excel 또는 회계SW 출력물</p>
-                  <p>• Buku Besar (총계정원장) — 있으면 추가</p>
+                  <p className="font-bold">{t('fsJournalNeeded')}</p>
+                  <p>{t('fsJournalItem1')}</p>
+                  <p>{t('fsJournalItem2')}</p>
                 </div>
               </button>
 
@@ -350,16 +348,15 @@ export default function PPhFinalAnnualPage() {
                   fsPath === 'BANK_PETTY' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                 }`}>
                 <FolderOpen className={`h-8 w-8 mb-2 ${fsPath === 'BANK_PETTY' ? 'text-blue-600' : 'text-gray-400'}`} />
-                <p className="font-bold text-sm">B. 저널이 없습니다</p>
+                <p className="font-bold text-sm">{t('fsNoJournalTitle')}</p>
                 <p className="text-xs text-gray-600 mt-2">
-                  회계 장부가 없는 경우, 법인 계좌 거래내역과 현금 출납(Petty Cash)을
-                  제출하면 JTC가 저널 + 재무제표를 대신 작성합니다.
+                  {t('fsNoJournalDesc')}
                 </p>
                 <div className="mt-3 text-[10px] text-blue-700 bg-blue-100 rounded p-2">
-                  <p className="font-bold">필요한 것:</p>
-                  <p>• 법인 은행 계좌 거래내역서 (Rekening Koran) — {year}년 1~12월 전체</p>
-                  <p>• Petty Cash (현금 출납부) — 있으면 (Excel 또는 수기 노트 촬영)</p>
-                  <p>• 매출/매입 영수증 원본 (증빙)</p>
+                  <p className="font-bold">{t('fsNoJournalNeeded')}</p>
+                  <p>{t('fsNoJournalItem1', { year })}</p>
+                  <p>{t('fsNoJournalItem2')}</p>
+                  <p>{t('fsNoJournalItem3')}</p>
                 </div>
               </button>
             </div>
@@ -369,26 +366,25 @@ export default function PPhFinalAnnualPage() {
                 fsPath === 'JOURNAL' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'
               }`}>
                 <p className="text-xs font-bold mb-2">
-                  {fsPath === 'JOURNAL' ? '✅ 저널 기반 재무제표 작성' : '✅ 은행거래 기반 재무제표 작성'}
+                  {fsPath === 'JOURNAL' ? t('fsJournalBased') : t('fsBankBased')}
                 </p>
                 <p className="text-xs text-gray-700">
                   {fsPath === 'JOURNAL'
-                    ? '저널 데이터를 "자료 업로드" 페이지에서 업로드해 주세요. JTC 세무사가 검토 후 Neraca + Laporan Laba Rugi를 작성합니다.'
-                    : '은행 거래내역서와 Petty Cash 내역을 "자료 업로드" 페이지에서 업로드해 주세요. JTC가 저널 작성 → 재무제표 작성을 대행합니다.'}
+                    ? t('fsJournalInstruction')
+                    : t('fsBankInstruction')}
                 </p>
                 <a href={`/${locale}/documents/upload`}
                   className={`mt-2 inline-flex items-center gap-1 text-xs font-medium ${
                     fsPath === 'JOURNAL' ? 'text-green-700' : 'text-blue-700'
                   } hover:underline`}>
-                  <Upload className="h-3 w-3" />자료 업로드 페이지로 이동
+                  <Upload className="h-3 w-3" />{t('goToUploadPage')}
                 </a>
 
                 {fsPath === 'BANK_PETTY' && (
                   <div className="mt-3 p-2 bg-amber-50 rounded border border-amber-200 text-[10px] text-amber-800">
-                    <p className="font-bold">💡 Petty Cash가 뭔가요?</p>
+                    <p className="font-bold">{t('pettyCashExplain')}</p>
                     <p className="mt-0.5">
-                      사무실에서 현금으로 소액 결제한 내역입니다 (교통비, 사무용품, 식대 등).
-                      Excel로 정리하거나, 수기 노트를 촬영하여 업로드해도 됩니다.
+                      {t('pettyCashDesc')}
                     </p>
                   </div>
                 )}
@@ -396,26 +392,26 @@ export default function PPhFinalAnnualPage() {
             )}
 
             <div className="bg-gray-50 rounded-lg p-3 text-xs">
-              <p className="font-bold text-gray-700 mb-1">JTC 재무제표 작성 프로세스</p>
+              <p className="font-bold text-gray-700 mb-1">{t('fsProcessTitle')}</p>
               <div className="flex items-center gap-2 text-[10px] text-gray-600">
                 <Badge className="bg-gray-200 text-gray-700">1</Badge>
-                <span>자료 접수</span>
-                <span>→</span>
+                <span>{t('fsProcess1')}</span>
+                <span>&rarr;</span>
                 <Badge className="bg-gray-200 text-gray-700">2</Badge>
-                <span>저널 정리</span>
-                <span>→</span>
+                <span>{t('fsProcess2')}</span>
+                <span>&rarr;</span>
                 <Badge className="bg-gray-200 text-gray-700">3</Badge>
-                <span>시산표</span>
-                <span>→</span>
+                <span>{t('fsProcess3')}</span>
+                <span>&rarr;</span>
                 <Badge className="bg-gray-200 text-gray-700">4</Badge>
                 <span>Neraca + L/R</span>
-                <span>→</span>
+                <span>&rarr;</span>
                 <Badge className="bg-gray-200 text-gray-700">5</Badge>
-                <span>고객 확인</span>
+                <span>{t('fsProcess5')}</span>
               </div>
               <a href={`/${locale}/tax/annual/financial-statements`}
                 className="inline-flex items-center gap-1 mt-2 text-indigo-700 font-medium hover:underline">
-                <BookOpen className="h-3 w-3" />재무제표 생성 페이지로 이동 →
+                <BookOpen className="h-3 w-3" />{t('goToFsPage')}
               </a>
             </div>
           </CardContent>
@@ -428,24 +424,23 @@ export default function PPhFinalAnnualPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
-              {year}년 월별 매출 및 납부 내역
+              {t('monthlyRevenueTitle', { year })}
             </h2>
             <p className="text-xs text-gray-500">
-              각 월의 사업 매출(Omzet)과 실제 납부한 PPh Final을 입력하세요.
-              월신고 데이터가 있으면 자동으로 채워집니다.
+              {t('monthlyRevenueDesc')}
             </p>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-green-50">
-                    <th className="p-2 text-left border">월</th>
-                    <th className="p-2 text-right border">매출 (Rp)</th>
-                    <th className="p-2 text-right border">비과세 공제</th>
-                    <th className="p-2 text-right border">과세 매출</th>
-                    <th className="p-2 text-right border">세액 (0.5%)</th>
-                    <th className="p-2 text-right border">실제 납부</th>
-                    <th className="p-2 text-center border">차이</th>
+                    <th className="p-2 text-left border">{t('colMonth')}</th>
+                    <th className="p-2 text-right border">{t('colRevenue')}</th>
+                    <th className="p-2 text-right border">{t('colExemption')}</th>
+                    <th className="p-2 text-right border">{t('colTaxableRevenue')}</th>
+                    <th className="p-2 text-right border">{t('colTaxAmount')}</th>
+                    <th className="p-2 text-right border">{t('colActualPaid')}</th>
+                    <th className="p-2 text-center border">{t('colDifference')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -494,7 +489,7 @@ export default function PPhFinalAnnualPage() {
                         <td className={`p-2 border text-center text-[10px] font-mono ${
                           diff === 0 ? 'text-gray-400' : diff > 0 ? 'text-blue-600' : 'text-red-600'
                         }`}>
-                          {monthlyRevenue[i] > 0 ? (diff === 0 ? '일치' : diff > 0 ? `+${fmtRp(diff)}` : fmtRp(diff)) : '-'}
+                          {monthlyRevenue[i] > 0 ? (diff === 0 ? t('match') : diff > 0 ? `+${fmtRp(diff)}` : fmtRp(diff)) : '-'}
                         </td>
                       </tr>
                     );
@@ -502,7 +497,7 @@ export default function PPhFinalAnnualPage() {
                 </tbody>
                 <tfoot className="bg-green-50 font-bold">
                   <tr>
-                    <td className="p-2 border">합계</td>
+                    <td className="p-2 border">{t('total')}</td>
                     <td className="p-2 border text-right font-mono">{fmtRp(totalRevenue)}</td>
                     <td className="p-2 border text-right font-mono text-gray-500">{fmtRp(Math.min(totalRevenue, EXEMPTION))}</td>
                     <td className="p-2 border text-right font-mono">{fmtRp(taxableRevenue)}</td>
@@ -519,7 +514,7 @@ export default function PPhFinalAnnualPage() {
             {totalRevenue > 0 && totalRevenue < EXEMPTION && (
               <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-600" />
-                <span>연 매출이 {fmtRp(EXEMPTION)} 미만으로 <b>전액 비과세</b>입니다. PPh Final = 0원.</span>
+                <span dangerouslySetInnerHTML={{ __html: t.raw('fullyExempt').replace('{exemption}', exemptionFormatted) }} />
               </div>
             )}
           </CardContent>
@@ -532,41 +527,41 @@ export default function PPhFinalAnnualPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <FileText className="h-5 w-5 text-green-600" />
-              기타 소득 및 조정 항목
+              {t('otherIncomeTitle')}
             </h2>
             <p className="text-xs text-gray-500">
-              UMKM PPh Final과 별도로 발생한 소득이 있으면 입력합니다. 없으면 비워두세요.
+              {t('otherIncomeDesc')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <Label className="text-xs">기타 사업외 소득 (Rp)</Label>
+                <Label className="text-xs">{t('otherBusinessIncome')}</Label>
                 <Input type="number" value={otherIncome} onChange={e => setOtherIncome(e.target.value)}
                   placeholder="0" className="font-mono" />
-                <p className="text-[10px] text-gray-400 mt-1">PPh Final 대상이 아닌 소득 (예: 임대소득은 별도 PPh 4(2))</p>
+                <p className="text-[10px] text-gray-400 mt-1">{t('otherBusinessIncomeNote')}</p>
               </div>
               <div>
-                <Label className="text-xs">이자 소득 (Rp)</Label>
+                <Label className="text-xs">{t('interestIncome')}</Label>
                 <Input type="number" value={interestIncome} onChange={e => setInterestIncome(e.target.value)}
                   placeholder="0" className="font-mono" />
-                <p className="text-[10px] text-gray-400 mt-1">은행 이자 등 (이미 원천징수된 경우 PPh 23/4(2))</p>
+                <p className="text-[10px] text-gray-400 mt-1">{t('interestIncomeNote')}</p>
               </div>
               <div>
-                <Label className="text-xs">자산 처분 손익 (Rp)</Label>
+                <Label className="text-xs">{t('assetGainLoss')}</Label>
                 <Input type="number" value={assetGainLoss} onChange={e => setAssetGainLoss(e.target.value)}
                   placeholder="0" className="font-mono" />
-                <p className="text-[10px] text-gray-400 mt-1">고정자산 매각 이익/손실</p>
+                <p className="text-[10px] text-gray-400 mt-1">{t('assetGainLossNote')}</p>
               </div>
             </div>
 
             <div className="bg-green-50 rounded-lg p-3 text-xs text-green-800">
-              <p className="font-bold">UMKM PPh Final 과세 범위</p>
+              <p className="font-bold">{t('taxScopeTitle')}</p>
               <ul className="mt-1 space-y-0.5">
-                <li>✅ 사업 매출 (Omzet) — PPh Final 0.5% 적용</li>
-                <li>⚠️ 임대 소득 — PPh 4(2) Final 10% (별도 신고)</li>
-                <li>⚠️ 이자 소득 — PPh 23 또는 PPh 4(2) (이미 원천징수됨)</li>
-                <li>⚠️ 배당 소득 — PPh 23 15% (이미 원천징수됨)</li>
-                <li>ℹ️ 위 항목은 SPT 1771에 기재하되 추가 과세 없음 (이미 Final/원천징수됨)</li>
+                <li>{t('taxScopeItem1')}</li>
+                <li>{t('taxScopeItem2')}</li>
+                <li>{t('taxScopeItem3')}</li>
+                <li>{t('taxScopeItem4')}</li>
+                <li>{t('taxScopeItem5')}</li>
               </ul>
             </div>
           </CardContent>
@@ -580,24 +575,24 @@ export default function PPhFinalAnnualPage() {
             <CardContent className="p-5">
               <h2 className="font-bold text-lg flex items-center gap-2 mb-4">
                 <Shield className="h-5 w-5" />
-                {year}년 PPh Final UMKM 정산 결과
+                {t('settlementTitle', { year })}
               </h2>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                 <div className="bg-white rounded-xl border p-3 text-center">
-                  <p className="text-[10px] text-gray-500">연간 매출</p>
+                  <p className="text-[10px] text-gray-500">{t('annualRevenue')}</p>
                   <p className="text-sm font-bold font-mono">{fmtRp(totalRevenue)}</p>
                 </div>
                 <div className="bg-white rounded-xl border p-3 text-center">
-                  <p className="text-[10px] text-gray-500">비과세 공제</p>
+                  <p className="text-[10px] text-gray-500">{t('taxExemptionDeduction')}</p>
                   <p className="text-sm font-bold font-mono text-gray-500">{fmtRp(Math.min(totalRevenue, EXEMPTION))}</p>
                 </div>
                 <div className="bg-white rounded-xl border p-3 text-center">
-                  <p className="text-[10px] text-green-600">연간 PPh Final</p>
+                  <p className="text-[10px] text-green-600">{t('annualPphFinal')}</p>
                   <p className="text-sm font-bold font-mono text-green-700">{fmtRp(annualTaxDue)}</p>
                 </div>
                 <div className="bg-white rounded-xl border p-3 text-center">
-                  <p className="text-[10px] text-gray-500">이미 납부</p>
+                  <p className="text-[10px] text-gray-500">{t('alreadyPaid')}</p>
                   <p className="text-sm font-bold font-mono">{fmtRp(totalPaid)}</p>
                 </div>
               </div>
@@ -607,8 +602,8 @@ export default function PPhFinalAnnualPage() {
                 <div className="p-4 bg-green-50 rounded-xl border border-green-200 flex items-center gap-3">
                   <CheckCircle className="h-6 w-6 text-green-600" />
                   <div>
-                    <p className="font-bold text-green-900">정산 완료 — 과부족 없음</p>
-                    <p className="text-xs text-green-700">연간 납부 세액과 의무 세액이 일치합니다. SPT Tahunan을 제출하면 됩니다.</p>
+                    <p className="font-bold text-green-900">{t('settlementBalanced')}</p>
+                    <p className="text-xs text-green-700">{t('settlementBalancedDesc')}</p>
                   </div>
                 </div>
               )}
@@ -617,52 +612,49 @@ export default function PPhFinalAnnualPage() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0" />
                     <div>
-                      <p className="font-bold text-red-900 text-lg">추가 납부 필요: {fmtRp(difference)}</p>
+                      <p className="font-bold text-red-900 text-lg">{t('underpaidTitle', { amount: fmtRp(difference) })}</p>
                       <p className="text-xs text-red-700 mt-1">
-                        SPT Tahunan 제출 전까지 아래 차액을 납부해야 합니다 (PPh 29).
+                        {t('underpaidDesc')}
                       </p>
                     </div>
                   </div>
 
-                  {/* 차액 산출 내역 */}
                   <div className="bg-white rounded-lg p-3 text-xs space-y-1">
-                    <p className="font-bold text-gray-700 mb-2">차액 산출 내역</p>
-                    <div className="flex justify-between"><span>연간 매출 합계</span><span className="font-mono">{fmtRp(totalRevenue)}</span></div>
-                    <div className="flex justify-between"><span>비과세 공제 (연 {fmtRp(EXEMPTION)})</span><span className="font-mono text-gray-500">- {fmtRp(Math.min(totalRevenue, EXEMPTION))}</span></div>
-                    <div className="flex justify-between"><span>과세 매출</span><span className="font-mono">{fmtRp(taxableRevenue)}</span></div>
-                    <div className="flex justify-between"><span>PPh Final 0.5%</span><span className="font-mono">{fmtRp(annualTaxDue)}</span></div>
-                    <div className="flex justify-between border-t pt-1"><span>이미 납부한 금액 (1~12월 합계)</span><span className="font-mono">- {fmtRp(totalPaid)}</span></div>
+                    <p className="font-bold text-gray-700 mb-2">{t('breakdownTitle')}</p>
+                    <div className="flex justify-between"><span>{t('totalAnnualRevenue')}</span><span className="font-mono">{fmtRp(totalRevenue)}</span></div>
+                    <div className="flex justify-between"><span>{t('exemptionDeduction', { exemption: exemptionFormatted })}</span><span className="font-mono text-gray-500">- {fmtRp(Math.min(totalRevenue, EXEMPTION))}</span></div>
+                    <div className="flex justify-between"><span>{t('taxableRevenue')}</span><span className="font-mono">{fmtRp(taxableRevenue)}</span></div>
+                    <div className="flex justify-between"><span>{t('pphFinalHalf')}</span><span className="font-mono">{fmtRp(annualTaxDue)}</span></div>
+                    <div className="flex justify-between border-t pt-1"><span>{t('alreadyPaidTotal')}</span><span className="font-mono">- {fmtRp(totalPaid)}</span></div>
                     <div className="flex justify-between border-t pt-1 font-bold text-red-700">
-                      <span>미납 차액 (PPh 29)</span><span className="font-mono">{fmtRp(difference)}</span>
+                      <span>{t('unpaidDifference')}</span><span className="font-mono">{fmtRp(difference)}</span>
                     </div>
                   </div>
 
-                  {/* 왜 차액이 발생하는지 설명 */}
                   <div className="bg-white rounded-lg p-3 text-[11px] text-gray-600">
-                    <p className="font-bold text-gray-700 mb-1">왜 차액이 발생하나요?</p>
+                    <p className="font-bold text-gray-700 mb-1">{t('whyDifference')}</p>
                     <ul className="space-y-0.5">
-                      <li>• 매월 납부한 PPh Final이 실제 매출 대비 부족한 경우</li>
-                      <li>• 매출이 연중 증가하여 기존 납부액보다 의무 세액이 커진 경우</li>
-                      <li>• 일부 월에 PPh Final을 납부하지 않은 경우</li>
+                      <li>{t('whyDiffItem1')}</li>
+                      <li>{t('whyDiffItem2')}</li>
+                      <li>{t('whyDiffItem3')}</li>
                     </ul>
                   </div>
 
-                  {/* ID Billing 생성 요청 */}
                   <div className="bg-red-100 rounded-lg p-3">
                     <p className="text-xs font-bold text-red-900 mb-2">
-                      납부 방법: AI가 ID Billing을 생성하여 안내합니다
+                      {t('paymentMethodTitle')}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-red-800 mb-2">
-                      <span>세목: <b>PPh 29 (연간 추가 납부)</b></span>
-                      <span>·</span>
-                      <span>금액: <b className="font-mono">{fmtRp(difference)}</b></span>
-                      <span>·</span>
-                      <span>기한: <b>{year + 1}년 4월 30일</b></span>
+                      <span>{t('taxType')} <b>{t('taxTypeValue')}</b></span>
+                      <span>&middot;</span>
+                      <span>{t('amountLabel')} <b className="font-mono">{fmtRp(difference)}</b></span>
+                      <span>&middot;</span>
+                      <span>{t('deadlineLabel')} <b>{t('deadlineValue', { nextYear: year + 1 })}</b></span>
                     </div>
                     <a href={`/${locale}/tax/billing`}
                       className="inline-flex items-center gap-1 px-4 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700">
                       <DollarSign className="h-3 w-3" />
-                      청구서 · 납부 페이지에서 확인
+                      {t('goToBillingPage')}
                     </a>
                   </div>
                 </div>
@@ -671,14 +663,13 @@ export default function PPhFinalAnnualPage() {
                 <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 flex items-center gap-3">
                   <Sparkles className="h-6 w-6 text-blue-600" />
                   <div>
-                    <p className="font-bold text-blue-900">초과 납부: {fmtRp(Math.abs(difference))}</p>
+                    <p className="font-bold text-blue-900">{t('overpaidTitle', { amount: fmtRp(Math.abs(difference)) })}</p>
                     <p className="text-xs text-blue-700">
-                      {fmtRp(Math.abs(difference))}이 초과 납부되었습니다.
-                      다음 연도로 이월(Kompensasi)하거나, 환급 신청(Restitusi)이 가능합니다.
+                      {t('overpaidDesc', { amount: fmtRp(Math.abs(difference)) })}
                     </p>
                     <div className="flex gap-2 mt-2">
-                      <Badge className="bg-blue-200 text-blue-800 text-[10px]">이월 (Kompensasi) — 무료</Badge>
-                      <Badge className="bg-amber-200 text-amber-800 text-[10px]">환급 (Restitusi) — 세무조사 수반</Badge>
+                      <Badge className="bg-blue-200 text-blue-800 text-[10px]">{t('carryOver')}</Badge>
+                      <Badge className="bg-amber-200 text-amber-800 text-[10px]">{t('refund')}</Badge>
                     </div>
                   </div>
                 </div>
@@ -690,11 +681,11 @@ export default function PPhFinalAnnualPage() {
           {(Number(otherIncome) > 0 || Number(interestIncome) > 0 || Number(assetGainLoss) > 0) && (
             <Card>
               <CardContent className="p-4">
-                <h3 className="font-bold text-sm mb-2">기타 소득 (SPT 기재, 추가 과세 없음)</h3>
+                <h3 className="font-bold text-sm mb-2">{t('otherIncomeSummary')}</h3>
                 <div className="grid grid-cols-3 gap-3 text-xs">
-                  <div><p className="text-gray-500">사업외 소득</p><p className="font-mono">{fmtRp(Number(otherIncome))}</p></div>
-                  <div><p className="text-gray-500">이자 소득</p><p className="font-mono">{fmtRp(Number(interestIncome))}</p></div>
-                  <div><p className="text-gray-500">자산 처분 손익</p><p className="font-mono">{fmtRp(Number(assetGainLoss))}</p></div>
+                  <div><p className="text-gray-500">{t('nonBusinessIncome')}</p><p className="font-mono">{fmtRp(Number(otherIncome))}</p></div>
+                  <div><p className="text-gray-500">{t('interestIncomeLabel')}</p><p className="font-mono">{fmtRp(Number(interestIncome))}</p></div>
+                  <div><p className="text-gray-500">{t('assetGainLossLabel')}</p><p className="font-mono">{fmtRp(Number(assetGainLoss))}</p></div>
                 </div>
               </CardContent>
             </Card>
@@ -708,17 +699,17 @@ export default function PPhFinalAnnualPage() {
           <Card className="border-green-200 bg-green-50">
             <CardContent className="p-5 text-center">
               <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
-              <h2 className="font-bold text-lg text-green-900">SPT Tahunan Badan 1771 생성 준비 완료</h2>
+              <h2 className="font-bold text-lg text-green-900">{t('sptReadyTitle')}</h2>
               <p className="text-sm text-green-700 mt-2">
-                {year}년 PPh Final UMKM 결산 데이터가 정리되었습니다.
+                {t('sptReadyDesc', { year })}
               </p>
               <div className="mt-4 bg-white rounded-xl p-4 text-left max-w-md mx-auto text-xs space-y-2">
-                <div className="flex justify-between"><span>연간 매출</span><span className="font-mono font-bold">{fmtRp(totalRevenue)}</span></div>
-                <div className="flex justify-between"><span>비과세 공제</span><span className="font-mono">{fmtRp(Math.min(totalRevenue, EXEMPTION))}</span></div>
-                <div className="flex justify-between"><span>PPh Final (0.5%)</span><span className="font-mono text-green-700 font-bold">{fmtRp(annualTaxDue)}</span></div>
-                <div className="flex justify-between"><span>이미 납부</span><span className="font-mono">{fmtRp(totalPaid)}</span></div>
+                <div className="flex justify-between"><span>{t('annualRevenue')}</span><span className="font-mono font-bold">{fmtRp(totalRevenue)}</span></div>
+                <div className="flex justify-between"><span>{t('taxExemptionDeduction')}</span><span className="font-mono">{fmtRp(Math.min(totalRevenue, EXEMPTION))}</span></div>
+                <div className="flex justify-between"><span>{t('pphFinalLabel')}</span><span className="font-mono text-green-700 font-bold">{fmtRp(annualTaxDue)}</span></div>
+                <div className="flex justify-between"><span>{t('alreadyPaid')}</span><span className="font-mono">{fmtRp(totalPaid)}</span></div>
                 <div className="flex justify-between border-t pt-2 font-bold">
-                  <span>{isUnderpaid ? '추가 납부' : isOverpaid ? '초과 납부' : '과부족'}</span>
+                  <span>{isUnderpaid ? t('additionalPayment') : isOverpaid ? t('overpayment') : t('noDifference')}</span>
                   <span className={`font-mono ${isBalanced ? 'text-green-600' : isOverpaid ? 'text-blue-600' : 'text-red-600'}`}>
                     {isBalanced ? '0' : fmtRp(Math.abs(difference))}
                   </span>
@@ -728,10 +719,10 @@ export default function PPhFinalAnnualPage() {
               <div className="mt-6 space-y-2">
                 <Button size="lg" className="w-full max-w-md" onClick={() => router.push(`/${locale}/tax/spt-tahunan/1771`)}>
                   <FileText className="h-4 w-4 mr-2" />
-                  SPT 1771 작성 페이지로 이동
+                  {t('goToSpt1771')}
                 </Button>
                 <p className="text-[10px] text-gray-500">
-                  JTC 세무사가 SPT 1771을 최종 검토 후 DJP에 제출합니다
+                  {t('sptFinalNote')}
                 </p>
               </div>
             </CardContent>
@@ -743,12 +734,12 @@ export default function PPhFinalAnnualPage() {
       <div className="flex justify-between mt-6">
         {step > 1 ? (
           <Button variant="outline" onClick={() => setStep(step - 1)}>
-            <ArrowLeft className="h-4 w-4 mr-1" />이전
+            <ArrowLeft className="h-4 w-4 mr-1" />{t('previous')}
           </Button>
         ) : <div />}
         {step < 7 ? (
           <Button onClick={() => setStep(step + 1)}>
-            다음<ArrowRight className="h-4 w-4 ml-1" />
+            {t('next')}<ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         ) : null}
       </div>

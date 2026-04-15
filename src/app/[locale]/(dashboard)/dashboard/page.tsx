@@ -131,13 +131,14 @@ function ProfileCompletenessBanner({
     annual_revenue?: number;
   };
 }) {
+  const tc = useTranslations('dashboardCompany');
   const isReady = completeness >= 80;
 
   // Next items to fill (LinkedIn-style recommendations)
   const nextItems: Array<{ label: string; boost: string }> = [];
-  if (!companyInfo.npwp) nextItems.push({ label: 'NPWP 입력', boost: '+14%' });
-  if (!companyInfo.business_category) nextItems.push({ label: '사업 유형 선택', boost: '+14%' });
-  if (!companyInfo.annual_revenue || companyInfo.annual_revenue <= 0) nextItems.push({ label: '연 매출 입력', boost: '+7%' });
+  if (!companyInfo.npwp) nextItems.push({ label: tc('enterNpwp'), boost: '+14%' });
+  if (!companyInfo.business_category) nextItems.push({ label: tc('selectBusinessType'), boost: '+14%' });
+  if (!companyInfo.annual_revenue || companyInfo.annual_revenue <= 0) nextItems.push({ label: tc('enterRevenue'), boost: '+7%' });
 
   const gradient = isReady
     ? 'from-emerald-50 via-teal-50 to-cyan-50 border-emerald-200'
@@ -168,12 +169,12 @@ function ProfileCompletenessBanner({
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div>
               <p className="font-bold text-sm text-gray-900">
-                {isReady ? '프로필 거의 완성! 100%까지 마무리하세요' : '회사 프로필을 완성하세요'}
+                {isReady ? tc('profileAlmostDone') : tc('completeProfile')}
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
                 {isReady
-                  ? '신고는 시작할 수 있지만, 100%를 채우면 모든 세무 최적화를 받을 수 있습니다.'
-                  : '몇 가지 정보만 더 입력하면 세금 신고를 시작할 수 있습니다.'}
+                  ? tc('profileReadyHint')
+                  : tc('profileNotReadyHint')}
               </p>
             </div>
             <Link
@@ -182,7 +183,7 @@ function ProfileCompletenessBanner({
                 isReady ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
               }`}
             >
-              프로필 완성
+              {tc('completeProfileBtn')}
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -361,7 +362,7 @@ function CorporateCustomerDashboard({
             <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-bold text-sm text-red-900">
-                미납 세금 {unpaidBillings.length}건 — 즉시 납부가 필요합니다
+                {t('dashboardCompany.unpaidTaxAlert', { count: unpaidBillings.length })}
               </p>
               <div className="mt-2 space-y-1">
                 {unpaidBillings.map(b => (
@@ -379,7 +380,7 @@ function CorporateCustomerDashboard({
               </div>
               <Link href={`/${locale}/tax/billing`}
                 className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-red-700 hover:underline">
-                청구서 · 납부 페이지로 이동 →
+                {t('dashboardCompany.goToBilling')}
               </Link>
             </div>
           </div>
@@ -425,7 +426,7 @@ function CorporateCustomerDashboard({
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="font-bold text-gray-900">월 신고 (SPT Masa)</p>
+              <p className="font-bold text-gray-900">{t('dashboardCompany.monthlyFiling')}</p>
               <p className="text-xs text-gray-500 mt-0.5">PPh 21 · PPh 23 · PPN · PPh 4(2)</p>
             </div>
           </div>
@@ -440,8 +441,8 @@ function CorporateCustomerDashboard({
               <FileSpreadsheet className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="font-bold text-gray-900">연 신고 (SPT Tahunan)</p>
-              <p className="text-xs text-gray-500 mt-0.5">SPT Badan 1771 · 법인세</p>
+              <p className="font-bold text-gray-900">{t('dashboardCompany.annualFiling')}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('dashboardCompany.annualFilingDesc')}</p>
             </div>
           </div>
           <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-300 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
@@ -456,24 +457,24 @@ function CorporateCustomerDashboard({
               <div>
                 <h3 className="font-bold text-sm flex items-center gap-2">
                   <Users className="h-4 w-4 text-indigo-600" />
-                  거래 상대방 ({cpSummary.total}개사)
+                  {t('dashboardCompany.counterparties', { count: cpSummary.total })}
                 </h3>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                  <span>공급자 {cpSummary.vendors}</span>
+                  <span>{t('dashboardCompany.vendors', { count: cpSummary.vendors })}</span>
                   <span>·</span>
-                  <span>고객 {cpSummary.clients}</span>
-                  {cpSummary.foreign > 0 && <><span>·</span><span>국외 {cpSummary.foreign}</span></>}
+                  <span>{t('dashboardCompany.clients', { count: cpSummary.clients })}</span>
+                  {cpSummary.foreign > 0 && <><span>·</span><span>{t('dashboardCompany.foreign', { count: cpSummary.foreign })}</span></>}
                 </div>
                 {cpSummary.expiringLicenses > 0 && (
                   <p className="text-[11px] text-amber-600 mt-1 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
-                    라이센스 만료 임박 {cpSummary.expiringLicenses}건
+                    {t('dashboardCompany.expiringLicenses', { count: cpSummary.expiringLicenses })}
                   </p>
                 )}
               </div>
               <Link href={`/${locale}/counterparties`}
                 className="px-3 py-1.5 border border-gray-200 text-xs font-medium rounded-lg hover:bg-gray-50">
-                상세 →
+                {t('dashboardCompany.details')}
               </Link>
             </div>
           </CardContent>
@@ -483,9 +484,9 @@ function CorporateCustomerDashboard({
       {/* Quick access */}
       <div className="grid gap-3 sm:grid-cols-3">
         {[
-          { href: '/tax/monthly-dashboard', icon: BarChart3, label: '월 신고 현황', desc: 'PPh 21/23/PPN/PPh 4(2)', gradient: 'from-blue-500 to-cyan-500' },
-          { href: '/tax/pph21', icon: Users, label: '급여 & PPh 21', desc: '월별 급여 명세 + TER 계산', gradient: 'from-amber-500 to-orange-500' },
-          { href: '/tax/spt-tahunan/1771', icon: FileSpreadsheet, label: 'SPT Badan 1771', desc: '법인 연간 신고', gradient: 'from-purple-500 to-pink-500' },
+          { href: '/tax/monthly-dashboard', icon: BarChart3, label: t('dashboardCompany.quickMonthly'), desc: t('dashboardCompany.quickMonthlyDesc'), gradient: 'from-blue-500 to-cyan-500' },
+          { href: '/tax/pph21', icon: Users, label: t('dashboardCompany.quickPph21'), desc: t('dashboardCompany.quickPph21Desc'), gradient: 'from-amber-500 to-orange-500' },
+          { href: '/tax/spt-tahunan/1771', icon: FileSpreadsheet, label: t('dashboardCompany.quickAnnual'), desc: t('dashboardCompany.quickAnnualDesc'), gradient: 'from-purple-500 to-pink-500' },
         ].map((item) => {
           const Icon = item.icon;
           return (

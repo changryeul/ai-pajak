@@ -13,6 +13,7 @@ import {
   Sparkles, Send, Eye, Users, DollarSign, Shield, X,
   ClipboardList, MessageCircle, Plus,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { fmtRp } from '@/lib/utils';
 
 interface Document {
@@ -52,6 +53,7 @@ interface QueueItem {
  * and can request additional documents (shown as AI to customer).
  */
 export default function OperatorReviewPage() {
+  const t = useTranslations('operatorReview');
   const searchParams = useSearchParams();
   const params = useParams();
   const locale = params.locale as string;
@@ -99,7 +101,7 @@ export default function OperatorReviewPage() {
   const handleSendRequest = async () => {
     const validDocs = reqDocs.filter(d => d.description.trim());
     if (!reqTitle || validDocs.length === 0) {
-      showMsg('error', '제목과 요청 서류를 입력하세요');
+      showMsg('error', t('errorTitleAndDocsRequired'));
       return;
     }
     setSubmitting(true);
@@ -111,14 +113,14 @@ export default function OperatorReviewPage() {
           customerId,
           period: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
           title: reqTitle,
-          message: reqMessage || '추가 자료가 필요합니다.',
+          message: reqMessage || t('defaultRequestMessage'),
           requiredDocuments: validDocs,
           sendWhatsapp,
         }),
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', data.message || '요청 발송 완료 (고객에게는 AI 요청으로 표시)');
+        showMsg('success', data.message || t('requestSentSuccess'));
         setShowRequestForm(false);
         setReqTitle('');
         setReqMessage('');
@@ -128,10 +130,10 @@ export default function OperatorReviewPage() {
         const reqData = await reqRes.json();
         if (reqData.success) setRequests(reqData.data || []);
       } else {
-        showMsg('error', data.error || '발송 실패');
+        showMsg('error', data.error || t('sendFailed'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setSubmitting(false);
     }
@@ -141,9 +143,9 @@ export default function OperatorReviewPage() {
     return (
       <div className="container mx-auto py-16 px-4 max-w-md text-center">
         <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-        <p className="text-sm text-gray-600">customerId가 필요합니다. 운영 큐에서 고객을 선택하세요.</p>
+        <p className="text-sm text-gray-600">{t('noCustomerIdMessage')}</p>
         <a href={`/${locale}/operator/queue`} className="text-blue-600 hover:underline text-xs mt-2 block">
-          운영 큐로 이동 →
+          {t('goToQueue')}
         </a>
       </div>
     );
@@ -163,10 +165,10 @@ export default function OperatorReviewPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Eye className="h-6 w-6 text-blue-600" />
-          고객 자료 검토
+          {t('pageTitle')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          <b>{customerName}</b> — 업로드 자료 확인 + 추가 요청
+          <b>{customerName}</b> — {t('pageSubtitle')}
         </p>
       </div>
 
@@ -180,35 +182,35 @@ export default function OperatorReviewPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Card className="border-0 shadow-sm"><CardContent className="p-3">
-          <p className="text-[10px] text-gray-500">업로드 자료</p>
-          <p className="text-xl font-bold">{documents.length}건</p>
+          <p className="text-[10px] text-gray-500">{t('uploadedDocs')}</p>
+          <p className="text-xl font-bold">{documents.length}{t('countSuffix')}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm border-l-4 border-l-green-500"><CardContent className="p-3">
-          <p className="text-[10px] text-green-600">OCR 완료</p>
-          <p className="text-xl font-bold text-green-700">{ocrCompleted}건</p>
+          <p className="text-[10px] text-green-600">{t('ocrCompleted')}</p>
+          <p className="text-xl font-bold text-green-700">{ocrCompleted}{t('countSuffix')}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm border-l-4 border-l-amber-500"><CardContent className="p-3">
-          <p className="text-[10px] text-amber-600">대기 중 요청</p>
-          <p className="text-xl font-bold text-amber-700">{pendingRequests}건</p>
+          <p className="text-[10px] text-amber-600">{t('pendingRequests')}</p>
+          <p className="text-xl font-bold text-amber-700">{pendingRequests}{t('countSuffix')}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm border-l-4 border-l-blue-500"><CardContent className="p-3">
-          <p className="text-[10px] text-blue-600">진행 중 큐</p>
-          <p className="text-xl font-bold text-blue-700">{activeQueue.length}건</p>
+          <p className="text-[10px] text-blue-600">{t('activeQueue')}</p>
+          <p className="text-xl font-bold text-blue-700">{activeQueue.length}{t('countSuffix')}</p>
         </CardContent></Card>
       </div>
 
       <Tabs defaultValue="documents">
         <TabsList className="mb-4">
-          <TabsTrigger value="documents"><FileText className="h-3 w-3 mr-1" />업로드 자료 ({documents.length})</TabsTrigger>
-          <TabsTrigger value="requests"><MessageCircle className="h-3 w-3 mr-1" />자료 요청 ({requests.length})</TabsTrigger>
-          <TabsTrigger value="queue"><ClipboardList className="h-3 w-3 mr-1" />신고 큐 ({queueItems.length})</TabsTrigger>
+          <TabsTrigger value="documents"><FileText className="h-3 w-3 mr-1" />{t('tabDocuments')} ({documents.length})</TabsTrigger>
+          <TabsTrigger value="requests"><MessageCircle className="h-3 w-3 mr-1" />{t('tabRequests')} ({requests.length})</TabsTrigger>
+          <TabsTrigger value="queue"><ClipboardList className="h-3 w-3 mr-1" />{t('tabQueue')} ({queueItems.length})</TabsTrigger>
         </TabsList>
 
         {/* Tab: Documents */}
         <TabsContent value="documents">
           <Card><CardContent className="p-4">
             {documents.length === 0 ? (
-              <p className="text-center text-sm text-gray-400 py-8">업로드된 자료가 없습니다</p>
+              <p className="text-center text-sm text-gray-400 py-8">{t('noDocuments')}</p>
             ) : (
               <div className="space-y-2">
                 {documents.map(doc => (
@@ -253,10 +255,10 @@ export default function OperatorReviewPage() {
         <TabsContent value="requests">
           <Card><CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-sm">자료 요청 이력</h3>
+              <h3 className="font-bold text-sm">{t('requestHistory')}</h3>
               <Button size="sm" onClick={() => setShowRequestForm(!showRequestForm)}>
                 {showRequestForm ? <X className="h-3 w-3 mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
-                {showRequestForm ? '닫기' : '추가 자료 요청'}
+                {showRequestForm ? t('close') : t('requestAdditionalDocs')}
               </Button>
             </div>
 
@@ -266,43 +268,43 @@ export default function OperatorReviewPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-4 w-4 text-blue-600" />
                   <p className="text-xs font-bold text-blue-900">
-                    자료 요청 작성 — 고객에게는 <b>AI 요청</b>으로 표시됩니다
+                    {t('requestFormDescription')}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs">요청 제목</Label>
+                  <Label className="text-xs">{t('requestTitle')}</Label>
                   <Input value={reqTitle} onChange={e => setReqTitle(e.target.value)}
-                    placeholder="예: 2026년 3월 추가 자료 요청" />
+                    placeholder={t('requestTitlePlaceholder')} />
                 </div>
                 <div>
-                  <Label className="text-xs">메시지 (고객에게 표시)</Label>
+                  <Label className="text-xs">{t('messageLabel')}</Label>
                   <Input value={reqMessage} onChange={e => setReqMessage(e.target.value)}
-                    placeholder="추가 자료가 필요합니다." />
+                    placeholder={t('messagePlaceholder')} />
                 </div>
                 <div>
-                  <Label className="text-xs">필요 서류 ({reqDocs.length}건)</Label>
+                  <Label className="text-xs">{t('requiredDocuments')} ({reqDocs.length}{t('countSuffix')})</Label>
                   {reqDocs.map((rd, i) => (
                     <div key={i} className="flex gap-2 mt-1">
                       <select value={rd.type} onChange={e => {
                         const next = [...reqDocs]; next[i] = { ...next[i], type: e.target.value }; setReqDocs(next);
                       }} className="h-8 px-2 border rounded text-xs w-32">
-                        <option value="">유형</option>
-                        <option value="INVOICE">인보이스</option>
-                        <option value="RECEIPT">영수증</option>
+                        <option value="">{t('docTypeLabel')}</option>
+                        <option value="INVOICE">{t('docTypeInvoice')}</option>
+                        <option value="RECEIPT">{t('docTypeReceipt')}</option>
                         <option value="FAKTUR_PAJAK">Faktur Pajak</option>
-                        <option value="BANK_STATEMENT">은행내역</option>
-                        <option value="SALARY_SLIP">급여명세</option>
-                        <option value="OTHER">기타</option>
+                        <option value="BANK_STATEMENT">{t('docTypeBankStatement')}</option>
+                        <option value="SALARY_SLIP">{t('docTypeSalarySlip')}</option>
+                        <option value="OTHER">{t('docTypeOther')}</option>
                       </select>
                       <Input className="h-8 text-xs flex-1" value={rd.description}
                         onChange={e => { const next = [...reqDocs]; next[i] = { ...next[i], description: e.target.value }; setReqDocs(next); }}
-                        placeholder="설명 (예: 3월분 매입 Faktur Pajak)" />
+                        placeholder={t('docDescriptionPlaceholder')} />
                       <select value={rd.priority} onChange={e => {
                         const next = [...reqDocs]; next[i] = { ...next[i], priority: e.target.value }; setReqDocs(next);
                       }} className="h-8 px-2 border rounded text-xs w-20">
-                        <option value="HIGH">높음</option>
-                        <option value="MEDIUM">중간</option>
-                        <option value="LOW">낮음</option>
+                        <option value="HIGH">{t('priorityHigh')}</option>
+                        <option value="MEDIUM">{t('priorityMedium')}</option>
+                        <option value="LOW">{t('priorityLow')}</option>
                       </select>
                       {reqDocs.length > 1 && (
                         <Button size="sm" variant="ghost" onClick={() => setReqDocs(reqDocs.filter((_, j) => j !== i))}>
@@ -312,22 +314,22 @@ export default function OperatorReviewPage() {
                     </div>
                   ))}
                   <Button size="sm" variant="outline" className="mt-1" onClick={() => setReqDocs([...reqDocs, { type: '', description: '', priority: 'MEDIUM' }])}>
-                    <Plus className="h-3 w-3 mr-1" />서류 추가
+                    <Plus className="h-3 w-3 mr-1" />{t('addDocument')}
                   </Button>
                 </div>
                 <label className="flex items-center gap-2 text-xs">
                   <input type="checkbox" checked={sendWhatsapp} onChange={e => setSendWhatsapp(e.target.checked)} className="accent-blue-600" />
-                  WhatsApp으로도 발송
+                  {t('sendViaWhatsapp')}
                 </label>
                 <Button onClick={handleSendRequest} disabled={submitting}>
                   {submitting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Send className="h-3 w-3 mr-1" />}
-                  요청 발송 (AI 발신자로 표시)
+                  {t('sendRequest')}
                 </Button>
               </div>
             )}
 
             {requests.length === 0 ? (
-              <p className="text-center text-sm text-gray-400 py-8">요청 이력이 없습니다</p>
+              <p className="text-center text-sm text-gray-400 py-8">{t('noRequests')}</p>
             ) : (
               <div className="space-y-2">
                 {requests.map(req => (
@@ -358,7 +360,7 @@ export default function OperatorReviewPage() {
         <TabsContent value="queue">
           <Card><CardContent className="p-4">
             {queueItems.length === 0 ? (
-              <p className="text-center text-sm text-gray-400 py-8">신고 큐 항목이 없습니다</p>
+              <p className="text-center text-sm text-gray-400 py-8">{t('noQueueItems')}</p>
             ) : (
               <div className="space-y-2">
                 {queueItems.map(q => (

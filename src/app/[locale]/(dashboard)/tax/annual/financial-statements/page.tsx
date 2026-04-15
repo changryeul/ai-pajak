@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,6 +62,7 @@ interface FSData {
 }
 
 export default function FinancialStatementsPage() {
+  const t = useTranslations('financialStatements');
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -127,12 +129,12 @@ export default function FinancialStatementsPage() {
       if (d.success) {
         setData(d.data);
         if (d.data.validation.isValid) {
-          showMsg('success', `재무제표 생성 완료 — 저널 ${d.data.journalEntryCount}건, ${d.data.journalLineCount}줄`);
+          showMsg('success', t('generateSuccess', { entries: d.data.journalEntryCount, lines: d.data.journalLineCount }));
         } else {
-          showMsg('error', `경고: ${d.data.validation.errors.join(', ')}`);
+          showMsg('error', t('generateWarning', { errors: d.data.validation.errors.join(', ') }));
         }
       } else {
-        showMsg('error', d.error || '생성 실패');
+        showMsg('error', d.error || t('generateFail'));
       }
 
       // Previous year (for comparison)
@@ -147,7 +149,7 @@ export default function FinancialStatementsPage() {
         else setPrevData(null);
       } catch { setPrevData(null); }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setLoading(false);
     }
@@ -165,12 +167,12 @@ export default function FinancialStatementsPage() {
       const d = await res.json();
       if (d.success) {
         setData(d.data);
-        showMsg('success', 'DB에 저장되었습니다');
+        showMsg('success', t('savedToDb'));
       } else {
-        showMsg('error', d.error || '저장 실패');
+        showMsg('error', d.error || t('saveFail'));
       }
     } catch {
-      showMsg('error', '서버 오류');
+      showMsg('error', t('serverError'));
     } finally {
       setSaving(false);
     }
@@ -208,7 +210,7 @@ export default function FinancialStatementsPage() {
                   type="button"
                   onClick={() => handleDrilldown(item.code, item.name)}
                   className="font-mono text-blue-700 hover:text-blue-900 hover:underline cursor-pointer transition-colors"
-                  title={`${item.code} 상세 보기 (클릭)`}
+                  title={t('viewDetail', { code: item.code })}
                 >
                   {fmtRp(item.amount)}
                 </button>
@@ -226,9 +228,9 @@ export default function FinancialStatementsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <BookOpen className="h-6 w-6 text-indigo-600" />
-          재무제표 (Laporan Keuangan)
+          {t('pageTitle')}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">저널 데이터를 기반으로 시산표, 손익계산서, 재무상태표를 자동 생성합니다</p>
+        <p className="text-sm text-gray-500 mt-1">{t('pageSubtitle')}</p>
       </div>
 
       {/* Controls */}
@@ -236,7 +238,7 @@ export default function FinancialStatementsPage() {
         {isConsultant && (
           <div>
             <Select value={customerId} onValueChange={setCustomerId}>
-              <SelectTrigger className="w-56"><SelectValue placeholder="고객 선택" /></SelectTrigger>
+              <SelectTrigger className="w-56"><SelectValue placeholder={t('selectCustomer')} /></SelectTrigger>
               <SelectContent>
                 {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name || c.full_name}</SelectItem>)}
               </SelectContent>
@@ -247,23 +249,23 @@ export default function FinancialStatementsPage() {
           <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
           <SelectContent>
             {[currentYear - 2, currentYear - 1, currentYear].map(y => (
-              <SelectItem key={y} value={String(y)}>{y}년</SelectItem>
+              <SelectItem key={y} value={String(y)}>{t('yearSuffix', { year: y })}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Button onClick={handleGenerate} disabled={loading || !customerId}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
-          재무제표 생성
+          {t('generateBtn')}
         </Button>
         {data && (
           <>
             <Button variant="outline" onClick={handleSave} disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <FileText className="h-4 w-4 mr-1" />}
-              DB에 저장
+              {t('saveToDb')}
             </Button>
             <Button variant="outline"
               onClick={() => window.open(`/api/accounting/financial-statements/pdf?customerId=${customerId}&year=${year}`, '_blank')}>
-              <Download className="h-4 w-4 mr-1" />PDF 인쇄
+              <Download className="h-4 w-4 mr-1" />{t('pdfPrint')}
             </Button>
           </>
         )}
@@ -280,7 +282,7 @@ export default function FinancialStatementsPage() {
         <Card className="border-dashed">
           <CardContent className="p-12 text-center text-gray-400">
             <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">"재무제표 생성" 버튼을 클릭하면 저널 데이터를 분석합니다</p>
+            <p className="text-sm">{t('generatePrompt')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -289,26 +291,26 @@ export default function FinancialStatementsPage() {
           <div className={`mb-4 p-3 rounded-xl text-sm flex items-center gap-2 ${data.validation.isValid ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
             {data.validation.isValid ? <CheckCircle className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
             {data.validation.isValid
-              ? `✓ 검증 통과 — 저널 ${data.journalEntryCount}건, 시산표 균형, 대차대조표 균형`
-              : `검증 오류: ${data.validation.errors.join('; ')}`}
+              ? '✓ ' + t('validationPass', { entries: data.journalEntryCount })
+              : t('validationError', { errors: data.validation.errors.join('; ') })}
           </div>
 
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             <Card className="border-0 shadow-sm"><CardContent className="p-3">
-              <p className="text-[10px] text-gray-500">저널</p>
-              <p className="font-bold">{data.journalEntryCount}건 / {data.journalLineCount}줄</p>
+              <p className="text-[10px] text-gray-500">{t('journalLabel')}</p>
+              <p className="font-bold">{t('journalCount', { entries: data.journalEntryCount, lines: data.journalLineCount })}</p>
             </CardContent></Card>
             <Card className="border-0 shadow-sm border-l-4 border-l-blue-500"><CardContent className="p-3">
-              <p className="text-[10px] text-blue-600">매출</p>
+              <p className="text-[10px] text-blue-600">{t('revenueLabel')}</p>
               <p className="font-bold font-mono text-sm">{fmtRp(data.incomeStatement.revenue.reduce((s, i) => s + i.amount, 0))}</p>
             </CardContent></Card>
             <Card className="border-0 shadow-sm border-l-4 border-l-green-500"><CardContent className="p-3">
-              <p className="text-[10px] text-green-600">순이익</p>
+              <p className="text-[10px] text-green-600">{t('netIncomeLabel')}</p>
               <p className="font-bold font-mono text-sm text-green-700">{fmtRp(data.incomeStatement.netIncome)}</p>
             </CardContent></Card>
             <Card className="border-0 shadow-sm border-l-4 border-l-indigo-500"><CardContent className="p-3">
-              <p className="text-[10px] text-indigo-600">총 자산</p>
+              <p className="text-[10px] text-indigo-600">{t('totalAssetsLabel')}</p>
               <p className="font-bold font-mono text-sm">{fmtRp(data.balanceSheet.assets.totalAssets)}</p>
             </CardContent></Card>
           </div>
@@ -316,9 +318,9 @@ export default function FinancialStatementsPage() {
           {/* Tabs */}
           <Tabs defaultValue="income">
             <TabsList className="mb-4">
-              <TabsTrigger value="trial"><RefreshCw className="h-3 w-3 mr-1" />시산표</TabsTrigger>
-              <TabsTrigger value="income"><TrendingUp className="h-3 w-3 mr-1" />손익계산서</TabsTrigger>
-              <TabsTrigger value="balance"><DollarSign className="h-3 w-3 mr-1" />재무상태표</TabsTrigger>
+              <TabsTrigger value="trial"><RefreshCw className="h-3 w-3 mr-1" />{t('tabTrialBalance')}</TabsTrigger>
+              <TabsTrigger value="income"><TrendingUp className="h-3 w-3 mr-1" />{t('tabIncomeStatement')}</TabsTrigger>
+              <TabsTrigger value="balance"><DollarSign className="h-3 w-3 mr-1" />{t('tabBalanceSheet')}</TabsTrigger>
             </TabsList>
 
             {/* Trial Balance */}
@@ -326,21 +328,21 @@ export default function FinancialStatementsPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-sm">시산표 (Neraca Saldo) — {year}년</h3>
+                    <h3 className="font-bold text-sm">{t('trialBalanceTitle', { year })}</h3>
                     <Badge className={data.trialBalance.isBalanced ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
-                      {data.trialBalance.isBalanced ? '✓ 균형' : '✗ 불균형'}
+                      {data.trialBalance.isBalanced ? '✓ ' + t('balanced') : '✗ ' + t('unbalanced')}
                     </Badge>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr className="bg-gray-50 border-b">
-                          <th className="p-2 text-left">코드</th>
-                          <th className="p-2 text-left">계정명</th>
-                          <th className="p-2 text-center">유형</th>
-                          <th className="p-2 text-right">차변 (Debit)</th>
-                          <th className="p-2 text-right">대변 (Credit)</th>
-                          <th className="p-2 text-right">잔액</th>
+                          <th className="p-2 text-left">{t('code')}</th>
+                          <th className="p-2 text-left">{t('accountName')}</th>
+                          <th className="p-2 text-center">{t('type')}</th>
+                          <th className="p-2 text-right">{t('debit')}</th>
+                          <th className="p-2 text-right">{t('credit')}</th>
+                          <th className="p-2 text-right">{t('balance')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -364,7 +366,7 @@ export default function FinancialStatementsPage() {
                       </tbody>
                       <tfoot className="bg-indigo-50 font-bold">
                         <tr>
-                          <td colSpan={3} className="p-2">합계</td>
+                          <td colSpan={3} className="p-2">{t('total')}</td>
                           <td className="p-2 text-right font-mono">{fmtRp(data.trialBalance.totalDebit)}</td>
                           <td className="p-2 text-right font-mono">{fmtRp(data.trialBalance.totalCredit)}</td>
                           <td className="p-2 text-right font-mono">
@@ -383,44 +385,44 @@ export default function FinancialStatementsPage() {
               <Card>
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-sm">손익계산서 (Laporan Laba Rugi) — {year}년</h3>
-                    {prevData && <Badge className="bg-blue-100 text-blue-700 text-[9px]">{year-1}년 비교 표시</Badge>}
+                    <h3 className="font-bold text-sm">{t('incomeStatementTitle', { year })}</h3>
+                    {prevData && <Badge className="bg-blue-100 text-blue-700 text-[9px]">{t('comparisonLabel', { year: year - 1 })}</Badge>}
                   </div>
 
                   {/* Header row for comparison */}
                   {prevData && (
                     <div className="flex justify-end gap-2 mb-2 text-[9px] text-gray-400">
-                      <span className="w-24 text-right">{year-1}년</span>
-                      <span className="w-24 text-right">{year}년</span>
-                      <span className="w-10">변동</span>
+                      <span className="w-24 text-right">{t('yearSuffix', { year: year - 1 })}</span>
+                      <span className="w-24 text-right">{t('yearSuffix', { year })}</span>
+                      <span className="w-10">{t('change')}</span>
                     </div>
                   )}
 
                   <div className="max-w-2xl">
-                    <SectionRow items={data.incomeStatement.revenue} label="수익 (Pendapatan)" prevItems={prevData?.incomeStatement.revenue} />
-                    <SectionRow items={data.incomeStatement.cogs} label="매출원가 (HPP)" prevItems={prevData?.incomeStatement.cogs} />
+                    <SectionRow items={data.incomeStatement.revenue} label={t('revenue')} prevItems={prevData?.incomeStatement.revenue} />
+                    <SectionRow items={data.incomeStatement.cogs} label={t('cogs')} prevItems={prevData?.incomeStatement.cogs} />
                     <div className="flex justify-between py-1 border-t text-xs font-bold">
-                      <span>매출총이익 (Laba Kotor)</span>
+                      <span>{t('grossProfit')}</span>
                       <span className="font-mono">{fmtRp(data.incomeStatement.grossProfit)}</span>
                     </div>
 
                     <div className="mt-3">
-                      <SectionRow items={data.incomeStatement.operatingExpenses} label="영업비용 (Biaya Operasional)" prevItems={prevData?.incomeStatement.operatingExpenses} />
+                      <SectionRow items={data.incomeStatement.operatingExpenses} label={t('operatingExpenses')} prevItems={prevData?.incomeStatement.operatingExpenses} />
                     </div>
                     <div className="flex justify-between py-1 border-t text-xs font-bold">
-                      <span>영업이익 (Laba Operasional)</span>
+                      <span>{t('operatingIncome')}</span>
                       <span className="font-mono">{fmtRp(data.incomeStatement.operatingIncome)}</span>
                     </div>
 
-                    <SectionRow items={data.incomeStatement.otherIncome} label="기타 손익" prevItems={prevData?.incomeStatement.otherIncome} />
+                    <SectionRow items={data.incomeStatement.otherIncome} label={t('otherIncome')} prevItems={prevData?.incomeStatement.otherIncome} />
                     <div className="flex justify-between py-1 border-t text-xs font-bold">
-                      <span>세전이익 (Laba Sebelum Pajak)</span>
+                      <span>{t('incomeBeforeTax')}</span>
                       <span className="font-mono">{fmtRp(data.incomeStatement.incomeBeforeTax)}</span>
                     </div>
 
-                    <SectionRow items={data.incomeStatement.taxExpense} label="세금 (Pajak)" prevItems={prevData?.incomeStatement.taxExpense} />
+                    <SectionRow items={data.incomeStatement.taxExpense} label={t('taxExpense')} prevItems={prevData?.incomeStatement.taxExpense} />
                     <div className="flex justify-between py-2 border-t-2 border-green-500 text-sm font-bold text-green-700">
-                      <span>순이익 (Laba Bersih)</span>
+                      <span>{t('netIncome')}</span>
                       <div className="flex items-center gap-2">
                         {prevData && <span className="text-[10px] text-gray-400 font-mono">{fmtRp(prevData.incomeStatement.netIncome)}</span>}
                         <span className="font-mono">{fmtRp(data.incomeStatement.netIncome)}</span>
@@ -432,19 +434,19 @@ export default function FinancialStatementsPage() {
                     {data.incomeStatement.revenue.length > 0 && (
                       <div className="mt-4 p-3 bg-gray-50 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                         <div>
-                          <p className="text-gray-500">매출총이익률</p>
+                          <p className="text-gray-500">{t('grossProfitMargin')}</p>
                           <p className="font-bold">{(data.incomeStatement.grossProfit / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">영업이익률</p>
+                          <p className="text-gray-500">{t('operatingMargin')}</p>
                           <p className="font-bold">{(data.incomeStatement.operatingIncome / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">순이익률</p>
+                          <p className="text-gray-500">{t('netMargin')}</p>
                           <p className="font-bold text-green-700">{(data.incomeStatement.netIncome / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">영업비용 비율</p>
+                          <p className="text-gray-500">{t('opexRatio')}</p>
                           <p className="font-bold">{(data.incomeStatement.operatingExpenses.reduce((s,i) => s + i.amount, 0) / Math.max(data.incomeStatement.revenue.reduce((s,i) => s + i.amount, 0), 1) * 100).toFixed(1)}%</p>
                         </div>
                       </div>
@@ -459,47 +461,47 @@ export default function FinancialStatementsPage() {
               <Card>
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-sm">재무상태표 (Neraca) — {year}년 12월 31일</h3>
+                    <h3 className="font-bold text-sm">{t('balanceSheetTitle', { year })}</h3>
                     <Badge className={data.balanceSheet.isBalanced ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
-                      {data.balanceSheet.isBalanced ? '✓ 자산 = 부채+자본' : '✗ 불균형'}
+                      {data.balanceSheet.isBalanced ? '✓ ' + t('assetsEqualsLiabilities') : '✗ ' + t('unbalanced')}
                     </Badge>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left: Assets */}
                     <div>
-                      <h4 className="font-bold text-xs text-blue-700 border-b border-blue-200 pb-1 mb-2">자산 (AKTIVA)</h4>
-                      <SectionRow items={data.balanceSheet.assets.current} label="유동자산 (Aktiva Lancar)" prevItems={prevData?.balanceSheet.assets.current} />
-                      <SectionRow items={data.balanceSheet.assets.fixed} label="고정자산 (Aktiva Tetap)" prevItems={prevData?.balanceSheet.assets.fixed} />
-                      <SectionRow items={data.balanceSheet.assets.other} label="기타자산" prevItems={prevData?.balanceSheet.assets.other} />
+                      <h4 className="font-bold text-xs text-blue-700 border-b border-blue-200 pb-1 mb-2">{t('assets')}</h4>
+                      <SectionRow items={data.balanceSheet.assets.current} label={t('currentAssets')} prevItems={prevData?.balanceSheet.assets.current} />
+                      <SectionRow items={data.balanceSheet.assets.fixed} label={t('fixedAssets')} prevItems={prevData?.balanceSheet.assets.fixed} />
+                      <SectionRow items={data.balanceSheet.assets.other} label={t('otherAssets')} prevItems={prevData?.balanceSheet.assets.other} />
                       <div className="flex justify-between py-2 border-t-2 border-blue-500 text-sm font-bold text-blue-700">
-                        <span>총 자산</span>
+                        <span>{t('totalAssets')}</span>
                         <span className="font-mono">{fmtRp(data.balanceSheet.assets.totalAssets)}</span>
                       </div>
                     </div>
 
                     {/* Right: Liabilities + Equity */}
                     <div>
-                      <h4 className="font-bold text-xs text-indigo-700 border-b border-indigo-200 pb-1 mb-2">부채 & 자본 (PASIVA)</h4>
-                      <SectionRow items={data.balanceSheet.liabilities.current} label="유동부채 (Kewajiban Lancar)" prevItems={prevData?.balanceSheet.liabilities.current} />
-                      <SectionRow items={data.balanceSheet.liabilities.longTerm} label="장기부채 (Kewajiban Jangka Panjang)" prevItems={prevData?.balanceSheet.liabilities.longTerm} />
+                      <h4 className="font-bold text-xs text-indigo-700 border-b border-indigo-200 pb-1 mb-2">{t('liabilitiesEquity')}</h4>
+                      <SectionRow items={data.balanceSheet.liabilities.current} label={t('currentLiabilities')} prevItems={prevData?.balanceSheet.liabilities.current} />
+                      <SectionRow items={data.balanceSheet.liabilities.longTerm} label={t('longTermLiabilities')} prevItems={prevData?.balanceSheet.liabilities.longTerm} />
                       <div className="flex justify-between py-1 border-t text-xs font-bold mb-3">
-                        <span>부채 소계</span>
+                        <span>{t('liabilitiesSubtotal')}</span>
                         <span className="font-mono">{fmtRp(data.balanceSheet.liabilities.totalLiabilities)}</span>
                       </div>
 
-                      <SectionRow items={data.balanceSheet.equity.items} label="자본 (Modal)" prevItems={prevData?.balanceSheet.equity.items} />
+                      <SectionRow items={data.balanceSheet.equity.items} label={t('equity')} prevItems={prevData?.balanceSheet.equity.items} />
                       <div className="flex justify-between py-0.5 text-xs">
-                        <span className="text-green-700 font-medium">당기순이익 (Laba Bersih)</span>
+                        <span className="text-green-700 font-medium">{t('currentNetIncome')}</span>
                         <span className="font-mono text-green-700 font-bold">{fmtRp(data.balanceSheet.equity.netIncome)}</span>
                       </div>
                       <div className="flex justify-between py-1 border-t text-xs font-bold mb-3">
-                        <span>자본 소계</span>
+                        <span>{t('equitySubtotal')}</span>
                         <span className="font-mono">{fmtRp(data.balanceSheet.equity.totalEquity)}</span>
                       </div>
 
                       <div className="flex justify-between py-2 border-t-2 border-indigo-500 text-sm font-bold text-indigo-700">
-                        <span>부채 + 자본</span>
+                        <span>{t('liabilitiesPlusEquity')}</span>
                         <span className="font-mono">{fmtRp(data.balanceSheet.totalLiabilitiesAndEquity)}</span>
                       </div>
                     </div>
@@ -518,7 +520,7 @@ export default function FinancialStatementsPage() {
             {drillLoading ? (
               <div className="p-12 text-center">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-                <p className="text-sm text-gray-500 mt-2">거래 내역 로드 중...</p>
+                <p className="text-sm text-gray-500 mt-2">{t('loadingTransactions')}</p>
               </div>
             ) : drilldown ? (
               <>
@@ -527,11 +529,11 @@ export default function FinancialStatementsPage() {
                     <h3 className="font-bold text-sm">
                       {drilldown.accountCode} {drilldown.accountName}
                     </h3>
-                    <p className="text-xs text-gray-500">{drilldown.count}건의 거래 — {year}년</p>
+                    <p className="text-xs text-gray-500">{t('transactionCount', { count: drilldown.count, year })}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <p className="text-[10px] text-gray-500">잔액</p>
+                      <p className="text-[10px] text-gray-500">{t('balance')}</p>
                       <p className="font-mono font-bold text-sm">{fmtRp(drilldown.balance)}</p>
                     </div>
                     <button onClick={() => setDrilldown(null)}><X className="h-5 w-5 text-gray-400 hover:text-gray-700" /></button>
@@ -539,17 +541,17 @@ export default function FinancialStatementsPage() {
                 </div>
                 <div className="p-4">
                   {drilldown.transactions.length === 0 ? (
-                    <p className="text-center text-sm text-gray-400 py-8">거래 내역이 없습니다</p>
+                    <p className="text-center text-sm text-gray-400 py-8">{t('noTransactions')}</p>
                   ) : (
                     <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr className="bg-gray-50 border-b">
-                          <th className="p-2 text-left">날짜</th>
-                          <th className="p-2 text-left">번호</th>
-                          <th className="p-2 text-left">설명</th>
-                          <th className="p-2 text-center">출처</th>
-                          <th className="p-2 text-right">차변</th>
-                          <th className="p-2 text-right">대변</th>
+                          <th className="p-2 text-left">{t('date')}</th>
+                          <th className="p-2 text-left">{t('number')}</th>
+                          <th className="p-2 text-left">{t('description')}</th>
+                          <th className="p-2 text-center">{t('source')}</th>
+                          <th className="p-2 text-right">{t('debit')}</th>
+                          <th className="p-2 text-right">{t('credit')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -568,7 +570,7 @@ export default function FinancialStatementsPage() {
                       </tbody>
                       <tfoot className="bg-indigo-50 font-bold">
                         <tr>
-                          <td colSpan={4} className="p-2">합계</td>
+                          <td colSpan={4} className="p-2">{t('total')}</td>
                           <td className="p-2 text-right font-mono">{fmtRp(drilldown.totalDebit)}</td>
                           <td className="p-2 text-right font-mono">{fmtRp(drilldown.totalCredit)}</td>
                         </tr>
