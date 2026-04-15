@@ -14,6 +14,7 @@ import {
   Building2, DollarSign, Calendar,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 // ── Constants ──
 const UMKM_RATE = 0.005;          // PPh Final 0.5%
@@ -53,6 +54,7 @@ export default function CorporateTaxPage() {
   const params = useParams();
   const locale = params.locale as string;
   const currentYear = new Date().getFullYear();
+  const t = useTranslations('umkm');
 
   // Wizard state
   const [step, setStep] = useState(1);
@@ -112,11 +114,11 @@ export default function CorporateTaxPage() {
     if (yearsOperating < 3 && !isUmkm) {
       return {
         regime: 'PPH25_NEW',
-        title: '신설 법인 — PPh 25 면제',
-        description: `설립 ${yearsOperating}년차. 신설 법인은 첫 3년간 PPh 25 납부 의무가 없습니다 (단, NPWP 발행 시 PPh 25를 선택한 경우 제외). 다만 사업 소득이 발생하면 연말 SPT Tahunan에서 정산합니다.`,
+        title: t('regimeNewCompanyTitle'),
+        description: t('regimeNewCompanyDesc', { years: yearsOperating }),
         monthlyAmount: 0,
         annualEstimate: 0,
-        legalBasis: 'PMK 215/PMK.03/2018 — 신설 법인 PPh 25 면제',
+        legalBasis: t('regimeNewCompanyBasis'),
         color: 'blue',
       };
     }
@@ -126,12 +128,12 @@ export default function CorporateTaxPage() {
       const taxableRevenue = Math.max(revenue - exemption, 0);
       const annualTax = Math.round(taxableRevenue * UMKM_RATE);
       const exemptionDesc = isCompany
-        ? '법인은 비과세 공제 없이 전액 과세'
-        : `개인 연 ${fmtRp(EXEMPTION_INDIVIDUAL)} 비과세 공제 후`;
+        ? t('regimeUmkmDescCompany')
+        : t('regimeUmkmDescIndividual', { exemption: fmtRp(EXEMPTION_INDIVIDUAL) });
       return {
         regime: 'UMKM_FINAL',
         title: 'PPh Final UMKM — 0.5%',
-        description: `연매출 ${fmtRp(revenue)} (< ${fmtRp(THRESHOLD)}). PP 55/2022 등록 ${umkmYearsUsed}/${maxUmkmYears}년차. ${exemptionDesc} 0.5% 납부.`,
+        description: t('regimeUmkmFullDesc', { revenue: fmtRp(revenue), threshold: fmtRp(THRESHOLD), used: umkmYearsUsed, max: maxUmkmYears, exemptionDesc }),
         monthlyAmount: Math.round(annualTax / 12),
         annualEstimate: annualTax,
         legalBasis: 'PP 55/2022 & PMK 164/2023 — UMKM PPh Final 0.5%',
@@ -143,11 +145,11 @@ export default function CorporateTaxPage() {
     if (hadFiscalLoss) {
       return {
         regime: 'PPH25_LOSS',
-        title: 'PPh 25 — 전기 결손',
-        description: '전년도 세무 결손(rugi fiskal)이 있으므로 PPh 25 분할 납부액이 0원입니다. 올해 이익이 발생하면 연말 SPT Tahunan에서 정산됩니다.',
+        title: t('regimeFiscalLossTitle'),
+        description: t('regimeFiscalLossDesc'),
         monthlyAmount: 0,
         annualEstimate: 0,
-        legalBasis: 'Pasal 25 UU PPh — 결손 이월 시 PPh 25 = 0',
+        legalBasis: t('regimeFiscalLossBasis'),
         color: 'amber',
       };
     }
@@ -160,31 +162,35 @@ export default function CorporateTaxPage() {
 
     let desc = '';
     if (revenue >= THRESHOLD) {
-      desc = `연매출 ${fmtRp(revenue)} (≥ ${fmtRp(THRESHOLD)}). 일반 PPh Badan 22% 적용.`;
+      desc = t('regimeGeneralDescRevenue', { revenue: fmtRp(revenue), threshold: fmtRp(THRESHOLD) });
     } else if (isUmkm && umkmYearsUsed >= maxUmkmYears) {
-      desc = `UMKM PPh Final 기간 만료 (${maxUmkmYears}년 한도 초과). 일반 PPh Badan으로 전환.`;
+      desc = t('regimeGeneralDescExpired', { maxYears: maxUmkmYears });
     } else {
-      desc = 'UMKM 미등록. 일반 PPh Badan 22% 적용.';
+      desc = t('regimeGeneralDescNotRegistered');
     }
 
     if (lastTax > 0) {
-      desc += ` 전년 PPh Badan ${fmtRp(lastTax)} - 세액공제 ${fmtRp(credits)} = 월 ${fmtRp(monthly)}.`;
+      desc += ' ' + t('regimeGeneralDescWithTax', { tax: fmtRp(lastTax), credits: fmtRp(credits), monthly: fmtRp(monthly) });
     } else {
-      desc += ' 전년 SPT Tahunan 데이터를 입력하면 정확한 월 분할액을 계산합니다.';
+      desc += ' ' + t('regimeGeneralDescNoTax');
     }
 
     return {
       regime: 'PPH25_GENERAL',
-      title: 'PPh 25 — 일반 법인세 월 분할',
+      title: t('regimeGeneralTitle'),
       description: desc,
       monthlyAmount: monthly,
       annualEstimate: netTax,
-      legalBasis: 'Pasal 25 UU PPh — (전년 PPh Badan - 세액공제) ÷ 12',
+      legalBasis: t('regimeGeneralBasis'),
       color: 'indigo',
     };
   };
 
-  const MONTHS = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+  const MONTHS = [
+    t('month1'), t('month2'), t('month3'), t('month4'),
+    t('month5'), t('month6'), t('month7'), t('month8'),
+    t('month9'), t('month10'), t('month11'), t('month12'),
+  ];
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -192,10 +198,10 @@ export default function CorporateTaxPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Building2 className="h-6 w-6 text-indigo-600" />
-          선납 법인세 (PPh 25 / PPh Final UMKM)
+          {t('pageTitle')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          우리 회사에 맞는 법인세 납부 방식을 단계별로 안내합니다
+          {t('pageDescription')}
         </p>
       </div>
 
@@ -204,16 +210,16 @@ export default function CorporateTaxPage() {
         <div className="flex items-start gap-3">
           <HelpCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-xs text-blue-900">
-            <p className="font-bold mb-1">법인세 납부는 회사 상황에 따라 다릅니다</p>
+            <p className="font-bold mb-1">{t('bannerTitle')}</p>
             <ul className="space-y-1 text-blue-800">
-              <li>• <b>신설 법인</b> (3년 미만): PPh 25 납부 의무 없음 <span className="text-[10px] text-blue-600">(단, NPWP 발행 시 PPh 25 선택한 경우 제외)</span></li>
-              <li>• <b>소규모 법인</b> (연매출 48억 미만, UMKM 등록): 매월 매출의 <b>0.5%</b>만 납부 (PPh Final)
-                <br/><span className="text-[10px] text-blue-600 ml-4">적용 기간: PT <b>3년</b>, CV/Firma <b>4년</b>, 개인 <b>7년</b>. 법인은 비과세 공제 없음 (개인만 연 5억 비과세)</span>
+              <li>• <b>{t('bannerNewCompany')}</b> {t('bannerNewCompanyDesc')} <span className="text-[10px] text-blue-600">{t('bannerNewCompanyNote')}</span></li>
+              <li>• <b>{t('bannerSmallCompany')}</b> {t('bannerSmallCompanyDesc')} <b>{t('bannerSmallCompanyRate')}</b>{t('bannerSmallCompanyFinal')}
+                <br/><span className="text-[10px] text-blue-600 ml-4">{t('bannerSmallCompanyNote', { ptYears: 3, cvYears: 4, individualYears: 7 })}</span>
               </li>
-              <li>• <b>일반 법인</b> (연매출 48억 이상): 전년도 세금을 12등분하여 매월 분할 납부 (PPh 25)</li>
-              <li>• <b>전기 결손</b>: PPh 25 = 0원 (연말 정산으로 대체)</li>
+              <li>• <b>{t('bannerGeneralCompany')}</b> {t('bannerGeneralCompanyDesc')}</li>
+              <li>• <b>{t('bannerFiscalLoss')}</b>{t('bannerFiscalLossDesc')}</li>
             </ul>
-            <p className="mt-2 text-blue-600">아래 질문에 답하면 우리 회사에 맞는 방식을 자동으로 판별합니다.</p>
+            <p className="mt-2 text-blue-600">{t('bannerAutoDetect')}</p>
           </div>
         </div>
       </div>
@@ -241,10 +247,10 @@ export default function CorporateTaxPage() {
       {/* Step indicator */}
       <div className="flex items-center justify-between mb-6">
         {[
-          { id: 1, label: '기본 정보' },
-          { id: 2, label: 'UMKM 확인' },
-          { id: 3, label: '전년 세금' },
-          { id: 4, label: '결과 확인' },
+          { id: 1, label: t('stepBasicInfo') },
+          { id: 2, label: t('stepUmkmCheck') },
+          { id: 3, label: t('stepPrevTax') },
+          { id: 4, label: t('stepResult') },
         ].map((s, i) => (
           <div key={s.id} className="flex items-center flex-1">
             <div className="flex flex-col items-center flex-1">
@@ -264,53 +270,53 @@ export default function CorporateTaxPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Building2 className="h-5 w-5 text-indigo-600" />
-              회사 기본 정보
+              {t('companyBasicInfo')}
             </h2>
-            <p className="text-xs text-gray-500">회사 정보에서 자동으로 불러온 데이터입니다. 수정이 필요하면 변경하세요.</p>
+            <p className="text-xs text-gray-500">{t('companyBasicInfoDesc')}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">회사명</Label>
+                <Label className="text-xs">{t('companyName')}</Label>
                 <Input value={companyName} onChange={e => setCompanyName(e.target.value)} />
               </div>
               <div>
-                <Label className="text-xs">법인 형태</Label>
+                <Label className="text-xs">{t('legalFormLabel')}</Label>
                 <select value={legalForm} onChange={e => setLegalForm(e.target.value)}
                   className="w-full h-9 px-3 rounded-md border text-sm">
-                  <option value="">선택하세요</option>
-                  <option value="PT">PT (유한회사)</option>
-                  <option value="CV">CV (합자회사)</option>
-                  <option value="UD">UD (개인사업)</option>
-                  <option value="FIRMA">Firma (합명회사)</option>
+                  <option value="">{t('legalFormPlaceholder')}</option>
+                  <option value="PT">{t('legalFormPT')}</option>
+                  <option value="CV">{t('legalFormCV')}</option>
+                  <option value="UD">{t('legalFormUD')}</option>
+                  <option value="FIRMA">{t('legalFormFirma')}</option>
                 </select>
               </div>
               <div>
-                <Label className="text-xs">설립 연도</Label>
+                <Label className="text-xs">{t('establishedYear')}</Label>
                 <Input type="number" value={establishedYear} onChange={e => setEstablishedYear(e.target.value)}
-                  placeholder="예: 2020" />
+                  placeholder={t('establishedYearPlaceholder')} />
                 {establishedYear && currentYear - Number(establishedYear) < 3 && (
-                  <p className="text-[11px] text-blue-600 mt-1">💡 설립 3년 미만 → 신설 법인 PPh 25 면제 대상 (NPWP 발행 시 선택한 경우 제외)</p>
+                  <p className="text-[11px] text-blue-600 mt-1">{t('newCompanyHint')}</p>
                 )}
                 {establishedYear && legalForm && (() => {
                   const yrs = currentYear - Number(establishedYear);
                   const max = getMaxUmkmYears(legalForm);
                   if (yrs > max) {
                     return <p className="text-[11px] text-indigo-600 mt-1">
-                      ℹ️ 설립 {yrs}년차 — {legalForm} UMKM 기간({max}년) 초과. <b>자동으로 PPh 25(일반 법인세)</b>가 적용됩니다.
+                      {t('umkmExpiredHint', { years: yrs, legalForm, maxYears: max })}
                     </p>;
                   }
                   return null;
                 })()}
               </div>
               <div>
-                <Label className="text-xs">연간 매출 (Rp) — 최근 1년</Label>
+                <Label className="text-xs">{t('annualRevenueLabel')}</Label>
                 <Input type="number" value={annualRevenue} onChange={e => setAnnualRevenue(e.target.value)}
                   placeholder="5000000000" className="font-mono" />
                 {annualRevenue && Number(annualRevenue) < THRESHOLD && (
-                  <p className="text-[11px] text-green-600 mt-1">✓ 48억 미만 → UMKM PPh Final 0.5% 대상 가능</p>
+                  <p className="text-[11px] text-green-600 mt-1">{t('revenueUnder48B')}</p>
                 )}
                 {annualRevenue && Number(annualRevenue) >= THRESHOLD && (
-                  <p className="text-[11px] text-indigo-600 mt-1">일반 PPh Badan 22% → PPh 25 월 분할 납부</p>
+                  <p className="text-[11px] text-indigo-600 mt-1">{t('revenueOver48B')}</p>
                 )}
               </div>
             </div>
@@ -326,15 +332,15 @@ export default function CorporateTaxPage() {
                     <div className="flex items-start gap-2">
                       <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
                       <div>
-                        <p className="font-bold text-sm text-red-900">⚠️ UMKM PPh Final 마지막 해입니다</p>
+                        <p className="font-bold text-sm text-red-900">{t('umkmLastYearWarningTitle')}</p>
                         <p className="text-xs text-red-700 mt-1">
-                          {legalForm} 적용 기간 {max}년 중 <b>{yrs}년차</b> — 올해가 마지막입니다.
+                          {t('umkmLastYearWarningDesc', { legalForm, maxYears: max, years: yrs })}
                         </p>
                         <p className="text-xs text-red-800 mt-1 font-bold">
-                          📢 {currentYear + 1}년부터 PPh Badan 일반 세율(22%)이 적용됩니다.
+                          {t('umkmLastYearWarningNext', { nextYear: currentYear + 1 })}
                         </p>
                         <p className="text-[10px] text-red-600 mt-1">
-                          PPh 25 월 분할 납부가 시작되므로 재무 계획을 미리 준비하시기 바랍니다.
+                          {t('umkmLastYearWarningPlan')}
                         </p>
                       </div>
                     </div>
@@ -347,7 +353,7 @@ export default function CorporateTaxPage() {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-amber-600" />
                       <p className="text-xs text-amber-800">
-                        ℹ️ UMKM PPh Final 잔여 <b>1년</b>. {currentYear + 1}년이 마지막 → {currentYear + 2}년부터 일반 법인세(22%) 전환 예정.
+                        {t('umkmOneYearLeft', { nextYear: currentYear + 1, yearAfter: currentYear + 2 })}
                       </p>
                     </div>
                   </div>
@@ -366,84 +372,84 @@ export default function CorporateTaxPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Store className="h-5 w-5 text-green-600" />
-              과세 방식 확인
+              {t('taxMethodTitle')}
             </h2>
 
-            {/* 1. 안내 */}
+            {/* 1. Guide */}
             <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
-              <p className="font-bold mb-1">안내</p>
-              <p>사업자의 매출, 사업 기간, 업종을 기반으로 현재 적용 가능한 세금 납부 방식을 자동으로 안내드립니다.</p>
+              <p className="font-bold mb-1">{t('taxMethodGuideTitle')}</p>
+              <p>{t('taxMethodGuideDesc')}</p>
             </div>
 
-            {/* 2. 과세 방식 설명 */}
+            {/* 2. Tax method explanation */}
             <div>
-              <p className="text-sm font-bold text-gray-900 mb-2">적용 가능한 과세 방식</p>
+              <p className="text-sm font-bold text-gray-900 mb-2">{t('applicableMethods')}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="p-3 bg-green-50 rounded-xl border border-green-200">
-                  <p className="font-bold text-sm text-green-900">1. UMKM (PPh Final 0.5%)</p>
+                  <p className="font-bold text-sm text-green-900">{t('umkmMethodTitle')}</p>
                   <ul className="mt-1 text-xs text-green-800 space-y-0.5">
-                    <li>• <b>매출</b> 기준 과세 (연매출 ≤ 4.8M IDR)</li>
-                    <li>• <b>0.5%</b> 단일 세율</li>
-                    <li>• 적용 기간: PT <b>3년</b>, CV <b>4년</b>, 개인 <b>7년</b></li>
-                    <li>• 법인은 비과세 공제 없음 (개인만 5억)</li>
+                    <li>{t('umkmMethodRevenue')}</li>
+                    <li>{t('umkmMethodRate')}</li>
+                    <li>{t('umkmMethodPeriod', { ptYears: 3, cvYears: 4, individualYears: 7 })}</li>
+                    <li>{t('umkmMethodNoExemption')}</li>
                   </ul>
                 </div>
                 <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-200">
-                  <p className="font-bold text-sm text-indigo-900">2. 일반 과세 (PPh 25 / 법인세)</p>
+                  <p className="font-bold text-sm text-indigo-900">{t('generalMethodTitle')}</p>
                   <ul className="mt-1 text-xs text-indigo-800 space-y-0.5">
-                    <li>• <b>순이익</b> 기준 과세</li>
-                    <li>• 최대 <b>22%</b> 세율</li>
-                    <li>• 매월 분할 납부 (PPh 25)</li>
-                    <li>• 세무 조정(Koreksi Fiskal) 필요</li>
+                    <li>{t('generalMethodProfit')}</li>
+                    <li>{t('generalMethodRate')}</li>
+                    <li>{t('generalMethodMonthly')}</li>
+                    <li>{t('generalMethodAdjustment')}</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* 3. 사용자 선택 */}
+            {/* 3. User selection */}
             <div>
-              <p className="text-sm font-bold text-gray-900 mb-2">현재 귀사의 세금 납부 방식은 무엇입니까?</p>
+              <p className="text-sm font-bold text-gray-900 mb-2">{t('selectMethodQuestion')}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <button onClick={() => { setIsUmkm(true); setStep(3); }}
                   className={`p-4 rounded-xl border-2 text-center transition-all hover:shadow-md ${
                     isUmkm === true ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'
                   }`}>
                   <Store className={`h-8 w-8 mx-auto mb-2 ${isUmkm === true ? 'text-green-600' : 'text-gray-400'}`} />
-                  <p className="font-bold text-sm">PPh Final (UMKM)</p>
-                  <p className="text-[10px] text-gray-500 mt-1">매출 × 0.5%</p>
+                  <p className="font-bold text-sm">{t('selectUmkm')}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">{t('selectUmkmDesc')}</p>
                 </button>
                 <button onClick={() => { setIsUmkm(false); setStep(3); }}
                   className={`p-4 rounded-xl border-2 text-center transition-all hover:shadow-md ${
                     isUmkm === false ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'
                   }`}>
                   <Building2 className={`h-8 w-8 mx-auto mb-2 ${isUmkm === false ? 'text-indigo-600' : 'text-gray-400'}`} />
-                  <p className="font-bold text-sm">PPh 25 (일반 과세)</p>
-                  <p className="text-[10px] text-gray-500 mt-1">순이익 × 22%</p>
+                  <p className="font-bold text-sm">{t('selectGeneral')}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">{t('selectGeneralDesc')}</p>
                 </button>
                 <button onClick={() => setShowDontKnow(true)}
                   className="p-4 rounded-xl border-2 border-gray-200 text-center transition-all hover:border-amber-300 hover:shadow-md">
                   <HelpCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                  <p className="font-bold text-sm">잘 모르겠습니다</p>
-                  <p className="text-[10px] text-gray-500 mt-1">추가 정보로 판별</p>
+                  <p className="font-bold text-sm">{t('selectDontKnow')}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">{t('selectDontKnowDesc')}</p>
                 </button>
               </div>
             </div>
 
-            {/* "잘 모르겠음" → 추가 정보 입력 */}
+            {/* Don't know → additional info */}
             {showDontKnow && (
               <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-3">
-                <p className="text-sm font-bold text-amber-900">추가 정보 입력</p>
-                <p className="text-xs text-amber-700">아래 정보를 입력하면 AI가 자동으로 과세 방식을 판별합니다.</p>
+                <p className="text-sm font-bold text-amber-900">{t('additionalInfoTitle')}</p>
+                <p className="text-xs text-amber-700">{t('additionalInfoDesc')}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs">회사 설립연도 (NPWP 등록 기준)</Label>
+                    <Label className="text-xs">{t('npwpEstablishedYear')}</Label>
                     <Input type="number" value={establishedYear} onChange={e => setEstablishedYear(e.target.value)}
-                      placeholder="예: 2020" />
+                      placeholder={t('establishedYearPlaceholder')} />
                   </div>
                   <div>
-                    <Label className="text-xs">전년도 매출액 (IDR)</Label>
+                    <Label className="text-xs">{t('lastYearRevenueLabel')}</Label>
                     <Input type="number" value={annualRevenue} onChange={e => setAnnualRevenue(e.target.value)}
-                      placeholder="예: 3000000000" className="font-mono" />
+                      placeholder={t('lastYearRevenuePlaceholder')} className="font-mono" />
                   </div>
                 </div>
 
@@ -457,26 +463,26 @@ export default function CorporateTaxPage() {
                   return (
                     <div className={`p-3 rounded-xl border ${canUmkm ? 'bg-green-50 border-green-300' : 'bg-indigo-50 border-indigo-300'}`}>
                       <p className="font-bold text-sm">
-                        귀사는 다음 과세 방식이 적용됩니다:
+                        {t('autoDetectResult')}
                       </p>
                       {canUmkm ? (
                         <div className="mt-2 text-xs text-green-800">
-                          <p className="font-bold text-green-900 text-base">✅ UMKM (PPh Final 0.5%)</p>
-                          <p className="mt-1">• 매출 기준 과세</p>
-                          <p>• 적용 가능 기간: <b>{maxYears - yrs}년 남음</b> ({yrs}/{maxYears}년차)</p>
+                          <p className="font-bold text-green-900 text-base">{t('autoDetectUmkm')}</p>
+                          <p className="mt-1">{t('autoDetectUmkmRevenue')}</p>
+                          <p>{t('autoDetectUmkmRemaining', { remaining: maxYears - yrs, used: yrs, max: maxYears })}</p>
                           <Button size="sm" className="mt-2" onClick={() => { setIsUmkm(true); setStep(3); }}>
-                            UMKM으로 진행 <ArrowRight className="h-3 w-3 ml-1" />
+                            {t('proceedUmkm')} <ArrowRight className="h-3 w-3 ml-1" />
                           </Button>
                         </div>
                       ) : (
                         <div className="mt-2 text-xs text-indigo-800">
-                          <p className="font-bold text-indigo-900 text-base">📋 일반 과세 (PPh 25)</p>
-                          <p className="mt-1">• 순이익 기준 과세</p>
-                          <p>• 월별 분할 납부 대상</p>
-                          {revenue >= THRESHOLD && <p className="text-[10px] mt-1">사유: 연매출 {fmtRp(revenue)} ≥ 48억 IDR</p>}
-                          {yrs > maxYears && <p className="text-[10px] mt-1">사유: 설립 {yrs}년차 — {legalForm} UMKM 기간({maxYears}년) 초과</p>}
+                          <p className="font-bold text-indigo-900 text-base">{t('autoDetectGeneral')}</p>
+                          <p className="mt-1">{t('autoDetectGeneralProfit')}</p>
+                          <p>{t('autoDetectGeneralMonthly')}</p>
+                          {revenue >= THRESHOLD && <p className="text-[10px] mt-1">{t('autoDetectReasonRevenue', { revenue: fmtRp(revenue) })}</p>}
+                          {yrs > maxYears && <p className="text-[10px] mt-1">{t('autoDetectReasonYears', { years: yrs, legalForm, maxYears })}</p>}
                           <Button size="sm" className="mt-2" onClick={() => { setIsUmkm(false); setStep(3); }}>
-                            일반 과세로 진행 <ArrowRight className="h-3 w-3 ml-1" />
+                            {t('proceedGeneral')} <ArrowRight className="h-3 w-3 ml-1" />
                           </Button>
                         </div>
                       )}
@@ -495,35 +501,35 @@ export default function CorporateTaxPage() {
           <CardContent className="p-5 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-indigo-600" />
-              전년도 세금 정보
+              {t('prevYearTaxTitle')}
             </h2>
 
             {isUmkm ? (
               <div className="bg-green-50 rounded-lg p-4 text-sm text-green-800">
                 <CheckCircle className="h-5 w-5 text-green-600 inline mr-2" />
-                UMKM으로 판별되었습니다. 전년도 세금 데이터가 필요 없습니다.
-                <p className="text-xs mt-1">매월 매출에 0.5%를 적용하여 PPh Final을 계산합니다.</p>
+                {t('umkmDetected')}
+                <p className="text-xs mt-1">{t('umkmDetectedDesc')}</p>
               </div>
             ) : (
               <>
                 <div className="bg-indigo-50 rounded-lg p-3 text-xs text-indigo-800">
-                  <p className="font-bold">PPh 25 계산 공식</p>
-                  <p className="mt-1 font-mono">월 PPh 25 = (전년 PPh Badan − 세액공제) ÷ 12</p>
-                  <p className="mt-1">전년도 SPT Tahunan(연간신고서)에 기재된 금액을 입력하세요. 모르면 0으로 두세요.</p>
+                  <p className="font-bold">{t('pph25Formula')}</p>
+                  <p className="mt-1 font-mono">{t('pph25FormulaDesc')}</p>
+                  <p className="mt-1">{t('pph25FormulaHint')}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs">전년 PPh Badan 납부액 (Rp)</Label>
+                    <Label className="text-xs">{t('lastYearTaxPaid')}</Label>
                     <Input type="number" value={lastYearTaxPaid} onChange={e => setLastYearTaxPaid(e.target.value)}
-                      placeholder="전년 SPT Tahunan의 PPh Badan" className="font-mono" />
-                    <p className="text-[10px] text-gray-400 mt-1">SPT 1771 양식의 "PPh Terutang" 금액</p>
+                      placeholder={t('lastYearTaxPaidPlaceholder')} className="font-mono" />
+                    <p className="text-[10px] text-gray-400 mt-1">{t('lastYearTaxPaidHint')}</p>
                   </div>
                   <div>
-                    <Label className="text-xs">전년 세액공제 합계 (Rp)</Label>
+                    <Label className="text-xs">{t('lastYearTaxCredits')}</Label>
                     <Input type="number" value={lastYearTaxCredits} onChange={e => setLastYearTaxCredits(e.target.value)}
-                      placeholder="PPh 22 + PPh 23 + PPh 24 등" className="font-mono" />
-                    <p className="text-[10px] text-gray-400 mt-1">원천징수당한 세액 합계</p>
+                      placeholder={t('lastYearTaxCreditsPlaceholder')} className="font-mono" />
+                    <p className="text-[10px] text-gray-400 mt-1">{t('lastYearTaxCreditsHint')}</p>
                   </div>
                 </div>
 
@@ -531,8 +537,8 @@ export default function CorporateTaxPage() {
                   <input type="checkbox" checked={hadFiscalLoss} onChange={e => setHadFiscalLoss(e.target.checked)}
                     className="accent-amber-600" />
                   <div className="text-xs">
-                    <span className="font-medium">전년도 세무 결손(rugi fiskal)이 있습니다</span>
-                    <p className="text-gray-500">결손이 있으면 PPh 25 = 0원</p>
+                    <span className="font-medium">{t('fiscalLossCheckbox')}</span>
+                    <p className="text-gray-500">{t('fiscalLossDesc')}</p>
                   </div>
                 </label>
               </>
@@ -574,16 +580,16 @@ export default function CorporateTaxPage() {
             <div className="grid grid-cols-2 gap-4">
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4 text-center">
-                  <p className="text-xs text-gray-500">월 납부액 (예상)</p>
+                  <p className="text-xs text-gray-500">{t('monthlyEstimate')}</p>
                   <p className="text-2xl font-bold font-mono mt-1">{fmtRp(r.monthlyAmount)}</p>
-                  <p className="text-[10px] text-gray-400">매월 15일까지 납부 (Coretax)</p>
+                  <p className="text-[10px] text-gray-400">{t('monthlyDeadline')}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4 text-center">
-                  <p className="text-xs text-gray-500">연간 예상 세액</p>
+                  <p className="text-xs text-gray-500">{t('annualEstimate')}</p>
                   <p className="text-2xl font-bold font-mono mt-1">{fmtRp(r.annualEstimate)}</p>
-                  <p className="text-[10px] text-gray-400">연말 SPT Tahunan에서 정산</p>
+                  <p className="text-[10px] text-gray-400">{t('annualSettlement')}</p>
                 </CardContent>
               </Card>
             </div>
@@ -594,10 +600,10 @@ export default function CorporateTaxPage() {
                 <CardContent className="p-4">
                   <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {currentYear}년 월별 매출 입력 (UMKM PPh Final)
+                    {t('monthlyRevenueTitle', { year: currentYear })}
                   </h3>
                   <p className="text-[11px] text-gray-500 mb-3">
-                    매월 매출을 입력하면 월별 PPh Final을 자동 계산합니다. 연 {fmtRp(getExemption(legalForm))}까지 비과세.
+                    {t('monthlyRevenueDesc', { exemption: fmtRp(getExemption(legalForm)) })}
                   </p>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {MONTHS.map((label, i) => {
@@ -616,9 +622,9 @@ export default function CorporateTaxPage() {
                               next[i] = Number(e.target.value) || 0;
                               setMonthlyRevenues(next);
                             }}
-                            placeholder="매출" />
+                            placeholder={t('monthlyRevenuePlaceholder')} />
                           {rev > 0 && (
-                            <p className="text-[9px] text-green-600 mt-0.5">세액: {fmtRp(tax)}</p>
+                            <p className="text-[9px] text-green-600 mt-0.5">{t('monthlyTaxAmount', { amount: fmtRp(tax) })}</p>
                           )}
                         </div>
                       );
@@ -626,15 +632,15 @@ export default function CorporateTaxPage() {
                   </div>
                   <div className="mt-3 p-3 bg-green-100 rounded-lg grid grid-cols-3 gap-3 text-xs">
                     <div>
-                      <p className="text-gray-600">연간 매출 합계</p>
+                      <p className="text-gray-600">{t('annualRevenueTotal')}</p>
                       <p className="font-bold font-mono">{fmtRp(monthlyRevenues.reduce((s, v) => s + v, 0))}</p>
                     </div>
                     <div>
-                      <p className="text-gray-600">비과세 공제</p>
+                      <p className="text-gray-600">{t('exemptionDeduction')}</p>
                       <p className="font-bold font-mono">{fmtRp(Math.min(monthlyRevenues.reduce((s, v) => s + v, 0), getExemption(legalForm)))}</p>
                     </div>
                     <div>
-                      <p className="text-green-700">연간 PPh Final</p>
+                      <p className="text-green-700">{t('annualPphFinal')}</p>
                       <p className="font-bold font-mono text-green-800">
                         {fmtRp(Math.round(Math.max(monthlyRevenues.reduce((s, v) => s + v, 0) - getExemption(legalForm), 0) * UMKM_RATE))}
                       </p>
@@ -647,21 +653,21 @@ export default function CorporateTaxPage() {
             {/* Next steps */}
             <Card className="bg-gray-50">
               <CardContent className="p-4">
-                <h3 className="font-bold text-sm mb-2">다음 단계</h3>
+                <h3 className="font-bold text-sm mb-2">{t('nextStepsTitle')}</h3>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center gap-2 p-2 bg-white rounded border">
                     <Badge className="bg-blue-100 text-blue-700">1</Badge>
-                    <span>월별 납부 페이지에서 ID Billing 생성</span>
-                    <a href={`/${locale}/tax/monthly-payments`} className="ml-auto text-blue-600 hover:underline">이동 →</a>
+                    <span>{t('nextStep1')}</span>
+                    <a href={`/${locale}/tax/monthly-payments`} className="ml-auto text-blue-600 hover:underline">{t('nextStep1Link')}</a>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-white rounded border">
                     <Badge className="bg-blue-100 text-blue-700">2</Badge>
-                    <span>은행/ATM에서 납부 후 NTPN 입력</span>
+                    <span>{t('nextStep2')}</span>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-white rounded border">
                     <Badge className="bg-blue-100 text-blue-700">3</Badge>
-                    <span>연말 SPT Tahunan 1771에서 최종 정산</span>
-                    <a href={`/${locale}/tax/spt-tahunan/1771`} className="ml-auto text-blue-600 hover:underline">이동 →</a>
+                    <span>{t('nextStep3')}</span>
+                    <a href={`/${locale}/tax/spt-tahunan/1771`} className="ml-auto text-blue-600 hover:underline">{t('nextStep3Link')}</a>
                   </div>
                 </div>
               </CardContent>
@@ -674,7 +680,7 @@ export default function CorporateTaxPage() {
       <div className="flex justify-between mt-6">
         {step > 1 ? (
           <Button variant="outline" onClick={() => setStep(step - 1)}>
-            <ArrowLeft className="h-4 w-4 mr-1" />이전
+            <ArrowLeft className="h-4 w-4 mr-1" />{t('prevButton')}
           </Button>
         ) : <div />}
         {step < 4 ? (
@@ -694,7 +700,7 @@ export default function CorporateTaxPage() {
             }
             setStep(nextStep);
           }}>
-            다음<ArrowRight className="h-4 w-4 ml-1" />
+            {t('nextButton')}<ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         ) : null}
       </div>

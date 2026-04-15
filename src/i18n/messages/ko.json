@@ -4927,5 +4927,15 @@
       "TAX_ADVISOR_JTC": "세무사 (Tax Advisor)",
       "CONSULTANT_JTC": "컨설턴트"
     }
+  },
+  "manualDetail": {
+    "backToList": "매뉴얼 목록으로",
+    "corporateManual": "법인 납세자 매뉴얼",
+    "externalManual": "외부 세무 사무소 매뉴얼",
+    "individualManual": "개인 납세자 매뉴얼",
+    "operatorManual": "운영팀 매뉴얼",
+    "jtcManual": "JTC 세무사 매뉴얼",
+    "adminManual": "플랫폼 관리자 매뉴얼",
+    "glossary": "매뉴얼 인덱스 · 용어 사전"
   }
 }

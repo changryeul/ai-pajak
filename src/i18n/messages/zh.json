@@ -4926,5 +4926,15 @@
       "TAX_ADVISOR_JTC": "Tax Advisor",
       "CONSULTANT_JTC": "Consultant"
     }
+  },
+  "manualDetail": {
+    "backToList": "Back to manual list",
+    "corporateManual": "Corporate Taxpayer Manual",
+    "externalManual": "External Tax Firm Manual",
+    "individualManual": "Individual Taxpayer Manual",
+    "operatorManual": "Operations Team Manual",
+    "jtcManual": "JTC Tax Advisor Manual",
+    "adminManual": "Platform Admin Manual",
+    "glossary": "Manual Index & Glossary"
   }
 }
