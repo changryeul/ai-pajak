@@ -11,15 +11,13 @@ import {
   Newspaper, Bell, CreditCard, FileText, Trash2, Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface CronJob {
   id: string;
-  name: string;
   endpoint: string;
   schedule: string;
-  scheduleDesc: string;
   icon: typeof Clock;
-  description: string;
   isEnabled: boolean;
   lastStatus?: 'success' | 'error' | 'running' | 'skipped' | null;
   lastResult?: string;
@@ -27,62 +25,19 @@ interface CronJob {
   lastRunAt?: string;
 }
 
-const CRON_JOBS: CronJob[] = [
-  {
-    id: 'deadline-reminders',
-    name: '마감 리마인더',
-    endpoint: '/api/cron/deadline-reminders',
-    schedule: '0 8 * * *',
-    scheduleDesc: '매일 08:00',
-    icon: Bell,
-    description: '세금 마감일 D-30/14/7/3/1 알림 (이메일 + WhatsApp)',
-    isEnabled: true,
-  },
-  {
-    id: 'payment-reminders',
-    name: '납부 리마인더',
-    endpoint: '/api/cron/payment-reminders',
-    schedule: '0 9 * * *',
-    scheduleDesc: '매일 09:00',
-    icon: CreditCard,
-    description: '미납 세금 납부 촉구 알림 (WhatsApp + in-app)',
-    isEnabled: true,
-  },
-  {
-    id: 'monthly-report',
-    name: '월간 리포트',
-    endpoint: '/api/cron/monthly-report',
-    schedule: '0 10 1 * *',
-    scheduleDesc: '매월 1일 10:00',
-    icon: FileText,
-    description: '월간 세금 분석 리포트 생성 + 알림',
-    isEnabled: true,
-  },
-  {
-    id: 'news-fetch',
-    name: '세금 뉴스 수집',
-    endpoint: '/api/cron/news-fetch',
-    schedule: '0 7 * * *',
-    scheduleDesc: '매일 07:00',
-    icon: Newspaper,
-    description: 'Google News RSS → AI 요약 (한/영/인니) → DB 저장',
-    isEnabled: true,
-  },
-  {
-    id: 'cleanup-expired-tokens',
-    name: '만료 토큰 정리',
-    endpoint: '/api/cron/cleanup-expired-tokens',
-    schedule: '0 0 * * *',
-    scheduleDesc: '매일 00:00',
-    icon: Trash2,
-    description: '만료된 세션/인증 토큰 정리',
-    isEnabled: true,
-  },
+const CRON_JOBS_STATIC: Array<{ id: string; endpoint: string; schedule: string; icon: typeof Clock }> = [
+  { id: 'deadline-reminders', endpoint: '/api/cron/deadline-reminders', schedule: '0 8 * * *', icon: Bell },
+  { id: 'payment-reminders', endpoint: '/api/cron/payment-reminders', schedule: '0 9 * * *', icon: CreditCard },
+  { id: 'monthly-report', endpoint: '/api/cron/monthly-report', schedule: '0 10 1 * *', icon: FileText },
+  { id: 'news-fetch', endpoint: '/api/cron/news-fetch', schedule: '0 7 * * *', icon: Newspaper },
+  { id: 'cleanup-expired-tokens', endpoint: '/api/cron/cleanup-expired-tokens', schedule: '0 0 * * *', icon: Trash2 },
 ];
 
 export default function AdminCronPage() {
+  const t = useTranslations('adminCron');
   const [cronSecret, setCronSecret] = useState('');
-  const [jobs, setJobs] = useState<CronJob[]>(CRON_JOBS);
+  const initialJobs: CronJob[] = CRON_JOBS_STATIC.map(j => ({ ...j, isEnabled: true }));
+  const [jobs, setJobs] = useState<CronJob[]>(initialJobs);
   const [runningId, setRunningId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
@@ -129,7 +84,7 @@ export default function AdminCronPage() {
 
   const runJob = async (job: CronJob) => {
     if (!cronSecret) {
-      alert('CRON_SECRET을 입력해주세요');
+      alert(t('cronSecretRequired'));
       return;
     }
 
@@ -191,21 +146,21 @@ export default function AdminCronPage() {
           <p className="text-gray-400 text-sm flex items-center gap-2">
             <Settings className="h-4 w-4" />Admin
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">Cron 작업 관리</h1>
-          <p className="text-gray-400 mt-2 text-sm">예약 작업 모니터링 + 수동 실행</p>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('title')}</h1>
+          <p className="text-gray-400 mt-2 text-sm">{t('description')}</p>
 
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-gray-400 text-xs">등록 작업</p>
-              <p className="font-bold text-lg">{CRON_JOBS.length}개</p>
+              <p className="text-gray-400 text-xs">{t('registeredJobs')}</p>
+              <p className="font-bold text-lg">{t('countUnit', { count: CRON_JOBS_STATIC.length })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-gray-400 text-xs">일간 실행</p>
-              <p className="font-bold text-lg">{CRON_JOBS.filter(j => j.schedule.includes('* * *') && !j.schedule.includes('1 * *')).length}개</p>
+              <p className="text-gray-400 text-xs">{t('dailyJobs')}</p>
+              <p className="font-bold text-lg">{t('countUnit', { count: CRON_JOBS_STATIC.filter(j => j.schedule.includes('* * *') && !j.schedule.includes('1 * *')).length })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-gray-400 text-xs">월간 실행</p>
-              <p className="font-bold text-lg">{CRON_JOBS.filter(j => j.schedule.includes('1 * *')).length}개</p>
+              <p className="text-gray-400 text-xs">{t('monthlyJobs')}</p>
+              <p className="font-bold text-lg">{t('countUnit', { count: CRON_JOBS_STATIC.filter(j => j.schedule.includes('1 * *')).length })}</p>
             </div>
           </div>
         </div>
@@ -214,12 +169,12 @@ export default function AdminCronPage() {
       {/* CRON_SECRET Input */}
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-4">
-          <Label className="text-xs text-gray-500">CRON_SECRET (수동 실행 시 필요)</Label>
+          <Label className="text-xs text-gray-500">{t('cronSecretLabel')}</Label>
           <Input
             type="password"
             value={cronSecret}
             onChange={e => setCronSecret(e.target.value)}
-            placeholder="CRON_SECRET 입력..."
+            placeholder={t('cronSecretPlaceholder')}
             className="mt-1 font-mono text-sm"
           />
         </CardContent>
@@ -246,19 +201,19 @@ export default function AdminCronPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm">{job.name}</h3>
+                        <h3 className="font-semibold text-sm">{t('jobs.' + job.id + '.name')}</h3>
                         <Badge variant="outline" className="text-[10px] font-mono">{job.schedule}</Badge>
-                        <span className="text-[10px] text-gray-400">{job.scheduleDesc}</span>
+                        <span className="text-[10px] text-gray-400">{t('jobs.' + job.id + '.scheduleDesc')}</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{job.description}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{t('jobs.' + job.id + '.description')}</p>
                       <p className="text-[10px] text-gray-300 font-mono mt-1">{job.endpoint}</p>
                       {job.lastRunAt && (
                         <p className="text-[10px] text-gray-400 mt-0.5">
-                          마지막 실행: {new Date(job.lastRunAt).toLocaleString('ko-KR')}
+                          {t('lastRun')}: {new Date(job.lastRunAt).toLocaleString('ko-KR')}
                         </p>
                       )}
                       {!job.isEnabled && (
-                        <Badge className="text-[10px] bg-red-100 text-red-600 mt-1">비활성</Badge>
+                        <Badge className="text-[10px] bg-red-100 text-red-600 mt-1">{t('disabled')}</Badge>
                       )}
                     </div>
                   </div>
@@ -298,7 +253,7 @@ export default function AdminCronPage() {
                       ) : (
                         <Play className="h-3 w-3 mr-1" />
                       )}
-                      실행
+                      {t('run')}
                     </Button>
                   </div>
                 </div>
@@ -316,7 +271,7 @@ export default function AdminCronPage() {
                       {job.lastStatus === 'error' && <XCircle className="h-3 w-3 text-red-500" />}
                       {job.lastStatus === 'running' && <Loader2 className="h-3 w-3 text-blue-500 animate-spin" />}
                       <span className="font-medium">
-                        {job.lastStatus === 'success' ? '성공' : job.lastStatus === 'error' ? '실패' : '실행 중...'}
+                        {job.lastStatus === 'success' ? t('statusSuccess') : job.lastStatus === 'error' ? t('statusError') : t('statusRunning')}
                       </span>
                       {job.lastDuration && <span className="text-gray-400">({job.lastDuration})</span>}
                     </div>
@@ -337,10 +292,10 @@ export default function AdminCronPage() {
       <Card className="border-0 shadow-sm mt-6">
         <CardContent className="p-4">
           <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-gray-400" />일간 실행 타임라인
+            <Clock className="h-4 w-4 text-gray-400" />{t('dailyTimeline')}
           </h3>
           <div className="space-y-1.5">
-            {[...CRON_JOBS]
+            {[...CRON_JOBS_STATIC]
               .sort((a, b) => {
                 const timeA = a.schedule.split(' ').slice(0, 2).reverse().join('');
                 const timeB = b.schedule.split(' ').slice(0, 2).reverse().join('');
@@ -355,9 +310,9 @@ export default function AdminCronPage() {
                   <div key={job.id} className="flex items-center gap-3 text-xs">
                     <span className="font-mono w-12 text-gray-400">{hour.padStart(2, '0')}:{minute.padStart(2, '0')}</span>
                     <Icon className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="text-gray-700">{job.name}</span>
+                    <span className="text-gray-700">{t('jobs.' + job.id + '.name')}</span>
                     <span className="text-gray-300">—</span>
-                    <span className="text-gray-400">{job.scheduleDesc}</span>
+                    <span className="text-gray-400">{t('jobs.' + job.id + '.scheduleDesc')}</span>
                   </div>
                 );
               })}

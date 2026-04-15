@@ -166,7 +166,7 @@ export default function PPhFinalAnnualPage() {
             <p className="font-bold mb-1">{t('educationalTitle')}</p>
             <ul className="space-y-0.5 text-green-800">
               <li dangerouslySetInnerHTML={{ __html: '• ' + t.raw('educationalItem1') }} />
-              <li dangerouslySetInnerHTML={{ __html: '• ' + t.raw('educationalItem2').replace('{exemption}', exemptionFormatted + ' (5억)') }} />
+              <li dangerouslySetInnerHTML={{ __html: '• ' + t.raw('educationalItem2').replace('{exemption}', exemptionFormatted) }} />
               <li>• {t('educationalItem3')}</li>
               <li>• {t('educationalItem4')}</li>
               <li dangerouslySetInnerHTML={{ __html: '• ' + t.raw('educationalItem5') }} />

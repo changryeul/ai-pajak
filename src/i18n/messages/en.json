@@ -4799,5 +4799,132 @@
     "none": "None",
     "taxAmount": "Tax",
     "confidence": "Confidence"
+  },
+  "ruleTest": {
+    "title": "Rule Test (Tax Rate Resolution)",
+    "description": "Enter transaction conditions to see which rule the Resolution Engine applies to determine the tax rate in real time.",
+    "qualificationLabel": "Qualification",
+    "recipientResident": "Resident",
+    "recipientNonResident": "Non-Resident",
+    "npwpPlaceholder": "Empty means no NPWP",
+    "countryLabel": "Country (ISO 2-letter)",
+    "codLabel": "Has CoD (Certificate of Domicile)",
+    "reasoning": "Reasoning",
+    "skippedRules": "Skipped Rules ({count})",
+    "emptyStateMain": "Enter conditions and click Run",
+    "emptyStateSub": "Or select a Preset",
+    "presets": {
+      "serviceWithNpwp": "General Service (with NPWP)",
+      "serviceWithoutNpwp": "General Service (no NPWP)",
+      "ownerVendor": "Property Mgmt (Owner=Vendor)",
+      "constructionSmall": "Construction Work (Small)",
+      "constructionNoQual": "Construction Consulting (No Qual.)",
+      "nonResidentKrCod": "Non-Resident Korea (with CoD)",
+      "nonResidentKrNoCod": "Non-Resident Korea (no CoD)",
+      "nonResidentSgRoyalty": "Non-Resident Singapore Royalty",
+      "landRental": "Land/Building Rental",
+      "dividendNoNpwp": "Dividend (no NPWP)"
+    },
+    "serviceCategories": {
+      "SERVICE": "Service (General)",
+      "CONSTRUCTION": "Construction",
+      "RENTAL": "Rental",
+      "EMPLOYMENT": "Employment",
+      "DIVIDEND": "Dividend",
+      "INTEREST": "Interest",
+      "ROYALTY": "Royalty",
+      "IMPORT": "Import",
+      "SHIPPING": "Shipping",
+      "OTHER": "Other"
+    },
+    "constructionTypes": {
+      "WORK": "Pelaksana (Execution)",
+      "CONSULT": "Konsultansi (Consulting)",
+      "INTEGRATED": "Terintegrasi (Integrated)"
+    },
+    "qualifications": {
+      "SMALL": "Kecil (Small)",
+      "MEDIUM_LARGE": "Menengah/Besar (Medium/Large)",
+      "QUALIFIED": "Berkualifikasi (Qualified)",
+      "NONE": "Tanpa Kualifikasi (Unqualified)"
+    }
+  },
+  "adminCron": {
+    "title": "Cron Job Management",
+    "description": "Scheduled job monitoring + manual execution",
+    "registeredJobs": "Registered Jobs",
+    "dailyJobs": "Daily Jobs",
+    "monthlyJobs": "Monthly Jobs",
+    "countUnit": "{count}",
+    "cronSecretLabel": "CRON_SECRET (required for manual execution)",
+    "cronSecretPlaceholder": "Enter CRON_SECRET...",
+    "cronSecretRequired": "Please enter CRON_SECRET",
+    "lastRun": "Last run",
+    "disabled": "Disabled",
+    "run": "Run",
+    "statusSuccess": "Success",
+    "statusError": "Failed",
+    "statusRunning": "Running...",
+    "dailyTimeline": "Daily Execution Timeline",
+    "jobs": {
+      "deadline-reminders": {
+        "name": "Deadline Reminders",
+        "scheduleDesc": "Daily 08:00",
+        "description": "Tax deadline D-30/14/7/3/1 notifications (Email + WhatsApp)"
+      },
+      "payment-reminders": {
+        "name": "Payment Reminders",
+        "scheduleDesc": "Daily 09:00",
+        "description": "Unpaid tax payment reminder (WhatsApp + in-app)"
+      },
+      "monthly-report": {
+        "name": "Monthly Report",
+        "scheduleDesc": "1st of each month 10:00",
+        "description": "Monthly tax analysis report generation + notification"
+      },
+      "news-fetch": {
+        "name": "Tax News Fetch",
+        "scheduleDesc": "Daily 07:00",
+        "description": "Google News RSS → AI summary (KO/EN/ID) → DB save"
+      },
+      "cleanup-expired-tokens": {
+        "name": "Expired Token Cleanup",
+        "scheduleDesc": "Daily 00:00",
+        "description": "Clean up expired session/auth tokens"
+      }
+    }
+  },
+  "adminTeam": {
+    "title": "Team Management",
+    "descriptionMaster": "Invite and manage tax advisors, consultants, and back-office staff",
+    "descriptionSupervisor": "Invite back-office operators",
+    "accessDenied": "This page is accessible only to masters or supervisors",
+    "inviteStaff": "Invite Staff",
+    "newInviteTitle": "New Staff Invitation",
+    "emailLabel": "Email *",
+    "nameLabel": "Name (optional)",
+    "namePlaceholder": "Staff name",
+    "roleLabel": "Role *",
+    "teamLabel": "Team (optional)",
+    "teamNone": "None",
+    "sendInvite": "Send Invitation Email",
+    "cancel": "Cancel",
+    "inviteFailed": "Invitation failed",
+    "inviteError": "Error during invitation",
+    "cancelConfirm": "Are you sure you want to cancel this invitation?",
+    "cancelFailed": "Cancel failed",
+    "invitationHistory": "Invitation History ({count})",
+    "noInvitations": "No invitation history",
+    "expiresAt": "Expires",
+    "statusAccepted": "Accepted",
+    "statusCancelled": "Cancelled",
+    "statusExpired": "Expired",
+    "statusPending": "Pending",
+    "roles": {
+      "TAX_OPERATOR": "Back-office Operator",
+      "TAX_OPERATOR_SUPERVISOR": "Back-office Supervisor",
+      "TAX_ADVISOR_JTC": "Tax Advisor",
+      "CONSULTANT_JTC": "Consultant"
+    }
   }
 }

@@ -4800,5 +4800,132 @@
     "comparisonFootnote": "* 어떤 방식을 적용할지는 회사 정보(설립 연도, 법인 형태, 매출, NPWP 선택 이력)를 바탕으로 자동 결정됩니다",
     "pphFinalUmkmLabel": "PPh Final UMKM",
     "pph25GeneralLabel": "PPh 25 일반"
+  },
+  "ruleTest": {
+    "title": "Rule Test (세율 판정 테스트)",
+    "description": "거래 조건을 입력하면 Resolution Engine이 어떤 Rule을 적용하여 세율을 결정하는지 실시간으로 확인합니다.",
+    "qualificationLabel": "Qualification (자격등급)",
+    "recipientResident": "Resident (거주자)",
+    "recipientNonResident": "Non-Resident (비거주자)",
+    "npwpPlaceholder": "비어있으면 NPWP 없음",
+    "countryLabel": "Country (ISO 2자리)",
+    "codLabel": "CoD (거주지증명서) 보유",
+    "reasoning": "판단 근거",
+    "skippedRules": "건너뛴 Rule ({count})",
+    "emptyStateMain": "조건을 입력하고 Run을 클릭하세요",
+    "emptyStateSub": "또는 Preset을 선택하세요",
+    "presets": {
+      "serviceWithNpwp": "일반 서비스 (NPWP 有)",
+      "serviceWithoutNpwp": "일반 서비스 (NPWP 無)",
+      "ownerVendor": "관리사무소 (Owner=Vendor)",
+      "constructionSmall": "건설 시공 (소규모)",
+      "constructionNoQual": "건설 컨설팅 (자격없음)",
+      "nonResidentKrCod": "비거주자 한국 (CoD 有)",
+      "nonResidentKrNoCod": "비거주자 한국 (CoD 無)",
+      "nonResidentSgRoyalty": "비거주자 싱가포르 로열티",
+      "landRental": "토지/건물 임대",
+      "dividendNoNpwp": "배당 (NPWP 無)"
+    },
+    "serviceCategories": {
+      "SERVICE": "Service (일반 용역)",
+      "CONSTRUCTION": "Construction (건설)",
+      "RENTAL": "Rental (임대)",
+      "EMPLOYMENT": "Employment (근로)",
+      "DIVIDEND": "Dividend (배당)",
+      "INTEREST": "Interest (이자)",
+      "ROYALTY": "Royalty (로열티)",
+      "IMPORT": "Import (수입)",
+      "SHIPPING": "Shipping (해운)",
+      "OTHER": "Other (기타)"
+    },
+    "constructionTypes": {
+      "WORK": "Pelaksana (시공)",
+      "CONSULT": "Konsultansi (컨설팅)",
+      "INTEGRATED": "Terintegrasi (통합)"
+    },
+    "qualifications": {
+      "SMALL": "Kecil (소규모)",
+      "MEDIUM_LARGE": "Menengah/Besar (중/대규모)",
+      "QUALIFIED": "Berkualifikasi (자격보유)",
+      "NONE": "Tanpa Kualifikasi (자격없음)"
+    }
+  },
+  "adminCron": {
+    "title": "Cron 작업 관리",
+    "description": "예약 작업 모니터링 + 수동 실행",
+    "registeredJobs": "등록 작업",
+    "dailyJobs": "일간 실행",
+    "monthlyJobs": "월간 실행",
+    "countUnit": "{count}개",
+    "cronSecretLabel": "CRON_SECRET (수동 실행 시 필요)",
+    "cronSecretPlaceholder": "CRON_SECRET 입력...",
+    "cronSecretRequired": "CRON_SECRET을 입력해주세요",
+    "lastRun": "마지막 실행",
+    "disabled": "비활성",
+    "run": "실행",
+    "statusSuccess": "성공",
+    "statusError": "실패",
+    "statusRunning": "실행 중...",
+    "dailyTimeline": "일간 실행 타임라인",
+    "jobs": {
+      "deadline-reminders": {
+        "name": "마감 리마인더",
+        "scheduleDesc": "매일 08:00",
+        "description": "세금 마감일 D-30/14/7/3/1 알림 (이메일 + WhatsApp)"
+      },
+      "payment-reminders": {
+        "name": "납부 리마인더",
+        "scheduleDesc": "매일 09:00",
+        "description": "미납 세금 납부 촉구 알림 (WhatsApp + in-app)"
+      },
+      "monthly-report": {
+        "name": "월간 리포트",
+        "scheduleDesc": "매월 1일 10:00",
+        "description": "월간 세금 분석 리포트 생성 + 알림"
+      },
+      "news-fetch": {
+        "name": "세금 뉴스 수집",
+        "scheduleDesc": "매일 07:00",
+        "description": "Google News RSS → AI 요약 (한/영/인니) → DB 저장"
+      },
+      "cleanup-expired-tokens": {
+        "name": "만료 토큰 정리",
+        "scheduleDesc": "매일 00:00",
+        "description": "만료된 세션/인증 토큰 정리"
+      }
+    }
+  },
+  "adminTeam": {
+    "title": "직원 관리",
+    "descriptionMaster": "세무사, 컨설턴트, 백오피스 직원을 초대하고 관리합니다",
+    "descriptionSupervisor": "백오피스 상담원을 초대합니다",
+    "accessDenied": "이 페이지는 마스터 또는 수퍼바이저만 접근 가능합니다",
+    "inviteStaff": "직원 초대",
+    "newInviteTitle": "새 직원 초대",
+    "emailLabel": "이메일 *",
+    "nameLabel": "이름 (선택)",
+    "namePlaceholder": "직원 이름",
+    "roleLabel": "역할 *",
+    "teamLabel": "팀 (선택)",
+    "teamNone": "선택 안 함",
+    "sendInvite": "초대 메일 발송",
+    "cancel": "취소",
+    "inviteFailed": "초대 실패",
+    "inviteError": "초대 중 오류",
+    "cancelConfirm": "초대를 취소하시겠습니까?",
+    "cancelFailed": "취소 실패",
+    "invitationHistory": "초대 이력 ({count})",
+    "noInvitations": "초대 이력이 없습니다",
+    "expiresAt": "만료",
+    "statusAccepted": "수락됨",
+    "statusCancelled": "취소됨",
+    "statusExpired": "만료됨",
+    "statusPending": "대기 중",
+    "roles": {
+      "TAX_OPERATOR": "백오피스 상담원",
+      "TAX_OPERATOR_SUPERVISOR": "백오피스 수퍼바이저",
+      "TAX_ADVISOR_JTC": "세무사 (Tax Advisor)",
+      "CONSULTANT_JTC": "컨설턴트"
+    }
   }
 }
