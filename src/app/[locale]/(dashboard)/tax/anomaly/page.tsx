@@ -58,6 +58,7 @@ export default function AnomalyDetectionPage() {
   const t = useTranslations('pages');
   const tp = useTranslations('sptPages');
   const tk = useTranslations('killer');
+  const ta = useTranslations('taxAnomaly');
   const currentYear = new Date().getFullYear();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -129,7 +130,7 @@ export default function AnomalyDetectionPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Tahun Pajak</Label>
+              <Label>{ta('taxYear')}</Label>
               <Select value={taxYear.toString()} onValueChange={(v) => setTaxYear(parseInt(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -144,7 +145,7 @@ export default function AnomalyDetectionPage() {
           {error && <div className="p-3 bg-red-50 text-red-800 rounded-lg text-sm">{error}</div>}
 
           <Button onClick={runCheck} disabled={isLoading || !selectedCustomer} className="w-full bg-gradient-to-r from-orange-500 to-red-500">
-            {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menganalisis...</>
+            {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{ta('analyzing')}</>
               : <><Shield className="h-4 w-4 mr-2" />{t('runAnomaly')}</>}
           </Button>
         </CardContent>
@@ -158,8 +159,8 @@ export default function AnomalyDetectionPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">Skor Risiko: {result.riskScore}/100</h3>
-                  <p className="text-sm text-gray-500">Probabilitas Pemeriksaan: {result.auditProbability}</p>
+                  <h3 className="text-lg font-bold text-gray-900">{ta('riskScore')}: {result.riskScore}/100</h3>
+                  <p className="text-sm text-gray-500">{ta('auditProbability')}: {result.auditProbability}</p>
                 </div>
                 <Badge className={`text-sm px-3 py-1 ${riskConfig[result.overallRisk as keyof typeof riskConfig]?.color || 'bg-gray-100'}`}>
                   {result.overallRisk}
@@ -219,17 +220,17 @@ export default function AnomalyDetectionPage() {
               </h3>
               <div className="space-y-2">
                 {[
-                  { item: 'Bukti Potong (1721-A1/A2) 전체 수집', category: 'document' },
-                  { item: '은행 거래내역 vs 신고 소득 대조', category: 'reconciliation' },
-                  { item: '공제 증빙 서류 정리 (기부금, BPJS, 연금)', category: 'document' },
-                  { item: '특수관계자 거래 arm\'s length 검증', category: 'tp' },
-                  { item: 'e-Faktur PPN 입력세 vs 출력세 정산', category: 'ppn' },
-                  { item: '급여 대장 vs PPh 21 신고 일치 여부', category: 'pph21' },
-                  { item: '전년도 SPT 수정신고 필요 여부 검토', category: 'compliance' },
+                  { itemKey: 'checkBuktiPotong', category: 'document' },
+                  { itemKey: 'checkBankReconciliation', category: 'reconciliation' },
+                  { itemKey: 'checkDeductionDocs', category: 'document' },
+                  { itemKey: 'checkArmsLength', category: 'tp' },
+                  { itemKey: 'checkEfakturPpn', category: 'ppn' },
+                  { itemKey: 'checkPayrollPph21', category: 'pph21' },
+                  { itemKey: 'checkAmendment', category: 'compliance' },
                 ].map((check, i) => (
                   <label key={i} className="flex items-center gap-2 text-xs text-gray-700 hover:bg-gray-50 rounded p-1.5 cursor-pointer">
                     <input type="checkbox" className="rounded border-gray-300" />
-                    {check.item}
+                    {ta(check.itemKey)}
                   </label>
                 ))}
               </div>
@@ -239,7 +240,7 @@ export default function AnomalyDetectionPage() {
           {/* Alerts */}
           <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base">Anomali Terdeteksi ({result.alerts.length})</CardTitle>
+              <CardTitle className="text-base">{ta('alertsDetected', { count: result.alerts.length })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {result.alerts.length === 0 ? (
@@ -263,12 +264,12 @@ export default function AnomalyDetectionPage() {
                           <p className="text-sm text-gray-600 mb-2">{alert.description}</p>
                           {alert.metric && (
                             <p className="text-xs text-gray-400 mb-1">
-                              {alert.metric}: {alert.actualValue} (batas: {alert.threshold})
+                              {alert.metric}: {alert.actualValue} ({ta('threshold')}: {alert.threshold})
                             </p>
                           )}
-                          <p className="text-xs text-blue-600 font-medium">Saran: {alert.recommendation}</p>
+                          <p className="text-xs text-blue-600 font-medium">{ta('suggestion')}: {alert.recommendation}</p>
                           {alert.legalBasis && (
-                            <p className="text-xs text-gray-400 mt-1">Dasar: {alert.legalBasis}</p>
+                            <p className="text-xs text-gray-400 mt-1">{ta('basis')}: {alert.legalBasis}</p>
                           )}
                         </div>
                       </div>

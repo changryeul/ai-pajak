@@ -31,10 +31,10 @@ interface MonthlyStatus {
 }
 
 const TAX_TYPES = [
-  { key: 'PPh21', label: 'PPh 21', icon: FileText, gradient: 'from-blue-500 to-indigo-600', desc: '근로소득세' },
-  { key: 'PPh23', label: 'PPh 23', icon: Receipt, gradient: 'from-emerald-500 to-green-600', desc: '원천징수세' },
-  { key: 'PPh_FINAL', label: 'PPh 4(2)', icon: Shield, gradient: 'from-amber-500 to-yellow-600', desc: 'Final Tax' },
-  { key: 'PPN', label: 'PPN', icon: DollarSign, gradient: 'from-orange-500 to-red-500', desc: '부가가치세' },
+  { key: 'PPh21', label: 'PPh 21', icon: FileText, gradient: 'from-blue-500 to-indigo-600', descKey: 'descPPh21' },
+  { key: 'PPh23', label: 'PPh 23', icon: Receipt, gradient: 'from-emerald-500 to-green-600', descKey: 'descPPh23' },
+  { key: 'PPh_FINAL', label: 'PPh 4(2)', icon: Shield, gradient: 'from-amber-500 to-yellow-600', descKey: 'descPPhFinal' },
+  { key: 'PPN', label: 'PPN', icon: DollarSign, gradient: 'from-orange-500 to-red-500', descKey: 'descPPN' },
 ];
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -136,11 +136,11 @@ export default function MonthlyDashboardPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.error || '작업 실행에 실패했습니다');
+        alert(result.error || t('actionFailed'));
         return;
       }
 
-      alert(result.message || '처리되었습니다');
+      alert(result.message || t('actionSuccess'));
 
       // start-review: navigate to calculations page
       if (action === 'start-review' && result.redirectTo) {
@@ -152,7 +152,7 @@ export default function MonthlyDashboardPage() {
       await loadData();
     } catch (err) {
       console.error(err);
-      alert('작업 실행 중 오류가 발생했습니다');
+      alert(t('actionError'));
     } finally {
       setActionLoading(null);
     }
@@ -256,8 +256,8 @@ export default function MonthlyDashboardPage() {
         return (
           <div className="mb-6">
             <div className="mb-4">
-              <h3 className="text-xl font-bold text-gray-900">이번 주 우선 처리 업무</h3>
-              <p className="text-sm text-gray-400 mt-1">가장 먼저 처리해야 할 실무 작업만 노출</p>
+              <h3 className="text-xl font-bold text-gray-900">{t('workQueueTitle')}</h3>
+              <p className="text-sm text-gray-400 mt-1">{t('workQueueSubtitle')}</p>
             </div>
             <div className="space-y-3">
               {tasks.map((task) => {
@@ -292,10 +292,10 @@ export default function MonthlyDashboardPage() {
                               ? 'bg-gray-50 text-gray-500 border-gray-200'
                               : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                         }`}>
-                          {isHigh ? '높음' : isLow ? '없음' : '중간'}
+                          {isHigh ? t('priorityHigh') : isLow ? t('priorityNone') : t('priorityMedium')}
                         </span>
                         {task.count > 0 && (
-                          <span className="text-xs text-gray-500">({task.count}건)</span>
+                          <span className="text-xs text-gray-500">({task.count}{t('count')})</span>
                         )}
                       </div>
                       <p className="text-sm text-gray-400">{task.desc}</p>
@@ -516,7 +516,7 @@ export default function MonthlyDashboardPage() {
                           <Icon className="h-4 w-4" />
                           <span className="font-bold text-sm">{tax.label}</span>
                         </div>
-                        <p className="text-[10px] opacity-75">{tax.desc}</p>
+                        <p className="text-[10px] opacity-75">{t(tax.descKey)}</p>
                         <p className="font-mono text-xs mt-2 opacity-90">{fmtRp(yearTotal)}</p>
                       </div>
 
