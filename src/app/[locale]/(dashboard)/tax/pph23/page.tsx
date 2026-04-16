@@ -1058,12 +1058,12 @@ export default function PPh23Page() {
         </div>
       )}
 
-      {/* Parsed withholding data table (prototype-style summary) */}
-      {transactions.length > 0 && (
-        <Card className="mb-4">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <h3 className="font-semibold text-sm">{t('parsedDataTitle')}</h3>
+      {/* Parsed withholding data table — always visible so users can preview the schema */}
+      <Card className="mb-4">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 className="font-semibold text-sm">{t('parsedDataTitle')}</h3>
+            {transactions.length > 0 && (
               <div className="flex gap-3 text-xs">
                 <span className="flex items-center gap-1 text-green-700">
                   <span className="w-2 h-2 rounded-full bg-green-500" />
@@ -1074,23 +1074,31 @@ export default function PPh23Page() {
                   {t('statusNeedsCheck')}: <span className="font-bold">{t('countItems', { count: transactions.filter(tx => !tx.counterparty_npwp).length })}</span>
                 </span>
               </div>
-            </div>
-            <div className="overflow-auto rounded-xl border">
-              <table className="min-w-full text-sm">
-                <thead className="bg-slate-100">
+            )}
+          </div>
+          <div className="overflow-auto rounded-xl border">
+            <table className="min-w-full text-sm">
+              <thead className="bg-slate-100">
+                <tr>
+                  <th className="p-2 text-left">No</th>
+                  <th className="p-2 text-left">{t('colCounterparty')}</th>
+                  <th className="p-2 text-left">NPWP</th>
+                  <th className="p-2 text-left">{t('colTaxType')}</th>
+                  <th className="p-2 text-left">{t('colTxType')}</th>
+                  <th className="p-2 text-right">{t('colAmount')}</th>
+                  <th className="p-2 text-right">{t('colRate')}</th>
+                  <th className="p-2 text-center">{t('colStatus')}</th>
+                  <th className="p-2 text-center">{t('colDetail')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.length === 0 && (
                   <tr>
-                    <th className="p-2 text-left">No</th>
-                    <th className="p-2 text-left">{t('colCounterparty')}</th>
-                    <th className="p-2 text-left">NPWP</th>
-                    <th className="p-2 text-left">{t('colTaxType')}</th>
-                    <th className="p-2 text-left">{t('colTxType')}</th>
-                    <th className="p-2 text-right">{t('colAmount')}</th>
-                    <th className="p-2 text-right">{t('colRate')}</th>
-                    <th className="p-2 text-center">{t('colStatus')}</th>
-                    <th className="p-2 text-center">{t('colDetail')}</th>
+                    <td colSpan={9} className="p-8 text-center text-sm text-slate-400">
+                      {t('parsedDataEmpty')}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
+                )}
                   {transactions.map((tx, i) => {
                     const isForeign = !tx.counterparty_npwp;
                     return (
@@ -1142,12 +1150,13 @@ export default function PPh23Page() {
                 </tbody>
               </table>
             </div>
+          {transactions.length > 0 && (
             <div className="mt-2 text-[10px] text-gray-400">
               {t('totalCountLabel', { count: transactions.length })}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       {/* Transaction list */}
       <Card>

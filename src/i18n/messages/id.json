@@ -3839,7 +3839,8 @@
     "foreignTag": "P3B berlaku",
     "npwpMissing": "NPWP wajib",
     "dgtRequired": "DGT wajib",
-    "totalCountLabel": "Menampilkan {count} item"
+    "totalCountLabel": "Menampilkan {count} item",
+    "parsedDataEmpty": "Belum ada transaksi. Tambah transaksi melalui unggah atau input manual di atas."
   },
   "companyProfile": {
     "k0_6f2592": "Jasa",

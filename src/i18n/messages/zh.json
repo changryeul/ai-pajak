@@ -3839,7 +3839,8 @@
     "foreignTag": "Treaty applied",
     "npwpMissing": "NPWP required",
     "dgtRequired": "DGT required",
-    "totalCountLabel": "Showing {count} items"
+    "totalCountLabel": "Showing {count} items",
+    "parsedDataEmpty": "No parsed transactions yet. Add transactions via upload or manual entry above."
   },
   "companyProfile": {
     "k0_6f2592": "Services (Jasa)",
