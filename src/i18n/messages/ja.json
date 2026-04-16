@@ -3827,7 +3827,19 @@
     "statusNormal": "Normal",
     "statusNeedsCheck": "Needs Review",
     "btnExcelDownload": "Download Excel",
-    "btnSubmitValidate": "Submit & Validate"
+    "btnSubmitValidate": "Submit & Validate",
+    "parsedDataTitle": "Parsed Withholding Data",
+    "colCounterparty": "Counterparty",
+    "colTaxType": "Tax Type",
+    "colTxType": "Transaction",
+    "colAmount": "Amount",
+    "colRate": "Rate",
+    "colStatus": "Status",
+    "colDetail": "Detail",
+    "foreignTag": "Treaty applied",
+    "npwpMissing": "NPWP required",
+    "dgtRequired": "DGT required",
+    "totalCountLabel": "Showing {count} items"
   },
   "companyProfile": {
     "k0_6f2592": "Services (Jasa)",

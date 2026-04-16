@@ -3828,7 +3828,19 @@
     "statusNormal": "정상",
     "statusNeedsCheck": "확인필요",
     "btnExcelDownload": "엑셀로 다운로드",
-    "btnSubmitValidate": "제출 및 검증"
+    "btnSubmitValidate": "제출 및 검증",
+    "parsedDataTitle": "파싱된 원천세 데이터",
+    "colCounterparty": "거래처명",
+    "colTaxType": "세목",
+    "colTxType": "거래유형",
+    "colAmount": "금액",
+    "colRate": "세율",
+    "colStatus": "상태",
+    "colDetail": "상세",
+    "foreignTag": "Treaty 적용",
+    "npwpMissing": "NPWP 입력 필요",
+    "dgtRequired": "DGT 필요",
+    "totalCountLabel": "총 {count}건 표시"
   },
   "companyProfile": {
     "k0_6f2592": "서비스업 (Jasa)",

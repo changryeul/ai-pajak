@@ -1058,15 +1058,12 @@ export default function PPh23Page() {
         </div>
       )}
 
-      {/* Transaction list */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <h3 className="font-bold text-sm flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              {period} {t('k116_c663ec')} ({transactions.length}{t('k30_bcbcd4')}
-            </h3>
-            {transactions.length > 0 && (
+      {/* Parsed withholding data table (prototype-style summary) */}
+      {transactions.length > 0 && (
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <h3 className="font-semibold text-sm">{t('parsedDataTitle')}</h3>
               <div className="flex gap-3 text-xs">
                 <span className="flex items-center gap-1 text-green-700">
                   <span className="w-2 h-2 rounded-full bg-green-500" />
@@ -1077,7 +1074,89 @@ export default function PPh23Page() {
                   {t('statusNeedsCheck')}: <span className="font-bold">{t('countItems', { count: transactions.filter(tx => !tx.counterparty_npwp).length })}</span>
                 </span>
               </div>
-            )}
+            </div>
+            <div className="overflow-auto rounded-xl border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-100">
+                  <tr>
+                    <th className="p-2 text-left">No</th>
+                    <th className="p-2 text-left">{t('colCounterparty')}</th>
+                    <th className="p-2 text-left">NPWP</th>
+                    <th className="p-2 text-left">{t('colTaxType')}</th>
+                    <th className="p-2 text-left">{t('colTxType')}</th>
+                    <th className="p-2 text-right">{t('colAmount')}</th>
+                    <th className="p-2 text-right">{t('colRate')}</th>
+                    <th className="p-2 text-center">{t('colStatus')}</th>
+                    <th className="p-2 text-center">{t('colDetail')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((tx, i) => {
+                    const isForeign = !tx.counterparty_npwp;
+                    return (
+                      <tr key={tx.id} className={`border-t ${isForeign ? 'bg-red-50' : ''}`}>
+                        <td className="p-2">{i + 1}</td>
+                        <td className="p-2">
+                          <div className="font-medium text-xs">{tx.counterparty_name}</div>
+                          {isForeign && (
+                            <div className="text-[9px] text-red-600 mt-0.5">
+                              {t('foreignTag')}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-2 font-mono text-[11px]">
+                          {tx.counterparty_npwp || (
+                            <span className="text-red-500 text-[10px]">{t('npwpMissing')}</span>
+                          )}
+                        </td>
+                        <td className="p-2 text-xs">
+                          <Badge className="text-[9px] bg-indigo-100 text-indigo-700">{tx.service_type}</Badge>
+                        </td>
+                        <td className="p-2 text-xs">
+                          <Badge variant="outline" className="text-[9px]">{tx.service_type}</Badge>
+                        </td>
+                        <td className="p-2 text-right font-mono text-xs">{fmtRp(tx.gross_amount)}</td>
+                        <td className="p-2 text-right font-mono text-xs text-emerald-700 font-bold">
+                          {(tx.tax_rate * 100).toFixed(1)}%
+                        </td>
+                        <td className="p-2 text-center">
+                          {isForeign ? (
+                            <Badge className="text-[9px] bg-red-100 text-red-700">{t('dgtRequired')}</Badge>
+                          ) : (
+                            <Badge className="text-[9px] bg-green-100 text-green-700">{t('statusNormal')}</Badge>
+                          )}
+                        </td>
+                        <td className="p-2 text-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 px-2 text-[10px]"
+                            onClick={() => setExpandedTx(expandedTx === tx.id ? null : tx.id)}
+                          >
+                            {t('colDetail')}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-2 text-[10px] text-gray-400">
+              {t('totalCountLabel', { count: transactions.length })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Transaction list */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              {period} {t('k116_c663ec')} ({transactions.length}{t('k30_bcbcd4')}
+            </h3>
           </div>
 
           {loading ? (

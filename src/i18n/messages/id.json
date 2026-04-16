@@ -3827,7 +3827,19 @@
     "statusNormal": "Normal",
     "statusNeedsCheck": "Perlu Periksa",
     "btnExcelDownload": "Unduh Excel",
-    "btnSubmitValidate": "Kirim & Validasi"
+    "btnSubmitValidate": "Kirim & Validasi",
+    "parsedDataTitle": "Data Pajak Pemotongan Hasil Parsing",
+    "colCounterparty": "Mitra",
+    "colTaxType": "Jenis Pajak",
+    "colTxType": "Transaksi",
+    "colAmount": "Jumlah",
+    "colRate": "Tarif",
+    "colStatus": "Status",
+    "colDetail": "Detail",
+    "foreignTag": "P3B berlaku",
+    "npwpMissing": "NPWP wajib",
+    "dgtRequired": "DGT wajib",
+    "totalCountLabel": "Menampilkan {count} item"
   },
   "companyProfile": {
     "k0_6f2592": "Jasa",
