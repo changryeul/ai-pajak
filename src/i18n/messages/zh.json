@@ -3892,7 +3892,13 @@
     "k126_8932d6": "추가 질문",
     "k127_e7a792": "답변을 입력하세요",
     "k128_cbe46b": "저장 및 신고 준비",
-    "k129_8fefbb": "저장 시 세금 체제가 자동 판정됩니다. 필수 정보가 모두 입력되면 대시보드로 이동합니다."
+    "k129_8fefbb": "저장 시 세금 체제가 자동 판정됩니다. 필수 정보가 모두 입력되면 대시보드로 이동합니다.",
+    "umkmLabel": "UMKM Registration (annual revenue < 4.8B)",
+    "umkmDesc": "Annual revenue < 4.8B → PPh Final 0.5%. PT: 3 years, CV/Firma/Koperasi: 4 years, Individual: 7 years",
+    "parentCompany": "Parent Company Name",
+    "selectAllApplicable": "Select all applicable items. Determines applicability of PPh 21/22/23/26/4(2) and PPN.",
+    "saveAndPrepare": "Save and Prepare Filing",
+    "saveDesc": "On save, the tax regime is auto-determined. Once all required fields are filled, you'll be redirected to the dashboard."
   },
   "pphFinal": {
     "pageTitle": "Annual Settlement — PPh Final UMKM",
@@ -4994,5 +5000,12 @@
     "jtcManual": "JTC Tax Advisor Manual",
     "adminManual": "Platform Admin Manual",
     "glossary": "Manual Index & Glossary"
+  },
+  "dashboardError": {
+    "pageError": "Page Error",
+    "tempError": "A temporary error occurred. Please try again.",
+    "errorDetails": "Error details",
+    "retry": "Retry",
+    "home": "Home"
   }
 }

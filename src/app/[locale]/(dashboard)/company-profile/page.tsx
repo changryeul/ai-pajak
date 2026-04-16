@@ -108,7 +108,7 @@ export default function CompanyProfilePage() {
     { value: 'FNB_CATERING', label: t('k17_53650e'), icon: Utensils, desc: t('k18_ac50b9'), taxNote: 'PPh 23 2%' },
     { value: 'TRANSPORTATION', label: t('k19_06615f'), icon: Ship, desc: t('k20_f4cef4'), taxNote: 'PPh 15 1.2~2.64%' },
     { value: 'MINING', label: t('k21_078b0b'), icon: Pickaxe, desc: t('k22_afc290'), taxNote: 'PPh 22 Mining' },
-    { value: 'DIGITAL_PLATFORM', label: t('k23_bd14ba'), icon: Globe, desc: 'e-Commerce, SaaS, 앱', taxNote: 'PPN PMSE' },
+    { value: 'DIGITAL_PLATFORM', label: t('k23_bd14ba'), icon: Globe, desc: t('k130_digital_desc'), taxNote: 'PPN PMSE' },
     { value: 'OTHER', label: t('k24_7f598d'), icon: Building2, desc: '', taxNote: '' },
   ];
   const { session } = useSession();
@@ -182,7 +182,7 @@ export default function CompanyProfilePage() {
   const getNextItems = (p: CompanyProfile): Array<{ label: string; boost: number; href?: string }> => {
     const items: Array<{ label: string; boost: number }> = [];
     if (!p.company_name) items.push({ label: t('k36_b75e2f'), boost: 14 });
-    if (!p.npwp) items.push({ label: `NPWP $' + t('k37_73b781') + '`, boost: 14 });
+    if (!p.npwp) items.push({ label: `NPWP ${t('k37_73b781')}`, boost: 14 });
     if (!p.business_category) items.push({ label: t('k38_a419a9'), boost: 14 });
     if (!p.legal_form) items.push({ label: t('k39_aad46d'), boost: 7 });
     if (!p.annual_revenue || p.annual_revenue <= 0) items.push({ label: t('k40_85ce9e'), boost: 7 });
@@ -226,7 +226,7 @@ export default function CompanyProfilePage() {
         showMsg('success', t('k44_489111'));
         setTimeout(() => router.push(`/${locale}/dashboard`), 2000);
       } else {
-        showMsg('success', `$' + t('k45_a50494') + ' ${completeness}%). ${t('k46_b1a005')}`);
+        showMsg('success', `${t('k45_a50494')} ${completeness}%). ${t('k46_b1a005')}`);
       }
     } catch {
       showMsg('error', t('k47_175c5f'));
@@ -243,7 +243,7 @@ export default function CompanyProfilePage() {
     return (
       <div className="container mx-auto py-16 px-4 max-w-md text-center">
         <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-sm text-gray-500">' + t('k48_6d5980') + '</p>
+        <p className="text-sm text-gray-500">{t('k48_6d5980')}</p>
       </div>
     );
   }
@@ -291,10 +291,10 @@ export default function CompanyProfilePage() {
       <div className="mb-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Building2 className="h-6 w-6 text-indigo-600" />
-          ' + t('k49_f0bca1') + '
+          {t('k49_f0bca1')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          {profile.company_name || t('k50_2e47c1')} — ' + t('k51_ce793a') + '
+          {profile.company_name || t('k50_2e47c1')} — {t('k51_ce793a')}
         </p>
       </div>
 
@@ -320,7 +320,7 @@ export default function CompanyProfilePage() {
             )}
             <div>
               <p className="font-bold text-base text-gray-900">
-                {isComplete ? '🎉 ' + t('k52_367729') + '!' : isReady ? t('k53_669bdc') : t('k54_7c9d02')}
+                {isComplete ? `🎉 ${t('k52_367729')}!` : isReady ? t('k53_669bdc') : t('k54_7c9d02')}
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
                 {isComplete
@@ -333,7 +333,7 @@ export default function CompanyProfilePage() {
           </div>
           {isReady && (
             <Button size="sm" onClick={() => router.push(`/${locale}/dashboard`)} className="flex-shrink-0">
-              ' + t('k58_bbcea4') + '
+              {t('k58_bbcea4')}
             </Button>
           )}
         </div>
@@ -363,7 +363,7 @@ export default function CompanyProfilePage() {
 
       <div className="mb-4 flex items-center justify-end gap-2">
         <Badge className={isReady ? 'bg-green-100 text-green-700' : completeness >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}>
-          ' + t('k60_262eb0') + ' {completeness}%
+          {t('k60_262eb0')} {completeness}%
         </Badge>
         <Button onClick={handleSave} disabled={saving} size="sm">
           {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
@@ -380,8 +380,8 @@ export default function CompanyProfilePage() {
 
       <div className="space-y-3">
         {/* Section 0: Basic Info (with NPWP OCR) */}
-        <Section id="basic" title="' + t('k62_2b51db') + '" icon={FileText} badge="{t('k63_b63c09')}">
-          <p className="text-[11px] text-gray-500 mb-2">' + t('k50_2e47c1') + '과 NPWP는 세금 신고 {t('k63_b63c09')} 정보입니다. NPWP 카드 사진을 올리면 자동으로 채워집니다.</p>
+        <Section id="basic" title={t('k62_2b51db')} icon={FileText} badge={t('k63_b63c09')}>
+          <p className="text-[11px] text-gray-500 mb-2">{t('k64_fe2bf6')}</p>
 
           {/* NPWP OCR Upload */}
           <div className="border-2 border-dashed border-blue-200 rounded-xl p-3 text-center bg-blue-50/50">
@@ -491,7 +491,7 @@ export default function CompanyProfilePage() {
           </div>
           <div className="space-y-2 mt-2">
             <Checkbox checked={profile.is_umkm} onChange={v => updateField('is_umkm', v)}
-              label="UMKM ' + t('k80_7eb57f') + '" desc="연매출 48{t('k77_5e4cf0')} → PPh Final 0.5%. PT: 3' + t('k82_be832d') + ': 4{t('k83_06df20')}: 7' + t('k26_73a335') + '" />
+              label={t('umkmLabel')} desc={t('umkmDesc')} />
             {profile.is_umkm && (
               <div className="ml-6">
                 <Label className="text-[10px]">PPh Final 0.5% {t('k84_e71351')}</Label>
@@ -531,7 +531,7 @@ export default function CompanyProfilePage() {
                   onChange={e => updateField('foreign_ownership_pct', e.target.value ? Number(e.target.value) : null)} />
               </div>
               <div>
-                <Label className="text-[10px]">모' + t('k50_2e47c1') + '</Label>
+                <Label className="text-[10px]">{t('parentCompany')}</Label>
                 <Input value={profile.parent_company_name || ''} className="h-8 text-xs"
                   onChange={e => updateField('parent_company_name', e.target.value || null)} />
               </div>
@@ -549,7 +549,7 @@ export default function CompanyProfilePage() {
 
         {/* Section 4: Income Sources */}
         <Section id="income" title="' + t('k94_7c846a') + ' & Expenses)" icon={DollarSign} badge="{t('k95_8a337a')}">
-          <p className="text-[11px] text-gray-500 mb-2">해당되는 항목을 모두 ' + t('k74_f1d7fb') + '. 세목(PPh 21/22/23/26/4(2), PPN) 적용 여부를 판단합니다.</p>
+          <p className="text-[11px] text-gray-500 mb-2">{t('selectAllApplicable')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <Checkbox checked={profile.has_employees} onChange={v => updateField('has_employees', v)}
               label="' + t('k97_b59235') + '" desc="→ PPh 21 {t('k98_f68dad')}" />
@@ -651,10 +651,10 @@ export default function CompanyProfilePage() {
       <div className="mt-6">
         <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-          {t('k61_9d0a47')} 및 신고 준비
+          {t('saveAndPrepare')}
         </Button>
         <p className="text-[11px] text-gray-400 text-center mt-2">
-          ' + t('k61_9d0a47') + ' 시 세금 체제가 자동 판정됩니다. {t('k63_b63c09')} 정보가 모두 입력되면 {t('k58_bbcea4')} 이동합니다.
+          {t('saveDesc')}
         </p>
       </div>
     </div>
