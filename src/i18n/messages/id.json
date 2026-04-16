@@ -5205,5 +5205,11 @@
     "title": "Notifikasi",
     "subtitle": "Tenggat pelaporan, permintaan persetujuan, dan peringatan sistem di satu tempat",
     "comingSoon": "Pusat notifikasi sedang disiapkan"
+  },
+  "taxScreen": {
+    "backToDashboard": "Ke Dashboard",
+    "uploadData": "Unggah Data",
+    "aiExecutes": "AI menjalankan",
+    "delete": "Hapus"
   }
 }

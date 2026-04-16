@@ -5205,5 +5205,11 @@
     "title": "Notifications",
     "subtitle": "Filing deadlines, approval requests, and system alerts in one place",
     "comingSoon": "Notification center is being prepared"
+  },
+  "taxScreen": {
+    "backToDashboard": "Back to Dashboard",
+    "uploadData": "Upload Data",
+    "aiExecutes": "AI performs",
+    "delete": "Delete"
   }
 }

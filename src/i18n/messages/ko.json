@@ -5206,5 +5206,11 @@
     "title": "알림",
     "subtitle": "신고 마감, 승인 요청, 시스템 알림을 모아서 확인",
     "comingSoon": "알림 센터를 준비 중입니다"
+  },
+  "taxScreen": {
+    "backToDashboard": "대시보드로",
+    "uploadData": "자료 업로드",
+    "aiExecutes": "AI가 수행",
+    "delete": "삭제"
   }
 }
