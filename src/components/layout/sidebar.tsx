@@ -34,6 +34,8 @@ import {
   Sparkles,
   ChevronDown,
   User,
+  Bell,
+  Newspaper,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -87,50 +89,101 @@ const navItems: NavSection[] = [
     section: 'main',
     items: [
       { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
-      { href: '/news', icon: ClipboardList, labelKey: 'nav.taxNews' },
-      // ── 법인 고객: 월신고 ──
-      { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'], children: [
-        { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
-        { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
-        { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
-        { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
-        { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.taxBilling' },
-      ]},
-      // ── 법인 고객: 연신고 ──
-      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'], children: [
-        { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.annualSettlement' },
-        { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
-        { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
-      ]},
-      // ── 개인 고객: 연신고만 ──
+    ],
+  },
+  // ── COMPANY 고객: 월신고 섹션 ──
+  {
+    section: 'company-monthly',
+    labelKey: 'nav.monthlyFiling',
+    roles: [UserRole.CUSTOMER],
+    items: [
+      { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+    ],
+  },
+  // ── COMPANY 고객: 연신고 섹션 ──
+  {
+    section: 'company-annual',
+    labelKey: 'nav.annualFiling',
+    roles: [UserRole.CUSTOMER],
+    items: [
+      { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.closingWork', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/ebupot', icon: FileText, labelKey: 'nav.ebupotIssue', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+    ],
+  },
+  // ── COMPANY 고객: 신고관리 섹션 ──
+  {
+    section: 'company-management',
+    labelKey: 'nav.filingManagement',
+    roles: [UserRole.CUSTOMER],
+    items: [
+      { href: '/filings', icon: ClipboardList, labelKey: 'nav.taxHistory', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/reports', icon: BarChart3, labelKey: 'nav.taxReport', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/counterparties', icon: Users, labelKey: 'nav.counterpartyInput', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+    ],
+  },
+  // ── COMPANY 고객: 세금도구 섹션 ──
+  {
+    section: 'company-tools',
+    labelKey: 'nav.taxTools',
+    roles: [UserRole.CUSTOMER],
+    items: [
+      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/news', icon: Newspaper, labelKey: 'nav.taxNews', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxCalculator', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+    ],
+  },
+  // ── 개인 고객: 연신고만 ──
+  {
+    section: 'individual-main',
+    roles: [UserRole.CUSTOMER],
+    items: [
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'], children: [
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
-      // ── 세무 컨설턴트: 월신고 (법인 고객용) ──
-      { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', roles: consultantRoles, children: [
+      { href: '/submissions', icon: ClipboardList, labelKey: 'nav.submissions', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/invoice-capture', icon: Camera, labelKey: 'nav.invoiceCapture', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+    ],
+  },
+  // ── 세무 컨설턴트: 월신고 (기존 구조 유지) ──
+  {
+    section: 'consultant-main',
+    roles: consultantRoles,
+    items: [
+      { href: '/news', icon: ClipboardList, labelKey: 'nav.taxNews' },
+      { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', children: [
         { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
         { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
         { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
         { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
         { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.taxBilling' },
       ]},
-      // ── 세무 컨설턴트: 연신고 (법인 + 개인) ──
-      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: consultantRoles, children: [
+      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', children: [
         { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.annualSettlement' },
         { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
-      { href: '/submissions', icon: ClipboardList, labelKey: 'nav.submissions', roles: [UserRole.CUSTOMER] },
-      { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings', roles: taxRoles },
-      { href: '/invoice-capture', icon: Camera, labelKey: 'nav.invoiceCapture', roles: taxRoles },
-      { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload', roles: taxRoles },
-      { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: taxRoles },
-      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: taxRoles },
-      { href: '/tax/payments', icon: Receipt, labelKey: 'nav.paymentStatus', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/monthly-payments', icon: CreditCard, labelKey: 'nav.monthlyPayments', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', roles: taxRoles },
-      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', roles: taxRoles },
+      { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings' },
+      { href: '/invoice-capture', icon: Camera, labelKey: 'nav.invoiceCapture' },
+      { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload' },
+      { href: '/documents', icon: Upload, labelKey: 'nav.documents' },
+      { href: '/reports', icon: BarChart3, labelKey: 'nav.reports' },
+      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar' },
+      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools' },
     ],
   },
   {
@@ -185,18 +238,33 @@ const navItems: NavSection[] = [
       { href: '/admin/rule-test', icon: Activity, labelKey: 'nav.ruleTest' },
     ],
   },
+  // ── COMPANY 고객: 계정 섹션 (프로토타입: 프로필/보안/알림/연동/도움말) ──
+  {
+    section: 'company-account',
+    labelKey: 'nav.account',
+    roles: [UserRole.CUSTOMER],
+    items: [
+      { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/notifications', icon: Bell, labelKey: 'nav.notifications', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/settings', icon: Settings, labelKey: 'nav.security', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+    ],
+  },
+  // ── 기타 역할: 계정 섹션 (기존 구조 유지) ──
   {
     section: 'account',
     labelKey: 'nav.account',
     items: [
-      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER, UserRole.PLATFORM_ADMIN] },
-      { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: [...consultantRoles, UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.PLATFORM_ADMIN] },
+      { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: consultantRoles },
       { href: '/my-profile', icon: User, labelKey: 'nav.myProfile', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: [...consultantRoles, UserRole.CUSTOMER] },
-      { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: [...consultantRoles, UserRole.CUSTOMER] },
+      { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: [...consultantRoles, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: [...consultantRoles, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
       { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR_JTC, UserRole.TAX_OPERATOR_SUPERVISOR] },
-      { href: '/settings', icon: Settings, labelKey: 'nav.settings' },
-      { href: '/help', icon: Lightbulb, labelKey: 'nav.help' },
+      { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
     ],
   },
 ];
