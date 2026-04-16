@@ -16,6 +16,7 @@ import {
   Calculator, Shield, Upload, Camera, Image, ArrowRight,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
+import { ScreenHeader } from '@/components/tax';
 
 // ── Types ──
 interface Transaction {
@@ -99,6 +100,7 @@ const currentMonth = new Date().getMonth() + 1;
 
 export default function PPh23Page() {
   const t = useTranslations('pph23Page');
+  const tsc = useTranslations('taxScreen');
 
   const SERVICE_TYPES: Array<{ value: string; label: string; note: string }> = [
     { value: 'DIVIDEN', label: t('k0_9674d4'), note: t('k1_5d2319') },
@@ -412,16 +414,11 @@ export default function PPh23Page() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Receipt className="h-6 w-6 text-emerald-600" />
-          {t('k20_5ee3c0')}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {t('k21_df1a82')}
-        </p>
-      </div>
+      <ScreenHeader
+        title={t('k20_5ee3c0')}
+        step={1}
+        aiSteps={[tsc('stepAiProcess'), tsc('stepRateAndTax'), tsc('stepIdBillingGen')]}
+      />
 
       {/* Controls */}
       <div className="flex flex-wrap gap-3 mb-4">

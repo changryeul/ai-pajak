@@ -17,6 +17,7 @@ import {
   Upload, Camera, Shield, Image, RefreshCw,
 } from 'lucide-react';
 import { useRef } from 'react';
+import { ScreenHeader } from '@/components/tax';
 
 interface Faktur {
   id: string;
@@ -57,6 +58,7 @@ function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
 export default function PPNPage() {
   const t = useTranslations('ppnPage');
+  const tsc = useTranslations('taxScreen');
   const { session } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -200,31 +202,26 @@ export default function PPNPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 p-6 md:p-8 text-white mb-6">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-        <div className="relative z-10">
-          <p className="text-orange-200 text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />PPN (Pajak Pertambahan Nilai)
-          </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">e-Faktur & PPN</h1>
-          <p className="text-orange-200 mt-2 text-sm">{t('subtitle')}</p>
+      <ScreenHeader
+        title="e-Faktur & PPN"
+        step={1}
+        aiSteps={[tsc('stepDataCollect'), tsc('stepVatCalc'), tsc('stepFilingRefund')]}
+      />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-            <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-orange-200 text-xs flex items-center gap-1"><ArrowUpRight className="h-3 w-3" />{t('ppnKeluaran')}</p>
-              <p className="font-bold text-lg">{fmt(summary.outputTax)}</p>
-            </div>
-            <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-orange-200 text-xs flex items-center gap-1"><ArrowDownLeft className="h-3 w-3" />{t('ppnMasukan')}</p>
-              <p className="font-bold text-lg">{fmt(summary.inputTax)}</p>
-            </div>
-            <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-orange-200 text-xs">Net PPN</p>
-              <p className="font-bold text-lg">{fmt(Math.abs(summary.netPpn))}</p>
-              <Badge className={`${currentStatus.color} text-[10px] mt-1`}>{currentStatus.label}</Badge>
-            </div>
-          </div>
+      {/* Compact summary below header */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <div className="bg-white rounded-xl border p-3">
+          <p className="text-gray-500 text-xs flex items-center gap-1"><ArrowUpRight className="h-3 w-3" />{t('ppnKeluaran')}</p>
+          <p className="font-bold text-lg">{fmt(summary.outputTax)}</p>
+        </div>
+        <div className="bg-white rounded-xl border p-3">
+          <p className="text-gray-500 text-xs flex items-center gap-1"><ArrowDownLeft className="h-3 w-3" />{t('ppnMasukan')}</p>
+          <p className="font-bold text-lg">{fmt(summary.inputTax)}</p>
+        </div>
+        <div className="bg-white rounded-xl border p-3">
+          <p className="text-gray-500 text-xs">Net PPN</p>
+          <p className="font-bold text-lg">{fmt(Math.abs(summary.netPpn))}</p>
+          <Badge className={`${currentStatus.color} text-[10px] mt-1`}>{currentStatus.label}</Badge>
         </div>
       </div>
 

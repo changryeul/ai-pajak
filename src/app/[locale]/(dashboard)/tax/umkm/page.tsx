@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { ScreenHeader } from '@/components/tax';
 
 // ── Constants ──
 const UMKM_RATE = 0.005;          // PPh Final 0.5%
@@ -55,6 +56,7 @@ export default function CorporateTaxPage() {
   const locale = params.locale as string;
   const currentYear = new Date().getFullYear();
   const t = useTranslations('umkm');
+  const tsc = useTranslations('taxScreen');
 
   // Wizard state
   const [step, setStep] = useState(1);
@@ -194,16 +196,11 @@ export default function CorporateTaxPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Building2 className="h-6 w-6 text-indigo-600" />
-          {t('pageTitle')}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {t('pageDescription')}
-        </p>
-      </div>
+      <ScreenHeader
+        title={t('pageTitle')}
+        step={step}
+        aiSteps={[tsc('stepAiDetect'), tsc('stepTaxCalc'), tsc('stepIdBillingGen')]}
+      />
 
       {/* Educational banner */}
       <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">

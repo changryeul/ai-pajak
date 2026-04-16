@@ -5228,7 +5228,16 @@
     "backToDashboard": "Back to Dashboard",
     "uploadData": "Upload Data",
     "aiExecutes": "AI performs",
-    "delete": "Delete"
+    "delete": "Delete",
+    "stepAiProcess": "AI Processing",
+    "stepTaxCalc": "Tax Calculation",
+    "stepRateAndTax": "Rate & Tax Calc",
+    "stepVatCalc": "VAT Calculation",
+    "stepIdBillingGen": "ID Billing Gen",
+    "stepCompanyInfo": "Company Info",
+    "stepAiDetect": "AI Detection",
+    "stepDataCollect": "Data Collection",
+    "stepFilingRefund": "Filing / Refund"
   },
   "closingWork": {
     "pageTitle": "Year-end Closing",

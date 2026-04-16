@@ -18,6 +18,7 @@ import {
   Briefcase, Image,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
+import { ScreenHeader } from '@/components/tax';
 import { fmtRp } from '@/lib/utils';
 
 interface Employee {
@@ -48,6 +49,7 @@ export default function PPh21PayrollPage() {
   const params = useParams();
   const locale = params.locale as string;
   const tp = useTranslations('pph21Page');
+  const tsc = useTranslations('taxScreen');
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [summary, setSummary] = useState({ totalEmployees: 0, totalGrossSalary: 0 });
@@ -193,62 +195,30 @@ export default function PPh21PayrollPage() {
     return <div className="container mx-auto py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" /></div>;
   }
 
+  // Map activeTab to step number (1-4) for header progress display
+  const tabToStep: Record<string, number> = {
+    upload: 1, monthly: 2, master: 3, freelancer: 3, filing: 4,
+  };
+  const currentStep = tabToStep[activeTab] || 1;
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 p-6 md:p-8 text-white mb-6">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-        <div className="relative z-10">
-          <p className="text-blue-200 text-sm flex items-center gap-2"><Sparkles className="h-4 w-4" />PPh 21</p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">{tp('pageTitle')}</h1>
-          <p className="text-blue-200 mt-2 text-sm">{tp('pageDescription')}</p>
-          <div className="grid grid-cols-2 gap-4 mt-6">
-            <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-blue-200 text-xs flex items-center gap-1"><Users className="h-3 w-3" />{tp('employeeCount')}</p>
-              <p className="font-bold text-lg">{tp('employeeCountValue', { count: summary.totalEmployees })}</p>
-            </div>
-            <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-blue-200 text-xs flex items-center gap-1"><DollarSign className="h-3 w-3" />{tp('totalSalary')}</p>
-              <p className="font-bold text-lg">{fmt(summary.totalGrossSalary)}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ScreenHeader
+        title={tp('pageTitle')}
+        step={currentStep}
+        aiSteps={[tsc('stepAiProcess'), tsc('stepTaxCalc'), tsc('stepIdBillingGen')]}
+      />
 
-      {/* Step Progress Indicator */}
-      <div className="mb-6 flex items-center gap-1 overflow-x-auto pb-1">
-        {[
-          { step: 1, label: tp('step1_upload'), tab: 'upload' },
-          { step: 2, label: tp('step2_ai'), tab: 'monthly' },
-          { step: 3, label: tp('step3_calculate'), tab: 'master' },
-          { step: 4, label: tp('step4_billing'), tab: 'filing' },
-        ].map((s, i, arr) => {
-          const tabOrder = ['upload', 'monthly', 'master', 'freelancer', 'filing'];
-          const currentIdx = tabOrder.indexOf(activeTab);
-          const stepIdx = tabOrder.indexOf(s.tab);
-          const isActive = activeTab === s.tab || (s.step === 3 && activeTab === 'freelancer');
-          const isDone = stepIdx < currentIdx;
-          return (
-            <div key={s.step} className="flex items-center">
-              <button
-                onClick={() => setActiveTab(s.tab)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap border ${
-                  isActive
-                    ? 'bg-blue-600 text-white shadow-sm border-blue-600'
-                    : isDone
-                    ? 'bg-green-50 text-green-700 border-green-200'
-                    : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                <span className="font-bold">{s.step}.</span> {s.label}
-                {isDone && <CheckCircle className="h-3 w-3 ml-1" />}
-              </button>
-              {i < arr.length - 1 && (
-                <div className={`mx-1.5 w-6 h-0.5 flex-shrink-0 ${isDone ? 'bg-green-300' : 'bg-gray-200'}`} />
-              )}
-            </div>
-          );
-        })}
+      {/* Compact summary below header */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-white rounded-xl border p-3">
+          <p className="text-gray-500 text-xs flex items-center gap-1"><Users className="h-3 w-3" />{tp('employeeCount')}</p>
+          <p className="font-bold text-lg">{tp('employeeCountValue', { count: summary.totalEmployees })}</p>
+        </div>
+        <div className="bg-white rounded-xl border p-3">
+          <p className="text-gray-500 text-xs flex items-center gap-1"><DollarSign className="h-3 w-3" />{tp('totalSalary')}</p>
+          <p className="font-bold text-lg">{fmt(summary.totalGrossSalary)}</p>
+        </div>
       </div>
 
       {/* Message */}

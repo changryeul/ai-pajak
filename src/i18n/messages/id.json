@@ -5228,7 +5228,16 @@
     "backToDashboard": "Ke Dashboard",
     "uploadData": "Unggah Data",
     "aiExecutes": "AI menjalankan",
-    "delete": "Hapus"
+    "delete": "Hapus",
+    "stepAiProcess": "Pemrosesan AI",
+    "stepTaxCalc": "Perhitungan Pajak",
+    "stepRateAndTax": "Tarif & Pajak",
+    "stepVatCalc": "Perhitungan PPN",
+    "stepIdBillingGen": "Buat ID Billing",
+    "stepCompanyInfo": "Info Perusahaan",
+    "stepAiDetect": "Deteksi AI",
+    "stepDataCollect": "Pengumpulan Data",
+    "stepFilingRefund": "Lapor / Restitusi"
   },
   "closingWork": {
     "pageTitle": "Tutup Buku Tahunan",
