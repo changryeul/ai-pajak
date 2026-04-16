@@ -458,7 +458,7 @@ export default function PPh23Page() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Card className="border-0 shadow-sm"><CardContent className="p-3">
           <p className="text-[10px] text-gray-500">{t('k25_e29066')}</p>
-          <p className="text-xl font-bold">{summary.transactionCount}건</p>
+          <p className="text-xl font-bold">{t('countItems', { count: summary.transactionCount })}</p>
         </CardContent></Card>
         <Card className="border-0 shadow-sm"><CardContent className="p-3">
           <p className="text-[10px] text-gray-500">{t('k26_f17d2d')}</p>
@@ -634,7 +634,7 @@ export default function PPh23Page() {
           <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-red-900">
-              NPWP {t('k57_9a67d8')} {transactions.filter(t => !t.counterparty_npwp).length}건 — {t('k58_1280cc')}
+              NPWP {t('k57_9a67d8')} {t('countItems', { count: transactions.filter(tx => !tx.counterparty_npwp).length })} — {t('k58_1280cc')}
             </p>
             <p className="text-xs text-red-700 mt-0.5">
               {t('k59_a0ec00')}
@@ -861,7 +861,7 @@ export default function PPh23Page() {
                         onChange={e => setFReinvestedOverride(e.target.value as '' | 'yes' | 'no')}
                         className="w-full h-8 px-2 rounded border text-xs">
                         <option value="">{t('k102_5e939b')}</option>
-                        <option value="yes">예 — {t('k103_fc0ca6')}</option>
+                        <option value="yes">{t('yesOption')} — {t('k103_fc0ca6')}</option>
                         <option value="no">{t('k104_b1e759')} — {t('k105_ee14ce')}</option>
                       </select>
                     </div>
@@ -942,7 +942,7 @@ export default function PPh23Page() {
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-amber-600" />
             <p className="text-xs text-amber-800">
-              <b>{pendingBP}건</b>{t('k114_5cb06f')}
+              <b>{t('countItems', { count: pendingBP })}</b>{t('k114_5cb06f')}
             </p>
           </div>
           <Button size="sm" onClick={handleGenerateBP} disabled={generatingBP}>
@@ -1130,7 +1130,7 @@ function FilingSteps({
 
   // Step status
   const steps = [
-    { id: 1, label: t('k130_e6ba7a'), done: transactions.length > 0, desc: `${summary.transactionCount}건 · ${fmtRp(summary.totalTax)}` },
+    { id: 1, label: t('k130_e6ba7a'), done: transactions.length > 0, desc: t('countItems', { count: summary.transactionCount }) + ' · ' + fmtRp(summary.totalTax) },
     { id: 2, label: 'e-Bupot ' + t('k131_4169bb'), done: allBPGenerated, desc: allBPGenerated ? t('k132_c7b5eb') : `${pendingBP}{t('k133_c84140')}` },
     { id: 3, label: 'SPT Masa ' + t('k131_4169bb'), done: sptCreated, desc: sptCreated ? `{t('k134_df2337')} ${sptResult?.submissionDeadline?.substring(0, 10)}` : t('k124_ac6176') },
     { id: 4, label: t('k135_b303e6'), done: false, desc: t('k136_85d0f9') },
