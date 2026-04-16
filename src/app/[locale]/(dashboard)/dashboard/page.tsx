@@ -33,6 +33,7 @@ import {
 } from '@/components/dashboard';
 import { CurrentPlanWidget } from '@/components/dashboard/CurrentPlanWidget';
 import { CustomPricingWidget } from '@/components/dashboard/CustomPricingWidget';
+import { CorporateDashboardV2 } from '@/components/dashboard/CorporateDashboardV2';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
 const SimpleMode = dynamic(() => import('@/components/dashboard/SimpleMode').then(m => ({ default: m.SimpleMode })), { ssr: false });
@@ -239,9 +240,9 @@ function CustomerDashboardWithOnboarding({
     }
   }, [session.customerId]);
 
-  // Branch by customer type — corporate customers focus on monthly filing
+  // Branch by customer type — corporate customers get the prototype-style dashboard
   if (session.customerType === 'COMPANY') {
-    return <CorporateCustomerDashboard session={session} locale={locale} />;
+    return <CorporateDashboardV2 session={session} locale={locale} />;
   }
   return <CustomerDashboard session={session} locale={locale} />;
 }

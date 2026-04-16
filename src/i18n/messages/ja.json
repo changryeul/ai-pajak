@@ -5276,5 +5276,42 @@
     "noProfileWarning": "Company information not available. Please enter it on the Company Profile page.",
     "goToCustomerList": "Go to customer list →",
     "goToCompanyInfo": "Enter company info →"
+  },
+  "corpDashboardV2": {
+    "title": "Dashboard",
+    "subtitle": "See your tax status and trends at a glance",
+    "kpiTotalTax": "Total Tax",
+    "kpiUnpaid": "Unpaid Tax",
+    "kpiUpcoming": "Upcoming Filings",
+    "countFilings": "{count} filings",
+    "trendTitle": "Monthly Tax Trend",
+    "withholding": "Withholding Tax",
+    "ppnSalesVsPurchase": "PPN (Output vs Input)",
+    "companyInfo": "Company Info",
+    "companyName": "Company Name"
+  },
+  "filingStatus": {
+    "pageTitle": "Monthly Filing Status",
+    "pageSubtitle": "Check payment/filing status and deadlines for each tax type at a glance",
+    "periodLabel": "{year}-{month} Accrual",
+    "colTaxType": "Tax Type",
+    "colTotalTax": "Total Tax",
+    "colPayment": "Payment (Deadline)",
+    "colFiling": "Filing (Deadline)",
+    "colStatus": "Status",
+    "colAction": "Action",
+    "deadlineFormat": "{month}/{day} ({dday})",
+    "ddayPast": "Past",
+    "ddayToday": "Today",
+    "ddayFuture": "D-{days}",
+    "statusDone": "Done",
+    "statusNone": "N/A",
+    "statusInProgress": "In Progress",
+    "statusPaymentLate": "Payment Late",
+    "statusFilingLate": "Filing Late",
+    "statusTodo": "To Do",
+    "filingDone": "Filed",
+    "filingNone": "Not Filed",
+    "actionProcess": "Process"
   }
 }

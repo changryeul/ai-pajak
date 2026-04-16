@@ -5277,5 +5277,42 @@
     "noProfileWarning": "회사 정보를 불러올 수 없습니다. 회사 정보 페이지에서 입력해주세요.",
     "goToCustomerList": "고객 목록으로 이동 →",
     "goToCompanyInfo": "회사 정보 입력 →"
+  },
+  "corpDashboardV2": {
+    "title": "대시보드",
+    "subtitle": "세금 현황과 흐름을 한눈에 확인하세요",
+    "kpiTotalTax": "총 세금",
+    "kpiUnpaid": "미납 세금",
+    "kpiUpcoming": "다가오는 신고",
+    "countFilings": "{count}건",
+    "trendTitle": "세금별 월별 추이",
+    "withholding": "원천세",
+    "ppnSalesVsPurchase": "PPN (매출 vs 매입)",
+    "companyInfo": "회사 정보",
+    "companyName": "회사명"
+  },
+  "filingStatus": {
+    "pageTitle": "월 신고 현황",
+    "pageSubtitle": "월별 세목의 납부·신고 상태와 마감일을 한눈에 확인하세요",
+    "periodLabel": "{year}년 {month}월 발생분",
+    "colTaxType": "세목",
+    "colTotalTax": "총 세액",
+    "colPayment": "납부 (마감)",
+    "colFiling": "신고 (마감)",
+    "colStatus": "상태",
+    "colAction": "액션",
+    "deadlineFormat": "{month}월 {day}일 ({dday})",
+    "ddayPast": "마감",
+    "ddayToday": "오늘",
+    "ddayFuture": "D-{days}",
+    "statusDone": "완료",
+    "statusNone": "대상 없음",
+    "statusInProgress": "진행중",
+    "statusPaymentLate": "납부지연",
+    "statusFilingLate": "신고지연",
+    "statusTodo": "미완료",
+    "filingDone": "완료",
+    "filingNone": "미신고",
+    "actionProcess": "처리하기"
   }
 }
