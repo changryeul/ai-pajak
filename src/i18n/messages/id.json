@@ -3648,7 +3648,9 @@
     "month9": "Sep",
     "month10": "Okt",
     "month11": "Nov",
-    "month12": "Des"
+    "month12": "Des",
+    "recommendedBadge": "Disarankan",
+    "manualEntryHint": "Daftarkan setiap karyawan satu per satu (nama · NPWP · gaji · PTKP)"
   },
   "pph23Page": {
     "k0_9674d4": "배당 (Dividen)",

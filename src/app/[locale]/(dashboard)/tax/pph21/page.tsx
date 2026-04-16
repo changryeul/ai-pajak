@@ -623,42 +623,70 @@ function PPh21DataInputSection({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-        <p className="text-sm font-bold text-blue-900 mb-2">{tp('l22_643eb4')}</p>
-        <p className="text-xs text-blue-700">{tp('l23_5c33c2')}</p>
+    <div className="space-y-5">
+      <div className="rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shadow-sm">
+            <Sparkles className="h-4 w-4 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-sm text-gray-900">{tp('l22_643eb4')}</p>
+            <p className="text-xs text-gray-600 mt-0.5">{tp('l23_5c33c2')}</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Method 1: Template download + upload */}
-        <Card className="border-2 border-dashed hover:border-blue-400 transition-colors cursor-pointer">
-          <CardContent className="p-5 text-center">
-            <Download className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-            <p className="font-bold text-sm mb-1">{tp('templateDownloadTitle')}</p>
-            <p className="text-[11px] text-gray-500 mb-3">{tp('templateDownloadDesc')}</p>
-            <div className="space-y-2">
+        <Card className="border-2 border-dashed border-blue-200 hover:border-blue-400 hover:shadow-sm transition-all">
+          <CardContent className="p-5 flex flex-col h-full">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <Download className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{tp('templateDownloadTitle')}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{tp('templateDownloadDesc')}</p>
+              </div>
+            </div>
+            <div className="space-y-2 flex-1">
               <Button size="sm" variant="outline" onClick={downloadTemplate} className="w-full">
                 <Download className="h-3 w-3 mr-1" />{tp('templateDownloadBtn')}
               </Button>
-              <Button size="sm" onClick={() => excelInputRef.current?.click()} disabled={uploading} className="w-full">
+              <Button size="sm" onClick={() => excelInputRef.current?.click()} disabled={uploading}
+                className="w-full bg-blue-600 hover:bg-blue-700">
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
                 {tp('l27_c3feb8')}
               </Button>
               <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
                 onChange={e => handleExcelUpload(e.target.files)} />
             </div>
-            <p className="text-[10px] text-gray-400 mt-2">worker_type: REGULAR / CONTRACT / DAILY / FREELANCER</p>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-500 font-medium">
+                worker_type: <span className="font-mono text-gray-600">REGULAR / CONTRACT / DAILY / FREELANCER</span>
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Method 2: Upload existing Excel/PDF */}
-        <Card className="border-2 border-dashed hover:border-emerald-400 transition-colors cursor-pointer">
-          <CardContent className="p-5 text-center">
-            <FileText className="h-8 w-8 text-emerald-600 mx-auto mb-3" />
-            <p className="font-bold text-sm mb-1">{tp('uploadExistingTitle')}</p>
-            <p className="text-[11px] text-gray-500 mb-3">{tp('l29_354dd1')}</p>
-            <div className="space-y-2">
-              <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="w-full">
+        {/* Method 2: Upload existing Excel/PDF — RECOMMENDED */}
+        <Card className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all relative">
+          <div className="absolute -top-2 left-5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
+            {tp('recommendedBadge')}
+          </div>
+          <CardContent className="p-5 flex flex-col h-full">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{tp('uploadExistingTitle')}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{tp('l29_354dd1')}</p>
+              </div>
+            </div>
+            <div className="space-y-2 flex-1">
+              <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                className="w-full bg-emerald-600 hover:bg-emerald-700">
                 <Upload className="h-3 w-3 mr-1" />{tp('fileUploadBtn')}
               </Button>
               {cameraAvailable && (
@@ -677,22 +705,35 @@ function PPh21DataInputSection({
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
                 onChange={e => handleUpload(e.target.files, 'WEB', 'SALARY_SLIP')} />
             </div>
-            <p className="text-[10px] text-gray-400 mt-2">{tp('ocrNote')}</p>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-emerald-500" />
+                {tp('ocrNote')}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
         {/* Method 3: Manual entry */}
-        <Card className="border-2 border-dashed hover:border-purple-400 transition-colors">
-          <CardContent className="p-5 text-center">
-            <Users className="h-8 w-8 text-purple-600 mx-auto mb-3" />
-            <p className="font-bold text-sm mb-1">{tp('directInputTitle')}</p>
-            <p className="text-[11px] text-gray-500 mb-3">{tp('l34_b7a3ab')}</p>
-            <div className="space-y-2">
+        <Card className="border-2 border-dashed border-purple-200 hover:border-purple-400 hover:shadow-sm transition-all">
+          <CardContent className="p-5 flex flex-col h-full">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                <Users className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{tp('directInputTitle')}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{tp('l34_b7a3ab')}</p>
+              </div>
+            </div>
+            <div className="space-y-2 flex-1">
               <Button size="sm" onClick={onNavigateToMaster} className="w-full bg-purple-600 hover:bg-purple-700">
                 <Users className="h-3 w-3 mr-1" />{tp('goToEmployeeMaster')}
               </Button>
-              <p className="text-[10px] text-gray-500 bg-gray-50 rounded p-2 text-left leading-relaxed">
-                "{tp('l36_5558f6')}" {tp('l37_9e4142')}
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-500">
+                {tp('manualEntryHint')}
               </p>
             </div>
           </CardContent>

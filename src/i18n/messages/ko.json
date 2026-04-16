@@ -3649,7 +3649,9 @@
     "month9": "9월",
     "month10": "10월",
     "month11": "11월",
-    "month12": "12월"
+    "month12": "12월",
+    "recommendedBadge": "추천",
+    "manualEntryHint": "직원을 한 명씩 등록하고 이름·NPWP·급여·PTKP를 입력합니다"
   },
   "pph23Page": {
     "k0_9674d4": "배당 (Dividen)",

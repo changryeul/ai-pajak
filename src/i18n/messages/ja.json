@@ -3648,7 +3648,9 @@
     "month9": "Sep",
     "month10": "Oct",
     "month11": "Nov",
-    "month12": "Dec"
+    "month12": "Dec",
+    "recommendedBadge": "Recommended",
+    "manualEntryHint": "Register each employee individually (name · NPWP · salary · PTKP)"
   },
   "pph23Page": {
     "k0_9674d4": "배당 (Dividen)",
