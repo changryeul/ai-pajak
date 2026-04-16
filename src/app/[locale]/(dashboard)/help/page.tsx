@@ -22,6 +22,7 @@ interface FAQItem {
 
 export default function HelpPage() {
   const t = useTranslations('help');
+  const th = useTranslations('helpPage');
   const params = useParams();
   const locale = params.locale as string;
   const [search, setSearch] = useState('');
@@ -138,12 +139,12 @@ export default function HelpPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-base text-gray-900">
-                      사용자 매뉴얼 (역할별 상세 가이드)
+                      {th('manualsTitle')}
                     </h3>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">NEW</span>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    법인 · 개인 · 외부 세무사무소 · JTC 세무사 · 운영팀 · 플랫폼 관리자 — 역할별 시나리오형 매뉴얼
+                    {th('manualsDesc')}
                   </p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />

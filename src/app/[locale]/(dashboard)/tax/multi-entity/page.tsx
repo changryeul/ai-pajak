@@ -42,6 +42,7 @@ const TYPE_STYLES: Record<string, { bg: string; label: string }> = {
 
 export default function MultiEntityPage() {
   const t = useTranslations('killer');
+  const tm = useTranslations('multiEntity');
   const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const router = useRouter();
@@ -90,11 +91,11 @@ export default function MultiEntityPage() {
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-slate-400 text-xs">{t('multiEntity.registered')}</p>
-              <p className="font-bold text-lg">{totalEntities}개</p>
+              <p className="font-bold text-lg">{tm('countUnits', { count: totalEntities })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-slate-400 text-xs">{t('multiEntity.totalFilings')}</p>
-              <p className="font-bold text-lg">{totalFilings}건</p>
+              <p className="font-bold text-lg">{tm('countCases', { count: totalFilings })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-slate-400 text-xs flex items-center gap-1">

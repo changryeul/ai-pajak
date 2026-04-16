@@ -1339,7 +1339,10 @@
     "jurnalFeature1": "Import Chart of Accounts",
     "jurnalFeature2": "Sinkronisasi faktur penjualan (PPN)",
     "jurnalFeature3": "Import Laporan Laba Rugi & Neraca",
-    "jurnalFeature4": "Data kontak (pelanggan/vendor) + NPWP"
+    "jurnalFeature4": "Data kontak (pelanggan/vendor) + NPWP",
+    "syncSuccess": "Sinkronisasi selesai",
+    "connectionRequired": "Koneksi diperlukan",
+    "syncFailed": "Sinkronisasi gagal"
   },
   "platformStats": {
     "totalCustomers": "Total Pelanggan",
@@ -1688,14 +1691,16 @@
     "deleted": "Dihapus",
     "counterpartySaved": "Lawan transaksi terdaftar",
     "aiClassified": "AI klasifikasi selesai (kepercayaan: {confidence}%)",
-    "csvImportResult": "CSV Import: {inserted}/{total} terdaftar",
+    "csvImportResult": "CSV Import: {inserted}/{total} data terdaftar",
     "csvErrors": "{count} error",
     "registerCounterparty": "Daftar lawan transaksi baru",
     "noMatchFound": "Tidak ditemukan",
     "registerNew": "Daftar lawan transaksi baru",
     "selectCustomer": "Pilih klien...",
     "djpSubmitInfo": "Hanya role TAX_ADVISOR_JTC yang bisa lapor ke DJP",
-    "djpSubmitDesc": "Setelah DRAFT dibuat, penasihat pajak akan meninjau dan melapor ke DJP."
+    "djpSubmitDesc": "Setelah DRAFT dibuat, penasihat pajak akan meninjau dan melapor ke DJP.",
+    "csvImportErrors": "({count} kesalahan)",
+    "csvImportMoreErrors": "... +{count} lagi"
   },
   "simpleMode": {
     "photoTitle": "Foto Slip Gaji Tahunan",
@@ -3185,7 +3190,9 @@
     "close": "Tutup",
     "errorEmpty": "File CSV kosong atau format tidak valid",
     "errorMax": "Maksimal 200 data per import",
-    "errorParse": "Gagal parsing CSV"
+    "errorParse": "Gagal parsing CSV",
+    "companyNameHeader": "Nama Perusahaan",
+    "errorRowFormat": "Baris {row}: [{field}] {message}"
   },
   "customPricing": {
     "title": "Penawaran Harga Khusus",
@@ -5022,5 +5029,52 @@
     "errorDetails": "Detail kesalahan",
     "retry": "Coba Lagi",
     "home": "Beranda"
+  },
+  "efakturVerify": {
+    "kodeTxDesc": "01-09: Kode Transaksi (01=Normal, 04=DPP Berbeda, 07=Penyerahan bebas)",
+    "kodeStatusDesc": "X: Kode Status (0=Normal, 1=Pengganti)",
+    "tahunDesc": "XX: Tahun Penerbitan (Tahun)",
+    "nomorUrutDesc": "XXXXXXXX: Nomor Urut (Nomor Seri)"
+  },
+  "submissionsList": {
+    "countCases": "{count} kasus"
+  },
+  "errorBoundary": {
+    "title": "Terjadi kesalahan",
+    "defaultMessage": "Terjadi kesalahan sementara. Silakan coba lagi.",
+    "retry": "Coba lagi"
+  },
+  "pph26Page": {
+    "title": "PPh 26 (Non-Residen)",
+    "preparing": "Sedang Disiapkan",
+    "description": "Fitur PPh 26 Non-Resident sedang dalam pengembangan."
+  },
+  "pph22Page": {
+    "title": "PPh 22 (Pajak Impor)",
+    "preparing": "Sedang Disiapkan",
+    "description": "Fitur PPh 22 Import sedang dalam pengembangan."
+  },
+  "operatorQueue": {
+    "rejectReasonPrompt": "Silakan masukkan alasan penolakan (wajib)",
+    "rejectReasonRequired": "Alasan penolakan wajib diisi",
+    "reject": "Tolak"
+  },
+  "poaStatus": {
+    "defaultPartner": "Konsultan Pajak"
+  },
+  "multiEntity": {
+    "countUnits": "{count}",
+    "countCases": "{count}"
+  },
+  "calculations": {
+    "countCases": "{count}"
+  },
+  "referral": {
+    "whatsappShare": "Pelaporan pajak jadi mudah dengan AI Pajak! 🎉\n\nDaftar dan dapatkan {reward}.\n\n{url}",
+    "countPeople": "{count} orang"
+  },
+  "helpPage": {
+    "manualsTitle": "Panduan Pengguna (Panduan detail per peran)",
+    "manualsDesc": "Korporat · Individu · Konsultan Eksternal · Advisor JTC · Operator · Admin Platform — Manual skenario per peran"
   }
 }

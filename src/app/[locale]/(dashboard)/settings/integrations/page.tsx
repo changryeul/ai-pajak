@@ -72,6 +72,7 @@ const SYNC_ACTIONS: { id: SyncAction; labelKey: string; descKey: string; integra
 
 export default function IntegrationsPage() {
   const t = useTranslations('killer');
+  const ti = useTranslations('integrations');
   const params = useParams();
   const locale = params.locale as string;
   const [syncing, setSyncing] = useState<string | null>(null);
@@ -96,12 +97,12 @@ export default function IntegrationsPage() {
       const data = await res.json();
       setSyncResults(prev => ({
         ...prev,
-        [action]: { success: data.success || res.ok, message: data.message || (res.ok ? '동기화 완료' : '연결이 필요합니다') },
+        [action]: { success: data.success || res.ok, message: data.message || (res.ok ? ti('syncSuccess') : ti('connectionRequired')) },
       }));
     } catch {
       setSyncResults(prev => ({
         ...prev,
-        [action]: { success: false, message: '동기화 실패' },
+        [action]: { success: false, message: ti('syncFailed') },
       }));
     } finally {
       setSyncing(null);

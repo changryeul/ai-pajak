@@ -1339,7 +1339,10 @@
     "jurnalFeature1": "导入会计科目",
     "jurnalFeature2": "同步销售发票（增值税）",
     "jurnalFeature3": "导入损益表和资产负债表",
-    "jurnalFeature4": "联系人数据（客户/供应商）+ NPWP"
+    "jurnalFeature4": "联系人数据（客户/供应商）+ NPWP",
+    "syncSuccess": "同步完成",
+    "connectionRequired": "需要连接",
+    "syncFailed": "同步失败"
   },
   "platformStats": {
     "totalCustomers": "总客户数",
@@ -1688,14 +1691,16 @@
     "deleted": "已删除",
     "counterpartySaved": "交易对方已注册",
     "aiClassified": "AI分类完成（置信度：{confidence}%）",
-    "csvImportResult": "CSV导入：{inserted}/{total}条已注册",
+    "csvImportResult": "CSV Import: {inserted}/{total}条 注册完成",
     "csvErrors": "{count}条错误",
     "registerCounterparty": "注册新交易对方",
     "noMatchFound": "未找到匹配",
     "registerNew": "注册新交易对方",
     "selectCustomer": "选择客户...",
     "djpSubmitInfo": "仅TAX_ADVISOR_JTC角色可提交至DJP",
-    "djpSubmitDesc": "创建草稿后，税务顾问将审核并提交至DJP。"
+    "djpSubmitDesc": "创建草稿后，税务顾问将审核并提交至DJP。",
+    "csvImportErrors": "({count}条错误)",
+    "csvImportMoreErrors": "... +{count}条"
   },
   "simpleMode": {
     "photoTitle": "拍摄年度工资单",
@@ -3185,7 +3190,9 @@
     "close": "Close",
     "errorEmpty": "CSV file is empty or has invalid format",
     "errorMax": "Maximum 200 records per import",
-    "errorParse": "CSV parsing failed"
+    "errorParse": "CSV parsing failed",
+    "companyNameHeader": "公司名称",
+    "errorRowFormat": "行 {row}: [{field}] {message}"
   },
   "customPricing": {
     "title": "Custom Pricing Quote",
@@ -5022,5 +5029,52 @@
     "errorDetails": "Error details",
     "retry": "Retry",
     "home": "Home"
+  },
+  "efakturVerify": {
+    "kodeTxDesc": "01-09: Kode Transaksi (01=一般, 04=DPP 不同值, 07=免税交付)",
+    "kodeStatusDesc": "X: Kode Status (0=一般, 1=替代)",
+    "tahunDesc": "XX: Tahun Penerbitan (年份)",
+    "nomorUrutDesc": "XXXXXXXX: Nomor Urut (序列号)"
+  },
+  "submissionsList": {
+    "countCases": "{count}件"
+  },
+  "errorBoundary": {
+    "title": "发生问题",
+    "defaultMessage": "发生临时错误。请再试一次。",
+    "retry": "重试"
+  },
+  "pph26Page": {
+    "title": "PPh 26 (非居民)",
+    "preparing": "准备中",
+    "description": "PPh 26 Non-Resident 功能正在开发中。"
+  },
+  "pph22Page": {
+    "title": "PPh 22 (进口税)",
+    "preparing": "准备中",
+    "description": "PPh 22 Import 功能正在开发中。"
+  },
+  "operatorQueue": {
+    "rejectReasonPrompt": "请输入拒绝原因 (必填)",
+    "rejectReasonRequired": "拒绝原因是必填项",
+    "reject": "拒绝"
+  },
+  "poaStatus": {
+    "defaultPartner": "税务代理机构"
+  },
+  "multiEntity": {
+    "countUnits": "{count}个",
+    "countCases": "{count}件"
+  },
+  "calculations": {
+    "countCases": "{count}件"
+  },
+  "referral": {
+    "whatsappShare": "使用 AI Pajak 报税变得简单！🎉\n\n注册即可获得 {reward}。\n\n{url}",
+    "countPeople": "{count}人"
+  },
+  "helpPage": {
+    "manualsTitle": "用户手册 (按角色的详细指南)",
+    "manualsDesc": "法人 · 个人 · 外部税务事务所 · JTC 税务师 · 运营团队 · 平台管理员 — 按角色的场景化手册"
   }
 }

@@ -1339,7 +1339,10 @@
     "jurnalFeature1": "勘定科目のインポート",
     "jurnalFeature2": "売上請求書の同期 (VAT)",
     "jurnalFeature3": "損益計算書＆貸借対照表のインポート",
-    "jurnalFeature4": "連絡先データ (顧客/ベンダー) + NPWP"
+    "jurnalFeature4": "連絡先データ (顧客/ベンダー) + NPWP",
+    "syncSuccess": "同期完了",
+    "connectionRequired": "接続が必要です",
+    "syncFailed": "同期失敗"
   },
   "platformStats": {
     "totalCustomers": "顧客合計",
@@ -1688,14 +1691,16 @@
     "deleted": "削除しました",
     "counterpartySaved": "取引先が登録されました",
     "aiClassified": "AI分類完了（信頼度：{confidence}%）",
-    "csvImportResult": "CSVインポート：{inserted}/{total}件登録完了",
+    "csvImportResult": "CSV Import: {inserted}/{total}件 登録完了",
     "csvErrors": "{count}件エラー",
     "registerCounterparty": "新規取引先登録",
     "noMatchFound": "一致するものが見つかりません",
     "registerNew": "新規取引先を登録",
     "selectCustomer": "顧客を選択...",
     "djpSubmitInfo": "DJPへの提出はTAX_ADVISOR_JTCロールのみ可能です",
-    "djpSubmitDesc": "DRAFT作成後、税務アドバイザーが確認してDJPに提出します。"
+    "djpSubmitDesc": "DRAFT作成後、税務アドバイザーが確認してDJPに提出します。",
+    "csvImportErrors": "({count}件エラー)",
+    "csvImportMoreErrors": "... +{count}件"
   },
   "simpleMode": {
     "photoTitle": "年間給与明細を撮影",
@@ -3185,7 +3190,9 @@
     "close": "Close",
     "errorEmpty": "CSV file is empty or has invalid format",
     "errorMax": "Maximum 200 records per import",
-    "errorParse": "CSV parsing failed"
+    "errorParse": "CSV parsing failed",
+    "companyNameHeader": "会社名",
+    "errorRowFormat": "行 {row}: [{field}] {message}"
   },
   "customPricing": {
     "title": "Custom Pricing Quote",
@@ -5022,5 +5029,52 @@
     "errorDetails": "Error details",
     "retry": "Retry",
     "home": "Home"
+  },
+  "efakturVerify": {
+    "kodeTxDesc": "01-09: Kode Transaksi (01=一般, 04=DPP 異なる値, 07=免税納品)",
+    "kodeStatusDesc": "X: Kode Status (0=一般, 1=代替)",
+    "tahunDesc": "XX: Tahun Penerbitan (年)",
+    "nomorUrutDesc": "XXXXXXXX: Nomor Urut (シリアル番号)"
+  },
+  "submissionsList": {
+    "countCases": "{count}件"
+  },
+  "errorBoundary": {
+    "title": "問題が発生しました",
+    "defaultMessage": "一時的なエラーが発生しました。もう一度お試しください。",
+    "retry": "再試行"
+  },
+  "pph26Page": {
+    "title": "PPh 26 (非居住者)",
+    "preparing": "準備中",
+    "description": "PPh 26 Non-Resident 機能は現在開発中です。"
+  },
+  "pph22Page": {
+    "title": "PPh 22 (輸入税)",
+    "preparing": "準備中",
+    "description": "PPh 22 Import 機能は現在開発中です。"
+  },
+  "operatorQueue": {
+    "rejectReasonPrompt": "却下理由を入力してください (必須)",
+    "rejectReasonRequired": "却下理由は必須です",
+    "reject": "却下"
+  },
+  "poaStatus": {
+    "defaultPartner": "税務代行会社"
+  },
+  "multiEntity": {
+    "countUnits": "{count}件",
+    "countCases": "{count}件"
+  },
+  "calculations": {
+    "countCases": "{count}件"
+  },
+  "referral": {
+    "whatsappShare": "AI Pajak で税務申告が簡単になりました! 🎉\n\n登録すると {reward} がもらえます。\n\n{url}",
+    "countPeople": "{count}名"
+  },
+  "helpPage": {
+    "manualsTitle": "ユーザーマニュアル (役割別詳細ガイド)",
+    "manualsDesc": "法人 · 個人 · 外部税務事務所 · JTC 税理士 · 運営チーム · プラットフォーム管理者 — 役割別シナリオマニュアル"
   }
 }

@@ -64,6 +64,7 @@ function formatFakturNumber(num: string): string {
 
 export default function EFakturVerifyPage() {
   const t = useTranslations('killer');
+  const tv = useTranslations('efakturVerify');
   const [numbers, setNumbers] = useState<string[]>(['']);
   const [results, setResults] = useState<VerifyResult[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -211,10 +212,10 @@ export default function EFakturVerifyPage() {
               <div className="font-mono text-sm bg-gray-50 rounded-lg p-3 space-y-1">
                 <p><span className="text-blue-600">0X</span>X . <span className="text-green-600">XXX</span> - <span className="text-purple-600">XX</span> . <span className="text-orange-600">XXXXXXXX</span></p>
                 <div className="text-xs text-gray-500 space-y-0.5 mt-2">
-                  <p><span className="text-blue-600">01-09</span>: Kode Transaksi (01=일반, 04=DPP 다른 값, 07=면세 납품)</p>
-                  <p><span className="text-green-600">X</span>: Kode Status (0=일반, 1=대체)</p>
-                  <p><span className="text-purple-600">XX</span>: Tahun Penerbitan (연도)</p>
-                  <p><span className="text-orange-600">XXXXXXXX</span>: Nomor Urut (일련번호)</p>
+                  <p>{tv('kodeTxDesc')}</p>
+                  <p>{tv('kodeStatusDesc')}</p>
+                  <p>{tv('tahunDesc')}</p>
+                  <p>{tv('nomorUrutDesc')}</p>
                 </div>
               </div>
             </CardContent>

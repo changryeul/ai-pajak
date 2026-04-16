@@ -1339,7 +1339,10 @@
     "jurnalFeature1": "Import Chart of Accounts",
     "jurnalFeature2": "Sync sales invoices (VAT)",
     "jurnalFeature3": "Import P&L and Balance Sheet",
-    "jurnalFeature4": "Contact data (customer/vendor) + NPWP"
+    "jurnalFeature4": "Contact data (customer/vendor) + NPWP",
+    "syncSuccess": "Sync complete",
+    "connectionRequired": "Connection required",
+    "syncFailed": "Sync failed"
   },
   "platformStats": {
     "totalCustomers": "Total Customers",
@@ -1688,14 +1691,16 @@
     "deleted": "Deleted",
     "counterpartySaved": "Counterparty registered",
     "aiClassified": "AI classified (confidence: {confidence}%)",
-    "csvImportResult": "CSV Import: {inserted}/{total} registered",
+    "csvImportResult": "CSV Import: {inserted}/{total} records imported",
     "csvErrors": "{count} errors",
     "registerCounterparty": "Register new counterparty",
     "noMatchFound": "No match found",
     "registerNew": "Register new counterparty",
     "selectCustomer": "Select customer...",
     "djpSubmitInfo": "Only TAX_ADVISOR_JTC role can submit to DJP",
-    "djpSubmitDesc": "After creating a DRAFT, a tax advisor will review and submit to DJP."
+    "djpSubmitDesc": "After creating a DRAFT, a tax advisor will review and submit to DJP.",
+    "csvImportErrors": "({count} errors)",
+    "csvImportMoreErrors": "... +{count} more"
   },
   "simpleMode": {
     "photoTitle": "Photo Annual Salary Slip",
@@ -3185,7 +3190,9 @@
     "close": "Close",
     "errorEmpty": "CSV file is empty or has invalid format",
     "errorMax": "Maximum 200 records per import",
-    "errorParse": "CSV parsing failed"
+    "errorParse": "CSV parsing failed",
+    "companyNameHeader": "Company Name",
+    "errorRowFormat": "Row {row}: [{field}] {message}"
   },
   "customPricing": {
     "title": "Custom Pricing Quote",
@@ -5022,5 +5029,52 @@
     "errorDetails": "Error details",
     "retry": "Retry",
     "home": "Home"
+  },
+  "efakturVerify": {
+    "kodeTxDesc": "01-09: Kode Transaksi (01=Normal, 04=Different DPP, 07=Exempt delivery)",
+    "kodeStatusDesc": "X: Kode Status (0=Normal, 1=Replacement)",
+    "tahunDesc": "XX: Tahun Penerbitan (Year)",
+    "nomorUrutDesc": "XXXXXXXX: Nomor Urut (Serial Number)"
+  },
+  "submissionsList": {
+    "countCases": "{count} cases"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "defaultMessage": "A temporary error occurred. Please try again.",
+    "retry": "Retry"
+  },
+  "pph26Page": {
+    "title": "PPh 26 (Non-Resident)",
+    "preparing": "Coming Soon",
+    "description": "PPh 26 Non-Resident feature is currently under development."
+  },
+  "pph22Page": {
+    "title": "PPh 22 (Import Tax)",
+    "preparing": "Coming Soon",
+    "description": "PPh 22 Import feature is currently under development."
+  },
+  "operatorQueue": {
+    "rejectReasonPrompt": "Please enter rejection reason (required)",
+    "rejectReasonRequired": "Rejection reason is required",
+    "reject": "Reject"
+  },
+  "poaStatus": {
+    "defaultPartner": "Tax Agency"
+  },
+  "multiEntity": {
+    "countUnits": "{count}",
+    "countCases": "{count}"
+  },
+  "calculations": {
+    "countCases": "{count}"
+  },
+  "referral": {
+    "whatsappShare": "Tax filing made easy with AI Pajak! 🎉\n\nSign up and get {reward}.\n\n{url}",
+    "countPeople": "{count}"
+  },
+  "helpPage": {
+    "manualsTitle": "User Manual (Detailed role-based guides)",
+    "manualsDesc": "Corporate · Individual · External Tax Firm · JTC Advisor · Operator · Platform Admin — Role-based scenario manuals"
   }
 }

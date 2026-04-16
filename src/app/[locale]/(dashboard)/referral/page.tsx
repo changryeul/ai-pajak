@@ -21,6 +21,7 @@ interface ReferralData {
 
 export default function ReferralPage() {
   const t = useTranslations('killer');
+  const tr = useTranslations('referral');
   const { session, isLoading: sessionLoading } = useSession();
   const [data, setData] = useState<ReferralData | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
@@ -53,7 +54,7 @@ export default function ReferralPage() {
 
   const shareWhatsApp = () => {
     if (!data) return;
-    const text = `AI Pajak으로 세금 신고가 쉬워졌어요! 🎉\n\n가입하면 ${data.rewards.refereeReward}을 받을 수 있습니다.\n\n${data.referralUrl}`;
+    const text = tr('whatsappShare', { reward: data.rewards.refereeReward, url: data.referralUrl });
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -81,7 +82,7 @@ export default function ReferralPage() {
               </div>
               <div className="bg-white/10 rounded-xl p-3">
                 <p className="text-pink-200 text-xs">{t('referral.totalReferrals')}</p>
-                <p className="font-bold text-lg">{data?.stats.totalReferrals || 0}명</p>
+                <p className="font-bold text-lg">{tr('countPeople', { count: data?.stats.totalReferrals || 0 })}</p>
               </div>
             </div>
           )}

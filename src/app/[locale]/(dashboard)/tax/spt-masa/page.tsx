@@ -619,15 +619,15 @@ export default function SPTMasaPage() {
           {uploadResult && (
             <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-xs">
               <p className="font-medium text-indigo-800">
-                CSV Import: {uploadResult.insertedCount}/{uploadResult.totalRows}건 등록 완료
-                {uploadResult.errorRows > 0 && <span className="text-red-600 ml-2">({uploadResult.errorRows}건 오류)</span>}
+                {t('csvImportResult', { inserted: uploadResult.insertedCount, total: uploadResult.totalRows })}
+                {uploadResult.errorRows > 0 && <span className="text-red-600 ml-2">{t('csvImportErrors', { count: uploadResult.errorRows })}</span>}
               </p>
               {uploadResult.errors && uploadResult.errors.length > 0 && (
                 <div className="mt-2 max-h-20 overflow-y-auto">
                   {uploadResult.errors.slice(0, 5).map((err, i) => (
                     <p key={i} className="text-red-500">Row {err.row}: {err.error}</p>
                   ))}
-                  {uploadResult.errors.length > 5 && <p className="text-gray-400">... +{uploadResult.errors.length - 5}건</p>}
+                  {uploadResult.errors.length > 5 && <p className="text-gray-400">{t('csvImportMoreErrors', { count: uploadResult.errors.length - 5 })}</p>}
                 </div>
               )}
             </div>

@@ -1339,7 +1339,10 @@
     "jurnalFeature1": "계정과목 가져오기",
     "jurnalFeature2": "매출 인보이스 동기화 (부가세)",
     "jurnalFeature3": "손익계산서 & 대차대조표 가져오기",
-    "jurnalFeature4": "거래처 데이터 (고객/벤더) + NPWP"
+    "jurnalFeature4": "거래처 데이터 (고객/벤더) + NPWP",
+    "syncSuccess": "동기화 완료",
+    "connectionRequired": "연결이 필요합니다",
+    "syncFailed": "동기화 실패"
   },
   "platformStats": {
     "totalCustomers": "총 고객 수",
@@ -1696,7 +1699,9 @@
     "registerNew": "새 거래 상대방 등록",
     "selectCustomer": "고객 선택...",
     "djpSubmitInfo": "DJP 제출은 TAX_ADVISOR_JTC 역할만 가능합니다",
-    "djpSubmitDesc": "DRAFT 생성 후 세무사가 검토하여 DJP에 제출합니다."
+    "djpSubmitDesc": "DRAFT 생성 후 세무사가 검토하여 DJP에 제출합니다.",
+    "csvImportErrors": "({count}건 오류)",
+    "csvImportMoreErrors": "... +{count}건"
   },
   "simpleMode": {
     "photoTitle": "연간 급여 명세서 촬영",
@@ -3186,7 +3191,9 @@
     "close": "닫기",
     "errorEmpty": "CSV 파일이 비어 있거나 형식이 잘못되었습니다",
     "errorMax": "한 번에 최대 200건까지 등록 가능합니다",
-    "errorParse": "CSV 파싱 실패"
+    "errorParse": "CSV 파싱 실패",
+    "companyNameHeader": "회사명",
+    "errorRowFormat": "행 {row}: [{field}] {message}"
   },
   "customPricing": {
     "title": "맞춤 가격 견적",
@@ -5023,5 +5030,52 @@
     "errorDetails": "에러 상세 정보",
     "retry": "다시 시도",
     "home": "홈으로"
+  },
+  "efakturVerify": {
+    "kodeTxDesc": "01-09: Kode Transaksi (01=일반, 04=DPP 다른 값, 07=면세 납품)",
+    "kodeStatusDesc": "X: Kode Status (0=일반, 1=대체)",
+    "tahunDesc": "XX: Tahun Penerbitan (연도)",
+    "nomorUrutDesc": "XXXXXXXX: Nomor Urut (일련번호)"
+  },
+  "submissionsList": {
+    "countCases": "{count}건"
+  },
+  "errorBoundary": {
+    "title": "문제가 발생했습니다",
+    "defaultMessage": "일시적인 오류가 발생했습니다. 다시 시도해주세요.",
+    "retry": "다시 시도"
+  },
+  "pph26Page": {
+    "title": "PPh 26 (비거주자)",
+    "preparing": "준비 중",
+    "description": "PPh 26 Non-Resident 기능은 현재 개발 중입니다."
+  },
+  "pph22Page": {
+    "title": "PPh 22 (수입세)",
+    "preparing": "준비 중",
+    "description": "PPh 22 Import 기능은 현재 개발 중입니다."
+  },
+  "operatorQueue": {
+    "rejectReasonPrompt": "거절 사유를 입력해 주세요 (필수)",
+    "rejectReasonRequired": "거절 사유는 필수입니다",
+    "reject": "거절"
+  },
+  "poaStatus": {
+    "defaultPartner": "세무 대행사"
+  },
+  "multiEntity": {
+    "countUnits": "{count}개",
+    "countCases": "{count}건"
+  },
+  "calculations": {
+    "countCases": "{count}건"
+  },
+  "referral": {
+    "whatsappShare": "AI Pajak으로 세금 신고가 쉬워졌어요! 🎉\n\n가입하면 {reward}을 받을 수 있습니다.\n\n{url}",
+    "countPeople": "{count}명"
+  },
+  "helpPage": {
+    "manualsTitle": "사용자 매뉴얼 (역할별 상세 가이드)",
+    "manualsDesc": "법인 · 개인 · 외부 세무사무소 · JTC 세무사 · 운영팀 · 플랫폼 관리자 — 역할별 시나리오형 매뉴얼"
   }
 }

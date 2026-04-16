@@ -62,10 +62,10 @@ function parseCSV(text: string): Record<string, string>[] {
   return rows;
 }
 
-function csvRowToCustomer(row: Record<string, string>) {
+function csvRowToCustomer(row: Record<string, string>, companyNameHeader: string) {
   return {
     full_name: row.full_name || row.name || '',
-    company_name: row.company_name || row['회사명'] || '',
+    company_name: row.company_name || row[companyNameHeader] || '',
     customer_type: (row.customer_type || 'COMPANY').toUpperCase() as 'INDIVIDUAL' | 'COMPANY',
     npwp: row.npwp || '',
     email: row.email || '',
@@ -111,7 +111,8 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
           setError(t('errorMax'));
           return;
         }
-        const customers = rawRows.map(csvRowToCustomer);
+        const companyNameHeader = t('companyNameHeader');
+        const customers = rawRows.map(row => csvRowToCustomer(row, companyNameHeader));
         setParsedRows(customers);
         setStep('preview');
       } catch {
@@ -289,7 +290,7 @@ export function BulkImportDialog({ onComplete }: { onComplete?: () => void }) {
                 <div className="space-y-1">
                   {result.errors.map((err, i) => (
                     <p key={i} className="text-[10px] text-red-700">
-                      행 {err.row}: [{err.field}] {err.message}
+                      {t('errorRowFormat', { row: err.row, field: err.field, message: err.message })}
                     </p>
                   ))}
                 </div>

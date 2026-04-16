@@ -17,6 +17,7 @@ interface Summary {
 
 export default function SubmissionsPage() {
   const t = useTranslations('killer');
+  const tl = useTranslations('submissionsList');
   const { session, isLoading: sessionLoading } = useSession();
   const [items, setItems] = useState<QueueItem[]>([]);
   const [summary, setSummary] = useState<Summary>({ total: 0, paymentPending: 0, paymentUploaded: 0, completed: 0, inProgress: 0 });
@@ -64,25 +65,25 @@ export default function SubmissionsPage() {
               <p className="text-indigo-300 text-xs flex items-center gap-1">
                 <Clock className="h-3 w-3" />{t('submissions.inProgress')}
               </p>
-              <p className="font-bold text-lg">{summary.inProgress}건</p>
+              <p className="font-bold text-lg">{tl('countCases', { count: summary.inProgress })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-indigo-300 text-xs flex items-center gap-1">
                 <CreditCard className="h-3 w-3 text-amber-300" />{t('submissions.paymentWaiting')}
               </p>
-              <p className="font-bold text-lg text-amber-300">{summary.paymentPending}건</p>
+              <p className="font-bold text-lg text-amber-300">{tl('countCases', { count: summary.paymentPending })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-indigo-300 text-xs flex items-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-300" />{t('submissions.completed')}
               </p>
-              <p className="font-bold text-lg">{summary.completed}건</p>
+              <p className="font-bold text-lg">{tl('countCases', { count: summary.completed })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-indigo-300 text-xs flex items-center gap-1">
                 <AlertTriangle className="h-3 w-3" />{t('submissions.total')}
               </p>
-              <p className="font-bold text-lg">{summary.total}건</p>
+              <p className="font-bold text-lg">{tl('countCases', { count: summary.total })}</p>
             </div>
           </div>
         </div>

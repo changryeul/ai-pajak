@@ -39,6 +39,7 @@ interface TaxCalculation {
 
 export default function TaxCalculationsPage() {
   const t = useTranslations('killer');
+  const tc = useTranslations('calculations');
   const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const router = useRouter();
@@ -97,13 +98,13 @@ export default function TaxCalculationsPage() {
           <div className="grid grid-cols-2 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-teal-300 text-xs">{t('calculations.totalDrafts')}</p>
-              <p className="font-bold text-lg">{calculations.length}건</p>
+              <p className="font-bold text-lg">{tc('countCases', { count: calculations.length })}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
               <p className="text-teal-300 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" />{t('calculations.aiClassified')}
               </p>
-              <p className="font-bold text-lg">{calculations.filter(c => c.source === 'CUSTOMER_OCR').length}건</p>
+              <p className="font-bold text-lg">{tc('countCases', { count: calculations.filter(c => c.source === 'CUSTOMER_OCR').length })}</p>
             </div>
           </div>
         </div>

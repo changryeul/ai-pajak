@@ -90,6 +90,7 @@ interface OperatorOption {
 
 export default function OperatorQueuePage() {
   const t = useTranslations('operator');
+  const tq = useTranslations('operatorQueue');
   const { session } = useSession();
 
   const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
@@ -299,9 +300,9 @@ export default function OperatorQueuePage() {
   // state plumbing; the API requires `rejectedReason` so we capture the
   // minimum here.
   const handleReject = (itemId: string) => {
-    const reason = window.prompt('거절 사유를 입력해 주세요 (필수)');
+    const reason = window.prompt(tq('rejectReasonPrompt'));
     if (!reason || !reason.trim()) {
-      setMessage({ text: '거절 사유는 필수입니다', type: 'error' });
+      setMessage({ text: tq('rejectReasonRequired'), type: 'error' });
       setTimeout(() => setMessage(null), 4000);
       return;
     }
@@ -547,7 +548,7 @@ export default function OperatorQueuePage() {
                             disabled={actionLoading === item.id}
                             onClick={() => handleReject(item.id)}
                           >
-                            거절
+                            {tq('reject')}
                           </Button>
                         )}
                       </div>
