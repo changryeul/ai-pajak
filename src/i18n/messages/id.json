@@ -3804,7 +3804,19 @@
     "k152_d85864": "생성 후 은행에서 납부 → NTPN 입력",
     "k153_d76082": "납부 페이지로",
     "countItems": "{count} item",
-    "yesOption": "Ya"
+    "yesOption": "Ya",
+    "inputModeTemplate": "1. Unduh Template",
+    "inputModeTemplateDesc": "Unduh template Excel lalu unggah",
+    "inputModeTemplateBtn": "Unduh Template",
+    "inputModeUpload": "2. Unggah Data",
+    "inputModeUploadDesc": "AI mem-parsing faktur / kuitansi",
+    "inputModeUploadBtn": "Unggah File",
+    "inputModeUploadPhoto": "Ambil Foto",
+    "inputModeManual": "3. Input Manual",
+    "inputModeManualDesc": "Input transaksi langsung",
+    "inputModeManualBtn": "Input Manual",
+    "templateComingSoon": "Template CSV diunduh",
+    "uploadComingSoon": "Fitur unggah OCR segera hadir"
   },
   "companyProfile": {
     "k0_6f2592": "서비스업 (Jasa)",

@@ -12,11 +12,12 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Loader2, Plus, Receipt, FileText, DollarSign, CheckCircle,
-  AlertTriangle, Download, Sparkles, X, ChevronDown, ChevronRight,
+  AlertTriangle, Sparkles, X, ChevronDown, ChevronRight,
   Calculator, Shield, Upload, Camera, Image, ArrowRight,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
-import { ScreenHeader } from '@/components/tax';
+import { ScreenHeader, InputModeCard } from '@/components/tax';
+import { Download, FileUp, Pencil } from 'lucide-react';
 
 // ── Types ──
 interface Transaction {
@@ -442,6 +443,52 @@ export default function PPh23Page() {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* 3-mode input cards (prototype alignment) */}
+      <div className="grid gap-4 md:grid-cols-3 mb-4">
+        <InputModeCard active={false} title={t('inputModeTemplate')} desc={t('inputModeTemplateDesc')} icon={Download}>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              const headers = ['counterparty_name', 'counterparty_npwp', 'service_type', 'transaction_type', 'gross_amount', 'tax_rate', 'contract_no', 'invoice_no', 'dgt_form'];
+              const sample = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', '10000000', '2', 'CT-001', 'INV-001', 'N'];
+              const csv = [headers.join(','), sample.join(','), ''].join('\n');
+              const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'pph23_template.csv';
+              a.click();
+              URL.revokeObjectURL(url);
+              showMsg('success', t('templateComingSoon'));
+            }}
+          >
+            <Download className="h-3 w-3 mr-1" />
+            {t('inputModeTemplateBtn')}
+          </Button>
+        </InputModeCard>
+        <InputModeCard active={false} title={t('inputModeUpload')} desc={t('inputModeUploadDesc')} icon={FileUp}>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => showMsg('success', t('uploadComingSoon'))}
+          >
+            <FileUp className="h-3 w-3 mr-1" />
+            {t('inputModeUploadBtn')}
+          </Button>
+        </InputModeCard>
+        <InputModeCard active={showForm} title={t('inputModeManual')} desc={t('inputModeManualDesc')} icon={Pencil}>
+          <Button
+            className="w-full bg-purple-600 hover:bg-purple-700"
+            onClick={() => setShowForm(true)}
+            disabled={!customerId}
+          >
+            <Pencil className="h-3 w-3 mr-1" />
+            {t('inputModeManualBtn')}
+          </Button>
+        </InputModeCard>
       </div>
 
       {message && (

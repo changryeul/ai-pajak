@@ -3804,7 +3804,19 @@
     "k152_d85864": "생성 후 은행에서 납부 → NTPN 입력",
     "k153_d76082": "납부 페이지로",
     "countItems": "{count} items",
-    "yesOption": "Yes"
+    "yesOption": "Yes",
+    "inputModeTemplate": "1. Download Template",
+    "inputModeTemplateDesc": "Download Excel template then upload",
+    "inputModeTemplateBtn": "Download Template",
+    "inputModeUpload": "2. Upload Data",
+    "inputModeUploadDesc": "AI parses invoices / receipts",
+    "inputModeUploadBtn": "Upload File",
+    "inputModeUploadPhoto": "Take Photo",
+    "inputModeManual": "3. Manual Entry",
+    "inputModeManualDesc": "Enter transaction directly",
+    "inputModeManualBtn": "Manual Entry",
+    "templateComingSoon": "CSV template downloaded",
+    "uploadComingSoon": "OCR upload feature coming soon"
   },
   "companyProfile": {
     "k0_6f2592": "서비스업 (Jasa)",

@@ -3805,7 +3805,19 @@
     "k152_d85864": "생성 후 은행에서 납부 → NTPN 입력",
     "k153_d76082": "납부 페이지로",
     "countItems": "{count}건",
-    "yesOption": "예"
+    "yesOption": "예",
+    "inputModeTemplate": "1. 템플릿 다운로드",
+    "inputModeTemplateDesc": "엑셀 템플릿 다운로드 후 업로드",
+    "inputModeTemplateBtn": "템플릿 다운로드",
+    "inputModeUpload": "2. 자료 업로드",
+    "inputModeUploadDesc": "인보이스 / 영수증 자동 파싱",
+    "inputModeUploadBtn": "파일 업로드",
+    "inputModeUploadPhoto": "사진 촬영",
+    "inputModeManual": "3. 직접 입력",
+    "inputModeManualDesc": "거래정보 직접 입력",
+    "inputModeManualBtn": "직접 입력",
+    "templateComingSoon": "템플릿 CSV가 다운로드됩니다",
+    "uploadComingSoon": "OCR 업로드 기능 준비 중입니다"
   },
   "companyProfile": {
     "k0_6f2592": "서비스업 (Jasa)",
