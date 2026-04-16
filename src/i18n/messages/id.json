@@ -2232,7 +2232,22 @@
     "retry": "Coba Lagi",
     "failedToLoad": "Gagal memuat status sistem",
     "failures": "Kegagalan",
-    "lastFailure": "Kegagalan terakhir"
+    "lastFailure": "Kegagalan terakhir",
+    "createUser": "Daftarkan Pengguna",
+    "createUserTitle": "Registrasi Pengguna Baru",
+    "email": "Email *",
+    "password": "Kata Sandi *",
+    "passwordPlaceholder": "Minimal 8 karakter",
+    "name": "Nama",
+    "namePlaceholder": "Nama lengkap",
+    "role": "Peran *",
+    "customerOption": "Customer (Wajib Pajak)",
+    "consultantOption": "Consultant (Konsultan)",
+    "taxAdvisorOption": "Tax Advisor (Konsultan Pajak)",
+    "operatorOption": "Tax Operator",
+    "adminOption": "Admin",
+    "cancel": "Batal",
+    "register": "Daftarkan"
   },
   "sptPages": {
     "back": "Kembali",

@@ -2232,7 +2232,22 @@
     "retry": "重试",
     "failedToLoad": "加载系统状态失败",
     "failures": "失败次数",
-    "lastFailure": "最后失败"
+    "lastFailure": "最后失败",
+    "createUser": "Create User",
+    "createUserTitle": "New User Registration",
+    "email": "Email *",
+    "password": "Password *",
+    "passwordPlaceholder": "Minimum 8 characters",
+    "name": "Name",
+    "namePlaceholder": "Full name",
+    "role": "Role *",
+    "customerOption": "Customer (Taxpayer)",
+    "consultantOption": "Consultant",
+    "taxAdvisorOption": "Tax Advisor",
+    "operatorOption": "Tax Operator",
+    "adminOption": "Admin",
+    "cancel": "Cancel",
+    "register": "Register"
   },
   "sptPages": {
     "back": "返回",

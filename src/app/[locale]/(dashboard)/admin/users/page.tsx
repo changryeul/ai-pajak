@@ -138,7 +138,7 @@ export default function AdminUsersPage() {
               onClick={() => setShowCreateForm(!showCreateForm)}
               className="bg-white/20 hover:bg-white/30 text-white border-0"
             >
-              <Plus className="h-4 w-4 mr-2" />사용자 등록
+              <Plus className="h-4 w-4 mr-2" />{t('createUser')}
             </Button>
           </div>
 
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
         <Card className="border-0 shadow-md mb-6">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">새 사용자 등록</CardTitle>
+              <CardTitle className="text-base">{t('createUserTitle')}</CardTitle>
               <button onClick={() => setShowCreateForm(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="h-4 w-4" />
               </button>
@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs">이메일 *</Label>
+                <Label className="text-xs">{t('email')}</Label>
                 <Input
                   type="email"
                   value={createForm.email}
@@ -184,36 +184,36 @@ export default function AdminUsersPage() {
                 />
               </div>
               <div>
-                <Label className="text-xs">비밀번호 *</Label>
+                <Label className="text-xs">{t('password')}</Label>
                 <Input
                   type="password"
                   value={createForm.password}
                   onChange={e => setCreateForm({ ...createForm, password: e.target.value })}
-                  placeholder="최소 8자"
+                  placeholder={t('passwordPlaceholder')}
                 />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <Label className="text-xs">이름</Label>
+                <Label className="text-xs">{t('name')}</Label>
                 <Input
                   value={createForm.fullName}
                   onChange={e => setCreateForm({ ...createForm, fullName: e.target.value })}
-                  placeholder="홍길동"
+                  placeholder={t('namePlaceholder')}
                 />
               </div>
               <div>
-                <Label className="text-xs">역할 *</Label>
+                <Label className="text-xs">{t('role')}</Label>
                 <Select value={createForm.role} onValueChange={v => setCreateForm({ ...createForm, role: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="CUSTOMER">Customer (납세자)</SelectItem>
-                    <SelectItem value="CONSULTANT_JTC">Consultant (컨설턴트)</SelectItem>
-                    <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor (세무사)</SelectItem>
-                    <SelectItem value="TAX_OPERATOR">Tax Operator (상담사)</SelectItem>
+                    <SelectItem value="CUSTOMER">{t('customerOption')}</SelectItem>
+                    <SelectItem value="CONSULTANT_JTC">{t('consultantOption')}</SelectItem>
+                    <SelectItem value="TAX_ADVISOR_JTC">{t('taxAdvisorOption')}</SelectItem>
+                    <SelectItem value="TAX_OPERATOR">{t('operatorOption')}</SelectItem>
                     <SelectItem value="TAX_OPERATOR_LEAD">Operator Lead</SelectItem>
                     <SelectItem value="TAX_OPERATOR_SUPERVISOR">Operator Supervisor</SelectItem>
-                    <SelectItem value="PLATFORM_ADMIN">Admin (관리자)</SelectItem>
+                    <SelectItem value="PLATFORM_ADMIN">{t('adminOption')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -228,14 +228,14 @@ export default function AdminUsersPage() {
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowCreateForm(false)}>취소</Button>
+              <Button variant="outline" onClick={() => setShowCreateForm(false)}>{t('cancel')}</Button>
               <Button
                 onClick={handleCreateUser}
                 disabled={isCreating || !createForm.email || !createForm.password}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600"
               >
                 {isCreating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                등록
+                {t('register')}
               </Button>
             </div>
           </CardContent>

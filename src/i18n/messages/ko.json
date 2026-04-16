@@ -2233,7 +2233,22 @@
     "retry": "재시도",
     "failedToLoad": "시스템 상태 로드 실패",
     "failures": "실패 횟수",
-    "lastFailure": "마지막 실패"
+    "lastFailure": "마지막 실패",
+    "createUser": "사용자 등록",
+    "createUserTitle": "새 사용자 등록",
+    "email": "이메일 *",
+    "password": "비밀번호 *",
+    "passwordPlaceholder": "최소 8자",
+    "name": "이름",
+    "namePlaceholder": "홍길동",
+    "role": "역할 *",
+    "customerOption": "Customer (납세자)",
+    "consultantOption": "Consultant (컨설턴트)",
+    "taxAdvisorOption": "Tax Advisor (세무사)",
+    "operatorOption": "Tax Operator (상담사)",
+    "adminOption": "Admin (관리자)",
+    "cancel": "취소",
+    "register": "등록"
   },
   "sptPages": {
     "back": "돌아가기",

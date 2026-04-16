@@ -2232,7 +2232,22 @@
     "retry": "再試行",
     "failedToLoad": "システムステータスの読み込みに失敗",
     "failures": "失敗回数",
-    "lastFailure": "最終失敗"
+    "lastFailure": "最終失敗",
+    "createUser": "Create User",
+    "createUserTitle": "New User Registration",
+    "email": "Email *",
+    "password": "Password *",
+    "passwordPlaceholder": "Minimum 8 characters",
+    "name": "Name",
+    "namePlaceholder": "Full name",
+    "role": "Role *",
+    "customerOption": "Customer (Taxpayer)",
+    "consultantOption": "Consultant",
+    "taxAdvisorOption": "Tax Advisor",
+    "operatorOption": "Tax Operator",
+    "adminOption": "Admin",
+    "cancel": "Cancel",
+    "register": "Register"
   },
   "sptPages": {
     "back": "戻る",

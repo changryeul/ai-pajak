@@ -2232,7 +2232,22 @@
     "retry": "Retry",
     "failedToLoad": "Failed to load system status",
     "failures": "Failures",
-    "lastFailure": "Last failure"
+    "lastFailure": "Last failure",
+    "createUser": "Create User",
+    "createUserTitle": "New User Registration",
+    "email": "Email *",
+    "password": "Password *",
+    "passwordPlaceholder": "Minimum 8 characters",
+    "name": "Name",
+    "namePlaceholder": "Full name",
+    "role": "Role *",
+    "customerOption": "Customer (Taxpayer)",
+    "consultantOption": "Consultant",
+    "taxAdvisorOption": "Tax Advisor",
+    "operatorOption": "Tax Operator",
+    "adminOption": "Admin",
+    "cancel": "Cancel",
+    "register": "Register"
   },
   "sptPages": {
     "back": "Back",
