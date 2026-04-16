@@ -78,7 +78,8 @@ export default function TaxBillingPage() {
       const res = await fetch('/api/customer/queue');
       const data = await res.json();
       if (data.success) {
-        const all = (data.data || []) as BillingItem[];
+        const fetched = data?.data?.items;
+        const all = (Array.isArray(fetched) ? fetched : []) as BillingItem[];
         setItems(
           all.filter(
             (i) => i.tax_period_year === year && VISIBLE_STATUSES.includes(i.status),

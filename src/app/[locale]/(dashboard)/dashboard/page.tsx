@@ -311,7 +311,8 @@ function CorporateCustomerDashboard({
       .then(r => r.json())
       .then(d => {
         if (d.success) {
-          const all = d.data || [];
+          const fetched = d?.data?.items;
+          const all = Array.isArray(fetched) ? fetched : [];
           setUnpaidBillings(all.filter((i: { status: string; ebilling_code?: string }) =>
             ['EBILLING_GENERATED', 'PAYMENT_PENDING'].includes(i.status) && i.ebilling_code
           ));

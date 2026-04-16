@@ -56,7 +56,10 @@ export function CorporateDashboardV2({
 
     fetch('/api/customer/queue')
       .then((r) => r.json())
-      .then((d) => { if (d.success) setQueueItems(d.data || []); })
+      .then((d) => {
+        const items = d?.data?.items;
+        if (d?.success && Array.isArray(items)) setQueueItems(items);
+      })
       .catch(() => {});
   }, [session.customerId]);
 

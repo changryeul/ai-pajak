@@ -67,7 +67,8 @@ export default function FilingStatusPage() {
     try {
       const res = await fetch('/api/customer/queue');
       const data = await res.json();
-      if (data.success) setItems(data.data || []);
+      const fetched = data?.data?.items;
+      if (data?.success && Array.isArray(fetched)) setItems(fetched);
     } catch {
       /* */
     } finally {
