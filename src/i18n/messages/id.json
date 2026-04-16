@@ -2146,7 +2146,17 @@
     "costBreakdown": "Estimasi Biaya",
     "costNote": "* Estimasi: Asumsi 30% penggunaan per-user limit, 8 jam aktif per hari",
     "warningTitle": "Perhatian",
-    "warningText": "Perubahan rate limit berlaku segera. Pengaturan terlalu rendah dapat mempengaruhi pengalaman pengguna. Default dipulihkan saat server restart."
+    "warningText": "Perubahan rate limit berlaku segera. Pengaturan terlalu rendah dapat mempengaruhi pengalaman pengguna. Default dipulihkan saat server restart.",
+    "monthActualCost": "Biaya aktual bulan ini",
+    "callsSuffix": " panggilan",
+    "todayCost": "Biaya hari ini",
+    "monthActualUsage": "Penggunaan aktual bulan ini",
+    "thFeature": "Fitur",
+    "thCalls": "Panggilan",
+    "thTokens": "Token",
+    "thCost": "Biaya (USD)",
+    "thErrors": "Error",
+    "totalRow": "Total"
   },
   "admin": {
     "admin": "Admin",
@@ -5076,5 +5086,101 @@
   "helpPage": {
     "manualsTitle": "Panduan Pengguna (Panduan detail per peran)",
     "manualsDesc": "Korporat · Individu · Konsultan Eksternal · Advisor JTC · Operator · Admin Platform — Manual skenario per peran"
+  },
+  "overrideRules": {
+    "pageTitle": "Manajemen Override Rule",
+    "pageSubtitle": "Kelola aturan prioritas tertinggi Resolution Engine. Jika semua kondisi cocok, aturan ini diutamakan dibanding aturan lain.",
+    "priorityLabel": "Priority (lebih tinggi = lebih dulu)",
+    "conditionsHeader": "Conditions (kosong = abaikan kondisi tersebut)",
+    "countryLabel": "Country (ISO 2 huruf)",
+    "resultHeader": "Result (diterapkan saat cocok)",
+    "rateLabel": "Rate (desimal) *",
+    "reasonLabel": "Reason (alasan) *",
+    "legalBasisLabel": "Legal Basis (dasar hukum) *",
+    "noRules": "Tidak ada override rule",
+    "howItWorksTitle": "Cara Kerja Override Rule",
+    "howItWorksBody": "Jika semua kondisi non-null cocok, aturan diterapkan dengan prioritas tertinggi di Resolution Engine. Nomor Priority yang lebih tinggi dievaluasi lebih dulu. Aturan nonaktif tidak diterapkan."
+  },
+  "spt1770ss": {
+    "aiAutoInput": "Pengisian otomatis AI",
+    "docsRecognized": " dokumen dikenali.",
+    "ptkpStatusLabel": "Status PTKP",
+    "verifyAndContinue": "Periksa data dan lanjutkan.",
+    "continueWithDocs": "Lanjut ({count} dokumen)",
+    "docIncomeReady": "Data penghasilan dari {count} dokumen siap.",
+    "fallbackDataDesc": "SPT akan dibuat berdasarkan data bukti potong tersimpan.",
+    "taxYearPlaceholder": "Pilih tahun pajak",
+    "ptkpLabel": "Status PTKP (pernikahan / tanggungan)",
+    "ptkpPlaceholder": "Pilih status PTKP",
+    "noteLabel": "Catatan",
+    "noDocUploadedMsg": "Tidak ada dokumen diunggah. SPT akan dibuat berdasarkan bukti potong (Form 1721-A1) tersimpan atau data perhitungan pajak sebelumnya.",
+    "backBtn": "Kembali"
+  },
+  "consultantTier": {
+    "subscriptionNeeded": "Langganan Firma Pajak Diperlukan",
+    "currentClientsPrefix": "Sedang mengelola {count} klien.",
+    "tierRecommended": "tier direkomendasikan.",
+    "viewPlans": "Lihat paket",
+    "currentTier": "Tier firma pajak",
+    "perMonth": "per bulan",
+    "nextPayment": "Pembayaran berikutnya",
+    "managedClients": "{count} klien dikelola",
+    "upgrade": "Upgrade",
+    "changeTier": "Ubah tier",
+    "suitablePrefix": "Jumlah klien Anda sesuai untuk",
+    "suitableSuffix": "tier."
+  },
+  "ocrUploader": {
+    "uploadAnother": "Unggah dokumen lain",
+    "processingFailed": "Pemrosesan gagal",
+    "retryBtn": "Coba lagi"
+  },
+  "taxOptimizer": {
+    "recPtkpMarriageTitle": "Perbarui status pernikahan",
+    "recPtkpMarriageDesc": "Terapkan K/0 untuk potongan PTKP tambahan Rp 4.500.000. Jika pasangan berpenghasilan, K/I gabungan menghemat lebih banyak.",
+    "recBpjsTitle": "Optimalkan potongan BPJS Ketenagakerjaan",
+    "recBpjsDesc": "Klaim iuran BPJS {amount} sebagai potongan penghasilan.",
+    "recZakatTitle": "Potongan Zakat / donasi",
+    "recZakatDesc": "Bayar Zakat 2.5% = {amount} ke lembaga resmi untuk potongan penghasilan.",
+    "recUmkmTitle": "Terapkan PPh Final UMKM 0,5%",
+    "recUmkmDesc": "Atas omzet usaha {revenue}, menerapkan UMKM Final 0,5% dibanding tarif normal menghemat {savings}.",
+    "recPensionTitle": "Kontribusi Dana Pensiun tambahan",
+    "recPensionDesc": "Kontribusi tambahan ke dana pensiun resmi dapat dipotong. Penghematan jangka panjang + persiapan pensiun."
+  },
+  "chatPage": {
+    "q1": "Berapa tarif PPh 21?",
+    "q2": "Apa syarat UMKM PPh Final 0,5%?",
+    "q3": "Kapan deadline SPT Tahunan?",
+    "q4": "Jelaskan perubahan tarif PPN",
+    "q5": "Apa saja objek PPh 23?",
+    "q6": "Berapa nilai PTKP 2024?",
+    "cannotGenerate": "Tidak dapat membuat jawaban."
+  },
+  "taxChat": {
+    "q1": "Bagaimana cara menghitung PPh 21?",
+    "q2": "Kapan deadline SPT Tahunan?",
+    "q3": "Apa itu PTKP dan berapa besarnya?",
+    "q4": "Bagaimana cara mengajukan restitusi?",
+    "q5": "Apa perbedaan SPT 1770 SS dan 1770 S?",
+    "greeting": "Halo! Saya Asisten Pajak AI",
+    "askAnything": "Tanyakan apapun tentang pajak Indonesia",
+    "clearChat": "Hapus percakapan",
+    "inputPlaceholder": "Tanyakan tentang pajak..."
+  },
+  "transferPricing": {
+    "methodCupDesc": "Harga pembanding antar perusahaan independen",
+    "methodCostPlusDesc": "Harga pokok plus markup",
+    "methodResaleDesc": "Harga jual kembali",
+    "methodTnmmDesc": "Margin bersih transaksional",
+    "methodProfitSplitDesc": "Pembagian laba",
+    "legalBasis": "Dasar hukum"
+  },
+  "monthlyReport": {
+    "taxLabelPph21": "PPh 21 (Pajak Penghasilan Karyawan)",
+    "taxLabelPph23": "PPh 23 (Pajak Potong/Pungut)",
+    "taxLabelPphFinal": "PPh 4(2) (Pajak Final)",
+    "taxLabelPpn": "PPN (Pajak Pertambahan Nilai)",
+    "count": "{n}",
+    "reportLoadFailed": "Gagal memuat laporan"
   }
 }

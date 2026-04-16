@@ -15,17 +15,17 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-const QUICK_QUESTIONS = [
-  'PPh 21 세율이 어떻게 되나요?',
-  'UMKM PPh Final 0.5% 조건은?',
-  'SPT Tahunan 마감일이 언제인가요?',
-  'PPN 세율 변경사항 알려주세요',
-  'PPh 23 원천징수 대상은?',
-  'PTKP 2024 기준 금액은?',
-];
-
 export default function ChatPage() {
   const t = useTranslations('killer');
+  const tc = useTranslations('chatPage');
+  const QUICK_QUESTIONS = [
+    tc('q1'),
+    tc('q2'),
+    tc('q3'),
+    tc('q4'),
+    tc('q5'),
+    tc('q6'),
+  ];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +59,7 @@ export default function ChatPage() {
 
       const assistantMsg: ChatMessage = {
         role: 'assistant',
-        content: data.data?.response || data.response || '답변을 생성할 수 없습니다.',
+        content: data.data?.response || data.response || tc('cannotGenerate'),
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, assistantMsg]);

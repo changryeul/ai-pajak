@@ -87,6 +87,7 @@ export function SPT1770SSGenerator({
 }: SPT1770SSGeneratorProps) {
   const ts = useTranslations('spt');
   const tf = useTranslations('sptForm');
+  const tg = useTranslations('spt1770ss');
   const currentYear = new Date().getFullYear();
   const taxYearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
@@ -621,14 +622,14 @@ export function SPT1770SSGenerator({
             {extractedIncomes.length > 0 && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm text-green-800">
-                  <strong>AI 자동 입력:</strong> {extractedIncomes.length}개 문서 인식 완료.
+                  <strong>{tg('aiAutoInput')}:</strong> {extractedIncomes.length}{tg('docsRecognized')}
                   {extractedIncomes[0]?.ptkpStatus && (
-                    <> PTKP 상태: <strong>{extractedIncomes[0].ptkpStatus}</strong>.</>
+                    <> {tg('ptkpStatusLabel')}: <strong>{extractedIncomes[0].ptkpStatus}</strong>.</>
                   )}
                   {extractedIncomes[0]?.taxYear && (
                     <> {tf('detectedYear')}: <strong>{extractedIncomes[0].taxYear}</strong>.</>
                   )}
-                  {' '}데이터를 확인하고 계속 진행하세요.
+                  {' '}{tg('verifyAndContinue')}
                 </p>
               </div>
             )}
@@ -719,7 +720,7 @@ export function SPT1770SSGenerator({
               onClick={proceedToForm}
               disabled={extractedIncomes.length === 0}
             >
-              계속 ({extractedIncomes.length}개 문서)
+              {tg('continueWithDocs', { count: extractedIncomes.length })}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </CardFooter>
@@ -737,8 +738,8 @@ export function SPT1770SSGenerator({
           <CardTitle>{ts('settingsStep')} 1770 SS</CardTitle>
           <CardDescription>
             {extractedIncomes.length > 0
-              ? `${extractedIncomes.length}개 문서의 소득 정보 사용 준비 완료.`
-              : '저장된 원천징수영수증 데이터를 기반으로 SPT가 생성됩니다.'}
+              ? tg('docIncomeReady', { count: extractedIncomes.length })
+              : tg('fallbackDataDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -799,7 +800,7 @@ export function SPT1770SSGenerator({
               onValueChange={(v) => setTaxYear(parseInt(v))}
             >
               <SelectTrigger id="taxYear">
-                <SelectValue placeholder="과세 연도 선택" />
+                <SelectValue placeholder={tg('taxYearPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {taxYearOptions.map((year) => (
@@ -813,13 +814,13 @@ export function SPT1770SSGenerator({
 
           {/* PTKP Status Selection */}
           <div className="space-y-2">
-            <Label htmlFor="ptkpStatus">PTKP 상태 (혼인/부양가족)</Label>
+            <Label htmlFor="ptkpStatus">{tg('ptkpLabel')}</Label>
             <Select
               value={ptkpStatus}
               onValueChange={(v) => setPtkpStatus(v as PTKPStatus)}
             >
               <SelectTrigger id="ptkpStatus">
-                <SelectValue placeholder="PTKP 상태 선택" />
+                <SelectValue placeholder={tg('ptkpPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {PTKP_OPTIONS.map((option) => (
@@ -864,15 +865,14 @@ export function SPT1770SSGenerator({
           {extractedIncomes.length === 0 && (
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>참고:</strong> 업로드된 문서가 없습니다. 이전에 저장된 원천징수영수증(Form 1721-A1)
-                또는 과거 세금 계산 데이터를 기반으로 SPT가 생성됩니다.
+                <strong>{tg('noteLabel')}:</strong> {tg('noDocUploadedMsg')}
               </p>
             </div>
           )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={() => setStep('upload')}>
-            이전으로
+            {tg('backBtn')}
           </Button>
           <Button onClick={generateSPT} disabled={isLoading}>
             {isLoading ? ts('generating') : ts('generateSpt')}

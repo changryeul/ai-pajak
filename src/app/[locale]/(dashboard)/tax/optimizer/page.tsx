@@ -32,20 +32,11 @@ interface Recommendation {
   legalBasis: string;
 }
 
-const PTKP_OPTIONS = [
-  { value: 'TK/0', label: 'TK/0 — 미혼, 부양가족 없음', amount: 54000000 },
-  { value: 'TK/1', label: 'TK/1 — 미혼, 부양 1명', amount: 58500000 },
-  { value: 'TK/2', label: 'TK/2 — 미혼, 부양 2명', amount: 63000000 },
-  { value: 'TK/3', label: 'TK/3 — 미혼, 부양 3명', amount: 67500000 },
-  { value: 'K/0', label: 'K/0 — 기혼, 부양가족 없음', amount: 58500000 },
-  { value: 'K/1', label: 'K/1 — 기혼, 부양 1명', amount: 63000000 },
-  { value: 'K/2', label: 'K/2 — 기혼, 부양 2명', amount: 67500000 },
-  { value: 'K/3', label: 'K/3 — 기혼, 부양 3명', amount: 72000000 },
-  { value: 'K/I/0', label: 'K/I/0 — 합산과세', amount: 112500000 },
-  { value: 'K/I/1', label: 'K/I/1 — 합산과세+1', amount: 117000000 },
-  { value: 'K/I/2', label: 'K/I/2 — 합산과세+2', amount: 121500000 },
-  { value: 'K/I/3', label: 'K/I/3 — 합산과세+3', amount: 126000000 },
-];
+const PTKP_AMOUNTS: Record<string, number> = {
+  'TK/0': 54000000, 'TK/1': 58500000, 'TK/2': 63000000, 'TK/3': 67500000,
+  'K/0': 58500000, 'K/1': 63000000, 'K/2': 67500000, 'K/3': 72000000,
+  'K/I/0': 112500000, 'K/I/1': 117000000, 'K/I/2': 121500000, 'K/I/3': 126000000,
+};
 
 
 function calculateTax(taxableIncome: number): number {
@@ -70,14 +61,36 @@ function calculateTax(taxableIncome: number): number {
   return Math.round(tax);
 }
 
-const DIFFICULTY_STYLES = {
-  EASY: { label: '쉬움', color: 'bg-green-100 text-green-700' },
-  MEDIUM: { label: '보통', color: 'bg-yellow-100 text-yellow-700' },
-  HARD: { label: '어려움', color: 'bg-red-100 text-red-700' },
+const DIFFICULTY_COLORS = {
+  EASY: 'bg-green-100 text-green-700',
+  MEDIUM: 'bg-yellow-100 text-yellow-700',
+  HARD: 'bg-red-100 text-red-700',
 };
 
 export default function TaxOptimizerPage() {
-  const t = useTranslations('killer');
+  const t = useTranslations('taxOptimizer');
+
+  const PTKP_OPTIONS = [
+    { value: 'TK/0', label: 'TK/0 — ' + t('ptkpSingleNoDep'), amount: 54000000 },
+    { value: 'TK/1', label: 'TK/1 — ' + t('ptkpSingleDep1'), amount: 58500000 },
+    { value: 'TK/2', label: 'TK/2 — ' + t('ptkpSingleDep2'), amount: 63000000 },
+    { value: 'TK/3', label: 'TK/3 — ' + t('ptkpSingleDep3'), amount: 67500000 },
+    { value: 'K/0', label: 'K/0 — ' + t('ptkpMarriedNoDep'), amount: 58500000 },
+    { value: 'K/1', label: 'K/1 — ' + t('ptkpMarriedDep1'), amount: 63000000 },
+    { value: 'K/2', label: 'K/2 — ' + t('ptkpMarriedDep2'), amount: 67500000 },
+    { value: 'K/3', label: 'K/3 — ' + t('ptkpMarriedDep3'), amount: 72000000 },
+    { value: 'K/I/0', label: 'K/I/0 — ' + t('ptkpCombined'), amount: 112500000 },
+    { value: 'K/I/1', label: 'K/I/1 — ' + t('ptkpCombinedPlus1'), amount: 117000000 },
+    { value: 'K/I/2', label: 'K/I/2 — ' + t('ptkpCombinedPlus2'), amount: 121500000 },
+    { value: 'K/I/3', label: 'K/I/3 — ' + t('ptkpCombinedPlus3'), amount: 126000000 },
+  ];
+
+  const DIFFICULTY_LABELS: Record<string, string> = {
+    EASY: t('difficultyEasy'),
+    MEDIUM: t('difficultyMedium'),
+    HARD: t('difficultyHard'),
+  };
+
   const [grossIncome, setGrossIncome] = useState(0);
   const [ptkpStatus, setPtkpStatus] = useState('TK/0');
   const [hasBusinessIncome, setHasBusinessIncome] = useState(false);
@@ -103,8 +116,8 @@ export default function TaxOptimizerPage() {
       if (!ptkpStatus.startsWith('K') && grossIncome > 100000000) {
         recommendations.push({
           id: 'ptkp_marriage', category: 'PTKP',
-          title: '혼인 상태 업데이트',
-          description: 'K/0 적용 시 PTKP Rp 4.500.000 추가 공제. 배우자 소득이 있으면 K/I 합산과세로 더 큰 절세.',
+          title: t('recPtkpMarriageTitle'),
+          description: t('recPtkpMarriageDesc'),
           savings: calculateTax(taxableIncome) - calculateTax(Math.max(taxableIncome - 4500000, 0)),
           difficulty: 'EASY', legalBasis: 'UU PPh Pasal 7',
         });
@@ -117,8 +130,8 @@ export default function TaxOptimizerPage() {
         const bpjsSavings = calculateTax(taxableIncome) - calculateTax(Math.max(taxableIncome - bpjsMax, 0));
         recommendations.push({
           id: 'bpjs', category: 'DEDUCTION',
-          title: 'BPJS Ketenagakerjaan 공제 최적화',
-          description: `BPJS 기여금 ${fmtRp(bpjsMax)}을 소득공제로 신청하세요.`,
+          title: t('recBpjsTitle'),
+          description: t('recBpjsDesc', { amount: fmtRp(bpjsMax) }),
           savings: bpjsSavings, difficulty: 'EASY', legalBasis: 'PMK 101/PMK.010/2016',
         });
         optimizedSavings += bpjsSavings;
@@ -130,8 +143,8 @@ export default function TaxOptimizerPage() {
         const zakatSavings = calculateTax(taxableIncome) - calculateTax(Math.max(taxableIncome - zakatAmount, 0));
         recommendations.push({
           id: 'zakat', category: 'DEDUCTION',
-          title: 'Zakat/기부금 공제',
-          description: `Zakat 2.5% = ${fmtRp(zakatAmount)}을 공인 기관에 납부하면 소득공제 가능.`,
+          title: t('recZakatTitle'),
+          description: t('recZakatDesc', { amount: fmtRp(zakatAmount) }),
           savings: zakatSavings, difficulty: 'EASY', legalBasis: 'UU PPh Pasal 9(1)(g)',
         });
         optimizedSavings += zakatSavings;
@@ -144,8 +157,8 @@ export default function TaxOptimizerPage() {
         if (umkmTax < normalTax) {
           recommendations.push({
             id: 'umkm', category: 'STRUCTURE',
-            title: 'PPh Final UMKM 0.5% 적용',
-            description: `사업 매출 ${fmtRp(businessRevenue)}에 일반 세율 대신 UMKM Final 0.5% 적용 시 ${fmtRp(normalTax - umkmTax)} 절세.`,
+            title: t('recUmkmTitle'),
+            description: t('recUmkmDesc', { revenue: fmtRp(businessRevenue), savings: fmtRp(normalTax - umkmTax) }),
             savings: normalTax - umkmTax, difficulty: 'MEDIUM', legalBasis: 'PP 55/2022',
           });
           optimizedSavings += normalTax - umkmTax;
@@ -156,8 +169,8 @@ export default function TaxOptimizerPage() {
       if (grossIncome > 200000000) {
         recommendations.push({
           id: 'pension', category: 'DEDUCTION',
-          title: 'Dana Pensiun 추가 기여',
-          description: '승인된 연금 기금 추가 기여분은 소득공제 대상. 장기 절세 + 노후 대비.',
+          title: t('recPensionTitle'),
+          description: t('recPensionDesc'),
           savings: Math.round(grossIncome * 0.003), difficulty: 'MEDIUM', legalBasis: 'UU PPh Pasal 6(1)(c)',
         });
         optimizedSavings += recommendations[recommendations.length - 1].savings;
@@ -262,13 +275,14 @@ export default function TaxOptimizerPage() {
               </h3>
               <div className="space-y-3">
                 {result.recommendations.map(rec => {
-                  const diff = DIFFICULTY_STYLES[rec.difficulty];
+                  const diffColor = DIFFICULTY_COLORS[rec.difficulty];
+                  const diffLabel = DIFFICULTY_LABELS[rec.difficulty];
                   return (
                     <div key={rec.id} className="border rounded-xl p-4 hover:shadow-sm transition-all">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-[10px]">{rec.category}</Badge>
-                          <Badge className={cn('text-[10px]', diff.color)}>{diff.label}</Badge>
+                          <Badge className={cn('text-[10px]', diffColor)}>{diffLabel}</Badge>
                         </div>
                         <span className="font-bold text-sm text-green-700">{fmtRp(rec.savings)}</span>
                       </div>

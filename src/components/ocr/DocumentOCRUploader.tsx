@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -43,6 +44,7 @@ export function DocumentOCRUploader({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [cameraAvailable, setCameraAvailable] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations('ocrUploader');
 
   // Detect camera availability (mobile device OR videoinput device connected)
   useEffect(() => {
@@ -145,7 +147,7 @@ export function DocumentOCRUploader({
     <Card className={cn('w-full', className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          문서 OCR 업로드
+          {t('title')}
           {uploadStatus === 'completed' && (
             <Badge variant="default" className="bg-green-500">
               Completed
@@ -185,11 +187,11 @@ export function DocumentOCRUploader({
                 </svg>
                 <p className="text-muted-foreground">
                   {isDragActive
-                    ? '파일을 여기에 놓으세요...'
-                    : '문서를 드래그해서 놓거나 클릭해서 선택'}
+                    ? t('dropHere')
+                    : t('dragOrClick')}
                 </p>
                 <p className="text-sm text-muted-foreground/70">
-                  지원 형식: JPEG, PNG, WebP, PDF (최대 10MB)
+                  {t('supportedFormats')}
                 </p>
               </div>
             </div>
@@ -199,7 +201,7 @@ export function DocumentOCRUploader({
               <>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-[11px] text-gray-400">또는</span>
+                  <span className="text-[11px] text-gray-400">{t('or')}</span>
                   <div className="flex-1 h-px bg-gray-200" />
                 </div>
                 <Button
@@ -209,7 +211,7 @@ export function DocumentOCRUploader({
                   onClick={() => cameraInputRef.current?.click()}
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  카메라로 촬영
+                  {t('captureWithCamera')}
                 </Button>
                 <input
                   ref={cameraInputRef}
@@ -234,8 +236,8 @@ export function DocumentOCRUploader({
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
               <span>
                 {uploadStatus === 'uploading'
-                  ? '업로드 중...'
-                  : 'AI가 문서를 읽는 중...'}
+                  ? t('uploading')
+                  : t('aiProcessing')}
               </span>
             </div>
             <Progress value={uploadProgress} />
@@ -246,7 +248,7 @@ export function DocumentOCRUploader({
           <div className="space-y-4">
             <OCRResultDisplay result={ocrResult} />
             <Button onClick={reset} variant="outline" className="w-full">
-              다른 문서 업로드
+              {t('uploadAnother')}
             </Button>
           </div>
         )}
@@ -254,11 +256,11 @@ export function DocumentOCRUploader({
         {uploadStatus === 'failed' && (
           <div className="space-y-4">
             <div className="p-4 bg-destructive/10 rounded-lg text-destructive">
-              <p className="font-medium">처리 실패</p>
+              <p className="font-medium">{t('processingFailed')}</p>
               <p className="text-sm">{errorMessage || 'An unknown error occurred'}</p>
             </div>
             <Button onClick={reset} variant="outline" className="w-full">
-              다시 시도
+              {t('retryBtn')}
             </Button>
           </div>
         )}

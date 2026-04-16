@@ -11,6 +11,7 @@ import {
   Shield, Plus, Save, Loader2, CheckCircle, AlertTriangle,
   Trash2, Power, Edit2, Sparkles, X,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface OverrideRule {
   id: string;
@@ -48,6 +49,7 @@ const emptyForm = {
 };
 
 export default function OverrideRulesAdmin() {
+  const t = useTranslations('overrideRules');
   const [rules, setRules] = useState<OverrideRule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -169,9 +171,9 @@ export default function OverrideRulesAdmin() {
             <p className="text-violet-200 text-sm flex items-center gap-2">
               <Shield className="h-4 w-4" />Admin — Tax Override Rules
             </p>
-            <h1 className="text-2xl md:text-3xl font-bold mt-1">Override Rule 관리</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('pageTitle')}</h1>
             <p className="text-violet-200 mt-2 text-sm">
-              Resolution Engine의 최우선 규칙을 관리합니다. 모든 조건이 일치하면 다른 규칙보다 우선 적용됩니다.
+              {t('pageSubtitle')}
             </p>
           </div>
           <Button onClick={startCreate} className="bg-white/20 hover:bg-white/30 text-white border-0">
@@ -205,7 +207,7 @@ export default function OverrideRulesAdmin() {
                 <Input className="h-9" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g., Related Party Service Override" />
               </div>
               <div>
-                <Label className="text-xs">Priority (높을수록 우선)</Label>
+                <Label className="text-xs">{t('priorityLabel')}</Label>
                 <Input className="h-9 font-mono" type="number" value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })} />
               </div>
             </div>
@@ -216,7 +218,7 @@ export default function OverrideRulesAdmin() {
 
             {/* Conditions */}
             <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs font-semibold text-gray-600 mb-2">Conditions (비어있으면 해당 조건 무시)</p>
+              <p className="text-xs font-semibold text-gray-600 mb-2">{t('conditionsHeader')}</p>
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs">Service Category</Label>
@@ -237,7 +239,7 @@ export default function OverrideRulesAdmin() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Country (ISO 2자리)</Label>
+                  <Label className="text-xs">{t('countryLabel')}</Label>
                   <Input className="h-9" value={form.conditionCountry} onChange={e => setForm({ ...form, conditionCountry: e.target.value.toUpperCase() })} placeholder="e.g., KR" />
                 </div>
                 <div>
@@ -271,7 +273,7 @@ export default function OverrideRulesAdmin() {
 
             {/* Result */}
             <div className="p-3 bg-violet-50 rounded-lg">
-              <p className="text-xs font-semibold text-violet-700 mb-2">Result (매칭 시 적용)</p>
+              <p className="text-xs font-semibold text-violet-700 mb-2">{t('resultHeader')}</p>
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs">Tax Type *</Label>
@@ -283,7 +285,7 @@ export default function OverrideRulesAdmin() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Rate (소수점) *</Label>
+                  <Label className="text-xs">{t('rateLabel')}</Label>
                   <Input className="h-9 font-mono" value={form.resultRate} onChange={e => setForm({ ...form, resultRate: e.target.value })} placeholder="e.g., 0.10 for 10%" />
                 </div>
                 <div>
@@ -298,11 +300,11 @@ export default function OverrideRulesAdmin() {
                 </div>
               </div>
               <div className="mt-3">
-                <Label className="text-xs">Reason (판단 근거) *</Label>
+                <Label className="text-xs">{t('reasonLabel')}</Label>
                 <Input className="h-9" value={form.resultReason} onChange={e => setForm({ ...form, resultReason: e.target.value })} placeholder="e.g., Related party — treated as rental" />
               </div>
               <div className="mt-2">
-                <Label className="text-xs">Legal Basis (법적 근거) *</Label>
+                <Label className="text-xs">{t('legalBasisLabel')}</Label>
                 <Input className="h-9" value={form.resultLegalBasis} onChange={e => setForm({ ...form, resultLegalBasis: e.target.value })} placeholder="e.g., PP 34/2017 Pasal 4(2)" />
               </div>
             </div>
@@ -327,7 +329,7 @@ export default function OverrideRulesAdmin() {
       ) : rules.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <Shield className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Override Rule이 없습니다</p>
+          <p className="text-sm">{t('noRules')}</p>
           <Button size="sm" variant="outline" className="mt-3" onClick={startCreate}><Plus className="h-3 w-3 mr-1" />Add First Rule</Button>
         </div>
       ) : (
@@ -381,8 +383,8 @@ export default function OverrideRulesAdmin() {
       <div className="mt-6 p-4 bg-violet-50 border border-violet-200 rounded-xl text-xs text-violet-800 flex items-start gap-2">
         <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5 text-violet-500" />
         <div>
-          <p className="font-medium">Override Rule 작동 방식</p>
-          <p className="mt-1">모든 non-null 조건이 일치하면 Resolution Engine에서 최우선(Priority 1)으로 적용됩니다. Priority 숫자가 높을수록 먼저 평가됩니다. 비활성화하면 적용되지 않습니다.</p>
+          <p className="font-medium">{t('howItWorksTitle')}</p>
+          <p className="mt-1">{t('howItWorksBody')}</p>
         </div>
       </div>
     </div>

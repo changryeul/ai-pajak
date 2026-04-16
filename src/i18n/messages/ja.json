@@ -2146,7 +2146,17 @@
     "costBreakdown": "コスト内訳",
     "costNote": "* 推定値：ユーザーあたり制限の30%使用、1日8時間アクティブを想定",
     "warningTitle": "注意事項",
-    "warningText": "レート制限の変更は即時に適用されます。低すぎる設定はユーザー体験に影響する可能性があります。サーバー再起動時にデフォルトに戻ります。"
+    "warningText": "レート制限の変更は即時に適用されます。低すぎる設定はユーザー体験に影響する可能性があります。サーバー再起動時にデフォルトに戻ります。",
+    "monthActualCost": "This month actual cost",
+    "callsSuffix": " calls",
+    "todayCost": "Today cost",
+    "monthActualUsage": "This month actual usage",
+    "thFeature": "Feature",
+    "thCalls": "Calls",
+    "thTokens": "Tokens",
+    "thCost": "Cost (USD)",
+    "thErrors": "Errors",
+    "totalRow": "Total"
   },
   "admin": {
     "admin": "管理者",
@@ -5076,5 +5086,101 @@
   "helpPage": {
     "manualsTitle": "ユーザーマニュアル (役割別詳細ガイド)",
     "manualsDesc": "法人 · 個人 · 外部税務事務所 · JTC 税理士 · 運営チーム · プラットフォーム管理者 — 役割別シナリオマニュアル"
+  },
+  "overrideRules": {
+    "pageTitle": "Override Rule Management",
+    "pageSubtitle": "Manage the Resolution Engine's top-priority rules. When all conditions match, they take precedence over other rules.",
+    "priorityLabel": "Priority (higher = earlier)",
+    "conditionsHeader": "Conditions (empty = ignore that condition)",
+    "countryLabel": "Country (ISO 2-letter)",
+    "resultHeader": "Result (applied on match)",
+    "rateLabel": "Rate (decimal) *",
+    "reasonLabel": "Reason (rationale) *",
+    "legalBasisLabel": "Legal Basis *",
+    "noRules": "No override rules",
+    "howItWorksTitle": "How Override Rules Work",
+    "howItWorksBody": "When all non-null conditions match, the rule is applied with highest priority in the Resolution Engine. Higher Priority numbers are evaluated first. Deactivated rules are not applied."
+  },
+  "spt1770ss": {
+    "aiAutoInput": "AI auto-fill",
+    "docsRecognized": " documents recognized.",
+    "ptkpStatusLabel": "PTKP status",
+    "verifyAndContinue": "Verify the data and continue.",
+    "continueWithDocs": "Continue ({count} docs)",
+    "docIncomeReady": "Income data from {count} documents is ready.",
+    "fallbackDataDesc": "SPT will be generated based on stored withholding slip data.",
+    "taxYearPlaceholder": "Select tax year",
+    "ptkpLabel": "PTKP Status (marital / dependents)",
+    "ptkpPlaceholder": "Select PTKP status",
+    "noteLabel": "Note",
+    "noDocUploadedMsg": "No documents uploaded. SPT will be generated based on previously stored withholding slips (Form 1721-A1) or past tax calculation data.",
+    "backBtn": "Back"
+  },
+  "consultantTier": {
+    "subscriptionNeeded": "Tax Firm Subscription Required",
+    "currentClientsPrefix": "Currently managing {count} clients.",
+    "tierRecommended": "tier recommended.",
+    "viewPlans": "View plans",
+    "currentTier": "Tax firm tier",
+    "perMonth": "per month",
+    "nextPayment": "Next payment",
+    "managedClients": "{count} managed clients",
+    "upgrade": "Upgrade",
+    "changeTier": "Change tier",
+    "suitablePrefix": "Your managed client count is suitable for",
+    "suitableSuffix": "tier."
+  },
+  "ocrUploader": {
+    "uploadAnother": "Upload another document",
+    "processingFailed": "Processing failed",
+    "retryBtn": "Retry"
+  },
+  "taxOptimizer": {
+    "recPtkpMarriageTitle": "Update marital status",
+    "recPtkpMarriageDesc": "Apply K/0 to get an additional PTKP deduction of Rp 4,500,000. If spouse has income, K/I combined filing saves even more.",
+    "recBpjsTitle": "Optimize BPJS Ketenagakerjaan deduction",
+    "recBpjsDesc": "Claim BPJS contribution {amount} as an income deduction.",
+    "recZakatTitle": "Zakat / donation deduction",
+    "recZakatDesc": "Pay Zakat 2.5% = {amount} to an accredited institution for an income deduction.",
+    "recUmkmTitle": "Apply PPh Final UMKM 0.5%",
+    "recUmkmDesc": "On business revenue {revenue}, applying UMKM Final 0.5% instead of standard rates saves {savings}.",
+    "recPensionTitle": "Additional Dana Pensiun contribution",
+    "recPensionDesc": "Extra contributions to approved pension funds are deductible. Long-term tax saving + retirement security."
+  },
+  "chatPage": {
+    "q1": "What are the PPh 21 tax rates?",
+    "q2": "What are the UMKM PPh Final 0.5% conditions?",
+    "q3": "When is the SPT Tahunan deadline?",
+    "q4": "Tell me about PPN rate changes",
+    "q5": "What is subject to PPh 23 withholding?",
+    "q6": "What is the PTKP amount for 2024?",
+    "cannotGenerate": "Unable to generate a response."
+  },
+  "taxChat": {
+    "q1": "How to calculate PPh 21?",
+    "q2": "When is the SPT deadline?",
+    "q3": "What is PTKP and how much?",
+    "q4": "How to request a tax refund?",
+    "q5": "Difference between SPT 1770 SS and 1770 S?",
+    "greeting": "Hi! I'm AI Tax Assistant",
+    "askAnything": "Ask anything about Indonesian tax",
+    "clearChat": "Clear chat",
+    "inputPlaceholder": "Ask about tax..."
+  },
+  "transferPricing": {
+    "methodCupDesc": "Comparable price between independent firms",
+    "methodCostPlusDesc": "Cost markup",
+    "methodResaleDesc": "Resale price",
+    "methodTnmmDesc": "Transactional net margin",
+    "methodProfitSplitDesc": "Profit split",
+    "legalBasis": "Legal basis"
+  },
+  "monthlyReport": {
+    "taxLabelPph21": "PPh 21 (Employment Income Tax)",
+    "taxLabelPph23": "PPh 23 (Withholding Tax)",
+    "taxLabelPphFinal": "PPh 4(2) (Final Tax)",
+    "taxLabelPpn": "PPN (VAT)",
+    "count": "{n}",
+    "reportLoadFailed": "Unable to load report"
   }
 }

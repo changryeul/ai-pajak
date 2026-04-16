@@ -87,14 +87,14 @@ export default function AIUsagePage() {
                 <p className="text-xl font-bold">${summary.totalMonthlyCostEstimate}</p>
               </div>
               <div className="bg-white/10 backdrop-blur rounded-xl p-3 border border-yellow-400/30">
-                <p className="text-xs text-yellow-300">이번 달 실제 비용</p>
+                <p className="text-xs text-yellow-300">{t('monthActualCost')}</p>
                 <p className="text-xl font-bold text-yellow-300">${actual?.monthly.totalCost.toFixed(4) || '0'}</p>
-                <p className="text-[10px] text-violet-300">{actual?.monthly.totalCalls || 0}회 호출</p>
+                <p className="text-[10px] text-violet-300">{actual?.monthly.totalCalls || 0}{t('callsSuffix')}</p>
               </div>
               <div className="bg-white/10 backdrop-blur rounded-xl p-3">
-                <p className="text-xs text-violet-300">오늘 비용</p>
+                <p className="text-xs text-violet-300">{t('todayCost')}</p>
                 <p className="text-xl font-bold">${actual?.today.totalCost.toFixed(4) || '0'}</p>
-                <p className="text-[10px] text-violet-300">{actual?.today.totalCalls || 0}회 호출</p>
+                <p className="text-[10px] text-violet-300">{actual?.today.totalCalls || 0}{t('callsSuffix')}</p>
               </div>
             </div>
           )}
@@ -207,7 +207,7 @@ export default function AIUsagePage() {
         <Card className="mt-6 border-0 shadow-sm border-l-4 border-l-yellow-400">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-yellow-500" />이번 달 실제 사용량
+              <DollarSign className="h-4 w-4 text-yellow-500" />{t('monthActualUsage')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -215,11 +215,11 @@ export default function AIUsagePage() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 text-gray-500 font-medium">기능</th>
-                    <th className="text-right py-2 text-gray-500 font-medium">호출</th>
-                    <th className="text-right py-2 text-gray-500 font-medium">토큰</th>
-                    <th className="text-right py-2 text-gray-500 font-medium">비용 (USD)</th>
-                    <th className="text-right py-2 text-gray-500 font-medium">에러</th>
+                    <th className="text-left py-2 text-gray-500 font-medium">{t('thFeature')}</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">{t('thCalls')}</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">{t('thTokens')}</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">{t('thCost')}</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">{t('thErrors')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -241,7 +241,7 @@ export default function AIUsagePage() {
                       </tr>
                     ))}
                   <tr className="border-t-2 font-bold">
-                    <td className="py-2">합계</td>
+                    <td className="py-2">{t('totalRow')}</td>
                     <td className="py-2 text-right font-mono">{actual.monthly.totalCalls}</td>
                     <td className="py-2 text-right font-mono text-gray-400">{actual.monthly.totalTokens.toLocaleString()}</td>
                     <td className="py-2 text-right font-mono text-yellow-600">${actual.monthly.totalCost.toFixed(4)}</td>

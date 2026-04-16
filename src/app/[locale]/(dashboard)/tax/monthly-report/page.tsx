@@ -56,12 +56,6 @@ const TAX_GRADIENTS: Record<string, string> = {
   PPN: 'from-orange-500 to-red-500',
 };
 
-const TAX_LABELS: Record<string, string> = {
-  PPh21: 'PPh 21 (근로소득세)',
-  PPh23: 'PPh 23 (원천징수세)',
-  PPh_FINAL: 'PPh 4(2) (Final Tax)',
-  PPN: 'PPN (부가가치세)',
-};
 
 const FILING_STATUS_COLORS: Record<string, string> = {
   NOT_FILED: 'bg-gray-200 text-gray-600',
@@ -81,6 +75,13 @@ const FILING_STATUS_KEYS: Record<string, string> = {
 
 export default function MonthlyReportPage() {
   const t = useTranslations('killer');
+  const tm = useTranslations('monthlyReport');
+  const TAX_LABELS: Record<string, string> = {
+    PPh21: tm('taxLabelPph21'),
+    PPh23: tm('taxLabelPph23'),
+    PPh_FINAL: tm('taxLabelPphFinal'),
+    PPN: tm('taxLabelPpn'),
+  };
   const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const locale = params.locale as string;
@@ -145,7 +146,7 @@ export default function MonthlyReportPage() {
                 <p className="text-violet-300 text-xs flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3 text-red-300" />{t('monthlyReport.alerts')}
                 </p>
-                <p className="font-bold text-lg text-red-300">{report.alerts.length}건</p>
+                <p className="font-bold text-lg text-red-300">{tm('count', { n: report.alerts.length })}</p>
               </div>
             </div>
           )}
@@ -201,7 +202,7 @@ export default function MonthlyReportPage() {
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div>
                           <p className="text-[10px] text-gray-400">{t('monthlyReport.transactions')}</p>
-                          <p className="font-bold text-sm">{s.transactionCount}건</p>
+                          <p className="font-bold text-sm">{tm('count', { n: s.transactionCount })}</p>
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-400">{t('monthlyReport.totalRevenue')}</p>
@@ -295,7 +296,7 @@ export default function MonthlyReportPage() {
       ) : (
         <div className="text-center py-20 text-gray-400">
           <BarChart3 className="h-8 w-8 mx-auto mb-2" />
-          <p className="text-sm">리포트를 불러올 수 없습니다</p>
+          <p className="text-sm">{tm('reportLoadFailed')}</p>
         </div>
       )}
     </div>

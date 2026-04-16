@@ -2147,7 +2147,17 @@
     "costBreakdown": "비용 내역",
     "costNote": "* 추정치: 사용자당 한도의 30% 사용 가정, 하루 8시간 활동 기준",
     "warningTitle": "주의사항",
-    "warningText": "Rate limit 변경은 즉시 적용됩니다. 너무 낮게 설정하면 사용자 경험에 영향을 줄 수 있습니다. 서버 재시작 시 기본값으로 복원됩니다."
+    "warningText": "Rate limit 변경은 즉시 적용됩니다. 너무 낮게 설정하면 사용자 경험에 영향을 줄 수 있습니다. 서버 재시작 시 기본값으로 복원됩니다.",
+    "monthActualCost": "이번 달 실제 비용",
+    "callsSuffix": "회 호출",
+    "todayCost": "오늘 비용",
+    "monthActualUsage": "이번 달 실제 사용량",
+    "thFeature": "기능",
+    "thCalls": "호출",
+    "thTokens": "토큰",
+    "thCost": "비용 (USD)",
+    "thErrors": "에러",
+    "totalRow": "합계"
   },
   "admin": {
     "admin": "관리자",
@@ -5077,5 +5087,101 @@
   "helpPage": {
     "manualsTitle": "사용자 매뉴얼 (역할별 상세 가이드)",
     "manualsDesc": "법인 · 개인 · 외부 세무사무소 · JTC 세무사 · 운영팀 · 플랫폼 관리자 — 역할별 시나리오형 매뉴얼"
+  },
+  "overrideRules": {
+    "pageTitle": "Override Rule 관리",
+    "pageSubtitle": "Resolution Engine의 최우선 규칙을 관리합니다. 모든 조건이 일치하면 다른 규칙보다 우선 적용됩니다.",
+    "priorityLabel": "Priority (높을수록 우선)",
+    "conditionsHeader": "Conditions (비어있으면 해당 조건 무시)",
+    "countryLabel": "Country (ISO 2자리)",
+    "resultHeader": "Result (매칭 시 적용)",
+    "rateLabel": "Rate (소수점) *",
+    "reasonLabel": "Reason (판단 근거) *",
+    "legalBasisLabel": "Legal Basis (법적 근거) *",
+    "noRules": "Override Rule이 없습니다",
+    "howItWorksTitle": "Override Rule 작동 방식",
+    "howItWorksBody": "모든 non-null 조건이 일치하면 Resolution Engine에서 최우선(Priority 1)으로 적용됩니다. Priority 숫자가 높을수록 먼저 평가됩니다. 비활성화하면 적용되지 않습니다."
+  },
+  "spt1770ss": {
+    "aiAutoInput": "AI 자동 입력",
+    "docsRecognized": "개 문서 인식 완료.",
+    "ptkpStatusLabel": "PTKP 상태",
+    "verifyAndContinue": "데이터를 확인하고 계속 진행하세요.",
+    "continueWithDocs": "계속 ({count}개 문서)",
+    "docIncomeReady": "{count}개 문서의 소득 정보 사용 준비 완료.",
+    "fallbackDataDesc": "저장된 원천징수영수증 데이터를 기반으로 SPT가 생성됩니다.",
+    "taxYearPlaceholder": "과세 연도 선택",
+    "ptkpLabel": "PTKP 상태 (혼인/부양가족)",
+    "ptkpPlaceholder": "PTKP 상태 선택",
+    "noteLabel": "참고",
+    "noDocUploadedMsg": "업로드된 문서가 없습니다. 이전에 저장된 원천징수영수증(Form 1721-A1) 또는 과거 세금 계산 데이터를 기반으로 SPT가 생성됩니다.",
+    "backBtn": "이전으로"
+  },
+  "consultantTier": {
+    "subscriptionNeeded": "세무 사무소 구독 필요",
+    "currentClientsPrefix": "현재 관리 고객 {count}명.",
+    "tierRecommended": "티어 추천.",
+    "viewPlans": "요금제 보기",
+    "currentTier": "세무 사무소 티어",
+    "perMonth": "월",
+    "nextPayment": "다음 결제",
+    "managedClients": "관리 고객 {count}명",
+    "upgrade": "업그레이드",
+    "changeTier": "티어 변경",
+    "suitablePrefix": "관리 고객 수가",
+    "suitableSuffix": "티어에 적합합니다."
+  },
+  "ocrUploader": {
+    "uploadAnother": "다른 문서 업로드",
+    "processingFailed": "처리 실패",
+    "retryBtn": "다시 시도"
+  },
+  "taxOptimizer": {
+    "recPtkpMarriageTitle": "혼인 상태 업데이트",
+    "recPtkpMarriageDesc": "K/0 적용 시 PTKP Rp 4.500.000 추가 공제. 배우자 소득이 있으면 K/I 합산과세로 더 큰 절세.",
+    "recBpjsTitle": "BPJS Ketenagakerjaan 공제 최적화",
+    "recBpjsDesc": "BPJS 기여금 {amount}을 소득공제로 신청하세요.",
+    "recZakatTitle": "Zakat/기부금 공제",
+    "recZakatDesc": "Zakat 2.5% = {amount}을 공인 기관에 납부하면 소득공제 가능.",
+    "recUmkmTitle": "PPh Final UMKM 0.5% 적용",
+    "recUmkmDesc": "사업 매출 {revenue}에 일반 세율 대신 UMKM Final 0.5% 적용 시 {savings} 절세.",
+    "recPensionTitle": "Dana Pensiun 추가 기여",
+    "recPensionDesc": "승인된 연금 기금 추가 기여분은 소득공제 대상. 장기 절세 + 노후 대비."
+  },
+  "chatPage": {
+    "q1": "PPh 21 세율이 어떻게 되나요?",
+    "q2": "UMKM PPh Final 0.5% 조건은?",
+    "q3": "SPT Tahunan 마감일이 언제인가요?",
+    "q4": "PPN 세율 변경사항 알려주세요",
+    "q5": "PPh 23 원천징수 대상은?",
+    "q6": "PTKP 2024 기준 금액은?",
+    "cannotGenerate": "답변을 생성할 수 없습니다."
+  },
+  "taxChat": {
+    "q1": "PPh 21은 어떻게 계산하나요?",
+    "q2": "SPT 마감일은 언제인가요?",
+    "q3": "PTKP란 무엇이며 얼마인가요?",
+    "q4": "세금 환급은 어떻게 신청하나요?",
+    "q5": "SPT 1770 SS와 1770 S의 차이는?",
+    "greeting": "안녕하세요! AI 세금 어시스턴트입니다",
+    "askAnything": "인도네시아 세금에 대해 무엇이든 물어보세요",
+    "clearChat": "대화 삭제",
+    "inputPlaceholder": "세금에 대해 물어보세요..."
+  },
+  "transferPricing": {
+    "methodCupDesc": "독립기업 간 비교가격",
+    "methodCostPlusDesc": "원가가산",
+    "methodResaleDesc": "재판매가격",
+    "methodTnmmDesc": "거래순이익률",
+    "methodProfitSplitDesc": "이익분할",
+    "legalBasis": "법적 근거"
+  },
+  "monthlyReport": {
+    "taxLabelPph21": "PPh 21 (근로소득세)",
+    "taxLabelPph23": "PPh 23 (원천징수세)",
+    "taxLabelPphFinal": "PPh 4(2) (Final Tax)",
+    "taxLabelPpn": "PPN (부가가치세)",
+    "count": "{n}건",
+    "reportLoadFailed": "리포트를 불러올 수 없습니다"
   }
 }

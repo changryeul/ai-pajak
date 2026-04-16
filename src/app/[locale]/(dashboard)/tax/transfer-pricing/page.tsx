@@ -9,13 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, Loader2, ArrowLeftRight, Sparkles, Shield, FileText, Globe, AlertTriangle, CheckCircle, Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-const TP_METHODS = [
-  { id: 'CUP', label: 'CUP (Comparable Uncontrolled Price)', desc: '독립기업 간 비교가격' },
-  { id: 'COST_PLUS', label: 'Cost Plus Method', desc: '원가가산' },
-  { id: 'RESALE', label: 'Resale Price Method', desc: '재판매가격' },
-  { id: 'TNMM', label: 'TNMM (Transactional Net Margin)', desc: '거래순이익률' },
-  { id: 'PROFIT_SPLIT', label: 'Profit Split Method', desc: '이익분할' },
-];
+interface TpMethodDef { id: string; label: string; desc: string; }
 
 interface TxRow { id: string; relatedParty: string; transactionType: string; amount: number; marketPrice: number; description: string; country: string; }
 function newTx(): TxRow { return { id: crypto.randomUUID(), relatedParty: '', transactionType: 'Sale', amount: 0, marketPrice: 0, description: '', country: 'ID' }; }
@@ -23,6 +17,14 @@ function newTx(): TxRow { return { id: crypto.randomUUID(), relatedParty: '', tr
 export default function TransferPricingPage() {
   const t = useTranslations('pages');
   const tk = useTranslations('killer');
+  const tp = useTranslations('transferPricing');
+  const TP_METHODS: TpMethodDef[] = [
+    { id: 'CUP', label: 'CUP (Comparable Uncontrolled Price)', desc: tp('methodCupDesc') },
+    { id: 'COST_PLUS', label: 'Cost Plus Method', desc: tp('methodCostPlusDesc') },
+    { id: 'RESALE', label: 'Resale Price Method', desc: tp('methodResaleDesc') },
+    { id: 'TNMM', label: 'TNMM (Transactional Net Margin)', desc: tp('methodTnmmDesc') },
+    { id: 'PROFIT_SPLIT', label: 'Profit Split Method', desc: tp('methodProfitSplitDesc') },
+  ];
   const [transactions, setTransactions] = useState<TxRow[]>([newTx()]);
   const [companyName, setCompanyName] = useState('');
   const [tpMethod, setTpMethod] = useState('CUP');
@@ -124,7 +126,7 @@ export default function TransferPricingPage() {
                   <p className="text-blue-600 mt-1">{TP_METHODS.find(m => m.id === tpMethod)?.label || tpMethod}</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="font-medium text-blue-800">법적 근거</p>
+                  <p className="font-medium text-blue-800">{tp('legalBasis')}</p>
                   <p className="text-blue-600 mt-1">PMK 213/PMK.03/2016, UU PPh Pasal 18(3)</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3">
