@@ -3821,7 +3821,14 @@
     "inputModeManualDesc": "거래정보 직접 입력",
     "inputModeManualBtn": "직접 입력",
     "templateComingSoon": "템플릿 CSV가 다운로드됩니다",
-    "uploadComingSoon": "OCR 업로드 기능 준비 중입니다"
+    "uploadComingSoon": "OCR 업로드 기능 준비 중입니다",
+    "recommendedBadge": "추천",
+    "uploadHint": "OCR로 자동 데이터 추출 지원",
+    "manualHint": "거래처·NPWP·금액·세목·세율을 직접 입력합니다",
+    "statusNormal": "정상",
+    "statusNeedsCheck": "확인필요",
+    "btnExcelDownload": "엑셀로 다운로드",
+    "btnSubmitValidate": "제출 및 검증"
   },
   "companyProfile": {
     "k0_6f2592": "서비스업 (Jasa)",

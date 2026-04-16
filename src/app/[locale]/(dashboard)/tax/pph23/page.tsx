@@ -16,7 +16,7 @@ import {
   Calculator, Shield, Upload, Camera, Image, ArrowRight,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
-import { ScreenHeader, InputModeCard } from '@/components/tax';
+import { ScreenHeader } from '@/components/tax';
 import { Download, FileUp, Pencil } from 'lucide-react';
 
 // ── Types ──
@@ -445,50 +445,112 @@ export default function PPh23Page() {
         </div>
       </div>
 
-      {/* 3-mode input cards (prototype alignment) */}
+      {/* 3-mode input cards (matching PPh21 polished design) */}
       <div className="grid gap-4 md:grid-cols-3 mb-4">
-        <InputModeCard active={false} title={t('inputModeTemplate')} desc={t('inputModeTemplateDesc')} icon={Download}>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              const headers = ['counterparty_name', 'counterparty_npwp', 'service_type', 'transaction_type', 'gross_amount', 'tax_rate', 'contract_no', 'invoice_no', 'dgt_form'];
-              const sample = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', '10000000', '2', 'CT-001', 'INV-001', 'N'];
-              const csv = [headers.join(','), sample.join(','), ''].join('\n');
-              const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'pph23_template.csv';
-              a.click();
-              URL.revokeObjectURL(url);
-              showMsg('success', t('templateComingSoon'));
-            }}
-          >
-            <Download className="h-3 w-3 mr-1" />
-            {t('inputModeTemplateBtn')}
-          </Button>
-        </InputModeCard>
-        <InputModeCard active={false} title={t('inputModeUpload')} desc={t('inputModeUploadDesc')} icon={FileUp}>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => showMsg('success', t('uploadComingSoon'))}
-          >
-            <FileUp className="h-3 w-3 mr-1" />
-            {t('inputModeUploadBtn')}
-          </Button>
-        </InputModeCard>
-        <InputModeCard active={showForm} title={t('inputModeManual')} desc={t('inputModeManualDesc')} icon={Pencil}>
-          <Button
-            className="w-full bg-purple-600 hover:bg-purple-700"
-            onClick={() => setShowForm(true)}
-            disabled={!customerId}
-          >
-            <Pencil className="h-3 w-3 mr-1" />
-            {t('inputModeManualBtn')}
-          </Button>
-        </InputModeCard>
+        {/* Method 1: Template */}
+        <Card className="border-2 border-dashed border-blue-200 hover:border-blue-400 hover:shadow-sm transition-all">
+          <CardContent className="p-5 flex flex-col h-full">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <Download className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{t('inputModeTemplate')}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeTemplateDesc')}</p>
+              </div>
+            </div>
+            <div className="space-y-2 flex-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  const headers = ['counterparty_name', 'counterparty_npwp', 'service_type', 'transaction_type', 'gross_amount', 'tax_rate', 'contract_no', 'invoice_no', 'dgt_form'];
+                  const sample = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', '10000000', '2', 'CT-001', 'INV-001', 'N'];
+                  const csv = [headers.join(','), sample.join(','), ''].join('\n');
+                  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'pph23_template.csv';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  showMsg('success', t('templateComingSoon'));
+                }}
+              >
+                <Download className="h-3 w-3 mr-1" />{t('inputModeTemplateBtn')}
+              </Button>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-500 font-medium">
+                <span className="font-mono text-gray-600">PPh 23 / PPh 4(2) / PPh 26 / PPh 15 / PPh 22</span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Method 2: Upload — RECOMMENDED */}
+        <Card className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all relative">
+          <div className="absolute -top-2 left-5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
+            {t('recommendedBadge')}
+          </div>
+          <CardContent className="p-5 flex flex-col h-full">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <FileUp className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{t('inputModeUpload')}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeUploadDesc')}</p>
+              </div>
+            </div>
+            <div className="space-y-2 flex-1">
+              <Button
+                size="sm"
+                className="w-full bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => showMsg('success', t('uploadComingSoon'))}
+              >
+                <FileUp className="h-3 w-3 mr-1" />{t('inputModeUploadBtn')}
+              </Button>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-emerald-500" />
+                {t('uploadHint')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Method 3: Manual */}
+        <Card className={`border-2 border-dashed ${showForm ? 'border-purple-400 shadow-sm' : 'border-purple-200 hover:border-purple-400 hover:shadow-sm'} transition-all`}>
+          <CardContent className="p-5 flex flex-col h-full">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                <Pencil className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{t('inputModeManual')}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeManualDesc')}</p>
+              </div>
+            </div>
+            <div className="space-y-2 flex-1">
+              <Button
+                size="sm"
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={() => setShowForm(true)}
+                disabled={!customerId}
+              >
+                <Pencil className="h-3 w-3 mr-1" />{t('inputModeManualBtn')}
+              </Button>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-500">
+                {t('manualHint')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {message && (
@@ -999,10 +1061,24 @@ export default function PPh23Page() {
       {/* Transaction list */}
       <Card>
         <CardContent className="p-4">
-          <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            {period} {t('k116_c663ec')} ({transactions.length}{t('k30_bcbcd4')}
-          </h3>
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              {period} {t('k116_c663ec')} ({transactions.length}{t('k30_bcbcd4')}
+            </h3>
+            {transactions.length > 0 && (
+              <div className="flex gap-3 text-xs">
+                <span className="flex items-center gap-1 text-green-700">
+                  <span className="w-2 h-2 rounded-full bg-green-500" />
+                  {t('statusNormal')}: <span className="font-bold">{t('countItems', { count: transactions.filter(tx => tx.counterparty_npwp).length })}</span>
+                </span>
+                <span className="flex items-center gap-1 text-red-600">
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  {t('statusNeedsCheck')}: <span className="font-bold">{t('countItems', { count: transactions.filter(tx => !tx.counterparty_npwp).length })}</span>
+                </span>
+              </div>
+            )}
+          </div>
 
           {loading ? (
             <div className="text-center py-8"><Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" /></div>
@@ -1103,6 +1179,54 @@ export default function PPh23Page() {
           )}
         </CardContent>
       </Card>
+
+      {/* Bottom action bar (prototype: Excel download / Submit & Validate) */}
+      {transactions.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2 items-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const headers = ['No', 'Counterparty', 'NPWP', 'Service Type', 'Gross Amount', 'Tax Rate', 'Tax Amount', 'Date', 'Invoice No', 'Bukti Potong No'];
+              const rows = transactions.map((tx, i) => [
+                String(i + 1),
+                tx.counterparty_name || '',
+                tx.counterparty_npwp || '',
+                tx.service_type || '',
+                String(tx.gross_amount || 0),
+                String((tx.tax_rate || 0) * 100) + '%',
+                String(tx.tax_amount || 0),
+                tx.transaction_date || '',
+                tx.invoice_number || '',
+                tx.bukti_potong_number || '',
+              ]);
+              const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')), ''].join('\n');
+              const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `pph23_${period}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            <Download className="h-3 w-3 mr-1" />{t('btnExcelDownload')}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              const needsCheckCount = transactions.filter(tx => !tx.counterparty_npwp).length;
+              if (needsCheckCount > 0) {
+                showMsg('error', t('statusNeedsCheck') + ': ' + needsCheckCount);
+                return;
+              }
+              showMsg('success', t('btnSubmitValidate'));
+            }}
+          >
+            <CheckCircle className="h-3 w-3 mr-1" />{t('btnSubmitValidate')}
+          </Button>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════ */}
       {/* Filing process steps — 5~7단계 통합       */}

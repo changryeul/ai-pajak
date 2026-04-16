@@ -3820,7 +3820,14 @@
     "inputModeManualDesc": "Input transaksi langsung",
     "inputModeManualBtn": "Input Manual",
     "templateComingSoon": "Template CSV diunduh",
-    "uploadComingSoon": "Fitur unggah OCR segera hadir"
+    "uploadComingSoon": "Fitur unggah OCR segera hadir",
+    "recommendedBadge": "Disarankan",
+    "uploadHint": "Ekstraksi data otomatis via OCR",
+    "manualHint": "Masukkan mitra, NPWP, jumlah, jenis pajak, tarif langsung",
+    "statusNormal": "Normal",
+    "statusNeedsCheck": "Perlu Periksa",
+    "btnExcelDownload": "Unduh Excel",
+    "btnSubmitValidate": "Kirim & Validasi"
   },
   "companyProfile": {
     "k0_6f2592": "Jasa",

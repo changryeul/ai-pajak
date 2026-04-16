@@ -3820,7 +3820,14 @@
     "inputModeManualDesc": "Enter transaction directly",
     "inputModeManualBtn": "Manual Entry",
     "templateComingSoon": "CSV template downloaded",
-    "uploadComingSoon": "OCR upload feature coming soon"
+    "uploadComingSoon": "OCR upload feature coming soon",
+    "recommendedBadge": "Recommended",
+    "uploadHint": "Auto data extraction via OCR",
+    "manualHint": "Enter counterparty, NPWP, amount, tax type, rate directly",
+    "statusNormal": "Normal",
+    "statusNeedsCheck": "Needs Review",
+    "btnExcelDownload": "Download Excel",
+    "btnSubmitValidate": "Submit & Validate"
   },
   "companyProfile": {
     "k0_6f2592": "Services (Jasa)",
