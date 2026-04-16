@@ -82,7 +82,11 @@
     "invalidResetLink": "無効なリンク",
     "invalidResetLinkDescription": "このパスワードリセットリンクは期限切れまたは無効です。",
     "requestNewLink": "新しいリンクをリクエスト",
-    "resetPasswordError": "パスワードのリセットに失敗しました。もう一度お試しください。"
+    "resetPasswordError": "パスワードのリセットに失敗しました。もう一度お試しください。",
+    "emailOrNpwp": "メールまたは納税者番号",
+    "emailOrNpwpPlaceholder": "email@example.com または 00.000.000.0-000.000",
+    "companyNpwpHint": "法人のお客様は納税者番号でもログインできます",
+    "npwpNotFound": "この納税者番号で登録されたアカウントはありません"
   },
   "nav": {
     "dashboard": "ダッシュボード",

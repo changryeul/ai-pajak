@@ -82,7 +82,11 @@
     "invalidResetLink": "Link Tidak Valid",
     "invalidResetLinkDescription": "Link reset kata sandi ini telah kedaluwarsa atau tidak valid.",
     "requestNewLink": "Minta Link Baru",
-    "resetPasswordError": "Gagal mengatur ulang kata sandi. Silakan coba lagi."
+    "resetPasswordError": "Gagal mengatur ulang kata sandi. Silakan coba lagi.",
+    "emailOrNpwp": "Email atau NPWP",
+    "emailOrNpwpPlaceholder": "email@example.com atau 00.000.000.0-000.000",
+    "companyNpwpHint": "Pelanggan badan dapat login dengan NPWP",
+    "npwpNotFound": "Tidak ada akun terdaftar dengan NPWP ini"
   },
   "nav": {
     "dashboard": "Dasbor",

@@ -82,7 +82,11 @@
     "invalidResetLink": "Invalid Link",
     "invalidResetLinkDescription": "This password reset link has expired or is invalid.",
     "requestNewLink": "Request New Link",
-    "resetPasswordError": "Failed to reset password. Please try again."
+    "resetPasswordError": "Failed to reset password. Please try again.",
+    "emailOrNpwp": "Email or Tax ID",
+    "emailOrNpwpPlaceholder": "email@example.com or 00.000.000.0-000.000",
+    "companyNpwpHint": "Business customers can also log in with Tax ID",
+    "npwpNotFound": "No account registered with this Tax ID"
   },
   "nav": {
     "dashboard": "Dashboard",

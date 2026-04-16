@@ -82,7 +82,11 @@
     "invalidResetLink": "无效链接",
     "invalidResetLinkDescription": "此密码重置链接已过期或无效。",
     "requestNewLink": "请求新链接",
-    "resetPasswordError": "密码重置失败，请重试。"
+    "resetPasswordError": "密码重置失败，请重试。",
+    "emailOrNpwp": "电子邮件或纳税人识别号",
+    "emailOrNpwpPlaceholder": "email@example.com 或 00.000.000.0-000.000",
+    "companyNpwpHint": "企业客户也可以使用纳税人识别号登录",
+    "npwpNotFound": "未找到使用此纳税人识别号注册的账户"
   },
   "nav": {
     "dashboard": "仪表盘",

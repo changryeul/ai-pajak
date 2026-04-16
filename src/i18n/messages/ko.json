@@ -82,7 +82,11 @@
     "invalidResetLink": "유효하지 않은 링크",
     "invalidResetLinkDescription": "비밀번호 재설정 링크가 만료되었거나 유효하지 않습니다.",
     "requestNewLink": "새 링크 요청",
-    "resetPasswordError": "비밀번호 재설정에 실패했습니다. 다시 시도해주세요."
+    "resetPasswordError": "비밀번호 재설정에 실패했습니다. 다시 시도해주세요.",
+    "emailOrNpwp": "이메일 또는 NPWP",
+    "emailOrNpwpPlaceholder": "email@example.com 또는 00.000.000.0-000.000",
+    "companyNpwpHint": "법인 고객은 NPWP로도 로그인 가능",
+    "npwpNotFound": "해당 NPWP로 등록된 계정이 없습니다"
   },
   "nav": {
     "dashboard": "대시보드",

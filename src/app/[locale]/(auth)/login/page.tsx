@@ -35,7 +35,7 @@ export default function LoginPage() {
         const resolveRes = await fetch(`/api/auth/resolve-npwp?npwp=${encodeURIComponent(digitsOnly)}`);
         const resolveData = await resolveRes.json();
         if (!resolveRes.ok || !resolveData.success || !resolveData.email) {
-          setError('해당 NPWP로 등록된 계정이 없습니다');
+          setError(t('auth.npwpNotFound'));
           setIsLoading(false);
           return;
         }
@@ -130,14 +130,14 @@ export default function LoginPage() {
               )}
 
               <Input
-                label="이메일 또는 NPWP"
+                label={t('auth.emailOrNpwp')}
                 type="text"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="email@example.com 또는 00.000.000.0-000.000"
+                placeholder={t('auth.emailOrNpwpPlaceholder')}
                 required
               />
-              <p className="text-[10px] text-gray-400 -mt-2">법인 고객은 NPWP로도 로그인 가능</p>
+              <p className="text-[10px] text-gray-400 -mt-2">{t('auth.companyNpwpHint')}</p>
 
               <Input
                 label={t('auth.password')}
