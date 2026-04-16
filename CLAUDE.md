@@ -237,3 +237,6 @@ Seed scripts:
 - `SEED_TARGET=prod npx tsx scripts/test-billing-flow.ts` — smoke test for the 3 billing endpoints, tolerates graceful-degrade responses
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
+##gstack 
+Use /browse from gstack for all web browsing.
+Never use mcp__claude-in-chrome__* tools.

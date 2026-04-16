@@ -97,8 +97,9 @@ export default function FilingStatusPage() {
   }
 
   const buildRowsForMonth = (year: number, month: number): Row[] => {
+    const safeItems = Array.isArray(items) ? items : [];
     return TAX_TYPES.map((taxType) => {
-      const monthItems = items.filter(
+      const monthItems = safeItems.filter(
         (i) =>
           i.tax_period_year === year &&
           i.tax_period_month === month &&

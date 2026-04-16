@@ -63,9 +63,10 @@ export function CorporateDashboardV2({
       .catch(() => {});
   }, [session.customerId]);
 
-  // KPIs
+  // KPIs — safeguard against non-array state (e.g., stale HMR)
+  const safeQueueItems = Array.isArray(queueItems) ? queueItems : [];
   const currentYear = new Date().getFullYear();
-  const thisYearItems = queueItems.filter((i) => i.tax_period_year === currentYear);
+  const thisYearItems = safeQueueItems.filter((i) => i.tax_period_year === currentYear);
   const totalTax = thisYearItems.reduce((sum, i) => sum + (i.amount || 0), 0);
   const unpaidTax = thisYearItems
     .filter((i) => UNPAID_STATUSES.includes(i.status))
@@ -80,7 +81,7 @@ export function CorporateDashboardV2({
   });
 
   const chartData = last6Months.map(({ year, month, label }) => {
-    const monthItems = queueItems.filter(
+    const monthItems = safeQueueItems.filter(
       (i) => i.tax_period_year === year && i.tax_period_month === month,
     );
     const pph21 = monthItems

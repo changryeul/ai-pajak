@@ -144,7 +144,28 @@
       "Bash(sed -i '' 's/fmtRp\\(EXEMPTION\\)/fmtRp\\(getExemption\\(legalForm\\)\\)/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
       "Bash(sed -i '' 's/EXEMPTION - \\(cumulative/getExemption\\(legalForm\\) - \\(cumulative/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
       "Bash(sed -i '' 's/Math.min\\(monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\), EXEMPTION\\)/Math.min\\(monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\), getExemption\\(legalForm\\)\\)/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
-      "Bash(sed -i '' 's/monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\) - EXEMPTION/monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\) - getExemption\\(legalForm\\)/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")"
+      "Bash(sed -i '' 's/monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\) - EXEMPTION/monthlyRevenues.reduce\\(\\(s, v\\) => s + v, 0\\) - getExemption\\(legalForm\\)/g' \"src/app/[locale]/\\(dashboard\\)/tax/umkm/page.tsx\")",
+      "Bash(npx vercel:*)",
+      "Bash(npm run:*)",
+      "Bash(supabase stop:*)",
+      "Bash(xargs -I{} ps -p {} -o pid,command)",
+      "Bash(awk '{ if \\(NR > 5 && $2 == \"|\"\\) print $0 }')",
+      "Bash(awk -F'|' 'NR>5 && $2 ~ /^[[:space:]]*$/ && $1 ~ /[0-9]/ { print $1 }')",
+      "Bash(SEED_TARGET=prod npx tsx:*)",
+      "Bash(xargs -r kill -9)",
+      "WebFetch(domain:account.co.id)",
+      "WebFetch(domain:www.scribd.com)",
+      "WebFetch(domain:accurate.id)",
+      "Bash(sed -i '' 's|ACCURATE_CLIENT_ID=your-accurate-client-id|ACCURATE_CLIENT_ID=d46c48f3-5759-445e-97a6-12aa2d7aead0|' .env.local)",
+      "Bash(sed -i '' 's|ACCURATE_CLIENT_SECRET=your-accurate-client-secret|ACCURATE_CLIENT_SECRET=defaae7b62bca878a765d34c84dfc996|' .env.local)",
+      "Bash(sed -i '' 's|ACCURATE_REDIRECT_URI=http://localhost:3000/api/integrations/accurate/callback|ACCURATE_REDIRECT_URI=https://ai-pajak.vercel.app/api/accounting/callback|' .env.local)",
+      "WebFetch(domain:sptpribadi.com)",
+      "Bash(awk '/const tp =/{found=NR} /tp\\\\\\(/{if\\(!found || NR<found\\) print NR\": \"$0}' 'src/app/[locale]/\\(dashboard\\)/tax/pph21/page.tsx')",
+      "Bash(awk 'NR>=420 && NR<=455' 'src/app/[locale]/\\(dashboard\\)/tax/pph23/page.tsx')",
+      "Bash(awk 'NR==527' 'src/app/[locale]/\\(dashboard\\)/tax/pph23/page.tsx')",
+      "Bash(awk NR>=565 && NR<=580:*)",
+      "Bash(mkdir -p \"src/app/[locale]/\\(dashboard\\)/tax/filing-status\")",
+      "Bash(mkdir -p \"src/app/[locale]/\\(dashboard\\)/notifications\")"
     ]
   }
 }
