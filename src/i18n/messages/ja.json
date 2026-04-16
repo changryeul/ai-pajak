@@ -5237,7 +5237,9 @@
     "stepCompanyInfo": "Company Info",
     "stepAiDetect": "AI Detection",
     "stepDataCollect": "Data Collection",
-    "stepFilingRefund": "Filing / Refund"
+    "stepFilingRefund": "Filing / Refund",
+    "stepDataGen": "Data Generation",
+    "stepPdfIssue": "PDF Issuance"
   },
   "closingWork": {
     "pageTitle": "Year-end Closing",

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Loader2, FileSpreadsheet, Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { ScreenHeader } from '@/components/tax';
 
 interface EmpRow { id: string; name: string; npwp: string; nik: string; ptkp: string; salary: number; jht: number; jp: number; }
 function newEmp(): EmpRow { return { id: crypto.randomUUID(), name: '', npwp: '', nik: '', ptkp: 'TK0', salary: 0, jht: 0, jp: 0 }; }
@@ -14,6 +15,7 @@ function newEmp(): EmpRow { return { id: crypto.randomUUID(), name: '', npwp: ''
 export default function EBupotPage() {
   const t = useTranslations('pages');
   const te = useTranslations('ebupotPage');
+  const tsc = useTranslations('taxScreen');
   const [employees, setEmployees] = useState<EmpRow[]>([newEmp()]);
   const [companyNpwp, setCompanyNpwp] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -51,11 +53,16 @@ export default function EBupotPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Step 1: input, Step 2: generated, Step 3: downloaded
+  const currentStep = result ? 2 : 1;
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <FileSpreadsheet className="h-6 w-6 text-blue-600" />{t('ebupotTitle')}
-      </h1>
+      <ScreenHeader
+        title={t('ebupotTitle')}
+        step={currentStep}
+        aiSteps={[tsc('stepDataGen'), tsc('stepPdfIssue')]}
+      />
 
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-5 space-y-4">

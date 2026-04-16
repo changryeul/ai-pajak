@@ -5237,7 +5237,9 @@
     "stepCompanyInfo": "Info Perusahaan",
     "stepAiDetect": "Deteksi AI",
     "stepDataCollect": "Pengumpulan Data",
-    "stepFilingRefund": "Lapor / Restitusi"
+    "stepFilingRefund": "Lapor / Restitusi",
+    "stepDataGen": "Pembuatan Data",
+    "stepPdfIssue": "Penerbitan PDF"
   },
   "closingWork": {
     "pageTitle": "Tutup Buku Tahunan",

@@ -5238,7 +5238,9 @@
     "stepCompanyInfo": "회사 정보",
     "stepAiDetect": "AI 판정",
     "stepDataCollect": "데이터 수집",
-    "stepFilingRefund": "신고 / 환급"
+    "stepFilingRefund": "신고 / 환급",
+    "stepDataGen": "데이터 생성",
+    "stepPdfIssue": "PDF 발급"
   },
   "closingWork": {
     "pageTitle": "결산 작업",
