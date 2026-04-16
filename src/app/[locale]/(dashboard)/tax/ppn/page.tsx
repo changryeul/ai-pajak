@@ -208,8 +208,8 @@ export default function PPNPage() {
         aiSteps={[tsc('stepDataCollect'), tsc('stepVatCalc'), tsc('stepFilingRefund')]}
       />
 
-      {/* Compact summary below header */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      {/* 4-card summary (prototype alignment: Output / Input / Prev Balance / Final) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         <div className="bg-white rounded-xl border p-3">
           <p className="text-gray-500 text-xs flex items-center gap-1"><ArrowUpRight className="h-3 w-3" />{t('ppnKeluaran')}</p>
           <p className="font-bold text-lg">{fmt(summary.outputTax)}</p>
@@ -219,7 +219,11 @@ export default function PPNPage() {
           <p className="font-bold text-lg">{fmt(summary.inputTax)}</p>
         </div>
         <div className="bg-white rounded-xl border p-3">
-          <p className="text-gray-500 text-xs">Net PPN</p>
+          <p className="text-gray-500 text-xs">{t('prevBalance')}</p>
+          <p className="font-bold text-lg">{fmt(0)}</p>
+        </div>
+        <div className="bg-white rounded-xl border p-3">
+          <p className="text-gray-500 text-xs">{t('finalResult')}</p>
           <p className="font-bold text-lg">{fmt(Math.abs(summary.netPpn))}</p>
           <Badge className={`${currentStatus.color} text-[10px] mt-1`}>{currentStatus.label}</Badge>
         </div>

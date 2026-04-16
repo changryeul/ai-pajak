@@ -3041,7 +3041,9 @@
     "requiredDocs": "Dokumen transaksi pembelian/penjualan (faktur, kontrak, surat jalan)",
     "sptRestitusi": "Ajukan SPT Masa PPN \"Lebih Bayar — Restitusi\"",
     "skplbResult": "Analisis hasil SKPLB (restitusi) atau SKPKB (pembayaran tambahan) dan review keberatan",
-    "refundAccepted": "Pengajuan restitusi diterima"
+    "refundAccepted": "Pengajuan restitusi diterima",
+    "prevBalance": "Saldo Bulan Lalu",
+    "finalResult": "Hasil Akhir"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

@@ -3041,7 +3041,9 @@
     "requiredDocs": "Purchase/sales transaction documents (invoices, contracts, delivery notes)",
     "sptRestitusi": "Submit SPT Masa PPN \"Lebih Bayar — Restitusi\"",
     "skplbResult": "Analyze SKPLB (refund) or SKPKB (additional payment) results and review objections",
-    "refundAccepted": "Refund application accepted"
+    "refundAccepted": "Refund application accepted",
+    "prevBalance": "Prev. Balance",
+    "finalResult": "Final Result"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
