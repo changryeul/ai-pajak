@@ -3156,7 +3156,13 @@
     "openCount": "진행",
     "doneCount": "완료",
     "showGrid": "연간 그리드 보기",
-    "hideGrid": "연간 그리드 숨기기"
+    "hideGrid": "연간 그리드 숨기기",
+    "descPPh21": "직원 급여 원천징수세 (월 신고)",
+    "descPPh23": "용역·로열티 원천징수세 (월 신고)",
+    "descPPhFinal": "선납 PPh (임대, UMKM 0.5% 등)",
+    "descPPN": "부가가치세 (월 신고)",
+    "priorityNone": "낮음",
+    "workQueueSubtitle": "이번 주 운영 업무"
   },
   "monthlyPaymentDetail": {
     "back": "뒤로",

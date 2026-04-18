@@ -3155,7 +3155,13 @@
     "openCount": "Open",
     "doneCount": "Done",
     "showGrid": "Show Annual Grid",
-    "hideGrid": "Hide Annual Grid"
+    "hideGrid": "Hide Annual Grid",
+    "descPPh21": "Employee income-tax withholding (monthly)",
+    "descPPh23": "Withholding on services & royalties (monthly)",
+    "descPPhFinal": "Final PPh (rent, UMKM 0.5%, etc.)",
+    "descPPN": "Value-added tax (monthly)",
+    "priorityNone": "Low",
+    "workQueueSubtitle": "Operational tasks for this week"
   },
   "monthlyPaymentDetail": {
     "back": "Back",

@@ -3155,7 +3155,13 @@
     "openCount": "Terbuka",
     "doneCount": "Selesai",
     "showGrid": "Tampilkan Grid Tahunan",
-    "hideGrid": "Sembunyikan Grid Tahunan"
+    "hideGrid": "Sembunyikan Grid Tahunan",
+    "descPPh21": "Pemotongan pajak penghasilan karyawan (bulanan)",
+    "descPPh23": "Pemotongan pajak atas jasa & royalti (bulanan)",
+    "descPPhFinal": "PPh Final (sewa, UMKM 0.5%, dll.)",
+    "descPPN": "Pajak Pertambahan Nilai (bulanan)",
+    "priorityNone": "Rendah",
+    "workQueueSubtitle": "Tugas operasional minggu ini"
   },
   "monthlyPaymentDetail": {
     "back": "Kembali",

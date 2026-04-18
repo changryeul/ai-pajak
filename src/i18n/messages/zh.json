@@ -3155,7 +3155,13 @@
     "openCount": "进行中",
     "doneCount": "已完成",
     "showGrid": "显示年度网格",
-    "hideGrid": "隐藏年度网格"
+    "hideGrid": "隐藏年度网格",
+    "descPPh21": "员工所得税代扣代缴(月报)",
+    "descPPh23": "服务与特许权使用费代扣(月报)",
+    "descPPhFinal": "最终PPh(租金、UMKM 0.5%等)",
+    "descPPN": "增值税(月报)",
+    "priorityNone": "低",
+    "workQueueSubtitle": "本周运营任务"
   },
   "monthlyPaymentDetail": {
     "back": "返回",

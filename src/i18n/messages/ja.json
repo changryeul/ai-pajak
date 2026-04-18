@@ -3155,7 +3155,13 @@
     "openCount": "進行中",
     "doneCount": "完了",
     "showGrid": "年間グリッド表示",
-    "hideGrid": "年間グリッド非表示"
+    "hideGrid": "年間グリッド非表示",
+    "descPPh21": "従業員所得税源泉徴収(月次)",
+    "descPPh23": "役務・ロイヤリティ源泉徴収(月次)",
+    "descPPhFinal": "最終PPh(賃貸・UMKM 0.5%等)",
+    "descPPN": "付加価値税(月次)",
+    "priorityNone": "低",
+    "workQueueSubtitle": "今週の業務タスク"
   },
   "monthlyPaymentDetail": {
     "back": "戻る",
