@@ -504,7 +504,7 @@ function CorporateCustomerDashboard({
             <Link
               key={item.href}
               href={`/${locale}${item.href}`}
-              className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
             >
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shadow-sm`}>
@@ -700,7 +700,7 @@ function ConsultantDashboard({
         {statCards.map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <Card key={i} className="group border-0 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+            <Card key={i} className="group rounded-2xl border-0 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div>
@@ -734,7 +734,7 @@ function ConsultantDashboard({
             <Link
               key={item.href}
               href={`/${locale}${item.href}`}
-              className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
             >
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shadow-sm`}>
