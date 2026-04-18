@@ -20,12 +20,17 @@ export async function GET() {
 
     const admin = getSupabaseAdmin();
 
-    // Get recent login activity from audit_log
+    // Get recent login activity from audit_log. Schema uses:
+    //   actor_user_id / activity_type / activity_details
+    // Enum values come from migrations 20251223000018 + 20251223000022.
+    // LOGOUT / PASSWORD_CHANGE / MFA_* are not in the activity_type enum,
+    // so filtering on them would hard-fail the PostgREST query. Stick to
+    // the two login events until a future migration adds the rest.
     const { data: loginLogs, error } = await admin
       .from('audit_log')
-      .select('id, action, ip_address, user_agent, created_at, details')
-      .eq('user_id', user.id)
-      .in('action', ['LOGIN_SUCCESS', 'LOGIN_FAILURE', 'LOGOUT', 'PASSWORD_CHANGE', 'MFA_ENROLL', 'MFA_VERIFY'])
+      .select('id, activity_type, ip_address, user_agent, created_at, activity_details')
+      .eq('actor_user_id', user.id)
+      .in('activity_type', ['LOGIN_SUCCESS', 'LOGIN_FAILURE'])
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -35,14 +40,14 @@ export async function GET() {
     }
 
     // Parse user agent for display
-    const sessions = (loginLogs || []).map(log => ({
+    const sessions = (loginLogs || []).map((log) => ({
       id: log.id,
-      action: log.action,
+      action: log.activity_type,
       ipAddress: log.ip_address,
       device: parseUserAgent(log.user_agent),
       userAgent: log.user_agent,
       timestamp: log.created_at,
-      details: log.details,
+      details: log.activity_details,
     }));
 
     return NextResponse.json({
