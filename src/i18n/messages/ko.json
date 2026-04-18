@@ -5436,7 +5436,8 @@
     "dependents": "부양가족 수",
     "dependentsHint": "최대 3명 (UU PPh 제7조). 일하지 않는 배우자는 여기서 제외됨.",
     "ptkpStatus": "PTKP 상태",
-    "ptkpExplain": "PTKP = 비과세 소득 한도. 위 선택으로 자동 계산됩니다."
+    "ptkpExplain": "PTKP = 비과세 소득 한도. 위 선택으로 자동 계산됩니다.",
+    "subtitle": "연간 신고용 결혼 상태 · PTKP"
   },
   "autoSave": {
     "saving": "저장 중…",
@@ -5462,7 +5463,8 @@
       "OTHER": "기타"
     },
     "notePlaceholder": "추가 메모 (선택)",
-    "saveAnswer": "답변 저장"
+    "saveAnswer": "답변 저장",
+    "subtitle": "자산 대비 소득 증가율 점검"
   },
   "crossBorder": {
     "title": "해외자산 신고의무 체크",
@@ -5485,7 +5487,8 @@
     },
     "KR": "해외금융계좌 신고 (5억 KRW)",
     "US": "FBAR (USD 10,000)",
-    "JP": "국외재산조서 (5천만 JPY)"
+    "JP": "국외재산조서 (5천만 JPY)",
+    "subtitle": "본국 신고의무 체크"
   },
   "bankAccounts": {
     "title": "은행 계좌",
@@ -5505,6 +5508,7 @@
       "KR": "한국",
       "US": "미국",
       "JP": "일본"
-    }
+    },
+    "subtitle": "계좌 {count}개 등록됨"
   }
 }

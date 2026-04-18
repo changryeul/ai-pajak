@@ -5435,7 +5435,8 @@
     "dependents": "Jumlah tanggungan",
     "dependentsHint": "Maksimum 3 orang (UU PPh Pasal 7). Istri dan suami yang tidak bekerja tidak termasuk di sini.",
     "ptkpStatus": "Status PTKP",
-    "ptkpExplain": "PTKP = penghasilan tidak kena pajak. Dihitung otomatis dari pilihan di atas."
+    "ptkpExplain": "PTKP = penghasilan tidak kena pajak. Dihitung otomatis dari pilihan di atas.",
+    "subtitle": "Status pernikahan dan PTKP untuk SPT Tahunan"
   },
   "autoSave": {
     "saving": "Menyimpan…",
@@ -5461,7 +5462,8 @@
       "OTHER": "Lainnya"
     },
     "notePlaceholder": "Catatan tambahan (opsional)",
-    "saveAnswer": "Simpan jawaban"
+    "saveAnswer": "Simpan jawaban",
+    "subtitle": "Pemeriksaan pertumbuhan aset vs. penghasilan"
   },
   "crossBorder": {
     "title": "Kewajiban Pelaporan Aset Luar Negeri",
@@ -5484,7 +5486,8 @@
     },
     "KR": "Laporan rekening luar negeri Korea (500M KRW)",
     "US": "FBAR (USD 10,000)",
-    "JP": "Laporan aset luar negeri Jepang (50M JPY)"
+    "JP": "Laporan aset luar negeri Jepang (50M JPY)",
+    "subtitle": "Aturan pelaporan negara asal"
   },
   "bankAccounts": {
     "title": "Rekening Bank",
@@ -5504,6 +5507,7 @@
       "KR": "Korea",
       "US": "Amerika Serikat",
       "JP": "Jepang"
-    }
+    },
+    "subtitle": "{count} rekening terdaftar"
   }
 }

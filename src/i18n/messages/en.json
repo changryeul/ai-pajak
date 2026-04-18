@@ -5435,7 +5435,8 @@
     "dependents": "Number of dependents",
     "dependentsHint": "Maximum 3 people (UU PPh Article 7). Non-working spouses are not counted here.",
     "ptkpStatus": "PTKP status",
-    "ptkpExplain": "PTKP is the non-taxable income threshold. Calculated automatically from your selection above."
+    "ptkpExplain": "PTKP is the non-taxable income threshold. Calculated automatically from your selection above.",
+    "subtitle": "Marital + PTKP status for annual filing"
   },
   "autoSave": {
     "saving": "Saving…",
@@ -5461,7 +5462,8 @@
       "OTHER": "Other"
     },
     "notePlaceholder": "Additional notes (optional)",
-    "saveAnswer": "Save answer"
+    "saveAnswer": "Save answer",
+    "subtitle": "Asset-vs-income growth check"
   },
   "crossBorder": {
     "title": "Foreign-Asset Reporting Check",
@@ -5484,7 +5486,8 @@
     },
     "KR": "Korea overseas-account report (500M KRW)",
     "US": "FBAR (USD 10,000)",
-    "JP": "Japan overseas assets (50M JPY)"
+    "JP": "Japan overseas assets (50M JPY)",
+    "subtitle": "Home-country reporting rules"
   },
   "bankAccounts": {
     "title": "Bank Accounts",
@@ -5504,6 +5507,7 @@
       "KR": "Korea",
       "US": "United States",
       "JP": "Japan"
-    }
+    },
+    "subtitle": "{count} accounts registered"
   }
 }

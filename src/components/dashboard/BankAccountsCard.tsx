@@ -116,31 +116,44 @@ export function BankAccountsCard() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
         <CardContent className="p-6 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-emerald-600" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+      <CardHeader className="pb-4 bg-gradient-to-r from-emerald-100 via-green-50 to-teal-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Wallet className="h-4 w-4 text-blue-600" />
-            {t('bankAccounts.title')}
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm">
+              <Wallet className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-semibold text-gray-900">
+                {t('bankAccounts.title')}
+              </CardTitle>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {t('bankAccounts.subtitle', { count: accounts.length })}
+              </p>
+            </div>
+          </div>
           {!adding && (
-            <Button size="sm" variant="outline" onClick={() => setAdding(true)}>
-              <Plus className="h-3 w-3 mr-1" />
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-sm border-0"
+              onClick={() => setAdding(true)}
+            >
+              <Plus className="h-3.5 w-3.5 mr-1" />
               {t('bankAccounts.add')}
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 pt-5">
         {error && <p className="text-xs text-red-600">{error}</p>}
 
         {accounts.length === 0 && !adding && (
@@ -150,7 +163,7 @@ export function BankAccountsCard() {
         {accounts.map((a) => (
           <div
             key={a.id}
-            className="flex items-center justify-between p-3 rounded-lg border bg-white"
+            className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-white hover:border-emerald-300 hover:shadow-sm transition-all"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="text-sm">
@@ -181,7 +194,7 @@ export function BankAccountsCard() {
         ))}
 
         {adding && (
-          <div className="rounded-lg border border-dashed p-3 space-y-2 bg-gray-50">
+          <div className="rounded-xl border-2 border-dashed border-emerald-200 p-4 space-y-3 bg-gradient-to-br from-emerald-50/50 to-green-50/50">
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs">
                 <div className="text-gray-500 mb-0.5">{t('bankAccounts.bankName')}</div>

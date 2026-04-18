@@ -5435,7 +5435,8 @@
     "dependents": "抚养人数",
     "dependentsHint": "最多3人(UU PPh第7条)。无工作的配偶不计入此处。",
     "ptkpStatus": "PTKP状态",
-    "ptkpExplain": "PTKP为非应税收入门槛。根据上述选择自动计算。"
+    "ptkpExplain": "PTKP为非应税收入门槛。根据上述选择自动计算。",
+    "subtitle": "年度申报婚姻与 PTKP 状态"
   },
   "autoSave": {
     "saving": "保存中…",
@@ -5461,7 +5462,8 @@
       "OTHER": "其他"
     },
     "notePlaceholder": "备注(可选)",
-    "saveAnswer": "保存答案"
+    "saveAnswer": "保存答案",
+    "subtitle": "资产与收入增长对比"
   },
   "crossBorder": {
     "title": "境外资产申报义务检查",
@@ -5484,7 +5486,8 @@
     },
     "KR": "韩国境外账户申报 (5亿KRW)",
     "US": "FBAR (1万美元)",
-    "JP": "日本境外财产 (5千万日元)"
+    "JP": "日本境外财产 (5千万日元)",
+    "subtitle": "母国申报规则"
   },
   "bankAccounts": {
     "title": "银行账户",
@@ -5504,6 +5507,7 @@
       "KR": "韩国",
       "US": "美国",
       "JP": "日本"
-    }
+    },
+    "subtitle": "已注册 {count} 个账户"
   }
 }

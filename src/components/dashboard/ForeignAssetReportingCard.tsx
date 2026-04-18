@@ -121,36 +121,57 @@ export function ForeignAssetReportingCard() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
         <CardContent className="p-6 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-sky-600" />
         </CardContent>
       </Card>
     );
   }
 
   if (error) {
-    return <Card><CardContent className="p-4 text-sm text-red-600">{error}</CardContent></Card>;
+    return (
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+        <CardContent className="p-4 text-sm text-red-600">{error}</CardContent>
+      </Card>
+    );
   }
 
   return (
-    <Card className={cn(result.requiresReporting && 'border-red-300')}>
-      <CardHeader className="pb-3">
+    <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+      <CardHeader className={cn(
+        'pb-4 bg-gradient-to-r',
+        result.requiresReporting
+          ? 'from-red-100 via-rose-50 to-pink-50'
+          : 'from-sky-100 via-cyan-50 to-blue-50',
+      )}>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Globe className="h-4 w-4 text-blue-600" />
-            {t('crossBorder.title')}
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              'h-10 w-10 rounded-xl flex items-center justify-center shadow-sm bg-gradient-to-br',
+              result.requiresReporting
+                ? 'from-red-500 to-rose-600'
+                : 'from-sky-500 to-cyan-600',
+            )}>
+              <Globe className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-semibold text-gray-900">
+                {t('crossBorder.title')}
+              </CardTitle>
+              <p className="text-xs text-gray-500 mt-0.5">{t('crossBorder.subtitle')}</p>
+            </div>
+          </div>
           <AutoSaveIndicator status={saveStatus} onRetry={retry} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-5">
         {/* Country selectors */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <label className="text-sm">
             <div className="text-xs text-gray-500 mb-1">{t('crossBorder.nationality')}</div>
             <select
-              className="w-full p-2 border rounded"
+              className="w-full p-2.5 border border-gray-200 rounded-lg bg-white focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition"
               value={profile.nationality ?? ''}
               onChange={(e) =>
                 setProfile((p) => ({
@@ -170,7 +191,7 @@ export function ForeignAssetReportingCard() {
           <label className="text-sm">
             <div className="text-xs text-gray-500 mb-1">{t('crossBorder.residence')}</div>
             <select
-              className="w-full p-2 border rounded"
+              className="w-full p-2.5 border border-gray-200 rounded-lg bg-white focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition"
               value={profile.tax_residence_country ?? ''}
               onChange={(e) =>
                 setProfile((p) => ({
@@ -201,10 +222,10 @@ export function ForeignAssetReportingCard() {
         ) : (
           <div
             className={cn(
-              'rounded-lg p-3 text-sm',
+              'rounded-xl p-4 text-sm',
               result.requiresReporting
-                ? 'bg-red-50 border border-red-200 text-red-900'
-                : 'bg-emerald-50 border border-emerald-200 text-emerald-800',
+                ? 'bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 text-red-900'
+                : 'bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 text-emerald-800',
             )}
           >
             <div className="flex items-start gap-2">

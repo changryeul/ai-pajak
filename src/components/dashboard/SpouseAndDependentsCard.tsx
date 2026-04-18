@@ -111,9 +111,9 @@ export function SpouseAndDependentsCard() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
         <CardContent className="p-6 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-purple-600" />
         </CardContent>
       </Card>
     );
@@ -121,7 +121,7 @@ export function SpouseAndDependentsCard() {
 
   if (error) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
         <CardContent className="p-6 text-sm text-red-600">{error}</CardContent>
       </Card>
     );
@@ -130,17 +130,24 @@ export function SpouseAndDependentsCard() {
   const showSpouseInputs = marital === 'married' && filing === 'joint';
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+      <CardHeader className="pb-4 bg-gradient-to-r from-purple-100 via-fuchsia-50 to-pink-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Users className="h-4 w-4 text-blue-600" />
-            {t('spouse.title')}
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center shadow-sm">
+              <Users className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-semibold text-gray-900">
+                {t('spouse.title')}
+              </CardTitle>
+              <p className="text-xs text-gray-500 mt-0.5">{t('spouse.subtitle')}</p>
+            </div>
+          </div>
           <AutoSaveIndicator status={saveStatus} onRetry={retry} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-5">
         {/* Marital status */}
         <fieldset>
           <legend className="text-sm font-medium mb-2">{t('spouse.maritalStatus')}</legend>
@@ -259,10 +266,10 @@ export function SpouseAndDependentsCard() {
                 type="button"
                 onClick={() => setDependents(n)}
                 className={cn(
-                  'w-12 h-10 rounded border text-sm font-medium transition-colors',
+                  'w-14 h-11 rounded-xl border text-sm font-semibold transition-all',
                   dependents === n
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
+                    ? 'bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white border-transparent shadow-md scale-105'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300 hover:bg-purple-50',
                 )}
               >
                 {n}
@@ -272,13 +279,18 @@ export function SpouseAndDependentsCard() {
         </div>
 
         {/* Live PTKP preview */}
-        <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 p-4 border border-emerald-200">
-          <div className="text-xs text-emerald-700 font-medium">{t('spouse.ptkpStatus')}</div>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-emerald-900">{ptkpStatus}</span>
-            <span className="text-sm text-emerald-700">· {formatRupiah(ptkpAmount)}</span>
+        <div className="rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 p-5 border border-emerald-200/60 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wide">
+              {t('spouse.ptkpStatus')}
+            </div>
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <div className="mt-1 text-xs text-emerald-600">{t('spouse.ptkpExplain')}</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold text-emerald-900 tracking-tight">{ptkpStatus}</span>
+            <span className="text-base text-emerald-700 font-medium">· {formatRupiah(ptkpAmount)}</span>
+          </div>
+          <div className="mt-2 text-xs text-emerald-600/90">{t('spouse.ptkpExplain')}</div>
         </div>
       </CardContent>
     </Card>

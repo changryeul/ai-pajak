@@ -5435,7 +5435,8 @@
     "dependents": "扶養家族の人数",
     "dependentsHint": "最大3人 (UU PPh 第7条)。無職の配偶者はここに含まれません。",
     "ptkpStatus": "PTKP ステータス",
-    "ptkpExplain": "PTKP は非課税所得限度。上記の選択から自動計算されます。"
+    "ptkpExplain": "PTKP は非課税所得限度。上記の選択から自動計算されます。",
+    "subtitle": "年次申告用の婚姻・PTKP"
   },
   "autoSave": {
     "saving": "保存中…",
@@ -5461,7 +5462,8 @@
       "OTHER": "その他"
     },
     "notePlaceholder": "追加メモ (任意)",
-    "saveAnswer": "回答を保存"
+    "saveAnswer": "回答を保存",
+    "subtitle": "資産と所得の増加率チェック"
   },
   "crossBorder": {
     "title": "国外資産報告義務チェック",
@@ -5484,7 +5486,8 @@
     },
     "KR": "海外金融口座報告 (5億KRW)",
     "US": "FBAR (USD 10,000)",
-    "JP": "国外財産調書 (50M JPY)"
+    "JP": "国外財産調書 (50M JPY)",
+    "subtitle": "母国の報告ルール"
   },
   "bankAccounts": {
     "title": "銀行口座",
@@ -5504,6 +5507,7 @@
       "KR": "韓国",
       "US": "アメリカ",
       "JP": "日本"
-    }
+    },
+    "subtitle": "{count}件の口座"
   }
 }

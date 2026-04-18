@@ -151,29 +151,58 @@ export function GrowthAnomalyCard() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
         <CardContent className="p-6 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-amber-600" />
         </CardContent>
       </Card>
     );
   }
 
   if (error) {
-    return <Card><CardContent className="p-4 text-sm text-red-600">{error}</CardContent></Card>;
+    return (
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+        <CardContent className="p-4 text-sm text-red-600">{error}</CardContent>
+      </Card>
+    );
   }
+
+  // Shared header — colored icon badge + title + subtitle
+  const Header = ({ tone }: { tone: 'neutral' | 'ok' | 'warn' }) => {
+    const grad =
+      tone === 'warn' ? 'from-amber-100 via-orange-50 to-yellow-50'
+      : tone === 'ok' ? 'from-emerald-100 via-green-50 to-teal-50'
+      :                 'from-gray-100 via-slate-50 to-gray-50';
+    const badgeGrad =
+      tone === 'warn' ? 'from-amber-500 to-orange-600'
+      : tone === 'ok' ? 'from-emerald-500 to-teal-600'
+      :                 'from-gray-400 to-slate-500';
+    const Icon = tone === 'warn' ? AlertTriangle : TrendingUp;
+    return (
+      <CardHeader className={cn('pb-4 bg-gradient-to-r', grad)}>
+        <div className="flex items-center gap-3">
+          <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center shadow-sm bg-gradient-to-br', badgeGrad)}>
+            <Icon className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <CardTitle className="text-base font-semibold text-gray-900">
+              {t('anomaly.title')}
+            </CardTitle>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {prevYear && latestYear ? `${prevYear} → ${latestYear}` : t('anomaly.subtitle')}
+            </p>
+          </div>
+        </div>
+      </CardHeader>
+    );
+  };
 
   // Not enough data → informational card encouraging the user to add snapshots.
   if (anomaly === null) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="h-4 w-4 text-gray-500" />
-            {t('anomaly.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-gray-500">
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+        <Header tone="neutral" />
+        <CardContent className="pt-5 text-sm text-gray-500">
           {t('anomaly.notEnoughData')}
         </CardContent>
       </Card>
@@ -183,37 +212,28 @@ export function GrowthAnomalyCard() {
   const fmtPct = (v: number | null) => v === null ? '—' : `${(v * 100).toFixed(1)}%`;
 
   return (
-    <Card className={cn(anomaly && 'border-amber-300')}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          {anomaly ? (
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-          ) : (
-            <TrendingUp className="h-4 w-4 text-emerald-600" />
-          )}
-          {t('anomaly.title')}
-          <span className="text-xs font-normal text-gray-500">
-            · {prevYear} → {latestYear}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+      <Header tone={anomaly ? 'warn' : 'ok'} />
+      <CardContent className="space-y-4 pt-5">
         {/* Growth rate summary */}
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-lg bg-gray-50 p-3">
-            <div className="text-xs text-gray-500">{t('anomaly.assetGrowth')}</div>
-            <div className="text-lg font-bold mt-0.5">{fmtPct(assetGrowth)}</div>
+          <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-4">
+            <div className="text-xs text-blue-700 font-medium uppercase tracking-wide">{t('anomaly.assetGrowth')}</div>
+            <div className="text-2xl font-bold mt-1 text-blue-900 tracking-tight">{fmtPct(assetGrowth)}</div>
           </div>
-          <div className="rounded-lg bg-gray-50 p-3">
-            <div className="text-xs text-gray-500">{t('anomaly.incomeGrowth')}</div>
-            <div className="text-lg font-bold mt-0.5">{fmtPct(incomeGrowth)}</div>
+          <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 p-4">
+            <div className="text-xs text-violet-700 font-medium uppercase tracking-wide">{t('anomaly.incomeGrowth')}</div>
+            <div className="text-2xl font-bold mt-1 text-violet-900 tracking-tight">{fmtPct(incomeGrowth)}</div>
           </div>
         </div>
 
         {anomaly ? (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            <p className="font-medium">{t('anomaly.warningTitle')}</p>
-            <p className="text-xs mt-1">
+          <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4 text-sm text-amber-900">
+            <p className="font-semibold flex items-center gap-1.5">
+              <AlertTriangle className="h-4 w-4" />
+              {t('anomaly.warningTitle')}
+            </p>
+            <p className="text-xs mt-1.5 text-amber-800/90">
               {t('anomaly.warningBody', {
                 assetGrowth: fmtPct(assetGrowth),
                 incomeGrowth: fmtPct(incomeGrowth),
@@ -221,7 +241,7 @@ export function GrowthAnomalyCard() {
             </p>
           </div>
         ) : (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 text-sm text-emerald-800 font-medium">
             ✓ {t('anomaly.okBody')}
           </div>
         )}
