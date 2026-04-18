@@ -5509,5 +5509,29 @@
       "JP": "日本"
     },
     "subtitle": "{count}件の口座"
+  },
+  "individualBilling": {
+    "heroEyebrow": "個人税務",
+    "heroTitle": "申告ごとの支払い、月額サブスクなし",
+    "heroSubtitle": "年次SPTの種類(1770SS / 1770S / 1770)を選んでください。一度の支払いで、JTCが申告し領収証をお届けします。",
+    "sectionPlans": "SPT種類を選択",
+    "sectionPending": "支払い待ち",
+    "sectionPendingHint": "チェックアウトを開始しましたが、支払いが未完了です",
+    "sectionHistory": "支払い履歴",
+    "sectionHistoryHint": "完了したすべてのSPT支払い",
+    "emptyHistory": "支払い履歴はまだありません。",
+    "pendingBadge": "支払い待ち",
+    "footerNote": "JTC審査 + DJP提出含む、PPN 11%込みの価格です。",
+    "loadError": "カタログの読み込みに失敗しました。",
+    "checkoutFailed": "チェックアウトに失敗しました。再試行してください。",
+    "snapTokenReady": "支払い準備完了 — Midtransの案内に従ってください。",
+    "pendingCreated": "取引を作成しました。「支払い待ち」リストから後で決済を完了してください。",
+    "plan": {
+      "perFiling": "申告ごと",
+      "vatInclusive": "PPN込合計: {total}",
+      "recommendedFor": "推奨対象",
+      "selectCta": "選択 · 支払い",
+      "processing": "処理中..."
+    }
   }
 }

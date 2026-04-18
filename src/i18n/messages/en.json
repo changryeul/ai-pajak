@@ -5509,5 +5509,29 @@
       "JP": "Japan"
     },
     "subtitle": "{count} accounts registered"
+  },
+  "individualBilling": {
+    "heroEyebrow": "Personal Tax",
+    "heroTitle": "Pay per filing, no monthly subscription",
+    "heroSubtitle": "Pick your annual SPT type (1770SS / 1770S / 1770). One-time payment, JTC files and delivers the receipt.",
+    "sectionPlans": "Pick SPT Type",
+    "sectionPending": "Pending payments",
+    "sectionPendingHint": "You started checkout but have not completed payment",
+    "sectionHistory": "Payment History",
+    "sectionHistoryHint": "All completed SPT payments",
+    "emptyHistory": "No payment history yet.",
+    "pendingBadge": "Awaiting payment",
+    "footerNote": "Price includes JTC review + DJP submission. VAT 11% included.",
+    "loadError": "Failed to load catalog.",
+    "checkoutFailed": "Checkout failed. Please retry.",
+    "snapTokenReady": "Payment ready — follow the Midtrans prompt.",
+    "pendingCreated": "Transaction created. Complete payment later from the \"Pending payments\" list.",
+    "plan": {
+      "perFiling": "Per filing",
+      "vatInclusive": "Total with VAT: {total}",
+      "recommendedFor": "Recommended for",
+      "selectCta": "Pick & Pay",
+      "processing": "Processing..."
+    }
   }
 }

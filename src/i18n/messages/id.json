@@ -5509,5 +5509,29 @@
       "JP": "Jepang"
     },
     "subtitle": "{count} rekening terdaftar"
+  },
+  "individualBilling": {
+    "heroEyebrow": "Pajak Pribadi",
+    "heroTitle": "Bayar per SPT, tanpa langganan bulanan",
+    "heroSubtitle": "Pilih jenis SPT tahunan Anda (1770SS / 1770S / 1770). Pembayaran sekali, JTC memfilingkan untuk Anda dan mengirim bukti setor.",
+    "sectionPlans": "Pilih Jenis SPT",
+    "sectionPending": "Pembayaran menunggu",
+    "sectionPendingHint": "Anda sudah memulai checkout tapi belum selesai membayar",
+    "sectionHistory": "Riwayat Pembayaran",
+    "sectionHistoryHint": "Semua pembayaran SPT yang sudah selesai",
+    "emptyHistory": "Belum ada riwayat pembayaran.",
+    "pendingBadge": "Menunggu pembayaran",
+    "footerNote": "Harga sudah termasuk review JTC + submit DJP. PPN 11% sudah termasuk.",
+    "loadError": "Gagal memuat katalog.",
+    "checkoutFailed": "Gagal memulai checkout. Coba lagi.",
+    "snapTokenReady": "Pembayaran disiapkan — silakan ikuti prompt Midtrans.",
+    "pendingCreated": "Transaksi dibuat. Selesaikan pembayaran nanti dari daftar \"Pembayaran menunggu\".",
+    "plan": {
+      "perFiling": "Per SPT",
+      "vatInclusive": "Total termasuk PPN: {total}",
+      "recommendedFor": "Direkomendasikan untuk",
+      "selectCta": "Pilih & Bayar",
+      "processing": "Memproses..."
+    }
   }
 }

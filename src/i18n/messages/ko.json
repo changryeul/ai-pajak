@@ -5510,5 +5510,29 @@
       "JP": "일본"
     },
     "subtitle": "계좌 {count}개 등록됨"
+  },
+  "individualBilling": {
+    "heroEyebrow": "개인 세무",
+    "heroTitle": "건당 결제, 월 구독 없음",
+    "heroSubtitle": "연간 SPT 유형(1770SS / 1770S / 1770)을 선택하세요. 한 번 결제하면 JTC가 신고 및 영수증 전달까지 처리합니다.",
+    "sectionPlans": "SPT 종류 선택",
+    "sectionPending": "결제 대기",
+    "sectionPendingHint": "체크아웃을 시작했으나 결제가 완료되지 않음",
+    "sectionHistory": "결제 이력",
+    "sectionHistoryHint": "완료된 모든 SPT 결제",
+    "emptyHistory": "결제 이력이 없습니다.",
+    "pendingBadge": "결제 대기 중",
+    "footerNote": "JTC 검토 + DJP 제출 포함, PPN 11% 포함 가격입니다.",
+    "loadError": "카탈로그 로드 실패.",
+    "checkoutFailed": "체크아웃 실패. 다시 시도해주세요.",
+    "snapTokenReady": "결제 준비 완료 — Midtrans 안내를 따르세요.",
+    "pendingCreated": "거래가 생성되었습니다. \"결제 대기\" 목록에서 나중에 결제를 완료하세요.",
+    "plan": {
+      "perFiling": "건당",
+      "vatInclusive": "PPN 포함 합계: {total}",
+      "recommendedFor": "추천 대상",
+      "selectCta": "선택 · 결제",
+      "processing": "처리 중..."
+    }
   }
 }

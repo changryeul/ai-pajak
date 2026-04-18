@@ -9,14 +9,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { CreditCard, FileText, TrendingUp, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
+import { CreditCard, FileText, TrendingUp, Calendar, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, type Subscription, type Invoice, type UsageMetrics, PRICING_PLANS } from '@/lib/billing/types';
 import { PageTitle } from '@/components/layout/PageTitle';
+import { useSession } from '@/hooks/useSession';
+import { IndividualBillingView } from '@/components/billing/IndividualBillingView';
 
 export default function BillingPage() {
   const t = useTranslations('billing');
   const router = useRouter();
+  const { session, isLoading: sessionLoading } = useSession();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [usage, setUsage] = useState<UsageMetrics | null>(null);
@@ -57,7 +60,18 @@ export default function BillingPage() {
 
   const plan = subscription ? PRICING_PLANS.find((p) => p.id === subscription.plan) : null;
 
-  if (loading) {
+  // INDIVIDUAL customers get a completely different view — per-SPT billing,
+  // not monthly subscriptions. Route them to IndividualBillingView.
+  if (!sessionLoading && session?.customerType === 'INDIVIDUAL') {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <PageTitle title="Tagihan" />
+        <IndividualBillingView />
+      </div>
+    );
+  }
+
+  if (loading || sessionLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse space-y-6">

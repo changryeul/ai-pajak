@@ -5509,5 +5509,29 @@
       "JP": "日本"
     },
     "subtitle": "已注册 {count} 个账户"
+  },
+  "individualBilling": {
+    "heroEyebrow": "个人税务",
+    "heroTitle": "按次申报付费,无需月度订阅",
+    "heroSubtitle": "选择您的年度 SPT 类型(1770SS / 1770S / 1770)。一次付款,JTC 负责申报并提供收据。",
+    "sectionPlans": "选择 SPT 类型",
+    "sectionPending": "待支付",
+    "sectionPendingHint": "您已开始结账但尚未完成付款",
+    "sectionHistory": "支付历史",
+    "sectionHistoryHint": "所有已完成的 SPT 付款",
+    "emptyHistory": "暂无支付历史。",
+    "pendingBadge": "等待付款",
+    "footerNote": "价格包含 JTC 审核 + DJP 提交,含 11% 增值税。",
+    "loadError": "加载目录失败。",
+    "checkoutFailed": "结账失败,请重试。",
+    "snapTokenReady": "付款准备就绪 — 请按照 Midtrans 提示操作。",
+    "pendingCreated": "已创建交易。稍后可从\"待支付\"列表完成付款。",
+    "plan": {
+      "perFiling": "按次",
+      "vatInclusive": "含税合计: {total}",
+      "recommendedFor": "推荐对象",
+      "selectCta": "选择并付款",
+      "processing": "处理中..."
+    }
   }
 }
