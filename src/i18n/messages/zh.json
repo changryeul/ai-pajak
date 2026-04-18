@@ -5663,5 +5663,22 @@
     "note": "注册后可添加团队税务师并邀请首个客户。",
     "switchIndividual": "个人注册",
     "errMissingFirm": "请输入事务所名称。"
+  },
+  "taxAnomaly": {
+    "taxYear": "税务年度",
+    "analyzing": "分析中...",
+    "riskScore": "风险评分",
+    "auditProbability": "审计概率",
+    "threshold": "阈值",
+    "suggestion": "建议",
+    "basis": "法律依据",
+    "alertsDetected": "检测到 {count} 条警报",
+    "checkBuktiPotong": "所有收入的 Bukti Potong(扣缴凭证)齐全",
+    "checkBankReconciliation": "银行交易与申报营业额对账",
+    "checkDeductionDocs": "所有扣除项的支持文件",
+    "checkArmsLength": "关联方交易的转让定价(独立交易原则)文件",
+    "checkEfakturPpn": "e-Faktur PPN 准备(进项 vs 销项)",
+    "checkPayrollPph21": "月度 PPh 21 工资核对",
+    "checkAmendment": "如有 SPT 修正申报,准备相关支持文件"
   }
 }

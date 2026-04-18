@@ -5663,5 +5663,22 @@
     "note": "登録後、チームの税理士を追加し、最初の顧問先を招待できます。",
     "switchIndividual": "個人登録",
     "errMissingFirm": "事務所名を入力してください。"
+  },
+  "taxAnomaly": {
+    "taxYear": "課税年度",
+    "analyzing": "分析中...",
+    "riskScore": "リスクスコア",
+    "auditProbability": "税務調査確率",
+    "threshold": "基準値",
+    "suggestion": "推奨事項",
+    "basis": "法的根拠",
+    "alertsDetected": "{count}件のアラート検出",
+    "checkBuktiPotong": "すべての所得に対するBukti Potong(源泉徴収票)完備",
+    "checkBankReconciliation": "銀行取引と申告売上の照合",
+    "checkDeductionDocs": "すべての控除項目の証憑書類",
+    "checkArmsLength": "関連者取引の移転価格(arm's length)文書",
+    "checkEfakturPpn": "e-Faktur PPN準備(仕入vs売上)",
+    "checkPayrollPph21": "月次PPh 21給与照合",
+    "checkAmendment": "SPT修正申告がある場合、根拠資料準備"
   }
 }

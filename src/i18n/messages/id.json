@@ -5663,5 +5663,22 @@
     "note": "Setelah pendaftaran, Anda dapat menambah konsultan tim dan mengundang klien pertama.",
     "switchIndividual": "Daftar Pribadi",
     "errMissingFirm": "Mohon isi nama kantor."
+  },
+  "taxAnomaly": {
+    "taxYear": "Tahun Pajak",
+    "analyzing": "Menganalisis...",
+    "riskScore": "Skor Risiko",
+    "auditProbability": "Probabilitas Pemeriksaan",
+    "threshold": "Ambang",
+    "suggestion": "Saran",
+    "basis": "Dasar",
+    "alertsDetected": "{count} peringatan terdeteksi",
+    "checkBuktiPotong": "Bukti Potong lengkap untuk semua penghasilan",
+    "checkBankReconciliation": "Rekonsiliasi bank vs omzet yang dilaporkan",
+    "checkDeductionDocs": "Dokumen pendukung untuk semua pengurangan",
+    "checkArmsLength": "Dokumentasi harga transfer (arm's length) untuk transaksi pihak berelasi",
+    "checkEfakturPpn": "e-Faktur PPN disiapkan (input vs output)",
+    "checkPayrollPph21": "Payroll PPh 21 bulanan direkonsiliasi",
+    "checkAmendment": "Jika ada pembetulan SPT, dokumen dasar sudah disiapkan"
   }
 }
