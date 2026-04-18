@@ -5442,5 +5442,25 @@
     "saved": "保存済み",
     "error": "保存失敗",
     "retry": "再試行"
+  },
+  "anomaly": {
+    "title": "資産増加異常検知",
+    "notEnoughData": "データ不足。資産と所得のスナップショットを最低2年分追加してください。",
+    "assetGrowth": "資産 前年比",
+    "incomeGrowth": "所得 前年比",
+    "warningTitle": "⚠ 資産増加が所得を上回る",
+    "warningBody": "資産{assetGrowth}増、所得{incomeGrowth}増。資金源の説明を検討してください。",
+    "okBody": "資産と所得の増加は整合的です。",
+    "fundingPrompt": "今年の資産増加の源泉は?",
+    "funding": {
+      "SALARY": "給与",
+      "BUSINESS": "事業",
+      "INVESTMENT": "投資",
+      "LOAN": "借入",
+      "INHERITANCE": "相続/贈与",
+      "OTHER": "その他"
+    },
+    "notePlaceholder": "追加メモ (任意)",
+    "saveAnswer": "回答を保存"
   }
 }

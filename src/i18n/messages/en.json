@@ -5442,5 +5442,25 @@
     "saved": "Saved",
     "error": "Save failed",
     "retry": "Retry"
+  },
+  "anomaly": {
+    "title": "Asset Growth Anomaly Check",
+    "notEnoughData": "Not enough data. Add at least 2 years of asset and income snapshots.",
+    "assetGrowth": "Asset YoY Growth",
+    "incomeGrowth": "Income YoY Growth",
+    "warningTitle": "⚠ Assets are growing faster than income",
+    "warningBody": "Assets up {assetGrowth}, income up {incomeGrowth}. Consider explaining the source of funds.",
+    "okBody": "Asset and income growth are consistent.",
+    "fundingPrompt": "Where did this year’s asset growth come from?",
+    "funding": {
+      "SALARY": "Salary",
+      "BUSINESS": "Business",
+      "INVESTMENT": "Investment",
+      "LOAN": "Loan",
+      "INHERITANCE": "Inheritance / gift",
+      "OTHER": "Other"
+    },
+    "notePlaceholder": "Additional notes (optional)",
+    "saveAnswer": "Save answer"
   }
 }

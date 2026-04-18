@@ -5443,5 +5443,25 @@
     "saved": "저장됨",
     "error": "저장 실패",
     "retry": "다시 시도"
+  },
+  "anomaly": {
+    "title": "자산 이상 징후 감지",
+    "notEnoughData": "데이터 부족. 최소 2년치 자산·소득 스냅샷 필요.",
+    "assetGrowth": "자산 전년 대비 증가율",
+    "incomeGrowth": "소득 전년 대비 증가율",
+    "warningTitle": "⚠ 자산이 소득보다 빠르게 증가",
+    "warningBody": "자산 {assetGrowth} 증가, 소득 {incomeGrowth} 증가. 자금 출처 설명을 권장합니다.",
+    "okBody": "자산과 소득의 증가가 일관됩니다.",
+    "fundingPrompt": "올해 자산 증가의 주된 출처는?",
+    "funding": {
+      "SALARY": "급여",
+      "BUSINESS": "사업",
+      "INVESTMENT": "투자",
+      "LOAN": "차입",
+      "INHERITANCE": "증여/상속",
+      "OTHER": "기타"
+    },
+    "notePlaceholder": "추가 메모 (선택)",
+    "saveAnswer": "답변 저장"
   }
 }

@@ -5442,5 +5442,25 @@
     "saved": "已保存",
     "error": "保存失败",
     "retry": "重试"
+  },
+  "anomaly": {
+    "title": "资产异常增长检测",
+    "notEnoughData": "数据不足。至少需要2年的资产和收入快照。",
+    "assetGrowth": "资产同比增长",
+    "incomeGrowth": "收入同比增长",
+    "warningTitle": "⚠ 资产增长超过收入",
+    "warningBody": "资产增长{assetGrowth},收入增长{incomeGrowth}。建议说明资金来源。",
+    "okBody": "资产与收入增长一致。",
+    "fundingPrompt": "今年资产增长的来源?",
+    "funding": {
+      "SALARY": "工资",
+      "BUSINESS": "业务",
+      "INVESTMENT": "投资",
+      "LOAN": "借款",
+      "INHERITANCE": "继承/赠与",
+      "OTHER": "其他"
+    },
+    "notePlaceholder": "备注(可选)",
+    "saveAnswer": "保存答案"
   }
 }

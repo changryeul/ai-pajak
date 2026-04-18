@@ -5442,5 +5442,25 @@
     "saved": "Tersimpan",
     "error": "Gagal menyimpan",
     "retry": "Coba lagi"
+  },
+  "anomaly": {
+    "title": "Deteksi Anomali Aset",
+    "notEnoughData": "Belum cukup data. Tambahkan snapshot aset dan penghasilan minimal 2 tahun.",
+    "assetGrowth": "Pertumbuhan Aset YoY",
+    "incomeGrowth": "Pertumbuhan Penghasilan YoY",
+    "warningTitle": "⚠ Aset tumbuh lebih cepat dari penghasilan",
+    "warningBody": "Aset naik {assetGrowth}, penghasilan naik {incomeGrowth}. Pertimbangkan untuk menjelaskan sumber dana.",
+    "okBody": "Pertumbuhan aset dan penghasilan konsisten.",
+    "fundingPrompt": "Dari mana sumber pertumbuhan aset tahun ini?",
+    "funding": {
+      "SALARY": "Gaji",
+      "BUSINESS": "Usaha",
+      "INVESTMENT": "Investasi",
+      "LOAN": "Pinjaman",
+      "INHERITANCE": "Warisan/Hibah",
+      "OTHER": "Lainnya"
+    },
+    "notePlaceholder": "Catatan tambahan (opsional)",
+    "saveAnswer": "Simpan jawaban"
   }
 }

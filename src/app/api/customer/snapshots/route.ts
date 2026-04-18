@@ -31,6 +31,10 @@ const liabilityCategories = [
   'BANK_LOAN', 'CREDIT_CARD', 'PERSONAL_LOAN', 'BUSINESS_LIABILITY', 'OTHER',
 ] as const;
 
+const incomeSources = [
+  'EMPLOYMENT', 'BUSINESS', 'INVESTMENT', 'RENTAL', 'OTHER',
+] as const;
+
 const upsertSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('asset'),
@@ -55,12 +59,29 @@ const upsertSchema = z.discriminatedUnion('kind', [
     label: z.string().max(200).nullable().optional(),
     notes: z.string().max(1000).nullable().optional(),
   }),
+  z.object({
+    kind: z.literal('income'),
+    id: z.string().uuid().optional(),
+    snapshot_year: z.number().int().min(2000).max(2100),
+    source: z.enum(incomeSources),
+    gross_income_idr: z.number().nonnegative(),
+    withheld_idr: z.number().nonnegative().nullable().optional(),
+    origin: z.string().max(50).nullable().optional(),
+    label: z.string().max(200).nullable().optional(),
+    notes: z.string().max(1000).nullable().optional(),
+  }),
 ]);
 
 const deleteSchema = z.object({
-  kind: z.enum(['asset', 'liability']),
+  kind: z.enum(['asset', 'liability', 'income']),
   id: z.string().uuid(),
 });
+
+function tableFor(kind: 'asset' | 'liability' | 'income'): string {
+  return kind === 'asset'     ? 'asset_snapshot'
+       : kind === 'liability' ? 'liability_snapshot'
+       :                        'income_snapshot';
+}
 
 async function resolveCustomerId(userId: string): Promise<string | null> {
   const admin = getSupabaseAdmin();
@@ -81,14 +102,15 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     }
 
     const admin = getSupabaseAdmin();
-    const [assetsRes, liabilitiesRes] = await Promise.all([
+    const [assetsRes, liabilitiesRes, incomesRes] = await Promise.all([
       admin.from('asset_snapshot').select('*').eq('customer_id', customerId).order('snapshot_year'),
       admin.from('liability_snapshot').select('*').eq('customer_id', customerId).order('snapshot_year'),
+      admin.from('income_snapshot').select('*').eq('customer_id', customerId).order('snapshot_year'),
     ]);
 
-    if (assetsRes.error || liabilitiesRes.error) {
+    if (assetsRes.error || liabilitiesRes.error || incomesRes.error) {
       loggers.api.error(
-        { assetErr: assetsRes.error, liaErr: liabilitiesRes.error },
+        { assetErr: assetsRes.error, liaErr: liabilitiesRes.error, incErr: incomesRes.error },
         'snapshot fetch failed',
       );
       return NextResponse.json({ success: false, error: 'fetch_failed' }, { status: 500 });
@@ -96,12 +118,18 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 
     const assets = assetsRes.data ?? [];
     const liabilities = liabilitiesRes.data ?? [];
+    const incomes = incomesRes.data ?? [];
+
+    // income_snapshot uses `gross_income_idr`, not `amount_idr`. Normalise for sumByYear.
+    const incomesForSum = (incomes as { snapshot_year: number; gross_income_idr: number }[])
+      .map((i) => ({ snapshot_year: i.snapshot_year, amount_idr: i.gross_income_idr }));
 
     return NextResponse.json({
       success: true,
       data: {
         assets,
         liabilities,
+        incomes,
         summary: {
           assetByYear:        sumByYear(assets as { snapshot_year: number; amount_idr: number }[]),
           foreignAssetByYear: sumForeignByYear(
@@ -110,6 +138,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
           liabilityByYear:    sumByYear(
             liabilities as { snapshot_year: number; amount_idr: number }[],
           ),
+          incomeByYear:       sumByYear(incomesForSum),
         },
       },
     });
@@ -139,7 +168,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     const admin = getSupabaseAdmin();
     const row = { ...parsed.data, customer_id: customerId };
     delete (row as { kind?: string }).kind;
-    const table = parsed.data.kind === 'asset' ? 'asset_snapshot' : 'liability_snapshot';
+    const table = tableFor(parsed.data.kind);
 
     let result;
     if (parsed.data.id) {
@@ -186,7 +215,7 @@ async function handleDelete(req: RequestWithSession): Promise<Response> {
     }
 
     const admin = getSupabaseAdmin();
-    const table = parsed.data.kind === 'asset' ? 'asset_snapshot' : 'liability_snapshot';
+    const table = tableFor(parsed.data.kind);
     const { error } = await admin
       .from(table)
       .delete()
