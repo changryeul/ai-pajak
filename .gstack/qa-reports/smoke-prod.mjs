@@ -50,13 +50,17 @@ try {
   await step('register INDIVIDUAL + full onboarding', async () => {
     await page.goto(`${BASE}/id/register`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(2000);
-    // Click 개인 납세자 (Individual) card
-    const individualCard = await page.locator('text=개인 납세자').first();
-    await individualCard.click();
-    await page.waitForTimeout(500);
+    // New 2-step signup flow (2026-04-18):
+    //   Step 1: fullName + NPWP/NIK dropdown + ID number + email + phone
+    //   Step 2: password + confirmPassword
     await page.fill('input[name="fullName"]', 'Prod Smoke User');
+    // Default dropdown is NPWP (15 digits). Use a synthetic 15-digit NPWP.
+    await page.fill('input[name="idNumber"]', '123456789012345');
     await page.fill('input[name="email"]', EMAIL);
     await page.fill('input[name="phone"]', '081234567890');
+    await page.locator('button[type="submit"]').click();
+    // Wait for step 2 (password)
+    await page.waitForSelector('input[name="password"]', { timeout: 15000 });
     await page.fill('input[name="password"]', PW);
     await page.fill('input[name="confirmPassword"]', PW);
     await page.locator('button[type="submit"]').click();
