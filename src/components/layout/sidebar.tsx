@@ -141,7 +141,13 @@ const navItems: NavSection[] = [
       { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
     ],
   },
-  // ── 개인 고객: 연신고만 ──
+  // ── 개인 고객: 최소 네비게이션 (2026-04-18 hybrid 재배치) ──
+  // 대시보드(상단)에 3년 이력/자산/부채/PTKP/해외자산 모두 표시하므로
+  // 사이드바는 실제로 따로 화면 전환이 필요한 항목만 남김.
+  //   - 연신고    : SPT 1770/1770S/1770SS 작성 진입점
+  //   - 빌링      : 건당 결제 / 결제 대기 / 이력
+  //   - 자료 업로드: 1721-A1 / KK OCR 업로드
+  //   - 보고서    : 5년 신고·납부 리포트
   {
     section: 'individual-main',
     roles: [UserRole.CUSTOMER],
@@ -149,13 +155,9 @@ const navItems: NavSection[] = [
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'], children: [
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
-      { href: '/submissions', icon: ClipboardList, labelKey: 'nav.submissions', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/invoice-capture', icon: Camera, labelKey: 'nav.invoiceCapture', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
       { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/documents', icon: Upload, labelKey: 'nav.documents', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
     ],
   },
   // ── 세무 컨설턴트: 월신고 (기존 구조 유지) ──
