@@ -5434,10 +5434,12 @@
     "spouseIncome": "배우자 연간 소득 (IDR)",
     "spouseWithheld": "배우자 원천세 (IDR)",
     "dependents": "부양가족 수",
-    "dependentsHint": "최대 3명 (UU PPh 제7조). 일하지 않는 배우자는 여기서 제외됨.",
+    "dependentsHint": "최대 3명 (UU PPh 제7조 (1)항). **배우자는 여기서 카운트되지 않습니다** — 결혼 상태 (K/K-I)는 별도로 처리됩니다.",
     "ptkpStatus": "PTKP 상태",
-    "ptkpExplain": "PTKP = 비과세 소득 한도. 위 선택으로 자동 계산됩니다.",
-    "subtitle": "연간 신고용 결혼 상태 · PTKP"
+    "ptkpExplain": "PTKP = 기본 소득공제액 (한도 아님). 위 선택으로 자동 계산됩니다.",
+    "subtitle": "연간 신고용 결혼 상태 · PTKP",
+    "jointDowngradeTitle": "합산신고 → 단일신고 자동 전환",
+    "jointDowngradeBody": "합산신고 (K/I)는 배우자 소득 > 0일 때만 적용됩니다. \"배우자 연간 소득\"을 입력해야 K/I PTKP (Rp 112.5M 공제)가 적용됩니다."
   },
   "autoSave": {
     "saving": "저장 중…",

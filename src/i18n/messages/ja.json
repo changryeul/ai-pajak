@@ -5433,10 +5433,12 @@
     "spouseIncome": "配偶者の年収 (IDR)",
     "spouseWithheld": "配偶者の源泉徴収税 (IDR)",
     "dependents": "扶養家族の人数",
-    "dependentsHint": "最大3人 (UU PPh 第7条)。無職の配偶者はここに含まれません。",
+    "dependentsHint": "最大3人 (UU PPh 第7条(1))。**配偶者はここには含まれません** — 婚姻区分 (K/K-I) は別途処理されます。",
     "ptkpStatus": "PTKP ステータス",
-    "ptkpExplain": "PTKP は非課税所得限度。上記の選択から自動計算されます。",
-    "subtitle": "年次申告用の婚姻・PTKP"
+    "ptkpExplain": "PTKPは基礎所得控除額です(上限ではありません)。上記の選択から自動計算されます。",
+    "subtitle": "年次申告用の婚姻・PTKP",
+    "jointDowngradeTitle": "合算申告 → 単独申告に自動変更",
+    "jointDowngradeBody": "合算申告 (K/I) は配偶者の所得が > 0 のときのみ適用されます。「配偶者の年間所得」を入力すると K/I PTKP (Rp 112.5M 控除) が適用されます。"
   },
   "autoSave": {
     "saving": "保存中…",

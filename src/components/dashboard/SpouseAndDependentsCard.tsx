@@ -66,16 +66,35 @@ export function SpouseAndDependentsCard() {
     return () => { alive = false; };
   }, [t]);
 
+  // K/I (joint filing) is only legitimate when the spouse actually has
+  // reported income to combine. If the user picked "joint" but the
+  // spouse income field is blank/0, downgrade the effective status to
+  // K/N so we don't claim the doubled PTKP deduction (DJP audit risk:
+  // K/I/0 = Rp 112.5M vs K/0 = Rp 58.5M).
+  const spouseIncomeNum = useMemo(() => {
+    const s = spouseIncome.trim();
+    if (s === '') return 0;
+    const n = Number(s);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }, [spouseIncome]);
+
+  const effectivelyJoint =
+    marital === 'married' && filing === 'joint' && spouseIncomeNum > 0;
+
   // Live PTKP derivation
   const ptkpStatus = useMemo<PTKPStatus>(
     () => buildPTKPStatus({
       isMarried: marital === 'married',
-      spouseIncomeJoint: marital === 'married' && filing === 'joint',
+      spouseIncomeJoint: effectivelyJoint,
       dependents,
     }),
-    [marital, filing, dependents],
+    [marital, effectivelyJoint, dependents],
   );
   const ptkpAmount = PTKP_RATES[ptkpStatus];
+
+  // Warn the user when they asked for joint but we silently downgraded.
+  const jointDowngradeWarning =
+    marital === 'married' && filing === 'joint' && !effectivelyJoint;
 
   // Auto-save payload; server schema expects numbers for spouse_annual_income/withheld.
   const payload = useMemo(() => {
@@ -277,6 +296,14 @@ export function SpouseAndDependentsCard() {
             ))}
           </div>
         </div>
+
+        {/* Joint-filing downgrade warning — fires when filing=joint but spouse income is 0/empty */}
+        {jointDowngradeWarning && (
+          <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
+            <p className="font-semibold">⚠ {t('spouse.jointDowngradeTitle')}</p>
+            <p className="mt-1 text-amber-800/90">{t('spouse.jointDowngradeBody')}</p>
+          </div>
+        )}
 
         {/* Live PTKP preview */}
         <div className="rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 p-5 border border-emerald-200/60 shadow-sm">

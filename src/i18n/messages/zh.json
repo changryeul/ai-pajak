@@ -5433,10 +5433,12 @@
     "spouseIncome": "配偶年收入(IDR)",
     "spouseWithheld": "配偶已代扣税(IDR)",
     "dependents": "抚养人数",
-    "dependentsHint": "最多3人(UU PPh第7条)。无工作的配偶不计入此处。",
+    "dependentsHint": "最多3名家属 (UU PPh 第7条第(1)款)。**配偶不计入此处** — 婚姻状态 (K/K-I) 单独处理。",
     "ptkpStatus": "PTKP状态",
-    "ptkpExplain": "PTKP为非应税收入门槛。根据上述选择自动计算。",
-    "subtitle": "年度申报婚姻与 PTKP 状态"
+    "ptkpExplain": "PTKP 为基础所得扣除额(不是上限)。根据上述选择自动计算。",
+    "subtitle": "年度申报婚姻与 PTKP 状态",
+    "jointDowngradeTitle": "合并申报 → 单独申报自动降级",
+    "jointDowngradeBody": "合并申报 (K/I) 仅在配偶收入 > 0 时生效。请填写\"配偶年收入\",系统才会套用 K/I PTKP (Rp 112.5M 扣除)。"
   },
   "autoSave": {
     "saving": "保存中…",

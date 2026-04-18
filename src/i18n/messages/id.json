@@ -5433,10 +5433,12 @@
     "spouseIncome": "Penghasilan tahunan pasangan (IDR)",
     "spouseWithheld": "Pajak pasangan yang dipotong (IDR)",
     "dependents": "Jumlah tanggungan",
-    "dependentsHint": "Maksimum 3 orang (UU PPh Pasal 7). Istri dan suami yang tidak bekerja tidak termasuk di sini.",
+    "dependentsHint": "Maksimum 3 tanggungan (UU PPh Pasal 7 ayat (1)). Pasangan TIDAK dihitung di sini — status KAWIN/KAWIN-IS ditangani secara terpisah.",
     "ptkpStatus": "Status PTKP",
-    "ptkpExplain": "PTKP = penghasilan tidak kena pajak. Dihitung otomatis dari pilihan di atas.",
-    "subtitle": "Status pernikahan dan PTKP untuk SPT Tahunan"
+    "ptkpExplain": "PTKP = pengurang penghasilan (deduksi) dasar. Dihitung otomatis dari pilihan di atas.",
+    "subtitle": "Status pernikahan dan PTKP untuk SPT Tahunan",
+    "jointDowngradeTitle": "Status KAWIN-IS diturunkan ke KAWIN",
+    "jointDowngradeBody": "Lapor gabungan (K/I) hanya berlaku jika pasangan memiliki penghasilan > 0. Isi \"Penghasilan bruto pasangan\" agar sistem mengklaim PTKP KAWIN-IS."
   },
   "autoSave": {
     "saving": "Menyimpan…",

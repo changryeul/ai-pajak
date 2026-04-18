@@ -5433,10 +5433,12 @@
     "spouseIncome": "Spouse annual income (IDR)",
     "spouseWithheld": "Spouse withheld tax (IDR)",
     "dependents": "Number of dependents",
-    "dependentsHint": "Maximum 3 people (UU PPh Article 7). Non-working spouses are not counted here.",
+    "dependentsHint": "Max 3 dependents (UU PPh Article 7 (1)). Spouse is NOT counted here — marital status (K/K-I) is handled separately.",
     "ptkpStatus": "PTKP status",
-    "ptkpExplain": "PTKP is the non-taxable income threshold. Calculated automatically from your selection above.",
-    "subtitle": "Marital + PTKP status for annual filing"
+    "ptkpExplain": "PTKP is a basic income deduction (not a cap). Calculated automatically from your selection above.",
+    "subtitle": "Marital + PTKP status for annual filing",
+    "jointDowngradeTitle": "Joint filing auto-downgraded to K",
+    "jointDowngradeBody": "Joint filing (K/I) only applies when the spouse has income > 0. Enter \"Spouse gross income\" so the system can claim the K/I PTKP."
   },
   "autoSave": {
     "saving": "Saving…",
