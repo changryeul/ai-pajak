@@ -210,7 +210,26 @@
       "Bash(echo \"TSC exit $?\")",
       "Bash(node /tmp/add-profile-i18n.mjs)",
       "Bash(node .gstack/qa-reports/smoke-onboarding.mjs)",
-      "Bash(cd /Users/winwaysystems/mywork/ai-pajak/ai-pajak grep -n \"Unauthorized\\\\|requireRole\\\\|requireAuth\" src/middleware/auth.ts src/middleware/rbac.ts)"
+      "Bash(cd /Users/winwaysystems/mywork/ai-pajak/ai-pajak grep -n \"Unauthorized\\\\|requireRole\\\\|requireAuth\" src/middleware/auth.ts src/middleware/rbac.ts)",
+      "Bash(cd /Users/winwaysystems/mywork/ai-pajak/ai-pajak grep -rn \"ptkp\\\\|PTKP\" src/lib/tax/spt-1770ss src/lib/tax/shared)",
+      "Bash(sed -n '145,170p' src/lib/tax/shared/tax-utils.ts)",
+      "Bash(sed -n '7,30p' src/lib/tax/shared/constants.ts)",
+      "Bash(node /tmp/add-spouse-i18n.mjs)",
+      "Bash(echo \"TSC: $?\")",
+      "Bash(node .gstack/qa-reports/smoke-spouse.mjs)",
+      "Bash(node .gstack/qa-reports/smoke-snapshots.mjs)",
+      "Bash(node .gstack/qa-reports/smoke-anomaly.mjs)",
+      "Bash(node /tmp/add-crossborder-i18n.mjs)",
+      "Bash(node .gstack/qa-reports/smoke-foreign-asset.mjs)",
+      "Bash(supabase projects *)",
+      "Bash(node .gstack/qa-reports/smoke-prod.mjs)",
+      "Bash(node *)",
+      "Bash(supabase link *)",
+      "Bash(BASE_URL=\"https://ai-pajak.vercel.app\" node .gstack/qa-reports/probe-individual-billing.mjs)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(BASE_URL=https://ai-pajak.vercel.app node .gstack/qa-reports/probe-login-korean.mjs)",
+      "Bash(BASE_URL=https://ai-pajak.vercel.app node .gstack/qa-reports/probe-id-korean-all.mjs)",
+      "Bash(BASE_URL=http://localhost:3000 node .gstack/qa-reports/probe-id-korean-all.mjs)"
     ]
   }
 }

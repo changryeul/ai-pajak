@@ -5,7 +5,7 @@
 import { chromium } from 'playwright';
 
 const CHROME = `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
-const BASE = 'http://localhost:3000';
+const BASE = process.env.BASE_URL || 'http://localhost:3000';
 
 const b = await chromium.launch({ headless: true, executablePath: CHROME });
 const ctx = await b.newContext({ viewport: { width: 1400, height: 2200 }, locale: 'ko-KR' });
