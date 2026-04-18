@@ -1,0 +1,170 @@
+{
+  "date": "2026-04-16T23:22:49.216Z",
+  "baseUrl": "http://localhost:3000",
+  "consoleErrors": [
+    {
+      "url": "http://localhost:3000/id/tax",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:3000/id/dashboard",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    },
+    {
+      "url": "http://localhost:3000/id/settings",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "url": "http://localhost:3000/id/tax",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:3000/id/tax",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "networkErrors": [
+    {
+      "url": "http://localhost:3000/id/dashboard?_rsc=19knp",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/api/customer/queue",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/api/company-profile?customerId=00000000-0000-0000-0000-000000000011",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/api/customer/queue",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/api/company-profile?customerId=00000000-0000-0000-0000-000000000011",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/id/dashboard?_rsc=5gya6",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/api/customer/queue",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/api/company-profile?customerId=00000000-0000-0000-0000-000000000011",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "findings": [
+    {
+      "id": "ISSUE-I18N-KO-ON-ID",
+      "severity": "medium",
+      "category": "content",
+      "title": "Korean text appearing on Indonesian-locale login page",
+      "detail": "Login placeholder contains Korean: \"email@example.com 또는 00.000.000.0-000.000\". Expected Indonesian translation. Page URL: http://localhost:3000/id/login",
+      "screenshot": null
+    },
+    {
+      "id": "ISSUE-NOTFOUND-tax",
+      "severity": "high",
+      "category": "functional",
+      "title": "tax returns 404",
+      "detail": "URL: http://localhost:3000/tax",
+      "screenshot": null
+    }
+  ],
+  "pageResults": [
+    {
+      "path": "/tax",
+      "label": "tax",
+      "name": "04-tax",
+      "url": "http://localhost:3000/tax",
+      "status": 404,
+      "finalUrl": "http://localhost:3000/id/tax",
+      "unauth": false,
+      "notfound": true,
+      "server5xx": false,
+      "title": "AI PAJAK - Platform Pajak Cerdas Indonesia"
+    },
+    {
+      "path": "/customers",
+      "label": "customers",
+      "name": "05-customers",
+      "url": "http://localhost:3000/customers",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/id/dashboard",
+      "unauth": false,
+      "notfound": false,
+      "server5xx": false,
+      "title": "AI PAJAK - Platform Pajak Cerdas Indonesia"
+    },
+    {
+      "path": "/filings",
+      "label": "filings",
+      "name": "06-filings",
+      "url": "http://localhost:3000/filings",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/id/filings",
+      "unauth": false,
+      "notfound": false,
+      "server5xx": false,
+      "title": "AI PAJAK - Platform Pajak Cerdas Indonesia"
+    },
+    {
+      "path": "/documents",
+      "label": "documents",
+      "name": "07-documents",
+      "url": "http://localhost:3000/documents",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/id/documents",
+      "unauth": false,
+      "notfound": false,
+      "server5xx": false,
+      "title": "AI PAJAK - Platform Pajak Cerdas Indonesia"
+    },
+    {
+      "path": "/billing",
+      "label": "billing",
+      "name": "08-billing",
+      "url": "http://localhost:3000/billing",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/id/billing",
+      "unauth": false,
+      "notfound": false,
+      "server5xx": false,
+      "title": "AI PAJAK - Platform Pajak Cerdas Indonesia"
+    },
+    {
+      "path": "/reports",
+      "label": "reports",
+      "name": "09-reports",
+      "url": "http://localhost:3000/reports",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/id/reports",
+      "unauth": false,
+      "notfound": false,
+      "server5xx": false,
+      "title": "AI PAJAK - Platform Pajak Cerdas Indonesia"
+    },
+    {
+      "path": "/settings",
+      "label": "settings",
+      "name": "10-settings",
+      "url": "http://localhost:3000/settings",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/id/settings",
+      "unauth": false,
+      "notfound": false,
+      "server5xx": false,
+      "title": "AI PAJAK - Platform Pajak Cerdas Indonesia"
+    }
+  ],
+  "navAudit": null,
+  "emptyStateSignals": {
+    "hasEmptyStateText": false,
+    "hasOnboardingBanner": false,
+    "hasCustomerSelection": false
+  }
+}

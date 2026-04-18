@@ -169,13 +169,26 @@ COMMENT ON TABLE signature_audit IS
   'Future PSrE (Privy/VIDA) integration uses external_provider/external_ref fields.';
 
 -- ============================================================================
--- Storage bucket policy for `signatures` (managed via dashboard or cli separately;
--- this migration leaves a comment so ops knows to create it).
+-- Storage bucket for signatures
 -- ============================================================================
 
--- Ops: create a Supabase Storage bucket named `signatures` with:
---   public = false
---   allowed mime types: image/png
---   max file size: 1 MB
---   Signed URL TTL: 5 minutes (generated per-request in app code)
---   RLS: users can upload under `signatures/<auth.uid()>/` prefix only.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('signatures', 'signatures', false, 1000000, ARRAY['image/png'])
+ON CONFLICT (id) DO UPDATE
+  SET file_size_limit = EXCLUDED.file_size_limit,
+      allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+-- RLS is enabled by default on storage.objects. Upload/read is gated to the
+-- owner customer. The API route uses the admin client so service role writes
+-- work regardless; these policies cover the case where a client reads their
+-- own signature via a signed URL.
+DO $$ BEGIN
+  CREATE POLICY signatures_customer_read ON storage.objects
+    FOR SELECT USING (
+      bucket_id = 'signatures'
+      AND auth.uid() IS NOT NULL
+      AND (SELECT user_id FROM customer
+           WHERE id::text = split_part(name, '/', 1)
+           LIMIT 1) = auth.uid()
+    );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;

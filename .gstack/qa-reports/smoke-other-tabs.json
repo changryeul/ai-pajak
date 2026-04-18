@@ -1,0 +1,54 @@
+[
+  {
+    "tab": "PPh21",
+    "status": 200,
+    "finalUrl": "http://localhost:3000/id/tax/pph21",
+    "title": "AI PAJAK - Platform Pajak Cerdas Indonesia",
+    "brokenConcat": false,
+    "hasKorean": false,
+    "koSamples": [],
+    "navCount": 26,
+    "submitStates": [],
+    "pageerrors": [],
+    "consoleErrors": []
+  },
+  {
+    "tab": "PPN",
+    "status": 200,
+    "finalUrl": "http://localhost:3000/id/tax/ppn",
+    "title": "AI PAJAK - Platform Pajak Cerdas Indonesia",
+    "brokenConcat": false,
+    "hasKorean": false,
+    "koSamples": [],
+    "navCount": 26,
+    "submitStates": [],
+    "pageerrors": [],
+    "consoleErrors": []
+  },
+  {
+    "tab": "UMKM",
+    "status": 200,
+    "finalUrl": "http://localhost:3000/id/tax/umkm",
+    "title": "AI PAJAK - Platform Pajak Cerdas Indonesia",
+    "brokenConcat": false,
+    "hasKorean": false,
+    "koSamples": [],
+    "navCount": 26,
+    "submitStates": [],
+    "pageerrors": [],
+    "consoleErrors": []
+  },
+  {
+    "tab": "PPh26",
+    "status": 200,
+    "finalUrl": "http://localhost:3000/id/tax/pph26",
+    "title": "AI PAJAK - Platform Pajak Cerdas Indonesia",
+    "brokenConcat": false,
+    "hasKorean": false,
+    "koSamples": [],
+    "navCount": 26,
+    "submitStates": [],
+    "pageerrors": [],
+    "consoleErrors": []
+  }
+]

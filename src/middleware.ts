@@ -5,7 +5,10 @@ import { createServerClient } from '@supabase/ssr';
 import { LOCALES, DEFAULT_LOCALE } from '@/config/constants';
 import { withRateLimit } from '@/middleware/rate-limit';
 import { getRequestId, REQUEST_ID_HEADER } from '@/middleware/request-id';
-import { getCached, setCached, type OnboardingState } from '@/lib/onboarding/cache';
+type OnboardingState = {
+  customerType: 'INDIVIDUAL' | 'COMPANY' | null;
+  onboardingStep: number | null;
+};
 
 const intlMiddleware = createMiddleware({
   locales: LOCALES,
@@ -86,17 +89,17 @@ function expectedOnboardingPath(step: number, locale: string): string | null {
 }
 
 /**
- * Fetch customer_type + onboarding_step for the current user. Cached for
- * 5 minutes per userId (see @/lib/onboarding/cache). Returns null on error
- * so the middleware can fall through without 500-ing.
+ * Fetch customer_type + onboarding_step for the current user. Always hits
+ * Postgres (~5-10ms) — module-level caching does not work across the
+ * middleware ↔ API route boundary (they may run in different isolates on
+ * Vercel, and even locally under Turbopack). If this becomes a hot path a
+ * shared Redis/KV is the right next step; don't reintroduce per-process
+ * Map caches.
  */
 async function fetchOnboardingState(
   request: NextRequest,
   userId: string,
 ): Promise<OnboardingState | null> {
-  const cached = getCached(userId);
-  if (cached) return cached;
-
   try {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -115,12 +118,10 @@ async function fetchOnboardingState(
       .eq('user_id', userId)
       .maybeSingle();
 
-    const state: OnboardingState = {
+    return {
       customerType: (data?.customer_type as OnboardingState['customerType']) ?? null,
       onboardingStep: (data?.onboarding_step as number | null) ?? null,
     };
-    setCached(userId, state);
-    return state;
   } catch {
     return null;
   }

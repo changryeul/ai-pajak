@@ -1,0 +1,23 @@
+import { chromium } from 'playwright';
+const CHROME = `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
+const b = await chromium.launch({ headless: true, executablePath: CHROME });
+const ctx = await b.newContext({ viewport: { width: 1280, height: 800 }, locale: 'id-ID' });
+const page = await ctx.newPage();
+const logs = [];
+page.on('console', m => logs.push(`[${m.type()}] ${m.text().slice(0,200)}`));
+await page.goto('http://localhost:3000/id/login', { waitUntil: 'networkidle' });
+await page.fill('input[type="text"]', 'company.test@example.com');
+await page.fill('input[type="password"]', 'TestPassword123!');
+await page.click('button[type="submit"]');
+await page.waitForURL(u => !u.pathname.includes('/login'), { timeout: 15000 });
+await page.waitForTimeout(1500);
+await page.goto('http://localhost:3000/id/tax/pph21', { waitUntil: 'networkidle' });
+await page.waitForTimeout(5000);
+// Check for the debug span
+const debug = await page.$('[data-debug-pagetitle]');
+console.log('debug span present?', !!debug);
+if (debug) console.log('  attr:', await debug.getAttribute('data-debug-pagetitle'));
+console.log('title:', await page.title());
+console.log('\nrelevant console logs:');
+for (const l of logs.filter(x => x.includes('PageTitle') || x.toLowerCase().includes('error'))) console.log(' ', l);
+await b.close();

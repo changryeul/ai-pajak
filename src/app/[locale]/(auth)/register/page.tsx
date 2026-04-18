@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
 import { User, Building2, Briefcase, ArrowRight, ArrowLeft } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 type AccountType = 'INDIVIDUAL' | 'COMPANY' | 'TAX_PARTNER';
 
@@ -117,10 +118,23 @@ export default function RegisterPage() {
       }
 
       // INDIVIDUAL customers continue straight into the onboarding flow
-      // (terms → mandate). Other account types keep the inline success page
-      // and head to /login for their first session.
+      // (terms → mandate). Sign the user in client-side so the Supabase
+      // session cookie is set before the next page hits protected APIs.
+      // Other account types keep the inline success page and head to /login
+      // for their first session.
       if (accountType === 'INDIVIDUAL') {
+        const supabase = createClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        if (signInError) {
+          // Fall back to the success page so the user can log in manually.
+          setSuccess(true);
+          return;
+        }
         router.push(`/${locale}/register/terms`);
+        router.refresh();
         return;
       }
 
