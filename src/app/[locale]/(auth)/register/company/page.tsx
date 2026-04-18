@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
 import {
   Building2, ArrowLeft, ArrowRight, ShieldCheck, FileCheck2,
@@ -16,14 +17,6 @@ interface KbliCode {
 }
 
 const JTC_AGREEMENT_VERSION = 'v1.0';
-
-const STEPS = [
-  { id: 1, title: '회사 정보', desc: 'NPWP 및 기본 정보' },
-  { id: 2, title: '세무 프로필', desc: '매출/직원/사업 유형' },
-  { id: 3, title: '업종(KBLI) 등록', desc: '사업 업종 선택' },
-  { id: 4, title: '약관 동의', desc: 'JTC 세무 대행 동의' },
-  { id: 5, title: '계정 생성', desc: '이메일 및 비밀번호' },
-];
 
 function formatNpwp(value: string): string {
   // Strip non-digits, limit to 15 digits (corporate NPWP format)
@@ -41,9 +34,18 @@ function isValidNpwp(formatted: string): boolean {
 }
 
 export default function CompanyRegisterPage() {
+  const t = useTranslations('companyRegister');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+
+  const STEPS = [
+    { id: 1, title: t('step1Title'), desc: t('step1Desc') },
+    { id: 2, title: t('step2Title'), desc: t('step2Desc') },
+    { id: 3, title: t('step3Title'), desc: t('step3Desc') },
+    { id: 4, title: t('step4Title'), desc: t('step4Desc') },
+    { id: 5, title: t('step5Title'), desc: t('step5Desc') },
+  ];
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -164,7 +166,7 @@ export default function CompanyRegisterPage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setError(data.error || '가입 처리 중 오류가 발생했습니다');
+        setError(data.error || t('errSignupFailed'));
         return;
       }
 
@@ -184,14 +186,14 @@ export default function CompanyRegisterPage() {
             <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <CardTitle className="text-xl text-green-700">가입이 완료되었습니다</CardTitle>
+            <CardTitle className="text-xl text-green-700">{t('successTitle')}</CardTitle>
             <CardDescription className="mt-2 text-xs">
-              <p>이메일({email})로 확인 링크가 발송되었습니다.</p>
-              <p className="mt-1">담당 세무사가 곧 연락드릴 예정입니다.</p>
+              <p>{t('successLinkSent', { email })}</p>
+              <p className="mt-1">{t('successAdvisor')}</p>
             </CardDescription>
           </CardHeader>
           <CardFooter>
-            <Button onClick={() => router.push(`/${locale}/login`)} className="w-full">로그인 페이지로</Button>
+            <Button onClick={() => router.push(`/${locale}/login`)} className="w-full">{t('successLoginCta')}</Button>
           </CardFooter>
         </Card>
       </div>
@@ -206,8 +208,8 @@ export default function CompanyRegisterPage() {
           <div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-sm">
             <Building2 className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">법인 고객 가입</h1>
-          <p className="text-sm text-gray-500 mt-1">Jakarta Tax Consulting과 함께 세무를 관리하세요</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('heading')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('subheading')}</p>
         </div>
 
         {/* Stepper */}
@@ -243,33 +245,33 @@ export default function CompanyRegisterPage() {
             {step === 1 && (
               <>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">법인명 (Nama Perusahaan)</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldCompanyName')}</label>
                   <Input value={companyName} onChange={e => setCompanyName(e.target.value)}
                     placeholder="PT Contoh Sejahtera" required />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">법인 NPWP (15자리)</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldNpwp')}</label>
                   <Input value={npwp} onChange={e => setNpwp(formatNpwp(e.target.value))}
                     placeholder="00.000.000.0-000.000" className="font-mono" required />
                   <p className="text-[10px] text-gray-400 mt-1">
-                    {npwp.replace(/\D/g, '').length}/15자리 {isValidNpwp(npwp) && '✓'}
+                    {t('npwpCounter', { have: npwp.replace(/\D/g, '').length, check: isValidNpwp(npwp) ? '✓' : '' })}
                   </p>
                   <p className="text-[10px] text-blue-600 mt-1">
-                    💡 NPWP는 로그인 시 이메일 대신 사용할 수 있습니다
+                    {t('npwpLoginHint')}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">대표자 이름</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldRepresentative')}</label>
                   <Input value={representativeName} onChange={e => setRepresentativeName(e.target.value)}
                     placeholder="Nama Direktur" required />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">회사 전화번호 (선택)</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldPhone')}</label>
                   <Input value={phone} onChange={e => setPhone(e.target.value)}
                     placeholder="+62 21 1234 5678" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">회사 주소 (선택)</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldAddress')}</label>
                   <Input value={address} onChange={e => setAddress(e.target.value)}
                     placeholder="Jl. Example No. 1, Jakarta" />
                 </div>
@@ -280,34 +282,34 @@ export default function CompanyRegisterPage() {
             {step === 2 && (
               <>
                 <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
-                  <p className="font-medium">세무 프로필</p>
+                  <p className="font-medium">{t('taxProfileTitle')}</p>
                   <p className="mt-1">
-                    아래 정보는 세목(PPh/PPN) 적용 여부 판단에 사용됩니다. 모두 선택사항이지만 정확할수록 신고 정확도가 올라갑니다.
+                    {t('taxProfileNote')}
                   </p>
                 </div>
 
                 {/* Annual revenue */}
                 <div>
-                  <label className="text-xs font-medium text-gray-700">연 매출 (IDR)</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldAnnualRevenue')}</label>
                   <div className="flex gap-2 mt-1">
                     <Input
                       type="number"
                       value={annualRevenue}
                       onChange={e => setAnnualRevenue(e.target.value)}
-                      placeholder="예: 5000000000 (50억)"
+                      placeholder={t('revenuePlaceholder')}
                       className="font-mono flex-1"
                     />
                     <Input
                       type="number"
                       value={revenueYear}
                       onChange={e => setRevenueYear(e.target.value)}
-                      placeholder="기준년도"
+                      placeholder={t('yearPlaceholder')}
                       className="w-24"
                     />
                   </div>
                   {annualRevenue && Number(annualRevenue) < 4_800_000_000 && (
                     <p className="text-[11px] text-green-600 mt-1">
-                      ✓ 연매출 48억 IDR 미만 — PP 23/2018 소규모 사업자 대상 (PPh Final 0.5%)
+                      {t('umkmHint')}
                     </p>
                   )}
                 </div>
@@ -317,8 +319,8 @@ export default function CompanyRegisterPage() {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={hasEmployees} onChange={e => setHasEmployees(e.target.checked)} className="accent-emerald-600" />
                     <div>
-                      <span className="text-sm font-medium">직원을 고용하고 있습니다</span>
-                      <p className="text-[11px] text-gray-500">→ 월 SPT Masa PPh 21 신고 의무</p>
+                      <span className="text-sm font-medium">{t('hasEmployees')}</span>
+                      <p className="text-[11px] text-gray-500">{t('hasEmployeesNote')}</p>
                     </div>
                   </label>
                   {hasEmployees && (
@@ -327,7 +329,7 @@ export default function CompanyRegisterPage() {
                         type="number"
                         value={employeeCount}
                         onChange={e => setEmployeeCount(e.target.value)}
-                        placeholder="대략 직원 수"
+                        placeholder={t('employeeCountPlaceholder')}
                         className="w-32 h-8 text-xs"
                       />
                     </div>
@@ -339,9 +341,9 @@ export default function CompanyRegisterPage() {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={isPkp} onChange={e => setIsPkp(e.target.checked)} className="accent-emerald-600" />
                     <div>
-                      <span className="text-sm font-medium">PKP 등록 (Pengusaha Kena Pajak)</span>
+                      <span className="text-sm font-medium">{t('isPkp')}</span>
                       <p className="text-[11px] text-gray-500">
-                        → VAT 등록 사업자 / 월 SPT Masa PPN 신고 의무 / Faktur Pajak 발행 가능
+                        {t('isPkpNote')}
                       </p>
                     </div>
                   </label>
@@ -349,27 +351,27 @@ export default function CompanyRegisterPage() {
 
                 {/* Additional activities */}
                 <div>
-                  <p className="text-xs font-medium text-gray-700 mb-2">추가 정보</p>
+                  <p className="text-xs font-medium text-gray-700 mb-2">{t('moreInfo')}</p>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
                       <input type="checkbox" checked={paysServiceFees} onChange={e => setPaysServiceFees(e.target.checked)} className="accent-emerald-600" />
                       <div className="text-xs">
-                        <span className="font-medium">서비스 비용 지급</span>
-                        <p className="text-gray-500 text-[11px]">→ PPh 23 원천징수 의무 (2% / 15%)</p>
+                        <span className="font-medium">{t('paysServiceFees')}</span>
+                        <p className="text-gray-500 text-[11px]">{t('paysServiceFeesNote')}</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
                       <input type="checkbox" checked={hasImportExport} onChange={e => setHasImportExport(e.target.checked)} className="accent-emerald-600" />
                       <div className="text-xs">
-                        <span className="font-medium">수입·수출 거래</span>
-                        <p className="text-gray-500 text-[11px]">→ PPh 22 및 수입 PPN 의무, PPh 26 적용 가능</p>
+                        <span className="font-medium">{t('hasImportExport')}</span>
+                        <p className="text-gray-500 text-[11px]">{t('hasImportExportNote')}</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
                       <input type="checkbox" checked={hasRentalBusiness} onChange={e => setHasRentalBusiness(e.target.checked)} className="accent-emerald-600" />
                       <div className="text-xs">
-                        <span className="font-medium">임대 사업</span>
-                        <p className="text-gray-500 text-[11px]">→ PPh 4(2) Final 10% 적용</p>
+                        <span className="font-medium">{t('hasRental')}</span>
+                        <p className="text-gray-500 text-[11px]">{t('hasRentalNote')}</p>
                       </div>
                     </label>
                   </div>
@@ -381,19 +383,18 @@ export default function CompanyRegisterPage() {
             {step === 3 && (
               <>
                 <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
-                  <p className="font-medium">KBLI란?</p>
+                  <p className="font-medium">{t('kbliAboutTitle')}</p>
                   <p className="mt-1">
-                    Klasifikasi Baku Lapangan Usaha Indonesia — 법인의 사업 업종 분류 코드(5자리)입니다.
-                    세율 결정과 SPT 작성에 사용되므로 **정확하게 선택**해주세요. 여러 개 선택 가능합니다.
+                    {t('kbliAbout')}
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-gray-700">업종 검색 (코드 또는 설명)</label>
+                  <label className="text-xs font-medium text-gray-700">{t('kbliSearchLabel')}</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input value={kbliSearch} onChange={e => setKbliSearch(e.target.value)}
-                      placeholder="예: 62010, Computer Programming, IT" className="pl-9" />
+                      placeholder={t('kbliSearchPlaceholder')} className="pl-9" />
                   </div>
                   {searchLoading && <Loader2 className="h-4 w-4 animate-spin text-gray-400 mt-2" />}
                   {kbliResults.length > 0 && (
@@ -416,7 +417,7 @@ export default function CompanyRegisterPage() {
 
                 {selectedKblis.length > 0 && (
                   <div>
-                    <label className="text-xs font-medium text-gray-700">선택된 업종 ({selectedKblis.length}개)</label>
+                    <label className="text-xs font-medium text-gray-700">{t('kbliSelectedLabel', { count: selectedKblis.length })}</label>
                     <div className="mt-2 space-y-2">
                       {selectedKblis.map(k => (
                         <div key={k.code} className="flex items-center gap-2 p-2 bg-emerald-50 rounded-lg border border-emerald-200">
@@ -430,14 +431,14 @@ export default function CompanyRegisterPage() {
                           <span className="font-mono text-xs font-bold text-emerald-700">{k.code}</span>
                           <span className="text-xs text-gray-800 flex-1 truncate">{k.description}</span>
                           {primaryKbli === k.code && (
-                            <span className="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 rounded">주업종</span>
+                            <span className="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 rounded">{t('kbliPrimaryBadge')}</span>
                           )}
                           <button type="button" onClick={() => removeKbli(k.code)}>
                             <X className="h-3 w-3 text-gray-400 hover:text-red-500" />
                           </button>
                         </div>
                       ))}
-                      <p className="text-[10px] text-gray-500">라디오 버튼으로 주업종을 선택하세요</p>
+                      <p className="text-[10px] text-gray-500">{t('kbliPrimaryHint')}</p>
                     </div>
                   </div>
                 )}
@@ -453,9 +454,7 @@ export default function CompanyRegisterPage() {
                     <div>
                       <p className="font-bold text-sm text-blue-900">AI Pajak × Jakarta Tax Consulting</p>
                       <p className="text-xs text-blue-700 mt-1">
-                        AI Pajak은 세무 신고를 <b>합법적으로 대행</b>하기 위해 인도네시아 공인 세무 컨설팅 법인인
-                        <b> Jakarta Tax Consulting (JTC)</b>과 협업합니다.
-                        모든 SPT 제출은 JTC의 공인 세무사가 검토·서명 후 DJP에 제출됩니다.
+                        {t('jtcExplainBody')}
                       </p>
                     </div>
                   </div>
@@ -466,11 +465,10 @@ export default function CompanyRegisterPage() {
                     className="mt-0.5 accent-emerald-600" />
                   <div className="text-xs">
                     <p className="font-medium text-gray-900">
-                      JTC 세무 대행 서비스 약관에 동의합니다 <span className="text-red-500">*</span>
+                      {t('agreeJtcLabel')} <span className="text-red-500">*</span>
                     </p>
                     <p className="text-gray-500 mt-1">
-                      AI Pajak을 통해 제공되는 모든 세무 서비스는 JTC와 본 고객 간 대행 계약에 따라 수행됩니다.
-                      상세 약관 버전 {JTC_AGREEMENT_VERSION} 적용.
+                      {t('agreeJtcHint', { version: JTC_AGREEMENT_VERSION })}
                     </p>
                   </div>
                 </label>
@@ -480,11 +478,10 @@ export default function CompanyRegisterPage() {
                     className="mt-0.5 accent-emerald-600" />
                   <div className="text-xs">
                     <p className="font-medium text-gray-900">
-                      개인정보 및 재무정보 처리에 동의합니다 <span className="text-red-500">*</span>
+                      {t('agreeDataLabel')} <span className="text-red-500">*</span>
                     </p>
                     <p className="text-gray-500 mt-1">
-                      NPWP, 재무제표, 거래내역 등이 세무 계산·신고 목적으로 처리됩니다.
-                      JTC 외 제3자에게 제공되지 않습니다.
+                      {t('agreeDataHint')}
                     </p>
                   </div>
                 </label>
@@ -494,11 +491,10 @@ export default function CompanyRegisterPage() {
                     className="mt-0.5 accent-emerald-600" />
                   <div className="text-xs">
                     <p className="font-medium text-gray-900">
-                      JTC에 세무 신고 대행 권한을 위임합니다 <span className="text-red-500">*</span>
+                      {t('agreeFilingLabel')} <span className="text-red-500">*</span>
                     </p>
                     <p className="text-gray-500 mt-1">
-                      JTC 공인 세무사가 본인을 대리하여 DJP에 SPT Masa / SPT Tahunan을 제출할 수 있도록
-                      위임합니다. 모든 제출 전에 본인 확인 단계가 포함됩니다.
+                      {t('agreeFilingHint')}
                     </p>
                   </div>
                 </label>
@@ -510,31 +506,31 @@ export default function CompanyRegisterPage() {
               <>
                 <div className="bg-emerald-50 rounded-lg p-3 text-xs text-emerald-800 flex items-center gap-2">
                   <FileCheck2 className="h-4 w-4" />
-                  <span>마지막 단계입니다. 이메일과 비밀번호를 설정하세요.</span>
+                  <span>{t('finalStepLead')}</span>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">이메일 (알림/비밀번호 재설정용)</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldEmail')}</label>
                   <Input type="email" value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="contact@yourcompany.co.id" required />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">비밀번호</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldPassword')}</label>
                   <Input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="최소 8자" required />
+                    placeholder={t('passwordPlaceholder')} required />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700">비밀번호 확인</label>
+                  <label className="text-xs font-medium text-gray-700">{t('fieldConfirmPassword')}</label>
                   <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                    placeholder="다시 입력" required />
+                    placeholder={t('confirmPlaceholder')} required />
                   {confirmPassword && password !== confirmPassword && (
-                    <p className="text-[10px] text-red-500 mt-1">비밀번호가 일치하지 않습니다</p>
+                    <p className="text-[10px] text-red-500 mt-1">{t('passwordMismatch')}</p>
                   )}
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
-                  <p className="font-medium mb-1">로그인 시 사용 가능:</p>
+                  <p className="font-medium mb-1">{t('loginMethodsTitle')}</p>
                   <ul className="space-y-0.5">
                     <li>• <span className="font-mono">{npwp || 'NPWP'}</span> (NPWP)</li>
-                    <li>• <span className="font-mono">{email || 'email@...'}</span> (이메일)</li>
+                    <li>• <span className="font-mono">{email || 'email@...'}</span> {t('loginMethodEmail')}</li>
                   </ul>
                 </div>
               </>
@@ -544,12 +540,12 @@ export default function CompanyRegisterPage() {
           <CardFooter className="flex justify-between gap-3">
             {step > 1 ? (
               <Button variant="outline" onClick={() => setStep(step - 1)} disabled={isSubmitting}>
-                <ArrowLeft className="h-4 w-4 mr-1" />이전
+                <ArrowLeft className="h-4 w-4 mr-1" />{t('previousCta')}
               </Button>
             ) : (
               <Link href={`/${locale}/register`}>
                 <Button variant="ghost">
-                  <ArrowLeft className="h-4 w-4 mr-1" />개인 가입으로
+                  <ArrowLeft className="h-4 w-4 mr-1" />{t('goToIndividual')}
                 </Button>
               </Link>
             )}
@@ -565,7 +561,7 @@ export default function CompanyRegisterPage() {
                 }
                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-sm"
               >
-                다음<ArrowRight className="h-4 w-4 ml-1" />
+                {t('nextCta')}<ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
               <Button
@@ -574,7 +570,7 @@ export default function CompanyRegisterPage() {
                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-sm"
               >
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckCircle className="h-4 w-4 mr-1" />}
-                가입 완료
+                {t('submitCta')}
               </Button>
             )}
           </CardFooter>

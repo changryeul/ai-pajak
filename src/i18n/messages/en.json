@@ -5680,5 +5680,218 @@
     "checkEfakturPpn": "e-Faktur PPN prepared (input vs output)",
     "checkPayrollPph21": "Monthly PPh 21 payroll reconciled",
     "checkAmendment": "If SPT amendment exists, supporting documents prepared"
+  },
+  "pricingPage": {
+    "title": "Pricing",
+    "subtitle": "Corporate plans are monthly; individuals pay per SPT filing. Choose what fits you.",
+    "tabCorporate": "Corporate (Monthly)",
+    "tabIndividual": "Individual (Per Filing)",
+    "tabConsultant": "Consultant Firm (Monthly)",
+    "aiRecommendation": "AI Recommendation",
+    "currentPlan": "Current Plan",
+    "currentTier": "Current Tier",
+    "monthlyVatExcluded": "Monthly · VAT excluded (VAT incl. {price})",
+    "sptPricingNote": "Per SPT filing (VAT excluded)",
+    "limitsBadge": "Limits",
+    "employeesLabel": "{count} employees",
+    "withholdingLabel": "{count} withholding/month",
+    "ppnLabel": "PPN {count}/month",
+    "ppnNotApplicable": "Not applicable",
+    "currentlyUsing": "Currently Active",
+    "subscribe": "Subscribe",
+    "signupAndSubscribe": "Sign Up & Subscribe",
+    "proExceeded": "Exceeds Pro Limits",
+    "proExceededNote": "We offer custom quotes for large enterprises. Click the button below to request a consultation.",
+    "customQuoteCta": "Request Custom Quote →",
+    "preparing": "Preparing…",
+    "payAndStart": "Pay & Start",
+    "signupAndStart": "Sign Up & Start",
+    "consultantTierTitle": "Consultant Firm Monthly",
+    "consultantTierDesc": "External consultants who use AI Pajak to manage their own clients. You can bill your clients separately.",
+    "managedClientCount": "Current managed clients: {count}",
+    "unlimitedClients": "Unlimited Clients",
+    "maxClientsLabel": "Max {count} clients",
+    "footerNote": "All prices in Indonesian Rupiah (IDR). VAT 11% billed separately.",
+    "errConsultantOnly": "Only tax-firm consultants can subscribe to this plan",
+    "errCorporateOnly": "Only corporate customers can subscribe to this plan",
+    "errIndividualPlanForCompany": "Corporate customers should use a corporate plan, not SPT Pribadi",
+    "errSubscribeFailed": "Subscription request failed",
+    "errPaymentPrepFailed": "Payment preparation failed",
+    "errPaymentPageFailed": "Failed to create payment page",
+    "errServer": "Server error"
+  },
+  "pricingPlans": {
+    "UMKM": {
+      "name": "UMKM (Micro Enterprise)",
+      "description": "For small businesses with ≤10 employees and ≤30 transactions/month",
+      "features": {
+        "f1": "Automatic PPh Final UMKM 0.5% calculation",
+        "f2": "PPh 21 payroll (up to 10 employees)",
+        "f3": "Automated withholding tax for up to 30 transactions/month",
+        "f4": "Automatic annual SPT Badan generation"
+      }
+    },
+    "BASIC": {
+      "name": "Basic (SME)",
+      "description": "For SMEs automating standard corporate tax with AI",
+      "features": {
+        "f1": "PPh 21 payroll automation (up to 50 employees)",
+        "f2": "AI withholding 100 transactions/month (22/23/4(2))",
+        "f3": "PPN invoice processing 200/month",
+        "f4": "Automatic monthly/annual SPT generation + filing",
+        "f5": "Tax optimization recommendations",
+        "f6": "Counterparty management + DTA document tracking"
+      }
+    },
+    "PRO": {
+      "name": "Pro (Mid/Large Enterprise)",
+      "description": "For mid-to-large enterprises with advanced governance needs",
+      "features": {
+        "f1": "All Basic features",
+        "f2": "PPh 21 payroll (up to 1,000 employees)",
+        "f3": "Withholding 200/month",
+        "f4": "PPN 500 transactions/month",
+        "f5": "Shareholder management + automated dividend PPh",
+        "f6": "Tax audit preparation",
+        "f7": "Basic Transfer Pricing support",
+        "f8": "Priority Support"
+      }
+    },
+    "SPT_1770SS": {
+      "name": "1770SS (Simple)",
+      "description": "Employee with a single income source",
+      "features": {
+        "f1": "Auto-input A1 (1721-A1) withholding slip via OCR",
+        "f2": "Auto-generate and validate 1770SS",
+        "f3": "Auto-detect tax refund eligibility",
+        "f4": "JTC review → submit to DJP"
+      }
+    },
+    "SPT_1770S": {
+      "name": "1770S (Standard)",
+      "description": "Multiple income sources · side income",
+      "features": {
+        "f1": "Merge multiple withholding slips",
+        "f2": "Auto: other income, assets, liabilities",
+        "f3": "PTKP profile integration",
+        "f4": "JTC review → submit to DJP"
+      }
+    },
+    "SPT_1770": {
+      "name": "1770 (Full)",
+      "description": "Business owners · freelancers · complex income",
+      "features": {
+        "f1": "Auto business P&L classification",
+        "f2": "Annual tax optimization advice",
+        "f3": "Unified supporting document management",
+        "f4": "JTC review → submit to DJP"
+      }
+    },
+    "STARTER": {
+      "name": "Starter",
+      "description": "New or small consulting firms (up to 10 clients)",
+      "features": {
+        "f1": "Manage up to 10 clients",
+        "f2": "Access all tax automation tools",
+        "f3": "Per-client dashboard + monthly/annual filing",
+        "f4": "e-Filing + e-Bupot",
+        "f5": "Standard support"
+      }
+    },
+    "GROWTH": {
+      "name": "Growth",
+      "description": "Growing firms (up to 50 clients)",
+      "features": {
+        "f1": "All Starter features",
+        "f2": "Manage up to 50 clients",
+        "f3": "Invite team members (including supervisor role)",
+        "f4": "Bulk client processing (bulk upload)",
+        "f5": "Per-client POA · articles · shareholder management",
+        "f6": "Priority support"
+      }
+    },
+    "ENTERPRISE": {
+      "name": "Enterprise",
+      "description": "Large firms (50+ clients, custom quotes available)",
+      "features": {
+        "f1": "All Growth features",
+        "f2": "Unlimited clients",
+        "f3": "Dedicated account manager",
+        "f4": "Custom integration (API)",
+        "f5": "Dedicated SLA + priority incident response",
+        "f6": "Discounts on tax audit · transfer pricing"
+      }
+    }
+  },
+  "companyRegister": {
+    "step1Title": "Company Info",
+    "step1Desc": "NPWP and basic info",
+    "step2Title": "Tax Profile",
+    "step2Desc": "Revenue, employees, business type",
+    "step3Title": "KBLI Registration",
+    "step3Desc": "Select business type",
+    "step4Title": "Terms Agreement",
+    "step4Desc": "JTC tax service agreement",
+    "step5Title": "Create Account",
+    "step5Desc": "Email and password",
+    "errSignupFailed": "An error occurred during registration",
+    "successTitle": "Registration complete",
+    "successLinkSent": "A confirmation link has been sent to {email}.",
+    "successAdvisor": "A tax advisor will contact you shortly.",
+    "successLoginCta": "Go to login page",
+    "heading": "Corporate Customer Signup",
+    "subheading": "Manage your taxes with Jakarta Tax Consulting",
+    "fieldCompanyName": "Company Name (Nama Perusahaan)",
+    "fieldNpwp": "Corporate NPWP (15 digits)",
+    "npwpCounter": "{have}/15 digits {check}",
+    "npwpLoginHint": "💡 NPWP can be used in place of email for login",
+    "fieldRepresentative": "Representative Name",
+    "fieldPhone": "Company Phone (optional)",
+    "fieldAddress": "Company Address (optional)",
+    "taxProfileTitle": "Tax Profile",
+    "taxProfileNote": "The information below is used to determine PPh/PPN obligations. All optional, but accuracy improves filing precision.",
+    "fieldAnnualRevenue": "Annual Revenue (IDR)",
+    "revenuePlaceholder": "E.g., 5,000,000,000 (5B)",
+    "yearPlaceholder": "Reference year",
+    "umkmHint": "✓ Revenue < IDR 4.8B — SMB eligible (PP 23/2018, PPh Final 0.5%)",
+    "hasEmployees": "Has employees",
+    "hasEmployeesNote": "→ Monthly SPT Masa PPh 21 required",
+    "employeeCountPlaceholder": "Approximate employee count",
+    "isPkp": "Registered as PKP",
+    "isPkpNote": "→ VAT-registered / monthly SPT Masa PPN required / can issue Faktur Pajak",
+    "moreInfo": "Additional Info",
+    "paysServiceFees": "Pays service fees",
+    "paysServiceFeesNote": "→ PPh 23 withholding obligation (2% / 15%)",
+    "hasImportExport": "Import/Export",
+    "hasImportExportNote": "→ PPh 22 and import PPN obligations; PPh 26 may apply",
+    "hasRental": "Rental business",
+    "hasRentalNote": "→ PPh 4(2) Final 10% applies",
+    "kbliAboutTitle": "What is KBLI?",
+    "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — 5-digit business classification code. Used for tax rate determination and SPT filing; **choose accurately**. Multiple selections allowed.",
+    "kbliSearchLabel": "Search KBLI (code or description)",
+    "kbliSearchPlaceholder": "E.g., 62010, Computer Programming, IT",
+    "kbliSelectedLabel": "Selected ({count})",
+    "kbliPrimaryBadge": "Primary",
+    "kbliPrimaryHint": "Select the primary KBLI via the radio button",
+    "jtcExplainBody": "AI Pajak partners with Jakarta Tax Consulting (JTC), a licensed Indonesian tax consulting firm, to legally handle tax filings. Every SPT is reviewed and signed by a certified JTC consultant before being submitted to DJP.",
+    "agreeJtcLabel": "I agree to the JTC Tax Service Terms",
+    "agreeJtcHint": "All tax services via AI Pajak are performed under a service agreement between JTC and the customer. Terms version {version} applies.",
+    "agreeDataLabel": "I consent to processing of personal and financial data",
+    "agreeDataHint": "NPWP, financial statements, and transaction data are processed for tax calculation and filing. Not shared with third parties other than JTC.",
+    "agreeFilingLabel": "I authorize JTC to handle my tax filings",
+    "agreeFilingHint": "Certified JTC consultants may represent me to submit SPT Masa / SPT Tahunan to DJP. Every submission includes an identity verification step.",
+    "finalStepLead": "Final step. Set your email and password.",
+    "fieldEmail": "Email (for notifications / password reset)",
+    "fieldPassword": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "fieldConfirmPassword": "Confirm Password",
+    "confirmPlaceholder": "Re-enter",
+    "passwordMismatch": "Passwords do not match",
+    "loginMethodsTitle": "Available login methods:",
+    "loginMethodEmail": "(email)",
+    "previousCta": "Previous",
+    "goToIndividual": "Switch to Individual Signup",
+    "nextCta": "Next",
+    "submitCta": "Complete Registration"
   }
 }

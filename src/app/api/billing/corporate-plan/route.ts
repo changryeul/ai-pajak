@@ -78,26 +78,23 @@ export async function GET() {
         usage,
         recommendation: {
           planId: recommendation.plan?.id || null,
-          planName: recommendation.plan?.name || null,
           reason: recommendation.reason,
           exceedsAllPlans: recommendation.exceedsAllPlans,
           exceedingDimensions: recommendation.exceedingDimensions,
         },
         availablePlans: CORPORATE_PLANS.map((p) => ({
           id: p.id,
-          name: p.name,
           priceIdr: p.priceIdr,
           billingCycle: p.billingCycle,
           limits: p.limits,
-          description: p.description,
-          features: p.features,
+          featureCount: p.featureCount,
         })),
       },
     });
   } catch (err) {
     loggers.api.error({ err }, 'GET /api/billing/corporate-plan error');
     return NextResponse.json(
-      { error: '구독 정보를 불러올 수 없습니다' },
+      { error: 'Gagal memuat informasi langganan' },
       { status: 500 }
     );
   }
@@ -162,7 +159,7 @@ export async function POST(request: NextRequest) {
       .insert({
         customer_id: customerId,
         plan_id: plan.id,
-        plan_name: plan.name,
+        plan_name: plan.id,
         price_idr: plan.priceIdr,
         billing_cycle: billingCycle || 'MONTHLY',
         status: 'PENDING_PAYMENT',
@@ -223,7 +220,7 @@ export async function POST(request: NextRequest) {
         itemDetails: [
           {
             id: plan.id,
-            name: `AI Pajak ${plan.name} (월 구독)`,
+            name: `AI Pajak ${plan.id} (Monthly Subscription)`,
             price: plan.priceIdr,
             quantity: 1,
           },

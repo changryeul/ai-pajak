@@ -16,9 +16,14 @@
 export const CORPORATE_PLAN_IDS = ['UMKM', 'BASIC', 'PRO'] as const;
 export type CorporatePlanId = typeof CORPORATE_PLAN_IDS[number];
 
+/**
+ * Plan copy (name, description, features) is localised via the `pricingPlans`
+ * i18n namespace — keyed by the plan `id`. Consumers that render plan text
+ * should call `t('pricingPlans.' + plan.id + '.name')` etc. so all 5 locales
+ * stay in sync.
+ */
 export interface CorporatePlan {
   id: CorporatePlanId;
-  name: string;
   priceIdr: number;
   billingCycle: 'MONTHLY';
   /** Hard usage limits. A customer fits this plan only if ALL usage dimensions are ≤ these limits. */
@@ -30,18 +35,12 @@ export interface CorporatePlan {
     /** Max PPN (VAT) invoice transactions per month. 0 = not applicable */
     ppnPerMonth: number;
   };
-  /** Short Korean description for UI */
-  description: string;
-  /** Highlighted features for pricing page */
-  features: string[];
+  /** Number of feature bullets (f1..fN) defined in i18n for this plan */
+  featureCount: number;
 }
 
-/**
- * UMKM 플랜 — small business, very low volume
- */
 export const UMKM_PLAN: CorporatePlan = {
   id: 'UMKM',
-  name: 'UMKM (소기업)',
   priceIdr: 500_000,
   billingCycle: 'MONTHLY',
   limits: {
@@ -49,21 +48,11 @@ export const UMKM_PLAN: CorporatePlan = {
     withholdingPerMonth: 30,
     ppnPerMonth: 0, // UMKM is typically exempt from PKP → no PPN
   },
-  description: '직원 10명 / 월 거래 30건 이하의 소규모 사업자 전용',
-  features: [
-    'PPh Final UMKM 0.5% 자동 계산',
-    'PPh 21 급여 세무 (최대 10명)',
-    '월 30건까지 원천세 자동 처리',
-    '연간 SPT Badan 자동 생성',
-  ],
+  featureCount: 4,
 };
 
-/**
- * Basic 플랜 — standard corporate with automated tax flow
- */
 export const BASIC_PLAN: CorporatePlan = {
   id: 'BASIC',
-  name: 'Basic (중소기업)',
   priceIdr: 1_500_000,
   billingCycle: 'MONTHLY',
   limits: {
@@ -71,23 +60,11 @@ export const BASIC_PLAN: CorporatePlan = {
     withholdingPerMonth: 100,
     ppnPerMonth: 200,
   },
-  description: '표준적인 법인 세무를 AI로 자동화하고자 하는 중소기업',
-  features: [
-    'PPh 21 급여 세무 자동화 (최대 50명)',
-    '원천세 월 100건 AI 자동 처리 (PPh 22/23/4(2))',
-    '부가세 월 200건 인보이스 처리 (PPN)',
-    '월/연간 SPT 자동 생성 + 제출',
-    '세금 최적화 추천',
-    '거래 상대방 관리 + DTA 서류 추적',
-  ],
+  featureCount: 6,
 };
 
-/**
- * Pro 플랜 — larger enterprises with advanced governance
- */
 export const PRO_PLAN: CorporatePlan = {
   id: 'PRO',
-  name: 'Pro (중견/대기업)',
   priceIdr: 3_000_000,
   billingCycle: 'MONTHLY',
   limits: {
@@ -95,17 +72,7 @@ export const PRO_PLAN: CorporatePlan = {
     withholdingPerMonth: 200,
     ppnPerMonth: 500,
   },
-  description: '중견/대기업 및 고도화 관리 요구 사항을 위한 플랜',
-  features: [
-    'Basic 전 기능 포함',
-    'PPh 21 급여 세무 (최대 1,000명)',
-    '원천세 월 200건',
-    '부가세 월 500건',
-    '주주 관리 + 배당 PPh 자동 판정',
-    '세무조사 대비 기능',
-    'Transfer Pricing 기본 지원',
-    '우선 지원 (Priority Support)',
-  ],
+  featureCount: 8,
 };
 
 /** All corporate plans in ascending order of price */

@@ -115,17 +115,14 @@ export async function GET() {
         managedClientCount: clientCount,
         recommendation: {
           tierId: recommendation.tier?.id || null,
-          tierName: recommendation.tier?.name || null,
           reason: recommendation.reason,
         },
         availableTiers: CONSULTANT_TIERS.map((t) => ({
           id: t.id,
-          name: t.name,
           priceIdr: t.priceIdr,
           billingCycle: t.billingCycle,
           maxClients: t.maxClients,
-          description: t.description,
-          features: t.features,
+          featureCount: t.featureCount,
         })),
       },
     });
@@ -184,7 +181,7 @@ export async function POST(request: NextRequest) {
       .insert({
         tax_partner_id: partner.partnerId,
         tier_id: tier.id,
-        tier_name: tier.name,
+        tier_name: tier.id,
         price_idr: tier.priceIdr,
         billing_cycle: billingCycle || 'MONTHLY',
         max_clients: tier.maxClients >= 999_999 ? null : tier.maxClients,
@@ -244,7 +241,7 @@ export async function POST(request: NextRequest) {
         itemDetails: [
           {
             id: tier.id,
-            name: `AI Pajak ${tier.name} (세무 사무소 월 구독)`,
+            name: `AI Pajak ${tier.id} (Consultant Monthly)`,
             price: tier.priceIdr,
             quantity: 1,
           },

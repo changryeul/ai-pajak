@@ -5680,5 +5680,218 @@
     "checkEfakturPpn": "e-Faktur PPN 准备(进项 vs 销项)",
     "checkPayrollPph21": "月度 PPh 21 工资核对",
     "checkAmendment": "如有 SPT 修正申报,准备相关支持文件"
+  },
+  "pricingPage": {
+    "title": "价格",
+    "subtitle": "企业按月订阅,个人按SPT申报次数付费。根据需要选择。",
+    "tabCorporate": "企业（月度订阅）",
+    "tabIndividual": "个人（按次）",
+    "tabConsultant": "税务咨询所（月度）",
+    "aiRecommendation": "AI推荐",
+    "currentPlan": "当前方案",
+    "currentTier": "当前级别",
+    "monthlyVatExcluded": "按月 · 不含增值税（含增值税 {price}）",
+    "sptPricingNote": "每次SPT申报（不含增值税）",
+    "limitsBadge": "上限",
+    "employeesLabel": "员工{count}人",
+    "withholdingLabel": "代扣代缴每月{count}笔",
+    "ppnLabel": "PPN每月{count}笔",
+    "ppnNotApplicable": "不适用",
+    "currentlyUsing": "使用中",
+    "subscribe": "订阅",
+    "signupAndSubscribe": "注册并订阅",
+    "proExceeded": "超出Pro方案限制",
+    "proExceededNote": "我们为大型企业提供定制报价。请点击下方按钮申请咨询。",
+    "customQuoteCta": "申请定制报价 →",
+    "preparing": "准备中…",
+    "payAndStart": "支付并开始",
+    "signupAndStart": "注册并开始",
+    "consultantTierTitle": "税务咨询所月度订阅",
+    "consultantTierDesc": "使用AI Pajak管理自己客户的外部顾问方案。可向客户单独收费。",
+    "managedClientCount": "当前管理客户数: {count}人",
+    "unlimitedClients": "无限客户",
+    "maxClientsLabel": "最多{count}位客户",
+    "footerNote": "所有价格以印尼盾(IDR)计算。PPN 11%另行收取。",
+    "errConsultantOnly": "仅税务咨询所顾问可订阅此方案",
+    "errCorporateOnly": "仅企业客户可订阅此方案",
+    "errIndividualPlanForCompany": "企业客户请使用企业方案,而非SPT Pribadi",
+    "errSubscribeFailed": "订阅申请失败",
+    "errPaymentPrepFailed": "付款准备失败",
+    "errPaymentPageFailed": "创建付款页面失败",
+    "errServer": "服务器错误"
+  },
+  "pricingPlans": {
+    "UMKM": {
+      "name": "UMKM（小微企业）",
+      "description": "适合员工10人以下、每月交易30笔以下的小型企业",
+      "features": {
+        "f1": "自动计算PPh Final UMKM 0.5%",
+        "f2": "PPh 21薪资（最多10人）",
+        "f3": "每月自动处理最多30笔代扣代缴",
+        "f4": "自动生成年度SPT Badan"
+      }
+    },
+    "BASIC": {
+      "name": "Basic（中小企业）",
+      "description": "适合希望用AI自动化标准企业税务的中小企业",
+      "features": {
+        "f1": "PPh 21薪资自动化（最多50人）",
+        "f2": "每月AI自动处理100笔代扣代缴（PPh 22/23/4(2)）",
+        "f3": "每月处理200份PPN发票",
+        "f4": "自动生成和提交月度/年度SPT",
+        "f5": "税务优化建议",
+        "f6": "交易对手管理+ DTA文档跟踪"
+      }
+    },
+    "PRO": {
+      "name": "Pro（中型/大型企业）",
+      "description": "面向中大型企业和高级治理需求的方案",
+      "features": {
+        "f1": "包含Basic全部功能",
+        "f2": "PPh 21薪资（最多1,000人）",
+        "f3": "代扣代缴每月200笔",
+        "f4": "PPN每月500笔",
+        "f5": "股东管理+自动判定股息PPh",
+        "f6": "税务审计准备",
+        "f7": "转让定价基本支持",
+        "f8": "优先支持"
+      }
+    },
+    "SPT_1770SS": {
+      "name": "1770SS（简单）",
+      "description": "单一收入来源的员工",
+      "features": {
+        "f1": "通过OCR自动录入A1 (1721-A1)代扣代缴凭证",
+        "f2": "自动生成并验证1770SS",
+        "f3": "自动判断退税",
+        "f4": "JTC税务师审核后提交DJP"
+      }
+    },
+    "SPT_1770S": {
+      "name": "1770S（标准）",
+      "description": "多收入来源·有兼职收入",
+      "features": {
+        "f1": "合并多份代扣代缴凭证",
+        "f2": "自动整理其他收入·资产·负债",
+        "f3": "PTKP 资料整合",
+        "f4": "JTC税务师审核后提交DJP"
+      }
+    },
+    "SPT_1770": {
+      "name": "1770（完整）",
+      "description": "经营者·自由职业·复杂收入",
+      "features": {
+        "f1": "自动分类经营损益",
+        "f2": "年度税务优化建议",
+        "f3": "统一管理凭证",
+        "f4": "JTC税务师审核后提交DJP"
+      }
+    },
+    "STARTER": {
+      "name": "Starter",
+      "description": "新开或小型事务所（最多10位客户）",
+      "features": {
+        "f1": "管理最多10位客户",
+        "f2": "访问所有税务自动化工具",
+        "f3": "每位客户仪表板+月度/年度申报",
+        "f4": "e-Filing代理+e-Bupot",
+        "f5": "标准支持"
+      }
+    },
+    "GROWTH": {
+      "name": "Growth",
+      "description": "快速成长的事务所（最多50位客户）",
+      "features": {
+        "f1": "包含Starter全部功能",
+        "f2": "管理最多50位客户",
+        "f3": "邀请团队成员（含监督员权限）",
+        "f4": "多客户批量处理（批量上传）",
+        "f5": "每位客户的POA·章程·股东管理",
+        "f6": "优先支持"
+      }
+    },
+    "ENTERPRISE": {
+      "name": "Enterprise",
+      "description": "大型事务所（50+客户，可定制报价）",
+      "features": {
+        "f1": "包含Growth全部功能",
+        "f2": "无限客户数",
+        "f3": "专属客户经理",
+        "f4": "定制集成（API）",
+        "f5": "专属SLA+优先故障响应",
+        "f6": "税务审计·转让定价咨询折扣"
+      }
+    }
+  },
+  "companyRegister": {
+    "step1Title": "公司信息",
+    "step1Desc": "NPWP和基本信息",
+    "step2Title": "税务档案",
+    "step2Desc": "营收/员工/业务类型",
+    "step3Title": "KBLI登记",
+    "step3Desc": "选择业务类型",
+    "step4Title": "条款同意",
+    "step4Desc": "同意JTC税务代理",
+    "step5Title": "创建账户",
+    "step5Desc": "邮箱和密码",
+    "errSignupFailed": "注册过程中发生错误",
+    "successTitle": "注册完成",
+    "successLinkSent": "确认链接已发送到{email}。",
+    "successAdvisor": "税务顾问稍后会联系您。",
+    "successLoginCta": "前往登录页面",
+    "heading": "企业客户注册",
+    "subheading": "与Jakarta Tax Consulting一起管理您的税务",
+    "fieldCompanyName": "公司名称 (Nama Perusahaan)",
+    "fieldNpwp": "企业NPWP（15位）",
+    "npwpCounter": "{have}/15位 {check}",
+    "npwpLoginHint": "💡 登录时可使用NPWP代替邮箱",
+    "fieldRepresentative": "法人代表姓名",
+    "fieldPhone": "公司电话（可选）",
+    "fieldAddress": "公司地址（可选）",
+    "taxProfileTitle": "税务档案",
+    "taxProfileNote": "以下信息用于判断PPh/PPN适用性。均为可选，但越准确申报越精准。",
+    "fieldAnnualRevenue": "年营收（IDR）",
+    "revenuePlaceholder": "例如: 5,000,000,000（50亿）",
+    "yearPlaceholder": "基准年度",
+    "umkmHint": "✓ 营收低于48亿IDR — PP 23/2018小微企业（PPh Final 0.5%）",
+    "hasEmployees": "有雇佣员工",
+    "hasEmployeesNote": "→ 每月需申报SPT Masa PPh 21",
+    "employeeCountPlaceholder": "大概员工数",
+    "isPkp": "PKP登记（Pengusaha Kena Pajak）",
+    "isPkpNote": "→ 增值税登记企业/每月申报SPT Masa PPN/可开具Faktur Pajak",
+    "moreInfo": "附加信息",
+    "paysServiceFees": "支付服务费用",
+    "paysServiceFeesNote": "→ PPh 23代扣代缴义务（2%/15%）",
+    "hasImportExport": "进出口交易",
+    "hasImportExportNote": "→ PPh 22及进口PPN义务，可能适用PPh 26",
+    "hasRental": "租赁业务",
+    "hasRentalNote": "→ 适用PPh 4(2) Final 10%",
+    "kbliAboutTitle": "什么是KBLI?",
+    "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — 企业业务分类代码（5位）。用于税率确定和SPT申报,请**准确选择**。可选多项。",
+    "kbliSearchLabel": "搜索KBLI（代码或描述）",
+    "kbliSearchPlaceholder": "例如: 62010, Computer Programming, IT",
+    "kbliSelectedLabel": "已选 ({count})",
+    "kbliPrimaryBadge": "主业",
+    "kbliPrimaryHint": "通过单选按钮选择主KBLI",
+    "jtcExplainBody": "AI Pajak与印度尼西亚持牌税务顾问公司Jakarta Tax Consulting (JTC)合作，以合法方式进行税务申报。所有SPT均由JTC认证顾问审核并签字后提交给DJP。",
+    "agreeJtcLabel": "我同意JTC税务代理服务条款",
+    "agreeJtcHint": "通过AI Pajak提供的所有税务服务依据JTC与客户之间的代理协议执行。适用条款版本{version}。",
+    "agreeDataLabel": "我同意处理个人及财务信息",
+    "agreeDataHint": "NPWP、财务报表、交易明细用于税务计算和申报。除JTC外不提供给第三方。",
+    "agreeFilingLabel": "我授权JTC代为办理税务申报",
+    "agreeFilingHint": "允许JTC认证顾问代表本人向DJP提交SPT Masa / SPT Tahunan。每次提交前均包含身份验证步骤。",
+    "finalStepLead": "最后一步。请设置邮箱和密码。",
+    "fieldEmail": "邮箱（用于通知/重置密码）",
+    "fieldPassword": "密码",
+    "passwordPlaceholder": "至少8个字符",
+    "fieldConfirmPassword": "确认密码",
+    "confirmPlaceholder": "再次输入",
+    "passwordMismatch": "密码不一致",
+    "loginMethodsTitle": "可用的登录方式:",
+    "loginMethodEmail": "（邮箱）",
+    "previousCta": "上一步",
+    "goToIndividual": "前往个人注册",
+    "nextCta": "下一步",
+    "submitCta": "完成注册"
   }
 }

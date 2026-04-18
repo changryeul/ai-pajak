@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,12 +31,13 @@ interface ConsultantState {
   managedClientCount: number;
   recommendation: {
     tierId: string | null;
-    tierName: string | null;
     reason: string;
   };
 }
 
 export default function PricingPage() {
+  const t = useTranslations('pricingPage');
+  const tPlans = useTranslations('pricingPlans');
   const { session } = useSession();
   const params = useParams();
   const locale = (params?.locale as string) || 'ko';
@@ -80,7 +82,7 @@ export default function PricingPage() {
       return;
     }
     if (!isConsultant) {
-      setError('세무 사무소 컨설턴트만 이 플랜을 구독할 수 있습니다');
+      setError(t('errConsultantOnly'));
       return;
     }
     setCheckoutLoading(tierId);
@@ -93,7 +95,7 @@ export default function PricingPage() {
       });
       const d = await res.json();
       if (!d.success) {
-        setError(d.error || '구독 신청 실패');
+        setError(d.error || t('errSubscribeFailed'));
         return;
       }
       // Same graceful degrade as corporate-plan
@@ -102,10 +104,10 @@ export default function PricingPage() {
       } else if (d.data?.subscriptionId) {
         window.location.href = `/${locale}/billing?pendingSubscriptionId=${d.data.subscriptionId}`;
       } else {
-        setError('결제 페이지 생성 실패');
+        setError(t('errPaymentPageFailed'));
       }
     } catch {
-      setError('서버 오류');
+      setError(t('errServer'));
     } finally {
       setCheckoutLoading(null);
     }
@@ -117,7 +119,7 @@ export default function PricingPage() {
       return;
     }
     if (session.customerType === 'COMPANY') {
-      setError('법인 고객은 SPT Pribadi가 아닌 법인 요금제를 이용해주세요');
+      setError(t('errIndividualPlanForCompany'));
       return;
     }
     setCheckoutLoading(sptType);
@@ -130,7 +132,7 @@ export default function PricingPage() {
       });
       const d = await res.json();
       if (!d.success) {
-        setError(d.error || '결제 준비 실패');
+        setError(d.error || t('errPaymentPrepFailed'));
         return;
       }
       // Snap token available → redirect to Midtrans payment page.
@@ -141,10 +143,10 @@ export default function PricingPage() {
       } else if (d.data?.transactionId) {
         window.location.href = `/${locale}/billing/pay/${d.data.transactionId}`;
       } else {
-        setError('결제 준비 실패');
+        setError(t('errPaymentPrepFailed'));
       }
     } catch {
-      setError('서버 오류');
+      setError(t('errServer'));
     } finally {
       setCheckoutLoading(null);
     }
@@ -157,7 +159,7 @@ export default function PricingPage() {
       return;
     }
     if (session.customerType !== 'COMPANY') {
-      setError('법인 고객만 이 플랜을 구독할 수 있습니다');
+      setError(t('errCorporateOnly'));
       return;
     }
     setCheckoutLoading(planId);
@@ -170,7 +172,7 @@ export default function PricingPage() {
       });
       const d = await res.json();
       if (!d.success) {
-        setError(d.error || '구독 신청 실패');
+        setError(d.error || t('errSubscribeFailed'));
         return;
       }
       // Payment gateway available → redirect to Snap; otherwise the
@@ -181,10 +183,10 @@ export default function PricingPage() {
       } else if (d.data?.subscriptionId) {
         window.location.href = `/${locale}/billing?pendingSubscriptionId=${d.data.subscriptionId}`;
       } else {
-        setError('결제 페이지 생성 실패');
+        setError(t('errPaymentPageFailed'));
       }
     } catch {
-      setError('서버 오류');
+      setError(t('errServer'));
     } finally {
       setCheckoutLoading(null);
     }
@@ -201,9 +203,9 @@ export default function PricingPage() {
           <Link href={`/${locale}`}>
             <img src="/logo.png" alt="AI Pajak" className="h-10 mx-auto mb-4" />
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">요금제</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{t('title')}</h1>
           <p className="text-gray-500 mt-2 max-w-xl mx-auto">
-            법인은 월 구독, 개인은 SPT 신고 건당 결제. 필요에 맞게 선택하세요.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -218,7 +220,7 @@ export default function PricingPage() {
               }`}
             >
               <Building2 className="h-4 w-4" />
-              법인 고객 (월 구독)
+              {t('tabCorporate')}
             </button>
             <button
               type="button"
@@ -228,7 +230,7 @@ export default function PricingPage() {
               }`}
             >
               <UserIcon className="h-4 w-4" />
-              개인 (건당 결제)
+              {t('tabIndividual')}
             </button>
             <button
               type="button"
@@ -238,7 +240,7 @@ export default function PricingPage() {
               }`}
             >
               <Briefcase className="h-4 w-4" />
-              세무 사무소 (월 구독)
+              {t('tabConsultant')}
             </button>
           </div>
         </div>
@@ -257,7 +259,7 @@ export default function PricingPage() {
                 <div className="flex items-start gap-3">
                   <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-bold text-blue-900">AI 추천</p>
+                    <p className="text-sm font-bold text-blue-900">{t('aiRecommendation')}</p>
                     <p className="text-xs text-blue-700 mt-1">{subState.recommendation.reason}</p>
                   </div>
                 </div>
@@ -284,40 +286,40 @@ export default function PricingPage() {
                   >
                     {isRecommended && (
                       <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-                        AI 추천
+                        {t('aiRecommendation')}
                       </div>
                     )}
                     {isCurrent && (
                       <div className="absolute top-0 right-0 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-                        현재 플랜
+                        {t('currentPlan')}
                       </div>
                     )}
                     <CardContent className="p-6">
                       <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-sm`}>
                         <Icon className="h-6 w-6 text-white" />
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                      <p className="text-xs text-gray-500 mt-1 h-8">{plan.description}</p>
+                      <h3 className="text-lg font-bold text-gray-900">{tPlans(`${plan.id}.name`)}</h3>
+                      <p className="text-xs text-gray-500 mt-1 h-8">{tPlans(`${plan.id}.description`)}</p>
 
                       <div className="mt-4">
                         <p className="text-3xl font-bold text-gray-900">{formatPlanPrice(plan)}</p>
-                        <p className="text-[11px] text-gray-500">월 · VAT 별도 (VAT 포함 {formatPlanPrice({ ...plan, priceIdr: priceWithVat(plan) })})</p>
+                        <p className="text-[11px] text-gray-500">{t('monthlyVatExcluded', { price: formatPlanPrice({ ...plan, priceIdr: priceWithVat(plan) }) })}</p>
                       </div>
 
                       <div className="mt-4 space-y-1.5 text-[11px] text-gray-600">
                         <div className="flex items-center gap-1">
-                          <Badge className="bg-gray-100 text-gray-700 text-[9px]">한도</Badge>
+                          <Badge className="bg-gray-100 text-gray-700 text-[9px]">{t('limitsBadge')}</Badge>
                         </div>
-                        <p>• 직원 {plan.limits.employees.toLocaleString('id-ID')}명</p>
-                        <p>• 원천세 월 {plan.limits.withholdingPerMonth}건</p>
-                        <p>• PPN 월 {plan.limits.ppnPerMonth === 0 ? '해당 없음' : `${plan.limits.ppnPerMonth}건`}</p>
+                        <p>• {t('employeesLabel', { count: plan.limits.employees.toLocaleString('id-ID') })}</p>
+                        <p>• {t('withholdingLabel', { count: plan.limits.withholdingPerMonth })}</p>
+                        <p>• {plan.limits.ppnPerMonth === 0 ? t('ppnNotApplicable') : t('ppnLabel', { count: plan.limits.ppnPerMonth })}</p>
                       </div>
 
                       <div className="mt-4 pt-4 border-t space-y-2">
-                        {plan.features.map((f, i) => (
+                        {Array.from({ length: plan.featureCount }, (_, i) => (
                           <div key={i} className="flex items-start gap-2 text-xs text-gray-700">
                             <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-                            <span>{f}</span>
+                            <span>{tPlans(`${plan.id}.features.f${i + 1}`)}</span>
                           </div>
                         ))}
                       </div>
@@ -330,11 +332,11 @@ export default function PricingPage() {
                         {checkoutLoading === plan.id ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-1" />
                         ) : isCurrent ? (
-                          '현재 이용 중'
+                          t('currentlyUsing')
                         ) : session ? (
-                          <>구독하기 <ArrowRight className="h-4 w-4 ml-1" /></>
+                          <>{t('subscribe')} <ArrowRight className="h-4 w-4 ml-1" /></>
                         ) : (
-                          '가입 후 구독'
+                          t('signupAndSubscribe')
                         )}
                       </Button>
                     </CardContent>
@@ -346,15 +348,15 @@ export default function PricingPage() {
             {/* Custom pricing CTA for over-Pro usage */}
             {subState?.recommendation?.exceedsAllPlans && (
               <div className="mt-6 max-w-2xl mx-auto p-5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300">
-                <p className="font-bold text-sm text-amber-900">Pro 플랜 한도 초과</p>
+                <p className="font-bold text-sm text-amber-900">{t('proExceeded')}</p>
                 <p className="text-xs text-amber-800 mt-1">
                   {subState.recommendation.reason}
                 </p>
                 <p className="text-xs text-amber-700 mt-2">
-                  대규모 기업을 위한 맞춤 견적을 제공합니다. 아래 버튼으로 상담 요청을 보내주세요.
+                  {t('proExceededNote')}
                 </p>
                 <Button variant="outline" className="mt-3 border-amber-400 text-amber-900" asChild>
-                  <Link href={`/${locale}/contact`}>맞춤 견적 상담 요청 →</Link>
+                  <Link href={`/${locale}/contact`}>{t('customQuoteCta')}</Link>
                 </Button>
               </div>
             )}
@@ -375,21 +377,21 @@ export default function PricingPage() {
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-sm`}>
                       <FileText className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                    <p className="text-xs text-gray-500 mt-1 h-8">{plan.description}</p>
+                    <h3 className="text-lg font-bold text-gray-900">{tPlans(`${plan.id}.name`)}</h3>
+                    <p className="text-xs text-gray-500 mt-1 h-8">{tPlans(`${plan.id}.description`)}</p>
 
                     <div className="mt-4">
                       <p className="text-3xl font-bold text-gray-900">
                         Rp {plan.priceIdr.toLocaleString('id-ID')}
                       </p>
-                      <p className="text-[11px] text-gray-500">SPT 신고 1건 (VAT 별도)</p>
+                      <p className="text-[11px] text-gray-500">{t('sptPricingNote')}</p>
                     </div>
 
                     <div className="mt-4 pt-4 border-t space-y-2">
-                      {plan.features.map((f, idx) => (
+                      {Array.from({ length: plan.featureCount }, (_, idx) => (
                         <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
                           <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span>{f}</span>
+                          <span>{tPlans(`${plan.id}.features.f${idx + 1}`)}</span>
                         </div>
                       ))}
                     </div>
@@ -402,11 +404,11 @@ export default function PricingPage() {
                       {checkoutLoading === plan.id ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          준비 중…
+                          {t('preparing')}
                         </>
                       ) : (
                         <>
-                          {session ? '결제하고 시작' : '가입하고 시작'}
+                          {session ? t('payAndStart') : t('signupAndStart')}
                           <ArrowRight className="h-4 w-4 ml-1" />
                         </>
                       )}
@@ -422,10 +424,9 @@ export default function PricingPage() {
         {tab === 'CONSULTANT' && (
           <>
             <div className="mb-6 max-w-2xl mx-auto p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 text-center">
-              <p className="text-sm font-bold text-purple-900">세무 사무소 월 구독</p>
+              <p className="text-sm font-bold text-purple-900">{t('consultantTierTitle')}</p>
               <p className="text-xs text-purple-700 mt-1">
-                AI Pajak을 사용해서 본인 사무소 고객을 관리하는 외부 세무사용 플랜.
-                본인 고객들에게는 별도 청구 가능합니다.
+                {t('consultantTierDesc')}
               </p>
             </div>
 
@@ -435,7 +436,7 @@ export default function PricingPage() {
                   <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-bold text-blue-900">
-                      현재 관리 고객 수: {consultantState.managedClientCount}명
+                      {t('managedClientCount', { count: consultantState.managedClientCount })}
                     </p>
                     <p className="text-xs text-blue-700 mt-0.5">{consultantState.recommendation.reason}</p>
                   </div>
@@ -465,39 +466,39 @@ export default function PricingPage() {
                   >
                     {isRecommended && (
                       <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-                        AI 추천
+                        {t('aiRecommendation')}
                       </div>
                     )}
                     {isCurrent && (
                       <div className="absolute top-0 right-0 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-                        현재 티어
+                        {t('currentTier')}
                       </div>
                     )}
                     <CardContent className="p-6">
                       <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-sm`}>
                         <Icon className="h-6 w-6 text-white" />
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900">{tier.name}</h3>
-                      <p className="text-xs text-gray-500 mt-1 h-8">{tier.description}</p>
+                      <h3 className="text-lg font-bold text-gray-900">{tPlans(`${tier.id}.name`)}</h3>
+                      <p className="text-xs text-gray-500 mt-1 h-8">{tPlans(`${tier.id}.description`)}</p>
 
                       <div className="mt-4">
                         <p className="text-3xl font-bold text-gray-900">{formatTierPrice(tier)}</p>
                         <p className="text-[11px] text-gray-500">
-                          월 · VAT 별도 (VAT 포함 Rp {tierPriceWithVat(tier).toLocaleString('id-ID')})
+                          {t('monthlyVatExcluded', { price: `Rp ${tierPriceWithVat(tier).toLocaleString('id-ID')}` })}
                         </p>
                       </div>
 
                       <div className="mt-4 py-2 px-3 rounded-lg bg-purple-50 border border-purple-100">
                         <p className="text-[11px] font-bold text-purple-900">
-                          {tier.maxClients >= 999_999 ? '무제한 고객' : `최대 ${tier.maxClients}명 고객`}
+                          {tier.maxClients >= 999_999 ? t('unlimitedClients') : t('maxClientsLabel', { count: tier.maxClients })}
                         </p>
                       </div>
 
                       <div className="mt-4 pt-4 border-t space-y-2">
-                        {tier.features.map((f, i) => (
+                        {Array.from({ length: tier.featureCount }, (_, i) => (
                           <div key={i} className="flex items-start gap-2 text-xs text-gray-700">
                             <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-                            <span>{f}</span>
+                            <span>{tPlans(`${tier.id}.features.f${i + 1}`)}</span>
                           </div>
                         ))}
                       </div>
@@ -510,11 +511,11 @@ export default function PricingPage() {
                         {checkoutLoading === tier.id ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-1" />
                         ) : isCurrent ? (
-                          '현재 이용 중'
+                          t('currentlyUsing')
                         ) : session ? (
-                          <>구독하기 <ArrowRight className="h-4 w-4 ml-1" /></>
+                          <>{t('subscribe')} <ArrowRight className="h-4 w-4 ml-1" /></>
                         ) : (
-                          '가입 후 구독'
+                          t('signupAndSubscribe')
                         )}
                       </Button>
                     </CardContent>
@@ -527,7 +528,7 @@ export default function PricingPage() {
 
         {/* Footer note */}
         <p className="text-center text-xs text-gray-400 mt-10">
-          모든 가격은 인도네시아 루피아(IDR) 기준입니다. PPN 11%는 별도로 청구됩니다.
+          {t('footerNote')}
         </p>
       </div>
     </div>

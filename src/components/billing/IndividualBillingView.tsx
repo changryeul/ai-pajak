@@ -34,12 +34,10 @@ import { cn } from '@/lib/utils';
 
 interface Plan {
   id: 'SPT_1770SS' | 'SPT_1770S' | 'SPT_1770';
-  name: string;
+  shortName: string;
   priceIdr: number;
   priceWithVat: number;
-  description: string;
-  features: string[];
-  recommendedFor: string;
+  featureCount: number;
 }
 
 interface Transaction {
@@ -70,6 +68,7 @@ function sptColor(id: Plan['id']) {
 
 export function IndividualBillingView() {
   const t = useTranslations('individualBilling');
+  const tPlans = useTranslations('pricingPlans');
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
@@ -216,7 +215,7 @@ export function IndividualBillingView() {
                     </div>
                     <div>
                       <div className="text-xs text-gray-500 font-medium">{t('plan.perFiling')}</div>
-                      <div className="font-bold text-gray-900 text-lg leading-tight">{plan.name}</div>
+                      <div className="font-bold text-gray-900 text-lg leading-tight">{tPlans(`${plan.id}.name`)}</div>
                     </div>
                   </div>
                   <div className="mt-4">
@@ -229,19 +228,15 @@ export function IndividualBillingView() {
                   </div>
                 </div>
                 <div className="p-5 flex-1 flex flex-col bg-white">
-                  <p className="text-sm text-gray-700 mb-3">{plan.description}</p>
+                  <p className="text-sm text-gray-700 mb-3">{tPlans(`${plan.id}.description`)}</p>
                   <ul className="space-y-1.5 mb-4 flex-1">
-                    {plan.features.map((f, i) => (
+                    {Array.from({ length: plan.featureCount }, (_, i) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
                         <CheckCircle className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                        {f}
+                        {tPlans(`${plan.id}.features.f${i + 1}`)}
                       </li>
                     ))}
                   </ul>
-                  <div className="text-[11px] text-gray-500 mb-3">
-                    <span className="font-semibold text-gray-700">{t('plan.recommendedFor')}:</span>{' '}
-                    {plan.recommendedFor}
-                  </div>
                   <Button
                     className={cn('w-full bg-gradient-to-r text-white border-0 shadow-sm hover:opacity-95', c.grad)}
                     disabled={busy}

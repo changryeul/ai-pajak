@@ -5680,5 +5680,218 @@
     "checkEfakturPpn": "e-Faktur PPN準備(仕入vs売上)",
     "checkPayrollPph21": "月次PPh 21給与照合",
     "checkAmendment": "SPT修正申告がある場合、根拠資料準備"
+  },
+  "pricingPage": {
+    "title": "料金プラン",
+    "subtitle": "法人は月額サブスク、個人はSPT申告ごとの支払い。ニーズに合わせて選択してください。",
+    "tabCorporate": "法人（月額）",
+    "tabIndividual": "個人（申告ごと）",
+    "tabConsultant": "税理士事務所（月額）",
+    "aiRecommendation": "AIのおすすめ",
+    "currentPlan": "現在のプラン",
+    "currentTier": "現在のティア",
+    "monthlyVatExcluded": "月額・VAT別（VAT込み {price}）",
+    "sptPricingNote": "SPT申告1件（VAT別）",
+    "limitsBadge": "上限",
+    "employeesLabel": "従業員{count}名",
+    "withholdingLabel": "源泉徴収 月{count}件",
+    "ppnLabel": "PPN 月{count}件",
+    "ppnNotApplicable": "該当なし",
+    "currentlyUsing": "利用中",
+    "subscribe": "登録する",
+    "signupAndSubscribe": "登録して契約",
+    "proExceeded": "Proプランの上限超過",
+    "proExceededNote": "大規模企業向けのカスタム見積もりを提供します。以下のボタンから相談依頼を送信してください。",
+    "customQuoteCta": "カスタム見積もりを依頼 →",
+    "preparing": "準備中…",
+    "payAndStart": "支払って開始",
+    "signupAndStart": "登録して開始",
+    "consultantTierTitle": "税理士事務所 月額プラン",
+    "consultantTierDesc": "AI Pajakで自社の顧客を管理する外部税理士向けプラン。顧客には別途請求できます。",
+    "managedClientCount": "現在の管理顧客数: {count}名",
+    "unlimitedClients": "無制限の顧客",
+    "maxClientsLabel": "最大{count}名の顧客",
+    "footerNote": "すべての価格はインドネシアルピア（IDR）建てです。PPN 11%は別途請求されます。",
+    "errConsultantOnly": "税理士事務所のコンサルタントのみこのプランに登録できます",
+    "errCorporateOnly": "法人のお客様のみこのプランに登録できます",
+    "errIndividualPlanForCompany": "法人のお客様はSPT Pribadiではなく法人プランをご利用ください",
+    "errSubscribeFailed": "サブスクリプション申請に失敗しました",
+    "errPaymentPrepFailed": "決済準備に失敗しました",
+    "errPaymentPageFailed": "決済ページの作成に失敗しました",
+    "errServer": "サーバーエラー"
+  },
+  "pricingPlans": {
+    "UMKM": {
+      "name": "UMKM（零細企業）",
+      "description": "従業員10名以下・月30件以下の小規模事業者向け",
+      "features": {
+        "f1": "PPh Final UMKM 0.5%の自動計算",
+        "f2": "PPh 21給与（最大10名）",
+        "f3": "月30件までの源泉徴収自動処理",
+        "f4": "年次SPT Badanの自動生成"
+      }
+    },
+    "BASIC": {
+      "name": "Basic（中小企業）",
+      "description": "標準的な法人税務をAIで自動化したい中小企業向け",
+      "features": {
+        "f1": "PPh 21給与自動化（最大50名）",
+        "f2": "源泉徴収 月100件 AI自動処理（22/23/4(2)）",
+        "f3": "月200件のPPN請求書処理",
+        "f4": "月次・年次SPTの自動生成・提出",
+        "f5": "税最適化のおすすめ",
+        "f6": "取引先管理＋DTA書類追跡"
+      }
+    },
+    "PRO": {
+      "name": "Pro（中堅・大企業）",
+      "description": "中堅・大企業や高度な管理要件に対応するプラン",
+      "features": {
+        "f1": "Basicの全機能",
+        "f2": "PPh 21給与（最大1,000名）",
+        "f3": "源泉徴収 月200件",
+        "f4": "PPN 月500件",
+        "f5": "株主管理＋配当PPhの自動判定",
+        "f6": "税務調査対応機能",
+        "f7": "Transfer Pricing基本サポート",
+        "f8": "優先サポート"
+      }
+    },
+    "SPT_1770SS": {
+      "name": "1770SS（シンプル）",
+      "description": "会社員・単一の所得源",
+      "features": {
+        "f1": "A1（1721-A1）源泉徴収票のOCR自動入力",
+        "f2": "1770SSの自動生成・検証",
+        "f3": "税還付の自動判定",
+        "f4": "JTC税理士レビュー後、DJPへ提出"
+      }
+    },
+    "SPT_1770S": {
+      "name": "1770S（スタンダード）",
+      "description": "複数の所得・副業所得あり",
+      "features": {
+        "f1": "複数の源泉徴収票を結合",
+        "f2": "その他の所得・資産・負債を自動整理",
+        "f3": "PTKPプロファイル連携",
+        "f4": "JTC税理士レビュー後、DJPへ提出"
+      }
+    },
+    "SPT_1770": {
+      "name": "1770（フル）",
+      "description": "事業主・フリーランス・複雑な所得",
+      "features": {
+        "f1": "事業損益の自動分類",
+        "f2": "年次税最適化のおすすめ",
+        "f3": "証憑の一括管理",
+        "f4": "JTC税理士レビュー後、DJPへ提出"
+      }
+    },
+    "STARTER": {
+      "name": "Starter",
+      "description": "新規または小規模事務所（最大10名）",
+      "features": {
+        "f1": "最大10名の顧客管理",
+        "f2": "すべての税務自動化ツール",
+        "f3": "顧客別ダッシュボード＋月次・年次申告",
+        "f4": "e-Filing代行＋e-Bupot",
+        "f5": "標準サポート"
+      }
+    },
+    "GROWTH": {
+      "name": "Growth",
+      "description": "成長中の事務所（最大50名）",
+      "features": {
+        "f1": "Starterの全機能",
+        "f2": "最大50名の顧客管理",
+        "f3": "チームメンバー招待（スーパーバイザー権限含む）",
+        "f4": "複数顧客の一括処理（一括アップロード）",
+        "f5": "顧客別のPOA・定款・株主管理",
+        "f6": "優先サポート"
+      }
+    },
+    "ENTERPRISE": {
+      "name": "Enterprise",
+      "description": "大手事務所（50名以上、カスタム見積可）",
+      "features": {
+        "f1": "Growthの全機能",
+        "f2": "顧客数無制限",
+        "f3": "専任アカウントマネージャー",
+        "f4": "カスタム統合（API連携）",
+        "f5": "専用SLA＋優先インシデント対応",
+        "f6": "税務調査・移転価格コンサルの割引"
+      }
+    }
+  },
+  "companyRegister": {
+    "step1Title": "会社情報",
+    "step1Desc": "NPWPと基本情報",
+    "step2Title": "税務プロファイル",
+    "step2Desc": "売上・従業員・事業種別",
+    "step3Title": "KBLI登録",
+    "step3Desc": "事業種別を選択",
+    "step4Title": "規約同意",
+    "step4Desc": "JTC税務代行同意",
+    "step5Title": "アカウント作成",
+    "step5Desc": "メールとパスワード",
+    "errSignupFailed": "登録処理中にエラーが発生しました",
+    "successTitle": "登録が完了しました",
+    "successLinkSent": "確認リンクを{email}に送信しました。",
+    "successAdvisor": "担当税理士より間もなくご連絡いたします。",
+    "successLoginCta": "ログインページへ",
+    "heading": "法人顧客登録",
+    "subheading": "Jakarta Tax Consultingと一緒に税務を管理しましょう",
+    "fieldCompanyName": "法人名 (Nama Perusahaan)",
+    "fieldNpwp": "法人NPWP（15桁）",
+    "npwpCounter": "{have}/15桁 {check}",
+    "npwpLoginHint": "💡 NPWPはログイン時にメールの代わりに使用できます",
+    "fieldRepresentative": "代表者名",
+    "fieldPhone": "会社電話番号（任意）",
+    "fieldAddress": "会社住所（任意）",
+    "taxProfileTitle": "税務プロファイル",
+    "taxProfileNote": "以下の情報はPPh/PPNの適用判定に使用されます。すべて任意ですが、正確なほど申告精度が向上します。",
+    "fieldAnnualRevenue": "年間売上（IDR）",
+    "revenuePlaceholder": "例: 5,000,000,000（50億）",
+    "yearPlaceholder": "基準年度",
+    "umkmHint": "✓ 売上48億ルピア未満 — PP 23/2018小規模事業者対象（PPh Final 0.5%）",
+    "hasEmployees": "従業員を雇用している",
+    "hasEmployeesNote": "→ 月次SPT Masa PPh 21の申告義務",
+    "employeeCountPlaceholder": "従業員数の概算",
+    "isPkp": "PKP登録（Pengusaha Kena Pajak）",
+    "isPkpNote": "→ PPN登録事業者／月次SPT Masa PPN申告義務／Faktur Pajak発行可能",
+    "moreInfo": "追加情報",
+    "paysServiceFees": "サービス費用を支払う",
+    "paysServiceFeesNote": "→ PPh 23源泉徴収義務（2%／15%）",
+    "hasImportExport": "輸入・輸出取引",
+    "hasImportExportNote": "→ PPh 22および輸入PPN義務、PPh 26適用の可能性",
+    "hasRental": "賃貸事業",
+    "hasRentalNote": "→ PPh 4(2) Final 10%適用",
+    "kbliAboutTitle": "KBLIとは？",
+    "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — 法人の事業種別分類コード（5桁）。税率決定やSPT作成に使用されるため、**正確に選択**してください。複数選択可能です。",
+    "kbliSearchLabel": "KBLI検索（コードまたは説明）",
+    "kbliSearchPlaceholder": "例: 62010, Computer Programming, IT",
+    "kbliSelectedLabel": "選択済み（{count}件）",
+    "kbliPrimaryBadge": "主要",
+    "kbliPrimaryHint": "ラジオボタンで主要KBLIを選択してください",
+    "jtcExplainBody": "AI Pajakは、税務申告を合法的に代行するため、インドネシアの公認税理士法人Jakarta Tax Consulting（JTC）と提携しています。すべてのSPTはJTCの認定税理士が確認・署名後、DJPに提出されます。",
+    "agreeJtcLabel": "JTC税務代行サービス規約に同意します",
+    "agreeJtcHint": "AI Pajakで提供される税務サービスはすべて、JTCと顧客間の代行契約に基づき実施されます。規約バージョン{version}適用。",
+    "agreeDataLabel": "個人情報および財務情報の処理に同意します",
+    "agreeDataHint": "NPWP、財務諸表、取引内訳等が税計算・申告目的で処理されます。JTC以外の第三者には提供されません。",
+    "agreeFilingLabel": "JTCに税務申告代行の権限を委任します",
+    "agreeFilingHint": "JTCの認定税理士が本人を代理し、DJPにSPT Masa／SPT Tahunanを提出できます。すべての提出前に本人確認手続きが含まれます。",
+    "finalStepLead": "最後のステップです。メールとパスワードを設定してください。",
+    "fieldEmail": "メール（通知・パスワードリセット用）",
+    "fieldPassword": "パスワード",
+    "passwordPlaceholder": "8文字以上",
+    "fieldConfirmPassword": "パスワード確認",
+    "confirmPlaceholder": "再入力",
+    "passwordMismatch": "パスワードが一致しません",
+    "loginMethodsTitle": "ログイン時に利用可能:",
+    "loginMethodEmail": "（メール）",
+    "previousCta": "前へ",
+    "goToIndividual": "個人登録へ",
+    "nextCta": "次へ",
+    "submitCta": "登録を完了"
   }
 }

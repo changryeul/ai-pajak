@@ -105,13 +105,13 @@ export function suggestPlanForCustomer(usage: CustomerUsage): PlanRecommendation
 
 function buildFitReason(plan: CorporatePlan, usage: CustomerUsage): string {
   const parts = [
-    `직원 ${usage.employees}명 (한도 ${plan.limits.employees})`,
-    `원천세 월 ${usage.withholdingPerMonth}건 (한도 ${plan.limits.withholdingPerMonth})`,
+    `Karyawan ${usage.employees} (batas ${plan.limits.employees})`,
+    `PPh potongan ${usage.withholdingPerMonth}/bulan (batas ${plan.limits.withholdingPerMonth})`,
   ];
   if (plan.limits.ppnPerMonth > 0) {
-    parts.push(`PPN 월 ${usage.ppnPerMonth}건 (한도 ${plan.limits.ppnPerMonth})`);
+    parts.push(`PPN ${usage.ppnPerMonth}/bulan (batas ${plan.limits.ppnPerMonth})`);
   }
-  return `${plan.name} 플랜 추천: ${parts.join(', ')}`;
+  return `Paket ${plan.id} direkomendasikan: ${parts.join(', ')}`;
 }
 
 function buildExceedReason(
@@ -120,12 +120,12 @@ function buildExceedReason(
   exceeding: PlanRecommendation['exceedingDimensions']
 ): string {
   const labels: Record<typeof exceeding[number], string> = {
-    employees: `직원 ${usage.employees}명 > ${topPlan.limits.employees}명 한도`,
-    withholdingPerMonth: `원천세 월 ${usage.withholdingPerMonth}건 > ${topPlan.limits.withholdingPerMonth}건 한도`,
-    ppnPerMonth: `PPN 월 ${usage.ppnPerMonth}건 > ${topPlan.limits.ppnPerMonth}건 한도`,
+    employees: `Karyawan ${usage.employees} > batas ${topPlan.limits.employees}`,
+    withholdingPerMonth: `PPh potongan ${usage.withholdingPerMonth}/bulan > batas ${topPlan.limits.withholdingPerMonth}`,
+    ppnPerMonth: `PPN ${usage.ppnPerMonth}/bulan > batas ${topPlan.limits.ppnPerMonth}`,
   };
   const parts = exceeding.map((k) => labels[k]);
-  return `Pro 플랜 한도 초과 — 상담 후 맞춤 견적 필요: ${parts.join(', ')}`;
+  return `Melebihi batas paket Pro — perlu penawaran khusus: ${parts.join(', ')}`;
 }
 
 /**

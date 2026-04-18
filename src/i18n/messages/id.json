@@ -5680,5 +5680,218 @@
     "checkEfakturPpn": "e-Faktur PPN disiapkan (input vs output)",
     "checkPayrollPph21": "Payroll PPh 21 bulanan direkonsiliasi",
     "checkAmendment": "Jika ada pembetulan SPT, dokumen dasar sudah disiapkan"
+  },
+  "pricingPage": {
+    "title": "Harga",
+    "subtitle": "Perusahaan berlangganan bulanan, perorangan bayar per pelaporan SPT. Pilih sesuai kebutuhan.",
+    "tabCorporate": "Perusahaan (Langganan Bulanan)",
+    "tabIndividual": "Perorangan (Per Pelaporan)",
+    "tabConsultant": "Kantor Konsultan (Langganan Bulanan)",
+    "aiRecommendation": "Rekomendasi AI",
+    "currentPlan": "Paket Saat Ini",
+    "currentTier": "Tier Saat Ini",
+    "monthlyVatExcluded": "Bulanan · PPN tidak termasuk (termasuk PPN {price})",
+    "sptPricingNote": "Per 1 pelaporan SPT (PPN tidak termasuk)",
+    "limitsBadge": "Batas",
+    "employeesLabel": "Karyawan {count} orang",
+    "withholdingLabel": "PPh Potongan {count} transaksi/bulan",
+    "ppnLabel": "PPN {count} transaksi/bulan",
+    "ppnNotApplicable": "Tidak berlaku",
+    "currentlyUsing": "Sedang Digunakan",
+    "subscribe": "Berlangganan",
+    "signupAndSubscribe": "Daftar & Berlangganan",
+    "proExceeded": "Melebihi Batas Paket Pro",
+    "proExceededNote": "Kami menawarkan penawaran khusus untuk perusahaan skala besar. Klik tombol di bawah untuk meminta konsultasi.",
+    "customQuoteCta": "Minta Konsultasi Penawaran Khusus →",
+    "preparing": "Mempersiapkan…",
+    "payAndStart": "Bayar & Mulai",
+    "signupAndStart": "Daftar & Mulai",
+    "consultantTierTitle": "Langganan Bulanan Kantor Konsultan",
+    "consultantTierDesc": "Paket untuk konsultan eksternal yang menggunakan AI Pajak untuk mengelola klien sendiri. Anda dapat menagih klien Anda secara terpisah.",
+    "managedClientCount": "Jumlah klien yang dikelola saat ini: {count} orang",
+    "unlimitedClients": "Klien Tak Terbatas",
+    "maxClientsLabel": "Maks {count} klien",
+    "footerNote": "Semua harga dalam Rupiah (IDR). PPN 11% ditagih terpisah.",
+    "errConsultantOnly": "Hanya konsultan kantor pajak yang dapat berlangganan paket ini",
+    "errCorporateOnly": "Hanya pelanggan korporat yang dapat berlangganan paket ini",
+    "errIndividualPlanForCompany": "Pelanggan korporat harap menggunakan paket korporat, bukan SPT Pribadi",
+    "errSubscribeFailed": "Pengajuan langganan gagal",
+    "errPaymentPrepFailed": "Persiapan pembayaran gagal",
+    "errPaymentPageFailed": "Gagal membuat halaman pembayaran",
+    "errServer": "Kesalahan server"
+  },
+  "pricingPlans": {
+    "UMKM": {
+      "name": "UMKM (Usaha Mikro)",
+      "description": "Untuk usaha kecil dengan ≤10 karyawan dan ≤30 transaksi per bulan",
+      "features": {
+        "f1": "Kalkulasi otomatis PPh Final UMKM 0.5%",
+        "f2": "PPh 21 payroll (hingga 10 karyawan)",
+        "f3": "Otomatisasi PPh potongan hingga 30 transaksi/bulan",
+        "f4": "Pembuatan SPT Badan tahunan otomatis"
+      }
+    },
+    "BASIC": {
+      "name": "Basic (UKM)",
+      "description": "Untuk UKM yang ingin mengotomatiskan pajak badan standar dengan AI",
+      "features": {
+        "f1": "Otomatisasi PPh 21 payroll (hingga 50 karyawan)",
+        "f2": "AI PPh potongan 100 transaksi/bulan (22/23/4(2))",
+        "f3": "Pemrosesan faktur PPN 200/bulan",
+        "f4": "Pembuatan + pelaporan SPT bulanan/tahunan otomatis",
+        "f5": "Rekomendasi optimasi pajak",
+        "f6": "Manajemen lawan transaksi + pelacakan dokumen DTA"
+      }
+    },
+    "PRO": {
+      "name": "Pro (Menengah/Besar)",
+      "description": "Untuk perusahaan menengah/besar dengan kebutuhan manajemen lanjutan",
+      "features": {
+        "f1": "Semua fitur Basic",
+        "f2": "PPh 21 payroll (hingga 1.000 karyawan)",
+        "f3": "PPh potongan 200/bulan",
+        "f4": "PPN 500 transaksi/bulan",
+        "f5": "Manajemen pemegang saham + PPh dividen otomatis",
+        "f6": "Persiapan pemeriksaan pajak",
+        "f7": "Dukungan Transfer Pricing dasar",
+        "f8": "Prioritas dukungan"
+      }
+    },
+    "SPT_1770SS": {
+      "name": "1770SS (Sederhana)",
+      "description": "Karyawan dengan satu sumber penghasilan",
+      "features": {
+        "f1": "Input otomatis bukti potong A1 (1721-A1) via OCR",
+        "f2": "Pembuatan & validasi 1770SS otomatis",
+        "f3": "Deteksi otomatis potensi restitusi pajak",
+        "f4": "Review konsultan JTC → submit ke DJP"
+      }
+    },
+    "SPT_1770S": {
+      "name": "1770S (Standar)",
+      "description": "Multi sumber penghasilan · ada pendapatan sampingan",
+      "features": {
+        "f1": "Gabungkan beberapa bukti potong",
+        "f2": "Otomatis: penghasilan lain · aset · kewajiban",
+        "f3": "Integrasi profil PTKP",
+        "f4": "Review konsultan JTC → submit ke DJP"
+      }
+    },
+    "SPT_1770": {
+      "name": "1770 (Lengkap)",
+      "description": "Pemilik usaha · freelancer · penghasilan kompleks",
+      "features": {
+        "f1": "Klasifikasi laba/rugi usaha otomatis",
+        "f2": "Rekomendasi optimasi pajak tahunan",
+        "f3": "Manajemen bukti pendukung terpadu",
+        "f4": "Review konsultan JTC → submit ke DJP"
+      }
+    },
+    "STARTER": {
+      "name": "Starter",
+      "description": "Kantor konsultan baru atau kecil (maks 10 klien)",
+      "features": {
+        "f1": "Kelola hingga 10 klien",
+        "f2": "Akses semua alat otomasi pajak",
+        "f3": "Dashboard per klien + pelaporan bulanan/tahunan",
+        "f4": "e-Filing + e-Bupot",
+        "f5": "Dukungan standar"
+      }
+    },
+    "GROWTH": {
+      "name": "Growth",
+      "description": "Kantor yang sedang berkembang (maks 50 klien)",
+      "features": {
+        "f1": "Semua fitur Starter",
+        "f2": "Kelola hingga 50 klien",
+        "f3": "Undang anggota tim (termasuk peran supervisor)",
+        "f4": "Pemrosesan batch banyak klien (bulk upload)",
+        "f5": "Manajemen POA · akta · pemegang saham per klien",
+        "f6": "Dukungan prioritas"
+      }
+    },
+    "ENTERPRISE": {
+      "name": "Enterprise",
+      "description": "Kantor besar (50+ klien, penawaran khusus tersedia)",
+      "features": {
+        "f1": "Semua fitur Growth",
+        "f2": "Jumlah klien tak terbatas",
+        "f3": "Account manager khusus",
+        "f4": "Integrasi khusus (API)",
+        "f5": "SLA khusus + respons insiden prioritas",
+        "f6": "Diskon untuk pemeriksaan pajak · transfer pricing"
+      }
+    }
+  },
+  "companyRegister": {
+    "step1Title": "Informasi Perusahaan",
+    "step1Desc": "NPWP dan data dasar",
+    "step2Title": "Profil Pajak",
+    "step2Desc": "Omzet, karyawan, jenis usaha",
+    "step3Title": "Pendaftaran KBLI",
+    "step3Desc": "Pilih jenis usaha",
+    "step4Title": "Persetujuan Syarat",
+    "step4Desc": "Persetujuan layanan pajak JTC",
+    "step5Title": "Pembuatan Akun",
+    "step5Desc": "Email dan kata sandi",
+    "errSignupFailed": "Terjadi kesalahan saat pendaftaran",
+    "successTitle": "Pendaftaran berhasil",
+    "successLinkSent": "Tautan konfirmasi telah dikirim ke email ({email}).",
+    "successAdvisor": "Konsultan pajak akan segera menghubungi Anda.",
+    "successLoginCta": "Ke halaman login",
+    "heading": "Pendaftaran Pelanggan Korporat",
+    "subheading": "Kelola pajak Anda bersama Jakarta Tax Consulting",
+    "fieldCompanyName": "Nama Perusahaan",
+    "fieldNpwp": "NPWP Perusahaan (15 digit)",
+    "npwpCounter": "{have}/15 digit {check}",
+    "npwpLoginHint": "💡 NPWP dapat digunakan sebagai pengganti email saat login",
+    "fieldRepresentative": "Nama Perwakilan",
+    "fieldPhone": "Telepon Perusahaan (opsional)",
+    "fieldAddress": "Alamat Perusahaan (opsional)",
+    "taxProfileTitle": "Profil Pajak",
+    "taxProfileNote": "Informasi di bawah digunakan untuk menentukan kewajiban PPh/PPN. Semua opsional, tapi makin akurat makin baik.",
+    "fieldAnnualRevenue": "Omzet Tahunan (IDR)",
+    "revenuePlaceholder": "Contoh: 5.000.000.000 (5 miliar)",
+    "yearPlaceholder": "Tahun acuan",
+    "umkmHint": "✓ Omzet < IDR 4,8 miliar — pelaku usaha kecil (PP 23/2018, PPh Final 0,5%)",
+    "hasEmployees": "Memiliki karyawan",
+    "hasEmployeesNote": "→ Wajib SPT Masa PPh 21 bulanan",
+    "employeeCountPlaceholder": "Perkiraan jumlah karyawan",
+    "isPkp": "Terdaftar PKP (Pengusaha Kena Pajak)",
+    "isPkpNote": "→ Pelaku usaha PPN / wajib SPT Masa PPN bulanan / dapat menerbitkan Faktur Pajak",
+    "moreInfo": "Informasi Tambahan",
+    "paysServiceFees": "Membayar biaya jasa",
+    "paysServiceFeesNote": "→ Kewajiban pemotongan PPh 23 (2% / 15%)",
+    "hasImportExport": "Transaksi impor/ekspor",
+    "hasImportExportNote": "→ Kewajiban PPh 22 dan PPN impor, PPh 26 dapat berlaku",
+    "hasRental": "Usaha persewaan",
+    "hasRentalNote": "→ PPh 4(2) Final 10% berlaku",
+    "kbliAboutTitle": "Apa itu KBLI?",
+    "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — kode 5 digit klasifikasi jenis usaha perusahaan. Digunakan untuk menentukan tarif pajak dan pengisian SPT, **pilih dengan akurat**. Bisa pilih lebih dari satu.",
+    "kbliSearchLabel": "Cari KBLI (kode atau deskripsi)",
+    "kbliSearchPlaceholder": "Contoh: 62010, Computer Programming, IT",
+    "kbliSelectedLabel": "KBLI terpilih ({count})",
+    "kbliPrimaryBadge": "Utama",
+    "kbliPrimaryHint": "Pilih KBLI utama dengan tombol radio",
+    "jtcExplainBody": "AI Pajak bekerja sama dengan Jakarta Tax Consulting (JTC), kantor konsultan pajak terdaftar di Indonesia, untuk melakukan pelaporan pajak secara sah. Setiap SPT diperiksa dan ditandatangani konsultan bersertifikat JTC sebelum dikirim ke DJP.",
+    "agreeJtcLabel": "Saya menyetujui Syarat Layanan Pajak JTC",
+    "agreeJtcHint": "Semua layanan pajak yang disediakan melalui AI Pajak dilakukan berdasarkan perjanjian kuasa antara JTC dan pelanggan. Versi syarat {version} berlaku.",
+    "agreeDataLabel": "Saya menyetujui pemrosesan data pribadi dan keuangan",
+    "agreeDataHint": "NPWP, laporan keuangan, dan data transaksi diproses untuk kalkulasi dan pelaporan pajak. Tidak diberikan ke pihak ketiga selain JTC.",
+    "agreeFilingLabel": "Saya memberi kuasa kepada JTC untuk melakukan pelaporan pajak",
+    "agreeFilingHint": "Konsultan bersertifikat JTC dapat mewakili saya untuk menyerahkan SPT Masa / SPT Tahunan kepada DJP. Semua pengiriman disertai langkah verifikasi identitas.",
+    "finalStepLead": "Langkah terakhir. Atur email dan kata sandi Anda.",
+    "fieldEmail": "Email (untuk notifikasi/reset kata sandi)",
+    "fieldPassword": "Kata Sandi",
+    "passwordPlaceholder": "Minimal 8 karakter",
+    "fieldConfirmPassword": "Konfirmasi Kata Sandi",
+    "confirmPlaceholder": "Masukkan ulang",
+    "passwordMismatch": "Kata sandi tidak cocok",
+    "loginMethodsTitle": "Metode login yang tersedia:",
+    "loginMethodEmail": "(email)",
+    "previousCta": "Sebelumnya",
+    "goToIndividual": "Ke Pendaftaran Perorangan",
+    "nextCta": "Berikutnya",
+    "submitCta": "Selesaikan Pendaftaran"
   }
 }

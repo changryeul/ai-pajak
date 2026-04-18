@@ -114,12 +114,10 @@ export async function GET() {
       data: {
         plans: INDIVIDUAL_SPT_PLANS.map((p) => ({
           id: p.id,
-          name: p.name,
+          shortName: p.shortName,
           priceIdr: p.priceIdr,
           priceWithVat: sptPriceWithVat(p),
-          description: p.description,
-          features: p.features,
-          recommendedFor: p.recommendedFor,
+          featureCount: p.featureCount,
         })),
         pendingTransactions,
       },
@@ -220,7 +218,7 @@ export async function POST(request: NextRequest) {
         platform_owner_id: platformOwner.id,
         transaction_type: 'TAX_SERVICE',
         service_type: 'TAX_FILING',
-        description: `${plan.name} 신고 대행 (${year}년 귀속)`,
+        description: `${plan.shortName} filing service (tax year ${year})`,
         amount_base: amountBase,
         amount_tax: amountTax,
         amount_total: amountTotal,
@@ -281,7 +279,7 @@ export async function POST(request: NextRequest) {
         itemDetails: [
           {
             id: plan.id,
-            name: `${plan.name} (${year})`,
+            name: `${plan.shortName} (${year})`,
             price: amountTotal,
             quantity: 1,
           },
