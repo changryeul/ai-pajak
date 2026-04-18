@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { DocumentList, DocumentUploader } from '@/components/documents';
 import { useSession } from '@/hooks/useSession';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 export default function DocumentsPage() {
   const t = useTranslations();
@@ -25,6 +26,7 @@ export default function DocumentsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <PageTitle title="Dokumen" />
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

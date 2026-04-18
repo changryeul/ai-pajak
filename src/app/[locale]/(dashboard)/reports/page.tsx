@@ -24,6 +24,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { PageTitle } from '@/components/layout/PageTitle';
 const MultiYearComparison = dynamic(() => import('@/components/reports/MultiYearComparison'), { ssr: false });
 
 type ReportType = 'tax_summary' | 'filing_history' | 'payment_history' | 'annual_summary';
@@ -119,6 +120,7 @@ export default function ReportsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <PageTitle title="Laporan" />
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

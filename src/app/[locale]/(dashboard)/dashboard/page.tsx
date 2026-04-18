@@ -34,6 +34,7 @@ import {
 import { CurrentPlanWidget } from '@/components/dashboard/CurrentPlanWidget';
 import { CustomPricingWidget } from '@/components/dashboard/CustomPricingWidget';
 import { CorporateDashboardV2 } from '@/components/dashboard/CorporateDashboardV2';
+import { usePageTitle } from '@/components/layout/PageTitle';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
 const SimpleMode = dynamic(() => import('@/components/dashboard/SimpleMode').then(m => ({ default: m.SimpleMode })), { ssr: false });
@@ -57,6 +58,7 @@ export default function DashboardPage() {
   const params = useParams();
   const locale = params.locale as string;
   const { session, isLoading } = useSession();
+  usePageTitle('Dasbor');
 
   if (isLoading) {
     return <DashboardSkeleton />;

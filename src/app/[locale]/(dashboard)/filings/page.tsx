@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FilingStatusList } from '@/components/filings';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 export default function FilingsPage() {
   const t = useTranslations();
@@ -13,6 +14,7 @@ export default function FilingsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <PageTitle title="Pelaporan Pajak" />
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

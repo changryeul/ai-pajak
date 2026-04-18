@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PageTitle } from '@/components/layout/PageTitle';
 import {
   Select,
   SelectContent,
@@ -348,6 +349,7 @@ export default function SettingsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <PageTitle title="Pengaturan" />
       {/* Message Toast */}
       {message && (
         <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg ${

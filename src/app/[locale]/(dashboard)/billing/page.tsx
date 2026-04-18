@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { CreditCard, FileText, TrendingUp, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, type Subscription, type Invoice, type UsageMetrics, PRICING_PLANS } from '@/lib/billing/types';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 export default function BillingPage() {
   const t = useTranslations('billing');
@@ -73,6 +74,7 @@ export default function BillingPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <PageTitle title="Tagihan" />
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Button onClick={() => router.push('/billing/plans')}>

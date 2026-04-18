@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { BulkImportDialog } from '@/components/customers/BulkImportDialog';
+import { PageTitle } from '@/components/layout/PageTitle';
 import {
   Select,
   SelectContent,
@@ -198,6 +199,7 @@ export default function CustomersPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <PageTitle title="Pelanggan" />
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

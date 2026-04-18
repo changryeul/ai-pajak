@@ -5,7 +5,7 @@ import { APP_NAME } from '@/config/constants';
 
 const DEFAULT = `${APP_NAME} - Platform Pajak Cerdas Indonesia`;
 
-export function PageTitle({ title }: { title: string }) {
+export function usePageTitle(title: string) {
   useEffect(() => {
     const target = title ? `${title} | ${APP_NAME}` : DEFAULT;
     document.title = target;
@@ -20,5 +20,9 @@ export function PageTitle({ title }: { title: string }) {
     obs.observe(titleEl, { childList: true, characterData: true, subtree: true });
     return () => obs.disconnect();
   }, [title]);
+}
+
+export function PageTitle({ title }: { title: string }) {
+  usePageTitle(title);
   return null;
 }
