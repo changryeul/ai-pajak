@@ -26,35 +26,20 @@ import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { UserRole, type RequestWithSession } from '@/types/auth';
+import {
+  resolveSignatureProvider,
+  availableSignatureProviders,
+} from '@/lib/signature/providers';
 
 const BUCKET = 'signatures';
-const MAX_BYTES = 1_000_000; // 1 MB
 
 const bodySchema = z.object({
   purpose: z.enum(['POA_MANDATE', 'SPT_SUBMISSION', 'PROFILE_CHANGE', 'OTHER']),
-  dataUrl: z.string().startsWith('data:image/png;base64,'),
+  dataUrl: z.string().startsWith('data:image/png;base64,').optional(),
+  providerRef: z.string().min(1).optional(),
+  provider: z.enum(['canvas', 'privy', 'vida']).optional().default('canvas'),
   poaId: z.string().uuid().optional(),
 });
-
-function dataUrlToBuffer(dataUrl: string): { buffer: Buffer; size: number } {
-  const commaIdx = dataUrl.indexOf(',');
-  const b64 = dataUrl.slice(commaIdx + 1);
-  const buffer = Buffer.from(b64, 'base64');
-  return { buffer, size: buffer.length };
-}
-
-async function sha256Hex(buffer: Buffer): Promise<string> {
-  // Node Buffer is an ArrayBufferView; Web Crypto wants a BufferSource. Pass
-  // the underlying ArrayBuffer slice that Buffer wraps.
-  const arrayBuffer = buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength,
-  ) as ArrayBuffer;
-  const digest = await crypto.subtle.digest('SHA-256', arrayBuffer);
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 async function handleSignature(req: RequestWithSession): Promise<Response> {
   try {
@@ -63,7 +48,7 @@ async function handleSignature(req: RequestWithSession): Promise<Response> {
     if (!parsed.success) {
       return NextResponse.json({ success: false, error: 'invalid_body' }, { status: 400 });
     }
-    const { purpose, dataUrl, poaId } = parsed.data;
+    const { purpose, dataUrl, providerRef, provider: requestedProvider, poaId } = parsed.data;
 
     const { userId } = req.session;
     const admin = getSupabaseAdmin();
@@ -82,38 +67,25 @@ async function handleSignature(req: RequestWithSession): Promise<Response> {
       );
     }
 
-    const { buffer, size } = dataUrlToBuffer(dataUrl);
-    if (size > MAX_BYTES) {
+    // Resolve the requested provider with automatic fallback to canvas.
+    const { provider, used, degraded } = resolveSignatureProvider(requestedProvider);
+
+    // Build the provider-shaped input. Canvas needs dataUrl; PSrE needs providerRef.
+    const input =
+      used === 'canvas'
+        ? { kind: 'canvas' as const, dataUrl: dataUrl ?? '' }
+        : { kind: 'psre' as const, providerRef: providerRef ?? '' };
+
+    if (used === 'canvas' && !dataUrl) {
       return NextResponse.json(
-        { success: false, error: 'signature_too_large' },
-        { status: 413 }
-      );
-    }
-    if (size < 200) {
-      // Guard against obviously empty / single-pixel canvas uploads
-      return NextResponse.json(
-        { success: false, error: 'signature_too_small' },
+        { success: false, error: 'dataUrl_required' },
         { status: 400 }
       );
     }
-
-    const hashSha256 = await sha256Hex(buffer);
-    const storagePath = `${customer.id}/${hashSha256}-${Date.now()}.png`;
-
-    // Upload to Supabase Storage (admin client bypasses RLS; ops created
-    // bucket policy per migration comment).
-    const { error: uploadErr } = await admin.storage
-      .from(BUCKET)
-      .upload(storagePath, buffer, {
-        contentType: 'image/png',
-        upsert: false,
-      });
-
-    if (uploadErr) {
-      loggers.api.error({ err: uploadErr, customerId: customer.id }, 'signature upload failed');
+    if (used !== 'canvas' && !providerRef) {
       return NextResponse.json(
-        { success: false, error: 'upload_failed' },
-        { status: 500 }
+        { success: false, error: 'providerRef_required' },
+        { status: 400 }
       );
     }
 
@@ -122,17 +94,38 @@ async function handleSignature(req: RequestWithSession): Promise<Response> {
     const ip = xfwd ? xfwd.split(',')[0].trim() : null;
     const userAgent = req.headers.get('user-agent');
 
+    let signResult;
+    try {
+      signResult = await provider.sign({
+        customerId: customer.id,
+        purpose,
+        input,
+        meta: { ipAddress: ip, userAgent },
+      });
+    } catch (err) {
+      const code = err instanceof Error ? err.message : 'sign_failed';
+      loggers.api.error({ err, customerId: customer.id, used }, 'provider.sign failed');
+      const status =
+        code === 'signature_too_large' ? 413
+        : code === 'signature_too_small' ? 400
+        : code === 'not_configured' ? 503
+        : code === 'not_implemented' ? 501
+        : 500;
+      return NextResponse.json({ success: false, error: code }, { status });
+    }
+
     const { data: auditRow, error: auditErr } = await admin
       .from('signature_audit')
       .insert({
         customer_id: customer.id,
         purpose,
-        signature_sha256: hashSha256,
+        signature_sha256: signResult.hashSha256,
         ip_address: ip,
         user_agent: userAgent,
-        storage_path: storagePath,
-        byte_size: size,
-        external_provider: 'canvas',
+        storage_path: signResult.storagePath,
+        byte_size: signResult.byteSize,
+        external_provider: signResult.provider,
+        external_ref: signResult.externalRef,
         poa_id: poaId ?? null,
       })
       .select('id')
@@ -140,8 +133,10 @@ async function handleSignature(req: RequestWithSession): Promise<Response> {
 
     if (auditErr || !auditRow) {
       loggers.api.error({ err: auditErr, customerId: customer.id }, 'signature_audit insert failed');
-      // Best-effort cleanup: delete the uploaded blob so we do not leak files without audit
-      await admin.storage.from(BUCKET).remove([storagePath]).catch(() => {});
+      // Best-effort cleanup: delete the uploaded blob so we do not leak files without audit.
+      if (signResult.storagePath) {
+        await admin.storage.from(BUCKET).remove([signResult.storagePath]).catch(() => {});
+      }
       return NextResponse.json(
         { success: false, error: 'audit_failed' },
         { status: 500 }
@@ -152,14 +147,36 @@ async function handleSignature(req: RequestWithSession): Promise<Response> {
       success: true,
       data: {
         signatureAuditId: auditRow.id,
-        storagePath,
-        hashSha256,
+        storagePath: signResult.storagePath,
+        hashSha256: signResult.hashSha256,
+        provider: signResult.provider,
+        externalRef: signResult.externalRef,
+        degraded,
+        requestedProvider,
       },
     });
   } catch (err) {
     loggers.api.error({ err }, 'signature endpoint exception');
     return NextResponse.json({ success: false, error: 'server_error' }, { status: 500 });
   }
+}
+
+async function handleAvailable(_req: RequestWithSession): Promise<Response> {
+  // Surfaces which providers are usable so the mandate UI can show
+  // Privy/VIDA options when configured and fall back to canvas otherwise.
+  return NextResponse.json({
+    success: true,
+    data: {
+      providers: availableSignatureProviders(),
+    },
+  });
+}
+
+export async function GET(request: NextRequest) {
+  return composeMiddleware(
+    requireAuth,
+    requireRole(UserRole.CUSTOMER),
+  )(request as RequestWithSession, handleAvailable);
 }
 
 export async function POST(request: NextRequest) {
