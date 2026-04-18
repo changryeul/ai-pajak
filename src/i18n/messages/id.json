@@ -672,7 +672,10 @@
     "passwordTooShort": "Kata sandi minimal 8 karakter",
     "passwordMismatch": "Kata sandi tidak cocok",
     "serverError": "Terjadi kesalahan server",
-    "networkError": "Kesalahan jaringan, periksa koneksi Anda"
+    "networkError": "Kesalahan jaringan, periksa koneksi Anda",
+    "pageNotFoundTitle": "Halaman tidak ditemukan",
+    "pageNotFoundDescription": "Halaman yang Anda cari tidak tersedia atau telah dipindahkan.",
+    "backToDashboard": "Kembali ke Dasbor"
   },
   "payment": {
     "pageTitle": "Status Pembayaran",

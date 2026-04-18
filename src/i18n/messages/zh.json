@@ -672,7 +672,10 @@
     "passwordTooShort": "密码至少需要8个字符",
     "passwordMismatch": "密码不匹配",
     "serverError": "服务器错误",
-    "networkError": "网络错误，请检查您的连接"
+    "networkError": "网络错误，请检查您的连接",
+    "pageNotFoundTitle": "页面未找到",
+    "pageNotFoundDescription": "您查找的页面不存在或已被移动。",
+    "backToDashboard": "返回仪表板"
   },
   "payment": {
     "pageTitle": "缴纳状态",
