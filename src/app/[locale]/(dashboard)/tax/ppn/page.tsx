@@ -105,7 +105,17 @@ export default function PPNPage() {
       const data = await res.json();
       if (data.success) {
         setFakturs(data.data.fakturs || []);
-        setSummary(data.data.summary || { outputTax: 0, inputTax: 0, netPpn: 0, status: 'NIHIL', keluaranCount: 0, masukanCount: 0 });
+        // API returns outputTax/inputTax as {count,totalDpp,totalPpn}; flatten
+        // to the numbers this page renders with `fmt(...)`.
+        const raw = data.data.summary || {};
+        setSummary({
+          outputTax: Number(raw.outputTax?.totalPpn ?? 0),
+          inputTax: Number(raw.inputTax?.totalPpn ?? 0),
+          netPpn: Number(raw.netPpn ?? 0),
+          status: raw.status || 'NIHIL',
+          keluaranCount: Number(raw.outputTax?.count ?? 0),
+          masukanCount: Number(raw.inputTax?.count ?? 0),
+        });
       }
     } catch { /* */ }
     finally { setIsLoading(false); }
