@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
+import type { KartuKeluargaData } from '@/lib/ocr/family-card';
 import {
   mapA1ToProfileProposals,
+  mapKKToProfileProposals,
   proposalsToPatchPayload,
   type FieldProposal,
   type ProposalField,
@@ -183,5 +185,86 @@ describe('proposalsToPatchPayload', () => {
     const accepted = new Set<ProposalField>(['spouse_name']);
     const patch = proposalsToPatchPayload(proposals, accepted);
     expect(patch).toEqual({});
+  });
+});
+
+describe('mapKKToProfileProposals', () => {
+  const baseKK: KartuKeluargaData = {
+    kkNumber: '3171021212345678',
+    headOfHouseholdName: 'Budi Santoso',
+    address: 'Jl. Sudirman No. 1 RT/RW 001/002',
+    postalCode: '12190',
+    kelurahan: 'Karet',
+    kecamatan: 'Setiabudi',
+    kabupaten: 'Jakarta Selatan',
+    provinsi: 'DKI Jakarta',
+    members: [
+      { fullName: 'Budi Santoso', nik: '3171012301851234', sex: 'L', birthDate: '1985-01-23', relation: 'KEPALA KELUARGA', maritalStatus: 'KAWIN' },
+      { fullName: 'Siti Aminah', nik: '3171023002901234', sex: 'P', birthDate: '1990-02-28', relation: 'ISTRI', maritalStatus: 'KAWIN' },
+      { fullName: 'Rafi Santoso', nik: '3171011005151234', sex: 'L', birthDate: '2015-05-10', relation: 'ANAK', maritalStatus: 'BELUM KAWIN' },
+    ],
+    confidence: 0.92,
+    rawText: '',
+  };
+
+  it('proposes head-of-household name + NIK + joined address', () => {
+    const out = mapKKToProfileProposals(baseKK, {});
+    const byField = Object.fromEntries(out.map((p) => [p.field, p]));
+    expect(byField.full_name?.proposedValue).toBe('Budi Santoso');
+    expect(byField.nik?.proposedValue).toBe('3171012301851234');
+    expect(String(byField.address?.proposedValue)).toContain('Jl. Sudirman');
+    expect(String(byField.address?.proposedValue)).toContain('DKI Jakarta');
+    expect(String(byField.address?.proposedValue)).toContain('12190');
+  });
+
+  it('proposes spouse name when an ISTRI row exists', () => {
+    const out = mapKKToProfileProposals(baseKK, {});
+    const spouse = out.find((p) => p.field === 'spouse_name');
+    expect(spouse?.proposedValue).toBe('Siti Aminah');
+  });
+
+  it('derives PTKP K/1 from married + 1 child', () => {
+    const out = mapKKToProfileProposals(baseKK, {});
+    const ptkp = out.find((p) => p.field === 'ptkp_status');
+    expect(ptkp?.proposedValue).toBe('K/1');
+  });
+
+  it('derives TK/0 from single-person household', () => {
+    const out = mapKKToProfileProposals({
+      ...baseKK,
+      members: [
+        { fullName: 'Solo', nik: '3171010101901234', sex: 'L', birthDate: null, relation: 'KEPALA KELUARGA', maritalStatus: 'BELUM KAWIN' },
+      ],
+    });
+    const ptkp = out.find((p) => p.field === 'ptkp_status');
+    expect(ptkp?.proposedValue).toBe('TK/0');
+  });
+
+  it('caps PTKP dependents at 3 even when KK lists more', () => {
+    const out = mapKKToProfileProposals({
+      ...baseKK,
+      members: [
+        { fullName: 'H', nik: '3171011111111111', sex: 'L', birthDate: null, relation: 'KEPALA KELUARGA', maritalStatus: 'KAWIN' },
+        { fullName: 'S', nik: '3171022222222222', sex: 'P', birthDate: null, relation: 'ISTRI', maritalStatus: 'KAWIN' },
+        { fullName: 'A1', nik: '3171013333333333', sex: 'L', birthDate: null, relation: 'ANAK', maritalStatus: null },
+        { fullName: 'A2', nik: '3171014444444444', sex: 'L', birthDate: null, relation: 'ANAK', maritalStatus: null },
+        { fullName: 'A3', nik: '3171015555555555', sex: 'P', birthDate: null, relation: 'ANAK', maritalStatus: null },
+        { fullName: 'A4', nik: '3171016666666666', sex: 'L', birthDate: null, relation: 'ANAK', maritalStatus: null },
+      ],
+    });
+    const ptkp = out.find((p) => p.field === 'ptkp_status');
+    // K/3, never K/4
+    expect(ptkp?.proposedValue).toBe('K/3');
+  });
+
+  it('flags conflict when existing NIK differs', () => {
+    const out = mapKKToProfileProposals(baseKK, { nik: '9999999999999999' });
+    const nik = out.find((p) => p.field === 'nik')!;
+    expect(nik.conflict).toBe(true);
+  });
+
+  it('sources all proposals as KK (not A1)', () => {
+    const out = mapKKToProfileProposals(baseKK, {});
+    expect(out.every((p) => p.source === 'KK')).toBe(true);
   });
 });

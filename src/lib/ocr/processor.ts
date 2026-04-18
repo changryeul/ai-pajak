@@ -57,11 +57,12 @@ Analyze this document image and extract all relevant information. The document m
 - Laporan Keuangan (Financial Statement)
 - KTP (Indonesian ID Card)
 - NPWP Card (Tax ID Card)
+- Kartu Keluarga (Family Register, KK) — do NOT try to extract full member rows here; just set category=KARTU_KELUARGA and let the specialised pipeline handle it.
 - SPT (Tax Return Form)
 
 Please respond with a JSON object containing:
 {
-  "category": "BUKTI_POTONG" | "FAKTUR_PAJAK" | "LAPORAN_KEUANGAN" | "KTP" | "NPWP_CARD" | "SPT" | "UNKNOWN",
+  "category": "BUKTI_POTONG" | "FAKTUR_PAJAK" | "LAPORAN_KEUANGAN" | "KTP" | "NPWP_CARD" | "KARTU_KELUARGA" | "SPT" | "UNKNOWN",
   "confidence": 0.0-1.0,
   "rawText": "all text visible in the document",
   "extractedData": {
@@ -174,6 +175,7 @@ export function classifyDocument(text: string): {
     LAPORAN_KEUANGAN: 0,
     KTP: 0,
     NPWP_CARD: 0,
+    KARTU_KELUARGA: 0,
     SPT: 0,
     UNKNOWN: 0,
   };

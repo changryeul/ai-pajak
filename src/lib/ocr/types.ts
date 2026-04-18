@@ -10,6 +10,7 @@ export type DocumentCategory =
   | 'LAPORAN_KEUANGAN'  // Financial statement
   | 'KTP'               // ID card
   | 'NPWP_CARD'         // Tax ID card
+  | 'KARTU_KELUARGA'    // Family register (KK) — drives PTKP dependents
   | 'SPT'               // Tax return form
   | 'UNKNOWN';
 
@@ -131,6 +132,14 @@ export const DOCUMENT_KEYWORDS: Record<DocumentCategory, string[]> = {
     'npwp',
     'terdaftar',
     'kantor pelayanan pajak',
+  ],
+  KARTU_KELUARGA: [
+    'kartu keluarga',
+    'nomor kartu keluarga',
+    'kepala keluarga',
+    'nama lengkap',
+    'status hubungan dalam keluarga',
+    'status perkawinan',
   ],
   SPT: [
     'surat pemberitahuan',

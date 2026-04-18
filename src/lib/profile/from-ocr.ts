@@ -15,6 +15,9 @@
  */
 
 import type { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
+import { deriveFactsFromKK, type KartuKeluargaData } from '@/lib/ocr/family-card';
+import { buildPTKPStatus } from '@/lib/tax/shared/tax-utils';
+import type { PTKPStatus } from '@/lib/tax/shared/types';
 
 export type ProposalSource = 'A1' | 'KK';
 
@@ -25,10 +28,12 @@ export type ProposalField =
   | 'full_name'
   | 'npwp'
   | 'nik'
+  | 'address'
   | 'spouse_name'
   | 'spouse_npwp'
   | 'spouse_annual_income'
-  | 'spouse_withheld_tax';
+  | 'spouse_withheld_tax'
+  | 'ptkp_status';
 
 export interface FieldProposal {
   /** customer table column name */
@@ -49,10 +54,12 @@ type CustomerSnapshot = Partial<{
   full_name: string | null;
   npwp: string | null;
   nik: string | null;
+  address: string | null;
   spouse_name: string | null;
   spouse_npwp: string | null;
   spouse_annual_income: number | null;
   spouse_withheld_tax: number | null;
+  ptkp_status: PTKPStatus | null;
 }>;
 
 /**
@@ -177,6 +184,101 @@ export function mapA1ToProfileProposals(
       source: 'A1',
     });
   }
+
+  return out;
+}
+
+/**
+ * Map a parsed KK (Kartu Keluarga) to a list of profile proposals.
+ *
+ * KK is the single most informative INDIVIDUAL onboarding doc: it
+ * gives the head-of-household name/NIK/address, confirms marital
+ * status, and defines the dependent count that drives PTKP.
+ *
+ * Rules:
+ *   - full_name + nik come from the head-of-household row.
+ *   - address = "<Alamat>, RT/RW, <kelurahan>, <kecamatan>, <kabupaten>, <provinsi> <postalCode>" (joined only from non-null parts).
+ *   - spouse_name from the ISTRI/SUAMI row, if present.
+ *   - ptkp_status from `buildPTKPStatus` using the derived dependent count,
+ *     defaulting filing mode to "separate" (PH/MT/HB) which is the
+ *     conservative choice — user can switch to joint (KK) in the UI.
+ *
+ * Pure function. No I/O, no model calls.
+ */
+export function mapKKToProfileProposals(
+  kk: KartuKeluargaData,
+  current: CustomerSnapshot = {},
+): FieldProposal[] {
+  const out: FieldProposal[] = [];
+  const facts = deriveFactsFromKK(kk);
+
+  const push = (p: Omit<FieldProposal, 'conflict'>) => {
+    const hasCurrent = p.currentValue !== null && p.currentValue !== '' && p.currentValue !== undefined;
+    const conflict =
+      hasCurrent && p.proposedValue !== null && String(p.currentValue) !== String(p.proposedValue);
+    out.push({ ...p, conflict });
+  };
+
+  if (facts.head?.fullName) {
+    push({
+      field: 'full_name',
+      label: 'profile.fullName',
+      currentValue: current.full_name ?? null,
+      proposedValue: facts.head.fullName,
+      source: 'KK',
+    });
+  }
+
+  if (facts.head?.nik && facts.head.nik.length === 16) {
+    push({
+      field: 'nik',
+      label: 'profile.nik',
+      currentValue: current.nik ?? null,
+      proposedValue: facts.head.nik,
+      source: 'KK',
+    });
+  }
+
+  const addressBits = [kk.address, kk.kelurahan, kk.kecamatan, kk.kabupaten, kk.provinsi, kk.postalCode]
+    .map((v) => (v ?? '').trim())
+    .filter((v) => v.length > 0);
+  if (addressBits.length > 0) {
+    const joined = addressBits.join(', ');
+    push({
+      field: 'address',
+      label: 'profile.address',
+      currentValue: current.address ?? null,
+      proposedValue: joined,
+      source: 'KK',
+    });
+  }
+
+  if (facts.spouse?.fullName) {
+    push({
+      field: 'spouse_name',
+      label: 'spouse.spouseName',
+      currentValue: current.spouse_name ?? null,
+      proposedValue: facts.spouse.fullName,
+      source: 'KK',
+    });
+  }
+
+  // PTKP — derive from dependent count + marital guess.
+  // The KK doesn't tell us whether the spouse is working or whether the
+  // couple files jointly, so we default to "separate" (conservative) and
+  // let the user confirm in SpouseAndDependentsCard if they want joint.
+  const proposedPtkp = buildPTKPStatus({
+    isMarried: facts.looksMarried,
+    spouseIncomeJoint: false,
+    dependents: facts.dependentsCapped,
+  });
+  push({
+    field: 'ptkp_status',
+    label: 'spouse.ptkpStatus',
+    currentValue: current.ptkp_status ?? null,
+    proposedValue: proposedPtkp,
+    source: 'KK',
+  });
 
   return out;
 }
