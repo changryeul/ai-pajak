@@ -187,13 +187,13 @@ export function TaxSavingsAdvisor({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-3 bg-gray-50 rounded-lg text-sm">
-            <span className="text-gray-500">Wajib Pajak:</span>{' '}
+            <span className="text-gray-500">{ts('taxpayer')}:</span>{' '}
             <span className="font-medium">{customerName}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Tahun Pajak</Label>
+              <Label>{ts('taxYear')}</Label>
               <Select value={taxYear.toString()} onValueChange={(v) => setTaxYear(parseInt(v))}>
                 <SelectTrigger>
                   <SelectValue />

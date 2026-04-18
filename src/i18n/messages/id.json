@@ -1608,7 +1608,9 @@
     "noSavingsDesc": "Tidak ditemukan peluang penghematan tambahan.",
     "easy": "Mudah",
     "medium": "Sedang",
-    "hard": "Sulit"
+    "hard": "Sulit",
+    "taxpayer": "Wajib Pajak",
+    "taxYear": "Tahun Pajak"
   },
   "navDesc": {
     "dashboard": "Ringkasan pajak Anda",

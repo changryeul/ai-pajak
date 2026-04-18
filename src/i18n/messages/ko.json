@@ -1608,7 +1608,9 @@
     "noSavingsDesc": "추가 절감 기회가 없습니다.",
     "easy": "쉬움",
     "medium": "보통",
-    "hard": "어려움"
+    "hard": "어려움",
+    "taxpayer": "납세자",
+    "taxYear": "과세 연도"
   },
   "navDesc": {
     "dashboard": "세금 요약",

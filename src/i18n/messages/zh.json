@@ -1608,7 +1608,9 @@
     "noSavingsDesc": "未发现额外的节省机会。",
     "easy": "容易",
     "medium": "中等",
-    "hard": "困难"
+    "hard": "困难",
+    "taxpayer": "纳税人",
+    "taxYear": "税务年度"
   },
   "navDesc": {
     "dashboard": "税务概览",

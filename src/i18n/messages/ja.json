@@ -1608,7 +1608,9 @@
     "noSavingsDesc": "追加の節約機会は見つかりませんでした。",
     "easy": "簡単",
     "medium": "中程度",
-    "hard": "難しい"
+    "hard": "難しい",
+    "taxpayer": "納税者",
+    "taxYear": "課税年度"
   },
   "navDesc": {
     "dashboard": "税務概要",
