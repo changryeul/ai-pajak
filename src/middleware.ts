@@ -49,7 +49,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com",
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseConnect} https://api.midtrans.com https://*.sentry.io https://www.googletagmanager.com https://www.google-analytics.com https://*.analytics.google.com`,
+    `connect-src 'self' ${supabaseConnect} https://api.midtrans.com https://*.sentry.io https://www.googletagmanager.com https://www.google-analytics.com https://*.analytics.google.com https://www.google.com`,
     "frame-src 'self' https://app.midtrans.com",
     "object-src 'none'",
     "base-uri 'self'",
