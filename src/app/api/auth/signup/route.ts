@@ -141,6 +141,9 @@ export async function POST(request: NextRequest) {
         full_name: fullName,
         email,
         phone: phone || null,
+        // INDIVIDUAL customers walk through 3-step onboarding
+        // (/register → /register/terms → /register/mandate).
+        onboarding_step: 1,
       });
 
       if (custError) {

@@ -116,6 +116,14 @@ export default function RegisterPage() {
         return;
       }
 
+      // INDIVIDUAL customers continue straight into the onboarding flow
+      // (terms → mandate). Other account types keep the inline success page
+      // and head to /login for their first session.
+      if (accountType === 'INDIVIDUAL') {
+        router.push(`/${locale}/register/terms`);
+        return;
+      }
+
       setSuccess(true);
     } catch {
       setError(t('errors.serverError'));
