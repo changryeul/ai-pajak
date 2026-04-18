@@ -25,6 +25,8 @@ interface Filing {
   id: string;
   filing_year?: number;
   tax_year?: number;
+  /** The schema-canonical field — e.g. "2024" or "2024-03" for PPh 21 monthly. */
+  tax_period?: string;
   status: string;
   tax_type?: string;
 }
@@ -33,11 +35,29 @@ interface RecentFilingsCardProps {
   customerId?: string;
 }
 
+function parseFilingYear(f: Filing): number | null {
+  // Canonical schema is the tax_period string (e.g. "2024" annual,
+  // "2024-03" monthly). Also accept the legacy optional fields.
+  if (typeof f.filing_year === 'number') return f.filing_year;
+  if (typeof f.tax_year === 'number') return f.tax_year;
+  if (typeof f.tax_period === 'string') {
+    const m = f.tax_period.match(/^(\d{4})/);
+    if (m) return Number(m[1]);
+  }
+  return null;
+}
+
 function yearStatus(filings: Filing[], year: number) {
-  const hit = filings.find((f) => (f.filing_year ?? f.tax_year) === year);
+  // Only consider annual SPT filings (SPT_TAHUNAN). Monthly PPh21/23
+  // filings share the same tax_filing table but have tax_type=SPT_MASA
+  // or per-tax enums (PPh21 etc.).
+  const hit = filings.find((f) => {
+    if (f.tax_type && f.tax_type !== 'SPT_TAHUNAN') return false;
+    return parseFilingYear(f) === year;
+  });
   if (!hit) return 'empty' as const;
   const s = hit.status.toUpperCase();
-  if (['ACCEPTED', 'PAID', 'COMPLETED', 'BPE_UPLOADED', 'DJP_SUBMITTED'].includes(s)) return 'done' as const;
+  if (['ACCEPTED', 'PAID', 'COMPLETED', 'BPE_UPLOADED', 'DJP_SUBMITTED', 'FILED'].includes(s)) return 'done' as const;
   return 'inprogress' as const;
 }
 
