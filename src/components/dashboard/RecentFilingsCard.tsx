@@ -109,7 +109,7 @@ export function RecentFilingsCard({ customerId }: RecentFilingsCardProps) {
                   )}
                   {status === 'empty' && (
                     <Link
-                      href={`/${locale}/tax/1770/new?year=${y}`}
+                      href={`/${locale}/tax/spt-tahunan?year=${y}`}
                       className={cn(
                         'inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700',
                       )}
