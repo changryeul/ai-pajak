@@ -340,16 +340,22 @@ async function handler(request: RequestWithSession): Promise<Response> {
  * MIDDLEWARE STACK (4 layers):
  * 1. requireAuth - Must be logged in
  * 2. blockPlatformAdmin - Platform admin blocked (Hard Rule #1)
- * 3. requireRole - CONSULTANT_JTC or TAX_ADVISOR_JTC allowed
+ * 3. requireRole - CUSTOMER / CONSULTANT_JTC / TAX_ADVISOR_JTC allowed.
+ *    Rationale: SPT Masa is DRAFT only. The CUSTOMER should be able to
+ *    prepare their own monthly tax summary — they own the transaction
+ *    data and Rp 3M/month of DJP filing fees shouldn't require a
+ *    consultant just to compute a total. Actual DJP submission is still
+ *    TAX_ADVISOR_JTC-only via /api/tax/file (see Note below).
  * 4. withAudit - Audit trail created (Hard Rule #5)
  *
- * Note: SPT Masa is DRAFT only - actual submission requires TAX_ADVISOR_JTC via /api/tax/file
+ * Note: SPT Masa is DRAFT only — actual DJP submission requires
+ * TAX_ADVISOR_JTC via /api/tax/file.
  */
 export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC),
     withAudit('SPT_MASA_CREATE')
   )(request as RequestWithSession, handler);
 }
