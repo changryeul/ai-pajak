@@ -167,7 +167,13 @@ export async function POST(request: NextRequest) {
       });
 
       if (custError) {
-        loggers.api.error({ err: custError }, 'Signup: customer record failed');
+        // Roll back the auth user so the email can be reused. Without this
+        // a failed customer insert leaves an orphan auth.users row that
+        // blocks any retry with 'Email sudah terdaftar'.
+        loggers.api.error({ err: custError, userId }, 'Signup: customer insert failed — rolling back auth user');
+        await admin.auth.admin.deleteUser(userId).catch((e) =>
+          loggers.api.error({ err: e, userId }, 'Signup: auth rollback failed'),
+        );
         return NextResponse.json({ error: custError.message }, { status: 500 });
       }
 
@@ -210,7 +216,10 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (partnerError || !partner) {
-        loggers.api.error({ err: partnerError }, 'Signup: tax_partner record failed');
+        loggers.api.error({ err: partnerError, userId }, 'Signup: tax_partner insert failed — rolling back auth user');
+        await admin.auth.admin.deleteUser(userId).catch((e) =>
+          loggers.api.error({ err: e, userId }, 'Signup: auth rollback failed'),
+        );
         return NextResponse.json(
           { error: partnerError?.message || 'Gagal mendaftarkan kantor konsultan' },
           { status: 500 }
@@ -228,7 +237,11 @@ export async function POST(request: NextRequest) {
       });
 
       if (consultantError) {
-        loggers.api.error({ err: consultantError }, 'Signup: consultant record failed');
+        loggers.api.error({ err: consultantError, userId }, 'Signup: consultant insert failed — rolling back auth user + tax_partner');
+        await admin.from('tax_partner').delete().eq('id', partner.id);
+        await admin.auth.admin.deleteUser(userId).catch((e) =>
+          loggers.api.error({ err: e, userId }, 'Signup: auth rollback failed'),
+        );
         return NextResponse.json(
           { error: consultantError.message },
           { status: 500 }

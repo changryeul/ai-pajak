@@ -186,7 +186,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (custError || !customer) {
-      loggers.api.error({ err: custError }, 'Company signup: customer record failed');
+      loggers.api.error({ err: custError, userId }, 'Company signup: customer insert failed — rolling back auth user');
+      await admin.auth.admin.deleteUser(userId).catch((e) =>
+        loggers.api.error({ err: e, userId }, 'Company signup: auth rollback failed'),
+      );
       return NextResponse.json(
         { error: custError?.message || 'Gagal menyimpan data pelanggan' },
         { status: 500 }
