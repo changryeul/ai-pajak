@@ -231,8 +231,8 @@ export default function CompanyRegisterPage() {
           ))}
         </div>
 
-        <Card>
-          <CardHeader>
+        <Card className="rounded-2xl border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50">
             <CardTitle className="text-lg">{STEPS[step - 1].title}</CardTitle>
             <CardDescription className="text-xs">{STEPS[step - 1].desc}</CardDescription>
           </CardHeader>
@@ -549,7 +549,7 @@ export default function CompanyRegisterPage() {
             ) : (
               <Link href={`/${locale}/register`}>
                 <Button variant="ghost">
-                  <ArrowLeft className="h-4 w-4 mr-1" />유형 선택으로
+                  <ArrowLeft className="h-4 w-4 mr-1" />개인 가입으로
                 </Button>
               </Link>
             )}
@@ -563,11 +563,16 @@ export default function CompanyRegisterPage() {
                   (step === 3 && !canProceedStep3) ||
                   (step === 4 && !canProceedStep4)
                 }
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-sm"
               >
                 다음<ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting}>
+              <Button
+                onClick={handleSubmit}
+                disabled={!canSubmit || isSubmitting}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-sm"
+              >
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckCircle className="h-4 w-4 mr-1" />}
                 가입 완료
               </Button>

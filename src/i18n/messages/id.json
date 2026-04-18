@@ -5632,5 +5632,15 @@
     "foreign": "Luar negeri",
     "isForeign": "Aset di luar negeri",
     "footnote": "Snapshot ini digunakan untuk mengisi SPT 1770 \"Harta dan Kewajiban\" otomatis dan untuk deteksi pertumbuhan aset."
+  },
+  "firmSignupPage": {
+    "title": "Daftar Kantor Konsultan",
+    "subtitle": "Kelola klien Anda lewat AI Pajak",
+    "firmNamePlaceholder": "Nama Kantor (contoh: Kantor Konsultan Pajak ABC)",
+    "licensePlaceholder": "Nomor Izin Praktik Konsultan Pajak (opsional)",
+    "repNamePlaceholder": "Nama Direktur / Penanggung Jawab",
+    "note": "Setelah pendaftaran, Anda dapat menambah konsultan tim dan mengundang klien pertama.",
+    "switchIndividual": "Daftar Pribadi",
+    "errMissingFirm": "Mohon isi nama kantor."
   }
 }

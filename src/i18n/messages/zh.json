@@ -5632,5 +5632,15 @@
     "foreign": "境外",
     "isForeign": "境外资产",
     "footnote": "此快照用于 SPT 1770\"Harta dan Kewajiban\"自动填充以及资产增长异常检测。"
+  },
+  "firmSignupPage": {
+    "title": "税务师事务所注册",
+    "subtitle": "通过 AI Pajak 管理您的客户",
+    "firmNamePlaceholder": "事务所名称(例如:ABC税务咨询)",
+    "licensePlaceholder": "税务师执照号码(可选)",
+    "repNamePlaceholder": "负责人/代表姓名",
+    "note": "注册后可添加团队税务师并邀请首个客户。",
+    "switchIndividual": "个人注册",
+    "errMissingFirm": "请输入事务所名称。"
   }
 }

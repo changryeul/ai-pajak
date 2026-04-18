@@ -5632,5 +5632,15 @@
     "foreign": "海外",
     "isForeign": "海外資産",
     "footnote": "このスナップショットは SPT 1770「Harta dan Kewajiban」の自動記入および資産増加率異常検知に使用されます。"
+  },
+  "firmSignupPage": {
+    "title": "税理士法人登録",
+    "subtitle": "AI Pajakで顧問先を管理",
+    "firmNamePlaceholder": "事務所名(例: ABC税理士法人)",
+    "licensePlaceholder": "税理士ライセンス番号(任意)",
+    "repNamePlaceholder": "代表者/責任者氏名",
+    "note": "登録後、チームの税理士を追加し、最初の顧問先を招待できます。",
+    "switchIndividual": "個人登録",
+    "errMissingFirm": "事務所名を入力してください。"
   }
 }
