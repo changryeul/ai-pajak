@@ -15,7 +15,7 @@
  */
 
 import type { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
-import { deriveFactsFromKK, type KartuKeluargaData } from '@/lib/ocr/family-card';
+import { deriveFactsFromKK, type KartuKeluargaData } from '@/lib/ocr/family-card-types';
 import { buildPTKPStatus } from '@/lib/tax/shared/tax-utils';
 import type { PTKPStatus } from '@/lib/tax/shared/types';
 

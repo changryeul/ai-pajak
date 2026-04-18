@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
-import type { KartuKeluargaData } from '@/lib/ocr/family-card';
+import type { KartuKeluargaData } from '@/lib/ocr/family-card-types';
 import {
   mapA1ToProfileProposals,
   mapKKToProfileProposals,
