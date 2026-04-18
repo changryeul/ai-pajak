@@ -228,7 +228,7 @@ export default function PPh23Page() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `' + t('k12_c05543') + ' — ' + t('k13_e2bf5c') + ' ${fmtRp(data.data?.tax_amount || 0)}`);
+        showMsg('success', `${t('k12_c05543')} — ${t('k13_e2bf5c')} ${fmtRp(data.data?.tax_amount || 0)}`);
         setFGrossAmount('');
         setFInvoiceNumber('');
         setFDescription('');
@@ -267,7 +267,7 @@ export default function PPh23Page() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `e-Bupot ${data.data?.generated || 0}' + t('k17_e7186b') + '`);
+        showMsg('success', `e-Bupot ${data.data?.generated || 0} ${t('k17_e7186b')}`);
         loadData();
       } else {
         showMsg('error', data.error || 'e-Bupot ' + t('k18_cbbcb4') + '');
@@ -402,7 +402,7 @@ export default function PPh23Page() {
       } catch { /* */ }
     }
     if (count > 0) {
-      showMsg('success', `${count}' + t('k19_4c0fb1') + '`);
+      showMsg('success', `${count} ${t('k19_4c0fb1')}`);
       setTimeout(() => {
         fetch(`/api/documents?customerId=${customerId}&period=${period}`)
           .then(r => r.json())
@@ -721,7 +721,7 @@ export default function PPh23Page() {
                             (c.npwp && cpNpwp && c.npwp === cpNpwp.replace(/\D/g, ''))
                           );
                           if (matchedCp) setFCounterparty(matchedCp.id);
-                          showMsg('success', `"${cpName}" ' + t('k56_ccb9ad') + '`);
+                          showMsg('success', `"${cpName}" ${t('k56_ccb9ad')}`);
                         }}>
                         <ArrowRight className="h-3 w-3 mr-1" />{t('k39_7c6f9f')}
                       </Button>
@@ -829,7 +829,7 @@ export default function PPh23Page() {
                               setQName('');
                               setQNpwp('');
                               setShowQuickAdd(false);
-                              showMsg('success', `' + t('k73_c81261') + ' "${qName}" ' + t('k74_9230b3') + '`);
+                              showMsg('success', `${t('k73_c81261')} "${qName}" ${t('k74_9230b3')}`);
                             } else {
                               showMsg('error', data.error || t('k75_71bfca'));
                             }
