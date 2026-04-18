@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, Loader2, AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { AutoSaveStatus } from '@/lib/profile/use-auto-save';
 
@@ -16,11 +17,12 @@ interface Props {
 }
 
 export function AutoSaveIndicator({ status, onRetry, labels }: Props) {
+  const t = useTranslations();
   const L = {
-    saving: labels?.saving ?? '저장 중…',
-    saved: labels?.saved ?? '저장됨',
-    error: labels?.error ?? '저장 실패',
-    retry: labels?.retry ?? '다시 시도',
+    saving: labels?.saving ?? t('autoSave.saving'),
+    saved: labels?.saved ?? t('autoSave.saved'),
+    error: labels?.error ?? t('autoSave.error'),
+    retry: labels?.retry ?? t('autoSave.retry'),
   };
 
   if (status === 'idle') return null;

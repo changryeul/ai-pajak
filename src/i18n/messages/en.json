@@ -5397,7 +5397,26 @@
     "phone": "Phone",
     "taxCredentials": "Tax credentials",
     "credentialsNote": "DJP credentials are stored encrypted and only used for automated e-Filing.",
-    "forceSave": "Save now"
+    "forceSave": "Save now",
+    "ocrUploadTitle": "Auto-fill profile from withholding slip",
+    "ocrUploadIntro": "Upload a 1721-A1. AI will propose fields it can fill — you confirm before we save.",
+    "ocrWhose": "Whose withholding slip is this?",
+    "ocrForSelf": "Mine",
+    "ocrForSpouse": "My spouse's",
+    "ocrProcessing": "AI is reading the document…",
+    "ocrDropzone": "Click to pick a file (JPG, PNG, PDF)",
+    "ocrAccepted": "Maximum 10 MB",
+    "ocrApplied": "Profile updated",
+    "proposalTitle": "AI suggestions",
+    "proposalIntro": "Tick only the fields you want to save. Conflicts are flagged amber.",
+    "proposalCurrent": "Current",
+    "proposalNew": "New",
+    "proposalEmpty": "AI did not find new information in this document.",
+    "proposalConflictWarning": "{count} field(s) differ from your current data. Review before accepting.",
+    "proposalConflictTag": "Conflict",
+    "proposalApply": "Apply {count} selected",
+    "npwp": "NPWP",
+    "nik": "NIK"
   },
   "spouse": {
     "title": "Marital Status & Dependents",
@@ -5417,5 +5436,11 @@
     "dependentsHint": "Maximum 3 people (UU PPh Article 7). Non-working spouses are not counted here.",
     "ptkpStatus": "PTKP status",
     "ptkpExplain": "PTKP is the non-taxable income threshold. Calculated automatically from your selection above."
+  },
+  "autoSave": {
+    "saving": "Saving…",
+    "saved": "Saved",
+    "error": "Save failed",
+    "retry": "Retry"
   }
 }

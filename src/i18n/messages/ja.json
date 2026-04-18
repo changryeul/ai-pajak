@@ -5397,7 +5397,26 @@
     "phone": "電話",
     "taxCredentials": "税務アカウント情報",
     "credentialsNote": "DJP認証情報は暗号化保存され、自動電子申告にのみ使用されます。",
-    "forceSave": "いますぐ保存"
+    "forceSave": "いますぐ保存",
+    "ocrUploadTitle": "源泉徴収票からプロフィール自動入力",
+    "ocrUploadIntro": "1721-A1をアップロード。AIが入力候補を提示し、確認後に保存されます。",
+    "ocrWhose": "この源泉徴収票は誰のものですか?",
+    "ocrForSelf": "自分",
+    "ocrForSpouse": "配偶者",
+    "ocrProcessing": "AIが読み取り中…",
+    "ocrDropzone": "クリックしてファイルを選択 (JPG, PNG, PDF)",
+    "ocrAccepted": "最大10 MB",
+    "ocrApplied": "プロフィールを更新しました",
+    "proposalTitle": "AI 提案",
+    "proposalIntro": "保存する項目のみチェック。競合は黄色で表示されます。",
+    "proposalCurrent": "現在",
+    "proposalNew": "新規",
+    "proposalEmpty": "AIは文書から新しい情報を見つけられませんでした。",
+    "proposalConflictWarning": "{count}件が現在のデータと異なります。承認前に確認してください。",
+    "proposalConflictTag": "競合",
+    "proposalApply": "選択した{count}件を適用",
+    "npwp": "NPWP",
+    "nik": "NIK"
   },
   "spouse": {
     "title": "婚姻状況・扶養家族",
@@ -5417,5 +5436,11 @@
     "dependentsHint": "最大3人 (UU PPh 第7条)。無職の配偶者はここに含まれません。",
     "ptkpStatus": "PTKP ステータス",
     "ptkpExplain": "PTKP は非課税所得限度。上記の選択から自動計算されます。"
+  },
+  "autoSave": {
+    "saving": "保存中…",
+    "saved": "保存済み",
+    "error": "保存失敗",
+    "retry": "再試行"
   }
 }

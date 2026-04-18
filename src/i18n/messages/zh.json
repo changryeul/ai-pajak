@@ -5397,7 +5397,26 @@
     "phone": "电话",
     "taxCredentials": "税务凭证",
     "credentialsNote": "DJP凭证已加密存储,仅用于自动电子申报。",
-    "forceSave": "立即保存"
+    "forceSave": "立即保存",
+    "ocrUploadTitle": "从代扣税凭证自动填写资料",
+    "ocrUploadIntro": "上传1721-A1。AI将提议可填写的字段 — 您确认后才保存。",
+    "ocrWhose": "这是谁的代扣税凭证?",
+    "ocrForSelf": "本人",
+    "ocrForSpouse": "配偶",
+    "ocrProcessing": "AI正在读取文档…",
+    "ocrDropzone": "点击选择文件(JPG、PNG、PDF)",
+    "ocrAccepted": "最大10 MB",
+    "ocrApplied": "资料已更新",
+    "proposalTitle": "AI 建议",
+    "proposalIntro": "仅勾选要保存的字段。冲突以黄色标记。",
+    "proposalCurrent": "当前",
+    "proposalNew": "新值",
+    "proposalEmpty": "AI未从此文档中找到新信息。",
+    "proposalConflictWarning": "{count}个字段与当前数据不同。接受前请查看。",
+    "proposalConflictTag": "冲突",
+    "proposalApply": "应用选中的{count}项",
+    "npwp": "NPWP",
+    "nik": "NIK"
   },
   "spouse": {
     "title": "婚姻状态和抚养人",
@@ -5417,5 +5436,11 @@
     "dependentsHint": "最多3人(UU PPh第7条)。无工作的配偶不计入此处。",
     "ptkpStatus": "PTKP状态",
     "ptkpExplain": "PTKP为非应税收入门槛。根据上述选择自动计算。"
+  },
+  "autoSave": {
+    "saving": "保存中…",
+    "saved": "已保存",
+    "error": "保存失败",
+    "retry": "重试"
   }
 }

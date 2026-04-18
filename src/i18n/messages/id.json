@@ -5397,7 +5397,26 @@
     "phone": "Telepon",
     "taxCredentials": "Kredensial Pajak",
     "credentialsNote": "Kredensial DJP disimpan terenkripsi dan hanya digunakan untuk e-Filing otomatis.",
-    "forceSave": "Simpan sekarang"
+    "forceSave": "Simpan sekarang",
+    "ocrUploadTitle": "Otomasi profil dari Bukti Potong",
+    "ocrUploadIntro": "Unggah 1721-A1. AI akan mengusulkan kolom yang bisa dilengkapi — Anda konfirmasi sebelum disimpan.",
+    "ocrWhose": "Ini bukti potong siapa?",
+    "ocrForSelf": "Milik saya",
+    "ocrForSpouse": "Milik pasangan",
+    "ocrProcessing": "AI membaca dokumen…",
+    "ocrDropzone": "Klik untuk memilih file (JPG, PNG, PDF)",
+    "ocrAccepted": "Ukuran maksimum 10 MB",
+    "ocrApplied": "Profil berhasil diperbarui",
+    "proposalTitle": "Usulan dari AI",
+    "proposalIntro": "Centang hanya kolom yang ingin Anda simpan. Konflik ditandai kuning.",
+    "proposalCurrent": "Saat ini",
+    "proposalNew": "Baru",
+    "proposalEmpty": "AI tidak menemukan informasi baru dari dokumen ini.",
+    "proposalConflictWarning": "{count} kolom berbeda dari data saat ini. Periksa sebelum menerima.",
+    "proposalConflictTag": "Konflik",
+    "proposalApply": "Terapkan {count} pilihan",
+    "npwp": "NPWP",
+    "nik": "NIK"
   },
   "spouse": {
     "title": "Status Pernikahan & Tanggungan",
@@ -5417,5 +5436,11 @@
     "dependentsHint": "Maksimum 3 orang (UU PPh Pasal 7). Istri dan suami yang tidak bekerja tidak termasuk di sini.",
     "ptkpStatus": "Status PTKP",
     "ptkpExplain": "PTKP = penghasilan tidak kena pajak. Dihitung otomatis dari pilihan di atas."
+  },
+  "autoSave": {
+    "saving": "Menyimpan…",
+    "saved": "Tersimpan",
+    "error": "Gagal menyimpan",
+    "retry": "Coba lagi"
   }
 }

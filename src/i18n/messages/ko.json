@@ -5398,7 +5398,26 @@
     "phone": "전화번호",
     "taxCredentials": "세무 계정 정보",
     "credentialsNote": "DJP 계정 정보는 암호화 저장되며 자동 전자신고에만 사용됩니다.",
-    "forceSave": "바로 저장"
+    "forceSave": "바로 저장",
+    "ocrUploadTitle": "원천징수증명서로 프로필 자동 채움",
+    "ocrUploadIntro": "1721-A1 업로드 → AI가 채울 수 있는 항목을 제안합니다. 사용자가 확인한 뒤에만 저장됩니다.",
+    "ocrWhose": "이 원천징수증명서는 누구의 것입니까?",
+    "ocrForSelf": "본인",
+    "ocrForSpouse": "배우자",
+    "ocrProcessing": "AI가 문서를 읽는 중…",
+    "ocrDropzone": "클릭하여 파일 선택 (JPG, PNG, PDF)",
+    "ocrAccepted": "최대 10 MB",
+    "ocrApplied": "프로필 업데이트 완료",
+    "proposalTitle": "AI 제안",
+    "proposalIntro": "저장할 항목만 체크하세요. 충돌은 주황색으로 표시됩니다.",
+    "proposalCurrent": "현재",
+    "proposalNew": "신규",
+    "proposalEmpty": "AI가 문서에서 새 정보를 찾지 못했습니다.",
+    "proposalConflictWarning": "{count}개 항목이 현재 데이터와 다릅니다. 승인 전에 확인하세요.",
+    "proposalConflictTag": "충돌",
+    "proposalApply": "선택한 {count}개 적용",
+    "npwp": "NPWP",
+    "nik": "NIK"
   },
   "spouse": {
     "title": "결혼 상태 및 부양가족",
@@ -5418,5 +5437,11 @@
     "dependentsHint": "최대 3명 (UU PPh 제7조). 일하지 않는 배우자는 여기서 제외됨.",
     "ptkpStatus": "PTKP 상태",
     "ptkpExplain": "PTKP = 비과세 소득 한도. 위 선택으로 자동 계산됩니다."
+  },
+  "autoSave": {
+    "saving": "저장 중…",
+    "saved": "저장됨",
+    "error": "저장 실패",
+    "retry": "다시 시도"
   }
 }
