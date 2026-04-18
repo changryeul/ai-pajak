@@ -5255,7 +5255,15 @@
   "ocrUploader": {
     "uploadAnother": "Upload another document",
     "processingFailed": "Processing failed",
-    "retryBtn": "Retry"
+    "retryBtn": "Retry",
+    "title": "Document OCR Upload",
+    "dropHere": "Drop file here",
+    "dragOrClick": "Drag file here, or click to select",
+    "supportedFormats": "Supported: PDF, JPG, PNG (max 10MB)",
+    "or": "or",
+    "captureWithCamera": "Capture with Camera",
+    "uploading": "Uploading...",
+    "aiProcessing": "AI is processing..."
   },
   "taxOptimizer": {
     "recPtkpMarriageTitle": "Update marital status",

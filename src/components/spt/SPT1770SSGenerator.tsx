@@ -388,7 +388,7 @@ export function SPT1770SSGenerator({
           <CardContent className="space-y-6">
             {/* Customer Info */}
             <div className="p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-2">Wajib Pajak</h4>
+              <h4 className="font-medium text-gray-700 mb-2">{ts('taxpayer')}</h4>
               <p className="font-semibold">{customerName}</p>
               {customerNpwp && (
                 <p className="text-sm text-gray-500 font-mono">{customerNpwp}</p>
@@ -745,7 +745,7 @@ export function SPT1770SSGenerator({
         <CardContent className="space-y-6">
           {/* Customer Info */}
           <div className="p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-medium text-gray-700 mb-2">Wajib Pajak</h4>
+            <h4 className="font-medium text-gray-700 mb-2">{ts('taxpayer')}</h4>
             <p className="font-semibold">{customerName}</p>
             {customerNpwp && (
               <p className="text-sm text-gray-500 font-mono">{customerNpwp}</p>

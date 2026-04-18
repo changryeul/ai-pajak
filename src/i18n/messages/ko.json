@@ -5256,7 +5256,15 @@
   "ocrUploader": {
     "uploadAnother": "다른 문서 업로드",
     "processingFailed": "처리 실패",
-    "retryBtn": "다시 시도"
+    "retryBtn": "다시 시도",
+    "title": "문서 OCR 업로드",
+    "dropHere": "여기에 파일을 놓으세요",
+    "dragOrClick": "파일을 드래그하거나, 클릭하여 선택하세요",
+    "supportedFormats": "지원 형식: PDF, JPG, PNG (최대 10MB)",
+    "or": "또는",
+    "captureWithCamera": "카메라로 촬영",
+    "uploading": "업로드 중...",
+    "aiProcessing": "AI가 처리 중입니다..."
   },
   "taxOptimizer": {
     "recPtkpMarriageTitle": "혼인 상태 업데이트",

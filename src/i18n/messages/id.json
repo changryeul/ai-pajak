@@ -5255,7 +5255,15 @@
   "ocrUploader": {
     "uploadAnother": "Unggah dokumen lain",
     "processingFailed": "Pemrosesan gagal",
-    "retryBtn": "Coba lagi"
+    "retryBtn": "Coba lagi",
+    "title": "Unggah Dokumen OCR",
+    "dropHere": "Lepaskan file di sini",
+    "dragOrClick": "Seret file ke sini, atau klik untuk memilih",
+    "supportedFormats": "Format yang didukung: PDF, JPG, PNG (maks. 10MB)",
+    "or": "atau",
+    "captureWithCamera": "Ambil Foto dengan Kamera",
+    "uploading": "Mengunggah...",
+    "aiProcessing": "AI sedang memproses..."
   },
   "taxOptimizer": {
     "recPtkpMarriageTitle": "Perbarui status pernikahan",

@@ -5255,7 +5255,15 @@
   "ocrUploader": {
     "uploadAnother": "Upload another document",
     "processingFailed": "Processing failed",
-    "retryBtn": "Retry"
+    "retryBtn": "Retry",
+    "title": "文档OCR上传",
+    "dropHere": "将文件拖放到此处",
+    "dragOrClick": "拖拽文件到此处,或点击选择",
+    "supportedFormats": "支持格式: PDF, JPG, PNG (最大10MB)",
+    "or": "或",
+    "captureWithCamera": "使用相机拍照",
+    "uploading": "上传中...",
+    "aiProcessing": "AI 正在处理..."
   },
   "taxOptimizer": {
     "recPtkpMarriageTitle": "Update marital status",

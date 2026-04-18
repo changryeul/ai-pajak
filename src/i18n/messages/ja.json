@@ -5255,7 +5255,15 @@
   "ocrUploader": {
     "uploadAnother": "Upload another document",
     "processingFailed": "Processing failed",
-    "retryBtn": "Retry"
+    "retryBtn": "Retry",
+    "title": "文書OCRアップロード",
+    "dropHere": "ファイルをここにドロップ",
+    "dragOrClick": "ファイルをドラッグするか、クリックして選択",
+    "supportedFormats": "対応形式: PDF, JPG, PNG (最大10MB)",
+    "or": "または",
+    "captureWithCamera": "カメラで撮影",
+    "uploading": "アップロード中...",
+    "aiProcessing": "AIが処理中です..."
   },
   "taxOptimizer": {
     "recPtkpMarriageTitle": "Update marital status",
