@@ -5258,7 +5258,9 @@
     "upgrade": "Upgrade",
     "changeTier": "Change tier",
     "suitablePrefix": "Your managed client count is suitable for",
-    "suitableSuffix": "tier."
+    "suitableSuffix": "tier.",
+    "overLimitBody": "客户数超出方案上限 — 请升级",
+    "nearLimitBody": "接近{max}位客户上限 — 请考虑升级"
   },
   "ocrUploader": {
     "uploadAnother": "Upload another document",
@@ -5893,5 +5895,19 @@
     "goToIndividual": "前往个人注册",
     "nextCta": "下一步",
     "submitCta": "完成注册"
+  },
+  "consultantBilling": {
+    "headerTitle": "税务咨询所订阅",
+    "headerSubtitle": "{partner}的订阅摘要",
+    "noAccess": "本页仅供外部税务咨询所顾问使用",
+    "monthlyFee": "月费",
+    "renewsOn": "续订日",
+    "status": "状态",
+    "clientCapacity": "客户容量",
+    "availableTiers": "可用级别",
+    "nearLimitTitle": "接近客户上限",
+    "nearLimitBody": "当前方案允许{count}位客户。请在超限前考虑升级。",
+    "overLimitTitle": "超出客户上限",
+    "overLimitBody": "客户数已超出方案上限。请升级以保持合规。"
   }
 }

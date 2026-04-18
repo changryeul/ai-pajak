@@ -5258,7 +5258,9 @@
     "upgrade": "Upgrade",
     "changeTier": "Ubah tier",
     "suitablePrefix": "Jumlah klien Anda sesuai untuk",
-    "suitableSuffix": "tier."
+    "suitableSuffix": "tier.",
+    "overLimitBody": "Melebihi batas klien paket — upgrade untuk tetap patuh",
+    "nearLimitBody": "Mendekati batas {max} klien — pertimbangkan upgrade"
   },
   "ocrUploader": {
     "uploadAnother": "Unggah dokumen lain",
@@ -5893,5 +5895,19 @@
     "goToIndividual": "Ke Pendaftaran Perorangan",
     "nextCta": "Berikutnya",
     "submitCta": "Selesaikan Pendaftaran"
+  },
+  "consultantBilling": {
+    "headerTitle": "Langganan Firma Pajak",
+    "headerSubtitle": "Ringkasan langganan untuk {partner}",
+    "noAccess": "Halaman ini hanya untuk konsultan kantor pajak eksternal",
+    "monthlyFee": "Biaya Bulanan",
+    "renewsOn": "Pembaruan Pada",
+    "status": "Status",
+    "clientCapacity": "Kapasitas Klien",
+    "availableTiers": "Tier Tersedia",
+    "nearLimitTitle": "Mendekati batas klien",
+    "nearLimitBody": "Paket saat ini mengizinkan {count} klien. Pertimbangkan upgrade sebelum melebihi.",
+    "overLimitTitle": "Melebihi batas klien",
+    "overLimitBody": "Jumlah klien sudah melebihi batas paket Anda. Upgrade untuk menjaga kepatuhan."
   }
 }

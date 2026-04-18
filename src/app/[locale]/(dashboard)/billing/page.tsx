@@ -13,8 +13,10 @@ import { CreditCard, FileText, TrendingUp, Calendar, AlertCircle, CheckCircle, L
 import { Button } from '@/components/ui/button';
 import { formatCurrency, type Subscription, type Invoice, type UsageMetrics, PRICING_PLANS } from '@/lib/billing/types';
 import { PageTitle } from '@/components/layout/PageTitle';
-import { useSession } from '@/hooks/useSession';
+import { useSession, hasRole } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { IndividualBillingView } from '@/components/billing/IndividualBillingView';
+import { ConsultantBillingView } from '@/components/billing/ConsultantBillingView';
 
 export default function BillingPage() {
   const t = useTranslations('billing');
@@ -67,6 +69,18 @@ export default function BillingPage() {
       <div className="container mx-auto px-4 py-8">
         <PageTitle title="Tagihan" />
         <IndividualBillingView />
+      </div>
+    );
+  }
+
+  // Consultants (including external tax-firm reps) see their own tier
+  // subscription, not a corporate SaaS plan. JTC internal consultants hit
+  // a 403 from /api/billing/consultant-plan and the view shows an info banner.
+  if (!sessionLoading && session && hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC)) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <PageTitle title="Tagihan" />
+        <ConsultantBillingView />
       </div>
     );
   }

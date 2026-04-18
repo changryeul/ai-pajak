@@ -33,6 +33,7 @@ import {
 } from '@/components/dashboard';
 import { CurrentPlanWidget } from '@/components/dashboard/CurrentPlanWidget';
 import { CustomPricingWidget } from '@/components/dashboard/CustomPricingWidget';
+import { ConsultantTierWidget } from '@/components/dashboard/ConsultantTierWidget';
 import { CorporateDashboardV2 } from '@/components/dashboard/CorporateDashboardV2';
 import { SpouseAndDependentsCard } from '@/components/dashboard/SpouseAndDependentsCard';
 import { GrowthAnomalyCard } from '@/components/dashboard/GrowthAnomalyCard';
@@ -753,6 +754,9 @@ function ConsultantDashboard({
           );
         })}
       </div>
+
+      {/* External consultant tier subscription (renders null for JTC internal) */}
+      <ConsultantTierWidget />
 
       {/* Urgent Actions */}
       <UrgentActionsPanel consultantId={session.consultantId} />

@@ -5258,7 +5258,9 @@
     "upgrade": "Upgrade",
     "changeTier": "Change tier",
     "suitablePrefix": "Your managed client count is suitable for",
-    "suitableSuffix": "tier."
+    "suitableSuffix": "tier.",
+    "overLimitBody": "顧客数がプラン上限を超過しています — アップグレードが必要です",
+    "nearLimitBody": "顧客上限{max}名に近づいています — アップグレードを検討"
   },
   "ocrUploader": {
     "uploadAnother": "Upload another document",
@@ -5893,5 +5895,19 @@
     "goToIndividual": "個人登録へ",
     "nextCta": "次へ",
     "submitCta": "登録を完了"
+  },
+  "consultantBilling": {
+    "headerTitle": "税理士事務所サブスク",
+    "headerSubtitle": "{partner}のサブスク概要",
+    "noAccess": "このページは外部税理士事務所コンサルタント専用です",
+    "monthlyFee": "月額料金",
+    "renewsOn": "更新日",
+    "status": "ステータス",
+    "clientCapacity": "顧客キャパシティ",
+    "availableTiers": "利用可能なティア",
+    "nearLimitTitle": "顧客上限に近づいています",
+    "nearLimitBody": "現在のプランは{count}名まで。超える前のアップグレードを検討してください。",
+    "overLimitTitle": "顧客上限を超過",
+    "overLimitBody": "顧客数がプラン上限を超過しました。コンプライアンス維持のためアップグレードしてください。"
   }
 }

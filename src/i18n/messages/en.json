@@ -5258,7 +5258,9 @@
     "upgrade": "Upgrade",
     "changeTier": "Change tier",
     "suitablePrefix": "Your managed client count is suitable for",
-    "suitableSuffix": "tier."
+    "suitableSuffix": "tier.",
+    "overLimitBody": "Client count exceeds tier limit — upgrade to stay compliant",
+    "nearLimitBody": "Approaching {max}-client limit — consider upgrading"
   },
   "ocrUploader": {
     "uploadAnother": "Upload another document",
@@ -5893,5 +5895,19 @@
     "goToIndividual": "Switch to Individual Signup",
     "nextCta": "Next",
     "submitCta": "Complete Registration"
+  },
+  "consultantBilling": {
+    "headerTitle": "Consultant Firm Subscription",
+    "headerSubtitle": "Subscription summary for {partner}",
+    "noAccess": "This page is only for external tax-firm consultants",
+    "monthlyFee": "Monthly Fee",
+    "renewsOn": "Renews On",
+    "status": "Status",
+    "clientCapacity": "Client Capacity",
+    "availableTiers": "Available Tiers",
+    "nearLimitTitle": "Approaching client limit",
+    "nearLimitBody": "Your current tier allows {count} clients. Consider upgrading before you exceed.",
+    "overLimitTitle": "Exceeded client limit",
+    "overLimitBody": "Your client count exceeds your tier limit. Upgrade to remain compliant."
   }
 }

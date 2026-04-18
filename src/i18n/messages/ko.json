@@ -5259,7 +5259,9 @@
     "upgrade": "업그레이드",
     "changeTier": "티어 변경",
     "suitablePrefix": "관리 고객 수가",
-    "suitableSuffix": "티어에 적합합니다."
+    "suitableSuffix": "티어에 적합합니다.",
+    "overLimitBody": "고객 수가 플랜 한도를 초과했습니다 — 업그레이드 필요",
+    "nearLimitBody": "고객 한도 {max}명에 근접 — 업그레이드 검토"
   },
   "ocrUploader": {
     "uploadAnother": "다른 문서 업로드",
@@ -5894,5 +5896,19 @@
     "goToIndividual": "개인 가입으로",
     "nextCta": "다음",
     "submitCta": "가입 완료"
+  },
+  "consultantBilling": {
+    "headerTitle": "세무 사무소 구독",
+    "headerSubtitle": "{partner}의 구독 요약",
+    "noAccess": "이 페이지는 외부 세무 사무소 컨설턴트 전용입니다",
+    "monthlyFee": "월 요금",
+    "renewsOn": "갱신일",
+    "status": "상태",
+    "clientCapacity": "고객 한도",
+    "availableTiers": "사용 가능 티어",
+    "nearLimitTitle": "고객 한도 근접",
+    "nearLimitBody": "현재 플랜의 한도는 {count}명입니다. 초과 전에 업그레이드를 고려하세요.",
+    "overLimitTitle": "고객 한도 초과",
+    "overLimitBody": "고객 수가 플랜 한도를 초과했습니다. 컴플라이언스를 위해 업그레이드하세요."
   }
 }

@@ -82,14 +82,14 @@ export async function GET() {
 
     if (!partner) {
       return NextResponse.json(
-        { error: '세무 사무소 컨설턴트만 접근 가능합니다' },
+        { error: 'Hanya konsultan kantor pajak yang dapat mengakses' },
         { status: 403 }
       );
     }
 
     if (partner.partnerType === 'JTC') {
       return NextResponse.json(
-        { error: 'JTC 내부 사무소는 자체 요금제가 없습니다' },
+        { error: 'Kantor JTC internal tidak memiliki paket mandiri' },
         { status: 403 }
       );
     }
