@@ -100,7 +100,14 @@
     "step1Invalid": "请正确填写所有字段。",
     "passwordHint8": "至少8个字符",
     "companySignup": "企业注册",
-    "firmSignup": "税务师事务所注册"
+    "firmSignup": "税务师事务所注册",
+    "errMissingName": "请输入姓名。",
+    "errInvalidEmail": "邮箱格式不正确。",
+    "errMissingPhone": "请输入电话号码。",
+    "errNpwpDigits": "NPWP必须为15位数字(当前:{have}位)。",
+    "errNikDigits": "NIK必须为16位数字(当前:{have}位)。",
+    "npwpDigitsRequired": "NPWP 15位",
+    "nikDigitsRequired": "NIK 16位"
   },
   "nav": {
     "dashboard": "仪表盘",

@@ -100,7 +100,14 @@
     "step1Invalid": "Please fill all fields correctly.",
     "passwordHint8": "At least 8 characters",
     "companySignup": "Company Signup",
-    "firmSignup": "Tax Firm Signup"
+    "firmSignup": "Tax Firm Signup",
+    "errMissingName": "Please enter your full name.",
+    "errInvalidEmail": "Invalid email format.",
+    "errMissingPhone": "Please enter your phone number.",
+    "errNpwpDigits": "NPWP must be 15 digits (currently: {have}).",
+    "errNikDigits": "NIK must be 16 digits (currently: {have}).",
+    "npwpDigitsRequired": "NPWP: 15 digits",
+    "nikDigitsRequired": "NIK: 16 digits"
   },
   "nav": {
     "dashboard": "Dashboard",

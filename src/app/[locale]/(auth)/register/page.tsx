@@ -69,21 +69,26 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const canAdvanceStep1 = (() => {
-    if (!basics.fullName.trim()) return false;
-    if (!basics.email.trim() || !basics.email.includes('@')) return false;
-    if (!basics.phone.trim()) return false;
+  function validateStep1(): string | null {
+    if (!basics.fullName.trim()) return t('auth.errMissingName');
+    if (!basics.email.trim() || !basics.email.includes('@')) return t('auth.errInvalidEmail');
+    if (!basics.phone.trim()) return t('auth.errMissingPhone');
     const digits = basics.idNumber.replace(/\D/g, '');
-    if (basics.idType === 'NPWP' && digits.length !== 15) return false;
-    if (basics.idType === 'NIK' && digits.length !== 16) return false;
-    return true;
-  })();
+    if (basics.idType === 'NPWP' && digits.length !== 15) {
+      return t('auth.errNpwpDigits', { have: digits.length });
+    }
+    if (basics.idType === 'NIK' && digits.length !== 16) {
+      return t('auth.errNikDigits', { have: digits.length });
+    }
+    return null;
+  }
 
   function step1Submit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!canAdvanceStep1) {
-      setError(t('auth.step1Invalid'));
+    const err = validateStep1();
+    if (err) {
+      setError(err);
       return;
     }
     setStep(2);
@@ -176,7 +181,6 @@ export default function RegisterPage() {
                   placeholder={t('auth.fullNameReal')}
                   value={basics.fullName}
                   onChange={(e) => setBasics({ ...basics, fullName: e.target.value })}
-                  required
                 />
 
                 <select
@@ -188,27 +192,38 @@ export default function RegisterPage() {
                   <option value="NIK">{t('auth.noNpwpUseNik')}</option>
                 </select>
 
-                <Input
-                  name="idNumber"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder={
-                    basics.idType === 'NPWP'
-                      ? '00.000.000.0-000.000'
-                      : t('auth.nikPlaceholder')
-                  }
-                  value={
-                    basics.idType === 'NPWP'
-                      ? formatNpwp(basics.idNumber)
-                      : basics.idNumber.replace(/\D/g, '').slice(0, 16)
-                  }
-                  onChange={(e) => {
-                    const digits = e.target.value.replace(/\D/g, '');
-                    const max = basics.idType === 'NPWP' ? 15 : 16;
-                    setBasics({ ...basics, idNumber: digits.slice(0, max) });
-                  }}
-                  required
-                />
+                <div>
+                  <Input
+                    name="idNumber"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={
+                      basics.idType === 'NPWP'
+                        ? '00.000.000.0-000.000'
+                        : t('auth.nikPlaceholder')
+                    }
+                    value={
+                      basics.idType === 'NPWP'
+                        ? formatNpwp(basics.idNumber)
+                        : basics.idNumber.replace(/\D/g, '').slice(0, 16)
+                    }
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, '');
+                      const max = basics.idType === 'NPWP' ? 15 : 16;
+                      setBasics({ ...basics, idNumber: digits.slice(0, max) });
+                    }}
+                  />
+                  <div className="mt-1 text-[11px] text-gray-500 flex justify-between">
+                    <span>
+                      {basics.idType === 'NPWP'
+                        ? t('auth.npwpDigitsRequired')
+                        : t('auth.nikDigitsRequired')}
+                    </span>
+                    <span className={basics.idNumber.length === (basics.idType === 'NPWP' ? 15 : 16) ? 'text-emerald-600 font-medium' : ''}>
+                      {basics.idNumber.length} / {basics.idType === 'NPWP' ? 15 : 16}
+                    </span>
+                  </div>
+                </div>
 
                 <Input
                   name="email"
@@ -216,7 +231,6 @@ export default function RegisterPage() {
                   placeholder={t('auth.email')}
                   value={basics.email}
                   onChange={(e) => setBasics({ ...basics, email: e.target.value })}
-                  required
                 />
 
                 <Input
@@ -225,18 +239,13 @@ export default function RegisterPage() {
                   placeholder={t('auth.phone')}
                   value={basics.phone}
                   onChange={(e) => setBasics({ ...basics, phone: e.target.value })}
-                  required
                 />
 
                 <p className="text-xs text-gray-500 leading-relaxed">
                   * {t('auth.signupIdentityNote')}
                 </p>
 
-                <Button
-                  type="submit"
-                  className="w-full h-11"
-                  disabled={!canAdvanceStep1}
-                >
+                <Button type="submit" className="w-full h-11">
                   {t('auth.next')}
                 </Button>
 
@@ -278,7 +287,6 @@ export default function RegisterPage() {
                   placeholder={t('auth.password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
                 />
 
                 <Input
@@ -287,7 +295,6 @@ export default function RegisterPage() {
                   placeholder={t('auth.confirmPassword')}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
                 />
 
                 <p className="text-xs text-gray-500">{t('auth.passwordHint8')}</p>

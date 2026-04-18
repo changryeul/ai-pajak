@@ -100,7 +100,14 @@
     "step1Invalid": "Mohon lengkapi semua field dengan benar.",
     "passwordHint8": "Minimal 8 karakter",
     "companySignup": "Daftar Perusahaan",
-    "firmSignup": "Daftar Kantor Konsultan"
+    "firmSignup": "Daftar Kantor Konsultan",
+    "errMissingName": "Mohon isi nama lengkap.",
+    "errInvalidEmail": "Format email tidak valid.",
+    "errMissingPhone": "Mohon isi nomor telepon.",
+    "errNpwpDigits": "NPWP harus 15 digit (saat ini: {have}).",
+    "errNikDigits": "NIK harus 16 digit (saat ini: {have}).",
+    "npwpDigitsRequired": "NPWP: 15 digit",
+    "nikDigitsRequired": "NIK: 16 digit"
   },
   "nav": {
     "dashboard": "Dasbor",

@@ -100,7 +100,14 @@
     "step1Invalid": "모든 필드를 정확히 입력해 주세요.",
     "passwordHint8": "최소 8자 이상",
     "companySignup": "법인 가입",
-    "firmSignup": "세무법인 가입"
+    "firmSignup": "세무법인 가입",
+    "errMissingName": "이름을 입력해 주세요.",
+    "errInvalidEmail": "이메일 형식이 올바르지 않습니다.",
+    "errMissingPhone": "전화번호를 입력해 주세요.",
+    "errNpwpDigits": "NPWP는 15자리 숫자입니다 (현재: {have}자리).",
+    "errNikDigits": "NIK는 16자리 숫자입니다 (현재: {have}자리).",
+    "npwpDigitsRequired": "NPWP 15자리",
+    "nikDigitsRequired": "NIK 16자리"
   },
   "nav": {
     "dashboard": "대시보드",

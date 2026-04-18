@@ -100,7 +100,14 @@
     "step1Invalid": "すべてのフィールドを正しく入力してください。",
     "passwordHint8": "8文字以上",
     "companySignup": "法人登録",
-    "firmSignup": "税理士法人登録"
+    "firmSignup": "税理士法人登録",
+    "errMissingName": "氏名を入力してください。",
+    "errInvalidEmail": "メール形式が正しくありません。",
+    "errMissingPhone": "電話番号を入力してください。",
+    "errNpwpDigits": "NPWPは15桁必要です(現在: {have}桁)。",
+    "errNikDigits": "NIKは16桁必要です(現在: {have}桁)。",
+    "npwpDigitsRequired": "NPWP 15桁",
+    "nikDigitsRequired": "NIK 16桁"
   },
   "nav": {
     "dashboard": "ダッシュボード",
