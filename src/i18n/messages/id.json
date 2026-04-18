@@ -5445,10 +5445,10 @@
     "single": "Lajang",
     "married": "Menikah",
     "filingMode": "Cara pelaporan pajak",
-    "separateFiling": "Laporan terpisah (masing-masing NPWP)",
-    "separateHint": "Suami dan istri melapor sendiri",
-    "jointFiling": "Laporan gabungan (penghasilan istri digabung)",
-    "jointHint": "Satu NPWP, total penghasilan keluarga",
+    "separateFiling": "Lapor terpisah (NPWP masing-masing)",
+    "separateHint": "Suami/istri memiliki NPWP sendiri",
+    "jointFiling": "Gabungan NPWP (suami/istri digabung)",
+    "jointHint": "Satu NPWP, penghasilan pasangan digabung",
     "spouseName": "Nama pasangan",
     "spouseNpwp": "NPWP pasangan",
     "spouseIncome": "Penghasilan tahunan pasangan (IDR)",
@@ -5555,6 +5555,55 @@
       "recommendedFor": "Direkomendasikan untuk",
       "selectCta": "Pilih & Bayar",
       "processing": "Memproses..."
+    }
+  },
+  "nationality": {
+    "heading": "Profil Lintas Negara",
+    "nationality": "Kewarganegaraan",
+    "taxResidence": "Negara tempat tinggal pajak",
+    "unspecified": "— belum ditentukan —",
+    "country": {
+      "ID": "Indonesia",
+      "KR": "Korea Selatan",
+      "JP": "Jepang",
+      "US": "Amerika Serikat"
+    }
+  },
+  "recentFilings": {
+    "title": "Riwayat SPT 3 Tahun Terakhir",
+    "subtitle": "Status pelaporan SPT Tahunan Anda",
+    "yearLabel": "SPT Tahun {year}",
+    "done": "Selesai",
+    "inProgress": "Sedang Diproses",
+    "start": "Mulai"
+  },
+  "assetsLiabilities": {
+    "assets": "Harta (Assets)",
+    "liabilities": "Kewajiban (Liabilities)",
+    "total": "Total",
+    "yearLabel": "Per {year}",
+    "netWorthLabel": "Kekayaan bersih: {net}",
+    "noDataYet": "Belum ada data",
+    "emptyAssets": "Belum ada aset tercatat.",
+    "emptyLiabilities": "Belum ada kewajiban tercatat.",
+    "addEntry": "Tambah entri",
+    "assetCategory": {
+      "CASH_BANK": "Kas / Bank",
+      "RECEIVABLE": "Piutang",
+      "INVENTORY": "Persediaan",
+      "INVESTMENT": "Investasi",
+      "VEHICLE": "Kendaraan",
+      "LAND": "Tanah",
+      "BUILDING": "Bangunan",
+      "BUSINESS_ASSET": "Aset usaha",
+      "OTHER": "Lainnya"
+    },
+    "liabilityCategory": {
+      "BANK_LOAN": "Pinjaman bank",
+      "CREDIT_CARD": "Kartu kredit",
+      "PERSONAL_LOAN": "Pinjaman pribadi",
+      "BUSINESS_LIABILITY": "Kewajiban usaha",
+      "OTHER": "Lainnya"
     }
   }
 }

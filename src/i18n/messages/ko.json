@@ -5446,10 +5446,10 @@
     "single": "미혼",
     "married": "기혼",
     "filingMode": "세금 신고 방식",
-    "separateFiling": "개별 신고 (부부 각자 NPWP)",
-    "separateHint": "남편/아내가 각각 신고",
-    "jointFiling": "통합 신고 (배우자 소득 합산)",
-    "jointHint": "하나의 NPWP, 가족 소득 합산",
+    "separateFiling": "개별 신고 (각자 NPWP)",
+    "separateHint": "남편·아내가 각자 NPWP로 신고",
+    "jointFiling": "NPWP 통합 신고 (남편/아내 합산)",
+    "jointHint": "하나의 NPWP로 배우자 소득 합산",
     "spouseName": "배우자 이름",
     "spouseNpwp": "배우자 NPWP",
     "spouseIncome": "배우자 연간 소득 (IDR)",
@@ -5556,6 +5556,55 @@
       "recommendedFor": "추천 대상",
       "selectCta": "선택 · 결제",
       "processing": "처리 중..."
+    }
+  },
+  "nationality": {
+    "heading": "국적 · 세법 거주지",
+    "nationality": "국적",
+    "taxResidence": "세법상 거주지",
+    "unspecified": "— 미지정 —",
+    "country": {
+      "ID": "인도네시아",
+      "KR": "한국",
+      "JP": "일본",
+      "US": "미국"
+    }
+  },
+  "recentFilings": {
+    "title": "최근 3년 신고 이력",
+    "subtitle": "연간 SPT 신고 상태",
+    "yearLabel": "{year}년 신고",
+    "done": "완료",
+    "inProgress": "진행 중",
+    "start": "시작하기"
+  },
+  "assetsLiabilities": {
+    "assets": "자산 (Assets)",
+    "liabilities": "부채 (Liabilities)",
+    "total": "합계",
+    "yearLabel": "{year}년 기준",
+    "netWorthLabel": "순자산: {net}",
+    "noDataYet": "데이터 없음",
+    "emptyAssets": "등록된 자산이 없습니다.",
+    "emptyLiabilities": "등록된 부채가 없습니다.",
+    "addEntry": "항목 추가",
+    "assetCategory": {
+      "CASH_BANK": "현금 / 은행",
+      "RECEIVABLE": "매출채권",
+      "INVENTORY": "재고",
+      "INVESTMENT": "투자",
+      "VEHICLE": "차량",
+      "LAND": "토지",
+      "BUILDING": "건물",
+      "BUSINESS_ASSET": "사업용 자산",
+      "OTHER": "기타"
+    },
+    "liabilityCategory": {
+      "BANK_LOAN": "은행 대출",
+      "CREDIT_CARD": "신용카드",
+      "PERSONAL_LOAN": "개인 대출",
+      "BUSINESS_LIABILITY": "사업 부채",
+      "OTHER": "기타"
     }
   }
 }

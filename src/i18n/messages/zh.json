@@ -5445,10 +5445,10 @@
     "single": "单身",
     "married": "已婚",
     "filingMode": "税务申报方式",
-    "separateFiling": "分开申报(夫妻各自NPWP)",
-    "separateHint": "丈夫和妻子分开申报",
-    "jointFiling": "合并申报(配偶收入合并)",
-    "jointHint": "单一NPWP,家庭收入合并",
+    "separateFiling": "单独申报(各自NPWP)",
+    "separateHint": "夫妻各用自己的NPWP申报",
+    "jointFiling": "NPWP合并申报(夫妻合算)",
+    "jointHint": "使用同一NPWP合并配偶所得",
     "spouseName": "配偶姓名",
     "spouseNpwp": "配偶NPWP",
     "spouseIncome": "配偶年收入(IDR)",
@@ -5555,6 +5555,55 @@
       "recommendedFor": "推荐对象",
       "selectCta": "选择并付款",
       "processing": "处理中..."
+    }
+  },
+  "nationality": {
+    "heading": "跨境税务档案",
+    "nationality": "国籍",
+    "taxResidence": "税务居住地",
+    "unspecified": "— 未指定 —",
+    "country": {
+      "ID": "印度尼西亚",
+      "KR": "韩国",
+      "JP": "日本",
+      "US": "美国"
+    }
+  },
+  "recentFilings": {
+    "title": "近3年申报记录",
+    "subtitle": "年度SPT申报状态",
+    "yearLabel": "{year}年申报",
+    "done": "已完成",
+    "inProgress": "处理中",
+    "start": "开始"
+  },
+  "assetsLiabilities": {
+    "assets": "资产 (Assets)",
+    "liabilities": "负债 (Liabilities)",
+    "total": "合计",
+    "yearLabel": "截至{year}年",
+    "netWorthLabel": "净资产:{net}",
+    "noDataYet": "暂无数据",
+    "emptyAssets": "尚未登记任何资产。",
+    "emptyLiabilities": "尚未登记任何负债。",
+    "addEntry": "添加条目",
+    "assetCategory": {
+      "CASH_BANK": "现金 / 银行",
+      "RECEIVABLE": "应收账款",
+      "INVENTORY": "库存",
+      "INVESTMENT": "投资",
+      "VEHICLE": "车辆",
+      "LAND": "土地",
+      "BUILDING": "建筑物",
+      "BUSINESS_ASSET": "业务资产",
+      "OTHER": "其他"
+    },
+    "liabilityCategory": {
+      "BANK_LOAN": "银行贷款",
+      "CREDIT_CARD": "信用卡",
+      "PERSONAL_LOAN": "个人贷款",
+      "BUSINESS_LIABILITY": "业务负债",
+      "OTHER": "其他"
     }
   }
 }

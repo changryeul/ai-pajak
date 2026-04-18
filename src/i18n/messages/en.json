@@ -5445,10 +5445,10 @@
     "single": "Single",
     "married": "Married",
     "filingMode": "Tax filing mode",
-    "separateFiling": "Separate filing (each spouse has own NPWP)",
-    "separateHint": "Husband and wife file separately",
-    "jointFiling": "Joint filing (spouse income combined)",
-    "jointHint": "One NPWP, combined family income",
+    "separateFiling": "Separate filing (each with own NPWP)",
+    "separateHint": "Spouses file under their own NPWP",
+    "jointFiling": "Combined NPWP (spousal income merged)",
+    "jointHint": "One NPWP, spouse income combined",
     "spouseName": "Spouse name",
     "spouseNpwp": "Spouse NPWP",
     "spouseIncome": "Spouse annual income (IDR)",
@@ -5555,6 +5555,55 @@
       "recommendedFor": "Recommended for",
       "selectCta": "Pick & Pay",
       "processing": "Processing..."
+    }
+  },
+  "nationality": {
+    "heading": "Cross-Border Profile",
+    "nationality": "Nationality",
+    "taxResidence": "Tax residence",
+    "unspecified": "— not set —",
+    "country": {
+      "ID": "Indonesia",
+      "KR": "South Korea",
+      "JP": "Japan",
+      "US": "United States"
+    }
+  },
+  "recentFilings": {
+    "title": "Last 3 Years of Filings",
+    "subtitle": "Status of your annual SPT",
+    "yearLabel": "SPT {year}",
+    "done": "Completed",
+    "inProgress": "In Progress",
+    "start": "Start"
+  },
+  "assetsLiabilities": {
+    "assets": "Assets",
+    "liabilities": "Liabilities",
+    "total": "Total",
+    "yearLabel": "As of {year}",
+    "netWorthLabel": "Net worth: {net}",
+    "noDataYet": "No data yet",
+    "emptyAssets": "No assets recorded yet.",
+    "emptyLiabilities": "No liabilities recorded yet.",
+    "addEntry": "Add entry",
+    "assetCategory": {
+      "CASH_BANK": "Cash / Bank",
+      "RECEIVABLE": "Receivable",
+      "INVENTORY": "Inventory",
+      "INVESTMENT": "Investment",
+      "VEHICLE": "Vehicle",
+      "LAND": "Land",
+      "BUILDING": "Building",
+      "BUSINESS_ASSET": "Business asset",
+      "OTHER": "Other"
+    },
+    "liabilityCategory": {
+      "BANK_LOAN": "Bank loan",
+      "CREDIT_CARD": "Credit card",
+      "PERSONAL_LOAN": "Personal loan",
+      "BUSINESS_LIABILITY": "Business liability",
+      "OTHER": "Other"
     }
   }
 }

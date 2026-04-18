@@ -38,6 +38,9 @@ import { SpouseAndDependentsCard } from '@/components/dashboard/SpouseAndDepende
 import { GrowthAnomalyCard } from '@/components/dashboard/GrowthAnomalyCard';
 import { ForeignAssetReportingCard } from '@/components/dashboard/ForeignAssetReportingCard';
 import { BankAccountsCard } from '@/components/dashboard/BankAccountsCard';
+import { NationalityResidenceCard } from '@/components/dashboard/NationalityResidenceCard';
+import { RecentFilingsCard } from '@/components/dashboard/RecentFilingsCard';
+import { AssetsLiabilitiesCard } from '@/components/dashboard/AssetsLiabilitiesCard';
 import { usePageTitle } from '@/components/layout/PageTitle';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
@@ -563,14 +566,29 @@ function CustomerDashboard({
         </div>
       </div>
 
-      {/* Filing Summary — moved to top */}
+      {/* Hybrid reorder (2026-04-18): lead with the cross-border selector,
+          then the 3-year filing history, then spouse+dependents, then the
+          assets/liabilities balance sheet — matches the agreed reference
+          mockup. Advanced cards (anomaly, foreign-asset rule, bank accounts)
+          sit below as supporting detail. */}
+
+      {/* Top: nationality + tax-residence selector (drives foreign-asset card below) */}
+      <NationalityResidenceCard />
+
+      {/* Last 3 years of annual SPT filings */}
+      <RecentFilingsCard customerId={session.customerId} />
+
+      {/* Spouse + dependents → live PTKP status */}
+      <SpouseAndDependentsCard />
+
+      {/* Harta dan Kewajiban — SPT 1770 balance sheet */}
+      <AssetsLiabilitiesCard />
+
+      {/* Supporting analytics */}
       <div className="grid gap-6 lg:grid-cols-2">
         <FilingSummaryWidget customerId={session.customerId} />
         <DeadlineCalendar customerId={session.customerId} />
       </div>
-
-      {/* Spouse + dependents → live PTKP status for annual filing */}
-      <SpouseAndDependentsCard />
 
       {/* Asset growth anomaly detection (T-002) + funding-source survey (T-003) */}
       <GrowthAnomalyCard />

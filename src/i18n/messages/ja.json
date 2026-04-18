@@ -5445,10 +5445,10 @@
     "single": "独身",
     "married": "既婚",
     "filingMode": "税務申告方式",
-    "separateFiling": "個別申告 (夫妻それぞれの NPWP)",
-    "separateHint": "夫と妻がそれぞれ申告",
-    "jointFiling": "合算申告 (配偶者所得を合算)",
-    "jointHint": "一つの NPWP、家族所得合算",
+    "separateFiling": "個別申告(各自のNPWP)",
+    "separateHint": "夫婦それぞれのNPWPで申告",
+    "jointFiling": "NPWP統合申告(夫婦合算)",
+    "jointHint": "一つのNPWPで配偶者の所得を合算",
     "spouseName": "配偶者氏名",
     "spouseNpwp": "配偶者 NPWP",
     "spouseIncome": "配偶者の年収 (IDR)",
@@ -5555,6 +5555,55 @@
       "recommendedFor": "推奨対象",
       "selectCta": "選択 · 支払い",
       "processing": "処理中..."
+    }
+  },
+  "nationality": {
+    "heading": "国籍 · 税務居住地",
+    "nationality": "国籍",
+    "taxResidence": "税務上の居住地",
+    "unspecified": "— 未指定 —",
+    "country": {
+      "ID": "インドネシア",
+      "KR": "韓国",
+      "JP": "日本",
+      "US": "アメリカ"
+    }
+  },
+  "recentFilings": {
+    "title": "過去3年のSPT履歴",
+    "subtitle": "年次SPT申告の状態",
+    "yearLabel": "{year}年 SPT",
+    "done": "完了",
+    "inProgress": "進行中",
+    "start": "開始"
+  },
+  "assetsLiabilities": {
+    "assets": "資産 (Assets)",
+    "liabilities": "負債 (Liabilities)",
+    "total": "合計",
+    "yearLabel": "{year}年時点",
+    "netWorthLabel": "純資産: {net}",
+    "noDataYet": "データなし",
+    "emptyAssets": "登録された資産はありません。",
+    "emptyLiabilities": "登録された負債はありません。",
+    "addEntry": "項目を追加",
+    "assetCategory": {
+      "CASH_BANK": "現金 / 銀行",
+      "RECEIVABLE": "売掛金",
+      "INVENTORY": "在庫",
+      "INVESTMENT": "投資",
+      "VEHICLE": "車両",
+      "LAND": "土地",
+      "BUILDING": "建物",
+      "BUSINESS_ASSET": "事業用資産",
+      "OTHER": "その他"
+    },
+    "liabilityCategory": {
+      "BANK_LOAN": "銀行ローン",
+      "CREDIT_CARD": "クレジットカード",
+      "PERSONAL_LOAN": "個人ローン",
+      "BUSINESS_LIABILITY": "事業負債",
+      "OTHER": "その他"
     }
   }
 }

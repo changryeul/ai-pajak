@@ -10,10 +10,6 @@ import {
   type CountryCode,
 } from '@/lib/cross-border/foreign-asset-rules';
 import { sumForeignByYear } from '@/lib/snapshots/trend';
-import { AutoSaveIndicator } from '@/components/profile/AutoSaveIndicator';
-import { useAutoSave } from '@/lib/profile/use-auto-save';
-
-const COUNTRIES: readonly CountryCode[] = ['ID', 'KR', 'US', 'JP'];
 
 interface CustomerProfile {
   nationality: CountryCode | null;
@@ -87,27 +83,6 @@ export function ForeignAssetReportingCard() {
 
   useEffect(() => { void load(); }, [load]);
 
-  // Autosave country selections to /api/customer/profile
-  const savePayload = useMemo(() => ({
-    nationality: profile.nationality,
-    tax_residence_country: profile.tax_residence_country,
-  }), [profile.nationality, profile.tax_residence_country]);
-
-  const save = useCallback(async (data: typeof savePayload) => {
-    const res = await fetch('/api/customer/profile', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error('save_failed');
-  }, []);
-
-  const { status: saveStatus, retry } = useAutoSave(savePayload, {
-    save,
-    enabled: !loading,
-  });
-
   // Pick the most recent year with foreign-asset data
   const latestForeign = useMemo(() => {
     const sorted = [...totalForeignByYear].sort((a, b) => b.year - a.year);
@@ -162,53 +137,11 @@ export function ForeignAssetReportingCard() {
               <p className="text-xs text-gray-500 mt-0.5">{t('crossBorder.subtitle')}</p>
             </div>
           </div>
-          <AutoSaveIndicator status={saveStatus} onRetry={retry} />
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-5">
-        {/* Country selectors */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <label className="text-sm">
-            <div className="text-xs text-gray-500 mb-1">{t('crossBorder.nationality')}</div>
-            <select
-              className="w-full p-2.5 border border-gray-200 rounded-lg bg-white focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition"
-              value={profile.nationality ?? ''}
-              onChange={(e) =>
-                setProfile((p) => ({
-                  ...p,
-                  nationality: (e.target.value || null) as CountryCode | null,
-                }))
-              }
-            >
-              <option value="">{t('crossBorder.unspecified')}</option>
-              {COUNTRIES.map((c) => (
-                <option key={c} value={c}>
-                  {t(`crossBorder.country.${c}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm">
-            <div className="text-xs text-gray-500 mb-1">{t('crossBorder.residence')}</div>
-            <select
-              className="w-full p-2.5 border border-gray-200 rounded-lg bg-white focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition"
-              value={profile.tax_residence_country ?? ''}
-              onChange={(e) =>
-                setProfile((p) => ({
-                  ...p,
-                  tax_residence_country: (e.target.value || null) as CountryCode | null,
-                }))
-              }
-            >
-              <option value="">{t('crossBorder.unspecified')}</option>
-              {COUNTRIES.map((c) => (
-                <option key={c} value={c}>
-                  {t(`crossBorder.country.${c}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        {/* Selectors moved to top-level NationalityResidenceCard. This card now
+            just surfaces the home-country threshold result. */}
 
         {/* Summary */}
         {!profile.nationality ? (
