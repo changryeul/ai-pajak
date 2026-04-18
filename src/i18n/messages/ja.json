@@ -5384,5 +5384,19 @@
     "filingDone": "Filed",
     "filingNone": "Not Filed",
     "actionProcess": "Process"
+  },
+  "profile": {
+    "title": "マイプロフィール",
+    "completionLabel": "入力完成度",
+    "completionHint": "申告開始には必須項目の入力が必要です",
+    "jumpToFirstMissing": "↳ 未入力項目へ",
+    "basicInfo": "基本情報",
+    "fullName": "氏名",
+    "identifier": "NPWPまたはNIK",
+    "email": "メール",
+    "phone": "電話",
+    "taxCredentials": "税務アカウント情報",
+    "credentialsNote": "DJP認証情報は暗号化保存され、自動電子申告にのみ使用されます。",
+    "forceSave": "いますぐ保存"
   }
 }

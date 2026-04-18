@@ -5384,5 +5384,19 @@
     "filingDone": "Filed",
     "filingNone": "Not Filed",
     "actionProcess": "Process"
+  },
+  "profile": {
+    "title": "我的资料",
+    "completionLabel": "信息完整度",
+    "completionHint": "填写必填字段才能开始申报",
+    "jumpToFirstMissing": "↳ 跳转到未填字段",
+    "basicInfo": "基本信息",
+    "fullName": "姓名",
+    "identifier": "NPWP 或 NIK",
+    "email": "电子邮件",
+    "phone": "电话",
+    "taxCredentials": "税务凭证",
+    "credentialsNote": "DJP凭证已加密存储,仅用于自动电子申报。",
+    "forceSave": "立即保存"
   }
 }

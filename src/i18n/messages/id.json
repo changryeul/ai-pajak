@@ -5384,5 +5384,19 @@
     "filingDone": "Terlapor",
     "filingNone": "Belum Lapor",
     "actionProcess": "Proses"
+  },
+  "profile": {
+    "title": "Profil Saya",
+    "completionLabel": "Kelengkapan informasi",
+    "completionHint": "Lengkapi informasi wajib untuk mulai melapor",
+    "jumpToFirstMissing": "↳ Buka kolom yang belum diisi",
+    "basicInfo": "Informasi Dasar",
+    "fullName": "Nama Lengkap",
+    "identifier": "NPWP atau NIK",
+    "email": "Email",
+    "phone": "Telepon",
+    "taxCredentials": "Kredensial Pajak",
+    "credentialsNote": "Kredensial DJP disimpan terenkripsi dan hanya digunakan untuk e-Filing otomatis.",
+    "forceSave": "Simpan sekarang"
   }
 }

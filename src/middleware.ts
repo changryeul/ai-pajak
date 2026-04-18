@@ -1,9 +1,11 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+import { createServerClient } from '@supabase/ssr';
 import { LOCALES, DEFAULT_LOCALE } from '@/config/constants';
 import { withRateLimit } from '@/middleware/rate-limit';
 import { getRequestId, REQUEST_ID_HEADER } from '@/middleware/request-id';
+import { getCached, setCached, type OnboardingState } from '@/lib/onboarding/cache';
 
 const intlMiddleware = createMiddleware({
   locales: LOCALES,
@@ -59,8 +61,70 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 // Routes that require authentication
 const protectedRoutes = ['/dashboard', '/tax', '/documents', '/reports', '/settings', '/subscription'];
 
-// Routes that should redirect to dashboard if already authenticated
+// Routes that should redirect to dashboard if already authenticated.
+// NOTE: /register/terms and /register/mandate are part of the onboarding flow
+// and require an authenticated session. The check below uses startsWith on the
+// exact '/register' prefix, so we keep /register here and add an explicit
+// exemption for the onboarding sub-routes.
 const authRoutes = ['/login', '/register', '/forgot-password'];
+
+// Onboarding sub-routes that an INDIVIDUAL customer uses AFTER signup.
+// Accessible while authenticated; not blocked by the authRoutes redirect.
+const onboardingRoutes = ['/register/terms', '/register/mandate'];
+
+/**
+ * Map onboarding_step to the URL the user should be on.
+ *
+ *   step 1 (account created)       → /register/terms   (agree to ToS next)
+ *   step 2 (ToS agreed)            → /register/mandate (sign the mandate next)
+ *   step 3 (mandate signed = done) → no redirect
+ */
+function expectedOnboardingPath(step: number, locale: string): string | null {
+  if (step >= 3) return null;
+  if (step <= 1) return `/${locale}/register/terms`;
+  return `/${locale}/register/mandate`;
+}
+
+/**
+ * Fetch customer_type + onboarding_step for the current user. Cached for
+ * 5 minutes per userId (see @/lib/onboarding/cache). Returns null on error
+ * so the middleware can fall through without 500-ing.
+ */
+async function fetchOnboardingState(
+  request: NextRequest,
+  userId: string,
+): Promise<OnboardingState | null> {
+  const cached = getCached(userId);
+  if (cached) return cached;
+
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => request.cookies.getAll(),
+          setAll: () => {}, // middleware response handles writes elsewhere
+        },
+      },
+    );
+
+    const { data } = await supabase
+      .from('customer')
+      .select('customer_type, onboarding_step')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    const state: OnboardingState = {
+      customerType: (data?.customer_type as OnboardingState['customerType']) ?? null,
+      onboardingStep: (data?.onboarding_step as number | null) ?? null,
+    };
+    setCached(userId, state);
+    return state;
+  } catch {
+    return null;
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -109,9 +173,15 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathWithoutLocale.startsWith(route)
   );
-  const isAuthRoute = authRoutes.some((route) =>
+  const isOnboardingRoute = onboardingRoutes.some((route) =>
     pathWithoutLocale.startsWith(route)
   );
+  // /register itself is an auth route that kicks logged-in users to /dashboard,
+  // BUT its /register/terms and /register/mandate sub-routes are onboarding
+  // steps the user should reach AFTER signing up.
+  const isAuthRoute =
+    !isOnboardingRoute &&
+    authRoutes.some((route) => pathWithoutLocale.startsWith(route));
 
   // Update Supabase session
   const { supabaseResponse, user } = await updateSession(request);
@@ -125,6 +195,21 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user) {
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+  }
+
+  // INDIVIDUAL onboarding enforcement:
+  //   step < 3 means the user has not yet signed the mandate. Prevent access
+  //   to protected routes until onboarding is complete, and funnel them to
+  //   the expected step URL. COMPANY and existing customers (onboarding_step
+  //   NULL) are unaffected.
+  if (user && (isProtectedRoute || isOnboardingRoute)) {
+    const state = await fetchOnboardingState(request, user.id);
+    if (state?.customerType === 'INDIVIDUAL' && state.onboardingStep !== null) {
+      const expected = expectedOnboardingPath(state.onboardingStep, locale);
+      if (expected && !pathname.startsWith(expected)) {
+        return NextResponse.redirect(new URL(expected, request.url));
+      }
+    }
   }
 
   // Merge cookies from supabase response to intl response

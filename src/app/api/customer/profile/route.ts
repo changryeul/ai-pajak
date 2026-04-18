@@ -124,6 +124,74 @@ async function handlePatch(req: RequestWithSession): Promise<Response> {
   }
 }
 
+interface CustomerProfileRow {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  npwp: string | null;
+  nik: string | null;
+  customer_type: 'INDIVIDUAL' | 'COMPANY';
+  ptkp_status: string | null;
+  spouse_name: string | null;
+  spouse_npwp: string | null;
+  spouse_annual_income: number | null;
+  spouse_withheld_tax: number | null;
+  coretax_id: string | null;
+  djp_password_hint: string | null;
+  efin: string | null;
+  onboarding_step: number | null;
+}
+
+async function handleGet(req: RequestWithSession): Promise<Response> {
+  try {
+    const { userId } = req.session;
+    const admin = getSupabaseAdmin();
+
+    const { data, error: fetchErr } = await admin
+      .from('customer')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (fetchErr || !data) {
+      return NextResponse.json(
+        { success: false, error: 'customer_not_found' },
+        { status: 404 }
+      );
+    }
+
+    const customer = data as unknown as CustomerProfileRow;
+
+    const completion = calculateCompletion({
+      name: customer.full_name,
+      idType: customer.npwp ? 'npwp' : 'nik',
+      npwp: customer.npwp,
+      nik: customer.nik,
+      email: customer.email,
+      phone: customer.phone,
+      coretaxId: customer.coretax_id,
+      djpPassword: customer.djp_password_hint,
+      efin: customer.efin,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: { customer, completion },
+    });
+  } catch (err) {
+    loggers.api.error({ err }, 'profile GET exception');
+    return NextResponse.json({ success: false, error: 'server_error' }, { status: 500 });
+  }
+}
+
+export async function GET(request: NextRequest) {
+  return composeMiddleware(
+    requireAuth,
+    requireRole(UserRole.CUSTOMER),
+  )(request as RequestWithSession, handleGet);
+}
+
 export async function PATCH(request: NextRequest) {
   return composeMiddleware(
     requireAuth,

@@ -5384,5 +5384,19 @@
     "filingDone": "Filed",
     "filingNone": "Not Filed",
     "actionProcess": "Process"
+  },
+  "profile": {
+    "title": "My Profile",
+    "completionLabel": "Profile completeness",
+    "completionHint": "Fill in required fields to start filing",
+    "jumpToFirstMissing": "↳ Jump to the first missing field",
+    "basicInfo": "Basic Info",
+    "fullName": "Full name",
+    "identifier": "Tax ID (NPWP or NIK)",
+    "email": "Email",
+    "phone": "Phone",
+    "taxCredentials": "Tax credentials",
+    "credentialsNote": "DJP credentials are stored encrypted and only used for automated e-Filing.",
+    "forceSave": "Save now"
   }
 }

@@ -5385,5 +5385,19 @@
     "filingDone": "완료",
     "filingNone": "미신고",
     "actionProcess": "처리하기"
+  },
+  "profile": {
+    "title": "내 프로필",
+    "completionLabel": "정보 완성도",
+    "completionHint": "필수 항목을 채워야 신고를 시작할 수 있습니다",
+    "jumpToFirstMissing": "↳ 미완성 항목으로 이동",
+    "basicInfo": "기본 정보",
+    "fullName": "이름",
+    "identifier": "NPWP 또는 NIK",
+    "email": "이메일",
+    "phone": "전화번호",
+    "taxCredentials": "세무 계정 정보",
+    "credentialsNote": "DJP 계정 정보는 암호화 저장되며 자동 전자신고에만 사용됩니다.",
+    "forceSave": "바로 저장"
   }
 }
