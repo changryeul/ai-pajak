@@ -5399,5 +5399,24 @@
     "taxCredentials": "세무 계정 정보",
     "credentialsNote": "DJP 계정 정보는 암호화 저장되며 자동 전자신고에만 사용됩니다.",
     "forceSave": "바로 저장"
+  },
+  "spouse": {
+    "title": "결혼 상태 및 부양가족",
+    "maritalStatus": "결혼 상태",
+    "single": "미혼",
+    "married": "기혼",
+    "filingMode": "세금 신고 방식",
+    "separateFiling": "개별 신고 (부부 각자 NPWP)",
+    "separateHint": "남편/아내가 각각 신고",
+    "jointFiling": "통합 신고 (배우자 소득 합산)",
+    "jointHint": "하나의 NPWP, 가족 소득 합산",
+    "spouseName": "배우자 이름",
+    "spouseNpwp": "배우자 NPWP",
+    "spouseIncome": "배우자 연간 소득 (IDR)",
+    "spouseWithheld": "배우자 원천세 (IDR)",
+    "dependents": "부양가족 수",
+    "dependentsHint": "최대 3명 (UU PPh 제7조). 일하지 않는 배우자는 여기서 제외됨.",
+    "ptkpStatus": "PTKP 상태",
+    "ptkpExplain": "PTKP = 비과세 소득 한도. 위 선택으로 자동 계산됩니다."
   }
 }

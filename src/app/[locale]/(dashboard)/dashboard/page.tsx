@@ -34,6 +34,7 @@ import {
 import { CurrentPlanWidget } from '@/components/dashboard/CurrentPlanWidget';
 import { CustomPricingWidget } from '@/components/dashboard/CustomPricingWidget';
 import { CorporateDashboardV2 } from '@/components/dashboard/CorporateDashboardV2';
+import { SpouseAndDependentsCard } from '@/components/dashboard/SpouseAndDependentsCard';
 import { usePageTitle } from '@/components/layout/PageTitle';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
@@ -564,6 +565,9 @@ function CustomerDashboard({
         <FilingSummaryWidget customerId={session.customerId} />
         <DeadlineCalendar customerId={session.customerId} />
       </div>
+
+      {/* Spouse + dependents → live PTKP status for annual filing */}
+      <SpouseAndDependentsCard />
 
       {/* Custom pricing quote (only renders when there is something to act on) */}
       <CustomPricingWidget />

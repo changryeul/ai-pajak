@@ -14,6 +14,13 @@ interface Options<T> {
    * hydrated from the server. Default true.
    */
   skipFirst?: boolean;
+  /**
+   * When false, all saves are suppressed. Use this to gate autosave on an
+   * async seed fetch (render with defaults → fetch server state → flip enabled)
+   * so the defaults never overwrite the persisted values.
+   * Default true (backwards compatible).
+   */
+  enabled?: boolean;
 }
 
 /**
@@ -30,7 +37,7 @@ export function useAutoSave<T>(value: T, options: Options<T>): {
   status: AutoSaveStatus;
   retry: () => void;
 } {
-  const { delay = 300, save, skipFirst = true } = options;
+  const { delay = 300, save, skipFirst = true, enabled = true } = options;
   const [status, setStatus] = useState<AutoSaveStatus>('idle');
   const isFirstRun = useRef(skipFirst);
   const latestValue = useRef(value);
@@ -53,6 +60,7 @@ export function useAutoSave<T>(value: T, options: Options<T>): {
   }, [save]);
 
   useEffect(() => {
+    if (!enabled) return;
     if (isFirstRun.current) {
       isFirstRun.current = false;
       return;
@@ -65,7 +73,7 @@ export function useAutoSave<T>(value: T, options: Options<T>): {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, delay, doSave]);
+  }, [value, delay, doSave, enabled]);
 
   // Cleanup reset timer on unmount
   useEffect(() => {

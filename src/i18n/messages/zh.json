@@ -5398,5 +5398,24 @@
     "taxCredentials": "税务凭证",
     "credentialsNote": "DJP凭证已加密存储,仅用于自动电子申报。",
     "forceSave": "立即保存"
+  },
+  "spouse": {
+    "title": "婚姻状态和抚养人",
+    "maritalStatus": "婚姻状态",
+    "single": "单身",
+    "married": "已婚",
+    "filingMode": "税务申报方式",
+    "separateFiling": "分开申报(夫妻各自NPWP)",
+    "separateHint": "丈夫和妻子分开申报",
+    "jointFiling": "合并申报(配偶收入合并)",
+    "jointHint": "单一NPWP,家庭收入合并",
+    "spouseName": "配偶姓名",
+    "spouseNpwp": "配偶NPWP",
+    "spouseIncome": "配偶年收入(IDR)",
+    "spouseWithheld": "配偶已代扣税(IDR)",
+    "dependents": "抚养人数",
+    "dependentsHint": "最多3人(UU PPh第7条)。无工作的配偶不计入此处。",
+    "ptkpStatus": "PTKP状态",
+    "ptkpExplain": "PTKP为非应税收入门槛。根据上述选择自动计算。"
   }
 }

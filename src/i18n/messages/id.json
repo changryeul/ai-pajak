@@ -5398,5 +5398,24 @@
     "taxCredentials": "Kredensial Pajak",
     "credentialsNote": "Kredensial DJP disimpan terenkripsi dan hanya digunakan untuk e-Filing otomatis.",
     "forceSave": "Simpan sekarang"
+  },
+  "spouse": {
+    "title": "Status Pernikahan & Tanggungan",
+    "maritalStatus": "Status pernikahan",
+    "single": "Lajang",
+    "married": "Menikah",
+    "filingMode": "Cara pelaporan pajak",
+    "separateFiling": "Laporan terpisah (masing-masing NPWP)",
+    "separateHint": "Suami dan istri melapor sendiri",
+    "jointFiling": "Laporan gabungan (penghasilan istri digabung)",
+    "jointHint": "Satu NPWP, total penghasilan keluarga",
+    "spouseName": "Nama pasangan",
+    "spouseNpwp": "NPWP pasangan",
+    "spouseIncome": "Penghasilan tahunan pasangan (IDR)",
+    "spouseWithheld": "Pajak pasangan yang dipotong (IDR)",
+    "dependents": "Jumlah tanggungan",
+    "dependentsHint": "Maksimum 3 orang (UU PPh Pasal 7). Istri dan suami yang tidak bekerja tidak termasuk di sini.",
+    "ptkpStatus": "Status PTKP",
+    "ptkpExplain": "PTKP = penghasilan tidak kena pajak. Dihitung otomatis dari pilihan di atas."
   }
 }

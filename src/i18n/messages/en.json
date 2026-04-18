@@ -5398,5 +5398,24 @@
     "taxCredentials": "Tax credentials",
     "credentialsNote": "DJP credentials are stored encrypted and only used for automated e-Filing.",
     "forceSave": "Save now"
+  },
+  "spouse": {
+    "title": "Marital Status & Dependents",
+    "maritalStatus": "Marital status",
+    "single": "Single",
+    "married": "Married",
+    "filingMode": "Tax filing mode",
+    "separateFiling": "Separate filing (each spouse has own NPWP)",
+    "separateHint": "Husband and wife file separately",
+    "jointFiling": "Joint filing (spouse income combined)",
+    "jointHint": "One NPWP, combined family income",
+    "spouseName": "Spouse name",
+    "spouseNpwp": "Spouse NPWP",
+    "spouseIncome": "Spouse annual income (IDR)",
+    "spouseWithheld": "Spouse withheld tax (IDR)",
+    "dependents": "Number of dependents",
+    "dependentsHint": "Maximum 3 people (UU PPh Article 7). Non-working spouses are not counted here.",
+    "ptkpStatus": "PTKP status",
+    "ptkpExplain": "PTKP is the non-taxable income threshold. Calculated automatically from your selection above."
   }
 }

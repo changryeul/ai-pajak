@@ -5398,5 +5398,24 @@
     "taxCredentials": "税務アカウント情報",
     "credentialsNote": "DJP認証情報は暗号化保存され、自動電子申告にのみ使用されます。",
     "forceSave": "いますぐ保存"
+  },
+  "spouse": {
+    "title": "婚姻状況・扶養家族",
+    "maritalStatus": "婚姻状況",
+    "single": "独身",
+    "married": "既婚",
+    "filingMode": "税務申告方式",
+    "separateFiling": "個別申告 (夫妻それぞれの NPWP)",
+    "separateHint": "夫と妻がそれぞれ申告",
+    "jointFiling": "合算申告 (配偶者所得を合算)",
+    "jointHint": "一つの NPWP、家族所得合算",
+    "spouseName": "配偶者氏名",
+    "spouseNpwp": "配偶者 NPWP",
+    "spouseIncome": "配偶者の年収 (IDR)",
+    "spouseWithheld": "配偶者の源泉徴収税 (IDR)",
+    "dependents": "扶養家族の人数",
+    "dependentsHint": "最大3人 (UU PPh 第7条)。無職の配偶者はここに含まれません。",
+    "ptkpStatus": "PTKP ステータス",
+    "ptkpExplain": "PTKP は非課税所得限度。上記の選択から自動計算されます。"
   }
 }
