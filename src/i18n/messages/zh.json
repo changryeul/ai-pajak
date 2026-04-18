@@ -5462,5 +5462,28 @@
     },
     "notePlaceholder": "备注(可选)",
     "saveAnswer": "保存答案"
+  },
+  "crossBorder": {
+    "title": "境外资产申报义务检查",
+    "nationality": "国籍",
+    "residence": "税务居住地",
+    "unspecified": "— 未指定 —",
+    "pickNationalityHint": "选择国籍以评估母国规则。",
+    "noExtraRule": "此国籍除年度申报外无额外境外资产申报义务。",
+    "requiredTitle": "⚠ 可能需要在{country}申报",
+    "okTitle": "低于{country}门槛",
+    "comparison": "境外资产{total} vs 门槛{threshold} ({ratio}).",
+    "ratesAsOf": "汇率参考 {date}",
+    "referenceLink": "查看官方指南",
+    "disclaimer": "本信息基于人工维护的汇率和门槛,为近似值。正式申报决定请咨询母国税务顾问。",
+    "country": {
+      "ID": "印度尼西亚",
+      "KR": "韩国",
+      "US": "美国",
+      "JP": "日本"
+    },
+    "KR": "韩国境外账户申报 (5亿KRW)",
+    "US": "FBAR (1万美元)",
+    "JP": "日本境外财产 (5000万日元)"
   }
 }

@@ -36,6 +36,7 @@ import { CustomPricingWidget } from '@/components/dashboard/CustomPricingWidget'
 import { CorporateDashboardV2 } from '@/components/dashboard/CorporateDashboardV2';
 import { SpouseAndDependentsCard } from '@/components/dashboard/SpouseAndDependentsCard';
 import { GrowthAnomalyCard } from '@/components/dashboard/GrowthAnomalyCard';
+import { ForeignAssetReportingCard } from '@/components/dashboard/ForeignAssetReportingCard';
 import { usePageTitle } from '@/components/layout/PageTitle';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
@@ -572,6 +573,9 @@ function CustomerDashboard({
 
       {/* Asset growth anomaly detection (T-002) + funding-source survey (T-003) */}
       <GrowthAnomalyCard />
+
+      {/* Home-country foreign-asset reporting threshold (T-004 + T-005) */}
+      <ForeignAssetReportingCard />
 
       {/* Custom pricing quote (only renders when there is something to act on) */}
       <CustomPricingWidget />

@@ -5462,5 +5462,28 @@
     },
     "notePlaceholder": "Additional notes (optional)",
     "saveAnswer": "Save answer"
+  },
+  "crossBorder": {
+    "title": "Foreign-Asset Reporting Check",
+    "nationality": "Nationality",
+    "residence": "Tax residence",
+    "unspecified": "— not set —",
+    "pickNationalityHint": "Pick your nationality to evaluate home-country rules.",
+    "noExtraRule": "No additional foreign-asset reporting obligation for this nationality beyond the local return.",
+    "requiredTitle": "⚠ You likely need to file in {country}",
+    "okTitle": "Below {country} threshold",
+    "comparison": "Your foreign assets {total} vs threshold {threshold} ({ratio}).",
+    "ratesAsOf": "Approximate FX as of {date}",
+    "referenceLink": "Official guidance",
+    "disclaimer": "This is an approximation using manually-maintained exchange rates and thresholds. For official filing decisions consult an advisor in your home country.",
+    "country": {
+      "ID": "Indonesia",
+      "KR": "Korea",
+      "US": "United States",
+      "JP": "Japan"
+    },
+    "KR": "Korea overseas-account report (500M KRW)",
+    "US": "FBAR (USD 10,000)",
+    "JP": "Japan overseas assets (50M JPY)"
   }
 }

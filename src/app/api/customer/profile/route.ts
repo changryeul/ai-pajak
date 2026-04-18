@@ -46,6 +46,10 @@ const patchSchema = z.object({
   coretax_id: z.string().trim().max(100).nullable().optional(),
   djp_password_hint: z.string().trim().max(100).nullable().optional(),
   efin: z.string().trim().max(20).nullable().optional(),
+  // Cross-border profile (PR3 Batch 3 / T-005). ISO 3166-1 alpha-2.
+  // The DB CHECK constraint enforces the supported subset.
+  nationality: z.enum(['ID', 'KR', 'US', 'JP']).nullable().optional(),
+  tax_residence_country: z.enum(['ID', 'KR', 'US', 'JP']).nullable().optional(),
 });
 
 async function handlePatch(req: RequestWithSession): Promise<Response> {
@@ -141,6 +145,8 @@ interface CustomerProfileRow {
   djp_password_hint: string | null;
   efin: string | null;
   onboarding_step: number | null;
+  nationality: 'ID' | 'KR' | 'US' | 'JP' | null;
+  tax_residence_country: 'ID' | 'KR' | 'US' | 'JP' | null;
 }
 
 async function handleGet(req: RequestWithSession): Promise<Response> {

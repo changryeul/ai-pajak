@@ -5462,5 +5462,28 @@
     },
     "notePlaceholder": "追加メモ (任意)",
     "saveAnswer": "回答を保存"
+  },
+  "crossBorder": {
+    "title": "国外資産報告義務チェック",
+    "nationality": "国籍",
+    "residence": "税務上の居住地",
+    "unspecified": "— 未指定 —",
+    "pickNationalityHint": "国籍を選ぶと母国のルールを評価します。",
+    "noExtraRule": "この国籍には年次申告以外の追加報告義務はありません。",
+    "requiredTitle": "⚠ {country}で報告が必要な可能性",
+    "okTitle": "{country}の基準以下",
+    "comparison": "国外資産{total} vs 基準{threshold} ({ratio}).",
+    "ratesAsOf": "為替近似 {date}",
+    "referenceLink": "公式ガイドを見る",
+    "disclaimer": "手動更新の為替・基準による概算です。正式な申告判断は母国の税理士にご相談ください。",
+    "country": {
+      "ID": "インドネシア",
+      "KR": "韓国",
+      "US": "アメリカ",
+      "JP": "日本"
+    },
+    "KR": "海外金融口座報告 (5億KRW)",
+    "US": "FBAR (USD 10,000)",
+    "JP": "国外財産調書 (5千万JPY)"
   }
 }

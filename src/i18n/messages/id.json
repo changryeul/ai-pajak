@@ -5462,5 +5462,28 @@
     },
     "notePlaceholder": "Catatan tambahan (opsional)",
     "saveAnswer": "Simpan jawaban"
+  },
+  "crossBorder": {
+    "title": "Kewajiban Pelaporan Aset Luar Negeri",
+    "nationality": "Kewarganegaraan",
+    "residence": "Negara tempat tinggal pajak",
+    "unspecified": "— belum ditentukan —",
+    "pickNationalityHint": "Pilih kewarganegaraan Anda untuk memeriksa aturan negara asal.",
+    "noExtraRule": "Tidak ada kewajiban pelaporan aset luar negeri tambahan untuk kewarganegaraan ini di luar SPT Tahunan.",
+    "requiredTitle": "⚠ Kemungkinan perlu lapor di {country}",
+    "okTitle": "Di bawah ambang {country}",
+    "comparison": "Aset luar negeri Anda {total} vs ambang {threshold} ({ratio}).",
+    "ratesAsOf": "Kurs perkiraan per {date}",
+    "referenceLink": "Lihat panduan resmi",
+    "disclaimer": "Informasi ini adalah perkiraan berdasarkan kurs mata uang dan ambang yang diperbarui manual. Untuk keputusan pelaporan resmi, konsultasikan dengan penasihat pajak di negara asal Anda.",
+    "country": {
+      "ID": "Indonesia",
+      "KR": "Korea",
+      "US": "Amerika Serikat",
+      "JP": "Jepang"
+    },
+    "KR": "해외금융계좌 신고 (500M KRW)",
+    "US": "FBAR (USD 10,000)",
+    "JP": "国外財産調書 (50M JPY)"
   }
 }
