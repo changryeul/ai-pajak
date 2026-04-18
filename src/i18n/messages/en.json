@@ -5613,5 +5613,24 @@
       "BUSINESS_LIABILITY": "Business liability",
       "OTHER": "Other"
     }
+  },
+  "assetsPage": {
+    "title": "Assets and Liabilities",
+    "subtitle": "Maintain your year-end balance sheet snapshots for SPT 1770.",
+    "backToDashboard": "Back to dashboard",
+    "taxYear": "Tax year",
+    "total": "Total",
+    "addAsset": "Add asset",
+    "addLiability": "Add liability",
+    "category": "Category",
+    "amountIdr": "Amount (IDR)",
+    "label": "Label",
+    "labelPlaceholder": "e.g. BCA main account",
+    "liaLabelPlaceholder": "e.g. Mortgage",
+    "creditor": "Creditor name",
+    "creditorPlaceholder": "e.g. Bank Mandiri",
+    "foreign": "Foreign",
+    "isForeign": "Foreign asset",
+    "footnote": "These snapshots auto-fill the SPT 1770 \"Harta dan Kewajiban\" section and power asset-growth anomaly detection."
   }
 }

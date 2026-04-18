@@ -5614,5 +5614,24 @@
       "BUSINESS_LIABILITY": "사업 부채",
       "OTHER": "기타"
     }
+  },
+  "assetsPage": {
+    "title": "자산 · 부채 관리",
+    "subtitle": "SPT 1770 작성용 연말 재무상태 스냅샷을 관리합니다.",
+    "backToDashboard": "대시보드로 돌아가기",
+    "taxYear": "과세 연도",
+    "total": "합계",
+    "addAsset": "자산 추가",
+    "addLiability": "부채 추가",
+    "category": "분류",
+    "amountIdr": "금액 (IDR)",
+    "label": "메모",
+    "labelPlaceholder": "예: BCA 주거래 계좌",
+    "liaLabelPlaceholder": "예: 주택담보 대출",
+    "creditor": "채권자명",
+    "creditorPlaceholder": "예: Bank Mandiri",
+    "foreign": "해외",
+    "isForeign": "해외 자산",
+    "footnote": "이 스냅샷은 SPT 1770 \"Harta dan Kewajiban\" 자동 작성과 자산 증가율 이상 탐지에 사용됩니다."
   }
 }

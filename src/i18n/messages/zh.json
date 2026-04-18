@@ -5613,5 +5613,24 @@
       "BUSINESS_LIABILITY": "业务负债",
       "OTHER": "其他"
     }
+  },
+  "assetsPage": {
+    "title": "资产与负债管理",
+    "subtitle": "维护用于 SPT 1770 申报的年末资产·负债快照。",
+    "backToDashboard": "返回仪表板",
+    "taxYear": "税务年度",
+    "total": "合计",
+    "addAsset": "添加资产",
+    "addLiability": "添加负债",
+    "category": "类别",
+    "amountIdr": "金额 (IDR)",
+    "label": "备注",
+    "labelPlaceholder": "例如:BCA 主账户",
+    "liaLabelPlaceholder": "例如:房屋贷款",
+    "creditor": "债权人名称",
+    "creditorPlaceholder": "例如:Bank Mandiri",
+    "foreign": "境外",
+    "isForeign": "境外资产",
+    "footnote": "此快照用于 SPT 1770\"Harta dan Kewajiban\"自动填充以及资产增长异常检测。"
   }
 }

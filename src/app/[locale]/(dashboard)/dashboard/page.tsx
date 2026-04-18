@@ -602,17 +602,18 @@ function CustomerDashboard({
       {/* Custom pricing quote (only renders when there is something to act on) */}
       <CustomPricingWidget />
 
-      {/* Getting Started Guide */}
+      {/* Getting Started Guide — dismissible onboarding checklist for new users */}
       <GettingStartedGuide customerId={session.customerId} userName={session.fullName} />
 
-      {/* Compliance Score */}
-      <ComplianceScoreWidget />
-
-      {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <TaxSummaryChart customerId={session.customerId} />
-        <FilingStatusChart customerId={session.customerId} />
-      </div>
+      {/*
+        Removed 2026-04-18 as part of the hybrid dashboard cleanup:
+          - ComplianceScoreWidget: duplicates profile-completion signal already
+            present in ProfileCompletenessBanner + getting-started checklist
+          - TaxSummaryChart + FilingStatusChart: for brand-new INDIVIDUAL
+            customers these always render "아직 데이터 없음" empty states,
+            creating dead air. RecentFilingsCard covers the same surface.
+        Re-add via feature flag if analytics users request them back.
+      */}
     </div>
   );
 }

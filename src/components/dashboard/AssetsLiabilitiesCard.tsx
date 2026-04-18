@@ -141,7 +141,7 @@ export function AssetsLiabilitiesCard() {
             <div className="p-6 text-center text-sm text-gray-500 space-y-2">
               <p>{t('assetsLiabilities.emptyAssets')}</p>
               <Link
-                href={`/${locale}/tax/spt-tahunan`}
+                href={`/${locale}/assets`}
                 className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700"
               >
                 {t('assetsLiabilities.addEntry')} <ArrowRight className="h-4 w-4" />
@@ -190,7 +190,7 @@ export function AssetsLiabilitiesCard() {
             <div className="p-6 text-center text-sm text-gray-500 space-y-2">
               <p>{t('assetsLiabilities.emptyLiabilities')}</p>
               <Link
-                href={`/${locale}/tax/spt-tahunan`}
+                href={`/${locale}/assets`}
                 className="inline-flex items-center gap-1 text-sm text-rose-600 hover:text-rose-700"
               >
                 {t('assetsLiabilities.addEntry')} <ArrowRight className="h-4 w-4" />

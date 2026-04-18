@@ -5613,5 +5613,24 @@
       "BUSINESS_LIABILITY": "Kewajiban usaha",
       "OTHER": "Lainnya"
     }
+  },
+  "assetsPage": {
+    "title": "Harta dan Kewajiban",
+    "subtitle": "Kelola snapshot aset & kewajiban tahunan untuk SPT 1770.",
+    "backToDashboard": "Kembali ke Dasbor",
+    "taxYear": "Tahun pajak",
+    "total": "Total",
+    "addAsset": "Tambah Aset",
+    "addLiability": "Tambah Kewajiban",
+    "category": "Kategori",
+    "amountIdr": "Nilai (IDR)",
+    "label": "Label",
+    "labelPlaceholder": "Contoh: Bank BCA utama",
+    "liaLabelPlaceholder": "Contoh: Cicilan rumah",
+    "creditor": "Nama kreditor",
+    "creditorPlaceholder": "Contoh: Bank Mandiri",
+    "foreign": "Luar negeri",
+    "isForeign": "Aset di luar negeri",
+    "footnote": "Snapshot ini digunakan untuk mengisi SPT 1770 \"Harta dan Kewajiban\" otomatis dan untuk deteksi pertumbuhan aset."
   }
 }

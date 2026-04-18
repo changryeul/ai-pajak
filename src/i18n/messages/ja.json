@@ -5613,5 +5613,24 @@
       "BUSINESS_LIABILITY": "事業負債",
       "OTHER": "その他"
     }
+  },
+  "assetsPage": {
+    "title": "資産・負債管理",
+    "subtitle": "SPT 1770 記入用に年末の資産・負債スナップショットを管理します。",
+    "backToDashboard": "ダッシュボードに戻る",
+    "taxYear": "課税年度",
+    "total": "合計",
+    "addAsset": "資産を追加",
+    "addLiability": "負債を追加",
+    "category": "区分",
+    "amountIdr": "金額 (IDR)",
+    "label": "メモ",
+    "labelPlaceholder": "例: BCA メイン口座",
+    "liaLabelPlaceholder": "例: 住宅ローン",
+    "creditor": "債権者名",
+    "creditorPlaceholder": "例: Bank Mandiri",
+    "foreign": "海外",
+    "isForeign": "海外資産",
+    "footnote": "このスナップショットは SPT 1770「Harta dan Kewajiban」の自動記入および資産増加率異常検知に使用されます。"
   }
 }
