@@ -44,7 +44,15 @@ ALTER TABLE customer
   ADD COLUMN IF NOT EXISTS spouse_withheld_tax NUMERIC(18, 2),
 
   -- Optional self-reference if the spouse also registers. Filled by trigger below.
-  ADD COLUMN IF NOT EXISTS spouse_customer_id UUID REFERENCES customer(id);
+  ADD COLUMN IF NOT EXISTS spouse_customer_id UUID REFERENCES customer(id),
+
+  -- Tax-portal credentials hints (not the actual secrets — see notes below).
+  -- Stored on customer so INDIVIDUAL + COMPANY both have the same profile surface.
+  -- `coretax_id` is a public identifier. `djp_password_hint` and `efin` are
+  -- sensitive — production should encrypt at rest (T-009 / PDP follow-up).
+  ADD COLUMN IF NOT EXISTS coretax_id VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS djp_password_hint VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS efin VARCHAR(20);
 
 -- Enforce onboarding_step range (1..3) — NULL allowed for COMPANY
 ALTER TABLE customer
