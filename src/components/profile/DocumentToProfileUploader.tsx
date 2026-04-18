@@ -4,23 +4,29 @@ import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { Button } from '@/components/ui/button';
-import { FileUp, Loader2, Users } from 'lucide-react';
+import { FileText, FileUp, Loader2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ProfileFillProposal } from '@/components/profile/ProfileFillProposal';
 import {
   mapA1ToProfileProposals,
+  mapKKToProfileProposals,
   proposalsToPatchPayload,
   type FieldProposal,
   type ProposalContext,
 } from '@/lib/profile/from-ocr';
 import type { Form1721A1Data } from '@/lib/ocr/form-1721-a1';
+import type { KartuKeluargaData } from '@/lib/ocr/family-card-types';
+import type { PTKPStatus } from '@/lib/tax/shared/types';
 
 type Phase = 'idle' | 'uploading' | 'proposing' | 'applying' | 'done' | 'error';
+type DocKind = 'A1' | 'KK';
 
 interface CurrentProfile {
   full_name?: string | null;
   npwp?: string | null;
   nik?: string | null;
+  address?: string | null;
+  ptkp_status?: PTKPStatus | null;
   spouse_name?: string | null;
   spouse_npwp?: string | null;
   spouse_annual_income?: number | null;
@@ -47,6 +53,7 @@ interface Props {
 export function DocumentToProfileUploader({ current, onApplied }: Props) {
   const t = useTranslations();
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const [docKind, setDocKind] = useState<DocKind>('A1');
   const [context, setContext] = useState<ProposalContext>('self');
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState('');
@@ -65,7 +72,10 @@ export function DocumentToProfileUploader({ current, onApplied }: Props) {
     try {
       const form = new FormData();
       form.append('file', file);
-      form.append('expectedCategory', 'BUKTI_POTONG');
+      form.append(
+        'expectedCategory',
+        docKind === 'KK' ? 'KARTU_KELUARGA' : 'BUKTI_POTONG',
+      );
       const res = await fetch('/api/documents/ocr-extract', {
         method: 'POST',
         body: form,
@@ -77,10 +87,17 @@ export function DocumentToProfileUploader({ current, onApplied }: Props) {
         setPhase('error');
         return;
       }
-      // processForm1721A1 returns OCRResult with extractedData of type Form1721A1Data
-      const ocrData = (json.data?.extractedData ?? json.data) as Form1721A1Data;
-      const out = mapA1ToProfileProposals(ocrData, current, context);
-      setProposals(out);
+
+      if (docKind === 'KK') {
+        const kkData = (json.data?.extractedData ?? json.data) as KartuKeluargaData;
+        const out = mapKKToProfileProposals(kkData, current);
+        setProposals(out);
+      } else {
+        // processForm1721A1 returns OCRResult with extractedData of type Form1721A1Data
+        const ocrData = (json.data?.extractedData ?? json.data) as Form1721A1Data;
+        const out = mapA1ToProfileProposals(ocrData, current, context);
+        setProposals(out);
+      }
       setPhase('proposing');
     } catch {
       setError(t('errors.serverError'));
@@ -118,7 +135,13 @@ export function DocumentToProfileUploader({ current, onApplied }: Props) {
         applying={phase === 'applying'}
         onApply={handleApply}
         onDismiss={reset}
-        sourceLabel={context === 'spouse' ? t('profile.ocrForSpouse') : t('profile.ocrForSelf')}
+        sourceLabel={
+          docKind === 'KK'
+            ? t('profile.ocrDocKK')
+            : context === 'spouse'
+              ? t('profile.ocrForSpouse')
+              : t('profile.ocrForSelf')
+        }
       />
     );
   }
@@ -134,39 +157,78 @@ export function DocumentToProfileUploader({ current, onApplied }: Props) {
       <CardContent className="space-y-4">
         <p className="text-xs text-gray-500">{t('profile.ocrUploadIntro')}</p>
 
-        {/* Context toggle: self vs spouse */}
+        {/* Document type toggle: 1721-A1 vs KK (Kartu Keluarga) */}
         <fieldset>
           <legend className="text-sm font-medium mb-2 flex items-center gap-1">
-            <Users className="h-3 w-3" />
-            {t('profile.ocrWhose')}
+            <FileText className="h-3 w-3" />
+            {t('profile.ocrDocType')}
           </legend>
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setContext('self')}
+              onClick={() => setDocKind('A1')}
               className={cn(
                 'px-3 py-1.5 rounded border text-sm transition-colors',
-                context === 'self'
+                docKind === 'A1'
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
               )}
             >
-              {t('profile.ocrForSelf')}
+              {t('profile.ocrDocA1')}
             </button>
             <button
               type="button"
-              onClick={() => setContext('spouse')}
+              onClick={() => setDocKind('KK')}
               className={cn(
                 'px-3 py-1.5 rounded border text-sm transition-colors',
-                context === 'spouse'
-                  ? 'bg-blue-600 text-white border-blue-600'
+                docKind === 'KK'
+                  ? 'bg-fuchsia-600 text-white border-fuchsia-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
               )}
             >
-              {t('profile.ocrForSpouse')}
+              {t('profile.ocrDocKK')}
             </button>
           </div>
+          <p className="text-[11px] text-gray-500 mt-1">
+            {docKind === 'A1' ? t('profile.ocrDocA1Hint') : t('profile.ocrDocKKHint')}
+          </p>
         </fieldset>
+
+        {/* Context toggle (only relevant for 1721-A1): self vs spouse */}
+        {docKind === 'A1' && (
+          <fieldset>
+            <legend className="text-sm font-medium mb-2 flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {t('profile.ocrWhose')}
+            </legend>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setContext('self')}
+                className={cn(
+                  'px-3 py-1.5 rounded border text-sm transition-colors',
+                  context === 'self'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
+                )}
+              >
+                {t('profile.ocrForSelf')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setContext('spouse')}
+                className={cn(
+                  'px-3 py-1.5 rounded border text-sm transition-colors',
+                  context === 'spouse'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
+                )}
+              >
+                {t('profile.ocrForSpouse')}
+              </button>
+            </div>
+          </fieldset>
+        )}
 
         {/* Upload picker */}
         <label className="block">

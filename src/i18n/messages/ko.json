@@ -5446,7 +5446,12 @@
     "proposalConflictTag": "충돌",
     "proposalApply": "선택한 {count}개 적용",
     "npwp": "NPWP",
-    "nik": "NIK"
+    "nik": "NIK",
+    "ocrDocType": "문서 종류",
+    "ocrDocA1": "1721-A1 (원천징수영수증)",
+    "ocrDocKK": "KK (가족관계카드)",
+    "ocrDocA1Hint": "고용주가 발급한 원천징수영수증 — 이름, NPWP, 소득을 자동 입력합니다.",
+    "ocrDocKKHint": "Kartu Keluarga — 이름, NIK, 주소, 배우자, 부양가족 수 기반 PTKP 를 자동 입력합니다."
   },
   "spouse": {
     "title": "결혼 상태 및 부양가족",

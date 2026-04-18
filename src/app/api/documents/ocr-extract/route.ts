@@ -4,6 +4,7 @@ import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
 import { processForm1721A1 } from '@/lib/ocr/form-1721-a1';
 import { processDocument } from '@/lib/ocr/processor';
 import { processReceipt } from '@/lib/ocr/receipt-processor';
+import { extractKartuKeluarga } from '@/lib/ocr/family-card';
 import type { DocumentCategory, OCRResult } from '@/lib/ocr/types';
 import Anthropic from '@anthropic-ai/sdk';
 import { loggers } from '@/lib/logger';
@@ -81,6 +82,29 @@ export async function POST(request: NextRequest) {
         base64,
         file.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
       );
+    } else if (expectedCategory === 'KARTU_KELUARGA') {
+      // Specialised KK parser — returns KartuKeluargaData or null.
+      // Wrap in the OCRResult envelope so the client handler can treat
+      // all OCR responses uniformly.
+      const kk = await extractKartuKeluarga(
+        base64,
+        file.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif',
+      );
+      if (!kk) {
+        return NextResponse.json(
+          { error: 'KK OCR failed — could not parse the document' },
+          { status: 500 },
+        );
+      }
+      result = {
+        documentId,
+        status: 'COMPLETED' as const,
+        category: 'KARTU_KELUARGA' as const,
+        confidence: kk.confidence,
+        rawText: kk.rawText,
+        extractedData: kk as unknown as Record<string, unknown>,
+        processingTimeMs: 0,
+      };
     } else {
       // General OCR
       result = await processDocument(

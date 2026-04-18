@@ -5445,7 +5445,12 @@
     "proposalConflictTag": "冲突",
     "proposalApply": "应用选中的{count}项",
     "npwp": "NPWP",
-    "nik": "NIK"
+    "nik": "NIK",
+    "ocrDocType": "文档类型",
+    "ocrDocA1": "1721-A1(扣缴凭证)",
+    "ocrDocKK": "KK(家庭卡)",
+    "ocrDocA1Hint": "雇主开具的扣缴凭证 — 自动填充姓名、NPWP 和收入。",
+    "ocrDocKKHint": "Kartu Keluarga — 自动填充姓名、NIK、地址、配偶和 PTKP(基于家属数量)。"
   },
   "spouse": {
     "title": "婚姻状态和抚养人",

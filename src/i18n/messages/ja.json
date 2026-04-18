@@ -5445,7 +5445,12 @@
     "proposalConflictTag": "競合",
     "proposalApply": "選択した{count}件を適用",
     "npwp": "NPWP",
-    "nik": "NIK"
+    "nik": "NIK",
+    "ocrDocType": "書類の種類",
+    "ocrDocA1": "1721-A1(源泉徴収票)",
+    "ocrDocKK": "KK(家族登録カード)",
+    "ocrDocA1Hint": "雇用者発行の源泉徴収票 — 氏名・NPWP・所得を自動入力。",
+    "ocrDocKKHint": "Kartu Keluarga — 氏名・NIK・住所・配偶者・扶養数に応じたPTKPを自動入力。"
   },
   "spouse": {
     "title": "婚姻状況・扶養家族",

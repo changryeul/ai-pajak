@@ -5445,7 +5445,12 @@
     "proposalConflictTag": "Conflict",
     "proposalApply": "Apply {count} selected",
     "npwp": "NPWP",
-    "nik": "NIK"
+    "nik": "NIK",
+    "ocrDocType": "Document type",
+    "ocrDocA1": "1721-A1 (Withholding Slip)",
+    "ocrDocKK": "KK (Family Register)",
+    "ocrDocA1Hint": "Employer withholding slip — auto-fills name, NPWP, and income.",
+    "ocrDocKKHint": "Kartu Keluarga — auto-fills name, NIK, address, spouse, and PTKP from dependent count."
   },
   "spouse": {
     "title": "Marital Status & Dependents",

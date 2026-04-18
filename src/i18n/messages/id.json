@@ -5445,7 +5445,12 @@
     "proposalConflictTag": "Konflik",
     "proposalApply": "Terapkan {count} pilihan",
     "npwp": "NPWP",
-    "nik": "NIK"
+    "nik": "NIK",
+    "ocrDocType": "Jenis Dokumen",
+    "ocrDocA1": "1721-A1 (Bukti Potong)",
+    "ocrDocKK": "KK (Kartu Keluarga)",
+    "ocrDocA1Hint": "Slip pemotongan pajak dari pemberi kerja — otomatis mengisi nama, NPWP, dan penghasilan.",
+    "ocrDocKKHint": "Kartu Keluarga — otomatis mengisi nama, NIK, alamat, pasangan, dan status PTKP dari jumlah tanggungan."
   },
   "spouse": {
     "title": "Status Pernikahan & Tanggungan",
