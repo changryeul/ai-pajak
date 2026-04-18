@@ -262,8 +262,11 @@ const navItems: NavSection[] = [
       { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.PLATFORM_ADMIN] },
       { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: consultantRoles },
       { href: '/my-profile', icon: User, labelKey: 'nav.myProfile', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: [...consultantRoles, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: [...consultantRoles, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      // Counterparties + accounting-SW integrations are COMPANY/CONSULTANT concepts
+      // (거래처 ledger, Xero/Accurate sync). INDIVIDUAL customers don't have these,
+      // so they are excluded from the INDIVIDUAL sidebar to keep it minimal.
+      { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: consultantRoles },
+      { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: consultantRoles },
       { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR_JTC, UserRole.TAX_OPERATOR_SUPERVISOR] },
       { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
       { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
