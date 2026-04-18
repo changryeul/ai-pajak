@@ -62,15 +62,15 @@ export async function POST(request: NextRequest) {
       );
     }
     if (password.length < 8) {
-      return NextResponse.json({ error: '비밀번호는 최소 8자 이상이어야 합니다' }, { status: 400 });
+      return NextResponse.json({ error: 'Kata sandi minimal 8 karakter' }, { status: 400 });
     }
     if (!jtcAgreement?.accepted) {
-      return NextResponse.json({ error: 'JTC 약관 동의가 필요합니다' }, { status: 400 });
+      return NextResponse.json({ error: 'Persetujuan syarat JTC diperlukan' }, { status: 400 });
     }
 
     const npwpDigits = npwp.replace(/\D/g, '');
     if (npwpDigits.length !== 15) {
-      return NextResponse.json({ error: 'NPWP는 15자리 숫자여야 합니다' }, { status: 400 });
+      return NextResponse.json({ error: 'NPWP harus 15 digit angka' }, { status: 400 });
     }
 
     const admin = getSupabaseAdmin();
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existingNpwp) {
-      return NextResponse.json({ error: '이미 등록된 NPWP입니다' }, { status: 409 });
+      return NextResponse.json({ error: 'NPWP sudah terdaftar' }, { status: 409 });
     }
 
     // Try admin.createUser first (no email → no rate limit)
@@ -130,19 +130,30 @@ export async function POST(request: NextRequest) {
         loggers.api.error({ err: signUpError }, 'Company signup: signUp failed');
         const msg = signUpError.message;
         if (msg.includes('already') || msg.includes('registered')) {
-          return NextResponse.json({ error: '이미 등록된 이메일입니다' }, { status: 409 });
+          return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 });
         }
         if (msg.includes('rate')) {
-          return NextResponse.json({ error: '잠시 후 다시 시도해주세요' }, { status: 429 });
+          return NextResponse.json({ error: 'Coba lagi beberapa saat lagi' }, { status: 429 });
         }
         return NextResponse.json({ error: msg }, { status: 500 });
       }
 
-      userId = signUpData.user?.id;
+      // Defensive guard — see /api/auth/signup for context on the synthetic
+      // user id Supabase returns when email confirmations are enabled and
+      // the email is already registered.
+      const candidateUserId = signUpData.user?.id;
+      if (candidateUserId) {
+        const verify = await admin.auth.admin.getUserById(candidateUserId);
+        if (verify.error || !verify.data?.user) {
+          loggers.api.warn({ userId: candidateUserId }, 'Company signup: signUp returned unresolved user id (likely existing email)');
+          return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 });
+        }
+        userId = candidateUserId;
+      }
     }
 
     if (!userId) {
-      return NextResponse.json({ error: '계정 생성에 실패했습니다' }, { status: 500 });
+      return NextResponse.json({ error: 'Gagal membuat akun' }, { status: 500 });
     }
 
     // Create customer record via admin DB client
@@ -177,7 +188,7 @@ export async function POST(request: NextRequest) {
     if (custError || !customer) {
       loggers.api.error({ err: custError }, 'Company signup: customer record failed');
       return NextResponse.json(
-        { error: custError?.message || '고객 정보 저장 실패' },
+        { error: custError?.message || 'Gagal menyimpan data pelanggan' },
         { status: 500 }
       );
     }
@@ -228,12 +239,12 @@ export async function POST(request: NextRequest) {
         npwp: npwpDigits,
         companyName,
       },
-      message: '법인 가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
+      message: 'Pendaftaran perusahaan berhasil. Mengalihkan ke halaman login.',
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Company signup error');
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '가입 처리 중 오류' },
+      { error: error instanceof Error ? error.message : 'Kesalahan saat pendaftaran' },
       { status: 500 }
     );
   }

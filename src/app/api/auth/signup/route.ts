@@ -53,16 +53,26 @@ async function createAuthUser(
   if (signUpError) {
     const msg = signUpError.message;
     if (msg.includes('already') || msg.includes('registered')) {
-      return { userId: '', error: '이미 등록된 이메일입니다' };
+      return { userId: '', error: 'Email sudah terdaftar' };
     }
     if (msg.includes('rate')) {
-      return { userId: '', error: '잠시 후 다시 시도해주세요' };
+      return { userId: '', error: 'Coba lagi beberapa saat lagi' };
     }
     return { userId: '', error: msg };
   }
 
   if (!signUpData.user?.id) {
-    return { userId: '', error: '계정 생성에 실패했습니다' };
+    return { userId: '', error: 'Gagal membuat akun' };
+  }
+
+  // Defensive guard: with email confirmations enabled, signUp may return a
+  // synthetic UUID for an already-registered email as a privacy measure.
+  // That UUID is NOT present in auth.users, so a subsequent customer insert
+  // would trigger customer_user_id_fkey. Verify first.
+  const verify = await admin.auth.admin.getUserById(signUpData.user.id);
+  if (verify.error || !verify.data?.user) {
+    loggers.api.warn({ userId: signUpData.user.id }, 'Signup: signUp returned unresolved user id (likely existing email)');
+    return { userId: '', error: 'Email sudah terdaftar' };
   }
 
   return { userId: signUpData.user.id };
@@ -108,13 +118,13 @@ export async function POST(request: NextRequest) {
     }
     if (password.length < 8) {
       return NextResponse.json(
-        { error: '비밀번호는 최소 8자 이상이어야 합니다' },
+        { error: 'Kata sandi minimal 8 karakter' },
         { status: 400 }
       );
     }
     if (accountType === 'TAX_PARTNER' && !firmName) {
       return NextResponse.json(
-        { error: '세무법인명은 필수입니다' },
+        { error: 'Nama kantor konsultan wajib diisi' },
         { status: 400 }
       );
     }
@@ -131,7 +141,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (authError) {
-      const status = authError.includes('이미') ? 409 : authError.includes('잠시') ? 429 : 500;
+      const status = authError.includes('terdaftar') ? 409 : authError.includes('Coba lagi') ? 429 : 500;
       return NextResponse.json({ error: authError }, { status });
     }
 
@@ -177,7 +187,7 @@ export async function POST(request: NextRequest) {
       if (!platform) {
         loggers.api.error({}, 'Signup: platform row not found');
         return NextResponse.json(
-          { error: '플랫폼 설정을 찾을 수 없습니다. 관리자에게 문의하세요.' },
+          { error: 'Konfigurasi platform tidak ditemukan. Hubungi administrator.' },
           { status: 500 }
         );
       }
@@ -202,7 +212,7 @@ export async function POST(request: NextRequest) {
       if (partnerError || !partner) {
         loggers.api.error({ err: partnerError }, 'Signup: tax_partner record failed');
         return NextResponse.json(
-          { error: partnerError?.message || '세무법인 등록 실패' },
+          { error: partnerError?.message || 'Gagal mendaftarkan kantor konsultan' },
           { status: 500 }
         );
       }
@@ -242,13 +252,13 @@ export async function POST(request: NextRequest) {
       success: true,
       data: { userId, email, accountType },
       message: accountType === 'INDIVIDUAL'
-        ? '개인 가입이 완료되었습니다.'
-        : '세무법인 가입이 완료되었습니다.',
+        ? 'Pendaftaran perorangan berhasil'
+        : 'Pendaftaran kantor konsultan berhasil',
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Signup error');
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '가입 처리 중 오류' },
+      { error: error instanceof Error ? error.message : 'Kesalahan saat pendaftaran' },
       { status: 500 }
     );
   }
