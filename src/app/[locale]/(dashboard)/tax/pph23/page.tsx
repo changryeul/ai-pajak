@@ -18,6 +18,7 @@ import {
 import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
 import { Download, FileUp, Pencil } from 'lucide-react';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 // ── Types ──
 interface Transaction {
@@ -415,6 +416,7 @@ export default function PPh23Page() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
+      <PageTitle title="PPh 23" />
       <ScreenHeader
         title={t('k20_5ee3c0')}
         step={1}

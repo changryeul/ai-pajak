@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useRef } from 'react';
 import { ScreenHeader } from '@/components/tax';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 interface Faktur {
   id: string;
@@ -202,6 +203,7 @@ export default function PPNPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
+      <PageTitle title="PPN" />
       <ScreenHeader
         title="e-Faktur & PPN"
         step={1}

@@ -20,6 +20,7 @@ import {
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
 import { fmtRp } from '@/lib/utils';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 interface Employee {
   id: string;
@@ -203,6 +204,7 @@ export default function PPh21PayrollPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
+      <PageTitle title="PPh 21" />
       <ScreenHeader
         title={tp('pageTitle')}
         step={currentStep}

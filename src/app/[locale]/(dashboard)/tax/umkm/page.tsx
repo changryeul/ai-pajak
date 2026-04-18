@@ -16,6 +16,7 @@ import {
 import { fmtRp } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { ScreenHeader } from '@/components/tax';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 // ── Constants ──
 const UMKM_RATE = 0.005;          // PPh Final 0.5%
@@ -196,6 +197,7 @@ export default function CorporateTaxPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <PageTitle title="UMKM (PPh Final)" />
       <ScreenHeader
         title={t('pageTitle')}
         step={step}

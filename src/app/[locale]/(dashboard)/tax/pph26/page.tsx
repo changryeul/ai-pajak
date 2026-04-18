@@ -2,11 +2,13 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
+import { PageTitle } from '@/components/layout/PageTitle';
 
 export default function pph26Page() {
   const t = useTranslations('pph26Page');
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <PageTitle title="PPh 26" />
       <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
       <Card className="border-amber-200 bg-amber-50">
         <CardContent className="p-6 text-center">
