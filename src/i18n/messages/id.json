@@ -5396,7 +5396,15 @@
     "withholding": "Pajak Pemotongan",
     "ppnSalesVsPurchase": "PPN (Output vs Input)",
     "companyInfo": "Info Perusahaan",
-    "companyName": "Nama Perusahaan"
+    "companyName": "Nama Perusahaan",
+    "trendSubtitle": "Tren 6 bulan terakhir",
+    "ppnOutput": "Keluaran",
+    "ppnInput": "Masukan",
+    "companyInfoSubtitle": "NPWP · KBLI · klasifikasi usaha",
+    "industry": "Kategori Usaha",
+    "annualRevenue": "Omzet Tahunan",
+    "pkpYes": "PKP terdaftar",
+    "pkpNo": "Non-PKP"
   },
   "filingStatus": {
     "pageTitle": "Status Pelaporan Bulanan",

@@ -5396,7 +5396,15 @@
     "withholding": "Withholding Tax",
     "ppnSalesVsPurchase": "PPN (Output vs Input)",
     "companyInfo": "Company Info",
-    "companyName": "Company Name"
+    "companyName": "Company Name",
+    "trendSubtitle": "直近6ヶ月の推移",
+    "ppnOutput": "売上",
+    "ppnInput": "仕入",
+    "companyInfoSubtitle": "NPWP · KBLI · 業種分類",
+    "industry": "業種",
+    "annualRevenue": "年間売上",
+    "pkpYes": "PKP登録済み",
+    "pkpNo": "非PKP"
   },
   "filingStatus": {
     "pageTitle": "Monthly Filing Status",

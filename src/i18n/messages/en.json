@@ -5396,7 +5396,15 @@
     "withholding": "Withholding Tax",
     "ppnSalesVsPurchase": "PPN (Output vs Input)",
     "companyInfo": "Company Info",
-    "companyName": "Company Name"
+    "companyName": "Company Name",
+    "trendSubtitle": "Last 6 months",
+    "ppnOutput": "Output",
+    "ppnInput": "Input",
+    "companyInfoSubtitle": "NPWP · KBLI · business classification",
+    "industry": "Industry",
+    "annualRevenue": "Annual Revenue",
+    "pkpYes": "PKP registered",
+    "pkpNo": "Non-PKP"
   },
   "filingStatus": {
     "pageTitle": "Monthly Filing Status",

@@ -5397,7 +5397,15 @@
     "withholding": "원천세",
     "ppnSalesVsPurchase": "PPN (매출 vs 매입)",
     "companyInfo": "회사 정보",
-    "companyName": "회사명"
+    "companyName": "회사명",
+    "trendSubtitle": "최근 6개월 추이",
+    "ppnOutput": "매출",
+    "ppnInput": "매입",
+    "companyInfoSubtitle": "NPWP · KBLI · 업종 분류",
+    "industry": "업종",
+    "annualRevenue": "연 매출",
+    "pkpYes": "PKP 등록",
+    "pkpNo": "비 PKP"
   },
   "filingStatus": {
     "pageTitle": "월 신고 현황",
