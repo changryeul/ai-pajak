@@ -5485,5 +5485,25 @@
     "KR": "海外金融口座報告 (5億KRW)",
     "US": "FBAR (USD 10,000)",
     "JP": "国外財産調書 (50M JPY)"
+  },
+  "bankAccounts": {
+    "title": "銀行口座",
+    "add": "追加",
+    "empty": "登録された口座はありません。",
+    "bankName": "銀行名",
+    "label": "ラベル",
+    "labelPlaceholder": "例: 給与口座",
+    "last4": "末尾4桁",
+    "currency": "通貨",
+    "isForeign": "海外口座",
+    "pickCountry": "— 国を選択 —",
+    "isPrimary": "メイン口座",
+    "disclaimer": "口座番号は末尾4桁のみ保存し、全桁は保存しません。KYCと海外資産の突合に使用します。",
+    "country": {
+      "ID": "インドネシア",
+      "KR": "韓国",
+      "US": "アメリカ",
+      "JP": "日本"
+    }
   }
 }

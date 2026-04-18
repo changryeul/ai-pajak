@@ -5485,5 +5485,25 @@
     "KR": "韩国境外账户申报 (5亿KRW)",
     "US": "FBAR (1万美元)",
     "JP": "日本境外财产 (5千万日元)"
+  },
+  "bankAccounts": {
+    "title": "银行账户",
+    "add": "添加",
+    "empty": "尚未注册任何账户。",
+    "bankName": "银行名称",
+    "label": "昵称",
+    "labelPlaceholder": "例如:工资账户",
+    "last4": "末4位",
+    "currency": "币种",
+    "isForeign": "境外账户",
+    "pickCountry": "— 选择国家 —",
+    "isPrimary": "主账户",
+    "disclaimer": "我们仅保存末4位,绝不保存完整账户号码。用于KYC检查和境外资产交叉核对。",
+    "country": {
+      "ID": "印度尼西亚",
+      "KR": "韩国",
+      "US": "美国",
+      "JP": "日本"
+    }
   }
 }

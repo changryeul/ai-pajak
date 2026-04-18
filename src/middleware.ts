@@ -45,11 +45,11 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.midtrans.com https://api.midtrans.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.midtrans.com https://api.midtrans.com https://www.googletagmanager.com https://www.google-analytics.com",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co",
+    "img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com",
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseConnect} https://api.midtrans.com https://*.sentry.io`,
+    `connect-src 'self' ${supabaseConnect} https://api.midtrans.com https://*.sentry.io https://www.googletagmanager.com https://www.google-analytics.com https://*.analytics.google.com`,
     "frame-src 'self' https://app.midtrans.com",
     "object-src 'none'",
     "base-uri 'self'",

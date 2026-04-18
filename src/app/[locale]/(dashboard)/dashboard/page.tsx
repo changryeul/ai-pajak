@@ -37,6 +37,7 @@ import { CorporateDashboardV2 } from '@/components/dashboard/CorporateDashboardV
 import { SpouseAndDependentsCard } from '@/components/dashboard/SpouseAndDependentsCard';
 import { GrowthAnomalyCard } from '@/components/dashboard/GrowthAnomalyCard';
 import { ForeignAssetReportingCard } from '@/components/dashboard/ForeignAssetReportingCard';
+import { BankAccountsCard } from '@/components/dashboard/BankAccountsCard';
 import { usePageTitle } from '@/components/layout/PageTitle';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
@@ -576,6 +577,9 @@ function CustomerDashboard({
 
       {/* Home-country foreign-asset reporting threshold (T-004 + T-005) */}
       <ForeignAssetReportingCard />
+
+      {/* Bank accounts (T-006) — last4 only, never full numbers */}
+      <BankAccountsCard />
 
       {/* Custom pricing quote (only renders when there is something to act on) */}
       <CustomPricingWidget />

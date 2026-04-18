@@ -5485,5 +5485,25 @@
     "KR": "Laporan rekening luar negeri Korea (500M KRW)",
     "US": "FBAR (USD 10,000)",
     "JP": "Laporan aset luar negeri Jepang (50M JPY)"
+  },
+  "bankAccounts": {
+    "title": "Rekening Bank",
+    "add": "Tambah",
+    "empty": "Belum ada rekening terdaftar.",
+    "bankName": "Nama bank",
+    "label": "Nama panggilan",
+    "labelPlaceholder": "contoh: Gaji utama",
+    "last4": "4 digit terakhir",
+    "currency": "Mata uang",
+    "isForeign": "Rekening luar negeri",
+    "pickCountry": "— pilih negara —",
+    "isPrimary": "Rekening utama",
+    "disclaimer": "Kami hanya menyimpan 4 digit terakhir, tidak pernah nomor rekening lengkap. Digunakan untuk pemeriksaan KYC dan referensi silang aset luar negeri.",
+    "country": {
+      "ID": "Indonesia",
+      "KR": "Korea",
+      "US": "Amerika Serikat",
+      "JP": "Jepang"
+    }
   }
 }

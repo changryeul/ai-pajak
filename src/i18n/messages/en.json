@@ -5485,5 +5485,25 @@
     "KR": "Korea overseas-account report (500M KRW)",
     "US": "FBAR (USD 10,000)",
     "JP": "Japan overseas assets (50M JPY)"
+  },
+  "bankAccounts": {
+    "title": "Bank Accounts",
+    "add": "Add",
+    "empty": "No accounts registered yet.",
+    "bankName": "Bank name",
+    "label": "Nickname",
+    "labelPlaceholder": "e.g. Main salary",
+    "last4": "Last 4 digits",
+    "currency": "Currency",
+    "isForeign": "Foreign account",
+    "pickCountry": "— pick country —",
+    "isPrimary": "Primary account",
+    "disclaimer": "We store only the last 4 digits — never the full account number. Used for KYC checks and foreign-asset cross-references.",
+    "country": {
+      "ID": "Indonesia",
+      "KR": "Korea",
+      "US": "United States",
+      "JP": "Japan"
+    }
   }
 }
