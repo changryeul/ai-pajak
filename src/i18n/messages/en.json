@@ -86,7 +86,21 @@
     "emailOrNpwp": "Email or Tax ID",
     "emailOrNpwpPlaceholder": "email@example.com or 00.000.000.0-000.000",
     "companyNpwpHint": "Business customers can also log in with Tax ID",
-    "npwpNotFound": "No account registered with this Tax ID"
+    "npwpNotFound": "No account registered with this Tax ID",
+    "serviceSignup": "Service Signup",
+    "setPassword": "Set Password",
+    "back": "Back",
+    "fullNameReal": "Full Name (as on KTP)",
+    "hasNpwp": "Have NPWP",
+    "noNpwpUseNik": "Don't have NPWP (use NIK)",
+    "nikPlaceholder": "16-digit NIK",
+    "signupIdentityNote": "Your account is created based on your full name and NPWP (or NIK).",
+    "next": "Next",
+    "alreadyHaveAccount": "Already have an account?",
+    "step1Invalid": "Please fill all fields correctly.",
+    "passwordHint8": "At least 8 characters",
+    "companySignup": "Company Signup",
+    "firmSignup": "Tax Firm Signup"
   },
   "nav": {
     "dashboard": "Dashboard",

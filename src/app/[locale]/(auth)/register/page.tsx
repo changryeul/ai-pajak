@@ -1,52 +1,54 @@
 'use client';
 
+/**
+ * Service Signup — INDIVIDUAL customers.
+ *
+ * Two screens in one page:
+ *   Step 1 (basics): full name, NPWP/NIK toggle + number, email, phone.
+ *   Step 2 (password): password + confirm → account creation.
+ *
+ * Rationale (per user redesign 2026-04-18): the old page led with a
+ * 3-card picker (개인/법인/세무 컨설턴트) and demanded password up front.
+ * Individual taxpayers are the dominant signup path; the screen now
+ * matches that reality. Company signup still lives at /register/company,
+ * consultant signup at /register/firm.
+ *
+ * Identity: we record *either* NPWP (15 digits) *or* NIK (16 digits) on
+ * the customer row. Both are acceptable to the DJP for filing 1770SS/S;
+ * if only NIK is provided, the system can pair it with an NPWP later
+ * (PMK 112/2022 gradually unified NPWP ↔ NIK for individuals).
+ */
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
-import { User, Building2, Briefcase, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, Loader2, User, Building2, Briefcase } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
-type AccountType = 'INDIVIDUAL' | 'COMPANY' | 'TAX_PARTNER';
+type IdType = 'NPWP' | 'NIK';
 
-const ACCOUNT_TYPES: Array<{
-  id: AccountType;
-  icon: typeof User;
-  title: string;
-  description: string;
-  features: string[];
-  gradient: string;
-}> = [
-  {
-    id: 'INDIVIDUAL',
-    icon: User,
-    title: '개인 납세자',
-    description: '내 세금 신고를 직접 관리합니다',
-    features: ['SPT 1770/1770S/1770SS', '개인 PPh 관리', '프리랜서 소득'],
-    gradient: 'from-blue-500 to-indigo-600',
-  },
-  {
-    id: 'COMPANY',
-    icon: Building2,
-    title: '법인 고객',
-    description: '회사 세무를 위탁 관리합니다',
-    features: ['월 SPT Masa (PPh 21/23, PPN)', 'SPT Badan 1771', '급여 자동 계산'],
-    gradient: 'from-emerald-500 to-green-600',
-  },
-  {
-    id: 'TAX_PARTNER',
-    icon: Briefcase,
-    title: '세무 컨설턴트 (외부 사무소)',
-    description: '내 사무소 고객을 AI Pajak으로 관리합니다',
-    features: [
-      '다수 고객 포트폴리오 관리',
-      '직원·세무사 팀 관리',
-      'e-Filing 대행 + 고객 청구',
-    ],
-    gradient: 'from-purple-500 to-pink-600',
-  },
-];
+interface Step1Data {
+  fullName: string;
+  idType: IdType;
+  idNumber: string;
+  email: string;
+  phone: string;
+}
+
+function formatNpwp(digits: string): string {
+  // 15 digits → XX.XXX.XXX.X-XXX.XXX
+  const d = digits.replace(/\D/g, '').slice(0, 15);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 9) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}.${d.slice(8)}`;
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}.${d.slice(8, 9)}-${d.slice(9)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}.${d.slice(8, 9)}-${d.slice(9, 12)}.${d.slice(12, 15)}`;
+}
 
 export default function RegisterPage() {
   const t = useTranslations();
@@ -54,287 +56,258 @@ export default function RegisterPage() {
   const router = useRouter();
   const locale = params.locale as string;
 
-  const [step, setStep] = useState<'select' | 'form'>('select');
-  const [accountType, setAccountType] = useState<AccountType | null>(null);
-
-  const [formData, setFormData] = useState({
+  const [step, setStep] = useState<1 | 2>(1);
+  const [basics, setBasics] = useState<Step1Data>({
     fullName: '',
+    idType: 'NPWP',
+    idNumber: '',
     email: '',
     phone: '',
-    password: '',
-    confirmPassword: '',
-    // Company-specific
-    companyName: '',
-    npwp: '',
-    // Tax partner-specific
-    firmName: '',
-    firmRegistrationNumber: '',
   });
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const canAdvanceStep1 = (() => {
+    if (!basics.fullName.trim()) return false;
+    if (!basics.email.trim() || !basics.email.includes('@')) return false;
+    if (!basics.phone.trim()) return false;
+    const digits = basics.idNumber.replace(/\D/g, '');
+    if (basics.idType === 'NPWP' && digits.length !== 15) return false;
+    if (basics.idType === 'NIK' && digits.length !== 16) return false;
+    return true;
+  })();
 
-  const handleRegister = async (e: React.FormEvent) => {
+  function step1Submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!accountType) return;
-    setIsLoading(true);
     setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError(t('errors.passwordMismatch'));
-      setIsLoading(false);
+    if (!canAdvanceStep1) {
+      setError(t('auth.step1Invalid'));
       return;
     }
-    if (formData.password.length < 8) {
+    setStep(2);
+  }
+
+  async function step2Submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    if (password.length < 8) {
       setError(t('errors.passwordTooShort'));
-      setIsLoading(false);
       return;
     }
-
+    if (password !== confirmPassword) {
+      setError(t('errors.passwordMismatch'));
+      return;
+    }
+    setIsLoading(true);
     try {
-      // Server-side signup with email_confirm=true (즉시 로그인 가능)
+      const digits = basics.idNumber.replace(/\D/g, '');
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          fullName: formData.fullName,
-          phone: formData.phone || undefined,
-          accountType,
-          firmName: formData.firmName || undefined,
-          firmRegistrationNumber: formData.firmRegistrationNumber || undefined,
+          email: basics.email.trim(),
+          password,
+          fullName: basics.fullName.trim(),
+          phone: basics.phone.trim() || undefined,
+          accountType: 'INDIVIDUAL',
+          npwp: basics.idType === 'NPWP' ? digits : undefined,
+          nik: basics.idType === 'NIK' ? digits : undefined,
         }),
       });
-
       const data = await res.json();
       if (!res.ok || !data.success) {
         setError(data.error || t('errors.serverError'));
         return;
       }
-
-      // INDIVIDUAL customers continue straight into the onboarding flow
-      // (terms → mandate). Sign the user in client-side so the Supabase
-      // session cookie is set before the next page hits protected APIs.
-      // Other account types keep the inline success page and head to /login
-      // for their first session.
-      if (accountType === 'INDIVIDUAL') {
-        const supabase = createClient();
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        if (signInError) {
-          // Fall back to the success page so the user can log in manually.
-          setSuccess(true);
-          return;
-        }
-        router.push(`/${locale}/register/terms`);
-        router.refresh();
+      // Sign in client-side so the session cookie is set before the
+      // onboarding routes fire protected-API calls.
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: basics.email.trim(),
+        password,
+      });
+      if (signInError) {
+        router.push(`/${locale}/login`);
         return;
       }
-
-      setSuccess(true);
+      router.push(`/${locale}/register/terms`);
+      router.refresh();
     } catch {
       setError(t('errors.serverError'));
     } finally {
       setIsLoading(false);
     }
-  };
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <CardTitle className="text-xl text-green-600">{t('common.success')}</CardTitle>
-            <CardDescription>{t('auth.registerSuccess')}</CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Link href={`/${locale}/login`} className="w-full">
-              <Button variant="outline" className="w-full">{t('auth.login')}</Button>
-            </Link>
-          </CardFooter>
-        </Card>
-      </div>
-    );
   }
-
-  // Step 1: Account type selection
-  if (step === 'select') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-10">
-        <div className="w-full max-w-4xl">
-          <div className="text-center mb-8">
-            <div className="mx-auto mb-4">
-              <img src="/logo.png" alt="AI Pajak" className="h-10 mx-auto" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">AI Pajak에 오신 것을 환영합니다</h1>
-            <p className="text-sm text-gray-500 mt-2">어떤 목적으로 이용하시나요? (1/2 단계)</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {ACCOUNT_TYPES.map((type) => {
-              const Icon = type.icon;
-              return (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => {
-                    if (type.id === 'COMPANY') {
-                      router.push(`/${locale}/register/company`);
-                      return;
-                    }
-                    setAccountType(type.id);
-                    setStep('form');
-                  }}
-                  className="text-left rounded-2xl border-2 border-gray-200 bg-white p-5 hover:border-blue-500 hover:shadow-lg transition-all group"
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${type.gradient} flex items-center justify-center mb-3 shadow-sm`}>
-                    <Icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-1">{type.title}</h3>
-                  <p className="text-xs text-gray-500 mb-3">{type.description}</p>
-                  <ul className="space-y-1">
-                    {type.features.map((f, i) => (
-                      <li key={i} className="text-[11px] text-gray-600 flex items-center gap-1">
-                        <span className="text-green-500">•</span>{f}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-3 flex items-center text-xs font-medium text-blue-600 group-hover:text-blue-700">
-                    선택하기 <ArrowRight className="h-3 w-3 ml-1" />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="text-center text-sm text-gray-600 mt-6">
-            이미 계정이 있으신가요?{' '}
-            <Link href={`/${locale}/login`} className="text-blue-600 hover:underline font-medium">
-              {t('auth.login')}
-            </Link>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 2: Form
-  const selectedType = ACCOUNT_TYPES.find(t => t.id === accountType)!;
-  const SelectedIcon = selectedType.icon;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-10">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className={`mx-auto mb-3 h-12 w-12 rounded-xl bg-gradient-to-br ${selectedType.gradient} flex items-center justify-center`}>
-            <SelectedIcon className="h-6 w-6 text-white" />
-          </div>
-          <CardTitle className="text-xl">{selectedType.title} 가입</CardTitle>
-          <CardDescription className="text-xs">{selectedType.description} (2/2 단계)</CardDescription>
-          <button
-            type="button"
-            onClick={() => setStep('select')}
-            className="text-xs text-blue-600 mt-2 inline-flex items-center gap-1 hover:underline"
-          >
-            <ArrowLeft className="h-3 w-3" />다른 유형으로 변경
-          </button>
-        </CardHeader>
+      <div className="w-full max-w-md">
+        <Card className="rounded-2xl border-0 shadow-lg overflow-hidden">
+          <CardContent className="p-6 md:p-8">
+            <div className="mb-6">
+              <h1 className="text-xl font-bold text-gray-900">
+                {step === 1 ? t('auth.serviceSignup') : t('auth.setPassword')}
+              </h1>
+              {step === 2 && (
+                <button
+                  type="button"
+                  onClick={() => { setStep(1); setError(''); }}
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  {t('auth.back')}
+                </button>
+              )}
+            </div>
 
-        <form onSubmit={handleRegister}>
-          <CardContent className="space-y-4">
-            {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
-
-            <Input
-              label={accountType === 'TAX_PARTNER' ? '대표자 이름' : t('auth.fullName')}
-              name="fullName" type="text" value={formData.fullName}
-              onChange={handleChange} placeholder="Nama Lengkap" required
-            />
-
-            {accountType === 'COMPANY' && (
-              <>
-                <Input
-                  label="회사명" name="companyName" type="text"
-                  value={formData.companyName} onChange={handleChange}
-                  placeholder="PT Contoh Sejahtera" required
-                />
-                <Input
-                  label="NPWP (회사)" name="npwp" type="text"
-                  value={formData.npwp} onChange={handleChange}
-                  placeholder="00.000.000.0-000.000"
-                />
-              </>
+            {error && (
+              <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+                {error}
+              </div>
             )}
 
-            {accountType === 'TAX_PARTNER' && (
-              <>
+            {step === 1 ? (
+              <form onSubmit={step1Submit} className="space-y-4">
                 <Input
-                  label="사무소명 (Nama Kantor)" name="firmName" type="text"
-                  value={formData.firmName} onChange={handleChange}
-                  placeholder="Kantor Konsultan Pajak ABC" required
+                  name="fullName"
+                  type="text"
+                  placeholder={t('auth.fullNameReal')}
+                  value={basics.fullName}
+                  onChange={(e) => setBasics({ ...basics, fullName: e.target.value })}
+                  required
                 />
+
+                <select
+                  className="w-full p-3 border border-gray-200 rounded-lg bg-white text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                  value={basics.idType}
+                  onChange={(e) => setBasics({ ...basics, idType: e.target.value as IdType, idNumber: '' })}
+                >
+                  <option value="NPWP">{t('auth.hasNpwp')}</option>
+                  <option value="NIK">{t('auth.noNpwpUseNik')}</option>
+                </select>
+
                 <Input
-                  label="세무사 라이센스 번호 (선택)" name="firmRegistrationNumber" type="text"
-                  value={formData.firmRegistrationNumber} onChange={handleChange}
-                  placeholder="Nomor Izin Praktik Konsultan Pajak"
+                  name="idNumber"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder={
+                    basics.idType === 'NPWP'
+                      ? '00.000.000.0-000.000'
+                      : t('auth.nikPlaceholder')
+                  }
+                  value={
+                    basics.idType === 'NPWP'
+                      ? formatNpwp(basics.idNumber)
+                      : basics.idNumber.replace(/\D/g, '').slice(0, 16)
+                  }
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, '');
+                    const max = basics.idType === 'NPWP' ? 15 : 16;
+                    setBasics({ ...basics, idNumber: digits.slice(0, max) });
+                  }}
+                  required
                 />
-                <p className="text-[10px] text-purple-600 bg-purple-50 rounded p-2">
-                  가입 후 사무소 상세 정보(NPWP, 주소, 직원 추가 등)는 설정에서
-                  언제든지 수정할 수 있습니다.
+
+                <Input
+                  name="email"
+                  type="email"
+                  placeholder={t('auth.email')}
+                  value={basics.email}
+                  onChange={(e) => setBasics({ ...basics, email: e.target.value })}
+                  required
+                />
+
+                <Input
+                  name="phone"
+                  type="tel"
+                  placeholder={t('auth.phone')}
+                  value={basics.phone}
+                  onChange={(e) => setBasics({ ...basics, phone: e.target.value })}
+                  required
+                />
+
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  * {t('auth.signupIdentityNote')}
                 </p>
-              </>
+
+                <Button
+                  type="submit"
+                  className="w-full h-11"
+                  disabled={!canAdvanceStep1}
+                >
+                  {t('auth.next')}
+                </Button>
+
+                {/* Secondary routes for non-INDIVIDUAL signup */}
+                <div className="pt-3 mt-2 border-t border-gray-100 grid grid-cols-2 gap-2">
+                  <Link
+                    href={`/${locale}/register/company`}
+                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition text-xs text-gray-700"
+                  >
+                    <Building2 className="h-4 w-4 text-emerald-600" />
+                    {t('auth.companySignup')}
+                  </Link>
+                  <Link
+                    href={`/${locale}/register/firm`}
+                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition text-xs text-gray-700"
+                  >
+                    <Briefcase className="h-4 w-4 text-purple-600" />
+                    {t('auth.firmSignup')}
+                  </Link>
+                </div>
+
+                <p className="text-center text-sm text-gray-600 pt-2">
+                  {t('auth.alreadyHaveAccount')}{' '}
+                  <Link href={`/${locale}/login`} className="text-blue-600 hover:underline font-medium">
+                    {t('auth.login')}
+                  </Link>
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={step2Submit} className="space-y-4">
+                <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-800 flex items-center gap-2">
+                  <User className="h-3.5 w-3.5" />
+                  <span className="truncate">{basics.fullName} · {basics.email}</span>
+                </div>
+
+                <Input
+                  name="password"
+                  type="password"
+                  placeholder={t('auth.password')}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+
+                <Input
+                  name="confirmPassword"
+                  type="password"
+                  placeholder={t('auth.confirmPassword')}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+
+                <p className="text-xs text-gray-500">{t('auth.passwordHint8')}</p>
+
+                <Button
+                  type="submit"
+                  className="w-full h-11"
+                  disabled={isLoading || password.length < 8 || password !== confirmPassword}
+                >
+                  {isLoading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t('common.submitting')}</>
+                  ) : (
+                    t('auth.register')
+                  )}
+                </Button>
+              </form>
             )}
-
-            <Input
-              label={t('auth.email')} name="email" type="email"
-              value={formData.email} onChange={handleChange}
-              placeholder="email@example.com" required
-            />
-
-            <Input
-              label={t('auth.phone')} name="phone" type="tel"
-              value={formData.phone} onChange={handleChange}
-              placeholder="+62 812 3456 7890"
-            />
-
-            <Input
-              label={t('auth.password')} name="password" type="password"
-              value={formData.password} onChange={handleChange}
-              placeholder="••••••••" required
-              helperText="최소 8자"
-            />
-
-            <Input
-              label={t('auth.confirmPassword')} name="confirmPassword" type="password"
-              value={formData.confirmPassword} onChange={handleChange}
-              placeholder="••••••••" required
-            />
           </CardContent>
-
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Loading...' : t('auth.register')}
-            </Button>
-            <p className="text-center text-sm text-gray-600">
-              이미 계정이 있으신가요?{' '}
-              <Link href={`/${locale}/login`} className="text-blue-600 hover:underline font-medium">
-                {t('auth.login')}
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

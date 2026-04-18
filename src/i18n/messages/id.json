@@ -86,7 +86,21 @@
     "emailOrNpwp": "Email atau NPWP",
     "emailOrNpwpPlaceholder": "email@example.com atau 00.000.000.0-000.000",
     "companyNpwpHint": "Pelanggan badan dapat login dengan NPWP",
-    "npwpNotFound": "Tidak ada akun terdaftar dengan NPWP ini"
+    "npwpNotFound": "Tidak ada akun terdaftar dengan NPWP ini",
+    "serviceSignup": "Daftar Layanan",
+    "setPassword": "Atur Kata Sandi",
+    "back": "Kembali",
+    "fullNameReal": "Nama Lengkap (Sesuai KTP)",
+    "hasNpwp": "Punya NPWP",
+    "noNpwpUseNik": "Tidak Punya NPWP (Pakai NIK)",
+    "nikPlaceholder": "16 digit NIK",
+    "signupIdentityNote": "Akun dibuat berdasarkan nama lengkap dan NPWP (atau NIK).",
+    "next": "Lanjut",
+    "alreadyHaveAccount": "Sudah punya akun?",
+    "step1Invalid": "Mohon lengkapi semua field dengan benar.",
+    "passwordHint8": "Minimal 8 karakter",
+    "companySignup": "Daftar Perusahaan",
+    "firmSignup": "Daftar Kantor Konsultan"
   },
   "nav": {
     "dashboard": "Dasbor",

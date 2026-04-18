@@ -79,6 +79,8 @@ export async function POST(request: NextRequest) {
       accountType,
       firmName,
       firmRegistrationNumber,
+      npwp,
+      nik,
     } = body as {
       email: string;
       password: string;
@@ -87,6 +89,8 @@ export async function POST(request: NextRequest) {
       accountType: 'INDIVIDUAL' | 'TAX_PARTNER';
       firmName?: string;
       firmRegistrationNumber?: string;
+      npwp?: string;
+      nik?: string;
     };
 
     // Validation
@@ -135,12 +139,18 @@ export async function POST(request: NextRequest) {
     const admin = getSupabaseAdmin();
 
     if (accountType === 'INDIVIDUAL') {
+      // Normalise NPWP/NIK to digits only so later validation + matching
+      // (e.g., KYC checks against uploaded documents) have a single canonical form.
+      const cleanNpwp = npwp ? npwp.replace(/\D/g, '') : '';
+      const cleanNik = nik ? nik.replace(/\D/g, '') : '';
       const { error: custError } = await admin.from('customer').insert({
         user_id: userId,
         customer_type: 'INDIVIDUAL',
         full_name: fullName,
         email,
         phone: phone || null,
+        npwp: cleanNpwp.length === 15 ? cleanNpwp : null,
+        nik: cleanNik.length === 16 ? cleanNik : null,
         // INDIVIDUAL customers walk through 3-step onboarding
         // (/register → /register/terms → /register/mandate).
         onboarding_step: 1,

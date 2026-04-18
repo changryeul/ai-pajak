@@ -86,7 +86,21 @@
     "emailOrNpwp": "이메일 또는 NPWP",
     "emailOrNpwpPlaceholder": "email@example.com 또는 00.000.000.0-000.000",
     "companyNpwpHint": "법인 고객은 NPWP로도 로그인 가능",
-    "npwpNotFound": "해당 NPWP로 등록된 계정이 없습니다"
+    "npwpNotFound": "해당 NPWP로 등록된 계정이 없습니다",
+    "serviceSignup": "서비스 가입",
+    "setPassword": "비밀번호 설정",
+    "back": "뒤로",
+    "fullNameReal": "이름 (실명)",
+    "hasNpwp": "NPWP 있음",
+    "noNpwpUseNik": "NPWP 없음 (NIK 사용)",
+    "nikPlaceholder": "16자리 NIK",
+    "signupIdentityNote": "본 서비스는 실명과 NPWP (또는 NIK)를 기준으로 계정이 생성됩니다.",
+    "next": "다음",
+    "alreadyHaveAccount": "이미 계정이 있으신가요?",
+    "step1Invalid": "모든 필드를 정확히 입력해 주세요.",
+    "passwordHint8": "최소 8자 이상",
+    "companySignup": "법인 가입",
+    "firmSignup": "세무법인 가입"
   },
   "nav": {
     "dashboard": "대시보드",

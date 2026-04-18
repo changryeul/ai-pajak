@@ -86,7 +86,21 @@
     "emailOrNpwp": "メールまたは納税者番号",
     "emailOrNpwpPlaceholder": "email@example.com または 00.000.000.0-000.000",
     "companyNpwpHint": "法人のお客様は納税者番号でもログインできます",
-    "npwpNotFound": "この納税者番号で登録されたアカウントはありません"
+    "npwpNotFound": "この納税者番号で登録されたアカウントはありません",
+    "serviceSignup": "サービス登録",
+    "setPassword": "パスワード設定",
+    "back": "戻る",
+    "fullNameReal": "氏名(実名)",
+    "hasNpwp": "NPWPあり",
+    "noNpwpUseNik": "NPWPなし(NIK使用)",
+    "nikPlaceholder": "16桁のNIK",
+    "signupIdentityNote": "本サービスは実名とNPWP(またはNIK)に基づいてアカウントを作成します。",
+    "next": "次へ",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか?",
+    "step1Invalid": "すべてのフィールドを正しく入力してください。",
+    "passwordHint8": "8文字以上",
+    "companySignup": "法人登録",
+    "firmSignup": "税理士法人登録"
   },
   "nav": {
     "dashboard": "ダッシュボード",
