@@ -41,15 +41,8 @@ interface TaxFiling {
   };
 }
 
-type FilingStatus =
-  | 'DRAFT'
-  | 'PENDING_REVIEW'
-  | 'IN_REVIEW'
-  | 'PENDING_SUBMISSION'
-  | 'SUBMITTED'
-  | 'ACCEPTED'
-  | 'REJECTED'
-  | 'AMENDED';
+// Must match the tax_filing_status enum in 20251223000001_initial_schema.sql.
+type FilingStatus = 'DRAFT' | 'UNDER_REVIEW' | 'FILED' | 'REJECTED';
 
 const TAX_TYPES = [
   { value: 'all', label: 'All Types' },
@@ -63,11 +56,8 @@ const TAX_TYPES = [
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All Status' },
   { value: 'DRAFT', label: 'Draft' },
-  { value: 'PENDING_REVIEW', label: 'Pending Review' },
-  { value: 'IN_REVIEW', label: 'In Review' },
-  { value: 'PENDING_SUBMISSION', label: 'Pending Submission' },
-  { value: 'SUBMITTED', label: 'Submitted' },
-  { value: 'ACCEPTED', label: 'Accepted' },
+  { value: 'UNDER_REVIEW', label: 'Under Review' },
+  { value: 'FILED', label: 'Filed' },
   { value: 'REJECTED', label: 'Rejected' },
 ];
 
@@ -138,14 +128,10 @@ export function FilingStatusList({ customerId }: FilingStatusListProps) {
 
   const getStatusBadge = (status: FilingStatus) => {
     const statusConfig: Record<FilingStatus, { variant: 'default' | 'secondary' | 'outline' | 'destructive'; className: string }> = {
-      DRAFT: { variant: 'outline', className: '' },
-      PENDING_REVIEW: { variant: 'secondary', className: 'bg-yellow-100 text-yellow-800' },
-      IN_REVIEW: { variant: 'secondary', className: 'bg-blue-100 text-blue-800' },
-      PENDING_SUBMISSION: { variant: 'secondary', className: 'bg-orange-100 text-orange-800' },
-      SUBMITTED: { variant: 'secondary', className: 'bg-purple-100 text-purple-800' },
-      ACCEPTED: { variant: 'default', className: 'bg-green-100 text-green-800' },
+      DRAFT: { variant: 'outline', className: 'bg-gray-100 text-gray-700' },
+      UNDER_REVIEW: { variant: 'secondary', className: 'bg-blue-100 text-blue-800' },
+      FILED: { variant: 'default', className: 'bg-emerald-100 text-emerald-800' },
       REJECTED: { variant: 'destructive', className: '' },
-      AMENDED: { variant: 'outline', className: 'bg-gray-100 text-gray-800' },
     };
 
     const config = statusConfig[status] || { variant: 'outline', className: '' };
@@ -288,9 +274,9 @@ export function FilingStatusList({ customerId }: FilingStatusListProps) {
                   </TableCell>
                   <TableCell>
                     {filing.dueDate && (
-                      <div className={`text-sm ${isOverdue(filing.dueDate) && filing.status !== 'ACCEPTED' ? 'text-red-600 font-medium' : ''}`}>
+                      <div className={`text-sm ${isOverdue(filing.dueDate) && filing.status !== 'FILED' ? 'text-red-600 font-medium' : ''}`}>
                         {new Date(filing.dueDate).toLocaleDateString()}
-                        {isOverdue(filing.dueDate) && filing.status !== 'ACCEPTED' && (
+                        {isOverdue(filing.dueDate) && filing.status !== 'FILED' && (
                           <span className="ml-1 text-xs">(Overdue)</span>
                         )}
                       </div>
