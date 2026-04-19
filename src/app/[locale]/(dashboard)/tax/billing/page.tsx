@@ -62,6 +62,23 @@ export default function TaxBillingPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // Company label for the 회사 column. For COMPANY customers this is the
+  // registered company_name; for INDIVIDUAL (who normally shouldn't see this
+  // page) we fall back to full_name so the cell is never blank.
+  const [companyLabel, setCompanyLabel] = useState<string>('');
+
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/customer/profile', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!alive || !d?.data?.customer) return;
+        const c = d.data.customer;
+        setCompanyLabel(c.company_name || c.full_name || '');
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   // Per-row NTPN input state
   const [ntpnInput, setNtpnInput] = useState<Record<string, string>>({});
@@ -298,7 +315,7 @@ export default function TaxBillingPage() {
                           <p className="text-[10px] text-gray-500 mt-1">{period}</p>
                         </td>
                         <td className="p-2 align-top text-sm">
-                          {session?.fullName || '—'}
+                          {companyLabel || session?.fullName || '—'}
                         </td>
                         <td className="p-2 align-top text-right font-mono">
                           {fmtRp(item.amount)}
