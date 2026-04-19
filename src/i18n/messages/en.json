@@ -5204,7 +5204,27 @@
   },
   "multiEntity": {
     "countUnits": "{count}",
-    "countCases": "{count}"
+    "countCases": "{count}",
+    "kpiEntities": "Entities",
+    "kpiOpenFilings": "Open Filings",
+    "kpiOverdue": "Overdue",
+    "kpiYtdTax": "Tax YTD",
+    "upcomingTitle": "Upcoming Deadlines (45 days)",
+    "daysLeft": "{n} days left",
+    "daysOverdue": "{n} days overdue",
+    "dueToday": "Due today",
+    "overdueChip": "{n} overdue",
+    "draft": "Draft",
+    "underReview": "Under Review",
+    "filedYear": "Filed (YTD)",
+    "openQueue": "Queue",
+    "ytdTax": "Tax YTD",
+    "nextDeadline": "Next deadline",
+    "actMonthly": "Monthly Filing",
+    "actBilling": "ID Billing",
+    "filings": "Filings",
+    "overdueHeader": "Overdue",
+    "statusBreakdown": "Status Breakdown (All Entities)"
   },
   "calculations": {
     "countCases": "{count}"

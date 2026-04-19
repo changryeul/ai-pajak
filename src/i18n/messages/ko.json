@@ -5205,7 +5205,27 @@
   },
   "multiEntity": {
     "countUnits": "{count}개",
-    "countCases": "{count}건"
+    "countCases": "{count}건",
+    "kpiEntities": "등록 법인",
+    "kpiOpenFilings": "진행 중 신고",
+    "kpiOverdue": "기한 초과",
+    "kpiYtdTax": "올해 납부 세액",
+    "upcomingTitle": "임박 마감 (45일)",
+    "daysLeft": "D-{n}",
+    "daysOverdue": "{n}일 연체",
+    "dueToday": "오늘 마감",
+    "overdueChip": "{n}건 연체",
+    "draft": "초안",
+    "underReview": "검토 중",
+    "filedYear": "신고 완료",
+    "openQueue": "진행 큐",
+    "ytdTax": "YTD 납부",
+    "nextDeadline": "다음 마감",
+    "actMonthly": "월 신고",
+    "actBilling": "ID Billing",
+    "filings": "신고 수",
+    "overdueHeader": "연체",
+    "statusBreakdown": "상태 분포 (전체 법인)"
   },
   "calculations": {
     "countCases": "{count}건"

@@ -5204,7 +5204,27 @@
   },
   "multiEntity": {
     "countUnits": "{count}",
-    "countCases": "{count}"
+    "countCases": "{count}",
+    "kpiEntities": "Jumlah Entitas",
+    "kpiOpenFilings": "Pelaporan Aktif",
+    "kpiOverdue": "Terlambat",
+    "kpiYtdTax": "Pajak YTD",
+    "upcomingTitle": "Tenggat Mendatang (45 hari)",
+    "daysLeft": "{n} hari lagi",
+    "daysOverdue": "Terlambat {n} hari",
+    "dueToday": "Hari ini",
+    "overdueChip": "{n} terlambat",
+    "draft": "Draft",
+    "underReview": "Diperiksa",
+    "filedYear": "Filed (Tahun Ini)",
+    "openQueue": "Antrean",
+    "ytdTax": "Pajak YTD",
+    "nextDeadline": "Tenggat berikut",
+    "actMonthly": "Pelaporan Bulanan",
+    "actBilling": "ID Billing",
+    "filings": "Pelaporan",
+    "overdueHeader": "Terlambat",
+    "statusBreakdown": "Distribusi Status (Seluruh Entitas)"
   },
   "calculations": {
     "countCases": "{count}"

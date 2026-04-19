@@ -5204,7 +5204,27 @@
   },
   "multiEntity": {
     "countUnits": "{count}个",
-    "countCases": "{count}件"
+    "countCases": "{count}件",
+    "kpiEntities": "企业数",
+    "kpiOpenFilings": "进行中申报",
+    "kpiOverdue": "逾期",
+    "kpiYtdTax": "年内已缴税款",
+    "upcomingTitle": "即将到期 (45天)",
+    "daysLeft": "剩{n}天",
+    "daysOverdue": "逾期{n}天",
+    "dueToday": "今日到期",
+    "overdueChip": "{n}项逾期",
+    "draft": "草稿",
+    "underReview": "审核中",
+    "filedYear": "已申报",
+    "openQueue": "队列",
+    "ytdTax": "YTD税款",
+    "nextDeadline": "下一期限",
+    "actMonthly": "月度申报",
+    "actBilling": "ID Billing",
+    "filings": "申报数",
+    "overdueHeader": "逾期",
+    "statusBreakdown": "状态分布（所有企业）"
   },
   "calculations": {
     "countCases": "{count}件"

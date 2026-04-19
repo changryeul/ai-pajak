@@ -5204,7 +5204,27 @@
   },
   "multiEntity": {
     "countUnits": "{count}件",
-    "countCases": "{count}件"
+    "countCases": "{count}件",
+    "kpiEntities": "登録エンティティ",
+    "kpiOpenFilings": "進行中申告",
+    "kpiOverdue": "期限超過",
+    "kpiYtdTax": "今年度納税額",
+    "upcomingTitle": "直近の期限（45日）",
+    "daysLeft": "あと{n}日",
+    "daysOverdue": "{n}日超過",
+    "dueToday": "本日期限",
+    "overdueChip": "{n}件超過",
+    "draft": "下書き",
+    "underReview": "審査中",
+    "filedYear": "申告済",
+    "openQueue": "キュー",
+    "ytdTax": "YTD納税",
+    "nextDeadline": "次の期限",
+    "actMonthly": "月次申告",
+    "actBilling": "ID Billing",
+    "filings": "申告数",
+    "overdueHeader": "超過",
+    "statusBreakdown": "ステータス内訳（全エンティティ）"
   },
   "calculations": {
     "countCases": "{count}件"
