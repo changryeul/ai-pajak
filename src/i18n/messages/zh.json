@@ -5972,5 +5972,33 @@
     "aiApplyCta": "应用AI推荐",
     "aiResultPrefix": "推荐:",
     "pageSubtitle": "请根据您的情况选择年度申报表"
+  },
+  "myProfileV2": {
+    "title": "我的信息",
+    "completenessLabel": "信息完整度",
+    "completenessValue": "{pct}% 完成",
+    "missingRequired": "⚠ 必填信息不足。请填写红色字段。",
+    "autoParsedHint": "核对自动识别的基本信息并补齐缺失项",
+    "basicInfo": "基本信息",
+    "contactInfo": "联系 / 账户信息",
+    "taxAccountInfo": "税务账户信息",
+    "fieldName": "姓名",
+    "fieldNpwp": "NPWP",
+    "fieldAddress": "地址",
+    "fieldFamilyCount": "家庭人数",
+    "fieldEmail": "邮箱",
+    "fieldPhone": "电话号码",
+    "fieldCompany": "公司名称",
+    "fieldCoretaxId": "Coretax ID",
+    "fieldCoretaxPassword": "Coretax 密码",
+    "fieldDjpPassword": "DJP 密码",
+    "fieldPassphrase": "Passphrase",
+    "fieldEfin": "EFIN",
+    "saveCta": "保存",
+    "saving": "保存中…",
+    "saveSuccess": "已保存",
+    "saveError": "保存失败",
+    "serverError": "服务器错误",
+    "loadError": "加载资料失败"
   }
 }

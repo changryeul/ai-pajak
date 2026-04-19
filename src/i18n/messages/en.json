@@ -5972,5 +5972,33 @@
     "aiApplyCta": "Apply AI Recommendation",
     "aiResultPrefix": "Recommended:",
     "pageSubtitle": "Select the annual filing form that fits your situation"
+  },
+  "myProfileV2": {
+    "title": "My Profile",
+    "completenessLabel": "Profile Completeness",
+    "completenessValue": "{pct}% complete",
+    "missingRequired": "⚠ Required info missing. Fill in the red fields.",
+    "autoParsedHint": "Review auto-parsed basics and complete anything missing",
+    "basicInfo": "Basic Info",
+    "contactInfo": "Contact / Account",
+    "taxAccountInfo": "Tax Account Info",
+    "fieldName": "Name",
+    "fieldNpwp": "NPWP",
+    "fieldAddress": "Address",
+    "fieldFamilyCount": "Dependents",
+    "fieldEmail": "Email",
+    "fieldPhone": "Phone",
+    "fieldCompany": "Company / Employer",
+    "fieldCoretaxId": "Coretax ID",
+    "fieldCoretaxPassword": "Coretax Password",
+    "fieldDjpPassword": "DJP Password",
+    "fieldPassphrase": "Passphrase",
+    "fieldEfin": "EFIN",
+    "saveCta": "Save",
+    "saving": "Saving…",
+    "saveSuccess": "Saved",
+    "saveError": "Save failed",
+    "serverError": "Server error",
+    "loadError": "Failed to load profile"
   }
 }

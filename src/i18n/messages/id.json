@@ -5972,5 +5972,33 @@
     "aiApplyCta": "Terapkan Rekomendasi AI",
     "aiResultPrefix": "Rekomendasi:",
     "pageSubtitle": "Pilih formulir Pelaporan Tahunan sesuai situasi Anda"
+  },
+  "myProfileV2": {
+    "title": "Info Saya",
+    "completenessLabel": "Kelengkapan Data",
+    "completenessValue": "{pct}% selesai",
+    "missingRequired": "⚠ Informasi wajib belum lengkap. Isi kolom bertanda merah.",
+    "autoParsedHint": "Periksa informasi yang otomatis terdeteksi dan lengkapi yang kurang",
+    "basicInfo": "Informasi Dasar",
+    "contactInfo": "Kontak / Akun",
+    "taxAccountInfo": "Info Akun Pajak",
+    "fieldName": "Nama",
+    "fieldNpwp": "NPWP",
+    "fieldAddress": "Alamat",
+    "fieldFamilyCount": "Jumlah Tanggungan",
+    "fieldEmail": "Email",
+    "fieldPhone": "Nomor Telepon",
+    "fieldCompany": "Nama Perusahaan",
+    "fieldCoretaxId": "Coretax ID",
+    "fieldCoretaxPassword": "Kata Sandi Coretax",
+    "fieldDjpPassword": "Kata Sandi DJP",
+    "fieldPassphrase": "Passphrase",
+    "fieldEfin": "EFIN",
+    "saveCta": "Simpan",
+    "saving": "Menyimpan…",
+    "saveSuccess": "Berhasil disimpan",
+    "saveError": "Gagal menyimpan",
+    "serverError": "Kesalahan server",
+    "loadError": "Gagal memuat profil"
   }
 }

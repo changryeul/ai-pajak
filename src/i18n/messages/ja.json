@@ -5972,5 +5972,33 @@
     "aiApplyCta": "AIのおすすめを適用",
     "aiResultPrefix": "おすすめ:",
     "pageSubtitle": "ご状況に合った年次申告書を選択してください"
+  },
+  "myProfileV2": {
+    "title": "内情報",
+    "completenessLabel": "情報完成度",
+    "completenessValue": "{pct}% 完了",
+    "missingRequired": "⚠ 必須情報が不足しています。赤の項目を入力してください。",
+    "autoParsedHint": "自動解析された基本情報を確認し、不足分を補完してください",
+    "basicInfo": "基本情報",
+    "contactInfo": "連絡 / アカウント情報",
+    "taxAccountInfo": "税務アカウント情報",
+    "fieldName": "氏名",
+    "fieldNpwp": "NPWP",
+    "fieldAddress": "住所",
+    "fieldFamilyCount": "扶養家族数",
+    "fieldEmail": "メール",
+    "fieldPhone": "電話番号",
+    "fieldCompany": "会社名",
+    "fieldCoretaxId": "Coretax ID",
+    "fieldCoretaxPassword": "Coretax パスワード",
+    "fieldDjpPassword": "DJP パスワード",
+    "fieldPassphrase": "Passphrase",
+    "fieldEfin": "EFIN",
+    "saveCta": "保存",
+    "saving": "保存中…",
+    "saveSuccess": "保存しました",
+    "saveError": "保存に失敗",
+    "serverError": "サーバーエラー",
+    "loadError": "プロフィールの読み込みに失敗"
   }
 }

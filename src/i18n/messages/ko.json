@@ -5973,5 +5973,33 @@
     "aiApplyCta": "AI 추천 적용하기",
     "aiResultPrefix": "추천:",
     "pageSubtitle": "상황에 맞는 연간 세금 신고서를 선택하세요"
+  },
+  "myProfileV2": {
+    "title": "내정보",
+    "completenessLabel": "정보 완성도",
+    "completenessValue": "{pct}% 완료",
+    "missingRequired": "⚠ 필수 정보가 부족합니다. 빨간 항목을 입력하세요.",
+    "autoParsedHint": "자동 파싱된 기본정보를 확인하고 부족한 내용을 보완하세요",
+    "basicInfo": "기본정보",
+    "contactInfo": "연락 / 계정정보",
+    "taxAccountInfo": "세무 계정 정보",
+    "fieldName": "이름",
+    "fieldNpwp": "NPWP",
+    "fieldAddress": "주소",
+    "fieldFamilyCount": "가족 수",
+    "fieldEmail": "이메일",
+    "fieldPhone": "전화번호",
+    "fieldCompany": "회사명",
+    "fieldCoretaxId": "Coretax ID",
+    "fieldCoretaxPassword": "Coretax Password",
+    "fieldDjpPassword": "DJP Password",
+    "fieldPassphrase": "Passphrase",
+    "fieldEfin": "EFIN",
+    "saveCta": "저장",
+    "saving": "저장 중…",
+    "saveSuccess": "저장되었습니다",
+    "saveError": "저장 실패",
+    "serverError": "서버 오류",
+    "loadError": "프로필을 불러오지 못했습니다"
   }
 }

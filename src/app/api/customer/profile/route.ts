@@ -32,6 +32,7 @@ const patchSchema = z.object({
   full_name: z.string().trim().min(1).max(100).optional(),
   email: z.string().email().optional(),
   phone: z.string().trim().max(30).optional(),
+  address: z.string().trim().max(500).nullable().optional(),
   npwp: z.string().regex(/^\d{15}$/).optional(),
   nik: z.string().regex(/^\d{16}$/).optional(),
   spouse_name: z.string().trim().max(100).nullable().optional(),
@@ -43,8 +44,12 @@ const patchSchema = z.object({
     'K/0', 'K/1', 'K/2', 'K/3',
     'K/I/0', 'K/I/1', 'K/I/2', 'K/I/3',
   ]).nullable().optional(),
+  company_name: z.string().trim().max(255).nullable().optional(),
+  employer_name: z.string().trim().max(200).nullable().optional(),
   coretax_id: z.string().trim().max(100).nullable().optional(),
+  coretax_password_hint: z.string().trim().max(200).nullable().optional(),
   djp_password_hint: z.string().trim().max(100).nullable().optional(),
+  djp_passphrase_hint: z.string().trim().max(200).nullable().optional(),
   efin: z.string().trim().max(20).nullable().optional(),
   // Cross-border profile (PR3 Batch 3 / T-005). ISO 3166-1 alpha-2.
   // The DB CHECK constraint enforces the supported subset.
@@ -133,6 +138,7 @@ interface CustomerProfileRow {
   full_name: string | null;
   email: string | null;
   phone: string | null;
+  address: string | null;
   npwp: string | null;
   nik: string | null;
   customer_type: 'INDIVIDUAL' | 'COMPANY';
@@ -141,8 +147,12 @@ interface CustomerProfileRow {
   spouse_npwp: string | null;
   spouse_annual_income: number | null;
   spouse_withheld_tax: number | null;
+  company_name: string | null;
+  employer_name: string | null;
   coretax_id: string | null;
+  coretax_password_hint: string | null;
   djp_password_hint: string | null;
+  djp_passphrase_hint: string | null;
   efin: string | null;
   onboarding_step: number | null;
   nationality: 'ID' | 'KR' | 'US' | 'JP' | null;
