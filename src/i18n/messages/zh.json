@@ -6079,5 +6079,34 @@
     "startFilingCta": "开始申报",
     "viewProgressCta": "查看进度",
     "sampleDataNotice": "样本数据 — 首次提交SPT Tahunan后自动更新为真实数据。"
+  },
+  "auditSimV2": {
+    "sev": {
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "back": "返回",
+    "prepTitle": "检查准备",
+    "risksTitle": "从您的数据中检测到的风险信号",
+    "docsTitle": "需要准备的文件",
+    "questionsTitle": "可能被问到的问题",
+    "startChat": "开始模拟",
+    "chatTitle": "审计访谈",
+    "doneHint": "模拟结束 — 查看报告以获取后续建议",
+    "viewReport": "查看报告",
+    "overall": "综合得分",
+    "dimEvidence": "提供的证据",
+    "dimClarity": "回答清晰度",
+    "dimCompliance": "法规理解",
+    "dimEvidenceShort": "证据",
+    "dimClarityShort": "清晰",
+    "dimComplianceShort": "法规",
+    "actions": "改进行动",
+    "actionEvidence": "每个回答中加入具体数字并引用文件（发票号、日期、银行账户）。",
+    "actionClarity": "以完整的结构化句子回答：背景→事实→结论。",
+    "actionCompliance": "引用您依据的法规（Pasal/PMK/PP），展示对法律依据的理解。",
+    "actionBaseline": "表现良好。请保持文档习惯以应对真正的审计。",
+    "restart": "重新开始"
   }
 }

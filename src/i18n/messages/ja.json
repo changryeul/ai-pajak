@@ -6079,5 +6079,34 @@
     "startFilingCta": "申告を開始",
     "viewProgressCta": "進捗を見る",
     "sampleDataNotice": "サンプルデータ — 初回のSPT Tahunan提出後に実データで更新されます。"
+  },
+  "auditSimV2": {
+    "sev": {
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "back": "戻る",
+    "prepTitle": "調査準備",
+    "risksTitle": "データから検出されたリスクシグナル",
+    "docsTitle": "準備すべき書類",
+    "questionsTitle": "想定される質問",
+    "startChat": "シミュレーション開始",
+    "chatTitle": "調査面談",
+    "doneHint": "シミュレーション終了 — レポートで改善アクションを確認",
+    "viewReport": "レポートを見る",
+    "overall": "総合スコア",
+    "dimEvidence": "証拠の提示",
+    "dimClarity": "回答の明瞭さ",
+    "dimCompliance": "規制理解",
+    "dimEvidenceShort": "証拠",
+    "dimClarityShort": "明瞭",
+    "dimComplianceShort": "規制",
+    "actions": "改善アクション",
+    "actionEvidence": "すべての回答に具体的な数字と書類（請求書番号、日付、口座）を示してください。",
+    "actionClarity": "構造化された完全な文で答える：文脈→事実→結論。",
+    "actionCompliance": "参照する規制（Pasal / PMK / PP）を示し、法的根拠の理解を示しましょう。",
+    "actionBaseline": "良いパフォーマンスです。本番の調査に備えて書類管理習慣を維持しましょう。",
+    "restart": "再開"
   }
 }

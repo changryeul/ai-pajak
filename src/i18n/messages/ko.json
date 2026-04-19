@@ -6080,5 +6080,34 @@
     "startFilingCta": "신고 시작하기",
     "viewProgressCta": "진행현황 보기",
     "sampleDataNotice": "샘플 데이터입니다. 첫 SPT Tahunan 제출 후 실제 값으로 채워집니다."
+  },
+  "auditSimV2": {
+    "sev": {
+      "high": "높음",
+      "medium": "중간",
+      "low": "낮음"
+    },
+    "back": "돌아가기",
+    "prepTitle": "조사 준비",
+    "risksTitle": "당신의 데이터에서 감지된 리스크 시그널",
+    "docsTitle": "준비할 서류",
+    "questionsTitle": "예상 질문",
+    "startChat": "시뮬레이션 시작",
+    "chatTitle": "세무조사 면담",
+    "doneHint": "시뮬레이션 완료 — 리포트에서 후속 액션 확인",
+    "viewReport": "리포트 보기",
+    "overall": "종합 점수",
+    "dimEvidence": "증거 제시",
+    "dimClarity": "답변 명료성",
+    "dimCompliance": "법규 이해",
+    "dimEvidenceShort": "증거",
+    "dimClarityShort": "명료",
+    "dimComplianceShort": "법규",
+    "actions": "개선 액션",
+    "actionEvidence": "모든 답변에 구체적인 숫자와 서류(송장번호, 날짜, 계좌)를 언급하세요.",
+    "actionClarity": "완전한 문장 구조로 답하세요: 맥락 → 사실 → 결론.",
+    "actionCompliance": "참조 법규(Pasal/PMK/PP)를 명시하세요 — 법적 근거에 대한 이해를 보여주세요.",
+    "actionBaseline": "좋은 답변이었습니다. 실제 조사를 위해 문서 관리 습관을 유지하세요.",
+    "restart": "다시 시작"
   }
 }

@@ -6079,5 +6079,34 @@
     "startFilingCta": "Mulai Pelaporan",
     "viewProgressCta": "Lihat Kemajuan",
     "sampleDataNotice": "Data contoh — grafik akan terisi otomatis setelah SPT Tahunan pertama dikirim."
+  },
+  "auditSimV2": {
+    "sev": {
+      "high": "Tinggi",
+      "medium": "Sedang",
+      "low": "Rendah"
+    },
+    "back": "Kembali",
+    "prepTitle": "Persiapan Pemeriksaan",
+    "risksTitle": "Sinyal risiko terdeteksi dari data Anda",
+    "docsTitle": "Dokumen yang perlu disiapkan",
+    "questionsTitle": "Pertanyaan yang kemungkinan ditanyakan",
+    "startChat": "Mulai Simulasi",
+    "chatTitle": "Simulasi Wawancara",
+    "doneHint": "Simulasi selesai — buka laporan untuk rekomendasi tindak lanjut",
+    "viewReport": "Lihat Laporan",
+    "overall": "Skor Keseluruhan",
+    "dimEvidence": "Bukti yang Diberikan",
+    "dimClarity": "Kejelasan Jawaban",
+    "dimCompliance": "Pemahaman Regulasi",
+    "dimEvidenceShort": "Bukti",
+    "dimClarityShort": "Jelas",
+    "dimComplianceShort": "Regulasi",
+    "actions": "Tindakan Perbaikan",
+    "actionEvidence": "Tambahkan angka spesifik dan rujuk dokumen (nomor faktur, tanggal, rekening bank) dalam setiap jawaban.",
+    "actionClarity": "Jawab dalam kalimat lengkap yang terstruktur: konteks → fakta → kesimpulan.",
+    "actionCompliance": "Sitasi regulasi (Pasal / PMK / PP) yang Anda rujuk — tunjukkan pemahaman dasar hukum.",
+    "actionBaseline": "Performa bagus. Pertahankan kebiasaan dokumentasi yang baik untuk audit sesungguhnya.",
+    "restart": "Mulai Lagi"
   }
 }

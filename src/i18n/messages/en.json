@@ -6079,5 +6079,34 @@
     "startFilingCta": "Start Filing",
     "viewProgressCta": "View Progress",
     "sampleDataNotice": "Sample data — charts populate once you submit your first SPT Tahunan."
+  },
+  "auditSimV2": {
+    "sev": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "back": "Back",
+    "prepTitle": "Audit Preparation",
+    "risksTitle": "Risk signals detected from your data",
+    "docsTitle": "Documents to prepare",
+    "questionsTitle": "Questions likely to be asked",
+    "startChat": "Start Simulation",
+    "chatTitle": "Audit Interview",
+    "doneHint": "Simulation complete — open the report for follow-up actions",
+    "viewReport": "View Report",
+    "overall": "Overall Score",
+    "dimEvidence": "Evidence Provided",
+    "dimClarity": "Answer Clarity",
+    "dimCompliance": "Regulation Knowledge",
+    "dimEvidenceShort": "Evi",
+    "dimClarityShort": "Clar",
+    "dimComplianceShort": "Reg",
+    "actions": "Improvement Actions",
+    "actionEvidence": "Include specific numbers and cite documents (invoice no., date, bank account) in every answer.",
+    "actionClarity": "Answer in full structured sentences: context → facts → conclusion.",
+    "actionCompliance": "Cite the regulation (Pasal / PMK / PP) you rely on — demonstrate knowledge of the legal basis.",
+    "actionBaseline": "Solid performance. Keep the documentation discipline for a real audit.",
+    "restart": "Restart"
   }
 }
