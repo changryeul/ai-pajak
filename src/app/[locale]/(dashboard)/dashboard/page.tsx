@@ -35,6 +35,7 @@ import { CurrentPlanWidget } from '@/components/dashboard/CurrentPlanWidget';
 import { CustomPricingWidget } from '@/components/dashboard/CustomPricingWidget';
 import { ConsultantTierWidget } from '@/components/dashboard/ConsultantTierWidget';
 import { CorporateDashboardV2 } from '@/components/dashboard/CorporateDashboardV2';
+import { PersonalDashboardV3 } from '@/components/dashboard/PersonalDashboardV3';
 import { SpouseAndDependentsCard } from '@/components/dashboard/SpouseAndDependentsCard';
 import { GrowthAnomalyCard } from '@/components/dashboard/GrowthAnomalyCard';
 import { ForeignAssetReportingCard } from '@/components/dashboard/ForeignAssetReportingCard';
@@ -253,6 +254,14 @@ function CustomerDashboardWithOnboarding({
   // Branch by customer type — corporate customers get the prototype-style dashboard
   if (session.customerType === 'COMPANY') {
     return <CorporateDashboardV2 session={session} locale={locale} />;
+  }
+  if (session.customerType === 'INDIVIDUAL' && session.customerId) {
+    return (
+      <PersonalDashboardV3
+        customerId={session.customerId}
+        customerName={session.fullName}
+      />
+    );
   }
   return <CustomerDashboard session={session} locale={locale} />;
 }
