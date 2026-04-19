@@ -40,11 +40,27 @@ try {
     await page.goto(`${BASE}/id/login`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(2000);
     await page.screenshot({ path: '.gstack/qa-reports/screenshots/prod-login.png' });
-    const body = (await page.textContent('body')) || '';
-    const koreanMatches = body.match(/[\uac00-\ud7af]/);
+    // Only check visible user-facing text. body.textContent also returns
+    // <script> contents, which can include i18n RSC payload from sibling
+    // pages (e.g., sptIntake is bilingual Korean↔Indonesian on purpose).
+    const visibleText = await page.evaluate(() => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const p = node.parentElement;
+          if (!p) return NodeFilter.FILTER_REJECT;
+          if (p.closest('script, style, noscript, template')) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        },
+      });
+      const chunks = [];
+      let n;
+      while ((n = walker.nextNode())) chunks.push(n.textContent || '');
+      return chunks.join(' ');
+    });
+    const koreanMatches = visibleText.match(/[\uac00-\ud7af]/);
     if (koreanMatches) throw new Error(`Korean found on id/login: ${koreanMatches[0]}`);
-    const expectedLabel = body.includes('Email atau NPWP');
-    if (!expectedLabel) throw new Error('Indonesian label "Email atau NPWP" not found');
+    if (!visibleText.includes('Email atau NPWP'))
+      throw new Error('Indonesian label "Email atau NPWP" not found');
   });
 
   await step('register INDIVIDUAL + full onboarding', async () => {
@@ -88,23 +104,54 @@ try {
     await page.screenshot({ path: '.gstack/qa-reports/screenshots/prod-dashboard.png', fullPage: true });
   });
 
-  await step('dashboard has PR1+PR2+PR3 widgets', async () => {
+  await step('dashboard has PersonalDashboardV3 sections', async () => {
     const body = (await page.textContent('body')) || '';
-    // PR2 Batch 1: Spouse & Dependents card
-    if (!body.includes('Status Pernikahan')) throw new Error('SpouseAndDependentsCard missing');
-    // PR3 Batch 2: Growth anomaly card
-    if (!body.includes('Deteksi Anomali')) throw new Error('GrowthAnomalyCard missing');
-    // PR3 Batch 3: Foreign asset reporting card
-    if (!body.includes('Pelaporan Aset Luar Negeri')) throw new Error('ForeignAssetReportingCard missing');
+    // V3 = PersonalDashboardV3 (2026-04-19 redesign)
+    // Section 2: 3 years filings
+    if (!body.match(/Riwayat Pelaporan 3 Tahun|3년 신고 이력|Last 3 Years/i))
+      throw new Error('3-year filings section missing');
+    // Section 4: assets + liabilities summary
+    if (!body.includes('Aset (Assets)') && !body.includes('Assets'))
+      throw new Error('Assets card missing');
+    if (!body.includes('Liabilitas (Liabilities)') && !body.includes('Liabilities'))
+      throw new Error('Liabilities card missing');
+    // Section 10: CTA buttons
+    if (!body.match(/Mulai Pelaporan|Start Filing|신고 시작하기/))
+      throw new Error('Start Filing CTA missing');
   });
 
-  await step('/settings/profile renders the OCR uploader', async () => {
-    await page.goto(`${BASE}/id/settings/profile`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForSelector('text=/Otomasi profil|AI|Profil Saya/', { timeout: 20000 });
+  await step('/my-profile renders profile editor', async () => {
+    await page.goto(`${BASE}/id/my-profile`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
-    await page.screenshot({ path: '.gstack/qa-reports/screenshots/prod-profile.png', fullPage: true });
+    await page.screenshot({ path: '.gstack/qa-reports/screenshots/prod-my-profile.png', fullPage: true });
     const body = (await page.textContent('body')) || '';
-    if (!body.includes('Otomasi profil')) throw new Error('DocumentToProfileUploader missing');
+    if (!body.includes('Info Saya') && !body.includes('My Profile'))
+      throw new Error('my-profile header missing');
+    if (!body.match(/Informasi Dasar|Basic Info/))
+      throw new Error('basic info section missing');
+    if (!body.match(/Info Akun Pajak|Tax Account/))
+      throw new Error('tax account section missing');
+  });
+
+  await step('/tax/spt-tahunan renders 2x2 selection grid', async () => {
+    await page.goto(`${BASE}/id/tax/spt-tahunan`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2500);
+    await page.screenshot({ path: '.gstack/qa-reports/screenshots/prod-spt-selection.png', fullPage: true });
+    const body = (await page.textContent('body')) || '';
+    if (!body.includes('SPT 1770 SS')) throw new Error('1770SS card missing');
+    if (!body.includes('SPT 1770 S')) throw new Error('1770S card missing');
+    if (!body.match(/Rekomendasi AI|AI Recommendation|AI 추천/))
+      throw new Error('AI recommendation card missing');
+  });
+
+  await step('/tax/spt-tahunan/1770ss loads intake', async () => {
+    await page.goto(`${BASE}/id/tax/spt-tahunan/1770ss`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(3000);
+    const body = (await page.textContent('body')) || '';
+    if (!body.match(/1770SS|Input Data|신고 자료/))
+      throw new Error('1770SS intake header missing');
+    if (!body.match(/Aset \(Harta\)|Assets \(Harta\)|자산 \(Harta\)/))
+      throw new Error('assets section missing');
   });
 
   console.log(`\n✅ Production smoke passed (email: ${EMAIL})`);
