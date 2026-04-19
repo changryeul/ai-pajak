@@ -445,49 +445,58 @@ export function SPTIntake({
               {/* Bank accounts */}
               <div>
                 <p className="text-xs text-gray-500 mb-2">{t('bankAccountsLabel')}</p>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {bankAccounts.map((row, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-1.5 items-center">
-                      <Input
-                        className="col-span-3 h-9 text-xs"
-                        placeholder={t('bankName')}
-                        value={row.bankName}
-                        onChange={(e) => updateBankAccount(idx, { bankName: e.target.value })}
-                      />
-                      <Input
-                        className="col-span-3 h-9 text-xs"
-                        placeholder={t('accountNumber')}
-                        value={row.accountNumber}
-                        onChange={(e) => updateBankAccount(idx, { accountNumber: e.target.value })}
-                      />
-                      <select
-                        className="col-span-2 h-9 text-xs rounded-md border border-input bg-background px-2"
-                        value={row.currency}
-                        onChange={(e) => updateBankAccount(idx, { currency: e.target.value as Currency })}
-                      >
-                        <option value="IDR">IDR</option>
-                        <option value="USD">USD</option>
-                        <option value="KRW">KRW</option>
-                        <option value="JPY">JPY</option>
-                        <option value="SGD">SGD</option>
-                        <option value="EUR">EUR</option>
-                      </select>
-                      <Input
-                        className="col-span-3 h-9 text-xs"
-                        type="number"
-                        inputMode="numeric"
-                        placeholder={t('balanceAt1231')}
-                        value={row.balance}
-                        onChange={(e) => updateBankAccount(idx, { balance: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        className="col-span-1 text-xs text-red-500 hover:text-red-700 disabled:opacity-40"
-                        onClick={() => removeBankAccount(idx)}
-                        disabled={bankAccounts.length <= 1}
-                      >
-                        {t('removeRow')}
-                      </button>
+                    <div
+                      key={idx}
+                      className="rounded-lg border border-gray-200 bg-gray-50/40 p-3 space-y-2"
+                    >
+                      {/* Row 1: bank name + account number */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <Input
+                          className="h-10"
+                          placeholder={t('bankName')}
+                          value={row.bankName}
+                          onChange={(e) => updateBankAccount(idx, { bankName: e.target.value })}
+                        />
+                        <Input
+                          className="h-10"
+                          placeholder={t('accountNumber')}
+                          value={row.accountNumber}
+                          onChange={(e) => updateBankAccount(idx, { accountNumber: e.target.value })}
+                        />
+                      </div>
+                      {/* Row 2: currency + balance + remove */}
+                      <div className="flex gap-2 items-center">
+                        <select
+                          className="h-10 w-24 rounded-md border border-input bg-white px-2 text-sm"
+                          value={row.currency}
+                          onChange={(e) => updateBankAccount(idx, { currency: e.target.value as Currency })}
+                        >
+                          <option value="IDR">IDR</option>
+                          <option value="USD">USD</option>
+                          <option value="KRW">KRW</option>
+                          <option value="JPY">JPY</option>
+                          <option value="SGD">SGD</option>
+                          <option value="EUR">EUR</option>
+                        </select>
+                        <Input
+                          className="h-10 flex-1"
+                          type="number"
+                          inputMode="numeric"
+                          placeholder={t('balanceAt1231')}
+                          value={row.balance}
+                          onChange={(e) => updateBankAccount(idx, { balance: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          className="h-10 px-3 text-xs text-red-500 hover:text-red-700 disabled:opacity-40 shrink-0"
+                          onClick={() => removeBankAccount(idx)}
+                          disabled={bankAccounts.length <= 1}
+                        >
+                          {t('removeRow')}
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -497,26 +506,31 @@ export function SPTIntake({
               </div>
 
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('stockInvest')}
                 value={stocks} onChange={(e) => setStocks(e.target.value)}
               />
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('realEstate')}
                 value={realEstate} onChange={(e) => setRealEstate(e.target.value)}
               />
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('vehicle')}
                 value={vehicle} onChange={(e) => setVehicle(e.target.value)}
               />
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('businessAssets')}
                 value={businessAssets} onChange={(e) => setBusinessAssets(e.target.value)}
               />
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('otherAssets')}
                 value={otherAssets} onChange={(e) => setOtherAssets(e.target.value)}
@@ -529,21 +543,25 @@ export function SPTIntake({
             <CardContent className="p-5 space-y-3">
               <p className="font-semibold text-gray-900">{t('liabilitiesTitle')}</p>
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('bankLoan')}
                 value={bankLoan} onChange={(e) => setBankLoan(e.target.value)}
               />
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('creditCard')}
                 value={creditCard} onChange={(e) => setCreditCard(e.target.value)}
               />
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('personalLoan')}
                 value={personalLoan} onChange={(e) => setPersonalLoan(e.target.value)}
               />
               <Input
+                className="h-10"
                 type="number" inputMode="numeric"
                 placeholder={t('businessDebt')}
                 value={businessDebt} onChange={(e) => setBusinessDebt(e.target.value)}
