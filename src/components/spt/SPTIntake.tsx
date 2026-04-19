@@ -14,7 +14,7 @@
  * with consultant_id = null so JTC picks it up from the operator queue.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -87,6 +87,11 @@ export function SPTIntake({
   const [uploading, setUploading] = useState<UploadKind | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Income (gross) — populated by OCR or operator later; user can also type
+  // directly. Stored under tax_data.incomeSummary.gross so the dashboard
+  // trend chart can compute year-over-year deltas.
+  const [grossIncome, setGrossIncome] = useState('');
+
   // Tax credit
   const [pph23Amount, setPph23Amount] = useState('');
   const [foreignTaxAmount, setForeignTaxAmount] = useState('');
@@ -112,6 +117,12 @@ export function SPTIntake({
   const [submitOk, setSubmitOk] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Draft autosave — debounced PATCH to /api/tax/filings in DRAFT status
+  type DraftStatus = 'idle' | 'saving' | 'saved' | 'error';
+  const [draftStatus, setDraftStatus] = useState<DraftStatus>('idle');
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draftSentRef = useRef(false);
+
   // Hidden file inputs
   const kkInputRef = useRef<HTMLInputElement>(null);
   const kkCaptureRef = useRef<HTMLInputElement>(null);
@@ -136,6 +147,29 @@ export function SPTIntake({
         if (kind === 'KK') setKkDoc(doc);
         else if (kind === 'INCOME') setIncomeDoc(doc);
         else setForeignTaxDoc(doc);
+
+        // OCR auto-prefill for 1721-A1 uploads on 1770SS/S. Fire-and-forget
+        // — the user can still edit the field if the OCR pick is wrong.
+        if (kind === 'INCOME' && form !== '1770') {
+          const ocrForm = new FormData();
+          ocrForm.append('file', file);
+          ocrForm.append('expectedCategory', 'BUKTI_POTONG');
+          fetch('/api/documents/ocr-extract', { method: 'POST', body: ocrForm })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((ocr) => {
+              if (!ocr || ocr.status !== 'COMPLETED') return;
+              const extracted = (ocr.extractedData || {}) as Record<string, unknown>;
+              const gross = Number(extracted.grossAmount);
+              if (Number.isFinite(gross) && gross > 0) {
+                setGrossIncome((prev) => (prev ? prev : String(Math.round(gross))));
+              }
+              const withheld = Number(extracted.taxAmount);
+              if (Number.isFinite(withheld) && withheld > 0) {
+                setPph23Amount((prev) => (prev ? prev : String(Math.round(withheld))));
+              }
+            })
+            .catch(() => { /* non-fatal */ });
+        }
       } catch (e) {
         setUploadError(e instanceof Error ? e.message : t('uploadFailed'));
       } finally {
@@ -190,6 +224,104 @@ export function SPTIntake({
     }
   }, [bankAccounts, t]);
 
+  // Draft payload — same shape as the submit payload but with status DRAFT.
+  // `/api/tax/filings` POST upserts by (customer, type, period, status=DRAFT),
+  // so every autosave re-hits the same row.
+  const draftBody = useMemo(() => {
+    const toNum = (s: string) => {
+      const n = Number(s.replace(/[^\d.-]/g, ''));
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+    return {
+      customerId,
+      taxType: 'SPT_TAHUNAN' as const,
+      taxPeriod: String(year),
+      taxYear: year,
+      status: 'DRAFT' as const,
+      taxData: {
+        form,
+        intake: true,
+        draft: true,
+        documents: {
+          kk: kkDoc?.documentId || null,
+          [form === '1770' ? 'businessIncome' : 'a1']: incomeDoc?.documentId || null,
+          foreignTaxReceipt: foreignTaxDoc?.documentId || null,
+        },
+        grossIncome: toNum(grossIncome),
+        incomeSummary: { gross: toNum(grossIncome), taxable: toNum(grossIncome) },
+        ...(showTaxCredit && { foreignTaxCredit: toNum(foreignTaxAmount) }),
+        ...(showPph23Credit && { pph23Credit: toNum(pph23Amount) }),
+        harta: {
+          bankAccounts: bankAccounts
+            .filter((r) => r.bankName || r.accountNumber || r.balance)
+            .map((r) => ({
+              bankName: r.bankName,
+              accountNumber: r.accountNumber,
+              currency: r.currency,
+              balance: toNum(r.balance),
+            })),
+          stocks: toNum(stocks),
+          realEstate: toNum(realEstate),
+          vehicle: toNum(vehicle),
+          businessAssets: toNum(businessAssets),
+          otherAssets: toNum(otherAssets),
+        },
+        utang: {
+          bankLoan: toNum(bankLoan),
+          creditCard: toNum(creditCard),
+          personalLoan: toNum(personalLoan),
+          businessDebt: toNum(businessDebt),
+        },
+      },
+    };
+  }, [
+    customerId, year, form, showTaxCredit, showPph23Credit,
+    kkDoc, incomeDoc, foreignTaxDoc, grossIncome, foreignTaxAmount, pph23Amount,
+    bankAccounts, stocks, realEstate, vehicle, businessAssets, otherAssets,
+    bankLoan, creditCard, personalLoan, businessDebt,
+  ]);
+
+  const isBlankDraft = useMemo(() => {
+    const h = draftBody.taxData.harta;
+    const u = draftBody.taxData.utang;
+    return (
+      !draftBody.taxData.grossIncome &&
+      !draftBody.taxData.documents.kk &&
+      !draftBody.taxData.documents[form === '1770' ? 'businessIncome' : 'a1'] &&
+      !h.bankAccounts.length && !h.stocks && !h.realEstate && !h.vehicle &&
+      !h.businessAssets && !h.otherAssets &&
+      !u.bankLoan && !u.creditCard && !u.personalLoan && !u.businessDebt
+    );
+  }, [draftBody, form]);
+
+  // Debounced draft autosave — 1.5s after the last edit. Skips when the form
+  // is blank (so we don't create empty DRAFT rows on initial mount) and
+  // stops once the user has clicked Submit (submitOk = true).
+  useEffect(() => {
+    if (submitOk || isBlankDraft) return;
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = setTimeout(async () => {
+      setDraftStatus('saving');
+      try {
+        const res = await fetch('/api/tax/filings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(draftBody),
+        });
+        if (!res.ok) throw new Error('draft_failed');
+        draftSentRef.current = true;
+        setDraftStatus('saved');
+        setTimeout(() => setDraftStatus('idle'), 1500);
+      } catch {
+        setDraftStatus('error');
+      }
+    }, 1500);
+    return () => {
+      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    };
+  }, [draftBody, submitOk, isBlankDraft]);
+
   const addBankAccount = () =>
     setBankAccounts((rows) => [...rows, { bankName: '', accountNumber: '', currency: 'IDR', balance: '' }]);
   const removeBankAccount = (idx: number) =>
@@ -228,6 +360,14 @@ export function SPTIntake({
             kk: kkDoc?.documentId || null,
             [form === '1770' ? 'businessIncome' : 'a1']: incomeDoc?.documentId || null,
             foreignTaxReceipt: foreignTaxDoc?.documentId || null,
+          },
+          // Flat grossIncome alias is what /api/tax/filings already maps to
+          // `totalIncome` on the filings list, and incomeSummary.gross is
+          // what trend-from-filings reads for year-over-year deltas.
+          grossIncome: toNum(grossIncome),
+          incomeSummary: {
+            gross: toNum(grossIncome),
+            taxable: toNum(grossIncome),
           },
           ...(showTaxCredit && {
             foreignTaxCredit: toNum(foreignTaxAmount),
@@ -275,7 +415,8 @@ export function SPTIntake({
       setSubmitting(false);
     }
   }, [
-    kkDoc, incomeDoc, foreignTaxDoc, foreignTaxAmount, pph23Amount, bankAccounts,
+    kkDoc, incomeDoc, foreignTaxDoc, foreignTaxAmount, pph23Amount, grossIncome,
+    bankAccounts,
     stocks, realEstate, vehicle, businessAssets, otherAssets,
     bankLoan, creditCard, personalLoan, businessDebt,
     customerId, year, t, form, showTaxCredit, showPph23Credit,
@@ -302,7 +443,26 @@ export function SPTIntake({
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t(headerKey)}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900">{t(headerKey)}</h1>
+          {draftStatus !== 'idle' && (
+            <span
+              className={`text-xs px-2 py-0.5 rounded ${
+                draftStatus === 'saving'
+                  ? 'bg-gray-100 text-gray-600'
+                  : draftStatus === 'saved'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                  : 'bg-red-50 text-red-700 border border-red-100'
+              }`}
+            >
+              {draftStatus === 'saving'
+                ? t('draftSaving')
+                : draftStatus === 'saved'
+                ? t('draftSaved')
+                : t('draftError')}
+            </span>
+          )}
+        </div>
         <Button variant="outline" size="sm" asChild>
           <Link href={`/${locale}/tax/spt-tahunan`}>
             <ArrowLeft className="h-4 w-4 mr-1" />
@@ -395,6 +555,18 @@ export function SPTIntake({
                 {t('uploaded')}: <span className="truncate">{incomeDoc.fileName}</span>
               </div>
             )}
+
+            {/* Gross income (annual) — optional; OCR/operator may fill later */}
+            <div>
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder={t('grossIncomePlaceholder')}
+                value={grossIncome}
+                onChange={(e) => setGrossIncome(e.target.value)}
+              />
+              <p className="text-[10px] text-gray-400 mt-1">{t('grossIncomeHint')}</p>
+            </div>
 
             {/* Tax credit (1770SS + 1770S) */}
             {showTaxCredit && (

@@ -5406,7 +5406,12 @@
     "industry": "業種",
     "annualRevenue": "年間売上",
     "pkpYes": "PKP登録済み",
-    "pkpNo": "非PKP"
+    "pkpNo": "非PKP",
+    "aiTotalThisYear": "今年の税額合計",
+    "aiUnpaidWarning": "未納税額 {amount} — 加算税前に納付してください",
+    "aiUpcomingCount": "予定申告 {count}件",
+    "aiAllClear": "すべての申告は正常 — 緊急対応なし",
+    "ctaMonthlyFiling": "月次申告"
   },
   "filingStatus": {
     "pageTitle": "Monthly Filing Status",
@@ -5953,7 +5958,12 @@
     "importDone": "口座{count}件を取り込み",
     "importNone": "プロフィールに口座が保存されていません",
     "importSkippedExisting": "既存の入力を保持",
-    "importFailed": "取り込みに失敗"
+    "importFailed": "取り込みに失敗",
+    "grossIncomePlaceholder": "年間総所得 (IDR)",
+    "grossIncomeHint": "任意 — A1源泉徴収票で検証されます",
+    "draftSaving": "保存中…",
+    "draftSaved": "下書き保存済み",
+    "draftError": "下書き保存に失敗"
   },
   "sptSelectV2": {
     "ssSubtitle": "非常にシンプルな個人申告",

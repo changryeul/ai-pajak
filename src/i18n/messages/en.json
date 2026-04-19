@@ -5406,7 +5406,12 @@
     "industry": "Industry",
     "annualRevenue": "Annual Revenue",
     "pkpYes": "PKP registered",
-    "pkpNo": "Non-PKP"
+    "pkpNo": "Non-PKP",
+    "aiTotalThisYear": "Total tax this year",
+    "aiUnpaidWarning": "{amount} unpaid — settle soon to avoid penalties",
+    "aiUpcomingCount": "{count} upcoming filings",
+    "aiAllClear": "All filings clear — no urgent action",
+    "ctaMonthlyFiling": "Monthly Filing"
   },
   "filingStatus": {
     "pageTitle": "Monthly Filing Status",
@@ -5953,7 +5958,12 @@
     "importDone": "{count} accounts imported",
     "importNone": "No accounts saved in profile",
     "importSkippedExisting": "Manual entries kept",
-    "importFailed": "Import failed"
+    "importFailed": "Import failed",
+    "grossIncomePlaceholder": "Annual gross income (IDR)",
+    "grossIncomeHint": "Optional — consultant verifies from the A1 slip",
+    "draftSaving": "Saving…",
+    "draftSaved": "Draft saved",
+    "draftError": "Draft save failed"
   },
   "sptSelectV2": {
     "ssSubtitle": "Very simple individual filing",

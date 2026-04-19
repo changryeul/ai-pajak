@@ -190,6 +190,48 @@ async function handleCreateFiling(request: RequestWithSession): Promise<Response
     await getSupabaseAdmin().from('tax_filing_documents').insert(links);
   }
 
+  // When a customer submits a filing for JTC review (UNDER_REVIEW, no
+  // consultant assigned yet), enqueue it on the operator side so the
+  // operator workflow picks it up. Idempotent via the unique
+  // (customer_id, tax_type, tax_period_month, tax_period_year) index.
+  if (status === 'UNDER_REVIEW' && consultantId === null) {
+    try {
+      // Derive month/year from tax_period. Annual filings use YYYY so we
+      // bucket them to month=12 which is the DJP deadline month anyway.
+      let periodMonth = 12;
+      let periodYear = Number(taxPeriod) || body.taxYear || new Date().getFullYear();
+      if (taxPeriod?.includes('-')) {
+        const [y, m] = taxPeriod.split('-').map((s) => parseInt(s, 10));
+        if (!Number.isNaN(y)) periodYear = y;
+        if (!Number.isNaN(m)) periodMonth = m;
+      }
+      // Amount heuristic for SPT Tahunan: pull netTaxDue/taxDue/calculatedTax
+      // if present, otherwise 0. Operator will update during review.
+      const td = taxData as Record<string, unknown>;
+      const amount =
+        Number(td.netTaxDue) || Number(td.taxDue) || Number(td.calculatedTax) || 0;
+
+      await getSupabaseAdmin()
+        .from('djp_submission_queue')
+        .upsert(
+          {
+            customer_id: customerId,
+            tax_type: taxType,
+            tax_period_month: periodMonth,
+            tax_period_year: periodYear,
+            amount,
+            status: 'PENDING',
+            notes: `Auto-enqueued from customer filing ${newFiling.id}`,
+          },
+          { onConflict: 'customer_id,tax_type,tax_period_month,tax_period_year' },
+        );
+    } catch (e) {
+      // Non-fatal: the filing is still created; operator ingestion can
+      // be backfilled. Log for diagnostics.
+      loggers.tax.warn({ err: e, filingId: newFiling.id }, 'Operator queue auto-enqueue failed');
+    }
+  }
+
   return NextResponse.json(
     {
       success: true,

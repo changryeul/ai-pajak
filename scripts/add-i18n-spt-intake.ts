@@ -146,6 +146,35 @@ const K: Record<string, Tr> = {
     ja: '取り込みに失敗',
     zh: '导入失败',
   },
+  grossIncomePlaceholder: {
+    id: 'Penghasilan Bruto Tahunan (IDR)',
+    en: 'Annual gross income (IDR)',
+    ko: '연 총소득 (IDR)',
+    ja: '年間総所得 (IDR)',
+    zh: '年度总收入 (IDR)',
+  },
+  grossIncomeHint: {
+    id: 'Opsional — konsultan akan memverifikasi dari bukti potong A1',
+    en: 'Optional — consultant verifies from the A1 slip',
+    ko: '선택 입력 — A1 원천징수영수증에서 검증됩니다',
+    ja: '任意 — A1源泉徴収票で検証されます',
+    zh: '可选 — 顾问将从A1凭证核实',
+  },
+  draftSaving: { id: 'Menyimpan…', en: 'Saving…', ko: '저장 중…', ja: '保存中…', zh: '保存中…' },
+  draftSaved: {
+    id: 'Draf tersimpan',
+    en: 'Draft saved',
+    ko: '임시 저장됨',
+    ja: '下書き保存済み',
+    zh: '草稿已保存',
+  },
+  draftError: {
+    id: 'Gagal menyimpan draf',
+    en: 'Draft save failed',
+    ko: '임시 저장 실패',
+    ja: '下書き保存に失敗',
+    zh: '草稿保存失败',
+  },
 };
 
 for (const locale of LOCALES) {

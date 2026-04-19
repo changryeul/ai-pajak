@@ -5407,7 +5407,12 @@
     "industry": "업종",
     "annualRevenue": "연 매출",
     "pkpYes": "PKP 등록",
-    "pkpNo": "비 PKP"
+    "pkpNo": "비 PKP",
+    "aiTotalThisYear": "올해 총 세액",
+    "aiUnpaidWarning": "미납 세액 {amount} — 가산세 전에 납부하세요",
+    "aiUpcomingCount": "예정된 신고 {count}건",
+    "aiAllClear": "모든 신고가 정상입니다 — 긴급 조치 없음",
+    "ctaMonthlyFiling": "월간 신고"
   },
   "filingStatus": {
     "pageTitle": "월 신고 현황",
@@ -5954,7 +5959,12 @@
     "importDone": "계좌 {count}개 불러옴",
     "importNone": "프로필에 저장된 계좌 없음",
     "importSkippedExisting": "이미 입력된 계좌가 있어 건너뜀",
-    "importFailed": "불러오기 실패"
+    "importFailed": "불러오기 실패",
+    "grossIncomePlaceholder": "연 총소득 (IDR)",
+    "grossIncomeHint": "선택 입력 — A1 원천징수영수증에서 검증됩니다",
+    "draftSaving": "저장 중…",
+    "draftSaved": "임시 저장됨",
+    "draftError": "임시 저장 실패"
   },
   "sptSelectV2": {
     "ssSubtitle": "매우 간단한 개인 신고",

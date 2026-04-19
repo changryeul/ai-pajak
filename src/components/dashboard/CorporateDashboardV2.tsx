@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3, Sparkles } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 
 interface QueueItem {
@@ -40,11 +43,15 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 export function CorporateDashboardV2({
   session,
+  locale: localeProp,
 }: {
   session: { customerId?: string; fullName?: string };
   locale: string;
 }) {
   const t = useTranslations('corpDashboardV2');
+  const tCta = useTranslations('personalDashV3');
+  const params = useParams();
+  const locale = localeProp || (params?.locale as string) || 'id';
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
 
@@ -299,6 +306,42 @@ export function CorporateDashboardV2({
           </dl>
         </CardContent>
       </Card>
+
+      {/* AI analysis comment — mirrors PersonalDashboardV3 structure for tone */}
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+        <CardContent className="p-5 space-y-2">
+          <p className="font-semibold text-gray-900 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-yellow-500" />
+            {tCta('aiCommentTitle')}
+          </p>
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            <li>
+              {t('aiTotalThisYear')}: <span className="font-semibold">{fmtRp(totalTax)}</span>
+            </li>
+            {unpaidTax > 0 && (
+              <li className="text-red-600 font-medium">
+                {t('aiUnpaidWarning', { amount: fmtRp(unpaidTax) })}
+              </li>
+            )}
+            {upcomingCount > 0 && (
+              <li>{t('aiUpcomingCount', { count: upcomingCount })}</li>
+            )}
+            {unpaidTax === 0 && upcomingCount === 0 && (
+              <li className="text-emerald-700">{t('aiAllClear')}</li>
+            )}
+          </ul>
+        </CardContent>
+      </Card>
+
+      {/* CTAs — mirror to personal dashboard */}
+      <div className="flex gap-3">
+        <Button asChild className="bg-gray-800 hover:bg-gray-900 text-white">
+          <Link href={`/${locale}/tax/monthly-dashboard`}>{t('ctaMonthlyFiling')}</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href={`/${locale}/filings`}>{tCta('viewProgressCta')}</Link>
+        </Button>
+      </div>
     </div>
   );
 }

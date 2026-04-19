@@ -5406,7 +5406,12 @@
     "industry": "行业",
     "annualRevenue": "年营业额",
     "pkpYes": "PKP已注册",
-    "pkpNo": "非PKP"
+    "pkpNo": "非PKP",
+    "aiTotalThisYear": "今年税额合计",
+    "aiUnpaidWarning": "未缴税款 {amount} — 请尽快缴纳以免滞纳金",
+    "aiUpcomingCount": "即将到来的申报 {count} 件",
+    "aiAllClear": "所有申报正常 — 无紧急处理事项",
+    "ctaMonthlyFiling": "月度申报"
   },
   "filingStatus": {
     "pageTitle": "Monthly Filing Status",
@@ -5953,7 +5958,12 @@
     "importDone": "已导入{count}个账户",
     "importNone": "资料中未保存账户",
     "importSkippedExisting": "保留已填写的内容",
-    "importFailed": "导入失败"
+    "importFailed": "导入失败",
+    "grossIncomePlaceholder": "年度总收入 (IDR)",
+    "grossIncomeHint": "可选 — 顾问将从A1凭证核实",
+    "draftSaving": "保存中…",
+    "draftSaved": "草稿已保存",
+    "draftError": "草稿保存失败"
   },
   "sptSelectV2": {
     "ssSubtitle": "极简个人申报",

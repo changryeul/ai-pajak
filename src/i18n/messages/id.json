@@ -5406,7 +5406,12 @@
     "industry": "Kategori Usaha",
     "annualRevenue": "Omzet Tahunan",
     "pkpYes": "PKP terdaftar",
-    "pkpNo": "Non-PKP"
+    "pkpNo": "Non-PKP",
+    "aiTotalThisYear": "Total pajak tahun ini",
+    "aiUnpaidWarning": "Pajak belum dibayar {amount} — segera lunasi",
+    "aiUpcomingCount": "{count} pelaporan yang akan datang",
+    "aiAllClear": "Semua pelaporan bersih — tidak ada tindakan mendesak",
+    "ctaMonthlyFiling": "Pelaporan Bulanan"
   },
   "filingStatus": {
     "pageTitle": "Status Pelaporan Bulanan",
@@ -5953,7 +5958,12 @@
     "importDone": "{count} rekening diimport",
     "importNone": "Tidak ada rekening di profil",
     "importSkippedExisting": "Sudah ada data — dibiarkan",
-    "importFailed": "Import gagal"
+    "importFailed": "Import gagal",
+    "grossIncomePlaceholder": "Penghasilan Bruto Tahunan (IDR)",
+    "grossIncomeHint": "Opsional — konsultan akan memverifikasi dari bukti potong A1",
+    "draftSaving": "Menyimpan…",
+    "draftSaved": "Draf tersimpan",
+    "draftError": "Gagal menyimpan draf"
   },
   "sptSelectV2": {
     "ssSubtitle": "Pelaporan sangat sederhana",
