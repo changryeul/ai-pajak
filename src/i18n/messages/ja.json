@@ -5999,6 +5999,12 @@
     "saveSuccess": "保存しました",
     "saveError": "保存に失敗",
     "serverError": "サーバーエラー",
-    "loadError": "プロフィールの読み込みに失敗"
+    "loadError": "プロフィールの読み込みに失敗",
+    "familyMaritalLabel": "婚姻状況",
+    "familySingle": "未婚",
+    "familyMarried": "既婚",
+    "familyJoint": "既婚（合算）",
+    "familyDepUnit": "人",
+    "familyPtkpHint": "PTKPコード"
   }
 }

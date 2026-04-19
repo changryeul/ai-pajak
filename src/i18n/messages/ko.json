@@ -6000,6 +6000,12 @@
     "saveSuccess": "저장되었습니다",
     "saveError": "저장 실패",
     "serverError": "서버 오류",
-    "loadError": "프로필을 불러오지 못했습니다"
+    "loadError": "프로필을 불러오지 못했습니다",
+    "familyMaritalLabel": "결혼 상태",
+    "familySingle": "미혼",
+    "familyMarried": "기혼",
+    "familyJoint": "기혼 (합산)",
+    "familyDepUnit": "명",
+    "familyPtkpHint": "PTKP 코드"
   }
 }

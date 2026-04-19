@@ -229,7 +229,9 @@
       "Bash(echo \"exit=$?\")",
       "Bash(BASE_URL=https://ai-pajak.vercel.app node .gstack/qa-reports/probe-login-korean.mjs)",
       "Bash(BASE_URL=https://ai-pajak.vercel.app node .gstack/qa-reports/probe-id-korean-all.mjs)",
-      "Bash(BASE_URL=http://localhost:3000 node .gstack/qa-reports/probe-id-korean-all.mjs)"
+      "Bash(BASE_URL=http://localhost:3000 node .gstack/qa-reports/probe-id-korean-all.mjs)",
+      "Bash(BASE_URL=https://ai-pajak.vercel.app node .gstack/qa-reports/probe-my-profile-v2.mjs)",
+      "Bash(BASE_URL=http://localhost:3000 node .gstack/qa-reports/probe-my-profile-v2.mjs)"
     ]
   }
 }

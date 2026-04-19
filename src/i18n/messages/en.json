@@ -5999,6 +5999,12 @@
     "saveSuccess": "Saved",
     "saveError": "Save failed",
     "serverError": "Server error",
-    "loadError": "Failed to load profile"
+    "loadError": "Failed to load profile",
+    "familyMaritalLabel": "Marital Status",
+    "familySingle": "Single",
+    "familyMarried": "Married",
+    "familyJoint": "Married (joint)",
+    "familyDepUnit": "person(s)",
+    "familyPtkpHint": "PTKP code"
   }
 }

@@ -5999,6 +5999,12 @@
     "saveSuccess": "已保存",
     "saveError": "保存失败",
     "serverError": "服务器错误",
-    "loadError": "加载资料失败"
+    "loadError": "加载资料失败",
+    "familyMaritalLabel": "婚姻状况",
+    "familySingle": "未婚",
+    "familyMarried": "已婚",
+    "familyJoint": "已婚（合并）",
+    "familyDepUnit": "人",
+    "familyPtkpHint": "PTKP代码"
   }
 }

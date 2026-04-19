@@ -41,16 +41,20 @@ interface ProfileForm {
   efin: string;
 }
 
+type MaritalState = 'single' | 'married' | 'joint';
+
 function dependentsFromPtkp(ptkp: string): number {
   const m = ptkp.match(/(\d)$/);
   return m ? Number(m[1]) : 0;
 }
-function buildPtkpFromDependents(current: string, dependents: number): string {
+function maritalFromPtkp(ptkp: string): MaritalState {
+  if (ptkp.startsWith('K/I/')) return 'joint';
+  if (ptkp.startsWith('K/')) return 'married';
+  return 'single';
+}
+function buildPtkp(marital: MaritalState, dependents: number): string {
   const d = Math.max(0, Math.min(3, dependents));
-  // Preserve marital prefix (TK/ | K/ | K/I/). Default to TK when blank.
-  const prefix = current.startsWith('K/I/') ? 'K/I/'
-    : current.startsWith('K/') ? 'K/'
-    : 'TK/';
+  const prefix = marital === 'joint' ? 'K/I/' : marital === 'married' ? 'K/' : 'TK/';
   return `${prefix}${d}`;
 }
 
@@ -258,18 +262,69 @@ export default function MyProfilePage() {
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
-            <Input
-              type="number"
-              inputMode="numeric"
-              min={0}
-              max={3}
-              placeholder={t('fieldFamilyCount')}
-              value={String(dependents)}
-              onChange={(e) => {
-                const n = Number(e.target.value);
-                setForm({ ...form, ptkp_status: buildPtkpFromDependents(form.ptkp_status, n) });
-              }}
-            />
+            {/* Marital + dependents → computed PTKP code */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50/40 p-3 space-y-3">
+              <div>
+                <p className="text-xs font-medium text-gray-600 mb-1.5">{t('familyMaritalLabel')}</p>
+                <div className="flex gap-2">
+                  {(['single', 'married', 'joint'] as const).map((m) => {
+                    const selected = maritalFromPtkp(form.ptkp_status) === m;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() =>
+                          setForm({ ...form, ptkp_status: buildPtkp(m, dependents) })
+                        }
+                        className={cn(
+                          'flex-1 h-9 rounded-md border text-xs font-medium transition-colors',
+                          selected
+                            ? 'bg-gray-800 text-white border-gray-800'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400',
+                        )}
+                      >
+                        {t(m === 'single' ? 'familySingle' : m === 'married' ? 'familyMarried' : 'familyJoint')}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-gray-600 mb-1.5">{t('fieldFamilyCount')}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    {[0, 1, 2, 3].map((n) => {
+                      const selected = dependents === n;
+                      return (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() =>
+                            setForm({ ...form, ptkp_status: buildPtkp(maritalFromPtkp(form.ptkp_status), n) })
+                          }
+                          className={cn(
+                            'w-10 h-10 rounded-md border text-sm font-semibold transition-colors',
+                            selected
+                              ? 'bg-gray-800 text-white border-gray-800'
+                              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400',
+                          )}
+                        >
+                          {n}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <span className="text-xs text-gray-500">{t('familyDepUnit')}</span>
+                </div>
+              </div>
+
+              {form.ptkp_status && (
+                <p className="text-[11px] text-gray-500">
+                  {t('familyPtkpHint')}: <span className="font-mono font-semibold text-gray-700">{form.ptkp_status}</span>
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
 

@@ -5999,6 +5999,12 @@
     "saveSuccess": "Berhasil disimpan",
     "saveError": "Gagal menyimpan",
     "serverError": "Kesalahan server",
-    "loadError": "Gagal memuat profil"
+    "loadError": "Gagal memuat profil",
+    "familyMaritalLabel": "Status Pernikahan",
+    "familySingle": "Lajang",
+    "familyMarried": "Menikah",
+    "familyJoint": "Menikah (gabung)",
+    "familyDepUnit": "orang",
+    "familyPtkpHint": "Kode PTKP"
   }
 }
