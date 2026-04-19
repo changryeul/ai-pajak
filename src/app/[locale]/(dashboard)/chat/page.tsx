@@ -1,23 +1,27 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Send, Loader2, Sparkles, User, Bot, MessageCircle,
+  Send, Loader2, Sparkles, User, Bot,
 } from 'lucide-react';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  followups?: string[];
 }
 
 export default function ChatPage() {
   const t = useTranslations('killer');
   const tc = useTranslations('chatPage');
+  const params = useParams();
+  const locale = (params?.locale as string) || 'id';
   const QUICK_QUESTIONS = [
     tc('q1'),
     tc('q2'),
@@ -33,17 +37,17 @@ export default function ChatPage() {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  const sendMessage = async (text?: string) => {
+  const sendMessage = useCallback(async (text?: string) => {
     const messageText = text || input.trim();
     if (!messageText) return;
 
     const userMsg: ChatMessage = { role: 'user', content: messageText, timestamp: new Date() };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const history = [...messages, userMsg].slice(-20).map(m => ({
+      const history = [...messages, userMsg].slice(-20).map((m) => ({
         role: m.role,
         content: m.content,
       }));
@@ -51,28 +55,30 @@ export default function ChatPage() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history }),
+        credentials: 'include',
+        body: JSON.stringify({ messages: history, language: locale }),
       });
-
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
+      const reply = (data.reply as string) || tc('cannotGenerate');
+      const followups = Array.isArray(data.followups) ? (data.followups as string[]) : [];
 
       const assistantMsg: ChatMessage = {
         role: 'assistant',
-        content: data.data?.response || data.response || tc('cannotGenerate'),
+        content: reply,
         timestamp: new Date(),
+        followups,
       };
-      setMessages(prev => [...prev, assistantMsg]);
+      setMessages((prev) => [...prev, assistantMsg]);
     } catch {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: t('chat.errorMsg'),
-        timestamp: new Date(),
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: t('chat.errorMsg'), timestamp: new Date() },
+      ]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, messages, locale, t, tc]);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
@@ -117,15 +123,31 @@ export default function ChatPage() {
                     <Bot className="h-3.5 w-3.5 text-white" />
                   </div>
                 )}
-                <div className={`rounded-2xl px-4 py-2.5 max-w-[80%] ${
-                  m.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-br-md'
-                    : 'bg-gray-100 text-gray-800 rounded-bl-md'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{m.content}</p>
-                  <p className={`text-[10px] mt-1 ${m.role === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>
-                    {m.timestamp.toLocaleTimeString()}
-                  </p>
+                <div className="max-w-[80%]">
+                  <div className={`rounded-2xl px-4 py-2.5 ${
+                    m.role === 'user'
+                      ? 'bg-blue-600 text-white rounded-br-md'
+                      : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                  }`}>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                    <p className={`text-[10px] mt-1 ${m.role === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>
+                      {m.timestamp.toLocaleTimeString()}
+                    </p>
+                  </div>
+                  {m.role === 'assistant' && m.followups && m.followups.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {m.followups.map((f, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => sendMessage(f)}
+                          className="text-[11px] bg-blue-50 text-blue-700 rounded-full px-2.5 py-1 hover:bg-blue-100 transition-colors border border-blue-100"
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {m.role === 'user' && (
                   <div className="p-1.5 bg-gray-200 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
