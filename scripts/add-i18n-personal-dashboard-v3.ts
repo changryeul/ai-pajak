@@ -132,6 +132,13 @@ const K: Record<string, Tr> = {
 
   startFilingCta: { id: 'Mulai Pelaporan', en: 'Start Filing', ko: '신고 시작하기', ja: '申告を開始', zh: '开始申报' },
   viewProgressCta: { id: 'Lihat Kemajuan', en: 'View Progress', ko: '진행현황 보기', ja: '進捗を見る', zh: '查看进度' },
+  sampleDataNotice: {
+    id: 'Data contoh — grafik akan terisi otomatis setelah SPT Tahunan pertama dikirim.',
+    en: 'Sample data — charts populate once you submit your first SPT Tahunan.',
+    ko: '샘플 데이터입니다. 첫 SPT Tahunan 제출 후 실제 값으로 채워집니다.',
+    ja: 'サンプルデータ — 初回のSPT Tahunan提出後に実データで更新されます。',
+    zh: '样本数据 — 首次提交SPT Tahunan后自动更新为真实数据。',
+  },
 };
 
 for (const locale of LOCALES) {

@@ -35,6 +35,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle, MessageCircle, Sparkles } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
+import { buildDashboardTrend, type TrendFiling } from '@/lib/tax/trend-from-filings';
 
 type Nationality = 'ID' | 'KR' | 'US' | 'JP';
 type FilingStatus = 'completed' | 'in_progress' | 'pending';
@@ -150,90 +151,72 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
     return years.map((y) => ({ year: y, filing: byYear.get(y) || null }));
   }, [filings]);
 
-  // Pull latest SPT 1770SS/S/1770 intake data for asset/liability totals
-  const latestTahunan = useMemo(
-    () => filings.find((f) => f.tax_type === 'SPT_TAHUNAN' && f.tax_data),
+  // Build the real trend from historical SPT_TAHUNAN filings.
+  const trend = useMemo(
+    () => buildDashboardTrend(filings as TrendFiling[]),
     [filings],
   );
 
+  // Latest filing's harta/utang snapshot powers the two summary cards.
+  const latestYear = useMemo(() => {
+    const ys = [...trend.hartaByYear.keys()].sort((a, b) => b - a);
+    return ys[0] ?? null;
+  }, [trend.hartaByYear]);
+
   const assetTotals: AssetTotals = useMemo(() => {
-    const h = (latestTahunan?.tax_data?.harta as Record<string, unknown>) || {};
-    const bank = Array.isArray(h.bankAccounts)
-      ? (h.bankAccounts as { balance?: number; currency?: string }[]).reduce(
-          (sum, r) => sum + (Number(r.balance) || 0),
-          0,
-        )
-      : 0;
-    const foreignBank = Array.isArray(h.bankAccounts)
-      ? (h.bankAccounts as { balance?: number; currency?: string }[]).reduce(
-          (sum, r) => sum + (r.currency && r.currency !== 'IDR' ? Number(r.balance) || 0 : 0),
-          0,
-        )
-      : 0;
+    const h = latestYear ? trend.hartaByYear.get(latestYear) : undefined;
+    if (!h) return { cashBank: 0, realEstate: 0, foreign: 0 };
     return {
-      cashBank: bank || 150_000_000,
-      realEstate: Number(h.realEstate) || 1_200_000_000,
-      foreign: foreignBank || 300_000_000,
+      cashBank: h.cashBank,
+      realEstate: h.realEstate,
+      foreign: h.foreignCash + h.foreignRealEstate + h.foreignStocks,
     };
-  }, [latestTahunan]);
+  }, [latestYear, trend.hartaByYear]);
 
   const liabilityTotals: LiabilityTotals = useMemo(() => {
-    const u = (latestTahunan?.tax_data?.utang as Record<string, unknown>) || {};
-    return {
-      bankLoan: Number(u.bankLoan) || 500_000_000,
-      foreign: Number(u.foreign) || 100_000_000,
-    };
-  }, [latestTahunan]);
+    const u = latestYear ? trend.utangByYear.get(latestYear) : undefined;
+    if (!u) return { bankLoan: 0, foreign: 0 };
+    return { bankLoan: u.bankLoan, foreign: u.foreignLoan };
+  }, [latestYear, trend.utangByYear]);
 
-  // Trend series — derived from filings per year; fall back to illustrative data
-  const years = useMemo(() => {
-    const now = new Date().getFullYear();
-    return [now - 4, now - 3, now - 2, now - 1, now];
-  }, []);
+  // Year-series points come straight from the helper. When the customer
+  // has never filed (hasRealData=false) the helper returns all zeros —
+  // keep an illustrative fallback so the chart isn't an empty axis.
+  const SAMPLE_ASSETS = trend.years.map((y, i) => ({
+    year: String(y),
+    building: 140 + i * 15,
+    vehicle: 40 + i * 20,
+    stocks: 25 + i * 30,
+    land: 170 + i * 10,
+    cash: 10 + i * 1,
+  }));
+  const SAMPLE_LIABILITIES = trend.years.map((y, i) => ({
+    year: String(y), loan: 420 - i * 30, credit: 50 + i * 3,
+  }));
+  const SAMPLE_FOREIGN_ASSETS = trend.years.map((y, i) => ({
+    year: String(y),
+    property: i === 0 ? 0 : 10 + i * 15,
+    stocks: i === 0 ? 0 : 20 + i * 22,
+    cash: i === 0 ? 0 : 15 + i * 20,
+  }));
+  const SAMPLE_FOREIGN_LIABILITIES = trend.years.map((y, i) => ({
+    year: String(y), loan: i === 0 ? 0 : 20 + i * 20,
+  }));
 
-  const domesticAssetSeries = useMemo(
-    () => years.map((y, i) => ({
-      year: String(y),
-      building: 140 + i * 15,
-      vehicle: 40 + i * 20,
-      stocks: 25 + i * 30,
-      land: 170 + i * 10,
-      cash: 10 + i * 1,
-    })),
-    [years],
-  );
+  const domesticAssetSeries = trend.hasRealData ? trend.domesticAssets : SAMPLE_ASSETS;
+  const domesticLiabilitySeries = trend.hasRealData ? trend.domesticLiabilities : SAMPLE_LIABILITIES;
+  const foreignAssetSeries = trend.hasRealData ? trend.foreignAssets : SAMPLE_FOREIGN_ASSETS;
+  const foreignLiabilitySeries = trend.hasRealData ? trend.foreignLiabilities : SAMPLE_FOREIGN_LIABILITIES;
+  const isSampleData = !trend.hasRealData;
 
-  const domesticLiabilitySeries = useMemo(
-    () => years.map((y, i) => ({
-      year: String(y),
-      loan: 420 - i * 30,
-      credit: 50 + i * 3,
-    })),
-    [years],
-  );
-
-  const foreignAssetSeries = useMemo(
-    () => years.map((y, i) => ({
-      year: String(y),
-      property: i === 0 ? 0 : 10 + i * 15,
-      stocks: i === 0 ? 0 : 20 + i * 22,
-      cash: i === 0 ? 0 : 15 + i * 20,
-    })),
-    [years],
-  );
-
-  const foreignLiabilitySeries = useMemo(
-    () => years.map((y, i) => ({
-      year: String(y),
-      loan: i === 0 ? 0 : 20 + i * 20,
-    })),
-    [years],
-  );
-
-  // Anomaly detection: naive placeholder — asset growth vs income growth
-  const assetGrowthPct = 20;
-  const incomeGrowthPct = 11;
-  const anomalyTriggered = assetGrowthPct - incomeGrowthPct >= 5;
+  // Anomaly detection — real growth deltas when we have 2+ years of data
+  const assetGrowthPct = trend.assetGrowthPct ?? (isSampleData ? 20 : 0);
+  const incomeGrowthPct = trend.incomeGrowthPct ?? (isSampleData ? 11 : 0);
+  const anomalyTriggered = isSampleData
+    ? true
+    : trend.assetGrowthPct !== null &&
+      trend.incomeGrowthPct !== null &&
+      assetGrowthPct - incomeGrowthPct >= 5;
 
   const toggleFundSource = (k: string) =>
     setFundSources((s) => ({ ...s, [k]: !s[k] }));
@@ -355,6 +338,13 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Sample data notice */}
+      {isSampleData && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">
+          {t('sampleDataNotice')}
+        </div>
+      )}
 
       {/* 4. Assets / Liabilities summary */}
       <div className="grid gap-5 md:grid-cols-2">

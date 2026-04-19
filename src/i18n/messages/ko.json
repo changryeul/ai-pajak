@@ -6064,6 +6064,7 @@
     "aiReviewNeeded": "자산 증가가 소득 대비 과도하여 세무 검토가 필요합니다.",
     "aiForeignNote": "해외 자산 증가 시 신고 여부를 반드시 확인하세요.",
     "startFilingCta": "신고 시작하기",
-    "viewProgressCta": "진행현황 보기"
+    "viewProgressCta": "진행현황 보기",
+    "sampleDataNotice": "샘플 데이터입니다. 첫 SPT Tahunan 제출 후 실제 값으로 채워집니다."
   }
 }

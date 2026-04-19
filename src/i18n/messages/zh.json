@@ -6063,6 +6063,7 @@
     "aiReviewNeeded": "资产增长超过收入，建议进行税务检查。",
     "aiForeignNote": "海外资产增加时请务必确认申报义务。",
     "startFilingCta": "开始申报",
-    "viewProgressCta": "查看进度"
+    "viewProgressCta": "查看进度",
+    "sampleDataNotice": "样本数据 — 首次提交SPT Tahunan后自动更新为真实数据。"
   }
 }

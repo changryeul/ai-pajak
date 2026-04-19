@@ -6063,6 +6063,7 @@
     "aiReviewNeeded": "資産増加が所得を上回るため、税務レビューが必要です。",
     "aiForeignNote": "海外資産が増えた場合は申告義務の確認を。",
     "startFilingCta": "申告を開始",
-    "viewProgressCta": "進捗を見る"
+    "viewProgressCta": "進捗を見る",
+    "sampleDataNotice": "サンプルデータ — 初回のSPT Tahunan提出後に実データで更新されます。"
   }
 }

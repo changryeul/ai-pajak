@@ -6063,6 +6063,7 @@
     "aiReviewNeeded": "Asset growth outpaces income — tax review recommended.",
     "aiForeignNote": "Verify reporting obligations for any new foreign assets.",
     "startFilingCta": "Start Filing",
-    "viewProgressCta": "View Progress"
+    "viewProgressCta": "View Progress",
+    "sampleDataNotice": "Sample data — charts populate once you submit your first SPT Tahunan."
   }
 }
