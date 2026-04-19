@@ -5950,7 +5950,11 @@
     "headerTitleS": "1770S 신고 자료 입력",
     "headerTitleFull": "1770 신고 자료 입력",
     "businessIncomeTitle": "사업소득 자료",
-    "pph23Placeholder": "PPh 23 (선택)"
+    "pph23Placeholder": "PPh 23 (선택)",
+    "importDone": "계좌 {count}개 불러옴",
+    "importNone": "프로필에 저장된 계좌 없음",
+    "importSkippedExisting": "이미 입력된 계좌가 있어 건너뜀",
+    "importFailed": "불러오기 실패"
   },
   "sptSelectV2": {
     "ssSubtitle": "매우 간단한 개인 신고",

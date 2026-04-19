@@ -145,21 +145,50 @@ export function SPTIntake({
     [customerId, t, form],
   );
 
+  const [importResult, setImportResult] = useState<string | null>(null);
+
   const importFromProfile = useCallback(async () => {
+    setImportResult(null);
     try {
-      const res = await fetch('/api/customer/profile', { credentials: 'include' });
-      if (!res.ok) return;
+      const res = await fetch('/api/customer/bank-accounts', { credentials: 'include' });
+      if (!res.ok) {
+        setImportResult(t('importNone'));
+        return;
+      }
       const json = await res.json();
-      const c = json?.data?.customer;
-      if (!c) return;
-      // Import whatever profile fields we have that match intake fields.
-      // Right now profile doesn't carry bank accounts, so this just prefills
-      // anything we add later. For now it's a stub surfacing the "imported"
-      // toast so the UX is consistent with the mockup's button.
+      const rows: Array<{
+        bank_name?: string;
+        account_last4?: string;
+        currency?: string;
+      }> = json?.data || json?.accounts || [];
+      if (!rows.length) {
+        setImportResult(t('importNone'));
+        return;
+      }
+      // Only replace when the existing rows are blank placeholders — we
+      // don't want to overwrite manual entry the user just typed.
+      const isBlank = bankAccounts.every(
+        (r) => !r.bankName && !r.accountNumber && !r.balance,
+      );
+      if (!isBlank) {
+        setImportResult(t('importSkippedExisting'));
+        return;
+      }
+      setBankAccounts(
+        rows.map((r) => ({
+          bankName: r.bank_name || '',
+          accountNumber: r.account_last4 ? `****${r.account_last4}` : '',
+          currency: ((r.currency as Currency) || 'IDR'),
+          balance: '',
+        })),
+      );
+      setImportResult(t('importDone', { count: rows.length }));
     } catch {
-      /* non-fatal */
+      setImportResult(t('importFailed'));
+    } finally {
+      setTimeout(() => setImportResult(null), 4000);
     }
-  }, []);
+  }, [bankAccounts, t]);
 
   const addBankAccount = () =>
     setBankAccounts((rows) => [...rows, { bankName: '', accountNumber: '', currency: 'IDR', balance: '' }]);
@@ -431,9 +460,16 @@ export function SPTIntake({
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-lg font-semibold text-gray-900">{t('assetsLiabilitiesTitle')}</p>
-          <Button size="sm" variant="outline" onClick={importFromProfile}>
-            {t('importFromProfile')}
-          </Button>
+          <div className="flex items-center gap-3">
+            {importResult && (
+              <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded px-2 py-1">
+                {importResult}
+              </span>
+            )}
+            <Button size="sm" variant="outline" onClick={importFromProfile}>
+              {t('importFromProfile')}
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">

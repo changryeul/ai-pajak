@@ -5949,7 +5949,11 @@
     "headerTitleS": "1770S申告データ入力",
     "headerTitleFull": "1770申告データ入力",
     "businessIncomeTitle": "事業所得資料",
-    "pph23Placeholder": "PPh 23（任意）"
+    "pph23Placeholder": "PPh 23（任意）",
+    "importDone": "口座{count}件を取り込み",
+    "importNone": "プロフィールに口座が保存されていません",
+    "importSkippedExisting": "既存の入力を保持",
+    "importFailed": "取り込みに失敗"
   },
   "sptSelectV2": {
     "ssSubtitle": "非常にシンプルな個人申告",

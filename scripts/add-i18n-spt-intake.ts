@@ -118,6 +118,34 @@ const K: Record<string, Tr> = {
     ja: 'KKまたはA1のいずれかをアップロードしてください',
     zh: '请至少上传 KK 或 A1 之一',
   },
+  importDone: {
+    id: '{count} rekening diimport',
+    en: '{count} accounts imported',
+    ko: '계좌 {count}개 불러옴',
+    ja: '口座{count}件を取り込み',
+    zh: '已导入{count}个账户',
+  },
+  importNone: {
+    id: 'Tidak ada rekening di profil',
+    en: 'No accounts saved in profile',
+    ko: '프로필에 저장된 계좌 없음',
+    ja: 'プロフィールに口座が保存されていません',
+    zh: '资料中未保存账户',
+  },
+  importSkippedExisting: {
+    id: 'Sudah ada data — dibiarkan',
+    en: 'Manual entries kept',
+    ko: '이미 입력된 계좌가 있어 건너뜀',
+    ja: '既存の入力を保持',
+    zh: '保留已填写的内容',
+  },
+  importFailed: {
+    id: 'Import gagal',
+    en: 'Import failed',
+    ko: '불러오기 실패',
+    ja: '取り込みに失敗',
+    zh: '导入失败',
+  },
 };
 
 for (const locale of LOCALES) {

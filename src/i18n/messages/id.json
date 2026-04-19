@@ -5949,7 +5949,11 @@
     "headerTitleS": "Input Data Pelaporan 1770S",
     "headerTitleFull": "Input Data Pelaporan 1770",
     "businessIncomeTitle": "Data Penghasilan Usaha",
-    "pph23Placeholder": "PPh 23 / 26 (선택)"
+    "pph23Placeholder": "PPh 23 / 26 (선택)",
+    "importDone": "{count} rekening diimport",
+    "importNone": "Tidak ada rekening di profil",
+    "importSkippedExisting": "Sudah ada data — dibiarkan",
+    "importFailed": "Import gagal"
   },
   "sptSelectV2": {
     "ssSubtitle": "Pelaporan sangat sederhana",

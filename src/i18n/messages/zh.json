@@ -5949,7 +5949,11 @@
     "headerTitleS": "1770S申报数据录入",
     "headerTitleFull": "1770申报数据录入",
     "businessIncomeTitle": "经营收入资料",
-    "pph23Placeholder": "PPh 23 (可选)"
+    "pph23Placeholder": "PPh 23 (可选)",
+    "importDone": "已导入{count}个账户",
+    "importNone": "资料中未保存账户",
+    "importSkippedExisting": "保留已填写的内容",
+    "importFailed": "导入失败"
   },
   "sptSelectV2": {
     "ssSubtitle": "极简个人申报",

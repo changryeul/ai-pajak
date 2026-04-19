@@ -5949,7 +5949,11 @@
     "headerTitleS": "1770S Filing Intake",
     "headerTitleFull": "1770 Filing Intake",
     "businessIncomeTitle": "Business Income Documents",
-    "pph23Placeholder": "PPh 23 / 26 (optional)"
+    "pph23Placeholder": "PPh 23 / 26 (optional)",
+    "importDone": "{count} accounts imported",
+    "importNone": "No accounts saved in profile",
+    "importSkippedExisting": "Manual entries kept",
+    "importFailed": "Import failed"
   },
   "sptSelectV2": {
     "ssSubtitle": "Very simple individual filing",
