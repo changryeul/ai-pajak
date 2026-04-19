@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { SPT1770SSGenerator } from '@/components/spt';
+import { SPT1770SSIntake } from '@/components/spt/SPT1770SSIntake';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { Button } from '@/components/ui/button';
@@ -105,6 +106,28 @@ export default function SPT1770SSPage() {
       <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
         <p className="text-gray-600">{tp('loadingData')}</p>
+      </div>
+    );
+  }
+
+  // CUSTOMER role gets the simple intake flow (upload KK + A1 + assets/liabilities,
+  // submit to JTC for processing). Advisors get the full generator wizard.
+  if (isCustomerRole) {
+    if (isLoading || !selectedCustomer) {
+      return (
+        <div className="container mx-auto py-20 flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
+          <p className="text-gray-600">{tp('loadingData')}</p>
+        </div>
+      );
+    }
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <SPT1770SSIntake
+          customerId={selectedCustomer.id}
+          customerName={selectedCustomer.full_name}
+          customerNpwp={selectedCustomer.npwp}
+        />
       </div>
     );
   }

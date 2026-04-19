@@ -14,6 +14,8 @@ export type DocumentType =
   | 'BANK_STATEMENT'
   | 'E_FAKTUR'
   | 'POA_DOCUMENT'
+  | 'FAMILY_CARD' // Kartu Keluarga (KK) — used for 1770SS intake
+  | 'FOREIGN_TAX_RECEIPT' // supporting doc for 세액공제
   | 'OTHER';
 
 export interface FileMetadata {
