@@ -14,19 +14,21 @@ await page.fill('input[type="password"]', 'TestPassword123!');
 await page.locator('button[type="submit"]').click();
 await page.waitForURL((u) => u.pathname.includes('/dashboard'), { timeout: 30000 });
 await page.waitForTimeout(1500);
-await page.goto(`${BASE}/ko/tax/spt-tahunan/1770ss`, { waitUntil: 'networkidle' });
-await page.waitForTimeout(3000);
-await page.screenshot({ path: '.gstack/qa-reports/screenshots/1770ss-intake-ko.png', fullPage: true });
-
-const body = (await page.textContent('body')) || '';
-const hits = {
-  header: body.includes('1770SS 신고 자료 입력'),
-  kkCard: body.includes('기본 정보 (KK)'),
-  a1Card: body.includes('근로소득 (A1)'),
-  taxCredit: body.includes('세액공제 / 기납부세액'),
-  assetsTitle: body.includes('자산 (Harta)'),
-  liabilitiesTitle: body.includes('부채 (Utang)'),
-  submit: body.includes('신고 제출'),
-};
-console.log(JSON.stringify(hits, null, 2));
+for (const form of ['1770ss', '1770s', '1770']) {
+  await page.goto(`${BASE}/ko/tax/spt-tahunan/${form}`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(3000);
+  await page.screenshot({ path: `.gstack/qa-reports/screenshots/${form}-intake-ko.png`, fullPage: true });
+  const body = (await page.textContent('body')) || '';
+  const hits = {
+    header: body.includes(`${form.toUpperCase()} 신고 자료 입력`),
+    kkCard: body.includes('기본 정보 (KK)'),
+    incomeCard: form === '1770' ? body.includes('사업소득 자료') : body.includes('근로소득 (A1)'),
+    taxCredit: form === '1770' ? true : body.includes('세액공제 / 기납부세액'),
+    pph23: form === '1770s' ? body.includes('PPh 23 (선택)') : true,
+    assetsTitle: body.includes('자산 (Harta)'),
+    liabilitiesTitle: body.includes('부채 (Utang)'),
+    submit: body.includes('신고 제출'),
+  };
+  console.log(form.toUpperCase(), JSON.stringify(hits));
+}
 await b.close();

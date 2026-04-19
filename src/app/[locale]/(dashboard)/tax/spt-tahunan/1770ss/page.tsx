@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { SPT1770SSGenerator } from '@/components/spt';
-import { SPT1770SSIntake } from '@/components/spt/SPT1770SSIntake';
+import { SPTIntake } from '@/components/spt/SPTIntake';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { Button } from '@/components/ui/button';
@@ -123,7 +123,8 @@ export default function SPT1770SSPage() {
     }
     return (
       <div className="container mx-auto py-8 px-4">
-        <SPT1770SSIntake
+        <SPTIntake
+          form="1770SS"
           customerId={selectedCustomer.id}
           customerName={selectedCustomer.full_name}
           customerNpwp={selectedCustomer.npwp}

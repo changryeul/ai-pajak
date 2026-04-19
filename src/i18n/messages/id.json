@@ -5945,6 +5945,10 @@
     "submitSuccess": "Pelaporan berhasil dikirim ke JTC",
     "submitError": "Gagal mengirim pelaporan",
     "uploadFailed": "Unggah gagal",
-    "needKKOrA1": "Unggah KK atau A1 minimal satu"
+    "needKKOrA1": "Unggah KK atau A1 minimal satu",
+    "headerTitleS": "Input Data Pelaporan 1770S",
+    "headerTitleFull": "Input Data Pelaporan 1770",
+    "businessIncomeTitle": "Data Penghasilan Usaha",
+    "pph23Placeholder": "PPh 23 / 26 (선택)"
   }
 }

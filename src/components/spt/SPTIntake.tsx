@@ -1,15 +1,17 @@
 'use client';
 
 /**
- * SPT 1770SS intake (simple) — customer-facing flow.
+ * SPT Tahunan intake — customer-facing simplified flow.
  *
- * Mirrors the Indonesian-tax intake pattern: upload the minimum DJP
- * paperwork (Kartu Keluarga + bukti potong A1), enter foreign tax credit,
- * and list assets/liabilities per Coretax Harta/Utang template. Submit
- * creates a tax_filing in DRAFT status with consultant_id = null — JTC
- * picks it up from the queue and completes the filing.
+ * Supports three forms with small per-form differences:
  *
- * Not used for advisors — they get the full SPT1770SSGenerator wizard.
+ *   1770SS (simple employee): KK + 1721-A1 + foreign tax credit
+ *   1770S  (mixed income):    KK + 1721-A1 + PPh 23 credit + foreign tax credit
+ *   1770   (business/freelance): KK + business-income docs (no tax credit UI)
+ *
+ * The rest — Harta (assets) and Utang (liabilities) — is identical per the
+ * Coretax intake template. Submit creates a tax_filing in UNDER_REVIEW
+ * with consultant_id = null so JTC picks it up from the operator queue.
  */
 
 import { useCallback, useRef, useState } from 'react';
@@ -23,7 +25,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+export type SPTForm = '1770SS' | '1770S' | '1770';
+
 interface Props {
+  form: SPTForm;
   customerId: string;
   customerName: string;
   customerNpwp?: string;
@@ -44,20 +49,31 @@ interface UploadedDoc {
   fileName: string;
 }
 
-type UploadKind = 'KK' | 'A1' | 'FOREIGN_TAX';
+// The right card's upload kind varies: A1 for 1770SS/S, business docs for 1770.
+type UploadKind = 'KK' | 'INCOME' | 'FOREIGN_TAX';
 
-const DOCUMENT_TYPE_BY_KIND: Record<UploadKind, string> = {
-  KK: 'FAMILY_CARD',
-  A1: 'FORM_1721_A1',
-  FOREIGN_TAX: 'FOREIGN_TAX_RECEIPT',
-};
+function documentTypeFor(kind: UploadKind, form: SPTForm): string {
+  if (kind === 'KK') return 'FAMILY_CARD';
+  if (kind === 'FOREIGN_TAX') return 'FOREIGN_TAX_RECEIPT';
+  // kind === 'INCOME'
+  return form === '1770' ? 'FORM_1770' : 'FORM_1721_A1';
+}
 
-export function SPT1770SSIntake({
+export function SPTIntake({
+  form,
   customerId,
   customerName,
   customerNpwp,
   taxYear,
 }: Props) {
+  const showTaxCredit = form !== '1770';
+  const showPph23Credit = form === '1770S';
+  const incomeCardTitleKey =
+    form === '1770' ? 'businessIncomeTitle' : 'employmentIncomeTitle';
+  const headerKey =
+    form === '1770SS' ? 'headerTitle'
+    : form === '1770S' ? 'headerTitleS'
+    : 'headerTitleFull';
   const t = useTranslations('sptIntake');
   const params = useParams();
   const router = useRouter();
@@ -66,12 +82,13 @@ export function SPT1770SSIntake({
 
   // Upload state
   const [kkDoc, setKkDoc] = useState<UploadedDoc | null>(null);
-  const [a1Doc, setA1Doc] = useState<UploadedDoc | null>(null);
+  const [incomeDoc, setIncomeDoc] = useState<UploadedDoc | null>(null);
   const [foreignTaxDoc, setForeignTaxDoc] = useState<UploadedDoc | null>(null);
   const [uploading, setUploading] = useState<UploadKind | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Tax credit
+  const [pph23Amount, setPph23Amount] = useState('');
   const [foreignTaxAmount, setForeignTaxAmount] = useState('');
 
   // Assets
@@ -98,8 +115,8 @@ export function SPT1770SSIntake({
   // Hidden file inputs
   const kkInputRef = useRef<HTMLInputElement>(null);
   const kkCaptureRef = useRef<HTMLInputElement>(null);
-  const a1InputRef = useRef<HTMLInputElement>(null);
-  const a1CaptureRef = useRef<HTMLInputElement>(null);
+  const incomeInputRef = useRef<HTMLInputElement>(null);
+  const incomeCaptureRef = useRef<HTMLInputElement>(null);
   const foreignTaxInputRef = useRef<HTMLInputElement>(null);
 
   const uploadDoc = useCallback(
@@ -107,17 +124,17 @@ export function SPT1770SSIntake({
       setUploading(kind);
       setUploadError(null);
       try {
-        const form = new FormData();
-        form.append('file', file);
-        form.append('bucket', 'tax-documents');
-        form.append('documentType', DOCUMENT_TYPE_BY_KIND[kind]);
-        form.append('customerId', customerId);
-        const res = await fetch('/api/documents/upload', { method: 'POST', body: form });
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('bucket', 'tax-documents');
+        fd.append('documentType', documentTypeFor(kind, form));
+        fd.append('customerId', customerId);
+        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || t('uploadFailed'));
         const doc: UploadedDoc = { documentId: data.data.id, fileName: file.name };
         if (kind === 'KK') setKkDoc(doc);
-        else if (kind === 'A1') setA1Doc(doc);
+        else if (kind === 'INCOME') setIncomeDoc(doc);
         else setForeignTaxDoc(doc);
       } catch (e) {
         setUploadError(e instanceof Error ? e.message : t('uploadFailed'));
@@ -125,7 +142,7 @@ export function SPT1770SSIntake({
         setUploading(null);
       }
     },
-    [customerId, t],
+    [customerId, t, form],
   );
 
   const importFromProfile = useCallback(async () => {
@@ -153,13 +170,13 @@ export function SPT1770SSIntake({
 
   const handleSubmit = useCallback(async () => {
     setSubmitError(null);
-    if (!kkDoc && !a1Doc) {
+    if (!kkDoc && !incomeDoc) {
       setSubmitError(t('needKKOrA1'));
       return;
     }
     setSubmitting(true);
     try {
-      const documentIds = [kkDoc, a1Doc, foreignTaxDoc]
+      const documentIds = [kkDoc, incomeDoc, foreignTaxDoc]
         .filter((d): d is UploadedDoc => Boolean(d))
         .map((d) => d.documentId);
 
@@ -175,15 +192,20 @@ export function SPT1770SSIntake({
         taxYear: year,
         status: 'UNDER_REVIEW' as const,
         taxData: {
-          form: '1770SS',
+          form,
           intake: true,
           requestedProcessing: 'JTC',
           documents: {
             kk: kkDoc?.documentId || null,
-            a1: a1Doc?.documentId || null,
+            [form === '1770' ? 'businessIncome' : 'a1']: incomeDoc?.documentId || null,
             foreignTaxReceipt: foreignTaxDoc?.documentId || null,
           },
-          foreignTaxCredit: toNum(foreignTaxAmount),
+          ...(showTaxCredit && {
+            foreignTaxCredit: toNum(foreignTaxAmount),
+          }),
+          ...(showPph23Credit && {
+            pph23Credit: toNum(pph23Amount),
+          }),
           harta: {
             bankAccounts: bankAccounts
               .filter((r) => r.bankName || r.accountNumber || r.balance)
@@ -224,10 +246,10 @@ export function SPT1770SSIntake({
       setSubmitting(false);
     }
   }, [
-    kkDoc, a1Doc, foreignTaxDoc, foreignTaxAmount, bankAccounts,
+    kkDoc, incomeDoc, foreignTaxDoc, foreignTaxAmount, pph23Amount, bankAccounts,
     stocks, realEstate, vehicle, businessAssets, otherAssets,
     bankLoan, creditCard, personalLoan, businessDebt,
-    customerId, year, t,
+    customerId, year, t, form, showTaxCredit, showPph23Credit,
   ]);
 
   if (submitOk) {
@@ -251,7 +273,7 @@ export function SPT1770SSIntake({
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t('headerTitle')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t(headerKey)}</h1>
         <Button variant="outline" size="sm" asChild>
           <Link href={`/${locale}/tax/spt-tahunan`}>
             <ArrowLeft className="h-4 w-4 mr-1" />
@@ -309,79 +331,91 @@ export function SPT1770SSIntake({
           </CardContent>
         </Card>
 
-        {/* A1 + tax credit */}
+        {/* Income card (A1 for 1770SS/S, business income for 1770) */}
         <Card className="border-0 shadow-sm">
           <CardContent className="p-5 space-y-4">
-            <p className="font-semibold text-gray-900">{t('employmentIncomeTitle')}</p>
+            <p className="font-semibold text-gray-900">{t(incomeCardTitleKey)}</p>
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" disabled={uploading === 'A1'} onClick={() => a1InputRef.current?.click()}>
-                {uploading === 'A1' ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <FolderOpen className="h-4 w-4 mr-1" />}
+              <Button variant="outline" disabled={uploading === 'INCOME'} onClick={() => incomeInputRef.current?.click()}>
+                {uploading === 'INCOME' ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <FolderOpen className="h-4 w-4 mr-1" />}
                 {t('uploadBtn')}
               </Button>
-              <Button variant="outline" disabled={uploading === 'A1'} onClick={() => a1CaptureRef.current?.click()}>
+              <Button variant="outline" disabled={uploading === 'INCOME'} onClick={() => incomeCaptureRef.current?.click()}>
                 <Camera className="h-4 w-4 mr-1" />
                 {t('captureBtn')}
               </Button>
             </div>
             <input
-              ref={a1InputRef}
+              ref={incomeInputRef}
               type="file"
               accept="image/*,application/pdf"
               className="hidden"
-              onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0], 'A1')}
+              onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0], 'INCOME')}
             />
             <input
-              ref={a1CaptureRef}
+              ref={incomeCaptureRef}
               type="file"
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0], 'A1')}
+              onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0], 'INCOME')}
             />
-            {a1Doc && (
+            {incomeDoc && (
               <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded px-3 py-2">
                 <CheckCircle className="h-3.5 w-3.5" />
-                {t('uploaded')}: <span className="truncate">{a1Doc.fileName}</span>
+                {t('uploaded')}: <span className="truncate">{incomeDoc.fileName}</span>
               </div>
             )}
 
-            {/* Tax credit */}
-            <div className="pt-2 border-t">
-              <p className="text-xs font-medium text-gray-600 mb-2">{t('taxCreditSection')}</p>
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder={t('foreignTaxPlaceholder')}
-                value={foreignTaxAmount}
-                onChange={(e) => setForeignTaxAmount(e.target.value)}
-              />
-              <Button
-                variant="outline"
-                className="w-full mt-2"
-                disabled={uploading === 'FOREIGN_TAX'}
-                onClick={() => foreignTaxInputRef.current?.click()}
-              >
-                {uploading === 'FOREIGN_TAX' ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                ) : (
-                  <Upload className="h-4 w-4 mr-1" />
+            {/* Tax credit (1770SS + 1770S) */}
+            {showTaxCredit && (
+              <div className="pt-2 border-t">
+                <p className="text-xs font-medium text-gray-600 mb-2">{t('taxCreditSection')}</p>
+                {showPph23Credit && (
+                  <Input
+                    className="mb-2"
+                    type="number"
+                    inputMode="numeric"
+                    placeholder={t('pph23Placeholder')}
+                    value={pph23Amount}
+                    onChange={(e) => setPph23Amount(e.target.value)}
+                  />
                 )}
-                {t('foreignTaxDocUpload')}
-              </Button>
-              <input
-                ref={foreignTaxInputRef}
-                type="file"
-                accept="image/*,application/pdf"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0], 'FOREIGN_TAX')}
-              />
-              {foreignTaxDoc && (
-                <div className="mt-2 flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded px-3 py-2">
-                  <CheckCircle className="h-3.5 w-3.5" />
-                  <span className="truncate">{foreignTaxDoc.fileName}</span>
-                </div>
-              )}
-            </div>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder={t('foreignTaxPlaceholder')}
+                  value={foreignTaxAmount}
+                  onChange={(e) => setForeignTaxAmount(e.target.value)}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full mt-2"
+                  disabled={uploading === 'FOREIGN_TAX'}
+                  onClick={() => foreignTaxInputRef.current?.click()}
+                >
+                  {uploading === 'FOREIGN_TAX' ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <Upload className="h-4 w-4 mr-1" />
+                  )}
+                  {t('foreignTaxDocUpload')}
+                </Button>
+                <input
+                  ref={foreignTaxInputRef}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0], 'FOREIGN_TAX')}
+                />
+                {foreignTaxDoc && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded px-3 py-2">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    <span className="truncate">{foreignTaxDoc.fileName}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

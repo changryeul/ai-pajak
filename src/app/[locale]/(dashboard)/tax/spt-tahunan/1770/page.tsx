@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { SPT1770Generator } from '@/components/spt';
+import { SPTIntake } from '@/components/spt/SPTIntake';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { Button } from '@/components/ui/button';
@@ -102,6 +103,28 @@ export default function SPT1770Page() {
       <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-purple-600 mb-4" />
         <p className="text-gray-600">{tp('loadingData')}</p>
+      </div>
+    );
+  }
+
+  // CUSTOMER role: simple intake flow. Advisors: full generator wizard.
+  if (isCustomerRole) {
+    if (isLoading || !selectedCustomer) {
+      return (
+        <div className="container mx-auto py-20 flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600 mb-4" />
+          <p className="text-gray-600">{tp('loadingData')}</p>
+        </div>
+      );
+    }
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <SPTIntake
+          form="1770"
+          customerId={selectedCustomer.id}
+          customerName={selectedCustomer.full_name}
+          customerNpwp={selectedCustomer.npwp}
+        />
       </div>
     );
   }

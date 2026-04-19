@@ -5945,6 +5945,10 @@
     "submitSuccess": "JTC担当者へ提出しました",
     "submitError": "提出に失敗しました",
     "uploadFailed": "アップロード失敗",
-    "needKKOrA1": "KKまたはA1のいずれかをアップロードしてください"
+    "needKKOrA1": "KKまたはA1のいずれかをアップロードしてください",
+    "headerTitleS": "1770S申告データ入力",
+    "headerTitleFull": "1770申告データ入力",
+    "businessIncomeTitle": "事業所得資料",
+    "pph23Placeholder": "PPh 23（任意）"
   }
 }

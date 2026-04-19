@@ -5946,6 +5946,10 @@
     "submitSuccess": "JTC 담당자에게 제출되었습니다",
     "submitError": "제출 실패",
     "uploadFailed": "업로드 실패",
-    "needKKOrA1": "KK 또는 A1 중 하나는 업로드해야 합니다"
+    "needKKOrA1": "KK 또는 A1 중 하나는 업로드해야 합니다",
+    "headerTitleS": "1770S 신고 자료 입력",
+    "headerTitleFull": "1770 신고 자료 입력",
+    "businessIncomeTitle": "사업소득 자료",
+    "pph23Placeholder": "PPh 23 (선택)"
   }
 }

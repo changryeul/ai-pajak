@@ -5945,6 +5945,10 @@
     "submitSuccess": "已提交给JTC",
     "submitError": "提交失败",
     "uploadFailed": "上传失败",
-    "needKKOrA1": "请至少上传 KK 或 A1 之一"
+    "needKKOrA1": "请至少上传 KK 或 A1 之一",
+    "headerTitleS": "1770S申报数据录入",
+    "headerTitleFull": "1770申报数据录入",
+    "businessIncomeTitle": "经营收入资料",
+    "pph23Placeholder": "PPh 23 (可选)"
   }
 }
