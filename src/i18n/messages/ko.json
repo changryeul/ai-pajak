@@ -5951,5 +5951,27 @@
     "headerTitleFull": "1770 신고 자료 입력",
     "businessIncomeTitle": "사업소득 자료",
     "pph23Placeholder": "PPh 23 (선택)"
+  },
+  "sptSelectV2": {
+    "ssSubtitle": "매우 간단한 개인 신고",
+    "sSubtitle": "일반 직장인",
+    "fullSubtitle": "사업자 / 복합소득",
+    "ssBul1": "연소득 약 Rp 60 juta 이하",
+    "ssBul2": "근로소득 1곳만 있는 경우",
+    "ssBul3": "자산/부채가 단순한 경우",
+    "ssBul4": "추가 소득 없음",
+    "sBul1": "연소득 60 juta 이상",
+    "sBul2": "근로소득 1~2곳",
+    "sBul3": "금융소득 일부",
+    "fullBul1": "사업소득 있음",
+    "fullBul2": "복합소득",
+    "selectCta": "선택하기",
+    "aiCardTitle": "AI 추천",
+    "aiHasBusiness": "사업소득 있음",
+    "aiMultipleEmployers": "근로소득 2곳 이상",
+    "aiFinancialIncome": "금융소득 있음",
+    "aiApplyCta": "AI 추천 적용하기",
+    "aiResultPrefix": "추천:",
+    "pageSubtitle": "상황에 맞는 연간 세금 신고서를 선택하세요"
   }
 }

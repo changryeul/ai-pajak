@@ -1,176 +1,154 @@
 'use client';
 
+/**
+ * Annual Tax Filing (SPT Tahunan) selection — redesigned 2x2 grid.
+ *
+ * Three form cards (1770SS / 1770S / 1770) plus an AI recommendation card
+ * whose checkbox logic maps to:
+ *   - hasBusiness            → 1770
+ *   - hasMultipleOrFinancial → 1770S
+ *   - else                   → 1770SS
+ *
+ * Corporate (1771) is still disabled per product direction.
+ */
+
+import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  FileText,
-  Building2,
-  Briefcase,
-  User,
-  ArrowRight,
-  CheckCircle,
-  Sparkles,
-  Upload,
-} from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
-interface SPTFormOption {
-  id: string;
+type FormId = '1770ss' | '1770s' | '1770';
+
+interface FormCard {
+  id: FormId;
   title: string;
-  description: string;
-  targetAudience: string;
-  icon: React.ElementType;
-  href: string;
-  features: string[];
-  gradient: string;
-  iconBg: string;
+  subtitleKey: string;
+  bulletKeys: string[];
+}
+
+const FORMS: FormCard[] = [
+  { id: '1770ss', title: 'SPT 1770 SS', subtitleKey: 'ssSubtitle', bulletKeys: ['ssBul1', 'ssBul2', 'ssBul3', 'ssBul4'] },
+  { id: '1770s', title: 'SPT 1770 S', subtitleKey: 'sSubtitle', bulletKeys: ['sBul1', 'sBul2', 'sBul3'] },
+  { id: '1770', title: 'SPT 1770', subtitleKey: 'fullSubtitle', bulletKeys: ['fullBul1', 'fullBul2'] },
+];
+
+function recommendForm(answers: {
+  hasBusiness: boolean;
+  multipleEmployers: boolean;
+  financialIncome: boolean;
+}): FormId {
+  if (answers.hasBusiness) return '1770';
+  if (answers.multipleEmployers || answers.financialIncome) return '1770s';
+  return '1770ss';
 }
 
 export default function SPTTahunanPage() {
   const t = useTranslations('tax');
-  const ts = useTranslations('sptSelect');
-
-  const sptForms: SPTFormOption[] = [
-    {
-      id: '1770ss',
-      title: 'SPT 1770 SS',
-      description: ts('ss_desc'),
-      targetAudience: ts('ss_audience'),
-      icon: User,
-      href: '/tax/spt-tahunan/1770ss',
-      features: [ts('ss_f1'), ts('ss_f2'), ts('ss_f3')],
-      gradient: 'from-green-500 to-emerald-600',
-      iconBg: 'bg-green-50',
-    },
-    {
-      id: '1770s',
-      title: 'SPT 1770 S',
-      description: ts('s_desc'),
-      targetAudience: ts('s_audience'),
-      icon: FileText,
-      href: '/tax/spt-tahunan/1770s',
-      features: [ts('s_f1'), ts('s_f2'), ts('s_f3')],
-      gradient: 'from-blue-500 to-indigo-600',
-      iconBg: 'bg-blue-50',
-    },
-    {
-      id: '1770',
-      title: 'SPT 1770',
-      description: ts('full_desc'),
-      targetAudience: ts('full_audience'),
-      icon: Briefcase,
-      href: '/tax/spt-tahunan/1770',
-      features: [ts('full_f1'), ts('full_f2'), ts('full_f3'), ts('full_f4')],
-      gradient: 'from-purple-500 to-violet-600',
-      iconBg: 'bg-purple-50',
-    },
-    // SPT 1771 (Corporate) — temporarily disabled
-    // {
-    //   id: '1771',
-    //   title: 'SPT 1771',
-    //   description: ts('badan_desc'),
-    //   targetAudience: ts('badan_audience'),
-    //   icon: Building2,
-    //   href: '/tax/spt-tahunan/1771',
-    //   features: [ts('badan_f1'), ts('badan_f2'), ts('badan_f3'), ts('badan_f4')],
-    //   gradient: 'from-orange-500 to-red-500',
-    //   iconBg: 'bg-orange-50',
-    // },
-  ];
+  const ts = useTranslations('sptSelectV2');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+
+  const [hasBusiness, setHasBusiness] = useState(false);
+  const [multipleEmployers, setMultipleEmployers] = useState(false);
+  const [financialIncome, setFinancialIncome] = useState(false);
+
+  const recommendation = useMemo(
+    () => recommendForm({ hasBusiness, multipleEmployers, financialIncome }),
+    [hasBusiness, multipleEmployers, financialIncome],
+  );
+  const recommendationTitle = FORMS.find((f) => f.id === recommendation)?.title ?? 'SPT';
+
+  const goTo = (form: FormId) => router.push(`/${locale}/tax/spt-tahunan/${form}`);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
-          <span className="text-sm font-medium text-yellow-700 bg-yellow-50 px-2.5 py-0.5 rounded-full">AI Auto-fill Available</span>
+          <Sparkles className="h-4 w-4 text-yellow-500" />
+          <span className="text-xs font-medium text-yellow-700">AI Auto-fill Available</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
           {t('sptTahunan.title')}
         </h1>
-        <p className="text-gray-500 mt-1">
-          {ts('subtitle')}
-        </p>
+        <p className="text-sm text-gray-500 mt-1">{ts('pageSubtitle')}</p>
       </div>
 
-      {/* SPT Form Cards */}
+      {/* 2 x 2 grid: 3 form cards + 1 AI card */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {sptForms.map((form) => {
-          const Icon = form.icon;
+        {FORMS.map((f) => (
+          <Card key={f.id} className="border-0 shadow-sm overflow-hidden">
+            <CardContent className="p-6 flex flex-col h-full">
+              <p className="text-lg font-bold text-gray-900">{f.title}</p>
+              <p className="text-sm text-gray-500 mt-1">{ts(f.subtitleKey)}</p>
+              <ul className="mt-4 space-y-1 text-sm text-gray-600 flex-1">
+                {f.bulletKeys.map((k) => (
+                  <li key={k}>• {ts(k)}</li>
+                ))}
+              </ul>
+              <Button
+                className="mt-6 w-full bg-gray-800 hover:bg-gray-900 text-white"
+                onClick={() => goTo(f.id)}
+              >
+                {ts('selectCta')}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
 
-          return (
-            <Card
-              key={form.id}
-              className="group cursor-pointer border-0 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-              onClick={() => router.push(`/${locale}${form.href}`)}
+        {/* AI recommendation card */}
+        <Card className="border-0 shadow-sm overflow-hidden">
+          <CardContent className="p-6 flex flex-col h-full">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-yellow-500" />
+              <p className="text-lg font-bold text-gray-900">{ts('aiCardTitle')}</p>
+            </div>
+            <div className="mt-4 space-y-2 flex-1">
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="accent-gray-800"
+                  checked={hasBusiness}
+                  onChange={(e) => setHasBusiness(e.target.checked)}
+                />
+                {ts('aiHasBusiness')}
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="accent-gray-800"
+                  checked={multipleEmployers}
+                  onChange={(e) => setMultipleEmployers(e.target.checked)}
+                />
+                {ts('aiMultipleEmployers')}
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="accent-gray-800"
+                  checked={financialIncome}
+                  onChange={(e) => setFinancialIncome(e.target.checked)}
+                />
+                {ts('aiFinancialIncome')}
+              </label>
+            </div>
+            {(hasBusiness || multipleEmployers || financialIncome) && (
+              <p className="mt-3 text-xs text-gray-500">
+                {ts('aiResultPrefix')} <span className="font-semibold text-gray-900">{recommendationTitle}</span>
+              </p>
+            )}
+            <Button
+              className="mt-4 w-full bg-gray-800 hover:bg-gray-900 text-white"
+              onClick={() => goTo(recommendation)}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl bg-gradient-to-br ${form.gradient} shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300`}>
-                      <Icon className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg tracking-tight">{form.title}</CardTitle>
-                      <CardDescription className="text-sm">
-                        {form.description}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-1 transition-all mt-1" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500 mb-4 leading-relaxed">
-                  {form.targetAudience}
-                </p>
-
-                <div className="space-y-2">
-                  {form.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-600">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              {ts('aiApplyCta')}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
-
-      {/* Help Section */}
-      <Card className="mt-8 border-0 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
-        <CardContent className="py-6 flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-1">
-              {ts('notSureForm')}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {ts('uploadHint')}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            className="bg-white shadow-sm shrink-0 ml-4"
-            onClick={() => router.push(`/${locale}/documents`)}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            {ts('uploadDoc')}
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   );
 }

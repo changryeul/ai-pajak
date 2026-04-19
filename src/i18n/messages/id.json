@@ -5950,5 +5950,27 @@
     "headerTitleFull": "Input Data Pelaporan 1770",
     "businessIncomeTitle": "Data Penghasilan Usaha",
     "pph23Placeholder": "PPh 23 / 26 (선택)"
+  },
+  "sptSelectV2": {
+    "ssSubtitle": "Pelaporan sangat sederhana",
+    "sSubtitle": "Karyawan biasa",
+    "fullSubtitle": "Pelaku usaha / penghasilan kompleks",
+    "ssBul1": "Penghasilan ≤ Rp 60 juta/tahun",
+    "ssBul2": "Satu pemberi kerja saja",
+    "ssBul3": "Aset/utang sederhana",
+    "ssBul4": "Tidak ada penghasilan tambahan",
+    "sBul1": "Penghasilan > Rp 60 juta/tahun",
+    "sBul2": "1~2 pemberi kerja",
+    "sBul3": "Sebagian penghasilan keuangan",
+    "fullBul1": "Punya penghasilan usaha",
+    "fullBul2": "Penghasilan kompleks",
+    "selectCta": "Pilih",
+    "aiCardTitle": "Rekomendasi AI",
+    "aiHasBusiness": "Punya penghasilan usaha",
+    "aiMultipleEmployers": "Punya 2+ pemberi kerja",
+    "aiFinancialIncome": "Punya penghasilan keuangan",
+    "aiApplyCta": "Terapkan Rekomendasi AI",
+    "aiResultPrefix": "Rekomendasi:",
+    "pageSubtitle": "Pilih formulir Pelaporan Tahunan sesuai situasi Anda"
   }
 }

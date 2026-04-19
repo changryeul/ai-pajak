@@ -5950,5 +5950,27 @@
     "headerTitleFull": "1770 Filing Intake",
     "businessIncomeTitle": "Business Income Documents",
     "pph23Placeholder": "PPh 23 / 26 (optional)"
+  },
+  "sptSelectV2": {
+    "ssSubtitle": "Very simple individual filing",
+    "sSubtitle": "Standard employee",
+    "fullSubtitle": "Business owner / mixed income",
+    "ssBul1": "Annual income ≤ Rp 60M",
+    "ssBul2": "Only one employer",
+    "ssBul3": "Simple assets/liabilities",
+    "ssBul4": "No additional income",
+    "sBul1": "Annual income > Rp 60M",
+    "sBul2": "1–2 employers",
+    "sBul3": "Some financial income",
+    "fullBul1": "Has business income",
+    "fullBul2": "Mixed / complex income",
+    "selectCta": "Select",
+    "aiCardTitle": "AI Recommendation",
+    "aiHasBusiness": "Has business income",
+    "aiMultipleEmployers": "Has 2+ employers",
+    "aiFinancialIncome": "Has financial income",
+    "aiApplyCta": "Apply AI Recommendation",
+    "aiResultPrefix": "Recommended:",
+    "pageSubtitle": "Select the annual filing form that fits your situation"
   }
 }

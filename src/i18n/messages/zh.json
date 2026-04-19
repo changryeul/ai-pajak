@@ -5950,5 +5950,27 @@
     "headerTitleFull": "1770申报数据录入",
     "businessIncomeTitle": "经营收入资料",
     "pph23Placeholder": "PPh 23 (可选)"
+  },
+  "sptSelectV2": {
+    "ssSubtitle": "极简个人申报",
+    "sSubtitle": "普通职员",
+    "fullSubtitle": "个体户 / 复合收入",
+    "ssBul1": "年收入≤6000万卢比",
+    "ssBul2": "仅有一个雇主",
+    "ssBul3": "资产/负债简单",
+    "ssBul4": "无额外收入",
+    "sBul1": "年收入 > 6000万卢比",
+    "sBul2": "1~2个雇主",
+    "sBul3": "部分金融收入",
+    "fullBul1": "有经营收入",
+    "fullBul2": "复合收入",
+    "selectCta": "选择",
+    "aiCardTitle": "AI推荐",
+    "aiHasBusiness": "有经营收入",
+    "aiMultipleEmployers": "有2个以上雇主",
+    "aiFinancialIncome": "有金融收入",
+    "aiApplyCta": "应用AI推荐",
+    "aiResultPrefix": "推荐:",
+    "pageSubtitle": "请根据您的情况选择年度申报表"
   }
 }

@@ -5950,5 +5950,27 @@
     "headerTitleFull": "1770申告データ入力",
     "businessIncomeTitle": "事業所得資料",
     "pph23Placeholder": "PPh 23（任意）"
+  },
+  "sptSelectV2": {
+    "ssSubtitle": "非常にシンプルな個人申告",
+    "sSubtitle": "一般会社員",
+    "fullSubtitle": "事業主・混合所得",
+    "ssBul1": "年収6,000万ルピア以下",
+    "ssBul2": "給与所得が1社のみ",
+    "ssBul3": "資産・負債がシンプル",
+    "ssBul4": "追加所得なし",
+    "sBul1": "年収6,000万ルピア超",
+    "sBul2": "給与所得1〜2社",
+    "sBul3": "金融所得の一部",
+    "fullBul1": "事業所得あり",
+    "fullBul2": "複合所得",
+    "selectCta": "選択する",
+    "aiCardTitle": "AIのおすすめ",
+    "aiHasBusiness": "事業所得あり",
+    "aiMultipleEmployers": "給与所得2社以上",
+    "aiFinancialIncome": "金融所得あり",
+    "aiApplyCta": "AIのおすすめを適用",
+    "aiResultPrefix": "おすすめ:",
+    "pageSubtitle": "ご状況に合った年次申告書を選択してください"
   }
 }
