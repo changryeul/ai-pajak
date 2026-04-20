@@ -564,7 +564,7 @@ export default function CounterpartiesPage() {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
                   <Input value={newLicense.type} onChange={e => setNewLicense({ ...newLicense, type: e.target.value })}
-                    placeholder="{t('k48_d38ee7')} (SIUP, NIB, SBU...)" className="h-8 text-xs" />
+                    placeholder={`${t('k48_d38ee7')} (SIUP, NIB, SBU...)`} className="h-8 text-xs" />
                   <Input value={newLicense.number} onChange={e => setNewLicense({ ...newLicense, number: e.target.value })}
                     placeholder={t('k66_5ca2f7')} className="h-8 text-xs font-mono" />
                   <Input value={newLicense.issuer || ''} onChange={e => setNewLicense({ ...newLicense, issuer: e.target.value })}

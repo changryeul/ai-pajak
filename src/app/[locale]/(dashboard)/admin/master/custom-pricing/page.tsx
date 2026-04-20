@@ -323,7 +323,7 @@ export default function CustomPricingPage() {
                 <Input
                   value={form.quoteTitle}
                   onChange={(e) => setForm({ ...form, quoteTitle: e.target.value })}
-                  placeholder="{t('quoteTitlePlaceholder')}"
+                  placeholder={t('quoteTitlePlaceholder')}
                 />
               </div>
               <div className="md:col-span-2">
@@ -331,7 +331,7 @@ export default function CustomPricingPage() {
                 <Textarea
                   value={form.quoteDescription}
                   onChange={(e) => setForm({ ...form, quoteDescription: e.target.value })}
-                  placeholder="{t('descriptionPlaceholder')}"
+                  placeholder={t('descriptionPlaceholder')}
                   rows={3}
                 />
               </div>
@@ -351,7 +351,7 @@ export default function CustomPricingPage() {
                   type="number"
                   value={form.oneTimePriceIdr}
                   onChange={(e) => setForm({ ...form, oneTimePriceIdr: e.target.value })}
-                  placeholder="{t('oneTimePlaceholder')}"
+                  placeholder={t('oneTimePlaceholder')}
                   className="font-mono"
                 />
               </div>
@@ -368,7 +368,7 @@ export default function CustomPricingPage() {
                 <Textarea
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  placeholder="{t('memoPlaceholder')}"
+                  placeholder={t('memoPlaceholder')}
                   rows={2}
                 />
               </div>
@@ -394,7 +394,7 @@ export default function CustomPricingPage() {
           <Input
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="{t('searchPlaceholder')}"
+            placeholder={t('searchPlaceholder')}
             className="h-8 text-xs"
           />
         </div>

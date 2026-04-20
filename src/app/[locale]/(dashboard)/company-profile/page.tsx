@@ -387,7 +387,7 @@ export default function CompanyProfilePage() {
           <div className="border-2 border-dashed border-blue-200 rounded-xl p-3 text-center bg-blue-50/50">
             <div className="flex items-center justify-center gap-2">
               <Camera className="h-4 w-4 text-blue-500" />
-              <p className="text-xs text-blue-700 font-medium">NPWP ' + t('k65_633b57') + '</p>
+              <p className="text-xs text-blue-700 font-medium">NPWP {t('k65_633b57')}</p>
             </div>
             <label className="inline-flex items-center gap-2 mt-2 rounded-lg bg-blue-600 px-4 py-1.5 text-white text-xs font-medium hover:bg-blue-700 transition-colors cursor-pointer">
               {ocrLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
@@ -409,7 +409,7 @@ export default function CompanyProfilePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
             <div className="md:col-span-2">
-              <Label className="text-xs">' + t('k50_2e47c1') + ' <span className="text-red-500">*</span></Label>
+              <Label className="text-xs">{t('k50_2e47c1')} <span className="text-red-500">*</span></Label>
               <Input
                 value={profile.company_name || ''}
                 onChange={e => updateField('company_name', e.target.value)}
@@ -427,7 +427,7 @@ export default function CompanyProfilePage() {
               />
             </div>
             <div>
-              <Label className="text-xs">' + t('k68_45f790') + '</Label>
+              <Label className="text-xs">{t('k68_45f790')}</Label>
               <Input
                 value={profile.address || ''}
                 onChange={e => updateField('address', e.target.value)}
@@ -439,8 +439,8 @@ export default function CompanyProfilePage() {
         </Section>
 
         {/* Section 1: Business Type */}
-        <Section id="business" title="' + t('k69_2aa9e2') + '" icon={Briefcase} badge="{t('k70_3cec60')}">
-          <p className="text-[11px] text-gray-500 mb-2">' + t('k71_ffc082') + '</p>
+        <Section id="business" title={t('k69_2aa9e2')} icon={Briefcase} badge={t('k70_3cec60')}>
+          <p className="text-[11px] text-gray-500 mb-2">{t('k71_ffc082')}</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {BUSINESS_CATEGORIES.map(cat => {
               const Icon = cat.icon;
@@ -460,13 +460,13 @@ export default function CompanyProfilePage() {
         </Section>
 
         {/* Section 2: Legal / UMKM */}
-        <Section id="legal" title="' + t('k72_45d02a') + '" icon={Shield} badge="PPh 25 vs PPh Final">
+        <Section id="legal" title={t('k72_45d02a')} icon={Shield} badge="PPh 25 vs PPh Final">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">{t('k73_c2e5a1')}</Label>
               <select value={profile.legal_form || ''} onChange={e => updateField('legal_form', e.target.value || null)}
                 className="w-full h-9 px-3 rounded-md border border-input text-xs">
-                <option value="">' + t('k74_f1d7fb') + '</option>
+                <option value="">{t('k74_f1d7fb')}</option>
                 {LEGAL_FORMS.map(lf => <option key={lf.value} value={lf.value}>{lf.label}</option>)}
               </select>
             </div>
@@ -476,15 +476,15 @@ export default function CompanyProfilePage() {
                 placeholder="2020" className="text-xs" />
             </div>
             <div>
-              <Label className="text-xs">' + t('k76_6e882c') + '</Label>
+              <Label className="text-xs">{t('k76_6e882c')}</Label>
               <Input type="number" value={profile.annual_revenue || ''} onChange={e => updateField('annual_revenue', e.target.value ? Number(e.target.value) : null)}
                 placeholder="5000000000" className="font-mono text-xs" />
               {profile.annual_revenue && profile.annual_revenue < 4_800_000_000 && (
-                <p className="text-[11px] text-green-600 mt-1">✓ 48' + t('k77_5e4cf0') + ' — UMKM PPh Final 0.5% {t('k78_ddaf1c')}</p>
+                <p className="text-[11px] text-green-600 mt-1">✓ 48{t('k77_5e4cf0')} — UMKM PPh Final 0.5% {t('k78_ddaf1c')}</p>
               )}
             </div>
             <div>
-              <Label className="text-xs">' + t('k79_79d9cf') + '</Label>
+              <Label className="text-xs">{t('k79_79d9cf')}</Label>
               <Input type="number" value={profile.paid_up_capital || ''} onChange={e => updateField('paid_up_capital', e.target.value ? Number(e.target.value) : null)}
                 className="font-mono text-xs" />
             </div>
@@ -504,11 +504,11 @@ export default function CompanyProfilePage() {
             <div className="border-t pt-2 mt-2">
               <Checkbox checked={profile.npwp_pph25_elected}
                 onChange={v => updateField('npwp_pph25_elected', v)}
-                label="NPWP ' + t('k85_ea9b00') + '"
-                desc="NPWP {t('k86_fc3b9e')}" />
+                label={`NPWP ${t('k85_ea9b00')}`}
+                desc={`NPWP ${t('k86_fc3b9e')}`} />
               {profile.npwp_pph25_elected && (
                 <div className="ml-6 mt-1">
-                  <Label className="text-[10px]">PPh 25 ' + t('k87_79bb85') + '</Label>
+                  <Label className="text-[10px]">PPh 25 {t('k87_79bb85')}</Label>
                   <Input type="date"
                     value={profile.npwp_pph25_elected_at || ''}
                     className="w-40 h-8 text-xs"
@@ -520,13 +520,13 @@ export default function CompanyProfilePage() {
         </Section>
 
         {/* Section 3: Ownership */}
-        <Section id="ownership" title="' + t('k88_0f43fb') + '" icon={Users}>
+        <Section id="ownership" title={t('k88_0f43fb')} icon={Users}>
           <Checkbox checked={profile.has_foreign_shareholders} onChange={v => updateField('has_foreign_shareholders', v)}
-            label="' + t('k89_b46f1f') + '" desc="→ PPh 26 {t('k90_7955d0')}" />
+            label={t('k89_b46f1f')} desc={`→ PPh 26 ${t('k90_7955d0')}`} />
           {profile.has_foreign_shareholders && (
             <div className="ml-6 grid grid-cols-3 gap-2">
               <div>
-                <Label className="text-[10px]">' + t('k91_cf8318') + '</Label>
+                <Label className="text-[10px]">{t('k91_cf8318')}</Label>
                 <Input type="number" value={profile.foreign_ownership_pct || ''} className="h-8 text-xs"
                   onChange={e => updateField('foreign_ownership_pct', e.target.value ? Number(e.target.value) : null)} />
               </div>
@@ -536,7 +536,7 @@ export default function CompanyProfilePage() {
                   onChange={e => updateField('parent_company_name', e.target.value || null)} />
               </div>
               <div>
-                <Label className="text-[10px]">' + t('k93_df9baf') + '</Label>
+                <Label className="text-[10px]">{t('k93_df9baf')}</Label>
                 <Input value={profile.parent_company_country || ''} className="h-8 text-xs font-mono" maxLength={2}
                   onChange={e => updateField('parent_company_country', e.target.value.toUpperCase() || null)} />
               </div>
@@ -548,48 +548,48 @@ export default function CompanyProfilePage() {
         <ShareholderSection />
 
         {/* Section 4: Income Sources */}
-        <Section id="income" title="' + t('k94_7c846a') + ' & Expenses)" icon={DollarSign} badge="{t('k95_8a337a')}">
+        <Section id="income" title={`${t('k94_7c846a')} & Expenses)`} icon={DollarSign} badge={t('k95_8a337a')}>
           <p className="text-[11px] text-gray-500 mb-2">{t('selectAllApplicable')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <Checkbox checked={profile.has_employees} onChange={v => updateField('has_employees', v)}
-              label="' + t('k97_b59235') + '" desc="→ PPh 21 {t('k98_f68dad')}" />
+              label={t('k97_b59235')} desc={`→ PPh 21 ${t('k98_f68dad')}`} />
             <Checkbox checked={profile.is_pkp} onChange={v => updateField('is_pkp', v)}
-              label="PKP ' + t('k99_c35e34') + '" desc="→ PPN 11% {t('k98_f68dad')}" />
+              label={`PKP ${t('k99_c35e34')}`} desc={`→ PPN 11% ${t('k98_f68dad')}`} />
             <Checkbox checked={profile.pays_service_fees} onChange={v => updateField('pays_service_fees', v)}
-              label="' + t('k100_72a7fc') + '" desc="→ PPh 23 {t('k101_a260fe')}" />
+              label={t('k100_72a7fc')} desc={`→ PPh 23 ${t('k101_a260fe')}`} />
             <Checkbox checked={profile.has_import_export} onChange={v => updateField('has_import_export', v)}
-              label="' + t('k102_3c83e0') + '" desc="→ PPh 22 + {t('k103_90fe7f')}" />
+              label={t('k102_3c83e0')} desc={`→ PPh 22 + ${t('k103_90fe7f')}`} />
             <Checkbox checked={profile.has_rental_business} onChange={v => updateField('has_rental_business', v)}
-              label="' + t('k104_180391') + '" desc="→ PPh 4(2) Final 10%" />
+              label={t('k104_180391')} desc="→ PPh 4(2) Final 10%" />
             <Checkbox checked={profile.pays_rent} onChange={v => updateField('pays_rent', v)}
-              label="' + t('k105_06030b') + '" desc="→ PPh 4(2) {t('k106_1e146b')}" />
+              label={t('k105_06030b')} desc={`→ PPh 4(2) ${t('k106_1e146b')}`} />
             <Checkbox checked={profile.receives_dividends} onChange={v => updateField('receives_dividends', v)}
-              label="' + t('k107_b8a139') + '" desc="→ PPh 23 15% ({t('k108_780901')}" />
+              label={t('k107_b8a139')} desc={`→ PPh 23 15% (${t('k108_780901')}`} />
             <Checkbox checked={profile.receives_interest} onChange={v => updateField('receives_interest', v)}
-              label="' + t('k109_f3d368') + '" desc="→ PPh 23 15% / PPh 4(2)" />
+              label={t('k109_f3d368')} desc="→ PPh 23 15% / PPh 4(2)" />
             <Checkbox checked={profile.receives_royalties} onChange={v => updateField('receives_royalties', v)}
-              label="' + t('k110_351231') + '" desc="→ PPh 23 15% ({t('k108_780901')}" />
+              label={t('k110_351231')} desc={`→ PPh 23 15% (${t('k108_780901')}`} />
             <Checkbox checked={profile.has_franchise} onChange={v => updateField('has_franchise', v)}
-              label="' + t('k111_43b93b') + '" desc="→ PPh 23 {t('k112_a9c8d4')}" />
+              label={t('k111_43b93b')} desc={`→ PPh 23 ${t('k112_a9c8d4')}`} />
             <Checkbox checked={profile.sells_property} onChange={v => updateField('sells_property', v)}
-              label="' + t('k113_3bdbdb') + '" desc="→ PPh 4(2) Final 2.5%" />
+              label={t('k113_3bdbdb')} desc="→ PPh 4(2) Final 2.5%" />
             <Checkbox checked={profile.has_shipping_business} onChange={v => updateField('has_shipping_business', v)}
-              label="' + t('k114_7c23cc') + '" desc="→ PPh 15" />
+              label={t('k114_7c23cc')} desc="→ PPh 15" />
           </div>
         </Section>
 
         {/* Section 5: Construction (conditional) */}
         {(profile.business_category === 'CONSTRUCTION' || profile.has_construction_sbu) && (
-          <Section id="construction" title="' + t('k115_4b74db') + '" icon={Building2} badge="PPh 4(2)">
+          <Section id="construction" title={t('k115_4b74db')} icon={Building2} badge="PPh 4(2)">
             <Checkbox checked={profile.has_construction_sbu} onChange={v => updateField('has_construction_sbu', v)}
-              label="SBU (Sertifikat Badan Usaha) ' + t('k116_286f58') + '" desc="PP 9/2022 {t('k117_8dee5d')}" />
+              label={`SBU (Sertifikat Badan Usaha) ${t('k116_286f58')}`} desc={`PP 9/2022 ${t('k117_8dee5d')}`} />
             {profile.has_construction_sbu && (
               <div className="grid grid-cols-3 gap-2 ml-6">
                 <div>
-                  <Label className="text-[10px]">SBU ' + t('k118_0e1cd4') + '</Label>
+                  <Label className="text-[10px]">SBU {t('k118_0e1cd4')}</Label>
                   <select value={profile.sbu_qualification || ''} onChange={e => updateField('sbu_qualification', e.target.value || null)}
                     className="w-full h-8 px-2 rounded border text-xs">
-                    <option value="">' + t('k119_3828fa') + '</option>
+                    <option value="">{t('k119_3828fa')}</option>
                     <option value="SMALL">Kecil (1.75%)</option>
                     <option value="MEDIUM">Menengah (2.65%)</option>
                     <option value="LARGE">Besar (4%)</option>
@@ -601,7 +601,7 @@ export default function CompanyProfilePage() {
                     onChange={e => updateField('sbu_number', e.target.value || null)} />
                 </div>
                 <div>
-                  <Label className="text-[10px]">' + t('k121_a37db9') + '</Label>
+                  <Label className="text-[10px]">{t('k121_a37db9')}</Label>
                   <Input type="date" value={profile.sbu_expires_at || ''} className="h-8 text-xs"
                     onChange={e => updateField('sbu_expires_at', e.target.value || null)} />
                 </div>
@@ -612,17 +612,17 @@ export default function CompanyProfilePage() {
 
         {/* Section 6: F&B (conditional) */}
         {(profile.business_category === 'FNB_RESTAURANT' || profile.business_category === 'FNB_CATERING' || profile.is_restaurant || profile.is_catering) && (
-          <Section id="fnb" title="F&B ' + t('k122_b70e98') + '" icon={Utensils}>
+          <Section id="fnb" title={`F&B ${t('k122_b70e98')}`} icon={Utensils}>
             <Checkbox checked={profile.is_restaurant} onChange={v => updateField('is_restaurant', v)}
-              label="' + t('k123_12daf7') + '" desc="{t('k124_e051d4')}" />
+              label={t('k123_12daf7')} desc={t('k124_e051d4')} />
             <Checkbox checked={profile.is_catering} onChange={v => updateField('is_catering', v)}
-              label="' + t('k125_78c265') + '" desc="PPh 23 2% {t('k2_3f6978')}" />
+              label={t('k125_78c265')} desc={`PPh 23 2% ${t('k2_3f6978')}`} />
           </Section>
         )}
 
         {/* AI Questions */}
         {profile.ai_profile_questions && profile.ai_profile_questions.length > 0 && (
-          <Section id="ai" title="AI ' + t('k126_8932d6') + '" icon={Sparkles}>
+          <Section id="ai" title={`AI ${t('k126_8932d6')}`} icon={Sparkles}>
             <div className="space-y-3">
               {profile.ai_profile_questions.map((q, i) => (
                 <div key={i} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
