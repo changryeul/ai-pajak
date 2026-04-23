@@ -30,7 +30,7 @@ describe('individual-pricing constants', () => {
   });
 
   it('1770 matches business spec', () => {
-    expect(SPT_1770_PLAN.priceIdr).toBe(300_000);
+    expect(SPT_1770_PLAN.priceIdr).toBe(500_000);
   });
 
   it('VAT rate is 11%', () => {
@@ -40,13 +40,13 @@ describe('individual-pricing constants', () => {
   it('formatSptPrice displays full IDR digits', () => {
     expect(formatSptPrice(SPT_1770SS_PLAN)).toBe('Rp 100.000');
     expect(formatSptPrice(SPT_1770S_PLAN)).toBe('Rp 200.000');
-    expect(formatSptPrice(SPT_1770_PLAN)).toBe('Rp 300.000');
+    expect(formatSptPrice(SPT_1770_PLAN)).toBe('Rp 500.000');
   });
 
   it('sptPriceWithVat adds 11% PPN', () => {
     expect(sptPriceWithVat(SPT_1770SS_PLAN)).toBe(111_000);
     expect(sptPriceWithVat(SPT_1770S_PLAN)).toBe(222_000);
-    expect(sptPriceWithVat(SPT_1770_PLAN)).toBe(333_000);
+    expect(sptPriceWithVat(SPT_1770_PLAN)).toBe(555_000);
   });
 
   it('getIndividualSptPlan looks up by id', () => {

@@ -146,8 +146,12 @@ export default function MyProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
+  // Required missing → 진한 빨강, optional missing → 옅은 빨강
+  // (keynote: 아직 입력하지 않은 정보의 빈칸은 빨간색으로 테두리)
   const requiredClass = (key: keyof ProfileForm) =>
     !String(form[key] || '').trim() ? 'border-red-400 focus:border-red-500' : '';
+  const optionalClass = (key: keyof ProfileForm) =>
+    !String(form[key] || '').trim() ? 'border-red-200 focus:border-red-300' : '';
 
   const save = async () => {
     setSaving(true);
@@ -261,9 +265,13 @@ export default function MyProfilePage() {
               placeholder={t('fieldAddress')}
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
+              className={cn(optionalClass('address'))}
             />
             {/* Marital + dependents → computed PTKP code */}
-            <div className="rounded-lg border border-gray-200 bg-gray-50/40 p-3 space-y-3">
+            <div className={cn(
+              'rounded-lg border bg-gray-50/40 p-3 space-y-3',
+              !form.ptkp_status ? 'border-red-200' : 'border-gray-200',
+            )}>
               <div>
                 <p className="text-xs font-medium text-gray-600 mb-1.5">{t('familyMaritalLabel')}</p>
                 <div className="flex gap-2">
@@ -351,6 +359,7 @@ export default function MyProfilePage() {
                   placeholder={t('fieldCompany')}
                   value={form.employer_name}
                   onChange={(e) => setForm({ ...form, employer_name: e.target.value })}
+                  className={cn(optionalClass('employer_name'))}
                 />
               </div>
             </div>
@@ -362,29 +371,34 @@ export default function MyProfilePage() {
                   placeholder={t('fieldCoretaxId')}
                   value={form.coretax_id}
                   onChange={(e) => setForm({ ...form, coretax_id: e.target.value })}
+                  className={cn(optionalClass('coretax_id'))}
                 />
                 <Input
                   type="password"
                   placeholder={t('fieldCoretaxPassword')}
                   value={form.coretax_password_hint}
                   onChange={(e) => setForm({ ...form, coretax_password_hint: e.target.value })}
+                  className={cn(optionalClass('coretax_password_hint'))}
                 />
                 <Input
                   type="password"
                   placeholder={t('fieldDjpPassword')}
                   value={form.djp_password_hint}
                   onChange={(e) => setForm({ ...form, djp_password_hint: e.target.value })}
+                  className={cn(optionalClass('djp_password_hint'))}
                 />
                 <Input
                   type="password"
                   placeholder={t('fieldPassphrase')}
                   value={form.djp_passphrase_hint}
                   onChange={(e) => setForm({ ...form, djp_passphrase_hint: e.target.value })}
+                  className={cn(optionalClass('djp_passphrase_hint'))}
                 />
                 <Input
                   placeholder={t('fieldEfin')}
                   value={form.efin}
                   onChange={(e) => setForm({ ...form, efin: e.target.value })}
+                  className={cn(optionalClass('efin'))}
                 />
               </div>
             </div>

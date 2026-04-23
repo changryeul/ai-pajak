@@ -1,16 +1,19 @@
 'use client';
 
 /**
- * 최근 3년 신고 이력 — compact year-by-year status list.
+ * 최근 5년 신고 이력 — AI가 기억하는 개인의 연간 SPT 이력.
  *
- * INDIVIDUAL customers file one SPT per year (1770SS/S/full). Instead of
- * the noisy stat-card quartet (Total/Submitted/Draft/Accepted), this card
- * shows the last 3 tax years with a single-word status:
+ * Keynote spec: "AI는 이 개인의 결산신고 내역 5년치를 기억하고 보여줍니다."
  *
- *   2025년 신고 — 완료 | 진행 중 | 시작하기
+ * INDIVIDUAL customers file one SPT per year (1770SS/S/1770). The card shows
+ * five tax years with: status, SPT type, and tax amount when completed.
+ *
+ *   2024년 신고 — ✓ 완료 · 1770S · Rp 1.5M
+ *   2023년 신고 — ⧗ 진행 중
+ *   2022년 신고 — + 시작하기
  *
  * Any year without a filing gets a "시작하기" CTA that routes to the
- * 1770 picker.
+ * 1770 picker for that year.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,7 +22,14 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui';
 import { CheckCircle2, Clock, PlusCircle, Loader2, History } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, fmtRp } from '@/lib/utils';
+
+const ANNUAL_SPT_TYPES = new Set([
+  'SPT_TAHUNAN',
+  'SPT_1770SS',
+  'SPT_1770S',
+  'SPT_1770',
+]);
 
 interface Filing {
   id: string;
@@ -29,6 +39,7 @@ interface Filing {
   tax_period?: string;
   status: string;
   tax_type?: string;
+  tax_data?: Record<string, unknown> | null;
 }
 
 interface RecentFilingsCardProps {
@@ -47,18 +58,50 @@ function parseFilingYear(f: Filing): number | null {
   return null;
 }
 
-function yearStatus(filings: Filing[], year: number) {
-  // Only consider annual SPT filings (SPT_TAHUNAN). Monthly PPh21/23
-  // filings share the same tax_filing table but have tax_type=SPT_MASA
-  // or per-tax enums (PPh21 etc.).
+function sptShortName(taxType: string | undefined): string | null {
+  if (!taxType) return null;
+  if (taxType === 'SPT_1770SS') return '1770SS';
+  if (taxType === 'SPT_1770S') return '1770S';
+  if (taxType === 'SPT_1770') return '1770';
+  return null;
+}
+
+function readTaxPayable(f: Filing): number | null {
+  // All 3 1770-series calculators output `taxPayable` (Rupiah). Accept
+  // both camelCase (TypeScript) and snake_case (if stored post-backend).
+  const d = f.tax_data;
+  if (!d || typeof d !== 'object') return null;
+  const pick = (k: string): number | null => {
+    const v = (d as Record<string, unknown>)[k];
+    return typeof v === 'number' && Number.isFinite(v) ? v : null;
+  };
+  return pick('taxPayable') ?? pick('tax_payable') ?? pick('total_tax_due') ?? null;
+}
+
+interface YearStatus {
+  kind: 'done' | 'inprogress' | 'empty';
+  sptShort: string | null;
+  taxPayable: number | null;
+}
+
+function yearStatus(filings: Filing[], year: number): YearStatus {
+  // Accept all annual SPT types (SPT_TAHUNAN, SPT_1770SS, SPT_1770S, SPT_1770).
+  // Monthly PPh21/23 filings share the same table via SPT_MASA/PPh21 etc.
+  // and are excluded here.
   const hit = filings.find((f) => {
-    if (f.tax_type && f.tax_type !== 'SPT_TAHUNAN') return false;
+    if (f.tax_type && !ANNUAL_SPT_TYPES.has(f.tax_type)) return false;
     return parseFilingYear(f) === year;
   });
-  if (!hit) return 'empty' as const;
+  if (!hit) {
+    return { kind: 'empty', sptShort: null, taxPayable: null };
+  }
   const s = hit.status.toUpperCase();
-  if (['ACCEPTED', 'PAID', 'COMPLETED', 'BPE_UPLOADED', 'DJP_SUBMITTED', 'FILED'].includes(s)) return 'done' as const;
-  return 'inprogress' as const;
+  const isDone = ['ACCEPTED', 'PAID', 'COMPLETED', 'BPE_UPLOADED', 'DJP_SUBMITTED', 'FILED'].includes(s);
+  return {
+    kind: isDone ? 'done' : 'inprogress',
+    sptShort: sptShortName(hit.tax_type),
+    taxPayable: readTaxPayable(hit),
+  };
 }
 
 export function RecentFilingsCard({ customerId }: RecentFilingsCardProps) {
@@ -70,15 +113,15 @@ export function RecentFilingsCard({ customerId }: RecentFilingsCardProps) {
 
   const years = useMemo(() => {
     // Indonesian SPT is for the PRIOR tax year, filed by end-March.
-    // Show the last 3 prior tax years.
+    // Show the last 5 prior tax years (keynote: AI remembers 5 years).
     const current = new Date().getFullYear();
-    return [current - 1, current - 2, current - 3];
+    return [current - 1, current - 2, current - 3, current - 4, current - 5];
   }, []);
 
   const fetch_ = useCallback(async () => {
     if (!customerId) { setLoading(false); return; }
     try {
-      const res = await fetch(`/api/tax/filings?customerId=${customerId}&limit=30`);
+      const res = await fetch(`/api/tax/filings?customerId=${customerId}&limit=50`);
       const j = await res.json();
       if (j.success) setFilings(j.data ?? []);
     } finally {
@@ -112,32 +155,46 @@ export function RecentFilingsCard({ customerId }: RecentFilingsCardProps) {
               const status = yearStatus(filings, y);
               return (
                 <div key={y} className="flex items-center justify-between px-5 py-3.5">
-                  <div className="font-medium text-sm">
-                    {t('recentFilings.yearLabel', { year: y })}
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium text-sm">
+                      {t('recentFilings.yearLabel', { year: y })}
+                    </div>
+                    {status.sptShort && (
+                      <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-700">
+                        {status.sptShort}
+                      </span>
+                    )}
                   </div>
-                  {status === 'done' && (
-                    <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
-                      <CheckCircle2 className="h-4 w-4" />
-                      {t('recentFilings.done')}
-                    </span>
-                  )}
-                  {status === 'inprogress' && (
-                    <span className="inline-flex items-center gap-1 text-sm font-medium text-amber-600">
-                      <Clock className="h-4 w-4" />
-                      {t('recentFilings.inProgress')}
-                    </span>
-                  )}
-                  {status === 'empty' && (
-                    <Link
-                      href={`/${locale}/tax/spt-tahunan?year=${y}`}
-                      className={cn(
-                        'inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700',
-                      )}
-                    >
-                      <PlusCircle className="h-4 w-4" />
-                      {t('recentFilings.start')}
-                    </Link>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {status.taxPayable !== null && status.kind === 'done' && (
+                      <span className="text-xs font-mono text-gray-600">
+                        {fmtRp(status.taxPayable)}
+                      </span>
+                    )}
+                    {status.kind === 'done' && (
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {t('recentFilings.done')}
+                      </span>
+                    )}
+                    {status.kind === 'inprogress' && (
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-amber-600">
+                        <Clock className="h-4 w-4" />
+                        {t('recentFilings.inProgress')}
+                      </span>
+                    )}
+                    {status.kind === 'empty' && (
+                      <Link
+                        href={`/${locale}/tax/spt-tahunan?year=${y}`}
+                        className={cn(
+                          'inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700',
+                        )}
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                        {t('recentFilings.start')}
+                      </Link>
+                    )}
+                  </div>
                 </div>
               );
             })}

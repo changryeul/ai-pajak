@@ -141,23 +141,19 @@ const navItems: NavSection[] = [
       { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
     ],
   },
-  // ── 개인 고객: 최소 네비게이션 (2026-04-18 hybrid 재배치) ──
-  // 대시보드(상단)에 3년 이력/자산/부채/PTKP/해외자산 모두 표시하므로
-  // 사이드바는 실제로 따로 화면 전환이 필요한 항목만 남김.
-  //   - 연신고    : SPT 1770/1770S/1770SS 작성 진입점
-  //   - 빌링      : 건당 결제 / 결제 대기 / 이력
-  //   - 자료 업로드: 1721-A1 / KK OCR 업로드
-  //   - 보고서    : 5년 신고·납부 리포트
+  // ── 개인 고객: 간결 7-메뉴 (2026-04-23 keynote Pribadi 스펙) ──
+  // 상단 main 섹션의 대시보드 + 여기 6개 = 총 7개.
+  // 대시보드 / 연신고 / ID billing 발행 / 세금 보고서 / 내정보 / 결제 / 도움말
   {
     section: 'individual-main',
     roles: [UserRole.CUSTOMER],
     items: [
-      { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'], children: [
-        { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
-      ]},
-      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/tax/spt-tahunan', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/tax/billing', icon: Receipt, labelKey: 'nav.idBillingIssue', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/my-profile', icon: User, labelKey: 'nav.myProfile', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
     ],
   },
   // ── 세무 컨설턴트: 월신고 (기존 구조 유지) ──
@@ -255,21 +251,19 @@ const navItems: NavSection[] = [
     ],
   },
   // ── 기타 역할: 계정 섹션 (기존 구조 유지) ──
+  // 개인(INDIVIDUAL) 고객의 내정보/결제/도움말은 individual-main 섹션으로 이동했으므로
+  // 여기서는 consultant/operator/platform_admin 전용 항목만 남긴다.
   {
     section: 'account',
     labelKey: 'nav.account',
     items: [
       { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.PLATFORM_ADMIN] },
       { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: consultantRoles },
-      { href: '/my-profile', icon: User, labelKey: 'nav.myProfile', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      // Counterparties + accounting-SW integrations are COMPANY/CONSULTANT concepts
-      // (거래처 ledger, Xero/Accurate sync). INDIVIDUAL customers don't have these,
-      // so they are excluded from the INDIVIDUAL sidebar to keep it minimal.
       { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: consultantRoles },
       { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: consultantRoles },
       { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR_JTC, UserRole.TAX_OPERATOR_SUPERVISOR] },
-      { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
-      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN, UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
+      { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN] },
+      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN] },
     ],
   },
 ];

@@ -4820,9 +4820,15 @@
     "v2NoticeApprovedOnly": "Note: Only supervisor-approved items appear here. After payment, proof must be submitted to complete filing.",
     "v2NoItems": "No approved billings",
     "v2NoItemsHint": "Items appear after monthly filing approval",
-    "v2NtpnPlaceholder": "Enter 16-digit NTPN",
-    "v2UploadFile": "Upload File",
-    "v2UploadPhoto": "Take Photo"
+    "v2NtpnPlaceholder": "NTPN 16桁を入力",
+    "v2UploadFile": "ファイルをアップロード",
+    "v2UploadPhoto": "写真を撮影",
+    "v2UploadBpe": "BPEをアップロード",
+    "v2BpeUploadHint": "DJPからメールで受信したBPE PDFをアップロードしてください",
+    "v2BpeNumberPlaceholder": "BPE番号 (任意)",
+    "v2BpeUploaded": "BPE受領",
+    "v2BpePreview": "BPEプレビュー",
+    "bpeUploadSuccess": "BPEがアップロードされました"
   },
   "documentUpload": {
     "pageTitle": "Document Upload",
@@ -5649,7 +5655,7 @@
     }
   },
   "recentFilings": {
-    "title": "過去3年のSPT履歴",
+    "title": "過去5年のSPT履歴",
     "subtitle": "年次SPT申告の状態",
     "yearLabel": "{year}年 SPT",
     "done": "完了",
@@ -6106,6 +6112,13 @@
     "serForeignLoan": "海外ローン",
     "anomalyTitle": "⚠ 資産増加の異常検知",
     "anomalyBody": "最近の資産増加率が所得増加率を大幅に上回っています。（資産+{assetPct}% vs 所得+{incomePct}%）",
+    "riskDetectionTitle": "AIによる資産リスク検知",
+    "riskDetectionSubtitle": "AIが5年分の履歴を分析し、{count}件のリスク信号を検出しました。",
+    "riskDetectionClear": "現在検出されているリスクはありません",
+    "riskDetectionClearBody": "AIが所得・資産フローを確認した結果、特異な信号はありませんでした。",
+    "riskSeverity_low": "低",
+    "riskSeverity_medium": "中",
+    "riskSeverity_high": "高",
     "fundSourceTitle": "💬 資産増加の資金出所確認",
     "fundSourceHint": "最近の資産増加が大きいため、資金出所の確認をおすすめします。",
     "fsSalary": "給与所得",

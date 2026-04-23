@@ -4822,7 +4822,13 @@
     "v2NoItemsHint": "Items appear after monthly filing approval",
     "v2NtpnPlaceholder": "Enter 16-digit NTPN",
     "v2UploadFile": "Upload File",
-    "v2UploadPhoto": "Take Photo"
+    "v2UploadPhoto": "Take Photo",
+    "v2UploadBpe": "Upload BPE",
+    "v2BpeUploadHint": "Upload the BPE PDF you received from DJP by email",
+    "v2BpeNumberPlaceholder": "BPE number (optional)",
+    "v2BpeUploaded": "BPE Received",
+    "v2BpePreview": "Preview BPE",
+    "bpeUploadSuccess": "BPE uploaded successfully"
   },
   "documentUpload": {
     "pageTitle": "Document Upload",
@@ -5649,7 +5655,7 @@
     }
   },
   "recentFilings": {
-    "title": "Last 3 Years of Filings",
+    "title": "Last 5 Years of Filings",
     "subtitle": "Status of your annual SPT",
     "yearLabel": "SPT {year}",
     "done": "Completed",
@@ -6106,6 +6112,13 @@
     "serForeignLoan": "Foreign Loan",
     "anomalyTitle": "⚠ Asset-growth anomaly detected",
     "anomalyBody": "Your recent asset growth far exceeds income growth. (Assets +{assetPct}% vs income +{incomePct}%)",
+    "riskDetectionTitle": "AI asset-risk detection",
+    "riskDetectionSubtitle": "AI analyzed 5 years of history and found {count} risk signals.",
+    "riskDetectionClear": "No risks detected",
+    "riskDetectionClearBody": "AI reviewed your income and asset flow and found no unusual signals.",
+    "riskSeverity_low": "LOW",
+    "riskSeverity_medium": "MED",
+    "riskSeverity_high": "HIGH",
     "fundSourceTitle": "💬 Confirm source of funds",
     "fundSourceHint": "The recent growth is significant. Please confirm the source of funds.",
     "fsSalary": "Salary income",

@@ -4823,7 +4823,13 @@
     "v2NoItemsHint": "월 신고 승인 후 이곳에 표시됩니다",
     "v2NtpnPlaceholder": "NTPN 16자리 입력",
     "v2UploadFile": "파일 업로드",
-    "v2UploadPhoto": "사진 촬영"
+    "v2UploadPhoto": "사진 촬영",
+    "v2UploadBpe": "BPE 업로드",
+    "v2BpeUploadHint": "DJP에서 이메일로 받은 BPE PDF를 업로드하세요",
+    "v2BpeNumberPlaceholder": "BPE 번호 (선택)",
+    "v2BpeUploaded": "BPE 수령",
+    "v2BpePreview": "BPE 미리보기",
+    "bpeUploadSuccess": "BPE가 업로드되었습니다"
   },
   "documentUpload": {
     "pageTitle": "자료 업로드",
@@ -5650,7 +5656,7 @@
     }
   },
   "recentFilings": {
-    "title": "최근 3년 신고 이력",
+    "title": "최근 5년 신고 이력",
     "subtitle": "연간 SPT 신고 상태",
     "yearLabel": "{year}년 신고",
     "done": "완료",
@@ -6107,6 +6113,13 @@
     "serForeignLoan": "해외 대출",
     "anomalyTitle": "⚠ 자산 증가 이상 감지",
     "anomalyBody": "최근 자산 증가율이 소득 증가율 대비 과도합니다. (자산 +{assetPct}% vs 소득 +{incomePct}%)",
+    "riskDetectionTitle": "AI 자산위험 감지",
+    "riskDetectionSubtitle": "AI가 5년치 이력을 분석하여 {count}건의 위험 신호를 발견했습니다.",
+    "riskDetectionClear": "현재 감지된 위험 없음",
+    "riskDetectionClearBody": "AI가 소득·자산 흐름을 검토한 결과 특이 신호가 없습니다.",
+    "riskSeverity_low": "낮음",
+    "riskSeverity_medium": "중간",
+    "riskSeverity_high": "높음",
     "fundSourceTitle": "💬 자산 증가 자금 출처 확인",
     "fundSourceHint": "최근 자산 증가폭이 커서 자금 출처를 확인하는 것이 좋습니다.",
     "fsSalary": "급여소득",

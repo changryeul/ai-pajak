@@ -36,6 +36,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle, MessageCircle, Sparkles } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { buildDashboardTrend, type TrendFiling } from '@/lib/tax/trend-from-filings';
+import { detectAuditRisks, type AuditRisk } from '@/lib/audit/risk-detector';
 
 type Nationality = 'ID' | 'KR' | 'US' | 'JP';
 type FilingStatus = 'completed' | 'in_progress' | 'pending';
@@ -217,6 +218,16 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
     : trend.assetGrowthPct !== null &&
       trend.incomeGrowthPct !== null &&
       assetGrowthPct - incomeGrowthPct >= 5;
+
+  // Multi-rule AI risk detection — lifestyle mismatch, asset drop, income
+  // dip, foreign assets, debt > asset. Sample data returns the baseline
+  // placeholder only; we filter that out so the card stays empty when
+  // there is nothing real to say.
+  const detectedRisks: AuditRisk[] = useMemo(() => {
+    if (isSampleData) return [];
+    const { risks } = detectAuditRisks(trend, 'general');
+    return risks.filter((r) => r.id !== 'baseline');
+  }, [trend, isSampleData]);
 
   const toggleFundSource = (k: string) =>
     setFundSources((s) => ({ ...s, [k]: !s[k] }));
@@ -465,8 +476,53 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
         </Card>
       </div>
 
-      {/* 9a. Anomaly alert */}
-      {anomalyTriggered && (
+      {/* 9a. AI 위험 감지 — 다중 규칙 기반
+          lifestyle mismatch / asset drop / income dip / foreign assets /
+          debt-exceeds-asset. 샘플 데이터일 때는 기존 단일 anomaly 메시지로
+          대체 표시 (실제 데이터 없을 때는 경고 대신 "실데이터 필요" 톤 유지). */}
+      {detectedRisks.length > 0 ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="font-semibold text-red-800 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            {t('riskDetectionTitle')}
+          </p>
+          <p className="text-xs text-red-700 mt-1">
+            {t('riskDetectionSubtitle', { count: detectedRisks.length })}
+          </p>
+          <ul className="mt-3 space-y-2">
+            {detectedRisks.map((r) => (
+              <li
+                key={r.id}
+                className="rounded-lg border border-red-100 bg-white p-3"
+              >
+                <div className="flex items-start gap-2">
+                  <span
+                    className={
+                      'inline-flex shrink-0 items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ' +
+                      (r.severity === 'high'
+                        ? 'bg-red-100 text-red-800'
+                        : r.severity === 'medium'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-slate-100 text-slate-700')
+                    }
+                  >
+                    {t(`riskSeverity_${r.severity}`)}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">{r.title}</p>
+                    <p className="text-xs text-gray-700 mt-0.5">{r.detail}</p>
+                    {r.regulation && (
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        <span className="font-medium">규정:</span> {r.regulation}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : anomalyTriggered ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4">
           <p className="font-semibold text-red-800 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
@@ -474,6 +530,16 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           </p>
           <p className="text-sm text-red-700 mt-1">
             {t('anomalyBody', { assetPct: assetGrowthPct, incomePct: incomeGrowthPct })}
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <p className="font-semibold text-emerald-800 flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            {t('riskDetectionClear')}
+          </p>
+          <p className="text-xs text-emerald-700 mt-1">
+            {t('riskDetectionClearBody')}
           </p>
         </div>
       )}

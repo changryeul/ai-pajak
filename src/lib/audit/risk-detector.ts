@@ -131,6 +131,20 @@ export function detectAuditRisks(
     }
   }
 
+  // Asset drop — total harta year-over-year drop > 30%.
+  // Flags situations where a big asset was liquidated but cash didn't
+  // reappear, which auditors treat as hidden income / undeclared disposal.
+  if (trend.assetGrowthPct !== null && trend.assetGrowthPct <= -30) {
+    risks.push({
+      id: 'asset-drop',
+      severity: trend.assetGrowthPct <= -50 ? 'high' : 'medium',
+      title: 'Aset turun drastis',
+      detail: `Total aset turun ${Math.abs(trend.assetGrowthPct)}% dari tahun sebelumnya. Pemeriksa akan mencari bukti penjualan dan ke mana dana hasil penjualan dialokasikan.`,
+      regulation: 'Pasal 4 UU PPh (definisi penghasilan luas)',
+      scenarios: ['general', 'umkm'],
+    });
+  }
+
   // UMKM scenario + no income reported → red flag
   if (scenarioId === 'umkm' && latestHarta) {
     const hartaTotal =

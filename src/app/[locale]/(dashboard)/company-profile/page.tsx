@@ -153,6 +153,13 @@ export default function CompanyProfilePage() {
     setProfile({ ...profile, [field]: value } as CompanyProfile);
   };
 
+  // keynote: 아직 입력하지 않은 정보의 빈칸은 빨간색으로 테두리.
+  // required → 진한 빨강, optional → 옅은 빨강.
+  const isEmpty = (v: unknown) =>
+    v === null || v === undefined || v === '' || (typeof v === 'string' && !v.trim());
+  const emptyCls = (v: unknown, required = false) =>
+    isEmpty(v) ? (required ? 'border-red-400' : 'border-red-200') : '';
+
   const handleNpwpOcr = async (file: File) => {
     setOcrLoading(true);
     try {
@@ -414,7 +421,7 @@ export default function CompanyProfilePage() {
                 value={profile.company_name || ''}
                 onChange={e => updateField('company_name', e.target.value)}
                 placeholder="PT. Example Indonesia"
-                className="text-sm"
+                className={`text-sm ${emptyCls(profile.company_name, true)}`}
               />
             </div>
             <div>
@@ -423,7 +430,7 @@ export default function CompanyProfilePage() {
                 value={profile.npwp || ''}
                 onChange={e => updateField('npwp', e.target.value)}
                 placeholder="XX.XXX.XXX.X-XXX.XXX"
-                className="font-mono text-sm tracking-wider"
+                className={`font-mono text-sm tracking-wider ${emptyCls(profile.npwp, true)}`}
               />
             </div>
             <div>
@@ -432,7 +439,7 @@ export default function CompanyProfilePage() {
                 value={profile.address || ''}
                 onChange={e => updateField('address', e.target.value)}
                 placeholder="Jl. Sudirman No. 1, Jakarta"
-                className="text-sm"
+                className={`text-sm ${emptyCls(profile.address)}`}
               />
             </div>
           </div>
@@ -465,7 +472,7 @@ export default function CompanyProfilePage() {
             <div>
               <Label className="text-xs">{t('k73_c2e5a1')}</Label>
               <select value={profile.legal_form || ''} onChange={e => updateField('legal_form', e.target.value || null)}
-                className="w-full h-9 px-3 rounded-md border border-input text-xs">
+                className={`w-full h-9 px-3 rounded-md border text-xs ${isEmpty(profile.legal_form) ? 'border-red-200' : 'border-input'}`}>
                 <option value="">{t('k74_f1d7fb')}</option>
                 {LEGAL_FORMS.map(lf => <option key={lf.value} value={lf.value}>{lf.label}</option>)}
               </select>
@@ -473,12 +480,12 @@ export default function CompanyProfilePage() {
             <div>
               <Label className="text-xs">{t('k75_7f0fd8')}</Label>
               <Input type="number" value={profile.established_year || ''} onChange={e => updateField('established_year', e.target.value ? Number(e.target.value) : null)}
-                placeholder="2020" className="text-xs" />
+                placeholder="2020" className={`text-xs ${emptyCls(profile.established_year)}`} />
             </div>
             <div>
               <Label className="text-xs">{t('k76_6e882c')}</Label>
               <Input type="number" value={profile.annual_revenue || ''} onChange={e => updateField('annual_revenue', e.target.value ? Number(e.target.value) : null)}
-                placeholder="5000000000" className="font-mono text-xs" />
+                placeholder="5000000000" className={`font-mono text-xs ${emptyCls(profile.annual_revenue)}`} />
               {profile.annual_revenue && profile.annual_revenue < 4_800_000_000 && (
                 <p className="text-[11px] text-green-600 mt-1">✓ 48{t('k77_5e4cf0')} — UMKM PPh Final 0.5% {t('k78_ddaf1c')}</p>
               )}
@@ -486,7 +493,7 @@ export default function CompanyProfilePage() {
             <div>
               <Label className="text-xs">{t('k79_79d9cf')}</Label>
               <Input type="number" value={profile.paid_up_capital || ''} onChange={e => updateField('paid_up_capital', e.target.value ? Number(e.target.value) : null)}
-                className="font-mono text-xs" />
+                className={`font-mono text-xs ${emptyCls(profile.paid_up_capital)}`} />
             </div>
           </div>
           <div className="space-y-2 mt-2">

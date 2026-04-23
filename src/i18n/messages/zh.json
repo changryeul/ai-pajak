@@ -4820,9 +4820,15 @@
     "v2NoticeApprovedOnly": "Note: Only supervisor-approved items appear here. After payment, proof must be submitted to complete filing.",
     "v2NoItems": "No approved billings",
     "v2NoItemsHint": "Items appear after monthly filing approval",
-    "v2NtpnPlaceholder": "Enter 16-digit NTPN",
-    "v2UploadFile": "Upload File",
-    "v2UploadPhoto": "Take Photo"
+    "v2NtpnPlaceholder": "输入 16 位 NTPN",
+    "v2UploadFile": "上传文件",
+    "v2UploadPhoto": "拍照",
+    "v2UploadBpe": "上传 BPE",
+    "v2BpeUploadHint": "请上传您从 DJP 邮件中收到的 BPE PDF",
+    "v2BpeNumberPlaceholder": "BPE 编号（可选）",
+    "v2BpeUploaded": "已收到 BPE",
+    "v2BpePreview": "预览 BPE",
+    "bpeUploadSuccess": "BPE 上传成功"
   },
   "documentUpload": {
     "pageTitle": "Document Upload",
@@ -5649,7 +5655,7 @@
     }
   },
   "recentFilings": {
-    "title": "近3年申报记录",
+    "title": "近5年申报记录",
     "subtitle": "年度SPT申报状态",
     "yearLabel": "{year}年申报",
     "done": "已完成",
@@ -6106,6 +6112,13 @@
     "serForeignLoan": "海外贷款",
     "anomalyTitle": "⚠ 资产增长异常检测",
     "anomalyBody": "最近资产增长率大幅超过收入增长率。(资产 +{assetPct}% vs 收入 +{incomePct}%)",
+    "riskDetectionTitle": "AI 资产风险检测",
+    "riskDetectionSubtitle": "AI 分析了 5 年历史,发现 {count} 个风险信号。",
+    "riskDetectionClear": "当前未检测到风险",
+    "riskDetectionClearBody": "AI 审查了您的收入和资产流,未发现异常信号。",
+    "riskSeverity_low": "低",
+    "riskSeverity_medium": "中",
+    "riskSeverity_high": "高",
     "fundSourceTitle": "💬 确认资金来源",
     "fundSourceHint": "近期资产增长幅度较大,建议确认资金来源。",
     "fsSalary": "工资收入",

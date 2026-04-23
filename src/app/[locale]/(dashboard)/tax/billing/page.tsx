@@ -28,6 +28,8 @@ interface BillingItem {
   payment_date: string | null;
   payment_verified_at: string | null;
   bpe_number: string | null;
+  bpe_date: string | null;
+  bpe_file_url: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -83,6 +85,9 @@ export default function TaxBillingPage() {
   // Per-row NTPN input state
   const [ntpnInput, setNtpnInput] = useState<Record<string, string>>({});
   const [submittingNtpn, setSubmittingNtpn] = useState<string | null>(null);
+  // Per-row BPE upload state (customer uploads BPE PDF received by email)
+  const [bpeNumberInput, setBpeNumberInput] = useState<Record<string, string>>({});
+  const [uploadingBpe, setUploadingBpe] = useState<string | null>(null);
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -188,6 +193,53 @@ export default function TaxBillingPage() {
       showMsg('error', t('serverError'));
     } finally {
       setSubmittingNtpn(null);
+    }
+  };
+
+  const handleUploadBpe = async (itemId: string, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploadingBpe(itemId);
+    try {
+      const fd = new FormData();
+      fd.append('file', files[0]);
+      fd.append('customerId', session?.customerId || '');
+      fd.append('documentType', 'BPE');
+      fd.append('uploadSource', 'WEB');
+
+      const uploadRes = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+      const uploadData = await uploadRes.json();
+
+      if (!uploadData.success) {
+        showMsg('error', t('uploadFailed'));
+        return;
+      }
+
+      const fileUrl = uploadData.data?.signedUrl || uploadData.data?.path;
+      const res = await fetch('/api/customer/bpe-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          queueItemId: itemId,
+          bpeFileUrl: fileUrl,
+          bpeNumber: bpeNumberInput[itemId]?.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', t('bpeUploadSuccess'));
+        setBpeNumberInput((prev) => {
+          const next = { ...prev };
+          delete next[itemId];
+          return next;
+        });
+        loadItems();
+      } else {
+        showMsg('error', data.error || t('uploadFailed'));
+      }
+    } catch {
+      showMsg('error', t('serverError'));
+    } finally {
+      setUploadingBpe(null);
     }
   };
 
@@ -428,10 +480,59 @@ export default function TaxBillingPage() {
                                 {t('v2BtnSubmit')}
                               </Button>
                             </div>
-                          ) : item.status === 'COMPLETED' ? (
-                            <div className="text-[10px] text-green-700 flex items-center gap-1">
-                              <CheckCircle className="h-3 w-3" />
-                              {t('filingComplete')}
+                          ) : item.status === 'DJP_SUBMITTED' ? (
+                            // DJP가 고객 이메일로 BPE를 직접 보내므로,
+                            // 고객이 BPE PDF를 업로드할 수 있는 인터페이스.
+                            // (미리보기 앞에 업로드 자리를 둔다는 keynote 지침)
+                            <div className="space-y-1">
+                              <p className="text-[10px] text-purple-700">{t('v2BpeUploadHint')}</p>
+                              <Input
+                                className="h-8 text-xs font-mono w-40"
+                                placeholder={t('v2BpeNumberPlaceholder')}
+                                value={bpeNumberInput[item.id] || ''}
+                                maxLength={50}
+                                onChange={(e) =>
+                                  setBpeNumberInput((prev) => ({
+                                    ...prev,
+                                    [item.id]: e.target.value,
+                                  }))
+                                }
+                              />
+                              <label className="block">
+                                <span className="inline-flex w-full items-center justify-center gap-1 px-2 py-1 rounded border border-purple-200 bg-purple-50 text-[10px] text-purple-800 cursor-pointer hover:bg-purple-100">
+                                  {uploadingBpe === item.id ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <Upload className="h-3 w-3" />
+                                  )}
+                                  {t('v2UploadBpe')}
+                                </span>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,image/*"
+                                  onChange={(e) => handleUploadBpe(item.id, e.target.files)}
+                                  disabled={uploadingBpe === item.id}
+                                />
+                              </label>
+                            </div>
+                          ) : item.bpe_file_url || item.status === 'BPE_UPLOADED' || item.status === 'COMPLETED' ? (
+                            <div className="space-y-1">
+                              <div className="text-[10px] text-green-700 flex items-center gap-1">
+                                <CheckCircle className="h-3 w-3" />
+                                {item.status === 'COMPLETED' ? t('filingComplete') : t('v2BpeUploaded')}
+                              </div>
+                              {item.bpe_file_url && (
+                                <a
+                                  href={item.bpe_file_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[10px] text-blue-600 hover:underline flex items-center gap-1"
+                                >
+                                  <FileText className="h-2.5 w-2.5" />
+                                  {t('v2BpePreview')}
+                                </a>
+                              )}
                             </div>
                           ) : (
                             <span className="text-[10px] text-gray-400">—</span>

@@ -4822,7 +4822,13 @@
     "v2NoItemsHint": "Item muncul setelah persetujuan pelaporan bulanan",
     "v2NtpnPlaceholder": "Masukkan NTPN 16 digit",
     "v2UploadFile": "Unggah File",
-    "v2UploadPhoto": "Ambil Foto"
+    "v2UploadPhoto": "Ambil Foto",
+    "v2UploadBpe": "Unggah BPE",
+    "v2BpeUploadHint": "Unggah PDF BPE yang Anda terima dari DJP melalui email",
+    "v2BpeNumberPlaceholder": "Nomor BPE (opsional)",
+    "v2BpeUploaded": "BPE Diterima",
+    "v2BpePreview": "Pratinjau BPE",
+    "bpeUploadSuccess": "BPE berhasil diunggah"
   },
   "documentUpload": {
     "pageTitle": "Unggah Dokumen",
@@ -5649,7 +5655,7 @@
     }
   },
   "recentFilings": {
-    "title": "Riwayat SPT 3 Tahun Terakhir",
+    "title": "Riwayat SPT 5 Tahun Terakhir",
     "subtitle": "Status pelaporan SPT Tahunan Anda",
     "yearLabel": "SPT Tahun {year}",
     "done": "Selesai",
@@ -6106,6 +6112,13 @@
     "serForeignLoan": "Pinjaman LN",
     "anomalyTitle": "⚠ Deteksi Anomali Peningkatan Aset",
     "anomalyBody": "Pertumbuhan aset baru-baru ini jauh melebihi pertumbuhan penghasilan. (Aset +{assetPct}% vs Penghasilan +{incomePct}%)",
+    "riskDetectionTitle": "Deteksi risiko aset oleh AI",
+    "riskDetectionSubtitle": "AI menganalisis riwayat 5 tahun dan menemukan {count} sinyal risiko.",
+    "riskDetectionClear": "Tidak ada risiko terdeteksi",
+    "riskDetectionClearBody": "AI telah meninjau aliran penghasilan dan aset Anda dan tidak menemukan sinyal yang tidak biasa.",
+    "riskSeverity_low": "RENDAH",
+    "riskSeverity_medium": "SEDANG",
+    "riskSeverity_high": "TINGGI",
     "fundSourceTitle": "💬 Konfirmasi Sumber Dana",
     "fundSourceHint": "Pertumbuhan aset cukup besar. Silakan konfirmasi sumber dananya.",
     "fsSalary": "Penghasilan Gaji",

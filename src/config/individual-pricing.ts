@@ -42,7 +42,7 @@ export const SPT_1770S_PLAN: IndividualSptPlan = {
 export const SPT_1770_PLAN: IndividualSptPlan = {
   id: 'SPT_1770',
   shortName: '1770',
-  priceIdr: 300_000,
+  priceIdr: 500_000,
   featureCount: 4,
 };
 
