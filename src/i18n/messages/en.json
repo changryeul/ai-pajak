@@ -6117,7 +6117,14 @@
     "previewPkp": "Taxable base (PKP)",
     "previewEstimatedTax": "Estimated tax",
     "previewHint": "* Auto-calculated from A1 and additional income",
-    "goToBillingCta": "Go to payment"
+    "goToBillingCta": "Go to payment",
+    "kkLinkTitle": "KK data link",
+    "kkLinkHint": "The KK uploaded in the annual filing is reflected here (name / address / family / PTKP / NIK / KK number).",
+    "fieldNik": "NIK (from KK)",
+    "fieldKkNo": "No. KK",
+    "familyInfoKK": "Family info (KK)",
+    "familyInfoKKHint": "Auto-generated when the KK is uploaded.",
+    "companyInfo": "Company info"
   },
   "filingHistory": {
     "pageTitle": "Tax reports",

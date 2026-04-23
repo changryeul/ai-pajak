@@ -6117,7 +6117,14 @@
     "previewPkp": "Dasar pengenaan pajak (PKP)",
     "previewEstimatedTax": "Perkiraan pajak",
     "previewHint": "* Dihitung otomatis dari A1 dan penghasilan tambahan",
-    "goToBillingCta": "Lanjut ke pembayaran"
+    "goToBillingCta": "Lanjut ke pembayaran",
+    "kkLinkTitle": "Integrasi data KK",
+    "kkLinkHint": "KK yang diunggah di pelaporan tahunan otomatis terisi (nama / alamat / keluarga / PTKP / NIK / No. KK).",
+    "fieldNik": "NIK (dari KK)",
+    "fieldKkNo": "No. KK",
+    "familyInfoKK": "Info keluarga (KK)",
+    "familyInfoKKHint": "Otomatis dibuat saat KK diunggah.",
+    "companyInfo": "Info perusahaan"
   },
   "filingHistory": {
     "pageTitle": "Laporan pajak",

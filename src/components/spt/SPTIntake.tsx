@@ -24,6 +24,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import InlineProfileAndPreview from '@/components/spt/InlineProfileAndPreview';
 
 export type SPTForm = '1770SS' | '1770S' | '1770';
 
@@ -1186,6 +1187,11 @@ export function SPTIntake({
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* 내정보 인라인 (keynote slide-8/9) */}
+      <div className="pt-2">
+        <InlineProfileAndPreview />
       </div>
 
       {/* Submit */}

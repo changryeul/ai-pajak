@@ -6117,7 +6117,14 @@
     "previewPkp": "課税標準 (PKP)",
     "previewEstimatedTax": "予想税額",
     "previewHint": "* A1 および追加所得から自動計算",
-    "goToBillingCta": "支払いへ進む"
+    "goToBillingCta": "支払いへ進む",
+    "kkLinkTitle": "KK データ連動",
+    "kkLinkHint": "年次申告でアップロードした KK が自動反映されます (氏名 / 住所 / 家族 / PTKP / NIK / KK番号)。",
+    "fieldNik": "NIK (KK由来)",
+    "fieldKkNo": "No. KK",
+    "familyInfoKK": "家族情報 (KK)",
+    "familyInfoKKHint": "KK アップロード時に自動生成されます。",
+    "companyInfo": "会社情報"
   },
   "filingHistory": {
     "pageTitle": "税務レポート",

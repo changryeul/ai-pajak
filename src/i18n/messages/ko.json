@@ -6118,7 +6118,14 @@
     "previewPkp": "과세표준 (PKP)",
     "previewEstimatedTax": "예상 세액",
     "previewHint": "* A1 및 추가소득 기준 자동 계산",
-    "goToBillingCta": "결제하러 이동"
+    "goToBillingCta": "결제하러 이동",
+    "kkLinkTitle": "KK 데이터 연동",
+    "kkLinkHint": "연신고에서 업로드한 KK가 자동으로 반영됩니다. (이름 / 주소 / 가족 / PTKP / NIK / KK번호)",
+    "fieldNik": "NIK (KK 기반)",
+    "fieldKkNo": "No. KK",
+    "familyInfoKK": "가족정보 (KK)",
+    "familyInfoKKHint": "KK 업로드 시 자동 생성됩니다",
+    "companyInfo": "회사 정보"
   },
   "filingHistory": {
     "pageTitle": "세금 보고서",

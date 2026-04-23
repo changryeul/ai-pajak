@@ -6117,7 +6117,14 @@
     "previewPkp": "应税所得 (PKP)",
     "previewEstimatedTax": "预估税额",
     "previewHint": "* 根据 A1 和额外收入自动计算",
-    "goToBillingCta": "前往支付"
+    "goToBillingCta": "前往支付",
+    "kkLinkTitle": "KK 数据联动",
+    "kkLinkHint": "年度申报上传的 KK 会自动填充 (姓名 / 地址 / 家庭 / PTKP / NIK / No. KK)。",
+    "fieldNik": "NIK (来自 KK)",
+    "fieldKkNo": "No. KK",
+    "familyInfoKK": "家庭信息 (KK)",
+    "familyInfoKKHint": "上传 KK 后自动生成。",
+    "companyInfo": "公司信息"
   },
   "filingHistory": {
     "pageTitle": "税务报告",
