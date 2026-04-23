@@ -6018,7 +6018,21 @@
     "spouseHasSpouse": "配偶者あり",
     "spouseSharedNpwp": "NPWP共有（合算申告）",
     "spouseExplainer": "配偶者NPWPを共有すると所得を合算して計算します。共有しない場合はそれぞれ別個に申告されます。",
-    "setPtkpFromProfile": "内情報でPTKPを設定"
+    "setPtkpFromProfile": "内情報でPTKPを設定",
+    "financialsTitle": "財務諸表 (1770専用)",
+    "pnlTitle": "損益計算書 (P&L)",
+    "pnlRevenue": "売上",
+    "pnlCogs": "売上原価",
+    "pnlSalary": "給与",
+    "pnlRent": "賃借料",
+    "pnlOther": "その他費用",
+    "pnlNetIncome": "当期純利益",
+    "bsTitle": "貸借対照表",
+    "bsTotalAssets": "総資産",
+    "bsTotalLiabilities": "総負債",
+    "bsCapital": "資本金",
+    "bsRetainedEarnings": "利益剰余金",
+    "financialsHint": "* 財政調整および課税標準計算に自動反映されます。"
   },
   "sptSelectV2": {
     "pageTitle": "年次申告タイプを選択",

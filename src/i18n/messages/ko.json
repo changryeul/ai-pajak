@@ -6019,7 +6019,21 @@
     "spouseHasSpouse": "배우자 있음",
     "spouseSharedNpwp": "NPWP 공유 (합산 신고)",
     "spouseExplainer": "배우자 NPWP를 공유하면 소득을 합산하여 계산합니다. 공유하지 않으면 각각 별도 신고로 계산됩니다.",
-    "setPtkpFromProfile": "내정보에서 PTKP 설정하기"
+    "setPtkpFromProfile": "내정보에서 PTKP 설정하기",
+    "financialsTitle": "재무제표 (1770 전용)",
+    "pnlTitle": "손익계산서 (P&L)",
+    "pnlRevenue": "매출",
+    "pnlCogs": "매출원가",
+    "pnlSalary": "급여",
+    "pnlRent": "임차료",
+    "pnlOther": "기타 비용",
+    "pnlNetIncome": "순이익 (Net Income)",
+    "bsTitle": "재무상태표 (Balance Sheet)",
+    "bsTotalAssets": "총자산",
+    "bsTotalLiabilities": "총부채",
+    "bsCapital": "자본금",
+    "bsRetainedEarnings": "이익잉여금",
+    "financialsHint": "* 업로드 시 자동으로 세무조정 및 과세표준 계산에 반영됩니다."
   },
   "sptSelectV2": {
     "pageTitle": "연간 신고 유형 선택",

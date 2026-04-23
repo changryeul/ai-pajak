@@ -6018,7 +6018,21 @@
     "spouseHasSpouse": "Memiliki pasangan",
     "spouseSharedNpwp": "Berbagi NPWP (pelaporan gabungan)",
     "spouseExplainer": "Berbagi NPWP pasangan menggabungkan penghasilan menjadi pelaporan gabungan. Tanpa berbagi, masing-masing melapor terpisah.",
-    "setPtkpFromProfile": "Atur PTKP dari Info Saya"
+    "setPtkpFromProfile": "Atur PTKP dari Info Saya",
+    "financialsTitle": "Laporan keuangan (khusus 1770)",
+    "pnlTitle": "Laporan laba rugi (P&L)",
+    "pnlRevenue": "Pendapatan",
+    "pnlCogs": "Harga pokok penjualan",
+    "pnlSalary": "Beban gaji",
+    "pnlRent": "Beban sewa",
+    "pnlOther": "Beban lain-lain",
+    "pnlNetIncome": "Laba bersih",
+    "bsTitle": "Neraca",
+    "bsTotalAssets": "Total aset",
+    "bsTotalLiabilities": "Total kewajiban",
+    "bsCapital": "Modal",
+    "bsRetainedEarnings": "Saldo laba",
+    "financialsHint": "* Digunakan untuk koreksi fiskal dan perhitungan dasar pengenaan pajak."
   },
   "sptSelectV2": {
     "pageTitle": "Pilih jenis Pelaporan Tahunan",

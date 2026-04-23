@@ -118,6 +118,19 @@ export function SPTIntake({
   const [personalLoan, setPersonalLoan] = useState('');
   const [businessDebt, setBusinessDebt] = useState('');
 
+  // Financial statements — 1770 business/freelance only (keynote slide-13/14).
+  // Operators use these to build the SPT 1770 fiscal-adjustment worksheet.
+  const showFinancials = form === '1770';
+  const [pnlRevenue, setPnlRevenue] = useState('');
+  const [pnlCogs, setPnlCogs] = useState('');
+  const [pnlSalary, setPnlSalary] = useState('');
+  const [pnlRent, setPnlRent] = useState('');
+  const [pnlOther, setPnlOther] = useState('');
+  const [bsTotalAssets, setBsTotalAssets] = useState('');
+  const [bsTotalLiabilities, setBsTotalLiabilities] = useState('');
+  const [bsCapital, setBsCapital] = useState('');
+  const [bsRetainedEarnings, setBsRetainedEarnings] = useState('');
+
   // Submit state
   const [submitting, setSubmitting] = useState(false);
   const [submitOk, setSubmitOk] = useState(false);
@@ -278,13 +291,38 @@ export function SPTIntake({
           personalLoan: toNum(personalLoan),
           businessDebt: toNum(businessDebt),
         },
+        ...(showFinancials && {
+          financials: {
+            pnl: {
+              revenue: toNum(pnlRevenue),
+              cogs: toNum(pnlCogs),
+              salary: toNum(pnlSalary),
+              rent: toNum(pnlRent),
+              other: toNum(pnlOther),
+              netIncome:
+                toNum(pnlRevenue)
+                - toNum(pnlCogs)
+                - toNum(pnlSalary)
+                - toNum(pnlRent)
+                - toNum(pnlOther),
+            },
+            balanceSheet: {
+              totalAssets: toNum(bsTotalAssets),
+              totalLiabilities: toNum(bsTotalLiabilities),
+              capital: toNum(bsCapital),
+              retainedEarnings: toNum(bsRetainedEarnings),
+            },
+          },
+        }),
       },
     };
   }, [
-    customerId, year, form, showTaxCredit, showPph23Credit,
+    customerId, year, form, showTaxCredit, showPph23Credit, showFinancials,
     kkDoc, incomeDoc, foreignTaxDoc, grossIncome, foreignTaxAmount, pph23Amount,
     bankAccounts, stocks, realEstate, vehicle, businessAssets, otherAssets,
     bankLoan, creditCard, personalLoan, businessDebt,
+    pnlRevenue, pnlCogs, pnlSalary, pnlRent, pnlOther,
+    bsTotalAssets, bsTotalLiabilities, bsCapital, bsRetainedEarnings,
   ]);
 
   const isBlankDraft = useMemo(() => {
@@ -402,6 +440,29 @@ export function SPTIntake({
             personalLoan: toNum(personalLoan),
             businessDebt: toNum(businessDebt),
           },
+          ...(showFinancials && {
+            financials: {
+              pnl: {
+                revenue: toNum(pnlRevenue),
+                cogs: toNum(pnlCogs),
+                salary: toNum(pnlSalary),
+                rent: toNum(pnlRent),
+                other: toNum(pnlOther),
+                netIncome:
+                  toNum(pnlRevenue)
+                  - toNum(pnlCogs)
+                  - toNum(pnlSalary)
+                  - toNum(pnlRent)
+                  - toNum(pnlOther),
+              },
+              balanceSheet: {
+                totalAssets: toNum(bsTotalAssets),
+                totalLiabilities: toNum(bsTotalLiabilities),
+                capital: toNum(bsCapital),
+                retainedEarnings: toNum(bsRetainedEarnings),
+              },
+            },
+          }),
           spouse: {
             hasSpouse,
             sharedNpwp: hasSpouse && sharedNpwp,
@@ -430,6 +491,9 @@ export function SPTIntake({
     stocks, realEstate, vehicle, businessAssets, otherAssets,
     bankLoan, creditCard, personalLoan, businessDebt,
     hasSpouse, sharedNpwp,
+    showFinancials,
+    pnlRevenue, pnlCogs, pnlSalary, pnlRent, pnlOther,
+    bsTotalAssets, bsTotalLiabilities, bsCapital, bsRetainedEarnings,
     customerId, year, t, form, showTaxCredit, showPph23Credit,
   ]);
 
@@ -688,6 +752,95 @@ export function SPTIntake({
         <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800 flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>{uploadError}</span>
+        </div>
+      )}
+
+      {/* 재무제표 — 1770 전용 (keynote slide-13/14) */}
+      {showFinancials && (
+        <div>
+          <p className="text-lg font-semibold text-gray-900 mb-3">{t('financialsTitle')}</p>
+          <div className="grid gap-5 md:grid-cols-2">
+            {/* 손익계산서 */}
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-5 space-y-3">
+                <p className="font-semibold text-gray-900">{t('pnlTitle')}</p>
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('pnlRevenue')}
+                  value={pnlRevenue} onChange={(e) => setPnlRevenue(e.target.value)}
+                />
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('pnlCogs')}
+                  value={pnlCogs} onChange={(e) => setPnlCogs(e.target.value)}
+                />
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('pnlSalary')}
+                  value={pnlSalary} onChange={(e) => setPnlSalary(e.target.value)}
+                />
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('pnlRent')}
+                  value={pnlRent} onChange={(e) => setPnlRent(e.target.value)}
+                />
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('pnlOther')}
+                  value={pnlOther} onChange={(e) => setPnlOther(e.target.value)}
+                />
+                <div className="pt-2 border-t flex items-center justify-between text-sm">
+                  <span className="font-medium text-gray-700">{t('pnlNetIncome')}</span>
+                  <span className="font-mono font-bold text-blue-700">
+                    Rp {(
+                      (Number(pnlRevenue) || 0)
+                      - (Number(pnlCogs) || 0)
+                      - (Number(pnlSalary) || 0)
+                      - (Number(pnlRent) || 0)
+                      - (Number(pnlOther) || 0)
+                    ).toLocaleString('id-ID')}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 재무상태표 */}
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-5 space-y-3">
+                <p className="font-semibold text-gray-900">{t('bsTitle')}</p>
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('bsTotalAssets')}
+                  value={bsTotalAssets} onChange={(e) => setBsTotalAssets(e.target.value)}
+                />
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('bsTotalLiabilities')}
+                  value={bsTotalLiabilities} onChange={(e) => setBsTotalLiabilities(e.target.value)}
+                />
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('bsCapital')}
+                  value={bsCapital} onChange={(e) => setBsCapital(e.target.value)}
+                />
+                <Input
+                  className="h-10"
+                  type="number" inputMode="numeric"
+                  placeholder={t('bsRetainedEarnings')}
+                  value={bsRetainedEarnings} onChange={(e) => setBsRetainedEarnings(e.target.value)}
+                />
+                <p className="text-[11px] text-gray-500 pt-1">{t('financialsHint')}</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 

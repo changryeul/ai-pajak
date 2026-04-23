@@ -6018,7 +6018,21 @@
     "spouseHasSpouse": "Have spouse",
     "spouseSharedNpwp": "Share NPWP (joint filing)",
     "spouseExplainer": "Sharing spouse NPWP combines incomes into a joint filing. Without sharing, each spouse files separately.",
-    "setPtkpFromProfile": "Set PTKP from My Profile"
+    "setPtkpFromProfile": "Set PTKP from My Profile",
+    "financialsTitle": "Financial statements (1770 only)",
+    "pnlTitle": "Income statement (P&L)",
+    "pnlRevenue": "Revenue",
+    "pnlCogs": "Cost of goods sold",
+    "pnlSalary": "Salary expense",
+    "pnlRent": "Rent expense",
+    "pnlOther": "Other expenses",
+    "pnlNetIncome": "Net income",
+    "bsTitle": "Balance sheet",
+    "bsTotalAssets": "Total assets",
+    "bsTotalLiabilities": "Total liabilities",
+    "bsCapital": "Capital",
+    "bsRetainedEarnings": "Retained earnings",
+    "financialsHint": "* Used for fiscal adjustment and taxable-income calculation."
   },
   "sptSelectV2": {
     "pageTitle": "Select your annual filing type",

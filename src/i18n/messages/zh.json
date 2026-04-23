@@ -6018,7 +6018,21 @@
     "spouseHasSpouse": "有配偶",
     "spouseSharedNpwp": "共享 NPWP（合并申报）",
     "spouseExplainer": "共享配偶 NPWP 将合并计算收入。不共享时各自单独申报。",
-    "setPtkpFromProfile": "在我的信息中设置 PTKP"
+    "setPtkpFromProfile": "在我的信息中设置 PTKP",
+    "financialsTitle": "财务报表 (1770 专用)",
+    "pnlTitle": "损益表 (P&L)",
+    "pnlRevenue": "销售收入",
+    "pnlCogs": "销售成本",
+    "pnlSalary": "工资费用",
+    "pnlRent": "租金费用",
+    "pnlOther": "其他费用",
+    "pnlNetIncome": "净利润",
+    "bsTitle": "资产负债表",
+    "bsTotalAssets": "资产总额",
+    "bsTotalLiabilities": "负债总额",
+    "bsCapital": "资本金",
+    "bsRetainedEarnings": "留存收益",
+    "financialsHint": "* 自动用于税务调整和应税所得计算。"
   },
   "sptSelectV2": {
     "pageTitle": "选择年度申报类型",
