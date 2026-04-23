@@ -131,6 +131,25 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
         const j = await filingsRes.json();
         setFilings((j?.data as Filing[]) || (j?.filings as Filing[]) || []);
       }
+      // Hydrate funding-source selection for the most recent snapshot year.
+      try {
+        const fsRes = await fetch('/api/customer/funding-source', { credentials: 'include' });
+        if (fsRes.ok) {
+          const j = await fsRes.json();
+          const latest = (j?.data || [])[0];
+          const sources = (latest?.sources || []) as string[];
+          const UI_KEY: Record<string, string> = {
+            SALARY: 'salary', BUSINESS: 'business', INVESTMENT: 'investment',
+            LOAN: 'loan', INHERITANCE: 'gift', OTHER: 'other',
+          };
+          const map: Record<string, boolean> = {};
+          for (const s of sources) {
+            const k = UI_KEY[s];
+            if (k) map[k] = true;
+          }
+          setFundSources(map);
+        }
+      } catch { /* non-fatal */ }
     } finally {
       setLoading(false);
     }
@@ -229,8 +248,28 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
     return risks.filter((r) => r.id !== 'baseline');
   }, [trend, isSampleData]);
 
-  const toggleFundSource = (k: string) =>
-    setFundSources((s) => ({ ...s, [k]: !s[k] }));
+  const toggleFundSource = (k: string) => {
+    setFundSources((s) => {
+      const next = { ...s, [k]: !s[k] };
+      // Persist to the customer_funding_source table (upsert by year).
+      const API_KEY: Record<string, string> = {
+        salary: 'SALARY', business: 'BUSINESS', investment: 'INVESTMENT',
+        loan: 'LOAN', gift: 'INHERITANCE', other: 'OTHER',
+      };
+      const sources = Object.entries(next)
+        .filter(([, v]) => v)
+        .map(([key]) => API_KEY[key])
+        .filter(Boolean);
+      const year = new Date().getFullYear();
+      fetch('/api/customer/funding-source', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ snapshot_year: year, sources }),
+      }).catch(() => { /* non-fatal */ });
+      return next;
+    });
+  };
 
   if (loading) {
     return (
