@@ -1,15 +1,23 @@
 'use client';
 
 /**
- * Annual Tax Filing (SPT Tahunan) selection — redesigned 2x2 grid.
+ * Annual Tax Filing (SPT Tahunan) selection — keynote-aligned 2x2 grid.
  *
- * Three form cards (1770SS / 1770S / 1770) plus an AI recommendation card
- * whose checkbox logic maps to:
+ * Layout per keynote slide-6:
+ *   Top-left    : 빠른 추천 질문 (salary? / salary tier / business?)
+ *   Top-right   : 1770SS
+ *   Bottom-left : 1770S
+ *   Bottom-right: 1770
+ *
+ * AI answers drive recommendation:
  *   - hasBusiness            → 1770
- *   - hasMultipleOrFinancial → 1770S
+ *   - salary > 60jt OR has financial/multi-employer → 1770S
  *   - else                   → 1770SS
  *
- * Corporate (1771) is still disabled per product direction.
+ * Bottom "다음 단계로 이동" button proceeds to the selected form's
+ * data-entry page; each card still carries a direct "이 유형 선택" button.
+ *
+ * Corporate (1771) is disabled per product direction.
  */
 
 import { useMemo, useState } from 'react';
@@ -17,47 +25,49 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 type FormId = '1770ss' | '1770s' | '1770';
+type YN = 'yes' | 'no';
+type SalaryTier = 'low' | 'high'; // ≤ 60jt / > 60jt
 
 interface FormCard {
   id: FormId;
   title: string;
   subtitleKey: string;
   bulletKeys: string[];
+  hintKey: string;
 }
 
 const FORMS: FormCard[] = [
-  { id: '1770ss', title: 'SPT 1770 SS', subtitleKey: 'ssSubtitle', bulletKeys: ['ssBul1', 'ssBul2', 'ssBul3', 'ssBul4'] },
-  { id: '1770s', title: 'SPT 1770 S', subtitleKey: 'sSubtitle', bulletKeys: ['sBul1', 'sBul2', 'sBul3'] },
-  { id: '1770', title: 'SPT 1770', subtitleKey: 'fullSubtitle', bulletKeys: ['fullBul1', 'fullBul2'] },
+  { id: '1770ss', title: 'SPT 1770 SS', subtitleKey: 'ssSubtitle', bulletKeys: ['ssBul1', 'ssBul2', 'ssBul3', 'ssBul4'], hintKey: 'ssHint' },
+  { id: '1770s',  title: 'SPT 1770 S',  subtitleKey: 'sSubtitle',  bulletKeys: ['sBul1', 'sBul2', 'sBul3', 'sBul4', 'sBul5'], hintKey: 'sHint' },
+  { id: '1770',   title: 'SPT 1770',    subtitleKey: 'fullSubtitle', bulletKeys: ['fullBul1', 'fullBul2', 'fullBul3', 'fullBul4', 'fullBul5'], hintKey: 'fullHint' },
 ];
 
 function recommendForm(answers: {
-  hasBusiness: boolean;
-  multipleEmployers: boolean;
-  financialIncome: boolean;
+  hasSalary: YN;
+  salaryTier: SalaryTier;
+  hasBusiness: YN;
 }): FormId {
-  if (answers.hasBusiness) return '1770';
-  if (answers.multipleEmployers || answers.financialIncome) return '1770s';
+  if (answers.hasBusiness === 'yes') return '1770';
+  if (answers.hasSalary === 'yes' && answers.salaryTier === 'high') return '1770s';
   return '1770ss';
 }
 
 export default function SPTTahunanPage() {
-  const t = useTranslations('tax');
   const ts = useTranslations('sptSelectV2');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
 
-  const [hasBusiness, setHasBusiness] = useState(false);
-  const [multipleEmployers, setMultipleEmployers] = useState(false);
-  const [financialIncome, setFinancialIncome] = useState(false);
+  const [hasSalary, setHasSalary] = useState<YN>('yes');
+  const [salaryTier, setSalaryTier] = useState<SalaryTier>('high');
+  const [hasBusiness, setHasBusiness] = useState<YN>('no');
 
   const recommendation = useMemo(
-    () => recommendForm({ hasBusiness, multipleEmployers, financialIncome }),
-    [hasBusiness, multipleEmployers, financialIncome],
+    () => recommendForm({ hasSalary, salaryTier, hasBusiness }),
+    [hasSalary, salaryTier, hasBusiness],
   );
   const recommendationTitle = FORMS.find((f) => f.id === recommendation)?.title ?? 'SPT';
 
@@ -66,88 +76,117 @@ export default function SPTTahunanPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="h-4 w-4 text-yellow-500" />
-          <span className="text-xs font-medium text-yellow-700">AI Auto-fill Available</span>
-        </div>
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-          {t('sptTahunan.title')}
+          {ts('pageTitle')}
         </h1>
         <p className="text-sm text-gray-500 mt-1">{ts('pageSubtitle')}</p>
       </div>
 
-      {/* 2 x 2 grid: 3 form cards + 1 AI card */}
+      {/* 2 x 2 grid: AI card + 3 form cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {FORMS.map((f) => (
-          <Card key={f.id} className="border-0 shadow-sm overflow-hidden">
-            <CardContent className="p-6 flex flex-col h-full">
-              <p className="text-lg font-bold text-gray-900">{f.title}</p>
-              <p className="text-sm text-gray-500 mt-1">{ts(f.subtitleKey)}</p>
-              <ul className="mt-4 space-y-1 text-sm text-gray-600 flex-1">
-                {f.bulletKeys.map((k) => (
-                  <li key={k}>• {ts(k)}</li>
-                ))}
-              </ul>
-              <Button
-                className="mt-6 w-full bg-gray-800 hover:bg-gray-900 text-white"
-                onClick={() => goTo(f.id)}
-              >
-                {ts('selectCta')}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* AI recommendation card */}
+        {/* AI recommendation card (top-left per keynote) */}
         <Card className="border-0 shadow-sm overflow-hidden">
           <CardContent className="p-6 flex flex-col h-full">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-yellow-500" />
               <p className="text-lg font-bold text-gray-900">{ts('aiCardTitle')}</p>
             </div>
-            <div className="mt-4 space-y-2 flex-1">
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="accent-gray-800"
-                  checked={hasBusiness}
-                  onChange={(e) => setHasBusiness(e.target.checked)}
-                />
-                {ts('aiHasBusiness')}
-              </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="accent-gray-800"
-                  checked={multipleEmployers}
-                  onChange={(e) => setMultipleEmployers(e.target.checked)}
-                />
-                {ts('aiMultipleEmployers')}
-              </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="accent-gray-800"
-                  checked={financialIncome}
-                  onChange={(e) => setFinancialIncome(e.target.checked)}
-                />
-                {ts('aiFinancialIncome')}
-              </label>
+            <div className="mt-4 space-y-3 flex-1">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  {ts('aiQSalary')}
+                </label>
+                <select
+                  value={hasSalary}
+                  onChange={(e) => setHasSalary(e.target.value as YN)}
+                  className="h-9 w-full rounded-md border border-gray-200 bg-white text-sm px-2"
+                >
+                  <option value="yes">{ts('optYes')}</option>
+                  <option value="no">{ts('optNo')}</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  {ts('aiQSalaryTier')}
+                </label>
+                <select
+                  value={salaryTier}
+                  onChange={(e) => setSalaryTier(e.target.value as SalaryTier)}
+                  className="h-9 w-full rounded-md border border-gray-200 bg-white text-sm px-2"
+                  disabled={hasSalary === 'no'}
+                >
+                  <option value="low">{ts('optSalaryLow')}</option>
+                  <option value="high">{ts('optSalaryHigh')}</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  {ts('aiQBusiness')}
+                </label>
+                <select
+                  value={hasBusiness}
+                  onChange={(e) => setHasBusiness(e.target.value as YN)}
+                  className="h-9 w-full rounded-md border border-gray-200 bg-white text-sm px-2"
+                >
+                  <option value="yes">{ts('optYes')}</option>
+                  <option value="no">{ts('optNo')}</option>
+                </select>
+              </div>
             </div>
-            {(hasBusiness || multipleEmployers || financialIncome) && (
-              <p className="mt-3 text-xs text-gray-500">
-                {ts('aiResultPrefix')} <span className="font-semibold text-gray-900">{recommendationTitle}</span>
-              </p>
-            )}
-            <Button
-              className="mt-4 w-full bg-gray-800 hover:bg-gray-900 text-white"
-              onClick={() => goTo(recommendation)}
-            >
-              {ts('aiApplyCta')}
-            </Button>
+            <div className="mt-4 rounded-lg bg-blue-50 border border-blue-100 px-3 py-2 text-sm text-blue-800">
+              👉 {ts('aiResultPrefix')} <span className="font-bold">{recommendationTitle}</span>
+            </div>
           </CardContent>
         </Card>
+
+        {FORMS.map((f) => {
+          const isRecommended = recommendation === f.id;
+          return (
+            <Card
+              key={f.id}
+              className={
+                'border-0 shadow-sm overflow-hidden ' +
+                (isRecommended ? 'ring-2 ring-blue-500' : '')
+              }
+            >
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center justify-between">
+                  <p className="text-lg font-bold text-gray-900">📌 {f.title}</p>
+                  {isRecommended && (
+                    <span className="inline-flex items-center rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                      {ts('aiBadge')}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">{ts(f.subtitleKey)}</p>
+                <ul className="mt-4 space-y-1 text-sm text-gray-600 flex-1">
+                  {f.bulletKeys.map((k) => (
+                    <li key={k}>- {ts(k)}</li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-[11px] text-gray-500">👉 {ts(f.hintKey)}</p>
+                <Button
+                  className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => goTo(f.id)}
+                >
+                  {ts('selectCta')}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Unified "다음 단계로 이동" button — applies the AI recommendation */}
+      <div className="mt-6 flex justify-end">
+        <Button
+          className="bg-gray-800 hover:bg-gray-900 text-white h-11 px-6"
+          onClick={() => goTo(recommendation)}
+        >
+          {ts('nextStepCta')}
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
       </div>
     </div>
   );
