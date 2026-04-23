@@ -6092,7 +6092,14 @@
     "familyMarried": "已婚",
     "familyJoint": "已婚（合并）",
     "familyDepUnit": "人",
-    "familyPtkpHint": "PTKP代码"
+    "familyPtkpHint": "PTKP代码",
+    "previewTitle": "税额计算预览 (基于 A1)",
+    "previewBruto": "总收入 (Bruto)",
+    "previewPtkp": "PTKP",
+    "previewPkp": "应税所得 (PKP)",
+    "previewEstimatedTax": "预估税额",
+    "previewHint": "* 根据 A1 和额外收入自动计算",
+    "goToBillingCta": "前往支付"
   },
   "personalDashV3": {
     "headerTitle": "仪表板",

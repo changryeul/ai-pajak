@@ -6093,7 +6093,14 @@
     "familyMarried": "기혼",
     "familyJoint": "기혼 (합산)",
     "familyDepUnit": "명",
-    "familyPtkpHint": "PTKP 코드"
+    "familyPtkpHint": "PTKP 코드",
+    "previewTitle": "세액 계산 미리보기 (A1 기반)",
+    "previewBruto": "총 소득 (Bruto)",
+    "previewPtkp": "PTKP",
+    "previewPkp": "과세표준 (PKP)",
+    "previewEstimatedTax": "예상 세액",
+    "previewHint": "* A1 및 추가소득 기준 자동 계산",
+    "goToBillingCta": "결제하러 이동"
   },
   "personalDashV3": {
     "headerTitle": "대시보드",

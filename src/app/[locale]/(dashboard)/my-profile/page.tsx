@@ -23,8 +23,22 @@ import { UserRole } from '@/types/auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, CheckCircle, Loader2, Save, User } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Calculator, CheckCircle, Loader2, Save, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface TaxPreview {
+  bruto: number;
+  ptkpStatus: string;
+  ptkpAmount: number;
+  pkp: number;
+  estimatedTax: number;
+  sourceYear: number | null;
+  hasDraft: boolean;
+}
+
+function formatRp(n: number): string {
+  return `Rp ${n.toLocaleString('id-ID')}`;
+}
 
 interface ProfileForm {
   full_name: string;
@@ -68,6 +82,7 @@ export default function MyProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [preview, setPreview] = useState<TaxPreview | null>(null);
   const [form, setForm] = useState<ProfileForm>({
     full_name: '',
     npwp: '',
@@ -126,6 +141,21 @@ export default function MyProfilePage() {
   }, [t]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/customer/tax-preview', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data?.success) setPreview(data.data as TaxPreview);
+      } catch {
+        // preview is best-effort; silent fail is OK
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Required vs optional split drives the red outline and completeness bar.
   const requiredFields: (keyof ProfileForm)[] = ['full_name', 'npwp', 'email', 'phone'];
@@ -423,6 +453,50 @@ export default function MyProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 세액 계산 미리보기 (A1 기반) — keynote slide-16 */}
+      <Card className="mt-5 border-0 shadow-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Calculator className="h-5 w-5 text-blue-600" />
+            <p className="font-semibold text-gray-900">{t('previewTitle')}</p>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">{t('previewBruto')}</span>
+              <span className="font-mono text-gray-900">{formatRp(preview?.bruto ?? 0)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">
+                {t('previewPtkp')}
+                {preview?.ptkpStatus && (
+                  <span className="ml-1 text-[11px] text-gray-400">({preview.ptkpStatus})</span>
+                )}
+              </span>
+              <span className="font-mono text-gray-900">{formatRp(preview?.ptkpAmount ?? 0)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">{t('previewPkp')}</span>
+              <span className="font-mono text-gray-900">{formatRp(preview?.pkp ?? 0)}</span>
+            </div>
+            <div className="flex justify-between pt-2 mt-2 border-t">
+              <span className="font-semibold text-blue-700">{t('previewEstimatedTax')}</span>
+              <span className="font-mono font-bold text-blue-700">
+                {formatRp(preview?.estimatedTax ?? 0)}
+              </span>
+            </div>
+          </div>
+          <p className="mt-3 text-[11px] text-gray-500">{t('previewHint')}</p>
+        </CardContent>
+      </Card>
+
+      <Button
+        className="w-full h-12 mt-4 bg-gray-900 hover:bg-black text-white"
+        onClick={() => router.push(`/${locale}/tax/billing`)}
+      >
+        {t('goToBillingCta')}
+        <ArrowRight className="h-4 w-4 ml-1" />
+      </Button>
     </div>
   );
 }

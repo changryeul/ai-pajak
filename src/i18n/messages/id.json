@@ -6092,7 +6092,14 @@
     "familyMarried": "Menikah",
     "familyJoint": "Menikah (gabung)",
     "familyDepUnit": "orang",
-    "familyPtkpHint": "Kode PTKP"
+    "familyPtkpHint": "Kode PTKP",
+    "previewTitle": "Pratinjau perhitungan pajak (berdasarkan A1)",
+    "previewBruto": "Penghasilan bruto",
+    "previewPtkp": "PTKP",
+    "previewPkp": "Dasar pengenaan pajak (PKP)",
+    "previewEstimatedTax": "Perkiraan pajak",
+    "previewHint": "* Dihitung otomatis dari A1 dan penghasilan tambahan",
+    "goToBillingCta": "Lanjut ke pembayaran"
   },
   "personalDashV3": {
     "headerTitle": "Dasbor",

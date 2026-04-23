@@ -6092,7 +6092,14 @@
     "familyMarried": "Married",
     "familyJoint": "Married (joint)",
     "familyDepUnit": "person(s)",
-    "familyPtkpHint": "PTKP code"
+    "familyPtkpHint": "PTKP code",
+    "previewTitle": "Tax preview (based on A1)",
+    "previewBruto": "Gross income (Bruto)",
+    "previewPtkp": "PTKP",
+    "previewPkp": "Taxable base (PKP)",
+    "previewEstimatedTax": "Estimated tax",
+    "previewHint": "* Auto-calculated from A1 and additional income",
+    "goToBillingCta": "Go to payment"
   },
   "personalDashV3": {
     "headerTitle": "Dashboard",

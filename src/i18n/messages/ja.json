@@ -6092,7 +6092,14 @@
     "familyMarried": "既婚",
     "familyJoint": "既婚（合算）",
     "familyDepUnit": "人",
-    "familyPtkpHint": "PTKPコード"
+    "familyPtkpHint": "PTKPコード",
+    "previewTitle": "税額計算プレビュー (A1 ベース)",
+    "previewBruto": "総所得 (Bruto)",
+    "previewPtkp": "PTKP",
+    "previewPkp": "課税標準 (PKP)",
+    "previewEstimatedTax": "予想税額",
+    "previewHint": "* A1 および追加所得から自動計算",
+    "goToBillingCta": "支払いへ進む"
   },
   "personalDashV3": {
     "headerTitle": "ダッシュボード",
