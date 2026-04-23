@@ -6033,7 +6033,11 @@
     "bsTotalLiabilities": "총부채",
     "bsCapital": "자본금",
     "bsRetainedEarnings": "이익잉여금",
-    "financialsHint": "* 업로드 시 자동으로 세무조정 및 과세표준 계산에 반영됩니다."
+    "financialsHint": "* 업로드 시 자동으로 세무조정 및 과세표준 계산에 반영됩니다.",
+    "addA1": "A1 추가",
+    "extraA1CompanyPlaceholder": "회사명 (선택)",
+    "extraA1Upload": "A1 파일 업로드",
+    "extraA1Replace": "파일 교체"
   },
   "sptSelectV2": {
     "pageTitle": "연간 신고 유형 선택",

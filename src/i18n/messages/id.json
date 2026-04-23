@@ -6032,7 +6032,11 @@
     "bsTotalLiabilities": "Total kewajiban",
     "bsCapital": "Modal",
     "bsRetainedEarnings": "Saldo laba",
-    "financialsHint": "* Digunakan untuk koreksi fiskal dan perhitungan dasar pengenaan pajak."
+    "financialsHint": "* Digunakan untuk koreksi fiskal dan perhitungan dasar pengenaan pajak.",
+    "addA1": "Tambah A1",
+    "extraA1CompanyPlaceholder": "Nama perusahaan (opsional)",
+    "extraA1Upload": "Unggah berkas A1",
+    "extraA1Replace": "Ganti berkas"
   },
   "sptSelectV2": {
     "pageTitle": "Pilih jenis Pelaporan Tahunan",

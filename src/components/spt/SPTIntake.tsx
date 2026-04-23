@@ -92,6 +92,17 @@ export function SPTIntake({
   // trend chart can compute year-over-year deltas.
   const [grossIncome, setGrossIncome] = useState('');
 
+  // Extra A1 entries for 1770S (keynote slide-10). Each row represents an
+  // additional employer's 1721-A1 slip. The primary A1 (incomeDoc + grossIncome)
+  // is row 0; everything here is rows 1..N.
+  const [extraA1Entries, setExtraA1Entries] = useState<Array<{
+    documentId?: string;
+    fileName?: string;
+    companyName: string;
+    grossIncome: string;
+  }>>([]);
+  const [uploadingExtraA1, setUploadingExtraA1] = useState<number | null>(null);
+
   // Spouse info (keynote slide-7). K/I/* PTKP codes flag joint filing on the
   // backend; this UI only collects the two checkboxes and persists them under
   // tax_data.spouse so the operator can see the customer's intent.
@@ -198,6 +209,64 @@ export function SPTIntake({
     [customerId, t, form],
   );
 
+  // Upload a file for an extra A1 row (1770S multi-A1).
+  const uploadExtraA1 = useCallback(
+    async (file: File, idx: number) => {
+      setUploadingExtraA1(idx);
+      setUploadError(null);
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('bucket', 'tax-documents');
+        fd.append('documentType', 'FORM_1721_A1');
+        fd.append('customerId', customerId);
+        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || t('uploadFailed'));
+        setExtraA1Entries((rows) =>
+          rows.map((r, i) =>
+            i === idx ? { ...r, documentId: data.data.id, fileName: file.name } : r,
+          ),
+        );
+        // OCR auto-fill for this row's grossIncome if empty
+        const ocrForm = new FormData();
+        ocrForm.append('file', file);
+        ocrForm.append('expectedCategory', 'BUKTI_POTONG');
+        fetch('/api/documents/ocr-extract', { method: 'POST', body: ocrForm })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((ocr) => {
+            if (!ocr || ocr.status !== 'COMPLETED') return;
+            const gross = Number((ocr.extractedData || {}).grossAmount);
+            if (Number.isFinite(gross) && gross > 0) {
+              setExtraA1Entries((rows) =>
+                rows.map((r, i) =>
+                  i === idx && !r.grossIncome
+                    ? { ...r, grossIncome: String(Math.round(gross)) }
+                    : r,
+                ),
+              );
+            }
+          })
+          .catch(() => { /* non-fatal */ });
+      } catch (e) {
+        setUploadError(e instanceof Error ? e.message : t('uploadFailed'));
+      } finally {
+        setUploadingExtraA1(null);
+      }
+    },
+    [customerId, t],
+  );
+
+  const addExtraA1 = () =>
+    setExtraA1Entries((rows) => [...rows, { companyName: '', grossIncome: '' }]);
+  const removeExtraA1 = (idx: number) =>
+    setExtraA1Entries((rows) => rows.filter((_, i) => i !== idx));
+  const updateExtraA1 = (
+    idx: number,
+    patch: Partial<{ companyName: string; grossIncome: string }>,
+  ) =>
+    setExtraA1Entries((rows) => rows.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+
   const [importResult, setImportResult] = useState<string | null>(null);
 
   const importFromProfile = useCallback(async () => {
@@ -251,6 +320,24 @@ export function SPTIntake({
       const n = Number(s.replace(/[^\d.-]/g, ''));
       return Number.isFinite(n) && n > 0 ? n : 0;
     };
+    // 1770S: primary A1 (row 0) + extras → total Bruto
+    const a1Entries = [
+      {
+        documentId: incomeDoc?.documentId || null,
+        fileName: incomeDoc?.fileName || null,
+        companyName: '',
+        grossIncome: toNum(grossIncome),
+      },
+      ...extraA1Entries.map((e) => ({
+        documentId: e.documentId || null,
+        fileName: e.fileName || null,
+        companyName: e.companyName,
+        grossIncome: toNum(e.grossIncome),
+      })),
+    ];
+    const totalGross = form === '1770S'
+      ? a1Entries.reduce((sum, e) => sum + e.grossIncome, 0)
+      : toNum(grossIncome);
     return {
       customerId,
       taxType: 'SPT_TAHUNAN' as const,
@@ -266,8 +353,9 @@ export function SPTIntake({
           [form === '1770' ? 'businessIncome' : 'a1']: incomeDoc?.documentId || null,
           foreignTaxReceipt: foreignTaxDoc?.documentId || null,
         },
-        grossIncome: toNum(grossIncome),
-        incomeSummary: { gross: toNum(grossIncome), taxable: toNum(grossIncome) },
+        ...(form === '1770S' && { a1Entries }),
+        grossIncome: totalGross,
+        incomeSummary: { gross: totalGross, taxable: totalGross },
         ...(showTaxCredit && { foreignTaxCredit: toNum(foreignTaxAmount) }),
         ...(showPph23Credit && { pph23Credit: toNum(pph23Amount) }),
         harta: {
@@ -319,6 +407,7 @@ export function SPTIntake({
   }, [
     customerId, year, form, showTaxCredit, showPph23Credit, showFinancials,
     kkDoc, incomeDoc, foreignTaxDoc, grossIncome, foreignTaxAmount, pph23Amount,
+    extraA1Entries,
     bankAccounts, stocks, realEstate, vehicle, businessAssets, otherAssets,
     bankLoan, creditCard, personalLoan, businessDebt,
     pnlRevenue, pnlCogs, pnlSalary, pnlRent, pnlOther,
@@ -381,14 +470,38 @@ export function SPTIntake({
     }
     setSubmitting(true);
     try {
-      const documentIds = [kkDoc, incomeDoc, foreignTaxDoc]
-        .filter((d): d is UploadedDoc => Boolean(d))
-        .map((d) => d.documentId);
-
       const toNum = (s: string) => {
         const n = Number(s.replace(/[^\d.-]/g, ''));
         return Number.isFinite(n) && n > 0 ? n : 0;
       };
+
+      // 1770S multi-A1: build combined entries and total gross.
+      const a1Entries = [
+        {
+          documentId: incomeDoc?.documentId || null,
+          fileName: incomeDoc?.fileName || null,
+          companyName: '',
+          grossIncome: toNum(grossIncome),
+        },
+        ...extraA1Entries.map((e) => ({
+          documentId: e.documentId || null,
+          fileName: e.fileName || null,
+          companyName: e.companyName,
+          grossIncome: toNum(e.grossIncome),
+        })),
+      ];
+      const totalGross = form === '1770S'
+        ? a1Entries.reduce((sum, e) => sum + e.grossIncome, 0)
+        : toNum(grossIncome);
+
+      const documentIds = [
+        kkDoc, incomeDoc, foreignTaxDoc,
+        ...extraA1Entries
+          .filter((e) => e.documentId)
+          .map((e) => ({ documentId: e.documentId!, fileName: e.fileName || '' })),
+      ]
+        .filter((d): d is UploadedDoc => Boolean(d))
+        .map((d) => d.documentId);
 
       const payload = {
         customerId,
@@ -405,13 +518,14 @@ export function SPTIntake({
             [form === '1770' ? 'businessIncome' : 'a1']: incomeDoc?.documentId || null,
             foreignTaxReceipt: foreignTaxDoc?.documentId || null,
           },
+          ...(form === '1770S' && { a1Entries }),
           // Flat grossIncome alias is what /api/tax/filings already maps to
           // `totalIncome` on the filings list, and incomeSummary.gross is
           // what trend-from-filings reads for year-over-year deltas.
-          grossIncome: toNum(grossIncome),
+          grossIncome: totalGross,
           incomeSummary: {
-            gross: toNum(grossIncome),
-            taxable: toNum(grossIncome),
+            gross: totalGross,
+            taxable: totalGross,
           },
           ...(showTaxCredit && {
             foreignTaxCredit: toNum(foreignTaxAmount),
@@ -487,6 +601,7 @@ export function SPTIntake({
     }
   }, [
     kkDoc, incomeDoc, foreignTaxDoc, foreignTaxAmount, pph23Amount, grossIncome,
+    extraA1Entries,
     bankAccounts,
     stocks, realEstate, vehicle, businessAssets, otherAssets,
     bankLoan, creditCard, personalLoan, businessDebt,
@@ -685,6 +800,9 @@ export function SPTIntake({
 
             {/* Gross income (annual) — optional; OCR/operator may fill later */}
             <div>
+              {form === '1770S' && (
+                <p className="text-[11px] font-semibold text-gray-600 mb-1">A1 #1</p>
+              )}
               <Input
                 type="number"
                 inputMode="numeric"
@@ -694,6 +812,75 @@ export function SPTIntake({
               />
               <p className="text-[10px] text-gray-400 mt-1">{t('grossIncomeHint')}</p>
             </div>
+
+            {/* 1770S 다중 A1 — 여러 고용주에게 받은 1721-A1 추가 (slide-10) */}
+            {form === '1770S' && (
+              <div className="pt-2 border-t space-y-3">
+                {extraA1Entries.map((row, idx) => {
+                  const rowNum = idx + 2;
+                  const inputId = `extra-a1-file-${idx}`;
+                  return (
+                    <div key={idx} className="rounded-lg border border-gray-200 bg-gray-50/40 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] font-semibold text-gray-600">A1 #{rowNum}</p>
+                        <button
+                          type="button"
+                          className="text-[10px] text-red-500 hover:text-red-700"
+                          onClick={() => removeExtraA1(idx)}
+                        >
+                          {t('removeRow')}
+                        </button>
+                      </div>
+                      <Input
+                        className="h-9"
+                        placeholder={t('extraA1CompanyPlaceholder')}
+                        value={row.companyName}
+                        onChange={(e) => updateExtraA1(idx, { companyName: e.target.value })}
+                      />
+                      <Input
+                        className="h-9"
+                        type="number"
+                        inputMode="numeric"
+                        placeholder={t('grossIncomePlaceholder')}
+                        value={row.grossIncome}
+                        onChange={(e) => updateExtraA1(idx, { grossIncome: e.target.value })}
+                      />
+                      <div>
+                        <label
+                          htmlFor={inputId}
+                          className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-slate-200 cursor-pointer hover:bg-slate-50"
+                        >
+                          {uploadingExtraA1 === idx ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Upload className="h-3 w-3" />
+                          )}
+                          {row.documentId ? t('extraA1Replace') : t('extraA1Upload')}
+                        </label>
+                        <input
+                          id={inputId}
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="hidden"
+                          onChange={(e) =>
+                            e.target.files?.[0] && uploadExtraA1(e.target.files[0], idx)
+                          }
+                        />
+                        {row.fileName && (
+                          <span className="ml-2 text-[10px] text-emerald-700">
+                            <CheckCircle className="h-3 w-3 inline mr-1" />
+                            {row.fileName}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <Button variant="ghost" size="sm" onClick={addExtraA1}>
+                  + {t('addA1')}
+                </Button>
+              </div>
+            )}
 
             {/* Tax credit (1770SS + 1770S) */}
             {showTaxCredit && (

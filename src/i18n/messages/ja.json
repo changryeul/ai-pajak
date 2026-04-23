@@ -6032,7 +6032,11 @@
     "bsTotalLiabilities": "総負債",
     "bsCapital": "資本金",
     "bsRetainedEarnings": "利益剰余金",
-    "financialsHint": "* 財政調整および課税標準計算に自動反映されます。"
+    "financialsHint": "* 財政調整および課税標準計算に自動反映されます。",
+    "addA1": "A1 を追加",
+    "extraA1CompanyPlaceholder": "会社名 (任意)",
+    "extraA1Upload": "A1 ファイルをアップロード",
+    "extraA1Replace": "ファイルを置き換え"
   },
   "sptSelectV2": {
     "pageTitle": "年次申告タイプを選択",

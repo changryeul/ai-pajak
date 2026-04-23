@@ -6032,7 +6032,11 @@
     "bsTotalLiabilities": "Total liabilities",
     "bsCapital": "Capital",
     "bsRetainedEarnings": "Retained earnings",
-    "financialsHint": "* Used for fiscal adjustment and taxable-income calculation."
+    "financialsHint": "* Used for fiscal adjustment and taxable-income calculation.",
+    "addA1": "Add A1",
+    "extraA1CompanyPlaceholder": "Company (optional)",
+    "extraA1Upload": "Upload A1 file",
+    "extraA1Replace": "Replace file"
   },
   "sptSelectV2": {
     "pageTitle": "Select your annual filing type",

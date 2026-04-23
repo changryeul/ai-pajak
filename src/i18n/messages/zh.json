@@ -6032,7 +6032,11 @@
     "bsTotalLiabilities": "负债总额",
     "bsCapital": "资本金",
     "bsRetainedEarnings": "留存收益",
-    "financialsHint": "* 自动用于税务调整和应税所得计算。"
+    "financialsHint": "* 自动用于税务调整和应税所得计算。",
+    "addA1": "添加 A1",
+    "extraA1CompanyPlaceholder": "公司名称 (可选)",
+    "extraA1Upload": "上传 A1 文件",
+    "extraA1Replace": "更换文件"
   },
   "sptSelectV2": {
     "pageTitle": "选择年度申报类型",
