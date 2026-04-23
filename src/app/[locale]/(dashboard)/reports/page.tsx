@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
+import { useSession, hasRole } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
+import IndividualFilingHistory from '@/components/reports/IndividualFilingHistory';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { fmtRp } from '@/lib/utils';
@@ -41,9 +44,16 @@ export default function ReportsPage() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+  const { session } = useSession();
 
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [isGenerating, setIsGenerating] = useState<ReportType | null>(null);
+
+  // INDIVIDUAL customers see the 5-year annual filing history (keynote slide-18/19).
+  // COMPANY customers and internal roles keep the full report suite.
+  if (session && hasRole(session, UserRole.CUSTOMER) && session.customerType === 'INDIVIDUAL') {
+    return <IndividualFilingHistory />;
+  }
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());

@@ -6101,6 +6101,26 @@
     "previewHint": "* Dihitung otomatis dari A1 dan penghasilan tambahan",
     "goToBillingCta": "Lanjut ke pembayaran"
   },
+  "filingHistory": {
+    "pageTitle": "Laporan pajak",
+    "pageSubtitle": "Tinjau pelaporan tahunan 5 tahun terakhir beserta dokumen pendukungnya. Untuk setiap tahun Anda dapat mengakses SPT Pribadi, BPE, A1, dan lampiran lainnya.",
+    "yearHeader": "Pelaporan {year}",
+    "yearMeta": "Jenis: {type} / Diajukan: {date} / Status: {status}",
+    "noFilingForYear": "Tidak ada pelaporan tercatat untuk tahun ini",
+    "statusCompleted": "Selesai",
+    "statusInProgress": "Diproses",
+    "statusDraft": "Draft",
+    "statusNone": "Belum lapor",
+    "docStatusSubmitted": "Terkirim",
+    "docStatusIssued": "Diterbitkan",
+    "docStatusAvailable": "Tersedia",
+    "colType": "Jenis",
+    "colName": "Dokumen",
+    "colStatus": "Status",
+    "colAction": "Aksi",
+    "actionPreview": "Pratinjau",
+    "actionDownload": "Unduh"
+  },
   "personalDashV3": {
     "headerTitle": "Dasbor",
     "headerSubtitle": "Riwayat pelaporan dan perubahan aset/utang Anda",

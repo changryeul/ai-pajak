@@ -6101,6 +6101,26 @@
     "previewHint": "* A1 および追加所得から自動計算",
     "goToBillingCta": "支払いへ進む"
   },
+  "filingHistory": {
+    "pageTitle": "税務レポート",
+    "pageSubtitle": "直近5年間の年次申告履歴と関連証憑を確認できます。各年度ごとに SPT Pribadi、BPE、A1 およびその他の添付資料を閲覧できます。",
+    "yearHeader": "{year}年 申告",
+    "yearMeta": "種類: {type} / 提出日: {date} / 状態: {status}",
+    "noFilingForYear": "この年度の申告記録はありません",
+    "statusCompleted": "完了",
+    "statusInProgress": "進行中",
+    "statusDraft": "ドラフト",
+    "statusNone": "未申告",
+    "docStatusSubmitted": "提出済",
+    "docStatusIssued": "発行済",
+    "docStatusAvailable": "確認可能",
+    "colType": "種類",
+    "colName": "書類",
+    "colStatus": "状態",
+    "colAction": "操作",
+    "actionPreview": "プレビュー",
+    "actionDownload": "ダウンロード"
+  },
   "personalDashV3": {
     "headerTitle": "ダッシュボード",
     "headerSubtitle": "最近の申告履歴と資産・負債の変動",

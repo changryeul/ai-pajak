@@ -6101,6 +6101,26 @@
     "previewHint": "* 根据 A1 和额外收入自动计算",
     "goToBillingCta": "前往支付"
   },
+  "filingHistory": {
+    "pageTitle": "税务报告",
+    "pageSubtitle": "查看最近 5 年的年度申报记录及相关凭证。您可以按年度访问 SPT Pribadi、BPE、A1 及其他附件。",
+    "yearHeader": "{year} 年申报",
+    "yearMeta": "类型: {type} / 提交日: {date} / 状态: {status}",
+    "noFilingForYear": "该年度没有申报记录",
+    "statusCompleted": "已完成",
+    "statusInProgress": "进行中",
+    "statusDraft": "草稿",
+    "statusNone": "未申报",
+    "docStatusSubmitted": "已提交",
+    "docStatusIssued": "已签发",
+    "docStatusAvailable": "可查看",
+    "colType": "类型",
+    "colName": "文档",
+    "colStatus": "状态",
+    "colAction": "操作",
+    "actionPreview": "预览",
+    "actionDownload": "下载"
+  },
   "personalDashV3": {
     "headerTitle": "仪表板",
     "headerSubtitle": "查看近期申报记录与资产/负债变动",

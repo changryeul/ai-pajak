@@ -6101,6 +6101,26 @@
     "previewHint": "* Auto-calculated from A1 and additional income",
     "goToBillingCta": "Go to payment"
   },
+  "filingHistory": {
+    "pageTitle": "Tax reports",
+    "pageSubtitle": "Review the last 5 years of annual filings and their supporting documents. For each year you can access SPT Pribadi, BPE, A1, and other attachments.",
+    "yearHeader": "{year} filing",
+    "yearMeta": "Type: {type} / Submitted: {date} / Status: {status}",
+    "noFilingForYear": "No filing on record for this year",
+    "statusCompleted": "Completed",
+    "statusInProgress": "In progress",
+    "statusDraft": "Draft",
+    "statusNone": "Not filed",
+    "docStatusSubmitted": "Submitted",
+    "docStatusIssued": "Issued",
+    "docStatusAvailable": "Available",
+    "colType": "Type",
+    "colName": "Document",
+    "colStatus": "Status",
+    "colAction": "View",
+    "actionPreview": "Preview",
+    "actionDownload": "Download"
+  },
   "personalDashV3": {
     "headerTitle": "Dashboard",
     "headerSubtitle": "Recent filings and asset/liability changes",
