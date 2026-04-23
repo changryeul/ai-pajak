@@ -6012,7 +6012,13 @@
     "grossIncomeHint": "Optional — consultant verifies from the A1 slip",
     "draftSaving": "Saving…",
     "draftSaved": "Draft saved",
-    "draftError": "Draft save failed"
+    "draftError": "Draft save failed",
+    "formSwitcherAria": "Change SPT type",
+    "spouseInfoTitle": "Spouse info",
+    "spouseHasSpouse": "Have spouse",
+    "spouseSharedNpwp": "Share NPWP (joint filing)",
+    "spouseExplainer": "Sharing spouse NPWP combines incomes into a joint filing. Without sharing, each spouse files separately.",
+    "setPtkpFromProfile": "Set PTKP from My Profile"
   },
   "sptSelectV2": {
     "pageTitle": "Select your annual filing type",

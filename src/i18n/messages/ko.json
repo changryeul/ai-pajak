@@ -6013,7 +6013,13 @@
     "grossIncomeHint": "선택 입력 — A1 원천징수영수증에서 검증됩니다",
     "draftSaving": "저장 중…",
     "draftSaved": "임시 저장됨",
-    "draftError": "임시 저장 실패"
+    "draftError": "임시 저장 실패",
+    "formSwitcherAria": "SPT 유형 변경",
+    "spouseInfoTitle": "배우자 정보",
+    "spouseHasSpouse": "배우자 있음",
+    "spouseSharedNpwp": "NPWP 공유 (합산 신고)",
+    "spouseExplainer": "배우자 NPWP를 공유하면 소득을 합산하여 계산합니다. 공유하지 않으면 각각 별도 신고로 계산됩니다.",
+    "setPtkpFromProfile": "내정보에서 PTKP 설정하기"
   },
   "sptSelectV2": {
     "pageTitle": "연간 신고 유형 선택",

@@ -6012,7 +6012,13 @@
     "grossIncomeHint": "可选 — 顾问将从A1凭证核实",
     "draftSaving": "保存中…",
     "draftSaved": "草稿已保存",
-    "draftError": "草稿保存失败"
+    "draftError": "草稿保存失败",
+    "formSwitcherAria": "更改 SPT 类型",
+    "spouseInfoTitle": "配偶信息",
+    "spouseHasSpouse": "有配偶",
+    "spouseSharedNpwp": "共享 NPWP（合并申报）",
+    "spouseExplainer": "共享配偶 NPWP 将合并计算收入。不共享时各自单独申报。",
+    "setPtkpFromProfile": "在我的信息中设置 PTKP"
   },
   "sptSelectV2": {
     "pageTitle": "选择年度申报类型",

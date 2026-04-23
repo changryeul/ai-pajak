@@ -6012,7 +6012,13 @@
     "grossIncomeHint": "Opsional — konsultan akan memverifikasi dari bukti potong A1",
     "draftSaving": "Menyimpan…",
     "draftSaved": "Draf tersimpan",
-    "draftError": "Gagal menyimpan draf"
+    "draftError": "Gagal menyimpan draf",
+    "formSwitcherAria": "Ubah jenis SPT",
+    "spouseInfoTitle": "Informasi Pasangan",
+    "spouseHasSpouse": "Memiliki pasangan",
+    "spouseSharedNpwp": "Berbagi NPWP (pelaporan gabungan)",
+    "spouseExplainer": "Berbagi NPWP pasangan menggabungkan penghasilan menjadi pelaporan gabungan. Tanpa berbagi, masing-masing melapor terpisah.",
+    "setPtkpFromProfile": "Atur PTKP dari Info Saya"
   },
   "sptSelectV2": {
     "pageTitle": "Pilih jenis Pelaporan Tahunan",

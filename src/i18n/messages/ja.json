@@ -6012,7 +6012,13 @@
     "grossIncomeHint": "任意 — A1源泉徴収票で検証されます",
     "draftSaving": "保存中…",
     "draftSaved": "下書き保存済み",
-    "draftError": "下書き保存に失敗"
+    "draftError": "下書き保存に失敗",
+    "formSwitcherAria": "SPTタイプを変更",
+    "spouseInfoTitle": "配偶者情報",
+    "spouseHasSpouse": "配偶者あり",
+    "spouseSharedNpwp": "NPWP共有（合算申告）",
+    "spouseExplainer": "配偶者NPWPを共有すると所得を合算して計算します。共有しない場合はそれぞれ別個に申告されます。",
+    "setPtkpFromProfile": "内情報でPTKPを設定"
   },
   "sptSelectV2": {
     "pageTitle": "年次申告タイプを選択",

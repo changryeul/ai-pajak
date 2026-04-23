@@ -92,6 +92,12 @@ export function SPTIntake({
   // trend chart can compute year-over-year deltas.
   const [grossIncome, setGrossIncome] = useState('');
 
+  // Spouse info (keynote slide-7). K/I/* PTKP codes flag joint filing on the
+  // backend; this UI only collects the two checkboxes and persists them under
+  // tax_data.spouse so the operator can see the customer's intent.
+  const [hasSpouse, setHasSpouse] = useState(false);
+  const [sharedNpwp, setSharedNpwp] = useState(false);
+
   // Tax credit
   const [pph23Amount, setPph23Amount] = useState('');
   const [foreignTaxAmount, setForeignTaxAmount] = useState('');
@@ -396,6 +402,10 @@ export function SPTIntake({
             personalLoan: toNum(personalLoan),
             businessDebt: toNum(businessDebt),
           },
+          spouse: {
+            hasSpouse,
+            sharedNpwp: hasSpouse && sharedNpwp,
+          },
         },
         documentIds,
       };
@@ -419,6 +429,7 @@ export function SPTIntake({
     bankAccounts,
     stocks, realEstate, vehicle, businessAssets, otherAssets,
     bankLoan, creditCard, personalLoan, businessDebt,
+    hasSpouse, sharedNpwp,
     customerId, year, t, form, showTaxCredit, showPph23Credit,
   ]);
 
@@ -445,6 +456,21 @@ export function SPTIntake({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-gray-900">{t(headerKey)}</h1>
+          <select
+            value={form}
+            onChange={(e) => {
+              const next = e.target.value as SPTForm;
+              if (next === form) return;
+              const slug = next === '1770SS' ? '1770ss' : next === '1770S' ? '1770s' : '1770';
+              router.push(`/${locale}/tax/spt-tahunan/${slug}`);
+            }}
+            className="h-9 rounded-md border border-gray-200 bg-white text-sm px-2"
+            aria-label={t('formSwitcherAria')}
+          >
+            <option value="1770SS">1770SS</option>
+            <option value="1770S">1770S</option>
+            <option value="1770">1770</option>
+          </select>
           {draftStatus !== 'idle' && (
             <span
               className={`text-xs px-2 py-0.5 rounded ${
@@ -479,6 +505,43 @@ export function SPTIntake({
         </div>
         <span className="text-xs text-blue-700">Tax Year {year}</span>
       </div>
+
+      {/* 배우자 정보 (keynote slide-7) */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-5 space-y-3">
+          <p className="font-semibold text-gray-900">{t('spouseInfoTitle')}</p>
+          <div className="flex flex-wrap gap-4">
+            <label className="inline-flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                className="accent-gray-800"
+                checked={hasSpouse}
+                onChange={(e) => {
+                  setHasSpouse(e.target.checked);
+                  if (!e.target.checked) setSharedNpwp(false);
+                }}
+              />
+              {t('spouseHasSpouse')}
+            </label>
+            <label
+              className={
+                'inline-flex items-center gap-2 text-sm ' +
+                (hasSpouse ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed')
+              }
+            >
+              <input
+                type="checkbox"
+                className="accent-gray-800"
+                checked={sharedNpwp}
+                onChange={(e) => setSharedNpwp(e.target.checked)}
+                disabled={!hasSpouse}
+              />
+              {t('spouseSharedNpwp')}
+            </label>
+          </div>
+          <p className="text-[11px] text-gray-500">{t('spouseExplainer')}</p>
+        </CardContent>
+      </Card>
 
       {/* Top row: two upload cards */}
       <div className="grid gap-5 md:grid-cols-2">
@@ -630,9 +693,9 @@ export function SPTIntake({
 
       {/* Assets / Liabilities */}
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <p className="text-lg font-semibold text-gray-900">{t('assetsLiabilitiesTitle')}</p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {importResult && (
               <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded px-2 py-1">
                 {importResult}
@@ -641,6 +704,12 @@ export function SPTIntake({
             <Button size="sm" variant="outline" onClick={importFromProfile}>
               {t('importFromProfile')}
             </Button>
+            <Link
+              href={`/${locale}/my-profile`}
+              className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
+            >
+              {t('setPtkpFromProfile')}
+            </Link>
           </div>
         </div>
 
