@@ -30,6 +30,7 @@ interface BillingItem {
   bpe_number: string | null;
   bpe_date: string | null;
   bpe_file_url: string | null;
+  counterparty_name: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -367,7 +368,7 @@ export default function TaxBillingPage() {
                           <p className="text-[10px] text-gray-500 mt-1">{period}</p>
                         </td>
                         <td className="p-2 align-top text-sm">
-                          {companyLabel || session?.fullName || '—'}
+                          {item.counterparty_name || companyLabel || session?.fullName || '—'}
                         </td>
                         <td className="p-2 align-top text-right font-mono">
                           {fmtRp(item.amount)}

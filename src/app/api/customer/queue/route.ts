@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     let query = admin
       .from('djp_submission_queue')
-      .select('id, tax_type, tax_period_month, tax_period_year, amount, status, ebilling_code, bpe_number, bpe_date, bpe_file_url, payment_proof_url, payment_amount, payment_date, payment_verified_at, completed_at, notes, created_at, updated_at')
+      .select('id, tax_type, tax_period_month, tax_period_year, amount, status, ebilling_code, bpe_number, bpe_date, bpe_file_url, counterparty_name, payment_proof_url, payment_amount, payment_date, payment_verified_at, completed_at, notes, created_at, updated_at')
       .eq('customer_id', customer.id)
       .order('created_at', { ascending: false });
 
