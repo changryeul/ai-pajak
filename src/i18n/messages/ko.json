@@ -6129,7 +6129,8 @@
     "foreignToggle": "외국인",
     "nationalityKR": "한국",
     "nationalityUS": "미국",
-    "nationalityJP": "일본"
+    "nationalityJP": "일본",
+    "nationalityLockedHint": "신고 시 입력한 값 — 수정은 SPT 입력 화면에서"
   },
   "filingHistory": {
     "pageTitle": "세금 보고서",

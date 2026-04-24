@@ -6128,7 +6128,8 @@
     "foreignToggle": "外国人",
     "nationalityKR": "韩国",
     "nationalityUS": "美国",
-    "nationalityJP": "日本"
+    "nationalityJP": "日本",
+    "nationalityLockedHint": "申报时填写 — 在 SPT 页面修改"
   },
   "filingHistory": {
     "pageTitle": "税务报告",

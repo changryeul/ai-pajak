@@ -6128,7 +6128,8 @@
     "foreignToggle": "WNA",
     "nationalityKR": "Korea",
     "nationalityUS": "Amerika Serikat",
-    "nationalityJP": "Jepang"
+    "nationalityJP": "Jepang",
+    "nationalityLockedHint": "Diisi saat pelaporan — ubah di layar SPT"
   },
   "filingHistory": {
     "pageTitle": "Laporan pajak",

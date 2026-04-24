@@ -6128,7 +6128,8 @@
     "foreignToggle": "Foreign national",
     "nationalityKR": "Korea",
     "nationalityUS": "USA",
-    "nationalityJP": "Japan"
+    "nationalityJP": "Japan",
+    "nationalityLockedHint": "Entered during filing — edit on the SPT screen"
   },
   "filingHistory": {
     "pageTitle": "Tax reports",

@@ -84,6 +84,9 @@ export default function MyProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [preview, setPreview] = useState<TaxPreview | null>(null);
+  // keynote v2 slide-21: "이미 신고시 입력한 정보가 있을 경우 여기서 보여주기만 하면 됨"
+  // — load 시점에 nationality가 이미 저장되어 있으면 해당 세션에서 read-only 처리.
+  const [nationalityLocked, setNationalityLocked] = useState(false);
   const [form, setForm] = useState<ProfileForm>({
     full_name: '',
     npwp: '',
@@ -136,6 +139,8 @@ export default function MyProfilePage() {
         efin: c.efin || '',
         nationality: c.nationality || '',
       });
+      // 저장된 국적이 이미 있으면 /my-profile에서는 표시 전용 (SPT intake에서만 편집)
+      setNationalityLocked(!!c.nationality);
     } catch (e) {
       showMsg('error', e instanceof Error ? e.message : t('serverError'));
     } finally {
@@ -367,33 +372,60 @@ export default function MyProfilePage() {
                 </p>
               )}
 
-              {/* keynote v2 slide-21: 외국인 체크박스 + 국적 */}
-              <div className="pt-2 border-t border-gray-100 flex items-center gap-2 flex-wrap">
-                <label className="inline-flex items-center gap-2 text-sm cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    className="accent-gray-800"
-                    checked={!!form.nationality}
-                    onChange={(e) =>
-                      setForm({ ...form, nationality: e.target.checked ? 'KR' : '' })
-                    }
-                  />
-                  {t('foreignToggle')}
-                </label>
-                <span className={form.nationality ? 'text-gray-500' : 'text-gray-300'}>
-                  (
-                  <select
-                    className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                    value={form.nationality || ''}
-                    disabled={!form.nationality}
-                    onChange={(e) => setForm({ ...form, nationality: e.target.value })}
-                  >
-                    <option value="KR">{t('nationalityKR')}</option>
-                    <option value="US">{t('nationalityUS')}</option>
-                    <option value="JP">{t('nationalityJP')}</option>
-                  </select>
-                  )
-                </span>
+              {/* keynote v2 slide-21: 외국인 체크박스 + 국적
+                  이미 저장된 값이 있으면 read-only 표시 (신고 시 입력한 정보는 여기서 보여주기만) */}
+              <div className="pt-2 border-t border-gray-100">
+                {nationalityLocked ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>{t('foreignToggle')}:</span>
+                    {form.nationality ? (
+                      <span className="font-semibold text-gray-800">
+                        {t(
+                          form.nationality === 'KR'
+                            ? 'nationalityKR'
+                            : form.nationality === 'US'
+                              ? 'nationalityUS'
+                              : form.nationality === 'JP'
+                                ? 'nationalityJP'
+                                : 'nationalityKR',
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                    <span className="text-[11px] text-gray-400 ml-1">
+                      {t('nationalityLockedHint')}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <label className="inline-flex items-center gap-2 text-sm cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        className="accent-gray-800"
+                        checked={!!form.nationality}
+                        onChange={(e) =>
+                          setForm({ ...form, nationality: e.target.checked ? 'KR' : '' })
+                        }
+                      />
+                      {t('foreignToggle')}
+                    </label>
+                    <span className={form.nationality ? 'text-gray-500' : 'text-gray-300'}>
+                      (
+                      <select
+                        className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                        value={form.nationality || ''}
+                        disabled={!form.nationality}
+                        onChange={(e) => setForm({ ...form, nationality: e.target.value })}
+                      >
+                        <option value="KR">{t('nationalityKR')}</option>
+                        <option value="US">{t('nationalityUS')}</option>
+                        <option value="JP">{t('nationalityJP')}</option>
+                      </select>
+                      )
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

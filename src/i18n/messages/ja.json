@@ -6128,7 +6128,8 @@
     "foreignToggle": "外国人",
     "nationalityKR": "韓国",
     "nationalityUS": "アメリカ",
-    "nationalityJP": "日本"
+    "nationalityJP": "日本",
+    "nationalityLockedHint": "申告時に入力 — 変更は SPT 画面で"
   },
   "filingHistory": {
     "pageTitle": "税務レポート",
