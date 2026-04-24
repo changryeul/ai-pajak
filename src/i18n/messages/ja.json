@@ -6149,7 +6149,12 @@
     "colStatus": "状態",
     "colAction": "操作",
     "actionPreview": "プレビュー",
-    "actionDownload": "ダウンロード"
+    "actionDownload": "ダウンロード",
+    "actionUpload": "アップロード",
+    "docStatusMissing": "未アップロード",
+    "bpeNumberPlaceholder": "BPE 番号",
+    "uploadSuccess": "アップロード完了",
+    "uploadFailed": "アップロード失敗"
   },
   "personalDashV3": {
     "headerTitle": "ダッシュボード",

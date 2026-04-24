@@ -6150,7 +6150,12 @@
     "colStatus": "상태",
     "colAction": "확인",
     "actionPreview": "미리보기",
-    "actionDownload": "다운로드"
+    "actionDownload": "다운로드",
+    "actionUpload": "업로드",
+    "docStatusMissing": "미업로드",
+    "bpeNumberPlaceholder": "BPE 번호",
+    "uploadSuccess": "업로드 완료",
+    "uploadFailed": "업로드 실패"
   },
   "personalDashV3": {
     "headerTitle": "대시보드",

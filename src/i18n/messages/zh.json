@@ -6149,7 +6149,12 @@
     "colStatus": "状态",
     "colAction": "操作",
     "actionPreview": "预览",
-    "actionDownload": "下载"
+    "actionDownload": "下载",
+    "actionUpload": "上传",
+    "docStatusMissing": "未上传",
+    "bpeNumberPlaceholder": "BPE 编号",
+    "uploadSuccess": "上传成功",
+    "uploadFailed": "上传失败"
   },
   "personalDashV3": {
     "headerTitle": "仪表板",

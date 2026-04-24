@@ -7,10 +7,15 @@ import type { RequestWithSession } from '@/types/auth';
 /**
  * GET /api/customer/filing-history
  *
- * Returns the customer's last 5 years of annual SPT filings, each bundled with
- * its related tax documents (SPT PDF, BPE, A1 slips, financial statements).
+ * Returns the customer's last 5 years of annual SPT filings. For each year
+ * we emit a fixed set of document *slots* (SPT / BPE / A1* / 재무제표*)
+ * with a `path` of null when the document is missing — the UI renders the
+ * empty slots as upload buttons (keynote slide-19/20: BPE 틀이 있어야
+ * 고객이 올릴 수 있음).
  *
- * Keynote slide-18/19: per-year accordion showing SPT + BPE + A1 + 재무제표.
+ * Asterisks:
+ *   - A1 slots only for 1770SS / 1770S (employment income).
+ *   - 재무제표 slot only for 1770 (business income).
  */
 
 interface DocRow {
@@ -33,6 +38,23 @@ interface FilingRow {
   tax_document?: DocRow[];
 }
 
+interface DocSlot {
+  type: 'SPT' | 'BPE' | 'A1' | '재무제표';
+  name: string;
+  path: string | null;
+  taxDocumentId?: string | null;
+  number?: string | null;
+}
+
+interface YearEntry {
+  year: number;
+  filingId: string;
+  filingType: string;
+  submittedAt: string | null;
+  status: string;
+  documents: DocSlot[];
+}
+
 function toYear(period: string | null, filedAt: string | null, createdAt: string): number {
   if (period) {
     const m = period.match(/^(\d{4})/);
@@ -43,12 +65,23 @@ function toYear(period: string | null, filedAt: string | null, createdAt: string
 }
 
 function filingLabel(taxType: string): string {
-  // Normalize to the short label used in the keynote header (1770SS/1770S/1770).
   if (taxType === 'SPT_1770SS') return '1770SS';
   if (taxType === 'SPT_1770S') return '1770S';
   if (taxType === 'SPT_1770') return '1770';
   if (taxType === 'SPT_1771') return '1771';
   return taxType.replace('SPT_', '');
+}
+
+function needsFinancials(taxType: string): boolean {
+  return taxType === 'SPT_1770' || taxType === 'SPT_1771';
+}
+
+function needsA1(taxType: string): boolean {
+  return (
+    taxType === 'SPT_TAHUNAN'
+    || taxType === 'SPT_1770SS'
+    || taxType === 'SPT_1770S'
+  );
 }
 
 async function handleGet(req: RequestWithSession): Promise<Response> {
@@ -80,50 +113,70 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
       .gte('created_at', cutoff)
       .order('created_at', { ascending: false });
 
-    const grouped = new Map<number, {
-      year: number;
-      filingId: string;
-      filingType: string;
-      submittedAt: string | null;
-      status: string;
-      documents: Array<{ type: string; name: string; path: string; number?: string | null }>;
-    }>();
+    const grouped = new Map<number, YearEntry>();
 
     for (const row of (filings || []) as FilingRow[]) {
       const year = toYear(row.tax_period, row.filed_at, row.created_at);
       if (grouped.has(year)) continue; // keep the newest per year
 
-      const docs: Array<{ type: string; name: string; path: string; number?: string | null }> = [];
-      // SPT PDF — always implied by the filing record itself.
+      const docs: DocSlot[] = [];
+
+      // 1) SPT slot — always present for an existing filing (server-generated PDF).
       docs.push({
         type: 'SPT',
         name: `SPT Pribadi ${year}`,
         path: `/api/tax/spt/${filingLabel(row.tax_type).toLowerCase()}?filingId=${row.id}`,
       });
 
-      if (row.bpe_number) {
+      // 2) BPE slot — always show. path = uploaded tax_document if exists,
+      //    otherwise null (UI renders upload button).
+      const bpeDoc = (row.tax_document || []).find((d) => d.document_type === 'BPE');
+      docs.push({
+        type: 'BPE',
+        name: `BPE ${year}`,
+        path: bpeDoc
+          ? `/api/customer/filing-document/${bpeDoc.id}`
+          : null,
+        taxDocumentId: bpeDoc?.id ?? null,
+        number: row.bpe_number,
+      });
+
+      // 3) A1 slots — one per uploaded A1 doc, plus one empty slot for upload
+      //    (employment income forms only).
+      if (needsA1(row.tax_type)) {
+        const a1Docs = (row.tax_document || []).filter(
+          (d) => d.document_type === 'A1' || d.document_type === 'FORM_1721_A1' || d.document_type === 'SALARY_SLIP',
+        );
+        for (const a1 of a1Docs) {
+          docs.push({
+            type: 'A1',
+            name: a1.file_name || `A1 ${year}`,
+            path: `/api/customer/filing-document/${a1.id}`,
+            taxDocumentId: a1.id,
+          });
+        }
+        // Always show one extra empty slot so customer can add another A1.
         docs.push({
-          type: 'BPE',
-          name: `BPE ${year}`,
-          path: `/api/tax/filings/${row.id}/bpe`,
-          number: row.bpe_number,
+          type: 'A1',
+          name: `A1 ${year}`,
+          path: null,
+          taxDocumentId: null,
         });
       }
 
-      for (const d of row.tax_document || []) {
-        if (d.document_type === 'A1' || d.document_type === 'SALARY_SLIP') {
-          docs.push({
-            type: 'A1',
-            name: d.file_name || `A1 ${year}`,
-            path: d.file_path,
-          });
-        } else if (d.document_type === 'FINANCIAL_STATEMENT' || d.document_type === 'BALANCE_SHEET') {
-          docs.push({
-            type: '재무제표',
-            name: d.file_name || `재무제표 ${year}`,
-            path: d.file_path,
-          });
-        }
+      // 4) 재무제표 slot — 1770/1771 only.
+      if (needsFinancials(row.tax_type)) {
+        const fsDoc = (row.tax_document || []).find(
+          (d) =>
+            d.document_type === 'FINANCIAL_STATEMENT'
+            || d.document_type === 'BALANCE_SHEET',
+        );
+        docs.push({
+          type: '재무제표',
+          name: `재무제표 ${year}`,
+          path: fsDoc ? `/api/customer/filing-document/${fsDoc.id}` : null,
+          taxDocumentId: fsDoc?.id ?? null,
+        });
       }
 
       grouped.set(year, {
@@ -136,8 +189,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
       });
     }
 
-    // Fill 5-year window, oldest last (matches keynote order: newest first).
-    const years: typeof grouped extends Map<number, infer V> ? V[] : never = [];
+    const years: YearEntry[] = [];
     for (let y = currentYear; y >= currentYear - 4; y--) {
       const entry = grouped.get(y);
       if (entry) {

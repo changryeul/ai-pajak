@@ -6149,7 +6149,12 @@
     "colStatus": "Status",
     "colAction": "Aksi",
     "actionPreview": "Pratinjau",
-    "actionDownload": "Unduh"
+    "actionDownload": "Unduh",
+    "actionUpload": "Unggah",
+    "docStatusMissing": "Belum diunggah",
+    "bpeNumberPlaceholder": "No. BPE",
+    "uploadSuccess": "Berhasil diunggah",
+    "uploadFailed": "Gagal mengunggah"
   },
   "personalDashV3": {
     "headerTitle": "Dasbor",
