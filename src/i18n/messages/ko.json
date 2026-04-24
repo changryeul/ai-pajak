@@ -6125,7 +6125,11 @@
     "fieldKkNo": "No. KK",
     "familyInfoKK": "가족정보 (KK)",
     "familyInfoKKHint": "KK 업로드 시 자동 생성됩니다",
-    "companyInfo": "회사 정보"
+    "companyInfo": "회사 정보",
+    "foreignToggle": "외국인",
+    "nationalityKR": "한국",
+    "nationalityUS": "미국",
+    "nationalityJP": "일본"
   },
   "filingHistory": {
     "pageTitle": "세금 보고서",

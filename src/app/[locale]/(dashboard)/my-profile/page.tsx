@@ -53,6 +53,7 @@ interface ProfileForm {
   djp_password_hint: string;
   djp_passphrase_hint: string;
   efin: string;
+  nationality: string; // '' = 내국인, 'KR'/'US'/'JP' = 외국인 국적
 }
 
 type MaritalState = 'single' | 'married' | 'joint';
@@ -96,6 +97,7 @@ export default function MyProfilePage() {
     djp_password_hint: '',
     djp_passphrase_hint: '',
     efin: '',
+    nationality: '',
   });
 
   // Guard: only INDIVIDUAL customers.
@@ -132,6 +134,7 @@ export default function MyProfilePage() {
         djp_password_hint: c.djp_password_hint || '',
         djp_passphrase_hint: c.djp_passphrase_hint || '',
         efin: c.efin || '',
+        nationality: c.nationality || '',
       });
     } catch (e) {
       showMsg('error', e instanceof Error ? e.message : t('serverError'));
@@ -197,6 +200,7 @@ export default function MyProfilePage() {
         djp_password_hint: form.djp_password_hint.trim() || null,
         djp_passphrase_hint: form.djp_passphrase_hint.trim() || null,
         efin: form.efin.trim() || null,
+        nationality: form.nationality || null,
       };
       const digits = form.npwp.replace(/\D/g, '');
       if (digits.length === 15) payload.npwp = digits;
@@ -362,6 +366,35 @@ export default function MyProfilePage() {
                   {t('familyPtkpHint')}: <span className="font-mono font-semibold text-gray-700">{form.ptkp_status}</span>
                 </p>
               )}
+
+              {/* keynote v2 slide-21: 외국인 체크박스 + 국적 */}
+              <div className="pt-2 border-t border-gray-100 flex items-center gap-2 flex-wrap">
+                <label className="inline-flex items-center gap-2 text-sm cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="accent-gray-800"
+                    checked={!!form.nationality}
+                    onChange={(e) =>
+                      setForm({ ...form, nationality: e.target.checked ? 'KR' : '' })
+                    }
+                  />
+                  {t('foreignToggle')}
+                </label>
+                <span className={form.nationality ? 'text-gray-500' : 'text-gray-300'}>
+                  (
+                  <select
+                    className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    value={form.nationality || ''}
+                    disabled={!form.nationality}
+                    onChange={(e) => setForm({ ...form, nationality: e.target.value })}
+                  >
+                    <option value="KR">{t('nationalityKR')}</option>
+                    <option value="US">{t('nationalityUS')}</option>
+                    <option value="JP">{t('nationalityJP')}</option>
+                  </select>
+                  )
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -6124,7 +6124,11 @@
     "fieldKkNo": "No. KK",
     "familyInfoKK": "Info keluarga (KK)",
     "familyInfoKKHint": "Otomatis dibuat saat KK diunggah.",
-    "companyInfo": "Info perusahaan"
+    "companyInfo": "Info perusahaan",
+    "foreignToggle": "WNA",
+    "nationalityKR": "Korea",
+    "nationalityUS": "Amerika Serikat",
+    "nationalityJP": "Jepang"
   },
   "filingHistory": {
     "pageTitle": "Laporan pajak",

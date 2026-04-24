@@ -6124,7 +6124,11 @@
     "fieldKkNo": "No. KK",
     "familyInfoKK": "家庭信息 (KK)",
     "familyInfoKKHint": "上传 KK 后自动生成。",
-    "companyInfo": "公司信息"
+    "companyInfo": "公司信息",
+    "foreignToggle": "外国人",
+    "nationalityKR": "韩国",
+    "nationalityUS": "美国",
+    "nationalityJP": "日本"
   },
   "filingHistory": {
     "pageTitle": "税务报告",

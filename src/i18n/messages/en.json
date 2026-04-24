@@ -6124,7 +6124,11 @@
     "fieldKkNo": "No. KK",
     "familyInfoKK": "Family info (KK)",
     "familyInfoKKHint": "Auto-generated when the KK is uploaded.",
-    "companyInfo": "Company info"
+    "companyInfo": "Company info",
+    "foreignToggle": "Foreign national",
+    "nationalityKR": "Korea",
+    "nationalityUS": "USA",
+    "nationalityJP": "Japan"
   },
   "filingHistory": {
     "pageTitle": "Tax reports",

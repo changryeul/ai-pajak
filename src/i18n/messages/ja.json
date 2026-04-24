@@ -6124,7 +6124,11 @@
     "fieldKkNo": "No. KK",
     "familyInfoKK": "家族情報 (KK)",
     "familyInfoKKHint": "KK アップロード時に自動生成されます。",
-    "companyInfo": "会社情報"
+    "companyInfo": "会社情報",
+    "foreignToggle": "外国人",
+    "nationalityKR": "韓国",
+    "nationalityUS": "アメリカ",
+    "nationalityJP": "日本"
   },
   "filingHistory": {
     "pageTitle": "税務レポート",

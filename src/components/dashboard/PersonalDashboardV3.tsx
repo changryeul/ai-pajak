@@ -281,38 +281,10 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header + filters */}
+      {/* 1. Header (keynote v2: 국적/세법기준 필터 삭제) */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t('headerTitle')}</h1>
         <p className="text-sm text-gray-500 mt-1">{t('headerSubtitle')}</p>
-        <div className="mt-3 flex flex-wrap gap-3">
-          <label className="inline-flex items-center gap-2 text-xs text-gray-700">
-            {t('filterNationality')}:
-            <select
-              className="h-9 rounded-md border border-gray-200 bg-white text-sm px-2"
-              value={nationality}
-              onChange={(e) => setNationality(e.target.value as Nationality)}
-            >
-              <option value="KR">{t('nationalityKR')}</option>
-              <option value="ID">{t('nationalityID')}</option>
-              <option value="US">{t('nationalityUS')}</option>
-              <option value="JP">{t('nationalityJP')}</option>
-            </select>
-          </label>
-          <label className="inline-flex items-center gap-2 text-xs text-gray-700">
-            {t('filterTaxRule')}:
-            <select
-              className="h-9 rounded-md border border-gray-200 bg-white text-sm px-2"
-              value={taxRule}
-              onChange={(e) => setTaxRule(e.target.value as Nationality)}
-            >
-              <option value="KR">{t('nationalityKR')}</option>
-              <option value="ID">{t('nationalityID')}</option>
-              <option value="US">{t('nationalityUS')}</option>
-              <option value="JP">{t('nationalityJP')}</option>
-            </select>
-          </label>
-        </div>
       </div>
 
       {/* 2. Recent 3-year filings */}
@@ -349,45 +321,8 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
         </CardContent>
       </Card>
 
-      {/* 3. Spouse filing mode + dependents */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-5 space-y-4">
-          <p className="font-semibold text-gray-900">{t('spouseFilingMode')}</p>
-          <div className="space-y-2 text-sm">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="spouseMode"
-                value="joint"
-                checked={spouseMode === 'joint'}
-                onChange={() => setSpouseMode('joint')}
-              />
-              {t('spouseJointNpwp')}
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="spouseMode"
-                value="separate"
-                checked={spouseMode === 'separate'}
-                onChange={() => setSpouseMode('separate')}
-              />
-              {t('spouseSeparateNpwp')}
-            </label>
-          </div>
-          <div>
-            <p className="text-xs text-gray-600 mb-1">{t('dependents')}</p>
-            <input
-              type="number"
-              min={0}
-              max={3}
-              className="h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm"
-              value={dependents}
-              onChange={(e) => setDependents(Math.max(0, Math.min(3, Number(e.target.value) || 0)))}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* keynote v2: 배우자 신고방식 카드 삭제 — 이 정보는 SPT 시작 시
+          배우자 정보 카드와 /my-profile 결혼상태에서 수집한다. */}
 
       {/* Sample data notice */}
       {isSampleData && (

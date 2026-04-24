@@ -41,6 +41,7 @@ interface ProfileForm {
   coretax_password_hint: string;
   djp_password_hint: string;
   djp_passphrase_hint: string;
+  nationality: string; // '' = 내국인, 'KR'/'US'/'JP' = 외국인 국적
 }
 
 interface Preview {
@@ -70,6 +71,7 @@ export default function InlineProfileAndPreview() {
     full_name: '', npwp: '', nik: '', kk_number: '', address: '', ptkp_status: 'TK/0',
     email: '', phone: '', company_name: '', employer_name: '',
     coretax_password_hint: '', djp_password_hint: '', djp_passphrase_hint: '',
+    nationality: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,6 +103,7 @@ export default function InlineProfileAndPreview() {
           coretax_password_hint: c.coretax_password_hint || '',
           djp_password_hint: c.djp_password_hint || '',
           djp_passphrase_hint: c.djp_passphrase_hint || '',
+          nationality: c.nationality || '',
         });
       }
       if (prev?.success) setPreview(prev.data as Preview);
@@ -124,6 +127,7 @@ export default function InlineProfileAndPreview() {
         djp_password_hint: form.djp_password_hint.trim() || null,
         djp_passphrase_hint: form.djp_passphrase_hint.trim() || null,
         ptkp_status: form.ptkp_status,
+        nationality: form.nationality || null,
       };
       const digits = form.npwp.replace(/\D/g, '');
       if (digits.length === 15) payload.npwp = digits;
@@ -152,13 +156,7 @@ export default function InlineProfileAndPreview() {
     <div className="space-y-5">
       <h2 className="text-lg font-semibold text-gray-900">{t('title')}</h2>
 
-      {/* KK 데이터 연동 안내 */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-5">
-          <p className="font-semibold text-gray-900 mb-1">{t('kkLinkTitle')}</p>
-          <p className="text-xs text-gray-500">{t('kkLinkHint')}</p>
-        </CardContent>
-      </Card>
+      {/* keynote v2: KK 데이터 연동 카드 삭제 — 상단 KK 업로드 자동 파싱으로 통합 */}
 
       {/* 기본정보 */}
       <Card className="border-0 shadow-sm">
@@ -190,28 +188,55 @@ export default function InlineProfileAndPreview() {
               onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 mb-1">PTKP</p>
-            <select
-              className="h-10 rounded-md border border-input bg-white px-2 text-sm w-32"
-              value={form.ptkp_status}
-              onChange={(e) => setForm({ ...form, ptkp_status: e.target.value })}
-            >
-              {PTKP_OPTIONS.map((p) => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
+          <div className="flex items-end gap-4 flex-wrap">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">PTKP</p>
+              <select
+                className="h-10 rounded-md border border-input bg-white px-2 text-sm w-32"
+                value={form.ptkp_status}
+                onChange={(e) => setForm({ ...form, ptkp_status: e.target.value })}
+              >
+                {PTKP_OPTIONS.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+            {/* keynote v2: 외국인 체크박스 + 국적 필드 (slide-9/12/15) */}
+            <div className="flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 text-sm cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="accent-gray-800"
+                  checked={!!form.nationality}
+                  onChange={(e) =>
+                    setForm({ ...form, nationality: e.target.checked ? 'KR' : '' })
+                  }
+                />
+                {t('foreignToggle')}
+              </label>
+              <span
+                className={form.nationality ? 'text-gray-500' : 'text-gray-300'}
+              >
+                (
+                <select
+                  className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  value={form.nationality || ''}
+                  disabled={!form.nationality}
+                  onChange={(e) => setForm({ ...form, nationality: e.target.value })}
+                >
+                  <option value="KR">{t('nationalityKR')}</option>
+                  <option value="US">{t('nationalityUS')}</option>
+                  <option value="JP">{t('nationalityJP')}</option>
+                </select>
+                )
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 가족정보 (KK) — auto from upload */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-5">
-          <p className="font-semibold text-gray-900 mb-1">{t('familyInfoKK')}</p>
-          <p className="text-xs text-gray-400">{t('familyInfoKKHint')}</p>
-        </CardContent>
-      </Card>
+      {/* keynote v2: 가족정보 (KK) 카드 삭제 — KK 업로드 자동 파싱 시
+          직접 가족 수/관계 정보를 기본정보 PTKP로 반영한다. */}
 
       {/* 세무 계정 */}
       <Card className="border-0 shadow-sm">
