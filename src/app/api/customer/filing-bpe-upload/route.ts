@@ -46,13 +46,17 @@ export async function POST(request: NextRequest) {
     }
 
     const form = await request.formData();
-    const filingId = String(form.get('filingId') || '');
+    let filingId = String(form.get('filingId') || '');
+    const yearStr = String(form.get('year') || '').trim();
     const bpeNumber = String(form.get('bpeNumber') || '').trim();
     const file = form.get('file');
 
-    if (!filingId || !(file instanceof File)) {
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: 'file is required' }, { status: 400 });
+    }
+    if (!filingId && !/^\d{4}$/.test(yearStr)) {
       return NextResponse.json(
-        { error: 'filingId and file are required' },
+        { error: 'filingId or year is required' },
         { status: 400 },
       );
     }
@@ -64,6 +68,35 @@ export async function POST(request: NextRequest) {
       .single();
     if (!customer) {
       return NextResponse.json({ error: 'Customer record not found' }, { status: 404 });
+    }
+
+    // When the customer filed externally (at DJP office / another advisor),
+    // no tax_filing row exists for the year. Create a minimal placeholder so
+    // the BPE can be attached via the tax_filing_id FK.
+    if (!filingId) {
+      const year = Number(yearStr);
+      const taxPeriod = `${year}-12-31`;
+      const { data: created, error: createErr } = await admin
+        .from('tax_filing')
+        .insert({
+          customer_id: customer.id,
+          tax_type: 'SPT_TAHUNAN',
+          tax_period: taxPeriod,
+          status: 'FILED',
+          filed_at: new Date().toISOString(),
+          bpe_number: bpeNumber || null,
+          tax_data: { external_submission: true, source: 'CUSTOMER_UPLOAD' },
+        })
+        .select('id, tax_type, tax_period')
+        .single();
+      if (createErr || !created) {
+        loggers.api.error({ err: createErr, year }, 'External BPE placeholder filing create failed');
+        return NextResponse.json(
+          { error: createErr?.message || 'Failed to create placeholder filing' },
+          { status: 500 },
+        );
+      }
+      filingId = created.id;
     }
 
     const { data: filing, error: filingError } = await admin

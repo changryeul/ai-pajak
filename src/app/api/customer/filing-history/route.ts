@@ -195,13 +195,20 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
       if (entry) {
         years.push(entry);
       } else {
+        // No filing row yet for this year — still emit an empty BPE slot so
+        // the customer can attach a DJP-issued BPE for an externally filed
+        // SPT. The upload endpoint creates a placeholder tax_filing row when
+        // it receives a year-only payload.
+        const emptyDocs: DocSlot[] = [
+          { type: 'BPE', name: `BPE ${y}`, path: null, taxDocumentId: null, number: null },
+        ];
         years.push({
           year: y,
           filingId: '',
           filingType: '',
           submittedAt: null,
           status: 'NONE',
-          documents: [],
+          documents: emptyDocs,
         });
       }
     }

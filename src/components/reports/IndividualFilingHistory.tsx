@@ -91,17 +91,20 @@ export default function IndividualFilingHistory() {
   const handleUpload = useCallback(
     async (
       filingId: string,
+      year: number,
       slot: DocSlot,
       file: File,
       uploadKey: string,
+      inputKey: string,
     ) => {
       setUploadingKey(uploadKey);
       try {
         if (slot.type === 'BPE') {
           const fd = new FormData();
-          fd.append('filingId', filingId);
+          if (filingId) fd.append('filingId', filingId);
+          else fd.append('year', String(year));
           fd.append('file', file);
-          const bpeNum = bpeNumberInput[filingId]?.trim();
+          const bpeNum = bpeNumberInput[inputKey]?.trim();
           if (bpeNum) fd.append('bpeNumber', bpeNum);
           const res = await fetch('/api/customer/filing-bpe-upload', {
             method: 'POST',
@@ -113,7 +116,7 @@ export default function IndividualFilingHistory() {
           showMsg('success', t('uploadSuccess'));
           setBpeNumberInput((prev) => {
             const next = { ...prev };
-            delete next[filingId];
+            delete next[inputKey];
             return next;
           });
         } else {
@@ -206,7 +209,7 @@ export default function IndividualFilingHistory() {
                   </span>
                 </div>
 
-                {hasFiling && y.documents.length > 0 && (
+                {y.documents.length > 0 && (
                   <div className="mt-4 border rounded-lg overflow-hidden">
                     <div className="grid grid-cols-[90px_1fr_120px_auto] gap-2 px-4 py-2 bg-gray-50 text-[11px] font-semibold text-gray-600 uppercase">
                       <span>{t('colType')}</span>
@@ -216,7 +219,9 @@ export default function IndividualFilingHistory() {
                     </div>
                     {y.documents.map((d, i) => {
                       const hasFile = !!d.path;
-                      const uploadKey = `${y.filingId}:${d.type}:${i}`;
+                      const rowScope = y.filingId || `year:${y.year}`;
+                      const uploadKey = `${rowScope}:${d.type}:${i}`;
+                      const inputKey = rowScope;
                       const isUploading = uploadingKey === uploadKey;
 
                       return (
@@ -245,11 +250,11 @@ export default function IndividualFilingHistory() {
                                 className="h-6 text-[11px] font-mono w-28 ml-1"
                                 placeholder={t('bpeNumberPlaceholder')}
                                 maxLength={50}
-                                value={bpeNumberInput[y.filingId] || ''}
+                                value={bpeNumberInput[inputKey] || ''}
                                 onChange={(e) =>
                                   setBpeNumberInput((prev) => ({
                                     ...prev,
-                                    [y.filingId]: e.target.value,
+                                    [inputKey]: e.target.value,
                                   }))
                                 }
                               />
@@ -303,7 +308,15 @@ export default function IndividualFilingHistory() {
                                   disabled={isUploading}
                                   onChange={(e) => {
                                     const f = e.target.files?.[0];
-                                    if (f) void handleUpload(y.filingId, d, f, uploadKey);
+                                    if (f)
+                                      void handleUpload(
+                                        y.filingId,
+                                        y.year,
+                                        d,
+                                        f,
+                                        uploadKey,
+                                        inputKey,
+                                      );
                                     e.currentTarget.value = '';
                                   }}
                                 />
