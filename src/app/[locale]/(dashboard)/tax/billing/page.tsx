@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from '@/hooks/useSession';
-import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   CreditCard, Loader2, CheckCircle, AlertTriangle, Upload, FileText,
@@ -54,8 +52,6 @@ const NEEDS_ACTION_STATUSES = ['EBILLING_GENERATED', 'PAYMENT_PENDING'];
 
 export default function TaxBillingPage() {
   const { session } = useSession();
-  const params = useParams();
-  const locale = params.locale as string;
   const t = useTranslations('taxBilling');
 
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -269,56 +265,19 @@ export default function TaxBillingPage() {
   const actionNeededCount = items.filter((i) => NEEDS_ACTION_STATUSES.includes(i.status)).length;
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-[1200px]">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <CreditCard className="h-6 w-6 text-indigo-600" />
-          {t('v2PageTitle')}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">{t('v2PageSubtitle')}</p>
-      </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-3">
-            <p className="text-[10px] text-gray-500">{t('totalCount')}</p>
-            <p className="text-xl font-bold">{approvedCount}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-sm border-l-4 border-l-orange-500">
-          <CardContent className="p-3">
-            <p className="text-[10px] text-orange-600">{t('paymentPending')}</p>
-            <p className="text-xl font-bold text-orange-700">{actionNeededCount}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-sm border-l-4 border-l-green-500">
-          <CardContent className="p-3">
-            <p className="text-[10px] text-green-600">{t('completedLabel')}</p>
-            <p className="text-xl font-bold text-green-700">{paidCount}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Year selector */}
-      <div className="flex gap-3 mb-4">
-        <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-          <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {[currentYear - 1, currentYear].map((y) => (
-              <SelectItem key={y} value={String(y)}>{t('yearUnit', { year: y })}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="mx-auto py-10 px-6 max-w-[1100px]">
+      {/* Header — keynote slide: clean title only, no icons or summary cards */}
+      <header className="mb-6">
+        <h1 className="text-[22px] font-bold text-gray-900">{t('v2PageTitle')}</h1>
+        <p className="text-[13px] text-gray-500 mt-1">{t('v2PageSubtitle')}</p>
+      </header>
 
       {/* Message */}
       {message && (
         <div
           className={`mb-4 p-3 rounded-xl text-sm flex items-center gap-2 ${
             message.type === 'success'
-              ? 'bg-green-50 border border-green-200 text-green-800'
+              ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
               : 'bg-red-50 border border-red-200 text-red-800'
           }`}
         >
@@ -327,32 +286,53 @@ export default function TaxBillingPage() {
         </div>
       )}
 
-      {/* Billing Table */}
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <p className="font-semibold">{t('v2ListTitle')}</p>
+      {/* Billing Table card */}
+      <Card className="border border-gray-200 shadow-none">
+        <CardContent className="p-8">
+          {/* Card header: title + discreet year selector + 3 status chips */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <p className="text-base font-bold text-gray-900">{t('v2ListTitle')}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-gray-400">
+                {t('totalCount')} <span className="font-semibold text-gray-700">{approvedCount}</span>
+                <span className="mx-1.5 text-gray-300">·</span>
+                <span className="text-orange-600 font-semibold">{actionNeededCount}</span> {t('paymentPending')}
+                <span className="mx-1.5 text-gray-300">·</span>
+                <span className="text-emerald-600 font-semibold">{paidCount}</span> {t('completedLabel')}
+              </span>
+              <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+                <SelectTrigger className="w-24 h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[currentYear - 1, currentYear].map((y) => (
+                    <SelectItem key={y} value={String(y)}>{t('yearUnit', { year: y })}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           {loading ? (
-            <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+            <div className="text-center py-16">
+              <Loader2 className="h-7 w-7 animate-spin mx-auto text-gray-400" />
             </div>
           ) : items.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-12 text-center text-gray-400">
-              <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
+            <div className="rounded-xl border border-dashed border-gray-200 p-16 text-center text-gray-400">
+              <CreditCard className="h-9 w-9 mx-auto mb-3 opacity-30" />
               <p className="text-sm">{t('v2NoItems')}</p>
               <p className="text-xs mt-1">{t('v2NoItemsHint')}</p>
             </div>
           ) : (
-            <div className="overflow-auto rounded-xl border">
+            <div className="overflow-auto">
               <table className="min-w-full text-sm">
-                <thead className="bg-slate-100">
-                  <tr>
-                    <th className="p-2 text-left">{t('v2ColType')}</th>
-                    <th className="p-2 text-left">{t('v2ColCompany')}</th>
-                    <th className="p-2 text-right">{t('v2ColAmount')}</th>
-                    <th className="p-2 text-left">{t('v2ColBillingCode')}</th>
-                    <th className="p-2 text-left">{t('v2ColPayment')}</th>
-                    <th className="p-2 text-left">{t('v2ColProof')}</th>
+                {/* Column headers — keynote styling: light gray, small caps, generous padding */}
+                <thead>
+                  <tr className="text-left text-[11px] font-semibold text-gray-500">
+                    <th className="px-4 py-3 w-[90px]">{t('v2ColType')}</th>
+                    <th className="px-4 py-3">{t('v2ColCompany')}</th>
+                    <th className="px-4 py-3 w-[130px]">{t('v2ColAmount')}</th>
+                    <th className="px-4 py-3 w-[200px]">{t('v2ColBillingCode')}</th>
+                    <th className="px-4 py-3 w-[200px]">{t('v2ColPayment')}</th>
+                    <th className="px-4 py-3 w-[150px] text-right">{t('v2ColProof')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -362,25 +342,34 @@ export default function TaxBillingPage() {
                     const period = `${item.tax_period_year}-${String(item.tax_period_month).padStart(2, '0')}`;
 
                     return (
-                      <tr key={item.id} className="border-t hover:bg-gray-50">
-                        <td className="p-2 align-top">
-                          <Badge className="bg-indigo-100 text-indigo-700 text-[10px]">{item.tax_type}</Badge>
-                          <p className="text-[10px] text-gray-500 mt-1">{period}</p>
+                      <tr key={item.id} className="border-t border-gray-100">
+                        {/* 세목 */}
+                        <td className="px-4 py-6 align-top">
+                          <p className="text-[13px] font-semibold text-gray-900">{item.tax_type}</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{period}</p>
                         </td>
-                        <td className="p-2 align-top text-sm">
+
+                        {/* 회사 */}
+                        <td className="px-4 py-6 align-top text-[13px] text-gray-800">
                           {item.counterparty_name || companyLabel || session?.fullName || '—'}
                         </td>
-                        <td className="p-2 align-top text-right font-mono">
+
+                        {/* 금액 */}
+                        <td className="px-4 py-6 align-top text-[13px] text-gray-800 font-medium">
                           {fmtRp(item.amount)}
                         </td>
-                        <td className="p-2 align-top">
+
+                        {/* Billing Code — code on top, "ID Billing 출력" pill below */}
+                        <td className="px-4 py-6 align-top">
                           {item.ebilling_code ? (
-                            <div className="space-y-1">
-                              <p className="font-mono text-[11px] text-indigo-900">{item.ebilling_code}</p>
+                            <div className="space-y-2">
+                              <p className="font-mono text-[13px] text-gray-900 tracking-wide">
+                                {item.ebilling_code}
+                              </p>
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-[10px] h-7"
+                                className="h-8 px-3 text-[11px] font-medium rounded-md bg-white border-gray-200 hover:bg-gray-50"
                                 onClick={() => handlePrintIdBilling(item)}
                               >
                                 <Printer className="h-3 w-3 mr-1" />
@@ -388,12 +377,14 @@ export default function TaxBillingPage() {
                               </Button>
                             </div>
                           ) : (
-                            <span className="text-[10px] text-gray-400">—</span>
+                            <span className="text-[11px] text-gray-400">—</span>
                           )}
                         </td>
-                        <td className="p-2 align-top">
+
+                        {/* 납부 — NTPN input only */}
+                        <td className="px-4 py-6 align-top">
                           {isPaid ? (
-                            <div className="text-xs text-green-700 flex items-center gap-1">
+                            <div className="text-xs text-emerald-700 flex items-center gap-1">
                               <CheckCircle className="h-3 w-3" />
                               {t('v2StatusPaid')}
                               {item.payment_date && (
@@ -402,7 +393,7 @@ export default function TaxBillingPage() {
                             </div>
                           ) : needsAction ? (
                             <Input
-                              className="h-8 text-xs font-mono w-40"
+                              className="h-9 text-xs font-mono rounded-md border-gray-200"
                               placeholder={t('v2NtpnPlaceholder')}
                               value={ntpnInput[item.id] || ''}
                               maxLength={16}
@@ -414,24 +405,26 @@ export default function TaxBillingPage() {
                               }
                             />
                           ) : (
-                            <span className="text-[10px] text-gray-400">—</span>
+                            <span className="text-[11px] text-gray-400">—</span>
                           )}
                           {item.bpe_number && (
-                            <div className="text-[9px] text-purple-700 mt-1 flex items-center gap-1">
+                            <div className="text-[10px] text-purple-700 mt-2 flex items-center gap-1">
                               <FileText className="h-2.5 w-2.5" />
                               BPE: {item.bpe_number}
                             </div>
                           )}
                         </td>
-                        <td className="p-2 align-top">
+
+                        {/* 증빙 — stacked: 파일 업로드 / 사진 촬영 / 제출 */}
+                        <td className="px-4 py-6 align-top">
                           {needsAction && !isPaid ? (
-                            <div className="space-y-1">
-                              <label className="block">
-                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-200 text-[10px] cursor-pointer hover:bg-slate-50">
+                            <div className="flex flex-col gap-2 w-[130px] ml-auto">
+                              <label>
+                                <span className="inline-flex w-full items-center justify-center h-8 px-3 text-[11px] font-medium rounded-md bg-white border border-gray-200 text-gray-700 cursor-pointer hover:bg-gray-50">
                                   {uploading === item.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
                                   ) : (
-                                    <Upload className="h-3 w-3" />
+                                    <Upload className="h-3 w-3 mr-1" />
                                   )}
                                   {t('v2UploadFile')}
                                 </span>
@@ -449,7 +442,7 @@ export default function TaxBillingPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-[10px] h-7 w-full"
+                                className="h-8 px-3 text-[11px] font-medium rounded-md bg-white border-gray-200 hover:bg-gray-50"
                                 disabled={uploading === item.id}
                                 onClick={() => {
                                   const input = document.createElement('input');
@@ -466,7 +459,7 @@ export default function TaxBillingPage() {
                               </Button>
                               <Button
                                 size="sm"
-                                className="text-[10px] h-7 w-full"
+                                className="h-8 px-3 text-[11px] font-medium rounded-md bg-slate-400 text-white hover:bg-slate-500 disabled:opacity-60"
                                 disabled={
                                   submittingNtpn === item.id ||
                                   (ntpnInput[item.id] || '').length < 16
@@ -482,13 +475,10 @@ export default function TaxBillingPage() {
                               </Button>
                             </div>
                           ) : item.status === 'DJP_SUBMITTED' ? (
-                            // DJP가 고객 이메일로 BPE를 직접 보내므로,
-                            // 고객이 BPE PDF를 업로드할 수 있는 인터페이스.
-                            // (미리보기 앞에 업로드 자리를 둔다는 keynote 지침)
-                            <div className="space-y-1">
+                            <div className="flex flex-col gap-2 w-[160px] ml-auto">
                               <p className="text-[10px] text-purple-700">{t('v2BpeUploadHint')}</p>
                               <Input
-                                className="h-8 text-xs font-mono w-40"
+                                className="h-8 text-[11px] font-mono rounded-md border-gray-200"
                                 placeholder={t('v2BpeNumberPlaceholder')}
                                 value={bpeNumberInput[item.id] || ''}
                                 maxLength={50}
@@ -499,12 +489,12 @@ export default function TaxBillingPage() {
                                   }))
                                 }
                               />
-                              <label className="block">
-                                <span className="inline-flex w-full items-center justify-center gap-1 px-2 py-1 rounded border border-purple-200 bg-purple-50 text-[10px] text-purple-800 cursor-pointer hover:bg-purple-100">
+                              <label>
+                                <span className="inline-flex w-full items-center justify-center h-8 px-3 text-[11px] font-medium rounded-md border border-purple-200 bg-purple-50 text-purple-800 cursor-pointer hover:bg-purple-100">
                                   {uploadingBpe === item.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
                                   ) : (
-                                    <Upload className="h-3 w-3" />
+                                    <Upload className="h-3 w-3 mr-1" />
                                   )}
                                   {t('v2UploadBpe')}
                                 </span>
@@ -518,8 +508,8 @@ export default function TaxBillingPage() {
                               </label>
                             </div>
                           ) : item.bpe_file_url || item.status === 'BPE_UPLOADED' || item.status === 'COMPLETED' ? (
-                            <div className="space-y-1">
-                              <div className="text-[10px] text-green-700 flex items-center gap-1">
+                            <div className="flex flex-col items-end gap-1.5">
+                              <div className="text-[11px] text-emerald-700 flex items-center gap-1">
                                 <CheckCircle className="h-3 w-3" />
                                 {item.status === 'COMPLETED' ? t('filingComplete') : t('v2BpeUploaded')}
                               </div>
@@ -528,7 +518,7 @@ export default function TaxBillingPage() {
                                   href={item.bpe_file_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-[10px] text-blue-600 hover:underline flex items-center gap-1"
+                                  className="text-[11px] text-blue-600 hover:underline flex items-center gap-1"
                                 >
                                   <FileText className="h-2.5 w-2.5" />
                                   {t('v2BpePreview')}
@@ -536,7 +526,7 @@ export default function TaxBillingPage() {
                               )}
                             </div>
                           ) : (
-                            <span className="text-[10px] text-gray-400">—</span>
+                            <span className="text-[11px] text-gray-400 block text-right">—</span>
                           )}
                         </td>
                       </tr>
@@ -547,9 +537,9 @@ export default function TaxBillingPage() {
             </div>
           )}
 
-          <div className="text-xs text-gray-500">
+          <p className="mt-6 text-[11px] text-gray-400">
             {t('v2NoticeApprovedOnly')}
-          </div>
+          </p>
         </CardContent>
       </Card>
     </div>
