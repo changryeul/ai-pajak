@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, ArrowRight, Calculator, CheckCircle, Loader2, Save, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NATIONALITIES, nationalityLabel, type Locale as NLocale } from '@/config/nationalities';
 
 interface TaxPreview {
   bruto: number;
@@ -380,15 +381,7 @@ export default function MyProfilePage() {
                     <span>{t('foreignToggle')}:</span>
                     {form.nationality ? (
                       <span className="font-semibold text-gray-800">
-                        {t(
-                          form.nationality === 'KR'
-                            ? 'nationalityKR'
-                            : form.nationality === 'US'
-                              ? 'nationalityUS'
-                              : form.nationality === 'JP'
-                                ? 'nationalityJP'
-                                : 'nationalityKR',
-                        )}
+                        {nationalityLabel(form.nationality, locale as NLocale)}
                       </span>
                     ) : (
                       <span className="text-gray-400">—</span>
@@ -413,14 +406,16 @@ export default function MyProfilePage() {
                     <span className={form.nationality ? 'text-gray-500' : 'text-gray-300'}>
                       (
                       <select
-                        className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
                         value={form.nationality || ''}
                         disabled={!form.nationality}
                         onChange={(e) => setForm({ ...form, nationality: e.target.value })}
                       >
-                        <option value="KR">{t('nationalityKR')}</option>
-                        <option value="US">{t('nationalityUS')}</option>
-                        <option value="JP">{t('nationalityJP')}</option>
+                        {NATIONALITIES.map((n) => (
+                          <option key={n.code} value={n.code}>
+                            {n.labels[(locale as NLocale)] || n.labels.en}
+                          </option>
+                        ))}
                       </select>
                       )
                     </span>

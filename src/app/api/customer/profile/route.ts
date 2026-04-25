@@ -51,10 +51,20 @@ const patchSchema = z.object({
   djp_password_hint: z.string().trim().max(100).nullable().optional(),
   djp_passphrase_hint: z.string().trim().max(200).nullable().optional(),
   efin: z.string().trim().max(20).nullable().optional(),
-  // Cross-border profile (PR3 Batch 3 / T-005). ISO 3166-1 alpha-2.
-  // The DB CHECK constraint enforces the supported subset.
-  nationality: z.enum(['ID', 'KR', 'US', 'JP']).nullable().optional(),
-  tax_residence_country: z.enum(['ID', 'KR', 'US', 'JP']).nullable().optional(),
+  // Cross-border profile. ISO 3166-1 alpha-2 (uppercase), plus sentinel
+  // 'OTHER'. DB CHECK constraint was relaxed in 20260425000001 to match.
+  nationality: z
+    .string()
+    .trim()
+    .regex(/^([A-Z]{2}|OTHER)$/, 'Must be ISO 3166-1 alpha-2 code or OTHER')
+    .nullable()
+    .optional(),
+  tax_residence_country: z
+    .string()
+    .trim()
+    .regex(/^([A-Z]{2}|OTHER)$/, 'Must be ISO 3166-1 alpha-2 code or OTHER')
+    .nullable()
+    .optional(),
 });
 
 async function handlePatch(req: RequestWithSession): Promise<Response> {

@@ -26,6 +26,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowRight, Calculator, CheckCircle, Loader2, Save } from 'lucide-react';
+import { NATIONALITIES, type Locale as NLocale } from '@/config/nationalities';
 
 interface ProfileForm {
   full_name: string;
@@ -219,14 +220,16 @@ export default function InlineProfileAndPreview() {
               >
                 (
                 <select
-                  className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-8 rounded border border-input bg-white px-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
                   value={form.nationality || ''}
                   disabled={!form.nationality}
                   onChange={(e) => setForm({ ...form, nationality: e.target.value })}
                 >
-                  <option value="KR">{t('nationalityKR')}</option>
-                  <option value="US">{t('nationalityUS')}</option>
-                  <option value="JP">{t('nationalityJP')}</option>
+                  {NATIONALITIES.map((n) => (
+                    <option key={n.code} value={n.code}>
+                      {n.labels[(locale as NLocale)] || n.labels.en}
+                    </option>
+                  ))}
                 </select>
                 )
               </span>

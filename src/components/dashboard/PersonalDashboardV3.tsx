@@ -568,13 +568,10 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
         </CardContent>
       </Card>
 
-      {/* 10b. CTAs */}
+      {/* 10b. CTAs — keynote 2026-04-25: 진행현황보기 버튼 제거, 시작 버튼만 */}
       <div className="flex gap-3">
         <Button asChild className="bg-gray-800 hover:bg-gray-900 text-white">
           <Link href={`/${locale}/tax/spt-tahunan`}>{t('startFilingCta')}</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href={`/${locale}/filings`}>{t('viewProgressCta')}</Link>
         </Button>
       </div>
 

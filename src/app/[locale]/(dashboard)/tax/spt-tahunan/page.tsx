@@ -25,7 +25,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 type FormId = '1770ss' | '1770s' | '1770';
 type YN = 'yes' | 'no';
@@ -178,16 +178,8 @@ export default function SPTTahunanPage() {
         })}
       </div>
 
-      {/* Unified "다음 단계로 이동" button — applies the AI recommendation */}
-      <div className="mt-6 flex justify-end">
-        <Button
-          className="bg-gray-800 hover:bg-gray-900 text-white h-11 px-6"
-          onClick={() => goTo(recommendation)}
-        >
-          {ts('nextStepCta')}
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
+      {/* keynote 2026-04-25: 하단 "다음 단계로 이동" 버튼 제거 —
+           각 카드의 "이 유형 선택" 버튼으로 바로 진입 */}
     </div>
   );
 }

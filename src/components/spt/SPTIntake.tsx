@@ -188,15 +188,86 @@ export function SPTIntake({
           fetch('/api/documents/ocr-extract', { method: 'POST', body: ocrForm })
             .then((r) => (r.ok ? r.json() : null))
             .then((ocr) => {
-              if (!ocr || ocr.status !== 'COMPLETED') return;
-              const extracted = (ocr.extractedData || {}) as Record<string, unknown>;
-              const gross = Number(extracted.grossAmount);
+              if (!ocr?.success || !ocr?.data) return;
+              const extracted = (ocr.data.extractedData || {}) as Record<string, unknown>;
+              const gross = Number(extracted.grossAmount ?? extracted.penghasilanBruto);
               if (Number.isFinite(gross) && gross > 0) {
                 setGrossIncome((prev) => (prev ? prev : String(Math.round(gross))));
               }
-              const withheld = Number(extracted.taxAmount);
+              const withheld = Number(extracted.taxAmount ?? extracted.pphDipotong);
               if (Number.isFinite(withheld) && withheld > 0) {
                 setPph23Amount((prev) => (prev ? prev : String(Math.round(withheld))));
+              }
+              // Mirror employer + employee identity to /my-profile so the
+              // customer doesn't have to re-type it. Fire-and-forget.
+              const profilePatch: Record<string, unknown> = {};
+              if (typeof extracted.employerName === 'string' && extracted.employerName.trim()) {
+                profilePatch.employer_name = String(extracted.employerName).trim().slice(0, 200);
+              }
+              if (typeof extracted.employeeName === 'string' && extracted.employeeName.trim()) {
+                profilePatch.full_name = String(extracted.employeeName).trim().slice(0, 100);
+              }
+              const eNpwp = String(extracted.employeeNpwp || '').replace(/\D/g, '');
+              if (eNpwp.length === 15) profilePatch.npwp = eNpwp;
+              const eNik = String(extracted.employeeNik || '').replace(/\D/g, '');
+              if (eNik.length === 16) profilePatch.nik = eNik;
+              if (typeof extracted.employeeStatus === 'string' && /^(TK|K|K\/I)\/[0-3]$/.test(extracted.employeeStatus)) {
+                profilePatch.ptkp_status = extracted.employeeStatus;
+              }
+              if (Object.keys(profilePatch).length > 0) {
+                fetch('/api/customer/profile', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify(profilePatch),
+                }).catch(() => { /* non-fatal */ });
+              }
+            })
+            .catch(() => { /* non-fatal */ });
+        }
+
+        // OCR auto-prefill for KK uploads — parses family card, derives PTKP,
+        // then mirrors the head-of-household identity + address + PTKP status
+        // to /my-profile so the customer doesn't re-type it elsewhere.
+        if (kind === 'KK') {
+          const ocrForm = new FormData();
+          ocrForm.append('file', file);
+          ocrForm.append('expectedCategory', 'KARTU_KELUARGA');
+          fetch('/api/documents/ocr-extract', { method: 'POST', body: ocrForm })
+            .then((r) => (r.ok ? r.json() : null))
+            .then(async (ocr) => {
+              if (!ocr?.success || !ocr?.data) return;
+              const kk = (ocr.data.extractedData || {}) as Record<string, unknown>;
+              const { deriveFactsFromKK, normaliseKartuKeluarga } = await import(
+                '@/lib/ocr/family-card-types'
+              );
+              type KKRaw = Parameters<typeof normaliseKartuKeluarga>[0];
+              const norm = normaliseKartuKeluarga(kk as unknown as KKRaw);
+              const facts = deriveFactsFromKK(norm);
+
+              const profilePatch: Record<string, unknown> = {};
+              if (facts.head?.fullName) {
+                profilePatch.full_name = facts.head.fullName.slice(0, 100);
+              }
+              if (facts.head?.nik && facts.head.nik.length === 16) {
+                profilePatch.nik = facts.head.nik;
+              }
+              if (norm.address) {
+                profilePatch.address = norm.address.slice(0, 500);
+              }
+              // Derive PTKP: K/I/n if spouse earns, K/n if spouse exists, TK/n otherwise
+              const n = facts.dependentsCapped;
+              const ptkp = facts.looksMarried ? `K/${n}` : `TK/${n}`;
+              if (/^(TK|K)\/[0-3]$/.test(ptkp)) {
+                profilePatch.ptkp_status = ptkp;
+              }
+              if (Object.keys(profilePatch).length > 0) {
+                fetch('/api/customer/profile', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify(profilePatch),
+                }).catch(() => { /* non-fatal */ });
               }
             })
             .catch(() => { /* non-fatal */ });
@@ -236,8 +307,9 @@ export function SPTIntake({
         fetch('/api/documents/ocr-extract', { method: 'POST', body: ocrForm })
           .then((r) => (r.ok ? r.json() : null))
           .then((ocr) => {
-            if (!ocr || ocr.status !== 'COMPLETED') return;
-            const gross = Number((ocr.extractedData || {}).grossAmount);
+            if (!ocr?.success || !ocr?.data) return;
+            const extracted = (ocr.data.extractedData || {}) as Record<string, unknown>;
+            const gross = Number(extracted.grossAmount ?? extracted.penghasilanBruto);
             if (Number.isFinite(gross) && gross > 0) {
               setExtraA1Entries((rows) =>
                 rows.map((r, i) =>
