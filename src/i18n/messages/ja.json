@@ -6250,5 +6250,13 @@
     "actionCompliance": "参照する規制（Pasal / PMK / PP）を示し、法的根拠の理解を示しましょう。",
     "actionBaseline": "良いパフォーマンスです。本番の調査に備えて書類管理習慣を維持しましょう。",
     "restart": "再開"
+  },
+  "aiReview": {
+    "sectionTitle": "AI確認が必要",
+    "sectionSubtitle": "入力内容の一部が不足または不明瞭です。赤枠で表示された項目を修正してください。",
+    "flaggedCount": "{n}項目",
+    "submitBtn": "修正を送信",
+    "submitSuccess": "修正内容を送信しました。担当者が再確認のうえ承認を依頼します。",
+    "submitFailed": "送信に失敗しました"
   }
 }

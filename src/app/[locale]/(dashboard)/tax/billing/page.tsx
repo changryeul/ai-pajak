@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import AiReviewSection from '@/components/tax-billing/AiReviewSection';
 
 interface BillingItem {
   id: string;
@@ -285,6 +286,11 @@ export default function TaxBillingPage() {
           {message.text}
         </div>
       )}
+
+      {/* AI review — shows up only when there are flagged items waiting
+          for customer input. Reloads the billing list on submit so items
+          advancing to PENDING_APPROVAL disappear from here. */}
+      <AiReviewSection onDone={() => loadItems()} />
 
       {/* Billing Table card */}
       <Card className="border border-gray-200 shadow-none">

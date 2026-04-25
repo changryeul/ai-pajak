@@ -6250,5 +6250,13 @@
     "actionCompliance": "引用您依据的法规（Pasal/PMK/PP），展示对法律依据的理解。",
     "actionBaseline": "表现良好。请保持文档习惯以应对真正的审计。",
     "restart": "重新开始"
+  },
+  "aiReview": {
+    "sectionTitle": "需要AI确认",
+    "sectionSubtitle": "您提交的部分数据缺失或不清晰。请更新红色边框标记的字段。",
+    "flaggedCount": "{n}项",
+    "submitBtn": "提交修改",
+    "submitSuccess": "您的修改已提交。顾问将复核后申请批准。",
+    "submitFailed": "提交失败"
   }
 }

@@ -6251,5 +6251,13 @@
     "actionCompliance": "참조 법규(Pasal/PMK/PP)를 명시하세요 — 법적 근거에 대한 이해를 보여주세요.",
     "actionBaseline": "좋은 답변이었습니다. 실제 조사를 위해 문서 관리 습관을 유지하세요.",
     "restart": "다시 시작"
+  },
+  "aiReview": {
+    "sectionTitle": "AI 확인 요청",
+    "sectionSubtitle": "고객님이 입력한 내용 중 일부가 누락되었거나 확인이 필요합니다. 빨간 테두리로 표시된 항목을 수정해 주세요.",
+    "flaggedCount": "{n}개 항목",
+    "submitBtn": "수정 제출",
+    "submitSuccess": "수정사항이 제출되었습니다. 상담원이 검토 후 승인을 요청합니다.",
+    "submitFailed": "제출 실패"
   }
 }

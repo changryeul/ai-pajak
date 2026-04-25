@@ -6250,5 +6250,13 @@
     "actionCompliance": "Cite the regulation (Pasal / PMK / PP) you rely on — demonstrate knowledge of the legal basis.",
     "actionBaseline": "Solid performance. Keep the documentation discipline for a real audit.",
     "restart": "Restart"
+  },
+  "aiReview": {
+    "sectionTitle": "AI Review Needed",
+    "sectionSubtitle": "Some of your submitted data is missing or unclear. Please update the fields highlighted in red.",
+    "flaggedCount": "{n} flagged",
+    "submitBtn": "Submit Changes",
+    "submitSuccess": "Your changes were submitted. The consultant will re-check and request approval.",
+    "submitFailed": "Submit failed"
   }
 }

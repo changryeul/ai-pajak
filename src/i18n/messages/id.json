@@ -6250,5 +6250,13 @@
     "actionCompliance": "Sitasi regulasi (Pasal / PMK / PP) yang Anda rujuk — tunjukkan pemahaman dasar hukum.",
     "actionBaseline": "Performa bagus. Pertahankan kebiasaan dokumentasi yang baik untuk audit sesungguhnya.",
     "restart": "Mulai Lagi"
+  },
+  "aiReview": {
+    "sectionTitle": "Konfirmasi AI Diperlukan",
+    "sectionSubtitle": "Beberapa data yang Anda kirim hilang atau kurang jelas. Mohon perbarui kolom yang ditandai merah.",
+    "flaggedCount": "{n} item",
+    "submitBtn": "Kirim Perubahan",
+    "submitSuccess": "Perubahan Anda telah dikirim. Konsultan akan memeriksa ulang dan mengajukan persetujuan.",
+    "submitFailed": "Gagal mengirim"
   }
 }
