@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { fmtRp } from '@/lib/utils';
+import FlagFieldsPanel from '@/components/operator/FlagFieldsPanel';
 
 interface Document {
   id: string;
@@ -356,7 +357,7 @@ export default function OperatorReviewPage() {
           </CardContent></Card>
         </TabsContent>
 
-        {/* Tab: Queue items */}
+        {/* Tab: Queue items — each row has an inline "🚩 AI 플래그" toggle */}
         <TabsContent value="queue">
           <Card><CardContent className="p-4">
             {queueItems.length === 0 ? (
@@ -364,20 +365,58 @@ export default function OperatorReviewPage() {
             ) : (
               <div className="space-y-2">
                 {queueItems.map(q => (
-                  <div key={q.id} className="flex items-center justify-between p-3 rounded-lg border">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-indigo-100 text-indigo-700 text-[10px]">{q.tax_type}</Badge>
-                      <span className="text-sm">{q.tax_period_year}-{String(q.tax_period_month).padStart(2, '0')}</span>
-                      {q.amount > 0 && <span className="text-xs font-mono text-gray-500">{fmtRp(q.amount)}</span>}
-                    </div>
-                    <Badge className="text-[9px]">{q.status}</Badge>
-                  </div>
+                  <QueueRowWithFlagPanel
+                    key={q.id}
+                    queueItem={q}
+                  />
                 ))}
               </div>
             )}
           </CardContent></Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+/**
+ * Queue row that expands to reveal the FlagFieldsPanel so the operator
+ * can write red-bordered field flags that surface on the customer's
+ * /tax/billing page (keynote slide-21).
+ */
+function QueueRowWithFlagPanel({ queueItem }: { queueItem: QueueItem }) {
+  const [open, setOpen] = useState(false);
+  const isDataReview = queueItem.status === 'DATA_REVIEW';
+
+  return (
+    <div className="rounded-lg border">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-t-lg"
+      >
+        <div className="flex items-center gap-2">
+          <Badge className="bg-indigo-100 text-indigo-700 text-[10px]">{queueItem.tax_type}</Badge>
+          <span className="text-sm">{queueItem.tax_period_year}-{String(queueItem.tax_period_month).padStart(2, '0')}</span>
+          {queueItem.amount > 0 && (
+            <span className="text-xs font-mono text-gray-500">{fmtRp(queueItem.amount)}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {isDataReview && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold">
+              고객 수정 대기
+            </span>
+          )}
+          <Badge className="text-[9px]">{queueItem.status}</Badge>
+          <span className="text-[10px] text-gray-400">{open ? '−' : '+'}</span>
+        </div>
+      </button>
+      {open && (
+        <div className="border-t p-3">
+          <FlagFieldsPanel queueItemId={queueItem.id} />
+        </div>
+      )}
     </div>
   );
 }
