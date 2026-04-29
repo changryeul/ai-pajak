@@ -10,10 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Loader2, Plus, Receipt, FileText, DollarSign, CheckCircle,
   AlertTriangle, Sparkles, X, ChevronDown, ChevronRight,
-  Calculator, Shield, Upload, Camera, Image, ArrowRight,
+  Calculator, Shield, Upload, Camera, ArrowRight,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
@@ -202,8 +203,8 @@ export default function PPh23Page() {
   useEffect(() => { loadData(); }, [loadData]);
 
   // Add transaction
-  const handleAddTransaction = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddTransaction = async (e: React.FormEvent | null, closeAfter: boolean = false) => {
+    if (e) e.preventDefault();
     if (!customerId || !fCounterparty || !fGrossAmount) return;
     setSaving(true);
     try {
@@ -230,6 +231,7 @@ export default function PPh23Page() {
       const data = await res.json();
       if (data.success) {
         showMsg('success', `${t('k12_c05543')} — ${t('k13_e2bf5c')} ${fmtRp(data.data?.tax_amount || 0)}`);
+        // Always clear the per-transaction fields so the form is ready for the next entry.
         setFGrossAmount('');
         setFInvoiceNumber('');
         setFDescription('');
@@ -237,6 +239,9 @@ export default function PPh23Page() {
         setFReinvestedOverride('');
         setResolutionPreview(null);
         loadData();
+        if (closeAfter) {
+          setShowForm(false);
+        }
       } else {
         showMsg('error', data.error || t('k14_5cf2ad'));
       }
@@ -367,12 +372,28 @@ export default function PPh23Page() {
 
   // Document upload
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Array<{
     id: string; file_name: string; document_type: string; ocr_status: string;
     ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
     created_at: string;
   }>>([]);
   const [uploading, setUploading] = useState(false);
+
+  // Month picker — opens before upload/manual entry
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'csv' | 'file' | 'camera' | 'manual' | null>(null);
+  const [pickedYear, setPickedYear] = useState<number>(currentYear);
+  const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
+  const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
+  const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
+
+  const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
+
+  const openMonthPicker = (action: 'csv' | 'file' | 'camera' | 'manual') => {
+    setPendingAction(action);
+    setMonthPickerOpen(true);
+  };
 
   // Load documents for this period
   useEffect(() => {
@@ -383,16 +404,18 @@ export default function PPh23Page() {
       .catch(() => {});
   }, [customerId, period, transactions]);
 
-  const handleDocUpload = async (files: FileList | null) => {
+  const handleDocUpload = async (files: FileList | null, source: string = 'WEB', docType: string = 'INVOICE', uploadPeriod?: string) => {
     if (!files || !customerId) return;
     setUploading(true);
     let count = 0;
+    const taxPeriod = uploadPeriod || confirmedPeriod;
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.append('file', file);
       fd.append('customerId', customerId);
-      fd.append('documentType', 'INVOICE');
-      fd.append('uploadSource', 'WEB');
+      fd.append('documentType', docType);
+      fd.append('uploadSource', source);
+      if (taxPeriod) fd.append('taxPeriod', taxPeriod);
       try {
         const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
         const data = await res.json();
@@ -404,14 +427,39 @@ export default function PPh23Page() {
     }
     if (count > 0) {
       showMsg('success', `${count} ${t('k19_4c0fb1')}`);
+      // Sync displayed period to the uploaded month so OCR auto-create cards show.
+      if (taxPeriod) setPeriod(taxPeriod);
       setTimeout(() => {
-        fetch(`/api/documents?customerId=${customerId}&period=${period}`)
+        fetch(`/api/documents?customerId=${customerId}&period=${taxPeriod || period}`)
           .then(r => r.json())
           .then(d => { if (d.success) setUploadedDocs(d.data || []); })
           .catch(() => {});
       }, 2000);
     }
     setUploading(false);
+  };
+
+  const confirmMonthPicker = () => {
+    const period = periodLabel(pickedYear, pickedMonth);
+    setConfirmedPeriod(period);
+    setMonthPickerOpen(false);
+    setTimeout(() => {
+      if (pendingAction === 'csv') {
+        csvInputRef.current?.click();
+      } else if (pendingAction === 'file') {
+        fileInputRef.current?.click();
+      } else if (pendingAction === 'camera') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = (e) => handleDocUpload((e.target as HTMLInputElement).files, 'CAMERA', 'INVOICE', period);
+        input.click();
+      } else if (pendingAction === 'manual') {
+        setPeriod(period);
+        setShowForm(true);
+      }
+    }, 50);
   };
 
   return (
@@ -422,6 +470,18 @@ export default function PPh23Page() {
         step={1}
         aiSteps={[tsc('stepAiProcess'), tsc('stepRateAndTax'), tsc('stepIdBillingGen')]}
       />
+
+      {/* Filing process — stepper moved to top so the user always sees overall progress */}
+      {transactions.length > 0 && (
+        <FilingSteps
+          customerId={customerId}
+          period={period}
+          transactions={transactions}
+          summary={summary}
+          pendingBP={pendingBP}
+          locale={locale}
+        />
+      )}
 
       {/* Controls */}
       <div className="flex flex-wrap gap-3 mb-4">
@@ -480,8 +540,24 @@ export default function PPh23Page() {
                   showMsg('success', t('templateComingSoon'));
                 }}
               >
-                <Download className="h-3 w-3 mr-1" />{t('inputModeTemplateBtn')}
+                <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownload')}
               </Button>
+              <Button
+                size="sm"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => openMonthPicker('csv')}
+                disabled={uploading || !customerId}
+              >
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
+                {t('inputTemplateUploadBtn')}
+              </Button>
+              {confirmedPeriod && pendingAction === 'csv' && (
+                <p className="text-[10px] text-blue-700 text-center">
+                  {t('monthPickerSelected', { period: confirmedPeriod })}
+                </p>
+              )}
+              <input ref={csvInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
+                onChange={e => handleDocUpload(e.target.files, 'WEB', 'INVOICE')} />
             </div>
             <div className="mt-3 pt-3 border-t border-gray-100">
               <p className="text-[10px] text-gray-500 font-medium">
@@ -510,16 +586,42 @@ export default function PPh23Page() {
               <Button
                 size="sm"
                 className="w-full bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => showMsg('success', t('uploadComingSoon'))}
+                onClick={() => openMonthPicker('file')}
+                disabled={uploading || !customerId}
               >
-                <FileUp className="h-3 w-3 mr-1" />{t('inputModeUploadBtn')}
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileUp className="h-3 w-3 mr-1" />}
+                {t('inputModeUploadBtn')}
               </Button>
+              {cameraAvailable && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => openMonthPicker('camera')}
+                  disabled={uploading || !customerId}
+                >
+                  <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
+                </Button>
+              )}
+              {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
+                <p className="text-[10px] text-emerald-700 text-center">
+                  {t('monthPickerSelected', { period: confirmedPeriod })}
+                </p>
+              )}
+              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
+                onChange={e => handleDocUpload(e.target.files, 'WEB', 'INVOICE')} />
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
               <p className="text-[10px] text-gray-500 flex items-center gap-1">
                 <Sparkles className="h-3 w-3 text-emerald-500" />
                 {t('uploadHint')}
               </p>
+              {cameraAvailable && (
+                <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                  <Camera className="h-3 w-3 text-emerald-500" />
+                  {t('inputCameraHint')}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -540,11 +642,16 @@ export default function PPh23Page() {
               <Button
                 size="sm"
                 className="w-full bg-purple-600 hover:bg-purple-700"
-                onClick={() => setShowForm(true)}
+                onClick={() => openMonthPicker('manual')}
                 disabled={!customerId}
               >
                 <Pencil className="h-3 w-3 mr-1" />{t('inputModeManualBtn')}
               </Button>
+              {confirmedPeriod && pendingAction === 'manual' && (
+                <p className="text-[10px] text-purple-700 text-center">
+                  {t('monthPickerSelected', { period: confirmedPeriod })}
+                </p>
+              )}
             </div>
             <div className="mt-3 pt-3 border-t border-gray-100">
               <p className="text-[10px] text-gray-500">
@@ -584,75 +691,6 @@ export default function PPh23Page() {
           </p>
         </CardContent></Card>
       </div>
-
-      {/* Document upload section */}
-      <Card className="mb-4">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-sm flex items-center gap-2">
-              <Upload className="h-4 w-4 text-blue-600" />
-              {t('k29_5d7277')} ({uploadedDocs.length}{t('k30_bcbcd4')}
-            </h3>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || !customerId}>
-                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                {t('k31_6c03f0')}
-              </Button>
-              {cameraAvailable && (
-                <Button size="sm" variant="outline" disabled={uploading || !customerId}
-                  onClick={() => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.capture = 'environment';
-                    input.onchange = (e) => handleDocUpload((e.target as HTMLInputElement).files);
-                    input.click();
-                  }}>
-                  <Camera className="h-3 w-3 mr-1" />{t('k32_8383f9')}
-                </Button>
-              )}
-              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
-                onChange={e => handleDocUpload(e.target.files)} />
-            </div>
-          </div>
-
-          {uploadedDocs.length === 0 ? (
-            <div className="text-center py-6 text-xs text-gray-400 border-2 border-dashed rounded-lg">
-              <Image className="h-8 w-8 mx-auto mb-2 opacity-30" />
-              <p>{t('k33_d006ac')}</p>
-              <p className="text-[10px] mt-1">OCR{t('k34_425c07')}</p>
-            </div>
-          ) : (
-            <div className="space-y-1 max-h-40 overflow-y-auto">
-              {uploadedDocs.map(doc => (
-                <div key={doc.id} className="flex items-center justify-between p-2 rounded border text-xs hover:bg-gray-50">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Badge className={
-                      doc.ocr_status === 'COMPLETED' ? 'text-[8px] bg-green-100 text-green-700' :
-                      doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
-                      'text-[8px] bg-gray-100 text-gray-600'
-                    }>
-                      {doc.ocr_status === 'COMPLETED' ? 'OCR ' + t('k35_4f8e30') : doc.ocr_status === 'PROCESSING' ? t('k36_95d1e4') : t('k28_65905a')}
-                    </Badge>
-                    <span className="truncate">{doc.file_name}</span>
-                    {doc.ocr_result?.confidence && (
-                      <span className="text-[9px] text-gray-400">{(doc.ocr_result.confidence * 100).toFixed(0)}%</span>
-                    )}
-                  </div>
-                  {doc.ocr_status === 'COMPLETED' && doc.ocr_result?.extractedData && (
-                    <div className="flex items-center gap-2 text-[10px] text-green-700 flex-shrink-0">
-                      <Sparkles className="h-3 w-3" />
-                      {Object.entries(doc.ocr_result.extractedData).slice(0, 2).map(([k, v]) => (
-                        <span key={k}>{k}: {typeof v === 'number' ? fmtRp(v) : String(v)}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* OCR → Auto-create transactions + NPWP validation + DGT Form */}
       {uploadedDocs.filter(d => d.ocr_status === 'COMPLETED' && d.ocr_result?.extractedData).length > 0 && (
@@ -763,7 +801,7 @@ export default function PPh23Page() {
               <p className="text-[11px] text-gray-400">{t('k62_cdba0c')}</p>
             </div>
           ) : (
-            <form onSubmit={handleAddTransaction} className="space-y-3">
+            <form onSubmit={(e) => handleAddTransaction(e, false)} className="space-y-3">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-bold text-sm">{t('k63_b9054b')}</h3>
                 <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)}>
@@ -1032,12 +1070,21 @@ export default function PPh23Page() {
                 </label>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button type="submit" disabled={saving || !fCounterparty || !fGrossAmount}>
-                  {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Calculator className="h-3 w-3 mr-1" />}
-                  {t('k112_cf7d46')}
+                  {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+                  {t('btnSaveAndAdd')}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>{t('k113_d9de21')}</Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={saving || !fCounterparty || !fGrossAmount}
+                  onClick={() => handleAddTransaction(null, true)}
+                >
+                  {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Calculator className="h-3 w-3 mr-1" />}
+                  {t('btnSaveAndClose')}
+                </Button>
+                <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>{t('k113_d9de21')}</Button>
               </div>
             </form>
           )}
@@ -1318,41 +1365,65 @@ export default function PPh23Page() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════ */}
-      {/* Filing process steps — 5~7단계 통합       */}
-      {/* ══════════════════════════════════════════ */}
-      {transactions.length > 0 && (
-        <FilingSteps
-          customerId={customerId}
-          period={period}
-          transactions={transactions}
-          summary={summary}
-          pendingBP={pendingBP}
-          onRefresh={loadData}
-          showMsg={showMsg}
-          locale={locale}
-        />
-      )}
+
+      {/* Month picker dialog — opens before any input action */}
+      <Dialog open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('monthPickerTitle')}</DialogTitle>
+            <DialogDescription>{t('monthPickerDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <div>
+              <Label className="text-xs">{t('monthPickerYear')}</Label>
+              <Select value={String(pickedYear)} onValueChange={v => setPickedYear(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map(y => (
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">{t('monthPickerMonth')}</Label>
+              <Select value={String(pickedMonth)} onValueChange={v => setPickedMonth(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                    <SelectItem key={m} value={String(m)}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMonthPickerOpen(false)}>
+              {t('k113_d9de21')}
+            </Button>
+            <Button onClick={confirmMonthPicker}>
+              <CheckCircle className="h-4 w-4 mr-1" />
+              {t('monthPickerConfirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 // ── Filing Steps Sub-component ──
 function FilingSteps({
-  customerId, period, transactions, summary, pendingBP, onRefresh, showMsg, locale,
+  customerId, period, transactions, summary, pendingBP, locale,
 }: {
   customerId: string;
   period: string;
   transactions: Transaction[];
   summary: Summary;
   pendingBP: number;
-  onRefresh: () => void;
-  showMsg: (type: 'success' | 'error', text: string) => void;
   locale: string;
 }) {
   const t = useTranslations('pph23Page');
-  const [generating, setGenerating] = useState(false);
-  const [creatingSPT, setCreatingSPT] = useState(false);
   const [sptResult, setSptResult] = useState<{
     totalGrossIncome: number; totalTaxWithheld: number; itemCount: number;
     submissionDeadline: string; isOverdue: boolean; filingId?: string;
@@ -1395,39 +1466,6 @@ function FilingSteps({
     { id: 5, label: 'DJP ' + t('k137_d6ed72'), done: false, desc: t('k138_48e2fc') },
   ];
 
-  const handleCreateSPT = async () => {
-    setCreatingSPT(true);
-    try {
-      const res = await fetch('/api/tax/spt-masa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
-      });
-      const data = await res.json();
-      if (data.success || data.sptMasa) {
-        // API returns { success, sptMasa, filingId, ... } at root level
-        const spt = data.sptMasa || data.data?.sptMasa;
-        if (spt) {
-          setSptResult({
-            totalGrossIncome: spt.totalGrossIncome || 0,
-            totalTaxWithheld: spt.totalTaxWithheld || 0,
-            itemCount: spt.itemCount || 0,
-            submissionDeadline: spt.submissionDeadline || '',
-            isOverdue: spt.isOverdue || false,
-            filingId: data.filingId,
-          });
-        }
-        showMsg('success', 'SPT Masa PPh 23 ' + t('k139_f2eaf5') + '');
-        onRefresh();
-      } else {
-        showMsg('error', data.error || data.message || 'SPT Masa ' + t('k18_cbbcb4') + '');
-      }
-    } catch {
-      showMsg('error', t('k15_175c5f'));
-    } finally {
-      setCreatingSPT(false);
-    }
-  };
 
   return (
     <Card className="mt-4">
@@ -1466,23 +1504,6 @@ function FilingSteps({
             <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <span>e-Bupot {t('k141_fbbdd4')} {pendingBP}{t('k142_004ba2')} "e-Bupot {t('k115_2daf49')}" {t('k143_b53d8b')}</span>
-            </div>
-          )}
-
-          {/* Step 3: SPT Masa generation */}
-          {allBPGenerated && !sptCreated && (
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-blue-600" />
-                <div className="text-xs">
-                  <p className="font-medium text-blue-900">SPT Masa PPh 23 {t('k144_b0b7b5')}</p>
-                  <p className="text-blue-700">{summary.transactionCount}{t('k145_17756e')} {fmtRp(summary.totalTax)}</p>
-                </div>
-              </div>
-              <Button size="sm" onClick={handleCreateSPT} disabled={creatingSPT}>
-                {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-                SPT Masa {t('k131_4169bb')}
-              </Button>
             </div>
           )}
 

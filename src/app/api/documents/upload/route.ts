@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
     const taxFilingId = formData.get('taxFilingId') as string | null;
     const customerId = formData.get('customerId') as string | null;
     const aiClassification = formData.get('aiClassification') as string | null;
+    const taxPeriodRaw = formData.get('taxPeriod') as string | null;
+    // Validate YYYY-MM format
+    const taxPeriod = taxPeriodRaw && /^\d{4}-\d{2}$/.test(taxPeriodRaw) ? taxPeriodRaw : null;
 
     if (!file) {
       return NextResponse.json(
@@ -98,6 +101,13 @@ export async function POST(request: NextRequest) {
         try { classificationData = JSON.parse(aiClassification); } catch { /* ignore */ }
       }
 
+      const docMetadata = {
+        original_document_type: documentType,
+        ai_classification: classificationData,
+        storage_bucket: bucket,
+        ...(taxPeriod ? { tax_period: taxPeriod } : {}),
+      };
+
       // Try with specific category first, fallback to 'OTHER' if enum doesn't exist
       let insertCategory = dbCategory;
       const { error: docInsertError } = await supabase
@@ -111,11 +121,7 @@ export async function POST(request: NextRequest) {
           mime_type: result.data.mimeType,
           file_size_bytes: result.data.size,
           upload_source: formData.get('uploadSource') as string || 'WEB',
-          metadata: {
-            original_document_type: documentType,
-            ai_classification: classificationData,
-            storage_bucket: bucket,
-          },
+          metadata: docMetadata,
         });
 
       if (docInsertError) {
@@ -131,11 +137,7 @@ export async function POST(request: NextRequest) {
             mime_type: result.data.mimeType,
             file_size_bytes: result.data.size,
             upload_source: formData.get('uploadSource') as string || 'WEB',
-            metadata: {
-              original_document_type: documentType,
-              ai_classification: classificationData,
-              storage_bucket: bucket,
-            },
+            metadata: docMetadata,
           });
         } else {
           loggers.api.error({ err: docInsertError }, 'Failed to create document record');

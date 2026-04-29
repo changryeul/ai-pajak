@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -10,12 +10,13 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
 import {
   Users, Plus, Loader2, CheckCircle, AlertTriangle, Save, X,
-  Edit2, Trash2, Calculator, Sparkles, DollarSign, FileText,
+  Edit2, Trash2, Calculator, Sparkles, FileText,
   Upload, Camera, Download, Shield, ChevronDown, ChevronRight,
-  Briefcase, Image,
+  Image, Send,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
@@ -34,6 +35,25 @@ interface Employee {
   position_allowance: number;
   other_deductions: number;
   is_active: boolean;
+  worker_type?: 'REGULAR' | 'CONTRACT' | 'DAILY' | 'FREELANCER' | 'COMMISSIONER' | null;
+  // HR record (Phase C)
+  hire_date?: string | null;
+  resign_date?: string | null;
+  birth_date?: string | null;
+  gender?: string | null;
+  marital_status?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  position?: string | null;
+  department?: string | null;
+  employee_number?: string | null;
+  bank_name?: string | null;
+  bank_account_no?: string | null;
+  bank_account_name?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  notes?: string | null;
 }
 
 const PTKP_OPTIONS = ['TK0','TK1','TK2','TK3','K0','K1','K2','K3','KI0','KI1','KI2','KI3'];
@@ -41,8 +61,17 @@ const PTKP_OPTIONS = ['TK0','TK1','TK2','TK3','K0','K1','K2','K3','KI0','KI1','K
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
 const emptyForm = {
-  id: '', employeeName: '', employeeNpwp: '', employeeNik: '', ptkpCategory: 'TK0',
+  id: '',
+  // Identity
+  employeeName: '', employeeNpwp: '', employeeNik: '', ptkpCategory: 'TK0',
+  // Salary
   grossSalary: '', jhtEmployee: '', jpEmployee: '', otherDeductions: '',
+  // HR record
+  employeeNumber: '', position: '', department: '', workerType: 'REGULAR',
+  hireDate: '', resignDate: '', birthDate: '', gender: '', maritalStatus: '',
+  email: '', phone: '', address: '',
+  bankName: '', bankAccountNo: '', bankAccountName: '',
+  emergencyContactName: '', emergencyContactPhone: '', notes: '',
 };
 
 export default function PPh21PayrollPage() {
@@ -53,13 +82,30 @@ export default function PPh21PayrollPage() {
   const tsc = useTranslations('taxScreen');
 
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [summary, setSummary] = useState({ totalEmployees: 0, totalGrossSalary: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [activeTab, setActiveTab] = useState('upload');
+  const [activeTab, setActiveTab] = useState('monthly');
+
+  // Group employees by worker_type for summary cards
+  const workerSummary = useMemo(() => {
+    const groups = {
+      REGULAR: { count: 0, total: 0 },
+      CONTRACT: { count: 0, total: 0 },
+      FREELANCER: { count: 0, total: 0 },
+      DAILY: { count: 0, total: 0 },
+    };
+    for (const e of employees) {
+      const t = (e.worker_type || 'REGULAR') as keyof typeof groups;
+      if (groups[t]) {
+        groups[t].count += 1;
+        groups[t].total += Number(e.gross_salary) || 0;
+      }
+    }
+    return groups;
+  }, [employees]);
 
   // TER calculation results
   const [calcResults, setCalcResults] = useState<Record<string, { taxAmount: number; terRate: number }>>({});
@@ -82,7 +128,6 @@ export default function PPh21PayrollPage() {
       const data = await res.json();
       if (data.success) {
         setEmployees(data.data.employees || []);
-        setSummary(data.data.summary || { totalEmployees: 0, totalGrossSalary: 0 });
       }
     } catch { /* */ }
     finally { setIsLoading(false); }
@@ -104,6 +149,24 @@ export default function PPh21PayrollPage() {
       jhtEmployee: String(emp.jht_employee),
       jpEmployee: String(emp.jp_employee),
       otherDeductions: String(emp.other_deductions),
+      employeeNumber: emp.employee_number || '',
+      position: emp.position || '',
+      department: emp.department || '',
+      workerType: emp.worker_type || 'REGULAR',
+      hireDate: emp.hire_date || '',
+      resignDate: emp.resign_date || '',
+      birthDate: emp.birth_date || '',
+      gender: emp.gender || '',
+      maritalStatus: emp.marital_status || '',
+      email: emp.email || '',
+      phone: emp.phone || '',
+      address: emp.address || '',
+      bankName: emp.bank_name || '',
+      bankAccountNo: emp.bank_account_no || '',
+      bankAccountName: emp.bank_account_name || '',
+      emergencyContactName: emp.emergency_contact_name || '',
+      emergencyContactPhone: emp.emergency_contact_phone || '',
+      notes: emp.notes || '',
     });
     setShowForm(true);
   };
@@ -129,6 +192,24 @@ export default function PPh21PayrollPage() {
           jhtEmployee: parseFloat(form.jhtEmployee) || 0,
           jpEmployee: parseFloat(form.jpEmployee) || 0,
           otherDeductions: parseFloat(form.otherDeductions) || 0,
+          employeeNumber: form.employeeNumber,
+          position: form.position,
+          department: form.department,
+          workerType: form.workerType,
+          hireDate: form.hireDate || null,
+          resignDate: form.resignDate || null,
+          birthDate: form.birthDate || null,
+          gender: form.gender,
+          maritalStatus: form.maritalStatus,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          bankName: form.bankName,
+          bankAccountNo: form.bankAccountNo,
+          bankAccountName: form.bankAccountName,
+          emergencyContactName: form.emergencyContactName,
+          emergencyContactPhone: form.emergencyContactPhone,
+          notes: form.notes,
         }),
       });
       const data = await res.json();
@@ -198,9 +279,27 @@ export default function PPh21PayrollPage() {
 
   // Map activeTab to step number (1-4) for header progress display
   const tabToStep: Record<string, number> = {
-    upload: 1, monthly: 2, master: 3, freelancer: 3, filing: 4,
+    monthly: 2, master: 1,
   };
   const currentStep = tabToStep[activeTab] || 1;
+
+  // Worker-type cards definition
+  const workerCards: Array<{
+    key: keyof typeof workerSummary;
+    label: string;
+    color: string;
+  }> = [
+    { key: 'REGULAR',    label: tp('workerRegular'),    color: 'border-blue-200 bg-blue-50' },
+    { key: 'CONTRACT',   label: tp('workerContract'),   color: 'border-green-200 bg-green-50' },
+    { key: 'FREELANCER', label: tp('workerFreelancer'), color: 'border-purple-200 bg-purple-50' },
+    { key: 'DAILY',      label: tp('workerDaily'),      color: 'border-amber-200 bg-amber-50' },
+  ];
+
+  const handleSubmit = () => {
+    // Scroll to filing process section to start submission flow
+    const el = document.getElementById('pph21-filing-process');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
@@ -211,16 +310,30 @@ export default function PPh21PayrollPage() {
         aiSteps={[tsc('stepAiProcess'), tsc('stepTaxCalc'), tsc('stepIdBillingGen')]}
       />
 
-      {/* Compact summary below header */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-white rounded-xl border p-3">
-          <p className="text-gray-500 text-xs flex items-center gap-1"><Users className="h-3 w-3" />{tp('employeeCount')}</p>
-          <p className="font-bold text-lg">{tp('employeeCountValue', { count: summary.totalEmployees })}</p>
-        </div>
-        <div className="bg-white rounded-xl border p-3">
-          <p className="text-gray-500 text-xs flex items-center gap-1"><DollarSign className="h-3 w-3" />{tp('totalSalary')}</p>
-          <p className="font-bold text-lg">{fmt(summary.totalGrossSalary)}</p>
-        </div>
+      {/* Filing process: stepper + e-Bupot/SPT/payment actions (moved from old "filing" tab) */}
+      <div id="pph21-filing-process" className="mb-6">
+        <PPh21FilingProcess customerId={customerId} locale={locale} showMsg={showMsg} />
+      </div>
+
+      {/* Worker-type summary + submit */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+        {workerCards.map(c => {
+          const g = workerSummary[c.key];
+          return (
+            <div key={c.key} className={`rounded-xl border p-3 ${c.color}`}>
+              <p className="text-gray-600 text-xs flex items-center gap-1">
+                <Users className="h-3 w-3" />{c.label}
+              </p>
+              <p className="font-bold text-base mt-0.5">{tp('workerCount', { count: g.count })}</p>
+              <p className="text-[11px] text-gray-600 font-mono mt-0.5">{fmt(g.total)}</p>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex justify-end mb-5">
+        <Button onClick={handleSubmit} className="bg-slate-900 hover:bg-slate-800 text-white">
+          <Send className="h-4 w-4 mr-1.5" />{tp('submitBtn')}
+        </Button>
       </div>
 
       {/* Message */}
@@ -230,24 +343,21 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
+      {/* Data input cards (moved from old "upload" tab — always visible above tabs) */}
+      <div className="mb-6">
+        <PPh21DataInputSection
+          customerId={customerId}
+          onComplete={loadEmployees}
+          showMsg={showMsg}
+          onNavigateToMaster={() => setActiveTab('monthly')}
+        />
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
         <TabsList className="mb-4 flex-wrap">
-          <TabsTrigger value="upload"><Upload className="h-3 w-3 mr-1" />{tp('l0_bcefd6')}</TabsTrigger>
           <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
           <TabsTrigger value="master"><Users className="h-3 w-3 mr-1" />{tp('tabEmployeeMaster')}</TabsTrigger>
-          <TabsTrigger value="freelancer"><Briefcase className="h-3 w-3 mr-1" />{tp('l1_c148d4')}</TabsTrigger>
-          <TabsTrigger value="filing"><Shield className="h-3 w-3 mr-1" />{tp('l2_38b7db')}</TabsTrigger>
         </TabsList>
-
-        {/* ── Tab: 자료 입력 (3가지 방식) ── */}
-        <TabsContent value="upload">
-          <PPh21DataInputSection
-            customerId={customerId}
-            onComplete={loadEmployees}
-            showMsg={showMsg}
-            onNavigateToMaster={() => setActiveTab('master')}
-          />
-        </TabsContent>
 
         <TabsContent value="monthly">
           <MonthlyPayslipTab customerId={customerId} />
@@ -267,46 +377,192 @@ export default function PPh21PayrollPage() {
         </div>
       </div>
 
-      {/* Employee Form */}
+      {/* Employee HR Record Form */}
       {showForm && (
         <Card className="mb-4 border-blue-200 shadow-md">
-          <CardContent className="pt-4 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <Label className="text-xs">{tp('employeeName')}</Label>
-                <Input className="h-9" value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} />
+          <CardContent className="pt-4 space-y-5 max-h-[70vh] overflow-y-auto">
+            {/* 1. Basic identity */}
+            <section>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{tp('hrSectionBasic')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">{tp('employeeName')} *</Label>
+                  <Input className="h-9" value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrEmployeeNumber')}</Label>
+                  <Input className="h-9 font-mono" value={form.employeeNumber} onChange={e => setForm({ ...form, employeeNumber: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrBirthDate')}</Label>
+                  <Input type="date" className="h-9" value={form.birthDate} onChange={e => setForm({ ...form, birthDate: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">NIK</Label>
+                  <Input className="h-9 font-mono" value={form.employeeNik} onChange={e => setForm({ ...form, employeeNik: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">NPWP</Label>
+                  <Input className="h-9 font-mono" value={form.employeeNpwp} onChange={e => setForm({ ...form, employeeNpwp: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrGender')}</Label>
+                  <Select value={form.gender || '__'} onValueChange={v => setForm({ ...form, gender: v === '__' ? '' : v })}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="-" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__">-</SelectItem>
+                      <SelectItem value="MALE">{tp('hrGenderMale')}</SelectItem>
+                      <SelectItem value="FEMALE">{tp('hrGenderFemale')}</SelectItem>
+                      <SelectItem value="OTHER">{tp('hrGenderOther')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrMaritalStatus')}</Label>
+                  <Select value={form.maritalStatus || '__'} onValueChange={v => setForm({ ...form, maritalStatus: v === '__' ? '' : v })}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="-" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__">-</SelectItem>
+                      <SelectItem value="SINGLE">{tp('hrMaritalSingle')}</SelectItem>
+                      <SelectItem value="MARRIED">{tp('hrMaritalMarried')}</SelectItem>
+                      <SelectItem value="DIVORCED">{tp('hrMaritalDivorced')}</SelectItem>
+                      <SelectItem value="WIDOWED">{tp('hrMaritalWidowed')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div>
-                <Label className="text-xs">NPWP</Label>
-                <Input className="h-9 font-mono" value={form.employeeNpwp} onChange={e => setForm({ ...form, employeeNpwp: e.target.value })} />
+            </section>
+
+            {/* 2. Contact */}
+            <section>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{tp('hrSectionContact')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">{tp('hrEmail')}</Label>
+                  <Input type="email" className="h-9" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrPhone')}</Label>
+                  <Input className="h-9 font-mono" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+                </div>
+                <div className="sm:col-span-3">
+                  <Label className="text-xs">{tp('hrAddress')}</Label>
+                  <Input className="h-9" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
+                </div>
               </div>
-              <div>
-                <Label className="text-xs">PTKP</Label>
-                <Select value={form.ptkpCategory} onValueChange={v => setForm({ ...form, ptkpCategory: v })}>
-                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>{PTKP_OPTIONS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                </Select>
+            </section>
+
+            {/* 3. Job */}
+            <section>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{tp('hrSectionJob')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">{tp('hrPosition')}</Label>
+                  <Input className="h-9" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrDepartment')}</Label>
+                  <Input className="h-9" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrWorkerType')}</Label>
+                  <Select value={form.workerType} onValueChange={v => setForm({ ...form, workerType: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="REGULAR">{tp('workerRegular')}</SelectItem>
+                      <SelectItem value="CONTRACT">{tp('workerContract')}</SelectItem>
+                      <SelectItem value="DAILY">{tp('workerDaily')}</SelectItem>
+                      <SelectItem value="FREELANCER">{tp('workerFreelancer')}</SelectItem>
+                      <SelectItem value="COMMISSIONER">{tp('hrWorkerCommissioner')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrHireDate')}</Label>
+                  <Input type="date" className="h-9" value={form.hireDate} onChange={e => setForm({ ...form, hireDate: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrResignDate')}</Label>
+                  <Input type="date" className="h-9" value={form.resignDate} onChange={e => setForm({ ...form, resignDate: e.target.value })} />
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <Label className="text-xs">{tp('monthlySalary')}</Label>
-                <Input className="h-9 font-mono" type="number" value={form.grossSalary} onChange={e => setForm({ ...form, grossSalary: e.target.value })} />
+            </section>
+
+            {/* 4. Salary baseline */}
+            <section>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{tp('hrSectionSalary')}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div>
+                  <Label className="text-xs">PTKP *</Label>
+                  <Select value={form.ptkpCategory} onValueChange={v => setForm({ ...form, ptkpCategory: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>{PTKP_OPTIONS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('monthlySalary')} *</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.grossSalary} onChange={e => setForm({ ...form, grossSalary: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('jhtEmployee')}</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.jhtEmployee} onChange={e => setForm({ ...form, jhtEmployee: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('jpEmployee')}</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.jpEmployee} onChange={e => setForm({ ...form, jpEmployee: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('otherDeductions')}</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.otherDeductions} onChange={e => setForm({ ...form, otherDeductions: e.target.value })} />
+                </div>
               </div>
-              <div>
-                <Label className="text-xs">{tp('jhtEmployee')}</Label>
-                <Input className="h-9 font-mono" type="number" value={form.jhtEmployee} onChange={e => setForm({ ...form, jhtEmployee: e.target.value })} />
+            </section>
+
+            {/* 5. Bank */}
+            <section>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{tp('hrSectionBank')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">{tp('hrBankName')}</Label>
+                  <Input className="h-9" value={form.bankName} onChange={e => setForm({ ...form, bankName: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrBankAccountNo')}</Label>
+                  <Input className="h-9 font-mono" value={form.bankAccountNo} onChange={e => setForm({ ...form, bankAccountNo: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrBankAccountName')}</Label>
+                  <Input className="h-9" value={form.bankAccountName} onChange={e => setForm({ ...form, bankAccountName: e.target.value })} />
+                </div>
               </div>
-              <div>
-                <Label className="text-xs">{tp('jpEmployee')}</Label>
-                <Input className="h-9 font-mono" type="number" value={form.jpEmployee} onChange={e => setForm({ ...form, jpEmployee: e.target.value })} />
+            </section>
+
+            {/* 6. Emergency contact */}
+            <section>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{tp('hrSectionEmergency')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">{tp('hrEmergencyName')}</Label>
+                  <Input className="h-9" value={form.emergencyContactName} onChange={e => setForm({ ...form, emergencyContactName: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">{tp('hrEmergencyPhone')}</Label>
+                  <Input className="h-9 font-mono" value={form.emergencyContactPhone} onChange={e => setForm({ ...form, emergencyContactPhone: e.target.value })} />
+                </div>
               </div>
-              <div>
-                <Label className="text-xs">{tp('otherDeductions')}</Label>
-                <Input className="h-9 font-mono" type="number" value={form.otherDeductions} onChange={e => setForm({ ...form, otherDeductions: e.target.value })} />
-              </div>
-            </div>
-            <div className="flex gap-2 justify-end">
+            </section>
+
+            {/* 7. Notes */}
+            <section>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{tp('hrSectionMemo')}</p>
+              <textarea
+                className="w-full min-h-[64px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                value={form.notes}
+                onChange={e => setForm({ ...form, notes: e.target.value })}
+              />
+            </section>
+
+            <div className="flex gap-2 justify-end pt-2 border-t">
               <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}><X className="h-3 w-3 mr-1" />{tp('cancel')}</Button>
               <Button size="sm" onClick={saveEmployee} disabled={isSaving}>
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
@@ -332,9 +588,13 @@ export default function PPh21PayrollPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-gray-500 text-xs">
+                    <th className="text-left py-2.5 px-3">{tp('hrEmployeeNumber')}</th>
                     <th className="text-left py-2.5 px-3">{tp('name')}</th>
+                    <th className="text-left py-2.5 px-3">{tp('hrPosition')} / {tp('hrDepartment')}</th>
                     <th className="text-left py-2.5 px-3">NPWP</th>
                     <th className="text-center py-2.5 px-3">PTKP</th>
+                    <th className="text-center py-2.5 px-3">{tp('hrWorkerType')}</th>
+                    <th className="text-center py-2.5 px-3">{tp('hrHireDate')}</th>
                     <th className="text-right py-2.5 px-3">{tp('salary')}</th>
                     <th className="text-right py-2.5 px-3">PPh 21</th>
                     <th className="text-center py-2.5 px-3 w-20"></th>
@@ -343,11 +603,27 @@ export default function PPh21PayrollPage() {
                 <tbody className="divide-y">
                   {employees.map(emp => {
                     const calc = calcResults[emp.id];
+                    const workerLabel: Record<string, string> = {
+                      REGULAR: tp('workerRegular'),
+                      CONTRACT: tp('workerContract'),
+                      DAILY: tp('workerDaily'),
+                      FREELANCER: tp('workerFreelancer'),
+                      COMMISSIONER: tp('hrWorkerCommissioner'),
+                    };
                     return (
                       <tr key={emp.id} className="hover:bg-gray-50">
+                        <td className="py-2 px-3 text-xs font-mono text-gray-500">{emp.employee_number || '—'}</td>
                         <td className="py-2 px-3 text-xs font-medium">{emp.employee_name}</td>
+                        <td className="py-2 px-3 text-xs text-gray-700">
+                          {emp.position || '—'}
+                          {emp.department && <span className="text-gray-400"> / {emp.department}</span>}
+                        </td>
                         <td className="py-2 px-3 text-xs font-mono text-gray-500">{emp.employee_npwp || '—'}</td>
                         <td className="py-2 px-3 text-center"><Badge variant="outline" className="text-[10px]">{emp.ptkp_category}</Badge></td>
+                        <td className="py-2 px-3 text-center text-[10px] text-gray-600">
+                          {workerLabel[emp.worker_type || 'REGULAR']}
+                        </td>
+                        <td className="py-2 px-3 text-center text-[10px] text-gray-500 font-mono">{emp.hire_date || '—'}</td>
                         <td className="py-2 px-3 text-right font-mono text-xs">{fmt(emp.gross_salary)}</td>
                         <td className="py-2 px-3 text-right font-mono text-xs">
                           {calc ? (
@@ -370,16 +646,6 @@ export default function PPh21PayrollPage() {
         </Card>
       )}
         </TabsContent>
-
-        {/* ── Tab: 비정규직/프리랜서 ── */}
-        <TabsContent value="freelancer">
-          <FreelancerSection customerId={customerId} showMsg={showMsg} />
-        </TabsContent>
-
-        {/* ── Tab: 신고 프로세스 ── */}
-        <TabsContent value="filing">
-          <PPh21FilingProcess customerId={customerId} locale={locale} showMsg={showMsg} />
-        </TabsContent>
       </Tabs>
     </div>
   );
@@ -401,6 +667,47 @@ function PPh21DataInputSection({
   const excelInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState(false);
+
+  // Month picker state — opens before upload to capture which tax month the data belongs to
+  const now = new Date();
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'excel' | 'file' | 'camera' | null>(null);
+  const [pickedYear, setPickedYear] = useState<number>(now.getFullYear());
+  const [pickedMonth, setPickedMonth] = useState<number>(now.getMonth() + 1);
+  const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
+
+  const yearOptions = useMemo(() => {
+    const cy = new Date().getFullYear();
+    return [cy - 1, cy, cy + 1];
+  }, []);
+
+  const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
+
+  const openMonthPicker = (action: 'excel' | 'file' | 'camera') => {
+    setPendingAction(action);
+    setMonthPickerOpen(true);
+  };
+
+  const confirmMonthPicker = () => {
+    const period = periodLabel(pickedYear, pickedMonth);
+    setConfirmedPeriod(period);
+    setMonthPickerOpen(false);
+    // Trigger the actual file input AFTER state settles
+    setTimeout(() => {
+      if (pendingAction === 'excel') {
+        excelInputRef.current?.click();
+      } else if (pendingAction === 'file') {
+        fileInputRef.current?.click();
+      } else if (pendingAction === 'camera') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files, 'CAMERA', 'SALARY_SLIP', period);
+        input.click();
+      }
+    }, 50);
+  };
   const [uploadedDocs, setUploadedDocs] = useState<Array<{
     id: string; file_name: string; ocr_status: string;
     ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
@@ -430,16 +737,18 @@ function PPh21DataInputSection({
     }
   }, []);
 
-  const handleUpload = async (files: FileList | null, source: string, docType: string) => {
+  const handleUpload = async (files: FileList | null, source: string, docType: string, period?: string) => {
     if (!files || !customerId) return;
     setUploading(true);
     let count = 0;
+    const taxPeriod = period || confirmedPeriod;
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.append('file', file);
       fd.append('customerId', customerId);
       fd.append('documentType', docType);
       fd.append('uploadSource', source);
+      if (taxPeriod) fd.append('taxPeriod', taxPeriod);
       try {
         const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
         const data = await res.json();
@@ -591,6 +900,7 @@ function PPh21DataInputSection({
     const fd = new FormData();
     fd.append('file', blob, 'mapped.csv');
     fd.append('customerId', customerId);
+    if (confirmedPeriod) fd.append('taxPeriod', confirmedPeriod);
 
     try {
       const res = await fetch('/api/tax/employees/import', { method: 'POST', body: fd });
@@ -655,11 +965,16 @@ function PPh21DataInputSection({
               <Button size="sm" variant="outline" onClick={downloadTemplate} className="w-full">
                 <Download className="h-3 w-3 mr-1" />{tp('templateDownloadBtn')}
               </Button>
-              <Button size="sm" onClick={() => excelInputRef.current?.click()} disabled={uploading}
+              <Button size="sm" onClick={() => openMonthPicker('excel')} disabled={uploading}
                 className="w-full bg-blue-600 hover:bg-blue-700">
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
                 {tp('l27_c3feb8')}
               </Button>
+              {confirmedPeriod && pendingAction === 'excel' && (
+                <p className="text-[10px] text-blue-700 text-center">
+                  {tp('monthPickerSelected', { period: confirmedPeriod })}
+                </p>
+              )}
               <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
                 onChange={e => handleExcelUpload(e.target.files)} />
             </div>
@@ -687,22 +1002,20 @@ function PPh21DataInputSection({
               </div>
             </div>
             <div className="space-y-2 flex-1">
-              <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+              <Button size="sm" onClick={() => openMonthPicker('file')} disabled={uploading}
                 className="w-full bg-emerald-600 hover:bg-emerald-700">
                 <Upload className="h-3 w-3 mr-1" />{tp('fileUploadBtn')}
               </Button>
               {cameraAvailable && (
                 <Button size="sm" variant="outline" disabled={uploading} className="w-full"
-                  onClick={() => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.capture = 'environment';
-                    input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files, 'CAMERA', 'SALARY_SLIP');
-                    input.click();
-                  }}>
+                  onClick={() => openMonthPicker('camera')}>
                   <Camera className="h-3 w-3 mr-1" />{tp('cameraCapture')}
                 </Button>
+              )}
+              {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
+                <p className="text-[10px] text-emerald-700 text-center">
+                  {tp('monthPickerSelected', { period: confirmedPeriod })}
+                </p>
               )}
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
                 onChange={e => handleUpload(e.target.files, 'WEB', 'SALARY_SLIP')} />
@@ -848,228 +1161,53 @@ function PPh21DataInputSection({
           </CardContent>
         </Card>
       )}
-    </div>
-  );
-}
 
-// ══════════════════════════════════════════════════════
-// Sub-component: 비정규직/프리랜서 관리
-// ══════════════════════════════════════════════════════
-function FreelancerSection({
-  customerId, showMsg,
-}: {
-  customerId: string;
-  showMsg: (type: 'success' | 'error', text: string) => void;
-}) {
-  const tp = useTranslations('pph21Page');
-  return (
-    <div className="space-y-4">
-      <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-        <p className="text-sm font-bold text-amber-900 mb-2">{tp('freelancerTitle')}</p>
-        <p className="text-xs text-amber-700">{tp('l55_e44dbc')}</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Worker type cards with explanation */}
-        {[
-          {
-            type: 'CONTRACT', label: tp('l56_1ed7ef'), icon: '📋',
-            desc: tp('l57_8ffa3f'),
-            calc: `TER × ${tp('l58_277101')}`,
-            color: 'border-blue-200 bg-blue-50',
-          },
-          {
-            type: 'DAILY', label: tp('l59_ab78f2'), icon: '🔨',
-            desc: tp('l60_bd695b'),
-            calc: `(${tp('l61_e0b3b7')} × 5% (${tp('l62_841e25')}`,
-            color: 'border-green-200 bg-green-50',
-          },
-          {
-            type: 'FREELANCER', label: tp('l63_fff243'), icon: '💼',
-            desc: `50% DPP ${tp('l64_7fede2')}`,
-            calc: `DPP = 50% × ${tp('l65_a52335')}`,
-            color: 'border-purple-200 bg-purple-50',
-            warning: `⚠️ ${tp('l66_da242e')}`,
-          },
-          {
-            type: 'COMMISSIONER', label: tp('l67_3e8f6a'), icon: '🏛️',
-            desc: tp('l68_6b99e2'),
-            calc: `${tp('l69_6e150b')} = ${tp('l70_ecd09e')}`,
-            color: 'border-amber-200 bg-amber-50',
-          },
-        ].map(wt => (
-          <Card key={wt.type} className={`${wt.color}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">{wt.icon}</span>
-                <div>
-                  <p className="font-bold text-sm">{wt.label}</p>
-                  <Badge variant="outline" className="text-[9px]">{wt.type}</Badge>
-                </div>
-              </div>
-              <p className="text-xs text-gray-700 mb-2">{wt.desc}</p>
-              <div className="bg-white rounded p-2 text-[11px] text-gray-600">
-                <p className="font-medium">{tp('calcMethod')}</p>
-                <p>{wt.calc}</p>
-              </div>
-              {wt.warning && (
-                <p className="text-[10px] text-red-600 mt-2">{wt.warning}</p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Freelancer cumulative tracker */}
-      <FreelancerCumulativeTracker customerId={customerId} showMsg={showMsg} />
-    </div>
-  );
-}
-
-// ── Freelancer Cumulative Tracker ──
-function FreelancerCumulativeTracker({
-  customerId, showMsg,
-}: {
-  customerId: string;
-  showMsg: (type: 'success' | 'error', text: string) => void;
-}) {
-  const tp = useTranslations('pph21Page');
-  const currentYear = new Date().getFullYear();
-  const [freelancers, setFreelancers] = useState<Array<{
-    id: string; employee_name: string; gross_salary: number;
-  }>>([]);
-  const [cumulatives, setCumulatives] = useState<Array<{
-    employee_id: string;
-    monthly_entries: Array<{ month: string; gross: number; expenses: number; net: number }>;
-    cumulative_gross: number;
-    cumulative_net: number;
-  }>>([]);
-  const [loading, setLoading] = useState(false);
-  const [savingId, setSavingId] = useState<string | null>(null);
-
-  // Load freelancers + cumulative data
-  useEffect(() => {
-    if (!customerId) return;
-    setLoading(true);
-    Promise.all([
-      fetch(`/api/tax/employees?customerId=${customerId}`).then(r => r.json()),
-      fetch(`/api/tax/freelancer-cumulative?customerId=${customerId}&year=${currentYear}`).then(r => r.json()),
-    ]).then(([empData, cumData]) => {
-      const allEmps = empData.data?.employees || [];
-      setFreelancers(allEmps.filter((e: { worker_type?: string; is_active: boolean }) =>
-        e.worker_type === 'FREELANCER' && e.is_active
-      ));
-      if (cumData.success) setCumulatives(cumData.data || []);
-    }).finally(() => setLoading(false));
-  }, [customerId, currentYear]);
-
-  const handleSaveMonth = async (employeeId: string, month: number, gross: number, expenses: number) => {
-    setSavingId(employeeId);
-    try {
-      const res = await fetch('/api/tax/freelancer-cumulative', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, employeeId, taxYear: currentYear, month, gross, expenses }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showMsg('success', `${month}${tp('l72_43f9aa')}`);
-        // Refresh
-        const cumRes = await fetch(`/api/tax/freelancer-cumulative?customerId=${customerId}&year=${currentYear}`);
-        const cumData = await cumRes.json();
-        if (cumData.success) setCumulatives(cumData.data || []);
-      }
-    } catch { showMsg('error', tp('l73_5f3ec4')); }
-    finally { setSavingId(null); }
-  };
-
-  if (freelancers.length === 0) {
-    return (
-      <Card className="border-purple-200 bg-purple-50">
-        <CardContent className="p-4">
-          <p className="text-sm font-bold text-purple-900 flex items-center gap-2">
-            <Briefcase className="h-4 w-4" />{tp('freelancerCumulative')}
-          </p>
-          <p className="text-xs text-purple-700 mt-2">
-            {tp('noFreelancers', { tab: tp('l76_db07a6') })}
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="border-purple-200">
-      <CardContent className="p-4">
-        <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
-          <Briefcase className="h-4 w-4 text-purple-600" />
-          {tp('l74_3e7eca')} ({tp('freelancerList', { year: currentYear, count: freelancers.length })})
-        </h3>
-
-        <div className="bg-purple-50 rounded-lg p-2 text-[10px] text-purple-800 mb-3">
-          {tp('freelancerDppNote')}
-        </div>
-
-        {loading ? (
-          <div className="text-center py-4"><Loader2 className="h-5 w-5 animate-spin mx-auto text-gray-400" /></div>
-        ) : (
-          <div className="space-y-4">
-            {freelancers.map(fl => {
-              const cum = cumulatives.find(c => c.employee_id === fl.id);
-              const entries = cum?.monthly_entries || [];
-              const MONTHS_SHORT = [tp('month1'),tp('month2'),tp('month3'),tp('month4'),tp('month5'),tp('month6'),tp('month7'),tp('month8'),tp('month9'),tp('month10'),tp('month11'),tp('month12')];
-
-              return (
-                <div key={fl.id} className="border rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="font-medium text-sm">{fl.employee_name}</p>
-                      <p className="text-[10px] text-gray-500">{tp('baseContract', { amount: fmtRp(fl.gross_salary) })}</p>
-                    </div>
-                    <div className="text-right text-xs">
-                      <p className="text-gray-500">{tp('l82_90271c')}</p>
-                      <p className="font-mono font-bold">{fmtRp(cum?.cumulative_gross || 0)}</p>
-                      <p className="text-purple-600 text-[10px]">DPP 50%: {fmtRp(cum?.cumulative_net || 0)}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 md:grid-cols-6 gap-1">
-                    {MONTHS_SHORT.map((label, i) => {
-                      const entry = entries.find((e: { month: string }) => e.month === String(i + 1).padStart(2, '0'));
-                      const [localGross, setLocalGross] = useState(String(entry?.gross || ''));
-
-                      return (
-                        <div key={i} className="text-center">
-                          <p className="text-[9px] text-gray-500">{label}</p>
-                          <Input
-                            type="number"
-                            className="h-7 text-[10px] font-mono text-center px-1"
-                            value={localGross}
-                            onChange={e => setLocalGross(e.target.value)}
-                            onBlur={() => {
-                              const val = Number(localGross) || 0;
-                              if (val !== (entry?.gross || 0)) {
-                                handleSaveMonth(fl.id, i + 1, val, 0);
-                              }
-                            }}
-                            placeholder={tp('l83_d25373')}
-                          />
-                          {entry && entry.gross > 0 && (
-                            <p className="text-[8px] text-purple-600">{fmtRp(entry.net)}</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+      {/* Month picker dialog — must select a tax month before uploading */}
+      <Dialog open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{tp('monthPickerTitle')}</DialogTitle>
+            <DialogDescription>{tp('monthPickerDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <div>
+              <Label className="text-xs">{tp('monthPickerYear')}</Label>
+              <Select value={String(pickedYear)} onValueChange={v => setPickedYear(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map(y => (
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">{tp('monthPickerMonth')}</Label>
+              <Select value={String(pickedMonth)} onValueChange={v => setPickedMonth(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                    <SelectItem key={m} value={String(m)}>{tp(`month${m}` as 'month1')}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMonthPickerOpen(false)}>
+              {tp('cancel')}
+            </Button>
+            <Button onClick={confirmMonthPicker}>
+              <CheckCircle className="h-4 w-4 mr-1" />
+              {tp('monthPickerConfirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
+
 
 // ══════════════════════════════════════════════════════
 // Sub-component: PPh 21 신고 프로세스

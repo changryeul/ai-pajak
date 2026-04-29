@@ -34,37 +34,38 @@ export function ScreenHeader({ title, onBack, step, aiSteps, showBackButton = tr
         )}
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap">
+      {/* Progress indicator — display-only, not interactive. Clarifies that steps 2~4 are AI-driven. */}
+      <div
+        aria-label="AI auto-processing progress"
+        className="flex items-center gap-2 flex-wrap select-none cursor-default"
+      >
         <div
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            step === 1 ? 'bg-slate-900 text-white' : step > 1 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
+          className={`rounded-md px-2.5 py-1 text-xs font-medium ${
+            step === 1 ? 'bg-slate-900 text-white' : step > 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
           }`}
         >
           1. {t('uploadData')}
         </div>
-
-        <div className="flex items-center gap-2">
-          <div className="flex gap-2 rounded-lg border bg-slate-100 px-3 py-2">
-            {aiSteps.map((label, i) => {
-              const stepNum = i + 2;
-              return (
-                <div
-                  key={label}
-                  className={`rounded px-3 py-1 text-sm transition-colors ${
-                    step === stepNum
-                      ? 'bg-slate-900 text-white'
-                      : step > stepNum
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-slate-200 text-slate-600'
-                  }`}
-                >
-                  {stepNum}. {label}
-                </div>
-              );
-            })}
-          </div>
-          <span className="text-xs text-slate-500">{t('aiExecutes')}</span>
-        </div>
+        {aiSteps.map((label, i) => {
+          const stepNum = i + 2;
+          return (
+            <div key={label} className="flex items-center gap-2">
+              <div className="h-px w-3 bg-slate-300" />
+              <div
+                className={`rounded-md px-2.5 py-1 text-xs ${
+                  step === stepNum
+                    ? 'bg-slate-900 text-white'
+                    : step > stepNum
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-slate-100 text-slate-500'
+                }`}
+              >
+                {stepNum}. {label}
+              </div>
+            </div>
+          );
+        })}
+        <span className="ml-1 text-[11px] text-slate-400 italic">{t('aiExecutes')}</span>
       </div>
     </div>
   );

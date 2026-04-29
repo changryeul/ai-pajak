@@ -34,8 +34,20 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 
 async function handlePost(req: RequestWithSession): Promise<Response> {
   const body = await req.json();
-  const { id, customerId, employeeName, employeeNpwp, employeeNik, ptkpCategory,
-    grossSalary, jhtEmployee, jpEmployee, positionAllowance, otherAllowances, otherDeductions, hireDate } = body;
+  const {
+    id, customerId,
+    // Identity
+    employeeName, employeeNpwp, employeeNik, ptkpCategory,
+    // Salary baseline
+    grossSalary, jhtEmployee, jpEmployee, positionAllowance, otherAllowances, otherDeductions,
+    // HR record (Phase C)
+    hireDate, resignDate, birthDate, gender, maritalStatus,
+    email, phone, address,
+    position, department, employeeNumber,
+    workerType,
+    bankName, bankAccountNo, bankAccountName,
+    emergencyContactName, emergencyContactPhone, notes,
+  } = body;
 
   if (!customerId || !employeeName || !grossSalary) {
     return NextResponse.json({ error: 'customerId, employeeName, grossSalary required' }, { status: 400 });
@@ -43,17 +55,37 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
 
   const record = {
     customer_id: customerId,
+    // Identity
     employee_name: employeeName,
     employee_npwp: employeeNpwp || null,
     employee_nik: employeeNik || null,
     ptkp_category: ptkpCategory || 'TK0',
+    // Salary baseline
     gross_salary: grossSalary,
     jht_employee: jhtEmployee || 0,
     jp_employee: jpEmployee || 0,
     position_allowance: positionAllowance || 0,
     other_allowances: otherAllowances || 0,
     other_deductions: otherDeductions || 0,
+    // HR record fields
     hire_date: hireDate || null,
+    resign_date: resignDate || null,
+    birth_date: birthDate || null,
+    gender: gender || null,
+    marital_status: maritalStatus || null,
+    email: email || null,
+    phone: phone || null,
+    address: address || null,
+    position: position || null,
+    department: department || null,
+    employee_number: employeeNumber || null,
+    worker_type: workerType || 'REGULAR',
+    bank_name: bankName || null,
+    bank_account_no: bankAccountNo || null,
+    bank_account_name: bankAccountName || null,
+    emergency_contact_name: emergencyContactName || null,
+    emergency_contact_phone: emergencyContactPhone || null,
+    notes: notes || null,
   };
 
   if (id) {

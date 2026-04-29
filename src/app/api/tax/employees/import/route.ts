@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const customerId = formData.get('customerId') as string;
+    const taxPeriodRaw = formData.get('taxPeriod') as string | null;
+    // Validate YYYY-MM
+    const taxPeriod = taxPeriodRaw && /^\d{4}-\d{2}$/.test(taxPeriodRaw) ? taxPeriodRaw : null;
 
     if (!file || !customerId) {
       return NextResponse.json({ error: 'file and customerId required' }, { status: 400 });
@@ -64,6 +67,7 @@ export async function POST(request: NextRequest) {
     const admin = getSupabaseAdmin();
     let imported = 0;
     let skipped = 0;
+    let payslipsUpserted = 0;
     const errors: string[] = [];
 
     for (let i = 1; i < lines.length; i++) {
@@ -77,6 +81,18 @@ export async function POST(request: NextRequest) {
       const ptkp = getVal(cols, 'ptkp_category') || 'TK0';
       const workerType = getVal(cols, 'worker_type') || 'REGULAR';
 
+      const positionAllowance = getNum(cols, 'position_allowance');
+      const overtimePay = getNum(cols, 'overtime_pay');
+      const mealAllowance = getNum(cols, 'meal_allowance');
+      const transportAllowance = getNum(cols, 'transport_allowance');
+      const otherAllowances = getNum(cols, 'other_allowances');
+      const bonus = getNum(cols, 'bonus');
+      const thr = getNum(cols, 'thr');
+      const jhtEmployee = getNum(cols, 'jht_employee');
+      const jpEmployee = getNum(cols, 'jp_employee');
+      const bpjsKesehatan = getNum(cols, 'bpjs_kesehatan');
+      const otherDeductions = getNum(cols, 'other_deductions');
+
       // Check duplicate by name + customer
       const { data: existing } = await admin
         .from('employee_payroll')
@@ -86,53 +102,93 @@ export async function POST(request: NextRequest) {
         .eq('is_active', true)
         .maybeSingle();
 
+      let employeeId: string | null = null;
+
       if (existing) {
-        // Update existing
+        // Update master (HR record): identity fields only — keep monthly amounts on payslip side.
+        // gross_salary is also kept fresh as the latest base for new payslips.
         await admin.from('employee_payroll').update({
           employee_npwp: getVal(cols, 'employee_npwp') || null,
           employee_nik: getVal(cols, 'employee_nik') || null,
           ptkp_category: ptkp,
           gross_salary: grossSalary,
-          position_allowance: getNum(cols, 'position_allowance'),
-          other_allowances: getNum(cols, 'other_allowances'),
-          jht_employee: getNum(cols, 'jht_employee'),
-          jp_employee: getNum(cols, 'jp_employee'),
-          other_deductions: getNum(cols, 'other_deductions'),
           worker_type: workerType,
         }).eq('id', existing.id);
+        employeeId = existing.id;
         imported++;
       } else {
-        // Insert new
-        const { error: insertErr } = await admin.from('employee_payroll').insert({
+        const { data: inserted, error: insertErr } = await admin.from('employee_payroll').insert({
           customer_id: customerId,
           employee_name: name,
           employee_npwp: getVal(cols, 'employee_npwp') || null,
           employee_nik: getVal(cols, 'employee_nik') || null,
           ptkp_category: ptkp,
           gross_salary: grossSalary,
-          position_allowance: getNum(cols, 'position_allowance'),
-          other_allowances: getNum(cols, 'other_allowances'),
-          jht_employee: getNum(cols, 'jht_employee'),
-          jp_employee: getNum(cols, 'jp_employee'),
-          other_deductions: getNum(cols, 'other_deductions'),
+          position_allowance: positionAllowance,
+          other_allowances: otherAllowances,
+          jht_employee: jhtEmployee,
+          jp_employee: jpEmployee,
+          other_deductions: otherDeductions,
           worker_type: workerType,
           is_active: true,
-        });
+        }).select('id').single();
         if (insertErr) {
           errors.push(`Row ${i + 1}: ${name} — ${insertErr.message}`);
           skipped++;
+          continue;
+        }
+        employeeId = inserted?.id ?? null;
+        imported++;
+      }
+
+      // If a tax period was supplied, mirror this row into monthly_payslip.
+      // employee_payroll holds the HR record; monthly_payslip holds the per-month salary detail.
+      if (taxPeriod && employeeId) {
+        const totalGross = grossSalary + overtimePay + mealAllowance + transportAllowance
+          + positionAllowance + otherAllowances + bonus + thr;
+        const totalDeduction = bpjsKesehatan + jhtEmployee + jpEmployee + otherDeductions;
+
+        const { error: payslipErr } = await admin
+          .from('monthly_payslip')
+          .upsert({
+            customer_id: customerId,
+            employee_id: employeeId,
+            period: taxPeriod,
+            base_salary: grossSalary,
+            overtime_pay: overtimePay,
+            meal_allowance: mealAllowance,
+            transport_allowance: transportAllowance,
+            position_allowance: positionAllowance,
+            other_allowances: otherAllowances,
+            bonus,
+            thr,
+            jht_employee: jhtEmployee,
+            jp_employee: jpEmployee,
+            bpjs_kesehatan: bpjsKesehatan,
+            other_deductions: otherDeductions,
+            total_gross: totalGross,
+            total_deduction: totalDeduction,
+            status: 'DRAFT',
+          }, { onConflict: 'employee_id,period' });
+
+        if (payslipErr) {
+          errors.push(`Row ${i + 1}: ${name} — payslip: ${payslipErr.message}`);
         } else {
-          imported++;
+          payslipsUpserted++;
         }
       }
     }
 
-    loggers.api.info({ customerId, imported, skipped, errors: errors.length }, 'Employee import completed');
+    loggers.api.info(
+      { customerId, taxPeriod, imported, skipped, payslipsUpserted, errors: errors.length },
+      'Employee import completed'
+    );
 
+    const periodMsg = taxPeriod ? ` (${taxPeriod} 급여 명세 ${payslipsUpserted}건 반영)` : '';
     return NextResponse.json({
       success: true,
-      data: { imported, skipped, errors, totalRows: lines.length - 1 },
-      message: `${imported}명 임포트 완료${skipped > 0 ? `, ${skipped}명 스킵` : ''}`,
+      data: { imported, skipped, errors, totalRows: lines.length - 1, payslipsUpserted, taxPeriod },
+      message: `${imported}명 임포트 완료${skipped > 0 ? `, ${skipped}명 스킵` : ''}${periodMsg}`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Employee import error');

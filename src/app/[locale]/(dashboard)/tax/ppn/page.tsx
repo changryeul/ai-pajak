@@ -9,12 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
 import {
   FileText, Loader2, CheckCircle, AlertTriangle, Plus, Trash2,
   DollarSign, TrendingUp, TrendingDown, Minus, Sparkles,
   ArrowUpRight, ArrowDownLeft, Check, X, Ban,
-  Upload, Camera, Shield, Image, RefreshCw,
+  Upload, Camera, Image, RefreshCw, Download, FileUp, Pencil,
 } from 'lucide-react';
 import { useRef } from 'react';
 import { ScreenHeader } from '@/components/tax';
@@ -90,6 +91,94 @@ export default function PPNPage() {
   });
 
   const period = `${year}-${String(month).padStart(2, '0')}`;
+
+  // Month picker — opens before any input action (template upload / file upload / camera / manual)
+  const csvInputRef = useRef<HTMLInputElement>(null);
+  const fileUploadRef = useRef<HTMLInputElement>(null);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'csv' | 'file' | 'camera' | 'manual' | null>(null);
+  const [pickedYear, setPickedYear] = useState<number>(currentYear);
+  const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
+  const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
+  const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
+  const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
+
+  const openMonthPicker = (action: 'csv' | 'file' | 'camera' | 'manual') => {
+    setPendingAction(action);
+    setMonthPickerOpen(true);
+  };
+
+  // Generic Faktur Pajak document upload — sends to /api/documents/upload with FAKTUR_PAJAK type.
+  const handleFakturUpload = async (files: FileList | null, source: string, uploadPeriod?: string) => {
+    if (!files || !session?.customerId) return;
+    setUploadingDoc(true);
+    let count = 0;
+    const taxPeriod = uploadPeriod || confirmedPeriod;
+    for (const file of Array.from(files)) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('customerId', session.customerId);
+      fd.append('documentType', 'FAKTUR_PAJAK');
+      fd.append('uploadSource', source);
+      if (taxPeriod) fd.append('taxPeriod', taxPeriod);
+      try {
+        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          count++;
+          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        }
+      } catch { /* */ }
+    }
+    if (count > 0 && taxPeriod) {
+      // Sync the page period selector to the uploaded month
+      const [py, pm] = taxPeriod.split('-').map(Number);
+      if (py && pm) {
+        setYear(py);
+        setMonth(pm);
+      }
+      showMsg('success', `${count} ${t('k15_4f8e30') || 'OK'}`);
+    }
+    setUploadingDoc(false);
+  };
+
+  const downloadPpnTemplate = () => {
+    const headers = ['faktur_type', 'faktur_number', 'faktur_date', 'counterparty_name', 'counterparty_npwp', 'description', 'dpp', 'ppn'];
+    const sample = ['OUTPUT', '0100002500000001', '2026-04-15', 'PT Buyer', '01.234.567.8-901.000', 'Jasa konsultasi', '10000000', '1100000'];
+    const csv = [headers.join(','), sample.join(','), ''].join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ppn_template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const confirmMonthPicker = () => {
+    const p = periodLabel(pickedYear, pickedMonth);
+    setConfirmedPeriod(p);
+    setMonthPickerOpen(false);
+    setTimeout(() => {
+      if (pendingAction === 'csv') {
+        csvInputRef.current?.click();
+      } else if (pendingAction === 'file') {
+        fileUploadRef.current?.click();
+      } else if (pendingAction === 'camera') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = (e) => handleFakturUpload((e.target as HTMLInputElement).files, 'CAMERA', p);
+        input.click();
+      } else if (pendingAction === 'manual') {
+        const [py, pm] = p.split('-').map(Number);
+        if (py && pm) { setYear(py); setMonth(pm); }
+        setShowForm(true);
+      }
+    }, 50);
+  };
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -287,6 +376,133 @@ export default function PPNPage() {
       {/* Tab 1: Faktur Management */}
       {activeTab === 'faktur' && (
         <div>
+          {/* 3-mode input cards (matching PPh 21/23 layout) */}
+          <div className="grid gap-4 md:grid-cols-3 mb-4">
+            {/* Method 1: Template */}
+            <Card className="border-2 border-dashed border-blue-200 hover:border-blue-400 hover:shadow-sm transition-all">
+              <CardContent className="p-5 flex flex-col h-full">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <Download className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{t('inputModeTemplate')}</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeTemplateDesc')}</p>
+                  </div>
+                </div>
+                <div className="space-y-2 flex-1">
+                  <Button variant="outline" size="sm" className="w-full" onClick={downloadPpnTemplate}>
+                    <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownloadBtn')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => openMonthPicker('csv')}
+                    disabled={uploadingDoc || !session?.customerId}
+                  >
+                    {uploadingDoc ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
+                    {t('inputTemplateUploadBtn')}
+                  </Button>
+                  {confirmedPeriod && pendingAction === 'csv' && (
+                    <p className="text-[10px] text-blue-700 text-center">
+                      {t('monthPickerSelected', { period: confirmedPeriod })}
+                    </p>
+                  )}
+                  <input ref={csvInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
+                    onChange={e => handleFakturUpload(e.target.files, 'WEB')} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Method 2: Upload — RECOMMENDED */}
+            <Card className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all relative">
+              <div className="absolute -top-2 left-5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
+                {t('recommendedBadge')}
+              </div>
+              <CardContent className="p-5 flex flex-col h-full">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                    <FileUp className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{t('inputModeUpload')}</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeUploadDesc')}</p>
+                  </div>
+                </div>
+                <div className="space-y-2 flex-1">
+                  <Button
+                    size="sm"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    onClick={() => openMonthPicker('file')}
+                    disabled={uploadingDoc || !session?.customerId}
+                  >
+                    {uploadingDoc ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileUp className="h-3 w-3 mr-1" />}
+                    {t('inputModeUploadBtn')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => openMonthPicker('camera')}
+                    disabled={uploadingDoc || !session?.customerId}
+                  >
+                    <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
+                  </Button>
+                  {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
+                    <p className="text-[10px] text-emerald-700 text-center">
+                      {t('monthPickerSelected', { period: confirmedPeriod })}
+                    </p>
+                  )}
+                  <input ref={fileUploadRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
+                    onChange={e => handleFakturUpload(e.target.files, 'WEB')} />
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
+                  <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-emerald-500" />
+                    {t('uploadHint')}
+                  </p>
+                  <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                    <Camera className="h-3 w-3 text-emerald-500" />
+                    {t('inputCameraHint')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Method 3: Manual */}
+            <Card className={`border-2 border-dashed ${showForm ? 'border-purple-400 shadow-sm' : 'border-purple-200 hover:border-purple-400 hover:shadow-sm'} transition-all`}>
+              <CardContent className="p-5 flex flex-col h-full">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                    <Pencil className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{t('inputModeManual')}</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeManualDesc')}</p>
+                  </div>
+                </div>
+                <div className="space-y-2 flex-1">
+                  <Button
+                    size="sm"
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    onClick={() => openMonthPicker('manual')}
+                    disabled={!session?.customerId}
+                  >
+                    <Pencil className="h-3 w-3 mr-1" />{t('inputModeManualBtn')}
+                  </Button>
+                  {confirmedPeriod && pendingAction === 'manual' && (
+                    <p className="text-[10px] text-purple-700 text-center">
+                      {t('monthPickerSelected', { period: confirmedPeriod })}
+                    </p>
+                  )}
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <p className="text-[10px] text-gray-500">{t('manualHint')}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
               {(['ALL', 'OUTPUT', 'INPUT'] as FakturFilter[]).map(f => (
@@ -296,9 +512,6 @@ export default function PPNPage() {
                 </button>
               ))}
             </div>
-            <Button size="sm" onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-1" />{t('newFaktur')}
-            </Button>
           </div>
 
           {/* Faktur Form */}
@@ -568,6 +781,49 @@ export default function PPNPage() {
 
       {/* PPN Refund Section */}
       <PPNRefundSection locale={locale} />
+
+      {/* Month picker dialog — opens before any input action */}
+      <Dialog open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('monthPickerTitle')}</DialogTitle>
+            <DialogDescription>{t('monthPickerDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <div>
+              <Label className="text-xs">{t('monthPickerYear')}</Label>
+              <Select value={String(pickedYear)} onValueChange={v => setPickedYear(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map(y => (
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">{t('monthPickerMonth')}</Label>
+              <Select value={String(pickedMonth)} onValueChange={v => setPickedMonth(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                    <SelectItem key={m} value={String(m)}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMonthPickerOpen(false)}>
+              {t('cancel')}
+            </Button>
+            <Button onClick={confirmMonthPicker}>
+              <CheckCircle className="h-4 w-4 mr-1" />
+              {t('monthPickerConfirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -576,7 +832,7 @@ export default function PPNPage() {
 // PPN Filing Process (증빙 + SPT Masa + 납부 프로그래스)
 // ══════════════════════════════════════════════════════
 function PPNFilingSection({
-  customerId, period, summary, fakturCount, locale,
+  customerId, period,
 }: {
   customerId: string;
   period: string;
@@ -591,11 +847,6 @@ function PPNFilingSection({
     id: string; file_name: string; ocr_status: string;
     ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
   }>>([]);
-  const [creatingSPT, setCreatingSPT] = useState(false);
-  const [sptResult, setSptResult] = useState<{
-    totalGrossIncome: number; totalTaxWithheld: number; itemCount: number;
-    submissionDeadline: string; isOverdue: boolean;
-  } | null>(null);
 
   // Load docs
   useEffect(() => {
@@ -603,29 +854,6 @@ function PPNFilingSection({
     fetch(`/api/documents?customerId=${customerId}&period=${period}`)
       .then(r => r.json())
       .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 10)); })
-      .catch(() => {});
-  }, [customerId, period]);
-
-  // Check existing SPT Masa PPN
-  useEffect(() => {
-    if (!customerId) return;
-    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPN&period=${period}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        const filings = d?.data || [];
-        const existing = filings.find((f: { tax_type: string; tax_period: string }) =>
-          f.tax_type === 'PPN' && f.tax_period === period);
-        if (existing?.tax_data?.spt_masa_result) {
-          const r = existing.tax_data.spt_masa_result;
-          setSptResult({
-            totalGrossIncome: r.total_gross_income || 0,
-            totalTaxWithheld: r.total_tax_withheld || 0,
-            itemCount: r.item_count || 0,
-            submissionDeadline: r.submission_deadline || '',
-            isOverdue: false,
-          });
-        }
-      })
       .catch(() => {});
   }, [customerId, period]);
 
@@ -658,43 +886,6 @@ function PPNFilingSection({
     }
     setUploading(false);
   };
-
-  const handleCreateSPT = async () => {
-    setCreatingSPT(true);
-    try {
-      const res = await fetch('/api/tax/spt-masa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, taxType: 'PPN', period }),
-      });
-      const data = await res.json();
-      if (data.success || data.sptMasa) {
-        const spt = data.sptMasa;
-        if (spt) {
-          setSptResult({
-            totalGrossIncome: spt.totalGrossIncome || 0,
-            totalTaxWithheld: spt.totalTaxWithheld || 0,
-            itemCount: spt.itemCount || 0,
-            submissionDeadline: spt.submissionDeadline || '',
-            isOverdue: spt.isOverdue || false,
-          });
-        }
-      }
-    } catch { /* */ }
-    finally { setCreatingSPT(false); }
-  };
-
-  const sptCreated = !!sptResult;
-  const netPpn = summary.netPpn;
-  const isLebihBayar = netPpn < 0;
-
-  const steps = [
-    { id: 1, label: 'Faktur ' + t('k0_7bb79c'), done: fakturCount > 0, desc: t('fakturCount', { count: fakturCount }) },
-    { id: 2, label: t('k1_32a33a'), done: uploadedDocs.length > 0, desc: t('fakturCount', { count: uploadedDocs.length }) },
-    { id: 3, label: 'SPT Masa PPN', done: sptCreated, desc: sptCreated ? t('k2_b93104') : t('k3_ac6176') },
-    { id: 4, label: t('k4_b303e6'), done: false, desc: netPpn > 0 ? fmt(netPpn) : netPpn < 0 ? t('overpaid') : 'NIHIL' },
-    { id: 5, label: 'DJP ' + t('k6_d6ed72'), done: false, desc: t('afterPayment') },
-  ];
 
   return (
     <div className="mt-6 space-y-4">
@@ -748,112 +939,6 @@ function PPNFilingSection({
         </CardContent>
       </Card>
 
-      {/* Filing progress */}
-      <Card>
-        <CardContent className="p-5">
-          <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-orange-600" />
-            {period} PPN {t('k16_aa38cd')}
-          </h3>
-
-          <div className="flex items-center justify-between mb-6">
-            {steps.map((step, i) => (
-              <div key={step.id} className="flex items-center flex-1">
-                <div className="flex flex-col items-center flex-1">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                    step.done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
-                  }`}>
-                    {step.done ? <CheckCircle className="h-4 w-4" /> : step.id}
-                  </div>
-                  <p className="text-[10px] mt-1 text-center font-medium">{step.label}</p>
-                  <p className="text-[9px] text-gray-400 text-center">{step.desc}</p>
-                </div>
-                {i < steps.length - 1 && <div className={`h-0.5 w-full ${step.done ? 'bg-green-400' : 'bg-gray-200'}`} />}
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-3">
-            {/* SPT Masa PPN action */}
-            {fakturCount > 0 && !sptCreated && (
-              <div className="p-3 rounded-lg bg-orange-50 border border-orange-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-orange-600" />
-                  <div className="text-xs">
-                    <p className="font-medium text-orange-900">SPT Masa PPN {t('k17_b0b7b5')}</p>
-                    <p className="text-orange-700">
-                      PPN Keluaran: {fmt(summary.outputTax)} — PPN Masukan: {fmt(summary.inputTax)} —
-                      Selisih: <b>{fmt(Math.abs(netPpn))}</b> ({netPpn > 0 ? 'Kurang Bayar' : netPpn < 0 ? 'Lebih Bayar' : 'Nihil'})
-                    </p>
-                  </div>
-                </div>
-                <Button size="sm" onClick={handleCreateSPT} disabled={creatingSPT}>
-                  {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-                  SPT Masa {t('k18_4169bb')}
-                </Button>
-              </div>
-            )}
-
-            {/* SPT Masa PPN done */}
-            {sptCreated && sptResult && (
-              <div className="p-3 rounded-lg bg-green-50 border border-green-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <p className="text-xs font-medium text-green-900">SPT Masa PPN {t('k18_4169bb')} {t('k13_4f8e30')}</p>
-                </div>
-                <div className="grid grid-cols-4 gap-2 text-xs">
-                  <div><p className="text-gray-500">PPN Keluaran</p><p className="font-mono font-bold">{fmt(summary.outputTax)}</p></div>
-                  <div><p className="text-gray-500">PPN Masukan</p><p className="font-mono font-bold">{fmt(summary.inputTax)}</p></div>
-                  <div>
-                    <p className="text-gray-500">Selisih</p>
-                    <p className={`font-mono font-bold ${netPpn > 0 ? 'text-red-700' : netPpn < 0 ? 'text-blue-700' : 'text-gray-700'}`}>
-                      {fmt(Math.abs(netPpn))} {netPpn > 0 ? '(' + t('k4_b303e6') + ')' : netPpn < 0 ? '(' + t('k21_d003cd') : '(NIHIL)'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">{t('k22_df2337')}</p>
-                    <p>{sptResult.submissionDeadline?.substring(0, 10)}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Payment / Lebih Bayar notice */}
-            {sptCreated && netPpn > 0 && (
-              <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-indigo-600" />
-                  <div className="text-xs">
-                    <p className="font-medium text-indigo-900">{t('ppnPayment', { amount: fmt(netPpn) })}</p>
-                    <p className="text-indigo-700">{t('billingNote')}</p>
-                  </div>
-                </div>
-                <a href={`/${locale}/tax/monthly-payments`}
-                  className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
-                  {t('k24_d76082')}
-                </a>
-              </div>
-            )}
-
-            {sptCreated && isLebihBayar && (
-              <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-blue-600" />
-                <div>
-                  <p className="font-medium">PPN {t('k25_7fd5d5')}: {fmt(Math.abs(netPpn))}</p>
-                  <p>{t('k26_a4897c')} — {t('k27_f960de')}</p>
-                </div>
-              </div>
-            )}
-
-            {sptCreated && netPpn === 0 && (
-              <div className="p-3 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-gray-400" />
-                <span>PPN NIHIL — {t('k28_c33073')}</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

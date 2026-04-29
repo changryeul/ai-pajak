@@ -339,7 +339,7 @@ export function CorporateDashboardV2({
           <Link href={`/${locale}/tax/monthly-dashboard`}>{t('ctaMonthlyFiling')}</Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href={`/${locale}/filings`}>{tCta('viewProgressCta')}</Link>
+          <Link href={`/${locale}/tax/filing-status`}>{tCta('viewProgressCta')}</Link>
         </Button>
       </div>
     </div>
