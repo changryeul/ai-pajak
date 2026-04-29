@@ -295,10 +295,29 @@ export default function PPh21PayrollPage() {
     { key: 'DAILY',      label: tp('workerDaily'),      color: 'border-amber-200 bg-amber-50' },
   ];
 
-  const handleSubmit = () => {
-    // Scroll to filing process section to start submission flow
-    const el = document.getElementById('pph21-filing-process');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleSubmit = async () => {
+    if (!customerId) return;
+    const period = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/tax/spt-masa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxType: 'PPh21', period }),
+      });
+      const data = await res.json();
+      if (data.success || data.sptMasa) {
+        showMsg('success', `SPT Masa PPh 21 ${tp('l84_f3bc85')}`);
+        const el = document.getElementById('pph21-filing-process');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        showMsg('error', data.message || data.error || `SPT Masa ${tp('l85_cbbcb4')}`);
+      }
+    } catch {
+      showMsg('error', tp('l21_175c5f'));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -331,8 +350,9 @@ export default function PPh21PayrollPage() {
         })}
       </div>
       <div className="flex justify-end mb-5">
-        <Button onClick={handleSubmit} className="bg-slate-900 hover:bg-slate-800 text-white">
-          <Send className="h-4 w-4 mr-1.5" />{tp('submitBtn')}
+        <Button onClick={handleSubmit} disabled={isSaving || employees.length === 0} className="bg-slate-900 hover:bg-slate-800 text-white">
+          {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+          {tp('submitBtn')}
         </Button>
       </div>
 

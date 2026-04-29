@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loggers } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { RequestWithSession } from '@/types/auth';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -294,6 +295,36 @@ async function handler(request: RequestWithSession): Promise<Response> {
   });
 
   loggers.tax.info({ filingId: filing.id, customerId, taxType, period, totalNetPayable: sptMasaResult.total_net_payable, consultantId: consultant.id }, 'SPT Masa created');
+
+  // Auto-enqueue to operator submission queue so the operator workflow picks it up.
+  // Mirrors the pattern in /api/tax/filings POST. Non-fatal: SPT Masa stands alone if this fails.
+  try {
+    let periodMonth = 12;
+    let periodYear = new Date().getFullYear();
+    if (period?.includes('-')) {
+      const [y, m] = period.split('-').map((s) => parseInt(s, 10));
+      if (!Number.isNaN(y)) periodYear = y;
+      if (!Number.isNaN(m)) periodMonth = m;
+    }
+    const amount = sptMasaResult.total_net_payable || sptMasaResult.total_tax_withheld || 0;
+    await getSupabaseAdmin()
+      .from('djp_submission_queue')
+      .upsert(
+        {
+          customer_id: customerId,
+          tax_type: taxType,
+          tax_period_month: periodMonth,
+          tax_period_year: periodYear,
+          tax_filing_id: filing.id,
+          amount,
+          status: 'PENDING',
+          notes: `Auto-enqueued from SPT Masa ${filing.id}`,
+        },
+        { onConflict: 'customer_id,tax_type,tax_period_month,tax_period_year' },
+      );
+  } catch (e) {
+    loggers.tax.warn({ err: e, filingId: filing.id }, 'Operator queue auto-enqueue failed');
+  }
 
   // Check if overdue
   const isOverdue = SPTMasaCalculator.isOverdue(period, taxType);

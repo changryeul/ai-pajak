@@ -1351,16 +1351,37 @@ export default function PPh23Page() {
           </Button>
           <Button
             size="sm"
-            onClick={() => {
+            disabled={saving || transactions.length === 0}
+            onClick={async () => {
               const needsCheckCount = transactions.filter(tx => !tx.counterparty_npwp).length;
               if (needsCheckCount > 0) {
                 showMsg('error', t('statusNeedsCheck') + ': ' + needsCheckCount);
                 return;
               }
-              showMsg('success', t('btnSubmitValidate'));
+              if (!customerId) return;
+              setSaving(true);
+              try {
+                const res = await fetch('/api/tax/spt-masa', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
+                });
+                const data = await res.json();
+                if (data.success || data.sptMasa) {
+                  showMsg('success', `SPT Masa PPh 23 ${t('k12_c05543')}`);
+                  loadData();
+                } else {
+                  showMsg('error', data.message || data.error || `SPT Masa ${t('k14_5cf2ad')}`);
+                }
+              } catch {
+                showMsg('error', t('k15_175c5f'));
+              } finally {
+                setSaving(false);
+              }
             }}
           >
-            <CheckCircle className="h-3 w-3 mr-1" />{t('btnSubmitValidate')}
+            {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+            {t('btnSubmitValidate')}
           </Button>
         </div>
       )}
