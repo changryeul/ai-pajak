@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -9,6 +9,7 @@ import {
   Building2, ArrowLeft, ArrowRight, ShieldCheck, FileCheck2,
   Search, X, Loader2, CheckCircle,
 } from 'lucide-react';
+import { SignaturePad, type SignaturePadHandle } from '@/components/signature/SignaturePad';
 
 interface KbliCode {
   code: string;
@@ -80,6 +81,12 @@ export default function CompanyRegisterPage() {
   const [agreeJtc, setAgreeJtc] = useState(false);
   const [agreeData, setAgreeData] = useState(false);
   const [agreeTaxFiling, setAgreeTaxFiling] = useState(false);
+  // (선택) 신용도 분석 데이터 활용 동의
+  const [agreeCredit, setAgreeCredit] = useState(false);
+  // 서명 패드 (법인 대표 서명)
+  const signatureRef = useRef<SignaturePadHandle>(null);
+  const [hasSignature, setHasSignature] = useState(false);
+  const [signatureError, setSignatureError] = useState('');
 
   // Step 4: Account
   const [email, setEmail] = useState('');
@@ -123,7 +130,18 @@ export default function CompanyRegisterPage() {
   const canProceedStep1 = companyName && isValidNpwp(npwp) && representativeName;
   const canProceedStep2 = true; // tax profile is optional but recommended
   const canProceedStep3 = selectedKblis.length > 0 && primaryKbli;
-  const canProceedStep4 = agreeJtc && agreeData && agreeTaxFiling;
+  // Step 4 — required consents AND signature must be present.
+  // Credit-analysis consent is optional, so it is intentionally excluded.
+  const canProceedStep4 = agreeJtc && agreeData && agreeTaxFiling && hasSignature;
+
+  // Master "agree to all" checkbox derived state — checked when every required+optional item is on.
+  const allAgreed = agreeJtc && agreeData && agreeTaxFiling && agreeCredit;
+  const handleAgreeAll = (next: boolean) => {
+    setAgreeJtc(next);
+    setAgreeData(next);
+    setAgreeTaxFiling(next);
+    setAgreeCredit(next);
+  };
   const canSubmit = email && password && password === confirmPassword && password.length >= 8;
 
   const handleSubmit = async () => {
@@ -160,7 +178,9 @@ export default function CompanyRegisterPage() {
             version: JTC_AGREEMENT_VERSION,
             dataProcessing: agreeData,
             taxFilingAuthorization: agreeTaxFiling,
+            creditAnalysis: agreeCredit,
           },
+          signatureDataUrl: signatureRef.current?.getDataUrl() ?? null,
         }),
       });
 
@@ -445,44 +465,59 @@ export default function CompanyRegisterPage() {
               </>
             )}
 
-            {/* Step 4: Terms */}
+            {/* Step 4: Mandate + Terms (combined consent page) */}
             {step === 4 && (
               <>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
-                  <div className="flex items-start gap-3 mb-3">
-                    <ShieldCheck className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-sm text-blue-900">AI Pajak × Jakarta Tax Consulting</p>
-                      <p className="text-xs text-blue-700 mt-1">
-                        {t('jtcExplainBody')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input type="checkbox" checked={agreeJtc} onChange={e => setAgreeJtc(e.target.checked)}
-                    className="mt-0.5 accent-emerald-600" />
-                  <div className="text-xs">
-                    <p className="font-medium text-gray-900">
-                      {t('agreeJtcLabel')} <span className="text-red-500">*</span>
-                    </p>
-                    <p className="text-gray-500 mt-1">
-                      {t('agreeJtcHint', { version: JTC_AGREEMENT_VERSION })}
-                    </p>
-                  </div>
+                {/* Master "agree to all" toggle */}
+                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer bg-blue-50 border-blue-200">
+                  <input
+                    type="checkbox"
+                    checked={allAgreed}
+                    onChange={(e) => handleAgreeAll(e.target.checked)}
+                    className="accent-blue-600 h-4 w-4"
+                  />
+                  <span className="text-sm font-bold text-blue-900">{t('consentMasterLabel')}</span>
                 </label>
 
+                {/* Mandate contents */}
+                <div className="border rounded-lg p-4 bg-gray-50 text-xs text-gray-700 space-y-2">
+                  <p className="font-bold text-sm text-gray-900">{t('mandateContentsTitle')}</p>
+                  <p>
+                    {t('mandateContentsLine', {
+                      companyName: companyName || '________',
+                      npwp: npwp || '________',
+                    })}
+                  </p>
+                  <ul className="list-disc ml-5 space-y-0.5">
+                    <li>{t('mandateContentsItem1')}</li>
+                    <li>{t('mandateContentsItem2')}</li>
+                    <li>{t('mandateContentsItem3')}</li>
+                    <li>{t('mandateContentsItem4')}</li>
+                  </ul>
+                  <p>{t('mandateContentsAi')}</p>
+                  <p>{t('mandateContentsResp')}</p>
+                  <p>{t('mandateContentsLiability')}</p>
+                </div>
+
+                {/* Terms contents */}
+                <div className="border rounded-lg p-4 bg-gray-50 text-xs text-gray-700 space-y-2">
+                  <p className="font-bold text-sm text-gray-900">{t('termsContentsTitle')}</p>
+                  <p>{t('termsArticle1')}</p>
+                  <p>{t('termsArticle2')}</p>
+                  <p>{t('termsArticle3')}</p>
+                  <p>{t('termsArticle4')}</p>
+                  <p>{t('termsArticle5')}</p>
+                </div>
+
+                {/* Required + optional consents (3 boxes) */}
                 <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input type="checkbox" checked={agreeData} onChange={e => setAgreeData(e.target.checked)}
+                  <input type="checkbox" checked={agreeJtc && agreeData} onChange={e => {
+                    setAgreeJtc(e.target.checked);
+                    setAgreeData(e.target.checked);
+                  }}
                     className="mt-0.5 accent-emerald-600" />
                   <div className="text-xs">
-                    <p className="font-medium text-gray-900">
-                      {t('agreeDataLabel')} <span className="text-red-500">*</span>
-                    </p>
-                    <p className="text-gray-500 mt-1">
-                      {t('agreeDataHint')}
-                    </p>
+                    <p className="font-medium text-gray-900">{t('agreeMandateLabel')}</p>
                   </div>
                 </label>
 
@@ -490,14 +525,39 @@ export default function CompanyRegisterPage() {
                   <input type="checkbox" checked={agreeTaxFiling} onChange={e => setAgreeTaxFiling(e.target.checked)}
                     className="mt-0.5 accent-emerald-600" />
                   <div className="text-xs">
-                    <p className="font-medium text-gray-900">
-                      {t('agreeFilingLabel')} <span className="text-red-500">*</span>
-                    </p>
-                    <p className="text-gray-500 mt-1">
-                      {t('agreeFilingHint')}
-                    </p>
+                    <p className="font-medium text-gray-900">{t('agreeTermsLabel')}</p>
                   </div>
                 </label>
+
+                <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input type="checkbox" checked={agreeCredit} onChange={e => setAgreeCredit(e.target.checked)}
+                    className="mt-0.5 accent-amber-600" />
+                  <div className="text-xs">
+                    <p className="font-medium text-gray-900">{t('agreeCreditLabel')}</p>
+                    <p className="text-amber-600 mt-1">{t('agreeCreditHint')}</p>
+                  </div>
+                </label>
+
+                {/* Signature pad */}
+                <div className="border rounded-lg p-4 bg-white">
+                  <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-blue-600" />
+                    {t('signatureSectionLabel')} <span className="text-red-500">*</span>
+                  </p>
+                  <SignaturePad
+                    ref={signatureRef}
+                    width={520}
+                    height={140}
+                    onChange={(has) => {
+                      setHasSignature(has);
+                      if (has) setSignatureError('');
+                    }}
+                    clearLabel={t('signatureClearLabel')}
+                  />
+                  {signatureError && (
+                    <p className="text-xs text-red-600 mt-1">{signatureError}</p>
+                  )}
+                </div>
               </>
             )}
 

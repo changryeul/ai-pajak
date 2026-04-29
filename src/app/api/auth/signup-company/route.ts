@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createHash } from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
       primaryKbli,
       taxProfile,
       jtcAgreement,
+      signatureDataUrl,
     } = body as {
       email: string;
       password: string;
@@ -51,7 +53,9 @@ export async function POST(request: NextRequest) {
         version?: string;
         dataProcessing?: boolean;
         taxFilingAuthorization?: boolean;
+        creditAnalysis?: boolean;
       };
+      signatureDataUrl?: string | null;
     };
 
     // Validation
@@ -173,6 +177,8 @@ export async function POST(request: NextRequest) {
         jtc_agreement_accepted_at: new Date().toISOString(),
         data_processing_consent: !!jtcAgreement.dataProcessing,
         tax_filing_authorization: !!jtcAgreement.taxFilingAuthorization,
+        credit_analysis_consent: !!jtcAgreement.creditAnalysis,
+        credit_analysis_consent_at: jtcAgreement.creditAnalysis ? new Date().toISOString() : null,
         annual_revenue: taxProfile?.annualRevenue || null,
         revenue_year: taxProfile?.revenueYear || null,
         has_employees: !!taxProfile?.hasEmployees,
@@ -197,6 +203,33 @@ export async function POST(request: NextRequest) {
     }
 
     const customerId = customer.id;
+
+    // Persist signature audit (POA_MANDATE) — non-fatal if it fails.
+    // Only the SHA-256 + metadata is recorded here; storage upload of the
+    // PNG bytes happens in a follow-up pass via /api/customer/signature.
+    if (signatureDataUrl && /^data:image\/(png|jpeg|webp);base64,/.test(signatureDataUrl)) {
+      try {
+        const base64 = signatureDataUrl.replace(/^data:image\/\w+;base64,/, '');
+        const buf = Buffer.from(base64, 'base64');
+        const sha256 = createHash('sha256').update(buf).digest('hex');
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null;
+        const ua = request.headers.get('user-agent') || null;
+        const { error: sigErr } = await admin.from('signature_audit').insert({
+          customer_id: customerId,
+          purpose: 'POA_MANDATE',
+          signature_sha256: sha256,
+          ip_address: ip,
+          user_agent: ua,
+          byte_size: buf.length,
+          external_provider: 'canvas',
+        });
+        if (sigErr) {
+          loggers.api.warn({ err: sigErr, customerId }, 'Signature audit insert failed (non-fatal)');
+        }
+      } catch (e) {
+        loggers.api.warn({ err: e, customerId }, 'Signature processing failed (non-fatal)');
+      }
+    }
 
     // Insert KBLI codes
     if (kbliCodes && kbliCodes.length > 0) {
