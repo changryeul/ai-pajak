@@ -5242,8 +5242,156 @@
     "countPeople": "{count}人"
   },
   "helpPage": {
-    "manualsTitle": "用户手册 (按角色的详细指南)",
-    "manualsDesc": "法人 · 个人 · 外部税务事务所 · JTC 税务师 · 运营团队 · 平台管理员 — 按角色的场景化手册"
+    "pageTitle": "帮助",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "1. 当前阶段",
+    "steps": {
+      "gettingStarted": "入门指南",
+      "byTopic": "按主题",
+      "dataUpload": "数据上传",
+      "troubleshoot": "问题排查"
+    },
+    "hero": {
+      "label": "AI Pajak Help Center",
+      "title": "即使没有税务知识，也能指引您下一步",
+      "subtitle": "月度申报、年终结算、数据上传、交易方代扣判定、历史、计费、集成等均可在此查询。",
+      "searchPlaceholder": "例如: PPh23、签字版财务报表、NTPN、年终结算价格"
+    },
+    "quickEntries": {
+      "onboarding": {
+        "title": "初次使用？",
+        "body": "查看从公司资料到首次申报的完整流程。"
+      },
+      "monthly": {
+        "title": "想了解本月申报？",
+        "body": "按税种查看资料与截止流程。"
+      },
+      "annual": {
+        "title": "正在筹备年终结算？",
+        "body": "查看 UMKM / PPh25 / 复杂结构 年终结算标准。"
+      },
+      "withholding": {
+        "title": "代扣税不清楚？",
+        "body": "查看基于交易方信息的 AI 判定规则。"
+      }
+    },
+    "sidebarHeader": "帮助主题",
+    "tabs": {
+      "quickStart": "快速开始",
+      "monthly": "月度申报",
+      "annual": "年终结算",
+      "upload": "上传",
+      "counterparty": "交易方 / 代扣",
+      "history": "历史 / 报表",
+      "billing": "计费",
+      "integration": "集成",
+      "security": "安全 / 账户",
+      "faq": "FAQ"
+    },
+    "categories": {
+      "quickStart": {
+        "title": "开始使用 AI Pajak",
+        "subtitle": "从填写公司资料到确认申报完成的基础流程。",
+        "items": [
+          "填写公司税务资料",
+          "选择套餐并预付",
+          "上传所需数据",
+          "AI 审核与税额计算",
+          "开具 ID Billing",
+          "提交付款凭证"
+        ]
+      },
+      "monthly": {
+        "title": "月度申报指南",
+        "subtitle": "PPh21/23/4(2)/25/PPN 的月度流程与截止。",
+        "items": [
+          "月度时间表与截止",
+          "PPh21 工资数据",
+          "PPh23/4(2) 交易方代扣",
+          "PPh25 分期税",
+          "PPN 进项/销项发票",
+          "申报后 NTPN/BPE 归档"
+        ]
+      },
+      "annual": {
+        "title": "年终结算指南",
+        "subtitle": "UMKM / PPh25 / 复杂结构年终标准与流程。",
+        "items": [
+          "比较套餐 (UMKM/PPh25/复杂)",
+          "结算资料清单",
+          "财务报表自动生成",
+          "年度 PPh29/PPh25",
+          "审查 SPT Tahunan 草稿",
+          "开具 e-Bupot 1721 A1"
+        ]
+      },
+      "upload": {
+        "title": "数据上传指南",
+        "subtitle": "上传 Excel/CSV/PDF 并自动分类。",
+        "items": [
+          "标准模板位置",
+          "上传工资/发票/银行数据",
+          "核对自动映射结果",
+          "重复/缺失校验",
+          "上传历史保留"
+        ]
+      },
+      "counterparty": {
+        "title": "交易方 / 代扣判定",
+        "subtitle": "基于 NPWP/KBLI/凭证的 AI 判定规则。",
+        "items": [
+          "登记交易方主数据",
+          "自动校验 NPWP/NITKU",
+          "自动判定 PPh23/4(2)/15/22/26",
+          "SKB / DGT Form 处理",
+          "修改交易方税务档案"
+        ]
+      },
+      "history": {
+        "title": "历史 / 报表",
+        "subtitle": "查询申报历史与税务报表的方式。",
+        "items": [
+          "SPT Masa / Tahunan 历史",
+          "BPE / NTPN 自动归档位置",
+          "月度税务报表生成",
+          "下载历史申报",
+          "审计资料合集"
+        ]
+      },
+      "billing": {
+        "title": "计费",
+        "subtitle": "月度/年终预付流程与开具收据。",
+        "items": [
+          "选择与变更套餐",
+          "12 个月预付 10% 折扣",
+          "年终结算单独预付",
+          "设置自动付款",
+          "下载发票与收据"
+        ]
+      },
+      "integration": {
+        "title": "集成",
+        "subtitle": "Coretax、Accurate、Jurnal、银行、Excel/CSV。",
+        "items": [
+          "Coretax / DJP 集成",
+          "Accurate Online 连接",
+          "Jurnal by Mekari 连接",
+          "Open Banking / Bank Feed",
+          "使用 Excel / CSV 模板"
+        ]
+      },
+      "security": {
+        "title": "安全 / 账户",
+        "subtitle": "账户安全与用户管理。",
+        "items": [
+          "修改密码",
+          "启用两步验证",
+          "获取备用码",
+          "查看登录活动",
+          "管理账户权限"
+        ]
+      }
+    }
   },
   "overrideRules": {
     "pageTitle": "Override Rule Management",

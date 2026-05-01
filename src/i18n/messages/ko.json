@@ -5345,8 +5345,156 @@
     "countPeople": "{count}명"
   },
   "helpPage": {
-    "manualsTitle": "사용자 매뉴얼 (역할별 상세 가이드)",
-    "manualsDesc": "법인 · 개인 · 외부 세무사무소 · JTC 세무사 · 운영팀 · 플랫폼 관리자 — 역할별 시나리오형 매뉴얼"
+    "pageTitle": "도움말",
+    "backToDashboard": "대시보드로",
+    "currentStep": "1. 현재 단계",
+    "steps": {
+      "gettingStarted": "시작 가이드",
+      "byTopic": "세목별 안내",
+      "dataUpload": "자료 업로드",
+      "troubleshoot": "문제 해결"
+    },
+    "hero": {
+      "label": "AI Pajak Help Center",
+      "title": "세금 지식이 없어도 다음 단계를 알 수 있도록 안내합니다",
+      "subtitle": "월신고, 연결산, 자료 업로드, 거래처 원천세 판정, 신고 이력, 요금/결제, 연동 설정까지 한 곳에서 확인하세요.",
+      "searchPlaceholder": "예: PPh23, 재무제표 서명본, NTPN, 연결산 요금"
+    },
+    "quickEntries": {
+      "onboarding": {
+        "title": "처음 사용하는 고객인가요?",
+        "body": "회사 정보부터 신고 완료까지 전체 흐름을 확인하세요."
+      },
+      "monthly": {
+        "title": "이번 달 신고가 궁금한가요?",
+        "body": "월신고 세목별 자료와 마감 흐름을 확인하세요."
+      },
+      "annual": {
+        "title": "연결산을 준비 중인가요?",
+        "body": "UMKM/PPh25/복잡 구조 연결산 기준을 확인하세요."
+      },
+      "withholding": {
+        "title": "원천세 세목이 헷갈리나요?",
+        "body": "거래처 정보 기반 AI 판정 기준을 확인하세요."
+      }
+    },
+    "sidebarHeader": "도움말 구성",
+    "tabs": {
+      "quickStart": "빠른 시작",
+      "monthly": "월신고",
+      "annual": "연결산",
+      "upload": "자료 업로드",
+      "counterparty": "거래처/원천세",
+      "history": "이력/보고서",
+      "billing": "요금/결제",
+      "integration": "연동",
+      "security": "보안/계정",
+      "faq": "FAQ"
+    },
+    "categories": {
+      "quickStart": {
+        "title": "AI Pajak 처음 시작하기",
+        "subtitle": "회사 정보 입력부터 신고 완료 확인까지 기본 흐름을 안내합니다.",
+        "items": [
+          "회사 세무 프로필 입력",
+          "요금제 및 선납 결제 선택",
+          "필요 자료 업로드",
+          "AI 검토 및 세액 계산",
+          "ID Billing 발행",
+          "납부 증빙 제출"
+        ]
+      },
+      "monthly": {
+        "title": "월신고 가이드",
+        "subtitle": "월별 PPh21/23/4(2)/25/PPN 신고 흐름과 마감을 안내합니다.",
+        "items": [
+          "월별 신고 일정과 마감일",
+          "PPh21 급여 자료 입력",
+          "PPh23/4(2) 거래처 원천세 자료",
+          "PPh25 선납세 산정",
+          "PPN 매입·매출 인보이스 정리",
+          "신고 후 NTPN/BPE 보관"
+        ]
+      },
+      "annual": {
+        "title": "연결산 가이드",
+        "subtitle": "UMKM / PPh25 / 복잡 구조 연결산의 기준과 흐름을 안내합니다.",
+        "items": [
+          "연결산 요금제 비교 (UMKM/PPh25/복잡)",
+          "결산 자료 준비 체크리스트",
+          "재무제표 자동 생성 흐름",
+          "PPh29/PPh25 연 산정",
+          "SPT Tahunan 초안 검토",
+          "e-Bupot 1721 A1 발급"
+        ]
+      },
+      "upload": {
+        "title": "자료 업로드 가이드",
+        "subtitle": "Excel·CSV·PDF 자료를 업로드하고 자동 분류되는 흐름을 안내합니다.",
+        "items": [
+          "표준 템플릿 다운로드 위치",
+          "급여·인보이스·은행 자료 업로드",
+          "자동 매핑된 결과 확인 방법",
+          "중복/누락 데이터 검증",
+          "업로드 이력 보관"
+        ]
+      },
+      "counterparty": {
+        "title": "거래처 / 원천세 판정",
+        "subtitle": "NPWP·KBLI·증빙 기반 AI 판정 기준을 안내합니다.",
+        "items": [
+          "거래처 마스터 등록",
+          "NPWP/NITKU 자동 검증",
+          "PPh23/4(2)/15/22/26 자동 판정",
+          "SKB·DGT Form 처리",
+          "거래처 세무 프로필 수정"
+        ]
+      },
+      "history": {
+        "title": "이력 / 보고서",
+        "subtitle": "신고 이력과 세금 보고서를 확인하는 방법을 안내합니다.",
+        "items": [
+          "SPT Masa·Tahunan 이력 조회",
+          "BPE·NTPN 자동 보관 위치",
+          "월별 세금 보고서 생성",
+          "과거 신고 자료 다운로드",
+          "감사 대비 자료 묶음"
+        ]
+      },
+      "billing": {
+        "title": "요금 / 결제",
+        "subtitle": "월관리·연결산 선납 결제 흐름과 영수증 발급 방법을 안내합니다.",
+        "items": [
+          "요금제 선택 및 변경",
+          "12개월 선납 10% 할인",
+          "연결산 별도 선납 결제",
+          "자동 결제 설정",
+          "청구서·영수증 다운로드"
+        ]
+      },
+      "integration": {
+        "title": "연동 설정",
+        "subtitle": "Coretax·Accurate·Jurnal·은행·Excel/CSV 연동을 안내합니다.",
+        "items": [
+          "Coretax / DJP 연동",
+          "Accurate Online 연결",
+          "Jurnal by Mekari 연결",
+          "Open Banking / Bank Feed",
+          "Excel / CSV 템플릿 사용"
+        ]
+      },
+      "security": {
+        "title": "보안 / 계정",
+        "subtitle": "계정 보안과 사용자 관리 방법을 안내합니다.",
+        "items": [
+          "비밀번호 변경",
+          "2단계 인증 설정",
+          "백업 코드 발급",
+          "로그인 이력 확인",
+          "계정 권한 관리"
+        ]
+      }
+    }
   },
   "overrideRules": {
     "pageTitle": "Override Rule 관리",

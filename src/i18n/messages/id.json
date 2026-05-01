@@ -5242,8 +5242,156 @@
     "countPeople": "{count} orang"
   },
   "helpPage": {
-    "manualsTitle": "Panduan Pengguna (Panduan detail per peran)",
-    "manualsDesc": "Korporat · Individu · Konsultan Eksternal · Advisor JTC · Operator · Admin Platform — Manual skenario per peran"
+    "pageTitle": "Bantuan",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "1. Tahap saat ini",
+    "steps": {
+      "gettingStarted": "Panduan awal",
+      "byTopic": "Per topik",
+      "dataUpload": "Unggah data",
+      "troubleshoot": "Pemecahan masalah"
+    },
+    "hero": {
+      "label": "AI Pajak Help Center",
+      "title": "Memandu langkah berikutnya, bahkan tanpa pengetahuan pajak",
+      "subtitle": "Temukan bantuan untuk pelaporan bulanan, tutup buku, unggahan, penentuan withholding, riwayat, tagihan, dan integrasi di satu tempat.",
+      "searchPlaceholder": "contoh: PPh23, laporan keuangan ditandatangani, NTPN, biaya tutup buku"
+    },
+    "quickEntries": {
+      "onboarding": {
+        "title": "Baru di AI Pajak?",
+        "body": "Lihat alur lengkap dari profil perusahaan hingga pelaporan pertama."
+      },
+      "monthly": {
+        "title": "Mau tahu pelaporan bulan ini?",
+        "body": "Cek alur data dan tenggat per jenis pajak."
+      },
+      "annual": {
+        "title": "Sedang siapkan tutup buku?",
+        "body": "Cek kriteria tutup buku UMKM / PPh25 / Kompleks."
+      },
+      "withholding": {
+        "title": "Bingung pajak withholding?",
+        "body": "Tinjau aturan keputusan AI berdasarkan info lawan transaksi."
+      }
+    },
+    "sidebarHeader": "Topik bantuan",
+    "tabs": {
+      "quickStart": "Mulai cepat",
+      "monthly": "Bulanan",
+      "annual": "Tutup buku",
+      "upload": "Unggahan",
+      "counterparty": "Lawan transaksi / WHT",
+      "history": "Riwayat / Laporan",
+      "billing": "Tagihan",
+      "integration": "Integrasi",
+      "security": "Keamanan / Akun",
+      "faq": "FAQ"
+    },
+    "categories": {
+      "quickStart": {
+        "title": "Memulai dengan AI Pajak",
+        "subtitle": "Dari pengisian profil perusahaan hingga konfirmasi pelaporan selesai.",
+        "items": [
+          "Isi profil pajak perusahaan",
+          "Pilih paket dan bayar di muka",
+          "Unggah data yang diperlukan",
+          "Tinjauan AI dan perhitungan pajak",
+          "Terbitkan ID Billing",
+          "Kirim bukti pembayaran"
+        ]
+      },
+      "monthly": {
+        "title": "Panduan pelaporan bulanan",
+        "subtitle": "Alur dan tenggat bulanan PPh21/23/4(2)/25/PPN.",
+        "items": [
+          "Jadwal & tenggat bulanan",
+          "Data gaji PPh21",
+          "Withholding lawan transaksi PPh23/4(2)",
+          "PPh25 angsuran",
+          "Faktur AP/AR PPN",
+          "Arsip NTPN/BPE setelah pelaporan"
+        ]
+      },
+      "annual": {
+        "title": "Panduan tutup buku",
+        "subtitle": "Kriteria & alur tutup buku UMKM / PPh25 / Kompleks.",
+        "items": [
+          "Bandingkan paket (UMKM/PPh25/Kompleks)",
+          "Daftar periksa data tutup buku",
+          "Laporan keuangan otomatis",
+          "Tahunan PPh29/PPh25",
+          "Tinjau draft SPT Tahunan",
+          "Terbitkan e-Bupot 1721 A1"
+        ]
+      },
+      "upload": {
+        "title": "Panduan unggah data",
+        "subtitle": "Unggah Excel/CSV/PDF dan klasifikasi otomatis.",
+        "items": [
+          "Lokasi template standar",
+          "Unggah data gaji/faktur/bank",
+          "Verifikasi hasil pemetaan otomatis",
+          "Pemeriksaan duplikat/hilang",
+          "Penyimpanan riwayat unggah"
+        ]
+      },
+      "counterparty": {
+        "title": "Lawan transaksi / WHT",
+        "subtitle": "Aturan keputusan AI berdasarkan NPWP/KBLI/sertifikat.",
+        "items": [
+          "Daftarkan master lawan transaksi",
+          "Verifikasi NPWP/NITKU otomatis",
+          "Penentuan PPh23/4(2)/15/22/26 otomatis",
+          "Penanganan SKB / DGT Form",
+          "Ubah profil pajak lawan transaksi"
+        ]
+      },
+      "history": {
+        "title": "Riwayat / laporan",
+        "subtitle": "Cara akses riwayat pelaporan dan laporan pajak.",
+        "items": [
+          "Riwayat SPT Masa / Tahunan",
+          "Lokasi arsip BPE / NTPN otomatis",
+          "Pembuatan laporan pajak bulanan",
+          "Unduh pelaporan lalu",
+          "Paket dokumen siap audit"
+        ]
+      },
+      "billing": {
+        "title": "Tagihan",
+        "subtitle": "Alur pembayaran di muka bulanan/tahunan dan kuitansi.",
+        "items": [
+          "Pilih dan ubah paket",
+          "Diskon 10% untuk bayar 12 bulan",
+          "Bayar tutup buku terpisah",
+          "Setel pembayaran otomatis",
+          "Unduh faktur & kuitansi"
+        ]
+      },
+      "integration": {
+        "title": "Integrasi",
+        "subtitle": "Coretax, Accurate, Jurnal, perbankan, Excel/CSV.",
+        "items": [
+          "Integrasi Coretax / DJP",
+          "Koneksi Accurate Online",
+          "Koneksi Jurnal by Mekari",
+          "Open Banking / Bank Feed",
+          "Pakai template Excel / CSV"
+        ]
+      },
+      "security": {
+        "title": "Keamanan / akun",
+        "subtitle": "Keamanan akun dan manajemen pengguna.",
+        "items": [
+          "Ubah kata sandi",
+          "Atur verifikasi 2 langkah",
+          "Terbitkan kode cadangan",
+          "Tinjau aktivitas login",
+          "Kelola hak akun"
+        ]
+      }
+    }
   },
   "overrideRules": {
     "pageTitle": "Manajemen Override Rule",

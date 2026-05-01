@@ -5242,8 +5242,156 @@
     "countPeople": "{count}"
   },
   "helpPage": {
-    "manualsTitle": "User Manual (Detailed role-based guides)",
-    "manualsDesc": "Corporate · Individual · External Tax Firm · JTC Advisor · Operator · Platform Admin — Role-based scenario manuals"
+    "pageTitle": "Help",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "1. Current step",
+    "steps": {
+      "gettingStarted": "Getting started",
+      "byTopic": "By topic",
+      "dataUpload": "Data upload",
+      "troubleshoot": "Troubleshoot"
+    },
+    "hero": {
+      "label": "AI Pajak Help Center",
+      "title": "Guides you through every next step — even without tax expertise",
+      "subtitle": "Find help on monthly filings, year-end, uploads, withholding decisions, history, billing, and integrations in one place.",
+      "searchPlaceholder": "e.g. PPh23, signed financials, NTPN, year-end pricing"
+    },
+    "quickEntries": {
+      "onboarding": {
+        "title": "New to AI Pajak?",
+        "body": "Walk through the full flow from company profile to first filing."
+      },
+      "monthly": {
+        "title": "Need this month's filing?",
+        "body": "See the data and deadline flow for each tax type."
+      },
+      "annual": {
+        "title": "Preparing year-end closing?",
+        "body": "Check the UMKM / PPh25 / Complex year-end criteria."
+      },
+      "withholding": {
+        "title": "Confused about withholding?",
+        "body": "Review the AI decision rules based on counterparty info."
+      }
+    },
+    "sidebarHeader": "Help topics",
+    "tabs": {
+      "quickStart": "Quick start",
+      "monthly": "Monthly",
+      "annual": "Year-end",
+      "upload": "Uploads",
+      "counterparty": "Counterparty / WHT",
+      "history": "History / Reports",
+      "billing": "Billing",
+      "integration": "Integrations",
+      "security": "Security / Account",
+      "faq": "FAQ"
+    },
+    "categories": {
+      "quickStart": {
+        "title": "Getting started with AI Pajak",
+        "subtitle": "From company profile entry to confirming a completed filing.",
+        "items": [
+          "Enter company tax profile",
+          "Choose plan and prepay",
+          "Upload required data",
+          "AI review and tax calculation",
+          "Issue ID Billing",
+          "Submit payment evidence"
+        ]
+      },
+      "monthly": {
+        "title": "Monthly filing guide",
+        "subtitle": "Monthly flow and deadlines for PPh21/23/4(2)/25/PPN.",
+        "items": [
+          "Monthly schedule and deadlines",
+          "PPh21 payroll data",
+          "PPh23/4(2) counterparty WHT",
+          "PPh25 installment tax",
+          "PPN AP/AR invoices",
+          "NTPN/BPE archive after filing"
+        ]
+      },
+      "annual": {
+        "title": "Year-end closing guide",
+        "subtitle": "UMKM / PPh25 / Complex year-end criteria and flow.",
+        "items": [
+          "Compare plans (UMKM/PPh25/Complex)",
+          "Closing data checklist",
+          "Automated financial statements",
+          "Annual PPh29/PPh25",
+          "Review SPT Tahunan draft",
+          "Issue e-Bupot 1721 A1"
+        ]
+      },
+      "upload": {
+        "title": "Data upload guide",
+        "subtitle": "Upload Excel/CSV/PDF and auto-classify.",
+        "items": [
+          "Where to find standard templates",
+          "Upload payroll/invoice/bank data",
+          "Verify auto-mapped results",
+          "Duplicate / missing data checks",
+          "Upload history retention"
+        ]
+      },
+      "counterparty": {
+        "title": "Counterparty / withholding",
+        "subtitle": "AI decision rules based on NPWP/KBLI/certificates.",
+        "items": [
+          "Register counterparty master",
+          "Auto NPWP/NITKU verification",
+          "Auto PPh23/4(2)/15/22/26 decisions",
+          "SKB / DGT Form handling",
+          "Edit counterparty tax profile"
+        ]
+      },
+      "history": {
+        "title": "History / reports",
+        "subtitle": "How to access filing history and tax reports.",
+        "items": [
+          "SPT Masa / Tahunan history",
+          "Auto BPE / NTPN archive location",
+          "Monthly tax report generation",
+          "Download past filings",
+          "Audit-ready document pack"
+        ]
+      },
+      "billing": {
+        "title": "Billing",
+        "subtitle": "Monthly / year-end prepay flows and receipt issuance.",
+        "items": [
+          "Choose and change plans",
+          "12-month prepay 10% discount",
+          "Year-end prepay separately",
+          "Set up auto-pay",
+          "Download invoices and receipts"
+        ]
+      },
+      "integration": {
+        "title": "Integrations",
+        "subtitle": "Coretax, Accurate, Jurnal, banking, Excel/CSV.",
+        "items": [
+          "Coretax / DJP integration",
+          "Accurate Online connection",
+          "Jurnal by Mekari connection",
+          "Open Banking / Bank Feed",
+          "Excel / CSV template use"
+        ]
+      },
+      "security": {
+        "title": "Security / account",
+        "subtitle": "Account security and user management.",
+        "items": [
+          "Change password",
+          "Set up 2-step verification",
+          "Issue backup codes",
+          "Review login activity",
+          "Manage account permissions"
+        ]
+      }
+    }
   },
   "overrideRules": {
     "pageTitle": "Override Rule Management",

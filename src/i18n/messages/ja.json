@@ -5242,8 +5242,156 @@
     "countPeople": "{count}名"
   },
   "helpPage": {
-    "manualsTitle": "ユーザーマニュアル (役割別詳細ガイド)",
-    "manualsDesc": "法人 · 個人 · 外部税務事務所 · JTC 税理士 · 運営チーム · プラットフォーム管理者 — 役割別シナリオマニュアル"
+    "pageTitle": "ヘルプ",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "1. 現在のステップ",
+    "steps": {
+      "gettingStarted": "スタートガイド",
+      "byTopic": "トピック別",
+      "dataUpload": "データアップロード",
+      "troubleshoot": "トラブル対応"
+    },
+    "hero": {
+      "label": "AI Pajak Help Center",
+      "title": "税の知識がなくても、次のステップが分かるように案内します",
+      "subtitle": "月次申告・年次決算・データアップロード・取引先源泉判定・履歴・料金/決済・連携設定までを一箇所で確認できます。",
+      "searchPlaceholder": "例: PPh23、財務諸表署名版、NTPN、決算料金"
+    },
+    "quickEntries": {
+      "onboarding": {
+        "title": "初めてご利用ですか?",
+        "body": "会社情報入力から申告完了までの流れを確認してください。"
+      },
+      "monthly": {
+        "title": "今月の申告が気になりますか?",
+        "body": "月次申告の税目別資料と締切の流れを確認してください。"
+      },
+      "annual": {
+        "title": "決算を準備中ですか?",
+        "body": "UMKM/PPh25/複雑構造決算の基準を確認してください。"
+      },
+      "withholding": {
+        "title": "源泉税で迷っていますか?",
+        "body": "取引先情報に基づく AI 判定ルールを確認してください。"
+      }
+    },
+    "sidebarHeader": "ヘルプ構成",
+    "tabs": {
+      "quickStart": "クイックスタート",
+      "monthly": "月次申告",
+      "annual": "決算",
+      "upload": "アップロード",
+      "counterparty": "取引先 / 源泉",
+      "history": "履歴 / レポート",
+      "billing": "料金 / 決済",
+      "integration": "連携",
+      "security": "セキュリティ / アカウント",
+      "faq": "FAQ"
+    },
+    "categories": {
+      "quickStart": {
+        "title": "AI Pajak をはじめる",
+        "subtitle": "会社情報入力から申告完了確認までの基本フロー。",
+        "items": [
+          "会社税務プロフィール入力",
+          "プラン選択と前払い決済",
+          "必要資料のアップロード",
+          "AI レビューと税額計算",
+          "ID Billing 発行",
+          "納付証憑の提出"
+        ]
+      },
+      "monthly": {
+        "title": "月次申告ガイド",
+        "subtitle": "PPh21/23/4(2)/25/PPN の月次フローと締切。",
+        "items": [
+          "月次スケジュールと締切",
+          "PPh21 給与データ",
+          "PPh23/4(2) 取引先源泉",
+          "PPh25 分納税",
+          "PPN 売上・仕入請求書",
+          "申告後の NTPN/BPE 保管"
+        ]
+      },
+      "annual": {
+        "title": "決算ガイド",
+        "subtitle": "UMKM / PPh25 / 複雑構造決算の基準とフロー。",
+        "items": [
+          "プラン比較 (UMKM/PPh25/複雑)",
+          "決算資料チェックリスト",
+          "財務諸表の自動生成",
+          "年次 PPh29/PPh25",
+          "SPT Tahunan 草案レビュー",
+          "e-Bupot 1721 A1 発行"
+        ]
+      },
+      "upload": {
+        "title": "アップロードガイド",
+        "subtitle": "Excel/CSV/PDF をアップロードし自動分類。",
+        "items": [
+          "標準テンプレートの場所",
+          "給与・請求書・銀行データの登録",
+          "自動マッピング結果の確認",
+          "重複・抜け漏れチェック",
+          "アップロード履歴保管"
+        ]
+      },
+      "counterparty": {
+        "title": "取引先 / 源泉判定",
+        "subtitle": "NPWP/KBLI/証憑に基づく AI 判定ルール。",
+        "items": [
+          "取引先マスター登録",
+          "NPWP/NITKU 自動検証",
+          "PPh23/4(2)/15/22/26 自動判定",
+          "SKB / DGT Form の処理",
+          "取引先税務プロフィール修正"
+        ]
+      },
+      "history": {
+        "title": "履歴 / レポート",
+        "subtitle": "申告履歴と税務レポートの確認方法。",
+        "items": [
+          "SPT Masa / Tahunan 履歴",
+          "BPE / NTPN 自動保管の場所",
+          "月次税務レポート作成",
+          "過去申告のダウンロード",
+          "監査対応書類セット"
+        ]
+      },
+      "billing": {
+        "title": "料金 / 決済",
+        "subtitle": "月次・決算前払い決済の流れと領収書発行。",
+        "items": [
+          "プラン選択と変更",
+          "12か月前払い 10% 割引",
+          "決算は別途前払い",
+          "自動決済の設定",
+          "請求書・領収書のダウンロード"
+        ]
+      },
+      "integration": {
+        "title": "連携設定",
+        "subtitle": "Coretax・Accurate・Jurnal・銀行・Excel/CSV。",
+        "items": [
+          "Coretax / DJP 連携",
+          "Accurate Online 接続",
+          "Jurnal by Mekari 接続",
+          "Open Banking / Bank Feed",
+          "Excel / CSV テンプレート利用"
+        ]
+      },
+      "security": {
+        "title": "セキュリティ / アカウント",
+        "subtitle": "アカウントセキュリティとユーザー管理。",
+        "items": [
+          "パスワード変更",
+          "2段階認証の設定",
+          "バックアップコード発行",
+          "ログイン履歴の確認",
+          "アカウント権限管理"
+        ]
+      }
+    }
   },
   "overrideRules": {
     "pageTitle": "Override Rule Management",
