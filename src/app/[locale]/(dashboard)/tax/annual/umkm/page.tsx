@@ -245,6 +245,7 @@ export default function UmkmClosingPage() {
               <SignStep
                 t={t}
                 tc={tc}
+                sessionId={closing.session?.id ?? null}
                 signedUploaded={signedUploaded}
                 onUpload={uploadSigned}
                 onPrev={goPrev}
@@ -626,6 +627,7 @@ function BsRow({ label, value }: { label: string; value: number }) {
 function SignStep({
   t,
   tc,
+  sessionId,
   signedUploaded,
   onUpload,
   onPrev,
@@ -633,11 +635,16 @@ function SignStep({
 }: {
   t: T;
   tc: T;
+  sessionId: string | null;
   signedUploaded: boolean;
   onUpload: (file: File) => Promise<void> | void;
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const downloadPdf = () => {
+    if (!sessionId) return;
+    window.open(`/api/tax/annual-closing/${sessionId}/financial-statements-pdf`, '_blank');
+  };
   return (
     <div>
       <div className="flex items-start justify-between gap-3">
@@ -653,8 +660,9 @@ function SignStep({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
         <button
           type="button"
-          onClick={() => toast.info(tc('comingSoon'))}
-          className="rounded-lg border border-slate-200 p-4 text-center hover:bg-slate-50"
+          onClick={downloadPdf}
+          disabled={!sessionId}
+          className="rounded-lg border border-slate-200 p-4 text-center hover:bg-slate-50 disabled:opacity-50"
         >
           <Printer className="h-5 w-5 mx-auto text-slate-700" />
           <p className="text-sm font-medium text-slate-900 mt-2">{t('sign.stepPrint')}</p>
