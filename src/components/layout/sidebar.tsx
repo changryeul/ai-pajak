@@ -112,9 +112,8 @@ const navItems: NavSection[] = [
     roles: [UserRole.CUSTOMER],
     items: [
       { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.closingWork', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
       { href: '/tax/ebupot', icon: FileText, labelKey: 'nav.ebupotIssue', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/tax/spt-1771', icon: FileSpreadsheet, labelKey: 'nav.sptGeneration', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
     ],
   },
   // ── COMPANY 고객: 신고관리 섹션 ──
@@ -134,11 +133,8 @@ const navItems: NavSection[] = [
     labelKey: 'nav.taxTools',
     roles: [UserRole.CUSTOMER],
     items: [
-      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/news', icon: Newspaper, labelKey: 'nav.taxNews', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
       { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxCalculator', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
       { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
     ],
   },
   // ── 개인 고객: 간결 7-메뉴 (2026-04-23 keynote Pribadi 스펙) ──
@@ -161,7 +157,6 @@ const navItems: NavSection[] = [
     section: 'consultant-main',
     roles: consultantRoles,
     items: [
-      { href: '/news', icon: ClipboardList, labelKey: 'nav.taxNews' },
       { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', children: [
         { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
         { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
@@ -171,7 +166,6 @@ const navItems: NavSection[] = [
       ]},
       { href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling', children: [
         { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.annualSettlement' },
-        { href: '/tax/annual/journals', icon: BookOpen, labelKey: 'nav.journals' },
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
@@ -180,7 +174,6 @@ const navItems: NavSection[] = [
       { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload' },
       { href: '/documents', icon: Upload, labelKey: 'nav.documents' },
       { href: '/reports', icon: BarChart3, labelKey: 'nav.reports' },
-      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar' },
       { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxTools' },
     ],
   },
@@ -194,7 +187,6 @@ const navItems: NavSection[] = [
       { href: '/tax/spt-masa', icon: Receipt, labelKey: 'nav.sptMasa' },
       { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk' },
       { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
-      { href: '/tax/transfer-pricing', icon: Receipt, labelKey: 'nav.transferPricing' },
       { href: '/tax/multi-entity', icon: Settings, labelKey: 'nav.multiEntity' },
       { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
     ],
@@ -236,16 +228,15 @@ const navItems: NavSection[] = [
       { href: '/admin/rule-test', icon: Activity, labelKey: 'nav.ruleTest' },
     ],
   },
-  // ── COMPANY 고객: 계정 섹션 (프로토타입: 프로필/보안/알림/연동/도움말) ──
+  // ── COMPANY 고객: 계정 섹션 (프로필/연동/보안/요금/도움말) ──
   {
     section: 'company-account',
     labelKey: 'nav.account',
     roles: [UserRole.CUSTOMER],
     items: [
       { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/notifications', icon: Bell, labelKey: 'nav.notifications', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
       { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/settings', icon: Settings, labelKey: 'nav.security', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      { href: '/settings', icon: Settings, labelKey: 'nav.securityPassword', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
       { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
       { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
     ],

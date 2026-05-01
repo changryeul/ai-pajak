@@ -17,6 +17,7 @@ import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { IndividualBillingView } from '@/components/billing/IndividualBillingView';
 import { ConsultantBillingView } from '@/components/billing/ConsultantBillingView';
+import { CompanyBillingView } from '@/components/billing/CompanyBillingView';
 
 export default function BillingPage() {
   const t = useTranslations('billing');
@@ -83,6 +84,12 @@ export default function BillingPage() {
         <ConsultantBillingView />
       </div>
     );
+  }
+
+  // COMPANY customers see the prepayment-style plan selector with the four
+  // monthly tiers (UMKM / Basic / Pro / Enterprise).
+  if (!sessionLoading && session?.customerType === 'COMPANY') {
+    return <CompanyBillingView />;
   }
 
   if (loading || sessionLoading) {

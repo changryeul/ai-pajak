@@ -209,7 +209,8 @@
     "switchRole": "Switch to {role}",
     "filingStatus": "Filing Status",
     "idBillingIssue": "ID Billing Issuance",
-    "ebupotIssue": "Ebupot/A1 Issuance",
+    "ebupotIssue": "E-bupot 1721 A1 ・ SPT Tahunan Badan",
+    "sptGeneration": "SPT申告書作成",
     "closingWork": "Year-end Closing",
     "taxHistory": "Filing History",
     "taxReport": "Tax Report",
@@ -217,6 +218,7 @@
     "taxCalculator": "Tax Forecast / Calculator",
     "notifications": "Notifications",
     "security": "Security",
+    "securityPassword": "セキュリティ (パスワード変更)",
     "filingManagement": "Filing Management",
     "closingWorkLabel": "Year-end Closing"
   },
@@ -1446,7 +1448,7 @@
     "clientReportDesc": "クライアント向けの包括的な税務分析レポートを作成",
     "pph21BulkTitle": "PPh 21一括計算",
     "pph21BulkDesc": "全従業員のPPh 21を一括計算",
-    "ebupotTitle": "e-Bupot 1721-A1一括生成",
+    "ebupotTitle": "e-Bupot 1721-A1 ・ SPT Tahunan Badan 生成",
     "ecommerceTitle": "Eコマースインポート",
     "tpTitle": "移転価格分析",
     "tpAnalyze": "TP分析",
@@ -6258,5 +6260,709 @@
     "submitBtn": "修正を送信",
     "submitSuccess": "修正内容を送信しました。担当者が再確認のうえ承認を依頼します。",
     "submitFailed": "送信に失敗しました"
+  },
+  "integrationsPage": {
+    "pageTitle": "連携",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "1. 現在のステップ",
+    "steps": {
+      "coretax": "Coretax",
+      "accounting": "会計SW",
+      "banking": "銀行",
+      "sync": "データ同期"
+    },
+    "heroLabel": "Integrations",
+    "heroTitle": "Coretax・会計ソフト・銀行プラットフォーム連携",
+    "heroSubtitle": "Coretaxの申告状況、会計データ、銀行入出金、請求書、給与データをAI Pajakに同期し、月次申告と年次決算を自動化します。",
+    "statusCards": {
+      "coretax": {
+        "title": "Coretax",
+        "sub": "申告/納付ステータス",
+        "value": "連携準備中"
+      },
+      "accounting": {
+        "title": "会計SW",
+        "sub": "Accurate / Jurnal",
+        "value": "0件接続"
+      },
+      "banking": {
+        "title": "銀行口座",
+        "sub": "Bank Feed",
+        "value": "未接続"
+      },
+      "excel": {
+        "title": "Excel/CSV",
+        "sub": "テンプレート登録",
+        "value": "利用可能"
+      }
+    },
+    "tabs": {
+      "systems": "連携システム",
+      "sync": "データ同期",
+      "mapping": "マッピング設定",
+      "logs": "同期ログ"
+    },
+    "statusBadge": {
+      "ready": "連携準備中",
+      "disconnected": "未接続",
+      "available": "利用可能"
+    },
+    "syncDataLabel": "連携データ",
+    "requirementsLabel": "必要事項",
+    "comingSoon": "このタブの画面は近日公開予定です。",
+    "cta": {
+      "connect": "接続する",
+      "manage": "管理"
+    },
+    "cards": {
+      "coretax": {
+        "title": "Coretax / DJP",
+        "subtitle": "Online",
+        "headline": "ID Billing, NTPN, BPE, SPT Masa/Tahunan, e-Bupot/A1, PPN データ連携",
+        "extraBadge": "API/RPA 段階対応",
+        "sync": [
+          "NPWP/NITKU 照会",
+          "ID Billing 発行/照会",
+          "NTPN 納付確認",
+          "BPE/申告ステータス確認",
+          "SPT Masa/Tahunan データ送信",
+          "e-Bupot/A1 データ取得"
+        ],
+        "reqs": [
+          "法人 NPWP/NITKU",
+          "Coretax ユーザー権限",
+          "電子署名/認証権限",
+          "顧客同意",
+          "権限範囲の設定"
+        ]
+      },
+      "accurate": {
+        "title": "Accurate Online",
+        "headline": "従業員、給与、請求書、取引先、財務諸表データを自動同期",
+        "sync": [
+          "従業員/給与同期",
+          "売上・仕入請求書",
+          "取引先マスター",
+          "財務諸表参照",
+          "勘定科目マッピング"
+        ],
+        "reqs": [
+          "API Key/OAuth",
+          "会社DB選択",
+          "勘定科目マッピング",
+          "同期スケジュール"
+        ]
+      },
+      "jurnal": {
+        "title": "Jurnal by Mekari",
+        "headline": "会計、取引先、請求書、損益計算書、貸借対照表の連携",
+        "sync": [
+          "請求書同期",
+          "取引先同期",
+          "COA マッピング",
+          "財務諸表参照",
+          "証憑添付連携"
+        ],
+        "reqs": [
+          "Mekari アカウント権限",
+          "API/OAuth 接続",
+          "データアクセス範囲承認",
+          "税勘定マッピング"
+        ]
+      },
+      "banking": {
+        "title": "Open Banking /",
+        "subtitle": "Bank Feed",
+        "headline": "BCA, Mandiri, BNI, BRI など銀行口座入出金を自動集計",
+        "sync": [
+          "銀行取引履歴収集",
+          "売上入金の自動分類",
+          "経費出金の自動分類",
+          "NTPN 納付マッチング",
+          "未確認入出金のアラート"
+        ],
+        "reqs": [
+          "銀行口座アクセス権限",
+          "口座別用途設定",
+          "取引履歴照会権限",
+          "自動分類ルール承認"
+        ]
+      },
+      "excel": {
+        "title": "Excel / CSV Import",
+        "headline": "連携前段階で給与、取引、在庫、固定資産データをテンプレートで収集",
+        "sync": [
+          "給与テンプレート",
+          "売上・仕入テンプレート",
+          "在庫テンプレート",
+          "固定資産テンプレート",
+          "取引先テンプレート"
+        ],
+        "reqs": [
+          "標準テンプレート使用",
+          "列の自動マッピング",
+          "重複データ検証",
+          "アップロード履歴保管"
+        ]
+      }
+    },
+    "syncTab": {
+      "title": "データ同期タスク",
+      "subtitle": "連携済みシステムから必要なデータを取得し、PPh21・PPh23・PPN・年次決算・申告履歴に反映します。",
+      "syncCta": "同期",
+      "lookupCta": "取得",
+      "statusCta": "ステータス確認",
+      "tasks": {
+        "employees": {
+          "title": "従業員同期",
+          "source": "Accurate / Jurnal → PPh21",
+          "desc": "氏名、NPWP/NIK、雇用形態、給与基準データ"
+        },
+        "payroll": {
+          "title": "給与同期",
+          "source": "Accounting SW → PPh21 計算",
+          "desc": "月給・諸手当・BPJS・ベネフィットを PPh21 に連携"
+        },
+        "invoices": {
+          "title": "請求書同期",
+          "source": "Accurate / Jurnal → PPh23 / PPN",
+          "desc": "売上・仕入請求書、Faktur Pajak、取引先情報"
+        },
+        "bank": {
+          "title": "銀行取引同期",
+          "source": "Open Banking → 財務諸表 / VAT / NTPN",
+          "desc": "入出金の自動分類、納付内容の照合、未確認取引の表示"
+        },
+        "financials": {
+          "title": "財務諸表取得",
+          "source": "Accounting SW → 年次決算",
+          "desc": "BS/PL/COA を取得し決算財務諸表を検証"
+        },
+        "coretax": {
+          "title": "Coretax ステータス同期",
+          "source": "Coretax → 申告履歴",
+          "desc": "ID Billing、NTPN、BPE、申告ステータスを AI Pajak の履歴に反映"
+        }
+      }
+    },
+    "mappingTab": {
+      "title": "データマッピング設定",
+      "subtitle": "会計勘定科目、銀行摘要、取引先マスターを AI Pajak の税務項目にマッピングします。",
+      "columns": {
+        "source": "ソースデータ",
+        "target": "AI Pajak 項目",
+        "purpose": "用途",
+        "action": "アクション"
+      },
+      "editCta": "編集",
+      "footer": "マッピングルールは繰り返しのアップロードと連携データに自動適用されます。同じ取引先・銀行摘要・勘定科目は次回以降の申告で自動分類されます。",
+      "rows": {
+        "salesRev": {
+          "source": "Accounting COA: Sales Revenue",
+          "target": "AI Pajak: 売上",
+          "purpose": "PPN / 年次決算 / UMKM 売上上限"
+        },
+        "salaryExp": {
+          "source": "Accounting COA: Salary Expense",
+          "target": "AI Pajak: 給与",
+          "purpose": "PPh21 / Employee Benefit 判定"
+        },
+        "rentExp": {
+          "source": "Accounting COA: Rent Expense",
+          "target": "AI Pajak: 賃料",
+          "purpose": "PPh4(2) / 費用検証"
+        },
+        "taxPayment": {
+          "source": "Bank Description: Tax Payment",
+          "target": "AI Pajak: NTPN 候補",
+          "purpose": "納付証憑の自動照合"
+        },
+        "vendorKbli": {
+          "source": "Vendor Master: KBLI/Certificate",
+          "target": "AI Pajak: 取引先税務プロフィール",
+          "purpose": "PPh23/4(2)/15/22/26 判定"
+        }
+      }
+    },
+    "logsTab": {
+      "title": "同期ログ",
+      "subtitle": "各連携システムの同期状況、エラー、権限期限切れ、承認待ち状況を確認します。",
+      "columns": {
+        "time": "時刻",
+        "system": "システム",
+        "event": "イベント",
+        "result": "結果"
+      },
+      "results": {
+        "done": "完了",
+        "ready": "連携準備中",
+        "pending": "承認待ち",
+        "attention": "要確認"
+      },
+      "events": {
+        "excelPayroll": "給与テンプレートのアップロード",
+        "coretaxIdBilling": "ID Billing ステータス照会",
+        "bankConnect": "BCA 口座連携リクエスト",
+        "accurateMapping": "勘定科目マッピング検証"
+      }
+    }
+  },
+  "securityPage": {
+    "pageTitle": "セキュリティ（パスワード変更）",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "1. 現在のステップ",
+    "steps": {
+      "password": "パスワード",
+      "twoFactor": "2段階認証",
+      "recentLogin": "最近のログイン"
+    },
+    "statusCards": {
+      "password": {
+        "title": "パスワード",
+        "sub": "最終変更",
+        "daysAgo": "{days}日前",
+        "never": "変更履歴なし"
+      },
+      "twoFactor": {
+        "title": "2段階認証",
+        "sub": "アカウント保護状態",
+        "on": "有効",
+        "off": "無効"
+      },
+      "recentLogin": {
+        "title": "最近のログイン",
+        "sub": "要確認項目",
+        "count": "{count}件",
+        "none": "0件"
+      }
+    },
+    "changePassword": {
+      "title": "パスワード変更",
+      "subtitle": "安全なパスワードへ定期的に変更しましょう。8文字以上を推奨します。",
+      "current": "現在のパスワード",
+      "new": "新しいパスワード",
+      "confirm": "新しいパスワード（確認）",
+      "helper": "英字・数字・記号を組み合わせるとセキュリティが向上します。",
+      "cta": "パスワード変更",
+      "saving": "変更中..."
+    },
+    "twoFactor": {
+      "title": "2段階認証",
+      "subtitle": "ログイン時に認証アプリまたはメールの確認コードを追加で確認します。",
+      "badgeOn": "使用中",
+      "badgeOff": "未使用",
+      "appTitle": "認証アプリ",
+      "appDesc": "Google Authenticator、Microsoft Authenticator などで OTP を生成します。",
+      "appCta": "認証アプリを設定",
+      "appCtaActive": "再設定",
+      "backupTitle": "バックアップコード",
+      "backupDesc": "端末紛失時に使用するバックアップコードを発行します。",
+      "backupCta": "バックアップコードを見る",
+      "disableCta": "2段階認証をオフ",
+      "verifyTitle": "コード確認",
+      "verifyDesc": "認証アプリに表示された6桁のコードを入力して登録を完了してください。",
+      "verifyPlaceholder": "000000",
+      "verifyCta": "確認",
+      "cancelCta": "キャンセル",
+      "manualKey": "手動キー",
+      "backupNotAvailable": "バックアップコードは近日提供予定です。"
+    },
+    "errors": {
+      "allRequired": "すべてのパスワード欄を入力してください。",
+      "mismatch": "新しいパスワードが一致しません。",
+      "tooShort": "パスワードは8文字以上にしてください。",
+      "generic": "リクエストを処理できませんでした。"
+    },
+    "toasts": {
+      "passwordChanged": "パスワードを変更しました。",
+      "twoFactorEnabled": "2段階認証を有効化しました。",
+      "twoFactorDisabled": "2段階認証を解除しました。"
+    },
+    "recentLogin": {
+      "title": "最近のログイン活動",
+      "subtitle": "最近のデバイス、場所、IP を確認し、不審なセッションを終了できます。",
+      "columns": {
+        "time": "日時",
+        "device": "デバイス",
+        "location": "場所",
+        "ip": "IP",
+        "status": "ステータス",
+        "action": "アクション"
+      },
+      "status": {
+        "ok": "正常",
+        "attention": "要確認"
+      },
+      "cta": {
+        "endSession": "セッション終了",
+        "notMe": "身に覚えなし"
+      },
+      "empty": "表示するログイン履歴がありません。"
+    }
+  },
+  "billingPage": {
+    "pageTitle": "料金 / 決済",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "1. 現在のステップ",
+    "steps": {
+      "monthlyFee": "月額料金",
+      "annualFee": "決算料金",
+      "prepayment": "前払決済",
+      "receipt": "領収書"
+    },
+    "notice": {
+      "title": "前払決済の原則",
+      "body": "AI Pajak のすべてのサービスは前払い後にご利用いただけます。月次運営料金と決算料金は別商品として選択し、別途請求されます。Pro 以上は単なる申告代行ではなく、税務運営の自動化システムです。"
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "月額プラン",
+        "sub": "現在の選択",
+        "value": "Basic 月額"
+      },
+      "paid": {
+        "title": "月次前払額",
+        "sub": "1か月前払い",
+        "value": "Rp 1,500,000",
+        "subAnnual": "12か月合計",
+        "valueAnnual": "Rp 16,200,000"
+      },
+      "annual": {
+        "title": "決算商品",
+        "sub": "別途選択",
+        "value": "UMKM 決算"
+      },
+      "total": {
+        "title": "前払総額",
+        "sub": "月次 + 決算",
+        "value": "Rp 4,000,000",
+        "valueAnnual": "Rp 18,700,000"
+      }
+    },
+    "monthlyPlans": {
+      "title": "月額プラン選択",
+      "subtitle": "月次申告・履歴・レポート・取引先判定など月次運営サービスのための料金です。Pro 以上は単発の税務コンサル料金ではなく、社内税務運営を削減するシステム費用として設計されています。決算は含まれません。",
+      "toggleMonthly": "月次前払い",
+      "toggleAnnual": "12か月前払い 10%割引",
+      "selected": "選択中",
+      "criteria": "適用基準",
+      "plans": {
+        "umkm": {
+          "name": "UMKM 月額",
+          "sub": "小規模法人 / Final Tax 中心",
+          "price": "Rp 750,000",
+          "term": "1か月前払い",
+          "criteria": [
+            "従業員5名以下",
+            "月間源泉徴収取引10件以下",
+            "月間アップロード/取引50件以下",
+            "複雑/海外取引なし"
+          ],
+          "features": [
+            "月次申告ダッシュボード",
+            "ID Billing 申請",
+            "基本リマインダー",
+            "基本 AI リスクコメント"
+          ],
+          "annualPrice": "Rp 8,100,000",
+          "priceOriginal": "Rp 750,000",
+          "priceDiscounted": "Rp 675,000",
+          "annualSavings": "Rp 900,000"
+        },
+        "basic": {
+          "name": "Basic 月額",
+          "sub": "一般法人の基本税務運営",
+          "price": "Rp 1,500,000",
+          "term": "1か月前払い",
+          "criteria": [
+            "従業員30名以下",
+            "月間源泉徴収取引30件以下",
+            "月間 AP/AR 取引300件以下",
+            "標準 PPh21/23/25/PPN 中心",
+            "TP・海外取引は別途検討"
+          ],
+          "features": [
+            "PPh21/23/25/PPN 管理",
+            "申告履歴/BPE/NTPN 保管",
+            "取引先源泉税判定",
+            "月次税務レポート"
+          ],
+          "annualPrice": "Rp 16,200,000",
+          "priceOriginal": "Rp 1,500,000",
+          "priceDiscounted": "Rp 1,350,000",
+          "annualSavings": "Rp 1,800,000"
+        },
+        "pro": {
+          "name": "Pro 月額",
+          "sub": "スポット相談ではなく月次税務運営システム",
+          "price": "Rp 2,500,000",
+          "term": "1か月前払い",
+          "criteria": [
+            "従業員100名以下",
+            "月間源泉徴収取引150件以下",
+            "月間 AP/AR 取引1,500件以下",
+            "海外取引・関係会社モニタリング",
+            "高度 AI 分析クォータ"
+          ],
+          "features": [
+            "Basic 全機能",
+            "TP 条件モニタリング",
+            "AI 異常検知",
+            "高度税務レポート",
+            "BPE/NTPN 自動保管",
+            "優先対応"
+          ],
+          "annualPrice": "Rp 27,000,000",
+          "priceOriginal": "Rp 2,500,000",
+          "priceDiscounted": "Rp 2,250,000",
+          "annualSavings": "Rp 3,000,000"
+        },
+        "enterprise": {
+          "name": "Enterprise カスタム",
+          "sub": "社内税務チーム代替型 + 従量課金",
+          "price": "Rp 3,500,000",
+          "term": "1か月前払い",
+          "criteria": [
+            "従業員100名超",
+            "月間源泉徴収取引150件超",
+            "月間 AP/AR 取引1,500件超",
+            "大量文書の自動分析必要",
+            "基本プラットフォーム料金 + 使用量"
+          ],
+          "features": [
+            "Pro 全機能",
+            "専任処理キュー",
+            "大量給与/取引処理",
+            "超過従量課金",
+            "SLA・優先サポート"
+          ],
+          "annualPrice": "Rp 37,800,000",
+          "priceOriginal": "Rp 3,500,000",
+          "priceDiscounted": "Rp 3,150,000",
+          "annualSavings": "Rp 4,200,000"
+        }
+      },
+      "breakdown": {
+        "original": "割引前月額",
+        "discounted": "10%割引月額",
+        "savings": "年間節約額"
+      },
+      "annualTerm": "12か月前払い合計"
+    },
+    "proValue": {
+      "title": "Pro 以上プランの中核価値",
+      "columns": {
+        "consulting": {
+          "title": "一般税務コンサル",
+          "body": "申告処理中心 · 資料は顧客側で管理 · リスクは事後対応"
+        },
+        "pro": {
+          "title": "AI Pajak Pro",
+          "body": "月次税務運営、BPE/NTPN 保管、取引先源泉税判定、AI リスク通知を一元管理"
+        },
+        "enterprise": {
+          "title": "AI Pajak Enterprise",
+          "body": "社内税務チームを代替するプラットフォーム料金＋実利用量に基づく透明な課金"
+        }
+      },
+      "footer": "Basic/Pro/Enterprise 区分は従業員数・月次取引量・文書自動分析量・リスク監視範囲をもとに設計されています。従業員100名超または取引量超のお客様は Enterprise カスタムに移行し、超過分は別途課金します。"
+    },
+    "enterpriseFees": {
+      "title": "Enterprise 基本料金 Rp 3,500,000 + 超過従量課金",
+      "items": {
+        "employee": {
+          "title": "従業員超過",
+          "base": "基本100名含む",
+          "overage": "超過1名あたり Rp 20,000 / 月"
+        },
+        "withholding": {
+          "title": "源泉徴収超過",
+          "base": "基本150件含む",
+          "overage": "超過1件あたり Rp 10,000 / 月"
+        },
+        "apar": {
+          "title": "AP/AR 超過",
+          "base": "基本1,500件含む",
+          "overage": "超過1件あたり Rp 1,500 / 月"
+        },
+        "docs": {
+          "title": "文書自動分析超過",
+          "base": "基本1,000ページ含む",
+          "overage": "超過1ページあたり Rp 1,000"
+        }
+      }
+    },
+    "annualPlans": {
+      "title": "決算プラン選択",
+      "subtitle": "決算は月額プランとは別に前払い決済します。範囲に合わせて選択してください。",
+      "selected": "選択中",
+      "criteria": "適用基準",
+      "contents": "含まれる内容",
+      "plans": {
+        "none": {
+          "name": "決算なし",
+          "sub": "月額プランのみ利用します。",
+          "price": "Rp 0",
+          "term": "1回前払い",
+          "criteria": [
+            "決算作業は含まれません",
+            "必要に応じて後から追加可能"
+          ],
+          "features": [
+            "決算作業は含まれません",
+            "必要に応じて後から追加可能"
+          ]
+        },
+        "umkm": {
+          "name": "UMKM 決算",
+          "sub": "Final Tax 0.5% 対象法人の決算",
+          "price": "Rp 2,500,000",
+          "term": "1回前払い",
+          "criteria": [
+            "年商 Rp 4.8B 以下",
+            "Final Tax 0.5% 対象",
+            "銀行口座 ≤ 2",
+            "年間取引 ≤ 500件",
+            "従業員 ≤ 10",
+            "在庫・固定資産が単純",
+            "海外取引・関連当事者なし"
+          ],
+          "features": [
+            "標準財務諸表作成",
+            "署名済資料アップロード管理",
+            "UMKM Final Tax 計算",
+            "SPT 草案作成",
+            "e-Bupot 1721 A1 発行"
+          ]
+        },
+        "pph25": {
+          "name": "PPh25 標準決算",
+          "sub": "一般法人税 22% の標準決算",
+          "price": "Rp 7,500,000",
+          "term": "1回前払い",
+          "criteria": [
+            "年商 Rp 4.8B 超 または UMKM 期間終了",
+            "銀行口座 ≤ 3",
+            "年間 AP/AR 取引 ≤ 1,000",
+            "従業員 ≤ 50",
+            "源泉/税額控除資料 ≤ 100",
+            "固定資産 ≤ 50",
+            "在庫品目 ≤ 100",
+            "海外取引・関連当事者・TP 問題なし",
+            "監査報告書添付対象外"
+          ],
+          "features": [
+            "財務諸表作成",
+            "税務調整",
+            "税額控除",
+            "PPh29/PPh25 計算",
+            "SPT 草案作成",
+            "e-Bupot 1721 A1 + SPT Tahunan Badan"
+          ]
+        },
+        "complex": {
+          "name": "複雑構造の決算",
+          "sub": "外資系・関連当事者・海外取引・大量取引法人",
+          "price": "Rp 15,000,000",
+          "term": "1回前払い",
+          "criteria": [
+            "PPh25 標準を超過",
+            "外国人株主または海外取引あり",
+            "関連当事者取引あり",
+            "PPh26 / DGT Form / Treaty レビュー必要",
+            "銀行口座 ≤ 6",
+            "年間 AP/AR ≤ 3,000",
+            "従業員 ≤ 100",
+            "固定資産 ≤ 150",
+            "在庫品目 ≤ 500",
+            "TP Doc 必要性判定を含む — 実際の TP Doc 作成は別途"
+          ],
+          "features": [
+            "PPh25 決算すべて",
+            "TP 条件レビュー",
+            "海外取引レビュー",
+            "AI リスクレポート",
+            "優先対応"
+          ]
+        }
+      }
+    },
+    "annualNotice": {
+      "title": "決算プラン選択基準",
+      "body1": "PPh25 標準決算は標準範囲内の固定価格です。海外取引、関連当事者、大量取引、複雑な在庫/固定資産、Treaty レビューが必要な場合は複雑構造決算を選択します。",
+      "body2": "複雑構造決算でも上記基準を超える場合、または実際の TP Doc 作成・税務調査対応・監査報告書作成が必要な場合は、別途サービスとして見積もりを行います。"
+    },
+    "payment": {
+      "method": {
+        "title": "決済方法",
+        "subtitle": "現在の決済方法と自動決済の有無を管理します。自動決済もサービス開始前に前払い方式で請求されます。",
+        "cardName": "Bank Transfer / Virtual Account",
+        "cardDetail": "BCA VA **** 9021",
+        "defaultBadge": "デフォルト",
+        "autoLabel": "月額の自動前払いを使用",
+        "changeCta": "決済方法を変更",
+        "manualCta": "手動で支払う"
+      },
+      "summary": {
+        "title": "前払い決済サマリー",
+        "subtitle": "月額料金と決算料金を分けて計算します。",
+        "monthlyLabel": "Basic 月額",
+        "monthlyTerm": "1か月前払い基準",
+        "monthlyAmount": "Rp 1,500,000",
+        "annualLabel": "UMKM 決算",
+        "annualAmount": "Rp 2,500,000",
+        "ppnLabel": "PPN",
+        "ppnAmount": "別途",
+        "totalLabel": "前払総額",
+        "totalAmount": "Rp 4,000,000",
+        "notice": "決済完了後、選択した月額サービスと決算プロセスをご利用いただけます。未決済の状態では申告提出と決算進行が制限されます。",
+        "quoteCta": "見積書作成",
+        "payCta": "前払い決済を進める",
+        "monthlyAmountAnnual": "Rp 16,200,000",
+        "totalAmountAnnual": "Rp 18,700,000",
+        "breakdown": {
+          "originalLabel": "定価月額",
+          "originalAmount": "Rp 1,500,000",
+          "discountedLabel": "10%割引月額",
+          "discountedAmount": "Rp 1,350,000",
+          "annualTotalLabel": "12か月前払い合計",
+          "annualTotalAmount": "Rp 16,200,000",
+          "savingsLabel": "総割引額",
+          "savingsAmount": "Rp 1,800,000"
+        }
+      }
+    },
+    "invoices": {
+      "title": "請求書 / 決済履歴",
+      "subtitle": "月額前払い請求書と決算前払い請求書を区別して確認します。",
+      "downloadAll": "一括ダウンロード",
+      "columns": {
+        "number": "請求書番号",
+        "date": "請求日",
+        "item": "項目",
+        "amount": "金額",
+        "status": "ステータス",
+        "method": "決済方法",
+        "receipt": "領収書"
+      },
+      "statusPaid": "決済済み",
+      "downloadCta": "ダウンロード",
+      "rows": {
+        "basic": {
+          "number": "INV-202604-001",
+          "date": "2026-04-01",
+          "item": "Basic 月額 2026年4月前払い",
+          "amount": "Rp 1,500,000",
+          "method": "Bank Transfer"
+        },
+        "umkm": {
+          "number": "INV-202604-CLS",
+          "date": "2026-04-05",
+          "item": "UMKM 決算 2025年度帰属前払い",
+          "amount": "Rp 2,500,000",
+          "method": "Bank Transfer"
+        }
+      }
+    }
   }
 }

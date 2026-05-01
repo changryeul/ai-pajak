@@ -209,7 +209,8 @@
     "switchRole": "{role}로 전환",
     "filingStatus": "신고 현황",
     "idBillingIssue": "ID Billing 발행",
-    "ebupotIssue": "Ebupot/A1 발급",
+    "ebupotIssue": "E-bupot 1721 A1 및 SPT Tahunan Badan",
+    "sptGeneration": "SPT 신고서 생성",
     "closingWork": "결산 작업",
     "taxHistory": "신고 이력",
     "taxReport": "세금 보고서",
@@ -217,6 +218,7 @@
     "taxCalculator": "세금예측/계산기",
     "notifications": "알림",
     "security": "보안",
+    "securityPassword": "보안 (비밀번호 변경)",
     "filingManagement": "신고 관리",
     "closingWorkLabel": "결산 작업"
   },
@@ -1446,7 +1448,7 @@
     "clientReportDesc": "고객을 위한 종합 세금 분석 보고서를 작성하세요",
     "pph21BulkTitle": "PPh 21 일괄 계산기",
     "pph21BulkDesc": "모든 직원의 PPh 21을 한번에 계산",
-    "ebupotTitle": "e-Bupot 1721-A1 일괄 생성",
+    "ebupotTitle": "e-Bupot 1721-A1 및 SPT Tahunan Badan 생성",
     "ecommerceTitle": "E-커머스 가져오기",
     "tpTitle": "이전가격 분석",
     "tpAnalyze": "TP 분석",
@@ -6384,5 +6386,709 @@
     "submitBtn": "수정 제출",
     "submitSuccess": "수정사항이 제출되었습니다. 상담원이 검토 후 승인을 요청합니다.",
     "submitFailed": "제출 실패"
+  },
+  "integrationsPage": {
+    "pageTitle": "연동",
+    "backToDashboard": "대시보드로",
+    "currentStep": "1. 현재 단계",
+    "steps": {
+      "coretax": "Coretax",
+      "accounting": "회계 SW",
+      "banking": "은행",
+      "sync": "데이터 동기화"
+    },
+    "heroLabel": "Integrations",
+    "heroTitle": "Coretax · 회계 소프트웨어 · 은행 플랫폼 연동",
+    "heroSubtitle": "Coretax 신고 상태, 회계 데이터, 은행 입출금, 인보이스, 급여 데이터를 AI Pajak으로 동기화하여 월신고와 연결산을 자동화합니다.",
+    "statusCards": {
+      "coretax": {
+        "title": "Coretax",
+        "sub": "신고/납부 상태",
+        "value": "연동 준비"
+      },
+      "accounting": {
+        "title": "회계 SW",
+        "sub": "Accurate / Jurnal",
+        "value": "0개 연결"
+      },
+      "banking": {
+        "title": "은행 계좌",
+        "sub": "Bank Feed",
+        "value": "미연결"
+      },
+      "excel": {
+        "title": "Excel/CSV",
+        "sub": "템플릿 업로드",
+        "value": "사용 가능"
+      }
+    },
+    "tabs": {
+      "systems": "연동 시스템",
+      "sync": "데이터 동기화",
+      "mapping": "매핑 설정",
+      "logs": "동기화 로그"
+    },
+    "statusBadge": {
+      "ready": "연동 준비",
+      "disconnected": "미연결",
+      "available": "사용 가능"
+    },
+    "syncDataLabel": "연동 데이터",
+    "requirementsLabel": "필요 사항",
+    "comingSoon": "이 탭의 화면은 곧 제공됩니다.",
+    "cta": {
+      "connect": "연결하기",
+      "manage": "관리"
+    },
+    "cards": {
+      "coretax": {
+        "title": "Coretax / DJP",
+        "subtitle": "Online",
+        "headline": "ID Billing, NTPN, BPE, SPT Masa/Tahunan, e-Bupot/A1, PPN 데이터 연동",
+        "extraBadge": "API/RPA 단계별 지원",
+        "sync": [
+          "NPWP/NITKU 조회",
+          "ID Billing 생성/조회",
+          "NTPN 납부 확인",
+          "BPE/신고 상태 조회",
+          "SPT Masa/Tahunan 데이터 전송",
+          "e-Bupot/A1 자료 조회"
+        ],
+        "reqs": [
+          "법인 NPWP/NITKU",
+          "Coretax 사용자 권한",
+          "전자서명/인증 권한",
+          "고객 동의",
+          "권한 범위 설정"
+        ]
+      },
+      "accurate": {
+        "title": "Accurate Online",
+        "headline": "직원, 급여, 인보이스, 거래처, 재무제표 데이터를 자동 동기화",
+        "sync": [
+          "직원/급여 동기화",
+          "매출·매입 인보이스",
+          "거래처 마스터",
+          "재무제표 조회",
+          "계정과목 매핑"
+        ],
+        "reqs": [
+          "API Key/OAuth",
+          "회사 DB 선택",
+          "계정과목 매핑",
+          "동기화 주기 설정"
+        ]
+      },
+      "jurnal": {
+        "title": "Jurnal by Mekari",
+        "headline": "회계, 거래처, 인보이스, 손익계산서, 재무상태표 연동",
+        "sync": [
+          "인보이스 동기화",
+          "거래처 동기화",
+          "COA 매핑",
+          "재무제표 조회",
+          "증빙 첨부 연동"
+        ],
+        "reqs": [
+          "Mekari 계정 권한",
+          "API/OAuth 연결",
+          "데이터 접근 범위 승인",
+          "세금 계정 매핑"
+        ]
+      },
+      "banking": {
+        "title": "Open Banking /",
+        "subtitle": "Bank Feed",
+        "headline": "BCA, Mandiri, BNI, BRI 등 은행 계좌 입출금 자동 집계",
+        "sync": [
+          "은행거래내역 수집",
+          "매출 입금 자동 분류",
+          "비용 출금 자동 분류",
+          "NTPN 납부 매칭",
+          "미확인 입출금 알림"
+        ],
+        "reqs": [
+          "은행 계좌 권한",
+          "계좌별 용도 설정",
+          "거래 내역 조회 권한",
+          "자동분류 규칙 승인"
+        ]
+      },
+      "excel": {
+        "title": "Excel / CSV Import",
+        "headline": "연동 전 단계에서 급여, 거래, 재고, 고정자산 자료를 템플릿으로 수집",
+        "sync": [
+          "급여 템플릿",
+          "매출·매입 템플릿",
+          "재고 템플릿",
+          "고정자산 템플릿",
+          "거래처 템플릿"
+        ],
+        "reqs": [
+          "표준 템플릿 사용",
+          "컬럼 자동 매핑",
+          "중복 데이터 검증",
+          "업로드 이력 보관"
+        ]
+      }
+    },
+    "syncTab": {
+      "title": "데이터 동기화 작업",
+      "subtitle": "연동된 시스템에서 필요한 데이터를 가져와 PPh21, PPh23, PPN, 연결산, 신고 이력에 반영합니다.",
+      "syncCta": "동기화",
+      "lookupCta": "조회",
+      "statusCta": "상태 조회",
+      "tasks": {
+        "employees": {
+          "title": "직원 동기화",
+          "source": "Accurate / Jurnal → PPh21",
+          "desc": "직원명, NPWP/NIK, 고용형태, 급여 기준 데이터"
+        },
+        "payroll": {
+          "title": "급여 동기화",
+          "source": "Accounting SW → PPh21 계산",
+          "desc": "월 급여, 수당, BPJS, benefit 항목을 PPh21로 연결"
+        },
+        "invoices": {
+          "title": "인보이스 동기화",
+          "source": "Accurate / Jurnal → PPh23 / PPN",
+          "desc": "매출·매입 인보이스, Faktur Pajak, 거래처 정보"
+        },
+        "bank": {
+          "title": "은행 거래 동기화",
+          "source": "Open Banking → 재무제표 / VAT / NTPN",
+          "desc": "입출금 자동 분류, 납부 내역 매칭, 미확인 거래 표시"
+        },
+        "financials": {
+          "title": "재무제표 조회",
+          "source": "Accounting SW → 연결산",
+          "desc": "BS/PL/COA를 불러와 연결산 재무제표 검증"
+        },
+        "coretax": {
+          "title": "Coretax 상태 동기화",
+          "source": "Coretax → 신고 이력",
+          "desc": "ID Billing, NTPN, BPE, 신고 상태를 AI Pajak 이력에 반영"
+        }
+      }
+    },
+    "mappingTab": {
+      "title": "데이터 매핑 설정",
+      "subtitle": "회계 계정과목, 은행 적요, 거래처 마스터를 AI Pajak 세무 항목으로 매핑합니다.",
+      "columns": {
+        "source": "원본 데이터",
+        "target": "AI Pajak 항목",
+        "purpose": "사용 목적",
+        "action": "액션"
+      },
+      "editCta": "수정",
+      "footer": "매핑 규칙은 반복 업로드와 연동 데이터에 자동 적용됩니다. 같은 거래처, 같은 은행 적요, 같은 계정과목은 다음 신고부터 자동 분류됩니다.",
+      "rows": {
+        "salesRev": {
+          "source": "Accounting COA: Sales Revenue",
+          "target": "AI Pajak: 매출",
+          "purpose": "PPN / 연결산 / UMKM 매출 한도"
+        },
+        "salaryExp": {
+          "source": "Accounting COA: Salary Expense",
+          "target": "AI Pajak: 급여",
+          "purpose": "PPh21 / Employee Benefit 판정"
+        },
+        "rentExp": {
+          "source": "Accounting COA: Rent Expense",
+          "target": "AI Pajak: 임대료",
+          "purpose": "PPh4(2) / 비용 검증"
+        },
+        "taxPayment": {
+          "source": "Bank Description: Tax Payment",
+          "target": "AI Pajak: NTPN 후보",
+          "purpose": "납부증빙 자동 매칭"
+        },
+        "vendorKbli": {
+          "source": "Vendor Master: KBLI/Certificate",
+          "target": "AI Pajak: 거래처 세무 프로필",
+          "purpose": "PPh23/4(2)/15/22/26 판정"
+        }
+      }
+    },
+    "logsTab": {
+      "title": "동기화 로그",
+      "subtitle": "각 연동 시스템의 동기화 상태, 오류, 권한 만료, 승인 대기 상태를 확인합니다.",
+      "columns": {
+        "time": "시간",
+        "system": "시스템",
+        "event": "이벤트",
+        "result": "결과"
+      },
+      "results": {
+        "done": "완료",
+        "ready": "연동 준비",
+        "pending": "승인 대기",
+        "attention": "확인 필요"
+      },
+      "events": {
+        "excelPayroll": "급여 템플릿 업로드",
+        "coretaxIdBilling": "ID Billing 상태 조회",
+        "bankConnect": "BCA 계좌 연결 요청",
+        "accurateMapping": "계정과목 매핑 검증"
+      }
+    }
+  },
+  "securityPage": {
+    "pageTitle": "보안(비밀번호 변경)",
+    "backToDashboard": "대시보드로",
+    "currentStep": "1. 현재 단계",
+    "steps": {
+      "password": "비밀번호",
+      "twoFactor": "2단계 인증",
+      "recentLogin": "최근 로그인"
+    },
+    "statusCards": {
+      "password": {
+        "title": "비밀번호",
+        "sub": "마지막 변경",
+        "daysAgo": "{days}일 전",
+        "never": "변경 이력 없음"
+      },
+      "twoFactor": {
+        "title": "2단계 인증",
+        "sub": "계정 보호 상태",
+        "on": "활성화",
+        "off": "비활성화"
+      },
+      "recentLogin": {
+        "title": "최근 로그인",
+        "sub": "확인 필요 항목",
+        "count": "{count}건",
+        "none": "0건"
+      }
+    },
+    "changePassword": {
+      "title": "비밀번호 변경",
+      "subtitle": "안전한 비밀번호로 주기적으로 변경하세요. 최소 8자 이상을 권장합니다.",
+      "current": "현재 비밀번호",
+      "new": "새 비밀번호",
+      "confirm": "새 비밀번호 확인",
+      "helper": "영문, 숫자, 특수문자를 조합하면 보안 수준이 높아집니다.",
+      "cta": "비밀번호 변경",
+      "saving": "변경 중..."
+    },
+    "twoFactor": {
+      "title": "2단계 인증",
+      "subtitle": "로그인 시 인증 앱 또는 이메일 인증 코드를 추가로 확인합니다.",
+      "badgeOn": "사용 중",
+      "badgeOff": "사용 안 함",
+      "appTitle": "인증 앱",
+      "appDesc": "Google Authenticator, Microsoft Authenticator 등으로 OTP를 생성합니다.",
+      "appCta": "인증 앱 설정",
+      "appCtaActive": "재설정",
+      "backupTitle": "백업 코드",
+      "backupDesc": "휴대폰 분실 시 사용할 백업 코드를 발급합니다.",
+      "backupCta": "백업 코드 보기",
+      "disableCta": "2단계 인증 끄기",
+      "verifyTitle": "인증 코드 확인",
+      "verifyDesc": "인증 앱에서 표시된 6자리 코드를 입력해 등록을 마무리하세요.",
+      "verifyPlaceholder": "000000",
+      "verifyCta": "확인",
+      "cancelCta": "취소",
+      "manualKey": "수동 키",
+      "backupNotAvailable": "백업 코드는 곧 제공됩니다."
+    },
+    "errors": {
+      "allRequired": "모든 비밀번호 필드를 입력하세요.",
+      "mismatch": "새 비밀번호가 일치하지 않습니다.",
+      "tooShort": "비밀번호는 최소 8자 이상이어야 합니다.",
+      "generic": "요청을 처리하지 못했습니다."
+    },
+    "toasts": {
+      "passwordChanged": "비밀번호가 변경되었습니다.",
+      "twoFactorEnabled": "2단계 인증이 활성화되었습니다.",
+      "twoFactorDisabled": "2단계 인증이 해제되었습니다."
+    },
+    "recentLogin": {
+      "title": "최근 로그인 활동",
+      "subtitle": "최근 접속 기기, 위치, IP를 확인하고 의심스러운 접속을 차단할 수 있습니다.",
+      "columns": {
+        "time": "일시",
+        "device": "기기",
+        "location": "위치",
+        "ip": "IP",
+        "status": "상태",
+        "action": "액션"
+      },
+      "status": {
+        "ok": "정상",
+        "attention": "확인 필요"
+      },
+      "cta": {
+        "endSession": "세션 종료",
+        "notMe": "내 활동 아님"
+      },
+      "empty": "표시할 로그인 기록이 없습니다."
+    }
+  },
+  "billingPage": {
+    "pageTitle": "요금/결제",
+    "backToDashboard": "대시보드로",
+    "currentStep": "1. 현재 단계",
+    "steps": {
+      "monthlyFee": "월 요금",
+      "annualFee": "연결산 요금",
+      "prepayment": "선납 결제",
+      "receipt": "영수증"
+    },
+    "notice": {
+      "title": "선납 결제 원칙",
+      "body": "AI Pajak의 모든 서비스는 선납 후 이용 가능합니다. 월관리 요금과 연결산 요금은 별도 상품으로 선택하고 별도 청구됩니다. Pro 이상은 단순 신고 대행이 아니라 세무 운영 자동화 시스템입니다."
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "월관리 요금제",
+        "sub": "현재 선택",
+        "value": "Basic 월관리"
+      },
+      "paid": {
+        "title": "월관리 선납액",
+        "sub": "1개월 선납",
+        "value": "Rp 1,500,000",
+        "subAnnual": "12개월 합계",
+        "valueAnnual": "Rp 16,200,000"
+      },
+      "annual": {
+        "title": "연결산 상품",
+        "sub": "별도 선택",
+        "value": "UMKM 연결산"
+      },
+      "total": {
+        "title": "총 선납 예정액",
+        "sub": "월관리 + 연결산",
+        "value": "Rp 4,000,000",
+        "valueAnnual": "Rp 18,700,000"
+      }
+    },
+    "monthlyPlans": {
+      "title": "월 요금제 선택",
+      "subtitle": "월 신고, 신고 이력, 보고서, 거래처 판정 등 월별 운영 서비스를 위한 요금입니다. Pro 이상은 일반 세무컨설팅과 경쟁하는 가격이 아니라, 내부 세무 운영을 줄이는 시스템 비용으로 설계합니다. 연결산은 포함하지 않습니다.",
+      "toggleMonthly": "월 선납",
+      "toggleAnnual": "12개월 선납 10% 할인",
+      "selected": "선택됨",
+      "criteria": "적용 기준",
+      "plans": {
+        "umkm": {
+          "name": "UMKM 월관리",
+          "sub": "소규모 법인 / Final Tax 중심",
+          "price": "Rp 750,000",
+          "term": "1개월 선납",
+          "criteria": [
+            "직원 5명 이하",
+            "월 원천세 거래 10건 이하",
+            "월 업로드/거래 50건 이하",
+            "복잡 거래·해외거래 없음"
+          ],
+          "features": [
+            "월 신고 현황",
+            "ID Billing 요청",
+            "기본 리마인더",
+            "기본 AI 리스크 코멘트"
+          ],
+          "annualPrice": "Rp 8,100,000",
+          "priceOriginal": "Rp 750,000",
+          "priceDiscounted": "Rp 675,000",
+          "annualSavings": "Rp 900,000"
+        },
+        "basic": {
+          "name": "Basic 월관리",
+          "sub": "일반 법인 기본 세무 운영",
+          "price": "Rp 1,500,000",
+          "term": "1개월 선납",
+          "criteria": [
+            "직원 30명 이하",
+            "월 원천세 거래 30건 이하",
+            "월 매입/매출 거래 300건 이하",
+            "일반 PPh21/23/25/PPN 중심",
+            "TP·해외거래는 별도 검토"
+          ],
+          "features": [
+            "PPh21/23/25/PPN 관리",
+            "신고 이력/BPE/NTPN 보관",
+            "거래처 원천세 판정",
+            "월별 세금 보고서"
+          ],
+          "annualPrice": "Rp 16,200,000",
+          "priceOriginal": "Rp 1,500,000",
+          "priceDiscounted": "Rp 1,350,000",
+          "annualSavings": "Rp 1,800,000"
+        },
+        "pro": {
+          "name": "Pro 월관리",
+          "sub": "세무 컨설팅 1회성이 아니라 월별 세무 운영 시스템",
+          "price": "Rp 2,500,000",
+          "term": "1개월 선납",
+          "criteria": [
+            "직원 100명 이하",
+            "월 원천세 거래 150건 이하",
+            "월 매입/매출 거래 1,500건 이하",
+            "해외거래·특수관계 모니터링 포함",
+            "고급 AI 분석 한도 적용"
+          ],
+          "features": [
+            "Basic 전체",
+            "TP 조건 모니터링",
+            "AI 이상 감지",
+            "고급 세금 보고서",
+            "BPE/NTPN 자동 보관",
+            "우선 처리"
+          ],
+          "annualPrice": "Rp 27,000,000",
+          "priceOriginal": "Rp 2,500,000",
+          "priceDiscounted": "Rp 2,250,000",
+          "annualSavings": "Rp 3,000,000"
+        },
+        "enterprise": {
+          "name": "Enterprise 맞춤 월관리",
+          "sub": "내부 세무팀 대체형 플랫폼 + 사용량 기반 과금",
+          "price": "Rp 3,500,000",
+          "term": "1개월 선납",
+          "criteria": [
+            "직원 100명 초과",
+            "월 원천세 거래 150건 초과",
+            "월 매입/매출 거래 1,500건 초과",
+            "대량 문서 자동분석 필요",
+            "기본 플랫폼 요금 + 사용량 과금"
+          ],
+          "features": [
+            "Pro 전체",
+            "전담 처리 큐",
+            "대량 급여/거래 처리",
+            "초과 사용량 기반 과금",
+            "SLA/우선 지원"
+          ],
+          "annualPrice": "Rp 37,800,000",
+          "priceOriginal": "Rp 3,500,000",
+          "priceDiscounted": "Rp 3,150,000",
+          "annualSavings": "Rp 4,200,000"
+        }
+      },
+      "breakdown": {
+        "original": "할인 전 월 요금",
+        "discounted": "10% 할인 월 요금",
+        "savings": "연간 절감액"
+      },
+      "annualTerm": "12개월 선납 합계"
+    },
+    "proValue": {
+      "title": "Pro 이상 요금제의 핵심 가치",
+      "columns": {
+        "consulting": {
+          "title": "일반 세무 컨설팅",
+          "body": "신고 처리 중심 · 자료는 고객이 따로 관리 · 리스크는 사후 대응"
+        },
+        "pro": {
+          "title": "AI Pajak Pro",
+          "body": "월별 세무 운영, BPE/NTPN 보관, 거래처 원천세 판정, AI 리스크 알림을 하나로 관리"
+        },
+        "enterprise": {
+          "title": "AI Pajak Enterprise",
+          "body": "내부 세무팀을 대체하는 플랫폼 요금 + 실제 사용량 기반의 투명한 과금"
+        }
+      },
+      "footer": "Basic/Pro/Enterprise 기준은 직원 수, 월 거래량, 문서 자동분석량, 리스크 모니터링 범위를 기준으로 설계되었습니다. 직원 100명 초과 또는 거래량 초과 고객은 Enterprise 맞춤 월관리로 전환하고, 초과 사용량은 별도 과금합니다."
+    },
+    "enterpriseFees": {
+      "title": "Enterprise 기본료 Rp 3,500,000 + 초과 사용 과금 기준",
+      "items": {
+        "employee": {
+          "title": "직원 초과",
+          "base": "기본 100명 포함",
+          "overage": "초과 1명당 Rp 20,000 / 월"
+        },
+        "withholding": {
+          "title": "원천세 거래 초과",
+          "base": "기본 150건 포함",
+          "overage": "초과 1건당 Rp 10,000 / 월"
+        },
+        "apar": {
+          "title": "매입/매출 거래 초과",
+          "base": "기본 1,500건 포함",
+          "overage": "초과 1건당 Rp 1,500 / 월"
+        },
+        "docs": {
+          "title": "문서 자동분석 초과",
+          "base": "기본 1,000페이지 포함",
+          "overage": "초과 1페이지당 Rp 1,000"
+        }
+      }
+    },
+    "annualPlans": {
+      "title": "연결산 요금 선택",
+      "subtitle": "연결산은 월관리 요금과 별도로 선납 결제합니다. 요금제별 기준 범위를 명확히 구분하여 선택합니다.",
+      "selected": "선택됨",
+      "criteria": "적용 기준",
+      "contents": "포함 내용",
+      "plans": {
+        "none": {
+          "name": "연결산 선택 안 함",
+          "sub": "월관리만 이용합니다.",
+          "price": "Rp 0",
+          "term": "1회 선납",
+          "criteria": [
+            "연결산 작업 미포함",
+            "필요 시 나중에 별도 결제 가능"
+          ],
+          "features": [
+            "연결산 작업 미포함",
+            "필요 시 나중에 별도 결제 가능"
+          ]
+        },
+        "umkm": {
+          "name": "UMKM 연결산",
+          "sub": "Final Tax 0.5% 대상 법인 연결산",
+          "price": "Rp 2,500,000",
+          "term": "1회 선납",
+          "criteria": [
+            "연매출 Rp 4.8B 이하",
+            "Final Tax 0.5% 대상",
+            "은행계좌 2개 이하",
+            "연 거래 500건 이하",
+            "직원 10명 이하",
+            "재고·고정자산 구조 단순",
+            "해외거래·특수관계 거래 없음"
+          ],
+          "features": [
+            "정상 재무제표 생성",
+            "서명본 업로드 관리",
+            "UMKM Final Tax 계산",
+            "SPT 초안 생성",
+            "e-Bupot 1721 A1 발급"
+          ]
+        },
+        "pph25": {
+          "name": "PPh25 일반 법인 연결산",
+          "sub": "일반 법인세 22% 대상 표준 연결산",
+          "price": "Rp 7,500,000",
+          "term": "1회 선납",
+          "criteria": [
+            "연매출 Rp 4.8B 초과 또는 UMKM 기간 종료",
+            "은행계좌 3개 이하",
+            "연 매입/매출 거래 1,000건 이하",
+            "직원 50명 이하",
+            "원천세/세액공제 자료 100건 이하",
+            "고정자산 50개 이하",
+            "재고 품목 100개 이하",
+            "해외거래·특수관계·TP 이슈 없음",
+            "감사보고서 첨부 대상 아님"
+          ],
+          "features": [
+            "재무제표 생성",
+            "세무조정",
+            "세액공제",
+            "PPh29/PPh25 산정",
+            "SPT 초안 생성",
+            "e-Bupot 1721 A1 + SPT Tahunan Badan"
+          ]
+        },
+        "complex": {
+          "name": "복잡 구조 연결산",
+          "sub": "외국계, 특수관계, 해외거래 또는 대량 거래 법인",
+          "price": "Rp 15,000,000",
+          "term": "1회 선납",
+          "criteria": [
+            "PPh25 일반 법인 기준 초과",
+            "해외 주주 또는 해외거래 존재",
+            "특수관계 거래 존재",
+            "PPh26 / DGT Form / Treaty 검토 필요",
+            "은행계좌 6개 이하",
+            "연 매입/매출 거래 3,000건 이하",
+            "직원 100명 이하",
+            "고정자산 150개 이하",
+            "재고 품목 500개 이하",
+            "TP Doc 필요 여부 판정 포함 — 실제 TP Doc 작성은 별도"
+          ],
+          "features": [
+            "PPh25 연결산 전체",
+            "TP 조건 검토",
+            "해외거래 검토",
+            "AI 리스크 보고서",
+            "우선 처리"
+          ]
+        }
+      }
+    },
+    "annualNotice": {
+      "title": "연결산 요금제 선택 기준",
+      "body1": "PPh25 일반 법인 연결산은 표준 범위 내 고정가입니다. 해외거래, 특수관계, 대량 거래, 복잡한 재고/고정자산, Treaty 검토가 있으면 복잡 구조 연결산을 선택합니다.",
+      "body2": "복잡 구조 연결산도 위 기준을 초과하거나 실제 TP Doc 작성, 세무조사 대응, 감사보고서 작성이 필요한 경우에는 별도 서비스로 진행합니다."
+    },
+    "payment": {
+      "method": {
+        "title": "결제 수단",
+        "subtitle": "현재 결제 수단과 자동 결제 여부를 관리합니다. 자동 결제도 서비스 시작 전 선납 방식으로 청구됩니다.",
+        "cardName": "Bank Transfer / Virtual Account",
+        "cardDetail": "BCA VA **** 9021",
+        "defaultBadge": "기본 결제수단",
+        "autoLabel": "월관리 자동 선납 결제 사용",
+        "changeCta": "결제수단 변경",
+        "manualCta": "수동 결제하기"
+      },
+      "summary": {
+        "title": "선납 결제 요약",
+        "subtitle": "월관리 요금과 연결산 요금을 분리하여 계산합니다.",
+        "monthlyLabel": "Basic 월관리",
+        "monthlyTerm": "1개월 선납 기준",
+        "monthlyAmount": "Rp 1,500,000",
+        "annualLabel": "UMKM 연결산",
+        "annualAmount": "Rp 2,500,000",
+        "ppnLabel": "PPN",
+        "ppnAmount": "별도",
+        "totalLabel": "총 선납 예정액",
+        "totalAmount": "Rp 4,000,000",
+        "notice": "결제 완료 후 선택한 월관리 서비스와 연결산 프로세스를 이용할 수 있습니다. 미결제 상태에서는 신고 제출 및 연결산 진행이 제한됩니다.",
+        "quoteCta": "견적서 생성",
+        "payCta": "선납 결제 진행",
+        "monthlyAmountAnnual": "Rp 16,200,000",
+        "totalAmountAnnual": "Rp 18,700,000",
+        "breakdown": {
+          "originalLabel": "정가 월 요금",
+          "originalAmount": "Rp 1,500,000",
+          "discountedLabel": "10% 할인 월 요금",
+          "discountedAmount": "Rp 1,350,000",
+          "annualTotalLabel": "12개월 선납 합계",
+          "annualTotalAmount": "Rp 16,200,000",
+          "savingsLabel": "총 할인액",
+          "savingsAmount": "Rp 1,800,000"
+        }
+      }
+    },
+    "invoices": {
+      "title": "청구서 / 결제 이력",
+      "subtitle": "월관리 선납 청구서와 연결산 선납 청구서를 구분하여 확인합니다.",
+      "downloadAll": "전체 다운로드",
+      "columns": {
+        "number": "청구서 번호",
+        "date": "청구일",
+        "item": "항목",
+        "amount": "금액",
+        "status": "상태",
+        "method": "결제수단",
+        "receipt": "영수증"
+      },
+      "statusPaid": "결제 완료",
+      "downloadCta": "다운로드",
+      "rows": {
+        "basic": {
+          "number": "INV-202604-001",
+          "date": "2026-04-01",
+          "item": "Basic 월관리 2026년 4월 선납",
+          "amount": "Rp 1,500,000",
+          "method": "Bank Transfer"
+        },
+        "umkm": {
+          "number": "INV-202604-CLS",
+          "date": "2026-04-05",
+          "item": "UMKM 연결산 2025년 귀속 선납",
+          "amount": "Rp 2,500,000",
+          "method": "Bank Transfer"
+        }
+      }
+    }
   }
 }

@@ -209,7 +209,8 @@
     "switchRole": "Switch to {role}",
     "filingStatus": "Filing Status",
     "idBillingIssue": "ID Billing Issuance",
-    "ebupotIssue": "Ebupot/A1 Issuance",
+    "ebupotIssue": "E-bupot 1721 A1 与 SPT Tahunan Badan",
+    "sptGeneration": "生成 SPT 申报表",
     "closingWork": "Year-end Closing",
     "taxHistory": "Filing History",
     "taxReport": "Tax Report",
@@ -217,6 +218,7 @@
     "taxCalculator": "Tax Forecast / Calculator",
     "notifications": "Notifications",
     "security": "Security",
+    "securityPassword": "安全（修改密码）",
     "filingManagement": "Filing Management",
     "closingWorkLabel": "Year-end Closing"
   },
@@ -1446,7 +1448,7 @@
     "clientReportDesc": "为客户创建全面的税务分析报告",
     "pph21BulkTitle": "PPh 21批量计算器",
     "pph21BulkDesc": "一次性计算所有员工的PPh 21",
-    "ebupotTitle": "批量e-Bupot 1721-A1",
+    "ebupotTitle": "生成 e-Bupot 1721-A1 与 SPT Tahunan Badan",
     "ecommerceTitle": "电商导入",
     "tpTitle": "转让定价分析",
     "tpAnalyze": "TP分析",
@@ -6258,5 +6260,709 @@
     "submitBtn": "提交修改",
     "submitSuccess": "您的修改已提交。顾问将复核后申请批准。",
     "submitFailed": "提交失败"
+  },
+  "integrationsPage": {
+    "pageTitle": "集成",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "1. 当前阶段",
+    "steps": {
+      "coretax": "Coretax",
+      "accounting": "会计软件",
+      "banking": "银行",
+      "sync": "数据同步"
+    },
+    "heroLabel": "Integrations",
+    "heroTitle": "Coretax · 会计软件 · 银行平台集成",
+    "heroSubtitle": "将 Coretax 申报状态、会计数据、银行收支、发票及工资数据同步至 AI Pajak，实现月度与年度申报自动化。",
+    "statusCards": {
+      "coretax": {
+        "title": "Coretax",
+        "sub": "申报/缴款状态",
+        "value": "准备就绪"
+      },
+      "accounting": {
+        "title": "会计软件",
+        "sub": "Accurate / Jurnal",
+        "value": "已连接 0 个"
+      },
+      "banking": {
+        "title": "银行账户",
+        "sub": "Bank Feed",
+        "value": "未连接"
+      },
+      "excel": {
+        "title": "Excel/CSV",
+        "sub": "模板上传",
+        "value": "可用"
+      }
+    },
+    "tabs": {
+      "systems": "集成系统",
+      "sync": "数据同步",
+      "mapping": "映射设置",
+      "logs": "同步日志"
+    },
+    "statusBadge": {
+      "ready": "准备就绪",
+      "disconnected": "未连接",
+      "available": "可用"
+    },
+    "syncDataLabel": "同步数据",
+    "requirementsLabel": "所需条件",
+    "comingSoon": "此标签页即将上线。",
+    "cta": {
+      "connect": "连接",
+      "manage": "管理"
+    },
+    "cards": {
+      "coretax": {
+        "title": "Coretax / DJP",
+        "subtitle": "Online",
+        "headline": "ID Billing、NTPN、BPE、SPT Masa/Tahunan、e-Bupot/A1、PPN 数据集成",
+        "extraBadge": "分阶段 API/RPA 支持",
+        "sync": [
+          "NPWP/NITKU 查询",
+          "ID Billing 生成/查询",
+          "NTPN 缴款确认",
+          "BPE/申报状态查询",
+          "SPT Masa/Tahunan 数据传输",
+          "e-Bupot/A1 数据获取"
+        ],
+        "reqs": [
+          "企业 NPWP/NITKU",
+          "Coretax 用户权限",
+          "电子签名/证书权限",
+          "客户同意",
+          "权限范围设置"
+        ]
+      },
+      "accurate": {
+        "title": "Accurate Online",
+        "headline": "员工、工资、发票、交易方、财务报表数据自动同步",
+        "sync": [
+          "员工/工资同步",
+          "销售·采购发票",
+          "交易方主数据",
+          "财务报表查询",
+          "科目表映射"
+        ],
+        "reqs": [
+          "API Key/OAuth",
+          "公司数据库选择",
+          "科目映射",
+          "同步周期设置"
+        ]
+      },
+      "jurnal": {
+        "title": "Jurnal by Mekari",
+        "headline": "会计、交易方、发票、利润表、资产负债表集成",
+        "sync": [
+          "发票同步",
+          "交易方同步",
+          "COA 映射",
+          "财务报表查询",
+          "凭证附件同步"
+        ],
+        "reqs": [
+          "Mekari 账户权限",
+          "API/OAuth 连接",
+          "数据访问范围授权",
+          "税务科目映射"
+        ]
+      },
+      "banking": {
+        "title": "Open Banking /",
+        "subtitle": "Bank Feed",
+        "headline": "BCA、Mandiri、BNI、BRI 等银行账户收支自动汇总",
+        "sync": [
+          "银行交易明细收集",
+          "销售收款自动分类",
+          "费用支出自动分类",
+          "NTPN 缴款匹配",
+          "未识别收支提醒"
+        ],
+        "reqs": [
+          "银行账户权限",
+          "账户用途设置",
+          "交易明细查询权限",
+          "自动分类规则审批"
+        ]
+      },
+      "excel": {
+        "title": "Excel / CSV Import",
+        "headline": "在集成之前通过模板收集工资、交易、库存、固定资产数据",
+        "sync": [
+          "工资模板",
+          "销售·采购模板",
+          "库存模板",
+          "固定资产模板",
+          "交易方模板"
+        ],
+        "reqs": [
+          "使用标准模板",
+          "自动列映射",
+          "重复数据验证",
+          "上传历史保留"
+        ]
+      }
+    },
+    "syncTab": {
+      "title": "数据同步任务",
+      "subtitle": "从已连接系统拉取所需数据，并应用至 PPh21、PPh23、PPN、年终结算与申报历史。",
+      "syncCta": "同步",
+      "lookupCta": "获取",
+      "statusCta": "查看状态",
+      "tasks": {
+        "employees": {
+          "title": "员工同步",
+          "source": "Accurate / Jurnal → PPh21",
+          "desc": "姓名、NPWP/NIK、雇佣类型、工资基础数据"
+        },
+        "payroll": {
+          "title": "工资同步",
+          "source": "Accounting SW → PPh21 计算",
+          "desc": "月薪、津贴、BPJS、福利项映射到 PPh21"
+        },
+        "invoices": {
+          "title": "发票同步",
+          "source": "Accurate / Jurnal → PPh23 / PPN",
+          "desc": "销售/采购发票、Faktur Pajak、交易方信息"
+        },
+        "bank": {
+          "title": "银行交易同步",
+          "source": "Open Banking → 财务报表 / VAT / NTPN",
+          "desc": "自动分类收支、匹配缴款明细、标记未识别交易"
+        },
+        "financials": {
+          "title": "财务报表查询",
+          "source": "Accounting SW → 年终结算",
+          "desc": "获取 BS/PL/COA 并校验结算财务报表"
+        },
+        "coretax": {
+          "title": "Coretax 状态同步",
+          "source": "Coretax → 申报历史",
+          "desc": "将 ID Billing、NTPN、BPE、申报状态同步到 AI Pajak 历史"
+        }
+      }
+    },
+    "mappingTab": {
+      "title": "数据映射设置",
+      "subtitle": "将会计科目、银行摘要、交易方主数据映射到 AI Pajak 税务项目。",
+      "columns": {
+        "source": "原始数据",
+        "target": "AI Pajak 项",
+        "purpose": "用途",
+        "action": "操作"
+      },
+      "editCta": "编辑",
+      "footer": "映射规则将自动应用于重复上传与同步数据。相同交易方、相同银行摘要、相同科目将在下一次申报中自动分类。",
+      "rows": {
+        "salesRev": {
+          "source": "Accounting COA: Sales Revenue",
+          "target": "AI Pajak: 销售收入",
+          "purpose": "PPN / 年终结算 / UMKM 营收上限"
+        },
+        "salaryExp": {
+          "source": "Accounting COA: Salary Expense",
+          "target": "AI Pajak: 工资",
+          "purpose": "PPh21 / Employee Benefit 判定"
+        },
+        "rentExp": {
+          "source": "Accounting COA: Rent Expense",
+          "target": "AI Pajak: 租金",
+          "purpose": "PPh4(2) / 费用验证"
+        },
+        "taxPayment": {
+          "source": "Bank Description: Tax Payment",
+          "target": "AI Pajak: NTPN 候选",
+          "purpose": "缴款凭证自动匹配"
+        },
+        "vendorKbli": {
+          "source": "Vendor Master: KBLI/Certificate",
+          "target": "AI Pajak: 交易方税务档案",
+          "purpose": "PPh23/4(2)/15/22/26 判定"
+        }
+      }
+    },
+    "logsTab": {
+      "title": "同步日志",
+      "subtitle": "查看各连接系统的同步状态、错误、权限到期及待审批情况。",
+      "columns": {
+        "time": "时间",
+        "system": "系统",
+        "event": "事件",
+        "result": "结果"
+      },
+      "results": {
+        "done": "完成",
+        "ready": "准备就绪",
+        "pending": "待审批",
+        "attention": "需要确认"
+      },
+      "events": {
+        "excelPayroll": "工资模板上传",
+        "coretaxIdBilling": "ID Billing 状态查询",
+        "bankConnect": "BCA 账户连接请求",
+        "accurateMapping": "科目映射校验"
+      }
+    }
+  },
+  "securityPage": {
+    "pageTitle": "安全（修改密码）",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "1. 当前阶段",
+    "steps": {
+      "password": "密码",
+      "twoFactor": "两步验证",
+      "recentLogin": "最近登录"
+    },
+    "statusCards": {
+      "password": {
+        "title": "密码",
+        "sub": "最后修改",
+        "daysAgo": "{days} 天前",
+        "never": "尚未修改"
+      },
+      "twoFactor": {
+        "title": "两步验证",
+        "sub": "账号保护状态",
+        "on": "已启用",
+        "off": "未启用"
+      },
+      "recentLogin": {
+        "title": "最近登录",
+        "sub": "需关注项",
+        "count": "{count} 项",
+        "none": "0 项"
+      }
+    },
+    "changePassword": {
+      "title": "修改密码",
+      "subtitle": "请定期更换为强密码，建议至少 8 个字符。",
+      "current": "当前密码",
+      "new": "新密码",
+      "confirm": "确认新密码",
+      "helper": "组合字母、数字和特殊字符可提升安全性。",
+      "cta": "修改密码",
+      "saving": "保存中..."
+    },
+    "twoFactor": {
+      "title": "两步验证",
+      "subtitle": "登录时额外验证认证应用或邮箱中的验证码。",
+      "badgeOn": "已启用",
+      "badgeOff": "未启用",
+      "appTitle": "认证应用",
+      "appDesc": "通过 Google Authenticator、Microsoft Authenticator 等生成 OTP。",
+      "appCta": "设置认证应用",
+      "appCtaActive": "重新配置",
+      "backupTitle": "备用码",
+      "backupDesc": "当手机丢失时使用的备用码。",
+      "backupCta": "查看备用码",
+      "disableCta": "关闭两步验证",
+      "verifyTitle": "验证代码",
+      "verifyDesc": "输入认证应用中显示的 6 位代码以完成注册。",
+      "verifyPlaceholder": "000000",
+      "verifyCta": "验证",
+      "cancelCta": "取消",
+      "manualKey": "手动密钥",
+      "backupNotAvailable": "备用码即将上线。"
+    },
+    "errors": {
+      "allRequired": "请填写所有密码字段。",
+      "mismatch": "新密码不一致。",
+      "tooShort": "密码至少 8 位。",
+      "generic": "请求未能处理。"
+    },
+    "toasts": {
+      "passwordChanged": "密码已修改。",
+      "twoFactorEnabled": "两步验证已启用。",
+      "twoFactorDisabled": "两步验证已关闭。"
+    },
+    "recentLogin": {
+      "title": "最近登录活动",
+      "subtitle": "查看最近的设备、位置、IP，并阻止可疑访问。",
+      "columns": {
+        "time": "时间",
+        "device": "设备",
+        "location": "位置",
+        "ip": "IP",
+        "status": "状态",
+        "action": "操作"
+      },
+      "status": {
+        "ok": "正常",
+        "attention": "需要确认"
+      },
+      "cta": {
+        "endSession": "结束会话",
+        "notMe": "非本人操作"
+      },
+      "empty": "暂无登录记录。"
+    }
+  },
+  "billingPage": {
+    "pageTitle": "费用 / 付款",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "1. 当前阶段",
+    "steps": {
+      "monthlyFee": "月度费用",
+      "annualFee": "年终结算费",
+      "prepayment": "预付款",
+      "receipt": "收据"
+    },
+    "notice": {
+      "title": "预付款政策",
+      "body": "AI Pajak 所有服务均需预付。月度运营费用与年终结算费用为独立产品，分别计费。Pro 及以上不是简单的代办申报，而是税务运营自动化系统。"
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "月度套餐",
+        "sub": "当前选择",
+        "value": "Basic 月度"
+      },
+      "paid": {
+        "title": "月度预付额",
+        "sub": "预付 1 个月",
+        "value": "Rp 1,500,000",
+        "subAnnual": "12 个月合计",
+        "valueAnnual": "Rp 16,200,000"
+      },
+      "annual": {
+        "title": "年终结算产品",
+        "sub": "单独选择",
+        "value": "UMKM 年终结算"
+      },
+      "total": {
+        "title": "预付总额",
+        "sub": "月度 + 年终结算",
+        "value": "Rp 4,000,000",
+        "valueAnnual": "Rp 18,700,000"
+      }
+    },
+    "monthlyPlans": {
+      "title": "选择月度套餐",
+      "subtitle": "月度运营费用：申报、历史、报告、交易方判定等。Pro 及以上以替代内部税务运营为定位，不与一次性咨询比价。年终结算不包含在内。",
+      "toggleMonthly": "月度预付",
+      "toggleAnnual": "12 个月预付优惠 10%",
+      "selected": "已选",
+      "criteria": "适用条件",
+      "plans": {
+        "umkm": {
+          "name": "UMKM 月度",
+          "sub": "小型法人 / 以 Final Tax 为主",
+          "price": "Rp 750,000",
+          "term": "预付 1 个月",
+          "criteria": [
+            "员工 ≤ 5 人",
+            "月度代扣交易 ≤ 10 笔",
+            "月度上传/交易 ≤ 50 笔",
+            "无复杂/跨境交易"
+          ],
+          "features": [
+            "月度申报仪表板",
+            "ID Billing 申请",
+            "基础提醒",
+            "基础 AI 风险评论"
+          ],
+          "annualPrice": "Rp 8,100,000",
+          "priceOriginal": "Rp 750,000",
+          "priceDiscounted": "Rp 675,000",
+          "annualSavings": "Rp 900,000"
+        },
+        "basic": {
+          "name": "Basic 月度",
+          "sub": "一般法人基础税务运营",
+          "price": "Rp 1,500,000",
+          "term": "预付 1 个月",
+          "criteria": [
+            "员工 ≤ 30 人",
+            "月度代扣交易 ≤ 30 笔",
+            "月度进项/销项 ≤ 300 笔",
+            "以 PPh21/23/25/PPN 为主",
+            "TP·跨境单独评估"
+          ],
+          "features": [
+            "PPh21/23/25/PPN 管理",
+            "申报历史 / BPE / NTPN 归档",
+            "交易方代扣判定",
+            "月度税务报告"
+          ],
+          "annualPrice": "Rp 16,200,000",
+          "priceOriginal": "Rp 1,500,000",
+          "priceDiscounted": "Rp 1,350,000",
+          "annualSavings": "Rp 1,800,000"
+        },
+        "pro": {
+          "name": "Pro 月度",
+          "sub": "不是一次性咨询，而是月度运营系统",
+          "price": "Rp 2,500,000",
+          "term": "预付 1 个月",
+          "criteria": [
+            "员工 ≤ 100 人",
+            "月度代扣交易 ≤ 150 笔",
+            "月度进项/销项 ≤ 1,500 笔",
+            "跨境·关联方监控",
+            "高级 AI 分析配额"
+          ],
+          "features": [
+            "Basic 全部功能",
+            "TP 条件监控",
+            "AI 异常检测",
+            "高级税务报告",
+            "BPE/NTPN 自动归档",
+            "优先处理"
+          ],
+          "annualPrice": "Rp 27,000,000",
+          "priceOriginal": "Rp 2,500,000",
+          "priceDiscounted": "Rp 2,250,000",
+          "annualSavings": "Rp 3,000,000"
+        },
+        "enterprise": {
+          "name": "Enterprise 定制",
+          "sub": "替代内部税务团队 + 用量计费",
+          "price": "Rp 3,500,000",
+          "term": "预付 1 个月",
+          "criteria": [
+            "员工 > 100 人",
+            "月度代扣交易 > 150 笔",
+            "月度进项/销项 > 1,500 笔",
+            "需大量文档自动分析",
+            "基础平台费 + 用量"
+          ],
+          "features": [
+            "Pro 全部功能",
+            "专属处理队列",
+            "大量薪资/交易处理",
+            "按超额用量计费",
+            "SLA / 优先支持"
+          ],
+          "annualPrice": "Rp 37,800,000",
+          "priceOriginal": "Rp 3,500,000",
+          "priceDiscounted": "Rp 3,150,000",
+          "annualSavings": "Rp 4,200,000"
+        }
+      },
+      "breakdown": {
+        "original": "原月费",
+        "discounted": "10% 折扣后月费",
+        "savings": "年度节省"
+      },
+      "annualTerm": "12 个月预付合计"
+    },
+    "proValue": {
+      "title": "Pro 及以上套餐的核心价值",
+      "columns": {
+        "consulting": {
+          "title": "一般税务咨询",
+          "body": "以申报处理为主 · 资料由客户自行管理 · 风险事后应对"
+        },
+        "pro": {
+          "title": "AI Pajak Pro",
+          "body": "月度税务运营、BPE/NTPN 归档、交易方代扣判定、AI 风险预警一站式管理"
+        },
+        "enterprise": {
+          "title": "AI Pajak Enterprise",
+          "body": "替代内部税务团队的平台费 + 基于实际用量的透明计费"
+        }
+      },
+      "footer": "Basic/Pro/Enterprise 等级按员工数、月度交易量、文档自动分析量与风险监控范围设计。员工 > 100 或超过交易量上限的客户将转入 Enterprise 定制套餐，超额部分单独计费。"
+    },
+    "enterpriseFees": {
+      "title": "Enterprise 基础费 Rp 3,500,000 + 超额计费标准",
+      "items": {
+        "employee": {
+          "title": "员工超额",
+          "base": "含 100 名员工",
+          "overage": "每超 1 名 Rp 20,000 / 月"
+        },
+        "withholding": {
+          "title": "代扣交易超额",
+          "base": "含 150 笔",
+          "overage": "每超 1 笔 Rp 10,000 / 月"
+        },
+        "apar": {
+          "title": "进项/销项超额",
+          "base": "含 1,500 笔",
+          "overage": "每超 1 笔 Rp 1,500 / 月"
+        },
+        "docs": {
+          "title": "文档自动分析超额",
+          "base": "含 1,000 页",
+          "overage": "每超 1 页 Rp 1,000"
+        }
+      }
+    },
+    "annualPlans": {
+      "title": "选择年终结算套餐",
+      "subtitle": "年终结算与月度套餐分开预付。请按范围选择对应等级。",
+      "selected": "已选",
+      "criteria": "适用条件",
+      "contents": "包含内容",
+      "plans": {
+        "none": {
+          "name": "不选年终结算",
+          "sub": "仅使用月度套餐。",
+          "price": "Rp 0",
+          "term": "一次性预付",
+          "criteria": [
+            "不含年终结算",
+            "可后续单独付款"
+          ],
+          "features": [
+            "不含年终结算",
+            "可后续单独付款"
+          ]
+        },
+        "umkm": {
+          "name": "UMKM 年终结算",
+          "sub": "Final Tax 0.5% 对象法人年终结算",
+          "price": "Rp 2,500,000",
+          "term": "一次性预付",
+          "criteria": [
+            "年营收 ≤ Rp 4.8B",
+            "适用 Final Tax 0.5%",
+            "银行账户 ≤ 2",
+            "年交易 ≤ 500 笔",
+            "员工 ≤ 10",
+            "库存/固定资产结构简单",
+            "无跨境/关联方交易"
+          ],
+          "features": [
+            "标准财务报表生成",
+            "签署版上传管理",
+            "UMKM Final Tax 计算",
+            "SPT 草稿生成",
+            "e-Bupot 1721 A1 出具"
+          ]
+        },
+        "pph25": {
+          "name": "PPh25 标准年终结算",
+          "sub": "一般法人税 22% 标准年终结算",
+          "price": "Rp 7,500,000",
+          "term": "一次性预付",
+          "criteria": [
+            "营收 > Rp 4.8B 或 UMKM 周期结束",
+            "银行账户 ≤ 3",
+            "年 AP/AR 交易 ≤ 1,000",
+            "员工 ≤ 50",
+            "代扣/抵免资料 ≤ 100",
+            "固定资产 ≤ 50",
+            "库存 SKU ≤ 100",
+            "无跨境/关联方/TP 问题",
+            "无审计报告附加"
+          ],
+          "features": [
+            "财务报表生成",
+            "税务调整",
+            "税额抵免",
+            "PPh29/PPh25 计算",
+            "SPT 草稿生成",
+            "e-Bupot 1721 A1 + SPT Tahunan Badan"
+          ]
+        },
+        "complex": {
+          "name": "复杂结构年终结算",
+          "sub": "外资、关联方、跨境或大量交易法人",
+          "price": "Rp 15,000,000",
+          "term": "一次性预付",
+          "criteria": [
+            "超 PPh25 标准",
+            "外籍股东或跨境交易存在",
+            "存在关联方交易",
+            "需 PPh26 / DGT Form / Treaty 审查",
+            "银行账户 ≤ 6",
+            "年 AP/AR ≤ 3,000",
+            "员工 ≤ 100",
+            "固定资产 ≤ 150",
+            "库存 SKU ≤ 500",
+            "含 TP Doc 必要性判定 — 实际 TP Doc 单独编制"
+          ],
+          "features": [
+            "PPh25 全部",
+            "TP 条件审查",
+            "跨境交易审查",
+            "AI 风险报告",
+            "优先处理"
+          ]
+        }
+      }
+    },
+    "annualNotice": {
+      "title": "年终结算套餐选择标准",
+      "body1": "PPh25 标准年终结算属于标准范围内的固定价格。如存在跨境交易、关联方、大量交易、复杂库存/固定资产或需 Treaty 审查，请选择复杂结构年终结算。",
+      "body2": "若复杂结构年终结算也超过上述标准，或需实际 TP Doc 编制、税务稽查应对、审计报告编制，将作为独立服务另行报价。"
+    },
+    "payment": {
+      "method": {
+        "title": "付款方式",
+        "subtitle": "管理当前付款方式与自动付款。自动付款也按服务开始前预付方式计费。",
+        "cardName": "Bank Transfer / Virtual Account",
+        "cardDetail": "BCA VA **** 9021",
+        "defaultBadge": "默认方式",
+        "autoLabel": "使用月度套餐自动预付",
+        "changeCta": "更改付款方式",
+        "manualCta": "手动付款"
+      },
+      "summary": {
+        "title": "预付汇总",
+        "subtitle": "月度费用与年终结算费用分别计算。",
+        "monthlyLabel": "Basic 月度",
+        "monthlyTerm": "预付 1 个月",
+        "monthlyAmount": "Rp 1,500,000",
+        "annualLabel": "UMKM 年终结算",
+        "annualAmount": "Rp 2,500,000",
+        "ppnLabel": "PPN",
+        "ppnAmount": "另计",
+        "totalLabel": "预付总额",
+        "totalAmount": "Rp 4,000,000",
+        "notice": "付款完成后即可使用所选月度服务与年终结算流程。未付款状态下，申报提交与年终结算受限。",
+        "quoteCta": "生成报价",
+        "payCta": "前往预付",
+        "monthlyAmountAnnual": "Rp 16,200,000",
+        "totalAmountAnnual": "Rp 18,700,000",
+        "breakdown": {
+          "originalLabel": "原月费",
+          "originalAmount": "Rp 1,500,000",
+          "discountedLabel": "10% 折扣后月费",
+          "discountedAmount": "Rp 1,350,000",
+          "annualTotalLabel": "12 个月预付合计",
+          "annualTotalAmount": "Rp 16,200,000",
+          "savingsLabel": "总折扣额",
+          "savingsAmount": "Rp 1,800,000"
+        }
+      }
+    },
+    "invoices": {
+      "title": "发票 / 付款历史",
+      "subtitle": "区分月度预付发票与年终结算预付发票进行查看。",
+      "downloadAll": "全部下载",
+      "columns": {
+        "number": "发票号",
+        "date": "开票日期",
+        "item": "项目",
+        "amount": "金额",
+        "status": "状态",
+        "method": "付款方式",
+        "receipt": "收据"
+      },
+      "statusPaid": "已付款",
+      "downloadCta": "下载",
+      "rows": {
+        "basic": {
+          "number": "INV-202604-001",
+          "date": "2026-04-01",
+          "item": "Basic 月度 2026年4月预付",
+          "amount": "Rp 1,500,000",
+          "method": "Bank Transfer"
+        },
+        "umkm": {
+          "number": "INV-202604-CLS",
+          "date": "2026-04-05",
+          "item": "UMKM 年终结算 2025归属预付",
+          "amount": "Rp 2,500,000",
+          "method": "Bank Transfer"
+        }
+      }
+    }
   }
 }

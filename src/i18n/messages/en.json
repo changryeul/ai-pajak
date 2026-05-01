@@ -209,7 +209,8 @@
     "switchRole": "Switch to {role}",
     "filingStatus": "Filing Status",
     "idBillingIssue": "ID Billing Issuance",
-    "ebupotIssue": "Ebupot/A1 Issuance",
+    "ebupotIssue": "E-bupot 1721 A1 & SPT Tahunan Badan",
+    "sptGeneration": "Generate SPT Return",
     "closingWork": "Year-end Closing",
     "taxHistory": "Filing History",
     "taxReport": "Tax Report",
@@ -217,6 +218,7 @@
     "taxCalculator": "Tax Forecast / Calculator",
     "notifications": "Notifications",
     "security": "Security",
+    "securityPassword": "Security (Change Password)",
     "filingManagement": "Filing Management",
     "closingWorkLabel": "Year-end Closing"
   },
@@ -1446,7 +1448,7 @@
     "clientReportDesc": "Create comprehensive tax analysis reports for your clients",
     "pph21BulkTitle": "PPh 21 Bulk Calculator",
     "pph21BulkDesc": "Calculate PPh 21 for all employees at once",
-    "ebupotTitle": "Bulk e-Bupot 1721-A1",
+    "ebupotTitle": "Generate e-Bupot 1721-A1 & SPT Tahunan Badan",
     "ecommerceTitle": "E-commerce Import",
     "tpTitle": "Transfer Pricing Analysis",
     "tpAnalyze": "TP Analysis",
@@ -6258,5 +6260,709 @@
     "submitBtn": "Submit Changes",
     "submitSuccess": "Your changes were submitted. The consultant will re-check and request approval.",
     "submitFailed": "Submit failed"
+  },
+  "integrationsPage": {
+    "pageTitle": "Integrations",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "1. Current step",
+    "steps": {
+      "coretax": "Coretax",
+      "accounting": "Accounting SW",
+      "banking": "Bank",
+      "sync": "Data sync"
+    },
+    "heroLabel": "Integrations",
+    "heroTitle": "Coretax · Accounting Software · Bank Platform Integration",
+    "heroSubtitle": "Synchronize Coretax filing status, accounting data, bank transactions, invoices, and payroll into AI Pajak to automate monthly and annual filings.",
+    "statusCards": {
+      "coretax": {
+        "title": "Coretax",
+        "sub": "Filing/Payment status",
+        "value": "Ready"
+      },
+      "accounting": {
+        "title": "Accounting SW",
+        "sub": "Accurate / Jurnal",
+        "value": "0 connected"
+      },
+      "banking": {
+        "title": "Bank account",
+        "sub": "Bank Feed",
+        "value": "Disconnected"
+      },
+      "excel": {
+        "title": "Excel/CSV",
+        "sub": "Template upload",
+        "value": "Available"
+      }
+    },
+    "tabs": {
+      "systems": "Integration systems",
+      "sync": "Data sync",
+      "mapping": "Mapping config",
+      "logs": "Sync logs"
+    },
+    "statusBadge": {
+      "ready": "Ready",
+      "disconnected": "Disconnected",
+      "available": "Available"
+    },
+    "syncDataLabel": "Synced data",
+    "requirementsLabel": "Requirements",
+    "comingSoon": "This tab will be available soon.",
+    "cta": {
+      "connect": "Connect",
+      "manage": "Manage"
+    },
+    "cards": {
+      "coretax": {
+        "title": "Coretax / DJP",
+        "subtitle": "Online",
+        "headline": "Sync ID Billing, NTPN, BPE, SPT Masa/Tahunan, e-Bupot/A1, PPN data",
+        "extraBadge": "Phased API/RPA support",
+        "sync": [
+          "NPWP/NITKU lookup",
+          "Issue/lookup ID Billing",
+          "NTPN payment check",
+          "BPE/filing status",
+          "Send SPT Masa/Tahunan",
+          "Pull e-Bupot/A1 data"
+        ],
+        "reqs": [
+          "Company NPWP/NITKU",
+          "Coretax user privileges",
+          "Digital signature/cert",
+          "Customer consent",
+          "Permission scope"
+        ]
+      },
+      "accurate": {
+        "title": "Accurate Online",
+        "headline": "Auto-sync employees, payroll, invoices, counterparties, and financial statements",
+        "sync": [
+          "Employees/payroll sync",
+          "Sales/purchase invoices",
+          "Counterparty master",
+          "Financial statements",
+          "Chart of accounts mapping"
+        ],
+        "reqs": [
+          "API Key/OAuth",
+          "Company DB selection",
+          "Account mapping",
+          "Sync schedule"
+        ]
+      },
+      "jurnal": {
+        "title": "Jurnal by Mekari",
+        "headline": "Sync accounting, counterparties, invoices, P&L, and balance sheet",
+        "sync": [
+          "Invoice sync",
+          "Counterparty sync",
+          "COA mapping",
+          "Financial statements",
+          "Evidence attachment sync"
+        ],
+        "reqs": [
+          "Mekari account access",
+          "API/OAuth connection",
+          "Data access scope",
+          "Tax account mapping"
+        ]
+      },
+      "banking": {
+        "title": "Open Banking /",
+        "subtitle": "Bank Feed",
+        "headline": "Auto-aggregate bank deposits and withdrawals from BCA, Mandiri, BNI, BRI",
+        "sync": [
+          "Bank transaction collection",
+          "Auto-classify sales receipts",
+          "Auto-classify expenses",
+          "NTPN payment matching",
+          "Unidentified flow alerts"
+        ],
+        "reqs": [
+          "Bank account access",
+          "Per-account purpose",
+          "Transaction history access",
+          "Auto-classification rule approval"
+        ]
+      },
+      "excel": {
+        "title": "Excel / CSV Import",
+        "headline": "Collect payroll, transactions, inventory, fixed asset data via templates before integration",
+        "sync": [
+          "Payroll template",
+          "Sales/purchase template",
+          "Inventory template",
+          "Fixed asset template",
+          "Counterparty template"
+        ],
+        "reqs": [
+          "Standard templates",
+          "Auto column mapping",
+          "Duplicate validation",
+          "Upload history retained"
+        ]
+      }
+    },
+    "syncTab": {
+      "title": "Data sync tasks",
+      "subtitle": "Pull required data from connected systems and apply to PPh21, PPh23, PPN, year-end closing, and filing history.",
+      "syncCta": "Sync",
+      "lookupCta": "Fetch",
+      "statusCta": "Check status",
+      "tasks": {
+        "employees": {
+          "title": "Employee sync",
+          "source": "Accurate / Jurnal → PPh21",
+          "desc": "Employee name, NPWP/NIK, employment type, base salary data"
+        },
+        "payroll": {
+          "title": "Payroll sync",
+          "source": "Accounting SW → PPh21 calculation",
+          "desc": "Monthly salary, allowances, BPJS, benefits mapped to PPh21"
+        },
+        "invoices": {
+          "title": "Invoice sync",
+          "source": "Accurate / Jurnal → PPh23 / PPN",
+          "desc": "Sales/purchase invoices, Faktur Pajak, counterparty info"
+        },
+        "bank": {
+          "title": "Bank transaction sync",
+          "source": "Open Banking → Financials / VAT / NTPN",
+          "desc": "Auto-classify deposits/withdrawals, match payments, flag unidentified items"
+        },
+        "financials": {
+          "title": "Financial statements lookup",
+          "source": "Accounting SW → Year-end closing",
+          "desc": "Pull BS/PL/COA and validate closing financial statements"
+        },
+        "coretax": {
+          "title": "Coretax status sync",
+          "source": "Coretax → Filing history",
+          "desc": "Reflect ID Billing, NTPN, BPE, and filing status into AI Pajak history"
+        }
+      }
+    },
+    "mappingTab": {
+      "title": "Data mapping rules",
+      "subtitle": "Map accounting chart of accounts, bank descriptions, and vendor master to AI Pajak tax items.",
+      "columns": {
+        "source": "Source data",
+        "target": "AI Pajak field",
+        "purpose": "Purpose",
+        "action": "Action"
+      },
+      "editCta": "Edit",
+      "footer": "Mapping rules apply automatically to repeated uploads and synced data. The same vendor, bank description, or account is auto-classified in subsequent filings.",
+      "rows": {
+        "salesRev": {
+          "source": "Accounting COA: Sales Revenue",
+          "target": "AI Pajak: Sales",
+          "purpose": "PPN / Year-end / UMKM revenue cap"
+        },
+        "salaryExp": {
+          "source": "Accounting COA: Salary Expense",
+          "target": "AI Pajak: Salary",
+          "purpose": "PPh21 / Employee benefit assessment"
+        },
+        "rentExp": {
+          "source": "Accounting COA: Rent Expense",
+          "target": "AI Pajak: Rent",
+          "purpose": "PPh4(2) / Expense validation"
+        },
+        "taxPayment": {
+          "source": "Bank Description: Tax Payment",
+          "target": "AI Pajak: NTPN candidate",
+          "purpose": "Auto-match payment evidence"
+        },
+        "vendorKbli": {
+          "source": "Vendor Master: KBLI/Certificate",
+          "target": "AI Pajak: Vendor tax profile",
+          "purpose": "PPh23/4(2)/15/22/26 assessment"
+        }
+      }
+    },
+    "logsTab": {
+      "title": "Sync logs",
+      "subtitle": "Track sync status, errors, expired credentials, and pending approvals for each connected system.",
+      "columns": {
+        "time": "Time",
+        "system": "System",
+        "event": "Event",
+        "result": "Result"
+      },
+      "results": {
+        "done": "Done",
+        "ready": "Ready",
+        "pending": "Pending approval",
+        "attention": "Attention"
+      },
+      "events": {
+        "excelPayroll": "Payroll template upload",
+        "coretaxIdBilling": "ID Billing status lookup",
+        "bankConnect": "BCA account link request",
+        "accurateMapping": "Chart of accounts mapping check"
+      }
+    }
+  },
+  "securityPage": {
+    "pageTitle": "Security (Change password)",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "1. Current step",
+    "steps": {
+      "password": "Password",
+      "twoFactor": "2-step verification",
+      "recentLogin": "Recent logins"
+    },
+    "statusCards": {
+      "password": {
+        "title": "Password",
+        "sub": "Last changed",
+        "daysAgo": "{days} days ago",
+        "never": "No change yet"
+      },
+      "twoFactor": {
+        "title": "2-step verification",
+        "sub": "Account protection",
+        "on": "On",
+        "off": "Off"
+      },
+      "recentLogin": {
+        "title": "Recent logins",
+        "sub": "Items to review",
+        "count": "{count} item(s)",
+        "none": "0"
+      }
+    },
+    "changePassword": {
+      "title": "Change password",
+      "subtitle": "Rotate to a strong password regularly. Minimum 8 characters recommended.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "helper": "Mix letters, numbers, and special characters to strengthen security.",
+      "cta": "Change password",
+      "saving": "Saving..."
+    },
+    "twoFactor": {
+      "title": "2-step verification",
+      "subtitle": "Require an authenticator app or email code at sign-in for extra security.",
+      "badgeOn": "On",
+      "badgeOff": "Off",
+      "appTitle": "Authenticator app",
+      "appDesc": "Generate OTP using Google Authenticator, Microsoft Authenticator, etc.",
+      "appCta": "Set up authenticator",
+      "appCtaActive": "Reconfigure",
+      "backupTitle": "Backup codes",
+      "backupDesc": "Issue backup codes to use if your phone is lost.",
+      "backupCta": "View backup codes",
+      "disableCta": "Turn off 2-step verification",
+      "verifyTitle": "Verify code",
+      "verifyDesc": "Enter the 6-digit code shown in your authenticator app to finish enrollment.",
+      "verifyPlaceholder": "000000",
+      "verifyCta": "Verify",
+      "cancelCta": "Cancel",
+      "manualKey": "Manual key",
+      "backupNotAvailable": "Backup codes will be available soon."
+    },
+    "errors": {
+      "allRequired": "Please fill in all password fields.",
+      "mismatch": "New passwords do not match.",
+      "tooShort": "Password must be at least 8 characters.",
+      "generic": "Failed to complete the request."
+    },
+    "toasts": {
+      "passwordChanged": "Password changed.",
+      "twoFactorEnabled": "2-step verification is enabled.",
+      "twoFactorDisabled": "2-step verification turned off."
+    },
+    "recentLogin": {
+      "title": "Recent login activity",
+      "subtitle": "Review recent devices, locations, and IPs, and revoke suspicious sessions.",
+      "columns": {
+        "time": "Time",
+        "device": "Device",
+        "location": "Location",
+        "ip": "IP",
+        "status": "Status",
+        "action": "Action"
+      },
+      "status": {
+        "ok": "Normal",
+        "attention": "Review"
+      },
+      "cta": {
+        "endSession": "End session",
+        "notMe": "Not me"
+      },
+      "empty": "No login activity to display."
+    }
+  },
+  "billingPage": {
+    "pageTitle": "Billing",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "1. Current step",
+    "steps": {
+      "monthlyFee": "Monthly fee",
+      "annualFee": "Year-end fee",
+      "prepayment": "Prepayment",
+      "receipt": "Receipts"
+    },
+    "notice": {
+      "title": "Prepayment policy",
+      "body": "All AI Pajak services require prepayment. Monthly operations fees and year-end closing fees are separate products billed independently. Pro and above are tax-operations automation systems, not simple filing services."
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "Monthly plan",
+        "sub": "Current selection",
+        "value": "Basic Monthly"
+      },
+      "paid": {
+        "title": "Monthly prepayment",
+        "sub": "Prepay 1 month",
+        "value": "Rp 1,500,000",
+        "subAnnual": "12-month total",
+        "valueAnnual": "Rp 16,200,000"
+      },
+      "annual": {
+        "title": "Year-end product",
+        "sub": "Selected separately",
+        "value": "UMKM year-end"
+      },
+      "total": {
+        "title": "Total prepayment due",
+        "sub": "Monthly + year-end",
+        "value": "Rp 4,000,000",
+        "valueAnnual": "Rp 18,700,000"
+      }
+    },
+    "monthlyPlans": {
+      "title": "Choose monthly plan",
+      "subtitle": "Pricing for monthly operations: filings, history, reports, and counterparty assessment. Pro and above are priced as internal tax operations replacement, not against ad-hoc consulting fees. Year-end closing is not included.",
+      "toggleMonthly": "Monthly prepay",
+      "toggleAnnual": "12 months prepay 10% off",
+      "selected": "Selected",
+      "criteria": "Eligibility",
+      "plans": {
+        "umkm": {
+          "name": "UMKM Monthly",
+          "sub": "Small entities / Final Tax focus",
+          "price": "Rp 750,000",
+          "term": "Prepay 1 month",
+          "criteria": [
+            "Up to 5 employees",
+            "Up to 10 withholding txns/month",
+            "Up to 50 uploads/txns/month",
+            "No complex or cross-border txns"
+          ],
+          "features": [
+            "Monthly filing dashboard",
+            "ID Billing requests",
+            "Basic reminders",
+            "Basic AI risk comments"
+          ],
+          "annualPrice": "Rp 8,100,000",
+          "priceOriginal": "Rp 750,000",
+          "priceDiscounted": "Rp 675,000",
+          "annualSavings": "Rp 900,000"
+        },
+        "basic": {
+          "name": "Basic Monthly",
+          "sub": "Standard corporate tax operations",
+          "price": "Rp 1,500,000",
+          "term": "Prepay 1 month",
+          "criteria": [
+            "Up to 30 employees",
+            "Up to 30 withholding txns/month",
+            "Up to 300 AP/AR txns/month",
+            "Standard PPh21/23/25/PPN focus",
+            "TP / cross-border reviewed separately"
+          ],
+          "features": [
+            "PPh21/23/25/PPN management",
+            "Filing history / BPE / NTPN archive",
+            "Counterparty withholding assessment",
+            "Monthly tax report"
+          ],
+          "annualPrice": "Rp 16,200,000",
+          "priceOriginal": "Rp 1,500,000",
+          "priceDiscounted": "Rp 1,350,000",
+          "annualSavings": "Rp 1,800,000"
+        },
+        "pro": {
+          "name": "Pro Monthly",
+          "sub": "Beyond ad-hoc consulting — monthly operations platform",
+          "price": "Rp 2,500,000",
+          "term": "Prepay 1 month",
+          "criteria": [
+            "Up to 100 employees",
+            "Up to 150 withholding txns/month",
+            "Up to 1,500 AP/AR txns/month",
+            "Cross-border / related-party monitoring",
+            "Advanced AI analysis quota"
+          ],
+          "features": [
+            "Everything in Basic",
+            "TP condition monitoring",
+            "AI anomaly detection",
+            "Advanced tax reports",
+            "Auto BPE/NTPN archive",
+            "Priority handling"
+          ],
+          "annualPrice": "Rp 27,000,000",
+          "priceOriginal": "Rp 2,500,000",
+          "priceDiscounted": "Rp 2,250,000",
+          "annualSavings": "Rp 3,000,000"
+        },
+        "enterprise": {
+          "name": "Enterprise Custom",
+          "sub": "In-house tax team replacement + usage-based billing",
+          "price": "Rp 3,500,000",
+          "term": "Prepay 1 month",
+          "criteria": [
+            "Over 100 employees",
+            "Over 150 withholding txns/month",
+            "Over 1,500 AP/AR txns/month",
+            "Mass document auto-analysis needed",
+            "Base platform fee + usage"
+          ],
+          "features": [
+            "Everything in Pro",
+            "Dedicated processing queue",
+            "Mass payroll/transactions",
+            "Usage-based overage",
+            "SLA / priority support"
+          ],
+          "annualPrice": "Rp 37,800,000",
+          "priceOriginal": "Rp 3,500,000",
+          "priceDiscounted": "Rp 3,150,000",
+          "annualSavings": "Rp 4,200,000"
+        }
+      },
+      "breakdown": {
+        "original": "Original monthly fee",
+        "discounted": "Monthly fee with 10% off",
+        "savings": "Annual savings"
+      },
+      "annualTerm": "Total prepay (12 mo)"
+    },
+    "proValue": {
+      "title": "Why Pro+ plans are different",
+      "columns": {
+        "consulting": {
+          "title": "Typical tax consulting",
+          "body": "Filing-only · Customer manages records · Risks handled after the fact"
+        },
+        "pro": {
+          "title": "AI Pajak Pro",
+          "body": "Monthly tax operations, BPE/NTPN archive, counterparty withholding assessment, AI risk alerts in one place"
+        },
+        "enterprise": {
+          "title": "AI Pajak Enterprise",
+          "body": "Replaces an internal tax team — platform fee + transparent usage-based billing"
+        }
+      },
+      "footer": "Basic/Pro/Enterprise tiers are designed by employee count, monthly transaction volume, document auto-analysis volume, and risk monitoring scope. Customers exceeding 100 employees or volume thresholds move to Enterprise Custom and pay overage separately."
+    },
+    "enterpriseFees": {
+      "title": "Enterprise base Rp 3,500,000 + overage billing",
+      "items": {
+        "employee": {
+          "title": "Employee overage",
+          "base": "Includes 100 employees",
+          "overage": "Rp 20,000 per extra employee / month"
+        },
+        "withholding": {
+          "title": "Withholding overage",
+          "base": "Includes 150 txns",
+          "overage": "Rp 10,000 per extra txn / month"
+        },
+        "apar": {
+          "title": "AP/AR overage",
+          "base": "Includes 1,500 txns",
+          "overage": "Rp 1,500 per extra txn / month"
+        },
+        "docs": {
+          "title": "Document auto-analysis overage",
+          "base": "Includes 1,000 pages",
+          "overage": "Rp 1,000 per extra page"
+        }
+      }
+    },
+    "annualPlans": {
+      "title": "Choose year-end plan",
+      "subtitle": "Year-end closing is prepaid separately from the monthly plan. Choose the tier that matches your scope.",
+      "selected": "Selected",
+      "criteria": "Eligibility",
+      "contents": "Included",
+      "plans": {
+        "none": {
+          "name": "No year-end add-on",
+          "sub": "Use the monthly plan only.",
+          "price": "Rp 0",
+          "term": "One-time prepay",
+          "criteria": [
+            "No year-end work included",
+            "Add later if needed"
+          ],
+          "features": [
+            "No year-end work included",
+            "Add later if needed"
+          ]
+        },
+        "umkm": {
+          "name": "UMKM Year-end",
+          "sub": "Final Tax 0.5% year-end closing",
+          "price": "Rp 2,500,000",
+          "term": "One-time prepay",
+          "criteria": [
+            "Annual revenue ≤ Rp 4.8B",
+            "Final Tax 0.5% eligible",
+            "≤ 2 bank accounts",
+            "≤ 500 annual txns",
+            "≤ 10 employees",
+            "Simple inventory/fixed assets",
+            "No cross-border / related-party"
+          ],
+          "features": [
+            "Standard financial statements",
+            "Signed copy upload management",
+            "UMKM Final Tax calculation",
+            "SPT draft generation",
+            "e-Bupot 1721 A1 issuance"
+          ]
+        },
+        "pph25": {
+          "name": "PPh25 Standard Year-end",
+          "sub": "Standard 22% corporate income tax year-end",
+          "price": "Rp 7,500,000",
+          "term": "One-time prepay",
+          "criteria": [
+            "Revenue > Rp 4.8B or UMKM grace ended",
+            "≤ 3 bank accounts",
+            "≤ 1,000 AP/AR txns/year",
+            "≤ 50 employees",
+            "≤ 100 withholding/credit records",
+            "≤ 50 fixed assets",
+            "≤ 100 inventory SKUs",
+            "No cross-border / related-party / TP issues",
+            "No audit-report attachment"
+          ],
+          "features": [
+            "Financial statements",
+            "Tax adjustments",
+            "Tax credit handling",
+            "PPh29/PPh25 calculation",
+            "SPT draft generation",
+            "e-Bupot 1721 A1 + SPT Tahunan Badan"
+          ]
+        },
+        "complex": {
+          "name": "Complex-structure Year-end",
+          "sub": "Foreign-owned, related-party, cross-border, or high-volume entities",
+          "price": "Rp 15,000,000",
+          "term": "One-time prepay",
+          "criteria": [
+            "Exceeds PPh25 standard",
+            "Foreign shareholder or cross-border",
+            "Related-party transactions",
+            "PPh26 / DGT Form / Treaty review",
+            "≤ 6 bank accounts",
+            "≤ 3,000 AP/AR txns/year",
+            "≤ 100 employees",
+            "≤ 150 fixed assets",
+            "≤ 500 inventory SKUs",
+            "TP Doc need assessment included — actual TP Doc separate"
+          ],
+          "features": [
+            "Everything in PPh25",
+            "TP condition review",
+            "Cross-border review",
+            "AI risk report",
+            "Priority handling"
+          ]
+        }
+      }
+    },
+    "annualNotice": {
+      "title": "Year-end plan selection guide",
+      "body1": "PPh25 standard year-end is a fixed price within the standard scope. If you have cross-border transactions, related-party dealings, high transaction volume, complex inventory/fixed assets, or Treaty review needs, choose Complex-structure Year-end.",
+      "body2": "If even the Complex-structure Year-end exceeds the criteria above, or you need actual TP Doc preparation, tax-audit response, or audit-report preparation, those will be quoted as separate services."
+    },
+    "payment": {
+      "method": {
+        "title": "Payment method",
+        "subtitle": "Manage your active payment method and auto-pay. Auto-pay is also charged as prepayment before service starts.",
+        "cardName": "Bank Transfer / Virtual Account",
+        "cardDetail": "BCA VA **** 9021",
+        "defaultBadge": "Default method",
+        "autoLabel": "Use auto-prepay for monthly plan",
+        "changeCta": "Change method",
+        "manualCta": "Pay manually"
+      },
+      "summary": {
+        "title": "Prepayment summary",
+        "subtitle": "Monthly fees and year-end fees are calculated separately.",
+        "monthlyLabel": "Basic Monthly",
+        "monthlyTerm": "Prepay 1 month basis",
+        "monthlyAmount": "Rp 1,500,000",
+        "annualLabel": "UMKM Year-end",
+        "annualAmount": "Rp 2,500,000",
+        "ppnLabel": "PPN",
+        "ppnAmount": "Separate",
+        "totalLabel": "Total due",
+        "totalAmount": "Rp 4,000,000",
+        "notice": "After payment, you can use the chosen monthly service and year-end workflow. While unpaid, filing submission and year-end progress are restricted.",
+        "quoteCta": "Generate quote",
+        "payCta": "Proceed to prepay",
+        "monthlyAmountAnnual": "Rp 16,200,000",
+        "totalAmountAnnual": "Rp 18,700,000",
+        "breakdown": {
+          "originalLabel": "Original monthly fee",
+          "originalAmount": "Rp 1,500,000",
+          "discountedLabel": "Monthly fee with 10% off",
+          "discountedAmount": "Rp 1,350,000",
+          "annualTotalLabel": "Total prepay (12 mo)",
+          "annualTotalAmount": "Rp 16,200,000",
+          "savingsLabel": "Total discount",
+          "savingsAmount": "Rp 1,800,000"
+        }
+      }
+    },
+    "invoices": {
+      "title": "Invoices / payment history",
+      "subtitle": "View monthly and year-end prepayment invoices side by side.",
+      "downloadAll": "Download all",
+      "columns": {
+        "number": "Invoice #",
+        "date": "Date",
+        "item": "Item",
+        "amount": "Amount",
+        "status": "Status",
+        "method": "Method",
+        "receipt": "Receipt"
+      },
+      "statusPaid": "Paid",
+      "downloadCta": "Download",
+      "rows": {
+        "basic": {
+          "number": "INV-202604-001",
+          "date": "2026-04-01",
+          "item": "Basic Monthly — April 2026 prepay",
+          "amount": "Rp 1,500,000",
+          "method": "Bank Transfer"
+        },
+        "umkm": {
+          "number": "INV-202604-CLS",
+          "date": "2026-04-05",
+          "item": "UMKM Year-end — FY2025 prepay",
+          "amount": "Rp 2,500,000",
+          "method": "Bank Transfer"
+        }
+      }
+    }
   }
 }

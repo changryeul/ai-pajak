@@ -209,7 +209,8 @@
     "switchRole": "Beralih ke {role}",
     "filingStatus": "Status Pelaporan",
     "idBillingIssue": "Penerbitan ID Billing",
-    "ebupotIssue": "Penerbitan Ebupot/A1",
+    "ebupotIssue": "E-bupot 1721 A1 & SPT Tahunan Badan",
+    "sptGeneration": "Buat SPT Tahunan",
     "closingWork": "Tutup Buku Tahunan",
     "taxHistory": "Riwayat Pelaporan",
     "taxReport": "Laporan Pajak",
@@ -217,6 +218,7 @@
     "taxCalculator": "Prediksi / Kalkulator Pajak",
     "notifications": "Notifikasi",
     "security": "Keamanan",
+    "securityPassword": "Keamanan (Ubah Kata Sandi)",
     "filingManagement": "Manajemen Pelaporan",
     "closingWorkLabel": "Tutup Buku Tahunan"
   },
@@ -1446,7 +1448,7 @@
     "clientReportDesc": "Buat laporan analisis pajak komprehensif untuk klien Anda",
     "pph21BulkTitle": "PPh 21 Bulk Calculator",
     "pph21BulkDesc": "Hitung PPh 21 untuk seluruh karyawan sekaligus",
-    "ebupotTitle": "Bulk e-Bupot 1721-A1",
+    "ebupotTitle": "Buat e-Bupot 1721-A1 & SPT Tahunan Badan",
     "ecommerceTitle": "Import E-commerce",
     "tpTitle": "Transfer Pricing Analysis",
     "tpAnalyze": "Analisis TP",
@@ -6258,5 +6260,709 @@
     "submitBtn": "Kirim Perubahan",
     "submitSuccess": "Perubahan Anda telah dikirim. Konsultan akan memeriksa ulang dan mengajukan persetujuan.",
     "submitFailed": "Gagal mengirim"
+  },
+  "integrationsPage": {
+    "pageTitle": "Integrasi",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "1. Tahap saat ini",
+    "steps": {
+      "coretax": "Coretax",
+      "accounting": "SW Akuntansi",
+      "banking": "Bank",
+      "sync": "Sinkronisasi data"
+    },
+    "heroLabel": "Integrations",
+    "heroTitle": "Integrasi Coretax · Software Akuntansi · Platform Bank",
+    "heroSubtitle": "Sinkronkan status SPT Coretax, data akuntansi, mutasi bank, faktur, dan data gaji ke AI Pajak untuk mengotomatisasi pelaporan bulanan dan tahunan.",
+    "statusCards": {
+      "coretax": {
+        "title": "Coretax",
+        "sub": "Status SPT/Pembayaran",
+        "value": "Siap integrasi"
+      },
+      "accounting": {
+        "title": "SW Akuntansi",
+        "sub": "Accurate / Jurnal",
+        "value": "0 terhubung"
+      },
+      "banking": {
+        "title": "Rekening Bank",
+        "sub": "Bank Feed",
+        "value": "Belum terhubung"
+      },
+      "excel": {
+        "title": "Excel/CSV",
+        "sub": "Unggah template",
+        "value": "Tersedia"
+      }
+    },
+    "tabs": {
+      "systems": "Sistem integrasi",
+      "sync": "Sinkronisasi data",
+      "mapping": "Konfigurasi mapping",
+      "logs": "Log sinkronisasi"
+    },
+    "statusBadge": {
+      "ready": "Siap integrasi",
+      "disconnected": "Belum terhubung",
+      "available": "Tersedia"
+    },
+    "syncDataLabel": "Data tersinkron",
+    "requirementsLabel": "Persyaratan",
+    "comingSoon": "Tab ini akan tersedia segera.",
+    "cta": {
+      "connect": "Hubungkan",
+      "manage": "Kelola"
+    },
+    "cards": {
+      "coretax": {
+        "title": "Coretax / DJP",
+        "subtitle": "Online",
+        "headline": "Integrasi data ID Billing, NTPN, BPE, SPT Masa/Tahunan, e-Bupot/A1, PPN",
+        "extraBadge": "Dukungan API/RPA bertahap",
+        "sync": [
+          "Cek NPWP/NITKU",
+          "Pembuatan/cek ID Billing",
+          "Verifikasi pembayaran NTPN",
+          "Status BPE/SPT",
+          "Kirim SPT Masa/Tahunan",
+          "Tarik data e-Bupot/A1"
+        ],
+        "reqs": [
+          "NPWP/NITKU badan",
+          "Hak akses Coretax",
+          "Tanda tangan digital/sertifikat",
+          "Persetujuan klien",
+          "Konfigurasi cakupan akses"
+        ]
+      },
+      "accurate": {
+        "title": "Accurate Online",
+        "headline": "Sinkronisasi otomatis karyawan, gaji, faktur, lawan transaksi, dan laporan keuangan",
+        "sync": [
+          "Sinkron karyawan/gaji",
+          "Faktur penjualan·pembelian",
+          "Master lawan transaksi",
+          "Laporan keuangan",
+          "Pemetaan COA"
+        ],
+        "reqs": [
+          "API Key/OAuth",
+          "Pilih DB perusahaan",
+          "Pemetaan akun",
+          "Jadwal sinkronisasi"
+        ]
+      },
+      "jurnal": {
+        "title": "Jurnal by Mekari",
+        "headline": "Integrasi akuntansi, lawan transaksi, faktur, laba rugi, dan neraca",
+        "sync": [
+          "Sinkron faktur",
+          "Sinkron lawan transaksi",
+          "Pemetaan COA",
+          "Laporan keuangan",
+          "Sinkron lampiran bukti"
+        ],
+        "reqs": [
+          "Hak akun Mekari",
+          "Koneksi API/OAuth",
+          "Persetujuan cakupan data",
+          "Pemetaan akun pajak"
+        ]
+      },
+      "banking": {
+        "title": "Open Banking /",
+        "subtitle": "Bank Feed",
+        "headline": "Agregasi otomatis mutasi rekening BCA, Mandiri, BNI, BRI dll.",
+        "sync": [
+          "Pengumpulan mutasi bank",
+          "Klasifikasi otomatis penerimaan",
+          "Klasifikasi otomatis pengeluaran",
+          "Pencocokan pembayaran NTPN",
+          "Notifikasi mutasi belum terverifikasi"
+        ],
+        "reqs": [
+          "Hak akses rekening",
+          "Pengaturan tujuan rekening",
+          "Hak akses riwayat mutasi",
+          "Persetujuan aturan klasifikasi"
+        ]
+      },
+      "excel": {
+        "title": "Excel / CSV Import",
+        "headline": "Kumpulkan data gaji, transaksi, inventaris, aset tetap via template sebelum integrasi penuh",
+        "sync": [
+          "Template gaji",
+          "Template penjualan·pembelian",
+          "Template inventaris",
+          "Template aset tetap",
+          "Template lawan transaksi"
+        ],
+        "reqs": [
+          "Pakai template standar",
+          "Pemetaan kolom otomatis",
+          "Validasi duplikat",
+          "Riwayat unggah tersimpan"
+        ]
+      }
+    },
+    "syncTab": {
+      "title": "Tugas sinkronisasi data",
+      "subtitle": "Tarik data dari sistem terhubung dan terapkan ke PPh21, PPh23, PPN, tutup buku, serta riwayat pelaporan.",
+      "syncCta": "Sinkron",
+      "lookupCta": "Ambil",
+      "statusCta": "Cek status",
+      "tasks": {
+        "employees": {
+          "title": "Sinkron karyawan",
+          "source": "Accurate / Jurnal → PPh21",
+          "desc": "Nama, NPWP/NIK, tipe karyawan, dasar gaji"
+        },
+        "payroll": {
+          "title": "Sinkron gaji",
+          "source": "Accounting SW → Hitung PPh21",
+          "desc": "Gaji bulanan, tunjangan, BPJS, benefit dipetakan ke PPh21"
+        },
+        "invoices": {
+          "title": "Sinkron faktur",
+          "source": "Accurate / Jurnal → PPh23 / PPN",
+          "desc": "Faktur penjualan/pembelian, Faktur Pajak, info lawan transaksi"
+        },
+        "bank": {
+          "title": "Sinkron transaksi bank",
+          "source": "Open Banking → Lap. Keuangan / VAT / NTPN",
+          "desc": "Klasifikasi otomatis mutasi, pencocokan pembayaran, tandai transaksi belum teridentifikasi"
+        },
+        "financials": {
+          "title": "Tarik laporan keuangan",
+          "source": "Accounting SW → Tutup buku",
+          "desc": "Tarik BS/PL/COA dan validasi laporan keuangan tutup buku"
+        },
+        "coretax": {
+          "title": "Sinkron status Coretax",
+          "source": "Coretax → Riwayat pelaporan",
+          "desc": "Refleksikan ID Billing, NTPN, BPE, dan status SPT ke riwayat AI Pajak"
+        }
+      }
+    },
+    "mappingTab": {
+      "title": "Konfigurasi mapping data",
+      "subtitle": "Petakan COA akuntansi, deskripsi bank, dan master vendor ke item pajak AI Pajak.",
+      "columns": {
+        "source": "Data sumber",
+        "target": "Item AI Pajak",
+        "purpose": "Tujuan",
+        "action": "Aksi"
+      },
+      "editCta": "Edit",
+      "footer": "Aturan mapping berlaku otomatis untuk unggahan berulang dan data tersinkron. Vendor, deskripsi bank, atau akun yang sama akan diklasifikasikan otomatis pada laporan berikutnya.",
+      "rows": {
+        "salesRev": {
+          "source": "Accounting COA: Sales Revenue",
+          "target": "AI Pajak: Penjualan",
+          "purpose": "PPN / Tutup buku / Batas omzet UMKM"
+        },
+        "salaryExp": {
+          "source": "Accounting COA: Salary Expense",
+          "target": "AI Pajak: Gaji",
+          "purpose": "PPh21 / Penentuan Employee Benefit"
+        },
+        "rentExp": {
+          "source": "Accounting COA: Rent Expense",
+          "target": "AI Pajak: Sewa",
+          "purpose": "PPh4(2) / Validasi biaya"
+        },
+        "taxPayment": {
+          "source": "Bank Description: Tax Payment",
+          "target": "AI Pajak: Kandidat NTPN",
+          "purpose": "Pencocokan otomatis bukti bayar"
+        },
+        "vendorKbli": {
+          "source": "Vendor Master: KBLI/Certificate",
+          "target": "AI Pajak: Profil pajak vendor",
+          "purpose": "Penentuan PPh23/4(2)/15/22/26"
+        }
+      }
+    },
+    "logsTab": {
+      "title": "Log sinkronisasi",
+      "subtitle": "Pantau status sinkronisasi, error, kredensial kedaluwarsa, dan persetujuan tertunda di tiap sistem terhubung.",
+      "columns": {
+        "time": "Waktu",
+        "system": "Sistem",
+        "event": "Event",
+        "result": "Hasil"
+      },
+      "results": {
+        "done": "Selesai",
+        "ready": "Siap integrasi",
+        "pending": "Menunggu persetujuan",
+        "attention": "Perlu ditinjau"
+      },
+      "events": {
+        "excelPayroll": "Unggah template gaji",
+        "coretaxIdBilling": "Cek status ID Billing",
+        "bankConnect": "Permintaan koneksi rekening BCA",
+        "accurateMapping": "Validasi pemetaan akun"
+      }
+    }
+  },
+  "securityPage": {
+    "pageTitle": "Keamanan (Ubah kata sandi)",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "1. Tahap saat ini",
+    "steps": {
+      "password": "Kata sandi",
+      "twoFactor": "Verifikasi 2 langkah",
+      "recentLogin": "Login terakhir"
+    },
+    "statusCards": {
+      "password": {
+        "title": "Kata sandi",
+        "sub": "Terakhir diubah",
+        "daysAgo": "{days} hari lalu",
+        "never": "Belum pernah diubah"
+      },
+      "twoFactor": {
+        "title": "Verifikasi 2 langkah",
+        "sub": "Status proteksi akun",
+        "on": "Aktif",
+        "off": "Nonaktif"
+      },
+      "recentLogin": {
+        "title": "Login terakhir",
+        "sub": "Perlu ditinjau",
+        "count": "{count} item",
+        "none": "0"
+      }
+    },
+    "changePassword": {
+      "title": "Ubah kata sandi",
+      "subtitle": "Ganti secara berkala dengan kata sandi yang kuat. Disarankan minimal 8 karakter.",
+      "current": "Kata sandi saat ini",
+      "new": "Kata sandi baru",
+      "confirm": "Konfirmasi kata sandi baru",
+      "helper": "Kombinasikan huruf, angka, dan karakter spesial untuk meningkatkan keamanan.",
+      "cta": "Ubah kata sandi",
+      "saving": "Menyimpan..."
+    },
+    "twoFactor": {
+      "title": "Verifikasi 2 langkah",
+      "subtitle": "Tambahkan kode dari aplikasi autentikator atau email saat login.",
+      "badgeOn": "Aktif",
+      "badgeOff": "Nonaktif",
+      "appTitle": "Aplikasi autentikator",
+      "appDesc": "Buat OTP dengan Google Authenticator, Microsoft Authenticator, dll.",
+      "appCta": "Atur aplikasi",
+      "appCtaActive": "Konfigurasi ulang",
+      "backupTitle": "Kode cadangan",
+      "backupDesc": "Terbitkan kode cadangan untuk dipakai jika ponsel hilang.",
+      "backupCta": "Lihat kode cadangan",
+      "disableCta": "Matikan verifikasi 2 langkah",
+      "verifyTitle": "Verifikasi kode",
+      "verifyDesc": "Masukkan 6 digit kode dari aplikasi autentikator untuk menyelesaikan pendaftaran.",
+      "verifyPlaceholder": "000000",
+      "verifyCta": "Verifikasi",
+      "cancelCta": "Batal",
+      "manualKey": "Kunci manual",
+      "backupNotAvailable": "Kode cadangan akan tersedia segera."
+    },
+    "errors": {
+      "allRequired": "Isi semua kolom kata sandi.",
+      "mismatch": "Kata sandi baru tidak cocok.",
+      "tooShort": "Kata sandi minimal 8 karakter.",
+      "generic": "Permintaan tidak dapat diproses."
+    },
+    "toasts": {
+      "passwordChanged": "Kata sandi berhasil diubah.",
+      "twoFactorEnabled": "Verifikasi 2 langkah diaktifkan.",
+      "twoFactorDisabled": "Verifikasi 2 langkah dimatikan."
+    },
+    "recentLogin": {
+      "title": "Aktivitas login terbaru",
+      "subtitle": "Tinjau perangkat, lokasi, dan IP yang baru-baru ini mengakses, lalu blokir akses mencurigakan.",
+      "columns": {
+        "time": "Waktu",
+        "device": "Perangkat",
+        "location": "Lokasi",
+        "ip": "IP",
+        "status": "Status",
+        "action": "Aksi"
+      },
+      "status": {
+        "ok": "Normal",
+        "attention": "Perlu ditinjau"
+      },
+      "cta": {
+        "endSession": "Akhiri sesi",
+        "notMe": "Bukan saya"
+      },
+      "empty": "Belum ada riwayat login."
+    }
+  },
+  "billingPage": {
+    "pageTitle": "Tagihan",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "1. Tahap saat ini",
+    "steps": {
+      "monthlyFee": "Biaya bulanan",
+      "annualFee": "Biaya tutup buku",
+      "prepayment": "Pembayaran di muka",
+      "receipt": "Kuitansi"
+    },
+    "notice": {
+      "title": "Kebijakan pembayaran di muka",
+      "body": "Semua layanan AI Pajak memerlukan pembayaran di muka. Biaya operasional bulanan dan tutup buku tahunan adalah produk terpisah dengan tagihan tersendiri. Mulai dari Pro adalah sistem otomatisasi operasional pajak, bukan sekadar layanan pelaporan."
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "Paket bulanan",
+        "sub": "Pilihan saat ini",
+        "value": "Basic Bulanan"
+      },
+      "paid": {
+        "title": "Bayar di muka bulanan",
+        "sub": "Bayar 1 bulan",
+        "value": "Rp 1,500,000",
+        "subAnnual": "Total 12 bulan",
+        "valueAnnual": "Rp 16.200.000"
+      },
+      "annual": {
+        "title": "Produk tutup buku",
+        "sub": "Dipilih terpisah",
+        "value": "Tutup buku UMKM"
+      },
+      "total": {
+        "title": "Total tagihan di muka",
+        "sub": "Bulanan + Tutup buku",
+        "value": "Rp 4,000,000",
+        "valueAnnual": "Rp 18.700.000"
+      }
+    },
+    "monthlyPlans": {
+      "title": "Pilih paket bulanan",
+      "subtitle": "Biaya operasional bulanan: pelaporan, riwayat, laporan, dan penilaian lawan transaksi. Pro ke atas dirancang sebagai pengganti operasional pajak internal, bukan kompetitor jasa konsultasi. Tutup buku tahunan tidak termasuk.",
+      "toggleMonthly": "Bayar bulanan",
+      "toggleAnnual": "Bayar 12 bulan diskon 10%",
+      "selected": "Dipilih",
+      "criteria": "Kriteria",
+      "plans": {
+        "umkm": {
+          "name": "UMKM Bulanan",
+          "sub": "Badan kecil / fokus Final Tax",
+          "price": "Rp 750,000",
+          "term": "Bayar di muka 1 bulan",
+          "criteria": [
+            "Maksimal 5 karyawan",
+            "Maks 10 transaksi withholding/bulan",
+            "Maks 50 unggahan/transaksi per bulan",
+            "Tanpa transaksi kompleks/luar negeri"
+          ],
+          "features": [
+            "Dasbor pelaporan bulanan",
+            "Permintaan ID Billing",
+            "Pengingat dasar",
+            "Komentar risiko AI dasar"
+          ],
+          "annualPrice": "Rp 8.100.000",
+          "priceOriginal": "Rp 750.000",
+          "priceDiscounted": "Rp 675.000",
+          "annualSavings": "Rp 900.000"
+        },
+        "basic": {
+          "name": "Basic Bulanan",
+          "sub": "Operasional pajak korporat standar",
+          "price": "Rp 1,500,000",
+          "term": "Bayar di muka 1 bulan",
+          "criteria": [
+            "Maks 30 karyawan",
+            "Maks 30 transaksi withholding/bulan",
+            "Maks 300 transaksi AP/AR per bulan",
+            "Fokus PPh21/23/25/PPN standar",
+            "TP / lintas negara ditinjau terpisah"
+          ],
+          "features": [
+            "Manajemen PPh21/23/25/PPN",
+            "Arsip riwayat SPT / BPE / NTPN",
+            "Penentuan withholding lawan transaksi",
+            "Laporan pajak bulanan"
+          ],
+          "annualPrice": "Rp 16.200.000",
+          "priceOriginal": "Rp 1.500.000",
+          "priceDiscounted": "Rp 1.350.000",
+          "annualSavings": "Rp 1.800.000"
+        },
+        "pro": {
+          "name": "Pro Bulanan",
+          "sub": "Bukan konsultasi sekali pakai — platform operasional bulanan",
+          "price": "Rp 2,500,000",
+          "term": "Bayar di muka 1 bulan",
+          "criteria": [
+            "Maks 100 karyawan",
+            "Maks 150 transaksi withholding/bulan",
+            "Maks 1.500 transaksi AP/AR per bulan",
+            "Pemantauan lintas negara / pihak terkait",
+            "Kuota analisis AI lanjutan"
+          ],
+          "features": [
+            "Seluruh fitur Basic",
+            "Pemantauan kondisi TP",
+            "Deteksi anomali AI",
+            "Laporan pajak lanjutan",
+            "Arsip otomatis BPE/NTPN",
+            "Prioritas penanganan"
+          ],
+          "annualPrice": "Rp 27.000.000",
+          "priceOriginal": "Rp 2.500.000",
+          "priceDiscounted": "Rp 2.250.000",
+          "annualSavings": "Rp 3.000.000"
+        },
+        "enterprise": {
+          "name": "Enterprise Khusus",
+          "sub": "Pengganti tim pajak internal + tagihan berbasis penggunaan",
+          "price": "Rp 3,500,000",
+          "term": "Bayar di muka 1 bulan",
+          "criteria": [
+            "Lebih dari 100 karyawan",
+            "Lebih dari 150 transaksi withholding/bulan",
+            "Lebih dari 1.500 transaksi AP/AR per bulan",
+            "Analisis otomatis dokumen massal",
+            "Biaya platform dasar + pemakaian"
+          ],
+          "features": [
+            "Seluruh fitur Pro",
+            "Antrian pemrosesan khusus",
+            "Pemrosesan gaji/transaksi massal",
+            "Tagihan over-usage",
+            "Dukungan SLA / prioritas"
+          ],
+          "annualPrice": "Rp 37.800.000",
+          "priceOriginal": "Rp 3.500.000",
+          "priceDiscounted": "Rp 3.150.000",
+          "annualSavings": "Rp 4.200.000"
+        }
+      },
+      "breakdown": {
+        "original": "Biaya bulanan asli",
+        "discounted": "Biaya bulanan diskon 10%",
+        "savings": "Hemat per tahun"
+      },
+      "annualTerm": "Total bayar di muka (12 bulan)"
+    },
+    "proValue": {
+      "title": "Nilai inti paket Pro ke atas",
+      "columns": {
+        "consulting": {
+          "title": "Konsultasi pajak umum",
+          "body": "Fokus pelaporan · Data dikelola klien · Risiko ditangani belakangan"
+        },
+        "pro": {
+          "title": "AI Pajak Pro",
+          "body": "Operasional bulanan, arsip BPE/NTPN, penilaian withholding lawan transaksi, peringatan risiko AI dalam satu tempat"
+        },
+        "enterprise": {
+          "title": "AI Pajak Enterprise",
+          "body": "Pengganti tim pajak internal — biaya platform + tagihan berbasis penggunaan yang transparan"
+        }
+      },
+      "footer": "Tier Basic/Pro/Enterprise dirancang berdasarkan jumlah karyawan, volume transaksi bulanan, volume analisis otomatis dokumen, dan cakupan pemantauan risiko. Pelanggan di atas 100 karyawan atau melebihi ambang volume berpindah ke Enterprise Khusus dan dikenakan tagihan over-usage terpisah."
+    },
+    "enterpriseFees": {
+      "title": "Biaya dasar Enterprise Rp 3.500.000 + tagihan kelebihan pemakaian",
+      "items": {
+        "employee": {
+          "title": "Kelebihan karyawan",
+          "base": "Termasuk 100 karyawan",
+          "overage": "Rp 20.000 per karyawan tambahan / bulan"
+        },
+        "withholding": {
+          "title": "Kelebihan withholding",
+          "base": "Termasuk 150 transaksi",
+          "overage": "Rp 10.000 per transaksi tambahan / bulan"
+        },
+        "apar": {
+          "title": "Kelebihan AP/AR",
+          "base": "Termasuk 1.500 transaksi",
+          "overage": "Rp 1.500 per transaksi tambahan / bulan"
+        },
+        "docs": {
+          "title": "Kelebihan analisis dokumen",
+          "base": "Termasuk 1.000 halaman",
+          "overage": "Rp 1.000 per halaman tambahan"
+        }
+      }
+    },
+    "annualPlans": {
+      "title": "Pilih paket tutup buku",
+      "subtitle": "Tutup buku tahunan dibayar di muka secara terpisah dari paket bulanan. Pilih tier yang sesuai dengan cakupan Anda.",
+      "selected": "Dipilih",
+      "criteria": "Kriteria",
+      "contents": "Termasuk",
+      "plans": {
+        "none": {
+          "name": "Tanpa tutup buku",
+          "sub": "Hanya pakai paket bulanan.",
+          "price": "Rp 0",
+          "term": "Bayar 1 kali",
+          "criteria": [
+            "Tutup buku tidak termasuk",
+            "Bisa dibayar kemudian"
+          ],
+          "features": [
+            "Tutup buku tidak termasuk",
+            "Bisa dibayar kemudian"
+          ]
+        },
+        "umkm": {
+          "name": "Tutup Buku UMKM",
+          "sub": "Tutup buku Final Tax 0.5%",
+          "price": "Rp 2,500,000",
+          "term": "Bayar 1 kali",
+          "criteria": [
+            "Omzet ≤ Rp 4.8B",
+            "Termasuk Final Tax 0.5%",
+            "≤ 2 rekening bank",
+            "≤ 500 transaksi/tahun",
+            "≤ 10 karyawan",
+            "Persediaan/aset tetap sederhana",
+            "Tanpa transaksi luar negeri/pihak terkait"
+          ],
+          "features": [
+            "Laporan keuangan standar",
+            "Manajemen unggahan dokumen ditandatangani",
+            "Perhitungan Final Tax UMKM",
+            "Draft SPT",
+            "Penerbitan e-Bupot 1721 A1"
+          ]
+        },
+        "pph25": {
+          "name": "Tutup Buku PPh25 Standar",
+          "sub": "Tutup buku PPh Badan 22% standar",
+          "price": "Rp 7,500,000",
+          "term": "Bayar 1 kali",
+          "criteria": [
+            "Omzet > Rp 4.8B atau masa UMKM berakhir",
+            "≤ 3 rekening bank",
+            "≤ 1.000 transaksi AP/AR/tahun",
+            "≤ 50 karyawan",
+            "≤ 100 catatan withholding/kredit pajak",
+            "≤ 50 aset tetap",
+            "≤ 100 SKU persediaan",
+            "Tanpa isu lintas negara/pihak terkait/TP",
+            "Tanpa lampiran laporan audit"
+          ],
+          "features": [
+            "Laporan keuangan",
+            "Penyesuaian fiskal",
+            "Kredit pajak",
+            "Perhitungan PPh29/PPh25",
+            "Draft SPT",
+            "e-Bupot 1721 A1 + SPT Tahunan Badan"
+          ]
+        },
+        "complex": {
+          "name": "Tutup Buku Struktur Kompleks",
+          "sub": "Pemegang saham asing, pihak terkait, transaksi lintas negara, atau volume tinggi",
+          "price": "Rp 15,000,000",
+          "term": "Bayar 1 kali",
+          "criteria": [
+            "Melebihi standar PPh25",
+            "Pemegang saham asing atau transaksi luar negeri",
+            "Transaksi pihak terkait",
+            "Tinjauan PPh26 / DGT Form / Treaty",
+            "≤ 6 rekening bank",
+            "≤ 3.000 transaksi AP/AR/tahun",
+            "≤ 100 karyawan",
+            "≤ 150 aset tetap",
+            "≤ 500 SKU persediaan",
+            "Penilaian kebutuhan TP Doc — TP Doc aktual terpisah"
+          ],
+          "features": [
+            "Seluruh fitur PPh25",
+            "Tinjauan kondisi TP",
+            "Tinjauan transaksi luar negeri",
+            "Laporan risiko AI",
+            "Prioritas penanganan"
+          ]
+        }
+      }
+    },
+    "annualNotice": {
+      "title": "Panduan pemilihan paket tutup buku",
+      "body1": "Tutup Buku PPh25 Standar adalah harga tetap dalam cakupan standar. Jika ada transaksi lintas negara, pihak terkait, volume tinggi, persediaan/aset tetap kompleks, atau perlu tinjauan Treaty, pilih Tutup Buku Struktur Kompleks.",
+      "body2": "Jika Tutup Buku Struktur Kompleks pun melebihi kriteria di atas, atau Anda perlu penyusunan TP Doc aktual, respons pemeriksaan pajak, atau laporan audit, layanan tersebut dikuotasikan terpisah."
+    },
+    "payment": {
+      "method": {
+        "title": "Metode pembayaran",
+        "subtitle": "Kelola metode pembayaran aktif dan pembayaran otomatis. Pembayaran otomatis juga ditagih sebagai pembayaran di muka sebelum layanan dimulai.",
+        "cardName": "Bank Transfer / Virtual Account",
+        "cardDetail": "BCA VA **** 9021",
+        "defaultBadge": "Metode utama",
+        "autoLabel": "Gunakan auto-prepay paket bulanan",
+        "changeCta": "Ubah metode",
+        "manualCta": "Bayar manual"
+      },
+      "summary": {
+        "title": "Ringkasan pembayaran di muka",
+        "subtitle": "Biaya bulanan dan biaya tutup buku dihitung terpisah.",
+        "monthlyLabel": "Basic Bulanan",
+        "monthlyTerm": "Dasar bayar 1 bulan",
+        "monthlyAmount": "Rp 1.500.000",
+        "annualLabel": "Tutup Buku UMKM",
+        "annualAmount": "Rp 2.500.000",
+        "ppnLabel": "PPN",
+        "ppnAmount": "Terpisah",
+        "totalLabel": "Total tagihan di muka",
+        "totalAmount": "Rp 4.000.000",
+        "notice": "Setelah pembayaran selesai, Anda dapat memakai layanan bulanan dan proses tutup buku yang dipilih. Selama belum dibayar, pengiriman SPT dan proses tutup buku terbatas.",
+        "quoteCta": "Buat kutipan",
+        "payCta": "Lanjut bayar di muka",
+        "monthlyAmountAnnual": "Rp 16.200.000",
+        "totalAmountAnnual": "Rp 18.700.000",
+        "breakdown": {
+          "originalLabel": "Biaya bulanan asli",
+          "originalAmount": "Rp 1.500.000",
+          "discountedLabel": "Biaya bulanan diskon 10%",
+          "discountedAmount": "Rp 1.350.000",
+          "annualTotalLabel": "Total bayar di muka (12 bulan)",
+          "annualTotalAmount": "Rp 16.200.000",
+          "savingsLabel": "Total diskon",
+          "savingsAmount": "Rp 1.800.000"
+        }
+      }
+    },
+    "invoices": {
+      "title": "Faktur / riwayat pembayaran",
+      "subtitle": "Tinjau faktur bulanan dan tutup buku secara terpisah.",
+      "downloadAll": "Unduh semua",
+      "columns": {
+        "number": "No. Faktur",
+        "date": "Tanggal",
+        "item": "Item",
+        "amount": "Jumlah",
+        "status": "Status",
+        "method": "Metode",
+        "receipt": "Kuitansi"
+      },
+      "statusPaid": "Lunas",
+      "downloadCta": "Unduh",
+      "rows": {
+        "basic": {
+          "number": "INV-202604-001",
+          "date": "2026-04-01",
+          "item": "Basic Bulanan — Bayar di muka April 2026",
+          "amount": "Rp 1.500.000",
+          "method": "Bank Transfer"
+        },
+        "umkm": {
+          "number": "INV-202604-CLS",
+          "date": "2026-04-05",
+          "item": "Tutup Buku UMKM — Bayar di muka FY2025",
+          "amount": "Rp 2.500.000",
+          "method": "Bank Transfer"
+        }
+      }
+    }
   }
 }
