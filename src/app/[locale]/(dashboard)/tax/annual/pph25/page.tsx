@@ -1016,6 +1016,75 @@ function CalcStep({
   );
 }
 
+function EbupotCta({ sessionId }: { sessionId: string | null }) {
+  const params = useParams();
+  const router = useRouter();
+  const locale = params.locale as string;
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      className="h-7 text-xs"
+      onClick={() => router.push(`/${locale}/tax/ebupot?from=closing&sessionId=${sessionId ?? ''}`)}
+    >
+      e-Bupot →
+    </Button>
+  );
+}
+
+function PayBillingCta({ sessionId }: { sessionId: string | null }) {
+  const [code, setCode] = useState<string | null>(null);
+  const [issuing, setIssuing] = useState(false);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    let aborted = false;
+    fetch(`/api/tax/annual-closing/${sessionId}/id-billing`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((j) => { if (!aborted && j.success && j.data) setCode(j.data.billing_code); })
+      .catch(() => { /* ignore */ });
+    return () => { aborted = true; };
+  }, [sessionId]);
+
+  const issue = async () => {
+    if (!sessionId) return;
+    setIssuing(true);
+    try {
+      const res = await fetch(`/api/tax/annual-closing/${sessionId}/id-billing`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const json = await res.json();
+      if (json.success) {
+        setCode(json.data.billing_code);
+        toast.success(`ID Billing 발급: ${json.data.billing_code}`);
+      } else {
+        toast.error(json.error || 'ID Billing 발급 실패');
+      }
+    } finally {
+      setIssuing(false);
+    }
+  };
+
+  if (code) {
+    return (
+      <span className="text-[11px] font-mono text-emerald-700 tabular-nums">{code}</span>
+    );
+  }
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      className="h-7 text-xs"
+      onClick={issue}
+      disabled={!sessionId || issuing}
+    >
+      {issuing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+      ID Billing 발급
+    </Button>
+  );
+}
+
 function MonthlyStep({
   t, tc, sessionId, pphBadan, pph22, pph23, pph24, monthlyBase, monthlyAmount, onPrev, onComplete, completed,
 }: {
@@ -1082,18 +1151,28 @@ function MonthlyStep({
             <li key={s} className="text-sm text-slate-700">
               <div className="flex items-center justify-between gap-2">
                 <span>{s}</span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs"
-                  onClick={() => (i === 0 ? downloadSpt() : toast.info(tc('comingSoon')))}
-                  disabled={i === 0 && !sessionId}
-                >
-                  {i === 0 ? t('monthly.sptCta') : t('monthly.payCta')}
-                </Button>
+                {i === 0 ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={downloadSpt}
+                    disabled={!sessionId}
+                  >
+                    {t('monthly.sptCta')}
+                  </Button>
+                ) : (
+                  <PayBillingCta sessionId={sessionId} />
+                )}
               </div>
             </li>
           ))}
+          <li className="text-sm text-slate-700">
+            <div className="flex items-center justify-between gap-2">
+              <span>e-Bupot 1721 A1 일괄 발급</span>
+              <EbupotCta sessionId={sessionId} />
+            </div>
+          </li>
         </ol>
       </div>
 

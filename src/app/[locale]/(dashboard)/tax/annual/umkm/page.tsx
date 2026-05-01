@@ -265,6 +265,7 @@ export default function UmkmClosingPage() {
               <BillingStep
                 t={t}
                 tc={tc}
+                sessionId={closing.session?.id ?? null}
                 finalTax={finalTax}
                 onPrev={goPrev}
                 onNext={goNext}
@@ -776,14 +777,58 @@ function CalcStep({
 }
 
 function BillingStep({
-  t, tc, finalTax, onPrev, onNext,
+  t, tc, sessionId, finalTax, onPrev, onNext,
 }: {
   t: T;
   tc: T;
+  sessionId: string | null;
   finalTax: number;
   onPrev: () => void;
   onNext: () => void;
 }) {
+  type Billing = {
+    billing_code: string;
+    amount: number;
+    kap_code: string;
+    kjs_code: string;
+    tax_period: string;
+    expires_at: string | null;
+    status: string;
+    source: string;
+  };
+  const [billing, setBilling] = useState<Billing | null>(null);
+  const [issuing, setIssuing] = useState(false);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    let aborted = false;
+    fetch(`/api/tax/annual-closing/${sessionId}/id-billing`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((j) => { if (!aborted && j.success) setBilling(j.data); })
+      .catch(() => { /* ignore */ });
+    return () => { aborted = true; };
+  }, [sessionId]);
+
+  const issue = async () => {
+    if (!sessionId) return;
+    setIssuing(true);
+    try {
+      const res = await fetch(`/api/tax/annual-closing/${sessionId}/id-billing`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const json = await res.json();
+      if (json.success) {
+        setBilling(json.data);
+        toast.success('ID Billing 발급되었습니다 — 30일 내 납부');
+      } else {
+        toast.error(json.error || tc('comingSoon'));
+      }
+    } finally {
+      setIssuing(false);
+    }
+  };
+
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('billing.title')}</p>
@@ -800,9 +845,33 @@ function BillingStep({
         </div>
       </div>
 
+      {billing ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 mt-5">
+          <p className="text-xs font-semibold text-emerald-700">발급된 ID Billing</p>
+          <p className="text-base font-mono font-bold text-emerald-900 mt-1 tabular-nums">{billing.billing_code}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 text-xs text-slate-600">
+            <div><span className="text-slate-400">KAP:</span> {billing.kap_code}</div>
+            <div><span className="text-slate-400">KJS:</span> {billing.kjs_code}</div>
+            <div><span className="text-slate-400">기간:</span> {billing.tax_period}</div>
+            <div><span className="text-slate-400">만료:</span> {billing.expires_at ? new Date(billing.expires_at).toISOString().slice(0, 10) : '-'}</div>
+          </div>
+          {billing.source === 'PLACEHOLDER' && (
+            <p className="text-[11px] text-amber-700 mt-2">
+              ※ Coretax API 연동 전 임시 코드입니다. 운영팀 검증 후 실 코드로 교체됩니다.
+            </p>
+          )}
+        </div>
+      ) : null}
+
       <div className="flex justify-end mt-5">
-        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => toast.info(tc('comingSoon'))}>
-          {t('billing.issueCta')}
+        <Button
+          size="sm"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={issue}
+          disabled={issuing || !sessionId || finalTax <= 0}
+        >
+          {issuing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+          {billing ? '재발급' : t('billing.issueCta')}
         </Button>
       </div>
 
@@ -830,14 +899,30 @@ function SubmitStep({
   onComplete: () => Promise<void> | void;
   completed: boolean;
 }) {
+  const params = useParams();
+  const router = useRouter();
+  const locale = params.locale as string;
   const downloadSpt = () => {
     if (!sessionId) return;
     window.open(`/api/tax/annual-closing/${sessionId}/spt-pdf`, '_blank');
   };
+  const goEbupot = () => router.push(`/${locale}/tax/ebupot?from=closing&sessionId=${sessionId ?? ''}`);
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('submit.title')}</p>
       <p className="text-sm text-slate-500 mt-1">{t('submit.subtitle')}</p>
+
+      <div className="rounded-lg border border-slate-200 p-4 mt-5">
+        <p className="text-sm font-bold text-slate-900">e-Bupot 1721 A1 발급</p>
+        <p className="text-xs text-slate-500 mt-1">
+          업로드된 직원 자료를 기반으로 1721 A1 일괄 발급 화면으로 이동합니다.
+        </p>
+        <div className="flex justify-end mt-3">
+          <Button size="sm" variant="outline" onClick={goEbupot}>
+            e-Bupot 1721 A1 →
+          </Button>
+        </div>
+      </div>
 
       <div className="flex flex-wrap justify-end gap-2 mt-5">
         <Button size="sm" variant="outline" onClick={downloadSpt} disabled={!sessionId}>
