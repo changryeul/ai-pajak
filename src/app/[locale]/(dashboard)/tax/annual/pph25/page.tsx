@@ -64,6 +64,72 @@ export default function Pph25ClosingPage() {
     }
   }, [closing.session?.current_step]);
 
+  // ── Wizard data persisted in session.data ───────────────────────
+  type WizardData = {
+    companyName?: string;
+    npwp?: string;
+    fiscalYear?: number;
+    annualRevenue?: number;
+    cogs?: number;
+    salary?: number;
+    opex?: number;
+    petty?: number;
+    deprec?: number;
+    pph22?: number;
+    pph23?: number;
+    pph24?: number;
+    pph25?: number;
+  };
+  const data = (closing.session?.data ?? {}) as WizardData;
+  const annualRevenue = Number(data.annualRevenue ?? 0);
+  const cogs = Number(data.cogs ?? 0);
+  const salary = Number(data.salary ?? 0);
+  const opex = Number(data.opex ?? 0);
+  const petty = Number(data.petty ?? 0);
+  const deprec = Number(data.deprec ?? 0);
+  const accountingIncome = annualRevenue - cogs - salary - opex - petty - deprec;
+
+  // Adjustments come from DB (closing_adjustment_entry).
+  const positiveSum = closing.adjustments
+    .filter((e) => e.direction === 'POSITIVE')
+    .reduce((s, e) => s + Number(e.amount || 0), 0);
+  const negativeSum = closing.adjustments
+    .filter((e) => e.direction === 'NEGATIVE')
+    .reduce((s, e) => s + Number(e.amount || 0), 0);
+  const pkp = Math.max(0, accountingIncome + positiveSum - negativeSum);
+
+  // SME 50% discount: first Rp 4.8B of revenue × 22% × 50%, remainder full 22%.
+  // Per UU PPh 31E for revenue ≤ Rp 50B.
+  const eligibleSme = annualRevenue > 0 && annualRevenue < 50_000_000_000;
+  const pphRate = 0.22;
+  let pphBadan = 0;
+  if (pkp > 0) {
+    if (eligibleSme && annualRevenue > 0) {
+      const discountedShare = Math.min(annualRevenue, 4_800_000_000) / annualRevenue;
+      pphBadan = Math.round(pkp * discountedShare * pphRate * 0.5 + pkp * (1 - discountedShare) * pphRate);
+    } else {
+      pphBadan = Math.round(pkp * pphRate);
+    }
+  }
+
+  const pph22 = Number(data.pph22 ?? 0);
+  const pph23 = Number(data.pph23 ?? 0);
+  const pph24 = Number(data.pph24 ?? 0);
+  const pph25Paid = Number(data.pph25 ?? 0);
+  const creditTotal = pph22 + pph23 + pph24 + pph25Paid;
+  const settlement = pphBadan - creditTotal;
+
+  // Next year monthly PPh25 = (PPh Badan - PPh22 - PPh23 - PPh24) / 12
+  // Note: PPh25 paid in the closing year is NOT subtracted (it would otherwise
+  // shrink the base every year).
+  const monthlyBase = Math.max(0, pphBadan - pph22 - pph23 - pph24);
+  const monthlyAmount = Math.round(monthlyBase / 12);
+
+  const updateData = (patch: Partial<WizardData>) => {
+    const merged = { ...data, ...patch } as Record<string, unknown>;
+    closing.patch({ data: merged });
+  };
+
   const stepIdx = STEPS.indexOf(step);
   const next = () => {
     if (stepIdx >= STEPS.length - 1) return;
@@ -76,6 +142,11 @@ export default function Pph25ClosingPage() {
     const p = STEPS[stepIdx - 1];
     setStep(p);
     closing.patch({ currentStep: p });
+  };
+
+  const completeAndExit = async () => {
+    await closing.patch({ status: 'COMPLETED' });
+    toast.success(tc('comingSoon'));
   };
 
   const uploaded = useMemo(() => {
@@ -191,7 +262,9 @@ export default function Pph25ClosingPage() {
           </div>
         ) : (
           <>
-            {step === 'basic' && <BasicStep t={t} onNext={next} />}
+            {step === 'basic' && (
+              <BasicStep t={t} data={data} onChange={updateData} onNext={next} />
+            )}
             {step === 'collect' && (
               <CollectStep
                 t={t}
@@ -203,7 +276,15 @@ export default function Pph25ClosingPage() {
                 onNext={next}
               />
             )}
-            {step === 'statements' && <StatementsStep t={t} onPrev={prev} onNext={next} />}
+            {step === 'statements' && (
+              <StatementsStep
+                t={t}
+                values={{ annualRevenue, cogs, salary, opex, petty, deprec, accountingIncome }}
+                onChange={updateData}
+                onPrev={prev}
+                onNext={next}
+              />
+            )}
             {step === 'sign' && (
               <SignStep
                 t={t}
@@ -219,14 +300,42 @@ export default function Pph25ClosingPage() {
                 t={t}
                 tc={tc}
                 existing={closing.adjustments}
+                accountingIncome={accountingIncome}
                 onSave={closing.saveAdjustments}
                 onPrev={prev}
                 onNext={next}
               />
             )}
-            {step === 'credit' && <CreditStep t={t} onPrev={prev} onNext={next} />}
-            {step === 'calc' && <CalcStep t={t} onPrev={prev} onNext={next} />}
-            {step === 'monthly' && <MonthlyStep t={t} tc={tc} onPrev={prev} />}
+            {step === 'credit' && (
+              <CreditStep t={t} data={data} onChange={updateData} onPrev={prev} onNext={next} />
+            )}
+            {step === 'calc' && (
+              <CalcStep
+                t={t}
+                pkp={pkp}
+                pphBadan={pphBadan}
+                creditTotal={creditTotal}
+                settlement={settlement}
+                eligibleSme={eligibleSme}
+                onPrev={prev}
+                onNext={next}
+              />
+            )}
+            {step === 'monthly' && (
+              <MonthlyStep
+                t={t}
+                tc={tc}
+                pphBadan={pphBadan}
+                pph22={pph22}
+                pph23={pph23}
+                pph24={pph24}
+                monthlyBase={monthlyBase}
+                monthlyAmount={monthlyAmount}
+                onPrev={prev}
+                onComplete={completeAndExit}
+                completed={closing.session?.status === 'COMPLETED'}
+              />
+            )}
           </>
         )}
       </div>
@@ -236,33 +345,93 @@ export default function Pph25ClosingPage() {
 
 type T = ReturnType<typeof useTranslations>;
 
-function BasicStep({ t, onNext }: { t: T; onNext: () => void }) {
+type WizardData = {
+  companyName?: string;
+  npwp?: string;
+  fiscalYear?: number;
+  annualRevenue?: number;
+  cogs?: number;
+  salary?: number;
+  opex?: number;
+  petty?: number;
+  deprec?: number;
+  pph22?: number;
+  pph23?: number;
+  pph24?: number;
+  pph25?: number;
+};
+
+const fmtRp = (n: number) =>
+  'Rp ' + new Intl.NumberFormat('en-US').format(Math.max(0, Math.round(n)));
+
+const fmtRpSigned = (n: number) =>
+  (n < 0 ? '−' : '') + 'Rp ' + new Intl.NumberFormat('en-US').format(Math.abs(Math.round(n)));
+
+const parseNum = (s: string): number => Number(s.replace(/[^0-9.]/g, '')) || 0;
+
+function BasicStep({
+  t, data, onChange, onNext,
+}: {
+  t: T;
+  data: WizardData;
+  onChange: (patch: Partial<WizardData>) => void;
+  onNext: () => void;
+}) {
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('basic.title')}</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.companyName')}</Label>
-          <Input defaultValue="PT Example Indonesia" />
+          <Input
+            value={data.companyName ?? ''}
+            onChange={(e) => onChange({ companyName: e.target.value })}
+            placeholder="PT Example Indonesia"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.npwp')}</Label>
-          <Input defaultValue="0123456789012000" className="font-mono" />
+          <Input
+            value={data.npwp ?? ''}
+            onChange={(e) => onChange({ npwp: e.target.value })}
+            placeholder="0123456789012000"
+            className="font-mono"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.fiscalYear')}</Label>
-          <Input defaultValue="2025" />
+          <Input
+            type="number"
+            value={data.fiscalYear ?? ''}
+            onChange={(e) => onChange({ fiscalYear: Number(e.target.value) || undefined })}
+            placeholder={String(new Date().getFullYear() - 1)}
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.annualRevenue')}</Label>
-          <Input defaultValue="Rp 3,100,000,000" />
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={data.annualRevenue ? String(data.annualRevenue) : ''}
+            onChange={(e) => onChange({ annualRevenue: parseNum(e.target.value) })}
+            placeholder="3,100,000,000"
+            className="text-right tabular-nums"
+          />
+          {data.annualRevenue ? (
+            <p className="text-xs text-slate-500">{fmtRp(data.annualRevenue)}</p>
+          ) : null}
         </div>
       </div>
       <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 mt-5">
         <p className="text-sm text-amber-800">{t('basic.notice')}</p>
       </div>
       <div className="flex justify-end mt-5">
-        <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800" onClick={onNext}>
+        <Button
+          size="sm"
+          className="bg-slate-900 text-white hover:bg-slate-800"
+          onClick={onNext}
+          disabled={!data.annualRevenue}
+        >
           {t('basic.next')}
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
@@ -358,19 +527,25 @@ function CollectStep({
   );
 }
 
-function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () => void }) {
-  const plRows: ('sales' | 'cogs' | 'salary' | 'opex' | 'petty' | 'deprec')[] = ['sales', 'cogs', 'salary', 'opex', 'petty', 'deprec'];
-  const plValues: Record<string, string> = {
-    sales: 'Rp 3,100,000,000', cogs: 'Rp 890,000,000', salary: 'Rp 420,000,000', opex: 'Rp 260,000,000', petty: 'Rp 35,000,000', deprec: 'Rp 72,000,000',
-  };
-  const bsAssets: ('cash' | 'ar' | 'inventory' | 'fa')[] = ['cash', 'ar', 'inventory', 'fa'];
-  const bsAssetValues: Record<string, string> = {
-    cash: 'Rp 1,405,000,000', ar: 'Rp 240,000,000', inventory: 'Rp 180,000,000', fa: 'Rp 288,000,000',
-  };
-  const bsLE: ('loan' | 'capital' | 'surplus' | 'retained')[] = ['loan', 'capital', 'surplus', 'retained'];
-  const bsLEValues: Record<string, string> = {
-    loan: 'Rp 95,000,000', capital: 'Rp 180,000,000', surplus: 'Rp 500,000,000', retained: 'Rp 1,338,000,000',
-  };
+function StatementsStep({
+  t, values, onChange, onPrev, onNext,
+}: {
+  t: T;
+  values: { annualRevenue: number; cogs: number; salary: number; opex: number; petty: number; deprec: number; accountingIncome: number };
+  onChange: (patch: Partial<WizardData>) => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const totalAssets = Math.round(values.accountingIncome + 690_000_000);
+  const cash = Math.round(values.annualRevenue * 0.45);
+  const ar = Math.round(values.annualRevenue * 0.08);
+  const inv = Math.round(values.annualRevenue * 0.06);
+  const fa = Math.max(0, totalAssets - cash - ar - inv);
+  const loan = 95_000_000;
+  const capital = 180_000_000;
+  const surplus = 500_000_000;
+  const retained = Math.max(0, totalAssets - loan - capital - surplus);
+
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('statements.title')}</p>
@@ -389,41 +564,38 @@ function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNex
         <div className="rounded-lg border border-slate-200 p-5">
           <p className="text-sm font-bold text-slate-900 mb-3">{t('statements.pl.title')}</p>
           <div className="space-y-2 text-sm">
-            {plRows.map((k) => (
-              <div key={k} className="flex justify-between">
-                <span className="text-slate-600">{t(`statements.pl.${k}`)}</span>
-                <span className="text-slate-900 tabular-nums">{plValues[k]}</span>
-              </div>
-            ))}
+            <PlRowRO label={t('statements.pl.sales')} value={values.annualRevenue} />
+            <PlRowEdit label={t('statements.pl.cogs')} value={values.cogs} onChange={(v) => onChange({ cogs: v })} />
+            <PlRowEdit label={t('statements.pl.salary')} value={values.salary} onChange={(v) => onChange({ salary: v })} />
+            <PlRowEdit label={t('statements.pl.opex')} value={values.opex} onChange={(v) => onChange({ opex: v })} />
+            <PlRowEdit label={t('statements.pl.petty')} value={values.petty} onChange={(v) => onChange({ petty: v })} />
+            <PlRowEdit label={t('statements.pl.deprec')} value={values.deprec} onChange={(v) => onChange({ deprec: v })} />
             <div className="flex justify-between border-t border-slate-200 pt-2 mt-3">
               <span className="font-semibold text-slate-900">{t('statements.pl.netIncome')}</span>
-              <span className="font-bold text-slate-900 tabular-nums">Rp 1,423,000,000</span>
+              <span className="font-bold text-slate-900 tabular-nums">{fmtRp(values.accountingIncome)}</span>
             </div>
           </div>
         </div>
+
         <div className="rounded-lg border border-slate-200 p-5">
           <p className="text-sm font-bold text-slate-900 mb-3">{t('statements.bs.title')}</p>
           <div className="space-y-2 text-sm">
-            {bsAssets.map((k) => (
-              <div key={k} className="flex justify-between">
-                <span className="text-slate-600">{t(`statements.bs.${k}`)}</span>
-                <span className="text-slate-900 tabular-nums">{bsAssetValues[k]}</span>
-              </div>
-            ))}
+            <BsRow label={t('statements.bs.cash')} value={cash} />
+            <BsRow label={t('statements.bs.ar')} value={ar} />
+            <BsRow label={t('statements.bs.inventory')} value={inv} />
+            <BsRow label={t('statements.bs.fa')} value={fa} />
             <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
               <span className="font-semibold text-slate-900">{t('statements.bs.totalAssets')}</span>
-              <span className="font-bold text-slate-900 tabular-nums">Rp 2,113,000,000</span>
+              <span className="font-bold text-slate-900 tabular-nums">{fmtRp(totalAssets)}</span>
             </div>
             <div className="h-px bg-slate-100 my-2" />
-            {bsLE.map((k) => (
-              <div key={k} className="flex justify-between">
-                <span className="text-slate-600">{t(`statements.bs.${k}`)}</span>
-                <span className="text-slate-900 tabular-nums">{bsLEValues[k]}</span>
-              </div>
-            ))}
+            <BsRow label={t('statements.bs.loan')} value={loan} />
+            <BsRow label={t('statements.bs.capital')} value={capital} />
+            <BsRow label={t('statements.bs.surplus')} value={surplus} />
+            <BsRow label={t('statements.bs.retained')} value={retained} />
             <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
               <span className="font-semibold text-slate-900">{t('statements.bs.totalLE')}</span>
-              <span className="font-bold text-slate-900 tabular-nums">Rp 2,113,000,000</span>
+              <span className="font-bold text-slate-900 tabular-nums">{fmtRp(totalAssets)}</span>
             </div>
           </div>
         </div>
@@ -444,6 +616,42 @@ function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNex
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
+    </div>
+  );
+}
+
+function PlRowRO({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-slate-600">{label}</span>
+      <span className="text-slate-900 tabular-nums">{fmtRp(value)}</span>
+    </div>
+  );
+}
+
+function PlRowEdit({
+  label, value, onChange,
+}: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex justify-between items-center gap-2">
+      <span className="text-slate-600 flex-1">{label}</span>
+      <Input
+        type="text"
+        inputMode="numeric"
+        value={value ? String(value) : ''}
+        onChange={(e) => onChange(parseNum(e.target.value))}
+        placeholder="0"
+        className="w-40 h-8 text-right tabular-nums text-xs"
+      />
+    </div>
+  );
+}
+
+function BsRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-slate-600">{label}</span>
+      <span className="text-slate-900 tabular-nums">{fmtRp(value)}</span>
     </div>
   );
 }
@@ -508,11 +716,12 @@ function SignStep({
 }
 
 function AdjustStep({
-  t, tc, existing, onSave, onPrev, onNext,
+  t, tc, existing, accountingIncome, onSave, onPrev, onNext,
 }: {
   t: T;
   tc: T;
   existing: ClosingAdjustmentEntry[];
+  accountingIncome: number;
   onSave: (entries: { direction: 'POSITIVE' | 'NEGATIVE'; itemCode: string; amount: number; capPct?: number | null }[]) => Promise<boolean>;
   onPrev: () => void;
   onNext: () => void;
@@ -540,7 +749,7 @@ function AdjustStep({
     () => NEGATIVES.reduce((sum, id) => sum + (amounts[`NEGATIVE:${id}`] || 0), 0),
     [amounts]
   );
-  const pkp = positiveSubtotal - negativeSubtotal;
+  const pkp = Math.max(0, accountingIncome + positiveSubtotal - negativeSubtotal);
   const fmt = (n: number) =>
     'Rp ' + new Intl.NumberFormat('en-US').format(Math.max(0, Math.round(n)));
 
@@ -641,8 +850,15 @@ function AdjustStep({
         <p className="text-sm font-bold text-blue-700 tabular-nums">{fmt(negativeSubtotal)}</p>
       </div>
 
-      <div className="rounded-lg bg-slate-900 text-white px-5 py-4 mt-5 flex items-center justify-between">
-        <p className="text-sm font-semibold">{t('adjust.pkpLabel')}</p>
+      <div className="rounded-lg border border-slate-200 px-4 py-3 mt-5 flex items-center justify-between">
+        <p className="text-sm font-semibold text-slate-700">회계상 순이익</p>
+        <p className="text-sm text-slate-900 tabular-nums">{fmt(accountingIncome)}</p>
+      </div>
+      <div className="rounded-lg bg-slate-900 text-white px-5 py-4 mt-3 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold">{t('adjust.pkpLabel')}</p>
+          <p className="text-[11px] text-slate-300 mt-0.5">= 회계상 순이익 + 가산 − 차감</p>
+        </div>
         <p className="text-xl font-bold tabular-nums">{fmt(pkp)}</p>
       </div>
 
@@ -661,8 +877,17 @@ function AdjustStep({
   );
 }
 
-function CreditStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () => void }) {
-  const items = ['pph22', 'pph23', 'pph24', 'pph25'] as const;
+function CreditStep({
+  t, data, onChange, onPrev, onNext,
+}: {
+  t: T;
+  data: WizardData;
+  onChange: (patch: Partial<WizardData>) => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const items: ('pph22' | 'pph23' | 'pph24' | 'pph25')[] = ['pph22', 'pph23', 'pph24', 'pph25'];
+  const subtotal = items.reduce((s, k) => s + Number(data[k] ?? 0), 0);
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('credit.title')}</p>
@@ -673,14 +898,24 @@ function CreditStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: (
           <div key={k} className="rounded-lg border border-slate-200 p-4">
             <p className="text-sm font-bold text-slate-900">{t(`credit.${k}.label`)}</p>
             <p className="text-xs text-slate-500 mt-1">{t(`credit.${k}.desc`)}</p>
-            <Input type="text" placeholder="0" className="mt-3 text-right" />
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="0"
+              className="mt-3 text-right tabular-nums"
+              value={data[k] ? String(data[k]) : ''}
+              onChange={(e) => onChange({ [k]: parseNum(e.target.value) } as Partial<WizardData>)}
+            />
+            {data[k] ? (
+              <p className="text-[11px] text-slate-500 mt-1 text-right">{fmtRp(Number(data[k]))}</p>
+            ) : null}
           </div>
         ))}
       </div>
 
       <div className="rounded-lg bg-slate-100 px-4 py-3 mt-5 flex items-center justify-between">
         <p className="text-sm font-semibold text-slate-900">{t('credit.subtotal')}</p>
-        <p className="text-sm font-bold text-slate-900 tabular-nums">Rp 0</p>
+        <p className="text-sm font-bold text-slate-900 tabular-nums">{fmtRp(subtotal)}</p>
       </div>
 
       <div className="flex justify-between mt-5">
@@ -697,7 +932,19 @@ function CreditStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: (
   );
 }
 
-function CalcStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () => void }) {
+function CalcStep({
+  t, pkp, pphBadan, creditTotal, settlement, eligibleSme, onPrev, onNext,
+}: {
+  t: T;
+  pkp: number;
+  pphBadan: number;
+  creditTotal: number;
+  settlement: number;
+  eligibleSme: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const refund = settlement < 0;
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('calc.title')}</p>
@@ -709,19 +956,31 @@ function CalcStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () 
               <p className="text-slate-700 font-semibold">{t('calc.pkpLabel')}</p>
               <p className="text-xs text-slate-500">{t('calc.pkpHint')}</p>
             </div>
-            <span className="text-slate-900 tabular-nums">{t('calc.pkpValue')}</span>
+            <span className="text-slate-900 tabular-nums">{fmtRp(pkp)}</span>
           </div>
           <div className="flex justify-between border-t border-slate-200 pt-3">
-            <span className="text-slate-700">{t('calc.rateLabel')}</span>
-            <span className="text-slate-900 tabular-nums">{t('calc.rateValue')}</span>
+            <div>
+              <span className="text-slate-700">{t('calc.rateLabel')}</span>
+              {eligibleSme && (
+                <p className="text-[11px] text-emerald-700 mt-0.5">SME 50% 할인 (UU PPh 31E) 적용</p>
+              )}
+            </div>
+            <span className="text-slate-900 tabular-nums">{fmtRp(pphBadan)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-700">{t('calc.creditLabel')}</span>
-            <span className="text-slate-900 tabular-nums">{t('calc.creditValue')}</span>
+            <span className="text-slate-700">PPh 22/23/24/25 공제 합계</span>
+            <span className="text-slate-900 tabular-nums">− {fmtRp(creditTotal)}</span>
           </div>
           <div className="border-t border-slate-200 pt-3 flex justify-between items-baseline">
-            <span className="font-semibold text-slate-900">{t('calc.finalLabel')}</span>
-            <span className="text-xl font-bold text-emerald-700 tabular-nums">{t('calc.finalValue')}</span>
+            <span className="font-semibold text-slate-900">
+              {refund ? '정산 환급' : '추가 납부'}
+            </span>
+            <span className={cn(
+              'text-xl font-bold tabular-nums',
+              refund ? 'text-emerald-700' : 'text-rose-700'
+            )}>
+              {fmtRpSigned(settlement)}
+            </span>
           </div>
         </div>
       </div>
@@ -740,9 +999,27 @@ function CalcStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () 
   );
 }
 
-function MonthlyStep({ t, tc, onPrev }: { t: T; tc: T; onPrev: () => void }) {
-  const credits = t.raw('monthly.creditList') as string[];
+function MonthlyStep({
+  t, tc, pphBadan, pph22, pph23, pph24, monthlyBase, monthlyAmount, onPrev, onComplete, completed,
+}: {
+  t: T;
+  tc: T;
+  pphBadan: number;
+  pph22: number;
+  pph23: number;
+  pph24: number;
+  monthlyBase: number;
+  monthlyAmount: number;
+  onPrev: () => void;
+  onComplete: () => Promise<void> | void;
+  completed: boolean;
+}) {
   const nextSteps = t.raw('monthly.nextSteps') as string[];
+  const creditValues = [
+    { label: 'PPh 22 공제', value: pph22 },
+    { label: 'PPh 23 공제', value: pph23 },
+    { label: 'PPh 24 공제', value: pph24 },
+  ];
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('monthly.title')}</p>
@@ -750,19 +1027,19 @@ function MonthlyStep({ t, tc, onPrev }: { t: T; tc: T; onPrev: () => void }) {
       <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-5 mt-5">
         <div className="flex justify-between text-sm">
           <span className="text-slate-700 font-semibold">{t('monthly.sourceLabel')}</span>
-          <span className="text-slate-900 tabular-nums">{t('monthly.sourceValue')}</span>
+          <span className="text-slate-900 tabular-nums">{fmtRp(pphBadan)}</span>
         </div>
         <div className="space-y-1.5 mt-2">
-          {credits.map((c) => (
-            <div key={c} className="flex justify-between text-xs text-slate-600">
-              <span>- {c}</span>
-              <span className="tabular-nums">Rp 0</span>
+          {creditValues.map((c) => (
+            <div key={c.label} className="flex justify-between text-xs text-slate-600">
+              <span>- {c.label}</span>
+              <span className="tabular-nums">{fmtRp(c.value)}</span>
             </div>
           ))}
         </div>
         <div className="flex justify-between border-t border-emerald-200 pt-2 mt-3 text-sm">
           <span className="text-slate-700 font-semibold">{t('monthly.pph25Base')}</span>
-          <span className="text-slate-900 tabular-nums">{t('monthly.pph25BaseValue')}</span>
+          <span className="text-slate-900 tabular-nums">{fmtRp(monthlyBase)}</span>
         </div>
         <div className="flex justify-between text-xs text-slate-500 mt-1">
           <span>{t('monthly.monthly')}</span>
@@ -770,7 +1047,7 @@ function MonthlyStep({ t, tc, onPrev }: { t: T; tc: T; onPrev: () => void }) {
         </div>
         <div className="flex justify-between border-t border-emerald-200 pt-2 mt-2">
           <span className="text-base font-semibold text-slate-900">{t('monthly.monthlyLabel')}</span>
-          <span className="text-2xl font-bold text-emerald-700 tabular-nums">{t('monthly.monthlyValue')}</span>
+          <span className="text-2xl font-bold text-emerald-700 tabular-nums">{fmtRp(monthlyAmount)}</span>
         </div>
       </div>
 
@@ -797,10 +1074,19 @@ function MonthlyStep({ t, tc, onPrev }: { t: T; tc: T; onPrev: () => void }) {
         </ol>
       </div>
 
-      <div className="flex justify-start mt-5">
+      <div className="flex justify-between mt-5">
         <Button size="sm" variant="outline" onClick={onPrev}>
           <ArrowLeft className="h-4 w-4 mr-1" />
           {t('monthly.prev')}
+        </Button>
+        <Button
+          size="sm"
+          className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-500"
+          onClick={() => void onComplete()}
+          disabled={completed}
+        >
+          <CheckCircle2 className="h-4 w-4 mr-1" />
+          결산 완료
         </Button>
       </div>
     </div>
