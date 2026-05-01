@@ -44,6 +44,34 @@ export default function UmkmClosingPage() {
     }
   }, [closing.session?.current_step]);
 
+  // ── Wizard inputs (persisted in session.data) ───────────────────
+  type WizardData = {
+    companyName?: string;
+    npwp?: string;
+    fiscalYear?: number;
+    annualRevenue?: number;
+    cogs?: number;
+    salary?: number;
+    opex?: number;
+    petty?: number;
+    deprec?: number;
+  };
+  const data = (closing.session?.data ?? {}) as WizardData;
+  const annualRevenue = Number(data.annualRevenue ?? 0);
+  const cogs = Number(data.cogs ?? 0);
+  const salary = Number(data.salary ?? 0);
+  const opex = Number(data.opex ?? 0);
+  const petty = Number(data.petty ?? 0);
+  const deprec = Number(data.deprec ?? 0);
+  const netIncome = annualRevenue - cogs - salary - opex - petty - deprec;
+  const finalTax = Math.round(annualRevenue * 0.005);
+  const meetsUmkm = annualRevenue > 0 && annualRevenue <= 4_800_000_000;
+
+  const updateData = (patch: Partial<WizardData>) => {
+    const merged = { ...data, ...patch } as Record<string, unknown>;
+    closing.patch({ data: merged });
+  };
+
   const stepIdx = STEPS.indexOf(step);
   const goNext = () => {
     if (stepIdx >= STEPS.length - 1) return;
@@ -56,6 +84,11 @@ export default function UmkmClosingPage() {
     const prev = STEPS[stepIdx - 1];
     setStep(prev);
     closing.patch({ currentStep: prev });
+  };
+
+  const completeAndExit = async () => {
+    await closing.patch({ status: 'COMPLETED' });
+    toast.success(t('submit.done'));
   };
 
   const uploaded = useMemo(() => {
@@ -179,7 +212,15 @@ export default function UmkmClosingPage() {
           </div>
         ) : (
           <>
-            {step === 'basic' && <BasicStep t={t} onNext={goNext} />}
+            {step === 'basic' && (
+              <BasicStep
+                t={t}
+                data={data}
+                onChange={updateData}
+                meetsUmkm={meetsUmkm}
+                onNext={goNext}
+              />
+            )}
             {step === 'collect' && (
               <CollectStep
                 t={t}
@@ -191,7 +232,15 @@ export default function UmkmClosingPage() {
                 onNext={goNext}
               />
             )}
-            {step === 'statements' && <StatementsStep t={t} onPrev={goPrev} onNext={goNext} />}
+            {step === 'statements' && (
+              <StatementsStep
+                t={t}
+                values={{ annualRevenue, cogs, salary, opex, petty, deprec, netIncome }}
+                onChange={updateData}
+                onPrev={goPrev}
+                onNext={goNext}
+              />
+            )}
             {step === 'sign' && (
               <SignStep
                 t={t}
@@ -202,9 +251,33 @@ export default function UmkmClosingPage() {
                 onNext={goNext}
               />
             )}
-            {step === 'calc' && <CalcStep t={t} onPrev={goPrev} onNext={goNext} />}
-            {step === 'billing' && <BillingStep t={t} tc={tc} onPrev={goPrev} onNext={goNext} />}
-            {step === 'submit' && <SubmitStep t={t} tc={tc} onPrev={goPrev} />}
+            {step === 'calc' && (
+              <CalcStep
+                t={t}
+                annualRevenue={annualRevenue}
+                finalTax={finalTax}
+                onPrev={goPrev}
+                onNext={goNext}
+              />
+            )}
+            {step === 'billing' && (
+              <BillingStep
+                t={t}
+                tc={tc}
+                finalTax={finalTax}
+                onPrev={goPrev}
+                onNext={goNext}
+              />
+            )}
+            {step === 'submit' && (
+              <SubmitStep
+                t={t}
+                tc={tc}
+                onPrev={goPrev}
+                onComplete={completeAndExit}
+                completed={closing.session?.status === 'COMPLETED'}
+              />
+            )}
           </>
         )}
       </div>
@@ -216,41 +289,108 @@ export default function UmkmClosingPage() {
 
 type T = ReturnType<typeof useTranslations>;
 
-function BasicStep({ t, onNext }: { t: T; onNext: () => void }) {
+type WizardData = {
+  companyName?: string;
+  npwp?: string;
+  fiscalYear?: number;
+  annualRevenue?: number;
+  cogs?: number;
+  salary?: number;
+  opex?: number;
+  petty?: number;
+  deprec?: number;
+};
+
+const fmtRp = (n: number) =>
+  'Rp ' + new Intl.NumberFormat('en-US').format(Math.max(0, Math.round(n)));
+
+const parseNum = (s: string): number => {
+  const cleaned = s.replace(/[^0-9.]/g, '');
+  return Number(cleaned) || 0;
+};
+
+function BasicStep({
+  t, data, onChange, meetsUmkm, onNext,
+}: {
+  t: T;
+  data: WizardData;
+  onChange: (patch: Partial<WizardData>) => void;
+  meetsUmkm: boolean;
+  onNext: () => void;
+}) {
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('basic.title')}</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.companyName')}</Label>
-          <Input defaultValue="PT Example Indonesia" />
+          <Input
+            value={data.companyName ?? ''}
+            onChange={(e) => onChange({ companyName: e.target.value })}
+            onBlur={(e) => onChange({ companyName: e.target.value })}
+            placeholder="PT Example Indonesia"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.npwp')}</Label>
-          <Input defaultValue="0123456789012000" className="font-mono" />
+          <Input
+            value={data.npwp ?? ''}
+            onChange={(e) => onChange({ npwp: e.target.value })}
+            placeholder="0123456789012000"
+            className="font-mono"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.fiscalYear')}</Label>
-          <Input defaultValue="2025" />
+          <Input
+            type="number"
+            value={data.fiscalYear ?? ''}
+            onChange={(e) => onChange({ fiscalYear: Number(e.target.value) || undefined })}
+            placeholder={String(new Date().getFullYear() - 1)}
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.annualRevenue')}</Label>
-          <Input defaultValue="Rp 3,200,000,000" />
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={data.annualRevenue ? String(data.annualRevenue) : ''}
+            onChange={(e) => onChange({ annualRevenue: parseNum(e.target.value) })}
+            placeholder="3,200,000,000"
+            className="text-right tabular-nums"
+          />
+          {data.annualRevenue ? (
+            <p className="text-xs text-slate-500">{fmtRp(data.annualRevenue)}</p>
+          ) : null}
         </div>
       </div>
 
-      <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 mt-5">
-        <p className="text-sm text-emerald-700 flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4" />
-          {t('basic.okMsg')}
-        </p>
-      </div>
+      {meetsUmkm ? (
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 mt-5">
+          <p className="text-sm text-emerald-700 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4" />
+            {t('basic.okMsg')}
+          </p>
+        </div>
+      ) : data.annualRevenue && data.annualRevenue > 4_800_000_000 ? (
+        <div className="rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 mt-5">
+          <p className="text-sm text-rose-700">
+            연매출 Rp 4.8B 초과 — UMKM 0.5% 적용 불가. PPh25 일반 결산으로 전환을 권장합니다.
+          </p>
+        </div>
+      ) : null}
+
       <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 mt-3">
         <p className="text-sm text-amber-800">{t('basic.deadlineMsg')}</p>
       </div>
 
       <div className="flex justify-end mt-5">
-        <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800" onClick={onNext}>
+        <Button
+          size="sm"
+          className="bg-slate-900 text-white hover:bg-slate-800"
+          onClick={onNext}
+          disabled={!data.annualRevenue}
+        >
           {t('basic.next')}
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
@@ -353,19 +493,27 @@ function CollectStep({
   );
 }
 
-function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () => void }) {
-  const plRows: (keyof { sales: 1; cogs: 1; salary: 1; opex: 1; petty: 1; deprec: 1 })[] = ['sales', 'cogs', 'salary', 'opex', 'petty', 'deprec'];
-  const plValues: Record<string, string> = {
-    sales: 'Rp 3,100,000,000', cogs: 'Rp 890,000,000', salary: 'Rp 420,000,000', opex: 'Rp 260,000,000', petty: 'Rp 35,000,000', deprec: 'Rp 72,000,000',
-  };
-  const bsAssets: ('cash' | 'ar' | 'inventory' | 'fa')[] = ['cash', 'ar', 'inventory', 'fa'];
-  const bsAssetValues: Record<string, string> = {
-    cash: 'Rp 1,405,000,000', ar: 'Rp 240,000,000', inventory: 'Rp 180,000,000', fa: 'Rp 288,000,000',
-  };
-  const bsLE: ('loan' | 'capital' | 'surplus' | 'retained')[] = ['loan', 'capital', 'surplus', 'retained'];
-  const bsLEValues: Record<string, string> = {
-    loan: 'Rp 95,000,000', capital: 'Rp 180,000,000', surplus: 'Rp 500,000,000', retained: 'Rp 1,338,000,000',
-  };
+function StatementsStep({
+  t, values, onChange, onPrev, onNext,
+}: {
+  t: T;
+  values: { annualRevenue: number; cogs: number; salary: number; opex: number; petty: number; deprec: number; netIncome: number };
+  onChange: (patch: Partial<WizardData>) => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  // PL is fully editable. BS values are derived from PL totals (best-effort
+  // demo model — refined in Phase 4 once bank/inventory data is parsed).
+  const totalAssets = Math.round(values.netIncome + 690_000_000); // placeholder offset
+  const cash = Math.round(values.annualRevenue * 0.45);
+  const ar = Math.round(values.annualRevenue * 0.08);
+  const inv = Math.round(values.annualRevenue * 0.06);
+  const fa = Math.max(0, totalAssets - cash - ar - inv);
+  const loan = 95_000_000;
+  const capital = 180_000_000;
+  const surplus = 500_000_000;
+  const retained = Math.max(0, totalAssets - loan - capital - surplus);
+
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('statements.title')}</p>
@@ -384,15 +532,15 @@ function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNex
         <div className="rounded-lg border border-slate-200 p-5">
           <p className="text-sm font-bold text-slate-900 mb-3">{t('statements.pl.title')}</p>
           <div className="space-y-2 text-sm">
-            {plRows.map((k) => (
-              <div key={k} className="flex justify-between">
-                <span className="text-slate-600">{t(`statements.pl.${k}`)}</span>
-                <span className="text-slate-900 tabular-nums">{plValues[k]}</span>
-              </div>
-            ))}
+            <PlRow label={t('statements.pl.sales')} value={values.annualRevenue} readOnly />
+            <PlRow label={t('statements.pl.cogs')} value={values.cogs} onChange={(v) => onChange({ cogs: v })} />
+            <PlRow label={t('statements.pl.salary')} value={values.salary} onChange={(v) => onChange({ salary: v })} />
+            <PlRow label={t('statements.pl.opex')} value={values.opex} onChange={(v) => onChange({ opex: v })} />
+            <PlRow label={t('statements.pl.petty')} value={values.petty} onChange={(v) => onChange({ petty: v })} />
+            <PlRow label={t('statements.pl.deprec')} value={values.deprec} onChange={(v) => onChange({ deprec: v })} />
             <div className="flex justify-between border-t border-slate-200 pt-2 mt-3">
               <span className="font-semibold text-slate-900">{t('statements.pl.netIncome')}</span>
-              <span className="font-bold text-slate-900 tabular-nums">Rp 1,423,000,000</span>
+              <span className="font-bold text-slate-900 tabular-nums">{fmtRp(values.netIncome)}</span>
             </div>
           </div>
         </div>
@@ -400,26 +548,22 @@ function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNex
         <div className="rounded-lg border border-slate-200 p-5">
           <p className="text-sm font-bold text-slate-900 mb-3">{t('statements.bs.title')}</p>
           <div className="space-y-2 text-sm">
-            {bsAssets.map((k) => (
-              <div key={k} className="flex justify-between">
-                <span className="text-slate-600">{t(`statements.bs.${k}`)}</span>
-                <span className="text-slate-900 tabular-nums">{bsAssetValues[k]}</span>
-              </div>
-            ))}
+            <BsRow label={t('statements.bs.cash')} value={cash} />
+            <BsRow label={t('statements.bs.ar')} value={ar} />
+            <BsRow label={t('statements.bs.inventory')} value={inv} />
+            <BsRow label={t('statements.bs.fa')} value={fa} />
             <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
               <span className="font-semibold text-slate-900">{t('statements.bs.totalAssets')}</span>
-              <span className="font-bold text-slate-900 tabular-nums">Rp 2,113,000,000</span>
+              <span className="font-bold text-slate-900 tabular-nums">{fmtRp(totalAssets)}</span>
             </div>
             <div className="h-px bg-slate-100 my-2" />
-            {bsLE.map((k) => (
-              <div key={k} className="flex justify-between">
-                <span className="text-slate-600">{t(`statements.bs.${k}`)}</span>
-                <span className="text-slate-900 tabular-nums">{bsLEValues[k]}</span>
-              </div>
-            ))}
+            <BsRow label={t('statements.bs.loan')} value={loan} />
+            <BsRow label={t('statements.bs.capital')} value={capital} />
+            <BsRow label={t('statements.bs.surplus')} value={surplus} />
+            <BsRow label={t('statements.bs.retained')} value={retained} />
             <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
               <span className="font-semibold text-slate-900">{t('statements.bs.totalLE')}</span>
-              <span className="font-bold text-slate-900 tabular-nums">Rp 2,113,000,000</span>
+              <span className="font-bold text-slate-900 tabular-nums">{fmtRp(totalAssets)}</span>
             </div>
           </div>
         </div>
@@ -440,6 +584,41 @@ function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNex
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
+    </div>
+  );
+}
+
+function PlRow({
+  label, value, readOnly, onChange,
+}: { label: string; value: number; readOnly?: boolean; onChange?: (v: number) => void }) {
+  if (readOnly) {
+    return (
+      <div className="flex justify-between items-center">
+        <span className="text-slate-600">{label}</span>
+        <span className="text-slate-900 tabular-nums">{fmtRp(value)}</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex justify-between items-center gap-2">
+      <span className="text-slate-600 flex-1">{label}</span>
+      <Input
+        type="text"
+        inputMode="numeric"
+        value={value ? String(value) : ''}
+        onChange={(e) => onChange?.(parseNum(e.target.value))}
+        placeholder="0"
+        className="w-40 h-8 text-right tabular-nums text-xs"
+      />
+    </div>
+  );
+}
+
+function BsRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-slate-600">{label}</span>
+      <span className="text-slate-900 tabular-nums">{fmtRp(value)}</span>
     </div>
   );
 }
@@ -536,7 +715,15 @@ function SignStep({
   );
 }
 
-function CalcStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () => void }) {
+function CalcStep({
+  t, annualRevenue, finalTax, onPrev, onNext,
+}: {
+  t: T;
+  annualRevenue: number;
+  finalTax: number;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('calc.title')}</p>
@@ -545,15 +732,15 @@ function CalcStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () 
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-600">{t('calc.base')}</span>
-            <span className="text-slate-900 tabular-nums">{t('calc.baseValue')}</span>
+            <span className="text-slate-900 tabular-nums">{fmtRp(annualRevenue)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-600">{t('calc.rate')}</span>
-            <span className="text-slate-900 tabular-nums">{t('calc.rateValue')}</span>
+            <span className="text-slate-900 tabular-nums">0.5%</span>
           </div>
           <div className="border-t border-slate-200 pt-3 flex justify-between items-baseline">
             <span className="font-semibold text-slate-900">{t('calc.result')}</span>
-            <span className="text-xl font-bold text-blue-700 tabular-nums">{t('calc.resultValue')}</span>
+            <span className="text-xl font-bold text-blue-700 tabular-nums">{fmtRp(finalTax)}</span>
           </div>
         </div>
       </div>
@@ -565,7 +752,12 @@ function CalcStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () 
           <ArrowLeft className="h-4 w-4 mr-1" />
           {t('calc.prev')}
         </Button>
-        <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800" onClick={onNext}>
+        <Button
+          size="sm"
+          className="bg-slate-900 text-white hover:bg-slate-800"
+          onClick={onNext}
+          disabled={finalTax <= 0}
+        >
           {t('calc.next')}
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
@@ -574,7 +766,15 @@ function CalcStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () 
   );
 }
 
-function BillingStep({ t, tc, onPrev, onNext }: { t: T; tc: T; onPrev: () => void; onNext: () => void }) {
+function BillingStep({
+  t, tc, finalTax, onPrev, onNext,
+}: {
+  t: T;
+  tc: T;
+  finalTax: number;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('billing.title')}</p>
@@ -583,7 +783,7 @@ function BillingStep({ t, tc, onPrev, onNext }: { t: T; tc: T; onPrev: () => voi
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
         <div className="rounded-lg border border-slate-200 p-5">
           <p className="text-xs font-semibold text-slate-500">{t('billing.amount')}</p>
-          <p className="text-xl font-bold text-slate-900 mt-2 tabular-nums">{t('billing.amountValue')}</p>
+          <p className="text-xl font-bold text-slate-900 mt-2 tabular-nums">{fmtRp(finalTax)}</p>
         </div>
         <div className="rounded-lg border border-slate-200 p-5">
           <p className="text-xs font-semibold text-slate-500">{t('billing.method')}</p>
@@ -611,7 +811,15 @@ function BillingStep({ t, tc, onPrev, onNext }: { t: T; tc: T; onPrev: () => voi
   );
 }
 
-function SubmitStep({ t, tc, onPrev }: { t: T; tc: T; onPrev: () => void }) {
+function SubmitStep({
+  t, tc, onPrev, onComplete, completed,
+}: {
+  t: T;
+  tc: T;
+  onPrev: () => void;
+  onComplete: () => Promise<void> | void;
+  completed: boolean;
+}) {
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('submit.title')}</p>
@@ -621,7 +829,7 @@ function SubmitStep({ t, tc, onPrev }: { t: T; tc: T; onPrev: () => void }) {
         <Button size="sm" variant="outline" onClick={() => toast.info(tc('comingSoon'))}>
           {t('submit.generateCta')}
         </Button>
-        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => toast.success(tc('comingSoon'))}>
+        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => toast.info(tc('comingSoon'))}>
           {t('submit.submitCta')}
         </Button>
       </div>
@@ -631,7 +839,12 @@ function SubmitStep({ t, tc, onPrev }: { t: T; tc: T; onPrev: () => void }) {
           <ArrowLeft className="h-4 w-4 mr-1" />
           {t('submit.prev')}
         </Button>
-        <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700" disabled>
+        <Button
+          size="sm"
+          className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-500"
+          onClick={() => void onComplete()}
+          disabled={completed}
+        >
           <CheckCircle2 className="h-4 w-4 mr-1" />
           {t('submit.done')}
         </Button>
