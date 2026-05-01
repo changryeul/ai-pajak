@@ -7251,6 +7251,20 @@
         "date": "2026-04-20",
         "amount": "Rp 24.200.000",
         "summary": "Ringkasan SPT Tahunan Badan, PPh29/PPh25, kredit pajak & koreksi fiskal"
+      },
+      "monthly": {
+        "name": "Laporan ringkasan pembayaran pajak bulanan",
+        "period": "Des 2025",
+        "date": "2026-01-31",
+        "amount": "Rp 20.500.000",
+        "summary": "Ringkasan pembayaran & status pelaporan PPh21, withholding, PPN, PPh25"
+      },
+      "financial": {
+        "name": "Laporan keuangan",
+        "period": "TB 2025",
+        "date": "2026-04-18",
+        "amount": "-",
+        "summary": "Neraca (BS), Laba Rugi (PL), pengelolaan laporan keuangan ditandatangani"
       }
     },
     "aiRisk": {
@@ -7284,6 +7298,7 @@
       }
     },
     "footerNote": "※ Laporan untuk konfirmasi pelanggan. Pelaporan Coretax dan bukti BPE/NTPN divalidasi dan disimpan akhir oleh konsultan.",
-    "statusAiReview": "AI sedang meninjau"
+    "statusAiReview": "AI sedang meninjau",
+    "statusSignedUploaded": "Tertanda diunggah"
   }
 }

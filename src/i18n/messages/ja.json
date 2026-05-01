@@ -7251,6 +7251,20 @@
         "date": "2026-04-20",
         "amount": "Rp 24,200,000",
         "summary": "SPT Tahunan Badan、PPh29/PPh25、税額控除・税務調整の要約"
+      },
+      "monthly": {
+        "name": "月次税務納付サマリーレポート",
+        "period": "2025年12月",
+        "date": "2026-01-31",
+        "amount": "Rp 20,500,000",
+        "summary": "PPh21・源泉税・PPN・PPh25 納付および申告状況の要約"
+      },
+      "financial": {
+        "name": "財務諸表レポート",
+        "period": "2025年帰属",
+        "date": "2026-04-18",
+        "amount": "-",
+        "summary": "貸借対照表(BS)、損益計算書(PL)、財務諸表署名版の管理"
       }
     },
     "aiRisk": {
@@ -7284,6 +7298,7 @@
       }
     },
     "footerNote": "※ レポートは顧客確認用です。Coretax 申告資料と BPE/NTPN 証憑はコンサルが検証後に最終保管します。",
-    "statusAiReview": "AI レビュー中"
+    "statusAiReview": "AI レビュー中",
+    "statusSignedUploaded": "署名版アップロード済"
   }
 }

@@ -7251,6 +7251,20 @@
         "date": "2026-04-20",
         "amount": "Rp 24,200,000",
         "summary": "SPT Tahunan Badan、PPh29/PPh25、税额抵免与税务调整摘要"
+      },
+      "monthly": {
+        "name": "月度税务缴纳摘要报表",
+        "period": "2025 年 12 月",
+        "date": "2026-01-31",
+        "amount": "Rp 20,500,000",
+        "summary": "PPh21、代扣税、PPN、PPh25 缴纳与申报状态摘要"
+      },
+      "financial": {
+        "name": "财务报表报告",
+        "period": "2025 归属",
+        "date": "2026-04-18",
+        "amount": "-",
+        "summary": "资产负债表 (BS)、损益表 (PL)、签字版财务报表管理"
       }
     },
     "aiRisk": {
@@ -7284,6 +7298,7 @@
       }
     },
     "footerNote": "※ 报表仅供客户确认。Coretax 申报资料及 BPE/NTPN 凭证由顾问核验后最终保管。",
-    "statusAiReview": "AI 审查中"
+    "statusAiReview": "AI 审查中",
+    "statusSignedUploaded": "签字版已上传"
   }
 }

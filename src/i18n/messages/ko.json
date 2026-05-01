@@ -7377,6 +7377,20 @@
         "date": "2026-04-20",
         "amount": "Rp 24,200,000",
         "summary": "SPT Tahunan Badan, PPh29/PPh25, 세액공제 및 세무조정 요약"
+      },
+      "monthly": {
+        "name": "월별 세금 납부 요약 보고서",
+        "period": "2025년 12월",
+        "date": "2026-01-31",
+        "amount": "Rp 20,500,000",
+        "summary": "PPh21, 원천세, PPN, PPh25 납부 및 신고 상태 요약"
+      },
+      "financial": {
+        "name": "재무제표 보고서",
+        "period": "2025년 귀속",
+        "date": "2026-04-18",
+        "amount": "-",
+        "summary": "재무상태표(BS), 손익계산서(PL), 재무제표 서명본 관리"
       }
     },
     "aiRisk": {
@@ -7410,6 +7424,7 @@
       }
     },
     "footerNote": "※ 보고서는 고객 확인용이며, Coretax 신고 자료와 BPE/NTPN 증빙은 상담원이 검증 후 최종 보관합니다.",
-    "statusAiReview": "AI 검토 중"
+    "statusAiReview": "AI 검토 중",
+    "statusSignedUploaded": "서명본 업로드 완료"
   }
 }

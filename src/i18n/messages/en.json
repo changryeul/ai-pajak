@@ -7251,6 +7251,20 @@
         "date": "2026-04-20",
         "amount": "Rp 24,200,000",
         "summary": "SPT Tahunan Badan, PPh29/PPh25, tax credits and adjustments summary"
+      },
+      "monthly": {
+        "name": "Monthly tax payment summary report",
+        "period": "Dec 2025",
+        "date": "2026-01-31",
+        "amount": "Rp 20,500,000",
+        "summary": "PPh21, withholding, PPN, PPh25 payment and filing status summary"
+      },
+      "financial": {
+        "name": "Financial statements report",
+        "period": "FY2025",
+        "date": "2026-04-18",
+        "amount": "-",
+        "summary": "Balance sheet (BS), P&L, signed financial-statement management"
       }
     },
     "aiRisk": {
@@ -7284,6 +7298,7 @@
       }
     },
     "footerNote": "※ Reports are for customer review. Coretax filings and BPE/NTPN evidence are validated and finalized by consultants.",
-    "statusAiReview": "AI reviewing"
+    "statusAiReview": "AI reviewing",
+    "statusSignedUploaded": "Signed copy uploaded"
   }
 }

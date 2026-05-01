@@ -20,7 +20,7 @@ interface ReportRow {
   date: string;
   amount: string;
   summary: string;
-  status: 'complete' | 'inProgress' | 'aiReview';
+  status: 'complete' | 'inProgress' | 'aiReview' | 'signedUploaded';
 }
 
 const RISK_ITEMS: ('umkm' | 'benefit' | 'omission' | 'tpDoc')[] = ['umkm', 'benefit', 'omission', 'tpDoc'];
@@ -41,7 +41,17 @@ export function CompanyReportsView() {
   };
 
   const rowsByTab: Record<Tab, ReportRow[]> = {
-    monthly: [],
+    monthly: [
+      {
+        id: 'monthly',
+        name: t('rows.monthly.name'),
+        period: t('rows.monthly.period'),
+        date: t('rows.monthly.date'),
+        amount: t('rows.monthly.amount'),
+        summary: t('rows.monthly.summary'),
+        status: 'complete',
+      },
+    ],
     annual: [
       {
         id: 'annual',
@@ -53,7 +63,17 @@ export function CompanyReportsView() {
         status: 'aiReview',
       },
     ],
-    financial: [],
+    financial: [
+      {
+        id: 'financial',
+        name: t('rows.financial.name'),
+        period: t('rows.financial.period'),
+        date: t('rows.financial.date'),
+        amount: t('rows.financial.amount'),
+        summary: t('rows.financial.summary'),
+        status: 'signedUploaded',
+      },
+    ],
     aiRisk: [
       {
         id: 'aiRisk',
@@ -161,6 +181,10 @@ export function CompanyReportsView() {
                     ) : row.status === 'inProgress' ? (
                       <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
                         {t('statusInProgress')}
+                      </span>
+                    ) : row.status === 'signedUploaded' ? (
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                        {t('statusSignedUploaded')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
