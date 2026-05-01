@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import IndividualFilingHistory from '@/components/reports/IndividualFilingHistory';
+import { CompanyReportsView } from '@/components/reports/CompanyReportsView';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { fmtRp } from '@/lib/utils';
@@ -50,9 +51,13 @@ export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState<ReportType | null>(null);
 
   // INDIVIDUAL customers see the 5-year annual filing history (keynote slide-18/19).
-  // COMPANY customers and internal roles keep the full report suite.
   if (session && hasRole(session, UserRole.CUSTOMER) && session.customerType === 'INDIVIDUAL') {
     return <IndividualFilingHistory />;
+  }
+
+  // COMPANY customers see the redesigned report center (monthly/annual/financial/AI risk).
+  if (session && hasRole(session, UserRole.CUSTOMER) && session.customerType === 'COMPANY') {
+    return <CompanyReportsView />;
   }
 
   const currentYear = new Date().getFullYear();

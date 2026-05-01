@@ -7180,5 +7180,102 @@
       "businessTitle": "行业类型 (Business Type)",
       "businessDesc": "不同行业适用的税种与税率不同。"
     }
+  },
+  "reportsPage": {
+    "pageTitle": "税务报表",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "1. 当前阶段",
+    "steps": {
+      "monthly": "月度概要",
+      "annual": "年终结算",
+      "financial": "财务报表",
+      "aiRisk": "AI 风险"
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "月度报表",
+        "sub": "按税种缴纳/申报",
+        "value": "{count} 项"
+      },
+      "annual": {
+        "title": "年度报表",
+        "sub": "SPT / 法人税",
+        "value": "{count} 项"
+      },
+      "financial": {
+        "title": "财务报表",
+        "sub": "BS / PL / 签字版",
+        "value": "{count} 项"
+      },
+      "aiRisk": {
+        "title": "AI 风险",
+        "sub": "预检",
+        "value": "{count} 项"
+      }
+    },
+    "reports": {
+      "title": "报表分类",
+      "subtitle": "将税务申报与年终结算结果作为报表查看与下载。"
+    },
+    "tabs": {
+      "monthly": "月度税务",
+      "annual": "年度法人税",
+      "financial": "财务报表",
+      "aiRisk": "AI 风险"
+    },
+    "columns": {
+      "name": "报表名称",
+      "period": "期间",
+      "status": "状态",
+      "date": "生成日期",
+      "taxAmount": "相关税额",
+      "summary": "摘要",
+      "action": "操作"
+    },
+    "statusComplete": "已生成",
+    "statusInProgress": "准备中",
+    "ctaPreview": "预览",
+    "ctaPdf": "下载 PDF",
+    "emptyRow": "尚无报表。",
+    "rows": {
+      "aiRisk": {
+        "name": "AI 税务风险分析报表",
+        "period": "2025 归属",
+        "date": "2026-04-19",
+        "amount": "-",
+        "summary": "分析 PKP 转换、TP Doc、员工 benefit、费用异常、销售遗漏可能性"
+      }
+    },
+    "aiRisk": {
+      "title": "AI 税务风险评论",
+      "badges": {
+        "caution": "注意",
+        "review": "需审核",
+        "conditional": "有条件"
+      },
+      "items": {
+        "umkm": {
+          "title": "UMKM 营收上限",
+          "body": "需监控年营收是否接近 Rp 4.8B 临界点。",
+          "level": "caution"
+        },
+        "benefit": {
+          "title": "员工 Benefit",
+          "body": "住房/学费/车辆等费用是否计入员工 PPh21 应税收入需确认。",
+          "level": "review"
+        },
+        "omission": {
+          "title": "销售遗漏",
+          "body": "需顾问核对银行入账与销售清单差异。",
+          "level": "caution"
+        },
+        "tpDoc": {
+          "title": "TP Doc",
+          "body": "需确认关联方与跨境交易规模是否达到阈值。",
+          "level": "conditional"
+        }
+      }
+    },
+    "footerNote": "※ 报表仅供客户确认。Coretax 申报资料及 BPE/NTPN 凭证由顾问核验后最终保管。"
   }
 }

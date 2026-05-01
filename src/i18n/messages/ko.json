@@ -7306,5 +7306,102 @@
       "businessTitle": "사업 유형 (Business Type)",
       "businessDesc": "사업 유형에 따라 적용되는 세목과 세율이 달라집니다."
     }
+  },
+  "reportsPage": {
+    "pageTitle": "세금 보고서",
+    "backToDashboard": "대시보드로",
+    "currentStep": "1. 현재 단계",
+    "steps": {
+      "monthly": "월별 요약",
+      "annual": "연간 결산",
+      "financial": "재무제표",
+      "aiRisk": "AI 리스크"
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "월별 보고서",
+        "sub": "세목별 납부/신고",
+        "value": "{count}건"
+      },
+      "annual": {
+        "title": "연간 보고서",
+        "sub": "SPT / 법인세",
+        "value": "{count}건"
+      },
+      "financial": {
+        "title": "재무제표",
+        "sub": "BS / PL / 서명본",
+        "value": "{count}건"
+      },
+      "aiRisk": {
+        "title": "AI 리스크",
+        "sub": "사전 점검",
+        "value": "{count}개"
+      }
+    },
+    "reports": {
+      "title": "보고서 분류",
+      "subtitle": "세금 신고와 결산 결과를 보고서 형태로 확인하고 다운로드합니다."
+    },
+    "tabs": {
+      "monthly": "월별 세금",
+      "annual": "연간 법인세",
+      "financial": "재무제표",
+      "aiRisk": "AI 리스크"
+    },
+    "columns": {
+      "name": "보고서명",
+      "period": "기간",
+      "status": "상태",
+      "date": "생성일",
+      "taxAmount": "관련 세액",
+      "summary": "요약",
+      "action": "액션"
+    },
+    "statusComplete": "생성 완료",
+    "statusInProgress": "준비 중",
+    "ctaPreview": "미리보기",
+    "ctaPdf": "PDF 다운로드",
+    "emptyRow": "아직 생성된 보고서가 없습니다.",
+    "rows": {
+      "aiRisk": {
+        "name": "AI 세무 리스크 분석 보고서",
+        "period": "2025년 귀속",
+        "date": "2026-04-19",
+        "amount": "-",
+        "summary": "PKP 전환, TP Doc, 임직원 benefit, 비용 이상치, 매출 누락 가능성 분석"
+      }
+    },
+    "aiRisk": {
+      "title": "AI 세무 리스크 코멘트",
+      "badges": {
+        "caution": "주의",
+        "review": "검토",
+        "conditional": "조건부"
+      },
+      "items": {
+        "umkm": {
+          "title": "UMKM 매출 한도",
+          "body": "연매출 Rp 4.8B 기준 접근 여부를 모니터링해야 합니다.",
+          "level": "caution"
+        },
+        "benefit": {
+          "title": "임직원 Benefit",
+          "body": "주택/학자금/차량 제공 비용은 직원 PPh21 과세소득 반영 여부 확인 필요",
+          "level": "review"
+        },
+        "omission": {
+          "title": "매출 누락",
+          "body": "은행 입금과 매출 리스트 차이를 상담원이 확인해야 합니다.",
+          "level": "caution"
+        },
+        "tpDoc": {
+          "title": "TP Doc",
+          "body": "특수관계 및 해외거래 규모가 threshold를 충족하는지 확인 필요",
+          "level": "conditional"
+        }
+      }
+    },
+    "footerNote": "※ 보고서는 고객 확인용이며, Coretax 신고 자료와 BPE/NTPN 증빙은 상담원이 검증 후 최종 보관합니다."
   }
 }

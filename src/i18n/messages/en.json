@@ -7180,5 +7180,102 @@
       "businessTitle": "Business Type",
       "businessDesc": "Applicable tax types and rates depend on the business type."
     }
+  },
+  "reportsPage": {
+    "pageTitle": "Tax reports",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "1. Current step",
+    "steps": {
+      "monthly": "Monthly summary",
+      "annual": "Year-end",
+      "financial": "Financials",
+      "aiRisk": "AI risk"
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "Monthly report",
+        "sub": "Per-tax filing/payment",
+        "value": "{count}"
+      },
+      "annual": {
+        "title": "Year-end report",
+        "sub": "SPT / corporate tax",
+        "value": "{count}"
+      },
+      "financial": {
+        "title": "Financial statements",
+        "sub": "BS / PL / signed",
+        "value": "{count}"
+      },
+      "aiRisk": {
+        "title": "AI risk",
+        "sub": "Pre-check",
+        "value": "{count}"
+      }
+    },
+    "reports": {
+      "title": "Report categories",
+      "subtitle": "Review and download tax filings and year-end results as reports."
+    },
+    "tabs": {
+      "monthly": "Monthly tax",
+      "annual": "Year-end corp",
+      "financial": "Financials",
+      "aiRisk": "AI risk"
+    },
+    "columns": {
+      "name": "Report",
+      "period": "Period",
+      "status": "Status",
+      "date": "Created",
+      "taxAmount": "Related tax",
+      "summary": "Summary",
+      "action": "Action"
+    },
+    "statusComplete": "Ready",
+    "statusInProgress": "Preparing",
+    "ctaPreview": "Preview",
+    "ctaPdf": "Download PDF",
+    "emptyRow": "No reports yet.",
+    "rows": {
+      "aiRisk": {
+        "name": "AI tax risk analysis report",
+        "period": "FY2025",
+        "date": "2026-04-19",
+        "amount": "-",
+        "summary": "PKP transition, TP Doc, employee benefit, cost outlier, sales-omission analysis"
+      }
+    },
+    "aiRisk": {
+      "title": "AI tax risk comments",
+      "badges": {
+        "caution": "Caution",
+        "review": "Review",
+        "conditional": "Conditional"
+      },
+      "items": {
+        "umkm": {
+          "title": "UMKM revenue cap",
+          "body": "Monitor whether annual revenue is approaching the Rp 4.8B threshold.",
+          "level": "caution"
+        },
+        "benefit": {
+          "title": "Employee benefit",
+          "body": "Verify if housing / tuition / vehicle benefits are reflected in PPh21 taxable income.",
+          "level": "review"
+        },
+        "omission": {
+          "title": "Sales omission",
+          "body": "A consultant should reconcile bank deposits vs sales list discrepancies.",
+          "level": "caution"
+        },
+        "tpDoc": {
+          "title": "TP Doc",
+          "body": "Verify whether related-party / cross-border volumes exceed the TP Doc threshold.",
+          "level": "conditional"
+        }
+      }
+    },
+    "footerNote": "※ Reports are for customer review. Coretax filings and BPE/NTPN evidence are validated and finalized by consultants."
   }
 }

@@ -7180,5 +7180,102 @@
       "businessTitle": "事業タイプ (Business Type)",
       "businessDesc": "事業タイプにより適用される税目と税率が異なります。"
     }
+  },
+  "reportsPage": {
+    "pageTitle": "税務レポート",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "1. 現在のステップ",
+    "steps": {
+      "monthly": "月次サマリー",
+      "annual": "年次決算",
+      "financial": "財務諸表",
+      "aiRisk": "AI リスク"
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "月次レポート",
+        "sub": "税目別の納付/申告",
+        "value": "{count}件"
+      },
+      "annual": {
+        "title": "年次レポート",
+        "sub": "SPT / 法人税",
+        "value": "{count}件"
+      },
+      "financial": {
+        "title": "財務諸表",
+        "sub": "BS / PL / 署名版",
+        "value": "{count}件"
+      },
+      "aiRisk": {
+        "title": "AI リスク",
+        "sub": "事前チェック",
+        "value": "{count}件"
+      }
+    },
+    "reports": {
+      "title": "レポート分類",
+      "subtitle": "税務申告と決算結果をレポートとして確認・ダウンロードします。"
+    },
+    "tabs": {
+      "monthly": "月次税務",
+      "annual": "年次法人税",
+      "financial": "財務諸表",
+      "aiRisk": "AI リスク"
+    },
+    "columns": {
+      "name": "レポート名",
+      "period": "期間",
+      "status": "ステータス",
+      "date": "作成日",
+      "taxAmount": "関連税額",
+      "summary": "要約",
+      "action": "アクション"
+    },
+    "statusComplete": "生成完了",
+    "statusInProgress": "準備中",
+    "ctaPreview": "プレビュー",
+    "ctaPdf": "PDFダウンロード",
+    "emptyRow": "まだレポートがありません。",
+    "rows": {
+      "aiRisk": {
+        "name": "AI 税務リスク分析レポート",
+        "period": "2025年帰属",
+        "date": "2026-04-19",
+        "amount": "-",
+        "summary": "PKP 移行、TP Doc、従業員ベネフィット、費用異常、売上漏れの可能性分析"
+      }
+    },
+    "aiRisk": {
+      "title": "AI 税務リスクコメント",
+      "badges": {
+        "caution": "注意",
+        "review": "要レビュー",
+        "conditional": "条件付き"
+      },
+      "items": {
+        "umkm": {
+          "title": "UMKM 売上上限",
+          "body": "年商 Rp 4.8B 接近をモニタリングする必要があります。",
+          "level": "caution"
+        },
+        "benefit": {
+          "title": "従業員ベネフィット",
+          "body": "住宅 / 学費 / 車両費用が PPh21 課税対象に反映されているか確認が必要。",
+          "level": "review"
+        },
+        "omission": {
+          "title": "売上漏れ",
+          "body": "銀行入金と売上リストの差異をコンサルが確認する必要があります。",
+          "level": "caution"
+        },
+        "tpDoc": {
+          "title": "TP Doc",
+          "body": "関連当事者・海外取引の規模が閾値を満たすか確認が必要。",
+          "level": "conditional"
+        }
+      }
+    },
+    "footerNote": "※ レポートは顧客確認用です。Coretax 申告資料と BPE/NTPN 証憑はコンサルが検証後に最終保管します。"
   }
 }

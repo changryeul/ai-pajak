@@ -7180,5 +7180,102 @@
       "businessTitle": "Jenis Usaha",
       "businessDesc": "Jenis pajak dan tarif yang berlaku tergantung jenis usaha."
     }
+  },
+  "reportsPage": {
+    "pageTitle": "Laporan pajak",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "1. Tahap saat ini",
+    "steps": {
+      "monthly": "Ringkasan bulanan",
+      "annual": "Tutup buku",
+      "financial": "Lap. keuangan",
+      "aiRisk": "Risiko AI"
+    },
+    "statusCards": {
+      "monthly": {
+        "title": "Laporan bulanan",
+        "sub": "Pelaporan / pembayaran per jenis",
+        "value": "{count}"
+      },
+      "annual": {
+        "title": "Laporan tahunan",
+        "sub": "SPT / PPh Badan",
+        "value": "{count}"
+      },
+      "financial": {
+        "title": "Laporan keuangan",
+        "sub": "BS / PL / Tertanda",
+        "value": "{count}"
+      },
+      "aiRisk": {
+        "title": "Risiko AI",
+        "sub": "Pra-pemeriksaan",
+        "value": "{count}"
+      }
+    },
+    "reports": {
+      "title": "Kategori laporan",
+      "subtitle": "Tinjau dan unduh hasil pelaporan dan tutup buku dalam bentuk laporan."
+    },
+    "tabs": {
+      "monthly": "Pajak bulanan",
+      "annual": "PPh Badan tahunan",
+      "financial": "Lap. keuangan",
+      "aiRisk": "Risiko AI"
+    },
+    "columns": {
+      "name": "Laporan",
+      "period": "Periode",
+      "status": "Status",
+      "date": "Dibuat",
+      "taxAmount": "Pajak terkait",
+      "summary": "Ringkasan",
+      "action": "Aksi"
+    },
+    "statusComplete": "Selesai",
+    "statusInProgress": "Disiapkan",
+    "ctaPreview": "Pratinjau",
+    "ctaPdf": "Unduh PDF",
+    "emptyRow": "Belum ada laporan.",
+    "rows": {
+      "aiRisk": {
+        "name": "Laporan analisis risiko pajak AI",
+        "period": "TB 2025",
+        "date": "2026-04-19",
+        "amount": "-",
+        "summary": "Analisis transisi PKP, TP Doc, benefit karyawan, anomali biaya, kemungkinan penjualan tidak dicatat"
+      }
+    },
+    "aiRisk": {
+      "title": "Komentar risiko pajak AI",
+      "badges": {
+        "caution": "Perhatian",
+        "review": "Tinjau",
+        "conditional": "Bersyarat"
+      },
+      "items": {
+        "umkm": {
+          "title": "Batas omzet UMKM",
+          "body": "Pantau apakah omzet tahunan mendekati ambang Rp 4,8B.",
+          "level": "caution"
+        },
+        "benefit": {
+          "title": "Benefit karyawan",
+          "body": "Pastikan biaya rumah / kuliah / kendaraan tercermin pada penghasilan PPh21.",
+          "level": "review"
+        },
+        "omission": {
+          "title": "Penjualan tidak dicatat",
+          "body": "Konsultan perlu rekonsiliasi setoran bank vs daftar penjualan.",
+          "level": "caution"
+        },
+        "tpDoc": {
+          "title": "TP Doc",
+          "body": "Verifikasi apakah volume pihak terkait / luar negeri melewati ambang TP Doc.",
+          "level": "conditional"
+        }
+      }
+    },
+    "footerNote": "※ Laporan untuk konfirmasi pelanggan. Pelaporan Coretax dan bukti BPE/NTPN divalidasi dan disimpan akhir oleh konsultan."
   }
 }
