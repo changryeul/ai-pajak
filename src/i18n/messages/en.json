@@ -7122,5 +7122,40 @@
         }
       }
     }
+  },
+  "companyProfilePage": {
+    "pageTitle": "Company profile",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "1. Current step",
+    "steps": {
+      "basic": "Basics",
+      "tax": "Tax info",
+      "ownership": "Ownership",
+      "business": "Business type",
+      "ai": "AI review"
+    },
+    "hero": {
+      "label": "Company Profile",
+      "title": "One place for the company info that powers tax automation",
+      "subtitle": "Fill in basic, tax, ownership, and business-specific data — it flows into Coretax filings and tax calculations."
+    },
+    "quickEntries": {
+      "first": {
+        "title": "First-time setup?",
+        "body": "Start with the basic information section."
+      },
+      "tax": {
+        "title": "Need a tax-info change?",
+        "body": "Check UMKM / PPh25 election and PKP status."
+      },
+      "ownership": {
+        "title": "Update ownership?",
+        "body": "Manage foreign shareholders and parent company."
+      },
+      "business": {
+        "title": "Business / special items?",
+        "body": "Construction / real estate / F&B / mining specifics."
+      }
+    }
   }
 }

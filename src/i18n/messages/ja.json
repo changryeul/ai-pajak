@@ -7122,5 +7122,40 @@
         }
       }
     }
+  },
+  "companyProfilePage": {
+    "pageTitle": "会社情報",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "1. 現在のステップ",
+    "steps": {
+      "basic": "基本情報",
+      "tax": "税務情報",
+      "ownership": "株主構成",
+      "business": "業種",
+      "ai": "AI レビュー"
+    },
+    "hero": {
+      "label": "Company Profile",
+      "title": "税務自動化に必要な会社情報を一元管理します",
+      "subtitle": "基本情報・税務情報・株主構成・業種/特殊項目を入力すると、Coretax 申告と税額計算へ自動反映されます。"
+    },
+    "quickEntries": {
+      "first": {
+        "title": "初めての登録ですか?",
+        "body": "まず基本情報から入力してください。"
+      },
+      "tax": {
+        "title": "税務情報の変更が必要ですか?",
+        "body": "UMKM/PPh25 の選択時期と PKP 区分を確認します。"
+      },
+      "ownership": {
+        "title": "株主構成の更新?",
+        "body": "外国株主、親会社情報を管理します。"
+      },
+      "business": {
+        "title": "業種・特殊項目?",
+        "body": "建設・不動産・F&B・鉱業など業種別の項目。"
+      }
+    }
   }
 }

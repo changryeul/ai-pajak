@@ -7248,5 +7248,40 @@
         }
       }
     }
+  },
+  "companyProfilePage": {
+    "pageTitle": "회사 정보",
+    "backToDashboard": "대시보드로",
+    "currentStep": "1. 현재 단계",
+    "steps": {
+      "basic": "기본 정보",
+      "tax": "세무 정보",
+      "ownership": "지분 구조",
+      "business": "업종",
+      "ai": "AI 검토"
+    },
+    "hero": {
+      "label": "Company Profile",
+      "title": "세무 자동화에 필요한 회사 정보를 한 곳에서 관리합니다",
+      "subtitle": "기본 정보, 세무 정보, 지분 구조, 업종/특수 항목을 입력하면 Coretax 신고와 세액 산정에 자동 반영됩니다."
+    },
+    "quickEntries": {
+      "first": {
+        "title": "처음 등록인가요?",
+        "body": "기본 정보부터 차근차근 입력하세요."
+      },
+      "tax": {
+        "title": "세무 정보 변경이 필요한가요?",
+        "body": "UMKM/PPh25 선택 시점과 PKP 여부를 확인하세요."
+      },
+      "ownership": {
+        "title": "지분 구조 업데이트?",
+        "body": "외국 주주, 모회사 정보를 관리하세요."
+      },
+      "business": {
+        "title": "업종/특수 정보?",
+        "body": "건설/부동산/F&B/광업 등 업종별 항목을 확인하세요."
+      }
+    }
   }
 }

@@ -7122,5 +7122,40 @@
         }
       }
     }
+  },
+  "companyProfilePage": {
+    "pageTitle": "Profil perusahaan",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "1. Tahap saat ini",
+    "steps": {
+      "basic": "Dasar",
+      "tax": "Info pajak",
+      "ownership": "Kepemilikan",
+      "business": "Jenis usaha",
+      "ai": "Tinjauan AI"
+    },
+    "hero": {
+      "label": "Company Profile",
+      "title": "Satu tempat untuk data perusahaan yang menggerakkan otomasi pajak",
+      "subtitle": "Isi data dasar, pajak, kepemilikan, dan informasi spesifik usaha — semuanya terhubung ke pelaporan Coretax dan perhitungan pajak."
+    },
+    "quickEntries": {
+      "first": {
+        "title": "Pengaturan awal?",
+        "body": "Mulai dari bagian Info dasar."
+      },
+      "tax": {
+        "title": "Perlu ubah info pajak?",
+        "body": "Cek pilihan UMKM / PPh25 dan status PKP."
+      },
+      "ownership": {
+        "title": "Ubah kepemilikan?",
+        "body": "Kelola pemegang saham asing dan induk perusahaan."
+      },
+      "business": {
+        "title": "Usaha / item khusus?",
+        "body": "Konstruksi / properti / F&B / pertambangan."
+      }
+    }
   }
 }

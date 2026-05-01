@@ -258,7 +258,7 @@ export default function CompanyProfilePage() {
   const Section = ({ id, title, icon: Icon, children, badge }: { id: string; title: string; icon: typeof Building2; children: React.ReactNode; badge?: string }) => {
     const isOpen = expandedSections.has(id);
     return (
-      <Card className="border-0 shadow-sm">
+      <Card id={`section-${id}`} className="border-0 shadow-sm scroll-mt-24">
         <button
           type="button"
           onClick={() => toggleSection(id)}
@@ -294,16 +294,13 @@ export default function CompanyProfilePage() {
   const progressBg = isComplete ? 'from-green-50 to-emerald-50 border-green-200' : isReady ? 'from-emerald-50 to-teal-50 border-emerald-200' : completeness >= 50 ? 'from-amber-50 to-orange-50 border-amber-200' : 'from-red-50 to-rose-50 border-red-200';
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Building2 className="h-6 w-6 text-indigo-600" />
-          {t('k49_f0bca1')}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {profile.company_name || t('k50_2e47c1')} — {t('k51_ce793a')}
-        </p>
-      </div>
+    <div className="container mx-auto py-8 px-4 max-w-6xl">
+      <CompanyProfileHeader
+        completeness={completeness}
+        onSave={handleSave}
+        saving={saving}
+      />
+
 
       {/* LinkedIn-style Profile Completeness Card */}
       <div className={`mb-6 p-5 rounded-2xl border-2 bg-gradient-to-br ${progressBg}`}>
@@ -663,6 +660,91 @@ export default function CompanyProfilePage() {
         <p className="text-[11px] text-gray-400 text-center mt-2">
           {t('saveDesc')}
         </p>
+      </div>
+    </div>
+  );
+}
+
+const STEP_KEYS: ('basic' | 'tax' | 'ownership' | 'business' | 'ai')[] = [
+  'basic', 'tax', 'ownership', 'business', 'ai',
+];
+
+function CompanyProfileHeader({
+  completeness,
+  onSave,
+  saving,
+}: {
+  completeness: number;
+  onSave: () => void;
+  saving: boolean;
+}) {
+  const tp = useTranslations('companyProfilePage');
+  const tcommon = useTranslations('common');
+  const params = useParams();
+  const router = useRouter();
+  const locale = params.locale as string;
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(`section-${id}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  return (
+    <div className="mb-6">
+      {/* Title row */}
+      <div className="flex items-start justify-between mb-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{tp('pageTitle')}</h1>
+        <div className="flex items-center gap-2">
+          <Button onClick={onSave} disabled={saving} size="sm" className="bg-slate-900 text-white hover:bg-slate-800">
+            {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+            {tcommon('save')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => router.push(`/${locale}/dashboard`)}>
+            {tp('backToDashboard')}
+          </Button>
+        </div>
+      </div>
+
+      {/* Step indicator */}
+      <div className="flex flex-wrap items-center gap-2 mb-5">
+        <span className="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">
+          {tp('currentStep')}
+        </span>
+        {STEP_KEYS.map((s) => (
+          <span key={s} className="inline-flex items-center rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-500">
+            {tp(`steps.${s}`)}
+          </span>
+        ))}
+      </div>
+
+      {/* Hero */}
+      <div className="rounded-2xl bg-slate-900 p-7 md:p-9 text-white mb-6">
+        <p className="text-slate-400 text-sm mb-2">{tp('hero.label')}</p>
+        <h2 className="text-2xl md:text-3xl font-bold leading-tight">{tp('hero.title')}</h2>
+        <p className="text-slate-300 text-sm mt-3 max-w-4xl">{tp('hero.subtitle')}</p>
+        <div className="mt-5 inline-flex items-center rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200">
+          프로필 완성도 {completeness}%
+        </div>
+      </div>
+
+      {/* Quick entries */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {([
+          { id: 'first', target: 'basic' },
+          { id: 'tax', target: 'legal' },
+          { id: 'ownership', target: 'ownership' },
+          { id: 'business', target: 'business' },
+        ] as const).map((entry) => (
+          <button
+            key={entry.id}
+            type="button"
+            onClick={() => scrollTo(entry.target)}
+            className="rounded-xl border border-slate-200 bg-white p-5 text-left transition-shadow hover:shadow-sm hover:border-slate-300"
+          >
+            <p className="text-sm font-semibold text-slate-900">{tp(`quickEntries.${entry.id}.title`)}</p>
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">{tp(`quickEntries.${entry.id}.body`)}</p>
+          </button>
+        ))}
       </div>
     </div>
   );

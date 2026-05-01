@@ -7122,5 +7122,40 @@
         }
       }
     }
+  },
+  "companyProfilePage": {
+    "pageTitle": "公司信息",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "1. 当前阶段",
+    "steps": {
+      "basic": "基本信息",
+      "tax": "税务信息",
+      "ownership": "股权结构",
+      "business": "行业",
+      "ai": "AI 审查"
+    },
+    "hero": {
+      "label": "Company Profile",
+      "title": "在一个页面管理驱动税务自动化的公司信息",
+      "subtitle": "填写基本/税务/股权/行业相关信息，将自动应用于 Coretax 申报与税额计算。"
+    },
+    "quickEntries": {
+      "first": {
+        "title": "初次登记？",
+        "body": "从基本信息部分开始填写。"
+      },
+      "tax": {
+        "title": "需要修改税务信息？",
+        "body": "查看 UMKM / PPh25 选择时点与 PKP 状态。"
+      },
+      "ownership": {
+        "title": "更新股权结构？",
+        "body": "管理外资股东与母公司信息。"
+      },
+      "business": {
+        "title": "行业/特殊项目？",
+        "body": "建筑/地产/F&B/采矿等行业事项。"
+      }
+    }
   }
 }
