@@ -7156,6 +7156,29 @@
         "title": "業種・特殊項目?",
         "body": "建設・不動産・F&B・鉱業など業種別の項目。"
       }
+    },
+    "simple": {
+      "title": "会社税務プロフィール",
+      "subtitle": "税目判定、申告スケジュール、源泉税/PPN/法人税判断に必要な会社基本情報を管理します。",
+      "save": "保存",
+      "saving": "保存中...",
+      "completenessTitle": "プロフィール完成度 {pct}%",
+      "completenessDesc": "不足情報を埋めると AI 税務判定の精度が上がります。",
+      "completenessBadge": "完成度 {pct}%",
+      "basicTitle": "基本情報 (Basic Info)",
+      "requiredBadge": "必須",
+      "npwpAutoInput": "NPWP カード画像から自動入力",
+      "npwpAutoCta": "写真撮影 / アップロード",
+      "fields": {
+        "companyName": "会社名",
+        "npwp": "NPWP",
+        "address": "住所",
+        "kbli": "KBLI コード",
+        "phone": "電話番号",
+        "email": "メール"
+      },
+      "businessTitle": "事業タイプ (Business Type)",
+      "businessDesc": "事業タイプにより適用される税目と税率が異なります。"
     }
   }
 }

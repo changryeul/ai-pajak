@@ -7282,6 +7282,29 @@
         "title": "업종/특수 정보?",
         "body": "건설/부동산/F&B/광업 등 업종별 항목을 확인하세요."
       }
+    },
+    "simple": {
+      "title": "회사 세무 프로필",
+      "subtitle": "세목 판정, 신고 일정, 원천세/PPN/법인세 판단에 필요한 회사 기본정보를 관리합니다.",
+      "save": "저장",
+      "saving": "저장 중...",
+      "completenessTitle": "프로필 완성도 {pct}%",
+      "completenessDesc": "누락된 정보를 채우면 AI 세무 판정 정확도가 올라갑니다.",
+      "completenessBadge": "완성도 {pct}%",
+      "basicTitle": "기본 정보 (Basic Info)",
+      "requiredBadge": "필수",
+      "npwpAutoInput": "NPWP 카드 사진으로 자동 입력",
+      "npwpAutoCta": "사진 촬영/업로드",
+      "fields": {
+        "companyName": "회사명",
+        "npwp": "NPWP",
+        "address": "주소",
+        "kbli": "KBLI 코드",
+        "phone": "전화번호",
+        "email": "이메일"
+      },
+      "businessTitle": "사업 유형 (Business Type)",
+      "businessDesc": "사업 유형에 따라 적용되는 세목과 세율이 달라집니다."
     }
   }
 }

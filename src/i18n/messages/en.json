@@ -7156,6 +7156,29 @@
         "title": "Business / special items?",
         "body": "Construction / real estate / F&B / mining specifics."
       }
+    },
+    "simple": {
+      "title": "Company tax profile",
+      "subtitle": "Manage the core company info used for tax-type assessment, filing schedule, and PPh/PPN/corporate-tax decisions.",
+      "save": "Save",
+      "saving": "Saving...",
+      "completenessTitle": "Profile {pct}% complete",
+      "completenessDesc": "Filling missing info improves AI tax-decision accuracy.",
+      "completenessBadge": "{pct}% complete",
+      "basicTitle": "Basic Info",
+      "requiredBadge": "Required",
+      "npwpAutoInput": "Auto-fill from NPWP card photo",
+      "npwpAutoCta": "Capture / Upload photo",
+      "fields": {
+        "companyName": "Company name",
+        "npwp": "NPWP",
+        "address": "Address",
+        "kbli": "KBLI code",
+        "phone": "Phone",
+        "email": "Email"
+      },
+      "businessTitle": "Business Type",
+      "businessDesc": "Applicable tax types and rates depend on the business type."
     }
   }
 }

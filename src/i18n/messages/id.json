@@ -7156,6 +7156,29 @@
         "title": "Usaha / item khusus?",
         "body": "Konstruksi / properti / F&B / pertambangan."
       }
+    },
+    "simple": {
+      "title": "Profil pajak perusahaan",
+      "subtitle": "Kelola data inti perusahaan untuk penentuan jenis pajak, jadwal pelaporan, serta keputusan PPh/PPN/PPh Badan.",
+      "save": "Simpan",
+      "saving": "Menyimpan...",
+      "completenessTitle": "Profil {pct}% lengkap",
+      "completenessDesc": "Mengisi info yang hilang meningkatkan akurasi keputusan AI.",
+      "completenessBadge": "{pct}% lengkap",
+      "basicTitle": "Info Dasar",
+      "requiredBadge": "Wajib",
+      "npwpAutoInput": "Isi otomatis dari foto kartu NPWP",
+      "npwpAutoCta": "Ambil / Unggah foto",
+      "fields": {
+        "companyName": "Nama perusahaan",
+        "npwp": "NPWP",
+        "address": "Alamat",
+        "kbli": "Kode KBLI",
+        "phone": "Telepon",
+        "email": "Email"
+      },
+      "businessTitle": "Jenis Usaha",
+      "businessDesc": "Jenis pajak dan tarif yang berlaku tergantung jenis usaha."
     }
   }
 }

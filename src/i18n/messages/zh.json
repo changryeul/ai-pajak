@@ -7156,6 +7156,29 @@
         "title": "行业/特殊项目？",
         "body": "建筑/地产/F&B/采矿等行业事项。"
       }
+    },
+    "simple": {
+      "title": "公司税务档案",
+      "subtitle": "管理税种判定、申报日程、PPh/PPN/法人税判断所需的公司基本信息。",
+      "save": "保存",
+      "saving": "保存中...",
+      "completenessTitle": "档案完成度 {pct}%",
+      "completenessDesc": "补全缺失信息可提升 AI 税务判定准确度。",
+      "completenessBadge": "完成度 {pct}%",
+      "basicTitle": "基本信息 (Basic Info)",
+      "requiredBadge": "必填",
+      "npwpAutoInput": "从 NPWP 卡片照片自动填写",
+      "npwpAutoCta": "拍照 / 上传",
+      "fields": {
+        "companyName": "公司名称",
+        "npwp": "NPWP",
+        "address": "地址",
+        "kbli": "KBLI 代码",
+        "phone": "电话",
+        "email": "邮箱"
+      },
+      "businessTitle": "行业类型 (Business Type)",
+      "businessDesc": "不同行业适用的税种与税率不同。"
     }
   }
 }

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import {
   Building2, Save, Loader2, CheckCircle, AlertTriangle,
   Sparkles, HelpCircle, ChevronDown, ChevronRight,
@@ -295,85 +296,20 @@ export default function CompanyProfilePage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <CompanyProfileHeader
-        completeness={completeness}
-        onSave={handleSave}
-        saving={saving}
+      <SimpleHeader completeness={completeness} onSave={handleSave} saving={saving} />
+      <SimpleCompletenessCard completeness={completeness} />
+      <SimpleBasicInfo
+        profile={profile}
+        updateField={updateField}
+        ocrLoading={ocrLoading}
+        onOcrFile={(file) => handleNpwpOcr(file)}
+      />
+      <SimpleBusinessType
+        categories={BUSINESS_CATEGORIES}
+        selected={profile.business_category}
+        onSelect={(v) => updateField('business_category', v)}
       />
 
-
-      {/* LinkedIn-style Profile Completeness Card */}
-      <div className={`mb-6 p-5 rounded-2xl border-2 bg-gradient-to-br ${progressBg}`}>
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <div className="flex items-center gap-3">
-            {isComplete ? (
-              <div className="p-2 rounded-full bg-green-500 shadow-lg shadow-green-500/30">
-                <Trophy className="h-5 w-5 text-white" />
-              </div>
-            ) : (
-              <div className="relative h-12 w-12 flex items-center justify-center">
-                <svg className="absolute inset-0 -rotate-90" viewBox="0 0 48 48">
-                  <circle cx="24" cy="24" r="20" fill="none" stroke="#e5e7eb" strokeWidth="4" />
-                  <circle cx="24" cy="24" r="20" fill="none"
-                    stroke={isReady ? '#10b981' : completeness >= 50 ? '#f59e0b' : '#ef4444'}
-                    strokeWidth="4" strokeDasharray={`${(completeness / 100) * 125.66} 125.66`}
-                    strokeLinecap="round" className="transition-all duration-700" />
-                </svg>
-                <span className="text-xs font-bold text-gray-700">{completeness}%</span>
-              </div>
-            )}
-            <div>
-              <p className="font-bold text-base text-gray-900">
-                {isComplete ? `🎉 ${t('k52_367729')}!` : isReady ? t('k53_669bdc') : t('k54_7c9d02')}
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                {isComplete
-                  ? t('k55_dc489b')
-                  : isReady
-                  ? t('k56_63989b')
-                  : t('k57_77d952')}
-              </p>
-            </div>
-          </div>
-          {isReady && (
-            <Button size="sm" onClick={() => router.push(`/${locale}/dashboard`)} className="flex-shrink-0">
-              {t('k58_bbcea4')}
-            </Button>
-          )}
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-2.5 bg-white/60 rounded-full overflow-hidden mb-3">
-          <div className={`h-full ${progressColor} transition-all duration-700 ease-out`} style={{ width: `${completeness}%` }} />
-        </div>
-
-        {/* Next items recommendation */}
-        {!isComplete && nextItems.length > 0 && (
-          <div>
-            <p className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-2">{t('k59_776c06')}</p>
-            <div className="grid sm:grid-cols-2 gap-2">
-              {nextItems.map((item, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 bg-white/70 rounded-lg border border-white">
-                  <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] font-bold text-indigo-700">+{item.boost}%</span>
-                  </div>
-                  <span className="text-xs text-gray-700 flex-1 truncate">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="mb-4 flex items-center justify-end gap-2">
-        <Badge className={isReady ? 'bg-green-100 text-green-700' : completeness >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}>
-          {t('k60_262eb0')} {completeness}%
-        </Badge>
-        <Button onClick={handleSave} disabled={saving} size="sm">
-          {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-          {t('k61_9d0a47')}
-        </Button>
-      </div>
 
       {message && (
         <div className={`mb-4 p-3 rounded-xl text-sm flex items-center gap-2 ${message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
@@ -383,86 +319,6 @@ export default function CompanyProfilePage() {
       )}
 
       <div className="space-y-3">
-        {/* Section 0: Basic Info (with NPWP OCR) */}
-        <Section id="basic" title={t('k62_2b51db')} icon={FileText} badge={t('k63_b63c09')}>
-          <p className="text-[11px] text-gray-500 mb-2">{t('k64_fe2bf6')}</p>
-
-          {/* NPWP OCR Upload */}
-          <div className="border-2 border-dashed border-blue-200 rounded-xl p-3 text-center bg-blue-50/50">
-            <div className="flex items-center justify-center gap-2">
-              <Camera className="h-4 w-4 text-blue-500" />
-              <p className="text-xs text-blue-700 font-medium">NPWP {t('k65_633b57')}</p>
-            </div>
-            <label className="inline-flex items-center gap-2 mt-2 rounded-lg bg-blue-600 px-4 py-1.5 text-white text-xs font-medium hover:bg-blue-700 transition-colors cursor-pointer">
-              {ocrLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
-              {ocrLoading ? 'AI ' + t('k66_4f1c1b') : t('k67_d15ce8')}
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                disabled={ocrLoading}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleNpwpOcr(file);
-                  e.target.value = '';
-                }}
-              />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-            <div className="md:col-span-2">
-              <Label className="text-xs">{t('k50_2e47c1')} <span className="text-red-500">*</span></Label>
-              <Input
-                value={profile.company_name || ''}
-                onChange={e => updateField('company_name', e.target.value)}
-                placeholder="PT. Example Indonesia"
-                className={`text-sm ${emptyCls(profile.company_name, true)}`}
-              />
-            </div>
-            <div>
-              <Label className="text-xs">NPWP <span className="text-red-500">*</span></Label>
-              <Input
-                value={profile.npwp || ''}
-                onChange={e => updateField('npwp', e.target.value)}
-                placeholder="XX.XXX.XXX.X-XXX.XXX"
-                className={`font-mono text-sm tracking-wider ${emptyCls(profile.npwp, true)}`}
-              />
-            </div>
-            <div>
-              <Label className="text-xs">{t('k68_45f790')}</Label>
-              <Input
-                value={profile.address || ''}
-                onChange={e => updateField('address', e.target.value)}
-                placeholder="Jl. Sudirman No. 1, Jakarta"
-                className={`text-sm ${emptyCls(profile.address)}`}
-              />
-            </div>
-          </div>
-        </Section>
-
-        {/* Section 1: Business Type */}
-        <Section id="business" title={t('k69_2aa9e2')} icon={Briefcase} badge={t('k70_3cec60')}>
-          <p className="text-[11px] text-gray-500 mb-2">{t('k71_ffc082')}</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {BUSINESS_CATEGORIES.map(cat => {
-              const Icon = cat.icon;
-              const selected = profile.business_category === cat.value;
-              return (
-                <button key={cat.value} type="button"
-                  onClick={() => updateField('business_category', cat.value)}
-                  className={`text-left p-3 rounded-lg border-2 transition-all ${selected ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
-                >
-                  <Icon className={`h-4 w-4 mb-1 ${selected ? 'text-indigo-600' : 'text-gray-400'}`} />
-                  <p className="text-xs font-medium">{cat.label}</p>
-                  {cat.taxNote && <p className="text-[10px] text-amber-600 mt-0.5">{cat.taxNote}</p>}
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-
         {/* Section 2: Legal / UMKM */}
         <Section id="legal" title={t('k72_45d02a')} icon={Shield} badge="PPh 25 vs PPh Final">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -665,86 +521,164 @@ export default function CompanyProfilePage() {
   );
 }
 
-const STEP_KEYS: ('basic' | 'tax' | 'ownership' | 'business' | 'ai')[] = [
-  'basic', 'tax', 'ownership', 'business', 'ai',
-];
-
-function CompanyProfileHeader({
-  completeness,
-  onSave,
-  saving,
-}: {
-  completeness: number;
-  onSave: () => void;
-  saving: boolean;
-}) {
-  const tp = useTranslations('companyProfilePage');
-  const tcommon = useTranslations('common');
-  const params = useParams();
-  const router = useRouter();
-  const locale = params.locale as string;
-
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(`section-${id}`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
+function SimpleHeader({ completeness, onSave, saving }: { completeness: number; onSave: () => void; saving: boolean }) {
+  void completeness;
+  const tp = useTranslations('companyProfilePage.simple');
   return (
-    <div className="mb-6">
-      {/* Title row */}
-      <div className="flex items-start justify-between mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{tp('pageTitle')}</h1>
-        <div className="flex items-center gap-2">
-          <Button onClick={onSave} disabled={saving} size="sm" className="bg-slate-900 text-white hover:bg-slate-800">
-            {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-            {tcommon('save')}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push(`/${locale}/dashboard`)}>
-            {tp('backToDashboard')}
-          </Button>
-        </div>
+    <div className="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{tp('title')}</h1>
+        <p className="text-sm text-slate-500 mt-2 max-w-3xl">{tp('subtitle')}</p>
       </div>
+      <Button onClick={onSave} disabled={saving} size="sm" className="bg-slate-900 text-white hover:bg-slate-800 shrink-0">
+        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+        {saving ? tp('saving') : tp('save')}
+      </Button>
+    </div>
+  );
+}
 
-      {/* Step indicator */}
-      <div className="flex flex-wrap items-center gap-2 mb-5">
-        <span className="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">
-          {tp('currentStep')}
+function SimpleCompletenessCard({ completeness }: { completeness: number }) {
+  const tp = useTranslations('companyProfilePage.simple');
+  return (
+    <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5 mb-6">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-base font-bold text-slate-900">{tp('completenessTitle', { pct: completeness })}</p>
+          <p className="text-xs text-slate-500 mt-1">{tp('completenessDesc')}</p>
+        </div>
+        <span className="inline-flex items-center rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 shrink-0">
+          {tp('completenessBadge', { pct: completeness })}
         </span>
-        {STEP_KEYS.map((s) => (
-          <span key={s} className="inline-flex items-center rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-500">
-            {tp(`steps.${s}`)}
-          </span>
-        ))}
+      </div>
+      <div className="mt-4 h-2.5 bg-white rounded-full overflow-hidden">
+        <div className="h-full bg-emerald-500 transition-all duration-700 ease-out" style={{ width: `${completeness}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function SimpleBasicInfo({
+  profile,
+  updateField,
+  ocrLoading,
+  onOcrFile,
+}: {
+  profile: CompanyProfile;
+  updateField: <K extends keyof CompanyProfile>(field: K, value: CompanyProfile[K]) => void;
+  ocrLoading: boolean;
+  onOcrFile: (file: File) => void;
+}) {
+  const tp = useTranslations('companyProfilePage.simple');
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h2 className="text-base font-bold text-slate-900">{tp('basicTitle')}</h2>
+        <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+          {tp('requiredBadge')}
+        </span>
       </div>
 
-      {/* Hero */}
-      <div className="rounded-2xl bg-slate-900 p-7 md:p-9 text-white mb-6">
-        <p className="text-slate-400 text-sm mb-2">{tp('hero.label')}</p>
-        <h2 className="text-2xl md:text-3xl font-bold leading-tight">{tp('hero.title')}</h2>
-        <p className="text-slate-300 text-sm mt-3 max-w-4xl">{tp('hero.subtitle')}</p>
-        <div className="mt-5 inline-flex items-center rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200">
-          프로필 완성도 {completeness}%
+      <div className="rounded-xl bg-blue-50 p-5 text-center mb-5">
+        <p className="text-sm font-semibold text-blue-900">{tp('npwpAutoInput')}</p>
+        <label className="inline-flex items-center justify-center mt-3 w-full cursor-pointer rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors">
+          {ocrLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Camera className="h-4 w-4 mr-2" />}
+          {tp('npwpAutoCta')}
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            disabled={ocrLoading}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onOcrFile(file);
+              e.target.value = '';
+            }}
+          />
+        </label>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs">{tp('fields.companyName')} <span className="text-red-500">*</span></Label>
+          <Input
+            value={profile.company_name || ''}
+            onChange={(e) => updateField('company_name', e.target.value)}
+            placeholder="PT Example Indonesia"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">{tp('fields.npwp')} <span className="text-red-500">*</span></Label>
+          <Input
+            value={profile.npwp || ''}
+            onChange={(e) => updateField('npwp', e.target.value)}
+            placeholder="0123456789012000"
+            className="font-mono tracking-wider"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">{tp('fields.address')} <span className="text-red-500">*</span></Label>
+          <Input
+            value={profile.address || ''}
+            onChange={(e) => updateField('address', e.target.value)}
+            placeholder="Jl. Sudirman No. 1, Jakarta Pusat"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">{tp('fields.kbli')} <span className="text-red-500">*</span></Label>
+          <Input placeholder="62010" className="font-mono" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">{tp('fields.phone')} <span className="text-red-500">*</span></Label>
+          <Input placeholder="+62 21 0000 0000" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">{tp('fields.email')} <span className="text-red-500">*</span></Label>
+          <Input type="email" placeholder="company.test@example.com" />
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Quick entries */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {([
-          { id: 'first', target: 'basic' },
-          { id: 'tax', target: 'legal' },
-          { id: 'ownership', target: 'ownership' },
-          { id: 'business', target: 'business' },
-        ] as const).map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            onClick={() => scrollTo(entry.target)}
-            className="rounded-xl border border-slate-200 bg-white p-5 text-left transition-shadow hover:shadow-sm hover:border-slate-300"
-          >
-            <p className="text-sm font-semibold text-slate-900">{tp(`quickEntries.${entry.id}.title`)}</p>
-            <p className="text-xs text-slate-500 mt-2 leading-relaxed">{tp(`quickEntries.${entry.id}.body`)}</p>
-          </button>
-        ))}
+function SimpleBusinessType({
+  categories,
+  selected,
+  onSelect,
+}: {
+  categories: { value: string; label: string; icon: typeof Building2; taxNote?: string }[];
+  selected: string | null;
+  onSelect: (v: string) => void;
+}) {
+  const tp = useTranslations('companyProfilePage.simple');
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 mb-6">
+      <h2 className="text-base font-bold text-slate-900">{tp('businessTitle')}</h2>
+      <p className="text-sm text-slate-500 mt-1">{tp('businessDesc')}</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-5">
+        {categories.map((cat) => {
+          const isSelected = selected === cat.value;
+          return (
+            <button
+              key={cat.value}
+              type="button"
+              onClick={() => onSelect(cat.value)}
+              className={cn(
+                'text-left rounded-xl border-2 p-4 transition-all',
+                isSelected
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-slate-200 hover:border-slate-300'
+              )}
+            >
+              <p className={cn('text-sm font-bold', isSelected ? 'text-blue-900' : 'text-slate-900')}>{cat.label}</p>
+              {cat.taxNote && (
+                <p className={cn('text-xs mt-1', isSelected ? 'text-blue-700' : 'text-amber-600')}>{cat.taxNote}</p>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
