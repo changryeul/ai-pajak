@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Building2, ArrowLeft, ArrowRight, FileText, Printer, Upload as UploadIcon,
-  CheckCircle2, Sparkles,
+  CheckCircle2, Sparkles, Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSession } from '@/hooks/useSession';
+import { useClosingSession, type ClosingDocument, type ClosingAdjustmentEntry } from '@/hooks/useClosingSession';
 
 type StepId = 'basic' | 'collect' | 'statements' | 'sign' | 'adjust' | 'credit' | 'calc' | 'monthly';
 const STEPS: StepId[] = ['basic', 'collect', 'statements', 'sign', 'adjust', 'credit', 'calc', 'monthly'];
@@ -46,14 +48,59 @@ export default function Pph25ClosingPage() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const { session: userSession } = useSession();
+
+  const fiscalYear = new Date().getFullYear() - 1;
+  const enabled = !!userSession?.customerId;
+  const closing = useClosingSession({ fiscalYear, closingType: 'PPH25', enabled });
 
   const [step, setStep] = useState<StepId>('basic');
-  const [uploaded, setUploaded] = useState<Set<DocId>>(new Set());
-  const [signedUploaded, setSignedUploaded] = useState(false);
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    if (closing.session?.current_step && STEPS.includes(closing.session.current_step as StepId)) {
+      setStep(closing.session.current_step as StepId);
+      hydratedRef.current = true;
+    }
+  }, [closing.session?.current_step]);
 
   const stepIdx = STEPS.indexOf(step);
-  const next = () => stepIdx < STEPS.length - 1 && setStep(STEPS[stepIdx + 1]);
-  const prev = () => stepIdx > 0 && setStep(STEPS[stepIdx - 1]);
+  const next = () => {
+    if (stepIdx >= STEPS.length - 1) return;
+    const n = STEPS[stepIdx + 1];
+    setStep(n);
+    closing.patch({ currentStep: n });
+  };
+  const prev = () => {
+    if (stepIdx <= 0) return;
+    const p = STEPS[stepIdx - 1];
+    setStep(p);
+    closing.patch({ currentStep: p });
+  };
+
+  const uploaded = useMemo(() => {
+    const set = new Set<DocId>();
+    for (const d of closing.documents) {
+      if ((DOCS as string[]).includes(d.doc_type)) {
+        set.add(d.doc_type as DocId);
+      }
+    }
+    return set;
+  }, [closing.documents]);
+
+  const signedUploaded = closing.session?.signed_statements_uploaded ?? false;
+
+  const uploadDoc = async (id: DocId, file: File) => {
+    const result = await closing.uploadDocument(id, file);
+    if (result) toast.success(t('collect.uploadedBadge'));
+    else toast.error(tc('comingSoon'));
+  };
+
+  const uploadSigned = async (file: File) => {
+    const result = await closing.uploadDocument('signedStatements', file);
+    if (result) toast.success(t('collect.uploadedBadge'));
+    else toast.error(tc('comingSoon'));
+  };
 
   const progressPct = useMemo(
     () => Math.round((uploaded.size / DOCS.length) * 100),
@@ -137,32 +184,51 @@ export default function Pph25ClosingPage() {
 
       {/* Step body */}
       <div className="rounded-xl border border-slate-200 bg-white p-6">
-        {step === 'basic' && <BasicStep t={t} onNext={next} />}
-        {step === 'collect' && (
-          <CollectStep
-            t={t}
-            uploaded={uploaded}
-            onUpload={(id) => { setUploaded((p) => new Set(p).add(id)); toast.success(t('collect.uploadedBadge')); }}
-            progressPct={progressPct}
-            onPrev={prev}
-            onNext={next}
-          />
+        {closing.loading ? (
+          <div className="py-10 text-center text-sm text-slate-500">
+            <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
+            {tc('loading')}
+          </div>
+        ) : (
+          <>
+            {step === 'basic' && <BasicStep t={t} onNext={next} />}
+            {step === 'collect' && (
+              <CollectStep
+                t={t}
+                uploaded={uploaded}
+                docMap={closing.documents}
+                onUpload={uploadDoc}
+                progressPct={progressPct}
+                onPrev={prev}
+                onNext={next}
+              />
+            )}
+            {step === 'statements' && <StatementsStep t={t} onPrev={prev} onNext={next} />}
+            {step === 'sign' && (
+              <SignStep
+                t={t}
+                tc={tc}
+                signedUploaded={signedUploaded}
+                onUpload={uploadSigned}
+                onPrev={prev}
+                onNext={next}
+              />
+            )}
+            {step === 'adjust' && (
+              <AdjustStep
+                t={t}
+                tc={tc}
+                existing={closing.adjustments}
+                onSave={closing.saveAdjustments}
+                onPrev={prev}
+                onNext={next}
+              />
+            )}
+            {step === 'credit' && <CreditStep t={t} onPrev={prev} onNext={next} />}
+            {step === 'calc' && <CalcStep t={t} onPrev={prev} onNext={next} />}
+            {step === 'monthly' && <MonthlyStep t={t} tc={tc} onPrev={prev} />}
+          </>
         )}
-        {step === 'statements' && <StatementsStep t={t} onPrev={prev} onNext={next} />}
-        {step === 'sign' && (
-          <SignStep
-            t={t}
-            tc={tc}
-            signedUploaded={signedUploaded}
-            onUpload={() => { setSignedUploaded(true); toast.success(t('collect.uploadedBadge')); }}
-            onPrev={prev}
-            onNext={next}
-          />
-        )}
-        {step === 'adjust' && <AdjustStep t={t} onPrev={prev} onNext={next} />}
-        {step === 'credit' && <CreditStep t={t} onPrev={prev} onNext={next} />}
-        {step === 'calc' && <CalcStep t={t} onPrev={prev} onNext={next} />}
-        {step === 'monthly' && <MonthlyStep t={t} tc={tc} onPrev={prev} />}
       </div>
     </div>
   );
@@ -206,9 +272,15 @@ function BasicStep({ t, onNext }: { t: T; onNext: () => void }) {
 }
 
 function CollectStep({
-  t, uploaded, onUpload, progressPct, onPrev, onNext,
+  t, uploaded, docMap, onUpload, progressPct, onPrev, onNext,
 }: {
-  t: T; uploaded: Set<DocId>; onUpload: (id: DocId) => void; progressPct: number; onPrev: () => void; onNext: () => void;
+  t: T;
+  uploaded: Set<DocId>;
+  docMap: ClosingDocument[];
+  onUpload: (id: DocId, file: File) => Promise<void> | void;
+  progressPct: number;
+  onPrev: () => void;
+  onNext: () => void;
 }) {
   return (
     <div>
@@ -226,6 +298,7 @@ function CollectStep({
         {DOCS.map((id) => {
           const isReq = DOC_REQ.includes(id);
           const isUp = uploaded.has(id);
+          const fileMeta = docMap.find((d) => d.doc_type === id);
           return (
             <div key={id} className="rounded-lg border border-slate-200 p-4">
               <div className="flex items-start justify-between gap-3">
@@ -244,19 +317,27 @@ function CollectStep({
                     )}
                   </div>
                   <p className="text-xs text-slate-600 mt-1">{t(`collect.items.${id}.body`)}</p>
+                  {fileMeta && (
+                    <p className="text-[11px] text-emerald-700 mt-1 truncate">📎 {fileMeta.file_name}</p>
+                  )}
                   <p className="text-[11px] text-blue-700 mt-2">
                     {t('collect.detailLink')} {t(`collect.items.${id}.detail`)}
                   </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0 h-8 text-xs"
-                  onClick={() => onUpload(id)}
-                >
+                <label className="shrink-0 inline-flex items-center justify-center h-8 px-3 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
                   <UploadIcon className="h-3 w-3 mr-1" />
                   {isUp ? t('collect.reuploadCta') : t('collect.uploadCta')}
-                </Button>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="application/pdf,image/*,.csv,.xlsx,.xls"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void onUpload(id, f);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
               </div>
             </div>
           );
@@ -370,7 +451,7 @@ function StatementsStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNex
 function SignStep({
   t, tc, signedUploaded, onUpload, onPrev, onNext,
 }: {
-  t: T; tc: T; signedUploaded: boolean; onUpload: () => void; onPrev: () => void; onNext: () => void;
+  t: T; tc: T; signedUploaded: boolean; onUpload: (file: File) => Promise<void> | void; onPrev: () => void; onNext: () => void;
 }) {
   return (
     <div>
@@ -396,10 +477,20 @@ function SignStep({
           <FileText className="h-5 w-5 mx-auto text-slate-700" />
           <p className="text-sm font-medium text-slate-900 mt-2">{t('sign.stepLocation')}</p>
         </button>
-        <button type="button" onClick={onUpload} className={cn('rounded-lg border p-4 text-center transition-colors', signedUploaded ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 hover:bg-slate-50')}>
+        <label className={cn('rounded-lg border p-4 text-center transition-colors cursor-pointer block', signedUploaded ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 hover:bg-slate-50')}>
           {signedUploaded ? <CheckCircle2 className="h-5 w-5 mx-auto text-emerald-600" /> : <UploadIcon className="h-5 w-5 mx-auto text-slate-700" />}
           <p className={cn('text-sm font-medium mt-2', signedUploaded ? 'text-emerald-800' : 'text-slate-900')}>{t('sign.stepUpload')}</p>
-        </button>
+          <input
+            type="file"
+            className="hidden"
+            accept="application/pdf,image/*"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void onUpload(f);
+              e.target.value = '';
+            }}
+          />
+        </label>
       </div>
       <p className="text-xs text-slate-500 mt-4">{t('sign.hint')}</p>
       <div className="flex justify-between mt-5">
@@ -416,7 +507,70 @@ function SignStep({
   );
 }
 
-function AdjustStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: () => void }) {
+function AdjustStep({
+  t, tc, existing, onSave, onPrev, onNext,
+}: {
+  t: T;
+  tc: T;
+  existing: ClosingAdjustmentEntry[];
+  onSave: (entries: { direction: 'POSITIVE' | 'NEGATIVE'; itemCode: string; amount: number; capPct?: number | null }[]) => Promise<boolean>;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  // amounts[`${direction}:${itemCode}`] = number
+  const [amounts, setAmounts] = useState<Record<string, number>>(() => {
+    const seed: Record<string, number> = {};
+    for (const e of existing) {
+      seed[`${e.direction}:${e.item_code}`] = Number(e.amount) || 0;
+    }
+    return seed;
+  });
+  const [saving, setSaving] = useState(false);
+
+  const setAmt = (direction: 'POSITIVE' | 'NEGATIVE', code: string, raw: string) => {
+    const n = Number(raw.replace(/[^0-9.]/g, '')) || 0;
+    setAmounts((s) => ({ ...s, [`${direction}:${code}`]: n }));
+  };
+
+  const positiveSubtotal = useMemo(
+    () => POSITIVES.reduce((sum, id) => sum + (amounts[`POSITIVE:${id}`] || 0), 0),
+    [amounts]
+  );
+  const negativeSubtotal = useMemo(
+    () => NEGATIVES.reduce((sum, id) => sum + (amounts[`NEGATIVE:${id}`] || 0), 0),
+    [amounts]
+  );
+  const pkp = positiveSubtotal - negativeSubtotal;
+  const fmt = (n: number) =>
+    'Rp ' + new Intl.NumberFormat('en-US').format(Math.max(0, Math.round(n)));
+
+  const persistAndGo = async () => {
+    setSaving(true);
+    const entries = [
+      ...POSITIVES.map((id) => ({
+        direction: 'POSITIVE' as const,
+        itemCode: id,
+        amount: amounts[`POSITIVE:${id}`] || 0,
+        capPct: POSITIVE_CAPS[id] ? Number(String(POSITIVE_CAPS[id]).replace('%', '')) : null,
+      })),
+      ...NEGATIVES.map((id) => ({
+        direction: 'NEGATIVE' as const,
+        itemCode: id,
+        amount: amounts[`NEGATIVE:${id}`] || 0,
+        capPct: null,
+      })),
+    ].filter((e) => e.amount > 0);
+
+    const ok = await onSave(entries);
+    setSaving(false);
+    if (!ok) {
+      toast.error(tc('comingSoon'));
+      return;
+    }
+    toast.success(tc('comingSoon'));
+    onNext();
+  };
+
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('adjust.title')}</p>
@@ -439,7 +593,14 @@ function AdjustStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: (
                 <p className="text-xs text-slate-600 mt-1">{t(`adjust.items.${id}.body`)}</p>
               </div>
               <div className="shrink-0 w-40">
-                <Input type="text" placeholder="0" className="text-right" />
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0"
+                  className="text-right tabular-nums"
+                  value={amounts[`POSITIVE:${id}`] ? String(amounts[`POSITIVE:${id}`]) : ''}
+                  onChange={(e) => setAmt('POSITIVE', id, e.target.value)}
+                />
               </div>
             </div>
           </div>
@@ -448,7 +609,7 @@ function AdjustStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: (
 
       <div className="rounded-lg bg-violet-50 border border-violet-200 px-4 py-3 mt-4 flex items-center justify-between">
         <p className="text-sm font-semibold text-violet-900">{t('adjust.positiveSubtotal')}</p>
-        <p className="text-sm font-bold text-violet-700 tabular-nums">Rp 0</p>
+        <p className="text-sm font-bold text-violet-700 tabular-nums">{fmt(positiveSubtotal)}</p>
       </div>
 
       <p className="text-sm font-semibold text-blue-700 mt-6">{t('adjust.negativeTitle')}</p>
@@ -461,7 +622,14 @@ function AdjustStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: (
                 <p className="text-xs text-slate-600 mt-1">{t(`adjust.items.${id}.body`)}</p>
               </div>
               <div className="shrink-0 w-40">
-                <Input type="text" placeholder="0" className="text-right" />
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0"
+                  className="text-right tabular-nums"
+                  value={amounts[`NEGATIVE:${id}`] ? String(amounts[`NEGATIVE:${id}`]) : ''}
+                  onChange={(e) => setAmt('NEGATIVE', id, e.target.value)}
+                />
               </div>
             </div>
           </div>
@@ -470,12 +638,12 @@ function AdjustStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: (
 
       <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 mt-4 flex items-center justify-between">
         <p className="text-sm font-semibold text-blue-900">{t('adjust.negativeSubtotal')}</p>
-        <p className="text-sm font-bold text-blue-700 tabular-nums">Rp 0</p>
+        <p className="text-sm font-bold text-blue-700 tabular-nums">{fmt(negativeSubtotal)}</p>
       </div>
 
       <div className="rounded-lg bg-slate-900 text-white px-5 py-4 mt-5 flex items-center justify-between">
         <p className="text-sm font-semibold">{t('adjust.pkpLabel')}</p>
-        <p className="text-xl font-bold tabular-nums">Rp 0</p>
+        <p className="text-xl font-bold tabular-nums">{fmt(pkp)}</p>
       </div>
 
       <div className="flex justify-between mt-5">
@@ -483,7 +651,8 @@ function AdjustStep({ t, onPrev, onNext }: { t: T; onPrev: () => void; onNext: (
           <ArrowLeft className="h-4 w-4 mr-1" />
           {t('adjust.prev')}
         </Button>
-        <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800" onClick={onNext}>
+        <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800" onClick={persistAndGo} disabled={saving}>
+          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
           {t('adjust.next')}
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>

@@ -1,14 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, ArrowRight, Building2, FileText, Printer, Upload as UploadIcon, CheckCircle2, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, FileText, Printer, Upload as UploadIcon, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSession } from '@/hooks/useSession';
+import { useClosingSession, type ClosingDocument } from '@/hooks/useClosingSession';
 
 type StepId = 'basic' | 'collect' | 'statements' | 'sign' | 'calc' | 'billing' | 'submit';
 const STEPS: StepId[] = ['basic', 'collect', 'statements', 'sign', 'calc', 'billing', 'submit'];
@@ -23,23 +25,65 @@ export default function UmkmClosingPage() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const { session: userSession } = useSession();
+
+  // Default to (current calendar year - 1) as the closing fiscal year.
+  const fiscalYear = new Date().getFullYear() - 1;
+  const enabled = !!userSession?.customerId;
+  const closing = useClosingSession({ fiscalYear, closingType: 'UMKM', enabled });
 
   const [step, setStep] = useState<StepId>('basic');
-  const [uploaded, setUploaded] = useState<Set<DocId>>(new Set());
-  const [signedUploaded, setSignedUploaded] = useState(false);
+
+  // Hydrate step from server-saved value once it loads.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    if (closing.session?.current_step && STEPS.includes(closing.session.current_step as StepId)) {
+      setStep(closing.session.current_step as StepId);
+      hydratedRef.current = true;
+    }
+  }, [closing.session?.current_step]);
 
   const stepIdx = STEPS.indexOf(step);
-  const goNext = () => stepIdx < STEPS.length - 1 && setStep(STEPS[stepIdx + 1]);
-  const goPrev = () => stepIdx > 0 && setStep(STEPS[stepIdx - 1]);
+  const goNext = () => {
+    if (stepIdx >= STEPS.length - 1) return;
+    const next = STEPS[stepIdx + 1];
+    setStep(next);
+    closing.patch({ currentStep: next });
+  };
+  const goPrev = () => {
+    if (stepIdx <= 0) return;
+    const prev = STEPS[stepIdx - 1];
+    setStep(prev);
+    closing.patch({ currentStep: prev });
+  };
 
-  const uploadDoc = (id: DocId) => {
-    setUploaded((prev) => new Set(prev).add(id));
-    toast.success(t('collect.uploadedBadge'));
+  const uploaded = useMemo(() => {
+    const set = new Set<DocId>();
+    for (const d of closing.documents) {
+      if ((DOC_IDS as string[]).includes(d.doc_type)) {
+        set.add(d.doc_type as DocId);
+      }
+    }
+    return set;
+  }, [closing.documents]);
+
+  const signedUploaded = closing.session?.signed_statements_uploaded ?? false;
+
+  const uploadDoc = async (id: DocId, file: File) => {
+    const result = await closing.uploadDocument(id, file);
+    if (result) toast.success(t('collect.uploadedBadge'));
+    else toast.error(tc('comingSoon'));
+  };
+
+  const uploadSigned = async (file: File) => {
+    const result = await closing.uploadDocument('signedStatements', file);
+    if (result) toast.success(t('collect.uploadedBadge'));
+    else toast.error(tc('comingSoon'));
   };
 
   const progressPct = useMemo(() => {
-    const need = DOC_IDS.length;
-    return Math.round((uploaded.size / need) * 100);
+    return Math.round((uploaded.size / DOC_IDS.length) * 100);
   }, [uploaded]);
 
   return (
@@ -128,31 +172,41 @@ export default function UmkmClosingPage() {
 
       {/* Step body */}
       <div className="rounded-xl border border-slate-200 bg-white p-6">
-        {step === 'basic' && <BasicStep t={t} onNext={goNext} />}
-        {step === 'collect' && (
-          <CollectStep
-            t={t}
-            uploaded={uploaded}
-            onUpload={uploadDoc}
-            progressPct={progressPct}
-            onPrev={goPrev}
-            onNext={goNext}
-          />
+        {closing.loading ? (
+          <div className="py-10 text-center text-sm text-slate-500">
+            <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
+            {tc('loading')}
+          </div>
+        ) : (
+          <>
+            {step === 'basic' && <BasicStep t={t} onNext={goNext} />}
+            {step === 'collect' && (
+              <CollectStep
+                t={t}
+                uploaded={uploaded}
+                docMap={closing.documents}
+                onUpload={uploadDoc}
+                progressPct={progressPct}
+                onPrev={goPrev}
+                onNext={goNext}
+              />
+            )}
+            {step === 'statements' && <StatementsStep t={t} onPrev={goPrev} onNext={goNext} />}
+            {step === 'sign' && (
+              <SignStep
+                t={t}
+                tc={tc}
+                signedUploaded={signedUploaded}
+                onUpload={uploadSigned}
+                onPrev={goPrev}
+                onNext={goNext}
+              />
+            )}
+            {step === 'calc' && <CalcStep t={t} onPrev={goPrev} onNext={goNext} />}
+            {step === 'billing' && <BillingStep t={t} tc={tc} onPrev={goPrev} onNext={goNext} />}
+            {step === 'submit' && <SubmitStep t={t} tc={tc} onPrev={goPrev} />}
+          </>
         )}
-        {step === 'statements' && <StatementsStep t={t} onPrev={goPrev} onNext={goNext} />}
-        {step === 'sign' && (
-          <SignStep
-            t={t}
-            tc={tc}
-            signedUploaded={signedUploaded}
-            onUpload={() => { setSignedUploaded(true); toast.success(t('collect.uploadedBadge')); }}
-            onPrev={goPrev}
-            onNext={goNext}
-          />
-        )}
-        {step === 'calc' && <CalcStep t={t} onPrev={goPrev} onNext={goNext} />}
-        {step === 'billing' && <BillingStep t={t} tc={tc} onPrev={goPrev} onNext={goNext} />}
-        {step === 'submit' && <SubmitStep t={t} tc={tc} onPrev={goPrev} />}
       </div>
     </div>
   );
@@ -208,6 +262,7 @@ function BasicStep({ t, onNext }: { t: T; onNext: () => void }) {
 function CollectStep({
   t,
   uploaded,
+  docMap,
   onUpload,
   progressPct,
   onPrev,
@@ -215,7 +270,8 @@ function CollectStep({
 }: {
   t: T;
   uploaded: Set<DocId>;
-  onUpload: (id: DocId) => void;
+  docMap: ClosingDocument[];
+  onUpload: (id: DocId, file: File) => Promise<void> | void;
   progressPct: number;
   onPrev: () => void;
   onNext: () => void;
@@ -237,6 +293,7 @@ function CollectStep({
         {DOC_IDS.map((id) => {
           const isReq = DOC_REQUIRED.includes(id);
           const isUp = uploaded.has(id);
+          const fileMeta = docMap.find((d) => d.doc_type === id);
           return (
             <div key={id} className="rounded-lg border border-slate-200 p-4">
               <div className="flex items-start justify-between gap-3">
@@ -255,19 +312,27 @@ function CollectStep({
                     )}
                   </div>
                   <p className="text-xs text-slate-600 mt-1">{t(`collect.items.${id}.body`)}</p>
+                  {fileMeta && (
+                    <p className="text-[11px] text-emerald-700 mt-1 truncate">📎 {fileMeta.file_name}</p>
+                  )}
                   <p className="text-[11px] text-blue-700 mt-2">
                     {t('collect.detailLink')} {t(`collect.items.${id}.detail`)}
                   </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0 h-8 text-xs"
-                  onClick={() => onUpload(id)}
-                >
+                <label className="shrink-0 inline-flex items-center justify-center h-8 px-3 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
                   <UploadIcon className="h-3 w-3 mr-1" />
                   {isUp ? t('collect.reuploadCta') : t('collect.uploadCta')}
-                </Button>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="application/pdf,image/*,.csv,.xlsx,.xls"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void onUpload(id, f);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
               </div>
             </div>
           );
@@ -390,7 +455,7 @@ function SignStep({
   t: T;
   tc: T;
   signedUploaded: boolean;
-  onUpload: () => void;
+  onUpload: (file: File) => Promise<void> | void;
   onPrev: () => void;
   onNext: () => void;
 }) {
@@ -423,11 +488,9 @@ function SignStep({
           <FileText className="h-5 w-5 mx-auto text-slate-700" />
           <p className="text-sm font-medium text-slate-900 mt-2">{t('sign.stepLocation')}</p>
         </button>
-        <button
-          type="button"
-          onClick={onUpload}
+        <label
           className={cn(
-            'rounded-lg border p-4 text-center transition-colors',
+            'rounded-lg border p-4 text-center transition-colors cursor-pointer block',
             signedUploaded ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 hover:bg-slate-50'
           )}
         >
@@ -439,7 +502,17 @@ function SignStep({
           <p className={cn('text-sm font-medium mt-2', signedUploaded ? 'text-emerald-800' : 'text-slate-900')}>
             {t('sign.stepUpload')}
           </p>
-        </button>
+          <input
+            type="file"
+            className="hidden"
+            accept="application/pdf,image/*"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void onUpload(f);
+              e.target.value = '';
+            }}
+          />
+        </label>
       </div>
 
       <p className="text-xs text-slate-500 mt-4">{t('sign.hint')}</p>
