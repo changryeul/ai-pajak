@@ -7430,5 +7430,61 @@
       "pdf": "下载 PDF"
     },
     "empty": "尚未生成 SPT 报表。点击 \"生成 SPT\" 开始。"
+  },
+  "annualClosing": {
+    "pageTitle": "年终结算",
+    "backToDashboard": "返回仪表板",
+    "aiPerforms": "AI 执行",
+    "steps": {
+      "upload": "上传资料",
+      "selectType": "选择结算类型",
+      "adjust": "税务调整",
+      "generate": "生成申报"
+    },
+    "guide": {
+      "title": "结算指引",
+      "timing": {
+        "title": "时间",
+        "body": "通常在会计年度结束（12 月）后的次年 3~4 月之间进行。"
+      },
+      "docs": {
+        "title": "所需资料",
+        "items": [
+          "财务报表 (BS / PL)",
+          "销售 / 采购资料",
+          "工资及代扣资料",
+          "固定资产 / 折旧基础",
+          "财务指标资料（含跨境交易）"
+        ]
+      },
+      "types": {
+        "title": "按企业类型结算方式",
+        "items": [
+          "UMKM (PPh Final) — 基于营收的简易结算",
+          "一般法人 (PPh 25) — 财务报表 + 税务调整",
+          "外资 / 特殊行业 — 需额外的税务风险审查"
+        ]
+      }
+    },
+    "typeSelect": {
+      "title": "选择结算类型",
+      "desc": "选择适合的结算方式后，后续流程将自动展开。",
+      "umkm": {
+        "name": "UMKM 结算",
+        "desc": "适用 PPh Final 0.5%"
+      },
+      "normal": {
+        "name": "一般法人结算",
+        "desc": "财务报表 + 税务调整"
+      },
+      "addons": {
+        "title": "附加选项（可选）",
+        "tp": "包含转让定价 (Transfer Pricing) 审查",
+        "related": "包含关联方交易分析",
+        "foreign": "包含外资 / 跨境风险审查"
+      },
+      "next": "下一步",
+      "ai": "获取 AI 推荐"
+    }
   }
 }

@@ -7430,5 +7430,61 @@
       "pdf": "Unduh PDF"
     },
     "empty": "Belum ada SPT. Tekan tombol \"Buat SPT\" untuk memulai."
+  },
+  "annualClosing": {
+    "pageTitle": "Tutup buku",
+    "backToDashboard": "Ke dasbor",
+    "aiPerforms": "Diproses AI",
+    "steps": {
+      "upload": "Unggah data",
+      "selectType": "Pilih jenis",
+      "adjust": "Koreksi fiskal",
+      "generate": "Buat SPT"
+    },
+    "guide": {
+      "title": "Panduan tutup buku",
+      "timing": {
+        "title": "Waktu",
+        "body": "Umumnya dilakukan antara Maret-April setelah akhir tahun buku (Desember)."
+      },
+      "docs": {
+        "title": "Dokumen yang diperlukan",
+        "items": [
+          "Laporan keuangan (BS / PL)",
+          "Data penjualan/pembelian",
+          "Data gaji & withholding",
+          "Aset tetap / dasar penyusutan",
+          "Data indikator keuangan (termasuk lintas negara)"
+        ]
+      },
+      "types": {
+        "title": "Metode tutup buku per jenis badan",
+        "items": [
+          "UMKM (PPh Final) — tutup buku sederhana berbasis omzet",
+          "Badan biasa (PPh 25) — laporan keuangan + koreksi fiskal",
+          "Asing / industri khusus — perlu tinjauan risiko pajak tambahan"
+        ]
+      }
+    },
+    "typeSelect": {
+      "title": "Pilih jenis tutup buku",
+      "desc": "Pemilihan jenis akan mengarahkan langkah berikutnya secara otomatis.",
+      "umkm": {
+        "name": "Tutup buku UMKM",
+        "desc": "PPh Final 0,5% berlaku"
+      },
+      "normal": {
+        "name": "Tutup buku biasa",
+        "desc": "Laporan keuangan + koreksi fiskal"
+      },
+      "addons": {
+        "title": "Opsi tambahan",
+        "tp": "Termasuk tinjauan Transfer Pricing",
+        "related": "Termasuk analisis pihak terkait",
+        "foreign": "Termasuk tinjauan risiko lintas negara"
+      },
+      "next": "Lanjut",
+      "ai": "Rekomendasi AI"
+    }
   }
 }

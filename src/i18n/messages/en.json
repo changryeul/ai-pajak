@@ -7430,5 +7430,61 @@
       "pdf": "Download PDF"
     },
     "empty": "No SPT return yet. Click \"Generate SPT\" to start."
+  },
+  "annualClosing": {
+    "pageTitle": "Year-end closing",
+    "backToDashboard": "Back to dashboard",
+    "aiPerforms": "AI handles",
+    "steps": {
+      "upload": "Upload data",
+      "selectType": "Choose type",
+      "adjust": "Tax adjustments",
+      "generate": "Generate return"
+    },
+    "guide": {
+      "title": "Closing workflow guide",
+      "timing": {
+        "title": "Timing",
+        "body": "Typically performed between March-April of the year following fiscal year-end (Dec)."
+      },
+      "docs": {
+        "title": "Required documents",
+        "items": [
+          "Financial statements (BS / PL)",
+          "Sales/purchase data",
+          "Payroll and withholding data",
+          "Fixed asset / depreciation basis",
+          "Financial-indicator data (incl. cross-border)"
+        ]
+      },
+      "types": {
+        "title": "Closing method by company type",
+        "items": [
+          "UMKM (PPh Final) — simple revenue-based closing",
+          "Standard corporation (PPh 25) — full statements + adjustments",
+          "Foreign-owned / special industry — extra tax risk review needed"
+        ]
+      }
+    },
+    "typeSelect": {
+      "title": "Choose closing type",
+      "desc": "Picking the right closing method auto-routes the next steps.",
+      "umkm": {
+        "name": "UMKM closing",
+        "desc": "PPh Final 0.5% applies"
+      },
+      "normal": {
+        "name": "Standard closing",
+        "desc": "Statements + tax adjustments"
+      },
+      "addons": {
+        "title": "Add-ons (optional)",
+        "tp": "Include Transfer Pricing review",
+        "related": "Include related-party analysis",
+        "foreign": "Include cross-border risk review"
+      },
+      "next": "Continue",
+      "ai": "Get AI recommendation"
+    }
   }
 }
