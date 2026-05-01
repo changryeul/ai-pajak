@@ -24,7 +24,7 @@
     "confirm": "确认",
     "close": "关闭",
     "change": "更改",
-    "comingSoon": "即将推出",
+    "comingSoon": "即将上线。",
     "saving": "保存中...",
     "unsavedChanges": "未保存的更改",
     "lastSaved": "上次保存",
@@ -42,7 +42,17 @@
     "allTypes": "所有类型",
     "all": "全部",
     "notFound": "未找到",
-    "settings": "设置"
+    "settings": "设置",
+    "quickJump": "已跳转到相关指南。",
+    "guideComing": "该指南即将上线。",
+    "sessionEnded": "已收到结束会话请求（测试模式）。",
+    "flagged": "已报告为可疑活动（测试模式）。",
+    "invoiceComing": "发票下载即将上线。",
+    "payComing": "预付流程即将上线。",
+    "methodComing": "更改付款方式即将上线。",
+    "quoteComing": "报价单生成即将上线。",
+    "syncComing": "集成操作即将上线。",
+    "mappingComing": "映射编辑即将上线。"
   },
   "auth": {
     "login": "登录",

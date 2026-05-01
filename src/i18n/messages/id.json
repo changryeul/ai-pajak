@@ -24,7 +24,7 @@
     "confirm": "Konfirmasi",
     "close": "Tutup",
     "change": "Ganti",
-    "comingSoon": "Segera Hadir",
+    "comingSoon": "Segera hadir.",
     "saving": "Menyimpan...",
     "unsavedChanges": "Perubahan belum disimpan",
     "lastSaved": "Terakhir disimpan",
@@ -42,7 +42,17 @@
     "allTypes": "Semua Jenis",
     "all": "Semua",
     "notFound": "Tidak ditemukan",
-    "settings": "Pengaturan"
+    "settings": "Pengaturan",
+    "quickJump": "Berpindah ke panduan terkait.",
+    "guideComing": "Panduan ini akan tersedia segera.",
+    "sessionEnded": "Permintaan akhiri sesi diterima (mode uji).",
+    "flagged": "Dilaporkan sebagai aktivitas mencurigakan (mode uji).",
+    "invoiceComing": "Unduhan faktur akan tersedia segera.",
+    "payComing": "Alur pembayaran di muka akan tersedia segera.",
+    "methodComing": "Perubahan metode pembayaran akan tersedia segera.",
+    "quoteComing": "Pembuatan kutipan akan tersedia segera.",
+    "syncComing": "Aksi integrasi akan tersedia segera.",
+    "mappingComing": "Editor mapping akan tersedia segera."
   },
   "auth": {
     "login": "Masuk",

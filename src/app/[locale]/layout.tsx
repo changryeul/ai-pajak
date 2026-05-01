@@ -3,6 +3,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LOCALES, type Locale } from '@/config/constants';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+import { Toaster } from '@/components/ui/sonner';
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -29,6 +30,7 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       {children}
       <InstallPrompt />
+      <Toaster position="top-right" richColors />
     </NextIntlClientProvider>
   );
 }

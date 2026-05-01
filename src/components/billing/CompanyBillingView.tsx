@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ const ENTERPRISE_FEE_KEYS: ('employee' | 'withholding' | 'apar' | 'docs')[] = [
 
 export function CompanyBillingView() {
   const t = useTranslations('billingPage');
+  const tc = useTranslations('common');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
@@ -310,8 +312,20 @@ export function CompanyBillingView() {
           </label>
 
           <div className="flex flex-wrap gap-2 mt-4">
-            <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800">{t('payment.method.changeCta')}</Button>
-            <Button size="sm" variant="outline">{t('payment.method.manualCta')}</Button>
+            <Button
+              size="sm"
+              className="bg-slate-900 text-white hover:bg-slate-800"
+              onClick={() => toast.info(tc('methodComing'))}
+            >
+              {t('payment.method.changeCta')}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toast.info(tc('payComing'))}
+            >
+              {t('payment.method.manualCta')}
+            </Button>
           </div>
         </div>
 
@@ -374,8 +388,20 @@ export function CompanyBillingView() {
           </div>
 
           <div className="flex flex-wrap justify-end gap-2 mt-4">
-            <Button size="sm" variant="outline">{t('payment.summary.quoteCta')}</Button>
-            <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800">{t('payment.summary.payCta')}</Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toast.info(tc('quoteComing'))}
+            >
+              {t('payment.summary.quoteCta')}
+            </Button>
+            <Button
+              size="sm"
+              className="bg-slate-900 text-white hover:bg-slate-800"
+              onClick={() => toast.info(tc('payComing'))}
+            >
+              {t('payment.summary.payCta')}
+            </Button>
           </div>
         </div>
       </div>
@@ -390,6 +416,7 @@ const INVOICE_ROWS: ('basic' | 'umkm')[] = ['basic', 'umkm'];
 
 function InvoiceHistory() {
   const t = useTranslations('billingPage.invoices');
+  const tc = useTranslations('common');
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 mt-6">
       <div className="flex items-start justify-between gap-3">
@@ -397,7 +424,9 @@ function InvoiceHistory() {
           <p className="text-base font-bold text-slate-900">{t('title')}</p>
           <p className="text-sm text-slate-500 mt-1">{t('subtitle')}</p>
         </div>
-        <Button size="sm" variant="outline">{t('downloadAll')}</Button>
+        <Button size="sm" variant="outline" onClick={() => toast.info(tc('invoiceComing'))}>
+          {t('downloadAll')}
+        </Button>
       </div>
 
       <div className="mt-5 overflow-hidden rounded-lg border border-slate-200">
@@ -427,7 +456,14 @@ function InvoiceHistory() {
                 </td>
                 <td className="px-4 py-4 text-slate-700">{t(`rows.${row}.method`)}</td>
                 <td className="px-4 py-4">
-                  <Button size="sm" variant="outline" className="h-8 text-xs">{t('downloadCta')}</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    onClick={() => toast.info(tc('invoiceComing'))}
+                  >
+                    {t('downloadCta')}
+                  </Button>
                 </td>
               </tr>
             ))}

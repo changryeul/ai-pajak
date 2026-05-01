@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -340,7 +341,7 @@ export default function SecurityPage() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => showMessage('success', t('twoFactor.backupNotAvailable'))}
+                onClick={() => toast.info(t('twoFactor.backupNotAvailable'))}
               >
                 {t('twoFactor.backupCta')}
               </Button>
@@ -413,6 +414,7 @@ const SAMPLE_LOGINS: LoginRow[] = [
 
 function RecentLoginActivity() {
   const t = useTranslations('securityPage.recentLogin');
+  const tc = useTranslations('common');
   const rows = SAMPLE_LOGINS;
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 mt-6">
@@ -451,7 +453,12 @@ function RecentLoginActivity() {
                   </span>
                 </td>
                 <td className="px-4 py-4">
-                  <Button size="sm" variant="outline" className="h-8 text-xs">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    onClick={() => toast.info(row.status === 'ok' ? tc('sessionEnded') : tc('flagged'))}
+                  >
                     {row.status === 'ok' ? t('cta.endSession') : t('cta.notMe')}
                   </Button>
                 </td>

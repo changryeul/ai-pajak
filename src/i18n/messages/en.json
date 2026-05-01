@@ -24,7 +24,7 @@
     "confirm": "Confirm",
     "close": "Close",
     "change": "Change",
-    "comingSoon": "Coming Soon",
+    "comingSoon": "Coming soon.",
     "saving": "Saving...",
     "unsavedChanges": "Unsaved changes",
     "lastSaved": "Last saved",
@@ -42,7 +42,17 @@
     "allTypes": "All Types",
     "all": "All",
     "notFound": "Not found",
-    "settings": "Settings"
+    "settings": "Settings",
+    "quickJump": "Jumped to the relevant guide.",
+    "guideComing": "This guide is coming soon.",
+    "sessionEnded": "Session-end request received (test mode).",
+    "flagged": "Reported as suspicious activity (test mode).",
+    "invoiceComing": "Invoice download is coming soon.",
+    "payComing": "Prepayment flow is coming soon.",
+    "methodComing": "Payment method change is coming soon.",
+    "quoteComing": "Quote generation is coming soon.",
+    "syncComing": "Integration actions are coming soon.",
+    "mappingComing": "Mapping editor is coming soon."
   },
   "auth": {
     "login": "Login",

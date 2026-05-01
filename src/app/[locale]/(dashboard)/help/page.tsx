@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -26,13 +27,34 @@ const STEP_KEYS: ('gettingStarted' | 'byTopic' | 'dataUpload' | 'troubleshoot')[
   'gettingStarted', 'byTopic', 'dataUpload', 'troubleshoot',
 ];
 
+const QUICK_TO_CATEGORY: Record<'onboarding' | 'monthly' | 'annual' | 'withholding', CategoryId> = {
+  onboarding: 'quickStart',
+  monthly: 'monthly',
+  annual: 'annual',
+  withholding: 'counterparty',
+};
+
 export default function HelpPage() {
   const t = useTranslations('helpPage');
+  const tc = useTranslations('common');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
   const [active, setActive] = useState<CategoryId>('quickStart');
   const [query, setQuery] = useState('');
+
+  // Filter items inside the active category by query
+  const filteredItems = useMemo(() => {
+    const items = (t.raw(`categories.${active}.items`) as string[]) || [];
+    const q = query.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((it) => it.toLowerCase().includes(q));
+  }, [active, query, t]);
+
+  const handleQuickJump = (key: 'onboarding' | 'monthly' | 'annual' | 'withholding') => {
+    setActive(QUICK_TO_CATEGORY[key]);
+    toast.success(tc('quickJump'));
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -75,10 +97,15 @@ export default function HelpPage() {
       {/* Quick entries */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {(['onboarding', 'monthly', 'annual', 'withholding'] as const).map((k) => (
-          <div key={k} className="rounded-xl border border-slate-200 bg-white p-5">
+          <button
+            key={k}
+            type="button"
+            onClick={() => handleQuickJump(k)}
+            className="rounded-xl border border-slate-200 bg-white p-5 text-left transition-shadow hover:shadow-sm hover:border-slate-300"
+          >
             <p className="text-sm font-semibold text-slate-900">{t(`quickEntries.${k}.title`)}</p>
             <p className="text-xs text-slate-500 mt-2 leading-relaxed">{t(`quickEntries.${k}.body`)}</p>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -90,7 +117,10 @@ export default function HelpPage() {
           return (
             <button
               key={tb}
-              onClick={() => { if (!isFaq) setActive(tb as CategoryId); }}
+              onClick={() => {
+                if (isFaq) toast.info(tc('comingSoon'));
+                else setActive(tb as CategoryId);
+              }}
               className={cn(
                 'rounded-md px-4 py-2 text-xs font-semibold transition-colors',
                 isActive
@@ -134,9 +164,14 @@ export default function HelpPage() {
           <p className="text-sm text-slate-500 mt-1">{t(`categories.${active}.subtitle`)}</p>
 
           <ul className="space-y-2 mt-5">
-            {(t.raw(`categories.${active}.items`) as string[]).map((item) => (
+            {filteredItems.length === 0 ? (
+              <li className="rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
+                {tc('comingSoon')}
+              </li>
+            ) : filteredItems.map((item) => (
               <li
                 key={item}
+                onClick={() => toast.info(tc('guideComing'))}
                 className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
                 {item}

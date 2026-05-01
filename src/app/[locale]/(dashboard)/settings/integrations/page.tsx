@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -86,6 +87,7 @@ const SYNC_TASKS: { id: SyncTaskId; ctaKey: 'syncCta' | 'lookupCta' | 'statusCta
 
 function SyncTabPanel() {
   const t = useTranslations('integrationsPage.syncTab');
+  const tc = useTranslations('common');
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <p className="text-base font-bold text-slate-900">{t('title')}</p>
@@ -99,7 +101,12 @@ function SyncTabPanel() {
                 <p className="text-xs text-slate-500 mt-1">{t(`tasks.${task.id}.source`)}</p>
                 <p className="text-xs text-slate-500 mt-2">{t(`tasks.${task.id}.desc`)}</p>
               </div>
-              <Button size="sm" variant="outline" className="shrink-0 h-8 text-xs">
+              <Button
+                size="sm"
+                variant="outline"
+                className="shrink-0 h-8 text-xs"
+                onClick={() => toast.info(tc('syncComing'))}
+              >
                 {t(task.ctaKey)}
               </Button>
             </div>
@@ -116,6 +123,7 @@ const MAPPING_ROWS: MappingRowId[] = ['salesRev', 'salaryExp', 'rentExp', 'taxPa
 
 function MappingTabPanel() {
   const t = useTranslations('integrationsPage.mappingTab');
+  const tc = useTranslations('common');
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <p className="text-base font-bold text-slate-900">{t('title')}</p>
@@ -138,7 +146,14 @@ function MappingTabPanel() {
                 <td className="px-4 py-4 text-slate-700">{t(`rows.${row}.target`)}</td>
                 <td className="px-4 py-4 text-slate-500">{t(`rows.${row}.purpose`)}</td>
                 <td className="px-4 py-4">
-                  <Button size="sm" variant="outline" className="h-8 text-xs">{t('editCta')}</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    onClick={() => toast.info(tc('mappingComing'))}
+                  >
+                    {t('editCta')}
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -227,10 +242,14 @@ export default function IntegrationsPage() {
   const t = useTranslations('integrationsPage');
   const [tab, setTab] = useState<Tab>('systems');
 
+  const tc = useTranslations('common');
+
   const handleConnect = (card: IntegrationCard) => {
     if (card.href) {
       window.location.href = `/${locale}${card.href}`;
+      return;
     }
+    toast.info(tc('syncComing'));
   };
 
   return (

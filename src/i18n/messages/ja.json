@@ -24,7 +24,7 @@
     "confirm": "確認",
     "close": "閉じる",
     "change": "変更",
-    "comingSoon": "近日公開",
+    "comingSoon": "近日公開予定です。",
     "saving": "保存中...",
     "unsavedChanges": "未保存の変更",
     "lastSaved": "最終保存",
@@ -42,7 +42,17 @@
     "allTypes": "すべてのタイプ",
     "all": "すべて",
     "notFound": "見つかりません",
-    "settings": "設定"
+    "settings": "設定",
+    "quickJump": "関連ガイドに移動しました。",
+    "guideComing": "このガイドは近日公開予定です。",
+    "sessionEnded": "セッション終了リクエストを受け付けました（テストモード）。",
+    "flagged": "不審な活動として報告しました（テストモード）。",
+    "invoiceComing": "請求書のダウンロードは近日提供予定です。",
+    "payComing": "前払い決済フローは近日提供予定です。",
+    "methodComing": "決済方法の変更は近日提供予定です。",
+    "quoteComing": "見積書作成は近日提供予定です。",
+    "syncComing": "連携動作は近日提供予定です。",
+    "mappingComing": "マッピング編集は近日提供予定です。"
   },
   "auth": {
     "login": "ログイン",
