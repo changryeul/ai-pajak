@@ -20,7 +20,7 @@ interface ReportRow {
   date: string;
   amount: string;
   summary: string;
-  status: 'complete' | 'inProgress';
+  status: 'complete' | 'inProgress' | 'aiReview';
 }
 
 const RISK_ITEMS: ('umkm' | 'benefit' | 'omission' | 'tpDoc')[] = ['umkm', 'benefit', 'omission', 'tpDoc'];
@@ -42,7 +42,17 @@ export function CompanyReportsView() {
 
   const rowsByTab: Record<Tab, ReportRow[]> = {
     monthly: [],
-    annual: [],
+    annual: [
+      {
+        id: 'annual',
+        name: t('rows.annual.name'),
+        period: t('rows.annual.period'),
+        date: t('rows.annual.date'),
+        amount: t('rows.annual.amount'),
+        summary: t('rows.annual.summary'),
+        status: 'aiReview',
+      },
+    ],
     financial: [],
     aiRisk: [
       {
@@ -144,9 +154,19 @@ export function CompanyReportsView() {
                   <td className="px-4 py-4 font-medium text-slate-900">{row.name}</td>
                   <td className="px-4 py-4 text-slate-700">{row.period}</td>
                   <td className="px-4 py-4">
-                    <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                      {t('statusComplete')}
-                    </span>
+                    {row.status === 'aiReview' ? (
+                      <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                        {t('statusAiReview')}
+                      </span>
+                    ) : row.status === 'inProgress' ? (
+                      <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                        {t('statusInProgress')}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                        {t('statusComplete')}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-4 text-slate-500 tabular-nums">{row.date}</td>
                   <td className="px-4 py-4 text-slate-500">{row.amount}</td>
@@ -168,7 +188,8 @@ export function CompanyReportsView() {
         </div>
       </div>
 
-      {/* AI Risk comments */}
+      {/* AI Risk comments — only on aiRisk tab */}
+      {tab === 'aiRisk' && (
       <div className="rounded-xl border border-slate-200 bg-white p-6 mb-6">
         <p className="text-base font-bold text-slate-900">{t('aiRisk.title')}</p>
         <div className="space-y-3 mt-5">
@@ -196,6 +217,7 @@ export function CompanyReportsView() {
           })}
         </div>
       </div>
+      )}
 
       {/* Footer note */}
       <div className="rounded-xl bg-blue-50 border border-blue-100 px-5 py-4">

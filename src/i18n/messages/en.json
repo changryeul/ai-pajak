@@ -7244,6 +7244,13 @@
         "date": "2026-04-19",
         "amount": "-",
         "summary": "PKP transition, TP Doc, employee benefit, cost outlier, sales-omission analysis"
+      },
+      "annual": {
+        "name": "Annual corporate-tax closing report",
+        "period": "FY2025",
+        "date": "2026-04-20",
+        "amount": "Rp 24,200,000",
+        "summary": "SPT Tahunan Badan, PPh29/PPh25, tax credits and adjustments summary"
       }
     },
     "aiRisk": {
@@ -7276,6 +7283,7 @@
         }
       }
     },
-    "footerNote": "※ Reports are for customer review. Coretax filings and BPE/NTPN evidence are validated and finalized by consultants."
+    "footerNote": "※ Reports are for customer review. Coretax filings and BPE/NTPN evidence are validated and finalized by consultants.",
+    "statusAiReview": "AI reviewing"
   }
 }

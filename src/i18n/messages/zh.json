@@ -7244,6 +7244,13 @@
         "date": "2026-04-19",
         "amount": "-",
         "summary": "分析 PKP 转换、TP Doc、员工 benefit、费用异常、销售遗漏可能性"
+      },
+      "annual": {
+        "name": "年度法人税结算报表",
+        "period": "2025 归属",
+        "date": "2026-04-20",
+        "amount": "Rp 24,200,000",
+        "summary": "SPT Tahunan Badan、PPh29/PPh25、税额抵免与税务调整摘要"
       }
     },
     "aiRisk": {
@@ -7276,6 +7283,7 @@
         }
       }
     },
-    "footerNote": "※ 报表仅供客户确认。Coretax 申报资料及 BPE/NTPN 凭证由顾问核验后最终保管。"
+    "footerNote": "※ 报表仅供客户确认。Coretax 申报资料及 BPE/NTPN 凭证由顾问核验后最终保管。",
+    "statusAiReview": "AI 审查中"
   }
 }

@@ -7244,6 +7244,13 @@
         "date": "2026-04-19",
         "amount": "-",
         "summary": "Analisis transisi PKP, TP Doc, benefit karyawan, anomali biaya, kemungkinan penjualan tidak dicatat"
+      },
+      "annual": {
+        "name": "Laporan tutup buku PPh Badan tahunan",
+        "period": "TB 2025",
+        "date": "2026-04-20",
+        "amount": "Rp 24.200.000",
+        "summary": "Ringkasan SPT Tahunan Badan, PPh29/PPh25, kredit pajak & koreksi fiskal"
       }
     },
     "aiRisk": {
@@ -7276,6 +7283,7 @@
         }
       }
     },
-    "footerNote": "※ Laporan untuk konfirmasi pelanggan. Pelaporan Coretax dan bukti BPE/NTPN divalidasi dan disimpan akhir oleh konsultan."
+    "footerNote": "※ Laporan untuk konfirmasi pelanggan. Pelaporan Coretax dan bukti BPE/NTPN divalidasi dan disimpan akhir oleh konsultan.",
+    "statusAiReview": "AI sedang meninjau"
   }
 }

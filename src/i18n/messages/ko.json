@@ -7370,6 +7370,13 @@
         "date": "2026-04-19",
         "amount": "-",
         "summary": "PKP 전환, TP Doc, 임직원 benefit, 비용 이상치, 매출 누락 가능성 분석"
+      },
+      "annual": {
+        "name": "연간 법인세 결산 보고서",
+        "period": "2025년 귀속",
+        "date": "2026-04-20",
+        "amount": "Rp 24,200,000",
+        "summary": "SPT Tahunan Badan, PPh29/PPh25, 세액공제 및 세무조정 요약"
       }
     },
     "aiRisk": {
@@ -7402,6 +7409,7 @@
         }
       }
     },
-    "footerNote": "※ 보고서는 고객 확인용이며, Coretax 신고 자료와 BPE/NTPN 증빙은 상담원이 검증 후 최종 보관합니다."
+    "footerNote": "※ 보고서는 고객 확인용이며, Coretax 신고 자료와 BPE/NTPN 증빙은 상담원이 검증 후 최종 보관합니다.",
+    "statusAiReview": "AI 검토 중"
   }
 }

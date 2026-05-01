@@ -7244,6 +7244,13 @@
         "date": "2026-04-19",
         "amount": "-",
         "summary": "PKP 移行、TP Doc、従業員ベネフィット、費用異常、売上漏れの可能性分析"
+      },
+      "annual": {
+        "name": "年次法人税決算レポート",
+        "period": "2025年帰属",
+        "date": "2026-04-20",
+        "amount": "Rp 24,200,000",
+        "summary": "SPT Tahunan Badan、PPh29/PPh25、税額控除・税務調整の要約"
       }
     },
     "aiRisk": {
@@ -7276,6 +7283,7 @@
         }
       }
     },
-    "footerNote": "※ レポートは顧客確認用です。Coretax 申告資料と BPE/NTPN 証憑はコンサルが検証後に最終保管します。"
+    "footerNote": "※ レポートは顧客確認用です。Coretax 申告資料と BPE/NTPN 証憑はコンサルが検証後に最終保管します。",
+    "statusAiReview": "AI レビュー中"
   }
 }
