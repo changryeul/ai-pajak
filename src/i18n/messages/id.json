@@ -7415,5 +7415,20 @@
       }
     },
     "footerNote": "※ Setelah pelaporan selesai, BPE dan NTPN pembayaran disimpan dengan aman."
+  },
+  "spt1771Page": {
+    "pageTitle": "Buat SPT Tahunan",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "3. Tahap saat ini",
+    "steps": {
+      "aggregate": "Agregasi data",
+      "generate": "Buat laporan",
+      "submit": "Kirim"
+    },
+    "cta": {
+      "generate": "Buat SPT",
+      "pdf": "Unduh PDF"
+    },
+    "empty": "Belum ada SPT. Tekan tombol \"Buat SPT\" untuk memulai."
   }
 }

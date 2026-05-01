@@ -7415,5 +7415,20 @@
       }
     },
     "footerNote": "※ 申报完成后，BPE 与缴纳 NTPN 将被安全保管。"
+  },
+  "spt1771Page": {
+    "pageTitle": "生成 SPT Tahunan",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "3. 当前阶段",
+    "steps": {
+      "aggregate": "数据汇总",
+      "generate": "生成报表",
+      "submit": "提交"
+    },
+    "cta": {
+      "generate": "生成 SPT",
+      "pdf": "下载 PDF"
+    },
+    "empty": "尚未生成 SPT 报表。点击 \"生成 SPT\" 开始。"
   }
 }

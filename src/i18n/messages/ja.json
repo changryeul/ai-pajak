@@ -7415,5 +7415,20 @@
       }
     },
     "footerNote": "※ 申告完了後、BPE と納付 NTPN を安全に保管します。"
+  },
+  "spt1771Page": {
+    "pageTitle": "SPT Tahunan 申告書作成",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "3. 現在のステップ",
+    "steps": {
+      "aggregate": "データ集計",
+      "generate": "申告書作成",
+      "submit": "提出"
+    },
+    "cta": {
+      "generate": "SPT 生成",
+      "pdf": "PDFダウンロード"
+    },
+    "empty": "まだ作成された SPT がありません。「SPT 生成」を押して開始してください。"
   }
 }

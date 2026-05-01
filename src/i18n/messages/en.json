@@ -7415,5 +7415,20 @@
       }
     },
     "footerNote": "※ After filing is complete, BPE and payment NTPN are stored safely."
+  },
+  "spt1771Page": {
+    "pageTitle": "Generate SPT Tahunan",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "3. Current step",
+    "steps": {
+      "aggregate": "Aggregate data",
+      "generate": "Generate return",
+      "submit": "Submit"
+    },
+    "cta": {
+      "generate": "Generate SPT",
+      "pdf": "Download PDF"
+    },
+    "empty": "No SPT return yet. Click \"Generate SPT\" to start."
   }
 }

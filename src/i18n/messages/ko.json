@@ -7541,5 +7541,20 @@
       }
     },
     "footerNote": "※ 신고 완료 후 BPE와 납부 NTPN을 안전하게 보관합니다."
+  },
+  "spt1771Page": {
+    "pageTitle": "SPT Tahunan 신고서 생성",
+    "backToDashboard": "대시보드로",
+    "currentStep": "3. 현재 단계",
+    "steps": {
+      "aggregate": "데이터 집계",
+      "generate": "신고서 생성",
+      "submit": "제출"
+    },
+    "cta": {
+      "generate": "SPT 생성",
+      "pdf": "PDF 다운로드"
+    },
+    "empty": "아직 생성된 SPT 신고서가 없습니다. SPT 생성 버튼을 눌러 시작하세요."
   }
 }
