@@ -7797,5 +7797,324 @@
       "prev": "이전",
       "done": "완료"
     }
+  },
+  "pph25Closing": {
+    "pageTitle": "연 결산 — PPh 25 (일반 법인세 22%)",
+    "subtitle": "2025년 법인세 정산 → 2026년 PPh 25 월선불액 산정",
+    "backToDashboard": "대시보드로",
+    "typeLock": {
+      "umkm": "UMKM 결산",
+      "other": "PPh25 일반 법인 결산",
+      "selected": "선택됨",
+      "umkmDesc": "매출 기준 Final Tax 0.5% 적용. 정상 재무제표 생성 후 SPT 첨부.",
+      "proDesc": "재무제표 + 세무조정 + 세액공제 + PPh29/PPh25 월선불 산정."
+    },
+    "coreBox": {
+      "title": "PPh 25 연 결산이란?",
+      "items": [
+        "회계 이익에 세무 조정(Koreksi Fiskal)을 적용하여 과세소득(PKP) 산출",
+        "PKP × 22% + 업인세 (PPh Badan Terutang)",
+        "매출 500억 미만 기업은 첫 48억까지 50% 할인 (할인 1)",
+        "이미 납부한 세액(PPh 22/23/24/25)을 공제 후 정산",
+        "다음 연도 PPh 25 월선불액 = (법인세 — 세액공제) ÷ 12"
+      ]
+    },
+    "steps": {
+      "basic": "기본 정보",
+      "collect": "자료수집",
+      "statements": "재무제표",
+      "adjust": "세무조정",
+      "sign": "출력/서명",
+      "credit": "세액공제",
+      "calc": "법인세",
+      "monthly": "월분납"
+    },
+    "basic": {
+      "title": "기본 정보",
+      "companyName": "회사명",
+      "npwp": "NPWP",
+      "fiscalYear": "사업 연도",
+      "annualRevenue": "연간 매출",
+      "notice": "PPh25 일반 법인 결산: 재무제표 + 세무조정 + 세액공제 검토 필요",
+      "next": "다음"
+    },
+    "collect": {
+      "title": "자료수집",
+      "progress": "{pct}%",
+      "uploadCta": "업로드",
+      "reuploadCta": "다시 업로드",
+      "uploadedBadge": "업로드 완료",
+      "requiredBadge": "필수",
+      "detailLink": "자세한 안내 보기 →",
+      "items": {
+        "akta": {
+          "title": "최초 정관 / 최근 수정 정관 / SK",
+          "body": "정관 및 정부 인가서를 일괄 업로드합니다.",
+          "detail": "정관 + 변경 정관 + SK Menteri 누락 항목을 안내합니다."
+        },
+        "bank": {
+          "title": "은행거래내역",
+          "body": "사업으로 진행한 전체 은행 입출금 내역을 업로드합니다.",
+          "detail": "전체 사업용 계좌의 입출금 거래내역."
+        },
+        "sales": {
+          "title": "매출 리스트 / 매출 증빙",
+          "body": "인보이스, 영수증, 판매 리스트, Faktur Pajak 등 매출 증빙 자료입니다.",
+          "detail": "인보이스 발행 ↔ 은행 입금 차이가 있을 때 점검 포인트."
+        },
+        "purchase": {
+          "title": "매입 비용 리스트 / 비용 증빙",
+          "body": "구매 인보이스, 비용 영수증, vendor invoice 등 비용 증빙이 필요합니다.",
+          "detail": "비용 증빙 누락 시 추가 자료 안내."
+        },
+        "petty": {
+          "title": "Petty Cash 리스트",
+          "body": "현금으로 지급된 소액 지출 내역입니다.",
+          "detail": "Petty Cash 운영 기준과 누락 항목 정리 가이드."
+        },
+        "inventory": {
+          "title": "Inventory Book / 재고관리장",
+          "body": "재고 종목별 기초/기말, 매입, 기말재고를 정리합니다.",
+          "detail": "재고 평가방법(FIFO/평균법)별 작성 예시."
+        },
+        "assets": {
+          "title": "고정자산 리스트 / 감가상각 정책",
+          "body": "회사가 보유한 자본, 장비, 가구, 컴퓨터 등 고정자산 목록입니다.",
+          "detail": "감가상각 정책, 사용연수, 폐기/매각 처리 가이드."
+        },
+        "payroll": {
+          "title": "급여 및 원천세 자료 (PPh21 / Ebupot)",
+          "body": "월별 급여, 원천징수, e-Bupot 1721 A1 발급 자료.",
+          "detail": "근로소득 PPh21 산정 누락 여부 확인."
+        },
+        "prepaid": {
+          "title": "기납부 세액 자료 (PPh22 / PPh23 / PPh24 / PPh25)",
+          "body": "해당 사업연도에 이미 납부한 세액 증빙(BPE/NTPN).",
+          "detail": "월선납·원천징수·해외세 공제 등 기납부 세액 증빙 정리 가이드."
+        },
+        "prevSpt": {
+          "title": "전년도 SPT Badan 및 PPh25 기준 자료",
+          "body": "전년도 SPT Tahunan Badan과 분납 산정 기준 자료.",
+          "detail": "PPh25 분납 산정 기초가 되는 전년도 자료 정리."
+        }
+      },
+      "prev": "이전",
+      "genStatements": "재무제표 생성"
+    },
+    "statements": {
+      "title": "정상 재무제표 생성",
+      "subtitle": "데이터 → 자동 분류 → 정상 재무제표 (BS/PL)",
+      "summary": {
+        "autoClass": "자동 분류",
+        "salesRecognized": "매출 인식",
+        "netIncome": "당기순이익"
+      },
+      "summaryDesc": {
+        "autoClass": "은행 + petty cash",
+        "salesRecognized": "수익 + 매출",
+        "netIncome": "PL · 자산총계"
+      },
+      "pl": {
+        "title": "손익계산서 (PL)",
+        "sales": "매출",
+        "cogs": "매출원가",
+        "salary": "급여",
+        "opex": "운영비",
+        "petty": "Petty Cash 비용",
+        "deprec": "감가상각",
+        "netIncome": "당기순이익"
+      },
+      "bs": {
+        "title": "재무상태표 (BS)",
+        "cash": "현금/은행",
+        "ar": "매출채권",
+        "inventory": "재고자산",
+        "fa": "고정자산(순액)",
+        "totalAssets": "자산총계",
+        "loan": "차입금",
+        "capital": "자본금",
+        "surplus": "자본",
+        "retained": "이익잉여금",
+        "totalLE": "부채+자본"
+      },
+      "aiNote": "AI 코멘트: 은행 입출과 매출 리스트 차이, 현금 매출, 계산상 비용, 고정자산 누락 여부를 자세히 검토합니다.",
+      "prev": "이전",
+      "next": "세무조정"
+    },
+    "adjust": {
+      "title": "세무 조정 (Koreksi Fiskal)",
+      "subtitle": "회계상 이익 → 세무상 이익으로 변환합니다. 과세소득(PKP) → 가산조정 + 차감조정.",
+      "positiveTitle": "가산 조정 (Koreksi Positif) — 비용 불인정",
+      "negativeTitle": "차감 조정 (Koreksi Negatif) — 비과세/기과세 소득",
+      "positiveSubtotal": "가산 소계 (비용 추가 인정)",
+      "negativeSubtotal": "차감 소계",
+      "pkpLabel": "과세소득 (PKP)",
+      "items": {
+        "entertainment": {
+          "title": "Biaya entertainment (접대비)",
+          "body": "Pasal 9(1)(k) UU PPh — 부담자/접대장소/금액 등 명세 미비 시 비용 미인정."
+        },
+        "welfare": {
+          "title": "Biaya kesejahteraan karyawan (복리후생비)",
+          "body": "과세 처리 안 된 복리후생 비용은 100% 부인."
+        },
+        "donation": {
+          "title": "Sumbangan/donasi (기부금)",
+          "body": "인정 가능한 기부 외에는 부인."
+        },
+        "penalty": {
+          "title": "Denda & sanksi pajak (벌금/가산세)",
+          "body": "Pasal 9(1)(k) — 세금 가산세는 비용 미인정."
+        },
+        "private": {
+          "title": "Biaya pribadi (주주/임원의 개인비용)",
+          "body": "회사와 무관한 개인 비용은 100% 부인."
+        },
+        "pphBorne": {
+          "title": "PPh ditanggung perusahaan (회사가 PPh 부담)",
+          "body": "Gross-up 처리되지 않으면 회사가 부담한 PPh는 부인."
+        },
+        "reserve": {
+          "title": "Cadangan/penyisihan (충당금)",
+          "body": "인정되지 않는 충당금/추정 비용은 부인."
+        },
+        "vehicle": {
+          "title": "Biaya BBM kendaraan (회사 차량비)",
+          "body": "KMK-138/PMK.03/2002 — 출퇴근/임원 차량 50% 인정.",
+          "cap": "50%"
+        },
+        "carBenefit": {
+          "title": "Biaya tol (도로비)",
+          "body": "공무 출장 외 50%만 인정.",
+          "cap": "50%"
+        },
+        "carService": {
+          "title": "Biaya perawatan kendaraan (차량 유지비)",
+          "body": "회사 보유 차량 50% 인정.",
+          "cap": "50%"
+        },
+        "phone": {
+          "title": "Biaya telepon/pulsa (통신비)",
+          "body": "회사 명의 통신비 50% 인정.",
+          "cap": "50%"
+        },
+        "houseRent": {
+          "title": "Biaya sewa rumah karyawan (직원 주택 렌트)",
+          "body": "오지/원격지 근무자 외 100% 부인.",
+          "cap": "100%"
+        },
+        "education": {
+          "title": "Biaya pendidikan (직원 학자금)",
+          "body": "직무 관련 외 100% 부인.",
+          "cap": "100%"
+        },
+        "travel": {
+          "title": "Biaya perjalanan dinas (출장비)",
+          "body": "관련 증빙 미비 시 40% 부인.",
+          "cap": "40%"
+        },
+        "operating": {
+          "title": "Biaya operasional lainnya (기타 운영비)",
+          "body": "증빙 부족시 50% 부인.",
+          "cap": "50%"
+        },
+        "otherPositive": {
+          "title": "Koreksi positif lainnya (기타 가산 항목)",
+          "body": "기타 가산 항목 자유 입력."
+        },
+        "pphFinal": {
+          "title": "Penghasilan PPh Final (이미 PPh Final 과세 소득)",
+          "body": "PPh Final로 별도 과세된 소득은 차감."
+        },
+        "nonObjek": {
+          "title": "Penghasilan bukan objek pajak (비과세 소득)",
+          "body": "배당, 자기주식 처분 등 비과세 소득."
+        },
+        "depDiff": {
+          "title": "Selisih penyusutan (회계/세무 감가 차이)",
+          "body": "회계 vs 세무 감가상각 차이."
+        },
+        "otherNegative": {
+          "title": "Koreksi negatif lainnya (기타 차감 항목)",
+          "body": "기타 차감 항목 자유 입력."
+        }
+      },
+      "inputAmount": "금액",
+      "prev": "이전",
+      "next": "다음"
+    },
+    "sign": {
+      "title": "재무제표 출력 - 서명 - 재업로드",
+      "subtitle": "생성된 재무제표를 공식 양식으로 출력하여 대표자 서명을 받은 뒤 다시 업로드 해야 합니다. 이 서명본은 결과되는 Coretax 신고 시 정부 자료로 업로드됩니다.",
+      "aiNote": "AI 검증: 은행 입출금 매출 리스트 차이, 현금 매출, 계산상 비용, 고정자산 누락 여부 자동 점검합니다.",
+      "stepPrint": "재무제표 PDF 출력",
+      "stepLocation": "서명 위치 안내",
+      "stepUpload": "서명본 업로드",
+      "requiredBadge": "서명본 필요",
+      "hint": "서명본 업로드가 완료되어야 다음 단계로 진행됩니다.",
+      "prev": "이전",
+      "next": "세무조정"
+    },
+    "credit": {
+      "title": "세액 공제 (Kredit Pajak)",
+      "subtitle": "연중 이미 납부한 세액을 입력하여 정산 시 차감되는 금액을 공제합니다.",
+      "pph22": {
+        "label": "PPh 22 (수입 원천징수)",
+        "desc": "수입통관 시 부과된 PPh 22 합계"
+      },
+      "pph23": {
+        "label": "PPh 23 (용역 원천징수)",
+        "desc": "거래처가 우리 매출에 대해 원천징수"
+      },
+      "pph24": {
+        "label": "PPh 24 (해외 세액공제)",
+        "desc": "해외 원천소득에 대한 외국세 공제"
+      },
+      "pph25": {
+        "label": "PPh 25 (월 분할납 합계)",
+        "desc": "2025년 PPh 25 월 분할납 합계"
+      },
+      "subtotal": "세액 공제 합계",
+      "prev": "이전",
+      "next": "다음"
+    },
+    "calc": {
+      "title": "2025년 법인세 (PPh Badan) 계산",
+      "pkpLabel": "과세소득 (PKP)",
+      "pkpHint": "+가산 조정 / -차감 조정",
+      "pkpValue": "Rp 0",
+      "rateLabel": "PPh Badan (50% 할인 적용) × 22%",
+      "rateValue": "Rp 0",
+      "creditLabel": "PPh 22 공제 / PPh 23 공제 / PPh 24 공제 / PPh 25 공제",
+      "creditValue": "Rp 0",
+      "finalLabel": "정산 환급",
+      "finalValue": "Rp 0",
+      "prev": "이전",
+      "next": "다음"
+    },
+    "monthly": {
+      "title": "2026년 PPh 25 월 분납액 산정",
+      "sourceLabel": "2025년 PPh Badan",
+      "sourceValue": "Rp 0",
+      "creditList": [
+        "PPh 22 공제",
+        "PPh 23 공제",
+        "PPh 24 공제"
+      ],
+      "pph25Base": "PPh 25 기준액",
+      "pph25BaseValue": "Rp 0",
+      "monthly": "/12개월",
+      "monthlyLabel": "2026년 월 PPh 25",
+      "monthlyValue": "Rp 0",
+      "note": "2026년 PPh 25는 매월 Rp 0의 10일까지 납부해야 합니다 (Coretax / PMK 81/2024). 매출 변동 시 PMK-44에 의한 조정 신청이 가능합니다.",
+      "nextStepsTitle": "다음 단계",
+      "nextSteps": [
+        "SPT Tahunan 1771 작성 + DJP 제출",
+        "2026년 월 PPh 25 Rp 0 납부 시작"
+      ],
+      "sptCta": "SPT 작성 →",
+      "payCta": "납부 →",
+      "prev": "이전"
+    }
   }
 }
