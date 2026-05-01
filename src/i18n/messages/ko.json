@@ -7612,5 +7612,190 @@
       "next": "다음 단계 진행",
       "ai": "AI 추천 받기"
     }
+  },
+  "umkmClosing": {
+    "pageTitle": "연 결산 — UMKM (최종 세율 0.5%)",
+    "subtitle": "2025년 법인세 정산 → 2026년 PPh 25 월선불액 산정",
+    "backToDashboard": "대시보드로",
+    "requirementBox": {
+      "title": "UMKM 세율 0.5% 적용 조건",
+      "items": [
+        "연매출 Rp 4.8B 이하",
+        "인도네시아 거주 법인",
+        "3년 동안 이 세율 적용 가능 (최대치)"
+      ]
+    },
+    "coreBox": {
+      "title": "UMKM 핵심 구조",
+      "items": [
+        "세금은 매출 기준 Final Tax 0.5%로 계산",
+        "정상 재무제표는 정상 재무제표(BS/PL)로 생성",
+        "은행, petty cash, inventory, 고정자산 데이터를 원장으로 변환"
+      ]
+    },
+    "steps": {
+      "basic": "기본 정보",
+      "collect": "자료 수집",
+      "statements": "재무제표 생성",
+      "sign": "출력/서명",
+      "calc": "세액 계산",
+      "billing": "ID Billing",
+      "submit": "SPT 제출"
+    },
+    "typeLock": {
+      "umkm": "UMKM 결산",
+      "selected": "선택됨",
+      "other": "PPh25 일반 법인 결산"
+    },
+    "basic": {
+      "title": "기본 정보",
+      "companyName": "회사명",
+      "npwp": "NPWP",
+      "fiscalYear": "사업 연도",
+      "annualRevenue": "연간 매출",
+      "okMsg": "UMKM 요건 충족 (0.5% 세율 적용 가능)",
+      "deadlineMsg": "제출 기한: 2026년 4월 30일",
+      "next": "다음"
+    },
+    "collect": {
+      "title": "자료 수집",
+      "progress": "{pct}%",
+      "uploadCta": "업로드",
+      "reuploadCta": "다시 업로드",
+      "uploadedBadge": "업로드 완료",
+      "requiredBadge": "필수",
+      "detailLink": "자세한 안내 보기 →",
+      "items": {
+        "akta": {
+          "title": "최초 정관 (Akta Pendirian)",
+          "body": "회사를 처음 설립할 때 Notaris가 작성한 공증 정관입니다.",
+          "detail": "정관 종류·작성 시점에 따라 제출해야 하는 자료를 안내합니다."
+        },
+        "aktaRev": {
+          "title": "최초 수정 정관 (Akta Perubahan Terakhir)",
+          "body": "기존 회사에서 자본 확장이나 정관 변경 등 변경된 사항이 반영되었을 때 필요한 정관입니다.",
+          "detail": "정관 변경 시점·마지막 변경 일자별로 제공해야 할 서류 안내."
+        },
+        "sk": {
+          "title": "SK Menteri (법무인권부 인가서)",
+          "body": "Surat Keputusan Menteri Hukum dan HAM — 법무인권부가 발행한 정관 인증 인가서입니다.",
+          "detail": "인가서 등록 / 만료 / 갱신 시점별 준비 자료 안내."
+        },
+        "bank": {
+          "title": "은행거래내역",
+          "body": "사업으로 진행한 전체 은행 입출금 내역을 업로드합니다.",
+          "detail": "사업용 은행 입출금 내역을 어떤 형식으로 저장해야 하는지 안내."
+        },
+        "sales": {
+          "title": "매출 리스트 / 매출 증빙",
+          "body": "인보이스, 영수증, 판매 리스트, Faktur Pajak 등 매출 증빙 자료입니다.",
+          "detail": "인보이스 발행 ↔ 은행 입출금 차이가 있을 때 점검 포인트."
+        },
+        "purchase": {
+          "title": "매입 비용 리스트 / 비용 증빙",
+          "body": "구매 인보이스, 비용 영수증, vendor invoice 등 비용 증빙이 필요합니다.",
+          "detail": "비용 증빙이 누락되었을 때 어떤 추가 자료가 필요한지 안내."
+        },
+        "petty": {
+          "title": "Petty Cash 리스트",
+          "body": "현금으로 지급된 소액 지출 내역입니다.",
+          "detail": "Petty Cash 운영 기준과 누락 항목 정리 가이드."
+        },
+        "inventory": {
+          "title": "Inventory Book / 재고관리장",
+          "body": "재고 종목별 기초/기말, 매입, 기말재고 내역을 정리합니다.",
+          "detail": "재고 평가 방법(FIFO/평균법)별 작성 예시."
+        },
+        "assets": {
+          "title": "고정자산 리스트",
+          "body": "회사가 보유한 자본, 장비, 가구, 컴퓨터 등 고정자산 목록입니다.",
+          "detail": "감가상각 정책, 사용연수, 폐기/매각 처리 가이드."
+        }
+      },
+      "prev": "이전",
+      "genStatements": "재무제표 생성"
+    },
+    "statements": {
+      "title": "정상 재무제표 생성",
+      "subtitle": "데이터 → 자동 분류(MR선기/단순) → 재무제표 자동 생성",
+      "summary": {
+        "autoClass": "자동 분류",
+        "salesRecognized": "매출 인식",
+        "netIncome": "당기순이익"
+      },
+      "summaryDesc": {
+        "autoClass": "은행 + petty cash",
+        "salesRecognized": "수익 + 매출",
+        "netIncome": "PL · 자산총계"
+      },
+      "pl": {
+        "title": "손익계산서 (PL)",
+        "sales": "매출",
+        "cogs": "매출원가",
+        "salary": "급여",
+        "opex": "운영비",
+        "petty": "Petty Cash 비용",
+        "deprec": "감가상각",
+        "netIncome": "당기순이익"
+      },
+      "bs": {
+        "title": "재무상태표 (BS)",
+        "cash": "현금/은행",
+        "ar": "매출채권",
+        "inventory": "재고자산",
+        "fa": "고정자산(순액)",
+        "totalAssets": "자산총계",
+        "loan": "차입금",
+        "capital": "자본금",
+        "surplus": "차본",
+        "retained": "이익잉여",
+        "totalLE": "부채+자본"
+      },
+      "aiNote": "AI 코멘트: 은행 입출과 매출 리스트 차이, 현금 매출, 계산상 비용, 고정자산 누락 여부를 자세히 검토합니다.",
+      "prev": "이전",
+      "next": "재무제표 출력"
+    },
+    "sign": {
+      "title": "재무제표 출력 - 서명 - 재업로드",
+      "subtitle": "생성된 재무제표를 공식 양식으로 출력하여 대표자 서명을 받은 뒤 다시 업로드 해야 합니다. 이 서명본은 결과되는 Coretax 신고 시 정부 자료로 업로드됩니다.",
+      "stepPrint": "재무제표 PDF 출력",
+      "stepLocation": "서명 위치 안내",
+      "stepUpload": "서명본 업로드",
+      "requiredBadge": "서명본 필요",
+      "hint": "서명본 업로드가 완료되어야 다음 단계로 진행됩니다.",
+      "prev": "이전",
+      "next": "세액 계산"
+    },
+    "calc": {
+      "title": "세액 계산 (UMKM Final Tax)",
+      "base": "과세 기준 매출",
+      "baseValue": "Rp 3,100,000,000",
+      "rate": "세율",
+      "rateValue": "0.5%",
+      "result": "예상 세액",
+      "resultValue": "Rp 15,500,000",
+      "note": "UMKM Final Tax는 매출에 비례한 세율 기준으로 계산됩니다.",
+      "prev": "이전",
+      "next": "ID Billing"
+    },
+    "billing": {
+      "title": "ID Billing 발행",
+      "subtitle": "계산된 UMKM Final Tax 세액 기반으로 Coretax ID Billing을 자동 발행합니다.",
+      "amount": "세액",
+      "amountValue": "Rp 15,500,000",
+      "method": "결제 수단",
+      "methodValue": "Bank Transfer / Virtual Account",
+      "issueCta": "ID Billing 발행",
+      "prev": "이전",
+      "next": "SPT 작성"
+    },
+    "submit": {
+      "title": "SPT Tahunan UMKM 제출",
+      "subtitle": "Coretax 시스템에 SPT 신고서를 자동 제출하고 BPE / NTPN을 보관합니다.",
+      "generateCta": "SPT 생성",
+      "submitCta": "신고 제출",
+      "prev": "이전",
+      "done": "완료"
+    }
   }
 }

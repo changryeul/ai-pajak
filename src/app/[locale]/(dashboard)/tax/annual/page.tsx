@@ -28,7 +28,7 @@ export default function AnnualClosingStartPage() {
   const types = t.raw('guide.types.items') as string[];
 
   const goNext = () => {
-    const route = selectedType === 'umkm' ? '/tax/umkm' : '/tax/annual/pph25';
+    const route = selectedType === 'umkm' ? '/tax/annual/umkm' : '/tax/annual/pph25';
     router.push(`/${locale}${route}`);
   };
 

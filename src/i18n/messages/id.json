@@ -7486,5 +7486,190 @@
       "next": "Lanjut",
       "ai": "Rekomendasi AI"
     }
+  },
+  "umkmClosing": {
+    "pageTitle": "Tutup buku — UMKM (Final 0,5%)",
+    "subtitle": "Tutup buku PPh Badan 2025 → Angsuran PPh 25 bulanan 2026",
+    "backToDashboard": "Ke dasbor",
+    "requirementBox": {
+      "title": "Syarat tarif UMKM 0,5%",
+      "items": [
+        "Omzet tahunan ≤ Rp 4,8B",
+        "Wajib Pajak Badan dalam negeri",
+        "Berlaku maksimum 3 tahun pajak"
+      ]
+    },
+    "coreBox": {
+      "title": "Alur inti UMKM",
+      "items": [
+        "Pajak = Omzet × 0,5% Final Tax",
+        "Laporan keuangan (BS/PL) standar dibuat otomatis",
+        "Data bank · petty cash · inventory · aset tetap dikonversi ke buku besar"
+      ]
+    },
+    "steps": {
+      "basic": "Info dasar",
+      "collect": "Kumpul dokumen",
+      "statements": "Lap. keuangan",
+      "sign": "Cetak/TTD",
+      "calc": "Hitung pajak",
+      "billing": "ID Billing",
+      "submit": "Kirim SPT"
+    },
+    "typeLock": {
+      "umkm": "Tutup buku UMKM",
+      "selected": "Dipilih",
+      "other": "Tutup buku PPh25 biasa"
+    },
+    "basic": {
+      "title": "Info dasar",
+      "companyName": "Nama perusahaan",
+      "npwp": "NPWP",
+      "fiscalYear": "Tahun buku",
+      "annualRevenue": "Omzet tahunan",
+      "okMsg": "Memenuhi syarat UMKM (tarif 0,5%)",
+      "deadlineMsg": "Tenggat: 30 April 2026",
+      "next": "Lanjut"
+    },
+    "collect": {
+      "title": "Pengumpulan dokumen",
+      "progress": "{pct}%",
+      "uploadCta": "Unggah",
+      "reuploadCta": "Unggah ulang",
+      "uploadedBadge": "Terunggah",
+      "requiredBadge": "Wajib",
+      "detailLink": "Panduan detail →",
+      "items": {
+        "akta": {
+          "title": "Akta Pendirian",
+          "body": "Akta pendirian notaris saat perusahaan dibentuk.",
+          "detail": "Dokumen pendukung sesuai jenis & periode akta."
+        },
+        "aktaRev": {
+          "title": "Akta Perubahan Terakhir",
+          "body": "Akta yang mencerminkan perubahan modal/anggaran terakhir.",
+          "detail": "Dokumen yang harus dikirim per waktu perubahan."
+        },
+        "sk": {
+          "title": "SK Menteri (Hukum & HAM)",
+          "body": "Surat Keputusan Menteri Hukum dan HAM — pengesahan akta.",
+          "detail": "Dokumen registrasi / kedaluwarsa / pembaruan."
+        },
+        "bank": {
+          "title": "Mutasi rekening",
+          "body": "Seluruh mutasi rekening bank usaha.",
+          "detail": "Format dan praktik penyimpanan data bank."
+        },
+        "sales": {
+          "title": "Daftar penjualan / bukti",
+          "body": "Faktur, kuitansi, daftar penjualan, Faktur Pajak.",
+          "detail": "Pengecekan ketika penerbitan faktur ≠ mutasi bank."
+        },
+        "purchase": {
+          "title": "Daftar pembelian / biaya",
+          "body": "Faktur pembelian, kuitansi biaya, faktur vendor.",
+          "detail": "Tindak lanjut bila bukti biaya hilang."
+        },
+        "petty": {
+          "title": "Petty cash",
+          "body": "Daftar pengeluaran tunai kecil.",
+          "detail": "Kebijakan & pengisian gap petty cash."
+        },
+        "inventory": {
+          "title": "Buku persediaan",
+          "body": "Saldo awal/akhir, pembelian, stok akhir per SKU.",
+          "detail": "Contoh per metode penilaian (FIFO/rata-rata)."
+        },
+        "assets": {
+          "title": "Daftar aset tetap",
+          "body": "Daftar modal, peralatan, furnitur, komputer perusahaan.",
+          "detail": "Kebijakan penyusutan, masa manfaat, pelepasan."
+        }
+      },
+      "prev": "Sebelumnya",
+      "genStatements": "Buat lap. keuangan"
+    },
+    "statements": {
+      "title": "Buat laporan keuangan",
+      "subtitle": "Data → klasifikasi otomatis → laporan keuangan",
+      "summary": {
+        "autoClass": "Klasifikasi otomatis",
+        "salesRecognized": "Penjualan diakui",
+        "netIncome": "Laba bersih"
+      },
+      "summaryDesc": {
+        "autoClass": "Bank + petty cash",
+        "salesRecognized": "Pendapatan + penjualan",
+        "netIncome": "PL · total aset"
+      },
+      "pl": {
+        "title": "Laba Rugi (PL)",
+        "sales": "Penjualan",
+        "cogs": "HPP",
+        "salary": "Gaji",
+        "opex": "Biaya operasional",
+        "petty": "Beban petty cash",
+        "deprec": "Penyusutan",
+        "netIncome": "Laba bersih"
+      },
+      "bs": {
+        "title": "Neraca (BS)",
+        "cash": "Kas / bank",
+        "ar": "Piutang",
+        "inventory": "Persediaan",
+        "fa": "Aset tetap (netto)",
+        "totalAssets": "Total aset",
+        "loan": "Pinjaman",
+        "capital": "Modal disetor",
+        "surplus": "Agio modal",
+        "retained": "Saldo laba",
+        "totalLE": "Liab + Ekuitas"
+      },
+      "aiNote": "Catatan AI: meninjau selisih bank ↔ penjualan, penjualan tunai, biaya hitung, aset tetap hilang.",
+      "prev": "Sebelumnya",
+      "next": "Cetak laporan"
+    },
+    "sign": {
+      "title": "Cetak · TTD · Unggah ulang laporan keuangan",
+      "subtitle": "Cetak laporan keuangan dalam format resmi, dapatkan tanda tangan direksi, lalu unggah kembali. Versi tertanda akan diunggah ke Coretax.",
+      "stepPrint": "Cetak PDF",
+      "stepLocation": "Panduan posisi tanda tangan",
+      "stepUpload": "Unggah versi tertanda",
+      "requiredBadge": "Perlu tertanda",
+      "hint": "Versi tertanda harus diunggah untuk lanjut.",
+      "prev": "Sebelumnya",
+      "next": "Hitung pajak"
+    },
+    "calc": {
+      "title": "Hitung pajak (UMKM Final)",
+      "base": "Omzet kena pajak",
+      "baseValue": "Rp 3.100.000.000",
+      "rate": "Tarif",
+      "rateValue": "0,5%",
+      "result": "Estimasi pajak",
+      "resultValue": "Rp 15.500.000",
+      "note": "PPh Final UMKM = Omzet × tarif tetap.",
+      "prev": "Sebelumnya",
+      "next": "ID Billing"
+    },
+    "billing": {
+      "title": "Terbitkan ID Billing",
+      "subtitle": "Terbitkan ID Billing Coretax otomatis berdasarkan pajak final UMKM.",
+      "amount": "Pajak terutang",
+      "amountValue": "Rp 15.500.000",
+      "method": "Metode",
+      "methodValue": "Bank Transfer / Virtual Account",
+      "issueCta": "Terbitkan ID Billing",
+      "prev": "Sebelumnya",
+      "next": "Buat SPT"
+    },
+    "submit": {
+      "title": "Kirim SPT Tahunan UMKM",
+      "subtitle": "Kirim SPT ke Coretax otomatis dan simpan BPE / NTPN.",
+      "generateCta": "Buat SPT",
+      "submitCta": "Kirim",
+      "prev": "Sebelumnya",
+      "done": "Selesai"
+    }
   }
 }

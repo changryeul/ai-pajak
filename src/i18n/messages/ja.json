@@ -7486,5 +7486,190 @@
       "next": "次へ進む",
       "ai": "AI 推奨を受ける"
     }
+  },
+  "umkmClosing": {
+    "pageTitle": "年次決算 — UMKM (最終税率 0.5%)",
+    "subtitle": "2025年法人税精算 → 2026年 PPh 25 月次前払い算定",
+    "backToDashboard": "ダッシュボードへ",
+    "requirementBox": {
+      "title": "UMKM 0.5% 適用要件",
+      "items": [
+        "年商 Rp 4.8B 以下",
+        "インドネシア居住法人",
+        "最大 3 年間 UMKM final tax 適用"
+      ]
+    },
+    "coreBox": {
+      "title": "UMKM 中核フロー",
+      "items": [
+        "税額 = 売上 × 0.5% Final Tax",
+        "標準財務諸表 (BS/PL) を自動生成",
+        "銀行・小口現金・在庫・固定資産データを元帳へ変換"
+      ]
+    },
+    "steps": {
+      "basic": "基本情報",
+      "collect": "資料収集",
+      "statements": "財務諸表",
+      "sign": "出力/署名",
+      "calc": "税額計算",
+      "billing": "ID Billing",
+      "submit": "SPT 提出"
+    },
+    "typeLock": {
+      "umkm": "UMKM 決算",
+      "selected": "選択中",
+      "other": "PPh25 一般法人決算"
+    },
+    "basic": {
+      "title": "基本情報",
+      "companyName": "会社名",
+      "npwp": "NPWP",
+      "fiscalYear": "事業年度",
+      "annualRevenue": "年商",
+      "okMsg": "UMKM 要件を満たしています (0.5% 適用)",
+      "deadlineMsg": "提出期限: 2026年4月30日",
+      "next": "次へ"
+    },
+    "collect": {
+      "title": "資料収集",
+      "progress": "{pct}%",
+      "uploadCta": "アップロード",
+      "reuploadCta": "再アップロード",
+      "uploadedBadge": "アップロード済",
+      "requiredBadge": "必須",
+      "detailLink": "詳細ガイドを見る →",
+      "items": {
+        "akta": {
+          "title": "Akta Pendirian (設立定款)",
+          "body": "会社設立時に Notaris が作成した公証定款。",
+          "detail": "定款の種類・作成時期に応じた提出書類のガイド。"
+        },
+        "aktaRev": {
+          "title": "Akta Perubahan Terakhir (最新改定定款)",
+          "body": "増資・条項変更等を反映した最新定款。",
+          "detail": "改定タイミング・最終変更日ごとの必要書類。"
+        },
+        "sk": {
+          "title": "SK Menteri (法務人権省承認)",
+          "body": "Surat Keputusan Menteri Hukum dan HAM — 法務人権省発行の定款認可。",
+          "detail": "登録・期限・更新ごとの必要書類。"
+        },
+        "bank": {
+          "title": "銀行取引明細",
+          "body": "事業に関連する全ての銀行入出金明細。",
+          "detail": "事業用銀行データの保存形式・運用ガイド。"
+        },
+        "sales": {
+          "title": "売上リスト / 売上証憑",
+          "body": "請求書・領収書・販売リスト・Faktur Pajak など。",
+          "detail": "請求発行 ↔ 銀行入金差異の確認ポイント。"
+        },
+        "purchase": {
+          "title": "仕入・経費リスト",
+          "body": "購買請求書・経費領収書・vendor invoice 等。",
+          "detail": "経費証憑欠落時の追加確認事項。"
+        },
+        "petty": {
+          "title": "小口現金 (Petty Cash)",
+          "body": "現金で支払った少額経費の明細。",
+          "detail": "小口現金運用基準・欠落整理ガイド。"
+        },
+        "inventory": {
+          "title": "在庫管理帳",
+          "body": "品目別 期首/期末・仕入・期末在庫。",
+          "detail": "評価方法 (FIFO/平均) ごとの作成例。"
+        },
+        "assets": {
+          "title": "固定資産リスト",
+          "body": "会社保有の資本設備・什器・PC 等のリスト。",
+          "detail": "減価償却方針・耐用年数・除売却処理ガイド。"
+        }
+      },
+      "prev": "戻る",
+      "genStatements": "財務諸表生成"
+    },
+    "statements": {
+      "title": "正規財務諸表生成",
+      "subtitle": "データ → 自動分類 → 財務諸表",
+      "summary": {
+        "autoClass": "自動分類",
+        "salesRecognized": "売上認識",
+        "netIncome": "当期純利益"
+      },
+      "summaryDesc": {
+        "autoClass": "銀行 + 小口現金",
+        "salesRecognized": "収益 + 売上",
+        "netIncome": "PL · 総資産"
+      },
+      "pl": {
+        "title": "損益計算書 (PL)",
+        "sales": "売上",
+        "cogs": "売上原価",
+        "salary": "給与",
+        "opex": "販管費",
+        "petty": "小口現金費用",
+        "deprec": "減価償却",
+        "netIncome": "当期純利益"
+      },
+      "bs": {
+        "title": "貸借対照表 (BS)",
+        "cash": "現預金",
+        "ar": "売掛金",
+        "inventory": "棚卸資産",
+        "fa": "固定資産 (純額)",
+        "totalAssets": "資産合計",
+        "loan": "借入金",
+        "capital": "資本金",
+        "surplus": "資本剰余金",
+        "retained": "利益剰余金",
+        "totalLE": "負債 + 資本"
+      },
+      "aiNote": "AI コメント: 銀行入出金 ↔ 売上リスト差異、現金売上、計算上経費、固定資産欠落をレビューします。",
+      "prev": "戻る",
+      "next": "財務諸表出力"
+    },
+    "sign": {
+      "title": "財務諸表 出力 - 署名 - 再アップロード",
+      "subtitle": "生成された財務諸表を公式様式で出力し、代表者署名を取得後に再アップロードしてください。署名版は Coretax 申告に提出されます。",
+      "stepPrint": "財務諸表 PDF 出力",
+      "stepLocation": "署名位置のガイド",
+      "stepUpload": "署名版アップロード",
+      "requiredBadge": "署名版必要",
+      "hint": "署名版アップロードが完了すると次へ進めます。",
+      "prev": "戻る",
+      "next": "税額計算"
+    },
+    "calc": {
+      "title": "税額計算 (UMKM Final Tax)",
+      "base": "課税対象売上",
+      "baseValue": "Rp 3,100,000,000",
+      "rate": "税率",
+      "rateValue": "0.5%",
+      "result": "見込税額",
+      "resultValue": "Rp 15,500,000",
+      "note": "UMKM Final Tax は 売上 × 固定税率 で計算されます。",
+      "prev": "戻る",
+      "next": "ID Billing"
+    },
+    "billing": {
+      "title": "ID Billing 発行",
+      "subtitle": "UMKM Final Tax 税額をもとに Coretax の ID Billing を自動発行します。",
+      "amount": "税額",
+      "amountValue": "Rp 15,500,000",
+      "method": "決済方法",
+      "methodValue": "Bank Transfer / Virtual Account",
+      "issueCta": "ID Billing 発行",
+      "prev": "戻る",
+      "next": "SPT 作成"
+    },
+    "submit": {
+      "title": "SPT Tahunan UMKM 提出",
+      "subtitle": "Coretax に SPT を自動送信し、BPE / NTPN を保管します。",
+      "generateCta": "SPT 生成",
+      "submitCta": "提出",
+      "prev": "戻る",
+      "done": "完了"
+    }
   }
 }

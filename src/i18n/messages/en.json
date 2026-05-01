@@ -7486,5 +7486,190 @@
       "next": "Continue",
       "ai": "Get AI recommendation"
     }
+  },
+  "umkmClosing": {
+    "pageTitle": "Year-end closing — UMKM (Final 0.5%)",
+    "subtitle": "FY2025 corp tax → FY2026 PPh 25 monthly prepayment",
+    "backToDashboard": "Back to dashboard",
+    "requirementBox": {
+      "title": "UMKM 0.5% rate eligibility",
+      "items": [
+        "Annual revenue ≤ Rp 4.8B",
+        "Indonesian resident corporation",
+        "Maximum 3 years of UMKM final-tax application"
+      ]
+    },
+    "coreBox": {
+      "title": "UMKM core flow",
+      "items": [
+        "Tax = revenue × 0.5% Final Tax",
+        "Standard financial statements (BS/PL) generated",
+        "Bank / petty cash / inventory / fixed-asset data converted into ledger"
+      ]
+    },
+    "steps": {
+      "basic": "Basics",
+      "collect": "Collect docs",
+      "statements": "Statements",
+      "sign": "Print/sign",
+      "calc": "Tax calc",
+      "billing": "ID Billing",
+      "submit": "Submit SPT"
+    },
+    "typeLock": {
+      "umkm": "UMKM closing",
+      "selected": "Selected",
+      "other": "PPh25 standard closing"
+    },
+    "basic": {
+      "title": "Basic info",
+      "companyName": "Company",
+      "npwp": "NPWP",
+      "fiscalYear": "Fiscal year",
+      "annualRevenue": "Annual revenue",
+      "okMsg": "UMKM requirements met (0.5% applies)",
+      "deadlineMsg": "Deadline: 30 April 2026",
+      "next": "Next"
+    },
+    "collect": {
+      "title": "Document collection",
+      "progress": "{pct}%",
+      "uploadCta": "Upload",
+      "reuploadCta": "Re-upload",
+      "uploadedBadge": "Uploaded",
+      "requiredBadge": "Required",
+      "detailLink": "See detailed guide →",
+      "items": {
+        "akta": {
+          "title": "Akta Pendirian (founding deed)",
+          "body": "Notarized founding deed prepared at company incorporation.",
+          "detail": "Required attachments by deed type and creation period."
+        },
+        "aktaRev": {
+          "title": "Akta Perubahan Terakhir (latest amendment)",
+          "body": "Latest deed reflecting capital changes or amendments.",
+          "detail": "What to provide for each amendment timing and last change date."
+        },
+        "sk": {
+          "title": "SK Menteri (MoLHR approval)",
+          "body": "Surat Keputusan Menteri Hukum dan HAM — MoLHR approval certifying the deed.",
+          "detail": "Documents needed for registration / expiry / renewal."
+        },
+        "bank": {
+          "title": "Bank statements",
+          "body": "Upload all business bank-account inflows and outflows.",
+          "detail": "Recommended file format and storage practice for bank data."
+        },
+        "sales": {
+          "title": "Sales list / receipts",
+          "body": "Invoices, receipts, sales lists, Faktur Pajak, etc.",
+          "detail": "Reconciliation tips when invoice issuance differs from bank deposits."
+        },
+        "purchase": {
+          "title": "Purchase / expense list",
+          "body": "Purchase invoices, expense receipts, vendor invoices, etc.",
+          "detail": "Required follow-ups when expense evidence is missing."
+        },
+        "petty": {
+          "title": "Petty cash log",
+          "body": "Cash-paid small expenses log.",
+          "detail": "Petty-cash policy and gap-handling guidance."
+        },
+        "inventory": {
+          "title": "Inventory book",
+          "body": "Beginning/ending inventory, purchases, ending stock per SKU.",
+          "detail": "Examples per valuation method (FIFO / average)."
+        },
+        "assets": {
+          "title": "Fixed-asset list",
+          "body": "List of capital, equipment, furniture, computers held by the company.",
+          "detail": "Depreciation policy, useful life, disposal/sale handling."
+        }
+      },
+      "prev": "Back",
+      "genStatements": "Generate statements"
+    },
+    "statements": {
+      "title": "Generate financial statements",
+      "subtitle": "Data → auto-classification → financial statements",
+      "summary": {
+        "autoClass": "Auto-class",
+        "salesRecognized": "Sales recognized",
+        "netIncome": "Net income"
+      },
+      "summaryDesc": {
+        "autoClass": "Bank + petty cash",
+        "salesRecognized": "Revenue + sales",
+        "netIncome": "PL · total assets"
+      },
+      "pl": {
+        "title": "Profit & Loss (PL)",
+        "sales": "Sales",
+        "cogs": "COGS",
+        "salary": "Salary",
+        "opex": "Operating expenses",
+        "petty": "Petty cash expense",
+        "deprec": "Depreciation",
+        "netIncome": "Net income"
+      },
+      "bs": {
+        "title": "Balance sheet (BS)",
+        "cash": "Cash / bank",
+        "ar": "AR",
+        "inventory": "Inventory",
+        "fa": "Fixed assets (net)",
+        "totalAssets": "Total assets",
+        "loan": "Loans",
+        "capital": "Paid-in capital",
+        "surplus": "Capital surplus",
+        "retained": "Retained earnings",
+        "totalLE": "Liab. + Equity"
+      },
+      "aiNote": "AI note: Reviews bank vs sales-list gaps, cash sales, computational expenses, missing fixed assets.",
+      "prev": "Back",
+      "next": "Print statements"
+    },
+    "sign": {
+      "title": "Print · Sign · Re-upload financial statements",
+      "subtitle": "Print generated financial statements in the official format, obtain the legal-rep signature, and re-upload. The signed copy is uploaded to Coretax filings.",
+      "stepPrint": "Print PDF",
+      "stepLocation": "Signing locations guide",
+      "stepUpload": "Upload signed copy",
+      "requiredBadge": "Signed copy required",
+      "hint": "Signed-copy upload is required to proceed.",
+      "prev": "Back",
+      "next": "Tax calc"
+    },
+    "calc": {
+      "title": "Tax calculation (UMKM Final Tax)",
+      "base": "Taxable revenue",
+      "baseValue": "Rp 3,100,000,000",
+      "rate": "Rate",
+      "rateValue": "0.5%",
+      "result": "Estimated tax",
+      "resultValue": "Rp 15,500,000",
+      "note": "UMKM Final Tax is computed on revenue × the fixed rate.",
+      "prev": "Back",
+      "next": "ID Billing"
+    },
+    "billing": {
+      "title": "Issue ID Billing",
+      "subtitle": "Auto-issue a Coretax ID Billing based on the calculated UMKM final tax.",
+      "amount": "Tax due",
+      "amountValue": "Rp 15,500,000",
+      "method": "Method",
+      "methodValue": "Bank Transfer / Virtual Account",
+      "issueCta": "Issue ID Billing",
+      "prev": "Back",
+      "next": "Generate SPT"
+    },
+    "submit": {
+      "title": "Submit SPT Tahunan UMKM",
+      "subtitle": "Auto-submit the SPT to Coretax and store BPE / NTPN.",
+      "generateCta": "Generate SPT",
+      "submitCta": "Submit",
+      "prev": "Back",
+      "done": "Done"
+    }
   }
 }

@@ -7486,5 +7486,190 @@
       "next": "下一步",
       "ai": "获取 AI 推荐"
     }
+  },
+  "umkmClosing": {
+    "pageTitle": "年终结算 — UMKM (Final 0.5%)",
+    "subtitle": "2025 年企业所得税清算 → 2026 年 PPh 25 月度预付额测算",
+    "backToDashboard": "返回仪表板",
+    "requirementBox": {
+      "title": "UMKM 0.5% 税率适用条件",
+      "items": [
+        "年营收 ≤ Rp 4.8B",
+        "印度尼西亚居民法人",
+        "UMKM Final Tax 最长适用 3 年"
+      ]
+    },
+    "coreBox": {
+      "title": "UMKM 核心流程",
+      "items": [
+        "税额 = 营收 × 0.5% Final Tax",
+        "自动生成标准财务报表 (BS/PL)",
+        "银行 / 备用金 / 库存 / 固定资产数据转换为账簿"
+      ]
+    },
+    "steps": {
+      "basic": "基础信息",
+      "collect": "资料收集",
+      "statements": "财务报表",
+      "sign": "打印 / 签字",
+      "calc": "税额计算",
+      "billing": "ID Billing",
+      "submit": "提交 SPT"
+    },
+    "typeLock": {
+      "umkm": "UMKM 结算",
+      "selected": "已选",
+      "other": "PPh25 一般法人结算"
+    },
+    "basic": {
+      "title": "基础信息",
+      "companyName": "公司名称",
+      "npwp": "NPWP",
+      "fiscalYear": "会计年度",
+      "annualRevenue": "年营收",
+      "okMsg": "满足 UMKM 条件（适用 0.5%）",
+      "deadlineMsg": "截止：2026 年 4 月 30 日",
+      "next": "下一步"
+    },
+    "collect": {
+      "title": "资料收集",
+      "progress": "{pct}%",
+      "uploadCta": "上传",
+      "reuploadCta": "重新上传",
+      "uploadedBadge": "已上传",
+      "requiredBadge": "必填",
+      "detailLink": "查看详细指南 →",
+      "items": {
+        "akta": {
+          "title": "设立章程 (Akta Pendirian)",
+          "body": "公司设立时由公证人 Notaris 出具的公证章程。",
+          "detail": "按章程类型与制定时点应提交的资料。"
+        },
+        "aktaRev": {
+          "title": "最新修订章程 (Akta Perubahan Terakhir)",
+          "body": "反映增资或章程修订的最新章程。",
+          "detail": "按变更时点提供的资料指引。"
+        },
+        "sk": {
+          "title": "SK Menteri (法务人权部批准)",
+          "body": "Surat Keputusan Menteri Hukum dan HAM — 法务人权部章程认可。",
+          "detail": "注册 / 到期 / 续期所需资料。"
+        },
+        "bank": {
+          "title": "银行交易明细",
+          "body": "上传所有业务相关的银行收支记录。",
+          "detail": "银行数据的格式与存档建议。"
+        },
+        "sales": {
+          "title": "销售清单 / 凭证",
+          "body": "发票、收据、销售清单、Faktur Pajak 等。",
+          "detail": "发票开具与银行收款差异的核对要点。"
+        },
+        "purchase": {
+          "title": "采购费用清单 / 凭证",
+          "body": "采购发票、费用收据、供应商发票等。",
+          "detail": "凭证缺失时的补充资料指引。"
+        },
+        "petty": {
+          "title": "备用金 (Petty Cash)",
+          "body": "现金支付的小额费用记录。",
+          "detail": "备用金运行规则与差额处理。"
+        },
+        "inventory": {
+          "title": "存货账",
+          "body": "按 SKU 的期初/期末、采购、期末库存。",
+          "detail": "估价方法 (FIFO/平均) 示例。"
+        },
+        "assets": {
+          "title": "固定资产清单",
+          "body": "公司持有的资本、设备、家具、电脑等列表。",
+          "detail": "折旧政策、使用年限、报废/转让处理。"
+        }
+      },
+      "prev": "上一步",
+      "genStatements": "生成财务报表"
+    },
+    "statements": {
+      "title": "生成正式财务报表",
+      "subtitle": "数据 → 自动分类 → 财务报表",
+      "summary": {
+        "autoClass": "自动分类",
+        "salesRecognized": "销售确认",
+        "netIncome": "净利润"
+      },
+      "summaryDesc": {
+        "autoClass": "银行 + 备用金",
+        "salesRecognized": "收入 + 销售",
+        "netIncome": "PL · 资产合计"
+      },
+      "pl": {
+        "title": "利润表 (PL)",
+        "sales": "销售",
+        "cogs": "销售成本",
+        "salary": "工资",
+        "opex": "运营费用",
+        "petty": "备用金费用",
+        "deprec": "折旧",
+        "netIncome": "净利润"
+      },
+      "bs": {
+        "title": "资产负债表 (BS)",
+        "cash": "现金 / 银行",
+        "ar": "应收账款",
+        "inventory": "存货",
+        "fa": "固定资产 (净额)",
+        "totalAssets": "资产合计",
+        "loan": "借款",
+        "capital": "实收资本",
+        "surplus": "资本公积",
+        "retained": "留存收益",
+        "totalLE": "负债 + 权益"
+      },
+      "aiNote": "AI 评论：复核银行 ↔ 销售清单差异、现金销售、计算性费用、固定资产遗漏。",
+      "prev": "上一步",
+      "next": "打印报表"
+    },
+    "sign": {
+      "title": "打印 · 签字 · 重新上传财务报表",
+      "subtitle": "将生成的财务报表按官方格式打印，取得法人代表签字后重新上传。签字版将作为 Coretax 申报附件。",
+      "stepPrint": "打印 PDF",
+      "stepLocation": "签字位置指引",
+      "stepUpload": "上传签字版",
+      "requiredBadge": "需签字版",
+      "hint": "需上传签字版方可继续。",
+      "prev": "上一步",
+      "next": "税额计算"
+    },
+    "calc": {
+      "title": "税额计算 (UMKM Final Tax)",
+      "base": "应税营收",
+      "baseValue": "Rp 3,100,000,000",
+      "rate": "税率",
+      "rateValue": "0.5%",
+      "result": "预计税额",
+      "resultValue": "Rp 15,500,000",
+      "note": "UMKM Final Tax = 营收 × 固定税率。",
+      "prev": "上一步",
+      "next": "ID Billing"
+    },
+    "billing": {
+      "title": "开具 ID Billing",
+      "subtitle": "基于 UMKM Final Tax 税额自动开具 Coretax ID Billing。",
+      "amount": "应缴税额",
+      "amountValue": "Rp 15,500,000",
+      "method": "付款方式",
+      "methodValue": "Bank Transfer / Virtual Account",
+      "issueCta": "开具 ID Billing",
+      "prev": "上一步",
+      "next": "生成 SPT"
+    },
+    "submit": {
+      "title": "提交 SPT Tahunan UMKM",
+      "subtitle": "自动向 Coretax 提交 SPT 并保存 BPE / NTPN。",
+      "generateCta": "生成 SPT",
+      "submitCta": "提交",
+      "prev": "上一步",
+      "done": "完成"
+    }
   }
 }
