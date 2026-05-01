@@ -7300,5 +7300,120 @@
     "footerNote": "※ Laporan untuk konfirmasi pelanggan. Pelaporan Coretax dan bukti BPE/NTPN divalidasi dan disimpan akhir oleh konsultan.",
     "statusAiReview": "AI sedang meninjau",
     "statusSignedUploaded": "Tertanda diunggah"
+  },
+  "filingsPage": {
+    "pageTitle": "Riwayat pelaporan pajak",
+    "backToDashboard": "Ke dasbor",
+    "currentStep": "1. Tahap saat ini",
+    "steps": {
+      "yearMonth": "Periode",
+      "monthly": "Bulanan",
+      "annual": "Tahunan",
+      "ntpn": "NTPN/BPE"
+    },
+    "query": {
+      "title": "Cari riwayat pelaporan",
+      "subtitle": "Pilih tahun dan bulan untuk melihat pelaporan bulanan/tahunan lalu, NTPN, BPE, dan lampiran.",
+      "year": "Tahun pelaporan",
+      "month": "Bulan kejadian",
+      "kind": "Kategori",
+      "taxType": "Jenis pajak / pelaporan",
+      "all": "Semua",
+      "search": "Cari",
+      "reset": "Reset"
+    },
+    "statusCards": {
+      "result": {
+        "title": "Hasil",
+        "sub": "Sesuai kriteria",
+        "value": "{count}"
+      },
+      "complete": {
+        "title": "Selesai",
+        "sub": "BPE / NTPN tervalidasi",
+        "value": "{count}"
+      },
+      "inProgress": {
+        "title": "Dalam proses",
+        "sub": "Pemrosesan AI atau menunggu",
+        "value": "{count}"
+      },
+      "total": {
+        "title": "Total pajak",
+        "sub": "Jumlah pembayaran / pelaporan",
+        "value": "{amount}"
+      }
+    },
+    "list": {
+      "title": "Daftar riwayat",
+      "subtitle": "Riwayat pelaporan untuk periode yang dipilih."
+    },
+    "listTabs": {
+      "all": "Semua",
+      "monthly": "Bulanan",
+      "annual": "Tahunan"
+    },
+    "columns": {
+      "period": "Periode",
+      "type": "Jenis pelaporan",
+      "status": "Status",
+      "deadline": "Tenggat bayar / lapor",
+      "amount": "Pajak",
+      "ntpn": "NTPN",
+      "bpe": "BPE / Lampiran",
+      "method": "Metode",
+      "action": "Aksi"
+    },
+    "statusFiled": "Selesai",
+    "statusPaidPending": "Dibayar / Pelaporan menunggu",
+    "statusAiReview": "AI sedang meninjau",
+    "methodAuto": "Otomatis AI",
+    "deadlinePay": "Bayar",
+    "deadlineFile": "Lapor",
+    "ctaDetail": "Detail",
+    "ctaDownload": "Unduh",
+    "rows": {
+      "pph21": {
+        "period": "Des 2025",
+        "type": "PPh21",
+        "status": "filed",
+        "payDeadline": "2026-01-15",
+        "fileDeadline": "2026-01-20",
+        "amount": "Rp 5.200.000",
+        "ntpn": "NTPN-20260115-001",
+        "bpe": "BPE-PPh21-202512.pdf"
+      },
+      "ppn": {
+        "period": "Des 2025",
+        "type": "PPN",
+        "status": "paidPending",
+        "payDeadline": "2026-01-31",
+        "fileDeadline": "2026-01-31",
+        "amount": "Rp 7.800.000",
+        "ntpn": "NTPN-20260131-014",
+        "bpe": "-"
+      },
+      "sptBadan": {
+        "period": "TB 2025",
+        "type": "SPT Tahunan Badan - UMKM",
+        "status": "aiReview",
+        "payDeadline": "2026-04-30",
+        "fileDeadline": "2026-04-30",
+        "amount": "Rp 15.600.000",
+        "ntpn": "-",
+        "bpe": "Laporan keuangan tertanda diunggah"
+      },
+      "pph25": {
+        "period": "Okt 2025",
+        "type": "PPh25",
+        "status": "filed",
+        "payDeadline": "2025-11-15",
+        "fileDeadline": "-",
+        "amount": "Rp 3.100.000",
+        "ntpn": "NTPN-20251115-051",
+        "bpe": "Bukti pembayaran tersimpan"
+      }
+    },
+    "footerNote": "※ Setelah pelaporan selesai, BPE dan NTPN pembayaran disimpan dengan aman."
   }
 }

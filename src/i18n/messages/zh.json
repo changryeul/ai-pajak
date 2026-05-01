@@ -7300,5 +7300,120 @@
     "footerNote": "※ 报表仅供客户确认。Coretax 申报资料及 BPE/NTPN 凭证由顾问核验后最终保管。",
     "statusAiReview": "AI 审查中",
     "statusSignedUploaded": "签字版已上传"
+  },
+  "filingsPage": {
+    "pageTitle": "税务申报历史",
+    "backToDashboard": "返回仪表板",
+    "currentStep": "1. 当前阶段",
+    "steps": {
+      "yearMonth": "按年月查询",
+      "monthly": "月度申报",
+      "annual": "年度申报",
+      "ntpn": "NTPN/BPE"
+    },
+    "query": {
+      "title": "申报历史查询",
+      "subtitle": "选择年份与月份查看过去的月度/年度申报、NTPN、BPE 与附件。",
+      "year": "申报年度",
+      "month": "发生月份",
+      "kind": "分类",
+      "taxType": "税种 / 申报类型",
+      "all": "全部",
+      "search": "查询",
+      "reset": "重置"
+    },
+    "statusCards": {
+      "result": {
+        "title": "查询结果",
+        "sub": "符合条件",
+        "value": "{count} 项"
+      },
+      "complete": {
+        "title": "已完成",
+        "sub": "BPE / NTPN 已确认",
+        "value": "{count} 项"
+      },
+      "inProgress": {
+        "title": "进行中",
+        "sub": "AI 处理或申报待办",
+        "value": "{count} 项"
+      },
+      "total": {
+        "title": "税额合计",
+        "sub": "缴纳 / 申报金额",
+        "value": "{amount}"
+      }
+    },
+    "list": {
+      "title": "申报历史列表",
+      "subtitle": "显示所选年月的过去申报记录。"
+    },
+    "listTabs": {
+      "all": "全部",
+      "monthly": "月度",
+      "annual": "年度"
+    },
+    "columns": {
+      "period": "期间",
+      "type": "申报类型",
+      "status": "状态",
+      "deadline": "缴纳 / 申报截止",
+      "amount": "税额",
+      "ntpn": "NTPN",
+      "bpe": "BPE / 附件",
+      "method": "处理方式",
+      "action": "操作"
+    },
+    "statusFiled": "申报完成",
+    "statusPaidPending": "已缴纳 / 申报待办",
+    "statusAiReview": "AI 审查中",
+    "methodAuto": "AI 自动处理",
+    "deadlinePay": "缴纳",
+    "deadlineFile": "申报",
+    "ctaDetail": "详情",
+    "ctaDownload": "下载",
+    "rows": {
+      "pph21": {
+        "period": "2025 年 12 月",
+        "type": "PPh21",
+        "status": "filed",
+        "payDeadline": "2026-01-15",
+        "fileDeadline": "2026-01-20",
+        "amount": "Rp 5,200,000",
+        "ntpn": "NTPN-20260115-001",
+        "bpe": "BPE-PPh21-202512.pdf"
+      },
+      "ppn": {
+        "period": "2025 年 12 月",
+        "type": "PPN",
+        "status": "paidPending",
+        "payDeadline": "2026-01-31",
+        "fileDeadline": "2026-01-31",
+        "amount": "Rp 7,800,000",
+        "ntpn": "NTPN-20260131-014",
+        "bpe": "-"
+      },
+      "sptBadan": {
+        "period": "2025 归属",
+        "type": "SPT Tahunan Badan - UMKM",
+        "status": "aiReview",
+        "payDeadline": "2026-04-30",
+        "fileDeadline": "2026-04-30",
+        "amount": "Rp 15,600,000",
+        "ntpn": "-",
+        "bpe": "签字版财务报表已上传"
+      },
+      "pph25": {
+        "period": "2025 年 10 月",
+        "type": "PPh25",
+        "status": "filed",
+        "payDeadline": "2025-11-15",
+        "fileDeadline": "-",
+        "amount": "Rp 3,100,000",
+        "ntpn": "NTPN-20251115-051",
+        "bpe": "缴款凭证已保管"
+      }
+    },
+    "footerNote": "※ 申报完成后，BPE 与缴纳 NTPN 将被安全保管。"
   }
 }

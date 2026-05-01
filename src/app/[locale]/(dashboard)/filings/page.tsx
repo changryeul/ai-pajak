@@ -5,7 +5,10 @@ import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FilingStatusList } from '@/components/filings';
+import { CompanyFilingsView } from '@/components/filings/CompanyFilingsView';
 import { PageTitle } from '@/components/layout/PageTitle';
+import { useSession, hasRole } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { FileText, Clock, CheckCircle, AlertTriangle, Plus } from 'lucide-react';
 
 interface StatResponse {
@@ -20,6 +23,7 @@ export default function FilingsPage() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+  const { session } = useSession();
 
   const [stats, setStats] = useState<StatResponse | null>(null);
 
@@ -43,6 +47,12 @@ export default function FilingsPage() {
     }
     loadStats();
   }, []);
+
+  // COMPANY customers see the redesigned filings history view (yearly/monthly,
+  // status cards, NTPN/BPE columns, AI auto-processing).
+  if (session && hasRole(session, UserRole.CUSTOMER) && session.customerType === 'COMPANY') {
+    return <CompanyFilingsView />;
+  }
 
   const fmt = (n: number | null | undefined) => (n == null ? '—' : String(n));
   const cards = [

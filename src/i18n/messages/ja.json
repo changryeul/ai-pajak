@@ -7300,5 +7300,120 @@
     "footerNote": "※ レポートは顧客確認用です。Coretax 申告資料と BPE/NTPN 証憑はコンサルが検証後に最終保管します。",
     "statusAiReview": "AI レビュー中",
     "statusSignedUploaded": "署名版アップロード済"
+  },
+  "filingsPage": {
+    "pageTitle": "税務申告履歴",
+    "backToDashboard": "ダッシュボードへ",
+    "currentStep": "1. 現在のステップ",
+    "steps": {
+      "yearMonth": "年月検索",
+      "monthly": "月次申告",
+      "annual": "年次申告",
+      "ntpn": "NTPN/BPE"
+    },
+    "query": {
+      "title": "申告履歴検索",
+      "subtitle": "年月を選択して過去の月次/年次申告、NTPN、BPE、添付資料を確認できます。",
+      "year": "申告年度",
+      "month": "発生月",
+      "kind": "区分",
+      "taxType": "税目 / 申告タイプ",
+      "all": "すべて",
+      "search": "検索",
+      "reset": "リセット"
+    },
+    "statusCards": {
+      "result": {
+        "title": "検索結果",
+        "sub": "条件一致",
+        "value": "{count}件"
+      },
+      "complete": {
+        "title": "完了",
+        "sub": "BPE / NTPN 確認",
+        "value": "{count}件"
+      },
+      "inProgress": {
+        "title": "進行中",
+        "sub": "AI 処理または申告待ち",
+        "value": "{count}件"
+      },
+      "total": {
+        "title": "税額合計",
+        "sub": "納付 / 申告金額",
+        "value": "{amount}"
+      }
+    },
+    "list": {
+      "title": "申告履歴一覧",
+      "subtitle": "選択した年月の申告履歴を表示します。"
+    },
+    "listTabs": {
+      "all": "すべて",
+      "monthly": "月次",
+      "annual": "年次"
+    },
+    "columns": {
+      "period": "期間",
+      "type": "申告タイプ",
+      "status": "ステータス",
+      "deadline": "納付 / 申告期限",
+      "amount": "税額",
+      "ntpn": "NTPN",
+      "bpe": "BPE / 添付",
+      "method": "処理方式",
+      "action": "アクション"
+    },
+    "statusFiled": "申告完了",
+    "statusPaidPending": "納付完了 / 申告待ち",
+    "statusAiReview": "AI レビュー中",
+    "methodAuto": "AI 自動処理",
+    "deadlinePay": "納付",
+    "deadlineFile": "申告",
+    "ctaDetail": "詳細",
+    "ctaDownload": "ダウンロード",
+    "rows": {
+      "pph21": {
+        "period": "2025年12月発生分",
+        "type": "PPh21",
+        "status": "filed",
+        "payDeadline": "2026-01-15",
+        "fileDeadline": "2026-01-20",
+        "amount": "Rp 5,200,000",
+        "ntpn": "NTPN-20260115-001",
+        "bpe": "BPE-PPh21-202512.pdf"
+      },
+      "ppn": {
+        "period": "2025年12月発生分",
+        "type": "PPN",
+        "status": "paidPending",
+        "payDeadline": "2026-01-31",
+        "fileDeadline": "2026-01-31",
+        "amount": "Rp 7,800,000",
+        "ntpn": "NTPN-20260131-014",
+        "bpe": "-"
+      },
+      "sptBadan": {
+        "period": "2025年帰属",
+        "type": "SPT Tahunan Badan - UMKM",
+        "status": "aiReview",
+        "payDeadline": "2026-04-30",
+        "fileDeadline": "2026-04-30",
+        "amount": "Rp 15,600,000",
+        "ntpn": "-",
+        "bpe": "署名済財務諸表アップロード完了"
+      },
+      "pph25": {
+        "period": "2025年10月発生分",
+        "type": "PPh25",
+        "status": "filed",
+        "payDeadline": "2025-11-15",
+        "fileDeadline": "-",
+        "amount": "Rp 3,100,000",
+        "ntpn": "NTPN-20251115-051",
+        "bpe": "納付証憑保管"
+      }
+    },
+    "footerNote": "※ 申告完了後、BPE と納付 NTPN を安全に保管します。"
   }
 }

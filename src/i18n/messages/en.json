@@ -7300,5 +7300,120 @@
     "footerNote": "※ Reports are for customer review. Coretax filings and BPE/NTPN evidence are validated and finalized by consultants.",
     "statusAiReview": "AI reviewing",
     "statusSignedUploaded": "Signed copy uploaded"
+  },
+  "filingsPage": {
+    "pageTitle": "Filing history",
+    "backToDashboard": "Back to dashboard",
+    "currentStep": "1. Current step",
+    "steps": {
+      "yearMonth": "Period",
+      "monthly": "Monthly",
+      "annual": "Year-end",
+      "ntpn": "NTPN/BPE"
+    },
+    "query": {
+      "title": "Filing history search",
+      "subtitle": "Pick a year and month to view past monthly/yearly filings, NTPN, BPE, and attachments.",
+      "year": "Filing year",
+      "month": "Occurrence month",
+      "kind": "Category",
+      "taxType": "Tax / Filing type",
+      "all": "All",
+      "search": "Search",
+      "reset": "Reset"
+    },
+    "statusCards": {
+      "result": {
+        "title": "Results",
+        "sub": "Matching criteria",
+        "value": "{count}"
+      },
+      "complete": {
+        "title": "Complete",
+        "sub": "BPE / NTPN verified",
+        "value": "{count}"
+      },
+      "inProgress": {
+        "title": "In progress",
+        "sub": "AI processing or pending",
+        "value": "{count}"
+      },
+      "total": {
+        "title": "Total tax",
+        "sub": "Payment / filing amount",
+        "value": "{amount}"
+      }
+    },
+    "list": {
+      "title": "Filing history",
+      "subtitle": "Past filings for the selected period."
+    },
+    "listTabs": {
+      "all": "All",
+      "monthly": "Monthly",
+      "annual": "Year-end"
+    },
+    "columns": {
+      "period": "Period",
+      "type": "Filing type",
+      "status": "Status",
+      "deadline": "Pay / file deadline",
+      "amount": "Tax",
+      "ntpn": "NTPN",
+      "bpe": "BPE / Attachment",
+      "method": "Method",
+      "action": "Action"
+    },
+    "statusFiled": "Filed",
+    "statusPaidPending": "Paid / Filing pending",
+    "statusAiReview": "AI reviewing",
+    "methodAuto": "AI automatic",
+    "deadlinePay": "Pay",
+    "deadlineFile": "File",
+    "ctaDetail": "View",
+    "ctaDownload": "Download",
+    "rows": {
+      "pph21": {
+        "period": "Dec 2025",
+        "type": "PPh21",
+        "status": "filed",
+        "payDeadline": "2026-01-15",
+        "fileDeadline": "2026-01-20",
+        "amount": "Rp 5,200,000",
+        "ntpn": "NTPN-20260115-001",
+        "bpe": "BPE-PPh21-202512.pdf"
+      },
+      "ppn": {
+        "period": "Dec 2025",
+        "type": "PPN",
+        "status": "paidPending",
+        "payDeadline": "2026-01-31",
+        "fileDeadline": "2026-01-31",
+        "amount": "Rp 7,800,000",
+        "ntpn": "NTPN-20260131-014",
+        "bpe": "-"
+      },
+      "sptBadan": {
+        "period": "FY2025",
+        "type": "SPT Tahunan Badan - UMKM",
+        "status": "aiReview",
+        "payDeadline": "2026-04-30",
+        "fileDeadline": "2026-04-30",
+        "amount": "Rp 15,600,000",
+        "ntpn": "-",
+        "bpe": "Signed financial statements uploaded"
+      },
+      "pph25": {
+        "period": "Oct 2025",
+        "type": "PPh25",
+        "status": "filed",
+        "payDeadline": "2025-11-15",
+        "fileDeadline": "-",
+        "amount": "Rp 3,100,000",
+        "ntpn": "NTPN-20251115-051",
+        "bpe": "Payment evidence archived"
+      }
+    },
+    "footerNote": "※ After filing is complete, BPE and payment NTPN are stored safely."
   }
 }
