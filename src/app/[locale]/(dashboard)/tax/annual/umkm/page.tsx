@@ -626,6 +626,78 @@ function BsRow({ label, value }: { label: string; value: number }) {
   );
 }
 
+function SubmitActions({
+  t, sessionId, downloadSpt,
+}: { t: T; sessionId: string | null; downloadSpt: () => void }) {
+  type Sub = { status: string; channel: string; submitted_at: string };
+  const [submission, setSubmission] = useState<Sub | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    let aborted = false;
+    fetch(`/api/tax/annual-closing/${sessionId}/submit`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((j) => { if (!aborted && j.success) setSubmission(j.data); })
+      .catch(() => { /* ignore */ });
+    return () => { aborted = true; };
+  }, [sessionId]);
+
+  const submit = async () => {
+    if (!sessionId) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/tax/annual-closing/${sessionId}/submit`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmission(json.data);
+        toast.success('SPT 제출 완료 — 운영팀 검증 대기중');
+      } else {
+        toast.error(json.error || '제출 실패');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="mt-5">
+      {submission ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4">
+          <p className="text-xs font-semibold text-emerald-700">제출 완료</p>
+          <p className="text-sm font-medium text-emerald-900 mt-1">
+            상태 {submission.status} · 채널 {submission.channel}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            제출 시각 {new Date(submission.submitted_at).toLocaleString()}
+          </p>
+          <p className="text-[11px] text-amber-700 mt-2">
+            ※ Coretax API 활성화 전이므로 운영팀이 RPA로 DJP에 첨부합니다. BPE/NTPN은 보고서 화면에 자동 반영됩니다.
+          </p>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap justify-end gap-2 mt-3">
+        <Button size="sm" variant="outline" onClick={downloadSpt} disabled={!sessionId}>
+          {t('submit.generateCta')}
+        </Button>
+        <Button
+          size="sm"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={submit}
+          disabled={!sessionId || submitting || !!submission}
+        >
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+          {submission ? '제출됨' : t('submit.submitCta')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function SignStep({
   t,
   tc,
@@ -924,14 +996,9 @@ function SubmitStep({
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-end gap-2 mt-5">
-        <Button size="sm" variant="outline" onClick={downloadSpt} disabled={!sessionId}>
-          {t('submit.generateCta')}
-        </Button>
-        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => toast.info(tc('comingSoon'))}>
-          {t('submit.submitCta')}
-        </Button>
-      </div>
+      <SubmitActions t={t} sessionId={sessionId} downloadSpt={downloadSpt} />
+
+
 
       <div className="flex justify-between mt-5">
         <Button size="sm" variant="outline" onClick={onPrev}>

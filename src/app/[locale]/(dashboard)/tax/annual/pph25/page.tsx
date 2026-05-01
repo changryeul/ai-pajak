@@ -1176,6 +1176,72 @@ function MonthlyStep({
         </ol>
       </div>
 
+      <SubmitClosingBox sessionId={sessionId} onComplete={onComplete} completed={completed} onPrev={onPrev} t={t} />
+    </div>
+  );
+}
+
+function SubmitClosingBox({
+  sessionId, onComplete, completed, onPrev, t,
+}: {
+  sessionId: string | null;
+  onComplete: () => Promise<void> | void;
+  completed: boolean;
+  onPrev: () => void;
+  t: T;
+}) {
+  type Sub = { status: string; channel: string; submitted_at: string };
+  const [submission, setSubmission] = useState<Sub | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    let aborted = false;
+    fetch(`/api/tax/annual-closing/${sessionId}/submit`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((j) => { if (!aborted && j.success) setSubmission(j.data); })
+      .catch(() => { /* ignore */ });
+    return () => { aborted = true; };
+  }, [sessionId]);
+
+  const submit = async () => {
+    if (!sessionId) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/tax/annual-closing/${sessionId}/submit`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmission(json.data);
+        toast.success('SPT 제출 완료 — 운영팀 검증 대기중');
+        await onComplete();
+      } else {
+        toast.error(json.error || '제출 실패');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      {submission ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 mt-5">
+          <p className="text-xs font-semibold text-emerald-700">제출 완료</p>
+          <p className="text-sm font-medium text-emerald-900 mt-1">
+            상태 {submission.status} · 채널 {submission.channel}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            제출 시각 {new Date(submission.submitted_at).toLocaleString()}
+          </p>
+          <p className="text-[11px] text-amber-700 mt-2">
+            ※ Coretax API 활성화 전이므로 운영팀이 RPA로 DJP에 첨부합니다.
+          </p>
+        </div>
+      ) : null}
+
       <div className="flex justify-between mt-5">
         <Button size="sm" variant="outline" onClick={onPrev}>
           <ArrowLeft className="h-4 w-4 mr-1" />
@@ -1184,13 +1250,13 @@ function MonthlyStep({
         <Button
           size="sm"
           className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-500"
-          onClick={() => void onComplete()}
-          disabled={completed}
+          onClick={submission ? () => void onComplete() : submit}
+          disabled={!sessionId || submitting || completed}
         >
-          <CheckCircle2 className="h-4 w-4 mr-1" />
-          결산 완료
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}
+          {submission || completed ? '결산 완료됨' : 'SPT 제출 + 결산 완료'}
         </Button>
       </div>
-    </div>
+    </>
   );
 }
