@@ -326,6 +326,7 @@ export default function Pph25ClosingPage() {
               <MonthlyStep
                 t={t}
                 tc={tc}
+                sessionId={closing.session?.id ?? null}
                 pphBadan={pphBadan}
                 pph22={pph22}
                 pph23={pph23}
@@ -1016,10 +1017,11 @@ function CalcStep({
 }
 
 function MonthlyStep({
-  t, tc, pphBadan, pph22, pph23, pph24, monthlyBase, monthlyAmount, onPrev, onComplete, completed,
+  t, tc, sessionId, pphBadan, pph22, pph23, pph24, monthlyBase, monthlyAmount, onPrev, onComplete, completed,
 }: {
   t: T;
   tc: T;
+  sessionId: string | null;
   pphBadan: number;
   pph22: number;
   pph23: number;
@@ -1030,6 +1032,10 @@ function MonthlyStep({
   onComplete: () => Promise<void> | void;
   completed: boolean;
 }) {
+  const downloadSpt = () => {
+    if (!sessionId) return;
+    window.open(`/api/tax/annual-closing/${sessionId}/spt-pdf`, '_blank');
+  };
   const nextSteps = t.raw('monthly.nextSteps') as string[];
   const creditValues = [
     { label: 'PPh 22 공제', value: pph22 },
@@ -1080,7 +1086,8 @@ function MonthlyStep({
                   size="sm"
                   variant="outline"
                   className="h-7 text-xs"
-                  onClick={() => toast.info(tc('comingSoon'))}
+                  onClick={() => (i === 0 ? downloadSpt() : toast.info(tc('comingSoon')))}
+                  disabled={i === 0 && !sessionId}
                 >
                   {i === 0 ? t('monthly.sptCta') : t('monthly.payCta')}
                 </Button>

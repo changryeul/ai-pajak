@@ -274,6 +274,7 @@ export default function UmkmClosingPage() {
               <SubmitStep
                 t={t}
                 tc={tc}
+                sessionId={closing.session?.id ?? null}
                 onPrev={goPrev}
                 onComplete={completeAndExit}
                 completed={closing.session?.status === 'COMPLETED'}
@@ -820,21 +821,26 @@ function BillingStep({
 }
 
 function SubmitStep({
-  t, tc, onPrev, onComplete, completed,
+  t, tc, sessionId, onPrev, onComplete, completed,
 }: {
   t: T;
   tc: T;
+  sessionId: string | null;
   onPrev: () => void;
   onComplete: () => Promise<void> | void;
   completed: boolean;
 }) {
+  const downloadSpt = () => {
+    if (!sessionId) return;
+    window.open(`/api/tax/annual-closing/${sessionId}/spt-pdf`, '_blank');
+  };
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('submit.title')}</p>
       <p className="text-sm text-slate-500 mt-1">{t('submit.subtitle')}</p>
 
       <div className="flex flex-wrap justify-end gap-2 mt-5">
-        <Button size="sm" variant="outline" onClick={() => toast.info(tc('comingSoon'))}>
+        <Button size="sm" variant="outline" onClick={downloadSpt} disabled={!sessionId}>
           {t('submit.generateCta')}
         </Button>
         <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => toast.info(tc('comingSoon'))}>
