@@ -254,15 +254,18 @@ export async function POST(request: NextRequest) {
     // Create FREE subscription
     const now = new Date();
     const yearEnd = new Date(now.getFullYear(), 11, 31);
-    await admin.from('subscription').insert({
+    const { error: subError } = await admin.from('subscription').insert({
       customer_id: customerId,
-      plan: 'free',
+      plan_type: 'FREE',
       billing_cycle: 'ANNUAL',
       price: 0,
       is_active: true,
       current_period_start: now.toISOString(),
       current_period_end: yearEnd.toISOString(),
     });
+    if (subError) {
+      loggers.api.warn({ err: subError, customerId }, 'FREE subscription insert failed (non-fatal)');
+    }
 
     loggers.api.info({ userId, customerId, npwp: npwpDigits }, 'Company signup completed');
 

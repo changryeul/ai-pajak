@@ -217,7 +217,7 @@ async function setupCustomer(
     const yearEnd = new Date(now.getFullYear(), 11, 31);
     await admin.from('subscription').insert({
       customer_id: customerId,
-      plan: 'free',
+      plan_type: 'FREE',
       billing_cycle: 'ANNUAL',
       price: 0,
       is_active: true,
