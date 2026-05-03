@@ -16,7 +16,7 @@ import {
   Users, Plus, Loader2, CheckCircle, AlertTriangle, Save, X,
   Edit2, Trash2, Calculator, Sparkles, FileText,
   Upload, Camera, Download, Shield, ChevronDown, ChevronRight,
-  Image, Send,
+  Image, ArrowLeft,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
@@ -88,6 +88,7 @@ export default function PPh21PayrollPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [activeTab, setActiveTab] = useState('monthly');
+  const [payslipMode, setPayslipMode] = useState(false);
 
   // Group employees by worker_type for summary cards
   const workerSummary = useMemo(() => {
@@ -295,31 +296,6 @@ export default function PPh21PayrollPage() {
     { key: 'DAILY',      label: tp('workerDaily'),      color: 'border-amber-200 bg-amber-50' },
   ];
 
-  const handleSubmit = async () => {
-    if (!customerId) return;
-    const period = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    setIsSaving(true);
-    try {
-      const res = await fetch('/api/tax/spt-masa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, taxType: 'PPh21', period }),
-      });
-      const data = await res.json();
-      if (data.success || data.sptMasa) {
-        showMsg('success', `SPT Masa PPh 21 ${tp('l84_f3bc85')}`);
-        const el = document.getElementById('pph21-filing-process');
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        showMsg('error', data.message || data.error || `SPT Masa ${tp('l85_cbbcb4')}`);
-      }
-    } catch {
-      showMsg('error', tp('l21_175c5f'));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       <PageTitle title="PPh 21" />
@@ -329,32 +305,32 @@ export default function PPh21PayrollPage() {
         aiSteps={[tsc('stepAiProcess'), tsc('stepTaxCalc'), tsc('stepIdBillingGen')]}
       />
 
-      {/* Filing process: stepper + e-Bupot/SPT/payment actions (moved from old "filing" tab) */}
-      <div id="pph21-filing-process" className="mb-6">
-        <PPh21FilingProcess customerId={customerId} locale={locale} showMsg={showMsg} />
-      </div>
+      {/* Back to selection (only in payslip fullscreen mode) */}
+      {payslipMode && (
+        <div className="mb-4">
+          <Button variant="outline" size="sm" onClick={() => setPayslipMode(false)}>
+            <ArrowLeft className="h-3 w-3 mr-1" />{tp('backToSelection')}
+          </Button>
+        </div>
+      )}
 
-      {/* Worker-type summary + submit */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-        {workerCards.map(c => {
-          const g = workerSummary[c.key];
-          return (
-            <div key={c.key} className={`rounded-xl border p-3 ${c.color}`}>
-              <p className="text-gray-600 text-xs flex items-center gap-1">
-                <Users className="h-3 w-3" />{c.label}
-              </p>
-              <p className="font-bold text-base mt-0.5">{tp('workerCount', { count: g.count })}</p>
-              <p className="text-[11px] text-gray-600 font-mono mt-0.5">{fmt(g.total)}</p>
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex justify-end mb-5">
-        <Button onClick={handleSubmit} disabled={isSaving || employees.length === 0} className="bg-slate-900 hover:bg-slate-800 text-white">
-          {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
-          {tp('submitBtn')}
-        </Button>
-      </div>
+      {/* Worker-type summary (hidden in payslip mode) */}
+      {!payslipMode && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          {workerCards.map(c => {
+            const g = workerSummary[c.key];
+            return (
+              <div key={c.key} className={`rounded-xl border p-3 ${c.color}`}>
+                <p className="text-gray-600 text-xs flex items-center gap-1">
+                  <Users className="h-3 w-3" />{c.label}
+                </p>
+                <p className="font-bold text-base mt-0.5">{tp('workerCount', { count: g.count })}</p>
+                <p className="text-[11px] text-gray-600 font-mono mt-0.5">{fmt(g.total)}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Message */}
       {message && (
@@ -363,21 +339,25 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
-      {/* Data input cards (moved from old "upload" tab — always visible above tabs) */}
-      <div className="mb-6">
-        <PPh21DataInputSection
-          customerId={customerId}
-          onComplete={loadEmployees}
-          showMsg={showMsg}
-          onNavigateToMaster={() => setActiveTab('monthly')}
-        />
-      </div>
+      {/* Data input cards (hidden in payslip mode) */}
+      {!payslipMode && (
+        <div className="mb-6">
+          <PPh21DataInputSection
+            customerId={customerId}
+            onComplete={loadEmployees}
+            showMsg={showMsg}
+            onNavigateToMaster={() => { setActiveTab('monthly'); setPayslipMode(true); }}
+          />
+        </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-        <TabsList className="mb-4 flex-wrap">
-          <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
-          <TabsTrigger value="master"><Users className="h-3 w-3 mr-1" />{tp('tabEmployeeMaster')}</TabsTrigger>
-        </TabsList>
+        {!payslipMode && (
+          <TabsList className="mb-4 flex-wrap">
+            <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
+            <TabsTrigger value="master"><Users className="h-3 w-3 mr-1" />{tp('tabEmployeeMaster')}</TabsTrigger>
+          </TabsList>
+        )}
 
         <TabsContent value="monthly">
           <MonthlyPayslipTab customerId={customerId} />
@@ -968,45 +948,8 @@ function PPh21DataInputSection({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Method 1: Template download + upload */}
-        <Card className="border-2 border-dashed border-blue-200 hover:border-blue-400 hover:shadow-sm transition-all">
-          <CardContent className="p-5 flex flex-col h-full">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                <Download className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">{tp('templateDownloadTitle')}</p>
-                <p className="text-[11px] text-gray-500 mt-0.5">{tp('templateDownloadDesc')}</p>
-              </div>
-            </div>
-            <div className="space-y-2 flex-1">
-              <Button size="sm" variant="outline" onClick={downloadTemplate} className="w-full">
-                <Download className="h-3 w-3 mr-1" />{tp('templateDownloadBtn')}
-              </Button>
-              <Button size="sm" onClick={() => openMonthPicker('excel')} disabled={uploading}
-                className="w-full bg-blue-600 hover:bg-blue-700">
-                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                {tp('l27_c3feb8')}
-              </Button>
-              {confirmedPeriod && pendingAction === 'excel' && (
-                <p className="text-[10px] text-blue-700 text-center">
-                  {tp('monthPickerSelected', { period: confirmedPeriod })}
-                </p>
-              )}
-              <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
-                onChange={e => handleExcelUpload(e.target.files)} />
-            </div>
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-[10px] text-gray-500 font-medium">
-                worker_type: <span className="font-mono text-gray-600">REGULAR / CONTRACT / DAILY / FREELANCER</span>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Method 2: Upload existing Excel/PDF — RECOMMENDED */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Method 1: Upload existing Excel/PDF — RECOMMENDED (with template download fallback) */}
         <Card className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all relative">
           <div className="absolute -top-2 left-5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
             {tp('recommendedBadge')}
@@ -1032,11 +975,21 @@ function PPh21DataInputSection({
                   <Camera className="h-3 w-3 mr-1" />{tp('cameraCapture')}
                 </Button>
               )}
-              {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
+              <Button size="sm" variant="outline" onClick={downloadTemplate} className="w-full">
+                <Download className="h-3 w-3 mr-1" />{tp('templateDownloadBtn')}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => openMonthPicker('excel')} disabled={uploading}
+                className="w-full text-emerald-700">
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
+                {tp('l27_c3feb8')}
+              </Button>
+              {confirmedPeriod && (
                 <p className="text-[10px] text-emerald-700 text-center">
                   {tp('monthPickerSelected', { period: confirmedPeriod })}
                 </p>
               )}
+              <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
+                onChange={e => handleExcelUpload(e.target.files)} />
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
                 onChange={e => handleUpload(e.target.files, 'WEB', 'SALARY_SLIP')} />
             </div>
@@ -1224,221 +1177,6 @@ function PPh21DataInputSection({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-
-// ══════════════════════════════════════════════════════
-// Sub-component: PPh 21 신고 프로세스
-// ══════════════════════════════════════════════════════
-function PPh21FilingProcess({
-  customerId, locale, showMsg,
-}: {
-  customerId: string;
-  locale: string;
-  showMsg: (type: 'success' | 'error', text: string) => void;
-}) {
-  const tp = useTranslations('pph21Page');
-  const [creatingSPT, setCreatingSPT] = useState(false);
-  const [generatingBP, setGeneratingBP] = useState(false);
-  const [bpResult, setBpResult] = useState<Array<{ employeeName: string; bpNumber: string; pph21: number }>>([]);
-  const [sptResult, setSptResult] = useState<{
-    totalGrossIncome: number; totalTaxWithheld: number; itemCount: number;
-    submissionDeadline: string; isOverdue: boolean;
-  } | null>(null);
-
-  const currentPeriod = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-
-  // Check existing SPT Masa PPh21
-  useEffect(() => {
-    if (!customerId) return;
-    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh21&period=${currentPeriod}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        const filings = d?.data || [];
-        const existing = filings.find((f: { tax_type: string; tax_period: string }) =>
-          f.tax_type === 'PPh21' && f.tax_period === currentPeriod);
-        if (existing?.tax_data?.spt_masa_result) {
-          const r = existing.tax_data.spt_masa_result;
-          setSptResult({
-            totalGrossIncome: r.total_gross_income || 0,
-            totalTaxWithheld: r.total_tax_withheld || 0,
-            itemCount: r.item_count || 0,
-            submissionDeadline: r.submission_deadline || '',
-            isOverdue: false,
-          });
-        }
-      })
-      .catch(() => {});
-  }, [customerId, currentPeriod]);
-
-  const handleCreateSPT = async () => {
-    setCreatingSPT(true);
-    try {
-      const res = await fetch('/api/tax/spt-masa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, taxType: 'PPh21', period: currentPeriod }),
-      });
-      const data = await res.json();
-      if (data.success || data.sptMasa) {
-        const spt = data.sptMasa;
-        if (spt) {
-          setSptResult({
-            totalGrossIncome: spt.totalGrossIncome || 0,
-            totalTaxWithheld: spt.totalTaxWithheld || 0,
-            itemCount: spt.itemCount || 0,
-            submissionDeadline: spt.submissionDeadline || '',
-            isOverdue: spt.isOverdue || false,
-          });
-        }
-        showMsg('success', `SPT Masa PPh 21 ${tp('l84_f3bc85')}`);
-      } else {
-        showMsg('error', data.error || data.message || `SPT ${tp('l85_cbbcb4')}`);
-      }
-    } catch {
-      showMsg('error', tp('l21_175c5f'));
-    } finally {
-      setCreatingSPT(false);
-    }
-  };
-
-  const handleGenerateBP = async () => {
-    setGeneratingBP(true);
-    try {
-      const res = await fetch('/api/tax/ebupot-pph21', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, period: currentPeriod }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBpResult(data.data?.buktiPotongs || []);
-        showMsg('success', data.message || `e-Bupot ${tp('l84_f3bc85')}`);
-      } else {
-        showMsg('error', data.error || `e-Bupot ${tp('l85_cbbcb4')}`);
-      }
-    } catch {
-      showMsg('error', tp('l21_175c5f'));
-    } finally {
-      setGeneratingBP(false);
-    }
-  };
-
-  const steps = [
-    { id: 1, label: tp('l0_bcefd6'), done: true, desc: tp('l86_c7547e') },
-    { id: 2, label: tp('l87_40851c'), done: true, desc: tp('l88_9dcc47') },
-    { id: 3, label: `PPh 21 ${tp('l89_4e9509')}`, done: true, desc: `TER ${tp('l90_773723')}` },
-    { id: 4, label: 'e-Bupot', done: bpResult.length > 0, desc: bpResult.length > 0 ? tp('countSuffix', { count: bpResult.length }) : tp('l91_ac6176') },
-    { id: 5, label: 'SPT Masa', done: !!sptResult, desc: sptResult ? `${tp('l92_df2337')} ${sptResult.submissionDeadline?.substring(0, 10)}` : tp('l91_ac6176') },
-    { id: 6, label: tp('l93_b303e6'), done: false, desc: tp('l94_a3adc9') },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <h3 className="font-bold text-sm flex items-center gap-2">
-        <Shield className="h-4 w-4 text-blue-600" />
-        {currentPeriod} PPh 21 {tp('l95_aa38cd')}
-      </h3>
-
-      {/* Progress steps */}
-      <div className="flex items-center justify-between">
-        {steps.map((step, i) => (
-          <div key={step.id} className="flex items-center flex-1">
-            <div className="flex flex-col items-center flex-1">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                step.done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
-                {step.done ? <CheckCircle className="h-4 w-4" /> : step.id}
-              </div>
-              <p className="text-[10px] mt-1 text-center font-medium">{step.label}</p>
-              <p className="text-[9px] text-gray-400 text-center">{step.desc}</p>
-            </div>
-            {i < steps.length - 1 && <div className={`h-0.5 w-full ${step.done ? 'bg-green-400' : 'bg-gray-200'}`} />}
-          </div>
-        ))}
-      </div>
-
-      {/* e-Bupot 1721-A1 */}
-      {bpResult.length === 0 ? (
-        <Card className="border-purple-200 bg-purple-50">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="font-medium text-sm text-purple-900">{tp('eBupotGenTitle')}</p>
-              <p className="text-xs text-purple-700">{tp('l97_00866c')}</p>
-            </div>
-            <Button onClick={handleGenerateBP} disabled={generatingBP} variant="outline">
-              {generatingBP ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-              e-Bupot {tp('l96_4169bb')}
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <p className="font-medium text-sm text-green-900">{tp('eBupotGenDone', { count: bpResult.length })}</p>
-            </div>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {bpResult.map((bp, i) => (
-                <div key={i} className="flex items-center justify-between text-xs p-1.5 bg-white rounded">
-                  <span>{bp.employeeName}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge className="font-mono text-[9px] bg-purple-100 text-purple-700">{bp.bpNumber}</Badge>
-                    <span className="font-mono text-blue-700">{fmtRp(bp.pph21)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* SPT Masa action */}
-      {!sptResult ? (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="font-medium text-sm text-blue-900">{tp('sptMasaGenTitle')}</p>
-              <p className="text-xs text-blue-700">{tp('l99_b88336')}</p>
-            </div>
-            <Button onClick={handleCreateSPT} disabled={creatingSPT}>
-              {creatingSPT ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileText className="h-3 w-3 mr-1" />}
-              SPT Masa {tp('l96_4169bb')}
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <p className="font-medium text-sm text-green-900">{tp('sptMasaGenDone')}</p>
-              </div>
-              <div className="grid grid-cols-3 gap-3 text-xs">
-                <div><p className="text-gray-500">{tp('l100_00c733')}</p><p className="font-bold">{sptResult.itemCount}</p></div>
-                <div><p className="text-gray-500">{tp('l101_6a76ba')}</p><p className="font-mono font-bold">{fmtRp(sptResult.totalGrossIncome)}</p></div>
-                <div><p className="text-gray-500">{tp('pph21TaxAmount')}</p><p className="font-mono font-bold text-blue-700">{fmtRp(sptResult.totalTaxWithheld)}</p></div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-indigo-200 bg-indigo-50">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm text-indigo-900">{tp('l103_25e8b8')}</p>
-                <p className="text-xs text-indigo-700">{tp('billingNote')}</p>
-              </div>
-              <a href={`/${locale}/tax/monthly-payments`}
-                className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
-                {tp('l105_d76082')}
-              </a>
-            </CardContent>
-          </Card>
-        </>
-      )}
     </div>
   );
 }

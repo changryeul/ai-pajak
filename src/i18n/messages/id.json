@@ -3665,7 +3665,7 @@
     "employeeCount": "Jumlah Karyawan",
     "totalSalary": "Total Gaji",
     "tabMonthlyPayslip": "Slip Gaji",
-    "tabEmployeeMaster": "Data Karyawan",
+    "tabEmployeeMaster": "Catatan HR Karyawan",
     "employeeList": "Daftar Karyawan",
     "newEmployee": "Tambah Karyawan",
     "employeeName": "Nama Karyawan",
@@ -3689,11 +3689,11 @@
     "templateDownloadTitle": "1. Unduh Template",
     "templateDownloadDesc": "Unduh template CSV, isi data gaji karyawan, dan unggah",
     "templateDownloadBtn": "Unduh Template (.csv)",
-    "uploadExistingTitle": "2. Unggah Data Gaji yang Ada",
+    "uploadExistingTitle": "1. Unggah Data Gaji yang Ada",
     "fileUploadBtn": "Unggah File (Excel/PDF)",
     "cameraCapture": "Foto Slip Gaji",
     "ocrNote": "Format slip gaji JTC juga dapat dikenali OCR",
-    "directInputTitle": "3. Input Manual",
+    "directInputTitle": "2. Input Manual",
     "goToEmployeeMaster": "Ke Master Karyawan",
     "excelColumn": "Kolom Excel",
     "mappingTarget": "→ Target Pemetaan",
@@ -3726,7 +3726,8 @@
     "month11": "Nov",
     "month12": "Des",
     "recommendedBadge": "Disarankan",
-    "manualEntryHint": "Daftarkan setiap karyawan satu per satu (nama · NPWP · gaji · PTKP)"
+    "manualEntryHint": "Daftarkan setiap karyawan satu per satu (nama · NPWP · gaji · PTKP)",
+    "backToSelection": "Kembali ke pilihan metode input"
   },
   "pph23Page": {
     "k0_9674d4": "Dividen",

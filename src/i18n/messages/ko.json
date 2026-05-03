@@ -3755,11 +3755,11 @@
     "templateDownloadTitle": "1. 템플릿 다운로드",
     "templateDownloadDesc": "CSV 템플릿을 다운로드하여 직원 급여 데이터를 입력하고 업로드",
     "templateDownloadBtn": "템플릿 다운로드 (.csv)",
-    "uploadExistingTitle": "2. 기존 급여 자료 업로드",
+    "uploadExistingTitle": "1. 기존 급여 자료 업로드",
     "fileUploadBtn": "파일 업로드 (Excel/PDF)",
     "cameraCapture": "급여명세 촬영",
     "ocrNote": "JTC 급여명세서 양식도 OCR 인식 가능",
-    "directInputTitle": "3. 직접 입력",
+    "directInputTitle": "2. 직접 입력",
     "goToEmployeeMaster": "급여 명세로 이동",
     "excelColumn": "Excel 컬럼",
     "mappingTarget": "→ 매핑 대상",
@@ -3792,7 +3792,8 @@
     "month11": "11월",
     "month12": "12월",
     "recommendedBadge": "추천",
-    "manualEntryHint": "급여 명세 탭에서 이번 달 급여 내역을 직접 입력합니다"
+    "manualEntryHint": "급여 명세 탭에서 이번 달 급여 내역을 직접 입력합니다",
+    "backToSelection": "입력 방법 선택으로 돌아가기"
   },
   "pph23Page": {
     "k0_9674d4": "배당 (Dividen)",

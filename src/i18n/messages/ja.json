@@ -3665,7 +3665,7 @@
     "employeeCount": "Employees",
     "totalSalary": "Total Salary",
     "tabMonthlyPayslip": "Monthly Payslip",
-    "tabEmployeeMaster": "Employee Master",
+    "tabEmployeeMaster": "Employee HR Records",
     "employeeList": "Employee List",
     "newEmployee": "Add Employee",
     "employeeName": "Employee Name",
@@ -3689,11 +3689,11 @@
     "templateDownloadTitle": "1. Download Template",
     "templateDownloadDesc": "Download the CSV template, fill in employee salary data, and upload",
     "templateDownloadBtn": "Download Template (.csv)",
-    "uploadExistingTitle": "2. Upload Existing Payroll Data",
+    "uploadExistingTitle": "1. Upload Existing Payroll Data",
     "fileUploadBtn": "Upload File (Excel/PDF)",
     "cameraCapture": "Capture Payslip",
     "ocrNote": "JTC payslip format is also OCR-compatible",
-    "directInputTitle": "3. Manual Entry",
+    "directInputTitle": "2. Manual Entry",
     "goToEmployeeMaster": "Go to Employee Master",
     "excelColumn": "Excel Column",
     "mappingTarget": "→ Mapping Target",
@@ -3726,7 +3726,8 @@
     "month11": "Nov",
     "month12": "Dec",
     "recommendedBadge": "Recommended",
-    "manualEntryHint": "Register each employee individually (name · NPWP · salary · PTKP)"
+    "manualEntryHint": "Register each employee individually (name · NPWP · salary · PTKP)",
+    "backToSelection": "Back to method selection"
   },
   "pph23Page": {
     "k0_9674d4": "Dividends (Dividen)",
