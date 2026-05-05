@@ -91,59 +91,62 @@ const navItems: NavSection[] = [
       { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
     ],
   },
-  // ── COMPANY 고객: 월신고 섹션 ──
+  // ── COMPANY 고객: 5개 큰 메뉴 (월 신고 / 연 신고 / 신고관리 / 계정) ──
+  // 대시보드는 위쪽 main 섹션에서 독립 링크로 노출.
+  // 각 큰 메뉴는 헤더 클릭으로 펼침/접힘 토글; 현재 페이지가 속한 메뉴는 자동 펼침.
   {
-    section: 'company-monthly',
-    labelKey: 'nav.monthlyFiling',
+    section: 'company-main',
     roles: [UserRole.CUSTOMER],
     items: [
-      { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-    ],
-  },
-  // ── COMPANY 고객: 연신고 섹션 ──
-  {
-    section: 'company-annual',
-    labelKey: 'nav.annualFiling',
-    roles: [UserRole.CUSTOMER],
-    items: [
-      { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.closingWork', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/ebupot', icon: FileText, labelKey: 'nav.ebupotIssue', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/spt-1771', icon: FileSpreadsheet, labelKey: 'nav.sptGeneration', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-    ],
-  },
-  // ── COMPANY 고객: 신고관리 섹션 ──
-  {
-    section: 'company-management',
-    labelKey: 'nav.filingManagement',
-    roles: [UserRole.CUSTOMER],
-    items: [
-      { href: '/filings', icon: ClipboardList, labelKey: 'nav.taxHistory', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/reports', icon: BarChart3, labelKey: 'nav.taxReport', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/counterparties', icon: Users, labelKey: 'nav.counterpartyInput', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-    ],
-  },
-  // ── COMPANY 고객: AI Payroll 섹션 ──
-  {
-    section: 'company-payroll',
-    labelKey: 'nav.aiPayroll',
-    roles: [UserRole.CUSTOMER],
-    items: [
-      { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-    ],
-  },
-  // ── COMPANY 고객: 세금도구 섹션 ──
-  {
-    section: 'company-tools',
-    labelKey: 'nav.taxTools',
-    roles: [UserRole.CUSTOMER],
-    items: [
-      { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxCalculator', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+      // 월 신고 (직원 인사 기록 + 세금 도구도 같이 묶음)
+      {
+        href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling',
+        customerTypes: ['COMPANY'],
+        children: [
+          { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus' },
+          { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
+          { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
+          { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
+          { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
+          { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue' },
+          { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord' },
+          { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxCalculator' },
+          { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
+        ],
+      },
+      // 연 신고
+      {
+        href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling',
+        customerTypes: ['COMPANY'],
+        children: [
+          { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.closingWork' },
+          { href: '/tax/ebupot', icon: FileText, labelKey: 'nav.ebupotIssue' },
+          { href: '/tax/spt-1771', icon: FileSpreadsheet, labelKey: 'nav.sptGeneration' },
+        ],
+      },
+      // 신고관리 (사용자 명시 3개만)
+      {
+        href: '#', icon: ClipboardList, labelKey: 'nav.filingManagement',
+        customerTypes: ['COMPANY'],
+        children: [
+          { href: '/filings', icon: ClipboardList, labelKey: 'nav.taxHistory' },
+          { href: '/reports', icon: BarChart3, labelKey: 'nav.taxReport' },
+          { href: '/counterparties', icon: Users, labelKey: 'nav.counterpartyInput' },
+        ],
+      },
+      // 계정
+      {
+        href: '#', icon: User, labelKey: 'nav.account',
+        customerTypes: ['COMPANY'],
+        children: [
+          { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile' },
+          { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations' },
+          { href: '/settings', icon: Settings, labelKey: 'nav.securityPassword' },
+          { href: '/billing', icon: CreditCard, labelKey: 'nav.billing' },
+          { href: '/notifications', icon: Bell, labelKey: 'nav.notifications' },
+          { href: '/help', icon: Lightbulb, labelKey: 'nav.help' },
+        ],
+      },
     ],
   },
   // ── 개인 고객: 간결 7-메뉴 (2026-04-23 keynote Pribadi 스펙) ──
@@ -236,19 +239,6 @@ const navItems: NavSection[] = [
       { href: '/admin/tax-rates', icon: Settings, labelKey: 'nav.taxRates' },
       { href: '/admin/override-rules', icon: Shield, labelKey: 'nav.overrideRules' },
       { href: '/admin/rule-test', icon: Activity, labelKey: 'nav.ruleTest' },
-    ],
-  },
-  // ── COMPANY 고객: 계정 섹션 (프로필/연동/보안/요금/도움말) ──
-  {
-    section: 'company-account',
-    labelKey: 'nav.account',
-    roles: [UserRole.CUSTOMER],
-    items: [
-      { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/settings', icon: Settings, labelKey: 'nav.securityPassword', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/billing', icon: CreditCard, labelKey: 'nav.billing', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
-      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
     ],
   },
   // ── 기타 역할: 계정 섹션 (기존 구조 유지) ──
