@@ -49,6 +49,11 @@ interface OperatorSeed {
   autoAssign: boolean;
   loggedInToday: boolean;
   supervisorEmpId: string;
+  // PDF '성과/평가' 화면의 12명 metric을 그대로 시드.
+  accuracyPct: number;
+  avgProcessingMinutes: number;
+  approvalQualityScore: number;
+  customerSatisfactionScore: number;
 }
 
 const supervisors: SupervisorSeed[] = [
@@ -57,22 +62,20 @@ const supervisors: SupervisorSeed[] = [
   { email: 'sv-personal@aipajak.com',  empId: 'SUP003', name: '정수퍼', team: 'Personal / Support',  maxManaged: 3 },
 ];
 
+// metric defaults follow the "상담원 비교 평가표" in PDF p.13-17.
 const operators: OperatorSeed[] = [
-  // SUP001 (4명 — 정상)
-  { email: 'op-emp001@aipajak.com', empId: 'EMP001', name: '김상담', workState: 'reviewing',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001' },
-  { email: 'op-emp002@aipajak.com', empId: 'EMP002', name: '이상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001' },
-  { email: 'op-emp005@aipajak.com', empId: 'EMP005', name: '최상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001' },
-  { email: 'op-emp006@aipajak.com', empId: 'EMP006', name: '한상담', workState: 'consulting', autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001' },
-  // SUP002 (4명 — 초과)
-  { email: 'op-emp003@aipajak.com', empId: 'EMP003', name: '박상담', workState: 'break',      autoAssign: false, loggedInToday: true,  supervisorEmpId: 'SUP002' },
-  { email: 'op-emp007@aipajak.com', empId: 'EMP007', name: '윤상담', workState: 'coretax',    autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP002' },
-  { email: 'op-emp008@aipajak.com', empId: 'EMP008', name: '오상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP002' },
-  { email: 'op-emp011@aipajak.com', empId: 'EMP011', name: '신상담', workState: 'break',      autoAssign: false, loggedInToday: true,  supervisorEmpId: 'SUP002' },
-  // SUP003 (4명 — 초과)
-  { email: 'op-emp004@aipajak.com', empId: 'EMP004', name: '정상담', workState: 'offline',    autoAssign: false, loggedInToday: false, supervisorEmpId: 'SUP003' },
-  { email: 'op-emp009@aipajak.com', empId: 'EMP009', name: '문상담', workState: 'reviewing',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP003' },
-  { email: 'op-emp010@aipajak.com', empId: 'EMP010', name: '강상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP003' },
-  { email: 'op-emp012@aipajak.com', empId: 'EMP012', name: '배상담', workState: 'offline',    autoAssign: false, loggedInToday: false, supervisorEmpId: 'SUP003' },
+  { email: 'op-emp001@aipajak.com', empId: 'EMP001', name: '김상담', workState: 'reviewing',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001', accuracyPct: 98, avgProcessingMinutes: 38, approvalQualityScore: 96, customerSatisfactionScore: 97 },
+  { email: 'op-emp002@aipajak.com', empId: 'EMP002', name: '이상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001', accuracyPct: 95, avgProcessingMinutes: 44, approvalQualityScore: 91, customerSatisfactionScore: 93 },
+  { email: 'op-emp005@aipajak.com', empId: 'EMP005', name: '최상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001', accuracyPct: 96, avgProcessingMinutes: 41, approvalQualityScore: 93, customerSatisfactionScore: 95 },
+  { email: 'op-emp006@aipajak.com', empId: 'EMP006', name: '한상담', workState: 'consulting', autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP001', accuracyPct: 94, avgProcessingMinutes: 47, approvalQualityScore: 89, customerSatisfactionScore: 92 },
+  { email: 'op-emp003@aipajak.com', empId: 'EMP003', name: '박상담', workState: 'break',      autoAssign: false, loggedInToday: true,  supervisorEmpId: 'SUP002', accuracyPct: 93, avgProcessingMinutes: 52, approvalQualityScore: 88, customerSatisfactionScore: 91 },
+  { email: 'op-emp007@aipajak.com', empId: 'EMP007', name: '윤상담', workState: 'coretax',    autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP002', accuracyPct: 97, avgProcessingMinutes: 45, approvalQualityScore: 92, customerSatisfactionScore: 95 },
+  { email: 'op-emp008@aipajak.com', empId: 'EMP008', name: '오상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP002', accuracyPct: 92, avgProcessingMinutes: 54, approvalQualityScore: 86, customerSatisfactionScore: 89 },
+  { email: 'op-emp011@aipajak.com', empId: 'EMP011', name: '신상담', workState: 'break',      autoAssign: false, loggedInToday: true,  supervisorEmpId: 'SUP002', accuracyPct: 90, avgProcessingMinutes: 59, approvalQualityScore: 85, customerSatisfactionScore: 88 },
+  { email: 'op-emp004@aipajak.com', empId: 'EMP004', name: '정상담', workState: 'offline',    autoAssign: false, loggedInToday: false, supervisorEmpId: 'SUP003', accuracyPct: 90, avgProcessingMinutes: 61, approvalQualityScore: 84, customerSatisfactionScore: 87 },
+  { email: 'op-emp009@aipajak.com', empId: 'EMP009', name: '문상담', workState: 'reviewing',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP003', accuracyPct: 95, avgProcessingMinutes: 49, approvalQualityScore: 90, customerSatisfactionScore: 93 },
+  { email: 'op-emp010@aipajak.com', empId: 'EMP010', name: '강상담', workState: 'available',  autoAssign: true,  loggedInToday: true,  supervisorEmpId: 'SUP003', accuracyPct: 91, avgProcessingMinutes: 50, approvalQualityScore: 87, customerSatisfactionScore: 89 },
+  { email: 'op-emp012@aipajak.com', empId: 'EMP012', name: '배상담', workState: 'offline',    autoAssign: false, loggedInToday: false, supervisorEmpId: 'SUP003', accuracyPct: 88, avgProcessingMinutes: 64, approvalQualityScore: 82, customerSatisfactionScore: 85 },
 ];
 
 async function findUserByEmail(email: string): Promise<string | null> {
@@ -132,6 +135,8 @@ async function ensureOperator(args: {
   role: 'tax_operator' | 'tax_operator_supervisor';
   maxClients?: number; maxManaged?: number;
   workState?: string; autoAssign?: boolean; loggedInToday?: boolean;
+  accuracyPct?: number; avgProcessingMinutes?: number;
+  approvalQualityScore?: number; customerSatisfactionScore?: number;
 }): Promise<string> {
   const payload: Record<string, unknown> = {
     user_id: args.userId,
@@ -146,6 +151,10 @@ async function ensureOperator(args: {
   };
   if (args.maxClients !== undefined) payload.max_clients = args.maxClients;
   if (args.maxManaged !== undefined) payload.max_managed = args.maxManaged;
+  if (args.accuracyPct !== undefined) payload.accuracy_pct = args.accuracyPct;
+  if (args.avgProcessingMinutes !== undefined) payload.avg_processing_minutes = args.avgProcessingMinutes;
+  if (args.approvalQualityScore !== undefined) payload.approval_quality_score = args.approvalQualityScore;
+  if (args.customerSatisfactionScore !== undefined) payload.customer_satisfaction_score = args.customerSatisfactionScore;
 
   const { data: existing } = await admin
     .from('tax_operators')
@@ -186,6 +195,10 @@ async function main() {
       userId, empId: op.empId, name: op.name, email: op.email,
       role: 'tax_operator', maxClients: 35,
       workState: op.workState, autoAssign: op.autoAssign, loggedInToday: op.loggedInToday,
+      accuracyPct: op.accuracyPct,
+      avgProcessingMinutes: op.avgProcessingMinutes,
+      approvalQualityScore: op.approvalQualityScore,
+      customerSatisfactionScore: op.customerSatisfactionScore,
     });
     opEmpToId.set(op.empId, opRowId);
   }
