@@ -73,8 +73,13 @@ export default function CorporateTaxPage() {
   const [lastYearTaxCredits, setLastYearTaxCredits] = useState('');
   const [hadFiscalLoss, setHadFiscalLoss] = useState(false);
 
-  // Step 4: UMKM monthly revenue
+  // Step 4: UMKM monthly revenue + which month the user is currently filing for.
+  // Default to the previous month — typical filing flow files for last month's revenue.
   const [monthlyRevenues, setMonthlyRevenues] = useState<number[]>(Array(12).fill(0));
+  const [selectedMonthIdx, setSelectedMonthIdx] = useState<number>(() => {
+    const cm = new Date().getMonth(); // 0..11
+    return cm === 0 ? 11 : cm - 1;
+  });
 
   // Result
   const [result, setResult] = useState<RegimeResult | null>(null);
@@ -624,27 +629,102 @@ export default function CorporateTaxPage() {
               </CardContent>
             </Card>
 
-            {/* This-month revenue input + auto-calculated tax + submit (UMKM only) */}
+            {/* UMKM: monthly revenue overview — pick the filing month + edit cells inline.
+                Already-submitted months stay visible across the year. */}
+            {r.regime === 'UMKM_FINAL' && (
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {t('monthlyRevenueTitle', { year: currentYear })}
+                  </h3>
+                  <p className="text-[11px] text-gray-500 mb-3">
+                    {t('monthlyRevenueDesc', { exemption: fmtRp(getExemption(legalForm)) })}
+                  </p>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                    {MONTHS.map((label, i) => {
+                      const rev = monthlyRevenues[i];
+                      const cumulative = monthlyRevenues.slice(0, i + 1).reduce((s, v) => s + v, 0);
+                      const exemptionLeft = Math.max(getExemption(legalForm) - (cumulative - rev), 0);
+                      const taxable = Math.max(rev - exemptionLeft, 0);
+                      const tax = Math.round(taxable * UMKM_RATE);
+                      const isSelected = i === selectedMonthIdx;
+                      return (
+                        <div
+                          key={i}
+                          onClick={() => setSelectedMonthIdx(i)}
+                          className={`rounded-md p-1.5 cursor-pointer transition-colors ${
+                            isSelected
+                              ? 'bg-green-50 ring-2 ring-green-500'
+                              : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          <Label className={`text-[10px] cursor-pointer ${isSelected ? 'text-green-700 font-semibold' : 'text-gray-500'}`}>
+                            {label}
+                          </Label>
+                          <Input
+                            type="number"
+                            className={`h-8 text-xs font-mono ${isSelected ? 'bg-white border-green-400' : 'bg-gray-50'}`}
+                            value={rev || ''}
+                            placeholder="—"
+                            onClick={e => { e.stopPropagation(); setSelectedMonthIdx(i); }}
+                            onChange={e => {
+                              const next = [...monthlyRevenues];
+                              next[i] = Number(e.target.value) || 0;
+                              setMonthlyRevenues(next);
+                            }}
+                          />
+                          {rev > 0 && (
+                            <p className="text-[9px] text-green-600 mt-0.5">{t('monthlyTaxAmount', { amount: fmtRp(tax) })}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3 p-3 bg-green-100 rounded-lg grid grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <p className="text-gray-600">{t('annualRevenueTotal')}</p>
+                      <p className="font-bold font-mono">{fmtRp(monthlyRevenues.reduce((s, v) => s + v, 0))}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">{t('exemptionDeduction')}</p>
+                      <p className="font-bold font-mono">{fmtRp(Math.min(monthlyRevenues.reduce((s, v) => s + v, 0), getExemption(legalForm)))}</p>
+                    </div>
+                    <div>
+                      <p className="text-green-700">{t('annualPphFinal')}</p>
+                      <p className="font-bold font-mono text-green-800">
+                        {fmtRp(Math.round(Math.max(monthlyRevenues.reduce((s, v) => s + v, 0) - getExemption(legalForm), 0) * UMKM_RATE))}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Selected-month revenue input + auto-calculated tax + submit (UMKM only).
+                The 12-month overview is rendered ABOVE this block so the user can pick the
+                filing month first; cells are clickable and editable in-place. */}
             {r.regime === 'UMKM_FINAL' ? (() => {
-              const thisMonthIdx = new Date().getMonth(); // 0..11
-              const thisMonthRev = monthlyRevenues[thisMonthIdx] || 0;
-              // Cumulative through prior months — exemption budget consumed before this month
-              const priorCumulative = monthlyRevenues.slice(0, thisMonthIdx).reduce((s, v) => s + v, 0);
+              const selectedRev = monthlyRevenues[selectedMonthIdx] || 0;
+              // Cumulative through prior months — exemption budget consumed before the selected month
+              const priorCumulative = monthlyRevenues.slice(0, selectedMonthIdx).reduce((s, v) => s + v, 0);
               const exemptionLeft = Math.max(getExemption(legalForm) - priorCumulative, 0);
-              const taxable = Math.max(thisMonthRev - exemptionLeft, 0);
-              const thisMonthTax = Math.round(taxable * UMKM_RATE);
+              const taxable = Math.max(selectedRev - exemptionLeft, 0);
+              const selectedTax = Math.round(taxable * UMKM_RATE);
               return (
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-stretch">
                   <Card className="border-0 shadow-sm">
                     <CardContent className="p-4 text-center">
-                      <p className="text-xs text-gray-500">{t('thisMonthRevenue')}</p>
+                      <p className="text-xs text-gray-500">
+                        {MONTHS[selectedMonthIdx]} {t('thisMonthRevenue')}
+                      </p>
                       <Input
                         type="number"
                         className="text-2xl font-bold font-mono mt-1 text-center h-auto py-1 border-0 shadow-none focus-visible:ring-0"
-                        value={thisMonthRev || ''}
+                        value={selectedRev || ''}
                         onChange={e => {
                           const next = [...monthlyRevenues];
-                          next[thisMonthIdx] = Number(e.target.value) || 0;
+                          next[selectedMonthIdx] = Number(e.target.value) || 0;
                           setMonthlyRevenues(next);
                         }}
                         placeholder="Rp 0"
@@ -654,17 +734,18 @@ export default function CorporateTaxPage() {
                   </Card>
                   <Card className="border-0 shadow-sm">
                     <CardContent className="p-4 text-center">
-                      <p className="text-xs text-gray-500">{t('thisMonthTax')}</p>
-                      <p className="text-2xl font-bold font-mono mt-1 text-green-700">{fmtRp(thisMonthTax)}</p>
+                      <p className="text-xs text-gray-500">
+                        {MONTHS[selectedMonthIdx]} {t('thisMonthTax')}
+                      </p>
+                      <p className="text-2xl font-bold font-mono mt-1 text-green-700">{fmtRp(selectedTax)}</p>
                       <p className="text-[10px] text-gray-400">{t('thisMonthTaxHint')}</p>
                     </CardContent>
                   </Card>
                   <Button
                     className="bg-green-600 hover:bg-green-700 text-white self-stretch px-6"
-                    disabled={thisMonthRev <= 0}
+                    disabled={selectedRev <= 0}
                     onClick={() => {
-                      // Submission workflow placeholder — wire to backend in a later pass.
-                      alert(`${t('submitBtn')}: ${MONTHS[thisMonthIdx]} ${fmtRp(thisMonthTax)}`);
+                      alert(`${t('submitBtn')}: ${MONTHS[selectedMonthIdx]} ${fmtRp(selectedTax)}`);
                     }}
                   >
                     {t('submitBtn')}
@@ -763,60 +844,6 @@ export default function CorporateTaxPage() {
               );
             })()}
 
-            {/* UMKM: read-only monthly revenue overview — mirrors the value entered above */}
-            {r.regime === 'UMKM_FINAL' && (
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    {t('monthlyRevenueTitle', { year: currentYear })}
-                  </h3>
-                  <p className="text-[11px] text-gray-500 mb-3">
-                    {t('monthlyRevenueDesc', { exemption: fmtRp(getExemption(legalForm)) })}
-                  </p>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                    {MONTHS.map((label, i) => {
-                      const rev = monthlyRevenues[i];
-                      const cumulative = monthlyRevenues.slice(0, i + 1).reduce((s, v) => s + v, 0);
-                      const exemptionLeft = Math.max(getExemption(legalForm) - (cumulative - rev), 0);
-                      const taxable = Math.max(rev - exemptionLeft, 0);
-                      const tax = Math.round(taxable * UMKM_RATE);
-                      return (
-                        <div key={i}>
-                          <Label className="text-[10px] text-gray-500">{label}</Label>
-                          <Input
-                            type="number"
-                            readOnly
-                            className="h-8 text-xs font-mono bg-gray-50 cursor-default"
-                            value={rev || ''}
-                            placeholder="—"
-                          />
-                          {rev > 0 && (
-                            <p className="text-[9px] text-green-600 mt-0.5">{t('monthlyTaxAmount', { amount: fmtRp(tax) })}</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="mt-3 p-3 bg-green-100 rounded-lg grid grid-cols-3 gap-3 text-xs">
-                    <div>
-                      <p className="text-gray-600">{t('annualRevenueTotal')}</p>
-                      <p className="font-bold font-mono">{fmtRp(monthlyRevenues.reduce((s, v) => s + v, 0))}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">{t('exemptionDeduction')}</p>
-                      <p className="font-bold font-mono">{fmtRp(Math.min(monthlyRevenues.reduce((s, v) => s + v, 0), getExemption(legalForm)))}</p>
-                    </div>
-                    <div>
-                      <p className="text-green-700">{t('annualPphFinal')}</p>
-                      <p className="font-bold font-mono text-green-800">
-                        {fmtRp(Math.round(Math.max(monthlyRevenues.reduce((s, v) => s + v, 0) - getExemption(legalForm), 0) * UMKM_RATE))}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         );
       })()}
