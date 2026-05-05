@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Loader2 } from 'lucide-react';
 
@@ -420,8 +420,148 @@ function PhotoUpload({ photoDataUrl, fullName, readOnly, onUpload, onRemove }: {
 // ─────────────────────────────────────────────────────────────────────────────
 // Search screen
 // ─────────────────────────────────────────────────────────────────────────────
+interface ImportSummary {
+  totalRows: number;
+  imported: number;
+  updated: number;
+  skipped: number;
+  errors: { row: number; message: string }[];
+  unmappedHeaders: string[];
+  mappedHeaders: { column: string; field: string }[];
+}
+
+function UploadCard({ customerId, onImported }: { customerId: string; onImported: () => void }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [fileName, setFileName] = useState<string>('');
+  const [summary, setSummary] = useState<ImportSummary | null>(null);
+  const [error, setError] = useState<string>('');
+
+  const handleFile = async (file: File) => {
+    setUploading(true);
+    setSummary(null);
+    setError('');
+    setFileName(file.name);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('customerId', customerId);
+      const res = await fetch('/api/tax/employees/hr-import', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        setError(json.error || '업로드 실패');
+      } else {
+        setSummary(json.data as ImportSummary);
+        onImported();
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '업로드 실패');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-xl shadow-slate-200/70">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
+        <div className="flex-1 space-y-3">
+          <div className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
+            기존 인사기록 업로드
+          </div>
+          <h3 className="text-lg font-black text-slate-900">회사 보유 인사자료 업로드 · 파싱 저장</h3>
+          <p className="text-sm text-slate-600">
+            Excel, CSV 또는 JSON 파일을 업로드하면 직원 ID, 이름, 부서, 직책, 급여, 세무, BPJS, 은행, 계약 정보를
+            자동 매핑하여 직원 마스터에 저장합니다.
+          </p>
+          <p className="text-xs text-slate-500">
+            <span className="font-mono">권장 엑셀 컬럼 예시:</span> Employee ID, Full Name, NIK, NPWP, Department,
+            Position, Join Date, Basic Salary, PTKP, BPJS Kesehatan No, Bank Account
+          </p>
+          <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            엑셀은 첫 번째 시트의 첫 번째 행을 컬럼명으로 인식합니다. 병합 셀, 여러 줄 제목, 빈 헤더는 피하는 것이 좋습니다.
+          </p>
+        </div>
+        <div className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/50 p-6 lg:w-72">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black text-white shadow-lg hover:bg-indigo-700 disabled:opacity-60"
+          >
+            {uploading ? <><Loader2 className="h-4 w-4 animate-spin inline mr-1" /> 업로드 중…</> : 'Excel / CSV / JSON 업로드'}
+          </button>
+          <p className="text-[11px] text-slate-500 text-center">
+            {fileName || '아직 선택된 파일 없음'}
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.xlsx,.xls,.json"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+            }}
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">
+          {error}
+        </div>
+      )}
+
+      {summary && (
+        <div className="mt-4 rounded-2xl bg-emerald-50 p-4 text-sm">
+          <p className="font-bold text-emerald-900">
+            신규 {summary.imported}명, 갱신 {summary.updated}명, 스킵 {summary.skipped}명 (총 {summary.totalRows}행)
+          </p>
+          {summary.mappedHeaders.length > 0 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs text-emerald-700">
+                매핑된 컬럼 {summary.mappedHeaders.length}개 보기
+              </summary>
+              <div className="mt-2 grid gap-1 text-[11px] text-emerald-800 sm:grid-cols-2">
+                {summary.mappedHeaders.map((m) => (
+                  <div key={`${m.column}-${m.field}`}>
+                    <span className="font-mono">{m.column}</span> → <span className="font-mono">{m.field}</span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+          {summary.unmappedHeaders.length > 0 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs text-amber-700">
+                매핑되지 않은 컬럼 {summary.unmappedHeaders.length}개 (무시됨)
+              </summary>
+              <div className="mt-2 text-[11px] text-amber-800 font-mono">
+                {summary.unmappedHeaders.join(', ')}
+              </div>
+            </details>
+          )}
+          {summary.errors.length > 0 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs text-red-700">
+                오류 {summary.errors.length}건
+              </summary>
+              <div className="mt-2 space-y-0.5 text-[11px] text-red-800">
+                {summary.errors.map((er) => (
+                  <div key={er.row}>Row {er.row}: {er.message}</div>
+                ))}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function SearchScreen({
-  searchBy, setSearchBy, keyword, setKeyword, results, openDetail, openNew, loading,
+  searchBy, setSearchBy, keyword, setKeyword, results, openDetail, openNew, loading, customerId, onImported,
 }: {
   searchBy: 'ID' | 'NAME';
   setSearchBy: (v: 'ID' | 'NAME') => void;
@@ -431,6 +571,8 @@ function SearchScreen({
   openDetail: (rec: UiRecord, mode: 'view' | 'edit') => void;
   openNew: () => void;
   loading: boolean;
+  customerId: string;
+  onImported: () => void;
 }) {
   return (
     <main className="min-h-screen bg-gradient-to-br from-sky-50 via-indigo-50 to-fuchsia-50 p-6 text-slate-800">
@@ -453,6 +595,8 @@ function SearchScreen({
             </button>
           </div>
         </section>
+
+        <UploadCard customerId={customerId} onImported={onImported} />
 
         <section className="rounded-3xl bg-white p-6 shadow-xl shadow-slate-200/70">
           <div className="grid gap-4 lg:grid-cols-[180px_1fr_auto] lg:items-end">
@@ -892,6 +1036,7 @@ export default function EmployeeHrRecord() {
   const [keyword, setKeyword] = useState('');
   const [results, setResults] = useState<UiRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshTick, setRefreshTick] = useState(0);
 
   const [record, setRecord] = useState<UiRecord>(emptyRecord);
   const [mode, setMode] = useState<'view' | 'edit'>('view');
@@ -925,7 +1070,7 @@ export default function EmployeeHrRecord() {
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [customerId, keyword, searchBy]);
+  }, [customerId, keyword, searchBy, refreshTick]);
 
   const openDetail = async (rec: UiRecord, m: 'view' | 'edit') => {
     setIsNew(false);
@@ -1014,6 +1159,8 @@ export default function EmployeeHrRecord() {
         openDetail={openDetail}
         openNew={openNew}
         loading={loading}
+        customerId={customerId}
+        onImported={() => setRefreshTick((t) => t + 1)}
       />
     );
   }
