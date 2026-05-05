@@ -379,6 +379,35 @@ function BasicStep({
   onChange: (patch: Partial<WizardData>) => void;
   onNext: () => void;
 }) {
+  // Local state — mirrors session.data and pushes back onBlur so typing isn't
+  // gated by the async closing-session patch round-trip.
+  const [companyName, setCompanyName] = useState<string>(data.companyName ?? '');
+  const [npwp, setNpwp] = useState<string>(data.npwp ?? '');
+  const [fiscalYearStr, setFiscalYearStr] = useState<string>(data.fiscalYear ? String(data.fiscalYear) : '');
+  const [annualRevenueStr, setAnnualRevenueStr] = useState<string>(data.annualRevenue ? String(data.annualRevenue) : '');
+  const hydrated = useRef(false);
+  useEffect(() => {
+    if (hydrated.current) return;
+    if (data.companyName || data.npwp || data.fiscalYear || data.annualRevenue) {
+      setCompanyName(data.companyName ?? '');
+      setNpwp(data.npwp ?? '');
+      setFiscalYearStr(data.fiscalYear ? String(data.fiscalYear) : '');
+      setAnnualRevenueStr(data.annualRevenue ? String(data.annualRevenue) : '');
+      hydrated.current = true;
+    }
+  }, [data.companyName, data.npwp, data.fiscalYear, data.annualRevenue]);
+
+  const annualRevenueNum = parseNum(annualRevenueStr);
+  const handleNext = () => {
+    onChange({
+      companyName,
+      npwp,
+      fiscalYear: Number(fiscalYearStr) || undefined,
+      annualRevenue: annualRevenueNum || undefined,
+    });
+    onNext();
+  };
+
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('basic.title')}</p>
@@ -386,16 +415,18 @@ function BasicStep({
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.companyName')}</Label>
           <Input
-            value={data.companyName ?? ''}
-            onChange={(e) => onChange({ companyName: e.target.value })}
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            onBlur={() => onChange({ companyName })}
             placeholder="PT Example Indonesia"
           />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">{t('basic.npwp')}</Label>
           <Input
-            value={data.npwp ?? ''}
-            onChange={(e) => onChange({ npwp: e.target.value })}
+            value={npwp}
+            onChange={(e) => setNpwp(e.target.value)}
+            onBlur={() => onChange({ npwp })}
             placeholder="0123456789012000"
             className="font-mono"
           />
@@ -404,8 +435,9 @@ function BasicStep({
           <Label className="text-xs">{t('basic.fiscalYear')}</Label>
           <Input
             type="number"
-            value={data.fiscalYear ?? ''}
-            onChange={(e) => onChange({ fiscalYear: Number(e.target.value) || undefined })}
+            value={fiscalYearStr}
+            onChange={(e) => setFiscalYearStr(e.target.value)}
+            onBlur={() => onChange({ fiscalYear: Number(fiscalYearStr) || undefined })}
             placeholder={String(new Date().getFullYear() - 1)}
           />
         </div>
@@ -414,13 +446,14 @@ function BasicStep({
           <Input
             type="text"
             inputMode="numeric"
-            value={data.annualRevenue ? String(data.annualRevenue) : ''}
-            onChange={(e) => onChange({ annualRevenue: parseNum(e.target.value) })}
+            value={annualRevenueStr}
+            onChange={(e) => setAnnualRevenueStr(e.target.value)}
+            onBlur={() => onChange({ annualRevenue: annualRevenueNum || undefined })}
             placeholder="3,100,000,000"
             className="text-right tabular-nums"
           />
-          {data.annualRevenue ? (
-            <p className="text-xs text-slate-500">{fmtRp(data.annualRevenue)}</p>
+          {annualRevenueNum ? (
+            <p className="text-xs text-slate-500">{fmtRp(annualRevenueNum)}</p>
           ) : null}
         </div>
       </div>
@@ -431,8 +464,8 @@ function BasicStep({
         <Button
           size="sm"
           className="bg-slate-900 text-white hover:bg-slate-800"
-          onClick={onNext}
-          disabled={!data.annualRevenue}
+          onClick={handleNext}
+          disabled={!annualRevenueNum}
         >
           {t('basic.next')}
           <ArrowRight className="h-4 w-4 ml-1" />

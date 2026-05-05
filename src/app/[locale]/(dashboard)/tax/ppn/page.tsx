@@ -338,28 +338,6 @@ export default function PPNPage() {
         </div>
       )}
 
-      {/* Period Selector */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <Select value={String(month)} onValueChange={v => setMonth(parseInt(v))}>
-          <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {Array.from({ length: 12 }, (_, i) => (
-              <SelectItem key={i + 1} value={String(i + 1)}>
-                {new Date(2024, i).toLocaleString(locale, { month: 'long' })}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={String(year)} onValueChange={v => setYear(parseInt(v))}>
-          <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {[currentYear - 1, currentYear, currentYear + 1].map(y => (
-              <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
         {tabs.map(tab => {
@@ -376,44 +354,9 @@ export default function PPNPage() {
       {/* Tab 1: Faktur Management */}
       {activeTab === 'faktur' && (
         <div>
-          {/* 3-mode input cards (matching PPh 21/23 layout) */}
-          <div className="grid gap-4 md:grid-cols-3 mb-4">
-            {/* Method 1: Template */}
-            <Card className="border-2 border-dashed border-blue-200 hover:border-blue-400 hover:shadow-sm transition-all">
-              <CardContent className="p-5 flex flex-col h-full">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <Download className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">{t('inputModeTemplate')}</p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeTemplateDesc')}</p>
-                  </div>
-                </div>
-                <div className="space-y-2 flex-1">
-                  <Button variant="outline" size="sm" className="w-full" onClick={downloadPpnTemplate}>
-                    <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownloadBtn')}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => openMonthPicker('csv')}
-                    disabled={uploadingDoc || !session?.customerId}
-                  >
-                    {uploadingDoc ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                    {t('inputTemplateUploadBtn')}
-                  </Button>
-                  {confirmedPeriod && pendingAction === 'csv' && (
-                    <p className="text-[10px] text-blue-700 text-center">
-                      {t('monthPickerSelected', { period: confirmedPeriod })}
-                    </p>
-                  )}
-                  <input ref={csvInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
-                    onChange={e => handleFakturUpload(e.target.files, 'WEB')} />
-                </div>
-              </CardContent>
-            </Card>
-
+          {/* 2-mode input cards (matching PPh 21/23 simplified layout) */}
+          <div className="grid gap-4 md:grid-cols-2 mb-4">
+            {/* (removed) Method 1: Template — merged into Method 2 below */}
             {/* Method 2: Upload — RECOMMENDED */}
             <Card className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all relative">
               <div className="absolute -top-2 left-5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
@@ -447,6 +390,9 @@ export default function PPNPage() {
                     disabled={uploadingDoc || !session?.customerId}
                   >
                     <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={downloadPpnTemplate}>
+                    <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownloadBtn')}
                   </Button>
                   {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
                     <p className="text-[10px] text-emerald-700 text-center">

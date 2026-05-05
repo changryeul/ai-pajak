@@ -507,66 +507,9 @@ export default function PPh23Page() {
         </div>
       </div>
 
-      {/* 3-mode input cards (matching PPh21 polished design) */}
-      <div className="grid gap-4 md:grid-cols-3 mb-4">
-        {/* Method 1: Template */}
-        <Card className="border-2 border-dashed border-blue-200 hover:border-blue-400 hover:shadow-sm transition-all">
-          <CardContent className="p-5 flex flex-col h-full">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                <Download className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">{t('inputModeTemplate')}</p>
-                <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeTemplateDesc')}</p>
-              </div>
-            </div>
-            <div className="space-y-2 flex-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() => {
-                  const headers = ['counterparty_name', 'counterparty_npwp', 'service_type', 'transaction_type', 'gross_amount', 'tax_rate', 'contract_no', 'invoice_no', 'dgt_form'];
-                  const sample = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', '10000000', '2', 'CT-001', 'INV-001', 'N'];
-                  const csv = [headers.join(','), sample.join(','), ''].join('\n');
-                  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'pph23_template.csv';
-                  a.click();
-                  URL.revokeObjectURL(url);
-                  showMsg('success', t('templateComingSoon'));
-                }}
-              >
-                <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownload')}
-              </Button>
-              <Button
-                size="sm"
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => openMonthPicker('csv')}
-                disabled={uploading || !customerId}
-              >
-                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                {t('inputTemplateUploadBtn')}
-              </Button>
-              {confirmedPeriod && pendingAction === 'csv' && (
-                <p className="text-[10px] text-blue-700 text-center">
-                  {t('monthPickerSelected', { period: confirmedPeriod })}
-                </p>
-              )}
-              <input ref={csvInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
-                onChange={e => handleDocUpload(e.target.files, 'WEB', 'INVOICE')} />
-            </div>
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-[10px] text-gray-500 font-medium">
-                <span className="font-mono text-gray-600">PPh 23 / PPh 4(2) / PPh 26 / PPh 15 / PPh 22</span>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
+      {/* 2-mode input cards (matching PPh21 simplified design) */}
+      <div className="grid gap-4 md:grid-cols-2 mb-4">
+        {/* (removed) Method 1: Template — merged into Method 2 below */}
         {/* Method 2: Upload — RECOMMENDED */}
         <Card className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all relative">
           <div className="absolute -top-2 left-5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
@@ -603,6 +546,26 @@ export default function PPh23Page() {
                   <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
                 </Button>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  const headers = ['counterparty_name', 'counterparty_npwp', 'service_type', 'transaction_type', 'gross_amount', 'tax_rate', 'contract_no', 'invoice_no', 'dgt_form'];
+                  const sample = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', '10000000', '2', 'CT-001', 'INV-001', 'N'];
+                  const csv = [headers.join(','), sample.join(','), ''].join('\n');
+                  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'pph23_template.csv';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  showMsg('success', t('templateComingSoon'));
+                }}
+              >
+                <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownload')}
+              </Button>
               {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
                 <p className="text-[10px] text-emerald-700 text-center">
                   {t('monthPickerSelected', { period: confirmedPeriod })}
@@ -622,6 +585,9 @@ export default function PPh23Page() {
                   {t('inputCameraHint')}
                 </p>
               )}
+              <p className="text-[10px] text-gray-500 font-mono">
+                PPh 23 / PPh 4(2) / PPh 26 / PPh 15 / PPh 22
+              </p>
             </div>
           </CardContent>
         </Card>
