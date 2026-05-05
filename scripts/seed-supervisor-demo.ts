@@ -75,17 +75,45 @@ const operators: OperatorSeed[] = [
   { email: 'op-emp012@aipajak.com', empId: 'EMP012', name: '배상담', workState: 'offline',    autoAssign: false, loggedInToday: false, supervisorEmpId: 'SUP003' },
 ];
 
+async function findUserByEmail(email: string): Promise<string | null> {
+  // GoTrue admin REST API supports email filter directly.
+  // Falls back to paginated listUsers on older deployments.
+  const url = `${SUPABASE_URL}/auth/v1/admin/users?filter=${encodeURIComponent(email)}`;
+  const r = await fetch(url, {
+    headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+  });
+  if (r.ok) {
+    const j = await r.json();
+    const hit = (j.users || []).find((u: { email?: string; id: string }) => u.email === email);
+    if (hit) return hit.id;
+  }
+  // Fallback: walk pages.
+  let page = 1;
+  while (page <= 50) {
+    const { data } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    const hit = data?.users.find(u => u.email === email);
+    if (hit) return hit.id;
+    if (!data?.users || data.users.length < 1000) break;
+    page += 1;
+  }
+  return null;
+}
+
 async function ensureAuthUser(email: string, fullName: string): Promise<string> {
-  const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
-  const existing = list?.users.find(u => u.email === email);
-  if (existing) return existing.id;
+  const found = await findUserByEmail(email);
+  if (found) return found;
 
   const { data, error } = await admin.auth.admin.createUser({
     email, password: PASSWORD, email_confirm: true,
     user_metadata: { full_name: fullName },
   });
-  if (error || !data.user) throw new Error(`createUser failed for ${email}: ${error?.message}`);
-  return data.user.id;
+  if (data?.user) return data.user.id;
+  // The "already registered" branch can race past listUsers — re-resolve.
+  if (error?.message?.toLowerCase().includes('already')) {
+    const again = await findUserByEmail(email);
+    if (again) return again;
+  }
+  throw new Error(`createUser failed for ${email}: ${error?.message}`);
 }
 
 async function ensureRole(userId: string, role: string) {
