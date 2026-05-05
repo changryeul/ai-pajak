@@ -212,7 +212,10 @@ const uiToApi = (rec: UiRecord, customerId: string) => ({
   employeeNumber: rec.employee.employeeId || null,
   employeeName: rec.employee.fullName,
   preferredName: rec.employee.preferredName || null,
-  photoUrl: rec.employee.photoDataUrl || null,
+  // photoUrl is intentionally not sent here — the /photo endpoint persists
+  // the storage path on its own. For unsaved (new) employees we still want
+  // the inline data: URL so it round-trips through the first save.
+  photoUrl: rec.employee.photoDataUrl?.startsWith('data:') ? rec.employee.photoDataUrl : undefined,
   nationality: rec.employee.nationality || null,
   gender: rec.employee.gender || null,
   birthDate: rec.employee.dob || null,
@@ -379,15 +382,61 @@ function AddButton({ children, onClick, hidden }: { children: React.ReactNode; o
   );
 }
 
-function PhotoUpload({ photoDataUrl, fullName, readOnly, onUpload, onRemove }: {
-  photoDataUrl: string; fullName: string; readOnly: boolean; onUpload: (v: string) => void; onRemove: () => void;
+function PhotoUpload({ photoDataUrl, fullName, readOnly, onUpload, onRemove, employeeId }: {
+  photoDataUrl: string; fullName: string; readOnly: boolean;
+  onUpload: (v: string) => void; onRemove: () => void;
+  employeeId?: string;
 }) {
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => onUpload(String(reader.result || ''));
-    reader.readAsDataURL(file);
+
+    // For unsaved (new) employees we keep the data URL inline and let the
+    // initial save snapshot the photo path during the first edit pass; for
+    // existing employees we upload to Supabase Storage immediately and store
+    // the signed URL.
+    if (!employeeId) {
+      const reader = new FileReader();
+      reader.onload = () => onUpload(String(reader.result || ''));
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/tax/employees/${employeeId}/photo`, {
+        method: 'POST',
+        body: fd,
+      });
+      const json = await res.json();
+      if (json.success && json.data?.signedUrl) {
+        onUpload(json.data.signedUrl);
+      } else {
+        // Fall back to data URL on error so the user still sees the picture.
+        const reader = new FileReader();
+        reader.onload = () => onUpload(String(reader.result || ''));
+        reader.readAsDataURL(file);
+      }
+    } catch {
+      const reader = new FileReader();
+      reader.onload = () => onUpload(String(reader.result || ''));
+      reader.readAsDataURL(file);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (employeeId) {
+      try {
+        await fetch(`/api/tax/employees/${employeeId}/photo`, { method: 'DELETE' });
+      } catch { /* ignore */ }
+    }
+    onRemove();
   };
 
   return (
@@ -403,11 +452,11 @@ function PhotoUpload({ photoDataUrl, fullName, readOnly, onUpload, onRemove }: {
       {!readOnly && (
         <div className="flex flex-col items-center gap-2">
           <label className="cursor-pointer rounded-2xl bg-white px-4 py-2 text-sm font-black text-indigo-700 shadow-sm hover:bg-indigo-50">
-            사진 업로드
-            <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+            {uploading ? '업로드 중…' : '사진 업로드'}
+            <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
           </label>
           {photoDataUrl && (
-            <button type="button" onClick={onRemove} className="text-xs font-bold text-white/80 underline">
+            <button type="button" onClick={handleRemove} className="text-xs font-bold text-white/80 underline">
               사진 제거
             </button>
           )}
@@ -674,8 +723,49 @@ function SearchScreen({
 // ─────────────────────────────────────────────────────────────────────────────
 // Detail screen
 // ─────────────────────────────────────────────────────────────────────────────
+interface ChangeLogEntry {
+  id: string;
+  section: string;
+  field: string;
+  old_value: string | null;
+  new_value: string | null;
+  changed_by_label: string | null;
+  changed_at: string;
+}
+
+function ChangeHistoryPanel({ entries, title }: { entries: ChangeLogEntry[]; title: string }) {
+  if (entries.length === 0) {
+    return (
+      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs text-slate-500">
+        {title} · 아직 이력이 없습니다.
+      </div>
+    );
+  }
+  return (
+    <div className="mt-4 rounded-2xl border border-slate-100 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
+        <span className="text-xs font-bold text-slate-700">{title}</span>
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+          {entries.length}건
+        </span>
+      </div>
+      <ul className="divide-y divide-slate-100 text-xs">
+        {entries.map((e) => (
+          <li key={e.id} className="grid grid-cols-[110px_1fr_1fr_1fr_120px] gap-2 px-4 py-2">
+            <span className="font-mono font-bold text-indigo-600">{e.changed_at.slice(0, 10)}</span>
+            <span className="text-slate-700"><span className="text-slate-400">항목</span><br />{e.field}</span>
+            <span className="text-slate-700 truncate"><span className="text-slate-400">이전</span><br />{e.old_value || '—'}</span>
+            <span className="text-slate-700 truncate"><span className="text-slate-400">변경/내용</span><br />{e.new_value || '—'}</span>
+            <span className="text-slate-700 truncate"><span className="text-slate-400">처리자</span><br />{e.changed_by_label || '—'}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function DetailScreen({
-  record, setRecord, mode, setMode, goBack, onSave, isNew, savedMessage, saving,
+  record, setRecord, mode, setMode, goBack, onSave, isNew, savedMessage, saving, changes,
 }: {
   record: UiRecord;
   setRecord: React.Dispatch<React.SetStateAction<UiRecord>>;
@@ -686,6 +776,7 @@ function DetailScreen({
   isNew: boolean;
   savedMessage: string;
   saving: boolean;
+  changes: ChangeLogEntry[];
 }) {
   const employee = record.employee;
   const readOnly = mode === 'view';
@@ -720,6 +811,8 @@ function DetailScreen({
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v || 0);
     } catch { return `Rp ${v || 0}`; }
   };
+
+  const changesBy = (section: string) => changes.filter((c) => c.section === section);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-sky-50 via-indigo-50 to-fuchsia-50 p-6 text-slate-800">
@@ -770,6 +863,7 @@ function DetailScreen({
               photoDataUrl={employee.photoDataUrl}
               fullName={employee.fullName}
               readOnly={readOnly}
+              employeeId={employee.id}
               onUpload={(value) => updateEmployee('photoDataUrl', value)}
               onRemove={() => updateEmployee('photoDataUrl', '')}
             />
@@ -833,6 +927,7 @@ function DetailScreen({
                 <Field readOnly={readOnly} label="Emergency Phone" value={employee.emergencyPhone} onChange={(v) => updateEmployee('emergencyPhone', v)} />
               </div>
             </div>
+                      <ChangeHistoryPanel entries={changesBy('basic')} title="기본정보 변경 이력" />
           </Section>
 
           <Section emoji="💼" title="고용 정보" subtitle="Employment position, department & work status" colorClass="bg-gradient-to-r from-violet-500 to-purple-400">
@@ -846,6 +941,7 @@ function DetailScreen({
               <SelectField readOnly={readOnly} label="Contract Status" value={employee.contractStatus} onChange={(v) => updateEmployee('contractStatus', v)} options={['Active', 'Probation', 'Resigned', 'Terminated', 'Suspended']} />
               <Field readOnly={readOnly} label="Probation End" type="date" value={employee.probationEnd} onChange={(v) => updateEmployee('probationEnd', v)} />
             </div>
+                      <ChangeHistoryPanel entries={changesBy('employment')} title="고용정보 변경 이력" />
           </Section>
 
           <Section emoji="👨‍👩‍👧" title="가족관계 / PTKP" subtitle="Family members, dependents & tax status" colorClass="bg-gradient-to-r from-rose-500 to-pink-400">
@@ -870,6 +966,7 @@ function DetailScreen({
               ))}
               <AddButton hidden={readOnly} onClick={() => addRow<FamilyMember>('family', { relation: 'Child', name: '', dob: '', nik: '', occupation: '', dependent: 'Yes' })}>가족 추가</AddButton>
             </div>
+                      <ChangeHistoryPanel entries={changesBy('family_ptkp')} title="가족/부양가족 변경 이력" />
           </Section>
 
           <Section emoji="🎓" title="학력" subtitle="Education background" colorClass="bg-gradient-to-r from-emerald-500 to-teal-400">
@@ -887,6 +984,7 @@ function DetailScreen({
               ))}
               <AddButton hidden={readOnly} onClick={() => addRow<EducationEntry>('education', { level: '', major: '', school: '', city: '', year: '' })}>학력 추가</AddButton>
             </div>
+                      <ChangeHistoryPanel entries={changesBy('education')} title="학력 등록/변경 이력" />
           </Section>
 
           <Section emoji="🏢" title="경력 / 부서이동" subtitle="Career history & internal movement" colorClass="bg-gradient-to-r from-orange-500 to-amber-400">
@@ -924,6 +1022,7 @@ function DetailScreen({
                 </div>
               </div>
             </div>
+                      <ChangeHistoryPanel entries={changesBy('career')} title="경력/부서이동 변경 이력" />
           </Section>
 
           <Section emoji="🏆" title="진급 / 상벌" subtitle="Promotion, reward & disciplinary record" colorClass="bg-gradient-to-r from-yellow-500 to-lime-400">
@@ -961,6 +1060,7 @@ function DetailScreen({
                 </div>
               </div>
             </div>
+                      <ChangeHistoryPanel entries={changesBy('rewards')} title="진급/상벌 변경 이력" />
           </Section>
 
           <Section emoji="💰" title="급여 정보" subtitle="Payroll base data for AI Payroll" colorClass="bg-gradient-to-r from-indigo-500 to-blue-400">
@@ -975,6 +1075,7 @@ function DetailScreen({
                 <div className="text-2xl font-black">{money(grossSalary)}</div>
               </div>
             </div>
+                      <ChangeHistoryPanel entries={changesBy('payroll')} title="급여 변경 이력" />
           </Section>
 
           <Section emoji="🛡️" title="세무 / BPJS" subtitle="PPh21, NPWP, BPJS & insurance data" colorClass="bg-gradient-to-r from-cyan-500 to-blue-400">
@@ -987,6 +1088,7 @@ function DetailScreen({
               <Field readOnly={readOnly} label="BPJS TK No." value={employee.bpjsTkNo} onChange={(v) => updateEmployee('bpjsTkNo', v)} />
               <Field readOnly={readOnly} label="Private Insurance" value={employee.privateInsurance} onChange={(v) => updateEmployee('privateInsurance', v)} />
             </div>
+                      <ChangeHistoryPanel entries={changesBy('tax_bpjs')} title="세무/BPJS 변경 이력" />
           </Section>
 
           <Section emoji="🏦" title="은행 정보" subtitle="Salary payment bank account" colorClass="bg-gradient-to-r from-slate-700 to-slate-500">
@@ -995,6 +1097,7 @@ function DetailScreen({
               <Field readOnly={readOnly} label="Account Number" value={employee.bankAccount} onChange={(v) => updateEmployee('bankAccount', v)} />
               <Field readOnly={readOnly} label="Account Holder" value={employee.bankHolder} onChange={(v) => updateEmployee('bankHolder', v)} />
             </div>
+                      <ChangeHistoryPanel entries={changesBy('bank')} title="은행정보 변경 이력" />
           </Section>
 
           <Section emoji="📄" title="계약 정보" subtitle="Employment contract control" colorClass="bg-gradient-to-r from-fuchsia-500 to-purple-400">
@@ -1004,6 +1107,7 @@ function DetailScreen({
               <Field readOnly={readOnly} label="Contract Start" type="date" value={employee.contractStart} onChange={(v) => updateEmployee('contractStart', v)} />
               <Field readOnly={readOnly} label="Contract End" type="date" value={employee.contractEnd} onChange={(v) => updateEmployee('contractEnd', v)} />
             </div>
+                      <ChangeHistoryPanel entries={changesBy('contract')} title="계약 변경 이력" />
           </Section>
 
           <Section emoji="✈️" title="외국인 직원 추가 정보" subtitle="Optional expat data for work permit & tax residency" colorClass="bg-gradient-to-r from-red-500 to-orange-400">
@@ -1013,11 +1117,16 @@ function DetailScreen({
               <Field readOnly={readOnly} label="Work Permit Expiry" type="date" value={employee.workPermitExpiry} onChange={(v) => updateEmployee('workPermitExpiry', v)} />
               <SelectField readOnly={readOnly} label="Tax Residency" value={employee.taxResidency} onChange={(v) => updateEmployee('taxResidency', v)} options={['Indonesia Tax Resident', 'Non-Resident', 'To be reviewed']} />
             </div>
+                      <ChangeHistoryPanel entries={changesBy('expat')} title="외국인 정보 변경 이력" />
           </Section>
         </div>
 
         <Section emoji="📝" title="비고 / 내부 메모" subtitle="Internal HR notes" colorClass="bg-gradient-to-r from-indigo-600 to-fuchsia-500">
           <TextAreaField readOnly={readOnly} label="Notes" value={employee.notes} onChange={(v) => updateEmployee('notes', v)} />
+        </Section>
+
+        <Section emoji="🗂" title="전체 변경 이력" subtitle="Full change history" colorClass="bg-gradient-to-r from-slate-800 to-slate-600">
+          <ChangeHistoryPanel entries={changes} title="전체 변경 이력" />
         </Section>
       </div>
     </main>
@@ -1043,6 +1152,23 @@ export default function EmployeeHrRecord() {
   const [isNew, setIsNew] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [changes, setChanges] = useState<ChangeLogEntry[]>([]);
+
+  // Pull change history whenever a non-new employee detail is opened (or after save).
+  useEffect(() => {
+    const empId = record.employee.id;
+    if (screen !== 'detail' || !empId || isNew) {
+      setChanges([]);
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch(`/api/tax/employees/${empId}/changes`);
+        const json = await res.json();
+        if (json.success) setChanges(json.data as ChangeLogEntry[]);
+      } catch { /* ignore */ }
+    })();
+  }, [screen, record.employee.id, isNew, refreshTick]);
 
   // Search effect — runs on keyword/searchBy change (debounced).
   useEffect(() => {
@@ -1078,10 +1204,22 @@ export default function EmployeeHrRecord() {
     if (rec.employee.id) {
       // Pull fresh detail to make sure JSONB sub-records are populated.
       try {
-        const res = await fetch(`/api/tax/employees/${rec.employee.id}`);
-        const json = await res.json();
-        if (json.success && json.data) {
-          setRecord(rowToUi(json.data as EmployeeRow));
+        const [detailRes, photoRes] = await Promise.all([
+          fetch(`/api/tax/employees/${rec.employee.id}`),
+          fetch(`/api/tax/employees/${rec.employee.id}/photo/sign`),
+        ]);
+        const detailJson = await detailRes.json();
+        const photoJson = await photoRes.json().catch(() => null);
+        if (detailJson.success && detailJson.data) {
+          const ui = rowToUi(detailJson.data as EmployeeRow);
+          // Swap stored storage path → signed URL so <img> renders correctly.
+          if (photoJson?.data?.signedUrl) {
+            ui.employee.photoDataUrl = photoJson.data.signedUrl;
+          } else if (ui.employee.photoDataUrl && !ui.employee.photoDataUrl.startsWith('data:') && !ui.employee.photoDataUrl.startsWith('http')) {
+            // path stored but no signed URL → blank
+            ui.employee.photoDataUrl = '';
+          }
+          setRecord(ui);
         } else {
           setRecord(rec);
         }
@@ -1125,6 +1263,7 @@ export default function EmployeeHrRecord() {
         setIsNew(false);
         setMode('view');
         setSavedMessage(`${saved.employee.employeeId || saved.employee.fullName} 저장 완료`);
+        setRefreshTick((t) => t + 1);
       }
     } catch (e) {
       setSavedMessage(e instanceof Error ? e.message : '저장 실패');
@@ -1176,6 +1315,7 @@ export default function EmployeeHrRecord() {
       isNew={isNew}
       savedMessage={savedMessage}
       saving={saving}
+      changes={changes}
     />
   );
 }

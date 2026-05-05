@@ -230,7 +230,9 @@
     "security": "Security",
     "securityPassword": "Security (Change Password)",
     "filingManagement": "Filing Management",
-    "closingWorkLabel": "Year-end Closing"
+    "closingWorkLabel": "Year-end Closing",
+    "aiPayroll": "AI Payroll",
+    "employeeHrRecord": "Employee HR Records"
   },
   "dashboard": {
     "title": "Dashboard",

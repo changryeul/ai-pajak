@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { diffEmployee } from '@/lib/payroll/employee-diff';
 
 /**
  * Employee Payroll / HR Record CRUD
@@ -162,8 +163,9 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     kitas_no: kitasNo ?? null,
     work_permit_expiry: workPermitExpiry || null,
     tax_residency: taxResidency ?? null,
-    // Storage
-    photo_url: photoUrl ?? null,
+    // Storage — only set when caller supplied a value; otherwise leave whatever
+    // the dedicated /photo endpoint stored.
+    ...(photoUrl !== undefined ? { photo_url: photoUrl } : {}),
     // Sub-records (only set if caller actually included them)
     ...(family !== undefined ? { family: Array.isArray(family) ? family : [] } : {}),
     ...(education !== undefined ? { education: Array.isArray(education) ? education : [] } : {}),
@@ -174,22 +176,66 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     notes: notes ?? null,
   };
 
+  const admin = getSupabaseAdmin();
+  const userId = req.session?.userId ?? null;
+  const userLabel = req.session?.email ?? 'system';
+
   if (id) {
-    const { data, error } = await getSupabaseAdmin()
+    // Read the previous row so we can write a field-level diff into employee_change_log.
+    const { data: previous } = await admin
+      .from('employee_payroll')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    const { data, error } = await admin
       .from('employee_payroll')
       .update(record)
       .eq('id', id)
       .select()
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    const changes = diffEmployee(previous as Record<string, unknown> | null, record);
+    if (changes.length > 0) {
+      await admin.from('employee_change_log').insert(
+        changes.map((c) => ({
+          employee_id: id,
+          customer_id: customerId,
+          section: c.section,
+          field: c.field,
+          old_value: c.old_value,
+          new_value: c.new_value,
+          changed_by_user_id: userId,
+          changed_by_label: userLabel,
+        })),
+      );
+    }
     return NextResponse.json({ success: true, data });
   } else {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await admin
       .from('employee_payroll')
       .insert(record)
       .select()
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    if (data?.id) {
+      const initial = diffEmployee(null, record);
+      if (initial.length > 0) {
+        await admin.from('employee_change_log').insert(
+          initial.map((c) => ({
+            employee_id: data.id,
+            customer_id: customerId,
+            section: c.section,
+            field: c.field,
+            old_value: c.old_value,
+            new_value: c.new_value,
+            changed_by_user_id: userId,
+            changed_by_label: userLabel,
+          })),
+        );
+      }
+    }
     return NextResponse.json({ success: true, data });
   }
 }

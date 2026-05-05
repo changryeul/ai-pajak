@@ -230,7 +230,9 @@
     "security": "Keamanan",
     "securityPassword": "Keamanan (Ubah Kata Sandi)",
     "filingManagement": "Manajemen Pelaporan",
-    "closingWorkLabel": "Tutup Buku Tahunan"
+    "closingWorkLabel": "Tutup Buku Tahunan",
+    "aiPayroll": "AI Payroll",
+    "employeeHrRecord": "Catatan HR Karyawan"
   },
   "dashboard": {
     "title": "Dasbor",

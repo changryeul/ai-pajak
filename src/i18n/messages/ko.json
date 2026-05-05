@@ -230,7 +230,9 @@
     "security": "보안",
     "securityPassword": "보안 (비밀번호 변경)",
     "filingManagement": "신고 관리",
-    "closingWorkLabel": "결산 작업"
+    "closingWorkLabel": "결산 작업",
+    "aiPayroll": "AI Payroll",
+    "employeeHrRecord": "직원 인사 기록"
   },
   "dashboard": {
     "title": "대시보드",

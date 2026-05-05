@@ -127,6 +127,15 @@ const navItems: NavSection[] = [
       { href: '/counterparties', icon: Users, labelKey: 'nav.counterpartyInput', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
     ],
   },
+  // ── COMPANY 고객: AI Payroll 섹션 ──
+  {
+    section: 'company-payroll',
+    labelKey: 'nav.aiPayroll',
+    roles: [UserRole.CUSTOMER],
+    items: [
+      { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord', roles: [UserRole.CUSTOMER], customerTypes: ['COMPANY'] },
+    ],
+  },
   // ── COMPANY 고객: 세금도구 섹션 ──
   {
     section: 'company-tools',
@@ -169,6 +178,7 @@ const navItems: NavSection[] = [
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
+      { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord' },
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings' },
       { href: '/invoice-capture', icon: Camera, labelKey: 'nav.invoiceCapture' },
       { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload' },
