@@ -460,15 +460,128 @@ export default function WorkloadPage() {
                 )}
               </div>
 
-              {/* Bulk Transfer placeholder — Phase 2b */}
-              <div className="rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/40 p-3 text-[11px] text-rose-800">
-                <div className="flex items-center gap-1 font-black mb-1"><ArrowRightLeft className="h-3 w-3" /> 퇴사자 고객 / 업무 전체 이관 (Bulk Transfer)</div>
-                <p>Phase 2b에서 구현 예정 — 상담원/Supervisor 퇴사 시 배정 고객 + 우선배정 이력을 한 번에 다른 담당자에게 넘김.</p>
-              </div>
+              {/* Bulk Transfer */}
+              <BulkTransferPanel operators={operators} supervisors={supervisors} onDone={loadAll} />
             </div>
           )}
         </section>
       </div>
+    </div>
+  );
+}
+
+function BulkTransferPanel({
+  operators, supervisors, onDone,
+}: {
+  operators: OperatorRow[];
+  supervisors: OperatorRow[];
+  onDone: () => Promise<void> | void;
+}) {
+  const [mode, setMode] = useState<'operator' | 'supervisor'>('operator');
+  const [fromId, setFromId] = useState('');
+  const [toId, setToId] = useState('');
+  const [preview, setPreview] = useState<{ activeCount?: number; completedCount?: number; managedOperatorCount?: number; customerCount?: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string>('');
+
+  const list = mode === 'operator' ? operators : supervisors;
+
+  useEffect(() => {
+    setFromId('');
+    setToId('');
+    setPreview(null);
+    setMsg('');
+  }, [mode]);
+
+  useEffect(() => {
+    if (!fromId) { setPreview(null); return; }
+    const params = new URLSearchParams({ mode, fromId });
+    fetch(`/api/operator/team/bulk-transfer?${params}`).then(r => r.json()).then(j => {
+      if (j.success) setPreview(j.data);
+    }).catch(() => setPreview(null));
+  }, [mode, fromId]);
+
+  const run = async () => {
+    if (!fromId || !toId) return;
+    if (!confirm(`정말 이관 실행하시겠습니까? 퇴사 처리도 함께 진행됩니다.`)) return;
+    setBusy(true);
+    setMsg('');
+    try {
+      const res = await fetch('/api/operator/team/bulk-transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, fromId, toId }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.success) {
+        setMsg(j.error || '이관 실패');
+      } else {
+        setMsg(`${j.data?.transferred ?? 0}건 이관 완료`);
+        await onDone();
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/40 p-3">
+      <div className="flex items-center gap-1 text-[11px] font-black text-rose-800 mb-2">
+        <ArrowRightLeft className="h-3 w-3" /> 퇴사자 고객 / 업무 전체 이관
+      </div>
+      <div className="flex items-center gap-2 mb-2">
+        <label className="text-[11px] flex items-center gap-1">
+          <input type="radio" checked={mode === 'operator'} onChange={() => setMode('operator')} /> 상담원
+        </label>
+        <label className="text-[11px] flex items-center gap-1">
+          <input type="radio" checked={mode === 'supervisor'} onChange={() => setMode('supervisor')} /> Supervisor
+        </label>
+      </div>
+      <div className="grid grid-cols-1 gap-2">
+        <select value={fromId} onChange={(e) => setFromId(e.target.value)}
+          className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs">
+          <option value="">퇴사자 선택…</option>
+          {list.map(o => (
+            <option key={o.id} value={o.id}>
+              {o.name} ({o.employee_id}) · {WORK_STATE_LABEL[o.work_state] || o.work_state}
+            </option>
+          ))}
+        </select>
+        <select value={toId} onChange={(e) => setToId(e.target.value)}
+          className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs">
+          <option value="">받을 사람 선택…</option>
+          {list.filter(o => o.id !== fromId && o.work_state !== 'resigned' && o.work_state !== 'offline').map(o => (
+            <option key={o.id} value={o.id}>
+              {o.name} ({o.employee_id}) · {WORK_STATE_LABEL[o.work_state] || o.work_state}
+            </option>
+          ))}
+        </select>
+      </div>
+      {preview && (
+        <div className="mt-2 rounded-lg bg-white p-2 text-[10px] text-slate-700 space-y-0.5">
+          {mode === 'operator' && (
+            <>
+              <p>이관 대상 활성 케이스: <b>{preview.activeCount ?? 0}건</b></p>
+              <p>현재 담당 고객: <b>{preview.customerCount ?? 0}곳</b></p>
+            </>
+          )}
+          {mode === 'supervisor' && (
+            <>
+              <p>이관 대상 활성 케이스: <b>{preview.activeCount ?? 0}건</b></p>
+              <p>완료 케이스(이력): <b>{preview.completedCount ?? 0}건</b></p>
+              <p>관리 상담원 수: <b>{preview.managedOperatorCount ?? 0}명</b></p>
+            </>
+          )}
+        </div>
+      )}
+      <button
+        disabled={!fromId || !toId || busy}
+        onClick={run}
+        className="mt-2 w-full rounded-lg bg-rose-600 px-3 py-2 text-xs font-black text-white hover:bg-rose-700 disabled:opacity-50"
+      >
+        {busy ? '이관 중…' : '전체 이관 실행'}
+      </button>
+      {msg && <p className="mt-2 text-[10px] font-bold text-emerald-700">{msg}</p>}
     </div>
   );
 }
