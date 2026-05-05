@@ -6,27 +6,44 @@ import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 /**
- * Employee Payroll CRUD
- * GET  ?customerId=xxx — List employees
- * POST — Create/update employee
- * DELETE ?id=xxx — Deactivate employee
+ * Employee Payroll / HR Record CRUD
+ * GET  ?customerId=xxx                                — list active employees
+ * GET  ?customerId=xxx&searchBy=ID|NAME&keyword=...   — filtered search (HR Master)
+ * POST                                                — create/update employee (handles HR fields + JSONB sub-records)
+ * DELETE ?id=xxx                                      — soft-deactivate employee
  */
 async function handleGet(req: RequestWithSession): Promise<Response> {
   const url = new URL(req.url);
   const customerId = url.searchParams.get('customerId');
+  const searchBy = url.searchParams.get('searchBy'); // 'ID' | 'NAME' | null
+  const keyword = (url.searchParams.get('keyword') || '').trim();
   if (!customerId) return NextResponse.json({ error: 'customerId required' }, { status: 400 });
 
-  const { data } = await getSupabaseAdmin()
+  let query = getSupabaseAdmin()
     .from('employee_payroll')
     .select('*')
     .eq('customer_id', customerId)
-    .eq('is_active', true)
-    .order('employee_name');
+    .eq('is_active', true);
+
+  if (keyword) {
+    if (searchBy === 'ID') {
+      query = query.ilike('employee_number', `%${keyword}%`);
+    } else if (searchBy === 'NAME') {
+      query = query.or(`employee_name.ilike.%${keyword}%,preferred_name.ilike.%${keyword}%`);
+    } else {
+      query = query.or(
+        `employee_number.ilike.%${keyword}%,employee_name.ilike.%${keyword}%,preferred_name.ilike.%${keyword}%`
+      );
+    }
+  }
+
+  const { data, error } = await query.order('employee_name');
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const employees = data || [];
   const summary = {
     totalEmployees: employees.length,
-    totalGrossSalary: employees.reduce((s, e) => s + Number(e.gross_salary), 0),
+    totalGrossSalary: employees.reduce((s, e) => s + Number(e.gross_salary || 0), 0),
   };
 
   return NextResponse.json({ success: true, data: { employees, summary } });
@@ -37,65 +54,141 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   const {
     id, customerId,
     // Identity
-    employeeName, employeeNpwp, employeeNik, ptkpCategory,
-    // Salary baseline
-    grossSalary, jhtEmployee, jpEmployee, positionAllowance, otherAllowances, otherDeductions,
-    // HR record (Phase C)
-    hireDate, resignDate, birthDate, gender, maritalStatus,
+    employeeName, preferredName, employeeNumber,
+    employeeNpwp, employeeNik, ptkpCategory,
+    // Personal
+    nationality, gender, birthDate, placeOfBirth, bloodType, maritalStatus,
     email, phone, address,
-    position, department, employeeNumber,
+    emergencyContactName, emergencyContactPhone,
+    // Job
+    position, department, workLocation, supervisor,
+    hireDate, resignDate, employmentStatus, contractStatus, probationEnd,
     workerType,
+    // Family / PTKP
+    spouseName, dependents,
+    // Payroll components
+    basicSalary, transportAllowance, mealAllowance, positionAllowance, otherAllowance,
+    grossSalary, jhtEmployee, jpEmployee, otherDeductions,
+    pph21Method,
+    // BPJS / insurance
+    bpjsKesehatan, bpjsKesehatanNo, bpjsTk, bpjsTkNo, privateInsurance,
+    // Bank
     bankName, bankAccountNo, bankAccountName,
-    emergencyContactName, emergencyContactPhone, notes,
+    // Contract
+    contractType, contractStartDate, contractEndDate,
+    // Expat
+    passportNo, kitasNo, workPermitExpiry, taxResidency,
+    // Storage
+    photoUrl,
+    // Sub-records
+    family, education, career, promotions, movements, rewards,
+    // Notes
+    notes,
   } = body;
 
-  if (!customerId || !employeeName || !grossSalary) {
-    return NextResponse.json({ error: 'customerId, employeeName, grossSalary required' }, { status: 400 });
+  if (!customerId || !employeeName) {
+    return NextResponse.json({ error: 'customerId and employeeName are required' }, { status: 400 });
   }
+
+  // Calculate gross_salary from components if not explicitly provided.
+  // Existing PPh21 callers pass grossSalary directly; the HR Master form sends components instead.
+  const computedGross = grossSalary != null
+    ? Number(grossSalary)
+    : Number(basicSalary || 0) + Number(transportAllowance || 0) + Number(mealAllowance || 0)
+      + Number(positionAllowance || 0) + Number(otherAllowance || 0);
 
   const record = {
     customer_id: customerId,
     // Identity
     employee_name: employeeName,
-    employee_npwp: employeeNpwp || null,
-    employee_nik: employeeNik || null,
-    ptkp_category: ptkpCategory || 'TK0',
-    // Salary baseline
-    gross_salary: grossSalary,
-    jht_employee: jhtEmployee || 0,
-    jp_employee: jpEmployee || 0,
-    position_allowance: positionAllowance || 0,
-    other_allowances: otherAllowances || 0,
-    other_deductions: otherDeductions || 0,
-    // HR record fields
+    preferred_name: preferredName ?? null,
+    employee_number: employeeNumber ?? null,
+    employee_npwp: employeeNpwp ?? null,
+    employee_nik: employeeNik ?? null,
+    ptkp_category: ptkpCategory ?? 'TK0',
+    // Personal
+    nationality: nationality ?? null,
+    gender: gender ?? null,
+    birth_date: birthDate || null,
+    place_of_birth: placeOfBirth ?? null,
+    blood_type: bloodType ?? null,
+    marital_status: maritalStatus ?? null,
+    email: email ?? null,
+    phone: phone ?? null,
+    address: address ?? null,
+    emergency_contact_name: emergencyContactName ?? null,
+    emergency_contact_phone: emergencyContactPhone ?? null,
+    // Job
+    position: position ?? null,
+    department: department ?? null,
+    work_location: workLocation ?? null,
+    supervisor: supervisor ?? null,
     hire_date: hireDate || null,
     resign_date: resignDate || null,
-    birth_date: birthDate || null,
-    gender: gender || null,
-    marital_status: maritalStatus || null,
-    email: email || null,
-    phone: phone || null,
-    address: address || null,
-    position: position || null,
-    department: department || null,
-    employee_number: employeeNumber || null,
-    worker_type: workerType || 'REGULAR',
-    bank_name: bankName || null,
-    bank_account_no: bankAccountNo || null,
-    bank_account_name: bankAccountName || null,
-    emergency_contact_name: emergencyContactName || null,
-    emergency_contact_phone: emergencyContactPhone || null,
-    notes: notes || null,
+    employment_status: employmentStatus ?? null,
+    contract_status: contractStatus ?? null,
+    probation_end: probationEnd || null,
+    worker_type: workerType ?? 'REGULAR',
+    // Family / PTKP
+    spouse_name: spouseName ?? null,
+    dependents: dependents ?? null,
+    // Payroll components
+    basic_salary: basicSalary != null ? Number(basicSalary) : null,
+    transport_allowance: transportAllowance != null ? Number(transportAllowance) : null,
+    meal_allowance: mealAllowance != null ? Number(mealAllowance) : null,
+    position_allowance: positionAllowance != null ? Number(positionAllowance) : 0,
+    other_allowance: otherAllowance != null ? Number(otherAllowance) : null,
+    gross_salary: computedGross,
+    jht_employee: jhtEmployee != null ? Number(jhtEmployee) : 0,
+    jp_employee: jpEmployee != null ? Number(jpEmployee) : 0,
+    other_deductions: otherDeductions != null ? Number(otherDeductions) : 0,
+    pph21_method: pph21Method ?? null,
+    // BPJS / insurance
+    bpjs_kesehatan: bpjsKesehatan ?? null,
+    bpjs_kesehatan_no: bpjsKesehatanNo ?? null,
+    bpjs_tk: bpjsTk ?? null,
+    bpjs_tk_no: bpjsTkNo ?? null,
+    private_insurance: privateInsurance ?? null,
+    // Bank
+    bank_name: bankName ?? null,
+    bank_account_no: bankAccountNo ?? null,
+    bank_account_name: bankAccountName ?? null,
+    // Contract
+    contract_type: contractType ?? null,
+    contract_start_date: contractStartDate || null,
+    contract_end_date: contractEndDate || null,
+    // Expat
+    passport_no: passportNo ?? null,
+    kitas_no: kitasNo ?? null,
+    work_permit_expiry: workPermitExpiry || null,
+    tax_residency: taxResidency ?? null,
+    // Storage
+    photo_url: photoUrl ?? null,
+    // Sub-records (only set if caller actually included them)
+    ...(family !== undefined ? { family: Array.isArray(family) ? family : [] } : {}),
+    ...(education !== undefined ? { education: Array.isArray(education) ? education : [] } : {}),
+    ...(career !== undefined ? { career: Array.isArray(career) ? career : [] } : {}),
+    ...(promotions !== undefined ? { promotions: Array.isArray(promotions) ? promotions : [] } : {}),
+    ...(movements !== undefined ? { movements: Array.isArray(movements) ? movements : [] } : {}),
+    ...(rewards !== undefined ? { rewards: Array.isArray(rewards) ? rewards : [] } : {}),
+    notes: notes ?? null,
   };
 
   if (id) {
-    // Update
-    const { error } = await getSupabaseAdmin().from('employee_payroll').update(record).eq('id', id);
+    const { data, error } = await getSupabaseAdmin()
+      .from('employee_payroll')
+      .update(record)
+      .eq('id', id)
+      .select()
+      .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true, message: 'Updated' });
+    return NextResponse.json({ success: true, data });
   } else {
-    // Create
-    const { data, error } = await getSupabaseAdmin().from('employee_payroll').insert(record).select().single();
+    const { data, error } = await getSupabaseAdmin()
+      .from('employee_payroll')
+      .insert(record)
+      .select()
+      .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, data });
   }

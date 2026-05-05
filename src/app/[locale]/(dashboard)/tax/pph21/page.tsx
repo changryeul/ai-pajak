@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,6 +78,7 @@ export default function PPh21PayrollPage() {
   const { session, isLoading: sessionLoading } = useSession();
   const params = useParams();
   const locale = params.locale as string;
+  const router = useRouter();
   const tp = useTranslations('pph21Page');
   const tsc = useTranslations('taxScreen');
 
@@ -351,7 +352,19 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => {
+          // The "직원 인사 기록" tab leaves the PPh 21 page entirely and lands on the
+          // dedicated AI Payroll Employee Master screen.
+          if (v === 'master') {
+            router.push(`/${locale}/tax/payroll/employees`);
+            return;
+          }
+          setActiveTab(v);
+        }}
+        className="mb-4"
+      >
         {!payslipMode && (
           <TabsList className="mb-4 flex-wrap">
             <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
