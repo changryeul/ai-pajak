@@ -185,10 +185,119 @@ async function main() {
   }
   console.log(`  ✓ supervisor↔operator assignments`);
 
+  // Cases — mirrors the PDF "업무 배정/회수" 좌측 케이스 리스트.
+  console.log('\n  • seeding demo cases…');
+  await seedCases(supEmpToId, opEmpToId);
+  console.log(`  ✓ demo cases`);
+
   console.log('\n✨ Done.\n');
   console.log('Login credentials (password: TestPassword123!):');
   for (const sv of supervisors) console.log(`  - ${sv.email} (${sv.empId} ${sv.name}, ${sv.team})`);
   console.log('  - op-emp001..emp012@aipajak.com (12 operators)');
+}
+
+interface CaseSeed {
+  caseCode: string;
+  customerName: string;
+  customerNpwp: string;
+  customerType: 'INDIVIDUAL' | 'COMPANY';
+  serviceLabel: string;
+  taxType: string;        // PPh21 / PPh23 / PPh25 / PPN / SPT_TAHUNAN / etc
+  status: string;
+  priority: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
+  operatorEmpId: string | null;
+  supervisorEmpId: string | null;
+  dueDays: number | null; // relative to today
+  amount: number;
+  // Period override (otherwise current month/year). Lets us distinguish multiple
+  // cases for the same customer-taxType pair (UNIQUE constraint).
+  monthOffset?: number;
+  yearOverride?: number;
+}
+
+const cases: CaseSeed[] = [
+  // PDF 업무 배정/회수 화면의 6개 좌측 케이스를 그대로 재현.
+  { caseCode: 'REQ-NEW-001', customerName: 'PT Baru Masuk',     customerNpwp: '01.000.001.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'DATA_REVIEW',      priority: 'URGENT', operatorEmpId: null,    supervisorEmpId: 'SUP002', dueDays: 0,  amount: 5_000_000 },
+  { caseCode: 'REQ-REPEAT-001', customerName: 'PT Hijau Lumut', customerNpwp: '01.000.002.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'DATA_REVIEW',      priority: 'HIGH',   operatorEmpId: null,    supervisorEmpId: 'SUP002', dueDays: 1,  amount: 7_200_000 },
+  { caseCode: 'C-001',         customerName: 'PT Hijau Lumut',  customerNpwp: '01.000.002.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'DATA_REVIEW',      priority: 'HIGH',   operatorEmpId: 'EMP001', supervisorEmpId: 'SUP002', dueDays: -1, amount: 13_000_000, monthOffset: -1 },
+  { caseCode: 'C-001-2025',    customerName: 'PT Hijau Lumut',  customerNpwp: '01.000.002.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Tahunan Badan Coretax 2025+', taxType: 'SPT_TAHUNAN', status: 'COMPLETED', priority: 'NORMAL', operatorEmpId: 'EMP001', supervisorEmpId: 'SUP002', dueDays: 30, amount: 0, monthOffset: 0, yearOverride: 2025 },
+  { caseCode: 'C-002',         customerName: 'PT ABC',          customerNpwp: '01.000.003.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Tahunan Badan Coretax 2025+', taxType: 'SPT_TAHUNAN', status: 'PENDING_APPROVAL', priority: 'URGENT', operatorEmpId: 'EMP001', supervisorEmpId: 'SUP002', dueDays: 2, amount: 22_000_000, monthOffset: 0, yearOverride: 2025 },
+  { caseCode: 'C-003',         customerName: 'PT Konstruksi Jaya', customerNpwp: '01.000.004.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'PENDING_DOCS',     priority: 'NORMAL', operatorEmpId: 'EMP002', supervisorEmpId: 'SUP002', dueDays: 5,  amount: 3_500_000 },
+  { caseCode: 'C-004',         customerName: 'Budi Santoso',    customerNpwp: '01.000.005.0-001.000', customerType: 'INDIVIDUAL',
+    serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'PENDING',          priority: 'NORMAL', operatorEmpId: null,    supervisorEmpId: 'SUP003', dueDays: 7,  amount: 1_200_000 },
+];
+
+async function ensureCustomer(c: CaseSeed): Promise<string> {
+  const npwpDigits = c.customerNpwp.replace(/\D/g, '');
+  const { data: existing } = await admin
+    .from('customer')
+    .select('id')
+    .eq('npwp', npwpDigits)
+    .maybeSingle();
+  if (existing) return existing.id;
+  const payload: Record<string, unknown> = {
+    customer_type: c.customerType,
+    full_name: c.customerName,
+    company_name: c.customerType === 'COMPANY' ? c.customerName : null,
+    npwp: npwpDigits,
+    email: `${c.caseCode.toLowerCase()}@example.com`,
+    is_pkp: false,
+  };
+  const { data, error } = await admin.from('customer').insert(payload).select('id').single();
+  if (error || !data) throw new Error(`customer insert failed for ${c.customerName}: ${error?.message}`);
+  return data.id;
+}
+
+async function seedCases(
+  supEmpToId: Map<string, string>,
+  opEmpToId: Map<string, string>,
+): Promise<void> {
+  const today = new Date();
+  for (const c of cases) {
+    const customerId = await ensureCustomer(c);
+    const due = c.dueDays != null
+      ? new Date(today.getTime() + c.dueDays * 86_400_000).toISOString().slice(0, 10)
+      : null;
+    const operatorId = c.operatorEmpId ? opEmpToId.get(c.operatorEmpId) ?? null : null;
+    const supervisorId = c.supervisorEmpId ? supEmpToId.get(c.supervisorEmpId) ?? null : null;
+    const periodDate = new Date(today.getFullYear(), today.getMonth() + (c.monthOffset ?? 0), 1);
+    const month = periodDate.getMonth() + 1;
+    const year = c.yearOverride ?? periodDate.getFullYear();
+
+    const payload = {
+      customer_id: customerId,
+      case_code: c.caseCode,
+      service_label: c.serviceLabel,
+      tax_type: c.taxType,
+      tax_period_month: month,
+      tax_period_year: year,
+      amount: c.amount,
+      status: c.status,
+      priority: c.priority,
+      operator_id: operatorId,
+      supervisor_id: supervisorId,
+      due_date: due,
+      assigned_at: operatorId ? new Date().toISOString() : null,
+    };
+
+    const { data: existing } = await admin
+      .from('djp_submission_queue')
+      .select('id')
+      .eq('case_code', c.caseCode)
+      .maybeSingle();
+    if (existing) {
+      await admin.from('djp_submission_queue').update(payload).eq('id', existing.id);
+    } else {
+      const { error } = await admin.from('djp_submission_queue').insert(payload);
+      if (error) console.warn(`  ! case ${c.caseCode} insert: ${error.message}`);
+    }
+  }
 }
 
 main().catch(err => { console.error(err); process.exit(1); });
