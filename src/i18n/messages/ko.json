@@ -232,7 +232,14 @@
     "filingManagement": "신고 관리",
     "closingWorkLabel": "결산 작업",
     "aiPayroll": "AI Payroll",
-    "employeeHrRecord": "직원 인사 기록"
+    "employeeHrRecord": "직원 인사 기록",
+    "opsWork": "업무",
+    "opsHr": "인사/평가",
+    "opsSystem": "시스템",
+    "allCases": "전체 케이스",
+    "operatorTeam": "상담원 관리",
+    "auditLog": "감사로그",
+    "opsSettings": "설정/양식버전"
   },
   "dashboard": {
     "title": "대시보드",

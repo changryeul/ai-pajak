@@ -232,7 +232,14 @@
     "filingManagement": "Manajemen Pelaporan",
     "closingWorkLabel": "Tutup Buku Tahunan",
     "aiPayroll": "AI Payroll",
-    "employeeHrRecord": "Catatan HR Karyawan"
+    "employeeHrRecord": "Catatan HR Karyawan",
+    "opsWork": "Pekerjaan",
+    "opsHr": "HR / Evaluasi",
+    "opsSystem": "Sistem",
+    "allCases": "Semua Kasus",
+    "operatorTeam": "Manajemen Operator",
+    "auditLog": "Audit Log",
+    "opsSettings": "Pengaturan / Versi Form"
   },
   "dashboard": {
     "title": "Dasbor",

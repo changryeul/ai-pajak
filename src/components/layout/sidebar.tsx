@@ -204,22 +204,46 @@ const navItems: NavSection[] = [
       { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
     ],
   },
+  // ── Operator/Supervisor: 4 큰 메뉴 (Dashboard / 업무 / 인사·평가 / 시스템) ──
+  // PDF 명세대로 8개 단일 메뉴를 의미적으로 묶어 드롭다운 4 그룹으로 노출.
+  // 기존 페이지(complaints/approval-rules/review/clients/calendar)는 폐기하지 않고 적절한 그룹 안에 흡수.
   {
     section: 'operator',
-    labelKey: 'nav.operatorSection',
     roles: operatorRoles,
     items: [
-      { href: '/operator/dashboard', icon: Headphones, labelKey: 'nav.operatorDashboard', descKey: 'navDesc.operatorDashboard' },
-      { href: '/operator/queue', icon: ListChecks, labelKey: 'nav.submissionQueue', descKey: 'navDesc.submissionQueue' },
-      { href: '/operator/review', icon: FileText, labelKey: 'nav.documentReview' },
-      { href: '/operator/approvals', icon: CheckCircle, labelKey: 'nav.approvals', descKey: 'navDesc.approvals', roles: supervisorRoles },
-      { href: '/operator/workload', icon: BarChart3, labelKey: 'nav.workloadManagement', descKey: 'navDesc.workloadManagement', roles: supervisorRoles },
-      { href: '/operator/statistics', icon: TrendingUp, labelKey: 'nav.operatorStatistics', descKey: 'navDesc.operatorStatistics', roles: supervisorRoles },
-      { href: '/operator/complaints', icon: MessageSquareWarning, labelKey: 'nav.complaints', descKey: 'navDesc.complaints', roles: supervisorRoles },
-      { href: '/operator/approval-rules', icon: Settings, labelKey: 'nav.approvalRules', descKey: 'navDesc.approvalRules', roles: supervisorRoles },
-      { href: '/operator/clients', icon: Users, labelKey: 'nav.assignedClients', descKey: 'navDesc.assignedClients' },
-      { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar', descKey: 'navDesc.taxCalendar' },
-      // Master-only: platform-wide stats, custom pricing, special-service quotes
+      { href: '/operator/dashboard', icon: Headphones, labelKey: 'nav.operatorDashboard' },
+      // 업무
+      {
+        href: '#', icon: ListChecks, labelKey: 'nav.opsWork',
+        children: [
+          { href: '/operator/workload', icon: BarChart3, labelKey: 'nav.workloadManagement', roles: supervisorRoles },
+          { href: '/operator/approvals', icon: CheckCircle, labelKey: 'nav.approvals', roles: supervisorRoles },
+          { href: '/operator/cases', icon: ClipboardList, labelKey: 'nav.allCases' },
+          { href: '/operator/queue', icon: ListChecks, labelKey: 'nav.submissionQueue' },
+          { href: '/operator/review', icon: FileText, labelKey: 'nav.documentReview' },
+          { href: '/operator/complaints', icon: MessageSquareWarning, labelKey: 'nav.complaints', roles: supervisorRoles },
+          { href: '/operator/clients', icon: Users, labelKey: 'nav.assignedClients' },
+          { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar' },
+        ],
+      },
+      // 인사/평가 (supervisor 이상만 의미)
+      {
+        href: '#', icon: Users, labelKey: 'nav.opsHr',
+        children: [
+          { href: '/operator/team', icon: Users, labelKey: 'nav.operatorTeam', roles: supervisorRoles },
+          { href: '/operator/statistics', icon: TrendingUp, labelKey: 'nav.operatorStatistics', roles: supervisorRoles },
+        ],
+      },
+      // 시스템
+      {
+        href: '#', icon: Settings, labelKey: 'nav.opsSystem',
+        children: [
+          { href: '/operator/audit', icon: Shield, labelKey: 'nav.auditLog' },
+          { href: '/operator/approval-rules', icon: Settings, labelKey: 'nav.approvalRules', roles: supervisorRoles },
+          { href: '/operator/settings', icon: Settings, labelKey: 'nav.opsSettings' },
+        ],
+      },
+      // Master-only: platform-wide stats, custom pricing, special-service quotes (큰 그룹과 분리)
       { href: '/admin/master', icon: TrendingUp, labelKey: 'nav.masterStats', roles: masterRoles },
       { href: '/admin/master/custom-pricing', icon: Settings, labelKey: 'nav.masterCustomPricing', roles: masterRoles },
     ],

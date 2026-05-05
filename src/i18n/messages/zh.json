@@ -232,7 +232,14 @@
     "filingManagement": "Filing Management",
     "closingWorkLabel": "Year-end Closing",
     "aiPayroll": "AI Payroll",
-    "employeeHrRecord": "Employee HR Records"
+    "employeeHrRecord": "Employee HR Records",
+    "opsWork": "Work",
+    "opsHr": "HR / Evaluation",
+    "opsSystem": "System",
+    "allCases": "All Cases",
+    "operatorTeam": "Operator Management",
+    "auditLog": "Audit Log",
+    "opsSettings": "Settings / Form Version"
   },
   "dashboard": {
     "title": "仪表板",
