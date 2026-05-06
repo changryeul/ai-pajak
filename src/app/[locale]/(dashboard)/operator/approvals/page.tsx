@@ -87,9 +87,11 @@ export default function ApprovalsPage() {
         if (!r.ok || !j.success) setMsg({ type: 'err', text: j.error || '지시 실패' });
         else { setMsg({ type: 'ok', text: '지시 전달됨' }); setInstruction(''); }
       } else {
-        const r = await fetch('/api/operator/queue', {
+        const r = await fetch(`/api/operator/cases/${selectedId}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: selectedId, action: op === 'approve' ? 'approve' : 'reject', rejectedReason: op === 'reject' ? '슈퍼바이저 반려' : undefined }),
+          body: JSON.stringify(op === 'approve'
+            ? { action: 'approve' }
+            : { action: 'reject', reason: '슈퍼바이저 반려' }),
         });
         const j = await r.json();
         if (!r.ok || !j.success) setMsg({ type: 'err', text: j.error || `${op} 실패` });

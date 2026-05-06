@@ -106,6 +106,11 @@ export async function POST(req: NextRequest) {
   const note = reason || `Bulk transfer (${mode}) on resignation`;
   const ts = new Date().toISOString();
 
+  // Resolve actor display label for audit log.
+  const { data: actorOp } = await admin
+    .from('tax_operators').select('employee_id, name').eq('user_id', user.id).maybeSingle();
+  const actorLabel = actorOp ? `${actorOp.name} (${actorOp.employee_id})` : (user.email ?? 'system');
+
   if (mode === 'operator') {
     const { data: moved, error } = await admin
       .from('djp_submission_queue')
@@ -130,6 +135,17 @@ export async function POST(req: NextRequest) {
     // Re-point the supervisor_operator_assignment row so the resigned operator
     // no longer counts against any supervisor's load.
     await admin.from('supervisor_operator_assignment').update({ is_active: false }).eq('operator_id', fromId);
+
+    // Emit one BULK_TRANSFERRED audit row per moved case.
+    if (moved && moved.length > 0) {
+      await admin.from('case_audit_log').insert(moved.map(m => ({
+        case_id: m.id,
+        event_type: 'BULK_TRANSFERRED',
+        actor_user_id: user.id,
+        actor_label: actorLabel,
+        payload: { mode: 'operator', from: fromId, to: toId, reason: note },
+      }))).then(undefined, () => undefined);
+    }
 
     return NextResponse.json({ success: true, data: { transferred: moved?.length ?? 0 } });
   }
@@ -157,6 +173,16 @@ export async function POST(req: NextRequest) {
       work_state: 'resigned',
       auto_assign_enabled: false,
     }).eq('id', fromId);
+
+    if (moved && moved.length > 0) {
+      await admin.from('case_audit_log').insert(moved.map(m => ({
+        case_id: m.id,
+        event_type: 'BULK_TRANSFERRED',
+        actor_user_id: user.id,
+        actor_label: actorLabel,
+        payload: { mode: 'supervisor', from: fromId, to: toId, reason: note },
+      }))).then(undefined, () => undefined);
+    }
 
     return NextResponse.json({ success: true, data: { transferred: moved?.length ?? 0 } });
   }

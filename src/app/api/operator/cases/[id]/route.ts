@@ -100,6 +100,10 @@ export async function GET(req: NextRequest, ctx: RouteCtx) {
  *   { action: 'recall' }                                 — clear operator_id, status='PENDING'
  *   { action: 'transfer-supervisor', supervisorId: <uuid> }
  *   { action: 'instruct',          note: string }         — append supervisor instruction to notes
+ *   { action: 'approve',           note?: string }         — Supervisor approves (status → APPROVED)
+ *   { action: 'reject',            reason: string }       — Supervisor rejects (status → DATA_REVIEW)
+ *
+ * Every action emits a case_audit_log row so the 감사로그 화면에 풍부하게 노출.
  */
 export async function PUT(req: NextRequest, ctx: RouteCtx) {
   const auth = await getOperatorUser();
@@ -114,6 +118,26 @@ export async function PUT(req: NextRequest, ctx: RouteCtx) {
 
   // reassigned_by FK targets auth.users — pass the auth user id directly.
   const actorId = user.id;
+
+  // Resolve the actor's display label (employee_id + name) once for audit logs.
+  const { data: actorOp } = await admin
+    .from('tax_operators')
+    .select('employee_id, name')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  const actorLabel = actorOp ? `${actorOp.name} (${actorOp.employee_id})` : (user.email ?? 'system');
+
+  const audit = async (event_type: string, payload: Record<string, unknown> = {}) => {
+    try {
+      await admin.from('case_audit_log').insert({
+        case_id: id,
+        event_type,
+        actor_user_id: actorId,
+        actor_label: actorLabel,
+        payload,
+      });
+    } catch { /* non-blocking */ }
+  };
 
   const { data: caseRow, error: caseErr } = await admin
     .from('djp_submission_queue')
@@ -136,6 +160,8 @@ export async function PUT(req: NextRequest, ctx: RouteCtx) {
         status: caseRow.status === 'PENDING' ? 'DATA_REVIEW' : caseRow.status,
       }).eq('id', id);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      const evt = caseRow.operator_id ? 'REASSIGNED' : 'ASSIGNED';
+      await audit(evt, { from: caseRow.operator_id, to: operatorId, mode: 'manual' });
       return NextResponse.json({ success: true });
     }
 
@@ -160,6 +186,7 @@ export async function PUT(req: NextRequest, ctx: RouteCtx) {
         status: caseRow.status === 'PENDING' ? 'DATA_REVIEW' : caseRow.status,
       }).eq('id', id);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await audit('REASSIGNED', { from: caseRow.operator_id, to: past.operator_id, mode: 'preferred' });
       return NextResponse.json({ success: true, data: { operatorId: past.operator_id } });
     }
 
@@ -204,6 +231,7 @@ export async function PUT(req: NextRequest, ctx: RouteCtx) {
         status: caseRow.status === 'PENDING' ? 'DATA_REVIEW' : caseRow.status,
       }).eq('id', id);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await audit('REASSIGNED', { from: caseRow.operator_id, to: pick.id, mode: 'auto', load: pick.load });
       return NextResponse.json({ success: true, data: { operatorId: pick.id, load: pick.load } });
     }
 
@@ -218,6 +246,7 @@ export async function PUT(req: NextRequest, ctx: RouteCtx) {
         status: 'PENDING',
       }).eq('id', id);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await audit('RECALLED', { from: caseRow.operator_id, reason });
       return NextResponse.json({ success: true });
     }
 
@@ -228,6 +257,7 @@ export async function PUT(req: NextRequest, ctx: RouteCtx) {
         supervisor_id: supervisorId,
       }).eq('id', id);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await audit('TRANSFERRED_TO_SV', { from: caseRow.supervisor_id, to: supervisorId });
       return NextResponse.json({ success: true });
     }
 
@@ -239,6 +269,38 @@ export async function PUT(req: NextRequest, ctx: RouteCtx) {
       const newNotes = `${cur?.notes ? cur.notes + '\n' : ''}[${ts}] [SV-Instruction] ${note}`;
       const { error } = await admin.from('djp_submission_queue').update({ notes: newNotes }).eq('id', id);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await audit('INSTRUCTED', { note });
+      return NextResponse.json({ success: true });
+    }
+
+    case 'approve': {
+      if (caseRow.status !== 'PENDING_APPROVAL' && caseRow.status !== 'DATA_REVIEW') {
+        return NextResponse.json({ error: 'Approval only valid in PENDING_APPROVAL/DATA_REVIEW' }, { status: 400 });
+      }
+      const note = (body.note as string | undefined)?.trim() || null;
+      const { error } = await admin.from('djp_submission_queue').update({
+        status: 'APPROVED',
+        approved_by: actorId,
+        approved_at: new Date().toISOString(),
+        approval_notes: note,
+      }).eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await audit('APPROVED', { note });
+      return NextResponse.json({ success: true });
+    }
+
+    case 'reject': {
+      const reason = (body.reason as string | undefined)?.trim();
+      if (!reason) return NextResponse.json({ error: 'reason required' }, { status: 400 });
+      if (caseRow.status !== 'PENDING_APPROVAL' && caseRow.status !== 'DATA_REVIEW') {
+        return NextResponse.json({ error: 'Reject only valid in PENDING_APPROVAL/DATA_REVIEW' }, { status: 400 });
+      }
+      const { error } = await admin.from('djp_submission_queue').update({
+        status: 'DATA_REVIEW',
+        rejected_reason: reason,
+      }).eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await audit('REJECTED', { reason });
       return NextResponse.json({ success: true });
     }
 
