@@ -204,12 +204,27 @@ const navItems: NavSection[] = [
       { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
     ],
   },
-  // ── Operator/Supervisor: 4 큰 메뉴 (Dashboard / 업무 / 인사·평가 / 시스템) ──
+  // ── 상담원(TAX_OPERATOR) 전용: 5단계 평면 메뉴 ──
+  // PDF 「AI Pajak 백오피스_상담원」: 복잡한 내부 메뉴 대신 고객 한 명을 골라
+  // "내 업무 → 검토 → 승인요청 → Coretax → 이력" 순으로 처리.
+  // Supervisor 이상은 별도 섹션('operator')에서 4-dropdown 콘솔을 사용한다.
+  {
+    section: 'operator-staff',
+    roles: [UserRole.TAX_OPERATOR],
+    items: [
+      { href: '/operator/my-work',          icon: ListChecks,    labelKey: 'nav.opMyWork' },
+      { href: '/operator/review-case',      icon: FileText,      labelKey: 'nav.opReview' },
+      { href: '/operator/approval-request', icon: CheckCircle,   labelKey: 'nav.opApproval' },
+      { href: '/operator/coretax',          icon: Receipt,       labelKey: 'nav.opCoretax' },
+      { href: '/operator/history',          icon: ClipboardList, labelKey: 'nav.opHistory' },
+    ],
+  },
+  // ── Supervisor / Master: 4 큰 메뉴 (Dashboard / 업무 / 인사·평가 / 시스템) ──
   // PDF 명세대로 8개 단일 메뉴를 의미적으로 묶어 드롭다운 4 그룹으로 노출.
   // 기존 페이지(complaints/approval-rules/review/clients/calendar)는 폐기하지 않고 적절한 그룹 안에 흡수.
   {
     section: 'operator',
-    roles: operatorRoles,
+    roles: supervisorRoles,
     items: [
       { href: '/operator/dashboard', icon: Headphones, labelKey: 'nav.operatorDashboard' },
       // 업무

@@ -239,7 +239,12 @@
     "allCases": "전체 케이스",
     "operatorTeam": "상담원 관리",
     "auditLog": "감사로그",
-    "opsSettings": "설정/양식버전"
+    "opsSettings": "설정/양식버전",
+    "opMyWork": "내 업무",
+    "opReview": "검토",
+    "opApproval": "승인요청",
+    "opCoretax": "Coretax 처리",
+    "opHistory": "이력"
   },
   "dashboard": {
     "title": "대시보드",
