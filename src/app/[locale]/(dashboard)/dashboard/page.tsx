@@ -105,13 +105,21 @@ export default function DashboardPage() {
     UserRole.TAX_OPERATOR_MASTER,
   )) {
     // Redirect to the appropriate operator landing page.
-    // Master goes straight to the master KPI dashboard; the other operator
-    // tiers go to the per-operator queue dashboard.
+    //   - Master         → /admin/master (전체 KPI / 커스텀 가격)
+    //   - Supervisor/Lead → /operator/dashboard (큐·승인·팀 콘솔)
+    //   - 일반 상담원    → /operator/my-work (PDF 「백오피스_상담원」 5단계 워크플로우)
     if (typeof window !== 'undefined') {
-      const target =
-        session.role === UserRole.TAX_OPERATOR_MASTER
-          ? `/${locale}/admin/master`
-          : `/${locale}/operator/dashboard`;
+      let target: string;
+      if (session.role === UserRole.TAX_OPERATOR_MASTER) {
+        target = `/${locale}/admin/master`;
+      } else if (
+        session.role === UserRole.TAX_OPERATOR_LEAD ||
+        session.role === UserRole.TAX_OPERATOR_SUPERVISOR
+      ) {
+        target = `/${locale}/operator/dashboard`;
+      } else {
+        target = `/${locale}/operator/my-work`;
+      }
       window.location.href = target;
     }
     return <DashboardSkeleton />;
