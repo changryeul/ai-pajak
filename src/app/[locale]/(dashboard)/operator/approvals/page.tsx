@@ -1,304 +1,267 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  Loader2,
-  RefreshCw,
-  AlertCircle,
-  Sparkles,
-  User,
-} from 'lucide-react';
+/**
+ * 승인 대기 (PDF p.7 명세 기준)
+ *
+ * 좌: 신규/배정 대상 (PENDING_APPROVAL 케이스)
+ * 우: 선택 케이스 상세 + 승인/반려 박스 + 상담원 지시 + 승인 검토 Snapshot 표
+ */
 
-interface ApprovalItem {
+import { useCallback, useEffect, useState } from 'react';
+import { Loader2, AlertTriangle, CheckCircle, RefreshCw, Send, XCircle } from 'lucide-react';
+import { PageTitle } from '@/components/layout/PageTitle';
+
+interface CaseRow {
   id: string;
+  case_code: string | null;
   customer_id: string;
-  tax_type: string;
-  tax_period: number;
-  tax_year: number;
-  amount: number;
+  service_label: string | null;
   status: string;
-  notes: string | null;
-  review_summary: Record<string, unknown> | null;
-  created_at: string;
-  updated_at: string;
-  operator_id: string;
-  customer: {
-    id: string;
-    customer_name: string;
-    npwp: string;
-    customer_type: string;
-  } | null;
+  priority: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW' | null;
+  due_date: string | null;
+  customer: { full_name: string; company_name: string | null } | null;
+  operator: { employee_id: string; name: string } | null;
+  supervisor: { employee_id: string; name: string } | null;
 }
 
-function fmt(n: number) {
-  return `Rp ${n.toLocaleString('id-ID')}`;
+interface SnapshotItem { state: string; invoice: string; vendor: string; taxKind: string; taxCode: string; tax: number }
+interface SnapshotData { items?: SnapshotItem[]; reviewRequired?: number; generatedAt?: string }
+
+interface CaseDetail extends CaseRow {
+  notes: string | null;
+  review_summary: SnapshotData | null;
 }
+
+const STATE_BADGE: Record<string, string> = {
+  '자동확인':    'bg-emerald-100 text-emerald-700',
+  '불확실 높음':  'bg-amber-100 text-amber-700',
+  '정보부족':    'bg-rose-100 text-rose-700',
+};
+
+const fmtRp = (n: number) => `${n.toLocaleString('id-ID')}`;
 
 export default function ApprovalsPage() {
-  const t = useTranslations('operator');
+  const [items, setItems] = useState<CaseRow[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<CaseDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [instruction, setInstruction] = useState('');
 
-  const [items, setItems] = useState<ApprovalItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-
-  // Form state per item
-  const [formState, setFormState] = useState<Record<string, {
-    approvalNotes: string;
-    rejectedReason: string;
-    showReject: boolean;
-  }>>({});
-
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/operator/queue?status=PENDING_APPROVAL&limit=100');
-      const data = await res.json();
-      if (data.success) {
-        setItems(data.data.items || []);
+      const r = await fetch('/api/operator/cases?scope=all&status=PENDING_APPROVAL,DATA_REVIEW');
+      const j = await r.json();
+      if (j.success) {
+        const list = (j.data.items as CaseRow[]).filter(c => c.status === 'PENDING_APPROVAL' || c.status === 'DATA_REVIEW');
+        setItems(list);
+        if (!selectedId && list.length > 0) setSelectedId(list[0].id);
       }
-    } catch {
-      setMessage({ text: t('networkError'), type: 'error' });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [t]);
+  }, [selectedId]);
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleAction = async (itemId: string, action: 'approve' | 'reject') => {
-    const form = formState[itemId];
-    if (action === 'reject' && !form?.rejectedReason?.trim()) {
-      setMessage({ text: t('enterRejectedReason'), type: 'error' });
-      return;
-    }
-
-    setActionLoading(itemId);
-    setMessage(null);
-    try {
-      const res = await fetch('/api/operator/queue', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: itemId,
-          action,
-          approvalNotes: form?.approvalNotes || undefined,
-          rejectedReason: form?.rejectedReason || undefined,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setMessage({ text: t('statusUpdated'), type: 'success' });
-        setItems(prev => prev.filter(i => i.id !== itemId));
-      } else {
-        setMessage({ text: data.error || t('errorOccurred'), type: 'error' });
-      }
-    } catch {
-      setMessage({ text: t('networkError'), type: 'error' });
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const updateForm = (itemId: string, field: string, value: string | boolean) => {
-    setFormState(prev => {
-      const existing = prev[itemId] || { approvalNotes: '', rejectedReason: '', showReject: false };
-      return {
-        ...prev,
-        [itemId]: {
-          ...existing,
-          [field]: value,
-        },
-      };
+    if (!selectedId) { setDetail(null); return; }
+    fetch(`/api/operator/cases/${selectedId}`).then(r => r.json()).then(j => {
+      if (j.success) setDetail(j.data as CaseDetail);
     });
+  }, [selectedId]);
+
+  const action = async (op: 'approve' | 'reject' | 'instruct') => {
+    if (!selectedId) return;
+    if (op === 'instruct' && !instruction.trim()) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      if (op === 'instruct') {
+        const r = await fetch(`/api/operator/cases/${selectedId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'instruct', note: instruction }),
+        });
+        const j = await r.json();
+        if (!r.ok || !j.success) setMsg({ type: 'err', text: j.error || '지시 실패' });
+        else { setMsg({ type: 'ok', text: '지시 전달됨' }); setInstruction(''); }
+      } else {
+        const r = await fetch('/api/operator/queue', {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: selectedId, action: op === 'approve' ? 'approve' : 'reject', rejectedReason: op === 'reject' ? '슈퍼바이저 반려' : undefined }),
+        });
+        const j = await r.json();
+        if (!r.ok || !j.success) setMsg({ type: 'err', text: j.error || `${op} 실패` });
+        else setMsg({ type: 'ok', text: op === 'approve' ? '승인 처리됨' : '반려 처리됨' });
+      }
+      await load();
+      const r2 = await fetch(`/api/operator/cases/${selectedId}`);
+      const j2 = await r2.json();
+      if (j2.success) setDetail(j2.data as CaseDetail);
+    } finally {
+      setBusy(false);
+    }
   };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-8 px-4 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+  if (loading) return <div className="container mx-auto py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-indigo-600" /></div>;
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('approvalsTitle')}</h1>
-          <p className="text-gray-600 mt-1">{t('approvalsSubtitle')}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={loadData}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          {t('refresh')}
-        </Button>
+    <div className="container mx-auto py-6 px-4 max-w-[1400px]">
+      <PageTitle title="승인 대기" />
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-black text-slate-900">승인 대기</h1>
+        <button onClick={load} className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+          <RefreshCw className="h-3.5 w-3.5" /> 새로고침
+        </button>
       </div>
 
-      {message && (
-        <div className={`p-3 rounded-lg mb-4 text-sm ${
-          message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-        }`}>
-          {message.text}
+      {msg && (
+        <div className={`mb-4 rounded-xl px-4 py-2 text-sm font-bold ${msg.type === 'ok' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+          {msg.type === 'ok' ? <CheckCircle className="h-4 w-4 inline mr-1" /> : <AlertTriangle className="h-4 w-4 inline mr-1" />}
+          {msg.text}
         </div>
       )}
 
-      {items.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">{t('noApprovalsNeeded')}</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-sm text-gray-500">{t('pendingApprovals')}: {items.length}</p>
-
-          {items.map(item => {
-            const form = formState[item.id];
-            const isActing = actionLoading === item.id;
-
-            return (
-              <Card key={item.id} className="border-orange-200">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <User className="h-4 w-4 text-gray-400" />
-                        {item.customer?.customer_name || 'Unknown'}
-                      </CardTitle>
-                      <div className="text-sm text-gray-500 mt-1">
-                        {item.customer?.npwp && <span>NPWP: {item.customer.npwp}</span>}
-                      </div>
-                    </div>
-                    <Badge className="bg-orange-100 text-orange-700">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {t('statusPendingApproval')}
-                    </Badge>
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
+        <section className="rounded-2xl bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-black text-slate-900 mb-3">신규/배정 대상</h2>
+          <div className="space-y-2 max-h-[calc(100vh-260px)] overflow-y-auto">
+            {items.map(c => (
+              <button
+                key={c.id} onClick={() => setSelectedId(c.id)}
+                className={`w-full text-left rounded-xl border p-3 ${c.id === selectedId ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:bg-slate-50'}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="font-bold text-sm text-slate-900 truncate">
+                    {c.customer?.company_name || c.customer?.full_name || '—'}
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Details */}
-                  <div className="grid grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">{t('taxType')}</span>
-                      <p className="font-medium">{item.tax_type}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">{t('period')}</span>
-                      <p className="font-medium">{item.tax_period}/{item.tax_year}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">{t('amount')}</span>
-                      <p className="font-medium">{fmt(item.amount)}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">{t('createdAt')}</span>
-                      <p className="font-medium">{new Date(item.created_at).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-
-                  {/* Notes from operator */}
-                  {item.notes && (
-                    <div className="p-3 bg-gray-50 rounded-lg text-sm">
-                      <span className="text-gray-500">{t('notes')}:</span> {item.notes}
-                    </div>
+                  {c.status === 'PENDING_APPROVAL' && (
+                    <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">승인요청</span>
                   )}
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">{c.case_code} · {c.service_label}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">담당 {c.operator?.employee_id ?? '미배정'} · {c.priority || 'NORMAL'}</p>
+              </button>
+            ))}
+            {items.length === 0 && <p className="text-xs text-slate-400 text-center py-6">승인 대기 케이스가 없습니다.</p>}
+          </div>
+        </section>
 
-                  {/* AI Review Summary */}
-                  {item.review_summary && (
-                    <div className="p-3 bg-blue-50 rounded-lg text-sm">
-                      <div className="flex items-center gap-1 text-blue-700 font-medium mb-1">
-                        <Sparkles className="h-3.5 w-3.5" />
-                        {t('reviewSummary')}
-                      </div>
-                      <pre className="whitespace-pre-wrap text-gray-700 text-xs">
-                        {JSON.stringify(item.review_summary, null, 2)}
-                      </pre>
-                    </div>
+        <section className="space-y-4">
+          {!detail ? (
+            <div className="rounded-2xl bg-white p-10 text-center text-sm text-slate-400 shadow-sm">왼쪽에서 케이스를 선택하세요.</div>
+          ) : (
+            <>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="text-base font-black text-slate-900">{detail.customer?.company_name || detail.customer?.full_name || '—'}</h2>
+                  {detail.status === 'PENDING_APPROVAL' && (
+                    <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">승인요청</span>
                   )}
+                </div>
+                <p className="text-[11px] text-slate-500">{detail.case_code} · {detail.service_label}</p>
+                <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                  <Field label="담당 상담원" value={detail.operator?.employee_id ?? '—'} />
+                  <Field label="담당 Supervisor" value={detail.supervisor?.employee_id ?? '—'} />
+                  <Field label="서비스" value={detail.service_label ?? '—'} />
+                  <Field label="우선순위" value={detail.priority ?? 'NORMAL'} />
+                  <Field label="Due" value={detail.due_date ? formatDue(detail.due_date) : '-'} />
+                </div>
+              </div>
 
-                  {/* Approval Notes */}
-                  <div className="space-y-2">
-                    <Label>{t('approvalNotes')}</Label>
-                    <Textarea
-                      placeholder={t('enterApprovalNotes')}
-                      value={form?.approvalNotes || ''}
-                      onChange={e => updateForm(item.id, 'approvalNotes', e.target.value)}
-                      rows={2}
-                    />
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-black text-slate-900 mb-2">승인 / 반려</h3>
+                <p className="text-xs text-slate-500 mb-2">승인상태: <b>{detail.status === 'PENDING_APPROVAL' ? '요청됨' : '미요청'}</b></p>
+                {detail.review_summary?.reviewRequired ? (
+                  <div className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 mb-3">
+                    ⚠ 검토필요 원천세 항목 {detail.review_summary.reviewRequired}건 미완료
                   </div>
+                ) : null}
+                <div className="flex gap-2">
+                  <button disabled={busy || detail.status !== 'PENDING_APPROVAL'} onClick={() => action('approve')}
+                    className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-50">
+                    <CheckCircle className="h-4 w-4 inline mr-1" /> 승인
+                  </button>
+                  <button disabled={busy || detail.status !== 'PENDING_APPROVAL'} onClick={() => action('reject')}
+                    className="rounded-xl bg-rose-600 px-5 py-2 text-sm font-black text-white hover:bg-rose-700 disabled:opacity-50">
+                    <XCircle className="h-4 w-4 inline mr-1" /> 반려
+                  </button>
+                </div>
+              </div>
 
-                  {/* Reject form */}
-                  {form?.showReject && (
-                    <div className="space-y-2 p-3 bg-red-50 rounded-lg">
-                      <Label className="text-red-700">{t('rejectedReason')} *</Label>
-                      <Textarea
-                        placeholder={t('enterRejectedReason')}
-                        value={form?.rejectedReason || ''}
-                        onChange={e => updateForm(item.id, 'rejectedReason', e.target.value)}
-                        rows={2}
-                        className="border-red-200"
-                      />
-                    </div>
-                  )}
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-black text-slate-900 mb-2">상담원 지시</h3>
+                <textarea
+                  value={instruction} onChange={(e) => setInstruction(e.target.value)} rows={3}
+                  placeholder="예: Coretax ID Billing 발행 후 고객 화면에 반영"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" />
+                <button disabled={busy || !instruction.trim()} onClick={() => action('instruct')}
+                  className="mt-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white hover:bg-slate-800 disabled:opacity-50">
+                  <Send className="h-3 w-3 inline mr-1" /> 지시
+                </button>
+                {detail.notes && (
+                  <pre className="mt-2 max-h-32 overflow-y-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-2 text-[10px] text-slate-600">
+                    {detail.notes}
+                  </pre>
+                )}
+              </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      onClick={() => handleAction(item.id, 'approve')}
-                      disabled={isActing}
-                      className="bg-emerald-600 hover:bg-emerald-700 flex-1"
-                    >
-                      {isActing ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                      )}
-                      {t('actionApprove')}
-                    </Button>
-
-                    {form?.showReject ? (
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleAction(item.id, 'reject')}
-                        disabled={isActing || !form?.rejectedReason?.trim()}
-                        className="flex-1"
-                      >
-                        {isActing ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <XCircle className="h-4 w-4 mr-2" />
-                        )}
-                        {t('actionReject')}
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        onClick={() => updateForm(item.id, 'showReject', true)}
-                        className="text-red-600 border-red-200 hover:bg-red-50 flex-1"
-                      >
-                        <AlertCircle className="h-4 w-4 mr-2" />
-                        {t('actionReject')}
-                      </Button>
-                    )}
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-black text-slate-900 mb-3">승인 검토 Snapshot</h3>
+                {!detail.review_summary?.items?.length ? (
+                  <p className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-xs text-slate-400">Snapshot 데이터가 없습니다.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-100 text-left text-[11px] text-slate-500">
+                          <th className="px-2 py-2 font-bold">상태</th>
+                          <th className="px-2 py-2 font-bold">Invoice</th>
+                          <th className="px-2 py-2 font-bold">Vendor</th>
+                          <th className="px-2 py-2 font-bold">세금종류</th>
+                          <th className="px-2 py-2 font-bold">Tax Code</th>
+                          <th className="px-2 py-2 font-bold text-right">Tax</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detail.review_summary.items.map((it, i) => (
+                          <tr key={i} className="border-b border-slate-100">
+                            <td className="px-2 py-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${STATE_BADGE[it.state] || 'bg-slate-100 text-slate-700'}`}>{it.state}</span></td>
+                            <td className="px-2 py-2 font-mono text-[11px]">{it.invoice}</td>
+                            <td className="px-2 py-2">{it.vendor}</td>
+                            <td className="px-2 py-2 font-mono text-[11px]">{it.taxKind}</td>
+                            <td className="px-2 py-2 font-mono text-[11px]">{it.taxCode}</td>
+                            <td className="px-2 py-2 text-right font-bold">{fmtRp(it.tax)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                )}
+              </div>
+            </>
+          )}
+        </section>
+      </div>
     </div>
   );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] text-slate-500">{label}</p>
+      <p className="font-bold text-slate-900 truncate">{value}</p>
+    </div>
+  );
+}
+
+function formatDue(d: string): string {
+  const today = new Date();
+  const due = new Date(d);
+  const diff = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  if (diff === 0) return 'D-Day';
+  if (diff > 0) return `D-${diff}`;
+  return `D+${-diff}`;
 }

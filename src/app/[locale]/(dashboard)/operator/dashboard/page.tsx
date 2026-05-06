@@ -1,700 +1,274 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer,
-} from 'recharts';
-import {
-  Headphones,
-  Users,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  FileText,
-  ArrowRight,
-  Loader2,
-  RefreshCw,
-  ListChecks,
-  Zap,
-  TrendingUp,
-  Timer,
-} from 'lucide-react';
+/**
+ * Supervisor Dashboard (PDF p.1-2 명세 기준)
+ *
+ * - KPI 7개 (전체 / 배정 / 미배정 / 승인대기 / 자료요청 / 긴급 / 신고완료)
+ * - Supervisor 자동배분 현황 — 3 supervisor 카드
+ * - 상담원 상태 5x2 grid (12명)
+ * - 내 자동배분 / 긴급 / 승인대기 케이스 리스트
+ */
 
-interface QueueItem {
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { Loader2, RefreshCw } from 'lucide-react';
+import { PageTitle } from '@/components/layout/PageTitle';
+
+interface CaseRow {
   id: string;
+  case_code: string | null;
   customer_id: string;
-  tax_type: string;
-  tax_period: number;
-  tax_year: number;
-  amount: number;
+  service_label: string | null;
   status: string;
-  ebilling_code: string | null;
-  bpe_number: string | null;
-  bpe_date: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-  customer: {
-    id: string;
-    customer_name: string;
-    npwp: string;
-  } | null;
+  priority: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW' | null;
+  operator_id: string | null;
+  supervisor_id: string | null;
+  customer: { full_name: string; company_name: string | null } | null;
+  operator: { employee_id: string; name: string } | null;
+  supervisor: { employee_id: string; name: string } | null;
 }
 
-interface DashboardData {
-  assignments: Array<{
-    id: string;
-    customer_id: string;
-    assigned_at: string;
-    customer: {
-      id: string;
-      customer_name: string;
-      npwp: string;
-      customer_type: string;
-      is_active: boolean;
-    } | null;
-  }>;
-  queueItems: QueueItem[];
-  stats: {
-    totalAssigned: number;
-    pending: number;
-    inProgress: number;
-    completedThisMonth: number;
-    failedThisMonth: number;
-  };
-  summary: {
-    totalAssigned: number;
-    pending: number;
-    inProgress: number;
-    completed: number;
-  };
+interface OperatorRow {
+  id: string;
+  employee_id: string;
+  name: string;
+  work_state: string;
+  auto_assign_enabled: boolean;
+  last_login_at: string | null;
+  active_load: number;
 }
 
-function fmt(n: number) {
-  return `Rp ${n.toLocaleString('id-ID')}`;
+interface SupervisorRow {
+  id: string;
+  employee_id: string;
+  name: string;
+  managed_count: number;
 }
 
-export default function OperatorDashboardPage() {
-  const t = useTranslations('operator');
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: '대기', PENDING_DOCS: '자료요청', DATA_REVIEW: '검토중',
+  PENDING_APPROVAL: '승인요청', APPROVED: '승인',
+  EBILLING_GENERATED: 'eBilling', PAYMENT_PENDING: '납부대기',
+  PAYMENT_UPLOADED: '납부영수증', PAYMENT_VERIFIED: '납부확인',
+  DJP_SUBMITTED: 'DJP제출', BPE_UPLOADED: 'BPE',
+  COMPLETED: '신고완료', FAILED: '실패',
+};
 
-  const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-    PENDING:            { label: t('statusPending'),           color: 'text-gray-700',    bg: 'bg-gray-100' },
-    DATA_REVIEW:        { label: t('statusDataReview'),        color: 'text-blue-700',    bg: 'bg-blue-100' },
-    PENDING_APPROVAL:   { label: t('statusPendingApproval'),   color: 'text-orange-700',  bg: 'bg-orange-100' },
-    APPROVED:           { label: t('statusApproved'),          color: 'text-emerald-700', bg: 'bg-emerald-100' },
-    EBILLING_GENERATED: { label: t('statusEbillingGenerated'), color: 'text-indigo-700',  bg: 'bg-indigo-100' },
-    PAYMENT_PENDING:    { label: t('statusPaymentPending'),    color: 'text-yellow-700',  bg: 'bg-yellow-100' },
-    PAYMENT_UPLOADED:   { label: t('statusPaymentUploaded'),   color: 'text-cyan-700',    bg: 'bg-cyan-100' },
-    PAYMENT_VERIFIED:   { label: t('statusPaymentVerified'),   color: 'text-purple-700',  bg: 'bg-purple-100' },
-    DJP_SUBMITTED:      { label: t('statusDjpSubmitted'),      color: 'text-amber-700',   bg: 'bg-amber-100' },
-    BPE_UPLOADED:       { label: t('statusBpeUploaded'),       color: 'text-teal-700',    bg: 'bg-teal-100' },
-    COMPLETED:          { label: t('statusCompleted'),         color: 'text-green-700',   bg: 'bg-green-100' },
-    FAILED:             { label: t('statusFailed'),            color: 'text-red-700',     bg: 'bg-red-100' },
-  };
+const STATUS_COLOR: Record<string, string> = {
+  PENDING: 'bg-slate-100 text-slate-700',
+  PENDING_DOCS: 'bg-amber-100 text-amber-800',
+  DATA_REVIEW: 'bg-indigo-100 text-indigo-700',
+  PENDING_APPROVAL: 'bg-purple-100 text-purple-700',
+  COMPLETED: 'bg-emerald-50 text-emerald-700',
+};
 
-  const ACTION_CONFIG: Record<string, { label: string; action: string; color: string }> = {
-    PENDING:            { label: t('actionReview'),            action: 'review',            color: 'bg-blue-600 hover:bg-blue-700' },
-    DATA_REVIEW:        { label: t('actionRequestApproval'),   action: 'request-approval',  color: 'bg-orange-600 hover:bg-orange-700' },
-    PENDING_APPROVAL:   { label: t('actionApprove'),           action: 'approve',           color: 'bg-emerald-600 hover:bg-emerald-700' },
-    APPROVED:           { label: t('actionGenerateEbilling'),  action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
-    EBILLING_GENERATED: { label: t('actionNotifyCustomer'),    action: 'notify-customer',   color: 'bg-yellow-600 hover:bg-yellow-700' },
-    PAYMENT_UPLOADED:   { label: t('actionVerifyPayment'),     action: 'verify-payment',    color: 'bg-purple-600 hover:bg-purple-700' },
-    PAYMENT_VERIFIED:   { label: t('actionSubmitDjp'),         action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
-    DJP_SUBMITTED:      { label: t('actionUploadBpe'),         action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
-    BPE_UPLOADED:       { label: t('actionComplete'),          action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
-  };
+const WORK_STATE_LABEL: Record<string, string> = {
+  available: '대기', consulting: '상담중', reviewing: '검토중',
+  coretax: 'Coretax 작업중', break: '휴식', offline: '오프라인', resigned: '퇴사',
+};
 
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+const WORK_STATE_DOT: Record<string, string> = {
+  available: 'bg-emerald-500', consulting: 'bg-blue-500', reviewing: 'bg-indigo-500',
+  coretax: 'bg-purple-500', break: 'bg-amber-500', offline: 'bg-slate-400', resigned: 'bg-rose-500',
+};
 
-  // Modal state for actions that need input
-  const [modalState, setModalState] = useState<{
-    open: boolean;
-    itemId: string;
-    action: string;
-    ebillingCode: string;
-    bpeNumber: string;
-    bpeDate: string;
-    notes: string;
-  }>({
-    open: false,
-    itemId: '',
-    action: '',
-    ebillingCode: '',
-    bpeNumber: '',
-    bpeDate: '',
-    notes: '',
-  });
+const WORK_STATE_BADGE: Record<string, string> = {
+  available: 'bg-emerald-100 text-emerald-700',
+  consulting: 'bg-blue-100 text-blue-700',
+  reviewing: 'bg-indigo-100 text-indigo-700',
+  coretax: 'bg-purple-100 text-purple-700',
+  break: 'bg-amber-100 text-amber-800',
+  offline: 'bg-slate-100 text-slate-500',
+  resigned: 'bg-rose-100 text-rose-700',
+};
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
+export default function SupervisorDashboardPage() {
+  const params = useParams();
+  const locale = params.locale as string;
+  const [cases, setCases] = useState<CaseRow[]>([]);
+  const [operators, setOperators] = useState<OperatorRow[]>([]);
+  const [supervisors, setSupervisors] = useState<SupervisorRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/operator');
-      const json = await res.json();
-      if (json.success) {
-        setData(json.data);
+      const [casesRes, teamRes] = await Promise.all([
+        fetch('/api/operator/cases?scope=all'),
+        fetch('/api/operator/team'),
+      ]);
+      const casesJson = await casesRes.json();
+      const teamJson = await teamRes.json();
+      if (casesJson.success) setCases(casesJson.data.items as CaseRow[]);
+      if (teamJson.success) {
+        setOperators(teamJson.data.operators as OperatorRow[]);
+        setSupervisors(teamJson.data.supervisors as SupervisorRow[]);
       }
-    } catch {
-      // ignore
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, []);
+  useEffect(() => { load(); }, [load]);
 
-  // Realtime stats
-  const [realtimeStats, setRealtimeStats] = useState<{
-    statusDistribution: Record<string, number>;
-    hourlyThroughput: Array<{ hour: string; count: number }>;
-    metrics: {
-      totalItems: number; activeItems: number; completedToday: number;
-      avgProcessingHours: number; autoApprovalRate: number; slaBreaches: number;
-    };
-    agingItems: Array<{ id: string; status: string; taxType: string; ageHours: number; slaWarning: boolean }>;
-  } | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const total = cases.length;
+  const assigned = cases.filter(c => !!c.operator_id).length;
+  const unassigned = cases.filter(c => !c.operator_id).length;
+  const pendingApproval = cases.filter(c => c.status === 'PENDING_APPROVAL').length;
+  const pendingDocs = cases.filter(c => c.status === 'PENDING_DOCS').length;
+  const urgent = cases.filter(c => c.priority === 'URGENT' || c.priority === 'HIGH').length;
+  const completed = cases.filter(c => c.status === 'COMPLETED').length;
 
-  const loadRealtimeStats = useCallback(async () => {
-    try {
-      const res = await fetch('/api/operator/queue/realtime-stats');
-      const json = await res.json();
-      if (json.success) {
-        setRealtimeStats(json.data);
-        setLastUpdated(new Date());
-      }
-    } catch { /* silent */ }
-  }, []);
-
-  useEffect(() => {
-    loadData();
-    loadRealtimeStats();
-    const interval = setInterval(() => {
-      loadData();
-      loadRealtimeStats();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [loadData, loadRealtimeStats]);
-
-  const handleAction = async (itemId: string, action: string) => {
-    // Actions that need additional input
-    if (action === 'generate-ebilling' || action === 'upload-bpe') {
-      setModalState({
-        open: true,
-        itemId,
-        action,
-        ebillingCode: '',
-        bpeNumber: '',
-        bpeDate: '',
-        notes: '',
-      });
-      return;
-    }
-
-    await executeAction(itemId, action, {});
+  const fmtTime = (iso: string | null) => {
+    if (!iso) return '미로그인';
+    const d = new Date(iso);
+    if (Date.now() - d.getTime() > 24 * 60 * 60 * 1000) return '미로그인';
+    return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const executeAction = async (
-    itemId: string,
-    action: string,
-    extra: Record<string, string>
-  ) => {
-    setActionLoading(itemId);
-    try {
-      const res = await fetch('/api/operator/queue', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: itemId, action, ...extra }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setMessage({ text: json.message || t('statusUpdated'), type: 'success' });
-        loadData();
-      } else {
-        setMessage({ text: json.error || t('errorOccurred'), type: 'error' });
-      }
-    } catch {
-      setMessage({ text: t('networkError'), type: 'error' });
-    } finally {
-      setActionLoading(null);
-      setModalState(prev => ({ ...prev, open: false }));
-      setTimeout(() => setMessage(null), 4000);
-    }
-  };
+  const myCases = cases.filter(c => !c.operator_id || c.priority === 'URGENT' || c.status === 'PENDING_APPROVAL' || c.status === 'PENDING_DOCS');
 
-  const handleModalSubmit = () => {
-    const extra: Record<string, string> = {};
-    if (modalState.action === 'generate-ebilling') {
-      if (!modalState.ebillingCode) return;
-      extra.ebillingCode = modalState.ebillingCode;
-    }
-    if (modalState.action === 'upload-bpe') {
-      if (!modalState.bpeNumber || !modalState.bpeDate) return;
-      extra.bpeNumber = modalState.bpeNumber;
-      extra.bpeDate = modalState.bpeDate;
-    }
-    if (modalState.notes) extra.notes = modalState.notes;
-    executeAction(modalState.itemId, modalState.action, extra);
-  };
-
-  const activeItems = data?.queueItems.filter(q => !['COMPLETED', 'FAILED'].includes(q.status)) || [];
+  if (loading) return <div className="container mx-auto py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-indigo-600" /></div>;
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-700 p-6 md:p-8 text-white mb-6">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/4" />
-        <div className="relative z-10">
-          <p className="text-blue-200 text-sm flex items-center gap-2">
-            <Headphones className="h-4 w-4" />
-            {t('taxOperator')}
-          </p>
-          <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('dashboardTitle')}</h1>
-          <p className="text-blue-100 text-sm mt-2">{t('dashboardSubtitle')}</p>
-
-          {data && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold">{data.summary.totalAssigned}</p>
-                <p className="text-xs text-blue-200">{t('assignedClients')}</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold">{data.summary.pending}</p>
-                <p className="text-xs text-blue-200">{t('pendingBadge')}</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold">{data.summary.inProgress}</p>
-                <p className="text-xs text-blue-200">{t('inProgress')}</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold">{data.summary.completed}</p>
-                <p className="text-xs text-blue-200">{t('completedBadge')}</p>
-              </div>
-            </div>
-          )}
+    <div className="container mx-auto py-6 px-4 max-w-[1500px]">
+      <PageTitle title="Supervisor Dashboard" />
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900">Supervisor Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.</p>
         </div>
+        <button onClick={load} className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+          <RefreshCw className="h-3.5 w-3.5" /> 새로고침
+        </button>
       </div>
 
-      {/* Messages */}
-      {message && (
-        <div className={`mb-4 p-3 rounded-xl text-sm border ${
-          message.type === 'success'
-            ? 'bg-green-50 border-green-200 text-green-800'
-            : 'bg-red-50 border-red-200 text-red-800'
-        }`}>
-          {message.text}
-        </div>
-      )}
+      {/* 7 KPI cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-4">
+        <Kpi label="전체" value={total} />
+        <Kpi label="배정" value={assigned} tone="indigo" />
+        <Kpi label="미배정" value={unassigned} tone="amber" highlight={unassigned > 0} />
+        <Kpi label="승인대기" value={pendingApproval} tone="purple" />
+        <Kpi label="자료요청" value={pendingDocs} tone="amber" />
+        <Kpi label="긴급" value={urgent} tone="rose" highlight={urgent > 0} />
+        <Kpi label="신고완료" value={completed} tone="emerald" />
+      </div>
 
-      {isLoading ? (
-        <div className="text-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-          <p className="text-sm text-gray-500 mt-2">{t('loadingData')}</p>
+      {/* Supervisor 자동배분 현황 */}
+      <section className="rounded-2xl bg-white p-5 shadow-sm mb-4">
+        <h2 className="text-base font-black text-slate-900 mb-3">Supervisor 자동배분 현황</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {supervisors.map(sv => {
+            const myCases = cases.filter(c => c.supervisor_id === sv.id);
+            return (
+              <div key={sv.id} className="rounded-xl border border-slate-200 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="text-sm font-black text-slate-900">{sv.name}</p>
+                    <p className="text-[11px] text-slate-500">{sv.employee_id} · {sv.managed_count}명 관리</p>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold">대기</span>
+                </div>
+                <p className="text-2xl font-black text-slate-900 mt-3">{myCases.length}<span className="text-sm font-bold text-slate-500 ml-1">건</span></p>
+                <p className="text-[11px] text-slate-500">현재 배정 업무</p>
+              </div>
+            );
+          })}
         </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { label: t('assignedClients'), value: data?.stats.totalAssigned || 0, icon: Users, gradient: 'from-blue-500 to-cyan-600' },
-              { label: t('pendingItems'), value: data?.stats.pending || 0, icon: Clock, gradient: 'from-amber-500 to-orange-500' },
-              { label: t('inProgress'), value: data?.stats.inProgress || 0, icon: ListChecks, gradient: 'from-indigo-500 to-purple-600' },
-              { label: t('completedThisMonth'), value: data?.stats.completedThisMonth || 0, icon: CheckCircle, gradient: 'from-green-500 to-emerald-600' },
-            ].map((kpi, i) => {
-              const Icon = kpi.icon;
-              return (
-                <Card key={i} className="border-0 shadow-sm group hover:shadow-md transition-all">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-xs text-gray-500">{kpi.label}</p>
-                        <p className="text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
-                      </div>
-                      <div className={`p-2.5 rounded-xl bg-gradient-to-br ${kpi.gradient} group-hover:scale-110 transition-transform`}>
-                        <Icon className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+      </section>
+
+      {/* 상담원 상태 5x2 */}
+      <section className="rounded-2xl bg-white p-5 shadow-sm mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-base font-black text-slate-900">상담원 상태</h2>
+            <p className="text-[11px] text-slate-500 mt-0.5">자동배정 판단에 필요한 오늘 로그인/상태/배정 현황을 정사각형 카드로 표시합니다.</p>
           </div>
-
-          {/* Failed items warning */}
-          {(data?.stats.failedThisMonth || 0) > 0 && (
-            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-red-800">
-                  {t('failedThisMonth', { count: data?.stats.failedThisMonth || 0 })}
-                </p>
-                <p className="text-xs text-red-600">{t('failedRetryMessage')}</p>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold">5 × 2 View</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {operators.slice(0, 10).map(o => (
+            <div key={o.id} className="rounded-xl border border-slate-200 p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className={`h-2 w-2 rounded-full ${WORK_STATE_DOT[o.work_state] || 'bg-slate-400'}`} />
+                <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${WORK_STATE_BADGE[o.work_state] || 'bg-slate-100 text-slate-500'}`}>
+                  {WORK_STATE_LABEL[o.work_state] || o.work_state}
+                </span>
+              </div>
+              <p className="text-sm font-black text-slate-900">{o.name}</p>
+              <p className="text-[10px] text-slate-400 mb-2">{o.employee_id}</p>
+              <div className="space-y-0.5 text-[10px]">
+                <Row label="배정" value={`${o.active_load}건`} />
+                <Row label="로그인" value={fmtTime(o.last_login_at)} />
+                <Row label="자동" value={o.auto_assign_enabled ? '가능' : '제외'} />
               </div>
             </div>
-          )}
-
-          {/* Submission Queue Table */}
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                {t('queueCount', { count: activeItems.length })}
-              </CardTitle>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={loadData}
-                className="text-xs"
-              >
-                <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                {t('refresh')}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {activeItems.length === 0 ? (
-                <div className="text-center py-12">
-                  <CheckCircle className="h-12 w-12 mx-auto text-green-300 mb-3" />
-                  <p className="text-gray-400 text-sm">{t('noItemsToProcess')}</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-gray-500 text-xs">
-                        <th className="text-left py-3 px-3">{t('customerName')}</th>
-                        <th className="text-left py-3 px-3">{t('taxType')}</th>
-                        <th className="text-left py-3 px-3">{t('period')}</th>
-                        <th className="text-right py-3 px-3">{t('amount')}</th>
-                        <th className="text-center py-3 px-3">{t('status')}</th>
-                        <th className="text-center py-3 px-3">{t('action')}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {activeItems.map((item) => {
-                        const statusCfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.PENDING;
-                        const actionCfg = ACTION_CONFIG[item.status];
-
-                        return (
-                          <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="py-3 px-3">
-                              <p className="font-medium text-xs text-gray-900">
-                                {item.customer?.customer_name || '-'}
-                              </p>
-                              <p className="text-[10px] text-gray-400">
-                                {item.customer?.npwp || '-'}
-                              </p>
-                            </td>
-                            <td className="py-3 px-3">
-                              <Badge variant="outline" className="text-[10px]">
-                                {item.tax_type}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3 text-xs text-gray-600">
-                              {item.tax_year}/{String(item.tax_period).padStart(2, '0')}
-                            </td>
-                            <td className="py-3 px-3 text-right font-mono text-xs">
-                              {fmt(item.amount || 0)}
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              <Badge className={`text-[10px] ${statusCfg.bg} ${statusCfg.color} border-0`}>
-                                {statusCfg.label}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              {actionCfg && (
-                                <Button
-                                  size="sm"
-                                  className={`text-[10px] h-7 text-white ${actionCfg.color}`}
-                                  disabled={actionLoading === item.id}
-                                  onClick={() => handleAction(item.id, actionCfg.action)}
-                                >
-                                  {actionLoading === item.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                  ) : (
-                                    <>
-                                      {actionCfg.label}
-                                      <ArrowRight className="h-3 w-3 ml-1" />
-                                    </>
-                                  )}
-                                </Button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Recently Completed */}
-          {(data?.queueItems.filter(q => q.status === 'COMPLETED').length || 0) > 0 && (
-            <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  {t('recentlyCompleted')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {data?.queueItems
-                    .filter(q => q.status === 'COMPLETED')
-                    .slice(0, 5)
-                    .map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-3 bg-green-50 rounded-xl"
-                      >
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <div>
-                            <p className="text-xs font-medium">{item.customer?.customer_name || '-'}</p>
-                            <p className="text-[10px] text-gray-500">
-                              {item.tax_type} - {item.tax_year}/{String(item.tax_period).padStart(2, '0')}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-mono">{fmt(item.amount || 0)}</p>
-                          {item.bpe_number && (
-                            <p className="text-[10px] text-gray-500">BPE: {item.bpe_number}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          ))}
         </div>
-      )}
+        {operators.length > 10 && (
+          <p className="mt-3 text-[11px] text-slate-500">
+            추가 상담원 {operators.length - 10}명은{' '}
+            <Link href={`/${locale}/operator/team`} className="text-indigo-600 underline">상담원 관리</Link>{' '}
+            화면의 compact table에서 확인합니다.
+          </p>
+        )}
+      </section>
 
-      {/* Real-time Analytics */}
-      {realtimeStats && (
-        <div className="space-y-6 mb-6">
-          {/* Last updated */}
-          {lastUpdated && (
-            <p className="text-xs text-gray-400 text-right">
-              <RefreshCw className="h-3 w-3 inline mr-1" />
-              {lastUpdated.toLocaleTimeString()} (30s auto)
+      {/* 내 자동배분 / 긴급 / 승인대기 케이스 */}
+      <section className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="text-base font-black text-slate-900 mb-3">내 자동배분 / 긴급 / 승인대기 케이스</h2>
+        <div className="space-y-2">
+          {myCases.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-xs text-slate-400">
+              표시할 케이스가 없습니다.
             </p>
-          )}
-
-          {/* KPI Cards Row */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <Card>
-              <CardContent className="pt-4 pb-3 text-center">
-                <TrendingUp className="h-5 w-5 mx-auto text-emerald-500 mb-1" />
-                <p className="text-2xl font-bold">{realtimeStats.metrics.completedToday}</p>
-                <p className="text-xs text-gray-500">{t('completedToday')}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 pb-3 text-center">
-                <Timer className="h-5 w-5 mx-auto text-blue-500 mb-1" />
-                <p className="text-2xl font-bold">{realtimeStats.metrics.avgProcessingHours}h</p>
-                <p className="text-xs text-gray-500">{t('avgProcessingTime')}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 pb-3 text-center">
-                <Zap className="h-5 w-5 mx-auto text-amber-500 mb-1" />
-                <p className="text-2xl font-bold">{realtimeStats.metrics.autoApprovalRate}%</p>
-                <p className="text-xs text-gray-500">{t('autoApprovalRateLabel')}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 pb-3 text-center">
-                <ListChecks className="h-5 w-5 mx-auto text-indigo-500 mb-1" />
-                <p className="text-2xl font-bold">{realtimeStats.metrics.activeItems}</p>
-                <p className="text-xs text-gray-500">{t('activeItemsLabel')}</p>
-              </CardContent>
-            </Card>
-            <Card className={realtimeStats.metrics.slaBreaches > 0 ? 'ring-2 ring-red-200' : ''}>
-              <CardContent className="pt-4 pb-3 text-center">
-                <AlertCircle className={`h-5 w-5 mx-auto mb-1 ${realtimeStats.metrics.slaBreaches > 0 ? 'text-red-500' : 'text-gray-300'}`} />
-                <p className={`text-2xl font-bold ${realtimeStats.metrics.slaBreaches > 0 ? 'text-red-600' : ''}`}>
-                  {realtimeStats.metrics.slaBreaches}
+          ) : myCases.slice(0, 10).map(c => (
+            <Link
+              key={c.id}
+              href={`/${locale}/operator/workload?caseId=${c.id}`}
+              className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-black text-slate-900 truncate">
+                  {c.customer?.company_name || c.customer?.full_name || '—'}
                 </p>
-                <p className="text-xs text-gray-500">{t('slaWarning')}</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Status Distribution PieChart */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">{t('statusDistribution')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={Object.entries(realtimeStats.statusDistribution).map(([name, value]) => ({ name, value }))}
-                      cx="50%" cy="50%" outerRadius={70} innerRadius={40}
-                      dataKey="value" paddingAngle={2}
-                    >
-                      {Object.keys(realtimeStats.statusDistribution).map((status, i) => {
-                        const colors: Record<string, string> = {
-                          PENDING: '#9ca3af', DATA_REVIEW: '#3b82f6', PENDING_APPROVAL: '#f97316',
-                          APPROVED: '#10b981', EBILLING_GENERATED: '#6366f1', PAYMENT_PENDING: '#eab308',
-                          PAYMENT_UPLOADED: '#06b6d4', PAYMENT_VERIFIED: '#8b5cf6', DJP_SUBMITTED: '#f59e0b',
-                          BPE_UPLOADED: '#14b8a6', COMPLETED: '#22c55e', FAILED: '#ef4444',
-                        };
-                        return <Cell key={i} fill={colors[status] || '#9ca3af'} />;
-                      })}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value} ${t('items')}`, '']} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex flex-wrap gap-2 mt-2 justify-center">
-                  {Object.entries(realtimeStats.statusDistribution)
-                    .filter(([, v]) => v > 0)
-                    .map(([status, count]) => (
-                      <Badge key={status} variant="outline" className="text-xs">
-                        {status.replace(/_/g, ' ')} ({count})
-                      </Badge>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Hourly Throughput AreaChart */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">{t('hourlyThroughput')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={realtimeStats.hourlyThroughput}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} interval={3} />
-                    <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-                    <Tooltip formatter={(value) => [`${value} ${t('items')}`, t('completed')]} />
-                    <Area type="monotone" dataKey="count" fill="#10b981" fillOpacity={0.2} stroke="#10b981" strokeWidth={2} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* SLA Aging Alert */}
-          {realtimeStats.agingItems.filter(i => i.slaWarning).length > 0 && (
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="pt-4">
-                <p className="text-sm font-medium text-red-700 flex items-center gap-2 mb-2">
-                  <AlertCircle className="h-4 w-4" /> {t('slaWarningOver48h')}
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {c.case_code ?? '-'} · {c.service_label || '-'}
                 </p>
-                <div className="space-y-1">
-                  {realtimeStats.agingItems.filter(i => i.slaWarning).map(item => (
-                    <p key={item.id} className="text-xs text-red-600">
-                      {item.taxType} [{item.status}] — {t('hoursElapsed', { hours: item.ageHours })}
-                    </p>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Input Modal */}
-      {modalState.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-bold mb-4">
-              {modalState.action === 'generate-ebilling' ? t('ebillingCodeInput') : t('bpeInfoInput')}
-            </h3>
-
-            <div className="space-y-4">
-              {modalState.action === 'generate-ebilling' && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">
-                    {t('ebillingCodeRequired')}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    placeholder={t('enterEbillingCode')}
-                    value={modalState.ebillingCode}
-                    onChange={(e) => setModalState(prev => ({ ...prev, ebillingCode: e.target.value }))}
-                  />
-                </div>
-              )}
-
-              {modalState.action === 'upload-bpe' && (
-                <>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">
-                      {t('bpeNumberRequired')}
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      placeholder={t('enterBpeNumber')}
-                      value={modalState.bpeNumber}
-                      onChange={(e) => setModalState(prev => ({ ...prev, bpeNumber: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">
-                      {t('bpeDateRequired')}
-                    </label>
-                    <input
-                      type="date"
-                      className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      value={modalState.bpeDate}
-                      onChange={(e) => setModalState(prev => ({ ...prev, bpeDate: e.target.value }))}
-                    />
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">{t('notes')}</label>
-                <textarea
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                  rows={2}
-                  placeholder={t('notesPlaceholder')}
-                  value={modalState.notes}
-                  onChange={(e) => setModalState(prev => ({ ...prev, notes: e.target.value }))}
-                />
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  담당 {c.operator?.employee_id ?? '미배정'} · {c.priority || 'NORMAL'} · 검토필요
+                </p>
               </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setModalState(prev => ({ ...prev, open: false }))}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={handleModalSubmit}
-                disabled={
-                  (modalState.action === 'generate-ebilling' && !modalState.ebillingCode) ||
-                  (modalState.action === 'upload-bpe' && (!modalState.bpeNumber || !modalState.bpeDate))
-                }
-              >
-                {t('confirm')}
-              </Button>
-            </div>
-          </div>
+              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_COLOR[c.status] || 'bg-slate-100 text-slate-700'}`}>
+                {STATUS_LABEL[c.status] || c.status}
+              </span>
+            </Link>
+          ))}
         </div>
-      )}
+      </section>
+    </div>
+  );
+}
+
+function Kpi({ label, value, tone = 'slate', highlight = false }: { label: string; value: number | string; tone?: 'slate' | 'indigo' | 'amber' | 'purple' | 'rose' | 'emerald'; highlight?: boolean }) {
+  const highlightCls: Partial<Record<string, string>> = {
+    amber: 'ring-2 ring-amber-200 bg-amber-50',
+    rose: 'ring-2 ring-rose-200 bg-rose-50',
+  };
+  const ring = highlight ? (highlightCls[tone] ?? '') : '';
+  return (
+    <div className={`rounded-xl bg-white px-4 py-3 shadow-sm ${ring}`}>
+      <p className="text-[11px] text-slate-500">{label}</p>
+      <p className="text-2xl font-black text-slate-900 mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-slate-400">{label}</span>
+      <span className="font-bold text-slate-700">{value}</span>
     </div>
   );
 }

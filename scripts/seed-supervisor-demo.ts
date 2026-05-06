@@ -311,6 +311,18 @@ async function seedCases(
     const month = periodDate.getMonth() + 1;
     const year = c.yearOverride ?? periodDate.getFullYear();
 
+    // PDF p.7 "승인 검토 Snapshot" 표 — PENDING_APPROVAL 케이스에만 데모용 항목 4건.
+    const reviewSummary = c.status === 'PENDING_APPROVAL' ? {
+      items: [
+        { state: '자동확인',     invoice: 'INV-W-001', vendor: 'PT Vendor Jasa',  taxKind: 'PPh23',  taxCode: '411124-104', tax: 200_000 },
+        { state: '불확실 높음', invoice: 'INV-W-002', vendor: 'PT Gedung Sewa',  taxKind: 'PPh4(2)', taxCode: '411128-403', tax: 5_000_000 },
+        { state: '정보부족',    invoice: 'INV-W-003', vendor: 'PT Importir',     taxKind: 'PPh22',  taxCode: '411122-100', tax: 1_800_000 },
+        { state: '정보부족',    invoice: 'INV-W-004', vendor: 'ABC Korea Ltd.',  taxKind: 'PPh26',  taxCode: '411127-100', tax: 6_000_000 },
+      ],
+      reviewRequired: 3,
+      generatedAt: new Date().toISOString(),
+    } : null;
+
     const payload = {
       customer_id: customerId,
       case_code: c.caseCode,
@@ -325,6 +337,7 @@ async function seedCases(
       supervisor_id: supervisorId,
       due_date: due,
       assigned_at: operatorId ? new Date().toISOString() : null,
+      review_summary: reviewSummary,
     };
 
     const { data: existing } = await admin
