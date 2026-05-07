@@ -21,6 +21,7 @@
     "test:e2e:audit": "playwright test tests/e2e/audit.spec.ts",
     "test:e2e:operator": "playwright test src/tests/e2e/operator.spec.ts",
     "test:e2e:operator-staff": "playwright test src/tests/e2e/operator-staff-workflow.spec.ts",
+    "test:e2e:operator-staff-pages": "playwright test src/tests/e2e/operator-staff-pages.spec.ts",
     "test:e2e:real-flow": "playwright test src/tests/e2e/real-customer-flow.spec.ts",
     "test:e2e:billing": "playwright test src/tests/e2e/billing-phases.spec.ts src/tests/e2e/billing-custom-pricing.spec.ts",
     "test:e2e:operator-queue": "playwright test src/tests/e2e/operator-queue-workflow.spec.ts",
