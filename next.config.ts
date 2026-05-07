@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
+  // 진단 목적: prod 번들에 source map 포함해서 minified stack을 풀어 본다.
+  // 빌드 시간/번들 크기 약간 증가하지만 디버깅 가치가 큼. 안정화되면 false로 되돌린다.
+  productionBrowserSourceMaps: true,
+
   // Include role-based user manuals in the serverless function bundle so
   // /help/manuals/[role] can read them via fs.readFile at runtime on Vercel.
   outputFileTracingIncludes: {
