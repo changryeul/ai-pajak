@@ -43,7 +43,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   const { id } = await ctx.params;
   const { data: caseRow } = await admin
     .from('djp_submission_queue')
-    .select('id, case_code, customer_id, tax_type, tax_period_month, tax_period_year, amount, status, priority, operator_id, supervisor_id, due_date, service_label, ebilling_code, bpe_number, bpe_date, bpe_file_url, submitted_to_djp_at, completed_at, review_summary, created_at, updated_at')
+    .select('id, case_code, customer_id, tax_type, tax_period_month, tax_period_year, amount, status, priority, operator_id, supervisor_id, due_date, service_label, ebilling_code, bpe_number, bpe_date, bpe_file_url, submitted_to_djp_at, completed_at, review_summary, closing_session_id, created_at, updated_at')
     .eq('id', id).maybeSingle();
   if (!caseRow) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -157,6 +157,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
       coretaxUrl: 'https://coretaxdjp.pajak.go.id/',
       canRecordBilling: approved, // Supervisor 승인 후만
       finalReviewedAt: ((caseRow.review_summary ?? null) as ReviewSummary | null)?.finalReviewedAt ?? null,
+      closingSessionId: caseRow.closing_session_id ?? null,
     },
   });
 }
@@ -189,7 +190,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   const { data: caseRow } = await admin
     .from('djp_submission_queue')
-    .select('id, operator_id, status, ebilling_code, bpe_number')
+    .select('id, operator_id, status, ebilling_code, bpe_number, closing_session_id')
     .eq('id', id).maybeSingle();
   if (!caseRow) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -237,7 +238,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
       const bpeNumber = (body.bpeNumber as string | undefined)?.trim();
       const bpeDate = (body.bpeDate as string | undefined) ?? new Date().toISOString().slice(0, 10);
       if (!bpeNumber) return NextResponse.json({ error: 'bpeNumber required' }, { status: 400 });
-      logValue = { bpeNumber, bpeDate };
+      logValue = { bpeNumber, bpeDate, closing_session_id: caseRow.closing_session_id };
       queueUpdate = {
         bpe_number: bpeNumber, bpe_date: bpeDate,
         submitted_to_djp_at: new Date().toISOString(),
@@ -273,6 +274,41 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (queueUpdate) {
     const { error } = await admin.from('djp_submission_queue').update(queueUpdate).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Phase B — record-completion 시 결산 wizard와 동기화.
+  // 운영팀이 BPE를 입력하면 closing_submission(status, bpe_number, ntpn, completed_at)도 함께 갱신.
+  // closing_session_id가 없는 일반 운영 케이스는 건너뜀.
+  if (action === 'record-completion' && caseRow.closing_session_id) {
+    try {
+      const ntpn = caseRow.ebilling_code ?? null;
+      await admin.from('closing_submission').update({
+        status: 'COMPLETED',
+        bpe_number: (logValue as { bpeNumber?: string }).bpeNumber,
+        bpe_uploaded_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        ntpn,
+        operator_id: user.id,
+      }).eq('session_id', caseRow.closing_session_id);
+
+      // closing_id_billing 도 ntpn / status 갱신해 결산 wizard에서 즉시 PAID로 보이게.
+      if (ntpn) {
+        await admin.from('closing_id_billing').update({
+          ntpn,
+          status: 'PAID',
+        }).eq('session_id', caseRow.closing_session_id);
+      }
+    } catch { /* non-blocking */ }
+  }
+
+  // record-billing 시에도 closing_submission status를 PROCESSING으로 진전시킨다.
+  if (action === 'record-billing' && caseRow.closing_session_id) {
+    try {
+      await admin.from('closing_submission').update({
+        status: 'PROCESSING',
+        operator_id: user.id,
+      }).eq('session_id', caseRow.closing_session_id).in('status', ['SUBMITTED', 'OPERATOR_REVIEW']);
+    } catch { /* non-blocking */ }
   }
 
   try {

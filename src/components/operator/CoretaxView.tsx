@@ -44,6 +44,7 @@ interface CoretaxData {
   myCases: MyCase[];
   coretaxUrl: string;
   canRecordBilling: boolean;
+  closingSessionId: string | null;
 }
 
 const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
@@ -195,6 +196,15 @@ export function CoretaxView({ caseId }: { caseId: string }) {
               <Meta label="예상 납부액"   value={fmtRupiah(d.service.expectedAmount)} highlight />
               <Meta label="Coretax 방식"  value={d.service.coretaxMode} />
             </div>
+            {d.closingSessionId && (
+              <div className="mt-3 flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
+                <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">결산 wizard 연동</span>
+                <p className="text-[11px] text-blue-900">
+                  이 케이스는 고객 결산 wizard(SPT Tahunan)에서 자동 생성되었습니다.
+                  「4. 신고완료 / BPE 반영」을 기록하면 결산 wizard 화면에 BPE/NTPN이 즉시 반영됩니다.
+                </p>
+              </div>
+            )}
           </section>
 
           {/* 처리 순서 4단계 */}

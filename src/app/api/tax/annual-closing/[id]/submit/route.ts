@@ -107,6 +107,44 @@ async function handlePost(req: RequestWithSession, sessionId: string): Promise<R
     .update({ status: 'COMPLETED' })
     .eq('id', sessionId);
 
+  // Phase B — 운영팀 큐와의 브릿지. 결산 wizard 제출은 곧바로 djp_submission_queue
+  // 케이스(SPT_TAHUNAN, status=PENDING)를 만들어둔다. 같은 session에서 재제출이
+  // 일어나면 closing_session_id 기준으로 upsert 한다. 운영팀이 Coretax 처리해서
+  // record-completion 액션을 호출하면 양쪽이 동기화된다.
+  try {
+    const { data: existingCase } = await sb
+      .from('djp_submission_queue')
+      .select('id')
+      .eq('closing_session_id', sessionId)
+      .maybeSingle();
+
+    const caseCode = `CL-${sessionId.slice(0, 8).toUpperCase()}`;
+    const queuePayload: Record<string, unknown> = {
+      customer_id: customerId,
+      closing_session_id: sessionId,
+      case_code: caseCode,
+      service_label: owned.closing_type === 'UMKM'
+        ? 'SPT Tahunan UMKM (PPh Final 0.5%)'
+        : 'SPT Tahunan Badan Coretax 2025+',
+      tax_type: 'SPT_TAHUNAN',
+      tax_period_month: 12,
+      tax_period_year: owned.fiscal_year,
+      amount: Number(billing.amount),
+      status: 'PENDING',
+      priority: 'NORMAL',
+      ebilling_code: billing.billing_code,
+    };
+
+    if (existingCase) {
+      await sb.from('djp_submission_queue').update(queuePayload).eq('id', existingCase.id);
+    } else {
+      await sb.from('djp_submission_queue').insert(queuePayload);
+    }
+  } catch (linkErr) {
+    // 브릿지 실패는 결산 제출 자체를 막지 않는다. 운영팀이 수동으로 케이스를 생성할 수 있음.
+    loggers.api.warn({ err: linkErr, sessionId }, 'failed to bridge closing → operator queue');
+  }
+
   return NextResponse.json({ success: true, data });
 }
 
