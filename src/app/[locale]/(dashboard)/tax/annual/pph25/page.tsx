@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useSession } from '@/hooks/useSession';
 import { useClosingSession, type ClosingDocument, type ClosingAdjustmentEntry } from '@/hooks/useClosingSession';
+import { ClosingSubmissionStatus } from '@/components/closing/ClosingSubmissionStatus';
 
 type StepId = 'basic' | 'collect' | 'statements' | 'sign' | 'adjust' | 'credit' | 'calc' | 'monthly';
 const STEPS: StepId[] = ['basic', 'collect', 'statements', 'sign', 'adjust', 'credit', 'calc', 'monthly'];
@@ -1223,7 +1224,16 @@ function SubmitClosingBox({
   onPrev: () => void;
   t: T;
 }) {
-  type Sub = { status: string; channel: string; submitted_at: string };
+  type Sub = {
+    status: string;
+    channel: string;
+    submitted_at: string;
+    completed_at?: string | null;
+    bpe_number?: string | null;
+    bpe_uploaded_at?: string | null;
+    ntpn?: string | null;
+    failure_reason?: string | null;
+  };
   const [submission, setSubmission] = useState<Sub | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -1261,17 +1271,8 @@ function SubmitClosingBox({
   return (
     <>
       {submission ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 mt-5">
-          <p className="text-xs font-semibold text-emerald-700">제출 완료</p>
-          <p className="text-sm font-medium text-emerald-900 mt-1">
-            상태 {submission.status} · 채널 {submission.channel}
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            제출 시각 {new Date(submission.submitted_at).toLocaleString()}
-          </p>
-          <p className="text-[11px] text-amber-700 mt-2">
-            ※ Coretax API 활성화 전이므로 운영팀이 RPA로 DJP에 첨부합니다.
-          </p>
+        <div className="mt-5">
+          <ClosingSubmissionStatus submission={submission} />
         </div>
       ) : null}
 

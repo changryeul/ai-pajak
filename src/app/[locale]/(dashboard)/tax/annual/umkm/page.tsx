@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowRight, Building2, FileText, Printer, Upload as UploadIc
 import { cn } from '@/lib/utils';
 import { useSession } from '@/hooks/useSession';
 import { useClosingSession, type ClosingDocument } from '@/hooks/useClosingSession';
+import { ClosingSubmissionStatus } from '@/components/closing/ClosingSubmissionStatus';
 
 type StepId = 'basic' | 'collect' | 'statements' | 'sign' | 'calc' | 'billing' | 'submit';
 const STEPS: StepId[] = ['basic', 'collect', 'statements', 'sign', 'calc', 'billing', 'submit'];
@@ -663,7 +664,16 @@ function BsRow({ label, value }: { label: string; value: number }) {
 function SubmitActions({
   t, sessionId, downloadSpt,
 }: { t: T; sessionId: string | null; downloadSpt: () => void }) {
-  type Sub = { status: string; channel: string; submitted_at: string };
+  type Sub = {
+    status: string;
+    channel: string;
+    submitted_at: string;
+    completed_at?: string | null;
+    bpe_number?: string | null;
+    bpe_uploaded_at?: string | null;
+    ntpn?: string | null;
+    failure_reason?: string | null;
+  };
   const [submission, setSubmission] = useState<Sub | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -699,20 +709,7 @@ function SubmitActions({
 
   return (
     <div className="mt-5">
-      {submission ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4">
-          <p className="text-xs font-semibold text-emerald-700">제출 완료</p>
-          <p className="text-sm font-medium text-emerald-900 mt-1">
-            상태 {submission.status} · 채널 {submission.channel}
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            제출 시각 {new Date(submission.submitted_at).toLocaleString()}
-          </p>
-          <p className="text-[11px] text-amber-700 mt-2">
-            ※ Coretax API 활성화 전이므로 운영팀이 RPA로 DJP에 첨부합니다. BPE/NTPN은 보고서 화면에 자동 반영됩니다.
-          </p>
-        </div>
-      ) : null}
+      {submission ? <ClosingSubmissionStatus submission={submission} /> : null}
 
       <div className="flex flex-wrap justify-end gap-2 mt-3">
         <Button size="sm" variant="outline" onClick={downloadSpt} disabled={!sessionId}>
