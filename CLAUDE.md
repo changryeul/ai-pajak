@@ -183,6 +183,19 @@ All three follow the same **graceful-degrade** pattern: if the Midtrans Snap cal
 
 **`MIDTRANS_IS_PRODUCTION`** must be set to `'true'` explicitly to point at the real Midtrans endpoints. Default is sandbox — `NODE_ENV` is intentionally NOT used as the signal because Vercel always sets it to `production`.
 
+### Coretax API (DJP) — Phase D
+
+Three env vars control the operator Coretax automation. Default is **manual mode** (operator types billingId/bpeNumber by hand).
+
+| Var | Required when | Purpose |
+|---|---|---|
+| `CORETAX_SUBMIT_ENABLED` | `'true'` to enable API mode | Master switch — must be exact string `'true'` |
+| `CORETAX_API_BASE_URL` | API mode | e.g. `https://api-coretax.pajak.go.id` |
+| `CORETAX_API_TOKEN` | API mode | DJP-issued bearer token |
+| `CORETAX_API_TIMEOUT_MS` | optional | Per-call timeout (default `15000`) |
+
+When enabled and operator leaves `billingId`/`bpeNumber` blank, the PUT actions call `coretax.issueIdBilling()` / `coretax.submitSpt()` via `src/lib/coretax/client.ts`. The client wraps every call in `CircuitBreaker('coretax')` + `withRetry` (2 retries, exponential backoff). HTTP 4xx/5xx are NOT retried; circuit opens after 5 consecutive failures for 30s. Operator can always override by typing values manually.
+
 ### Authentication & Security
 - **2FA (TOTP)**: `/api/auth/mfa` — Supabase MFA enroll/verify/unenroll. Settings page UI.
 - **Login History**: `/api/auth/sessions` — audit_log based login/failure history.

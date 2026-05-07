@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import * as coretax from '@/lib/coretax/client';
+import { CoretaxError } from '@/lib/coretax/types';
 
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
@@ -18,6 +20,21 @@ const CHECKLIST_KEYS = [
   'submit-spt-masa',
   'upload-bpe',
 ] as const;
+
+/** djp_submission_queue.tax_type → Coretax KAP/JENIS_SETORAN. */
+function mapTaxTypeToKap(taxType: string): { kap: string; kjs: string } {
+  switch (taxType) {
+    case 'PPh21':       return { kap: '411121', kjs: '100' };
+    case 'PPh22':       return { kap: '411122', kjs: '100' };
+    case 'PPh23':       return { kap: '411124', kjs: '100' };
+    case 'PPh4_2':
+    case 'PPh4(2)':     return { kap: '411128', kjs: '420' };
+    case 'PPh26':       return { kap: '411127', kjs: '100' };
+    case 'PPN':         return { kap: '411211', kjs: '100' };
+    case 'SPT_TAHUNAN': return { kap: '411126', kjs: '200' };
+    default:            return { kap: '411124', kjs: '100' };
+  }
+}
 
 interface ChecklistMap { [key: string]: '대기' | '진행' | '완료' | '미완' }
 
@@ -129,8 +146,9 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
         taxType: caseRow.tax_type,
         period: { month: caseRow.tax_period_month, year: caseRow.tax_period_year },
         expectedAmount: Number(caseRow.amount ?? 0),
-        coretaxMode: '수동 접속',
+        coretaxMode: coretax.isEnabled() ? 'API 자동' : '수동 접속',
       },
+      apiEnabled: coretax.isEnabled(),
       stepStates,
       billing: {
         state: billingIssued ? '발행' : '미발행',
@@ -218,12 +236,49 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   switch (action) {
     case 'record-billing': {
-      const billingId = (body.billingId as string | undefined)?.trim();
-      if (!billingId) return NextResponse.json({ error: 'billingId required' }, { status: 400 });
       if (!['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'].includes(caseRow.status)) {
         return NextResponse.json({ error: 'Supervisor 승인 후에만 ID Billing 발행 기록이 가능합니다.' }, { status: 400 });
       }
-      logValue = { billingId, method: body.method ?? 'Coretax 수동' };
+      let billingId = (body.billingId as string | undefined)?.trim();
+      let method = body.method ?? 'Coretax 수동';
+      let apiResult: Record<string, unknown> | null = null;
+
+      // Coretax API 자동 모드 — 환경변수가 켜졌고 사용자가 billingId 입력 안 했을 때만 호출.
+      // (수동 입력값이 있으면 그걸 그대로 신뢰 — 운영팀 권한 우선)
+      if (!billingId && coretax.isEnabled()) {
+        try {
+          // 자세한 케이스 데이터를 다시 fetch.
+          const { data: full } = await admin
+            .from('djp_submission_queue')
+            .select('amount, tax_type, tax_period_month, tax_period_year, customer_id')
+            .eq('id', id).maybeSingle();
+          const { data: cust } = full?.customer_id
+            ? await admin.from('customer').select('npwp').eq('id', full.customer_id).maybeSingle()
+            : { data: null };
+          if (!cust?.npwp) {
+            return NextResponse.json({ error: '고객 NPWP가 없어 Coretax API 호출이 불가능합니다. billingId를 직접 입력하세요.' }, { status: 400 });
+          }
+          const kapKjs = mapTaxTypeToKap(full!.tax_type);
+          const billing = await coretax.issueIdBilling({
+            npwp: cust.npwp,
+            kap: kapKjs.kap,
+            kjs: kapKjs.kjs,
+            taxPeriod: `${full!.tax_period_year}-${String(full!.tax_period_month).padStart(2, '0')}`,
+            amount: Number(full!.amount ?? 0),
+          });
+          billingId = billing.billingCode;
+          method = `Coretax API (자동, expires ${billing.expiresAt.slice(0, 10)})`;
+          apiResult = { billing };
+        } catch (err) {
+          if (err instanceof CoretaxError && err.code === 'NOT_CONFIGURED') {
+            return NextResponse.json({ error: 'Coretax API 미설정 — billingId를 수동 입력하세요.' }, { status: 400 });
+          }
+          return NextResponse.json({ error: `Coretax API 발행 실패: ${(err as Error).message}` }, { status: 502 });
+        }
+      }
+
+      if (!billingId) return NextResponse.json({ error: 'billingId required' }, { status: 400 });
+      logValue = { billingId, method, apiResult };
       queueUpdate = { ebilling_code: billingId, status: caseRow.status === 'APPROVED' ? 'EBILLING_GENERATED' : caseRow.status };
       break;
     }
@@ -235,10 +290,53 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
       break;
     }
     case 'record-completion': {
-      const bpeNumber = (body.bpeNumber as string | undefined)?.trim();
-      const bpeDate = (body.bpeDate as string | undefined) ?? new Date().toISOString().slice(0, 10);
+      let bpeNumber = (body.bpeNumber as string | undefined)?.trim();
+      let bpeDate = (body.bpeDate as string | undefined) ?? new Date().toISOString().slice(0, 10);
+      let apiResult: Record<string, unknown> | null = null;
+
+      // Coretax API 자동 모드 — 사용자가 BPE 입력 안 했고 API 활성화된 경우 자동 제출.
+      if (!bpeNumber && coretax.isEnabled()) {
+        try {
+          const { data: full } = await admin
+            .from('djp_submission_queue')
+            .select('tax_type, tax_period_month, tax_period_year, customer_id, ebilling_code')
+            .eq('id', id).maybeSingle();
+          const { data: cust } = full?.customer_id
+            ? await admin.from('customer').select('npwp').eq('id', full.customer_id).maybeSingle()
+            : { data: null };
+          if (!cust?.npwp) {
+            return NextResponse.json({ error: '고객 NPWP가 없어 Coretax API 호출이 불가능합니다.' }, { status: 400 });
+          }
+          const sptType = full!.tax_type === 'SPT_TAHUNAN' ? 'SPT_TAHUNAN_BADAN' : `SPT_MASA_${full!.tax_type}`;
+          const result = await coretax.submitSpt({
+            npwp: cust.npwp,
+            sptType,
+            taxPeriod: `${full!.tax_period_year}-${String(full!.tax_period_month).padStart(2, '0')}`,
+            billingCode: full!.ebilling_code ?? undefined,
+            payload: { caseId: id }, // 실제 SPT XML 페이로드는 추후 추가
+          });
+          bpeNumber = result.bpeNumber;
+          bpeDate = result.bpeDate;
+          apiResult = { submission: result };
+        } catch (err) {
+          if (err instanceof CoretaxError && err.code === 'NOT_CONFIGURED') {
+            return NextResponse.json({ error: 'Coretax API 미설정 — bpeNumber를 수동 입력하세요.' }, { status: 400 });
+          }
+          // 자동 제출 실패 시 closing_submission도 FAILED로 표시.
+          if (caseRow.closing_session_id) {
+            try {
+              await admin.from('closing_submission').update({
+                status: 'FAILED',
+                failure_reason: (err as Error).message,
+              }).eq('session_id', caseRow.closing_session_id);
+            } catch { /* non-blocking */ }
+          }
+          return NextResponse.json({ error: `Coretax API 제출 실패: ${(err as Error).message}` }, { status: 502 });
+        }
+      }
+
       if (!bpeNumber) return NextResponse.json({ error: 'bpeNumber required' }, { status: 400 });
-      logValue = { bpeNumber, bpeDate, closing_session_id: caseRow.closing_session_id };
+      logValue = { bpeNumber, bpeDate, closing_session_id: caseRow.closing_session_id, apiResult };
       queueUpdate = {
         bpe_number: bpeNumber, bpe_date: bpeDate,
         submitted_to_djp_at: new Date().toISOString(),

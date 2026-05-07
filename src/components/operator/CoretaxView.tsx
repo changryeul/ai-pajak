@@ -45,6 +45,7 @@ interface CoretaxData {
   coretaxUrl: string;
   canRecordBilling: boolean;
   closingSessionId: string | null;
+  apiEnabled: boolean;
 }
 
 const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
@@ -185,7 +186,15 @@ export function CoretaxView({ caseId }: { caseId: string }) {
           <section className="rounded-2xl bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Coretax 처리</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-slate-900">Coretax 처리</h2>
+                  <span className={cn(
+                    'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                    d.apiEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600',
+                  )}>
+                    {d.apiEnabled ? '🔌 API 자동' : '📝 수동 모드'}
+                  </span>
+                </div>
                 <p className="text-xs text-slate-500">Supervisor 승인 후 상담원이 Coretax에 접속해 ID Billing 발행, NTPN 확인, 신고완료/BPE 반영을 처리합니다.</p>
               </div>
               <span className={cn('rounded-full px-2.5 py-1 text-[11px] font-bold', sBadge.cls)}>{sBadge.text}</span>
@@ -265,19 +274,19 @@ export function CoretaxView({ caseId }: { caseId: string }) {
               <div className="mt-3 flex items-center gap-2">
                 <input
                   value={billingId} onChange={e => setBillingId(e.target.value)}
-                  placeholder="Coretax에서 받은 Billing ID"
+                  placeholder={d.apiEnabled ? '비워두면 API로 자동 발행' : 'Coretax에서 받은 Billing ID'}
                   disabled={!d.canRecordBilling}
                   className="flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono"
                 />
                 <button
-                  disabled={!d.canRecordBilling || !billingId.trim() || busy === 'record-billing'}
-                  onClick={() => act('record-billing', { billingId, method: 'Coretax 수동' })}
+                  disabled={!d.canRecordBilling || (!d.apiEnabled && !billingId.trim()) || busy === 'record-billing'}
+                  onClick={() => act('record-billing', { billingId: billingId.trim() || undefined, method: billingId.trim() ? 'Coretax 수동' : 'Coretax API' })}
                   className={cn(
                     'rounded-lg px-3 py-1.5 text-[11px] font-bold',
-                    !d.canRecordBilling || !billingId.trim() ? 'cursor-not-allowed bg-slate-200 text-slate-400' : 'bg-blue-600 text-white hover:bg-blue-700',
+                    (!d.canRecordBilling || (!d.apiEnabled && !billingId.trim())) ? 'cursor-not-allowed bg-slate-200 text-slate-400' : 'bg-blue-600 text-white hover:bg-blue-700',
                   )}
                 >
-                  ID Billing 발행완료 기록
+                  {d.apiEnabled && !billingId.trim() ? 'API로 자동 발행' : 'ID Billing 발행완료 기록'}
                 </button>
               </div>
             </section>
@@ -319,17 +328,17 @@ export function CoretaxView({ caseId }: { caseId: string }) {
               <div className="mt-3 flex items-center gap-2">
                 <input
                   value={bpeNumber} onChange={e => setBpeNumber(e.target.value)}
-                  placeholder="Coretax 신고 BPE 번호"
+                  placeholder={d.apiEnabled ? '비워두면 API로 자동 제출' : 'Coretax 신고 BPE 번호'}
                   className="flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-mono text-xs"
                 />
                 <button
-                  disabled={!bpeNumber.trim() || busy === 'record-completion'}
-                  onClick={() => act('record-completion', { bpeNumber })}
+                  disabled={(!d.apiEnabled && !bpeNumber.trim()) || busy === 'record-completion'}
+                  onClick={() => act('record-completion', { bpeNumber: bpeNumber.trim() || undefined })}
                   className={cn(
                     'rounded-lg px-3 py-1.5 text-[11px] font-bold',
-                    !bpeNumber.trim() ? 'cursor-not-allowed bg-slate-200 text-slate-400' : 'bg-violet-600 text-white hover:bg-violet-700',
+                    (!d.apiEnabled && !bpeNumber.trim()) ? 'cursor-not-allowed bg-slate-200 text-slate-400' : 'bg-violet-600 text-white hover:bg-violet-700',
                   )}
-                >Coretax 신고완료 / BPE 반영</button>
+                >{d.apiEnabled && !bpeNumber.trim() ? 'API로 자동 제출' : 'Coretax 신고완료 / BPE 반영'}</button>
               </div>
             </section>
 
