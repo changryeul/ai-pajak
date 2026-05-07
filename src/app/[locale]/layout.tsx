@@ -27,7 +27,17 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider
+      messages={messages}
+      onError={(error) => {
+        if (error.code === 'MISSING_MESSAGE') {
+          if (typeof console !== 'undefined') console.warn('[i18n]', error.message);
+          return;
+        }
+        console.error('[i18n]', error);
+      }}
+      getMessageFallback={({ namespace, key }) => namespace ? `${namespace}.${key}` : key}
+    >
       {children}
       <InstallPrompt />
       <Toaster position="top-right" richColors />
