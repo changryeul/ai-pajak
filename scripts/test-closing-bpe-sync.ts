@@ -49,8 +49,8 @@ async function main() {
     const { data: session, error: sErr } = await admin.from('tax_closing_session').insert({
       customer_id: customer.id,
       fiscal_year: fiscalYear,
-      closing_type: 'PPh25',
-      step: 'submit',
+      closing_type: 'PPH25',
+      current_step: 'submit',
       status: 'COMPLETED',
     }).select('id').single();
     if (sErr || !session) fail(`session insert failed: ${sErr?.message}`);
