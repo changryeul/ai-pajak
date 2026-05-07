@@ -2,18 +2,11 @@
 
 /**
  * 상담원 본인 상태 카드 (PDF 「AI Pajak 백오피스_상담원」 1p 우상단).
- *
- * 표시 정보:
- *   - 이름 + employee_id + work_state 배지
- *   - 로그인 시각 / 내 활성 배정 건수 / 자동배정 가능 여부
- *   - 현재 보고 있는 케이스(또는 직전에 선택한 케이스) 빠른 점프 버튼
- *
- * 선택된 케이스는 localStorage('aip.operator.lastCase')에 영속화.
- * /operator/review-case/[id] 등 케이스 라우트에 진입할 때 자동 갱신.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface Me {
@@ -37,25 +30,28 @@ interface LastCase {
   status: string | null;
 }
 
-const WORK_STATE_LABEL: Record<string, { text: string; cls: string }> = {
-  available:  { text: '대기',     cls: 'bg-emerald-100 text-emerald-700' },
-  consulting: { text: '상담중',   cls: 'bg-blue-100 text-blue-700' },
-  reviewing:  { text: '검토중',   cls: 'bg-indigo-100 text-indigo-700' },
-  coretax:    { text: 'Coretax', cls: 'bg-violet-100 text-violet-700' },
-  break:      { text: '휴식',     cls: 'bg-amber-100 text-amber-700' },
-  offline:    { text: '오프라인', cls: 'bg-slate-100 text-slate-500' },
-  resigned:   { text: '퇴사',     cls: 'bg-rose-100 text-rose-700' },
+const WORK_STATE_CLASS: Record<string, string> = {
+  available:  'bg-emerald-100 text-emerald-700',
+  consulting: 'bg-blue-100 text-blue-700',
+  reviewing:  'bg-indigo-100 text-indigo-700',
+  coretax:    'bg-violet-100 text-violet-700',
+  break:      'bg-amber-100 text-amber-700',
+  offline:    'bg-slate-100 text-slate-500',
+  resigned:   'bg-rose-100 text-rose-700',
 };
 
 const fmtTime = (iso: string | null): string => {
   if (!iso) return '—';
-  return new Date(iso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString();
 };
 
 export function MyStatusCard() {
   const router = useRouter();
   const pathname = usePathname();
   const { locale } = useParams<{ locale: string }>();
+  const t = useTranslations('operatorStaff.myStatus');
+  const tWork = useTranslations('operatorStaff.workState');
+  const tStatus = useTranslations('operatorStaff.caseStatus');
   const [me, setMe] = useState<Me | null>(null);
   const [lastCase, setLastCase] = useState<LastCase | null>(null);
 
@@ -69,7 +65,6 @@ export function MyStatusCard() {
 
   useEffect(() => { load(); }, [load]);
 
-  // localStorage에서 직전에 선택된 케이스를 읽고, 라우트 변화 때 다시 동기화.
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem('aip.operator.lastCase');
@@ -86,15 +81,16 @@ export function MyStatusCard() {
   }
 
   const op = me.operator;
-  const stateBadge = op?.work_state ? WORK_STATE_LABEL[op.work_state] : null;
+  const stateCls = op?.work_state ? WORK_STATE_CLASS[op.work_state] : null;
+  const stateText = op?.work_state ? tWork(op.work_state as 'available') : null;
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">내 상태</p>
-        {stateBadge && (
-          <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold', stateBadge.cls)}>
-            {stateBadge.text}
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('title')}</p>
+        {stateText && stateCls && (
+          <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold', stateCls)}>
+            {stateText}
           </span>
         )}
       </div>
@@ -106,9 +102,9 @@ export function MyStatusCard() {
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <Cell label="로그인" value={fmtTime(me.lastLoginAt ?? op?.last_login_at ?? null)} />
-        <Cell label="내 배정" value={`${me.activeCount}건`} highlight />
-        <Cell label="자동배정" value={op?.auto_assign_enabled ? '가능' : '꺼짐'} />
+        <Cell label={t('loginAt')} value={fmtTime(me.lastLoginAt ?? op?.last_login_at ?? null)} />
+        <Cell label={t('myAssignments')} value={`${me.activeCount}${t('casesUnit')}`} highlight />
+        <Cell label={t('autoAssign')} value={op?.auto_assign_enabled ? t('autoAssignOn') : t('autoAssignOff')} />
       </div>
 
       {lastCase && (
@@ -116,9 +112,11 @@ export function MyStatusCard() {
           <select
             defaultValue={lastCase.status ?? ''}
             className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600"
-            onChange={() => { /* 단계는 stepper에서 자동 추적 — 여기는 표기용 */ }}
+            onChange={() => { /* 단계는 stepper에서 자동 추적 */ }}
           >
-            <option value={lastCase.status ?? ''}>{lastCase.status ?? '—'}</option>
+            <option value={lastCase.status ?? ''}>
+              {lastCase.status ? tStatus(lastCase.status as 'PENDING') : '—'}
+            </option>
           </select>
           <button
             onClick={() => router.push(`/${locale}/operator/review-case/${lastCase.id}`)}

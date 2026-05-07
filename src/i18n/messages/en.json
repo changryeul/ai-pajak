@@ -8006,6 +8006,114 @@
       "prev": "Back"
     }
   },
+  "operatorStaff": {
+    "stepper": {
+      "step1": "Pick Client",
+      "step2": "Review Docs/Tax",
+      "step3": "Request Approval",
+      "step4": "Coretax",
+      "step5": "Done"
+    },
+    "myStatus": {
+      "title": "My Status",
+      "loginAt": "Login",
+      "myAssignments": "My Cases",
+      "autoAssign": "Auto-assign",
+      "autoAssignOn": "On",
+      "autoAssignOff": "Off",
+      "casesUnit": "cases"
+    },
+    "workState": {
+      "available": "Available",
+      "consulting": "Consulting",
+      "reviewing": "Reviewing",
+      "coretax": "Coretax",
+      "break": "Break",
+      "offline": "Offline",
+      "resigned": "Resigned"
+    },
+    "caseStatus": {
+      "PENDING": "Pending",
+      "PENDING_DOCS": "Docs Requested",
+      "DATA_REVIEW": "Reviewing",
+      "PENDING_APPROVAL": "Approval Pending",
+      "APPROVED": "Approved",
+      "EBILLING_GENERATED": "ID Billing",
+      "PAYMENT_PENDING": "Payment Pending",
+      "PAYMENT_UPLOADED": "Verifying Payment",
+      "PAYMENT_VERIFIED": "Payment Verified",
+      "DJP_SUBMITTED": "Submitted to DJP",
+      "BPE_UPLOADED": "BPE Uploaded",
+      "COMPLETED": "Filed",
+      "FAILED": "Failed"
+    },
+    "priority": {
+      "URGENT": "Urgent",
+      "HIGH": "High",
+      "NORMAL": "Normal",
+      "LOW": "Low"
+    },
+    "approvalState": {
+      "미요청": "Not Requested",
+      "요청중": "Pending",
+      "승인됨": "Approved",
+      "반려": "Rejected"
+    },
+    "myWork": {
+      "pageTitle": "Operator Workspace — My Work",
+      "title": "Operator Workspace",
+      "subtitle": "Instead of digging through menus, pick one client and walk through 5 steps in order.",
+      "todayHeader": "Today's Clients",
+      "todayHint": "Sorted by urgency and current status so you handle the most important first.",
+      "kpiUrgent": "Urgent",
+      "kpiNeedsReview": "Needs Review",
+      "kpiAwaitingApproval": "Awaiting Approval",
+      "kpiCoretaxReady": "Coretax Ready",
+      "metricReviewRequired": "Needs Review",
+      "metricDocRequested": "Docs Requested",
+      "metricApproval": "Approval",
+      "metricNtpn": "NTPN",
+      "nextActionPrefix": "Next Action:",
+      "assignee": "PIC",
+      "emptyAll": "No clients to process.",
+      "emptyFiltered": "No cases match this filter.",
+      "filterTitle": "Quick Filters",
+      "filterApproval": "Approval Pending",
+      "filterCoretax": "Coretax Ready",
+      "filterDocsPending": "Awaiting Docs / Client Response",
+      "filterEmpty": "None",
+      "filterPending": "{count} pending",
+      "guideTitle": "How to Use",
+      "guide1": "1. Pick a client from the Today's Clients card.",
+      "guide2": "2. Watch the Next Action indicator and proceed with review / approval / Coretax.",
+      "guide3": "3. Check the consultation log in the History menu after processing."
+    },
+    "nextAction": {
+      "PENDING": "Start the review. Use the review menu on the right.",
+      "PENDING_DOCS": "You have requested docs or are awaiting client response.",
+      "DATA_REVIEW": "Check items or request additional docs.",
+      "PENDING_APPROVAL": "Wait for Supervisor's approval result.",
+      "APPROVED": "Start Coretax processing. Record ID Billing issuance.",
+      "EBILLING_GENERATED": "Wait for the client's NTPN payment receipt.",
+      "PAYMENT_PENDING": "Wait for client's NTPN or payment proof upload.",
+      "PAYMENT_UPLOADED": "Verify the payment NTPN and submit the filing.",
+      "PAYMENT_VERIFIED": "Submit the filing via Coretax.",
+      "DJP_SUBMITTED": "Upload BPE.",
+      "BPE_UPLOADED": "Finalize the filing.",
+      "default": "Continue to the next step."
+    },
+    "landing": {
+      "reviewTitle": "Review — Docs, Withholding, Closing",
+      "reviewSubtitle": "Pick a client to review. Use the Next Action panel on the right to proceed step by step.",
+      "approvalTitle": "Supervisor Approval Request",
+      "approvalSubtitle": "Pick a case to submit. Only cases with completed review can be submitted.",
+      "coretaxTitle": "Coretax Processing",
+      "coretaxSubtitle": "Pick a case to process. Record Coretax actions after Supervisor approval.",
+      "historyTitle": "Consultation / Processing History",
+      "historySubtitle": "Pick a case to view. See per-case + per-company + all-my-clients combined timeline.",
+      "noCases": "No cases assigned."
+    }
+  },
   "closingSubmission": {
     "badge": {
       "SUBMITTED": "Awaiting Operator",

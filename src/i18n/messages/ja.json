@@ -8006,6 +8006,114 @@
       "prev": "戻る"
     }
   },
+  "operatorStaff": {
+    "stepper": {
+      "step1": "顧客選択",
+      "step2": "資料/税務確認",
+      "step3": "承認申請",
+      "step4": "Coretax 処理",
+      "step5": "完了"
+    },
+    "myStatus": {
+      "title": "マイ状態",
+      "loginAt": "ログイン",
+      "myAssignments": "担当案件",
+      "autoAssign": "自動割当",
+      "autoAssignOn": "ON",
+      "autoAssignOff": "OFF",
+      "casesUnit": "件"
+    },
+    "workState": {
+      "available": "待機",
+      "consulting": "相談中",
+      "reviewing": "確認中",
+      "coretax": "Coretax",
+      "break": "休憩",
+      "offline": "オフライン",
+      "resigned": "退職"
+    },
+    "caseStatus": {
+      "PENDING": "待機",
+      "PENDING_DOCS": "資料要求",
+      "DATA_REVIEW": "確認中",
+      "PENDING_APPROVAL": "承認申請",
+      "APPROVED": "承認済み",
+      "EBILLING_GENERATED": "ID Billing",
+      "PAYMENT_PENDING": "納付待ち",
+      "PAYMENT_UPLOADED": "納付確認中",
+      "PAYMENT_VERIFIED": "納付完了",
+      "DJP_SUBMITTED": "DJP 提出",
+      "BPE_UPLOADED": "BPE 登録",
+      "COMPLETED": "申告完了",
+      "FAILED": "失敗"
+    },
+    "priority": {
+      "URGENT": "緊急",
+      "HIGH": "高",
+      "NORMAL": "通常",
+      "LOW": "低"
+    },
+    "approvalState": {
+      "미요청": "未申請",
+      "요청중": "申請中",
+      "승인됨": "承認済み",
+      "반려": "差戻し"
+    },
+    "myWork": {
+      "pageTitle": "オペレーター業務画面 — マイ業務",
+      "title": "オペレーター業務画面",
+      "subtitle": "複雑な内部メニューの代わりに、顧客を1人選んで5ステップを順に処理します。",
+      "todayHeader": "本日処理する顧客",
+      "todayHint": "緊急度と現在の状態順に、優先処理すべき顧客を並べました。",
+      "kpiUrgent": "緊急",
+      "kpiNeedsReview": "要確認",
+      "kpiAwaitingApproval": "承認待ち",
+      "kpiCoretaxReady": "Coretax 待ち",
+      "metricReviewRequired": "要確認",
+      "metricDocRequested": "資料要求",
+      "metricApproval": "承認",
+      "metricNtpn": "NTPN",
+      "nextActionPrefix": "次の作業:",
+      "assignee": "担当",
+      "emptyAll": "処理する顧客がありません。",
+      "emptyFiltered": "フィルター条件に合うケースがありません。",
+      "filterTitle": "クイックフィルター",
+      "filterApproval": "承認申請ステータス",
+      "filterCoretax": "Coretax 処理可能",
+      "filterDocsPending": "資料要求/顧客応答待ち",
+      "filterEmpty": "該当なし",
+      "filterPending": "{count}件 待機中",
+      "guideTitle": "使い方",
+      "guide1": "1. 本日処理する顧客カードから顧客を選択。",
+      "guide2": "2. 次の作業表示を見て確認/承認/Coretax 処理を進めます。",
+      "guide3": "3. 処理後、履歴メニューで相談/処理記録を確認します。"
+    },
+    "nextAction": {
+      "PENDING": "確認を開始してください。右側の確認メニューに移動します。",
+      "PENDING_DOCS": "顧客に資料を要求したか、顧客の応答を待ってください。",
+      "DATA_REVIEW": "確認項目をレビューするか、資料を要求してください。",
+      "PENDING_APPROVAL": "Supervisor の承認結果をお待ちください。",
+      "APPROVED": "Coretax 処理を開始してください。ID Billing 発行を記録します。",
+      "EBILLING_GENERATED": "顧客からの納付 NTPN 提出をお待ちください。",
+      "PAYMENT_PENDING": "顧客の NTPN 提出または納付証憑のアップロードをお待ちください。",
+      "PAYMENT_UPLOADED": "納付 NTPN を検証して申告を提出してください。",
+      "PAYMENT_VERIFIED": "Coretax で申告を提出してください。",
+      "DJP_SUBMITTED": "BPE をアップロードしてください。",
+      "BPE_UPLOADED": "申告完了の処理を仕上げてください。",
+      "default": "次のステップに進んでください。"
+    },
+    "landing": {
+      "reviewTitle": "確認 — 資料・源泉徴収・決算",
+      "reviewSubtitle": "まず確認する顧客を選択してください。右側の次の作業パネルで段階別に処理します。",
+      "approvalTitle": "Supervisor 承認申請",
+      "approvalSubtitle": "申請するケースを選択してください。確認が完了したケースのみ申請可能です。",
+      "coretaxTitle": "Coretax 処理",
+      "coretaxSubtitle": "処理するケースを選択してください。Supervisor 承認後に Coretax 作業を記録します。",
+      "historyTitle": "相談/処理履歴",
+      "historySubtitle": "確認するケースを選択してください。ケース別・会社別・全顧客タイムラインを一画面で見ます。",
+      "noCases": "割り当てられたケースがありません。"
+    }
+  },
   "closingSubmission": {
     "badge": {
       "SUBMITTED": "オペレーター待ち",

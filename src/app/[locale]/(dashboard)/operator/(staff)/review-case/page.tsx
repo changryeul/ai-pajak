@@ -2,14 +2,12 @@
 
 /**
  * 검토 화면 — index landing.
- *
- * /operator/review-case (case id 없음)에 들어왔을 때:
- *   1. localStorage에 lastCase가 있으면 즉시 /operator/review-case/[id]로 점프
- *   2. 없으면 본인 활성 케이스 리스트를 보여주고 선택을 유도
+ * lastCase가 있으면 즉시 /operator/review-case/[id]로 점프, 없으면 본인 활성 케이스 카드 그리드.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { cn } from '@/lib/utils';
@@ -23,17 +21,19 @@ interface MyCase {
   priority: string;
 }
 
-const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
-  PENDING:            { text: '대기',      cls: 'bg-slate-100 text-slate-600' },
-  PENDING_DOCS:       { text: '자료요청',  cls: 'bg-amber-100 text-amber-700' },
-  DATA_REVIEW:        { text: '검토중',    cls: 'bg-indigo-100 text-indigo-700' },
-  PENDING_APPROVAL:   { text: '승인요청',  cls: 'bg-violet-100 text-violet-700' },
-  APPROVED:           { text: '승인완료',  cls: 'bg-emerald-100 text-emerald-700' },
+const STATUS_CLASS: Record<string, string> = {
+  PENDING: 'bg-slate-100 text-slate-600',
+  PENDING_DOCS: 'bg-amber-100 text-amber-700',
+  DATA_REVIEW: 'bg-indigo-100 text-indigo-700',
+  PENDING_APPROVAL: 'bg-violet-100 text-violet-700',
+  APPROVED: 'bg-emerald-100 text-emerald-700',
 };
 
 export default function ReviewCaseLandingPage() {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
+  const t = useTranslations('operatorStaff.landing');
+  const tStatus = useTranslations('operatorStaff.caseStatus');
   const [items, setItems] = useState<MyCase[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,13 +42,10 @@ export default function ReviewCaseLandingPage() {
       const r = await fetch('/api/operator/my-cases');
       const j = await r.json();
       if (j.success) setItems(j.data.items as MyCase[]);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
-    // lastCase가 있으면 즉시 점프.
     try {
       const raw = window.localStorage.getItem('aip.operator.lastCase');
       if (raw) {
@@ -75,18 +72,18 @@ export default function ReviewCaseLandingPage() {
 
   return (
     <div>
-      <PageTitle title="검토 — 고객 선택" />
-      <h1 className="mb-1 text-2xl font-black text-slate-900">검토 — 자료·원천세·결산 확인</h1>
-      <p className="mb-6 text-sm text-slate-500">먼저 검토할 고객을 선택하세요. 우측 다음 작업 패널에서 단계별로 처리합니다.</p>
+      <PageTitle title={t('reviewTitle')} />
+      <h1 className="mb-1 text-2xl font-black text-slate-900">{t('reviewTitle')}</h1>
+      <p className="mb-6 text-sm text-slate-500">{t('reviewSubtitle')}</p>
 
       {items.length === 0 ? (
         <section className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-400 shadow-sm">
-          배정된 케이스가 없습니다.
+          {t('noCases')}
         </section>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map(c => {
-            const s = STATUS_LABEL[c.status] ?? { text: c.status, cls: 'bg-slate-100 text-slate-600' };
+            const cls = STATUS_CLASS[c.status] ?? 'bg-slate-100 text-slate-600';
             return (
               <li key={c.id}>
                 <button
@@ -95,7 +92,7 @@ export default function ReviewCaseLandingPage() {
                 >
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-black text-slate-900">{c.customer.name}</h3>
-                    <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', s.cls)}>{s.text}</span>
+                    <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', cls)}>{tStatus(c.status as 'PENDING')}</span>
                   </div>
                   <p className="mt-1 text-xs text-slate-500">{c.case_code ?? '—'} · {c.service_label}</p>
                 </button>

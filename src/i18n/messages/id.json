@@ -8006,6 +8006,114 @@
       "prev": "Sebelumnya"
     }
   },
+  "operatorStaff": {
+    "stepper": {
+      "step1": "Pilih Klien",
+      "step2": "Tinjau Dokumen/Pajak",
+      "step3": "Permintaan Persetujuan",
+      "step4": "Proses Coretax",
+      "step5": "Selesai"
+    },
+    "myStatus": {
+      "title": "Status Saya",
+      "loginAt": "Login",
+      "myAssignments": "Tugas Saya",
+      "autoAssign": "Auto-Assign",
+      "autoAssignOn": "Aktif",
+      "autoAssignOff": "Mati",
+      "casesUnit": "kasus"
+    },
+    "workState": {
+      "available": "Tersedia",
+      "consulting": "Konsultasi",
+      "reviewing": "Tinjauan",
+      "coretax": "Coretax",
+      "break": "Istirahat",
+      "offline": "Offline",
+      "resigned": "Resign"
+    },
+    "caseStatus": {
+      "PENDING": "Menunggu",
+      "PENDING_DOCS": "Minta Dokumen",
+      "DATA_REVIEW": "Tinjauan",
+      "PENDING_APPROVAL": "Permintaan Persetujuan",
+      "APPROVED": "Disetujui",
+      "EBILLING_GENERATED": "ID Billing",
+      "PAYMENT_PENDING": "Menunggu Bayar",
+      "PAYMENT_UPLOADED": "Verifikasi Bayar",
+      "PAYMENT_VERIFIED": "Bayar Selesai",
+      "DJP_SUBMITTED": "Diajukan ke DJP",
+      "BPE_UPLOADED": "BPE Terdaftar",
+      "COMPLETED": "Pelaporan Selesai",
+      "FAILED": "Gagal"
+    },
+    "priority": {
+      "URGENT": "Mendesak",
+      "HIGH": "Tinggi",
+      "NORMAL": "Normal",
+      "LOW": "Rendah"
+    },
+    "approvalState": {
+      "미요청": "Belum Diminta",
+      "요청중": "Sedang Diproses",
+      "승인됨": "Disetujui",
+      "반려": "Ditolak"
+    },
+    "myWork": {
+      "pageTitle": "Layar Kerja Operator — Pekerjaan Saya",
+      "title": "Layar Kerja Operator",
+      "subtitle": "Alih-alih menu internal yang rumit, pilih satu klien dan kerjakan 5 langkah secara berurutan.",
+      "todayHeader": "Klien yang Diproses Hari Ini",
+      "todayHint": "Diurutkan berdasarkan urgensi dan status saat ini agar operator menangani yang paling penting dulu.",
+      "kpiUrgent": "Mendesak",
+      "kpiNeedsReview": "Perlu Tinjauan",
+      "kpiAwaitingApproval": "Menunggu Persetujuan",
+      "kpiCoretaxReady": "Menunggu Coretax",
+      "metricReviewRequired": "Perlu Tinjauan",
+      "metricDocRequested": "Minta Dokumen",
+      "metricApproval": "Persetujuan",
+      "metricNtpn": "NTPN",
+      "nextActionPrefix": "Tindakan Berikut:",
+      "assignee": "PIC",
+      "emptyAll": "Tidak ada klien yang harus diproses.",
+      "emptyFiltered": "Tidak ada kasus yang cocok dengan filter ini.",
+      "filterTitle": "Filter Cepat",
+      "filterApproval": "Status Permintaan Persetujuan",
+      "filterCoretax": "Siap Proses Coretax",
+      "filterDocsPending": "Menunggu Dokumen / Respons Klien",
+      "filterEmpty": "Tidak ada",
+      "filterPending": "{count} kasus menunggu",
+      "guideTitle": "Cara Pakai",
+      "guide1": "1. Pilih klien dari kartu Klien yang Diproses Hari Ini.",
+      "guide2": "2. Lihat indikator Tindakan Berikut, lalu lakukan tinjauan / persetujuan / proses Coretax.",
+      "guide3": "3. Setelah selesai, periksa catatan di menu Riwayat."
+    },
+    "nextAction": {
+      "PENDING": "Mulai tinjauan. Pindah ke menu Tinjauan di kanan.",
+      "PENDING_DOCS": "Anda telah meminta dokumen atau sedang menunggu respons klien.",
+      "DATA_REVIEW": "Tinjau item yang perlu dicek atau minta dokumen.",
+      "PENDING_APPROVAL": "Tunggu hasil persetujuan Supervisor.",
+      "APPROVED": "Mulai proses Coretax. Catat penerbitan ID Billing.",
+      "EBILLING_GENERATED": "Tunggu klien mengirim NTPN pembayaran.",
+      "PAYMENT_PENDING": "Tunggu pengiriman NTPN atau bukti bayar dari klien.",
+      "PAYMENT_UPLOADED": "Verifikasi NTPN pembayaran lalu kirim laporan.",
+      "PAYMENT_VERIFIED": "Kirim laporan via Coretax.",
+      "DJP_SUBMITTED": "Unggah BPE.",
+      "BPE_UPLOADED": "Selesaikan proses pelaporan.",
+      "default": "Lanjut ke langkah berikutnya."
+    },
+    "landing": {
+      "reviewTitle": "Tinjauan — Dokumen, Pajak, Tutup Buku",
+      "reviewSubtitle": "Pilih klien yang akan ditinjau. Tindakan tersedia di panel Tindakan Berikut di kanan.",
+      "approvalTitle": "Permintaan Persetujuan Supervisor",
+      "approvalSubtitle": "Pilih kasus untuk diajukan. Hanya kasus yang sudah selesai ditinjau yang dapat diajukan.",
+      "coretaxTitle": "Proses Coretax",
+      "coretaxSubtitle": "Pilih kasus untuk diproses. Catat aktivitas Coretax setelah persetujuan Supervisor.",
+      "historyTitle": "Riwayat Konsultasi / Proses",
+      "historySubtitle": "Pilih kasus untuk dilihat. Lihat timeline gabungan per kasus + per perusahaan + seluruh klien Anda.",
+      "noCases": "Belum ada kasus yang ditugaskan."
+    }
+  },
   "closingSubmission": {
     "badge": {
       "SUBMITTED": "Menunggu Operator",

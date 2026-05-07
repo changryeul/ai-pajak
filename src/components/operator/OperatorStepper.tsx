@@ -5,39 +5,34 @@
  *
  * PDF 「AI Pajak 백오피스_상담원」 상단의 1→5 진행바.
  * 현재 단계는 1) URL 경로, 2) 선택된 케이스 상태에서 결정한다.
- *
- *   1. 고객선택       /operator/my-work
- *   2. 자료/세금검토   /operator/review-case
- *   3. 승인요청       /operator/approval-request
- *   4. Coretax 처리   /operator/coretax
- *   5. 완료           /operator/history (또는 case 상태가 COMPLETED)
  */
 
 import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+
+type StepKey = 'step1' | 'step2' | 'step3' | 'step4' | 'step5';
 
 interface Step {
   n: number;
-  label: string;
-  // 매칭되는 라우트 prefix (locale 제외)
+  key: StepKey;
   routes: string[];
 }
 
 const STEPS: Step[] = [
-  { n: 1, label: '고객선택',     routes: ['/operator/my-work'] },
-  { n: 2, label: '자료/세금검토', routes: ['/operator/review-case'] },
-  { n: 3, label: '승인요청',     routes: ['/operator/approval-request'] },
-  { n: 4, label: 'Coretax 처리', routes: ['/operator/coretax'] },
-  { n: 5, label: '완료',         routes: ['/operator/history'] },
+  { n: 1, key: 'step1', routes: ['/operator/my-work'] },
+  { n: 2, key: 'step2', routes: ['/operator/review-case'] },
+  { n: 3, key: 'step3', routes: ['/operator/approval-request'] },
+  { n: 4, key: 'step4', routes: ['/operator/coretax'] },
+  { n: 5, key: 'step5', routes: ['/operator/history'] },
 ];
 
 export function OperatorStepper() {
   const pathname = usePathname();
   const { locale } = useParams<{ locale: string }>();
+  const t = useTranslations('operatorStaff.stepper');
 
-  // 현재 활성 단계 결정 — 첫 번째로 매칭되는 step.
-  // 매칭되는 게 없으면 1단계로 폴백.
   const activeIdx = (() => {
     for (let i = 0; i < STEPS.length; i++) {
       const s = STEPS[i];
@@ -65,7 +60,7 @@ export function OperatorStepper() {
               )}
             >
               <span className="text-[11px] font-bold opacity-90">{s.n}</span>
-              <span className="text-[13px] font-bold">{s.label}</span>
+              <span className="text-[13px] font-bold">{t(s.key)}</span>
             </Link>
           );
         })}
