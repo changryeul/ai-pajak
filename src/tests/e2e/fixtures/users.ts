@@ -148,6 +148,22 @@ export const TEST_USERS = {
   },
 
   /**
+   * EMP001 김상담 — 「상담원 백오피스」 5단계 워크플로우 e2e의 주연.
+   * scripts/seed-supervisor-demo.ts 가 생성. 4 demo cases 배정됨:
+   *   C-001 PT Hijau Lumut    (DATA_REVIEW)        ② 검토
+   *   C-002 PT ABC            (PENDING_APPROVAL)   ③ 승인요청 게이트 막힘
+   *   C-005 PT Sehat Sentosa  (APPROVED)           ④ Coretax ID Billing 발행
+   *   C-006 PT Maju Bersama   (EBILLING_GENERATED) ④ Coretax NTPN/BPE
+   */
+  TAX_OPERATOR_EMP001: {
+    email: 'op-emp001@aipajak.com',
+    password: 'TestPassword123!',
+    role: 'TAX_OPERATOR',
+    employeeId: 'EMP001',
+    fullName: '김상담',
+  },
+
+  /**
    * CUSTOMER (COMPANY) - Corporate customer for corporate-plan tests.
    * Seeded by scripts/seed-test-users.ts + scripts/seed-company-customer.ts
    */
