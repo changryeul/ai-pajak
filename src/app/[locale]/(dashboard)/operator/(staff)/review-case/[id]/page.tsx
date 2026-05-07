@@ -10,6 +10,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Loader2, AlertCircle, ExternalLink, CheckCircle2, FileText, ArrowRight, Send, Upload, Sparkles } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { cn } from '@/lib/utils';
@@ -51,14 +52,14 @@ interface Detail {
   myCases: MyCase[];
 }
 
-const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
-  PENDING:            { text: '대기',       cls: 'bg-slate-100 text-slate-600' },
-  PENDING_DOCS:       { text: '자료요청',   cls: 'bg-amber-100 text-amber-700' },
-  DATA_REVIEW:        { text: '검토중',     cls: 'bg-indigo-100 text-indigo-700' },
-  PENDING_APPROVAL:   { text: '승인요청',   cls: 'bg-violet-100 text-violet-700' },
-  APPROVED:           { text: '승인완료',   cls: 'bg-emerald-100 text-emerald-700' },
-  EBILLING_GENERATED: { text: 'ID Billing', cls: 'bg-blue-100 text-blue-700' },
-  COMPLETED:          { text: '신고완료',   cls: 'bg-emerald-100 text-emerald-700' },
+const STATUS_CLASS: Record<string, string> = {
+  PENDING: 'bg-slate-100 text-slate-600',
+  PENDING_DOCS: 'bg-amber-100 text-amber-700',
+  DATA_REVIEW: 'bg-indigo-100 text-indigo-700',
+  PENDING_APPROVAL: 'bg-violet-100 text-violet-700',
+  APPROVED: 'bg-emerald-100 text-emerald-700',
+  EBILLING_GENERATED: 'bg-blue-100 text-blue-700',
+  COMPLETED: 'bg-emerald-100 text-emerald-700',
 };
 
 const fmtRupiah = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
@@ -68,11 +69,15 @@ const ITEM_STATE_CLS: Record<string, string> = {
   '불확실 높음': 'border-rose-200 bg-rose-50',
   '정보부족':    'border-rose-200 bg-rose-50',
   '자료요청':    'border-amber-200 bg-amber-50',
+  'AI 확인필요': 'border-violet-200 bg-violet-50',
 };
 
 export default function ReviewCasePage() {
   const router = useRouter();
   const { locale, id } = useParams<{ locale: string; id: string }>();
+  const t = useTranslations('operatorStaff.review');
+  const tStatus = useTranslations('operatorStaff.caseStatus');
+  const tApproval = useTranslations('operatorStaff.approvalState');
   const [d, setD] = useState<Detail | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyInvoice, setBusyInvoice] = useState<string | null>(null);
@@ -97,7 +102,6 @@ export default function ReviewCasePage() {
   }, [id]);
   useEffect(() => { load(); }, [load]);
 
-  // 라우트 진입 시 lastCase 갱신.
   useEffect(() => {
     if (!d) return;
     try {
@@ -123,11 +127,11 @@ export default function ReviewCasePage() {
     try {
       const r = await fetch(`/api/operator/cases/${id}/review-item`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoice, action, note: action === 'request-docs' ? '추가 자료 요청' : undefined }),
+        body: JSON.stringify({ invoice, action }),
       });
       const j = await r.json();
       if (!j.success) {
-        alert(j.error ?? '실패');
+        alert(j.error ?? t('ocrAlertGenericFailed'));
         return;
       }
       await load();
@@ -138,23 +142,21 @@ export default function ReviewCasePage() {
 
   const handleOcrFile = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
-      alert('10MB 이하 파일만 업로드 가능합니다.');
+      alert(t('ocrAlertFileSize'));
       return;
     }
     const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowed.includes(file.type)) {
-      alert('JPG / PNG / WebP / GIF 만 지원합니다. (PDF는 추후 지원 예정)');
+      alert(t('ocrAlertFileType'));
       return;
     }
-    // base64 변환.
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         const r = reader.result as string;
-        // dataURL prefix(`data:image/png;base64,`) 제거.
         resolve(r.split(',')[1] ?? r);
       };
-      reader.onerror = () => reject(new Error('파일 읽기 실패'));
+      reader.onerror = () => reject(new Error(t('ocrAlertReadFailed')));
       reader.readAsDataURL(file);
     });
 
@@ -167,7 +169,7 @@ export default function ReviewCasePage() {
       });
       const j = await r.json();
       if (!j.success) {
-        alert(j.error ?? 'OCR 실패');
+        alert(j.error ?? t('ocrAlertGeneric'));
         return;
       }
       setOcrLastResult({
@@ -186,40 +188,40 @@ export default function ReviewCasePage() {
   const requestApproval = async () => {
     if (!d) return;
     if (d.reviewRequired > 0) {
-      alert(`검토필요 항목 ${d.reviewRequired}건이 미완료 상태입니다.`);
+      alert(t('ocrAlertReviewRequired', { count: d.reviewRequired }));
       return;
     }
-    if (!confirm('Supervisor 승인을 요청하시겠습니까?')) return;
+    if (!confirm(t('ocrConfirmApproval'))) return;
     const r = await fetch(`/api/operator/cases/${id}/request-approval`, { method: 'PUT' });
     const j = await r.json();
     if (!j.success) {
-      alert(j.error ?? '실패');
+      alert(j.error ?? t('ocrAlertGenericFailed'));
       return;
     }
     router.push(`/${locale}/operator/approval-request`);
   };
 
   if (loading) return <div className="py-20 text-center"><Loader2 className="mx-auto h-8 w-8 animate-spin text-indigo-600" /></div>;
-  if (!d) return <div className="py-20 text-center text-sm text-slate-400">케이스를 불러올 수 없습니다.</div>;
+  if (!d) return <div className="py-20 text-center text-sm text-slate-400">{t('loadFailed')}</div>;
 
-  const statusBadge = STATUS_LABEL[d.case.status] ?? { text: d.case.status, cls: 'bg-slate-100 text-slate-600' };
+  const statusCls = STATUS_CLASS[d.case.status] ?? 'bg-slate-100 text-slate-600';
   const customerName = d.customer?.company_name || d.customer?.full_name || '—';
   const canRequestApproval = d.reviewRequired === 0 && ['PENDING', 'PENDING_DOCS', 'DATA_REVIEW'].includes(d.case.status);
   const canCoretax = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'].includes(d.case.status);
 
   return (
     <div>
-      <PageTitle title={`검토 · ${customerName}`} />
+      <PageTitle title={`${t('pageTitlePrefix')} ${customerName}`} />
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[280px_1fr_320px]">
         {/* 좌측: 내 고객 */}
         <aside className="rounded-2xl bg-white p-3 shadow-sm">
-          <h2 className="px-2 py-2 text-sm font-black text-slate-900">내 고객</h2>
+          <h2 className="px-2 py-2 text-sm font-black text-slate-900">{t('myCustomers')}</h2>
           <ul className="space-y-1.5">
             {d.myCases.length === 0 ? (
-              <li className="px-2 py-2 text-xs text-slate-400">배정된 케이스가 없습니다.</li>
+              <li className="px-2 py-2 text-xs text-slate-400">{t('noCustomers')}</li>
             ) : d.myCases.map(c => {
               const sel = c.id === d.case.id;
-              const s = STATUS_LABEL[c.status] ?? { text: c.status, cls: 'bg-slate-100 text-slate-600' };
+              const sCls = STATUS_CLASS[c.status] ?? 'bg-slate-100 text-slate-600';
               return (
                 <li key={c.id}>
                   <button
@@ -231,11 +233,11 @@ export default function ReviewCasePage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className={cn('text-sm font-black', sel ? 'text-white' : 'text-slate-900')}>{c.customer_name}</span>
-                      <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-bold', sel ? 'bg-white/20 text-white' : s.cls)}>{s.text}</span>
+                      <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-bold', sel ? 'bg-white/20 text-white' : sCls)}>{tStatus(c.status as 'PENDING')}</span>
                     </div>
                     <p className={cn('mt-0.5 text-[10px]', sel ? 'text-white/70' : 'text-slate-500')}>{c.case_code ?? '—'} · {c.service_label}</p>
                     <p className={cn('mt-1 text-[10px]', sel ? 'text-white/70' : 'text-slate-400')}>
-                      담당 {d.operator?.employee_id ?? '—'} · {c.priority === 'URGENT' ? 'Urgent' : c.priority === 'HIGH' ? 'High' : 'Normal'} · 검토필요 {c.review_required}건
+                      {t('assignee')} {d.operator?.employee_id ?? '—'} · {t('reviewRequiredCount', { count: c.review_required })}
                     </p>
                   </button>
                 </li>
@@ -248,31 +250,31 @@ export default function ReviewCasePage() {
         <main className="space-y-3">
           {/* 헤더 */}
           <section className="rounded-2xl bg-slate-900 p-5 text-white shadow-sm">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">고객 AI Pajak 화면과 비슷한 상담 화면</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">{t('subHeaderHint')}</p>
             <div className="mt-1 flex items-center gap-2">
               <h2 className="text-xl font-black">{customerName}</h2>
-              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', statusBadge.cls)}>{statusBadge.text}</span>
+              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', statusCls)}>{tStatus(d.case.status as 'PENDING')}</span>
             </div>
             <p className="mt-1 text-sm text-white/80">{d.service.label}</p>
           </section>
 
-          {/* 메타 4 카드 */}
+          {/* 메타 */}
           <section className="rounded-2xl bg-white p-5 shadow-sm">
             <div className="grid grid-cols-3 gap-3">
-              <Meta label="서비스" value={d.service.label.includes('Tahunan') ? '연 신고 결산' : '월신고 원천세'} />
-              <Meta label="원천세 합계" value={fmtRupiah(d.service.totalTax)} highlight />
-              <Meta label="Supervisor 승인" value={d.approval.state} highlight={d.approval.state === '승인됨'} />
+              <Meta label={t('metaService')} value={d.service.label.includes('Tahunan') ? t('serviceTypeAnnual') : t('serviceTypeMonthly')} />
+              <Meta label={t('metaWithholdingTotal')} value={fmtRupiah(d.service.totalTax)} highlight />
+              <Meta label={t('metaSupervisorApproval')} value={tApproval(d.approval.state)} highlight={d.approval.state === '승인됨'} />
             </div>
             <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5">
-              <p className="text-[13px] font-bold text-amber-900">상담원이 확인해야 할 항목이 있습니다</p>
-              <p className="text-[11px] text-amber-700">아래 항목을 확인하거나 고객에게 부족자료를 요청하세요.</p>
+              <p className="text-[13px] font-bold text-amber-900">{t('alertTitle')}</p>
+              <p className="text-[11px] text-amber-700">{t('alertHint')}</p>
             </div>
           </section>
 
           {/* 확인할 항목 */}
           <section className="rounded-2xl bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <h3 className="text-sm font-black text-slate-900">확인할 항목</h3>
+              <h3 className="text-sm font-black text-slate-900">{t('checkItemsTitle')}</h3>
               <div className="flex items-center gap-2">
                 <input
                   ref={fileInputRef}
@@ -290,20 +292,20 @@ export default function ReviewCasePage() {
                   )}
                 >
                   {ocrBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Upload className="h-3 w-3" /><Sparkles className="h-3 w-3" /></>}
-                  Invoice OCR 추가
+                  {t('btnAddOcr')}
                 </button>
               </div>
             </div>
             {ocrLastResult && (
               <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2.5">
                 <p className="text-[11px] font-black text-violet-900">
-                  AI 분류: {ocrLastResult.taxKind} · Tax Code {ocrLastResult.taxCode} · 신뢰도 {Math.round(ocrLastResult.confidence * 100)}%
+                  {t('ocrResultClassification')} {ocrLastResult.taxKind} · {t('ocrResultTaxCode')} {ocrLastResult.taxCode} · {t('ocrResultConfidence')} {Math.round(ocrLastResult.confidence * 100)}%
                 </p>
                 <p className="text-[10px] text-violet-700">{ocrLastResult.reason}</p>
               </div>
             )}
             {d.reviewItems.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-slate-200 px-4 py-10 text-center text-xs text-slate-400">검토할 항목이 없습니다.</p>
+              <p className="rounded-xl border border-dashed border-slate-200 px-4 py-10 text-center text-xs text-slate-400">{t('checkItemsEmpty')}</p>
             ) : (
               <ul className="space-y-2.5">
                 {d.reviewItems.map(it => {
@@ -327,7 +329,7 @@ export default function ReviewCasePage() {
                           <button
                             onClick={() => setPreviewItem(it)}
                             className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-200"
-                          >자료보기</button>
+                          >{t('btnViewDoc')}</button>
                           <button
                             disabled={checked || busyInvoice === it.invoice}
                             onClick={() => itemAction(it.invoice!, 'mark-checked')}
@@ -336,7 +338,7 @@ export default function ReviewCasePage() {
                               checked ? 'bg-emerald-200 text-emerald-800' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200',
                               busyInvoice === it.invoice && 'opacity-50',
                             )}
-                          >{checked ? '확인완료 ✓' : '확인완료'}</button>
+                          >{checked ? t('btnMarkCheckedDone') : t('btnMarkChecked')}</button>
                           <button
                             disabled={requested || busyInvoice === it.invoice}
                             onClick={() => itemAction(it.invoice!, 'request-docs')}
@@ -345,7 +347,7 @@ export default function ReviewCasePage() {
                               requested ? 'bg-amber-200 text-amber-800' : 'bg-amber-100 text-amber-700 hover:bg-amber-200',
                               busyInvoice === it.invoice && 'opacity-50',
                             )}
-                          >{requested ? '자료요청됨' : '자료요청'}</button>
+                          >{requested ? t('btnRequestDocsDone') : t('btnRequestDocs')}</button>
                         </div>
                       </div>
                     </li>
@@ -357,20 +359,20 @@ export default function ReviewCasePage() {
 
           {/* 자료 Preview */}
           <section className="rounded-2xl bg-white p-5 shadow-sm">
-            <h3 className="mb-3 text-sm font-black text-slate-900">자료 Preview</h3>
+            <h3 className="mb-3 text-sm font-black text-slate-900">{t('previewTitle')}</h3>
             {previewItem ? (
               <div className="rounded-xl border border-slate-200 p-3">
                 <p className="text-sm font-black text-slate-900">{previewItem.invoice} · {previewItem.vendor}</p>
                 <p className="text-[11px] text-slate-500">{previewItem.taxKind} · Tax Code {previewItem.taxCode}</p>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="rounded-lg bg-slate-50 px-2 py-1.5">DPP: <span className="font-bold">{fmtRupiah(previewItem.dpp ?? 0)}</span></div>
-                  <div className="rounded-lg bg-slate-50 px-2 py-1.5">세액: <span className="font-bold">{fmtRupiah(previewItem.tax ?? 0)}</span></div>
+                  <div className="rounded-lg bg-slate-50 px-2 py-1.5">{t('previewDpp')}: <span className="font-bold">{fmtRupiah(previewItem.dpp ?? 0)}</span></div>
+                  <div className="rounded-lg bg-slate-50 px-2 py-1.5">{t('previewTax')}: <span className="font-bold">{fmtRupiah(previewItem.tax ?? 0)}</span></div>
                 </div>
-                <p className="mt-2 text-[11px] text-slate-400">실제 Invoice/Contract/Bank PDF는 Phase 7+에서 연동됩니다.</p>
+                <p className="mt-2 text-[11px] text-slate-400">{t('previewNote')}</p>
               </div>
             ) : (
               <p className="rounded-xl border border-dashed border-slate-200 px-4 py-10 text-center text-xs text-slate-400">
-                위에서 「자료보기」 버튼을 누르면 이곳에 Invoice / Contract / Bank 자료가 열립니다.
+                {t('previewEmpty')}
               </p>
             )}
           </section>
@@ -379,56 +381,40 @@ export default function ReviewCasePage() {
         {/* 우: Sticky 다음 작업 */}
         <aside className="space-y-3 lg:sticky lg:top-4 lg:self-start">
           <section className="rounded-2xl bg-white p-5 shadow-sm">
-            <h3 className="mb-3 text-sm font-black text-slate-900">다음 작업</h3>
-            <p className="mb-3 text-[11px] text-slate-500">지금 필요한 버튼만 위에서부터 누르면 됩니다.</p>
+            <h3 className="mb-3 text-sm font-black text-slate-900">{t('nextActionTitle')}</h3>
+            <p className="mb-3 text-[11px] text-slate-500">{t('nextActionHint')}</p>
             <div className="space-y-2">
-              <ActionButton
-                color="emerald" disabled={!canRequestApproval} onClick={requestApproval}
-                icon={<Send className="h-3.5 w-3.5" />}
-                label="1. Supervisor 승인요청"
-              />
-              <ActionButton
-                color="blue" disabled={!canCoretax} onClick={() => router.push(`/${locale}/operator/coretax`)}
-                icon={<ExternalLink className="h-3.5 w-3.5" />}
-                label="2. Coretax 새 탭 열기"
-              />
-              <ActionButton
-                color="slate" disabled={!canCoretax} onClick={() => router.push(`/${locale}/operator/coretax`)}
-                icon={<ArrowRight className="h-3.5 w-3.5" />}
-                label="Coretax 현재 탭 이동"
-              />
-              <ActionButton
-                color="slate" disabled={d.case.status !== 'EBILLING_GENERATED' && d.case.status !== 'PAYMENT_PENDING'}
+              <ActionButton color="emerald" disabled={!canRequestApproval} onClick={requestApproval}
+                icon={<Send className="h-3.5 w-3.5" />} label={t('actionRequestApproval')} />
+              <ActionButton color="blue" disabled={!canCoretax} onClick={() => router.push(`/${locale}/operator/coretax`)}
+                icon={<ExternalLink className="h-3.5 w-3.5" />} label={t('actionOpenCoretax')} />
+              <ActionButton color="slate" disabled={!canCoretax} onClick={() => router.push(`/${locale}/operator/coretax`)}
+                icon={<ArrowRight className="h-3.5 w-3.5" />} label={t('actionGoCoretax')} />
+              <ActionButton color="slate" disabled={d.case.status !== 'EBILLING_GENERATED' && d.case.status !== 'PAYMENT_PENDING'}
                 onClick={() => router.push(`/${locale}/operator/coretax`)}
-                icon={<CheckCircle2 className="h-3.5 w-3.5" />}
-                label="3. ID Billing 발행완료 기록"
-              />
-              <ActionButton
-                color="violet" disabled={!['PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED'].includes(d.case.status)}
+                icon={<CheckCircle2 className="h-3.5 w-3.5" />} label={t('actionRecordBilling')} />
+              <ActionButton color="violet" disabled={!['PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED'].includes(d.case.status)}
                 onClick={() => router.push(`/${locale}/operator/coretax`)}
-                icon={<FileText className="h-3.5 w-3.5" />}
-                label="4. 신고완료 / BPE 반영"
-              />
+                icon={<FileText className="h-3.5 w-3.5" />} label={t('actionRecordCompletion')} />
             </div>
           </section>
 
           {/* 고객 NTPN */}
           <section className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-[11px] font-bold text-slate-500">고객이 AI Pajak 화면에서 제출한 NTPN</p>
+            <p className="text-[11px] font-bold text-slate-500">{t('ntpnSubmittedLabel')}</p>
             <p className="mt-1 text-base font-black text-slate-900">{d.submitted.ntpn ?? '—'}</p>
             {d.submitted.buktiFile && (
               <p className="mt-0.5 text-[10px] text-slate-400">
-                증빙파일: {d.submitted.buktiFile} · 제출일: {d.submitted.submittedAt ? new Date(d.submitted.submittedAt).toLocaleString('ko-KR') : '—'}
+                {t('ntpnEvidenceFile')}: {d.submitted.buktiFile} · {t('ntpnSubmittedAt')}: {d.submitted.submittedAt ? new Date(d.submitted.submittedAt).toLocaleString() : '—'}
               </p>
             )}
-
-            <p className="mt-3 text-[11px] font-bold text-slate-500">상담원 확인 / 수정값</p>
+            <p className="mt-3 text-[11px] font-bold text-slate-500">{t('ntpnEditLabel')}</p>
             <div className="mt-1 flex items-center gap-2">
               <input
                 value={ntpnInput} onChange={e => setNtpnInput(e.target.value)}
                 className="flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono"
               />
-              <button className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-600">확인</button>
+              <button className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-600">{t('ntpnConfirm')}</button>
             </div>
           </section>
 
@@ -437,7 +423,7 @@ export default function ReviewCasePage() {
             <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
               <div className="flex items-start gap-2">
                 <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-600" />
-                <p className="text-[12px] font-bold text-rose-900">⚠️ 검토필요 원천세 항목 {d.reviewRequired}건 미완료</p>
+                <p className="text-[12px] font-bold text-rose-900">{t('alertReviewRequired', { count: d.reviewRequired })}</p>
               </div>
             </section>
           )}
@@ -445,9 +431,7 @@ export default function ReviewCasePage() {
           {/* Coretax 안내 */}
           {!canCoretax && (
             <section className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-[11px] text-slate-600">
-                Coretax 접속은 항상 가능하지만, ID Billing 발행 기록은 <strong>Supervisor 승인완료</strong> 후 가능합니다.
-              </p>
+              <p className="text-[11px] text-slate-600">{t('coretaxNote')}</p>
             </section>
           )}
         </aside>
