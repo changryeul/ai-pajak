@@ -8131,5 +8131,45 @@
       "payCta": "납부 →",
       "prev": "이전"
     }
+  },
+  "closingSubmission": {
+    "badge": {
+      "SUBMITTED": "운영팀 대기",
+      "OPERATOR_REVIEW": "운영팀 검토",
+      "PROCESSING": "Coretax 처리",
+      "BPE_UPLOADED": "BPE 업로드",
+      "COMPLETED": "신고완료",
+      "FAILED": "제출 실패",
+      "CANCELLED": "취소됨",
+      "UNKNOWN": "상태 미정"
+    },
+    "title": {
+      "SUBMITTED": "제출 완료 — 운영팀 검증 대기",
+      "OPERATOR_REVIEW": "운영팀 검토 중",
+      "PROCESSING": "Coretax에서 ID Billing 발행 중",
+      "BPE_UPLOADED": "BPE 업로드 완료 — NTPN 확인 대기",
+      "COMPLETED": "SPT 신고가 정상 접수되었습니다",
+      "FAILED": "제출 처리 중 오류가 발생했습니다",
+      "CANCELLED": "제출이 취소되었습니다",
+      "UNKNOWN": "상태 정보 없음"
+    },
+    "hint": {
+      "SUBMITTED": "운영팀이 Coretax 처리를 시작하면 자동으로 다음 단계로 넘어갑니다.",
+      "PROCESSING": "운영팀이 DJP Coretax에서 처리 중입니다. 완료되면 BPE/NTPN이 자동으로 채워집니다.",
+      "FAILED": "운영팀이 곧 연락드립니다. 오류 정보:"
+    },
+    "channel": {
+      "api": "Coretax API 자동",
+      "manual": "RPA / 수동"
+    },
+    "field": {
+      "channel": "채널",
+      "bpeNumber": "BPE 번호",
+      "ntpn": "NTPN (납부번호)",
+      "failureReason": "실패 사유",
+      "submittedAt": "제출 시각",
+      "bpeUploadedAt": "BPE 업로드",
+      "completedAt": "완료 시각"
+    }
   }
 }

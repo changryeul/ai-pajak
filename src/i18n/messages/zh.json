@@ -239,7 +239,12 @@
     "allCases": "All Cases",
     "operatorTeam": "Operator Management",
     "auditLog": "Audit Log",
-    "opsSettings": "Settings / Form Version"
+    "opsSettings": "Settings / Form Version",
+    "opMyWork": "我的工作",
+    "opReview": "审核",
+    "opApproval": "审批申请",
+    "opCoretax": "Coretax 处理",
+    "opHistory": "历史"
   },
   "dashboard": {
     "title": "仪表板",
@@ -7999,6 +8004,46 @@
       "sptCta": "SPT 작성 →",
       "payCta": "납부 →",
       "prev": "上一步"
+    }
+  },
+  "closingSubmission": {
+    "badge": {
+      "SUBMITTED": "等待运营",
+      "OPERATOR_REVIEW": "运营审核中",
+      "PROCESSING": "Coretax 处理中",
+      "BPE_UPLOADED": "BPE 已上传",
+      "COMPLETED": "申报完成",
+      "FAILED": "提交失败",
+      "CANCELLED": "已取消",
+      "UNKNOWN": "状态未知"
+    },
+    "title": {
+      "SUBMITTED": "提交完成 — 等待运营核验",
+      "OPERATOR_REVIEW": "运营审核中",
+      "PROCESSING": "正在 Coretax 中开具 ID Billing",
+      "BPE_UPLOADED": "BPE 上传完成 — 等待 NTPN 确认",
+      "COMPLETED": "SPT 申报已正常受理",
+      "FAILED": "提交处理过程中发生错误",
+      "CANCELLED": "提交已取消",
+      "UNKNOWN": "暂无状态信息"
+    },
+    "hint": {
+      "SUBMITTED": "运营开始 Coretax 处理后,状态会自动推进。",
+      "PROCESSING": "运营正在 DJP Coretax 中处理。完成后 BPE/NTPN 会自动填入。",
+      "FAILED": "运营将尽快与您联系。错误信息:"
+    },
+    "channel": {
+      "api": "Coretax API 自动",
+      "manual": "RPA / 手动"
+    },
+    "field": {
+      "channel": "渠道",
+      "bpeNumber": "BPE 号码",
+      "ntpn": "NTPN (缴款号)",
+      "failureReason": "失败原因",
+      "submittedAt": "提交时间",
+      "bpeUploadedAt": "BPE 上传",
+      "completedAt": "完成时间"
     }
   }
 }

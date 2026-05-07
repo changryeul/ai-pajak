@@ -239,7 +239,12 @@
     "allCases": "All Cases",
     "operatorTeam": "Operator Management",
     "auditLog": "Audit Log",
-    "opsSettings": "Settings / Form Version"
+    "opsSettings": "Settings / Form Version",
+    "opMyWork": "My Work",
+    "opReview": "Review",
+    "opApproval": "Approval Request",
+    "opCoretax": "Coretax",
+    "opHistory": "History"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -7999,6 +8004,46 @@
       "sptCta": "SPT 작성 →",
       "payCta": "납부 →",
       "prev": "Back"
+    }
+  },
+  "closingSubmission": {
+    "badge": {
+      "SUBMITTED": "Awaiting Operator",
+      "OPERATOR_REVIEW": "Operator Reviewing",
+      "PROCESSING": "Processing in Coretax",
+      "BPE_UPLOADED": "BPE Uploaded",
+      "COMPLETED": "Filed",
+      "FAILED": "Submission Failed",
+      "CANCELLED": "Cancelled",
+      "UNKNOWN": "Unknown Status"
+    },
+    "title": {
+      "SUBMITTED": "Submission received — awaiting operator verification",
+      "OPERATOR_REVIEW": "Operator is reviewing",
+      "PROCESSING": "Issuing ID Billing via Coretax",
+      "BPE_UPLOADED": "BPE uploaded — awaiting NTPN confirmation",
+      "COMPLETED": "Your SPT filing has been accepted",
+      "FAILED": "An error occurred while processing your submission",
+      "CANCELLED": "Submission cancelled",
+      "UNKNOWN": "Status information unavailable"
+    },
+    "hint": {
+      "SUBMITTED": "Once the operator starts Coretax processing, the status will advance automatically.",
+      "PROCESSING": "The operator is processing this in DJP Coretax. BPE/NTPN will appear automatically once done.",
+      "FAILED": "The operator will contact you shortly. Error details:"
+    },
+    "channel": {
+      "api": "Coretax API (automatic)",
+      "manual": "RPA / Manual"
+    },
+    "field": {
+      "channel": "Channel",
+      "bpeNumber": "BPE Number",
+      "ntpn": "NTPN (Payment Receipt)",
+      "failureReason": "Failure reason",
+      "submittedAt": "Submitted at",
+      "bpeUploadedAt": "BPE uploaded",
+      "completedAt": "Completed at"
     }
   }
 }

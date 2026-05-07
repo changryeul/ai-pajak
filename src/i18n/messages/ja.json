@@ -239,7 +239,12 @@
     "allCases": "All Cases",
     "operatorTeam": "Operator Management",
     "auditLog": "Audit Log",
-    "opsSettings": "Settings / Form Version"
+    "opsSettings": "Settings / Form Version",
+    "opMyWork": "マイ業務",
+    "opReview": "レビュー",
+    "opApproval": "承認申請",
+    "opCoretax": "Coretax 処理",
+    "opHistory": "履歴"
   },
   "dashboard": {
     "title": "ダッシュボード",
@@ -7999,6 +8004,46 @@
       "sptCta": "SPT 작성 →",
       "payCta": "납부 →",
       "prev": "戻る"
+    }
+  },
+  "closingSubmission": {
+    "badge": {
+      "SUBMITTED": "オペレーター待ち",
+      "OPERATOR_REVIEW": "オペレーター確認中",
+      "PROCESSING": "Coretax 処理中",
+      "BPE_UPLOADED": "BPE アップロード済み",
+      "COMPLETED": "申告完了",
+      "FAILED": "提出失敗",
+      "CANCELLED": "キャンセル",
+      "UNKNOWN": "状態不明"
+    },
+    "title": {
+      "SUBMITTED": "提出完了 — オペレーターの確認待ち",
+      "OPERATOR_REVIEW": "オペレーター確認中",
+      "PROCESSING": "Coretax で ID Billing 発行中",
+      "BPE_UPLOADED": "BPE アップロード完了 — NTPN 確認待ち",
+      "COMPLETED": "SPT 申告が正常に受理されました",
+      "FAILED": "提出処理中にエラーが発生しました",
+      "CANCELLED": "提出がキャンセルされました",
+      "UNKNOWN": "状態情報がありません"
+    },
+    "hint": {
+      "SUBMITTED": "オペレーターが Coretax 処理を開始すると自動的に次の段階に進みます。",
+      "PROCESSING": "オペレーターが DJP Coretax で処理中です。完了すると BPE/NTPN が自動で反映されます。",
+      "FAILED": "オペレーターからすぐにご連絡いたします。エラー情報:"
+    },
+    "channel": {
+      "api": "Coretax API 自動",
+      "manual": "RPA / 手動"
+    },
+    "field": {
+      "channel": "チャネル",
+      "bpeNumber": "BPE 番号",
+      "ntpn": "NTPN (納付番号)",
+      "failureReason": "失敗理由",
+      "submittedAt": "提出時刻",
+      "bpeUploadedAt": "BPE アップロード",
+      "completedAt": "完了時刻"
     }
   }
 }

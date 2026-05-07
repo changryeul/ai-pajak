@@ -239,7 +239,12 @@
     "allCases": "Semua Kasus",
     "operatorTeam": "Manajemen Operator",
     "auditLog": "Audit Log",
-    "opsSettings": "Pengaturan / Versi Form"
+    "opsSettings": "Pengaturan / Versi Form",
+    "opMyWork": "Pekerjaan Saya",
+    "opReview": "Tinjauan",
+    "opApproval": "Permintaan Persetujuan",
+    "opCoretax": "Proses Coretax",
+    "opHistory": "Riwayat"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -7999,6 +8004,46 @@
       "sptCta": "SPT 작성 →",
       "payCta": "납부 →",
       "prev": "Sebelumnya"
+    }
+  },
+  "closingSubmission": {
+    "badge": {
+      "SUBMITTED": "Menunggu Operator",
+      "OPERATOR_REVIEW": "Tinjauan Operator",
+      "PROCESSING": "Proses Coretax",
+      "BPE_UPLOADED": "BPE Diunggah",
+      "COMPLETED": "Pelaporan Selesai",
+      "FAILED": "Pengajuan Gagal",
+      "CANCELLED": "Dibatalkan",
+      "UNKNOWN": "Status Tidak Diketahui"
+    },
+    "title": {
+      "SUBMITTED": "Pengajuan diterima — menunggu verifikasi operator",
+      "OPERATOR_REVIEW": "Operator sedang meninjau",
+      "PROCESSING": "Penerbitan ID Billing di Coretax sedang berlangsung",
+      "BPE_UPLOADED": "BPE diunggah — menunggu konfirmasi NTPN",
+      "COMPLETED": "Pelaporan SPT diterima",
+      "FAILED": "Terjadi kesalahan saat memproses pengajuan",
+      "CANCELLED": "Pengajuan dibatalkan",
+      "UNKNOWN": "Informasi status tidak tersedia"
+    },
+    "hint": {
+      "SUBMITTED": "Setelah operator memulai proses Coretax, status akan berlanjut secara otomatis.",
+      "PROCESSING": "Operator sedang memproses di DJP Coretax. BPE/NTPN akan terisi otomatis setelah selesai.",
+      "FAILED": "Operator akan segera menghubungi Anda. Detail kesalahan:"
+    },
+    "channel": {
+      "api": "Coretax API otomatis",
+      "manual": "RPA / Manual"
+    },
+    "field": {
+      "channel": "Kanal",
+      "bpeNumber": "Nomor BPE",
+      "ntpn": "NTPN (Nomor Penerimaan)",
+      "failureReason": "Alasan kegagalan",
+      "submittedAt": "Waktu pengajuan",
+      "bpeUploadedAt": "Unggah BPE",
+      "completedAt": "Waktu selesai"
     }
   }
 }
