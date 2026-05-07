@@ -109,8 +109,6 @@ export default function MyWorkPage() {
     <div className="py-20 text-center"><Loader2 className="mx-auto h-8 w-8 animate-spin text-indigo-600" /></div>
   );
 
-  const fmtCount = (n: number) => `${n}${tStatus('PENDING') /* fallback unit access */ ? '' : ''}건`;
-  // unit string from i18n
   const tMy = useTranslations('operatorStaff.myStatus');
   const unit = tMy('casesUnit');
 
