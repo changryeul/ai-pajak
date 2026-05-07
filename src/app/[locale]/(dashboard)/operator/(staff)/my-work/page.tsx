@@ -148,7 +148,7 @@ export default function MyWorkPage() {
                 return (
                   <CaseCard key={c.id} c={c} onPick={pickCase}
                     statusLabel={tStatus(c.status as 'PENDING')}
-                    priorityLabel={tPriority(c.priority)}
+                    priorityLabel={tPriority((c.priority ?? 'NORMAL') as 'NORMAL')}
                     approvalLabel={tApproval(c.metrics.approval)}
                     metricLabels={{
                       reviewRequired: t('metricReviewRequired'),
