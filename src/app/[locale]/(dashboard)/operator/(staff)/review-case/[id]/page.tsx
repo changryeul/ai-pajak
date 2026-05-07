@@ -8,9 +8,9 @@
  *   우(320px, sticky): 「다음 작업」 패널 4 액션 + NTPN 입력 + 검토필요 알림
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, AlertCircle, ExternalLink, CheckCircle2, FileText, ArrowRight, Send } from 'lucide-react';
+import { Loader2, AlertCircle, ExternalLink, CheckCircle2, FileText, ArrowRight, Send, Upload, Sparkles } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { cn } from '@/lib/utils';
 
@@ -78,6 +78,9 @@ export default function ReviewCasePage() {
   const [busyInvoice, setBusyInvoice] = useState<string | null>(null);
   const [ntpnInput, setNtpnInput] = useState('');
   const [previewItem, setPreviewItem] = useState<ReviewItem | null>(null);
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [ocrLastResult, setOcrLastResult] = useState<{ taxKind: string; taxCode: string; confidence: number; reason: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -130,6 +133,53 @@ export default function ReviewCasePage() {
       await load();
     } finally {
       setBusyInvoice(null);
+    }
+  };
+
+  const handleOcrFile = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) {
+      alert('10MB 이하 파일만 업로드 가능합니다.');
+      return;
+    }
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(file.type)) {
+      alert('JPG / PNG / WebP / GIF 만 지원합니다. (PDF는 추후 지원 예정)');
+      return;
+    }
+    // base64 변환.
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const r = reader.result as string;
+        // dataURL prefix(`data:image/png;base64,`) 제거.
+        resolve(r.split(',')[1] ?? r);
+      };
+      reader.onerror = () => reject(new Error('파일 읽기 실패'));
+      reader.readAsDataURL(file);
+    });
+
+    setOcrBusy(true);
+    setOcrLastResult(null);
+    try {
+      const r = await fetch(`/api/operator/cases/${id}/invoices/ocr`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileBase64: base64, mimeType: file.type }),
+      });
+      const j = await r.json();
+      if (!j.success) {
+        alert(j.error ?? 'OCR 실패');
+        return;
+      }
+      setOcrLastResult({
+        taxKind: j.data.item.taxKind,
+        taxCode: j.data.item.taxCode,
+        confidence: j.data.classification.confidence,
+        reason: j.data.classification.resolution.reason,
+      });
+      await load();
+    } finally {
+      setOcrBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -221,7 +271,37 @@ export default function ReviewCasePage() {
 
           {/* 확인할 항목 */}
           <section className="rounded-2xl bg-white p-5 shadow-sm">
-            <h3 className="mb-3 text-sm font-black text-slate-900">확인할 항목</h3>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-black text-slate-900">확인할 항목</h3>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleOcrFile(f); }}
+                />
+                <button
+                  disabled={ocrBusy}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-bold transition',
+                    ocrBusy ? 'cursor-not-allowed bg-slate-200 text-slate-400' : 'bg-violet-600 text-white hover:bg-violet-700',
+                  )}
+                >
+                  {ocrBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Upload className="h-3 w-3" /><Sparkles className="h-3 w-3" /></>}
+                  Invoice OCR 추가
+                </button>
+              </div>
+            </div>
+            {ocrLastResult && (
+              <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2.5">
+                <p className="text-[11px] font-black text-violet-900">
+                  AI 분류: {ocrLastResult.taxKind} · Tax Code {ocrLastResult.taxCode} · 신뢰도 {Math.round(ocrLastResult.confidence * 100)}%
+                </p>
+                <p className="text-[10px] text-violet-700">{ocrLastResult.reason}</p>
+              </div>
+            )}
             {d.reviewItems.length === 0 ? (
               <p className="rounded-xl border border-dashed border-slate-200 px-4 py-10 text-center text-xs text-slate-400">검토할 항목이 없습니다.</p>
             ) : (
