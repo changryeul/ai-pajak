@@ -254,6 +254,10 @@ interface CaseSeed {
   // cases for the same customer-taxType pair (UNIQUE constraint).
   monthOffset?: number;
   yearOverride?: number;
+  // Coretax 흐름 데모용. EBILLING_GENERATED 이상 status에서 fill.
+  ebillingCode?: string;
+  bpeNumber?: string;
+  bpeDate?: string;
 }
 
 const cases: CaseSeed[] = [
@@ -272,6 +276,15 @@ const cases: CaseSeed[] = [
     serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'PENDING_DOCS',     priority: 'NORMAL', operatorEmpId: 'EMP002', supervisorEmpId: 'SUP002', dueDays: 5,  amount: 3_500_000 },
   { caseCode: 'C-004',         customerName: 'Budi Santoso',    customerNpwp: '01.000.005.0-001.000', customerType: 'INDIVIDUAL',
     serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'PENDING',          priority: 'NORMAL', operatorEmpId: null,    supervisorEmpId: 'SUP003', dueDays: 7,  amount: 1_200_000 },
+
+  // Phase A 시드 보강 — Coretax 4단계 흐름을 EMP001 계정으로 데모하기 위한 추가 케이스.
+  // C-005: APPROVED — 「2. ID Billing 발행 결과」에서 Billing ID를 직접 입력해 발행완료 기록 가능
+  { caseCode: 'C-005',         customerName: 'PT Sehat Sentosa', customerNpwp: '01.000.006.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Masa 원천세', taxType: 'PPh21', status: 'APPROVED',         priority: 'HIGH',   operatorEmpId: 'EMP001', supervisorEmpId: 'SUP002', dueDays: 3,  amount: 8_400_000 },
+  // C-006: EBILLING_GENERATED — 「3. 고객 NTPN 확인」 흐름 + 신고완료/BPE 입력 가능
+  { caseCode: 'C-006',         customerName: 'PT Maju Bersama',  customerNpwp: '01.000.007.0-001.000', customerType: 'COMPANY',
+    serviceLabel: 'SPT Masa 원천세', taxType: 'PPh23', status: 'EBILLING_GENERATED', priority: 'NORMAL', operatorEmpId: 'EMP001', supervisorEmpId: 'SUP002', dueDays: 4, amount: 6_500_000,
+    ebillingCode: '820123456789012' },
 ];
 
 async function ensureCustomer(c: CaseSeed): Promise<string> {
@@ -311,19 +324,37 @@ async function seedCases(
     const month = periodDate.getMonth() + 1;
     const year = c.yearOverride ?? periodDate.getFullYear();
 
-    // PDF p.7 "승인 검토 Snapshot" 표 — PENDING_APPROVAL 케이스에만 데모용 항목 4건.
-    const reviewSummary = c.status === 'PENDING_APPROVAL' ? {
-      items: [
-        { state: '자동확인',     invoice: 'INV-W-001', vendor: 'PT Vendor Jasa',  taxKind: 'PPh23',  taxCode: '411124-104', tax: 200_000 },
-        { state: '불확실 높음', invoice: 'INV-W-002', vendor: 'PT Gedung Sewa',  taxKind: 'PPh4(2)', taxCode: '411128-403', tax: 5_000_000 },
-        { state: '정보부족',    invoice: 'INV-W-003', vendor: 'PT Importir',     taxKind: 'PPh22',  taxCode: '411122-100', tax: 1_800_000 },
-        { state: '정보부족',    invoice: 'INV-W-004', vendor: 'ABC Korea Ltd.',  taxKind: 'PPh26',  taxCode: '411127-100', tax: 6_000_000 },
-      ],
-      reviewRequired: 3,
-      generatedAt: new Date().toISOString(),
-    } : null;
+    // PDF p.7 "승인 검토 Snapshot" 표.
+    //   - PENDING_APPROVAL  → 4건 + reviewRequired:3 (검토 필요한 상태로 노출)
+    //   - APPROVED 이상     → 4건 모두 자동확인 + reviewRequired:0 (검토 완료로 노출)
+    //   - 그 외(PENDING/PENDING_DOCS/DATA_REVIEW) → null
+    const APPROVED_OR_LATER = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'];
+    let reviewSummary: Record<string, unknown> | null = null;
+    if (c.status === 'PENDING_APPROVAL') {
+      reviewSummary = {
+        items: [
+          { state: '자동확인',    invoice: 'INV-W-001', vendor: 'PT Vendor Jasa', taxKind: 'PPh23',   taxCode: '411124-104', tax: 200_000,   dpp: 10_000_000 },
+          { state: '불확실 높음', invoice: 'INV-W-002', vendor: 'PT Gedung Sewa', taxKind: 'PPh4(2)', taxCode: '411128-403', tax: 5_000_000, dpp: 50_000_000 },
+          { state: '정보부족',    invoice: 'INV-W-003', vendor: 'PT Importir',    taxKind: 'PPh22',   taxCode: '411122-100', tax: 1_800_000, dpp: 120_000_000 },
+          { state: '정보부족',    invoice: 'INV-W-004', vendor: 'ABC Korea Ltd.', taxKind: 'PPh26',   taxCode: '411127-100', tax: 6_000_000, dpp: 30_000_000 },
+        ],
+        reviewRequired: 3,
+        generatedAt: new Date().toISOString(),
+      };
+    } else if (APPROVED_OR_LATER.includes(c.status)) {
+      reviewSummary = {
+        items: [
+          { state: '자동확인', invoice: 'INV-W-001', vendor: 'PT Vendor Jasa',  taxKind: 'PPh23', taxCode: '411124-104', tax: 1_500_000, dpp: 30_000_000 },
+          { state: '자동확인', invoice: 'INV-W-002', vendor: 'PT Konsultan IT', taxKind: 'PPh23', taxCode: '411124-104', tax: 2_400_000, dpp: 48_000_000 },
+          { state: '자동확인', invoice: 'INV-W-003', vendor: 'CV Cleaning',     taxKind: 'PPh23', taxCode: '411124-104', tax: 1_000_000, dpp: 20_000_000 },
+        ],
+        reviewRequired: 0,
+        generatedAt: new Date().toISOString(),
+        finalReviewedAt: new Date().toISOString(),
+      };
+    }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       customer_id: customerId,
       case_code: c.caseCode,
       service_label: c.serviceLabel,
@@ -339,6 +370,9 @@ async function seedCases(
       assigned_at: operatorId ? new Date().toISOString() : null,
       review_summary: reviewSummary,
     };
+    if (c.ebillingCode) payload.ebilling_code = c.ebillingCode;
+    if (c.bpeNumber)    payload.bpe_number    = c.bpeNumber;
+    if (c.bpeDate)      payload.bpe_date      = c.bpeDate;
 
     const { data: existing } = await admin
       .from('djp_submission_queue')
