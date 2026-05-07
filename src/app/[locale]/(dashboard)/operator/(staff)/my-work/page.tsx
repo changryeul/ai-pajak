@@ -63,6 +63,7 @@ export default function MyWorkPage() {
   const tPriority = useTranslations('operatorStaff.priority');
   const tApproval = useTranslations('operatorStaff.approvalState');
   const tNext = useTranslations('operatorStaff.nextAction');
+  const tMy = useTranslations('operatorStaff.myStatus');
   const [items, setItems] = useState<CaseItem[]>([]);
   const [kpi, setKpi] = useState<Kpi>({ urgent: 0, needsReview: 0, awaitingApproval: 0, coretaxReady: 0 });
   const [loading, setLoading] = useState(true);
@@ -105,12 +106,11 @@ export default function MyWorkPage() {
     DOCS_PENDING: items.filter(i => i.status === 'PENDING_DOCS').length,
   }), [items]);
 
+  const unit = tMy('casesUnit');
+
   if (loading) return (
     <div className="py-20 text-center"><Loader2 className="mx-auto h-8 w-8 animate-spin text-indigo-600" /></div>
   );
-
-  const tMy = useTranslations('operatorStaff.myStatus');
-  const unit = tMy('casesUnit');
 
   return (
     <div>

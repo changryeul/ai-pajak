@@ -16,11 +16,7 @@ export default function DashboardError({
   const t = useTranslations('dashboardError');
 
   useEffect(() => {
-    // 풍부한 dump — minified 에러도 모든 속성을 펼쳐서 콘솔에 노출.
-    console.error('[Dashboard Error] name=', error.name, 'message=', error.message, 'digest=', error.digest);
-    console.error('[Dashboard Error] full:', error);
-    if (error.cause) console.error('[Dashboard Error] cause:', error.cause);
-    if (error.stack) console.error('[Dashboard Error] stack:', error.stack);
+    console.error('[Dashboard Error]', error);
   }, [error]);
 
   return (
@@ -34,18 +30,16 @@ export default function DashboardError({
           <p className="text-sm text-gray-500 mb-6">
             {t('tempError')}
           </p>
-          <details className="text-left mb-4 text-xs bg-red-50 rounded p-2" open>
-            <summary className="cursor-pointer text-red-700 font-medium">{t('errorDetails')}</summary>
-            <p className="mt-2 text-red-800 font-mono break-all">
-              <strong>name:</strong> {error.name || '(none)'}<br />
-              <strong>message:</strong> {error.message || '(empty)'}<br />
-              {error.digest && <><strong>digest:</strong> {error.digest}<br /></>}
-              {error.cause ? <><strong>cause:</strong> {String(error.cause)}<br /></> : null}
-            </p>
-            {error.stack && (
-              <pre className="mt-2 text-red-600 font-mono text-[10px] whitespace-pre-wrap overflow-auto max-h-64">{error.stack}</pre>
-            )}
-          </details>
+          {error.message && (
+            <details className="text-left mb-4 text-xs bg-red-50 rounded p-2">
+              <summary className="cursor-pointer text-red-700 font-medium">{t('errorDetails')}</summary>
+              <p className="mt-2 text-red-800 font-mono break-all">{error.message}</p>
+              {error.stack && (
+                <pre className="mt-2 text-red-600 font-mono text-[10px] whitespace-pre-wrap overflow-auto max-h-48">{error.stack}</pre>
+              )}
+              {error.digest && <p className="mt-1 text-gray-400">Digest: {error.digest}</p>}
+            </details>
+          )}
           <div className="flex gap-3 justify-center">
             <Button onClick={reset}>
               <RotateCcw className="h-4 w-4 mr-2" />{t('retry')}
