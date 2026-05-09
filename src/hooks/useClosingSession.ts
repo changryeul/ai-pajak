@@ -2,6 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+export interface ClosingOcrExtracted {
+  category: 'SALES_LIST' | 'PURCHASE_LIST' | 'BANK_STATEMENT' | 'FINANCIAL_STATEMENT' | 'PAYROLL' | 'INVENTORY' | 'OTHER';
+  totalAmount: number | null;
+  rowCount: number | null;
+  lineItems: { description: string; amount: number | null; date: string | null }[];
+  summary: string;
+  rawText?: string;
+  model?: string;
+}
+
 export interface ClosingDocument {
   id: string;
   session_id: string;
@@ -11,6 +21,12 @@ export interface ClosingDocument {
   mime_type: string | null;
   size_bytes: number | null;
   uploaded_at: string;
+  // 2026-05-09 추가 — closing_document_ocr 마이그레이션
+  ocr_status?: 'NONE' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  ocr_confidence?: number | null;
+  ocr_extracted?: ClosingOcrExtracted | null;
+  ocr_error?: string | null;
+  ocr_completed_at?: string | null;
 }
 
 export interface ClosingAdjustmentEntry {
@@ -174,6 +190,27 @@ export function useClosingSession({ fiscalYear, closingType, enabled = true }: O
     [state.session?.id, refresh]
   );
 
+  /** Run AI 분류/요약 on a single uploaded document. */
+  const classifyDocument = useCallback(
+    async (docId: string): Promise<{ ok: boolean; error?: string }> => {
+      const sessionId = state.session?.id;
+      if (!sessionId) return { ok: false, error: 'no session' };
+      try {
+        const res = await fetch(
+          `/api/tax/annual-closing/${sessionId}/document/${docId}/ocr`,
+          { method: 'POST', credentials: 'include' }
+        );
+        const json = await res.json();
+        await refresh(sessionId);
+        return json.success ? { ok: true } : { ok: false, error: json.error };
+      } catch (err) {
+        await refresh(sessionId);
+        return { ok: false, error: err instanceof Error ? err.message : 'network' };
+      }
+    },
+    [state.session?.id, refresh]
+  );
+
   const saveAdjustments = useCallback(
     async (
       entries: { direction: 'POSITIVE' | 'NEGATIVE'; itemCode: string; amount: number; capPct?: number | null }[]
@@ -199,6 +236,7 @@ export function useClosingSession({ fiscalYear, closingType, enabled = true }: O
     patch,
     uploadDocument,
     deleteDocument,
+    classifyDocument,
     saveAdjustments,
   };
 }

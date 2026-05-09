@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { useSession } from '@/hooks/useSession';
 import { useClosingSession, type ClosingDocument, type ClosingAdjustmentEntry } from '@/hooks/useClosingSession';
 import { ClosingSubmissionStatus } from '@/components/closing/ClosingSubmissionStatus';
+import { ClosingOcrPanel } from '@/components/closing/ClosingOcrPanel';
 
 type StepId = 'basic' | 'collect' | 'statements' | 'sign' | 'adjust' | 'credit' | 'calc' | 'monthly';
 const STEPS: StepId[] = ['basic', 'collect', 'statements', 'sign', 'adjust', 'credit', 'calc', 'monthly'];
@@ -174,6 +175,12 @@ export default function Pph25ClosingPage() {
     else toast.error(tc('comingSoon'));
   };
 
+  const classifyDoc = async (docId: string) => {
+    const r = await closing.classifyDocument(docId);
+    if (r.ok) toast.success('AI 분석 완료');
+    else toast.error(r.error || 'AI 분석 실패');
+  };
+
   const progressPct = useMemo(
     () => Math.round((uploaded.size / DOCS.length) * 100),
     [uploaded]
@@ -272,6 +279,7 @@ export default function Pph25ClosingPage() {
                 uploaded={uploaded}
                 docMap={closing.documents}
                 onUpload={uploadDoc}
+                onClassify={classifyDoc}
                 progressPct={progressPct}
                 onPrev={prev}
                 onNext={next}
@@ -477,16 +485,30 @@ function BasicStep({
 }
 
 function CollectStep({
-  t, uploaded, docMap, onUpload, progressPct, onPrev, onNext,
+  t, uploaded, docMap, onUpload, onClassify, progressPct, onPrev, onNext,
 }: {
   t: T;
   uploaded: Set<DocId>;
   docMap: ClosingDocument[];
   onUpload: (id: DocId, file: File) => Promise<void> | void;
+  onClassify: (docId: string) => Promise<void> | void;
   progressPct: number;
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const [classifying, setClassifying] = useState<Set<string>>(new Set());
+  const trigger = async (docId: string) => {
+    setClassifying((s) => new Set(s).add(docId));
+    try {
+      await onClassify(docId);
+    } finally {
+      setClassifying((s) => {
+        const n = new Set(s);
+        n.delete(docId);
+        return n;
+      });
+    }
+  };
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
@@ -524,6 +546,13 @@ function CollectStep({
                   <p className="text-xs text-slate-600 mt-1">{t(`collect.items.${id}.body`)}</p>
                   {fileMeta && (
                     <p className="text-[11px] text-emerald-700 mt-1 truncate">📎 {fileMeta.file_name}</p>
+                  )}
+                  {fileMeta && (
+                    <ClosingOcrPanel
+                      doc={fileMeta}
+                      busy={classifying.has(fileMeta.id)}
+                      onTrigger={() => trigger(fileMeta.id)}
+                    />
                   )}
                   <p className="text-[11px] text-blue-700 mt-2">
                     {t('collect.detailLink')} {t(`collect.items.${id}.detail`)}
