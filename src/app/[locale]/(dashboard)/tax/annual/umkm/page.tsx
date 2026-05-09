@@ -13,6 +13,7 @@ import { useSession } from '@/hooks/useSession';
 import { useClosingSession, type ClosingDocument } from '@/hooks/useClosingSession';
 import { ClosingSubmissionStatus } from '@/components/closing/ClosingSubmissionStatus';
 import { ClosingOcrPanel } from '@/components/closing/ClosingOcrPanel';
+import { ClosingEbupotInline } from '@/components/closing/ClosingEbupotInline';
 
 type StepId = 'basic' | 'collect' | 'statements' | 'sign' | 'calc' | 'billing' | 'submit';
 const STEPS: StepId[] = ['basic', 'collect', 'statements', 'sign', 'calc', 'billing', 'submit'];
@@ -285,6 +286,9 @@ export default function UmkmClosingPage() {
                 t={t}
                 tc={tc}
                 sessionId={closing.session?.id ?? null}
+                fiscalYear={fiscalYear}
+                companyName={data.companyName ?? ''}
+                companyNpwp={data.npwp ?? ''}
                 onPrev={goPrev}
                 onComplete={completeAndExit}
                 completed={closing.session?.status === 'COMPLETED'}
@@ -1023,39 +1027,33 @@ function BillingStep({
 }
 
 function SubmitStep({
-  t, tc, sessionId, onPrev, onComplete, completed,
+  t, tc, sessionId, fiscalYear, companyName, companyNpwp, onPrev, onComplete, completed,
 }: {
   t: T;
   tc: T;
   sessionId: string | null;
+  fiscalYear: number;
+  companyName: string;
+  companyNpwp: string;
   onPrev: () => void;
   onComplete: () => Promise<void> | void;
   completed: boolean;
 }) {
-  const params = useParams();
-  const router = useRouter();
-  const locale = params.locale as string;
+  void tc;
   const downloadSpt = () => {
     if (!sessionId) return;
     window.open(`/api/tax/annual-closing/${sessionId}/spt-pdf`, '_blank');
   };
-  const goEbupot = () => router.push(`/${locale}/tax/ebupot?from=closing&sessionId=${sessionId ?? ''}`);
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('submit.title')}</p>
       <p className="text-sm text-slate-500 mt-1">{t('submit.subtitle')}</p>
 
-      <div className="rounded-lg border border-slate-200 p-4 mt-5">
-        <p className="text-sm font-bold text-slate-900">e-Bupot 1721 A1 발급</p>
-        <p className="text-xs text-slate-500 mt-1">
-          업로드된 직원 자료를 기반으로 1721 A1 일괄 발급 화면으로 이동합니다.
-        </p>
-        <div className="flex justify-end mt-3">
-          <Button size="sm" variant="outline" onClick={goEbupot}>
-            e-Bupot 1721 A1 →
-          </Button>
-        </div>
-      </div>
+      <ClosingEbupotInline
+        taxYear={fiscalYear}
+        initialCompanyName={companyName}
+        initialCompanyNpwp={companyNpwp}
+      />
 
       <SubmitActions t={t} sessionId={sessionId} downloadSpt={downloadSpt} />
 

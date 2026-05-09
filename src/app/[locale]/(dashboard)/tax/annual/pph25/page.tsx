@@ -16,6 +16,7 @@ import { useSession } from '@/hooks/useSession';
 import { useClosingSession, type ClosingDocument, type ClosingAdjustmentEntry } from '@/hooks/useClosingSession';
 import { ClosingSubmissionStatus } from '@/components/closing/ClosingSubmissionStatus';
 import { ClosingOcrPanel } from '@/components/closing/ClosingOcrPanel';
+import { ClosingEbupotInline } from '@/components/closing/ClosingEbupotInline';
 
 type StepId = 'basic' | 'collect' | 'statements' | 'sign' | 'adjust' | 'credit' | 'calc' | 'monthly';
 const STEPS: StepId[] = ['basic', 'collect', 'statements', 'sign', 'adjust', 'credit', 'calc', 'monthly'];
@@ -336,6 +337,9 @@ export default function Pph25ClosingPage() {
                 t={t}
                 tc={tc}
                 sessionId={closing.session?.id ?? null}
+                fiscalYear={fiscalYear}
+                companyName={data.companyName ?? ''}
+                companyNpwp={data.npwp ?? ''}
                 pphBadan={pphBadan}
                 pph22={pph22}
                 pph23={pph23}
@@ -1079,22 +1083,6 @@ function CalcStep({
   );
 }
 
-function EbupotCta({ sessionId }: { sessionId: string | null }) {
-  const params = useParams();
-  const router = useRouter();
-  const locale = params.locale as string;
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      className="h-7 text-xs"
-      onClick={() => router.push(`/${locale}/tax/ebupot?from=closing&sessionId=${sessionId ?? ''}`)}
-    >
-      e-Bupot →
-    </Button>
-  );
-}
-
 function PayBillingCta({ sessionId }: { sessionId: string | null }) {
   const [code, setCode] = useState<string | null>(null);
   const [issuing, setIssuing] = useState(false);
@@ -1149,11 +1137,14 @@ function PayBillingCta({ sessionId }: { sessionId: string | null }) {
 }
 
 function MonthlyStep({
-  t, tc, sessionId, pphBadan, pph22, pph23, pph24, monthlyBase, monthlyAmount, onPrev, onComplete, completed,
+  t, tc, sessionId, fiscalYear, companyName, companyNpwp, pphBadan, pph22, pph23, pph24, monthlyBase, monthlyAmount, onPrev, onComplete, completed,
 }: {
   t: T;
   tc: T;
   sessionId: string | null;
+  fiscalYear: number;
+  companyName: string;
+  companyNpwp: string;
   pphBadan: number;
   pph22: number;
   pph23: number;
@@ -1164,6 +1155,7 @@ function MonthlyStep({
   onComplete: () => Promise<void> | void;
   completed: boolean;
 }) {
+  void tc;
   const downloadSpt = () => {
     if (!sessionId) return;
     window.open(`/api/tax/annual-closing/${sessionId}/spt-pdf`, '_blank');
@@ -1230,14 +1222,14 @@ function MonthlyStep({
               </div>
             </li>
           ))}
-          <li className="text-sm text-slate-700">
-            <div className="flex items-center justify-between gap-2">
-              <span>e-Bupot 1721 A1 일괄 발급</span>
-              <EbupotCta sessionId={sessionId} />
-            </div>
-          </li>
         </ol>
       </div>
+
+      <ClosingEbupotInline
+        taxYear={fiscalYear}
+        initialCompanyName={companyName}
+        initialCompanyNpwp={companyNpwp}
+      />
 
       <SubmitClosingBox sessionId={sessionId} onComplete={onComplete} completed={completed} onPrev={onPrev} t={t} />
     </div>
