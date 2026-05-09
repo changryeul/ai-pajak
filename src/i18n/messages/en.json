@@ -5230,7 +5230,13 @@
   "operatorQueue": {
     "rejectReasonPrompt": "Please enter rejection reason (required)",
     "rejectReasonRequired": "Rejection reason is required",
-    "reject": "Reject"
+    "reject": "Reject",
+    "kindFilter": "Kind",
+    "kindAll": "All",
+    "kindMonthly": "Monthly",
+    "kindClosing": "Annual closing",
+    "closingBadge": "Closing",
+    "closingHint": "This case originated from the customer's annual closing (SPT Tahunan)."
   },
   "poaStatus": {
     "defaultPartner": "Tax Agency"

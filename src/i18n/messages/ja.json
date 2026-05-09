@@ -5230,7 +5230,13 @@
   "operatorQueue": {
     "rejectReasonPrompt": "却下理由を入力してください (必須)",
     "rejectReasonRequired": "却下理由は必須です",
-    "reject": "却下"
+    "reject": "却下",
+    "kindFilter": "種別",
+    "kindAll": "すべて",
+    "kindMonthly": "月次申告",
+    "kindClosing": "年次決算",
+    "closingBadge": "決算",
+    "closingHint": "この案件はお客様の年次決算 (SPT Tahunan) から発生しました。"
   },
   "poaStatus": {
     "defaultPartner": "税務代行会社"

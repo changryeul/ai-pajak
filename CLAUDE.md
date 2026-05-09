@@ -13,7 +13,7 @@ AI Pajak — Indonesian tax filing automation platform for Jakarta Tax Consultin
 ## Commands
 
 ```bash
-npm run dev                # Dev server (Turbopack)
+npm run dev                # Dev server (Turbopack — Next.js 16 default)
 npm run build              # Production build
 npm run lint               # ESLint
 npm test                   # Vitest unit tests
@@ -65,10 +65,18 @@ E2E tests live in `src/tests/e2e/` (Playwright, 60s timeout, 2 workers locally).
 ### Routing
 All pages are under `src/app/[locale]/` with route groups:
 - `(auth)/` — login, register, forgot-password (redirect to dashboard if authenticated)
-- `(dashboard)/` — billing, customers, documents, filings, poa, reports, settings, tax
+- `(dashboard)/` — see below
 - `(public)/` — public pages
 
 API routes live at `src/app/api/` (not locale-prefixed).
+
+**Dashboard surfaces** (under `(dashboard)/`) split by audience:
+- Customer-side: `dashboard`, `tax` (filings/intake), `filings`, `submissions`, `billing`, `documents`, `invoice-capture` (OCR), `assets`, `counterparties`, `company-profile`, `my-profile`, `poa`, `reports`, `chat` (AI 챗봇), `news`, `marketplace`, `referral`, `notifications`, `settings`, `help`
+- Consultant-side: `customers`, `customers/[id]`
+- Operator-side: `operator/*` — 운영팀 큐 UI (review/approval/ebilling/payment/DJP/BPE)
+- Admin-side: `admin/*` — `monitoring` (observability), `master/*` (TAX_OPERATOR_MASTER governance)
+
+**Customer dashboard 진입은 `customer.customer_type`(INDIVIDUAL/COMPANY)에 따라 자동 분기**합니다. 같은 `/dashboard` URL이라도 INDIVIDUAL은 개인 SPT 위주 (1770SS/S/1770), COMPANY는 월 신고/결산 wizard 위주의 화면을 받습니다. 이 분기는 server component에서 customer 행을 읽어 결정합니다.
 
 ### Middleware Composition (Critical Pattern)
 API routes use `composeMiddleware()` from `src/middleware/compose.ts` to chain middleware left-to-right:
@@ -98,13 +106,37 @@ Multi-tenancy: a single `tax_partner` row can be `JTC` (internal, `is_platform_p
 Auth enforced at **two levels**: API middleware (first gate) + Supabase RLS (final gate).
 
 ### Tax Calculation Modules
-Each SPT form has its own directory under `src/lib/tax/`:
+The platform calculates **annual SPT, monthly SPT Masa, and annual closing** under `src/lib/tax/`.
+
+Annual SPT (개인/법인 연간):
 - `spt-1770ss/` — simple employee form
 - `spt-1770s/` — mixed income
 - `spt-1770/` — business income
-- `spt-1771/` — corporate
+- `spt-1771/` — corporate (UI is currently disabled in favor of monthly filing — calculator kept)
 
-Shared types/constants in `src/lib/tax/shared/` (PTKP rates, tax brackets, common types).
+Monthly SPT Masa (월 신고) and withholding:
+- `spt-masa/`, `spt-masa-calculator.ts` — monthly SPT Masa generation + PDF
+- `pph21-calculator.ts` — employee withholding (개정 2024 brackets)
+- `pph22-calculator.ts` — import withholding
+- `pph23-calculator.ts` — service withholding
+- `pph26-calculator.ts` — non-resident withholding
+- `pph15-calculator.ts` — sector-specific (shipping/airline)
+- `pph-final-calculator.ts` — final tax (PPh Final 0.5% UMKM 등)
+- `ppn-calculator.ts` — VAT (PPN)
+- `ebupot/`, `bpe/` — e-Bupot 전자증빙 / BPE 전자수령증
+- `withholding-helpers.ts`, `grossup-calculator.ts`, `annual-regime.ts`
+
+Annual closing (연간 결산):
+- `closing-statements/` — closing PDF (UMKM/PPh25 8-phase wizard, 2026-05 완료). Walks UMKM (PPh Final 0.5%) or PPh25 (정상 법인세) closure end-to-end: ID Billing 발급 → 납부 → DJP 제출 → BPE 수령 → 신고 완료.
+- `koreksi-fiskal-engine.ts` — fiscal correction (회계 → 세무 조정)
+- `annual-aggregator.ts`, `trend-from-filings.ts` — aggregates monthly filings into annual figures
+- `tax-resolution-engine.ts` — resolves which SPT applies given customer profile
+
+Bulk + shared:
+- `bulk-import/`, `column-mapper.ts` — CSV/Excel bulk import for transactions/employees
+- `shared/` — PTKP rates, tax brackets, common types
+- `export/` — exporters for filings
+
 Unit tests colocated: `src/lib/**/*.test.ts`.
 
 ### Supabase Client Tiers
@@ -196,6 +228,8 @@ Three env vars control the operator Coretax automation. Default is **manual mode
 
 When enabled and operator leaves `billingId`/`bpeNumber` blank, the PUT actions call `coretax.issueIdBilling()` / `coretax.submitSpt()` via `src/lib/coretax/client.ts`. The client wraps every call in `CircuitBreaker('coretax')` + `withRetry` (2 retries, exponential backoff). HTTP 4xx/5xx are NOT retried; circuit opens after 5 consecutive failures for 30s. Operator can always override by typing values manually.
 
+Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/response/duration/error) and `case_audit_log` for case-level traceability. The `djp_submission_queue` row is linked to the originating `annual_closing_session` via `djp_queue_closing_link`, so the closing wizard and the operator queue share state — supervisor can reopen a closing case from the operator queue and vice versa.
+
 ### Authentication & Security
 - **2FA (TOTP)**: `/api/auth/mfa` — Supabase MFA enroll/verify/unenroll. Settings page UI.
 - **Login History**: `/api/auth/sessions` — audit_log based login/failure history.
@@ -246,8 +280,17 @@ Seed scripts:
 - `npm run db:seed-test-users` — JTC customers + consultants + admin
 - `SEED_TARGET=prod npx tsx scripts/seed-master-and-external.ts` — Operator team + EXTERNAL tax_partner + its consultant
 - `SEED_TARGET=prod npx tsx scripts/seed-company-customer.ts` — patches `company.test@example.com` to a COMPANY customer (works around `listUsers` pagination on populated DBs)
-- `SEED_TARGET=prod npx tsx scripts/verify-rls-isolation.ts` — verifies JTC ↔ EXTERNAL tenant isolation
-- `SEED_TARGET=prod npx tsx scripts/test-billing-flow.ts` — smoke test for the 3 billing endpoints, tolerates graceful-degrade responses
+
+Verification / regression scripts (회귀 검증):
+- `SEED_TARGET=prod npx tsx scripts/verify-rls-isolation.ts` — JTC ↔ EXTERNAL tenant isolation
+- `SEED_TARGET=prod npx tsx scripts/test-external-consultant-isolation.ts` — external consultant이 JTC 데이터를 절대 못 보는지 end-to-end
+- `SEED_TARGET=prod npx tsx scripts/test-billing-flow.ts` — 3 billing endpoints smoke test, graceful-degrade 허용
+- `SEED_TARGET=prod npx tsx scripts/test-custom-pricing-flow.ts` — Master custom pricing quote 발행 → 고객 수락 흐름
+- `SEED_TARGET=prod npx tsx scripts/test-operator-queue-flow.ts` — 운영팀 11-state 워크플로우 전체 전이
+- `SEED_TARGET=prod npx tsx scripts/test-closing-bpe-sync.ts` — 결산 wizard ↔ operator queue ↔ BPE 동기화
+- `SEED_TARGET=prod npx tsx scripts/test-onboarding-flow.ts` — 신규 가입 → 첫 신고까지 골든 패스
+- `SEED_TARGET=prod npx tsx scripts/test-staff-workflow.ts` — supervisor → operator 배정/평가 흐름
+- `SEED_TARGET=prod npx tsx scripts/test-monitoring-flow.ts` — Sentry / circuit breaker / monitoring dashboard 신호
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 

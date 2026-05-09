@@ -75,6 +75,10 @@ export async function GET(request: NextRequest) {
   const taxType = searchParams.get('taxType');
   const year = searchParams.get('year');
   const month = searchParams.get('month');
+  // kind=closing → 결산만 (closing_session_id IS NOT NULL)
+  // kind=monthly → 월신고만 (closing_session_id IS NULL)
+  // 미지정/all  → 전체
+  const kind = searchParams.get('kind');
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '50', 10);
   const offset = (page - 1) * limit;
@@ -97,6 +101,7 @@ export async function GET(request: NextRequest) {
       ebilling_code, bpe_number, bpe_date, notes, failed_reason,
       approved_by, approved_at, approval_notes, rejected_reason, review_summary,
       payment_proof_url, payment_amount, payment_date, payment_verified_by, payment_verified_at,
+      closing_session_id,
       created_at, updated_at, operator_id
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
@@ -111,6 +116,8 @@ export async function GET(request: NextRequest) {
   if (taxType) query = query.eq('tax_type', taxType);
   if (year) query = query.eq('tax_period_year', parseInt(year, 10));
   if (month) query = query.eq('tax_period_month', parseInt(month, 10));
+  if (kind === 'closing') query = query.not('closing_session_id', 'is', null);
+  else if (kind === 'monthly') query = query.is('closing_session_id', null);
 
   const { data: rawItems, count, error } = await query;
 
@@ -120,7 +127,7 @@ export async function GET(request: NextRequest) {
 
   // Enrich with customer data
   const customerIds = [...new Set((rawItems || []).map(i => i.customer_id).filter(Boolean))];
-  let customerMap: Record<string, { id: string; customer_name: string; npwp: string; customer_type: string }> = {};
+  const customerMap: Record<string, { id: string; customer_name: string; npwp: string; customer_type: string }> = {};
   if (customerIds.length > 0) {
     const { data: customers } = await admin.from('customer').select('id, customer_name, npwp, customer_type').in('id', customerIds);
     for (const c of customers || []) customerMap[c.id] = c;

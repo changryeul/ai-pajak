@@ -1,11 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+interface ClosingRow {
+  kind: 'CLOSING';
+  sessionId: string;
+  fiscalYear: number;
+  closingType: 'UMKM' | 'PPH25';
+  sessionStatus: string;
+  submission: {
+    status: string;
+    bpeNumber: string | null;
+    ntpn: string | null;
+    completedAt: string | null;
+  } | null;
+  idBilling: {
+    billingCode: string;
+    amount: number;
+    status: string;
+    ntpn: string | null;
+  } | null;
+}
 
 type ListTab = 'all' | 'monthly' | 'annual';
 type RowStatus = 'filed' | 'paidPending' | 'aiReview';
@@ -44,8 +64,49 @@ export function CompanyFilingsView() {
   const router = useRouter();
   const locale = params.locale as string;
   const [listTab, setListTab] = useState<ListTab>('all');
+  const [closingRows, setClosingRows] = useState<Row[]>([]);
 
-  const allRows: Row[] = ROW_KEYS.map((id) => ({
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/tax/closing-filings', { credentials: 'include' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const rows = ((json?.data ?? []) as ClosingRow[]).map((r): Row => {
+          const completed = r.submission?.status === 'COMPLETED';
+          const paid = r.idBilling?.status === 'PAID';
+          const status: RowStatus = completed ? 'filed' : paid ? 'paidPending' : 'aiReview';
+          const amountFmt =
+            r.idBilling?.amount != null
+              ? `Rp ${r.idBilling.amount.toLocaleString('id-ID')}`
+              : '—';
+          const typeLabel =
+            r.closingType === 'UMKM'
+              ? `SPT Tahunan ${r.fiscalYear} (UMKM)`
+              : `SPT Tahunan ${r.fiscalYear} (PPh25)`;
+          return {
+            id: `closing-${r.sessionId}`,
+            kind: 'annual',
+            period: String(r.fiscalYear),
+            type: typeLabel,
+            status,
+            payDeadline: '—',
+            fileDeadline: '—',
+            amount: amountFmt,
+            ntpn: r.submission?.ntpn ?? r.idBilling?.ntpn ?? '—',
+            bpe: r.submission?.bpeNumber ?? '—',
+          };
+        });
+        if (!cancelled) setClosingRows(rows);
+      } catch {
+        /* non-fatal */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const mockRows: Row[] = ROW_KEYS.map((id) => ({
     id,
     kind: ROW_KIND[id],
     period: t(`rows.${id}.period`),
@@ -58,6 +119,8 @@ export function CompanyFilingsView() {
     bpe: t(`rows.${id}.bpe`),
   }));
 
+  // 결산은 항상 우선 노출 — 실제 데이터(closingRows) + mock 행을 합쳐 보여준다.
+  const allRows: Row[] = [...closingRows, ...mockRows];
   const filteredRows = listTab === 'all' ? allRows : allRows.filter((r) => r.kind === listTab);
 
   const counts = {

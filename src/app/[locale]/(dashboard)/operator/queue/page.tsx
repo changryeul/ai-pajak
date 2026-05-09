@@ -42,6 +42,7 @@ interface QueueItem {
   bpe_date: string | null;
   notes: string | null;
   failed_reason: string | null;
+  closing_session_id: string | null;
   created_at: string;
   updated_at: string;
   operator_id: string;
@@ -132,6 +133,8 @@ export default function OperatorQueuePage() {
   const [filterTaxType, setFilterTaxType] = useState<string>('');
   const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
   const [filterMonth, setFilterMonth] = useState<string>('');
+  // 'all' | 'monthly' | 'closing' — 결산건만 보고 싶을 때 사용
+  const [filterKind, setFilterKind] = useState<string>('all');
 
   // Inline edit state
   const [editState, setEditState] = useState<{
@@ -209,6 +212,7 @@ export default function OperatorQueuePage() {
       if (filterTaxType) params.set('taxType', filterTaxType);
       if (filterYear) params.set('year', filterYear);
       if (filterMonth) params.set('month', filterMonth);
+      if (filterKind && filterKind !== 'all') params.set('kind', filterKind);
 
       const res = await fetch(`/api/operator/queue?${params.toString()}`);
       const json = await res.json();
@@ -221,7 +225,7 @@ export default function OperatorQueuePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [filterStatus, filterTaxType, filterYear, filterMonth]);
+  }, [filterStatus, filterTaxType, filterYear, filterMonth, filterKind]);
 
   useEffect(() => {
     loadData();
@@ -343,7 +347,21 @@ export default function OperatorQueuePage() {
       {/* Filters */}
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-4">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+            {/* Kind filter (월신고 / 연결산) */}
+            <div>
+              <label className="text-[10px] text-gray-500 font-medium block mb-1">{tq('kindFilter')}</label>
+              <select
+                className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                value={filterKind}
+                onChange={(e) => setFilterKind(e.target.value)}
+              >
+                <option value="all">{tq('kindAll')}</option>
+                <option value="monthly">{tq('kindMonthly')}</option>
+                <option value="closing">{tq('kindClosing')}</option>
+              </select>
+            </div>
+
             {/* Status filter */}
             <div>
               <label className="text-[10px] text-gray-500 font-medium block mb-1">{t('filterStatus')}</label>
@@ -495,11 +513,16 @@ export default function OperatorQueuePage() {
                           </p>
                         </div>
 
-                        {/* Tax Type */}
-                        <div>
+                        {/* Tax Type (+ closing badge if linked to a closing session) */}
+                        <div className="flex items-center gap-1 flex-wrap">
                           <Badge variant="outline" className="text-[10px]">
                             {item.tax_type}
                           </Badge>
+                          {item.closing_session_id && (
+                            <Badge className="text-[10px] bg-amber-100 text-amber-800 border-0">
+                              {tq('closingBadge')}
+                            </Badge>
+                          )}
                         </div>
 
                         {/* Period */}
@@ -557,6 +580,11 @@ export default function OperatorQueuePage() {
                     {/* Expanded Detail */}
                     {isExpanded && (
                       <div className="px-3 pb-4 bg-gray-50 border-t">
+                        {item.closing_session_id && (
+                          <div className="mt-3 p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px]">
+                            {tq('closingHint')}
+                          </div>
+                        )}
                         <div className="grid md:grid-cols-2 gap-4 pt-4">
                           {/* Details */}
                           <div className="space-y-3">

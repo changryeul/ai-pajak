@@ -5333,7 +5333,13 @@
   "operatorQueue": {
     "rejectReasonPrompt": "거절 사유를 입력해 주세요 (필수)",
     "rejectReasonRequired": "거절 사유는 필수입니다",
-    "reject": "거절"
+    "reject": "거절",
+    "kindFilter": "유형",
+    "kindAll": "전체",
+    "kindMonthly": "월 신고",
+    "kindClosing": "연간 결산",
+    "closingBadge": "결산",
+    "closingHint": "이 케이스는 고객의 연간 결산(SPT Tahunan)에서 시작되었습니다."
   },
   "poaStatus": {
     "defaultPartner": "세무 대행사"

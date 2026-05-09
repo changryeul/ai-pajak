@@ -5230,7 +5230,13 @@
   "operatorQueue": {
     "rejectReasonPrompt": "请输入拒绝原因 (必填)",
     "rejectReasonRequired": "拒绝原因是必填项",
-    "reject": "拒绝"
+    "reject": "拒绝",
+    "kindFilter": "类别",
+    "kindAll": "全部",
+    "kindMonthly": "月度申报",
+    "kindClosing": "年度结算",
+    "closingBadge": "结算",
+    "closingHint": "本案源自客户的年度结算 (SPT Tahunan)。"
   },
   "poaStatus": {
     "defaultPartner": "税务代理机构"

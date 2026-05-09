@@ -5230,7 +5230,13 @@
   "operatorQueue": {
     "rejectReasonPrompt": "Silakan masukkan alasan penolakan (wajib)",
     "rejectReasonRequired": "Alasan penolakan wajib diisi",
-    "reject": "Tolak"
+    "reject": "Tolak",
+    "kindFilter": "Jenis",
+    "kindAll": "Semua",
+    "kindMonthly": "Bulanan",
+    "kindClosing": "Tutup buku tahunan",
+    "closingBadge": "Tahunan",
+    "closingHint": "Kasus ini berasal dari tutup buku tahunan pelanggan (SPT Tahunan)."
   },
   "poaStatus": {
     "defaultPartner": "Konsultan Pajak"

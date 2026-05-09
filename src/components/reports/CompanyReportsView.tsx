@@ -1,11 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+interface ClosingApiRow {
+  kind: 'CLOSING';
+  sessionId: string;
+  fiscalYear: number;
+  closingType: 'UMKM' | 'PPH25';
+  sessionStatus: string;
+  submission: { status: string; bpeNumber: string | null; ntpn: string | null; completedAt: string | null } | null;
+  idBilling: { billingCode: string; amount: number; status: string; ntpn: string | null } | null;
+}
 
 type Tab = 'monthly' | 'annual' | 'financial' | 'aiRisk';
 
@@ -32,10 +42,51 @@ export function CompanyReportsView() {
   const router = useRouter();
   const locale = params.locale as string;
   const [tab, setTab] = useState<Tab>('aiRisk');
+  const [closingReportRows, setClosingReportRows] = useState<ReportRow[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/tax/closing-filings', { credentials: 'include' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const rows = ((json?.data ?? []) as ClosingApiRow[]).map((r): ReportRow => {
+          const completed = r.submission?.status === 'COMPLETED';
+          const paid = r.idBilling?.status === 'PAID';
+          const status: ReportRow['status'] = completed ? 'complete' : paid ? 'inProgress' : 'aiReview';
+          const amount = r.idBilling?.amount != null
+            ? `Rp ${r.idBilling.amount.toLocaleString('id-ID')}`
+            : '—';
+          const name = r.closingType === 'UMKM'
+            ? `결산보고서 ${r.fiscalYear} (UMKM)`
+            : `결산보고서 ${r.fiscalYear} (PPh25)`;
+          const summary = r.submission?.bpeNumber
+            ? `BPE ${r.submission.bpeNumber} · NTPN ${r.submission.ntpn ?? '—'}`
+            : r.idBilling?.billingCode
+              ? `ID Billing ${r.idBilling.billingCode}`
+              : '결산 진행 중';
+          return {
+            id: `closing-${r.sessionId}`,
+            name,
+            period: String(r.fiscalYear),
+            date: r.submission?.completedAt?.slice(0, 10) ?? '—',
+            amount,
+            summary,
+            status,
+          };
+        });
+        if (!cancelled) setClosingReportRows(rows);
+      } catch {
+        /* non-fatal */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const counts: Record<Tab, number> = {
     monthly: 1,
-    annual: 1,
+    annual: 1 + closingReportRows.length,
     financial: 1,
     aiRisk: 4,
   };
@@ -53,6 +104,7 @@ export function CompanyReportsView() {
       },
     ],
     annual: [
+      ...closingReportRows,
       {
         id: 'annual',
         name: t('rows.annual.name'),
