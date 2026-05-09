@@ -20,8 +20,30 @@ interface SessionRow {
   closing_type: 'UMKM' | 'PPH25';
   status: 'IN_PROGRESS' | 'COMPLETED' | 'ARCHIVED';
   current_step: string;
+  data: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
+}
+
+/** 결산 wizard data JSONB 에서 PL 키를 안전하게 추출. 누락 필드는 null. */
+function extractPL(raw: Record<string, unknown> | null): {
+  annualRevenue: number | null;
+  cogs: number | null;
+  salary: number | null;
+  opex: number | null;
+  netIncome: number | null;
+} {
+  const num = (k: string): number | null => {
+    const v = raw?.[k];
+    return typeof v === 'number' && Number.isFinite(v) ? v : null;
+  };
+  return {
+    annualRevenue: num('annualRevenue'),
+    cogs: num('cogs'),
+    salary: num('salary'),
+    opex: num('opex'),
+    netIncome: num('netIncome') ?? num('accountingIncome'),
+  };
 }
 
 interface SubmissionRow {
@@ -70,7 +92,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 
     const { data: sessions } = await admin
       .from('tax_closing_session')
-      .select('id, fiscal_year, closing_type, status, current_step, created_at, updated_at')
+      .select('id, fiscal_year, closing_type, status, current_step, data, created_at, updated_at')
       .eq('customer_id', customerId)
       .order('fiscal_year', { ascending: false });
 
@@ -107,6 +129,8 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
         closingType: s.closing_type, // 'UMKM' | 'PPH25'
         sessionStatus: s.status, // wizard 진행 상태
         wizardStep: s.current_step,
+        pl: extractPL(s.data), // multi-year 비교용 PL 파생값
+        taxAmount: bill ? Number(bill.amount) : null, // 결산 세액 (PPh Final / PPh Badan)
         // submission(운영팀 큐 동기화) 상태
         submission: sub
           ? {

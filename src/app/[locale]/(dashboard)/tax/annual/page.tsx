@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Calendar, FileText, Building2, Sparkles, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ClosingMultiYearTrend } from '@/components/closing/ClosingMultiYearTrend';
 
 type ClosingType = 'umkm' | 'normal';
 
@@ -60,6 +61,9 @@ export default function AnnualClosingStartPage() {
           {t('aiPerforms')}
         </span>
       </div>
+
+      {/* Multi-year closing trend (최근 5년 결산 비교) */}
+      <ClosingMultiYearTrend />
 
       {/* Guide */}
       <div className="rounded-xl border border-slate-200 bg-white p-6 mb-6">
