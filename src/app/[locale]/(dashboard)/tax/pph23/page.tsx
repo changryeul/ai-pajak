@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
-import { Download, FileUp, Pencil } from 'lucide-react';
+import { Download, FileUp, FileSpreadsheet, Pencil } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 
 // ── Types ──
@@ -164,7 +164,11 @@ export default function PPh23Page() {
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage(null), 5000);
+    // 성공만 자동 dismiss (5초). 에러는 사용자가 명시적으로 닫게 — 제출 실패는
+    // 사용자가 인지하지 못한 채 사라지면 안 됨.
+    if (type === 'success') {
+      setTimeout(() => setMessage(null), 5000);
+    }
   };
 
   // Load customers (consultant) or set own customerId
@@ -404,6 +408,56 @@ export default function PPh23Page() {
       .catch(() => {});
   }, [customerId, period, transactions]);
 
+  /**
+   * CSV 일괄 업로드 — /api/tax/pph23-transactions/import 호출.
+   * OCR 흐름과 별개로 사용자가 작성한 CSV 를 직접 거래로 import.
+   * 부분 실패 (일부 행 검증 실패) 도 사용자에게 명확히 표시.
+   */
+  const handleCsvImport = async (file: File | null, uploadPeriod?: string) => {
+    if (!file || !customerId) return;
+    const importPeriod = uploadPeriod || confirmedPeriod || period;
+    if (!importPeriod) {
+      showMsg('error', '월(taxPeriod)을 먼저 선택해 주세요.');
+      return;
+    }
+    setUploading(true);
+    try {
+      const csvContent = await file.text();
+      const res = await fetch('/api/tax/pph23-transactions/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxPeriod: importPeriod, csvContent }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        showMsg('error', `CSV 일괄 업로드 실패 — ${data.error || `HTTP ${res.status}`}`);
+        return;
+      }
+      const d = data.data || {};
+      const inserted = d.insertedCount ?? 0;
+      const errorRows = d.errorRows ?? 0;
+      const total = d.totalRows ?? 0;
+      if (errorRows > 0) {
+        const sample = (d.errors || []).slice(0, 3)
+          .map((e: { rowNumber: number; errors: string[] }) => `행 ${e.rowNumber}: ${e.errors.join(', ')}`)
+          .join(' / ');
+        showMsg(
+          'error',
+          `${inserted}/${total}건 등록, ${errorRows}건 검증 실패 — ${sample}${(d.errors || []).length > 3 ? ' …' : ''}`,
+        );
+      } else {
+        showMsg('success', `${inserted}/${total}건 PPh 23 거래 등록 완료`);
+      }
+      // 거래 목록 갱신
+      if (importPeriod !== period) setPeriod(importPeriod);
+      loadData();
+    } catch (err) {
+      showMsg('error', `CSV 처리 중 오류 — ${err instanceof Error ? err.message : '알 수 없음'}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDocUpload = async (files: FileList | null, source: string = 'WEB', docType: string = 'INVOICE', uploadPeriod?: string) => {
     if (!files || !customerId) return;
     setUploading(true);
@@ -573,6 +627,32 @@ export default function PPh23Page() {
               )}
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
                 onChange={e => handleDocUpload(e.target.files, 'WEB', 'INVOICE')} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                onClick={() => openMonthPicker('csv')}
+                disabled={uploading || !customerId}
+              >
+                <FileSpreadsheet className="h-3 w-3 mr-1" />
+                CSV 일괄 업로드
+              </Button>
+              <input
+                ref={csvInputRef}
+                type="file"
+                className="hidden"
+                accept=".csv,text/csv"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void handleCsvImport(f);
+                  e.target.value = '';
+                }}
+              />
+              {confirmedPeriod && pendingAction === 'csv' && (
+                <p className="text-[10px] text-blue-700 text-center">
+                  {t('monthPickerSelected', { period: confirmedPeriod })}
+                </p>
+              )}
             </div>
             <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
               <p className="text-[10px] text-gray-500 flex items-center gap-1">
@@ -629,9 +709,19 @@ export default function PPh23Page() {
       </div>
 
       {message && (
-        <div className={`mb-4 p-3 rounded-xl text-sm flex items-center gap-2 ${message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
-          {message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
-          {message.text}
+        <div className={`mb-4 p-3 rounded-xl text-sm flex items-start gap-2 ${message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
+          {message.type === 'success' ? <CheckCircle className="h-4 w-4 shrink-0 mt-0.5" /> : <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />}
+          <div className="flex-1">{message.text}</div>
+          {message.type === 'error' && (
+            <button
+              type="button"
+              onClick={() => setMessage(null)}
+              className="ml-1 text-xs text-red-700 hover:text-red-900 underline"
+              aria-label="dismiss"
+            >
+              닫기
+            </button>
+          )}
         </div>
       )}
 
@@ -1332,15 +1422,28 @@ export default function PPh23Page() {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
                 });
-                const data = await res.json();
-                if (data.success || data.sptMasa) {
-                  showMsg('success', `SPT Masa PPh 23 ${t('k12_c05543')}`);
+                const data = await res.json().catch(() => ({}));
+                // 백엔드 success contract: HTTP 2xx + data.success===true.
+                // 어느 한쪽이라도 false 면 실패로 처리해 사용자가 명확히 인지.
+                if (res.ok && data.success === true) {
+                  showMsg(
+                    'success',
+                    `SPT Masa PPh 23 ${t('k12_c05543')} (filing ${data.filingId?.slice(0, 8) ?? ''}, 운영팀 큐 자동 등록 완료)`,
+                  );
                   loadData();
                 } else {
-                  showMsg('error', data.message || data.error || `SPT Masa ${t('k14_5cf2ad')}`);
+                  const detail = data.message || data.error || `HTTP ${res.status}`;
+                  showMsg(
+                    'error',
+                    `SPT Masa ${t('k14_5cf2ad')} — ${detail}. 다시 시도해 주세요. 반복되면 운영팀에 문의 (filing 미생성, 거래는 보존됨).`,
+                  );
                 }
-              } catch {
-                showMsg('error', t('k15_175c5f'));
+              } catch (err) {
+                const detail = err instanceof Error ? err.message : '네트워크 오류';
+                showMsg(
+                  'error',
+                  `${t('k15_175c5f')} — ${detail}. 인터넷 연결을 확인하고 다시 시도해 주세요.`,
+                );
               } finally {
                 setSaving(false);
               }
