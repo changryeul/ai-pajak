@@ -7698,14 +7698,14 @@
     "subtitle": "2025 年企业所得税清算 → 2026 年 PPh 25 月度预付额测算",
     "backToDashboard": "返回仪表板",
     "typeLock": {
-      "umkm": "UMKM 결산",
+      "umkm": "UMKM 结算",
       "other": "PPh25 일반 법인 결산",
       "selected": "선택됨",
       "umkmDesc": "매출 기준 Final Tax 0.5% 적용. 정상 재무제표 생성 후 SPT 첨부.",
       "proDesc": "재무제표 + 세무조정 + 세액공제 + PPh29/PPh25 월선불 산정."
     },
     "coreBox": {
-      "title": "PPh 25 연 결산이란?",
+      "title": "什么是 PPh 25 年度结算?",
       "items": [
         "회계 이익에 세무 조정(Koreksi Fiskal)을 적용하여 과세소득(PKP) 산출",
         "PKP × 22% + 업인세 (PPh Badan Terutang)",
@@ -7715,17 +7715,17 @@
       ]
     },
     "steps": {
-      "basic": "기본 정보",
-      "collect": "자료수집",
-      "statements": "재무제표",
-      "adjust": "세무조정",
-      "sign": "출력/서명",
-      "credit": "세액공제",
-      "calc": "법인세",
-      "monthly": "월분납"
+      "basic": "基本信息",
+      "collect": "资料收集",
+      "statements": "财务报表",
+      "adjust": "税务调整",
+      "sign": "打印/签名",
+      "credit": "税额抵免",
+      "calc": "企业所得税",
+      "monthly": "月度分期"
     },
     "basic": {
-      "title": "기본 정보",
+      "title": "基本信息",
       "companyName": "회사명",
       "npwp": "NPWP",
       "fiscalYear": "사업 연도",
@@ -7734,7 +7734,7 @@
       "next": "다음"
     },
     "collect": {
-      "title": "자료수집",
+      "title": "资料收集",
       "progress": "{pct}%",
       "uploadCta": "업로드",
       "reuploadCta": "다시 업로드",
@@ -7797,7 +7797,7 @@
       "genStatements": "재무제표 생성"
     },
     "statements": {
-      "title": "정상 재무제표 생성",
+      "title": "生成正常财务报表",
       "subtitle": "데이터 → 자동 분류 → 정상 재무제표 (BS/PL)",
       "summary": {
         "autoClass": "자동 분류",
@@ -7837,7 +7837,7 @@
       "next": "세무조정"
     },
     "adjust": {
-      "title": "세무 조정 (Koreksi Fiskal)",
+      "title": "税务调整 (Koreksi Fiskal)",
       "subtitle": "회계상 이익 → 세무상 이익으로 변환합니다. 과세소득(PKP) → 가산조정 + 차감조정.",
       "positiveTitle": "가산 조정 (Koreksi Positif) — 비용 불인정",
       "negativeTitle": "차감 조정 (Koreksi Negatif) — 비과세/기과세 소득",
@@ -7939,7 +7939,7 @@
       "next": "다음"
     },
     "sign": {
-      "title": "재무제표 출력 - 서명 - 재업로드",
+      "title": "打印、签名、重新上传财务报表",
       "subtitle": "생성된 재무제표를 공식 양식으로 출력하여 대표자 서명을 받은 뒤 다시 업로드 해야 합니다. 이 서명본은 결과되는 Coretax 신고 시 정부 자료로 업로드됩니다.",
       "aiNote": "AI 검증: 은행 입출금 매출 리스트 차이, 현금 매출, 계산상 비용, 고정자산 누락 여부 자동 점검합니다.",
       "stepPrint": "재무제표 PDF 출력",
@@ -7951,7 +7951,7 @@
       "next": "세무조정"
     },
     "credit": {
-      "title": "세액 공제 (Kredit Pajak)",
+      "title": "税额抵免 (Kredit Pajak)",
       "subtitle": "연중 이미 납부한 세액을 입력하여 정산 시 차감되는 금액을 공제합니다.",
       "pph22": {
         "label": "PPh 22 (수입 원천징수)",
@@ -7974,7 +7974,7 @@
       "next": "다음"
     },
     "calc": {
-      "title": "2025년 법인세 (PPh Badan) 계산",
+      "title": "2025年企业所得税 (PPh Badan) 计算",
       "pkpLabel": "과세소득 (PKP)",
       "pkpHint": "+가산 조정 / -차감 조정",
       "pkpValue": "Rp 0",
@@ -7988,7 +7988,7 @@
       "next": "다음"
     },
     "monthly": {
-      "title": "2026년 PPh 25 월 분납액 산정",
+      "title": "2026年 PPh 25 月度分期计算",
       "sourceLabel": "2025년 PPh Badan",
       "sourceValue": "Rp 0",
       "creditList": [
