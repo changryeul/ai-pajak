@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Noto_Sans_KR } from 'next/font/google';
 import { APP_NAME, APP_DESCRIPTION } from '@/config/constants';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
@@ -7,7 +7,17 @@ import { WebVitals } from '@/components/analytics/WebVitals';
 import { ServiceWorkerRegistration } from '@/components/pwa/ServiceWorkerRegistration';
 import '@/app/globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+const notoSansKr = Noto_Sans_KR({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '900'],
+  variable: '--font-noto-kr',
+  display: 'swap',
+});
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://aipajak.com';
 
@@ -124,7 +134,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${notoSansKr.variable} font-sans antialiased`} suppressHydrationWarning>
         <GoogleAnalytics />
         <WebVitals />
         <ServiceWorkerRegistration />

@@ -1,0 +1,4432 @@
+{
+  "ko": {
+    "modules": [
+      {
+        "mark": "01",
+        "title": "쓰던 자료 그대로 제출",
+        "short": "정해진 템플릿에 맞춰 다시 입력할 필요가 없습니다",
+        "detail": "AI Pajak은 고객이 이미 사용 중인 인보이스, Faktur Pajak, 영수증, 급여자료, 원천징수 자료를 그대로 제출하는 것을 전제로 합니다. 별도 템플릿에 옮겨 적는 시간을 줄이고, AI가 신고에 필요한 데이터를 찾아 정리합니다.",
+        "customerPromise": "고객은 세무 신고용 엑셀을 새로 만들 필요가 없습니다. 쓰던 자료를 올리거나 사진으로 촬영해 제출하면 AI가 필요한 데이터를 읽어냅니다.",
+        "primaryMetric": "템플릿 없음",
+        "primaryLabel": "양식 재작성 불필요",
+        "statusText": "기존 양식 · 사진 · PDF 제출 가능",
+        "previewCards": [
+          [
+            "사용 중인 양식",
+            "회사 자체 invoice, 급여자료, 거래명세서도 그대로 제출"
+          ],
+          [
+            "사진 촬영 제출",
+            "영수증, Faktur Pajak, 종이 invoice는 촬영해서 제출 가능"
+          ],
+          [
+            "AI 데이터 추출",
+            "날짜, 금액, NPWP, 거래처, 세액 등 필요한 항목을 자동 파싱"
+          ],
+          [
+            "신고 데이터 정리",
+            "추출된 데이터를 세목별 신고 준비 데이터로 변환"
+          ]
+        ],
+        "customerView": [
+          "정해진 템플릿 없이 기존 자료 제출",
+          "인보이스, Faktur Pajak, 영수증 촬영 제출 가능",
+          "AI가 필요한 신고 데이터를 자동 추출",
+          "추출된 데이터를 고객이 확인하기 쉬운 형태로 정리"
+        ],
+        "outputs": [
+          "AI 파싱 결과",
+          "추출 데이터 확인표",
+          "누락 항목 안내",
+          "신고용 데이터 정리본"
+        ],
+        "process": [
+          [
+            "01",
+            "자료 그대로 제출",
+            "쓰던 invoice, Faktur Pajak, 영수증, 급여자료를 그대로 제출합니다."
+          ],
+          [
+            "02",
+            "사진 촬영도 가능",
+            "종이 영수증이나 Faktur는 촬영해서 제출할 수 있습니다."
+          ],
+          [
+            "03",
+            "AI 데이터 파싱",
+            "날짜, 금액, 세액, 거래처, NPWP 등 필요한 값을 읽어냅니다."
+          ],
+          [
+            "04",
+            "신고 데이터 생성",
+            "파싱된 데이터를 신고 준비용 데이터로 자동 정리합니다."
+          ]
+        ]
+      },
+      {
+        "mark": "02",
+        "title": "AI 자료 정리 및 세목 분류",
+        "short": "문서와 거래자료를 신고 목적별로 정리",
+        "detail": "A1/A2, invoice, Faktur Pajak, 영수증, 계약서, payroll, bank statement 등 다양한 자료에서 신고에 필요한 데이터를 읽고 세목별로 구분합니다.",
+        "customerPromise": "고객은 데이터를 다시 입력하거나 세목별 표를 새로 만들 필요가 없습니다.",
+        "primaryMetric": "AI",
+        "primaryLabel": "자료 정리 엔진",
+        "statusText": "파싱 완료 18건 · 확인 필요 3건",
+        "previewCards": [
+          [
+            "A1/A2",
+            "근로소득, 원천징수세액, 고용주 정보로 정리"
+          ],
+          [
+            "Faktur Pajak",
+            "NPWP, DPP, PPN, 거래일자 정리"
+          ],
+          [
+            "Invoice / Receipt",
+            "원천세 유형과 세금코드 검토 항목 추출"
+          ],
+          [
+            "Payroll",
+            "PPh21 검토 항목으로 정리"
+          ]
+        ],
+        "customerView": [
+          "자료별 인식 결과와 분류 상태 표시",
+          "확인 필요 자료 분리",
+          "개인/법인 자료를 다른 화면으로 구성",
+          "쉬운 항목명으로 표시"
+        ],
+        "outputs": [
+          "AI 파싱 테이블",
+          "확인 필요 항목",
+          "세목별 자료 묶음",
+          "신고용 데이터 초안"
+        ],
+        "process": [
+          [
+            "01",
+            "자료 인식",
+            "사진, PDF, 엑셀, 기존 양식에서 세금 항목을 읽어옵니다."
+          ],
+          [
+            "02",
+            "신고 목적 분류",
+            "소득, 공제, 원천세, PPN, 자산·부채 등으로 구분합니다."
+          ],
+          [
+            "03",
+            "세금코드 확인",
+            "원천세 대상 거래는 코드 확인 항목으로 표시합니다."
+          ],
+          [
+            "04",
+            "신고 준비 반영",
+            "분류된 자료가 준비도에 반영됩니다."
+          ]
+        ]
+      },
+      {
+        "mark": "03",
+        "title": "AI 원천세 세금코드 자동 판정",
+        "short": "ID Billing에 들어갈 PPh 유형과 세금코드를 AI가 판정합니다",
+        "detail": "원천세 신고에서 가장 중요한 것은 거래 성격에 맞는 PPh 유형과 세금코드를 정확히 정하는 것입니다. AI Pajak은 invoice, 계약서, 거래처 정보, 서비스 내용을 바탕으로 ID Billing 발행에 필요한 세금코드를 자동 판정합니다.",
+        "customerPromise": "고객은 어떤 세금코드를 선택해야 하는지 몰라도 됩니다. AI Pajak이 원천세 코드와 판단 근거를 함께 안내합니다.",
+        "primaryMetric": "Code AI",
+        "primaryLabel": "세금코드 자동 판정",
+        "statusText": "PPh 유형 · 세금코드 · 납부월 자동 정리",
+        "previewCards": [
+          [
+            "거래 성격 분석",
+            "서비스, 임대, 이자, 배당, 로열티, 건설 등 분류"
+          ],
+          [
+            "PPh 유형 판정",
+            "PPh 4(2), 15, 22, 23, 26 등 구분"
+          ],
+          [
+            "세금코드 매칭",
+            "ID Billing에 필요한 tax type / deposit type 정리"
+          ],
+          [
+            "판단 근거 표시",
+            "쉬운 설명과 신고 기준값으로 정리"
+          ]
+        ],
+        "customerView": [
+          "원천세 대상 여부 확인",
+          "PPh 유형과 세금코드 후보 표시",
+          "ID Billing 전 확인 필요 항목 강조",
+          "코드 선택 이유 설명"
+        ],
+        "outputs": [
+          "원천세 세금코드 판정값",
+          "PPh 유형 분류",
+          "ID Billing 준비값",
+          "확인 필요 거래 리스트"
+        ],
+        "process": [
+          [
+            "01",
+            "거래 내용 읽기",
+            "invoice, 계약서, 거래처 정보에서 지급 성격을 읽어옵니다."
+          ],
+          [
+            "02",
+            "PPh 유형 분류",
+            "거래 성격에 따라 PPh 유형을 구분합니다."
+          ],
+          [
+            "03",
+            "세금코드 매칭",
+            "ID Billing 발행에 필요한 값을 정리합니다."
+          ],
+          [
+            "04",
+            "확인 항목 표시",
+            "불명확한 거래를 분리합니다."
+          ]
+        ]
+      },
+      {
+        "mark": "04",
+        "title": "AI 세무 인사이트",
+        "short": "제출 데이터와 신고 데이터를 근거로 세무 리스크와 다음 액션을 안내합니다",
+        "detail": "AI Pajak은 제출 자료와 누적 신고 데이터를 바탕으로 법인세 납부 방식 전환, PKP 신청 시기, 자산 취득 이상, Tax Treaty 적용 가능성 등 고객별 세무 인사이트를 제공합니다.",
+        "customerPromise": "AI Pajak이 신고 데이터 변화와 주요 기준 충족 여부를 확인해 필요한 시점에 알림과 설명을 제공합니다.",
+        "primaryMetric": "Insight AI",
+        "primaryLabel": "세무 리스크 진단",
+        "statusText": "전환 시점 · 알림 · 리스크 자동 안내",
+        "previewCards": [
+          [
+            "법인세 납부 방식",
+            "UMKM Final Tax 또는 PPh25 전환 안내"
+          ],
+          [
+            "PKP 신청 시기",
+            "매출 추이를 기준으로 사전 알림"
+          ],
+          [
+            "자산 증가 리스크",
+            "소득 대비 자산 취득 이상 신호"
+          ],
+          [
+            "Tax Treaty",
+            "PPh26, DGT Form, 조세조약 검토 안내"
+          ]
+        ],
+        "customerView": [
+          "현재 세무상태와 적용 가능 제도 안내",
+          "매출·자산·거래 데이터 기반 리스크 알림",
+          "PKP, PPh25, UMKM 전환 시점 안내",
+          "Tax Treaty 검토 필요 여부 표시"
+        ],
+        "outputs": [
+          "AI 세무 리스크 알림",
+          "전환 시점 안내",
+          "PKP 신청 알림",
+          "Tax Treaty 검토 신호"
+        ],
+        "process": [
+          [
+            "01",
+            "데이터 축적",
+            "월별 신고자료와 자산·부채 데이터를 누적합니다."
+          ],
+          [
+            "02",
+            "조건 확인",
+            "매출 기준, 과세 방식, PKP 요건을 점검합니다."
+          ],
+          [
+            "03",
+            "리스크 알림",
+            "전환 시점, 자산 증가 이상, Treaty 필요성을 안내합니다."
+          ],
+          [
+            "04",
+            "다음 액션",
+            "준비 자료와 처리 방향을 보여줍니다."
+          ]
+        ]
+      },
+      {
+        "mark": "05",
+        "title": "신고 준비상태 대시보드",
+        "short": "준비도, 누락자료, 다음 액션을 한 화면에서 확인",
+        "detail": "고객은 자료 준비, AI 검토, 납부 준비, 신고완료 증빙 상태를 한 화면에서 확인할 수 있습니다.",
+        "customerPromise": "‘지금 어디까지 됐는가’를 숫자와 단계로 보여줍니다.",
+        "primaryMetric": "82%",
+        "primaryLabel": "신고 준비도",
+        "statusText": "다음 단계: 누락자료 2건 보완",
+        "previewCards": [
+          [
+            "준비도",
+            "필수자료와 검토 완료 항목 기준 표시"
+          ],
+          [
+            "누락자료",
+            "마감 전 보완 자료 표시"
+          ],
+          [
+            "리스크 알림",
+            "자산 증가, PPN 불일치, 원천세 누락 가능성"
+          ],
+          [
+            "다음 액션",
+            "자료 보완, 납부 준비, 증빙 확인"
+          ]
+        ],
+        "customerView": [
+          "전체 진행률 표시",
+          "세목별 진행상태 표시",
+          "누락자료와 리스크 강조",
+          "다음 행동 정리"
+        ],
+        "outputs": [
+          "진행률 대시보드",
+          "누락자료 우선순위",
+          "리스크 알림",
+          "다음 액션 카드"
+        ],
+        "process": [
+          [
+            "01",
+            "자료 준비율 계산",
+            "필수자료와 제출자료를 비교합니다."
+          ],
+          [
+            "02",
+            "세목별 상태 표시",
+            "항목별 진행상태를 보여줍니다."
+          ],
+          [
+            "03",
+            "리스크·누락 안내",
+            "보완 항목을 정리합니다."
+          ],
+          [
+            "04",
+            "다음 액션 제공",
+            "다음 단계를 안내합니다."
+          ]
+        ]
+      },
+      {
+        "mark": "06",
+        "title": "납부·신고 증빙 관리",
+        "short": "ID Billing · NTPN · BPE를 고객별로 보관",
+        "detail": "AI Pajak은 납부 코드, 납부증빙, 신고완료증을 고객별·연도별·세목별로 추적합니다.",
+        "customerPromise": "신고 결과를 흩어진 파일이 아니라 기록으로 남깁니다.",
+        "primaryMetric": "BPE",
+        "primaryLabel": "신고완료 증빙",
+        "statusText": "ID Billing 발행 · NTPN 입력 · BPE 보관",
+        "previewCards": [
+          [
+            "ID Billing",
+            "세목별 납부 코드와 납부 상태 관리"
+          ],
+          [
+            "NTPN",
+            "납부 확인 번호 보관"
+          ],
+          [
+            "BPE",
+            "신고 완료 증빙 정리"
+          ],
+          [
+            "History",
+            "연도별·월별 신고 이력 확인"
+          ]
+        ],
+        "customerView": [
+          "납부 전/후 상태 표시",
+          "ID Billing, NTPN, BPE 연결",
+          "개인/법인 신고 이력 분리",
+          "다운로드 가능한 증빙 제공"
+        ],
+        "outputs": [
+          "ID Billing 기록",
+          "NTPN 기록",
+          "BPE 보관함",
+          "신고 히스토리"
+        ],
+        "process": [
+          [
+            "01",
+            "납부 준비",
+            "세목과 금액을 확인합니다."
+          ],
+          [
+            "02",
+            "납부 상태 기록",
+            "NTPN을 보관합니다."
+          ],
+          [
+            "03",
+            "신고완료 증빙",
+            "BPE와 파일을 저장합니다."
+          ],
+          [
+            "04",
+            "히스토리 관리",
+            "과거 신고 증빙을 찾을 수 있게 합니다."
+          ]
+        ]
+      }
+    ],
+    "pricing": [
+      {
+        "id": "p-simple",
+        "group": "개인 세무",
+        "badge": "건당 결제",
+        "typeLabel": "Personal Simple (단순 신고)",
+        "price": "Rp 100.000",
+        "vat": "PPN 포함 합계: Rp 111.000",
+        "description": "근로소득 1개 중심 · 자료가 단순한 개인",
+        "meta": [
+          "PPN 포함 합계: Rp 111.000",
+          "복잡도 기준",
+          "통합 개인 연간 신고"
+        ],
+        "items": [
+          "A1/A2 또는 원천징수 자료 자동 정리",
+          "기본 인적사항 및 소득자료 확인",
+          "납부/환급 가능성 기본 안내",
+          "신고 완료 증빙 관리"
+        ],
+        "criteria": [
+          "근로소득 중심",
+          "A1/A2 또는 원천징수 자료 1개 중심",
+          "추가 사업소득·프리랜스 소득 없음"
+        ]
+      },
+      {
+        "id": "p-standard",
+        "group": "개인 세무",
+        "badge": "건당 결제",
+        "typeLabel": "Personal Standard (표준 신고)",
+        "price": "Rp 200.000",
+        "vat": "PPN 포함 합계: Rp 222.000",
+        "description": "복수 소득·복수 원천징수·자산/부채 입력이 필요한 개인",
+        "meta": [
+          "PPN 포함 합계: Rp 222.000",
+          "복잡도 기준",
+          "통합 개인 연간 신고"
+        ],
+        "items": [
+          "여러 원천징수 자료 병합 정리",
+          "기타 소득·공제·자산·부채 정리",
+          "가족정보/PTKP 프로필 확인",
+          "신고 완료 증빙 관리"
+        ],
+        "criteria": [
+          "복수 고용주 또는 복수 원천징수 자료",
+          "기타 소득 또는 공제 확인 필요",
+          "자산·부채 입력 필요"
+        ]
+      },
+      {
+        "id": "p-complex",
+        "group": "개인 세무",
+        "badge": "건당 결제",
+        "typeLabel": "Personal Business / Complex",
+        "price": "Rp 500.000",
+        "vat": "PPN 포함 합계: Rp 555.000",
+        "description": "프리랜스 · 개인사업 · 투자소득 · 복잡 자산이 있는 개인",
+        "meta": [
+          "PPN 포함 합계: Rp 555.000",
+          "복잡도 기준",
+          "통합 개인 연간 신고"
+        ],
+        "items": [
+          "사업/프리랜스 소득자료 자동 정리",
+          "수입·비용·증빙 자료 분류",
+          "투자소득·임대소득 반영",
+          "자산·부채 변동 및 리스크 체크"
+        ],
+        "criteria": [
+          "프리랜스 또는 개인사업 소득",
+          "사업 관련 수입·비용 자료",
+          "추가 소득 또는 복잡 자산"
+        ]
+      },
+      {
+        "id": "monthly-umkm",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "UMKM 월관리",
+        "price": "Rp 750,000",
+        "description": "소규모 법인 / Final Tax 중심",
+        "meta": [
+          "1개월 선납",
+          "12개월 선납 시 10% 할인 가능",
+          "연결산 별도"
+        ],
+        "items": [
+          "월 신고 현황",
+          "ID Billing 요청",
+          "기본 리마인더",
+          "기본 AI 리스크 코멘트"
+        ],
+        "criteria": [
+          "직원 5명 이하",
+          "월 원천세 거래 10건 이하",
+          "월 업로드/거래 50건 이하"
+        ]
+      },
+      {
+        "id": "monthly-basic",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "Basic 월관리",
+        "price": "Rp 1,500,000",
+        "description": "일반 법인 기본 세무 운영",
+        "meta": [
+          "1개월 선납",
+          "12개월 선납 시 10% 할인 가능",
+          "연결산 별도"
+        ],
+        "items": [
+          "PPh21/23/25/PPN 관리",
+          "신고 이력/BPE/NTPN 보관",
+          "거래처 원천세 판정",
+          "월별 세금 보고서"
+        ],
+        "criteria": [
+          "직원 30명 이하",
+          "월 원천세 거래 30건 이하",
+          "월 매입/매출 거래 300건 이하"
+        ]
+      },
+      {
+        "id": "monthly-pro",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "Pro 월관리",
+        "price": "Rp 2,500,000",
+        "description": "월별 세무 운영 강화",
+        "meta": [
+          "1개월 선납",
+          "12개월 선납 시 10% 할인 가능",
+          "연결산 별도"
+        ],
+        "items": [
+          "Basic 전체",
+          "TP 조건 모니터링",
+          "AI 이상 감지",
+          "고급 세금 보고서",
+          "우선 처리"
+        ],
+        "criteria": [
+          "직원 100명 이하",
+          "월 원천세 거래 150건 이하",
+          "해외거래·특수관계 모니터링 포함"
+        ]
+      },
+      {
+        "id": "monthly-enterprise",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "Enterprise 맞춤 월관리",
+        "price": "Rp 3,500,000",
+        "description": "대량/맞춤 운영",
+        "meta": [
+          "1개월 선납",
+          "사용량 기반 과금",
+          "연결산 별도"
+        ],
+        "items": [
+          "Pro 전체",
+          "대량 급여/거래 처리",
+          "초과 사용량 기반 과금",
+          "SLA/우선 지원"
+        ],
+        "criteria": [
+          "직원 100명 초과",
+          "월 원천세 거래 150건 초과",
+          "대량 문서 자동분류 필요"
+        ]
+      },
+      {
+        "id": "annual-umkm",
+        "group": "법인 연결산",
+        "badge": "1회 선납",
+        "typeLabel": "UMKM 연결산",
+        "price": "Rp 2,500,000",
+        "description": "Final Tax 0.5% 대상 법인 연결산",
+        "meta": [
+          "1회 선납",
+          "월관리와 별도 선택",
+          "SPT Badan 기준"
+        ],
+        "items": [
+          "정상 재무제표 생성",
+          "UMKM Final Tax 계산",
+          "SPT 초안 생성",
+          "e-Bupot 1721 A1 발급"
+        ],
+        "criteria": [
+          "연매출 Rp 4.8B 이하",
+          "Final Tax 0.5% 대상",
+          "해외거래·특수관계 거래 없음"
+        ]
+      },
+      {
+        "id": "annual-pph25",
+        "group": "법인 연결산",
+        "badge": "1회 선납",
+        "typeLabel": "PPh25 일반 법인 연결산",
+        "price": "Rp 7,500,000",
+        "description": "일반 법인세 대상 표준 연결산",
+        "meta": [
+          "1회 선납",
+          "월관리와 별도 선택",
+          "SPT Badan 기준"
+        ],
+        "items": [
+          "재무제표 생성",
+          "세무조정",
+          "세액공제",
+          "PPh29/PPh25 산정",
+          "SPT 초안 생성"
+        ],
+        "criteria": [
+          "연매출 Rp 4.8B 초과 또는 UMKM 기간 종료",
+          "연 거래 1,000건 이하",
+          "TP 이슈 없음"
+        ]
+      },
+      {
+        "id": "annual-complex",
+        "group": "법인 연결산",
+        "badge": "1회 선납",
+        "typeLabel": "복잡 구조 연결산",
+        "price": "Rp 15,000,000",
+        "description": "외국계, 특수관계, 해외거래 또는 대량 거래 법인",
+        "meta": [
+          "1회 선납",
+          "월관리와 별도 선택",
+          "SPT Badan 기준"
+        ],
+        "items": [
+          "PPh25 연결산 전체",
+          "TP 조건 검토",
+          "해외거래 검토",
+          "AI 리스크 보고서",
+          "우선 처리"
+        ],
+        "criteria": [
+          "해외 주주 또는 해외거래 존재",
+          "특수관계 거래 존재",
+          "PPh26 / DGT Form / Treaty 검토 필요"
+        ]
+      }
+    ],
+    "text": {
+      "nav": {
+        "product": "서비스",
+        "start": "자료 제출",
+        "difference": "경쟁비교",
+        "faq": "FAQ"
+      },
+      "login": "로그인",
+      "viewPricing": "요금제 확인하기",
+      "chips": "Personal · Corporate only",
+      "heroTop": "양식 맞추느라 시간 쓰지 마세요.",
+      "heroMain": "AI가 신고 데이터, 세금코드, 세무 리스크까지 진단합니다",
+      "heroDesc": "AI Pajak은 고객이 사용하던 인보이스, Faktur Pajak, 영수증, 급여자료, 원천징수 자료를 그대로 제출하면 AI가 필요한 데이터를 읽고 분류합니다. 원천세 자료는 거래 성격을 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 자동 판정하고, 제출 데이터와 신고 데이터를 근거로 법인세 납부 방식, PKP 신청 시기, 자산 증가 리스크, Tax Treaty 적용 가능성까지 안내합니다.",
+      "readiness": "준비도",
+      "missing": "누락자료",
+      "next": "다음 액션",
+      "personas": {
+        "personal": {
+          "label": "개인고객",
+          "icon": "👤",
+          "title": "Personal Annual Filing",
+          "subtitle": "A1/A2, 영수증, 소득자료를 다시 입력하지 않고 그대로 제출하는 개인 연간 신고",
+          "readiness": 72,
+          "missing": [
+            "A1/A2 원천징수증",
+            "12월 31일 기준 자산·부채 잔액",
+            "기타 소득자료"
+          ],
+          "next": "소득·공제·자산 변동을 확인하고, 납부 또는 환급 가능성을 안내합니다."
+        },
+        "corporate": {
+          "label": "법인고객",
+          "icon": "🏢",
+          "title": "Corporate Monthly & Annual Filing",
+          "subtitle": "인보이스, Faktur Pajak, 영수증, payroll, 계약서를 다시 정리하지 않고 제출하는 법인 세무 대시보드",
+          "readiness": 58,
+          "missing": [
+            "PPN 매입 Faktur",
+            "일부 원천세 계약서",
+            "PPh21 payroll template"
+          ],
+          "next": "올린 invoice와 계약서의 거래 성격을 분석해 원천세 유형과 세금코드 선택을 안내합니다."
+        }
+      },
+      "cards": [
+        [
+          "AI 원천세 세금코드 판정",
+          "거래 성격을 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 자동 판정"
+        ],
+        [
+          "개인·법인 전용 흐름",
+          "고객 유형별로 필요한 자료와 신고 절차를 분리"
+        ],
+        [
+          "AI 세무 인사이트",
+          "제출 데이터와 신고 데이터를 근거로 세무 리스크와 다음 액션 안내"
+        ],
+        [
+          "그대로 올리는 자료 제출",
+          "템플릿 작성 없이 기존 양식·사진·PDF에서 AI가 데이터 파싱"
+        ]
+      ],
+      "trustTitle": "민감한 세무자료는 암호화 보관됩니다",
+      "trustDesc": "NPWP, NIK, 급여자료, Faktur Pajak, 계약서 등 민감자료는 암호화 보관을 전제로 설계합니다. 자료는 신고 준비와 고객별 세무 인사이트 제공 목적에 한해 사용됩니다.",
+      "trustItems": [
+        "Encrypted data storage",
+        "Access-controlled workflow",
+        "Audit-ready filing evidence"
+      ],
+      "coreDiff": "핵심 차별화",
+      "advisoryKicker": "AI Tax Advisory",
+      "taxTitle": "ID Billing의 정확도는 원천세 세금코드에서 결정됩니다.",
+      "taxDesc": "기존 온라인 세무 플랫폼은 e-Billing 발행 기능은 제공하지만, 어떤 거래에 어떤 PPh 유형과 세금코드를 넣어야 하는지는 사용자가 직접 판단해야 하는 경우가 많습니다. AI Pajak은 invoice, 계약서, 거래처 정보, 서비스 내용을 분석해 ID Billing에 필요한 원천세 세금코드를 판정합니다.",
+      "taxCards": [
+        [
+          "거래 성격 분석",
+          "서비스, 임대, 이자, 배당, 로열티, 건설 등 지급 성격을 분류"
+        ],
+        [
+          "PPh 유형 판정",
+          "PPh 4(2), 15, 22, 23, 26 등 적용 가능 유형을 구분"
+        ],
+        [
+          "세금코드 매칭",
+          "ID Billing 발행에 필요한 tax type / deposit type 값을 정리"
+        ],
+        [
+          "확인 필요 분리",
+          "불명확한 거래는 별도 표시해 잘못된 코드 입력 리스크 감소"
+        ]
+      ],
+      "advisoryTitle": "신고 데이터가 쌓일수록, AI가 필요한 세무 액션을 먼저 알려줍니다.",
+      "advisoryDesc": "AI Pajak은 고객이 제출한 자료와 신고 이력을 바탕으로 단순 계산을 넘어 세무 의사결정을 지원합니다. 법인세 납부 방식 변경, PKP 신청 시기, 수입 대비 자산 취득 이상, 해외거래와 Tax Treaty 검토 필요성을 고객별로 안내합니다.",
+      "advisoryCards": [
+        [
+          "법인세 납부 방식",
+          "UMKM Final Tax에서 PPh25로 전환해야 할 시점과 조건 안내"
+        ],
+        [
+          "PKP 신청 알림",
+          "매출 추이를 기준으로 PKP 신청 필요 시기를 사전에 안내"
+        ],
+        [
+          "자산 증가 이상 감지",
+          "신고 소득 대비 자산 취득이 과도한 경우 리스크 신호 표시"
+        ],
+        [
+          "Tax Treaty 체크",
+          "해외거래, PPh26, DGT Form, 조세조약 적용 가능성 안내"
+        ]
+      ],
+      "serviceFlow": "서비스 흐름",
+      "productTitle": "그냥 올리면, AI가 신고 데이터를 정리합니다",
+      "productDesc": "별도 템플릿에 맞춰 다시 입력할 필요가 없습니다. 인보이스, Faktur Pajak, 영수증, 급여자료를 쓰던 형태 그대로 제출하거나 촬영하면 AI가 필요한 데이터를 읽고 신고 준비 데이터로 정리합니다.",
+      "moduleStep": "서비스 단계",
+      "coreGuide": "핵심 안내",
+      "customerView": "고객이 확인하는 내용",
+      "outputs": "제공되는 결과",
+      "requiredDocs": "제출 가능한 자료",
+      "startKicker": "Upload-ready documents",
+      "startTitle": "세무 신고용 자료를 새로 만들 필요가 없습니다.",
+      "startDesc": "쓰던 인보이스, Faktur Pajak, 영수증, 급여자료, 원천징수 자료를 그대로 제출하세요. 종이 영수증이나 세금계산서는 촬영해서 제출할 수 있고, AI가 필요한 데이터를 읽어 신고 준비 데이터로 정리합니다.",
+      "personalBtn": "개인 필수자료",
+      "corporateBtn": "법인 필수자료",
+      "methodTitle": "자료 제출 방식",
+      "methods": [
+        "기존 양식 그대로 제출",
+        "인보이스·Faktur·영수증 촬영",
+        "AI 데이터 파싱",
+        "확인 필요 항목만 체크",
+        "신고 준비 데이터 자동 정리"
+      ],
+      "guide": "안내",
+      "startNote": "자료를 별도 템플릿에 맞춰 재작성하지 않아도 됩니다. 원천세 대상 거래는 ID Billing에 필요한 세금코드 선택까지 이어지도록 안내합니다.",
+      "requirements": {
+        "personal": [
+          [
+            "필수",
+            "NIK/NPWP, 이름, 주소, 연락처"
+          ],
+          [
+            "필수",
+            "A1/A2 또는 원천징수 증빙"
+          ],
+          [
+            "필수",
+            "12월 31일 기준 자산·부채 잔액"
+          ],
+          [
+            "해당 시",
+            "프리랜스/사업/임대/이자/배당 소득자료"
+          ],
+          [
+            "해당 시",
+            "가족관계 및 공제 관련 자료"
+          ]
+        ],
+        "corporate": [
+          [
+            "필수",
+            "NPWP, KBLI, PKP 여부, 사업유형"
+          ],
+          [
+            "필수",
+            "월별 매출·매입자료 및 Faktur Pajak"
+          ],
+          [
+            "필수",
+            "Payroll template 및 직원별 PPh21 자료"
+          ],
+          [
+            "해당 시",
+            "원천세 대상 계약서·invoice"
+          ],
+          [
+            "해당 시",
+            "은행거래 내역, 전년도 SPT Badan, PPh25 자료"
+          ]
+        ]
+      },
+      "compKicker": "Competitive Comparison",
+      "compTitle": "기존 세무서비스, 온라인 세무 플랫폼과 무엇이 다른가",
+      "compDesc": "AI Pajak의 핵심 차별점은 원천세 거래의 성격을 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 판정한다는 점입니다.",
+      "columns": [
+        "비교 기준",
+        "기존 세무사무소",
+        "기존 온라인 세무 플랫폼",
+        "AI Pajak"
+      ],
+      "rows": [
+        [
+          "핵심 포지션",
+          "전문가에게 자료를 보내고 결과를 기다리는 세무대행",
+          "e-Filing, e-Billing, e-Faktur, e-Bupot 등 신고·납부·세금문서 처리 중심 플랫폼",
+          "고객이 쓰던 자료를 그대로 올리면 AI가 필요한 데이터를 읽고 신고 준비까지 연결하는 자동화 플랫폼"
+        ],
+        [
+          "고객 경험",
+          "WhatsApp, 이메일, 엑셀로 자료를 전달하고 진행상황은 별도 문의",
+          "사용자가 직접 세금문서·신고·납부 기능을 조작하는 방식",
+          "고객은 별도 템플릿 없이 기존 자료나 촬영본을 제출하고, AI가 정리한 결과와 진행상태를 확인"
+        ],
+        [
+          "원천세 세금코드",
+          "담당자가 거래 내용을 보고 수작업으로 판단하는 경우가 많음",
+          "사용자가 직접 세금 유형과 납부 코드를 선택해야 하는 구조가 많음",
+          "invoice·계약서·거래처 정보를 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 자동 판정"
+        ],
+        [
+          "AI 세무 인사이트",
+          "담당자 경험에 따라 안내 수준이 달라질 수 있음",
+          "신고·납부 기능은 제공하지만 고객별 세무 의사결정 안내는 제한적",
+          "납부 방식 전환, PKP 신청, 자산 증가 리스크, Tax Treaty 검토 필요성을 안내"
+        ],
+        [
+          "차별화 포인트",
+          "전문가의 설명과 세무대행 경험",
+          "전자신고·납부 처리 편의성, 단 세금코드 판단은 사용자의 입력과 이해에 의존",
+          "자료 파싱, 원천세 세금코드 판정, AI 세무 인사이트, 신고 준비도, 증빙관리"
+        ]
+      ],
+      "pricingKicker": "요금 안내",
+      "pricingTitle": "요금제를 선택하면 상세 범위를 바로 확인할 수 있습니다",
+      "pricingDesc": "개인 신고는 양식명이 아니라 신고 복잡도 기준으로 안내합니다. 개인 세무, 법인 월관리, 법인 연결산 중 필요한 상품을 클릭하면 가격·적용 기준·포함 내용을 자세히 볼 수 있습니다.",
+      "pricingListTitle": "요금제 종류",
+      "chooseService": "필요한 서비스를 선택하세요",
+      "pricingListDesc": "클릭하면 오른쪽에 상세 내용이 표시됩니다.",
+      "selectedPlan": "선택한 요금제",
+      "included": "포함 내용",
+      "criteria": "적용 기준",
+      "pricingInfo": "표시된 금액은 기본 요금입니다. 실제 신고 범위는 제출 자료, 거래량, 해외거래·특수관계 여부 등에 따라 최종 확인됩니다.",
+      "pricingButton": "제출 가능 자료 보기 →",
+      "groups": [
+        "개인 세무",
+        "법인 월관리",
+        "법인 연결산"
+      ],
+      "faqs": [
+        [
+          "신고 준비를 시작하려면 어떤 자료가 필요한가요?",
+          "개인고객은 NIK/NPWP, A1/A2, 가족정보, 자산·부채 자료가 기본입니다. 법인고객은 NPWP, KBLI, PKP 여부, 매출·매입자료, PPh21 급여자료, 원천세 관련 invoice/계약서, PPN 자료 등이 필요합니다."
+        ],
+        [
+          "OnlinePajak, Klikpajak 같은 플랫폼과 정면 경쟁인가요?",
+          "완전히 같은 포지션은 아닙니다. 기존 온라인 세무 플랫폼은 e-Filing, e-Billing, e-Faktur, e-Bupot 등 신고·납부·전자세금문서 기능이 강점입니다. AI Pajak의 핵심 차별점은 invoice와 계약서의 거래 성격을 분석해 원천세 유형과 ID Billing 세금코드를 자동 판정한다는 점입니다."
+        ],
+        [
+          "개인 신고 요금은 1770SS/1770S/1770 기준인가요?",
+          "아니요. 개인 연간 신고는 통합된 흐름을 기준으로 안내합니다. AI Pajak의 개인 요금은 양식명이 아니라 소득 유형, 원천징수 자료 수, 자산·부채 복잡도, 사업/프리랜스 소득 여부를 기준으로 구분합니다."
+        ],
+        [
+          "AI 세무 인사이트는 어떤 내용을 알려주나요?",
+          "제출자료와 신고 데이터를 근거로 법인세 납부 방식 변경 가능성, PKP 신청 시기, 수입 대비 자산 취득 이상, 해외거래와 Tax Treaty 검토 필요성 등을 안내합니다."
+        ]
+      ],
+      "finalTitle": "AI Pajak은 자료 준비부터 신고완료 증빙까지 함께 관리합니다.",
+      "finalDesc": "개인과 법인 고객이 필요한 자료를 준비하면, AI Pajak이 신고 준비 상태와 다음 액션을 명확하게 안내합니다.",
+      "finalButton": "로그인 후 신고 시작하기 →",
+      "footerCompare": "Comparison",
+      "footerPricing": "Pricing detail",
+      "footerDocs": "Required documents"
+    }
+  },
+  "en": {
+    "modules": [
+      {
+        "mark": "01",
+        "title": "Submit Your Documents As-Is",
+        "short": "No need to re-enter data into a fixed template",
+        "detail": "AI Pajak is built around the documents you already use — invoice, Faktur Pajak, receipts, payroll records, and withholding tax documents. Skip the tedious reformatting and let AI find and organize the data needed for filing.",
+        "customerPromise": "You don't need to build a new tax spreadsheet from scratch. Just upload your existing documents or snap a photo, and AI will read out the data it needs.",
+        "primaryMetric": "No Templates",
+        "primaryLabel": "No Reformatting Required",
+        "statusText": "Existing formats · Photos · PDFs accepted",
+        "previewCards": [
+          [
+            "Your Own Formats",
+            "Submit your company's own invoice, payroll records, and transaction sheets as-is"
+          ],
+          [
+            "Photo Submission",
+            "Receipts, Faktur Pajak, and paper invoice can be submitted as photos"
+          ],
+          [
+            "AI Data Extraction",
+            "Dates, amounts, NPWP, counterparties, and tax amounts are parsed automatically"
+          ],
+          [
+            "Filing Data Organization",
+            "Extracted data is converted into filing-ready data by tax type"
+          ]
+        ],
+        "customerView": [
+          "Submit existing documents without a fixed template",
+          "invoice, Faktur Pajak, and receipts can be submitted as photos",
+          "AI automatically extracts the required filing data",
+          "Extracted data is organized in an easy-to-review format"
+        ],
+        "outputs": [
+          "AI parsing results",
+          "Extracted data review sheet",
+          "Missing item notifications",
+          "Filing-ready data summary"
+        ],
+        "process": [
+          [
+            "01",
+            "Submit As-Is",
+            "Submit your existing invoice, Faktur Pajak, receipts, and payroll records as they are."
+          ],
+          [
+            "02",
+            "Photo Submission Available",
+            "Paper receipts and Faktur can be submitted as photos."
+          ],
+          [
+            "03",
+            "AI Data Parsing",
+            "Dates, amounts, tax figures, counterparties, and NPWP are read and extracted."
+          ],
+          [
+            "04",
+            "Filing Data Generated",
+            "Parsed data is automatically organized into filing-ready data."
+          ]
+        ]
+      },
+      {
+        "mark": "02",
+        "title": "AI Document Organization & Tax Classification",
+        "short": "Documents and transaction records sorted by filing purpose",
+        "detail": "AI reads filing-relevant data from a wide range of documents — A1/A2, invoice, Faktur Pajak, receipts, contracts, payroll, and bank statements — and classifies them by tax type.",
+        "customerPromise": "You don't need to re-enter data or build new tables for each tax type.",
+        "primaryMetric": "AI",
+        "primaryLabel": "Document Organization Engine",
+        "statusText": "Parsing complete: 18 · Needs review: 3",
+        "previewCards": [
+          [
+            "A1/A2",
+            "Organized into employment income, withholding tax, and employer information"
+          ],
+          [
+            "Faktur Pajak",
+            "NPWP, DPP, PPN, and transaction date organized"
+          ],
+          [
+            "Invoice / Receipt",
+            "Withholding tax type and tax code review items extracted"
+          ],
+          [
+            "Payroll",
+            "Organized as PPh21 review items"
+          ]
+        ],
+        "customerView": [
+          "Recognition results and classification status shown per document",
+          "Documents requiring review separated out",
+          "Individual and corporate documents displayed on separate screens",
+          "Field names displayed in plain, easy-to-understand language"
+        ],
+        "outputs": [
+          "AI parsing table",
+          "Items requiring review",
+          "Documents grouped by tax type",
+          "Draft filing data"
+        ],
+        "process": [
+          [
+            "01",
+            "Document Recognition",
+            "Tax items are read from photos, PDFs, spreadsheets, and existing formats."
+          ],
+          [
+            "02",
+            "Filing Purpose Classification",
+            "Sorted into income, deductions, withholding tax, PPN, and assets/liabilities."
+          ],
+          [
+            "03",
+            "Tax Code Review",
+            "Transactions subject to withholding tax are flagged for code verification."
+          ],
+          [
+            "04",
+            "Filing Readiness Updated",
+            "Classified documents are reflected in your filing readiness status."
+          ]
+        ]
+      },
+      {
+        "mark": "03",
+        "title": "AI Withholding Tax Code Auto-Determination",
+        "short": "AI determines the PPh type and tax code required for ID Billing",
+        "detail": "The most critical part of withholding tax filing is accurately identifying the right PPh type and tax code for each transaction. AI Pajak analyzes invoice, contracts, counterparty information, and service descriptions to automatically determine the tax codes needed for ID Billing.",
+        "customerPromise": "You don't need to know which tax code to select. AI Pajak identifies the withholding tax code and explains the reasoning behind it.",
+        "primaryMetric": "Code AI",
+        "primaryLabel": "Tax Code Auto-Determination",
+        "statusText": "PPh type · Tax code · Payment month auto-organized",
+        "previewCards": [
+          [
+            "Transaction Nature Analysis",
+            "Classified as services, rental, interest, dividends, royalties, construction, and more"
+          ],
+          [
+            "PPh Type Determination",
+            "Distinguishes PPh 4(2), PPh15, PPh22, PPh23, PPh26, and more"
+          ],
+          [
+            "Tax Code Matching",
+            "Tax type and deposit type required for ID Billing organized"
+          ],
+          [
+            "Reasoning Displayed",
+            "Plain-language explanations with applicable filing thresholds"
+          ]
+        ],
+        "customerView": [
+          "Confirm whether a transaction is subject to withholding tax",
+          "Suggested PPh type and tax code candidates displayed",
+          "Items requiring review before ID Billing highlighted",
+          "Explanation of why each code was selected"
+        ],
+        "outputs": [
+          "Withholding tax code determination",
+          "PPh type classification",
+          "ID Billing preparation values",
+          "List of transactions requiring review"
+        ],
+        "process": [
+          [
+            "01",
+            "Read Transaction Details",
+            "Payment nature is read from invoice, contracts, and counterparty information."
+          ],
+          [
+            "02",
+            "PPh Type Classification",
+            "PPh type is determined based on the nature of the transaction."
+          ],
+          [
+            "03",
+            "Tax Code Matching",
+            "Values required for ID Billing issuance are organized."
+          ],
+          [
+            "04",
+            "Flag Review Items",
+            "Ambiguous transactions are separated for review."
+          ]
+        ]
+      },
+      {
+        "mark": "04",
+        "title": "AI Tax Insights",
+        "short": "Tax risks and next actions surfaced from your submission and filing data",
+        "detail": "Based on submitted documents and accumulated filing data, AI Pajak delivers client-specific tax insights — including when to switch corporate tax payment methods, when to apply for PKP status, unusual asset acquisitions, and potential Tax Treaty applicability.",
+        "customerPromise": "AI Pajak monitors changes in your filing data and key threshold conditions, then delivers timely alerts and clear explanations when action is needed.",
+        "primaryMetric": "Insight AI",
+        "primaryLabel": "Tax Risk Diagnostics",
+        "statusText": "Transition timing · Alerts · Risks surfaced automatically",
+        "previewCards": [
+          [
+            "Corporate Tax Payment Method",
+            "Guidance on switching between UMKM Final Tax and PPh25"
+          ],
+          [
+            "PKP Registration Timing",
+            "Early alert based on revenue trends"
+          ],
+          [
+            "Asset Growth Risk",
+            "Unusual asset acquisition signals relative to reported income"
+          ],
+          [
+            "Tax Treaty",
+            "PPh26, DGT Form, and tax treaty review guidance"
+          ]
+        ],
+        "customerView": [
+          "Current tax status and applicable regimes explained",
+          "Risk alerts based on revenue, asset, and transaction data",
+          "Guidance on PKP, PPh25, and UMKM transition timing",
+          "Indicator for whether Tax Treaty review is needed"
+        ],
+        "outputs": [
+          "AI tax risk alerts",
+          "Transition timing guidance",
+          "PKP registration alert",
+          "Tax Treaty review signal"
+        ],
+        "process": [
+          [
+            "01",
+            "Data Accumulation",
+            "Monthly filing records and asset/liability data are accumulated over time."
+          ],
+          [
+            "02",
+            "Threshold Monitoring",
+            "Revenue thresholds, tax regimes, and PKP requirements are checked."
+          ],
+          [
+            "03",
+            "Risk Alerts",
+            "Transition timing, unusual asset growth, and Treaty needs are flagged."
+          ],
+          [
+            "04",
+            "Next Actions",
+            "Required documents and recommended steps are presented."
+          ]
+        ]
+      },
+      {
+        "mark": "05",
+        "title": "Filing Readiness Dashboard",
+        "short": "Readiness, missing documents, and next actions — all on one screen",
+        "detail": "Clients can track document preparation, AI review, payment readiness, and filing completion status all from a single screen.",
+        "customerPromise": "See exactly where you stand — in numbers and stages.",
+        "primaryMetric": "82%",
+        "primaryLabel": "Filing Readiness",
+        "statusText": "Next step: Complete 2 missing documents",
+        "previewCards": [
+          [
+            "Readiness",
+            "Displayed based on required documents and completed review items"
+          ],
+          [
+            "Missing Documents",
+            "Outstanding items to complete before the deadline"
+          ],
+          [
+            "Risk Alerts",
+            "Unusual asset growth, PPN mismatches, possible withholding tax omissions"
+          ],
+          [
+            "Next Actions",
+            "Document completion, payment preparation, proof verification"
+          ]
+        ],
+        "customerView": [
+          "Overall progress percentage displayed",
+          "Per-tax-type progress status shown",
+          "Missing documents and risks highlighted",
+          "Next steps clearly laid out"
+        ],
+        "outputs": [
+          "Progress dashboard",
+          "Missing document priority list",
+          "Risk alerts",
+          "Next action cards"
+        ],
+        "process": [
+          [
+            "01",
+            "Calculate Document Readiness",
+            "Required documents are compared against submitted documents."
+          ],
+          [
+            "02",
+            "Show Per-Tax-Type Status",
+            "Progress status is displayed for each tax item."
+          ],
+          [
+            "03",
+            "Risk & Gap Alerts",
+            "Items that need to be completed are flagged."
+          ],
+          [
+            "04",
+            "Provide Next Actions",
+            "Guidance on the next step is provided."
+          ]
+        ]
+      },
+      {
+        "mark": "06",
+        "title": "Payment & Filing Proof Management",
+        "short": "ID Billing · NTPN · BPE stored per client",
+        "detail": "AI Pajak tracks payment codes, payment proof, and filing completion certificates per client, per year, and per tax type.",
+        "customerPromise": "Your filing outcomes are kept as organized records — not scattered files.",
+        "primaryMetric": "BPE",
+        "primaryLabel": "Filing Completion Proof",
+        "statusText": "ID Billing issued · NTPN recorded · BPE stored",
+        "previewCards": [
+          [
+            "ID Billing",
+            "Payment codes and payment status managed by tax type"
+          ],
+          [
+            "NTPN",
+            "Payment confirmation number stored"
+          ],
+          [
+            "BPE",
+            "Filing completion proof organized"
+          ],
+          [
+            "History",
+            "Annual and monthly filing history accessible"
+          ]
+        ],
+        "customerView": [
+          "Pre- and post-payment status displayed",
+          "ID Billing, NTPN, and BPE linked together",
+          "Individual and corporate filing histories kept separate",
+          "Downloadable proof documents provided"
+        ],
+        "outputs": [
+          "ID Billing records",
+          "NTPN records",
+          "BPE vault",
+          "Filing history"
+        ],
+        "process": [
+          [
+            "01",
+            "Payment Preparation",
+            "Tax type and amount are confirmed."
+          ],
+          [
+            "02",
+            "Payment Status Recorded",
+            "NTPN is stored."
+          ],
+          [
+            "03",
+            "Filing Completion Proof",
+            "BPE and related files are saved."
+          ],
+          [
+            "04",
+            "History Management",
+            "Past filing proof is made easily retrievable."
+          ]
+        ]
+      }
+    ],
+    "pricing": [
+      {
+        "id": "p-simple",
+        "group": "Personal Tax",
+        "badge": "Per Filing",
+        "typeLabel": "Personal Simple",
+        "price": "Rp 100.000",
+        "vat": "Total incl. PPN: Rp 111.000",
+        "description": "Individuals with a single employment income and straightforward tax data",
+        "meta": [
+          "Total incl. PPN: Rp 111.000",
+          "Based on complexity",
+          "Unified annual personal filing"
+        ],
+        "items": [
+          "Auto-organize A1/A2 or withholding tax documents",
+          "Verify basic personal info and income data",
+          "Basic guidance on tax payable or refund",
+          "Filing completion proof management"
+        ],
+        "criteria": [
+          "Primarily employment income",
+          "Single A1/A2 or withholding tax document",
+          "No additional business or freelance income"
+        ]
+      },
+      {
+        "id": "p-standard",
+        "group": "Personal Tax",
+        "badge": "Per Filing",
+        "typeLabel": "Personal Standard",
+        "price": "Rp 200.000",
+        "vat": "Total incl. PPN: Rp 222.000",
+        "description": "Individuals with multiple income sources, multiple withholding documents, or assets and liabilities to declare",
+        "meta": [
+          "Total incl. PPN: Rp 222.000",
+          "Based on complexity",
+          "Unified annual personal filing"
+        ],
+        "items": [
+          "Merge and organize multiple withholding tax documents",
+          "Organize other income, deductions, assets, and liabilities",
+          "Verify family data and PTKP profile",
+          "Filing completion proof management"
+        ],
+        "criteria": [
+          "Multiple employers or multiple withholding tax documents",
+          "Other income or deductions to verify",
+          "Assets and liabilities to declare"
+        ]
+      },
+      {
+        "id": "p-complex",
+        "group": "Personal Tax",
+        "badge": "Per Filing",
+        "typeLabel": "Personal Business / Complex",
+        "price": "Rp 500.000",
+        "vat": "Total incl. PPN: Rp 555.000",
+        "description": "Individuals with freelance, sole-proprietorship, investment, or complex asset situations",
+        "meta": [
+          "Total incl. PPN: Rp 555.000",
+          "Based on complexity",
+          "Unified annual personal filing"
+        ],
+        "items": [
+          "Auto-organize business and freelance income documents",
+          "Classify revenue, expenses, and supporting documents",
+          "Reflect investment and rental income",
+          "Track asset and liability changes and flag risks"
+        ],
+        "criteria": [
+          "Freelance or sole-proprietorship income",
+          "Business-related revenue and expense documents",
+          "Additional income sources or complex assets"
+        ]
+      },
+      {
+        "id": "monthly-umkm",
+        "group": "Corporate Monthly",
+        "badge": "Monthly Prepaid",
+        "typeLabel": "UMKM Monthly Management",
+        "price": "Rp 750,000",
+        "description": "Small-scale corporations / Final Tax focused",
+        "meta": [
+          "1-month prepaid",
+          "10% discount available with 12-month prepaid",
+          "Annual filing sold separately"
+        ],
+        "items": [
+          "Monthly filing status",
+          "ID Billing requests",
+          "Basic reminders",
+          "Basic AI risk commentary"
+        ],
+        "criteria": [
+          "Up to 5 employees",
+          "Up to 10 withholding tax transactions per month",
+          "Up to 50 uploads/transactions per month"
+        ]
+      },
+      {
+        "id": "monthly-basic",
+        "group": "Corporate Monthly",
+        "badge": "Monthly Prepaid",
+        "typeLabel": "Basic Monthly Management",
+        "price": "Rp 1,500,000",
+        "description": "Core tax operations for standard corporations",
+        "meta": [
+          "1-month prepaid",
+          "10% discount available with 12-month prepaid",
+          "Annual filing sold separately"
+        ],
+        "items": [
+          "PPh21/23/25/PPN management",
+          "Filing history, BPE, and NTPN storage",
+          "Withholding tax classification for counterparties",
+          "Monthly tax reports"
+        ],
+        "criteria": [
+          "Up to 30 employees",
+          "Up to 30 withholding tax transactions per month",
+          "Up to 300 purchase/sales transactions per month"
+        ]
+      },
+      {
+        "id": "monthly-pro",
+        "group": "Corporate Monthly",
+        "badge": "Monthly Prepaid",
+        "typeLabel": "Pro Monthly Management",
+        "price": "Rp 2,500,000",
+        "description": "Advanced monthly tax operations",
+        "meta": [
+          "1-month prepaid",
+          "10% discount available with 12-month prepaid",
+          "Annual filing sold separately"
+        ],
+        "items": [
+          "Everything in Basic",
+          "Transfer pricing condition monitoring",
+          "AI anomaly detection",
+          "Advanced tax reports",
+          "Priority processing"
+        ],
+        "criteria": [
+          "Up to 100 employees",
+          "Up to 150 withholding tax transactions per month",
+          "Cross-border and related-party transaction monitoring included"
+        ]
+      },
+      {
+        "id": "monthly-enterprise",
+        "group": "Corporate Monthly",
+        "badge": "Monthly Prepaid",
+        "typeLabel": "Enterprise Custom Monthly Management",
+        "price": "Rp 3,500,000",
+        "description": "High-volume and fully customized operations",
+        "meta": [
+          "1-month prepaid",
+          "Usage-based billing",
+          "Annual filing sold separately"
+        ],
+        "items": [
+          "Everything in Pro",
+          "High-volume payroll and transaction processing",
+          "Overage usage-based billing",
+          "SLA and priority support"
+        ],
+        "criteria": [
+          "More than 100 employees",
+          "More than 150 withholding tax transactions per month",
+          "Bulk document auto-classification required"
+        ]
+      },
+      {
+        "id": "annual-umkm",
+        "group": "Corporate Annual Filing",
+        "badge": "One-Time Prepaid",
+        "typeLabel": "UMKM Annual Filing",
+        "price": "Rp 2,500,000",
+        "description": "Annual filing for corporations subject to 0.5% Final Tax",
+        "meta": [
+          "One-time prepaid",
+          "Can be selected separately from monthly management",
+          "Based on SPT Badan"
+        ],
+        "items": [
+          "Normalized financial statement preparation",
+          "UMKM Final Tax calculation",
+          "SPT draft generation",
+          "e-Bupot 1721 A1 issuance"
+        ],
+        "criteria": [
+          "Annual revenue up to Rp 4.8B",
+          "Subject to 0.5% Final Tax",
+          "No cross-border or related-party transactions"
+        ]
+      },
+      {
+        "id": "annual-pph25",
+        "group": "Corporate Annual Filing",
+        "badge": "One-Time Prepaid",
+        "typeLabel": "PPh25 Standard Corporate Annual Filing",
+        "price": "Rp 7,500,000",
+        "description": "Standard annual filing for general corporate tax subjects",
+        "meta": [
+          "One-time prepaid",
+          "Can be selected separately from monthly management",
+          "Based on SPT Badan"
+        ],
+        "items": [
+          "Financial statement preparation",
+          "Tax reconciliation",
+          "Tax credit application",
+          "PPh29/PPh25 calculation",
+          "SPT draft generation"
+        ],
+        "criteria": [
+          "Annual revenue above Rp 4.8B or past UMKM eligibility period",
+          "Up to 1,000 annual transactions",
+          "No transfer pricing issues"
+        ]
+      },
+      {
+        "id": "annual-complex",
+        "group": "Corporate Annual Filing",
+        "badge": "One-Time Prepaid",
+        "typeLabel": "Complex Structure Annual Filing",
+        "price": "Rp 15,000,000",
+        "description": "Foreign-owned, related-party, cross-border, or high-volume transaction corporations",
+        "meta": [
+          "One-time prepaid",
+          "Can be selected separately from monthly management",
+          "Based on SPT Badan"
+        ],
+        "items": [
+          "Full PPh25 annual filing",
+          "Transfer pricing condition review",
+          "Cross-border transaction review",
+          "AI risk report",
+          "Priority processing"
+        ],
+        "criteria": [
+          "Foreign shareholders or cross-border transactions present",
+          "Related-party transactions present",
+          "PPh26 / DGT Form / Tax Treaty review required"
+        ]
+      }
+    ],
+    "text": {
+      "nav": {
+        "product": "Services",
+        "start": "Submit Documents",
+        "difference": "How We Compare",
+        "faq": "FAQ"
+      },
+      "login": "Log In",
+      "viewPricing": "View Pricing",
+      "chips": "Personal · Corporate only",
+      "heroTop": "Stop wasting time wrestling with forms.",
+      "heroMain": "AI diagnoses your filing data, tax codes, and tax risks — all at once",
+      "heroDesc": "With AI Pajak, simply submit the invoices, Faktur Pajak, receipts, payroll data, and withholding documents you already have — AI reads and classifies what's needed. For withholding transactions, it analyzes the nature of each payment to automatically determine the applicable PPh type and tax code for ID Billing, then provides guidance on corporate tax payment method, PKP registration timing, asset growth risk, and Tax Treaty eligibility based on your submitted and filed data.",
+      "readiness": "Readiness",
+      "missing": "Missing Documents",
+      "next": "Next Action",
+      "personas": {
+        "personal": {
+          "label": "Individual Client",
+          "icon": "👤",
+          "title": "Personal Annual Filing",
+          "subtitle": "Personal annual filing that lets you submit A1/A2, receipts, and income documents as-is — no re-entry required",
+          "readiness": 72,
+          "missing": [
+            "A1/A2 withholding certificate",
+            "Asset & liability balances as of December 31",
+            "Other income documents"
+          ],
+          "next": "We review your income, deductions, and asset changes, then advise on potential tax due or refund."
+        },
+        "corporate": {
+          "label": "Corporate Client",
+          "icon": "🏢",
+          "title": "Corporate Monthly & Annual Filing",
+          "subtitle": "Corporate tax dashboard where you submit invoices, Faktur Pajak, receipts, payroll, and contracts without reorganizing them",
+          "readiness": 58,
+          "missing": [
+            "PPN input Faktur",
+            "Some withholding tax contracts",
+            "PPh21 payroll template"
+          ],
+          "next": "We analyze the transaction nature of uploaded invoices and contracts to guide you on withholding tax type and tax code selection."
+        }
+      },
+      "cards": [
+        [
+          "AI Withholding Tax Code Determination",
+          "Analyzes transaction nature to automatically determine the applicable PPh type and tax code for ID Billing"
+        ],
+        [
+          "Separate Flows for Individuals & Corporates",
+          "Required documents and filing procedures are tailored by client type"
+        ],
+        [
+          "AI Tax Insights",
+          "Flags tax risks and recommends next actions based on submitted and filed data"
+        ],
+        [
+          "Submit Documents As-Is",
+          "No template required — AI parses data directly from your existing files, photos, and PDFs"
+        ]
+      ],
+      "trustTitle": "Your sensitive tax data is stored with encryption",
+      "trustDesc": "Sensitive information including NPWP, NIK, payroll data, Faktur Pajak, and contracts is handled with encryption by design. Your data is used solely for filing preparation and delivering personalized tax insights.",
+      "trustItems": [
+        "Encrypted data storage",
+        "Access-controlled workflow",
+        "Audit-ready filing evidence"
+      ],
+      "coreDiff": "Key Differentiators",
+      "advisoryKicker": "AI Tax Advisory",
+      "taxTitle": "ID Billing accuracy starts with getting the withholding tax code right.",
+      "taxDesc": "Existing online tax platforms provide e-Billing issuance, but users often have to determine on their own which PPh type and tax code applies to each transaction. AI Pajak analyzes your invoices, contracts, counterparty details, and service descriptions to determine the withholding tax codes required for ID Billing.",
+      "taxCards": [
+        [
+          "Transaction Nature Analysis",
+          "Classifies the payment type — services, rental, interest, dividends, royalties, construction, and more"
+        ],
+        [
+          "PPh Type Determination",
+          "Identifies the applicable type among PPh 4(2), 15, 22, 23, 26, and others"
+        ],
+        [
+          "Tax Code Matching",
+          "Maps the tax type and deposit type values needed to issue ID Billing"
+        ],
+        [
+          "Flagging Unclear Items",
+          "Ambiguous transactions are marked separately to reduce the risk of incorrect code entry"
+        ]
+      ],
+      "advisoryTitle": "The more filing data accumulates, the earlier AI surfaces the tax actions you need to take.",
+      "advisoryDesc": "Drawing on your submitted documents and filing history, AI Pajak goes beyond simple calculation to support tax decision-making. It provides client-specific guidance on switching corporate tax payment methods, PKP registration timing, anomalies between income and asset acquisition, and the need to review overseas transactions under Tax Treaty.",
+      "advisoryCards": [
+        [
+          "Corporate Tax Payment Method",
+          "Guidance on when and how to transition from UMKM Final Tax to PPh25"
+        ],
+        [
+          "PKP Registration Alert",
+          "Proactively notifies you when PKP registration is approaching based on revenue trends"
+        ],
+        [
+          "Asset Growth Anomaly Detection",
+          "Flags a risk signal when asset acquisitions appear disproportionate to reported income"
+        ],
+        [
+          "Tax Treaty Check",
+          "Advises on overseas transactions, PPh26, DGT Form, and potential tax treaty applicability"
+        ]
+      ],
+      "serviceFlow": "How It Works",
+      "productTitle": "Just upload — AI organizes your filing data",
+      "productDesc": "No need to re-enter data into a separate template. Submit or photograph your invoices, Faktur Pajak, receipts, and payroll documents in whatever format you already use, and AI will read the data and organize it into filing-ready form.",
+      "moduleStep": "Service Steps",
+      "coreGuide": "Key Guidance",
+      "customerView": "What Clients See",
+      "outputs": "Deliverables",
+      "requiredDocs": "Accepted Documents",
+      "startKicker": "Upload-ready documents",
+      "startTitle": "No need to create new documents for tax filing.",
+      "startDesc": "Submit the invoices, Faktur Pajak, receipts, payroll data, and withholding documents you already have. Paper receipts and tax invoices can be submitted as photos, and AI will read the data and organize it into filing-ready form.",
+      "personalBtn": "Individual Required Docs",
+      "corporateBtn": "Corporate Required Docs",
+      "methodTitle": "How to Submit Documents",
+      "methods": [
+        "Submit existing files as-is",
+        "Photograph invoices, Faktur & receipts",
+        "AI data parsing",
+        "Review only flagged items",
+        "Filing data auto-organized"
+      ],
+      "guide": "Guidance",
+      "startNote": "No need to reformat your documents to fit a separate template. For withholding tax transactions, we guide you through selecting the appropriate tax code for ID Billing.",
+      "requirements": {
+        "personal": [
+          [
+            "Required",
+            "NIK/NPWP, full name, address, contact details"
+          ],
+          [
+            "Required",
+            "A1/A2 or withholding tax certificate"
+          ],
+          [
+            "Required",
+            "Asset & liability balances as of December 31"
+          ],
+          [
+            "If applicable",
+            "Freelance / business / rental / interest / dividend income documents"
+          ],
+          [
+            "If applicable",
+            "Family status and deduction-related documents"
+          ]
+        ],
+        "corporate": [
+          [
+            "Required",
+            "NPWP, KBLI, PKP status, business type"
+          ],
+          [
+            "Required",
+            "Monthly revenue & expense records and Faktur Pajak"
+          ],
+          [
+            "Required",
+            "Payroll template and per-employee PPh21 data"
+          ],
+          [
+            "If applicable",
+            "Contracts and invoices subject to withholding tax"
+          ],
+          [
+            "If applicable",
+            "Bank statements, prior-year SPT Badan, PPh25 records"
+          ]
+        ]
+      },
+      "compKicker": "Competitive Comparison",
+      "compTitle": "How we differ from traditional tax firms and online tax platforms",
+      "compDesc": "AI Pajak's core differentiator is its ability to analyze the nature of withholding tax transactions and automatically determine the applicable PPh type and tax code for ID Billing.",
+      "columns": [
+        "Criteria",
+        "Traditional Tax Firm",
+        "Existing Online Tax Platform",
+        "AI Pajak"
+      ],
+      "rows": [
+        [
+          "Core Position",
+          "Tax agency where you send documents to an expert and wait for results",
+          "Platform focused on processing filings, payments, and tax documents via e-Filing, e-Billing, e-Faktur, e-Bupot",
+          "Automation platform where clients upload existing documents as-is and AI reads the data to produce filing-ready output"
+        ],
+        [
+          "Client Experience",
+          "Documents sent via WhatsApp, email, or Excel — progress tracked through separate follow-up",
+          "Users manually operate tax document, filing, and payment features themselves",
+          "Clients submit existing documents or photos without extra templates and review AI-organized results and status"
+        ],
+        [
+          "Withholding Tax Code",
+          "Often determined manually by the agent reviewing transaction details",
+          "Users typically must select tax type and payment code themselves",
+          "Automatically determines the applicable PPh type and tax code for ID Billing by analyzing invoices, contracts, and counterparty details"
+        ],
+        [
+          "AI Tax Insights",
+          "Guidance quality varies by the individual agent's experience",
+          "Filing and payment features provided, but client-specific tax decision support is limited",
+          "Advises on payment method transitions, PKP registration, asset growth risk, and Tax Treaty review needs"
+        ],
+        [
+          "Differentiating Factor",
+          "Expert explanation and managed tax filing experience",
+          "Convenience of electronic filing and payment — but tax code judgment depends on user input and knowledge",
+          "Document parsing, withholding tax code determination, AI tax insights, filing readiness tracking, and evidence management"
+        ]
+      ],
+      "pricingKicker": "Pricing",
+      "pricingTitle": "Select a plan to instantly see what's included",
+      "pricingDesc": "Individual filing plans are structured by complexity, not form name. Click on any individual tax, corporate monthly, or corporate year-end plan to view pricing, eligibility criteria, and what's included.",
+      "pricingListTitle": "Available Plans",
+      "chooseService": "Choose the service you need",
+      "pricingListDesc": "Click a plan to see details on the right.",
+      "selectedPlan": "Selected Plan",
+      "included": "What's Included",
+      "criteria": "Eligibility Criteria",
+      "pricingInfo": "Prices shown are base rates. Final scope is confirmed based on submitted documents, transaction volume, overseas transactions, and related-party status.",
+      "pricingButton": "View accepted documents →",
+      "groups": [
+        "Individual Tax",
+        "Corporate Monthly",
+        "Corporate Year-End"
+      ],
+      "faqs": [
+        [
+          "What documents do I need to get started?",
+          "Individual clients need NIK/NPWP, A1/A2, family information, and asset & liability records as a baseline. Corporate clients need NPWP, KBLI, PKP status, revenue & expense records, PPh21 payroll data, withholding-related invoices and contracts, and PPN documents."
+        ],
+        [
+          "Are you directly competing with platforms like OnlinePajak and Klikpajak?",
+          "Not exactly. Existing online tax platforms excel at e-Filing, e-Billing, e-Faktur, e-Bupot, and electronic tax document processing. AI Pajak's core differentiator is automatically determining withholding tax types and ID Billing tax codes by analyzing the transaction nature of invoices and contracts."
+        ],
+        [
+          "Is individual filing priced based on 1770SS / 1770S / 1770?",
+          "No. Individual annual filing is guided through a unified flow. AI Pajak's individual pricing is based on income type, number of withholding documents, asset & liability complexity, and whether business or freelance income is involved — not form names."
+        ],
+        [
+          "What does the AI Tax Insights feature tell me?",
+          "Based on your submitted documents and filing data, it advises on potential changes to corporate tax payment method, PKP registration timing, anomalies between income and asset acquisition, and the need to review overseas transactions under Tax Treaty."
+        ]
+      ],
+      "finalTitle": "AI Pajak manages everything from document preparation to filing completion proof.",
+      "finalDesc": "Once individuals and corporate clients prepare their documents, AI Pajak clearly guides them through filing readiness status and the next steps to take.",
+      "finalButton": "Log in and start filing →",
+      "footerCompare": "Comparison",
+      "footerPricing": "Pricing detail",
+      "footerDocs": "Required documents"
+    }
+  },
+  "id": {
+    "modules": [
+      {
+        "mark": "01",
+        "title": "Kirim Dokumen yang Sudah Ada",
+        "short": "Tidak perlu input ulang data ke template yang sudah ditentukan",
+        "detail": "AI Pajak dirancang agar pelanggan dapat langsung mengirimkan invoice, Faktur Pajak, kuitansi, data gaji, dan data pemotongan pajak yang sudah mereka gunakan. Hemat waktu tanpa perlu menyalin ke template terpisah—AI akan menemukan dan menyusun data yang diperlukan untuk pelaporan.",
+        "customerPromise": "Pelanggan tidak perlu membuat spreadsheet baru untuk keperluan pelaporan pajak. Cukup unggah dokumen yang sudah ada atau foto, lalu AI akan membaca data yang diperlukan.",
+        "primaryMetric": "Tanpa Template",
+        "primaryLabel": "Tidak Perlu Isi Ulang Formulir",
+        "statusText": "Formulir lama · Foto · PDF dapat dikirimkan",
+        "previewCards": [
+          [
+            "Formulir yang Sudah Dipakai",
+            "invoice perusahaan, data gaji, dan faktur transaksi bisa langsung dikirim"
+          ],
+          [
+            "Kirim via Foto",
+            "Kuitansi, Faktur Pajak, dan invoice kertas bisa difoto lalu dikirim"
+          ],
+          [
+            "Ekstraksi Data AI",
+            "Tanggal, nominal, NPWP, mitra usaha, dan nilai pajak di-parsing otomatis"
+          ],
+          [
+            "Penyusunan Data Laporan",
+            "Data yang diekstrak dikonversi menjadi data siap lapor per jenis pajak"
+          ]
+        ],
+        "customerView": [
+          "Kirim dokumen yang sudah ada tanpa template khusus",
+          "invoice, Faktur Pajak, dan kuitansi bisa dikirim via foto",
+          "AI mengekstrak data pelaporan yang diperlukan secara otomatis",
+          "Data yang diekstrak disusun dalam tampilan yang mudah dicek pelanggan"
+        ],
+        "outputs": [
+          "Hasil Parsing AI",
+          "Tabel Konfirmasi Data Ekstraksi",
+          "Notifikasi Item yang Belum Lengkap",
+          "Data Terstruktur Siap Lapor"
+        ],
+        "process": [
+          [
+            "01",
+            "Kirim Dokumen Apa Adanya",
+            "Kirimkan invoice, Faktur Pajak, kuitansi, dan data gaji yang sudah Anda gunakan."
+          ],
+          [
+            "02",
+            "Bisa Juga via Foto",
+            "Kuitansi kertas atau Faktur bisa difoto dan langsung dikirimkan."
+          ],
+          [
+            "03",
+            "Parsing Data oleh AI",
+            "Tanggal, nominal, nilai pajak, mitra usaha, dan NPWP dibaca secara otomatis."
+          ],
+          [
+            "04",
+            "Pembuatan Data Laporan",
+            "Data hasil parsing disusun otomatis menjadi data siap lapor."
+          ]
+        ]
+      },
+      {
+        "mark": "02",
+        "title": "Penyusunan & Klasifikasi Dokumen oleh AI",
+        "short": "Dokumen dan data transaksi dikelompokkan sesuai tujuan pelaporan",
+        "detail": "AI membaca data yang diperlukan untuk pelaporan dari berbagai dokumen seperti A1/A2, invoice, Faktur Pajak, kuitansi, kontrak, payroll, dan bank statement, lalu mengklasifikasikannya per jenis pajak.",
+        "customerPromise": "Pelanggan tidak perlu menginput ulang data atau membuat tabel baru per jenis pajak.",
+        "primaryMetric": "AI",
+        "primaryLabel": "Mesin Penyusunan Dokumen",
+        "statusText": "Parsing selesai 18 item · Perlu konfirmasi 3 item",
+        "previewCards": [
+          [
+            "A1/A2",
+            "Disusun berdasarkan penghasilan kerja, PPh yang dipotong, dan info pemberi kerja"
+          ],
+          [
+            "Faktur Pajak",
+            "NPWP, DPP, PPN, dan tanggal transaksi dirapikan"
+          ],
+          [
+            "Invoice / Receipt",
+            "Jenis pajak pemotongan dan item kode pajak yang perlu dicek diekstrak"
+          ],
+          [
+            "Payroll",
+            "Disusun sebagai item review PPh21"
+          ]
+        ],
+        "customerView": [
+          "Tampilan hasil pengenalan dan status klasifikasi per dokumen",
+          "Dokumen yang perlu konfirmasi dipisahkan",
+          "Data individu/badan disajikan di layar terpisah",
+          "Ditampilkan dengan nama item yang mudah dipahami"
+        ],
+        "outputs": [
+          "Tabel Parsing AI",
+          "Item yang Perlu Konfirmasi",
+          "Kumpulan Dokumen per Jenis Pajak",
+          "Draf Data Siap Lapor"
+        ],
+        "process": [
+          [
+            "01",
+            "Pengenalan Dokumen",
+            "Item pajak dibaca dari foto, PDF, Excel, dan formulir yang sudah ada."
+          ],
+          [
+            "02",
+            "Klasifikasi Tujuan Pelaporan",
+            "Dikelompokkan berdasarkan penghasilan, potongan, PPh, PPN, serta aset dan kewajiban."
+          ],
+          [
+            "03",
+            "Verifikasi Kode Pajak",
+            "Transaksi yang dikenai pemotongan pajak ditandai sebagai item yang perlu dicek kodenya."
+          ],
+          [
+            "04",
+            "Refleksi ke Kesiapan Lapor",
+            "Dokumen yang sudah diklasifikasi tercermin dalam tingkat kesiapan pelaporan."
+          ]
+        ]
+      },
+      {
+        "mark": "03",
+        "title": "Penentuan Kode Pajak Pemotongan Otomatis oleh AI",
+        "short": "AI menentukan jenis PPh dan kode pajak yang dibutuhkan untuk ID Billing",
+        "detail": "Hal terpenting dalam pelaporan PPh pemotongan adalah menentukan jenis PPh dan kode pajak yang tepat sesuai sifat transaksi. AI Pajak menentukan kode pajak yang diperlukan untuk penerbitan ID Billing secara otomatis berdasarkan invoice, kontrak, informasi mitra usaha, dan uraian layanan.",
+        "customerPromise": "Pelanggan tidak perlu tahu kode pajak mana yang harus dipilih. AI Pajak memberikan panduan lengkap beserta kode PPh pemotongan dan dasar pertimbangannya.",
+        "primaryMetric": "Code AI",
+        "primaryLabel": "Penentuan Kode Pajak Otomatis",
+        "statusText": "Jenis PPh · Kode Pajak · Bulan Setor disusun otomatis",
+        "previewCards": [
+          [
+            "Analisis Sifat Transaksi",
+            "Klasifikasi jasa, sewa, bunga, dividen, royalti, konstruksi, dan lainnya"
+          ],
+          [
+            "Penentuan Jenis PPh",
+            "Dibedakan antara PPh 4(2), PPh15, PPh22, PPh23, PPh26, dll."
+          ],
+          [
+            "Pencocokan Kode Pajak",
+            "Tax type / deposit type yang dibutuhkan untuk ID Billing dirapikan"
+          ],
+          [
+            "Tampilan Dasar Pertimbangan",
+            "Disusun dengan penjelasan sederhana dan nilai acuan pelaporan"
+          ]
+        ],
+        "customerView": [
+          "Konfirmasi apakah transaksi dikenai pemotongan pajak",
+          "Tampilan kandidat jenis PPh dan kode pajak",
+          "Penekanan item yang perlu dicek sebelum ID Billing",
+          "Penjelasan alasan pemilihan kode"
+        ],
+        "outputs": [
+          "Nilai Penentuan Kode Pajak Pemotongan",
+          "Klasifikasi Jenis PPh",
+          "Nilai Siap ID Billing",
+          "Daftar Transaksi yang Perlu Konfirmasi"
+        ],
+        "process": [
+          [
+            "01",
+            "Pembacaan Isi Transaksi",
+            "Sifat pembayaran dibaca dari invoice, kontrak, dan informasi mitra usaha."
+          ],
+          [
+            "02",
+            "Klasifikasi Jenis PPh",
+            "Jenis PPh dibedakan sesuai sifat transaksi."
+          ],
+          [
+            "03",
+            "Pencocokan Kode Pajak",
+            "Nilai yang diperlukan untuk penerbitan ID Billing dirapikan."
+          ],
+          [
+            "04",
+            "Tampilan Item Konfirmasi",
+            "Transaksi yang tidak jelas dipisahkan."
+          ]
+        ]
+      },
+      {
+        "mark": "04",
+        "title": "Insight Perpajakan oleh AI",
+        "short": "Risiko pajak dan langkah berikutnya disampaikan berdasarkan data yang dikirim dan data pelaporan",
+        "detail": "AI Pajak memberikan insight perpajakan personal berdasarkan dokumen yang dikirimkan dan data pelaporan yang terakumulasi, mencakup peralihan metode pembayaran PPh badan, waktu pengajuan PKP, anomali perolehan aset, hingga kemungkinan penerapan Tax Treaty.",
+        "customerPromise": "AI Pajak memantau perubahan data pelaporan dan pemenuhan syarat utama, lalu memberikan notifikasi beserta penjelasan pada waktu yang tepat.",
+        "primaryMetric": "Insight AI",
+        "primaryLabel": "Diagnosis Risiko Perpajakan",
+        "statusText": "Waktu peralihan · Notifikasi · Risiko disampaikan otomatis",
+        "previewCards": [
+          [
+            "Metode Pembayaran PPh Badan",
+            "Panduan peralihan dari UMKM Final Tax ke PPh25"
+          ],
+          [
+            "Waktu Pengajuan PKP",
+            "Notifikasi dini berdasarkan tren omzet"
+          ],
+          [
+            "Risiko Kenaikan Aset",
+            "Sinyal anomali perolehan aset dibanding penghasilan"
+          ],
+          [
+            "Tax Treaty",
+            "Panduan review PPh26, DGT Form, dan perjanjian pajak"
+          ]
+        ],
+        "customerView": [
+          "Informasi status perpajakan saat ini dan ketentuan yang dapat diterapkan",
+          "Notifikasi risiko berdasarkan data omzet, aset, dan transaksi",
+          "Panduan waktu peralihan PKP, PPh25, dan UMKM",
+          "Indikator kebutuhan review Tax Treaty"
+        ],
+        "outputs": [
+          "Notifikasi Risiko Pajak AI",
+          "Panduan Waktu Peralihan",
+          "Notifikasi Pengajuan PKP",
+          "Sinyal Review Tax Treaty"
+        ],
+        "process": [
+          [
+            "01",
+            "Akumulasi Data",
+            "Data pelaporan bulanan beserta data aset dan kewajiban dikumpulkan secara bertahap."
+          ],
+          [
+            "02",
+            "Pemeriksaan Kondisi",
+            "Batas omzet, metode pengenaan pajak, dan persyaratan PKP diperiksa."
+          ],
+          [
+            "03",
+            "Notifikasi Risiko",
+            "Waktu peralihan, anomali kenaikan aset, dan kebutuhan Treaty disampaikan."
+          ],
+          [
+            "04",
+            "Langkah Berikutnya",
+            "Dokumen yang perlu disiapkan dan arah penanganan ditampilkan."
+          ]
+        ]
+      },
+      {
+        "mark": "05",
+        "title": "Dashboard Kesiapan Pelaporan",
+        "short": "Tingkat kesiapan, dokumen yang kurang, dan langkah berikutnya dalam satu layar",
+        "detail": "Pelanggan dapat melihat status persiapan dokumen, review AI, kesiapan pembayaran, dan bukti selesai lapor dalam satu layar.",
+        "customerPromise": "Menampilkan sejauh mana progres saat ini dalam bentuk angka dan tahapan yang jelas.",
+        "primaryMetric": "82%",
+        "primaryLabel": "Tingkat Kesiapan Lapor",
+        "statusText": "Langkah berikutnya: Lengkapi 2 dokumen yang kurang",
+        "previewCards": [
+          [
+            "Tingkat Kesiapan",
+            "Ditampilkan berdasarkan dokumen wajib dan item yang sudah direview"
+          ],
+          [
+            "Dokumen yang Kurang",
+            "Dokumen yang perlu dilengkapi sebelum batas waktu ditampilkan"
+          ],
+          [
+            "Notifikasi Risiko",
+            "Kemungkinan kenaikan aset, ketidaksesuaian PPN, dan PPh yang terlewat"
+          ],
+          [
+            "Langkah Berikutnya",
+            "Pelengkapan dokumen, persiapan pembayaran, dan konfirmasi bukti"
+          ]
+        ],
+        "customerView": [
+          "Tampilan progres keseluruhan",
+          "Tampilan status per jenis pajak",
+          "Penekanan dokumen yang kurang dan risiko",
+          "Rangkuman tindakan berikutnya"
+        ],
+        "outputs": [
+          "Dashboard Progres",
+          "Prioritas Dokumen yang Kurang",
+          "Notifikasi Risiko",
+          "Kartu Langkah Berikutnya"
+        ],
+        "process": [
+          [
+            "01",
+            "Perhitungan Tingkat Kesiapan Dokumen",
+            "Dokumen wajib dibandingkan dengan dokumen yang sudah dikirimkan."
+          ],
+          [
+            "02",
+            "Tampilan Status per Jenis Pajak",
+            "Progres per item ditampilkan."
+          ],
+          [
+            "03",
+            "Panduan Risiko & Kekurangan",
+            "Item yang perlu dilengkapi dirangkum."
+          ],
+          [
+            "04",
+            "Penyediaan Langkah Berikutnya",
+            "Tahap selanjutnya disampaikan dengan jelas."
+          ]
+        ]
+      },
+      {
+        "mark": "06",
+        "title": "Manajemen Bukti Pembayaran & Pelaporan",
+        "short": "ID Billing · NTPN · BPE disimpan per pelanggan",
+        "detail": "AI Pajak melacak kode pembayaran, bukti setor, dan bukti selesai lapor per pelanggan, per tahun, dan per jenis pajak.",
+        "customerPromise": "Hasil pelaporan tidak lagi berupa file yang berserakan, melainkan tersimpan sebagai catatan yang terorganisir.",
+        "primaryMetric": "BPE",
+        "primaryLabel": "Bukti Selesai Lapor",
+        "statusText": "Penerbitan ID Billing · Input NTPN · Penyimpanan BPE",
+        "previewCards": [
+          [
+            "ID Billing",
+            "Manajemen kode setor dan status pembayaran per jenis pajak"
+          ],
+          [
+            "NTPN",
+            "Penyimpanan nomor konfirmasi pembayaran"
+          ],
+          [
+            "BPE",
+            "Pengelolaan bukti selesai lapor"
+          ],
+          [
+            "History",
+            "Riwayat pelaporan per tahun dan per bulan"
+          ]
+        ],
+        "customerView": [
+          "Tampilan status sebelum/sesudah pembayaran",
+          "ID Billing, NTPN, dan BPE terhubung",
+          "Riwayat lapor individu/badan dipisahkan",
+          "Bukti yang dapat diunduh tersedia"
+        ],
+        "outputs": [
+          "Catatan ID Billing",
+          "Catatan NTPN",
+          "Arsip BPE",
+          "Riwayat Pelaporan"
+        ],
+        "process": [
+          [
+            "01",
+            "Persiapan Pembayaran",
+            "Jenis pajak dan nominal dikonfirmasi."
+          ],
+          [
+            "02",
+            "Pencatatan Status Pembayaran",
+            "NTPN disimpan."
+          ],
+          [
+            "03",
+            "Bukti Selesai Lapor",
+            "BPE dan file disimpan."
+          ],
+          [
+            "04",
+            "Manajemen Riwayat",
+            "Bukti pelaporan masa lalu dapat ditemukan dengan mudah."
+          ]
+        ]
+      }
+    ],
+    "pricing": [
+      {
+        "id": "p-simple",
+        "group": "Pajak Pribadi",
+        "badge": "Per Filing",
+        "typeLabel": "Personal Simple (Laporan Sederhana)",
+        "price": "Rp 100.000",
+        "vat": "Total termasuk PPN: Rp 111.000",
+        "description": "Individu dengan 1 sumber penghasilan kerja · data sederhana",
+        "meta": [
+          "Total termasuk PPN: Rp 111.000",
+          "Berdasarkan tingkat kompleksitas",
+          "Laporan tahunan pribadi terpadu"
+        ],
+        "items": [
+          "Perapihan otomatis data A1/A2 atau bukti potong",
+          "Verifikasi data identitas dan penghasilan dasar",
+          "Informasi awal kemungkinan kurang/lebih bayar",
+          "Manajemen bukti penyelesaian laporan"
+        ],
+        "criteria": [
+          "Berbasis penghasilan dari pekerjaan",
+          "1 data A1/A2 atau bukti potong utama",
+          "Tidak ada penghasilan usaha atau freelance tambahan"
+        ]
+      },
+      {
+        "id": "p-standard",
+        "group": "Pajak Pribadi",
+        "badge": "Per Filing",
+        "typeLabel": "Personal Standard (Laporan Standar)",
+        "price": "Rp 200.000",
+        "vat": "Total termasuk PPN: Rp 222.000",
+        "description": "Individu dengan beberapa sumber penghasilan, beberapa bukti potong, serta input harta/kewajiban",
+        "meta": [
+          "Total termasuk PPN: Rp 222.000",
+          "Berdasarkan tingkat kompleksitas",
+          "Laporan tahunan pribadi terpadu"
+        ],
+        "items": [
+          "Penggabungan dan perapihan beberapa bukti potong",
+          "Perapihan penghasilan lain, pengurangan, harta, dan kewajiban",
+          "Verifikasi profil keluarga/PTKP",
+          "Manajemen bukti penyelesaian laporan"
+        ],
+        "criteria": [
+          "Beberapa pemberi kerja atau beberapa bukti potong",
+          "Penghasilan lain atau pengurangan yang perlu diverifikasi",
+          "Perlu input harta dan kewajiban"
+        ]
+      },
+      {
+        "id": "p-complex",
+        "group": "Pajak Pribadi",
+        "badge": "Per Filing",
+        "typeLabel": "Personal Business / Complex",
+        "price": "Rp 500.000",
+        "vat": "Total termasuk PPN: Rp 555.000",
+        "description": "Individu dengan penghasilan freelance · usaha pribadi · investasi · atau harta kompleks",
+        "meta": [
+          "Total termasuk PPN: Rp 555.000",
+          "Berdasarkan tingkat kompleksitas",
+          "Laporan tahunan pribadi terpadu"
+        ],
+        "items": [
+          "Perapihan otomatis data penghasilan usaha/freelance",
+          "Klasifikasi dokumen penerimaan, biaya, dan bukti",
+          "Pencatatan penghasilan investasi dan sewa",
+          "Pemeriksaan perubahan harta/kewajiban dan risiko"
+        ],
+        "criteria": [
+          "Penghasilan freelance atau usaha pribadi",
+          "Dokumen penerimaan dan biaya terkait usaha",
+          "Penghasilan tambahan atau harta kompleks"
+        ]
+      },
+      {
+        "id": "monthly-umkm",
+        "group": "Manajemen Bulanan Badan",
+        "badge": "Bayar Bulanan",
+        "typeLabel": "Manajemen Bulanan UMKM",
+        "price": "Rp 750,000",
+        "description": "Badan usaha skala kecil / berbasis Final Tax",
+        "meta": [
+          "Dibayar di muka 1 bulan",
+          "Diskon 10% untuk pembayaran di muka 12 bulan",
+          "Rekonsiliasi tahunan terpisah"
+        ],
+        "items": [
+          "Status pelaporan bulanan",
+          "Permintaan ID Billing",
+          "Pengingat dasar",
+          "Komentar risiko AI dasar"
+        ],
+        "criteria": [
+          "Maksimal 5 karyawan",
+          "Maksimal 10 transaksi withholding per bulan",
+          "Maksimal 50 unggahan/transaksi per bulan"
+        ]
+      },
+      {
+        "id": "monthly-basic",
+        "group": "Manajemen Bulanan Badan",
+        "badge": "Bayar Bulanan",
+        "typeLabel": "Manajemen Bulanan Basic",
+        "price": "Rp 1,500,000",
+        "description": "Operasional pajak dasar untuk badan umum",
+        "meta": [
+          "Dibayar di muka 1 bulan",
+          "Diskon 10% untuk pembayaran di muka 12 bulan",
+          "Rekonsiliasi tahunan terpisah"
+        ],
+        "items": [
+          "Pengelolaan PPh21/23/25/PPN",
+          "Penyimpanan riwayat pelaporan/BPE/NTPN",
+          "Penentuan withholding pajak pihak ketiga",
+          "Laporan pajak bulanan"
+        ],
+        "criteria": [
+          "Maksimal 30 karyawan",
+          "Maksimal 30 transaksi withholding per bulan",
+          "Maksimal 300 transaksi pembelian/penjualan per bulan"
+        ]
+      },
+      {
+        "id": "monthly-pro",
+        "group": "Manajemen Bulanan Badan",
+        "badge": "Bayar Bulanan",
+        "typeLabel": "Manajemen Bulanan Pro",
+        "price": "Rp 2,500,000",
+        "description": "Operasional pajak bulanan yang lebih andal",
+        "meta": [
+          "Dibayar di muka 1 bulan",
+          "Diskon 10% untuk pembayaran di muka 12 bulan",
+          "Rekonsiliasi tahunan terpisah"
+        ],
+        "items": [
+          "Semua fitur Basic",
+          "Pemantauan kondisi TP",
+          "Deteksi anomali berbasis AI",
+          "Laporan pajak tingkat lanjut",
+          "Pemrosesan prioritas"
+        ],
+        "criteria": [
+          "Maksimal 100 karyawan",
+          "Maksimal 150 transaksi withholding per bulan",
+          "Termasuk pemantauan transaksi luar negeri dan hubungan istimewa"
+        ]
+      },
+      {
+        "id": "monthly-enterprise",
+        "group": "Manajemen Bulanan Badan",
+        "badge": "Bayar Bulanan",
+        "typeLabel": "Manajemen Bulanan Enterprise Kustom",
+        "price": "Rp 3,500,000",
+        "description": "Operasional volume besar / solusi kustom",
+        "meta": [
+          "Dibayar di muka 1 bulan",
+          "Tagihan berbasis penggunaan",
+          "Rekonsiliasi tahunan terpisah"
+        ],
+        "items": [
+          "Semua fitur Pro",
+          "Pemrosesan payroll dan transaksi volume besar",
+          "Tagihan berbasis kelebihan penggunaan",
+          "SLA / dukungan prioritas"
+        ],
+        "criteria": [
+          "Lebih dari 100 karyawan",
+          "Lebih dari 150 transaksi withholding per bulan",
+          "Perlu klasifikasi otomatis dokumen volume besar"
+        ]
+      },
+      {
+        "id": "annual-umkm",
+        "group": "Rekonsiliasi Tahunan Badan",
+        "badge": "Bayar Sekali",
+        "typeLabel": "Rekonsiliasi Tahunan UMKM",
+        "price": "Rp 2,500,000",
+        "description": "Rekonsiliasi tahunan badan dengan Final Tax 0,5%",
+        "meta": [
+          "Dibayar sekali di muka",
+          "Dapat dipilih terpisah dari manajemen bulanan",
+          "Berdasarkan SPT Badan"
+        ],
+        "items": [
+          "Penyusunan laporan keuangan yang wajar",
+          "Perhitungan UMKM Final Tax",
+          "Pembuatan draf SPT",
+          "Penerbitan e-Bupot 1721 A1"
+        ],
+        "criteria": [
+          "Omzet tahunan di bawah Rp 4.8B",
+          "Termasuk objek Final Tax 0,5%",
+          "Tidak ada transaksi luar negeri atau hubungan istimewa"
+        ]
+      },
+      {
+        "id": "annual-pph25",
+        "group": "Rekonsiliasi Tahunan Badan",
+        "badge": "Bayar Sekali",
+        "typeLabel": "Rekonsiliasi Tahunan Badan Umum PPh25",
+        "price": "Rp 7,500,000",
+        "description": "Rekonsiliasi tahunan standar untuk badan dengan pajak penghasilan umum",
+        "meta": [
+          "Dibayar sekali di muka",
+          "Dapat dipilih terpisah dari manajemen bulanan",
+          "Berdasarkan SPT Badan"
+        ],
+        "items": [
+          "Penyusunan laporan keuangan",
+          "Koreksi fiskal",
+          "Kredit pajak",
+          "Perhitungan PPh29/PPh25",
+          "Pembuatan draf SPT"
+        ],
+        "criteria": [
+          "Omzet tahunan di atas Rp 4.8B atau masa UMKM telah berakhir",
+          "Transaksi tahunan maksimal 1.000 transaksi",
+          "Tidak ada isu TP"
+        ]
+      },
+      {
+        "id": "annual-complex",
+        "group": "Rekonsiliasi Tahunan Badan",
+        "badge": "Bayar Sekali",
+        "typeLabel": "Rekonsiliasi Tahunan Struktur Kompleks",
+        "price": "Rp 15,000,000",
+        "description": "Badan dengan kepemilikan asing, hubungan istimewa, transaksi luar negeri, atau volume transaksi besar",
+        "meta": [
+          "Dibayar sekali di muka",
+          "Dapat dipilih terpisah dari manajemen bulanan",
+          "Berdasarkan SPT Badan"
+        ],
+        "items": [
+          "Seluruh layanan rekonsiliasi PPh25",
+          "Telaah kondisi TP",
+          "Telaah transaksi luar negeri",
+          "Laporan risiko berbasis AI",
+          "Pemrosesan prioritas"
+        ],
+        "criteria": [
+          "Pemegang saham asing atau transaksi luar negeri",
+          "Terdapat transaksi hubungan istimewa",
+          "Perlu telaah PPh26 / DGT Form / Tax Treaty"
+        ]
+      }
+    ],
+    "text": {
+      "nav": {
+        "product": "Layanan",
+        "start": "Kirim Dokumen",
+        "difference": "Perbandingan",
+        "faq": "FAQ"
+      },
+      "login": "Masuk",
+      "viewPricing": "Lihat Paket Harga",
+      "chips": "Personal · Corporate only",
+      "heroTop": "Berhenti buang waktu urus formulir pajak.",
+      "heroMain": "AI menganalisis data pelaporan, kode pajak, hingga risiko perpajakan Anda",
+      "heroDesc": "AI Pajak membaca dan mengklasifikasikan data dari invoice, Faktur Pajak, kuitansi, data penggajian, dan dokumen pemotongan pajak yang sudah Anda gunakan — cukup kirimkan apa adanya. Untuk transaksi pemotongan pajak, AI menganalisis sifat transaksi dan secara otomatis menentukan jenis PPh serta kode pajak yang dibutuhkan untuk ID Billing. Berdasarkan data yang dikirimkan dan riwayat pelaporan, AI Pajak juga memberikan panduan mengenai metode pembayaran pajak badan, waktu pengajuan PKP, risiko kenaikan aset, hingga kemungkinan penerapan Tax Treaty.",
+      "readiness": "Kesiapan",
+      "missing": "Dokumen Kurang",
+      "next": "Langkah Berikutnya",
+      "personas": {
+        "personal": {
+          "label": "Nasabah Individu",
+          "icon": "👤",
+          "title": "Personal Annual Filing",
+          "subtitle": "Pelaporan tahunan individu tanpa perlu memasukkan ulang A1/A2, kuitansi, dan data penghasilan — cukup kirim apa adanya",
+          "readiness": 72,
+          "missing": [
+            "Bukti potong A1/A2",
+            "Saldo aset dan kewajiban per 31 Desember",
+            "Data penghasilan lainnya"
+          ],
+          "next": "Memeriksa penghasilan, potongan, dan perubahan aset, lalu memberikan estimasi kurang bayar atau lebih bayar."
+        },
+        "corporate": {
+          "label": "Nasabah Korporat",
+          "icon": "🏢",
+          "title": "Corporate Monthly & Annual Filing",
+          "subtitle": "Dashboard perpajakan badan tanpa perlu merapikan ulang invoice, Faktur Pajak, kuitansi, payroll, dan kontrak",
+          "readiness": 58,
+          "missing": [
+            "Faktur masukan PPN",
+            "Sebagian kontrak pemotongan pajak",
+            "PPh21 payroll template"
+          ],
+          "next": "Menganalisis sifat transaksi dari invoice dan kontrak yang diunggah, lalu memandu pemilihan jenis pemotongan pajak dan kode pajak."
+        }
+      },
+      "cards": [
+        [
+          "Penentuan Kode Pajak Pemotongan oleh AI",
+          "Menganalisis sifat transaksi dan secara otomatis menentukan jenis PPh serta kode pajak untuk ID Billing"
+        ],
+        [
+          "Alur Khusus Individu & Badan",
+          "Dokumen yang dibutuhkan dan prosedur pelaporan dipisahkan sesuai jenis nasabah"
+        ],
+        [
+          "Wawasan Perpajakan berbasis AI",
+          "Memberikan panduan risiko perpajakan dan langkah berikutnya berdasarkan data yang dikirimkan dan riwayat pelaporan"
+        ],
+        [
+          "Unggah Dokumen Apa Adanya",
+          "Tanpa perlu mengisi template — AI mengurai data langsung dari formulir, foto, dan PDF yang sudah ada"
+        ]
+      ],
+      "trustTitle": "Dokumen perpajakan sensitif Anda disimpan dengan enkripsi",
+      "trustDesc": "Data sensitif seperti NPWP, NIK, data penggajian, Faktur Pajak, dan kontrak dirancang untuk disimpan dengan enkripsi sejak awal. Data hanya digunakan untuk keperluan persiapan pelaporan dan pemberian wawasan perpajakan per nasabah.",
+      "trustItems": [
+        "Encrypted data storage",
+        "Access-controlled workflow",
+        "Audit-ready filing evidence"
+      ],
+      "coreDiff": "Keunggulan Utama",
+      "advisoryKicker": "AI Tax Advisory",
+      "taxTitle": "Akurasi ID Billing ditentukan oleh ketepatan kode pajak pemotongan.",
+      "taxDesc": "Platform perpajakan online yang ada saat ini menyediakan fitur penerbitan e-Billing, namun pengguna sering kali harus menentukan sendiri jenis PPh dan kode pajak yang sesuai untuk setiap transaksi. AI Pajak menganalisis invoice, kontrak, informasi rekanan, dan uraian layanan untuk menentukan kode pajak pemotongan yang dibutuhkan dalam ID Billing.",
+      "taxCards": [
+        [
+          "Analisis Sifat Transaksi",
+          "Mengklasifikasikan jenis pembayaran: jasa, sewa, bunga, dividen, royalti, konstruksi, dan lainnya"
+        ],
+        [
+          "Penentuan Jenis PPh",
+          "Membedakan jenis yang berlaku: PPh 4(2), 15, 22, 23, 26, dan sebagainya"
+        ],
+        [
+          "Pencocokan Kode Pajak",
+          "Menyiapkan nilai tax type dan deposit type yang diperlukan untuk penerbitan ID Billing"
+        ],
+        [
+          "Pemisahan Item yang Perlu Dikonfirmasi",
+          "Transaksi yang belum jelas ditandai secara terpisah untuk mengurangi risiko kesalahan input kode"
+        ]
+      ],
+      "advisoryTitle": "Semakin banyak data pelaporan terkumpul, semakin awal AI memberi tahu langkah perpajakan yang perlu Anda ambil.",
+      "advisoryDesc": "Berdasarkan dokumen yang dikirimkan dan riwayat pelaporan, AI Pajak mendukung pengambilan keputusan perpajakan — lebih dari sekadar perhitungan biasa. Kami memberikan panduan personal mengenai perubahan metode pembayaran pajak badan, waktu pengajuan PKP, ketidakwajaran perolehan aset terhadap penghasilan, serta kebutuhan tinjauan transaksi luar negeri dan Tax Treaty.",
+      "advisoryCards": [
+        [
+          "Metode Pembayaran Pajak Badan",
+          "Panduan kapan dan syarat beralih dari UMKM Final Tax ke PPh25"
+        ],
+        [
+          "Notifikasi Pengajuan PKP",
+          "Pemberitahuan dini mengenai waktu yang tepat untuk mengajukan PKP berdasarkan tren omzet"
+        ],
+        [
+          "Deteksi Anomali Kenaikan Aset",
+          "Menampilkan sinyal risiko jika perolehan aset tidak sebanding dengan penghasilan yang dilaporkan"
+        ],
+        [
+          "Pemeriksaan Tax Treaty",
+          "Panduan kemungkinan penerapan Tax Treaty untuk transaksi luar negeri, PPh26, dan DGT Form"
+        ]
+      ],
+      "serviceFlow": "Alur Layanan",
+      "productTitle": "Cukup unggah, AI yang mengurus data pelaporannya",
+      "productDesc": "Tidak perlu memasukkan ulang data ke template terpisah. Kirimkan invoice, Faktur Pajak, kuitansi, dan data penggajian dalam format yang sudah Anda gunakan — atau cukup foto — dan AI akan membaca serta menyusunnya menjadi data siap lapor.",
+      "moduleStep": "Tahapan Layanan",
+      "coreGuide": "Panduan Utama",
+      "customerView": "Yang Dilihat Nasabah",
+      "outputs": "Hasil yang Diberikan",
+      "requiredDocs": "Dokumen yang Dapat Dikirimkan",
+      "startKicker": "Upload-ready documents",
+      "startTitle": "Tidak perlu membuat dokumen baru untuk keperluan pelaporan pajak.",
+      "startDesc": "Kirimkan saja invoice, Faktur Pajak, kuitansi, data penggajian, dan dokumen pemotongan pajak yang sudah Anda gunakan. Kuitansi kertas atau faktur pajak bisa difoto lalu dikirimkan, dan AI akan membaca data yang diperlukan untuk disusun menjadi data siap lapor.",
+      "personalBtn": "Dokumen Wajib Individu",
+      "corporateBtn": "Dokumen Wajib Badan",
+      "methodTitle": "Cara Pengiriman Dokumen",
+      "methods": [
+        "Kirim dalam format yang sudah ada",
+        "Foto invoice, Faktur, atau kuitansi",
+        "Parsing data oleh AI",
+        "Cek hanya item yang perlu dikonfirmasi",
+        "Data siap lapor tersusun otomatis"
+      ],
+      "guide": "Panduan",
+      "startNote": "Tidak perlu menyalin ulang dokumen ke template terpisah. Untuk transaksi yang dikenai pemotongan pajak, panduan berlanjut hingga pemilihan kode pajak yang dibutuhkan untuk ID Billing.",
+      "requirements": {
+        "personal": [
+          [
+            "Wajib",
+            "NIK/NPWP, nama, alamat, kontak"
+          ],
+          [
+            "Wajib",
+            "A1/A2 atau bukti pemotongan pajak"
+          ],
+          [
+            "Wajib",
+            "Saldo aset dan kewajiban per 31 Desember"
+          ],
+          [
+            "Jika Ada",
+            "Data penghasilan freelance/usaha/sewa/bunga/dividen"
+          ],
+          [
+            "Jika Ada",
+            "Dokumen data keluarga dan potongan terkait"
+          ]
+        ],
+        "corporate": [
+          [
+            "Wajib",
+            "NPWP, KBLI, status PKP, jenis usaha"
+          ],
+          [
+            "Wajib",
+            "Data penjualan dan pembelian bulanan serta Faktur Pajak"
+          ],
+          [
+            "Wajib",
+            "Payroll template dan data PPh21 per karyawan"
+          ],
+          [
+            "Jika Ada",
+            "Kontrak dan invoice yang dikenai pemotongan pajak"
+          ],
+          [
+            "Jika Ada",
+            "Rekening koran, SPT Badan tahun lalu, data PPh25"
+          ]
+        ]
+      },
+      "compKicker": "Competitive Comparison",
+      "compTitle": "Apa bedanya dengan kantor akuntan dan platform perpajakan online yang sudah ada?",
+      "compDesc": "Keunggulan utama AI Pajak adalah kemampuan menganalisis sifat transaksi pemotongan pajak untuk menentukan jenis PPh dan kode pajak yang dibutuhkan dalam ID Billing.",
+      "columns": [
+        "Kriteria",
+        "Kantor Akuntan/Konsultan Pajak",
+        "Platform Perpajakan Online",
+        "AI Pajak"
+      ],
+      "rows": [
+        [
+          "Posisi Utama",
+          "Layanan perpajakan berbasis tenaga ahli — kirim dokumen, tunggu hasilnya",
+          "Platform yang berfokus pada pemrosesan pelaporan, pembayaran, dan dokumen pajak elektronik seperti e-Filing, e-Billing, e-Faktur, e-Bupot",
+          "Platform otomasi yang memungkinkan nasabah mengunggah dokumen yang sudah ada, lalu AI membaca data dan menghubungkannya hingga tahap persiapan pelaporan"
+        ],
+        [
+          "Pengalaman Nasabah",
+          "Kirim dokumen via WhatsApp, email, atau Excel; tanyakan progres secara terpisah",
+          "Pengguna mengoperasikan sendiri fitur dokumen pajak, pelaporan, dan pembayaran",
+          "Nasabah cukup mengirimkan dokumen yang ada atau hasil foto tanpa template tambahan, lalu melihat hasil yang disusun AI beserta status prosesnya"
+        ],
+        [
+          "Kode Pajak Pemotongan",
+          "Petugas sering menilai isi transaksi dan memutuskan secara manual",
+          "Pengguna umumnya harus memilih sendiri jenis pajak dan kode pembayaran",
+          "Menganalisis invoice, kontrak, dan informasi rekanan untuk secara otomatis menentukan jenis PPh dan kode pajak yang diperlukan untuk ID Billing"
+        ],
+        [
+          "Wawasan Perpajakan AI",
+          "Kualitas panduan bergantung pada pengalaman petugas yang menangani",
+          "Fitur pelaporan dan pembayaran tersedia, namun panduan keputusan perpajakan per nasabah masih terbatas",
+          "Memberikan panduan mengenai perubahan metode pembayaran, pengajuan PKP, risiko kenaikan aset, dan kebutuhan tinjauan Tax Treaty"
+        ],
+        [
+          "Poin Pembeda",
+          "Keahlian konsultan dan pengalaman layanan perpajakan profesional",
+          "Kemudahan pemrosesan pelaporan dan pembayaran elektronik, namun penilaian kode pajak bergantung pada input dan pemahaman pengguna",
+          "Parsing dokumen, penentuan kode pajak pemotongan, wawasan perpajakan AI, kesiapan pelaporan, dan pengelolaan bukti"
+        ]
+      ],
+      "pricingKicker": "Informasi Harga",
+      "pricingTitle": "Pilih paket untuk langsung melihat cakupan detailnya",
+      "pricingDesc": "Pelaporan individu dipandu berdasarkan kompleksitas pelaporan, bukan nama formulir. Klik layanan yang Anda butuhkan — pajak individu, pengelolaan bulanan badan, atau rekonsiliasi tahunan badan — untuk melihat harga, kriteria penerapan, dan cakupan layanan secara lengkap.",
+      "pricingListTitle": "Jenis Paket",
+      "chooseService": "Pilih layanan yang Anda butuhkan",
+      "pricingListDesc": "Klik untuk melihat detail di sebelah kanan.",
+      "selectedPlan": "Paket yang Dipilih",
+      "included": "Cakupan Layanan",
+      "criteria": "Kriteria Penerapan",
+      "pricingInfo": "Harga yang ditampilkan adalah tarif dasar. Cakupan pelaporan aktual akan dikonfirmasi berdasarkan dokumen yang dikirimkan, volume transaksi, adanya transaksi luar negeri, dan hubungan istimewa.",
+      "pricingButton": "Lihat dokumen yang dapat dikirimkan →",
+      "groups": [
+        "Pajak Individu",
+        "Pengelolaan Bulanan Badan",
+        "Rekonsiliasi Tahunan Badan"
+      ],
+      "faqs": [
+        [
+          "Dokumen apa yang diperlukan untuk memulai persiapan pelaporan?",
+          "Nasabah individu memerlukan NIK/NPWP, A1/A2, data keluarga, serta dokumen aset dan kewajiban sebagai dasar. Nasabah korporat memerlukan NPWP, KBLI, status PKP, data penjualan dan pembelian, data penggajian PPh21, invoice/kontrak terkait pemotongan pajak, dan dokumen PPN."
+        ],
+        [
+          "Apakah AI Pajak bersaing langsung dengan OnlinePajak dan Klikpajak?",
+          "Tidak sepenuhnya. Platform perpajakan online yang ada memiliki keunggulan pada fitur e-Filing, e-Billing, e-Faktur, e-Bupot, dan pemrosesan dokumen pajak elektronik. Keunggulan utama AI Pajak adalah menganalisis sifat transaksi dari invoice dan kontrak untuk secara otomatis menentukan jenis pemotongan pajak dan kode pajak ID Billing."
+        ],
+        [
+          "Apakah tarif pelaporan individu berdasarkan 1770SS/1770S/1770?",
+          "Tidak. Pelaporan tahunan individu dipandu dalam satu alur terpadu. Tarif individu AI Pajak dibedakan berdasarkan jenis penghasilan, jumlah dokumen pemotongan pajak, kompleksitas aset dan kewajiban, serta ada tidaknya penghasilan usaha atau freelance — bukan berdasarkan nama formulir."
+        ],
+        [
+          "Informasi apa yang diberikan oleh wawasan perpajakan AI?",
+          "Berdasarkan dokumen yang dikirimkan dan data pelaporan, AI memberikan panduan mengenai kemungkinan perubahan metode pembayaran pajak badan, waktu pengajuan PKP, ketidakwajaran perolehan aset terhadap penghasilan, serta kebutuhan tinjauan transaksi luar negeri dan Tax Treaty."
+        ]
+      ],
+      "finalTitle": "AI Pajak mendampingi Anda mulai dari persiapan dokumen hingga bukti selesai lapor.",
+      "finalDesc": "Begitu individu maupun nasabah korporat menyiapkan dokumen yang diperlukan, AI Pajak akan memberikan panduan yang jelas mengenai kesiapan pelaporan dan langkah berikutnya.",
+      "finalButton": "Masuk dan Mulai Lapor →",
+      "footerCompare": "Comparison",
+      "footerPricing": "Pricing detail",
+      "footerDocs": "Required documents"
+    }
+  },
+  "zh": {
+    "modules": [
+      {
+        "mark": "01",
+        "title": "直接提交现有资料",
+        "short": "无需按固定模板重新录入数据",
+        "detail": "AI Pajak 的设计前提是：客户可直接提交已在使用的 invoice、Faktur Pajak、收据、薪资资料及预扣税资料，无需另行誊写至其他模板，AI 将自动查找并整理申报所需数据。",
+        "customerPromise": "客户无需为税务申报重新制作 Excel 表格。只需上传现有资料或拍照提交，AI 即可读取所需数据。",
+        "primaryMetric": "无模板",
+        "primaryLabel": "无需重填表格",
+        "statusText": "支持现有表格 · 照片 · PDF 提交",
+        "previewCards": [
+          [
+            "使用现有表格",
+            "公司自有 invoice、薪资资料、交易明细均可直接提交"
+          ],
+          [
+            "拍照提交",
+            "收据、Faktur Pajak、纸质 invoice 均可拍照上传"
+          ],
+          [
+            "AI 数据提取",
+            "自动解析日期、金额、NPWP、交易方、税额等关键字段"
+          ],
+          [
+            "申报数据整理",
+            "将提取的数据转化为各税种申报准备数据"
+          ]
+        ],
+        "customerView": [
+          "无需固定模板，直接提交现有资料",
+          "支持 invoice、Faktur Pajak、收据拍照提交",
+          "AI 自动提取所需申报数据",
+          "提取结果以清晰易读的方式呈现供客户确认"
+        ],
+        "outputs": [
+          "AI 解析结果",
+          "提取数据确认表",
+          "缺失字段提示",
+          "申报用数据整理版"
+        ],
+        "process": [
+          [
+            "01",
+            "直接提交资料",
+            "将现有 invoice、Faktur Pajak、收据、薪资资料直接提交。"
+          ],
+          [
+            "02",
+            "支持拍照上传",
+            "纸质收据或 Faktur 可拍照后提交。"
+          ],
+          [
+            "03",
+            "AI 数据解析",
+            "读取日期、金额、税额、交易方、NPWP 等所需数值。"
+          ],
+          [
+            "04",
+            "生成申报数据",
+            "将解析结果自动整理为申报准备数据。"
+          ]
+        ]
+      },
+      {
+        "mark": "02",
+        "title": "AI 资料整理与税种分类",
+        "short": "按申报目的整理文件与交易资料",
+        "detail": "从 A1/A2、invoice、Faktur Pajak、收据、合同、payroll、bank statement 等多种资料中读取申报所需数据，并按税种分类归整。",
+        "customerPromise": "客户无需重新录入数据，也无需另行制作各税种分类表格。",
+        "primaryMetric": "AI",
+        "primaryLabel": "资料整理引擎",
+        "statusText": "解析完成 18 条 · 待确认 3 条",
+        "previewCards": [
+          [
+            "A1/A2",
+            "整理为劳动所得、预扣税额、雇主信息"
+          ],
+          [
+            "Faktur Pajak",
+            "整理 NPWP、DPP、PPN、交易日期"
+          ],
+          [
+            "Invoice / Receipt",
+            "提取预扣税类型与税码待审项"
+          ],
+          [
+            "Payroll",
+            "整理为 PPh21 审核项"
+          ]
+        ],
+        "customerView": [
+          "显示各资料识别结果与分类状态",
+          "单独列出待确认资料",
+          "个人与法人资料分屏呈现",
+          "以简明字段名显示内容"
+        ],
+        "outputs": [
+          "AI 解析表格",
+          "待确认项目",
+          "各税种资料包",
+          "申报数据草稿"
+        ],
+        "process": [
+          [
+            "01",
+            "资料识别",
+            "从照片、PDF、Excel 及现有表格中读取税务字段。"
+          ],
+          [
+            "02",
+            "申报目的分类",
+            "按收入、扣除、预扣税、PPN、资产负债等分类归整。"
+          ],
+          [
+            "03",
+            "税码确认",
+            "预扣税相关交易标注为税码待确认项。"
+          ],
+          [
+            "04",
+            "反映至申报准备",
+            "分类完成的资料自动计入申报准备进度。"
+          ]
+        ]
+      },
+      {
+        "mark": "03",
+        "title": "AI 预扣税税码自动判定",
+        "short": "AI 自动判定 ID Billing 所需的 PPh 类型与税码",
+        "detail": "预扣税申报最关键的一步，是准确确定与交易性质相符的 PPh 类型和税码。AI Pajak 根据 invoice、合同、交易方信息及服务内容，自动判定 ID Billing 开具所需的税码。",
+        "customerPromise": "客户无需了解该选哪个税码。AI Pajak 会同时给出预扣税代码与判断依据。",
+        "primaryMetric": "Code AI",
+        "primaryLabel": "税码自动判定",
+        "statusText": "PPh 类型 · 税码 · 缴纳月份自动整理",
+        "previewCards": [
+          [
+            "交易性质分析",
+            "分类为服务、租赁、利息、股息、特许权使用费、建筑等"
+          ],
+          [
+            "PPh 类型判定",
+            "区分 PPh 4(2)、15、22、23、26 等"
+          ],
+          [
+            "税码匹配",
+            "整理 ID Billing 所需 tax type / deposit type"
+          ],
+          [
+            "判断依据说明",
+            "以简明说明与申报基准值呈现"
+          ]
+        ],
+        "customerView": [
+          "确认是否属于预扣税范围",
+          "显示 PPh 类型与税码候选项",
+          "重点标注 ID Billing 前待确认项",
+          "说明税码选择理由"
+        ],
+        "outputs": [
+          "预扣税税码判定值",
+          "PPh 类型分类",
+          "ID Billing 准备值",
+          "待确认交易清单"
+        ],
+        "process": [
+          [
+            "01",
+            "读取交易内容",
+            "从 invoice、合同、交易方信息中读取付款性质。"
+          ],
+          [
+            "02",
+            "PPh 类型分类",
+            "依据交易性质区分 PPh 类型。"
+          ],
+          [
+            "03",
+            "税码匹配",
+            "整理 ID Billing 开具所需数值。"
+          ],
+          [
+            "04",
+            "标注待确认项",
+            "将性质不明确的交易单独列出。"
+          ]
+        ]
+      },
+      {
+        "mark": "04",
+        "title": "AI 税务洞察",
+        "short": "基于提交数据与申报数据，提示税务风险与下一步行动",
+        "detail": "AI Pajak 根据提交资料与累积申报数据，为每位客户提供专属税务洞察，涵盖企业税缴纳方式转换、PKP 申请时机、资产增加异常、Tax Treaty 适用可能性等。",
+        "customerPromise": "AI Pajak 持续监测申报数据变化与关键条件达成情况，在关键时点发送提醒并附上说明。",
+        "primaryMetric": "Insight AI",
+        "primaryLabel": "税务风险诊断",
+        "statusText": "转换时机 · 提醒 · 风险自动提示",
+        "previewCards": [
+          [
+            "企业税缴纳方式",
+            "提示转换为 UMKM Final Tax 或 PPh25"
+          ],
+          [
+            "PKP 申请时机",
+            "依据营收趋势提前预警"
+          ],
+          [
+            "资产增加风险",
+            "收入与资产增长不匹配的异常信号"
+          ],
+          [
+            "Tax Treaty",
+            "提示审查 PPh26、DGT Form 及税收协定"
+          ]
+        ],
+        "customerView": [
+          "告知当前税务状态与可适用制度",
+          "基于营收、资产、交易数据发出风险提醒",
+          "提示 PKP、PPh25、UMKM 转换时机",
+          "标注是否需要审查 Tax Treaty"
+        ],
+        "outputs": [
+          "AI 税务风险提醒",
+          "转换时机提示",
+          "PKP 申请提醒",
+          "Tax Treaty 审查信号"
+        ],
+        "process": [
+          [
+            "01",
+            "数据累积",
+            "持续积累月度申报资料及资产负债数据。"
+          ],
+          [
+            "02",
+            "条件核查",
+            "检查营收基准、计税方式及 PKP 条件。"
+          ],
+          [
+            "03",
+            "风险提醒",
+            "提示转换时机、资产异常增长及 Treaty 必要性。"
+          ],
+          [
+            "04",
+            "下一步行动",
+            "展示所需准备资料与处理方向。"
+          ]
+        ]
+      },
+      {
+        "mark": "05",
+        "title": "申报准备状态仪表盘",
+        "short": "在同一界面查看准备进度、缺失资料与下一步行动",
+        "detail": "客户可在同一界面查看资料准备、AI 审核、缴纳准备及申报完成凭证的状态。",
+        "customerPromise": "用数字与步骤直观告诉你「现在进行到哪一步了」。",
+        "primaryMetric": "82%",
+        "primaryLabel": "申报准备进度",
+        "statusText": "下一步：补充 2 项缺失资料",
+        "previewCards": [
+          [
+            "准备进度",
+            "以必要资料与审核完成项为基准显示"
+          ],
+          [
+            "缺失资料",
+            "显示截止前需补充的资料"
+          ],
+          [
+            "风险提醒",
+            "资产增加、PPN 不一致、预扣税遗漏可能性"
+          ],
+          [
+            "下一步行动",
+            "补充资料、缴纳准备、确认凭证"
+          ]
+        ],
+        "customerView": [
+          "显示整体进度百分比",
+          "按税种显示各项进度状态",
+          "重点标注缺失资料与风险",
+          "汇总下一步行动"
+        ],
+        "outputs": [
+          "进度仪表盘",
+          "缺失资料优先级",
+          "风险提醒",
+          "下一步行动卡片"
+        ],
+        "process": [
+          [
+            "01",
+            "计算资料准备率",
+            "对比必要资料与已提交资料。"
+          ],
+          [
+            "02",
+            "按税种显示状态",
+            "展示各项目进度状态。"
+          ],
+          [
+            "03",
+            "提示风险与缺失",
+            "汇总待补充项目。"
+          ],
+          [
+            "04",
+            "提供下一步行动",
+            "引导至下一处理步骤。"
+          ]
+        ]
+      },
+      {
+        "mark": "06",
+        "title": "缴纳与申报凭证管理",
+        "short": "按客户归档保存 ID Billing · NTPN · BPE",
+        "detail": "AI Pajak 按客户、年度、税种追踪缴纳代码、缴纳凭证及申报完成证明。",
+        "customerPromise": "将申报结果以结构化记录留存，而非散落的零散文件。",
+        "primaryMetric": "BPE",
+        "primaryLabel": "申报完成凭证",
+        "statusText": "ID Billing 开具 · NTPN 录入 · BPE 归档",
+        "previewCards": [
+          [
+            "ID Billing",
+            "管理各税种缴纳代码与缴纳状态"
+          ],
+          [
+            "NTPN",
+            "保存缴纳确认编号"
+          ],
+          [
+            "BPE",
+            "整理申报完成凭证"
+          ],
+          [
+            "History",
+            "查看各年度及月度申报历史"
+          ]
+        ],
+        "customerView": [
+          "显示缴纳前后状态",
+          "关联 ID Billing、NTPN、BPE",
+          "个人与法人申报历史分开管理",
+          "提供可下载的凭证文件"
+        ],
+        "outputs": [
+          "ID Billing 记录",
+          "NTPN 记录",
+          "BPE 归档库",
+          "申报历史记录"
+        ],
+        "process": [
+          [
+            "01",
+            "缴纳准备",
+            "确认税种与金额。"
+          ],
+          [
+            "02",
+            "记录缴纳状态",
+            "保存 NTPN。"
+          ],
+          [
+            "03",
+            "申报完成凭证",
+            "存储 BPE 及相关文件。"
+          ],
+          [
+            "04",
+            "历史管理",
+            "方便查找历史申报凭证。"
+          ]
+        ]
+      }
+    ],
+    "pricing": [
+      {
+        "id": "p-simple",
+        "group": "个人税务",
+        "badge": "按件付款",
+        "typeLabel": "Personal Simple（简单申报）",
+        "price": "Rp 100.000",
+        "vat": "含PPN合计：Rp 111.000",
+        "description": "以单一劳动所得为主 · 资料简单的个人",
+        "meta": [
+          "含PPN合计：Rp 111.000",
+          "按复杂程度计费",
+          "个人年度综合申报"
+        ],
+        "items": [
+          "A1/A2 或预扣税资料自动整理",
+          "基本个人信息及收入资料核查",
+          "应缴/可退税基本说明",
+          "申报完成凭证管理"
+        ],
+        "criteria": [
+          "以劳动所得为主",
+          "A1/A2 或单份预扣税资料",
+          "无额外经营所得或自由职业所得"
+        ]
+      },
+      {
+        "id": "p-standard",
+        "group": "个人税务",
+        "badge": "按件付款",
+        "typeLabel": "Personal Standard（标准申报）",
+        "price": "Rp 200.000",
+        "vat": "含PPN合计：Rp 222.000",
+        "description": "有多项收入、多份预扣税资料及资产/负债录入需求的个人",
+        "meta": [
+          "含PPN合计：Rp 222.000",
+          "按复杂程度计费",
+          "个人年度综合申报"
+        ],
+        "items": [
+          "多份预扣税资料合并整理",
+          "其他收入、扣除项、资产及负债整理",
+          "家庭信息/PTKP档案核查",
+          "申报完成凭证管理"
+        ],
+        "criteria": [
+          "多雇主或多份预扣税资料",
+          "需核查其他收入或扣除项",
+          "需录入资产与负债"
+        ]
+      },
+      {
+        "id": "p-complex",
+        "group": "个人税务",
+        "badge": "按件付款",
+        "typeLabel": "Personal Business / Complex",
+        "price": "Rp 500.000",
+        "vat": "含PPN合计：Rp 555.000",
+        "description": "有自由职业 · 个体经营 · 投资收益 · 复杂资产的个人",
+        "meta": [
+          "含PPN合计：Rp 555.000",
+          "按复杂程度计费",
+          "个人年度综合申报"
+        ],
+        "items": [
+          "经营/自由职业收入资料自动整理",
+          "收入、成本及凭证资料分类",
+          "投资收益、租金收入纳入核算",
+          "资产负债变动及风险排查"
+        ],
+        "criteria": [
+          "自由职业或个体经营所得",
+          "经营相关收入及成本资料",
+          "额外收入或复杂资产"
+        ]
+      },
+      {
+        "id": "monthly-umkm",
+        "group": "法人月度管理",
+        "badge": "月度预付",
+        "typeLabel": "UMKM 月度管理",
+        "price": "Rp 750,000",
+        "description": "小微法人 / 以 Final Tax 为主",
+        "meta": [
+          "预付1个月",
+          "预付12个月可享9折优惠",
+          "年度结算另计"
+        ],
+        "items": [
+          "月度申报状态跟踪",
+          "ID Billing 申请",
+          "基础提醒通知",
+          "基础AI风险点评"
+        ],
+        "criteria": [
+          "员工5人以下",
+          "每月预扣税交易10笔以下",
+          "每月上传/交易记录50条以下"
+        ]
+      },
+      {
+        "id": "monthly-basic",
+        "group": "法人月度管理",
+        "badge": "月度预付",
+        "typeLabel": "Basic 月度管理",
+        "price": "Rp 1,500,000",
+        "description": "一般法人基础税务运营",
+        "meta": [
+          "预付1个月",
+          "预付12个月可享9折优惠",
+          "年度结算另计"
+        ],
+        "items": [
+          "PPh21/23/25/PPN 管理",
+          "申报记录/BPE/NTPN 存档",
+          "交易方预扣税判定",
+          "月度税务报告"
+        ],
+        "criteria": [
+          "员工30人以下",
+          "每月预扣税交易30笔以下",
+          "每月进销项交易300条以下"
+        ]
+      },
+      {
+        "id": "monthly-pro",
+        "group": "法人月度管理",
+        "badge": "月度预付",
+        "typeLabel": "Pro 月度管理",
+        "price": "Rp 2,500,000",
+        "description": "强化月度税务运营能力",
+        "meta": [
+          "预付1个月",
+          "预付12个月可享9折优惠",
+          "年度结算另计"
+        ],
+        "items": [
+          "涵盖 Basic 全部功能",
+          "关联交易条件监控",
+          "AI 异常检测",
+          "高级税务报告",
+          "优先处理"
+        ],
+        "criteria": [
+          "员工100人以下",
+          "每月预扣税交易150笔以下",
+          "含境外交易及关联方监控"
+        ]
+      },
+      {
+        "id": "monthly-enterprise",
+        "group": "法人月度管理",
+        "badge": "月度预付",
+        "typeLabel": "Enterprise 定制月度管理",
+        "price": "Rp 3,500,000",
+        "description": "大规模 / 定制化运营",
+        "meta": [
+          "预付1个月",
+          "按用量计费",
+          "年度结算另计"
+        ],
+        "items": [
+          "涵盖 Pro 全部功能",
+          "大批量 payroll / 交易处理",
+          "超量部分按用量计费",
+          "SLA / 优先支持"
+        ],
+        "criteria": [
+          "员工超过100人",
+          "每月预扣税交易超过150笔",
+          "需大批量文件自动分类"
+        ]
+      },
+      {
+        "id": "annual-umkm",
+        "group": "法人年度结算",
+        "badge": "一次性预付",
+        "typeLabel": "UMKM 年度结算",
+        "price": "Rp 2,500,000",
+        "description": "适用于 Final Tax 0.5% 的法人年度结算",
+        "meta": [
+          "一次性预付",
+          "与月度管理分开选购",
+          "以 SPT Badan 为准"
+        ],
+        "items": [
+          "标准财务报表生成",
+          "UMKM Final Tax 计算",
+          "SPT 草稿生成",
+          "e-Bupot 1721 A1 开具"
+        ],
+        "criteria": [
+          "年营业额 Rp 4.8B 以下",
+          "适用 Final Tax 0.5%",
+          "无境外交易及关联方交易"
+        ]
+      },
+      {
+        "id": "annual-pph25",
+        "group": "法人年度结算",
+        "badge": "一次性预付",
+        "typeLabel": "PPh25 一般法人年度结算",
+        "price": "Rp 7,500,000",
+        "description": "适用于一般企业所得税的标准年度结算",
+        "meta": [
+          "一次性预付",
+          "与月度管理分开选购",
+          "以 SPT Badan 为准"
+        ],
+        "items": [
+          "财务报表生成",
+          "税务调整",
+          "税收抵免",
+          "PPh29/PPh25 计算",
+          "SPT 草稿生成"
+        ],
+        "criteria": [
+          "年营业额超过 Rp 4.8B 或 UMKM 资格到期",
+          "年度交易1,000笔以下",
+          "无关联交易定价问题"
+        ]
+      },
+      {
+        "id": "annual-complex",
+        "group": "法人年度结算",
+        "badge": "一次性预付",
+        "typeLabel": "复杂架构年度结算",
+        "price": "Rp 15,000,000",
+        "description": "外资企业、关联方交易、境外业务或大批量交易法人",
+        "meta": [
+          "一次性预付",
+          "与月度管理分开选购",
+          "以 SPT Badan 为准"
+        ],
+        "items": [
+          "涵盖 PPh25 年度结算全部内容",
+          "关联交易定价条件审查",
+          "境外交易审查",
+          "AI 风险报告",
+          "优先处理"
+        ],
+        "criteria": [
+          "存在境外股东或境外交易",
+          "存在关联方交易",
+          "需审查 PPh26 / DGT Form / Tax Treaty"
+        ]
+      }
+    ],
+    "text": {
+      "nav": {
+        "product": "服务",
+        "start": "提交资料",
+        "difference": "竞品对比",
+        "faq": "FAQ"
+      },
+      "login": "登录",
+      "viewPricing": "查看套餐",
+      "chips": "Personal · Corporate only",
+      "heroTop": "别再为填表浪费时间。",
+      "heroMain": "AI 一键诊断申报数据、税务代码与合规风险",
+      "heroDesc": "AI Pajak 支持客户直接上传现有的 invoice、Faktur Pajak、收据、薪资资料及预扣税凭证，AI 自动读取并分类所需数据。针对预扣税资料，系统分析交易性质，自动判定 ID Billing 所需的 PPh 类型与税务代码；并结合提交数据与申报数据，就企业所得税缴纳方式、PKP 申请时机、资产增长风险及 Tax Treaty 适用可能性逐一给出建议。",
+      "readiness": "准备度",
+      "missing": "缺失资料",
+      "next": "下一步行动",
+      "personas": {
+        "personal": {
+          "label": "个人客户",
+          "icon": "👤",
+          "title": "Personal Annual Filing",
+          "subtitle": "直接提交 A1/A2、收据及收入资料，无需重新录入的个人年度申报",
+          "readiness": 72,
+          "missing": [
+            "A1/A2 预扣税凭证",
+            "12月31日基准资产与负债余额",
+            "其他收入资料"
+          ],
+          "next": "核查收入、扣除项及资产变动情况，并告知应缴或可退税额。"
+        },
+        "corporate": {
+          "label": "企业客户",
+          "icon": "🏢",
+          "title": "Corporate Monthly & Annual Filing",
+          "subtitle": "无需重新整理即可直接提交 invoice、Faktur Pajak、收据、payroll 及合同的企业税务管理面板",
+          "readiness": 58,
+          "missing": [
+            "PPN 进项 Faktur",
+            "部分预扣税合同",
+            "PPh21 payroll template"
+          ],
+          "next": "分析已上传 invoice 与合同的交易性质，指引预扣税类型与税务代码选择。"
+        }
+      },
+      "cards": [
+        [
+          "AI 预扣税税务代码判定",
+          "分析交易性质，自动判定 ID Billing 所需的 PPh 类型与税务代码"
+        ],
+        [
+          "个人与企业专属流程",
+          "按客户类型区分所需资料与申报流程"
+        ],
+        [
+          "AI 税务洞察",
+          "基于提交数据与申报数据，提示税务风险并指引下一步行动"
+        ],
+        [
+          "原样上传即可",
+          "无需填写模板，AI 直接从原有格式、照片或 PDF 中解析数据"
+        ]
+      ],
+      "trustTitle": "敏感税务资料加密存储，安全有保障",
+      "trustDesc": "NPWP、NIK、薪资资料、Faktur Pajak、合同等敏感信息以加密存储为前提进行设计。资料仅用于申报准备及向客户提供个性化税务洞察。",
+      "trustItems": [
+        "Encrypted data storage",
+        "Access-controlled workflow",
+        "Audit-ready filing evidence"
+      ],
+      "coreDiff": "核心差异化优势",
+      "advisoryKicker": "AI Tax Advisory",
+      "taxTitle": "ID Billing 的准确性，取决于预扣税税务代码是否正确。",
+      "taxDesc": "现有在线税务平台提供 e-Billing 开具功能，但在哪笔交易应填入哪种 PPh 类型和税务代码这一问题上，往往需要用户自行判断。AI Pajak 通过分析 invoice、合同、交易方信息及服务内容，自动判定 ID Billing 所需的预扣税税务代码。",
+      "taxCards": [
+        [
+          "交易性质分析",
+          "对服务、租赁、利息、股息、特许权使用费、建筑工程等付款性质进行分类"
+        ],
+        [
+          "PPh 类型判定",
+          "区分 PPh 4(2)、15、22、23、26 等适用税种"
+        ],
+        [
+          "税务代码匹配",
+          "整理 ID Billing 开具所需的税种 / 缴款类型代码"
+        ],
+        [
+          "存疑交易单独标注",
+          "对不明确的交易单独标记，降低错误代码输入风险"
+        ]
+      ],
+      "advisoryTitle": "申报数据越积越多，AI 越早告诉你该做什么。",
+      "advisoryDesc": "AI Pajak 基于客户提交的资料与申报历史，超越简单计算，为税务决策提供支持。就企业所得税缴纳方式变更、PKP 申请时机、收入与资产取得异常、境外交易与 Tax Treaty 审查必要性，逐一向客户给出提示。",
+      "advisoryCards": [
+        [
+          "企业所得税缴纳方式",
+          "告知从 UMKM Final Tax 转换为 PPh25 的时机与条件"
+        ],
+        [
+          "PKP 申请提醒",
+          "根据营收趋势，提前告知需要申请 PKP 的时间节点"
+        ],
+        [
+          "资产异常增长预警",
+          "当资产取得与申报收入明显不符时，显示风险信号"
+        ],
+        [
+          "Tax Treaty 核查",
+          "提示境外交易、PPh26、DGT Form 及税收协定适用可能性"
+        ]
+      ],
+      "serviceFlow": "服务流程",
+      "productTitle": "直接上传，AI 自动整理申报数据",
+      "productDesc": "无需按照额外模板重新录入。将 invoice、Faktur Pajak、收据、薪资资料以原有格式提交或拍照上传，AI 即可读取所需数据并整理为申报准备数据。",
+      "moduleStep": "服务阶段",
+      "coreGuide": "核心说明",
+      "customerView": "客户可查看的内容",
+      "outputs": "提供的结果",
+      "requiredDocs": "可提交的资料",
+      "startKicker": "Upload-ready documents",
+      "startTitle": "无需为税务申报重新准备资料。",
+      "startDesc": "直接提交您现有的 invoice、Faktur Pajak、收据、薪资资料及预扣税凭证即可。纸质收据或税务凭证可拍照提交，AI 读取所需数据后自动整理为申报准备数据。",
+      "personalBtn": "个人必备资料",
+      "corporateBtn": "企业必备资料",
+      "methodTitle": "资料提交方式",
+      "methods": [
+        "以原有格式直接提交",
+        "拍照上传 invoice、Faktur 及收据",
+        "AI 数据解析",
+        "仅核查待确认项目",
+        "自动整理申报准备数据"
+      ],
+      "guide": "说明",
+      "startNote": "无需将资料按额外模板重新填写。预扣税相关交易将引导您完成 ID Billing 所需税务代码的选择。",
+      "requirements": {
+        "personal": [
+          [
+            "Required",
+            "NIK/NPWP、姓名、地址、联系方式"
+          ],
+          [
+            "Required",
+            "A1/A2 或预扣税凭证"
+          ],
+          [
+            "Required",
+            "12月31日基准资产与负债余额"
+          ],
+          [
+            "If applicable",
+            "自由职业/经营/租赁/利息/股息收入资料"
+          ],
+          [
+            "If applicable",
+            "家庭关系及扣除相关资料"
+          ]
+        ],
+        "corporate": [
+          [
+            "Required",
+            "NPWP、KBLI、PKP 状态、经营类型"
+          ],
+          [
+            "Required",
+            "月度销售与进项资料及 Faktur Pajak"
+          ],
+          [
+            "Required",
+            "Payroll template 及员工 PPh21 资料"
+          ],
+          [
+            "If applicable",
+            "预扣税相关合同与 invoice"
+          ],
+          [
+            "If applicable",
+            "银行流水、上年度 SPT Badan、PPh25 资料"
+          ]
+        ]
+      },
+      "compKicker": "Competitive Comparison",
+      "compTitle": "与传统税务服务及在线税务平台有何不同",
+      "compDesc": "AI Pajak 的核心差异化在于：分析预扣税交易性质，自动判定 ID Billing 所需的 PPh 类型与税务代码。",
+      "columns": [
+        "对比维度",
+        "传统税务事务所",
+        "现有在线税务平台",
+        "AI Pajak"
+      ],
+      "rows": [
+        [
+          "核心定位",
+          "将资料发送给专业人员并等待结果的税务代理模式",
+          "以 e-Filing、e-Billing、e-Faktur、e-Bupot 等申报、缴税、税务文件处理为核心的平台",
+          "客户直接上传现有资料，AI 读取数据并衔接申报准备的自动化平台"
+        ],
+        [
+          "客户体验",
+          "通过 WhatsApp、邮件、Excel 传递资料，进度需另行询问",
+          "由用户自行操作税务文件、申报及缴税功能",
+          "客户无需额外模板，提交原有资料或拍照件后查看 AI 整理结果及进度状态"
+        ],
+        [
+          "预扣税税务代码",
+          "经办人员查看交易内容后人工判断，依赖个人经验",
+          "通常需要用户自行选择税种与缴款代码",
+          "分析 invoice、合同及交易方信息，自动判定 ID Billing 所需 PPh 类型与税务代码"
+        ],
+        [
+          "AI 税务洞察",
+          "因经办人员经验不同，指导质量存在差异",
+          "提供申报与缴税功能，但针对客户个性化税务决策的指引较为有限",
+          "提示缴税方式转换、PKP 申请、资产增长风险及 Tax Treaty 审查必要性"
+        ],
+        [
+          "差异化亮点",
+          "专业人员的专业解读与税务代理经验",
+          "电子申报与缴税的便捷性，但税务代码判断依赖用户自身的输入与理解",
+          "资料解析、预扣税税务代码判定、AI 税务洞察、申报准备度、凭证管理"
+        ]
+      ],
+      "pricingKicker": "套餐说明",
+      "pricingTitle": "选择套餐后即可立即查看详细范围",
+      "pricingDesc": "个人申报以申报复杂度而非表格名称为标准进行说明。点击个人税务、企业月度管理或企业年度结算，即可查看价格、适用标准及包含内容。",
+      "pricingListTitle": "套餐类型",
+      "chooseService": "请选择所需服务",
+      "pricingListDesc": "点击后右侧将显示详细内容。",
+      "selectedPlan": "已选套餐",
+      "included": "包含内容",
+      "criteria": "适用标准",
+      "pricingInfo": "所示金额为基础费用。实际申报范围将根据提交资料、交易量、境外交易及关联方情况等最终确认。",
+      "pricingButton": "查看可提交资料 →",
+      "groups": [
+        "个人税务",
+        "企业月度管理",
+        "企业年度结算"
+      ],
+      "faqs": [
+        [
+          "开始准备申报需要哪些资料？",
+          "个人客户基本需要 NIK/NPWP、A1/A2、家庭信息及资产负债资料。企业客户则需要 NPWP、KBLI、PKP 状态、销售与进项资料、PPh21 薪资资料、预扣税相关 invoice/合同及 PPN 资料等。"
+        ],
+        [
+          "与 OnlinePajak、Klikpajak 等平台是否正面竞争？",
+          "定位并不完全相同。现有在线税务平台的优势在于 e-Filing、e-Billing、e-Faktur、e-Bupot 等申报、缴税及电子税务文件功能。AI Pajak 的核心差异化在于：分析 invoice 与合同的交易性质，自动判定预扣税类型与 ID Billing 税务代码。"
+        ],
+        [
+          "个人申报费用是否以 1770SS/1770S/1770 为标准？",
+          "不是。个人年度申报以统一流程为基础进行说明。AI Pajak 的个人费用以收入类型、预扣税凭证数量、资产负债复杂度及是否有经营/自由职业收入为划分标准，而非表格名称。"
+        ],
+        [
+          "AI 税务洞察具体会提示哪些内容？",
+          "基于提交资料与申报数据，提示企业所得税缴纳方式变更可能性、PKP 申请时机、收入与资产取得异常，以及境外交易与 Tax Treaty 审查必要性等。"
+        ]
+      ],
+      "finalTitle": "AI Pajak 全程管理，从资料准备到申报完成凭证一手包办。",
+      "finalDesc": "个人与企业客户准备好所需资料后，AI Pajak 将清晰告知申报准备状态与下一步行动。",
+      "finalButton": "登录后开始申报 →",
+      "footerCompare": "Comparison",
+      "footerPricing": "Pricing detail",
+      "footerDocs": "Required documents"
+    }
+  },
+  "ja": {
+    "modules": [
+      {
+        "mark": "01",
+        "title": "お手持ちの資料をそのまま提出",
+        "short": "決まったテンプレートに合わせて入力し直す必要はありません",
+        "detail": "AI Pajak は、お客様がすでにお使いの invoice、Faktur Pajak、領収書、給与資料、源泉徴収資料をそのまま提出することを前提としています。別途テンプレートに転記する手間を省き、AIが申告に必要なデータを自動で見つけて整理します。",
+        "customerPromise": "お客様は税務申告用のExcelを新たに作成する必要はありません。お使いの資料をアップロードするか、写真を撮って提出するだけで、AIが必要なデータを読み取ります。",
+        "primaryMetric": "テンプレート不要",
+        "primaryLabel": "様式の再作成は不要",
+        "statusText": "既存の様式 · 写真 · PDF 提出に対応",
+        "previewCards": [
+          [
+            "お使いの様式のまま",
+            "社内独自の invoice、給与資料、取引明細書もそのまま提出可能"
+          ],
+          [
+            "写真撮影で提出",
+            "領収書、Faktur Pajak、紙の invoice は撮影してそのまま提出できます"
+          ],
+          [
+            "AIによるデータ抽出",
+            "日付・金額・NPWP・取引先・税額など必要な項目を自動でパース"
+          ],
+          [
+            "申告データの整理",
+            "抽出したデータを税目別の申告準備データに変換"
+          ]
+        ],
+        "customerView": [
+          "決まったテンプレートなしで既存資料を提出",
+          "invoice、Faktur Pajak、領収書を撮影して提出可能",
+          "AIが必要な申告データを自動抽出",
+          "抽出したデータをお客様が確認しやすい形に整理"
+        ],
+        "outputs": [
+          "AIパース結果",
+          "抽出データ確認表",
+          "不足項目のご案内",
+          "申告用データ整理版"
+        ],
+        "process": [
+          [
+            "01",
+            "資料をそのまま提出",
+            "お使いの invoice、Faktur Pajak、領収書、給与資料をそのまま提出します。"
+          ],
+          [
+            "02",
+            "写真撮影でもOK",
+            "紙の領収書やFakturは撮影して提出できます。"
+          ],
+          [
+            "03",
+            "AIによるデータパース",
+            "日付・金額・税額・取引先・NPWPなど必要な値を読み取ります。"
+          ],
+          [
+            "04",
+            "申告データの生成",
+            "パースしたデータを申告準備用データとして自動整理します。"
+          ]
+        ]
+      },
+      {
+        "mark": "02",
+        "title": "AIによる資料整理・税目分類",
+        "short": "書類と取引資料を申告目的別に整理",
+        "detail": "A1/A2、invoice、Faktur Pajak、領収書、契約書、payroll、bank statementなどさまざまな資料から申告に必要なデータを読み取り、税目別に分類します。",
+        "customerPromise": "お客様はデータを再入力したり、税目別の表を新たに作成したりする必要はありません。",
+        "primaryMetric": "AI",
+        "primaryLabel": "資料整理エンジン",
+        "statusText": "パース完了 18件 · 確認が必要 3件",
+        "previewCards": [
+          [
+            "A1/A2",
+            "給与所得・源泉徴収税額・雇用主情報として整理"
+          ],
+          [
+            "Faktur Pajak",
+            "NPWP・DPP・PPN・取引日付を整理"
+          ],
+          [
+            "Invoice / Receipt",
+            "源泉税の種類と税コードの確認項目を抽出"
+          ],
+          [
+            "Payroll",
+            "PPh21の確認項目として整理"
+          ]
+        ],
+        "customerView": [
+          "資料ごとの認識結果と分類状況を表示",
+          "要確認資料を分離",
+          "個人・法人の資料を別画面で管理",
+          "わかりやすい項目名で表示"
+        ],
+        "outputs": [
+          "AIパーステーブル",
+          "要確認項目",
+          "税目別資料まとめ",
+          "申告用データ初稿"
+        ],
+        "process": [
+          [
+            "01",
+            "資料の認識",
+            "写真・PDF・Excel・既存の様式から税務項目を読み取ります。"
+          ],
+          [
+            "02",
+            "申告目的別の分類",
+            "所得・控除・源泉税・PPN・資産負債などに分類します。"
+          ],
+          [
+            "03",
+            "税コードの確認",
+            "源泉税対象の取引はコード確認項目として表示します。"
+          ],
+          [
+            "04",
+            "申告準備への反映",
+            "分類した資料が準備度に反映されます。"
+          ]
+        ]
+      },
+      {
+        "mark": "03",
+        "title": "AI源泉税コードの自動判定",
+        "short": "ID Billing に必要なPPhの種類と税コードをAIが自動で判定します",
+        "detail": "源泉税申告で最も重要なのは、取引の性質に合ったPPhの種類と税コードを正確に決めることです。AI Pajak は invoice・契約書・取引先情報・サービス内容をもとに、ID Billing の発行に必要な税コードを自動で判定します。",
+        "customerPromise": "お客様はどの税コードを選べばよいか迷う必要はありません。AI Pajak が源泉税コードと判断根拠をわかりやすくご案内します。",
+        "primaryMetric": "Code AI",
+        "primaryLabel": "税コード自動判定",
+        "statusText": "PPh種別 · 税コード · 納付月を自動整理",
+        "previewCards": [
+          [
+            "取引性質の分析",
+            "サービス・賃貸・利子・配当・ロイヤルティ・建設などを分類"
+          ],
+          [
+            "PPh種別の判定",
+            "PPh 4(2)・15・22・23・26などを区分"
+          ],
+          [
+            "税コードのマッチング",
+            "ID Billing に必要な tax type / deposit type を整理"
+          ],
+          [
+            "判断根拠の表示",
+            "わかりやすい説明と申告基準値で整理"
+          ]
+        ],
+        "customerView": [
+          "源泉税対象かどうかの確認",
+          "PPh種別と税コードの候補を表示",
+          "ID Billing 前の確認項目をハイライト",
+          "コード選択の理由を説明"
+        ],
+        "outputs": [
+          "源泉税コード判定値",
+          "PPh種別分類",
+          "ID Billing 準備値",
+          "要確認取引リスト"
+        ],
+        "process": [
+          [
+            "01",
+            "取引内容の読み取り",
+            "invoice・契約書・取引先情報から支払いの性質を読み取ります。"
+          ],
+          [
+            "02",
+            "PPh種別の分類",
+            "取引の性質に応じてPPh種別を区分します。"
+          ],
+          [
+            "03",
+            "税コードのマッチング",
+            "ID Billing 発行に必要な値を整理します。"
+          ],
+          [
+            "04",
+            "確認項目の表示",
+            "不明確な取引を分離します。"
+          ]
+        ]
+      },
+      {
+        "mark": "04",
+        "title": "AI税務インサイト",
+        "short": "提出データと申告データをもとに、税務リスクと次のアクションをご案内します",
+        "detail": "AI Pajak は、提出資料と累積申告データをもとに、法人税の納付方式の切り替え、PKP申請のタイミング、資産取得の異常、Tax Treaty の適用可能性など、お客様ごとの税務インサイトを提供します。",
+        "customerPromise": "AI Pajak が申告データの変化と主要な基準の充足状況を確認し、必要なタイミングで通知と説明をお届けします。",
+        "primaryMetric": "Insight AI",
+        "primaryLabel": "税務リスク診断",
+        "statusText": "切替タイミング · 通知 · リスクを自動案内",
+        "previewCards": [
+          [
+            "法人税の納付方式",
+            "UMKM Final Tax または PPh25 への切替案内"
+          ],
+          [
+            "PKP申請のタイミング",
+            "売上推移をもとに事前通知"
+          ],
+          [
+            "資産増加リスク",
+            "所得に対する資産取得の異常シグナル"
+          ],
+          [
+            "Tax Treaty",
+            "PPh26、DGT Form、租税条約の検討案内"
+          ]
+        ],
+        "customerView": [
+          "現在の税務状況と適用可能な制度のご案内",
+          "売上・資産・取引データに基づくリスク通知",
+          "PKP・PPh25・UMKM への切替タイミング案内",
+          "Tax Treaty の検討要否を表示"
+        ],
+        "outputs": [
+          "AI税務リスク通知",
+          "切替タイミング案内",
+          "PKP申請通知",
+          "Tax Treaty 検討シグナル"
+        ],
+        "process": [
+          [
+            "01",
+            "データの蓄積",
+            "月次の申告資料と資産・負債データを累積します。"
+          ],
+          [
+            "02",
+            "条件の確認",
+            "売上基準・課税方式・PKP要件を点検します。"
+          ],
+          [
+            "03",
+            "リスク通知",
+            "切替タイミング・資産増加の異常・Treaty の必要性をご案内します。"
+          ],
+          [
+            "04",
+            "次のアクション",
+            "準備資料と対応の方向性をお示しします。"
+          ]
+        ]
+      },
+      {
+        "mark": "05",
+        "title": "申告準備状況ダッシュボード",
+        "short": "準備度・不足資料・次のアクションを一画面で確認",
+        "detail": "お客様は、資料準備・AIレビュー・納付準備・申告完了の証憑状況を一画面でご確認いただけます。",
+        "customerPromise": "「今どこまで完了しているか」を数字とステップでわかりやすくお示しします。",
+        "primaryMetric": "82%",
+        "primaryLabel": "申告準備度",
+        "statusText": "次のステップ：不足資料 2件を補完",
+        "previewCards": [
+          [
+            "準備度",
+            "必須資料と確認完了項目を基準に表示"
+          ],
+          [
+            "不足資料",
+            "期限前に補完が必要な資料を表示"
+          ],
+          [
+            "リスク通知",
+            "資産増加・PPN不一致・源泉税漏れの可能性"
+          ],
+          [
+            "次のアクション",
+            "資料補完・納付準備・証憑確認"
+          ]
+        ],
+        "customerView": [
+          "全体の進捗率を表示",
+          "税目別の進行状況を表示",
+          "不足資料とリスクをハイライト",
+          "次の行動をまとめて表示"
+        ],
+        "outputs": [
+          "進捗ダッシュボード",
+          "不足資料の優先順位",
+          "リスク通知",
+          "次のアクションカード"
+        ],
+        "process": [
+          [
+            "01",
+            "資料準備率の計算",
+            "必須資料と提出済み資料を比較します。"
+          ],
+          [
+            "02",
+            "税目別の状況表示",
+            "項目ごとの進行状況をお示しします。"
+          ],
+          [
+            "03",
+            "リスク・不足項目の案内",
+            "補完が必要な項目を整理します。"
+          ],
+          [
+            "04",
+            "次のアクションの提供",
+            "次のステップをご案内します。"
+          ]
+        ]
+      },
+      {
+        "mark": "06",
+        "title": "納付・申告証憑の管理",
+        "short": "ID Billing · NTPN · BPE をお客様ごとに保管",
+        "detail": "AI Pajak は、納付コード・納付証憑・申告完了証をお客様別・年度別・税目別に追跡・管理します。",
+        "customerPromise": "申告結果を散在するファイルではなく、きちんとした記録として残します。",
+        "primaryMetric": "BPE",
+        "primaryLabel": "申告完了証憑",
+        "statusText": "ID Billing 発行 · NTPN 入力 · BPE 保管",
+        "previewCards": [
+          [
+            "ID Billing",
+            "税目別の納付コードと納付状況を管理"
+          ],
+          [
+            "NTPN",
+            "納付確認番号を保管"
+          ],
+          [
+            "BPE",
+            "申告完了証憑を整理"
+          ],
+          [
+            "History",
+            "年度別・月別の申告履歴を確認"
+          ]
+        ],
+        "customerView": [
+          "納付前・後の状況を表示",
+          "ID Billing・NTPN・BPE を連携",
+          "個人・法人の申告履歴を分離",
+          "ダウンロード可能な証憑を提供"
+        ],
+        "outputs": [
+          "ID Billing 記録",
+          "NTPN 記録",
+          "BPE 保管庫",
+          "申告ヒストリー"
+        ],
+        "process": [
+          [
+            "01",
+            "納付の準備",
+            "税目と金額を確認します。"
+          ],
+          [
+            "02",
+            "納付状況の記録",
+            "NTPNを保管します。"
+          ],
+          [
+            "03",
+            "申告完了証憑",
+            "BPEとファイルを保存します。"
+          ],
+          [
+            "04",
+            "ヒストリーの管理",
+            "過去の申告証憑をすぐに見つけられるようにします。"
+          ]
+        ]
+      }
+    ],
+    "pricing": [
+      {
+        "id": "p-simple",
+        "group": "個人税務",
+        "badge": "申告ごと決済",
+        "typeLabel": "Personal Simple (シンプル申告)",
+        "price": "Rp 100.000",
+        "vat": "PPN込み合計: Rp 111.000",
+        "description": "給与所得1件中心・資料がシンプルな個人",
+        "meta": [
+          "PPN込み合計: Rp 111.000",
+          "複雑度基準",
+          "個人年次申告一括"
+        ],
+        "items": [
+          "A1/A2 または源泉徴収資料の自動整理",
+          "基本的な人的事項・所得資料の確認",
+          "納付／還付の可能性に関する基本案内",
+          "申告完了証憑の管理"
+        ],
+        "criteria": [
+          "給与所得中心",
+          "A1/A2 または源泉徴収資料1件中心",
+          "追加の事業所得・フリーランス所得なし"
+        ]
+      },
+      {
+        "id": "p-standard",
+        "group": "個人税務",
+        "badge": "申告ごと決済",
+        "typeLabel": "Personal Standard (スタンダード申告)",
+        "price": "Rp 200.000",
+        "vat": "PPN込み合計: Rp 222.000",
+        "description": "複数所得・複数源泉徴収・資産／負債の入力が必要な個人",
+        "meta": [
+          "PPN込み合計: Rp 222.000",
+          "複雑度基準",
+          "個人年次申告一括"
+        ],
+        "items": [
+          "複数の源泉徴収資料の統合整理",
+          "その他所得・控除・資産・負債の整理",
+          "家族情報／PTKP プロフィールの確認",
+          "申告完了証憑の管理"
+        ],
+        "criteria": [
+          "複数の雇用主または複数の源泉徴収資料",
+          "その他所得または控除の確認が必要",
+          "資産・負債の入力が必要"
+        ]
+      },
+      {
+        "id": "p-complex",
+        "group": "個人税務",
+        "badge": "申告ごと決済",
+        "typeLabel": "Personal Business / Complex",
+        "price": "Rp 500.000",
+        "vat": "PPN込み合計: Rp 555.000",
+        "description": "フリーランス・個人事業・投資所得・複雑な資産をお持ちの個人",
+        "meta": [
+          "PPN込み合計: Rp 555.000",
+          "複雑度基準",
+          "個人年次申告一括"
+        ],
+        "items": [
+          "事業／フリーランス所得資料の自動整理",
+          "収入・費用・証憑資料の分類",
+          "投資所得・賃貸所得の反映",
+          "資産・負債の変動およびリスクチェック"
+        ],
+        "criteria": [
+          "フリーランスまたは個人事業所得",
+          "事業関連の収入・費用資料",
+          "追加所得または複雑な資産"
+        ]
+      },
+      {
+        "id": "monthly-umkm",
+        "group": "法人月次管理",
+        "badge": "月額前払い",
+        "typeLabel": "UMKM 月次管理",
+        "price": "Rp 750,000",
+        "description": "小規模法人／Final Tax 中心",
+        "meta": [
+          "1ヶ月前払い",
+          "12ヶ月前払いで10％割引あり",
+          "年次決算は別途"
+        ],
+        "items": [
+          "月次申告状況の管理",
+          "ID Billing のリクエスト",
+          "基本リマインダー",
+          "基本 AI リスクコメント"
+        ],
+        "criteria": [
+          "従業員5名以下",
+          "月次源泉税取引10件以下",
+          "月次アップロード／取引50件以下"
+        ]
+      },
+      {
+        "id": "monthly-basic",
+        "group": "法人月次管理",
+        "badge": "月額前払い",
+        "typeLabel": "Basic 月次管理",
+        "price": "Rp 1,500,000",
+        "description": "一般法人の基本税務オペレーション",
+        "meta": [
+          "1ヶ月前払い",
+          "12ヶ月前払いで10％割引あり",
+          "年次決算は別途"
+        ],
+        "items": [
+          "PPh21/23/25/PPN の管理",
+          "申告履歴／BPE／NTPN の保管",
+          "取引先源泉税の判定",
+          "月次税務レポート"
+        ],
+        "criteria": [
+          "従業員30名以下",
+          "月次源泉税取引30件以下",
+          "月次仕入／売上取引300件以下"
+        ]
+      },
+      {
+        "id": "monthly-pro",
+        "group": "法人月次管理",
+        "badge": "月額前払い",
+        "typeLabel": "Pro 月次管理",
+        "price": "Rp 2,500,000",
+        "description": "月次税務オペレーションの強化プラン",
+        "meta": [
+          "1ヶ月前払い",
+          "12ヶ月前払いで10％割引あり",
+          "年次決算は別途"
+        ],
+        "items": [
+          "Basic すべての機能",
+          "TP 条件のモニタリング",
+          "AI 異常検知",
+          "高度な税務レポート",
+          "優先処理"
+        ],
+        "criteria": [
+          "従業員100名以下",
+          "月次源泉税取引150件以下",
+          "海外取引・特殊関係者のモニタリングを含む"
+        ]
+      },
+      {
+        "id": "monthly-enterprise",
+        "group": "法人月次管理",
+        "badge": "月額前払い",
+        "typeLabel": "Enterprise カスタム月次管理",
+        "price": "Rp 3,500,000",
+        "description": "大量処理／カスタムオペレーション",
+        "meta": [
+          "1ヶ月前払い",
+          "使用量ベースの課金",
+          "年次決算は別途"
+        ],
+        "items": [
+          "Pro すべての機能",
+          "大量給与／取引処理",
+          "超過使用量ベースの課金",
+          "SLA／優先サポート"
+        ],
+        "criteria": [
+          "従業員100名超",
+          "月次源泉税取引150件超",
+          "大量ドキュメントの自動分類が必要"
+        ]
+      },
+      {
+        "id": "annual-umkm",
+        "group": "法人年次決算",
+        "badge": "一回前払い",
+        "typeLabel": "UMKM 年次決算",
+        "price": "Rp 2,500,000",
+        "description": "Final Tax 0.5％対象法人の年次決算",
+        "meta": [
+          "一回前払い",
+          "月次管理とは別途選択",
+          "SPT Badan 基準"
+        ],
+        "items": [
+          "正規財務諸表の作成",
+          "UMKM Final Tax の計算",
+          "SPT 草案の作成",
+          "e-Bupot 1721 A1 の発行"
+        ],
+        "criteria": [
+          "年間売上 Rp 4.8B 以下",
+          "Final Tax 0.5％ 対象",
+          "海外取引・特殊関係者取引なし"
+        ]
+      },
+      {
+        "id": "annual-pph25",
+        "group": "法人年次決算",
+        "badge": "一回前払い",
+        "typeLabel": "PPh25 一般法人年次決算",
+        "price": "Rp 7,500,000",
+        "description": "一般法人税対象の標準年次決算",
+        "meta": [
+          "一回前払い",
+          "月次管理とは別途選択",
+          "SPT Badan 基準"
+        ],
+        "items": [
+          "財務諸表の作成",
+          "税務調整",
+          "税額控除",
+          "PPh29／PPh25 の算定",
+          "SPT 草案の作成"
+        ],
+        "criteria": [
+          "年間売上 Rp 4.8B 超またはUMKM期間終了",
+          "年間取引1,000件以下",
+          "TP イシューなし"
+        ]
+      },
+      {
+        "id": "annual-complex",
+        "group": "法人年次決算",
+        "badge": "一回前払い",
+        "typeLabel": "複雑構造年次決算",
+        "price": "Rp 15,000,000",
+        "description": "外資系・特殊関係者・海外取引または大量取引のある法人",
+        "meta": [
+          "一回前払い",
+          "月次管理とは別途選択",
+          "SPT Badan 基準"
+        ],
+        "items": [
+          "PPh25 年次決算すべて",
+          "TP 条件のレビュー",
+          "海外取引のレビュー",
+          "AI リスクレポート",
+          "優先処理"
+        ],
+        "criteria": [
+          "海外株主または海外取引あり",
+          "特殊関係者取引あり",
+          "PPh26／DGT Form／Tax Treaty のレビューが必要"
+        ]
+      }
+    ],
+    "text": {
+      "nav": {
+        "product": "サービス",
+        "start": "資料提出",
+        "difference": "競合比較",
+        "faq": "FAQ"
+      },
+      "login": "ログイン",
+      "viewPricing": "料金プランを確認する",
+      "chips": "Personal · Corporate only",
+      "heroTop": "書類の記入に、もう時間をかけないでください。",
+      "heroMain": "AIが申告データ・税コード・税務リスクまで診断します",
+      "heroDesc": "AI Pajakは、お客様がお使いのinvoice、Faktur Pajak、領収書、給与資料、源泉徴収資料をそのままご提出いただければ、AIが必要なデータを読み取り分類します。源泉税資料は取引の性質を分析し、ID Billingに必要なPPhの種類と税コードを自動判定。提出データと申告データをもとに、法人税の納付方式・PKP申請のタイミング・資産増加リスク・Tax Treaty適用の可能性までご案内します。",
+      "readiness": "準備度",
+      "missing": "不足資料",
+      "next": "次のアクション",
+      "personas": {
+        "personal": {
+          "label": "個人のお客様",
+          "icon": "👤",
+          "title": "Personal Annual Filing",
+          "subtitle": "A1/A2・領収書・所得資料を再入力せず、そのまま提出できる個人年次申告",
+          "readiness": 72,
+          "missing": [
+            "A1/A2 源泉徴収証明書",
+            "12月31日基準の資産・負債残高",
+            "その他の所得資料"
+          ],
+          "next": "所得・控除・資産の変動を確認し、納付または還付の可能性をご案内します。"
+        },
+        "corporate": {
+          "label": "法人のお客様",
+          "icon": "🏢",
+          "title": "Corporate Monthly & Annual Filing",
+          "subtitle": "invoice、Faktur Pajak、領収書、payroll、契約書を再整理せずに提出できる法人税務ダッシュボード",
+          "readiness": 58,
+          "missing": [
+            "PPN 仕入Faktur",
+            "一部の源泉税関連契約書",
+            "PPh21 payroll template"
+          ],
+          "next": "アップロードしたinvoiceと契約書の取引性質を分析し、源泉税の種類と税コードの選択をご案内します。"
+        }
+      },
+      "cards": [
+        [
+          "AI源泉税コード自動判定",
+          "取引の性質を分析し、ID Billingに必要なPPhの種類と税コードを自動判定"
+        ],
+        [
+          "個人・法人専用フロー",
+          "お客様の種類ごとに必要な資料と申告手順を分けて管理"
+        ],
+        [
+          "AI税務インサイト",
+          "提出データと申告データをもとに、税務リスクと次のアクションをご案内"
+        ],
+        [
+          "そのまま提出できる資料アップロード",
+          "テンプレート記入不要。既存の書式・写真・PDFからAIがデータを解析"
+        ]
+      ],
+      "trustTitle": "機密性の高い税務資料は暗号化して保管されます",
+      "trustDesc": "NPWP、NIK、給与資料、Faktur Pajak、契約書などの機密資料は、暗号化保管を前提に設計されています。資料は申告準備およびお客様ごとの税務インサイト提供の目的にのみ使用されます。",
+      "trustItems": [
+        "Encrypted data storage",
+        "Access-controlled workflow",
+        "Audit-ready filing evidence"
+      ],
+      "coreDiff": "核心的な差別化ポイント",
+      "advisoryKicker": "AI Tax Advisory",
+      "taxTitle": "ID Billingの正確性は、源泉税コードで決まります。",
+      "taxDesc": "既存のオンライン税務プラットフォームはe-Billing発行機能を提供していますが、どの取引にどのPPhの種類と税コードを入力すべきかは、ユーザーが自ら判断しなければならないケースが多くあります。AI Pajakはinvoice・契約書・取引先情報・サービス内容を分析し、ID Billingに必要な源泉税コードを判定します。",
+      "taxCards": [
+        [
+          "取引性質の分析",
+          "サービス・賃貸・利子・配当・ロイヤルティ・建設など、支払いの性質を分類"
+        ],
+        [
+          "PPh種類の判定",
+          "PPh 4(2)、15、22、23、26など、適用可能な種類を区分"
+        ],
+        [
+          "税コードのマッチング",
+          "ID Billing発行に必要なtax type / deposit typeの値を整理"
+        ],
+        [
+          "要確認項目の分離",
+          "不明確な取引は別途表示し、誤ったコード入力のリスクを軽減"
+        ]
+      ],
+      "advisoryTitle": "申告データが蓄積されるほど、AIが必要な税務アクションを先回りしてお知らせします。",
+      "advisoryDesc": "AI Pajakは、お客様が提出した資料と申告履歴をもとに、単純な計算を超えた税務意思決定をサポートします。法人税の納付方式の変更・PKP申請のタイミング・収入に対する資産取得の異常・海外取引とTax Treatyの検討必要性を、お客様ごとにご案内します。",
+      "advisoryCards": [
+        [
+          "法人税納付方式",
+          "UMKM Final TaxからPPh25へ切り替えるべきタイミングと条件をご案内"
+        ],
+        [
+          "PKP申請アラート",
+          "売上推移をもとに、PKP申請が必要な時期を事前にご案内"
+        ],
+        [
+          "資産増加の異常検知",
+          "申告所得に対して資産取得が過大な場合にリスクシグナルを表示"
+        ],
+        [
+          "Tax Treatyチェック",
+          "海外取引・PPh26・DGT Form・租税条約の適用可能性をご案内"
+        ]
+      ],
+      "serviceFlow": "サービスの流れ",
+      "productTitle": "そのままアップロードするだけで、AIが申告データを整理します",
+      "productDesc": "別途テンプレートに合わせて再入力する必要はありません。invoice、Faktur Pajak、領収書、給与資料をお使いの形式のままご提出いただくか、写真に撮って提出するだけで、AIが必要なデータを読み取り、申告準備データとして整理します。",
+      "moduleStep": "サービスステップ",
+      "coreGuide": "主要ガイド",
+      "customerView": "お客様が確認できる内容",
+      "outputs": "提供される結果",
+      "requiredDocs": "提出可能な資料",
+      "startKicker": "Upload-ready documents",
+      "startTitle": "税務申告用の資料を新たに作成する必要はありません。",
+      "startDesc": "お使いのinvoice、Faktur Pajak、領収書、給与資料、源泉徴収資料をそのままご提出ください。紙の領収書や税額計算書は写真を撮って提出でき、AIが必要なデータを読み取って申告準備データとして整理します。",
+      "personalBtn": "個人の必須資料",
+      "corporateBtn": "法人の必須資料",
+      "methodTitle": "資料提出方法",
+      "methods": [
+        "既存の書式のままご提出",
+        "invoice・Faktur・領収書を撮影",
+        "AIによるデータ解析",
+        "要確認項目のみチェック",
+        "申告準備データの自動整理"
+      ],
+      "guide": "ガイド",
+      "startNote": "資料を別途テンプレートに合わせて書き直す必要はありません。源泉税対象の取引は、ID Billingに必要な税コードの選択までスムーズにご案内します。",
+      "requirements": {
+        "personal": [
+          [
+            "Required",
+            "NIK/NPWP、氏名、住所、連絡先"
+          ],
+          [
+            "Required",
+            "A1/A2または源泉徴収証明書"
+          ],
+          [
+            "Required",
+            "12月31日基準の資産・負債残高"
+          ],
+          [
+            "任意",
+            "フリーランス・事業・賃貸・利子・配当の所得資料"
+          ],
+          [
+            "任意",
+            "家族関係および控除関連資料"
+          ]
+        ],
+        "corporate": [
+          [
+            "Required",
+            "NPWP、KBLI、PKP登録有無、事業種別"
+          ],
+          [
+            "Required",
+            "月次売上・仕入資料およびFaktur Pajak"
+          ],
+          [
+            "Required",
+            "Payroll templateおよび従業員別PPh21資料"
+          ],
+          [
+            "任意",
+            "源泉税対象の契約書・invoice"
+          ],
+          [
+            "任意",
+            "銀行取引明細・前年度SPT Badan・PPh25資料"
+          ]
+        ]
+      },
+      "compKicker": "Competitive Comparison",
+      "compTitle": "既存の税務サービス・オンライン税務プラットフォームとの違い",
+      "compDesc": "AI Pajakの核心的な差別化ポイントは、源泉税取引の性質を分析し、ID Billingに必要なPPhの種類と税コードを判定することです。",
+      "columns": [
+        "比較基準",
+        "既存の税務事務所",
+        "既存のオンライン税務プラットフォーム",
+        "AI Pajak"
+      ],
+      "rows": [
+        [
+          "コアポジション",
+          "専門家に資料を送り、結果を待つ税務代行",
+          "e-Filing、e-Billing、e-Faktur、e-Bupotなど申告・納付・税務書類処理を中心としたプラットフォーム",
+          "お客様がお使いの資料をそのままアップロードするだけで、AIがデータを読み取り申告準備まで繋げる自動化プラットフォーム"
+        ],
+        [
+          "お客様体験",
+          "WhatsApp・メール・Excelで資料を送り、進捗は都度問い合わせが必要",
+          "ユーザーが自ら税務書類・申告・納付機能を操作する方式",
+          "お客様はテンプレート不要で既存の資料や撮影画像を提出するだけで、AIが整理した結果と進捗状況を確認できる"
+        ],
+        [
+          "源泉税コード",
+          "担当者が取引内容を見て手作業で判断するケースが多い",
+          "ユーザーが自ら税種別と納付コードを選択しなければならない構造が多い",
+          "invoice・契約書・取引先情報を分析し、ID Billingに必要なPPhの種類と税コードを自動判定"
+        ],
+        [
+          "AI税務インサイト",
+          "担当者の経験によってご案内のレベルが異なる場合がある",
+          "申告・納付機能は提供しているが、お客様ごとの税務意思決定のサポートは限定的",
+          "納付方式の変更・PKP申請・資産増加リスク・Tax Treaty検討の必要性をご案内"
+        ],
+        [
+          "差別化ポイント",
+          "専門家による説明と税務代行の経験",
+          "電子申告・納付処理の利便性。ただし税コードの判断はユーザーの入力と理解に依存",
+          "資料解析・源泉税コード判定・AI税務インサイト・申告準備度・証憑管理"
+        ]
+      ],
+      "pricingKicker": "料金案内",
+      "pricingTitle": "料金プランを選択すると、詳細な範囲をすぐに確認できます",
+      "pricingDesc": "個人申告は書式名ではなく、申告の複雑度を基準にご案内します。個人税務・法人月次管理・法人年次決算の中から必要なプランをクリックすると、価格・適用基準・含まれる内容を詳しくご確認いただけます。",
+      "pricingListTitle": "料金プランの種類",
+      "chooseService": "必要なサービスをお選びください",
+      "pricingListDesc": "クリックすると右側に詳細が表示されます。",
+      "selectedPlan": "選択中のプラン",
+      "included": "含まれる内容",
+      "criteria": "適用基準",
+      "pricingInfo": "表示金額は基本料金です。実際の申告範囲は、提出資料・取引量・海外取引や特殊関係の有無などにより最終確認されます。",
+      "pricingButton": "提出可能な資料を見る →",
+      "groups": [
+        "個人税務",
+        "法人月次管理",
+        "法人年次決算"
+      ],
+      "faqs": [
+        [
+          "申告準備を始めるには、どのような資料が必要ですか？",
+          "個人のお客様はNIK/NPWP・A1/A2・家族情報・資産および負債資料が基本です。法人のお客様はNPWP・KBLI・PKP登録有無・売上および仕入資料・PPh21給与資料・源泉税関連invoice/契約書・PPN資料などが必要です。"
+        ],
+        [
+          "OnlinePajak、Klikpajakのようなプラットフォームと直接競合していますか？",
+          "まったく同じポジションではありません。既存のオンライン税務プラットフォームはe-Filing・e-Billing・e-Faktur・e-Bupotなど申告・納付・電子税務書類機能が強みです。AI Pajakの核心的な差別化ポイントは、invoiceと契約書の取引性質を分析して源泉税の種類とID Billingの税コードを自動判定することです。"
+        ],
+        [
+          "個人申告の料金は1770SS/1770S/1770基準ですか？",
+          "いいえ。個人年次申告は統合されたフローを基準にご案内します。AI Pajakの個人料金は書式名ではなく、所得の種類・源泉徴収資料の数・資産および負債の複雑度・事業/フリーランス所得の有無を基準に区分しています。"
+        ],
+        [
+          "AI税務インサイトではどのような内容がわかりますか？",
+          "提出資料と申告データをもとに、法人税の納付方式変更の可能性・PKP申請のタイミング・収入に対する資産取得の異常・海外取引とTax Treatyの検討必要性などをご案内します。"
+        ]
+      ],
+      "finalTitle": "AI Pajakは、資料準備から申告完了の証憑まで一括管理します。",
+      "finalDesc": "個人・法人のお客様が必要な資料をご準備いただければ、AI Pajakが申告の準備状況と次のアクションを明確にご案内します。",
+      "finalButton": "ログインして申告を始める →",
+      "footerCompare": "Comparison",
+      "footerPricing": "Pricing detail",
+      "footerDocs": "Required documents"
+    }
+  }
+}

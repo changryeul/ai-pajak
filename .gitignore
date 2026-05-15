@@ -52,3 +52,6 @@ ai-pajak/.obsidian/
 
 # Duplicate project folder
 /ai-pajak/
+
+# Translation script cache
+scripts/.translate-cache/
