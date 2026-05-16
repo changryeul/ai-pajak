@@ -147,7 +147,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 py-10">
       <div className="w-full max-w-md">
         <Card className="rounded-2xl border-0 shadow-lg overflow-hidden">
           <CardContent className="p-6 md:p-8">
@@ -159,7 +159,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => { setStep(1); setError(''); }}
-                  className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline"
                 >
                   <ArrowLeft className="h-3 w-3" />
                   {t('auth.back')}
@@ -184,7 +184,7 @@ export default function RegisterPage() {
                 />
 
                 <select
-                  className="w-full p-3 border border-gray-200 rounded-lg bg-white text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                  className="w-full p-3 border border-gray-200 rounded-lg bg-white text-sm focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition"
                   value={basics.idType}
                   onChange={(e) => setBasics({ ...basics, idType: e.target.value as IdType, idNumber: '' })}
                 >
@@ -269,14 +269,14 @@ export default function RegisterPage() {
 
                 <p className="text-center text-sm text-gray-600 pt-2">
                   {t('auth.alreadyHaveAccount')}{' '}
-                  <Link href={`/${locale}/login`} className="text-blue-600 hover:underline font-medium">
+                  <Link href={`/${locale}/login`} className="text-emerald-600 hover:underline font-medium">
                     {t('auth.login')}
                   </Link>
                 </p>
               </form>
             ) : (
               <form onSubmit={step2Submit} className="space-y-4">
-                <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-800 flex items-center gap-2">
+                <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 text-xs text-emerald-800 flex items-center gap-2">
                   <User className="h-3.5 w-3.5" />
                   <span className="truncate">{basics.fullName} · {basics.email}</span>
                 </div>
