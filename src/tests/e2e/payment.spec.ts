@@ -321,7 +321,10 @@ test.describe('Midtrans Webhook Tests', () => {
     expect(response.status()).toBe(400);
 
     const body = await response.json();
-    expect(body.error).toBe('Invalid order_id format');
+    // Webhook now routes by order_id prefix (CORP-, CONS-, PAY-). An order_id
+    // that doesn't match any of these is rejected with "Unknown order_id prefix";
+    // a truly malformed one (< 2 parts) is rejected with "Invalid order_id format".
+    expect(['Invalid order_id format', 'Unknown order_id prefix']).toContain(body.error);
 
     console.log('[WEBHOOK TEST] Invalid order_id rejected');
   });
