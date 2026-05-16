@@ -22,7 +22,7 @@ import {
   ensureSessionAccess,
   resolveConsultantContext,
 } from '@/lib/consultant-erp/session-helpers';
-import { getMockRowsForSlot } from '@/lib/consultant-erp/mock-parser';
+import { parseConsultantDocument } from '@/lib/consultant-erp/claude-parser';
 import { evaluateRow } from '@/lib/consultant-erp/parse-row-rules';
 import type { RequestWithSession } from '@/types/auth';
 
@@ -55,7 +55,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
 
   let docsQuery = admin
     .from('consultant_session_document')
-    .select('id, slot, storage_path')
+    .select('id, slot, storage_path, original_filename, mime_type')
     .eq('session_id', sessionId);
   if (parsed.data.documentId) docsQuery = docsQuery.eq('id', parsed.data.documentId);
   const { data: docs, error: docsErr } = await docsQuery;
@@ -64,7 +64,13 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({ error: 'No documents to parse' }, { status: 400 });
   }
 
-  const result: Array<{ documentId: string; slot: string; rowCount: number; findingCount: number }> = [];
+  const result: Array<{
+    documentId: string;
+    slot: string;
+    rowCount: number;
+    findingCount: number;
+    mode: 'CLAUDE' | 'MOCK';
+  }> = [];
 
   for (const doc of docs) {
     // Wipe any previous findings for this document so we always recompute.
@@ -73,7 +79,14 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       .delete()
       .eq('document_id', doc.id);
 
-    const rows = getMockRowsForSlot(doc.slot);
+    const parseRes = await parseConsultantDocument({
+      documentId: doc.id,
+      slot: doc.slot,
+      storagePath: doc.storage_path,
+      originalFilename: doc.original_filename,
+      mimeType: doc.mime_type,
+    });
+    const rows = parseRes.rows;
     const inserts: Array<{
       document_id: string;
       row_index: number;
@@ -121,8 +134,8 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       .from('consultant_session_document')
       .update({
         parse_status: 'PARSED',
-        parse_confidence: 85,
-        ai_model_version: 'mock-p3-mvp-v1',
+        parse_confidence: parseRes.confidence,
+        ai_model_version: parseRes.modelVersion,
       })
       .eq('id', doc.id);
 
@@ -131,6 +144,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       slot: doc.slot,
       rowCount: rows.length,
       findingCount,
+      mode: parseRes.mode,
     });
   }
 

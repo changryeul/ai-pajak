@@ -135,20 +135,16 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
     }
   };
 
-  const uploadDoc = async (slot: string) => {
+  const uploadFile = async (slot: string, file: File) => {
     if (!sessionId) return;
-    const filename = window.prompt(`'${slot}' 슬롯에 등록할 파일명 (P1 mvp: 메타데이터만 기록)`);
-    if (!filename) return;
     setBusy(true);
     try {
-      const r = await fetch(`/api/consultant-erp/sessions/${sessionId}/documents`, {
+      const form = new FormData();
+      form.append('slot', slot);
+      form.append('file', file);
+      const r = await fetch(`/api/consultant-erp/sessions/${sessionId}/documents/upload`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slot,
-          storagePath: `consultant-erp/${sessionId}/${slot}/${Date.now()}-${filename}`,
-          originalFilename: filename,
-        }),
+        body: form,
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? 'upload failed');
@@ -349,15 +345,22 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                       ) : (
                         <p className="text-xs text-slate-400">아직 업로드 없음</p>
                       )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="mt-3 w-full"
-                        onClick={() => uploadDoc(slot.key)}
-                        disabled={busy}
-                      >
-                        {doc ? '수정본 업로드' : '업로드'}
-                      </Button>
+                      <label className="mt-3 block">
+                        <input
+                          type="file"
+                          accept=".pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,.zip,.txt"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) void uploadFile(slot.key, f);
+                            e.target.value = '';
+                          }}
+                          disabled={busy}
+                        />
+                        <span className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-1.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50">
+                          {doc ? '수정본 업로드' : '파일 선택 + 업로드'}
+                        </span>
+                      </label>
                     </div>
                   );
                 })}
