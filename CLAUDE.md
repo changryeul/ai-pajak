@@ -241,14 +241,23 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 - Use `useTranslations()` from `next-intl` in components
 - Auto-translate helper: `scripts/i18n-auto-translate.ts` (Anthropic SDK; namespace-scoped, dry-run by default)
 
-### Consultant ERP (P0 골격)
-세무 사무소 직원(컨설턴트·수퍼바이저) 전용 ERP. PDF 35p 와이어프레임을 기반으로 5단계 워크플로우(고객선택 → 자료업로드 → 파싱검토/자동계산 → 수퍼바이저 승인 → Coretax 기록)와 공동 거래처 DB, 리갈리티 자료 보관함을 제공.
+### Consultant ERP (P0~P6 완료)
+세무 사무소 직원(컨설턴트·수퍼바이저) 전용 ERP. PDF 35p 와이어프레임 기반의 5단계 워크플로우 + 공동 거래처 DB + 리갈리티 자료 보관함. 상세 계획서: `docs/01-plan/features/consultant-erp.md`
 
-- 데이터 모델: `consultant_session` + 5 자식(`*_document`, `*_parse_row`, `*_calc`, `*_approval`, `*_coretax_record`) + `counterparty_master` (cross-tenant) + `counterparty_attribute_trust` + `counterparty_update_candidate` + `legality_document`. 마이그레이션: `20260516000001_consultant_erp.sql`
-- 미들웨어: `requireConsultantOrSupervisor` (CONSULTANT_JTC / TAX_ADVISOR_JTC / TAX_OPERATOR_SUPERVISOR 만 통과). 다른 모든 role 403.
-- 라우팅: `(dashboard)/consultant-erp/{dashboard,work,legality,counterparty}/page.tsx`. 운영팀 큐 / 결산 wizard 와는 책임 분리 (ERP는 EXTERNAL 사무소 자기 고객 처리, 운영팀 큐는 결제 후 DJP 제출).
-- 책임 분리: 운영팀 큐(`djp_submission_queue` 11-state)는 ERP 세션 완료와 별개로 트리거. ERP는 자체 완결 워크플로우.
-- 상세 계획 + Phase 별 Wireframe: `docs/01-plan/features/consultant-erp.md`
+- **데이터 모델**: 10 테이블 (`consultant_session` + 5 자식 / `counterparty_master` + 2 자식 / `legality_document`) + 5 ENUM. 마이그레이션 2종:
+  - `20260516000001_consultant_erp.sql` — 테이블 + RLS
+  - `20260516000002_consultant_erp_storage.sql` — bucket `consultant-erp-docs` (20MB private) + storage RLS
+- **미들웨어**: `requireConsultantOrSupervisor` — CONSULTANT_JTC / TAX_ADVISOR_JTC / TAX_OPERATOR_SUPERVISOR 만 통과, 그 외 403.
+- **API** (`/api/consultant-erp/`, 13+ endpoint):
+  - `sessions/board` · `sessions` · `sessions/[id]` · `sessions/[id]/documents` · `sessions/[id]/documents/upload` (multipart) · `sessions/[id]/parsing` · `sessions/[id]/parse-rows` · `sessions/[id]/parse-rows/message` · `sessions/[id]/calc` · `sessions/[id]/approval` · `sessions/[id]/coretax-record`
+  - `counterparty` · `counterparty/[id]` · `counterparty/match` · `counterparty/[id]/candidates`
+  - `legality` (multipart upload) · `legality/[id]` · `legality/[id]/download` (signed URL 5분)
+- **AI 파싱**: `src/lib/consultant-erp/claude-parser.ts` — Anthropic SDK (Claude Sonnet 4.6 streaming, 20MB까지 PDF/이미지/Excel/CSV 지원). API key 미설정 / storage miss / JSON parse 실패 시 6단계 graceful fallback → mock 결과로 복구 (`mock-parser.ts`).
+- **룰 엔진**: `src/lib/consultant-erp/parse-row-rules.ts` — slot별 critical/warning/info 룰. `client-message-builder.ts` 가 ko/id markdown 으로 고객 확인요청 메시지를 모아 생성.
+- **자동계산**: `src/lib/consultant-erp/calc-engine.ts` — PPH21_TER / WITHHOLDING / CORP_TAX_MONTHLY (PPh Final ↔ PPh25 듀얼 케이스) / PPN_NET / BANK_RECON.
+- **공동 거래처 DB**: cross-tenant 공유 (`counterparty_master_read` 정책으로 모든 active consultant read, 등록·갱신은 consultant 행 필요). `counterparty-matcher.ts` 의 `matchByNpwp()` 가 NPWP exact 매칭으로 suggested PPh + trust score 반환.
+- **운영팀 큐 / 결산 wizard 와 책임 분리**: ERP 세션은 자체 완결 (Coretax 외부 처리 후 수기 기록), `djp_submission_queue` 와 별도 트리거.
+- **회귀**: `npx tsx scripts/test-consultant-erp-flow.ts` — 세션 생성 → 자료 → 결재 → Coretax → 거래처 + 리갈리티 list 까지 끝-끝. e2e: `consultant-erp.spec.ts` 9 tests (4 페이지 접근 + content + 3 access control).
 
 ### Landing Page (public `/`)
 The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/page.tsx`) that delegates to a single client component (`src/components/landing/LandingPage.tsx`) wired to a separate data layer:

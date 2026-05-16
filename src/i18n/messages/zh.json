@@ -8432,5 +8432,17 @@
     "treatyNotApplicableHint": "没有记录海外交易（PPh26），无需进行税收协定审查。",
     "treatyReviewNeededHint": "{count}笔交易未提交DGT表格。如需享受税收协定优惠，请在交易日前确保获得DGT表格。",
     "treatyOkHint": "PPh26 {count}笔交易均已完成协定适用审核"
+  },
+  "consultantErp": {
+    "pageTitleDashboard": "客户业务现况板",
+    "pageTitleWork": "5 步申报流程",
+    "pageTitleLegality": "法务资料保管库",
+    "pageTitleCounterparty": "交易方主数据",
+    "stepCustomer": "选择客户",
+    "stepUpload": "资料上传",
+    "stepParseCalc": "解析与自动计算",
+    "stepApproval": "主管审批",
+    "stepCoretax": "Coretax 记录",
+    "startMonthly": "开始月度申报上传"
   }
 }

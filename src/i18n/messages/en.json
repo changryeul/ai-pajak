@@ -8432,5 +8432,17 @@
     "treatyNotApplicableHint": "No overseas transactions (PPh26) recorded, no Tax Treaty review required.",
     "treatyReviewNeededHint": "{count} transactions without DGT Form submission. Secure DGT Form before transaction date to apply tax treaty benefits.",
     "treatyOkHint": "All {count} PPh26 transactions have completed treaty application review"
+  },
+  "consultantErp": {
+    "pageTitleDashboard": "Customer Workboard",
+    "pageTitleWork": "5-Step Filing Workflow",
+    "pageTitleLegality": "Legality Vault",
+    "pageTitleCounterparty": "Counterparty Master",
+    "stepCustomer": "Customer Select",
+    "stepUpload": "Document Upload",
+    "stepParseCalc": "Parse & Auto-Calc",
+    "stepApproval": "Supervisor Approval",
+    "stepCoretax": "Coretax Record",
+    "startMonthly": "Start Monthly Filing Upload"
   }
 }

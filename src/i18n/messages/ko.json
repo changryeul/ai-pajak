@@ -8558,5 +8558,17 @@
     "treatyNotApplicableHint": "해외 거래(PPh26) 기록이 없어 Tax Treaty 검토 대상이 없습니다.",
     "treatyReviewNeededHint": "DGT Form 미제출 거래 {count}건. 조세조약 혜택을 적용하려면 거래일 전까지 DGT Form을 확보하세요.",
     "treatyOkHint": "PPh26 {count}건 모두 treaty 적용 검토 완료"
+  },
+  "consultantErp": {
+    "pageTitleDashboard": "고객별 업무 현황판",
+    "pageTitleWork": "5단계 신고 워크플로우",
+    "pageTitleLegality": "고객 법인 기본자료 보관함",
+    "pageTitleCounterparty": "Counterparty Master",
+    "stepCustomer": "고객선택",
+    "stepUpload": "자료업로드",
+    "stepParseCalc": "파싱검토/자동계산",
+    "stepApproval": "수퍼바이저 승인대기",
+    "stepCoretax": "Coretax기록",
+    "startMonthly": "월신고 자료업로드 시작"
   }
 }

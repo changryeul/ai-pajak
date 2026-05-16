@@ -8432,5 +8432,17 @@
     "treatyNotApplicableHint": "海外取引（PPh26）の記録がないため、Tax Treaty検討対象はありません。",
     "treatyReviewNeededHint": "DGT Form未提出の取引が{count}件。租税協定の特典を適用するには取引日前にDGT Formを確保してください。",
     "treatyOkHint": "PPh26 {count}件すべてtreaty適用検討完了"
+  },
+  "consultantErp": {
+    "pageTitleDashboard": "顧客別業務ダッシュボード",
+    "pageTitleWork": "5段階申告ワークフロー",
+    "pageTitleLegality": "リーガル資料保管庫",
+    "pageTitleCounterparty": "取引先マスタ",
+    "stepCustomer": "顧客選択",
+    "stepUpload": "資料アップロード",
+    "stepParseCalc": "解析と自動計算",
+    "stepApproval": "スーパーバイザー承認",
+    "stepCoretax": "Coretax 記録",
+    "startMonthly": "月次申告アップロード開始"
   }
 }

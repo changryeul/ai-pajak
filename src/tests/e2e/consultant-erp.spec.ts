@@ -43,3 +43,65 @@ test.describe('Consultant ERP — P0 skeleton', () => {
     }
   });
 });
+
+test.describe('Consultant ERP — page content checks', () => {
+  test('dashboard page renders board section', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT_JTC');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/dashboard`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    expect(html).toContain('고객별 업무 현황판');
+  });
+
+  test('work page renders 5-step navigator hint', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT_JTC');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/work`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    expect(html).toContain('5단계 신고 워크플로우');
+  });
+
+  test('counterparty page renders search panel', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT_JTC');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/counterparty`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    expect(html).toContain('Counterparty Master');
+  });
+
+  test('legality page renders vault sections', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT_JTC');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/legality`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    expect(html).toContain('고객 법인 기본자료 보관함');
+  });
+});
+
+test.describe('Consultant ERP — API access control', () => {
+  test('CUSTOMER cannot access /api/consultant-erp/sessions/board', async ({ page }) => {
+    await loginAs(page, 'CUSTOMER');
+    const res = await page.request.get(`${BASE_URL}/api/consultant-erp/sessions/board`);
+    expect([401, 403]).toContain(res.status());
+  });
+
+  test('CUSTOMER cannot search counterparty master', async ({ page }) => {
+    await loginAs(page, 'CUSTOMER');
+    const res = await page.request.get(`${BASE_URL}/api/consultant-erp/counterparty`);
+    expect([401, 403]).toContain(res.status());
+  });
+
+  test('PLATFORM_ADMIN is blocked from ERP endpoints', async ({ page }) => {
+    await loginAs(page, 'PLATFORM_ADMIN');
+    const res = await page.request.get(`${BASE_URL}/api/consultant-erp/sessions/board`);
+    expect([401, 403]).toContain(res.status());
+  });
+});

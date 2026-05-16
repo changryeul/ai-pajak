@@ -8432,5 +8432,17 @@
     "treatyNotApplicableHint": "Tidak ada transaksi luar negeri (PPh26) yang tercatat, tidak perlu tinjauan Tax Treaty.",
     "treatyReviewNeededHint": "{count} transaksi belum submit DGT Form. Pastikan DGT Form tersedia sebelum tanggal transaksi untuk menerapkan manfaat perjanjian pajak.",
     "treatyOkHint": "Semua {count} PPh26 telah selesai review penerapan treaty"
+  },
+  "consultantErp": {
+    "pageTitleDashboard": "Papan Kerja Pelanggan",
+    "pageTitleWork": "Alur 5 Langkah",
+    "pageTitleLegality": "Brankas Legalitas",
+    "pageTitleCounterparty": "Master Mitra",
+    "stepCustomer": "Pilih Pelanggan",
+    "stepUpload": "Unggah Dokumen",
+    "stepParseCalc": "Tinjau & Hitung Otomatis",
+    "stepApproval": "Persetujuan Supervisor",
+    "stepCoretax": "Catatan Coretax",
+    "startMonthly": "Mulai Upload Bulanan"
   }
 }

@@ -182,11 +182,64 @@ async function run() {
     pass++;
   }
 
-  // ── Cleanup: delete the test session so re-runs do not collide ──
+  // ── 6. Counterparty: search + create + match (P4) ──
+  console.log('\n━━ 6. counterparty search + create + match ━━');
+  const counterpartyName = `Smoke Test PT ${Date.now()}`;
+  const counterpartyNpwp = String(Date.now()).slice(-15).padStart(15, '0');
+  const cpCreate = await api('POST', '/api/consultant-erp/counterparty', consultantTok, {
+    name: counterpartyName,
+    npwp: counterpartyNpwp,
+    country: 'ID',
+    kbli: '62019',
+    suggestedPph: 'PPh 23',
+    suggestedRate: 0.02,
+  });
+  if (cpCreate.status !== 201) {
+    console.error('   ✗ counterparty create failed', cpCreate.body);
+    fail++;
+  } else {
+    console.log(`   ✅ counterparty created id=${cpCreate.body.data.id.slice(0, 8)}…`);
+    pass++;
+  }
+  const counterpartyId = cpCreate.body.data?.id as string | undefined;
+
+  const cpSearch = await api('GET', `/api/consultant-erp/counterparty?q=${encodeURIComponent(counterpartyName)}`, consultantTok);
+  if (cpSearch.status !== 200 || !cpSearch.body.data?.rows?.length) {
+    console.error('   ✗ counterparty search failed', cpSearch.body);
+    fail++;
+  } else {
+    console.log(`   ✅ counterparty search returned ${cpSearch.body.data.rows.length} row(s)`);
+    pass++;
+  }
+
+  const cpMatch = await api('POST', '/api/consultant-erp/counterparty/match', consultantTok, {
+    npwp: counterpartyNpwp,
+  });
+  if (cpMatch.status !== 200 || !cpMatch.body.data?.matched) {
+    console.error('   ✗ counterparty match failed', cpMatch.body);
+    fail++;
+  } else {
+    console.log(`   ✅ counterparty match suggestedPph=${cpMatch.body.data.suggestedPph}`);
+    pass++;
+  }
+
+  // ── 7. Legality vault list (P5) ──
+  console.log('\n━━ 7. legality vault list ━━');
+  const leg = await api('GET', '/api/consultant-erp/legality', consultantTok);
+  if (leg.status !== 200 || !Array.isArray(leg.body.data?.customers)) {
+    console.error('   ✗ legality list failed', leg.body);
+    fail++;
+  } else {
+    console.log(`   ✅ legality customers=${leg.body.data.customers.length}, documents=${leg.body.data.documents.length}`);
+    pass++;
+  }
+
+  // ── Cleanup: delete the test session + counterparty so re-runs do not collide ──
   console.log('\n🧹 cleanup');
   const c = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   await c.from('consultant_session').delete().eq('id', sessionId);
-  console.log('   ✓ deleted test session');
+  if (counterpartyId) await c.from('counterparty_master').delete().eq('id', counterpartyId);
+  console.log('   ✓ deleted test session + counterparty');
 
   console.log(`\n${fail === 0 ? '✨' : '⚠️'} Done. ${pass} PASS / ${fail} FAIL`);
   process.exit(fail === 0 ? 0 : 1);
