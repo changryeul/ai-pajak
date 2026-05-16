@@ -18,7 +18,7 @@ export default function TermsOfServicePage() {
             {/* Header */}
             <div className="text-center mb-8">
               <Link href={`/${locale}`} className="inline-flex items-center gap-2 mb-6">
-                <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center">
                   <span className="text-lg font-bold text-white">AI</span>
                 </div>
                 <span className="text-xl font-bold text-gray-900">AI Pajak</span>
@@ -179,10 +179,10 @@ export default function TermsOfServicePage() {
                 </p>
                 <div className="mt-4 space-y-2 text-gray-600">
                   <p>
-                    Email: <a href={`mailto:${t('termsOfService.contact.supportEmail')}`} className="text-blue-600 hover:underline">{t('termsOfService.contact.supportEmail')}</a>
+                    Email: <a href={`mailto:${t('termsOfService.contact.supportEmail')}`} className="text-emerald-600 hover:underline">{t('termsOfService.contact.supportEmail')}</a>
                   </p>
                   <p>
-                    Legal: <a href={`mailto:${t('termsOfService.contact.legalEmail')}`} className="text-blue-600 hover:underline">{t('termsOfService.contact.legalEmail')}</a>
+                    Legal: <a href={`mailto:${t('termsOfService.contact.legalEmail')}`} className="text-emerald-600 hover:underline">{t('termsOfService.contact.legalEmail')}</a>
                   </p>
                   <p>{t('termsOfService.contact.address')}</p>
                 </div>
@@ -193,13 +193,13 @@ export default function TermsOfServicePage() {
             <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center gap-6">
               <Link
                 href={`/${locale}/privacy`}
-                className="text-blue-600 hover:underline"
+                className="text-emerald-600 hover:underline"
               >
                 {t('privacyPolicy.title')}
               </Link>
               <Link
                 href={`/${locale}/login`}
-                className="text-blue-600 hover:underline"
+                className="text-emerald-600 hover:underline"
               >
                 {t('backToLogin')}
               </Link>

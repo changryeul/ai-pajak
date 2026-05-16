@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-green-600 flex items-center justify-center">
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
           <CardFooter className="flex justify-center">
             <Link
               href={`/${locale}/login`}
-              className="text-blue-600 hover:underline font-medium"
+              className="text-emerald-600 hover:underline font-medium"
             >
               {t('auth.backToLogin')}
             </Link>
@@ -68,10 +68,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-emerald-600 flex items-center justify-center">
             <span className="text-2xl font-bold text-white">AI</span>
           </div>
           <CardTitle className="text-2xl">{t('auth.forgotPasswordTitle')}</CardTitle>
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
 
             <Link
               href={`/${locale}/login`}
-              className="text-center text-sm text-blue-600 hover:underline"
+              className="text-center text-sm text-emerald-600 hover:underline"
             >
               {t('auth.backToLogin')}
             </Link>

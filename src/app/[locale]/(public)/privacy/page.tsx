@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
             {/* Header */}
             <div className="text-center mb-8">
               <Link href={`/${locale}`} className="inline-flex items-center gap-2 mb-6">
-                <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center">
                   <span className="text-lg font-bold text-white">AI</span>
                 </div>
                 <span className="text-xl font-bold text-gray-900">AI Pajak</span>
@@ -28,8 +28,8 @@ export default function PrivacyPolicyPage() {
             </div>
 
             {/* UU PDP Compliance Badge */}
-            <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 text-center">
+            <div className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <p className="text-sm text-emerald-800 text-center">
                 {locale === 'id'
                   ? 'Kebijakan ini disusun sesuai dengan Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP)'
                   : 'This policy is prepared in compliance with Indonesian Personal Data Protection Law (UU PDP No. 27/2022)'}
@@ -100,16 +100,16 @@ export default function PrivacyPolicyPage() {
                   {t('privacyPolicy.thirdParty.intro')}
                 </p>
                 <div className="space-y-4 pl-4">
-                  <div className="border-l-4 border-blue-200 pl-4">
+                  <div className="border-l-4 border-emerald-200 pl-4">
                     <p className="text-gray-600">{t('privacyPolicy.thirdParty.items.djp')}</p>
                   </div>
-                  <div className="border-l-4 border-blue-200 pl-4">
+                  <div className="border-l-4 border-emerald-200 pl-4">
                     <p className="text-gray-600">{t('privacyPolicy.thirdParty.items.anthropic')}</p>
                   </div>
-                  <div className="border-l-4 border-blue-200 pl-4">
+                  <div className="border-l-4 border-emerald-200 pl-4">
                     <p className="text-gray-600">{t('privacyPolicy.thirdParty.items.midtrans')}</p>
                   </div>
-                  <div className="border-l-4 border-blue-200 pl-4">
+                  <div className="border-l-4 border-emerald-200 pl-4">
                     <p className="text-gray-600">{t('privacyPolicy.thirdParty.items.jtc')}</p>
                   </div>
                 </div>
@@ -179,13 +179,13 @@ export default function PrivacyPolicyPage() {
                 <div className="mt-4 space-y-2 text-gray-600">
                   <p>
                     <span className="font-medium">{t('privacyPolicy.contact.dpo')}:</span>{' '}
-                    <a href={`mailto:${t('privacyPolicy.contact.dpoEmail')}`} className="text-blue-600 hover:underline">
+                    <a href={`mailto:${t('privacyPolicy.contact.dpoEmail')}`} className="text-emerald-600 hover:underline">
                       {t('privacyPolicy.contact.dpoEmail')}
                     </a>
                   </p>
                   <p>
                     Support:{' '}
-                    <a href={`mailto:${t('privacyPolicy.contact.supportEmail')}`} className="text-blue-600 hover:underline">
+                    <a href={`mailto:${t('privacyPolicy.contact.supportEmail')}`} className="text-emerald-600 hover:underline">
                       {t('privacyPolicy.contact.supportEmail')}
                     </a>
                   </p>
@@ -198,13 +198,13 @@ export default function PrivacyPolicyPage() {
             <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center gap-6">
               <Link
                 href={`/${locale}/terms`}
-                className="text-blue-600 hover:underline"
+                className="text-emerald-600 hover:underline"
               >
                 {t('termsOfService.title')}
               </Link>
               <Link
                 href={`/${locale}/login`}
-                className="text-blue-600 hover:underline"
+                className="text-emerald-600 hover:underline"
               >
                 {t('backToLogin')}
               </Link>
