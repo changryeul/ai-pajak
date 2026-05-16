@@ -8397,5 +8397,35 @@
       "bpeUploadedAt": "Unggah BPE",
       "completedAt": "Waktu selesai"
     }
+  },
+  "taxAdvisory": {
+    "panelTitle": "AI Wawasan Pajak",
+    "panelDesc": "Kami memantau perubahan data pelaporan dan pemenuhan persyaratan utama untuk memberikan notifikasi dan penjelasan tepat waktu.",
+    "loading": "Memuat diagnosis AI…",
+    "empty": "Belum ada data untuk didiagnosis.",
+    "pkpTitle": "Waktu Pendaftaran PKP",
+    "pkp_NOT_APPLICABLE": "Informasi Tidak Cukup",
+    "pkp_OK": "Aman",
+    "pkp_APPROACHING": "Segera Daftar",
+    "pkp_EXCEEDED": "Wajib Daftar",
+    "pkp_REGISTERED": "Terdaftar",
+    "pkpNotApplicableHint": "Masukkan omzet tahunan di menu Informasi Perusahaan untuk panduan otomatis waktu pendaftaran PKP.",
+    "pkpProgress": "Omzet tahunan {pct}% ({revenue} / {threshold})",
+    "pkpExceededHint": "Omzet tahunan melebihi Rp 4,8M, wajib mendaftar PKP. Kewajiban pelaporan PPN bulanan dimulai setelah pendaftaran PKP.",
+    "pkpApproachingHint": "Telah mencapai lebih dari 80% dari Rp 4,8M. Persiapkan prosedur pendaftaran PKP sebelumnya.",
+    "umkmTitle": "Metode Pajak Penghasilan Badan",
+    "umkmStatusUrgent": "Perlu Beralih ke PPh25",
+    "umkmStatusUnknown": "Informasi Tidak Cukup",
+    "umkmRegime_PPH_FINAL": "UMKM Final 0.5%",
+    "umkmRegime_PPH25": "PPh25 Umum",
+    "umkmNotDeterminedHint": "Masukkan tahun pendirian dan bentuk badan hukum di menu Informasi Perusahaan untuk menentukan metode pembayaran yang berlaku secara otomatis.",
+    "umkmYearsRemaining": "UMKM Final sisa {years} tahun",
+    "treatyTitle": "Tinjauan Tax Treaty",
+    "treaty_NOT_APPLICABLE": "Tidak Berlaku",
+    "treaty_OK": "Penerapan Ditinjau",
+    "treaty_REVIEW_NEEDED": "Perlu Ditinjau",
+    "treatyNotApplicableHint": "Tidak ada transaksi luar negeri (PPh26) yang tercatat, tidak perlu tinjauan Tax Treaty.",
+    "treatyReviewNeededHint": "{count} transaksi belum submit DGT Form. Pastikan DGT Form tersedia sebelum tanggal transaksi untuk menerapkan manfaat perjanjian pajak.",
+    "treatyOkHint": "Semua {count} PPh26 telah selesai review penerapan treaty"
   }
 }

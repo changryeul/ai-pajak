@@ -8397,5 +8397,35 @@
       "bpeUploadedAt": "BPE アップロード",
       "completedAt": "完了時刻"
     }
+  },
+  "taxAdvisory": {
+    "panelTitle": "AI税務インサイト",
+    "panelDesc": "申告データの変化と主要要件の遵守状況を監視し、適切なタイミングで通知と説明を提供します。",
+    "loading": "AI診断を読み込み中…",
+    "empty": "診断するデータがまだありません。",
+    "pkpTitle": "PKP登録タイミング",
+    "pkp_NOT_APPLICABLE": "情報不足",
+    "pkp_OK": "余裕",
+    "pkp_APPROACHING": "登録が必要",
+    "pkp_EXCEEDED": "登録必須",
+    "pkp_REGISTERED": "登録済み",
+    "pkpNotApplicableHint": "会社情報メニューで年間売上を入力すると、PKP登録時期を自動でご案内します。",
+    "pkpProgress": "年間売上 {pct}% ({revenue} / {threshold})",
+    "pkpExceededHint": "年間売上がRp 4.8Bを超え、PKP登録義務が発生します。PKP登録後、PPN（付加価値税）月次申告義務が開始されます。",
+    "pkpApproachingHint": "Rp 4.8Bの80%以上に到達しました。PKP登録手続きを事前に準備してください。",
+    "umkmTitle": "法人税納付方式",
+    "umkmStatusUrgent": "PPh25への転換が必要",
+    "umkmStatusUnknown": "情報不足",
+    "umkmRegime_PPH_FINAL": "UMKM Final 0.5%",
+    "umkmRegime_PPH25": "PPh25一般",
+    "umkmNotDeterminedHint": "会社情報メニューで設立年度と法人形態を入力すると、適用可能な納付方式を自動判定します。",
+    "umkmYearsRemaining": "UMKM Final残り{years}年",
+    "treatyTitle": "Tax Treaty検討",
+    "treaty_NOT_APPLICABLE": "該当なし",
+    "treaty_OK": "適用検討済み",
+    "treaty_REVIEW_NEEDED": "検討が必要",
+    "treatyNotApplicableHint": "海外取引（PPh26）の記録がないため、Tax Treaty検討対象はありません。",
+    "treatyReviewNeededHint": "DGT Form未提出の取引が{count}件。租税協定の特典を適用するには取引日前にDGT Formを確保してください。",
+    "treatyOkHint": "PPh26 {count}件すべてtreaty適用検討完了"
   }
 }

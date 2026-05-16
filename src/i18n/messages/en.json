@@ -8397,5 +8397,35 @@
       "bpeUploadedAt": "BPE uploaded",
       "completedAt": "Completed at"
     }
+  },
+  "taxAdvisory": {
+    "panelTitle": "AI Tax Insights",
+    "panelDesc": "We monitor changes in filing data and compliance with key requirements to provide timely alerts and explanations.",
+    "loading": "Loading AI diagnosis…",
+    "empty": "No data available for diagnosis yet.",
+    "pkpTitle": "PKP Registration Timing",
+    "pkp_NOT_APPLICABLE": "Insufficient Info",
+    "pkp_OK": "Safe",
+    "pkp_APPROACHING": "Registration Soon",
+    "pkp_EXCEEDED": "Registration Required",
+    "pkp_REGISTERED": "Registered",
+    "pkpNotApplicableHint": "Enter annual revenue in Company Info menu to automatically guide PKP registration timing.",
+    "pkpProgress": "Annual revenue {pct}% ({revenue} / {threshold})",
+    "pkpExceededHint": "Annual revenue exceeds Rp 4.8B, requiring PKP registration. Monthly PPN (VAT) filing obligations begin after PKP registration.",
+    "pkpApproachingHint": "Reached over 80% of Rp 4.8B. Prepare PKP registration procedures in advance.",
+    "umkmTitle": "Corporate Tax Method",
+    "umkmStatusUrgent": "Switch to PPh25 Required",
+    "umkmStatusUnknown": "Insufficient Info",
+    "umkmRegime_PPH_FINAL": "UMKM Final 0.5%",
+    "umkmRegime_PPH25": "PPh25 Standard",
+    "umkmNotDeterminedHint": "Enter establishment year and corporate type in Company Info menu to automatically determine applicable payment methods.",
+    "umkmYearsRemaining": "UMKM Final remaining {years} years",
+    "treatyTitle": "Tax Treaty Review",
+    "treaty_NOT_APPLICABLE": "Not Applicable",
+    "treaty_OK": "Application Reviewed",
+    "treaty_REVIEW_NEEDED": "Review Required",
+    "treatyNotApplicableHint": "No overseas transactions (PPh26) recorded, no Tax Treaty review required.",
+    "treatyReviewNeededHint": "{count} transactions without DGT Form submission. Secure DGT Form before transaction date to apply tax treaty benefits.",
+    "treatyOkHint": "All {count} PPh26 transactions have completed treaty application review"
   }
 }

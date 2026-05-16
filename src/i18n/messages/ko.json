@@ -8523,5 +8523,35 @@
       "bpeUploadedAt": "BPE 업로드",
       "completedAt": "완료 시각"
     }
+  },
+  "taxAdvisory": {
+    "panelTitle": "AI 세무 인사이트",
+    "panelDesc": "신고 데이터 변화와 주요 기준 충족 여부를 확인해 필요한 시점에 알림과 설명을 드립니다.",
+    "loading": "AI 진단 불러오는 중…",
+    "empty": "진단할 데이터가 아직 없습니다.",
+    "pkpTitle": "PKP 신청 시기",
+    "pkp_NOT_APPLICABLE": "정보 부족",
+    "pkp_OK": "여유",
+    "pkp_APPROACHING": "곧 등록 필요",
+    "pkp_EXCEEDED": "등록 필요",
+    "pkp_REGISTERED": "등록 완료",
+    "pkpNotApplicableHint": "회사정보 메뉴에서 연 매출을 입력하면 PKP 등록 시기를 자동으로 안내합니다.",
+    "pkpProgress": "연 매출 {pct}% ({revenue} / {threshold})",
+    "pkpExceededHint": "연 매출이 Rp 4.8B를 넘어 PKP 등록 의무가 발생합니다. PKP 등록 후 PPN(부가가치세) 월 신고 의무가 시작됩니다.",
+    "pkpApproachingHint": "Rp 4.8B의 80% 이상에 도달했습니다. PKP 등록 절차를 미리 준비하세요.",
+    "umkmTitle": "법인세 납부 방식",
+    "umkmStatusUrgent": "PPh25 전환 필요",
+    "umkmStatusUnknown": "정보 부족",
+    "umkmRegime_PPH_FINAL": "UMKM Final 0.5%",
+    "umkmRegime_PPH25": "PPh25 일반",
+    "umkmNotDeterminedHint": "회사정보 메뉴에서 설립 연도와 법인 형태를 입력하면 적용 가능한 납부 방식을 자동 판정합니다.",
+    "umkmYearsRemaining": "UMKM Final 잔여 {years}년",
+    "treatyTitle": "Tax Treaty 검토",
+    "treaty_NOT_APPLICABLE": "해당 없음",
+    "treaty_OK": "적용 검토됨",
+    "treaty_REVIEW_NEEDED": "검토 필요",
+    "treatyNotApplicableHint": "해외 거래(PPh26) 기록이 없어 Tax Treaty 검토 대상이 없습니다.",
+    "treatyReviewNeededHint": "DGT Form 미제출 거래 {count}건. 조세조약 혜택을 적용하려면 거래일 전까지 DGT Form을 확보하세요.",
+    "treatyOkHint": "PPh26 {count}건 모두 treaty 적용 검토 완료"
   }
 }

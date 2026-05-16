@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3, Sparkles } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
+import { TaxAdvisoryPanel } from '@/components/dashboard/TaxAdvisoryPanel';
 
 interface QueueItem {
   id: string;
@@ -332,6 +333,9 @@ export function CorporateDashboardV2({
           </ul>
         </CardContent>
       </Card>
+
+      {/* AI Tax Advisory — PKP / UMKM transition / Tax Treaty */}
+      <TaxAdvisoryPanel />
 
       {/* CTAs — mirror to personal dashboard */}
       <div className="flex gap-3">
