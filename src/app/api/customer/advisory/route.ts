@@ -52,7 +52,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 
   const { data: customer, error: cErr } = await admin
     .from('customer')
-    .select('id, customer_type, annual_revenue, is_pkp, legal_form, established_year, npwp_pph25_elected, umkm_start_year')
+    .select('id, customer_type, annual_revenue, is_pkp, legal_form, established_year, npwp_pph25_elected')
     .eq('user_id', req.session.userId)
     .maybeSingle();
 
@@ -96,7 +96,6 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
         annualRevenue,
         npwpPph25Elected: customer.npwp_pph25_elected,
         legalForm: customer.legal_form,
-        umkmStartYear: customer.umkm_start_year,
       })
     : null;
 
