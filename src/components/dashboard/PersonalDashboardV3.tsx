@@ -37,6 +37,7 @@ import { AlertTriangle, CheckCircle, MessageCircle, Sparkles } from 'lucide-reac
 import { fmtRp } from '@/lib/utils';
 import { buildDashboardTrend, type TrendFiling } from '@/lib/tax/trend-from-filings';
 import { detectAuditRisks, type AuditRisk } from '@/lib/audit/risk-detector';
+import { TaxAdvisoryPanel } from '@/components/dashboard/TaxAdvisoryPanel';
 
 type Nationality = 'ID' | 'KR' | 'US' | 'JP';
 type FilingStatus = 'completed' | 'in_progress' | 'pending';
@@ -567,6 +568,9 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           </ul>
         </CardContent>
       </Card>
+
+      {/* AI Tax Advisory — only renders cards with actual signal for individuals */}
+      <TaxAdvisoryPanel />
 
       {/* 10b. CTAs — keynote 2026-04-25: 진행현황보기 버튼 제거, 시작 버튼만 */}
       <div className="flex gap-3">

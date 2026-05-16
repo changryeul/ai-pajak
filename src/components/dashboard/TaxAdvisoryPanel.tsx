@@ -115,7 +115,14 @@ export function TaxAdvisoryPanel() {
     );
   }
 
-  const { pkp, umkmTransition, taxTreaty } = data;
+  const { pkp, umkmTransition, taxTreaty, isCompany } = data;
+  // Personal customers hide cards that have no signal yet — they only see
+  // advisory rows once real data exists (revenue, PPh26 transactions, etc.).
+  const showPkp = isCompany || pkp.status !== 'NOT_APPLICABLE';
+  const showUmkm = isCompany || umkmTransition.regime !== 'NOT_DETERMINED';
+  const showTreaty = isCompany || taxTreaty.status !== 'NOT_APPLICABLE';
+  if (!showPkp && !showUmkm && !showTreaty) return null;
+
   const pkpTone = PKP_TONE[pkp.status];
   const treatyTone = TREATY_TONE[taxTreaty.status];
   const regimeUrgent = umkmTransition.transitionUrgent;
@@ -135,6 +142,7 @@ export function TaxAdvisoryPanel() {
       </CardHeader>
       <CardContent className="space-y-3">
         {/* PKP */}
+        {showPkp && (
         <div className={cn('rounded-2xl p-4 ring-1', pkpTone.bg, pkpTone.ring)}>
           <div className="flex items-start gap-3">
             <Receipt className={cn('h-5 w-5 mt-0.5 shrink-0', pkpTone.iconTone)} />
@@ -177,7 +185,10 @@ export function TaxAdvisoryPanel() {
           </div>
         </div>
 
+        )}
+
         {/* UMKM ↔ PPh25 transition */}
+        {showUmkm && (
         <div className={cn('rounded-2xl p-4 ring-1', regimeTone.bg, regimeTone.ring)}>
           <div className="flex items-start gap-3">
             <Repeat className={cn('h-5 w-5 mt-0.5 shrink-0', regimeTone.iconTone)} />
@@ -216,7 +227,10 @@ export function TaxAdvisoryPanel() {
           </div>
         </div>
 
+        )}
+
         {/* Tax Treaty */}
+        {showTreaty && (
         <div className={cn('rounded-2xl p-4 ring-1', treatyTone.bg, treatyTone.ring)}>
           <div className="flex items-start gap-3">
             <Globe className={cn('h-5 w-5 mt-0.5 shrink-0', treatyTone.iconTone)} />
@@ -242,6 +256,7 @@ export function TaxAdvisoryPanel() {
             </div>
           </div>
         </div>
+        )}
       </CardContent>
     </Card>
   );
