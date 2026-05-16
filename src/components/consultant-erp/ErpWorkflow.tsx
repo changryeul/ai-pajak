@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { CalcCardsPanel } from './CalcCardsPanel';
+import { ParseReviewPanel } from './ParseReviewPanel';
 
 type SessionStatus =
   | 'DRAFT' | 'UPLOADING' | 'PARSING' | 'REVIEWING'
@@ -364,7 +365,10 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
             </CardContent>
           </Card>
 
-          {/* Step 3: 파싱검토 / 자동계산 */}
+          {/* Step 3-1: AI 파싱 검토 */}
+          <ParseReviewPanel sessionId={session.id} />
+
+          {/* Step 3-2: 파싱검토 / 자동계산 */}
           <CalcCardsPanel sessionId={session.id} />
 
           {/* Step 4: 결재 */}
