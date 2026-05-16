@@ -244,7 +244,12 @@
     "opReview": "Tinjauan",
     "opApproval": "Permintaan Persetujuan",
     "opCoretax": "Proses Coretax",
-    "opHistory": "Riwayat"
+    "opHistory": "Riwayat",
+    "consultantErp": "ERP Konsultan",
+    "consultantErpDashboard": "Dashboard ERP",
+    "consultantErpWork": "Pemrosesan ERP",
+    "consultantErpLegality": "Berkas Legalitas",
+    "consultantErpCounterparty": "DB Mitra Bersama"
   },
   "dashboard": {
     "title": "Dasbor",

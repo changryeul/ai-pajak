@@ -244,7 +244,12 @@
     "opReview": "Review",
     "opApproval": "Approval Request",
     "opCoretax": "Coretax",
-    "opHistory": "History"
+    "opHistory": "History",
+    "consultantErp": "Consultant ERP",
+    "consultantErpDashboard": "ERP Dashboard",
+    "consultantErpWork": "ERP Workflow",
+    "consultantErpLegality": "Legality Vault",
+    "consultantErpCounterparty": "Counterparty Master"
   },
   "dashboard": {
     "title": "Dashboard",

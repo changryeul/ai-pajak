@@ -164,6 +164,18 @@ const navItems: NavSection[] = [
       { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [UserRole.CUSTOMER], customerTypes: ['INDIVIDUAL'] },
     ],
   },
+  // ── 세무 컨설턴트 ERP (직원용, 5-step workflow) ──
+  {
+    section: 'consultant-erp',
+    labelKey: 'nav.consultantErp',
+    roles: [...consultantRoles, UserRole.TAX_OPERATOR_SUPERVISOR],
+    items: [
+      { href: '/consultant-erp/dashboard', icon: LayoutDashboard, labelKey: 'nav.consultantErpDashboard' },
+      { href: '/consultant-erp/work', icon: ClipboardList, labelKey: 'nav.consultantErpWork' },
+      { href: '/consultant-erp/legality', icon: Shield, labelKey: 'nav.consultantErpLegality' },
+      { href: '/consultant-erp/counterparty', icon: Users, labelKey: 'nav.consultantErpCounterparty' },
+    ],
+  },
   // ── 세무 컨설턴트: 월신고 (기존 구조 유지) ──
   {
     section: 'consultant-main',

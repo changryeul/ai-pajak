@@ -244,7 +244,12 @@
     "opReview": "검토",
     "opApproval": "승인요청",
     "opCoretax": "Coretax 처리",
-    "opHistory": "이력"
+    "opHistory": "이력",
+    "consultantErp": "세무사 ERP",
+    "consultantErpDashboard": "ERP 현황판",
+    "consultantErpWork": "ERP 업무처리",
+    "consultantErpLegality": "ERP 리갈리티 자료",
+    "consultantErpCounterparty": "ERP 공동 거래처 DB"
   },
   "dashboard": {
     "title": "대시보드",

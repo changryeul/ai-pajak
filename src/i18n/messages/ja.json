@@ -244,7 +244,12 @@
     "opReview": "レビュー",
     "opApproval": "承認申請",
     "opCoretax": "Coretax 処理",
-    "opHistory": "履歴"
+    "opHistory": "履歴",
+    "consultantErp": "コンサルタントERP",
+    "consultantErpDashboard": "ERPダッシュボード",
+    "consultantErpWork": "ERP 業務処理",
+    "consultantErpLegality": "リーガル資料",
+    "consultantErpCounterparty": "共同取引先DB"
   },
   "dashboard": {
     "title": "ダッシュボード",

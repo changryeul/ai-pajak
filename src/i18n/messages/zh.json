@@ -244,7 +244,12 @@
     "opReview": "审核",
     "opApproval": "审批申请",
     "opCoretax": "Coretax 处理",
-    "opHistory": "历史"
+    "opHistory": "历史",
+    "consultantErp": "顾问 ERP",
+    "consultantErpDashboard": "ERP 仪表盘",
+    "consultantErpWork": "ERP 业务处理",
+    "consultantErpLegality": "法务资料",
+    "consultantErpCounterparty": "共同交易方 DB"
   },
   "dashboard": {
     "title": "仪表板",
