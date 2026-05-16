@@ -1,4 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
+import { ErpDashboard } from '@/components/consultant-erp/ErpDashboard';
 
 export default async function ConsultantErpDashboardPage({
   params,
@@ -22,17 +23,7 @@ export default async function ConsultantErpDashboardPage({
         </p>
       </header>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-bold text-slate-700">P0 골격</p>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          이 페이지는 Phase 1에서 4 통계 카드 + 고객별 행 테이블 + ACTION
-          버튼으로 채워집니다. 데이터 소스는{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">
-            GET /api/consultant-erp/sessions/board?consultantId=me
-          </code>{' '}
-          엔드포인트입니다.
-        </p>
-      </div>
+      <ErpDashboard locale={locale} />
     </div>
   );
 }
