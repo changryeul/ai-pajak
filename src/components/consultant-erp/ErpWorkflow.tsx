@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import { CalcCardsPanel } from './CalcCardsPanel';
 
 type SessionStatus =
   | 'DRAFT' | 'UPLOADING' | 'PARSING' | 'REVIEWING'
@@ -362,6 +363,9 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Step 3: 파싱검토 / 자동계산 */}
+          <CalcCardsPanel sessionId={session.id} />
 
           {/* Step 4: 결재 */}
           <Card>
