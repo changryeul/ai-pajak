@@ -5995,8 +5995,8 @@
       }
     },
     "SPT_1770SS": {
-      "name": "1770SS (Simple)",
-      "description": "Employee with a single income source",
+      "name": "Personal Simple",
+      "description": "Individuals with a single employment income and straightforward tax data",
       "features": {
         "f1": "Auto-input A1 (1721-A1) withholding slip via OCR",
         "f2": "Auto-generate and validate 1770SS",
@@ -6005,8 +6005,8 @@
       }
     },
     "SPT_1770S": {
-      "name": "1770S (Standard)",
-      "description": "Multiple income sources · side income",
+      "name": "Personal Standard",
+      "description": "Individuals with multiple income sources, multiple withholding documents, or assets and liabilities to declare",
       "features": {
         "f1": "Merge multiple withholding slips",
         "f2": "Auto: other income, assets, liabilities",
@@ -6015,8 +6015,8 @@
       }
     },
     "SPT_1770": {
-      "name": "1770 (Full)",
-      "description": "Business owners · freelancers · complex income",
+      "name": "Personal Business / Complex",
+      "description": "Individuals with freelance, sole-proprietorship, investment, or complex asset situations",
       "features": {
         "f1": "Auto business P&L classification",
         "f2": "Annual tax optimization advice",

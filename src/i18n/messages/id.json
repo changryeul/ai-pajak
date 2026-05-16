@@ -5995,8 +5995,8 @@
       }
     },
     "SPT_1770SS": {
-      "name": "1770SS (Sederhana)",
-      "description": "Karyawan dengan satu sumber penghasilan",
+      "name": "Personal Simple (Laporan Sederhana)",
+      "description": "Individu dengan 1 sumber penghasilan kerja · data sederhana",
       "features": {
         "f1": "Input otomatis bukti potong A1 (1721-A1) via OCR",
         "f2": "Pembuatan & validasi 1770SS otomatis",
@@ -6005,8 +6005,8 @@
       }
     },
     "SPT_1770S": {
-      "name": "1770S (Standar)",
-      "description": "Multi sumber penghasilan · ada pendapatan sampingan",
+      "name": "Personal Standard (Laporan Standar)",
+      "description": "Individu dengan beberapa sumber penghasilan, beberapa bukti potong, serta input harta/kewajiban",
       "features": {
         "f1": "Gabungkan beberapa bukti potong",
         "f2": "Otomatis: penghasilan lain · aset · kewajiban",
@@ -6015,8 +6015,8 @@
       }
     },
     "SPT_1770": {
-      "name": "1770 (Lengkap)",
-      "description": "Pemilik usaha · freelancer · penghasilan kompleks",
+      "name": "Personal Business / Complex",
+      "description": "Individu dengan penghasilan freelance · usaha pribadi · investasi · atau harta kompleks",
       "features": {
         "f1": "Klasifikasi laba/rugi usaha otomatis",
         "f2": "Rekomendasi optimasi pajak tahunan",

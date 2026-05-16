@@ -5995,8 +5995,8 @@
       }
     },
     "SPT_1770SS": {
-      "name": "1770SS（简单）",
-      "description": "单一收入来源的员工",
+      "name": "Personal Simple（简单申报）",
+      "description": "以单一劳动所得为主 · 资料简单的个人",
       "features": {
         "f1": "通过OCR自动录入A1 (1721-A1)代扣代缴凭证",
         "f2": "自动生成并验证1770SS",
@@ -6005,8 +6005,8 @@
       }
     },
     "SPT_1770S": {
-      "name": "1770S（标准）",
-      "description": "多收入来源·有兼职收入",
+      "name": "Personal Standard（标准申报）",
+      "description": "有多项收入、多份预扣税资料及资产/负债录入需求的个人",
       "features": {
         "f1": "合并多份代扣代缴凭证",
         "f2": "自动整理其他收入·资产·负债",
@@ -6015,8 +6015,8 @@
       }
     },
     "SPT_1770": {
-      "name": "1770（完整）",
-      "description": "经营者·自由职业·复杂收入",
+      "name": "Personal Business / Complex",
+      "description": "有自由职业 · 个体经营 · 投资收益 · 复杂资产的个人",
       "features": {
         "f1": "自动分类经营损益",
         "f2": "年度税务优化建议",
