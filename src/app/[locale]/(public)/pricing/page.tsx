@@ -196,7 +196,7 @@ export default function PricingPage() {
   const recommendedPlanId = subState?.recommendation?.planId || null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
@@ -216,7 +216,7 @@ export default function PricingPage() {
               type="button"
               onClick={() => setTab('CORPORATE')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                tab === 'CORPORATE' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                tab === 'CORPORATE' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <Building2 className="h-4 w-4" />
@@ -226,7 +226,7 @@ export default function PricingPage() {
               type="button"
               onClick={() => setTab('INDIVIDUAL')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                tab === 'INDIVIDUAL' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                tab === 'INDIVIDUAL' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <UserIcon className="h-4 w-4" />
@@ -236,7 +236,7 @@ export default function PricingPage() {
               type="button"
               onClick={() => setTab('CONSULTANT')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                tab === 'CONSULTANT' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                tab === 'CONSULTANT' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <Briefcase className="h-4 w-4" />
@@ -255,12 +255,12 @@ export default function PricingPage() {
         {tab === 'CORPORATE' && (
           <>
             {subState?.recommendation?.reason && (
-              <div className="mb-6 max-w-2xl mx-auto p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+              <div className="mb-6 max-w-2xl mx-auto p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-50 border border-emerald-200">
                 <div className="flex items-start gap-3">
-                  <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <Sparkles className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-bold text-blue-900">{t('aiRecommendation')}</p>
-                    <p className="text-xs text-blue-700 mt-1">{subState.recommendation.reason}</p>
+                    <p className="text-sm font-bold text-emerald-900">{t('aiRecommendation')}</p>
+                    <p className="text-xs text-emerald-700 mt-1">{subState.recommendation.reason}</p>
                   </div>
                 </div>
               </div>
@@ -272,20 +272,20 @@ export default function PricingPage() {
                 const isRecommended = recommendedPlanId === plan.id && !isCurrent;
                 const Icon = plan.id === 'UMKM' ? Store : plan.id === 'BASIC' ? Building2 : Star;
                 const gradient = plan.id === 'UMKM' ? 'from-emerald-500 to-green-600'
-                  : plan.id === 'BASIC' ? 'from-blue-500 to-indigo-600'
+                  : plan.id === 'BASIC' ? 'from-emerald-500 to-emerald-600'
                   : 'from-purple-500 to-pink-600';
 
                 return (
                   <Card
                     key={plan.id}
                     className={`border-2 relative overflow-hidden ${
-                      isRecommended ? 'border-blue-500 shadow-lg ring-2 ring-blue-100'
+                      isRecommended ? 'border-emerald-500 shadow-lg ring-2 ring-emerald-100'
                       : isCurrent ? 'border-green-500 shadow-md'
                       : 'border-gray-200'
                     }`}
                   >
                     {isRecommended && (
-                      <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+                      <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
                         {t('aiRecommendation')}
                       </div>
                     )}
@@ -367,8 +367,8 @@ export default function PricingPage() {
         {tab === 'INDIVIDUAL' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {INDIVIDUAL_SPT_PLANS.map((plan, i) => {
-              const gradient = i === 0 ? 'from-cyan-500 to-blue-600'
-                : i === 1 ? 'from-indigo-500 to-purple-600'
+              const gradient = i === 0 ? 'from-cyan-500 to-emerald-600'
+                : i === 1 ? 'from-emerald-500 to-purple-600'
                 : 'from-pink-500 to-rose-600';
 
               return (
@@ -431,14 +431,14 @@ export default function PricingPage() {
             </div>
 
             {consultantState && (
-              <div className="mb-6 max-w-2xl mx-auto p-4 rounded-xl bg-blue-50 border border-blue-200">
+              <div className="mb-6 max-w-2xl mx-auto p-4 rounded-xl bg-emerald-50 border border-emerald-200">
                 <div className="flex items-center gap-3">
-                  <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <Sparkles className="h-5 w-5 text-emerald-600 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-blue-900">
+                    <p className="text-sm font-bold text-emerald-900">
                       {t('managedClientCount', { count: consultantState.managedClientCount })}
                     </p>
-                    <p className="text-xs text-blue-700 mt-0.5">{consultantState.recommendation.reason}</p>
+                    <p className="text-xs text-emerald-700 mt-0.5">{consultantState.recommendation.reason}</p>
                   </div>
                 </div>
               </div>
@@ -450,7 +450,7 @@ export default function PricingPage() {
                 const isRecommended =
                   consultantState?.recommendation.tierId === tier.id && !isCurrent;
                 const gradient = tier.id === 'STARTER' ? 'from-emerald-500 to-green-600'
-                  : tier.id === 'GROWTH' ? 'from-indigo-500 to-purple-600'
+                  : tier.id === 'GROWTH' ? 'from-emerald-500 to-purple-600'
                   : 'from-pink-500 to-rose-600';
                 const Icon = tier.id === 'STARTER' ? Briefcase
                   : tier.id === 'GROWTH' ? Users : Star;
@@ -459,13 +459,13 @@ export default function PricingPage() {
                   <Card
                     key={tier.id}
                     className={`border-2 relative overflow-hidden ${
-                      isRecommended ? 'border-blue-500 shadow-lg ring-2 ring-blue-100'
+                      isRecommended ? 'border-emerald-500 shadow-lg ring-2 ring-emerald-100'
                       : isCurrent ? 'border-green-500 shadow-md'
                       : 'border-gray-200'
                     }`}
                   >
                     {isRecommended && (
-                      <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+                      <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
                         {t('aiRecommendation')}
                       </div>
                     )}
