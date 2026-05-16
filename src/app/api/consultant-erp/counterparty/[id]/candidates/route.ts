@@ -20,12 +20,12 @@ import type { RequestWithSession } from '@/types/auth';
 
 const createSchema = z.object({
   proposedPayload: z.record(z.string(), z.unknown()),
-  evidenceSessionId: z.string().uuid().nullable().optional(),
-  evidenceDocumentId: z.string().uuid().nullable().optional(),
+  evidenceSessionId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID").nullable().optional(),
+  evidenceDocumentId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID").nullable().optional(),
 });
 
 const patchSchema = z.object({
-  candidateId: z.string().uuid(),
+  candidateId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID"),
   action: z.enum(['APPROVE', 'REJECT']),
 });
 

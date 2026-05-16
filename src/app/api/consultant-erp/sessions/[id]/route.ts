@@ -32,7 +32,7 @@ const patchSchema = z.object({
       'CANCELLED',
     ])
     .optional(),
-  supervisorId: z.string().uuid().nullable().optional(),
+  supervisorId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID").nullable().optional(),
   totalEstimatedTax: z.number().nonnegative().nullable().optional(),
 });
 

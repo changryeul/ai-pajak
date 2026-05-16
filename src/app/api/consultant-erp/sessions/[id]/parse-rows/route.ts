@@ -26,7 +26,7 @@ import {
 import type { RequestWithSession } from '@/types/auth';
 
 const patchSchema = z.object({
-  rowId: z.string().uuid(),
+  rowId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID"),
   isResolved: z.boolean().optional(),
   clientMessageSent: z.boolean().optional(),
 });

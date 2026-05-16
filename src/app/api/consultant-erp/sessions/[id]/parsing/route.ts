@@ -27,7 +27,7 @@ import { evaluateRow } from '@/lib/consultant-erp/parse-row-rules';
 import type { RequestWithSession } from '@/types/auth';
 
 const schema = z.object({
-  documentId: z.string().uuid().optional(),
+  documentId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID").optional(),
 });
 
 function getSessionId(req: NextRequest): string | null {

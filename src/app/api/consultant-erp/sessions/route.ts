@@ -21,7 +21,7 @@ import { resolveConsultantContext } from '@/lib/consultant-erp/session-helpers';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 
 const createSchema = z.object({
-  customerId: z.string().uuid(),
+  customerId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID"),
   filingKind: z.enum(['MONTHLY', 'ANNUAL']),
   taxPeriod: z.string().regex(/^\d{4}-\d{2}$/, 'YYYY-MM expected'),
 });
