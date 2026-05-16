@@ -1,4 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
+import { LegalityVault } from '@/components/consultant-erp/LegalityVault';
 
 export default async function ConsultantErpLegalityPage({
   params,
@@ -23,17 +24,7 @@ export default async function ConsultantErpLegalityPage({
         </p>
       </header>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-bold text-slate-700">P0 골격</p>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Phase 5에서 카테고리 grid + 업로드/추가업로드/미리보기 + 유효기간
-          datepicker UI가 들어옵니다. 데이터는{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">
-            legality_document
-          </code>{' '}
-          테이블입니다.
-        </p>
-      </div>
+      <LegalityVault />
     </div>
   );
 }
