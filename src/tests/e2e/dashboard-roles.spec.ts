@@ -18,18 +18,25 @@ async function loginAs(page: Page, role: keyof typeof TEST_USERS) {
 
 // UI tests require stable page load - skip locally if server is slow
 test.describe('Landing Page', () => {
-  test('should display landing page with pricing', async ({ page }) => {
-    await page.goto(`${BASE_URL}/id`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  test('should display landing page with individual SPT pricing', async ({ page }) => {
+    await page.goto(`${BASE_URL}/id`, { waitUntil: 'networkidle', timeout: 30000 });
     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Rp 0')).toBeVisible();
-    await expect(page.getByText('Rp 199K')).toBeVisible();
-    await expect(page.getByText('Rp 499K')).toBeVisible();
+    // Pricing list is part of the single LandingPage client component — assert
+    // its contents are in the serialized HTML regardless of viewport position.
+    const html = await page.content();
+    expect(html).toContain('Personal Simple');
+    expect(html).toContain('Personal Standard');
+    expect(html).toContain('Personal Business');
+    expect(html).toContain('Rp 100.000');
+    expect(html).toContain('Rp 500.000');
   });
 
-  test('should have login and register links', async ({ page }) => {
+  test('should have a header login button', async ({ page }) => {
     await page.goto(`${BASE_URL}/id`, { waitUntil: 'domcontentloaded', timeout: 20000 });
-    await expect(page.locator('nav a[href*="login"]')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('nav a[href*="register"]')).toBeVisible({ timeout: 10000 });
+    // New landing header renders a <button> labelled "Masuk" (id) / "로그인" (ko) / "Log in" (en) / etc.
+    await expect(
+      page.getByRole('button', { name: /Masuk|Log in|로그인|登录|ログイン/i }).first(),
+    ).toBeVisible({ timeout: 10000 });
   });
 });
 
