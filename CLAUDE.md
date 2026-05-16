@@ -237,8 +237,17 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 
 ### i18n
 - Config: `src/config/constants.ts` (LOCALES, DEFAULT_LOCALE)
-- Message files: `src/i18n/messages/{locale}/`
+- Message files: `src/i18n/messages/{ko,en,id,ja,zh}.json` (flat JSON per locale, not nested folders)
 - Use `useTranslations()` from `next-intl` in components
+- Auto-translate helper: `scripts/i18n-auto-translate.ts` (Anthropic SDK; namespace-scoped, dry-run by default)
+
+### Landing Page (public `/`)
+The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/page.tsx`) that delegates to a single client component (`src/components/landing/LandingPage.tsx`) wired to a separate data layer:
+- `src/data/landing/` — types, modules (6), pricing (10), and `auto-translated.json` (5 locales, one bundle each)
+- `getLandingContent(locale)` in `translations.ts` returns a fully-resolved `LandingContent` per locale, falling back to ko
+- Translation pipeline: `scripts/translate-landing.ts` (Anthropic SDK streaming, disk cache at `scripts/.translate-cache/`, sanitize + 3-retry) regenerates `auto-translated.json` whenever the ko source data changes
+- `scripts/sync-individual-pricing-labels.ts` mirrors the landing's `pricing.typeLabel/description` into the `pricingPlans.SPT_1770SS / SPT_1770S / SPT_1770` i18n namespace so the landing and `/pricing` show the same plan names ("Personal Simple/Standard/Complex"). Internal plan ids stay `SPT_1770SS/S/1770` for DB/Midtrans compatibility.
+- `generateMetadata` in `page.tsx` produces locale-specific `<title>`, `<meta description>`, `og:locale`, and alternate-language links. OG image at `public/og-image.svg` (slate-950 + emerald tone, 1200×630).
 
 ### Webpack / Next.js Config Notes
 - `canvas` is externalized in `next.config.ts` to avoid native module issues with `@react-pdf/renderer`
@@ -280,6 +289,11 @@ Seed scripts:
 - `npm run db:seed-test-users` — JTC customers + consultants + admin
 - `SEED_TARGET=prod npx tsx scripts/seed-master-and-external.ts` — Operator team + EXTERNAL tax_partner + its consultant
 - `SEED_TARGET=prod npx tsx scripts/seed-company-customer.ts` — patches `company.test@example.com` to a COMPANY customer (works around `listUsers` pagination on populated DBs)
+- `SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts` — seeds two approved ID Billing rows (PPh21 5M / PPh23 2M) in `EBILLING_GENERATED` for the INDIVIDUAL test customer so `/tax/billing` shows the design-spec demo
+
+Landing / i18n maintenance scripts:
+- `npx tsx scripts/translate-landing.ts` — regenerate `src/data/landing/auto-translated.json` (en/id/zh/ja) via Anthropic SDK. Disk cache at `scripts/.translate-cache/` so re-runs only re-call failed parts.
+- `npx tsx scripts/sync-individual-pricing-labels.ts` — push the landing's `pricing.typeLabel/description` into the `pricingPlans.SPT_1770*` i18n namespace (5 locales). Re-run whenever individual pricing copy changes.
 
 Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/verify-rls-isolation.ts` — JTC ↔ EXTERNAL tenant isolation

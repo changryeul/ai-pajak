@@ -55,3 +55,6 @@ ai-pajak/.obsidian/
 
 # Translation script cache
 scripts/.translate-cache/
+
+# Logo backup (kept locally, not deployed)
+public/logo.old.*
