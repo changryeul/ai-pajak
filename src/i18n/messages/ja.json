@@ -8656,5 +8656,32 @@
       "pageTitle": "決裁キュー / 全体進行状況",
       "pageDesc": "すべての tax_partner の申告セッションを1画面で確認し、決裁待ちキューを処理します。"
     }
+  },
+  "closingTrend": {
+    "title": "最近の決算トレンド",
+    "subtitle": "直近 {n} 年の決算 PL + 税額の推移。前年比の変化率を自動算出。",
+    "empty": "前年度以前の決算記録がまだありません。初回の決算が完了すると、ここに多年度比較が表示されます。",
+    "loading": "読み込み中…",
+    "singleYearNote": "1 年分のみのため変化率は非表示。次回の決算完了で前年比が自動追加されます。",
+    "thYear": "年度",
+    "thType": "区分",
+    "thRevenue": "売上",
+    "thCogs": "売上原価",
+    "thNetIncome": "純利益",
+    "thTax": "税額",
+    "thEtr": "ETR",
+    "thStatus": "ステータス",
+    "statusCompleted": "申告完了",
+    "statusInProgress": "進行中",
+    "yoyTitle": "前年比 ({prev} → {curr})",
+    "yoyRevenue": "売上",
+    "yoyNetIncome": "純利益",
+    "yoyTax": "税額",
+    "yoyEtrDelta": "ETR Δ",
+    "chartTitle": "推移グラフ",
+    "chartSubtitle": "棒は売上と純利益(左軸)、線は実効税率(右軸)。",
+    "legendRevenue": "売上",
+    "legendNetIncome": "純利益",
+    "legendEtr": "実効税率 (ETR)"
   }
 }

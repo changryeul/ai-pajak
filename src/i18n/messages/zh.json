@@ -8656,5 +8656,32 @@
       "pageTitle": "审批队列 / 全平台进度",
       "pageDesc": "在一个屏幕上审查所有事务所的申报会话并处理审批队列。"
     }
+  },
+  "closingTrend": {
+    "title": "近期年度结算趋势",
+    "subtitle": "近 {n} 年决算 PL + 税额变动,自动计算同比变化率。",
+    "empty": "尚无往年决算记录。完成首次决算后,此处将显示多年对比。",
+    "loading": "加载中…",
+    "singleYearNote": "仅有 1 年数据,变化率不显示。下次决算完成后将自动添加同比对比。",
+    "thYear": "年度",
+    "thType": "类型",
+    "thRevenue": "营业收入",
+    "thCogs": "主营成本",
+    "thNetIncome": "净利润",
+    "thTax": "税额",
+    "thEtr": "ETR",
+    "thStatus": "状态",
+    "statusCompleted": "已申报",
+    "statusInProgress": "进行中",
+    "yoyTitle": "同比 ({prev} → {curr})",
+    "yoyRevenue": "营业收入",
+    "yoyNetIncome": "净利润",
+    "yoyTax": "税额",
+    "yoyEtrDelta": "ETR Δ",
+    "chartTitle": "走势图",
+    "chartSubtitle": "柱:营业收入与净利润(左轴);线:实效税率(右轴)。",
+    "legendRevenue": "营业收入",
+    "legendNetIncome": "净利润",
+    "legendEtr": "实效税率 (ETR)"
   }
 }

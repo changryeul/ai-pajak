@@ -8656,5 +8656,32 @@
       "pageTitle": "Approval Queue / Platform Overview",
       "pageDesc": "Review filing sessions across all tax partners and process the approval queue from one screen."
     }
+  },
+  "closingTrend": {
+    "title": "Recent Closing Trends",
+    "subtitle": "PL and tax movements across the last {n} fiscal years. Year-over-year deltas auto-computed.",
+    "empty": "No prior fiscal year closings yet. Once you complete your first closing, multi-year comparison appears here.",
+    "loading": "Loading…",
+    "singleYearNote": "Only one year of data — change rates are hidden. Year-over-year comparison will appear automatically when the next closing completes.",
+    "thYear": "Year",
+    "thType": "Type",
+    "thRevenue": "Revenue",
+    "thCogs": "COGS",
+    "thNetIncome": "Net income",
+    "thTax": "Tax due",
+    "thEtr": "ETR",
+    "thStatus": "Status",
+    "statusCompleted": "Filed",
+    "statusInProgress": "In progress",
+    "yoyTitle": "Year-over-year ({prev} → {curr})",
+    "yoyRevenue": "Revenue",
+    "yoyNetIncome": "Net income",
+    "yoyTax": "Tax due",
+    "yoyEtrDelta": "ETR Δ",
+    "chartTitle": "Trend chart",
+    "chartSubtitle": "Bars: revenue and net income (left axis). Line: effective tax rate (right axis).",
+    "legendRevenue": "Revenue",
+    "legendNetIncome": "Net income",
+    "legendEtr": "Effective tax rate (ETR)"
   }
 }

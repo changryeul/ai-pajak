@@ -8656,5 +8656,32 @@
       "pageTitle": "Antrian Persetujuan / Ringkasan Platform",
       "pageDesc": "Tinjau sesi pelaporan di seluruh mitra pajak dan proses antrian persetujuan dari satu layar."
     }
+  },
+  "closingTrend": {
+    "title": "Tren Penutupan Tahunan Terbaru",
+    "subtitle": "PL dan pajak {n} tahun terakhir. Delta tahunan dihitung otomatis.",
+    "empty": "Belum ada penutupan tahun fiskal sebelumnya. Setelah Anda menyelesaikan penutupan pertama, perbandingan multi-tahun akan muncul di sini.",
+    "loading": "Memuat…",
+    "singleYearNote": "Hanya satu tahun data — perubahan tidak ditampilkan. Perbandingan tahun-ke-tahun akan muncul otomatis setelah penutupan berikutnya selesai.",
+    "thYear": "Tahun",
+    "thType": "Jenis",
+    "thRevenue": "Pendapatan",
+    "thCogs": "HPP",
+    "thNetIncome": "Laba bersih",
+    "thTax": "Pajak",
+    "thEtr": "ETR",
+    "thStatus": "Status",
+    "statusCompleted": "Selesai diajukan",
+    "statusInProgress": "Sedang berjalan",
+    "yoyTitle": "Perubahan tahunan ({prev} → {curr})",
+    "yoyRevenue": "Pendapatan",
+    "yoyNetIncome": "Laba bersih",
+    "yoyTax": "Pajak",
+    "yoyEtrDelta": "ETR Δ",
+    "chartTitle": "Grafik tren",
+    "chartSubtitle": "Batang: pendapatan dan laba bersih (sumbu kiri). Garis: tarif pajak efektif (sumbu kanan).",
+    "legendRevenue": "Pendapatan",
+    "legendNetIncome": "Laba bersih",
+    "legendEtr": "Tarif pajak efektif (ETR)"
   }
 }

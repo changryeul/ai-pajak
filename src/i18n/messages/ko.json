@@ -8782,5 +8782,32 @@
       "pageTitle": "결재 큐 / 전체 진행 현황",
       "pageDesc": "전체 tax_partner의 신고 세션을 한 화면에서 검토하고 결재 대기 큐를 처리합니다."
     }
+  },
+  "closingTrend": {
+    "title": "최근 결산 트렌드",
+    "subtitle": "최근 {n}년 결산 PL + 세액 변동. 전년 대비 변화율 자동 계산.",
+    "empty": "이전 회계연도 결산 기록이 아직 없습니다. 첫 결산을 완료하면 다년 비교가 여기 표시됩니다.",
+    "loading": "불러오는 중…",
+    "singleYearNote": "1개 연도 기록만 있어 변화율은 표시되지 않습니다. 다음 결산이 완료되면 전년 대비 비교가 자동으로 추가됩니다.",
+    "thYear": "연도",
+    "thType": "유형",
+    "thRevenue": "매출",
+    "thCogs": "매입원가",
+    "thNetIncome": "순이익",
+    "thTax": "세액",
+    "thEtr": "ETR",
+    "thStatus": "상태",
+    "statusCompleted": "신고 완료",
+    "statusInProgress": "진행 중",
+    "yoyTitle": "전년 대비 ({prev} → {curr})",
+    "yoyRevenue": "매출",
+    "yoyNetIncome": "순이익",
+    "yoyTax": "세액",
+    "yoyEtrDelta": "ETR Δ",
+    "chartTitle": "추이 차트",
+    "chartSubtitle": "막대는 매출/순이익(좌측 축), 선은 실효세율(우측 축).",
+    "legendRevenue": "매출",
+    "legendNetIncome": "순이익",
+    "legendEtr": "실효세율 (ETR)"
   }
 }
