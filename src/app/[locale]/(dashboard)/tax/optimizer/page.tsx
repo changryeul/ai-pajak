@@ -13,6 +13,8 @@ import {
   Loader2, DollarSign, Users, Building2, Shield,
 } from 'lucide-react';
 import { cn, fmtRp } from '@/lib/utils';
+import { CHART_ACCENT_POSITIVE } from '@/lib/charts/palette';
+import { TrendBadge } from '@/components/ui/TrendBadge';
 
 interface OptimizationResult {
   currentTax: number;
@@ -61,10 +63,14 @@ function calculateTax(taxableIncome: number): number {
   return Math.round(tax);
 }
 
-const DIFFICULTY_COLORS = {
-  EASY: 'bg-green-100 text-green-700',
-  MEDIUM: 'bg-yellow-100 text-yellow-700',
-  HARD: 'bg-red-100 text-red-700',
+// Okabe-Ito-safe difficulty palette. EASY uses bluish-green family
+// (CHART_ACCENT_POSITIVE), HARD uses vermillion family
+// (CHART_ACCENT_NEGATIVE), MEDIUM stays amber/yellow (no red-green pair
+// so no colorblind collision).
+const DIFFICULTY_STYLES: Record<'EASY' | 'MEDIUM' | 'HARD', React.CSSProperties> = {
+  EASY: { backgroundColor: '#D0F0E5', color: '#00684D' },
+  MEDIUM: { backgroundColor: '#FEF3C7', color: '#92400E' },
+  HARD: { backgroundColor: '#FBE0D0', color: '#A04400' },
 };
 
 export default function TaxOptimizerPage() {
@@ -252,11 +258,32 @@ export default function TaxOptimizerPage() {
                 <p className="font-bold text-lg">{fmtRp(result.currentTax)}</p>
               </CardContent>
             </Card>
-            <Card className="border-0 shadow-sm bg-green-50">
+            <Card className="border-0 shadow-sm" style={{ backgroundColor: '#E6F6F0' }}>
               <CardContent className="p-3 text-center">
-                <p className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />{t('optimizer.savings')}</p>
-                <p className="font-bold text-lg text-green-700">{fmtRp(result.savings)}</p>
-                <p className="text-[10px] text-green-500">-{result.savingsPercent}%</p>
+                <p
+                  className="text-xs flex items-center justify-center gap-1 font-semibold"
+                  style={{ color: CHART_ACCENT_POSITIVE }}
+                >
+                  <TrendingDown className="h-3 w-3" />
+                  {t('optimizer.savings')}
+                </p>
+                <p
+                  className="font-bold text-lg"
+                  style={{ color: CHART_ACCENT_POSITIVE }}
+                >
+                  {fmtRp(result.savings)}
+                </p>
+                {/* Percent reduction in tax — directionally 'tax went down' = good,
+                    so up-bad direction with a negative value renders bluish-green. */}
+                <div className="flex justify-center mt-0.5">
+                  <TrendBadge
+                    value={-result.savingsPercent}
+                    suffix="%"
+                    direction="up-bad"
+                    size="text-[10px]"
+                    precision={1}
+                  />
+                </div>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm border-l-4 border-l-blue-500">
@@ -275,16 +302,21 @@ export default function TaxOptimizerPage() {
               </h3>
               <div className="space-y-3">
                 {result.recommendations.map(rec => {
-                  const diffColor = DIFFICULTY_COLORS[rec.difficulty];
+                  const diffStyle = DIFFICULTY_STYLES[rec.difficulty];
                   const diffLabel = DIFFICULTY_LABELS[rec.difficulty];
                   return (
                     <div key={rec.id} className="border rounded-xl p-4 hover:shadow-sm transition-all">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-[10px]">{rec.category}</Badge>
-                          <Badge className={cn('text-[10px]', diffColor)}>{diffLabel}</Badge>
+                          <Badge className="text-[10px]" style={diffStyle}>{diffLabel}</Badge>
                         </div>
-                        <span className="font-bold text-sm text-green-700">{fmtRp(rec.savings)}</span>
+                        <TrendBadge
+                          value={rec.savings}
+                          valueString={fmtRp(rec.savings)}
+                          direction="up-good"
+                          size="text-sm"
+                        />
                       </div>
                       <p className="font-medium text-sm">{rec.title}</p>
                       <p className="text-xs text-gray-500 mt-1">{rec.description}</p>
