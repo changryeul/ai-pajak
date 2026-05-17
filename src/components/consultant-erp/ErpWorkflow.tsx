@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { CalcCardsPanel } from './CalcCardsPanel';
 import { ParseReviewPanel } from './ParseReviewPanel';
 
@@ -49,18 +50,19 @@ interface CoretaxRow {
   recorded_at: string | null;
 }
 
-const SLOTS: { key: string; label: string; required: boolean }[] = [
-  { key: 'PAYROLL', label: '급여자료', required: true },
-  { key: 'WITHHOLDING_INVOICE', label: '원천세 관련 수신 인보이스', required: true },
-  { key: 'CORP_TAX_INPUT', label: '법인세 계산 검증', required: true },
-  { key: 'VAT_IN_OUT', label: '부가세 In/Out 자료', required: true },
-  { key: 'OTHER_REFERENCE', label: '기타 별도 수신자료', required: false },
-  { key: 'BANK_STATEMENT', label: '법인통장 거래내역', required: true },
+const SLOT_KEYS: { key: string; required: boolean }[] = [
+  { key: 'PAYROLL', required: true },
+  { key: 'WITHHOLDING_INVOICE', required: true },
+  { key: 'CORP_TAX_INPUT', required: true },
+  { key: 'VAT_IN_OUT', required: true },
+  { key: 'OTHER_REFERENCE', required: false },
+  { key: 'BANK_STATEMENT', required: true },
 ];
 
-const STEPS = ['고객선택', '자료업로드', '파싱검토/자동계산', '수퍼바이저 승인대기', 'Coretax기록'];
+const STEP_KEYS = ['stepCustomer', 'stepUpload', 'stepParseCalc', 'stepApproval', 'stepCoretax'] as const;
 
 export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
+  const t = useTranslations('consultantErp');
   const params = useSearchParams();
   const customerId = params.get('customerId');
   const sessionIdParam = params.get('sessionId');
@@ -104,7 +106,7 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
 
   const startSession = async () => {
     if (!customerId) {
-      setError('customerId 가 URL 에 없습니다. Dashboard 에서 고객을 선택하세요.');
+      setError(t('workflow.startHint'));
       return;
     }
     setBusy(true);
@@ -117,7 +119,6 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
       const j = await r.json();
       if (!r.ok) {
         if (r.status === 409) {
-          // Already exists — fetch it.
           const list = await fetch(`/api/consultant-erp/sessions?customerId=${customerId}`).then((x) => x.json());
           const found = (list.data ?? []).find(
             (s: SessionRow) => s.filing_kind === filingKind && s.tax_period.startsWith(taxPeriod),
@@ -160,7 +161,7 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
     if (!sessionId) return;
     const comment =
       action === 'REJECT' || action === 'WITHDRAW'
-        ? window.prompt(`${action} 코멘트 (필수는 아님)`) ?? undefined
+        ? window.prompt(t('workflow.approveCommentPrompt', { action })) ?? undefined
         : undefined;
     setBusy(true);
     try {
@@ -212,8 +213,8 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
     documents.forEach((d) => m.set(d.slot, d));
     return m;
   }, [documents]);
-  const requiredFilled = SLOTS.filter((s) => s.required && docsBySlot.has(s.key)).length;
-  const requiredTotal = SLOTS.filter((s) => s.required).length;
+  const requiredFilled = SLOT_KEYS.filter((s) => s.required && docsBySlot.has(s.key)).length;
+  const requiredTotal = SLOT_KEYS.filter((s) => s.required).length;
 
   return (
     <div className="space-y-6">
@@ -228,15 +229,15 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
         <Card className="border-dashed">
           <CardContent className="p-6 space-y-4">
             <div>
-              <p className="text-sm font-bold text-slate-700">업무 시작</p>
+              <p className="text-sm font-bold text-slate-700">{t('workflow.startHeading')}</p>
               <p className="mt-1 text-xs text-slate-500">
-                Dashboard 에서 &lsquo;고객 열기&rsquo; 로 진입하면 customerId 가 URL 에 들어옵니다.
-                현재 customerId: <code className="rounded bg-slate-100 px-1.5 py-0.5">{customerId ?? '없음'}</code>
+                {t('workflow.startHint')}{' '}
+                {t('workflow.startCurrentCustomer')}: <code className="rounded bg-slate-100 px-1.5 py-0.5">{customerId ?? t('workflow.startNoCustomer')}</code>
               </p>
             </div>
             <div className="flex flex-wrap items-end gap-3">
               <div>
-                <p className="mb-1 text-xs font-bold text-slate-600">신고구분</p>
+                <p className="mb-1 text-xs font-bold text-slate-600">{t('workflow.startFilingKindLabel')}</p>
                 <div className="flex gap-1 rounded-full bg-slate-100 p-1">
                   {(['MONTHLY', 'ANNUAL'] as const).map((k) => (
                     <button
@@ -246,13 +247,13 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                         filingKind === k ? 'bg-slate-950 text-white' : 'text-slate-600'
                       }`}
                     >
-                      {k === 'MONTHLY' ? '월신고' : '연신고'}
+                      {t(`filingKind.${k}`)}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-1 text-xs font-bold text-slate-600">과세월</p>
+                <p className="mb-1 text-xs font-bold text-slate-600">{t('workflow.startTaxPeriodLabel')}</p>
                 <Input
                   type="month"
                   value={taxPeriod}
@@ -261,7 +262,7 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                 />
               </div>
               <Button onClick={startSession} disabled={busy || !customerId}>
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : '월신고 자료업로드 시작'}
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : t('startMonthly')}
               </Button>
             </div>
           </CardContent>
@@ -274,23 +275,23 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
-                  {session.filing_kind === 'ANNUAL' ? '연신고' : '월신고'} · {session.tax_period.slice(0, 7)}
+                  {session.filing_kind === 'ANNUAL' ? t('filingKind.ANNUAL') : t('filingKind.MONTHLY')} · {session.tax_period.slice(0, 7)}
                 </p>
                 <p className="mt-1 text-sm text-slate-500">
-                  현재 상태:{' '}
+                  {t('workflow.statusLabel')}:{' '}
                   <span className="font-black text-slate-950">{session.status}</span>
                 </p>
               </div>
               {loading && <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
             </div>
             <div className="flex flex-wrap gap-2">
-              {STEPS.map((label, i) => {
+              {STEP_KEYS.map((stepKey, i) => {
                 const stepNum = i + 1;
                 const on = currentStep === stepNum;
                 const done = currentStep > stepNum;
                 return (
                   <span
-                    key={label}
+                    key={stepKey}
                     className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black ${
                       on
                         ? 'bg-slate-950 text-white'
@@ -300,7 +301,7 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                     }`}
                   >
                     {done && <CheckCircle2 className="h-3 w-3" />}
-                    {stepNum}. {label}
+                    {stepNum}. {t(stepKey)}
                   </span>
                 );
               })}
@@ -312,15 +313,15 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
             <CardContent className="p-6">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
-                  <p className="text-sm font-black text-slate-950">2단계: 자료 업로드</p>
-                  <p className="text-xs text-slate-500">필수자료 {requiredFilled}/{requiredTotal}</p>
+                  <p className="text-sm font-black text-slate-950">{t('workflow.step2Title')}</p>
+                  <p className="text-xs text-slate-500">{t('workflow.step2Required', { filled: requiredFilled, total: requiredTotal })}</p>
                 </div>
                 <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-                  P1 mvp: 메타데이터만 기록
+                  {t('workflow.step2P1Hint')}
                 </span>
               </div>
               <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {SLOTS.map((slot) => {
+                {SLOT_KEYS.map((slot) => {
                   const doc = docsBySlot.get(slot.key);
                   return (
                     <div
@@ -328,13 +329,13 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                       className={`rounded-xl border p-4 ${doc ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-200 bg-white'}`}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="font-black text-slate-950">{slot.label}</p>
+                        <p className="font-black text-slate-950">{t(`slot.${slot.key}`)}</p>
                         <span
                           className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
                             slot.required ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'
                           }`}
                         >
-                          {slot.required ? '필수' : '참고'}
+                          {slot.required ? t('slot.required') : t('slot.optional')}
                         </span>
                       </div>
                       {doc ? (
@@ -343,7 +344,7 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                           {doc.original_filename} · v{doc.version}
                         </p>
                       ) : (
-                        <p className="text-xs text-slate-400">아직 업로드 없음</p>
+                        <p className="text-xs text-slate-400">{t('slot.notUploaded')}</p>
                       )}
                       <label className="mt-3 block">
                         <input
@@ -358,7 +359,7 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                           disabled={busy}
                         />
                         <span className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-1.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50">
-                          {doc ? '수정본 업로드' : '파일 선택 + 업로드'}
+                          {doc ? t('slot.replaceUpload') : t('slot.selectAndUpload')}
                         </span>
                       </label>
                     </div>
@@ -377,29 +378,29 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
           {/* Step 4: 결재 */}
           <Card>
             <CardContent className="p-6">
-              <p className="text-sm font-black text-slate-950 mb-3">4단계: 수퍼바이저 결재</p>
+              <p className="text-sm font-black text-slate-950 mb-3">{t('workflow.step4Title')}</p>
               <p className="text-xs text-slate-500 mb-4">
-                상태: <span className="font-bold text-slate-950">{session.status}</span>
-                {session.supervisor_id && ` · 담당 supervisor: ${session.supervisor_id.slice(0, 8)}…`}
+                {t('workflow.step4StatusLabel')}: <span className="font-bold text-slate-950">{session.status}</span>
+                {session.supervisor_id && ` · ${t('workflow.step4SupervisorPrefix')}: ${session.supervisor_id.slice(0, 8)}…`}
               </p>
               <div className="flex flex-wrap gap-2">
                 {session.status !== 'PENDING_APPROVAL' && session.status !== 'APPROVED' && session.status !== 'COMPLETED' && (
                   <Button onClick={() => submitApproval('SUBMIT')} disabled={busy}>
-                    상신 (SUBMIT)
+                    {t('workflow.approveSubmit')}
                   </Button>
                 )}
                 {session.status === 'PENDING_APPROVAL' && (
                   <Button variant="outline" onClick={() => submitApproval('WITHDRAW')} disabled={busy}>
-                    상신 회수
+                    {t('workflow.approveWithdraw')}
                   </Button>
                 )}
                 {isSupervisor && session.status === 'PENDING_APPROVAL' && (
                   <>
                     <Button onClick={() => submitApproval('APPROVE')} disabled={busy}>
-                      승인
+                      {t('workflow.approveApprove')}
                     </Button>
                     <Button variant="destructive" onClick={() => submitApproval('REJECT')} disabled={busy}>
-                      반려
+                      {t('workflow.approveReject')}
                     </Button>
                   </>
                 )}
@@ -408,13 +409,13 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
               {approvals.length > 0 && (
                 <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-3">
                   <p className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
-                    결재 이력
+                    {t('workflow.approveHistory')}
                   </p>
                   <ul className="space-y-1.5 text-xs text-slate-700">
                     {approvals.slice(0, 5).map((a) => (
                       <li key={a.id}>
                         <span className="font-bold">{a.action}</span> · {a.actor_role} ·{' '}
-                        {new Date(a.created_at).toLocaleString('ko-KR')}
+                        {new Date(a.created_at).toLocaleString()}
                         {a.comment && <span className="text-slate-500"> — {a.comment}</span>}
                       </li>
                     ))}
@@ -428,37 +429,36 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
           {(session.status === 'APPROVED' || session.status === 'COMPLETED') && (
             <Card>
               <CardContent className="p-6">
-                <p className="text-sm font-black text-slate-950 mb-1">5단계: Coretax 직접 처리 결과 기록</p>
+                <p className="text-sm font-black text-slate-950 mb-1">{t('workflow.step5Title')}</p>
                 <p className="text-xs text-slate-500 mb-4">
-                  Coretax 외부 페이지에서 ID Billing 발행 + 납부 + 신고 처리 후, 그 결과만 여기에
-                  기록합니다.
+                  {t('workflow.step5Hint')}
                 </p>
                 {coretax?.recorded_at ? (
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
                     <CheckCircle2 className="mr-1 inline h-4 w-4" />
-                    기록 완료: ID Billing {coretax.id_billing} · NTPN {coretax.ntpn}
+                    {t('workflow.step5RecordedPrefix')}: ID Billing {coretax.id_billing} · NTPN {coretax.ntpn}
                     {coretax.bpe_file_path && <div className="mt-1 text-xs">BPE: {coretax.bpe_file_path}</div>}
                   </div>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-3">
                     <Input
-                      placeholder="ID BILLING"
+                      placeholder={t('workflow.step5IdBillingPlaceholder')}
                       value={crIdBilling}
                       onChange={(e) => setCrIdBilling(e.target.value)}
                     />
                     <Input
-                      placeholder="NTPN"
+                      placeholder={t('workflow.step5NtpnPlaceholder')}
                       value={crNtpn}
                       onChange={(e) => setCrNtpn(e.target.value)}
                     />
                     <Input
-                      placeholder="BPE 파일명 (옵션)"
+                      placeholder={t('workflow.step5BpePlaceholder')}
                       value={crBpe}
                       onChange={(e) => setCrBpe(e.target.value)}
                     />
                     <div className="col-span-full">
                       <Button onClick={submitCoretax} disabled={busy || !crIdBilling || !crNtpn}>
-                        결과 저장 / 업무 완료
+                        {t('workflow.step5Submit')}
                       </Button>
                     </div>
                   </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { BoardCustomer, BoardStats } from '@/lib/consultant-erp/session-helpers';
 
 interface Resp {
@@ -24,6 +25,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export function ErpDashboard({ locale }: { locale: string }) {
+  const t = useTranslations('consultantErp');
   const [data, setData] = useState<Resp['data'] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,12 +44,12 @@ export function ErpDashboard({ locale }: { locale: string }) {
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-sm text-slate-500">
-        <Loader2 className="h-4 w-4 animate-spin" /> 진단 불러오는 중…
+        <Loader2 className="h-4 w-4 animate-spin" /> {t('dashboard.loading')}
       </div>
     );
   }
   if (error || !data) {
-    return <p className="text-sm text-rose-600">오류: {error ?? '데이터 없음'}</p>;
+    return <p className="text-sm text-rose-600">{t('dashboard.errorPrefix')}: {error ?? t('dashboard.errorEmpty')}</p>;
   }
 
   const { stats, rows } = data;
@@ -55,31 +57,31 @@ export function ErpDashboard({ locale }: { locale: string }) {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="전체 고객" value={stats.totalCustomers} />
-        <StatCard label="진행 고객" value={stats.activeCustomers} tone="text-blue-700" />
-        <StatCard label="자료 업로드" value={stats.uploadedSessions} tone="text-emerald-700" />
-        <StatCard label="검토 완료" value={stats.reviewedSessions} tone="text-violet-700" />
+        <StatCard label={t('dashboard.totalCustomers')} value={stats.totalCustomers} />
+        <StatCard label={t('dashboard.activeCustomers')} value={stats.activeCustomers} tone="text-blue-700" />
+        <StatCard label={t('dashboard.uploadedSessions')} value={stats.uploadedSessions} tone="text-emerald-700" />
+        <StatCard label={t('dashboard.reviewedSessions')} value={stats.reviewedSessions} tone="text-violet-700" />
       </div>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="border-b border-slate-100 bg-slate-50 px-5 py-3">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">
-            고객별 업무 현황판
+            {t('dashboard.boardHeading')}
           </p>
         </div>
         {rows.length === 0 ? (
           <div className="px-5 py-8 text-center text-sm text-slate-500">
-            담당 고객이 없습니다. 사무소 관리자에게 고객 배정을 요청하세요.
+            {t('dashboard.boardEmpty')}
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs font-black uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-5 py-3 text-left">고객명</th>
-                <th className="px-5 py-3 text-left">담당</th>
-                <th className="px-5 py-3 text-left">진행</th>
-                <th className="px-5 py-3 text-left">자료상태</th>
-                <th className="px-5 py-3 text-right">Action</th>
+                <th className="px-5 py-3 text-left">{t('dashboard.thCustomer')}</th>
+                <th className="px-5 py-3 text-left">{t('dashboard.thAssignee')}</th>
+                <th className="px-5 py-3 text-left">{t('dashboard.thProgress')}</th>
+                <th className="px-5 py-3 text-left">{t('dashboard.thDocStatus')}</th>
+                <th className="px-5 py-3 text-right">{t('dashboard.thAction')}</th>
               </tr>
             </thead>
             <tbody>
@@ -88,14 +90,14 @@ export function ErpDashboard({ locale }: { locale: string }) {
                   <td className="px-5 py-3 align-top">
                     <p className="font-bold text-slate-950">{r.customerName}</p>
                     <p className="mt-0.5 text-xs text-slate-500">
-                      {r.customerType === 'COMPANY' ? '법인' : '개인'}
+                      {r.customerType === 'COMPANY' ? t('customerType.COMPANY') : t('customerType.INDIVIDUAL')}
                       {r.npwp ? ` · ${r.npwp}` : ''}
                     </p>
                   </td>
                   <td className="px-5 py-3 align-top">
                     <p className="text-slate-700">{r.consultantName ?? '—'}</p>
                     {r.supervisorName && (
-                      <p className="mt-0.5 text-xs text-slate-500">Sup. {r.supervisorName}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">{t('dashboard.supervisorPrefix')} {r.supervisorName}</p>
                     )}
                   </td>
                   <td className="px-5 py-3 align-top">
@@ -103,14 +105,14 @@ export function ErpDashboard({ locale }: { locale: string }) {
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-black ${STATUS_TONE[r.status] ?? 'bg-slate-100 text-slate-700'}`}
                       >
-                        {r.filingKind === 'ANNUAL' ? '연' : '월'} · {r.status}
+                        {r.filingKind === 'ANNUAL' ? t('filingKind.ANNUAL_SHORT') : t('filingKind.MONTHLY_SHORT')} · {r.status}
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-400">세션 없음</span>
+                      <span className="text-xs text-slate-400">{t('dashboard.sessionNone')}</span>
                     )}
                   </td>
                   <td className="px-5 py-3 align-top text-xs text-slate-600">
-                    업로드 {r.uploadCount} / 파싱 {r.parsedCount} / 검토 {r.reviewedCount}
+                    {t('dashboard.docStatusSummary', { up: r.uploadCount, parsed: r.parsedCount, reviewed: r.reviewedCount })}
                   </td>
                   <td className="px-5 py-3 align-top text-right">
                     <Link
@@ -120,7 +122,7 @@ export function ErpDashboard({ locale }: { locale: string }) {
                       }}
                       className="rounded-full bg-slate-950 px-3 py-1.5 text-xs font-black text-white transition hover:bg-slate-800"
                     >
-                      고객 열기
+                      {t('dashboard.openCustomer')}
                     </Link>
                   </td>
                 </tr>

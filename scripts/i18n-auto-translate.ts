@@ -30,6 +30,7 @@ type Locale = (typeof TARGET_LOCALES)[number];
 const NAMESPACE_HINTS: Record<string, string> = {
   pph25Closing: '인도네시아 법인 PPh 25 연간 결산(SPT Tahunan Badan) wizard 라벨. KAP/KJS/Koreksi Fiskal/Kredit Pajak 등 인도네시아 세무 용어는 음역 또는 원어 유지.',
   umkmClosing: '인도네시아 UMKM(소상공인) 결산 wizard 라벨. PPh Final 0.5%.',
+  consultantErp: '세무 사무소(컨설팅 펌) 직원용 ERP UI 라벨. 5단계 신고 워크플로우(고객선택 → 자료업로드 → AI 파싱검토/자동계산 → supervisor 결재 → Coretax 수기 기록), 공동 거래처(counterparty master) DB, 리갈리티(legality) 자료 보관함. Akta Pendirian, NIB, OSS, PPh 21 TER, PPh 25, PPh Final, NPWP, Coretax, BPE, NTPN 등 인도네시아 세법 고유명사 음역 또는 원어 유지.',
 };
 
 interface Args {

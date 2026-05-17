@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, Plus, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SearchHit {
   id: string;
@@ -47,6 +48,7 @@ const TRUST_TONE = (n: number) =>
   : 'bg-rose-100 text-rose-700';
 
 export function CounterpartyExplorer() {
+  const t = useTranslations('consultantErp');
   const [q, setQ] = useState('');
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -54,7 +56,6 @@ export function CounterpartyExplorer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Create-form state
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({
     name: '',
@@ -143,16 +144,16 @@ export function CounterpartyExplorer() {
       <div className="space-y-4">
         <div className="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-300">
-            Counterparty Master
+            {t('pageTitleCounterparty')}
           </p>
           <div className="mt-3 grid grid-cols-2 gap-3 text-center">
             <div>
               <p className="text-2xl font-black">{stats.total}</p>
-              <p className="text-[10px] text-slate-400">검색결과</p>
+              <p className="text-[10px] text-slate-400">{t('counterparty.statsResults')}</p>
             </div>
             <div>
               <p className="text-2xl font-black text-emerald-300">{stats.averageTrust}</p>
-              <p className="text-[10px] text-slate-400">평균 신뢰도</p>
+              <p className="text-[10px] text-slate-400">{t('counterparty.statsAvgTrust')}</p>
             </div>
           </div>
         </div>
@@ -164,28 +165,28 @@ export function CounterpartyExplorer() {
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="회사명, NPWP, NIB, KBLI 검색"
+                placeholder={t('counterparty.searchPlaceholder')}
                 onKeyDown={(e) => e.key === 'Enter' && search()}
               />
             </div>
             <Button size="sm" variant="outline" className="w-full" onClick={() => setShowCreate((v) => !v)}>
-              <Plus className="h-3 w-3 mr-1" /> {showCreate ? '신규 등록 닫기' : '신규 거래처 등록'}
+              <Plus className="h-3 w-3 mr-1" /> {showCreate ? t('counterparty.createClose') : t('counterparty.createOpen')}
             </Button>
 
             {showCreate && (
               <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="회사명 *" />
-                <Input value={form.npwp} onChange={(e) => setForm({ ...form, npwp: e.target.value })} placeholder="NPWP (옵션)" />
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('counterparty.namePlaceholder')} />
+                <Input value={form.npwp} onChange={(e) => setForm({ ...form, npwp: e.target.value })} placeholder={t('counterparty.npwpPlaceholder')} />
                 <div className="grid grid-cols-2 gap-2">
-                  <Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder="국가" />
-                  <Input value={form.kbli} onChange={(e) => setForm({ ...form, kbli: e.target.value })} placeholder="KBLI" />
+                  <Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder={t('counterparty.countryPlaceholder')} />
+                  <Input value={form.kbli} onChange={(e) => setForm({ ...form, kbli: e.target.value })} placeholder={t('counterparty.kbliPlaceholder')} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Input value={form.suggestedPph} onChange={(e) => setForm({ ...form, suggestedPph: e.target.value })} placeholder="추천 PPh" />
-                  <Input value={form.suggestedRate} onChange={(e) => setForm({ ...form, suggestedRate: e.target.value })} placeholder="세율 (예: 0.02)" />
+                  <Input value={form.suggestedPph} onChange={(e) => setForm({ ...form, suggestedPph: e.target.value })} placeholder={t('counterparty.suggestedPphPlaceholder')} />
+                  <Input value={form.suggestedRate} onChange={(e) => setForm({ ...form, suggestedRate: e.target.value })} placeholder={t('counterparty.suggestedRatePlaceholder')} />
                 </div>
                 <Button size="sm" className="w-full" onClick={create} disabled={!form.name || loading}>
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : '등록'}
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('counterparty.createSubmit')}
                 </Button>
               </div>
             )}
@@ -212,7 +213,7 @@ export function CounterpartyExplorer() {
                 </li>
               ))}
               {hits.length === 0 && !loading && (
-                <li className="text-xs text-slate-500 px-2 py-4 text-center">검색 결과가 없습니다.</li>
+                <li className="text-xs text-slate-500 px-2 py-4 text-center">{t('counterparty.listEmpty')}</li>
               )}
             </ul>
           </CardContent>
@@ -223,7 +224,7 @@ export function CounterpartyExplorer() {
         {!detail && (
           <Card>
             <CardContent className="p-6 text-sm text-slate-500">
-              좌측에서 거래처를 선택하거나 신규 등록하세요.
+              {t('counterparty.detailEmptyHint')}
             </CardContent>
           </Card>
         )}
@@ -234,20 +235,20 @@ export function CounterpartyExplorer() {
                 <div>
                   <p className="text-2xl font-black text-slate-950">{detail.master.name}</p>
                   <p className="text-xs text-slate-500 mt-1">
-                    {detail.master.npwp ?? 'NPWP 없음'} · {detail.master.country}
+                    {detail.master.npwp ?? t('counterparty.npwpNone')} · {detail.master.country}
                   </p>
                 </div>
                 <span className={`rounded-full px-3 py-1 text-xs font-black ${TRUST_TONE(detail.master.overall_trust)}`}>
-                  Trust {detail.master.overall_trust}
+                  {t('counterparty.trustLabel')} {detail.master.overall_trust}
                 </span>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <KeyVal label="PKP" value={detail.master.pkp_status ?? '확인필요'} />
-                <KeyVal label="KBLI" value={detail.master.kbli ?? '—'} />
-                <KeyVal label="추천 PPh" value={detail.master.suggested_pph_type ?? '—'} />
+                <KeyVal label={t('counterparty.kvPkp')} value={detail.master.pkp_status ?? t('counterparty.pkpCheckRequired')} />
+                <KeyVal label={t('counterparty.kvKbli')} value={detail.master.kbli ?? '—'} />
+                <KeyVal label={t('counterparty.kvSuggestedPph')} value={detail.master.suggested_pph_type ?? '—'} />
                 <KeyVal
-                  label="추천 세율"
+                  label={t('counterparty.kvSuggestedRate')}
                   value={
                     detail.master.suggested_tax_rate !== null
                       ? `${(Number(detail.master.suggested_tax_rate) * 100).toFixed(2)}%`
@@ -255,42 +256,42 @@ export function CounterpartyExplorer() {
                   }
                 />
                 <KeyVal
-                  label="Last Verified"
-                  value={detail.master.last_verified_at ? new Date(detail.master.last_verified_at).toLocaleString('ko-KR') : '—'}
+                  label={t('counterparty.kvLastVerified')}
+                  value={detail.master.last_verified_at ? new Date(detail.master.last_verified_at).toLocaleString() : '—'}
                 />
-                <KeyVal label="NIB" value={detail.master.nib ?? '—'} />
+                <KeyVal label={t('counterparty.kvNib')} value={detail.master.nib ?? '—'} />
               </div>
 
               {detail.master.business_description && (
                 <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-700">
-                  <p className="font-black text-slate-900 mb-1">업종 설명</p>
+                  <p className="font-black text-slate-900 mb-1">{t('counterparty.businessDescTitle')}</p>
                   {detail.master.business_description}
                 </div>
               )}
 
               <div>
-                <p className="text-xs font-black text-slate-900 mb-2">필드별 신뢰도</p>
+                <p className="text-xs font-black text-slate-900 mb-2">{t('counterparty.fieldTrustTitle')}</p>
                 {detail.trust.length === 0 ? (
-                  <p className="text-xs text-slate-500">필드별 출처 기록이 아직 없습니다.</p>
+                  <p className="text-xs text-slate-500">{t('counterparty.fieldTrustEmpty')}</p>
                 ) : (
                   <table className="w-full text-xs">
                     <thead className="text-left text-slate-500">
                       <tr>
-                        <th className="py-1">필드</th>
-                        <th className="py-1">값</th>
-                        <th className="py-1">출처</th>
-                        <th className="py-1 text-right">Trust</th>
+                        <th className="py-1">{t('counterparty.thField')}</th>
+                        <th className="py-1">{t('counterparty.thValue')}</th>
+                        <th className="py-1">{t('counterparty.thSource')}</th>
+                        <th className="py-1 text-right">{t('counterparty.thTrust')}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {detail.trust.map((t, i) => (
+                      {detail.trust.map((tr, i) => (
                         <tr key={i} className="border-t border-slate-100">
-                          <td className="py-1.5 font-bold text-slate-900">{t.field_name}</td>
-                          <td className="py-1.5 text-slate-700">{t.field_value ?? '—'}</td>
-                          <td className="py-1.5 text-slate-500">{t.source ?? '—'}</td>
+                          <td className="py-1.5 font-bold text-slate-900">{tr.field_name}</td>
+                          <td className="py-1.5 text-slate-700">{tr.field_value ?? '—'}</td>
+                          <td className="py-1.5 text-slate-500">{tr.source ?? '—'}</td>
                           <td className="py-1.5 text-right">
-                            <span className={`rounded-full px-2 py-0.5 font-black ${TRUST_TONE(t.trust_score)}`}>
-                              {t.trust_score}
+                            <span className={`rounded-full px-2 py-0.5 font-black ${TRUST_TONE(tr.trust_score)}`}>
+                              {tr.trust_score}
                             </span>
                           </td>
                         </tr>
@@ -302,7 +303,7 @@ export function CounterpartyExplorer() {
 
               {detail.candidates.length > 0 && (
                 <div>
-                  <p className="text-xs font-black text-slate-900 mb-2">업데이트 후보</p>
+                  <p className="text-xs font-black text-slate-900 mb-2">{t('counterparty.candidateTitle')}</p>
                   <ul className="space-y-2">
                     {detail.candidates.map((c) => (
                       <li
@@ -312,7 +313,7 @@ export function CounterpartyExplorer() {
                         <div>
                           <p className="font-bold text-slate-900">{c.status}</p>
                           <p className="text-slate-500">
-                            {new Date(c.proposed_at).toLocaleString('ko-KR')}
+                            {new Date(c.proposed_at).toLocaleString()}
                           </p>
                           <pre className="mt-1 text-[10px] text-slate-600 bg-slate-50 rounded px-2 py-1 max-w-md overflow-x-auto">
                             {JSON.stringify(c.proposed_payload, null, 0)}
@@ -320,12 +321,12 @@ export function CounterpartyExplorer() {
                         </div>
                         {c.status === 'PROPOSED' && (
                           <span className="flex items-center text-amber-600 text-[10px] font-black">
-                            <AlertTriangle className="h-3 w-3 mr-0.5" /> 검토 대기
+                            <AlertTriangle className="h-3 w-3 mr-0.5" /> {t('counterparty.candidatePending')}
                           </span>
                         )}
                         {c.status === 'APPROVED' && (
                           <span className="flex items-center text-emerald-600 text-[10px] font-black">
-                            <ShieldCheck className="h-3 w-3 mr-0.5" /> 반영됨
+                            <ShieldCheck className="h-3 w-3 mr-0.5" /> {t('counterparty.candidateApproved')}
                           </span>
                         )}
                       </li>

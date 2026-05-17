@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Calculator, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 type CalcKind = 'PPH21_TER' | 'WITHHOLDING_SUMMARY' | 'CORP_TAX_MONTHLY' | 'PPN_NET' | 'BANK_RECON';
@@ -26,21 +27,13 @@ interface CalcRow {
 const fmtRp = (n: number) =>
   `Rp ${Math.round(n).toLocaleString('id-ID')}`;
 
-const KIND_LABEL: Record<CalcKind, string> = {
-  PPH21_TER: 'PPh 21 TER',
-  WITHHOLDING_SUMMARY: '원천세 검토',
-  CORP_TAX_MONTHLY: '법인세 월납부 계산',
-  PPN_NET: 'PPN / PPnBM',
-  BANK_RECON: '법인통장 거래내역 대사',
-};
-
 export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
+  const t = useTranslations('consultantErp');
   const [rows, setRows] = useState<CalcRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyKind, setBusyKind] = useState<CalcKind | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // ── per-kind input drafts ──
   const [pph21Gross, setPph21Gross] = useState('');
   const [whGross, setWhGross] = useState('');
   const [whRate, setWhRate] = useState('0.02');
@@ -98,9 +91,9 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
     <Card>
       <CardContent className="p-6 space-y-5">
         <div>
-          <p className="text-sm font-black text-slate-950">3단계: 파싱검토 / 자동계산</p>
+          <p className="text-sm font-black text-slate-950">{t('calc.title')}</p>
           <p className="text-xs text-slate-500 mt-1">
-            P2 mvp: 컨설턴트가 입력값을 직접 채워 자동계산. P3에서 파싱 결과를 자동 연결.
+            {t('calc.p2Hint')}
           </p>
         </div>
 
@@ -113,9 +106,9 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
 
         <div className="grid gap-4 md:grid-cols-2">
           {/* PPh 21 TER */}
-          <CalcCard title={KIND_LABEL.PPH21_TER} row={findRow('PPH21_TER')}>
+          <CalcCard title={t('calc.kind.PPH21_TER')} row={findRow('PPH21_TER')}>
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-600">Gross monthly payroll (Rp)</label>
+              <label className="block text-xs font-bold text-slate-600">{t('calc.pph21GrossLabel')}</label>
               <Input
                 value={pph21Gross}
                 onChange={(e) => setPph21Gross(e.target.value)}
@@ -127,16 +120,16 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                 onClick={() => run('PPH21_TER', { grossMonthlyPayroll: Number(pph21Gross) || 0 })}
                 disabled={busyKind === 'PPH21_TER' || !pph21Gross}
               >
-                {busyKind === 'PPH21_TER' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> 자동계산</>}
+                {busyKind === 'PPH21_TER' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> {t('calc.autoCompute')}</>}
               </Button>
             </div>
           </CalcCard>
 
           {/* Withholding summary */}
-          <CalcCard title={KIND_LABEL.WITHHOLDING_SUMMARY} row={findRow('WITHHOLDING_SUMMARY')}>
+          <CalcCard title={t('calc.kind.WITHHOLDING_SUMMARY')} row={findRow('WITHHOLDING_SUMMARY')}>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-bold text-slate-600">합계 (Rp)</label>
+                <label className="block text-xs font-bold text-slate-600">{t('calc.whTotalLabel')}</label>
                 <Input
                   value={whGross}
                   onChange={(e) => setWhGross(e.target.value)}
@@ -145,7 +138,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600">가중평균 세율</label>
+                <label className="block text-xs font-bold text-slate-600">{t('calc.whRateLabel')}</label>
                 <Input
                   value={whRate}
                   onChange={(e) => setWhRate(e.target.value)}
@@ -164,16 +157,16 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
               })}
               disabled={busyKind === 'WITHHOLDING_SUMMARY' || !whGross}
             >
-              {busyKind === 'WITHHOLDING_SUMMARY' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> 자동계산</>}
+              {busyKind === 'WITHHOLDING_SUMMARY' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> {t('calc.autoCompute')}</>}
             </Button>
           </CalcCard>
 
           {/* Corp tax dual case — full width */}
           <div className="md:col-span-2">
-            <CalcCard title={KIND_LABEL.CORP_TAX_MONTHLY} row={findRow('CORP_TAX_MONTHLY')}>
+            <CalcCard title={t('calc.kind.CORP_TAX_MONTHLY')} row={findRow('CORP_TAX_MONTHLY')}>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600">설립연도</label>
+                  <label className="block text-xs font-bold text-slate-600">{t('calc.corpEstablishedLabel')}</label>
                   <Input
                     value={corpEstablished}
                     onChange={(e) => setCorpEstablished(e.target.value)}
@@ -182,7 +175,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-600">법인 형태</label>
+                  <label className="block text-xs font-bold text-slate-600">{t('calc.corpLegalFormLabel')}</label>
                   <select
                     value={corpLegalForm}
                     onChange={(e) => setCorpLegalForm(e.target.value)}
@@ -197,8 +190,8 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
               <div className="grid gap-3 mt-3 lg:grid-cols-2">
                 {/* PPh Final case */}
                 <div className={cn('rounded-xl border p-3', corpSelected === 'PPH_FINAL' ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 bg-white')}>
-                  <p className="text-xs font-black text-slate-900 mb-2">⓵ PPh Final 케이스 (UMKM 0.5%)</p>
-                  <label className="block text-xs font-bold text-slate-600">월매출 (Rp)</label>
+                  <p className="text-xs font-black text-slate-900 mb-2">{t('calc.corpFinalCaseTitle')}</p>
+                  <label className="block text-xs font-bold text-slate-600">{t('calc.corpMonthlyRevenueLabel')}</label>
                   <Input
                     value={corpMonthly}
                     onChange={(e) => setCorpMonthly(e.target.value)}
@@ -211,20 +204,20 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                     className="mt-2 w-full"
                     onClick={() => setCorpSelected('PPH_FINAL')}
                   >
-                    PPh Final 선택
+                    {t('calc.corpFinalSelect')}
                   </Button>
                 </div>
                 {/* PPh 25 case */}
                 <div className={cn('rounded-xl border p-3', corpSelected === 'PPH25' ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 bg-white')}>
-                  <p className="text-xs font-black text-slate-900 mb-2">⓶ PPh 25 케이스</p>
-                  <label className="block text-xs font-bold text-slate-600">전년 산출세액 (Rp)</label>
+                  <p className="text-xs font-black text-slate-900 mb-2">{t('calc.corpPph25CaseTitle')}</p>
+                  <label className="block text-xs font-bold text-slate-600">{t('calc.corpPrevTaxLabel')}</label>
                   <Input
                     value={corpPrevTax}
                     onChange={(e) => setCorpPrevTax(e.target.value)}
                     placeholder="240000000"
                     type="number"
                   />
-                  <label className="block text-xs font-bold text-slate-600 mt-2">매뉴얼 조정 (옵션)</label>
+                  <label className="block text-xs font-bold text-slate-600 mt-2">{t('calc.corpManualAdjustLabel')}</label>
                   <Input
                     value={corpManual}
                     onChange={(e) => setCorpManual(e.target.value)}
@@ -237,7 +230,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                     className="mt-2 w-full"
                     onClick={() => setCorpSelected('PPH25')}
                   >
-                    PPh 25 선택
+                    {t('calc.corpPph25Select')}
                   </Button>
                 </div>
               </div>
@@ -254,16 +247,16 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                 })}
                 disabled={busyKind === 'CORP_TAX_MONTHLY' || !corpSelected}
               >
-                {busyKind === 'CORP_TAX_MONTHLY' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> 자동계산 + 저장</>}
+                {busyKind === 'CORP_TAX_MONTHLY' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> {t('calc.autoComputeAndSave')}</>}
               </Button>
             </CalcCard>
           </div>
 
           {/* PPN net */}
-          <CalcCard title={KIND_LABEL.PPN_NET} row={findRow('PPN_NET')}>
+          <CalcCard title={t('calc.kind.PPN_NET')} row={findRow('PPN_NET')}>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-bold text-slate-600">Output DPP</label>
+                <label className="block text-xs font-bold text-slate-600">{t('calc.ppnOutputLabel')}</label>
                 <Input
                   value={ppnOutput}
                   onChange={(e) => setPpnOutput(e.target.value)}
@@ -272,7 +265,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600">Input DPP</label>
+                <label className="block text-xs font-bold text-slate-600">{t('calc.ppnInputLabel')}</label>
                 <Input
                   value={ppnInput}
                   onChange={(e) => setPpnInput(e.target.value)}
@@ -290,15 +283,15 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
               })}
               disabled={busyKind === 'PPN_NET' || !ppnOutput}
             >
-              {busyKind === 'PPN_NET' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> 자동계산</>}
+              {busyKind === 'PPN_NET' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> {t('calc.autoCompute')}</>}
             </Button>
           </CalcCard>
 
           {/* Bank recon */}
-          <CalcCard title={KIND_LABEL.BANK_RECON} row={findRow('BANK_RECON')}>
+          <CalcCard title={t('calc.kind.BANK_RECON')} row={findRow('BANK_RECON')}>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-bold text-slate-600">제출자료 합계</label>
+                <label className="block text-xs font-bold text-slate-600">{t('calc.bankSubmittedLabel')}</label>
                 <Input
                   value={bankSubmitted}
                   onChange={(e) => setBankSubmitted(e.target.value)}
@@ -307,7 +300,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600">통장 합계</label>
+                <label className="block text-xs font-bold text-slate-600">{t('calc.bankTotalLabel')}</label>
                 <Input
                   value={bankTotal}
                   onChange={(e) => setBankTotal(e.target.value)}
@@ -325,13 +318,13 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
               })}
               disabled={busyKind === 'BANK_RECON' || !bankTotal}
             >
-              {busyKind === 'BANK_RECON' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> 대사</>}
+              {busyKind === 'BANK_RECON' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Calculator className="h-4 w-4 mr-1" /> {t('calc.bankCompute')}</>}
             </Button>
           </CalcCard>
         </div>
 
         {loading && rows.length === 0 && (
-          <p className="text-xs text-slate-500"><Loader2 className="inline h-3 w-3 animate-spin mr-1" />계산 결과 로드 중…</p>
+          <p className="text-xs text-slate-500"><Loader2 className="inline h-3 w-3 animate-spin mr-1" />{t('calc.loading')}</p>
         )}
       </CardContent>
     </Card>

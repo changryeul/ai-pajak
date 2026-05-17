@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, AlertTriangle, Info, CheckCircle2, Loader2, Copy, MessageSquare } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 type Severity = 'CRITICAL' | 'WARNING' | 'INFO' | 'OK';
@@ -44,6 +45,7 @@ const TONES: Record<Severity, string> = {
 };
 
 export function ParseReviewPanel({ sessionId }: { sessionId: string }) {
+  const t = useTranslations('consultantErp');
   const [rows, setRows] = useState<ParseRow[]>([]);
   const [counts, setCounts] = useState({ critical: 0, warning: 0, info: 0 });
   const [loading, setLoading] = useState(true);
@@ -136,14 +138,14 @@ export function ParseReviewPanel({ sessionId }: { sessionId: string }) {
       <CardContent className="p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-black text-slate-950">3-2. 자료 파싱 검토</p>
+            <p className="text-sm font-black text-slate-950">{t('parseReview.title')}</p>
             <p className="text-xs text-slate-500 mt-1">
-              자료별 행을 검토하고 critical 항목은 고객에게 확인요청 메시지를 보냅니다.
+              {t('parseReview.subtitle')}
             </p>
           </div>
           <Button onClick={runParse} disabled={busy} size="sm">
             {busy ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-            AI 파싱 실행 (mvp mock)
+            {t('parseReview.runAi')}
           </Button>
         </div>
 
@@ -168,11 +170,11 @@ export function ParseReviewPanel({ sessionId }: { sessionId: string }) {
         {loading && rows.length === 0 ? (
           <p className="text-xs text-slate-500">
             <Loader2 className="inline h-3 w-3 animate-spin mr-1" />
-            검토 행 로드 중…
+            {t('parseReview.loadingRows')}
           </p>
         ) : rows.length === 0 ? (
           <p className="text-xs text-slate-500">
-            아직 파싱된 행이 없습니다. 자료가 업로드된 상태에서 위 &lsquo;AI 파싱 실행&rsquo; 버튼을 누르세요.
+            {t('parseReview.noRows')}
           </p>
         ) : (
           <ul className="space-y-2">
@@ -190,7 +192,7 @@ export function ParseReviewPanel({ sessionId }: { sessionId: string }) {
                         <span className="font-black uppercase text-[10px] tracking-wide">
                           {r.slot}
                         </span>
-                        <span className="text-[10px] opacity-70">Row {r.row_index}</span>
+                        <span className="text-[10px] opacity-70">{t('parseReview.rowPrefix')} {r.row_index}</span>
                         {r.entity_label && (
                           <span className="text-[11px] font-bold text-slate-900">
                             {r.entity_label}
@@ -202,7 +204,7 @@ export function ParseReviewPanel({ sessionId }: { sessionId: string }) {
                       </p>
                       {r.field_value !== null && r.field_value !== '' && (
                         <p className="text-[10px] text-slate-500 mt-1">
-                          현재 값: <code className="rounded bg-white/70 px-1">{String(r.field_value)}</code>
+                          {t('parseReview.currentValue')}: <code className="rounded bg-white/70 px-1">{String(r.field_value)}</code>
                         </p>
                       )}
                     </div>
@@ -212,7 +214,7 @@ export function ParseReviewPanel({ sessionId }: { sessionId: string }) {
                       onClick={() => toggleResolved(r.id, r.is_resolved)}
                       disabled={busy}
                     >
-                      {r.is_resolved ? '해결됨' : '미해결'}
+                      {r.is_resolved ? t('parseReview.resolved') : t('parseReview.unresolved')}
                     </Button>
                   </div>
                 </li>
@@ -224,17 +226,17 @@ export function ParseReviewPanel({ sessionId }: { sessionId: string }) {
         {rows.length > 0 && (
           <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-black text-slate-950">고객 확인요청 메시지</p>
+              <p className="text-xs font-black text-slate-950">{t('parseReview.clientMessageTitle')}</p>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => buildMessage('ko')} disabled={busy}>
-                  <MessageSquare className="h-3 w-3 mr-1" /> 한국어
+                  <MessageSquare className="h-3 w-3 mr-1" /> {t('parseReview.langKo')}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => buildMessage('id')} disabled={busy}>
-                  <MessageSquare className="h-3 w-3 mr-1" /> Bahasa
+                  <MessageSquare className="h-3 w-3 mr-1" /> {t('parseReview.langId')}
                 </Button>
                 {message && (
                   <Button size="sm" onClick={copyMessage}>
-                    <Copy className="h-3 w-3 mr-1" /> 복사
+                    <Copy className="h-3 w-3 mr-1" /> {t('parseReview.copy')}
                   </Button>
                 )}
               </div>

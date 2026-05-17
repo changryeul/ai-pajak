@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, FileText, Eye, AlertTriangle, CheckCircle2, Upload, Building2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 type Category =
   | 'AKTA_PENDIRIAN'
@@ -35,16 +36,17 @@ interface Customer {
   customer_type: 'INDIVIDUAL' | 'COMPANY';
 }
 
-const CATEGORIES: { key: Category; label: string; group: string; required: boolean }[] = [
-  { key: 'AKTA_PENDIRIAN', label: '최초정관 (Akta Pendirian)', group: '정관/법인설립', required: true },
-  { key: 'AKTA_PERUBAHAN', label: '수정정관 (Akta Perubahan)', group: '정관/법인설립', required: true },
-  { key: 'NIB_OSS', label: 'NIB / OSS 자료', group: '사업허가', required: true },
-  { key: 'LICENSE_SBU_SKK', label: '자격증 및 라이센스', group: '사업허가', required: false },
-  { key: 'COMPANY_NPWP', label: '회사 NPWP', group: '세무등록', required: true },
-  { key: 'CORETAX_ACCESS', label: 'Coretax 접속정보', group: '세무등록', required: false },
+const CATEGORIES: { key: Category; groupKey: 'aktaCorporate' | 'permit' | 'tax'; required: boolean }[] = [
+  { key: 'AKTA_PENDIRIAN', groupKey: 'aktaCorporate', required: true },
+  { key: 'AKTA_PERUBAHAN', groupKey: 'aktaCorporate', required: true },
+  { key: 'NIB_OSS', groupKey: 'permit', required: true },
+  { key: 'LICENSE_SBU_SKK', groupKey: 'permit', required: false },
+  { key: 'COMPANY_NPWP', groupKey: 'tax', required: true },
+  { key: 'CORETAX_ACCESS', groupKey: 'tax', required: false },
 ];
 
 export function LegalityVault() {
+  const t = useTranslations('consultantErp');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [customerId, setCustomerId] = useState<string>('');
   const [docs, setDocs] = useState<DocRow[]>([]);
@@ -128,7 +130,6 @@ export function LegalityVault() {
     }
   };
 
-  // Pick latest version per category
   const latestByCategory = useMemo(() => {
     const m = new Map<Category, DocRow>();
     for (const d of docs) {
@@ -143,7 +144,6 @@ export function LegalityVault() {
 
   return (
     <div className="space-y-6">
-      {/* Customer select + stats */}
       <Card>
         <CardContent className="p-5 grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
           <div className="flex items-center gap-3">
@@ -153,7 +153,7 @@ export function LegalityVault() {
               onChange={(e) => setCustomerId(e.target.value)}
               className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
             >
-              <option value="">— 고객 선택 —</option>
+              <option value="">{t('legality.selectCustomerOption')}</option>
               {customers
                 .filter((c) => c.customer_type === 'COMPANY')
                 .map((c) => (
@@ -166,10 +166,10 @@ export function LegalityVault() {
           {selected && (
             <div className="flex items-center gap-3 text-xs">
               <span className="rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-700">
-                완성도 {Math.round((requiredFilled / requiredTotal) * 100)}%
+                {t('legality.completeness', { pct: Math.round((requiredFilled / requiredTotal) * 100) })}
               </span>
               <span className="rounded-full bg-emerald-100 px-3 py-1 font-bold text-emerald-700">
-                필수 {requiredFilled}/{requiredTotal}
+                {t('legality.requiredCount', { filled: requiredFilled, total: requiredTotal })}
               </span>
             </div>
           )}
@@ -185,7 +185,7 @@ export function LegalityVault() {
       {!customerId ? (
         <Card>
           <CardContent className="p-6 text-sm text-slate-500">
-            상단에서 법인 고객을 선택하면 카테고리별 보관함이 표시됩니다.
+            {t('legality.emptyHint')}
           </CardContent>
         </Card>
       ) : (
@@ -198,16 +198,16 @@ export function LegalityVault() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">
-                        {c.group}
+                        {t(`legality.group.${c.groupKey}`)}
                       </p>
-                      <p className="mt-1 font-black text-slate-950">{c.label}</p>
+                      <p className="mt-1 font-black text-slate-950">{t(`legality.category.${c.key}`)}</p>
                     </div>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
                         c.required ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'
                       }`}
                     >
-                      {c.required ? '필수' : '선택'}
+                      {c.required ? t('legality.required') : t('legality.optional')}
                     </span>
                   </div>
 
@@ -218,7 +218,7 @@ export function LegalityVault() {
                         <span className="truncate">{d.original_filename}</span>
                       </p>
                       <p className="text-[10px] text-slate-500">
-                        v{d.version} · {new Date(d.uploaded_at).toLocaleString('ko-KR')}
+                        v{d.version} · {new Date(d.uploaded_at).toLocaleString()}
                       </p>
                       <div className="flex items-center gap-1.5">
                         <Input
@@ -235,13 +235,13 @@ export function LegalityVault() {
                       <Input
                         defaultValue={d.note ?? ''}
                         onBlur={(e) => updateMeta(d.id, d.valid_until, e.target.value || null)}
-                        placeholder="보관메모"
+                        placeholder={t('legality.notePlaceholder')}
                         className="h-7 text-xs"
                         disabled={busy}
                       />
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-400 italic">아직 업로드된 파일이 없습니다.</p>
+                    <p className="text-xs text-slate-400 italic">{t('legality.notUploaded')}</p>
                   )}
 
                   <label className="block">
@@ -258,7 +258,7 @@ export function LegalityVault() {
                     />
                     <span className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-1.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50">
                       <Upload className="inline h-3 w-3 mr-1" />
-                      {d ? '추가 업로드' : '업로드'}
+                      {d ? t('legality.replaceUpload') : t('legality.upload')}
                     </span>
                   </label>
                 </CardContent>
@@ -271,13 +271,13 @@ export function LegalityVault() {
       {loading && (
         <p className="text-xs text-slate-500">
           <Loader2 className="inline h-3 w-3 animate-spin mr-1" />
-          로딩 중…
+          {t('legality.loading')}
         </p>
       )}
       {requiredFilled === requiredTotal && customerId && (
         <p className="text-sm font-bold text-emerald-700">
           <CheckCircle2 className="inline h-4 w-4 mr-1" />
-          필수 자료가 모두 등록되었습니다.
+          {t('legality.allRequiredDone')}
         </p>
       )}
     </div>
