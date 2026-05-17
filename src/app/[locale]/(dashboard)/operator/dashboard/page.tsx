@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
+import { OperatorQueueDailyTrend } from '@/components/operator/OperatorQueueDailyTrend';
 
 interface CaseRow {
   id: string;
@@ -153,6 +154,9 @@ export default function SupervisorDashboardPage() {
         <Kpi label="긴급" value={urgent} tone="rose" highlight={urgent > 0} />
         <Kpi label="신고완료" value={completed} tone="emerald" />
       </div>
+
+      {/* Queue daily activity trend (status별 일별 추이) */}
+      <OperatorQueueDailyTrend />
 
       {/* Supervisor 자동배분 현황 */}
       <section className="rounded-2xl bg-white p-5 shadow-sm mb-4">
