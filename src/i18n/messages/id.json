@@ -8692,6 +8692,10 @@
     "yoyQuarterTitle": "Triwulan vs tahun lalu",
     "thQuarter": "Triwulan",
     "thTotal": "Total",
-    "yearSelector": "Tahun"
+    "yearSelector": "Tahun",
+    "modeTotal": "Total",
+    "modeByType": "Per jenis pajak",
+    "stackedSingleYearHint": "Tampilan per jenis pajak hanya menampilkan {year}. Ganti tahun di atas.",
+    "stackedTitle": "Komposisi Pajak Triwulanan {year}"
   }
 }

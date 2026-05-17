@@ -8818,6 +8818,10 @@
     "yoyQuarterTitle": "분기별 전년 대비",
     "thQuarter": "분기",
     "thTotal": "합계",
-    "yearSelector": "비교 연도"
+    "yearSelector": "비교 연도",
+    "modeTotal": "합계",
+    "modeByType": "세목별",
+    "stackedSingleYearHint": "세목별 보기는 {year}년 데이터만 표시합니다. 연도 선택은 위에서 변경하세요.",
+    "stackedTitle": "{year}년 분기별 세목 구성"
   }
 }

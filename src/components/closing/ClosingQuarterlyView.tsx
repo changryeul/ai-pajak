@@ -69,10 +69,23 @@ function fmtRpCompact(n: number): string {
 const CURRENT_YEAR = new Date().getFullYear();
 const AVAILABLE_YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - i);
 
+// Canonical tax type colors so the legend stays stable across years.
+const TYPE_COLORS: Record<string, string> = {
+  PPh21: '#3b82f6',     // blue
+  PPh23: '#8b5cf6',     // violet
+  PPh25: '#f97316',     // orange
+  PPN: '#10b981',       // emerald
+  PPh_FINAL: '#f43f5e', // rose
+};
+const FALLBACK_TYPE_COLOR = '#94a3b8'; // slate-400
+
+type ChartMode = 'TOTAL' | 'BY_TYPE';
+
 export function ClosingQuarterlyView() {
   const t = useTranslations('closingTrend');
 
   const [selectedYears, setSelectedYears] = useState<number[]>([CURRENT_YEAR, CURRENT_YEAR - 1]);
+  const [mode, setMode] = useState<ChartMode>('TOTAL');
   const [data, setData] = useState<ApiResp['data'] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,6 +150,34 @@ export function ClosingQuarterlyView() {
     yearColors[y] = palette[i % palette.length];
   });
 
+  // BY_TYPE mode renders a single-year stacked bar chart. Pick the most
+  // recent year that has data, or fall back to the first selected year.
+  const stackedYear = yearsSorted[0] ?? selectedYears[0];
+
+  // Per-tax-type stacked chart rows for the chosen year.
+  const stackedRows = useMemo(() => {
+    if (!data || mode !== 'BY_TYPE' || stackedYear == null) {
+      return [] as Array<Record<string, string | number>>;
+    }
+    const rows: Array<Record<string, string | number>> = ([1, 2, 3, 4] as const).map(
+      (q) => ({ quarter: `Q${q}` }),
+    );
+    for (const r of data.quarters) {
+      if (r.year !== stackedYear) continue;
+      const row = rows[r.quarter - 1];
+      for (const [tt, amt] of Object.entries(r.byType)) {
+        row[tt] = amt;
+      }
+    }
+    return rows;
+  }, [data, mode, stackedYear]);
+
+  const stackedTypes = useMemo(() => {
+    if (!data || mode !== 'BY_TYPE') return [] as string[];
+    // Use data.taxTypes ordering (canonical first, then any custom).
+    return data.taxTypes;
+  }, [data, mode]);
+
   if (loading && !data) {
     return (
       <p className="text-sm text-slate-500">
@@ -160,27 +201,48 @@ export function ClosingQuarterlyView() {
 
   return (
     <div>
-      {/* Year selector */}
-      <div className="flex items-center flex-wrap gap-2 mt-2">
-        <span className="text-xs font-bold text-slate-700">{t('yearSelector')}:</span>
-        {AVAILABLE_YEARS.map((y) => {
-          const on = selectedYears.includes(y);
-          return (
+      {/* Year selector + mode toggle */}
+      <div className="mt-2 flex items-center flex-wrap gap-3">
+        <div className="flex items-center flex-wrap gap-2">
+          <span className="text-xs font-bold text-slate-700">{t('yearSelector')}:</span>
+          {AVAILABLE_YEARS.map((y) => {
+            const on = selectedYears.includes(y);
+            return (
+              <button
+                key={y}
+                onClick={() => toggleYear(y)}
+                className={`rounded-full px-3 py-1 text-xs font-bold transition ${
+                  on
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {y}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex gap-1 rounded-full bg-slate-100 p-1" role="tablist">
+          {([
+            ['TOTAL', t('modeTotal')],
+            ['BY_TYPE', t('modeByType')],
+          ] as const).map(([m, label]) => (
             <button
-              key={y}
-              onClick={() => toggleYear(y)}
+              key={m}
+              role="tab"
+              aria-selected={mode === m}
+              onClick={() => setMode(m)}
               className={`rounded-full px-3 py-1 text-xs font-bold transition ${
-                on
-                  ? 'bg-slate-950 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                mode === m ? 'bg-slate-950 text-white' : 'text-slate-600'
               }`}
             >
-              {y}
+              {label}
             </button>
-          );
-        })}
-        <p className="text-[11px] text-slate-500">{t('quarterSubtitle')}</p>
+          ))}
+        </div>
       </div>
+      <p className="text-[11px] text-slate-500 mt-1">{t('quarterSubtitle')}</p>
 
       {!hasAnyData ? (
         <div className="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50/50 p-6 text-center">
@@ -216,11 +278,23 @@ export function ClosingQuarterlyView() {
           <div className="mt-5">
             <div className="flex items-center gap-2 mb-2">
               <BarChart3 className="h-4 w-4 text-slate-500" />
-              <p className="text-sm font-bold text-slate-900">{t('quarterTitle')}</p>
+              <p className="text-sm font-bold text-slate-900">
+                {mode === 'BY_TYPE' && stackedYear
+                  ? t('stackedTitle', { year: stackedYear })
+                  : t('quarterTitle')}
+              </p>
             </div>
+            {mode === 'BY_TYPE' && yearsSorted.length > 1 && stackedYear && (
+              <p className="text-[11px] text-slate-500 mb-2">
+                {t('stackedSingleYearHint', { year: stackedYear })}
+              </p>
+            )}
             <div style={{ width: '100%', height: 260 }}>
               <ResponsiveContainer>
-                <BarChart data={chartRows} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
+                <BarChart
+                  data={mode === 'BY_TYPE' ? stackedRows : chartRows}
+                  margin={{ top: 8, right: 16, left: 8, bottom: 4 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#64748b" />
                   <YAxis
@@ -236,15 +310,26 @@ export function ClosingQuarterlyView() {
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  {yearsSorted.map((y) => (
-                    <Bar
-                      key={y}
-                      dataKey={String(y)}
-                      name={String(y)}
-                      fill={yearColors[y]}
-                      radius={[4, 4, 0, 0]}
-                    />
-                  ))}
+                  {mode === 'TOTAL'
+                    ? yearsSorted.map((y) => (
+                        <Bar
+                          key={y}
+                          dataKey={String(y)}
+                          name={String(y)}
+                          fill={yearColors[y]}
+                          radius={[4, 4, 0, 0]}
+                        />
+                      ))
+                    : stackedTypes.map((tt, i) => (
+                        <Bar
+                          key={tt}
+                          dataKey={tt}
+                          name={tt}
+                          stackId="taxtype"
+                          fill={TYPE_COLORS[tt] ?? FALLBACK_TYPE_COLOR}
+                          radius={i === stackedTypes.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                        />
+                      ))}
                 </BarChart>
               </ResponsiveContainer>
             </div>

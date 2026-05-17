@@ -8692,6 +8692,10 @@
     "yoyQuarterTitle": "四半期前年比",
     "thQuarter": "四半期",
     "thTotal": "合計",
-    "yearSelector": "年度"
+    "yearSelector": "年度",
+    "modeTotal": "合計",
+    "modeByType": "税目別",
+    "stackedSingleYearHint": "税目別ビューは {year} 年のみ表示。年度は上で切り替えてください。",
+    "stackedTitle": "{year} 年四半期別の税目構成"
   }
 }

@@ -117,7 +117,7 @@ async function run() {
     console.error('   ✗ quarters missing', r1.body.data);
     fail++;
   } else {
-    type Q = { year: number; quarter: number; total: number };
+    type Q = { year: number; quarter: number; total: number; byType: Record<string, number> };
     const q1Curr = (r1.body.data.quarters as Q[]).find(
       (q) => q.year === currYear && q.quarter === 1,
     );
@@ -130,9 +130,12 @@ async function run() {
     } else if (!q1Prev || q1Prev.total < 4_000_000) {
       console.error('   ✗ prev Q1 total wrong', q1Prev);
       fail++;
+    } else if (q1Curr.byType?.PPh21 !== 5_000_000) {
+      console.error('   ✗ curr Q1 byType.PPh21 wrong', q1Curr.byType);
+      fail++;
     } else {
       console.log(
-        `   ✅ Q1 curr=${q1Curr.total}, prev=${q1Prev.total}, taxTypes=${(r1.body.data.taxTypes as string[]).join(',')}`,
+        `   ✅ Q1 curr=${q1Curr.total} (PPh21=${q1Curr.byType.PPh21}), prev=${q1Prev.total}, taxTypes=${(r1.body.data.taxTypes as string[]).join(',')}`,
       );
       pass++;
     }

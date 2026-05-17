@@ -8692,6 +8692,10 @@
     "yoyQuarterTitle": "Quarter-over-quarter YoY",
     "thQuarter": "Quarter",
     "thTotal": "Total",
-    "yearSelector": "Years"
+    "yearSelector": "Years",
+    "modeTotal": "Total",
+    "modeByType": "By tax type",
+    "stackedSingleYearHint": "By-tax-type view shows {year} only. Change the year selector above.",
+    "stackedTitle": "{year} Quarterly Tax-Type Breakdown"
   }
 }

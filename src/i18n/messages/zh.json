@@ -8692,6 +8692,10 @@
     "yoyQuarterTitle": "季度同比",
     "thQuarter": "季度",
     "thTotal": "合计",
-    "yearSelector": "年度"
+    "yearSelector": "年度",
+    "modeTotal": "合计",
+    "modeByType": "按税目",
+    "stackedSingleYearHint": "按税目视图仅显示 {year} 年。请在上方切换年度。",
+    "stackedTitle": "{year} 年季度税目构成"
   }
 }
