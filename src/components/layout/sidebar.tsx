@@ -185,6 +185,7 @@ const navItems: NavSection[] = [
       { href: '/consultant-erp/supervisor/customers', icon: Users, labelKey: 'nav.supervisorCustomers' },
       { href: '/consultant-erp/supervisor/revisions', icon: ClipboardList, labelKey: 'nav.supervisorRevisions' },
       { href: '/consultant-erp/supervisor/calendar', icon: BarChart3, labelKey: 'nav.supervisorCalendar' },
+      { href: '/consultant-erp/supervisor/settings', icon: Shield, labelKey: 'nav.supervisorSettings' },
     ],
   },
   // ── 세무 컨설턴트: 월신고 (기존 구조 유지) ──
