@@ -114,7 +114,7 @@ async function getPlatformPartner() {
   // Prefer the explicit platform partner if one is flagged.
   let { data } = await admin
     .from('tax_partner')
-    .select('id, name, legal_name, npwp, email, phone, address, partner_type, is_active')
+    .select('id, name, legal_name, npwp, email, phone, address, partner_type, is_active, settings')
     .eq('is_platform_partner', true)
     .eq('is_active', true)
     .limit(1)
@@ -123,7 +123,7 @@ async function getPlatformPartner() {
     // Fallback to the first active row.
     const res = await admin
       .from('tax_partner')
-      .select('id, name, legal_name, npwp, email, phone, address, partner_type, is_active')
+      .select('id, name, legal_name, npwp, email, phone, address, partner_type, is_active, settings')
       .eq('is_active', true)
       .order('created_at', { ascending: true })
       .limit(1)
@@ -131,6 +131,31 @@ async function getPlatformPartner() {
     data = res.data;
   }
   return data;
+}
+
+function mergeApproval(stored: unknown): ApprovalSettings {
+  const s = (stored && typeof stored === 'object' ? stored : {}) as Partial<ApprovalSettings>;
+  return {
+    requireSupervisorApproval:
+      typeof s.requireSupervisorApproval === 'boolean' ? s.requireSupervisorApproval : DEFAULT_APPROVAL.requireSupervisorApproval,
+    allowRevisionAfterReject:
+      typeof s.allowRevisionAfterReject === 'boolean' ? s.allowRevisionAfterReject : DEFAULT_APPROVAL.allowRevisionAfterReject,
+    autoAdvanceToBilling:
+      typeof s.autoAdvanceToBilling === 'boolean' ? s.autoAdvanceToBilling : DEFAULT_APPROVAL.autoAdvanceToBilling,
+    slaMaxReviewDays:
+      typeof s.slaMaxReviewDays === 'number' ? s.slaMaxReviewDays : DEFAULT_APPROVAL.slaMaxReviewDays,
+    slaReminderHours:
+      typeof s.slaReminderHours === 'number' ? s.slaReminderHours : DEFAULT_APPROVAL.slaReminderHours,
+  };
+}
+
+function mergeChannels(stored: unknown): ChannelSettings {
+  const s = (stored && typeof stored === 'object' ? stored : {}) as Partial<ChannelSettings>;
+  const out: ChannelSettings = { ...DEFAULT_CHANNELS };
+  for (const key of Object.keys(DEFAULT_CHANNELS) as Array<keyof ChannelSettings>) {
+    if (typeof s[key] === 'boolean') out[key] = s[key] as boolean;
+  }
+  return out;
 }
 
 const patchSchema = z.object({
@@ -175,6 +200,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   if (!partner) {
     return NextResponse.json({ error: 'No platform partner configured' }, { status: 404 });
   }
+  const stored = (partner.settings ?? {}) as Record<string, unknown>;
   return NextResponse.json({
     success: true,
     data: {
@@ -189,9 +215,9 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
         partnerType: partner.partner_type,
       },
       rbac: RBAC_MATRIX,
-      approval: DEFAULT_APPROVAL,
+      approval: mergeApproval(stored.approval),
       security: SECURITY_DEFAULTS,
-      channels: DEFAULT_CHANNELS,
+      channels: mergeChannels(stored.channels),
     },
   });
 }
@@ -204,13 +230,15 @@ async function handlePatch(req: RequestWithSession): Promise<Response> {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
-  const { company } = parsed.data;
+  const { company, approval, channels } = parsed.data;
   const partner = await getPlatformPartner();
   if (!partner) {
     return NextResponse.json({ error: 'No platform partner configured' }, { status: 404 });
   }
+  const admin = getSupabaseAdmin();
+
+  // 1) tax_partner column updates (company fields).
   if (company) {
-    const admin = getSupabaseAdmin();
     const patch: Record<string, unknown> = {};
     if (company.name !== undefined) patch.name = company.name;
     if (company.legalName !== undefined) patch.legal_name = company.legalName;
@@ -221,14 +249,34 @@ async function handlePatch(req: RequestWithSession): Promise<Response> {
     if (Object.keys(patch).length > 0) {
       const { error } = await admin.from('tax_partner').update(patch).eq('id', partner.id);
       if (error) {
-        loggers.api.error({ err: error }, 'tax_partner update failed');
+        loggers.api.error({ err: error }, 'tax_partner column update failed');
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     }
   }
-  // Approval + channels: TODO persist to tax_partner.settings once that
-  // column lands. Current payload is accepted as a no-op so the UI can
-  // toast 'saved' without rolling back the user's edits.
+
+  // 2) tax_partner.settings JSONB updates (approval + channels).
+  if (approval || channels) {
+    const stored = (partner.settings ?? {}) as Record<string, unknown>;
+    const nextSettings: Record<string, unknown> = { ...stored };
+    if (approval) {
+      const current = (stored.approval ?? {}) as Record<string, unknown>;
+      nextSettings.approval = { ...current, ...approval };
+    }
+    if (channels) {
+      const current = (stored.channels ?? {}) as Record<string, unknown>;
+      nextSettings.channels = { ...current, ...channels };
+    }
+    const { error } = await admin
+      .from('tax_partner')
+      .update({ settings: nextSettings })
+      .eq('id', partner.id);
+    if (error) {
+      loggers.api.error({ err: error }, 'tax_partner settings JSONB update failed');
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+  }
+
   return NextResponse.json({ success: true, data: { saved: true } });
 }
 
