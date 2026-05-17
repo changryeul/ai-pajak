@@ -324,8 +324,51 @@ async function run() {
     pass++;
   }
 
-  // ── 10. /counterparty/stats ──
-  console.log('\n━━ 10. GET /counterparty/stats ━━');
+  // ── 10. /approval/[id] detail (uses an existing session if any) ──
+  console.log('\n━━ 10. GET /supervisor/approval/:sessionId ━━');
+  // Find any session by reading the board to pick a real id.
+  const board = await api('/api/consultant-erp/sessions/board', supTok);
+  const sessionId = (board.body?.data?.rows ?? []).find(
+    (r: { sessionId: string | null }) => r.sessionId,
+  )?.sessionId;
+  if (!sessionId) {
+    console.log('   ⏭️  no session in board, skip');
+  } else {
+    const rA = await api(`/api/consultant-erp/supervisor/approval/${sessionId}`, supTok);
+    if (rA.status !== 200 || !rA.body.success) {
+      console.error('   ✗ approval detail failed', rA);
+      fail++;
+    } else {
+      const d = rA.body.data;
+      const ok =
+        d?.session?.id === sessionId &&
+        Array.isArray(d?.documents) &&
+        Array.isArray(d?.calcs) &&
+        Array.isArray(d?.parseRows) &&
+        Array.isArray(d?.approvals) &&
+        d?.parseCounts;
+      if (!ok) {
+        console.error('   ✗ shape wrong', d);
+        fail++;
+      } else {
+        console.log(
+          `   ✅ docs=${d.documents.length}, calcs=${d.calcs.length}, approvals=${d.approvals.length}`,
+        );
+        pass++;
+      }
+    }
+    const rAc = await api(`/api/consultant-erp/supervisor/approval/${sessionId}`, consTok);
+    if (rAc.status !== 403) {
+      console.error('   ✗ consultant should be 403', rAc.status);
+      fail++;
+    } else {
+      console.log('   ✅ consultant 403');
+      pass++;
+    }
+  }
+
+  // ── 11. /counterparty/stats ──
+  console.log('\n━━ 11. GET /counterparty/stats ━━');
   const r4 = await api('/api/consultant-erp/counterparty/stats', supTok);
   if (r4.status !== 200 || !r4.body.success) {
     console.error('   ✗ failed', r4);
