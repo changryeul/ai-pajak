@@ -135,8 +135,46 @@ async function run() {
     pass++;
   }
 
-  // ── 4. /counterparty/stats ──
-  console.log('\n━━ 4. GET /counterparty/stats ━━');
+  // ── 4. /team-members ──
+  console.log('\n━━ 4. GET /supervisor/team-members ━━');
+  const rTM = await api('/api/consultant-erp/supervisor/team-members', supTok);
+  if (rTM.status !== 200 || !rTM.body.success || !Array.isArray(rTM.body.data?.rows)) {
+    console.error('   ✗ wrong shape', rTM);
+    fail++;
+  } else {
+    console.log(`   ✅ ${rTM.body.data.rows.length} team cards`);
+    pass++;
+    if (rTM.body.data.rows.length > 0) {
+      const first = rTM.body.data.rows[0];
+      const ok =
+        typeof first.consultantId === 'string' &&
+        typeof first.fullName === 'string' &&
+        typeof first.customerCount === 'number' &&
+        typeof first.activeTasks === 'number' &&
+        typeof first.pendingApproval === 'number' &&
+        typeof first.revisionCount === 'number';
+      if (!ok) {
+        console.error('   ✗ card shape wrong', first);
+        fail++;
+      } else {
+        console.log(
+          `   ✅ card shape ok (${first.fullName}: ${first.customerCount} clients, ${first.activeTasks} active, ${first.pendingApproval} pending)`,
+        );
+        pass++;
+      }
+    }
+  }
+  const rTMc = await api('/api/consultant-erp/supervisor/team-members', consTok);
+  if (rTMc.status !== 403) {
+    console.error('   ✗ consultant should be 403', rTMc.status);
+    fail++;
+  } else {
+    console.log('   ✅ consultant 403');
+    pass++;
+  }
+
+  // ── 5. /counterparty/stats ──
+  console.log('\n━━ 5. GET /counterparty/stats ━━');
   const r4 = await api('/api/consultant-erp/counterparty/stats', supTok);
   if (r4.status !== 200 || !r4.body.success) {
     console.error('   ✗ failed', r4);

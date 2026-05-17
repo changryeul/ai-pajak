@@ -308,6 +308,135 @@ export async function buildRevisionEventLog(opts?: { limit?: number }): Promise<
     });
 }
 
+export interface TeamMemberCard {
+  consultantId: string;
+  fullName: string;
+  taxPartnerName: string | null;
+  teamLabel: string;
+  customerCount: number;
+  activeTasks: number;
+  pendingApproval: number;
+  revisionCount: number;
+}
+
+/**
+ * Per-consultant workload strip for the supervisor dashboard (PDF p.1
+ * shows up to 14 cards: name, team label, 업무/승인대기/수정발생 counts).
+ *
+ * Aggregates across all active consultants in the platform.
+ */
+export async function buildTeamMemberCards(): Promise<TeamMemberCard[]> {
+  const admin = getSupabaseAdmin();
+
+  const { data: consultants } = await admin
+    .from('consultant')
+    .select('id, full_name, tax_partner_id, is_active')
+    .eq('is_active', true);
+  if (!consultants || consultants.length === 0) return [];
+
+  const partnerIds = Array.from(
+    new Set((consultants).map((c) => c.tax_partner_id).filter((v): v is string => !!v)),
+  );
+  let partnerNames = new Map<string, string>();
+  if (partnerIds.length > 0) {
+    const { data: ps } = await admin
+      .from('tax_partner')
+      .select('id, name')
+      .in('id', partnerIds);
+    partnerNames = new Map((ps ?? []).map((p) => [p.id, p.name as string]));
+  }
+
+  const consultantIds = consultants.map((c) => c.id);
+
+  // Customer counts per consultant.
+  const customerCountByConsultant = new Map<string, number>();
+  if (consultantIds.length > 0) {
+    const { data: assignments } = await admin
+      .from('customer_consultant')
+      .select('consultant_id, customer_id')
+      .eq('is_active', true)
+      .in('consultant_id', consultantIds);
+    const uniquePerConsultant = new Map<string, Set<string>>();
+    for (const a of assignments ?? []) {
+      if (!uniquePerConsultant.has(a.consultant_id)) {
+        uniquePerConsultant.set(a.consultant_id, new Set());
+      }
+      uniquePerConsultant.get(a.consultant_id)!.add(a.customer_id);
+    }
+    for (const [id, set] of uniquePerConsultant) {
+      customerCountByConsultant.set(id, set.size);
+    }
+  }
+
+  // Session-state counts per consultant.
+  const ACTIVE = new Set(['DRAFT', 'UPLOADING', 'PARSING', 'REVIEWING', 'PENDING_APPROVAL']);
+  const activeByConsultant = new Map<string, number>();
+  const pendingByConsultant = new Map<string, number>();
+  if (consultantIds.length > 0) {
+    const { data: sessions } = await admin
+      .from('consultant_session')
+      .select('consultant_id, status')
+      .in('consultant_id', consultantIds);
+    for (const s of sessions ?? []) {
+      if (ACTIVE.has(s.status)) {
+        activeByConsultant.set(s.consultant_id, (activeByConsultant.get(s.consultant_id) ?? 0) + 1);
+      }
+      if (s.status === 'PENDING_APPROVAL') {
+        pendingByConsultant.set(
+          s.consultant_id,
+          (pendingByConsultant.get(s.consultant_id) ?? 0) + 1,
+        );
+      }
+    }
+  }
+
+  // Revision (REJECT) counts from approval log over the last 30 days.
+  const revisionByConsultant = new Map<string, number>();
+  const recentCutoff = new Date();
+  recentCutoff.setDate(recentCutoff.getDate() - 30);
+  if (consultantIds.length > 0) {
+    const { data: approvals } = await admin
+      .from('consultant_session_approval')
+      .select('session_id, action, created_at')
+      .eq('action', 'REJECT')
+      .gte('created_at', recentCutoff.toISOString());
+    const sessionIds = (approvals ?? []).map((a) => a.session_id);
+    if (sessionIds.length > 0) {
+      const { data: sessRows } = await admin
+        .from('consultant_session')
+        .select('id, consultant_id')
+        .in('id', sessionIds);
+      const sessConsultant = new Map((sessRows ?? []).map((s) => [s.id, s.consultant_id]));
+      for (const a of approvals ?? []) {
+        const cid = sessConsultant.get(a.session_id);
+        if (cid) {
+          revisionByConsultant.set(cid, (revisionByConsultant.get(cid) ?? 0) + 1);
+        }
+      }
+    }
+  }
+
+  const cards: TeamMemberCard[] = consultants.map((c) => ({
+    consultantId: c.id,
+    fullName: c.full_name as string,
+    taxPartnerName: c.tax_partner_id ? partnerNames.get(c.tax_partner_id) ?? null : null,
+    teamLabel: c.tax_partner_id
+      ? (partnerNames.get(c.tax_partner_id) ?? 'Team')
+      : 'Independent',
+    customerCount: customerCountByConsultant.get(c.id) ?? 0,
+    activeTasks: activeByConsultant.get(c.id) ?? 0,
+    pendingApproval: pendingByConsultant.get(c.id) ?? 0,
+    revisionCount: revisionByConsultant.get(c.id) ?? 0,
+  }));
+
+  // Sort: most active first, then most customers.
+  cards.sort((a, b) => {
+    if (a.activeTasks !== b.activeTasks) return b.activeTasks - a.activeTasks;
+    return b.customerCount - a.customerCount;
+  });
+  return cards;
+}
+
 export interface CalendarEntry {
   customerId: string;
   customerName: string;

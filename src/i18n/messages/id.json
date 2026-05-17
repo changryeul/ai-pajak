@@ -8736,6 +8736,12 @@
     "daysToday": "Hari ini",
     "daysLeft": "D-{n}",
     "statusLabel": "Status",
-    "riskLabel": "Risiko"
+    "riskLabel": "Risiko",
+    "teamMembersHeading": "Anggota tim",
+    "cardCustomerCount": "Klien",
+    "cardActiveTasks": "Tugas",
+    "cardPendingApproval": "Menunggu",
+    "cardRevisionCount": "Revisi",
+    "teamMembersEmpty": "Tidak ada anggota tim aktif."
   }
 }

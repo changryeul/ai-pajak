@@ -8736,6 +8736,12 @@
     "daysToday": "Today",
     "daysLeft": "D-{n}",
     "statusLabel": "Status",
-    "riskLabel": "Risk"
+    "riskLabel": "Risk",
+    "teamMembersHeading": "Team members",
+    "cardCustomerCount": "Clients",
+    "cardActiveTasks": "Tasks",
+    "cardPendingApproval": "Pending",
+    "cardRevisionCount": "Revisions",
+    "teamMembersEmpty": "No active team members."
   }
 }

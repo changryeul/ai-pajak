@@ -202,6 +202,8 @@ function SupervisorView({
         <StatCard label={t('supervisor.totalTaxPartners')} value={stats.totalTaxPartners} />
       </div>
 
+      <TeamMembersStrip />
+
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">
@@ -307,6 +309,98 @@ function StatCard({ label, value, tone }: { label: string; value: number; tone?:
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{label}</p>
       <p className={`mt-3 text-4xl font-black ${tone ?? 'text-slate-950'}`}>{value}</p>
+    </div>
+  );
+}
+
+interface TeamMemberCard {
+  consultantId: string;
+  fullName: string;
+  taxPartnerName: string | null;
+  teamLabel: string;
+  customerCount: number;
+  activeTasks: number;
+  pendingApproval: number;
+  revisionCount: number;
+}
+
+function TeamMembersStrip() {
+  const t = useTranslations('consultantErp');
+  const [rows, setRows] = useState<TeamMemberCard[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/consultant-erp/supervisor/team-members')
+      .then((r) => r.json())
+      .then((j) => {
+        if (cancelled) return;
+        if (j.success) setRows(j.data?.rows ?? []);
+        else setRows([]);
+      })
+      .catch(() => {
+        if (!cancelled) setRows([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (rows === null) {
+    return (
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p className="text-xs text-slate-500">
+          <Loader2 className="inline h-3 w-3 mr-1 animate-spin" />
+          {t('dashboard.loading')}
+        </p>
+      </div>
+    );
+  }
+  if (rows.length === 0) {
+    return (
+      <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-5">
+        <p className="text-xs text-slate-500">{t('supervisor.teamMembersEmpty')}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-6">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500 mb-3">
+        {t('supervisor.teamMembersHeading')}
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {rows.map((m) => (
+          <div
+            key={m.consultantId}
+            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-400 transition"
+          >
+            <p className="text-sm font-black text-slate-950 truncate">{m.fullName}</p>
+            <p className="text-[10px] text-slate-500 mt-0.5 truncate">{m.teamLabel}</p>
+            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-[10px]">
+              <div>
+                <p className="font-black text-slate-950 text-sm">{m.customerCount}</p>
+                <p className="text-slate-500">{t('supervisor.cardCustomerCount')}</p>
+              </div>
+              <div>
+                <p className="font-black text-blue-700 text-sm">{m.activeTasks}</p>
+                <p className="text-slate-500">{t('supervisor.cardActiveTasks')}</p>
+              </div>
+              <div>
+                <p className="font-black text-orange-700 text-sm">{m.pendingApproval}</p>
+                <p className="text-slate-500">{t('supervisor.cardPendingApproval')}</p>
+              </div>
+              <div>
+                <p
+                  className="font-black text-sm"
+                  style={{ color: m.revisionCount > 0 ? '#D55E00' : '#475569' }}
+                >
+                  {m.revisionCount}
+                </p>
+                <p className="text-slate-500">{t('supervisor.cardRevisionCount')}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

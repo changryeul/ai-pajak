@@ -8862,6 +8862,12 @@
     "daysToday": "오늘",
     "daysLeft": "D-{n}",
     "statusLabel": "상태",
-    "riskLabel": "위험"
+    "riskLabel": "위험",
+    "teamMembersHeading": "팀원 현황",
+    "cardCustomerCount": "고객",
+    "cardActiveTasks": "업무",
+    "cardPendingApproval": "승인대기",
+    "cardRevisionCount": "수정발생",
+    "teamMembersEmpty": "활성 팀원이 없습니다."
   }
 }

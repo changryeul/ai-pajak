@@ -8736,6 +8736,12 @@
     "daysToday": "本日",
     "daysLeft": "D-{n}",
     "statusLabel": "ステータス",
-    "riskLabel": "リスク"
+    "riskLabel": "リスク",
+    "teamMembersHeading": "チームメンバー",
+    "cardCustomerCount": "顧客",
+    "cardActiveTasks": "業務",
+    "cardPendingApproval": "決裁待ち",
+    "cardRevisionCount": "修正",
+    "teamMembersEmpty": "アクティブなチームメンバーがいません。"
   }
 }

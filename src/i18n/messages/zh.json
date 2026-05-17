@@ -8736,6 +8736,12 @@
     "daysToday": "今天",
     "daysLeft": "D-{n}",
     "statusLabel": "状态",
-    "riskLabel": "风险"
+    "riskLabel": "风险",
+    "teamMembersHeading": "团队成员",
+    "cardCustomerCount": "客户",
+    "cardActiveTasks": "任务",
+    "cardPendingApproval": "待审",
+    "cardRevisionCount": "修订",
+    "teamMembersEmpty": "暂无活跃团队成员。"
   }
 }
