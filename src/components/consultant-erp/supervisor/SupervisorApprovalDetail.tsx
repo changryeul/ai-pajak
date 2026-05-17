@@ -3,8 +3,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Loader2, CheckCircle, XCircle, FileText, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { CHART_ACCENT_POSITIVE } from '@/lib/charts/palette';
 
 interface Session {
   id: string;
@@ -61,6 +71,13 @@ interface Approval {
   comment: string | null;
   created_at: string;
 }
+interface TrendPoint {
+  period: string;
+  sessionId: string | null;
+  status: string | null;
+  totalCalc: number;
+  byKind: Record<string, number>;
+}
 interface Resp {
   session: Session;
   customer: Customer | null;
@@ -71,6 +88,7 @@ interface Resp {
   parseCounts: { critical: number; warning: number; info: number };
   approvals: Approval[];
   coretax: { id_billing: string | null; ntpn: string | null; bpe_file_path: string | null } | null;
+  trend?: TrendPoint[];
 }
 
 const SEVERITY_STYLE = {
@@ -146,13 +164,22 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
     return <p className="text-sm text-rose-600">{error ?? 'no data'}</p>;
   }
 
-  const { session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals } = data;
+  const { session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals, trend } = data;
 
   const totalCalc = calcs.reduce((s, c) => s + Number(c.amount || 0), 0);
   const submissionCount = approvals.filter((a) => a.action === 'SUBMIT').length;
   const docFilledCount = documents.filter((d) => !!d.original_filename).length;
   const reviewedCount = parseRows.filter((p) => p.is_resolved).length;
   const reviewedComplete = parseRows.length === 0 || reviewedCount === parseRows.length;
+
+  // Trend chart data: drop leading zero-only periods so we don't bury the
+  // signal under months that pre-date this customer's relationship with us.
+  const trendData = (trend ?? []).map((p) => ({
+    period: p.period.slice(2), // 'YY-MM'
+    totalCalc: p.totalCalc,
+    isCurrent: p.sessionId === session.id,
+  }));
+  const trendNonZero = trendData.filter((p) => p.totalCalc > 0).length;
 
   return (
     <div className="space-y-5">
@@ -247,6 +274,57 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
           </div>
         )}
       </section>
+
+      {/* 6-month trend (MONTHLY only) */}
+      {session.filing_kind === 'MONTHLY' && trendData.length > 0 && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-black text-slate-950">{t('trendHeading')}</p>
+            <p className="text-[10px] text-slate-500">{t('trendSubtitle')}</p>
+          </div>
+          {trendNonZero === 0 ? (
+            <p className="text-xs text-slate-400">{t('trendEmpty')}</p>
+          ) : (
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                  <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="period"
+                    tick={{ fontSize: 10, fill: '#64748B' }}
+                    axisLine={{ stroke: '#CBD5E1' }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: '#64748B' }}
+                    axisLine={{ stroke: '#CBD5E1' }}
+                    tickFormatter={(v) => {
+                      const n = typeof v === 'number' ? v : 0;
+                      if (n >= 1_000_000_000) return `${Math.round(n / 100_000_000) / 10}B`;
+                      if (n >= 1_000_000) return `${Math.round(n / 100_000) / 10}M`;
+                      if (n >= 1_000) return `${Math.round(n / 100) / 10}k`;
+                      return String(n);
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(v) => fmtRp(typeof v === 'number' ? v : 0)}
+                    labelFormatter={(l) => `${t('trendTooltipPeriodPrefix')} ${l}`}
+                    contentStyle={{ fontSize: 11, borderRadius: 8 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="totalCalc"
+                    stroke={CHART_ACCENT_POSITIVE}
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: CHART_ACCENT_POSITIVE }}
+                    activeDot={{ r: 5 }}
+                    name={t('trendLineLabel')}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Findings */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5">

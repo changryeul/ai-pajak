@@ -1214,3 +1214,101 @@ export async function buildClosingCalendar(opts?: {
     }))
     .sort((a, b) => a.daysToDeadline - b.daysToDeadline);
 }
+
+export interface CustomerTrendPoint {
+  /** "YYYY-MM" — the tax_period truncated to month. */
+  period: string;
+  /** Session id for that period (latest if multiple). */
+  sessionId: string | null;
+  /** Overall session status, or null if no session exists for that period. */
+  status: string | null;
+  /** Sum of all consultant_session_calc.amount for that session. */
+  totalCalc: number;
+  /** Per-kind breakdown (PPH21_TER / WITHHOLDING / CORP_TAX_MONTHLY / PPN_NET / BANK_RECON). */
+  byKind: Record<string, number>;
+}
+
+/**
+ * Returns up to `months` MONTHLY-filing data points for the given customer,
+ * oldest → newest. Used by the supervisor approval case-detail trend chart
+ * (PDF p.3). Periods with no consultant_session yet are still emitted with
+ * totalCalc=0 + status=null so the chart shows the full window without gaps.
+ */
+export async function buildCustomerTrend(
+  customerId: string,
+  months: number = 6,
+): Promise<CustomerTrendPoint[]> {
+  const admin = getSupabaseAdmin();
+
+  // 1) Build the trailing N-month window ending at today (inclusive).
+  const periods: string[] = [];
+  const now = new Date();
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    periods.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+
+  // 2) Pull MONTHLY sessions for this customer that fall in the window.
+  //    tax_period is a DATE, so the windows are 'YYYY-MM-01'.
+  const fromDate = `${periods[0]}-01`;
+  const { data: sessions } = await admin
+    .from('consultant_session')
+    .select('id, tax_period, status, customer_id')
+    .eq('customer_id', customerId)
+    .eq('filing_kind', 'MONTHLY')
+    .gte('tax_period', fromDate)
+    .order('tax_period', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  // De-dup: only keep the latest session per period (already ordered desc).
+  const sessionByPeriod = new Map<
+    string,
+    { id: string; status: string | null }
+  >();
+  for (const s of sessions ?? []) {
+    const key = s.tax_period.slice(0, 7);
+    if (!sessionByPeriod.has(key)) {
+      sessionByPeriod.set(key, { id: s.id, status: s.status });
+    }
+  }
+
+  // 3) Pull calc rows for all those sessions in one shot.
+  const sessionIds = Array.from(sessionByPeriod.values()).map((v) => v.id);
+  let calcRows: Array<{ session_id: string; kind: string; amount: number | null }> = [];
+  if (sessionIds.length > 0) {
+    const { data } = await admin
+      .from('consultant_session_calc')
+      .select('session_id, kind, amount')
+      .in('session_id', sessionIds);
+    calcRows = (data ?? []) as typeof calcRows;
+  }
+
+  const calcsBySession = new Map<string, Array<{ kind: string; amount: number }>>();
+  for (const c of calcRows) {
+    const arr = calcsBySession.get(c.session_id) ?? [];
+    arr.push({ kind: c.kind, amount: Number(c.amount ?? 0) });
+    calcsBySession.set(c.session_id, arr);
+  }
+
+  // 4) Emit one point per period in the window.
+  return periods.map((period) => {
+    const session = sessionByPeriod.get(period) ?? null;
+    if (!session) {
+      return { period, sessionId: null, status: null, totalCalc: 0, byKind: {} };
+    }
+    const calcs = calcsBySession.get(session.id) ?? [];
+    const byKind: Record<string, number> = {};
+    let total = 0;
+    for (const c of calcs) {
+      byKind[c.kind] = (byKind[c.kind] ?? 0) + c.amount;
+      total += c.amount;
+    }
+    return {
+      period,
+      sessionId: session.id,
+      status: session.status,
+      totalCalc: total,
+      byKind,
+    };
+  });
+}

@@ -15,6 +15,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { requireConsultantOrSupervisor } from '@/middleware/requireConsultantOrSupervisor';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { buildCustomerTrend } from '@/lib/consultant-erp/supervisor-views';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 
 async function handleGet(
@@ -100,6 +101,12 @@ async function handleGet(
     else if (r.severity === 'INFO') parseCounts.info++;
   }
 
+  // 6개월 트렌드 (PDF p.3) — only meaningful for MONTHLY filings.
+  const trend =
+    session.filing_kind === 'MONTHLY' && session.customer_id
+      ? await buildCustomerTrend(session.customer_id, 6)
+      : [];
+
   return NextResponse.json({
     success: true,
     data: {
@@ -112,6 +119,7 @@ async function handleGet(
       parseCounts,
       approvals: approvalsRes.data ?? [],
       coretax: coretaxRes.data ?? null,
+      trend,
     },
   });
 }
