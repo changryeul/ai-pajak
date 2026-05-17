@@ -122,3 +122,59 @@ test.describe('Closing trend — UI panel', () => {
     expect(hasTitle || hasEmpty).toBe(true);
   });
 });
+
+test.describe('Closing trend — quarterly stacked-by-tax-type mode', () => {
+  test('mode toggle exposes [합계 / 세목별] tabs inside the Quarterly view', async ({ page }) => {
+    await loginAs(page, 'COMPANY_CUSTOMER');
+    await page.goto(`${BASE_URL}/${LOCALE}/tax/annual`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    await page.getByRole('tab', { name: '분기' }).click();
+    await page.waitForTimeout(800);
+    // closingTrend.modeTotal / modeByType (ko: 합계 / 세목별)
+    await expect(page.getByRole('tab', { name: '합계' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('tab', { name: '세목별' })).toBeVisible();
+  });
+
+  test('default mode is 합계 (aria-selected=true)', async ({ page }) => {
+    await loginAs(page, 'COMPANY_CUSTOMER');
+    await page.goto(`${BASE_URL}/${LOCALE}/tax/annual`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    await page.getByRole('tab', { name: '분기' }).click();
+    await page.waitForTimeout(800);
+    const totalTab = page.getByRole('tab', { name: '합계' });
+    const byTypeTab = page.getByRole('tab', { name: '세목별' });
+    await expect(totalTab).toHaveAttribute('aria-selected', 'true');
+    await expect(byTypeTab).toHaveAttribute('aria-selected', 'false');
+  });
+
+  test('clicking 세목별 flips aria-selected + reveals stacked-mode UI', async ({ page }) => {
+    await loginAs(page, 'COMPANY_CUSTOMER');
+    await page.goto(`${BASE_URL}/${LOCALE}/tax/annual`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    await page.getByRole('tab', { name: '분기' }).click();
+    await page.waitForTimeout(800);
+
+    const byTypeTab = page.getByRole('tab', { name: '세목별' });
+    await byTypeTab.click();
+    await page.waitForTimeout(500);
+
+    await expect(byTypeTab).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tab', { name: '합계' })).toHaveAttribute(
+      'aria-selected',
+      'false',
+    );
+
+    // closingTrend.stackedTitle includes {year} so we match the leading
+    // "분기별 세목 구성" suffix that is locale-stable.
+    const html = await page.content();
+    const hasStackedTitle = /분기별 세목 구성/.test(html);
+    const hasEmpty = html.includes('월별 신고 데이터가 아직 없습니다');
+    expect(hasStackedTitle || hasEmpty).toBe(true);
+  });
+});
