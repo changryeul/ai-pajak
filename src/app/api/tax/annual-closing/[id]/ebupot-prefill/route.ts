@@ -86,9 +86,19 @@ async function handle(req: RequestWithSession, sessionId: string): Promise<Respo
     });
   }
 
-  const mapped = mapClosingOcrToEmployees(
-    payrollDoc.ocr_extracted as Partial<ClosingClassificationResult>,
-  );
+  // Confidence may live either inside ocr_extracted (newer runs) or in the
+  // ocr_confidence column (older runs). Merge both so the helper sees a value.
+  const extracted = (payrollDoc.ocr_extracted as Partial<ClosingClassificationResult>) ?? {};
+  const merged: Partial<ClosingClassificationResult> = {
+    ...extracted,
+    confidence:
+      typeof extracted.confidence === 'number'
+        ? extracted.confidence
+        : typeof payrollDoc.ocr_confidence === 'number'
+          ? payrollDoc.ocr_confidence
+          : undefined,
+  };
+  const mapped = mapClosingOcrToEmployees(merged);
 
   return NextResponse.json({
     success: true,

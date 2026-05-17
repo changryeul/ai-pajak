@@ -89,6 +89,7 @@ async function handle(req: RequestWithSession, sessionId: string, docId: string)
         ocr_confidence: result.confidence,
         ocr_extracted: {
           category: result.category,
+          confidence: result.confidence,
           totalAmount: result.totalAmount,
           rowCount: result.rowCount,
           lineItems: result.lineItems,

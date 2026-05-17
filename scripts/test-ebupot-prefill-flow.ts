@@ -172,6 +172,9 @@ async function run() {
   } else if (r1.body.data.employees[0].name !== 'Andi Saputra' || r1.body.data.employees[0].ptkp !== 'K1') {
     console.error('   ✗ first employee field mismatch', r1.body.data.employees[0]);
     fail++;
+  } else if (typeof r1.body.data.ocrConfidence !== 'number') {
+    console.error('   ✗ expected ocrConfidence to be a number, got', r1.body.data.ocrConfidence);
+    fail++;
   } else {
     console.log(
       `   ✅ source=payrollRows, employees=3, confidence=${r1.body.data.ocrConfidence}, lowConfidence=${r1.body.data.lowConfidence}`,
