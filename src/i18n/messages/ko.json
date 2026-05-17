@@ -8758,6 +8758,29 @@
         "permit": "사업허가",
         "tax": "세무등록"
       }
+    },
+    "supervisor": {
+      "boardHeading": "전체 사무소 결재 큐",
+      "pendingApproval": "결재 대기",
+      "approvedThisMonth": "이번 달 승인",
+      "rejectedThisMonth": "이번 달 반려",
+      "completedThisMonth": "이번 달 완료",
+      "activeSessions": "진행 세션",
+      "totalTaxPartners": "관리 사무소 수",
+      "filterAll": "전체",
+      "filterPendingApproval": "결재 대기만",
+      "thTaxPartner": "사무소",
+      "thCustomer": "고객",
+      "thConsultant": "담당자",
+      "thPeriod": "대상기간",
+      "thStatus": "상태",
+      "thUpdated": "최근 업데이트",
+      "thAction": "액션",
+      "openSession": "세션 열기",
+      "empty": "해당 조건의 세션이 없습니다.",
+      "pageEyebrow": "Consultant ERP · Supervisor",
+      "pageTitle": "결재 큐 / 전체 진행 현황",
+      "pageDesc": "전체 tax_partner의 신고 세션을 한 화면에서 검토하고 결재 대기 큐를 처리합니다."
     }
   }
 }

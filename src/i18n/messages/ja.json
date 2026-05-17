@@ -8632,6 +8632,29 @@
         "permit": "事業許可",
         "tax": "税務登録"
       }
+    },
+    "supervisor": {
+      "boardHeading": "全事務所決裁キュー",
+      "pendingApproval": "決裁待ち",
+      "approvedThisMonth": "今月の承認",
+      "rejectedThisMonth": "今月の却下",
+      "completedThisMonth": "今月の完了",
+      "activeSessions": "進行中セッション",
+      "totalTaxPartners": "管理事務所数",
+      "filterAll": "すべて",
+      "filterPendingApproval": "決裁待ちのみ",
+      "thTaxPartner": "事務所",
+      "thCustomer": "顧客",
+      "thConsultant": "担当者",
+      "thPeriod": "対象期間",
+      "thStatus": "ステータス",
+      "thUpdated": "最終更新",
+      "thAction": "アクション",
+      "openSession": "セッションを開く",
+      "empty": "該当条件のセッションはありません。",
+      "pageEyebrow": "Consultant ERP · Supervisor",
+      "pageTitle": "決裁キュー / 全体進行状況",
+      "pageDesc": "すべての tax_partner の申告セッションを1画面で確認し、決裁待ちキューを処理します。"
     }
   }
 }

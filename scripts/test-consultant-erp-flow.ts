@@ -234,6 +234,64 @@ async function run() {
     pass++;
   }
 
+  // ── 8. Supervisor board (platform-wide view) ──
+  console.log('\n━━ 8. supervisor board ━━');
+  const supBoardAll = await api('GET', '/api/consultant-erp/sessions/board', supervisorTok);
+  if (
+    supBoardAll.status !== 200 ||
+    supBoardAll.body.data?.mode !== 'SUPERVISOR' ||
+    !Array.isArray(supBoardAll.body.data?.rows)
+  ) {
+    console.error('   ✗ supervisor board (ALL) failed', supBoardAll.body);
+    fail++;
+  } else {
+    console.log(
+      `   ✅ SUPERVISOR mode, ${supBoardAll.body.data.rows.length} rows, ` +
+        `pendingApproval=${supBoardAll.body.data.stats.pendingApproval}, ` +
+        `taxPartners=${supBoardAll.body.data.stats.totalTaxPartners}`,
+    );
+    pass++;
+  }
+
+  const supBoardPending = await api(
+    'GET',
+    '/api/consultant-erp/sessions/board?status=PENDING_APPROVAL',
+    supervisorTok,
+  );
+  if (
+    supBoardPending.status !== 200 ||
+    supBoardPending.body.data?.mode !== 'SUPERVISOR'
+  ) {
+    console.error('   ✗ supervisor board (PENDING_APPROVAL filter) failed', supBoardPending.body);
+    fail++;
+  } else {
+    const allPending = (supBoardPending.body.data.rows as Array<{ status: string }>).every(
+      (r) => r.status === 'PENDING_APPROVAL',
+    );
+    if (!allPending) {
+      console.error(
+        '   ✗ supervisor board PENDING filter returned non-PENDING rows',
+        supBoardPending.body.data.rows.map((r: { status: string }) => r.status),
+      );
+      fail++;
+    } else {
+      console.log(
+        `   ✅ filter=PENDING_APPROVAL returned ${supBoardPending.body.data.rows.length} rows, all PENDING`,
+      );
+      pass++;
+    }
+  }
+
+  // Consultant should still get CONSULTANT mode
+  const consBoard = await api('GET', '/api/consultant-erp/sessions/board', consultantTok);
+  if (consBoard.status !== 200 || consBoard.body.data?.mode !== 'CONSULTANT') {
+    console.error('   ✗ consultant board mode mismatch', consBoard.body);
+    fail++;
+  } else {
+    console.log(`   ✅ consultant gets CONSULTANT mode, ${consBoard.body.data.rows.length} rows`);
+    pass++;
+  }
+
   // ── Cleanup: delete the test session + counterparty so re-runs do not collide ──
   console.log('\n🧹 cleanup');
   const c = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!);

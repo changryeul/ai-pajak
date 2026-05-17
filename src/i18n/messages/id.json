@@ -8632,6 +8632,29 @@
         "permit": "Izin Usaha",
         "tax": "Registrasi Pajak"
       }
+    },
+    "supervisor": {
+      "boardHeading": "Antrian Persetujuan Platform",
+      "pendingApproval": "Menunggu persetujuan",
+      "approvedThisMonth": "Disetujui bulan ini",
+      "rejectedThisMonth": "Ditolak bulan ini",
+      "completedThisMonth": "Selesai bulan ini",
+      "activeSessions": "Sesi aktif",
+      "totalTaxPartners": "Mitra pajak dikelola",
+      "filterAll": "Semua",
+      "filterPendingApproval": "Hanya yang menunggu",
+      "thTaxPartner": "Kantor",
+      "thCustomer": "Klien",
+      "thConsultant": "Penanggung jawab",
+      "thPeriod": "Periode",
+      "thStatus": "Status",
+      "thUpdated": "Diperbarui",
+      "thAction": "Tindakan",
+      "openSession": "Buka sesi",
+      "empty": "Tidak ada sesi yang cocok dengan filter saat ini.",
+      "pageEyebrow": "Consultant ERP · Supervisor",
+      "pageTitle": "Antrian Persetujuan / Ringkasan Platform",
+      "pageDesc": "Tinjau sesi pelaporan di seluruh mitra pajak dan proses antrian persetujuan dari satu layar."
     }
   }
 }

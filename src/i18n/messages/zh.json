@@ -8632,6 +8632,29 @@
         "permit": "营业许可",
         "tax": "税务登记"
       }
+    },
+    "supervisor": {
+      "boardHeading": "全平台审批队列",
+      "pendingApproval": "待审批",
+      "approvedThisMonth": "本月已批准",
+      "rejectedThisMonth": "本月已驳回",
+      "completedThisMonth": "本月已完成",
+      "activeSessions": "进行中会话",
+      "totalTaxPartners": "管理事务所数",
+      "filterAll": "全部",
+      "filterPendingApproval": "仅待审批",
+      "thTaxPartner": "事务所",
+      "thCustomer": "客户",
+      "thConsultant": "负责人",
+      "thPeriod": "所属期间",
+      "thStatus": "状态",
+      "thUpdated": "更新时间",
+      "thAction": "操作",
+      "openSession": "打开会话",
+      "empty": "没有符合当前筛选条件的会话。",
+      "pageEyebrow": "Consultant ERP · Supervisor",
+      "pageTitle": "审批队列 / 全平台进度",
+      "pageDesc": "在一个屏幕上审查所有事务所的申报会话并处理审批队列。"
     }
   }
 }

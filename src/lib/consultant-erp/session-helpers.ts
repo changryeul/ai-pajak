@@ -80,6 +80,7 @@ export type BoardCustomer = {
   npwp: string | null;
   consultantName: string | null;
   supervisorName: string | null;
+  taxPartnerName: string | null;
   taxPeriod: string | null;
   filingKind: 'MONTHLY' | 'ANNUAL' | null;
   status: string | null;
@@ -87,6 +88,7 @@ export type BoardCustomer = {
   uploadCount: number;
   parsedCount: number;
   reviewedCount: number;
+  updatedAt: string | null;
 };
 
 export type BoardStats = {
@@ -95,6 +97,19 @@ export type BoardStats = {
   uploadedSessions: number;
   reviewedSessions: number;
 };
+
+export type SupervisorStats = {
+  pendingApproval: number;
+  approvedThisMonth: number;
+  rejectedThisMonth: number;
+  completedThisMonth: number;
+  activeSessions: number;
+  totalTaxPartners: number;
+};
+
+export type BoardPayload =
+  | { mode: 'CONSULTANT'; stats: BoardStats; rows: BoardCustomer[] }
+  | { mode: 'SUPERVISOR'; stats: SupervisorStats; rows: BoardCustomer[] };
 
 export async function buildBoardForConsultant(
   ctx: ConsultantContext,
@@ -214,6 +229,7 @@ export async function buildBoardForConsultant(
       npwp: c.npwp,
       consultantName: s?.consultant_id ? consultantNames.get(s.consultant_id) ?? null : null,
       supervisorName: s?.supervisor_id ? consultantNames.get(s.supervisor_id) ?? null : null,
+      taxPartnerName: null,
       taxPeriod: s?.tax_period ?? null,
       filingKind: (s?.filing_kind as 'MONTHLY' | 'ANNUAL' | undefined) ?? null,
       status: s?.status ?? null,
@@ -221,6 +237,7 @@ export async function buildBoardForConsultant(
       uploadCount: counts.up,
       parsedCount: counts.parsed,
       reviewedCount: counts.reviewed,
+      updatedAt: s?.updated_at ?? null,
     };
   });
 
@@ -239,4 +256,156 @@ export async function buildBoardForConsultant(
   };
 
   return { stats, rows };
+}
+
+/**
+ * Supervisor view — platform-wide, across all tax_partners.
+ *
+ * Returns the most recent N sessions (default 100), optionally filtered by
+ * status, plus an aggregate counter strip so the supervisor can see at a
+ * glance how many filings are waiting for approval and the month's throughput.
+ */
+export async function buildBoardForSupervisor(opts?: {
+  statusFilter?: string;
+  limit?: number;
+}): Promise<{ stats: SupervisorStats; rows: BoardCustomer[] }> {
+  const admin = getSupabaseAdmin();
+  const limit = opts?.limit ?? 100;
+
+  let q = admin
+    .from('consultant_session')
+    .select(
+      'id, customer_id, consultant_id, supervisor_id, tax_partner_id, filing_kind, tax_period, status, current_step, updated_at',
+    )
+    .order('updated_at', { ascending: false })
+    .limit(limit);
+  if (opts?.statusFilter) q = q.eq('status', opts.statusFilter);
+  const { data: sessions } = await q;
+
+  const stats = await computeSupervisorStats();
+
+  if (!sessions || sessions.length === 0) {
+    return { stats, rows: [] };
+  }
+
+  // Customer profiles
+  const customerIds = Array.from(new Set(sessions.map((s) => s.customer_id)));
+  const { data: customers } = await admin
+    .from('customer')
+    .select('id, customer_type, npwp, full_name, company_name')
+    .in('id', customerIds);
+  const customerById = new Map((customers ?? []).map((c) => [c.id, c]));
+
+  // Consultant + supervisor names
+  const consultantIds = new Set<string>();
+  const partnerIds = new Set<string>();
+  for (const s of sessions) {
+    if (s.consultant_id) consultantIds.add(s.consultant_id);
+    if (s.supervisor_id) consultantIds.add(s.supervisor_id);
+    if (s.tax_partner_id) partnerIds.add(s.tax_partner_id);
+  }
+  let consultantNames: Map<string, string> = new Map();
+  if (consultantIds.size > 0) {
+    const { data: cs } = await admin
+      .from('consultant')
+      .select('id, full_name')
+      .in('id', Array.from(consultantIds));
+    consultantNames = new Map((cs ?? []).map((c) => [c.id, c.full_name as string]));
+  }
+  let partnerNames: Map<string, string> = new Map();
+  if (partnerIds.size > 0) {
+    const { data: ps } = await admin
+      .from('tax_partner')
+      .select('id, name')
+      .in('id', Array.from(partnerIds));
+    partnerNames = new Map((ps ?? []).map((p) => [p.id, p.name as string]));
+  }
+
+  // Doc counts per session
+  const sessionIds = sessions.map((s) => s.id);
+  const docCountBySession = new Map<string, { up: number; parsed: number; reviewed: number }>();
+  if (sessionIds.length > 0) {
+    const { data: docs } = await admin
+      .from('consultant_session_document')
+      .select('session_id, parse_status')
+      .in('session_id', sessionIds);
+    for (const d of docs ?? []) {
+      const e = docCountBySession.get(d.session_id) ?? { up: 0, parsed: 0, reviewed: 0 };
+      e.up += 1;
+      if (d.parse_status === 'PARSED') e.parsed += 1;
+      docCountBySession.set(d.session_id, e);
+    }
+  }
+
+  const rows: BoardCustomer[] = sessions.map((s) => {
+    const c = customerById.get(s.customer_id);
+    const counts = docCountBySession.get(s.id) ?? { up: 0, parsed: 0, reviewed: 0 };
+    return {
+      sessionId: s.id,
+      customerId: s.customer_id,
+      customerName: c ? ((c.company_name || c.full_name) as string) : '(unknown)',
+      customerType: (c?.customer_type as 'INDIVIDUAL' | 'COMPANY') ?? 'COMPANY',
+      npwp: c?.npwp ?? null,
+      consultantName: s.consultant_id ? consultantNames.get(s.consultant_id) ?? null : null,
+      supervisorName: s.supervisor_id ? consultantNames.get(s.supervisor_id) ?? null : null,
+      taxPartnerName: s.tax_partner_id ? partnerNames.get(s.tax_partner_id) ?? null : null,
+      taxPeriod: s.tax_period,
+      filingKind: s.filing_kind as 'MONTHLY' | 'ANNUAL',
+      status: s.status,
+      currentStep: s.current_step,
+      uploadCount: counts.up,
+      parsedCount: counts.parsed,
+      reviewedCount: counts.reviewed,
+      updatedAt: s.updated_at,
+    };
+  });
+
+  return { stats, rows };
+}
+
+async function computeSupervisorStats(): Promise<SupervisorStats> {
+  const admin = getSupabaseAdmin();
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const monthStartIso = monthStart.toISOString();
+
+  const [pending, approved, rejected, completed, active, partners] = await Promise.all([
+    admin
+      .from('consultant_session')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'PENDING_APPROVAL'),
+    admin
+      .from('consultant_session_approval')
+      .select('id', { count: 'exact', head: true })
+      .eq('action', 'APPROVE')
+      .gte('created_at', monthStartIso),
+    admin
+      .from('consultant_session_approval')
+      .select('id', { count: 'exact', head: true })
+      .eq('action', 'REJECT')
+      .gte('created_at', monthStartIso),
+    admin
+      .from('consultant_session')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'COMPLETED')
+      .gte('updated_at', monthStartIso),
+    admin
+      .from('consultant_session')
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['DRAFT', 'UPLOADING', 'PARSING', 'REVIEWING', 'PENDING_APPROVAL']),
+    admin
+      .from('tax_partner')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_active', true),
+  ]);
+
+  return {
+    pendingApproval: pending.count ?? 0,
+    approvedThisMonth: approved.count ?? 0,
+    rejectedThisMonth: rejected.count ?? 0,
+    completedThisMonth: completed.count ?? 0,
+    activeSessions: active.count ?? 0,
+    totalTaxPartners: partners.count ?? 0,
+  };
 }

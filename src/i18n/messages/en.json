@@ -8632,6 +8632,29 @@
         "permit": "Business Permits",
         "tax": "Tax Registration"
       }
+    },
+    "supervisor": {
+      "boardHeading": "Platform Approval Queue",
+      "pendingApproval": "Pending approval",
+      "approvedThisMonth": "Approved this month",
+      "rejectedThisMonth": "Rejected this month",
+      "completedThisMonth": "Completed this month",
+      "activeSessions": "Active sessions",
+      "totalTaxPartners": "Tax partners managed",
+      "filterAll": "All",
+      "filterPendingApproval": "Pending only",
+      "thTaxPartner": "Office",
+      "thCustomer": "Client",
+      "thConsultant": "Assignee",
+      "thPeriod": "Period",
+      "thStatus": "Status",
+      "thUpdated": "Updated",
+      "thAction": "Action",
+      "openSession": "Open session",
+      "empty": "No sessions match the current filter.",
+      "pageEyebrow": "Consultant ERP · Supervisor",
+      "pageTitle": "Approval Queue / Platform Overview",
+      "pageDesc": "Review filing sessions across all tax partners and process the approval queue from one screen."
     }
   }
 }
