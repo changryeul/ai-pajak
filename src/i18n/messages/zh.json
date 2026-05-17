@@ -257,7 +257,8 @@
     "supervisorSettings": "设置",
     "supervisorCoretax": "Coretax",
     "supervisorTeam": "团队管理",
-    "supervisorQuality": "质量"
+    "supervisorQuality": "质量",
+    "supervisorLegality": "法律文档"
   },
   "dashboard": {
     "title": "仪表板",
@@ -8897,6 +8898,34 @@
     "qualityFieldSource": "来源",
     "qualityFieldTrust": "Trust",
     "qualityFieldEmpty": "尚无来源记录。",
-    "qualityEmpty": "没有需审查的交易方。"
+    "qualityEmpty": "没有需审查的交易方。",
+    "pageTitleLegalitySup": "法律文档状态",
+    "pageDescLegalitySup": "搜索客户后点击行,持有的资料明细就地展开。",
+    "legSearch": "客户检索",
+    "legSearchPlaceholder": "公司名/NPWP/负责人",
+    "legSearchResultCount": "搜索结果 ({n}/{total})",
+    "legCustomerListHeading": "客户列表/内联详情",
+    "legCustomerListHint": "点击名称即可在下方展开资料明细。",
+    "legSummaryRequired": "必填",
+    "legSummaryMissing": "缺失",
+    "legSummaryFiles": "文件",
+    "legSummaryCoretax": "Coretax",
+    "legSummaryExpiry": "到期",
+    "legAiHint": "AI 推荐:必填资料 {n} 件缺失,请优先补足。",
+    "legCategoryGroupAkta": "章程/法人设立",
+    "legCategoryGroupPermit": "营业许可",
+    "legCategoryGroupTax": "税务登记",
+    "legNoDocs": "尚无登记资料。",
+    "legDocPreviewHeading": "文档内容",
+    "legGroup": "组",
+    "legRequiredYes": "必填",
+    "legRequiredNo": "可选",
+    "legVersion": "版本",
+    "legUpdated": "更新",
+    "legOwner": "所有者",
+    "legExpiry": "到期",
+    "legNote": "备注",
+    "legExpiringHeading": "90 天内到期资料",
+    "legExpiringEmpty": "无即将到期。"
   }
 }

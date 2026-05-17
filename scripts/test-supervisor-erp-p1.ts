@@ -293,8 +293,39 @@ async function run() {
     pass++;
   }
 
-  // ── 9. /counterparty/stats ──
-  console.log('\n━━ 9. GET /counterparty/stats ━━');
+  // ── 9. /legality ──
+  console.log('\n━━ 9. GET /supervisor/legality ━━');
+  const rL = await api('/api/consultant-erp/supervisor/legality', supTok);
+  if (rL.status !== 200 || !rL.body.success) {
+    console.error('   ✗ failed', rL);
+    fail++;
+  } else {
+    const d = rL.body.data;
+    const ok =
+      Array.isArray(d?.customers) &&
+      typeof d?.documents === 'object' &&
+      Array.isArray(d?.expiringSoon);
+    if (!ok) {
+      console.error('   ✗ shape wrong', d);
+      fail++;
+    } else {
+      console.log(
+        `   ✅ customers=${d.customers.length}, expiringSoon=${d.expiringSoon.length}`,
+      );
+      pass++;
+    }
+  }
+  const rLc = await api('/api/consultant-erp/supervisor/legality', consTok);
+  if (rLc.status !== 403) {
+    console.error('   ✗ consultant should be 403', rLc.status);
+    fail++;
+  } else {
+    console.log('   ✅ consultant 403');
+    pass++;
+  }
+
+  // ── 10. /counterparty/stats ──
+  console.log('\n━━ 10. GET /counterparty/stats ━━');
   const r4 = await api('/api/consultant-erp/counterparty/stats', supTok);
   if (r4.status !== 200 || !r4.body.success) {
     console.error('   ✗ failed', r4);

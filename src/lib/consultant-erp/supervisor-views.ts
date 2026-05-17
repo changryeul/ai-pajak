@@ -308,6 +308,182 @@ export async function buildRevisionEventLog(opts?: { limit?: number }): Promise<
     });
 }
 
+export interface LegalityCustomerSummary {
+  customerId: string;
+  customerName: string;
+  npwp: string | null;
+  consultantName: string | null;
+  requiredFilled: number;
+  requiredTotal: number;
+  missingCount: number;
+  fileCount: number;
+  hasCoretax: boolean;
+  expiringCount: number;
+  completionPct: number;
+}
+
+export interface LegalityDoc {
+  id: string;
+  category: string;
+  category_group: '정관/법인설립' | '사업허가' | '세무등록';
+  isRequired: boolean;
+  storagePath: string | null;
+  originalFilename: string | null;
+  validUntil: string | null;
+  note: string | null;
+  uploadedAt: string;
+  version: number;
+}
+
+const REQUIRED_CATEGORIES = [
+  'AKTA_PENDIRIAN',
+  'AKTA_PERUBAHAN',
+  'NIB_OSS',
+  'COMPANY_NPWP',
+];
+const CORETAX_CATEGORY = 'CORETAX_ACCESS';
+const CATEGORY_GROUP: Record<string, '정관/법인설립' | '사업허가' | '세무등록'> = {
+  AKTA_PENDIRIAN: '정관/법인설립',
+  AKTA_PERUBAHAN: '정관/법인설립',
+  NIB_OSS: '사업허가',
+  LICENSE_SBU_SKK: '사업허가',
+  COMPANY_NPWP: '세무등록',
+  CORETAX_ACCESS: '세무등록',
+};
+
+/**
+ * Supervisor legality overview (PDF p.11-15 of 팀장용 ERP).
+ *
+ * Returns one summary row per company customer plus the latest version
+ * of each document so the page can render the master-detail layout
+ * (left = customer + doc list, right = inline preview metadata).
+ */
+export async function buildLegalityOverview(): Promise<{
+  customers: LegalityCustomerSummary[];
+  documents: Record<string, LegalityDoc[]>;
+  expiringSoon: Array<{ customerId: string; customerName: string; category: string; validUntil: string }>;
+}> {
+  const admin = getSupabaseAdmin();
+
+  const { data: customers } = await admin
+    .from('customer')
+    .select('id, customer_type, full_name, company_name, npwp')
+    .eq('customer_type', 'COMPANY');
+  if (!customers) return { customers: [], documents: {}, expiringSoon: [] };
+
+  const customerIds = customers.map((c) => c.id);
+  if (customerIds.length === 0) return { customers: [], documents: {}, expiringSoon: [] };
+
+  // Consultant assignments
+  const { data: assignments } = await admin
+    .from('customer_consultant')
+    .select('customer_id, consultant_id, is_active')
+    .eq('is_active', true)
+    .in('customer_id', customerIds);
+  const consultantByCustomer = new Map<string, string>();
+  for (const a of assignments ?? []) {
+    if (!consultantByCustomer.has(a.customer_id)) consultantByCustomer.set(a.customer_id, a.consultant_id);
+  }
+  const consultantIds = Array.from(new Set(Array.from(consultantByCustomer.values())));
+  let consultantNames = new Map<string, string>();
+  if (consultantIds.length > 0) {
+    const { data: cs } = await admin
+      .from('consultant')
+      .select('id, full_name')
+      .in('id', consultantIds);
+    consultantNames = new Map((cs ?? []).map((c) => [c.id, c.full_name as string]));
+  }
+
+  // Legality documents (latest version per customer+category)
+  const { data: docs } = await admin
+    .from('legality_document')
+    .select('id, customer_id, category, is_required, storage_path, original_filename, valid_until, note, uploaded_at, version')
+    .in('customer_id', customerIds)
+    .order('version', { ascending: false });
+  const latestByCustCat = new Map<string, typeof docs extends (infer R)[] | null ? R : never>();
+  for (const d of docs ?? []) {
+    const key = `${d.customer_id}:${d.category}`;
+    if (!latestByCustCat.has(key)) latestByCustCat.set(key, d);
+  }
+
+  const docsByCustomer: Record<string, LegalityDoc[]> = {};
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiryWindow = new Date(today);
+  expiryWindow.setDate(today.getDate() + 90);
+  const expiringSoon: Array<{ customerId: string; customerName: string; category: string; validUntil: string }> = [];
+
+  // Build documents per customer + count metrics
+  const summaries: LegalityCustomerSummary[] = customers.map((c) => {
+    const ownDocs = (docs ?? []).filter((d) => d.customer_id === c.id);
+    const latestSet = new Map<string, typeof ownDocs[0]>();
+    for (const d of ownDocs) {
+      if (!latestSet.has(d.category)) latestSet.set(d.category, d);
+    }
+    const mappedDocs: LegalityDoc[] = Array.from(latestSet.values()).map((d) => ({
+      id: d.id,
+      category: d.category,
+      category_group: CATEGORY_GROUP[d.category] ?? '세무등록',
+      isRequired: !!d.is_required,
+      storagePath: d.storage_path,
+      originalFilename: d.original_filename,
+      validUntil: d.valid_until,
+      note: d.note,
+      uploadedAt: d.uploaded_at,
+      version: d.version,
+    }));
+    docsByCustomer[c.id] = mappedDocs;
+
+    const filledCategories = new Set(mappedDocs.filter((d) => !!d.storagePath).map((d) => d.category));
+    const requiredFilled = REQUIRED_CATEGORIES.filter((cat) => filledCategories.has(cat)).length;
+    const requiredTotal = REQUIRED_CATEGORIES.length;
+    const missingCount = requiredTotal - requiredFilled;
+    const fileCount = mappedDocs.filter((d) => !!d.storagePath).length;
+    const hasCoretax = filledCategories.has(CORETAX_CATEGORY);
+
+    let expiringCount = 0;
+    for (const d of mappedDocs) {
+      if (!d.validUntil) continue;
+      const exp = new Date(d.validUntil);
+      exp.setHours(0, 0, 0, 0);
+      if (exp <= expiryWindow) {
+        expiringCount++;
+        expiringSoon.push({
+          customerId: c.id,
+          customerName: (c.company_name || c.full_name) as string,
+          category: d.category,
+          validUntil: d.validUntil,
+        });
+      }
+    }
+
+    return {
+      customerId: c.id,
+      customerName: (c.company_name || c.full_name) as string,
+      npwp: c.npwp,
+      consultantName: consultantByCustomer.has(c.id)
+        ? consultantNames.get(consultantByCustomer.get(c.id)!) ?? null
+        : null,
+      requiredFilled,
+      requiredTotal,
+      missingCount,
+      fileCount,
+      hasCoretax,
+      expiringCount,
+      completionPct: Math.round((requiredFilled / Math.max(1, requiredTotal)) * 100),
+    };
+  });
+
+  // Sort: lowest completion first (most urgent on top), then by name.
+  summaries.sort((a, b) => {
+    if (a.completionPct !== b.completionPct) return a.completionPct - b.completionPct;
+    return a.customerName.localeCompare(b.customerName);
+  });
+  expiringSoon.sort((a, b) => a.validUntil.localeCompare(b.validUntil));
+
+  return { customers: summaries, documents: docsByCustomer, expiringSoon };
+}
+
 export interface QualityHealthSummary {
   totalRegistered: number;
   avgTrust: number;

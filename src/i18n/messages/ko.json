@@ -257,7 +257,8 @@
     "supervisorSettings": "설정",
     "supervisorCoretax": "Coretax 처리 대기",
     "supervisorTeam": "팀원 관리",
-    "supervisorQuality": "품질 모니터링"
+    "supervisorQuality": "품질 모니터링",
+    "supervisorLegality": "리갈리티 자료"
   },
   "dashboard": {
     "title": "대시보드",
@@ -9023,6 +9024,34 @@
     "qualityFieldSource": "Source",
     "qualityFieldTrust": "Trust",
     "qualityFieldEmpty": "아직 출처 기록이 없습니다.",
-    "qualityEmpty": "검토 대상 거래처가 없습니다."
+    "qualityEmpty": "검토 대상 거래처가 없습니다.",
+    "pageTitleLegalitySup": "리갈리티 자료 현황",
+    "pageDescLegalitySup": "고객사를 검색한 뒤 고객명을 클릭하면 해당 고객 카드 바로 아래에서 보유자료 상세가 펼쳐집니다.",
+    "legSearch": "고객사 검색",
+    "legSearchPlaceholder": "회사명, NPWP, 담당자 검색",
+    "legSearchResultCount": "검색 결과 ({n}/{total})",
+    "legCustomerListHeading": "고객사 목록 / 인라인 상세",
+    "legCustomerListHint": "고객명을 클릭하면 바로 아래에 자료 상세가 펼쳐집니다.",
+    "legSummaryRequired": "필수",
+    "legSummaryMissing": "누락",
+    "legSummaryFiles": "파일",
+    "legSummaryCoretax": "Coretax",
+    "legSummaryExpiry": "만료",
+    "legAiHint": "AI 추천: 필수자료 {n}건 누락. 우선 누락자료를 보완하세요.",
+    "legCategoryGroupAkta": "정관 / 법인설립",
+    "legCategoryGroupPermit": "사업허가",
+    "legCategoryGroupTax": "세무등록",
+    "legNoDocs": "아직 등록된 자료가 없습니다.",
+    "legDocPreviewHeading": "문서 내용",
+    "legGroup": "그룹",
+    "legRequiredYes": "필수",
+    "legRequiredNo": "선택",
+    "legVersion": "Version",
+    "legUpdated": "Updated",
+    "legOwner": "Owner",
+    "legExpiry": "Expiry",
+    "legNote": "보관메모",
+    "legExpiringHeading": "만료예정 자료 (90일 이내)",
+    "legExpiringEmpty": "예정된 만료 자료가 없습니다."
   }
 }

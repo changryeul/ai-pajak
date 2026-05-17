@@ -187,6 +187,7 @@ const navItems: NavSection[] = [
       { href: '/consultant-erp/supervisor/customers', icon: Users, labelKey: 'nav.supervisorCustomers' },
       { href: '/consultant-erp/supervisor/revisions', icon: ClipboardList, labelKey: 'nav.supervisorRevisions' },
       { href: '/consultant-erp/supervisor/calendar', icon: BarChart3, labelKey: 'nav.supervisorCalendar' },
+      { href: '/consultant-erp/supervisor/legality', icon: Shield, labelKey: 'nav.supervisorLegality' },
       { href: '/consultant-erp/supervisor/coretax', icon: Receipt, labelKey: 'nav.supervisorCoretax' },
       { href: '/consultant-erp/supervisor/quality', icon: ShieldCheck, labelKey: 'nav.supervisorQuality' },
       { href: '/consultant-erp/supervisor/settings', icon: Shield, labelKey: 'nav.supervisorSettings' },

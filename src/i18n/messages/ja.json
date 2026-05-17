@@ -257,7 +257,8 @@
     "supervisorSettings": "設定",
     "supervisorCoretax": "Coretax 待ち",
     "supervisorTeam": "チーム管理",
-    "supervisorQuality": "品質"
+    "supervisorQuality": "品質",
+    "supervisorLegality": "リーガリティ"
   },
   "dashboard": {
     "title": "ダッシュボード",
@@ -8897,6 +8898,34 @@
     "qualityFieldSource": "出典",
     "qualityFieldTrust": "Trust",
     "qualityFieldEmpty": "まだ出典記録がありません。",
-    "qualityEmpty": "審査対象の取引先はありません。"
+    "qualityEmpty": "審査対象の取引先はありません。",
+    "pageTitleLegalitySup": "リーガリティ資料現況",
+    "pageDescLegalitySup": "顧客を検索後、行をクリックすると保持資料の詳細が展開します。",
+    "legSearch": "顧客検索",
+    "legSearchPlaceholder": "会社名/NPWP/担当者",
+    "legSearchResultCount": "検索結果 ({n}/{total})",
+    "legCustomerListHeading": "顧客一覧/インライン詳細",
+    "legCustomerListHint": "名前をクリックすると資料詳細が展開します。",
+    "legSummaryRequired": "必須",
+    "legSummaryMissing": "欠落",
+    "legSummaryFiles": "ファイル",
+    "legSummaryCoretax": "Coretax",
+    "legSummaryExpiry": "満了",
+    "legAiHint": "AI 推奨: 必須資料 {n} 件欠落。先に補完してください。",
+    "legCategoryGroupAkta": "定款/法人設立",
+    "legCategoryGroupPermit": "事業許可",
+    "legCategoryGroupTax": "税務登録",
+    "legNoDocs": "まだ登録された資料がありません。",
+    "legDocPreviewHeading": "文書内容",
+    "legGroup": "グループ",
+    "legRequiredYes": "必須",
+    "legRequiredNo": "任意",
+    "legVersion": "バージョン",
+    "legUpdated": "更新",
+    "legOwner": "所有者",
+    "legExpiry": "満了",
+    "legNote": "メモ",
+    "legExpiringHeading": "90日以内満了予定資料",
+    "legExpiringEmpty": "満了予定はありません。"
   }
 }

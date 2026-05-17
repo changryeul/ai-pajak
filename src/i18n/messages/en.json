@@ -257,7 +257,8 @@
     "supervisorSettings": "Settings",
     "supervisorCoretax": "Coretax",
     "supervisorTeam": "Team",
-    "supervisorQuality": "Quality"
+    "supervisorQuality": "Quality",
+    "supervisorLegality": "Legality"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -8897,6 +8898,34 @@
     "qualityFieldSource": "Source",
     "qualityFieldTrust": "Trust",
     "qualityFieldEmpty": "No source rows yet.",
-    "qualityEmpty": "No counterparties to review."
+    "qualityEmpty": "No counterparties to review.",
+    "pageTitleLegalitySup": "Legality Documents",
+    "pageDescLegalitySup": "Search a customer, click a row, and the held documents fan open in place.",
+    "legSearch": "Customer search",
+    "legSearchPlaceholder": "Company name, NPWP, assignee",
+    "legSearchResultCount": "Results ({n}/{total})",
+    "legCustomerListHeading": "Customer list / inline detail",
+    "legCustomerListHint": "Click a name to expand documents inline.",
+    "legSummaryRequired": "Required",
+    "legSummaryMissing": "Missing",
+    "legSummaryFiles": "Files",
+    "legSummaryCoretax": "Coretax",
+    "legSummaryExpiry": "Expiring",
+    "legAiHint": "AI tip: {n} required docs missing. Fill those first.",
+    "legCategoryGroupAkta": "Articles / incorporation",
+    "legCategoryGroupPermit": "Business permit",
+    "legCategoryGroupTax": "Tax registration",
+    "legNoDocs": "No documents yet.",
+    "legDocPreviewHeading": "Document",
+    "legGroup": "Group",
+    "legRequiredYes": "Required",
+    "legRequiredNo": "Optional",
+    "legVersion": "Version",
+    "legUpdated": "Updated",
+    "legOwner": "Owner",
+    "legExpiry": "Expiry",
+    "legNote": "Note",
+    "legExpiringHeading": "Expiring soon (90d)",
+    "legExpiringEmpty": "Nothing expiring."
   }
 }

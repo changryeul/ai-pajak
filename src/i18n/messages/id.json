@@ -257,7 +257,8 @@
     "supervisorSettings": "Pengaturan",
     "supervisorCoretax": "Coretax",
     "supervisorTeam": "Tim",
-    "supervisorQuality": "Kualitas"
+    "supervisorQuality": "Kualitas",
+    "supervisorLegality": "Legalitas"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -8897,6 +8898,34 @@
     "qualityFieldSource": "Sumber",
     "qualityFieldTrust": "Trust",
     "qualityFieldEmpty": "Belum ada sumber.",
-    "qualityEmpty": "Tidak ada pihak ketiga untuk ditinjau."
+    "qualityEmpty": "Tidak ada pihak ketiga untuk ditinjau.",
+    "pageTitleLegalitySup": "Status Dokumen Legalitas",
+    "pageDescLegalitySup": "Cari pelanggan, klik baris, dan dokumen yang dipegang terbuka di tempat.",
+    "legSearch": "Cari pelanggan",
+    "legSearchPlaceholder": "Nama perusahaan, NPWP, penanggung jawab",
+    "legSearchResultCount": "Hasil ({n}/{total})",
+    "legCustomerListHeading": "Daftar pelanggan / detail inline",
+    "legCustomerListHint": "Klik nama untuk memperluas dokumen.",
+    "legSummaryRequired": "Wajib",
+    "legSummaryMissing": "Hilang",
+    "legSummaryFiles": "Berkas",
+    "legSummaryCoretax": "Coretax",
+    "legSummaryExpiry": "Kedaluwarsa",
+    "legAiHint": "Tip AI: {n} dokumen wajib hilang. Tangani lebih dahulu.",
+    "legCategoryGroupAkta": "Anggaran / pendirian",
+    "legCategoryGroupPermit": "Izin usaha",
+    "legCategoryGroupTax": "Registrasi pajak",
+    "legNoDocs": "Belum ada dokumen.",
+    "legDocPreviewHeading": "Dokumen",
+    "legGroup": "Grup",
+    "legRequiredYes": "Wajib",
+    "legRequiredNo": "Opsional",
+    "legVersion": "Versi",
+    "legUpdated": "Diperbarui",
+    "legOwner": "Pemilik",
+    "legExpiry": "Kedaluwarsa",
+    "legNote": "Catatan",
+    "legExpiringHeading": "Akan kedaluwarsa (90 hari)",
+    "legExpiringEmpty": "Tidak ada yang akan kedaluwarsa."
   }
 }
