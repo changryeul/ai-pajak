@@ -13,6 +13,16 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 import { fmtRp as fmt } from '@/lib/utils';
+import { CHART_ACCENT_POSITIVE } from '@/lib/charts/palette';
+import { TrendBadge } from '@/components/ui/TrendBadge';
+
+// Okabe-Ito derived tints for the projection-card backgrounds. Pairs with
+// CHART_ACCENT_POSITIVE for headers and amounts so deuteranopes see one
+// consistent positive-projection treatment instead of Tailwind emerald,
+// which collides with rose for them.
+const PROJECTION_CARD_BG = '#E6F6F0';
+const PROJECTION_BADGE_BG = '#D0F0E5';
+const PROJECTION_BADGE_TEXT = '#00684D';
 
 interface SimulationData {
   taxYear: number;
@@ -114,22 +124,72 @@ export default function AnnualSimulationPage() {
             <Card className="border-0 shadow-sm">
               <CardContent className="pt-4">
                 <p className="text-xs text-gray-500">{t('ytdTotalCredits')}</p>
-                <p className="text-lg font-bold text-green-600">{fmt(data.ytd.totalCredits)}</p>
-                <p className="text-[10px] text-gray-400">PPh 21+22+23+25</p>
+                <p
+                  className="text-lg font-bold"
+                  style={{ color: CHART_ACCENT_POSITIVE }}
+                >
+                  {fmt(data.ytd.totalCredits)}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-[10px] text-gray-400">PPh 21+22+23+25</p>
+                  {/* Collection progress vs projected annual credits. */}
+                  {data.projected.totalCredits > 0 && (
+                    <TrendBadge
+                      value={(data.ytd.totalCredits / data.projected.totalCredits) * 100}
+                      suffix="% of proj."
+                      precision={0}
+                      direction="up-good"
+                      size="text-[10px]"
+                      showSign={false}
+                    />
+                  )}
+                </div>
               </CardContent>
             </Card>
-            <Card className="border-0 shadow-sm bg-emerald-50">
+            <Card className="border-0 shadow-sm" style={{ backgroundColor: PROJECTION_CARD_BG }}>
               <CardContent className="pt-4">
-                <p className="text-xs text-emerald-700 flex items-center gap-1"><TrendingUp className="h-3 w-3" />{t('projectedAnnualIncome')}</p>
-                <p className="text-lg font-bold text-emerald-800">{fmt(data.projected.annualGross)}</p>
-                <Badge className="text-[8px] bg-emerald-100 text-emerald-700">{t('includesProjection')}</Badge>
+                <p
+                  className="text-xs flex items-center gap-1 font-semibold"
+                  style={{ color: CHART_ACCENT_POSITIVE }}
+                >
+                  <TrendingUp className="h-3 w-3" />
+                  {t('projectedAnnualIncome')}
+                </p>
+                <p className="text-lg font-bold" style={{ color: PROJECTION_BADGE_TEXT }}>
+                  {fmt(data.projected.annualGross)}
+                </p>
+                <Badge
+                  className="text-[8px]"
+                  style={{
+                    backgroundColor: PROJECTION_BADGE_BG,
+                    color: PROJECTION_BADGE_TEXT,
+                  }}
+                >
+                  {t('includesProjection')}
+                </Badge>
               </CardContent>
             </Card>
-            <Card className="border-0 shadow-sm bg-emerald-50">
+            <Card className="border-0 shadow-sm" style={{ backgroundColor: PROJECTION_CARD_BG }}>
               <CardContent className="pt-4">
-                <p className="text-xs text-emerald-700 flex items-center gap-1"><DollarSign className="h-3 w-3" />{t('projectedTotalCredits')}</p>
-                <p className="text-lg font-bold text-emerald-800">{fmt(data.projected.totalCredits)}</p>
-                <Badge className="text-[8px] bg-emerald-100 text-emerald-700">{t('monthsProjected', { count: data.monthsRemaining })}</Badge>
+                <p
+                  className="text-xs flex items-center gap-1 font-semibold"
+                  style={{ color: CHART_ACCENT_POSITIVE }}
+                >
+                  <DollarSign className="h-3 w-3" />
+                  {t('projectedTotalCredits')}
+                </p>
+                <p className="text-lg font-bold" style={{ color: PROJECTION_BADGE_TEXT }}>
+                  {fmt(data.projected.totalCredits)}
+                </p>
+                <Badge
+                  className="text-[8px]"
+                  style={{
+                    backgroundColor: PROJECTION_BADGE_BG,
+                    color: PROJECTION_BADGE_TEXT,
+                  }}
+                >
+                  {t('monthsProjected', { count: data.monthsRemaining })}
+                </Badge>
               </CardContent>
             </Card>
           </div>
@@ -175,11 +235,11 @@ export default function AnnualSimulationPage() {
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={v => v >= 1 ? Math.round(v).toLocaleString('id-ID') : ''} />
                   <Tooltip formatter={(v) => fmt(Number(v))} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <ReferenceLine x={MONTHS[data.monthsElapsed - 1]} stroke="#10b981" strokeDasharray="3 3" label={{ value: t('current'), fontSize: 9 }} />
-                  <Bar dataKey={incomeActualLabel} fill="#6366f1" radius={[2, 2, 0, 0]} />
-                  <Bar dataKey={incomeProjectedLabel} fill="#a5b4fc" radius={[2, 2, 0, 0]} />
-                  <Bar dataKey={taxActualLabel} fill="#10b981" radius={[2, 2, 0, 0]} />
-                  <Bar dataKey={taxProjectedLabel} fill="#6ee7b7" radius={[2, 2, 0, 0]} />
+                  <ReferenceLine x={MONTHS[data.monthsElapsed - 1]} stroke={CHART_ACCENT_POSITIVE} strokeDasharray="3 3" label={{ value: t('current'), fontSize: 9 }} />
+                  <Bar dataKey={incomeActualLabel} fill="#0072B2" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey={incomeProjectedLabel} fill="#56B4E9" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey={taxActualLabel} fill={CHART_ACCENT_POSITIVE} radius={[2, 2, 0, 0]} />
+                  <Bar dataKey={taxProjectedLabel} fill="#A6E2CB" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
               <p className="text-[10px] text-gray-400 text-center mt-2">
