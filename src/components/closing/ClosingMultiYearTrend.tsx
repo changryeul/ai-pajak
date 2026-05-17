@@ -15,6 +15,11 @@ import {
   YAxis,
 } from 'recharts';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  CLOSING_BAR_REVENUE,
+  CLOSING_BAR_NET_INCOME,
+  CLOSING_LINE_ETR,
+} from '@/lib/charts/palette';
 import { ClosingQuarterlyView } from './ClosingQuarterlyView';
 
 /**
@@ -317,7 +322,7 @@ function AnnualContent({ t, loading, rows, ordered, chartData, yoy }: AnnualCont
                   yAxisId="etr"
                   orientation="right"
                   tick={{ fontSize: 11 }}
-                  stroke="#10b981"
+                  stroke={CLOSING_LINE_ETR}
                   tickFormatter={(v: number) => `${v.toFixed(0)}%`}
                   width={48}
                 />
@@ -335,14 +340,14 @@ function AnnualContent({ t, loading, rows, ordered, chartData, yoy }: AnnualCont
                   yAxisId="rp"
                   dataKey="revenue"
                   name={t('legendRevenue')}
-                  fill="#3b82f6"
+                  fill={CLOSING_BAR_REVENUE}
                   radius={[4, 4, 0, 0]}
                 />
                 <Bar
                   yAxisId="rp"
                   dataKey="netIncome"
                   name={t('legendNetIncome')}
-                  fill="#8b5cf6"
+                  fill={CLOSING_BAR_NET_INCOME}
                   radius={[4, 4, 0, 0]}
                 />
                 <Line
@@ -350,9 +355,9 @@ function AnnualContent({ t, loading, rows, ordered, chartData, yoy }: AnnualCont
                   type="monotone"
                   dataKey="etrPct"
                   name={t('legendEtr')}
-                  stroke="#10b981"
+                  stroke={CLOSING_LINE_ETR}
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#10b981' }}
+                  dot={{ r: 3, fill: CLOSING_LINE_ETR }}
                 />
               </ComposedChart>
             </ResponsiveContainer>

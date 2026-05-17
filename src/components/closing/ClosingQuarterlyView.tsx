@@ -13,6 +13,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import {
+  TAX_TYPE_COLORS,
+  TAX_TYPE_FALLBACK,
+  YEAR_PALETTE,
+} from '@/lib/charts/palette';
 
 /**
  * Quarterly Tax Payment Trend — sibling view to ClosingMultiYearTrend.
@@ -68,16 +73,6 @@ function fmtRpCompact(n: number): string {
 
 const CURRENT_YEAR = new Date().getFullYear();
 const AVAILABLE_YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - i);
-
-// Canonical tax type colors so the legend stays stable across years.
-const TYPE_COLORS: Record<string, string> = {
-  PPh21: '#3b82f6',     // blue
-  PPh23: '#8b5cf6',     // violet
-  PPh25: '#f97316',     // orange
-  PPN: '#10b981',       // emerald
-  PPh_FINAL: '#f43f5e', // rose
-};
-const FALLBACK_TYPE_COLOR = '#94a3b8'; // slate-400
 
 type ChartMode = 'TOTAL' | 'BY_TYPE';
 
@@ -145,9 +140,8 @@ export function ClosingQuarterlyView() {
   );
 
   const yearColors: Record<number, string> = {};
-  const palette = ['#3b82f6', '#8b5cf6', '#f97316', '#10b981', '#f43f5e'];
   yearsSorted.forEach((y, i) => {
-    yearColors[y] = palette[i % palette.length];
+    yearColors[y] = YEAR_PALETTE[i % YEAR_PALETTE.length];
   });
 
   // BY_TYPE mode renders a single-year stacked bar chart. Pick the most
@@ -326,7 +320,7 @@ export function ClosingQuarterlyView() {
                           dataKey={tt}
                           name={tt}
                           stackId="taxtype"
-                          fill={TYPE_COLORS[tt] ?? FALLBACK_TYPE_COLOR}
+                          fill={TAX_TYPE_COLORS[tt] ?? TAX_TYPE_FALLBACK}
                           radius={i === stackedTypes.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                         />
                       ))}

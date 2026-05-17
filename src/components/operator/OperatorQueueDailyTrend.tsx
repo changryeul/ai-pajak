@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { QUEUE_STATUS_COLORS, QUEUE_STATUS_FALLBACK } from '@/lib/charts/palette';
 
 /**
  * Supervisor dashboard daily activity chart.
@@ -35,24 +36,6 @@ interface ApiResp {
   data?: { days: DayRow[]; statuses: string[] };
   error?: string;
 }
-
-// Same canonical palette as the queue page status badges so the chart stays
-// consistent with the rest of the operator surface.
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: '#64748b',
-  DATA_REVIEW: '#3b82f6',
-  PENDING_APPROVAL: '#f97316',
-  APPROVED: '#10b981',
-  EBILLING_GENERATED: '#6366f1',
-  PAYMENT_PENDING: '#facc15',
-  PAYMENT_UPLOADED: '#06b6d4',
-  PAYMENT_VERIFIED: '#a855f7',
-  DJP_SUBMITTED: '#f59e0b',
-  BPE_UPLOADED: '#14b8a6',
-  COMPLETED: '#22c55e',
-  FAILED: '#ef4444',
-};
-const FALLBACK_COLOR = '#94a3b8';
 
 const DAY_RANGES = [7, 14, 30] as const;
 
@@ -148,7 +131,7 @@ export function OperatorQueueDailyTrend() {
                   key={s}
                   dataKey={s}
                   stackId="status"
-                  fill={STATUS_COLORS[s] ?? FALLBACK_COLOR}
+                  fill={QUEUE_STATUS_COLORS[s] ?? QUEUE_STATUS_FALLBACK}
                   name={s}
                   radius={i === statuses.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                 />
