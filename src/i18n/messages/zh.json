@@ -254,7 +254,8 @@
     "supervisorCustomers": "客户进度",
     "supervisorRevisions": "修订历史",
     "supervisorCalendar": "截止日历",
-    "supervisorSettings": "设置"
+    "supervisorSettings": "设置",
+    "supervisorCoretax": "Coretax"
   },
   "dashboard": {
     "title": "仪表板",
@@ -8793,6 +8794,22 @@
     "channelRevision": "修订/重新提交",
     "channelLegality": "法律文档到期",
     "on": "开",
-    "off": "关"
+    "off": "关",
+    "pageTitleCoretax": "Coretax 待处理",
+    "pageDescCoretax": "主管批准后,负责顾问在 Coretax 发出 ID Billing 并记录编号 + PDF。然后输入客户付款 NTPN,记录最终申报 BPE。",
+    "coretaxStageIdBilling": "ID Billing 待办",
+    "coretaxStageNtpn": "NTPN 待办",
+    "coretaxStageBpe": "BPE 待办",
+    "coretaxStageCompleted": "已完成",
+    "coretaxEmpty": "尚无已批准的会话。批准后会在此显示。",
+    "coretaxProgress": "进行中",
+    "coretaxDone": "完成",
+    "coretaxFilterAll": "全部",
+    "coretaxFilterPending": "仅未完成",
+    "thStage": "阶段",
+    "thIdBilling": "ID Billing",
+    "thNtpn": "NTPN",
+    "thBpe": "BPE",
+    "thRecordedAt": "记录时间"
   }
 }

@@ -308,6 +308,129 @@ export async function buildRevisionEventLog(opts?: { limit?: number }): Promise<
     });
 }
 
+export type CoretaxStage =
+  | 'ID_BILLING_PENDING'
+  | 'NTPN_PENDING'
+  | 'BPE_PENDING'
+  | 'COMPLETED';
+
+export interface CoretaxQueueRow {
+  sessionId: string;
+  customerId: string;
+  customerName: string;
+  npwp: string | null;
+  consultantName: string | null;
+  taxPartnerName: string | null;
+  filingKind: 'MONTHLY' | 'ANNUAL';
+  taxPeriod: string;
+  sessionStatus: string;
+  stage: CoretaxStage;
+  idBilling: string | null;
+  ntpn: string | null;
+  bpeFilePath: string | null;
+  recordedAt: string | null;
+  bpeUploadedAt: string | null;
+}
+
+/**
+ * Coretax 처리 대기 queue for the supervisor (PDF p.27).
+ *
+ * Walks every APPROVED / COMPLETED consultant_session and pairs it with
+ * the optional consultant_session_coretax_record. The resulting stage
+ * tells the supervisor where each session is in the
+ *   ID_BILLING → NTPN → BPE → COMPLETED
+ * pipeline so the supervisor can monitor without having to drill into
+ * every session.
+ *
+ * Sessions in earlier statuses (REVIEWING / PENDING_APPROVAL) are
+ * excluded — they're not ready for Coretax processing.
+ */
+export async function buildCoretaxQueue(): Promise<CoretaxQueueRow[]> {
+  const admin = getSupabaseAdmin();
+
+  const { data: sessions } = await admin
+    .from('consultant_session')
+    .select(
+      'id, customer_id, consultant_id, tax_partner_id, filing_kind, tax_period, status, updated_at',
+    )
+    .in('status', ['APPROVED', 'COMPLETED'])
+    .order('updated_at', { ascending: false })
+    .limit(200);
+  if (!sessions || sessions.length === 0) return [];
+
+  const sessionIds = sessions.map((s) => s.id);
+  const { data: records } = await admin
+    .from('consultant_session_coretax_record')
+    .select('session_id, id_billing, ntpn, bpe_file_path, bpe_uploaded_at, recorded_at')
+    .in('session_id', sessionIds);
+  const recordBySession = new Map((records ?? []).map((r) => [r.session_id, r]));
+
+  // Customer lookup
+  const customerIds = Array.from(new Set(sessions.map((s) => s.customer_id)));
+  const { data: customers } = await admin
+    .from('customer')
+    .select('id, full_name, company_name, npwp')
+    .in('id', customerIds);
+  const customerById = new Map((customers ?? []).map((c) => [c.id, c]));
+
+  // Consultant + partner lookup
+  const consultantIds = Array.from(
+    new Set(sessions.map((s) => s.consultant_id).filter((v): v is string => !!v)),
+  );
+  let consultantById = new Map<string, { full_name: string; tax_partner_id: string | null }>();
+  if (consultantIds.length > 0) {
+    const { data: cs } = await admin
+      .from('consultant')
+      .select('id, full_name, tax_partner_id')
+      .in('id', consultantIds);
+    consultantById = new Map(
+      (cs ?? []).map((c) => [c.id, { full_name: c.full_name as string, tax_partner_id: c.tax_partner_id }]),
+    );
+  }
+  const partnerIds = Array.from(
+    new Set(sessions.map((s) => s.tax_partner_id).filter((v): v is string => !!v)),
+  );
+  let partnerNames = new Map<string, string>();
+  if (partnerIds.length > 0) {
+    const { data: ps } = await admin
+      .from('tax_partner')
+      .select('id, name')
+      .in('id', partnerIds);
+    partnerNames = new Map((ps ?? []).map((p) => [p.id, p.name as string]));
+  }
+
+  return sessions.map((s) => {
+    const r = recordBySession.get(s.id);
+    const c = customerById.get(s.customer_id);
+    const consultant = s.consultant_id ? consultantById.get(s.consultant_id) : null;
+
+    let stage: CoretaxStage;
+    if (s.status === 'COMPLETED') stage = 'COMPLETED';
+    else if (!r || !r.id_billing) stage = 'ID_BILLING_PENDING';
+    else if (!r.ntpn) stage = 'NTPN_PENDING';
+    else if (!r.bpe_file_path) stage = 'BPE_PENDING';
+    else stage = 'COMPLETED';
+
+    return {
+      sessionId: s.id,
+      customerId: s.customer_id,
+      customerName: c ? ((c.company_name || c.full_name) as string) : '(unknown)',
+      npwp: c?.npwp ?? null,
+      consultantName: consultant?.full_name ?? null,
+      taxPartnerName: s.tax_partner_id ? partnerNames.get(s.tax_partner_id) ?? null : null,
+      filingKind: s.filing_kind as 'MONTHLY' | 'ANNUAL',
+      taxPeriod: s.tax_period,
+      sessionStatus: s.status,
+      stage,
+      idBilling: r?.id_billing ?? null,
+      ntpn: r?.ntpn ?? null,
+      bpeFilePath: r?.bpe_file_path ?? null,
+      recordedAt: r?.recorded_at ?? null,
+      bpeUploadedAt: r?.bpe_uploaded_at ?? null,
+    };
+  });
+}
+
 export interface TeamMemberCard {
   consultantId: string;
   fullName: string;

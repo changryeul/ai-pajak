@@ -254,7 +254,8 @@
     "supervisorCustomers": "Pelanggan",
     "supervisorRevisions": "Revisi",
     "supervisorCalendar": "Kalender Tenggat",
-    "supervisorSettings": "Pengaturan"
+    "supervisorSettings": "Pengaturan",
+    "supervisorCoretax": "Coretax"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -8793,6 +8794,22 @@
     "channelRevision": "Revisi / kirim ulang",
     "channelLegality": "Kedaluwarsa legalitas",
     "on": "AKTIF",
-    "off": "NONAKTIF"
+    "off": "NONAKTIF",
+    "pageTitleCoretax": "Coretax Tertunda",
+    "pageDescCoretax": "Setelah supervisor menyetujui, konsultan yang ditugaskan menerbitkan ID Billing di Coretax dan mencatat nomor + PDF. Lalu NTPN pembayaran pelanggan, dan BPE pelaporan akhir.",
+    "coretaxStageIdBilling": "ID Billing tertunda",
+    "coretaxStageNtpn": "NTPN tertunda",
+    "coretaxStageBpe": "BPE tertunda",
+    "coretaxStageCompleted": "Selesai",
+    "coretaxEmpty": "Belum ada sesi yang disetujui. Setelah disetujui, sesi akan muncul di sini.",
+    "coretaxProgress": "Sedang berjalan",
+    "coretaxDone": "Selesai",
+    "coretaxFilterAll": "Semua",
+    "coretaxFilterPending": "Hanya tertunda",
+    "thStage": "Tahap",
+    "thIdBilling": "ID Billing",
+    "thNtpn": "NTPN",
+    "thBpe": "BPE",
+    "thRecordedAt": "Tercatat"
   }
 }

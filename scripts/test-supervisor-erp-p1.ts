@@ -204,8 +204,35 @@ async function run() {
     pass++;
   }
 
-  // ── 6. /counterparty/stats ──
-  console.log('\n━━ 6. GET /counterparty/stats ━━');
+  // ── 6. /coretax ──
+  console.log('\n━━ 6. GET /supervisor/coretax ━━');
+  const rCT = await api('/api/consultant-erp/supervisor/coretax', supTok);
+  if (rCT.status !== 200 || !rCT.body.success || !Array.isArray(rCT.body.data?.rows)) {
+    console.error('   ✗ wrong shape', rCT);
+    fail++;
+  } else {
+    const rows = rCT.body.data.rows as Array<{ stage: string; sessionId: string }>;
+    const validStages = new Set(['ID_BILLING_PENDING', 'NTPN_PENDING', 'BPE_PENDING', 'COMPLETED']);
+    const allValid = rows.every((r) => validStages.has(r.stage));
+    if (!allValid) {
+      console.error('   ✗ invalid stage value');
+      fail++;
+    } else {
+      console.log(`   ✅ ${rows.length} coretax rows, all stages valid`);
+      pass++;
+    }
+  }
+  const rCTc = await api('/api/consultant-erp/supervisor/coretax', consTok);
+  if (rCTc.status !== 403) {
+    console.error('   ✗ consultant should be 403', rCTc.status);
+    fail++;
+  } else {
+    console.log('   ✅ consultant 403');
+    pass++;
+  }
+
+  // ── 7. /counterparty/stats ──
+  console.log('\n━━ 7. GET /counterparty/stats ━━');
   const r4 = await api('/api/consultant-erp/counterparty/stats', supTok);
   if (r4.status !== 200 || !r4.body.success) {
     console.error('   ✗ failed', r4);

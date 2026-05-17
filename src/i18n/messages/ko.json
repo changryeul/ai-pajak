@@ -254,7 +254,8 @@
     "supervisorCustomers": "고객별 진행현황",
     "supervisorRevisions": "수정/재상신 이력",
     "supervisorCalendar": "마감 캘린더",
-    "supervisorSettings": "설정"
+    "supervisorSettings": "설정",
+    "supervisorCoretax": "Coretax 처리 대기"
   },
   "dashboard": {
     "title": "대시보드",
@@ -8919,6 +8920,22 @@
     "channelRevision": "수정/재상신 알림",
     "channelLegality": "리갈리티 만료 알림",
     "on": "ON",
-    "off": "OFF"
+    "off": "OFF",
+    "pageTitleCoretax": "Coretax 처리 대기",
+    "pageDescCoretax": "수퍼바이저 승인 후 팀원이 Coretax에서 ID Billing을 발행해 번호와 PDF를 기록합니다. 이후 고객 납부 NTPN 입력, 최종 신고 BPE 기록 순서로 완료됩니다.",
+    "coretaxStageIdBilling": "ID Billing 대기",
+    "coretaxStageNtpn": "NTPN 대기",
+    "coretaxStageBpe": "BPE 대기",
+    "coretaxStageCompleted": "완료",
+    "coretaxEmpty": "승인된 세션이 아직 없습니다. 승인이 완료되면 여기에 표시됩니다.",
+    "coretaxProgress": "진행",
+    "coretaxDone": "완료",
+    "coretaxFilterAll": "전체",
+    "coretaxFilterPending": "미완료만",
+    "thStage": "단계",
+    "thIdBilling": "ID Billing",
+    "thNtpn": "NTPN",
+    "thBpe": "BPE",
+    "thRecordedAt": "기록일"
   }
 }

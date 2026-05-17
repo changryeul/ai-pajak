@@ -254,7 +254,8 @@
     "supervisorCustomers": "Customers",
     "supervisorRevisions": "Revisions",
     "supervisorCalendar": "Deadline Calendar",
-    "supervisorSettings": "Settings"
+    "supervisorSettings": "Settings",
+    "supervisorCoretax": "Coretax"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -8793,6 +8794,22 @@
     "channelRevision": "Revision / resubmit",
     "channelLegality": "Legality expiry",
     "on": "ON",
-    "off": "OFF"
+    "off": "OFF",
+    "pageTitleCoretax": "Coretax Pending",
+    "pageDescCoretax": "After supervisor approval the assigned consultant issues ID Billing on Coretax and records the number + PDF. Customer payment NTPN follows, then BPE filing closes the case.",
+    "coretaxStageIdBilling": "ID Billing pending",
+    "coretaxStageNtpn": "NTPN pending",
+    "coretaxStageBpe": "BPE pending",
+    "coretaxStageCompleted": "Completed",
+    "coretaxEmpty": "No approved sessions yet. Once approved, sessions appear here.",
+    "coretaxProgress": "In progress",
+    "coretaxDone": "Done",
+    "coretaxFilterAll": "All",
+    "coretaxFilterPending": "Pending only",
+    "thStage": "Stage",
+    "thIdBilling": "ID Billing",
+    "thNtpn": "NTPN",
+    "thBpe": "BPE",
+    "thRecordedAt": "Recorded"
   }
 }
