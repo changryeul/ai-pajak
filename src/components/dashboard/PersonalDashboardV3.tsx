@@ -38,6 +38,7 @@ import { fmtRp } from '@/lib/utils';
 import { buildDashboardTrend, type TrendFiling } from '@/lib/tax/trend-from-filings';
 import { detectAuditRisks, type AuditRisk } from '@/lib/audit/risk-detector';
 import { TaxAdvisoryPanel } from '@/components/dashboard/TaxAdvisoryPanel';
+import { ClosingQuarterlyView } from '@/components/closing/ClosingQuarterlyView';
 
 type Nationality = 'ID' | 'KR' | 'US' | 'JP';
 type FilingStatus = 'completed' | 'in_progress' | 'pending';
@@ -331,6 +332,16 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           {t('sampleDataNotice')}
         </div>
       )}
+
+      {/* Quarterly tax payment trend (PPh21 + PPh23 + PPh25 + PPN + PPh Final).
+          Reuses the closing-trend Quarterly view so INDIVIDUAL customers
+          get the same YoY comparison + by-tax-type breakdown the corporate
+          /tax/annual page already exposes. */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-5">
+          <ClosingQuarterlyView />
+        </CardContent>
+      </Card>
 
       {/* 4. Assets / Liabilities summary */}
       <div className="grid gap-5 md:grid-cols-2">

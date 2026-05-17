@@ -123,6 +123,23 @@ test.describe('Closing trend — UI panel', () => {
   });
 });
 
+test.describe('Closing trend — INDIVIDUAL dashboard surfaces the quarterly view', () => {
+  test('INDIVIDUAL customer sees the quarterly chart on /dashboard', async ({ page }) => {
+    await loginAs(page, 'CUSTOMER');
+    await page.goto(`${BASE_URL}/${LOCALE}/dashboard`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    // closingTrend.yearSelector ('비교 연도') is rendered by ClosingQuarterlyView
+    // regardless of whether the customer has monthly-payment history.
+    expect(html).toContain('비교 연도');
+    // The mode toggle is also part of the view.
+    await expect(page.getByRole('tab', { name: '합계' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('tab', { name: '세목별' })).toBeVisible();
+  });
+});
+
 test.describe('Closing trend — quarterly stacked-by-tax-type mode', () => {
   test('mode toggle exposes [합계 / 세목별] tabs inside the Quarterly view', async ({ page }) => {
     await loginAs(page, 'COMPANY_CUSTOMER');
