@@ -19,6 +19,8 @@ import {
   CLOSING_BAR_REVENUE,
   CLOSING_BAR_NET_INCOME,
   CLOSING_LINE_ETR,
+  CHART_ACCENT_POSITIVE,
+  CHART_ACCENT_NEGATIVE,
 } from '@/lib/charts/palette';
 import { ClosingQuarterlyView } from './ClosingQuarterlyView';
 
@@ -96,22 +98,29 @@ function ChangeBadge({ rate }: { rate: number | null }) {
     );
   }
   if (rate > 0) {
+    // 매출/순이익 증가 = 긍정 — Okabe-Ito 청록 (#009E73)
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-700">
+      <span
+        className="inline-flex items-center gap-0.5 text-[10px] font-semibold"
+        style={{ color: CHART_ACCENT_POSITIVE }}
+      >
         <TrendingUp className="h-2.5 w-2.5" />
         +{pctStr}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-0.5 text-[10px] text-rose-700">
+    <span
+      className="inline-flex items-center gap-0.5 text-[10px] font-semibold"
+      style={{ color: CHART_ACCENT_NEGATIVE }}
+    >
       <TrendingDown className="h-2.5 w-2.5" />
       −{pctStr}
     </span>
   );
 }
 
-/** Tax/ETR delta — direction is "tax up = red, tax down = green" (opposite of revenue). */
+/** Tax/ETR delta — direction is "tax up = bad, tax down = good" (opposite of revenue). */
 function TaxChangeBadge({ rate }: { rate: number | null }) {
   if (rate == null) {
     return <span className="text-[10px] text-slate-400">—</span>;
@@ -126,15 +135,22 @@ function TaxChangeBadge({ rate }: { rate: number | null }) {
     );
   }
   if (rate > 0) {
+    // 세액/ETR 증가 = 부정 — Okabe-Ito vermillion (#D55E00)
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] text-rose-700">
+      <span
+        className="inline-flex items-center gap-0.5 text-[10px] font-semibold"
+        style={{ color: CHART_ACCENT_NEGATIVE }}
+      >
         <TrendingUp className="h-2.5 w-2.5" />
         +{pctStr}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-700">
+    <span
+      className="inline-flex items-center gap-0.5 text-[10px] font-semibold"
+      style={{ color: CHART_ACCENT_POSITIVE }}
+    >
       <TrendingDown className="h-2.5 w-2.5" />
       −{pctStr}
     </span>
