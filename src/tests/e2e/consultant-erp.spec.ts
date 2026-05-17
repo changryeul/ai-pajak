@@ -105,3 +105,93 @@ test.describe('Consultant ERP — API access control', () => {
     expect([401, 403]).toContain(res.status());
   });
 });
+
+test.describe('Consultant ERP — board mode discriminator', () => {
+  test('consultant board returns CONSULTANT mode', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT_JTC');
+    const res = await page.request.get(`${BASE_URL}/api/consultant-erp/sessions/board`);
+    expect(res.status()).toBe(200);
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.data?.mode).toBe('CONSULTANT');
+    expect(Array.isArray(json.data?.rows)).toBe(true);
+  });
+
+  test('supervisor board returns SUPERVISOR mode with platform-wide stats', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.get(`${BASE_URL}/api/consultant-erp/sessions/board`);
+    expect(res.status()).toBe(200);
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.data?.mode).toBe('SUPERVISOR');
+    // Supervisor stats strip should include the cross-tenant aggregates.
+    expect(typeof json.data?.stats?.pendingApproval).toBe('number');
+    expect(typeof json.data?.stats?.totalTaxPartners).toBe('number');
+    expect(typeof json.data?.stats?.activeSessions).toBe('number');
+  });
+
+  test('supervisor board honors ?status=PENDING_APPROVAL filter', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.get(
+      `${BASE_URL}/api/consultant-erp/sessions/board?status=PENDING_APPROVAL`,
+    );
+    expect(res.status()).toBe(200);
+    const json = await res.json();
+    expect(json.data?.mode).toBe('SUPERVISOR');
+    type Row = { status: string };
+    for (const row of (json.data?.rows ?? []) as Row[]) {
+      expect(row.status).toBe('PENDING_APPROVAL');
+    }
+  });
+});
+
+test.describe('Consultant ERP — supervisor UI rendering', () => {
+  test('supervisor dashboard shows SUPERVISOR view (approval queue heading)', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/dashboard`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    // ko translation of supervisor.boardHeading
+    expect(html).toContain('전체 사무소 결재 큐');
+    // Both filter chips should render
+    expect(html).toContain('전체');
+    expect(html).toContain('결재 대기만');
+  });
+
+  test('consultant dashboard does NOT show supervisor heading', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT_JTC');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/dashboard`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    expect(html).not.toContain('전체 사무소 결재 큐');
+    expect(html).toContain('고객별 업무 현황판');
+  });
+
+  test('work page renders ErpWorkflow start card for consultants', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT_JTC');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/work`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    // Consultant sees the "Start Work" card (workflow.startHeading)
+    expect(html).toContain('업무 시작');
+    // Old P0 placeholder text must be gone
+    expect(html).not.toContain('P0 골격');
+  });
+
+  test('work page is read-only for supervisor (no Start Work card, hint only)', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/work`, {
+      waitUntil: 'networkidle',
+      timeout: 30000,
+    });
+    const html = await page.content();
+    expect(html).not.toContain('업무 시작');
+    expect(html).toContain('결재 큐에서 세션을 선택');
+  });
+});
