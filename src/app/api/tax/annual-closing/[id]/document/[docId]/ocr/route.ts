@@ -92,6 +92,7 @@ async function handle(req: RequestWithSession, sessionId: string, docId: string)
           totalAmount: result.totalAmount,
           rowCount: result.rowCount,
           lineItems: result.lineItems,
+          payrollRows: result.payrollRows ?? null,
           summary: result.summary,
           rawText: result.rawText,
           model: result.model,

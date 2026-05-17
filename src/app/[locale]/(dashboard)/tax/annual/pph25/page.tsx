@@ -1229,6 +1229,7 @@ function MonthlyStep({
         taxYear={fiscalYear}
         initialCompanyName={companyName}
         initialCompanyNpwp={companyNpwp}
+        sessionId={sessionId}
       />
 
       <SubmitClosingBox sessionId={sessionId} onComplete={onComplete} completed={completed} onPrev={onPrev} t={t} />

@@ -1053,6 +1053,7 @@ function SubmitStep({
         taxYear={fiscalYear}
         initialCompanyName={companyName}
         initialCompanyNpwp={companyNpwp}
+        sessionId={sessionId}
       />
 
       <SubmitActions t={t} sessionId={sessionId} downloadSpt={downloadSpt} />
