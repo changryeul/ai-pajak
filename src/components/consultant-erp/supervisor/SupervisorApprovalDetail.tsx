@@ -78,6 +78,25 @@ interface TrendPoint {
   totalCalc: number;
   byKind: Record<string, number>;
 }
+interface InvoiceLine {
+  id: string;
+  document_id: string;
+  line_no: number;
+  invoice_number: string | null;
+  invoice_date: string | null;
+  counterparty_name: string | null;
+  counterparty_npwp: string | null;
+  currency: string;
+  description: string | null;
+  quantity: number | null;
+  unit_price: number | null;
+  subtotal: number | null;
+  vat_amount: number | null;
+  withholding_amount: number | null;
+  total: number | null;
+  parse_confidence: number | null;
+  is_reviewed: boolean;
+}
 interface Resp {
   session: Session;
   customer: Customer | null;
@@ -89,6 +108,7 @@ interface Resp {
   approvals: Approval[];
   coretax: { id_billing: string | null; ntpn: string | null; bpe_file_path: string | null } | null;
   trend?: TrendPoint[];
+  invoiceLines?: InvoiceLine[];
 }
 
 const SEVERITY_STYLE = {
@@ -164,7 +184,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
     return <p className="text-sm text-rose-600">{error ?? 'no data'}</p>;
   }
 
-  const { session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals, trend } = data;
+  const { session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals, trend, invoiceLines } = data;
 
   const totalCalc = calcs.reduce((s, c) => s + Number(c.amount || 0), 0);
   const submissionCount = approvals.filter((a) => a.action === 'SUBMIT').length;
@@ -376,6 +396,95 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
           </ul>
         )}
       </section>
+
+      {/* Invoice line-items (PDF p.4) */}
+      {invoiceLines && invoiceLines.length > 0 && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-black text-slate-950">{t('invoiceLinesHeading')}</p>
+            <p className="text-[10px] text-slate-500">
+              {invoiceLines.length} {t('invoiceLinesUnit')}
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="bg-slate-50 text-slate-600">
+                <tr>
+                  <th className="text-left py-2 px-2">#</th>
+                  <th className="text-left py-2 px-2">{t('invoiceLinesCounterparty')}</th>
+                  <th className="text-left py-2 px-2">{t('invoiceLinesInvoice')}</th>
+                  <th className="text-left py-2 px-2">{t('invoiceLinesDescription')}</th>
+                  <th className="text-right py-2 px-2">{t('invoiceLinesQty')}</th>
+                  <th className="text-right py-2 px-2">{t('invoiceLinesUnitPrice')}</th>
+                  <th className="text-right py-2 px-2">{t('invoiceLinesSubtotal')}</th>
+                  <th className="text-right py-2 px-2">{t('invoiceLinesVat')}</th>
+                  <th className="text-right py-2 px-2">{t('invoiceLinesWithholding')}</th>
+                  <th className="text-right py-2 px-2">{t('invoiceLinesTotal')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {invoiceLines.map((l) => (
+                  <tr key={l.id} className={l.is_reviewed ? 'bg-emerald-50/40' : ''}>
+                    <td className="py-1.5 px-2 font-mono text-[10px] text-slate-500">{l.line_no}</td>
+                    <td className="py-1.5 px-2">
+                      <p className="font-bold text-slate-900">{l.counterparty_name ?? '—'}</p>
+                      {l.counterparty_npwp && (
+                        <p className="text-[9px] font-mono text-slate-500">{l.counterparty_npwp}</p>
+                      )}
+                    </td>
+                    <td className="py-1.5 px-2">
+                      <p className="text-slate-800">{l.invoice_number ?? '—'}</p>
+                      {l.invoice_date && (
+                        <p className="text-[9px] text-slate-500">{l.invoice_date}</p>
+                      )}
+                    </td>
+                    <td className="py-1.5 px-2 max-w-[200px] truncate text-slate-700">
+                      {l.description ?? '—'}
+                    </td>
+                    <td className="py-1.5 px-2 text-right text-slate-700">
+                      {l.quantity != null ? Number(l.quantity).toLocaleString('id-ID') : '—'}
+                    </td>
+                    <td className="py-1.5 px-2 text-right text-slate-700 font-mono">
+                      {l.unit_price != null ? fmtRp(Number(l.unit_price)) : '—'}
+                    </td>
+                    <td className="py-1.5 px-2 text-right text-slate-700 font-mono">
+                      {l.subtotal != null ? fmtRp(Number(l.subtotal)) : '—'}
+                    </td>
+                    <td className="py-1.5 px-2 text-right text-slate-700 font-mono">
+                      {l.vat_amount != null ? fmtRp(Number(l.vat_amount)) : '—'}
+                    </td>
+                    <td className="py-1.5 px-2 text-right text-slate-700 font-mono">
+                      {l.withholding_amount != null ? fmtRp(Number(l.withholding_amount)) : '—'}
+                    </td>
+                    <td className="py-1.5 px-2 text-right font-bold text-slate-900 font-mono">
+                      {l.total != null ? fmtRp(Number(l.total)) : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-slate-50 font-bold">
+                  <td colSpan={6} className="py-2 px-2 text-right text-slate-700">
+                    {t('invoiceLinesGrandTotal')}
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono text-slate-900">
+                    {fmtRp(invoiceLines.reduce((s, l) => s + Number(l.subtotal ?? 0), 0))}
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono text-slate-900">
+                    {fmtRp(invoiceLines.reduce((s, l) => s + Number(l.vat_amount ?? 0), 0))}
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono text-slate-900">
+                    {fmtRp(invoiceLines.reduce((s, l) => s + Number(l.withholding_amount ?? 0), 0))}
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono text-slate-900">
+                    {fmtRp(invoiceLines.reduce((s, l) => s + Number(l.total ?? 0), 0))}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+      )}
 
       {/* Documents */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5">

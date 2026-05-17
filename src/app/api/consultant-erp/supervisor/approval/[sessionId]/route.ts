@@ -107,6 +107,38 @@ async function handleGet(
       ? await buildCustomerTrend(session.customer_id, 6)
       : [];
 
+  // Invoice line-items (PDF p.4 자료 탭) — populated by the AI parser
+  // for WITHHOLDING_INVOICE / VAT_IN_OUT documents.
+  let invoiceLines: Array<{
+    id: string;
+    document_id: string;
+    line_no: number;
+    invoice_number: string | null;
+    invoice_date: string | null;
+    counterparty_name: string | null;
+    counterparty_npwp: string | null;
+    currency: string;
+    description: string | null;
+    quantity: number | null;
+    unit_price: number | null;
+    subtotal: number | null;
+    vat_amount: number | null;
+    withholding_amount: number | null;
+    total: number | null;
+    parse_confidence: number | null;
+    is_reviewed: boolean;
+  }> = [];
+  const { data: lineRows } = await admin
+    .from('consultant_session_invoice_line')
+    .select(
+      'id, document_id, line_no, invoice_number, invoice_date, counterparty_name, counterparty_npwp, currency, description, quantity, unit_price, subtotal, vat_amount, withholding_amount, total, parse_confidence, is_reviewed',
+    )
+    .eq('session_id', sessionId)
+    .order('document_id', { ascending: true })
+    .order('line_no', { ascending: true })
+    .limit(500);
+  invoiceLines = (lineRows ?? []) as typeof invoiceLines;
+
   return NextResponse.json({
     success: true,
     data: {
@@ -120,6 +152,7 @@ async function handleGet(
       approvals: approvalsRes.data ?? [],
       coretax: coretaxRes.data ?? null,
       trend,
+      invoiceLines,
     },
   });
 }
