@@ -111,9 +111,9 @@ export default function ApprovalsPage() {
   return (
     <div className="container mx-auto py-6 px-4 max-w-[1400px]">
       <PageTitle title="승인 대기" />
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-black text-slate-900">승인 대기</h1>
-        <button onClick={load} className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900">승인 대기</h1>
+        <button onClick={load} className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 min-h-10 text-xs font-bold text-slate-700 hover:bg-slate-50">
           <RefreshCw className="h-3.5 w-3.5" /> 새로고침
         </button>
       </div>
@@ -180,13 +180,13 @@ export default function ApprovalsPage() {
                     ⚠ 검토필요 원천세 항목 {detail.review_summary.reviewRequired}건 미완료
                   </div>
                 ) : null}
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button disabled={busy || detail.status !== 'PENDING_APPROVAL'} onClick={() => action('approve')}
-                    className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-50">
+                    className="flex-1 sm:flex-none rounded-xl bg-blue-600 px-5 min-h-12 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-50">
                     <CheckCircle className="h-4 w-4 inline mr-1" /> 승인
                   </button>
                   <button disabled={busy || detail.status !== 'PENDING_APPROVAL'} onClick={() => action('reject')}
-                    className="rounded-xl bg-rose-600 px-5 py-2 text-sm font-black text-white hover:bg-rose-700 disabled:opacity-50">
+                    className="flex-1 sm:flex-none rounded-xl bg-rose-600 px-5 min-h-12 text-sm font-black text-white hover:bg-rose-700 disabled:opacity-50">
                     <XCircle className="h-4 w-4 inline mr-1" /> 반려
                   </button>
                 </div>
@@ -199,7 +199,7 @@ export default function ApprovalsPage() {
                   placeholder="예: Coretax ID Billing 발행 후 고객 화면에 반영"
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" />
                 <button disabled={busy || !instruction.trim()} onClick={() => action('instruct')}
-                  className="mt-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white hover:bg-slate-800 disabled:opacity-50">
+                  className="mt-2 w-full sm:w-auto rounded-xl bg-slate-900 px-4 min-h-11 text-xs font-black text-white hover:bg-slate-800 disabled:opacity-50">
                   <Send className="h-3 w-3 inline mr-1" /> 지시
                 </button>
                 {detail.notes && (

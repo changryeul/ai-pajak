@@ -347,7 +347,7 @@ export default function OperatorQueuePage() {
       {/* Filters */}
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-4">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
             {/* Kind filter (월신고 / 연결산) */}
             <div>
               <label className="text-[10px] text-gray-500 font-medium block mb-1">{tq('kindFilter')}</label>
@@ -495,16 +495,16 @@ export default function OperatorQueuePage() {
 
                 return (
                   <div key={item.id} className="border-b last:border-0">
-                    {/* Row */}
+                    {/* Desktop row (md+) */}
                     <div
-                      className="flex items-center gap-3 py-3 px-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="hidden md:flex items-center gap-3 py-3 px-3 hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => setExpandedId(isExpanded ? null : item.id)}
                     >
                       <StatusIcon className={`h-4 w-4 flex-shrink-0 ${statusCfg.color}`} />
 
-                      <div className="flex-1 min-w-0 grid grid-cols-2 md:grid-cols-6 gap-2 items-center">
+                      <div className="flex-1 min-w-0 grid grid-cols-6 gap-2 items-center">
                         {/* Customer */}
-                        <div className="col-span-2 md:col-span-2">
+                        <div className="col-span-2">
                           <p className="text-xs font-medium text-gray-900 truncate">
                             {item.customer?.customer_name || '-'}
                           </p>
@@ -543,7 +543,7 @@ export default function OperatorQueuePage() {
                         </div>
                       </div>
 
-                      {/* Action */}
+                      {/* Action (desktop) */}
                       <div className="flex-shrink-0 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                         {actionCfg && (
                           <Button
@@ -575,6 +575,81 @@ export default function OperatorQueuePage() {
                           </Button>
                         )}
                       </div>
+                    </div>
+
+                    {/* Mobile card (< md) */}
+                    <div
+                      className="md:hidden py-4 px-3 hover:bg-gray-50 transition-colors"
+                      onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                    >
+                      <div className="flex items-start gap-2.5 mb-2">
+                        <StatusIcon className={`h-4 w-4 flex-shrink-0 mt-0.5 ${statusCfg.color}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {item.customer?.customer_name || '-'}
+                          </p>
+                          <p className="text-[11px] text-gray-500 truncate font-mono">
+                            {item.customer?.npwp || '—'}
+                          </p>
+                        </div>
+                        <Badge className={`text-[10px] flex-shrink-0 ${statusCfg.bg} ${statusCfg.color} border-0`}>
+                          {statusCfg.label}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 mb-3 text-xs">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Badge variant="outline" className="text-[10px]">
+                            {item.tax_type}
+                          </Badge>
+                          {item.closing_session_id && (
+                            <Badge className="text-[10px] bg-amber-100 text-amber-800 border-0">
+                              {tq('closingBadge')}
+                            </Badge>
+                          )}
+                          <span className="text-gray-500">
+                            {item.tax_year}/{String(item.tax_period).padStart(2, '0')}
+                          </span>
+                        </div>
+                        <span className="font-mono text-gray-900 text-right">
+                          {fmt(item.amount || 0)}
+                        </span>
+                      </div>
+
+                      {/* Mobile action row — full-width buttons with min-h-11 (44px tap target) */}
+                      {(actionCfg || (item.status === 'PENDING_APPROVAL' && isSupervisor)) && (
+                        <div
+                          className="flex gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {actionCfg && (
+                            <Button
+                              className={`flex-1 min-h-11 text-xs font-bold text-white ${actionCfg.color}`}
+                              disabled={actionLoading === item.id}
+                              onClick={() => handleAction(item.id, actionCfg.action)}
+                            >
+                              {actionLoading === item.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <>
+                                  {actionCfg.label}
+                                  <ArrowRight className="h-4 w-4 ml-1" />
+                                </>
+                              )}
+                            </Button>
+                          )}
+                          {item.status === 'PENDING_APPROVAL' && isSupervisor && (
+                            <Button
+                              variant="outline"
+                              className="flex-1 min-h-11 text-xs font-bold border-red-200 text-red-700 hover:bg-red-50"
+                              disabled={actionLoading === item.id}
+                              onClick={() => handleReject(item.id)}
+                            >
+                              {tq('reject')}
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Expanded Detail */}
@@ -829,21 +904,20 @@ export default function OperatorQueuePage() {
 
           {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 mt-4 border-t">
-              <p className="text-xs text-gray-500">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-4 mt-4 border-t">
+              <p className="text-xs text-gray-500 text-center sm:text-left">
                 {t('itemsRange', {
                   total: pagination.total,
                   start: (pagination.page - 1) * pagination.limit + 1,
                   end: Math.min(pagination.page * pagination.limit, pagination.total),
                 })}
               </p>
-              <div className="flex gap-2">
+              <div className="flex items-center justify-between sm:justify-end gap-2">
                 <Button
-                  size="sm"
                   variant="outline"
                   disabled={pagination.page <= 1}
                   onClick={() => loadData(pagination.page - 1)}
-                  className="text-xs"
+                  className="text-xs min-h-10 flex-1 sm:flex-none"
                 >
                   {t('previous')}
                 </Button>
@@ -851,11 +925,10 @@ export default function OperatorQueuePage() {
                   {pagination.page} / {pagination.totalPages}
                 </span>
                 <Button
-                  size="sm"
                   variant="outline"
                   disabled={pagination.page >= pagination.totalPages}
                   onClick={() => loadData(pagination.page + 1)}
-                  className="text-xs"
+                  className="text-xs min-h-10 flex-1 sm:flex-none"
                 >
                   {t('next')}
                 </Button>
