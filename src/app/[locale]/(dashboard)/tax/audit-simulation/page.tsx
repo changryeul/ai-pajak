@@ -27,6 +27,14 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AuditPrep, AuditScenarioId } from '@/lib/audit/risk-detector';
+import { CHART_ACCENT_POSITIVE, CHART_ACCENT_NEGATIVE } from '@/lib/charts/palette';
+import { TrendBadge } from '@/components/ui/TrendBadge';
+
+// Score tier — "passing" baseline for the audit simulation overall score
+// (out of 100). Below this is a soft-fail (vermillion delta), above is good
+// (bluish-green delta). Lets the report card surface a single, glanceable
+// 'how am I doing?' chip without forcing the user to read the raw number.
+const SCORE_PASS_THRESHOLD = 60;
 
 interface TurnScore {
   evidence: number;
@@ -58,12 +66,25 @@ const INITIAL_QUESTIONS: Record<AuditScenarioId, string> = {
 
 type Stage = 'select' | 'prep' | 'chat' | 'report';
 
+// Colorblind-safe severity color helper. 'high' uses vermillion-derived
+// fills instead of red, so deuteranopic users can distinguish high vs the
+// medium amber and low blue tones.
 function severityColor(sev: 'low' | 'medium' | 'high') {
   return sev === 'high'
-    ? 'bg-red-50 border-red-200 text-red-900'
+    ? 'border'   // bg + text applied via inline style for high tier
     : sev === 'medium'
-    ? 'bg-amber-50 border-amber-200 text-amber-900'
-    : 'bg-blue-50 border-blue-200 text-blue-900';
+    ? 'bg-amber-50 border border-amber-200 text-amber-900'
+    : 'bg-blue-50 border border-blue-200 text-blue-900';
+}
+function severityStyle(sev: 'low' | 'medium' | 'high'): React.CSSProperties | undefined {
+  if (sev === 'high') {
+    return {
+      backgroundColor: '#FBE0D0',
+      borderColor: '#F4A878',
+      color: '#A04400',
+    };
+  }
+  return undefined;
 }
 function avg(arr: number[]): number {
   return arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
@@ -232,7 +253,11 @@ export default function AuditSimulationPage() {
                   {tSim('risksTitle')}
                 </p>
                 {prep.risks.map((r) => (
-                  <div key={r.id} className={cn('rounded-lg border p-3', severityColor(r.severity))}>
+                  <div
+                    key={r.id}
+                    className={cn('rounded-lg p-3', severityColor(r.severity))}
+                    style={severityStyle(r.severity)}
+                  >
                     <p className="font-semibold text-sm">
                       <Badge className="mr-2 bg-white/50 text-current border border-current/30">
                         {tSim(`sev.${r.severity}`)}
@@ -302,14 +327,27 @@ export default function AuditSimulationPage() {
     if (complianceAvg < 6) actions.push(tSim('actionCompliance'));
     if (!actions.length) actions.push(tSim('actionBaseline'));
 
+    const overallDelta = overall - SCORE_PASS_THRESHOLD;
     return (
       <div className="container mx-auto py-8 px-4 max-w-3xl space-y-4">
         <Card className="border-0 shadow-sm">
           <CardContent className="p-6 text-center">
-            <TrendingUp className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
+            <TrendingUp
+              className="h-8 w-8 mx-auto mb-2"
+              style={{ color: CHART_ACCENT_POSITIVE }}
+            />
             <p className="text-xs text-gray-500 uppercase tracking-wide">{tSim('overall')}</p>
             <p className="text-5xl font-bold text-gray-900 mt-2">{overall}</p>
             <p className="text-xs text-gray-500 mt-1">/ 100</p>
+            <div className="mt-2 flex justify-center">
+              <TrendBadge
+                value={overallDelta}
+                suffix={` vs ${SCORE_PASS_THRESHOLD}`}
+                precision={0}
+                direction="up-good"
+                size="text-xs"
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -318,23 +356,31 @@ export default function AuditSimulationPage() {
             { key: 'evidence', score: evidenceAvg, label: tSim('dimEvidence') },
             { key: 'clarity', score: clarityAvg, label: tSim('dimClarity') },
             { key: 'compliance', score: complianceAvg, label: tSim('dimCompliance') },
-          ].map((d) => (
-            <Card key={d.key} className="border-0 shadow-sm">
-              <CardContent className="p-4">
-                <p className="text-xs text-gray-500">{d.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{d.score}/10</p>
-                <div className="h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
-                  <div
-                    className={cn(
-                      'h-full',
-                      d.score >= 7 ? 'bg-emerald-500' : d.score >= 4 ? 'bg-amber-500' : 'bg-red-500',
-                    )}
-                    style={{ width: `${d.score * 10}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          ].map((d) => {
+            // Tier color uses Okabe-Ito accents instead of emerald/red. The
+            // 4-7 amber tier keeps the Tailwind amber-500 since it doesn't
+            // collide with anything for red-green deficiency.
+            const tierColor =
+              d.score >= 7
+                ? CHART_ACCENT_POSITIVE
+                : d.score >= 4
+                  ? '#F59E0B' // amber-500
+                  : CHART_ACCENT_NEGATIVE;
+            return (
+              <Card key={d.key} className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <p className="text-xs text-gray-500">{d.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">{d.score}/10</p>
+                  <div className="h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                    <div
+                      className="h-full"
+                      style={{ width: `${d.score * 10}%`, backgroundColor: tierColor }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         <Card className="border-0 shadow-sm">
