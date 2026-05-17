@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { CHART_ACCENT_NEGATIVE } from '@/lib/charts/palette';
+import { TrendBadge } from '@/components/ui/TrendBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
 import { fmtRp } from '@/lib/utils';
@@ -274,7 +276,18 @@ export default function MonthlyPaymentsPage() {
                         <h3 className="font-bold text-gray-900">{config.label}</h3>
                         <span className="text-xs text-gray-400">{tt(config.descKey)}</span>
                         {ts.overdueMonths > 0 && (
-                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium">{ts.overdueMonths} {tm('lateCount')}</span>
+                          <span
+                            className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                            style={{
+                              // Okabe-Ito vermillion at 12% bg + 100% text — colorblind-safe replacement
+                              // for bg-red-100 text-red-700 (the prior pairing collided with bg-emerald-100
+                              // text-emerald-700 elsewhere for deuteranopes).
+                              backgroundColor: '#FBE0D0',
+                              color: '#A04400',
+                            }}
+                          >
+                            {ts.overdueMonths} {tm('lateCount')}
+                          </span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-1.5">
@@ -284,7 +297,14 @@ export default function MonthlyPaymentsPage() {
                     </div>
                     <div className="text-right hidden sm:block">
                       <p className="text-sm font-bold text-gray-900">{fmtShort(ts.totalDue)}</p>
-                      {ts.outstanding > 0 && <p className="text-xs text-red-600">-{fmtShort(ts.outstanding)}</p>}
+                      {ts.outstanding > 0 && (
+                        <TrendBadge
+                          value={ts.outstanding}
+                          valueString={`−${fmtShort(ts.outstanding)}`}
+                          direction="up-bad"
+                          size="text-[10px]"
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -361,7 +381,12 @@ export default function MonthlyPaymentsPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Status</span>
-                <span className={`font-medium ${selectedPayment.status === 'OVERDUE' ? 'text-red-600' : 'text-gray-900'}`}>
+                <span
+                  className="font-medium"
+                  style={selectedPayment.status === 'OVERDUE'
+                    ? { color: CHART_ACCENT_NEGATIVE }
+                    : undefined}
+                >
                   {selectedPayment.status}
                 </span>
               </div>
