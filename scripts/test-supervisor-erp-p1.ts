@@ -231,8 +231,39 @@ async function run() {
     pass++;
   }
 
-  // ── 7. /counterparty/stats ──
-  console.log('\n━━ 7. GET /counterparty/stats ━━');
+  // ── 7. /team ──
+  console.log('\n━━ 7. GET /supervisor/team ━━');
+  const rT = await api('/api/consultant-erp/supervisor/team', supTok);
+  if (rT.status !== 200 || !rT.body.success) {
+    console.error('   ✗ failed', rT);
+    fail++;
+  } else {
+    const d = rT.body.data;
+    const ok =
+      Array.isArray(d?.rubric) && d.rubric.length > 0 &&
+      Array.isArray(d?.teams) &&
+      Array.isArray(d?.members);
+    if (!ok) {
+      console.error('   ✗ shape wrong', d);
+      fail++;
+    } else {
+      console.log(
+        `   ✅ rubric=${d.rubric.length}, teams=${d.teams.length}, members=${d.members.length}`,
+      );
+      pass++;
+    }
+  }
+  const rTc = await api('/api/consultant-erp/supervisor/team', consTok);
+  if (rTc.status !== 403) {
+    console.error('   ✗ consultant should be 403', rTc.status);
+    fail++;
+  } else {
+    console.log('   ✅ consultant 403');
+    pass++;
+  }
+
+  // ── 8. /counterparty/stats ──
+  console.log('\n━━ 8. GET /counterparty/stats ━━');
   const r4 = await api('/api/consultant-erp/counterparty/stats', supTok);
   if (r4.status !== 200 || !r4.body.success) {
     console.error('   ✗ failed', r4);

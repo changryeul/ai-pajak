@@ -182,6 +182,7 @@ const navItems: NavSection[] = [
     labelKey: 'nav.supervisorErp',
     roles: [UserRole.TAX_OPERATOR_SUPERVISOR],
     items: [
+      { href: '/consultant-erp/supervisor/team', icon: Users, labelKey: 'nav.supervisorTeam' },
       { href: '/consultant-erp/supervisor/customers', icon: Users, labelKey: 'nav.supervisorCustomers' },
       { href: '/consultant-erp/supervisor/revisions', icon: ClipboardList, labelKey: 'nav.supervisorRevisions' },
       { href: '/consultant-erp/supervisor/calendar', icon: BarChart3, labelKey: 'nav.supervisorCalendar' },

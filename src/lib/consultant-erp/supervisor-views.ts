@@ -308,6 +308,217 @@ export async function buildRevisionEventLog(opts?: { limit?: number }): Promise<
     });
 }
 
+export interface PerformanceRubric {
+  label: string;
+  individual: number;
+  team: number;
+  description: string;
+}
+
+export interface TeamKpi {
+  teamId: string;
+  teamName: string;
+  supervisorName: string | null;
+  memberCount: number;
+  customerCount: number;
+  activeMembers: number;
+  transactionsThisMonth: number;
+  counterpartyContributions: number;
+  completionRatePct: number;
+  reviewCompletenessPct: number;
+  pendingApproval: number;
+  revisionCount: number;
+  riskTasks: number;
+  totalTaxAmount: number;
+  insight: string;
+}
+
+export interface TeamMemberDetail {
+  consultantId: string;
+  fullName: string;
+  email: string | null;
+  isActive: boolean;
+  teamName: string;
+  customerCount: number;
+  activeTasks: number;
+  pendingApproval: number;
+  revisionCount: number;
+  avgProcessingMinutes: number;
+}
+
+const PERFORMANCE_RUBRIC: PerformanceRubric[] = [
+  { label: 'transactions',       individual: 25, team: 20, description: 'rubric.transactionsDesc' },
+  { label: 'docReview',          individual: 25, team: 20, description: 'rubric.docReviewDesc' },
+  { label: 'completionFlow',     individual: 20, team: 20, description: 'rubric.completionFlowDesc' },
+  { label: 'riskSla',            individual: 15, team: 15, description: 'rubric.riskSlaDesc' },
+  { label: 'counterpartyDb',     individual: 10, team: 10, description: 'rubric.counterpartyDbDesc' },
+  { label: 'taskCompletion',     individual: 5,  team: 0,  description: 'rubric.taskCompletionDesc' },
+  { label: 'queueBottleneck',    individual: 0,  team: 15, description: 'rubric.queueBottleneckDesc' },
+];
+
+/**
+ * Tax-partner-grouped KPI for the 팀원 관리 페이지 (PDF p.7).
+ * Each team = one tax_partner. Counts roll up from its active consultants.
+ */
+export async function buildTeamKpi(): Promise<{
+  rubric: PerformanceRubric[];
+  teams: TeamKpi[];
+  members: TeamMemberDetail[];
+}> {
+  const admin = getSupabaseAdmin();
+
+  const { data: partners } = await admin
+    .from('tax_partner')
+    .select('id, name')
+    .eq('is_active', true);
+  if (!partners) return { rubric: PERFORMANCE_RUBRIC, teams: [], members: [] };
+
+  const { data: consultants } = await admin
+    .from('consultant')
+    .select('id, full_name, email, tax_partner_id, is_active');
+  const consultantList = consultants ?? [];
+
+  // Customer assignments per consultant
+  const { data: assignments } = await admin
+    .from('customer_consultant')
+    .select('consultant_id, customer_id, is_active')
+    .eq('is_active', true);
+  const customersByConsultant = new Map<string, Set<string>>();
+  for (const a of assignments ?? []) {
+    if (!customersByConsultant.has(a.consultant_id)) customersByConsultant.set(a.consultant_id, new Set());
+    customersByConsultant.get(a.consultant_id)!.add(a.customer_id);
+  }
+
+  // Sessions per consultant
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const { data: sessions } = await admin
+    .from('consultant_session')
+    .select('id, consultant_id, status, updated_at');
+  const sessList = sessions ?? [];
+
+  // Documents this month per session → roll to consultant
+  const sessIds = sessList.map((s) => s.id);
+  const docsBySession = new Map<string, number>();
+  if (sessIds.length > 0) {
+    const { data: docs } = await admin
+      .from('consultant_session_document')
+      .select('session_id, uploaded_at')
+      .in('session_id', sessIds)
+      .gte('uploaded_at', monthStart.toISOString());
+    for (const d of docs ?? []) {
+      docsBySession.set(d.session_id, (docsBySession.get(d.session_id) ?? 0) + 1);
+    }
+  }
+
+  // Counterparty contributions (registered_by consultant_id)
+  const cpCountByConsultant = new Map<string, number>();
+  if (consultantList.length > 0) {
+    const { data: cps } = await admin
+      .from('counterparty_master')
+      .select('registered_by')
+      .in('registered_by', consultantList.map((c) => c.id));
+    for (const cp of cps ?? []) {
+      if (cp.registered_by) {
+        cpCountByConsultant.set(cp.registered_by, (cpCountByConsultant.get(cp.registered_by) ?? 0) + 1);
+      }
+    }
+  }
+
+  // Revisions (last 30 days)
+  const recentCutoff = new Date();
+  recentCutoff.setDate(recentCutoff.getDate() - 30);
+  const { data: rejects } = await admin
+    .from('consultant_session_approval')
+    .select('session_id, action, created_at')
+    .eq('action', 'REJECT')
+    .gte('created_at', recentCutoff.toISOString());
+  const sessIdsToConsultant = new Map((sessList).map((s) => [s.id, s.consultant_id]));
+  const revisionByConsultant = new Map<string, number>();
+  for (const r of rejects ?? []) {
+    const cid = sessIdsToConsultant.get(r.session_id);
+    if (cid) revisionByConsultant.set(cid, (revisionByConsultant.get(cid) ?? 0) + 1);
+  }
+
+  // Member-level aggregates
+  const ACTIVE = new Set(['DRAFT', 'UPLOADING', 'PARSING', 'REVIEWING', 'PENDING_APPROVAL']);
+  const members: TeamMemberDetail[] = consultantList.map((c) => {
+    const ownedSessions = sessList.filter((s) => s.consultant_id === c.id);
+    return {
+      consultantId: c.id,
+      fullName: c.full_name as string,
+      email: c.email,
+      isActive: !!c.is_active,
+      teamName: c.tax_partner_id
+        ? partners.find((p) => p.id === c.tax_partner_id)?.name ?? 'Independent'
+        : 'Independent',
+      customerCount: customersByConsultant.get(c.id)?.size ?? 0,
+      activeTasks: ownedSessions.filter((s) => ACTIVE.has(s.status)).length,
+      pendingApproval: ownedSessions.filter((s) => s.status === 'PENDING_APPROVAL').length,
+      revisionCount: revisionByConsultant.get(c.id) ?? 0,
+      avgProcessingMinutes: 18, // TODO: derive from doc upload→approval cycle when telemetry is wired.
+    };
+  });
+
+  // Team-level rollups
+  const teams: TeamKpi[] = partners.map((p) => {
+    const teamMembers = consultantList.filter((c) => c.tax_partner_id === p.id);
+    const activeMembers = teamMembers.filter((c) => c.is_active).length;
+    const teamCustomerSet = new Set<string>();
+    let transactions = 0;
+    let counterpartyContrib = 0;
+    let pendingApproval = 0;
+    let revisionCount = 0;
+    let completedThisMonth = 0;
+    let activeThisMonth = 0;
+    let riskTasks = 0;
+    for (const m of teamMembers) {
+      (customersByConsultant.get(m.id) ?? new Set()).forEach((id) => teamCustomerSet.add(id));
+      counterpartyContrib += cpCountByConsultant.get(m.id) ?? 0;
+      const own = sessList.filter((s) => s.consultant_id === m.id);
+      for (const s of own) {
+        transactions += docsBySession.get(s.id) ?? 0;
+        if (s.status === 'PENDING_APPROVAL') pendingApproval++;
+        if (ACTIVE.has(s.status)) activeThisMonth++;
+        if (s.status === 'COMPLETED' && new Date(s.updated_at) >= monthStart) completedThisMonth++;
+        if (s.status === 'REJECTED') riskTasks++;
+      }
+      revisionCount += revisionByConsultant.get(m.id) ?? 0;
+    }
+    const total = activeThisMonth + completedThisMonth;
+    const completionRatePct = total > 0 ? Math.round((completedThisMonth / total) * 100) : 0;
+    const reviewCompletenessPct = transactions > 0 ? Math.round(Math.min(100, (transactions / Math.max(1, teamMembers.length * 5)) * 100)) : 0;
+
+    const insight =
+      riskTasks > 0
+        ? `위험업무 ${riskTasks}건`
+        : pendingApproval > 0
+          ? `결재 병목 ${pendingApproval}건`
+          : '정상';
+
+    return {
+      teamId: p.id,
+      teamName: p.name as string,
+      supervisorName: null, // tax_partner doesn't directly map to a supervisor user yet
+      memberCount: teamMembers.length,
+      activeMembers,
+      customerCount: teamCustomerSet.size,
+      transactionsThisMonth: transactions,
+      counterpartyContributions: counterpartyContrib,
+      completionRatePct,
+      reviewCompletenessPct,
+      pendingApproval,
+      revisionCount,
+      riskTasks,
+      totalTaxAmount: 0, // TODO: aggregate from calc rows once schema firms up
+      insight,
+    };
+  });
+
+  return { rubric: PERFORMANCE_RUBRIC, teams, members };
+}
+
 export type CoretaxStage =
   | 'ID_BILLING_PENDING'
   | 'NTPN_PENDING'
