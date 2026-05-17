@@ -8508,9 +8508,7 @@
       "approveApprove": "承認",
       "approveReject": "却下",
       "approveHistory": "承認履歴",
-      "approveCommentPrompt": "{action}コメント（任意）",
-      "p0Title": "P0フレームワーク",
-      "p0Body": "Phase 1では5ステップナビゲーター + 6データスロットアップロード + スーパーバイザー承認 + Coretax手動記録UIが含まれます。データモデルはconsultant_session + 5つの子テーブルです。"
+      "approveCommentPrompt": "{action}コメント（任意）"
     },
     "slot": {
       "PAYROLL": "給与データ",
@@ -8654,7 +8652,9 @@
       "empty": "該当条件のセッションはありません。",
       "pageEyebrow": "Consultant ERP · Supervisor",
       "pageTitle": "決裁キュー / 全体進行状況",
-      "pageDesc": "すべての tax_partner の申告セッションを1画面で確認し、決裁待ちキューを処理します。"
+      "pageDesc": "すべての tax_partner の申告セッションを1画面で確認し、決裁待ちキューを処理します。",
+      "openSessionHint": "決裁キューからセッションを選択すると、ここに詳細が表示されます。",
+      "coretaxReadOnlyHint": "Coretax 結果は担当コンサルタントが記録します — supervisor は確認のみ。"
     }
   },
   "closingTrend": {

@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
 import { CalcCardsPanel } from './CalcCardsPanel';
 import { ParseReviewPanel } from './ParseReviewPanel';
 
@@ -61,8 +63,11 @@ const SLOT_KEYS: { key: string; required: boolean }[] = [
 
 const STEP_KEYS = ['stepCustomer', 'stepUpload', 'stepParseCalc', 'stepApproval', 'stepCoretax'] as const;
 
-export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
+export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?: boolean } = {}) {
   const t = useTranslations('consultantErp');
+  const { session: clientSession } = useSession();
+  const isSupervisor =
+    isSupervisorProp ?? clientSession?.role === UserRole.TAX_OPERATOR_SUPERVISOR;
   const params = useSearchParams();
   const customerId = params.get('customerId');
   const sessionIdParam = params.get('sessionId');
@@ -225,7 +230,7 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
         </div>
       )}
 
-      {!session && (
+      {!session && !isSupervisor && (
         <Card className="border-dashed">
           <CardContent className="p-6 space-y-4">
             <div>
@@ -265,6 +270,14 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : t('startMonthly')}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!session && isSupervisor && (
+        <Card className="border-dashed">
+          <CardContent className="p-6 text-sm text-slate-500">
+            {t('supervisor.openSessionHint')}
           </CardContent>
         </Card>
       )}
@@ -346,22 +359,24 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                       ) : (
                         <p className="text-xs text-slate-400">{t('slot.notUploaded')}</p>
                       )}
-                      <label className="mt-3 block">
-                        <input
-                          type="file"
-                          accept=".pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,.zip,.txt"
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) void uploadFile(slot.key, f);
-                            e.target.value = '';
-                          }}
-                          disabled={busy}
-                        />
-                        <span className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-1.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50">
-                          {doc ? t('slot.replaceUpload') : t('slot.selectAndUpload')}
-                        </span>
-                      </label>
+                      {!isSupervisor && (
+                        <label className="mt-3 block">
+                          <input
+                            type="file"
+                            accept=".pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,.zip,.txt"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) void uploadFile(slot.key, f);
+                              e.target.value = '';
+                            }}
+                            disabled={busy}
+                          />
+                          <span className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-1.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50">
+                            {doc ? t('slot.replaceUpload') : t('slot.selectAndUpload')}
+                          </span>
+                        </label>
+                      )}
                     </div>
                   );
                 })}
@@ -439,6 +454,10 @@ export function ErpWorkflow({ isSupervisor }: { isSupervisor: boolean }) {
                     {t('workflow.step5RecordedPrefix')}: ID Billing {coretax.id_billing} · NTPN {coretax.ntpn}
                     {coretax.bpe_file_path && <div className="mt-1 text-xs">BPE: {coretax.bpe_file_path}</div>}
                   </div>
+                ) : isSupervisor ? (
+                  <p className="text-xs text-slate-500">
+                    {t('supervisor.coretaxReadOnlyHint')}
+                  </p>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-3">
                     <Input

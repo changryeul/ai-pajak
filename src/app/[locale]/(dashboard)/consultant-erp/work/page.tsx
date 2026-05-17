@@ -1,4 +1,7 @@
+import { Suspense } from 'react';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { Loader2 } from 'lucide-react';
+import { ErpWorkflow } from '@/components/consultant-erp/ErpWorkflow';
 
 export default async function ConsultantErpWorkPage({
   params,
@@ -23,12 +26,16 @@ export default async function ConsultantErpWorkPage({
         </p>
       </header>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-bold text-slate-700">{t('workflow.p0Title')}</p>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          {t('workflow.p0Body')}
-        </p>
-      </div>
+      <Suspense
+        fallback={
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t('dashboard.loading')}
+          </div>
+        }
+      >
+        <ErpWorkflow />
+      </Suspense>
     </div>
   );
 }

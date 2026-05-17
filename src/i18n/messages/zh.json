@@ -8508,9 +8508,7 @@
       "approveApprove": "批准",
       "approveReject": "驳回",
       "approveHistory": "审批历史",
-      "approveCommentPrompt": "{action}备注（可选）",
-      "p0Title": "P0 框架",
-      "p0Body": "Phase 1 将包含 5 步导航器 + 6 个数据槽上传 + 主管审批 + Coretax 手动记录 UI。数据模型包括 consultant_session + 5 个子表。"
+      "approveCommentPrompt": "{action}备注（可选）"
     },
     "slot": {
       "PAYROLL": "工资数据",
@@ -8654,7 +8652,9 @@
       "empty": "没有符合当前筛选条件的会话。",
       "pageEyebrow": "Consultant ERP · Supervisor",
       "pageTitle": "审批队列 / 全平台进度",
-      "pageDesc": "在一个屏幕上审查所有事务所的申报会话并处理审批队列。"
+      "pageDesc": "在一个屏幕上审查所有事务所的申报会话并处理审批队列。",
+      "openSessionHint": "从审批队列中选择一个会话即可在此查看详情。",
+      "coretaxReadOnlyHint": "Coretax 结果由负责的顾问记录,主管仅可查看。"
     }
   },
   "closingTrend": {

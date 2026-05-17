@@ -8634,9 +8634,7 @@
       "approveApprove": "승인",
       "approveReject": "반려",
       "approveHistory": "결재 이력",
-      "approveCommentPrompt": "{action} 코멘트 (필수는 아님)",
-      "p0Title": "P0 골격",
-      "p0Body": "Phase 1에서 5-step navigator + 6 자료 슬롯 업로드 + supervisor 결재 + Coretax 수기 기록 UI가 들어옵니다. 데이터 모델은 consultant_session + 5 자식 테이블입니다."
+      "approveCommentPrompt": "{action} 코멘트 (필수는 아님)"
     },
     "slot": {
       "PAYROLL": "급여자료",
@@ -8780,7 +8778,9 @@
       "empty": "해당 조건의 세션이 없습니다.",
       "pageEyebrow": "Consultant ERP · Supervisor",
       "pageTitle": "결재 큐 / 전체 진행 현황",
-      "pageDesc": "전체 tax_partner의 신고 세션을 한 화면에서 검토하고 결재 대기 큐를 처리합니다."
+      "pageDesc": "전체 tax_partner의 신고 세션을 한 화면에서 검토하고 결재 대기 큐를 처리합니다.",
+      "openSessionHint": "결재 큐에서 세션을 선택하면 여기에 세부 내용이 표시됩니다.",
+      "coretaxReadOnlyHint": "Coretax 결과는 담당 컨설턴트가 기록합니다 — supervisor는 결과만 확인."
     }
   },
   "closingTrend": {

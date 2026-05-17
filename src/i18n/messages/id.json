@@ -8508,9 +8508,7 @@
       "approveApprove": "Setujui",
       "approveReject": "Tolak",
       "approveHistory": "Riwayat Persetujuan",
-      "approveCommentPrompt": "Komentar {action} (opsional)",
-      "p0Title": "Kerangka P0",
-      "p0Body": "Phase 1 akan mencakup navigator 5 langkah + upload 6 slot data + persetujuan supervisor + UI pencatatan manual Coretax. Model data terdiri dari consultant_session + 5 tabel anak."
+      "approveCommentPrompt": "Komentar {action} (opsional)"
     },
     "slot": {
       "PAYROLL": "Data Payroll",
@@ -8654,7 +8652,9 @@
       "empty": "Tidak ada sesi yang cocok dengan filter saat ini.",
       "pageEyebrow": "Consultant ERP · Supervisor",
       "pageTitle": "Antrian Persetujuan / Ringkasan Platform",
-      "pageDesc": "Tinjau sesi pelaporan di seluruh mitra pajak dan proses antrian persetujuan dari satu layar."
+      "pageDesc": "Tinjau sesi pelaporan di seluruh mitra pajak dan proses antrian persetujuan dari satu layar.",
+      "openSessionHint": "Pilih sesi dari antrian persetujuan untuk melihat detailnya di sini.",
+      "coretaxReadOnlyHint": "Hasil Coretax dicatat oleh konsultan penanggung jawab — supervisor hanya meninjau."
     }
   },
   "closingTrend": {

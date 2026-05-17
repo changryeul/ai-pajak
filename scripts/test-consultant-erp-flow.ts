@@ -292,6 +292,20 @@ async function run() {
     pass++;
   }
 
+  // ── 9. Supervisor can GET arbitrary session detail (work-page nav) ──
+  console.log('\n━━ 9. supervisor GET session detail ━━');
+  const supDetail = await api('GET', `/api/consultant-erp/sessions/${sessionId}`, supervisorTok);
+  if (supDetail.status !== 200 || !supDetail.body.success) {
+    console.error('   ✗ supervisor GET session failed', supDetail.status, supDetail.body);
+    fail++;
+  } else if (supDetail.body.data?.session?.id !== sessionId) {
+    console.error('   ✗ wrong session in response', supDetail.body.data?.session?.id);
+    fail++;
+  } else {
+    console.log(`   ✅ supervisor can fetch session ${sessionId.slice(0, 8)}… across tax_partners`);
+    pass++;
+  }
+
   // ── Cleanup: delete the test session + counterparty so re-runs do not collide ──
   console.log('\n🧹 cleanup');
   const c = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!);

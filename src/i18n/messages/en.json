@@ -8508,9 +8508,7 @@
       "approveApprove": "Approve",
       "approveReject": "Reject",
       "approveHistory": "Approval History",
-      "approveCommentPrompt": "{action} comment (optional)",
-      "p0Title": "P0 Framework",
-      "p0Body": "Phase 1 will include 5-step navigator + 6 data slot uploads + supervisor approval + manual Coretax recording UI. Data model consists of consultant_session + 5 child tables."
+      "approveCommentPrompt": "{action} comment (optional)"
     },
     "slot": {
       "PAYROLL": "Payroll Data",
@@ -8654,7 +8652,9 @@
       "empty": "No sessions match the current filter.",
       "pageEyebrow": "Consultant ERP · Supervisor",
       "pageTitle": "Approval Queue / Platform Overview",
-      "pageDesc": "Review filing sessions across all tax partners and process the approval queue from one screen."
+      "pageDesc": "Review filing sessions across all tax partners and process the approval queue from one screen.",
+      "openSessionHint": "Pick a session from the approval queue to see its detail here.",
+      "coretaxReadOnlyHint": "Coretax results are recorded by the assigned consultant — supervisors can only review."
     }
   },
   "closingTrend": {
