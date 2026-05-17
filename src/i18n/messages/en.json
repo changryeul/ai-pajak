@@ -249,7 +249,11 @@
     "consultantErpDashboard": "ERP Dashboard",
     "consultantErpWork": "ERP Workflow",
     "consultantErpLegality": "Legality Vault",
-    "consultantErpCounterparty": "Counterparty Master"
+    "consultantErpCounterparty": "Counterparty Master",
+    "supervisorErp": "Supervisor ERP",
+    "supervisorCustomers": "Customers",
+    "supervisorRevisions": "Revisions",
+    "supervisorCalendar": "Deadline Calendar"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -8602,7 +8606,10 @@
       "thTrust": "Trust",
       "candidateTitle": "Update Candidates",
       "candidatePending": "Pending Review",
-      "candidateApproved": "Applied"
+      "candidateApproved": "Applied",
+      "statsRegistered": "Registered",
+      "statsPending": "Pending",
+      "statsNeedsEvidence": "Needs evidence"
     },
     "legality": {
       "selectCustomerOption": "— Select Customer —",

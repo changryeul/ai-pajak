@@ -249,7 +249,11 @@
     "consultantErpDashboard": "Dashboard ERP",
     "consultantErpWork": "Pemrosesan ERP",
     "consultantErpLegality": "Berkas Legalitas",
-    "consultantErpCounterparty": "DB Mitra Bersama"
+    "consultantErpCounterparty": "DB Mitra Bersama",
+    "supervisorErp": "ERP Supervisor",
+    "supervisorCustomers": "Pelanggan",
+    "supervisorRevisions": "Revisi",
+    "supervisorCalendar": "Kalender Tenggat"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -8602,7 +8606,10 @@
       "thTrust": "Trust",
       "candidateTitle": "Kandidat Update",
       "candidatePending": "Menunggu Review",
-      "candidateApproved": "Diterapkan"
+      "candidateApproved": "Diterapkan",
+      "statsRegistered": "Terdaftar",
+      "statsPending": "Menunggu",
+      "statsNeedsEvidence": "Perlu bukti"
     },
     "legality": {
       "selectCustomerOption": "— Pilih Klien —",

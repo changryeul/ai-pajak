@@ -139,6 +139,27 @@ export function CounterpartyExplorer() {
     pendingCandidates: 0,
   };
 
+  const [globalStats, setGlobalStats] = useState<{
+    totalRegistered: number;
+    avgTrust: number;
+    pendingCandidates: number;
+    needsEvidence: number;
+    verified: number;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/consultant-erp/counterparty/stats')
+      .then((r) => r.json())
+      .then((j) => {
+        if (!cancelled && j.success) setGlobalStats(j.data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
       <div className="space-y-4">
@@ -146,16 +167,37 @@ export function CounterpartyExplorer() {
           <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-300">
             {t('pageTitleCounterparty')}
           </p>
-          <div className="mt-3 grid grid-cols-2 gap-3 text-center">
-            <div>
-              <p className="text-2xl font-black">{stats.total}</p>
-              <p className="text-[10px] text-slate-400">{t('counterparty.statsResults')}</p>
+          {globalStats ? (
+            <div className="mt-3 grid grid-cols-2 gap-3 text-center">
+              <div>
+                <p className="text-2xl font-black">{globalStats.totalRegistered}</p>
+                <p className="text-[10px] text-slate-400">{t('counterparty.statsRegistered')}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-emerald-300">{globalStats.avgTrust}</p>
+                <p className="text-[10px] text-slate-400">{t('counterparty.statsAvgTrust')}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-amber-300">{globalStats.pendingCandidates}</p>
+                <p className="text-[10px] text-slate-400">{t('counterparty.statsPending')}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-rose-300">{globalStats.needsEvidence}</p>
+                <p className="text-[10px] text-slate-400">{t('counterparty.statsNeedsEvidence')}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-black text-emerald-300">{stats.averageTrust}</p>
-              <p className="text-[10px] text-slate-400">{t('counterparty.statsAvgTrust')}</p>
+          ) : (
+            <div className="mt-3 grid grid-cols-2 gap-3 text-center">
+              <div>
+                <p className="text-2xl font-black">{stats.total}</p>
+                <p className="text-[10px] text-slate-400">{t('counterparty.statsResults')}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-emerald-300">{stats.averageTrust}</p>
+                <p className="text-[10px] text-slate-400">{t('counterparty.statsAvgTrust')}</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <Card>

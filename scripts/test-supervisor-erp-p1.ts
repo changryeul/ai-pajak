@@ -135,6 +135,40 @@ async function run() {
     pass++;
   }
 
+  // ── 4. /counterparty/stats ──
+  console.log('\n━━ 4. GET /counterparty/stats ━━');
+  const r4 = await api('/api/consultant-erp/counterparty/stats', supTok);
+  if (r4.status !== 200 || !r4.body.success) {
+    console.error('   ✗ failed', r4);
+    fail++;
+  } else {
+    const d = r4.body.data;
+    const ok =
+      typeof d.totalRegistered === 'number' &&
+      typeof d.avgTrust === 'number' &&
+      typeof d.pendingCandidates === 'number' &&
+      typeof d.needsEvidence === 'number' &&
+      typeof d.verified === 'number';
+    if (!ok) {
+      console.error('   ✗ shape wrong', d);
+      fail++;
+    } else {
+      console.log(
+        `   ✅ total=${d.totalRegistered}, avg=${d.avgTrust}, pending=${d.pendingCandidates}, needsEvidence=${d.needsEvidence}, verified=${d.verified}`,
+      );
+      pass++;
+    }
+  }
+  // Consultant can also see counterparty stats (counterparty is cross-tenant).
+  const r4c = await api('/api/consultant-erp/counterparty/stats', consTok);
+  if (r4c.status !== 200) {
+    console.error('   ✗ consultant should see counterparty stats too', r4c.status);
+    fail++;
+  } else {
+    console.log('   ✅ consultant 200 (cross-tenant)');
+    pass++;
+  }
+
   console.log(`\n${fail === 0 ? '✨' : '⚠️'} Done. ${pass} PASS / ${fail} FAIL`);
   process.exit(fail === 0 ? 0 : 1);
 }

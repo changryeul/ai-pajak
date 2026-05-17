@@ -249,7 +249,11 @@
     "consultantErpDashboard": "ERP 현황판",
     "consultantErpWork": "ERP 업무처리",
     "consultantErpLegality": "ERP 리갈리티 자료",
-    "consultantErpCounterparty": "ERP 공동 거래처 DB"
+    "consultantErpCounterparty": "ERP 공동 거래처 DB",
+    "supervisorErp": "Supervisor ERP",
+    "supervisorCustomers": "고객별 진행현황",
+    "supervisorRevisions": "수정/재상신 이력",
+    "supervisorCalendar": "마감 캘린더"
   },
   "dashboard": {
     "title": "대시보드",
@@ -8728,7 +8732,10 @@
       "thTrust": "Trust",
       "candidateTitle": "업데이트 후보",
       "candidatePending": "검토 대기",
-      "candidateApproved": "반영됨"
+      "candidateApproved": "반영됨",
+      "statsRegistered": "등록 거래처",
+      "statsPending": "검토대기",
+      "statsNeedsEvidence": "증빙 필요"
     },
     "legality": {
       "selectCustomerOption": "— 고객 선택 —",

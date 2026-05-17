@@ -249,7 +249,11 @@
     "consultantErpDashboard": "ERPダッシュボード",
     "consultantErpWork": "ERP 業務処理",
     "consultantErpLegality": "リーガル資料",
-    "consultantErpCounterparty": "共同取引先DB"
+    "consultantErpCounterparty": "共同取引先DB",
+    "supervisorErp": "Supervisor ERP",
+    "supervisorCustomers": "顧客別進行状況",
+    "supervisorRevisions": "修正/再提出",
+    "supervisorCalendar": "締切カレンダー"
   },
   "dashboard": {
     "title": "ダッシュボード",
@@ -8602,7 +8606,10 @@
       "thTrust": "Trust",
       "candidateTitle": "更新候補",
       "candidatePending": "確認待ち",
-      "candidateApproved": "反映済み"
+      "candidateApproved": "反映済み",
+      "statsRegistered": "登録",
+      "statsPending": "審査待ち",
+      "statsNeedsEvidence": "証拠必要"
     },
     "legality": {
       "selectCustomerOption": "— 顧客を選択 —",

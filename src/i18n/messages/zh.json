@@ -249,7 +249,11 @@
     "consultantErpDashboard": "ERP 仪表盘",
     "consultantErpWork": "ERP 业务处理",
     "consultantErpLegality": "法务资料",
-    "consultantErpCounterparty": "共同交易方 DB"
+    "consultantErpCounterparty": "共同交易方 DB",
+    "supervisorErp": "Supervisor ERP",
+    "supervisorCustomers": "客户进度",
+    "supervisorRevisions": "修订历史",
+    "supervisorCalendar": "截止日历"
   },
   "dashboard": {
     "title": "仪表板",
@@ -8602,7 +8606,10 @@
       "thTrust": "Trust",
       "candidateTitle": "更新候选",
       "candidatePending": "待审核",
-      "candidateApproved": "已应用"
+      "candidateApproved": "已应用",
+      "statsRegistered": "已登记",
+      "statsPending": "待审",
+      "statsNeedsEvidence": "需补证"
     },
     "legality": {
       "selectCustomerOption": "— 选择客户 —",

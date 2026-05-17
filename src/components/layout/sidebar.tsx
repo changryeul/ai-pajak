@@ -176,6 +176,17 @@ const navItems: NavSection[] = [
       { href: '/consultant-erp/counterparty', icon: Users, labelKey: 'nav.consultantErpCounterparty' },
     ],
   },
+  // ── Supervisor ERP (팀장용, supervisor-only) ──
+  {
+    section: 'supervisor-erp',
+    labelKey: 'nav.supervisorErp',
+    roles: [UserRole.TAX_OPERATOR_SUPERVISOR],
+    items: [
+      { href: '/consultant-erp/supervisor/customers', icon: Users, labelKey: 'nav.supervisorCustomers' },
+      { href: '/consultant-erp/supervisor/revisions', icon: ClipboardList, labelKey: 'nav.supervisorRevisions' },
+      { href: '/consultant-erp/supervisor/calendar', icon: BarChart3, labelKey: 'nav.supervisorCalendar' },
+    ],
+  },
   // ── 세무 컨설턴트: 월신고 (기존 구조 유지) ──
   {
     section: 'consultant-main',
