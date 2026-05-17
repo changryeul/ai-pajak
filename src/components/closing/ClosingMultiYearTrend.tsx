@@ -14,6 +14,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ClosingQuarterlyView } from './ClosingQuarterlyView';
 
 /**
  * /tax/annual 진입 페이지에서 사용하는 최근 5년 결산 트렌드 패널.
@@ -199,24 +201,6 @@ export function ClosingMultiYearTrend() {
     };
   }, [ordered]);
 
-  if (loading) {
-    return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 mb-6">
-        <p className="text-base font-bold text-slate-900">{t('title')}</p>
-        <p className="text-sm text-slate-400 mt-2">{t('loading')}</p>
-      </div>
-    );
-  }
-
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-6 mb-6">
-        <p className="text-base font-bold text-slate-900">{t('title')}</p>
-        <p className="text-sm text-slate-500 mt-2">{t('empty')}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 mb-6">
       <div className="flex items-start justify-between gap-2 flex-wrap">
@@ -226,6 +210,62 @@ export function ClosingMultiYearTrend() {
         </div>
       </div>
 
+      <Tabs defaultValue="annual" className="mt-4">
+        <TabsList>
+          <TabsTrigger value="annual">{t('tabAnnual')}</TabsTrigger>
+          <TabsTrigger value="quarterly">{t('tabQuarterly')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="annual">
+          <AnnualContent
+            t={t}
+            loading={loading}
+            rows={rows}
+            ordered={ordered}
+            chartData={chartData}
+            yoy={yoy}
+          />
+        </TabsContent>
+
+        <TabsContent value="quarterly">
+          <ClosingQuarterlyView />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+interface AnnualContentProps {
+  t: ReturnType<typeof useTranslations<'closingTrend'>>;
+  loading: boolean;
+  rows: ClosingApiRow[];
+  ordered: ClosingApiRow[];
+  chartData: ChartPoint[];
+  yoy: {
+    prevYear: number;
+    currYear: number;
+    revenueRate: number | null;
+    netIncomeRate: number | null;
+    taxRate: number | null;
+    etrDelta: number | null;
+  } | null;
+}
+
+function AnnualContent({ t, loading, rows, ordered, chartData, yoy }: AnnualContentProps) {
+  if (loading) {
+    return <p className="text-sm text-slate-400 mt-2">{t('loading')}</p>;
+  }
+
+  if (rows.length === 0) {
+    return (
+      <div className="mt-2 rounded-lg border border-dashed border-slate-300 bg-slate-50/50 p-6 text-center">
+        <p className="text-sm text-slate-500">{t('empty')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
       {/* YoY summary banner */}
       {yoy && (
         <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50/40 p-4">

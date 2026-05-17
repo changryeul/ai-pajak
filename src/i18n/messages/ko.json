@@ -8808,6 +8808,16 @@
     "chartSubtitle": "막대는 매출/순이익(좌측 축), 선은 실효세율(우측 축).",
     "legendRevenue": "매출",
     "legendNetIncome": "순이익",
-    "legendEtr": "실효세율 (ETR)"
+    "legendEtr": "실효세율 (ETR)",
+    "tabAnnual": "연간",
+    "tabQuarterly": "분기",
+    "quarterTitle": "분기별 세금 납부 추이",
+    "quarterSubtitle": "월별 신고 금액을 Q1~Q4 로 묶어 전년 대비 비교. (월 납부 = amount_paid 우선, 미납 시 amount_due)",
+    "quarterEmpty": "월별 신고 데이터가 아직 없습니다. 월 SPT Masa 신고를 1건 이상 완료하면 분기 추이가 표시됩니다.",
+    "quarterLegendTotal": "분기 합계",
+    "yoyQuarterTitle": "분기별 전년 대비",
+    "thQuarter": "분기",
+    "thTotal": "합계",
+    "yearSelector": "비교 연도"
   }
 }

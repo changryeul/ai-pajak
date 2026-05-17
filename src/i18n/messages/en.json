@@ -8682,6 +8682,16 @@
     "chartSubtitle": "Bars: revenue and net income (left axis). Line: effective tax rate (right axis).",
     "legendRevenue": "Revenue",
     "legendNetIncome": "Net income",
-    "legendEtr": "Effective tax rate (ETR)"
+    "legendEtr": "Effective tax rate (ETR)",
+    "tabAnnual": "Annual",
+    "tabQuarterly": "Quarterly",
+    "quarterTitle": "Quarterly Tax Payment Trend",
+    "quarterSubtitle": "Monthly filings grouped into Q1~Q4 with year-over-year comparison. (Uses amount_paid when available, falls back to amount_due)",
+    "quarterEmpty": "No monthly filings yet. Once at least one monthly SPT Masa is filed, the quarterly trend appears here.",
+    "quarterLegendTotal": "Quarter total",
+    "yoyQuarterTitle": "Quarter-over-quarter YoY",
+    "thQuarter": "Quarter",
+    "thTotal": "Total",
+    "yearSelector": "Years"
   }
 }

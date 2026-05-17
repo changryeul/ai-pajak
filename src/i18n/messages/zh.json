@@ -8682,6 +8682,16 @@
     "chartSubtitle": "柱:营业收入与净利润(左轴);线:实效税率(右轴)。",
     "legendRevenue": "营业收入",
     "legendNetIncome": "净利润",
-    "legendEtr": "实效税率 (ETR)"
+    "legendEtr": "实效税率 (ETR)",
+    "tabAnnual": "年度",
+    "tabQuarterly": "季度",
+    "quarterTitle": "季度纳税走势",
+    "quarterSubtitle": "将每月申报金额按 Q1~Q4 汇总并进行同比对比。(优先使用 amount_paid,未付款则使用 amount_due)",
+    "quarterEmpty": "尚无月度申报数据。完成至少一次 SPT Masa 月报后,季度走势将在此显示。",
+    "quarterLegendTotal": "季度合计",
+    "yoyQuarterTitle": "季度同比",
+    "thQuarter": "季度",
+    "thTotal": "合计",
+    "yearSelector": "年度"
   }
 }

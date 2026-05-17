@@ -8682,6 +8682,16 @@
     "chartSubtitle": "棒は売上と純利益(左軸)、線は実効税率(右軸)。",
     "legendRevenue": "売上",
     "legendNetIncome": "純利益",
-    "legendEtr": "実効税率 (ETR)"
+    "legendEtr": "実効税率 (ETR)",
+    "tabAnnual": "年次",
+    "tabQuarterly": "四半期",
+    "quarterTitle": "四半期別の納税推移",
+    "quarterSubtitle": "月次申告額を Q1~Q4 にまとめて前年比比較。(amount_paid 優先、未払時は amount_due)",
+    "quarterEmpty": "月次申告データがまだありません。月次 SPT Masa を1件以上提出すると、四半期トレンドが表示されます。",
+    "quarterLegendTotal": "四半期合計",
+    "yoyQuarterTitle": "四半期前年比",
+    "thQuarter": "四半期",
+    "thTotal": "合計",
+    "yearSelector": "年度"
   }
 }

@@ -8682,6 +8682,16 @@
     "chartSubtitle": "Batang: pendapatan dan laba bersih (sumbu kiri). Garis: tarif pajak efektif (sumbu kanan).",
     "legendRevenue": "Pendapatan",
     "legendNetIncome": "Laba bersih",
-    "legendEtr": "Tarif pajak efektif (ETR)"
+    "legendEtr": "Tarif pajak efektif (ETR)",
+    "tabAnnual": "Tahunan",
+    "tabQuarterly": "Triwulan",
+    "quarterTitle": "Tren Pembayaran Pajak Triwulanan",
+    "quarterSubtitle": "Pelaporan bulanan dikelompokkan menjadi Q1~Q4 dengan perbandingan tahunan. (Pakai amount_paid bila ada, jika belum bayar pakai amount_due)",
+    "quarterEmpty": "Belum ada pelaporan bulanan. Setelah satu SPT Masa bulanan diajukan, tren triwulanan akan muncul di sini.",
+    "quarterLegendTotal": "Total triwulan",
+    "yoyQuarterTitle": "Triwulan vs tahun lalu",
+    "thQuarter": "Triwulan",
+    "thTotal": "Total",
+    "yearSelector": "Tahun"
   }
 }
