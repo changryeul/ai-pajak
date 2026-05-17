@@ -65,26 +65,49 @@ const EXTERNAL_CUSTOMER_ID   = '00000000-0000-0000-0000-000000000042';
 // JTC platform_id from seed-test-users.ts
 const PLATFORM_ID = '00000000-0000-0000-0000-000000000002';
 
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+/**
+ * Resolve a user id by signing in with the test password.
+ *
+ * Prod Supabase's `auth.admin.listUsers` returns 500
+ * ("Database error finding users") on this database, so we cannot page through
+ * the user table. Instead we try to sign in with the well-known test password
+ * — this returns the user id when the account exists.
+ */
+async function findUserIdBySignIn(email: string): Promise<string | null> {
+  if (!supabaseAnonKey) return null;
+  const c = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { data, error } = await c.auth.signInWithPassword({ email, password: PASSWORD });
+  if (error || !data.user?.id) return null;
+  return data.user.id;
+}
+
 async function findOrCreateUser(email: string, fullName: string, role: string) {
-  const { data: existing } = await supabase.auth.admin.listUsers();
-  const found = existing?.users?.find((u) => u.email === email);
+  let userId: string | null = null;
 
-  let userId: string;
-
-  if (found) {
-    console.log(`⏭️  ${email} already exists`);
-    userId = found.id;
-  } else {
-    const { data, error } = await supabase.auth.admin.createUser({
-      email,
-      password: PASSWORD,
-      email_confirm: true,
-      user_metadata: { full_name: fullName, role },
-    });
-    if (error) {
+  // Try create first — if email already exists, fall back to sign-in lookup.
+  const { data, error } = await supabase.auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: true,
+    user_metadata: { full_name: fullName, role },
+  });
+  if (error) {
+    if ((error as { code?: string }).code === 'email_exists') {
+      userId = await findUserIdBySignIn(email);
+      if (!userId) {
+        console.error(`❌ ${email} exists but sign-in failed — password may have been changed.`);
+        throw error;
+      }
+      console.log(`⏭️  ${email} already exists`);
+    } else {
       console.error(`❌ Failed to create ${email}:`, error.message);
       throw error;
     }
+  } else {
     userId = data.user.id;
     console.log(`✅ Created auth user: ${email}`);
   }

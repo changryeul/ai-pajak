@@ -23,6 +23,20 @@ export async function resolveConsultantContext(opts: {
 }): Promise<ConsultantContext | null> {
   const { userId, role } = opts;
   const admin = getSupabaseAdmin();
+
+  // TAX_OPERATOR_SUPERVISOR is platform-wide (1-단 결재 권한 across all
+  // tax_partners) so it has no consultant row. Return a synthetic context;
+  // ensureSessionAccess and buildBoardForConsultant honor isSupervisor.
+  if (role === UserRole.TAX_OPERATOR_SUPERVISOR) {
+    return {
+      userId,
+      role,
+      consultantId: '',
+      taxPartnerId: '',
+      isSupervisor: true,
+    };
+  }
+
   const { data: c } = await admin
     .from('consultant')
     .select('id, tax_partner_id, is_active')
@@ -35,7 +49,7 @@ export async function resolveConsultantContext(opts: {
     role,
     consultantId: c.id,
     taxPartnerId: c.tax_partner_id,
-    isSupervisor: role === UserRole.TAX_OPERATOR_SUPERVISOR,
+    isSupervisor: false,
   };
 }
 
@@ -50,6 +64,8 @@ export async function ensureSessionAccess(opts: {
     .eq('id', opts.sessionId)
     .maybeSingle();
   if (!row) return { ok: false, status: 404, error: 'Session not found' };
+  // Supervisors approve sessions across all tax_partners; no scope check.
+  if (opts.ctx.isSupervisor) return { ok: true, partnerId: row.tax_partner_id };
   if (row.tax_partner_id !== opts.ctx.taxPartnerId) {
     return { ok: false, status: 403, error: 'Session belongs to another tax_partner' };
   }
