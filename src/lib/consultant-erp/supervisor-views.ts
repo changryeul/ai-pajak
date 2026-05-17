@@ -308,6 +308,172 @@ export async function buildRevisionEventLog(opts?: { limit?: number }): Promise<
     });
 }
 
+export interface QualityHealthSummary {
+  totalRegistered: number;
+  avgTrust: number;
+  needsRemediation: number; // trust < 75
+  manageable: number;       // 75-89
+  verified: number;         // 90+
+  evidenceNeeded: number;   // pending update candidates
+  pendingCandidates: number;
+  completedToday: number;
+}
+
+export interface QualityActionStep {
+  step: 1 | 2 | 3 | 4;
+  titleKey: string;
+  count: number;
+}
+
+export interface QualityQueueRow {
+  counterpartyId: string;
+  name: string;
+  npwp: string | null;
+  country: string;
+  trustScore: number;
+  pkpStatus: string | null;
+  suggestedPph: string | null;
+  status: 'remediation' | 'manageable' | 'verified' | 'evidence-needed';
+  insight: string;
+  lastVerifiedAt: string | null;
+  fieldTrust: Array<{
+    fieldName: string;
+    fieldValue: string | null;
+    source: string | null;
+    trustScore: number;
+  }>;
+}
+
+/**
+ * Counterparty DB quality monitoring (PDF p.21-25 of 팀장용 ERP).
+ *
+ * Aggregates trust score distribution, pending update candidates, and the
+ * priority queue of rows that need a supervisor review. The queue is
+ * ranked: lowest-trust + evidence-needed first.
+ */
+export async function buildQualityMonitor(): Promise<{
+  summary: QualityHealthSummary;
+  actions: QualityActionStep[];
+  queue: QualityQueueRow[];
+}> {
+  const admin = getSupabaseAdmin();
+
+  const { data: counterparties } = await admin
+    .from('counterparty_master')
+    .select(
+      'id, name, npwp, country, overall_trust, pkp_status, suggested_pph_type, last_verified_at',
+    )
+    .limit(500);
+
+  const list = counterparties ?? [];
+  const totalRegistered = list.length;
+  const avgTrust = list.length
+    ? Math.round(list.reduce((s, r) => s + (Number(r.overall_trust) || 0), 0) / list.length)
+    : 0;
+
+  const needsRemediation = list.filter((r) => (Number(r.overall_trust) || 0) < 75).length;
+  const manageable = list.filter(
+    (r) => (Number(r.overall_trust) || 0) >= 75 && (Number(r.overall_trust) || 0) < 90,
+  ).length;
+  const verified = list.filter((r) => (Number(r.overall_trust) || 0) >= 90).length;
+
+  const { data: pendingCandidates } = await admin
+    .from('counterparty_update_candidate')
+    .select('counterparty_id, status')
+    .eq('status', 'PROPOSED');
+  const pendingByCounterparty = new Set((pendingCandidates ?? []).map((c) => c.counterparty_id));
+  const evidenceNeeded = list.filter(
+    (r) => pendingByCounterparty.has(r.id) || (Number(r.overall_trust) || 0) < 40,
+  ).length;
+
+  // Completed today: counterparties whose last_verified_at is today.
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const completedToday = list.filter((r) => {
+    if (!r.last_verified_at) return false;
+    return new Date(r.last_verified_at) >= todayStart;
+  }).length;
+
+  // Field trust lookup for the top 50 priority rows.
+  const queueSorted = list
+    .slice()
+    .sort((a, b) => (Number(a.overall_trust) || 0) - (Number(b.overall_trust) || 0))
+    .slice(0, 50);
+  const ids = queueSorted.map((r) => r.id);
+  const fieldTrustByCounterparty = new Map<
+    string,
+    Array<{ fieldName: string; fieldValue: string | null; source: string | null; trustScore: number }>
+  >();
+  if (ids.length > 0) {
+    const { data: trustRows } = await admin
+      .from('counterparty_field_trust')
+      .select('counterparty_id, field_name, field_value, source, trust_score')
+      .in('counterparty_id', ids);
+    for (const t of trustRows ?? []) {
+      const arr = fieldTrustByCounterparty.get(t.counterparty_id) ?? [];
+      arr.push({
+        fieldName: t.field_name,
+        fieldValue: t.field_value,
+        source: t.source,
+        trustScore: Number(t.trust_score) || 0,
+      });
+      fieldTrustByCounterparty.set(t.counterparty_id, arr);
+    }
+  }
+
+  const queue: QualityQueueRow[] = queueSorted.map((r) => {
+    const trust = Number(r.overall_trust) || 0;
+    let status: QualityQueueRow['status'];
+    if (pendingByCounterparty.has(r.id)) status = 'evidence-needed';
+    else if (trust >= 90) status = 'verified';
+    else if (trust >= 75) status = 'manageable';
+    else status = 'remediation';
+    const insight =
+      status === 'evidence-needed'
+        ? 'DGT/Treaty/계약서 증빙 보강 필요'
+        : status === 'remediation'
+          ? '국내 법인 서비스 거래처 후보. KBLI/계약내용 기준 최종 확인 필요'
+          : status === 'manageable'
+            ? '검증 양호 — 다음 분기 재확인'
+            : '검증 완료';
+    return {
+      counterpartyId: r.id,
+      name: r.name as string,
+      npwp: r.npwp,
+      country: r.country,
+      trustScore: trust,
+      pkpStatus: r.pkp_status,
+      suggestedPph: r.suggested_pph_type,
+      status,
+      insight,
+      lastVerifiedAt: r.last_verified_at,
+      fieldTrust: fieldTrustByCounterparty.get(r.id) ?? [],
+    };
+  });
+
+  const actions: QualityActionStep[] = [
+    { step: 1, titleKey: 'quality.actionStep1', count: needsRemediation },
+    { step: 2, titleKey: 'quality.actionStep2', count: evidenceNeeded },
+    { step: 3, titleKey: 'quality.actionStep3', count: pendingByCounterparty.size },
+    { step: 4, titleKey: 'quality.actionStep4', count: verified },
+  ];
+
+  return {
+    summary: {
+      totalRegistered,
+      avgTrust,
+      needsRemediation,
+      manageable,
+      verified,
+      evidenceNeeded,
+      pendingCandidates: pendingByCounterparty.size,
+      completedToday,
+    },
+    actions,
+    queue,
+  };
+}
+
 export interface PerformanceRubric {
   label: string;
   individual: number;

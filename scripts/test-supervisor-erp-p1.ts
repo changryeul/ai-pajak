@@ -262,8 +262,39 @@ async function run() {
     pass++;
   }
 
-  // ── 8. /counterparty/stats ──
-  console.log('\n━━ 8. GET /counterparty/stats ━━');
+  // ── 8. /quality ──
+  console.log('\n━━ 8. GET /supervisor/quality ━━');
+  const rQ = await api('/api/consultant-erp/supervisor/quality', supTok);
+  if (rQ.status !== 200 || !rQ.body.success) {
+    console.error('   ✗ failed', rQ);
+    fail++;
+  } else {
+    const d = rQ.body.data;
+    const ok =
+      d?.summary && typeof d.summary.avgTrust === 'number' &&
+      Array.isArray(d?.actions) && d.actions.length === 4 &&
+      Array.isArray(d?.queue);
+    if (!ok) {
+      console.error('   ✗ shape wrong', d);
+      fail++;
+    } else {
+      console.log(
+        `   ✅ avgTrust=${d.summary.avgTrust}, queue=${d.queue.length}, actions=${d.actions.length}`,
+      );
+      pass++;
+    }
+  }
+  const rQc = await api('/api/consultant-erp/supervisor/quality', consTok);
+  if (rQc.status !== 403) {
+    console.error('   ✗ consultant should be 403', rQc.status);
+    fail++;
+  } else {
+    console.log('   ✅ consultant 403');
+    pass++;
+  }
+
+  // ── 9. /counterparty/stats ──
+  console.log('\n━━ 9. GET /counterparty/stats ━━');
   const r4 = await api('/api/consultant-erp/counterparty/stats', supTok);
   if (r4.status !== 200 || !r4.body.success) {
     console.error('   ✗ failed', r4);
