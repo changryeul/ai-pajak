@@ -8967,6 +8967,17 @@
     "approveSuccess": "Approved",
     "rejectSuccess": "Rejected",
     "historyHeading": "Submission / revision history",
-    "backToList": "← Back to list"
+    "backToList": "← Back to list",
+    "reassignHeading": "Reassign task",
+    "reassignDesc": "In one row, see customer/period/current assignee/new assignee and reassign.",
+    "reassignTarget": "Target task",
+    "reassignCurrent": "Current",
+    "reassignNew": "New assignee",
+    "reassignReason": "Reason (optional)",
+    "reassignButton": "Reassign",
+    "reassignRuleWarning": "Delete rule: members with active work must be reassigned or deactivated first.",
+    "reassignSuccess": "Reassigned",
+    "reassignEmpty": "No active sessions to reassign.",
+    "reassignSelected": "Selected task"
   }
 }

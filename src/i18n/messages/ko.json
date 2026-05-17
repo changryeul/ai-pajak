@@ -9093,6 +9093,17 @@
     "approveSuccess": "승인 처리됨",
     "rejectSuccess": "반려 처리됨",
     "historyHeading": "상신/반려 이력",
-    "backToList": "← 목록으로"
+    "backToList": "← 목록으로",
+    "reassignHeading": "업무 재배정",
+    "reassignDesc": "팀원별 업무량 화면과 같은 폭에서 고객, 기간, 현재 담당, 변경 담당을 한 줄로 확인하고 재배정합니다.",
+    "reassignTarget": "대상 업무",
+    "reassignCurrent": "현재 담당",
+    "reassignNew": "변경 담당",
+    "reassignReason": "재배정 사유 (선택)",
+    "reassignButton": "재배정",
+    "reassignRuleWarning": "삭제 규칙: 진행 업무가 있는 팀원은 먼저 재배정하거나 비활성 처리합니다.",
+    "reassignSuccess": "재배정 완료",
+    "reassignEmpty": "재배정 가능한 진행업무가 없습니다.",
+    "reassignSelected": "선택 업무"
   }
 }

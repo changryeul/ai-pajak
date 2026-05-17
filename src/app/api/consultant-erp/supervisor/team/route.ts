@@ -22,7 +22,7 @@ import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { requireConsultantOrSupervisor } from '@/middleware/requireConsultantOrSupervisor';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { buildTeamKpi } from '@/lib/consultant-erp/supervisor-views';
+import { buildTeamKpi, buildReassignableSessions } from '@/lib/consultant-erp/supervisor-views';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 
 const createSchema = z.object({
@@ -44,8 +44,11 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   if (req.session.role !== UserRole.TAX_OPERATOR_SUPERVISOR) {
     return NextResponse.json({ error: 'Supervisor only' }, { status: 403 });
   }
-  const data = await buildTeamKpi();
-  return NextResponse.json({ success: true, data });
+  const [kpi, reassignable] = await Promise.all([
+    buildTeamKpi(),
+    buildReassignableSessions(),
+  ]);
+  return NextResponse.json({ success: true, data: { ...kpi, reassignable } });
 }
 
 async function handlePost(req: RequestWithSession): Promise<Response> {

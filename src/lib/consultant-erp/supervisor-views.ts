@@ -698,6 +698,68 @@ const PERFORMANCE_RUBRIC: PerformanceRubric[] = [
   { label: 'queueBottleneck',    individual: 0,  team: 15, description: 'rubric.queueBottleneckDesc' },
 ];
 
+export interface ReassignableSession {
+  sessionId: string;
+  customerName: string;
+  taxPeriod: string;
+  filingKind: 'MONTHLY' | 'ANNUAL';
+  status: string;
+  currentConsultantId: string | null;
+  currentConsultantName: string | null;
+  label: string;
+}
+
+/**
+ * Active sessions list for the 업무 재배정 widget (PDF p.9).
+ * Active = DRAFT/UPLOADING/PARSING/REVIEWING/PENDING_APPROVAL/APPROVED.
+ * COMPLETED sessions can't be reassigned.
+ */
+export async function buildReassignableSessions(): Promise<ReassignableSession[]> {
+  const admin = getSupabaseAdmin();
+  const { data: sessions } = await admin
+    .from('consultant_session')
+    .select('id, customer_id, consultant_id, filing_kind, tax_period, status, updated_at')
+    .in('status', ['DRAFT', 'UPLOADING', 'PARSING', 'REVIEWING', 'PENDING_APPROVAL', 'APPROVED'])
+    .order('updated_at', { ascending: false })
+    .limit(200);
+  if (!sessions || sessions.length === 0) return [];
+
+  const customerIds = Array.from(new Set(sessions.map((s) => s.customer_id)));
+  const { data: customers } = await admin
+    .from('customer')
+    .select('id, full_name, company_name')
+    .in('id', customerIds);
+  const customerById = new Map((customers ?? []).map((c) => [c.id, c]));
+
+  const consultantIds = Array.from(
+    new Set(sessions.map((s) => s.consultant_id).filter((v): v is string => !!v)),
+  );
+  let consultantNames = new Map<string, string>();
+  if (consultantIds.length > 0) {
+    const { data: cs } = await admin
+      .from('consultant')
+      .select('id, full_name')
+      .in('id', consultantIds);
+    consultantNames = new Map((cs ?? []).map((c) => [c.id, c.full_name as string]));
+  }
+
+  return sessions.map((s) => {
+    const c = customerById.get(s.customer_id);
+    const name = c ? ((c.company_name || c.full_name) as string) : '(unknown)';
+    const period = s.tax_period?.slice(0, 7) ?? '';
+    return {
+      sessionId: s.id,
+      customerName: name,
+      taxPeriod: s.tax_period,
+      filingKind: s.filing_kind as 'MONTHLY' | 'ANNUAL',
+      status: s.status,
+      currentConsultantId: s.consultant_id,
+      currentConsultantName: s.consultant_id ? consultantNames.get(s.consultant_id) ?? null : null,
+      label: `${name} · ${period} · ${s.filing_kind}`,
+    };
+  });
+}
+
 /**
  * Tax-partner-grouped KPI for the 팀원 관리 페이지 (PDF p.7).
  * Each team = one tax_partner. Counts roll up from its active consultants.

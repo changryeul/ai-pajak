@@ -8967,6 +8967,17 @@
     "approveSuccess": "Disetujui",
     "rejectSuccess": "Ditolak",
     "historyHeading": "Riwayat pengiriman / revisi",
-    "backToList": "← Kembali"
+    "backToList": "← Kembali",
+    "reassignHeading": "Penugasan ulang",
+    "reassignDesc": "Dalam satu baris, lihat pelanggan/periode/penugas saat ini/baru dan tugaskan ulang.",
+    "reassignTarget": "Tugas",
+    "reassignCurrent": "Saat ini",
+    "reassignNew": "Penugas baru",
+    "reassignReason": "Alasan (opsional)",
+    "reassignButton": "Tugaskan ulang",
+    "reassignRuleWarning": "Aturan: anggota dengan tugas aktif harus dipindah/dinonaktifkan terlebih dahulu.",
+    "reassignSuccess": "Dipindahkan",
+    "reassignEmpty": "Tidak ada sesi aktif.",
+    "reassignSelected": "Tugas dipilih"
   }
 }

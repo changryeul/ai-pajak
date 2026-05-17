@@ -46,10 +46,22 @@ interface MemberDetail {
   avgProcessingMinutes: number;
 }
 
+interface ReassignableSession {
+  sessionId: string;
+  customerName: string;
+  taxPeriod: string;
+  filingKind: 'MONTHLY' | 'ANNUAL';
+  status: string;
+  currentConsultantId: string | null;
+  currentConsultantName: string | null;
+  label: string;
+}
+
 interface TeamResp {
   rubric: RubricRow[];
   teams: TeamKpi[];
   members: MemberDetail[];
+  reassignable: ReassignableSession[];
 }
 
 export function SupervisorTeamView() {
@@ -62,6 +74,11 @@ export function SupervisorTeamView() {
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newTeam, setNewTeam] = useState('');
+
+  // Reassignment widget state
+  const [reassignSessionId, setReassignSessionId] = useState('');
+  const [reassignTargetConsultantId, setReassignTargetConsultantId] = useState('');
+  const [reassignReason, setReassignReason] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -107,6 +124,34 @@ export function SupervisorTeamView() {
       setBusy(false);
     }
   }, [newName, newEmail, newTeam, load, t]);
+
+  const reassign = useCallback(async () => {
+    if (!reassignSessionId || !reassignTargetConsultantId) return;
+    setBusy(true);
+    try {
+      const r = await fetch('/api/consultant-erp/supervisor/team/reassign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: reassignSessionId,
+          newConsultantId: reassignTargetConsultantId,
+          reason: reassignReason.trim() || undefined,
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.success) {
+        toast.error(j.error || 'failed');
+      } else {
+        toast.success(t('reassignSuccess'));
+        setReassignSessionId('');
+        setReassignTargetConsultantId('');
+        setReassignReason('');
+        await load();
+      }
+    } finally {
+      setBusy(false);
+    }
+  }, [reassignSessionId, reassignTargetConsultantId, reassignReason, load, t]);
 
   const toggleActive = useCallback(
     async (consultantId: string, isActive: boolean) => {
@@ -223,6 +268,111 @@ export function SupervisorTeamView() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      {/* Reassignment widget (PDF p.9) */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <p className="text-sm font-black text-slate-950">{t('reassignHeading')}</p>
+        <p className="text-xs text-slate-500 mt-1">{t('reassignDesc')}</p>
+
+        {(() => {
+          const selected = data.reassignable.find((s) => s.sessionId === reassignSessionId);
+          const selectedSession = selected ?? null;
+          const targetTeamId = selectedSession
+            ? data.members.find((m) => m.consultantId === selectedSession.currentConsultantId)?.teamName
+            : null;
+          // Eligible new consultants: active + same team as the current consultant.
+          const eligible = data.members.filter(
+            (m) => m.isActive && m.consultantId !== selectedSession?.currentConsultantId && (
+              !selectedSession || !targetTeamId || m.teamName === targetTeamId
+            ),
+          );
+
+          return (
+            <>
+              <div className="mt-4 grid gap-3 sm:grid-cols-4 items-end">
+                <div>
+                  <Label className="text-[11px] text-slate-600">{t('reassignTarget')}</Label>
+                  <select
+                    value={reassignSessionId}
+                    onChange={(e) => {
+                      setReassignSessionId(e.target.value);
+                      setReassignTargetConsultantId('');
+                    }}
+                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  >
+                    <option value="">—</option>
+                    {data.reassignable.map((s) => (
+                      <option key={s.sessionId} value={s.sessionId}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-[11px] text-slate-600">{t('reassignCurrent')}</Label>
+                  <div className="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 min-h-10">
+                    {selectedSession?.currentConsultantName ?? '—'}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-[11px] text-slate-600">{t('reassignNew')}</Label>
+                  <select
+                    value={reassignTargetConsultantId}
+                    onChange={(e) => setReassignTargetConsultantId(e.target.value)}
+                    disabled={!selectedSession}
+                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-50"
+                  >
+                    <option value="">—</option>
+                    {eligible.map((m) => (
+                      <option key={m.consultantId} value={m.consultantId}>
+                        {m.fullName} · {m.teamName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  onClick={reassign}
+                  disabled={busy || !reassignSessionId || !reassignTargetConsultantId}
+                  className="min-h-10"
+                >
+                  {busy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
+                  {t('reassignButton')}
+                </Button>
+              </div>
+
+              <div className="mt-3">
+                <Label className="text-[11px] text-slate-600">{t('reassignReason')}</Label>
+                <Input
+                  value={reassignReason}
+                  onChange={(e) => setReassignReason(e.target.value)}
+                  placeholder="예: 휴가, 업무량 균형"
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                  <p className="text-[10px] text-slate-500">{t('reassignSelected')}</p>
+                  <p className="font-bold text-slate-900 mt-0.5">
+                    {selectedSession?.label ?? '—'}
+                  </p>
+                </div>
+                <div
+                  className="rounded-lg px-3 py-2 text-xs"
+                  style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
+                >
+                  <span className="font-bold">삭제 규칙: </span>
+                  {t('reassignRuleWarning')}
+                </div>
+              </div>
+            </>
+          );
+        })()}
+
+        {data.reassignable.length === 0 && (
+          <p className="mt-3 text-xs text-slate-400">{t('reassignEmpty')}</p>
+        )}
       </section>
 
       {/* Member workload + manage */}

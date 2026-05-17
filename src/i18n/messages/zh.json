@@ -8967,6 +8967,17 @@
     "approveSuccess": "已批准",
     "rejectSuccess": "已拒绝",
     "historyHeading": "提交/拒绝历史",
-    "backToList": "← 返回列表"
+    "backToList": "← 返回列表",
+    "reassignHeading": "任务重新分配",
+    "reassignDesc": "在一行中查看客户/期间/当前/新负责人并重新分配。",
+    "reassignTarget": "目标任务",
+    "reassignCurrent": "当前",
+    "reassignNew": "新负责人",
+    "reassignReason": "原因(可选)",
+    "reassignButton": "重新分配",
+    "reassignRuleWarning": "规则:有进行中任务的成员需先重新分配或停用。",
+    "reassignSuccess": "已重新分配",
+    "reassignEmpty": "无可重新分配的活动任务。",
+    "reassignSelected": "选中任务"
   }
 }

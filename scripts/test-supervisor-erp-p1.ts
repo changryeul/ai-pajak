@@ -262,6 +262,39 @@ async function run() {
     pass++;
   }
 
+  // ── 7b. /team/reassign — invalid sessionId should 404 ──
+  console.log('\n━━ 7b. POST /supervisor/team/reassign (404 for fake id) ━━');
+  const rR = await fetch(`${baseUrl}/api/consultant-erp/supervisor/team/reassign`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${supTok}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId: '00000000-0000-4000-8000-000000000000',
+      newConsultantId: '00000000-0000-4000-8000-000000000001',
+    }),
+  });
+  if (rR.status !== 404) {
+    console.error('   ✗ expected 404 for non-existent session, got', rR.status);
+    fail++;
+  } else {
+    console.log('   ✅ fake sessionId → 404');
+    pass++;
+  }
+  const rRc = await fetch(`${baseUrl}/api/consultant-erp/supervisor/team/reassign`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${consTok}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId: '00000000-0000-4000-8000-000000000000',
+      newConsultantId: '00000000-0000-4000-8000-000000000001',
+    }),
+  });
+  if (rRc.status !== 403) {
+    console.error('   ✗ consultant should be 403, got', rRc.status);
+    fail++;
+  } else {
+    console.log('   ✅ consultant 403');
+    pass++;
+  }
+
   // ── 8. /quality ──
   console.log('\n━━ 8. GET /supervisor/quality ━━');
   const rQ = await api('/api/consultant-erp/supervisor/quality', supTok);

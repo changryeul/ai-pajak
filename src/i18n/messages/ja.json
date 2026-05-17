@@ -8967,6 +8967,17 @@
     "approveSuccess": "承認しました",
     "rejectSuccess": "却下しました",
     "historyHeading": "提出/却下履歴",
-    "backToList": "← 一覧へ"
+    "backToList": "← 一覧へ",
+    "reassignHeading": "業務再割当",
+    "reassignDesc": "1行で顧客/期間/現担当/新担当を確認し再割当します。",
+    "reassignTarget": "対象業務",
+    "reassignCurrent": "現担当",
+    "reassignNew": "新担当",
+    "reassignReason": "理由(任意)",
+    "reassignButton": "再割当",
+    "reassignRuleWarning": "削除規則: 進行中業務を持つメンバーは先に再割当または非活性化が必要。",
+    "reassignSuccess": "再割当完了",
+    "reassignEmpty": "再割当可能な業務がありません。",
+    "reassignSelected": "選択業務"
   }
 }
