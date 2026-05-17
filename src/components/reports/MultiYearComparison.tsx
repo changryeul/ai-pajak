@@ -12,8 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  TrendingUp,
-  TrendingDown,
   Minus,
   Loader2,
   BarChart3,
@@ -22,6 +20,8 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
+import { CHART_ACCENT_POSITIVE, CHART_ACCENT_NEGATIVE } from '@/lib/charts/palette';
+import { TrendBadge } from '@/components/ui/TrendBadge';
 
 interface YearData {
   year: number;
@@ -60,10 +60,32 @@ function fmtFull(n: number): string {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
+/**
+ * Tax-due / effective-rate delta indicator — colorblind-safe.
+ *
+ * Used in contexts where "up" is unfavorable (paying more tax), so positive
+ * values render in the negative accent (vermillion) and negative values in
+ * the positive accent (bluish green). Arrows preserve the direction signal
+ * for grayscale viewers.
+ */
 function ChangeIndicator({ value, suffix = '' }: { value: number; suffix?: string }) {
   if (value === 0) return <span className="text-gray-400 text-xs flex items-center gap-0.5"><Minus className="h-3 w-3" />0{suffix}</span>;
-  if (value > 0) return <span className="text-red-500 text-xs flex items-center gap-0.5"><ArrowUpRight className="h-3 w-3" />+{value.toFixed(1)}{suffix}</span>;
-  return <span className="text-green-500 text-xs flex items-center gap-0.5"><ArrowDownRight className="h-3 w-3" />{value.toFixed(1)}{suffix}</span>;
+  if (value > 0) return (
+    <span
+      className="text-xs flex items-center gap-0.5 font-semibold"
+      style={{ color: CHART_ACCENT_NEGATIVE }}
+    >
+      <ArrowUpRight className="h-3 w-3" />+{value.toFixed(1)}{suffix}
+    </span>
+  );
+  return (
+    <span
+      className="text-xs flex items-center gap-0.5 font-semibold"
+      style={{ color: CHART_ACCENT_POSITIVE }}
+    >
+      <ArrowDownRight className="h-3 w-3" />{value.toFixed(1)}{suffix}
+    </span>
+  );
 }
 
 export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
@@ -276,39 +298,31 @@ export function MultiYearComparison({ customerId }: MultiYearComparisonProps) {
                       <div className="flex-1 grid grid-cols-3 gap-4">
                         <div>
                           <p className="text-xs text-gray-500">{t('income')}</p>
-                          <div className="flex items-center gap-1">
-                            {change.grossIncomeChangePercent > 0 ? (
-                              <TrendingUp className="h-4 w-4 text-green-500" />
-                            ) : change.grossIncomeChangePercent < 0 ? (
-                              <TrendingDown className="h-4 w-4 text-red-500" />
-                            ) : (
-                              <Minus className="h-4 w-4 text-gray-400" />
-                            )}
-                            <span className={`text-sm font-medium ${change.grossIncomeChangePercent > 0 ? 'text-green-600' : change.grossIncomeChangePercent < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-                              {change.grossIncomeChangePercent > 0 ? '+' : ''}{change.grossIncomeChangePercent.toFixed(1)}%
-                            </span>
-                          </div>
+                          <TrendBadge
+                            value={change.grossIncomeChangePercent}
+                            suffix="%"
+                            direction="up-good"
+                            size="text-sm"
+                          />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500">{t('taxDue')}</p>
-                          <div className="flex items-center gap-1">
-                            {change.taxDueChangePercent > 0 ? (
-                              <TrendingUp className="h-4 w-4 text-red-500" />
-                            ) : change.taxDueChangePercent < 0 ? (
-                              <TrendingDown className="h-4 w-4 text-green-500" />
-                            ) : (
-                              <Minus className="h-4 w-4 text-gray-400" />
-                            )}
-                            <span className={`text-sm font-medium ${change.taxDueChangePercent > 0 ? 'text-red-600' : change.taxDueChangePercent < 0 ? 'text-green-600' : 'text-gray-500'}`}>
-                              {change.taxDueChangePercent > 0 ? '+' : ''}{change.taxDueChangePercent.toFixed(1)}%
-                            </span>
-                          </div>
+                          <TrendBadge
+                            value={change.taxDueChangePercent}
+                            suffix="%"
+                            direction="up-bad"
+                            size="text-sm"
+                          />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500">{t('effectiveRate')}</p>
-                          <span className={`text-sm font-medium ${change.effectiveRateChange > 0 ? 'text-red-600' : change.effectiveRateChange < 0 ? 'text-green-600' : 'text-gray-500'}`}>
-                            {change.effectiveRateChange > 0 ? '+' : ''}{(change.effectiveRateChange * 100).toFixed(2)}pp
-                          </span>
+                          <TrendBadge
+                            value={change.effectiveRateChange * 100}
+                            suffix="pp"
+                            precision={2}
+                            direction="up-bad"
+                            size="text-sm"
+                          />
                         </div>
                       </div>
                     </div>
