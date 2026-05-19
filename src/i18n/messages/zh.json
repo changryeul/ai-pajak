@@ -8961,6 +8961,8 @@
     "invoiceLinesWithholding": "代扣",
     "invoiceLinesTotal": "合计",
     "invoiceLinesGrandTotal": "总计",
+    "invoiceLinesParse": "AI解析",
+    "invoiceLinesEmpty": "运行AI解析以填充行项目",
     "findingsHeading": "审查行汇总",
     "findingsCritical": "严重",
     "findingsWarning": "警告",

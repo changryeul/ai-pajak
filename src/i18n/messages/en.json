@@ -8961,6 +8961,8 @@
     "invoiceLinesWithholding": "Withholding",
     "invoiceLinesTotal": "Total",
     "invoiceLinesGrandTotal": "Grand total",
+    "invoiceLinesParse": "Parse with AI",
+    "invoiceLinesEmpty": "Run AI parse to populate line items",
     "findingsHeading": "Findings summary",
     "findingsCritical": "Critical",
     "findingsWarning": "Warning",

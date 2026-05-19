@@ -127,6 +127,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState('');
   const [busy, setBusy] = useState<'APPROVE' | 'REJECT' | null>(null);
+  const [parsingDocId, setParsingDocId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -148,6 +149,37 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const runParseInvoice = useCallback(
+    async (documentId: string, filename: string) => {
+      setParsingDocId(documentId);
+      try {
+        const r = await fetch(
+          `/api/consultant-erp/sessions/${sessionId}/parse-invoice`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ documentId }),
+          },
+        );
+        const j = await r.json();
+        if (!r.ok || !j.success) {
+          toast.error(j.error || `${filename} 파싱 실패`);
+        } else {
+          const { inserted, mode, reason } = j.data;
+          if (mode === 'CLAUDE') {
+            toast.success(`${filename}: ${inserted} ${t('invoiceLinesUnit')}`);
+          } else {
+            toast.warning(`${filename}: ${reason ?? mode}`);
+          }
+          await load();
+        }
+      } finally {
+        setParsingDocId(null);
+      }
+    },
+    [sessionId, load, t],
+  );
 
   const decide = useCallback(
     async (action: 'APPROVE' | 'REJECT') => {
@@ -185,6 +217,10 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   }
 
   const { session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals, trend, invoiceLines } = data;
+
+  const invoiceDocs = documents.filter(
+    (d) => d.slot === 'WITHHOLDING_INVOICE' || d.slot === 'VAT_IN_OUT',
+  );
 
   const totalCalc = calcs.reduce((s, c) => s + Number(c.amount || 0), 0);
   const submissionCount = approvals.filter((a) => a.action === 'SUBMIT').length;
@@ -398,14 +434,36 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
       </section>
 
       {/* Invoice line-items (PDF p.4) */}
-      {invoiceLines && invoiceLines.length > 0 && (
+      {(invoiceDocs.length > 0 || (invoiceLines && invoiceLines.length > 0)) && (
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-black text-slate-950">{t('invoiceLinesHeading')}</p>
             <p className="text-[10px] text-slate-500">
-              {invoiceLines.length} {t('invoiceLinesUnit')}
+              {invoiceLines?.length ?? 0} {t('invoiceLinesUnit')}
             </p>
           </div>
+          {invoiceDocs.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {invoiceDocs.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => runParseInvoice(d.id, d.original_filename)}
+                  disabled={parsingDocId === d.id}
+                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                >
+                  {parsingDocId === d.id ? (
+                    <Loader2 className="inline h-3 w-3 animate-spin" />
+                  ) : (
+                    <FileText className="inline h-3 w-3" />
+                  )}{' '}
+                  {t('invoiceLinesParse')} · {d.original_filename}
+                </button>
+              ))}
+            </div>
+          )}
+          {(!invoiceLines || invoiceLines.length === 0) ? (
+            <p className="text-xs text-slate-400">{t('invoiceLinesEmpty')}</p>
+          ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50 text-slate-600">
@@ -483,6 +541,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
               </tfoot>
             </table>
           </div>
+          )}
         </section>
       )}
 
