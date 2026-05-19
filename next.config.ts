@@ -1,3 +1,4 @@
+import path from 'path';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { withSentryConfig } from '@sentry/nextjs';
@@ -8,6 +9,11 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
+  // Pin Turbopack to this project so Next 16 doesn't infer the wrong
+  // workspace root when multiple lockfiles exist on the machine.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
 
   // Include role-based user manuals in the serverless function bundle so
   // /help/manuals/[role] can read them via fs.readFile at runtime on Vercel.
@@ -81,9 +87,18 @@ const nextConfig: NextConfig = {
   },
 
   // Webpack configuration for handling specific modules
-  webpack: (config) => {
+  webpack: (config, { webpack }) => {
     // Handle canvas module for PDF generation (if needed)
     config.externals = [...(config.externals || []), { canvas: 'canvas' }];
+    // Tree-shake Sentry SDK debug logging. Replaces the deprecated
+    // `disableLogger: true` option passed to withSentryConfig — same
+    // bundle behaviour (drops Sentry's internal console.log calls), but
+    // via webpack DefinePlugin which is the Sentry-recommended path.
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __SENTRY_DEBUG__: false,
+      }),
+    );
     return config;
   },
 };
@@ -94,5 +109,4 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   project: 'ai-pajak',
   silent: true,
   widenClientFileUpload: true,
-  disableLogger: true,
 });
