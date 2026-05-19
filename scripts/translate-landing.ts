@@ -26,11 +26,36 @@ const koText = {
   nav: { product: '서비스', start: '자료 제출', difference: '경쟁비교', faq: 'FAQ' },
   login: '로그인',
   viewPricing: '요금제 확인하기',
-  chips: 'Personal · Corporate only',
-  heroTop: '양식 맞추느라 시간 쓰지 마세요.',
-  heroMain: 'AI가 신고 데이터, 세금코드, 세무 리스크까지 진단합니다',
+  chips: 'Indonesia Tax Filing Automation',
+  heroTop: '복잡한 세무신고,',
+  heroMain: '자료만 올리면 끝.',
+  heroSub: '자료 그대로 제출 → AI 세금코드 판정 → 신고 준비 완료',
   heroDesc:
-    'AI Pajak은 고객이 사용하던 인보이스, Faktur Pajak, 영수증, 급여자료, 원천징수 자료를 그대로 제출하면 AI가 필요한 데이터를 읽고 분류합니다. 원천세 자료는 거래 성격을 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 자동 판정하고, 제출 데이터와 신고 데이터를 근거로 법인세 납부 방식, PKP 신청 시기, 자산 증가 리스크, Tax Treaty 적용 가능성까지 안내합니다.',
+    '인보이스, Faktur Pajak, 영수증, 급여자료, 계약서를 새 양식에 다시 맞출 필요가 없습니다. AI가 필요한 데이터를 읽고 PPh 21·23·4(2)·26 등 원천세 코드와 세무 리스크까지 함께 정리합니다.',
+  trustBaseTitle: '세무신고는 자동화만큼, 기준이 중요합니다',
+  trustBaseDesc:
+    'AI Pajak은 Jakarta Tax Consulting의 인도네시아 세무 운영 기준을 바탕으로, 자료 제출부터 세금코드 판정, 납부·신고 증빙 관리까지 하나의 흐름으로 정리합니다.',
+  trustIndicators: [
+    { title: 'JTC Tax Workflow', desc: '인도네시아 개인·법인 신고 운영 기준 반영' },
+    { title: 'Withholding Code AI', desc: 'PPh 21 · 23 · 4(2) · 26 세금코드 판정 지원' },
+    { title: 'Evidence Tracking', desc: 'ID Billing · NTPN · BPE 신고 증빙 이력 관리' },
+    { title: 'Secure Tax Data', desc: 'NPWP · NIK · Faktur Pajak · 급여자료 암호화 보관' },
+  ],
+  footer: {
+    brand: 'AI Pajak',
+    tagline: 'AI Pajak · Indonesia Tax Filing Automation',
+    jtcNote: 'Tax operation workflow by Jakarta Tax Consulting',
+    companyHeading: 'Company',
+    companyName: 'PT. Mono Flip Global',
+    companyLocation: 'Jakarta, Indonesia',
+    contactHeading: 'Contact',
+    contactEmail: 'support@ai-pajak.com',
+    contactPricingLabel: 'Pricing detail',
+    legalHeading: 'Legal',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    copyright: '© 2026 AI Pajak. Built for upload-based Indonesian tax automation.',
+  },
   readiness: '준비도',
   missing: '누락자료',
   next: '다음 액션',
@@ -194,6 +219,10 @@ const koText = {
       'AI 세무 인사이트는 어떤 내용을 알려주나요?',
       '제출자료와 신고 데이터를 근거로 법인세 납부 방식 변경 가능성, PKP 신청 시기, 수입 대비 자산 취득 이상, 해외거래와 Tax Treaty 검토 필요성 등을 안내합니다.',
     ],
+    [
+      '요금제에 포함되지 않는 업무는 어떻게 처리하나요?',
+      '세무조사 대응, 이전가격 보고서, 특수관계 분석, 다국가 법인 자문 등은 요금제 범위 밖이며 별도 견적으로 진행합니다. 요금제 안에서는 자료 파싱, 세금코드 판정, 신고 준비, 증빙 관리까지를 다룹니다.',
+    ],
   ],
   finalTitle: 'AI Pajak은 자료 준비부터 신고완료 증빙까지 함께 관리합니다.',
   finalDesc: '개인과 법인 고객이 필요한 자료를 준비하면, AI Pajak이 신고 준비 상태와 다음 액션을 명확하게 안내합니다.',
@@ -276,25 +305,58 @@ function cachePath(lang: string, label: string) {
 }
 
 function sanitizeJson(s: string): string {
-  return s
+  let out = s
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'")
     .replace(/,(\s*[}\]])/g, '$1');
+  // The model sometimes emits ]]} after the faqs array, closing the
+  // text object too early before finalTitle. Strip that stray }. (We do
+  // NOT touch the ]]} that legitimately closes the requirements object
+  // before compKicker — that one is correct JSON.)
+  out = out.replace(/\]\]\}(\s*,\s*"finalTitle")/g, ']]$1');
+  return out;
 }
 
 function extractJson(text: string): string {
   const fence = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (fence) return fence[1];
-  // Find first { or [ ... last } or ]
-  const startObj = text.indexOf('{');
-  const startArr = text.indexOf('[');
+  const candidate = fence ? fence[1] : text;
+  const startObj = candidate.indexOf('{');
+  const startArr = candidate.indexOf('[');
   let start = -1;
   if (startObj < 0) start = startArr;
   else if (startArr < 0) start = startObj;
   else start = Math.min(startObj, startArr);
-  if (start < 0) return text;
-  // crude: take from start to end
-  return text.slice(start).trim();
+  if (start < 0) return candidate;
+  // Walk forward tracking string state + nesting depth. When depth
+  // returns to zero, we've consumed exactly one top-level value and can
+  // discard whatever trailing commentary the model added.
+  const opener = candidate[start];
+  const closer = opener === '{' ? '}' : ']';
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < candidate.length; i++) {
+    const c = candidate[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (c === '\\') {
+      escape = true;
+      continue;
+    }
+    if (c === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (c === opener) depth++;
+    else if (c === closer) {
+      depth--;
+      if (depth === 0) return candidate.slice(start, i + 1);
+    }
+  }
+  return candidate.slice(start).trim();
 }
 
 async function callOnce(targetLang: string, source: unknown): Promise<string> {
@@ -332,14 +394,19 @@ async function translatePart(targetLang: string, source: unknown, label: string,
   console.log(`  • ${label}…`);
   let lastErr: unknown;
   for (let attempt = 1; attempt <= 3; attempt++) {
+    let text = '';
     try {
-      const text = await callOnce(targetLang, source);
-      const jsonStr = extractJson(text);
+      text = await callOnce(targetLang, source);
+      // Sanitize FIRST so brace-balance extractor doesn't stop at the
+      // model's stray `]]}` right after faqs (it closes text object early
+      // and we'd lose finalTitle/footer keys).
+      const sanitized = sanitizeJson(text);
+      const jsonStr = extractJson(sanitized);
       let parsed: unknown;
       try {
         parsed = JSON.parse(jsonStr);
       } catch {
-        parsed = JSON.parse(sanitizeJson(jsonStr));
+        parsed = JSON.parse(sanitizeJson(extractJson(text)));
       }
       fs.writeFileSync(cp, JSON.stringify(parsed, null, 2));
       return parsed;
@@ -347,8 +414,7 @@ async function translatePart(targetLang: string, source: unknown, label: string,
       lastErr = e;
       const dumpPath = path.join(CACHE_DIR, `FAIL-${langCode}-${label}-attempt${attempt}.txt`);
       try {
-        const text = await callOnce(targetLang, source);
-        fs.writeFileSync(dumpPath, text);
+        if (text) fs.writeFileSync(dumpPath, text);
       } catch {}
       console.warn(`  ! parse failed (attempt ${attempt}) for ${label}: ${(e as Error).message}`);
     }

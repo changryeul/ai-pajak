@@ -123,7 +123,10 @@ export default function LandingPage({ locale }: { locale: string }) {
                 {content.heroMain}
               </span>
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">{content.heroDesc}</p>
+            <p className="mt-5 max-w-2xl text-base font-black leading-7 text-slate-900 sm:text-lg">
+              {content.heroSub}
+            </p>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">{content.heroDesc}</p>
             <div className="mt-5 flex max-w-2xl flex-wrap gap-2">
               {['PPh 21', 'PPh 23', 'PPh 4(2)', 'PPh 26', 'PPh 25', 'PPN'].map((tag) => (
                 <span
@@ -218,6 +221,25 @@ export default function LandingPage({ locale }: { locale: string }) {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* TRUST INDICATORS strip (PDF p.3 top) — JTC 기준 reassurance */}
+        <section className="mx-auto max-w-7xl px-5 pb-10 lg:px-8">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="rounded-2xl bg-slate-950 p-5 text-white sm:col-span-2 lg:col-span-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-300">
+                TRUST BASE
+              </p>
+              <p className="mt-2 text-base font-black leading-6">{content.trustBaseTitle}</p>
+              <p className="mt-2 text-xs leading-5 text-slate-300">{content.trustBaseDesc}</p>
+            </div>
+            {content.trustIndicators.map((ind) => (
+              <div key={ind.title} className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-black text-slate-950">{ind.title}</p>
+                <p className="mt-2 text-xs leading-5 text-slate-600">{ind.desc}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -684,24 +706,60 @@ export default function LandingPage({ locale }: { locale: string }) {
         </section>
       </main>
 
-      <footer className="relative z-10 border-t border-slate-200 bg-white px-5 py-8 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="text-left font-bold hover:text-slate-950"
-          >
-            © 2026 AI Pajak. Built for upload-based tax automation.
-          </button>
-          <div className="flex flex-wrap gap-4 font-bold">
-            <button onClick={() => goTo('difference')} className="hover:text-slate-950">
-              {content.footerCompare}
+      <footer className="relative z-10 border-t border-slate-200 bg-white px-5 py-10 lg:px-8 lg:py-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="text-base font-black text-slate-950">{content.footer.brand}</p>
+              <p className="mt-2 text-xs leading-5 text-slate-600">{content.footer.tagline}</p>
+              <p className="mt-3 text-xs font-black leading-5 text-slate-950">{content.footer.jtcNote}</p>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">
+                {content.footer.companyHeading}
+              </p>
+              <p className="mt-3 text-sm font-bold text-slate-700">{content.footer.companyName}</p>
+              <p className="text-sm text-slate-500">{content.footer.companyLocation}</p>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">
+                {content.footer.contactHeading}
+              </p>
+              <p className="mt-3 text-sm text-slate-700">
+                <a href={`mailto:${content.footer.contactEmail}`} className="hover:text-slate-950">
+                  {content.footer.contactEmail}
+                </a>
+              </p>
+              <button
+                onClick={() => goTo('pricing')}
+                className="mt-1 text-left text-sm font-black text-slate-950 hover:text-emerald-700"
+              >
+                {content.footer.contactPricingLabel}
+              </button>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">
+                {content.footer.legalHeading}
+              </p>
+              <p className="mt-3 text-sm text-slate-700">{content.footer.privacyPolicy}</p>
+              <p className="text-sm text-slate-700">{content.footer.termsOfService}</p>
+            </div>
+          </div>
+          <div className="mt-8 flex flex-col gap-4 border-t border-slate-100 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-left font-bold hover:text-slate-950"
+            >
+              {content.footer.copyright}
             </button>
-            <button onClick={() => goTo('pricing')} className="hover:text-slate-950">
-              {content.footerPricing}
-            </button>
-            <button onClick={() => goTo('start')} className="hover:text-slate-950">
-              {content.footerDocs}
-            </button>
+            <div className="flex flex-wrap gap-4 font-bold">
+              <button onClick={() => goTo('difference')} className="hover:text-slate-950">
+                {content.footerCompare}
+              </button>
+              <button onClick={() => goTo('start')} className="hover:text-slate-950">
+                {content.footerDocs}
+              </button>
+            </div>
           </div>
         </div>
       </footer>

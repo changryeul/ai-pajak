@@ -38,6 +38,27 @@ export type LandingPlan = {
   criteria: string[];
 };
 
+export type TrustIndicator = {
+  title: string;
+  desc: string;
+};
+
+export type FooterCopy = {
+  brand: string;
+  tagline: string;
+  jtcNote: string;
+  companyHeading: string;
+  companyName: string;
+  companyLocation: string;
+  contactHeading: string;
+  contactEmail: string;
+  contactPricingLabel: string;
+  legalHeading: string;
+  privacyPolicy: string;
+  termsOfService: string;
+  copyright: string;
+};
+
 export type LandingContent = {
   nav: { product: string; start: string; difference: string; faq: string };
   login: string;
@@ -45,7 +66,12 @@ export type LandingContent = {
   chips: string;
   heroTop: string;
   heroMain: string;
+  heroSub: string;
   heroDesc: string;
+  trustBaseTitle: string;
+  trustBaseDesc: string;
+  trustIndicators: TrustIndicator[];
+  footer: FooterCopy;
   readiness: string;
   missing: string;
   next: string;
