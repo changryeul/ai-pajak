@@ -8531,7 +8531,16 @@
       "optional": "Optional",
       "notUploaded": "Not uploaded yet",
       "replaceUpload": "Upload Revision",
-      "selectAndUpload": "Select File + Upload"
+      "selectAndUpload": "Select File + Upload",
+      "parseInvoice": "AI parse lines",
+      "invoiceLinesHeading": "Invoice line items",
+      "invoiceLinesUnit": "lines",
+      "invoiceLinesCounterparty": "Counterparty",
+      "invoiceLinesInvoice": "Invoice",
+      "invoiceLinesDescription": "Description",
+      "invoiceLinesSubtotal": "Subtotal",
+      "invoiceLinesVat": "VAT",
+      "invoiceLinesTotal": "Total"
     },
     "calc": {
       "title": "Step 3: Parsing Review / Auto Calculation",

@@ -8531,7 +8531,16 @@
       "optional": "Opsional",
       "notUploaded": "Belum diunggah",
       "replaceUpload": "Unggah Revisi",
-      "selectAndUpload": "Pilih File + Unggah"
+      "selectAndUpload": "Pilih File + Unggah",
+      "parseInvoice": "Parsing AI",
+      "invoiceLinesHeading": "Baris faktur",
+      "invoiceLinesUnit": "baris",
+      "invoiceLinesCounterparty": "Mitra",
+      "invoiceLinesInvoice": "Faktur",
+      "invoiceLinesDescription": "Deskripsi",
+      "invoiceLinesSubtotal": "Subtotal",
+      "invoiceLinesVat": "PPN",
+      "invoiceLinesTotal": "Total"
     },
     "calc": {
       "title": "Tahap 3: Tinjauan Parsing / Kalkulasi Otomatis",

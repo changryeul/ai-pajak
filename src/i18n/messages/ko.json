@@ -8657,7 +8657,16 @@
       "optional": "참고",
       "notUploaded": "아직 업로드 없음",
       "replaceUpload": "수정본 업로드",
-      "selectAndUpload": "파일 선택 + 업로드"
+      "selectAndUpload": "파일 선택 + 업로드",
+      "parseInvoice": "AI 라인 파싱",
+      "invoiceLinesHeading": "인보이스 라인",
+      "invoiceLinesUnit": "건",
+      "invoiceLinesCounterparty": "거래처",
+      "invoiceLinesInvoice": "인보이스",
+      "invoiceLinesDescription": "내역",
+      "invoiceLinesSubtotal": "소계",
+      "invoiceLinesVat": "VAT",
+      "invoiceLinesTotal": "총액"
     },
     "calc": {
       "title": "3단계: 파싱검토 / 자동계산",

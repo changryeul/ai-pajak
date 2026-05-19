@@ -8531,7 +8531,16 @@
       "optional": "参考",
       "notUploaded": "未アップロード",
       "replaceUpload": "修正版をアップロード",
-      "selectAndUpload": "ファイル選択 + アップロード"
+      "selectAndUpload": "ファイル選択 + アップロード",
+      "parseInvoice": "AI明細解析",
+      "invoiceLinesHeading": "インボイス明細",
+      "invoiceLinesUnit": "件",
+      "invoiceLinesCounterparty": "取引先",
+      "invoiceLinesInvoice": "インボイス",
+      "invoiceLinesDescription": "内訳",
+      "invoiceLinesSubtotal": "小計",
+      "invoiceLinesVat": "VAT",
+      "invoiceLinesTotal": "合計"
     },
     "calc": {
       "title": "ステップ3: パース確認 / 自動計算",

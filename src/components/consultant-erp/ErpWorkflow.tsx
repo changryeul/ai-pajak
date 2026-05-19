@@ -52,6 +52,23 @@ interface CoretaxRow {
   recorded_at: string | null;
 }
 
+interface InvoiceLineRow {
+  id: string;
+  document_id: string;
+  line_no: number;
+  invoice_number: string | null;
+  invoice_date: string | null;
+  counterparty_name: string | null;
+  counterparty_npwp: string | null;
+  description: string | null;
+  quantity: number | null;
+  unit_price: number | null;
+  subtotal: number | null;
+  vat_amount: number | null;
+  withholding_amount: number | null;
+  total: number | null;
+}
+
 const SLOT_KEYS: { key: string; required: boolean }[] = [
   { key: 'PAYROLL', required: true },
   { key: 'WITHHOLDING_INVOICE', required: true },
@@ -83,6 +100,8 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [approvals, setApprovals] = useState<ApprovalRow[]>([]);
   const [coretax, setCoretax] = useState<CoretaxRow | null>(null);
+  const [invoiceLines, setInvoiceLines] = useState<InvoiceLineRow[]>([]);
+  const [parsingDocId, setParsingDocId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +117,7 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
       setDocuments(j.data.documents ?? []);
       setApprovals(j.data.approvals ?? []);
       setCoretax(j.data.coretax ?? null);
+      setInvoiceLines(j.data.invoiceLines ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'failed');
     } finally {
@@ -138,6 +158,26 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
       setError(e instanceof Error ? e.message : 'failed');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const runParseInvoice = async (documentId: string) => {
+    if (!sessionId) return;
+    setParsingDocId(documentId);
+    try {
+      const r = await fetch(`/api/consultant-erp/sessions/${sessionId}/parse-invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.success) {
+        setError(j.error || 'parse failed');
+      } else {
+        await loadSession(sessionId);
+      }
+    } finally {
+      setParsingDocId(null);
     }
   };
 
@@ -377,10 +417,78 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
                           </span>
                         </label>
                       )}
+                      {doc && (slot.key === 'WITHHOLDING_INVOICE' || slot.key === 'VAT_IN_OUT') && (
+                        <button
+                          onClick={() => void runParseInvoice(doc.id)}
+                          disabled={parsingDocId === doc.id || busy}
+                          className="mt-2 block w-full rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-center text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                        >
+                          {parsingDocId === doc.id ? (
+                            <Loader2 className="inline h-3 w-3 animate-spin" />
+                          ) : null}{' '}
+                          {t('slot.parseInvoice')}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
               </div>
+
+              {/* Invoice line items extracted by AI */}
+              {invoiceLines.length > 0 && (
+                <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm font-black text-slate-950">{t('slot.invoiceLinesHeading')}</p>
+                    <p className="text-[10px] text-slate-500">
+                      {invoiceLines.length} {t('slot.invoiceLinesUnit')}
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-slate-50 text-slate-600">
+                        <tr>
+                          <th className="px-2 py-1.5 text-left">#</th>
+                          <th className="px-2 py-1.5 text-left">{t('slot.invoiceLinesCounterparty')}</th>
+                          <th className="px-2 py-1.5 text-left">{t('slot.invoiceLinesInvoice')}</th>
+                          <th className="px-2 py-1.5 text-left">{t('slot.invoiceLinesDescription')}</th>
+                          <th className="px-2 py-1.5 text-right">{t('slot.invoiceLinesSubtotal')}</th>
+                          <th className="px-2 py-1.5 text-right">{t('slot.invoiceLinesVat')}</th>
+                          <th className="px-2 py-1.5 text-right">{t('slot.invoiceLinesTotal')}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {invoiceLines.map((l) => (
+                          <tr key={l.id}>
+                            <td className="px-2 py-1.5 font-mono text-[10px] text-slate-500">{l.line_no}</td>
+                            <td className="px-2 py-1.5">
+                              <p className="font-bold text-slate-900">{l.counterparty_name ?? '—'}</p>
+                              {l.counterparty_npwp && (
+                                <p className="text-[9px] font-mono text-slate-500">{l.counterparty_npwp}</p>
+                              )}
+                            </td>
+                            <td className="px-2 py-1.5">
+                              <p className="text-slate-800">{l.invoice_number ?? '—'}</p>
+                              {l.invoice_date && <p className="text-[9px] text-slate-500">{l.invoice_date}</p>}
+                            </td>
+                            <td className="max-w-[200px] truncate px-2 py-1.5 text-slate-700">
+                              {l.description ?? '—'}
+                            </td>
+                            <td className="px-2 py-1.5 text-right font-mono text-slate-700">
+                              {l.subtotal != null ? `Rp ${Math.round(Number(l.subtotal)).toLocaleString('id-ID')}` : '—'}
+                            </td>
+                            <td className="px-2 py-1.5 text-right font-mono text-slate-700">
+                              {l.vat_amount != null ? `Rp ${Math.round(Number(l.vat_amount)).toLocaleString('id-ID')}` : '—'}
+                            </td>
+                            <td className="px-2 py-1.5 text-right font-mono font-bold text-slate-900">
+                              {l.total != null ? `Rp ${Math.round(Number(l.total)).toLocaleString('id-ID')}` : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

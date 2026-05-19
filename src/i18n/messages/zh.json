@@ -8531,7 +8531,16 @@
       "optional": "可选",
       "notUploaded": "尚未上传",
       "replaceUpload": "上传修订版",
-      "selectAndUpload": "选择文件 + 上传"
+      "selectAndUpload": "选择文件 + 上传",
+      "parseInvoice": "AI 行项解析",
+      "invoiceLinesHeading": "发票明细",
+      "invoiceLinesUnit": "项",
+      "invoiceLinesCounterparty": "对方",
+      "invoiceLinesInvoice": "发票",
+      "invoiceLinesDescription": "说明",
+      "invoiceLinesSubtotal": "小计",
+      "invoiceLinesVat": "VAT",
+      "invoiceLinesTotal": "合计"
     },
     "calc": {
       "title": "第3步: 解析审核 / 自动计算",

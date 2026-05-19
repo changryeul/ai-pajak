@@ -79,10 +79,19 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     .select('*')
     .eq('session_id', sessionId)
     .maybeSingle();
+  const { data: invoiceLines } = await admin
+    .from('consultant_session_invoice_line')
+    .select(
+      'id, document_id, line_no, invoice_number, invoice_date, counterparty_name, counterparty_npwp, currency, description, quantity, unit_price, subtotal, vat_amount, withholding_amount, total, parse_confidence, is_reviewed',
+    )
+    .eq('session_id', sessionId)
+    .order('document_id', { ascending: true })
+    .order('line_no', { ascending: true })
+    .limit(500);
 
   return NextResponse.json({
     success: true,
-    data: { session, documents, calcs, approvals, coretax },
+    data: { session, documents, calcs, approvals, coretax, invoiceLines: invoiceLines ?? [] },
   });
 }
 
