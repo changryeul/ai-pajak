@@ -1,10 +1,13 @@
 /**
  * e2e coverage for the 팀장용 (Supervisor) ERP shipped between commits
- * c0b8687 (P1) → a7b1f59 (reassign). 9 supervisor-only pages plus the
- * cross-tenant counterparty stats endpoint.
+ * c0b8687 (P1) → a7b1f59 (reassign) → e893fb2 (invoice lines Phase 1)
+ * → ff3a328 (invoice parser Phase 2). 9 supervisor-only pages plus the
+ * cross-tenant counterparty stats endpoint plus the parse-invoice
+ * endpoint contract.
  *
- * The smoke tests in scripts/test-supervisor-erp-p1.ts already cover
- * the API shape; this spec exercises the UI rendering + role gating.
+ * The smoke tests in scripts/test-supervisor-erp-p1.ts +
+ * scripts/test-invoice-parser-phase2.ts cover the data-layer round-trip;
+ * this spec exercises UI rendering + role gating + 400/404 contracts.
  */
 
 import { test, expect, type Page } from '@playwright/test';
@@ -173,5 +176,51 @@ test.describe('Supervisor ERP — settings page interactions', () => {
     // exact value across environments, so we just check the input exists.
     const npwpField = page.locator('input').nth(2); // 3rd input = NPWP per the field order
     await expect(npwpField).toBeVisible({ timeout: 10000 });
+  });
+});
+
+test.describe('Supervisor ERP — invoice line-item parser (Phase 2)', () => {
+  // Smoke gating only — the seed/cleanup roundtrip lives in
+  // scripts/test-invoice-parser-phase2.ts so this spec stays Playwright-only.
+
+  test('supervisor: missing documentId returns 400', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.post(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/parse-invoice`,
+      { data: {} },
+    );
+    expect(res.status()).toBe(400);
+  });
+
+  test('supervisor: malformed documentId (not uuid) returns 400', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.post(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/parse-invoice`,
+      { data: { documentId: 'not-a-uuid' } },
+    );
+    expect(res.status()).toBe(400);
+  });
+
+  test('supervisor: well-formed but unknown ids return 404', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.post(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/parse-invoice`,
+      {
+        data: { documentId: '00000000-0000-4000-8000-000000000001' },
+      },
+    );
+    // ensureSessionAccess hits first (session not found in any partner).
+    expect([403, 404]).toContain(res.status());
+  });
+
+  test('PLATFORM_ADMIN blocked on /parse-invoice', async ({ page }) => {
+    await loginAs(page, 'PLATFORM_ADMIN');
+    const res = await page.request.post(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/parse-invoice`,
+      {
+        data: { documentId: '00000000-0000-4000-8000-000000000001' },
+      },
+    );
+    expect([401, 403]).toContain(res.status());
   });
 });
