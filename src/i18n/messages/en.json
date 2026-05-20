@@ -8972,6 +8972,7 @@
     "invoiceLinesGrandTotal": "Grand total",
     "invoiceLinesParse": "Parse with AI",
     "invoiceLinesEmpty": "Run AI parse to populate line items",
+    "invoiceLinesReviewedCount": "reviewed",
     "findingsHeading": "Findings summary",
     "findingsCritical": "Critical",
     "findingsWarning": "Warning",

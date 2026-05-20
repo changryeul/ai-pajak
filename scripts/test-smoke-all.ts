@@ -31,6 +31,7 @@ const STEPS: Step[] = [
   { name: 'invoice lines read path (Phase 1)', file: 'seed-and-verify-invoice-lines.ts' },
   { name: 'invoice parser contract (Phase 2)', file: 'test-invoice-parser-phase2.ts' },
   { name: 'upload autoParse contract', file: 'test-upload-autoparse.ts' },
+  { name: 'invoice line review PATCH', file: 'test-invoice-line-review.ts' },
   // --- Cross-tenant + role isolation -----------------------------------
   { name: 'RLS isolation (JTC vs EXTERNAL)', file: 'verify-rls-isolation.ts', optional: true },
   { name: 'external consultant isolation', file: 'test-external-consultant-isolation.ts', optional: true },

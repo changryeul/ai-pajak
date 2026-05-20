@@ -8972,6 +8972,7 @@
     "invoiceLinesGrandTotal": "Jumlah total",
     "invoiceLinesParse": "Parsing AI",
     "invoiceLinesEmpty": "Jalankan parsing AI untuk mengisi baris",
+    "invoiceLinesReviewedCount": "ditinjau",
     "findingsHeading": "Ringkasan temuan",
     "findingsCritical": "Kritis",
     "findingsWarning": "Peringatan",

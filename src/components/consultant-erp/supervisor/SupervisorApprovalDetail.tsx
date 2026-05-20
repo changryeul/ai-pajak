@@ -128,6 +128,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   const [comment, setComment] = useState('');
   const [busy, setBusy] = useState<'APPROVE' | 'REJECT' | null>(null);
   const [parsingDocId, setParsingDocId] = useState<string | null>(null);
+  const [reviewingLineId, setReviewingLineId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -149,6 +150,31 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const toggleLineReviewed = useCallback(
+    async (lineId: string, next: boolean) => {
+      setReviewingLineId(lineId);
+      try {
+        const r = await fetch(
+          `/api/consultant-erp/sessions/${sessionId}/invoice-lines/${lineId}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_reviewed: next }),
+          },
+        );
+        const j = await r.json();
+        if (!r.ok || !j.success) {
+          toast.error(j.error || 'review toggle failed');
+        } else {
+          await load();
+        }
+      } finally {
+        setReviewingLineId(null);
+      }
+    },
+    [sessionId, load],
+  );
 
   const runParseInvoice = useCallback(
     async (documentId: string, filename: string) => {
@@ -440,6 +466,11 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
             <p className="text-sm font-black text-slate-950">{t('invoiceLinesHeading')}</p>
             <p className="text-[10px] text-slate-500">
               {invoiceLines?.length ?? 0} {t('invoiceLinesUnit')}
+              {invoiceLines && invoiceLines.length > 0 && (
+                <span className="ml-2 text-emerald-700">
+                  · {invoiceLines.filter((l) => l.is_reviewed).length} {t('invoiceLinesReviewedCount')}
+                </span>
+              )}
             </p>
           </div>
           {invoiceDocs.length > 0 && (
@@ -468,6 +499,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
             <table className="w-full text-xs">
               <thead className="bg-slate-50 text-slate-600">
                 <tr>
+                  <th className="text-left py-2 px-2 w-8">✓</th>
                   <th className="text-left py-2 px-2">#</th>
                   <th className="text-left py-2 px-2">{t('invoiceLinesCounterparty')}</th>
                   <th className="text-left py-2 px-2">{t('invoiceLinesInvoice')}</th>
@@ -483,6 +515,15 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
               <tbody className="divide-y divide-slate-100">
                 {invoiceLines.map((l) => (
                   <tr key={l.id} className={l.is_reviewed ? 'bg-emerald-50/40' : ''}>
+                    <td className="py-1.5 px-2 text-center">
+                      <input
+                        type="checkbox"
+                        checked={l.is_reviewed}
+                        disabled={reviewingLineId === l.id}
+                        onChange={(e) => void toggleLineReviewed(l.id, e.target.checked)}
+                        className="h-3.5 w-3.5 cursor-pointer accent-emerald-600 disabled:opacity-50"
+                      />
+                    </td>
                     <td className="py-1.5 px-2 font-mono text-[10px] text-slate-500">{l.line_no}</td>
                     <td className="py-1.5 px-2">
                       <p className="font-bold text-slate-900">{l.counterparty_name ?? '—'}</p>
@@ -522,7 +563,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
               </tbody>
               <tfoot>
                 <tr className="bg-slate-50 font-bold">
-                  <td colSpan={6} className="py-2 px-2 text-right text-slate-700">
+                  <td colSpan={7} className="py-2 px-2 text-right text-slate-700">
                     {t('invoiceLinesGrandTotal')}
                   </td>
                   <td className="py-2 px-2 text-right font-mono text-slate-900">

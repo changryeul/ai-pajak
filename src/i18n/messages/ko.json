@@ -9098,6 +9098,7 @@
     "invoiceLinesGrandTotal": "합계",
     "invoiceLinesParse": "AI 파싱",
     "invoiceLinesEmpty": "AI 파싱을 실행하면 라인이 표시됩니다",
+    "invoiceLinesReviewedCount": "검토완료",
     "findingsHeading": "검토 행 요약",
     "findingsCritical": "Critical",
     "findingsWarning": "Warning",

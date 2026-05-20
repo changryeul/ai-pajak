@@ -8972,6 +8972,7 @@
     "invoiceLinesGrandTotal": "総合計",
     "invoiceLinesParse": "AI解析",
     "invoiceLinesEmpty": "AI解析を実行すると明細が表示されます",
+    "invoiceLinesReviewedCount": "確認済み",
     "findingsHeading": "検討行サマリー",
     "findingsCritical": "Critical",
     "findingsWarning": "Warning",
