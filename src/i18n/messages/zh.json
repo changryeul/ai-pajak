@@ -402,6 +402,23 @@
     },
     "successToast": "{n}人 1721 A1 发行完成"
   },
+  "flagFields": {
+    "heading": "AI 缺失字段审查",
+    "suggestBtn": "获取 AI 建议",
+    "labelPlaceholder": "标签 (向客户显示)",
+    "reasonPlaceholder": "AI 原因 (向客户显示的说明)",
+    "removeAria": "删除",
+    "addRow": "添加行",
+    "saveBtn": "保存 → 向客户公开",
+    "msg": {
+      "nothingMissing": "AI 检查后未发现缺失项目。",
+      "suggested": "AI 建议了 {n} 项。",
+      "suggestFailed": "建议失败",
+      "saveFailed": "保存失败",
+      "clearedAll": "已清除所有标记。状态移至 PENDING_APPROVAL。",
+      "savedRequest": "已向客户请求 {n} 个字段。状态设为 DATA_REVIEW。"
+    }
+  },
   "dashboard": {
     "title": "仪表板",
     "complianceScore": "税务合规评分",

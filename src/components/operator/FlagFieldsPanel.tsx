@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,6 +38,7 @@ function emptyField(): FlaggedField {
 }
 
 export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }: Props) {
+  const t = useTranslations('flagFields');
   const [fields, setFields] = useState<FlaggedField[]>(
     initialFields && initialFields.length > 0 ? initialFields : [emptyField()],
   );
@@ -72,7 +74,7 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
       }
       const list = (data.data.suggestions as FlaggedField[]) ?? [];
       if (list.length === 0) {
-        showMsg('success', 'AI 확인 결과 특별히 누락된 항목이 없습니다.');
+        showMsg('success', t('msg.nothingMissing'));
         return;
       }
       setFields((prev) => {
@@ -81,13 +83,13 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
         const additions = list.filter((f) => !existingKeys.has(f.key));
         return [...filtered, ...additions];
       });
-      showMsg('success', `AI가 ${list.length}개 항목을 제안했습니다.`);
+      showMsg('success', t('msg.suggested', { n: list.length }));
     } catch (e) {
-      showMsg('error', e instanceof Error ? e.message : '제안 실패');
+      showMsg('error', e instanceof Error ? e.message : t('msg.suggestFailed'));
     } finally {
       setSuggesting(false);
     }
-  }, [queueItemId]);
+  }, [queueItemId, t]);
 
   const save = useCallback(async () => {
     // Drop empty rows before saving
@@ -105,28 +107,28 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
       });
       const data = await res.json();
       if (!res.ok || !data?.success) {
-        throw new Error(data?.error || '저장 실패');
+        throw new Error(data?.error || t('msg.saveFailed'));
       }
       showMsg(
         'success',
         clean.length === 0
-          ? '플래그가 모두 해제되었습니다. 상태가 PENDING_APPROVAL로 이동합니다.'
-          : `${clean.length}개 필드를 고객에게 수정 요청했습니다. 상태가 DATA_REVIEW로 설정되었습니다.`,
+          ? t('msg.clearedAll')
+          : t('msg.savedRequest', { n: clean.length }),
       );
       if (onSaved) onSaved();
     } catch (e) {
-      showMsg('error', e instanceof Error ? e.message : '저장 실패');
+      showMsg('error', e instanceof Error ? e.message : t('msg.saveFailed'));
     } finally {
       setSaving(false);
     }
-  }, [fields, queueItemId, onSaved]);
+  }, [fields, queueItemId, onSaved, t]);
 
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50/30 p-4 space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-amber-900 flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-          AI 누락 필드 검토
+          {t('heading')}
         </p>
         <Button
           size="sm"
@@ -140,7 +142,7 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
           ) : (
             <Sparkles className="h-3 w-3 mr-1" />
           )}
-          AI 제안 받기
+          {t('suggestBtn')}
         </Button>
       </div>
 
@@ -175,14 +177,14 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
             />
             <Input
               className="h-8 text-[11px]"
-              placeholder="라벨 (고객 화면 표시)"
+              placeholder={t('labelPlaceholder')}
               value={f.label}
               onChange={(e) => update(idx, { label: e.target.value })}
             />
             <Textarea
               className="min-h-[32px] text-[11px] py-1.5"
               rows={1}
-              placeholder="AI 사유 (고객에게 표시되는 설명)"
+              placeholder={t('reasonPlaceholder')}
               value={f.reason}
               onChange={(e) => update(idx, { reason: e.target.value })}
             />
@@ -202,7 +204,7 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
               variant="ghost"
               className="h-8 w-8"
               onClick={() => remove(idx)}
-              aria-label="제거"
+              aria-label={t('removeAria')}
             >
               <Trash2 className="h-3 w-3 text-gray-400" />
             </Button>
@@ -213,7 +215,7 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
       <div className="flex items-center justify-between pt-1">
         <Button size="sm" variant="outline" className="h-8 text-[11px]" onClick={add}>
           <Plus className="h-3 w-3 mr-1" />
-          행 추가
+          {t('addRow')}
         </Button>
         <Button
           size="sm"
@@ -226,7 +228,7 @@ export default function FlagFieldsPanel({ queueItemId, initialFields, onSaved }:
           ) : (
             <Save className="h-3 w-3 mr-1" />
           )}
-          저장 → 고객 화면에 노출
+          {t('saveBtn')}
         </Button>
       </div>
     </div>

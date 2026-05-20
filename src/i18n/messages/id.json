@@ -402,6 +402,23 @@
     },
     "successToast": "{n} bukti 1721 A1 diterbitkan"
   },
+  "flagFields": {
+    "heading": "Review field hilang oleh AI",
+    "suggestBtn": "Dapatkan saran AI",
+    "labelPlaceholder": "Label (ditampilkan ke pelanggan)",
+    "reasonPlaceholder": "Alasan AI (ditampilkan ke pelanggan)",
+    "removeAria": "Hapus",
+    "addRow": "Tambah baris",
+    "saveBtn": "Simpan → tampilkan ke pelanggan",
+    "msg": {
+      "nothingMissing": "AI tidak menemukan item yang hilang.",
+      "suggested": "AI menyarankan {n} item.",
+      "suggestFailed": "Saran gagal",
+      "saveFailed": "Penyimpanan gagal",
+      "clearedAll": "Semua flag dihapus. Status berpindah ke PENDING_APPROVAL.",
+      "savedRequest": "{n} field diminta dari pelanggan. Status diatur ke DATA_REVIEW."
+    }
+  },
   "dashboard": {
     "title": "Dasbor",
     "complianceScore": "Skor Kepatuhan",

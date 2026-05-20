@@ -402,6 +402,23 @@
     },
     "successToast": "{n}名 1721 A1 発行完了"
   },
+  "flagFields": {
+    "heading": "AI 欠落項目レビュー",
+    "suggestBtn": "AI 提案を取得",
+    "labelPlaceholder": "ラベル (顧客画面に表示)",
+    "reasonPlaceholder": "AI 理由 (顧客に表示される説明)",
+    "removeAria": "削除",
+    "addRow": "行を追加",
+    "saveBtn": "保存 → 顧客画面に公開",
+    "msg": {
+      "nothingMissing": "AI 確認の結果、特に欠落項目はありません。",
+      "suggested": "AI が {n} 件の項目を提案しました。",
+      "suggestFailed": "提案失敗",
+      "saveFailed": "保存失敗",
+      "clearedAll": "フラグがすべて解除されました。ステータスが PENDING_APPROVAL に移行します。",
+      "savedRequest": "{n} 件のフィールドを顧客に修正依頼しました。ステータスが DATA_REVIEW に設定されました。"
+    }
+  },
   "dashboard": {
     "title": "ダッシュボード",
     "complianceScore": "税務コンプライアンススコア",

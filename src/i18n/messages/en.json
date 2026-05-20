@@ -402,6 +402,23 @@
     },
     "successToast": "{n} 1721 A1 certificates issued"
   },
+  "flagFields": {
+    "heading": "AI missing-field review",
+    "suggestBtn": "Get AI suggestions",
+    "labelPlaceholder": "Label (shown to customer)",
+    "reasonPlaceholder": "AI reason (shown to customer)",
+    "removeAria": "Remove",
+    "addRow": "Add row",
+    "saveBtn": "Save → expose to customer",
+    "msg": {
+      "nothingMissing": "AI found no missing items.",
+      "suggested": "AI suggested {n} items.",
+      "suggestFailed": "Suggestion failed",
+      "saveFailed": "Save failed",
+      "clearedAll": "All flags cleared. Status moves to PENDING_APPROVAL.",
+      "savedRequest": "{n} fields requested from the customer. Status set to DATA_REVIEW."
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome",

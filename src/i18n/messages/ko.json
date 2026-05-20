@@ -402,6 +402,23 @@
     },
     "successToast": "{n}명 1721 A1 발급 완료"
   },
+  "flagFields": {
+    "heading": "AI 누락 필드 검토",
+    "suggestBtn": "AI 제안 받기",
+    "labelPlaceholder": "라벨 (고객 화면 표시)",
+    "reasonPlaceholder": "AI 사유 (고객에게 표시되는 설명)",
+    "removeAria": "제거",
+    "addRow": "행 추가",
+    "saveBtn": "저장 → 고객 화면에 노출",
+    "msg": {
+      "nothingMissing": "AI 확인 결과 특별히 누락된 항목이 없습니다.",
+      "suggested": "AI가 {n}개 항목을 제안했습니다.",
+      "suggestFailed": "제안 실패",
+      "saveFailed": "저장 실패",
+      "clearedAll": "플래그가 모두 해제되었습니다. 상태가 PENDING_APPROVAL로 이동합니다.",
+      "savedRequest": "{n}개 필드를 고객에게 수정 요청했습니다. 상태가 DATA_REVIEW로 설정되었습니다."
+    }
+  },
   "dashboard": {
     "title": "대시보드",
     "welcome": "환영합니다",
