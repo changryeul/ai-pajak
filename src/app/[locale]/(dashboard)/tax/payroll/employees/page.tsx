@@ -1,10 +1,12 @@
+import { getTranslations } from 'next-intl/server';
 import EmployeeHrRecord from '@/components/payroll/EmployeeHrRecord';
 import { PageTitle } from '@/components/layout/PageTitle';
 
-export default function PayrollEmployeesPage() {
+export default async function PayrollEmployeesPage() {
+  const t = await getTranslations('employeeHr');
   return (
     <>
-      <PageTitle title="AI Payroll · 인사기록" />
+      <PageTitle title={t('pageTitle')} />
       <EmployeeHrRecord />
     </>
   );

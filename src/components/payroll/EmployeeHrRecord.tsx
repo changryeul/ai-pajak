@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { Loader2 } from 'lucide-react';
 
@@ -387,6 +388,7 @@ function PhotoUpload({ photoDataUrl, fullName, readOnly, onUpload, onRemove, emp
   onUpload: (v: string) => void; onRemove: () => void;
   employeeId?: string;
 }) {
+  const t = useTranslations('employeeHr.photo');
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -452,12 +454,12 @@ function PhotoUpload({ photoDataUrl, fullName, readOnly, onUpload, onRemove, emp
       {!readOnly && (
         <div className="flex flex-col items-center gap-2">
           <label className="cursor-pointer rounded-2xl bg-white px-4 py-2 text-sm font-black text-indigo-700 shadow-sm hover:bg-indigo-50">
-            {uploading ? '업로드 중…' : '사진 업로드'}
+            {uploading ? t('uploading') : t('uploadBtn')}
             <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
           </label>
           {photoDataUrl && (
             <button type="button" onClick={handleRemove} className="text-xs font-bold text-white/80 underline">
-              사진 제거
+              {t('removeBtn')}
             </button>
           )}
         </div>
@@ -480,6 +482,7 @@ interface ImportSummary {
 }
 
 function UploadCard({ customerId, onImported }: { customerId: string; onImported: () => void }) {
+  const t = useTranslations('employeeHr.uploadSection');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState<string>('');
@@ -498,13 +501,13 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
       const res = await fetch('/api/tax/employees/hr-import', { method: 'POST', body: fd });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        setError(json.error || '업로드 실패');
+        setError(json.error || t('uploadFailed'));
       } else {
         setSummary(json.data as ImportSummary);
         onImported();
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : '업로드 실패');
+      setError(e instanceof Error ? e.message : t('uploadFailed'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -516,20 +519,14 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
       <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
         <div className="flex-1 space-y-3">
           <div className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
-            기존 인사기록 업로드
+            {t('title')}
           </div>
-          <h3 className="text-lg font-black text-slate-900">회사 보유 인사자료 업로드 · 파싱 저장</h3>
-          <p className="text-sm text-slate-600">
-            Excel, CSV 또는 JSON 파일을 업로드하면 직원 ID, 이름, 부서, 직책, 급여, 세무, BPJS, 은행, 계약 정보를
-            자동 매핑하여 직원 마스터에 저장합니다.
-          </p>
+          <h3 className="text-lg font-black text-slate-900">{t('heading')}</h3>
+          <p className="text-sm text-slate-600">{t('desc')}</p>
           <p className="text-xs text-slate-500">
-            <span className="font-mono">권장 엑셀 컬럼 예시:</span> Employee ID, Full Name, NIK, NPWP, Department,
-            Position, Join Date, Basic Salary, PTKP, BPJS Kesehatan No, Bank Account
+            <span className="font-mono">{t('example')}</span> {t('exampleValue')}
           </p>
-          <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            엑셀은 첫 번째 시트의 첫 번째 행을 컬럼명으로 인식합니다. 병합 셀, 여러 줄 제목, 빈 헤더는 피하는 것이 좋습니다.
-          </p>
+          <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">{t('note')}</p>
         </div>
         <div className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/50 p-6 lg:w-72">
           <button
@@ -538,10 +535,10 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
             disabled={uploading}
             className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black text-white shadow-lg hover:bg-indigo-700 disabled:opacity-60"
           >
-            {uploading ? <><Loader2 className="h-4 w-4 animate-spin inline mr-1" /> 업로드 중…</> : 'Excel / CSV / JSON 업로드'}
+            {uploading ? <><Loader2 className="h-4 w-4 animate-spin inline mr-1" /> {t('uploading')}</> : t('button')}
           </button>
           <p className="text-[11px] text-slate-500 text-center">
-            {fileName || '아직 선택된 파일 없음'}
+            {fileName || t('noFile')}
           </p>
           <input
             ref={fileInputRef}
@@ -565,12 +562,17 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
       {summary && (
         <div className="mt-4 rounded-2xl bg-emerald-50 p-4 text-sm">
           <p className="font-bold text-emerald-900">
-            신규 {summary.imported}명, 갱신 {summary.updated}명, 스킵 {summary.skipped}명 (총 {summary.totalRows}행)
+            {t('summary', {
+              imported: summary.imported,
+              updated: summary.updated,
+              skipped: summary.skipped,
+              total: summary.totalRows,
+            })}
           </p>
           {summary.mappedHeaders.length > 0 && (
             <details className="mt-2">
               <summary className="cursor-pointer text-xs text-emerald-700">
-                매핑된 컬럼 {summary.mappedHeaders.length}개 보기
+                {t('viewMapped', { n: summary.mappedHeaders.length })}
               </summary>
               <div className="mt-2 grid gap-1 text-[11px] text-emerald-800 sm:grid-cols-2">
                 {summary.mappedHeaders.map((m) => (
@@ -584,7 +586,7 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
           {summary.unmappedHeaders.length > 0 && (
             <details className="mt-2">
               <summary className="cursor-pointer text-xs text-amber-700">
-                매핑되지 않은 컬럼 {summary.unmappedHeaders.length}개 (무시됨)
+                {t('unmapped', { n: summary.unmappedHeaders.length })}
               </summary>
               <div className="mt-2 text-[11px] text-amber-800 font-mono">
                 {summary.unmappedHeaders.join(', ')}
@@ -594,7 +596,7 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
           {summary.errors.length > 0 && (
             <details className="mt-2">
               <summary className="cursor-pointer text-xs text-red-700">
-                오류 {summary.errors.length}건
+                {t('errors', { n: summary.errors.length })}
               </summary>
               <div className="mt-2 space-y-0.5 text-[11px] text-red-800">
                 {summary.errors.map((er) => (
@@ -623,6 +625,7 @@ function SearchScreen({
   customerId: string;
   onImported: () => void;
 }) {
+  const t = useTranslations('employeeHr.search');
   return (
     <main className="min-h-screen bg-gradient-to-br from-sky-50 via-indigo-50 to-fuchsia-50 p-6 text-slate-800">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -630,17 +633,15 @@ function SearchScreen({
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <div className="mb-3 inline-flex rounded-full bg-white/20 px-4 py-1 text-xs font-black">AI Payroll · Employee Master</div>
-              <h1 className="text-4xl font-black tracking-tight">인사기록 조회 화면</h1>
-              <p className="mt-3 text-indigo-100">
-                기존 직원은 먼저 조회한 뒤 필요할 때 수정하고, 신규 직원은 별도의 신규 입력 화면에서 등록합니다.
-              </p>
+              <h1 className="text-4xl font-black tracking-tight">{t('title')}</h1>
+              <p className="mt-3 text-indigo-100">{t('subtitle')}</p>
             </div>
             <button
               type="button"
               onClick={openNew}
               className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-black text-indigo-700 shadow-lg hover:bg-indigo-50"
             >
-              ＋ 신규 직원 입력
+              {t('newEmployee')}
             </button>
           </div>
         </section>
@@ -650,27 +651,27 @@ function SearchScreen({
         <section className="rounded-3xl bg-white p-6 shadow-xl shadow-slate-200/70">
           <div className="grid gap-4 lg:grid-cols-[180px_1fr_auto] lg:items-end">
             <label className="block">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">조회 기준</span>
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">{t('by')}</span>
               <select
                 value={searchBy}
                 onChange={(e) => setSearchBy(e.target.value as 'ID' | 'NAME')}
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
               >
-                <option value="ID">직원 ID</option>
-                <option value="NAME">이름</option>
+                <option value="ID">{t('byId')}</option>
+                <option value="NAME">{t('byName')}</option>
               </select>
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">조회 키워드</span>
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">{t('keyword')}</span>
               <input
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder={searchBy === 'ID' ? '예: EMP-001' : '예: 홍길동 또는 Gildong'}
+                placeholder={searchBy === 'ID' ? t('placeholderId') : t('placeholderName')}
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
               />
             </label>
             <div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-fuchsia-500 px-4 py-3 text-center text-sm font-black text-white shadow-lg">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : `${results.length}명 조회됨`}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : t('resultCount', { n: results.length })}
             </div>
           </div>
         </section>
@@ -703,7 +704,7 @@ function SearchScreen({
                   onClick={() => openDetail(item, 'view')}
                   className="w-full rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-indigo-700"
                 >
-                  인사기록 조회
+                  {t('openBtn')}
                 </button>
               </div>
             </div>
@@ -712,7 +713,7 @@ function SearchScreen({
 
         {!loading && results.length === 0 && (
           <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-sm font-bold text-amber-700">
-            조회 결과가 없습니다. 직원 ID 또는 이름을 다시 입력하거나, 우측 상단의 「+ 신규 직원 입력」 버튼으로 등록을 시작하세요.
+            {t('emptyState')}
           </div>
         )}
       </div>
@@ -734,10 +735,11 @@ interface ChangeLogEntry {
 }
 
 function ChangeHistoryPanel({ entries, title }: { entries: ChangeLogEntry[]; title: string }) {
+  const t = useTranslations('employeeHr.history');
   if (entries.length === 0) {
     return (
       <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs text-slate-500">
-        {title} · 아직 이력이 없습니다.
+        {t('empty', { title })}
       </div>
     );
   }
@@ -746,17 +748,17 @@ function ChangeHistoryPanel({ entries, title }: { entries: ChangeLogEntry[]; tit
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
         <span className="text-xs font-bold text-slate-700">{title}</span>
         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-          {entries.length}건
+          {t('count', { n: entries.length })}
         </span>
       </div>
       <ul className="divide-y divide-slate-100 text-xs">
         {entries.map((e) => (
           <li key={e.id} className="grid grid-cols-[110px_1fr_1fr_1fr_120px] gap-2 px-4 py-2">
             <span className="font-mono font-bold text-indigo-600">{e.changed_at.slice(0, 10)}</span>
-            <span className="text-slate-700"><span className="text-slate-400">항목</span><br />{e.field}</span>
-            <span className="text-slate-700 truncate"><span className="text-slate-400">이전</span><br />{e.old_value || '—'}</span>
-            <span className="text-slate-700 truncate"><span className="text-slate-400">변경/내용</span><br />{e.new_value || '—'}</span>
-            <span className="text-slate-700 truncate"><span className="text-slate-400">처리자</span><br />{e.changed_by_label || '—'}</span>
+            <span className="text-slate-700"><span className="text-slate-400">{t('field')}</span><br />{e.field}</span>
+            <span className="text-slate-700 truncate"><span className="text-slate-400">{t('before')}</span><br />{e.old_value || '—'}</span>
+            <span className="text-slate-700 truncate"><span className="text-slate-400">{t('after')}</span><br />{e.new_value || '—'}</span>
+            <span className="text-slate-700 truncate"><span className="text-slate-400">{t('actor')}</span><br />{e.changed_by_label || '—'}</span>
           </li>
         ))}
       </ul>
@@ -778,6 +780,8 @@ function DetailScreen({
   saving: boolean;
   changes: ChangeLogEntry[];
 }) {
+  const tForm = useTranslations('employeeHr.form');
+  const tSec = useTranslations('employeeHr.sections');
   const employee = record.employee;
   const readOnly = mode === 'view';
 
@@ -822,35 +826,35 @@ function DetailScreen({
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={goBack}
                 className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50">
-                ← 조회 화면으로
+                {tForm('back')}
               </button>
               <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-black text-indigo-700">
-                {isNew ? '신규 직원 입력' : '조회된 결과 상세 화면'}
+                {isNew ? tForm('newTitle') : tForm('detailTitle')}
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
               {!isNew && mode === 'view' ? (
                 <button type="button" onClick={() => setMode('edit')}
                   className="rounded-2xl bg-fuchsia-600 px-5 py-2 text-sm font-black text-white shadow-sm hover:bg-fuchsia-700">
-                  수정하기
+                  {tForm('edit')}
                 </button>
               ) : !isNew ? (
                 <>
                   <button type="button" onClick={() => setMode('view')}
                     className="rounded-2xl border border-slate-200 bg-white px-5 py-2 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50">
-                    수정 취소
+                    {tForm('cancelEdit')}
                   </button>
                   <button type="button" onClick={onSave} disabled={saving}
                     className="rounded-2xl bg-indigo-600 px-5 py-2 text-sm font-black text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60">
                     {saving ? <Loader2 className="h-4 w-4 animate-spin inline mr-1" /> : null}
-                    저장 후 조회
+                    {tForm('saveAndView')}
                   </button>
                 </>
               ) : (
                 <button type="button" onClick={onSave} disabled={saving}
                   className="rounded-2xl bg-indigo-600 px-5 py-2 text-sm font-black text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin inline mr-1" /> : null}
-                  신규 등록
+                  {tForm('createNew')}
                 </button>
               )}
             </div>
@@ -869,7 +873,7 @@ function DetailScreen({
             />
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold">{employee.employeeId || (isNew ? '신규' : '—')}</span>
+                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold">{employee.employeeId || (isNew ? tForm('newBadge') : '—')}</span>
                 {employee.contractStatus && (
                   <span className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-bold text-emerald-950">{employee.contractStatus}</span>
                 )}
@@ -877,11 +881,11 @@ function DetailScreen({
                   <span className="rounded-full bg-amber-300 px-3 py-1 text-xs font-bold text-amber-950">PTKP {employee.ptkp}</span>
                 )}
                 <span className={`rounded-full px-3 py-1 text-xs font-bold ${mode === 'view' ? 'bg-sky-300 text-sky-950' : 'bg-fuchsia-300 text-fuchsia-950'}`}>
-                  {mode === 'view' ? '조회 모드' : isNew ? '신규 입력' : '수정 모드'}
+                  {mode === 'view' ? tForm('modeView') : isNew ? tForm('modeNew') : tForm('modeEdit')}
                 </span>
               </div>
               <div>
-                <h2 className="text-4xl font-black tracking-tight">{employee.fullName || '신규 직원'}</h2>
+                <h2 className="text-4xl font-black tracking-tight">{employee.fullName || tForm('namePlaceholder')}</h2>
                 <p className="mt-1 text-lg text-indigo-100">
                   {employee.position}{employee.department ? ` · ${employee.department}` : ''}
                 </p>
@@ -899,7 +903,7 @@ function DetailScreen({
               <button type="button" onClick={onSave} disabled={readOnly && !isNew || saving}
                 className={`mt-4 rounded-2xl px-4 py-2 text-sm font-black shadow-sm ${(readOnly && !isNew) ? 'bg-white/30 text-white/60' : 'bg-white text-indigo-700 hover:bg-indigo-50'} disabled:opacity-60`}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin inline mr-1" /> : null}
-                저장
+                {tForm('save')}
               </button>
               {savedMessage && <div className="mt-3 text-xs font-bold text-white">{savedMessage}</div>}
             </div>
@@ -907,7 +911,7 @@ function DetailScreen({
         </header>
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <Section emoji="👤" title="기본 인적사항" subtitle="Personal identity & contact profile" colorClass="bg-gradient-to-r from-sky-500 to-cyan-400">
+          <Section emoji="👤" title={tSec('personal')} subtitle="Personal identity & contact profile" colorClass="bg-gradient-to-r from-sky-500 to-cyan-400">
             <div className="grid gap-4 md:grid-cols-2">
               <Field readOnly={readOnly} label="Employee ID" value={employee.employeeId} onChange={(v) => updateEmployee('employeeId', v)} />
               <Field readOnly={readOnly} label="Full Name" value={employee.fullName} onChange={(v) => updateEmployee('fullName', v)} />
@@ -927,10 +931,10 @@ function DetailScreen({
                 <Field readOnly={readOnly} label="Emergency Phone" value={employee.emergencyPhone} onChange={(v) => updateEmployee('emergencyPhone', v)} />
               </div>
             </div>
-                      <ChangeHistoryPanel entries={changesBy('basic')} title="기본정보 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('basic')} title={tSec('personalHistory')} />
           </Section>
 
-          <Section emoji="💼" title="고용 정보" subtitle="Employment position, department & work status" colorClass="bg-gradient-to-r from-violet-500 to-purple-400">
+          <Section emoji="💼" title={tSec('employment')} subtitle="Employment position, department & work status" colorClass="bg-gradient-to-r from-violet-500 to-purple-400">
             <div className="grid gap-4 md:grid-cols-2">
               <Field readOnly={readOnly} label="Position" value={employee.position} onChange={(v) => updateEmployee('position', v)} />
               <Field readOnly={readOnly} label="Department" value={employee.department} onChange={(v) => updateEmployee('department', v)} />
@@ -941,10 +945,10 @@ function DetailScreen({
               <SelectField readOnly={readOnly} label="Contract Status" value={employee.contractStatus} onChange={(v) => updateEmployee('contractStatus', v)} options={['Active', 'Probation', 'Resigned', 'Terminated', 'Suspended']} />
               <Field readOnly={readOnly} label="Probation End" type="date" value={employee.probationEnd} onChange={(v) => updateEmployee('probationEnd', v)} />
             </div>
-                      <ChangeHistoryPanel entries={changesBy('employment')} title="고용정보 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('employment')} title={tSec('employmentHistory')} />
           </Section>
 
-          <Section emoji="👨‍👩‍👧" title="가족관계 / PTKP" subtitle="Family members, dependents & tax status" colorClass="bg-gradient-to-r from-rose-500 to-pink-400">
+          <Section emoji="👨‍👩‍👧" title={tSec('familyPtkp')} subtitle="Family members, dependents & tax status" colorClass="bg-gradient-to-r from-rose-500 to-pink-400">
             <div className="mb-4 grid gap-4 md:grid-cols-4">
               <SelectField readOnly={readOnly} label="Marital Status" value={employee.maritalStatus} onChange={(v) => updateEmployee('maritalStatus', v)} options={['Single', 'Married', 'Divorced', 'Widowed']} />
               <SelectField readOnly={readOnly} label="PTKP" value={employee.ptkp} onChange={(v) => updateEmployee('ptkp', v)} options={['TK/0', 'TK/1', 'TK/2', 'TK/3', 'K/0', 'K/1', 'K/2', 'K/3', 'K/I/0', 'K/I/1', 'K/I/2', 'K/I/3']} />
@@ -964,12 +968,12 @@ function DetailScreen({
                   </div>
                 </ArrayRow>
               ))}
-              <AddButton hidden={readOnly} onClick={() => addRow<FamilyMember>('family', { relation: 'Child', name: '', dob: '', nik: '', occupation: '', dependent: 'Yes' })}>가족 추가</AddButton>
+              <AddButton hidden={readOnly} onClick={() => addRow<FamilyMember>('family', { relation: 'Child', name: '', dob: '', nik: '', occupation: '', dependent: 'Yes' })}>{tSec('addFamily')}</AddButton>
             </div>
-                      <ChangeHistoryPanel entries={changesBy('family_ptkp')} title="가족/부양가족 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('family_ptkp')} title={tSec('familyHistory')} />
           </Section>
 
-          <Section emoji="🎓" title="학력" subtitle="Education background" colorClass="bg-gradient-to-r from-emerald-500 to-teal-400">
+          <Section emoji="🎓" title={tSec('education')} subtitle="Education background" colorClass="bg-gradient-to-r from-emerald-500 to-teal-400">
             <div className="space-y-3">
               {record.education.map((item, i) => (
                 <ArrayRow key={`education-${i}`}>
@@ -982,15 +986,15 @@ function DetailScreen({
                   </div>
                 </ArrayRow>
               ))}
-              <AddButton hidden={readOnly} onClick={() => addRow<EducationEntry>('education', { level: '', major: '', school: '', city: '', year: '' })}>학력 추가</AddButton>
+              <AddButton hidden={readOnly} onClick={() => addRow<EducationEntry>('education', { level: '', major: '', school: '', city: '', year: '' })}>{tSec('addEducation')}</AddButton>
             </div>
-                      <ChangeHistoryPanel entries={changesBy('education')} title="학력 등록/변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('education')} title={tSec('educationHistory')} />
           </Section>
 
-          <Section emoji="🏢" title="경력 / 부서이동" subtitle="Career history & internal movement" colorClass="bg-gradient-to-r from-orange-500 to-amber-400">
+          <Section emoji="🏢" title={tSec('careerMovement')} subtitle="Career history & internal movement" colorClass="bg-gradient-to-r from-orange-500 to-amber-400">
             <div className="space-y-5">
               <div>
-                <div className="mb-2 text-sm font-black text-slate-700">이전 경력</div>
+                <div className="mb-2 text-sm font-black text-slate-700">{tSec('previousCareer')}</div>
                 <div className="space-y-3">
                   {record.career.map((item, i) => (
                     <ArrayRow key={`career-${i}`}>
@@ -1002,11 +1006,11 @@ function DetailScreen({
                       </div>
                     </ArrayRow>
                   ))}
-                  <AddButton hidden={readOnly} onClick={() => addRow<CareerEntry>('career', { period: '', company: '', jobTitle: '', reason: '' })}>경력 추가</AddButton>
+                  <AddButton hidden={readOnly} onClick={() => addRow<CareerEntry>('career', { period: '', company: '', jobTitle: '', reason: '' })}>{tSec('addCareer')}</AddButton>
                 </div>
               </div>
               <div>
-                <div className="mb-2 text-sm font-black text-slate-700">부서 이동</div>
+                <div className="mb-2 text-sm font-black text-slate-700">{tSec('departmentMovement')}</div>
                 <div className="space-y-3">
                   {record.movements.map((item, i) => (
                     <ArrayRow key={`movement-${i}`}>
@@ -1018,17 +1022,17 @@ function DetailScreen({
                       </div>
                     </ArrayRow>
                   ))}
-                  <AddButton hidden={readOnly} onClick={() => addRow<MovementEntry>('movements', { date: '', previousDept: '', newDept: '', reason: '' })}>부서이동 추가</AddButton>
+                  <AddButton hidden={readOnly} onClick={() => addRow<MovementEntry>('movements', { date: '', previousDept: '', newDept: '', reason: '' })}>{tSec('addMovement')}</AddButton>
                 </div>
               </div>
             </div>
-                      <ChangeHistoryPanel entries={changesBy('career')} title="경력/부서이동 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('career')} title={tSec('careerHistory')} />
           </Section>
 
-          <Section emoji="🏆" title="진급 / 상벌" subtitle="Promotion, reward & disciplinary record" colorClass="bg-gradient-to-r from-yellow-500 to-lime-400">
+          <Section emoji="🏆" title={tSec('promotionReward')} subtitle="Promotion, reward & disciplinary record" colorClass="bg-gradient-to-r from-yellow-500 to-lime-400">
             <div className="space-y-5">
               <div>
-                <div className="mb-2 text-sm font-black text-slate-700">진급 이력</div>
+                <div className="mb-2 text-sm font-black text-slate-700">{tSec('promotions')}</div>
                 <div className="space-y-3">
                   {record.promotions.map((item, i) => (
                     <ArrayRow key={`promotion-${i}`}>
@@ -1040,11 +1044,11 @@ function DetailScreen({
                       </div>
                     </ArrayRow>
                   ))}
-                  <AddButton hidden={readOnly} onClick={() => addRow<PromotionEntry>('promotions', { date: '', previousTitle: '', newTitle: '', reason: '' })}>진급 추가</AddButton>
+                  <AddButton hidden={readOnly} onClick={() => addRow<PromotionEntry>('promotions', { date: '', previousTitle: '', newTitle: '', reason: '' })}>{tSec('addPromotion')}</AddButton>
                 </div>
               </div>
               <div>
-                <div className="mb-2 text-sm font-black text-slate-700">상벌 이력</div>
+                <div className="mb-2 text-sm font-black text-slate-700">{tSec('rewards')}</div>
                 <div className="space-y-3">
                   {record.rewards.map((item, i) => (
                     <ArrayRow key={`reward-${i}`}>
@@ -1056,14 +1060,14 @@ function DetailScreen({
                       </div>
                     </ArrayRow>
                   ))}
-                  <AddButton hidden={readOnly} onClick={() => addRow<RewardEntry>('rewards', { date: '', type: 'Reward', title: '', note: '' })}>상벌 추가</AddButton>
+                  <AddButton hidden={readOnly} onClick={() => addRow<RewardEntry>('rewards', { date: '', type: 'Reward', title: '', note: '' })}>{tSec('addReward')}</AddButton>
                 </div>
               </div>
             </div>
-                      <ChangeHistoryPanel entries={changesBy('rewards')} title="진급/상벌 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('rewards')} title={tSec('promotionHistory')} />
           </Section>
 
-          <Section emoji="💰" title="급여 정보" subtitle="Payroll base data for AI Payroll" colorClass="bg-gradient-to-r from-indigo-500 to-blue-400">
+          <Section emoji="💰" title={tSec('payroll')} subtitle="Payroll base data for AI Payroll" colorClass="bg-gradient-to-r from-indigo-500 to-blue-400">
             <div className="grid gap-4 md:grid-cols-2">
               <Field readOnly={readOnly} label="Basic Salary" value={employee.basicSalary} onChange={(v) => updateEmployee('basicSalary', v)} />
               <Field readOnly={readOnly} label="Transport Allowance" value={employee.transportAllowance} onChange={(v) => updateEmployee('transportAllowance', v)} />
@@ -1075,10 +1079,10 @@ function DetailScreen({
                 <div className="text-2xl font-black">{money(grossSalary)}</div>
               </div>
             </div>
-                      <ChangeHistoryPanel entries={changesBy('payroll')} title="급여 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('payroll')} title={tSec('payrollHistory')} />
           </Section>
 
-          <Section emoji="🛡️" title="세무 / BPJS" subtitle="PPh21, NPWP, BPJS & insurance data" colorClass="bg-gradient-to-r from-cyan-500 to-blue-400">
+          <Section emoji="🛡️" title={tSec('taxBpjs')} subtitle="PPh21, NPWP, BPJS & insurance data" colorClass="bg-gradient-to-r from-cyan-500 to-blue-400">
             <div className="grid gap-4 md:grid-cols-2">
               <SelectField readOnly={readOnly} label="PPh21 Method" value={employee.pph21Method} onChange={(v) => updateEmployee('pph21Method', v)} options={['Gross', 'Gross-up', 'Nett']} />
               <Field readOnly={readOnly} label="PTKP" value={employee.ptkp} onChange={(v) => updateEmployee('ptkp', v)} />
@@ -1088,45 +1092,45 @@ function DetailScreen({
               <Field readOnly={readOnly} label="BPJS TK No." value={employee.bpjsTkNo} onChange={(v) => updateEmployee('bpjsTkNo', v)} />
               <Field readOnly={readOnly} label="Private Insurance" value={employee.privateInsurance} onChange={(v) => updateEmployee('privateInsurance', v)} />
             </div>
-                      <ChangeHistoryPanel entries={changesBy('tax_bpjs')} title="세무/BPJS 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('tax_bpjs')} title={tSec('taxBpjsHistory')} />
           </Section>
 
-          <Section emoji="🏦" title="은행 정보" subtitle="Salary payment bank account" colorClass="bg-gradient-to-r from-slate-700 to-slate-500">
+          <Section emoji="🏦" title={tSec('bank')} subtitle="Salary payment bank account" colorClass="bg-gradient-to-r from-slate-700 to-slate-500">
             <div className="grid gap-4 md:grid-cols-3">
               <Field readOnly={readOnly} label="Bank Name" value={employee.bankName} onChange={(v) => updateEmployee('bankName', v)} />
               <Field readOnly={readOnly} label="Account Number" value={employee.bankAccount} onChange={(v) => updateEmployee('bankAccount', v)} />
               <Field readOnly={readOnly} label="Account Holder" value={employee.bankHolder} onChange={(v) => updateEmployee('bankHolder', v)} />
             </div>
-                      <ChangeHistoryPanel entries={changesBy('bank')} title="은행정보 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('bank')} title={tSec('bankHistory')} />
           </Section>
 
-          <Section emoji="📄" title="계약 정보" subtitle="Employment contract control" colorClass="bg-gradient-to-r from-fuchsia-500 to-purple-400">
+          <Section emoji="📄" title={tSec('contract')} subtitle="Employment contract control" colorClass="bg-gradient-to-r from-fuchsia-500 to-purple-400">
             <div className="grid gap-4 md:grid-cols-2">
               <SelectField readOnly={readOnly} label="Contract Type" value={employee.contractType} onChange={(v) => updateEmployee('contractType', v)} options={['PKWTT', 'PKWT', 'Internship', 'Consultant', 'Daily Worker']} />
               <SelectField readOnly={readOnly} label="Contract Status" value={employee.contractStatus} onChange={(v) => updateEmployee('contractStatus', v)} options={['Active', 'Probation', 'Expired', 'Resigned', 'Terminated']} />
               <Field readOnly={readOnly} label="Contract Start" type="date" value={employee.contractStart} onChange={(v) => updateEmployee('contractStart', v)} />
               <Field readOnly={readOnly} label="Contract End" type="date" value={employee.contractEnd} onChange={(v) => updateEmployee('contractEnd', v)} />
             </div>
-                      <ChangeHistoryPanel entries={changesBy('contract')} title="계약 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('contract')} title={tSec('contractHistory')} />
           </Section>
 
-          <Section emoji="✈️" title="외국인 직원 추가 정보" subtitle="Optional expat data for work permit & tax residency" colorClass="bg-gradient-to-r from-red-500 to-orange-400">
+          <Section emoji="✈️" title={tSec('expat')} subtitle="Optional expat data for work permit & tax residency" colorClass="bg-gradient-to-r from-red-500 to-orange-400">
             <div className="grid gap-4 md:grid-cols-2">
               <Field readOnly={readOnly} label="Passport No." value={employee.passportNo} onChange={(v) => updateEmployee('passportNo', v)} />
               <Field readOnly={readOnly} label="KITAS / KITAP No." value={employee.kitasNo} onChange={(v) => updateEmployee('kitasNo', v)} />
               <Field readOnly={readOnly} label="Work Permit Expiry" type="date" value={employee.workPermitExpiry} onChange={(v) => updateEmployee('workPermitExpiry', v)} />
               <SelectField readOnly={readOnly} label="Tax Residency" value={employee.taxResidency} onChange={(v) => updateEmployee('taxResidency', v)} options={['Indonesia Tax Resident', 'Non-Resident', 'To be reviewed']} />
             </div>
-                      <ChangeHistoryPanel entries={changesBy('expat')} title="외국인 정보 변경 이력" />
+                      <ChangeHistoryPanel entries={changesBy('expat')} title={tSec('expatHistory')} />
           </Section>
         </div>
 
-        <Section emoji="📝" title="비고 / 내부 메모" subtitle="Internal HR notes" colorClass="bg-gradient-to-r from-indigo-600 to-fuchsia-500">
+        <Section emoji="📝" title={tSec('notes')} subtitle="Internal HR notes" colorClass="bg-gradient-to-r from-indigo-600 to-fuchsia-500">
           <TextAreaField readOnly={readOnly} label="Notes" value={employee.notes} onChange={(v) => updateEmployee('notes', v)} />
         </Section>
 
-        <Section emoji="🗂" title="전체 변경 이력" subtitle="Full change history" colorClass="bg-gradient-to-r from-slate-800 to-slate-600">
-          <ChangeHistoryPanel entries={changes} title="전체 변경 이력" />
+        <Section emoji="🗂" title={tSec('allHistory')} subtitle="Full change history" colorClass="bg-gradient-to-r from-slate-800 to-slate-600">
+          <ChangeHistoryPanel entries={changes} title={tSec('allHistory')} />
         </Section>
       </div>
     </main>
@@ -1137,6 +1141,7 @@ function DetailScreen({
 // Top-level component — handles screen switching, search, fetch, save.
 // ─────────────────────────────────────────────────────────────────────────────
 export default function EmployeeHrRecord() {
+  const t = useTranslations('employeeHr');
   const { session } = useSession();
   const customerId = session?.customerId || '';
 
@@ -1244,7 +1249,7 @@ export default function EmployeeHrRecord() {
   const saveRecord = async () => {
     if (!customerId) return;
     if (!record.employee.fullName.trim()) {
-      setSavedMessage('Full Name(이름)은 필수입니다.');
+      setSavedMessage(t('messages.fullNameRequired'));
       return;
     }
     setSaving(true);
@@ -1256,17 +1261,19 @@ export default function EmployeeHrRecord() {
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        setSavedMessage(json.error || '저장 실패');
+        setSavedMessage(json.error || t('messages.saveFailed'));
       } else {
         const saved = rowToUi(json.data as EmployeeRow);
         setRecord(saved);
         setIsNew(false);
         setMode('view');
-        setSavedMessage(`${saved.employee.employeeId || saved.employee.fullName} 저장 완료`);
-        setRefreshTick((t) => t + 1);
+        setSavedMessage(
+          t('messages.saveSuccess', { name: saved.employee.employeeId || saved.employee.fullName }),
+        );
+        setRefreshTick((tick) => tick + 1);
       }
     } catch (e) {
-      setSavedMessage(e instanceof Error ? e.message : '저장 실패');
+      setSavedMessage(e instanceof Error ? e.message : t('messages.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -1282,7 +1289,7 @@ export default function EmployeeHrRecord() {
     return (
       <div className="container mx-auto py-20 text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
-        <p className="text-sm text-slate-500 mt-3">세션 로딩 중…</p>
+        <p className="text-sm text-slate-500 mt-3">{t('messages.sessionLoading')}</p>
       </div>
     );
   }
