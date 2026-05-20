@@ -264,6 +264,8 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 - **인보이스 라인 파싱 (2단계)**: `WITHHOLDING_INVOICE` / `VAT_IN_OUT` 슬롯 문서에서 line-item을 추출해 `consultant_session_invoice_line` 에 적재.
   - **Phase 1 (read path)**: 마이그레이션 `20260518000001_consultant_session_invoice_line.sql` — 21컬럼, `(document_id, line_no)` UNIQUE, session 단위 RLS. `/api/consultant-erp/sessions/[id]` 응답에 `invoiceLines` (≤500) 포함.
   - **Phase 2 (AI 파서)**: `src/lib/consultant-erp/invoice-line-parser.ts` — Claude Sonnet 4.6 vision, `claude-parser.ts` 와 동일한 6단계 graceful-fallback. `POST /api/consultant-erp/sessions/[id]/parse-invoice` (auth=consultantOrSupervisor + audit + slot 가드 + 재실행시 lines 삭제 후 insert → drift 0). UI는 직원용 `ErpWorkflow` slot 카드 + 봉인 `SupervisorApprovalDetail` 양쪽 모두 노출.
+  - **자동 트리거 (autoParse)**: `/sessions/[id]/documents/upload` 가 새 form field `autoParse=true` 를 받으면 invoice 슬롯 업로드 직후 `parseInvoiceLines` 를 sync 실행. 실패는 업로드를 rollback 하지 않고 응답 `data.parse.{inserted, mode, confidence, reason}` 으로 보고. `ErpWorkflow` 가 invoice 슬롯에 자동으로 `autoParse=true` 부여 — 직원은 "업로드 + 파싱"이 한 클릭.
+  - **라인별 검토 토글**: `PATCH /api/consultant-erp/sessions/[id]/invoice-lines/[lineId]` (body `{is_reviewed?, reviewer_note?}`, refine 으로 둘 다 비면 400). 두 화면(`SupervisorApprovalDetail` + `ErpWorkflow`)에서 ✓ 컬럼 + emerald row tint + "N 검토완료" 카운트 badge 공유.
 - **회귀**: `npx tsx scripts/test-consultant-erp-flow.ts` — 세션 생성 → 자료 → 결재 → Coretax → 거래처 + 리갈리티 list 까지 끝-끝. e2e: `consultant-erp.spec.ts` 9 tests (4 페이지 접근 + content + 3 access control).
 
 ### Supervisor ERP (팀장용 — PDF 11/11 메뉴)
@@ -336,8 +338,9 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs 10 steps (6 required + 4 optional) in sequence, single PASS/FAIL summary. Required: supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, RLS isolation. Optional: external isolation, operator queue 11-state, billing 3-endpoint, monitoring.
+- `npm run test:smoke:prod` — runs 12 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry. Last verified run was 12/12 PASS.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
+- `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars). Requires repo secrets `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` / `ANTHROPIC_API_KEY` (optional `E2E_BASE_URL`).
 
 **Individual scripts** (if you need to focus on one area):
 - `SEED_TARGET=prod npx tsx scripts/verify-rls-isolation.ts` — JTC ↔ EXTERNAL tenant isolation
@@ -355,6 +358,8 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/seed-and-verify-trend.ts` — 2 MONTHLY 세션 seed → 6-point trend → cleanup
 - `SEED_TARGET=prod npx tsx scripts/seed-and-verify-invoice-lines.ts` — 3 lines seed → grand total = Rp 16,495,000 검증 → cleanup
 - `SEED_TARGET=prod npx tsx scripts/test-invoice-parser-phase2.ts` — invoice 파서 contract (synthetic path → mode=MOCK, slot 가드, consultant 비-5xx)
+- `SEED_TARGET=prod npx tsx scripts/test-upload-autoparse.ts` — upload `autoParse=true` 응답 shape (data.parse) + non-invoice 슬롯엔 미부착 검증
+- `SEED_TARGET=prod npx tsx scripts/test-invoice-line-review.ts` — PATCH `/invoice-lines/:lineId` is_reviewed flip → GET 반영 → reviewer_note persist → 빈 body 400
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 
