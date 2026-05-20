@@ -8543,7 +8543,10 @@
       "invoiceLinesTotal": "合計",
       "invoiceLinesReviewedCount": "確認済み",
       "invoiceLinesNotePrompt": "明細別の短いメモを入力 (空欄で削除)",
-      "invoiceLinesNoteBtn": "明細メモを編集"
+      "invoiceLinesNoteBtn": "明細メモを編集",
+      "invoiceLinesBulkReview": "全て ✓",
+      "invoiceLinesBulkUnreview": "全て解除",
+      "invoiceLinesBulkFailed": "件失敗"
     },
     "calc": {
       "title": "ステップ3: パース確認 / 自動計算",

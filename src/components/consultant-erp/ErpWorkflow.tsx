@@ -105,6 +105,7 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
   const [invoiceLines, setInvoiceLines] = useState<InvoiceLineRow[]>([]);
   const [parsingDocId, setParsingDocId] = useState<string | null>(null);
   const [reviewingLineId, setReviewingLineId] = useState<string | null>(null);
+  const [bulkReviewBusy, setBulkReviewBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +185,31 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
       }
     } finally {
       setReviewingLineId(null);
+    }
+  };
+
+  const bulkSetReviewed = async (next: boolean) => {
+    if (!sessionId) return;
+    const targets = invoiceLines.filter((l) => l.is_reviewed !== next);
+    if (targets.length === 0) return;
+    setBulkReviewBusy(true);
+    try {
+      const results = await Promise.allSettled(
+        targets.map((l) =>
+          fetch(`/api/consultant-erp/sessions/${sessionId}/invoice-lines/${l.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_reviewed: next }),
+          }),
+        ),
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) {
+        setError(`${failed} / ${targets.length} ${t('slot.invoiceLinesBulkFailed')}`);
+      }
+      await loadSession(sessionId);
+    } finally {
+      setBulkReviewBusy(false);
     }
   };
 
@@ -496,15 +522,32 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
               {/* Invoice line items extracted by AI */}
               {invoiceLines.length > 0 && (
                 <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4">
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between gap-3">
                     <p className="text-sm font-black text-slate-950">{t('slot.invoiceLinesHeading')}</p>
-                    <p className="text-[10px] text-slate-500">
-                      {invoiceLines.length} {t('slot.invoiceLinesUnit')}
-                      <span className="ml-2 text-emerald-700">
-                        · {invoiceLines.filter((l) => l.is_reviewed).length}{' '}
-                        {t('slot.invoiceLinesReviewedCount')}
-                      </span>
-                    </p>
+                    <div className="flex items-center gap-3">
+                      {(() => {
+                        const allReviewed = invoiceLines.every((l) => l.is_reviewed);
+                        return (
+                          <button
+                            onClick={() => void bulkSetReviewed(!allReviewed)}
+                            disabled={bulkReviewBusy}
+                            className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                          >
+                            {bulkReviewBusy ? <Loader2 className="inline h-3 w-3 animate-spin" /> : null}{' '}
+                            {allReviewed
+                              ? t('slot.invoiceLinesBulkUnreview')
+                              : t('slot.invoiceLinesBulkReview')}
+                          </button>
+                        );
+                      })()}
+                      <p className="text-[10px] text-slate-500">
+                        {invoiceLines.length} {t('slot.invoiceLinesUnit')}
+                        <span className="ml-2 text-emerald-700">
+                          · {invoiceLines.filter((l) => l.is_reviewed).length}{' '}
+                          {t('slot.invoiceLinesReviewedCount')}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">

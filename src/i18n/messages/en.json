@@ -8543,7 +8543,10 @@
       "invoiceLinesTotal": "Total",
       "invoiceLinesReviewedCount": "reviewed",
       "invoiceLinesNotePrompt": "Short reviewer note (empty to clear)",
-      "invoiceLinesNoteBtn": "Edit line note"
+      "invoiceLinesNoteBtn": "Edit line note",
+      "invoiceLinesBulkReview": "Mark all ✓",
+      "invoiceLinesBulkUnreview": "Clear all",
+      "invoiceLinesBulkFailed": "lines failed"
     },
     "calc": {
       "title": "Step 3: Parsing Review / Auto Calculation",
