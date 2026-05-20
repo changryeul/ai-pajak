@@ -130,6 +130,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   const [busy, setBusy] = useState<'APPROVE' | 'REJECT' | null>(null);
   const [parsingDocId, setParsingDocId] = useState<string | null>(null);
   const [reviewingLineId, setReviewingLineId] = useState<string | null>(null);
+  const [bulkReviewBusy, setBulkReviewBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -175,6 +176,37 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
       }
     },
     [sessionId, load],
+  );
+
+  const bulkSetReviewed = useCallback(
+    async (next: boolean) => {
+      const lines = data?.invoiceLines ?? [];
+      if (lines.length === 0) return;
+      // Only flip rows that actually need flipping — no-op PATCH wastes
+      // round-trips and pollutes the audit log.
+      const targets = lines.filter((l) => l.is_reviewed !== next);
+      if (targets.length === 0) return;
+      setBulkReviewBusy(true);
+      try {
+        const results = await Promise.allSettled(
+          targets.map((l) =>
+            fetch(`/api/consultant-erp/sessions/${sessionId}/invoice-lines/${l.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ is_reviewed: next }),
+            }),
+          ),
+        );
+        const failed = results.filter((r) => r.status === 'rejected').length;
+        if (failed > 0) {
+          toast.error(`${failed} / ${targets.length} ${t('invoiceLinesBulkFailed')}`);
+        }
+        await load();
+      } finally {
+        setBulkReviewBusy(false);
+      }
+    },
+    [sessionId, data, load, t],
   );
 
   const editLineNote = useCallback(
@@ -492,16 +524,32 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
       {/* Invoice line-items (PDF p.4) */}
       {(invoiceDocs.length > 0 || (invoiceLines && invoiceLines.length > 0)) && (
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between gap-3 mb-3">
             <p className="text-sm font-black text-slate-950">{t('invoiceLinesHeading')}</p>
-            <p className="text-[10px] text-slate-500">
-              {invoiceLines?.length ?? 0} {t('invoiceLinesUnit')}
-              {invoiceLines && invoiceLines.length > 0 && (
-                <span className="ml-2 text-emerald-700">
-                  · {invoiceLines.filter((l) => l.is_reviewed).length} {t('invoiceLinesReviewedCount')}
-                </span>
-              )}
-            </p>
+            <div className="flex items-center gap-3">
+              {invoiceLines && invoiceLines.length > 0 && (() => {
+                const reviewedCount = invoiceLines.filter((l) => l.is_reviewed).length;
+                const allReviewed = reviewedCount === invoiceLines.length;
+                return (
+                  <button
+                    onClick={() => void bulkSetReviewed(!allReviewed)}
+                    disabled={bulkReviewBusy}
+                    className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                  >
+                    {bulkReviewBusy ? <Loader2 className="inline h-3 w-3 animate-spin" /> : null}{' '}
+                    {allReviewed ? t('invoiceLinesBulkUnreview') : t('invoiceLinesBulkReview')}
+                  </button>
+                );
+              })()}
+              <p className="text-[10px] text-slate-500">
+                {invoiceLines?.length ?? 0} {t('invoiceLinesUnit')}
+                {invoiceLines && invoiceLines.length > 0 && (
+                  <span className="ml-2 text-emerald-700">
+                    · {invoiceLines.filter((l) => l.is_reviewed).length} {t('invoiceLinesReviewedCount')}
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
           {invoiceDocs.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
