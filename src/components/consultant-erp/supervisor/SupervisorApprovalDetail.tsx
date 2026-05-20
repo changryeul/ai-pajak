@@ -96,6 +96,7 @@ interface InvoiceLine {
   total: number | null;
   parse_confidence: number | null;
   is_reviewed: boolean;
+  reviewer_note: string | null;
 }
 interface Resp {
   session: Session;
@@ -174,6 +175,35 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
       }
     },
     [sessionId, load],
+  );
+
+  const editLineNote = useCallback(
+    async (lineId: string, current: string | null) => {
+      const input = window.prompt(t('invoiceLinesNotePrompt'), current ?? '');
+      if (input === null) return; // user cancelled
+      const trimmed = input.trim();
+      const next = trimmed === '' ? null : trimmed.slice(0, 500);
+      setReviewingLineId(lineId);
+      try {
+        const r = await fetch(
+          `/api/consultant-erp/sessions/${sessionId}/invoice-lines/${lineId}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewer_note: next }),
+          },
+        );
+        const j = await r.json();
+        if (!r.ok || !j.success) {
+          toast.error(j.error || 'note save failed');
+        } else {
+          await load();
+        }
+      } finally {
+        setReviewingLineId(null);
+      }
+    },
+    [sessionId, load, t],
   );
 
   const runParseInvoice = useCallback(
@@ -537,8 +567,23 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
                         <p className="text-[9px] text-slate-500">{l.invoice_date}</p>
                       )}
                     </td>
-                    <td className="py-1.5 px-2 max-w-[200px] truncate text-slate-700">
-                      {l.description ?? '—'}
+                    <td className="py-1.5 px-2 max-w-[220px] text-slate-700">
+                      <div className="flex items-start gap-1.5">
+                        <p className="flex-1 truncate">{l.description ?? '—'}</p>
+                        <button
+                          onClick={() => void editLineNote(l.id, l.reviewer_note)}
+                          disabled={reviewingLineId === l.id}
+                          title={t('invoiceLinesNoteBtn')}
+                          className="rounded-full px-1 text-[10px] font-bold text-slate-400 transition hover:bg-slate-100 hover:text-emerald-700 disabled:opacity-50"
+                        >
+                          {l.reviewer_note ? '✎' : '+'}
+                        </button>
+                      </div>
+                      {l.reviewer_note && (
+                        <p className="mt-0.5 text-[10px] italic text-emerald-700">
+                          📝 {l.reviewer_note}
+                        </p>
+                      )}
                     </td>
                     <td className="py-1.5 px-2 text-right text-slate-700">
                       {l.quantity != null ? Number(l.quantity).toLocaleString('id-ID') : '—'}

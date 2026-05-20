@@ -8974,6 +8974,8 @@
     "invoiceLinesParse": "Parsing AI",
     "invoiceLinesEmpty": "Jalankan parsing AI untuk mengisi baris",
     "invoiceLinesReviewedCount": "ditinjau",
+    "invoiceLinesNotePrompt": "Catatan singkat peninjau (kosongkan untuk hapus)",
+    "invoiceLinesNoteBtn": "Edit catatan baris",
     "findingsHeading": "Ringkasan temuan",
     "findingsCritical": "Kritis",
     "findingsWarning": "Peringatan",

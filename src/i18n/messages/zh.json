@@ -8974,6 +8974,8 @@
     "invoiceLinesParse": "AI解析",
     "invoiceLinesEmpty": "运行AI解析以填充行项目",
     "invoiceLinesReviewedCount": "已审核",
+    "invoiceLinesNotePrompt": "输入行项备注 (空白则清除)",
+    "invoiceLinesNoteBtn": "编辑行备注",
     "findingsHeading": "审查行汇总",
     "findingsCritical": "严重",
     "findingsWarning": "警告",

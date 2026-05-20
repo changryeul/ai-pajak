@@ -9100,6 +9100,8 @@
     "invoiceLinesParse": "AI 파싱",
     "invoiceLinesEmpty": "AI 파싱을 실행하면 라인이 표시됩니다",
     "invoiceLinesReviewedCount": "검토완료",
+    "invoiceLinesNotePrompt": "라인별 짧은 메모를 입력하세요 (비우면 삭제)",
+    "invoiceLinesNoteBtn": "라인 메모 편집",
     "findingsHeading": "검토 행 요약",
     "findingsCritical": "Critical",
     "findingsWarning": "Warning",

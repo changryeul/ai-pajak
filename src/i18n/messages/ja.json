@@ -8974,6 +8974,8 @@
     "invoiceLinesParse": "AI解析",
     "invoiceLinesEmpty": "AI解析を実行すると明細が表示されます",
     "invoiceLinesReviewedCount": "確認済み",
+    "invoiceLinesNotePrompt": "明細別の短いメモを入力 (空欄で削除)",
+    "invoiceLinesNoteBtn": "明細メモを編集",
     "findingsHeading": "検討行サマリー",
     "findingsCritical": "Critical",
     "findingsWarning": "Warning",

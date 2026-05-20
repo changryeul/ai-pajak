@@ -82,7 +82,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   const { data: invoiceLines } = await admin
     .from('consultant_session_invoice_line')
     .select(
-      'id, document_id, line_no, invoice_number, invoice_date, counterparty_name, counterparty_npwp, currency, description, quantity, unit_price, subtotal, vat_amount, withholding_amount, total, parse_confidence, is_reviewed',
+      'id, document_id, line_no, invoice_number, invoice_date, counterparty_name, counterparty_npwp, currency, description, quantity, unit_price, subtotal, vat_amount, withholding_amount, total, parse_confidence, is_reviewed, reviewer_note',
     )
     .eq('session_id', sessionId)
     .order('document_id', { ascending: true })
