@@ -8540,7 +8540,8 @@
       "invoiceLinesDescription": "Deskripsi",
       "invoiceLinesSubtotal": "Subtotal",
       "invoiceLinesVat": "PPN",
-      "invoiceLinesTotal": "Total"
+      "invoiceLinesTotal": "Total",
+      "invoiceLinesReviewedCount": "ditinjau"
     },
     "calc": {
       "title": "Tahap 3: Tinjauan Parsing / Kalkulasi Otomatis",

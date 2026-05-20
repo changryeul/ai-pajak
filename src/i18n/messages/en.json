@@ -8540,7 +8540,8 @@
       "invoiceLinesDescription": "Description",
       "invoiceLinesSubtotal": "Subtotal",
       "invoiceLinesVat": "VAT",
-      "invoiceLinesTotal": "Total"
+      "invoiceLinesTotal": "Total",
+      "invoiceLinesReviewedCount": "reviewed"
     },
     "calc": {
       "title": "Step 3: Parsing Review / Auto Calculation",

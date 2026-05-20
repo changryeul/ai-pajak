@@ -67,6 +67,7 @@ interface InvoiceLineRow {
   vat_amount: number | null;
   withholding_amount: number | null;
   total: number | null;
+  is_reviewed: boolean;
 }
 
 const SLOT_KEYS: { key: string; required: boolean }[] = [
@@ -102,6 +103,7 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
   const [coretax, setCoretax] = useState<CoretaxRow | null>(null);
   const [invoiceLines, setInvoiceLines] = useState<InvoiceLineRow[]>([]);
   const [parsingDocId, setParsingDocId] = useState<string | null>(null);
+  const [reviewingLineId, setReviewingLineId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +160,29 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
       setError(e instanceof Error ? e.message : 'failed');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const toggleLineReviewed = async (lineId: string, next: boolean) => {
+    if (!sessionId) return;
+    setReviewingLineId(lineId);
+    try {
+      const r = await fetch(
+        `/api/consultant-erp/sessions/${sessionId}/invoice-lines/${lineId}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_reviewed: next }),
+        },
+      );
+      const j = await r.json();
+      if (!r.ok || !j.success) {
+        setError(j.error || 'review toggle failed');
+      } else {
+        await loadSession(sessionId);
+      }
+    } finally {
+      setReviewingLineId(null);
     }
   };
 
@@ -447,12 +472,17 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
                     <p className="text-sm font-black text-slate-950">{t('slot.invoiceLinesHeading')}</p>
                     <p className="text-[10px] text-slate-500">
                       {invoiceLines.length} {t('slot.invoiceLinesUnit')}
+                      <span className="ml-2 text-emerald-700">
+                        · {invoiceLines.filter((l) => l.is_reviewed).length}{' '}
+                        {t('slot.invoiceLinesReviewedCount')}
+                      </span>
                     </p>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                       <thead className="bg-slate-50 text-slate-600">
                         <tr>
+                          <th className="px-2 py-1.5 text-left w-8">✓</th>
                           <th className="px-2 py-1.5 text-left">#</th>
                           <th className="px-2 py-1.5 text-left">{t('slot.invoiceLinesCounterparty')}</th>
                           <th className="px-2 py-1.5 text-left">{t('slot.invoiceLinesInvoice')}</th>
@@ -464,7 +494,16 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {invoiceLines.map((l) => (
-                          <tr key={l.id}>
+                          <tr key={l.id} className={l.is_reviewed ? 'bg-emerald-50/40' : ''}>
+                            <td className="px-2 py-1.5 text-center">
+                              <input
+                                type="checkbox"
+                                checked={l.is_reviewed}
+                                disabled={reviewingLineId === l.id}
+                                onChange={(e) => void toggleLineReviewed(l.id, e.target.checked)}
+                                className="h-3.5 w-3.5 cursor-pointer accent-emerald-600 disabled:opacity-50"
+                              />
+                            </td>
                             <td className="px-2 py-1.5 font-mono text-[10px] text-slate-500">{l.line_no}</td>
                             <td className="px-2 py-1.5">
                               <p className="font-bold text-slate-900">{l.counterparty_name ?? '—'}</p>

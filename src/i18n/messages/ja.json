@@ -8540,7 +8540,8 @@
       "invoiceLinesDescription": "内訳",
       "invoiceLinesSubtotal": "小計",
       "invoiceLinesVat": "VAT",
-      "invoiceLinesTotal": "合計"
+      "invoiceLinesTotal": "合計",
+      "invoiceLinesReviewedCount": "確認済み"
     },
     "calc": {
       "title": "ステップ3: パース確認 / 自動計算",
