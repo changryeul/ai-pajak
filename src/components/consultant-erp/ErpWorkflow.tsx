@@ -188,6 +188,12 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
       const form = new FormData();
       form.append('slot', slot);
       form.append('file', file);
+      // Auto-trigger the AI line-item parser when the slot is invoice-like.
+      // Synchronous server-side; the upload response carries the inserted
+      // count + mode so we can refresh the session in one round-trip.
+      if (slot === 'WITHHOLDING_INVOICE' || slot === 'VAT_IN_OUT') {
+        form.append('autoParse', 'true');
+      }
       const r = await fetch(`/api/consultant-erp/sessions/${sessionId}/documents/upload`, {
         method: 'POST',
         body: form,

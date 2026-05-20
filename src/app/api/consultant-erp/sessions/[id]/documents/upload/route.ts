@@ -17,10 +17,12 @@ import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { requireConsultantOrSupervisor } from '@/middleware/requireConsultantOrSupervisor';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
 import {
   ensureSessionAccess,
   resolveConsultantContext,
 } from '@/lib/consultant-erp/session-helpers';
+import { parseInvoiceLines } from '@/lib/consultant-erp/invoice-line-parser';
 import type { RequestWithSession } from '@/types/auth';
 
 const ALLOWED_SLOTS = new Set([
@@ -120,8 +122,99 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     .eq('id', sessionId)
     .lt('current_step', 2);
 
+  // Optional: kick the AI line-item parser inline when the caller asks
+  // and the slot is invoice-eligible. Synchronous so the response carries
+  // the lines + count — UX gets "uploaded AND parsed" in one round-trip.
+  // Failure here NEVER rolls back the upload; we just report it.
+  const autoParseRaw = String(formData.get('autoParse') ?? '').toLowerCase();
+  const autoParse =
+    autoParseRaw === 'true' || autoParseRaw === '1' || autoParseRaw === 'yes';
+  let parse: {
+    inserted: number;
+    mode: 'CLAUDE' | 'MOCK';
+    confidence: number;
+    reason: string | null;
+  } | null = null;
+  if (autoParse && (slot === 'WITHHOLDING_INVOICE' || slot === 'VAT_IN_OUT')) {
+    try {
+      const result = await parseInvoiceLines({
+        documentId: data.id,
+        slot,
+        storagePath,
+        originalFilename: file.name,
+        mimeType: file.type || null,
+      });
+      let inserted = 0;
+      if (result.lines.length > 0) {
+        const rows = result.lines.map((l) => ({
+          document_id: data.id,
+          session_id: sessionId,
+          line_no: l.line_no,
+          invoice_number: l.invoice_number,
+          invoice_date: l.invoice_date,
+          counterparty_name: l.counterparty_name,
+          counterparty_npwp: l.counterparty_npwp,
+          currency: l.currency,
+          description: l.description,
+          quantity: l.quantity,
+          unit_price: l.unit_price,
+          subtotal: l.subtotal,
+          vat_amount: l.vat_amount,
+          withholding_amount: l.withholding_amount,
+          total: l.total,
+          parse_confidence: result.confidence,
+          ai_model_version: result.modelVersion,
+        }));
+        const { error: iErr, count } = await admin
+          .from('consultant_session_invoice_line')
+          .insert(rows, { count: 'exact' });
+        if (iErr) {
+          loggers.api.warn(
+            { err: iErr, documentId: data.id },
+            'upload autoParse: invoice line insert failed',
+          );
+        } else {
+          inserted = count ?? rows.length;
+        }
+      }
+      await admin
+        .from('consultant_session_document')
+        .update({
+          parse_status: result.mode === 'CLAUDE' ? 'PARSED' : 'FAILED',
+          parse_confidence: result.confidence,
+          ai_model_version: result.modelVersion,
+        })
+        .eq('id', data.id);
+      parse = {
+        inserted,
+        mode: result.mode,
+        confidence: result.confidence,
+        reason: result.reason,
+      };
+    } catch (e) {
+      loggers.api.warn(
+        { err: e, documentId: data.id },
+        'upload autoParse: parser threw',
+      );
+      parse = {
+        inserted: 0,
+        mode: 'MOCK',
+        confidence: 0,
+        reason: e instanceof Error ? e.message : 'autoParse exception',
+      };
+    }
+  }
+
   return NextResponse.json(
-    { success: true, data: { documentId: data.id, storagePath, version: nextVersion } },
+    {
+      success: true,
+      data: {
+        documentId: data.id,
+        storagePath,
+        version: nextVersion,
+        ...(parse ? { parse } : {}),
+      },
+    },
     { status: 201 },
   );
 }
