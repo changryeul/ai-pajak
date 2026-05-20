@@ -8541,7 +8541,9 @@
       "invoiceLinesSubtotal": "小計",
       "invoiceLinesVat": "VAT",
       "invoiceLinesTotal": "合計",
-      "invoiceLinesReviewedCount": "確認済み"
+      "invoiceLinesReviewedCount": "確認済み",
+      "invoiceLinesNotePrompt": "明細別の短いメモを入力 (空欄で削除)",
+      "invoiceLinesNoteBtn": "明細メモを編集"
     },
     "calc": {
       "title": "ステップ3: パース確認 / 自動計算",

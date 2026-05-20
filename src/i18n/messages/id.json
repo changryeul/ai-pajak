@@ -8541,7 +8541,9 @@
       "invoiceLinesSubtotal": "Subtotal",
       "invoiceLinesVat": "PPN",
       "invoiceLinesTotal": "Total",
-      "invoiceLinesReviewedCount": "ditinjau"
+      "invoiceLinesReviewedCount": "ditinjau",
+      "invoiceLinesNotePrompt": "Catatan singkat peninjau (kosongkan untuk hapus)",
+      "invoiceLinesNoteBtn": "Edit catatan baris"
     },
     "calc": {
       "title": "Tahap 3: Tinjauan Parsing / Kalkulasi Otomatis",

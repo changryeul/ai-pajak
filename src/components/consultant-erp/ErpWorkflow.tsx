@@ -68,6 +68,7 @@ interface InvoiceLineRow {
   withholding_amount: number | null;
   total: number | null;
   is_reviewed: boolean;
+  reviewer_note: string | null;
 }
 
 const SLOT_KEYS: { key: string; required: boolean }[] = [
@@ -178,6 +179,33 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
       const j = await r.json();
       if (!r.ok || !j.success) {
         setError(j.error || 'review toggle failed');
+      } else {
+        await loadSession(sessionId);
+      }
+    } finally {
+      setReviewingLineId(null);
+    }
+  };
+
+  const editLineNote = async (lineId: string, current: string | null) => {
+    if (!sessionId) return;
+    const input = window.prompt(t('slot.invoiceLinesNotePrompt'), current ?? '');
+    if (input === null) return;
+    const trimmed = input.trim();
+    const note = trimmed === '' ? null : trimmed.slice(0, 500);
+    setReviewingLineId(lineId);
+    try {
+      const r = await fetch(
+        `/api/consultant-erp/sessions/${sessionId}/invoice-lines/${lineId}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewer_note: note }),
+        },
+      );
+      const j = await r.json();
+      if (!r.ok || !j.success) {
+        setError(j.error || 'note save failed');
       } else {
         await loadSession(sessionId);
       }
@@ -515,8 +543,23 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
                               <p className="text-slate-800">{l.invoice_number ?? '—'}</p>
                               {l.invoice_date && <p className="text-[9px] text-slate-500">{l.invoice_date}</p>}
                             </td>
-                            <td className="max-w-[200px] truncate px-2 py-1.5 text-slate-700">
-                              {l.description ?? '—'}
+                            <td className="max-w-[220px] px-2 py-1.5 text-slate-700">
+                              <div className="flex items-start gap-1.5">
+                                <p className="flex-1 truncate">{l.description ?? '—'}</p>
+                                <button
+                                  onClick={() => void editLineNote(l.id, l.reviewer_note)}
+                                  disabled={reviewingLineId === l.id}
+                                  title={t('slot.invoiceLinesNoteBtn')}
+                                  className="rounded-full px-1 text-[10px] font-bold text-slate-400 transition hover:bg-slate-100 hover:text-emerald-700 disabled:opacity-50"
+                                >
+                                  {l.reviewer_note ? '✎' : '+'}
+                                </button>
+                              </div>
+                              {l.reviewer_note && (
+                                <p className="mt-0.5 text-[10px] italic text-emerald-700">
+                                  📝 {l.reviewer_note}
+                                </p>
+                              )}
                             </td>
                             <td className="px-2 py-1.5 text-right font-mono text-slate-700">
                               {l.subtotal != null ? `Rp ${Math.round(Number(l.subtotal)).toLocaleString('id-ID')}` : '—'}

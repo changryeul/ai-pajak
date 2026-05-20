@@ -8667,7 +8667,9 @@
       "invoiceLinesSubtotal": "소계",
       "invoiceLinesVat": "VAT",
       "invoiceLinesTotal": "총액",
-      "invoiceLinesReviewedCount": "검토완료"
+      "invoiceLinesReviewedCount": "검토완료",
+      "invoiceLinesNotePrompt": "라인별 짧은 메모를 입력하세요 (비우면 삭제)",
+      "invoiceLinesNoteBtn": "라인 메모 편집"
     },
     "calc": {
       "title": "3단계: 파싱검토 / 자동계산",

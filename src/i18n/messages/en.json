@@ -8541,7 +8541,9 @@
       "invoiceLinesSubtotal": "Subtotal",
       "invoiceLinesVat": "VAT",
       "invoiceLinesTotal": "Total",
-      "invoiceLinesReviewedCount": "reviewed"
+      "invoiceLinesReviewedCount": "reviewed",
+      "invoiceLinesNotePrompt": "Short reviewer note (empty to clear)",
+      "invoiceLinesNoteBtn": "Edit line note"
     },
     "calc": {
       "title": "Step 3: Parsing Review / Auto Calculation",

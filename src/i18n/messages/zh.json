@@ -8541,7 +8541,9 @@
       "invoiceLinesSubtotal": "小计",
       "invoiceLinesVat": "VAT",
       "invoiceLinesTotal": "合计",
-      "invoiceLinesReviewedCount": "已审核"
+      "invoiceLinesReviewedCount": "已审核",
+      "invoiceLinesNotePrompt": "输入行项备注 (空白则清除)",
+      "invoiceLinesNoteBtn": "编辑行备注"
     },
     "calc": {
       "title": "第3步: 解析审核 / 自动计算",
