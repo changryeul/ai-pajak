@@ -1,12 +1,13 @@
 /**
  * e2e coverage for the 팀장용 (Supervisor) ERP shipped between commits
  * c0b8687 (P1) → a7b1f59 (reassign) → e893fb2 (invoice lines Phase 1)
- * → ff3a328 (invoice parser Phase 2). 9 supervisor-only pages plus the
- * cross-tenant counterparty stats endpoint plus the parse-invoice
- * endpoint contract.
+ * → ff3a328 (invoice parser Phase 2) → 9d64ddd (line review PATCH).
+ * 9 supervisor-only pages plus the cross-tenant counterparty stats
+ * endpoint plus the parse-invoice + line review endpoint contracts.
  *
  * The smoke tests in scripts/test-supervisor-erp-p1.ts +
- * scripts/test-invoice-parser-phase2.ts cover the data-layer round-trip;
+ * scripts/test-invoice-parser-phase2.ts +
+ * scripts/test-invoice-line-review.ts cover the data-layer round-trip;
  * this spec exercises UI rendering + role gating + 400/404 contracts.
  */
 
@@ -220,6 +221,56 @@ test.describe('Supervisor ERP — invoice line-item parser (Phase 2)', () => {
       {
         data: { documentId: '00000000-0000-4000-8000-000000000001' },
       },
+    );
+    expect([401, 403]).toContain(res.status());
+  });
+});
+
+test.describe('Supervisor ERP — invoice line review PATCH', () => {
+  // Data round-trip lives in scripts/test-invoice-line-review.ts.
+  // These are contract gates only — input shape + role gating.
+
+  test('supervisor: empty body → 400 (zod refine)', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.patch(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/invoice-lines/00000000-0000-4000-8000-000000000001`,
+      { data: {} },
+    );
+    expect(res.status()).toBe(400);
+  });
+
+  test('supervisor: non-uuid lineId → 400', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.patch(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/invoice-lines/not-a-uuid`,
+      { data: { is_reviewed: true } },
+    );
+    expect(res.status()).toBe(400);
+  });
+
+  test('supervisor: reviewer_note > 500 chars → 400 (zod max)', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.patch(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/invoice-lines/00000000-0000-4000-8000-000000000001`,
+      { data: { reviewer_note: 'x'.repeat(501) } },
+    );
+    expect(res.status()).toBe(400);
+  });
+
+  test('supervisor: unknown session/line → 403 or 404', async ({ page }) => {
+    await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
+    const res = await page.request.patch(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/invoice-lines/00000000-0000-4000-8000-000000000001`,
+      { data: { is_reviewed: true } },
+    );
+    expect([403, 404]).toContain(res.status());
+  });
+
+  test('PLATFORM_ADMIN blocked on line review PATCH', async ({ page }) => {
+    await loginAs(page, 'PLATFORM_ADMIN');
+    const res = await page.request.patch(
+      `${BASE_URL}/api/consultant-erp/sessions/00000000-0000-4000-8000-000000000000/invoice-lines/00000000-0000-4000-8000-000000000001`,
+      { data: { is_reviewed: true } },
     );
     expect([401, 403]).toContain(res.status());
   });
