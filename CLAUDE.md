@@ -265,7 +265,7 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
   - **Phase 1 (read path)**: 마이그레이션 `20260518000001_consultant_session_invoice_line.sql` — 21컬럼, `(document_id, line_no)` UNIQUE, session 단위 RLS. `/api/consultant-erp/sessions/[id]` 응답에 `invoiceLines` (≤500) 포함.
   - **Phase 2 (AI 파서)**: `src/lib/consultant-erp/invoice-line-parser.ts` — Claude Sonnet 4.6 vision, `claude-parser.ts` 와 동일한 6단계 graceful-fallback. `POST /api/consultant-erp/sessions/[id]/parse-invoice` (auth=consultantOrSupervisor + audit + slot 가드 + 재실행시 lines 삭제 후 insert → drift 0). UI는 직원용 `ErpWorkflow` slot 카드 + 봉인 `SupervisorApprovalDetail` 양쪽 모두 노출.
   - **자동 트리거 (autoParse)**: `/sessions/[id]/documents/upload` 가 새 form field `autoParse=true` 를 받으면 invoice 슬롯 업로드 직후 `parseInvoiceLines` 를 sync 실행. 실패는 업로드를 rollback 하지 않고 응답 `data.parse.{inserted, mode, confidence, reason}` 으로 보고. `ErpWorkflow` 가 invoice 슬롯에 자동으로 `autoParse=true` 부여 — 직원은 "업로드 + 파싱"이 한 클릭.
-  - **라인별 검토 토글**: `PATCH /api/consultant-erp/sessions/[id]/invoice-lines/[lineId]` (body `{is_reviewed?, reviewer_note?}`, refine 으로 둘 다 비면 400). 두 화면(`SupervisorApprovalDetail` + `ErpWorkflow`)에서 ✓ 컬럼 + emerald row tint + "N 검토완료" 카운트 badge 공유.
+  - **라인별 검토 토글**: `PATCH /api/consultant-erp/sessions/[id]/invoice-lines/[lineId]` (body `{is_reviewed?, reviewer_note?}`, refine 으로 둘 다 비면 400, reviewer_note 500자 cap). 두 화면(`SupervisorApprovalDetail` + `ErpWorkflow`)에서 ✓ 컬럼 + emerald row tint + "N 검토완료" 카운트 badge + description 셀 옆 ✎/+ 노트 인라인 편집 (`window.prompt`)을 공유. note 가 있으면 italic emerald "📝 …" 로 description 아래 표시.
 - **회귀**: `npx tsx scripts/test-consultant-erp-flow.ts` — 세션 생성 → 자료 → 결재 → Coretax → 거래처 + 리갈리티 list 까지 끝-끝. e2e: `consultant-erp.spec.ts` 9 tests (4 페이지 접근 + content + 3 access control).
 
 ### Supervisor ERP (팀장용 — PDF 11/11 메뉴)
@@ -278,7 +278,7 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 - **설정 persistence**: `tax_partner.settings JSONB` (마이그레이션 `20260517000001_tax_partner_settings.sql`) — GET은 stored ⊕ `DEFAULT_APPROVAL`/`DEFAULT_CHANNELS` 머지, PATCH은 sibling 키 보존 partial-merge.
 - **재배정**: `POST /supervisor/team/reassign` — 활성 + 같은 tax_partner + COMPLETED 아님 검증 후 `consultant_session.consultant_id` 갱신 + `WITHDRAW` 감사 row.
 - **회귀**: 통합 runner `npm run test:smoke:prod` 안에 supervisor P1 (`test-supervisor-erp-p1.ts` 11 endpoint × 2 role) + settings round-trip + 6-month trend seed+verify + invoice lines Phase 1 + invoice parser Phase 2 가 모두 포함.
-- **e2e**: `src/tests/e2e/supervisor-erp.spec.ts` — 9 페이지 렌더 + 9 endpoint × 3 role 접근 게이트 + reassign 2 + approval 2 + settings 2 + parse-invoice contract 4 = **49 cases**.
+- **e2e**: `src/tests/e2e/supervisor-erp.spec.ts` — 9 페이지 렌더 + 9 endpoint × 3 role 접근 게이트 + reassign 2 + approval 2 + settings 2 + parse-invoice contract 4 + line-review contract 5 = **54 cases**.
 
 ### Landing Page (public `/`)
 The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/page.tsx`) that delegates to a single client component (`src/components/landing/LandingPage.tsx`) wired to a separate data layer:
