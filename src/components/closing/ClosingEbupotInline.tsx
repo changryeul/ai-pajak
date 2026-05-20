@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,6 +79,7 @@ export function ClosingEbupotInline({
    *  closing_document OCR result for this session. */
   sessionId?: string | null;
 }) {
+  const t = useTranslations('closingEbupot');
   const [companyName, setCompanyName] = useState(initialCompanyName ?? '');
   const [companyNpwp, setCompanyNpwp] = useState(initialCompanyNpwp ?? '');
   const [employees, setEmployees] = useState<EmpRow[]>([newEmp()]);
@@ -104,7 +106,7 @@ export function ClosingEbupotInline({
       });
       const json = await res.json();
       if (!json.success) {
-        setPrefill((p) => ({ ...p, loading: false, error: json.error || 'prefill 실패' }));
+        setPrefill((p) => ({ ...p, loading: false, error: json.error || t('errors.prefillFailed') }));
         return;
       }
       const payload = json.data as {
@@ -151,10 +153,10 @@ export function ClosingEbupotInline({
       setPrefill((p) => ({
         ...p,
         loading: false,
-        error: err instanceof Error ? err.message : '네트워크 오류',
+        error: err instanceof Error ? err.message : t('errors.network'),
       }));
     }
-  }, [sessionId]);
+  }, [sessionId, t]);
 
   useEffect(() => {
     if (sessionId) void runPrefill();
@@ -164,11 +166,11 @@ export function ClosingEbupotInline({
 
   const generate = async () => {
     if (!companyName || !companyNpwp) {
-      toast.error('회사명과 NPWP가 필요합니다');
+      toast.error(t('errors.companyRequired'));
       return;
     }
     if (valid.length === 0) {
-      toast.error('직원 1명 이상이 필요합니다');
+      toast.error(t('errors.employeesRequired'));
       return;
     }
     setBusy(true);
@@ -198,13 +200,13 @@ export function ClosingEbupotInline({
       });
       const json = await res.json();
       if (!json.success) {
-        toast.error(json.error || '발급 실패');
+        toast.error(json.error || t('errors.issueFailed'));
         return;
       }
       setResult(json.data as BulkResult);
-      toast.success(`${json.data.summary.totalEmployees}명 1721 A1 발급 완료`);
+      toast.success(t('successToast', { n: json.data.summary.totalEmployees }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : '네트워크 오류');
+      toast.error(err instanceof Error ? err.message : t('errors.network'));
     } finally {
       setBusy(false);
     }
@@ -230,16 +232,16 @@ export function ClosingEbupotInline({
     <div className="rounded-lg border border-slate-200 bg-white p-4 mt-4">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
-          <p className="text-sm font-bold text-slate-900">e-Bupot 1721 A1 일괄 발급</p>
+          <p className="text-sm font-bold text-slate-900">{t('heading')}</p>
           <p className="text-xs text-slate-500 mt-0.5">
-            {taxYear}년 직원 원천징수 증빙. 회사명/NPWP는 결산 정보에서 자동 채움.
+            {t('subtitle', { year: taxYear })}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <Label className="text-[11px] text-slate-600">회사명</Label>
+          <Label className="text-[11px] text-slate-600">{t('companyName')}</Label>
           <Input
             className="text-sm"
             value={companyName}
@@ -248,7 +250,7 @@ export function ClosingEbupotInline({
           />
         </div>
         <div>
-          <Label className="text-[11px] text-slate-600">회사 NPWP</Label>
+          <Label className="text-[11px] text-slate-600">{t('companyNpwp')}</Label>
           <Input
             className="text-sm font-mono"
             value={companyNpwp}
@@ -263,28 +265,28 @@ export function ClosingEbupotInline({
           {prefill.loading ? (
             <span className="flex items-center text-emerald-700">
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              급여대장 OCR 결과 확인 중…
+              {t('ocrLoading')}
             </span>
           ) : prefill.source === 'payrollRows' || prefill.source === 'lineItems' ? (
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="flex items-center font-bold text-emerald-800">
                   <Sparkles className="h-3 w-3 mr-1" />
-                  OCR로 직원 {prefill.prefillCount}명 자동 채움
+                  {t('ocrPrefilled', { n: prefill.prefillCount })}
                 </p>
                 <p className="text-[10px] text-emerald-700 mt-0.5">
-                  {prefill.sourceFilename ? `출처: ${prefill.sourceFilename}` : '출처: PAYROLL 자료'}
+                  {prefill.sourceFilename
+                    ? t('ocrSourceFile', { filename: prefill.sourceFilename })
+                    : t('ocrSourceDefault')}
                   {prefill.confidence !== null
-                    ? ` · 신뢰도 ${Math.round(prefill.confidence * 100)}%`
+                    ? t('ocrConfidence', { pct: Math.round(prefill.confidence * 100) })
                     : ''}
-                  {prefill.source === 'lineItems'
-                    ? ' · NPWP/NIK/PTKP는 비어 있으니 수동 보완 필요'
-                    : ''}
+                  {prefill.source === 'lineItems' ? t('ocrManualNote') : ''}
                 </p>
                 {prefill.lowConfidence && (
                   <p className="flex items-center text-[10px] text-amber-800 mt-1">
                     <AlertTriangle className="h-3 w-3 mr-1" />
-                    신뢰도가 낮습니다. 발급 전에 직원 정보를 한 번 더 확인하세요.
+                    {t('ocrLowConfWarn')}
                   </p>
                 )}
               </div>
@@ -298,30 +300,27 @@ export function ClosingEbupotInline({
                 }}
                 disabled={prefill.loading}
               >
-                다시 채움
+                {t('ocrRefill')}
               </Button>
             </div>
           ) : prefill.error ? (
             <p className="text-[11px] text-rose-700">
               <AlertTriangle className="inline h-3 w-3 mr-1" />
-              OCR prefill 실패: {prefill.error}
+              {t('ocrPrefillFailed', { error: prefill.error })}
             </p>
           ) : (
-            <p className="text-[11px] text-slate-600">
-              PAYROLL 자료를 결산 wizard에서 업로드 + OCR 처리하면 여기에서 1721 A1 직원 정보가
-              자동 채워집니다.
-            </p>
+            <p className="text-[11px] text-slate-600">{t('ocrEmptyHint')}</p>
           )}
         </div>
       )}
 
-      <p className="text-[11px] text-slate-600 font-medium mt-4">직원 목록</p>
+      <p className="text-[11px] text-slate-600 font-medium mt-4">{t('employeeList')}</p>
       <div className="space-y-2 mt-1">
         {employees.map((emp) => (
           <div key={emp.id} className="grid grid-cols-12 gap-1.5 items-end">
             <Input
               className="col-span-3 text-xs"
-              placeholder="이름"
+              placeholder={t('namePlaceholder')}
               value={emp.name}
               onChange={(e) => updateEmp(emp.id, { name: e.target.value })}
             />
@@ -352,7 +351,7 @@ export function ClosingEbupotInline({
             <Input
               className="col-span-2 text-xs font-mono"
               type="number"
-              placeholder="연봉"
+              placeholder={t('salaryPlaceholder')}
               value={emp.salary || ''}
               onChange={(e) => updateEmp(emp.id, { salary: Number(e.target.value) })}
             />
@@ -391,7 +390,7 @@ export function ClosingEbupotInline({
           }}
         >
           <Plus className="h-3 w-3 mr-1" />
-          직원 추가
+          {t('addEmployee')}
         </Button>
         <Button
           size="sm"
@@ -404,7 +403,7 @@ export function ClosingEbupotInline({
           ) : (
             <FileSpreadsheet className="h-3 w-3 mr-1" />
           )}
-          1721 A1 발급
+          {t('issueBtn')}
         </Button>
       </div>
 
@@ -412,9 +411,9 @@ export function ClosingEbupotInline({
         <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50/40 p-3">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold text-emerald-800">
-              {result.summary.totalEmployees}명 발급 완료
+              {t('issueDone', { n: result.summary.totalEmployees })}
               {result.summary.errorCount > 0 && (
-                <span className="text-rose-700"> · 오류 {result.summary.errorCount}건</span>
+                <span className="text-rose-700">{t('issueErrors', { n: result.summary.errorCount })}</span>
               )}
             </p>
             <Button size="sm" variant="outline" className="text-xs h-7" onClick={downloadCsv}>
@@ -424,19 +423,19 @@ export function ClosingEbupotInline({
           </div>
           <div className="grid grid-cols-3 gap-2 mt-3 text-[11px]">
             <div className="rounded bg-white border border-slate-200 p-2 text-center">
-              <p className="text-slate-500">총 급여</p>
+              <p className="text-slate-500">{t('totalSalary')}</p>
               <p className="font-mono text-slate-900 font-semibold">
                 Rp {result.summary.totalGrossIncome.toLocaleString('id-ID')}
               </p>
             </div>
             <div className="rounded bg-white border border-slate-200 p-2 text-center">
-              <p className="text-slate-500">총 PPh 21</p>
+              <p className="text-slate-500">{t('totalPph21')}</p>
               <p className="font-mono text-slate-900 font-semibold">
                 Rp {result.summary.totalTaxWithheld.toLocaleString('id-ID')}
               </p>
             </div>
             <div className="rounded bg-white border border-slate-200 p-2 text-center">
-              <p className="text-slate-500">직원</p>
+              <p className="text-slate-500">{t('employeeCount')}</p>
               <p className="font-mono text-slate-900 font-semibold">{result.summary.totalEmployees}</p>
             </div>
           </div>
@@ -445,9 +444,9 @@ export function ClosingEbupotInline({
               <table className="w-full text-[11px]">
                 <thead className="bg-slate-50 text-slate-600">
                   <tr>
-                    <th className="text-left py-1.5 px-2">이름</th>
-                    <th className="text-left py-1.5 px-2">증빙번호</th>
-                    <th className="text-right py-1.5 px-2">급여</th>
+                    <th className="text-left py-1.5 px-2">{t('tblName')}</th>
+                    <th className="text-left py-1.5 px-2">{t('tblCertNo')}</th>
+                    <th className="text-right py-1.5 px-2">{t('tblSalary')}</th>
                     <th className="text-right py-1.5 px-2">PPh 21</th>
                   </tr>
                 </thead>
@@ -468,7 +467,7 @@ export function ClosingEbupotInline({
               </table>
               {result.items.length > 20 && (
                 <p className="text-[10px] text-slate-500 px-2 py-1 bg-slate-50">
-                  …상위 20명만 표시. 전체는 CSV 다운로드.
+                  {t('tblTop20Note')}
                 </p>
               )}
             </div>
