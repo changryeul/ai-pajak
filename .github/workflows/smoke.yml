@@ -1,0 +1,72 @@
+name: Prod smoke regression
+
+# Runs the integrated smoke runner (`npm run test:smoke:prod`) against the
+# live ai-pajak.vercel.app deployment. We DO NOT gate PR merges on this —
+# the existing ci.yml lint+test+build is the merge gate. This workflow is
+# a separate dependability signal:
+#
+#   - On `workflow_dispatch`: a maintainer can re-run it after rotating
+#     env vars, a hotfix, or a database migration to confirm nothing
+#     regressed in prod.
+#   - On `schedule` (nightly): we catch drift even when no commits land —
+#     e.g. an upstream Anthropic API change, a Supabase RLS edit done in
+#     the UI, or a Vercel env var that quietly expired.
+#
+# Required GitHub repo secrets (Settings → Secrets and variables → Actions):
+#   - NEXT_PUBLIC_SUPABASE_URL
+#   - NEXT_PUBLIC_SUPABASE_ANON_KEY
+#   - SUPABASE_SERVICE_ROLE_KEY
+#   - ANTHROPIC_API_KEY
+# Optional:
+#   - E2E_BASE_URL  (defaults to https://ai-pajak.vercel.app)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily at 23:00 UTC = 06:00 WIB (Jakarta), avoids business-hours noise.
+    - cron: '0 23 * * *'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  smoke:
+    name: Prod smoke (12 steps)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Secrets land in env vars only — never interpolated into shell
+      # command strings. The smoke runner reads .env.production.local,
+      # so we write the file from $-vars (single-quoted heredoc) instead
+      # of GitHub-Actions template substitution.
+      - name: Write .env.production.local
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          {
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$NEXT_PUBLIC_SUPABASE_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
+            printf 'ANTHROPIC_API_KEY=%s\n' "$ANTHROPIC_API_KEY"
+          } > .env.production.local
+
+      - name: Run integrated smoke
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL || 'https://ai-pajak.vercel.app' }}
+        run: npm run test:smoke:prod
+
+      - name: Clean up secrets
+        if: always()
+        run: rm -f .env.production.local
