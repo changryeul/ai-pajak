@@ -27,6 +27,8 @@
     "test:e2e:operator-queue": "playwright test src/tests/e2e/operator-queue-workflow.spec.ts",
     "test:e2e:phase-b3-k-d": "playwright test src/tests/e2e/billing-phases.spec.ts src/tests/e2e/billing-custom-pricing.spec.ts src/tests/e2e/operator-queue-workflow.spec.ts",
     "test:e2e:report": "playwright show-report",
+    "test:smoke": "tsx scripts/test-smoke-all.ts",
+    "test:smoke:prod": "SEED_TARGET=prod tsx scripts/test-smoke-all.ts",
     "db:seed-test-users": "tsx scripts/seed-test-users.ts"
   },
   "dependencies": {
