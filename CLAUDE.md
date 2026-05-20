@@ -33,6 +33,10 @@ npm run test:e2e:system             # System role only
 npm run test:e2e:audit              # Audit trail tests
 npm run test:e2e:operator           # Operator workflow tests
 
+# Smoke regression (prod or local Supabase) — see "Verification" section for the 10 steps
+npm run test:smoke                  # local Supabase
+npm run test:smoke:prod             # .env.production.local
+
 # Database
 supabase start             # Local Supabase
 supabase migration up      # Apply migrations
@@ -257,7 +261,22 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 - **자동계산**: `src/lib/consultant-erp/calc-engine.ts` — PPH21_TER / WITHHOLDING / CORP_TAX_MONTHLY (PPh Final ↔ PPh25 듀얼 케이스) / PPN_NET / BANK_RECON.
 - **공동 거래처 DB**: cross-tenant 공유 (`counterparty_master_read` 정책으로 모든 active consultant read, 등록·갱신은 consultant 행 필요). `counterparty-matcher.ts` 의 `matchByNpwp()` 가 NPWP exact 매칭으로 suggested PPh + trust score 반환.
 - **운영팀 큐 / 결산 wizard 와 책임 분리**: ERP 세션은 자체 완결 (Coretax 외부 처리 후 수기 기록), `djp_submission_queue` 와 별도 트리거.
+- **인보이스 라인 파싱 (2단계)**: `WITHHOLDING_INVOICE` / `VAT_IN_OUT` 슬롯 문서에서 line-item을 추출해 `consultant_session_invoice_line` 에 적재.
+  - **Phase 1 (read path)**: 마이그레이션 `20260518000001_consultant_session_invoice_line.sql` — 21컬럼, `(document_id, line_no)` UNIQUE, session 단위 RLS. `/api/consultant-erp/sessions/[id]` 응답에 `invoiceLines` (≤500) 포함.
+  - **Phase 2 (AI 파서)**: `src/lib/consultant-erp/invoice-line-parser.ts` — Claude Sonnet 4.6 vision, `claude-parser.ts` 와 동일한 6단계 graceful-fallback. `POST /api/consultant-erp/sessions/[id]/parse-invoice` (auth=consultantOrSupervisor + audit + slot 가드 + 재실행시 lines 삭제 후 insert → drift 0). UI는 직원용 `ErpWorkflow` slot 카드 + 봉인 `SupervisorApprovalDetail` 양쪽 모두 노출.
 - **회귀**: `npx tsx scripts/test-consultant-erp-flow.ts` — 세션 생성 → 자료 → 결재 → Coretax → 거래처 + 리갈리티 list 까지 끝-끝. e2e: `consultant-erp.spec.ts` 9 tests (4 페이지 접근 + content + 3 access control).
+
+### Supervisor ERP (팀장용 — PDF 11/11 메뉴)
+세무 사무소 팀장(supervisor) 전용 ERP. 직원용 ERP 위에 read-only 집계 + 1~2개 write endpoint 만 얹은 구조 — 새 DB 0개. 사이드바에서 supervisor 에게만 노출되는 9 링크 + Dashboard role-aware 분기. 상세 메모리: `2026-05-17 Supervisor ERP 완료`.
+
+- **라우팅**: 모두 `/consultant-erp/supervisor/*` — `approval` (+ `[sessionId]` 케이스 상세) · `team` · `customers` · `revisions` · `legality` · `calendar` · `coretax` · `quality` · `settings`.
+- **API**: `/api/consultant-erp/supervisor/{approval/[id], team, team-members, team/reassign, customers, revisions, calendar, legality, coretax, quality, settings}` — 핸들러 첫 줄에서 `req.session.role !== TAX_OPERATOR_SUPERVISOR → 403` 강제 (consultant 도 `requireConsultantOrSupervisor` 는 통과하지만 supervisor only).
+- **데이터 helper**: `src/lib/consultant-erp/supervisor-views.ts` — 모든 supervisor 집계 함수 한 파일. Risk score 0..50 휴리스틱 (status 기본점 + 미충족 필수 슬롯 ×2 + 마감 임박 가산). MONTHLY 마감=다음달 20일, ANNUAL=다음해 4/30.
+- **승인 케이스 상세 (PDF p.2-5)**: `GET /supervisor/approval/[sessionId]` 가 `{session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals, coretax, trend, invoiceLines}` 통합 반환. MONTHLY 세션은 6개월 트렌드 (`buildCustomerTrend`) 포함.
+- **설정 persistence**: `tax_partner.settings JSONB` (마이그레이션 `20260517000001_tax_partner_settings.sql`) — GET은 stored ⊕ `DEFAULT_APPROVAL`/`DEFAULT_CHANNELS` 머지, PATCH은 sibling 키 보존 partial-merge.
+- **재배정**: `POST /supervisor/team/reassign` — 활성 + 같은 tax_partner + COMPLETED 아님 검증 후 `consultant_session.consultant_id` 갱신 + `WITHDRAW` 감사 row.
+- **회귀**: 통합 runner `npm run test:smoke:prod` 안에 supervisor P1 (`test-supervisor-erp-p1.ts` 11 endpoint × 2 role) + settings round-trip + 6-month trend seed+verify + invoice lines Phase 1 + invoice parser Phase 2 가 모두 포함.
+- **e2e**: `src/tests/e2e/supervisor-erp.spec.ts` — 9 페이지 렌더 + 9 endpoint × 3 role 접근 게이트 + reassign 2 + approval 2 + settings 2 + parse-invoice contract 4 = **49 cases**.
 
 ### Landing Page (public `/`)
 The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/page.tsx`) that delegates to a single client component (`src/components/landing/LandingPage.tsx`) wired to a separate data layer:
@@ -266,6 +285,7 @@ The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/pa
 - Translation pipeline: `scripts/translate-landing.ts` (Anthropic SDK streaming, disk cache at `scripts/.translate-cache/`, sanitize + 3-retry) regenerates `auto-translated.json` whenever the ko source data changes
 - `scripts/sync-individual-pricing-labels.ts` mirrors the landing's `pricing.typeLabel/description` into the `pricingPlans.SPT_1770SS / SPT_1770S / SPT_1770` i18n namespace so the landing and `/pricing` show the same plan names ("Personal Simple/Standard/Complex"). Internal plan ids stay `SPT_1770SS/S/1770` for DB/Midtrans compatibility.
 - `generateMetadata` in `page.tsx` produces locale-specific `<title>`, `<meta description>`, `og:locale`, and alternate-language links. OG image at `public/og-image.svg` (slate-950 + emerald tone, 1200×630).
+- `LandingContent` includes hero (heroTop/heroMain/heroSub/heroDesc), Trust Indicators 5-card strip (`trustBaseTitle`/`trustBaseDesc` + `trustIndicators[4]`), and 4-column footer (`footer.{brand,tagline,jtcNote,company×3,contact×3,legal×3,copyright}`) per the 2026-05-19 PDF spec. `translate-landing.ts` is the source-of-truth for the ko bundle; running it regenerates all 4 non-ko locales with disk cache reuse for unchanged parts.
 
 ### Webpack / Next.js Config Notes
 - `canvas` is externalized in `next.config.ts` to avoid native module issues with `@react-pdf/renderer`
@@ -314,6 +334,12 @@ Landing / i18n maintenance scripts:
 - `npx tsx scripts/sync-individual-pricing-labels.ts` — push the landing's `pricing.typeLabel/description` into the `pricingPlans.SPT_1770*` i18n namespace (5 locales). Re-run whenever individual pricing copy changes.
 
 Verification / regression scripts (회귀 검증):
+
+**Integrated runner** (use this first — covers everything below + roll-up):
+- `npm run test:smoke:prod` — runs 10 steps (6 required + 4 optional) in sequence, single PASS/FAIL summary. Required: supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, RLS isolation. Optional: external isolation, operator queue 11-state, billing 3-endpoint, monitoring.
+- `npm run test:smoke` — same against local Supabase (requires `supabase start`).
+
+**Individual scripts** (if you need to focus on one area):
 - `SEED_TARGET=prod npx tsx scripts/verify-rls-isolation.ts` — JTC ↔ EXTERNAL tenant isolation
 - `SEED_TARGET=prod npx tsx scripts/test-external-consultant-isolation.ts` — external consultant이 JTC 데이터를 절대 못 보는지 end-to-end
 - `SEED_TARGET=prod npx tsx scripts/test-billing-flow.ts` — 3 billing endpoints smoke test, graceful-degrade 허용
@@ -324,6 +350,11 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-staff-workflow.ts` — supervisor → operator 배정/평가 흐름
 - `SEED_TARGET=prod npx tsx scripts/test-monitoring-flow.ts` — Sentry / circuit breaker / monitoring dashboard 신호
 - `npx tsx scripts/test-advisory-flow.ts` — `/api/customer/advisory` PKP/UMKM/Tax Treaty 응답 shape + INDIVIDUAL/COMPANY/unauth 3-way 검증
+- `SEED_TARGET=prod npx tsx scripts/test-supervisor-erp-p1.ts` — supervisor 11 endpoint × consultant 403 contract (24 assertions)
+- `SEED_TARGET=prod npx tsx scripts/test-supervisor-settings-roundtrip.ts` — `tax_partner.settings` JSONB persist 검증 (flip → restore)
+- `SEED_TARGET=prod npx tsx scripts/seed-and-verify-trend.ts` — 2 MONTHLY 세션 seed → 6-point trend → cleanup
+- `SEED_TARGET=prod npx tsx scripts/seed-and-verify-invoice-lines.ts` — 3 lines seed → grand total = Rp 16,495,000 검증 → cleanup
+- `SEED_TARGET=prod npx tsx scripts/test-invoice-parser-phase2.ts` — invoice 파서 contract (synthetic path → mode=MOCK, slot 가드, consultant 비-5xx)
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 
