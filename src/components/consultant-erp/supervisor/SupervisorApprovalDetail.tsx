@@ -252,7 +252,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
         );
         const j = await r.json();
         if (!r.ok || !j.success) {
-          toast.error(j.error || `${filename} 파싱 실패`);
+          toast.error(j.error || t('parseInvoiceFailed', { filename }));
         } else {
           const { inserted, mode, reason } = j.data;
           if (mode === 'CLAUDE') {
@@ -332,7 +332,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-amber-300">
-              {session.status === 'PENDING_APPROVAL' ? '수퍼바이저 승인대기' : session.status}
+              {session.status === 'PENDING_APPROVAL' ? t('supervisorApprovalPending') : session.status}
             </p>
             <p className="mt-1 text-2xl font-black">
               {customer?.company_name || customer?.full_name || '—'}
@@ -340,7 +340,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
             <p className="text-[11px] text-slate-400 mt-1">
               {session.filing_kind} {session.tax_period.slice(0, 7)}
               {customer?.npwp && ` · ${customer.npwp}`}
-              {consultant && ` · 담당 ${consultant.full_name}`}
+              {consultant && t('assigneePrefix', { name: consultant.full_name })}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 text-center min-w-[300px]">
@@ -364,7 +364,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
             <div className="bg-white/5 rounded-xl px-3 py-2">
               <p className="text-[10px] text-slate-400">{t('caseCompleteness')}</p>
               <p className="text-xs font-bold mt-1" style={{ color: reviewedComplete ? '#86EFAC' : '#FCD34D' }}>
-                {reviewedComplete ? t('reviewedComplete') : '진행중'}
+                {reviewedComplete ? t('reviewedComplete') : t('inProgress')}
               </p>
             </div>
           </div>
@@ -380,7 +380,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
         />
         <StatChip
           label={t('caseBankRecon')}
-          value={`${t('caseConfirmNeeded')} ${parseCounts.info}건`}
+          value={`${t('caseConfirmNeeded')} ${t('countSuffix', { n: parseCounts.info })}`}
           tone="#075985"
         />
         <StatChip
@@ -732,7 +732,7 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
         <p className="text-sm font-black text-slate-950 mb-3">{t('decisionHeading')}</p>
         <div className="grid gap-3 sm:grid-cols-3 mb-4 text-xs">
           <KV label={t('decisionStatus')} value={session.status} />
-          <KV label={t('decisionResubmitCount')} value={`${submissionCount}회`} />
+          <KV label={t('decisionResubmitCount')} value={t('timesSuffix', { n: submissionCount })} />
           <KV label={t('decisionAssignee')} value={consultant?.full_name ?? '—'} />
         </div>
         <label className="text-[11px] text-slate-600">{t('decisionCommentLabel')}</label>
