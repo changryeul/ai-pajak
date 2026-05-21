@@ -402,6 +402,46 @@
     },
     "successToast": "{n}人 1721 A1 发行完成"
   },
+  "inviteAccept": {
+    "roleLabel": {
+      "TAX_OPERATOR": "后台客服",
+      "TAX_OPERATOR_SUPERVISOR": "后台主管",
+      "TAX_ADVISOR_JTC": "税务顾问 (Tax Advisor)",
+      "CONSULTANT_JTC": "顾问"
+    },
+    "errors": {
+      "noToken": "缺少邀请令牌",
+      "invalidInvite": "无效的邀请",
+      "checkFailed": "邀请校验失败",
+      "passwordMismatch": "两次密码不一致",
+      "passwordTooShort": "密码至少需要 8 位",
+      "signupFailed": "注册失败",
+      "serverError": "服务器错误"
+    },
+    "errorCard": {
+      "title": "该邀请无法使用",
+      "loginBtn": "前往登录"
+    },
+    "successCard": {
+      "title": "注册完成",
+      "welcome": "欢迎加入 AI Pajak 团队。",
+      "ctaHint": "请登录后开始工作。",
+      "loginBtn": "登录"
+    },
+    "form": {
+      "title": "AI Pajak 团队邀请",
+      "emailLabel": "邀请邮箱",
+      "roleLabel": "角色",
+      "teamLabel": "团队",
+      "nameLabel": "姓名",
+      "namePlaceholder": "您的姓名",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "至少 8 位",
+      "confirmLabel": "确认密码",
+      "confirmPlaceholder": "再次输入",
+      "submitBtn": "接受邀请并注册"
+    }
+  },
   "flagFields": {
     "heading": "AI 缺失字段审查",
     "suggestBtn": "获取 AI 建议",

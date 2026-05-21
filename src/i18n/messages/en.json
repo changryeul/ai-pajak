@@ -402,6 +402,46 @@
     },
     "successToast": "{n} 1721 A1 certificates issued"
   },
+  "inviteAccept": {
+    "roleLabel": {
+      "TAX_OPERATOR": "Back-office operator",
+      "TAX_OPERATOR_SUPERVISOR": "Back-office supervisor",
+      "TAX_ADVISOR_JTC": "Tax Advisor",
+      "CONSULTANT_JTC": "Consultant"
+    },
+    "errors": {
+      "noToken": "Invitation token is missing",
+      "invalidInvite": "Invalid invitation",
+      "checkFailed": "Invitation check failed",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "signupFailed": "Sign-up failed",
+      "serverError": "Server error"
+    },
+    "errorCard": {
+      "title": "This invitation is no longer usable",
+      "loginBtn": "Go to login"
+    },
+    "successCard": {
+      "title": "Sign-up complete",
+      "welcome": "Welcome to the AI Pajak team.",
+      "ctaHint": "Log in to get started.",
+      "loginBtn": "Log in"
+    },
+    "form": {
+      "title": "AI Pajak team invitation",
+      "emailLabel": "Invited email",
+      "roleLabel": "Role",
+      "teamLabel": "Team",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmLabel": "Confirm password",
+      "confirmPlaceholder": "Re-enter",
+      "submitBtn": "Accept invitation & sign up"
+    }
+  },
   "flagFields": {
     "heading": "AI missing-field review",
     "suggestBtn": "Get AI suggestions",

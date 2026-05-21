@@ -402,6 +402,46 @@
     },
     "successToast": "{n} bukti 1721 A1 diterbitkan"
   },
+  "inviteAccept": {
+    "roleLabel": {
+      "TAX_OPERATOR": "Operator back-office",
+      "TAX_OPERATOR_SUPERVISOR": "Supervisor back-office",
+      "TAX_ADVISOR_JTC": "Tax Advisor",
+      "CONSULTANT_JTC": "Konsultan"
+    },
+    "errors": {
+      "noToken": "Token undangan tidak ada",
+      "invalidInvite": "Undangan tidak valid",
+      "checkFailed": "Pemeriksaan undangan gagal",
+      "passwordMismatch": "Kata sandi tidak cocok",
+      "passwordTooShort": "Kata sandi minimal 8 karakter",
+      "signupFailed": "Pendaftaran gagal",
+      "serverError": "Kesalahan server"
+    },
+    "errorCard": {
+      "title": "Undangan ini tidak dapat digunakan",
+      "loginBtn": "Ke halaman login"
+    },
+    "successCard": {
+      "title": "Pendaftaran selesai",
+      "welcome": "Selamat datang di tim AI Pajak.",
+      "ctaHint": "Silakan login untuk mulai.",
+      "loginBtn": "Login"
+    },
+    "form": {
+      "title": "Undangan tim AI Pajak",
+      "emailLabel": "Email yang diundang",
+      "roleLabel": "Peran",
+      "teamLabel": "Tim",
+      "nameLabel": "Nama",
+      "namePlaceholder": "Nama Anda",
+      "passwordLabel": "Kata sandi",
+      "passwordPlaceholder": "Minimal 8 karakter",
+      "confirmLabel": "Konfirmasi kata sandi",
+      "confirmPlaceholder": "Masukkan ulang",
+      "submitBtn": "Terima undangan & daftar"
+    }
+  },
   "flagFields": {
     "heading": "Review field hilang oleh AI",
     "suggestBtn": "Dapatkan saran AI",

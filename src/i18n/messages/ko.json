@@ -402,6 +402,46 @@
     },
     "successToast": "{n}명 1721 A1 발급 완료"
   },
+  "inviteAccept": {
+    "roleLabel": {
+      "TAX_OPERATOR": "백오피스 상담원",
+      "TAX_OPERATOR_SUPERVISOR": "백오피스 수퍼바이저",
+      "TAX_ADVISOR_JTC": "세무사 (Tax Advisor)",
+      "CONSULTANT_JTC": "컨설턴트"
+    },
+    "errors": {
+      "noToken": "초대 토큰이 없습니다",
+      "invalidInvite": "유효하지 않은 초대",
+      "checkFailed": "초대 확인 실패",
+      "passwordMismatch": "비밀번호가 일치하지 않습니다",
+      "passwordTooShort": "비밀번호는 최소 8자 이상이어야 합니다",
+      "signupFailed": "가입 실패",
+      "serverError": "서버 오류"
+    },
+    "errorCard": {
+      "title": "초대를 사용할 수 없습니다",
+      "loginBtn": "로그인 페이지로"
+    },
+    "successCard": {
+      "title": "가입이 완료되었습니다",
+      "welcome": "AI Pajak 팀의 일원이 되신 것을 환영합니다.",
+      "ctaHint": "로그인 후 업무를 시작하세요.",
+      "loginBtn": "로그인하기"
+    },
+    "form": {
+      "title": "AI Pajak 팀 초대",
+      "emailLabel": "초대받은 이메일",
+      "roleLabel": "역할",
+      "teamLabel": "팀",
+      "nameLabel": "이름",
+      "namePlaceholder": "본인 이름",
+      "passwordLabel": "비밀번호",
+      "passwordPlaceholder": "최소 8자",
+      "confirmLabel": "비밀번호 확인",
+      "confirmPlaceholder": "다시 입력",
+      "submitBtn": "초대 수락 및 가입"
+    }
+  },
   "flagFields": {
     "heading": "AI 누락 필드 검토",
     "suggestBtn": "AI 제안 받기",

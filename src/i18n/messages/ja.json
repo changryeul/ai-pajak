@@ -402,6 +402,46 @@
     },
     "successToast": "{n}名 1721 A1 発行完了"
   },
+  "inviteAccept": {
+    "roleLabel": {
+      "TAX_OPERATOR": "バックオフィス担当",
+      "TAX_OPERATOR_SUPERVISOR": "バックオフィス スーパーバイザー",
+      "TAX_ADVISOR_JTC": "税理士 (Tax Advisor)",
+      "CONSULTANT_JTC": "コンサルタント"
+    },
+    "errors": {
+      "noToken": "招待トークンがありません",
+      "invalidInvite": "無効な招待です",
+      "checkFailed": "招待の確認に失敗しました",
+      "passwordMismatch": "パスワードが一致しません",
+      "passwordTooShort": "パスワードは8文字以上にしてください",
+      "signupFailed": "登録に失敗しました",
+      "serverError": "サーバーエラー"
+    },
+    "errorCard": {
+      "title": "この招待は使用できません",
+      "loginBtn": "ログインページへ"
+    },
+    "successCard": {
+      "title": "登録が完了しました",
+      "welcome": "AI Pajak チームへようこそ。",
+      "ctaHint": "ログイン後に業務を開始してください。",
+      "loginBtn": "ログイン"
+    },
+    "form": {
+      "title": "AI Pajak チーム招待",
+      "emailLabel": "招待メールアドレス",
+      "roleLabel": "役割",
+      "teamLabel": "チーム",
+      "nameLabel": "氏名",
+      "namePlaceholder": "ご自身の氏名",
+      "passwordLabel": "パスワード",
+      "passwordPlaceholder": "8文字以上",
+      "confirmLabel": "パスワード確認",
+      "confirmPlaceholder": "再入力",
+      "submitBtn": "招待を承諾して登録"
+    }
+  },
   "flagFields": {
     "heading": "AI 欠落項目レビュー",
     "suggestBtn": "AI 提案を取得",
