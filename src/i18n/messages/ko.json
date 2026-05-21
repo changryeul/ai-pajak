@@ -402,6 +402,82 @@
     },
     "successToast": "{n}명 1721 A1 발급 완료"
   },
+  "operatorStatistics": {
+    "pageTitle": "성과/평가",
+    "pageDesc": "상담원 비교 + 가중치 기반 점수와 인센티브를 산정합니다. 상담원 관리와 달리 상태 변경이 아니라 평가 기준과 보상 계산이 핵심입니다.",
+    "refresh": "새로고침",
+    "comparisonBadge": "Comparison / Incentive",
+    "personSuffix": "{n}명",
+    "scoreSuffix": "{n}점",
+    "percentSuffix": "{n}%",
+    "caseSuffix": "{n}건",
+    "minuteSuffix": "{n}분",
+    "kpi": {
+      "evaluated": "평가대상",
+      "topOperator": "1위 상담원",
+      "avgScore": "평균점수",
+      "totalIncentive": "인센티브 총액",
+      "weightSum": "가중치 합계"
+    },
+    "weights": {
+      "title": "평가 가중치",
+      "desc": "각 지표의 비중을 입력합니다. 합계 100%를 권장합니다.",
+      "processing": "처리량",
+      "accuracy": "정확도",
+      "speed": "처리속도",
+      "approval": "Supervisor 승인품질",
+      "satisfaction": "고객응대",
+      "sumLabel": "가중치 합계: {n}%"
+    },
+    "incentive": {
+      "title": "인센티브 정책",
+      "desc": "성과점수에 따른 월별 보상 산정 기준을 입력합니다.",
+      "monthlyPool": "월 인센티브 풀",
+      "perPoint": "점수 1점당 보상",
+      "maxPerPerson": "1인 최대 지급액",
+      "minScore": "지급 최소점수",
+      "improvementThreshold": "개선관리 기준점수",
+      "savingBtn": "저장중…",
+      "saveBtn": "가중치 / 인센티브 저장"
+    },
+    "hints": {
+      "title": "메뉴 구분",
+      "opsTitle": "상담원 관리",
+      "opsBody": "상담원 상태, 근무 가능 여부, 계정/권한, 퇴사 상태를 관리합니다.",
+      "statsTitle": "성과/평가",
+      "statsBody": "상담원 간 처리량, 정확도, 속도, 승인품질, 고객응대를 비교하고 인센티브를 산정합니다.",
+      "useTitle": "평가 결과 활용",
+      "useBody": "우수 상담원 보상, 교육대상 선정, 과부하 조정, 업무 재배정 판단에 사용합니다."
+    },
+    "table": {
+      "title": "상담원 비교 평가표",
+      "rank": "Rank",
+      "operator": "상담원",
+      "totalScore": "종합점수",
+      "currentLoad": "현재 배정",
+      "completedCount": "처리완료",
+      "avgMinutes": "평균시간",
+      "accuracy": "정확도",
+      "approval": "승인품질",
+      "satisfaction": "고객응대",
+      "incentive": "인센티브",
+      "evalResult": "평가결과"
+    },
+    "distribution": {
+      "title": "성과 점수 분포",
+      "processing": "처리량",
+      "accuracy": "정확도",
+      "speed": "처리속도",
+      "approval": "승인품질",
+      "satisfaction": "고객응대"
+    },
+    "evalLabel": {
+      "EXCELLENT": "우수",
+      "PAYABLE": "지급대상",
+      "IMPROVE": "보류",
+      "HOLD": "보류"
+    }
+  },
   "operatorWorkload": {
     "pageTitle": "업무 배정/회수",
     "pageDesc": "신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.",

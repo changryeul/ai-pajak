@@ -402,6 +402,82 @@
     },
     "successToast": "{n} 1721 A1 certificates issued"
   },
+  "operatorStatistics": {
+    "pageTitle": "Performance / evaluation",
+    "pageDesc": "Compares operators on weighted scores and computes incentives. Unlike operator management, this is about evaluation criteria and reward calculation, not state changes.",
+    "refresh": "Refresh",
+    "comparisonBadge": "Comparison / Incentive",
+    "personSuffix": "{n} people",
+    "scoreSuffix": "{n} pts",
+    "percentSuffix": "{n}%",
+    "caseSuffix": "{n} cases",
+    "minuteSuffix": "{n} min",
+    "kpi": {
+      "evaluated": "Evaluated",
+      "topOperator": "Top operator",
+      "avgScore": "Avg. score",
+      "totalIncentive": "Total incentive",
+      "weightSum": "Weight sum"
+    },
+    "weights": {
+      "title": "Evaluation weights",
+      "desc": "Set the weight of each metric. 100% total is recommended.",
+      "processing": "Throughput",
+      "accuracy": "Accuracy",
+      "speed": "Speed",
+      "approval": "Supervisor approval quality",
+      "satisfaction": "Customer handling",
+      "sumLabel": "Weight sum: {n}%"
+    },
+    "incentive": {
+      "title": "Incentive policy",
+      "desc": "Monthly reward calculation rules based on the performance score.",
+      "monthlyPool": "Monthly incentive pool",
+      "perPoint": "Reward per point",
+      "maxPerPerson": "Max per person",
+      "minScore": "Minimum payable score",
+      "improvementThreshold": "Improvement threshold",
+      "savingBtn": "Saving…",
+      "saveBtn": "Save weights / incentive"
+    },
+    "hints": {
+      "title": "Menu separation",
+      "opsTitle": "Operator management",
+      "opsBody": "Manages operator state, availability, accounts/permissions, and resignation status.",
+      "statsTitle": "Performance / evaluation",
+      "statsBody": "Compares operators on throughput, accuracy, speed, approval quality, and customer handling, and computes incentives.",
+      "useTitle": "Using evaluation results",
+      "useBody": "Used for top-performer rewards, training-target picks, overload adjustments, and reassignment decisions."
+    },
+    "table": {
+      "title": "Operator comparison table",
+      "rank": "Rank",
+      "operator": "Operator",
+      "totalScore": "Total",
+      "currentLoad": "Load",
+      "completedCount": "Completed",
+      "avgMinutes": "Avg. min",
+      "accuracy": "Accuracy",
+      "approval": "Approval",
+      "satisfaction": "CSAT",
+      "incentive": "Incentive",
+      "evalResult": "Result"
+    },
+    "distribution": {
+      "title": "Performance score distribution",
+      "processing": "Throughput",
+      "accuracy": "Accuracy",
+      "speed": "Speed",
+      "approval": "Approval",
+      "satisfaction": "CSAT"
+    },
+    "evalLabel": {
+      "EXCELLENT": "Excellent",
+      "PAYABLE": "Payable",
+      "IMPROVE": "Hold (improve)",
+      "HOLD": "Hold"
+    }
+  },
   "operatorWorkload": {
     "pageTitle": "Workload assignment / recall",
     "pageDesc": "New work is auto-balanced across supervisors; customers with a consult history are auto-assigned to their previous operator first.",

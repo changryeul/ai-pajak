@@ -402,6 +402,82 @@
     },
     "successToast": "{n}人 1721 A1 发行完成"
   },
+  "operatorStatistics": {
+    "pageTitle": "绩效 / 评估",
+    "pageDesc": "按加权分数比较客服并计算激励。与客服管理不同,重点是评估标准与奖励计算,而非状态变更。",
+    "refresh": "刷新",
+    "comparisonBadge": "Comparison / Incentive",
+    "personSuffix": "{n}人",
+    "scoreSuffix": "{n}分",
+    "percentSuffix": "{n}%",
+    "caseSuffix": "{n}件",
+    "minuteSuffix": "{n}分钟",
+    "kpi": {
+      "evaluated": "评估对象",
+      "topOperator": "第一名",
+      "avgScore": "平均分",
+      "totalIncentive": "激励总额",
+      "weightSum": "权重合计"
+    },
+    "weights": {
+      "title": "评估权重",
+      "desc": "输入各指标权重。建议合计 100%。",
+      "processing": "处理量",
+      "accuracy": "准确度",
+      "speed": "处理速度",
+      "approval": "主管审批质量",
+      "satisfaction": "客户应对",
+      "sumLabel": "权重合计: {n}%"
+    },
+    "incentive": {
+      "title": "激励政策",
+      "desc": "基于绩效分数的月度奖励计算标准。",
+      "monthlyPool": "月度激励池",
+      "perPoint": "每分奖励",
+      "maxPerPerson": "每人最高额",
+      "minScore": "最低支付分数",
+      "improvementThreshold": "改善管理基准分",
+      "savingBtn": "保存中…",
+      "saveBtn": "保存权重 / 激励"
+    },
+    "hints": {
+      "title": "菜单划分",
+      "opsTitle": "客服管理",
+      "opsBody": "管理客服状态、出勤、账号/权限、离职状态。",
+      "statsTitle": "绩效 / 评估",
+      "statsBody": "比较客服的处理量、准确度、速度、审批质量、客户应对并计算激励。",
+      "useTitle": "评估结果应用",
+      "useBody": "用于优秀客服奖励、培训对象选定、过载调整、再分配判断。"
+    },
+    "table": {
+      "title": "客服比较表",
+      "rank": "Rank",
+      "operator": "客服",
+      "totalScore": "总分",
+      "currentLoad": "当前分配",
+      "completedCount": "已完成",
+      "avgMinutes": "平均时长",
+      "accuracy": "准确度",
+      "approval": "审批质量",
+      "satisfaction": "客户应对",
+      "incentive": "激励",
+      "evalResult": "评估结果"
+    },
+    "distribution": {
+      "title": "绩效分数分布",
+      "processing": "处理量",
+      "accuracy": "准确度",
+      "speed": "处理速度",
+      "approval": "审批质量",
+      "satisfaction": "客户应对"
+    },
+    "evalLabel": {
+      "EXCELLENT": "优秀",
+      "PAYABLE": "可支付",
+      "IMPROVE": "暂停 (改进)",
+      "HOLD": "暂停"
+    }
+  },
   "operatorWorkload": {
     "pageTitle": "工作分配 / 回收",
     "pageDesc": "新工作均匀自动分配给主管,有咨询历史的客户优先自动指派给原客服。",

@@ -402,6 +402,82 @@
     },
     "successToast": "{n}名 1721 A1 発行完了"
   },
+  "operatorStatistics": {
+    "pageTitle": "業績 / 評価",
+    "pageDesc": "担当者を加重スコアで比較しインセンティブを算定します。担当者管理と違い、状態変更ではなく評価基準と報酬計算が中心です。",
+    "refresh": "再読み込み",
+    "comparisonBadge": "Comparison / Incentive",
+    "personSuffix": "{n}名",
+    "scoreSuffix": "{n}点",
+    "percentSuffix": "{n}%",
+    "caseSuffix": "{n}件",
+    "minuteSuffix": "{n}分",
+    "kpi": {
+      "evaluated": "評価対象",
+      "topOperator": "1位担当",
+      "avgScore": "平均スコア",
+      "totalIncentive": "インセンティブ総額",
+      "weightSum": "重み合計"
+    },
+    "weights": {
+      "title": "評価ウェイト",
+      "desc": "各指標の比率を入力します。合計100%を推奨。",
+      "processing": "処理量",
+      "accuracy": "正確性",
+      "speed": "処理速度",
+      "approval": "SV承認品質",
+      "satisfaction": "顧客応対",
+      "sumLabel": "重み合計: {n}%"
+    },
+    "incentive": {
+      "title": "インセンティブ方針",
+      "desc": "業績スコアに基づく月次報酬の算定基準を入力します。",
+      "monthlyPool": "月次インセンティブプール",
+      "perPoint": "1点あたり報酬",
+      "maxPerPerson": "1人あたり最大支給額",
+      "minScore": "支給最低スコア",
+      "improvementThreshold": "改善管理基準スコア",
+      "savingBtn": "保存中…",
+      "saveBtn": "ウェイト / インセンティブを保存"
+    },
+    "hints": {
+      "title": "メニュー区分",
+      "opsTitle": "担当者管理",
+      "opsBody": "担当者の状態・稼働・アカウント/権限・退職状態を管理します。",
+      "statsTitle": "業績 / 評価",
+      "statsBody": "担当者間の処理量・正確性・速度・承認品質・顧客応対を比較しインセンティブを算定します。",
+      "useTitle": "評価結果の活用",
+      "useBody": "優秀者報酬、教育対象選定、過負荷調整、業務再割当の判断に使用します。"
+    },
+    "table": {
+      "title": "担当者比較表",
+      "rank": "Rank",
+      "operator": "担当者",
+      "totalScore": "総合スコア",
+      "currentLoad": "現在割当",
+      "completedCount": "処理完了",
+      "avgMinutes": "平均時間",
+      "accuracy": "正確性",
+      "approval": "承認品質",
+      "satisfaction": "顧客応対",
+      "incentive": "インセンティブ",
+      "evalResult": "評価結果"
+    },
+    "distribution": {
+      "title": "業績スコア分布",
+      "processing": "処理量",
+      "accuracy": "正確性",
+      "speed": "処理速度",
+      "approval": "承認品質",
+      "satisfaction": "顧客応対"
+    },
+    "evalLabel": {
+      "EXCELLENT": "優秀",
+      "PAYABLE": "支給対象",
+      "IMPROVE": "保留 (改善)",
+      "HOLD": "保留"
+    }
+  },
   "operatorWorkload": {
     "pageTitle": "業務 割当 / 引き戻し",
     "pageDesc": "新規業務はスーパーバイザーに均等自動配分され、相談履歴のある顧客は従来の担当者へ優先自動割当されます。",

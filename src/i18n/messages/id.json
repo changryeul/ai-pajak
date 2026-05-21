@@ -402,6 +402,82 @@
     },
     "successToast": "{n} bukti 1721 A1 diterbitkan"
   },
+  "operatorStatistics": {
+    "pageTitle": "Kinerja / evaluasi",
+    "pageDesc": "Bandingkan operator dengan skor berbobot dan hitung insentif. Berbeda dengan manajemen operator, fokusnya pada kriteria evaluasi dan perhitungan reward, bukan perubahan status.",
+    "refresh": "Muat ulang",
+    "comparisonBadge": "Comparison / Incentive",
+    "personSuffix": "{n} orang",
+    "scoreSuffix": "{n} pts",
+    "percentSuffix": "{n}%",
+    "caseSuffix": "{n} kasus",
+    "minuteSuffix": "{n} mnt",
+    "kpi": {
+      "evaluated": "Dievaluasi",
+      "topOperator": "Operator teratas",
+      "avgScore": "Skor rata-rata",
+      "totalIncentive": "Total insentif",
+      "weightSum": "Total bobot"
+    },
+    "weights": {
+      "title": "Bobot evaluasi",
+      "desc": "Tentukan bobot tiap metrik. Total 100% disarankan.",
+      "processing": "Throughput",
+      "accuracy": "Akurasi",
+      "speed": "Kecepatan",
+      "approval": "Kualitas persetujuan supervisor",
+      "satisfaction": "Penanganan pelanggan",
+      "sumLabel": "Total bobot: {n}%"
+    },
+    "incentive": {
+      "title": "Kebijakan insentif",
+      "desc": "Aturan perhitungan reward bulanan berdasarkan skor kinerja.",
+      "monthlyPool": "Pool insentif bulanan",
+      "perPoint": "Reward per poin",
+      "maxPerPerson": "Maks per orang",
+      "minScore": "Skor minimum dibayar",
+      "improvementThreshold": "Threshold improvement",
+      "savingBtn": "Menyimpan…",
+      "saveBtn": "Simpan bobot / insentif"
+    },
+    "hints": {
+      "title": "Pembagian menu",
+      "opsTitle": "Manajemen operator",
+      "opsBody": "Mengelola status operator, ketersediaan, akun/izin, dan status resign.",
+      "statsTitle": "Kinerja / evaluasi",
+      "statsBody": "Bandingkan operator pada throughput, akurasi, kecepatan, kualitas persetujuan, dan penanganan pelanggan, lalu hitung insentif.",
+      "useTitle": "Penggunaan hasil evaluasi",
+      "useBody": "Untuk reward top performer, penentuan target training, penyesuaian beban berlebih, dan keputusan penugasan ulang."
+    },
+    "table": {
+      "title": "Tabel perbandingan operator",
+      "rank": "Rank",
+      "operator": "Operator",
+      "totalScore": "Total",
+      "currentLoad": "Beban",
+      "completedCount": "Selesai",
+      "avgMinutes": "Rata-rata mnt",
+      "accuracy": "Akurasi",
+      "approval": "Persetujuan",
+      "satisfaction": "CSAT",
+      "incentive": "Insentif",
+      "evalResult": "Hasil"
+    },
+    "distribution": {
+      "title": "Distribusi skor kinerja",
+      "processing": "Throughput",
+      "accuracy": "Akurasi",
+      "speed": "Kecepatan",
+      "approval": "Persetujuan",
+      "satisfaction": "CSAT"
+    },
+    "evalLabel": {
+      "EXCELLENT": "Sangat baik",
+      "PAYABLE": "Dapat dibayar",
+      "IMPROVE": "Tunda (improve)",
+      "HOLD": "Tunda"
+    }
+  },
   "operatorWorkload": {
     "pageTitle": "Penugasan / penarikan pekerjaan",
     "pageDesc": "Pekerjaan baru otomatis dibagi rata ke supervisor; pelanggan dengan riwayat konsultasi diprioritaskan ke operator sebelumnya.",
