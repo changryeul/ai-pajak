@@ -643,9 +643,39 @@ export default function LandingPage({ locale }: { locale: string }) {
                   </ul>
                 </div>
               </div>
+              {selectedPlan.storage && (
+                <div className="mt-7 rounded-3xl border border-cyan-300/30 bg-cyan-400/10 p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="text-xs font-black text-cyan-200">{content.storageHeading}</p>
+                      <p className="mt-2 text-sm font-black leading-6 text-white">
+                        {selectedPlan.storage.retentionCopy}
+                      </p>
+                    </div>
+                    <div className="shrink-0 rounded-2xl bg-white px-4 py-3 text-center text-slate-900">
+                      <p className="text-[10px] font-bold text-slate-500">{content.storageAllowanceLabel}</p>
+                      <p className="mt-1 text-base font-black text-cyan-700">
+                        {selectedPlan.storage.allowance}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm leading-6 text-slate-200">
+                    {selectedPlan.storage.rawFileCopy}
+                  </p>
+                  <p className="mt-3 rounded-xl bg-slate-900/40 px-3 py-2 text-xs leading-5 text-slate-100">
+                    <span className="font-black text-cyan-200">{content.storageOverageLabel}:</span>{' '}
+                    {selectedPlan.storage.overage}
+                  </p>
+                  <p className="mt-3 text-xs leading-5 text-slate-300">
+                    {selectedPlan.storage.alertPolicy}
+                  </p>
+                </div>
+              )}
               <div className="mt-7 rounded-3xl border border-emerald-400/30 bg-emerald-400/10 p-5">
                 <p className="text-xs font-black text-emerald-300">{content.guide}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-100">{content.pricingInfo}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-100">
+                  {selectedPlan.info ?? content.pricingInfo}
+                </p>
               </div>
               <button
                 onClick={() => goTo('start')}

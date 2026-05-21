@@ -25,6 +25,19 @@ export type LandingModule = {
   process: Array<[string, string, string]>;
 };
 
+export type PlanStorage = {
+  /** Storage allowance, e.g. "500MB / 신고연도", "30GB / 월" */
+  allowance: string;
+  /** Core retention copy describing what's kept inside the allowance. */
+  retentionCopy: string;
+  /** Raw-file scope copy listing the types of source files retained. */
+  rawFileCopy: string;
+  /** Overage pricing (Active + Archive). */
+  overage: string;
+  /** Threshold-alert policy (80% / 100%). */
+  alertPolicy: string;
+};
+
 export type LandingPlan = {
   id: string;
   group: string;
@@ -36,6 +49,10 @@ export type LandingPlan = {
   meta: string[];
   items: string[];
   criteria: string[];
+  /** 2026-05-22 PDF: storage & evidence-retention panel per plan. */
+  storage?: PlanStorage;
+  /** Plan-specific 안내 copy (overrides the global pricingInfo when set). */
+  info?: string;
 };
 
 export type TrustIndicator = {
@@ -122,6 +139,9 @@ export type LandingContent = {
   criteria: string;
   pricingInfo: string;
   pricingButton: string;
+  storageHeading: string;
+  storageAllowanceLabel: string;
+  storageOverageLabel: string;
   groups: string[];
   faqs: Array<[string, string]>;
   finalTitle: string;

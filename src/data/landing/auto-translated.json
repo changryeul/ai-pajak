@@ -398,7 +398,15 @@
           "근로소득 중심",
           "A1/A2 또는 원천징수 자료 1개 중심",
           "추가 사업소득·프리랜스 소득 없음"
-        ]
+        ],
+        "storage": {
+          "allowance": "500MB / 신고연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "개인 세무는 건당 결제 기준입니다. 제출 자료 확인 후 소득 유형, 원천징수 자료 수, 자산·부채 복잡도에 따라 단순/표준/복잡 유형이 달라질 수 있으며, 선택한 유형보다 복잡도가 높으면 신고 진행 전 차액 결제를 안내합니다."
       },
       {
         "id": "p-standard",
@@ -423,7 +431,15 @@
           "복수 고용주 또는 복수 원천징수 자료",
           "기타 소득 또는 공제 확인 필요",
           "자산·부채 입력 필요"
-        ]
+        ],
+        "storage": {
+          "allowance": "1GB / 신고연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "개인 세무는 건당 결제 기준입니다. 제출 자료 확인 후 소득 유형, 원천징수 자료 수, 자산·부채 복잡도에 따라 단순/표준/복잡 유형이 달라질 수 있으며, 선택한 유형보다 복잡도가 높으면 신고 진행 전 차액 결제를 안내합니다."
       },
       {
         "id": "p-complex",
@@ -448,7 +464,15 @@
           "프리랜스 또는 개인사업 소득",
           "사업 관련 수입·비용 자료",
           "추가 소득 또는 복잡 자산"
-        ]
+        ],
+        "storage": {
+          "allowance": "3GB / 신고연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "개인 세무는 건당 결제 기준입니다. 제출 자료 확인 후 소득 유형, 원천징수 자료 수, 자산·부채 복잡도에 따라 단순/표준/복잡 유형이 달라질 수 있으며, 선택한 유형보다 복잡도가 높으면 신고 진행 전 차액 결제를 안내합니다."
       },
       {
         "id": "monthly-umkm",
@@ -463,16 +487,28 @@
           "연결산 별도"
         ],
         "items": [
-          "월 신고 현황",
-          "ID Billing 요청",
-          "기본 리마인더",
+          "월 신고 준비상태 대시보드",
+          "PPh Final UMKM 월 매출 기준 계산",
+          "간단 PPh21 급여 검토",
+          "제한적 원천세 코드 판정",
+          "ID Billing 준비값 및 납부 리마인더",
           "기본 AI 리스크 코멘트"
         ],
         "criteria": [
-          "직원 5명 이하",
+          "직원 10명 이하",
           "월 원천세 거래 10건 이하",
-          "월 업로드/거래 50건 이하"
-        ]
+          "월 업로드/거래 50건 이하",
+          "PKP/PPN 정기 신고가 필요한 법인은 Basic 이상 권장",
+          "기준 초과 시 해당 월은 Basic 월관리 기준으로 보정될 수 있으며, 이미 결제한 금액을 제외한 차액만 추가 청구"
+        ],
+        "storage": {
+          "allowance": "2GB / 월",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "monthly-basic",
@@ -487,16 +523,28 @@
           "연결산 별도"
         ],
         "items": [
-          "PPh21/23/25/PPN 관리",
-          "신고 이력/BPE/NTPN 보관",
-          "거래처 원천세 판정",
-          "월별 세금 보고서"
+          "PPh21 급여 원천세 관리",
+          "PPh23/4(2)/26 등 원천세 코드 판정",
+          "PPh25 또는 PPh Final 월 납부 관리",
+          "PPN 매입·매출 자료 정리",
+          "ID Billing · NTPN · BPE 증빙 보관",
+          "표준 월별 세금 보고서"
         ],
         "criteria": [
           "직원 30명 이하",
           "월 원천세 거래 30건 이하",
-          "월 매입/매출 거래 300건 이하"
-        ]
+          "월 매입/매출 거래 300건 이하",
+          "일반 PKP 법인의 기본 월관리 기준",
+          "기준 초과 시 해당 월은 Pro 월관리 기준으로 보정될 수 있음"
+        ],
+        "storage": {
+          "allowance": "10GB / 월",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "monthly-pro",
@@ -511,17 +559,29 @@
           "연결산 별도"
         ],
         "items": [
-          "Basic 전체",
-          "TP 조건 모니터링",
-          "AI 이상 감지",
-          "고급 세금 보고서",
+          "Basic 포함 내용 전체",
+          "대량 급여·원천세 자료 처리",
+          "해외거래·PPh26·Tax Treaty 검토 신호",
+          "특수관계/TP 조건 모니터링",
+          "AI 이상 감지 및 고급 리스크 코멘트",
+          "고급 월별 세금 보고서",
           "우선 처리"
         ],
         "criteria": [
           "직원 100명 이하",
           "월 원천세 거래 150건 이하",
-          "해외거래·특수관계 모니터링 포함"
-        ]
+          "월 매입/매출 거래 1,000건 이하",
+          "해외거래·특수관계 모니터링 포함",
+          "기준 초과 또는 반복 대량 거래는 Enterprise 기준 적용"
+        ],
+        "storage": {
+          "allowance": "30GB / 월",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "monthly-enterprise",
@@ -536,16 +596,27 @@
           "연결산 별도"
         ],
         "items": [
-          "Pro 전체",
-          "대량 급여/거래 처리",
-          "초과 사용량 기반 과금",
-          "SLA/우선 지원"
+          "Pro 포함 내용 전체",
+          "직원 100명 초과 급여·PPh21 처리",
+          "월 150건 초과 원천세 코드 판정",
+          "대량 PPN·매입·매출 자료 자동분류",
+          "맞춤형 리포트/SLA",
+          "초과 사용량 기반 과금 및 우선 지원"
         ],
         "criteria": [
           "직원 100명 초과",
           "월 원천세 거래 150건 초과",
-          "대량 문서 자동분류 필요"
-        ]
+          "월 매입/매출 거래 1,000건 초과 또는 대량 문서 자동분류 필요",
+          "복수 사업장·복잡 승인흐름·맞춤 리포트가 필요한 법인"
+        ],
+        "storage": {
+          "allowance": "100GB / 월부터",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "annual-umkm",
@@ -567,9 +638,18 @@
         ],
         "criteria": [
           "연매출 Rp 4.8B 이하",
-          "Final Tax 0.5% 대상",
-          "해외거래·특수관계 거래 없음"
-        ]
+          "Final Tax 0.5% 적용 가능 법인",
+          "일반 UMKM 장부 기준",
+          "대량 재고·고정자산·복잡 세무조정 없음"
+        ],
+        "storage": {
+          "allowance": "2GB / 회계연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "UMKM 연결산은 기준이 명확한 1회성 연간 결산·SPT Badan 신고 준비 서비스입니다. 연매출 Rp 4.8B 이하, Final Tax 0.5% 적용 가능 법인, 일반 UMKM 장부 기준에 적용됩니다."
       },
       {
         "id": "annual-pph25",
@@ -585,16 +665,29 @@
         ],
         "items": [
           "재무제표 생성",
-          "세무조정",
-          "세액공제",
+          "일반 세무조정",
+          "세액공제 확인",
           "PPh29/PPh25 산정",
           "SPT 초안 생성"
         ],
         "criteria": [
-          "연매출 Rp 4.8B 초과 또는 UMKM 기간 종료",
+          "연매출 Rp 25B 이하",
+          "UMKM Final Tax 대상이 아니거나 일반 법인세(PPh25) 적용 법인",
           "연 거래 1,000건 이하",
-          "TP 이슈 없음"
-        ]
+          "직원 100명 이하",
+          "단일 법인·단일 사업장 또는 단순 사업구조",
+          "회계자료 정리 상태 양호",
+          "일반 세무조정 범위",
+          "TP 문서화, Tax Treaty, 대규모 재고·고정자산 재구성 등 별도 전문 검토 없음"
+        ],
+        "storage": {
+          "allowance": "10GB / 회계연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "PPh25 일반 법인 연결산은 매출과 업무량 기준의 표준 결산입니다. 연매출 Rp 25B 이하, 연 거래 1,000건 이하, 직원 100명 이하, 회계자료 정리 상태가 양호하고 일반 세무조정 범위인 경우에 적용됩니다. UMKM Final Tax 대상이 아닌 일반 법인 또는 PPh25 적용 법인도 이 기준으로 판단합니다."
       },
       {
         "id": "annual-complex",
@@ -602,24 +695,39 @@
         "badge": "1회 선납",
         "typeLabel": "복잡 구조 연결산",
         "price": "Rp 15,000,000",
-        "description": "외국계, 특수관계, 해외거래 또는 대량 거래 법인",
+        "description": "매출·거래량·자료정리 난이도가 높은 법인",
         "meta": [
           "1회 선납",
           "월관리와 별도 선택",
           "SPT Badan 기준"
         ],
         "items": [
-          "PPh25 연결산 전체",
-          "TP 조건 검토",
-          "해외거래 검토",
+          "PPh25 일반 연결산 전체",
+          "대량 거래 데이터 정리",
+          "복잡 재고·고정자산·외화거래 검토",
+          "불완전 회계자료 재구성 지원",
+          "필요 시 TP·PPh26·Tax Treaty 별도 검토",
           "AI 리스크 보고서",
           "우선 처리"
         ],
         "criteria": [
-          "해외 주주 또는 해외거래 존재",
-          "특수관계 거래 존재",
-          "PPh26 / DGT Form / Treaty 검토 필요"
-        ]
+          "아래 조건 중 하나라도 해당하면 복잡 구조 연결산 적용",
+          "연매출 Rp 25B 초과",
+          "연 거래 1,000건 초과",
+          "직원 100명 초과",
+          "복수 사업장·복수 프로젝트·복수 KBLI 운영",
+          "재고·원가·고정자산·외화거래 정리가 복잡한 경우",
+          "회계자료가 불완전해 재무제표 재구성이 필요한 경우",
+          "TP, PPh26, DGT Form, Tax Treaty 등 별도 전문 검토가 필요한 경우"
+        ],
+        "storage": {
+          "allowance": "30GB / 회계연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "복잡 구조 연결산은 해외 여부 자체가 아니라 매출·거래량·직원 수·자료정리 난이도 또는 별도 전문 검토 필요성으로 판단합니다. 연매출 Rp 25B 초과, 연 거래 1,000건 초과, 직원 100명 초과, 복수 사업장, 복잡한 재고·고정자산·외화거래, 회계자료 재구성, TP/PPh26/Tax Treaty 별도 검토 필요 중 하나라도 해당하면 적용됩니다."
       }
     ],
     "text": {
@@ -890,6 +998,9 @@
       "criteria": "적용 기준",
       "pricingInfo": "표시된 금액은 기본 요금입니다. 실제 신고 범위는 제출 자료, 거래량, 해외거래·특수관계 여부 등에 따라 최종 확인됩니다.",
       "pricingButton": "제출 가능 자료 보기 →",
+      "storageHeading": "저장공간 및 증빙 보관",
+      "storageAllowanceLabel": "포함 원본파일 저장용량",
+      "storageOverageLabel": "초과 시",
       "groups": [
         "개인 세무",
         "법인 월관리",
@@ -1304,174 +1415,245 @@
       {
         "id": "p-simple",
         "group": "Personal Tax",
-        "badge": "Per Filing",
-        "typeLabel": "Personal Simple",
+        "badge": "Per-Filing",
+        "typeLabel": "Personal Simple (단순 신고)",
         "price": "Rp 100.000",
         "vat": "Total incl. PPN: Rp 111.000",
-        "description": "Individuals with a single employment income and straightforward tax data",
+        "description": "Individuals with a single employment income · straightforward documents",
         "meta": [
           "Total incl. PPN: Rp 111.000",
-          "Based on complexity",
-          "Unified annual personal filing"
+          "Complexity-based",
+          "Unified Annual Personal Filing"
         ],
         "items": [
           "Auto-organize A1/A2 or withholding tax documents",
-          "Verify basic personal info and income data",
+          "Verify basic personal details and income data",
           "Basic guidance on tax payable or refund",
           "Filing completion proof management"
         ],
         "criteria": [
-          "Primarily employment income",
-          "Single A1/A2 or withholding tax document",
+          "Employment income only",
+          "Single A1/A2 or withholding document",
           "No additional business or freelance income"
-        ]
+        ],
+        "storage": {
+          "allowance": "500MB / filing year",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Personal tax is billed on a per-filing basis. After reviewing your submitted documents, the filing type (Simple / Standard / Complex) may be adjusted based on income type, number of withholding documents, and asset/liability complexity. If your situation exceeds the selected tier, you'll be asked to pay the difference before filing proceeds."
       },
       {
         "id": "p-standard",
         "group": "Personal Tax",
-        "badge": "Per Filing",
-        "typeLabel": "Personal Standard",
+        "badge": "Per-Filing",
+        "typeLabel": "Personal Standard (표준 신고)",
         "price": "Rp 200.000",
         "vat": "Total incl. PPN: Rp 222.000",
-        "description": "Individuals with multiple income sources, multiple withholding documents, or assets and liabilities to declare",
+        "description": "Individuals with multiple income sources, multiple withholding documents, or asset/liability entries",
         "meta": [
           "Total incl. PPN: Rp 222.000",
-          "Based on complexity",
-          "Unified annual personal filing"
+          "Complexity-based",
+          "Unified Annual Personal Filing"
         ],
         "items": [
-          "Merge and organize multiple withholding tax documents",
-          "Organize other income, deductions, assets, and liabilities",
+          "Merge and organize multiple withholding documents",
+          "Compile other income, deductions, assets, and liabilities",
           "Verify family data and PTKP profile",
           "Filing completion proof management"
         ],
         "criteria": [
-          "Multiple employers or multiple withholding tax documents",
+          "Multiple employers or multiple withholding documents",
           "Other income or deductions to verify",
-          "Assets and liabilities to declare"
-        ]
+          "Asset and liability entries required"
+        ],
+        "storage": {
+          "allowance": "1GB / filing year",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Personal tax is billed on a per-filing basis. After reviewing your submitted documents, the filing type (Simple / Standard / Complex) may be adjusted based on income type, number of withholding documents, and asset/liability complexity. If your situation exceeds the selected tier, you'll be asked to pay the difference before filing proceeds."
       },
       {
         "id": "p-complex",
         "group": "Personal Tax",
-        "badge": "Per Filing",
+        "badge": "Per-Filing",
         "typeLabel": "Personal Business / Complex",
         "price": "Rp 500.000",
         "vat": "Total incl. PPN: Rp 555.000",
-        "description": "Individuals with freelance, sole-proprietorship, investment, or complex asset situations",
+        "description": "Individuals with freelance, business, investment, or complex assets",
         "meta": [
           "Total incl. PPN: Rp 555.000",
-          "Based on complexity",
-          "Unified annual personal filing"
+          "Complexity-based",
+          "Unified Annual Personal Filing"
         ],
         "items": [
-          "Auto-organize business and freelance income documents",
+          "Auto-organize business/freelance income documents",
           "Classify revenue, expenses, and supporting documents",
           "Reflect investment and rental income",
-          "Track asset and liability changes and flag risks"
+          "Review asset/liability changes and flag risks"
         ],
         "criteria": [
-          "Freelance or sole-proprietorship income",
-          "Business-related revenue and expense documents",
+          "Freelance or self-employment income",
+          "Business-related revenue and expense records",
           "Additional income sources or complex assets"
-        ]
+        ],
+        "storage": {
+          "allowance": "3GB / filing year",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Personal tax is billed on a per-filing basis. After reviewing your submitted documents, the filing type (Simple / Standard / Complex) may be adjusted based on income type, number of withholding documents, and asset/liability complexity. If your situation exceeds the selected tier, you'll be asked to pay the difference before filing proceeds."
       },
       {
         "id": "monthly-umkm",
-        "group": "Corporate Monthly",
+        "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "UMKM Monthly Management",
         "price": "Rp 750,000",
-        "description": "Small-scale corporations / Final Tax focused",
+        "description": "Small-scale entities / Final Tax-focused",
         "meta": [
           "1-month prepaid",
           "10% discount available with 12-month prepaid",
-          "Annual filing sold separately"
+          "Annual filing separate"
         ],
         "items": [
-          "Monthly filing status",
-          "ID Billing requests",
-          "Basic reminders",
+          "Monthly filing readiness dashboard",
+          "PPh Final UMKM monthly revenue-based calculation",
+          "Basic PPh21 payroll review",
+          "Limited withholding tax code determination",
+          "ID Billing prepared values and payment reminders",
           "Basic AI risk commentary"
         ],
         "criteria": [
-          "Up to 5 employees",
+          "Up to 10 employees",
           "Up to 10 withholding tax transactions per month",
-          "Up to 50 uploads/transactions per month"
-        ]
+          "Up to 50 uploads/transactions per month",
+          "Entities with regular PKP/PPN filing requirements are recommended to choose Basic or above",
+          "If thresholds are exceeded, the affected month may be automatically adjusted to the Basic tier; only the difference above the amount already paid will be charged"
+        ],
+        "storage": {
+          "allowance": "2GB / month",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Each monthly management plan includes usage thresholds. If the actual number of employees, withholding tax transactions, or monthly uploads/transactions exceeds the threshold, the affected month may be automatically upgraded to the appropriate higher-tier plan. Any amount already paid will be deducted and only the difference charged. You'll be notified via the dashboard and alerts before any threshold is reached."
       },
       {
         "id": "monthly-basic",
-        "group": "Corporate Monthly",
+        "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "Basic Monthly Management",
         "price": "Rp 1,500,000",
-        "description": "Core tax operations for standard corporations",
+        "description": "Essential tax operations for standard corporations",
         "meta": [
           "1-month prepaid",
           "10% discount available with 12-month prepaid",
-          "Annual filing sold separately"
+          "Annual filing separate"
         ],
         "items": [
-          "PPh21/23/25/PPN management",
-          "Filing history, BPE, and NTPN storage",
-          "Withholding tax classification for counterparties",
-          "Monthly tax reports"
+          "PPh21 payroll withholding tax management",
+          "PPh23/4(2)/26 and other withholding tax code determination",
+          "PPh25 or PPh Final monthly payment management",
+          "PPN input/output data organization",
+          "ID Billing · NTPN · BPE proof storage",
+          "Standard monthly tax report"
         ],
         "criteria": [
           "Up to 30 employees",
           "Up to 30 withholding tax transactions per month",
-          "Up to 300 purchase/sales transactions per month"
-        ]
+          "Up to 300 purchase/sales transactions per month",
+          "Standard monthly management baseline for general PKP entities",
+          "If thresholds are exceeded, the affected month may be automatically adjusted to the Pro tier"
+        ],
+        "storage": {
+          "allowance": "10GB / month",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Each monthly management plan includes usage thresholds. If the actual number of employees, withholding tax transactions, or monthly uploads/transactions exceeds the threshold, the affected month may be automatically upgraded to the appropriate higher-tier plan. Any amount already paid will be deducted and only the difference charged. You'll be notified via the dashboard and alerts before any threshold is reached."
       },
       {
         "id": "monthly-pro",
-        "group": "Corporate Monthly",
+        "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "Pro Monthly Management",
         "price": "Rp 2,500,000",
-        "description": "Advanced monthly tax operations",
+        "description": "Enhanced monthly tax operations",
         "meta": [
           "1-month prepaid",
           "10% discount available with 12-month prepaid",
-          "Annual filing sold separately"
+          "Annual filing separate"
         ],
         "items": [
           "Everything in Basic",
-          "Transfer pricing condition monitoring",
-          "AI anomaly detection",
-          "Advanced tax reports",
+          "High-volume payroll and withholding tax data processing",
+          "Cross-border transactions · PPh26 · Tax Treaty review signals",
+          "Related-party / TP condition monitoring",
+          "AI anomaly detection and advanced risk commentary",
+          "Advanced monthly tax report",
           "Priority processing"
         ],
         "criteria": [
           "Up to 100 employees",
           "Up to 150 withholding tax transactions per month",
-          "Cross-border and related-party transaction monitoring included"
-        ]
+          "Up to 1,000 purchase/sales transactions per month",
+          "Includes cross-border transaction and related-party monitoring",
+          "Exceeding thresholds or recurring high-volume transactions will be subject to Enterprise pricing"
+        ],
+        "storage": {
+          "allowance": "30GB / month",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Each monthly management plan includes usage thresholds. If the actual number of employees, withholding tax transactions, or monthly uploads/transactions exceeds the threshold, the affected month may be automatically upgraded to the appropriate higher-tier plan. Any amount already paid will be deducted and only the difference charged. You'll be notified via the dashboard and alerts before any threshold is reached."
       },
       {
         "id": "monthly-enterprise",
-        "group": "Corporate Monthly",
+        "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "Enterprise Custom Monthly Management",
         "price": "Rp 3,500,000",
-        "description": "High-volume and fully customized operations",
+        "description": "High-volume / fully customized operations",
         "meta": [
           "1-month prepaid",
           "Usage-based billing",
-          "Annual filing sold separately"
+          "Annual filing separate"
         ],
         "items": [
           "Everything in Pro",
-          "High-volume payroll and transaction processing",
-          "Overage usage-based billing",
-          "SLA and priority support"
+          "Payroll and PPh21 processing for 100+ employees",
+          "Withholding tax code determination for 150+ transactions/month",
+          "Auto-classification of high-volume PPN, purchase, and sales data",
+          "Custom reports / SLA",
+          "Usage-based overage billing and priority support"
         ],
         "criteria": [
           "More than 100 employees",
           "More than 150 withholding tax transactions per month",
-          "Bulk document auto-classification required"
-        ]
+          "More than 1,000 purchase/sales transactions per month, or high-volume document auto-classification required",
+          "Entities with multiple branches, complex approval workflows, or custom reporting needs"
+        ],
+        "storage": {
+          "allowance": "From 100GB / month",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Each monthly management plan includes usage thresholds. If the actual number of employees, withholding tax transactions, or monthly uploads/transactions exceeds the threshold, the affected month may be automatically upgraded to the appropriate higher-tier plan. Any amount already paid will be deducted and only the difference charged. You'll be notified via the dashboard and alerts before any threshold is reached."
       },
       {
         "id": "annual-umkm",
@@ -1479,11 +1661,11 @@
         "badge": "One-Time Prepaid",
         "typeLabel": "UMKM Annual Filing",
         "price": "Rp 2,500,000",
-        "description": "Annual filing for corporations subject to 0.5% Final Tax",
+        "description": "Annual corporate filing for entities eligible for Final Tax 0.5%",
         "meta": [
           "One-time prepaid",
-          "Can be selected separately from monthly management",
-          "Based on SPT Badan"
+          "Available separately from monthly management",
+          "SPT Badan basis"
         ],
         "items": [
           "Normalized financial statement preparation",
@@ -1493,9 +1675,18 @@
         ],
         "criteria": [
           "Annual revenue up to Rp 4.8B",
-          "Subject to 0.5% Final Tax",
-          "No cross-border or related-party transactions"
-        ]
+          "Entities eligible for Final Tax 0.5%",
+          "Standard UMKM bookkeeping basis",
+          "No complex inventory, fixed assets, or tax adjustments"
+        ],
+        "storage": {
+          "allowance": "2GB / fiscal year",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "UMKM Annual Filing is a one-time annual closing and SPT Badan preparation service with clear eligibility criteria: annual revenue up to Rp 4.8B, eligible for Final Tax 0.5%, and using standard UMKM bookkeeping."
       },
       {
         "id": "annual-pph25",
@@ -1503,24 +1694,37 @@
         "badge": "One-Time Prepaid",
         "typeLabel": "PPh25 Standard Corporate Annual Filing",
         "price": "Rp 7,500,000",
-        "description": "Standard annual filing for general corporate tax subjects",
+        "description": "Standard annual filing for general corporate taxpayers",
         "meta": [
           "One-time prepaid",
-          "Can be selected separately from monthly management",
-          "Based on SPT Badan"
+          "Available separately from monthly management",
+          "SPT Badan basis"
         ],
         "items": [
           "Financial statement preparation",
-          "Tax reconciliation",
-          "Tax credit application",
-          "PPh29/PPh25 calculation",
+          "Standard tax adjustments",
+          "Tax credit verification",
+          "PPh29/PPh25 computation",
           "SPT draft generation"
         ],
         "criteria": [
-          "Annual revenue above Rp 4.8B or past UMKM eligibility period",
-          "Up to 1,000 annual transactions",
-          "No transfer pricing issues"
-        ]
+          "Annual revenue up to Rp 25B",
+          "Entities not subject to UMKM Final Tax, or those subject to general corporate tax (PPh25)",
+          "Up to 1,000 transactions per year",
+          "Up to 100 employees",
+          "Single entity, single branch, or simple business structure",
+          "Accounting records in good order",
+          "Standard tax adjustment scope",
+          "No TP documentation, Tax Treaty, or large-scale inventory/fixed asset reconstruction requiring specialist review"
+        ],
+        "storage": {
+          "allowance": "10GB / fiscal year",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "PPh25 Standard Corporate Annual Filing is assessed based on revenue, transaction volume, and workload. It applies to entities with annual revenue up to Rp 25B, up to 1,000 transactions per year, up to 100 employees, well-organized accounting records, and a standard tax adjustment scope. Entities that are not eligible for UMKM Final Tax or that are subject to PPh25 are also assessed under these criteria."
       },
       {
         "id": "annual-complex",
@@ -1528,24 +1732,39 @@
         "badge": "One-Time Prepaid",
         "typeLabel": "Complex Structure Annual Filing",
         "price": "Rp 15,000,000",
-        "description": "Foreign-owned, related-party, cross-border, or high-volume transaction corporations",
+        "description": "Entities with high revenue, transaction volume, or complex data organization needs",
         "meta": [
           "One-time prepaid",
-          "Can be selected separately from monthly management",
-          "Based on SPT Badan"
+          "Available separately from monthly management",
+          "SPT Badan basis"
         ],
         "items": [
-          "Full PPh25 annual filing",
-          "Transfer pricing condition review",
-          "Cross-border transaction review",
+          "Everything in PPh25 Standard Annual Filing",
+          "High-volume transaction data organization",
+          "Complex inventory, fixed asset, and foreign currency review",
+          "Reconstruction support for incomplete accounting records",
+          "TP · PPh26 · Tax Treaty specialist review as needed",
           "AI risk report",
           "Priority processing"
         ],
         "criteria": [
-          "Foreign shareholders or cross-border transactions present",
-          "Related-party transactions present",
-          "PPh26 / DGT Form / Tax Treaty review required"
-        ]
+          "Complex Structure Annual Filing applies if any of the following conditions are met:",
+          "Annual revenue exceeds Rp 25B",
+          "More than 1,000 transactions per year",
+          "More than 100 employees",
+          "Multiple branches, projects, or KBLI classifications",
+          "Complex inventory, cost of goods, fixed assets, or foreign currency transactions",
+          "Incomplete accounting records requiring financial statement reconstruction",
+          "Specialist review required for TP, PPh26, DGT Form, or Tax Treaty matters"
+        ],
+        "storage": {
+          "allowance": "30GB / fiscal year",
+          "retentionCopy": "Core filing records — including ID Billing, NTPN, BPE, filing history, AI parsing results, and tax code determination logs — are retained by default.",
+          "rawFileCopy": "Original files uploaded by the client are stored within the included storage allowance. These may include invoice, Faktur Pajak, receipt photos, payroll Excel, contracts, bank statements, and bulk purchase/sales documents.",
+          "overage": "If exceeded: Active Storage Rp 50,000 / 10GB / month · Archive Storage Rp 250,000 / 10GB / year",
+          "alertPolicy": "You'll be notified at 80% usage. At 100%, you'll be prompted to purchase additional storage, switch to Archive, or download and delete original files. Temporary uploads may be permitted for documents needed to meet filing deadlines."
+        },
+        "info": "Complex Structure Annual Filing is determined not by whether the entity has cross-border activities, but by revenue, transaction volume, headcount, data complexity, or the need for specialist review. It applies if any of the following are present: annual revenue exceeding Rp 25B, more than 1,000 transactions per year, more than 100 employees, multiple branches, complex inventory/fixed asset/foreign currency records, accounting records requiring reconstruction, or the need for specialist TP/PPh26/Tax Treaty review."
       }
     ],
     "text": {
@@ -1558,12 +1777,12 @@
       "login": "Log In",
       "viewPricing": "View Pricing",
       "chips": "Indonesia Tax Filing Automation",
-      "heroTop": "Tax filing doesn't have to be complicated.",
-      "heroMain": "Just upload your documents — done.",
-      "heroSub": "Upload as-is → AI determines tax codes → Filing-ready",
-      "heroDesc": "No need to reformat invoices, Faktur Pajak, receipts, payroll data, or contracts into new templates. AI reads your documents and organizes withholding tax codes — PPh 21·23·4(2)·26 and more — along with any tax risks.",
-      "trustBaseTitle": "Automation matters — but so does the standard behind it.",
-      "trustBaseDesc": "AI Pajak is built on the Indonesian tax operation standards of Jakarta Tax Consulting, covering everything from document submission and tax code determination to payment and filing evidence management — all in one seamless flow.",
+      "heroTop": "Tax filing, simplified.",
+      "heroMain": "Just upload your documents.",
+      "heroSub": "Upload your docs → AI determines tax codes → Filing ready",
+      "heroDesc": "No need to reformat your invoices, Faktur Pajak, receipts, payroll data, or contracts into new templates. AI reads your existing documents and organizes withholding tax codes — PPh 21·23·4(2)·26 and more — along with any tax risk flags.",
+      "trustBaseTitle": "Automation is only as good as the standards behind it",
+      "trustBaseDesc": "AI Pajak is built on the Indonesian tax operation standards of Jakarta Tax Consulting — covering everything from document submission and tax code determination to payment and filing evidence management, all in one seamless flow.",
       "trustIndicators": [
         {
           "title": "JTC Tax Workflow",
@@ -1598,44 +1817,44 @@
         "copyright": "© 2026 AI Pajak. Built for upload-based Indonesian tax automation."
       },
       "readiness": "Readiness",
-      "missing": "Missing Documents",
+      "missing": "Missing Docs",
       "next": "Next Action",
       "personas": {
         "personal": {
           "label": "Individual",
           "icon": "👤",
           "title": "Personal Annual Filing",
-          "subtitle": "Personal annual filing — submit A1/A2, receipts, and income documents as-is, no re-entry required",
+          "subtitle": "Submit your A1/A2, receipts, and income documents as-is — no re-entry required",
           "readiness": 72,
           "missing": [
             "A1/A2 withholding certificate",
-            "Asset & liability balance as of December 31",
+            "Asset & liability balances as of December 31",
             "Other income documents"
           ],
-          "next": "We'll review your income, deductions, and asset changes, then let you know whether you owe tax or are due a refund."
+          "next": "We'll review your income, deductions, and asset changes, then advise on any tax due or refund potential."
         },
         "corporate": {
           "label": "Corporate",
           "icon": "🏢",
           "title": "Corporate Monthly & Annual Filing",
-          "subtitle": "Corporate tax dashboard — submit invoices, Faktur Pajak, receipts, payroll, and contracts as-is, no reformatting needed",
+          "subtitle": "A corporate tax dashboard where invoices, Faktur Pajak, receipts, payroll, and contracts are submitted without reformatting",
           "readiness": 58,
           "missing": [
             "PPN input Faktur",
             "Some withholding tax contracts",
             "PPh21 payroll template"
           ],
-          "next": "We'll analyze the nature of your uploaded invoices and contracts to guide you on withholding tax types and tax codes."
+          "next": "We'll analyze the nature of your uploaded invoices and contracts to guide you on withholding tax types and tax code selection."
         }
       },
       "cards": [
         [
           "AI Withholding Tax Code Determination",
-          "Analyzes transaction nature to automatically identify the right PPh type and tax code for ID Billing"
+          "Analyzes transaction type to automatically determine the applicable PPh type and tax code for ID Billing"
         ],
         [
-          "Separate Flows for Individuals & Corporations",
-          "Required documents and filing steps are tailored by client type"
+          "Separate Flows for Individuals & Corporates",
+          "Document requirements and filing procedures tailored to each client type"
         ],
         [
           "AI Tax Insights",
@@ -1643,40 +1862,40 @@
         ],
         [
           "Upload Documents As-Is",
-          "No template required — AI parses data directly from your existing forms, photos, and PDFs"
+          "No template required — AI parses data directly from your existing formats, photos, and PDFs"
         ]
       ],
-      "trustTitle": "Your sensitive tax data is stored with encryption.",
-      "trustDesc": "Sensitive data including NPWP, NIK, payroll records, Faktur Pajak, and contracts are handled with encryption by design. Your data is used solely for filing preparation and delivering personalized tax insights.",
+      "trustTitle": "Your sensitive tax data is stored with encryption",
+      "trustDesc": "Sensitive information — including NPWP, NIK, payroll data, Faktur Pajak, and contracts — is stored encrypted by design. Data is used solely for filing preparation and delivering personalized tax insights.",
       "trustItems": [
         "Encrypted data storage",
         "Access-controlled workflow",
         "Audit-ready filing evidence"
       ],
-      "coreDiff": "Core Differentiators",
+      "coreDiff": "What Sets Us Apart",
       "advisoryKicker": "AI Tax Advisory",
       "taxTitle": "The accuracy of ID Billing comes down to the right withholding tax code.",
-      "taxDesc": "Most online tax platforms offer e-Billing generation, but deciding which PPh type and tax code to apply for each transaction is often left to the user. AI Pajak analyzes your invoices, contracts, counterparty details, and service descriptions to automatically determine the correct withholding tax codes for ID Billing.",
+      "taxDesc": "Most online tax platforms provide e-Billing generation, but users often have to decide on their own which PPh type and tax code applies to each transaction. AI Pajak analyzes your invoices, contracts, counterparty details, and service descriptions to determine the correct withholding tax code for ID Billing.",
       "taxCards": [
         [
-          "Transaction Nature Analysis",
-          "Classifies payment types — services, rent, interest, dividends, royalties, construction, and more"
+          "Transaction Classification",
+          "Categorizes the nature of payments — services, rental, interest, dividends, royalties, construction, and more"
         ],
         [
           "PPh Type Determination",
-          "Identifies applicable types including PPh 4(2), 15, 22, 23, and 26"
+          "Identifies which tax type applies: PPh 4(2), 15, 22, 23, 26, etc."
         ],
         [
           "Tax Code Matching",
-          "Resolves the tax type and deposit type values needed for ID Billing"
+          "Resolves the correct tax type and deposit type values needed for ID Billing"
         ],
         [
-          "Flagging Unclear Transactions",
+          "Flagging Unclear Items",
           "Ambiguous transactions are flagged separately to reduce the risk of incorrect code entry"
         ]
       ],
-      "advisoryTitle": "The more filing data accumulates, the more proactively AI surfaces the tax actions you need.",
-      "advisoryDesc": "AI Pajak goes beyond simple calculation — it supports tax decision-making based on the documents you submit and your filing history. It provides client-specific guidance on switching corporate tax payment methods, timing your PKP registration, unusual asset growth relative to income, and whether overseas transactions warrant a Tax Treaty review.",
+      "advisoryTitle": "The more filing data you accumulate, the smarter AI Pajak gets at surfacing what matters next.",
+      "advisoryDesc": "Beyond calculation, AI Pajak uses your submitted documents and filing history to support real tax decisions. It provides client-specific guidance on switching corporate tax payment methods, timing your PKP registration, detecting unusual asset growth relative to income, and flagging overseas transactions that may require Tax Treaty review.",
       "advisoryCards": [
         [
           "Corporate Tax Payment Method",
@@ -1684,40 +1903,40 @@
         ],
         [
           "PKP Registration Alert",
-          "Proactive notification on when to apply for PKP based on your revenue trend"
+          "Proactively notifies you when your revenue trend suggests it's time to register as PKP"
         ],
         [
           "Unusual Asset Growth Detection",
-          "Flags a risk signal when asset acquisition appears disproportionate to declared income"
+          "Flags risk signals when asset acquisition appears disproportionate to reported income"
         ],
         [
           "Tax Treaty Check",
-          "Guidance on overseas transactions, PPh26, DGT Form, and applicable tax treaty eligibility"
+          "Advises on overseas transactions, PPh26, DGT Form, and potential tax treaty applicability"
         ]
       ],
-      "serviceFlow": "Service Flow",
-      "productTitle": "Just upload — AI organizes your filing data.",
-      "productDesc": "No need to re-enter anything into a separate template. Submit your invoices, Faktur Pajak, receipts, and payroll data in whatever format you already use — or just take a photo — and AI reads the data and prepares it for filing.",
+      "serviceFlow": "How It Works",
+      "productTitle": "Just upload — AI handles the rest",
+      "productDesc": "No need to re-enter data into separate templates. Upload your invoices, Faktur Pajak, receipts, and payroll documents in whatever format you already use — or simply take a photo — and AI will extract the data and organize it into filing-ready form.",
       "moduleStep": "Service Steps",
-      "coreGuide": "Key Guidelines",
+      "coreGuide": "Key Notes",
       "customerView": "What Clients See",
       "outputs": "Deliverables",
       "requiredDocs": "Accepted Documents",
       "startKicker": "Upload-ready documents",
       "startTitle": "No need to create new documents for tax filing.",
-      "startDesc": "Submit your existing invoices, Faktur Pajak, receipts, payroll data, and withholding documents as they are. Paper receipts and tax invoices can be submitted as photos — AI reads the data and organizes it into filing-ready format.",
-      "personalBtn": "Individual Required Documents",
-      "corporateBtn": "Corporate Required Documents",
+      "startDesc": "Just submit the invoices, Faktur Pajak, receipts, payroll data, and withholding documents you already have. Paper receipts and tax invoices can be photographed and submitted — AI will read the data and organize it into filing-ready form.",
+      "personalBtn": "Individual Required Docs",
+      "corporateBtn": "Corporate Required Docs",
       "methodTitle": "How to Submit Documents",
       "methods": [
-        "Submit your existing documents as-is",
+        "Submit in your existing format",
         "Photograph invoices, Faktur, or receipts",
-        "AI parses the data",
+        "AI data parsing",
         "Review only flagged items",
         "Filing data organized automatically"
       ],
       "guide": "Guide",
-      "startNote": "No need to rewrite your documents to fit a separate template. For withholding tax transactions, we walk you through selecting the right tax code for ID Billing.",
+      "startNote": "No need to reformat your documents into a separate template. For withholding tax transactions, we'll guide you all the way through to selecting the correct tax code for ID Billing.",
       "requirements": {
         "personal": [
           [
@@ -1730,7 +1949,7 @@
           ],
           [
             "Required",
-            "Asset & liability balance as of December 31"
+            "Asset & liability balances as of December 31"
           ],
           [
             "If applicable",
@@ -1748,11 +1967,11 @@
           ],
           [
             "Required",
-            "Monthly revenue & purchase records and Faktur Pajak"
+            "Monthly revenue & expense records and Faktur Pajak"
           ],
           [
             "Required",
-            "Payroll template and per-employee PPh21 documents"
+            "Payroll template and per-employee PPh21 data"
           ],
           [
             "If applicable",
@@ -1765,87 +1984,90 @@
         ]
       },
       "compKicker": "Competitive Comparison",
-      "compTitle": "How is AI Pajak different from traditional tax firms and online tax platforms?",
-      "compDesc": "AI Pajak's core differentiator is its ability to analyze the nature of withholding tax transactions and automatically determine the right PPh type and tax code for ID Billing.",
+      "compTitle": "How we're different from traditional tax firms and online tax platforms",
+      "compDesc": "AI Pajak's core differentiator is its ability to analyze the nature of withholding tax transactions and automatically determine the PPh type and tax code required for ID Billing.",
       "columns": [
         "Criteria",
         "Traditional Tax Firm",
-        "Existing Online Tax Platform",
+        "Online Tax Platform",
         "AI Pajak"
       ],
       "rows": [
         [
           "Core Position",
-          "Managed tax service where you send documents to an expert and wait for results",
-          "Platform focused on e-Filing, e-Billing, e-Faktur, e-Bupot, and other filing and payment processing",
-          "Automation platform where you upload existing documents as-is, AI reads the data, and connects it through to filing readiness"
+          "Tax agency service — send documents to an expert and wait for results",
+          "Platform focused on processing e-Filing, e-Billing, e-Faktur, e-Bupot filings and payments",
+          "Automation platform — upload your existing documents and AI reads the data, organizes it, and gets you filing-ready"
         ],
         [
           "Client Experience",
-          "Documents sent via WhatsApp, email, or spreadsheet — with separate follow-up needed for status updates",
-          "Users directly operate tax document, filing, and payment features themselves",
-          "Clients submit existing documents or photos without any template — then review AI-organized results and filing status"
+          "Documents shared via WhatsApp, email, or Excel; status updates require separate follow-up",
+          "Users manually operate tax document, filing, and payment features themselves",
+          "Clients submit existing documents or photos without any template; AI presents organized results and progress status"
         ],
         [
           "Withholding Tax Code",
-          "Typically determined manually by the assigned accountant reviewing the transaction",
+          "Staff typically reviews transaction details and makes a manual judgment",
           "Users are often required to select the tax type and payment code themselves",
           "Analyzes invoices, contracts, and counterparty details to automatically determine the PPh type and tax code for ID Billing"
         ],
         [
           "AI Tax Insights",
-          "Guidance quality varies depending on the assigned accountant's experience",
-          "Filing and payment features are available, but client-specific tax decision support is limited",
-          "Proactively advises on payment method changes, PKP registration timing, unusual asset growth, and Tax Treaty applicability"
+          "Guidance quality varies depending on the assigned staff's experience",
+          "Filing and payment features are provided, but client-specific tax decision support is limited",
+          "Advises on payment method transitions, PKP registration timing, unusual asset growth, and Tax Treaty review needs"
         ],
         [
-          "Key Differentiator",
-          "Expert guidance and managed tax filing experience",
-          "Convenience for electronic filing and payment — but tax code judgment depends on user input and knowledge",
+          "Differentiator",
+          "Expert-driven advice and hands-on tax agency experience",
+          "Convenience of electronic filing and payment processing — though tax code judgment relies on user input and understanding",
           "Document parsing, withholding tax code determination, AI tax insights, filing readiness tracking, and evidence management"
         ]
       ],
       "pricingKicker": "Pricing",
-      "pricingTitle": "Select a plan to instantly see what's included.",
-      "pricingDesc": "Individual filing plans are structured by complexity, not by form name. Click on the plan you need — personal tax, corporate monthly management, or corporate year-end closing — to view pricing, eligibility criteria, and what's included.",
+      "pricingTitle": "Select a plan to see exactly what's included",
+      "pricingDesc": "Individual filing plans are based on complexity — not form names. Click on Personal Tax, Corporate Monthly, or Corporate Annual Settlement to view pricing, eligibility criteria, and what's included.",
       "pricingListTitle": "Available Plans",
       "chooseService": "Choose the service you need",
-      "pricingListDesc": "Click to view details on the right.",
+      "pricingListDesc": "Click a plan to see details on the right.",
       "selectedPlan": "Selected Plan",
       "included": "What's Included",
       "criteria": "Eligibility Criteria",
       "pricingInfo": "Prices shown are base rates. Final scope is confirmed based on submitted documents, transaction volume, overseas transactions, and related-party considerations.",
-      "pricingButton": "See accepted documents →",
+      "pricingButton": "View accepted documents →",
+      "storageHeading": "Storage & Evidence Retention",
+      "storageAllowanceLabel": "Included file storage",
+      "storageOverageLabel": "Additional overage",
       "groups": [
         "Personal Tax",
         "Corporate Monthly",
-        "Corporate Year-End"
+        "Corporate Annual Settlement"
       ],
       "faqs": [
         [
           "What documents do I need to get started?",
-          "Individuals need NIK/NPWP, A1/A2 certificate, family information, and asset/liability records. Corporations need NPWP, KBLI, PKP status, revenue and purchase records, PPh21 payroll data, withholding tax-related invoices/contracts, and PPN documents."
+          "For individuals: NIK/NPWP, A1/A2, family information, and asset & liability records are the basics. For corporates: NPWP, KBLI, PKP status, revenue & expense records, PPh21 payroll data, withholding tax-related invoices/contracts, and PPN documents are required."
         ],
         [
           "Are you directly competing with platforms like OnlinePajak and Klikpajak?",
-          "Not exactly. Existing online tax platforms excel at e-Filing, e-Billing, e-Faktur, e-Bupot, and other electronic tax document processing. AI Pajak's core differentiator is automatically analyzing transaction nature from invoices and contracts to determine the right withholding tax type and ID Billing tax code."
+          "Not exactly. Existing online tax platforms excel at e-Filing, e-Billing, e-Faktur, and e-Bupot — processing filings, payments, and electronic tax documents. AI Pajak's core differentiator is analyzing the nature of transactions in invoices and contracts to automatically determine withholding tax types and ID Billing tax codes."
         ],
         [
-          "Are individual filing fees based on 1770SS / 1770S / 1770?",
-          "No. Personal annual filing is structured as a unified flow. AI Pajak's individual pricing is based on income type, number of withholding documents, asset and liability complexity, and whether business or freelance income is involved — not form names."
+          "Are individual filing fees based on the 1770SS / 1770S / 1770 form?",
+          "No. Individual annual filing is guided through a unified flow. AI Pajak's individual pricing is based on income type, number of withholding documents, asset & liability complexity, and whether business or freelance income is involved — not form names."
         ],
         [
-          "What does the AI Tax Insights feature actually tell me?",
-          "Based on your submitted documents and filing history, it provides guidance on potential changes to corporate tax payment methods, optimal PKP registration timing, unusual asset acquisition relative to income, and whether overseas transactions warrant a Tax Treaty review."
+          "What does AI Tax Insights cover?",
+          "Based on your submitted documents and filing history, it provides guidance on potential corporate tax payment method changes, PKP registration timing, unusual asset acquisition relative to income, and whether overseas transactions may require Tax Treaty review."
         ],
         [
           "How are services outside the plan scope handled?",
-          "Tax audit defense, transfer pricing reports, related-party analysis, and multi-jurisdiction corporate advisory are outside plan scope and priced separately. Plans cover document parsing, tax code determination, filing preparation, and evidence management."
+          "Tax audit defense, transfer pricing reports, related-party analysis, and multinational corporate advisory fall outside plan scope and are quoted separately. Within the plan, we cover document parsing, tax code determination, filing preparation, and evidence management."
         ]
       ],
-      "finalTitle": "AI Pajak manages everything from document preparation to final filing evidence.",
-      "finalDesc": "Once individuals and corporations prepare their documents, AI Pajak clearly guides them through filing readiness status and the next steps to take.",
-      "finalButton": "Log in and start filing →",
+      "finalTitle": "AI Pajak manages everything from document prep to completed filing evidence.",
+      "finalDesc": "Once individuals and corporate clients have their documents ready, AI Pajak clearly guides them through filing readiness status and the next actions required.",
+      "finalButton": "Log in to start filing →",
       "footerCompare": "Comparison",
       "footerPricing": "Pricing detail",
       "footerDocs": "Required documents"
@@ -2230,248 +2452,356 @@
       {
         "id": "p-simple",
         "group": "Pajak Pribadi",
-        "badge": "Per Filing",
+        "badge": "per-filing",
         "typeLabel": "Personal Simple (Laporan Sederhana)",
         "price": "Rp 100.000",
         "vat": "Total termasuk PPN: Rp 111.000",
-        "description": "Individu dengan 1 sumber penghasilan kerja · data sederhana",
+        "description": "Individu dengan 1 penghasilan kerja utama · data sederhana",
         "meta": [
           "Total termasuk PPN: Rp 111.000",
           "Berdasarkan tingkat kompleksitas",
           "Laporan tahunan pribadi terpadu"
         ],
         "items": [
-          "Perapihan otomatis data A1/A2 atau bukti potong",
+          "Pengorganisasian otomatis data A1/A2 atau bukti potong",
           "Verifikasi data identitas dan penghasilan dasar",
-          "Informasi awal kemungkinan kurang/lebih bayar",
+          "Panduan awal kemungkinan kurang/lebih bayar",
           "Manajemen bukti penyelesaian laporan"
         ],
         "criteria": [
-          "Berbasis penghasilan dari pekerjaan",
-          "1 data A1/A2 atau bukti potong utama",
+          "Berbasis penghasilan pekerjaan",
+          "1 data A1/A2 atau 1 bukti potong utama",
           "Tidak ada penghasilan usaha atau freelance tambahan"
-        ]
+        ],
+        "storage": {
+          "allowance": "500MB / tahun pajak",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Pajak pribadi dikenakan biaya per-filing. Setelah dokumen diperiksa, jenis laporan (sederhana/standar/kompleks) dapat berubah tergantung jenis penghasilan, jumlah bukti potong, dan kompleksitas aset/kewajiban. Jika kompleksitasnya lebih tinggi dari jenis yang dipilih, Anda akan diarahkan untuk membayar selisihnya sebelum proses pelaporan dilanjutkan."
       },
       {
         "id": "p-standard",
         "group": "Pajak Pribadi",
-        "badge": "Per Filing",
+        "badge": "per-filing",
         "typeLabel": "Personal Standard (Laporan Standar)",
         "price": "Rp 200.000",
         "vat": "Total termasuk PPN: Rp 222.000",
-        "description": "Individu dengan beberapa sumber penghasilan, beberapa bukti potong, serta input harta/kewajiban",
+        "description": "Individu dengan beberapa sumber penghasilan, beberapa bukti potong, serta perlu input aset/kewajiban",
         "meta": [
           "Total termasuk PPN: Rp 222.000",
           "Berdasarkan tingkat kompleksitas",
           "Laporan tahunan pribadi terpadu"
         ],
         "items": [
-          "Penggabungan dan perapihan beberapa bukti potong",
-          "Perapihan penghasilan lain, pengurangan, harta, dan kewajiban",
+          "Penggabungan dan pengorganisasian beberapa bukti potong",
+          "Penghasilan lain, pengurangan, aset, dan kewajiban",
           "Verifikasi profil keluarga/PTKP",
           "Manajemen bukti penyelesaian laporan"
         ],
         "criteria": [
           "Beberapa pemberi kerja atau beberapa bukti potong",
-          "Penghasilan lain atau pengurangan yang perlu diverifikasi",
-          "Perlu input harta dan kewajiban"
-        ]
+          "Perlu verifikasi penghasilan lain atau pengurangan",
+          "Perlu input aset dan kewajiban"
+        ],
+        "storage": {
+          "allowance": "1GB / tahun pajak",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Pajak pribadi dikenakan biaya per-filing. Setelah dokumen diperiksa, jenis laporan (sederhana/standar/kompleks) dapat berubah tergantung jenis penghasilan, jumlah bukti potong, dan kompleksitas aset/kewajiban. Jika kompleksitasnya lebih tinggi dari jenis yang dipilih, Anda akan diarahkan untuk membayar selisihnya sebelum proses pelaporan dilanjutkan."
       },
       {
         "id": "p-complex",
         "group": "Pajak Pribadi",
-        "badge": "Per Filing",
+        "badge": "per-filing",
         "typeLabel": "Personal Business / Complex",
         "price": "Rp 500.000",
         "vat": "Total termasuk PPN: Rp 555.000",
-        "description": "Individu dengan penghasilan freelance · usaha pribadi · investasi · atau harta kompleks",
+        "description": "Individu dengan penghasilan freelance, usaha, investasi, atau aset kompleks",
         "meta": [
           "Total termasuk PPN: Rp 555.000",
           "Berdasarkan tingkat kompleksitas",
           "Laporan tahunan pribadi terpadu"
         ],
         "items": [
-          "Perapihan otomatis data penghasilan usaha/freelance",
-          "Klasifikasi dokumen penerimaan, biaya, dan bukti",
+          "Pengorganisasian otomatis data penghasilan usaha/freelance",
+          "Klasifikasi data pendapatan, biaya, dan bukti transaksi",
           "Pencatatan penghasilan investasi dan sewa",
-          "Pemeriksaan perubahan harta/kewajiban dan risiko"
+          "Pemantauan perubahan aset/kewajiban dan pengecekan risiko"
         ],
         "criteria": [
           "Penghasilan freelance atau usaha pribadi",
-          "Dokumen penerimaan dan biaya terkait usaha",
-          "Penghasilan tambahan atau harta kompleks"
-        ]
+          "Data pendapatan dan biaya terkait usaha",
+          "Penghasilan tambahan atau aset kompleks"
+        ],
+        "storage": {
+          "allowance": "3GB / tahun pajak",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Pajak pribadi dikenakan biaya per-filing. Setelah dokumen diperiksa, jenis laporan (sederhana/standar/kompleks) dapat berubah tergantung jenis penghasilan, jumlah bukti potong, dan kompleksitas aset/kewajiban. Jika kompleksitasnya lebih tinggi dari jenis yang dipilih, Anda akan diarahkan untuk membayar selisihnya sebelum proses pelaporan dilanjutkan."
       },
       {
         "id": "monthly-umkm",
-        "group": "Manajemen Bulanan Badan",
-        "badge": "Bayar Bulanan",
-        "typeLabel": "Manajemen Bulanan UMKM",
+        "group": "Pengelolaan Bulanan Badan",
+        "badge": "monthly prepaid",
+        "typeLabel": "Pengelolaan Bulanan UMKM",
         "price": "Rp 750,000",
-        "description": "Badan usaha skala kecil / berbasis Final Tax",
+        "description": "Badan skala kecil / berbasis Final Tax",
         "meta": [
-          "Dibayar di muka 1 bulan",
-          "Diskon 10% untuk pembayaran di muka 12 bulan",
-          "Rekonsiliasi tahunan terpisah"
+          "Prabayar 1 bulan",
+          "Diskon 10% untuk prabayar 12 bulan",
+          "Tutup buku tahunan terpisah"
         ],
         "items": [
-          "Status pelaporan bulanan",
-          "Permintaan ID Billing",
-          "Pengingat dasar",
+          "Dashboard kesiapan laporan bulanan",
+          "Perhitungan PPh Final UMKM berdasarkan omzet bulanan",
+          "Tinjauan sederhana PPh21 penggajian",
+          "Penetapan kode pajak potong terbatas",
+          "Nilai siap pakai ID Billing dan pengingat pembayaran",
           "Komentar risiko AI dasar"
         ],
         "criteria": [
-          "Maksimal 5 karyawan",
-          "Maksimal 10 transaksi withholding per bulan",
-          "Maksimal 50 unggahan/transaksi per bulan"
-        ]
+          "Karyawan maksimal 10 orang",
+          "Transaksi pajak potong maksimal 10 per bulan",
+          "Unggahan/transaksi maksimal 50 per bulan",
+          "Badan PKP yang wajib lapor PPN rutin disarankan menggunakan paket Basic ke atas",
+          "Jika melampaui batas, bulan tersebut dapat disesuaikan ke tarif Pengelolaan Bulanan Basic, dan hanya selisih di luar pembayaran yang telah dilakukan yang akan ditagihkan"
+        ],
+        "storage": {
+          "allowance": "2GB / bulan",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Setiap paket pengelolaan bulanan memiliki batas penggunaan yang tercakup. Jika jumlah karyawan, transaksi pajak potong, atau unggahan/transaksi bulanan aktual melebihi batas tersebut, bulan yang bersangkutan dapat secara otomatis disesuaikan ke paket yang lebih tinggi sesuai penggunaan aktual. Jumlah yang telah dibayarkan akan dikurangi, dan hanya selisihnya yang ditagihkan. Anda akan mendapat pemberitahuan lebih awal melalui dashboard dan notifikasi sebelum batas terlampaui."
       },
       {
         "id": "monthly-basic",
-        "group": "Manajemen Bulanan Badan",
-        "badge": "Bayar Bulanan",
-        "typeLabel": "Manajemen Bulanan Basic",
+        "group": "Pengelolaan Bulanan Badan",
+        "badge": "monthly prepaid",
+        "typeLabel": "Pengelolaan Bulanan Basic",
         "price": "Rp 1,500,000",
         "description": "Operasional pajak dasar untuk badan umum",
         "meta": [
-          "Dibayar di muka 1 bulan",
-          "Diskon 10% untuk pembayaran di muka 12 bulan",
-          "Rekonsiliasi tahunan terpisah"
+          "Prabayar 1 bulan",
+          "Diskon 10% untuk prabayar 12 bulan",
+          "Tutup buku tahunan terpisah"
         ],
         "items": [
-          "Pengelolaan PPh21/23/25/PPN",
-          "Penyimpanan riwayat pelaporan/BPE/NTPN",
-          "Penentuan withholding pajak pihak ketiga",
-          "Laporan pajak bulanan"
+          "Pengelolaan pajak potong PPh21 penggajian",
+          "Penetapan kode pajak potong PPh23/4(2)/26 dll.",
+          "Pengelolaan pembayaran bulanan PPh25 atau PPh Final",
+          "Pengorganisasian data PPN masukan dan keluaran",
+          "Penyimpanan bukti ID Billing · NTPN · BPE",
+          "Laporan pajak bulanan standar"
         ],
         "criteria": [
-          "Maksimal 30 karyawan",
-          "Maksimal 30 transaksi withholding per bulan",
-          "Maksimal 300 transaksi pembelian/penjualan per bulan"
-        ]
+          "Karyawan maksimal 30 orang",
+          "Transaksi pajak potong maksimal 30 per bulan",
+          "Transaksi pembelian/penjualan maksimal 300 per bulan",
+          "Standar pengelolaan bulanan dasar untuk badan PKP umum",
+          "Jika melampaui batas, bulan tersebut dapat disesuaikan ke tarif Pengelolaan Bulanan Pro"
+        ],
+        "storage": {
+          "allowance": "10GB / bulan",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Setiap paket pengelolaan bulanan memiliki batas penggunaan yang tercakup. Jika jumlah karyawan, transaksi pajak potong, atau unggahan/transaksi bulanan aktual melebihi batas tersebut, bulan yang bersangkutan dapat secara otomatis disesuaikan ke paket yang lebih tinggi sesuai penggunaan aktual. Jumlah yang telah dibayarkan akan dikurangi, dan hanya selisihnya yang ditagihkan. Anda akan mendapat pemberitahuan lebih awal melalui dashboard dan notifikasi sebelum batas terlampaui."
       },
       {
         "id": "monthly-pro",
-        "group": "Manajemen Bulanan Badan",
-        "badge": "Bayar Bulanan",
-        "typeLabel": "Manajemen Bulanan Pro",
+        "group": "Pengelolaan Bulanan Badan",
+        "badge": "monthly prepaid",
+        "typeLabel": "Pengelolaan Bulanan Pro",
         "price": "Rp 2,500,000",
-        "description": "Operasional pajak bulanan yang lebih andal",
+        "description": "Operasional pajak bulanan yang lebih kuat",
         "meta": [
-          "Dibayar di muka 1 bulan",
-          "Diskon 10% untuk pembayaran di muka 12 bulan",
-          "Rekonsiliasi tahunan terpisah"
+          "Prabayar 1 bulan",
+          "Diskon 10% untuk prabayar 12 bulan",
+          "Tutup buku tahunan terpisah"
         ],
         "items": [
-          "Semua fitur Basic",
-          "Pemantauan kondisi TP",
-          "Deteksi anomali berbasis AI",
-          "Laporan pajak tingkat lanjut",
-          "Pemrosesan prioritas"
+          "Seluruh fitur paket Basic",
+          "Pemrosesan data penggajian dan pajak potong skala besar",
+          "Sinyal tinjauan transaksi luar negeri, PPh26, dan Tax Treaty",
+          "Pemantauan kondisi pihak berelasi/TP",
+          "Deteksi anomali AI dan komentar risiko lanjutan",
+          "Laporan pajak bulanan tingkat lanjut",
+          "Prioritas penanganan"
         ],
         "criteria": [
-          "Maksimal 100 karyawan",
-          "Maksimal 150 transaksi withholding per bulan",
-          "Termasuk pemantauan transaksi luar negeri dan hubungan istimewa"
-        ]
+          "Karyawan maksimal 100 orang",
+          "Transaksi pajak potong maksimal 150 per bulan",
+          "Transaksi pembelian/penjualan maksimal 1.000 per bulan",
+          "Termasuk pemantauan transaksi luar negeri dan pihak berelasi",
+          "Jika melebihi batas atau terdapat transaksi massal berulang, ketentuan Enterprise akan diterapkan"
+        ],
+        "storage": {
+          "allowance": "30GB / bulan",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Setiap paket pengelolaan bulanan memiliki batas penggunaan yang tercakup. Jika jumlah karyawan, transaksi pajak potong, atau unggahan/transaksi bulanan aktual melebihi batas tersebut, bulan yang bersangkutan dapat secara otomatis disesuaikan ke paket yang lebih tinggi sesuai penggunaan aktual. Jumlah yang telah dibayarkan akan dikurangi, dan hanya selisihnya yang ditagihkan. Anda akan mendapat pemberitahuan lebih awal melalui dashboard dan notifikasi sebelum batas terlampaui."
       },
       {
         "id": "monthly-enterprise",
-        "group": "Manajemen Bulanan Badan",
-        "badge": "Bayar Bulanan",
-        "typeLabel": "Manajemen Bulanan Enterprise Kustom",
+        "group": "Pengelolaan Bulanan Badan",
+        "badge": "monthly prepaid",
+        "typeLabel": "Pengelolaan Bulanan Enterprise Khusus",
         "price": "Rp 3,500,000",
-        "description": "Operasional volume besar / solusi kustom",
+        "description": "Operasional skala besar / kustom",
         "meta": [
-          "Dibayar di muka 1 bulan",
+          "Prabayar 1 bulan",
           "Tagihan berbasis penggunaan",
-          "Rekonsiliasi tahunan terpisah"
+          "Tutup buku tahunan terpisah"
         ],
         "items": [
-          "Semua fitur Pro",
-          "Pemrosesan payroll dan transaksi volume besar",
-          "Tagihan berbasis kelebihan penggunaan",
-          "SLA / dukungan prioritas"
+          "Seluruh fitur paket Pro",
+          "Pemrosesan penggajian dan PPh21 lebih dari 100 karyawan",
+          "Penetapan kode pajak potong lebih dari 150 transaksi per bulan",
+          "Klasifikasi otomatis data PPN, pembelian, dan penjualan massal",
+          "Laporan kustom / SLA",
+          "Tagihan berbasis penggunaan berlebih dan dukungan prioritas"
         ],
         "criteria": [
-          "Lebih dari 100 karyawan",
-          "Lebih dari 150 transaksi withholding per bulan",
-          "Perlu klasifikasi otomatis dokumen volume besar"
-        ]
+          "Karyawan lebih dari 100 orang",
+          "Transaksi pajak potong lebih dari 150 per bulan",
+          "Transaksi pembelian/penjualan lebih dari 1.000 per bulan atau butuh klasifikasi otomatis dokumen massal",
+          "Badan dengan beberapa lokasi usaha, alur persetujuan kompleks, atau kebutuhan laporan kustom"
+        ],
+        "storage": {
+          "allowance": "Mulai dari 100GB / bulan",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Setiap paket pengelolaan bulanan memiliki batas penggunaan yang tercakup. Jika jumlah karyawan, transaksi pajak potong, atau unggahan/transaksi bulanan aktual melebihi batas tersebut, bulan yang bersangkutan dapat secara otomatis disesuaikan ke paket yang lebih tinggi sesuai penggunaan aktual. Jumlah yang telah dibayarkan akan dikurangi, dan hanya selisihnya yang ditagihkan. Anda akan mendapat pemberitahuan lebih awal melalui dashboard dan notifikasi sebelum batas terlampaui."
       },
       {
         "id": "annual-umkm",
-        "group": "Rekonsiliasi Tahunan Badan",
-        "badge": "Bayar Sekali",
-        "typeLabel": "Rekonsiliasi Tahunan UMKM",
+        "group": "Tutup Buku Tahunan Badan",
+        "badge": "one-time prepaid",
+        "typeLabel": "Tutup Buku Tahunan UMKM",
         "price": "Rp 2,500,000",
-        "description": "Rekonsiliasi tahunan badan dengan Final Tax 0,5%",
+        "description": "Tutup buku tahunan untuk badan yang dikenakan Final Tax 0,5%",
         "meta": [
-          "Dibayar sekali di muka",
-          "Dapat dipilih terpisah dari manajemen bulanan",
+          "Prabayar sekali",
+          "Dapat dipilih terpisah dari pengelolaan bulanan",
           "Berdasarkan SPT Badan"
         ],
         "items": [
-          "Penyusunan laporan keuangan yang wajar",
-          "Perhitungan UMKM Final Tax",
-          "Pembuatan draf SPT",
+          "Penyusunan laporan keuangan standar",
+          "Perhitungan Final Tax UMKM",
+          "Pembuatan draft SPT",
           "Penerbitan e-Bupot 1721 A1"
         ],
         "criteria": [
           "Omzet tahunan di bawah Rp 4.8B",
-          "Termasuk objek Final Tax 0,5%",
-          "Tidak ada transaksi luar negeri atau hubungan istimewa"
-        ]
+          "Badan yang dapat menerapkan Final Tax 0,5%",
+          "Berdasarkan pembukuan UMKM umum",
+          "Tidak ada persediaan massal, aset tetap besar, atau koreksi fiskal kompleks"
+        ],
+        "storage": {
+          "allowance": "2GB / tahun buku",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Tutup Buku Tahunan UMKM adalah layanan tutup buku tahunan dan persiapan SPT Badan satu kali dengan kriteria yang jelas. Berlaku untuk badan dengan omzet tahunan di bawah Rp 4.8B yang dapat menerapkan Final Tax 0,5% dan menggunakan pembukuan UMKM umum."
       },
       {
         "id": "annual-pph25",
-        "group": "Rekonsiliasi Tahunan Badan",
-        "badge": "Bayar Sekali",
-        "typeLabel": "Rekonsiliasi Tahunan Badan Umum PPh25",
+        "group": "Tutup Buku Tahunan Badan",
+        "badge": "one-time prepaid",
+        "typeLabel": "Tutup Buku Tahunan Badan Umum PPh25",
         "price": "Rp 7,500,000",
-        "description": "Rekonsiliasi tahunan standar untuk badan dengan pajak penghasilan umum",
+        "description": "Tutup buku tahunan standar untuk badan yang dikenakan pajak badan umum",
         "meta": [
-          "Dibayar sekali di muka",
-          "Dapat dipilih terpisah dari manajemen bulanan",
+          "Prabayar sekali",
+          "Dapat dipilih terpisah dari pengelolaan bulanan",
           "Berdasarkan SPT Badan"
         ],
         "items": [
           "Penyusunan laporan keuangan",
-          "Koreksi fiskal",
-          "Kredit pajak",
+          "Koreksi fiskal umum",
+          "Verifikasi kredit pajak",
           "Perhitungan PPh29/PPh25",
-          "Pembuatan draf SPT"
+          "Pembuatan draft SPT"
         ],
         "criteria": [
-          "Omzet tahunan di atas Rp 4.8B atau masa UMKM telah berakhir",
-          "Transaksi tahunan maksimal 1.000 transaksi",
-          "Tidak ada isu TP"
-        ]
+          "Omzet tahunan maksimal Rp 25B",
+          "Badan yang tidak termasuk UMKM Final Tax atau yang dikenakan pajak badan umum (PPh25)",
+          "Transaksi tahunan maksimal 1.000",
+          "Karyawan maksimal 100 orang",
+          "Badan tunggal, lokasi usaha tunggal, atau struktur usaha sederhana",
+          "Data akuntansi dalam kondisi tertata baik",
+          "Cakupan koreksi fiskal umum",
+          "Tidak termasuk dokumentasi TP, Tax Treaty, rekonstruksi persediaan/aset tetap berskala besar, atau telaah khusus lainnya"
+        ],
+        "storage": {
+          "allowance": "10GB / tahun buku",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Tutup Buku Tahunan Badan Umum PPh25 adalah tutup buku standar berbasis omzet dan volume pekerjaan. Berlaku untuk badan dengan omzet tahunan maksimal Rp 25B, transaksi tahunan maksimal 1.000, karyawan maksimal 100 orang, data akuntansi yang tertata baik, dan cakupan koreksi fiskal umum. Badan yang tidak termasuk UMKM Final Tax atau yang dikenakan PPh25 juga dinilai berdasarkan kriteria ini."
       },
       {
         "id": "annual-complex",
-        "group": "Rekonsiliasi Tahunan Badan",
-        "badge": "Bayar Sekali",
-        "typeLabel": "Rekonsiliasi Tahunan Struktur Kompleks",
+        "group": "Tutup Buku Tahunan Badan",
+        "badge": "one-time prepaid",
+        "typeLabel": "Tutup Buku Tahunan Struktur Kompleks",
         "price": "Rp 15,000,000",
-        "description": "Badan dengan kepemilikan asing, hubungan istimewa, transaksi luar negeri, atau volume transaksi besar",
+        "description": "Badan dengan omzet besar, volume transaksi tinggi, atau data yang sulit dirapikan",
         "meta": [
-          "Dibayar sekali di muka",
-          "Dapat dipilih terpisah dari manajemen bulanan",
+          "Prabayar sekali",
+          "Dapat dipilih terpisah dari pengelolaan bulanan",
           "Berdasarkan SPT Badan"
         ],
         "items": [
-          "Seluruh layanan rekonsiliasi PPh25",
-          "Telaah kondisi TP",
-          "Telaah transaksi luar negeri",
-          "Laporan risiko berbasis AI",
-          "Pemrosesan prioritas"
+          "Seluruh layanan Tutup Buku Tahunan Badan Umum PPh25",
+          "Pengorganisasian data transaksi massal",
+          "Telaah persediaan kompleks, aset tetap, dan transaksi valuta asing",
+          "Dukungan rekonstruksi data akuntansi tidak lengkap",
+          "Telaah TP, PPh26, dan Tax Treaty terpisah jika diperlukan",
+          "Laporan risiko AI",
+          "Prioritas penanganan"
         ],
         "criteria": [
-          "Pemegang saham asing atau transaksi luar negeri",
-          "Terdapat transaksi hubungan istimewa",
-          "Perlu telaah PPh26 / DGT Form / Tax Treaty"
-        ]
+          "Berlaku jika memenuhi salah satu kondisi berikut",
+          "Omzet tahunan di atas Rp 25B",
+          "Transaksi tahunan lebih dari 1.000",
+          "Karyawan lebih dari 100 orang",
+          "Memiliki beberapa lokasi usaha, beberapa proyek, atau beberapa KBLI",
+          "Persediaan, harga pokok, aset tetap, atau transaksi valuta asing yang kompleks",
+          "Data akuntansi tidak lengkap sehingga perlu rekonstruksi laporan keuangan",
+          "Memerlukan telaah khusus seperti TP, PPh26, DGT Form, atau Tax Treaty"
+        ],
+        "storage": {
+          "allowance": "30GB / tahun buku",
+          "retentionCopy": "Bukti laporan inti seperti ID Billing, NTPN, BPE, riwayat pelaporan, hasil parsing AI, riwayat penetapan kode pajak, dll. disimpan secara default.",
+          "rawFileCopy": "File asli yang diunggah pelanggan disimpan dalam batas kuota penyimpanan yang tersedia. File asli mencakup invoice, Faktur Pajak, foto struk, payroll Excel, kontrak, rekening koran, data pembelian/penjualan massal, dll.",
+          "overage": "Jika melebihi kuota: Active Storage Rp 50,000 / 10GB / bulan · Archive Storage Rp 250,000 / 10GB / tahun",
+          "alertPolicy": "Notifikasi dikirim saat mencapai 80%, dan saat mencapai 100% Anda akan diarahkan untuk membeli ruang penyimpanan tambahan, beralih ke Archive, atau mengunduh lalu menghapus file asli. Unggahan sementara dapat diizinkan untuk dokumen yang dibutuhkan menjelang batas waktu pelaporan."
+        },
+        "info": "Tutup Buku Tahunan Struktur Kompleks dinilai bukan dari faktor luar negeri semata, melainkan dari omzet, volume transaksi, jumlah karyawan, tingkat kesulitan penataan data, atau kebutuhan telaah khusus. Berlaku jika memenuhi salah satu kondisi berikut: omzet tahunan di atas Rp 25B, transaksi tahunan lebih dari 1.000, karyawan lebih dari 100 orang, beberapa lokasi usaha, persediaan/aset tetap/transaksi valuta asing yang kompleks, rekonstruksi data akuntansi, atau kebutuhan telaah TP/PPh26/Tax Treaty."
       }
     ],
     "text": {
@@ -2484,12 +2814,12 @@
       "login": "Masuk",
       "viewPricing": "Lihat Paket Harga",
       "chips": "Indonesia Tax Filing Automation",
-      "heroTop": "Laporan pajak yang rumit,",
-      "heroMain": "cukup unggah dokumennya.",
-      "heroSub": "Unggah dokumen → AI tentukan kode pajak → Siap lapor",
-      "heroDesc": "Tidak perlu menyesuaikan invoice, Faktur Pajak, kwitansi, data gaji, atau kontrak ke format baru. AI membaca data yang dibutuhkan dan merangkum kode pemotongan PPh 21·23·4(2)·26 beserta risiko perpajakannya.",
-      "trustBaseTitle": "Dalam pelaporan pajak, standar sama pentingnya dengan otomasi",
-      "trustBaseDesc": "AI Pajak dibangun berdasarkan standar operasional perpajakan Indonesia dari Jakarta Tax Consulting — mulai dari pengiriman dokumen, penentuan kode pajak, hingga pengelolaan bukti pembayaran dan pelaporan dalam satu alur.",
+      "heroTop": "Urusan pajak yang rumit,",
+      "heroMain": "cukup upload, selesai.",
+      "heroSub": "Upload dokumen → AI tentukan kode pajak → Siap lapor",
+      "heroDesc": "Tidak perlu menyesuaikan invoice, Faktur Pajak, kwitansi, data gaji, atau kontrak ke format baru. AI membaca data yang dibutuhkan dan merangkum kode PPh 21·23·4(2)·26 serta risiko perpajakan sekaligus.",
+      "trustBaseTitle": "Dalam pelaporan pajak, standar sama pentingnya dengan otomatisasi",
+      "trustBaseDesc": "AI Pajak dibangun berdasarkan standar operasional perpajakan Indonesia dari Jakarta Tax Consulting, mulai dari pengiriman dokumen, penentuan kode pajak, hingga pengelolaan bukti pembayaran dan pelaporan dalam satu alur.",
       "trustIndicators": [
         {
           "title": "JTC Tax Workflow",
@@ -2505,7 +2835,7 @@
         },
         {
           "title": "Secure Tax Data",
-          "desc": "Enkripsi penyimpanan NPWP · NIK · Faktur Pajak · data gaji"
+          "desc": "Penyimpanan terenkripsi untuk NPWP · NIK · Faktur Pajak · data gaji"
         }
       ],
       "footer": {
@@ -2528,52 +2858,52 @@
       "next": "Langkah Berikutnya",
       "personas": {
         "personal": {
-          "label": "Individu",
+          "label": "Klien Individu",
           "icon": "👤",
           "title": "Personal Annual Filing",
-          "subtitle": "Pelaporan tahunan individu dengan A1/A2, kwitansi, dan data penghasilan — tanpa perlu diinput ulang",
+          "subtitle": "Pelaporan tahunan individu tanpa perlu memasukkan ulang A1/A2, kwitansi, dan data penghasilan",
           "readiness": 72,
           "missing": [
             "Bukti potong A1/A2",
-            "Saldo harta dan kewajiban per 31 Desember",
-            "Dokumen penghasilan lainnya"
+            "Saldo harta dan utang per 31 Desember",
+            "Data penghasilan lainnya"
           ],
-          "next": "Kami akan memeriksa penghasilan, pengurangan, dan perubahan harta, lalu menginformasikan kemungkinan kurang bayar atau lebih bayar."
+          "next": "Kami akan memeriksa perubahan penghasilan, pengurang, dan harta, lalu memberikan estimasi kurang bayar atau lebih bayar."
         },
         "corporate": {
-          "label": "Badan",
+          "label": "Klien Badan",
           "icon": "🏢",
           "title": "Corporate Monthly & Annual Filing",
-          "subtitle": "Dashboard perpajakan badan yang memproses invoice, Faktur Pajak, kwitansi, payroll, dan kontrak tanpa perlu dirapikan ulang",
+          "subtitle": "Dashboard perpajakan badan yang memungkinkan Anda mengirim invoice, Faktur Pajak, kwitansi, payroll, dan kontrak tanpa perlu merapikannya ulang",
           "readiness": 58,
           "missing": [
-            "Faktur masukan PPN",
-            "Sebagian kontrak pajak witholding",
+            "Faktur Pajak Masukan PPN",
+            "Sebagian kontrak withholding tax",
             "PPh21 payroll template"
           ],
-          "next": "Kami menganalisis karakter transaksi pada invoice dan kontrak yang diunggah untuk memandu pemilihan jenis PPh dan kode pajak yang sesuai."
+          "next": "AI akan menganalisis sifat transaksi dari invoice dan kontrak yang diunggah, lalu memandu pemilihan jenis dan kode PPh yang sesuai."
         }
       },
       "cards": [
         [
-          "Penentuan Kode Pajak Witholding oleh AI",
-          "Menganalisis karakter transaksi dan menentukan jenis PPh serta kode pajak yang dibutuhkan untuk ID Billing secara otomatis"
+          "AI Penentuan Kode Withholding Tax",
+          "Menganalisis sifat transaksi untuk menentukan jenis PPh dan kode pajak yang dibutuhkan dalam ID Billing secara otomatis"
         ],
         [
           "Alur Khusus Individu & Badan",
-          "Dokumen yang diperlukan dan prosedur pelaporan dipisahkan sesuai jenis wajib pajak"
+          "Dokumen yang diperlukan dan prosedur pelaporan dipisah sesuai jenis klien"
         ],
         [
-          "AI Tax Insight Perpajakan",
-          "Memberikan panduan risiko pajak dan langkah berikutnya berdasarkan data yang diunggah dan data pelaporan"
+          "AI Tax Insight",
+          "Memberikan panduan risiko perpajakan dan langkah berikutnya berdasarkan data yang dikirim dan riwayat pelaporan"
         ],
         [
-          "Unggah Dokumen Apa Adanya",
-          "Tanpa mengisi template baru — AI mem-parsing data langsung dari format asli, foto, atau PDF"
+          "Upload Dokumen Apa Adanya",
+          "Tanpa mengisi template — AI membaca dan mem-parsing data dari format asli, foto, atau PDF"
         ]
       ],
-      "trustTitle": "Dokumen pajak sensitif Anda disimpan dengan enkripsi",
-      "trustDesc": "NPWP, NIK, data gaji, Faktur Pajak, kontrak, dan dokumen sensitif lainnya dirancang untuk disimpan dengan enkripsi. Data hanya digunakan untuk keperluan persiapan pelaporan dan pemberian insight perpajakan per klien.",
+      "trustTitle": "Data perpajakan sensitif Anda disimpan dengan enkripsi",
+      "trustDesc": "Data sensitif seperti NPWP, NIK, data gaji, Faktur Pajak, dan kontrak dirancang untuk disimpan secara terenkripsi. Data hanya digunakan untuk keperluan persiapan pelaporan dan pemberian tax insight per klien.",
       "trustItems": [
         "Encrypted data storage",
         "Access-controlled workflow",
@@ -2581,69 +2911,69 @@
       ],
       "coreDiff": "Keunggulan Utama",
       "advisoryKicker": "AI Tax Advisory",
-      "taxTitle": "Akurasi ID Billing ditentukan oleh ketepatan kode pajak witholding.",
-      "taxDesc": "Platform perpajakan online yang ada umumnya menyediakan fitur penerbitan e-Billing, namun pengguna masih harus menentukan sendiri jenis PPh dan kode pajak yang tepat untuk setiap transaksi. AI Pajak menganalisis invoice, kontrak, informasi mitra bisnis, dan uraian jasa untuk menentukan kode pajak witholding yang dibutuhkan dalam ID Billing.",
+      "taxTitle": "Akurasi ID Billing ditentukan oleh kode withholding tax yang tepat.",
+      "taxDesc": "Platform perpajakan online yang ada saat ini umumnya menyediakan fitur penerbitan e-Billing, namun pengguna masih harus menentukan sendiri jenis PPh dan kode pajak yang sesuai untuk setiap transaksi. AI Pajak menganalisis invoice, kontrak, informasi rekanan, dan jenis layanan untuk menentukan kode withholding tax yang dibutuhkan dalam ID Billing.",
       "taxCards": [
         [
-          "Analisis Karakter Transaksi",
-          "Mengklasifikasikan sifat pembayaran: jasa, sewa, bunga, dividen, royalti, konstruksi, dan lainnya"
+          "Analisis Sifat Transaksi",
+          "Mengklasifikasikan jenis pembayaran: jasa, sewa, bunga, dividen, royalti, konstruksi, dll."
         ],
         [
           "Penentuan Jenis PPh",
-          "Membedakan jenis yang berlaku: PPh 4(2), 15, 22, 23, 26, dan lainnya"
+          "Membedakan jenis yang berlaku: PPh 4(2), 15, 22, 23, 26, dll."
         ],
         [
           "Pencocokan Kode Pajak",
-          "Menyiapkan nilai tax type / deposit type yang dibutuhkan untuk penerbitan ID Billing"
+          "Menyusun nilai tax type / deposit type yang dibutuhkan untuk penerbitan ID Billing"
         ],
         [
-          "Pemisahan Item yang Perlu Diperiksa",
-          "Transaksi yang tidak jelas ditandai secara terpisah untuk mengurangi risiko kesalahan input kode"
+          "Pemisahan Item yang Perlu Dikonfirmasi",
+          "Transaksi yang tidak jelas ditandai tersendiri untuk mengurangi risiko input kode yang salah"
         ]
       ],
-      "advisoryTitle": "Semakin banyak data pelaporan terkumpul, AI semakin cepat menginformasikan tindakan pajak yang perlu diambil.",
-      "advisoryDesc": "Berdasarkan dokumen yang dikirimkan klien dan riwayat pelaporan, AI Pajak tidak hanya menghitung — tetapi juga mendukung pengambilan keputusan perpajakan. Kami menginformasikan perubahan metode pembayaran PPh badan, waktu pengajuan PKP, kejanggalan perolehan aset dibanding penghasilan, serta kebutuhan review transaksi luar negeri dan Tax Treaty secara personal per klien.",
+      "advisoryTitle": "Semakin banyak data laporan terkumpul, AI semakin proaktif memberi tahu langkah pajak yang Anda butuhkan.",
+      "advisoryDesc": "Berdasarkan dokumen yang dikirimkan dan riwayat pelaporan, AI Pajak tidak hanya menghitung — tetapi juga mendukung pengambilan keputusan perpajakan. Kami memberikan panduan per klien mengenai perubahan metode pembayaran PPh badan, waktu pengajuan PKP, anomali perolehan aset dibanding pendapatan, serta kebutuhan review transaksi luar negeri dan Tax Treaty.",
       "advisoryCards": [
         [
           "Metode Pembayaran PPh Badan",
-          "Panduan kapan dan syarat beralih dari UMKM Final Tax ke PPh25"
+          "Panduan kapan dan dengan syarat apa harus beralih dari UMKM Final Tax ke PPh25"
         ],
         [
           "Notifikasi Pengajuan PKP",
-          "Pemberitahuan dini waktu pengajuan PKP berdasarkan tren omzet"
+          "Pemberitahuan dini mengenai waktu yang tepat untuk mengajukan PKP berdasarkan tren omzet"
         ],
         [
-          "Deteksi Kenaikan Aset Tidak Wajar",
-          "Menampilkan sinyal risiko jika perolehan aset tidak proporsional dengan penghasilan yang dilaporkan"
+          "Deteksi Anomali Kenaikan Aset",
+          "Tanda peringatan risiko jika perolehan aset tidak sebanding dengan penghasilan yang dilaporkan"
         ],
         [
           "Pemeriksaan Tax Treaty",
-          "Panduan kemungkinan penerapan transaksi luar negeri, PPh26, DGT Form, dan perjanjian pajak"
+          "Panduan mengenai transaksi luar negeri, PPh26, DGT Form, dan kemungkinan penerapan tax treaty"
         ]
       ],
       "serviceFlow": "Alur Layanan",
-      "productTitle": "Cukup unggah, AI yang merapikan data pelaporan Anda",
-      "productDesc": "Tidak perlu memasukkan ulang data ke template terpisah. Cukup kirimkan invoice, Faktur Pajak, kwitansi, dan data gaji dalam format yang biasa Anda gunakan — atau foto langsung — dan AI akan membaca serta menyusunnya menjadi data siap lapor.",
+      "productTitle": "Cukup upload, AI yang merapikan data laporan Anda",
+      "productDesc": "Tidak perlu memasukkan ulang data ke template tertentu. Cukup kirimkan invoice, Faktur Pajak, kwitansi, dan data gaji dalam format aslinya atau foto, maka AI akan membaca data yang dibutuhkan dan menyusunnya menjadi data siap lapor.",
       "moduleStep": "Tahapan Layanan",
       "coreGuide": "Panduan Utama",
       "customerView": "Yang Dilihat Klien",
       "outputs": "Hasil yang Diberikan",
-      "requiredDocs": "Dokumen yang Dapat Dikirimkan",
+      "requiredDocs": "Dokumen yang Dapat Dikirim",
       "startKicker": "Upload-ready documents",
-      "startTitle": "Tidak perlu membuat dokumen baru khusus untuk pelaporan pajak.",
-      "startDesc": "Kirimkan invoice, Faktur Pajak, kwitansi, data gaji, dan bukti potong yang sudah Anda miliki apa adanya. Kwitansi atau faktur pajak fisik bisa difoto langsung, dan AI akan membaca data yang dibutuhkan lalu menyusunnya menjadi data siap lapor.",
+      "startTitle": "Tidak perlu membuat dokumen baru untuk pelaporan pajak.",
+      "startDesc": "Kirimkan saja invoice, Faktur Pajak, kwitansi, data gaji, dan bukti potong yang sudah Anda miliki. Kwitansi kertas atau faktur pajak bisa difoto lalu dikirim, dan AI akan membaca data yang dibutuhkan untuk disusun menjadi data siap lapor.",
       "personalBtn": "Dokumen Wajib Individu",
       "corporateBtn": "Dokumen Wajib Badan",
       "methodTitle": "Cara Pengiriman Dokumen",
       "methods": [
-        "Kirim dalam format asli",
-        "Foto invoice · Faktur · kwitansi",
-        "AI mem-parsing data",
+        "Kirim dokumen dalam format asli",
+        "Foto invoice, Faktur, atau kwitansi",
+        "AI parsing data",
         "Cek hanya item yang perlu dikonfirmasi",
         "Data siap lapor tersusun otomatis"
       ],
       "guide": "Panduan",
-      "startNote": "Tidak perlu menulis ulang dokumen sesuai template terpisah. Untuk transaksi yang dikenai witholding, kami memandu hingga pemilihan kode pajak yang diperlukan untuk ID Billing.",
+      "startNote": "Anda tidak perlu menulis ulang dokumen ke dalam template terpisah. Untuk transaksi yang menjadi objek withholding tax, kami akan memandu hingga pemilihan kode pajak yang dibutuhkan untuk ID Billing.",
       "requirements": {
         "personal": [
           [
@@ -2652,19 +2982,19 @@
           ],
           [
             "Wajib",
-            "A1/A2 atau bukti pemotongan pajak"
+            "A1/A2 atau bukti potong"
           ],
           [
             "Wajib",
-            "Saldo harta dan kewajiban per 31 Desember"
+            "Saldo harta dan utang per 31 Desember"
           ],
           [
             "Jika Ada",
-            "Dokumen penghasilan freelance/usaha/sewa/bunga/dividen"
+            "Data penghasilan freelance/usaha/sewa/bunga/dividen"
           ],
           [
             "Jika Ada",
-            "Dokumen hubungan keluarga dan pengurangan/tanggungan"
+            "Dokumen data keluarga dan pengurang pajak"
           ]
         ],
         "corporate": [
@@ -2674,7 +3004,7 @@
           ],
           [
             "Wajib",
-            "Data penjualan dan pembelian bulanan serta Faktur Pajak"
+            "Data penjualan & pembelian bulanan serta Faktur Pajak"
           ],
           [
             "Wajib",
@@ -2682,7 +3012,7 @@
           ],
           [
             "Jika Ada",
-            "Kontrak dan invoice yang dikenai witholding"
+            "Kontrak dan invoice yang menjadi objek withholding tax"
           ],
           [
             "Jika Ada",
@@ -2691,8 +3021,8 @@
         ]
       },
       "compKicker": "Competitive Comparison",
-      "compTitle": "Apa bedanya dengan kantor pajak dan platform perpajakan online yang sudah ada?",
-      "compDesc": "Keunggulan utama AI Pajak adalah kemampuannya menganalisis karakter transaksi witholding dan menentukan jenis PPh serta kode pajak yang dibutuhkan untuk ID Billing.",
+      "compTitle": "Apa bedanya dengan layanan pajak konvensional dan platform perpajakan online",
+      "compDesc": "Keunggulan utama AI Pajak terletak pada kemampuannya menganalisis sifat transaksi withholding tax dan menentukan jenis PPh serta kode pajak yang dibutuhkan untuk ID Billing.",
       "columns": [
         "Kriteria",
         "Kantor Pajak Konvensional",
@@ -2702,75 +3032,78 @@
       "rows": [
         [
           "Posisi Utama",
-          "Jasa kepatuhan pajak — klien mengirim dokumen dan menunggu hasilnya dari tenaga ahli",
-          "Platform berfokus pada pemrosesan e-Filing, e-Billing, e-Faktur, e-Bupot, dan dokumen perpajakan elektronik",
-          "Platform otomasi — klien mengunggah dokumen yang sudah ada, AI membaca data dan menghubungkannya hingga siap lapor"
+          "Jasa konsultan pajak di mana klien mengirim dokumen dan menunggu hasilnya",
+          "Platform yang berfokus pada pemrosesan e-Filing, e-Billing, e-Faktur, e-Bupot, dan dokumen perpajakan elektronik",
+          "Platform otomatisasi di mana AI membaca dokumen yang sudah Anda miliki dan menyambungkannya hingga siap lapor"
         ],
         [
           "Pengalaman Klien",
-          "Dokumen dikirim via WhatsApp, email, atau Excel; progres ditanyakan secara terpisah",
+          "Kirim dokumen via WhatsApp, email, atau Excel, dan tanyakan perkembangannya secara terpisah",
           "Pengguna mengoperasikan sendiri fitur dokumen pajak, pelaporan, dan pembayaran",
-          "Klien mengirimkan dokumen asli atau foto tanpa template khusus, lalu memantau hasil yang dirapikan AI beserta status prosesnya"
+          "Klien cukup mengirim dokumen atau foto tanpa template khusus, lalu mengecek hasil yang telah dirapikan AI beserta status prosesnya"
         ],
         [
-          "Kode Pajak Witholding",
-          "Petugas umumnya menilai isi transaksi dan menentukan secara manual",
-          "Banyak yang mengharuskan pengguna memilih sendiri jenis pajak dan kode setoran",
-          "Menganalisis invoice, kontrak, dan informasi mitra untuk menentukan jenis PPh dan kode pajak ID Billing secara otomatis"
+          "Kode Withholding Tax",
+          "Petugas umumnya menentukan kode secara manual berdasarkan isi transaksi",
+          "Pengguna umumnya harus memilih sendiri jenis pajak dan kode pembayaran yang sesuai",
+          "Menganalisis invoice, kontrak, dan informasi rekanan untuk menentukan jenis PPh dan kode pajak ID Billing secara otomatis"
         ],
         [
-          "AI Tax Insight Perpajakan",
+          "AI Tax Insight",
           "Kualitas panduan bergantung pada pengalaman petugas yang menangani",
-          "Fitur pelaporan dan pembayaran tersedia, namun panduan keputusan pajak per klien masih terbatas",
-          "Memberikan panduan perubahan metode pembayaran, pengajuan PKP, risiko kenaikan aset, dan kebutuhan review Tax Treaty"
+          "Menyediakan fitur pelaporan dan pembayaran, namun panduan keputusan pajak per klien masih terbatas",
+          "Memberikan panduan mengenai perubahan metode pembayaran, pengajuan PKP, risiko kenaikan aset, dan kebutuhan review Tax Treaty"
         ],
         [
           "Keunggulan Pembeda",
-          "Keahlian tenaga ahli dan pengalaman layanan kepatuhan pajak",
-          "Kemudahan pemrosesan pelaporan dan pembayaran elektronik — namun penentuan kode pajak bergantung pada input dan pemahaman pengguna",
-          "Parsing dokumen, penentuan kode pajak witholding, AI tax insight, tingkat kesiapan lapor, dan manajemen bukti"
+          "Penjelasan dari ahli dan pengalaman layanan konsultasi pajak",
+          "Kemudahan pemrosesan pelaporan dan pembayaran elektronik, namun penentuan kode pajak bergantung pada input dan pemahaman pengguna",
+          "Parsing dokumen, penentuan kode withholding tax, AI tax insight, kesiapan lapor, dan manajemen bukti"
         ]
       ],
       "pricingKicker": "Informasi Harga",
-      "pricingTitle": "Pilih paket untuk langsung melihat detail cakupannya",
-      "pricingDesc": "Pelaporan individu dipandu berdasarkan kompleksitas pelaporan, bukan nama formulir. Klik layanan yang Anda butuhkan — pajak individu, manajemen bulanan badan, atau tahunan badan — untuk melihat harga, kriteria, dan cakupannya secara lengkap.",
-      "pricingListTitle": "Jenis Paket",
+      "pricingTitle": "Pilih paket untuk langsung melihat cakupan detailnya",
+      "pricingDesc": "Pelaporan individu dijelaskan berdasarkan tingkat kompleksitas, bukan nama formulir. Klik layanan yang Anda butuhkan — pajak individu, pengelolaan bulanan badan, atau perhitungan tahunan badan — untuk melihat harga, kriteria, dan cakupan layanannya secara lengkap.",
+      "pricingListTitle": "Daftar Paket",
       "chooseService": "Pilih layanan yang Anda butuhkan",
       "pricingListDesc": "Klik untuk melihat detail di sebelah kanan.",
       "selectedPlan": "Paket yang Dipilih",
       "included": "Cakupan Layanan",
       "criteria": "Kriteria Penerapan",
-      "pricingInfo": "Harga yang ditampilkan adalah tarif dasar. Cakupan pelaporan aktual akan dikonfirmasi berdasarkan dokumen yang dikirimkan, volume transaksi, serta ada tidaknya transaksi luar negeri atau hubungan istimewa.",
-      "pricingButton": "Lihat dokumen yang dapat dikirimkan →",
+      "pricingInfo": "Harga yang ditampilkan adalah tarif dasar. Cakupan pelaporan aktual akan dikonfirmasi berdasarkan dokumen yang dikirim, volume transaksi, ada tidaknya transaksi luar negeri, dan hubungan istimewa.",
+      "pricingButton": "Lihat dokumen yang bisa dikirim →",
+      "storageHeading": "Penyimpanan & Pengarsipan Bukti",
+      "storageAllowanceLabel": "Kapasitas file asli yang disertakan",
+      "storageOverageLabel": "Jika melebihi batas",
       "groups": [
         "Pajak Individu",
-        "Manajemen Bulanan Badan",
-        "Tahunan Badan"
+        "Pengelolaan Bulanan Badan",
+        "Perhitungan Tahunan Badan"
       ],
       "faqs": [
         [
           "Dokumen apa yang dibutuhkan untuk memulai persiapan pelaporan?",
-          "Untuk individu: NIK/NPWP, A1/A2, data keluarga, dan dokumen harta serta kewajiban. Untuk badan: NPWP, KBLI, status PKP, data penjualan dan pembelian, data gaji PPh21, invoice/kontrak terkait witholding, dan data PPN."
+          "Untuk klien individu, dokumen dasarnya adalah NIK/NPWP, A1/A2, data keluarga, serta data harta dan utang. Untuk klien badan, yang dibutuhkan antara lain NPWP, KBLI, status PKP, data penjualan dan pembelian, data gaji PPh21, invoice/kontrak terkait withholding tax, dan data PPN."
         ],
         [
-          "Apakah AI Pajak bersaing langsung dengan OnlinePajak atau Klikpajak?",
-          "Tidak sepenuhnya. Platform perpajakan online yang sudah ada unggul dalam fitur e-Filing, e-Billing, e-Faktur, dan e-Bupot. Keunggulan utama AI Pajak adalah kemampuan menganalisis karakter transaksi pada invoice dan kontrak untuk menentukan jenis PPh dan kode pajak ID Billing secara otomatis."
+          "Apakah AI Pajak bersaing langsung dengan OnlinePajak dan Klikpajak?",
+          "Tidak sepenuhnya. Platform perpajakan online yang ada memiliki keunggulan pada fitur e-Filing, e-Billing, e-Faktur, e-Bupot, dan pemrosesan dokumen pajak elektronik. Keunggulan utama AI Pajak adalah kemampuannya menganalisis sifat transaksi dari invoice dan kontrak untuk menentukan jenis withholding tax dan kode pajak ID Billing secara otomatis."
         ],
         [
-          "Apakah harga pelaporan individu berdasarkan formulir 1770SS/1770S/1770?",
-          "Tidak. Pelaporan tahunan individu dipandu dalam satu alur terpadu. Paket individu AI Pajak dibedakan berdasarkan jenis penghasilan, jumlah bukti potong, kompleksitas harta dan kewajiban, serta ada tidaknya penghasilan usaha atau freelance — bukan berdasarkan nama formulir."
+          "Apakah tarif pelaporan individu berdasarkan 1770SS/1770S/1770?",
+          "Tidak. Pelaporan tahunan individu dipandu dalam satu alur yang terintegrasi. Tarif individu AI Pajak ditentukan bukan berdasarkan nama formulir, melainkan berdasarkan jenis penghasilan, jumlah bukti potong, kompleksitas harta dan utang, serta ada tidaknya penghasilan usaha atau freelance."
         ],
         [
-          "Apa saja yang diinformasikan oleh AI Tax Insight?",
-          "Berdasarkan dokumen yang dikirimkan dan data pelaporan, kami menginformasikan kemungkinan perubahan metode pembayaran PPh badan, waktu pengajuan PKP, kejanggalan perolehan aset dibanding penghasilan, serta kebutuhan review transaksi luar negeri dan Tax Treaty."
+          "Informasi apa saja yang diberikan oleh AI Tax Insight?",
+          "Berdasarkan dokumen yang dikirim dan data pelaporan, kami memberikan panduan mengenai kemungkinan perubahan metode pembayaran PPh badan, waktu pengajuan PKP, anomali perolehan aset dibanding penghasilan, serta kebutuhan review transaksi luar negeri dan Tax Treaty."
         ],
         [
-          "Bagaimana penanganan pekerjaan yang tidak termasuk dalam paket?",
-          "Pendampingan pemeriksaan pajak, laporan transfer pricing, analisis hubungan istimewa, dan konsultasi badan multinasional berada di luar cakupan paket dan ditangani dengan penawaran terpisah. Cakupan dalam paket meliputi parsing dokumen, penentuan kode pajak, persiapan pelaporan, dan manajemen bukti."
+          "Bagaimana pekerjaan yang tidak termasuk dalam paket ditangani?",
+          "Pekerjaan seperti pendampingan pemeriksaan pajak, laporan transfer pricing, analisis hubungan istimewa, dan konsultasi badan multinasional berada di luar cakupan paket dan diproses dengan penawaran harga terpisah. Cakupan paket meliputi parsing dokumen, penentuan kode pajak, persiapan pelaporan, dan manajemen bukti."
         ]
       ],
       "finalTitle": "AI Pajak mendampingi Anda dari persiapan dokumen hingga bukti pelaporan selesai.",
-      "finalDesc": "Setelah individu maupun badan menyiapkan dokumen yang diperlukan, AI Pajak akan memberikan panduan yang jelas mengenai status kesiapan lapor dan langkah berikutnya.",
+      "finalDesc": "Setelah klien individu maupun badan menyiapkan dokumen yang dibutuhkan, AI Pajak akan memberikan panduan yang jelas mengenai kesiapan lapor dan langkah berikutnya.",
       "finalButton": "Masuk dan mulai lapor →",
       "footerCompare": "Comparison",
       "footerPricing": "Pricing detail",
@@ -3156,186 +3489,257 @@
       {
         "id": "p-simple",
         "group": "个人税务",
-        "badge": "按件付款",
+        "badge": "按件付费",
         "typeLabel": "Personal Simple（简单申报）",
         "price": "Rp 100.000",
         "vat": "含PPN合计：Rp 111.000",
         "description": "以单一劳动所得为主 · 资料简单的个人",
         "meta": [
           "含PPN合计：Rp 111.000",
-          "按复杂程度计费",
+          "按复杂度区分",
           "个人年度综合申报"
         ],
         "items": [
-          "A1/A2 或预扣税资料自动整理",
-          "基本个人信息及收入资料核查",
-          "应缴/可退税基本说明",
+          "A1/A2 或扣缴资料自动整理",
+          "基本个人信息及所得资料核查",
+          "应缴/可退税基础说明",
           "申报完成凭证管理"
         ],
         "criteria": [
           "以劳动所得为主",
-          "A1/A2 或单份预扣税资料",
-          "无额外经营所得或自由职业所得"
-        ]
+          "A1/A2 或单份扣缴资料",
+          "无额外营业所得或自由职业所得"
+        ],
+        "storage": {
+          "allowance": "500MB / 申报年度",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "个人税务按件付费。提交资料审核后，将根据所得类型、扣缴资料数量、资产与负债复杂度判定为简单／标准／复杂类型。若实际复杂度高于所选类型，将在申报推进前提示补缴差额。"
       },
       {
         "id": "p-standard",
         "group": "个人税务",
-        "badge": "按件付款",
+        "badge": "按件付费",
         "typeLabel": "Personal Standard（标准申报）",
         "price": "Rp 200.000",
         "vat": "含PPN合计：Rp 222.000",
-        "description": "有多项收入、多份预扣税资料及资产/负债录入需求的个人",
+        "description": "需填报多项所得、多份扣缴资料及资产/负债的个人",
         "meta": [
           "含PPN合计：Rp 222.000",
-          "按复杂程度计费",
+          "按复杂度区分",
           "个人年度综合申报"
         ],
         "items": [
-          "多份预扣税资料合并整理",
-          "其他收入、扣除项、资产及负债整理",
-          "家庭信息/PTKP档案核查",
+          "多份扣缴资料合并整理",
+          "其他所得、扣除项、资产及负债整理",
+          "家庭信息 / PTKP 档案核查",
           "申报完成凭证管理"
         ],
         "criteria": [
-          "多雇主或多份预扣税资料",
-          "需核查其他收入或扣除项",
-          "需录入资产与负债"
-        ]
+          "多雇主或多份扣缴资料",
+          "需核查其他所得或扣除项",
+          "需填报资产与负债"
+        ],
+        "storage": {
+          "allowance": "1GB / 申报年度",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "个人税务按件付费。提交资料审核后，将根据所得类型、扣缴资料数量、资产与负债复杂度判定为简单／标准／复杂类型。若实际复杂度高于所选类型，将在申报推进前提示补缴差额。"
       },
       {
         "id": "p-complex",
         "group": "个人税务",
-        "badge": "按件付款",
+        "badge": "按件付费",
         "typeLabel": "Personal Business / Complex",
         "price": "Rp 500.000",
         "vat": "含PPN合计：Rp 555.000",
-        "description": "有自由职业 · 个体经营 · 投资收益 · 复杂资产的个人",
+        "description": "拥有自由职业 · 个体经营 · 投资所得 · 复杂资产的个人",
         "meta": [
           "含PPN合计：Rp 555.000",
-          "按复杂程度计费",
+          "按复杂度区分",
           "个人年度综合申报"
         ],
         "items": [
-          "经营/自由职业收入资料自动整理",
-          "收入、成本及凭证资料分类",
-          "投资收益、租金收入纳入核算",
-          "资产负债变动及风险排查"
+          "经营 / 自由职业所得资料自动整理",
+          "收入、费用及凭证资料分类",
+          "投资所得、租赁所得纳入申报",
+          "资产负债变动及风险核查"
         ],
         "criteria": [
           "自由职业或个体经营所得",
-          "经营相关收入及成本资料",
-          "额外收入或复杂资产"
-        ]
+          "与经营相关的收入及费用资料",
+          "其他所得或复杂资产"
+        ],
+        "storage": {
+          "allowance": "3GB / 申报年度",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "个人税务按件付费。提交资料审核后，将根据所得类型、扣缴资料数量、资产与负债复杂度判定为简单／标准／复杂类型。若实际复杂度高于所选类型，将在申报推进前提示补缴差额。"
       },
       {
         "id": "monthly-umkm",
-        "group": "法人月度管理",
-        "badge": "月度预付",
+        "group": "企业月度管理",
+        "badge": "月付预付",
         "typeLabel": "UMKM 月度管理",
         "price": "Rp 750,000",
-        "description": "小微法人 / 以 Final Tax 为主",
+        "description": "小规模企业 / 以 Final Tax 为主",
         "meta": [
           "预付1个月",
           "预付12个月可享9折优惠",
           "年度结算另计"
         ],
         "items": [
-          "月度申报状态跟踪",
-          "ID Billing 申请",
-          "基础提醒通知",
-          "基础AI风险点评"
+          "月度申报准备状态仪表盘",
+          "PPh Final UMKM 按月营业额计算",
+          "简易 PPh21 薪资核查",
+          "有限扣缴税码判定",
+          "ID Billing 预算值及缴税提醒",
+          "基础 AI 风险点评"
         ],
         "criteria": [
-          "员工5人以下",
-          "每月预扣税交易10笔以下",
-          "每月上传/交易记录50条以下"
-        ]
+          "员工10人以下",
+          "每月扣缴交易10笔以下",
+          "每月上传／交易50笔以下",
+          "需定期申报 PKP/PPN 的企业建议选择 Basic 及以上套餐",
+          "超出标准时，当月将按 Basic 月度管理标准自动调整，已付金额抵扣后仅补缴差额"
+        ],
+        "storage": {
+          "allowance": "2GB / 月",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "每个月度管理套餐均设有包含用量上限。实际员工人数、扣缴交易笔数、月上传／交易笔数超出上限时，当月将自动升级至与实际用量匹配的更高套餐。已付金额予以抵扣，仅补缴差额。超出上限前将通过仪表盘和通知提前告知。"
       },
       {
         "id": "monthly-basic",
-        "group": "法人月度管理",
-        "badge": "月度预付",
+        "group": "企业月度管理",
+        "badge": "月付预付",
         "typeLabel": "Basic 月度管理",
         "price": "Rp 1,500,000",
-        "description": "一般法人基础税务运营",
+        "description": "一般企业基础税务运营",
         "meta": [
           "预付1个月",
           "预付12个月可享9折优惠",
           "年度结算另计"
         ],
         "items": [
-          "PPh21/23/25/PPN 管理",
-          "申报记录/BPE/NTPN 存档",
-          "交易方预扣税判定",
-          "月度税务报告"
+          "PPh21 薪资扣缴管理",
+          "PPh23/4(2)/26 等扣缴税码判定",
+          "PPh25 或 PPh Final 月度缴纳管理",
+          "PPN 进项与销项资料整理",
+          "ID Billing · NTPN · BPE 凭证存档",
+          "标准月度税务报告"
         ],
         "criteria": [
           "员工30人以下",
-          "每月预扣税交易30笔以下",
-          "每月进销项交易300条以下"
-        ]
+          "每月扣缴交易30笔以下",
+          "每月进项／销项交易300笔以下",
+          "一般 PKP 企业基础月度管理标准",
+          "超出标准时，当月将按 Pro 月度管理标准自动调整"
+        ],
+        "storage": {
+          "allowance": "10GB / 月",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "每个月度管理套餐均设有包含用量上限。实际员工人数、扣缴交易笔数、月上传／交易笔数超出上限时，当月将自动升级至与实际用量匹配的更高套餐。已付金额予以抵扣，仅补缴差额。超出上限前将通过仪表盘和通知提前告知。"
       },
       {
         "id": "monthly-pro",
-        "group": "法人月度管理",
-        "badge": "月度预付",
+        "group": "企业月度管理",
+        "badge": "月付预付",
         "typeLabel": "Pro 月度管理",
         "price": "Rp 2,500,000",
-        "description": "强化月度税务运营能力",
+        "description": "强化月度税务运营",
         "meta": [
           "预付1个月",
           "预付12个月可享9折优惠",
           "年度结算另计"
         ],
         "items": [
-          "涵盖 Basic 全部功能",
-          "关联交易条件监控",
-          "AI 异常检测",
-          "高级税务报告",
+          "包含 Basic 全部内容",
+          "大批量薪资及扣缴资料处理",
+          "境外交易 · PPh26 · Tax Treaty 审查信号",
+          "关联方 / TP 条件监控",
+          "AI 异常检测及高级风险点评",
+          "高级月度税务报告",
           "优先处理"
         ],
         "criteria": [
           "员工100人以下",
-          "每月预扣税交易150笔以下",
-          "含境外交易及关联方监控"
-        ]
+          "每月扣缴交易150笔以下",
+          "每月进项／销项交易1,000笔以下",
+          "含境外交易及关联方监控",
+          "超出标准或反复出现大批量交易时适用 Enterprise 标准"
+        ],
+        "storage": {
+          "allowance": "30GB / 月",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "每个月度管理套餐均设有包含用量上限。实际员工人数、扣缴交易笔数、月上传／交易笔数超出上限时，当月将自动升级至与实际用量匹配的更高套餐。已付金额予以抵扣，仅补缴差额。超出上限前将通过仪表盘和通知提前告知。"
       },
       {
         "id": "monthly-enterprise",
-        "group": "法人月度管理",
-        "badge": "月度预付",
+        "group": "企业月度管理",
+        "badge": "月付预付",
         "typeLabel": "Enterprise 定制月度管理",
         "price": "Rp 3,500,000",
-        "description": "大规模 / 定制化运营",
+        "description": "大批量 / 定制化运营",
         "meta": [
           "预付1个月",
           "按用量计费",
           "年度结算另计"
         ],
         "items": [
-          "涵盖 Pro 全部功能",
-          "大批量 payroll / 交易处理",
-          "超量部分按用量计费",
-          "SLA / 优先支持"
+          "包含 Pro 全部内容",
+          "员工超100人的薪资及 PPh21 处理",
+          "每月超150笔扣缴税码判定",
+          "大批量 PPN · 进项 · 销项资料自动分类",
+          "定制报告 / SLA",
+          "超额用量计费及优先支持"
         ],
         "criteria": [
-          "员工超过100人",
-          "每月预扣税交易超过150笔",
-          "需大批量文件自动分类"
-        ]
+          "员工超100人",
+          "每月扣缴交易超150笔",
+          "每月进项／销项交易超1,000笔或需大批量文件自动分类",
+          "拥有多个营业场所、复杂审批流程或需要定制报告的企业"
+        ],
+        "storage": {
+          "allowance": "100GB / 月起",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "每个月度管理套餐均设有包含用量上限。实际员工人数、扣缴交易笔数、月上传／交易笔数超出上限时，当月将自动升级至与实际用量匹配的更高套餐。已付金额予以抵扣，仅补缴差额。超出上限前将通过仪表盘和通知提前告知。"
       },
       {
         "id": "annual-umkm",
-        "group": "法人年度结算",
+        "group": "企业年度结算",
         "badge": "一次性预付",
         "typeLabel": "UMKM 年度结算",
         "price": "Rp 2,500,000",
-        "description": "适用于 Final Tax 0.5% 的法人年度结算",
+        "description": "适用 Final Tax 0.5% 的企业年度结算",
         "meta": [
           "一次性预付",
-          "与月度管理分开选购",
-          "以 SPT Badan 为准"
+          "可与月度管理分开选择",
+          "SPT Badan 标准"
         ],
         "items": [
           "标准财务报表生成",
@@ -3345,59 +3749,96 @@
         ],
         "criteria": [
           "年营业额 Rp 4.8B 以下",
-          "适用 Final Tax 0.5%",
-          "无境外交易及关联方交易"
-        ]
+          "可适用 Final Tax 0.5% 的企业",
+          "一般 UMKM 账簿标准",
+          "无大量库存、固定资产或复杂税务调整"
+        ],
+        "storage": {
+          "allowance": "2GB / 会计年度",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "UMKM 年度结算是标准明确的一次性年度决算及 SPT Badan 申报准备服务。适用于年营业额 Rp 4.8B 以下、可适用 Final Tax 0.5% 且符合一般 UMKM 账簿标准的企业。"
       },
       {
         "id": "annual-pph25",
-        "group": "法人年度结算",
+        "group": "企业年度结算",
         "badge": "一次性预付",
-        "typeLabel": "PPh25 一般法人年度结算",
+        "typeLabel": "PPh25 一般企业年度结算",
         "price": "Rp 7,500,000",
-        "description": "适用于一般企业所得税的标准年度结算",
+        "description": "一般企业所得税标准年度结算",
         "meta": [
           "一次性预付",
-          "与月度管理分开选购",
-          "以 SPT Badan 为准"
+          "可与月度管理分开选择",
+          "SPT Badan 标准"
         ],
         "items": [
           "财务报表生成",
-          "税务调整",
-          "税收抵免",
-          "PPh29/PPh25 计算",
+          "一般税务调整",
+          "税收抵免核查",
+          "PPh29 / PPh25 计算",
           "SPT 草稿生成"
         ],
         "criteria": [
-          "年营业额超过 Rp 4.8B 或 UMKM 资格到期",
-          "年度交易1,000笔以下",
-          "无关联交易定价问题"
-        ]
+          "年营业额 Rp 25B 以下",
+          "不适用 UMKM Final Tax 或适用一般企业所得税（PPh25）的企业",
+          "年交易1,000笔以下",
+          "员工100人以下",
+          "单一法人、单一营业场所或业务结构简单",
+          "会计资料整理状态良好",
+          "一般税务调整范围",
+          "不含 TP 文件化、Tax Treaty、大规模库存及固定资产重构等专项专业审查"
+        ],
+        "storage": {
+          "allowance": "10GB / 会计年度",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "PPh25 一般企业年度结算以营业额和业务量为判定标准。适用于年营业额 Rp 25B 以下、年交易1,000笔以下、员工100人以下、会计资料整理状态良好且属于一般税务调整范围的企业。不适用 UMKM Final Tax 的一般企业或适用 PPh25 的企业均以此标准判定。"
       },
       {
         "id": "annual-complex",
-        "group": "法人年度结算",
+        "group": "企业年度结算",
         "badge": "一次性预付",
-        "typeLabel": "复杂架构年度结算",
+        "typeLabel": "复杂结构年度结算",
         "price": "Rp 15,000,000",
-        "description": "外资企业、关联方交易、境外业务或大批量交易法人",
+        "description": "营业额、交易量及资料整理难度较高的企业",
         "meta": [
           "一次性预付",
-          "与月度管理分开选购",
-          "以 SPT Badan 为准"
+          "可与月度管理分开选择",
+          "SPT Badan 标准"
         ],
         "items": [
-          "涵盖 PPh25 年度结算全部内容",
-          "关联交易定价条件审查",
-          "境外交易审查",
+          "包含 PPh25 一般结算全部内容",
+          "大批量交易数据整理",
+          "复杂库存、固定资产及外币交易审查",
+          "不完整会计资料重构支持",
+          "如需，另行审查 TP · PPh26 · Tax Treaty",
           "AI 风险报告",
           "优先处理"
         ],
         "criteria": [
-          "存在境外股东或境外交易",
-          "存在关联方交易",
-          "需审查 PPh26 / DGT Form / Tax Treaty"
-        ]
+          "以下条件满足任意一项即适用复杂结构年度结算",
+          "年营业额超 Rp 25B",
+          "年交易超1,000笔",
+          "员工超100人",
+          "拥有多个营业场所、多项目或多 KBLI 经营",
+          "库存、成本、固定资产或外币交易整理复杂",
+          "会计资料不完整，需重构财务报表",
+          "需对 TP、PPh26、DGT Form、Tax Treaty 等进行专项专业审查"
+        ],
+        "storage": {
+          "allowance": "30GB / 会计年度",
+          "retentionCopy": "ID Billing、NTPN、BPE、申报历史、AI 解析结果、税码判定历史等核心申报凭证将默认保存。",
+          "rawFileCopy": "客户上传的原始文件将在包含存储空间内保存。原始文件包括 invoice、Faktur Pajak、收据照片、payroll Excel、合同、银行流水、大量采购及销售资料等。",
+          "overage": "超出时：Active Storage Rp 50,000 / 10GB / 月 · Archive Storage Rp 250,000 / 10GB / 年",
+          "alertPolicy": "使用达 80% 时发出提醒，达 100% 时将引导购买额外存储空间、转为 Archive 或下载原始文件后删除。申报截止所需资料可酌情允许临时上传。"
+        },
+        "info": "复杂结构年度结算的判定依据并非是否涉及境外，而是营业额、交易量、员工人数、资料整理难度或是否需要专项专业审查。满足以下任意一项即适用：年营业额超 Rp 25B、年交易超1,000笔、员工超100人、拥有多个营业场所、库存及固定资产或外币交易整理复杂、需重构会计资料，或需对 TP / PPh26 / Tax Treaty 进行专项审查。"
       }
     ],
     "text": {
@@ -3412,10 +3853,10 @@
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "繁琐的税务申报，",
       "heroMain": "上传资料，搞定一切。",
-      "heroSub": "直接上传资料 → AI 判定税务代码 → 申报准备完成",
-      "heroDesc": "无需将 invoice、Faktur Pajak、收据、薪资资料、合同重新套入新表格。AI 自动读取所需数据，并整理 PPh 21·23·4(2)·26 等预扣税代码及税务风险。",
-      "trustBaseTitle": "税务申报，自动化之外更需要专业标准",
-      "trustBaseDesc": "AI Pajak 以 Jakarta Tax Consulting 的印尼税务运营标准为基础，将资料提交、税务代码判定、缴税与申报凭证管理整合为一套完整流程。",
+      "heroSub": "原样上传资料 → AI 判定税务代码 → 申报准备完成",
+      "heroDesc": "发票、Faktur Pajak、收据、薪资资料、合同，无需重新填写新表格。AI 自动读取所需数据，整理 PPh 21·23·4(2)·26 等预扣税代码及税务风险。",
+      "trustBaseTitle": "税务申报，自动化之外，标准同样重要",
+      "trustBaseDesc": "AI Pajak 以 Jakarta Tax Consulting 的印度尼西亚税务运营标准为基础，从资料提交、税务代码判定，到缴税与申报凭证管理，一站式整合为完整流程。",
       "trustIndicators": [
         {
           "title": "JTC Tax Workflow",
@@ -3423,15 +3864,15 @@
         },
         {
           "title": "Withholding Code AI",
-          "desc": "支持 PPh 21 · 23 · 4(2) · 26 税务代码判定"
+          "desc": "支持 PPh 21 · 23 · 4(2) · 26 税务代码智能判定"
         },
         {
           "title": "Evidence Tracking",
-          "desc": "管理 ID Billing · NTPN · BPE 申报凭证记录"
+          "desc": "ID Billing · NTPN · BPE 申报凭证历史管理"
         },
         {
           "title": "Secure Tax Data",
-          "desc": "加密存储 NPWP · NIK · Faktur Pajak · 薪资资料"
+          "desc": "NPWP · NIK · Faktur Pajak · 薪资资料加密存储"
         }
       ],
       "footer": {
@@ -3457,20 +3898,20 @@
           "label": "个人客户",
           "icon": "👤",
           "title": "Personal Annual Filing",
-          "subtitle": "直接提交 A1/A2、收据及收入资料，无需重新录入的个人年度申报",
+          "subtitle": "A1/A2、收据、收入资料无需重新录入，直接提交的个人年度申报",
           "readiness": 72,
           "missing": [
             "A1/A2 预扣税凭证",
             "12月31日基准资产与负债余额",
             "其他收入资料"
           ],
-          "next": "核对收入、扣除及资产变动情况，并告知应缴或可退税金额。"
+          "next": "核实收入、扣除与资产变动情况，并告知应缴或可退税额。"
         },
         "corporate": {
           "label": "企业客户",
           "icon": "🏢",
           "title": "Corporate Monthly & Annual Filing",
-          "subtitle": "直接提交 invoice、Faktur Pajak、收据、payroll、合同，无需重新整理的企业税务仪表盘",
+          "subtitle": "发票、Faktur Pajak、收据、payroll、合同无需重新整理，直接提交的法人税务仪表盘",
           "readiness": 58,
           "missing": [
             "PPN 进项 Faktur",
@@ -3482,24 +3923,24 @@
       },
       "cards": [
         [
-          "AI 预扣税代码判定",
-          "分析交易性质，自动判定 ID Billing 所需的 PPh 类型与税务代码"
+          "AI 预扣税代码智能判定",
+          "分析交易性质，自动判定 ID Billing 所需 PPh 类型与税务代码"
         ],
         [
-          "个人与企业专属流程",
-          "按客户类型分别梳理所需资料与申报步骤"
+          "个人与法人专属流程",
+          "按客户类型拆分所需资料与申报流程"
         ],
         [
           "AI 税务洞察",
-          "基于提交数据与申报数据，提示税务风险及下一步行动"
+          "基于提交数据与申报记录，提示税务风险与下一步操作"
         ],
         [
-          "原始资料直接上传",
-          "无需填写模板，AI 从现有表格、照片、PDF 中自动解析数据"
+          "原样上传资料",
+          "无需填写模板，AI 直接从现有表格、照片、PDF 中解析数据"
         ]
       ],
-      "trustTitle": "敏感税务资料经加密安全存储",
-      "trustDesc": "NPWP、NIK、薪资资料、Faktur Pajak、合同等敏感资料在设计上以加密存储为前提，仅用于申报准备及为客户提供个性化税务洞察。",
+      "trustTitle": "敏感税务资料，加密存储，安心无忧",
+      "trustDesc": "NPWP、NIK、薪资资料、Faktur Pajak、合同等敏感信息均以加密存储为前提进行设计。资料仅用于申报准备及为客户提供专属税务洞察。",
       "trustItems": [
         "Encrypted data storage",
         "Access-controlled workflow",
@@ -3507,8 +3948,8 @@
       ],
       "coreDiff": "核心差异化",
       "advisoryKicker": "AI Tax Advisory",
-      "taxTitle": "ID Billing 的准确性，取决于预扣税代码的正确选择。",
-      "taxDesc": "现有在线税务平台提供 e-Billing 开具功能，但针对每笔交易应填入哪种 PPh 类型与税务代码，往往需要用户自行判断。AI Pajak 通过分析 invoice、合同、交易方信息及服务内容，自动判定 ID Billing 所需的预扣税代码。",
+      "taxTitle": "ID Billing 的准确性，取决于预扣税代码是否正确。",
+      "taxDesc": "现有在线税务平台提供 e-Billing 开票功能，但针对具体交易应填入哪种 PPh 类型和税务代码，往往需要用户自行判断。AI Pajak 通过分析 invoice、合同、交易方信息和服务内容，自动判定 ID Billing 所需的预扣税代码。",
       "taxCards": [
         [
           "交易性质分析",
@@ -3516,31 +3957,31 @@
         ],
         [
           "PPh 类型判定",
-          "区分 PPh 4(2)、15、22、23、26 等可适用类型"
+          "区分 PPh 4(2)、15、22、23、26 等适用类型"
         ],
         [
           "税务代码匹配",
-          "整理 ID Billing 开具所需的 tax type / deposit type 值"
+          "整理 ID Billing 开票所需的 tax type / deposit type 值"
         ],
         [
-          "疑难交易单独标注",
-          "对不明确的交易单独标记，降低代码填写错误风险"
+          "存疑项单独标记",
+          "对不明确交易单独提示，降低错误代码录入风险"
         ]
       ],
-      "advisoryTitle": "申报数据积累越多，AI 越能提前告知您所需的税务行动。",
-      "advisoryDesc": "AI Pajak 基于客户提交的资料与申报历史，超越简单计算，为税务决策提供支持。针对每位客户，就企业所得税缴纳方式变更、PKP 申请时机、收入与资产取得异常、境外交易与 Tax Treaty 审查必要性逐一提示。",
+      "advisoryTitle": "申报数据越积越多，AI 越能提前告知您需要采取的税务行动。",
+      "advisoryDesc": "AI Pajak 基于客户提交的资料与申报历史，超越简单计算，为税务决策提供支持。针对企业所得税缴纳方式变更、PKP 申请时机、收入与资产取得异常、境外交易与 Tax Treaty 审查需求，逐一为客户提供个性化提示。",
       "advisoryCards": [
         [
           "企业所得税缴纳方式",
-          "提示从 UMKM Final Tax 切换至 PPh25 的时机与条件"
+          "告知从 UMKM Final Tax 转换为 PPh25 的时机与条件"
         ],
         [
           "PKP 申请提醒",
-          "根据营收趋势提前告知 PKP 申请所需时机"
+          "根据营业额趋势，提前提示 PKP 申请所需时机"
         ],
         [
-          "资产异常增长检测",
-          "当申报收入与资产取得比例异常时发出风险预警"
+          "资产增长异常检测",
+          "申报收入与资产取得明显不符时，发出风险预警"
         ],
         [
           "Tax Treaty 核查",
@@ -3548,40 +3989,40 @@
         ]
       ],
       "serviceFlow": "服务流程",
-      "productTitle": "直接上传，AI 整理申报数据",
-      "productDesc": "无需按照专门模板重新录入。将 invoice、Faktur Pajak、收据、薪资资料以原有格式直接提交或拍照上传，AI 自动读取所需数据并整理为申报准备数据。",
+      "productTitle": "直接上传，AI 自动整理申报数据",
+      "productDesc": "无需按额外模板重新录入。将发票、Faktur Pajak、收据、薪资资料以现有形式直接提交或拍照上传，AI 自动读取所需数据并整理为申报准备数据。",
       "moduleStep": "服务步骤",
       "coreGuide": "核心说明",
-      "customerView": "客户可查看的内容",
-      "outputs": "提供的结果",
-      "requiredDocs": "可提交的资料",
+      "customerView": "客户查看内容",
+      "outputs": "提供的成果",
+      "requiredDocs": "可提交资料",
       "startKicker": "Upload-ready documents",
-      "startTitle": "无需为税务申报重新准备新资料。",
-      "startDesc": "直接提交您现有的 invoice、Faktur Pajak、收据、薪资资料及预扣税资料。纸质收据或税务单据可拍照提交，AI 自动读取数据并整理为申报准备数据。",
+      "startTitle": "无需重新制作税务申报专用资料。",
+      "startDesc": "直接提交您已有的发票、Faktur Pajak、收据、薪资资料及预扣税凭证。纸质收据或税务单据可拍照上传，AI 自动读取所需数据并整理为申报准备数据。",
       "personalBtn": "个人必备资料",
-      "corporateBtn": "企业必备资料",
+      "corporateBtn": "法人必备资料",
       "methodTitle": "资料提交方式",
       "methods": [
-        "以原有格式直接提交",
-        "拍照上传 invoice·Faktur·收据",
+        "现有表格原样提交",
+        "发票·Faktur·收据拍照上传",
         "AI 数据解析",
-        "仅核查待确认项目",
-        "自动整理申报准备数据"
+        "仅核查存疑项目",
+        "申报准备数据自动整理"
       ],
       "guide": "说明",
-      "startNote": "无需将资料重新套入专用模板。预扣税相关交易将引导您完成 ID Billing 所需税务代码的选择。",
+      "startNote": "无需将资料重新整理至额外模板。预扣税相关交易将引导您完成 ID Billing 所需税务代码选择。",
       "requirements": {
         "personal": [
           [
-            "必填",
+            "Wajib",
             "NIK/NPWP、姓名、地址、联系方式"
           ],
           [
-            "必填",
+            "Wajib",
             "A1/A2 或预扣税凭证"
           ],
           [
-            "必填",
+            "Wajib",
             "12月31日基准资产与负债余额"
           ],
           [
@@ -3595,15 +4036,15 @@
         ],
         "corporate": [
           [
-            "必填",
+            "Wajib",
             "NPWP、KBLI、PKP 状态、经营类型"
           ],
           [
-            "必填",
-            "月度销项与进项资料及 Faktur Pajak"
+            "Wajib",
+            "月度销售与采购资料及 Faktur Pajak"
           ],
           [
-            "必填",
+            "Wajib",
             "Payroll template 及各员工 PPh21 资料"
           ],
           [
@@ -3617,8 +4058,8 @@
         ]
       },
       "compKicker": "Competitive Comparison",
-      "compTitle": "与传统税务服务及在线税务平台有何不同",
-      "compDesc": "AI Pajak 的核心差异在于：分析预扣税交易的性质，自动判定 ID Billing 所需的 PPh 类型与税务代码。",
+      "compTitle": "与传统税务服务和在线税务平台有何不同",
+      "compDesc": "AI Pajak 的核心差异在于：分析预扣税交易性质，自动判定 ID Billing 所需的 PPh 类型与税务代码。",
       "columns": [
         "对比维度",
         "传统税务事务所",
@@ -3628,39 +4069,39 @@
       "rows": [
         [
           "核心定位",
-          "将资料发给专家、等待结果的税务代理服务",
-          "以 e-Filing、e-Billing、e-Faktur、e-Bupot 等申报、缴税、电子税务文件处理为核心的平台",
-          "客户直接上传现有资料，AI 读取数据并衔接申报准备的自动化平台"
+          "将资料发给专家、等待结果的税务代理模式",
+          "以 e-Filing、e-Billing、e-Faktur、e-Bupot 等申报、缴税、税务单据处理为核心的平台",
+          "客户原样上传已有资料，AI 读取所需数据并衔接申报准备的自动化平台"
         ],
         [
           "客户体验",
-          "通过 WhatsApp、邮件、Excel 传递资料，进度需单独询问",
-          "用户自行操作税务文件、申报、缴税等功能",
-          "客户无需额外模板，提交现有资料或拍照件，即可查看 AI 整理结果与进度"
+          "通过 WhatsApp、邮件、Excel 传递资料，进度需另行询问",
+          "用户需自行操作税务单据、申报、缴税等功能",
+          "客户无需额外模板，提交现有资料或拍照件，查看 AI 整理结果与进度状态"
         ],
         [
           "预扣税代码",
-          "负责人查看交易内容后人工判断，多为手动处理",
-          "用户需自行选择税务类型与缴款代码的结构居多",
-          "分析 invoice、合同、交易方信息，自动判定 ID Billing 所需的 PPh 类型与税务代码"
+          "经办人查看交易内容后人工判断，依赖个人经验",
+          "用户需自行选择税种和缴款代码的结构居多",
+          "分析 invoice、合同、交易方信息，自动判定 ID Billing 所需 PPh 类型与税务代码"
         ],
         [
           "AI 税务洞察",
-          "指导水平因负责人经验而异",
-          "提供申报与缴税功能，但针对客户个性化税务决策的指导有限",
-          "提示缴税方式切换、PKP 申请、资产增长风险及 Tax Treaty 审查必要性"
+          "指导水平因经办人经验而异",
+          "提供申报与缴税功能，但针对个别客户的税务决策指引有限",
+          "提示缴税方式转换、PKP 申请、资产增长风险及 Tax Treaty 审查需求"
         ],
         [
           "差异化亮点",
-          "专家说明与税务代理经验",
-          "电子申报与缴税处理的便利性，但税务代码判断依赖用户的输入与理解",
-          "资料解析、预扣税代码判定、AI 税务洞察、申报准备度、凭证管理"
+          "专家讲解与税务代理经验",
+          "电子申报与缴税处理便捷，但税务代码判断依赖用户输入与理解",
+          "资料解析、预扣税代码判定、AI 税务洞察、申报准备进度、凭证管理"
         ]
       ],
       "pricingKicker": "套餐说明",
       "pricingTitle": "选择套餐，立即查看详细服务范围",
-      "pricingDesc": "个人申报以申报复杂度为标准，而非表格名称。点击个人税务、企业月度管理或企业年度结算，即可查看价格、适用标准及包含内容。",
-      "pricingListTitle": "套餐类型",
+      "pricingDesc": "个人申报按复杂程度而非表格名称进行说明。点击个人税务、法人月度管理或法人年度结算，即可查看价格、适用标准及包含内容。",
+      "pricingListTitle": "套餐种类",
       "chooseService": "请选择所需服务",
       "pricingListDesc": "点击后右侧将显示详细内容。",
       "selectedPlan": "已选套餐",
@@ -3668,35 +4109,38 @@
       "criteria": "适用标准",
       "pricingInfo": "显示金额为基础费用。实际申报范围将根据提交资料、交易量、境外交易及关联方情况最终确认。",
       "pricingButton": "查看可提交资料 →",
+      "storageHeading": "存储空间及凭证保管",
+      "storageAllowanceLabel": "含原始文件存储容量",
+      "storageOverageLabel": "超出后",
       "groups": [
         "个人税务",
-        "企业月度管理",
-        "企业年度结算"
+        "法人月度管理",
+        "法人年度结算"
       ],
       "faqs": [
         [
-          "开始申报准备需要哪些资料？",
-          "个人客户基本需要 NIK/NPWP、A1/A2、家庭信息及资产负债资料。企业客户需要 NPWP、KBLI、PKP 状态、销项与进项资料、PPh21 薪资资料、预扣税相关 invoice/合同及 PPN 资料等。"
+          "开始准备申报需要哪些资料？",
+          "个人客户基本需要 NIK/NPWP、A1/A2、家庭信息、资产与负债资料。法人客户需要 NPWP、KBLI、PKP 状态、销售与采购资料、PPh21 薪资资料、预扣税相关 invoice/合同、PPN 资料等。"
         ],
         [
           "与 OnlinePajak、Klikpajak 等平台是直接竞争关系吗？",
-          "定位并不完全相同。现有在线税务平台的强项在于 e-Filing、e-Billing、e-Faktur、e-Bupot 等申报、缴税及电子税务文件功能。AI Pajak 的核心差异在于分析 invoice 与合同的交易性质，自动判定预扣税类型与 ID Billing 税务代码。"
+          "定位并不完全相同。现有在线税务平台的优势在于 e-Filing、e-Billing、e-Faktur、e-Bupot 等申报、缴税及电子税务单据功能。AI Pajak 的核心差异在于分析 invoice 和合同的交易性质，自动判定预扣税类型与 ID Billing 税务代码。"
         ],
         [
-          "个人申报费用是以 1770SS/1770S/1770 为标准吗？",
-          "不是。个人年度申报以统一流程为标准。AI Pajak 的个人套餐不以表格名称区分，而是以收入类型、预扣税凭证数量、资产负债复杂度及是否有经营/自由职业收入为依据。"
+          "个人申报费用是以 1770SS/1770S/1770 为基准吗？",
+          "不是。个人年度申报以统一流程为基准进行说明。AI Pajak 的个人套餐不以表格名称区分，而是根据收入类型、预扣税凭证数量、资产与负债复杂程度及是否有经营/自由职业收入来划分。"
         ],
         [
           "AI 税务洞察会提供哪些内容？",
-          "基于提交资料与申报数据，提示企业所得税缴纳方式变更可能性、PKP 申请时机、收入与资产取得异常，以及境外交易与 Tax Treaty 审查必要性等。"
+          "基于提交资料与申报数据，提示企业所得税缴纳方式变更可能性、PKP 申请时机、收入与资产取得异常，以及境外交易与 Tax Treaty 审查需求等。"
         ],
         [
-          "套餐范围外的业务如何处理？",
-          "税务稽查应对、转让定价报告、关联方分析、跨国企业咨询等不在套餐范围内，需单独报价处理。套餐内涵盖资料解析、税务代码判定、申报准备及凭证管理。"
+          "套餐不涵盖的业务如何处理？",
+          "税务稽查应对、转让定价报告、关联方分析、跨国法人咨询等超出套餐范围，需另行报价。套餐内涵盖资料解析、税务代码判定、申报准备及凭证管理。"
         ]
       ],
-      "finalTitle": "AI Pajak 全程管理，从资料准备到申报完成凭证。",
-      "finalDesc": "个人与企业客户备齐所需资料后，AI Pajak 将清晰告知申报准备状态与下一步行动。",
+      "finalTitle": "AI Pajak 从资料准备到申报完成凭证，全程一站式管理。",
+      "finalDesc": "个人与法人客户准备好所需资料后，AI Pajak 将清晰告知申报准备状态与下一步操作。",
       "finalButton": "登录后开始申报 →",
       "footerCompare": "Comparison",
       "footerPricing": "Pricing detail",
@@ -4081,283 +4525,391 @@
     "pricing": [
       {
         "id": "p-simple",
-        "group": "個人税務",
-        "badge": "申告ごと決済",
-        "typeLabel": "Personal Simple (シンプル申告)",
+        "group": "개인 세무",
+        "badge": "건당 결제",
+        "typeLabel": "Personal Simple (단순 신고)",
         "price": "Rp 100.000",
-        "vat": "PPN込み合計: Rp 111.000",
-        "description": "給与所得1件中心・資料がシンプルな個人",
+        "vat": "PPN 포함 합계: Rp 111.000",
+        "description": "근로소득 1개 중심 · 자료가 단순한 개인",
         "meta": [
-          "PPN込み合計: Rp 111.000",
-          "複雑度基準",
-          "個人年次申告一括"
+          "PPN 포함 합계: Rp 111.000",
+          "복잡도 기준",
+          "통합 개인 연간 신고"
         ],
         "items": [
-          "A1/A2 または源泉徴収資料の自動整理",
-          "基本的な人的事項・所得資料の確認",
-          "納付／還付の可能性に関する基本案内",
-          "申告完了証憑の管理"
+          "A1/A2 또는 원천징수 자료 자동 정리",
+          "기본 인적사항 및 소득자료 확인",
+          "납부/환급 가능성 기본 안내",
+          "신고 완료 증빙 관리"
         ],
         "criteria": [
-          "給与所得中心",
-          "A1/A2 または源泉徴収資料1件中心",
-          "追加の事業所得・フリーランス所得なし"
-        ]
+          "근로소득 중심",
+          "A1/A2 또는 원천징수 자료 1개 중심",
+          "추가 사업소득·프리랜스 소득 없음"
+        ],
+        "storage": {
+          "allowance": "500MB / 신고연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "개인 세무는 건당 결제 기준입니다. 제출 자료 확인 후 소득 유형, 원천징수 자료 수, 자산·부채 복잡도에 따라 단순/표준/복잡 유형이 달라질 수 있으며, 선택한 유형보다 복잡도가 높으면 신고 진행 전 차액 결제를 안내합니다."
       },
       {
         "id": "p-standard",
-        "group": "個人税務",
-        "badge": "申告ごと決済",
-        "typeLabel": "Personal Standard (スタンダード申告)",
+        "group": "개인 세무",
+        "badge": "건당 결제",
+        "typeLabel": "Personal Standard (표준 신고)",
         "price": "Rp 200.000",
-        "vat": "PPN込み合計: Rp 222.000",
-        "description": "複数所得・複数源泉徴収・資産／負債の入力が必要な個人",
+        "vat": "PPN 포함 합계: Rp 222.000",
+        "description": "복수 소득·복수 원천징수·자산/부채 입력이 필요한 개인",
         "meta": [
-          "PPN込み合計: Rp 222.000",
-          "複雑度基準",
-          "個人年次申告一括"
+          "PPN 포함 합계: Rp 222.000",
+          "복잡도 기준",
+          "통합 개인 연간 신고"
         ],
         "items": [
-          "複数の源泉徴収資料の統合整理",
-          "その他所得・控除・資産・負債の整理",
-          "家族情報／PTKP プロフィールの確認",
-          "申告完了証憑の管理"
+          "여러 원천징수 자료 병합 정리",
+          "기타 소득·공제·자산·부채 정리",
+          "가족정보/PTKP 프로필 확인",
+          "신고 완료 증빙 관리"
         ],
         "criteria": [
-          "複数の雇用主または複数の源泉徴収資料",
-          "その他所得または控除の確認が必要",
-          "資産・負債の入力が必要"
-        ]
+          "복수 고용주 또는 복수 원천징수 자료",
+          "기타 소득 또는 공제 확인 필요",
+          "자산·부채 입력 필요"
+        ],
+        "storage": {
+          "allowance": "1GB / 신고연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "개인 세무는 건당 결제 기준입니다. 제출 자료 확인 후 소득 유형, 원천징수 자료 수, 자산·부채 복잡도에 따라 단순/표준/복잡 유형이 달라질 수 있으며, 선택한 유형보다 복잡도가 높으면 신고 진행 전 차액 결제를 안내합니다."
       },
       {
         "id": "p-complex",
-        "group": "個人税務",
-        "badge": "申告ごと決済",
+        "group": "개인 세무",
+        "badge": "건당 결제",
         "typeLabel": "Personal Business / Complex",
         "price": "Rp 500.000",
-        "vat": "PPN込み合計: Rp 555.000",
-        "description": "フリーランス・個人事業・投資所得・複雑な資産をお持ちの個人",
+        "vat": "PPN 포함 합계: Rp 555.000",
+        "description": "프리랜스 · 개인사업 · 투자소득 · 복잡 자산이 있는 개인",
         "meta": [
-          "PPN込み合計: Rp 555.000",
-          "複雑度基準",
-          "個人年次申告一括"
+          "PPN 포함 합계: Rp 555.000",
+          "복잡도 기준",
+          "통합 개인 연간 신고"
         ],
         "items": [
-          "事業／フリーランス所得資料の自動整理",
-          "収入・費用・証憑資料の分類",
-          "投資所得・賃貸所得の反映",
-          "資産・負債の変動およびリスクチェック"
+          "사업/프리랜스 소득자료 자동 정리",
+          "수입·비용·증빙 자료 분류",
+          "투자소득·임대소득 반영",
+          "자산·부채 변동 및 리스크 체크"
         ],
         "criteria": [
-          "フリーランスまたは個人事業所得",
-          "事業関連の収入・費用資料",
-          "追加所得または複雑な資産"
-        ]
+          "프리랜스 또는 개인사업 소득",
+          "사업 관련 수입·비용 자료",
+          "추가 소득 또는 복잡 자산"
+        ],
+        "storage": {
+          "allowance": "3GB / 신고연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "개인 세무는 건당 결제 기준입니다. 제출 자료 확인 후 소득 유형, 원천징수 자료 수, 자산·부채 복잡도에 따라 단순/표준/복잡 유형이 달라질 수 있으며, 선택한 유형보다 복잡도가 높으면 신고 진행 전 차액 결제를 안내합니다."
       },
       {
         "id": "monthly-umkm",
-        "group": "法人月次管理",
-        "badge": "月額前払い",
-        "typeLabel": "UMKM 月次管理",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "UMKM 월관리",
         "price": "Rp 750,000",
-        "description": "小規模法人／Final Tax 中心",
+        "description": "소규모 법인 / Final Tax 중심",
         "meta": [
-          "1ヶ月前払い",
-          "12ヶ月前払いで10％割引あり",
-          "年次決算は別途"
+          "1개월 선납",
+          "12개월 선납 시 10% 할인 가능",
+          "연결산 별도"
         ],
         "items": [
-          "月次申告状況の管理",
-          "ID Billing のリクエスト",
-          "基本リマインダー",
-          "基本 AI リスクコメント"
+          "월 신고 준비상태 대시보드",
+          "PPh Final UMKM 월 매출 기준 계산",
+          "간단 PPh21 급여 검토",
+          "제한적 원천세 코드 판정",
+          "ID Billing 준비값 및 납부 리마인더",
+          "기본 AI 리스크 코멘트"
         ],
         "criteria": [
-          "従業員5名以下",
-          "月次源泉税取引10件以下",
-          "月次アップロード／取引50件以下"
-        ]
+          "직원 10명 이하",
+          "월 원천세 거래 10건 이하",
+          "월 업로드/거래 50건 이하",
+          "PKP/PPN 정기 신고가 필요한 법인은 Basic 이상 권장",
+          "기준 초과 시 해당 월은 Basic 월관리 기준으로 보정될 수 있으며, 이미 결제한 금액을 제외한 차액만 추가 청구"
+        ],
+        "storage": {
+          "allowance": "2GB / 월",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "monthly-basic",
-        "group": "法人月次管理",
-        "badge": "月額前払い",
-        "typeLabel": "Basic 月次管理",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "Basic 월관리",
         "price": "Rp 1,500,000",
-        "description": "一般法人の基本税務オペレーション",
+        "description": "일반 법인 기본 세무 운영",
         "meta": [
-          "1ヶ月前払い",
-          "12ヶ月前払いで10％割引あり",
-          "年次決算は別途"
+          "1개월 선납",
+          "12개월 선납 시 10% 할인 가능",
+          "연결산 별도"
         ],
         "items": [
-          "PPh21/23/25/PPN の管理",
-          "申告履歴／BPE／NTPN の保管",
-          "取引先源泉税の判定",
-          "月次税務レポート"
+          "PPh21 급여 원천세 관리",
+          "PPh23/4(2)/26 등 원천세 코드 판정",
+          "PPh25 또는 PPh Final 월 납부 관리",
+          "PPN 매입·매출 자료 정리",
+          "ID Billing · NTPN · BPE 증빙 보관",
+          "표준 월별 세금 보고서"
         ],
         "criteria": [
-          "従業員30名以下",
-          "月次源泉税取引30件以下",
-          "月次仕入／売上取引300件以下"
-        ]
+          "직원 30명 이하",
+          "월 원천세 거래 30건 이하",
+          "월 매입/매출 거래 300건 이하",
+          "일반 PKP 법인의 기본 월관리 기준",
+          "기준 초과 시 해당 월은 Pro 월관리 기준으로 보정될 수 있음"
+        ],
+        "storage": {
+          "allowance": "10GB / 월",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "monthly-pro",
-        "group": "法人月次管理",
-        "badge": "月額前払い",
-        "typeLabel": "Pro 月次管理",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "Pro 월관리",
         "price": "Rp 2,500,000",
-        "description": "月次税務オペレーションの強化プラン",
+        "description": "월별 세무 운영 강화",
         "meta": [
-          "1ヶ月前払い",
-          "12ヶ月前払いで10％割引あり",
-          "年次決算は別途"
+          "1개월 선납",
+          "12개월 선납 시 10% 할인 가능",
+          "연결산 별도"
         ],
         "items": [
-          "Basic すべての機能",
-          "TP 条件のモニタリング",
-          "AI 異常検知",
-          "高度な税務レポート",
-          "優先処理"
+          "Basic 포함 내용 전체",
+          "대량 급여·원천세 자료 처리",
+          "해외거래·PPh26·Tax Treaty 검토 신호",
+          "특수관계/TP 조건 모니터링",
+          "AI 이상 감지 및 고급 리스크 코멘트",
+          "고급 월별 세금 보고서",
+          "우선 처리"
         ],
         "criteria": [
-          "従業員100名以下",
-          "月次源泉税取引150件以下",
-          "海外取引・特殊関係者のモニタリングを含む"
-        ]
+          "직원 100명 이하",
+          "월 원천세 거래 150건 이하",
+          "월 매입/매출 거래 1,000건 이하",
+          "해외거래·특수관계 모니터링 포함",
+          "기준 초과 또는 반복 대량 거래는 Enterprise 기준 적용"
+        ],
+        "storage": {
+          "allowance": "30GB / 월",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "monthly-enterprise",
-        "group": "法人月次管理",
-        "badge": "月額前払い",
-        "typeLabel": "Enterprise カスタム月次管理",
+        "group": "법인 월관리",
+        "badge": "월 선납",
+        "typeLabel": "Enterprise 맞춤 월관리",
         "price": "Rp 3,500,000",
-        "description": "大量処理／カスタムオペレーション",
+        "description": "대량/맞춤 운영",
         "meta": [
-          "1ヶ月前払い",
-          "使用量ベースの課金",
-          "年次決算は別途"
+          "1개월 선납",
+          "사용량 기반 과금",
+          "연결산 별도"
         ],
         "items": [
-          "Pro すべての機能",
-          "大量給与／取引処理",
-          "超過使用量ベースの課金",
-          "SLA／優先サポート"
+          "Pro 포함 내용 전체",
+          "직원 100명 초과 급여·PPh21 처리",
+          "월 150건 초과 원천세 코드 판정",
+          "대량 PPN·매입·매출 자료 자동분류",
+          "맞춤형 리포트/SLA",
+          "초과 사용량 기반 과금 및 우선 지원"
         ],
         "criteria": [
-          "従業員100名超",
-          "月次源泉税取引150件超",
-          "大量ドキュメントの自動分類が必要"
-        ]
+          "직원 100명 초과",
+          "월 원천세 거래 150건 초과",
+          "월 매입/매출 거래 1,000건 초과 또는 대량 문서 자동분류 필요",
+          "복수 사업장·복잡 승인흐름·맞춤 리포트가 필요한 법인"
+        ],
+        "storage": {
+          "allowance": "100GB / 월부터",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "각 월관리 요금제는 포함 사용량 기준을 가지고 있습니다. 실제 직원 수, 원천세 거래 수, 월 업로드/거래 수가 기준을 초과하면 해당 월은 실제 사용량에 맞는 상위 요금제로 자동 보정될 수 있습니다. 이미 결제한 금액은 차감되며, 차액만 추가 청구됩니다. 기준 초과 전에는 대시보드와 알림을 통해 사전 안내됩니다."
       },
       {
         "id": "annual-umkm",
-        "group": "法人年次決算",
-        "badge": "一回前払い",
-        "typeLabel": "UMKM 年次決算",
+        "group": "법인 연결산",
+        "badge": "1회 선납",
+        "typeLabel": "UMKM 연결산",
         "price": "Rp 2,500,000",
-        "description": "Final Tax 0.5％対象法人の年次決算",
+        "description": "Final Tax 0.5% 대상 법인 연결산",
         "meta": [
-          "一回前払い",
-          "月次管理とは別途選択",
-          "SPT Badan 基準"
+          "1회 선납",
+          "월관리와 별도 선택",
+          "SPT Badan 기준"
         ],
         "items": [
-          "正規財務諸表の作成",
-          "UMKM Final Tax の計算",
-          "SPT 草案の作成",
-          "e-Bupot 1721 A1 の発行"
+          "정상 재무제표 생성",
+          "UMKM Final Tax 계산",
+          "SPT 초안 생성",
+          "e-Bupot 1721 A1 발급"
         ],
         "criteria": [
-          "年間売上 Rp 4.8B 以下",
-          "Final Tax 0.5％ 対象",
-          "海外取引・特殊関係者取引なし"
-        ]
+          "연매출 Rp 4.8B 이하",
+          "Final Tax 0.5% 적용 가능 법인",
+          "일반 UMKM 장부 기준",
+          "대량 재고·고정자산·복잡 세무조정 없음"
+        ],
+        "storage": {
+          "allowance": "2GB / 회계연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "UMKM 연결산은 기준이 명확한 1회성 연간 결산·SPT Badan 신고 준비 서비스입니다. 연매출 Rp 4.8B 이하, Final Tax 0.5% 적용 가능 법인, 일반 UMKM 장부 기준에 적용됩니다."
       },
       {
         "id": "annual-pph25",
-        "group": "法人年次決算",
-        "badge": "一回前払い",
-        "typeLabel": "PPh25 一般法人年次決算",
+        "group": "법인 연결산",
+        "badge": "1회 선납",
+        "typeLabel": "PPh25 일반 법인 연결산",
         "price": "Rp 7,500,000",
-        "description": "一般法人税対象の標準年次決算",
+        "description": "일반 법인세 대상 표준 연결산",
         "meta": [
-          "一回前払い",
-          "月次管理とは別途選択",
-          "SPT Badan 基準"
+          "1회 선납",
+          "월관리와 별도 선택",
+          "SPT Badan 기준"
         ],
         "items": [
-          "財務諸表の作成",
-          "税務調整",
-          "税額控除",
-          "PPh29／PPh25 の算定",
-          "SPT 草案の作成"
+          "재무제표 생성",
+          "일반 세무조정",
+          "세액공제 확인",
+          "PPh29/PPh25 산정",
+          "SPT 초안 생성"
         ],
         "criteria": [
-          "年間売上 Rp 4.8B 超またはUMKM期間終了",
-          "年間取引1,000件以下",
-          "TP イシューなし"
-        ]
+          "연매출 Rp 25B 이하",
+          "UMKM Final Tax 대상이 아니거나 일반 법인세(PPh25) 적용 법인",
+          "연 거래 1,000건 이하",
+          "직원 100명 이하",
+          "단일 법인·단일 사업장 또는 단순 사업구조",
+          "회계자료 정리 상태 양호",
+          "일반 세무조정 범위",
+          "TP 문서화, Tax Treaty, 대규모 재고·고정자산 재구성 등 별도 전문 검토 없음"
+        ],
+        "storage": {
+          "allowance": "10GB / 회계연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "PPh25 일반 법인 연결산은 매출과 업무량 기준의 표준 결산입니다. 연매출 Rp 25B 이하, 연 거래 1,000건 이하, 직원 100명 이하, 회계자료 정리 상태가 양호하고 일반 세무조정 범위인 경우에 적용됩니다. UMKM Final Tax 대상이 아닌 일반 법인 또는 PPh25 적용 법인도 이 기준으로 판단합니다."
       },
       {
         "id": "annual-complex",
-        "group": "法人年次決算",
-        "badge": "一回前払い",
-        "typeLabel": "複雑構造年次決算",
+        "group": "법인 연결산",
+        "badge": "1회 선납",
+        "typeLabel": "복잡 구조 연결산",
         "price": "Rp 15,000,000",
-        "description": "外資系・特殊関係者・海外取引または大量取引のある法人",
+        "description": "매출·거래량·자료정리 난이도가 높은 법인",
         "meta": [
-          "一回前払い",
-          "月次管理とは別途選択",
-          "SPT Badan 基準"
+          "1회 선납",
+          "월관리와 별도 선택",
+          "SPT Badan 기준"
         ],
         "items": [
-          "PPh25 年次決算すべて",
-          "TP 条件のレビュー",
-          "海外取引のレビュー",
-          "AI リスクレポート",
-          "優先処理"
+          "PPh25 일반 연결산 전체",
+          "대량 거래 데이터 정리",
+          "복잡 재고·고정자산·외화거래 검토",
+          "불완전 회계자료 재구성 지원",
+          "필요 시 TP·PPh26·Tax Treaty 별도 검토",
+          "AI 리스크 보고서",
+          "우선 처리"
         ],
         "criteria": [
-          "海外株主または海外取引あり",
-          "特殊関係者取引あり",
-          "PPh26／DGT Form／Tax Treaty のレビューが必要"
-        ]
+          "아래 조건 중 하나라도 해당하면 복잡 구조 연결산 적용",
+          "연매출 Rp 25B 초과",
+          "연 거래 1,000건 초과",
+          "직원 100명 초과",
+          "복수 사업장·복수 프로젝트·복수 KBLI 운영",
+          "재고·원가·고정자산·외화거래 정리가 복잡한 경우",
+          "회계자료가 불완전해 재무제표 재구성이 필요한 경우",
+          "TP, PPh26, DGT Form, Tax Treaty 등 별도 전문 검토가 필요한 경우"
+        ],
+        "storage": {
+          "allowance": "30GB / 회계연도",
+          "retentionCopy": "ID Billing, NTPN, BPE, 신고 이력, AI 파싱 결과, 세금코드 판단 이력 등 핵심 신고증빙은 기본 보관됩니다.",
+          "rawFileCopy": "고객이 업로드한 원본파일은 포함 저장용량 내에서 보관됩니다. 원본파일에는 invoice, Faktur Pajak, 영수증 사진, payroll Excel, 계약서, 은행거래내역, 대량 매입·매출 자료 등이 포함됩니다.",
+          "overage": "초과 시: Active Storage Rp 50,000 / 10GB / 월 · Archive Storage Rp 250,000 / 10GB / 년",
+          "alertPolicy": "80% 도달 시 알림, 100% 도달 시 추가 저장공간 구매·Archive 전환·원본파일 다운로드 후 삭제를 안내합니다. 신고 마감에 필요한 자료는 임시 업로드를 허용할 수 있습니다."
+        },
+        "info": "복잡 구조 연결산은 해외 여부 자체가 아니라 매출·거래량·직원 수·자료정리 난이도 또는 별도 전문 검토 필요성으로 판단합니다. 연매출 Rp 25B 초과, 연 거래 1,000건 초과, 직원 100명 초과, 복수 사업장, 복잡한 재고·고정자산·외화거래, 회계자료 재구성, TP/PPh26/Tax Treaty 별도 검토 필요 중 하나라도 해당하면 적용됩니다."
       }
     ],
     "text": {
       "nav": {
-        "product": "サービス",
-        "start": "資料提出",
-        "difference": "競合比較",
+        "product": "서비스",
+        "start": "자료 제출",
+        "difference": "경쟁비교",
         "faq": "FAQ"
       },
-      "login": "ログイン",
-      "viewPricing": "料金プランを確認する",
+      "login": "로그인",
+      "viewPricing": "요금제 확인하기",
       "chips": "Indonesia Tax Filing Automation",
-      "heroTop": "複雑な税務申告も、",
-      "heroMain": "資料をアップロードするだけ。",
-      "heroSub": "資料をそのまま提出 → AI税コード判定 → 申告準備完了",
-      "heroDesc": "invoice、Faktur Pajak、領収書、給与資料、契約書を新しい様式に合わせて作り直す必要はありません。AIが必要なデータを読み取り、PPh 21·23·4(2)·26などの源泉税コードと税務リスクまでまとめて整理します。",
-      "trustBaseTitle": "税務申告は、自動化と同じくらい基準が重要です",
-      "trustBaseDesc": "AI PajakはJakarta Tax Consultingのインドネシア税務運用基準をもとに、資料提出から税コード判定、納付・申告証憑の管理まで、ひとつの流れで整理します。",
+      "heroTop": "복잡한 세무신고,",
+      "heroMain": "자료만 올리면 끝.",
+      "heroSub": "자료 그대로 제출 → AI 세금코드 판정 → 신고 준비 완료",
+      "heroDesc": "인보이스, Faktur Pajak, 영수증, 급여자료, 계약서를 새 양식에 다시 맞출 필요가 없습니다. AI가 필요한 데이터를 읽고 PPh 21·23·4(2)·26 등 원천세 코드와 세무 리스크까지 함께 정리합니다.",
+      "trustBaseTitle": "세무신고는 자동화만큼, 기준이 중요합니다",
+      "trustBaseDesc": "AI Pajak은 Jakarta Tax Consulting의 인도네시아 세무 운영 기준을 바탕으로, 자료 제출부터 세금코드 판정, 납부·신고 증빙 관리까지 하나의 흐름으로 정리합니다.",
       "trustIndicators": [
         {
           "title": "JTC Tax Workflow",
-          "desc": "インドネシア個人・法人申告の運用基準を反映"
+          "desc": "인도네시아 개인·법인 신고 운영 기준 반영"
         },
         {
           "title": "Withholding Code AI",
-          "desc": "PPh 21 · 23 · 4(2) · 26の税コード判定をサポート"
+          "desc": "PPh 21 · 23 · 4(2) · 26 세금코드 판정 지원"
         },
         {
           "title": "Evidence Tracking",
-          "desc": "ID Billing · NTPN · BPEの申告証憑履歴を管理"
+          "desc": "ID Billing · NTPN · BPE 신고 증빙 이력 관리"
         },
         {
           "title": "Secure Tax Data",
-          "desc": "NPWP · NIK · Faktur Pajak · 給与資料を暗号化保管"
+          "desc": "NPWP · NIK · Faktur Pajak · 급여자료 암호화 보관"
         }
       ],
       "footer": {
@@ -4375,255 +4927,258 @@
         "termsOfService": "Terms of Service",
         "copyright": "© 2026 AI Pajak. Built for upload-based Indonesian tax automation."
       },
-      "readiness": "準備度",
-      "missing": "不足資料",
-      "next": "次のアクション",
+      "readiness": "준비도",
+      "missing": "누락자료",
+      "next": "다음 액션",
       "personas": {
         "personal": {
-          "label": "個人のお客様",
+          "label": "개인고객",
           "icon": "👤",
           "title": "Personal Annual Filing",
-          "subtitle": "A1/A2、領収書、所得資料を再入力せずそのまま提出できる個人年次申告",
+          "subtitle": "A1/A2, 영수증, 소득자료를 다시 입력하지 않고 그대로 제출하는 개인 연간 신고",
           "readiness": 72,
           "missing": [
-            "A1/A2 源泉徴収証明書",
-            "12月31日時点の資産・負債残高",
-            "その他所得資料"
+            "A1/A2 원천징수증",
+            "12월 31일 기준 자산·부채 잔액",
+            "기타 소득자료"
           ],
-          "next": "所得・控除・資産変動を確認し、納付または還付の可能性をご案内します。"
+          "next": "소득·공제·자산 변동을 확인하고, 납부 또는 환급 가능성을 안내합니다."
         },
         "corporate": {
-          "label": "法人のお客様",
+          "label": "법인고객",
           "icon": "🏢",
           "title": "Corporate Monthly & Annual Filing",
-          "subtitle": "invoice、Faktur Pajak、領収書、payroll、契約書を再整理せずに提出できる法人税務ダッシュボード",
+          "subtitle": "인보이스, Faktur Pajak, 영수증, payroll, 계약서를 다시 정리하지 않고 제출하는 법인 세무 대시보드",
           "readiness": 58,
           "missing": [
-            "PPN 仕入 Faktur",
-            "一部源泉税の契約書",
+            "PPN 매입 Faktur",
+            "일부 원천세 계약서",
             "PPh21 payroll template"
           ],
-          "next": "アップロードされたinvoiceと契約書の取引内容を分析し、源泉税の種類と税コードの選択をご案内します。"
+          "next": "올린 invoice와 계약서의 거래 성격을 분석해 원천세 유형과 세금코드 선택을 안내합니다."
         }
       },
       "cards": [
         [
-          "AI源泉税コード判定",
-          "取引の性質を分析し、ID Billingに必要なPPh種別と税コードを自動判定"
+          "AI 원천세 세금코드 판정",
+          "거래 성격을 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 자동 판정"
         ],
         [
-          "個人・法人専用フロー",
-          "お客様の種別ごとに必要な資料と申告手順を分けて管理"
+          "개인·법인 전용 흐름",
+          "고객 유형별로 필요한 자료와 신고 절차를 분리"
         ],
         [
-          "AI税務インサイト",
-          "提出データと申告データをもとに、税務リスクと次のアクションをご案内"
+          "AI 세무 인사이트",
+          "제출 데이터와 신고 데이터를 근거로 세무 리스크와 다음 액션 안내"
         ],
         [
-          "資料はそのままアップロードするだけ",
-          "テンプレート作成不要。既存の様式・写真・PDFからAIがデータを解析"
+          "그대로 올리는 자료 제출",
+          "템플릿 작성 없이 기존 양식·사진·PDF에서 AI가 데이터 파싱"
         ]
       ],
-      "trustTitle": "機密性の高い税務資料は暗号化して保管されます",
-      "trustDesc": "NPWP、NIK、給与資料、Faktur Pajak、契約書などの機密資料は、暗号化保管を前提に設計されています。資料は申告準備とお客様ごとの税務インサイト提供の目的にのみ使用されます。",
+      "trustTitle": "민감한 세무자료는 암호화 보관됩니다",
+      "trustDesc": "NPWP, NIK, 급여자료, Faktur Pajak, 계약서 등 민감자료는 암호화 보관을 전제로 설계합니다. 자료는 신고 준비와 고객별 세무 인사이트 제공 목적에 한해 사용됩니다.",
       "trustItems": [
         "Encrypted data storage",
         "Access-controlled workflow",
         "Audit-ready filing evidence"
       ],
-      "coreDiff": "主な差別化ポイント",
+      "coreDiff": "핵심 차별화",
       "advisoryKicker": "AI Tax Advisory",
-      "taxTitle": "ID Billingの正確性は、源泉税コードで決まります。",
-      "taxDesc": "既存のオンライン税務プラットフォームはe-Billing発行機能を提供していますが、どの取引にどのPPh種別と税コードを入力すべきかは、ユーザーが自ら判断しなければならないケースが多くあります。AI Pajakはinvoice、契約書、取引先情報、サービス内容を分析し、ID Billingに必要な源泉税コードを判定します。",
+      "taxTitle": "ID Billing의 정확도는 원천세 세금코드에서 결정됩니다.",
+      "taxDesc": "기존 온라인 세무 플랫폼은 e-Billing 발행 기능은 제공하지만, 어떤 거래에 어떤 PPh 유형과 세금코드를 넣어야 하는지는 사용자가 직접 판단해야 하는 경우가 많습니다. AI Pajak은 invoice, 계약서, 거래처 정보, 서비스 내용을 분석해 ID Billing에 필요한 원천세 세금코드를 판정합니다.",
       "taxCards": [
         [
-          "取引性質の分析",
-          "サービス、賃貸、利子、配当、ロイヤルティ、建設など支払の性質を分類"
+          "거래 성격 분석",
+          "서비스, 임대, 이자, 배당, 로열티, 건설 등 지급 성격을 분류"
         ],
         [
-          "PPh種別の判定",
-          "PPh 4(2)、15、22、23、26など適用可能な種別を判別"
+          "PPh 유형 판정",
+          "PPh 4(2), 15, 22, 23, 26 등 적용 가능 유형을 구분"
         ],
         [
-          "税コードのマッチング",
-          "ID Billing発行に必要なtax type / deposit typeの値を整理"
+          "세금코드 매칭",
+          "ID Billing 발행에 필요한 tax type / deposit type 값을 정리"
         ],
         [
-          "要確認案件の分離",
-          "不明確な取引を別途表示し、誤ったコード入力リスクを低減"
+          "확인 필요 분리",
+          "불명확한 거래는 별도 표시해 잘못된 코드 입력 리스크 감소"
         ]
       ],
-      "advisoryTitle": "申告データが蓄積されるほど、AIが必要な税務アクションを先にお知らせします。",
-      "advisoryDesc": "AI Pajakはお客様が提出した資料と申告履歴をもとに、単純な計算を超えた税務上の意思決定をサポートします。法人税の納付方式変更、PKP申請のタイミング、収入に対する資産取得の異常、海外取引とTax Treatyの検討必要性をお客様ごとにご案内します。",
+      "advisoryTitle": "신고 데이터가 쌓일수록, AI가 필요한 세무 액션을 먼저 알려줍니다.",
+      "advisoryDesc": "AI Pajak은 고객이 제출한 자료와 신고 이력을 바탕으로 단순 계산을 넘어 세무 의사결정을 지원합니다. 법인세 납부 방식 변경, PKP 신청 시기, 수입 대비 자산 취득 이상, 해외거래와 Tax Treaty 검토 필요성을 고객별로 안내합니다.",
       "advisoryCards": [
         [
-          "法人税の納付方式",
-          "UMKM Final TaxからPPh25へ切り替えるべき時期と条件をご案内"
+          "법인세 납부 방식",
+          "UMKM Final Tax에서 PPh25로 전환해야 할 시점과 조건 안내"
         ],
         [
-          "PKP申請アラート",
-          "売上の推移をもとに、PKP申請が必要な時期を事前にお知らせ"
+          "PKP 신청 알림",
+          "매출 추이를 기준으로 PKP 신청 필요 시기를 사전에 안내"
         ],
         [
-          "資産増加の異常検知",
-          "申告所得に対して資産取得が過大な場合、リスクシグナルを表示"
+          "자산 증가 이상 감지",
+          "신고 소득 대비 자산 취득이 과도한 경우 리스크 신호 표시"
         ],
         [
-          "Tax Treaty チェック",
-          "海外取引、PPh26、DGT Form、租税条約の適用可能性をご案内"
+          "Tax Treaty 체크",
+          "해외거래, PPh26, DGT Form, 조세조약 적용 가능성 안내"
         ]
       ],
-      "serviceFlow": "サービスの流れ",
-      "productTitle": "アップロードするだけで、AIが申告データを整理します",
-      "productDesc": "別途テンプレートに合わせて再入力する必要はありません。invoice、Faktur Pajak、領収書、給与資料をお手持ちの形式のままご提出いただくか、撮影してアップロードするだけで、AIが必要なデータを読み取り申告準備データとして整理します。",
-      "moduleStep": "サービスステップ",
-      "coreGuide": "主なご案内",
-      "customerView": "お客様が確認できる内容",
-      "outputs": "提供される結果",
-      "requiredDocs": "提出可能な資料",
+      "serviceFlow": "서비스 흐름",
+      "productTitle": "그냥 올리면, AI가 신고 데이터를 정리합니다",
+      "productDesc": "별도 템플릿에 맞춰 다시 입력할 필요가 없습니다. 인보이스, Faktur Pajak, 영수증, 급여자료를 쓰던 형태 그대로 제출하거나 촬영하면 AI가 필요한 데이터를 읽고 신고 준비 데이터로 정리합니다.",
+      "moduleStep": "서비스 단계",
+      "coreGuide": "핵심 안내",
+      "customerView": "고객이 확인하는 내용",
+      "outputs": "제공되는 결과",
+      "requiredDocs": "제출 가능한 자료",
       "startKicker": "Upload-ready documents",
-      "startTitle": "税務申告用の資料を新たに作成する必要はありません。",
-      "startDesc": "お使いのinvoice、Faktur Pajak、領収書、給与資料、源泉徴収資料をそのままご提出ください。紙の領収書や税金計算書は撮影して提出でき、AIが必要なデータを読み取り申告準備データとして整理します。",
-      "personalBtn": "個人の必須資料",
-      "corporateBtn": "法人の必須資料",
-      "methodTitle": "資料の提出方法",
+      "startTitle": "세무 신고용 자료를 새로 만들 필요가 없습니다.",
+      "startDesc": "쓰던 인보이스, Faktur Pajak, 영수증, 급여자료, 원천징수 자료를 그대로 제출하세요. 종이 영수증이나 세금계산서는 촬영해서 제출할 수 있고, AI가 필요한 데이터를 읽어 신고 준비 데이터로 정리합니다.",
+      "personalBtn": "개인 필수자료",
+      "corporateBtn": "법인 필수자료",
+      "methodTitle": "자료 제출 방식",
       "methods": [
-        "既存の様式をそのまま提出",
-        "invoice・Faktur・領収書を撮影",
-        "AIによるデータ解析",
-        "要確認項目のみチェック",
-        "申告準備データの自動整理"
+        "기존 양식 그대로 제출",
+        "인보이스·Faktur·영수증 촬영",
+        "AI 데이터 파싱",
+        "확인 필요 항목만 체크",
+        "신고 준비 데이터 자동 정리"
       ],
-      "guide": "ご案内",
-      "startNote": "資料を別途テンプレートに合わせて作り直す必要はありません。源泉税対象の取引については、ID Billingに必要な税コード選択までつながるようにご案内します。",
+      "guide": "안내",
+      "startNote": "자료를 별도 템플릿에 맞춰 재작성하지 않아도 됩니다. 원천세 대상 거래는 ID Billing에 필요한 세금코드 선택까지 이어지도록 안내합니다.",
       "requirements": {
         "personal": [
           [
-            "Required",
-            "NIK/NPWP、氏名、住所、連絡先"
+            "필수",
+            "NIK/NPWP, 이름, 주소, 연락처"
           ],
           [
-            "Required",
-            "A1/A2 または源泉徴収証明書"
+            "필수",
+            "A1/A2 또는 원천징수 증빙"
           ],
           [
-            "Required",
-            "12月31日時点の資産・負債残高"
+            "필수",
+            "12월 31일 기준 자산·부채 잔액"
           ],
           [
-            "該当時",
-            "フリーランス・事業・賃貸・利子・配当所得資料"
+            "해당 시",
+            "프리랜스/사업/임대/이자/배당 소득자료"
           ],
           [
-            "該当時",
-            "家族関係および控除関連資料"
+            "해당 시",
+            "가족관계 및 공제 관련 자료"
           ]
         ],
         "corporate": [
           [
-            "Required",
-            "NPWP、KBLI、PKP有無、事業種別"
+            "필수",
+            "NPWP, KBLI, PKP 여부, 사업유형"
           ],
           [
-            "Required",
-            "月別売上・仕入資料およびFaktur Pajak"
+            "필수",
+            "월별 매출·매입자료 및 Faktur Pajak"
           ],
           [
-            "Required",
-            "Payroll templateおよび従業員別PPh21資料"
+            "필수",
+            "Payroll template 및 직원별 PPh21 자료"
           ],
           [
-            "該当時",
-            "源泉税対象の契約書・invoice"
+            "해당 시",
+            "원천세 대상 계약서·invoice"
           ],
           [
-            "該当時",
-            "銀行取引明細、前年度SPT Badan、PPh25資料"
+            "해당 시",
+            "은행거래 내역, 전년도 SPT Badan, PPh25 자료"
           ]
         ]
       },
       "compKicker": "Competitive Comparison",
-      "compTitle": "既存の税務サービス・オンライン税務プラットフォームとの違い",
-      "compDesc": "AI Pajakの核心的な差別化ポイントは、源泉税取引の性質を分析し、ID Billingに必要なPPh種別と税コードを判定できる点です。",
+      "compTitle": "기존 세무서비스, 온라인 세무 플랫폼과 무엇이 다른가",
+      "compDesc": "AI Pajak의 핵심 차별점은 원천세 거래의 성격을 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 판정한다는 점입니다.",
       "columns": [
-        "比較基準",
-        "既存の税務事務所",
-        "既存のオンライン税務プラットフォーム",
+        "비교 기준",
+        "기존 세무사무소",
+        "기존 온라인 세무 플랫폼",
         "AI Pajak"
       ],
       "rows": [
         [
-          "主なポジション",
-          "専門家に資料を送り結果を待つ税務代行",
-          "e-Filing、e-Billing、e-Faktur、e-Bupotなど申告・納付・税務書類処理を中心としたプラットフォーム",
-          "お客様のお手持ち資料をそのままアップロードするだけで、AIが必要なデータを読み取り申告準備までつなげる自動化プラットフォーム"
+          "핵심 포지션",
+          "전문가에게 자료를 보내고 결과를 기다리는 세무대행",
+          "e-Filing, e-Billing, e-Faktur, e-Bupot 등 신고·납부·세금문서 처리 중심 플랫폼",
+          "고객이 쓰던 자료를 그대로 올리면 AI가 필요한 데이터를 읽고 신고 준비까지 연결하는 자동화 플랫폼"
         ],
         [
-          "顧客体験",
-          "WhatsApp、メール、Excelで資料を送り、進捗は別途問い合わせが必要",
-          "ユーザーが自ら税務書類・申告・納付機能を操作する方式",
-          "お客様はテンプレート不要で既存資料や撮影画像を提出し、AIが整理した結果と進捗状況を確認"
+          "고객 경험",
+          "WhatsApp, 이메일, 엑셀로 자료를 전달하고 진행상황은 별도 문의",
+          "사용자가 직접 세금문서·신고·납부 기능을 조작하는 방식",
+          "고객은 별도 템플릿 없이 기존 자료나 촬영본을 제출하고, AI가 정리한 결과와 진행상태를 확인"
         ],
         [
-          "源泉税コード",
-          "担当者が取引内容を見て手作業で判断するケースが多い",
-          "ユーザーが自ら税種別と納付コードを選択しなければならない構造が多い",
-          "invoice・契約書・取引先情報を分析し、ID Billingに必要なPPh種別と税コードを自動判定"
+          "원천세 세금코드",
+          "담당자가 거래 내용을 보고 수작업으로 판단하는 경우가 많음",
+          "사용자가 직접 세금 유형과 납부 코드를 선택해야 하는 구조가 많음",
+          "invoice·계약서·거래처 정보를 분석해 ID Billing에 필요한 PPh 유형과 세금코드를 자동 판정"
         ],
         [
-          "AI税務インサイト",
-          "担当者の経験によって案内レベルが異なる場合がある",
-          "申告・納付機能は提供されるが、お客様ごとの税務意思決定サポートは限定的",
-          "納付方式の切り替え、PKP申請、資産増加リスク、Tax Treaty検討の必要性をご案内"
+          "AI 세무 인사이트",
+          "담당자 경험에 따라 안내 수준이 달라질 수 있음",
+          "신고·납부 기능은 제공하지만 고객별 세무 의사결정 안내는 제한적",
+          "납부 방식 전환, PKP 신청, 자산 증가 리스크, Tax Treaty 검토 필요성을 안내"
         ],
         [
-          "差別化ポイント",
-          "専門家による説明と税務代行の経験",
-          "電子申告・納付処理の利便性。ただし税コードの判断はユーザーの入力と理解に依存",
-          "資料解析、源泉税コード判定、AI税務インサイト、申告準備度、証憑管理"
+          "차별화 포인트",
+          "전문가의 설명과 세무대행 경험",
+          "전자신고·납부 처리 편의성, 단 세금코드 판단은 사용자의 입력과 이해에 의존",
+          "자료 파싱, 원천세 세금코드 판정, AI 세무 인사이트, 신고 준비도, 증빙관리"
         ]
       ],
-      "pricingKicker": "料金のご案内",
-      "pricingTitle": "料金プランを選ぶと、詳細な範囲をすぐに確認できます",
-      "pricingDesc": "個人申告は様式名ではなく、申告の複雑度を基準にご案内します。個人税務・法人月次管理・法人年次決算の中から必要なプランをクリックすると、価格・適用基準・含まれる内容を詳しくご覧いただけます。",
-      "pricingListTitle": "料金プランの種類",
-      "chooseService": "必要なサービスをお選びください",
-      "pricingListDesc": "クリックすると右側に詳細が表示されます。",
-      "selectedPlan": "選択中のプラン",
-      "included": "含まれる内容",
-      "criteria": "適用基準",
-      "pricingInfo": "表示金額は基本料金です。実際の申告範囲は、提出資料・取引量・海外取引や特殊関係の有無などにより最終確認されます。",
-      "pricingButton": "提出可能な資料を見る →",
+      "pricingKicker": "요금 안내",
+      "pricingTitle": "요금제를 선택하면 상세 범위를 바로 확인할 수 있습니다",
+      "pricingDesc": "개인 신고는 양식명이 아니라 신고 복잡도 기준으로 안내합니다. 개인 세무, 법인 월관리, 법인 연결산 중 필요한 상품을 클릭하면 가격·적용 기준·포함 내용을 자세히 볼 수 있습니다.",
+      "pricingListTitle": "요금제 종류",
+      "chooseService": "필요한 서비스를 선택하세요",
+      "pricingListDesc": "클릭하면 오른쪽에 상세 내용이 표시됩니다.",
+      "selectedPlan": "선택한 요금제",
+      "included": "포함 내용",
+      "criteria": "적용 기준",
+      "pricingInfo": "표시된 금액은 기본 요금입니다. 실제 신고 범위는 제출 자료, 거래량, 해외거래·특수관계 여부 등에 따라 최종 확인됩니다.",
+      "pricingButton": "제출 가능 자료 보기 →",
+      "storageHeading": "저장공간 및 증빙 보관",
+      "storageAllowanceLabel": "포함 원본파일 저장용량",
+      "storageOverageLabel": "초과 시",
       "groups": [
-        "個人税務",
-        "法人月次管理",
-        "法人年次決算"
+        "개인 세무",
+        "법인 월관리",
+        "법인 연결산"
       ],
       "faqs": [
         [
-          "申告準備を始めるには、どのような資料が必要ですか？",
-          "個人のお客様はNIK/NPWP、A1/A2、家族情報、資産・負債資料が基本です。法人のお客様はNPWP、KBLI、PKPの有無、売上・仕入資料、PPh21給与資料、源泉税関連のinvoice/契約書、PPN資料などが必要です。"
+          "신고 준비를 시작하려면 어떤 자료가 필요한가요?",
+          "개인고객은 NIK/NPWP, A1/A2, 가족정보, 자산·부채 자료가 기본입니다. 법인고객은 NPWP, KBLI, PKP 여부, 매출·매입자료, PPh21 급여자료, 원천세 관련 invoice/계약서, PPN 자료 등이 필요합니다."
         ],
         [
-          "OnlinePajak、Klikpajakのようなプラットフォームと正面から競合しているのですか？",
-          "まったく同じポジションではありません。既存のオンライン税務プラットフォームはe-Filing、e-Billing、e-Faktur、e-Bupotなど申告・納付・電子税務書類機能が強みです。AI Pajakの核心的な差別化ポイントは、invoiceと契約書の取引性質を分析して源泉税の種別とID Billingの税コードを自動判定できる点です。"
+          "OnlinePajak, Klikpajak 같은 플랫폼과 정면 경쟁인가요?",
+          "완전히 같은 포지션은 아닙니다. 기존 온라인 세무 플랫폼은 e-Filing, e-Billing, e-Faktur, e-Bupot 등 신고·납부·전자세금문서 기능이 강점입니다. AI Pajak의 핵심 차별점은 invoice와 계약서의 거래 성격을 분석해 원천세 유형과 ID Billing 세금코드를 자동 판정한다는 점입니다."
         ],
         [
-          "個人申告の料金は1770SS/1770S/1770を基準にしていますか？",
-          "いいえ。個人年次申告は統合されたフローを基準にご案内しています。AI Pajakの個人料金は様式名ではなく、所得の種類・源泉徴収資料の数・資産負債の複雑度・事業/フリーランス所得の有無を基準に区分しています。"
+          "개인 신고 요금은 1770SS/1770S/1770 기준인가요?",
+          "아니요. 개인 연간 신고는 통합된 흐름을 기준으로 안내합니다. AI Pajak의 개인 요금은 양식명이 아니라 소득 유형, 원천징수 자료 수, 자산·부채 복잡도, 사업/프리랜스 소득 여부를 기준으로 구분합니다."
         ],
         [
-          "AI税務インサイトでは、どのような内容が確認できますか？",
-          "提出資料と申告データをもとに、法人税の納付方式変更の可能性、PKP申請のタイミング、収入に対する資産取得の異常、海外取引とTax Treatyの検討必要性などをご案内します。"
+          "AI 세무 인사이트는 어떤 내용을 알려주나요?",
+          "제출자료와 신고 데이터를 근거로 법인세 납부 방식 변경 가능성, PKP 신청 시기, 수입 대비 자산 취득 이상, 해외거래와 Tax Treaty 검토 필요성 등을 안내합니다."
         ],
         [
-          "料金プランに含まれない業務はどのように対応しますか？",
-          "税務調査対応、移転価格報告書、特殊関係分析、多国籍法人コンサルティングなどは料金プランの範囲外であり、別途お見積りとなります。料金プランの範囲内では、資料解析・税コード判定・申告準備・証憑管理までを対応します。"
+          "요금제에 포함되지 않는 업무는 어떻게 처리하나요?",
+          "세무조사 대응, 이전가격 보고서, 특수관계 분석, 다국가 법인 자문 등은 요금제 범위 밖이며 별도 견적으로 진행합니다. 요금제 안에서는 자료 파싱, 세금코드 판정, 신고 준비, 증빙 관리까지를 다룹니다."
         ]
       ],
-      "finalTitle": "AI Pajakは、資料準備から申告完了の証憑まで一括管理します。",
-      "finalDesc": "個人・法人のお客様が必要な資料を準備すれば、AI Pajakが申告準備の状況と次のアクションを明確にご案内します。",
-      "finalButton": "ログインして申告を始める →",
+      "finalTitle": "AI Pajak은 자료 준비부터 신고완료 증빙까지 함께 관리합니다.",
+      "finalDesc": "개인과 법인 고객이 필요한 자료를 준비하면, AI Pajak이 신고 준비 상태와 다음 액션을 명확하게 안내합니다.",
+      "finalButton": "로그인 후 신고 시작하기 →",
       "footerCompare": "Comparison",
       "footerPricing": "Pricing detail",
       "footerDocs": "Required documents"

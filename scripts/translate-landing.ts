@@ -201,6 +201,9 @@ const koText = {
   pricingInfo:
     '표시된 금액은 기본 요금입니다. 실제 신고 범위는 제출 자료, 거래량, 해외거래·특수관계 여부 등에 따라 최종 확인됩니다.',
   pricingButton: '제출 가능 자료 보기 →',
+  storageHeading: '저장공간 및 증빙 보관',
+  storageAllowanceLabel: '포함 원본파일 저장용량',
+  storageOverageLabel: '초과 시',
   groups: ['개인 세무', '법인 월관리', '법인 연결산'],
   faqs: [
     [
