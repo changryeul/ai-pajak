@@ -402,6 +402,62 @@
     },
     "successToast": "{n}名 1721 A1 発行完了"
   },
+  "operatorTeam": {
+    "pageTitle": "担当者管理",
+    "pageDesc": "人 / アカウント / 状態 / 稼働可否を管理する画面です。業績比較やインセンティブ算定は「業績/評価」メニューで行います。",
+    "refresh": "再読み込み",
+    "notLoggedIn": "未ログイン",
+    "personSuffix": "{n}名",
+    "caseSuffix": "{n}件",
+    "workState": {
+      "available": "待機",
+      "consulting": "相談中",
+      "reviewing": "検討中",
+      "coretax": "Coretax作業中",
+      "break": "休憩",
+      "offline": "オフライン",
+      "resigned": "退職"
+    },
+    "status": {
+      "title": "担当者状態 概況",
+      "desc": "カード型詳細を減らし、1画面で10名以上を確認できる状態ボード + 表に簡素化しました。",
+      "todayLoggedIn": "本日ログイン",
+      "autoEligible": "自動割当可能",
+      "activeAssignment": "稼働中の割当"
+    },
+    "table": {
+      "title": "担当者状態表",
+      "desc": "状態変更と管理SV指定のみ表で直接処理。10名以上も1画面表示。",
+      "state": "状態",
+      "operator": "担当",
+      "todayLogin": "本日ログイン",
+      "currentLoad": "現在割当",
+      "completed": "処理完了",
+      "supervisor": "管理SV",
+      "stateChange": "状態変更",
+      "autoAssign": "自動割当",
+      "unassigned": "— 未指定 —",
+      "autoEnabled": "可能",
+      "autoDisabled": "除外"
+    },
+    "span": {
+      "title": "SV 管理人員設定",
+      "badge": "Span of Control",
+      "desc": "SV1名が管理したい担当者数を決め、各担当者をどのSVが管理するかを指定します。業務分配 / 過負荷判断 / 業績管理の基準として使用。",
+      "exceeded": "超過",
+      "normal": "正常",
+      "managing": "管理中",
+      "desiredCapacity": "希望管理人員",
+      "desiredCapacityLabel": "希望管理担当数",
+      "managedOperators": "管理担当",
+      "none": "なし"
+    },
+    "assign": {
+      "title": "担当者別 管理SV指定",
+      "active": "稼働",
+      "inactive": "非稼働"
+    }
+  },
   "operatorStatistics": {
     "pageTitle": "業績 / 評価",
     "pageDesc": "担当者を加重スコアで比較しインセンティブを算定します。担当者管理と違い、状態変更ではなく評価基準と報酬計算が中心です。",

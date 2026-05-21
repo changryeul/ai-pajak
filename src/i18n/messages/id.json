@@ -402,6 +402,62 @@
     },
     "successToast": "{n} bukti 1721 A1 diterbitkan"
   },
+  "operatorTeam": {
+    "pageTitle": "Manajemen operator",
+    "pageDesc": "Orang / akun / status / ketersediaan. Perbandingan kinerja & insentif ada di menu Kinerja.",
+    "refresh": "Muat ulang",
+    "notLoggedIn": "Belum login",
+    "personSuffix": "{n} orang",
+    "caseSuffix": "{n} kasus",
+    "workState": {
+      "available": "Tersedia",
+      "consulting": "Konsultasi",
+      "reviewing": "Tinjauan",
+      "coretax": "Coretax",
+      "break": "Istirahat",
+      "offline": "Offline",
+      "resigned": "Resign"
+    },
+    "status": {
+      "title": "Ringkasan status operator",
+      "desc": "Papan status & tabel ringkas — bisa lihat 10+ operator dalam satu layar.",
+      "todayLoggedIn": "Online hari ini",
+      "autoEligible": "Siap auto-tugas",
+      "activeAssignment": "Penugasan aktif"
+    },
+    "table": {
+      "title": "Tabel status operator",
+      "desc": "Ubah status atau pilih supervisor langsung di tabel. Skala 10+ baris di satu layar.",
+      "state": "Status",
+      "operator": "Operator",
+      "todayLogin": "Login hari ini",
+      "currentLoad": "Beban",
+      "completed": "Selesai",
+      "supervisor": "Supervisor",
+      "stateChange": "Ubah status",
+      "autoAssign": "Auto-tugas",
+      "unassigned": "— Belum ditugaskan —",
+      "autoEnabled": "Aktif",
+      "autoDisabled": "Dikecualikan"
+    },
+    "span": {
+      "title": "Pengaturan span of control supervisor",
+      "badge": "Span of Control",
+      "desc": "Tentukan jumlah operator yang ingin dikelola tiap supervisor dan tentukan tiap operator dikelola supervisor mana. Dipakai untuk distribusi beban, deteksi overload, dasar kinerja.",
+      "exceeded": "Lebih",
+      "normal": "Normal",
+      "managing": "Dikelola",
+      "desiredCapacity": "Target",
+      "desiredCapacityLabel": "Target jumlah operator",
+      "managedOperators": "Operator dikelola",
+      "none": "Tidak ada"
+    },
+    "assign": {
+      "title": "Penugasan supervisor per operator",
+      "active": "Aktif",
+      "inactive": "Tidak aktif"
+    }
+  },
   "operatorStatistics": {
     "pageTitle": "Kinerja / evaluasi",
     "pageDesc": "Bandingkan operator dengan skor berbobot dan hitung insentif. Berbeda dengan manajemen operator, fokusnya pada kriteria evaluasi dan perhitungan reward, bukan perubahan status.",

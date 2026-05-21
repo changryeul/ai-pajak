@@ -402,6 +402,62 @@
     },
     "successToast": "{n} 1721 A1 certificates issued"
   },
+  "operatorTeam": {
+    "pageTitle": "Operator management",
+    "pageDesc": "People / accounts / state / availability. Performance comparison and incentives live in the Performance menu.",
+    "refresh": "Refresh",
+    "notLoggedIn": "Not logged in",
+    "personSuffix": "{n} people",
+    "caseSuffix": "{n} cases",
+    "workState": {
+      "available": "Available",
+      "consulting": "Consulting",
+      "reviewing": "Reviewing",
+      "coretax": "Coretax",
+      "break": "Break",
+      "offline": "Offline",
+      "resigned": "Resigned"
+    },
+    "status": {
+      "title": "Operator state overview",
+      "desc": "Compact status board + table so you can see 10+ operators on one screen.",
+      "todayLoggedIn": "Online today",
+      "autoEligible": "Auto-assign ready",
+      "activeAssignment": "Active assignments"
+    },
+    "table": {
+      "title": "Operator state table",
+      "desc": "Change state or pick the managing supervisor directly in the table. Scales to 10+ rows on one screen.",
+      "state": "State",
+      "operator": "Operator",
+      "todayLogin": "Today's login",
+      "currentLoad": "Load",
+      "completed": "Completed",
+      "supervisor": "Supervisor",
+      "stateChange": "Change state",
+      "autoAssign": "Auto-assign",
+      "unassigned": "— Unassigned —",
+      "autoEnabled": "Enabled",
+      "autoDisabled": "Excluded"
+    },
+    "span": {
+      "title": "Supervisor span of control",
+      "badge": "Span of Control",
+      "desc": "Set each supervisor's desired operator count and assign each operator to a supervisor. Used for workload balance, overload detection, and performance baselines.",
+      "exceeded": "Over",
+      "normal": "Normal",
+      "managing": "Managing",
+      "desiredCapacity": "Desired",
+      "desiredCapacityLabel": "Desired operator count",
+      "managedOperators": "Managed operators",
+      "none": "None"
+    },
+    "assign": {
+      "title": "Per-operator supervisor assignment",
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
   "operatorStatistics": {
     "pageTitle": "Performance / evaluation",
     "pageDesc": "Compares operators on weighted scores and computes incentives. Unlike operator management, this is about evaluation criteria and reward calculation, not state changes.",

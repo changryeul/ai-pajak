@@ -402,6 +402,62 @@
     },
     "successToast": "{n}人 1721 A1 发行完成"
   },
+  "operatorTeam": {
+    "pageTitle": "客服管理",
+    "pageDesc": "管理人员 / 账号 / 状态 / 出勤情况的页面。绩效比较与激励计算在「绩效 / 评估」菜单。",
+    "refresh": "刷新",
+    "notLoggedIn": "未登录",
+    "personSuffix": "{n}人",
+    "caseSuffix": "{n}件",
+    "workState": {
+      "available": "待机",
+      "consulting": "咨询中",
+      "reviewing": "审核中",
+      "coretax": "Coretax作业",
+      "break": "休息",
+      "offline": "离线",
+      "resigned": "离职"
+    },
+    "status": {
+      "title": "客服状态概览",
+      "desc": "去掉卡片详情,改用一屏可见 10+ 客服的状态板与表格。",
+      "todayLoggedIn": "今日上线",
+      "autoEligible": "可自动指派",
+      "activeAssignment": "活动中分配"
+    },
+    "table": {
+      "title": "客服状态表",
+      "desc": "状态变更与主管指派在表内直接完成。10+ 行也可一屏显示。",
+      "state": "状态",
+      "operator": "客服",
+      "todayLogin": "今日登录",
+      "currentLoad": "当前分配",
+      "completed": "已完成",
+      "supervisor": "主管",
+      "stateChange": "更改状态",
+      "autoAssign": "自动指派",
+      "unassigned": "— 未指派 —",
+      "autoEnabled": "可用",
+      "autoDisabled": "排除"
+    },
+    "span": {
+      "title": "主管管理人数设定",
+      "badge": "Span of Control",
+      "desc": "为每位主管设定希望管理的客服人数,并指派客服归属。用于工作分配、过载判断、绩效基准。",
+      "exceeded": "超出",
+      "normal": "正常",
+      "managing": "管理中",
+      "desiredCapacity": "目标人数",
+      "desiredCapacityLabel": "希望管理客服数",
+      "managedOperators": "管理的客服",
+      "none": "无"
+    },
+    "assign": {
+      "title": "按客服指派主管",
+      "active": "启用",
+      "inactive": "未启用"
+    }
+  },
   "operatorStatistics": {
     "pageTitle": "绩效 / 评估",
     "pageDesc": "按加权分数比较客服并计算激励。与客服管理不同,重点是评估标准与奖励计算,而非状态变更。",
