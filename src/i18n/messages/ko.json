@@ -419,6 +419,27 @@
       "savedRequest": "{n}개 필드를 고객에게 수정 요청했습니다. 상태가 DATA_REVIEW로 설정되었습니다."
     }
   },
+  "closingOcr": {
+    "aiAnalysis": "AI 분석",
+    "analyzing": "분석 중…",
+    "reAnalyzing": "재분석 중…",
+    "reAnalyze": "다시 분석",
+    "retrying": "재시도 중…",
+    "retry": "다시 시도",
+    "aiFailed": "AI 분석 실패",
+    "confidence": "신뢰도 {pct}",
+    "total": "합계",
+    "rowCount": "행 수",
+    "categories": {
+      "SALES_LIST": "매출 리스트",
+      "PURCHASE_LIST": "매입 비용 리스트",
+      "BANK_STATEMENT": "은행 거래내역",
+      "FINANCIAL_STATEMENT": "재무제표",
+      "PAYROLL": "급여 대장",
+      "INVENTORY": "재고 명세",
+      "OTHER": "기타"
+    }
+  },
   "dashboard": {
     "title": "대시보드",
     "welcome": "환영합니다",

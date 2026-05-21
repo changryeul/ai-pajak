@@ -419,6 +419,27 @@
       "savedRequest": "{n} 件のフィールドを顧客に修正依頼しました。ステータスが DATA_REVIEW に設定されました。"
     }
   },
+  "closingOcr": {
+    "aiAnalysis": "AI 分析",
+    "analyzing": "分析中…",
+    "reAnalyzing": "再分析中…",
+    "reAnalyze": "再分析",
+    "retrying": "再試行中…",
+    "retry": "再試行",
+    "aiFailed": "AI 分析失敗",
+    "confidence": "信頼度 {pct}",
+    "total": "合計",
+    "rowCount": "行数",
+    "categories": {
+      "SALES_LIST": "売上リスト",
+      "PURCHASE_LIST": "仕入・費用リスト",
+      "BANK_STATEMENT": "銀行取引明細",
+      "FINANCIAL_STATEMENT": "財務諸表",
+      "PAYROLL": "給与台帳",
+      "INVENTORY": "在庫明細",
+      "OTHER": "その他"
+    }
+  },
   "dashboard": {
     "title": "ダッシュボード",
     "complianceScore": "税務コンプライアンススコア",

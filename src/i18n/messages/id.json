@@ -419,6 +419,27 @@
       "savedRequest": "{n} field diminta dari pelanggan. Status diatur ke DATA_REVIEW."
     }
   },
+  "closingOcr": {
+    "aiAnalysis": "Analisis AI",
+    "analyzing": "Menganalisis…",
+    "reAnalyzing": "Menganalisis ulang…",
+    "reAnalyze": "Analisis ulang",
+    "retrying": "Mencoba lagi…",
+    "retry": "Coba lagi",
+    "aiFailed": "Analisis AI gagal",
+    "confidence": "Keyakinan {pct}",
+    "total": "Total",
+    "rowCount": "Baris",
+    "categories": {
+      "SALES_LIST": "Daftar penjualan",
+      "PURCHASE_LIST": "Daftar pembelian / biaya",
+      "BANK_STATEMENT": "Mutasi bank",
+      "FINANCIAL_STATEMENT": "Laporan keuangan",
+      "PAYROLL": "Daftar gaji",
+      "INVENTORY": "Daftar persediaan",
+      "OTHER": "Lainnya"
+    }
+  },
   "dashboard": {
     "title": "Dasbor",
     "complianceScore": "Skor Kepatuhan",

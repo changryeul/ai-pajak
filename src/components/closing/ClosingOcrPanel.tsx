@@ -4,16 +4,6 @@ import { useTranslations } from 'next-intl';
 import { Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import type { ClosingDocument } from '@/hooks/useClosingSession';
 
-const CATEGORY_KO: Record<string, string> = {
-  SALES_LIST: '매출 리스트',
-  PURCHASE_LIST: '매입 비용 리스트',
-  BANK_STATEMENT: '은행 거래내역',
-  FINANCIAL_STATEMENT: '재무제표',
-  PAYROLL: '급여 대장',
-  INVENTORY: '재고 명세',
-  OTHER: '기타',
-};
-
 function fmtIDR(n: number | null | undefined): string {
   if (n == null) return '—';
   return `Rp ${n.toLocaleString('id-ID')}`;
@@ -34,6 +24,16 @@ export function ClosingOcrPanel({
   onTrigger: () => void;
 }) {
   const tc = useTranslations('common');
+  const t = useTranslations('closingOcr');
+  // next-intl throws on missing keys; the model may invent unknown
+  // categories so we fall back to the raw code if the key is absent.
+  const categoryLabel = (cat: string) => {
+    try {
+      return t(`categories.${cat}`);
+    } catch {
+      return cat;
+    }
+  };
 
   const status = doc.ocr_status ?? 'NONE';
   const ext = doc.ocr_extracted ?? null;
@@ -42,7 +42,7 @@ export function ClosingOcrPanel({
   const inProgress = busy || status === 'PROCESSING';
 
   if (status === 'COMPLETED' && ext) {
-    const categoryLabel = CATEGORY_KO[ext.category] ?? ext.category;
+    const catLabel = categoryLabel(ext.category);
     const confidence = doc.ocr_confidence ?? null;
     const confColor =
       confidence == null
@@ -57,22 +57,22 @@ export function ClosingOcrPanel({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 border">
             <Sparkles className="h-3 w-3 mr-1 text-emerald-600" />
-            AI 분석
+            {t('aiAnalysis')}
           </span>
           <span className="inline-flex items-center rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-            {categoryLabel}
+            {catLabel}
           </span>
           <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${confColor}`}>
-            신뢰도 {fmtPct(confidence)}
+            {t('confidence', { pct: fmtPct(confidence) })}
           </span>
         </div>
         <div className="mt-1.5 grid grid-cols-2 gap-2 text-[11px]">
           <div>
-            <span className="text-slate-500">합계: </span>
+            <span className="text-slate-500">{t('total')}: </span>
             <span className="font-mono text-slate-800">{fmtIDR(ext.totalAmount)}</span>
           </div>
           <div>
-            <span className="text-slate-500">행 수: </span>
+            <span className="text-slate-500">{t('rowCount')}: </span>
             <span className="font-mono text-slate-800">{ext.rowCount ?? '—'}</span>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function ClosingOcrPanel({
           disabled={inProgress}
           onClick={onTrigger}
         >
-          {inProgress ? '재분석 중…' : '다시 분석'}
+          {inProgress ? t('reAnalyzing') : t('reAnalyze')}
         </button>
       </div>
     );
@@ -96,7 +96,7 @@ export function ClosingOcrPanel({
       <div className="mt-2 rounded-md border border-rose-100 bg-rose-50/60 p-2.5">
         <div className="flex items-center gap-1.5 text-[11px] text-rose-700">
           <AlertCircle className="h-3 w-3" />
-          <span className="font-semibold">AI 분석 실패</span>
+          <span className="font-semibold">{t('aiFailed')}</span>
         </div>
         {doc.ocr_error && (
           <p className="text-[11px] text-rose-700 mt-1">{doc.ocr_error}</p>
@@ -107,7 +107,7 @@ export function ClosingOcrPanel({
           disabled={inProgress}
           onClick={onTrigger}
         >
-          {inProgress ? '재시도 중…' : '다시 시도'}
+          {inProgress ? t('retrying') : t('retry')}
         </button>
       </div>
     );
@@ -120,14 +120,14 @@ export function ClosingOcrPanel({
       className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
       disabled={inProgress}
       onClick={onTrigger}
-      aria-label={tc('analyze') ?? 'AI 분석'}
+      aria-label={tc('analyze') ?? t('aiAnalysis')}
     >
       {inProgress ? (
         <Loader2 className="h-3 w-3 animate-spin" />
       ) : (
         <Sparkles className="h-3 w-3 text-emerald-600" />
       )}
-      {inProgress ? '분석 중…' : 'AI 분석'}
+      {inProgress ? t('analyzing') : t('aiAnalysis')}
     </button>
   );
 }

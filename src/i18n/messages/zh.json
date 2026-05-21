@@ -419,6 +419,27 @@
       "savedRequest": "已向客户请求 {n} 个字段。状态设为 DATA_REVIEW。"
     }
   },
+  "closingOcr": {
+    "aiAnalysis": "AI 分析",
+    "analyzing": "分析中…",
+    "reAnalyzing": "重新分析中…",
+    "reAnalyze": "重新分析",
+    "retrying": "重试中…",
+    "retry": "重试",
+    "aiFailed": "AI 分析失败",
+    "confidence": "可信度 {pct}",
+    "total": "合计",
+    "rowCount": "行数",
+    "categories": {
+      "SALES_LIST": "销售清单",
+      "PURCHASE_LIST": "采购 / 费用清单",
+      "BANK_STATEMENT": "银行流水",
+      "FINANCIAL_STATEMENT": "财务报表",
+      "PAYROLL": "工资册",
+      "INVENTORY": "库存清单",
+      "OTHER": "其他"
+    }
+  },
   "dashboard": {
     "title": "仪表板",
     "complianceScore": "税务合规评分",

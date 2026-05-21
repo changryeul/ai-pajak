@@ -419,6 +419,27 @@
       "savedRequest": "{n} fields requested from the customer. Status set to DATA_REVIEW."
     }
   },
+  "closingOcr": {
+    "aiAnalysis": "AI analysis",
+    "analyzing": "Analyzing…",
+    "reAnalyzing": "Re-analyzing…",
+    "reAnalyze": "Re-analyze",
+    "retrying": "Retrying…",
+    "retry": "Retry",
+    "aiFailed": "AI analysis failed",
+    "confidence": "Confidence {pct}",
+    "total": "Total",
+    "rowCount": "Rows",
+    "categories": {
+      "SALES_LIST": "Sales list",
+      "PURCHASE_LIST": "Purchase / expense list",
+      "BANK_STATEMENT": "Bank statement",
+      "FINANCIAL_STATEMENT": "Financial statement",
+      "PAYROLL": "Payroll",
+      "INVENTORY": "Inventory",
+      "OTHER": "Other"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome",
