@@ -402,6 +402,53 @@
     },
     "successToast": "{n} 1721 A1 certificates issued"
   },
+  "operatorDashboard": {
+    "pageTitle": "Supervisor Dashboard",
+    "pageDesc": "New work is auto-balanced across supervisors; customers with a consult history are auto-assigned to their previous operator first.",
+    "refresh": "Refresh",
+    "notLoggedIn": "Not logged in",
+    "caseSuffix": "{n}",
+    "personSuffix": "{n} people",
+    "kpi": {
+      "total": "Total",
+      "assigned": "Assigned",
+      "unassigned": "Unassigned",
+      "pendingApproval": "Approval pending",
+      "pendingDocs": "Docs requested",
+      "urgent": "Urgent",
+      "completed": "Filed"
+    },
+    "supervisorDist": {
+      "title": "Supervisor auto-balance status",
+      "managedSuffix": "managing {n}",
+      "waiting": "Waiting",
+      "currentAssignment": "Current load"
+    },
+    "operatorStatus": {
+      "title": "Operator status",
+      "desc": "Square cards showing today's login, state, and load — the inputs for auto-assign decisions.",
+      "badge": "5 × 2 View",
+      "row": {
+        "assignment": "Load",
+        "login": "Login",
+        "auto": "Auto",
+        "autoEnabled": "On",
+        "autoDisabled": "Off"
+      },
+      "moreHint": "Additional operators ({n})",
+      "moreLink": "Operator management",
+      "moreHintTail": "— see the compact table there."
+    },
+    "myCases": {
+      "title": "My auto-balance / urgent / approval cases",
+      "empty": "Nothing to show.",
+      "row": {
+        "assigneePrefix": "Assignee {id}",
+        "unassigned": "Unassigned",
+        "reviewNeeded": "Review needed"
+      }
+    }
+  },
   "operatorTeam": {
     "pageTitle": "Operator management",
     "pageDesc": "People / accounts / state / availability. Performance comparison and incentives live in the Performance menu.",

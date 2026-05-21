@@ -402,6 +402,53 @@
     },
     "successToast": "{n}名 1721 A1 発行完了"
   },
+  "operatorDashboard": {
+    "pageTitle": "Supervisor Dashboard",
+    "pageDesc": "新規業務はSVに均等自動配分され、相談履歴のある顧客は従来担当へ優先自動割当されます。",
+    "refresh": "再読み込み",
+    "notLoggedIn": "未ログイン",
+    "caseSuffix": "{n}件",
+    "personSuffix": "{n}名",
+    "kpi": {
+      "total": "全体",
+      "assigned": "割当",
+      "unassigned": "未割当",
+      "pendingApproval": "承認待ち",
+      "pendingDocs": "資料要請",
+      "urgent": "緊急",
+      "completed": "申告完了"
+    },
+    "supervisorDist": {
+      "title": "SV 自動配分状況",
+      "managedSuffix": "{n}名 管理",
+      "waiting": "待機",
+      "currentAssignment": "現在の割当業務"
+    },
+    "operatorStatus": {
+      "title": "担当者状態",
+      "desc": "自動割当判断に必要な本日ログイン/状態/割当状況を正方形カードで表示します。",
+      "badge": "5 × 2 View",
+      "row": {
+        "assignment": "割当",
+        "login": "ログイン",
+        "auto": "自動",
+        "autoEnabled": "可能",
+        "autoDisabled": "除外"
+      },
+      "moreHint": "他の担当 {n}名は",
+      "moreLink": "担当者管理",
+      "moreHintTail": "画面のcompact tableで確認します。"
+    },
+    "myCases": {
+      "title": "私の 自動配分 / 緊急 / 承認待ち ケース",
+      "empty": "表示するケースがありません。",
+      "row": {
+        "assigneePrefix": "担当 {id}",
+        "unassigned": "未割当",
+        "reviewNeeded": "確認要"
+      }
+    }
+  },
   "operatorTeam": {
     "pageTitle": "担当者管理",
     "pageDesc": "人 / アカウント / 状態 / 稼働可否を管理する画面です。業績比較やインセンティブ算定は「業績/評価」メニューで行います。",

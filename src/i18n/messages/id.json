@@ -402,6 +402,53 @@
     },
     "successToast": "{n} bukti 1721 A1 diterbitkan"
   },
+  "operatorDashboard": {
+    "pageTitle": "Supervisor Dashboard",
+    "pageDesc": "Pekerjaan baru dibagi rata ke supervisor secara otomatis; pelanggan dengan riwayat konsultasi diprioritaskan ke operator sebelumnya.",
+    "refresh": "Muat ulang",
+    "notLoggedIn": "Belum login",
+    "caseSuffix": "{n}",
+    "personSuffix": "{n} orang",
+    "kpi": {
+      "total": "Total",
+      "assigned": "Ditugaskan",
+      "unassigned": "Belum ditugaskan",
+      "pendingApproval": "Menunggu persetujuan",
+      "pendingDocs": "Permintaan dokumen",
+      "urgent": "Urgent",
+      "completed": "Selesai"
+    },
+    "supervisorDist": {
+      "title": "Status pembagian otomatis supervisor",
+      "managedSuffix": "kelola {n}",
+      "waiting": "Menunggu",
+      "currentAssignment": "Beban saat ini"
+    },
+    "operatorStatus": {
+      "title": "Status operator",
+      "desc": "Kartu persegi menampilkan login hari ini, status, dan beban — input untuk auto-tugas.",
+      "badge": "5 × 2 View",
+      "row": {
+        "assignment": "Beban",
+        "login": "Login",
+        "auto": "Auto",
+        "autoEnabled": "Aktif",
+        "autoDisabled": "Mati"
+      },
+      "moreHint": "Operator tambahan ({n})",
+      "moreLink": "Manajemen operator",
+      "moreHintTail": "— lihat tabel ringkas di sana."
+    },
+    "myCases": {
+      "title": "Kasus saya: auto-tugas / urgent / persetujuan",
+      "empty": "Tidak ada kasus untuk ditampilkan.",
+      "row": {
+        "assigneePrefix": "PIC {id}",
+        "unassigned": "Belum ditugaskan",
+        "reviewNeeded": "Perlu tinjauan"
+      }
+    }
+  },
   "operatorTeam": {
     "pageTitle": "Manajemen operator",
     "pageDesc": "Orang / akun / status / ketersediaan. Perbandingan kinerja & insentif ada di menu Kinerja.",

@@ -402,6 +402,53 @@
     },
     "successToast": "{n}명 1721 A1 발급 완료"
   },
+  "operatorDashboard": {
+    "pageTitle": "Supervisor Dashboard",
+    "pageDesc": "신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.",
+    "refresh": "새로고침",
+    "notLoggedIn": "미로그인",
+    "caseSuffix": "{n}건",
+    "personSuffix": "{n}명",
+    "kpi": {
+      "total": "전체",
+      "assigned": "배정",
+      "unassigned": "미배정",
+      "pendingApproval": "승인대기",
+      "pendingDocs": "자료요청",
+      "urgent": "긴급",
+      "completed": "신고완료"
+    },
+    "supervisorDist": {
+      "title": "Supervisor 자동배분 현황",
+      "managedSuffix": "{n}명 관리",
+      "waiting": "대기",
+      "currentAssignment": "현재 배정 업무"
+    },
+    "operatorStatus": {
+      "title": "상담원 상태",
+      "desc": "자동배정 판단에 필요한 오늘 로그인/상태/배정 현황을 정사각형 카드로 표시합니다.",
+      "badge": "5 × 2 View",
+      "row": {
+        "assignment": "배정",
+        "login": "로그인",
+        "auto": "자동",
+        "autoEnabled": "가능",
+        "autoDisabled": "제외"
+      },
+      "moreHint": "추가 상담원 {n}명은",
+      "moreLink": "상담원 관리",
+      "moreHintTail": "화면의 compact table에서 확인합니다."
+    },
+    "myCases": {
+      "title": "내 자동배분 / 긴급 / 승인대기 케이스",
+      "empty": "표시할 케이스가 없습니다.",
+      "row": {
+        "assigneePrefix": "담당 {id}",
+        "unassigned": "미배정",
+        "reviewNeeded": "검토필요"
+      }
+    }
+  },
   "operatorTeam": {
     "pageTitle": "상담원 관리",
     "pageDesc": "상담원 관리는 사람/계정/상태/근무 가능 여부를 관리하는 화면입니다. 성과 비교나 인센티브 산정은 성과/평가 메뉴에서 처리합니다.",

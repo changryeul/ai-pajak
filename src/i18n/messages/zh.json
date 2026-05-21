@@ -402,6 +402,53 @@
     },
     "successToast": "{n}人 1721 A1 发行完成"
   },
+  "operatorDashboard": {
+    "pageTitle": "Supervisor Dashboard",
+    "pageDesc": "新工作均匀自动分配给主管,有咨询历史的客户优先自动指派给原客服。",
+    "refresh": "刷新",
+    "notLoggedIn": "未登录",
+    "caseSuffix": "{n}件",
+    "personSuffix": "{n}人",
+    "kpi": {
+      "total": "全部",
+      "assigned": "已分配",
+      "unassigned": "未分配",
+      "pendingApproval": "待审批",
+      "pendingDocs": "资料请求",
+      "urgent": "紧急",
+      "completed": "申报完成"
+    },
+    "supervisorDist": {
+      "title": "主管自动分配状况",
+      "managedSuffix": "管理 {n}人",
+      "waiting": "等待",
+      "currentAssignment": "当前分配业务"
+    },
+    "operatorStatus": {
+      "title": "客服状态",
+      "desc": "用方形卡片显示今日登录 / 状态 / 分配情况 — 自动指派判断的输入。",
+      "badge": "5 × 2 View",
+      "row": {
+        "assignment": "分配",
+        "login": "登录",
+        "auto": "自动",
+        "autoEnabled": "可用",
+        "autoDisabled": "排除"
+      },
+      "moreHint": "其他 {n} 名客服请在",
+      "moreLink": "客服管理",
+      "moreHintTail": "页面的紧凑表格中查看。"
+    },
+    "myCases": {
+      "title": "我的 自动分配 / 紧急 / 待审批 案件",
+      "empty": "没有可显示的案件。",
+      "row": {
+        "assigneePrefix": "负责 {id}",
+        "unassigned": "未分配",
+        "reviewNeeded": "需审核"
+      }
+    }
+  },
   "operatorTeam": {
     "pageTitle": "客服管理",
     "pageDesc": "管理人员 / 账号 / 状态 / 出勤情况的页面。绩效比较与激励计算在「绩效 / 评估」菜单。",
