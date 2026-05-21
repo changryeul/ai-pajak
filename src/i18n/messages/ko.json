@@ -402,6 +402,138 @@
     },
     "successToast": "{n}명 1721 A1 발급 완료"
   },
+  "operatorWorkload": {
+    "pageTitle": "업무 배정/회수",
+    "pageDesc": "신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.",
+    "refresh": "새로고침",
+    "actionFailed": "{action} 실패",
+    "actionDone": "{action} 처리됨",
+    "kpi": {
+      "mySupervisorPending": "내 Supervisor 대기",
+      "todayLoggedIn": "오늘 로그인 상담원",
+      "autoEligible": "자동배정 가능",
+      "autoExcluded": "자동배정 제외",
+      "selectedCase": "선택 케이스",
+      "personSuffix": "{n}명"
+    },
+    "list": {
+      "title": "신규/배정 대상",
+      "empty": "케이스가 없습니다.",
+      "assigneePrefix": "담당 {id}",
+      "unassigned": "미배정"
+    },
+    "console": {
+      "title": "업무요청 상담원 배정 콘솔",
+      "desc": "이 리스트는 이미 Supervisor에게 자동 배분된 고객 요청입니다. 여기서는 어느 상담원에게 배정할지만 결정합니다.",
+      "emptyState": "왼쪽에서 케이스를 선택하면 배정 옵션이 나타납니다."
+    },
+    "decision": {
+      "title": "선택 업무 배정 결정",
+      "currentSupervisor": "현재 Supervisor",
+      "currentOperator": "현재 상담원",
+      "assignMode": "배정방식",
+      "requestReceived": "요청접수",
+      "autoAssigned": "자동배정",
+      "unassigned": "미배정",
+      "notDistributed": "미배분"
+    },
+    "preferred": {
+      "title": "1. 우선지원 상담원",
+      "desc": "같은 고객을 과거 처리한 상담원을 최우선으로 배정합니다.",
+      "candidateLabel": "우선지원 후보:",
+      "none": "없음",
+      "btn": "우선지원 상담원에게 배정"
+    },
+    "auto": {
+      "title": "2. 자동배정",
+      "desc": "제외 상담원을 빼고, 상태/부하 기준으로 가장 적합한 상담원을 추천합니다.",
+      "btn": "자동배정 확정"
+    },
+    "exclude": {
+      "title": "3. 자동배정 제외 설정",
+      "excludedBadge": "제외 {n}명",
+      "desc": "특정 상담원을 자동배정 후보에서 제외합니다. 제외해도 수동배정은 가능합니다.",
+      "statusLabel": "상태",
+      "loadLabel": "배정 {n}건",
+      "excluded": "자동배정 제외",
+      "candidate": "자동배정 후보"
+    },
+    "recall": {
+      "title": "4. 환수 / 수동 재배정",
+      "recallBtn": "현재 배정 환수",
+      "desc": "이미 배정된 업무를 Supervisor가 환수하거나, 특정 상담원에게 직접 재배정합니다.",
+      "selectPlaceholder": "오늘 로그인 상담원 선택…",
+      "selectOption": "{name} ({id}) · {state} · 배정 {n}건",
+      "assignBtn": "선택 상담원에게 배정"
+    },
+    "transferSupervisor": {
+      "title": "Supervisor 이관",
+      "desc": "이 고객 요청 자체를 다른 Supervisor에게 넘길 때 사용합니다.",
+      "btn": "{name} ({n}건)"
+    },
+    "detail": {
+      "title": "선택 케이스 상세",
+      "empty": "선택된 케이스가 없습니다.",
+      "operator": "담당 상담원",
+      "supervisor": "담당 Supervisor",
+      "priority": "우선순위",
+      "due": "Due"
+    },
+    "sticky": {
+      "title": "동일 상담원 우선배정",
+      "badge": "Sticky Assignment",
+      "summary": "같은 고객의 과거 케이스 {n}건. 우선 상담원: ",
+      "noPast": "과거 케이스 없음."
+    },
+    "instruction": {
+      "title": "상담원 지시",
+      "placeholder": "예: Coretax ID Billing 발행 후 고객 화면에 반영",
+      "sendBtn": "지시"
+    },
+    "workState": {
+      "available": "대기",
+      "consulting": "상담중",
+      "reviewing": "검토중",
+      "coretax": "Coretax작업중",
+      "break": "휴식",
+      "offline": "오프라인",
+      "resigned": "퇴사"
+    },
+    "status": {
+      "PENDING": "대기",
+      "PENDING_DOCS": "자료요청",
+      "DATA_REVIEW": "검토중",
+      "PENDING_APPROVAL": "승인요청",
+      "APPROVED": "승인",
+      "EBILLING_GENERATED": "eBilling",
+      "PAYMENT_PENDING": "납부대기",
+      "PAYMENT_UPLOADED": "납부영수증",
+      "PAYMENT_VERIFIED": "납부확인",
+      "DJP_SUBMITTED": "DJP제출",
+      "BPE_UPLOADED": "BPE",
+      "COMPLETED": "신고완료",
+      "FAILED": "실패"
+    },
+    "bulkTransfer": {
+      "title": "퇴사자 고객 / 업무 전체 이관",
+      "operator": "상담원",
+      "supervisor": "Supervisor",
+      "fromPlaceholder": "퇴사자 선택…",
+      "toPlaceholder": "받을 사람 선택…",
+      "confirm": "정말 이관 실행하시겠습니까? 퇴사 처리도 함께 진행됩니다.",
+      "previewActive": "이관 대상 활성 케이스: ",
+      "previewCustomer": "현재 담당 고객: ",
+      "previewCompleted": "완료 케이스(이력): ",
+      "previewManaged": "관리 상담원 수: ",
+      "caseUnit": "{n}건",
+      "placeUnit": "{n}곳",
+      "personUnit": "{n}명",
+      "runBtn": "전체 이관 실행",
+      "running": "이관 중…",
+      "failed": "이관 실패",
+      "done": "{n}건 이관 완료"
+    }
+  },
   "inviteAccept": {
     "roleLabel": {
       "TAX_OPERATOR": "백오피스 상담원",

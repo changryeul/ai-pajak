@@ -1,17 +1,18 @@
 'use client';
 
 /**
- * 업무 배정/회수 — Supervisor 콘솔 (PDF p.3-6 명세 기준).
+ * Workload assignment / recall — Supervisor console (PDF p.3-6).
  *
  * 3-column layout:
- *   좌  : 신규/배정 대상 케이스 리스트
- *   중앙: 업무요청 상담원 배정 콘솔 — 우선지원 / 자동배정 / 제외 / 환수 / SV 이관
- *   우  : 선택 케이스 상세 + Sticky Assignment + 상담원 지시
+ *   left   : new / unassigned case list
+ *   center : operator-assignment console — preferred / auto / exclude / recall / SV transfer
+ *   right  : selected case detail + Sticky Assignment + operator instruction
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
-import { Loader2, AlertTriangle, CheckCircle, Users, BarChart3, RefreshCw, Send, ArrowRightLeft, Sparkles } from 'lucide-react';
+import { Loader2, AlertTriangle, CheckCircle, RefreshCw, Send, ArrowRightLeft } from 'lucide-react';
 
 interface CaseRow {
   id: string;
@@ -48,22 +49,6 @@ interface OperatorRow {
   active_load: number;
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: '대기',
-  PENDING_DOCS: '자료요청',
-  DATA_REVIEW: '검토중',
-  PENDING_APPROVAL: '승인요청',
-  APPROVED: '승인',
-  EBILLING_GENERATED: 'eBilling',
-  PAYMENT_PENDING: '납부대기',
-  PAYMENT_UPLOADED: '납부영수증',
-  PAYMENT_VERIFIED: '납부확인',
-  DJP_SUBMITTED: 'DJP제출',
-  BPE_UPLOADED: 'BPE',
-  COMPLETED: '신고완료',
-  FAILED: '실패',
-};
-
 const STATUS_COLOR: Record<string, string> = {
   PENDING: 'bg-slate-100 text-slate-700',
   PENDING_DOCS: 'bg-amber-100 text-amber-800',
@@ -81,17 +66,8 @@ const PRIORITY_COLOR: Record<string, string> = {
   LOW: 'text-slate-500 bg-slate-50 border-slate-200',
 };
 
-const WORK_STATE_LABEL: Record<string, string> = {
-  available: '대기',
-  consulting: '상담중',
-  reviewing: '검토중',
-  coretax: 'Coretax작업중',
-  break: '휴식',
-  offline: '오프라인',
-  resigned: '퇴사',
-};
-
 export default function WorkloadPage() {
+  const t = useTranslations('operatorWorkload');
   const { session } = useSession();
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [operators, setOperators] = useState<OperatorRow[]>([]);
@@ -103,6 +79,15 @@ export default function WorkloadPage() {
   const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [pickedOperatorId, setPickedOperatorId] = useState<string>('');
   const [instruction, setInstruction] = useState('');
+
+  // Safe enum label helpers — next-intl throws on missing keys, and the
+  // model may return unknown enum values from the API.
+  const statusLabel = (key: string) => {
+    try { return t(`status.${key}`); } catch { return key; }
+  };
+  const workStateLabel = (key: string) => {
+    try { return t(`workState.${key}`); } catch { return key; }
+  };
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -168,9 +153,9 @@ export default function WorkloadPage() {
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        setMessage({ type: 'err', text: json.error || `${action} 실패` });
+        setMessage({ type: 'err', text: json.error || t('actionFailed', { action }) });
       } else {
-        setMessage({ type: 'ok', text: `${action} 처리됨` });
+        setMessage({ type: 'ok', text: t('actionDone', { action }) });
         await loadAll();
         await loadDetail(selectedCaseId);
       }
@@ -180,10 +165,6 @@ export default function WorkloadPage() {
   };
 
   const myCases = cases.filter(c => session?.userId && c.supervisor?.employee_id);
-  // Note: we can't directly compare supervisor user_id from the row alone here;
-  // use API scope=mine instead in a future iteration. For now, "내 SV 대기" =
-  // unassigned cases (supervisor 자동배분 받았지만 operator 미지정).
-  const unassignedCount = cases.filter(c => !c.operator_id).length;
   const todayLoggedIn = operators.filter(o => o.work_state !== 'offline').length;
   const autoEligible = operators.filter(o => o.auto_assign_enabled && (o.work_state === 'available' || o.work_state === 'reviewing' || o.work_state === 'consulting')).length;
 
@@ -195,11 +176,11 @@ export default function WorkloadPage() {
     <div className="container mx-auto py-6 px-4 max-w-[1500px]">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">업무 배정/회수</h1>
-          <p className="text-sm text-slate-500 mt-1">신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.</p>
+          <h1 className="text-2xl font-black text-slate-900">{t('pageTitle')}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t('pageDesc')}</p>
         </div>
         <button onClick={loadAll} className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> 새로고침
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> {t('refresh')}
         </button>
       </div>
 
@@ -212,17 +193,17 @@ export default function WorkloadPage() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-        <KpiCard label="내 Supervisor 대기" value={String(myCases.filter(c => !c.operator_id).length)} />
-        <KpiCard label="오늘 로그인 상담원" value={`${todayLoggedIn}명`} />
-        <KpiCard label="자동배정 가능" value={`${autoEligible}명`} />
-        <KpiCard label="자동배정 제외" value={`${excludedOperators.length}명`} />
-        <KpiCard label="선택 케이스" value={detail?.case_code || '-'} />
+        <KpiCard label={t('kpi.mySupervisorPending')} value={String(myCases.filter(c => !c.operator_id).length)} />
+        <KpiCard label={t('kpi.todayLoggedIn')} value={t('kpi.personSuffix', { n: todayLoggedIn })} />
+        <KpiCard label={t('kpi.autoEligible')} value={t('kpi.personSuffix', { n: autoEligible })} />
+        <KpiCard label={t('kpi.autoExcluded')} value={t('kpi.personSuffix', { n: excludedOperators.length })} />
+        <KpiCard label={t('kpi.selectedCase')} value={detail?.case_code || '-'} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_360px] gap-4">
         {/* Left: case list */}
         <section className="rounded-2xl bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-black text-slate-900 mb-3">신규/배정 대상</h2>
+          <h2 className="text-sm font-black text-slate-900 mb-3">{t('list.title')}</h2>
           <div className="space-y-2 max-h-[calc(100vh-260px)] overflow-y-auto">
             {cases.map(c => {
               const isSel = c.id === selectedCaseId;
@@ -237,14 +218,14 @@ export default function WorkloadPage() {
                       {c.customer?.company_name || c.customer?.full_name || '—'}
                     </div>
                     <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_COLOR[c.status] || 'bg-slate-100 text-slate-700'}`}>
-                      {STATUS_LABEL[c.status] || c.status}
+                      {statusLabel(c.status)}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-0.5">
                     {c.case_code ?? '-'} · {c.service_label || c.tax_type}
                   </p>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    담당 {c.operator?.employee_id ?? '미배정'}
+                    {t('list.assigneePrefix', { id: c.operator?.employee_id ?? t('list.unassigned') })}
                     <span className={`ml-2 inline-block rounded border px-1.5 py-0.5 text-[10px] font-bold ${PRIORITY_COLOR[c.priority || 'NORMAL']}`}>
                       {c.priority || 'NORMAL'}
                     </span>
@@ -253,46 +234,46 @@ export default function WorkloadPage() {
               );
             })}
             {cases.length === 0 && !loading && (
-              <p className="text-xs text-slate-400 text-center py-8">케이스가 없습니다.</p>
+              <p className="text-xs text-slate-400 text-center py-8">{t('list.empty')}</p>
             )}
           </div>
         </section>
 
         {/* Center: assignment console */}
         <section className="rounded-2xl bg-white p-5 shadow-sm">
-          <h2 className="text-base font-black text-slate-900 mb-3">업무요청 상담원 배정 콘솔</h2>
-          <p className="text-xs text-slate-500 mb-4">이 리스트는 이미 Supervisor에게 자동 배분된 고객 요청입니다. 여기서는 어느 상담원에게 배정할지만 결정합니다.</p>
+          <h2 className="text-base font-black text-slate-900 mb-3">{t('console.title')}</h2>
+          <p className="text-xs text-slate-500 mb-4">{t('console.desc')}</p>
 
           {!detail ? (
             <div className="rounded-xl border border-dashed border-slate-200 px-4 py-12 text-center text-sm text-slate-400">
-              왼쪽에서 케이스를 선택하면 배정 옵션이 나타납니다.
+              {t('console.emptyState')}
             </div>
           ) : (
             <div className="space-y-5">
-              {/* 선택 업무 배정 결정 */}
+              {/* Decision summary */}
               <div className="rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-slate-900">선택 업무 배정 결정</h3>
+                  <h3 className="text-sm font-black text-slate-900">{t('decision.title')}</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                  <Field label="현재 Supervisor" value={detail.supervisor ? `${detail.supervisor.name} (${detail.supervisor.employee_id})` : '미배분'} />
-                  <Field label="현재 상담원" value={detail.operator ? detail.operator.employee_id : '미배정'} />
-                  <Field label="배정방식" value={detail.operator_id ? '자동배정' : '미배정'} />
-                  <Field label="요청접수" value={detail.created_at?.slice(0, 10) || '-'} />
+                  <Field label={t('decision.currentSupervisor')} value={detail.supervisor ? `${detail.supervisor.name} (${detail.supervisor.employee_id})` : t('decision.notDistributed')} />
+                  <Field label={t('decision.currentOperator')} value={detail.operator ? detail.operator.employee_id : t('decision.unassigned')} />
+                  <Field label={t('decision.assignMode')} value={detail.operator_id ? t('decision.autoAssigned') : t('decision.unassigned')} />
+                  <Field label={t('decision.requestReceived')} value={detail.created_at?.slice(0, 10) || '-'} />
                 </div>
               </div>
 
-              {/* 1. 우선지원 상담원 */}
+              {/* 1. Preferred operator */}
               <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-slate-900">1. 우선지원 상담원 <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Preferred</span></h3>
+                  <h3 className="text-sm font-black text-slate-900">{t('preferred.title')} <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Preferred</span></h3>
                 </div>
-                <p className="text-[11px] text-slate-600 mb-3">같은 고객을 과거 처리한 상담원을 최우선으로 배정합니다.</p>
+                <p className="text-[11px] text-slate-600 mb-3">{t('preferred.desc')}</p>
                 <div className="text-xs text-slate-700 mb-3">
-                  우선지원 후보: <span className="font-bold">
+                  {t('preferred.candidateLabel')} <span className="font-bold">
                     {detail.preferredOperatorId
                       ? (operators.find(o => o.id === detail.preferredOperatorId)?.name ?? detail.preferredOperatorId)
-                      : '없음'}
+                      : t('preferred.none')}
                   </span>
                 </div>
                 <button
@@ -300,41 +281,41 @@ export default function WorkloadPage() {
                   onClick={() => caseAction('assign-preferred')}
                   className="w-full rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
                 >
-                  우선지원 상담원에게 배정
+                  {t('preferred.btn')}
                 </button>
               </div>
 
-              {/* 2. 자동배정 */}
+              {/* 2. Auto assign */}
               <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-slate-900">2. 자동배정 <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">Auto</span></h3>
+                  <h3 className="text-sm font-black text-slate-900">{t('auto.title')} <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">Auto</span></h3>
                 </div>
-                <p className="text-[11px] text-slate-600 mb-3">제외 상담원을 빼고, 상태/부하 기준으로 가장 적합한 상담원을 추천합니다.</p>
+                <p className="text-[11px] text-slate-600 mb-3">{t('auto.desc')}</p>
                 <button
                   disabled={busy}
                   onClick={() => caseAction('auto-assign')}
                   className="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
                 >
-                  자동배정 확정
+                  {t('auto.btn')}
                 </button>
               </div>
 
-              {/* 3. 자동배정 제외 설정 */}
+              {/* 3. Exclude */}
               <div className="rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-slate-900">3. 자동배정 제외 설정</h3>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold">제외 {excludedOperators.length}명</span>
+                  <h3 className="text-sm font-black text-slate-900">{t('exclude.title')}</h3>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold">{t('exclude.excludedBadge', { n: excludedOperators.length })}</span>
                 </div>
-                <p className="text-[11px] text-slate-600 mb-3">특정 상담원을 자동배정 후보에서 제외합니다. 제외해도 수동배정은 가능합니다.</p>
+                <p className="text-[11px] text-slate-600 mb-3">{t('exclude.desc')}</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {operators.map(o => {
                     const excluded = !o.auto_assign_enabled || o.work_state === 'break' || o.work_state === 'offline' || o.work_state === 'resigned';
                     return (
                       <div key={o.id} className={`rounded-lg border p-2 text-xs ${excluded ? 'border-slate-200 bg-slate-50 text-slate-400' : 'border-emerald-200 bg-white'}`}>
                         <div className="font-bold text-slate-900">{o.name} <span className="text-slate-400 font-normal">{o.employee_id}</span></div>
-                        <div className="text-[10px] text-slate-500 mt-0.5">상태 {WORK_STATE_LABEL[o.work_state] || o.work_state} · 배정 {o.active_load}건</div>
+                        <div className="text-[10px] text-slate-500 mt-0.5">{t('exclude.statusLabel')} {workStateLabel(o.work_state)} · {t('exclude.loadLabel', { n: o.active_load })}</div>
                         <div className={`text-[10px] mt-0.5 font-bold ${excluded ? 'text-slate-400' : 'text-emerald-700'}`}>
-                          {excluded ? '자동배정 제외' : '자동배정 후보'}
+                          {excluded ? t('exclude.excluded') : t('exclude.candidate')}
                         </div>
                       </div>
                     );
@@ -342,29 +323,29 @@ export default function WorkloadPage() {
                 </div>
               </div>
 
-              {/* 4. 환수 / 수동 재배정 */}
+              {/* 4. Recall */}
               <div className="rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-slate-900">4. 환수 / 수동 재배정</h3>
+                  <h3 className="text-sm font-black text-slate-900">{t('recall.title')}</h3>
                   <button
                     disabled={!detail.operator_id || busy}
                     onClick={() => caseAction('recall')}
                     className="rounded-lg bg-rose-600 px-3 py-1 text-[11px] font-black text-white hover:bg-rose-700 disabled:opacity-50"
                   >
-                    현재 배정 환수
+                    {t('recall.recallBtn')}
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-600 mb-2">이미 배정된 업무를 Supervisor가 환수하거나, 특정 상담원에게 직접 재배정합니다.</p>
+                <p className="text-[11px] text-slate-600 mb-2">{t('recall.desc')}</p>
                 <div className="flex flex-col gap-2">
                   <select
                     value={pickedOperatorId}
                     onChange={(e) => setPickedOperatorId(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
                   >
-                    <option value="">오늘 로그인 상담원 선택…</option>
+                    <option value="">{t('recall.selectPlaceholder')}</option>
                     {eligibleOperators.map(o => (
                       <option key={o.id} value={o.id}>
-                        {o.name} ({o.employee_id}) · {WORK_STATE_LABEL[o.work_state] || o.work_state} · 배정 {o.active_load}건
+                        {t('recall.selectOption', { name: o.name, id: o.employee_id, state: workStateLabel(o.work_state), n: o.active_load })}
                       </option>
                     ))}
                   </select>
@@ -373,15 +354,15 @@ export default function WorkloadPage() {
                     onClick={() => caseAction('assign', { operatorId: pickedOperatorId })}
                     className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white hover:bg-slate-800 disabled:opacity-50"
                   >
-                    선택 상담원에게 배정
+                    {t('recall.assignBtn')}
                   </button>
                 </div>
               </div>
 
-              {/* Supervisor 이관 */}
+              {/* Supervisor transfer */}
               <div className="rounded-xl border border-purple-200 bg-purple-50/40 p-4">
-                <h3 className="text-sm font-black text-slate-900 mb-2">Supervisor 이관</h3>
-                <p className="text-[11px] text-slate-600 mb-3">이 고객 요청 자체를 다른 Supervisor에게 넘길 때 사용합니다.</p>
+                <h3 className="text-sm font-black text-slate-900 mb-2">{t('transferSupervisor.title')}</h3>
+                <p className="text-[11px] text-slate-600 mb-3">{t('transferSupervisor.desc')}</p>
                 <div className="flex flex-wrap gap-2">
                   {supervisors.map(sv => (
                     <button
@@ -390,7 +371,7 @@ export default function WorkloadPage() {
                       onClick={() => caseAction('transfer-supervisor', { supervisorId: sv.id })}
                       className={`rounded-full px-3 py-1 text-xs font-bold ${sv.id === detail.supervisor_id ? 'bg-slate-200 text-slate-500' : 'bg-white border border-purple-300 text-purple-700 hover:bg-purple-50'}`}
                     >
-                      {sv.name} ({sv.active_load}건)
+                      {t('transferSupervisor.btn', { name: sv.name, n: sv.active_load })}
                     </button>
                   ))}
                 </div>
@@ -401,49 +382,56 @@ export default function WorkloadPage() {
 
         {/* Right: case detail + sticky info + supervisor instruction */}
         <section className="rounded-2xl bg-white p-5 shadow-sm">
-          <h2 className="text-base font-black text-slate-900 mb-3">선택 케이스 상세</h2>
+          <h2 className="text-base font-black text-slate-900 mb-3">{t('detail.title')}</h2>
           {!detail ? (
-            <p className="text-xs text-slate-400">선택된 케이스가 없습니다.</p>
+            <p className="text-xs text-slate-400">{t('detail.empty')}</p>
           ) : (
             <div className="space-y-4">
               <div>
                 <p className="text-[11px] text-slate-500">{detail.case_code} · {detail.service_label || detail.tax_type}</p>
                 <p className="text-lg font-black text-slate-900">{detail.customer?.company_name || detail.customer?.full_name || '—'}</p>
                 <span className={`inline-block mt-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_COLOR[detail.status] || 'bg-slate-100 text-slate-700'}`}>
-                  {STATUS_LABEL[detail.status] || detail.status}
+                  {statusLabel(detail.status)}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <Field label="담당 상담원" value={detail.operator?.employee_id ?? '—'} />
-                <Field label="담당 Supervisor" value={detail.supervisor?.employee_id ?? '—'} />
-                <Field label="우선순위" value={detail.priority ?? 'NORMAL'} />
-                <Field label="Due" value={detail.due_date ? formatDue(detail.due_date) : '-'} />
+                <Field label={t('detail.operator')} value={detail.operator?.employee_id ?? '—'} />
+                <Field label={t('detail.supervisor')} value={detail.supervisor?.employee_id ?? '—'} />
+                <Field label={t('detail.priority')} value={detail.priority ?? 'NORMAL'} />
+                <Field label={t('detail.due')} value={detail.due_date ? formatDue(detail.due_date) : '-'} />
               </div>
 
-              {/* Sticky Assignment / 동일 상담원 우선배정 */}
+              {/* Sticky Assignment */}
               <div className="rounded-xl border border-indigo-200 bg-indigo-50/30 p-3">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-black text-slate-900">동일 상담원 우선배정</p>
-                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700">Sticky Assignment</span>
+                  <p className="text-xs font-black text-slate-900">{t('sticky.title')}</p>
+                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700">{t('sticky.badge')}</span>
                 </div>
-                <p className="text-[11px] text-slate-600 mb-2">같은 고객의 과거 케이스 {detail.pastCases.length}건. 우선 상담원: <b>{detail.preferredOperatorId ? operators.find(o => o.id === detail.preferredOperatorId)?.name ?? '—' : '없음'}</b></p>
+                <p className="text-[11px] text-slate-600 mb-2">
+                  {t('sticky.summary', { n: detail.pastCases.length })}
+                  <b>
+                    {detail.preferredOperatorId
+                      ? operators.find(o => o.id === detail.preferredOperatorId)?.name ?? '—'
+                      : t('preferred.none')}
+                  </b>
+                </p>
                 <ul className="space-y-1 text-[11px] text-slate-600">
                   {detail.pastCases.slice(0, 5).map(p => (
-                    <li key={p.id}>· {p.case_code ?? '-'} · {STATUS_LABEL[p.status] || p.status} · {p.operator?.employee_id ?? '미배정'}</li>
+                    <li key={p.id}>· {p.case_code ?? '-'} · {statusLabel(p.status)} · {p.operator?.employee_id ?? t('list.unassigned')}</li>
                   ))}
-                  {detail.pastCases.length === 0 && <li className="text-slate-400">과거 케이스 없음.</li>}
+                  {detail.pastCases.length === 0 && <li className="text-slate-400">{t('sticky.noPast')}</li>}
                 </ul>
               </div>
 
-              {/* Supervisor instruction */}
+              {/* Operator instruction */}
               <div className="rounded-xl border border-slate-200 p-3">
-                <p className="text-xs font-black text-slate-900 mb-1">상담원 지시</p>
+                <p className="text-xs font-black text-slate-900 mb-1">{t('instruction.title')}</p>
                 <textarea
                   value={instruction}
                   onChange={(e) => setInstruction(e.target.value)}
                   rows={3}
-                  placeholder="예: Coretax ID Billing 발행 후 고객 화면에 반영"
+                  placeholder={t('instruction.placeholder')}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
                 />
                 <button
@@ -451,7 +439,7 @@ export default function WorkloadPage() {
                   onClick={async () => { await caseAction('instruct', { note: instruction }); setInstruction(''); }}
                   className="mt-2 w-full rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white hover:bg-slate-800 disabled:opacity-50"
                 >
-                  <Send className="h-3 w-3 inline mr-1" /> 지시
+                  <Send className="h-3 w-3 inline mr-1" /> {t('instruction.sendBtn')}
                 </button>
                 {detail.notes && (
                   <pre className="mt-2 max-h-32 overflow-y-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-2 text-[10px] text-slate-600">
@@ -477,6 +465,7 @@ function BulkTransferPanel({
   supervisors: OperatorRow[];
   onDone: () => Promise<void> | void;
 }) {
+  const t = useTranslations('operatorWorkload');
   const [mode, setMode] = useState<'operator' | 'supervisor'>('operator');
   const [fromId, setFromId] = useState('');
   const [toId, setToId] = useState('');
@@ -485,6 +474,10 @@ function BulkTransferPanel({
   const [msg, setMsg] = useState<string>('');
 
   const list = mode === 'operator' ? operators : supervisors;
+
+  const workStateLabel = (key: string) => {
+    try { return t(`workState.${key}`); } catch { return key; }
+  };
 
   useEffect(() => {
     setFromId('');
@@ -503,7 +496,7 @@ function BulkTransferPanel({
 
   const run = async () => {
     if (!fromId || !toId) return;
-    if (!confirm(`정말 이관 실행하시겠습니까? 퇴사 처리도 함께 진행됩니다.`)) return;
+    if (!confirm(t('bulkTransfer.confirm'))) return;
     setBusy(true);
     setMsg('');
     try {
@@ -514,9 +507,9 @@ function BulkTransferPanel({
       });
       const j = await res.json();
       if (!res.ok || !j.success) {
-        setMsg(j.error || '이관 실패');
+        setMsg(j.error || t('bulkTransfer.failed'));
       } else {
-        setMsg(`${j.data?.transferred ?? 0}건 이관 완료`);
+        setMsg(t('bulkTransfer.done', { n: j.data?.transferred ?? 0 }));
         await onDone();
       }
     } finally {
@@ -527,32 +520,32 @@ function BulkTransferPanel({
   return (
     <div className="rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/40 p-3">
       <div className="flex items-center gap-1 text-[11px] font-black text-rose-800 mb-2">
-        <ArrowRightLeft className="h-3 w-3" /> 퇴사자 고객 / 업무 전체 이관
+        <ArrowRightLeft className="h-3 w-3" /> {t('bulkTransfer.title')}
       </div>
       <div className="flex items-center gap-2 mb-2">
         <label className="text-[11px] flex items-center gap-1">
-          <input type="radio" checked={mode === 'operator'} onChange={() => setMode('operator')} /> 상담원
+          <input type="radio" checked={mode === 'operator'} onChange={() => setMode('operator')} /> {t('bulkTransfer.operator')}
         </label>
         <label className="text-[11px] flex items-center gap-1">
-          <input type="radio" checked={mode === 'supervisor'} onChange={() => setMode('supervisor')} /> Supervisor
+          <input type="radio" checked={mode === 'supervisor'} onChange={() => setMode('supervisor')} /> {t('bulkTransfer.supervisor')}
         </label>
       </div>
       <div className="grid grid-cols-1 gap-2">
         <select value={fromId} onChange={(e) => setFromId(e.target.value)}
           className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs">
-          <option value="">퇴사자 선택…</option>
+          <option value="">{t('bulkTransfer.fromPlaceholder')}</option>
           {list.map(o => (
             <option key={o.id} value={o.id}>
-              {o.name} ({o.employee_id}) · {WORK_STATE_LABEL[o.work_state] || o.work_state}
+              {o.name} ({o.employee_id}) · {workStateLabel(o.work_state)}
             </option>
           ))}
         </select>
         <select value={toId} onChange={(e) => setToId(e.target.value)}
           className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs">
-          <option value="">받을 사람 선택…</option>
+          <option value="">{t('bulkTransfer.toPlaceholder')}</option>
           {list.filter(o => o.id !== fromId && o.work_state !== 'resigned' && o.work_state !== 'offline').map(o => (
             <option key={o.id} value={o.id}>
-              {o.name} ({o.employee_id}) · {WORK_STATE_LABEL[o.work_state] || o.work_state}
+              {o.name} ({o.employee_id}) · {workStateLabel(o.work_state)}
             </option>
           ))}
         </select>
@@ -561,15 +554,15 @@ function BulkTransferPanel({
         <div className="mt-2 rounded-lg bg-white p-2 text-[10px] text-slate-700 space-y-0.5">
           {mode === 'operator' && (
             <>
-              <p>이관 대상 활성 케이스: <b>{preview.activeCount ?? 0}건</b></p>
-              <p>현재 담당 고객: <b>{preview.customerCount ?? 0}곳</b></p>
+              <p>{t('bulkTransfer.previewActive')}<b>{t('bulkTransfer.caseUnit', { n: preview.activeCount ?? 0 })}</b></p>
+              <p>{t('bulkTransfer.previewCustomer')}<b>{t('bulkTransfer.placeUnit', { n: preview.customerCount ?? 0 })}</b></p>
             </>
           )}
           {mode === 'supervisor' && (
             <>
-              <p>이관 대상 활성 케이스: <b>{preview.activeCount ?? 0}건</b></p>
-              <p>완료 케이스(이력): <b>{preview.completedCount ?? 0}건</b></p>
-              <p>관리 상담원 수: <b>{preview.managedOperatorCount ?? 0}명</b></p>
+              <p>{t('bulkTransfer.previewActive')}<b>{t('bulkTransfer.caseUnit', { n: preview.activeCount ?? 0 })}</b></p>
+              <p>{t('bulkTransfer.previewCompleted')}<b>{t('bulkTransfer.caseUnit', { n: preview.completedCount ?? 0 })}</b></p>
+              <p>{t('bulkTransfer.previewManaged')}<b>{t('bulkTransfer.personUnit', { n: preview.managedOperatorCount ?? 0 })}</b></p>
             </>
           )}
         </div>
@@ -579,7 +572,7 @@ function BulkTransferPanel({
         onClick={run}
         className="mt-2 w-full rounded-lg bg-rose-600 px-3 py-2 text-xs font-black text-white hover:bg-rose-700 disabled:opacity-50"
       >
-        {busy ? '이관 중…' : '전체 이관 실행'}
+        {busy ? t('bulkTransfer.running') : t('bulkTransfer.runBtn')}
       </button>
       {msg && <p className="mt-2 text-[10px] font-bold text-emerald-700">{msg}</p>}
     </div>

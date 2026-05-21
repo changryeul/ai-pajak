@@ -402,6 +402,138 @@
     },
     "successToast": "{n}名 1721 A1 発行完了"
   },
+  "operatorWorkload": {
+    "pageTitle": "業務 割当 / 引き戻し",
+    "pageDesc": "新規業務はスーパーバイザーに均等自動配分され、相談履歴のある顧客は従来の担当者へ優先自動割当されます。",
+    "refresh": "再読み込み",
+    "actionFailed": "{action} 失敗",
+    "actionDone": "{action} 完了",
+    "kpi": {
+      "mySupervisorPending": "私のSV待機",
+      "todayLoggedIn": "本日ログイン担当",
+      "autoEligible": "自動割当可能",
+      "autoExcluded": "自動割当除外",
+      "selectedCase": "選択ケース",
+      "personSuffix": "{n}名"
+    },
+    "list": {
+      "title": "新規 / 割当対象",
+      "empty": "ケースがありません。",
+      "assigneePrefix": "担当 {id}",
+      "unassigned": "未割当"
+    },
+    "console": {
+      "title": "担当者割当コンソール",
+      "desc": "このリストはすでにSVへ自動配分された顧客依頼です。ここではどの担当者に割当てるかだけ決定します。",
+      "emptyState": "左でケースを選択すると割当オプションが表示されます。"
+    },
+    "decision": {
+      "title": "選択業務の割当判断",
+      "currentSupervisor": "現在SV",
+      "currentOperator": "現在担当",
+      "assignMode": "割当方式",
+      "requestReceived": "受付",
+      "autoAssigned": "自動割当",
+      "unassigned": "未割当",
+      "notDistributed": "未配分"
+    },
+    "preferred": {
+      "title": "1. 優先担当者",
+      "desc": "同一顧客を過去に担当した担当者を最優先で割当てます。",
+      "candidateLabel": "優先候補:",
+      "none": "なし",
+      "btn": "優先担当者へ割当"
+    },
+    "auto": {
+      "title": "2. 自動割当",
+      "desc": "除外担当を外し、状態・負荷を基準に最適な担当者を推奨します。",
+      "btn": "自動割当確定"
+    },
+    "exclude": {
+      "title": "3. 自動割当除外設定",
+      "excludedBadge": "除外 {n}名",
+      "desc": "特定担当を自動割当候補から除外します。手動割当は引き続き可能です。",
+      "statusLabel": "状態",
+      "loadLabel": "{n}件",
+      "excluded": "自動割当除外",
+      "candidate": "自動割当候補"
+    },
+    "recall": {
+      "title": "4. 引き戻し / 手動再割当",
+      "recallBtn": "現在の割当を引き戻し",
+      "desc": "割当済の業務をSVが引き戻すか、特定担当へ直接再割当します。",
+      "selectPlaceholder": "本日ログイン担当を選択…",
+      "selectOption": "{name} ({id}) · {state} · {n}件",
+      "assignBtn": "選択担当へ割当"
+    },
+    "transferSupervisor": {
+      "title": "SV 移管",
+      "desc": "この顧客依頼自体を別のSVへ引き継ぐ場合に使用します。",
+      "btn": "{name} ({n}件)"
+    },
+    "detail": {
+      "title": "選択ケース詳細",
+      "empty": "選択されたケースはありません。",
+      "operator": "担当",
+      "supervisor": "SV",
+      "priority": "優先度",
+      "due": "Due"
+    },
+    "sticky": {
+      "title": "同一担当者 優先割当",
+      "badge": "Sticky Assignment",
+      "summary": "同一顧客の過去ケース {n}件。優先担当: ",
+      "noPast": "過去ケースなし。"
+    },
+    "instruction": {
+      "title": "担当者指示",
+      "placeholder": "例: Coretax ID Billing 発行後、顧客画面に反映",
+      "sendBtn": "指示"
+    },
+    "workState": {
+      "available": "待機",
+      "consulting": "相談中",
+      "reviewing": "検討中",
+      "coretax": "Coretax作業中",
+      "break": "休憩",
+      "offline": "オフライン",
+      "resigned": "退職"
+    },
+    "status": {
+      "PENDING": "待機",
+      "PENDING_DOCS": "資料要請",
+      "DATA_REVIEW": "確認中",
+      "PENDING_APPROVAL": "承認待ち",
+      "APPROVED": "承認",
+      "EBILLING_GENERATED": "eBilling",
+      "PAYMENT_PENDING": "納付待ち",
+      "PAYMENT_UPLOADED": "領収書",
+      "PAYMENT_VERIFIED": "納付確認",
+      "DJP_SUBMITTED": "DJP提出",
+      "BPE_UPLOADED": "BPE",
+      "COMPLETED": "申告完了",
+      "FAILED": "失敗"
+    },
+    "bulkTransfer": {
+      "title": "退職者 顧客 / 業務 一括移管",
+      "operator": "担当",
+      "supervisor": "SV",
+      "fromPlaceholder": "退職者を選択…",
+      "toPlaceholder": "受け取り側を選択…",
+      "confirm": "本当に一括移管しますか？退職処理も同時に行われます。",
+      "previewActive": "移管対象アクティブケース: ",
+      "previewCustomer": "現在の担当顧客: ",
+      "previewCompleted": "完了ケース(履歴): ",
+      "previewManaged": "管理担当者数: ",
+      "caseUnit": "{n}件",
+      "placeUnit": "{n}社",
+      "personUnit": "{n}名",
+      "runBtn": "一括移管 実行",
+      "running": "移管中…",
+      "failed": "移管失敗",
+      "done": "{n}件 移管完了"
+    }
+  },
   "inviteAccept": {
     "roleLabel": {
       "TAX_OPERATOR": "バックオフィス担当",

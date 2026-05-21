@@ -402,6 +402,138 @@
     },
     "successToast": "{n} bukti 1721 A1 diterbitkan"
   },
+  "operatorWorkload": {
+    "pageTitle": "Penugasan / penarikan pekerjaan",
+    "pageDesc": "Pekerjaan baru otomatis dibagi rata ke supervisor; pelanggan dengan riwayat konsultasi diprioritaskan ke operator sebelumnya.",
+    "refresh": "Muat ulang",
+    "actionFailed": "{action} gagal",
+    "actionDone": "{action} berhasil",
+    "kpi": {
+      "mySupervisorPending": "Antrian supervisor saya",
+      "todayLoggedIn": "Operator online hari ini",
+      "autoEligible": "Siap auto-tugas",
+      "autoExcluded": "Dikecualikan auto-tugas",
+      "selectedCase": "Kasus terpilih",
+      "personSuffix": "{n} orang"
+    },
+    "list": {
+      "title": "Masuk / perlu ditugaskan",
+      "empty": "Tidak ada kasus.",
+      "assigneePrefix": "PIC {id}",
+      "unassigned": "Belum ditugaskan"
+    },
+    "console": {
+      "title": "Konsol penugasan operator",
+      "desc": "Daftar ini sudah dibagi rata ke supervisor. Di sini Anda hanya memilih operator yang menangani.",
+      "emptyState": "Pilih kasus di kiri untuk melihat opsi penugasan."
+    },
+    "decision": {
+      "title": "Keputusan penugasan",
+      "currentSupervisor": "Supervisor saat ini",
+      "currentOperator": "Operator saat ini",
+      "assignMode": "Mode",
+      "requestReceived": "Diterima",
+      "autoAssigned": "Auto-tugas",
+      "unassigned": "Belum ditugaskan",
+      "notDistributed": "Belum didistribusi"
+    },
+    "preferred": {
+      "title": "1. Operator prioritas",
+      "desc": "Operator yang pernah menangani pelanggan ini diprioritaskan.",
+      "candidateLabel": "Kandidat prioritas:",
+      "none": "Tidak ada",
+      "btn": "Tugaskan ke operator prioritas"
+    },
+    "auto": {
+      "title": "2. Auto-tugas",
+      "desc": "Lewati operator yang dikecualikan, pilih yang paling cocok berdasarkan status / beban.",
+      "btn": "Konfirmasi auto-tugas"
+    },
+    "exclude": {
+      "title": "3. Pengaturan pengecualian auto-tugas",
+      "excludedBadge": "Dikecualikan {n}",
+      "desc": "Kecualikan operator tertentu dari auto-tugas. Penugasan manual tetap bisa.",
+      "statusLabel": "Status",
+      "loadLabel": "{n} kasus",
+      "excluded": "Dikecualikan",
+      "candidate": "Kandidat"
+    },
+    "recall": {
+      "title": "4. Penarikan / penugasan ulang manual",
+      "recallBtn": "Tarik penugasan saat ini",
+      "desc": "Tarik kembali penugasan, atau langsung tugaskan ke operator tertentu.",
+      "selectPlaceholder": "Pilih operator online…",
+      "selectOption": "{name} ({id}) · {state} · {n} kasus",
+      "assignBtn": "Tugaskan ke operator terpilih"
+    },
+    "transferSupervisor": {
+      "title": "Pindahkan ke supervisor lain",
+      "desc": "Serahkan keseluruhan permintaan ke supervisor lain.",
+      "btn": "{name} ({n})"
+    },
+    "detail": {
+      "title": "Detail kasus terpilih",
+      "empty": "Belum ada kasus terpilih.",
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "priority": "Prioritas",
+      "due": "Due"
+    },
+    "sticky": {
+      "title": "Prioritas operator yang sama",
+      "badge": "Sticky Assignment",
+      "summary": "Kasus sebelumnya untuk pelanggan ini: {n}. Operator prioritas: ",
+      "noPast": "Belum ada kasus sebelumnya."
+    },
+    "instruction": {
+      "title": "Instruksi operator",
+      "placeholder": "mis. Terbitkan Coretax ID Billing dan tampilkan di layar pelanggan",
+      "sendBtn": "Kirim"
+    },
+    "workState": {
+      "available": "Tersedia",
+      "consulting": "Konsultasi",
+      "reviewing": "Tinjauan",
+      "coretax": "Coretax",
+      "break": "Istirahat",
+      "offline": "Offline",
+      "resigned": "Mengundurkan diri"
+    },
+    "status": {
+      "PENDING": "Menunggu",
+      "PENDING_DOCS": "Permintaan dokumen",
+      "DATA_REVIEW": "Sedang ditinjau",
+      "PENDING_APPROVAL": "Menunggu persetujuan",
+      "APPROVED": "Disetujui",
+      "EBILLING_GENERATED": "eBilling",
+      "PAYMENT_PENDING": "Menunggu pembayaran",
+      "PAYMENT_UPLOADED": "Bukti bayar",
+      "PAYMENT_VERIFIED": "Terverifikasi",
+      "DJP_SUBMITTED": "Submit DJP",
+      "BPE_UPLOADED": "BPE",
+      "COMPLETED": "Selesai",
+      "FAILED": "Gagal"
+    },
+    "bulkTransfer": {
+      "title": "Pemindahan massal staf resign",
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "fromPlaceholder": "Pilih yang resign…",
+      "toPlaceholder": "Pilih penerima…",
+      "confirm": "Jalankan pemindahan massal? Status resign juga diproses.",
+      "previewActive": "Kasus aktif untuk dipindah: ",
+      "previewCustomer": "Pelanggan saat ini: ",
+      "previewCompleted": "Selesai (riwayat): ",
+      "previewManaged": "Operator dikelola: ",
+      "caseUnit": "{n}",
+      "placeUnit": "{n}",
+      "personUnit": "{n}",
+      "runBtn": "Jalankan pemindahan",
+      "running": "Memindah…",
+      "failed": "Pemindahan gagal",
+      "done": "{n} berhasil dipindah"
+    }
+  },
   "inviteAccept": {
     "roleLabel": {
       "TAX_OPERATOR": "Operator back-office",

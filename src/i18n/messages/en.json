@@ -402,6 +402,138 @@
     },
     "successToast": "{n} 1721 A1 certificates issued"
   },
+  "operatorWorkload": {
+    "pageTitle": "Workload assignment / recall",
+    "pageDesc": "New work is auto-balanced across supervisors; customers with a consult history are auto-assigned to their previous operator first.",
+    "refresh": "Refresh",
+    "actionFailed": "{action} failed",
+    "actionDone": "{action} done",
+    "kpi": {
+      "mySupervisorPending": "My supervisor queue",
+      "todayLoggedIn": "Online operators today",
+      "autoEligible": "Auto-assign ready",
+      "autoExcluded": "Auto-assign excluded",
+      "selectedCase": "Selected case",
+      "personSuffix": "{n} people"
+    },
+    "list": {
+      "title": "Inbound / to assign",
+      "empty": "No cases.",
+      "assigneePrefix": "Assignee {id}",
+      "unassigned": "Unassigned"
+    },
+    "console": {
+      "title": "Operator assignment console",
+      "desc": "This list is requests already balanced to supervisors. From here you only pick which operator handles each case.",
+      "emptyState": "Pick a case on the left to see assignment options."
+    },
+    "decision": {
+      "title": "Assignment decision",
+      "currentSupervisor": "Current supervisor",
+      "currentOperator": "Current operator",
+      "assignMode": "Mode",
+      "requestReceived": "Received",
+      "autoAssigned": "Auto-assigned",
+      "unassigned": "Unassigned",
+      "notDistributed": "Not distributed"
+    },
+    "preferred": {
+      "title": "1. Preferred operator",
+      "desc": "Operator who handled this customer previously is prioritised.",
+      "candidateLabel": "Preferred candidate:",
+      "none": "None",
+      "btn": "Assign to preferred operator"
+    },
+    "auto": {
+      "title": "2. Auto-assign",
+      "desc": "Skips excluded operators and picks the best fit by state and current load.",
+      "btn": "Confirm auto-assign"
+    },
+    "exclude": {
+      "title": "3. Auto-assign exclusion",
+      "excludedBadge": "Excluded {n}",
+      "desc": "Exclude specific operators from auto-assign. Manual assignment still works.",
+      "statusLabel": "State",
+      "loadLabel": "{n} cases",
+      "excluded": "Excluded",
+      "candidate": "Candidate"
+    },
+    "recall": {
+      "title": "4. Recall / manual reassign",
+      "recallBtn": "Recall current assignment",
+      "desc": "Recall an assigned case, or reassign it directly to a chosen operator.",
+      "selectPlaceholder": "Pick an online operator…",
+      "selectOption": "{name} ({id}) · {state} · {n} cases",
+      "assignBtn": "Assign to selected operator"
+    },
+    "transferSupervisor": {
+      "title": "Transfer to another supervisor",
+      "desc": "Hand the whole request over to another supervisor.",
+      "btn": "{name} ({n})"
+    },
+    "detail": {
+      "title": "Selected case detail",
+      "empty": "No case selected.",
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "priority": "Priority",
+      "due": "Due"
+    },
+    "sticky": {
+      "title": "Same-operator priority",
+      "badge": "Sticky Assignment",
+      "summary": "Prior cases for this customer: {n}. Preferred operator: ",
+      "noPast": "No prior cases."
+    },
+    "instruction": {
+      "title": "Operator instruction",
+      "placeholder": "e.g. Issue Coretax ID Billing and reflect on customer screen",
+      "sendBtn": "Send"
+    },
+    "workState": {
+      "available": "Available",
+      "consulting": "Consulting",
+      "reviewing": "Reviewing",
+      "coretax": "Coretax",
+      "break": "Break",
+      "offline": "Offline",
+      "resigned": "Resigned"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "PENDING_DOCS": "Docs requested",
+      "DATA_REVIEW": "Reviewing",
+      "PENDING_APPROVAL": "Approval pending",
+      "APPROVED": "Approved",
+      "EBILLING_GENERATED": "eBilling",
+      "PAYMENT_PENDING": "Payment pending",
+      "PAYMENT_UPLOADED": "Receipt up",
+      "PAYMENT_VERIFIED": "Payment verified",
+      "DJP_SUBMITTED": "DJP submitted",
+      "BPE_UPLOADED": "BPE",
+      "COMPLETED": "Filed",
+      "FAILED": "Failed"
+    },
+    "bulkTransfer": {
+      "title": "Bulk transfer for resigned staff",
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "fromPlaceholder": "Pick resigned…",
+      "toPlaceholder": "Pick recipient…",
+      "confirm": "Run bulk transfer? Resignation will also be processed.",
+      "previewActive": "Active cases to transfer: ",
+      "previewCustomer": "Current customers: ",
+      "previewCompleted": "Completed (history): ",
+      "previewManaged": "Operators managed: ",
+      "caseUnit": "{n}",
+      "placeUnit": "{n}",
+      "personUnit": "{n}",
+      "runBtn": "Run bulk transfer",
+      "running": "Transferring…",
+      "failed": "Transfer failed",
+      "done": "{n} transferred"
+    }
+  },
   "inviteAccept": {
     "roleLabel": {
       "TAX_OPERATOR": "Back-office operator",

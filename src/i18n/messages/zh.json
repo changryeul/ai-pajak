@@ -402,6 +402,138 @@
     },
     "successToast": "{n}人 1721 A1 发行完成"
   },
+  "operatorWorkload": {
+    "pageTitle": "工作分配 / 回收",
+    "pageDesc": "新工作均匀自动分配给主管,有咨询历史的客户优先自动指派给原客服。",
+    "refresh": "刷新",
+    "actionFailed": "{action} 失败",
+    "actionDone": "{action} 已处理",
+    "kpi": {
+      "mySupervisorPending": "我的主管待办",
+      "todayLoggedIn": "今日上线客服",
+      "autoEligible": "可自动指派",
+      "autoExcluded": "自动指派已排除",
+      "selectedCase": "选中案件",
+      "personSuffix": "{n}人"
+    },
+    "list": {
+      "title": "新进 / 待分配",
+      "empty": "无案件。",
+      "assigneePrefix": "负责 {id}",
+      "unassigned": "未分配"
+    },
+    "console": {
+      "title": "客服指派控制台",
+      "desc": "此列表为已自动分配给主管的客户请求。在此仅决定由哪位客服处理。",
+      "emptyState": "请在左侧选择案件以查看指派选项。"
+    },
+    "decision": {
+      "title": "选中案件指派决定",
+      "currentSupervisor": "当前主管",
+      "currentOperator": "当前客服",
+      "assignMode": "分配方式",
+      "requestReceived": "受理日",
+      "autoAssigned": "自动指派",
+      "unassigned": "未分配",
+      "notDistributed": "未分配"
+    },
+    "preferred": {
+      "title": "1. 优先客服",
+      "desc": "曾经处理过同一客户的客服优先指派。",
+      "candidateLabel": "优先候选:",
+      "none": "无",
+      "btn": "指派给优先客服"
+    },
+    "auto": {
+      "title": "2. 自动指派",
+      "desc": "排除被剔除的客服,按状态/负荷推荐最合适的客服。",
+      "btn": "确认自动指派"
+    },
+    "exclude": {
+      "title": "3. 自动指派排除设置",
+      "excludedBadge": "排除 {n}人",
+      "desc": "将特定客服排除在自动指派之外。手动指派仍然可行。",
+      "statusLabel": "状态",
+      "loadLabel": "{n}件",
+      "excluded": "自动指派排除",
+      "candidate": "自动指派候选"
+    },
+    "recall": {
+      "title": "4. 回收 / 手动重分配",
+      "recallBtn": "回收当前指派",
+      "desc": "由主管回收已指派工作,或直接重新分派给特定客服。",
+      "selectPlaceholder": "请选择今日在线客服…",
+      "selectOption": "{name} ({id}) · {state} · {n}件",
+      "assignBtn": "指派给选中客服"
+    },
+    "transferSupervisor": {
+      "title": "主管移交",
+      "desc": "将整个客户请求移交给另一位主管时使用。",
+      "btn": "{name} ({n}件)"
+    },
+    "detail": {
+      "title": "选中案件详情",
+      "empty": "未选择案件。",
+      "operator": "负责客服",
+      "supervisor": "负责主管",
+      "priority": "优先级",
+      "due": "Due"
+    },
+    "sticky": {
+      "title": "同一客服优先指派",
+      "badge": "Sticky Assignment",
+      "summary": "同一客户过往案件 {n}件。优先客服: ",
+      "noPast": "无过往案件。"
+    },
+    "instruction": {
+      "title": "客服指示",
+      "placeholder": "例: Coretax ID Billing 发行后反映到客户界面",
+      "sendBtn": "指示"
+    },
+    "workState": {
+      "available": "待机",
+      "consulting": "咨询中",
+      "reviewing": "审核中",
+      "coretax": "Coretax作业中",
+      "break": "休息",
+      "offline": "离线",
+      "resigned": "离职"
+    },
+    "status": {
+      "PENDING": "待机",
+      "PENDING_DOCS": "资料请求",
+      "DATA_REVIEW": "审核中",
+      "PENDING_APPROVAL": "等待审批",
+      "APPROVED": "已批准",
+      "EBILLING_GENERATED": "eBilling",
+      "PAYMENT_PENDING": "待付款",
+      "PAYMENT_UPLOADED": "付款凭证",
+      "PAYMENT_VERIFIED": "付款确认",
+      "DJP_SUBMITTED": "DJP 提交",
+      "BPE_UPLOADED": "BPE",
+      "COMPLETED": "申报完成",
+      "FAILED": "失败"
+    },
+    "bulkTransfer": {
+      "title": "离职人员 客户 / 业务 整体移交",
+      "operator": "客服",
+      "supervisor": "主管",
+      "fromPlaceholder": "选择离职人员…",
+      "toPlaceholder": "选择接收人…",
+      "confirm": "确定执行整体移交吗?离职处理也将一并进行。",
+      "previewActive": "待移交活动案件: ",
+      "previewCustomer": "当前负责客户: ",
+      "previewCompleted": "已完成(历史): ",
+      "previewManaged": "管理客服数: ",
+      "caseUnit": "{n}件",
+      "placeUnit": "{n}家",
+      "personUnit": "{n}人",
+      "runBtn": "执行整体移交",
+      "running": "移交中…",
+      "failed": "移交失败",
+      "done": "{n}件 移交完成"
+    }
+  },
   "inviteAccept": {
     "roleLabel": {
       "TAX_OPERATOR": "后台客服",
