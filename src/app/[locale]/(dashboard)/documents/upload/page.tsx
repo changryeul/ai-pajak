@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -63,25 +64,15 @@ export default function DocumentUploadPage() {
     { value: 'OTHER', label: t('docTypeOther'), desc: '' },
   ];
 
-  const isConsultant = session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
-  const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name?: string }>>([]);
-
-  // Resolve effective customerId: direct for CUSTOMER, selected for consultant
-  const effectiveCustomerId = isConsultant ? selectedCustomerId : session?.customerId;
-
-  // Load customer list for consultants
-  useEffect(() => {
-    if (!isConsultant) return;
-    fetch('/api/customers')
-      .then(r => r.json())
-      .then(d => {
-        const list = d.customers || [];
-        setCustomers(list);
-        if (list.length > 0 && !selectedCustomerId) setSelectedCustomerId(list[0].id);
-      })
-      .catch(() => {});
-  }, [isConsultant]);
+  // Common hook handles consultant /api/customers loading + first-pick
+  // auto-select. CUSTOMER role uses their own session.customerId.
+  const {
+    customerId: effectiveCustomerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
 
   const [period, setPeriod] = useState(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
   const [docType, setDocType] = useState('INVOICE');

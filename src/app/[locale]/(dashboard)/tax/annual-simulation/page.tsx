@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   Loader2, TrendingUp, DollarSign, Calculator, BarChart3, Sparkles,
 } from 'lucide-react';
@@ -38,7 +39,15 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 export default function AnnualSimulationPage() {
   const t = useTranslations('annualSimulation');
+  const tsc = useTranslations('taxScreen');
   const { session } = useSession();
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
   const params = useParams();
   const locale = params.locale as string;
   const currentYear = new Date().getFullYear();
@@ -48,19 +57,19 @@ export default function AnnualSimulationPage() {
   const [data, setData] = useState<SimulationData | null>(null);
 
   const loadSimulation = useCallback(async () => {
-    if (!session?.customerId) return;
+    if (!customerId) return;
     setIsLoading(true);
     try {
       const res = await fetch('/api/tax/annual-simulation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: session.customerId, taxYear: year }),
+        body: JSON.stringify({ customerId, taxYear: year }),
       });
       const result = await res.json();
       if (result.success) setData(result.data);
     } catch { /* */ }
     finally { setIsLoading(false); }
-  }, [session?.customerId, year]);
+  }, [customerId, year]);
 
   useEffect(() => { loadSimulation(); }, [loadSimulation]);
 
@@ -90,6 +99,30 @@ export default function AnnualSimulationPage() {
           <p className="text-green-200 mt-2 text-sm">{t('subtitle')}</p>
         </div>
       </div>
+
+      {isConsultant && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="as-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {tsc('selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{tsc('noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="as-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-3 mb-6">
         <Select value={String(year)} onValueChange={v => setYear(parseInt(v))}>

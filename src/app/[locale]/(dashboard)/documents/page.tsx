@@ -11,12 +11,19 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { DocumentList, DocumentUploader } from '@/components/documents';
-import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { PageTitle } from '@/components/layout/PageTitle';
 
 export default function DocumentsPage() {
   const t = useTranslations();
-  const { session } = useSession();
+  const tsc = useTranslations('taxScreen');
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -51,7 +58,7 @@ export default function DocumentsPage() {
               <DialogTitle>{t('documents.uploadNew')}</DialogTitle>
             </DialogHeader>
             <DocumentUploader
-              customerId={session?.customerId}
+              customerId={customerId}
               onUploadComplete={() => {
                 handleUploadComplete();
               }}
@@ -64,6 +71,31 @@ export default function DocumentsPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Consultant customer picker. CUSTOMER role: not rendered. */}
+      {isConsultant && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="docs-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {tsc('selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{tsc('noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="docs-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       {/* Document List */}
       <div className="bg-white rounded-lg shadow-sm border p-6">

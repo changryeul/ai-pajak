@@ -14,6 +14,7 @@ import { CHART_ACCENT_NEGATIVE } from '@/lib/charts/palette';
 import { TrendBadge } from '@/components/ui/TrendBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { fmtRp } from '@/lib/utils';
 import {
   CreditCard, AlertTriangle, CheckCircle, Clock, Loader2,
@@ -60,6 +61,14 @@ export default function MonthlyPaymentsPage() {
   const tm = useTranslations('monthlyPayments');
   const tt = useTranslations('taxTypes');
   const { session } = useSession();
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
+  const tsc = useTranslations('taxScreen');
   const params = useParams();
   const locale = params.locale as string;
   const currentYear = new Date().getFullYear();
@@ -77,19 +86,19 @@ export default function MonthlyPaymentsPage() {
     setIsLoading(true);
     try {
       const p = new URLSearchParams({ year: year.toString() });
-      if (session?.customerId) p.append('customerId', session.customerId);
+      if (customerId) p.append('customerId', customerId);
       const res = await fetch(`/api/tax/monthly-payments?${p}`);
       const data = await res.json();
       if (data.success) { setSummary(data.data.summary); setTotalOutstanding(data.data.totalOutstanding); }
     } catch { /* */ }
     finally { setIsLoading(false); }
-  }, [year, session?.customerId]);
+  }, [year, customerId]);
 
   useEffect(() => { loadPayments(); }, [loadPayments]);
 
   const generateSchedule = async () => {
-    // For customer role, use session.customerId. For consultants, will need to select a client.
-    const cid = session?.customerId;
+    // Either CUSTOMER's own ID or the consultant's currently selected client.
+    const cid = customerId;
     if (!cid) {
       alert('Customer ID not available. Please select a client first.');
       return;
@@ -184,6 +193,31 @@ export default function MonthlyPaymentsPage() {
         </div>
       </div>
 
+      {/* Consultant customer picker. CUSTOMER role: not rendered. */}
+      {isConsultant && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="mp-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {tsc('selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{tsc('noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="mp-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
         {[
@@ -211,7 +245,7 @@ export default function MonthlyPaymentsPage() {
 
       {/* Tab: Counterparties */}
       {activeTab === 'counterparties' && (
-        <CounterpartiesTab customerId={session?.customerId} />
+        <CounterpartiesTab customerId={customerId} />
       )}
 
       {/* Tab: Transactions */}
