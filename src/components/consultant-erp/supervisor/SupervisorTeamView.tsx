@@ -346,7 +346,7 @@ export function SupervisorTeamView() {
                 <Input
                   value={reassignReason}
                   onChange={(e) => setReassignReason(e.target.value)}
-                  placeholder="예: 휴가, 업무량 균형"
+                  placeholder={t('reassignReasonPlaceholder')}
                   className="mt-1"
                 />
               </div>
@@ -362,7 +362,7 @@ export function SupervisorTeamView() {
                   className="rounded-lg px-3 py-2 text-xs"
                   style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
                 >
-                  <span className="font-bold">삭제 규칙: </span>
+                  <span className="font-bold">{t('reassignRuleLabel')}</span>
                   {t('reassignRuleWarning')}
                 </div>
               </div>
@@ -419,7 +419,7 @@ export function SupervisorTeamView() {
                       {m.revisionCount}
                     </span>
                   </td>
-                  <td className="py-2 px-3 text-right text-slate-700">{m.avgProcessingMinutes}분</td>
+                  <td className="py-2 px-3 text-right text-slate-700">{t('minutesSuffix', { n: m.avgProcessingMinutes })}</td>
                   <td className="py-2 px-3 text-center">
                     <button
                       onClick={() => toggleActive(m.consultantId, m.isActive)}
@@ -458,7 +458,7 @@ export function SupervisorTeamView() {
             <Input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="예: Novi Anggraini"
+              placeholder={t('addMemberFullNamePlaceholder')}
               className="mt-1"
             />
           </div>

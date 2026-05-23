@@ -7896,6 +7896,8 @@
   "reportsPage": {
     "pageTitle": "Tax reports",
     "backToDashboard": "Back to dashboard",
+    "closingReportTitle": "Closing report {year} ({type})",
+    "closingInProgress": "Closing in progress",
     "currentStep": "1. Current step",
     "steps": {
       "monthly": "Monthly summary",
@@ -9732,6 +9734,10 @@
     "reassignRuleWarning": "Delete rule: members with active work must be reassigned or deactivated first.",
     "reassignSuccess": "Reassigned",
     "reassignEmpty": "No active sessions to reassign.",
-    "reassignSelected": "Selected task"
+    "reassignSelected": "Selected task",
+    "reassignReasonPlaceholder": "e.g. PTO, workload balancing",
+    "reassignRuleLabel": "Delete rule: ",
+    "addMemberFullNamePlaceholder": "e.g. Novi Anggraini",
+    "minutesSuffix": "{n}m"
   }
 }

@@ -8022,6 +8022,8 @@
   "reportsPage": {
     "pageTitle": "세금 보고서",
     "backToDashboard": "대시보드로",
+    "closingReportTitle": "결산보고서 {year} ({type})",
+    "closingInProgress": "결산 진행 중",
     "currentStep": "1. 현재 단계",
     "steps": {
       "monthly": "월별 요약",
@@ -9858,6 +9860,10 @@
     "reassignRuleWarning": "삭제 규칙: 진행 업무가 있는 팀원은 먼저 재배정하거나 비활성 처리합니다.",
     "reassignSuccess": "재배정 완료",
     "reassignEmpty": "재배정 가능한 진행업무가 없습니다.",
-    "reassignSelected": "선택 업무"
+    "reassignSelected": "선택 업무",
+    "reassignReasonPlaceholder": "예: 휴가, 업무량 균형",
+    "reassignRuleLabel": "삭제 규칙: ",
+    "addMemberFullNamePlaceholder": "예: Novi Anggraini",
+    "minutesSuffix": "{n}분"
   }
 }

@@ -7896,6 +7896,8 @@
   "reportsPage": {
     "pageTitle": "税務レポート",
     "backToDashboard": "ダッシュボードへ",
+    "closingReportTitle": "決算報告書 {year} ({type})",
+    "closingInProgress": "決算進行中",
     "currentStep": "1. 現在のステップ",
     "steps": {
       "monthly": "月次サマリー",
@@ -9732,6 +9734,10 @@
     "reassignRuleWarning": "削除規則: 進行中業務を持つメンバーは先に再割当または非活性化が必要。",
     "reassignSuccess": "再割当完了",
     "reassignEmpty": "再割当可能な業務がありません。",
-    "reassignSelected": "選択業務"
+    "reassignSelected": "選択業務",
+    "reassignReasonPlaceholder": "例: 休暇、業務量バランス",
+    "reassignRuleLabel": "削除規則: ",
+    "addMemberFullNamePlaceholder": "例: Novi Anggraini",
+    "minutesSuffix": "{n}分"
   }
 }

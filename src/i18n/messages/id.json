@@ -7896,6 +7896,8 @@
   "reportsPage": {
     "pageTitle": "Laporan pajak",
     "backToDashboard": "Ke dasbor",
+    "closingReportTitle": "Laporan tutup buku {year} ({type})",
+    "closingInProgress": "Tutup buku berjalan",
     "currentStep": "1. Tahap saat ini",
     "steps": {
       "monthly": "Ringkasan bulanan",
@@ -9732,6 +9734,10 @@
     "reassignRuleWarning": "Aturan: anggota dengan tugas aktif harus dipindah/dinonaktifkan terlebih dahulu.",
     "reassignSuccess": "Dipindahkan",
     "reassignEmpty": "Tidak ada sesi aktif.",
-    "reassignSelected": "Tugas dipilih"
+    "reassignSelected": "Tugas dipilih",
+    "reassignReasonPlaceholder": "mis. cuti, penyeimbangan beban",
+    "reassignRuleLabel": "Aturan: ",
+    "addMemberFullNamePlaceholder": "mis. Novi Anggraini",
+    "minutesSuffix": "{n} mnt"
   }
 }

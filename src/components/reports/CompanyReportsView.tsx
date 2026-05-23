@@ -59,13 +59,13 @@ export function CompanyReportsView() {
             ? `Rp ${r.idBilling.amount.toLocaleString('id-ID')}`
             : '—';
           const name = r.closingType === 'UMKM'
-            ? `결산보고서 ${r.fiscalYear} (UMKM)`
-            : `결산보고서 ${r.fiscalYear} (PPh25)`;
+            ? t('closingReportTitle', { year: r.fiscalYear, type: 'UMKM' })
+            : t('closingReportTitle', { year: r.fiscalYear, type: 'PPh25' });
           const summary = r.submission?.bpeNumber
             ? `BPE ${r.submission.bpeNumber} · NTPN ${r.submission.ntpn ?? '—'}`
             : r.idBilling?.billingCode
               ? `ID Billing ${r.idBilling.billingCode}`
-              : '결산 진행 중';
+              : t('closingInProgress');
           return {
             id: `closing-${r.sessionId}`,
             name,

@@ -7896,6 +7896,8 @@
   "reportsPage": {
     "pageTitle": "税务报表",
     "backToDashboard": "返回仪表板",
+    "closingReportTitle": "结算报告 {year} ({type})",
+    "closingInProgress": "结算进行中",
     "currentStep": "1. 当前阶段",
     "steps": {
       "monthly": "月度概要",
@@ -9732,6 +9734,10 @@
     "reassignRuleWarning": "规则:有进行中任务的成员需先重新分配或停用。",
     "reassignSuccess": "已重新分配",
     "reassignEmpty": "无可重新分配的活动任务。",
-    "reassignSelected": "选中任务"
+    "reassignSelected": "选中任务",
+    "reassignReasonPlaceholder": "例: 休假、工作量平衡",
+    "reassignRuleLabel": "规则: ",
+    "addMemberFullNamePlaceholder": "例: Novi Anggraini",
+    "minutesSuffix": "{n}分"
   }
 }
