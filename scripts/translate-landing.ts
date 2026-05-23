@@ -22,7 +22,7 @@ config({ path: path.resolve(__dirname, '../.env.local') });
 const client = new Anthropic();
 
 // 텍스트 필드 (modules/pricing 제외)
-const koText = {
+export const koText = {
   nav: { product: '서비스', start: '자료 제출', difference: '경쟁비교', faq: 'FAQ' },
   login: '로그인',
   viewPricing: '요금제 확인하기',
@@ -447,7 +447,15 @@ async function main() {
   console.log(`\n✓ Written: ${outPath}`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Only run when invoked directly (so other scripts can `import { koText }`
+// without triggering the full translation pipeline).
+const isDirectRun = (() => {
+  const argv1 = process.argv[1] ?? '';
+  return argv1.endsWith('translate-landing.ts') || argv1.endsWith('translate-landing.js');
+})();
+if (isDirectRun) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
