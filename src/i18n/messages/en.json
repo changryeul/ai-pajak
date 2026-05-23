@@ -501,6 +501,26 @@
       "instructDone": "Instruction sent"
     }
   },
+  "operatorSettings": {
+    "pageTitle": "Settings / Form versions",
+    "pageHeading": "Settings / Form versions / Tax Code Rules",
+    "header": {
+      "fiscalYear": "Fiscal year",
+      "platform": "Platform",
+      "coretaxStatus": "Coretax status",
+      "coretaxStatusValue": "API not connected / manual"
+    },
+    "badan": {
+      "title": "Badan Form Profile",
+      "desc": "From fiscal 2025, the input flow and attachment/sub-schedule structure follow Coretax. The legacy e-Form/e-Filing 1771 screen is not replicated.",
+      "legacy": "Legacy: 1771"
+    },
+    "op": {
+      "title": "OP Form Profile",
+      "desc": "From fiscal 2025, individual SPT is handled through the Coretax unified OP Form, not the legacy 1770 / 1770S / 1770SS selector.",
+      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "New work is auto-balanced across supervisors; customers with a consult history are auto-assigned to their previous operator first.",

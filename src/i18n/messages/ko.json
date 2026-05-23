@@ -501,6 +501,26 @@
       "instructDone": "지시 전달됨"
     }
   },
+  "operatorSettings": {
+    "pageTitle": "설정 / 양식버전",
+    "pageHeading": "설정 / 양식버전 / Tax Code Rules",
+    "header": {
+      "fiscalYear": "귀속연도",
+      "platform": "플랫폼",
+      "coretaxStatus": "Coretax 상태",
+      "coretaxStatusValue": "API 미연동 / 수동처리"
+    },
+    "badan": {
+      "title": "Badan Form Profile",
+      "desc": "2025년 귀속분부터 Coretax 기준 입력 흐름과 첨부/부속명세 구조를 따른다. 구 e-Form/e-Filing 1771 화면을 그대로 복제하지 않는다.",
+      "legacy": "Legacy: 1771"
+    },
+    "op": {
+      "title": "OP Form Profile",
+      "desc": "2025년 귀속분부터 개인 SPT는 1770/1770S/1770SS 선택 화면이 아니라 Coretax 단일 OP Form 기준으로 처리한다.",
+      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.",

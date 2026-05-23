@@ -501,6 +501,26 @@
       "instructDone": "指示已发送"
     }
   },
+  "operatorSettings": {
+    "pageTitle": "设置 / 表单版本",
+    "pageHeading": "设置 / 表单版本 / Tax Code Rules",
+    "header": {
+      "fiscalYear": "归属年度",
+      "platform": "平台",
+      "coretaxStatus": "Coretax 状态",
+      "coretaxStatusValue": "API 未对接 / 手动处理"
+    },
+    "badan": {
+      "title": "Badan Form Profile",
+      "desc": "自 2025 年度起,按 Coretax 标准的录入流程与附件/明细结构执行;不再复用旧版 e-Form/e-Filing 1771 界面。",
+      "legacy": "Legacy: 1771"
+    },
+    "op": {
+      "title": "OP Form Profile",
+      "desc": "自 2025 年度起,个人 SPT 不再走 1770/1770S/1770SS 选择界面,统一按 Coretax 单一 OP Form 处理。",
+      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "新工作均匀自动分配给主管,有咨询历史的客户优先自动指派给原客服。",

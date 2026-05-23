@@ -501,6 +501,26 @@
       "instructDone": "Instruksi terkirim"
     }
   },
+  "operatorSettings": {
+    "pageTitle": "Pengaturan / Versi formulir",
+    "pageHeading": "Pengaturan / Versi formulir / Tax Code Rules",
+    "header": {
+      "fiscalYear": "Tahun pajak",
+      "platform": "Platform",
+      "coretaxStatus": "Status Coretax",
+      "coretaxStatusValue": "API belum terhubung / manual"
+    },
+    "badan": {
+      "title": "Badan Form Profile",
+      "desc": "Mulai tahun pajak 2025, alur input dan struktur lampiran/sub-spesifikasi mengikuti Coretax. Tampilan lama e-Form/e-Filing 1771 tidak direplikasi.",
+      "legacy": "Legacy: 1771"
+    },
+    "op": {
+      "title": "OP Form Profile",
+      "desc": "Mulai tahun pajak 2025, SPT orang pribadi diproses melalui OP Form tunggal Coretax, bukan pemilihan 1770 / 1770S / 1770SS.",
+      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "Pekerjaan baru dibagi rata ke supervisor secara otomatis; pelanggan dengan riwayat konsultasi diprioritaskan ke operator sebelumnya.",

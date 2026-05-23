@@ -501,6 +501,26 @@
       "instructDone": "指示送信済"
     }
   },
+  "operatorSettings": {
+    "pageTitle": "設定 / 様式バージョン",
+    "pageHeading": "設定 / 様式バージョン / Tax Code Rules",
+    "header": {
+      "fiscalYear": "対象年度",
+      "platform": "プラットフォーム",
+      "coretaxStatus": "Coretax 状態",
+      "coretaxStatusValue": "API 未連携 / 手動処理"
+    },
+    "badan": {
+      "title": "Badan Form Profile",
+      "desc": "2025年度分から Coretax 基準の入力フローと添付/付属明細構造に従う。旧 e-Form/e-Filing 1771 画面はそのまま複製しない。",
+      "legacy": "Legacy: 1771"
+    },
+    "op": {
+      "title": "OP Form Profile",
+      "desc": "2025年度分から個人 SPT は 1770/1770S/1770SS の選択ではなく、Coretax 単一 OP Form 基準で処理する。",
+      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "新規業務はSVに均等自動配分され、相談履歴のある顧客は従来担当へ優先自動割当されます。",
