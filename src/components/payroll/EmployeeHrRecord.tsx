@@ -1155,8 +1155,16 @@ function DetailScreen({
 // ─────────────────────────────────────────────────────────────────────────────
 export default function EmployeeHrRecord() {
   const t = useTranslations('employeeHr');
-  const { session } = useSession();
-  const customerId = session?.customerId || '';
+  const { session, isLoading: sessionLoading } = useSession();
+
+  // CUSTOMER (COMPANY) sees their own customerId from session.
+  // Consultants/advisors don't have a customerId — they must pick which
+  // customer's HR records to manage from a dropdown.
+  const isConsultant =
+    session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name: string | null; customer_type: string }>>([]);
+  const customerId = isConsultant ? selectedCustomerId : (session?.customerId || '');
 
   const [screen, setScreen] = useState<'search' | 'detail'>('search');
   const [searchBy, setSearchBy] = useState<'ID' | 'NAME'>('ID');
@@ -1164,6 +1172,26 @@ export default function EmployeeHrRecord() {
   const [results, setResults] = useState<UiRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshTick, setRefreshTick] = useState(0);
+
+  // Consultants: load assigned customer list once session is ready.
+  useEffect(() => {
+    if (!isConsultant) return;
+    (async () => {
+      try {
+        const r = await fetch('/api/customers');
+        const j = await r.json();
+        if (j.success && Array.isArray(j.customers)) {
+          const companies = j.customers.filter(
+            (c: { customer_type: string }) => c.customer_type === 'COMPANY',
+          );
+          setCustomers(companies);
+          if (companies.length > 0 && !selectedCustomerId) {
+            setSelectedCustomerId(companies[0].id);
+          }
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [isConsultant, selectedCustomerId]);
 
   const [record, setRecord] = useState<UiRecord>(emptyRecord);
   const [mode, setMode] = useState<'view' | 'edit'>('view');
@@ -1297,6 +1325,42 @@ export default function EmployeeHrRecord() {
     setIsNew(false);
     setSavedMessage('');
   };
+
+  // Only show the spinner while the session is genuinely loading. Once the
+  // session is resolved we either render the customer picker (consultant) or
+  // fall through to the screen (CUSTOMER with a real customerId).
+  if (sessionLoading) {
+    return (
+      <div className="container mx-auto py-20 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
+        <p className="text-sm text-slate-500 mt-3">{t('messages.sessionLoading')}</p>
+      </div>
+    );
+  }
+
+  if (isConsultant && !customerId) {
+    return (
+      <div className="container mx-auto py-12 px-4 max-w-md text-center">
+        <p className="text-sm text-slate-600 mb-3">
+          {customers.length === 0 ? t('messages.noAssignedCustomers') : t('messages.selectCustomer')}
+        </p>
+        {customers.length > 0 && (
+          <select
+            value={selectedCustomerId}
+            onChange={(e) => setSelectedCustomerId(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+          >
+            <option value="">— {t('messages.selectCustomer')} —</option>
+            {customers.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.company_name || c.full_name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
+  }
 
   if (!customerId) {
     return (

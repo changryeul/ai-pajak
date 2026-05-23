@@ -366,7 +366,10 @@
       "sessionLoading": "세션 로딩 중…",
       "fullNameRequired": "Full Name(이름)은 필수입니다.",
       "saveFailed": "저장 실패",
-      "saveSuccess": "{name} 저장 완료"
+      "saveSuccess": "{name} 저장 완료",
+      "selectCustomer": "고객사를 선택하세요",
+      "noAssignedCustomers": "배정된 고객사가 없습니다",
+      "customerLabel": "고객사"
     },
     "pageTitle": "AI Payroll · 인사기록"
   },

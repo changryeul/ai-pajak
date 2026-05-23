@@ -366,7 +366,10 @@
       "sessionLoading": "会话加载中…",
       "fullNameRequired": "Full Name 为必填项。",
       "saveFailed": "保存失败",
-      "saveSuccess": "{name} 已保存"
+      "saveSuccess": "{name} 已保存",
+      "selectCustomer": "请选择客户",
+      "noAssignedCustomers": "没有分配的客户",
+      "customerLabel": "客户"
     },
     "pageTitle": "AI Payroll · 人事记录"
   },

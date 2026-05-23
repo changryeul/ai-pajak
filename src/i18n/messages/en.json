@@ -366,7 +366,10 @@
       "sessionLoading": "Loading session…",
       "fullNameRequired": "Full Name is required.",
       "saveFailed": "Save failed",
-      "saveSuccess": "{name} saved"
+      "saveSuccess": "{name} saved",
+      "selectCustomer": "Select a customer",
+      "noAssignedCustomers": "No customers assigned",
+      "customerLabel": "Customer"
     },
     "pageTitle": "AI Payroll · HR record"
   },

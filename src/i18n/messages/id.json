@@ -366,7 +366,10 @@
       "sessionLoading": "Memuat sesi…",
       "fullNameRequired": "Full Name wajib diisi.",
       "saveFailed": "Penyimpanan gagal",
-      "saveSuccess": "{name} disimpan"
+      "saveSuccess": "{name} disimpan",
+      "selectCustomer": "Pilih pelanggan",
+      "noAssignedCustomers": "Belum ada pelanggan ditugaskan",
+      "customerLabel": "Pelanggan"
     },
     "pageTitle": "AI Payroll · Catatan HR"
   },

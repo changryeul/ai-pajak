@@ -366,7 +366,10 @@
       "sessionLoading": "セッション読み込み中…",
       "fullNameRequired": "Full Name は必須です。",
       "saveFailed": "保存失敗",
-      "saveSuccess": "{name} を保存しました"
+      "saveSuccess": "{name} を保存しました",
+      "selectCustomer": "顧客を選択してください",
+      "noAssignedCustomers": "割当てられた顧客がありません",
+      "customerLabel": "顧客"
     },
     "pageTitle": "AI Payroll · 人事記録"
   },
