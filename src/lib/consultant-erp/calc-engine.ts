@@ -87,7 +87,7 @@ export function calcPph21Ter(input: {
     kind: 'PPH21_TER',
     amount,
     basis: { grossMonthlyPayroll: g, terRate: rate },
-    sourceSummary: `Gross payroll Rp ${g.toLocaleString('id-ID')} 기준`,
+    sourceSummary: `Based on gross payroll Rp ${g.toLocaleString('id-ID')}`,
     rationaleSummary: `PMK 168/2023 TER ${(rate * 100).toFixed(2)}%`,
     confidence: 85,
   };
@@ -105,8 +105,8 @@ export function calcWithholdingSummary(input: {
     kind: 'WITHHOLDING_SUMMARY',
     amount,
     basis: { totalGross: g, averageRate: r },
-    sourceSummary: `수신 인보이스 합계 Rp ${g.toLocaleString('id-ID')}`,
-    rationaleSummary: `가중평균 원천세율 ${(r * 100).toFixed(2)}%`,
+    sourceSummary: `Total received invoices Rp ${g.toLocaleString('id-ID')}`,
+    rationaleSummary: `Weighted-average withholding rate ${(r * 100).toFixed(2)}%`,
     confidence: 70,
   };
 }
@@ -175,10 +175,10 @@ export function calcCorpTaxMonthly(input: CorpTaxDualInput): CorpTaxDualOutput {
     },
     sourceSummary:
       selectedCase === 'PPH_FINAL'
-        ? `월매출 Rp ${monthly.toLocaleString('id-ID')} × 0.5%`
+        ? `Monthly revenue Rp ${monthly.toLocaleString('id-ID')} × 0.5%`
         : selectedCase === 'PPH25'
-          ? `전년도 산출세액 Rp ${prevTax.toLocaleString('id-ID')} / 12`
-          : '회사정보 부족 — 컨설턴트 선택 필요',
+          ? `Prior-year tax Rp ${prevTax.toLocaleString('id-ID')} / 12`
+          : 'Company info incomplete — consultant must choose',
     rationaleSummary:
       regimeRes.regime === 'NOT_DETERMINED'
         ? regimeRes.reason
@@ -204,7 +204,7 @@ export function calcPpnNet(input: {
     amount,
     basis: { outputDpp: out, inputDpp: inp, outputVat, inputVat, vatRate: rate },
     sourceSummary: `Output VAT Rp ${outputVat.toLocaleString('id-ID')} − Input VAT Rp ${inputVat.toLocaleString('id-ID')}`,
-    rationaleSummary: amount > 0 ? 'Kurang Bayar (납부)' : amount < 0 ? 'Lebih Bayar (크레딧)' : '균형',
+    rationaleSummary: amount > 0 ? 'Kurang Bayar (payment due)' : amount < 0 ? 'Lebih Bayar (credit)' : 'Balanced',
     confidence: 90,
   };
 }
@@ -221,8 +221,8 @@ export function calcBankRecon(input: {
     kind: 'BANK_RECON',
     amount: diff,
     basis: { submittedTotal: s, bankTotal: b, diff },
-    sourceSummary: `제출자료 합계 Rp ${s.toLocaleString('id-ID')} vs 통장 합계 Rp ${b.toLocaleString('id-ID')}`,
-    rationaleSummary: Math.abs(diff) < 1000 ? '대사 일치' : `차이 Rp ${diff.toLocaleString('id-ID')}`,
+    sourceSummary: `Submitted total Rp ${s.toLocaleString('id-ID')} vs bank total Rp ${b.toLocaleString('id-ID')}`,
+    rationaleSummary: Math.abs(diff) < 1000 ? 'Reconciled' : `Difference Rp ${diff.toLocaleString('id-ID')}`,
     confidence: Math.abs(diff) < 1000 ? 95 : 60,
   };
 }
