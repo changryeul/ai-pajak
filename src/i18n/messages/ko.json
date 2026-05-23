@@ -3885,6 +3885,14 @@
     },
     "priorityHigh": "높음",
     "priorityMedium": "중간",
+    "actionResult": {
+      "requestDocsDone": "{customers}명에게 자료 요청을 보냈습니다 (WhatsApp {wa}건, 알림 {inApp}건)",
+      "reviewListed": "{count}건의 검토 대상이 있습니다",
+      "billingNothing": "처리할 납부 예정 건이 없습니다",
+      "billingCreated": "{count}건의 ID Billing이 생성되었습니다",
+      "submitNothing": "제출 가능한 신고서가 없습니다",
+      "submitDone": "{count}건의 신고서가 제출 처리되었습니다"
+    },
     "upcomingDeadlinesTitle": "다가오는 신고",
     "noUpcomingDeadlines": "30일 내 예정된 마감일이 없습니다",
     "riskAlertsTitle": "리스크 알림",

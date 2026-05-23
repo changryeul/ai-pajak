@@ -3864,6 +3864,14 @@
     },
     "priorityHigh": "高",
     "priorityMedium": "中",
+    "actionResult": {
+      "requestDocsDone": "已向 {customers} 位客户发送资料请求 (WhatsApp {wa} 条,站内 {inApp} 条)",
+      "reviewListed": "{count} 项待复核",
+      "billingNothing": "无待生成 Billing 的项目",
+      "billingCreated": "已生成 {count} 笔 ID Billing",
+      "submitNothing": "无可提交的申报",
+      "submitDone": "{count} 份申报已标记为提交"
+    },
     "upcomingDeadlinesTitle": "即将到期的申报",
     "noUpcomingDeadlines": "未来 30 天内无截止日期",
     "riskAlertsTitle": "风险提醒",

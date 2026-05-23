@@ -3864,6 +3864,14 @@
     },
     "priorityHigh": "Tinggi",
     "priorityMedium": "Sedang",
+    "actionResult": {
+      "requestDocsDone": "Permintaan dokumen terkirim ke {customers} pelanggan (WhatsApp {wa}, in-app {inApp})",
+      "reviewListed": "{count} item perlu ditinjau",
+      "billingNothing": "Tidak ada item menunggu billing",
+      "billingCreated": "{count} ID Billing dibuat",
+      "submitNothing": "Tidak ada laporan yang siap dikirim",
+      "submitDone": "{count} laporan ditandai terkirim"
+    },
     "upcomingDeadlinesTitle": "Pelaporan Mendatang",
     "noUpcomingDeadlines": "Tidak ada tenggat dalam 30 hari ke depan",
     "riskAlertsTitle": "Peringatan Risiko",

@@ -3864,6 +3864,14 @@
     },
     "priorityHigh": "High",
     "priorityMedium": "Medium",
+    "actionResult": {
+      "requestDocsDone": "Sent document request to {customers} customers (WhatsApp {wa}, in-app {inApp})",
+      "reviewListed": "{count} items to review",
+      "billingNothing": "No items pending billing",
+      "billingCreated": "{count} ID Billing entries created",
+      "submitNothing": "No filings ready to submit",
+      "submitDone": "{count} filings marked as submitted"
+    },
     "upcomingDeadlinesTitle": "Upcoming Filings",
     "noUpcomingDeadlines": "No deadlines in next 30 days",
     "riskAlertsTitle": "Risk Alerts",

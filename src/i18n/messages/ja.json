@@ -3864,6 +3864,14 @@
     },
     "priorityHigh": "高",
     "priorityMedium": "中",
+    "actionResult": {
+      "requestDocsDone": "{customers}名へ資料依頼を送信しました (WhatsApp {wa}件、通知 {inApp}件)",
+      "reviewListed": "{count}件の検証対象があります",
+      "billingNothing": "処理対象の納付予定がありません",
+      "billingCreated": "{count}件の ID Billing を生成しました",
+      "submitNothing": "提出可能な申告書がありません",
+      "submitDone": "{count}件の申告書を提出処理しました"
+    },
     "upcomingDeadlinesTitle": "今後の申告",
     "noUpcomingDeadlines": "30日以内の締切はありません",
     "riskAlertsTitle": "リスク通知",

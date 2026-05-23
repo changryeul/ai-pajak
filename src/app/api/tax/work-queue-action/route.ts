@@ -52,7 +52,10 @@ export async function POST(request: NextRequest) {
 
       for (const cust of customers) {
         const customerName = cust.company_name || cust.full_name;
-        const message = `📋 *자료 요청 안내 - AI Pajak*\n\n안녕하세요, ${customerName}님.\n\n이번 달 세금 신고를 위해 다음 자료가 필요합니다:\n\n• 은행 거래내역\n• 매입 세금계산서\n• 급여 자료\n\n아래 링크에서 업로드 부탁드립니다:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents\n\n_AI Pajak_`;
+        // Customer-facing copy is in Indonesian (target audience). When customer
+        // table grows a locale column we can branch on it.
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
+        const message = `📋 *Permintaan Dokumen - AI Pajak*\n\nHalo ${customerName},\n\nUntuk pelaporan pajak bulan ini kami memerlukan dokumen berikut:\n\n• Mutasi rekening bank\n• Faktur pajak masukan\n• Data penggajian\n\nSilakan unggah melalui tautan berikut:\n${appUrl}/documents\n\n_AI Pajak_`;
 
         // WhatsApp
         if (cust.phone_number) {
@@ -70,13 +73,13 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // In-app notification
+        // In-app notification — Indonesian copy (customer-facing).
         try {
           await admin.from('notification').insert({
             user_id: cust.user_id,
             type: 'SYSTEM_ANNOUNCEMENT',
-            title: '자료 요청',
-            message: '이번 달 세금 신고를 위해 필요한 자료가 있습니다. 문서 페이지에서 업로드해주세요.',
+            title: 'Permintaan dokumen',
+            message: 'Beberapa dokumen masih kurang untuk pelaporan pajak bulan ini. Mohon unggah melalui halaman dokumen.',
             priority: 'HIGH',
             data: { action: 'document-request' },
           });
@@ -88,7 +91,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: `${customers.length}명에게 자료 요청을 보냈습니다 (WhatsApp ${waSent}건, 알림 ${inAppSent}건)`,
+        messageKey: 'actionResult.requestDocsDone',
+        messageParams: { customers: customers.length, wa: waSent, inApp: inAppSent },
         data: { waSent, inAppSent, total: customers.length },
       });
     }
@@ -108,7 +112,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: `${(calcs || []).length}건의 검토 대상이 있습니다`,
+        messageKey: 'actionResult.reviewListed',
+        messageParams: { count: (calcs || []).length },
         data: calcs || [],
         redirectTo: '/tax/calculations',
       });
@@ -127,7 +132,7 @@ export async function POST(request: NextRequest) {
       if (!items || items.length === 0) {
         return NextResponse.json({
           success: true,
-          message: '처리할 납부 예정 건이 없습니다',
+          messageKey: 'actionResult.billingNothing',
           data: { created: 0 },
         });
       }
@@ -161,7 +166,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: `${created}건의 ID Billing이 생성되었습니다`,
+        messageKey: 'actionResult.billingCreated',
+        messageParams: { count: created },
         data: { created, results },
       });
     }
@@ -179,7 +185,7 @@ export async function POST(request: NextRequest) {
       if (!items || items.length === 0) {
         return NextResponse.json({
           success: true,
-          message: '제출 가능한 신고서가 없습니다',
+          messageKey: 'actionResult.submitNothing',
           data: { submitted: 0 },
         });
       }
@@ -211,7 +217,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: `${submitted}건의 신고서가 제출 처리되었습니다`,
+        messageKey: 'actionResult.submitDone',
+        messageParams: { count: submitted },
         data: { submitted, results },
       });
     }

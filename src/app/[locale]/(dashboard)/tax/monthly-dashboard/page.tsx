@@ -140,7 +140,11 @@ export default function MonthlyDashboardPage() {
         return;
       }
 
-      alert(result.message || t('actionSuccess'));
+      // API returns `messageKey` + `messageParams` for i18n-aware toasts.
+      const localizedMsg = result.messageKey
+        ? t(result.messageKey, result.messageParams ?? undefined)
+        : t('actionSuccess');
+      alert(localizedMsg);
 
       // start-review: navigate to calculations page
       if (action === 'start-review' && result.redirectTo) {
