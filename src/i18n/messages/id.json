@@ -855,12 +855,18 @@
     "errors": {
       "noToken": "Token undangan tidak ada",
       "invalidInvite": "Undangan tidak valid",
+      "alreadyAccepted": "Undangan ini sudah pernah diterima",
+      "cancelled": "Undangan ini telah dibatalkan",
+      "expired": "Undangan ini sudah kedaluwarsa",
+      "passwordRequired": "Kata sandi minimal 8 karakter",
+      "signupCreateFailed": "Pembuatan akun gagal",
       "checkFailed": "Pemeriksaan undangan gagal",
       "passwordMismatch": "Kata sandi tidak cocok",
       "passwordTooShort": "Kata sandi minimal 8 karakter",
       "signupFailed": "Pendaftaran gagal",
       "serverError": "Kesalahan server"
     },
+    "signupDone": "Pendaftaran selesai. Silakan ke halaman login.",
     "errorCard": {
       "title": "Undangan ini tidak dapat digunakan",
       "loginBtn": "Ke halaman login"

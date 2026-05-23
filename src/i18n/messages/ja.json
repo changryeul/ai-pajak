@@ -855,12 +855,18 @@
     "errors": {
       "noToken": "招待トークンがありません",
       "invalidInvite": "無効な招待です",
+      "alreadyAccepted": "この招待は既に受諾されています",
+      "cancelled": "この招待はキャンセルされました",
+      "expired": "この招待は有効期限が切れています",
+      "passwordRequired": "パスワードは8文字以上にしてください",
+      "signupCreateFailed": "アカウント作成に失敗しました",
       "checkFailed": "招待の確認に失敗しました",
       "passwordMismatch": "パスワードが一致しません",
       "passwordTooShort": "パスワードは8文字以上にしてください",
       "signupFailed": "登録に失敗しました",
       "serverError": "サーバーエラー"
     },
+    "signupDone": "登録が完了しました。ログインページへお進みください。",
     "errorCard": {
       "title": "この招待は使用できません",
       "loginBtn": "ログインページへ"

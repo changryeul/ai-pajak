@@ -22,11 +22,11 @@ export async function GET(request: NextRequest) {
       .eq('token', token)
       .maybeSingle();
 
-    if (!inv) return NextResponse.json({ error: '유효하지 않은 초대입니다' }, { status: 404 });
-    if (inv.accepted_at) return NextResponse.json({ error: '이미 수락된 초대입니다' }, { status: 410 });
-    if (inv.cancelled_at) return NextResponse.json({ error: '취소된 초대입니다' }, { status: 410 });
+    if (!inv) return NextResponse.json({ errorKey: 'errors.invalidInvite' }, { status: 404 });
+    if (inv.accepted_at) return NextResponse.json({ errorKey: 'errors.alreadyAccepted' }, { status: 410 });
+    if (inv.cancelled_at) return NextResponse.json({ errorKey: 'errors.cancelled' }, { status: 410 });
     if (new Date(inv.expires_at).getTime() < Date.now()) {
-      return NextResponse.json({ error: '만료된 초대입니다' }, { status: 410 });
+      return NextResponse.json({ errorKey: 'errors.expired' }, { status: 410 });
     }
 
     return NextResponse.json({
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'token and password required' }, { status: 400 });
     }
     if (password.length < 8) {
-      return NextResponse.json({ error: '비밀번호는 최소 8자 이상이어야 합니다' }, { status: 400 });
+      return NextResponse.json({ errorKey: 'errors.passwordRequired' }, { status: 400 });
     }
 
     const admin = getSupabaseAdmin();
@@ -69,11 +69,11 @@ export async function POST(request: NextRequest) {
       .eq('token', token)
       .maybeSingle();
 
-    if (!inv) return NextResponse.json({ error: '유효하지 않은 초대' }, { status: 404 });
-    if (inv.accepted_at) return NextResponse.json({ error: '이미 수락된 초대' }, { status: 410 });
-    if (inv.cancelled_at) return NextResponse.json({ error: '취소된 초대' }, { status: 410 });
+    if (!inv) return NextResponse.json({ errorKey: 'errors.invalidInvite' }, { status: 404 });
+    if (inv.accepted_at) return NextResponse.json({ errorKey: 'errors.alreadyAccepted' }, { status: 410 });
+    if (inv.cancelled_at) return NextResponse.json({ errorKey: 'errors.cancelled' }, { status: 410 });
     if (new Date(inv.expires_at).getTime() < Date.now()) {
-      return NextResponse.json({ error: '만료된 초대' }, { status: 410 });
+      return NextResponse.json({ errorKey: 'errors.expired' }, { status: 410 });
     }
 
     const displayName = fullName || inv.full_name || inv.email.split('@')[0];
@@ -93,7 +93,10 @@ export async function POST(request: NextRequest) {
 
     if (authError || !authUser?.user) {
       loggers.api.error({ err: authError, email: inv.email }, 'Failed to create user from invitation');
-      return NextResponse.json({ error: authError?.message || '계정 생성 실패' }, { status: 500 });
+      return NextResponse.json(
+        { error: authError?.message, errorKey: authError?.message ? undefined : 'errors.signupCreateFailed' },
+        { status: 500 },
+      );
     }
 
     const userId = authUser.user.id;
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: { email: inv.email, role: inv.role },
-      message: '가입이 완료되었습니다. 로그인 페이지로 이동하세요.',
+      messageKey: 'signupDone',
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Accept invitation POST error');

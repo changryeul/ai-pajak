@@ -855,12 +855,18 @@
     "errors": {
       "noToken": "缺少邀请令牌",
       "invalidInvite": "无效的邀请",
+      "alreadyAccepted": "该邀请已被接受",
+      "cancelled": "该邀请已被取消",
+      "expired": "该邀请已过期",
+      "passwordRequired": "密码至少需要 8 位",
+      "signupCreateFailed": "账号创建失败",
       "checkFailed": "邀请校验失败",
       "passwordMismatch": "两次密码不一致",
       "passwordTooShort": "密码至少需要 8 位",
       "signupFailed": "注册失败",
       "serverError": "服务器错误"
     },
+    "signupDone": "注册完成。请前往登录页面。",
     "errorCard": {
       "title": "该邀请无法使用",
       "loginBtn": "前往登录"

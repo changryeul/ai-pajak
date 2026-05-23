@@ -855,12 +855,18 @@
     "errors": {
       "noToken": "초대 토큰이 없습니다",
       "invalidInvite": "유효하지 않은 초대",
+      "alreadyAccepted": "이미 수락된 초대입니다",
+      "cancelled": "취소된 초대입니다",
+      "expired": "만료된 초대입니다",
+      "passwordRequired": "비밀번호는 최소 8자 이상이어야 합니다",
+      "signupCreateFailed": "계정 생성 실패",
       "checkFailed": "초대 확인 실패",
       "passwordMismatch": "비밀번호가 일치하지 않습니다",
       "passwordTooShort": "비밀번호는 최소 8자 이상이어야 합니다",
       "signupFailed": "가입 실패",
       "serverError": "서버 오류"
     },
+    "signupDone": "가입이 완료되었습니다. 로그인 페이지로 이동하세요.",
     "errorCard": {
       "title": "초대를 사용할 수 없습니다",
       "loginBtn": "로그인 페이지로"

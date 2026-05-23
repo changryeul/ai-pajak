@@ -855,12 +855,18 @@
     "errors": {
       "noToken": "Invitation token is missing",
       "invalidInvite": "Invalid invitation",
+      "alreadyAccepted": "This invitation has already been accepted",
+      "cancelled": "This invitation has been cancelled",
+      "expired": "This invitation has expired",
+      "passwordRequired": "Password must be at least 8 characters",
+      "signupCreateFailed": "Account creation failed",
       "checkFailed": "Invitation check failed",
       "passwordMismatch": "Passwords do not match",
       "passwordTooShort": "Password must be at least 8 characters",
       "signupFailed": "Sign-up failed",
       "serverError": "Server error"
     },
+    "signupDone": "Sign-up complete. Please go to the login page.",
     "errorCard": {
       "title": "This invitation is no longer usable",
       "loginBtn": "Go to login"

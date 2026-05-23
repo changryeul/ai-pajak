@@ -46,7 +46,9 @@ function AcceptInvitationContent() {
           setInvitation(data.data);
           setFullName(data.data.fullName || '');
         } else {
-          setError(data.error || t('errors.invalidInvite'));
+          // API may return `errorKey` (i18n key inside inviteAccept) or legacy `error`.
+          const key = typeof data.errorKey === 'string' ? data.errorKey : null;
+          setError(key ? t(key) : (data.error || t('errors.invalidInvite')));
         }
       })
       .catch(() => setError(t('errors.checkFailed')))
@@ -76,7 +78,8 @@ function AcceptInvitationContent() {
       if (data.success) {
         setSuccess(true);
       } else {
-        setError(data.error || t('errors.signupFailed'));
+        const key = typeof data.errorKey === 'string' ? data.errorKey : null;
+        setError(key ? t(key) : (data.error || t('errors.signupFailed')));
       }
     } catch {
       setError(t('errors.serverError'));
