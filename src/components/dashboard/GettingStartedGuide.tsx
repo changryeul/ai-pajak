@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -91,26 +91,13 @@ export function GettingStartedGuide({ customerId, userName }: GettingStartedGuid
     },
   ];
 
-  useEffect(() => {
-    // Check if dismissed
-    if (typeof window !== 'undefined') {
-      const d = localStorage.getItem('ai-pajak-guide-dismissed');
-      if (d) setDismissed(true);
-
-      // Load completed steps
-      const saved = localStorage.getItem('ai-pajak-guide-completed');
-      if (saved) {
-        try {
-          setCompletedSteps(new Set(JSON.parse(saved)));
-        } catch { /* ignore */ }
-      }
-    }
-
-    // Check profile completion
-    checkSteps();
-  }, []);
-
-  const checkSteps = async () => {
+  // Declared with useCallback so the useEffect below can list it as a
+  // dependency AND so the function reference exists before useEffect tries
+  // to call it on first render. (The previous form used a `const` declared
+  // after the effect, which the React 19 lint flags as TDZ access — the
+  // effect runs after mount so it worked in practice, but the lint is right
+  // that hoisting via useCallback is the canonical fix.)
+  const checkSteps = useCallback(async () => {
     setIsChecking(true);
     const completed = new Set<string>();
 
@@ -145,7 +132,26 @@ export function GettingStartedGuide({ customerId, userName }: GettingStartedGuid
     setCompletedSteps(completed);
     localStorage.setItem('ai-pajak-guide-completed', JSON.stringify([...completed]));
     setIsChecking(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    // Check if dismissed
+    if (typeof window !== 'undefined') {
+      const d = localStorage.getItem('ai-pajak-guide-dismissed');
+      if (d) setDismissed(true);
+
+      // Load completed steps
+      const saved = localStorage.getItem('ai-pajak-guide-completed');
+      if (saved) {
+        try {
+          setCompletedSteps(new Set(JSON.parse(saved)));
+        } catch { /* ignore */ }
+      }
+    }
+
+    // Check profile completion
+    checkSteps();
+  }, [checkSteps]);
 
   const markComplete = (stepId: string) => {
     const next = new Set(completedSteps);

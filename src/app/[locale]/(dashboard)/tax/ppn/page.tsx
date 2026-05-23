@@ -1013,7 +1013,7 @@ function PPNRefundSection({ locale }: { locale: string }) {
                 <p className="font-bold text-sm text-emerald-900 mb-2">PPN {t('k36_09f6dc')}?</p>
                 <p className="text-xs text-emerald-800">
                   {t('k37_be38dd')}
-                  {t('k38_445cc6')} <b>"Restitusi PPN"</b>{t('k39_081b53')}
+                  {t('k38_445cc6')} <b>&ldquo;Restitusi PPN&rdquo;</b>{t('k39_081b53')}
                 </p>
               </div>
 
