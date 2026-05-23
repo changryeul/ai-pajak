@@ -6301,6 +6301,8 @@
   },
   "taxScreen": {
     "backToDashboard": "Back to Dashboard",
+    "selectCustomer": "顧客",
+    "noAssignedCustomers": "割当てられた顧客がありません",
     "uploadData": "Upload Data",
     "aiExecutes": "AI performs",
     "delete": "Delete",

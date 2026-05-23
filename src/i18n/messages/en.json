@@ -6301,6 +6301,8 @@
   },
   "taxScreen": {
     "backToDashboard": "Back to Dashboard",
+    "selectCustomer": "Customer",
+    "noAssignedCustomers": "No customers assigned",
     "uploadData": "Upload Data",
     "aiExecutes": "AI performs",
     "delete": "Delete",

@@ -6404,6 +6404,8 @@
   },
   "taxScreen": {
     "backToDashboard": "대시보드로",
+    "selectCustomer": "고객사",
+    "noAssignedCustomers": "배정된 고객사가 없습니다",
     "uploadData": "자료 업로드",
     "aiExecutes": "AI 자동 처리 — 진행 표시용",
     "delete": "삭제",

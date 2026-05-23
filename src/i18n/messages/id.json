@@ -6301,6 +6301,8 @@
   },
   "taxScreen": {
     "backToDashboard": "Ke Dashboard",
+    "selectCustomer": "Pelanggan",
+    "noAssignedCustomers": "Belum ada pelanggan ditugaskan",
     "uploadData": "Unggah Data",
     "aiExecutes": "AI menjalankan",
     "delete": "Hapus",

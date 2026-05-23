@@ -112,7 +112,29 @@ export default function PPh21PayrollPage() {
   // TER calculation results
   const [calcResults, setCalcResults] = useState<Record<string, { taxAmount: number; terRate: number }>>({});
 
-  const customerId = session?.customerId || '';
+  // Consultant flow: load assigned customer list and let the user pick one.
+  // CUSTOMER role keeps using session.customerId directly.
+  const isConsultant =
+    session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name: string | null }>>([]);
+  useEffect(() => {
+    if (!isConsultant) return;
+    (async () => {
+      try {
+        const r = await fetch('/api/customers');
+        const j = await r.json();
+        if (j.success && Array.isArray(j.customers)) {
+          setCustomers(j.customers);
+          if (j.customers.length > 0 && !selectedCustomerId) {
+            setSelectedCustomerId(j.customers[0].id);
+          }
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [isConsultant, selectedCustomerId]);
+
+  const customerId = isConsultant ? selectedCustomerId : (session?.customerId || '');
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -305,6 +327,32 @@ export default function PPh21PayrollPage() {
         step={currentStep}
         aiSteps={[tsc('stepAiProcess'), tsc('stepTaxCalc'), tsc('stepIdBillingGen')]}
       />
+
+      {/* Consultant customer picker — visible only for CONSULTANT_JTC /
+          TAX_ADVISOR_JTC. CUSTOMER role keeps the existing UI unchanged. */}
+      {isConsultant && (
+        <div className="mb-5 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="pph21-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {tsc('selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{tsc('noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="pph21-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       {/* Back to selection (only in payslip fullscreen mode) */}
       {payslipMode && (
