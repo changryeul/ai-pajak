@@ -278,6 +278,12 @@
       "unmapped": "未映射列 {n} 个 (已忽略)",
       "errors": "错误 {n} 项"
     },
+    "hrImport": {
+      "noData": "无数据 (需要表头 + 至少 1 行)。",
+      "noIdColumn": "未找到员工标识列。\"Employee ID\" 或 \"Full Name\" 至少需要一项。",
+      "rowMissingName": "姓名和工号均为空",
+      "summary": "新增 {imported} 人, 更新 {updated} 人, 跳过 {skipped} 人"
+    },
     "photo": {
       "uploadBtn": "上传照片",
       "uploading": "上传中…",

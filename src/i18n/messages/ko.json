@@ -278,6 +278,12 @@
       "unmapped": "매핑되지 않은 컬럼 {n}개 (무시됨)",
       "errors": "오류 {n}건"
     },
+    "hrImport": {
+      "noData": "데이터가 없습니다 (헤더 + 1행 이상 필요).",
+      "noIdColumn": "직원 식별 컬럼을 찾을 수 없습니다. \"Employee ID\" 또는 \"Full Name\" 중 하나는 필요합니다.",
+      "rowMissingName": "이름/사번 모두 비어있음",
+      "summary": "신규 {imported}명, 갱신 {updated}명, 스킵 {skipped}명"
+    },
     "photo": {
       "uploadBtn": "사진 업로드",
       "uploading": "업로드 중…",

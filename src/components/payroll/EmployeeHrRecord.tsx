@@ -476,13 +476,14 @@ interface ImportSummary {
   imported: number;
   updated: number;
   skipped: number;
-  errors: { row: number; message: string }[];
+  errors: { row: number; message?: string; messageKey?: string }[];
   unmappedHeaders: string[];
   mappedHeaders: { column: string; field: string }[];
 }
 
 function UploadCard({ customerId, onImported }: { customerId: string; onImported: () => void }) {
   const t = useTranslations('employeeHr.uploadSection');
+  const tEmployeeHr = useTranslations('employeeHr');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState<string>('');
@@ -501,7 +502,14 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
       const res = await fetch('/api/tax/employees/hr-import', { method: 'POST', body: fd });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        setError(json.error || t('uploadFailed'));
+        // API returns either `errorKey` (i18n key into employeeHr namespace) or
+        // `error` (plain string fallback). Strip the `employeeHr.` prefix so
+        // the namespaced `t` resolves correctly.
+        const key = typeof json.errorKey === 'string' && json.errorKey.startsWith('employeeHr.')
+          ? json.errorKey.slice('employeeHr.'.length)
+          : null;
+        const tEmp = tEmployeeHr;
+        setError(key ? tEmp(key) : (json.error || t('uploadFailed')));
       } else {
         setSummary(json.data as ImportSummary);
         onImported();
@@ -599,9 +607,14 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
                 {t('errors', { n: summary.errors.length })}
               </summary>
               <div className="mt-2 space-y-0.5 text-[11px] text-red-800">
-                {summary.errors.map((er) => (
-                  <div key={er.row}>Row {er.row}: {er.message}</div>
-                ))}
+                {summary.errors.map((er) => {
+                  // API may return either `messageKey` (i18n key, namespaced
+                  // under `employeeHr.`) or a raw `message` string.
+                  const localized = er.messageKey && er.messageKey.startsWith('employeeHr.')
+                    ? tEmployeeHr(er.messageKey.slice('employeeHr.'.length))
+                    : er.message ?? '';
+                  return <div key={er.row}>Row {er.row}: {localized}</div>;
+                })}
               </div>
             </details>
           )}

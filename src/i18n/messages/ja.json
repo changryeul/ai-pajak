@@ -278,6 +278,12 @@
       "unmapped": "未マッピング列 {n}件 (無視)",
       "errors": "エラー {n}件"
     },
+    "hrImport": {
+      "noData": "データがありません (ヘッダー + 1行以上が必要)。",
+      "noIdColumn": "従業員識別列が見つかりません。\"Employee ID\" または \"Full Name\" のいずれかが必要です。",
+      "rowMissingName": "氏名/社員番号ともに空欄",
+      "summary": "新規 {imported}名、更新 {updated}名、スキップ {skipped}名"
+    },
     "photo": {
       "uploadBtn": "写真をアップロード",
       "uploading": "アップロード中…",

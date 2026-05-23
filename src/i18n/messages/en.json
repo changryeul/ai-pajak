@@ -278,6 +278,12 @@
       "unmapped": "{n} unmapped columns (ignored)",
       "errors": "{n} errors"
     },
+    "hrImport": {
+      "noData": "No data found (header + at least 1 row required).",
+      "noIdColumn": "No employee identifier column found. Either \"Employee ID\" or \"Full Name\" is required.",
+      "rowMissingName": "Both name and employee ID are empty",
+      "summary": "{imported} new, {updated} updated, {skipped} skipped"
+    },
     "photo": {
       "uploadBtn": "Upload photo",
       "uploading": "Uploading…",

@@ -176,7 +176,7 @@ interface ImportSummary {
   imported: number;
   updated: number;
   skipped: number;
-  errors: { row: number; message: string }[];
+  errors: { row: number; message?: string; messageKey?: string }[];
   unmappedHeaders: string[];
   mappedHeaders: { column: string; field: FieldKey }[];
 }
@@ -228,7 +228,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   }
 
   if (rows.length < 2) {
-    return NextResponse.json({ error: '데이터가 없습니다 (헤더 + 1행 이상 필요).' }, { status: 400 });
+    return NextResponse.json({ errorKey: 'employeeHr.hrImport.noData' }, { status: 400 });
   }
 
   const headers = rows[0].map(h => String(h ?? '').trim());
@@ -249,7 +249,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   if (!hasName && !hasId) {
     return NextResponse.json(
       {
-        error: '직원 식별 컬럼을 찾을 수 없습니다. "Employee ID" 또는 "Full Name" 중 하나는 필요합니다.',
+        errorKey: 'employeeHr.hrImport.noIdColumn',
         data: { mappedHeaders, unmappedHeaders, headers },
       },
       { status: 400 },
@@ -300,7 +300,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     const empName = String(record.employee_name || '').trim();
     const empNumber = String(record.employee_number || '').trim();
     if (!empName && !empNumber) {
-      summary.errors.push({ row: r + 1, message: '이름/사번 모두 비어있음' });
+      summary.errors.push({ row: r + 1, messageKey: 'employeeHr.hrImport.rowMissingName' });
       summary.skipped++;
       continue;
     }
@@ -369,7 +369,12 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   return NextResponse.json({
     success: true,
     data: summary,
-    message: `신규 ${summary.imported}명, 갱신 ${summary.updated}명, 스킵 ${summary.skipped}명`,
+    messageKey: 'employeeHr.hrImport.summary',
+    messageParams: {
+      imported: summary.imported,
+      updated: summary.updated,
+      skipped: summary.skipped,
+    },
   });
 }
 

@@ -278,6 +278,12 @@
       "unmapped": "{n} kolom tidak dipetakan (diabaikan)",
       "errors": "{n} kesalahan"
     },
+    "hrImport": {
+      "noData": "Tidak ada data (header + minimal 1 baris diperlukan).",
+      "noIdColumn": "Kolom identitas karyawan tidak ditemukan. Salah satu dari \"Employee ID\" atau \"Full Name\" wajib ada.",
+      "rowMissingName": "Nama dan ID karyawan keduanya kosong",
+      "summary": "{imported} baru, {updated} diperbarui, {skipped} dilewati"
+    },
     "photo": {
       "uploadBtn": "Unggah foto",
       "uploading": "Mengunggah…",
