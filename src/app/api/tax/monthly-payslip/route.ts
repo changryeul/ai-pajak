@@ -79,7 +79,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       .limit(1);
 
     if (existing && existing.length > 0) {
-      return NextResponse.json({ error: '이미 해당 월의 급여가 생성되었습니다', existingCount: existing.length }, { status: 409 });
+      return NextResponse.json({ error: 'Payslips for this month already exist', existingCount: existing.length }, { status: 409 });
     }
 
     // Get active employees
@@ -90,7 +90,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       .eq('is_active', true);
 
     if (!employees || employees.length === 0) {
-      return NextResponse.json({ error: '활성 직원이 없습니다' }, { status: 400 });
+      return NextResponse.json({ error: 'No active employees' }, { status: 400 });
     }
 
     // BPJS rate/cap constants (2024)
@@ -160,7 +160,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({
       success: true,
       data: inserted,
-      message: `${inserted?.length}명의 급여가 생성되었습니다`,
+      message: `${inserted?.length} payslips generated`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Payslip POST error');

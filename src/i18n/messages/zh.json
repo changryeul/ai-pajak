@@ -7067,7 +7067,12 @@
     "docStatusMissing": "未上传",
     "bpeNumberPlaceholder": "BPE 编号",
     "uploadSuccess": "上传成功",
-    "uploadFailed": "上传失败"
+    "uploadFailed": "上传失败",
+    "docTypeSpt": "SPT",
+    "docTypeBpe": "BPE",
+    "docTypeA1": "A1",
+    "docTypeFinancial": "财务报表",
+    "docNameFinancial": "财务报表 {year}"
   },
   "personalDashV3": {
     "regulationLabel": "法规:",

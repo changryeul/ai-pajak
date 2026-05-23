@@ -94,19 +94,19 @@ async function handle(req: RequestWithSession): Promise<Response> {
   const inputBundle = rowsFromBody(body);
   if (!inputBundle) {
     return NextResponse.json(
-      { success: false, error: 'csvContent 또는 rows 중 하나가 필요합니다' },
+      { success: false, error: 'Either csvContent or rows is required' },
       { status: 400 },
     );
   }
   if (inputBundle.rows.length === 0) {
     return NextResponse.json(
-      { success: false, error: '입력 행이 없습니다' },
+      { success: false, error: 'No input rows' },
       { status: 400 },
     );
   }
   if (inputBundle.rows.length > 500) {
     return NextResponse.json(
-      { success: false, error: '한 번에 최대 500행까지 처리 가능합니다' },
+      { success: false, error: 'At most 500 rows per request' },
       { status: 400 },
     );
   }

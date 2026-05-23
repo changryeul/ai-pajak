@@ -7067,7 +7067,12 @@
     "docStatusMissing": "Not uploaded",
     "bpeNumberPlaceholder": "BPE number",
     "uploadSuccess": "Uploaded",
-    "uploadFailed": "Upload failed"
+    "uploadFailed": "Upload failed",
+    "docTypeSpt": "SPT",
+    "docTypeBpe": "BPE",
+    "docTypeA1": "A1",
+    "docTypeFinancial": "Financial statements",
+    "docNameFinancial": "Financial statements {year}"
   },
   "personalDashV3": {
     "regulationLabel": "Regulation:",

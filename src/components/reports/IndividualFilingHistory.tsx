@@ -60,6 +60,25 @@ function docStatusLabel(
   return t('docStatusAvailable');
 }
 
+// API still uses Korean enum values (legacy); UI maps them to localized labels.
+function docTypeLabel(type: DocType, t: (k: string) => string): string {
+  if (type === 'SPT') return t('docTypeSpt');
+  if (type === 'BPE') return t('docTypeBpe');
+  if (type === 'A1')  return t('docTypeA1');
+  return t('docTypeFinancial');
+}
+
+// API encodes the financial-statement row name as `재무제표 {year}` — strip the
+// Korean prefix and re-emit through i18n so the label localizes naturally.
+function docNameLabel(
+  d: { type: DocType; name: string },
+  t: (k: string, params?: Record<string, string | number>) => string,
+): string {
+  if (d.type !== '재무제표') return d.name;
+  const m = d.name.match(/(\d{4})/);
+  return t('docNameFinancial', { year: m?.[1] ?? '' });
+}
+
 export default function IndividualFilingHistory() {
   const t = useTranslations('filingHistory');
   const [loading, setLoading] = useState(true);
@@ -229,7 +248,7 @@ export default function IndividualFilingHistory() {
                           key={uploadKey}
                           className="grid grid-cols-[90px_1fr_120px_auto] gap-2 px-4 py-3 items-center text-sm border-t"
                         >
-                          <span className="text-xs font-semibold text-gray-700">{d.type}</span>
+                          <span className="text-xs font-semibold text-gray-700">{docTypeLabel(d.type, t)}</span>
                           <span className="truncate text-gray-800 flex items-center gap-1.5">
                             <FileText
                               className={
@@ -238,7 +257,7 @@ export default function IndividualFilingHistory() {
                                   : 'h-3.5 w-3.5 text-gray-300 shrink-0'
                               }
                             />
-                            <span className={hasFile ? '' : 'text-gray-400'}>{d.name}</span>
+                            <span className={hasFile ? '' : 'text-gray-400'}>{docNameLabel(d, t)}</span>
                             {d.number && (
                               <span className="text-[10px] text-gray-400 font-mono ml-1">
                                 #{d.number}

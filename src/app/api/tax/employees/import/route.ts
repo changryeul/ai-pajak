@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const lines = text.split('\n').filter(l => l.trim());
 
     if (lines.length < 2) {
-      return NextResponse.json({ error: '데이터가 없습니다. 헤더 + 최소 1행 필요.' }, { status: 400 });
+      return NextResponse.json({ error: 'No data (header + at least 1 row required).' }, { status: 400 });
     }
 
     // Parse header
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       if (!name) { skipped++; continue; }
 
       const grossSalary = getNum(cols, 'gross_salary');
-      if (grossSalary <= 0) { errors.push(`Row ${i + 1}: ${name} — gross_salary 없음`); skipped++; continue; }
+      if (grossSalary <= 0) { errors.push(`Row ${i + 1}: ${name} — missing gross_salary`); skipped++; continue; }
 
       const ptkp = getVal(cols, 'ptkp_category') || 'TK0';
       const workerType = getVal(cols, 'worker_type') || 'REGULAR';
@@ -184,11 +184,11 @@ export async function POST(request: NextRequest) {
       'Employee import completed'
     );
 
-    const periodMsg = taxPeriod ? ` (${taxPeriod} 급여 명세 ${payslipsUpserted}건 반영)` : '';
+    const periodMsg = taxPeriod ? ` (${payslipsUpserted} payslip rows for ${taxPeriod})` : '';
     return NextResponse.json({
       success: true,
       data: { imported, skipped, errors, totalRows: lines.length - 1, payslipsUpserted, taxPeriod },
-      message: `${imported}명 임포트 완료${skipped > 0 ? `, ${skipped}명 스킵` : ''}${periodMsg}`,
+      message: `${imported} imported${skipped > 0 ? `, ${skipped} skipped` : ''}${periodMsg}`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Employee import error');

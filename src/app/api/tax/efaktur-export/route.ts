@@ -241,7 +241,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: { count: 0, csv: '' },
-        message: '해당 기간에 e-Faktur 데이터가 없습니다',
+        message: 'No e-Faktur data for the selected period',
       });
     }
 

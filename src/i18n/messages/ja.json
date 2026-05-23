@@ -7067,7 +7067,12 @@
     "docStatusMissing": "未アップロード",
     "bpeNumberPlaceholder": "BPE 番号",
     "uploadSuccess": "アップロード完了",
-    "uploadFailed": "アップロード失敗"
+    "uploadFailed": "アップロード失敗",
+    "docTypeSpt": "SPT",
+    "docTypeBpe": "BPE",
+    "docTypeA1": "A1",
+    "docTypeFinancial": "財務諸表",
+    "docNameFinancial": "財務諸表 {year}"
   },
   "personalDashV3": {
     "regulationLabel": "規定:",

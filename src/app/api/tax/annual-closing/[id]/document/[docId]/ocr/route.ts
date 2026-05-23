@@ -60,7 +60,7 @@ async function handle(req: RequestWithSession, sessionId: string, docId: string)
     return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
   }
   if ((doc.size_bytes ?? 0) > MAX_BYTES) {
-    return NextResponse.json({ success: false, error: '파일 크기 초과 (50MB)' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'File too large (50MB max)' }, { status: 400 });
   }
 
   // PROCESSING 마킹 — 여러 호출이 겹치지 않도록.
@@ -72,7 +72,7 @@ async function handle(req: RequestWithSession, sessionId: string, docId: string)
       .from('closing-documents')
       .download(doc.storage_path);
     if (dlErr || !blob) {
-      throw new Error(`Storage download 실패: ${dlErr?.message ?? 'unknown'}`);
+      throw new Error(`Storage download failed: ${dlErr?.message ?? 'unknown'}`);
     }
     const buf = await blob.arrayBuffer();
 
@@ -118,10 +118,10 @@ async function handle(req: RequestWithSession, sessionId: string, docId: string)
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'OCR 분류 실패';
+    const message = err instanceof Error ? err.message : 'OCR classification failed';
     const userMessage =
       err instanceof ClosingClassifierNotConfigured
-        ? 'AI 분류가 설정되지 않았습니다 (관리자: ANTHROPIC_API_KEY).'
+        ? 'AI classification is not configured (admin: ANTHROPIC_API_KEY).'
         : message;
     loggers.ocr.error({ err, sessionId, docId }, 'closing-document OCR failed');
     await sb

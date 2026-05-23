@@ -7193,7 +7193,12 @@
     "docStatusMissing": "미업로드",
     "bpeNumberPlaceholder": "BPE 번호",
     "uploadSuccess": "업로드 완료",
-    "uploadFailed": "업로드 실패"
+    "uploadFailed": "업로드 실패",
+    "docTypeSpt": "SPT",
+    "docTypeBpe": "BPE",
+    "docTypeA1": "A1",
+    "docTypeFinancial": "재무제표",
+    "docNameFinancial": "재무제표 {year}"
   },
   "personalDashV3": {
     "regulationLabel": "규정:",

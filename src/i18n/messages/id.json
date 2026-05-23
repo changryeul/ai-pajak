@@ -7067,7 +7067,12 @@
     "docStatusMissing": "Belum diunggah",
     "bpeNumberPlaceholder": "No. BPE",
     "uploadSuccess": "Berhasil diunggah",
-    "uploadFailed": "Gagal mengunggah"
+    "uploadFailed": "Gagal mengunggah",
+    "docTypeSpt": "SPT",
+    "docTypeBpe": "BPE",
+    "docTypeA1": "A1",
+    "docTypeFinancial": "Laporan keuangan",
+    "docNameFinancial": "Laporan keuangan {year}"
   },
   "personalDashV3": {
     "regulationLabel": "Regulasi:",

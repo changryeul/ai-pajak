@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data,
-      message: '매핑이 저장되었습니다. 다음에 같은 형식의 Excel을 올리면 자동으로 매핑됩니다.',
+      message: 'Mapping saved. Uploading the same Excel format next time will auto-map.',
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Mapping save error');

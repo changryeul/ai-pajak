@@ -78,7 +78,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       return NextResponse.json({
         success: true,
         data: { generated: 0 },
-        message: '생성할 e-Bupot가 없습니다 (PPh 21 = 0)',
+        message: 'No e-Bupot to generate (PPh 21 = 0)',
       });
     }
 
@@ -103,7 +103,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         period,
         buktiPotongs: generated,
       },
-      message: `${generated.length}건의 Bukti Potong 1721-A1 생성 완료`,
+      message: `${generated.length} Bukti Potong 1721-A1 generated`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'e-Bupot PPh21 POST error');

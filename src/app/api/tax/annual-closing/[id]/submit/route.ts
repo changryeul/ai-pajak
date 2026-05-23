@@ -53,13 +53,13 @@ async function handlePost(req: RequestWithSession, sessionId: string): Promise<R
   const hasSigned = docs?.some((d) => d.doc_type === 'signedStatements');
   if (!hasSigned) {
     return NextResponse.json(
-      { success: false, error: '서명된 재무제표가 업로드되지 않았습니다' },
+      { success: false, error: 'Signed financial statements not uploaded' },
       { status: 400 }
     );
   }
   if (!billing) {
     return NextResponse.json(
-      { success: false, error: 'ID Billing이 발급되지 않았습니다' },
+      { success: false, error: 'ID Billing has not been issued' },
       { status: 400 }
     );
   }
