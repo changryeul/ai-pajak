@@ -1241,7 +1241,8 @@
     "ocrFailed": "OCR处理失败",
     "retryOcr": "重试OCR",
     "runOcr": "运行OCR",
-    "noOcrData": "无OCR数据"
+    "noOcrData": "无OCR数据",
+    "createSptTransaction": "→ 在 SPT Masa 中创建交易"
   },
   "filings": {
     "title": "税务申报",
@@ -2775,6 +2776,10 @@
   "counterparties": {
     "title": "交易对手",
     "subtitle": "管理供应商、客户和员工的税务申报",
+    "qualSmall": "Kecil (小规模)",
+    "relatedPartyLabel": "关联方 (Related Party)",
+    "residentLabel": "居民 (Resident)",
+    "codLabel": "持有 CoD",
     "add": "添加",
     "addEdit": "添加/编辑交易对手",
     "nameRequired": "名称 *",
@@ -8170,7 +8175,8 @@
         "foreign": "包含外资 / 跨境风险审查"
       },
       "next": "下一步",
-      "ai": "获取 AI 推荐"
+      "ai": "获取 AI 推荐",
+      "selected": "已选择"
     }
   },
   "umkmClosing": {

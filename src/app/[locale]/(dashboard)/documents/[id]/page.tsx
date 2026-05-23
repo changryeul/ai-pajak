@@ -435,7 +435,7 @@ export default function DocumentDetailPage({ params }: PageProps) {
                   </pre>
                 </div>
                 <Button size="sm" onClick={handleCreateTransaction} className="bg-indigo-600 hover:bg-indigo-700">
-                  → SPT Masa에 거래 생성
+                  {t('documents.createSptTransaction')}
                 </Button>
               </div>
             ) : document.ocrStatus === 'PROCESSING' ? (

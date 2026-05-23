@@ -1241,7 +1241,8 @@
     "ocrFailed": "OCR処理に失敗",
     "retryOcr": "OCRを再試行",
     "runOcr": "OCRを実行",
-    "noOcrData": "OCRデータがありません"
+    "noOcrData": "OCRデータがありません",
+    "createSptTransaction": "→ SPT Masaに取引を作成"
   },
   "filings": {
     "title": "税務申告",
@@ -2775,6 +2776,10 @@
   "counterparties": {
     "title": "取引先",
     "subtitle": "税務申告のための取引先、顧客、従業員管理",
+    "qualSmall": "Kecil (小規模)",
+    "relatedPartyLabel": "関係会社 (Related Party)",
+    "residentLabel": "居住者 (Resident)",
+    "codLabel": "CoD 保有",
     "add": "追加",
     "addEdit": "取引先の追加/編集",
     "nameRequired": "名前 *",
@@ -8170,7 +8175,8 @@
         "foreign": "外資系・海外取引リスクレビューを含める"
       },
       "next": "次へ進む",
-      "ai": "AI 推奨を受ける"
+      "ai": "AI 推奨を受ける",
+      "selected": "選択済"
     }
   },
   "umkmClosing": {

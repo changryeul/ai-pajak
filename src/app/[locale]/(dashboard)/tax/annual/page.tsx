@@ -131,7 +131,7 @@ export default function AnnualClosingStartPage() {
                   </div>
                   {isSelected && (
                     <span className="inline-flex items-center rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-medium text-white">
-                      {t('typeSelect.umkm.name') === t(`typeSelect.${k}.name`) ? '선택됨' : '선택됨'}
+                      {t('typeSelect.selected')}
                     </span>
                   )}
                 </div>

@@ -1241,7 +1241,8 @@
     "ocrFailed": "Pemrosesan OCR gagal",
     "retryOcr": "Coba Lagi OCR",
     "runOcr": "Jalankan OCR",
-    "noOcrData": "Data OCR tidak tersedia"
+    "noOcrData": "Data OCR tidak tersedia",
+    "createSptTransaction": "→ Buat transaksi di SPT Masa"
   },
   "filings": {
     "title": "Pelaporan Pajak",
@@ -2775,6 +2776,10 @@
   "counterparties": {
     "title": "Lawan Transaksi",
     "subtitle": "Kelola vendor, klien, dan karyawan untuk pelaporan pajak",
+    "qualSmall": "Kecil",
+    "relatedPartyLabel": "Pihak Berelasi (Related Party)",
+    "residentLabel": "Subjek Pajak Dalam Negeri (Resident)",
+    "codLabel": "Memiliki CoD",
     "add": "Tambah",
     "addEdit": "Tambah/Edit Lawan Transaksi",
     "nameRequired": "Nama *",
@@ -8170,7 +8175,8 @@
         "foreign": "Termasuk tinjauan risiko lintas negara"
       },
       "next": "Lanjut",
-      "ai": "Rekomendasi AI"
+      "ai": "Rekomendasi AI",
+      "selected": "Dipilih"
     }
   },
   "umkmClosing": {

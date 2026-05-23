@@ -1241,7 +1241,8 @@
     "ocrFailed": "OCR processing failed",
     "retryOcr": "Retry OCR",
     "runOcr": "Run OCR",
-    "noOcrData": "No OCR data available"
+    "noOcrData": "No OCR data available",
+    "createSptTransaction": "→ Create transaction in SPT Masa"
   },
   "filings": {
     "title": "Tax Filings",
@@ -2775,6 +2776,10 @@
   "counterparties": {
     "title": "Counterparties",
     "subtitle": "Manage vendors, clients, and employees for tax reporting",
+    "qualSmall": "Kecil (Small)",
+    "relatedPartyLabel": "Related Party",
+    "residentLabel": "Resident",
+    "codLabel": "Has CoD",
     "add": "Add",
     "addEdit": "Add/Edit Counterparty",
     "nameRequired": "Name *",
@@ -8170,7 +8175,8 @@
         "foreign": "Include cross-border risk review"
       },
       "next": "Continue",
-      "ai": "Get AI recommendation"
+      "ai": "Get AI recommendation",
+      "selected": "Selected"
     }
   },
   "umkmClosing": {

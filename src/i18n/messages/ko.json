@@ -1241,7 +1241,8 @@
     "ocrFailed": "OCR 처리 실패",
     "retryOcr": "OCR 재시도",
     "runOcr": "OCR 실행",
-    "noOcrData": "OCR 데이터 없음"
+    "noOcrData": "OCR 데이터 없음",
+    "createSptTransaction": "→ SPT Masa에 거래 생성"
   },
   "filings": {
     "title": "세금 신고",
@@ -2776,6 +2777,10 @@
   "counterparties": {
     "title": "거래 상대방",
     "subtitle": "세금 신고를 위한 거래처, 고객, 직원 관리",
+    "qualSmall": "Kecil (소규모)",
+    "relatedPartyLabel": "관계사 (Related Party)",
+    "residentLabel": "거주자 (Resident)",
+    "codLabel": "CoD 보유",
     "add": "추가",
     "addEdit": "거래 상대방 추가/수정",
     "nameRequired": "이름 *",
@@ -8296,7 +8301,8 @@
         "foreign": "외국계/해외거래 리스크 검토 포함"
       },
       "next": "다음 단계 진행",
-      "ai": "AI 추천 받기"
+      "ai": "AI 추천 받기",
+      "selected": "선택됨"
     }
   },
   "umkmClosing": {

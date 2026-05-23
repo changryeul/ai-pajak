@@ -191,7 +191,7 @@ export default function CounterpartiesPage() {
                     <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="N/A" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">N/A</SelectItem>
-                      <SelectItem value="SMALL">Kecil (소규모)</SelectItem>
+                      <SelectItem value="SMALL">{tc('qualSmall')}</SelectItem>
                       <SelectItem value="MEDIUM_LARGE">Menengah/Besar</SelectItem>
                       <SelectItem value="QUALIFIED">Berkualifikasi</SelectItem>
                       <SelectItem value="NONE">Tanpa Kualifikasi</SelectItem>
@@ -206,15 +206,15 @@ export default function CounterpartiesPage() {
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id="related" checked={form.isRelatedParty} onChange={e => setForm({ ...form, isRelatedParty: e.target.checked })} className="rounded" />
-                  <label htmlFor="related" className="text-xs">관계사 (Related Party)</label>
+                  <label htmlFor="related" className="text-xs">{tc('relatedPartyLabel')}</label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id="resident" checked={form.isResident} onChange={e => setForm({ ...form, isResident: e.target.checked })} className="rounded" />
-                  <label htmlFor="resident" className="text-xs">거주자 (Resident)</label>
+                  <label htmlFor="resident" className="text-xs">{tc('residentLabel')}</label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id="cod" checked={form.hasCod} onChange={e => setForm({ ...form, hasCod: e.target.checked })} className="rounded" />
-                  <label htmlFor="cod" className="text-xs">CoD 보유</label>
+                  <label htmlFor="cod" className="text-xs">{tc('codLabel')}</label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id="owner" checked={form.vendorIsPropertyOwner} onChange={e => setForm({ ...form, vendorIsPropertyOwner: e.target.checked })} className="rounded" />
