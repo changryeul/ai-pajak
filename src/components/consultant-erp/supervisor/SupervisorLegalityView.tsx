@@ -18,10 +18,11 @@ interface CustomerSummary {
   expiringCount: number;
   completionPct: number;
 }
+type CategoryGroup = 'AKTA' | 'PERMIT' | 'TAX';
 interface Doc {
   id: string;
   category: string;
-  category_group: '정관/법인설립' | '사업허가' | '세무등록';
+  category_group: CategoryGroup;
   isRequired: boolean;
   storagePath: string | null;
   originalFilename: string | null;
@@ -172,14 +173,14 @@ export function SupervisorLegalityView() {
                 <div className="border-t border-slate-200 p-4 grid gap-4 lg:grid-cols-[1fr_1.4fr]">
                   {/* Docs list */}
                   <div className="space-y-3">
-                    {(['정관/법인설립', '사업허가', '세무등록'] as const).map((group) => {
+                    {(['AKTA', 'PERMIT', 'TAX'] as const).map((group) => {
                       const groupDocs = docs.filter((d) => d.category_group === group);
                       return (
                         <div key={group}>
                           <p className="text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">
-                            {group === '정관/법인설립'
+                            {group === 'AKTA'
                               ? t('legCategoryGroupAkta')
-                              : group === '사업허가'
+                              : group === 'PERMIT'
                                 ? t('legCategoryGroupPermit')
                                 : t('legCategoryGroupTax')}
                           </p>
@@ -259,7 +260,13 @@ export function SupervisorLegalityView() {
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
-                        <Meta label={t('legGroup')} value={selectedDoc.category_group} />
+                        <Meta label={t('legGroup')} value={
+                          selectedDoc.category_group === 'AKTA'
+                            ? t('legCategoryGroupAkta')
+                            : selectedDoc.category_group === 'PERMIT'
+                              ? t('legCategoryGroupPermit')
+                              : t('legCategoryGroupTax')
+                        } />
                         <Meta label={t('legRequiredYes')} value={selectedDoc.isRequired ? t('legRequiredYes') : t('legRequiredNo')} />
                         <Meta label={t('legVersion')} value={`v${selectedDoc.version}`} />
                         <Meta label={t('legUpdated')} value={new Date(selectedDoc.uploadedAt).toLocaleDateString()} />

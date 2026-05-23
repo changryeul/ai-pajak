@@ -322,10 +322,14 @@ export interface LegalityCustomerSummary {
   completionPct: number;
 }
 
+// Group keys are stable enum codes; the UI renders localized labels via
+// `legCategoryGroup{Akta,Permit,Tax}` in supervisor-erp namespace.
+export type LegalityCategoryGroup = 'AKTA' | 'PERMIT' | 'TAX';
+
 export interface LegalityDoc {
   id: string;
   category: string;
-  category_group: '정관/법인설립' | '사업허가' | '세무등록';
+  category_group: LegalityCategoryGroup;
   isRequired: boolean;
   storagePath: string | null;
   originalFilename: string | null;
@@ -342,13 +346,13 @@ const REQUIRED_CATEGORIES = [
   'COMPANY_NPWP',
 ];
 const CORETAX_CATEGORY = 'CORETAX_ACCESS';
-const CATEGORY_GROUP: Record<string, '정관/법인설립' | '사업허가' | '세무등록'> = {
-  AKTA_PENDIRIAN: '정관/법인설립',
-  AKTA_PERUBAHAN: '정관/법인설립',
-  NIB_OSS: '사업허가',
-  LICENSE_SBU_SKK: '사업허가',
-  COMPANY_NPWP: '세무등록',
-  CORETAX_ACCESS: '세무등록',
+const CATEGORY_GROUP: Record<string, LegalityCategoryGroup> = {
+  AKTA_PENDIRIAN: 'AKTA',
+  AKTA_PERUBAHAN: 'AKTA',
+  NIB_OSS: 'PERMIT',
+  LICENSE_SBU_SKK: 'PERMIT',
+  COMPANY_NPWP: 'TAX',
+  CORETAX_ACCESS: 'TAX',
 };
 
 /**
@@ -423,7 +427,7 @@ export async function buildLegalityOverview(): Promise<{
     const mappedDocs: LegalityDoc[] = Array.from(latestSet.values()).map((d) => ({
       id: d.id,
       category: d.category,
-      category_group: CATEGORY_GROUP[d.category] ?? '세무등록',
+      category_group: CATEGORY_GROUP[d.category] ?? 'TAX',
       isRequired: !!d.is_required,
       storagePath: d.storage_path,
       originalFilename: d.original_filename,
@@ -606,12 +610,12 @@ export async function buildQualityMonitor(): Promise<{
     else status = 'remediation';
     const insight =
       status === 'evidence-needed'
-        ? 'DGT/Treaty/계약서 증빙 보강 필요'
+        ? 'DGT/treaty/contract evidence required'
         : status === 'remediation'
-          ? '국내 법인 서비스 거래처 후보. KBLI/계약내용 기준 최종 확인 필요'
+          ? 'Likely domestic corporate service counterparty — verify against KBLI/contract'
           : status === 'manageable'
-            ? '검증 양호 — 다음 분기 재확인'
-            : '검증 완료';
+            ? 'Verification OK — re-check next quarter'
+            : 'Verification complete';
     return {
       counterpartyId: r.id,
       name: r.name as string,
@@ -896,10 +900,10 @@ export async function buildTeamKpi(): Promise<{
 
     const insight =
       riskTasks > 0
-        ? `위험업무 ${riskTasks}건`
+        ? `${riskTasks} at-risk tasks`
         : pendingApproval > 0
-          ? `결재 병목 ${pendingApproval}건`
-          : '정상';
+          ? `${pendingApproval} approvals pending`
+          : 'Normal';
 
     return {
       teamId: p.id,
