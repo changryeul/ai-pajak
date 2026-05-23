@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   FileText, Receipt, Loader2, CheckCircle, AlertTriangle,
   Plus, DollarSign, Globe, Shield, ClipboardList, Send,
@@ -102,30 +103,20 @@ export default function SPTMasaPage() {
   const [cpSearch, setCpSearch] = useState('');
   const [showCpDropdown, setShowCpDropdown] = useState(false);
 
-  // Customer selection (for consultants with multiple clients)
-  const [customers, setCustomers] = useState<Array<{ id: string; name: string; npwp: string }>>([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
+  // Customer selection — common hook handles consultant /api/customers
+  // loading + auto-select. CUSTOMER role uses their own session.customerId.
+  // (Previous hand-rolled fetch above also read `data.data` instead of the
+  // correct `data.customers` shape, so consultants never got a populated
+  // dropdown.)
+  const {
+    customerId: effectiveCustomerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
 
-  const effectiveCustomerId = selectedCustomerId || session?.customerId || '';
   const period = `${year}-${String(month).padStart(2, '0')}`;
-
-  // Load customer list for consultants
-  useEffect(() => {
-    if (!session || session.role === 'CUSTOMER') return;
-    (async () => {
-      try {
-        const res = await fetch('/api/customers');
-        const data = await res.json();
-        if (data.success) {
-          setCustomers((data.data || []).map((c: { id: string; full_name: string; company_name: string; npwp: string; customer_type: string }) => ({
-            id: c.id,
-            name: c.customer_type === 'INDIVIDUAL' ? c.full_name : c.company_name || c.full_name,
-            npwp: c.npwp,
-          })));
-        }
-      } catch { /* */ }
-    })();
-  }, [session]);
 
   // Load transactions
   const loadTransactions = useCallback(async () => {
@@ -262,7 +253,7 @@ export default function SPTMasaPage() {
   // CSV Upload handler
   const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !session?.customerId) return;
+    if (!file || !effectiveCustomerId) return;
 
     setIsSaving(true);
     setUploadResult(null);
@@ -430,7 +421,7 @@ export default function SPTMasaPage() {
   const [newCpNpwp, setNewCpNpwp] = useState('');
 
   const saveNewCounterparty = async () => {
-    if (!session?.customerId || !newCpName) return;
+    if (!effectiveCustomerId || !newCpName) return;
     try {
       const res = await fetch('/api/tax/counterparties', {
         method: 'POST',
@@ -533,12 +524,16 @@ export default function SPTMasaPage() {
 
       {/* Period + Tax Type + Customer Selectors */}
       <div className="flex flex-wrap gap-3 mb-6">
-        {customers.length > 0 && (
+        {isConsultant && customers.length > 0 && (
           <Select value={selectedCustomerId} onValueChange={v => setSelectedCustomerId(v)}>
             <SelectTrigger className="w-52"><SelectValue placeholder={t('selectCustomer')} /></SelectTrigger>
             <SelectContent>
               {customers.map(c => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>
+                  {c.customer_type === 'INDIVIDUAL'
+                    ? c.full_name
+                    : c.company_name || c.full_name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
