@@ -1,13 +1,14 @@
 'use client';
 
 /**
- * 전체 케이스 (PDF p.21 명세 기준)
+ * All cases (PDF p.21).
  *
- * 좌측: 모든 케이스 리스트 (status badge)
- * 우측: 선택 상세 + 상담원 지시 입력
+ * Left: list of every case with status badge.
+ * Right: selected detail + operator instruction box.
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2, RefreshCw, Send, CheckCircle, AlertTriangle } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 
@@ -28,11 +29,6 @@ interface CaseDetail extends CaseRow {
   notes: string | null;
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: '대기', PENDING_DOCS: '자료요청', DATA_REVIEW: '검토중',
-  PENDING_APPROVAL: '승인요청', COMPLETED: '신고완료', FAILED: '실패',
-};
-
 const STATUS_COLOR: Record<string, string> = {
   PENDING: 'bg-slate-100 text-slate-700',
   PENDING_DOCS: 'bg-amber-100 text-amber-800',
@@ -43,6 +39,8 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default function AllCasesPage() {
+  const t = useTranslations('operatorCases');
+  const tWorkload = useTranslations('operatorWorkload');
   const [items, setItems] = useState<CaseRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<CaseDetail | null>(null);
@@ -50,6 +48,10 @@ export default function AllCasesPage() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [instruction, setInstruction] = useState('');
+
+  const statusLabel = (s: string) => {
+    try { return tWorkload(`status.${s}`); } catch { return s; }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -79,8 +81,8 @@ export default function AllCasesPage() {
         body: JSON.stringify({ action: 'instruct', note: instruction }),
       });
       const j = await r.json();
-      if (!r.ok || !j.success) setMsg({ type: 'err', text: j.error || '실패' });
-      else { setMsg({ type: 'ok', text: '지시 전달됨' }); setInstruction(''); }
+      if (!r.ok || !j.success) setMsg({ type: 'err', text: j.error || t('msg.failed') });
+      else { setMsg({ type: 'ok', text: t('msg.instructDone') }); setInstruction(''); }
       const r2 = await fetch(`/api/operator/cases/${selectedId}`);
       const j2 = await r2.json();
       if (j2.success) setDetail(j2.data as CaseDetail);
@@ -93,11 +95,11 @@ export default function AllCasesPage() {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-[1400px]">
-      <PageTitle title="전체 케이스" />
+      <PageTitle title={t('pageTitle')} />
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-black text-slate-900">전체 케이스</h1>
+        <h1 className="text-2xl font-black text-slate-900">{t('pageTitle')}</h1>
         <button onClick={load} className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
-          <RefreshCw className="h-3.5 w-3.5" /> 새로고침
+          <RefreshCw className="h-3.5 w-3.5" /> {t('refresh')}
         </button>
       </div>
 
@@ -110,7 +112,7 @@ export default function AllCasesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
         <section className="rounded-2xl bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-black text-slate-900 mb-3">전체 케이스 ({items.length})</h2>
+          <h2 className="text-sm font-black text-slate-900 mb-3">{t('listTitle', { n: items.length })}</h2>
           <div className="space-y-2 max-h-[calc(100vh-260px)] overflow-y-auto">
             {items.map(c => (
               <button key={c.id} onClick={() => setSelectedId(c.id)}
@@ -118,11 +120,11 @@ export default function AllCasesPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="font-bold text-sm text-slate-900 truncate">{c.customer?.company_name || c.customer?.full_name || '—'}</div>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_COLOR[c.status] || 'bg-slate-100 text-slate-700'}`}>
-                    {STATUS_LABEL[c.status] || c.status}
+                    {statusLabel(c.status)}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-0.5">{c.case_code} · {c.service_label}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">담당 {c.operator?.employee_id ?? '미배정'} · {c.priority || 'NORMAL'}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('assigneePrefix', { id: c.operator?.employee_id ?? t('unassigned') })} · {c.priority || 'NORMAL'}</p>
               </button>
             ))}
           </div>
@@ -130,34 +132,34 @@ export default function AllCasesPage() {
 
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           {!detail ? (
-            <p className="text-center text-sm text-slate-400 py-12">왼쪽에서 케이스를 선택하세요.</p>
+            <p className="text-center text-sm text-slate-400 py-12">{t('pickPrompt')}</p>
           ) : (
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <h2 className="text-base font-black text-slate-900">{detail.customer?.company_name || detail.customer?.full_name || '—'}</h2>
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_COLOR[detail.status] || 'bg-slate-100 text-slate-700'}`}>
-                    {STATUS_LABEL[detail.status] || detail.status}
+                    {statusLabel(detail.status)}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500">{detail.case_code} · {detail.service_label}</p>
                 <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-                  <Field label="담당 상담원" value={detail.operator?.employee_id ?? '—'} />
-                  <Field label="담당 Supervisor" value={detail.supervisor?.employee_id ?? '—'} />
-                  <Field label="서비스" value={detail.service_label ?? '—'} />
-                  <Field label="우선순위" value={detail.priority ?? 'NORMAL'} />
+                  <Field label={t('field.operator')} value={detail.operator?.employee_id ?? '—'} />
+                  <Field label={t('field.supervisor')} value={detail.supervisor?.employee_id ?? '—'} />
+                  <Field label={t('field.service')} value={detail.service_label ?? '—'} />
+                  <Field label={t('field.priority')} value={detail.priority ?? 'NORMAL'} />
                   <Field label="Due" value={detail.due_date ? formatDue(detail.due_date) : '-'} />
                 </div>
               </div>
 
               <div>
-                <h3 className="text-sm font-black text-slate-900 mb-2">상담원 지시</h3>
+                <h3 className="text-sm font-black text-slate-900 mb-2">{t('instruction.title')}</h3>
                 <textarea value={instruction} onChange={(e) => setInstruction(e.target.value)} rows={3}
-                  placeholder="예: Coretax ID Billing 발행 후 고객 화면에 반영"
+                  placeholder={t('instruction.placeholder')}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" />
                 <button onClick={sendInstruction} disabled={busy || !instruction.trim()}
                   className="mt-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white hover:bg-slate-800 disabled:opacity-50">
-                  <Send className="h-3 w-3 inline mr-1" /> 지시
+                  <Send className="h-3 w-3 inline mr-1" /> {t('instruction.sendBtn')}
                 </button>
                 {detail.notes && (
                   <pre className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-2 text-[10px] text-slate-600">

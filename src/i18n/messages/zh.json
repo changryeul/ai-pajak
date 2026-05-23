@@ -402,6 +402,105 @@
     },
     "successToast": "{n}人 1721 A1 发行完成"
   },
+  "operatorApprovals": {
+    "pageTitle": "待审批",
+    "refresh": "刷新",
+    "listTitle": "新进 / 待分配",
+    "listEmpty": "无待审批案件。",
+    "pickPrompt": "请在左侧选择案件。",
+    "assigneePrefix": "负责 {id}",
+    "unassigned": "未分配",
+    "approvalBadge": "待审批",
+    "field": {
+      "operator": "负责客服",
+      "supervisor": "负责主管",
+      "service": "服务",
+      "priority": "优先级"
+    },
+    "decision": {
+      "title": "审批 / 驳回",
+      "stateLabel": "审批状态:",
+      "requested": "已申请",
+      "notRequested": "未申请",
+      "reviewBlocker": "⚠ 需审核的代扣项 {n} 项未完成",
+      "approveBtn": "批准",
+      "rejectBtn": "驳回",
+      "rejectReason": "主管驳回"
+    },
+    "instruction": {
+      "title": "客服指示",
+      "placeholder": "例: Coretax ID Billing 发行后反映到客户界面",
+      "sendBtn": "指示"
+    },
+    "snapshot": {
+      "title": "审批审核 Snapshot",
+      "empty": "无 Snapshot 数据。",
+      "state": "状态",
+      "taxType": "税种"
+    },
+    "confidence": {
+      "auto": "自动确认",
+      "highUncertainty": "不确定性高",
+      "lackInfo": "信息不足"
+    },
+    "msg": {
+      "instructFailed": "指示发送失败",
+      "instructDone": "指示已发送",
+      "actionFailed": "{op} 失败",
+      "approvedDone": "已批准",
+      "rejectedDone": "已驳回"
+    }
+  },
+  "operatorAudit": {
+    "pageTitle": "审计日志 / 变更历史",
+    "refresh": "刷新",
+    "filterAll": "全部 {n}",
+    "empty": "暂无事件记录。",
+    "event": {
+      "CASE_CREATED": "案件创建",
+      "ASSIGNED": "分配客服",
+      "REASSIGNED": "重新分配客服",
+      "RECALLED": "回收",
+      "TRANSFERRED_TO_SV": "主管移交",
+      "BULK_TRANSFERRED": "离职批量移交",
+      "APPROVED": "批准",
+      "REJECTED": "驳回",
+      "INSTRUCTED": "客服指示"
+    },
+    "summary": {
+      "modePrefix": "方式: {mode}",
+      "reasonPrefix": "原因: {reason}",
+      "supervisorChange": "主管变更",
+      "bulkOperator": "客服离职批量移交",
+      "bulkSupervisor": "主管离职批量移交",
+      "bulkGeneric": "离职批量",
+      "memoPrefix": "备注: {note}",
+      "instructPrefix": "指示: {note}"
+    }
+  },
+  "operatorCases": {
+    "pageTitle": "全部案件",
+    "refresh": "刷新",
+    "listTitle": "全部案件 ({n})",
+    "pickPrompt": "请在左侧选择案件。",
+    "assigneePrefix": "负责 {id}",
+    "unassigned": "未分配",
+    "field": {
+      "operator": "负责客服",
+      "supervisor": "负责主管",
+      "service": "服务",
+      "priority": "优先级"
+    },
+    "instruction": {
+      "title": "客服指示",
+      "placeholder": "例: Coretax ID Billing 发行后反映到客户界面",
+      "sendBtn": "指示"
+    },
+    "msg": {
+      "failed": "失败",
+      "instructDone": "指示已发送"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "新工作均匀自动分配给主管,有咨询历史的客户优先自动指派给原客服。",

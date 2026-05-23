@@ -402,6 +402,105 @@
     },
     "successToast": "{n}명 1721 A1 발급 완료"
   },
+  "operatorApprovals": {
+    "pageTitle": "승인 대기",
+    "refresh": "새로고침",
+    "listTitle": "신규/배정 대상",
+    "listEmpty": "승인 대기 케이스가 없습니다.",
+    "pickPrompt": "왼쪽에서 케이스를 선택하세요.",
+    "assigneePrefix": "담당 {id}",
+    "unassigned": "미배정",
+    "approvalBadge": "승인요청",
+    "field": {
+      "operator": "담당 상담원",
+      "supervisor": "담당 Supervisor",
+      "service": "서비스",
+      "priority": "우선순위"
+    },
+    "decision": {
+      "title": "승인 / 반려",
+      "stateLabel": "승인상태:",
+      "requested": "요청됨",
+      "notRequested": "미요청",
+      "reviewBlocker": "⚠ 검토필요 원천세 항목 {n}건 미완료",
+      "approveBtn": "승인",
+      "rejectBtn": "반려",
+      "rejectReason": "슈퍼바이저 반려"
+    },
+    "instruction": {
+      "title": "상담원 지시",
+      "placeholder": "예: Coretax ID Billing 발행 후 고객 화면에 반영",
+      "sendBtn": "지시"
+    },
+    "snapshot": {
+      "title": "승인 검토 Snapshot",
+      "empty": "Snapshot 데이터가 없습니다.",
+      "state": "상태",
+      "taxType": "세금종류"
+    },
+    "confidence": {
+      "auto": "자동확인",
+      "highUncertainty": "불확실 높음",
+      "lackInfo": "정보부족"
+    },
+    "msg": {
+      "instructFailed": "지시 실패",
+      "instructDone": "지시 전달됨",
+      "actionFailed": "{op} 실패",
+      "approvedDone": "승인 처리됨",
+      "rejectedDone": "반려 처리됨"
+    }
+  },
+  "operatorAudit": {
+    "pageTitle": "감사로그 / 변경이력",
+    "refresh": "새로고침",
+    "filterAll": "전체 {n}",
+    "empty": "기록된 이벤트가 없습니다.",
+    "event": {
+      "CASE_CREATED": "케이스 생성",
+      "ASSIGNED": "상담원 배정",
+      "REASSIGNED": "상담원 재배정",
+      "RECALLED": "환수",
+      "TRANSFERRED_TO_SV": "Supervisor 이관",
+      "BULK_TRANSFERRED": "퇴사 Bulk Transfer",
+      "APPROVED": "승인",
+      "REJECTED": "반려",
+      "INSTRUCTED": "상담원 지시"
+    },
+    "summary": {
+      "modePrefix": "방식: {mode}",
+      "reasonPrefix": "사유: {reason}",
+      "supervisorChange": "Supervisor 변경",
+      "bulkOperator": "상담원 퇴사 일괄 이관",
+      "bulkSupervisor": "Supervisor 퇴사 일괄 이관",
+      "bulkGeneric": "퇴사 Bulk",
+      "memoPrefix": "메모: {note}",
+      "instructPrefix": "지시: {note}"
+    }
+  },
+  "operatorCases": {
+    "pageTitle": "전체 케이스",
+    "refresh": "새로고침",
+    "listTitle": "전체 케이스 ({n})",
+    "pickPrompt": "왼쪽에서 케이스를 선택하세요.",
+    "assigneePrefix": "담당 {id}",
+    "unassigned": "미배정",
+    "field": {
+      "operator": "담당 상담원",
+      "supervisor": "담당 Supervisor",
+      "service": "서비스",
+      "priority": "우선순위"
+    },
+    "instruction": {
+      "title": "상담원 지시",
+      "placeholder": "예: Coretax ID Billing 발행 후 고객 화면에 반영",
+      "sendBtn": "지시"
+    },
+    "msg": {
+      "failed": "실패",
+      "instructDone": "지시 전달됨"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.",

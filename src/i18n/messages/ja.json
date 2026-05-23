@@ -402,6 +402,105 @@
     },
     "successToast": "{n}名 1721 A1 発行完了"
   },
+  "operatorApprovals": {
+    "pageTitle": "承認待ち",
+    "refresh": "再読み込み",
+    "listTitle": "新規 / 割当対象",
+    "listEmpty": "承認待ちケースがありません。",
+    "pickPrompt": "左でケースを選択してください。",
+    "assigneePrefix": "担当 {id}",
+    "unassigned": "未割当",
+    "approvalBadge": "承認待ち",
+    "field": {
+      "operator": "担当",
+      "supervisor": "SV",
+      "service": "サービス",
+      "priority": "優先度"
+    },
+    "decision": {
+      "title": "承認 / 却下",
+      "stateLabel": "承認状態:",
+      "requested": "申請済",
+      "notRequested": "未申請",
+      "reviewBlocker": "⚠ 要確認の源泉項目 {n}件 未完了",
+      "approveBtn": "承認",
+      "rejectBtn": "却下",
+      "rejectReason": "スーパーバイザー却下"
+    },
+    "instruction": {
+      "title": "担当者指示",
+      "placeholder": "例: Coretax ID Billing 発行後、顧客画面に反映",
+      "sendBtn": "指示"
+    },
+    "snapshot": {
+      "title": "承認確認 Snapshot",
+      "empty": "Snapshot データがありません。",
+      "state": "状態",
+      "taxType": "税種"
+    },
+    "confidence": {
+      "auto": "自動確認",
+      "highUncertainty": "不確実性高",
+      "lackInfo": "情報不足"
+    },
+    "msg": {
+      "instructFailed": "指示失敗",
+      "instructDone": "指示送信済",
+      "actionFailed": "{op} 失敗",
+      "approvedDone": "承認しました",
+      "rejectedDone": "却下しました"
+    }
+  },
+  "operatorAudit": {
+    "pageTitle": "監査ログ / 変更履歴",
+    "refresh": "再読み込み",
+    "filterAll": "全件 {n}",
+    "empty": "記録されたイベントがありません。",
+    "event": {
+      "CASE_CREATED": "ケース作成",
+      "ASSIGNED": "担当者割当",
+      "REASSIGNED": "担当者再割当",
+      "RECALLED": "引き戻し",
+      "TRANSFERRED_TO_SV": "SV 移管",
+      "BULK_TRANSFERRED": "退職 Bulk Transfer",
+      "APPROVED": "承認",
+      "REJECTED": "却下",
+      "INSTRUCTED": "担当者指示"
+    },
+    "summary": {
+      "modePrefix": "方式: {mode}",
+      "reasonPrefix": "理由: {reason}",
+      "supervisorChange": "SV 変更",
+      "bulkOperator": "担当者 退職一括移管",
+      "bulkSupervisor": "SV 退職一括移管",
+      "bulkGeneric": "退職 Bulk",
+      "memoPrefix": "メモ: {note}",
+      "instructPrefix": "指示: {note}"
+    }
+  },
+  "operatorCases": {
+    "pageTitle": "全ケース",
+    "refresh": "再読み込み",
+    "listTitle": "全ケース ({n})",
+    "pickPrompt": "左でケースを選択してください。",
+    "assigneePrefix": "担当 {id}",
+    "unassigned": "未割当",
+    "field": {
+      "operator": "担当",
+      "supervisor": "SV",
+      "service": "サービス",
+      "priority": "優先度"
+    },
+    "instruction": {
+      "title": "担当者指示",
+      "placeholder": "例: Coretax ID Billing 発行後、顧客画面に反映",
+      "sendBtn": "指示"
+    },
+    "msg": {
+      "failed": "失敗",
+      "instructDone": "指示送信済"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "新規業務はSVに均等自動配分され、相談履歴のある顧客は従来担当へ優先自動割当されます。",

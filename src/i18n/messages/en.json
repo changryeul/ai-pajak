@@ -402,6 +402,105 @@
     },
     "successToast": "{n} 1721 A1 certificates issued"
   },
+  "operatorApprovals": {
+    "pageTitle": "Approval queue",
+    "refresh": "Refresh",
+    "listTitle": "Inbound / to assign",
+    "listEmpty": "No approval-pending cases.",
+    "pickPrompt": "Pick a case on the left.",
+    "assigneePrefix": "Assignee {id}",
+    "unassigned": "Unassigned",
+    "approvalBadge": "Approval pending",
+    "field": {
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "service": "Service",
+      "priority": "Priority"
+    },
+    "decision": {
+      "title": "Approve / reject",
+      "stateLabel": "Approval state:",
+      "requested": "Requested",
+      "notRequested": "Not requested",
+      "reviewBlocker": "⚠ {n} withholding items still need review",
+      "approveBtn": "Approve",
+      "rejectBtn": "Reject",
+      "rejectReason": "Supervisor reject"
+    },
+    "instruction": {
+      "title": "Operator instruction",
+      "placeholder": "e.g. Issue Coretax ID Billing and reflect to the customer screen",
+      "sendBtn": "Send"
+    },
+    "snapshot": {
+      "title": "Approval review snapshot",
+      "empty": "No snapshot data.",
+      "state": "State",
+      "taxType": "Tax type"
+    },
+    "confidence": {
+      "auto": "Auto-confirmed",
+      "highUncertainty": "High uncertainty",
+      "lackInfo": "Insufficient info"
+    },
+    "msg": {
+      "instructFailed": "Instruction failed",
+      "instructDone": "Instruction sent",
+      "actionFailed": "{op} failed",
+      "approvedDone": "Approved",
+      "rejectedDone": "Rejected"
+    }
+  },
+  "operatorAudit": {
+    "pageTitle": "Audit log / change history",
+    "refresh": "Refresh",
+    "filterAll": "All {n}",
+    "empty": "No recorded events.",
+    "event": {
+      "CASE_CREATED": "Case created",
+      "ASSIGNED": "Operator assigned",
+      "REASSIGNED": "Operator reassigned",
+      "RECALLED": "Recalled",
+      "TRANSFERRED_TO_SV": "Supervisor transferred",
+      "BULK_TRANSFERRED": "Resignation bulk transfer",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "INSTRUCTED": "Operator instructed"
+    },
+    "summary": {
+      "modePrefix": "Mode: {mode}",
+      "reasonPrefix": "Reason: {reason}",
+      "supervisorChange": "Supervisor changed",
+      "bulkOperator": "Operator resignation bulk transfer",
+      "bulkSupervisor": "Supervisor resignation bulk transfer",
+      "bulkGeneric": "Resignation bulk",
+      "memoPrefix": "Memo: {note}",
+      "instructPrefix": "Instruction: {note}"
+    }
+  },
+  "operatorCases": {
+    "pageTitle": "All cases",
+    "refresh": "Refresh",
+    "listTitle": "All cases ({n})",
+    "pickPrompt": "Pick a case on the left.",
+    "assigneePrefix": "Assignee {id}",
+    "unassigned": "Unassigned",
+    "field": {
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "service": "Service",
+      "priority": "Priority"
+    },
+    "instruction": {
+      "title": "Operator instruction",
+      "placeholder": "e.g. Issue Coretax ID Billing and reflect to the customer screen",
+      "sendBtn": "Send"
+    },
+    "msg": {
+      "failed": "Failed",
+      "instructDone": "Instruction sent"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "New work is auto-balanced across supervisors; customers with a consult history are auto-assigned to their previous operator first.",

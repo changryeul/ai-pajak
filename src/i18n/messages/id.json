@@ -402,6 +402,105 @@
     },
     "successToast": "{n} bukti 1721 A1 diterbitkan"
   },
+  "operatorApprovals": {
+    "pageTitle": "Antrian persetujuan",
+    "refresh": "Muat ulang",
+    "listTitle": "Masuk / perlu ditugaskan",
+    "listEmpty": "Tidak ada kasus yang menunggu persetujuan.",
+    "pickPrompt": "Pilih kasus di kiri.",
+    "assigneePrefix": "PIC {id}",
+    "unassigned": "Belum ditugaskan",
+    "approvalBadge": "Menunggu persetujuan",
+    "field": {
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "service": "Layanan",
+      "priority": "Prioritas"
+    },
+    "decision": {
+      "title": "Setujui / tolak",
+      "stateLabel": "Status persetujuan:",
+      "requested": "Diminta",
+      "notRequested": "Belum diminta",
+      "reviewBlocker": "⚠ {n} item withholding masih perlu ditinjau",
+      "approveBtn": "Setujui",
+      "rejectBtn": "Tolak",
+      "rejectReason": "Penolakan supervisor"
+    },
+    "instruction": {
+      "title": "Instruksi operator",
+      "placeholder": "mis. Terbitkan Coretax ID Billing dan tampilkan ke layar pelanggan",
+      "sendBtn": "Kirim"
+    },
+    "snapshot": {
+      "title": "Snapshot tinjauan persetujuan",
+      "empty": "Tidak ada data snapshot.",
+      "state": "Status",
+      "taxType": "Jenis pajak"
+    },
+    "confidence": {
+      "auto": "Otomatis terkonfirmasi",
+      "highUncertainty": "Ketidakpastian tinggi",
+      "lackInfo": "Informasi kurang"
+    },
+    "msg": {
+      "instructFailed": "Pengiriman instruksi gagal",
+      "instructDone": "Instruksi terkirim",
+      "actionFailed": "{op} gagal",
+      "approvedDone": "Disetujui",
+      "rejectedDone": "Ditolak"
+    }
+  },
+  "operatorAudit": {
+    "pageTitle": "Log audit / riwayat perubahan",
+    "refresh": "Muat ulang",
+    "filterAll": "Semua {n}",
+    "empty": "Belum ada event tercatat.",
+    "event": {
+      "CASE_CREATED": "Kasus dibuat",
+      "ASSIGNED": "Operator ditugaskan",
+      "REASSIGNED": "Operator ditugaskan ulang",
+      "RECALLED": "Ditarik",
+      "TRANSFERRED_TO_SV": "Pindah supervisor",
+      "BULK_TRANSFERRED": "Pemindahan massal resign",
+      "APPROVED": "Disetujui",
+      "REJECTED": "Ditolak",
+      "INSTRUCTED": "Instruksi operator"
+    },
+    "summary": {
+      "modePrefix": "Mode: {mode}",
+      "reasonPrefix": "Alasan: {reason}",
+      "supervisorChange": "Supervisor berubah",
+      "bulkOperator": "Pemindahan massal operator resign",
+      "bulkSupervisor": "Pemindahan massal supervisor resign",
+      "bulkGeneric": "Bulk resign",
+      "memoPrefix": "Memo: {note}",
+      "instructPrefix": "Instruksi: {note}"
+    }
+  },
+  "operatorCases": {
+    "pageTitle": "Semua kasus",
+    "refresh": "Muat ulang",
+    "listTitle": "Semua kasus ({n})",
+    "pickPrompt": "Pilih kasus di kiri.",
+    "assigneePrefix": "PIC {id}",
+    "unassigned": "Belum ditugaskan",
+    "field": {
+      "operator": "Operator",
+      "supervisor": "Supervisor",
+      "service": "Layanan",
+      "priority": "Prioritas"
+    },
+    "instruction": {
+      "title": "Instruksi operator",
+      "placeholder": "mis. Terbitkan Coretax ID Billing dan tampilkan ke layar pelanggan",
+      "sendBtn": "Kirim"
+    },
+    "msg": {
+      "failed": "Gagal",
+      "instructDone": "Instruksi terkirim"
+    }
+  },
   "operatorDashboard": {
     "pageTitle": "Supervisor Dashboard",
     "pageDesc": "Pekerjaan baru dibagi rata ke supervisor secara otomatis; pelanggan dengan riwayat konsultasi diprioritaskan ke operator sebelumnya.",
