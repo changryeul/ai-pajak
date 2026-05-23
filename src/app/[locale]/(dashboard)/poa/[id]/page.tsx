@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useSession } from '@/hooks/useSession';
 import {
   FileSignature,
   ArrowLeft,
@@ -50,9 +51,25 @@ export default function POADetailPage() {
 
   const [poa, setPoa] = useState<POADetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // `loadError` blocks the page (initial fetch failed → can't render anything).
+  // `signError` is inline (page renders, but the last sign attempt failed).
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [signError, setSignError] = useState<string | null>(null);
   const [isSigningCustomer, setIsSigningCustomer] = useState(false);
   const [isSigningAdvisor, setIsSigningAdvisor] = useState(false);
+
+  const { session } = useSession();
+  // Customer-sign button is meaningful only for the POA owner (CUSTOMER whose
+  // customerId matches poa.customer_id). Advisor-sign is for consultants
+  // belonging to the POA's tax_partner. We can't verify tax_partner_id from the
+  // session alone, so we just gate by role.
+  const isPoaOwner =
+    session?.role === 'CUSTOMER' &&
+    !!poa &&
+    !!session.customerId &&
+    session.customerId === (poa as POADetail & { customer_id?: string }).customer_id;
+  const isAdvisorRole =
+    session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
 
   const fetchPOA = useCallback(async () => {
     try {
@@ -62,10 +79,10 @@ export default function POADetailPage() {
       if (data.success) {
         setPoa(data.data);
       } else {
-        setError(data.error || 'Failed to load POA');
+        setLoadError(data.error || 'Failed to load POA');
       }
     } catch {
-      setError('Network error');
+      setLoadError('Network error');
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +94,7 @@ export default function POADetailPage() {
 
   const handleCustomerSign = async () => {
     setIsSigningCustomer(true);
+    setSignError(null);
     try {
       const response = await fetch(`/api/poa/${poaId}/customer-sign`, {
         method: 'POST',
@@ -86,10 +104,10 @@ export default function POADetailPage() {
       if (data.success) {
         fetchPOA();
       } else {
-        setError(data.error || 'Failed to sign POA');
+        setSignError(data.error || 'Failed to sign POA');
       }
     } catch {
-      setError('Failed to sign POA');
+      setSignError('Failed to sign POA');
     } finally {
       setIsSigningCustomer(false);
     }
@@ -97,6 +115,7 @@ export default function POADetailPage() {
 
   const handleAdvisorSign = async () => {
     setIsSigningAdvisor(true);
+    setSignError(null);
     try {
       const response = await fetch(`/api/poa/${poaId}/advisor-sign`, {
         method: 'POST',
@@ -106,10 +125,10 @@ export default function POADetailPage() {
       if (data.success) {
         fetchPOA();
       } else {
-        setError(data.error || 'Failed to sign POA');
+        setSignError(data.error || 'Failed to sign POA');
       }
     } catch {
-      setError('Failed to sign POA');
+      setSignError('Failed to sign POA');
     } finally {
       setIsSigningAdvisor(false);
     }
@@ -165,7 +184,7 @@ export default function POADetailPage() {
     );
   }
 
-  if (error || !poa) {
+  if (loadError || !poa) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-3xl">
         <Card className="border-red-200">
@@ -174,7 +193,7 @@ export default function POADetailPage() {
             <h2 className="text-xl font-semibold mb-2">
               {t('poa.notFound') || 'POA Not Found'}
             </h2>
-            <p className="text-gray-600 mb-4">{error || 'Unable to load POA details'}</p>
+            <p className="text-gray-600 mb-4">{loadError || 'Unable to load POA details'}</p>
             <Button onClick={() => router.push(`/${locale}/dashboard`)}>
               {t('common.back') || 'Back to Dashboard'}
             </Button>
@@ -202,6 +221,30 @@ export default function POADetailPage() {
         </div>
         {getStatusIcon(poa.status)}
       </div>
+
+      {/* Sign-action error (inline — replaced the old full-page error fallback
+          that used to swallow the whole detail screen on 403). */}
+      {signError && (
+        <Card className="mb-6 bg-red-50 border-red-200">
+          <CardContent className="p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-red-900">
+                {t('poa.signError') || 'Could not sign the POA'}
+              </p>
+              <p className="text-sm text-red-700 mt-1">{signError}</p>
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-700"
+              onClick={() => setSignError(null)}
+            >
+              ×
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Status Card */}
       {poa.status === 'DRAFT' && (
@@ -304,7 +347,7 @@ export default function POADetailPage() {
                 <CheckCircle className="h-4 w-4" />
                 Signed on {formatDate(poa.customerSignedAt)}
               </div>
-            ) : (
+            ) : isPoaOwner ? (
               <Button
                 className="mt-3 w-full"
                 onClick={handleCustomerSign}
@@ -317,6 +360,13 @@ export default function POADetailPage() {
                 )}
                 {t('poa.signAsCustomer') || 'Sign as Customer'}
               </Button>
+            ) : (
+              // Advisor / supervisor / admin view — read-only status text so
+              // the customer-sign button isn't clickable from staff accounts
+              // (which would 403 and previously blew the page to error state).
+              <p className="mt-3 text-sm text-gray-500">
+                {t('poa.awaitingCustomerSignature') || 'Awaiting customer signature'}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -337,7 +387,7 @@ export default function POADetailPage() {
                 <CheckCircle className="h-4 w-4" />
                 Countersigned on {formatDate(poa.advisorSignedAt)}
               </div>
-            ) : poa.customerSignedAt ? (
+            ) : poa.customerSignedAt && isAdvisorRole ? (
               <Button
                 className="mt-3 w-full"
                 variant="outline"
@@ -351,6 +401,10 @@ export default function POADetailPage() {
                 )}
                 {t('poa.countersign') || 'Countersign (Advisor)'}
               </Button>
+            ) : poa.customerSignedAt ? (
+              <p className="mt-3 text-sm text-gray-500">
+                {t('poa.awaitingAdvisorCountersign') || 'Awaiting tax advisor countersignature'}
+              </p>
             ) : (
               <p className="mt-3 text-sm text-gray-500">
                 {t('poa.awaitingCustomerSignature') || 'Awaiting customer signature'}
