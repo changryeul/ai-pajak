@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,8 +88,46 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
   const isSupervisor =
     isSupervisorProp ?? clientSession?.role === UserRole.TAX_OPERATOR_SUPERVISOR;
   const params = useSearchParams();
-  const customerId = params.get('customerId');
+  const router = useRouter();
+  const pathname = usePathname();
+  // `customerId` first comes from URL (?customerId=...). Consultants without
+  // a URL param see a picker — their selection is then mirrored back into the
+  // URL so refreshes / shareable links still work.
+  const urlCustomerId = params.get('customerId');
   const sessionIdParam = params.get('sessionId');
+  const [pickedCustomerId, setPickedCustomerId] = useState<string | null>(null);
+  const customerId = urlCustomerId ?? pickedCustomerId;
+
+  // Consultant customer list (for the picker shown when no URL customerId).
+  const isConsultantRole =
+    clientSession?.role === UserRole.CONSULTANT_JTC ||
+    clientSession?.role === UserRole.TAX_ADVISOR_JTC;
+  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name: string | null }>>([]);
+
+  useEffect(() => {
+    if (!isConsultantRole) return;
+    if (urlCustomerId) return; // URL already has one — no picker needed
+    (async () => {
+      try {
+        const r = await fetch('/api/customers');
+        const j = await r.json();
+        if (j.success && Array.isArray(j.customers)) {
+          setCustomers(j.customers);
+          if (j.customers.length > 0 && !pickedCustomerId) {
+            setPickedCustomerId(j.customers[0].id);
+          }
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [isConsultantRole, urlCustomerId, pickedCustomerId]);
+
+  const handlePickCustomer = (id: string) => {
+    setPickedCustomerId(id);
+    // Mirror into URL so refresh / share preserves the selection.
+    const usp = new URLSearchParams(params.toString());
+    usp.set('customerId', id);
+    router.replace(`${pathname}?${usp.toString()}`);
+  };
 
   const [sessionId, setSessionId] = useState<string | null>(sessionIdParam);
   const [filingKind, setFilingKind] = useState<'MONTHLY' | 'ANNUAL'>('MONTHLY');
@@ -365,6 +403,29 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
                 {t('workflow.startCurrentCustomer')}: <code className="rounded bg-slate-100 px-1.5 py-0.5">{customerId ?? t('workflow.startNoCustomer')}</code>
               </p>
             </div>
+            {/* Consultant picker — only shown when there is no customerId in the URL
+                so dashboard-driven flows (which already pass customerId) keep
+                their existing UX. */}
+            {isConsultantRole && !urlCustomerId && (
+              <div>
+                <p className="mb-1 text-xs font-bold text-slate-600">{t('workflow.startCurrentCustomer')}</p>
+                {customers.length === 0 ? (
+                  <p className="text-xs text-slate-400">{t('workflow.startNoCustomer')}</p>
+                ) : (
+                  <select
+                    value={pickedCustomerId ?? ''}
+                    onChange={(e) => handlePickCustomer(e.target.value)}
+                    className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
+                  >
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.company_name || c.full_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
             <div className="flex flex-wrap items-end gap-3">
               <div>
                 <p className="mb-1 text-xs font-bold text-slate-600">{t('workflow.startFilingKindLabel')}</p>
