@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       .not('ebilling_code', 'is', null);
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ success: true, data: { sent: 0 }, message: '미납 건이 없습니다' });
+      return NextResponse.json({ success: true, data: { sent: 0 }, message: 'No unpaid items' });
     }
 
     // Group by customer
@@ -54,9 +54,10 @@ export async function POST(request: NextRequest) {
       const customerName = customer.company_name || customer.full_name;
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
 
-      // Build message
+      // Customer-facing copy is in Indonesian. Once `customer.locale` exists
+      // we can branch per recipient.
       const billingList = customerItems.map(i =>
-        `• ${i.tax_type} ${i.tax_period_year}-${String(i.tax_period_month).padStart(2, '0')}: Rp ${i.amount?.toLocaleString('id-ID')} (코드: ${i.ebilling_code})`
+        `• ${i.tax_type} ${i.tax_period_year}-${String(i.tax_period_month).padStart(2, '0')}: Rp ${i.amount?.toLocaleString('id-ID')} (kode: ${i.ebilling_code})`
       ).join('\n');
 
       const totalAmount = customerItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
           try {
             await sendWhatsApp({
               to: customer.phone_number,
-              text: `🔴 *미납 세금 알림*\n\n안녕하세요, ${customerName}님.\n\n아래 ${customerItems.length}건의 세금이 아직 납부되지 않았습니다:\n\n${billingList}\n\n💰 *총 납부액: Rp ${totalAmount.toLocaleString('id-ID')}*\n\n은행/ATM/모바일뱅킹에서 위 ID Billing 코드로 납부해주세요.\n납부 후 증빙을 업로드해주세요:\n${appUrl}/tax/billing\n\n_AI Pajak_`,
+              text: `🔴 *Pajak Belum Dibayar*\n\nHalo ${customerName},\n\n${customerItems.length} item pajak berikut belum dibayar:\n\n${billingList}\n\n💰 *Total: Rp ${totalAmount.toLocaleString('id-ID')}*\n\nMohon lakukan pembayaran melalui bank/ATM/mobile banking dengan kode ID Billing di atas, lalu unggah bukti pembayaran:\n${appUrl}/tax/billing\n\n_AI Pajak_`,
             });
             waSent++;
           } catch { /* */ }
@@ -92,19 +93,19 @@ export async function POST(request: NextRequest) {
           try {
             await sendTelegram({
               chatId: customer.telegram_chat_id,
-              text: `🔴 *미납 세금 알림*\n\n안녕하세요, ${customerName}님.\n\n${customerItems.length}건 미납:\n\n${billingList}\n\n💰 총 납부액: *Rp ${totalAmount.toLocaleString('id-ID')}*\n\n[납부 페이지](${appUrl}/tax/billing)`,
+              text: `🔴 *Pajak Belum Dibayar*\n\nHalo ${customerName},\n\n${customerItems.length} item belum dibayar:\n\n${billingList}\n\n💰 Total: *Rp ${totalAmount.toLocaleString('id-ID')}*\n\n[Halaman pembayaran](${appUrl}/tax/billing)`,
             });
             tgSent++;
           } catch { /* */ }
         }
       }
 
-      // In-app notification
+      // In-app notification (Indonesian)
       await admin.from('notification').insert({
         user_id: customer.user_id,
         type: 'SYSTEM_ANNOUNCEMENT',
-        title: `미납 세금 ${customerItems.length}건`,
-        message: `총 Rp ${totalAmount.toLocaleString('id-ID')} 납부가 필요합니다. 청구서 페이지에서 확인하세요.`,
+        title: `${customerItems.length} pajak belum dibayar`,
+        message: `Total Rp ${totalAmount.toLocaleString('id-ID')} perlu dibayar. Periksa halaman tagihan.`,
         priority: 'HIGH',
         data: { action: 'billing-reminder' },
       });
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: { customers: byCustomer.size, unpaidItems: items.length, waSent, tgSent },
-      message: `${byCustomer.size}명의 고객에게 미납 알림 발송 (WhatsApp ${waSent}, Telegram ${tgSent})`,
+      message: `Sent reminders to ${byCustomer.size} customers (WhatsApp ${waSent}, Telegram ${tgSent})`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Billing reminder error');

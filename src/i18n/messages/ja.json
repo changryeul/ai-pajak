@@ -6273,7 +6273,11 @@
     "taxLabelPphFinal": "PPh 4(2) (Final Tax)",
     "taxLabelPpn": "PPN (VAT)",
     "count": "{n}",
-    "reportLoadFailed": "Unable to load report"
+    "reportLoadFailed": "Unable to load report",
+    "alertMissingFiling": "{taxType} 取引が {count} 件ありますが、SPT Masa が未申告です。",
+    "alertTaxIncrease": "{taxType} の税額が前月比 {changePercent}% 増加しました。確認が必要です。",
+    "alertUnpaid": "{taxType} の納付が保留中です。期限内に納付してください。",
+    "savingsNpwpSurcharge": "取引先 {count} 件に NPWP が未登録のため、100% 上乗せ課税が適用される可能性があります。NPWP を入力すると節税できます。"
   },
   "filingStatusPlaceholder": {
     "title": "Monthly Filing Status",

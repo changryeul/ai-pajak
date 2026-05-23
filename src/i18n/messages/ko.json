@@ -6376,7 +6376,11 @@
     "taxLabelPphFinal": "PPh 4(2) (Final Tax)",
     "taxLabelPpn": "PPN (부가가치세)",
     "count": "{n}건",
-    "reportLoadFailed": "리포트를 불러올 수 없습니다"
+    "reportLoadFailed": "리포트를 불러올 수 없습니다",
+    "alertMissingFiling": "{taxType} 거래 {count}건이 있지만 SPT Masa가 아직 미신고 상태입니다.",
+    "alertTaxIncrease": "{taxType} 세액이 전월 대비 {changePercent}% 증가했습니다. 확인이 필요합니다.",
+    "alertUnpaid": "{taxType} 납부가 대기 중입니다. 기한 내 납부해주세요.",
+    "savingsNpwpSurcharge": "거래 상대방 {count}건의 NPWP가 미등록되어 추가 과세 (100% 가산)가 적용될 수 있습니다. NPWP를 입력하면 절세 가능합니다."
   },
   "filingStatusPlaceholder": {
     "title": "월 신고 현황",

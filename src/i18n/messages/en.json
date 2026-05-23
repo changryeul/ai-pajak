@@ -6273,7 +6273,11 @@
     "taxLabelPphFinal": "PPh 4(2) (Final Tax)",
     "taxLabelPpn": "PPN (VAT)",
     "count": "{n}",
-    "reportLoadFailed": "Unable to load report"
+    "reportLoadFailed": "Unable to load report",
+    "alertMissingFiling": "{count} {taxType} transactions exist but SPT Masa has not been filed yet.",
+    "alertTaxIncrease": "{taxType} tax is {changePercent}% higher than last month — please verify.",
+    "alertUnpaid": "{taxType} payment is pending — please pay by the deadline.",
+    "savingsNpwpSurcharge": "{count} counterparties have no NPWP, so the 100% surcharge may apply. Entering NPWP can reduce tax."
   },
   "filingStatusPlaceholder": {
     "title": "Monthly Filing Status",

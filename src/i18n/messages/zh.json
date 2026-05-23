@@ -6273,7 +6273,11 @@
     "taxLabelPphFinal": "PPh 4(2) (Final Tax)",
     "taxLabelPpn": "PPN (VAT)",
     "count": "{n}",
-    "reportLoadFailed": "Unable to load report"
+    "reportLoadFailed": "Unable to load report",
+    "alertMissingFiling": "存在 {count} 笔 {taxType} 交易,但 SPT Masa 尚未申报。",
+    "alertTaxIncrease": "{taxType} 税额较上月增加 {changePercent}%,需核实。",
+    "alertUnpaid": "{taxType} 付款仍待处理,请在截止日前缴纳。",
+    "savingsNpwpSurcharge": "{count} 个交易对手缺少 NPWP,可能适用 100% 加征。填写 NPWP 可节税。"
   },
   "filingStatusPlaceholder": {
     "title": "Monthly Filing Status",

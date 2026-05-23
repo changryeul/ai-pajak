@@ -95,8 +95,15 @@ async function handleReport(req: RequestWithSession): Promise<Response> {
       };
     });
 
-    // Alerts
-    const alerts: Array<{ type: string; severity: string; message: string }> = [];
+    // Alerts — `messageKey` is a key inside the `monthlyReport` i18n namespace;
+    // the client renders with `t(messageKey, messageParams)`.
+    interface AlertRow {
+      type: string;
+      severity: string;
+      messageKey: string;
+      messageParams?: Record<string, string | number>;
+    }
+    const alerts: AlertRow[] = [];
 
     // Check for missing filings
     for (const s of summary) {
@@ -104,7 +111,8 @@ async function handleReport(req: RequestWithSession): Promise<Response> {
         alerts.push({
           type: 'MISSING_FILING',
           severity: 'HIGH',
-          message: `${s.taxType} 거래 ${s.transactionCount}건이 있지만 SPT Masa가 아직 미신고 상태입니다.`,
+          messageKey: 'alertMissingFiling',
+          messageParams: { taxType: s.taxType, count: s.transactionCount },
         });
       }
     }
@@ -115,7 +123,8 @@ async function handleReport(req: RequestWithSession): Promise<Response> {
         alerts.push({
           type: 'TAX_INCREASE',
           severity: 'MEDIUM',
-          message: `${s.taxType} 세액이 전월 대비 ${s.changePercent}% 증가했습니다. 확인이 필요합니다.`,
+          messageKey: 'alertTaxIncrease',
+          messageParams: { taxType: s.taxType, changePercent: s.changePercent },
         });
       }
     }
@@ -126,13 +135,20 @@ async function handleReport(req: RequestWithSession): Promise<Response> {
         alerts.push({
           type: 'UNPAID',
           severity: 'HIGH',
-          message: `${s.taxType} 납부가 대기 중입니다. 기한 내 납부해주세요.`,
+          messageKey: 'alertUnpaid',
+          messageParams: { taxType: s.taxType },
         });
       }
     }
 
-    // Savings opportunities (simplified check)
-    const savingsOpportunities: Array<{ category: string; description: string; potentialSavings: number }> = [];
+    // Savings opportunities — `descriptionKey` lives under `monthlyReport` too.
+    interface SavingsRow {
+      category: string;
+      descriptionKey: string;
+      descriptionParams?: Record<string, string | number>;
+      potentialSavings: number;
+    }
+    const savingsOpportunities: SavingsRow[] = [];
 
     // Check if customer has OCR-captured invoices without proper NPWP
     const noNpwpCalcs = calculations.filter(c =>
@@ -142,7 +158,8 @@ async function handleReport(req: RequestWithSession): Promise<Response> {
       const surchargeAmount = noNpwpCalcs.reduce((sum, c) => sum + (c.calculation_result?.calculatedTax || 0), 0);
       savingsOpportunities.push({
         category: 'NPWP_SURCHARGE',
-        description: `거래 상대방 ${noNpwpCalcs.length}건의 NPWP가 미등록되어 추가 과세 (100% 가산)가 적용될 수 있습니다. NPWP를 입력하면 절세 가능합니다.`,
+        descriptionKey: 'savingsNpwpSurcharge',
+        descriptionParams: { count: noNpwpCalcs.length },
         potentialSavings: Math.round(surchargeAmount * 0.5),
       });
     }

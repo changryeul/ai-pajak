@@ -6273,7 +6273,11 @@
     "taxLabelPphFinal": "PPh 4(2) (Pajak Final)",
     "taxLabelPpn": "PPN (Pajak Pertambahan Nilai)",
     "count": "{n}",
-    "reportLoadFailed": "Gagal memuat laporan"
+    "reportLoadFailed": "Gagal memuat laporan",
+    "alertMissingFiling": "Ada {count} transaksi {taxType}, namun SPT Masa belum dilaporkan.",
+    "alertTaxIncrease": "Pajak {taxType} naik {changePercent}% dibanding bulan lalu — mohon diverifikasi.",
+    "alertUnpaid": "Pembayaran {taxType} masih tertunda — mohon dibayar sebelum tenggat.",
+    "savingsNpwpSurcharge": "{count} lawan transaksi tanpa NPWP, sehingga gross-up 100% bisa berlaku. Memasukkan NPWP dapat menghemat pajak."
   },
   "filingStatusPlaceholder": {
     "title": "Status Pelaporan Bulanan",

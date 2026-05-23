@@ -29,12 +29,18 @@ interface TaxSummary {
 interface Alert {
   type: string;
   severity: string;
-  message: string;
+  // Either the API returns a localized `message` (legacy) or a `messageKey`
+  // (i18n key inside the `monthlyReport` namespace) + params.
+  message?: string;
+  messageKey?: string;
+  messageParams?: Record<string, string | number>;
 }
 
 interface SavingsOpportunity {
   category: string;
-  description: string;
+  description?: string;
+  descriptionKey?: string;
+  descriptionParams?: Record<string, string | number>;
   potentialSavings: number;
 }
 
@@ -172,15 +178,20 @@ export default function MonthlyReportPage() {
           {/* Alerts */}
           {report.alerts.length > 0 && (
             <div className="space-y-2">
-              {report.alerts.map((alert, i) => (
-                <div key={i} className={cn(
-                  'p-3 rounded-xl text-sm flex items-center gap-2',
-                  alert.severity === 'HIGH' ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-amber-50 border border-amber-200 text-amber-800'
-                )}>
-                  <AlertTriangle className={cn('h-4 w-4 flex-shrink-0', alert.severity === 'HIGH' ? 'text-red-500' : 'text-amber-500')} />
-                  {alert.message}
-                </div>
-              ))}
+              {report.alerts.map((alert, i) => {
+                const alertText = alert.messageKey
+                  ? tm(alert.messageKey, alert.messageParams ?? undefined)
+                  : alert.message ?? '';
+                return (
+                  <div key={i} className={cn(
+                    'p-3 rounded-xl text-sm flex items-center gap-2',
+                    alert.severity === 'HIGH' ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-amber-50 border border-amber-200 text-amber-800'
+                  )}>
+                    <AlertTriangle className={cn('h-4 w-4 flex-shrink-0', alert.severity === 'HIGH' ? 'text-red-500' : 'text-amber-500')} />
+                    {alertText}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -259,17 +270,22 @@ export default function MonthlyReportPage() {
                   <Lightbulb className="h-4 w-4 text-yellow-500" />{t('monthlyReport.savingsTitle')}
                 </h3>
                 <div className="space-y-3">
-                  {report.savingsOpportunities.map((opp, i) => (
-                    <div key={i} className="bg-yellow-50 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <Badge className="text-[10px] bg-yellow-100 text-yellow-700">{opp.category}</Badge>
-                        <span className="text-sm font-bold text-yellow-700 flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" />{fmtRp(opp.potentialSavings)}
-                        </span>
+                  {report.savingsOpportunities.map((opp, i) => {
+                    const oppDesc = opp.descriptionKey
+                      ? tm(opp.descriptionKey, opp.descriptionParams ?? undefined)
+                      : opp.description ?? '';
+                    return (
+                      <div key={i} className="bg-yellow-50 rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <Badge className="text-[10px] bg-yellow-100 text-yellow-700">{opp.category}</Badge>
+                          <span className="text-sm font-bold text-yellow-700 flex items-center gap-1">
+                            <DollarSign className="h-3 w-3" />{fmtRp(opp.potentialSavings)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600">{oppDesc}</p>
                       </div>
-                      <p className="text-xs text-gray-600">{opp.description}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
