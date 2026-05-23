@@ -625,7 +625,7 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
 }
 
 function SearchScreen({
-  searchBy, setSearchBy, keyword, setKeyword, results, openDetail, openNew, loading, customerId, onImported,
+  searchBy, setSearchBy, keyword, setKeyword, results, openDetail, openNew, loading, customerId, onImported, customerPicker,
 }: {
   searchBy: 'ID' | 'NAME';
   setSearchBy: (v: 'ID' | 'NAME') => void;
@@ -637,6 +637,8 @@ function SearchScreen({
   loading: boolean;
   customerId: string;
   onImported: () => void;
+  /** Consultant-only customer dropdown shown above the search box. Null for CUSTOMER role. */
+  customerPicker: React.ReactNode | null;
 }) {
   const t = useTranslations('employeeHr.search');
   return (
@@ -658,6 +660,8 @@ function SearchScreen({
             </button>
           </div>
         </section>
+
+        {customerPicker}
 
         <UploadCard customerId={customerId} onImported={onImported} />
 
@@ -1371,6 +1375,30 @@ export default function EmployeeHrRecord() {
     );
   }
 
+  // Consultant-only customer picker shown above the search box so the
+  // consultant can swap between assigned COMPANY customers without leaving
+  // the page. CUSTOMER role gets `null` and the section is skipped entirely.
+  const customerPicker = isConsultant && customers.length > 0 ? (
+    <section className="rounded-3xl bg-white p-5 shadow-xl shadow-slate-200/70">
+      <label className="block">
+        <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+          {t('messages.customerLabel')}
+        </span>
+        <select
+          value={selectedCustomerId}
+          onChange={(e) => setSelectedCustomerId(e.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+        >
+          {customers.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.company_name || c.full_name}
+            </option>
+          ))}
+        </select>
+      </label>
+    </section>
+  ) : null;
+
   if (screen === 'search') {
     return (
       <SearchScreen
@@ -1384,6 +1412,7 @@ export default function EmployeeHrRecord() {
         loading={loading}
         customerId={customerId}
         onImported={() => setRefreshTick((t) => t + 1)}
+        customerPicker={customerPicker}
       />
     );
   }
