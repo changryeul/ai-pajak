@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         requester_type: 'AI',        // ← Always AI-branded to customer
         requested_by: user.id,        // ← Audit: actual operator who requested
         title,
-        message: reqMessage || '추가 자료가 필요합니다.',
+        message: reqMessage || 'Additional documents are needed.',
         required_documents: requiredDocuments,
         sent_via_web: true,
         sent_via_whatsapp: sendWhatsapp,
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       user_id: customer.user_id,
       type: 'SYSTEM_ANNOUNCEMENT',
       title,
-      message: `${requiredDocuments.length}개의 추가 자료가 필요합니다.`,
+      message: `${requiredDocuments.length} dokumen tambahan diperlukan.`,
       priority: 'HIGH',
       data: { action: 'document-request', period, requestId: req.id },
     });
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       try {
         await sendWhatsApp({
           to: customer.phone_number,
-          text: `📋 *${title}*\n\n안녕하세요, ${customerName}님.\n\n${reqMessage || '다음 자료가 필요합니다:'}\n\n${docList}\n\n아래 링크에서 업로드:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload\n\n_AI Pajak_`,
+          text: `📋 *${title}*\n\nHalo ${customerName},\n\n${reqMessage || 'Dokumen berikut diperlukan:'}\n\n${docList}\n\nSilakan unggah di:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload\n\n_AI Pajak_`,
         });
         await admin.from('document_request')
           .update({ whatsapp_sent_at: new Date().toISOString() })
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: req,
-      message: `자료 요청이 발송되었습니다 (고객에게는 AI 요청으로 표시)`,
+      message: `Document request sent (shown as AI request to the customer)`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Create doc request error');

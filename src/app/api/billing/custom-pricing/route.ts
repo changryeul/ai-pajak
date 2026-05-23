@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     const customerId = await resolveCustomerId(supabase, user.id);
     if (!customerId) {
       return NextResponse.json(
-        { error: '고객 정보를 찾을 수 없습니다' },
+        { error: 'Customer record not found' },
         { status: 403 }
       );
     }
@@ -123,18 +123,18 @@ export async function POST(request: NextRequest) {
       .maybeSingle<CustomPricingQuote>();
 
     if (fetchErr || !quote) {
-      return NextResponse.json({ error: '견적을 찾을 수 없습니다' }, { status: 404 });
+      return NextResponse.json({ error: 'Quote not found' }, { status: 404 });
     }
     if (quote.customer_id !== customerId) {
       loggers.api.warn(
         { userId: user.id, quoteId, ownerCustomerId: quote.customer_id, callerCustomerId: customerId },
         'Cross-customer quote access attempt blocked',
       );
-      return NextResponse.json({ error: '본인 견적이 아닙니다' }, { status: 403 });
+      return NextResponse.json({ error: 'This quote belongs to a different customer' }, { status: 403 });
     }
     if (quote.status !== 'SENT') {
       return NextResponse.json(
-        { error: `견적이 ${quote.status} 상태라 ${action} 할 수 없습니다` },
+        { error: `Cannot ${action} a quote with status ${quote.status}` },
         { status: 409 }
       );
     }
@@ -233,8 +233,8 @@ export async function POST(request: NextRequest) {
         subscriptionId,
         nextStep:
           quote.service_type === 'CORPORATE_PLAN'
-            ? '/billing 페이지에서 결제를 진행해주세요'
-            : 'JTC 마스터가 곧 후속 절차를 안내해드립니다',
+            ? 'Please complete payment on the /billing page'
+            : 'A JTC master will follow up with you shortly',
       },
     });
   } catch (err) {

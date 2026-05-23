@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: { classified: 0, applied: 0 },
-        message: '대상 인보이스가 없습니다',
+        message: 'No invoices to classify',
       });
     }
 
@@ -155,8 +155,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: { classified, applied },
       message: applyToCalculation
-        ? `${classified}건 분류 완료, ${applied}건이 세금 계산에 적용되었습니다`
-        : `${classified}건이 분류되었습니다`,
+        ? `${classified} classified, ${applied} applied to tax calculations`
+        : `${classified} classified`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Accounting classify POST error');
