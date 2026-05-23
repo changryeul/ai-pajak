@@ -200,8 +200,8 @@ export function SimpleMode() {
                   <div className="text-sm text-yellow-800 space-y-2">
                     <p className="font-medium">{ts('exampleTitle')}</p>
                     <ul className="space-y-1 text-xs">
-                      <li>• Judul: <strong>"BUKTI PEMOTONGAN PAJAK PENGHASILAN PASAL 21"</strong></li>
-                      <li>• Ada tulisan <strong>"FORMULIR 1721-A1"</strong></li>
+                      <li>• Judul: <strong>&ldquo;BUKTI PEMOTONGAN PAJAK PENGHASILAN PASAL 21&rdquo;</strong></li>
+                      <li>• Ada tulisan <strong>&ldquo;FORMULIR 1721-A1&rdquo;</strong></li>
                       <li>• Ada nama perusahaan dan nama Anda</li>
                       <li>• Ada angka gaji dan pajak yang dipotong</li>
                     </ul>

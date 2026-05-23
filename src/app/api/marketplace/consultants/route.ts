@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '20');
 
-    let query = getSupabaseAdmin()
+    const query = getSupabaseAdmin()
       .from('consultant')
       .select(`
         id, user_id, is_active,

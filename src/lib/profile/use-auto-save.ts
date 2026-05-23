@@ -72,7 +72,7 @@ export function useAutoSave<T>(value: T, options: Options<T>): {
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [value, delay, doSave, enabled]);
 
   // Cleanup reset timer on unmount

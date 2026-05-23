@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
-export default function pph22Page() {
+export default function Pph22Page() {
   const t = useTranslations('pph22Page');
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">

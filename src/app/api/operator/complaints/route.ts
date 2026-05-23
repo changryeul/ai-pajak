@@ -77,8 +77,8 @@ export async function GET(request: NextRequest) {
   const custIds = [...new Set((complaintsRaw || []).map(c => c.customer_id).filter(Boolean))];
   const opIds = [...new Set((complaintsRaw || []).map(c => c.operator_id).filter(Boolean))];
 
-  let custMap: Record<string, { id: string; customer_name: string; npwp: string }> = {};
-  let opMap: Record<string, { id: string; name: string; employee_id: string }> = {};
+  const custMap: Record<string, { id: string; customer_name: string; npwp: string }> = {};
+  const opMap: Record<string, { id: string; name: string; employee_id: string }> = {};
 
   if (custIds.length > 0) {
     const { data: custs } = await admin.from('customer').select('id, customer_name, npwp').in('id', custIds);

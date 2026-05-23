@@ -22,7 +22,7 @@ const scriptSrc = fs.readFileSync(path.resolve(__dirname, '../scripts/translate-
 const koTextStart = scriptSrc.indexOf('const koText = {');
 if (koTextStart >= 0) {
   // Parse from `const koText = {` to matching `};` — naive brace count.
-  let i = scriptSrc.indexOf('{', koTextStart);
+  const i = scriptSrc.indexOf('{', koTextStart);
   let depth = 0;
   let end = -1;
   for (let p = i; p < scriptSrc.length; p++) {
@@ -36,7 +36,7 @@ if (koTextStart >= 0) {
     const objSrc = scriptSrc.slice(i, end);
     // Evaluate via Function — the literal is plain JS.
     try {
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+       
       const koText = new Function(`return ${objSrc}`)();
       koBundle.text = koText;
     } catch (e) {

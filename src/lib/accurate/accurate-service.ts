@@ -460,7 +460,7 @@ export class AccurateService {
   // Internal Helpers
   // ============================
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private static async apiCall(
     accessToken: string,
     session: AccurateSession | null,
@@ -490,7 +490,7 @@ export class AccurateService {
     return response.json();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private static parseFinancialStatement(
     type: AccurateFinancialStatement['type'],
     period: string,

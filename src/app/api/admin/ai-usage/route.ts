@@ -14,7 +14,7 @@ const DEFAULT_LIMITS: Record<string, { maxRequests: number; windowMs: number; la
 };
 
 // Runtime config (modified by admin, stored in memory + DB)
-let runtimeLimits: Record<string, { maxRequests: number; windowMs: number }> = {};
+const runtimeLimits: Record<string, { maxRequests: number; windowMs: number }> = {};
 
 export function getRuntimeLimits() {
   return { ...DEFAULT_LIMITS, ...runtimeLimits };

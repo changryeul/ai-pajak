@@ -757,7 +757,7 @@ export default function PPh23Page() {
               AI {t('k37_b8e205')}
             </h3>
             <p className="text-[11px] text-gray-500 mb-3">
-              {t('k38_38bd8a')} "{t('k39_7c6f9f')}"{t('k40_7672d5')}
+              {t('k38_38bd8a')} &ldquo;{t('k39_7c6f9f')}&rdquo;{t('k40_7672d5')}
             </p>
             <div className="space-y-2">
               {uploadedDocs.filter(d => d.ocr_status === 'COMPLETED' && d.ocr_result?.extractedData).map(doc => {
@@ -798,7 +798,7 @@ export default function PPh23Page() {
                               <li>• <b>DGT Form</b> (Directorate General of Taxes) — {t('k49_853bb3')}</li>
                               <li>• <b>{t('k50_d59e63')}</b> — {t('k51_52cc75')}</li>
                               <li>• {t('k52_7f17f7')}</li>
-                              <li>• {t('k53_b64454')} "{t('k54_f47999')}" {t('k55_129210')}</li>
+                              <li>• {t('k53_b64454')} &ldquo;{t('k54_f47999')}&rdquo; {t('k55_129210')}</li>
                             </ul>
                           </div>
                         )}
@@ -1278,7 +1278,7 @@ export default function PPh23Page() {
           ) : transactions.length === 0 ? (
             <div className="text-center py-12 text-sm text-gray-400">
               <Receipt className="h-10 w-10 mx-auto mb-2 opacity-30" />
-              {t('k117_0b6c6c')} "{t('k118_85e500')}" {t('k119_eeb60e')}
+              {t('k117_0b6c6c')} &ldquo;{t('k118_85e500')}&rdquo; {t('k119_eeb60e')}
             </div>
           ) : (
             <div className="space-y-2">
@@ -1593,7 +1593,7 @@ function FilingSteps({
           {!allBPGenerated && transactions.length > 0 && (
             <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <span>e-Bupot {t('k141_fbbdd4')} {pendingBP}{t('k142_004ba2')} "e-Bupot {t('k115_2daf49')}" {t('k143_b53d8b')}</span>
+              <span>e-Bupot {t('k141_fbbdd4')} {pendingBP}{t('k142_004ba2')} &ldquo;e-Bupot {t('k115_2daf49')}&rdquo; {t('k143_b53d8b')}</span>
             </div>
           )}
 

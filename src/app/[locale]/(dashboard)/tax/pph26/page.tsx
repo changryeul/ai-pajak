@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 
-export default function pph26Page() {
+export default function Pph26Page() {
   const t = useTranslations('pph26Page');
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
