@@ -293,7 +293,7 @@ export function generateFinancialStatements(journalLines: JournalLine[]): {
   const errors: string[] = [];
 
   if (Math.abs(totalDebit - totalCredit) > 1) {
-    errors.push(`차변/대변 불일치: 차변 ${totalDebit.toLocaleString()}, 대변 ${totalCredit.toLocaleString()}, 차이 ${Math.abs(totalDebit - totalCredit).toLocaleString()}`);
+    errors.push(`Debit/credit mismatch: debits ${totalDebit.toLocaleString()}, credits ${totalCredit.toLocaleString()}, diff ${Math.abs(totalDebit - totalCredit).toLocaleString()}`);
   }
 
   const ledger = buildGeneralLedger(journalLines);
@@ -302,10 +302,10 @@ export function generateFinancialStatements(journalLines: JournalLine[]): {
   const balanceSheet = buildBalanceSheet(ledger, incomeStatement.netIncome);
 
   if (!trialBalance.isBalanced) {
-    errors.push('시산표 불균형: 차변 합계와 대변 합계가 일치하지 않습니다');
+    errors.push('Trial balance unbalanced: total debits do not equal total credits');
   }
   if (!balanceSheet.isBalanced) {
-    errors.push(`대차대조표 불균형: 자산 ${balanceSheet.assets.totalAssets.toLocaleString()} ≠ 부채+자본 ${balanceSheet.totalLiabilitiesAndEquity.toLocaleString()}`);
+    errors.push(`Balance sheet unbalanced: assets ${balanceSheet.assets.totalAssets.toLocaleString()} ≠ liabilities+equity ${balanceSheet.totalLiabilitiesAndEquity.toLocaleString()}`);
   }
 
   return {

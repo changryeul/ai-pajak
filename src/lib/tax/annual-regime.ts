@@ -85,15 +85,19 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
     || annualRevenue >= UMKM_REVENUE_THRESHOLD;
   const maxYears = getMaxUmkmYears(input.legalForm);
 
+  // Reason/warning copy is in English; TaxAdvisoryPanel renders it as-is.
+  // The threshold readable in billions of IDR (Rp 4.8B).
+  const thresholdBillions = (UMKM_REVENUE_THRESHOLD / 1_000_000_000).toFixed(1);
+
   // Missing data → cannot determine
   if (!establishedYear || !input.legalForm) {
     return {
       regime: 'NOT_DETERMINED',
-      title: '회사 정보가 부족합니다',
-      reason: '연 결산 방식 판정을 위해 설립 연도와 법인 형태가 필요합니다.',
+      title: 'Company information incomplete',
+      reason: 'Established year and legal form are required to determine the annual closing regime.',
       legalBasis: '',
       yearsOperating: 0,
-      warnings: ['회사정보 메뉴에서 설립 연도와 법인 형태를 먼저 입력하세요'],
+      warnings: ['Please fill in establishment year and legal form under Company Profile first.'],
       route: null,
     };
   }
@@ -102,8 +106,8 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
   if (input.npwpPph25Elected) {
     return {
       regime: 'PPH25',
-      title: 'PPh 25 — 일반 법인세',
-      reason: 'NPWP 발행 시점에 PPh 25 적용을 선택하셨습니다. 설립 3년 이내라도 UMKM PPh Final 대신 일반 법인세(PPh 25)를 적용합니다.',
+      title: 'PPh 25 — standard corporate income tax',
+      reason: 'You elected PPh 25 when the NPWP was issued. PPh 25 applies regardless of being within the UMKM 3-year window.',
       legalBasis: 'PP 55/2022 Pasal 59 — PPh 25 election at NPWP registration',
       yearsOperating,
       route: '/tax/annual/pph25',
@@ -114,8 +118,8 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
   if (!UMKM_ELIGIBLE_LEGAL_FORMS.has(input.legalForm.toUpperCase())) {
     return {
       regime: 'PPH25',
-      title: 'PPh 25 — 일반 법인세',
-      reason: `${input.legalForm}은 UMKM PPh Final 적용 대상이 아닙니다.`,
+      title: 'PPh 25 — standard corporate income tax',
+      reason: `${input.legalForm} is not eligible for UMKM PPh Final.`,
       legalBasis: 'PP 55/2022 — legal form not eligible for UMKM Final',
       yearsOperating,
       route: '/tax/annual/pph25',
@@ -126,11 +130,11 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
   if (yearsOperating >= maxYears) {
     return {
       regime: 'PPH25',
-      title: 'PPh 25 — 일반 법인세',
-      reason: `설립 ${yearsOperating}년차로 ${input.legalForm} UMKM 최대 기간(${maxYears}년)을 초과했습니다. 익년부터 PPh 25가 적용됩니다.`,
+      title: 'PPh 25 — standard corporate income tax',
+      reason: `Year ${yearsOperating} of operation — exceeds the UMKM eligibility window for ${input.legalForm} (${maxYears} years). PPh 25 applies from next year.`,
       legalBasis: `PP 55/2022 — UMKM eligibility period (${input.legalForm}: ${maxYears} years)`,
       yearsOperating,
-      warnings: ['UMKM PPh Final 기간이 만료되어 일반 법인세 체계로 전환되었습니다'],
+      warnings: ['UMKM PPh Final period has expired — switched to the standard corporate income tax regime.'],
       route: '/tax/annual/pph25',
     };
   }
@@ -139,11 +143,11 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
   if (everExceededThreshold) {
     return {
       regime: 'PPH25',
-      title: 'PPh 25 — 일반 법인세',
-      reason: `설립 ${yearsOperating}년차이지만 연매출이 ${(UMKM_REVENUE_THRESHOLD / 1_000_000_000).toFixed(1)}억 IDR 임계값을 초과하여 UMKM PPh Final 대상에서 제외됩니다.`,
+      title: 'PPh 25 — standard corporate income tax',
+      reason: `Year ${yearsOperating} of operation, but annual revenue exceeded the Rp ${thresholdBillions}B threshold — not eligible for UMKM PPh Final.`,
       legalBasis: 'UU HPP 7/2021 — UMKM revenue threshold exceeded',
       yearsOperating,
-      warnings: [`연매출 ${(UMKM_REVENUE_THRESHOLD / 1_000_000_000).toFixed(1)}억 IDR 초과 → PPh 25 전환`],
+      warnings: [`Annual revenue exceeded Rp ${thresholdBillions}B → switch to PPh 25.`],
       route: '/tax/annual/pph25',
     };
   }
@@ -153,12 +157,12 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
   return {
     regime: 'PPH_FINAL',
     title: 'PPh Final UMKM 0.5%',
-    reason: `설립 ${yearsOperating}년차 (${input.legalForm}). UMKM 대상(연매출 < 48억 IDR)으로 매출의 0.5%만 매월 선납합니다. 잔여 기간 ${umkmYearsRemaining}년.`,
+    reason: `Year ${yearsOperating} of operation (${input.legalForm}). UMKM applies (revenue under Rp 4.8B), so only 0.5% of monthly revenue is prepaid. ${umkmYearsRemaining} year(s) remaining.`,
     legalBasis: 'PP 55/2022 — UMKM PPh Final 0.5%',
     yearsOperating,
     umkmYearsRemaining,
     warnings: umkmYearsRemaining <= 1
-      ? [`UMKM 적용 마지막 해입니다. 익년부터 PPh 25로 자동 전환됩니다`]
+      ? [`This is the final year of UMKM eligibility — PPh 25 takes over automatically from next year.`]
       : undefined,
     route: '/tax/annual/pph-final',
   };

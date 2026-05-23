@@ -65,7 +65,7 @@ export function classifyInvoice(inv: InvoiceInput): ClassificationResult[] {
     if (inv.has_ppn && inv.tax_amount > 0) {
       const warnings: string[] = [];
       if (!inv.counterparty_npwp) {
-        warnings.push('고객 NPWP 누락 — Faktur Pajak 발행 시 오류 가능');
+        warnings.push('Customer NPWP missing — Faktur Pajak issuance may fail.');
       }
       results.push({
         tax_type: 'PPN_OUTPUT',
@@ -84,7 +84,7 @@ export function classifyInvoice(inv: InvoiceInput): ClassificationResult[] {
     if (inv.has_ppn && inv.tax_amount > 0) {
       const warnings: string[] = [];
       if (!inv.counterparty_npwp) {
-        warnings.push('공급자 NPWP 누락 — PPN 매입세액 공제 불가');
+        warnings.push('Supplier NPWP missing — input PPN cannot be credited.');
       }
       results.push({
         tax_type: 'PPN_INPUT',
@@ -98,11 +98,11 @@ export function classifyInvoice(inv: InvoiceInput): ClassificationResult[] {
 
     // PPh 23 withholding (services, 2%)
     if (looksLikeService(inv.counterparty_name)) {
-      const warnings: string[] = ['서비스 공급자로 추정 — PPh 23 원천징수 확인 필요'];
+      const warnings: string[] = ['Estimated to be a service supplier — verify PPh 23 withholding.'];
       const hasNpwp = !!inv.counterparty_npwp;
       const rate = hasNpwp ? 0.02 : 0.04; // 100% surcharge if no NPWP
       if (!hasNpwp) {
-        warnings.push('NPWP 누락 — PPh 23 세율 4% 적용 (100% 할증)');
+        warnings.push('NPWP missing — PPh 23 4% rate applies (100% surcharge).');
       }
       results.push({
         tax_type: 'PPh23',
