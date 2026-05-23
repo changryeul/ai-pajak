@@ -75,17 +75,22 @@ export async function notifyWorkflowStatusChange(
       customerName,
     };
 
+    // Notification copy policy:
+    //   - Customer-bound notifications go in Bahasa Indonesia (most customers
+    //     are Indonesian; locale-per-customer is a future refactor).
+    //   - Operator/supervisor notifications go in English so JTC + EXTERNAL
+    //     operators can both read them.
     switch (newStatus) {
       case 'PENDING_APPROVAL': {
-        // Notify all supervisors
+        // Notify all supervisors (English)
         const supervisorUserIds = await getSupervisorUserIds(admin);
         for (const supUserId of supervisorUserIds) {
           await svc.sendNotification({
             userId: supUserId,
             type: 'FILING_STATUS',
             priority: 'HIGH',
-            title: `승인 요청: ${customerName} ${queueItem.tax_type}`,
-            message: `${customerName}의 ${queueItem.tax_type} ${period} 건이 승인 대기 중입니다. (${amountStr})`,
+            title: `Approval requested: ${customerName} ${queueItem.tax_type}`,
+            message: `${customerName} ${queueItem.tax_type} ${period} is waiting for approval (${amountStr}).`,
             data: baseData,
           });
         }
@@ -94,26 +99,26 @@ export async function notifyWorkflowStatusChange(
 
       case 'APPROVED': {
         if (autoApproved) {
-          // Auto-approved: notify operator + supervisors (low priority)
+          // Auto-approved: notify operator (English)
           if (operatorUserId) {
             await svc.sendNotification({
               userId: operatorUserId,
               type: 'FILING_STATUS',
               priority: 'LOW',
-              title: `자동 승인: ${customerName} ${queueItem.tax_type}`,
-              message: `${customerName}의 ${queueItem.tax_type} ${period} 건이 자동 승인되었습니다.`,
+              title: `Auto-approved: ${customerName} ${queueItem.tax_type}`,
+              message: `${customerName} ${queueItem.tax_type} ${period} was auto-approved.`,
               data: { ...baseData, autoApproved: true },
             });
           }
         } else {
-          // Manual approval: notify operator
+          // Manual approval: notify operator (English)
           if (operatorUserId) {
             await svc.sendNotification({
               userId: operatorUserId,
               type: 'FILING_STATUS',
               priority: 'MEDIUM',
-              title: `승인 완료: ${customerName} ${queueItem.tax_type}`,
-              message: `${customerName}의 ${queueItem.tax_type} ${period} 건이 승인되었습니다. e-Billing을 생성해 주세요.`,
+              title: `Approved: ${customerName} ${queueItem.tax_type}`,
+              message: `${customerName} ${queueItem.tax_type} ${period} was approved. Please generate the e-Billing.`,
               data: baseData,
             });
           }
@@ -122,14 +127,14 @@ export async function notifyWorkflowStatusChange(
       }
 
       case 'DATA_REVIEW': {
-        // Rejection (from PENDING_APPROVAL): notify operator
+        // Rejection (from PENDING_APPROVAL): notify operator (English)
         if (previousStatus === 'PENDING_APPROVAL' && operatorUserId) {
           await svc.sendNotification({
             userId: operatorUserId,
             type: 'FILING_STATUS',
             priority: 'HIGH',
-            title: `반려: ${customerName} ${queueItem.tax_type}`,
-            message: `${customerName}의 ${queueItem.tax_type} ${period} 건이 반려되었습니다. 데이터를 확인해 주세요.`,
+            title: `Rejected: ${customerName} ${queueItem.tax_type}`,
+            message: `${customerName} ${queueItem.tax_type} ${period} was rejected. Please review the data.`,
             data: baseData,
           });
         }
@@ -137,14 +142,14 @@ export async function notifyWorkflowStatusChange(
       }
 
       case 'PAYMENT_PENDING': {
-        // Notify customer with billing info
+        // Notify customer with billing info (Bahasa Indonesia)
         if (customer?.user_id) {
           await svc.sendNotification({
             userId: customer.user_id,
             type: 'PAYMENT_DUE',
             priority: 'HIGH',
-            title: `납부 요청: ${queueItem.tax_type} ${period}`,
-            message: `${queueItem.tax_type} ${period} 세금 ${amountStr}의 e-Billing이 발행되었습니다. 납부 후 증빙을 업로드해 주세요.`,
+            title: `Permintaan pembayaran: ${queueItem.tax_type} ${period}`,
+            message: `e-Billing untuk pajak ${queueItem.tax_type} ${period} sebesar ${amountStr} telah diterbitkan. Mohon bayar dan unggah bukti pembayaran.`,
             data: { ...baseData, ebillingCode: queueItem.ebilling_code },
           });
         }
@@ -152,14 +157,14 @@ export async function notifyWorkflowStatusChange(
       }
 
       case 'PAYMENT_UPLOADED': {
-        // Notify operator for verification
+        // Notify operator for verification (English)
         if (operatorUserId) {
           await svc.sendNotification({
             userId: operatorUserId,
             type: 'FILING_STATUS',
             priority: 'MEDIUM',
-            title: `납부증빙 제출: ${customerName} ${queueItem.tax_type}`,
-            message: `${customerName}이(가) ${queueItem.tax_type} ${period} 납부증빙을 업로드했습니다. 확인해 주세요.`,
+            title: `Payment proof submitted: ${customerName} ${queueItem.tax_type}`,
+            message: `${customerName} uploaded payment proof for ${queueItem.tax_type} ${period}. Please verify.`,
             data: baseData,
           });
         }
@@ -167,14 +172,14 @@ export async function notifyWorkflowStatusChange(
       }
 
       case 'PAYMENT_VERIFIED': {
-        // Notify customer
+        // Notify customer (Bahasa Indonesia)
         if (customer?.user_id) {
           await svc.sendNotification({
             userId: customer.user_id,
             type: 'PAYMENT_RECEIVED',
             priority: 'LOW',
-            title: `납부 확인: ${queueItem.tax_type} ${period}`,
-            message: `${queueItem.tax_type} ${period} 납부가 확인되었습니다. DJP 신고가 진행됩니다.`,
+            title: `Pembayaran terverifikasi: ${queueItem.tax_type} ${period}`,
+            message: `Pembayaran ${queueItem.tax_type} ${period} telah diverifikasi. Pelaporan DJP sedang diproses.`,
             data: baseData,
           });
         }
@@ -182,14 +187,14 @@ export async function notifyWorkflowStatusChange(
       }
 
       case 'DJP_SUBMITTED': {
-        // Notify customer + operator
+        // Notify customer (Bahasa Indonesia)
         if (customer?.user_id) {
           await svc.sendNotification({
             userId: customer.user_id,
             type: 'FILING_STATUS',
             priority: 'MEDIUM',
-            title: `DJP 제출 완료: ${queueItem.tax_type} ${period}`,
-            message: `${queueItem.tax_type} ${period} 세금 신고가 DJP에 제출되었습니다.`,
+            title: `Terkirim ke DJP: ${queueItem.tax_type} ${period}`,
+            message: `Pelaporan pajak ${queueItem.tax_type} ${period} telah dikirim ke DJP.`,
             data: baseData,
           });
         }
@@ -197,14 +202,14 @@ export async function notifyWorkflowStatusChange(
       }
 
       case 'COMPLETED': {
-        // Notify customer with BPE info
+        // Notify customer with BPE info (Bahasa Indonesia)
         if (customer?.user_id) {
           await svc.sendNotification({
             userId: customer.user_id,
             type: 'FILING_STATUS',
             priority: 'HIGH',
-            title: `신고 완료: ${queueItem.tax_type} ${period}`,
-            message: `${queueItem.tax_type} ${period} 세금 신고가 완료되었습니다. BPE 번호: ${queueItem.bpe_number || '-'}`,
+            title: `Pelaporan selesai: ${queueItem.tax_type} ${period}`,
+            message: `Pelaporan pajak ${queueItem.tax_type} ${period} telah selesai. Nomor BPE: ${queueItem.bpe_number || '-'}`,
             data: { ...baseData, bpeNumber: queueItem.bpe_number },
           });
         }
@@ -212,7 +217,7 @@ export async function notifyWorkflowStatusChange(
       }
 
       case 'FAILED': {
-        // Notify operator + supervisors
+        // Notify operator + supervisors (English)
         const targets: string[] = [];
         if (operatorUserId) targets.push(operatorUserId);
         const supervisorUserIds = await getSupervisorUserIds(admin);
@@ -224,8 +229,8 @@ export async function notifyWorkflowStatusChange(
             userId,
             type: 'FILING_STATUS',
             priority: 'HIGH' as NotificationPriority,
-            title: `실패: ${customerName} ${queueItem.tax_type}`,
-            message: `${customerName}의 ${queueItem.tax_type} ${period} 건이 실패 처리되었습니다. 확인이 필요합니다.`,
+            title: `Failed: ${customerName} ${queueItem.tax_type}`,
+            message: `${customerName} ${queueItem.tax_type} ${period} failed. Investigation required.`,
             data: baseData,
           });
         }

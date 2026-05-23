@@ -75,7 +75,8 @@ export async function sendDeadlineReminderTelegram(
   daysLeft: number
 ): Promise<TelegramResult> {
   const emoji = daysLeft <= 3 ? '🚨' : daysLeft <= 7 ? '⚠️' : 'ℹ️';
-  const text = `${emoji} *${taxType} 신고 마감 알림*\n\n안녕하세요, ${customerName}님.\n\n*${taxType}* 신고 마감일이 *${daysLeft}일* 남았습니다.\n마감일: ${deadline}\n\n[AI Pajak에서 확인](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/tax/monthly-dashboard)\n\n_AI Pajak × JTC_`;
+  // Customer-facing Telegram messages in Bahasa Indonesia.
+  const text = `${emoji} *Pengingat tenggat ${taxType}*\n\nHalo ${customerName},\n\nTenggat pelaporan *${taxType}* tinggal *${daysLeft} hari* lagi.\nTenggat: ${deadline}\n\n[Buka AI Pajak](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/tax/monthly-dashboard)\n\n_AI Pajak × JTC_`;
   return sendTelegram({ chatId, text });
 }
 
@@ -89,7 +90,7 @@ export async function sendDocRequestTelegram(
   documents: Array<{ description: string }>
 ): Promise<TelegramResult> {
   const docList = documents.map(d => `• ${d.description}`).join('\n');
-  const text = `📋 *${title}*\n\n안녕하세요, ${customerName}님.\n\n다음 자료가 필요합니다:\n\n${docList}\n\n[업로드하기](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload)\n\n_AI Pajak_`;
+  const text = `📋 *${title}*\n\nHalo ${customerName},\n\nDokumen berikut diperlukan:\n\n${docList}\n\n[Unggah dokumen](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload)\n\n_AI Pajak_`;
   return sendTelegram({ chatId, text });
 }
 
@@ -103,6 +104,6 @@ export async function sendFilingCompleteTelegram(
   period: string,
   bpeNumber?: string
 ): Promise<TelegramResult> {
-  const text = `✅ *${taxType} 신고 완료*\n\n안녕하세요, ${customerName}님.\n\n*${period}* ${taxType} 신고가 완료되었습니다.${bpeNumber ? `\nBPE: ${bpeNumber}` : ''}\n\n[상세 확인](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/submissions)\n\n_AI Pajak × JTC_`;
+  const text = `✅ *Pelaporan ${taxType} selesai*\n\nHalo ${customerName},\n\nPelaporan *${period}* ${taxType} telah selesai.${bpeNumber ? `\nBPE: ${bpeNumber}` : ''}\n\n[Lihat detail](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/submissions)\n\n_AI Pajak × JTC_`;
   return sendTelegram({ chatId, text });
 }
