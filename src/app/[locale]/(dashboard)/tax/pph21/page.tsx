@@ -113,14 +113,16 @@ export default function PPh21PayrollPage() {
   // TER calculation results
   const [calcResults, setCalcResults] = useState<Record<string, { taxAmount: number; terRate: number }>>({});
 
-  // Consultant/customer-aware customerId (selector rendered below).
+  // Consultant/customer-aware customerId. PPh 21 needs employee/payroll
+  // data which only COMPANY customers have, so we filter the consultant's
+  // customer dropdown to COMPANY rows.
   const {
     customerId,
     isConsultant,
     customers,
     selectedCustomerId,
     setSelectedCustomerId,
-  } = useEffectiveCustomerId();
+  } = useEffectiveCustomerId({ companyOnly: true });
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
