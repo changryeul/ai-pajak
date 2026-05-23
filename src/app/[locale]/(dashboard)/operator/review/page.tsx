@@ -385,6 +385,7 @@ export default function OperatorReviewPage() {
  * /tax/billing page (keynote slide-21).
  */
 function QueueRowWithFlagPanel({ queueItem }: { queueItem: QueueItem }) {
+  const t = useTranslations('operatorReview');
   const [open, setOpen] = useState(false);
   const isDataReview = queueItem.status === 'DATA_REVIEW';
 
@@ -405,7 +406,7 @@ function QueueRowWithFlagPanel({ queueItem }: { queueItem: QueueItem }) {
         <div className="flex items-center gap-2">
           {isDataReview && (
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold">
-              고객 수정 대기
+              {t('awaitingCustomerEdit')}
             </span>
           )}
           <Badge className="text-[9px]">{queueItem.status}</Badge>

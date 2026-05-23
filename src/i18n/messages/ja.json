@@ -5369,6 +5369,7 @@
   "operatorReview": {
     "pageTitle": "Customer Document Review",
     "pageSubtitle": "Review uploads + request additional documents",
+    "awaitingCustomerEdit": "顧客修正待ち",
     "noCustomerIdMessage": "customerId is required. Please select a customer from the operator queue.",
     "goToQueue": "Go to Operator Queue →",
     "uploadedDocs": "Uploaded Documents",

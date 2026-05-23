@@ -5409,6 +5409,7 @@
   "operatorReview": {
     "pageTitle": "Tinjauan Dokumen Pelanggan",
     "pageSubtitle": "Periksa dokumen yang diunggah + minta tambahan",
+    "awaitingCustomerEdit": "Menunggu revisi pelanggan",
     "noCustomerIdMessage": "customerId diperlukan. Silakan pilih pelanggan dari antrean operator.",
     "goToQueue": "Ke Antrean Operator →",
     "uploadedDocs": "Dokumen Diunggah",

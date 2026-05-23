@@ -5512,6 +5512,7 @@
   "operatorReview": {
     "pageTitle": "고객 자료 검토",
     "pageSubtitle": "업로드 자료 확인 + 추가 요청",
+    "awaitingCustomerEdit": "고객 수정 대기",
     "noCustomerIdMessage": "customerId가 필요합니다. 운영 큐에서 고객을 선택하세요.",
     "goToQueue": "운영 큐로 이동 →",
     "uploadedDocs": "업로드 자료",
