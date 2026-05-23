@@ -50,20 +50,23 @@ const dDay = (due: string | null): string => {
   return `D+${Math.abs(diff)}`;
 };
 
+// English fallback text kept for non-i18n callers — the staff UIs all derive
+// the localized hint from `status` via `operatorStaff.nextAction.*`, so this
+// field is only used as a safety net.
 const nextAction = (status: string): string => {
   switch (status) {
-    case 'PENDING':            return '검토를 시작하세요. 우측 검토 메뉴로 이동합니다.';
-    case 'PENDING_DOCS':       return '고객에게 부족자료를 요청했거나, 고객 응답을 기다리세요.';
-    case 'DATA_REVIEW':        return '확인할 항목을 검토하거나 자료요청하세요.';
-    case 'PENDING_APPROVAL':   return 'Supervisor 승인 결과를 기다리세요.';
-    case 'APPROVED':           return 'Coretax 처리를 시작하세요. ID Billing 발행을 기록합니다.';
-    case 'EBILLING_GENERATED': return '고객의 납부 NTPN 제출을 기다리세요.';
-    case 'PAYMENT_PENDING':    return '고객 NTPN 제출 또는 납부증빙 업로드를 기다리세요.';
-    case 'PAYMENT_UPLOADED':   return '납부 NTPN을 검증하고 신고를 제출하세요.';
-    case 'PAYMENT_VERIFIED':   return 'Coretax에서 신고를 제출하세요.';
-    case 'DJP_SUBMITTED':      return 'BPE를 업로드하세요.';
-    case 'BPE_UPLOADED':       return '신고완료 처리를 마무리하세요.';
-    default:                   return '다음 단계를 진행하세요.';
+    case 'PENDING':            return 'Start review. Open the review menu on the right.';
+    case 'PENDING_DOCS':       return 'You have requested missing documents from the customer, or are waiting for the customer to respond.';
+    case 'DATA_REVIEW':        return 'Review the flagged items or request missing documents.';
+    case 'PENDING_APPROVAL':   return 'Waiting for supervisor approval.';
+    case 'APPROVED':           return 'Start Coretax processing. Record the ID Billing issuance.';
+    case 'EBILLING_GENERATED': return "Waiting for the customer's NTPN submission.";
+    case 'PAYMENT_PENDING':    return 'Waiting for the customer to submit NTPN or upload payment proof.';
+    case 'PAYMENT_UPLOADED':   return 'Verify the NTPN and submit the filing.';
+    case 'PAYMENT_VERIFIED':   return 'Submit the filing in Coretax.';
+    case 'DJP_SUBMITTED':      return 'Upload the BPE.';
+    case 'BPE_UPLOADED':       return 'Finalize the filing as completed.';
+    default:                   return 'Proceed with the next step.';
   }
 };
 

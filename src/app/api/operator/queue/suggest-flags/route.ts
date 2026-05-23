@@ -63,8 +63,8 @@ function suggestForRow(row: QueueRow): FlaggedField[] {
   if (isBlank(row.counterparty_name) && isBlank(sub['counterparty_name'])) {
     out.push({
       key: 'counterparty_name',
-      label: '거래 상대방 / 회사명',
-      reason: '회사명이 비어 있습니다. 청구서·증빙에 기재된 정확한 상호를 입력해 주세요.',
+      label: 'Counterparty / Company name',
+      reason: 'Company name is empty. Enter the exact name from the invoice/voucher.',
       currentValue: row.counterparty_name ?? '',
       inputType: 'text',
     });
@@ -72,8 +72,8 @@ function suggestForRow(row: QueueRow): FlaggedField[] {
   if (!row.amount || Number(row.amount) <= 0) {
     out.push({
       key: 'amount',
-      label: '세액 (Rp)',
-      reason: '세액이 0 또는 누락되었습니다. 정확한 금액(Rp)을 입력해 주세요.',
+      label: 'Tax amount (Rp)',
+      reason: 'Tax amount is 0 or missing. Enter the correct amount (Rp).',
       currentValue: row.amount ?? 0,
       inputType: 'number',
     });
@@ -83,8 +83,8 @@ function suggestForRow(row: QueueRow): FlaggedField[] {
   if (npwp && npwp.length !== 15) {
     out.push({
       key: 'counterparty_npwp',
-      label: '상대방 NPWP',
-      reason: `NPWP는 15자리 숫자여야 합니다. (현재 ${npwp.length}자리)`,
+      label: 'Counterparty NPWP',
+      reason: `NPWP must be 15 digits (currently ${npwp.length} digits).`,
       currentValue: String(sub['npwp'] ?? sub['counterparty_npwp'] ?? ''),
       inputType: 'text',
     });
@@ -95,7 +95,7 @@ function suggestForRow(row: QueueRow): FlaggedField[] {
     out.push({
       key: 'ntpn',
       label: 'NTPN',
-      reason: `NTPN은 16자리 숫자여야 합니다. (현재 ${ntpn.length}자리)`,
+      reason: `NTPN must be 16 digits (currently ${ntpn.length} digits).`,
       currentValue: String(sub['ntpn'] ?? ''),
       inputType: 'text',
     });
@@ -106,19 +106,19 @@ function suggestForRow(row: QueueRow): FlaggedField[] {
     if (Number.isNaN(d.getTime())) {
       out.push({
         key: 'bpe_date',
-        label: 'BPE 일자',
-        reason: 'BPE 일자가 올바른 날짜 형식이 아닙니다 (YYYY-MM-DD).',
+        label: 'BPE date',
+        reason: 'BPE date is not a valid date (YYYY-MM-DD).',
         currentValue: String(sub['bpe_date']),
         inputType: 'date',
       });
     }
   }
-  // PPh tax types: payee/주식 type sanity
+  // PPh tax types: service description sanity for PPh23
   if (row.tax_type === 'PPh23' && isBlank(sub['service_description'])) {
     out.push({
       key: 'service_description',
-      label: '용역 내용 / 적용 코드',
-      reason: 'PPh23은 용역 종류(2% / 15%)에 따라 세율이 다릅니다. 용역 내용을 적어 주세요.',
+      label: 'Service description / applicable code',
+      reason: 'PPh23 rate depends on the service type (2% / 15%). Enter the service description.',
       currentValue: '',
       inputType: 'text',
     });

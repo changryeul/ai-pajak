@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     if (!await requireMaster(supabase, user.id)) {
-      return NextResponse.json({ error: '마스터 권한이 필요합니다' }, { status: 403 });
+      return NextResponse.json({ error: 'Master role required' }, { status: 403 });
     }
 
     const admin = getSupabaseAdmin();
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     if (!await requireMaster(supabase, user.id)) {
-      return NextResponse.json({ error: '마스터 권한이 필요합니다' }, { status: 403 });
+      return NextResponse.json({ error: 'Master role required' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     if (!customerId || !quoteTitle) {
       return NextResponse.json(
-        { error: 'customerId와 quoteTitle은 필수입니다' },
+        { error: 'customerId and quoteTitle are required' },
         { status: 400 }
       );
     }
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     if (monthlyPriceIdr == null && oneTimePriceIdr == null) {
       return NextResponse.json(
-        { error: 'monthlyPriceIdr 또는 oneTimePriceIdr 중 하나는 필수입니다' },
+        { error: 'Either monthlyPriceIdr or oneTimePriceIdr is required' },
         { status: 400 }
       );
     }
@@ -187,7 +187,7 @@ export async function PATCH(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     if (!await requireMaster(supabase, user.id)) {
-      return NextResponse.json({ error: '마스터 권한이 필요합니다' }, { status: 403 });
+      return NextResponse.json({ error: 'Master role required' }, { status: 403 });
     }
 
     const body = await request.json();

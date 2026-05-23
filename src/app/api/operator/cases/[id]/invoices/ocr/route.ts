@@ -50,7 +50,7 @@ function mapTaxType(taxType: ResolvedTaxType): { taxKind: string; taxCode: strin
     case 'PPh21':  return { taxKind: 'PPh21',   taxCode: `${DJP_TAX_CODES.PPH21.JENIS_PAJAK}-${DJP_TAX_CODES.PPH21.JENIS_SETORAN.MONTHLY}` };
     case 'PPh15':  return { taxKind: 'PPh15',   taxCode: '411123-100' };
     case 'PPN':    return { taxKind: 'PPN',     taxCode: `${DJP_TAX_CODES.PPN.JENIS_PAJAK}-${DJP_TAX_CODES.PPN.JENIS_SETORAN.MONTHLY}` };
-    default:       return { taxKind: '미분류',  taxCode: '—' };
+    default:       return { taxKind: 'Unclassified', taxCode: '—' };
   }
 }
 
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   try {
     classification = await InvoiceClassifier.classify(fileBase64, mimeType ?? 'image/jpeg');
   } catch (err) {
-    return NextResponse.json({ error: `OCR 실패: ${(err as Error).message}` }, { status: 502 });
+    return NextResponse.json({ error: `OCR failed: ${(err as Error).message}` }, { status: 502 });
   }
 
   // 2) TaxResolutionEngine으로 PPh 자동 추정.
@@ -128,13 +128,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   const newItem: ReviewItem = {
     invoice: invoiceTag,
-    vendor: classification.counterpartyName || '미상',
+    vendor: classification.counterpartyName || 'Unknown',
     taxKind,
     taxCode,
     tax: Math.round(resolution.taxAmount),
     dpp: Math.round(classification.grossAmount),
     state: isHighConfidence ? '자동확인' : 'AI 확인필요',
-    reason: isHighConfidence ? '' : `AI 신뢰도 ${Math.round((classification.confidence ?? 0) * 100)}% — 사람이 확인하세요`,
+    reason: isHighConfidence ? '' : `AI confidence ${Math.round((classification.confidence ?? 0) * 100)}% — please verify manually`,
     source: 'ocr',
     ocrConfidence: classification.confidence,
     ocrDocUrl: docUrl,

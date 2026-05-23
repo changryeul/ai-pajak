@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     if (!canInvite(role!, targetRole)) {
       return NextResponse.json(
-        { error: `${role}는 ${targetRole} 역할을 초대할 수 없습니다` },
+        { error: `${role} cannot invite ${targetRole}` },
         { status: 403 }
       );
     }
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: '이미 대기 중인 초대가 있습니다' },
+        { error: 'A pending invitation already exists for this email' },
         { status: 409 }
       );
     }
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     const { data: existingAuth } = await admin.auth.admin.listUsers();
     if (existingAuth?.users?.some(u => u.email === email)) {
       return NextResponse.json(
-        { error: '이미 가입된 이메일입니다' },
+        { error: 'This email is already registered' },
         { status: 409 }
       );
     }
@@ -144,46 +144,49 @@ export async function POST(request: NextRequest) {
 
     if (insertError || !inv) {
       loggers.api.error({ err: insertError }, 'Failed to create invitation');
-      return NextResponse.json({ error: '초대 생성 실패' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to create invitation' }, { status: 500 });
     }
 
     // Send invitation email
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
     const acceptUrl = `${appUrl}/ko/invite/accept?token=${token}`;
 
+    // Email copy is English so any future staff (KR/EN/ID) can read it. The
+    // accept-invitation page itself is locale-aware, so the recipient lands on
+    // their preferred language.
     const roleLabel =
-      targetRole === 'TAX_ADVISOR_JTC' ? '세무사 (Tax Advisor)' :
-      targetRole === 'CONSULTANT_JTC' ? '컨설턴트' :
-      targetRole === 'TAX_OPERATOR_SUPERVISOR' ? '백오피스 수퍼바이저' :
-      '백오피스 상담원';
+      targetRole === 'TAX_ADVISOR_JTC' ? 'Tax Advisor' :
+      targetRole === 'CONSULTANT_JTC' ? 'Consultant' :
+      targetRole === 'TAX_OPERATOR_SUPERVISOR' ? 'Back-office Supervisor' :
+      'Back-office Operator';
 
     try {
       await sendEmail({
         to: email,
-        subject: `[AI Pajak] ${roleLabel}으로 초대되었습니다`,
+        subject: `[AI Pajak] You have been invited as ${roleLabel}`,
         html: `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="background: linear-gradient(135deg, #1e40af, #4338ca); color: white; padding: 30px; border-radius: 12px 12px 0 0;">
-    <h1 style="margin: 0; font-size: 24px;">AI Pajak에 초대되었습니다</h1>
-    <p style="margin: 10px 0 0; opacity: 0.9;">${roleLabel} 역할로 합류하세요</p>
+    <h1 style="margin: 0; font-size: 24px;">You're invited to AI Pajak</h1>
+    <p style="margin: 10px 0 0; opacity: 0.9;">Join as ${roleLabel}</p>
   </div>
   <div style="border: 1px solid #e5e7eb; border-top: none; padding: 30px; border-radius: 0 0 12px 12px;">
-    <p>안녕하세요${fullName ? ' ' + fullName + '님' : ''},</p>
-    <p>Jakarta Tax Consulting(AI Pajak) 팀에 <b>${roleLabel}</b>으로 초대되었습니다.</p>
-    <p>아래 버튼을 클릭하여 계정을 생성하세요. 초대는 <b>7일 후 만료</b>됩니다.</p>
+    <p>Hello${fullName ? ' ' + fullName : ''},</p>
+    <p>You have been invited to the Jakarta Tax Consulting (AI Pajak) team as <b>${roleLabel}</b>.</p>
+    <p>Click the button below to create your account. The invitation expires in <b>7 days</b>.</p>
     <div style="text-align: center; margin: 30px 0;">
       <a href="${acceptUrl}" style="display: inline-block; background: #1e40af; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-        초대 수락하기
+        Accept invitation
       </a>
     </div>
-    <p style="font-size: 12px; color: #6b7280;">또는 아래 링크를 브라우저에 복사:</p>
+    <p style="font-size: 12px; color: #6b7280;">Or copy this link into your browser:</p>
     <p style="font-size: 11px; color: #6b7280; word-break: break-all;">${acceptUrl}</p>
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-    <p style="font-size: 11px; color: #9ca3af;">본 이메일을 요청하지 않으셨다면 무시해 주세요.</p>
+    <p style="font-size: 11px; color: #9ca3af;">If you did not request this email, please ignore it.</p>
   </div>
 </div>
         `,
-        text: `AI Pajak ${roleLabel} 초대\n\n계정 생성 링크: ${acceptUrl}\n\n7일 후 만료됩니다.`,
+        text: `AI Pajak ${roleLabel} invitation\n\nAccept link: ${acceptUrl}\n\nExpires in 7 days.`,
       });
     } catch (emailErr) {
       loggers.api.warn({ err: emailErr, email }, 'Email send failed (invitation still created)');
@@ -199,7 +202,7 @@ export async function POST(request: NextRequest) {
         role: inv.role,
         expiresAt: inv.expires_at,
       },
-      message: '초대 이메일을 발송했습니다',
+      message: 'Invitation email sent',
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Create invitation error');

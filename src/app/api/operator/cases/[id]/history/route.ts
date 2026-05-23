@@ -24,25 +24,25 @@ interface TimelineEvent {
 }
 
 const CASE_EVENT_LABEL: Record<string, string> = {
-  CASE_CREATED: '케이스 생성',
-  ASSIGNED: '상담원 배정',
-  REASSIGNED: '상담원 재배정',
-  RECALLED: '환수',
-  TRANSFERRED_TO_SV: 'SV 이관',
-  BULK_TRANSFERRED: 'Bulk 이관',
-  APPROVED: 'Supervisor 승인',
-  REJECTED: 'Supervisor 반려',
-  INSTRUCTED: '상담원 처리/지시',
+  CASE_CREATED: 'Case created',
+  ASSIGNED: 'Operator assigned',
+  REASSIGNED: 'Operator reassigned',
+  RECALLED: 'Recalled',
+  TRANSFERRED_TO_SV: 'Supervisor transfer',
+  BULK_TRANSFERRED: 'Bulk transfer',
+  APPROVED: 'Supervisor approved',
+  REJECTED: 'Supervisor rejected',
+  INSTRUCTED: 'Operator instructed',
 };
 
 const CORETAX_STEP_LABEL: Record<string, string> = {
-  ACCESS:        'Coretax 접속',
-  ID_BILLING:    'ID Billing 발행',
-  CONFIRM_NTPN:  '고객 NTPN 확인',
-  COMPLETE:      '신고완료/BPE 반영',
-  CHECKLIST:     '체크리스트 갱신',
-  QUICK_ACTION:  '빠른 액션',
-  MANUAL:        '수동 로그',
+  ACCESS:        'Coretax access',
+  ID_BILLING:    'ID Billing issued',
+  CONFIRM_NTPN:  'Customer NTPN confirmed',
+  COMPLETE:      'Filed / BPE recorded',
+  CHECKLIST:     'Checklist updated',
+  QUICK_ACTION:  'Quick action',
+  MANUAL:        'Manual log',
 };
 
 /**
@@ -183,7 +183,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
         customer_name: customerName,
         kind: 'system',
         event: 'CASE_CREATED',
-        label: '케이스 생성 및 자동 배정',
+        label: 'Case created and auto-assigned',
         actor: 'system',
         payload: null,
         at: c.created_at,
@@ -196,8 +196,8 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
         customer_name: customerName,
         kind: 'system',
         event: 'SYSTEM_ANALYZED',
-        label: 'AI-Pajak가 제출자료를 분석했습니다',
-        actor: '시스템',
+        label: 'AI Pajak analyzed the submitted documents',
+        actor: 'system',
         payload: null,
         at: c.updated_at ?? c.created_at,
       });
@@ -210,7 +210,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
           kind: 'customer-ntpn',
           event: 'CUSTOMER_NTPN',
           label: `${c.ebilling_code}`,
-          actor: 'AI Pajak 고객 화면',
+          actor: 'AI Pajak customer screen',
           payload: { ntpn: c.ebilling_code, file: 'Bukti_Bayar_PPh23_Jan.pdf' },
           at: c.updated_at ?? c.created_at,
         });

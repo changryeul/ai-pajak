@@ -44,10 +44,10 @@ export async function PUT(_req: NextRequest, ctx: { params: Promise<{ id: string
   const rs = (caseRow.review_summary ?? null) as ReviewSummary | null;
   const reviewRequired = rs?.reviewRequired ?? 0;
   if (reviewRequired > 0) {
-    return NextResponse.json({ error: `검토필요 항목 ${reviewRequired}건이 미완료 상태입니다` }, { status: 400 });
+    return NextResponse.json({ error: `${reviewRequired} review-required items are still pending` }, { status: 400 });
   }
   if (!['PENDING', 'PENDING_DOCS', 'DATA_REVIEW'].includes(caseRow.status)) {
-    return NextResponse.json({ error: `현재 상태(${caseRow.status})에서는 승인요청을 보낼 수 없습니다` }, { status: 400 });
+    return NextResponse.json({ error: `Cannot request approval from status ${caseRow.status}` }, { status: 400 });
   }
 
   const { error } = await admin.from('djp_submission_queue').update({ status: 'PENDING_APPROVAL' }).eq('id', id);
@@ -58,7 +58,7 @@ export async function PUT(_req: NextRequest, ctx: { params: Promise<{ id: string
     await admin.from('case_audit_log').insert({
       case_id: id, event_type: 'INSTRUCTED',
       actor_user_id: user.id, actor_label: actorLabel,
-      payload: { note: 'Supervisor 승인요청 상신', from: caseRow.status, to: 'PENDING_APPROVAL' },
+      payload: { note: 'Supervisor approval requested', from: caseRow.status, to: 'PENDING_APPROVAL' },
     });
   } catch { /* non-blocking */ }
 

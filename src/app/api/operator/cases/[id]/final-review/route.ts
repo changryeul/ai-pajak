@@ -148,9 +148,9 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
 
   // 제출자료 (Phase 3과 동일한 데모 데이터).
   const documents = [
-    { type: 'INVOICE',  name: 'Invoice_Jasa_Jan.pdf',  parsedFields: 11, status: '제출' },
-    { type: 'CONTRACT', name: 'Contract_Service.pdf',  parsedFields: 8,  status: '제출' },
-    { type: 'BANK',     name: 'Bank_Payment_Jan.xlsx', parsedFields: 6,  status: '제출' },
+    { type: 'INVOICE',  name: 'Invoice_Jasa_Jan.pdf',  parsedFields: 11, status: 'submitted' },
+    { type: 'CONTRACT', name: 'Contract_Service.pdf',  parsedFields: 8,  status: 'submitted' },
+    { type: 'BANK',     name: 'Bank_Payment_Jan.xlsx', parsedFields: 6,  status: 'submitted' },
   ];
 
   return NextResponse.json({

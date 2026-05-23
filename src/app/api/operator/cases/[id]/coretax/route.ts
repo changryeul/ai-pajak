@@ -146,15 +146,15 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
         taxType: caseRow.tax_type,
         period: { month: caseRow.tax_period_month, year: caseRow.tax_period_year },
         expectedAmount: Number(caseRow.amount ?? 0),
-        coretaxMode: coretax.isEnabled() ? 'API 자동' : '수동 접속',
+        coretaxMode: coretax.isEnabled() ? 'API (auto)' : 'Manual access',
       },
       apiEnabled: coretax.isEnabled(),
       stepStates,
       billing: {
-        state: billingIssued ? '발행' : '미발행',
+        state: billingIssued ? 'Issued' : 'Not issued',
         billingId: caseRow.ebilling_code ?? null,
         amount: Number(caseRow.amount ?? 0),
-        method: 'Coretax 수동발행 예정',
+        method: 'Coretax manual (pending)',
       },
       submitted: {
         ntpn: submittedNtpn,
@@ -237,10 +237,10 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   switch (action) {
     case 'record-billing': {
       if (!['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'].includes(caseRow.status)) {
-        return NextResponse.json({ error: 'Supervisor 승인 후에만 ID Billing 발행 기록이 가능합니다.' }, { status: 400 });
+        return NextResponse.json({ error: 'ID Billing can only be recorded after supervisor approval.' }, { status: 400 });
       }
       let billingId = (body.billingId as string | undefined)?.trim();
-      let method = body.method ?? 'Coretax 수동';
+      let method = body.method ?? 'Coretax manual';
       let apiResult: Record<string, unknown> | null = null;
 
       // Coretax API 자동 모드 — 환경변수가 켜졌고 사용자가 billingId 입력 안 했을 때만 호출.
@@ -256,7 +256,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
             ? await admin.from('customer').select('npwp').eq('id', full.customer_id).maybeSingle()
             : { data: null };
           if (!cust?.npwp) {
-            return NextResponse.json({ error: '고객 NPWP가 없어 Coretax API 호출이 불가능합니다. billingId를 직접 입력하세요.' }, { status: 400 });
+            return NextResponse.json({ error: 'Customer NPWP missing — cannot call Coretax API. Enter billingId manually.' }, { status: 400 });
           }
           const kapKjs = mapTaxTypeToKap(full!.tax_type);
           const billing = await coretax.issueIdBilling({
@@ -267,13 +267,13 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
             amount: Number(full!.amount ?? 0),
           });
           billingId = billing.billingCode;
-          method = `Coretax API (자동, expires ${billing.expiresAt.slice(0, 10)})`;
+          method = `Coretax API (auto, expires ${billing.expiresAt.slice(0, 10)})`;
           apiResult = { billing };
         } catch (err) {
           if (err instanceof CoretaxError && err.code === 'NOT_CONFIGURED') {
-            return NextResponse.json({ error: 'Coretax API 미설정 — billingId를 수동 입력하세요.' }, { status: 400 });
+            return NextResponse.json({ error: 'Coretax API not configured — enter billingId manually.' }, { status: 400 });
           }
-          return NextResponse.json({ error: `Coretax API 발행 실패: ${(err as Error).message}` }, { status: 502 });
+          return NextResponse.json({ error: `Coretax API issue failed: ${(err as Error).message}` }, { status: 502 });
         }
       }
 
@@ -305,7 +305,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
             ? await admin.from('customer').select('npwp').eq('id', full.customer_id).maybeSingle()
             : { data: null };
           if (!cust?.npwp) {
-            return NextResponse.json({ error: '고객 NPWP가 없어 Coretax API 호출이 불가능합니다.' }, { status: 400 });
+            return NextResponse.json({ error: 'Customer NPWP missing — cannot call Coretax API.' }, { status: 400 });
           }
           const sptType = full!.tax_type === 'SPT_TAHUNAN' ? 'SPT_TAHUNAN_BADAN' : `SPT_MASA_${full!.tax_type}`;
           const result = await coretax.submitSpt({
@@ -320,7 +320,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
           apiResult = { submission: result };
         } catch (err) {
           if (err instanceof CoretaxError && err.code === 'NOT_CONFIGURED') {
-            return NextResponse.json({ error: 'Coretax API 미설정 — bpeNumber를 수동 입력하세요.' }, { status: 400 });
+            return NextResponse.json({ error: 'Coretax API not configured — enter bpeNumber manually.' }, { status: 400 });
           }
           // 자동 제출 실패 시 closing_submission도 FAILED로 표시.
           if (caseRow.closing_session_id) {
@@ -331,7 +331,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
               }).eq('session_id', caseRow.closing_session_id);
             } catch { /* non-blocking */ }
           }
-          return NextResponse.json({ error: `Coretax API 제출 실패: ${(err as Error).message}` }, { status: 502 });
+          return NextResponse.json({ error: `Coretax API submission failed: ${(err as Error).message}` }, { status: 502 });
         }
       }
 

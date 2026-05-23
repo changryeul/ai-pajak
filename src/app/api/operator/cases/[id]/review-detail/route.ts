@@ -32,10 +32,10 @@ interface ReviewSummary {
 }
 
 const STATE_FALLBACK_REASON: Record<string, string> = {
-  '불확실 높음': '계약서에서 임대료/서비스료 구분 불명확',
-  '정보부족': '수입 PIB 또는 구매 성격 자료 부족',
+  '불확실 높음': 'Rent vs service fee is unclear in the contract',
+  '정보부족': 'Missing import PIB or purchase-type documents',
   '자동확인': '',
-  '자료요청': '고객 응답 대기',
+  '자료요청': 'Waiting for customer response',
 };
 
 /**
@@ -125,9 +125,9 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
 
   // 가짜 제출자료 (Phase 3에선 데모 데이터). 추후 document/document_request 연동 예정.
   const submittedDocs = [
-    { type: 'INVOICE',  name: 'Invoice_Jasa_Jan.pdf',     parsedFields: 11, status: '제출' },
-    { type: 'CONTRACT', name: 'Contract_Service.pdf',     parsedFields: 8,  status: '제출' },
-    { type: 'BANK',     name: 'Bank_Payment_Jan.xlsx',    parsedFields: 6,  status: '제출' },
+    { type: 'INVOICE',  name: 'Invoice_Jasa_Jan.pdf',     parsedFields: 11, status: 'submitted' },
+    { type: 'CONTRACT', name: 'Contract_Service.pdf',     parsedFields: 8,  status: 'submitted' },
+    { type: 'BANK',     name: 'Bank_Payment_Jan.xlsx',    parsedFields: 6,  status: 'submitted' },
   ];
 
   // 고객이 제출한 NTPN/증빙 (Phase 6 Coretax 화면에서도 사용).

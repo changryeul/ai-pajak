@@ -100,7 +100,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
       await admin.from('case_audit_log').insert({
         case_id: id, event_type: 'INSTRUCTED',
         actor_user_id: user.id, actor_label: actorLabel,
-        payload: { invoice, note: note ?? '자료요청 발송' },
+        payload: { invoice, note: note ?? 'Document request sent' },
       });
     } catch { /* non-blocking */ }
   }

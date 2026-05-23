@@ -33,7 +33,7 @@ export async function DELETE(
     const { error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    return NextResponse.json({ success: true, message: '초대가 취소되었습니다' });
+    return NextResponse.json({ success: true, message: 'Invitation cancelled' });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed' },

@@ -30,7 +30,7 @@ export async function GET() {
     const role = await resolveUserRole(supabase, user.id);
     if (role !== 'TAX_OPERATOR_MASTER') {
       return NextResponse.json(
-        { error: '마스터 권한이 필요합니다' },
+        { error: 'Master role required' },
         { status: 403 }
       );
     }
