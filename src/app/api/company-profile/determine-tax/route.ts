@@ -34,6 +34,8 @@ function determineTaxRegime(profile: Record<string, unknown>): TaxDetermination 
   let regime = 'GENERAL_25';
   let reason = '';
 
+  // All copy is English. Indonesian tax-law references (PP, PMK, SBU codes)
+  // remain in their statutory form.
   if (isUmkm && revenue > 0 && revenue < 4_800_000_000) {
     // Check UMKM period limit
     const maxYears = ['PT'].includes(legalForm) ? 3 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
@@ -41,108 +43,108 @@ function determineTaxRegime(profile: Record<string, unknown>): TaxDetermination 
 
     if (yearsUsed < maxYears) {
       regime = 'UMKM_FINAL';
-      reason = `PP 55/2022 적용: 연매출 Rp ${Math.round(revenue).toLocaleString('id-ID')} (< Rp 4.800.000.000), ${legalForm || '법인'} ${maxYears}년 한도 중 ${yearsUsed}년차`;
+      reason = `PP 55/2022 applies: annual revenue Rp ${Math.round(revenue).toLocaleString('id-ID')} (< Rp 4,800,000,000); ${legalForm || 'entity'} — year ${yearsUsed} of ${maxYears}-year UMKM eligibility.`;
     } else {
       regime = 'GENERAL_25';
-      reason = `UMKM PPh Final 기간 만료: ${legalForm} ${maxYears}년 한도 초과 (${umkmStartYear}~${currentYear}). 일반 PPh Badan 22% 적용`;
+      reason = `UMKM PPh Final period expired: ${legalForm} exceeded the ${maxYears}-year limit (${umkmStartYear}~${currentYear}). Standard PPh Badan 22% applies.`;
     }
   } else if (revenue >= 4_800_000_000) {
     regime = 'GENERAL_25';
-    reason = `연매출 Rp ${Math.round(revenue).toLocaleString('id-ID')} — Rp 4.800.000.000 이상이므로 일반 PPh Badan 22% 적용`;
+    reason = `Annual revenue Rp ${Math.round(revenue).toLocaleString('id-ID')} — at or above Rp 4,800,000,000, so standard PPh Badan 22% applies.`;
   } else if (!isUmkm && revenue > 0 && revenue < 4_800_000_000) {
-    followUpQuestions.push({ question: '연매출이 48억 IDR 미만입니다. PP 55/2022 (UMKM PPh Final 0.5%)에 등록되어 있나요?' });
+    followUpQuestions.push({ question: 'Annual revenue is under Rp 4.8B. Are you registered under PP 55/2022 (UMKM PPh Final 0.5%)?' });
     regime = 'GENERAL_25';
-    reason = 'UMKM 미등록 — 일반 PPh Badan 22% 적용 (PP 55 등록 시 0.5% 가능)';
+    reason = 'Not registered as UMKM — standard PPh Badan 22% applies (0.5% available if PP 55 is registered).';
   }
 
   if (revenue === 0) {
-    followUpQuestions.push({ question: '최근 1년간 총 매출액은 얼마입니까? (PPh Final vs PPh Badan 결정에 필수)' });
+    followUpQuestions.push({ question: 'What was your total revenue in the past 12 months? (Required to decide PPh Final vs PPh Badan)' });
   }
 
-  // ── Step 2: 세목별 적용 판단 ──
+  // ── Step 2: per-tax applicability ──
 
-  // PPh 21 — 직원
+  // PPh 21 — employees
   if (profile.has_employees) {
-    applicableTaxes.push('PPh 21 (근로소득세)');
+    applicableTaxes.push('PPh 21 (employment income tax)');
   } else {
-    followUpQuestions.push({ question: '직원(정규직/계약직/일용직 포함)을 1명이라도 고용하고 있나요?' });
+    followUpQuestions.push({ question: 'Do you employ at least one person (full-time, contract, or daily)?' });
   }
 
   // PPN — PKP
   if (profile.is_pkp) {
-    applicableTaxes.push('PPN 11% (부가가치세)');
+    applicableTaxes.push('PPN 11% (VAT)');
   } else if (revenue >= 4_800_000_000) {
-    followUpQuestions.push({ question: '연매출 48억 이상이면 PKP 등록이 의무입니다. PKP 등록 상태를 확인해주세요.' });
+    followUpQuestions.push({ question: 'Annual revenue above Rp 4.8B requires PKP registration. Please confirm your PKP status.' });
   }
 
-  // PPh 23 — 서비스 비용
+  // PPh 23 — services purchased
   if (profile.pays_service_fees) {
-    applicableTaxes.push('PPh 23 (서비스 원천징수 2%)');
+    applicableTaxes.push('PPh 23 (service withholding 2%)');
   }
 
-  // PPh 4(2) — 임대
+  // PPh 4(2) — rental
   if (profile.has_rental_business) {
-    applicableTaxes.push('PPh 4(2) Final 10% (임대소득)');
+    applicableTaxes.push('PPh 4(2) Final 10% (rental income)');
   }
   if (profile.pays_rent) {
-    applicableTaxes.push('PPh 4(2) 원천징수 10% (임차료)');
+    applicableTaxes.push('PPh 4(2) 10% (rent withholding)');
   }
 
-  // PPh 22 — 수입
+  // PPh 22 — import
   if (profile.has_import_export) {
-    applicableTaxes.push('PPh 22 (수입) + PPN Import');
+    applicableTaxes.push('PPh 22 (import) + PPN Import');
   }
 
-  // PPh 4(2) — 건설
+  // PPh 4(2) — construction
   if (profile.has_construction_sbu || category === 'CONSTRUCTION') {
     const sbuGrade = profile.sbu_qualification as string || '';
     const rate = sbuGrade === 'SMALL' ? '1.75%' : sbuGrade === 'MEDIUM' ? '2.65%' : sbuGrade === 'LARGE' ? '4%' : '?%';
-    applicableTaxes.push(`PPh 4(2) Final ${rate} (건설업)`);
+    applicableTaxes.push(`PPh 4(2) Final ${rate} (construction)`);
     if (!sbuGrade) {
-      followUpQuestions.push({ question: '건설업 SBU(Sertifikat Badan Usaha) 등급이 무엇인가요? (Kecil/Menengah/Besar)' });
+      followUpQuestions.push({ question: 'What is your construction SBU (Sertifikat Badan Usaha) grade? (Kecil/Menengah/Besar)' });
     }
   }
 
-  // PPh 4(2) — 부동산
+  // PPh 4(2) — property
   if (profile.sells_property) {
-    applicableTaxes.push('PPh 4(2) Final 2.5% (부동산 양도)');
+    applicableTaxes.push('PPh 4(2) Final 2.5% (property transfer)');
   }
 
-  // PPh 23 — 배당/이자/로열티
-  if (profile.receives_dividends) applicableTaxes.push('PPh 23 15% (배당소득)');
-  if (profile.receives_interest) applicableTaxes.push('PPh 23/4(2) (이자소득)');
-  if (profile.receives_royalties || profile.has_franchise) applicableTaxes.push('PPh 23 15% (로열티)');
+  // PPh 23 — dividend/interest/royalty
+  if (profile.receives_dividends) applicableTaxes.push('PPh 23 15% (dividend income)');
+  if (profile.receives_interest) applicableTaxes.push('PPh 23/4(2) (interest income)');
+  if (profile.receives_royalties || profile.has_franchise) applicableTaxes.push('PPh 23 15% (royalty)');
 
-  // PPh 26 — 외국인
+  // PPh 26 — non-resident
   if (profile.has_foreign_shareholders) {
-    applicableTaxes.push('PPh 26 (외국인 배당/이자/로열티)');
+    applicableTaxes.push('PPh 26 (foreign dividend/interest/royalty)');
     if (!profile.parent_company_country) {
-      followUpQuestions.push({ question: '외국인 주주의 거주 국가는 어디인가요? (DTA 조세조약 세율 결정)' });
+      followUpQuestions.push({ question: 'Which country are your foreign shareholders resident in? (Required to determine DTA treaty rate)' });
     }
   }
 
-  // PPh 15 — 해운
+  // PPh 15 — shipping/airline
   if (profile.has_shipping_business) {
-    applicableTaxes.push('PPh 15 (해운/항공 1.2~2.64%)');
+    applicableTaxes.push('PPh 15 (shipping/airline 1.2~2.64%)');
   }
 
   // F&B specific
   if (profile.is_restaurant) {
-    applicableTaxes.push('Pajak Restoran (지역세, PPN 면제)');
+    applicableTaxes.push('Pajak Restoran (local tax, PPN exempt)');
   }
   if (profile.is_catering) {
-    applicableTaxes.push('PPh 23 2% (케이터링 서비스)');
+    applicableTaxes.push('PPh 23 2% (catering service)');
   }
 
-  // ── Step 3: 프로필 부족 시 추가 질문 ──
+  // ── Step 3: extra questions when profile is incomplete ──
   if (!category) {
-    followUpQuestions.push({ question: '주요 사업 유형은 무엇인가요? (서비스/무역/제조/건설/부동산/식당 등)' });
+    followUpQuestions.push({ question: 'What is your primary business category? (service / trade / manufacturing / construction / property / restaurant…)' });
   }
   if (!legalForm) {
-    followUpQuestions.push({ question: '법인 형태가 무엇인가요? (PT/CV/UD/Firma 등 — UMKM 기간 한도 결정에 필요)' });
+    followUpQuestions.push({ question: 'What is your legal form? (PT/CV/UD/Firma — needed to decide the UMKM period limit)' });
   }
   if (!estYear && isUmkm) {
-    followUpQuestions.push({ question: '법인 설립 연도는? (UMKM PPh Final 기간 한도 확인)' });
+    followUpQuestions.push({ question: 'In which year was the company established? (To check the UMKM PPh Final period limit)' });
   }
 
   return { regime, reason, applicableTaxes, followUpQuestions };

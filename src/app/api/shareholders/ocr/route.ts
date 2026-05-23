@@ -188,10 +188,10 @@ async function handleOcr(req: RequestWithSession): Promise<Response> {
       const extraWarnings: string[] = [];
       if (parsed.shareholders && parsed.shareholders.length > 0) {
         if (Math.abs(totalPct - 100) > 1) {
-          extraWarnings.push(`주주 지분율 합계가 ${totalPct.toFixed(2)}% — 100%와 차이가 있습니다. 검토 필요.`);
+          extraWarnings.push(`Shareholding percentages total ${totalPct.toFixed(2)}% — differs from 100%. Please review.`);
         }
       } else {
-        extraWarnings.push('주주 정보를 추출하지 못했습니다. 수동으로 입력하거나 더 선명한 문서를 올려주세요.');
+        extraWarnings.push('Could not extract shareholder info. Please enter manually or upload a clearer document.');
       }
 
       loggers.api.info(
@@ -214,7 +214,7 @@ async function handleOcr(req: RequestWithSession): Promise<Response> {
       loggers.api.warn({ parseError, textPreview: text.slice(0, 200) }, 'Shareholder OCR JSON parse failed');
       return Response.json({
         success: false,
-        error: 'AI 응답을 파싱할 수 없습니다. 문서를 수동으로 확인해주세요.',
+        error: 'Unable to parse the AI response. Please review the document manually.',
         rawText: text.slice(0, 500),
       }, { status: 200 });
     }

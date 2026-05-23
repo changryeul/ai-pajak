@@ -62,23 +62,23 @@ function validateRow(row: BulkCustomerRow, index: number): RowError[] {
   const r = index + 1; // 1-based for user display
 
   if (!row.full_name?.trim()) {
-    errors.push({ row: r, field: 'full_name', message: '이름은 필수입니다' });
+    errors.push({ row: r, field: 'full_name', message: 'Full name is required' });
   }
 
   if (!row.customer_type || !['INDIVIDUAL', 'COMPANY'].includes(row.customer_type)) {
-    errors.push({ row: r, field: 'customer_type', message: 'INDIVIDUAL 또는 COMPANY 여야 합니다' });
+    errors.push({ row: r, field: 'customer_type', message: 'customer_type must be INDIVIDUAL or COMPANY' });
   }
 
   if (row.customer_type === 'COMPANY' && !row.company_name?.trim()) {
-    errors.push({ row: r, field: 'company_name', message: '법인은 회사명이 필수입니다' });
+    errors.push({ row: r, field: 'company_name', message: 'company_name is required for COMPANY' });
   }
 
   if (row.npwp && !/^\d{15,16}$/.test(row.npwp.replace(/[.\-\s]/g, ''))) {
-    errors.push({ row: r, field: 'npwp', message: 'NPWP는 15~16자리 숫자여야 합니다' });
+    errors.push({ row: r, field: 'npwp', message: 'NPWP must be 15–16 digits' });
   }
 
   if (row.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email)) {
-    errors.push({ row: r, field: 'email', message: '이메일 형식이 올바르지 않습니다' });
+    errors.push({ row: r, field: 'email', message: 'Invalid email format' });
   }
 
   return errors;
@@ -92,14 +92,14 @@ async function handleBulkCreate(req: RequestWithSession): Promise<Response> {
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'customers 배열이 비어 있습니다' },
+        { success: false, error: 'customers array is empty' },
         { status: 400 }
       );
     }
 
     if (rows.length > 200) {
       return NextResponse.json(
-        { success: false, error: '한 번에 최대 200건까지 등록 가능합니다' },
+        { success: false, error: 'At most 200 rows per request' },
         { status: 400 }
       );
     }
@@ -113,7 +113,7 @@ async function handleBulkCreate(req: RequestWithSession): Promise<Response> {
     if (allErrors.length > 0) {
       return NextResponse.json({
         success: false,
-        error: `${allErrors.length}개 검증 오류가 있습니다`,
+        error: `${allErrors.length} validation errors`,
         data: { total: rows.length, created: 0, skipped: rows.length, errors: allErrors },
       }, { status: 400 });
     }
@@ -130,7 +130,7 @@ async function handleBulkCreate(req: RequestWithSession): Promise<Response> {
 
     if (!consultant) {
       return NextResponse.json(
-        { success: false, error: '활성 컨설턴트 레코드가 없습니다' },
+        { success: false, error: 'No active consultant record' },
         { status: 403 }
       );
     }
@@ -242,7 +242,7 @@ async function handleBulkCreate(req: RequestWithSession): Promise<Response> {
         skipped,
         errors: insertErrors,
       },
-      message: `${created}건 등록, ${skipped}건 기존 고객(NPWP 중복), ${insertErrors.length}건 오류`,
+      message: `${created} created, ${skipped} skipped (existing NPWP), ${insertErrors.length} errors`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Bulk customer import error');

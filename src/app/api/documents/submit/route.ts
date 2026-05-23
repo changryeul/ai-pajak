@@ -25,28 +25,29 @@ function getRequiredDocTypes(customerProfile: {
 }): Array<{ type: string; description: string; condition: string }> {
   const required: Array<{ type: string; description: string; condition: string }> = [];
 
-  // Base requirement — always needed
-  required.push({ type: 'BANK_STATEMENT', description: '은행 거래내역서 (월별)', condition: 'ALWAYS' });
+  // Base requirement — always needed. Description in English; the UI may
+  // later localize by `condition` if needed.
+  required.push({ type: 'BANK_STATEMENT', description: 'Bank statement (monthly)', condition: 'ALWAYS' });
 
   if (customerProfile.has_employees) {
-    required.push({ type: 'SALARY_SLIP', description: '급여 명세서 또는 직원 급여 데이터', condition: 'PPh21' });
+    required.push({ type: 'SALARY_SLIP', description: 'Salary slips or employee payroll data', condition: 'PPh21' });
   }
 
   if (customerProfile.is_pkp) {
-    required.push({ type: 'FAKTUR_PAJAK', description: '매출 Faktur Pajak (Keluaran)', condition: 'PPN' });
-    required.push({ type: 'FAKTUR_PAJAK', description: '매입 Faktur Pajak (Masukan)', condition: 'PPN' });
+    required.push({ type: 'FAKTUR_PAJAK', description: 'Sales Faktur Pajak (Keluaran)', condition: 'PPN' });
+    required.push({ type: 'FAKTUR_PAJAK', description: 'Purchase Faktur Pajak (Masukan)', condition: 'PPN' });
   }
 
   if (customerProfile.pays_service_fees) {
-    required.push({ type: 'INVOICE', description: '서비스 비용 인보이스 (PPh 23 원천징수 대상)', condition: 'PPh23' });
+    required.push({ type: 'INVOICE', description: 'Service-fee invoices (subject to PPh 23 withholding)', condition: 'PPh23' });
   }
 
   if (customerProfile.has_import_export) {
-    required.push({ type: 'INVOICE', description: '수입/수출 인보이스 및 통관 서류', condition: 'PPh22/PPN' });
+    required.push({ type: 'INVOICE', description: 'Import/export invoices and customs documents', condition: 'PPh22/PPN' });
   }
 
   if (customerProfile.has_rental_business) {
-    required.push({ type: 'RECEIPT', description: '임대 수입 관련 영수증/계약서', condition: 'PPh4(2)' });
+    required.push({ type: 'RECEIPT', description: 'Rental income receipts and contracts', condition: 'PPh4(2)' });
   }
 
   return required;
@@ -112,10 +113,10 @@ export async function POST(request: NextRequest) {
     // Suggestions
     const suggestions: string[] = [];
     if (!uploadedTypes.has('BANK_STATEMENT')) {
-      suggestions.push('은행 거래내역서는 매월 필수입니다. 모바일 뱅킹에서 PDF로 다운로드 가능합니다.');
+      suggestions.push('A monthly bank statement is mandatory. You can download a PDF from mobile banking.');
     }
     if (customer.is_pkp && !uploadedTypes.has('FAKTUR_PAJAK')) {
-      suggestions.push('PKP 등록 사업자는 매월 Faktur Pajak(Keluaran + Masukan) 제출이 필요합니다.');
+      suggestions.push('PKP-registered businesses must submit Faktur Pajak (Keluaran + Masukan) every month.');
     }
 
     const aiResult = { complete, missing, suggestions };
@@ -136,8 +137,9 @@ export async function POST(request: NextRequest) {
 
     // If incomplete → create document_request + send notification
     if (!complete && missing.length > 0) {
-      const reqTitle = `${period} 추가 자료 요청`;
-      const reqMessage = `안녕하세요. ${period} 세금 신고를 위해 다음 자료가 추가로 필요합니다:`;
+      // Customer-facing copy in Bahasa Indonesia.
+      const reqTitle = `Permintaan dokumen tambahan ${period}`;
+      const reqMessage = `Halo, untuk pelaporan pajak ${period} kami memerlukan dokumen berikut:`;
 
       await admin.from('document_request').insert({
         customer_id: customerId,
@@ -161,7 +163,7 @@ export async function POST(request: NextRequest) {
         user_id: customer.user_id,
         type: 'SYSTEM_ANNOUNCEMENT',
         title: reqTitle,
-        message: `${missing.length}개의 추가 자료가 필요합니다. 문서 페이지에서 업로드해 주세요.`,
+        message: `${missing.length} dokumen tambahan diperlukan. Mohon unggah melalui halaman dokumen.`,
         priority: 'HIGH',
         data: { action: 'document-request', period },
       });
@@ -179,7 +181,7 @@ export async function POST(request: NextRequest) {
           try {
             await sendWhatsApp({
               to: customer.phone_number,
-              text: `📋 *${period} 추가 자료 요청*\n\n${reqMessage}\n\n${missingList}\n\n아래 링크에서 업로드:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload\n\n_AI Pajak_`,
+              text: `📋 *Permintaan dokumen tambahan ${period}*\n\n${reqMessage}\n\n${missingList}\n\nSilakan unggah di:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload\n\n_AI Pajak_`,
             });
             await admin.from('document_request')
               .update({ sent_via_whatsapp: true, whatsapp_sent_at: new Date().toISOString() })
@@ -205,7 +207,7 @@ export async function POST(request: NextRequest) {
           await sendDocRequestTelegram(
             telePrefs.telegram_chat_id,
             customerName,
-            `${period} 추가 자료 요청`,
+            `Permintaan dokumen tambahan ${period}`,
             missing.map(m => ({ description: m.description }))
           );
         } catch { /* */ }
