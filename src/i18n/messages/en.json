@@ -3844,6 +3844,24 @@
       "createBillingAction": "Create Billing",
       "submitAction": "Submit"
     },
+    "workQueueDesc": {
+      "missingDocs": {
+        "idle": "Ask customers via WhatsApp/notifications to upload missing supporting docs (NPWP, bank statements, invoices, etc.)",
+        "active": "{count} transactions missing NPWP — sending doc requests to customers"
+      },
+      "aiReview": {
+        "idle": "Review and approve OCR/AI-generated tax drafts (rate, KBLI, license conditions, etc.)",
+        "active": "{count} customer-generated drafts — final rate/scope verification needed"
+      },
+      "createBilling": {
+        "idle": "Bulk-generate payment ID Billing codes for approved tax calculations",
+        "active": "{count} approved — generating payment Billing codes"
+      },
+      "efilingSubmit": {
+        "idle": "Submit filings whose payment is verified (DJP submission handled separately)",
+        "active": "{count} payment-verified — submitting filings"
+      }
+    },
     "priorityHigh": "High",
     "priorityMedium": "Medium",
     "upcomingDeadlinesTitle": "Upcoming Filings",

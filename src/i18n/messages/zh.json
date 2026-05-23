@@ -3844,6 +3844,24 @@
       "createBillingAction": "生成 Billing",
       "submitAction": "提交"
     },
+    "workQueueDesc": {
+      "missingDocs": {
+        "idle": "通过 WhatsApp/通知请求客户上传缺失的证明材料 (NPWP、银行流水、发票等)",
+        "active": "{count} 笔交易缺失 NPWP — 向客户发送资料请求"
+      },
+      "aiReview": {
+        "idle": "复核并批准客户通过 OCR/AI 生成的税务计算草稿 (税率、KBLI、许可条件等)",
+        "active": "{count} 份客户草稿 — 需最终核对税率/征税对象"
+      },
+      "createBilling": {
+        "idle": "为已批准的税务计算批量生成付款用 ID Billing 代码",
+        "active": "{count} 笔已批准 — 正在生成付款 Billing 代码"
+      },
+      "efilingSubmit": {
+        "idle": "提交付款已核验的申报 (DJP 提交另行处理)",
+        "active": "{count} 笔已核验付款 — 提交申报中"
+      }
+    },
     "priorityHigh": "高",
     "priorityMedium": "中",
     "upcomingDeadlinesTitle": "即将到期的申报",

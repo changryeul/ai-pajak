@@ -3844,6 +3844,24 @@
       "createBillingAction": "Buat Billing",
       "submitAction": "Kirim"
     },
+    "workQueueDesc": {
+      "missingDocs": {
+        "idle": "Minta pelanggan via WhatsApp/notifikasi untuk mengunggah dokumen pendukung (NPWP, rekening, faktur, dll.)",
+        "active": "{count} transaksi tanpa NPWP — kirim permintaan dokumen ke pelanggan"
+      },
+      "aiReview": {
+        "idle": "Tinjau dan setujui draf pajak hasil OCR/AI (tarif, KBLI, syarat lisensi, dll.)",
+        "active": "{count} draf dari pelanggan — verifikasi akhir tarif/objek pajak diperlukan"
+      },
+      "createBilling": {
+        "idle": "Hasilkan ID Billing pembayaran secara massal untuk perhitungan pajak yang disetujui",
+        "active": "{count} disetujui — menerbitkan kode Billing pembayaran"
+      },
+      "efilingSubmit": {
+        "idle": "Kirim laporan yang pembayarannya telah diverifikasi (pengiriman ke DJP terpisah)",
+        "active": "{count} pembayaran terverifikasi — mengirim laporan"
+      }
+    },
     "priorityHigh": "Tinggi",
     "priorityMedium": "Sedang",
     "upcomingDeadlinesTitle": "Pelaporan Mendatang",

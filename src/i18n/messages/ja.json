@@ -3844,6 +3844,24 @@
       "createBillingAction": "Billing 作成",
       "submitAction": "提出"
     },
+    "workQueueDesc": {
+      "missingDocs": {
+        "idle": "WhatsApp・通知で顧客に不足資料(NPWP、銀行明細、税金計算書など)のアップロードを依頼します",
+        "active": "NPWP 欠落取引 {count} 件 — 顧客へ資料依頼を送信します"
+      },
+      "aiReview": {
+        "idle": "顧客が OCR・AI で生成した税額計算ドラフトを審査・承認します (税率、KBLI、ライセンス条件など)",
+        "active": "顧客作成ドラフト {count} 件 — 税率・課税対象の最終確認が必要です"
+      },
+      "createBilling": {
+        "idle": "承認済みの税額計算に対し、納付用 ID Billing(支払コード)を一括生成します",
+        "active": "承認完了 {count} 件 — 納付用 Billing コードを生成します"
+      },
+      "efilingSubmit": {
+        "idle": "納付検証が完了した申告書をシステムに提出処理します (DJP 提出は別途実施)",
+        "active": "納付検証完了 {count} 件 — 申告書を提出処理します"
+      }
+    },
     "priorityHigh": "高",
     "priorityMedium": "中",
     "upcomingDeadlinesTitle": "今後の申告",

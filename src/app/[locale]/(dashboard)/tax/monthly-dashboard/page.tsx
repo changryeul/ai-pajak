@@ -58,7 +58,7 @@ export default function MonthlyDashboardPage() {
   const [showGrid, setShowGrid] = useState(true);
   const [overview, setOverview] = useState<{
     kpis: { deadlines: number; attention: number; expectedTax: number; submitted: number };
-    workQueue: Array<{ id: string; title: string; desc: string; priority: string; actionKey: string; count: number }>;
+    workQueue: Array<{ id: string; priority: string; count: number }>;
     upcomingDeadlines: Array<{ tax: string; due: string; entity: string; status: string; daysLeft: number }>;
     riskAlerts: Array<{ type: string; message: string; severity: string }>;
     clientStatus: Array<{ id: string; name: string; health: string; open: number; done: number }>;
@@ -267,9 +267,34 @@ export default function MonthlyDashboardPage() {
                   'billing': Landmark,
                   'e-filing': FileCheck2,
                 };
+                // Maps API `id` to i18n keys under `monthlyDashboard.workQueue*`.
+                const titleKeyMap: Record<string, string> = {
+                  'missing-docs': 'workQueue.missingDocs',
+                  'ai-review':    'workQueue.aiReview',
+                  'billing':      'workQueue.createBilling',
+                  'e-filing':     'workQueue.efilingSubmit',
+                };
+                const actionKeyMap: Record<string, string> = {
+                  'missing-docs': 'workQueue.requestDocs',
+                  'ai-review':    'workQueue.startReview',
+                  'billing':      'workQueue.createBillingAction',
+                  'e-filing':     'workQueue.submitAction',
+                };
+                const descGroupMap: Record<string, string> = {
+                  'missing-docs': 'missingDocs',
+                  'ai-review':    'aiReview',
+                  'billing':      'createBilling',
+                  'e-filing':     'efilingSubmit',
+                };
                 const Icon = iconMap[task.id] || FileText;
                 const isHigh = task.priority === 'HIGH';
                 const isLow = task.priority === 'LOW';
+                const taskTitle = t(titleKeyMap[task.id] ?? 'workQueue.missingDocs');
+                const descGroup = descGroupMap[task.id] ?? 'missingDocs';
+                const taskDesc = task.count > 0
+                  ? t(`workQueueDesc.${descGroup}.active`, { count: task.count })
+                  : t(`workQueueDesc.${descGroup}.idle`);
+                const taskAction = t(actionKeyMap[task.id] ?? 'workQueue.requestDocs');
 
                 return (
                   <div
@@ -284,7 +309,7 @@ export default function MonthlyDashboardPage() {
                     {/* Title + Badge + Description */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold text-base text-gray-900">{task.title}</h4>
+                        <h4 className="font-bold text-base text-gray-900">{taskTitle}</h4>
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${
                           isHigh
                             ? 'bg-red-50 text-red-600 border-red-200'
@@ -298,7 +323,7 @@ export default function MonthlyDashboardPage() {
                           <span className="text-xs text-gray-500">({task.count}{t('count')})</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-400">{task.desc}</p>
+                      <p className="text-sm text-gray-400">{taskDesc}</p>
                     </div>
 
                     {/* Action Button */}
@@ -307,7 +332,7 @@ export default function MonthlyDashboardPage() {
                       disabled={actionLoading === task.id || task.count === 0}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-all flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span className="text-sm font-medium text-gray-700">{task.actionKey}</span>
+                      <span className="text-sm font-medium text-gray-700">{taskAction}</span>
                       {actionLoading === task.id ? (
                         <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
                       ) : (

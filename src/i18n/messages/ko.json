@@ -3865,6 +3865,24 @@
       "createBillingAction": "Billing 생성",
       "submitAction": "제출 진행"
     },
+    "workQueueDesc": {
+      "missingDocs": {
+        "idle": "고객에게 부족한 증빙 자료(NPWP, 은행내역, 세금계산서 등) 업로드를 WhatsApp·알림으로 요청합니다",
+        "active": "NPWP 누락 거래 {count}건 — 고객에게 자료 요청을 보냅니다"
+      },
+      "aiReview": {
+        "idle": "고객이 OCR·AI로 생성한 세금 계산 초안을 검토하고 승인합니다 (세율, KBLI, 라이선스 조건 등)",
+        "active": "고객이 생성한 초안 {count}건 — 세율·과세대상 최종 확인이 필요합니다"
+      },
+      "createBilling": {
+        "idle": "승인된 세금 계산에 대해 납부용 ID Billing(결제 코드)을 일괄 생성합니다",
+        "active": "승인 완료 {count}건 — 납부용 Billing 코드를 생성합니다"
+      },
+      "efilingSubmit": {
+        "idle": "납부 검증이 완료된 신고서를 시스템에 제출 처리합니다 (DJP 제출은 별도 진행)",
+        "active": "납부 검증 완료 {count}건 — 신고서를 제출 처리합니다"
+      }
+    },
     "priorityHigh": "높음",
     "priorityMedium": "중간",
     "upcomingDeadlinesTitle": "다가오는 신고",
