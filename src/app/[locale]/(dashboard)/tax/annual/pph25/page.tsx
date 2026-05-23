@@ -178,8 +178,8 @@ export default function Pph25ClosingPage() {
 
   const classifyDoc = async (docId: string) => {
     const r = await closing.classifyDocument(docId);
-    if (r.ok) toast.success('AI 분석 완료');
-    else toast.error(r.error || 'AI 분석 실패');
+    if (r.ok) toast.success(t('toastAiDone'));
+    else toast.error(r.error || t('toastAiFailed'));
   };
 
   const progressPct = useMemo(
@@ -935,13 +935,13 @@ function AdjustStep({
       </div>
 
       <div className="rounded-lg border border-slate-200 px-4 py-3 mt-5 flex items-center justify-between">
-        <p className="text-sm font-semibold text-slate-700">회계상 순이익</p>
+        <p className="text-sm font-semibold text-slate-700">{t('accNetIncome')}</p>
         <p className="text-sm text-slate-900 tabular-nums">{fmt(accountingIncome)}</p>
       </div>
       <div className="rounded-lg bg-slate-900 text-white px-5 py-4 mt-3 flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold">{t('adjust.pkpLabel')}</p>
-          <p className="text-[11px] text-slate-300 mt-0.5">= 회계상 순이익 + 가산 − 차감</p>
+          <p className="text-[11px] text-slate-300 mt-0.5">{t('accNetIncomeFormula')}</p>
         </div>
         <p className="text-xl font-bold tabular-nums">{fmt(pkp)}</p>
       </div>
@@ -1046,18 +1046,18 @@ function CalcStep({
             <div>
               <span className="text-slate-700">{t('calc.rateLabel')}</span>
               {eligibleSme && (
-                <p className="text-[11px] text-emerald-700 mt-0.5">SME 50% 할인 (UU PPh 31E) 적용</p>
+                <p className="text-[11px] text-emerald-700 mt-0.5">{t('smeDiscount')}</p>
               )}
             </div>
             <span className="text-slate-900 tabular-nums">{fmtRp(pphBadan)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-700">PPh 22/23/24/25 공제 합계</span>
+            <span className="text-slate-700">{t('creditTotal')}</span>
             <span className="text-slate-900 tabular-nums">− {fmtRp(creditTotal)}</span>
           </div>
           <div className="border-t border-slate-200 pt-3 flex justify-between items-baseline">
             <span className="font-semibold text-slate-900">
-              {refund ? '정산 환급' : '추가 납부'}
+              {refund ? t('refund') : t('extraPay')}
             </span>
             <span className={cn(
               'text-xl font-bold tabular-nums',
@@ -1084,6 +1084,7 @@ function CalcStep({
 }
 
 function PayBillingCta({ sessionId }: { sessionId: string | null }) {
+  const t = useTranslations('pph25Closing');
   const [code, setCode] = useState<string | null>(null);
   const [issuing, setIssuing] = useState(false);
 
@@ -1108,9 +1109,9 @@ function PayBillingCta({ sessionId }: { sessionId: string | null }) {
       const json = await res.json();
       if (json.success) {
         setCode(json.data.billing_code);
-        toast.success(`ID Billing 발급: ${json.data.billing_code}`);
+        toast.success(t('billingIssuedToast', { code: json.data.billing_code }));
       } else {
-        toast.error(json.error || 'ID Billing 발급 실패');
+        toast.error(json.error || t('billingIssueFailed'));
       }
     } finally {
       setIssuing(false);
@@ -1131,7 +1132,7 @@ function PayBillingCta({ sessionId }: { sessionId: string | null }) {
       disabled={!sessionId || issuing}
     >
       {issuing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-      ID Billing 발급
+      {t('billingIssueCta')}
     </Button>
   );
 }
@@ -1162,9 +1163,9 @@ function MonthlyStep({
   };
   const nextSteps = t.raw('monthly.nextSteps') as string[];
   const creditValues = [
-    { label: 'PPh 22 공제', value: pph22 },
-    { label: 'PPh 23 공제', value: pph23 },
-    { label: 'PPh 24 공제', value: pph24 },
+    { label: t('pph22Credit'), value: pph22 },
+    { label: t('pph23Credit'), value: pph23 },
+    { label: t('pph24Credit'), value: pph24 },
   ];
   return (
     <div>
@@ -1280,10 +1281,10 @@ function SubmitClosingBox({
       const json = await res.json();
       if (json.success) {
         setSubmission(json.data);
-        toast.success('SPT 제출 완료 — 운영팀 검증 대기중');
+        toast.success(t('submitDone'));
         await onComplete();
       } else {
-        toast.error(json.error || '제출 실패');
+        toast.error(json.error || t('submitFailed'));
       }
     } finally {
       setSubmitting(false);
@@ -1310,7 +1311,7 @@ function SubmitClosingBox({
           disabled={!sessionId || submitting || completed}
         >
           {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}
-          {submission || completed ? '결산 완료됨' : 'SPT 제출 + 결산 완료'}
+          {submission || completed ? t('closingDone') : t('submitAndComplete')}
         </Button>
       </div>
     </>
