@@ -417,7 +417,7 @@ export default function PPh23Page() {
     if (!file || !customerId) return;
     const importPeriod = uploadPeriod || confirmedPeriod || period;
     if (!importPeriod) {
-      showMsg('error', '월(taxPeriod)을 먼저 선택해 주세요.');
+      showMsg('error', t('pickMonthFirst'));
       return;
     }
     setUploading(true);
@@ -430,7 +430,7 @@ export default function PPh23Page() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) {
-        showMsg('error', `CSV 일괄 업로드 실패 — ${data.error || `HTTP ${res.status}`}`);
+        showMsg('error', `${t('csvUploadFailed')} — ${data.error || `HTTP ${res.status}`}`);
         return;
       }
       const d = data.data || {};
@@ -439,20 +439,20 @@ export default function PPh23Page() {
       const total = d.totalRows ?? 0;
       if (errorRows > 0) {
         const sample = (d.errors || []).slice(0, 3)
-          .map((e: { rowNumber: number; errors: string[] }) => `행 ${e.rowNumber}: ${e.errors.join(', ')}`)
+          .map((e: { rowNumber: number; errors: string[] }) => `${t('csvRowPrefix', { row: e.rowNumber })}: ${e.errors.join(', ')}`)
           .join(' / ');
         showMsg(
           'error',
-          `${inserted}/${total}건 등록, ${errorRows}건 검증 실패 — ${sample}${(d.errors || []).length > 3 ? ' …' : ''}`,
+          `${t('csvImportPartial', { inserted, total, failed: errorRows, sample })}${(d.errors || []).length > 3 ? ' …' : ''}`,
         );
       } else {
-        showMsg('success', `${inserted}/${total}건 PPh 23 거래 등록 완료`);
+        showMsg('success', t('csvImportDone', { inserted, total }));
       }
       // 거래 목록 갱신
       if (importPeriod !== period) setPeriod(importPeriod);
       loadData();
     } catch (err) {
-      showMsg('error', `CSV 처리 중 오류 — ${err instanceof Error ? err.message : '알 수 없음'}`);
+      showMsg('error', `${t('csvProcessError')} — ${err instanceof Error ? err.message : t('unknownError')}`);
     } finally {
       setUploading(false);
     }
@@ -635,7 +635,7 @@ export default function PPh23Page() {
                 disabled={uploading || !customerId}
               >
                 <FileSpreadsheet className="h-3 w-3 mr-1" />
-                CSV 일괄 업로드
+                {t('csvBulkUpload')}
               </Button>
               <input
                 ref={csvInputRef}
@@ -719,7 +719,7 @@ export default function PPh23Page() {
               className="ml-1 text-xs text-red-700 hover:text-red-900 underline"
               aria-label="dismiss"
             >
-              닫기
+              {t('dismiss')}
             </button>
           )}
         </div>
@@ -1428,21 +1428,21 @@ export default function PPh23Page() {
                 if (res.ok && data.success === true) {
                   showMsg(
                     'success',
-                    `SPT Masa PPh 23 ${t('k12_c05543')} (filing ${data.filingId?.slice(0, 8) ?? ''}, 운영팀 큐 자동 등록 완료)`,
+                    `SPT Masa PPh 23 ${t('k12_c05543')} (filing ${data.filingId?.slice(0, 8) ?? ''}, ${t('sptOpsQueueRegistered')})`,
                   );
                   loadData();
                 } else {
                   const detail = data.message || data.error || `HTTP ${res.status}`;
                   showMsg(
                     'error',
-                    `SPT Masa ${t('k14_5cf2ad')} — ${detail}. 다시 시도해 주세요. 반복되면 운영팀에 문의 (filing 미생성, 거래는 보존됨).`,
+                    `SPT Masa ${t('k14_5cf2ad')} — ${detail}. ${t('sptRetryHint')}`,
                   );
                 }
               } catch (err) {
-                const detail = err instanceof Error ? err.message : '네트워크 오류';
+                const detail = err instanceof Error ? err.message : t('networkError');
                 showMsg(
                   'error',
-                  `${t('k15_175c5f')} — ${detail}. 인터넷 연결을 확인하고 다시 시도해 주세요.`,
+                  `${t('k15_175c5f')} — ${detail}. ${t('internetCheckHint')}`,
                 );
               } finally {
                 setSaving(false);
