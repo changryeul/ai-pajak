@@ -44,6 +44,25 @@ async function loginSupervisor() {
     console.log('1️⃣  Seed session');
     const today = new Date();
     const taxPeriod = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+
+    // Pre-cleanup — drop any leftover session from a crashed prior run on
+    // the same (customer_id, filing_kind, tax_period) tuple.
+    const { data: stale } = await admin
+      .from('consultant_session')
+      .select('id')
+      .eq('customer_id', CUSTOMER_ID)
+      .eq('filing_kind', 'MONTHLY')
+      .eq('tax_period', taxPeriod);
+    if (stale && stale.length > 0) {
+      const staleIds = stale.map((x) => x.id);
+      await admin.from('consultant_session_invoice_line').delete().in('document_id',
+        ((await admin.from('consultant_session_document').select('id').in('session_id', staleIds)).data ?? []).map((d) => d.id),
+      );
+      await admin.from('consultant_session_document').delete().in('session_id', staleIds);
+      await admin.from('consultant_session').delete().in('id', staleIds);
+      console.log(`   pre-cleaned ${staleIds.length} stale session(s)`);
+    }
+
     const { data: s, error: sErr } = await admin
       .from('consultant_session')
       .insert({

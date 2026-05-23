@@ -44,6 +44,23 @@ function periodDate(monthsAgo: number): string {
 (async () => {
   const sessionIds: string[] = [];
   try {
+    // Pre-cleanup — a previous run that crashed mid-script may have left
+    // sessions behind. They'd collide with the unique
+    // (customer_id, filing_kind, tax_period) constraint on re-run.
+    const periods = [periodDate(0), periodDate(1)];
+    const { data: stale } = await admin
+      .from('consultant_session')
+      .select('id')
+      .eq('customer_id', CUSTOMER_ID)
+      .eq('filing_kind', 'MONTHLY')
+      .in('tax_period', periods);
+    if (stale && stale.length > 0) {
+      const staleIds = stale.map((s) => s.id);
+      console.log(`0️⃣  Pre-cleanup ${staleIds.length} stale session(s) from prior runs`);
+      await admin.from('consultant_session_calc').delete().in('session_id', staleIds);
+      await admin.from('consultant_session').delete().in('id', staleIds);
+    }
+
     console.log('1️⃣  Seed 2 MONTHLY sessions');
     for (const monthsAgo of [0, 1]) {
       const taxPeriod = periodDate(monthsAgo);
