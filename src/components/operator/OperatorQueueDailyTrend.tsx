@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Loader2, BarChart3 } from 'lucide-react';
 import {
   Bar,
@@ -40,6 +41,8 @@ interface ApiResp {
 const DAY_RANGES = [7, 14, 30] as const;
 
 export function OperatorQueueDailyTrend() {
+  const t = useTranslations('operatorQueueDailyTrend');
+  const locale = useLocale();
   const [days, setDays] = useState<7 | 14 | 30>(14);
   const [data, setData] = useState<ApiResp['data'] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -82,11 +85,10 @@ export function OperatorQueueDailyTrend() {
         <div>
           <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-slate-600" />
-            큐 일별 활동 추이
+            {t('title')}
           </h2>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            지난 {days}일간 큐 항목이 각 상태에 도달한 건수 (updated_at 기준).
-            총 {totalAcrossRange.toLocaleString('ko-KR')}건.
+            {t('subtitle', { days, total: totalAcrossRange.toLocaleString(locale) })}
           </p>
         </div>
         <div className="flex gap-1 rounded-full bg-slate-100 p-1">
@@ -98,7 +100,7 @@ export function OperatorQueueDailyTrend() {
                 days === d ? 'bg-slate-950 text-white' : 'text-slate-600'
               }`}
             >
-              {d}일
+              {t('daySuffix', { days: d })}
             </button>
           ))}
         </div>
@@ -106,12 +108,12 @@ export function OperatorQueueDailyTrend() {
 
       {loading && !data ? (
         <p className="text-sm text-slate-500">
-          <Loader2 className="inline h-4 w-4 mr-1 animate-spin" /> 불러오는 중…
+          <Loader2 className="inline h-4 w-4 mr-1 animate-spin" /> {t('loading')}
         </p>
       ) : error ? (
         <p className="text-sm text-rose-600">{error}</p>
       ) : !data || statuses.length === 0 ? (
-        <p className="text-sm text-slate-400">표시할 데이터가 없습니다.</p>
+        <p className="text-sm text-slate-400">{t('empty')}</p>
       ) : (
         <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>

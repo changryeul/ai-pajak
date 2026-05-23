@@ -700,6 +700,13 @@
       "HOLD": "Hold"
     }
   },
+  "operatorQueueDailyTrend": {
+    "title": "Queue daily activity",
+    "subtitle": "Queue items that reached each status in the last {days} days (by updated_at). Total {total}.",
+    "daySuffix": "{days}d",
+    "loading": "Loading…",
+    "empty": "No data to display."
+  },
   "operatorWorkload": {
     "pageTitle": "Workload assignment / recall",
     "pageDesc": "New work is auto-balanced across supervisors; customers with a consult history are auto-assigned to their previous operator first.",
@@ -7021,6 +7028,7 @@
     "uploadFailed": "Upload failed"
   },
   "personalDashV3": {
+    "regulationLabel": "Regulation:",
     "headerTitle": "Dashboard",
     "headerSubtitle": "Recent filings and asset/liability changes",
     "filterNationality": "Nationality",

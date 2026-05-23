@@ -499,7 +499,7 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
                     <p className="text-xs text-gray-700 mt-0.5">{r.detail}</p>
                     {r.regulation && (
                       <p className="text-[11px] text-gray-500 mt-1">
-                        <span className="font-medium">규정:</span> {r.regulation}
+                        <span className="font-medium">{t('regulationLabel')}</span> {r.regulation}
                       </p>
                     )}
                   </div>

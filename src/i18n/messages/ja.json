@@ -700,6 +700,13 @@
       "HOLD": "保留"
     }
   },
+  "operatorQueueDailyTrend": {
+    "title": "キュー日別活動推移",
+    "subtitle": "過去 {days} 日間にキュー項目が各状態に到達した件数 (updated_at 基準)。合計 {total} 件。",
+    "daySuffix": "{days}日",
+    "loading": "読み込み中…",
+    "empty": "表示するデータがありません。"
+  },
   "operatorWorkload": {
     "pageTitle": "業務 割当 / 引き戻し",
     "pageDesc": "新規業務はスーパーバイザーに均等自動配分され、相談履歴のある顧客は従来の担当者へ優先自動割当されます。",
@@ -7021,6 +7028,7 @@
     "uploadFailed": "アップロード失敗"
   },
   "personalDashV3": {
+    "regulationLabel": "規定:",
     "headerTitle": "ダッシュボード",
     "headerSubtitle": "最近の申告履歴と資産・負債の変動",
     "filterNationality": "国籍",

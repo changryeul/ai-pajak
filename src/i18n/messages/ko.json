@@ -700,6 +700,13 @@
       "HOLD": "보류"
     }
   },
+  "operatorQueueDailyTrend": {
+    "title": "큐 일별 활동 추이",
+    "subtitle": "지난 {days}일간 큐 항목이 각 상태에 도달한 건수 (updated_at 기준). 총 {total}건.",
+    "daySuffix": "{days}일",
+    "loading": "불러오는 중…",
+    "empty": "표시할 데이터가 없습니다."
+  },
   "operatorWorkload": {
     "pageTitle": "업무 배정/회수",
     "pageDesc": "신규 업무는 Supervisor에게 균등 자동배분되고, 상담이력 고객은 기존 상담원에게 우선 자동배정됩니다.",
@@ -7147,6 +7154,7 @@
     "uploadFailed": "업로드 실패"
   },
   "personalDashV3": {
+    "regulationLabel": "규정:",
     "headerTitle": "대시보드",
     "headerSubtitle": "최근 신고 이력 및 자산/부채 변동을 확인하세요",
     "filterNationality": "국적",

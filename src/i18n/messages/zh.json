@@ -700,6 +700,13 @@
       "HOLD": "暂停"
     }
   },
+  "operatorQueueDailyTrend": {
+    "title": "队列每日活动趋势",
+    "subtitle": "过去 {days} 天内队列项目达到各状态的次数 (按 updated_at)。合计 {total} 条。",
+    "daySuffix": "{days}天",
+    "loading": "加载中…",
+    "empty": "没有可显示的数据。"
+  },
   "operatorWorkload": {
     "pageTitle": "工作分配 / 回收",
     "pageDesc": "新工作均匀自动分配给主管,有咨询历史的客户优先自动指派给原客服。",
@@ -7021,6 +7028,7 @@
     "uploadFailed": "上传失败"
   },
   "personalDashV3": {
+    "regulationLabel": "法规:",
     "headerTitle": "仪表板",
     "headerSubtitle": "查看近期申报记录与资产/负债变动",
     "filterNationality": "国籍",

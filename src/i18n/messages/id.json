@@ -700,6 +700,13 @@
       "HOLD": "Tunda"
     }
   },
+  "operatorQueueDailyTrend": {
+    "title": "Aktivitas harian antrian",
+    "subtitle": "Item antrian yang mencapai tiap status dalam {days} hari terakhir (berdasarkan updated_at). Total {total}.",
+    "daySuffix": "{days} hari",
+    "loading": "Memuat…",
+    "empty": "Tidak ada data untuk ditampilkan."
+  },
   "operatorWorkload": {
     "pageTitle": "Penugasan / penarikan pekerjaan",
     "pageDesc": "Pekerjaan baru otomatis dibagi rata ke supervisor; pelanggan dengan riwayat konsultasi diprioritaskan ke operator sebelumnya.",
@@ -7021,6 +7028,7 @@
     "uploadFailed": "Gagal mengunggah"
   },
   "personalDashV3": {
+    "regulationLabel": "Regulasi:",
     "headerTitle": "Dasbor",
     "headerSubtitle": "Riwayat pelaporan dan perubahan aset/utang Anda",
     "filterNationality": "Kewarganegaraan",
