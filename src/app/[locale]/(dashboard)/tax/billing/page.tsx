@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +54,15 @@ const NEEDS_ACTION_STATUSES = ['EBILLING_GENERATED', 'PAYMENT_PENDING'];
 
 export default function TaxBillingPage() {
   const { session } = useSession();
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
   const t = useTranslations('taxBilling');
+  const tsc = useTranslations('taxScreen');
 
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -123,7 +132,7 @@ export default function TaxBillingPage() {
     try {
       const fd = new FormData();
       fd.append('file', files[0]);
-      fd.append('customerId', session?.customerId || '');
+      fd.append('customerId', customerId);
       fd.append('documentType', 'RECEIPT');
       fd.append('uploadSource', 'WEB');
 
@@ -200,7 +209,7 @@ export default function TaxBillingPage() {
     try {
       const fd = new FormData();
       fd.append('file', files[0]);
-      fd.append('customerId', session?.customerId || '');
+      fd.append('customerId', customerId);
       fd.append('documentType', 'BPE');
       fd.append('uploadSource', 'WEB');
 
@@ -272,6 +281,31 @@ export default function TaxBillingPage() {
         <h1 className="text-[22px] font-bold text-gray-900">{t('v2PageTitle')}</h1>
         <p className="text-[13px] text-gray-500 mt-1">{t('v2PageSubtitle')}</p>
       </header>
+
+      {/* Consultant customer picker. CUSTOMER role keeps existing UI. */}
+      {isConsultant && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="billing-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {tsc('selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{tsc('noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="billing-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       {/* Message */}
       {message && (

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   FileText, Loader2, CheckCircle, AlertTriangle, Plus, Trash2,
   DollarSign, TrendingUp, TrendingDown, Minus, Sparkles,
@@ -62,6 +63,13 @@ export default function PPNPage() {
   const t = useTranslations('ppnPage');
   const tsc = useTranslations('taxScreen');
   const { session } = useSession();
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
   const params = useParams();
   const locale = params.locale as string;
 
@@ -111,14 +119,14 @@ export default function PPNPage() {
 
   // Generic Faktur Pajak document upload — sends to /api/documents/upload with FAKTUR_PAJAK type.
   const handleFakturUpload = async (files: FileList | null, source: string, uploadPeriod?: string) => {
-    if (!files || !session?.customerId) return;
+    if (!files || !customerId) return;
     setUploadingDoc(true);
     let count = 0;
     const taxPeriod = uploadPeriod || confirmedPeriod;
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.append('file', file);
-      fd.append('customerId', session.customerId);
+      fd.append('customerId', customerId);
       fd.append('documentType', 'FAKTUR_PAJAK');
       fd.append('uploadSource', source);
       if (taxPeriod) fd.append('taxPeriod', taxPeriod);
@@ -187,10 +195,10 @@ export default function PPNPage() {
 
   // Load faktur data
   const loadFakturs = useCallback(async () => {
-    if (!session?.customerId) return;
+    if (!customerId) return;
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/tax/ppn-faktur-monthly?customerId=${session.customerId}&period=${period}`);
+      const res = await fetch(`/api/tax/ppn-faktur-monthly?customerId=${customerId}&period=${period}`);
       const data = await res.json();
       if (data.success) {
         setFakturs(data.data.fakturs || []);
@@ -208,7 +216,7 @@ export default function PPNPage() {
       }
     } catch { /* */ }
     finally { setIsLoading(false); }
-  }, [session?.customerId, period]);
+  }, [customerId, period]);
 
   useEffect(() => { loadFakturs(); }, [loadFakturs]);
 
@@ -233,7 +241,7 @@ export default function PPNPage() {
 
   // Save faktur
   const saveFaktur = async () => {
-    if (!session?.customerId) return;
+    if (!customerId) return;
     if (!formData.counterpartyName.trim()) {
       showMsg('error', t('validationCounterpartyRequired'));
       return;
@@ -253,7 +261,7 @@ export default function PPNPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerId: session.customerId,
+          customerId: customerId,
           taxPeriod: period,
           fakturType: formData.transactionType === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN',
           fakturDate: formData.fakturDate,
@@ -308,6 +316,32 @@ export default function PPNPage() {
         step={1}
         aiSteps={[tsc('stepDataCollect'), tsc('stepVatCalc'), tsc('stepFilingRefund')]}
       />
+
+      {/* Consultant customer picker — only shown for CONSULTANT_JTC /
+          TAX_ADVISOR_JTC. CUSTOMER role keeps the existing UI unchanged. */}
+      {isConsultant && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="ppn-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {tsc('selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{tsc('noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="ppn-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       {/* 4-card summary (prototype alignment: Output / Input / Prev Balance / Final) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -377,7 +411,7 @@ export default function PPNPage() {
                     size="sm"
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
                     onClick={() => openMonthPicker('file')}
-                    disabled={uploadingDoc || !session?.customerId}
+                    disabled={uploadingDoc || !customerId}
                   >
                     {uploadingDoc ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileUp className="h-3 w-3 mr-1" />}
                     {t('inputModeUploadBtn')}
@@ -387,7 +421,7 @@ export default function PPNPage() {
                     variant="outline"
                     className="w-full"
                     onClick={() => openMonthPicker('camera')}
-                    disabled={uploadingDoc || !session?.customerId}
+                    disabled={uploadingDoc || !customerId}
                   >
                     <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
                   </Button>
@@ -432,7 +466,7 @@ export default function PPNPage() {
                     size="sm"
                     className="w-full bg-purple-600 hover:bg-purple-700"
                     onClick={() => openMonthPicker('manual')}
-                    disabled={!session?.customerId}
+                    disabled={!customerId}
                   >
                     <Pencil className="h-3 w-3 mr-1" />{t('inputModeManualBtn')}
                   </Button>
@@ -718,7 +752,7 @@ export default function PPNPage() {
 
       {/* Document Upload + Filing Process */}
       <PPNFilingSection
-        customerId={session?.customerId || ''}
+        customerId={customerId || ''}
         period={period}
         summary={summary}
         fakturCount={fakturs.length}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { Loader2 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1159,16 +1159,14 @@ function DetailScreen({
 // ─────────────────────────────────────────────────────────────────────────────
 export default function EmployeeHrRecord() {
   const t = useTranslations('employeeHr');
-  const { session, isLoading: sessionLoading } = useSession();
-
-  // CUSTOMER (COMPANY) sees their own customerId from session.
-  // Consultants/advisors don't have a customerId — they must pick which
-  // customer's HR records to manage from a dropdown.
-  const isConsultant =
-    session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
-  const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name: string | null; customer_type: string }>>([]);
-  const customerId = isConsultant ? selectedCustomerId : (session?.customerId || '');
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+    isSessionLoading: sessionLoading,
+  } = useEffectiveCustomerId({ companyOnly: true });
 
   const [screen, setScreen] = useState<'search' | 'detail'>('search');
   const [searchBy, setSearchBy] = useState<'ID' | 'NAME'>('ID');
@@ -1176,26 +1174,6 @@ export default function EmployeeHrRecord() {
   const [results, setResults] = useState<UiRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshTick, setRefreshTick] = useState(0);
-
-  // Consultants: load assigned customer list once session is ready.
-  useEffect(() => {
-    if (!isConsultant) return;
-    (async () => {
-      try {
-        const r = await fetch('/api/customers');
-        const j = await r.json();
-        if (j.success && Array.isArray(j.customers)) {
-          const companies = j.customers.filter(
-            (c: { customer_type: string }) => c.customer_type === 'COMPANY',
-          );
-          setCustomers(companies);
-          if (companies.length > 0 && !selectedCustomerId) {
-            setSelectedCustomerId(companies[0].id);
-          }
-        }
-      } catch { /* ignore */ }
-    })();
-  }, [isConsultant, selectedCustomerId]);
 
   const [record, setRecord] = useState<UiRecord>(emptyRecord);
   const [mode, setMode] = useState<'view' | 'edit'>('view');

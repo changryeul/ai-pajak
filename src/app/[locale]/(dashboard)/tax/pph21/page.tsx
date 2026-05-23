@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   Users, Plus, Loader2, CheckCircle, AlertTriangle, Save, X,
   Edit2, Trash2, Calculator, Sparkles, FileText,
@@ -112,29 +113,14 @@ export default function PPh21PayrollPage() {
   // TER calculation results
   const [calcResults, setCalcResults] = useState<Record<string, { taxAmount: number; terRate: number }>>({});
 
-  // Consultant flow: load assigned customer list and let the user pick one.
-  // CUSTOMER role keeps using session.customerId directly.
-  const isConsultant =
-    session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
-  const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name: string | null }>>([]);
-  useEffect(() => {
-    if (!isConsultant) return;
-    (async () => {
-      try {
-        const r = await fetch('/api/customers');
-        const j = await r.json();
-        if (j.success && Array.isArray(j.customers)) {
-          setCustomers(j.customers);
-          if (j.customers.length > 0 && !selectedCustomerId) {
-            setSelectedCustomerId(j.customers[0].id);
-          }
-        }
-      } catch { /* ignore */ }
-    })();
-  }, [isConsultant, selectedCustomerId]);
-
-  const customerId = isConsultant ? selectedCustomerId : (session?.customerId || '');
+  // Consultant/customer-aware customerId (selector rendered below).
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });

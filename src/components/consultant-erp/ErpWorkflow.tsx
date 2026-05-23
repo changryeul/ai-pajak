@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { UserRole } from '@/types/auth';
 import { CalcCardsPanel } from './CalcCardsPanel';
 import { ParseReviewPanel } from './ParseReviewPanel';
@@ -91,35 +92,18 @@ export function ErpWorkflow({ isSupervisor: isSupervisorProp }: { isSupervisor?:
   const router = useRouter();
   const pathname = usePathname();
   // `customerId` first comes from URL (?customerId=...). Consultants without
-  // a URL param see a picker — their selection is then mirrored back into the
-  // URL so refreshes / shareable links still work.
+  // a URL param fall back to the shared picker hook; the picked value is
+  // then mirrored back into the URL so refreshes / shareable links work.
   const urlCustomerId = params.get('customerId');
   const sessionIdParam = params.get('sessionId');
-  const [pickedCustomerId, setPickedCustomerId] = useState<string | null>(null);
-  const customerId = urlCustomerId ?? pickedCustomerId;
-
-  // Consultant customer list (for the picker shown when no URL customerId).
-  const isConsultantRole =
-    clientSession?.role === UserRole.CONSULTANT_JTC ||
-    clientSession?.role === UserRole.TAX_ADVISOR_JTC;
-  const [customers, setCustomers] = useState<Array<{ id: string; full_name: string; company_name: string | null }>>([]);
-
-  useEffect(() => {
-    if (!isConsultantRole) return;
-    if (urlCustomerId) return; // URL already has one — no picker needed
-    (async () => {
-      try {
-        const r = await fetch('/api/customers');
-        const j = await r.json();
-        if (j.success && Array.isArray(j.customers)) {
-          setCustomers(j.customers);
-          if (j.customers.length > 0 && !pickedCustomerId) {
-            setPickedCustomerId(j.customers[0].id);
-          }
-        }
-      } catch { /* ignore */ }
-    })();
-  }, [isConsultantRole, urlCustomerId, pickedCustomerId]);
+  const {
+    customerId: hookCustomerId,
+    isConsultant: isConsultantRole,
+    customers,
+    selectedCustomerId: pickedCustomerId,
+    setSelectedCustomerId: setPickedCustomerId,
+  } = useEffectiveCustomerId();
+  const customerId = urlCustomerId ?? hookCustomerId;
 
   const handlePickCustomer = (id: string) => {
     setPickedCustomerId(id);

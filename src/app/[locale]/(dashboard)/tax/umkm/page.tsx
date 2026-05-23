@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +52,13 @@ interface RegimeResult {
 
 export default function CorporateTaxPage() {
   const { session } = useSession();
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
   const currentYear = new Date().getFullYear();
   const t = useTranslations('umkm');
   const tsc = useTranslations('taxScreen');
@@ -86,8 +94,8 @@ export default function CorporateTaxPage() {
 
   // Load company profile
   useEffect(() => {
-    if (!session?.customerId) return;
-    fetch(`/api/company-profile?customerId=${session.customerId}`)
+    if (!customerId) return;
+    fetch(`/api/company-profile?customerId=${customerId}`)
       .then(r => r.json())
       .then(d => {
         if (d.success && d.data) {
@@ -101,7 +109,7 @@ export default function CorporateTaxPage() {
         }
       })
       .catch(() => {});
-  }, [session?.customerId]);
+  }, [customerId]);
 
   // Auto-determine regime
   const determineRegime = (): RegimeResult => {
@@ -204,6 +212,31 @@ export default function CorporateTaxPage() {
         step={step}
         aiSteps={[tsc('stepAiDetect'), tsc('stepTaxCalc'), tsc('stepIdBillingGen')]}
       />
+
+      {/* Consultant customer picker. CUSTOMER role keeps the existing UI. */}
+      {isConsultant && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="umkm-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {tsc('selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{tsc('noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="umkm-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       {/* Educational banner */}
       <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">

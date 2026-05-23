@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   Users, Plus, Search, Edit2, Trash2, Building2, User, Briefcase,
   Loader2, X, Check, AlertTriangle,
@@ -33,6 +34,13 @@ export default function CounterpartiesPage() {
     EMPLOYEE: { label: tc('employee'), icon: User, color: 'bg-purple-100 text-purple-700' },
   };
   const { session } = useSession();
+  const {
+    customerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId();
 
   const [counterparties, setCounterparties] = useState<Counterparty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,14 +61,14 @@ export default function CounterpartiesPage() {
     setIsLoading(true);
     try {
       const p = new URLSearchParams();
-      if (session?.customerId) p.append('customerId', session.customerId);
+      if (customerId) p.append('customerId', customerId);
       if (filterType !== 'all') p.append('type', filterType);
       const res = await fetch(`/api/tax/counterparties?${p}`);
       const data = await res.json();
       if (data.success) setCounterparties(data.data.counterparties);
     } catch { /* */ }
     finally { setIsLoading(false); }
-  }, [session?.customerId, filterType]);
+  }, [customerId, filterType]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -96,7 +104,7 @@ export default function CounterpartiesPage() {
           kbliCode: form.kbliCode, qualificationGrade: form.qualificationGrade,
           country: form.country, isResident: form.isResident,
           hasCod: form.hasCod, vendorIsPropertyOwner: form.vendorIsPropertyOwner,
-          customerId: session?.customerId,
+          customerId: customerId,
           ...(editingId ? { id: editingId } : {}),
         }),
       });
@@ -128,6 +136,31 @@ export default function CounterpartiesPage() {
           <Plus className="h-4 w-4 mr-2" />{tc('add')}
         </Button>
       </div>
+
+      {/* Consultant customer picker. CUSTOMER role: card is not rendered. */}
+      {isConsultant && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label htmlFor="cp-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {t('taxScreen.selectCustomer')}
+          </label>
+          {customers.length === 0 ? (
+            <span className="text-xs text-slate-400">{t('taxScreen.noAssignedCustomers')}</span>
+          ) : (
+            <select
+              id="cp-customer"
+              value={selectedCustomerId}
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
+              className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            >
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       {/* Add/Edit Form */}
       {showForm && (
