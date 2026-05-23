@@ -120,8 +120,8 @@ export default function UmkmClosingPage() {
 
   const classifyDoc = async (docId: string) => {
     const r = await closing.classifyDocument(docId);
-    if (r.ok) toast.success('AI 분석 완료');
-    else toast.error(r.error || 'AI 분석 실패');
+    if (r.ok) toast.success(t('toastAiDone'));
+    else toast.error(r.error || t('toastAiFailed'));
   };
 
   const progressPct = useMemo(() => {
@@ -161,7 +161,7 @@ export default function UmkmClosingPage() {
           className="rounded-xl border-2 border-slate-200 bg-white p-4 text-left hover:border-slate-300"
         >
           <p className="text-sm font-bold text-slate-900">{t('typeLock.other')}</p>
-          <p className="text-xs text-slate-500 mt-0.5">PPh 25 일반 결산</p>
+          <p className="text-xs text-slate-500 mt-0.5">{t('altCorpClosing')}</p>
         </button>
       </div>
 
@@ -425,7 +425,7 @@ function BasicStep({
       ) : annualRevenueNum > 4_800_000_000 ? (
         <div className="rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 mt-5">
           <p className="text-sm text-rose-700">
-            연매출 Rp 4.8B 초과 — UMKM 0.5% 적용 불가. PPh25 일반 결산으로 전환을 권장합니다.
+            {t('exceedsThreshold')}
           </p>
         </div>
       ) : null}
@@ -732,9 +732,9 @@ function SubmitActions({
       const json = await res.json();
       if (json.success) {
         setSubmission(json.data);
-        toast.success('SPT 제출 완료 — 운영팀 검증 대기중');
+        toast.success(t('submitDone'));
       } else {
-        toast.error(json.error || '제출 실패');
+        toast.error(json.error || t('submitFailed'));
       }
     } finally {
       setSubmitting(false);
@@ -756,7 +756,7 @@ function SubmitActions({
           disabled={!sessionId || submitting || !!submission}
         >
           {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-          {submission ? '제출됨' : t('submit.submitCta')}
+          {submission ? t('submitted') : t('submit.submitCta')}
         </Button>
       </div>
     </div>
@@ -957,7 +957,7 @@ function BillingStep({
       const json = await res.json();
       if (json.success) {
         setBilling(json.data);
-        toast.success('ID Billing 발급되었습니다 — 30일 내 납부');
+        toast.success(t('billingIssued'));
       } else {
         toast.error(json.error || tc('comingSoon'));
       }
@@ -984,17 +984,17 @@ function BillingStep({
 
       {billing ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 mt-5">
-          <p className="text-xs font-semibold text-emerald-700">발급된 ID Billing</p>
+          <p className="text-xs font-semibold text-emerald-700">{t('billingIssuedTitle')}</p>
           <p className="text-base font-mono font-bold text-emerald-900 mt-1 tabular-nums">{billing.billing_code}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 text-xs text-slate-600">
             <div><span className="text-slate-400">KAP:</span> {billing.kap_code}</div>
             <div><span className="text-slate-400">KJS:</span> {billing.kjs_code}</div>
-            <div><span className="text-slate-400">기간:</span> {billing.tax_period}</div>
-            <div><span className="text-slate-400">만료:</span> {billing.expires_at ? new Date(billing.expires_at).toISOString().slice(0, 10) : '-'}</div>
+            <div><span className="text-slate-400">{t('periodLabel')}</span> {billing.tax_period}</div>
+            <div><span className="text-slate-400">{t('expiresLabel')}</span> {billing.expires_at ? new Date(billing.expires_at).toISOString().slice(0, 10) : '-'}</div>
           </div>
           {billing.source === 'PLACEHOLDER' && (
             <p className="text-[11px] text-amber-700 mt-2">
-              ※ Coretax API 연동 전 임시 코드입니다. 운영팀 검증 후 실 코드로 교체됩니다.
+              {t('billingTempNote')}
             </p>
           )}
         </div>
@@ -1008,7 +1008,7 @@ function BillingStep({
           disabled={issuing || !sessionId || finalTax <= 0}
         >
           {issuing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-          {billing ? '재발급' : t('billing.issueCta')}
+          {billing ? t('reissue') : t('billing.issueCta')}
         </Button>
       </div>
 
