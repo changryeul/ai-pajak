@@ -37,6 +37,10 @@ async function api(token: string, method: 'GET' | 'PATCH', body?: unknown) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const text = await r.text();
+  // Smoke-test helper — accept any JSON shape the API returns. Callers read
+  // settings JSONB sub-keys via untyped property access; a strict generic
+  // would force a full settings type duplicate here just for one script.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let json: any;
   try { json = JSON.parse(text); } catch { json = { raw: text }; }
   if (!r.ok) throw new Error(`${method} ${r.status}: ${text}`);

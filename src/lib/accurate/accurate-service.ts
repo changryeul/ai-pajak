@@ -461,6 +461,10 @@ export class AccurateService {
   // ============================
 
    
+  // External-API helper — Accurate returns ad-hoc JSON shapes that vary per
+  // endpoint. Callers cast to the expected response type at the call site,
+  // so we intentionally leave the return as `any` here.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static async apiCall(
     accessToken: string,
     session: AccurateSession | null,
@@ -494,6 +498,8 @@ export class AccurateService {
   private static parseFinancialStatement(
     type: AccurateFinancialStatement['type'],
     period: string,
+    // Accurate JSON shape, narrowed inline below.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     response: any
   ): AccurateFinancialStatement {
     const data = response.d as Array<Record<string, unknown>> || [];

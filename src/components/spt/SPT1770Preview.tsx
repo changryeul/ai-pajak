@@ -46,8 +46,11 @@ export function SPT1770Preview({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const getPtkpLabel = (status: PTKPStatus): string => {
-    const key = 'ptkp' + status.replace(/\//g, '');
-    return t(key as any);
+    // Build the i18n key dynamically from the PTKP enum; cast to the
+    // translator's key parameter because the message catalog is keyed by
+    // string union and TS can't narrow this template literal.
+    const key = `ptkp${status.replace(/\//g, '')}` as Parameters<typeof t>[0];
+    return t(key);
   };
 
   const getBookkeepingLabel = (method: string): string => {

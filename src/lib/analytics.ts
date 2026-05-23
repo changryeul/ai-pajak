@@ -9,11 +9,21 @@ type GAEvent = {
   value?: number;
 };
 
+// Minimal shape of the globals injected by Google Analytics 4.
+type GtagWindow = Window & {
+  gtag?: (
+    command: 'event',
+    action: string,
+    params: Record<string, unknown>,
+  ) => void;
+};
+
 export function trackEvent({ action, category, label, value }: GAEvent) {
   if (typeof window === 'undefined') return;
-  if (!(window as any).gtag) return;
+  const w = window as GtagWindow;
+  if (!w.gtag) return;
 
-  (window as any).gtag('event', action, {
+  w.gtag('event', action, {
     event_category: category,
     event_label: label,
     value: value,

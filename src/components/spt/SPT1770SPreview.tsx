@@ -45,8 +45,8 @@ export function SPT1770SPreview({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const getPtkpLabel = (status: PTKPStatus): string => {
-    const key = 'ptkp' + status.replace(/\//g, '');
-    return t(key as any);
+    const key = `ptkp${status.replace(/\//g, '')}` as Parameters<typeof t>[0];
+    return t(key);
   };
 
   const handleDownload = async () => {
