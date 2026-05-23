@@ -464,12 +464,12 @@ export class AccurateService {
   // External-API helper — Accurate returns ad-hoc JSON shapes that vary per
   // endpoint. Callers cast to the expected response type at the call site,
   // so we intentionally leave the return as `any` here.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static async apiCall(
     accessToken: string,
     session: AccurateSession | null,
     method: string,
     path: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     const baseUrl = session ? `https://${session.host}` : ACCURATE_API_BASE;
     const headers: Record<string, string> = {
