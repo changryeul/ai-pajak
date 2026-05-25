@@ -185,7 +185,7 @@ export async function middleware(request: NextRequest) {
     authRoutes.some((route) => pathWithoutLocale.startsWith(route));
 
   // Update Supabase session
-  const { supabaseResponse, user } = await updateSession(request);
+  const { supabaseResponse, user, supabase } = await updateSession(request);
 
   // Redirect logic
   if (isProtectedRoute && !user) {
@@ -196,6 +196,34 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user) {
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+  }
+
+  // Operator-tier /dashboard landing — fastest possible cutoff.
+  //
+  // We already do this in (dashboard)/dashboard/layout.tsx, but some users
+  // hit a /dashboard ↔ /operator/dashboard client ping-pong even with the
+  // server layout in place (Vercel edge HTML cache + stale Service Worker
+  // serving the previous build's `window.location.href`-in-render code).
+  // Middleware runs at the edge before any cache, so this is the level that
+  // guarantees the operator never sees a /dashboard tree mount at all.
+  //
+  // CUSTOMER / CONSULTANT_JTC / TAX_ADVISOR_JTC / PLATFORM_ADMIN pass through.
+  if (user && pathWithoutLocale === '/dashboard') {
+    const { data: roleRows } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+    const roles = (roleRows ?? []).map((r) => r.role as string);
+    if (roles.includes('TAX_OPERATOR_MASTER')) {
+      return NextResponse.redirect(new URL(`/${locale}/admin/master`, request.url));
+    }
+    if (roles.includes('TAX_OPERATOR_SUPERVISOR') || roles.includes('TAX_OPERATOR_LEAD')) {
+      return NextResponse.redirect(new URL(`/${locale}/operator/dashboard`, request.url));
+    }
+    if (roles.includes('TAX_OPERATOR')) {
+      return NextResponse.redirect(new URL(`/${locale}/operator/my-work`, request.url));
+    }
   }
 
   // INDIVIDUAL onboarding enforcement:

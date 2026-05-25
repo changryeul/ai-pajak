@@ -34,5 +34,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return { supabaseResponse, user };
+  // Expose the cookie-bound client too so the root middleware can run
+  // follow-up queries (e.g. user_roles for /dashboard role redirect) without
+  // building a second client and refreshing cookies a second time.
+  return { supabaseResponse, user, supabase };
 }
