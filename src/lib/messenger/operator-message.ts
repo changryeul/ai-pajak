@@ -92,10 +92,13 @@ export function resolveSender(
  * Find the tax_operators.id that should be cached on this message for RLS.
  *
  * Priority:
- *   1. djp_submission_queue(caseId).operator_id  — the case owner
+ *   1. djp_submission_queue(caseId).operator_id — the case owner
  *   2. operator_client_assignments — latest active assignment for the customer
- *   3. NULL — no current owner (supervisor can still see it; non-supervisor
- *      operator will not, which is the intended fallback)
+ *   3. inherit from the latest non-null assigned_operator_id on this customer's
+ *      messenger thread — keeps supervisor replies bound to the same operator
+ *      who started the thread, so the operator sees the answer come back
+ *      even when no formal case/assignment exists
+ *   4. NULL — supervisor can still see it; non-supervisor operator cannot
  */
 export async function resolveAssignedOperatorId(
   customerId: string,
@@ -120,6 +123,15 @@ export async function resolveAssignedOperatorId(
     .order('assigned_date', { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (assignment?.operator_id) return assignment.operator_id;
 
-  return assignment?.operator_id ?? null;
+  const { data: latestMsg } = await admin
+    .from('operator_message')
+    .select('assigned_operator_id')
+    .eq('customer_id', customerId)
+    .not('assigned_operator_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return latestMsg?.assigned_operator_id ?? null;
 }
