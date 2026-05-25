@@ -69,7 +69,10 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       business_description: parsed.data.businessDescription ?? null,
       aliases: parsed.data.aliases ?? null,
       overall_trust: 60,
-      registered_by: ctx.consultantId,
+      // Supervisor has no consultant row (synthetic ctx returns ''), and the
+      // FK column is nullable. Coerce empty → null so PG doesn't reject the
+      // insert with "invalid input syntax for type uuid".
+      registered_by: ctx.consultantId || null,
     })
     .select('id')
     .single();
