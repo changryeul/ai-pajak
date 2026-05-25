@@ -516,20 +516,69 @@
     "pageTitle": "设置 / 表单版本",
     "pageHeading": "设置 / 表单版本 / Tax Code Rules",
     "header": {
-      "fiscalYear": "归属年度",
-      "platform": "平台",
-      "coretaxStatus": "Coretax 状态",
-      "coretaxStatusValue": "API 未对接 / 手动处理"
+      "manageTarget": "管理对象",
+      "manageTargetValue": "Form + Tax Code + Rule"
     },
     "badan": {
-      "title": "Badan Form Profile",
-      "desc": "自 2025 年度起,按 Coretax 标准的录入流程与附件/明细结构执行;不再复用旧版 e-Form/e-Filing 1771 界面。",
-      "legacy": "Legacy: 1771"
+      "current": "当前标准",
+      "currentValue": "SPT Tahunan Badan Coretax 2025+",
+      "model": "输入模型",
+      "modelValue": "Form Induk + 动态 Lampiran"
     },
     "op": {
-      "title": "OP Form Profile",
-      "desc": "自 2025 年度起,个人 SPT 不再走 1770/1770S/1770SS 选择界面,统一按 Coretax 单一 OP Form 处理。",
-      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+      "current": "当前标准",
+      "currentValue": "SPT Tahunan PPh Wajib Pajak Orang Pribadi Coretax 2025+",
+      "model": "输入模型",
+      "modelValue": "单一 OP Form + 问题驱动的动态 lampiran"
+    },
+    "adminBadge": "Admin / Tax Engine",
+    "pageDesc": "不是员工业务菜单，而是管理 AI Pajak 税务判断标准的管理员菜单。表单版本、Tax Code Rules、判断条件、变更历史在此统一管理。",
+    "control": {
+      "title": "2. 运营标准",
+      "badge": "Control",
+      "whyTitle": "为何需要",
+      "whyBody": "税法、Coretax 表单、Tax Code 变更时，管理员通过修改标准值切换规则，无需开发改代码。",
+      "whoTitle": "由谁修改",
+      "whoBody": "不是普通员工，只有 Tax Admin、Supervisor、Master Admin 权限可以修改。",
+      "visibleTitle": "客户是否可见",
+      "visibleBody": "对客户隐藏。此为员工与 AI 判断引擎内部使用的标准表。",
+      "auditTitle": "修改控制",
+      "auditBody": "修改前后值、修改人、理由必须留在变更/审计日志中。"
+    },
+    "rules": {
+      "title": "3. Tax Code Rules",
+      "badge": "Tax Rules",
+      "intro": "用于 ID Billing 发行与代扣判断的内部标准表。正式运营前请确认最新规定。",
+      "colCategory": "税目",
+      "colCode": "默认 Tax Code",
+      "colRate": "税率基准",
+      "colCondition": "适用条件",
+      "colDoc": "所需凭据",
+      "colReview": "员工检视条件"
+    },
+    "decision": {
+      "title": "4. 判断条件",
+      "badge": "Decision Logic",
+      "box1Title": "交易类型",
+      "box1Body": "依据 Invoice 描述、合同范围、银行备注区分服务/租赁/进口/特许权使用费等。",
+      "box2Title": "KBLI / 许可证",
+      "box2Body": "对方 KBLI 与许可证影响税目判断时，提交至 Operator 复核。",
+      "box3Title": "合同关键词",
+      "box3Body": "提取 rent, service, royalty, management, construction 等关键词生成 PPh23/PPh4(2)/PPh26 候选。",
+      "box4Title": "跨境 / 租税协定",
+      "box4Body": "非居民支付在确认 DGT Form 与协定条件前保守标记为需复核。",
+      "box5Title": "Coretax 手动处理",
+      "box5Body": "目前 API 未对接，本表是员工在 Coretax 手动开具 ID Billing 时的参照标准。",
+      "box6Title": "变更控制",
+      "box6Body": "税率、Tax Code、表单标准变更时，必须将谁/为何/变更内容留在审计日志。"
+    },
+    "audit": {
+      "title": "5. 标准变更历史",
+      "badge": "Audit",
+      "stateApplied": "已应用",
+      "stateReviewing": "审核中",
+      "sampleByTaxAdmin": "Tax Admin",
+      "sampleBySystem": "System"
     }
   },
   "operatorDashboard": {

@@ -516,20 +516,69 @@
     "pageTitle": "Settings / Form versions",
     "pageHeading": "Settings / Form versions / Tax Code Rules",
     "header": {
-      "fiscalYear": "Fiscal year",
-      "platform": "Platform",
-      "coretaxStatus": "Coretax status",
-      "coretaxStatusValue": "API not connected / manual"
+      "manageTarget": "Scope",
+      "manageTargetValue": "Form + Tax Code + Rule"
     },
     "badan": {
-      "title": "Badan Form Profile",
-      "desc": "From fiscal 2025, the input flow and attachment/sub-schedule structure follow Coretax. The legacy e-Form/e-Filing 1771 screen is not replicated.",
-      "legacy": "Legacy: 1771"
+      "current": "Current standard",
+      "currentValue": "SPT Tahunan Badan Coretax 2025+",
+      "model": "Input model",
+      "modelValue": "Form Induk + dynamic Lampiran"
     },
     "op": {
-      "title": "OP Form Profile",
-      "desc": "From fiscal 2025, individual SPT is handled through the Coretax unified OP Form, not the legacy 1770 / 1770S / 1770SS selector.",
-      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+      "current": "Current standard",
+      "currentValue": "SPT Tahunan PPh Wajib Pajak Orang Pribadi Coretax 2025+",
+      "model": "Input model",
+      "modelValue": "Single OP Form + question-driven dynamic lampiran"
+    },
+    "adminBadge": "Admin / Tax Engine",
+    "pageDesc": "Admin menu for AI Pajak's tax decision standards — not a staff workflow. Form versions, Tax Code Rules, decision logic, and change history are managed in one place.",
+    "control": {
+      "title": "2. Operational Standards",
+      "badge": "Control",
+      "whyTitle": "Why is it needed",
+      "whyBody": "When tax law, Coretax forms, or Tax Codes change, admins flip these values instead of patching code.",
+      "whoTitle": "Who can edit",
+      "whoBody": "Not regular staff — only Tax Admin, Supervisor, and Master Admin roles can edit.",
+      "visibleTitle": "Visible to customers",
+      "visibleBody": "Hidden from customers. This is an internal standard used by staff and the AI decision engine.",
+      "auditTitle": "Edit controls",
+      "auditBody": "Before/after values, editor, and reason must be logged in Change & Audit Log."
+    },
+    "rules": {
+      "title": "3. Tax Code Rules",
+      "badge": "Tax Rules",
+      "intro": "Internal standard used for ID Billing issuance and withholding decisions. Verify the latest regulation before going live.",
+      "colCategory": "Category",
+      "colCode": "Default Tax Code",
+      "colRate": "Rate basis",
+      "colCondition": "Applies when",
+      "colDoc": "Required evidence",
+      "colReview": "Staff review condition"
+    },
+    "decision": {
+      "title": "4. Decision Logic",
+      "badge": "Decision Logic",
+      "box1Title": "Transaction type",
+      "box1Body": "Distinguishes service/rent/import/royalty etc. from invoice description, contract scope, and bank payment memo.",
+      "box2Title": "KBLI / Licenses",
+      "box2Body": "Escalates to Operator review when the counterpart's KBLI and licenses affect the category decision.",
+      "box3Title": "Contract keywords",
+      "box3Body": "Extracts keywords like rent, service, royalty, management, construction to build PPh23/PPh4(2)/PPh26 candidates.",
+      "box4Title": "Cross-border / Tax Treaty",
+      "box4Body": "Non-resident payments are flagged for review until DGT Form and treaty terms are confirmed.",
+      "box5Title": "Coretax manual processing",
+      "box5Body": "API integration is offline today; this table is the reference staff use when issuing ID Billing manually in Coretax.",
+      "box6Title": "Change control",
+      "box6Body": "Whenever rates, Tax Codes, or form standards change, log who changed what and why in the audit trail."
+    },
+    "audit": {
+      "title": "5. Standards Change Log",
+      "badge": "Audit",
+      "stateApplied": "Applied",
+      "stateReviewing": "In review",
+      "sampleByTaxAdmin": "Tax Admin",
+      "sampleBySystem": "System"
     }
   },
   "operatorDashboard": {

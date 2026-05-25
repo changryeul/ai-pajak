@@ -516,20 +516,69 @@
     "pageTitle": "設定 / 様式バージョン",
     "pageHeading": "設定 / 様式バージョン / Tax Code Rules",
     "header": {
-      "fiscalYear": "対象年度",
-      "platform": "プラットフォーム",
-      "coretaxStatus": "Coretax 状態",
-      "coretaxStatusValue": "API 未連携 / 手動処理"
+      "manageTarget": "管理対象",
+      "manageTargetValue": "Form + Tax Code + Rule"
     },
     "badan": {
-      "title": "Badan Form Profile",
-      "desc": "2025年度分から Coretax 基準の入力フローと添付/付属明細構造に従う。旧 e-Form/e-Filing 1771 画面はそのまま複製しない。",
-      "legacy": "Legacy: 1771"
+      "current": "現在の基準",
+      "currentValue": "SPT Tahunan Badan Coretax 2025+",
+      "model": "入力モデル",
+      "modelValue": "Form Induk + 動的 Lampiran"
     },
     "op": {
-      "title": "OP Form Profile",
-      "desc": "2025年度分から個人 SPT は 1770/1770S/1770SS の選択ではなく、Coretax 単一 OP Form 基準で処理する。",
-      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+      "current": "現在の基準",
+      "currentValue": "SPT Tahunan PPh Wajib Pajak Orang Pribadi Coretax 2025+",
+      "model": "入力モデル",
+      "modelValue": "単一 OP Form + 質問駆動の動的 lampiran"
+    },
+    "adminBadge": "Admin / Tax Engine",
+    "pageDesc": "相談員業務メニューではなく、AI Pajak の税務判断基準を管理する管理者メニューです。様式バージョン、Tax Code Rules、判断条件、変更履歴をひとつにまとめて管理します。",
+    "control": {
+      "title": "2. 運用基準",
+      "badge": "Control",
+      "whyTitle": "なぜ必要か",
+      "whyBody": "税法・Coretax 様式・Tax Code が変わったとき、開発者がコードを書き換えるのではなく管理者が基準値で運用ルールを切り替えます。",
+      "whoTitle": "誰が編集するか",
+      "whoBody": "一般相談員ではなく Tax Admin / Supervisor / Master Admin 権限のみ編集できます。",
+      "visibleTitle": "顧客に見えるか",
+      "visibleBody": "顧客には公開されません。相談員と AI 判断エンジンの内部基準表です。",
+      "auditTitle": "変更統制",
+      "auditBody": "変更前後の値・編集者・理由を変更履歴 / 監査ログに必ず残します。"
+    },
+    "rules": {
+      "title": "3. Tax Code Rules",
+      "badge": "Tax Rules",
+      "intro": "ID Billing 発行と源泉判断に使う内部基準表です。本番運用前に最新規定を必ず確認してください。",
+      "colCategory": "税目",
+      "colCode": "基本 Tax Code",
+      "colRate": "税率基準",
+      "colCondition": "適用条件",
+      "colDoc": "必要証憑",
+      "colReview": "相談員検討条件"
+    },
+    "decision": {
+      "title": "4. 判断条件",
+      "badge": "Decision Logic",
+      "box1Title": "取引タイプ",
+      "box1Body": "Invoice description / 契約スコープ / 銀行メモを基にサービス・賃貸・輸入・ロイヤリティ等を分類します。",
+      "box2Title": "KBLI / ライセンス",
+      "box2Body": "相手の KBLI とライセンスが税目判断に影響する場合、Operator 検討対象に上げます。",
+      "box3Title": "契約書キーワード",
+      "box3Body": "rent, service, royalty, management, construction 等のキーワードから PPh23/PPh4(2)/PPh26 候補を作ります。",
+      "box4Title": "海外取引 / 租税条約",
+      "box4Body": "非居住者支払は DGT Form と treaty 条件確認まで保守的に検討必要扱いにします。",
+      "box5Title": "Coretax 手動処理",
+      "box5Body": "現状 API 未連動につき、本表は相談員が Coretax で ID Billing を手動発行する際の参照基準です。",
+      "box6Title": "変更統制",
+      "box6Body": "税率・Tax Code・様式基準を変えたら誰が何故変えたかを監査ログに残します。"
+    },
+    "audit": {
+      "title": "5. 基準変更履歴",
+      "badge": "Audit",
+      "stateApplied": "適用",
+      "stateReviewing": "検討中",
+      "sampleByTaxAdmin": "Tax Admin",
+      "sampleBySystem": "System"
     }
   },
   "operatorDashboard": {

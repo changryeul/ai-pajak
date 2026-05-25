@@ -516,20 +516,69 @@
     "pageTitle": "Pengaturan / Versi formulir",
     "pageHeading": "Pengaturan / Versi formulir / Tax Code Rules",
     "header": {
-      "fiscalYear": "Tahun pajak",
-      "platform": "Platform",
-      "coretaxStatus": "Status Coretax",
-      "coretaxStatusValue": "API belum terhubung / manual"
+      "manageTarget": "Cakupan",
+      "manageTargetValue": "Form + Tax Code + Rule"
     },
     "badan": {
-      "title": "Badan Form Profile",
-      "desc": "Mulai tahun pajak 2025, alur input dan struktur lampiran/sub-spesifikasi mengikuti Coretax. Tampilan lama e-Form/e-Filing 1771 tidak direplikasi.",
-      "legacy": "Legacy: 1771"
+      "current": "Standar saat ini",
+      "currentValue": "SPT Tahunan Badan Coretax 2025+",
+      "model": "Model input",
+      "modelValue": "Form Induk + Lampiran dinamis"
     },
     "op": {
-      "title": "OP Form Profile",
-      "desc": "Mulai tahun pajak 2025, SPT orang pribadi diproses melalui OP Form tunggal Coretax, bukan pemilihan 1770 / 1770S / 1770SS.",
-      "legacy": "Legacy: 1770 / 1770S / 1770SS"
+      "current": "Standar saat ini",
+      "currentValue": "SPT Tahunan PPh Wajib Pajak Orang Pribadi Coretax 2025+",
+      "model": "Model input",
+      "modelValue": "Form OP tunggal + lampiran dinamis berbasis pertanyaan"
+    },
+    "adminBadge": "Admin / Tax Engine",
+    "pageDesc": "Menu admin untuk mengelola standar keputusan pajak AI Pajak — bukan alur kerja staf. Versi formulir, Tax Code Rules, logika keputusan, dan riwayat perubahan dikelola di satu tempat.",
+    "control": {
+      "title": "2. Standar Operasional",
+      "badge": "Control",
+      "whyTitle": "Mengapa dibutuhkan",
+      "whyBody": "Saat UU pajak, formulir Coretax, atau Tax Code berubah, admin mengubah nilai standar tanpa harus memodifikasi kode.",
+      "whoTitle": "Siapa yang dapat mengubah",
+      "whoBody": "Bukan staf biasa — hanya peran Tax Admin, Supervisor, dan Master Admin yang dapat mengedit.",
+      "visibleTitle": "Apakah terlihat pelanggan",
+      "visibleBody": "Tersembunyi dari pelanggan. Ini adalah standar internal untuk staf dan mesin keputusan AI.",
+      "auditTitle": "Kontrol perubahan",
+      "auditBody": "Nilai sebelum/sesudah, editor, dan alasan harus dicatat di Log Perubahan & Audit."
+    },
+    "rules": {
+      "title": "3. Tax Code Rules",
+      "badge": "Tax Rules",
+      "intro": "Standar internal untuk penerbitan ID Billing dan keputusan PPh potong. Pastikan regulasi terbaru sebelum berjalan produksi.",
+      "colCategory": "Kategori",
+      "colCode": "Tax Code Default",
+      "colRate": "Dasar tarif",
+      "colCondition": "Berlaku saat",
+      "colDoc": "Bukti diperlukan",
+      "colReview": "Syarat tinjau staf"
+    },
+    "decision": {
+      "title": "4. Logika Keputusan",
+      "badge": "Decision Logic",
+      "box1Title": "Tipe transaksi",
+      "box1Body": "Membedakan jasa/sewa/impor/royalti dari deskripsi invoice, scope kontrak, dan memo bank.",
+      "box2Title": "KBLI / Lisensi",
+      "box2Body": "Diteruskan ke tinjauan Operator bila KBLI dan lisensi mitra memengaruhi keputusan kategori.",
+      "box3Title": "Kata kunci kontrak",
+      "box3Body": "Ekstrak kata kunci seperti rent, service, royalty, management, construction untuk kandidat PPh23/PPh4(2)/PPh26.",
+      "box4Title": "Transaksi luar / Treaty",
+      "box4Body": "Pembayaran non-residen ditandai untuk tinjau hingga DGT Form dan treaty terkonfirmasi.",
+      "box5Title": "Coretax manual",
+      "box5Body": "API belum terintegrasi; tabel ini adalah acuan staf saat menerbitkan ID Billing manual di Coretax.",
+      "box6Title": "Kontrol perubahan",
+      "box6Body": "Saat tarif, Tax Code, atau standar formulir berubah, catat siapa, apa, dan mengapa di audit log."
+    },
+    "audit": {
+      "title": "5. Riwayat Perubahan Standar",
+      "badge": "Audit",
+      "stateApplied": "Diterapkan",
+      "stateReviewing": "Ditinjau",
+      "sampleByTaxAdmin": "Tax Admin",
+      "sampleBySystem": "System"
     }
   },
   "operatorDashboard": {
