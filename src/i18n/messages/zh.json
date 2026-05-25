@@ -259,7 +259,8 @@
     "supervisorTeam": "团队管理",
     "supervisorQuality": "质量",
     "supervisorLegality": "法律文档",
-    "supervisorApproval": "待审批"
+    "supervisorApproval": "待审批",
+    "opMessenger": "消息"
   },
   "employeeHr": {
     "uploadSection": {
@@ -8795,7 +8796,8 @@
       "step2": "资料/税务审核",
       "step3": "审批申请",
       "step4": "Coretax 处理",
-      "step5": "完成"
+      "step5": "消息",
+      "step6": "完成"
     },
     "myStatus": {
       "title": "我的状态",
@@ -9598,13 +9600,6 @@
     "rubricIntro": "分数不是固定基础分,而是按实际处理量、文档审核完成度、完成流程、风险管理、共同 DB 贡献逐项汇总。",
     "rubricRoleIndividual": "个人",
     "rubricRoleTeam": "团队",
-    "rubric.transactionsDesc": "实际处理的交易量",
-    "rubric.docReviewDesc": "必填文档完成率",
-    "rubric.completionFlowDesc": "提交后稳定推进至完成的比例",
-    "rubric.riskSlaDesc": "高风险任务、拒绝、排队、缺失数据扣分",
-    "rubric.counterpartyDbDesc": "共同 DB 登记/反映完成数",
-    "rubric.taskCompletionDesc": "个人单位完成率 (至 BPE)",
-    "rubric.queueBottleneckDesc": "团队整体队列瓶颈扣分",
     "teamKpiHeading": "团队 KPI",
     "thTeamName": "团队/主管",
     "thMembers": "人数",
@@ -9648,10 +9643,6 @@
     "qualityDistVerified": "验证良好",
     "qualityDistEvidence": "需补证",
     "qualityActionsHeading": "今日质量任务",
-    "quality.actionStep1": "修复低信任交易方",
-    "quality.actionStep2": "核实需补证候选",
-    "quality.actionStep3": "处理待审候选",
-    "quality.actionStep4": "完成数据维护",
     "qualityStatRemediation": "需补强",
     "qualityStatManageable": "可管理",
     "qualityStatVerified": "验证良好",
@@ -9790,6 +9781,65 @@
     "reassignReasonPlaceholder": "例: 休假、工作量平衡",
     "reassignRuleLabel": "规则: ",
     "addMemberFullNamePlaceholder": "例: Novi Anggraini",
-    "minutesSuffix": "{n}分"
+    "minutesSuffix": "{n}分",
+    "rubric": {
+      "transactionsDesc": "实际处理的交易量",
+      "docReviewDesc": "必填文档完成率",
+      "completionFlowDesc": "提交后稳定推进至完成的比例",
+      "riskSlaDesc": "高风险任务、拒绝、排队、缺失数据扣分",
+      "counterpartyDbDesc": "共同 DB 登记/反映完成数",
+      "taskCompletionDesc": "个人单位完成率 (至 BPE)",
+      "queueBottleneckDesc": "团队整体队列瓶颈扣分"
+    },
+    "quality": {
+      "actionStep1": "修复低信任交易方",
+      "actionStep2": "核实需补证候选",
+      "actionStep3": "处理待审候选",
+      "actionStep4": "完成数据维护"
+    }
+  },
+  "messenger": {
+    "title": "消息",
+    "subtitle": "客户与内部频道一屏管理。CUSTOMER 频道消息将自动以\"AI Pajak\"名义掩码显示。",
+    "empty": {
+      "noCases": "没有分配的案件。",
+      "pickThread": "请在左侧选择客户。",
+      "noMessages": "尚无消息。发送第一条消息吧。"
+    },
+    "list": {
+      "title": "我的客户",
+      "searchPlaceholder": "搜索姓名或 NPWP",
+      "unread": "未读"
+    },
+    "channel": {
+      "customer": "客户",
+      "internal": "内部",
+      "customerHint": "客户可见频道 — 以 AI Pajak 名义显示",
+      "internalHint": "仅内部 — 客户 0% 可见"
+    },
+    "composer": {
+      "placeholderCustomer": "撰写给客户的消息（以 AI Pajak 名义发送）…",
+      "placeholderInternal": "内部备注（客户不可见）…",
+      "send": "发送",
+      "sending": "发送中…",
+      "attach": "附件",
+      "reasonCode": "原因代码（可选）"
+    },
+    "sender": {
+      "AI_PAJAK": "AI Pajak",
+      "OPERATOR": "操作员",
+      "SUPERVISOR": "主管",
+      "CUSTOMER": "客户"
+    },
+    "context": {
+      "title": "客户信息",
+      "npwp": "NPWP",
+      "type": "类型",
+      "poa": "POA",
+      "caseCode": "案件",
+      "openCase": "打开案件",
+      "noCase": "无关联案件"
+    },
+    "maskNotice": "ℹ️ 此消息在客户屏幕上显示为\"AI Pajak\"。"
   }
 }

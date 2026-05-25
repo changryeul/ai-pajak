@@ -259,7 +259,8 @@
     "supervisorTeam": "Team",
     "supervisorQuality": "Quality",
     "supervisorLegality": "Legality",
-    "supervisorApproval": "Approval"
+    "supervisorApproval": "Approval",
+    "opMessenger": "Messenger"
   },
   "employeeHr": {
     "uploadSection": {
@@ -8795,7 +8796,8 @@
       "step2": "Review Docs/Tax",
       "step3": "Request Approval",
       "step4": "Coretax",
-      "step5": "Done"
+      "step5": "Messenger",
+      "step6": "Done"
     },
     "myStatus": {
       "title": "My Status",
@@ -9598,13 +9600,6 @@
     "rubricIntro": "Scores are summed across actual transaction volume, doc review completion, completion flow, risk management, and counterparty-DB contribution — not base credit.",
     "rubricRoleIndividual": "Individual",
     "rubricRoleTeam": "Team",
-    "rubric.transactionsDesc": "Actual transactions processed (payroll/invoice/PPN/bank/calc)",
-    "rubric.docReviewDesc": "Required-doc completion ratio",
-    "rubric.completionFlowDesc": "Stable progression to approval/completion",
-    "rubric.riskSlaDesc": "Penalty for risk, rejects, queue delays, missing data",
-    "rubric.counterpartyDbDesc": "Counterparty-DB entries contributed",
-    "rubric.taskCompletionDesc": "Per-member completion ratio (to BPE)",
-    "rubric.queueBottleneckDesc": "Team queue-bottleneck penalty (team-only)",
     "teamKpiHeading": "Team KPI",
     "thTeamName": "Team / Supervisor",
     "thMembers": "Members",
@@ -9648,10 +9643,6 @@
     "qualityDistVerified": "Verified",
     "qualityDistEvidence": "Evidence needed",
     "qualityActionsHeading": "Today's quality actions",
-    "quality.actionStep1": "Remediate low-trust counterparties",
-    "quality.actionStep2": "Verify evidence-needed candidates",
-    "quality.actionStep3": "Process pending candidates",
-    "quality.actionStep4": "Maintain completed data",
     "qualityStatRemediation": "Needs remediation",
     "qualityStatManageable": "Manageable",
     "qualityStatVerified": "Verified",
@@ -9790,6 +9781,65 @@
     "reassignReasonPlaceholder": "e.g. PTO, workload balancing",
     "reassignRuleLabel": "Delete rule: ",
     "addMemberFullNamePlaceholder": "e.g. Novi Anggraini",
-    "minutesSuffix": "{n}m"
+    "minutesSuffix": "{n}m",
+    "rubric": {
+      "transactionsDesc": "Actual transactions processed (payroll/invoice/PPN/bank/calc)",
+      "docReviewDesc": "Required-doc completion ratio",
+      "completionFlowDesc": "Stable progression to approval/completion",
+      "riskSlaDesc": "Penalty for risk, rejects, queue delays, missing data",
+      "counterpartyDbDesc": "Counterparty-DB entries contributed",
+      "taskCompletionDesc": "Per-member completion ratio (to BPE)",
+      "queueBottleneckDesc": "Team queue-bottleneck penalty (team-only)"
+    },
+    "quality": {
+      "actionStep1": "Remediate low-trust counterparties",
+      "actionStep2": "Verify evidence-needed candidates",
+      "actionStep3": "Process pending candidates",
+      "actionStep4": "Maintain completed data"
+    }
+  },
+  "messenger": {
+    "title": "Messenger",
+    "subtitle": "Customer + internal channels in one place. CUSTOMER channel messages are automatically masked as \"AI Pajak\".",
+    "empty": {
+      "noCases": "No assigned cases.",
+      "pickThread": "Pick a customer on the left.",
+      "noMessages": "No messages yet. Send the first one."
+    },
+    "list": {
+      "title": "My customers",
+      "searchPlaceholder": "Search by name or NPWP",
+      "unread": "unread"
+    },
+    "channel": {
+      "customer": "Customer",
+      "internal": "Internal",
+      "customerHint": "Customer-visible channel — masked as AI Pajak",
+      "internalHint": "Internal-only — 0% visibility to customer"
+    },
+    "composer": {
+      "placeholderCustomer": "Write a message to the customer (sent as AI Pajak)…",
+      "placeholderInternal": "Internal note (not visible to the customer)…",
+      "send": "Send",
+      "sending": "Sending…",
+      "attach": "Attach",
+      "reasonCode": "Reason code (optional)"
+    },
+    "sender": {
+      "AI_PAJAK": "AI Pajak",
+      "OPERATOR": "Operator",
+      "SUPERVISOR": "Supervisor",
+      "CUSTOMER": "Customer"
+    },
+    "context": {
+      "title": "Customer info",
+      "npwp": "NPWP",
+      "type": "Type",
+      "poa": "POA",
+      "caseCode": "Case",
+      "openCase": "Open case",
+      "noCase": "No linked case"
+    },
+    "maskNotice": "ℹ️ This message appears as \"AI Pajak\" on the customer screen."
   }
 }

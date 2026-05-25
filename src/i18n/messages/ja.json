@@ -259,7 +259,8 @@
     "supervisorTeam": "チーム管理",
     "supervisorQuality": "品質",
     "supervisorLegality": "リーガリティ",
-    "supervisorApproval": "決裁待ち"
+    "supervisorApproval": "決裁待ち",
+    "opMessenger": "メッセンジャー"
   },
   "employeeHr": {
     "uploadSection": {
@@ -8795,7 +8796,8 @@
       "step2": "資料/税務確認",
       "step3": "承認申請",
       "step4": "Coretax 処理",
-      "step5": "完了"
+      "step5": "メッセンジャー",
+      "step6": "完了"
     },
     "myStatus": {
       "title": "マイ状態",
@@ -9598,13 +9600,6 @@
     "rubricIntro": "スコアは固定点ではなく、実際の処理量・資料検討完成度・完了フロー・リスク管理・共同DB寄与を項目別に合算します。",
     "rubricRoleIndividual": "個人",
     "rubricRoleTeam": "チーム",
-    "rubric.transactionsDesc": "実際の処理 transaction 数",
-    "rubric.docReviewDesc": "必須資料検討完了率",
-    "rubric.completionFlowDesc": "提出後の安定的な完了率",
-    "rubric.riskSlaDesc": "高リスク・却下・キュー停滞・欠落資料の減点",
-    "rubric.counterpartyDbDesc": "共同DB登録/反映完了数",
-    "rubric.taskCompletionDesc": "個人単位の完了率 (BPEまで)",
-    "rubric.queueBottleneckDesc": "チーム全体の待機ボトルネック減点",
     "teamKpiHeading": "チーム別成績管理",
     "thTeamName": "チーム/Sup.",
     "thMembers": "人数",
@@ -9648,10 +9643,6 @@
     "qualityDistVerified": "検証良好",
     "qualityDistEvidence": "証拠必要",
     "qualityActionsHeading": "本日の品質アクション",
-    "quality.actionStep1": "低信頼度取引先の補完",
-    "quality.actionStep2": "証拠必要候補の確認",
-    "quality.actionStep3": "審査待ち候補の処理",
-    "quality.actionStep4": "完了データ維持管理",
     "qualityStatRemediation": "補完必要",
     "qualityStatManageable": "管理可能",
     "qualityStatVerified": "検証良好",
@@ -9790,6 +9781,65 @@
     "reassignReasonPlaceholder": "例: 休暇、業務量バランス",
     "reassignRuleLabel": "削除規則: ",
     "addMemberFullNamePlaceholder": "例: Novi Anggraini",
-    "minutesSuffix": "{n}分"
+    "minutesSuffix": "{n}分",
+    "rubric": {
+      "transactionsDesc": "実際の処理 transaction 数",
+      "docReviewDesc": "必須資料検討完了率",
+      "completionFlowDesc": "提出後の安定的な完了率",
+      "riskSlaDesc": "高リスク・却下・キュー停滞・欠落資料の減点",
+      "counterpartyDbDesc": "共同DB登録/反映完了数",
+      "taskCompletionDesc": "個人単位の完了率 (BPEまで)",
+      "queueBottleneckDesc": "チーム全体の待機ボトルネック減点"
+    },
+    "quality": {
+      "actionStep1": "低信頼度取引先の補完",
+      "actionStep2": "証拠必要候補の確認",
+      "actionStep3": "審査待ち候補の処理",
+      "actionStep4": "完了データ維持管理"
+    }
+  },
+  "messenger": {
+    "title": "メッセンジャー",
+    "subtitle": "顧客・社内チャネルを 1 画面で。CUSTOMER チャネルのメッセージは自動的に「AI Pajak」名義でマスクされます。",
+    "empty": {
+      "noCases": "担当ケースがありません。",
+      "pickThread": "左側で顧客を選択してください。",
+      "noMessages": "まだメッセージがありません。最初のメッセージを送りましょう。"
+    },
+    "list": {
+      "title": "担当顧客",
+      "searchPlaceholder": "名前または NPWP で検索",
+      "unread": "未読"
+    },
+    "channel": {
+      "customer": "顧客",
+      "internal": "社内",
+      "customerHint": "顧客に見えるチャネル — AI Pajak 名義",
+      "internalHint": "社内専用 — 顧客には 0% 表示"
+    },
+    "composer": {
+      "placeholderCustomer": "顧客へのメッセージ（AI Pajak 名義で送信）…",
+      "placeholderInternal": "社内ノート（顧客には非表示）…",
+      "send": "送信",
+      "sending": "送信中…",
+      "attach": "添付",
+      "reasonCode": "理由コード（任意）"
+    },
+    "sender": {
+      "AI_PAJAK": "AI Pajak",
+      "OPERATOR": "オペレーター",
+      "SUPERVISOR": "スーパーバイザー",
+      "CUSTOMER": "顧客"
+    },
+    "context": {
+      "title": "顧客情報",
+      "npwp": "NPWP",
+      "type": "タイプ",
+      "poa": "POA",
+      "caseCode": "ケース",
+      "openCase": "ケースを開く",
+      "noCase": "紐付くケースなし"
+    },
+    "maskNotice": "ℹ️ このメッセージは顧客画面に「AI Pajak」として表示されます。"
   }
 }

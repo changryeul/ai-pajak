@@ -259,7 +259,8 @@
     "supervisorTeam": "팀원 관리",
     "supervisorQuality": "품질 모니터링",
     "supervisorLegality": "리갈리티 자료",
-    "supervisorApproval": "승인대기"
+    "supervisorApproval": "승인대기",
+    "opMessenger": "메신저"
   },
   "employeeHr": {
     "uploadSection": {
@@ -8921,7 +8922,8 @@
       "step2": "자료/세금검토",
       "step3": "승인요청",
       "step4": "Coretax 처리",
-      "step5": "완료"
+      "step5": "메신저",
+      "step6": "완료"
     },
     "myStatus": {
       "title": "내 상태",
@@ -9724,13 +9726,6 @@
     "rubricIntro": "점수는 기본점수를 주는 방식이 아니라, 실제 처리량·검토완성도·완료흐름·리스크관리·공동DB 기여를 항목별로 합산합니다.",
     "rubricRoleIndividual": "직원",
     "rubricRoleTeam": "팀",
-    "rubric.transactionsDesc": "급여/인보이스/PPN/통장/계산결과 등 실제 처리한 transaction 수",
-    "rubric.docReviewDesc": "필수자료 검토완료 비율. 월신고는 필수 패키지, 연신고는 분석완료 여부",
-    "rubric.completionFlowDesc": "상신 이후 승인완료·업무완료 단계로 안정적으로 이동한 비율",
-    "rubric.riskSlaDesc": "고위험업무, 반려, 승인대기, Coretax 대기, 누락자료를 감점",
-    "rubric.counterpartyDbDesc": "공동거래처 DB 등재/자동반영 완료 수",
-    "rubric.taskCompletionDesc": "직원 단위에서 실제 완료/BPE까지 끝난 업무 비율",
-    "rubric.queueBottleneckDesc": "팀 전체 대기병목 단순 감점 (팀 평가 전용)",
     "teamKpiHeading": "팀별 성과관리",
     "thTeamName": "팀 / 수퍼바이저",
     "thMembers": "팀원수",
@@ -9774,10 +9769,6 @@
     "qualityDistVerified": "검증양호",
     "qualityDistEvidence": "증빙필요",
     "qualityActionsHeading": "오늘의 품질 액션",
-    "quality.actionStep1": "낮은 신뢰도 거래처 보완",
-    "quality.actionStep2": "증빙 필요 후보 확인",
-    "quality.actionStep3": "검토대기 후보 처리",
-    "quality.actionStep4": "완료 데이터 유지관리",
     "qualityStatRemediation": "보완 필요",
     "qualityStatManageable": "관리 가능",
     "qualityStatVerified": "검증 양호",
@@ -9916,6 +9907,65 @@
     "reassignReasonPlaceholder": "예: 휴가, 업무량 균형",
     "reassignRuleLabel": "삭제 규칙: ",
     "addMemberFullNamePlaceholder": "예: Novi Anggraini",
-    "minutesSuffix": "{n}분"
+    "minutesSuffix": "{n}분",
+    "rubric": {
+      "transactionsDesc": "급여/인보이스/PPN/통장/계산결과 등 실제 처리한 transaction 수",
+      "docReviewDesc": "필수자료 검토완료 비율. 월신고는 필수 패키지, 연신고는 분석완료 여부",
+      "completionFlowDesc": "상신 이후 승인완료·업무완료 단계로 안정적으로 이동한 비율",
+      "riskSlaDesc": "고위험업무, 반려, 승인대기, Coretax 대기, 누락자료를 감점",
+      "counterpartyDbDesc": "공동거래처 DB 등재/자동반영 완료 수",
+      "taskCompletionDesc": "직원 단위에서 실제 완료/BPE까지 끝난 업무 비율",
+      "queueBottleneckDesc": "팀 전체 대기병목 단순 감점 (팀 평가 전용)"
+    },
+    "quality": {
+      "actionStep1": "낮은 신뢰도 거래처 보완",
+      "actionStep2": "증빙 필요 후보 확인",
+      "actionStep3": "검토대기 후보 처리",
+      "actionStep4": "완료 데이터 유지관리"
+    }
+  },
+  "messenger": {
+    "title": "메신저",
+    "subtitle": "고객·내부 채널을 한 화면에서. CUSTOMER 채널 메시지는 자동으로 AI Pajak 명의로 마스킹됩니다.",
+    "empty": {
+      "noCases": "배정된 케이스가 없습니다.",
+      "pickThread": "왼쪽에서 고객을 선택하세요.",
+      "noMessages": "아직 메시지가 없습니다. 첫 메시지를 보내보세요."
+    },
+    "list": {
+      "title": "내 고객",
+      "searchPlaceholder": "고객명·NPWP 검색",
+      "unread": "읽지 않음"
+    },
+    "channel": {
+      "customer": "고객",
+      "internal": "내부",
+      "customerHint": "고객에게 보이는 채널 — AI Pajak 명의로 마스킹",
+      "internalHint": "운영팀 내부 채널 — 고객에게 0% 노출"
+    },
+    "composer": {
+      "placeholderCustomer": "고객에게 보낼 메시지를 입력하세요 (AI Pajak 명의로 발송됩니다)…",
+      "placeholderInternal": "내부 노트를 입력하세요 (고객에게 보이지 않음)…",
+      "send": "보내기",
+      "sending": "보내는 중…",
+      "attach": "첨부",
+      "reasonCode": "사유 코드 (선택)"
+    },
+    "sender": {
+      "AI_PAJAK": "AI Pajak",
+      "OPERATOR": "상담원",
+      "SUPERVISOR": "수퍼바이저",
+      "CUSTOMER": "고객"
+    },
+    "context": {
+      "title": "고객 정보",
+      "npwp": "NPWP",
+      "type": "유형",
+      "poa": "POA",
+      "caseCode": "케이스",
+      "openCase": "케이스 열기",
+      "noCase": "연결된 케이스 없음"
+    },
+    "maskNotice": "ℹ️ 이 메시지는 고객 화면에 \"AI Pajak\"로 표시됩니다."
   }
 }

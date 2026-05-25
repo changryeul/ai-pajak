@@ -259,7 +259,8 @@
     "supervisorTeam": "Tim",
     "supervisorQuality": "Kualitas",
     "supervisorLegality": "Legalitas",
-    "supervisorApproval": "Persetujuan"
+    "supervisorApproval": "Persetujuan",
+    "opMessenger": "Pesan"
   },
   "employeeHr": {
     "uploadSection": {
@@ -8795,7 +8796,8 @@
       "step2": "Tinjau Dokumen/Pajak",
       "step3": "Permintaan Persetujuan",
       "step4": "Proses Coretax",
-      "step5": "Selesai"
+      "step5": "Pesan",
+      "step6": "Selesai"
     },
     "myStatus": {
       "title": "Status Saya",
@@ -9598,13 +9600,6 @@
     "rubricIntro": "Skor dijumlahkan dari volume transaksi aktual, kelengkapan tinjauan dokumen, alur penyelesaian, manajemen risiko, dan kontribusi DB pihak ketiga — bukan kredit dasar.",
     "rubricRoleIndividual": "Individu",
     "rubricRoleTeam": "Tim",
-    "rubric.transactionsDesc": "Transaksi aktual (gaji/faktur/PPN/bank/kalkulasi)",
-    "rubric.docReviewDesc": "Rasio penyelesaian dokumen wajib",
-    "rubric.completionFlowDesc": "Kemajuan stabil ke persetujuan/penyelesaian",
-    "rubric.riskSlaDesc": "Penalti untuk risiko, penolakan, antrian, data hilang",
-    "rubric.counterpartyDbDesc": "Entri DB pihak ketiga yang disumbang",
-    "rubric.taskCompletionDesc": "Rasio penyelesaian per anggota (sampai BPE)",
-    "rubric.queueBottleneckDesc": "Penalti antrian tim (khusus tim)",
     "teamKpiHeading": "KPI tim",
     "thTeamName": "Tim / Supervisor",
     "thMembers": "Anggota",
@@ -9648,10 +9643,6 @@
     "qualityDistVerified": "Terverifikasi",
     "qualityDistEvidence": "Butuh bukti",
     "qualityActionsHeading": "Aksi kualitas hari ini",
-    "quality.actionStep1": "Perbaiki pihak rendah-trust",
-    "quality.actionStep2": "Verifikasi kandidat bukti",
-    "quality.actionStep3": "Proses kandidat tertunda",
-    "quality.actionStep4": "Pemeliharaan data selesai",
     "qualityStatRemediation": "Perlu perbaikan",
     "qualityStatManageable": "Dapat dikelola",
     "qualityStatVerified": "Terverifikasi",
@@ -9790,6 +9781,65 @@
     "reassignReasonPlaceholder": "mis. cuti, penyeimbangan beban",
     "reassignRuleLabel": "Aturan: ",
     "addMemberFullNamePlaceholder": "mis. Novi Anggraini",
-    "minutesSuffix": "{n} mnt"
+    "minutesSuffix": "{n} mnt",
+    "rubric": {
+      "transactionsDesc": "Transaksi aktual (gaji/faktur/PPN/bank/kalkulasi)",
+      "docReviewDesc": "Rasio penyelesaian dokumen wajib",
+      "completionFlowDesc": "Kemajuan stabil ke persetujuan/penyelesaian",
+      "riskSlaDesc": "Penalti untuk risiko, penolakan, antrian, data hilang",
+      "counterpartyDbDesc": "Entri DB pihak ketiga yang disumbang",
+      "taskCompletionDesc": "Rasio penyelesaian per anggota (sampai BPE)",
+      "queueBottleneckDesc": "Penalti antrian tim (khusus tim)"
+    },
+    "quality": {
+      "actionStep1": "Perbaiki pihak rendah-trust",
+      "actionStep2": "Verifikasi kandidat bukti",
+      "actionStep3": "Proses kandidat tertunda",
+      "actionStep4": "Pemeliharaan data selesai"
+    }
+  },
+  "messenger": {
+    "title": "Pesan",
+    "subtitle": "Channel pelanggan + internal dalam satu layar. Pesan channel CUSTOMER otomatis dimasking sebagai \"AI Pajak\".",
+    "empty": {
+      "noCases": "Tidak ada kasus yang ditugaskan.",
+      "pickThread": "Pilih pelanggan di sebelah kiri.",
+      "noMessages": "Belum ada pesan. Kirim pesan pertama."
+    },
+    "list": {
+      "title": "Pelanggan saya",
+      "searchPlaceholder": "Cari nama atau NPWP",
+      "unread": "belum dibaca"
+    },
+    "channel": {
+      "customer": "Pelanggan",
+      "internal": "Internal",
+      "customerHint": "Channel terlihat pelanggan — dimasking sebagai AI Pajak",
+      "internalHint": "Hanya internal — 0% terlihat pelanggan"
+    },
+    "composer": {
+      "placeholderCustomer": "Tulis pesan ke pelanggan (terkirim sebagai AI Pajak)…",
+      "placeholderInternal": "Catatan internal (tidak terlihat pelanggan)…",
+      "send": "Kirim",
+      "sending": "Mengirim…",
+      "attach": "Lampirkan",
+      "reasonCode": "Kode alasan (opsional)"
+    },
+    "sender": {
+      "AI_PAJAK": "AI Pajak",
+      "OPERATOR": "Operator",
+      "SUPERVISOR": "Supervisor",
+      "CUSTOMER": "Pelanggan"
+    },
+    "context": {
+      "title": "Info pelanggan",
+      "npwp": "NPWP",
+      "type": "Tipe",
+      "poa": "POA",
+      "caseCode": "Kasus",
+      "openCase": "Buka kasus",
+      "noCase": "Tidak ada kasus terkait"
+    },
+    "maskNotice": "ℹ️ Pesan ini tampil sebagai \"AI Pajak\" di layar pelanggan."
   }
 }

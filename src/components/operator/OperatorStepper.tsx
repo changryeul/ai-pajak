@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
-type StepKey = 'step1' | 'step2' | 'step3' | 'step4' | 'step5';
+type StepKey = 'step1' | 'step2' | 'step3' | 'step4' | 'step5' | 'step6';
 
 interface Step {
   n: number;
@@ -25,7 +25,8 @@ const STEPS: Step[] = [
   { n: 2, key: 'step2', routes: ['/operator/review-case'] },
   { n: 3, key: 'step3', routes: ['/operator/approval-request'] },
   { n: 4, key: 'step4', routes: ['/operator/coretax'] },
-  { n: 5, key: 'step5', routes: ['/operator/history'] },
+  { n: 5, key: 'step5', routes: ['/operator/messenger'] },
+  { n: 6, key: 'step6', routes: ['/operator/history'] },
 ];
 
 export function OperatorStepper() {
@@ -43,7 +44,7 @@ export function OperatorStepper() {
 
   return (
     <div className="rounded-2xl bg-white p-3 shadow-sm">
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-6 gap-2">
         {STEPS.map((s, i) => {
           const isActive = i === activeIdx;
           const isPassed = i < activeIdx;
