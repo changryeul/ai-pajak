@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { fmtRp } from '@/lib/utils';
@@ -65,17 +65,21 @@ interface ConsultantStats {
 export default function DashboardPage() {
   const t = useTranslations();
   const params = useParams();
-  const router = useRouter();
   const locale = params.locale as string;
   const { session, isLoading } = useSession();
   usePageTitle('Dasbor');
 
-  // Operator-tier landing redirect. MUST run from useEffect, not the render
-  // body — calling window.location.href inside render fires on every
-  // re-render (useSession refreshes session on every supabase auth event),
-  // which leaves the user stuck on /dashboard with a spinner while the
-  // browser keeps queuing the same navigation. router.replace is idempotent
-  // for same-URL calls so the ref is belt-and-suspenders.
+  // Operator-tier landing redirect.
+  //
+  // History: we first set window.location.href inside the render body — that
+  // re-fired on every supabase auth-subscription tick and left the page stuck
+  // on a spinner. We then moved it to useEffect with router.replace — but
+  // router.replace is a client-side RSC nav, and on Next 16 with a leftover
+  // Service Worker / RSC cache it can land on a partial tree that triggers
+  // the same /dashboard mount again (the user reports a /dashboard ↔
+  // /operator/dashboard ping-pong even after SW unregister). Switching to
+  // window.location.replace forces a full browser nav so client state is
+  // discarded and the component cannot remount. ref guard keeps it 1-shot.
   const operatorRedirectedRef = useRef(false);
   const isOperatorTier = !!session && hasRole(
     session,
@@ -98,8 +102,10 @@ export default function DashboardPage() {
     } else {
       target = `/${locale}/operator/my-work`;
     }
-    router.replace(target);
-  }, [isLoading, session, isOperatorTier, locale, router]);
+    if (typeof window !== 'undefined') {
+      window.location.replace(target);
+    }
+  }, [isLoading, session, isOperatorTier, locale]);
 
   if (isLoading) {
     return <DashboardSkeleton />;
