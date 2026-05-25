@@ -21,7 +21,7 @@ import {
   operatorSendSchema,
   listQuerySchema,
   resolveSender,
-  resolveAssignedOperatorId,
+  resolveAssignedOperatorUserId,
   isSupervisorRole,
 } from '@/lib/messenger/operator-message';
 
@@ -60,20 +60,11 @@ async function handleList(req: RequestWithSession): Promise<Response> {
   if (channel) query = query.eq('channel', channel);
   if (since) query = query.gt('created_at', since);
 
-  // Non-supervisor operator only sees rows they're assigned to. Supervisor/
-  // master see everything (RLS already enforces this; we mirror it here so
-  // the admin client doesn't return extra rows the user wouldn't be allowed
-  // to fetch through anon).
+  // Non-supervisor operator only sees rows assigned to them. Supervisor/master
+  // see everything. RLS enforces the same rule; we mirror it here so the
+  // admin client returns the same row set the user would get through anon.
   if (!isSupervisorRole(req.session.role)) {
-    const { data: op } = await admin
-      .from('tax_operators')
-      .select('id')
-      .eq('user_id', req.session.userId)
-      .maybeSingle();
-    if (!op) {
-      return NextResponse.json({ success: true, data: { messages: [] } });
-    }
-    query = query.eq('assigned_operator_id', op.id);
+    query = query.eq('assigned_operator_id', req.session.userId);
   }
 
   const { data, error } = await query;
@@ -100,7 +91,7 @@ async function handleSend(req: RequestWithSession): Promise<Response> {
   // We allow it for ops flexibility; masking guarantees the customer never
   // sees the difference.
   const { senderRole, displaySender } = resolveSender(channel, req.session.role);
-  const assignedOperatorId = await resolveAssignedOperatorId(customerId, caseId);
+  const assignedOperatorUserId = await resolveAssignedOperatorUserId(customerId, caseId);
 
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
@@ -112,7 +103,7 @@ async function handleSend(req: RequestWithSession): Promise<Response> {
       sender_user_id: req.session.userId,
       sender_role: senderRole,
       display_sender: displaySender,
-      assigned_operator_id: assignedOperatorId,
+      assigned_operator_id: assignedOperatorUserId,
       body: text,
       reason_code: reasonCode ?? null,
       attachment_url: attachmentUrl ?? null,

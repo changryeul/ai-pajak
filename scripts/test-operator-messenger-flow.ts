@@ -53,22 +53,21 @@ function record(name: string, pass: boolean, detail?: string) {
   console.log(`   ${pass ? '✅' : '❌'} ${name}${detail ? `  (${detail})` : ''}`);
 }
 
-async function login(email: string): Promise<string> {
+interface LoginResult { token: string; userId: string }
+
+async function login(email: string): Promise<LoginResult> {
   const client = createClient(url, anonKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
   const { data, error } = await client.auth.signInWithPassword({ email, password: PASSWORD });
   if (error || !data.session) throw new Error(`login failed: ${email}: ${error?.message ?? 'no session'}`);
-  return data.session.access_token;
+  return { token: data.session.access_token, userId: data.user!.id };
 }
 
-async function getCustomerIdFor(email: string): Promise<string> {
+async function getCustomerIdForUser(userId: string): Promise<string> {
   const admin = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
-  const { data: u } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-  const user = u?.users.find((x) => x.email === email);
-  if (!user) throw new Error(`user not found: ${email}`);
-  const { data } = await admin.from('customer').select('id').eq('user_id', user.id).maybeSingle();
-  if (!data) throw new Error(`customer row not found for ${email}`);
+  const { data } = await admin.from('customer').select('id').eq('user_id', userId).maybeSingle();
+  if (!data) throw new Error(`customer row not found for user ${userId}`);
   return data.id as string;
 }
 
@@ -92,14 +91,15 @@ async function getJson(token: string, route: string): Promise<{ status: number; 
 
 async function main() {
   console.log('\n━━━━ login as 3 roles ━━━━');
-  const [opToken, supToken, custToken] = await Promise.all([
+  const [op, sup, cust] = await Promise.all([
     login(OPERATOR_EMAIL),
     login(SUPERVISOR_EMAIL),
     login(CUSTOMER_EMAIL),
   ]);
+  const opToken = op.token, supToken = sup.token, custToken = cust.token;
   console.log('   ✅ all three sessions');
 
-  const customerId = await getCustomerIdFor(CUSTOMER_EMAIL);
+  const customerId = await getCustomerIdForUser(cust.userId);
   console.log(`   📎 target customer: ${customerId}`);
 
   console.log('\n━━━━ 1. operator POST CUSTOMER channel (must mask) ━━━━');

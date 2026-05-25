@@ -21,7 +21,7 @@ import { RequestWithSession, UserRole } from '@/types/auth';
 import {
   customerSendSchema,
   listQuerySchema,
-  resolveAssignedOperatorId,
+  resolveAssignedOperatorUserId,
 } from '@/lib/messenger/operator-message';
 
 async function getCustomerIdForSession(userId: string): Promise<string | null> {
@@ -84,7 +84,7 @@ async function handleSend(req: RequestWithSession): Promise<Response> {
   }
 
   const { body: text, caseId, attachmentUrl } = parsed.data;
-  const assignedOperatorId = await resolveAssignedOperatorId(customerId, caseId);
+  const assignedOperatorUserId = await resolveAssignedOperatorUserId(customerId, caseId);
 
   const { data, error } = await getSupabaseAdmin()
     .from('operator_message')
@@ -95,7 +95,7 @@ async function handleSend(req: RequestWithSession): Promise<Response> {
       sender_user_id: req.session.userId,
       sender_role: 'CUSTOMER',
       display_sender: 'CUSTOMER',
-      assigned_operator_id: assignedOperatorId,
+      assigned_operator_id: assignedOperatorUserId,
       body: text,
       attachment_url: attachmentUrl ?? null,
     })

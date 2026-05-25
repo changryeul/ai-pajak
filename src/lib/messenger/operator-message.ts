@@ -88,19 +88,28 @@ export function resolveSender(
   return { senderRole: 'OPERATOR', displaySender: 'OPERATOR' };
 }
 
+async function taxOperatorUserId(taxOperatorId: string | null | undefined): Promise<string | null> {
+  if (!taxOperatorId) return null;
+  const { data } = await getSupabaseAdmin()
+    .from('tax_operators')
+    .select('user_id')
+    .eq('id', taxOperatorId)
+    .maybeSingle();
+  return data?.user_id ?? null;
+}
+
 /**
- * Find the tax_operators.id that should be cached on this message for RLS.
+ * Find the auth.users.id that should be cached on this message for RLS.
  *
  * Priority:
- *   1. djp_submission_queue(caseId).operator_id — the case owner
- *   2. operator_client_assignments — latest active assignment for the customer
- *   3. inherit from the latest non-null assigned_operator_id on this customer's
- *      messenger thread — keeps supervisor replies bound to the same operator
- *      who started the thread, so the operator sees the answer come back
- *      even when no formal case/assignment exists
- *   4. NULL — supervisor can still see it; non-supervisor operator cannot
+ *   1. djp_submission_queue(caseId).operator_id → tax_operators.user_id
+ *   2. operator_client_assignments — latest active for this customer
+ *   3. inherit from the latest non-null assigned_operator_id on the customer's
+ *      messenger thread (lets supervisor replies stay bound to the operator
+ *      who started the thread)
+ *   4. NULL — supervisor still sees it; non-supervisor operator does not
  */
-export async function resolveAssignedOperatorId(
+export async function resolveAssignedOperatorUserId(
   customerId: string,
   caseId?: string,
 ): Promise<string | null> {
@@ -112,7 +121,8 @@ export async function resolveAssignedOperatorId(
       .select('operator_id')
       .eq('id', caseId)
       .maybeSingle();
-    if (caseRow?.operator_id) return caseRow.operator_id;
+    const fromCase = await taxOperatorUserId(caseRow?.operator_id);
+    if (fromCase) return fromCase;
   }
 
   const { data: assignment } = await admin
@@ -123,7 +133,8 @@ export async function resolveAssignedOperatorId(
     .order('assigned_date', { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (assignment?.operator_id) return assignment.operator_id;
+  const fromAssignment = await taxOperatorUserId(assignment?.operator_id);
+  if (fromAssignment) return fromAssignment;
 
   const { data: latestMsg } = await admin
     .from('operator_message')
