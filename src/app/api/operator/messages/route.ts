@@ -91,7 +91,17 @@ async function handleSend(req: RequestWithSession): Promise<Response> {
   // We allow it for ops flexibility; masking guarantees the customer never
   // sees the difference.
   const { senderRole, displaySender } = resolveSender(channel, req.session.role);
-  const assignedOperatorUserId = await resolveAssignedOperatorUserId(customerId, caseId);
+  let assignedOperatorUserId = await resolveAssignedOperatorUserId(customerId, caseId);
+
+  // Thread bootstrap: when no case / assignment / prior thread exists, the
+  // first OPERATOR-side message becomes the thread anchor — the sender becomes
+  // the assigned operator so the same user sees the reply later. We don't do
+  // this for supervisor senders because that would let a non-supervisor lose
+  // visibility into their own conversation if the supervisor happened to be
+  // the very first poster.
+  if (!assignedOperatorUserId && senderRole === 'OPERATOR') {
+    assignedOperatorUserId = req.session.userId;
+  }
 
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
