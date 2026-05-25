@@ -166,11 +166,11 @@
     "createPoa": "Buat Surat Kuasa",
     "poaManage": "Kelola Surat Kuasa",
     "operatorSection": "Operator Pajak",
-    "operatorDashboard": "Dasbor Operator",
+    "operatorDashboard": "Dashboard",
     "submissionQueue": "Antrian Pengajuan",
-    "approvals": "Persetujuan",
-    "workloadManagement": "Manajemen Beban Kerja",
-    "operatorStatistics": "Statistik Kinerja",
+    "approvals": "Antrian Persetujuan",
+    "workloadManagement": "Penugasan Kerja",
+    "operatorStatistics": "Kinerja & Evaluasi",
     "masterStats": "Master — Statistik Platform",
     "masterCustomPricing": "Master — Harga Kustom",
     "complaints": "Keluhan Pelanggan",
@@ -237,9 +237,9 @@
     "opsHr": "HR / Evaluasi",
     "opsSystem": "Sistem",
     "allCases": "Semua Kasus",
-    "operatorTeam": "Manajemen Operator",
-    "auditLog": "Audit Log",
-    "opsSettings": "Pengaturan / Versi Form",
+    "operatorTeam": "Manajemen Staf",
+    "auditLog": "Log Perubahan & Audit",
+    "opsSettings": "Pengaturan Standar Pajak",
     "opMyWork": "Pekerjaan Saya",
     "opReview": "Tinjauan",
     "opApproval": "Permintaan Persetujuan",
@@ -260,7 +260,8 @@
     "supervisorQuality": "Kualitas",
     "supervisorLegality": "Legalitas",
     "supervisorApproval": "Persetujuan",
-    "opMessenger": "Pesan"
+    "opMessenger": "Pesan",
+    "masterArea": "Area Master"
   },
   "employeeHr": {
     "uploadSection": {

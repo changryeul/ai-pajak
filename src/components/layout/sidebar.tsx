@@ -251,49 +251,34 @@ const navItems: NavSection[] = [
       { href: '/operator/history',          icon: ClipboardList, labelKey: 'nav.opHistory' },
     ],
   },
-  // ── Supervisor / Master: 4 큰 메뉴 (Dashboard / 업무 / 인사·평가 / 시스템) ──
-  // PDF 명세대로 8개 단일 메뉴를 의미적으로 묶어 드롭다운 4 그룹으로 노출.
-  // 기존 페이지(complaints/approval-rules/review/clients/calendar)는 폐기하지 않고 적절한 그룹 안에 흡수.
+  // ── Supervisor: 평면 9-메뉴 (PDF "AI Pajak 수퍼바이저 화면_20260525") ──
+  // 이전 드롭다운 3-그룹 구조에서 평면으로 단순화. 미명시 페이지
+  // (queue/review/complaints/clients/calendar/approval-rules) 는 그대로
+  // 존속하되 사이드바에서는 빼고 각 페이지(e.g. workload, approvals)
+  // 안에서 cross-link 또는 직접 URL 로 접근.
   {
     section: 'operator',
     roles: supervisorRoles,
     items: [
-      { href: '/operator/dashboard', icon: Headphones, labelKey: 'nav.operatorDashboard' },
-      // 업무
-      {
-        href: '#', icon: ListChecks, labelKey: 'nav.opsWork',
-        children: [
-          { href: '/operator/workload', icon: BarChart3, labelKey: 'nav.workloadManagement', roles: supervisorRoles },
-          { href: '/operator/approvals', icon: CheckCircle, labelKey: 'nav.approvals', roles: supervisorRoles },
-          { href: '/operator/cases', icon: ClipboardList, labelKey: 'nav.allCases' },
-          { href: '/operator/queue', icon: ListChecks, labelKey: 'nav.submissionQueue' },
-          { href: '/operator/review', icon: FileText, labelKey: 'nav.documentReview' },
-          { href: '/operator/messenger', icon: MessageSquare, labelKey: 'nav.opMessenger' },
-          { href: '/operator/complaints', icon: MessageSquareWarning, labelKey: 'nav.complaints', roles: supervisorRoles },
-          { href: '/operator/clients', icon: Users, labelKey: 'nav.assignedClients' },
-          { href: '/tax/calendar', icon: Calendar, labelKey: 'nav.taxCalendar' },
-        ],
-      },
-      // 인사/평가 (supervisor 이상만 의미)
-      {
-        href: '#', icon: Users, labelKey: 'nav.opsHr',
-        children: [
-          { href: '/operator/team', icon: Users, labelKey: 'nav.operatorTeam', roles: supervisorRoles },
-          { href: '/operator/statistics', icon: TrendingUp, labelKey: 'nav.operatorStatistics', roles: supervisorRoles },
-        ],
-      },
-      // 시스템
-      {
-        href: '#', icon: Settings, labelKey: 'nav.opsSystem',
-        children: [
-          { href: '/operator/audit', icon: Shield, labelKey: 'nav.auditLog' },
-          { href: '/operator/approval-rules', icon: Settings, labelKey: 'nav.approvalRules', roles: supervisorRoles },
-          { href: '/operator/settings', icon: Settings, labelKey: 'nav.opsSettings' },
-        ],
-      },
-      // Master-only: platform-wide stats, custom pricing, special-service quotes (큰 그룹과 분리)
-      { href: '/admin/master', icon: TrendingUp, labelKey: 'nav.masterStats', roles: masterRoles },
-      { href: '/admin/master/custom-pricing', icon: Settings, labelKey: 'nav.masterCustomPricing', roles: masterRoles },
+      { href: '/operator/dashboard',  icon: Headphones,    labelKey: 'nav.operatorDashboard' },
+      { href: '/operator/workload',   icon: ListChecks,    labelKey: 'nav.workloadManagement' },
+      { href: '/operator/approvals',  icon: CheckCircle,   labelKey: 'nav.approvals' },
+      { href: '/operator/team',       icon: Users,         labelKey: 'nav.operatorTeam' },
+      { href: '/operator/statistics', icon: TrendingUp,    labelKey: 'nav.operatorStatistics' },
+      { href: '/operator/cases',      icon: ClipboardList, labelKey: 'nav.allCases' },
+      { href: '/operator/messenger',  icon: MessageSquare, labelKey: 'nav.opMessenger' },
+      { href: '/operator/audit',      icon: Shield,        labelKey: 'nav.auditLog' },
+      { href: '/operator/settings',   icon: Settings,      labelKey: 'nav.opsSettings' },
+    ],
+  },
+  // ── Master-only: 별도 섹션 (supervisor 평면 9-메뉴 와 시각적 분리) ──
+  {
+    section: 'master',
+    labelKey: 'nav.masterArea',
+    roles: masterRoles,
+    items: [
+      { href: '/admin/master',                icon: TrendingUp, labelKey: 'nav.masterStats' },
+      { href: '/admin/master/custom-pricing', icon: Settings,   labelKey: 'nav.masterCustomPricing' },
     ],
   },
   {

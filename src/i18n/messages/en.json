@@ -166,11 +166,11 @@
     "createPoa": "Create POA",
     "poaManage": "Manage POA",
     "operatorSection": "Tax Operator",
-    "operatorDashboard": "Operator Dashboard",
+    "operatorDashboard": "Dashboard",
     "submissionQueue": "Submission Queue",
-    "approvals": "Approvals",
-    "workloadManagement": "Workload Management",
-    "operatorStatistics": "Performance Statistics",
+    "approvals": "Approval Queue",
+    "workloadManagement": "Work Assignment",
+    "operatorStatistics": "Performance & Review",
     "masterStats": "Master — Platform Stats",
     "masterCustomPricing": "Master — Custom Pricing",
     "complaints": "Complaints",
@@ -237,9 +237,9 @@
     "opsHr": "HR / Evaluation",
     "opsSystem": "System",
     "allCases": "All Cases",
-    "operatorTeam": "Operator Management",
-    "auditLog": "Audit Log",
-    "opsSettings": "Settings / Form Version",
+    "operatorTeam": "Staff Management",
+    "auditLog": "Change & Audit Log",
+    "opsSettings": "Tax Standards Settings",
     "opMyWork": "My Work",
     "opReview": "Review",
     "opApproval": "Approval Request",
@@ -260,7 +260,8 @@
     "supervisorQuality": "Quality",
     "supervisorLegality": "Legality",
     "supervisorApproval": "Approval",
-    "opMessenger": "Messenger"
+    "opMessenger": "Messenger",
+    "masterArea": "Master Area"
   },
   "employeeHr": {
     "uploadSection": {
