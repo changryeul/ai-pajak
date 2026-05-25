@@ -1,11 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { fmtRp } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   FileText,
   Clock,
@@ -65,9 +65,41 @@ interface ConsultantStats {
 export default function DashboardPage() {
   const t = useTranslations();
   const params = useParams();
+  const router = useRouter();
   const locale = params.locale as string;
   const { session, isLoading } = useSession();
   usePageTitle('Dasbor');
+
+  // Operator-tier landing redirect. MUST run from useEffect, not the render
+  // body — calling window.location.href inside render fires on every
+  // re-render (useSession refreshes session on every supabase auth event),
+  // which leaves the user stuck on /dashboard with a spinner while the
+  // browser keeps queuing the same navigation. router.replace is idempotent
+  // for same-URL calls so the ref is belt-and-suspenders.
+  const operatorRedirectedRef = useRef(false);
+  const isOperatorTier = !!session && hasRole(
+    session,
+    UserRole.TAX_OPERATOR,
+    UserRole.TAX_OPERATOR_LEAD,
+    UserRole.TAX_OPERATOR_SUPERVISOR,
+    UserRole.TAX_OPERATOR_MASTER,
+  );
+  useEffect(() => {
+    if (isLoading || !session || !isOperatorTier || operatorRedirectedRef.current) return;
+    operatorRedirectedRef.current = true;
+    let target: string;
+    if (session.role === UserRole.TAX_OPERATOR_MASTER) {
+      target = `/${locale}/admin/master`;
+    } else if (
+      session.role === UserRole.TAX_OPERATOR_LEAD ||
+      session.role === UserRole.TAX_OPERATOR_SUPERVISOR
+    ) {
+      target = `/${locale}/operator/dashboard`;
+    } else {
+      target = `/${locale}/operator/my-work`;
+    }
+    router.replace(target);
+  }, [isLoading, session, isOperatorTier, locale, router]);
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -97,31 +129,8 @@ export default function DashboardPage() {
     return <PlatformAdminDashboard session={session} locale={locale} />;
   }
 
-  if (hasRole(
-    session,
-    UserRole.TAX_OPERATOR,
-    UserRole.TAX_OPERATOR_LEAD,
-    UserRole.TAX_OPERATOR_SUPERVISOR,
-    UserRole.TAX_OPERATOR_MASTER,
-  )) {
-    // Redirect to the appropriate operator landing page.
-    //   - Master         → /admin/master (전체 KPI / 커스텀 가격)
-    //   - Supervisor/Lead → /operator/dashboard (큐·승인·팀 콘솔)
-    //   - 일반 상담원    → /operator/my-work (PDF 「백오피스_상담원」 5단계 워크플로우)
-    if (typeof window !== 'undefined') {
-      let target: string;
-      if (session.role === UserRole.TAX_OPERATOR_MASTER) {
-        target = `/${locale}/admin/master`;
-      } else if (
-        session.role === UserRole.TAX_OPERATOR_LEAD ||
-        session.role === UserRole.TAX_OPERATOR_SUPERVISOR
-      ) {
-        target = `/${locale}/operator/dashboard`;
-      } else {
-        target = `/${locale}/operator/my-work`;
-      }
-      window.location.href = target;
-    }
+  // operator-tier: keep showing skeleton until the useEffect above swaps the route.
+  if (isOperatorTier) {
     return <DashboardSkeleton />;
   }
 
