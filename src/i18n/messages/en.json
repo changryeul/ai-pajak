@@ -9842,5 +9842,21 @@
       "noCase": "No linked case"
     },
     "maskNotice": "ℹ️ This message appears as \"AI Pajak\" on the customer screen."
+  },
+  "supervisorSidebar": {
+    "appTitle": "AI Pajak Ops",
+    "subTitleSupervisor": "Supervisor Back-office",
+    "subTitleMaster": "Master Back-office",
+    "subTitleOperator": "Staff Back-office",
+    "languageLabel": "Language",
+    "actorSwitchLabel": "Actor switch (real login)",
+    "actorSwitchNote": "Open the Supervisor and Staff accounts in two browsers/tabs to share the 1:1 conversation.",
+    "searchPlaceholder": "Search my customer / case",
+    "kpiAll": "All",
+    "kpiApproval": "Approval",
+    "kpiAssignment": "Assigned",
+    "roleShortSV": "SV",
+    "roleShortMaster": "MASTER",
+    "roleShortOperator": "CS"
   }
 }

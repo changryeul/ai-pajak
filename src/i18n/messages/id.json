@@ -9842,5 +9842,21 @@
       "noCase": "Tidak ada kasus terkait"
     },
     "maskNotice": "ℹ️ Pesan ini tampil sebagai \"AI Pajak\" di layar pelanggan."
+  },
+  "supervisorSidebar": {
+    "appTitle": "AI Pajak Ops",
+    "subTitleSupervisor": "Back-office Supervisor",
+    "subTitleMaster": "Back-office Master",
+    "subTitleOperator": "Back-office Staf",
+    "languageLabel": "Bahasa",
+    "actorSwitchLabel": "Ganti aktor (login asli)",
+    "actorSwitchNote": "Buka akun Supervisor dan Staf di dua browser/tab untuk berbagi percakapan 1:1.",
+    "searchPlaceholder": "Cari pelanggan / kasus saya",
+    "kpiAll": "Total",
+    "kpiApproval": "Persetujuan",
+    "kpiAssignment": "Penugasan",
+    "roleShortSV": "SV",
+    "roleShortMaster": "MASTER",
+    "roleShortOperator": "CS"
   }
 }

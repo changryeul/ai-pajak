@@ -9842,5 +9842,21 @@
       "noCase": "无关联案件"
     },
     "maskNotice": "ℹ️ 此消息在客户屏幕上显示为\"AI Pajak\"。"
+  },
+  "supervisorSidebar": {
+    "appTitle": "AI Pajak Ops",
+    "subTitleSupervisor": "主管后台",
+    "subTitleMaster": "主管(Master) 后台",
+    "subTitleOperator": "员工后台",
+    "languageLabel": "语言",
+    "actorSwitchLabel": "实际操作员 登录切换",
+    "actorSwitchNote": "在两个浏览器/标签页中分别以主管与员工身份打开，可以共享 1:1 对话。",
+    "searchPlaceholder": "搜索我的客户 / 案件",
+    "kpiAll": "全部",
+    "kpiApproval": "审批",
+    "kpiAssignment": "分配",
+    "roleShortSV": "SV",
+    "roleShortMaster": "MASTER",
+    "roleShortOperator": "CS"
   }
 }

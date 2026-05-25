@@ -46,6 +46,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
 import { useMobileSidebar } from './mobile-sidebar';
+import { OpsSidebarHeader } from './OpsSidebarHeader';
+import { OpsSidebarFooter } from './OpsSidebarFooter';
 
 type CustomerType = 'INDIVIDUAL' | 'COMPANY';
 
@@ -366,46 +368,70 @@ export function Sidebar() {
   // AI-powered menu items
   const aiMenuPaths = ['/tax/savings', '/tax/report', '/tax/spt-tahunan/1770ss'];
 
+  // Supervisor / Master / Operator 사이드바는 PDF 「수퍼바이저 화면 20260525」
+  // spec 의 다크 상단 패널 (타이틀 + 사용자 + 언어 + 작업자 전환 + 검색) 을 사용.
+  // 그 외 role (customer/consultant/admin) 은 기존 로고 + role badge 유지.
+  const opsRoles = new Set<UserRole>([
+    UserRole.TAX_OPERATOR,
+    UserRole.TAX_OPERATOR_LEAD,
+    UserRole.TAX_OPERATOR_SUPERVISOR,
+    UserRole.TAX_OPERATOR_MASTER,
+  ]);
+  const isOpsRole = !!userRole && opsRoles.has(userRole);
+
   const sidebarContent = (
     <div className="flex h-full flex-col bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950">
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-6">
-        <Link href={`/${locale}/dashboard`} className="flex items-center gap-2" onClick={close}>
-          <img src="/logo.png" alt="AI Pajak" className="h-9" />
-        </Link>
-        <button onClick={close} className="lg:hidden rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Role badge with switcher */}
-      {userRole && (
-        <div className="px-6 pb-4">
-          <div className={cn(
-            'inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium',
-            userRole === UserRole.CUSTOMER && 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200',
-            userRole === UserRole.CONSULTANT_JTC && 'bg-gradient-to-r from-green-50 to-emerald-100 text-green-700 border border-green-200',
-            userRole === UserRole.TAX_ADVISOR_JTC && 'bg-gradient-to-r from-purple-50 to-violet-100 text-purple-700 border border-purple-200',
-            userRole === UserRole.PLATFORM_ADMIN && 'bg-gradient-to-r from-orange-50 to-amber-100 text-orange-700 border border-orange-200',
-            (userRole === UserRole.TAX_OPERATOR || userRole === UserRole.TAX_OPERATOR_LEAD || userRole === UserRole.TAX_OPERATOR_SUPERVISOR) && 'bg-gradient-to-r from-teal-50 to-cyan-100 text-teal-700 border border-teal-200',
-          )}>
-            {t(`nav.role.${userRole}`)}
+      {isOpsRole && session ? (
+        <>
+          {/* Mobile close button overlay (matches the ops-style dark header) */}
+          <button
+            onClick={close}
+            className="absolute top-3 right-3 lg:hidden rounded-lg p-1.5 text-slate-300 hover:bg-slate-800 transition-colors z-10"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <OpsSidebarHeader session={session} />
+        </>
+      ) : (
+        <>
+          {/* Logo (non-ops roles) */}
+          <div className="flex h-16 items-center justify-between px-6">
+            <Link href={`/${locale}/dashboard`} className="flex items-center gap-2" onClick={close}>
+              <img src="/logo.png" alt="AI Pajak" className="h-9" />
+            </Link>
+            <button onClick={close} className="lg:hidden rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          {/* Role switcher - shown when user has multiple roles */}
-          {availableRoles && availableRoles.length > 1 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {availableRoles.filter(r => r !== userRole).map(role => (
-                <button
-                  key={role}
-                  onClick={() => { switchRole(role); router.push(`/${locale}/dashboard`); }}
-                  className="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-all"
-                >
-                  {t('nav.switchRole', { role: t(`nav.role.${role}`) })}
-                </button>
-              ))}
+
+          {/* Role badge with switcher (non-ops roles) */}
+          {userRole && (
+            <div className="px-6 pb-4">
+              <div className={cn(
+                'inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium',
+                userRole === UserRole.CUSTOMER && 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200',
+                userRole === UserRole.CONSULTANT_JTC && 'bg-gradient-to-r from-green-50 to-emerald-100 text-green-700 border border-green-200',
+                userRole === UserRole.TAX_ADVISOR_JTC && 'bg-gradient-to-r from-purple-50 to-violet-100 text-purple-700 border border-purple-200',
+                userRole === UserRole.PLATFORM_ADMIN && 'bg-gradient-to-r from-orange-50 to-amber-100 text-orange-700 border border-orange-200',
+              )}>
+                {t(`nav.role.${userRole}`)}
+              </div>
+              {availableRoles && availableRoles.length > 1 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {availableRoles.filter(r => r !== userRole).map(role => (
+                    <button
+                      key={role}
+                      onClick={() => { switchRole(role); router.push(`/${locale}/dashboard`); }}
+                      className="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-all"
+                    >
+                      {t('nav.switchRole', { role: t(`nav.role.${role}`) })}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
 
       <div className="mx-6 border-t border-gray-100 dark:border-gray-800" />
@@ -527,11 +553,18 @@ export function Sidebar() {
 
       {/* User info + Logout */}
       <div className="border-t border-gray-100 dark:border-gray-800 p-3">
-        {session?.fullName && (
-          <div className="px-3 pb-2">
-            <p className="text-xs font-medium text-gray-900 dark:text-gray-200 truncate">{session.fullName}</p>
-            <p className="text-[10px] text-gray-400 truncate">{session.email || ''}</p>
+        {isOpsRole ? (
+          /* PDF spec: 좌측 하단 "전체·승인·배정" KPI 줄 */
+          <div className="pb-2">
+            <OpsSidebarFooter />
           </div>
+        ) : (
+          session?.fullName && (
+            <div className="px-3 pb-2">
+              <p className="text-xs font-medium text-gray-900 dark:text-gray-200 truncate">{session.fullName}</p>
+              <p className="text-[10px] text-gray-400 truncate">{session.email || ''}</p>
+            </div>
+          )
         )}
         <button
           onClick={handleLogout}

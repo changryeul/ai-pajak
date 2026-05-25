@@ -9842,5 +9842,21 @@
       "noCase": "紐付くケースなし"
     },
     "maskNotice": "ℹ️ このメッセージは顧客画面に「AI Pajak」として表示されます。"
+  },
+  "supervisorSidebar": {
+    "appTitle": "AI Pajak Ops",
+    "subTitleSupervisor": "スーパーバイザー バックオフィス",
+    "subTitleMaster": "マスター バックオフィス",
+    "subTitleOperator": "相談員 バックオフィス",
+    "languageLabel": "言語",
+    "actorSwitchLabel": "実際の作業者 ログイン切替",
+    "actorSwitchNote": "スーパーバイザーと相談員を別々のブラウザ／タブで開くと 1:1 会話が共有されます。",
+    "searchPlaceholder": "担当顧客 / ケース検索",
+    "kpiAll": "全体",
+    "kpiApproval": "承認",
+    "kpiAssignment": "割当",
+    "roleShortSV": "SV",
+    "roleShortMaster": "MASTER",
+    "roleShortOperator": "CS"
   }
 }
