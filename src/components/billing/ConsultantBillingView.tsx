@@ -84,16 +84,25 @@ export function ConsultantBillingView() {
     );
   }
 
-  if (error || !data) {
+  // JTC internal consultants get { success: true, data: null } from the API —
+  // render nothing (no error banner) since they have no standalone subscription.
+  if (!error && !data) {
+    return null;
+  }
+
+  if (error) {
     return (
       <Card className="border-amber-200 bg-amber-50">
         <CardContent className="p-4 flex items-start gap-3 text-sm text-amber-900">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-          <span>{error || t('noAccess')}</span>
+          <span>{error}</span>
         </CardContent>
       </Card>
     );
   }
+
+  // Type guard — past the !data check above, TS still needs the assertion.
+  if (!data) return null;
 
   const hasActive = data.subscription?.status === 'ACTIVE';
   const currentTier = hasActive

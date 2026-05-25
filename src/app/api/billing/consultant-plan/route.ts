@@ -88,10 +88,11 @@ export async function GET() {
     }
 
     if (partner.partnerType === 'JTC') {
-      return NextResponse.json(
-        { error: 'Kantor JTC internal tidak memiliki paket mandiri' },
-        { status: 403 }
-      );
+      // JTC internal staff have no standalone subscription — they're part of
+      // the platform owner. Return 200 with data=null (graceful no-op) so the
+      // dashboard widget can render nothing without the browser surfacing a
+      // red 403 in the console.
+      return NextResponse.json({ success: true, data: null });
     }
 
     // Current active subscription
