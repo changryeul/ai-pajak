@@ -9984,5 +9984,26 @@
     "roleShortSV": "SV",
     "roleShortMaster": "MASTER",
     "roleShortOperator": "CS"
+  },
+  "staffMessenger": {
+    "title": "메신저",
+    "subtitle": "Supervisor의 대화 상대는 고객사가 아니라 상담원입니다.",
+    "badgeSupOp": "Supervisor ↔ Operator",
+    "badgeHidden": "Hidden from Customer",
+    "pickerTitle": "메신저 상담원 선택",
+    "pickerEmpty": "대화 가능한 상담원이 없습니다.",
+    "pickerSearchPlaceholder": "상담원 이름·번호 검색",
+    "threadIntro": "상담원과의 1:1 내부 대화입니다. 고객사별 케이스 목록은 이 화면에 표시하지 않습니다.",
+    "threadEmpty": "아직 대화가 없습니다. 첫 내부 지시를 보내보세요.",
+    "kpiOperator": "상담원",
+    "kpiStatus": "상태",
+    "kpiAssignment": "배정 현황",
+    "kpiUnread": "안 읽음",
+    "composerPlaceholder": "상담원에게 보낼 내부 메시지",
+    "composerSend": "{name}에게 전송",
+    "composerSending": "전송 중…",
+    "securityNote": "Supervisor 메시지는 상담원에게 내부지시로 전달됩니다. 고객 메신저에는 노출되지 않습니다.",
+    "operatorMode": "Supervisor에게서 받은 내부 지시를 확인합니다.",
+    "pickSupervisor": "대화 가능한 Supervisor를 선택하세요."
   }
 }

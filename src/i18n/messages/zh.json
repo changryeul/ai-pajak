@@ -9858,5 +9858,26 @@
     "roleShortSV": "SV",
     "roleShortMaster": "MASTER",
     "roleShortOperator": "CS"
+  },
+  "staffMessenger": {
+    "title": "消息",
+    "subtitle": "主管的对话对象是员工，而不是客户。",
+    "badgeSupOp": "Supervisor ↔ Operator",
+    "badgeHidden": "对客户隐藏",
+    "pickerTitle": "选择员工",
+    "pickerEmpty": "没有可对话的员工。",
+    "pickerSearchPlaceholder": "搜索员工姓名 / 编号",
+    "threadIntro": "与所选员工的 1:1 内部对话。此处不显示客户案件。",
+    "threadEmpty": "尚无消息。发送第一条内部指示吧。",
+    "kpiOperator": "员工",
+    "kpiStatus": "状态",
+    "kpiAssignment": "负荷",
+    "kpiUnread": "未读",
+    "composerPlaceholder": "发送给员工的内部消息",
+    "composerSend": "发送给 {name}",
+    "composerSending": "发送中…",
+    "securityNote": "主管消息以内部指示形式送达，绝不在客户消息中显示。",
+    "operatorMode": "查看主管发来的内部指示。",
+    "pickSupervisor": "请选择要对话的主管。"
   }
 }

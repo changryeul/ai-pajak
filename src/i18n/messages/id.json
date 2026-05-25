@@ -9858,5 +9858,26 @@
     "roleShortSV": "SV",
     "roleShortMaster": "MASTER",
     "roleShortOperator": "CS"
+  },
+  "staffMessenger": {
+    "title": "Pesan Internal",
+    "subtitle": "Supervisor berbicara dengan staf, bukan dengan pelanggan.",
+    "badgeSupOp": "Supervisor ↔ Operator",
+    "badgeHidden": "Tersembunyi dari Pelanggan",
+    "pickerTitle": "Pilih staf",
+    "pickerEmpty": "Tidak ada staf yang tersedia.",
+    "pickerSearchPlaceholder": "Cari nama / ID staf",
+    "threadIntro": "Obrolan internal 1:1 dengan staf terpilih. Daftar kasus pelanggan tidak ditampilkan di sini.",
+    "threadEmpty": "Belum ada pesan. Kirim instruksi internal pertama.",
+    "kpiOperator": "Staf",
+    "kpiStatus": "Status",
+    "kpiAssignment": "Beban",
+    "kpiUnread": "Belum dibaca",
+    "composerPlaceholder": "Pesan internal untuk staf",
+    "composerSend": "Kirim ke {name}",
+    "composerSending": "Mengirim…",
+    "securityNote": "Pesan Supervisor disampaikan sebagai instruksi internal. Tidak pernah muncul di messenger pelanggan.",
+    "operatorMode": "Instruksi internal dari Supervisor Anda.",
+    "pickSupervisor": "Pilih Supervisor untuk diajak bicara."
   }
 }

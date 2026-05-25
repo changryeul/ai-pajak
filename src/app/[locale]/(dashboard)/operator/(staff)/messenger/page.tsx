@@ -18,6 +18,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useSession } from '@/hooks/useSession';
+import { UserRole } from '@/types/auth';
+import { SupervisorMessengerView } from '@/components/messenger/SupervisorMessengerView';
 import {
   Loader2,
   Search,
@@ -76,6 +79,23 @@ function formatTime(iso: string): string {
 }
 
 export default function MessengerPage() {
+  const { session, isLoading } = useSession();
+
+  // Supervisor / Master 는 PDF p.21 spec 의 staff-internal messenger 사용.
+  // operator (TAX_OPERATOR / LEAD) 는 기존 operator↔customer 메신저 그대로.
+  if (
+    !isLoading &&
+    session &&
+    (session.role === UserRole.TAX_OPERATOR_SUPERVISOR ||
+      session.role === UserRole.TAX_OPERATOR_MASTER)
+  ) {
+    return <SupervisorMessengerView session={session} />;
+  }
+
+  return <OperatorMessengerInner />;
+}
+
+function OperatorMessengerInner() {
   const { locale } = useParams<{ locale: string }>();
   const t = useTranslations('messenger');
   const tStatus = useTranslations('operatorStaff.caseStatus');

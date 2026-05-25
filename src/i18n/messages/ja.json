@@ -9858,5 +9858,26 @@
     "roleShortSV": "SV",
     "roleShortMaster": "MASTER",
     "roleShortOperator": "CS"
+  },
+  "staffMessenger": {
+    "title": "メッセンジャー",
+    "subtitle": "スーパーバイザーの会話相手は顧客ではなく相談員です。",
+    "badgeSupOp": "Supervisor ↔ Operator",
+    "badgeHidden": "顧客には非表示",
+    "pickerTitle": "相談員を選択",
+    "pickerEmpty": "対話可能な相談員がいません。",
+    "pickerSearchPlaceholder": "相談員の名前 / ID 検索",
+    "threadIntro": "選択した相談員との 1:1 社内会話です。顧客ケースは表示しません。",
+    "threadEmpty": "まだメッセージがありません。最初の社内指示を送信してください。",
+    "kpiOperator": "相談員",
+    "kpiStatus": "状態",
+    "kpiAssignment": "稼働",
+    "kpiUnread": "未読",
+    "composerPlaceholder": "相談員への社内メッセージ",
+    "composerSend": "{name} に送信",
+    "composerSending": "送信中…",
+    "securityNote": "スーパーバイザーのメッセージは社内指示として届きます。顧客側メッセンジャーには絶対に表示されません。",
+    "operatorMode": "スーパーバイザーからの社内指示を確認します。",
+    "pickSupervisor": "会話するスーパーバイザーを選択してください。"
   }
 }

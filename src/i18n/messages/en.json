@@ -9858,5 +9858,26 @@
     "roleShortSV": "SV",
     "roleShortMaster": "MASTER",
     "roleShortOperator": "CS"
+  },
+  "staffMessenger": {
+    "title": "Messenger",
+    "subtitle": "A Supervisor talks to staff, not to customers.",
+    "badgeSupOp": "Supervisor ↔ Operator",
+    "badgeHidden": "Hidden from Customer",
+    "pickerTitle": "Pick a staff member",
+    "pickerEmpty": "No staff available to chat.",
+    "pickerSearchPlaceholder": "Search staff name / ID",
+    "threadIntro": "1:1 internal chat with the selected staff. Customer cases are not shown here.",
+    "threadEmpty": "No messages yet. Send the first internal instruction.",
+    "kpiOperator": "Staff",
+    "kpiStatus": "State",
+    "kpiAssignment": "Workload",
+    "kpiUnread": "Unread",
+    "composerPlaceholder": "Internal message to the staff",
+    "composerSend": "Send to {name}",
+    "composerSending": "Sending…",
+    "securityNote": "Supervisor messages are delivered as internal instructions. They are never shown in the customer messenger.",
+    "operatorMode": "Internal instructions received from your Supervisor.",
+    "pickSupervisor": "Pick a Supervisor to talk to."
   }
 }
