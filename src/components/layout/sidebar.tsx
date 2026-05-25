@@ -300,9 +300,15 @@ const navItems: NavSection[] = [
       { href: '/admin/rule-test', icon: Activity, labelKey: 'nav.ruleTest' },
     ],
   },
-  // ── 기타 역할: 계정 섹션 (기존 구조 유지) ──
-  // 개인(INDIVIDUAL) 고객의 내정보/결제/도움말은 individual-main 섹션으로 이동했으므로
-  // 여기서는 consultant/operator/platform_admin 전용 항목만 남긴다.
+  // ── 기타 역할: 계정 섹션 ──
+  //
+  // PDF 「수퍼바이저 화면 20260525」 의 supervisor 사이드바에는 평면 9-메뉴 +
+  // (master 면) 마스터 영역만 있고 별도 "계정" 섹션이 없다 (세무 기준 설정 ·
+  // 도움말은 평면 9-메뉴 안에 포함되거나 페이지 내부에서 진입). 그래서
+  // operator-tier (TAX_OPERATOR / LEAD / SUPERVISOR / MASTER) 의 사이드바
+  // 에는 이 섹션을 노출하지 않는다. operator-tier 의 "/settings" 와 "/help"
+  // 경로 자체는 살아있지만 진입은 다른 곳에서. consultant/platform_admin
+  // 은 기존 그대로.
   {
     section: 'account',
     labelKey: 'nav.account',
@@ -311,9 +317,9 @@ const navItems: NavSection[] = [
       { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: consultantRoles },
       { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: consultantRoles },
       { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: consultantRoles },
-      { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR_JTC, UserRole.TAX_OPERATOR_SUPERVISOR] },
-      { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN] },
-      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [...consultantRoles, ...operatorRoles, UserRole.PLATFORM_ADMIN] },
+      { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR_JTC] },
+      { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: [...consultantRoles, UserRole.PLATFORM_ADMIN] },
+      { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [...consultantRoles, UserRole.PLATFORM_ADMIN] },
     ],
   },
 ];
