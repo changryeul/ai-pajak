@@ -200,30 +200,47 @@ export async function middleware(request: NextRequest) {
 
   // Operator-tier /dashboard landing — fastest possible cutoff.
   //
-  // We already do this in (dashboard)/dashboard/layout.tsx, but some users
-  // hit a /dashboard ↔ /operator/dashboard client ping-pong even with the
-  // server layout in place (Vercel edge HTML cache + stale Service Worker
-  // serving the previous build's `window.location.href`-in-render code).
-  // Middleware runs at the edge before any cache, so this is the level that
-  // guarantees the operator never sees a /dashboard tree mount at all.
+  // Middleware runs at the edge before any cache so this is the level that
+  // guarantees an operator-tier user is never served a /dashboard tree HTML.
+  // CRITICAL: the role we pick here MUST match what (dashboard)/operator/
+  // layout.tsx + resolveUserRole pick, otherwise dual-role users (e.g. a
+  // tester with both TAX_ADVISOR_JTC and TAX_OPERATOR_SUPERVISOR active)
+  // ping-pong forever between the two paths and Chrome eventually triggers
+  // its "Throttling navigation" protection, leaving the page blank.
   //
-  // CUSTOMER / CONSULTANT_JTC / TAX_ADVISOR_JTC / PLATFORM_ADMIN pass through.
+  // Priority is the same ordered list resolveUserRole uses — the FIRST role
+  // present in user_roles wins, not just "has any operator role".
   if (user && pathWithoutLocale === '/dashboard') {
     const { data: roleRows } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .eq('is_active', true);
-    const roles = (roleRows ?? []).map((r) => r.role as string);
-    if (roles.includes('TAX_OPERATOR_MASTER')) {
+    const userRoles = new Set((roleRows ?? []).map((r) => r.role as string));
+    const PRIORITY = [
+      'TAX_OPERATOR_MASTER',
+      'TAX_ADVISOR_JTC',
+      'CONSULTANT_JTC',
+      'TAX_OPERATOR_SUPERVISOR',
+      'TAX_OPERATOR_LEAD',
+      'TAX_OPERATOR',
+      'CUSTOMER',
+      'PLATFORM_ADMIN',
+    ];
+    const effective = PRIORITY.find((p) => userRoles.has(p)) ?? null;
+
+    if (effective === 'TAX_OPERATOR_MASTER') {
       return NextResponse.redirect(new URL(`/${locale}/admin/master`, request.url));
     }
-    if (roles.includes('TAX_OPERATOR_SUPERVISOR') || roles.includes('TAX_OPERATOR_LEAD')) {
+    if (effective === 'TAX_OPERATOR_SUPERVISOR' || effective === 'TAX_OPERATOR_LEAD') {
       return NextResponse.redirect(new URL(`/${locale}/operator/dashboard`, request.url));
     }
-    if (roles.includes('TAX_OPERATOR')) {
+    if (effective === 'TAX_OPERATOR') {
       return NextResponse.redirect(new URL(`/${locale}/operator/my-work`, request.url));
     }
+    // TAX_ADVISOR_JTC, CONSULTANT_JTC, CUSTOMER, PLATFORM_ADMIN, null → fall
+    // through to the regular /dashboard tree (which renders the role-aware
+    // client dashboards).
   }
 
   // INDIVIDUAL onboarding enforcement:
