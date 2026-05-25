@@ -65,18 +65,50 @@ export async function buildSupervisorThreads(
 ): Promise<StaffThreadRow[]> {
   const admin = getSupabaseAdmin();
 
-  // 1) 모든 active operator (supervisor 도 작업 받지만 self pair 는 CHECK 로 차단)
-  const { data: ops } = await admin
+  // 1) operator-tier 역할을 가진 active user 들. 환경에 따라 tax_operators 가
+  //    비어 있을 수 있으므로 (prod 의 일부 시드 누락) source-of-truth 는
+  //    user_roles 로 잡고, tax_operators 는 메타 (employee_id / work_state /
+  //    active_load) enrich 용으로만 사용.
+  const { data: roleRows } = await admin
+    .from('user_roles')
+    .select('user_id, role')
+    .eq('is_active', true)
+    .in('role', [
+      'TAX_OPERATOR',
+      'TAX_OPERATOR_LEAD',
+      'TAX_OPERATOR_SUPERVISOR',
+      'TAX_OPERATOR_MASTER',
+    ])
+    .neq('user_id', supervisorUserId);
+
+  const operatorUserIds = Array.from(
+    new Set((roleRows ?? []).map((r) => r.user_id as string)),
+  );
+  if (operatorUserIds.length === 0) return [];
+
+  // tax_operators 메타 (있으면) — 정렬 안정성 위해 name 기준 정렬은 메타 있는
+  // row 우선, 그 다음 미시드 row 는 user_id 순으로.
+  const { data: opMeta } = await admin
     .from('tax_operators')
     .select('user_id, employee_id, name, work_state, active_load')
-    .eq('is_active', true)
-    .neq('user_id', supervisorUserId)
-    .order('name', { ascending: true });
+    .in('user_id', operatorUserIds);
+  const metaByUid = new Map(
+    (opMeta ?? []).map((o) => [o.user_id as string, o]),
+  );
 
-  const operatorUserIds = (ops ?? [])
-    .map((o) => o.user_id as string | null)
-    .filter((id): id is string => !!id);
-  if (operatorUserIds.length === 0) return [];
+  // 메타 없는 row 의 fallback name 은 user_id 의 short prefix.
+  const opsBase = operatorUserIds.map((uid) => {
+    const m = metaByUid.get(uid);
+    return {
+      user_id: uid,
+      employee_id: (m?.employee_id as string | null) ?? null,
+      name: (m?.name as string | null) ?? `User ${uid.slice(0, 8)}`,
+      work_state: (m?.work_state as string | null) ?? 'offline',
+      active_load: (m?.active_load as number | null) ?? 0,
+    };
+  });
+  opsBase.sort((a, b) => a.name.localeCompare(b.name));
+  const ops = opsBase;
 
   // 2) 같은 supervisor 와의 모든 staff_internal_message — last + unread
   const { data: msgs } = await admin
@@ -107,22 +139,19 @@ export async function buildSupervisorThreads(
     }
   }
 
-  return (ops ?? [])
-    .filter((o) => !!o.user_id)
-    .map((o) => {
-      const opId = o.user_id as string;
-      const last = lastByOperator.get(opId);
-      return {
-        operator_user_id: opId,
-        employee_id: (o.employee_id as string | null) ?? null,
-        name: (o.name as string) ?? '',
-        work_state: (o.work_state as string | null) ?? null,
-        active_load: (o.active_load as number | null) ?? 0,
-        unread: unreadByOperator.get(opId) ?? 0,
-        last_message_at: last?.created_at ?? null,
-        last_message_body: last?.body ?? null,
-      };
-    });
+  return ops.map((o) => {
+    const last = lastByOperator.get(o.user_id);
+    return {
+      operator_user_id: o.user_id,
+      employee_id: o.employee_id,
+      name: o.name,
+      work_state: o.work_state,
+      active_load: o.active_load,
+      unread: unreadByOperator.get(o.user_id) ?? 0,
+      last_message_at: last?.created_at ?? null,
+      last_message_body: last?.body ?? null,
+    };
+  });
 }
 
 /**
