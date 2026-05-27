@@ -225,7 +225,7 @@ Three env vars control the operator Coretax automation. Default is **manual mode
 
 | Var | Required when | Purpose |
 |---|---|---|
-| `CORETAX_SUBMIT_ENABLED` | `'true'` to enable API mode | Master switch — must be exact string `'true'` |
+| ~~`CORETAX_SUBMIT_ENABLED`~~ | **DEPRECATED (Track D, 2026-05-27)** | Moved to `system_setting.coretax.submit_enabled` JSONB row. MASTER toggles via UI at `/operator/settings` §3 Coretax Status card. |
 | `CORETAX_API_BASE_URL` | API mode | e.g. `https://api-coretax.pajak.go.id` |
 | `CORETAX_API_TOKEN` | API mode | DJP-issued bearer token |
 | `CORETAX_API_TIMEOUT_MS` | optional | Per-call timeout (default `15000`) |
@@ -338,7 +338,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs 13 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry, tax code rule CRUD + RBAC (Track B). Last verified run was 13/13 PASS.
+- `npm run test:smoke:prod` — runs 14 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry, tax code rule CRUD + RBAC (Track B), coretax toggle (Track D). Last verified run was 14/14 PASS.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars). Requires repo secrets `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` / `ANTHROPIC_API_KEY` (optional `E2E_BASE_URL`).
 
@@ -361,6 +361,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-upload-autoparse.ts` — upload `autoParse=true` 응답 shape (data.parse) + non-invoice 슬롯엔 미부착 검증
 - `SEED_TARGET=prod npx tsx scripts/test-invoice-line-review.ts` — PATCH `/invoice-lines/:lineId` is_reviewed flip → GET 반영 → reviewer_note persist → 빈 body 400
 - `SEED_TARGET=prod npx tsx scripts/test-tax-code-rule.ts` — Track B+C+A Tax Code Rule CRUD + RBAC + audit timeline + access gate (GET 4 roles + PATCH 5 roles + 400/404 + audit-log GET 2 roles, 총 18)
+- `SEED_TARGET=prod npx tsx scripts/test-coretax-toggle.ts` — Track D Coretax 토글 GET/PATCH RBAC + DB round-trip (총 5 assertion)
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 
