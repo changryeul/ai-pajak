@@ -13,7 +13,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { requireRole } from '@/middleware/rbac';
-import { withAudit } from '@/middleware/audit';
+import { recordAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { UserRole, type RequestWithSession } from '@/types/auth';
@@ -38,6 +38,8 @@ function getId(req: NextRequest): string | null {
   return m?.[1] ?? null;
 }
 
+const PATCHABLE_FIELDS = ['tax_code', 'rate_rule', 'condition_text', 'doc_required', 'review_note'] as const;
+
 async function handlePatch(req: RequestWithSession): Promise<Response> {
   const id = getId(req as unknown as NextRequest);
   if (!id || !UUID_RE.test(id)) {
@@ -50,7 +52,26 @@ async function handlePatch(req: RequestWithSession): Promise<Response> {
   }
 
   const admin = getSupabaseAdmin();
-  const { data, error } = await admin
+
+  // 1. SELECT before — needed for diff capture in audit log.
+  const { data: before, error: selErr } = await admin
+    .from('tax_code_rule')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (selErr) {
+    if (selErr.code === 'PGRST116') {
+      return NextResponse.json({ error: 'rule not found' }, { status: 404 });
+    }
+    loggers.api.error(
+      { err: selErr.message, route: `/api/admin/tax-code-rule/${id}`, code: selErr.code },
+      'tax_code_rule pre-update select failed',
+    );
+    return NextResponse.json({ error: 'Failed to update rule' }, { status: 500 });
+  }
+
+  // 2. UPDATE
+  const { data: after, error: updErr } = await admin
     .from('tax_code_rule')
     .update({
       ...parsed.data,
@@ -60,19 +81,40 @@ async function handlePatch(req: RequestWithSession): Promise<Response> {
     .eq('id', id)
     .select('*')
     .single();
-
-  if (error) {
-    // PostgREST PGRST116 = no row matched
-    if (error.code === 'PGRST116') {
-      return NextResponse.json({ error: 'rule not found' }, { status: 404 });
-    }
+  if (updErr) {
     loggers.api.error(
-      { err: error.message, route: `/api/admin/tax-code-rule/${id}`, code: error.code },
+      { err: updErr.message, route: `/api/admin/tax-code-rule/${id}`, code: updErr.code },
       'tax_code_rule update failed',
     );
     return NextResponse.json({ error: 'Failed to update rule' }, { status: 500 });
   }
-  return NextResponse.json({ data: data as TaxCodeRule });
+
+  // 3. Compute diff — only fields that actually changed.
+  const beforeRule = before as TaxCodeRule;
+  const afterRule = after as TaxCodeRule;
+  const diff: Record<string, { before: string; after: string }> = {};
+  for (const k of PATCHABLE_FIELDS) {
+    if (parsed.data[k] !== undefined && beforeRule[k] !== afterRule[k]) {
+      diff[k] = { before: beforeRule[k], after: afterRule[k] };
+    }
+  }
+
+  // 4. Record audit row only if something actually changed (skip no-op PATCH).
+  if (Object.keys(diff).length > 0) {
+    await recordAudit({
+      action: 'TAX_CODE_RULE_UPDATE',
+      actorUserId: req.session.userId,
+      actorRole: req.session.role,
+      details: { ruleId: id, category: afterRule.category, diff },
+      ipAddress:
+        req.headers.get('x-forwarded-for') ||
+        req.headers.get('x-real-ip') ||
+        null,
+      userAgent: req.headers.get('user-agent') || null,
+    });
+  }
+
+  return NextResponse.json({ data: afterRule });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -80,6 +122,6 @@ export async function PATCH(request: NextRequest) {
     requireAuth,
     blockPlatformAdmin,
     requireRole(UserRole.TAX_OPERATOR_MASTER),
-    withAudit('TAX_CODE_RULE_UPDATE'),
+    // withAudit 제거 — handler 가 SELECT before → UPDATE → diff 계산 후 recordAudit 직접 호출.
   )(request as RequestWithSession, handlePatch);
 }
