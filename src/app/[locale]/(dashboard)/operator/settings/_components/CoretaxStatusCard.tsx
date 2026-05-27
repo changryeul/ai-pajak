@@ -53,6 +53,7 @@ export function CoretaxStatusCard({ initial, canEdit }: Props) {
             onClick={toggle}
             className={`rounded px-2 py-1 text-[10px] font-bold border ${enabled ? 'bg-emerald-700 text-white border-emerald-800' : 'bg-amber-700 text-white border-amber-800'} disabled:opacity-50`}
             aria-pressed={enabled}
+            aria-busy={saving}
           >
             {saving ? '…' : t('coretaxToggle')}
           </button>
