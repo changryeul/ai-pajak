@@ -270,7 +270,16 @@ const navItems: NavSection[] = [
       { href: '/operator/cases',      icon: ClipboardList, labelKey: 'nav.allCases' },
       { href: '/operator/messenger',  icon: MessageSquare, labelKey: 'nav.opMessenger' },
       { href: '/operator/audit',      icon: Shield,        labelKey: 'nav.auditLog' },
-      { href: '/operator/settings',   icon: Settings,      labelKey: 'nav.opsSettings' },
+      {
+        href: '/operator/settings',
+        icon: Settings,
+        labelKey: 'nav.opsSettings',
+        // Track A: narrow visibility to MASTER + SUPERVISOR (PDF "Admin/Tax Engine"
+        // governance scope). LEAD 는 상위 supervisorRoles 에 포함이지만 settings
+        // 페이지는 OPERATOR/LEAD 진입 시 silent redirect 라 sidebar 도 일관성 위해
+        // 좁힘.
+        roles: [UserRole.TAX_OPERATOR_SUPERVISOR, UserRole.TAX_OPERATOR_MASTER],
+      },
     ],
   },
   // ── Master-only: 별도 섹션 (supervisor 평면 9-메뉴 와 시각적 분리) ──
