@@ -1,5 +1,5 @@
 /**
- * Smoke test for Tax Code Rule (Track B):
+ * Smoke test for Tax Code Rule (Track B + Track C):
  *   1.  MASTER GET → 200, 7 rows, expected category set
  *   2.  CONSULTANT_JTC GET → 200 (read allowed)
  *   3.  PLATFORM_ADMIN GET → 403 (blockPlatformAdmin)
@@ -12,6 +12,9 @@
  *   10. PLATFORM_ADMIN PATCH → 403
  *   11. MASTER PATCH empty body → 400
  *   12. MASTER PATCH non-existent uuid → 404
+ *   13. MASTER GET audit-log → 200, array (Track C)
+ *   14. PATCH 후 audit-log 첫 행 = 방금 변경 (ruleId/category/before/after) (Track C)
+ *   15. PLATFORM_ADMIN GET audit-log → 403 (Track C)
  *
  * Prereq: master.test@aipajak.com seeded (seed-master-and-external.ts).
  * Migration 20260527000001_tax_code_rule.sql applied.
@@ -161,6 +164,49 @@ async function run() {
   const r12 = await patch(masterTok, '00000000-0000-0000-0000-000000000000', { review_note: 'x' });
   if (r12.status === 404) { console.log(`✅ 12. non-existent uuid → 404`); pass++; }
   else { console.error(`✗ 12. non-existent uuid ${r12.status}`); fail++; }
+
+  // ── Track C: audit-log endpoint ──
+
+  // 13. MASTER GET audit-log → 200, array
+  async function getAudit(token: string, limit = 10) {
+    const r = await fetch(`${baseUrl}/api/admin/tax-code-rule/audit-log?limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return { status: r.status, body: await r.json().catch(() => ({})) };
+  }
+  const r13 = await getAudit(masterTok);
+  if (r13.status === 200 && Array.isArray(r13.body.data)) {
+    console.log(`✅ 13. MASTER GET audit-log → 200, ${r13.body.data.length} rows`); pass++;
+  } else {
+    console.error(`✗ 13. MASTER GET audit-log:`, r13); fail++;
+  }
+
+  // 14. PATCH 후 audit-log 첫 행 = 방금 변경
+  const TEMP2 = `__SMOKE_AUDIT_${Date.now()}__`;
+  const r14p = await patch(masterTok, pph21.id, { review_note: TEMP2 });
+  if (r14p.status !== 200) {
+    console.error(`✗ 14. setup PATCH failed:`, r14p); fail++;
+  } else {
+    const r14 = await getAudit(masterTok, 1);
+    const first = r14.body.data?.[0];
+    const matches =
+      first?.ruleId === pph21.id &&
+      first?.category === 'PPh21' &&
+      first?.diff?.review_note?.before === originalReviewNote &&
+      first?.diff?.review_note?.after === TEMP2;
+    if (matches) {
+      console.log(`✅ 14. audit-log 첫 행 = 방금 PATCH (before/after 정확)`); pass++;
+    } else {
+      console.error(`✗ 14. audit-log first row mismatch:`, first); fail++;
+    }
+    // revert
+    await patch(masterTok, pph21.id, { review_note: originalReviewNote });
+  }
+
+  // 15. PLATFORM_ADMIN GET audit-log → 403
+  const r15 = await getAudit(adminTok);
+  if (r15.status === 403) { console.log(`✅ 15. PLATFORM_ADMIN GET audit-log → 403`); pass++; }
+  else { console.error(`✗ 15. PLATFORM_ADMIN GET audit-log ${r15.status}`); fail++; }
 
   console.log(`\n— ${pass} pass / ${fail} fail —`);
   process.exit(fail === 0 ? 0 : 1);
