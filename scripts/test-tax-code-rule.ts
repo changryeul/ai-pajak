@@ -32,7 +32,6 @@ const baseUrl =
 console.log(`🌐 ${baseUrl}\n`);
 
 const EXPECTED_CATEGORIES = ['PPh21', 'PPh23', 'PPh4(2)', 'PPh22', 'PPh26', 'PPN', 'PPh25'];
-const ORIGINAL_PPH21_REVIEW = '직원구분/비과세/공제항목 확인';
 const TEMP = `__SMOKE_${Date.now()}__`;
 
 async function login(email: string): Promise<string | null> {
@@ -89,6 +88,18 @@ async function run() {
   const pph21 = r1.body.data?.find((x: { category: string }) => x.category === 'PPh21');
   if (!pph21) { console.error('✗ PPh21 row missing — abort'); process.exit(1); }
 
+  // Guard: prior aborted run could have left __SMOKE_ marker in prod.
+  // If so, we'd overwrite the marker with another marker and the revert
+  // would never get back to the real value. Abort with a clear message
+  // instead so a human can investigate.
+  if (pph21.review_note.startsWith('__SMOKE_')) {
+    console.error(`✗ leftover TEMP marker detected in prod (${pph21.review_note}). A prior smoke run aborted mid-write — manual revert needed before this test can run.`);
+    process.exit(1);
+  }
+
+  // Self-healing baseline: capture the real value from r1, not hardcoded.
+  const originalReviewNote = pph21.review_note;
+
   // 2. CONSULTANT GET
   const r2 = await get(consTok);
   if (r2.status === 200) { console.log(`✅ 2. CONSULTANT GET → 200`); pass++; }
@@ -117,7 +128,7 @@ async function run() {
   }
 
   // 6. revert
-  const r6 = await patch(masterTok, pph21.id, { review_note: ORIGINAL_PPH21_REVIEW });
+  const r6 = await patch(masterTok, pph21.id, { review_note: originalReviewNote });
   if (r6.status === 200) { console.log(`✅ 6. revert ok`); pass++; }
   else { console.error(`✗ 6. revert:`, r6); fail++; }
 
