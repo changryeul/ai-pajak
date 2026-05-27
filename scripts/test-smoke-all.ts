@@ -39,6 +39,8 @@ const STEPS: Step[] = [
   { name: 'operator queue 11-state flow', file: 'test-operator-queue-flow.ts', optional: true },
   { name: 'billing 3-endpoint smoke', file: 'test-billing-flow.ts', optional: true },
   { name: 'monitoring/Sentry flow', file: 'test-monitoring-flow.ts', optional: true },
+  // --- Admin / config governance ---------------------------------------
+  { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
 ];
 
 interface Result {

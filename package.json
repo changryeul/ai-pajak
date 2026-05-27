@@ -29,6 +29,7 @@
     "test:e2e:report": "playwright show-report",
     "test:smoke": "tsx scripts/test-smoke-all.ts",
     "test:smoke:prod": "SEED_TARGET=prod tsx scripts/test-smoke-all.ts",
+    "test:tax-code-rule": "tsx scripts/test-tax-code-rule.ts",
     "db:seed-test-users": "tsx scripts/seed-test-users.ts"
   },
   "dependencies": {
