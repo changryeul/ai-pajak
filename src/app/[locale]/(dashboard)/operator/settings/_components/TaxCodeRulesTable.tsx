@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import type { TaxCodeRule, TaxCodeRulePatch } from '@/types/tax-code-rule';
@@ -9,15 +9,6 @@ import type { TaxCodeRule, TaxCodeRulePatch } from '@/types/tax-code-rule';
 interface Props {
   initialRules: TaxCodeRule[];
   canEdit: boolean;
-}
-
-const QUERY_KEY = ['tax-code-rule'] as const;
-
-async function fetchRules(): Promise<TaxCodeRule[]> {
-  const r = await fetch('/api/admin/tax-code-rule', { cache: 'no-store' });
-  if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
-  const j = await r.json();
-  return j.data as TaxCodeRule[];
 }
 
 async function patchRule(id: string, patch: TaxCodeRulePatch): Promise<TaxCodeRule> {
@@ -37,28 +28,11 @@ function isRecentlyUpdated(iso: string): boolean {
 
 export function TaxCodeRulesTable({ initialRules, canEdit }: Props) {
   const t = useTranslations('operatorSettings.rules');
-  const qc = useQueryClient();
+  const router = useRouter();
+  const [rules, setRules] = useState<TaxCodeRule[]>(initialRules);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<TaxCodeRulePatch>({});
-
-  const { data: rules = initialRules } = useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: fetchRules,
-    initialData: initialRules,
-  });
-
-  const mutation = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: TaxCodeRulePatch }) => patchRule(id, patch),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: QUERY_KEY });
-      setEditingId(null);
-      setDraft({});
-      toast.success(t('saveButton'));
-    },
-    onError: (err: Error) => {
-      toast.error(t('saveError', { message: err.message }));
-    },
-  });
+  const [saving, setSaving] = useState(false);
 
   const startEdit = (row: TaxCodeRule) => {
     setEditingId(row.id);
@@ -74,7 +48,7 @@ export function TaxCodeRulesTable({ initialRules, canEdit }: Props) {
     setEditingId(null);
     setDraft({});
   };
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editingId) return;
     const original = rules.find((r) => r.id === editingId);
     if (!original) return;
@@ -88,7 +62,20 @@ export function TaxCodeRulesTable({ initialRules, canEdit }: Props) {
       cancelEdit();
       return;
     }
-    mutation.mutate({ id: editingId, patch: diff });
+    setSaving(true);
+    try {
+      const updated = await patchRule(editingId, diff);
+      setRules((rs) => rs.map((r) => (r.id === updated.id ? updated : r)));
+      setEditingId(null);
+      setDraft({});
+      toast.success(t('saveSuccess'));
+      // Refresh the server component so SSR also reflects the new value next visit.
+      router.refresh();
+    } catch (err) {
+      toast.error(t('saveError', { message: (err as Error).message }));
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -102,7 +89,11 @@ export function TaxCodeRulesTable({ initialRules, canEdit }: Props) {
             <th className="text-left px-3 py-2">{t('colCondition')}</th>
             <th className="text-left px-3 py-2">{t('colDoc')}</th>
             <th className="text-left px-3 py-2">{t('colReview')}</th>
-            {canEdit && <th className="px-3 py-2 w-20" />}
+            {canEdit && (
+              <th className="px-3 py-2 w-20">
+                <span className="sr-only">{t('editButton')}</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -121,17 +112,17 @@ export function TaxCodeRulesTable({ initialRules, canEdit }: Props) {
                 </td>
                 {editing ? (
                   <>
-                    <td className="px-2 py-2"><input className="w-32 rounded border border-slate-300 px-2 py-1 font-mono text-xs" value={draft.tax_code ?? ''} onChange={(e) => setDraft((d) => ({ ...d, tax_code: e.target.value }))} /></td>
-                    <td className="px-2 py-2"><textarea className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.rate_rule ?? ''} onChange={(e) => setDraft((d) => ({ ...d, rate_rule: e.target.value }))} /></td>
-                    <td className="px-2 py-2"><textarea className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.condition_text ?? ''} onChange={(e) => setDraft((d) => ({ ...d, condition_text: e.target.value }))} /></td>
-                    <td className="px-2 py-2"><textarea className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.doc_required ?? ''} onChange={(e) => setDraft((d) => ({ ...d, doc_required: e.target.value }))} /></td>
-                    <td className="px-2 py-2"><textarea className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.review_note ?? ''} onChange={(e) => setDraft((d) => ({ ...d, review_note: e.target.value }))} /></td>
+                    <td className="px-2 py-2"><input aria-label={t('colCode')} className="w-32 rounded border border-slate-300 px-2 py-1 font-mono text-xs" value={draft.tax_code ?? ''} onChange={(e) => setDraft((d) => ({ ...d, tax_code: e.target.value }))} /></td>
+                    <td className="px-2 py-2"><textarea aria-label={t('colRate')}      className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.rate_rule ?? ''}      onChange={(e) => setDraft((d) => ({ ...d, rate_rule: e.target.value }))} /></td>
+                    <td className="px-2 py-2"><textarea aria-label={t('colCondition')} className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.condition_text ?? ''} onChange={(e) => setDraft((d) => ({ ...d, condition_text: e.target.value }))} /></td>
+                    <td className="px-2 py-2"><textarea aria-label={t('colDoc')}       className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.doc_required ?? ''}   onChange={(e) => setDraft((d) => ({ ...d, doc_required: e.target.value }))} /></td>
+                    <td className="px-2 py-2"><textarea aria-label={t('colReview')}    className="w-full rounded border border-slate-300 px-2 py-1 text-xs" rows={2} value={draft.review_note ?? ''}    onChange={(e) => setDraft((d) => ({ ...d, review_note: e.target.value }))} /></td>
                     <td className="px-2 py-2 align-top">
                       <div className="flex flex-col gap-1">
-                        <button type="button" disabled={mutation.isPending} onClick={saveEdit} className="rounded bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 disabled:opacity-50">
-                          {mutation.isPending ? t('savingLabel') : t('saveButton')}
+                        <button type="button" disabled={saving} onClick={saveEdit} className="rounded bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 disabled:opacity-50">
+                          {saving ? t('savingLabel') : t('saveButton')}
                         </button>
-                        <button type="button" disabled={mutation.isPending} onClick={cancelEdit} className="rounded border border-slate-300 px-2 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+                        <button type="button" disabled={saving} onClick={cancelEdit} className="rounded border border-slate-300 px-2 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
                           {t('cancelButton')}
                         </button>
                       </div>

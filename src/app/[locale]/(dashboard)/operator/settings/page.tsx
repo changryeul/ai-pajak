@@ -9,7 +9,6 @@
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
-import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { TaxCodeRulesTable } from './_components/TaxCodeRulesTable';
 import type { TaxCodeRule } from '@/types/tax-code-rule';
@@ -37,9 +36,10 @@ export default async function OperatorSettingsPage() {
   const role = user ? await resolveUserRole(supabase, user.id) : null;
   const canEdit = role === 'TAX_OPERATOR_MASTER';
 
-  // Fetch tax code rules (RLS allows all authenticated reads).
-  const admin = getSupabaseAdmin();
-  const { data: rulesRaw } = await admin
+  // Fetch tax code rules. RLS policy `tax_code_rule_read` USING (true)
+  // permits any authenticated session — exercise it instead of bypassing
+  // with the service role, so a future RLS regression surfaces immediately.
+  const { data: rulesRaw } = await supabase
     .from('tax_code_rule')
     .select('*')
     .order('sort_order', { ascending: true });

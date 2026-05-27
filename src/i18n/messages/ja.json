@@ -560,6 +560,7 @@
       "cancelButton": "キャンセル",
       "savingLabel": "保存中…",
       "saveError": "保存失敗: {message}",
+      "saveSuccess": "保存しました",
       "recentlyUpdated": "最近更新",
       "masterOnlyTooltip": "編集にはMASTER権限が必要です。"
     },

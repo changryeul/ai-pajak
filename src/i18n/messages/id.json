@@ -560,6 +560,7 @@
       "cancelButton": "Batal",
       "savingLabel": "Menyimpan…",
       "saveError": "Gagal menyimpan: {message}",
+      "saveSuccess": "Tersimpan",
       "recentlyUpdated": "Baru diperbarui",
       "masterOnlyTooltip": "Pengeditan memerlukan peran MASTER."
     },

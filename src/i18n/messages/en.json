@@ -560,6 +560,7 @@
       "cancelButton": "Cancel",
       "savingLabel": "Saving…",
       "saveError": "Save failed: {message}",
+      "saveSuccess": "Saved",
       "recentlyUpdated": "Recently updated",
       "masterOnlyTooltip": "Editing requires MASTER role."
     },

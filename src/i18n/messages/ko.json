@@ -560,6 +560,7 @@
       "cancelButton": "취소",
       "savingLabel": "저장 중…",
       "saveError": "저장 실패: {message}",
+      "saveSuccess": "저장됨",
       "recentlyUpdated": "최근 수정",
       "masterOnlyTooltip": "편집은 MASTER 권한이 필요합니다."
     },
