@@ -198,6 +198,9 @@ export const AuditActions = {
   BILLING_CREATE: 'BILLING_CREATE',
   BILLING_UPDATE: 'BILLING_UPDATE',
 
+  // Tax Code Rule (admin governance)
+  TAX_CODE_RULE_UPDATE: 'TAX_CODE_RULE_UPDATE',
+
   // User Management
   USER_CREATE: 'USER_CREATE',
   USER_UPDATE: 'USER_UPDATE',

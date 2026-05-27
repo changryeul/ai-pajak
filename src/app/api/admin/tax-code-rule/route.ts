@@ -26,7 +26,7 @@ async function handleGet(_req: RequestWithSession): Promise<Response> {
   const headers = { 'Cache-Control': 'no-store' };
   if (error) {
     loggers.api.error(
-      { err: error.message, route: '/api/admin/tax-code-rule' },
+      { err: error.message, route: '/api/admin/tax-code-rule', code: error.code },
       'tax_code_rule select failed',
     );
     return NextResponse.json({ error: 'Failed to load tax code rules' }, { status: 500, headers });

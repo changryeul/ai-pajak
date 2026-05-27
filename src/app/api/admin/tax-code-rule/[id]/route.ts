@@ -29,7 +29,7 @@ const patchSchema = z
     doc_required:   z.string().min(1).max(500).optional(),
     review_note:    z.string().min(1).max(500).optional(),
   })
-  .refine((v) => Object.keys(v).length > 0, {
+  .refine((v) => Object.values(v).some((x) => x !== undefined), {
     message: 'at least one of tax_code, rate_rule, condition_text, doc_required, review_note is required',
   });
 
