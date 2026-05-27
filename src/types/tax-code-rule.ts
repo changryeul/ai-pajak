@@ -24,3 +24,20 @@ export interface TaxCodeRule {
 export type TaxCodeRulePatch = Partial<
   Pick<TaxCodeRule, 'tax_code' | 'rate_rule' | 'condition_text' | 'doc_required' | 'review_note'>
 >;
+
+/**
+ * Single Tax Code Rule audit timeline row, shaped for UI consumption.
+ * Used by:
+ *   - GET /api/admin/tax-code-rule/audit-log → AuditRowDTO[]
+ *   - <TaxCodeRuleAuditTimeline />
+ */
+export interface AuditRowDTO {
+  id: string;                 // audit_log.id
+  ruleId: string;             // tax_code_rule.id
+  category: string;           // 'PPh21' | ...
+  actorRole: string | null;   // 'TAX_OPERATOR_MASTER' 등
+  actorUserId: string;        // auth.users.id (NOT NULL per audit_log schema)
+  actorEmail: string | null;  // joined from auth.users
+  createdAt: string;          // ISO
+  diff: Record<string, { before: string; after: string }>;
+}
