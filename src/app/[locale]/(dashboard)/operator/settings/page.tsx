@@ -14,9 +14,9 @@ import { PageTitle } from '@/components/layout/PageTitle';
 import { TaxCodeRulesTable } from './_components/TaxCodeRulesTable';
 import { TaxCodeRuleAuditTimeline } from './_components/TaxCodeRuleAuditTimeline';
 import { CoretaxStatusCard } from './_components/CoretaxStatusCard';
-import type { TaxCodeRule, AuditRowDTO } from '@/types/tax-code-rule';
+import type { TaxCodeRule } from '@/types/tax-code-rule';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { formatAuditTs } from '@/lib/tax-code-rule/format-audit';
+import { loadAuditRows } from '@/lib/tax-code-rule/audit-log';
 
 export default async function OperatorSettingsPage() {
   const t = await getTranslations('operatorSettings');
@@ -47,52 +47,11 @@ export default async function OperatorSettingsPage() {
     .order('sort_order', { ascending: true });
   const rules = (rulesRaw ?? []) as TaxCodeRule[];
 
-  // Audit timeline — last 10 PATCH events with full diff.
+  // Audit timeline — last 10 PATCH events with full diff. Shared helper.
+  const initialAuditRows = await loadAuditRows(10);
+
+  // Coretax toggle (Track D) — admin client for system_setting read.
   const admin = getSupabaseAdmin();
-  const { data: auditRaw } = await admin
-    .from('audit_log')
-    .select('id, actor_user_id, actor_role, activity_details, created_at')
-    .eq('activity_type', 'TAX_CODE_RULE_UPDATE')
-    .order('created_at', { ascending: false })
-    .limit(10);
-
-  const auditRows = (auditRaw ?? []) as Array<{
-    id: string;
-    actor_user_id: string;
-    actor_role: string | null;
-    activity_details: {
-      ruleId?: string;
-      category?: string;
-      diff?: Record<string, { before: string; after: string }>;
-    };
-    created_at: string;
-  }>;
-
-  const auditUserIds = [...new Set(auditRows.map((r) => r.actor_user_id))];
-  const auditEmailById = Object.fromEntries(
-    await Promise.all(
-      auditUserIds.map(async (id) => {
-        const { data: u } = await admin.auth.admin.getUserById(id);
-        return [id, u.user?.email ?? null] as const;
-      }),
-    ),
-  );
-
-  const initialAuditRows: AuditRowDTO[] = auditRows
-    .filter((r) => r.activity_details?.ruleId && r.activity_details?.diff)
-    .map((r) => ({
-      id: r.id,
-      ruleId: r.activity_details.ruleId!,
-      category: r.activity_details.category ?? '',
-      actorRole: r.actor_role,
-      actorUserId: r.actor_user_id,
-      actorEmail: auditEmailById[r.actor_user_id] ?? null,
-      createdAt: r.created_at,
-      displayTs: formatAuditTs(r.created_at),
-      diff: r.activity_details.diff!,
-    }));
-
-  // Coretax toggle (Track D) — same admin client.
   const { data: coretaxRow } = await admin
     .from('system_setting')
     .select('value, updated_by, updated_at')
