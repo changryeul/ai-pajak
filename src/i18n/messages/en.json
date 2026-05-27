@@ -584,9 +584,12 @@
       "title": "5. Standards Change Log",
       "badge": "Audit",
       "stateApplied": "Applied",
-      "stateReviewing": "In review",
-      "sampleByTaxAdmin": "Tax Admin",
-      "sampleBySystem": "System"
+      "empty": "No edit history yet.",
+      "changedFields": "Changed fields",
+      "expandToggle": "Details",
+      "collapseToggle": "Collapse",
+      "colBefore": "Before",
+      "colAfter": "After"
     }
   },
   "operatorDashboard": {

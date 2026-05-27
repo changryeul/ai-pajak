@@ -11,21 +11,9 @@ import { createClient } from '@/lib/supabase/server';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { TaxCodeRulesTable } from './_components/TaxCodeRulesTable';
-import type { TaxCodeRule } from '@/types/tax-code-rule';
-
-interface AuditRow {
-  titleKey: string;
-  body: string;
-  byKey: 'sampleByTaxAdmin' | 'sampleBySystem';
-  ts: string;
-  stateKey: 'stateApplied' | 'stateReviewing';
-}
-
-const AUDIT_ROWS: AuditRow[] = [
-  { titleKey: 'SPT OP Form Profile', body: '1770/1770S/1770SS 선택 기준 대신 Coretax 단일 OP Form 기준 표시',          byKey: 'sampleByTaxAdmin', ts: '2026-05-25', stateKey: 'stateApplied' },
-  { titleKey: 'PPh23/PPh4(2) 판단',  body: '건물 임대·서비스 혼합 계약은 Supervisor 검토필요로 상향',                  byKey: 'sampleByTaxAdmin', ts: '2026-05-25', stateKey: 'stateReviewing' },
-  { titleKey: 'Coretax Integration', body: 'API 미연동 / 상담원 수동처리 기준 유지',                                  byKey: 'sampleBySystem',   ts: '2026-05-25', stateKey: 'stateApplied' },
-];
+import { TaxCodeRuleAuditTimeline } from './_components/TaxCodeRuleAuditTimeline';
+import type { TaxCodeRule, AuditRowDTO } from '@/types/tax-code-rule';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 export default async function OperatorSettingsPage() {
   const t = await getTranslations('operatorSettings');
@@ -44,6 +32,50 @@ export default async function OperatorSettingsPage() {
     .select('*')
     .order('sort_order', { ascending: true });
   const rules = (rulesRaw ?? []) as TaxCodeRule[];
+
+  // Audit timeline — last 10 PATCH events with full diff.
+  const admin = getSupabaseAdmin();
+  const { data: auditRaw } = await admin
+    .from('audit_log')
+    .select('id, actor_user_id, actor_role, activity_details, created_at')
+    .eq('activity_type', 'TAX_CODE_RULE_UPDATE')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const auditRows = (auditRaw ?? []) as Array<{
+    id: string;
+    actor_user_id: string;
+    actor_role: string | null;
+    activity_details: {
+      ruleId?: string;
+      category?: string;
+      diff?: Record<string, { before: string; after: string }>;
+    };
+    created_at: string;
+  }>;
+
+  const auditUserIds = [...new Set(auditRows.map((r) => r.actor_user_id))];
+  const auditEmailById = Object.fromEntries(
+    await Promise.all(
+      auditUserIds.map(async (id) => {
+        const { data: u } = await admin.auth.admin.getUserById(id);
+        return [id, u.user?.email ?? null] as const;
+      }),
+    ),
+  );
+
+  const initialAuditRows: AuditRowDTO[] = auditRows
+    .filter((r) => r.activity_details?.ruleId && r.activity_details?.diff)
+    .map((r) => ({
+      id: r.id,
+      ruleId: r.activity_details.ruleId!,
+      category: r.activity_details.category ?? '',
+      actorRole: r.actor_role,
+      actorUserId: r.actor_user_id,
+      actorEmail: auditEmailById[r.actor_user_id] ?? null,
+      createdAt: r.created_at,
+      diff: r.activity_details.diff!,
+    }));
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-[1400px]">
@@ -148,22 +180,7 @@ export default async function OperatorSettingsPage() {
             <h2 className="text-lg font-black text-slate-900">{t('audit.title')}</h2>
             <Pill tone="blue">{t('audit.badge')}</Pill>
           </div>
-          <ul className="space-y-3">
-            {AUDIT_ROWS.map((row) => (
-              <li key={row.titleKey} className="rounded-xl border border-slate-200 p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-bold text-slate-900">{row.titleKey}</p>
-                  <Pill tone={row.stateKey === 'stateApplied' ? 'emerald' : 'amber'}>
-                    {t(`audit.${row.stateKey}`)}
-                  </Pill>
-                </div>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-slate-600">{row.body}</p>
-                <p className="mt-2 text-[10px] text-slate-400">
-                  {row.ts} · {t(`audit.${row.byKey}`)}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <TaxCodeRuleAuditTimeline initialRows={initialAuditRows} />
         </section>
       </div>
     </div>

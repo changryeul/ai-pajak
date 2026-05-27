@@ -584,9 +584,12 @@
       "title": "5. 基準変更履歴",
       "badge": "Audit",
       "stateApplied": "適用",
-      "stateReviewing": "検討中",
-      "sampleByTaxAdmin": "Tax Admin",
-      "sampleBySystem": "System"
+      "empty": "編集履歴がありません。",
+      "changedFields": "変更フィールド",
+      "expandToggle": "詳細",
+      "collapseToggle": "閉じる",
+      "colBefore": "変更前",
+      "colAfter": "変更後"
     }
   },
   "operatorDashboard": {

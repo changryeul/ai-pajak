@@ -584,9 +584,12 @@
       "title": "5. Riwayat Perubahan Standar",
       "badge": "Audit",
       "stateApplied": "Diterapkan",
-      "stateReviewing": "Ditinjau",
-      "sampleByTaxAdmin": "Tax Admin",
-      "sampleBySystem": "System"
+      "empty": "Belum ada riwayat edit.",
+      "changedFields": "Bidang yang diubah",
+      "expandToggle": "Detail",
+      "collapseToggle": "Tutup",
+      "colBefore": "Sebelum",
+      "colAfter": "Setelah"
     }
   },
   "operatorDashboard": {

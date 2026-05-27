@@ -584,9 +584,12 @@
       "title": "5. 기준 변경이력",
       "badge": "Audit",
       "stateApplied": "적용",
-      "stateReviewing": "검토중",
-      "sampleByTaxAdmin": "Tax Admin",
-      "sampleBySystem": "System"
+      "empty": "아직 편집 이력이 없습니다.",
+      "changedFields": "변경 필드",
+      "expandToggle": "자세히",
+      "collapseToggle": "접기",
+      "colBefore": "이전",
+      "colAfter": "변경 후"
     }
   },
   "operatorDashboard": {

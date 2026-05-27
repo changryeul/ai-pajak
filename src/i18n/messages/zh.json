@@ -584,9 +584,12 @@
       "title": "5. 标准变更历史",
       "badge": "Audit",
       "stateApplied": "已应用",
-      "stateReviewing": "审核中",
-      "sampleByTaxAdmin": "Tax Admin",
-      "sampleBySystem": "System"
+      "empty": "暂无编辑历史。",
+      "changedFields": "更改字段",
+      "expandToggle": "详情",
+      "collapseToggle": "收起",
+      "colBefore": "之前",
+      "colAfter": "之后"
     }
   },
   "operatorDashboard": {
