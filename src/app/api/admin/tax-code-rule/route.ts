@@ -12,6 +12,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { loggers } from '@/lib/logger';
 import type { RequestWithSession } from '@/types/auth';
 import type { TaxCodeRule } from '@/types/tax-code-rule';
 
@@ -22,13 +23,15 @@ async function handleGet(_req: RequestWithSession): Promise<Response> {
     .select('*')
     .order('sort_order', { ascending: true });
 
+  const headers = { 'Cache-Control': 'no-store' };
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    loggers.api.error(
+      { err: error.message, route: '/api/admin/tax-code-rule' },
+      'tax_code_rule select failed',
+    );
+    return NextResponse.json({ error: 'Failed to load tax code rules' }, { status: 500, headers });
   }
-  return NextResponse.json(
-    { data: (data ?? []) as TaxCodeRule[] },
-    { headers: { 'Cache-Control': 'no-store' } },
-  );
+  return NextResponse.json({ data: (data ?? []) as TaxCodeRule[] }, { headers });
 }
 
 export async function GET(request: NextRequest) {
