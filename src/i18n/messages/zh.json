@@ -516,7 +516,7 @@
     "pageTitle": "设置 / 表单版本",
     "pageHeading": "设置 / 表单版本 / Tax Code Rules",
     "header": {
-      "fiscalYear": "会计年度",
+      "fiscalYear": "归属年度",
       "platform": "平台",
       "coretaxStatus": "Coretax 状态",
       "coretaxValueOn": "API 自动",

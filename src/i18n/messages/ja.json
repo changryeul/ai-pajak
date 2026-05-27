@@ -516,7 +516,7 @@
     "pageTitle": "設定 / 様式バージョン",
     "pageHeading": "設定 / 様式バージョン / Tax Code Rules",
     "header": {
-      "fiscalYear": "事業年度",
+      "fiscalYear": "対象年度",
       "platform": "プラットフォーム",
       "coretaxStatus": "Coretax 状態",
       "coretaxValueOn": "API 自動",

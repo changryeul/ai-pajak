@@ -516,7 +516,7 @@
     "pageTitle": "Pengaturan / Versi formulir",
     "pageHeading": "Pengaturan / Versi formulir / Tax Code Rules",
     "header": {
-      "fiscalYear": "Tahun fiskal",
+      "fiscalYear": "Tahun pajak",
       "platform": "Platform",
       "coretaxStatus": "Status Coretax",
       "coretaxValueOn": "API otomatis",
