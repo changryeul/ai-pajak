@@ -1,7 +1,7 @@
 /**
  * Smoke test for Tax Code Rule (Track B + Track C):
  *   1.  MASTER GET → 200, 7 rows, expected category set
- *   2.  CONSULTANT_JTC GET → 200 (read allowed)
+ *   2.  CONSULTANT_JTC GET → 403 (Track A narrow gate)
  *   3.  PLATFORM_ADMIN GET → 403 (blockPlatformAdmin)
  *   4.  MASTER PATCH PPh21.review_note → 200, value applied
  *   5.  re-GET → updated_by/updated_at reflect MASTER
@@ -15,6 +15,9 @@
  *   13. MASTER GET audit-log → 200, array (Track C)
  *   14. PATCH 후 audit-log 첫 행 = 방금 변경 (ruleId/category/before/after) (Track C)
  *   15. PLATFORM_ADMIN GET audit-log → 403 (Track C)
+ *   16. SUPERVISOR GET → 200, 7 rows
+ *   17. SUPERVISOR GET audit-log → 200, array
+ *   18. OPERATOR GET → 403 (Track A 추가 차단)
  *
  * Prereq: master.test@aipajak.com seeded (seed-master-and-external.ts).
  * Migration 20260527000001_tax_code_rule.sql applied.
@@ -103,10 +106,10 @@ async function run() {
   // Self-healing baseline: capture the real value from r1, not hardcoded.
   const originalReviewNote = pph21.review_note;
 
-  // 2. CONSULTANT GET
+  // 2. CONSULTANT GET → 403 (Track A 의 narrow gate)
   const r2 = await get(consTok);
-  if (r2.status === 200) { console.log(`✅ 2. CONSULTANT GET → 200`); pass++; }
-  else { console.error(`✗ 2. CONSULTANT GET ${r2.status}`); fail++; }
+  if (r2.status === 403) { console.log(`✅ 2. CONSULTANT GET → 403`); pass++; }
+  else { console.error(`✗ 2. CONSULTANT GET ${r2.status} (want 403)`); fail++; }
 
   // 3. PLATFORM_ADMIN GET
   const r3 = await get(adminTok);
@@ -207,6 +210,29 @@ async function run() {
   const r15 = await getAudit(adminTok);
   if (r15.status === 403) { console.log(`✅ 15. PLATFORM_ADMIN GET audit-log → 403`); pass++; }
   else { console.error(`✗ 15. PLATFORM_ADMIN GET audit-log ${r15.status}`); fail++; }
+
+  // ── Track A: narrow gate (SUPERVISOR/OPERATOR contracts) ──
+
+  // 16. SUPERVISOR GET → 200 + 7 rows
+  const r16 = await get(supTok);
+  if (r16.status === 200 && Array.isArray(r16.body.data) && r16.body.data.length === 7) {
+    console.log(`✅ 16. SUPERVISOR GET → 200, 7 rows`); pass++;
+  } else {
+    console.error(`✗ 16. SUPERVISOR GET unexpected:`, r16); fail++;
+  }
+
+  // 17. SUPERVISOR GET audit-log → 200 + array
+  const r17 = await getAudit(supTok);
+  if (r17.status === 200 && Array.isArray(r17.body.data)) {
+    console.log(`✅ 17. SUPERVISOR GET audit-log → 200, ${r17.body.data.length} rows`); pass++;
+  } else {
+    console.error(`✗ 17. SUPERVISOR GET audit-log:`, r17); fail++;
+  }
+
+  // 18. OPERATOR GET → 403 (Track A 추가 차단)
+  const r18 = await get(opTok);
+  if (r18.status === 403) { console.log(`✅ 18. OPERATOR GET → 403`); pass++; }
+  else { console.error(`✗ 18. OPERATOR GET ${r18.status} (want 403)`); fail++; }
 
   console.log(`\n— ${pass} pass / ${fail} fail —`);
   process.exit(fail === 0 ? 0 : 1);
