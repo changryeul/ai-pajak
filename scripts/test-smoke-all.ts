@@ -41,6 +41,7 @@ const STEPS: Step[] = [
   { name: 'monitoring/Sentry flow', file: 'test-monitoring-flow.ts', optional: true },
   // --- Admin / config governance ---------------------------------------
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
+  { name: 'coretax toggle (Track D)', file: 'test-coretax-toggle.ts' },
 ];
 
 interface Result {
