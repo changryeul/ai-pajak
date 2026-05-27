@@ -6,7 +6,8 @@
  * 나머지 §1/§2/§4/§5 는 정적 view.
  */
 
-import { getTranslations } from 'next-intl/server';
+import { redirect } from 'next/navigation';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { PageTitle } from '@/components/layout/PageTitle';
@@ -23,6 +24,17 @@ export default async function OperatorSettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const role = user ? await resolveUserRole(supabase, user.id) : null;
+
+  // Track A: narrow to MASTER + SUPERVISOR (PDF "Admin/Tax Engine" governance).
+  // operator/layout.tsx 가 이미 4 operator-tier role 을 허용하지만, settings
+  // 페이지는 governance scope 라 OPERATOR/LEAD 를 추가 차단. silent redirect
+  // 패턴은 operator/layout.tsx 와 일관.
+  const SETTINGS_ROLES = ['TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
+  if (!role || !SETTINGS_ROLES.includes(role)) {
+    const locale = await getLocale();
+    redirect(`/${locale}/operator/dashboard`);
+  }
+
   const canEdit = role === 'TAX_OPERATOR_MASTER';
 
   // Fetch tax code rules. RLS policy `tax_code_rule_read` USING (true)
