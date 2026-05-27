@@ -360,7 +360,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-invoice-parser-phase2.ts` — invoice 파서 contract (synthetic path → mode=MOCK, slot 가드, consultant 비-5xx)
 - `SEED_TARGET=prod npx tsx scripts/test-upload-autoparse.ts` — upload `autoParse=true` 응답 shape (data.parse) + non-invoice 슬롯엔 미부착 검증
 - `SEED_TARGET=prod npx tsx scripts/test-invoice-line-review.ts` — PATCH `/invoice-lines/:lineId` is_reviewed flip → GET 반영 → reviewer_note persist → 빈 body 400
-- `SEED_TARGET=prod npx tsx scripts/test-tax-code-rule.ts` — Track B Tax Code Rule CRUD + RBAC (GET MASTER/CONSULTANT/PLATFORM_ADMIN, PATCH 5 roles + 400 empty body + 404 non-existent uuid)
+- `SEED_TARGET=prod npx tsx scripts/test-tax-code-rule.ts` — Track B+C Tax Code Rule CRUD + RBAC + audit timeline (GET 3 roles + PATCH 5 roles + 400/404 + audit-log GET/diff/RBAC 3 assertions, 총 15)
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 
