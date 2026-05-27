@@ -15,9 +15,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
+import { requireRole } from '@/middleware/rbac';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
-import type { RequestWithSession } from '@/types/auth';
+import { UserRole, type RequestWithSession } from '@/types/auth';
 import type { AuditRowDTO } from '@/types/tax-code-rule';
 import { formatAuditTs } from '@/lib/tax-code-rule/format-audit';
 
@@ -89,5 +90,6 @@ export async function GET(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
+    requireRole(UserRole.TAX_OPERATOR_SUPERVISOR, UserRole.TAX_OPERATOR_MASTER),
   )(request as RequestWithSession, handleGet);
 }
