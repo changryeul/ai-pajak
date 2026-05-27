@@ -338,7 +338,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs 12 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry. Last verified run was 12/12 PASS.
+- `npm run test:smoke:prod` — runs 13 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry, tax code rule CRUD + RBAC (Track B). Last verified run was 13/13 PASS.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars). Requires repo secrets `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` / `ANTHROPIC_API_KEY` (optional `E2E_BASE_URL`).
 
@@ -360,6 +360,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-invoice-parser-phase2.ts` — invoice 파서 contract (synthetic path → mode=MOCK, slot 가드, consultant 비-5xx)
 - `SEED_TARGET=prod npx tsx scripts/test-upload-autoparse.ts` — upload `autoParse=true` 응답 shape (data.parse) + non-invoice 슬롯엔 미부착 검증
 - `SEED_TARGET=prod npx tsx scripts/test-invoice-line-review.ts` — PATCH `/invoice-lines/:lineId` is_reviewed flip → GET 반영 → reviewer_note persist → 빈 body 400
+- `SEED_TARGET=prod npx tsx scripts/test-tax-code-rule.ts` — Track B Tax Code Rule CRUD + RBAC (GET MASTER/CONSULTANT/PLATFORM_ADMIN, PATCH 5 roles + 400 empty body + 404 non-existent uuid)
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 
