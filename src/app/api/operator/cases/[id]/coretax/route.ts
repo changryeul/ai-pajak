@@ -146,9 +146,9 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
         taxType: caseRow.tax_type,
         period: { month: caseRow.tax_period_month, year: caseRow.tax_period_year },
         expectedAmount: Number(caseRow.amount ?? 0),
-        coretaxMode: coretax.isEnabled() ? 'API (auto)' : 'Manual access',
+        coretaxMode: (await coretax.isEnabled()) ? 'API (auto)' : 'Manual access',
       },
-      apiEnabled: coretax.isEnabled(),
+      apiEnabled: await coretax.isEnabled(),
       stepStates,
       billing: {
         state: billingIssued ? 'Issued' : 'Not issued',
@@ -245,7 +245,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
 
       // Coretax API 자동 모드 — 환경변수가 켜졌고 사용자가 billingId 입력 안 했을 때만 호출.
       // (수동 입력값이 있으면 그걸 그대로 신뢰 — 운영팀 권한 우선)
-      if (!billingId && coretax.isEnabled()) {
+      if (!billingId && (await coretax.isEnabled())) {
         try {
           // 자세한 케이스 데이터를 다시 fetch.
           const { data: full } = await admin
@@ -295,7 +295,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
       let apiResult: Record<string, unknown> | null = null;
 
       // Coretax API 자동 모드 — 사용자가 BPE 입력 안 했고 API 활성화된 경우 자동 제출.
-      if (!bpeNumber && coretax.isEnabled()) {
+      if (!bpeNumber && (await coretax.isEnabled())) {
         try {
           const { data: full } = await admin
             .from('djp_submission_queue')

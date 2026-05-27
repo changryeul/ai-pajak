@@ -1,13 +1,16 @@
 /**
  * Coretax API client (graceful-degrade adapter).
  *
- * 환경변수:
- *   CORETAX_SUBMIT_ENABLED  — 'true'면 client.isEnabled() === true. 호출 시 실제 API 호출.
+ * 환경변수 (Track D 후):
  *   CORETAX_API_BASE_URL    — 예: https://api-coretax.pajak.go.id
  *   CORETAX_API_TOKEN       — Bearer token
  *   CORETAX_API_TIMEOUT_MS  — 단일 호출 timeout (default 15_000)
  *
- * 환경변수가 없거나 ENABLED=false 인 경우 isEnabled()=false 를 돌려주고, 호출 시
+ *   ⚠ CORETAX_SUBMIT_ENABLED 는 deprecated — system_setting.coretax.
+ *      submit_enabled JSONB (`{enabled: boolean}`) 로 이전. MASTER 가
+ *      /operator/settings 의 Coretax 카드에서 토글.
+ *
+ * 환경변수가 없거나 DB 토글이 false 인 경우 isEnabled()=false 를 돌려주고, 호출 시
  * CoretaxError(code='NOT_CONFIGURED')를 던진다. 호출 측에서 manual 모드로 fallback.
  *
  * 실패 회복:
@@ -18,6 +21,7 @@
 
 import { CircuitBreaker, withRetry, fetchWithTimeout } from '@/lib/resilience';
 import { loggers } from '@/lib/logger';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import {
   CoretaxError,
   type IssueIdBillingRequest,
@@ -47,15 +51,42 @@ function readConfig(): CoretaxClientConfig {
   };
 }
 
-export function isEnabled(): boolean {
-  if (process.env.CORETAX_SUBMIT_ENABLED !== 'true') return false;
+let enabledCache: { value: boolean; expiresAt: number } | null = null;
+const ENABLED_CACHE_TTL_MS = 60_000;
+
+/**
+ * DB-backed (Track D): system_setting.coretax.submit_enabled + credentials
+ * presence check. 60s in-memory cache; PATCH endpoint calls
+ * invalidateEnabledCache() after master flips the toggle.
+ *
+ * env CORETAX_SUBMIT_ENABLED 는 더 이상 참조하지 않음 (Track D 에서
+ * deprecate). URL/token/timeout 은 여전히 env.
+ */
+export async function isEnabled(): Promise<boolean> {
+  if (enabledCache && enabledCache.expiresAt > Date.now()) {
+    return enabledCache.value;
+  }
+  const admin = getSupabaseAdmin();
+  const { data } = await admin
+    .from('system_setting')
+    .select('value')
+    .eq('key', 'coretax.submit_enabled')
+    .single();
+  const dbEnabled = (data?.value as { enabled?: boolean } | undefined)?.enabled === true;
   const cfg = readConfig();
-  return !!(cfg.baseUrl && cfg.token);
+  const value = dbEnabled && !!(cfg.baseUrl && cfg.token);
+  enabledCache = { value, expiresAt: Date.now() + ENABLED_CACHE_TTL_MS };
+  return value;
+}
+
+/** PATCH endpoint 가 toggle 후 호출. test helper 로도 사용. */
+export function invalidateEnabledCache(): void {
+  enabledCache = null;
 }
 
 async function call<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
-  if (!isEnabled()) {
-    throw new CoretaxError('Coretax API is not configured (set CORETAX_SUBMIT_ENABLED=true + CORETAX_API_BASE_URL + CORETAX_API_TOKEN)', 'NOT_CONFIGURED');
+  if (!(await isEnabled())) {
+    throw new CoretaxError('Coretax API is not configured (set system_setting.coretax.submit_enabled=true + CORETAX_API_BASE_URL + CORETAX_API_TOKEN)', 'NOT_CONFIGURED');
   }
   const cfg = readConfig();
   const url = `${cfg.baseUrl!.replace(/\/$/, '')}${path}`;

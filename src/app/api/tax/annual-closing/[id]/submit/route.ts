@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
+import * as coretax from '@/lib/coretax/client';
 import type { RequestWithSession } from '@/types/auth';
 
 async function ensureOwnedSession(sessionId: string, customerId: string) {
@@ -77,7 +78,7 @@ async function handlePost(req: RequestWithSession, sessionId: string): Promise<R
     submitted_via: 'wizard',
   };
 
-  const useCoretaxApi = process.env.CORETAX_SUBMIT_ENABLED === 'true';
+  const useCoretaxApi = await coretax.isEnabled();
   const channel = useCoretaxApi ? 'CORETAX_API' : 'RPA';
 
   // Until Coretax is enabled, sit in SUBMITTED so an operator can pick up.
