@@ -516,6 +516,12 @@
     "pageTitle": "設定 / 様式バージョン",
     "pageHeading": "設定 / 様式バージョン / Tax Code Rules",
     "header": {
+      "fiscalYear": "事業年度",
+      "platform": "プラットフォーム",
+      "coretaxStatus": "Coretax 状態",
+      "coretaxValueOn": "API 自動",
+      "coretaxValueOff": "手動処理",
+      "coretaxToggle": "切替",
       "manageTarget": "管理対象",
       "manageTargetValue": "Form + Tax Code + Rule"
     },

@@ -13,6 +13,7 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { TaxCodeRulesTable } from './_components/TaxCodeRulesTable';
 import { TaxCodeRuleAuditTimeline } from './_components/TaxCodeRuleAuditTimeline';
+import { CoretaxStatusCard } from './_components/CoretaxStatusCard';
 import type { TaxCodeRule, AuditRowDTO } from '@/types/tax-code-rule';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { formatAuditTs } from '@/lib/tax-code-rule/format-audit';
@@ -91,6 +92,18 @@ export default async function OperatorSettingsPage() {
       diff: r.activity_details.diff!,
     }));
 
+  // Coretax toggle (Track D) — same admin client.
+  const { data: coretaxRow } = await admin
+    .from('system_setting')
+    .select('value, updated_by, updated_at')
+    .eq('key', 'coretax.submit_enabled')
+    .single();
+  const coretaxConfig = {
+    enabled: (coretaxRow?.value as { enabled?: boolean } | undefined)?.enabled === true,
+    updatedAt: coretaxRow?.updated_at ?? null,
+    updatedBy: coretaxRow?.updated_by ?? null,
+  };
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-[1400px]">
       <PageTitle title={t('pageTitle')} />
@@ -110,7 +123,7 @@ export default async function OperatorSettingsPage() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-6">
         <Header label={t('header.fiscalYear')} value="2025" />
         <Header label={t('header.platform')} value="Coretax DJP" />
-        <Header label={t('header.coretaxStatus')} value={t('header.coretaxStatusValue')} tone="amber" />
+        <CoretaxStatusCard initial={coretaxConfig} canEdit={canEdit} />
         <Header label={t('header.manageTarget')} value={t('header.manageTargetValue')} />
       </div>
 

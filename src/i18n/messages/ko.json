@@ -516,6 +516,12 @@
     "pageTitle": "설정 / 양식버전",
     "pageHeading": "설정 / 양식버전 / Tax Code Rules",
     "header": {
+      "fiscalYear": "귀속연도",
+      "platform": "플랫폼",
+      "coretaxStatus": "Coretax 상태",
+      "coretaxValueOn": "API 자동",
+      "coretaxValueOff": "수동 처리",
+      "coretaxToggle": "토글",
       "manageTarget": "관리대상",
       "manageTargetValue": "Form + Tax Code + Rule"
     },

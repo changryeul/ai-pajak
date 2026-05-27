@@ -516,6 +516,12 @@
     "pageTitle": "Settings / Form versions",
     "pageHeading": "Settings / Form versions / Tax Code Rules",
     "header": {
+      "fiscalYear": "Fiscal year",
+      "platform": "Platform",
+      "coretaxStatus": "Coretax status",
+      "coretaxValueOn": "API auto",
+      "coretaxValueOff": "Manual mode",
+      "coretaxToggle": "Toggle",
       "manageTarget": "Scope",
       "manageTargetValue": "Form + Tax Code + Rule"
     },

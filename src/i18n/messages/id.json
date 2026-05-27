@@ -516,6 +516,12 @@
     "pageTitle": "Pengaturan / Versi formulir",
     "pageHeading": "Pengaturan / Versi formulir / Tax Code Rules",
     "header": {
+      "fiscalYear": "Tahun fiskal",
+      "platform": "Platform",
+      "coretaxStatus": "Status Coretax",
+      "coretaxValueOn": "API otomatis",
+      "coretaxValueOff": "Mode manual",
+      "coretaxToggle": "Toggle",
       "manageTarget": "Cakupan",
       "manageTargetValue": "Form + Tax Code + Rule"
     },
