@@ -67,11 +67,17 @@ export async function isEnabled(): Promise<boolean> {
     return enabledCache.value;
   }
   const admin = getSupabaseAdmin();
-  const { data } = await admin
+  const { data, error } = await admin
     .from('system_setting')
     .select('value')
     .eq('key', 'coretax.submit_enabled')
     .single();
+  if (error) {
+    loggers.api.warn(
+      { err: error.message, code: error.code },
+      'coretax.isEnabled DB read failed, defaulting to false',
+    );
+  }
   const dbEnabled = (data?.value as { enabled?: boolean } | undefined)?.enabled === true;
   const cfg = readConfig();
   const value = dbEnabled && !!(cfg.baseUrl && cfg.token);
