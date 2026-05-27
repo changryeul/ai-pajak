@@ -38,6 +38,7 @@ export interface AuditRowDTO {
   actorRole: string | null;   // 'TAX_OPERATOR_MASTER' 등
   actorUserId: string;        // auth.users.id (NOT NULL per audit_log schema)
   actorEmail: string | null;  // joined from auth.users
-  createdAt: string;          // ISO
+  createdAt: string;          // ISO (raw, kept for sorting/logic)
+  displayTs: string;          // pre-formatted "YYYY-MM-DD HH:mm UTC" (server-side, hydration-safe)
   diff: Record<string, { before: string; after: string }>;
 }

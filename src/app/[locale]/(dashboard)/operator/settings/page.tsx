@@ -14,6 +14,7 @@ import { TaxCodeRulesTable } from './_components/TaxCodeRulesTable';
 import { TaxCodeRuleAuditTimeline } from './_components/TaxCodeRuleAuditTimeline';
 import type { TaxCodeRule, AuditRowDTO } from '@/types/tax-code-rule';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { formatAuditTs } from '@/lib/tax-code-rule/format-audit';
 
 export default async function OperatorSettingsPage() {
   const t = await getTranslations('operatorSettings');
@@ -74,6 +75,7 @@ export default async function OperatorSettingsPage() {
       actorUserId: r.actor_user_id,
       actorEmail: auditEmailById[r.actor_user_id] ?? null,
       createdAt: r.created_at,
+      displayTs: formatAuditTs(r.created_at),
       diff: r.activity_details.diff!,
     }));
 

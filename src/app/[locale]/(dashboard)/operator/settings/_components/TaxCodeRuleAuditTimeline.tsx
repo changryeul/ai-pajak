@@ -8,12 +8,6 @@ interface Props {
   initialRows: AuditRowDTO[];
 }
 
-function formatTs(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
 export function TaxCodeRuleAuditTimeline({ initialRows }: Props) {
   const t = useTranslations('operatorSettings.audit');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -42,7 +36,7 @@ export function TaxCodeRuleAuditTimeline({ initialRows }: Props) {
                   </span>
                 </div>
                 <p className="mt-2 text-[10px] text-slate-400">
-                  {formatTs(row.createdAt)} · {row.actorEmail ?? row.actorUserId}
+                  {row.displayTs} · {row.actorEmail ?? row.actorUserId}
                 </p>
               </div>
               <div className="flex items-center gap-2">

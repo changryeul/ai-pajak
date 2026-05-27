@@ -19,6 +19,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import type { RequestWithSession } from '@/types/auth';
 import type { AuditRowDTO } from '@/types/tax-code-rule';
+import { formatAuditTs } from '@/lib/tax-code-rule/format-audit';
 
 interface AuditLogRow {
   id: string;
@@ -77,6 +78,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
       actorUserId: r.actor_user_id,
       actorEmail: emailById[r.actor_user_id] ?? null,
       createdAt: r.created_at,
+      displayTs: formatAuditTs(r.created_at),
       diff: r.activity_details.diff!,
     }));
 
