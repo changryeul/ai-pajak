@@ -554,7 +554,14 @@
       "colRate": "Dasar tarif",
       "colCondition": "Berlaku saat",
       "colDoc": "Bukti diperlukan",
-      "colReview": "Syarat tinjau staf"
+      "colReview": "Syarat tinjau staf",
+      "editButton": "Edit",
+      "saveButton": "Simpan",
+      "cancelButton": "Batal",
+      "savingLabel": "Menyimpan…",
+      "saveError": "Gagal menyimpan: {message}",
+      "recentlyUpdated": "Baru diperbarui",
+      "masterOnlyTooltip": "Pengeditan memerlukan peran MASTER."
     },
     "decision": {
       "title": "4. Logika Keputusan",

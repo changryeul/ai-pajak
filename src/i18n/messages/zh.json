@@ -554,7 +554,14 @@
       "colRate": "税率基准",
       "colCondition": "适用条件",
       "colDoc": "所需凭据",
-      "colReview": "员工检视条件"
+      "colReview": "员工检视条件",
+      "editButton": "编辑",
+      "saveButton": "保存",
+      "cancelButton": "取消",
+      "savingLabel": "保存中…",
+      "saveError": "保存失败: {message}",
+      "recentlyUpdated": "最近更新",
+      "masterOnlyTooltip": "编辑需要MASTER权限。"
     },
     "decision": {
       "title": "4. 判断条件",

@@ -1,42 +1,18 @@
-'use client';
-
 /**
- * 세무 기준 설정 — Admin / Tax Engine 페이지.
+ * 세무 기준 설정 — Admin / Tax Engine 페이지. PDF p.26-27.
  *
- * PDF 「수퍼바이저 화면 메신저 포함 20260525」 p.26-27 spec 그대로:
- *   상단 5-카드 (귀속연도 / 플랫폼 / Coretax 상태 / 관리대상 + Admin badge)
- *   1. 신고연도 / 양식버전 — Badan / OP Form Profile
- *   2. 운영 기준 — 4-박스 (왜 / 누가 / 보이나 / 통제)
- *   3. Tax Code Rules — 7-row 테이블
- *   4. 판단 조건 — 6-박스
- *   5. 기준 변경이력 — Audit row list
- *
- * 현재는 정적 informational. 다음 트랙에서 admin-edit 모드 + Coretax API
- * 토글 + 변경이력 영구 저장 추가 예정.
+ * Track A 이전이라 페이지 자체 접근은 operator/supervisor/master 모두 가능.
+ * §3 "Tax Code Rules" 만 DB-backed + MASTER inline-editable (Track B);
+ * 나머지 §1/§2/§4/§5 는 정적 view.
  */
 
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { createClient } from '@/lib/supabase/server';
+import { resolveUserRole } from '@/lib/auth/resolve-role';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { PageTitle } from '@/components/layout/PageTitle';
-
-interface TaxRuleRow {
-  category: string;
-  taxCode: string;
-  rate: string;
-  condition: string;
-  doc: string;
-  review: string;
-}
-
-// PDF p.27 의 Tax Code Rules 7행을 그대로 표시.
-const TAX_RULES_KO: TaxRuleRow[] = [
-  { category: 'PPh21',    taxCode: '411121-100', rate: '급여/비정기소득별 누진·TER 기준',     condition: '직원 급여, THR, bonus, benefit 등',         doc: 'Payroll, A1/A2, employee master',         review: '직원구분/비과세/공제항목 확인' },
-  { category: 'PPh23',    taxCode: '411124-104', rate: '일반 용역 2% 등',                    condition: '서비스 수수료, management fee, royalty 등', doc: 'Invoice, contract, bukti potong',         review: '서비스 성격과 계약서 문구 확인' },
-  { category: 'PPh4(2)',  taxCode: '411128-403', rate: '최종분리과세 항목별 상이',             condition: '건물 임대, 특정 건설서비스, 토지/건물 거래 등', doc: '계약서, 라이선스, invoice',                  review: 'PPh23과 혼동 위험이 큰 항목 우선검토' },
-  { category: 'PPh22',    taxCode: '411122-100', rate: '거래/수입/기관별 상이',               condition: '수입, 정부거래, 특정 상품 거래',            doc: 'PIB, purchase document, payment proof',   review: '거래주체와 과세대상 여부 확인' },
-  { category: 'PPh26',    taxCode: '411127-100', rate: '기본 20% / 조세조약 적용 가능',         condition: '비거주자 지급, royalty, interest, technical fee', doc: 'DGT Form, treaty residence certificate, contract', review: '조세조약 적용 가능성과 DGT 유효성 확인' },
-  { category: 'PPN',      taxCode: '411211-100', rate: '현재 적용 VAT rate 기준',             condition: '과세 재화/용역, PKP 거래',                doc: 'Faktur Pajak, invoice, e-Faktur data',    review: 'PKP 여부, VAT credit 가능 여부 확인' },
-  { category: 'PPh25',    taxCode: '411126-100', rate: '전년도 기준 월할 또는 신규 기준',        condition: '법인/개인 월별 선납세액',                  doc: '전년도 SPT, PPh25 billing history',       review: 'UMKM final 전환 여부와 법인나이 확인' },
-];
+import { TaxCodeRulesTable } from './_components/TaxCodeRulesTable';
+import type { TaxCodeRule } from '@/types/tax-code-rule';
 
 interface AuditRow {
   titleKey: string;
@@ -52,13 +28,28 @@ const AUDIT_ROWS: AuditRow[] = [
   { titleKey: 'Coretax Integration', body: 'API 미연동 / 상담원 수동처리 기준 유지',                                  byKey: 'sampleBySystem',   ts: '2026-05-25', stateKey: 'stateApplied' },
 ];
 
-export default function OperatorSettingsPage() {
-  const t = useTranslations('operatorSettings');
+export default async function OperatorSettingsPage() {
+  const t = await getTranslations('operatorSettings');
+
+  // Resolve current user role for canEdit gate.
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const role = user ? await resolveUserRole(supabase, user.id) : null;
+  const canEdit = role === 'TAX_OPERATOR_MASTER';
+
+  // Fetch tax code rules (RLS allows all authenticated reads).
+  const admin = getSupabaseAdmin();
+  const { data: rulesRaw } = await admin
+    .from('tax_code_rule')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  const rules = (rulesRaw ?? []) as TaxCodeRule[];
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-[1400px]">
       <PageTitle title={t('pageTitle')} />
 
-      {/* ── header: title + admin badge + page desc ── */}
+      {/* ── header ── */}
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-black text-slate-900">{t('pageHeading')}</h1>
@@ -77,7 +68,7 @@ export default function OperatorSettingsPage() {
         <Header label={t('header.manageTarget')} value={t('header.manageTargetValue')} />
       </div>
 
-      {/* ── 1. 신고연도 / 양식버전 + 2. 운영 기준 ── */}
+      {/* ── §1 + §2 ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <section className="rounded-2xl bg-white p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
@@ -86,7 +77,6 @@ export default function OperatorSettingsPage() {
           </div>
           <p className="text-sm text-slate-600">{t('badan.desc')}</p>
 
-          {/* Badan Form Profile */}
           <div className="rounded-xl border border-slate-200 p-4">
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-sm font-black text-slate-900">Badan Form Profile</h3>
@@ -99,7 +89,6 @@ export default function OperatorSettingsPage() {
             </div>
           </div>
 
-          {/* OP Form Profile */}
           <div className="rounded-xl border border-slate-200 p-4">
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-sm font-black text-slate-900">OP Form Profile</h3>
@@ -113,7 +102,6 @@ export default function OperatorSettingsPage() {
           </div>
         </section>
 
-        {/* 2. 운영 기준 */}
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-black text-slate-900">{t('control.title')}</h2>
@@ -128,42 +116,17 @@ export default function OperatorSettingsPage() {
         </section>
       </div>
 
-      {/* ── 3. Tax Code Rules ── */}
+      {/* ── §3 Tax Code Rules (DB-backed + inline edit) ── */}
       <section className="rounded-2xl bg-white p-5 shadow-sm mb-6">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-black text-slate-900">{t('rules.title')}</h2>
           <Pill tone="blue">{t('rules.badge')}</Pill>
         </div>
         <p className="text-sm text-slate-600 mb-4">{t('rules.intro')}</p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-slate-50 text-slate-600">
-              <tr>
-                <th className="text-left px-3 py-2">{t('rules.colCategory')}</th>
-                <th className="text-left px-3 py-2">{t('rules.colCode')}</th>
-                <th className="text-left px-3 py-2">{t('rules.colRate')}</th>
-                <th className="text-left px-3 py-2">{t('rules.colCondition')}</th>
-                <th className="text-left px-3 py-2">{t('rules.colDoc')}</th>
-                <th className="text-left px-3 py-2">{t('rules.colReview')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {TAX_RULES_KO.map((r) => (
-                <tr key={r.category}>
-                  <td className="px-3 py-2.5 font-bold text-slate-900">{r.category}</td>
-                  <td className="px-3 py-2.5 font-mono text-slate-700">{r.taxCode}</td>
-                  <td className="px-3 py-2.5 text-slate-700">{r.rate}</td>
-                  <td className="px-3 py-2.5 text-slate-700">{r.condition}</td>
-                  <td className="px-3 py-2.5 text-slate-700">{r.doc}</td>
-                  <td className="px-3 py-2.5 text-slate-700">{r.review}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <TaxCodeRulesTable initialRules={rules} canEdit={canEdit} />
       </section>
 
-      {/* ── 4. 판단 조건 + 5. 기준 변경이력 ── */}
+      {/* ── §4 + §5 ── */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
@@ -207,15 +170,7 @@ export default function OperatorSettingsPage() {
   );
 }
 
-function Header({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: 'amber';
-}) {
+function Header({ label, value, tone }: { label: string; value: string; tone?: 'amber' }) {
   const cls = tone === 'amber' ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200';
   return (
     <div className={`rounded-2xl border px-5 py-4 shadow-sm ${cls}`}>
@@ -252,13 +207,7 @@ function DecisionBox({ title, body }: { title: string; body: string }) {
   );
 }
 
-function Pill({
-  tone,
-  children,
-}: {
-  tone: 'slate' | 'blue' | 'indigo' | 'amber' | 'emerald';
-  children: React.ReactNode;
-}) {
+function Pill({ tone, children }: { tone: 'slate' | 'blue' | 'indigo' | 'amber' | 'emerald'; children: React.ReactNode }) {
   const cls =
     tone === 'blue'
       ? 'bg-blue-50 text-blue-700 border-blue-200'

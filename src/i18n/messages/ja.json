@@ -554,7 +554,14 @@
       "colRate": "税率基準",
       "colCondition": "適用条件",
       "colDoc": "必要証憑",
-      "colReview": "相談員検討条件"
+      "colReview": "相談員検討条件",
+      "editButton": "編集",
+      "saveButton": "保存",
+      "cancelButton": "キャンセル",
+      "savingLabel": "保存中…",
+      "saveError": "保存失敗: {message}",
+      "recentlyUpdated": "最近更新",
+      "masterOnlyTooltip": "編集にはMASTER権限が必要です。"
     },
     "decision": {
       "title": "4. 判断条件",

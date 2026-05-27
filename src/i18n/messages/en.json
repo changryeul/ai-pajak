@@ -554,7 +554,14 @@
       "colRate": "Rate basis",
       "colCondition": "Applies when",
       "colDoc": "Required evidence",
-      "colReview": "Staff review condition"
+      "colReview": "Staff review condition",
+      "editButton": "Edit",
+      "saveButton": "Save",
+      "cancelButton": "Cancel",
+      "savingLabel": "Saving…",
+      "saveError": "Save failed: {message}",
+      "recentlyUpdated": "Recently updated",
+      "masterOnlyTooltip": "Editing requires MASTER role."
     },
     "decision": {
       "title": "4. Decision Logic",
