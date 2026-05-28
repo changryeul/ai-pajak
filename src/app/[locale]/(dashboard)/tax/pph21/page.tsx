@@ -23,6 +23,7 @@ import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
 import { fmtRp } from '@/lib/utils';
 import { PageTitle } from '@/components/layout/PageTitle';
+import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
 
 interface Employee {
   id: string;
@@ -865,15 +866,15 @@ function PPh21DataInputSection({
     const file = files[0];
     setMappedFile(file);
 
-    // Read CSV/Excel and extract headers for mapping
-    const text = await file.text();
-    const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) { showMsg('error', tp('l15_5d59d2')); return; }
-
-    const headerRaw = lines[0].replace(/\uFEFF/, '');
-    const headers = headerRaw.split(',').map(h => h.trim().replace(/['"]/g, ''));
-    const preview = lines.slice(1, 4).map(l => l.split(',').map(c => c.trim().replace(/['"]/g, '')));
-
+    // Read CSV/Excel via shared helper (csv + xlsx + xls all supported).
+    let parsed;
+    try {
+      parsed = await parseTabularFile(file);
+    } catch (err) {
+      showMsg('error', `${tp('l15_5d59d2')}: ${(err as Error).message}`);
+      return;
+    }
+    const { headers, preview } = parsed;
     setCsvHeaders(headers);
     setCsvPreview(preview);
 
@@ -937,14 +938,19 @@ function PPh21DataInputSection({
     setMappingStep('importing');
     setUploading(true);
 
-    // Rebuild CSV with mapped headers
-    const text = await mappedFile.text();
-    const lines = text.split('\n').filter(l => l.trim());
-    const dataRows = lines.slice(1);
-
+    // Parse original CSV/XLSX, rebuild CSV with mapped headers, submit as CSV blob.
+    let dataRows: string[][];
+    try {
+      const parsed = await parseTabularFile(mappedFile);
+      dataRows = parsed.dataRows;
+    } catch (err) {
+      showMsg('error', tp('l20_ceee68') + `: ${(err as Error).message}`);
+      setMappingStep('mapping');
+      setUploading(false);
+      return;
+    }
     const mappedHeaders = columnMappings.map(m => m.targetField || 'SKIP');
-    const mappedCsv = [mappedHeaders.join(','), ...dataRows].join('\n');
-
+    const mappedCsv = rowsToCsv(mappedHeaders, dataRows);
     const blob = new Blob(['\uFEFF' + mappedCsv], { type: 'text/csv' });
     const fd = new FormData();
     fd.append('file', blob, 'mapped.csv');

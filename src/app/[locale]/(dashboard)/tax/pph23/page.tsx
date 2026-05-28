@@ -20,6 +20,7 @@ import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
 import { Download, FileUp, FileSpreadsheet, Pencil } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
+import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
 
 // ── Types ──
 interface Transaction {
@@ -422,7 +423,16 @@ export default function PPh23Page() {
     }
     setUploading(true);
     try {
-      const csvContent = await file.text();
+      // Parse CSV/XLSX via shared helper, serialise back to CSV string for the server.
+      let csvContent: string;
+      try {
+        const parsed = await parseTabularFile(file);
+        csvContent = rowsToCsv(parsed.headers, parsed.dataRows);
+      } catch (parseErr) {
+        showMsg('error', `${t('csvUploadFailed')} — ${(parseErr as Error).message}`);
+        setUploading(false);
+        return;
+      }
       const res = await fetch('/api/tax/pph23-transactions/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
