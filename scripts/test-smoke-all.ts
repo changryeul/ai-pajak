@@ -46,43 +46,79 @@ const STEPS: Step[] = [
 
 interface Result {
   step: Step;
-  status: 'PASS' | 'FAIL' | 'MISSING';
+  status: 'PASS' | 'RETRY_PASS' | 'FAIL' | 'MISSING';
   ms: number;
   exit: number | null;
+  retried?: boolean;
 }
 
-function runStep(step: Step): Promise<Result> {
+// Per-step timeout — generous; long-running smokes (autoParse, parser) take 10-15s.
+const STEP_TIMEOUT_MS = 5 * 60_000;
+// Delay before retry — gives transient causes (deploy roll, rate-limit cooldown) time to clear.
+const RETRY_DELAY_MS = 5_000;
+
+/** Spawn ONE attempt of a script. Returns exit code + ms. */
+function spawnAttempt(step: Step): Promise<{ exit: number | null; ms: number; status: 'PASS' | 'FAIL' | 'MISSING'; timedOut?: boolean }> {
   return new Promise((resolve) => {
     const fullPath = path.join(HERE, step.file);
     const t0 = Date.now();
-    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`▶ ${step.name}  (${step.file})`);
-    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-
     const child = spawn('npx', ['tsx', fullPath], {
       stdio: 'inherit',
       env: process.env,
     });
 
+    const killTimer = setTimeout(() => {
+      console.error(`\n⏱  step exceeded ${STEP_TIMEOUT_MS / 1000}s — killing`);
+      child.kill('SIGTERM');
+      // Force-kill if SIGTERM doesn't take effect in 3s.
+      setTimeout(() => child.kill('SIGKILL'), 3_000);
+    }, STEP_TIMEOUT_MS);
+
+    let timedOut = false;
     child.on('close', (code) => {
+      clearTimeout(killTimer);
       const ms = Date.now() - t0;
       const exit = code ?? 0;
-      let status: Result['status'] = 'PASS';
-      if (exit !== 0) status = 'FAIL';
-      resolve({ step, status, ms, exit });
+      resolve({ exit, ms, status: exit === 0 ? 'PASS' : 'FAIL', timedOut });
     });
     child.on('error', (err) => {
+      clearTimeout(killTimer);
       const ms = Date.now() - t0;
       const msg = err.message;
       console.error(`!! step ${step.name} spawn failed: ${msg}`);
       resolve({
-        step,
-        status: msg.includes('ENOENT') ? 'MISSING' : 'FAIL',
-        ms,
         exit: null,
+        ms,
+        status: msg.includes('ENOENT') ? 'MISSING' : 'FAIL',
       });
     });
+    // Mark timedOut for telemetry when SIGTERM closes the child.
+    const origKill = child.kill.bind(child);
+    child.kill = ((sig?: NodeJS.Signals | number) => { timedOut = true; return origKill(sig); }) as typeof child.kill;
   });
+}
+
+async function runStep(step: Step): Promise<Result> {
+  console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  console.log(`▶ ${step.name}  (${step.file})`);
+  console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
+  const first = await spawnAttempt(step);
+
+  // PASS or MISSING — no retry. Only FAIL with non-zero exit gets one retry.
+  if (first.status !== 'FAIL') {
+    return { step, status: first.status, ms: first.ms, exit: first.exit };
+  }
+
+  console.log(`\n⚠  step FAILED (exit=${first.exit}, ${(first.ms / 1000).toFixed(1)}s) — retrying once in ${RETRY_DELAY_MS / 1000}s …`);
+  await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+
+  const second = await spawnAttempt(step);
+  const totalMs = first.ms + RETRY_DELAY_MS + second.ms;
+  if (second.status === 'PASS') {
+    return { step, status: 'RETRY_PASS', ms: totalMs, exit: second.exit, retried: true };
+  }
+  return { step, status: 'FAIL', ms: totalMs, exit: second.exit, retried: true };
 }
 
 (async () => {
@@ -104,17 +140,22 @@ function runStep(step: Step): Promise<Result> {
   let hardFail = 0;
   for (const r of results) {
     const icon =
-      r.status === 'PASS' ? '✅' : r.status === 'MISSING' ? '⏭️ ' : '💥';
-    const tag = r.step.optional && r.status !== 'PASS' ? ' (optional)' : '';
+      r.status === 'PASS' ? '✅' :
+      r.status === 'RETRY_PASS' ? '⚠️ ' :
+      r.status === 'MISSING' ? '⏭️ ' : '💥';
+    const tag = r.step.optional && r.status === 'FAIL' ? ' (optional)' : '';
+    const retryNote = r.status === 'RETRY_PASS' ? '  [retried]' : '';
     const seconds = (r.ms / 1000).toFixed(1);
-    console.log(`  ${icon} ${r.step.name}  —  ${seconds}s${tag}`);
+    console.log(`  ${icon} ${r.step.name}  —  ${seconds}s${tag}${retryNote}`);
     if (r.status === 'FAIL' && !r.step.optional) hardFail++;
   }
 
   const passed = results.filter((r) => r.status === 'PASS').length;
+  const retryPassed = results.filter((r) => r.status === 'RETRY_PASS').length;
   const skipped = results.filter((r) => r.status === 'MISSING').length;
+  const retryNote = retryPassed > 0 ? ` · ${retryPassed} retry-pass` : '';
   console.log(
-    `\n  ${passed} pass · ${skipped} missing · ${hardFail} required-fail / ${results.length} total\n`,
+    `\n  ${passed} pass${retryNote} · ${skipped} missing · ${hardFail} required-fail / ${results.length} total\n`,
   );
 
   process.exit(hardFail > 0 ? 1 : 0);
