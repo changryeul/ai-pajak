@@ -20,7 +20,7 @@ import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
 import { Download, FileUp, FileSpreadsheet, Pencil } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
-import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
+import { importWholesaleFile } from '@/lib/tax/bulk-import/pph23-wholesale-importer';
 
 // ── Types ──
 interface Transaction {
@@ -423,16 +423,26 @@ export default function PPh23Page() {
     }
     setUploading(true);
     try {
-      // Parse CSV/XLSX via shared helper, serialise back to CSV string for the server.
-      let csvContent: string;
+      // Parse wholesale ledger (xlsx/csv) → extract PPh23-only rows → normalised CSV for the server.
+      let summary;
       try {
-        const parsed = await parseTabularFile(file);
-        csvContent = rowsToCsv(parsed.headers, parsed.dataRows);
+        summary = await importWholesaleFile(file);
       } catch (parseErr) {
-        showMsg('error', `${t('csvUploadFailed')} — ${(parseErr as Error).message}`);
+        showMsg('error', t('wholesaleParseError', { reason: (parseErr as Error).message }));
         setUploading(false);
         return;
       }
+
+      if (summary.imported === 0) {
+        showMsg('error', t('wholesaleNoRowsImported', {
+          skippedByTaxType: summary.skippedByTaxType,
+          skippedByValidation: summary.skippedByValidation,
+        }));
+        setUploading(false);
+        return;
+      }
+
+      const csvContent = summary.csvContent;
       const res = await fetch('/api/tax/pph23-transactions/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -447,16 +457,22 @@ export default function PPh23Page() {
       const inserted = d.insertedCount ?? 0;
       const errorRows = d.errorRows ?? 0;
       const total = d.totalRows ?? 0;
+      // Wholesale ledger 에서 PPh23 외 세금이 섞여 있던 경우, 성공 메시지에 skip 카운트를 덧붙여
+      // 한 banner 안에 두 정보(성공 + skip 안내)를 동시에 보여준다. (showMsg 는 단일 슬롯이라
+      // 별도 'info' toast 를 띄우면 직전 success 를 덮어쓴다 — 그래서 문자열 join.)
+      const skipNotice = summary.skippedByTaxType > 0
+        ? ` — ${t('wholesaleSkippedTaxType', { count: summary.skippedByTaxType })}`
+        : '';
       if (errorRows > 0) {
         const sample = (d.errors || []).slice(0, 3)
           .map((e: { rowNumber: number; errors: string[] }) => `${t('csvRowPrefix', { row: e.rowNumber })}: ${e.errors.join(', ')}`)
           .join(' / ');
         showMsg(
           'error',
-          `${t('csvImportPartial', { inserted, total, failed: errorRows, sample })}${(d.errors || []).length > 3 ? ' …' : ''}`,
+          `${t('csvImportPartial', { inserted, total, failed: errorRows, sample })}${(d.errors || []).length > 3 ? ' …' : ''}${skipNotice}`,
         );
       } else {
-        showMsg('success', t('csvImportDone', { inserted, total }));
+        showMsg('success', `${t('csvImportDone', { inserted, total })}${skipNotice}`);
       }
       // 거래 목록 갱신
       if (importPeriod !== period) setPeriod(importPeriod);
