@@ -17,6 +17,7 @@ import {
   Sparkles, BarChart3, Upload, Download, Trash2, UserPlus, Camera,
 } from 'lucide-react';
 import { generateTemplate } from '@/lib/tax/bulk-import/csv-parser';
+import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
 
 // Types
 interface Transaction {
@@ -258,7 +259,9 @@ export default function SPTMasaPage() {
     setIsSaving(true);
     setUploadResult(null);
     try {
-      const text = await file.text();
+      // Parse csv OR xlsx via shared helper, serialise back to CSV for server.
+      const parsed = await parseTabularFile(file);
+      const text = rowsToCsv(parsed.headers, parsed.dataRows);
       const res = await fetch('/api/tax/bulk-import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -596,7 +599,7 @@ export default function SPTMasaPage() {
                 <Button size="sm" variant="outline" asChild>
                   <span><Upload className="h-3 w-3 mr-1" />CSV Upload</span>
                 </Button>
-                <input type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
+                <input type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleCSVUpload} />
               </label>
               <label className="cursor-pointer">
                 <Button size="sm" variant="outline" asChild disabled={isScanning}>

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { ShoppingCart, Upload, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { parseEcommerceCSV, calculateMonthlySummary, type EcommercePlatform, type EcommerceMonthlySummary } from '@/lib/ecommerce';
+import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
 import { useTranslations } from 'next-intl';
 
 export default function EcommercePage() {
@@ -21,7 +22,9 @@ export default function EcommercePage() {
     if (!file) return;
     setIsLoading(true);
     try {
-      const text = await file.text();
+      // Parse csv OR xlsx via shared helper, serialise back to CSV for parseEcommerceCSV.
+      const parsed = await parseTabularFile(file);
+      const text = rowsToCsv(parsed.headers, parsed.dataRows);
       const orders = parseEcommerceCSV(text, platform);
       setOrderCount(orders.length);
       const period = new Date().toISOString().slice(0, 7);
@@ -57,7 +60,7 @@ export default function EcommercePage() {
           <div className="border-2 border-dashed rounded-xl p-8 text-center">
             <FileSpreadsheet className="h-10 w-10 text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-600 mb-2">Upload CSV export dari seller dashboard</p>
-            <input type="file" accept=".csv" onChange={handleUpload} disabled={isLoading} className="text-sm" />
+            <input type="file" accept=".csv,.xlsx,.xls" onChange={handleUpload} disabled={isLoading} className="text-sm" />
             <p className="text-xs text-gray-400 mt-2">Download laporan penjualan dari {platform} Seller Center → Export CSV</p>
           </div>
           {isLoading && <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="h-4 w-4 animate-spin" />Memproses...</div>}
