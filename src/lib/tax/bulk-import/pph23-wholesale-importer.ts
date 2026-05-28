@@ -117,7 +117,7 @@ export function classifyTaxType(s: string): 'pph23_jasa' | 'pph23_sewa' | SkipRe
   if (/^PPH\s*23\s+SEWA/.test(t)) return 'pph23_sewa';
   if (/^PPH\s*23(\s+JASA)?/.test(t)) return 'pph23_jasa';
   if (/^PPH\s*4\s+AYAT\s+2/.test(t)) return 'pph4_2';
-  if (/^PPH?\s*26/.test(t)) return 'pph26';
+  if (/^PPH\s*26/.test(t)) return 'pph26';
   if (/^PPH\s*21/.test(t)) return 'pph21bp';
   return 'unknown';
 }
