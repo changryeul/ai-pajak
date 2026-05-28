@@ -33,8 +33,23 @@ export function TaxChatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Ref mirror of isOpen so async sendMessage callbacks see the current value
+  // even when the user closes the panel while a request is in-flight.
+  const isOpenRef = useRef(isOpen);
+  useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
+
+  // appendAssistant centralises the "AI says something" code path so unread
+  // tracking happens automatically when the panel is closed.
+  const appendAssistant = useCallback((content: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: 'assistant', content, timestamp: new Date() },
+    ]);
+    if (!isOpenRef.current) setUnreadCount((c) => c + 1);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -99,40 +114,16 @@ export function TaxChatbot() {
       const data = await response.json();
 
       if (data.success && data.reply) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: data.reply,
-            timestamp: new Date(),
-          },
-        ]);
+        appendAssistant(data.reply);
       } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: 'Maaf, terjadi kesalahan. Silakan coba lagi.',
-            timestamp: new Date(),
-          },
-        ]);
+        appendAssistant('Maaf, terjadi kesalahan. Silakan coba lagi.');
       }
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: 'Maaf, tidak dapat terhubung ke server. Silakan coba lagi.',
-          timestamp: new Date(),
-        },
-      ]);
+      appendAssistant('Maaf, tidak dapat terhubung ke server. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
-  }, [input, messages, isLoading, locale]);
+  }, [input, messages, isLoading, locale, appendAssistant]);
 
   const clearChat = () => {
     setMessages([]);
@@ -142,10 +133,21 @@ export function TaxChatbot() {
   if (!isOpen) {
     return (
       <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:scale-105 transition-all duration-300"
+        onClick={() => { setIsOpen(true); setUnreadCount(0); }}
+        aria-label={unreadCount > 0 ? `AI 응답 ${unreadCount}개 도착` : 'AI 챗 열기'}
+        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 relative"
       >
         <MessageCircle className="h-6 w-6" />
+        {unreadCount > 0 && (
+          <>
+            {/* Outer pulsing ring to grab attention */}
+            <span className="absolute -top-1 -right-1 inline-flex h-5 w-5 rounded-full bg-red-500 opacity-75 animate-ping" />
+            {/* Solid badge on top */}
+            <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-white shadow-lg">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          </>
+        )}
       </button>
     );
   }
