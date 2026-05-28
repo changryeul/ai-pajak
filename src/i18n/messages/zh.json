@@ -4535,7 +4535,7 @@
     "csvImportPartial": "已导入 {inserted}/{total} 条, {failed} 条验证失败 — {sample}",
     "csvImportDone": "已导入 {inserted}/{total} 条 PPh 23 交易",
     "wholesaleNoRowsImported": "未导入 PPh23 行 — 税种跳过: {skippedByTaxType}, 验证跳过: {skippedByValidation}",
-    "wholesaleSkippedTaxType": "{count} 行已跳过 (非 PPh23)",
+    "wholesaleSkippedTaxType": "{count} 行已跳过 — 非 PPh23 (PPh4(2)/PPh26/PPh21 BP)",
     "wholesaleParseError": "文件解析失败: {reason}",
     "csvProcessError": "CSV 处理出错",
     "unknownError": "未知",

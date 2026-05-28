@@ -424,7 +424,7 @@ export default function PPh23Page() {
     setUploading(true);
     try {
       // Parse wholesale ledger (xlsx/csv) → extract PPh23-only rows → normalised CSV for the server.
-      let summary;
+      let summary: Awaited<ReturnType<typeof importWholesaleFile>>;
       try {
         summary = await importWholesaleFile(file);
       } catch (parseErr) {

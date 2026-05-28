@@ -4535,7 +4535,7 @@
     "csvImportPartial": "{inserted}/{total} imported, {failed} failed validation — {sample}",
     "csvImportDone": "{inserted}/{total} PPh 23 transactions imported",
     "wholesaleNoRowsImported": "No PPh23 rows imported — wrong-tax-type skipped: {skippedByTaxType}, validation skipped: {skippedByValidation}",
-    "wholesaleSkippedTaxType": "{count} rows skipped — non-PPh23 tax types",
+    "wholesaleSkippedTaxType": "{count} rows skipped — non-PPh23 tax types (PPh4(2)/PPh26/PPh21 BP)",
     "wholesaleParseError": "File parse failed: {reason}",
     "csvProcessError": "Error while processing CSV",
     "unknownError": "Unknown",
