@@ -30,6 +30,7 @@ import {
   Calendar,
   CheckCircle,
   TrendingUp,
+  MessageCircle,
   MessageSquare,
   MessageSquareWarning,
   Sparkles,
@@ -250,6 +251,7 @@ const navItems: NavSection[] = [
       { href: '/operator/approval-request', icon: CheckCircle,   labelKey: 'nav.opApproval' },
       { href: '/operator/coretax',          icon: Receipt,       labelKey: 'nav.opCoretax' },
       { href: '/operator/messenger',        icon: MessageSquare, labelKey: 'nav.opMessenger' },
+      { href: '/operator/customer-inbox',   icon: MessageCircle, labelKey: 'nav.customerInbox' },
       { href: '/operator/history',          icon: ClipboardList, labelKey: 'nav.opHistory' },
     ],
   },
@@ -269,6 +271,7 @@ const navItems: NavSection[] = [
       { href: '/operator/statistics', icon: TrendingUp,    labelKey: 'nav.operatorStatistics' },
       { href: '/operator/cases',      icon: ClipboardList, labelKey: 'nav.allCases' },
       { href: '/operator/messenger',  icon: MessageSquare, labelKey: 'nav.opMessenger' },
+      { href: '/operator/customer-inbox', icon: MessageCircle, labelKey: 'nav.customerInbox' },
       { href: '/operator/audit',      icon: Shield,        labelKey: 'nav.auditLog' },
       {
         href: '/operator/settings',
