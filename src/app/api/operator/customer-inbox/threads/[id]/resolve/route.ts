@@ -3,6 +3,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { requireRole } from '@/middleware/rbac';
+import { recordAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 
@@ -19,6 +20,12 @@ async function handle(req: RequestWithSession): Promise<Response> {
     .update({ status: 'RESOLVED', updated_at: new Date().toISOString() })
     .eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await recordAudit({
+    action: 'CUSTOMER_AI_RESOLVE',
+    actorUserId: req.session.userId,
+    actorRole: req.session.role,
+    details: { threadId: id },
+  });
   return NextResponse.json({ data: { status: 'RESOLVED' } });
 }
 

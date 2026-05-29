@@ -64,9 +64,19 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   if (unread.length > 0) {
     await admin.from('customer_ai_message').update({ operator_read_at: now })
       .in('id', unread.map((m) => m.id));
+    // Fetch current count + compute. Race-safe: decrement by exactly the rows
+    // we just marked read. New unread arrivals between SELECT and UPDATE
+    // remain counted.
+    const { data: current } = await admin
+      .from('customer_ai_thread')
+      .select('operator_unread_count')
+      .eq('id', threadId)
+      .maybeSingle();
+    const newCount = Math.max(0, (current?.operator_unread_count ?? 0) - unread.length);
+    await admin.from('customer_ai_thread')
+      .update({ operator_unread_count: newCount, updated_at: now })
+      .eq('id', threadId);
   }
-  await admin.from('customer_ai_thread')
-    .update({ operator_unread_count: 0, updated_at: now }).eq('id', threadId);
 
   // Resolve operator emails
   const operatorIds = [...new Set(rawMsgs.filter((m) => m.sender_role === 'operator' && m.sender_user_id).map((m) => m.sender_user_id as string))];
