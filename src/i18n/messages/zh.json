@@ -261,6 +261,7 @@
     "supervisorLegality": "法律文档",
     "supervisorApproval": "待审批",
     "opMessenger": "消息",
+    "customerInbox": "客户咨询",
     "masterArea": "主管区域"
   },
   "employeeHr": {
@@ -9948,5 +9949,29 @@
     "securityNote": "主管消息以内部指示形式送达，绝不在客户消息中显示。",
     "operatorMode": "查看主管发来的内部指示。",
     "pickSupervisor": "请选择要对话的主管。"
+  },
+  "customerAiChat": {
+    "title": "AI 顾问",
+    "subtitle": "提供资料请求、申报进度、咨询指引",
+    "statusAwaiting": "等待 AI 顾问回复",
+    "statusResponded": "已收到回复",
+    "statusResolved": "已解决",
+    "linkedTask": "关联业务",
+    "inputPlaceholder": "请输入消息...",
+    "send": "发送",
+    "emptyState": "向 AI 顾问发送第一条消息",
+    "loading": "加载中...",
+    "errorSend": "发送失败,请重试。"
+  },
+  "operatorCustomerInbox": {
+    "title": "客户咨询",
+    "subtitle": "客户始终将您的消息显示为「AI 顾问」",
+    "threadListEmpty": "暂无客户咨询",
+    "selectThreadHint": "请在左侧选择会话",
+    "customerInfoHeader": "客户信息",
+    "metadataHeader": "会话信息",
+    "replyPlaceholder": "以 AI 顾问身份回复...",
+    "send": "发送",
+    "markResolved": "标记已解决"
   }
 }

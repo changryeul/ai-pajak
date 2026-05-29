@@ -261,6 +261,7 @@
     "supervisorLegality": "Legalitas",
     "supervisorApproval": "Persetujuan",
     "opMessenger": "Pesan",
+    "customerInbox": "Kotak Pelanggan",
     "masterArea": "Area Master"
   },
   "employeeHr": {
@@ -9948,5 +9949,29 @@
     "securityNote": "Pesan Supervisor disampaikan sebagai instruksi internal. Tidak pernah muncul di messenger pelanggan.",
     "operatorMode": "Instruksi internal dari Supervisor Anda.",
     "pickSupervisor": "Pilih Supervisor untuk diajak bicara."
+  },
+  "customerAiChat": {
+    "title": "Konsultan AI",
+    "subtitle": "Panduan permintaan dokumen, status pelaporan, dan pertanyaan",
+    "statusAwaiting": "Menunggu Konsultan AI",
+    "statusResponded": "Balasan Diterima",
+    "statusResolved": "Selesai",
+    "linkedTask": "Tugas terhubung",
+    "inputPlaceholder": "Ketik pesan Anda...",
+    "send": "Kirim",
+    "emptyState": "Kirim pesan pertama ke Konsultan AI",
+    "loading": "Memuat...",
+    "errorSend": "Gagal mengirim. Coba lagi."
+  },
+  "operatorCustomerInbox": {
+    "title": "Kotak Pelanggan",
+    "subtitle": "Pelanggan selalu melihat pesan Anda sebagai 'Konsultan AI'",
+    "threadListEmpty": "Tidak ada pertanyaan pelanggan",
+    "selectThreadHint": "Pilih thread di sebelah kiri",
+    "customerInfoHeader": "Info Pelanggan",
+    "metadataHeader": "Info Thread",
+    "replyPlaceholder": "Balas sebagai Konsultan AI...",
+    "send": "Kirim",
+    "markResolved": "Tandai selesai"
   }
 }

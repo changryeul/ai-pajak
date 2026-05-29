@@ -261,6 +261,7 @@
     "supervisorLegality": "리갈리티 자료",
     "supervisorApproval": "승인대기",
     "opMessenger": "메신저",
+    "customerInbox": "고객 상담",
     "masterArea": "마스터 영역"
   },
   "employeeHr": {
@@ -10074,5 +10075,29 @@
     "securityNote": "Supervisor 메시지는 상담원에게 내부지시로 전달됩니다. 고객 메신저에는 노출되지 않습니다.",
     "operatorMode": "Supervisor에게서 받은 내부 지시를 확인합니다.",
     "pickSupervisor": "대화 가능한 Supervisor를 선택하세요."
+  },
+  "customerAiChat": {
+    "title": "AI 상담원",
+    "subtitle": "자료 요청, 신고 진행 상황, 문의를 안내합니다",
+    "statusAwaiting": "AI 상담원 응답 대기",
+    "statusResponded": "응답 도착",
+    "statusResolved": "해결됨",
+    "linkedTask": "현재 연결된 업무",
+    "inputPlaceholder": "메시지를 입력하세요...",
+    "send": "전송",
+    "emptyState": "AI 상담원에게 첫 메시지를 보내보세요",
+    "loading": "불러오는 중...",
+    "errorSend": "전송 실패. 다시 시도해주세요."
+  },
+  "operatorCustomerInbox": {
+    "title": "고객 상담",
+    "subtitle": "고객 view 에는 항상 'AI 상담원' 으로 표시됩니다",
+    "threadListEmpty": "고객 상담 요청이 없습니다",
+    "selectThreadHint": "왼쪽에서 thread 를 선택하세요",
+    "customerInfoHeader": "고객 정보",
+    "metadataHeader": "Thread 정보",
+    "replyPlaceholder": "AI 상담원 페르소나로 답변...",
+    "send": "전송",
+    "markResolved": "해결됨으로 표시"
   }
 }

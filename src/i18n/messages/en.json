@@ -261,6 +261,7 @@
     "supervisorLegality": "Legality",
     "supervisorApproval": "Approval",
     "opMessenger": "Messenger",
+    "customerInbox": "Customer Inbox",
     "masterArea": "Master Area"
   },
   "employeeHr": {
@@ -9948,5 +9949,29 @@
     "securityNote": "Supervisor messages are delivered as internal instructions. They are never shown in the customer messenger.",
     "operatorMode": "Internal instructions received from your Supervisor.",
     "pickSupervisor": "Pick a Supervisor to talk to."
+  },
+  "customerAiChat": {
+    "title": "AI Consultant",
+    "subtitle": "Material requests, filing status, and inquiry guidance",
+    "statusAwaiting": "Awaiting AI Consultant",
+    "statusResponded": "Reply Received",
+    "statusResolved": "Resolved",
+    "linkedTask": "Linked task",
+    "inputPlaceholder": "Type your message...",
+    "send": "Send",
+    "emptyState": "Send your first message to the AI Consultant",
+    "loading": "Loading...",
+    "errorSend": "Send failed. Try again."
+  },
+  "operatorCustomerInbox": {
+    "title": "Customer Inbox",
+    "subtitle": "Customers always see your messages as 'AI Consultant'",
+    "threadListEmpty": "No customer inquiries",
+    "selectThreadHint": "Select a thread on the left",
+    "customerInfoHeader": "Customer Info",
+    "metadataHeader": "Thread Info",
+    "replyPlaceholder": "Reply as AI Consultant...",
+    "send": "Send",
+    "markResolved": "Mark resolved"
   }
 }

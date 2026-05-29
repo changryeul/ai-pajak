@@ -261,6 +261,7 @@
     "supervisorLegality": "リーガリティ",
     "supervisorApproval": "決裁待ち",
     "opMessenger": "メッセンジャー",
+    "customerInbox": "顧客対応",
     "masterArea": "マスター領域"
   },
   "employeeHr": {
@@ -9948,5 +9949,29 @@
     "securityNote": "スーパーバイザーのメッセージは社内指示として届きます。顧客側メッセンジャーには絶対に表示されません。",
     "operatorMode": "スーパーバイザーからの社内指示を確認します。",
     "pickSupervisor": "会話するスーパーバイザーを選択してください。"
+  },
+  "customerAiChat": {
+    "title": "AIコンサルタント",
+    "subtitle": "資料リクエスト、申告進捗、お問い合わせを案内します",
+    "statusAwaiting": "AIコンサルタント応答待ち",
+    "statusResponded": "返信あり",
+    "statusResolved": "解決済み",
+    "linkedTask": "関連業務",
+    "inputPlaceholder": "メッセージを入力...",
+    "send": "送信",
+    "emptyState": "AIコンサルタントに最初のメッセージを送りましょう",
+    "loading": "読込中...",
+    "errorSend": "送信失敗。再試行してください。"
+  },
+  "operatorCustomerInbox": {
+    "title": "顧客対応",
+    "subtitle": "顧客には常に「AIコンサルタント」として表示されます",
+    "threadListEmpty": "顧客の問い合わせはありません",
+    "selectThreadHint": "左からスレッドを選択",
+    "customerInfoHeader": "顧客情報",
+    "metadataHeader": "スレッド情報",
+    "replyPlaceholder": "AIコンサルタントとして返信...",
+    "send": "送信",
+    "markResolved": "解決済みに"
   }
 }
