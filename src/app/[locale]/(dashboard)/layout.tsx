@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { SidebarWrapper } from '@/components/layout/SidebarWrapper';
 import { Header } from '@/components/layout/header';
 import { MobileSidebarProvider } from '@/components/layout/mobile-sidebar';
@@ -16,6 +17,7 @@ export default async function DashboardLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const role = user ? await resolveUserRole(supabase, user.id) : null;
 
   return (
     <MobileSidebarProvider>
@@ -28,7 +30,7 @@ export default async function DashboardLayout({
           />
           <main className="p-4 lg:p-6">{children}</main>
         </div>
-        <ChatbotWrapper />
+        <ChatbotWrapper role={role} />
       </div>
     </MobileSidebarProvider>
   );
