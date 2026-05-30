@@ -9974,6 +9974,9 @@
     "send": "Kirim",
     "markResolved": "Tandai selesai",
     "aiDraftButton": "Saran AI",
-    "aiDraftLoading": "Membuat draft..."
+    "aiDraftLoading": "Membuat draft...",
+    "autoDraftPillText": "Saran AI tersedia",
+    "autoDraftAccept": "Terima",
+    "autoDraftDismiss": "Tutup"
   }
 }

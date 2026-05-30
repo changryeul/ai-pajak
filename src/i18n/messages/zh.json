@@ -9974,6 +9974,9 @@
     "send": "发送",
     "markResolved": "标记已解决",
     "aiDraftButton": "AI 推荐",
-    "aiDraftLoading": "正在生成草稿..."
+    "aiDraftLoading": "正在生成草稿...",
+    "autoDraftPillText": "AI 推荐已生成",
+    "autoDraftAccept": "接受",
+    "autoDraftDismiss": "关闭"
   }
 }

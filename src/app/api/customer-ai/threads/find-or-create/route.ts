@@ -38,6 +38,10 @@ interface RawThread {
 }
 
 function toDTO(t: RawThread): ThreadDTO {
+  // SECURITY BOUNDARY (Phase 2.1): explicit whitelist — `auto_draft` and
+  // `auto_draft_at` are operator-only and MUST NOT leak to the customer.
+  // Even though `RawThread` does not declare them, the DB row contains them
+  // (select '*'). Spread is intentionally avoided here.
   return {
     id: t.id,
     contextKind: t.context_kind,

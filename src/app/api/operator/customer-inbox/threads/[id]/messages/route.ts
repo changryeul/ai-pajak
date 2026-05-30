@@ -123,6 +123,10 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     customer_unread_count: (thread.customer_unread_count ?? 0) + 1,
     status: 'RESPONDED',
     updated_at: now,
+    // Phase 2.1: operator just sent a reply → clear any pending auto-draft.
+    // Next customer message re-triggers the auto-draft helper.
+    auto_draft: null,
+    auto_draft_at: null,
   }).eq('id', threadId);
 
   await recordAudit({

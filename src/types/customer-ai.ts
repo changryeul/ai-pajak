@@ -24,6 +24,11 @@ export interface ThreadDTO {
 export interface ThreadWithCustomerDTO extends ThreadDTO {
   customerId: string;
   customerName: string;
+  /** Phase 2.1: auto-generated draft pending operator review. NULL when no
+   *  pending draft. Operator-only — never sent to customer endpoints. */
+  auto_draft: string | null;
+  /** Phase 2.1: when auto_draft was generated. NULL when auto_draft is NULL. */
+  auto_draft_at: string | null;
 }
 
 export interface MessageDTO {

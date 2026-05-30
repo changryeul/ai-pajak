@@ -10100,6 +10100,9 @@
     "send": "전송",
     "markResolved": "해결됨으로 표시",
     "aiDraftButton": "AI 추천",
-    "aiDraftLoading": "AI 답변 작성 중..."
+    "aiDraftLoading": "AI 답변 작성 중...",
+    "autoDraftPillText": "AI 추천 답변 있음",
+    "autoDraftAccept": "수락",
+    "autoDraftDismiss": "닫기"
   }
 }

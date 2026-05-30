@@ -9974,6 +9974,9 @@
     "send": "送信",
     "markResolved": "解決済みに",
     "aiDraftButton": "AI 推奨",
-    "aiDraftLoading": "下書き作成中..."
+    "aiDraftLoading": "下書き作成中...",
+    "autoDraftPillText": "AI 推奨あり",
+    "autoDraftAccept": "受け入れる",
+    "autoDraftDismiss": "閉じる"
   }
 }

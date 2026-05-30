@@ -141,6 +141,35 @@ export function CustomerInboxClient() {
     }
   };
 
+  // Phase 2.1: auto-draft pill handlers
+  const acceptAutoDraft = () => {
+    if (!selectedThread?.auto_draft) return;
+    setInput(selectedThread.auto_draft);
+    // Locally hide pill — server keeps row until operator sends or dismisses.
+    setThreads((prev) =>
+      prev.map((th) =>
+        th.id === selectedId ? { ...th, auto_draft: null, auto_draft_at: null } : th,
+      ),
+    );
+  };
+
+  const dismissAutoDraft = async () => {
+    if (!selectedId) return;
+    // Optimistic clear
+    setThreads((prev) =>
+      prev.map((th) =>
+        th.id === selectedId ? { ...th, auto_draft: null, auto_draft_at: null } : th,
+      ),
+    );
+    try {
+      await fetch(`/api/operator/customer-inbox/threads/${selectedId}/auto-draft`, {
+        method: 'DELETE',
+      });
+    } catch {
+      /* silent — next poll re-syncs */
+    }
+  };
+
   return (
     <div className="grid grid-cols-[260px_1fr_300px] gap-3 h-[700px]">
       {/* Left: thread list */}
@@ -224,6 +253,29 @@ export function CustomerInboxClient() {
             </div>
             {selectedThread.status !== 'RESOLVED' && (
               <div className="border-t p-3 flex-shrink-0">
+                {/* Phase 2.1: auto-draft suggestion pill */}
+                {selectedThread.auto_draft && !drafting && (
+                  <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-purple-50 border border-purple-200 text-sm">
+                    <Sparkles className="h-4 w-4 text-purple-600 shrink-0" />
+                    <span className="text-purple-900 truncate flex-1">
+                      {t('autoDraftPillText')}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={acceptAutoDraft}
+                      className="px-2 py-1 rounded bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium"
+                    >
+                      {t('autoDraftAccept')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={dismissAutoDraft}
+                      className="px-2 py-1 rounded border border-purple-300 text-purple-700 hover:bg-purple-100 text-xs"
+                    >
+                      {t('autoDraftDismiss')}
+                    </button>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <input
                     type="text"

@@ -9,7 +9,7 @@
  *   Side effect: operator_unread_count += 1, status='AWAITING_OPERATOR'.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { z } from 'zod';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -20,6 +20,8 @@ import { loggers } from '@/lib/logger';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 import type { MessageDTO } from '@/types/customer-ai';
 import { mapMessageForCustomer } from '@/lib/customer-ai/persona';
+import { generateDraft } from '@/lib/customer-ai/draft';
+import { recordAudit } from '@/middleware/audit';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -135,6 +137,56 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     status: 'AWAITING_OPERATOR',
     updated_at: now,
   }).eq('id', threadId);
+
+  // Phase 2.1: auto-draft trigger. Only fire if no pending draft exists
+  // (state = NULL means it's the first customer message since the operator's
+  // last reply / since dismiss). Background work via next/server `after()` —
+  // customer response latency stays unchanged.
+  const { data: draftState } = await admin
+    .from('customer_ai_thread')
+    .select('auto_draft')
+    .eq('id', threadId)
+    .maybeSingle();
+  if (draftState && draftState.auto_draft === null) {
+    after(async () => {
+      try {
+        const result = await generateDraft(threadId);
+        if (!result) return;
+        // Race-safe update: only set if still NULL (another in-flight trigger
+        // might have already populated it).
+        const { error: upErr } = await admin
+          .from('customer_ai_thread')
+          .update({
+            auto_draft: result.draft,
+            auto_draft_at: new Date().toISOString(),
+          })
+          .eq('id', threadId)
+          .is('auto_draft', null);
+        if (upErr) {
+          loggers.api.warn(
+            { err: upErr.message, threadId },
+            'auto-draft update failed',
+          );
+          return;
+        }
+        await recordAudit({
+          action: 'CUSTOMER_AI_DRAFT_REQUEST',
+          actorUserId: req.session.userId,
+          actorRole: req.session.role,
+          details: {
+            threadId,
+            trigger: 'auto',
+            draftLength: result.draft.length,
+          },
+        });
+      } catch (e) {
+        loggers.api.error(
+          { err: e instanceof Error ? e.message : 'unknown', threadId },
+          'auto-draft background trigger failed',
+        );
+      }
+    });
+  }
 
   const customerName = await getCustomerName(admin, thread.customer_id);
   return NextResponse.json({ data: mapMessageForCustomer(msg as RawMessage, customerName) });

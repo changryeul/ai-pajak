@@ -9974,6 +9974,9 @@
     "send": "Send",
     "markResolved": "Mark resolved",
     "aiDraftButton": "AI Draft",
-    "aiDraftLoading": "Drafting reply..."
+    "aiDraftLoading": "Drafting reply...",
+    "autoDraftPillText": "AI draft available",
+    "autoDraftAccept": "Accept",
+    "autoDraftDismiss": "Dismiss"
   }
 }
