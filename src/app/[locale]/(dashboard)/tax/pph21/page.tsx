@@ -23,7 +23,7 @@ import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
 import { fmtRp } from '@/lib/utils';
 import { PageTitle } from '@/components/layout/PageTitle';
-import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
+import { parseTabularFile, rowsToCsv, findBestHeaderRow } from '@/lib/tax/bulk-import/client-file-parser';
 
 interface Employee {
   id: string;
@@ -791,6 +791,7 @@ function PPh21DataInputSection({
     if (!files || !customerId) return;
     setUploading(true);
     let count = 0;
+    const errors: string[] = [];
     const taxPeriod = period || confirmedPeriod;
     for (const file of Array.from(files)) {
       const fd = new FormData();
@@ -801,12 +802,16 @@ function PPh21DataInputSection({
       if (taxPeriod) fd.append('taxPeriod', taxPeriod);
       try {
         const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.success) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
           count++;
           if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        } else {
+          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
         }
-      } catch { /* */ }
+      } catch (e) {
+        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
+      }
     }
     if (count > 0) {
       showMsg('success', `${count}${tp('l3_4c0fb1')}`);
@@ -817,20 +822,52 @@ function PPh21DataInputSection({
           .catch(() => {});
       }, 2000);
     }
+    if (errors.length > 0) {
+      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
+    }
     setUploading(false);
   };
 
-  const downloadTemplate = () => {
+  const downloadTemplate = async () => {
     const headers = ['employee_name', 'employee_npwp', 'employee_nik', 'ptkp_category', 'gross_salary', 'position_allowance', 'overtime_pay', 'meal_allowance', 'transport_allowance', 'other_allowances', 'bonus', 'thr', 'jht_employee', 'jp_employee', 'bpjs_kesehatan', 'other_deductions', 'worker_type'];
-    const sample = ['John Doe', '01.234.567.8-901.000', '3201234567890001', 'TK0', '15000000', '500000', '0', '300000', '200000', '0', '0', '0', '300000', '150000', '120000', '0', 'REGULAR'];
-    const csv = [headers.join(','), sample.join(','), ''].join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'pph21_employee_template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    const sample: (string | number)[] = ['John Doe', '01.234.567.8-901.000', '3201234567890001', 'TK/0', 15000000, 500000, 0, 300000, 200000, 0, 0, 0, 300000, 150000, 120000, 0, 'REGULAR'];
+
+    const XLSX = await import('xlsx');
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Template (headers + 1 sample row)
+    const aoa: (string | number)[][] = [headers, sample];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    // Set reasonable column widths
+    ws['!cols'] = headers.map(() => ({ wch: 20 }));
+    XLSX.utils.book_append_sheet(wb, ws, 'PPh21 \uC9C1\uC6D0 \uB370\uC774\uD130');
+
+    // Sheet 2: Guide (Korean+Indonesian short instructions)
+    const guideRows: string[][] = [
+      ['\uCEEC\uB7FC / Column', '\uC124\uBA85 / Keterangan'],
+      ['employee_name', '\uC9C1\uC6D0 \uC774\uB984 (\uD544\uC218) / Nama karyawan (wajib)'],
+      ['employee_npwp', 'NPWP (\uC120\uD0DD, \uD615\uC2DD: 01.234.567.8-901.000)'],
+      ['employee_nik', '\uC8FC\uBBFC\uBC88\uD638 / NIK 16\uC790\uB9AC'],
+      ['ptkp_category', 'TK/0, TK/1, TK/2, TK/3, K/0, K/1, K/2, K/3'],
+      ['gross_salary', '\uC6D4 \uAE30\uBCF8\uAE09 (\uD544\uC218, \uC22B\uC790) / Gaji bulanan (wajib)'],
+      ['position_allowance', '\uC9C1\uCC45 \uC218\uB2F9 / Tunjangan jabatan'],
+      ['overtime_pay', '\uCD08\uACFC\uADFC\uBB34 / Uang lembur'],
+      ['meal_allowance', '\uC2DD\uB300 / Tunjangan makan'],
+      ['transport_allowance', '\uAD50\uD1B5\uBE44 / Tunjangan transport'],
+      ['other_allowances', '\uAE30\uD0C0 \uC218\uB2F9 / Tunjangan lainnya'],
+      ['bonus', '\uBCF4\uB108\uC2A4 / Bonus'],
+      ['thr', 'THR / Tunjangan Hari Raya'],
+      ['jht_employee', 'JHT \uADFC\uB85C\uC790 \uBD80\uB2F4 / Iuran JHT karyawan'],
+      ['jp_employee', 'JP \uADFC\uB85C\uC790 \uBD80\uB2F4 / Iuran JP karyawan'],
+      ['bpjs_kesehatan', 'BPJS \uAC74\uAC15\uBCF4\uD5D8'],
+      ['other_deductions', '\uAE30\uD0C0 \uACF5\uC81C / Potongan lainnya'],
+      ['worker_type', 'REGULAR / CONTRACT / DAILY / FREELANCER / COMMISSIONER'],
+    ];
+    const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
+    wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
+    XLSX.utils.book_append_sheet(wb, wsGuide, '\uC548\uB0B4 / Petunjuk');
+
+    XLSX.writeFile(wb, 'pph21_employee_template.xlsx');
   };
 
   // Column mapping state
@@ -867,14 +904,35 @@ function PPh21DataInputSection({
     setMappedFile(file);
 
     // Read CSV/Excel via shared helper (csv + xlsx + xls all supported).
-    let parsed;
+    // Then auto-detect header row to skip meta header rows like "YEAR/2023"
+    // or A-codes that appear above the real column names in customer files.
+    let headers: string[];
+    let preview: string[][];
     try {
-      parsed = await parseTabularFile(file);
+      const parsed = await parseTabularFile(file);
+      const allRows = [parsed.headers, ...parsed.dataRows];
+
+      // Auto-detect header — skip meta rows like 'YEAR/2023' or A-code rows
+      const PPH21_HINTS = [
+        /^(name|nama|이름|emp\s*id|employee)/i,
+        /^npwp$/i,
+        /^nik$/i,
+        /^(gaji|salary|gross|기본급)/i,
+        /^(tunjangan|allowance|수당)/i,
+        /^(tax\s*status|ptkp|status)$/i,
+        /^(status\s*pegawai|worker|jenis)/i,
+        /^(honorarium|honor|bonus|thr)/i,
+        /^(jht|jp|bpjs|kesehatan|pensiun)/i,
+      ];
+      const headerIdx = findBestHeaderRow(allRows, PPH21_HINTS);
+      headers = allRows[headerIdx];
+      const dataRows = allRows.slice(headerIdx + 1);
+      preview = dataRows.slice(0, 3);
     } catch (err) {
       showMsg('error', `${tp('l15_5d59d2')}: ${(err as Error).message}`);
       return;
     }
-    const { headers, preview } = parsed;
+
     setCsvHeaders(headers);
     setCsvPreview(preview);
 
@@ -895,25 +953,25 @@ function PPh21DataInputSection({
       }
     } catch { /* fallback to keyword mapping */ }
 
-    // No memory — auto-map using keyword matching
+    // No memory — auto-map using keyword matching (expanded with Indonesian payroll terms)
     const KEYWORD_MAP: Record<string, string[]> = {
-      employee_name: ['nama', 'name', 'karyawan', 'pegawai', '이름', 'employee'],
-      employee_npwp: ['npwp', 'tax_id'],
-      employee_nik: ['nik', 'ktp'],
-      ptkp_category: ['ptkp', 'status'],
-      gross_salary: ['gaji', 'salary', 'basic', 'pokok', 'base', '기본급', 'gross', 'gapok'],
-      position_allowance: ['jabatan', 'position', '직책'],
-      overtime_pay: ['lembur', 'overtime', '초과'],
-      meal_allowance: ['makan', 'meal', '식대'],
-      transport_allowance: ['transport', '교통'],
-      other_allowances: ['tunjangan lain', 'allowance', '수당'],
-      bonus: ['bonus', '보너스'],
-      thr: ['thr', 'hari raya'],
-      jht_employee: ['jht', 'hari tua'],
-      jp_employee: ['jp', 'pensiun'],
-      bpjs_kesehatan: ['bpjs', 'kesehatan'],
-      other_deductions: ['potongan', 'deduction', '공제'],
-      worker_type: ['type', 'tipe', 'jenis', '유형'],
+      employee_name: ['nama', 'name', 'karyawan', 'pegawai', '이름', 'employee', 'emp_name'],
+      employee_npwp: ['npwp', 'tax_id', 'tax id'],
+      employee_nik: ['nik', 'ktp', 'no ktp', 'identitas'],
+      ptkp_category: ['ptkp', 'tax status', 'status pajak', 'kategori ptkp'],
+      gross_salary: ['gaji', 'salary', 'basic', 'pokok', 'base', '기본급', 'gross', 'gapok', 'gaji pokok', 'pendapatan', 'monthly salary'],
+      position_allowance: ['jabatan', 'position', '직책', 'tunjangan jabatan'],
+      overtime_pay: ['lembur', 'overtime', '초과', 'uang lembur'],
+      meal_allowance: ['makan', 'meal', '식대', 'tunjangan makan', 'uang makan'],
+      transport_allowance: ['transport', '교통', 'tunjangan transport', 'transportasi'],
+      other_allowances: ['tunjangan lain', 'tunjangan lainnya', 'allowance', '수당', 'honorarium', 'imbalan', 'tunjangan'],
+      bonus: ['bonus', '보너스', 'tantiem', 'gratifikasi'],
+      thr: ['thr', 'hari raya', 'tunjangan hari raya'],
+      jht_employee: ['jht', 'hari tua', 'jaminan hari tua', 'iuran jht'],
+      jp_employee: ['jp', 'pensiun', 'jaminan pensiun', 'iuran pensiun'],
+      bpjs_kesehatan: ['bpjs', 'kesehatan', 'bpjs kesehatan', 'asuransi kesehatan'],
+      other_deductions: ['potongan', 'deduction', '공제', 'pemotongan', 'iuran lain'],
+      worker_type: ['type', 'tipe', 'jenis', '유형', 'status pegawai', 'worker type', 'pegawai tetap'],
     };
 
     const usedTargets = new Set<string>();
@@ -929,8 +987,22 @@ function PPh21DataInputSection({
       return { sourceColumn: h, targetField: '', confidence: 'NONE' };
     });
 
+    const hasRequired = mappings.some(m => m.targetField === 'employee_name')
+      && mappings.some(m => m.targetField === 'gross_salary');
+    const matchedCount = mappings.filter(m => m.targetField).length;
+    const matchRate = matchedCount / Math.max(headers.length, 1);
+
     setColumnMappings(mappings);
-    setMappingStep('mapping');
+
+    if (hasRequired && matchRate >= 0.7) {
+      // 70%+ auto-mapped + both required matched → skip UI, import directly
+      showMsg('success', `${matchedCount}/${headers.length} 컬럼 자동 매핑됨. 바로 가져옵니다...`);
+      setMappingStep('mapping');
+      // Use setTimeout to ensure state updates before triggering import
+      setTimeout(() => handleConfirmMapping(), 100);
+    } else {
+      setMappingStep('mapping');
+    }
   };
 
   const handleConfirmMapping = async () => {
@@ -939,10 +1011,25 @@ function PPh21DataInputSection({
     setUploading(true);
 
     // Parse original CSV/XLSX, rebuild CSV with mapped headers, submit as CSV blob.
+    // Re-apply header detection so dataRows match the headers we mapped against
+    // (handleExcelUpload may have skipped meta rows like "YEAR/2023").
     let dataRows: string[][];
     try {
       const parsed = await parseTabularFile(mappedFile);
-      dataRows = parsed.dataRows;
+      const allRows = [parsed.headers, ...parsed.dataRows];
+      const PPH21_HINTS = [
+        /^(name|nama|이름|emp\s*id|employee)/i,
+        /^npwp$/i,
+        /^nik$/i,
+        /^(gaji|salary|gross|기본급)/i,
+        /^(tunjangan|allowance|수당)/i,
+        /^(tax\s*status|ptkp|status)$/i,
+        /^(status\s*pegawai|worker|jenis)/i,
+        /^(honorarium|honor|bonus|thr)/i,
+        /^(jht|jp|bpjs|kesehatan|pensiun)/i,
+      ];
+      const headerIdx = findBestHeaderRow(allRows, PPH21_HINTS);
+      dataRows = allRows.slice(headerIdx + 1).filter(r => r.some(c => c !== ''));
     } catch (err) {
       showMsg('error', tp('l20_ceee68') + `: ${(err as Error).message}`);
       setMappingStep('mapping');

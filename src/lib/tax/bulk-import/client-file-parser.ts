@@ -81,6 +81,35 @@ export async function parseTabularFile(file: File): Promise<ParsedTabular> {
 }
 
 /**
+ * Find the row most likely to be the header by scoring against the provided
+ * regex hint set. Returns 0 if no row scores ≥2 hints (so existing behavior
+ * — first row is header — is preserved when the file is already well-formed).
+ *
+ * Used by PPh21 + future PPh23/PPN imports to skip meta header rows like
+ * "YEAR / 2023" or "Input Data / expected" that appear above the real column
+ * names in customer-provided xlsx files.
+ */
+export function findBestHeaderRow(
+  rows: string[][],
+  hints: RegExp[],
+  lookahead = 5,
+): number {
+  let bestIdx = 0;
+  let bestScore = 0;
+  for (let i = 0; i < Math.min(rows.length, lookahead); i++) {
+    const score = rows[i].reduce(
+      (acc, cell) => acc + (hints.some((re) => re.test(cell)) ? 1 : 0),
+      0,
+    );
+    if (score > bestScore) {
+      bestScore = score;
+      bestIdx = i;
+    }
+  }
+  return bestScore >= 2 ? bestIdx : 0;
+}
+
+/**
  * Serialise parsed rows back into CSV text (for sites that POST CSV to the server).
  * Quotes any cell containing comma/newline/quote, escapes inner quotes by doubling.
  */
