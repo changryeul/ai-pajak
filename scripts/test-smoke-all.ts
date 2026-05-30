@@ -43,6 +43,12 @@ const STEPS: Step[] = [
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },
   { name: 'coretax toggle (Track D)', file: 'test-coretax-toggle.ts' },
+  // --- Real-file importer regression (BINTANG JAYA) --------------------
+  // These run against the real customer xlsx at ~/Downloads. In CI or fresh
+  // checkouts the file is absent; the scripts exit 0 with a SKIPPED log so
+  // the runner counts them as PASS. Marked optional defensively.
+  { name: 'pph23 wholesale importer e2e (BINTANG JAYA)', file: 'validate-pph23-e2e.ts', optional: true },
+  { name: 'ppn wholesale importer e2e (BINTANG JAYA)', file: 'validate-ppn-e2e.ts', optional: true },
 ];
 
 interface Result {

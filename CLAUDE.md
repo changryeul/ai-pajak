@@ -338,7 +338,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs 15 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry, tax code rule CRUD + RBAC (Track B), customer-ai inbox end-to-end (Phase 1), coretax toggle (Track D). Last verified run was 15/15 PASS.
+- `npm run test:smoke:prod` — runs 17 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry, tax code rule CRUD + RBAC (Track B), customer-ai inbox end-to-end (Phase 1), coretax toggle (Track D), pph23 wholesale importer e2e (optional, real BINTANG JAYA xlsx), ppn wholesale importer e2e (optional, real BINTANG JAYA xlsx). The 2 importer steps are `optional: true` — they skip-with-exit-0 when the xlsx isn't present (CI / fresh checkout), so failures don't block the runner.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars). Requires repo secrets `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` / `ANTHROPIC_API_KEY` (optional `E2E_BASE_URL`).
 
@@ -363,6 +363,11 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-tax-code-rule.ts` — Track B+C+A Tax Code Rule CRUD + RBAC + audit timeline + access gate (GET 4 roles + PATCH 5 roles + 400/404 + audit-log GET 2 roles, 총 18)
 - `SEED_TARGET=prod npx tsx scripts/test-customer-ai-inbox.ts` — Phase 1 Customer ↔ AI 상담원 chat (find-or-create + persona masking + RBAC, 10 assertions)
 - `SEED_TARGET=prod npx tsx scripts/test-coretax-toggle.ts` — Track D Coretax 토글 GET/PATCH RBAC + DB round-trip (총 5 assertion)
+- `SEED_TARGET=prod npx tsx scripts/validate-pph23-e2e.ts` — PPh23 wholesale importer → POST → DB → cleanup (BINTANG JAYA real xlsx; auto-skip if file absent)
+- `SEED_TARGET=prod npx tsx scripts/validate-pph23-bintang-jaya.ts [sheet]` — offline PPh23 importer pipeline 검증 (sheet 2601~2604)
+- `SEED_TARGET=prod npx tsx scripts/validate-pph21-bintang-jaya.ts` — offline PPh21 parser + auto-mapping 검증 (cleanCell 회귀 확인)
+- `SEED_TARGET=prod npx tsx scripts/validate-ppn-e2e.ts` — PPN wholesale (VAT OUT+IN) importer → POST → DB → cleanup
+- `SEED_TARGET=prod npx tsx scripts/validate-ppn-bintang-jaya.ts [sheet]` — offline PPN importer 검증 (sheet 2601 = OUT 6 + IN 19)
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 
