@@ -45,12 +45,22 @@ export default function EBupotPage() {
     finally { setIsLoading(false); }
   };
 
-  const downloadCSV = () => {
+  const downloadCSV = async () => {
     if (!result?.csv) return;
-    const blob = new Blob([result.csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `ebupot-1721a1-${result.summary.taxYear}.csv`; a.click();
-    URL.revokeObjectURL(url);
+    // Convert generated CSV → rows → xlsx workbook.
+    const lines = String(result.csv).split('\n').filter((l: string) => l.trim().length > 0);
+    const rows: (string | number)[][] = lines.map((l: string) => l.split(',').map((cell: string) => {
+      const n = Number(cell);
+      return cell !== '' && !Number.isNaN(n) && /^-?\d+(\.\d+)?$/.test(cell) ? n : cell;
+    }));
+
+    const XLSX = await import('xlsx');
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = (rows[0] || []).map(() => ({ wch: 22 }));
+    XLSX.utils.book_append_sheet(wb, ws, `e-Bupot 1721 A1`);
+
+    XLSX.writeFile(wb, `ebupot-1721a1-${result.summary.taxYear}.xlsx`);
   };
 
   // Step 1: input, Step 2: generated, Step 3: downloaded

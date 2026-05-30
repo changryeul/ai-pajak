@@ -116,6 +116,7 @@ export default function DocumentUploadPage() {
     setUploading(true);
 
     let successCount = 0;
+    const errors: string[] = [];
     for (const file of Array.from(files)) {
       const formData = new FormData();
       formData.append('file', file);
@@ -126,22 +127,29 @@ export default function DocumentUploadPage() {
 
       try {
         const res = await fetch('/api/documents/upload', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
           successCount++;
           // Auto-trigger OCR
           if (data.data?.id) {
             fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
           }
+        } else {
+          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
         }
-      } catch { /* */ }
+      } catch (e) {
+        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
+      }
     }
 
     if (successCount > 0) {
       showMsg('success', successCount + t('uploadSuccessOcr'));
       // Reload after short delay (OCR needs time)
       setTimeout(loadData, 2000);
-    } else {
+    }
+    if (errors.length > 0) {
+      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
+    } else if (successCount === 0) {
       showMsg('error', t('uploadFailed'));
     }
     setUploading(false);

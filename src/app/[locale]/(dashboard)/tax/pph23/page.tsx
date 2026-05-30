@@ -488,6 +488,7 @@ export default function PPh23Page() {
     if (!files || !customerId) return;
     setUploading(true);
     let count = 0;
+    const errors: string[] = [];
     const taxPeriod = uploadPeriod || confirmedPeriod;
     for (const file of Array.from(files)) {
       const fd = new FormData();
@@ -498,12 +499,16 @@ export default function PPh23Page() {
       if (taxPeriod) fd.append('taxPeriod', taxPeriod);
       try {
         const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.success) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
           count++;
           if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        } else {
+          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
         }
-      } catch { /* */ }
+      } catch (e) {
+        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
+      }
     }
     if (count > 0) {
       showMsg('success', `${count} ${t('k19_4c0fb1')}`);
@@ -515,6 +520,9 @@ export default function PPh23Page() {
           .then(d => { if (d.success) setUploadedDocs(d.data || []); })
           .catch(() => {});
       }, 2000);
+    }
+    if (errors.length > 0) {
+      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
     }
     setUploading(false);
   };
@@ -630,17 +638,35 @@ export default function PPh23Page() {
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={() => {
+                onClick={async () => {
                   const headers = ['counterparty_name', 'counterparty_npwp', 'service_type', 'transaction_type', 'gross_amount', 'tax_rate', 'contract_no', 'invoice_no', 'dgt_form'];
-                  const sample = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', '10000000', '2', 'CT-001', 'INV-001', 'N'];
-                  const csv = [headers.join(','), sample.join(','), ''].join('\n');
-                  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'pph23_template.csv';
-                  a.click();
-                  URL.revokeObjectURL(url);
+                  const sample: (string | number)[] = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', 10000000, 2, 'CT-001', 'INV-001', 'N'];
+
+                  const XLSX = await import('xlsx');
+                  const wb = XLSX.utils.book_new();
+
+                  const aoa: (string | number)[][] = [headers, sample];
+                  const ws = XLSX.utils.aoa_to_sheet(aoa);
+                  ws['!cols'] = headers.map(() => ({ wch: 20 }));
+                  XLSX.utils.book_append_sheet(wb, ws, 'PPh23 \uAC70\uB798 \uB370\uC774\uD130');
+
+                  const guideRows: string[][] = [
+                    ['\uCEEC\uB7FC / Column', '\uC124\uBA85 / Keterangan'],
+                    ['counterparty_name', '\uAC70\uB798\uCC98(\uACF5\uAE09\uC790) \uC774\uB984 (\uD544\uC218) / Nama vendor (wajib)'],
+                    ['counterparty_npwp', 'NPWP (\uC120\uD0DD, \uD615\uC2DD: 01.234.567.8-901.000)'],
+                    ['service_type', '\uC11C\uBE44\uC2A4 \uC885\uB958: PPh 23 / Jasa Teknik / Jasa Manajemen / Sewa \uB4F1'],
+                    ['transaction_type', '\uAC70\uB798 \uC720\uD615: service / rent / royalty / dividend / interest'],
+                    ['gross_amount', '\uAC70\uB798 \uAE08\uC561 (\uD544\uC218, \uC22B\uC790, \uBD80\uAC00\uC138 \uC81C\uC678) / Jumlah bruto (wajib)'],
+                    ['tax_rate', '\uC6D0\uCC9C\uC9D5\uC218\uC728 % (\uC11C\uBE44\uC2A4 2%, \uBC30\uB2F9/\uC774\uC790/\uB85C\uC5F4\uD2F0 15%)'],
+                    ['contract_no', '\uACC4\uC57D \uBC88\uD638 (\uC120\uD0DD) / Nomor kontrak (opsional)'],
+                    ['invoice_no', '\uC778\uBCF4\uC774\uC2A4 \uBC88\uD638 / Nomor faktur'],
+                    ['dgt_form', 'P3B \uC801\uC6A9 \uC2DC DGT \uD3FC \uC81C\uCD9C \uC5EC\uBD80 (Y/N) / Form DGT untuk P3B'],
+                  ];
+                  const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
+                  wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
+                  XLSX.utils.book_append_sheet(wb, wsGuide, '\uC548\uB0B4 / Petunjuk');
+
+                  XLSX.writeFile(wb, 'pph23_template.xlsx');
                   showMsg('success', t('templateComingSoon'));
                 }}
               >

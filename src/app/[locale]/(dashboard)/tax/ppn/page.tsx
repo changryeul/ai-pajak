@@ -122,6 +122,7 @@ export default function PPNPage() {
     if (!files || !customerId) return;
     setUploadingDoc(true);
     let count = 0;
+    const errors: string[] = [];
     const taxPeriod = uploadPeriod || confirmedPeriod;
     for (const file of Array.from(files)) {
       const fd = new FormData();
@@ -132,12 +133,16 @@ export default function PPNPage() {
       if (taxPeriod) fd.append('taxPeriod', taxPeriod);
       try {
         const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.success) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
           count++;
           if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        } else {
+          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
         }
-      } catch { /* */ }
+      } catch (e) {
+        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
+      }
     }
     if (count > 0 && taxPeriod) {
       // Sync the page period selector to the uploaded month
@@ -148,20 +153,40 @@ export default function PPNPage() {
       }
       showMsg('success', `${count} ${t('k15_4f8e30') || 'OK'}`);
     }
+    if (errors.length > 0) {
+      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
+    }
     setUploadingDoc(false);
   };
 
-  const downloadPpnTemplate = () => {
+  const downloadPpnTemplate = async () => {
     const headers = ['faktur_type', 'faktur_number', 'faktur_date', 'counterparty_name', 'counterparty_npwp', 'description', 'dpp', 'ppn'];
-    const sample = ['OUTPUT', '0100002500000001', '2026-04-15', 'PT Buyer', '01.234.567.8-901.000', 'Jasa konsultasi', '10000000', '1100000'];
-    const csv = [headers.join(','), sample.join(','), ''].join('\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ppn_template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    const sample: (string | number)[] = ['OUTPUT', '0100002500000001', '2026-04-15', 'PT Buyer', '01.234.567.8-901.000', 'Jasa konsultasi', 10000000, 1100000];
+
+    const XLSX = await import('xlsx');
+    const wb = XLSX.utils.book_new();
+
+    const aoa: (string | number)[][] = [headers, sample];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map(() => ({ wch: 20 }));
+    XLSX.utils.book_append_sheet(wb, ws, 'PPN Faktur 데이터');
+
+    const guideRows: string[][] = [
+      ['컬럼 / Column', '설명 / Keterangan'],
+      ['faktur_type', 'OUTPUT(매출/KELUARAN) 또는 INPUT(매입/MASUKAN) (필수)'],
+      ['faktur_number', '16자리 Faktur Pajak 번호 / Nomor Faktur Pajak (16 digit)'],
+      ['faktur_date', '발행일 YYYY-MM-DD / Tanggal faktur'],
+      ['counterparty_name', '거래처 이름 (필수) / Nama lawan transaksi (wajib)'],
+      ['counterparty_npwp', '거래처 NPWP (01.234.567.8-901.000)'],
+      ['description', '거래 내역 / Deskripsi barang atau jasa'],
+      ['dpp', 'DPP — 부가세 제외 금액 (필수, 숫자) / Dasar Pengenaan Pajak (wajib)'],
+      ['ppn', 'PPN 11% — DPP × 11% / PPN 11% dari DPP'],
+    ];
+    const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
+    wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
+    XLSX.utils.book_append_sheet(wb, wsGuide, '안내 / Petunjuk');
+
+    XLSX.writeFile(wb, 'ppn_template.xlsx');
   };
 
   const confirmMonthPicker = () => {
@@ -425,7 +450,7 @@ export default function PPNPage() {
                   >
                     <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full" onClick={downloadPpnTemplate}>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { void downloadPpnTemplate(); }}>
                     <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownloadBtn')}
                   </Button>
                   {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
@@ -823,6 +848,7 @@ function PPNFilingSection({
   const t = useTranslations('ppnPage');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Array<{
     id: string; file_name: string; ocr_status: string;
     ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
@@ -840,7 +866,9 @@ function PPNFilingSection({
   const handleUpload = async (files: FileList | null) => {
     if (!files || !customerId) return;
     setUploading(true);
+    setUploadError(null);
     let count = 0;
+    const errors: string[] = [];
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.append('file', file);
@@ -849,12 +877,16 @@ function PPNFilingSection({
       fd.append('uploadSource', 'WEB');
       try {
         const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.success) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
           count++;
           if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
+        } else {
+          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
         }
-      } catch { /* */ }
+      } catch (e) {
+        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
+      }
     }
     if (count > 0) {
       setTimeout(() => {
@@ -863,6 +895,11 @@ function PPNFilingSection({
           .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 10)); })
           .catch(() => {});
       }, 2000);
+    }
+    if (errors.length > 0) {
+      const msg = `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`;
+      setUploadError(msg);
+      setTimeout(() => setUploadError(null), 5000);
     }
     setUploading(false);
   };
@@ -895,6 +932,12 @@ function PPNFilingSection({
                 onChange={e => handleUpload(e.target.files)} />
             </div>
           </div>
+          {uploadError && (
+            <div className="mb-3 p-2 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2">
+              <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+              <span>{uploadError}</span>
+            </div>
+          )}
           {uploadedDocs.length === 0 ? (
             <div className="text-center py-4 text-xs text-gray-400 border-2 border-dashed rounded-lg">
               <Image className="h-6 w-6 mx-auto mb-1 opacity-30" />

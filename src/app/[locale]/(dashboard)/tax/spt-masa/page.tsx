@@ -284,15 +284,23 @@ export default function SPTMasaPage() {
     finally { setIsSaving(false); e.target.value = ''; setTimeout(() => setMessage(null), 5000); }
   };
 
-  const downloadTemplate = () => {
-    const csv = generateTemplate(taxType as 'PPh23' | 'PPh21' | 'PPN');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `template_${taxType}_${period}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadTemplate = async () => {
+    const csvString = generateTemplate(taxType as 'PPh23' | 'PPh21' | 'PPN');
+    // Convert csv → rows → xlsx. generateTemplate returns headers + 1 sample row,
+    // simple comma split is sufficient because the templates don't quote any cells.
+    const lines = csvString.split('\n').filter(l => l.trim().length > 0);
+    const rows: (string | number)[][] = lines.map(l => l.split(',').map(cell => {
+      const n = Number(cell);
+      return cell !== '' && !Number.isNaN(n) && /^-?\d+(\.\d+)?$/.test(cell) ? n : cell;
+    }));
+
+    const XLSX = await import('xlsx');
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = (rows[0] || []).map(() => ({ wch: 22 }));
+    XLSX.utils.book_append_sheet(wb, ws, `${taxType} 데이터`);
+
+    XLSX.writeFile(wb, `template_${taxType}_${period}.xlsx`);
   };
 
   // Generate Bukti Potong

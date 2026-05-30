@@ -137,26 +137,30 @@ export default function TaxBillingPage() {
       fd.append('uploadSource', 'WEB');
 
       const uploadRes = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-      const uploadData = await uploadRes.json();
+      const uploadData = await uploadRes.json().catch(() => ({}));
 
-      if (uploadData.success) {
-        try {
-          await fetch('/api/customer/payment-proof', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              queueItemId: itemId,
-              fileUrl: uploadData.data?.signedUrl || uploadData.data?.path,
-            }),
-          });
-        } catch {
-          /* */
-        }
-        showMsg('success', t('proofUploadSuccess'));
-        loadItems();
-      } else {
-        showMsg('error', t('uploadFailed'));
+      if (!uploadRes.ok || !uploadData.success) {
+        showMsg(
+          'error',
+          `${files[0].name}: ${uploadData.error || uploadData.message || `HTTP ${uploadRes.status}`}`,
+        );
+        return;
       }
+
+      try {
+        await fetch('/api/customer/payment-proof', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            queueItemId: itemId,
+            fileUrl: uploadData.data?.signedUrl || uploadData.data?.path,
+          }),
+        });
+      } catch {
+        /* */
+      }
+      showMsg('success', t('proofUploadSuccess'));
+      loadItems();
     } catch {
       showMsg('error', t('serverError'));
     } finally {
