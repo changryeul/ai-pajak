@@ -10098,6 +10098,8 @@
     "metadataHeader": "Thread 정보",
     "replyPlaceholder": "AI 상담원 페르소나로 답변...",
     "send": "전송",
-    "markResolved": "해결됨으로 표시"
+    "markResolved": "해결됨으로 표시",
+    "aiDraftButton": "AI 추천",
+    "aiDraftLoading": "AI 답변 작성 중..."
   }
 }

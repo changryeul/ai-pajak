@@ -9972,6 +9972,8 @@
     "metadataHeader": "スレッド情報",
     "replyPlaceholder": "AIコンサルタントとして返信...",
     "send": "送信",
-    "markResolved": "解決済みに"
+    "markResolved": "解決済みに",
+    "aiDraftButton": "AI 推奨",
+    "aiDraftLoading": "下書き作成中..."
   }
 }

@@ -9972,6 +9972,8 @@
     "metadataHeader": "会话信息",
     "replyPlaceholder": "以 AI 顾问身份回复...",
     "send": "发送",
-    "markResolved": "标记已解决"
+    "markResolved": "标记已解决",
+    "aiDraftButton": "AI 推荐",
+    "aiDraftLoading": "正在生成草稿..."
   }
 }

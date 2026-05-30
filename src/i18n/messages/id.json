@@ -9972,6 +9972,8 @@
     "metadataHeader": "Info Thread",
     "replyPlaceholder": "Balas sebagai Konsultan AI...",
     "send": "Kirim",
-    "markResolved": "Tandai selesai"
+    "markResolved": "Tandai selesai",
+    "aiDraftButton": "Saran AI",
+    "aiDraftLoading": "Membuat draft..."
   }
 }

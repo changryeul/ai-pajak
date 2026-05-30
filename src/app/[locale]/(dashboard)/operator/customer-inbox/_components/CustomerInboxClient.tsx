@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2, Send, CheckCircle, MessageCircle } from 'lucide-react';
+import { Loader2, Send, CheckCircle, MessageCircle, Sparkles } from 'lucide-react';
 import type { ThreadWithCustomerDTO, MessageDTO, ThreadStatus } from '@/types/customer-ai';
 
 const POLL_MS = 5_000;
@@ -29,6 +29,7 @@ export function CustomerInboxClient() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [resolving, setResolving] = useState(false);
+  const [drafting, setDrafting] = useState(false);
 
   const selectedThread = threads.find((th) => th.id === selectedId) ?? null;
 
@@ -103,6 +104,24 @@ export function CustomerInboxClient() {
       }
     } finally {
       setSending(false);
+    }
+  };
+
+  const generateDraft = async () => {
+    if (!selectedId || drafting) return;
+    setDrafting(true);
+    try {
+      const r = await fetch(`/api/operator/customer-inbox/threads/${selectedId}/ai-draft`, {
+        method: 'POST',
+      });
+      if (r.ok) {
+        const j = await r.json();
+        if (typeof j.data?.draft === 'string') setInput(j.data.draft);
+      }
+    } catch {
+      /* silent — operator can retry */
+    } finally {
+      setDrafting(false);
     }
   };
 
@@ -211,10 +230,20 @@ export function CustomerInboxClient() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
-                    placeholder={t('replyPlaceholder')}
-                    disabled={sending}
-                    className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                    placeholder={drafting ? t('aiDraftLoading') : t('replyPlaceholder')}
+                    disabled={sending || drafting}
+                    className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400 disabled:bg-slate-50"
                   />
+                  <button
+                    type="button"
+                    onClick={generateDraft}
+                    disabled={drafting || sending}
+                    className="rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 disabled:opacity-50"
+                    aria-label={t('aiDraftButton')}
+                    title={t('aiDraftButton')}
+                  >
+                    {drafting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  </button>
                   <button
                     type="button"
                     onClick={send}

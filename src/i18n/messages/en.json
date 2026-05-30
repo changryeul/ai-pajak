@@ -9972,6 +9972,8 @@
     "metadataHeader": "Thread Info",
     "replyPlaceholder": "Reply as AI Consultant...",
     "send": "Send",
-    "markResolved": "Mark resolved"
+    "markResolved": "Mark resolved",
+    "aiDraftButton": "AI Draft",
+    "aiDraftLoading": "Drafting reply..."
   }
 }
