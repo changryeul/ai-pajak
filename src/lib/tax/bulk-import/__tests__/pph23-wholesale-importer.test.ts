@@ -53,11 +53,14 @@ describe('mapColumns', () => {
   it('throws ColumnMapError with missing list', () => {
     expect(() => mapColumns(['name', 'foo'])).toThrow(ColumnMapError);
     try {
+      // 'name' alone now satisfies the biz-name slot (synonym added for real
+      // customer files that use NAME instead of Biz Name) — so missing list
+      // is the other 3 required columns.
       mapColumns(['name']);
     } catch (e) {
       expect(e).toBeInstanceOf(ColumnMapError);
       expect((e as ColumnMapError).missing).toEqual(
-        expect.arrayContaining(['Biz Name', 'Invoice Amount', 'Invoice Date', 'Type of Tax']),
+        expect.arrayContaining(['Invoice Amount', 'Invoice Date', 'Type of Tax']),
       );
     }
   });

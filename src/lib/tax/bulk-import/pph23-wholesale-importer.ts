@@ -37,16 +37,16 @@ type Pph23Header = (typeof PPH23_HEADERS)[number];
 // Header detection
 
 const HEADER_HINTS = [
-  /^biz\s*name$/i,
+  /^(biz\s*name|name)$/i,
   /^npwp$/i,
   /^invoice\s*(amount|date|no\.?|number)/i,
   /^tax\s*(rate|base|method)/i,
   /^type\s*of\s*tax/i,
   /^transaction\s*(desc|description)/i,
-  /^sub\s*transaction/i,
+  /^sub[-\s]*(type\s+)?transaction/i,
 ];
 
-export function detectHeaderRow(rows: string[][], lookahead = 5): number {
+export function detectHeaderRow(rows: string[][], lookahead = 10): number {
   let bestIdx = 0;
   let bestScore = 0;
   for (let i = 0; i < Math.min(rows.length, lookahead); i++) {
@@ -89,12 +89,12 @@ export function mapColumns(header: string[]): ColumnMap {
   header.forEach((cell, idx) => {
     const c = cell.toLowerCase().trim();
     if (!c) return;
-    if (/^biz\s*name$/.test(c) && map.opp_biz_name === undefined) map.opp_biz_name = idx;
+    if (/^(biz\s*name|name)$/.test(c) && map.opp_biz_name === undefined) map.opp_biz_name = idx;
     else if (/^npwp$/.test(c) && map.opp_npwp === undefined) map.opp_npwp = idx;
     else if (/^invoice\s*amount/.test(c) && map.invoice_amount === undefined) map.invoice_amount = idx;
     else if (/^invoice\s*date/.test(c)) map.invoice_date = idx;
     else if (/^invoice\s*(no\.?|number)/.test(c)) map.invoice_no = idx;
-    else if (/^sub\s*transaction/.test(c)) map.sub_transaction = idx;
+    else if (/^sub[-\s]*(type\s+)?transaction/.test(c)) map.sub_transaction = idx;
     else if (/^transaction\s*(desc|description)/.test(c)) map.transaction_desc = idx;
     else if (/^type\s*of\s*tax/.test(c)) map.type_of_tax = idx; // LAST match wins (withholding, not VAT)
   });

@@ -22,6 +22,24 @@ const STRIP_QUOTES = /['"]/g;
 
 function cleanCell(v: unknown): string {
   if (v === null || v === undefined) return '';
+  // Excel date cells come through as Date objects when raw:true + cellDates:true.
+  // Emit ISO yyyy-mm-dd so downstream parsers don't have to disambiguate
+  // M/D/YY vs D/M/YY (Excel's display format is locale-dependent — silent
+  // month/day swap caused stale dates to import cleanly on customer files).
+  if (v instanceof Date) {
+    const y = v.getFullYear();
+    const m = String(v.getMonth() + 1).padStart(2, '0');
+    const d = String(v.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  // Numeric cells: raw:true gives JS numbers. Excel ↔ float round-trips
+  // introduce sub-unit artifacts (e.g. 3242750 → 3242750.0000000005). IDR is
+  // integer, so round; downstream parseAmount treats dots as Indo thousand
+  // grouping and would otherwise turn the artifact into a 16-digit number.
+  if (typeof v === 'number') {
+    if (!Number.isFinite(v)) return '';
+    return String(Math.round(v));
+  }
   return String(v).trim().replace(STRIP_QUOTES, '');
 }
 
@@ -50,7 +68,15 @@ export async function parseTabularFile(file: File): Promise<ParsedTabular> {
     if (!ws) throw new Error('Excel file has no sheets');
     // header: 1 → array-of-arrays; defval: '' → undefined cells become empty;
     // raw: false → dates/numbers get formatted to strings already.
-    const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '', raw: false });
+    // raw:true gives us Date objects for date cells (cellDates above), numbers
+    // for numeric cells. cleanCell normalizes Date -> ISO yyyy-mm-dd. We chose
+    // raw:true over raw:false+dateNF because xlsx ignores dateNF when the cell
+    // has an inline format string (common in customer-supplied files).
+    const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, {
+      header: 1,
+      defval: '',
+      raw: true,
+    });
     rawRows = aoa.map((row) => row.map(cleanCell));
   } else {
     const text = await file.text();
