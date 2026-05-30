@@ -3908,7 +3908,10 @@
     "skplbResult": "SKPLB(환급결정) 또는 SKPKB(추가납부) 결과 분석 및 이의신청 검토",
     "refundAccepted": "환급 신청 접수 완료",
     "prevBalance": "전월 잔액",
-    "finalResult": "최종 결과"
+    "finalResult": "최종 결과",
+    "wholesaleOutImported": "VAT OUT {count}건 import 됨",
+    "wholesaleInImported": "VAT IN {count}건 import 됨",
+    "wholesalePpnFailed": "PPN wholesale import 실패: {reason}"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

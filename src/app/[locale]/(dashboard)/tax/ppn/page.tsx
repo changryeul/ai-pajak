@@ -21,6 +21,7 @@ import {
 import { useRef } from 'react';
 import { ScreenHeader } from '@/components/tax';
 import { PageTitle } from '@/components/layout/PageTitle';
+import { importPpnWholesaleFile } from '@/lib/tax/bulk-import/ppn-wholesale-importer';
 
 interface Faktur {
   id: string;
@@ -100,21 +101,85 @@ export default function PPNPage() {
 
   const period = `${year}-${String(month).padStart(2, '0')}`;
 
-  // Month picker — opens before any input action (template upload / file upload / camera / manual)
+  // Month picker — opens before any input action (template upload / file upload / camera / manual / wholesale)
   const csvInputRef = useRef<HTMLInputElement>(null);
   const fileUploadRef = useRef<HTMLInputElement>(null);
+  const wholesaleInputRef = useRef<HTMLInputElement>(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadingWholesale, setUploadingWholesale] = useState(false);
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'csv' | 'file' | 'camera' | 'manual' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'csv' | 'file' | 'camera' | 'manual' | 'wholesale' | null>(null);
   const [pickedYear, setPickedYear] = useState<number>(currentYear);
   const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
   const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
   const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-  const openMonthPicker = (action: 'csv' | 'file' | 'camera' | 'manual') => {
+  const openMonthPicker = (action: 'csv' | 'file' | 'camera' | 'manual' | 'wholesale') => {
     setPendingAction(action);
     setMonthPickerOpen(true);
+  };
+
+  /**
+   * Wholesale VAT compliance upload — extracts VAT OUT + VAT IN in one pass
+   * and POSTs to /api/tax/ppn-bulk-import. Distinct from `handleFakturUpload`
+   * (single faktur images via /api/documents/upload + OCR) — wholesale path
+   * is for the customer's monthly compliance Excel that already lists every
+   * faktur in a 16-column ledger.
+   */
+  const handleWholesaleUpload = async (file: File | null, uploadPeriod?: string) => {
+    if (!file || !customerId) return;
+    const importPeriod = uploadPeriod || confirmedPeriod || period;
+    if (!importPeriod) {
+      showMsg('error', t('monthPickerDesc'));
+      return;
+    }
+    setUploadingWholesale(true);
+    try {
+      let summary: Awaited<ReturnType<typeof importPpnWholesaleFile>>;
+      try {
+        summary = await importPpnWholesaleFile(file);
+      } catch (parseErr) {
+        showMsg('error', t('wholesalePpnFailed', { reason: (parseErr as Error).message }));
+        setUploadingWholesale(false);
+        return;
+      }
+
+      if (summary.outImported === 0 && summary.inImported === 0) {
+        showMsg('error', t('wholesalePpnFailed', { reason: `no rows parsed (errors: ${summary.errors.length})` }));
+        setUploadingWholesale(false);
+        return;
+      }
+
+      const res = await fetch('/api/tax/ppn-bulk-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId,
+          taxPeriod: importPeriod,
+          outCsv: summary.outCsv,
+          inCsv: summary.inCsv,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        showMsg('error', t('wholesalePpnFailed', { reason: data.error || `HTTP ${res.status}` }));
+        return;
+      }
+      const d = data.data || {};
+      const outMsg = t('wholesaleOutImported', { count: d.outInserted ?? 0 });
+      const inMsg = t('wholesaleInImported', { count: d.inInserted ?? 0 });
+      showMsg('success', `${outMsg} / ${inMsg}`);
+
+      // Sync the page period selector to the imported month and refresh.
+      const [py, pm] = importPeriod.split('-').map(Number);
+      if (py && pm) { setYear(py); setMonth(pm); }
+      loadFakturs();
+    } catch (err) {
+      showMsg('error', t('wholesalePpnFailed', { reason: err instanceof Error ? err.message : 'unknown' }));
+    } finally {
+      setUploadingWholesale(false);
+    }
   };
 
   // Generic Faktur Pajak document upload — sends to /api/documents/upload with FAKTUR_PAJAK type.
@@ -198,6 +263,8 @@ export default function PPNPage() {
         csvInputRef.current?.click();
       } else if (pendingAction === 'file') {
         fileUploadRef.current?.click();
+      } else if (pendingAction === 'wholesale') {
+        wholesaleInputRef.current?.click();
       } else if (pendingAction === 'camera') {
         const input = document.createElement('input');
         input.type = 'file';
@@ -450,16 +517,28 @@ export default function PPNPage() {
                   >
                     <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-emerald-400 text-emerald-700 hover:bg-emerald-50"
+                    onClick={() => openMonthPicker('wholesale')}
+                    disabled={uploadingWholesale || !customerId}
+                  >
+                    {uploadingWholesale ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileUp className="h-3 w-3 mr-1" />}
+                    Wholesale (VAT OUT + VAT IN)
+                  </Button>
                   <Button variant="outline" size="sm" className="w-full" onClick={() => { void downloadPpnTemplate(); }}>
                     <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownloadBtn')}
                   </Button>
-                  {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
+                  {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera' || pendingAction === 'wholesale') && (
                     <p className="text-[10px] text-emerald-700 text-center">
                       {t('monthPickerSelected', { period: confirmedPeriod })}
                     </p>
                   )}
                   <input ref={fileUploadRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
                     onChange={e => handleFakturUpload(e.target.files, 'WEB')} />
+                  <input ref={wholesaleInputRef} type="file" className="hidden" accept=".xlsx,.xls,.csv"
+                    onChange={e => handleWholesaleUpload(e.target.files?.[0] ?? null)} />
                 </div>
                 <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
                   <p className="text-[10px] text-gray-500 flex items-center gap-1">

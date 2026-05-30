@@ -3887,7 +3887,10 @@
     "skplbResult": "Analisis hasil SKPLB (restitusi) atau SKPKB (pembayaran tambahan) dan review keberatan",
     "refundAccepted": "Pengajuan restitusi diterima",
     "prevBalance": "Saldo Bulan Lalu",
-    "finalResult": "Hasil Akhir"
+    "finalResult": "Hasil Akhir",
+    "wholesaleOutImported": "{count} VAT OUT diimpor",
+    "wholesaleInImported": "{count} VAT IN diimpor",
+    "wholesalePpnFailed": "Import PPN wholesale gagal: {reason}"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

@@ -3887,7 +3887,10 @@
     "skplbResult": "Analyze SKPLB (refund) or SKPKB (additional payment) results and review objections",
     "refundAccepted": "Refund application accepted",
     "prevBalance": "Prev. Balance",
-    "finalResult": "Final Result"
+    "finalResult": "Final Result",
+    "wholesaleOutImported": "已导入 {count} 条 VAT OUT",
+    "wholesaleInImported": "已导入 {count} 条 VAT IN",
+    "wholesalePpnFailed": "PPN wholesale 导入失败: {reason}"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
