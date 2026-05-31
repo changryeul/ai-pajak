@@ -6,9 +6,10 @@
  * `ppn_faktur_monthly` with the correct `faktur_type`.
  *
  * Why a new endpoint (Q3 = B):
- *   - Existing `/api/tax/ppn-faktur-monthly` POST hard-codes ppn = dpp × 0.11.
- *     Bulk import must preserve the file's raw VAT (some periods are 12%,
- *     and some rows are PPN Tidak Dipungut where VAT ≠ dpp × rate).
+ *   - Single-faktur entry path (POST /api/tax/ppn-faktur-monthly) was added
+ *     for a different shape (one row per request, UI-side total + ppn). Bulk
+ *     import must preserve the file's raw VAT (some periods are 12%, and some
+ *     rows are PPN Tidak Dipungut where VAT ≠ dpp × rate).
  *   - Keeps single-faktur entry path untouched.
  *
  * Body shape:
