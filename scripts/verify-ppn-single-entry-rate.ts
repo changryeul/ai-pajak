@@ -65,6 +65,19 @@ async function main() {
   if (j3.success && j3.data?.ppn === 60000) { console.log(`✅ 3. ppn=0 → fallback ${j3.data.ppn}`); pass++; }
   else { console.error('✗ 3.', j3); fail++; }
 
+  // 4. body.dppNilaiLain 전달 시 그 값 그대로 저장 (Phase 3.1)
+  const r4 = await post({ dpp: 1200000, dppNilaiLain: 1100000, ppn: 132000, fakturNumber: 'DPPNL-EXPLICIT' });
+  const j4 = await r4.json();
+  if (j4.success && Number(j4.data?.dpp_nilai_lain) === 1100000) { console.log(`✅ 4. body.dppNilaiLain preserved → ${j4.data.dpp_nilai_lain}`); pass++; }
+  else { console.error('✗ 4.', j4); fail++; }
+
+  // 5. body.dppNilaiLain 없으면 PPNCalculator.adjustDPP fallback (essential, 2026 → ×11/12)
+  const r5 = await post({ dpp: 1200000, fakturDate: '2026-03-15', fakturNumber: 'DPPNL-FALLBACK' });
+  const j5 = await r5.json();
+  const expected = Math.round(1200000 * (11 / 12));
+  if (j5.success && Number(j5.data?.dpp_nilai_lain) === expected) { console.log(`✅ 5. fallback adjustDPP → ${j5.data.dpp_nilai_lain}`); pass++; }
+  else { console.error(`✗ 5. expected ${expected}, got ${j5.data?.dpp_nilai_lain}`, j5); fail++; }
+
   // cleanup
   await sbAdmin.from('ppn_faktur_monthly').delete().eq('customer_id', cust.id).eq('tax_period', PERIOD);
 

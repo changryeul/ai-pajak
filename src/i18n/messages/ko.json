@@ -3741,6 +3741,7 @@
     "thType": "Jenis",
     "thCounterparty": "Lawan Transaksi",
     "thStatus": "Status",
+    "dppNilaiLain": "DPP Nilai Lain",
     "noData": "데이터 없음",
     "fakturKeluaran": "Faktur Keluaran (매출)",
     "fakturMasukan": "Faktur Masukan (매입)",

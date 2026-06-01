@@ -3740,6 +3740,7 @@
     "thType": "種別",
     "thCounterparty": "取引先",
     "thStatus": "ステータス",
+    "dppNilaiLain": "DPP Nilai Lain",
     "noData": "データなし",
     "fakturKeluaran": "Faktur Keluaran（売上）",
     "fakturMasukan": "Faktur Masukan（仕入）",

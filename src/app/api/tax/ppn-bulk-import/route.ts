@@ -31,6 +31,7 @@ import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { parseCSV, validatePPNRows } from '@/lib/tax/bulk-import/csv-parser';
+import { PPNCalculator } from '@/lib/tax/ppn-calculator';
 import type { RequestWithSession } from '@/types/auth';
 
 interface RequestBody {
@@ -92,6 +93,13 @@ async function processSection(
         // Fallback to current PMK rate when file omits VAT.
         ppnNum = Math.round(dppNum * PPN_DEFAULT_RATE);
       }
+      // PMK 131/2024 DPP Nilai Lain — trust file's OTHER TAX BASE when present,
+      // else derive via PPNCalculator (essential default, isLuxury=false).
+      const isLuxury = false;  // Phase 3.1 Q2(b): default essential
+      const dppNilaiLainFromFile = parseFloat(r.data.dpp_nilai_lain ?? '');
+      const dppNilaiLain = Number.isFinite(dppNilaiLainFromFile) && dppNilaiLainFromFile > 0
+        ? Math.round(dppNilaiLainFromFile)
+        : PPNCalculator.adjustDPP(dppNum, new Date(r.data.faktur_date), isLuxury);
       return {
         customer_id: customerId,
         tax_period: taxPeriod,
@@ -101,6 +109,8 @@ async function processSection(
         counterparty_name: r.data.counterparty_name || null,
         counterparty_npwp: r.data.counterparty_npwp || null,
         dpp: dppNum,
+        dpp_nilai_lain: dppNilaiLain,
+        is_luxury: isLuxury,
         ppn: Math.round(ppnNum),
       };
     });

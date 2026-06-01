@@ -49,6 +49,8 @@ interface FakturMonthly {
   counterparty_name: string;
   counterparty_npwp: string;
   dpp: number;
+  dpp_nilai_lain: number | null;  // PMK 131/2024 adjusted DPP (Phase 3.1)
+  is_luxury: boolean | null;
   ppn: number;
   status: string;
 }
@@ -712,6 +714,7 @@ export default function PPNPage() {
                         <th className="text-center py-2.5 px-3">{t('thType')}</th>
                         <th className="text-left py-2.5 px-3">{t('thCounterparty')}</th>
                         <th className="text-right py-2.5 px-3">DPP</th>
+                        <th className="text-right py-2.5 px-3">{t('dppNilaiLain')}</th>
                         <th className="text-right py-2.5 px-3">PPN</th>
                         <th className="text-center py-2.5 px-3">Status</th>
                       </tr>
@@ -728,6 +731,7 @@ export default function PPNPage() {
                           </td>
                           <td className="py-2 px-3 text-xs">{f.counterparty_name}</td>
                           <td className="py-2 px-3 text-right font-mono text-xs">{fmt(f.dpp)}</td>
+                          <td className="py-2 px-3 text-right font-mono text-xs text-gray-500">{f.dpp_nilai_lain != null ? fmt(Number(f.dpp_nilai_lain)) : '—'}</td>
                           <td className="py-2 px-3 text-right font-mono text-xs font-medium text-orange-600">{fmt(f.ppn)}</td>
                           <td className="py-2 px-3 text-center">
                             <Badge variant="outline" className="text-[10px]">{f.status}</Badge>

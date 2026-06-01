@@ -178,14 +178,14 @@ describe('importPpnWholesaleFile (end-to-end)', () => {
 
     // CSV header matches canonical schema
     const outLines = summary.outCsv.split('\n');
-    expect(outLines[0]).toBe('faktur_date,faktur_number,counterparty_name,counterparty_npwp,dpp,ppn,description');
+    expect(outLines[0]).toBe('faktur_date,faktur_number,counterparty_name,counterparty_npwp,dpp,dpp_nilai_lain,ppn,description');
     expect(outLines[1]).toContain('2026-01-05');
     expect(outLines[1]).toContain('PT BUYER A');
     expect(outLines[1]).toContain('1000000');
     expect(outLines[1]).toContain('110000');
 
     const inLines = summary.inCsv.split('\n');
-    expect(inLines[0]).toBe('faktur_date,faktur_number,counterparty_name,counterparty_npwp,dpp,ppn,description');
+    expect(inLines[0]).toBe('faktur_date,faktur_number,counterparty_name,counterparty_npwp,dpp,dpp_nilai_lain,ppn,description');
     expect(inLines.length).toBe(4); // header + 3 data rows
   });
 
@@ -287,5 +287,62 @@ describe('importPpnWholesaleFile (end-to-end)', () => {
     const lines = summary.outCsv.split('\n');
     // CSV row should still emit DPP correctly; PPN cell empty
     expect(lines[1]).toContain('1000000');
+  });
+});
+
+describe('OTHER TAX BASE (DPP Nilai Lain) — Phase 3.1', () => {
+  it('maps OTHER TAX BASE column when present', () => {
+    const m = mapPpnColumns(['NO', 'NPWP', 'NAME', 'DESC', 'EFAKTUR NO', 'EFAKTUR DATE', 'TAX BASE', 'OTHER TAX BASE', 'TAX RATE', 'VAT']);
+    expect(m.other_tax_base).toBe(7);
+    expect(m.tax_base).toBe(6);
+    expect(m.vat).toBe(9);
+  });
+
+  it('maps DPP Nilai Lain literal as synonym', () => {
+    const m = mapPpnColumns(['NPWP', 'NAME', 'EFAKTUR DATE', 'TAX BASE', 'DPP Nilai Lain', 'VAT']);
+    expect(m.other_tax_base).toBe(4);
+  });
+
+  it('importer includes dpp_nilai_lain when OTHER TAX BASE present (BINTANG JAYA shape)', async () => {
+    // Mirrors BINTANG JAYA Sheet 2601 row 1: dpp=3,900,000 → other=3,575,000 (×11/12)
+    const aoa: unknown[][] = [
+      ['NO', 'NPWP', 'NAME', 'DESC', 'EFAKTUR NO', 'EFAKTUR DATE', 'TAX BASE', 'OTHER TAX BASE', 'TAX RATE', 'VAT'],
+      ['1', '01.000.001.0-001.000', 'VENDOR PMK', 'item', 'EF001', '2026-01-15', 3900000, 3575000, 0.12, 429000],
+    ];
+    const summary = await importPpnWholesaleFile(makeXlsxFile(aoa));
+    expect(summary.outImported).toBe(1);
+    // CSV header includes dpp_nilai_lain between dpp and ppn
+    const rows = summary.outCsv.split('\n');
+    expect(rows[0]).toContain('dpp_nilai_lain');
+    // CSV data row contains both 3900000 (dpp) and 3575000 (dpp_nilai_lain)
+    expect(rows[1]).toContain('3900000');
+    expect(rows[1]).toContain('3575000');
+  });
+
+  it('leaves dpp_nilai_lain empty when OTHER TAX BASE column absent', async () => {
+    // No OTHER TAX BASE column at all — importer must emit empty cell, not zero
+    const aoa: unknown[][] = [
+      ['NO', 'NPWP', 'NAME', 'DESC', 'EFAKTUR NO', 'EFAKTUR DATE', 'TAX BASE', 'TAX RATE', 'VAT'],
+      ['1', '01.000.001.0-001.000', 'VENDOR LEGACY', 'item', 'EF001', '2026-01-15', 3900000, 0.12, 429000],
+    ];
+    const summary = await importPpnWholesaleFile(makeXlsxFile(aoa));
+    expect(summary.outImported).toBe(1);
+    const rows = summary.outCsv.split('\n');
+    expect(rows[0]).toContain('dpp_nilai_lain');
+    // Empty cell between dpp (3900000) and ppn (429000): `,3900000,,429000,`
+    expect(rows[1]).toMatch(/,3900000,,429000,/);
+  });
+
+  it('leaves dpp_nilai_lain empty when OTHER TAX BASE present but cell value is 0', async () => {
+    // BINTANG JAYA Notes section / pre-PMK row: column exists but value 0
+    const aoa: unknown[][] = [
+      ['NO', 'NPWP', 'NAME', 'DESC', 'EFAKTUR NO', 'EFAKTUR DATE', 'TAX BASE', 'OTHER TAX BASE', 'TAX RATE', 'VAT'],
+      ['1', '01.000.001.0-001.000', 'VENDOR PRE2025', 'item', 'EF001', '2024-12-15', 1000000, 0, 0.11, 110000],
+    ];
+    const summary = await importPpnWholesaleFile(makeXlsxFile(aoa));
+    expect(summary.outImported).toBe(1);
+    const rows = summary.outCsv.split('\n');
+    // Zero in OTHER TAX BASE → empty CSV cell, server fallback handles
+    expect(rows[1]).toMatch(/,1000000,,110000,/);
   });
 });

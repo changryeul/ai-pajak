@@ -149,7 +149,7 @@ async function main() {
   // ── Step 7: Verify DB ─────────────────────────────────────────────────
   const { data: rows, count } = await sbAdmin
     .from('ppn_faktur_monthly')
-    .select('id, faktur_type, faktur_date, counterparty_name, dpp, ppn', { count: 'exact' })
+    .select('id, faktur_type, faktur_date, counterparty_name, dpp, dpp_nilai_lain, is_luxury, ppn', { count: 'exact' })
     .eq('customer_id', customerId)
     .eq('tax_period', taxPeriod)
     .order('faktur_date');
@@ -157,9 +157,29 @@ async function main() {
   const inCount = rows?.filter((r) => r.faktur_type === 'MASUKAN').length ?? 0;
   console.log(`✅ Step 7: DB has ${count ?? 0} rows for ${taxPeriod} (OUT=${outCount}, IN=${inCount})`);
   rows?.slice(0, 5).forEach((r) => {
-    console.log(`   • [${r.faktur_type}] ${r.faktur_date} | ${r.counterparty_name} | dpp=${r.dpp} ppn=${r.ppn}`);
+    console.log(`   • [${r.faktur_type}] ${r.faktur_date} | ${r.counterparty_name} | dpp=${r.dpp} dpp_nilai_lain=${r.dpp_nilai_lain} ppn=${r.ppn}`);
   });
   if (rows && rows.length > 5) console.log(`   … +${rows.length - 5} more`);
+
+  // ── Step 7b: Verify dpp_nilai_lain from OTHER TAX BASE (Phase 3.1) ────
+  // The BINTANG JAYA file uses OTHER TAX BASE = dpp × 11/12 (PMK 131/2024).
+  // Pick the first row that has a non-null dpp_nilai_lain and check the ratio.
+  const sampleRow = rows?.find((r) => r.dpp_nilai_lain != null);
+  if (sampleRow) {
+    const dpp = Number(sampleRow.dpp);
+    const dppNL = Number(sampleRow.dpp_nilai_lain);
+    const ratio = dpp > 0 ? dppNL / dpp : 0;
+    const isClose = Math.abs(ratio - 11 / 12) < 0.01;
+    if (isClose) {
+      console.log(`✅ Step 7b: dpp_nilai_lain ratio ${ratio.toFixed(4)} ≈ 11/12 (PMK 131/2024 ✓)`);
+    } else {
+      console.error(`✗ Step 7b: dpp_nilai_lain ratio off — dpp=${dpp}, dpp_nilai_lain=${dppNL}, ratio=${ratio.toFixed(4)}`);
+      process.exit(1);
+    }
+  } else {
+    console.error(`✗ Step 7b: no row has dpp_nilai_lain — Phase 3.1 importer regression?`);
+    process.exit(1);
+  }
 
   // ── Step 8: Cleanup ───────────────────────────────────────────────────
   const { count: cleaned } = await sbAdmin

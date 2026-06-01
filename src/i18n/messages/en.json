@@ -3740,6 +3740,7 @@
     "thType": "Type",
     "thCounterparty": "Counterparty",
     "thStatus": "Status",
+    "dppNilaiLain": "DPP Nilai Lain",
     "noData": "No data",
     "fakturKeluaran": "Faktur Keluaran (Output)",
     "fakturMasukan": "Faktur Masukan (Input)",

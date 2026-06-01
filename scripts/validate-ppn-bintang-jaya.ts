@@ -67,6 +67,15 @@ async function main() {
   console.log(`\n✅ First 5 IN rows:`);
   summary.inCsv.split('\n').slice(0, 6).forEach((l) => console.log(`   ${l}`));
 
+  // Phase 3.1 sanity check — surface dpp_nilai_lain (OTHER TAX BASE) presence.
+  // CSV header position of dpp_nilai_lain is index 5 in canonical schema.
+  const outHeader = summary.outCsv.split('\n')[0]?.split(',') ?? [];
+  const dppNlIdx = outHeader.indexOf('dpp_nilai_lain');
+  const firstOut = summary.outCsv.split('\n')[1]?.split(',') ?? [];
+  const firstDpp = firstOut[outHeader.indexOf('dpp')] ?? '';
+  const firstDppNl = dppNlIdx >= 0 ? (firstOut[dppNlIdx] ?? '') : '(no column)';
+  console.log(`\n📐 First OUT row dpp=${firstDpp} dpp_nilai_lain=${firstDppNl}`);
+
   const expected = { '2601': { out: 6, in: 19 } } as Record<string, { out: number; in: number }>;
   const exp = expected[SHEET];
   if (exp) {

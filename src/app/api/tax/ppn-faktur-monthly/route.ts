@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { PPNCalculator } from '@/lib/tax/ppn-calculator';
 
 /**
  * GET /api/tax/ppn-faktur-monthly?customerId=xxx&period=2025-01
@@ -61,7 +62,12 @@ const PPN_DEFAULT_RATE = 0.12;
 async function handlePost(req: RequestWithSession): Promise<Response> {
   try {
     const body = await req.json();
-    const { customerId, taxPeriod, fakturType, fakturNumber, fakturDate, counterpartyId, counterpartyName, counterpartyNpwp, dpp, ppn: ppnFromBody } = body;
+    const {
+      customerId, taxPeriod, fakturType, fakturNumber, fakturDate,
+      counterpartyId, counterpartyName, counterpartyNpwp,
+      dpp, ppn: ppnFromBody,
+      dppNilaiLain: dppNilaiLainFromBody, isLuxury: isLuxuryFromBody,
+    } = body;
 
     if (!customerId || !taxPeriod || !fakturType || !dpp) {
       return NextResponse.json({ error: 'customerId, taxPeriod, fakturType, dpp required' }, { status: 400 });
@@ -71,6 +77,17 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     const ppn = Number.isFinite(ppnNum) && ppnNum > 0
       ? Math.round(ppnNum)
       : Math.round(Number(dpp) * PPN_DEFAULT_RATE);
+
+    // PMK 131/2024 metadata — Phase 3.1.
+    // is_luxury default false (safer for taxpayer: effective 11%).
+    // dpp_nilai_lain: trust body when present (UI may pre-compute), else
+    // derive via PPNCalculator.adjustDPP (essential 2025+ → dpp × 11/12).
+    const isLuxury = isLuxuryFromBody === true;
+    const dppNilaiLainNum = Number(dppNilaiLainFromBody);
+    const fakturDateResolved = fakturDate || new Date().toISOString().slice(0, 10);
+    const dppNilaiLain = Number.isFinite(dppNilaiLainNum) && dppNilaiLainNum > 0
+      ? Math.round(dppNilaiLainNum)
+      : PPNCalculator.adjustDPP(Number(dpp), new Date(fakturDateResolved), isLuxury);
 
     // Get counterparty info if provided
     let cpName = counterpartyName || '';
@@ -85,11 +102,13 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       tax_period: taxPeriod,
       faktur_type: fakturType,
       faktur_number: fakturNumber || null,
-      faktur_date: fakturDate || new Date().toISOString().slice(0, 10),
+      faktur_date: fakturDateResolved,
       counterparty_id: counterpartyId || null,
       counterparty_name: cpName,
       counterparty_npwp: cpNpwp,
       dpp,
+      dpp_nilai_lain: dppNilaiLain,
+      is_luxury: isLuxury,
       ppn,
     }).select().single();
 

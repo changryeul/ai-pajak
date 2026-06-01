@@ -17,6 +17,10 @@
  * Q2 = (a) TAX BASE as-is (no DPP Nilai Lain 11/12 adjustment in bulk).
  * Q3 = (B) new dedicated endpoint avoids the existing single-faktur
  *          endpoint's hard-coded 0.11 rate.
+ *
+ * Phase 3.1 (2026-06-01): also captures OTHER TAX BASE column when present
+ * → dpp_nilai_lain in normalized row. Empty when source file lacks the column;
+ * server-side PPNCalculator.adjustDPP fills the gap.
  */
 
 import { parseTabularFile, rowsToCsv, findBestHeaderRow } from './client-file-parser';
@@ -28,6 +32,7 @@ const PPN_CSV_HEADERS = [
   'counterparty_name', // NAME
   'counterparty_npwp', // NPWP
   'dpp',               // TAX BASE
+  'dpp_nilai_lain',    // OTHER TAX BASE (PMK 131/2024 adjusted DPP, optional)
   'ppn',               // VAT (raw from file — rate may be 11% or 12%)
   'description',       // DESC
 ] as const;
@@ -67,6 +72,7 @@ export interface PpnColumnMap {
   efaktur_no?: number;
   efaktur_date?: number;
   tax_base?: number;
+  other_tax_base?: number;  // PMK 131/2024 adjusted DPP (optional)
   vat?: number;
 }
 
@@ -84,6 +90,10 @@ export function mapPpnColumns(header: string[]): PpnColumnMap {
     // 'TAX BASE' matches FIRST. 'OTHER TAX BASE' is also a column but starts
     // with 'other', so the `^tax\s*base` anchor protects us.
     else if (/^tax\s*base/.test(c) && map.tax_base === undefined) map.tax_base = idx;
+    // OTHER TAX BASE = PMK 131/2024 adjusted DPP (dpp × 11/12). Also matches
+    // 'DPP Nilai Lain' literal as a synonym (some templates label the same
+    // column with the Indonesian term).
+    else if (/^(other\s*tax\s*base|dpp\s*nilai\s*lain)/.test(c) && map.other_tax_base === undefined) map.other_tax_base = idx;
     else if (/^(vat|ppn)$/.test(c) && map.vat === undefined) map.vat = idx;
   });
 
@@ -183,6 +193,7 @@ export interface NormalizedPpnRow {
   counterparty_name: string;
   counterparty_npwp: string;
   dpp: string;
+  dpp_nilai_lain: string;  // empty when source file lacks OTHER TAX BASE
   ppn: string;
   description: string;
 }
@@ -250,12 +261,19 @@ function processSection(
     const vat = parseAmount(vatRaw);
     const ppn = Number.isFinite(vat) ? String(vat) : '';
 
+    // OTHER TAX BASE (PMK 131/2024 adjusted DPP) — optional column.
+    // If present and > 0, preserve; otherwise leave empty so server-side
+    // PPNCalculator.adjustDPP fallback can derive it.
+    const dppNilaiLainRaw = colMap.other_tax_base !== undefined ? getCell(row, colMap.other_tax_base) : '';
+    const dppNilaiLain = dppNilaiLainRaw ? parseAmount(dppNilaiLainRaw) : NaN;
+
     normalized.push({
       faktur_date: date,
       faktur_number: getCell(row, colMap.efaktur_no),
       counterparty_name,
       counterparty_npwp: getCell(row, colMap.npwp),
       dpp: String(dpp),
+      dpp_nilai_lain: Number.isFinite(dppNilaiLain) && dppNilaiLain > 0 ? String(dppNilaiLain) : '',
       ppn,
       description: getCell(row, colMap.desc),
     });
