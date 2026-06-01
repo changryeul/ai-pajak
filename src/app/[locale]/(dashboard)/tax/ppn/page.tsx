@@ -13,10 +13,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
-  FileText, Loader2, CheckCircle, AlertTriangle, Plus, Trash2,
+  FileText, Loader2, CheckCircle, AlertTriangle, Check, X,
   DollarSign, TrendingUp, TrendingDown, Minus, Sparkles,
-  ArrowUpRight, ArrowDownLeft, Check, X, Ban,
-  Upload, Camera, Image, RefreshCw, Download, FileUp, Pencil,
+  ArrowUpRight, ArrowDownLeft,
+  Download, FileUp,
 } from 'lucide-react';
 import { useRef } from 'react';
 import { ScreenHeader } from '@/components/tax';
@@ -58,8 +58,6 @@ interface FakturMonthly {
 type TabId = 'faktur' | 'reconciliation';
 type FakturFilter = 'ALL' | 'OUTPUT' | 'INPUT';
 
-const PPN_RATE = 0.11;
-
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
 export default function PPNPage() {
@@ -83,7 +81,6 @@ export default function PPNPage() {
   const [year, setYear] = useState(currentYear);
   const [month, setMonth] = useState(currentMonth);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [filter, setFilter] = useState<FakturFilter>('ALL');
 
@@ -91,34 +88,20 @@ export default function PPNPage() {
   const [fakturs, setFakturs] = useState<FakturMonthly[]>([]);
   const [summary, setSummary] = useState({ outputTax: 0, inputTax: 0, netPpn: 0, status: 'NIHIL', keluaranCount: 0, masukanCount: 0 });
 
-  // Faktur form
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    transactionType: 'OUTPUT' as 'OUTPUT' | 'INPUT',
-    counterpartyName: '',
-    counterpartyNpwp: '',
-    fakturDate: new Date().toISOString().slice(0, 10),
-    items: [{ description: '', quantity: 1, unitPrice: 0 }] as Array<{ description: string; quantity: number; unitPrice: number }>,
-  });
-
   const period = `${year}-${String(month).padStart(2, '0')}`;
 
-  // Month picker — opens before any input action (template upload / file upload / camera / manual / wholesale)
-  const csvInputRef = useRef<HTMLInputElement>(null);
-  const fileUploadRef = useRef<HTMLInputElement>(null);
+  // Month picker — opens before wholesale upload (file/camera/manual modes
+  // removed in Phase 4 simplification; only template + wholesale remain).
   const wholesaleInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingDoc, setUploadingDoc] = useState(false);
   const [uploadingWholesale, setUploadingWholesale] = useState(false);
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'csv' | 'file' | 'camera' | 'manual' | 'wholesale' | null>(null);
   const [pickedYear, setPickedYear] = useState<number>(currentYear);
   const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
   const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
   const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-  const openMonthPicker = (action: 'csv' | 'file' | 'camera' | 'manual' | 'wholesale') => {
-    setPendingAction(action);
+  const openMonthPicker = () => {
     setMonthPickerOpen(true);
   };
 
@@ -184,48 +167,6 @@ export default function PPNPage() {
     }
   };
 
-  // Generic Faktur Pajak document upload — sends to /api/documents/upload with FAKTUR_PAJAK type.
-  const handleFakturUpload = async (files: FileList | null, source: string, uploadPeriod?: string) => {
-    if (!files || !customerId) return;
-    setUploadingDoc(true);
-    let count = 0;
-    const errors: string[] = [];
-    const taxPeriod = uploadPeriod || confirmedPeriod;
-    for (const file of Array.from(files)) {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('customerId', customerId);
-      fd.append('documentType', 'FAKTUR_PAJAK');
-      fd.append('uploadSource', source);
-      if (taxPeriod) fd.append('taxPeriod', taxPeriod);
-      try {
-        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data.success) {
-          count++;
-          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
-        } else {
-          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
-        }
-      } catch (e) {
-        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
-      }
-    }
-    if (count > 0 && taxPeriod) {
-      // Sync the page period selector to the uploaded month
-      const [py, pm] = taxPeriod.split('-').map(Number);
-      if (py && pm) {
-        setYear(py);
-        setMonth(pm);
-      }
-      showMsg('success', `${count} ${t('k15_4f8e30') || 'OK'}`);
-    }
-    if (errors.length > 0) {
-      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
-    }
-    setUploadingDoc(false);
-  };
-
   const downloadPpnTemplate = async () => {
     const headers = ['faktur_type', 'faktur_number', 'faktur_date', 'counterparty_name', 'counterparty_npwp', 'description', 'dpp', 'ppn'];
     const sample: (string | number)[] = ['OUTPUT', '0100002500000001', '2026-04-15', 'PT Buyer', '01.234.567.8-901.000', 'Jasa konsultasi', 10000000, 1100000];
@@ -261,24 +202,7 @@ export default function PPNPage() {
     setConfirmedPeriod(p);
     setMonthPickerOpen(false);
     setTimeout(() => {
-      if (pendingAction === 'csv') {
-        csvInputRef.current?.click();
-      } else if (pendingAction === 'file') {
-        fileUploadRef.current?.click();
-      } else if (pendingAction === 'wholesale') {
-        wholesaleInputRef.current?.click();
-      } else if (pendingAction === 'camera') {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.capture = 'environment';
-        input.onchange = (e) => handleFakturUpload((e.target as HTMLInputElement).files, 'CAMERA', p);
-        input.click();
-      } else if (pendingAction === 'manual') {
-        const [py, pm] = p.split('-').map(Number);
-        if (py && pm) { setYear(py); setMonth(pm); }
-        setShowForm(true);
-      }
+      wholesaleInputRef.current?.click();
     }, 50);
   };
 
@@ -313,70 +237,6 @@ export default function PPNPage() {
   }, [customerId, period]);
 
   useEffect(() => { loadFakturs(); }, [loadFakturs]);
-
-  // Calculate form totals
-  const formTotals = formData.items.reduce((acc, item) => {
-    const dpp = item.quantity * item.unitPrice;
-    const ppn = Math.round(dpp * PPN_RATE);
-    return { dpp: acc.dpp + dpp, ppn: acc.ppn + ppn };
-  }, { dpp: 0, ppn: 0 });
-
-  // Add/remove item rows
-  const addItem = () => setFormData({ ...formData, items: [...formData.items, { description: '', quantity: 1, unitPrice: 0 }] });
-  const removeItem = (idx: number) => {
-    if (formData.items.length <= 1) return;
-    setFormData({ ...formData, items: formData.items.filter((_, i) => i !== idx) });
-  };
-  const updateItem = (idx: number, field: string, value: string | number) => {
-    const items = [...formData.items];
-    items[idx] = { ...items[idx], [field]: value };
-    setFormData({ ...formData, items });
-  };
-
-  // Save faktur
-  const saveFaktur = async () => {
-    if (!customerId) return;
-    if (!formData.counterpartyName.trim()) {
-      showMsg('error', t('validationCounterpartyRequired'));
-      return;
-    }
-    if (formTotals.dpp <= 0) {
-      showMsg('error', t('validationDppPositive'));
-      return;
-    }
-    if (formData.counterpartyNpwp && formData.counterpartyNpwp.length > 0 && formData.counterpartyNpwp.length < 15) {
-      showMsg('error', t('validationNpwpInvalid'));
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const res = await fetch('/api/tax/ppn-faktur-monthly', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerId: customerId,
-          taxPeriod: period,
-          fakturType: formData.transactionType === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN',
-          fakturDate: formData.fakturDate,
-          counterpartyName: formData.counterpartyName,
-          counterpartyNpwp: formData.counterpartyNpwp,
-          dpp: formTotals.dpp,
-          ppn: formTotals.ppn,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showMsg('success', t('fakturSaved'));
-        setShowForm(false);
-        setFormData({ transactionType: 'OUTPUT', counterpartyName: '', counterpartyNpwp: '', fakturDate: new Date().toISOString().slice(0, 10), items: [{ description: '', quantity: 1, unitPrice: 0 }] });
-        loadFakturs();
-      } else {
-        showMsg('error', data.error || t('errorSave'));
-      }
-    } catch { showMsg('error', t('errorGeneral')); }
-    finally { setIsSaving(false); }
-  };
 
   const filteredFakturs = filter === 'ALL' ? fakturs : fakturs.filter(f => f.faktur_type === (filter === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN'));
 
@@ -482,10 +342,8 @@ export default function PPNPage() {
       {/* Tab 1: Faktur Management */}
       {activeTab === 'faktur' && (
         <div>
-          {/* 2-mode input cards (matching PPh 21/23 simplified layout) */}
-          <div className="grid gap-4 md:grid-cols-2 mb-4">
-            {/* (removed) Method 1: Template — merged into Method 2 below */}
-            {/* Method 2: Upload — RECOMMENDED */}
+          {/* Single input card — template + wholesale xlsx only (Phase 4 simplification) */}
+          <div className="mb-4">
             <Card className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all relative">
               <div className="absolute -top-2 left-5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
                 {t('recommendedBadge')}
@@ -501,44 +359,23 @@ export default function PPNPage() {
                   </div>
                 </div>
                 <div className="space-y-2 flex-1">
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { void downloadPpnTemplate(); }}>
+                    <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownloadBtn')}
+                  </Button>
                   <Button
                     size="sm"
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() => openMonthPicker('file')}
-                    disabled={uploadingDoc || !customerId}
-                  >
-                    {uploadingDoc ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileUp className="h-3 w-3 mr-1" />}
-                    {t('inputModeUploadBtn')}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => openMonthPicker('camera')}
-                    disabled={uploadingDoc || !customerId}
-                  >
-                    <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-emerald-400 text-emerald-700 hover:bg-emerald-50"
-                    onClick={() => openMonthPicker('wholesale')}
+                    onClick={openMonthPicker}
                     disabled={uploadingWholesale || !customerId}
                   >
                     {uploadingWholesale ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileUp className="h-3 w-3 mr-1" />}
                     Wholesale (VAT OUT + VAT IN)
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => { void downloadPpnTemplate(); }}>
-                    <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownloadBtn')}
-                  </Button>
-                  {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera' || pendingAction === 'wholesale') && (
+                  {confirmedPeriod && (
                     <p className="text-[10px] text-emerald-700 text-center">
                       {t('monthPickerSelected', { period: confirmedPeriod })}
                     </p>
                   )}
-                  <input ref={fileUploadRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
-                    onChange={e => handleFakturUpload(e.target.files, 'WEB')} />
                   <input ref={wholesaleInputRef} type="file" className="hidden" accept=".xlsx,.xls,.csv"
                     onChange={e => handleWholesaleUpload(e.target.files?.[0] ?? null)} />
                 </div>
@@ -547,43 +384,6 @@ export default function PPNPage() {
                     <Sparkles className="h-3 w-3 text-emerald-500" />
                     {t('uploadHint')}
                   </p>
-                  <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                    <Camera className="h-3 w-3 text-emerald-500" />
-                    {t('inputCameraHint')}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Method 3: Manual */}
-            <Card className={`border-2 border-dashed ${showForm ? 'border-purple-400 shadow-sm' : 'border-purple-200 hover:border-purple-400 hover:shadow-sm'} transition-all`}>
-              <CardContent className="p-5 flex flex-col h-full">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-                    <Pencil className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">{t('inputModeManual')}</p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">{t('inputModeManualDesc')}</p>
-                  </div>
-                </div>
-                <div className="space-y-2 flex-1">
-                  <Button
-                    size="sm"
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                    onClick={() => openMonthPicker('manual')}
-                    disabled={!customerId}
-                  >
-                    <Pencil className="h-3 w-3 mr-1" />{t('inputModeManualBtn')}
-                  </Button>
-                  {confirmedPeriod && pendingAction === 'manual' && (
-                    <p className="text-[10px] text-purple-700 text-center">
-                      {t('monthPickerSelected', { period: confirmedPeriod })}
-                    </p>
-                  )}
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <p className="text-[10px] text-gray-500">{t('manualHint')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -599,100 +399,6 @@ export default function PPNPage() {
               ))}
             </div>
           </div>
-
-          {/* Faktur Form */}
-          {showForm && (
-            <Card className="mb-4 border-orange-200 shadow-md">
-              <CardContent className="pt-4 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-xs">{t('fakturType')}</Label>
-                    <Select value={formData.transactionType} onValueChange={v => setFormData({ ...formData, transactionType: v as 'OUTPUT' | 'INPUT' })}>
-                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="OUTPUT">{t('typeKeluaran')}</SelectItem>
-                        <SelectItem value="INPUT">{t('typeMasukan')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs">{formData.transactionType === 'OUTPUT' ? t('buyerLabel') : t('sellerLabel')}</Label>
-                    <Input className="h-9" value={formData.counterpartyName} onChange={e => setFormData({ ...formData, counterpartyName: e.target.value })} placeholder="PT ABC" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">NPWP</Label>
-                    <Input className="h-9 font-mono" value={formData.counterpartyNpwp} onChange={e => setFormData({ ...formData, counterpartyNpwp: e.target.value })} placeholder="01.234.567.8-901.234" />
-                  </div>
-                </div>
-
-                {/* Line Items */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <Label className="text-xs font-semibold">{t('itemLabel')}</Label>
-                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={addItem}><Plus className="h-3 w-3 mr-1" />{t('addItem')}</Button>
-                  </div>
-                  <div className="space-y-2 overflow-x-auto">
-                    {formData.items.map((item, idx) => {
-                      const dpp = item.quantity * item.unitPrice;
-                      const ppn = Math.round(dpp * PPN_RATE);
-                      return (
-                        <div key={idx} className="grid grid-cols-12 gap-2 items-end min-w-[600px]">
-                          <div className="col-span-4">
-                            {idx === 0 && <Label className="text-[10px] text-gray-400">{t('uraian')}</Label>}
-                            <Input className="h-8 text-xs" value={item.description} onChange={e => updateItem(idx, 'description', e.target.value)} placeholder="Barang/Jasa" />
-                          </div>
-                          <div className="col-span-1">
-                            {idx === 0 && <Label className="text-[10px] text-gray-400">Qty</Label>}
-                            <Input className="h-8 text-xs font-mono" type="number" value={item.quantity} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} />
-                          </div>
-                          <div className="col-span-2">
-                            {idx === 0 && <Label className="text-[10px] text-gray-400">{t('unitPrice')}</Label>}
-                            <Input className="h-8 text-xs font-mono" type="number" value={item.unitPrice || ''} onChange={e => updateItem(idx, 'unitPrice', parseInt(e.target.value) || 0)} />
-                          </div>
-                          <div className="col-span-2">
-                            {idx === 0 && <Label className="text-[10px] text-gray-400">DPP</Label>}
-                            <div className="h-8 bg-gray-50 rounded px-2 flex items-center text-xs font-mono text-gray-600">{fmt(dpp)}</div>
-                          </div>
-                          <div className="col-span-2">
-                            {idx === 0 && <Label className="text-[10px] text-gray-400">PPN 11%</Label>}
-                            <div className="h-8 bg-orange-50 rounded px-2 flex items-center text-xs font-mono text-orange-700">{fmt(ppn)}</div>
-                          </div>
-                          <div className="col-span-1">
-                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => removeItem(idx)} disabled={formData.items.length <= 1}>
-                              <Trash2 className="h-3 w-3 text-gray-300" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Totals */}
-                  <div className="mt-3 pt-3 border-t flex justify-end gap-6">
-                    <div className="text-right">
-                      <p className="text-[10px] text-gray-400">{t('totalDpp')}</p>
-                      <p className="font-mono font-bold text-sm">{fmt(formTotals.dpp)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-gray-400">{t('totalPpn')}</p>
-                      <p className="font-mono font-bold text-sm text-orange-600">{fmt(formTotals.ppn)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-gray-400">{t('grandTotal')}</p>
-                      <p className="font-mono font-bold text-sm">{fmt(formTotals.dpp + formTotals.ppn)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 justify-end">
-                  <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}><X className="h-3 w-3 mr-1" />{t('cancel')}</Button>
-                  <Button size="sm" onClick={saveFaktur} disabled={isSaving}>
-                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}{t('save')}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Faktur List */}
           {isLoading ? (
@@ -917,136 +623,18 @@ export default function PPNPage() {
 }
 
 // ══════════════════════════════════════════════════════
-// PPN Filing Process (증빙 + SPT Masa + 납부 프로그래스)
+// PPN Filing Process placeholder (camera + file upload + OCR doc list
+// removed in Phase 4 simplification — wholesale xlsx is the sole input).
+// Component kept as no-op shim to preserve parent layout + future hooks.
 // ══════════════════════════════════════════════════════
-function PPNFilingSection({
-  customerId, period,
-}: {
+function PPNFilingSection(_props: {
   customerId: string;
   period: string;
   summary: { outputTax: number; inputTax: number; netPpn: number; status: string };
   fakturCount: number;
   locale: string;
 }) {
-  const t = useTranslations('ppnPage');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadedDocs, setUploadedDocs] = useState<Array<{
-    id: string; file_name: string; ocr_status: string;
-    ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
-  }>>([]);
-
-  // Load docs
-  useEffect(() => {
-    if (!customerId) return;
-    fetch(`/api/documents?customerId=${customerId}&period=${period}`)
-      .then(r => r.json())
-      .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 10)); })
-      .catch(() => {});
-  }, [customerId, period]);
-
-  const handleUpload = async (files: FileList | null) => {
-    if (!files || !customerId) return;
-    setUploading(true);
-    setUploadError(null);
-    let count = 0;
-    const errors: string[] = [];
-    for (const file of Array.from(files)) {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('customerId', customerId);
-      fd.append('documentType', 'FAKTUR_PAJAK');
-      fd.append('uploadSource', 'WEB');
-      try {
-        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data.success) {
-          count++;
-          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
-        } else {
-          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
-        }
-      } catch (e) {
-        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
-      }
-    }
-    if (count > 0) {
-      setTimeout(() => {
-        fetch(`/api/documents?customerId=${customerId}&period=${period}`)
-          .then(r => r.json())
-          .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 10)); })
-          .catch(() => {});
-      }, 2000);
-    }
-    if (errors.length > 0) {
-      const msg = `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`;
-      setUploadError(msg);
-      setTimeout(() => setUploadError(null), 5000);
-    }
-    setUploading(false);
-  };
-
-  return (
-    <div className="mt-6 space-y-4">
-      {/* Document upload section */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-sm flex items-center gap-2">
-              <Upload className="h-4 w-4 text-orange-600" />
-              Faktur Pajak {t('k8_c219cc')} ({uploadedDocs.length}{t('k9_bcbcd4')}
-            </h3>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-                Faktur {t('k10_a45c31')}
-              </Button>
-              <Button size="sm" variant="outline" disabled={uploading}
-                onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
-                  input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files);
-                  input.click();
-                }}>
-                <Camera className="h-3 w-3 mr-1" />{t('k11_8383f9')}
-              </Button>
-              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf" multiple
-                onChange={e => handleUpload(e.target.files)} />
-            </div>
-          </div>
-          {uploadError && (
-            <div className="mb-3 p-2 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2">
-              <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
-              <span>{uploadError}</span>
-            </div>
-          )}
-          {uploadedDocs.length === 0 ? (
-            <div className="text-center py-4 text-xs text-gray-400 border-2 border-dashed rounded-lg">
-              <Image className="h-6 w-6 mx-auto mb-1 opacity-30" />
-              <p>{t('uploadHint')}</p>
-            </div>
-          ) : (
-            <div className="space-y-1 max-h-28 overflow-y-auto">
-              {uploadedDocs.map(doc => (
-                <div key={doc.id} className="flex items-center gap-2 p-1.5 rounded border text-xs">
-                  <Badge className={
-                    doc.ocr_status === 'COMPLETED' ? 'text-[8px] bg-green-100 text-green-700' :
-                    doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
-                    'text-[8px] bg-gray-100 text-gray-600'
-                  }>
-                    {doc.ocr_status === 'COMPLETED' ? 'OCR' + t('k13_4f8e30') : doc.ocr_status === 'PROCESSING' ? t('k14_95d1e4') : t('k15_65905a')}
-                  </Badge>
-                  <span className="truncate">{doc.file_name}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-    </div>
-  );
+  return null;
 }
 
 // ══════════════════════════════════════════════════════

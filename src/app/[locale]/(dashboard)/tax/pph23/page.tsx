@@ -14,11 +14,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import {
   Loader2, Plus, Receipt, FileText, DollarSign, CheckCircle,
   AlertTriangle, Sparkles, X, ChevronDown, ChevronRight,
-  Calculator, Shield, Upload, Camera, ArrowRight,
+  Calculator, Shield, Camera,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
-import { Download, FileUp, FileSpreadsheet, Pencil } from 'lucide-react';
+import { Download, FileSpreadsheet, Pencil } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { importWholesaleFile } from '@/lib/tax/bulk-import/pph23-wholesale-importer';
 
@@ -155,7 +155,10 @@ export default function PPh23Page() {
   // Tax resolution preview (from /api/tax/resolve)
   const [resolutionPreview, setResolutionPreview] = useState<TaxResolutionResult | null>(null);
   const [resolvingTax, setResolvingTax] = useState(false);
-  const [cameraAvailable, setCameraAvailable] = useState(false);
+
+  // Invoice image (mandatory for manual entry — Phase 4 simplification)
+  const [invoiceImageFile, setInvoiceImageFile] = useState<File | null>(null);
+  const invoiceImageInputRef = useRef<HTMLInputElement>(null);
 
   // Quick-add counterparty
   const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -211,6 +214,11 @@ export default function PPh23Page() {
   const handleAddTransaction = async (e: React.FormEvent | null, closeAfter: boolean = false) => {
     if (e) e.preventDefault();
     if (!customerId || !fCounterparty || !fGrossAmount) return;
+    // Mandatory invoice image — Phase 4 manual entry rule
+    if (!invoiceImageFile) {
+      showMsg('error', t('invoiceImageRequired'));
+      return;
+    }
     setSaving(true);
     try {
       const res = await fetch('/api/tax/pph23-transactions', {
@@ -235,7 +243,23 @@ export default function PPh23Page() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `${t('k12_c05543')} — ${t('k13_e2bf5c')} ${fmtRp(data.data?.tax_amount || 0)}`);
+        // Upload invoice image (transaction is already saved; image is best-effort)
+        try {
+          const fd = new FormData();
+          fd.append('file', invoiceImageFile);
+          fd.append('customerId', customerId);
+          fd.append('documentType', 'INVOICE');
+          fd.append('uploadSource', 'WEB');
+          fd.append('taxPeriod', period);
+          const imgRes = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+          if (!imgRes.ok) {
+            showMsg('error', t('invoiceImageUploadFailed'));
+          } else {
+            showMsg('success', `${t('k12_c05543')} — ${t('k13_e2bf5c')} ${fmtRp(data.data?.tax_amount || 0)}`);
+          }
+        } catch {
+          showMsg('error', t('invoiceImageUploadFailed'));
+        }
         // Always clear the per-transaction fields so the form is ready for the next entry.
         setFGrossAmount('');
         setFInvoiceNumber('');
@@ -243,6 +267,7 @@ export default function PPh23Page() {
         setFShareholdingOverride('');
         setFReinvestedOverride('');
         setResolutionPreview(null);
+        setInvoiceImageFile(null);
         loadData();
         if (closeAfter) {
           setShowForm(false);
@@ -353,20 +378,6 @@ export default function PPh23Page() {
     };
   }, [fCounterparty, fServiceType, fGrossAmount, fTransactionDate, fDescription, fUseResolution, counterparties, fRentalAssetType, fInterestSource, fShareholdingOverride, fReinvestedOverride]);
 
-  // Detect camera availability (mobile or videoinput device)
-  useEffect(() => {
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
-      setCameraAvailable(true);
-      return;
-    }
-    if (navigator.mediaDevices?.enumerateDevices) {
-      navigator.mediaDevices.enumerateDevices()
-        .then(devices => setCameraAvailable(devices.some(d => d.kind === 'videoinput')))
-        .catch(() => setCameraAvailable(false));
-    }
-  }, []);
-
   const months = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(currentYear, currentMonth - 1 - i, 1);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -375,19 +386,13 @@ export default function PPh23Page() {
   const pendingBP = transactions.filter(t => !t.bukti_potong_number).length;
   const completedBP = transactions.filter(t => !!t.bukti_potong_number).length;
 
-  // Document upload
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Document upload (csv only — file/camera removed in Phase 4 simplification)
   const csvInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedDocs, setUploadedDocs] = useState<Array<{
-    id: string; file_name: string; document_type: string; ocr_status: string;
-    ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
-    created_at: string;
-  }>>([]);
   const [uploading, setUploading] = useState(false);
 
-  // Month picker — opens before upload/manual entry
+  // Month picker — opens before csv upload / manual entry
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'csv' | 'file' | 'camera' | 'manual' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'csv' | 'manual' | null>(null);
   const [pickedYear, setPickedYear] = useState<number>(currentYear);
   const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
@@ -395,19 +400,10 @@ export default function PPh23Page() {
 
   const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-  const openMonthPicker = (action: 'csv' | 'file' | 'camera' | 'manual') => {
+  const openMonthPicker = (action: 'csv' | 'manual') => {
     setPendingAction(action);
     setMonthPickerOpen(true);
   };
-
-  // Load documents for this period
-  useEffect(() => {
-    if (!customerId) return;
-    fetch(`/api/documents?customerId=${customerId}&period=${period}`)
-      .then(r => r.json())
-      .then(d => { if (d.success) setUploadedDocs(d.data || []); })
-      .catch(() => {});
-  }, [customerId, period, transactions]);
 
   /**
    * CSV 일괄 업로드 — /api/tax/pph23-transactions/import 호출.
@@ -484,67 +480,15 @@ export default function PPh23Page() {
     }
   };
 
-  const handleDocUpload = async (files: FileList | null, source: string = 'WEB', docType: string = 'INVOICE', uploadPeriod?: string) => {
-    if (!files || !customerId) return;
-    setUploading(true);
-    let count = 0;
-    const errors: string[] = [];
-    const taxPeriod = uploadPeriod || confirmedPeriod;
-    for (const file of Array.from(files)) {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('customerId', customerId);
-      fd.append('documentType', docType);
-      fd.append('uploadSource', source);
-      if (taxPeriod) fd.append('taxPeriod', taxPeriod);
-      try {
-        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data.success) {
-          count++;
-          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
-        } else {
-          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
-        }
-      } catch (e) {
-        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
-      }
-    }
-    if (count > 0) {
-      showMsg('success', `${count} ${t('k19_4c0fb1')}`);
-      // Sync displayed period to the uploaded month so OCR auto-create cards show.
-      if (taxPeriod) setPeriod(taxPeriod);
-      setTimeout(() => {
-        fetch(`/api/documents?customerId=${customerId}&period=${taxPeriod || period}`)
-          .then(r => r.json())
-          .then(d => { if (d.success) setUploadedDocs(d.data || []); })
-          .catch(() => {});
-      }, 2000);
-    }
-    if (errors.length > 0) {
-      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
-    }
-    setUploading(false);
-  };
-
   const confirmMonthPicker = () => {
-    const period = periodLabel(pickedYear, pickedMonth);
-    setConfirmedPeriod(period);
+    const newPeriod = periodLabel(pickedYear, pickedMonth);
+    setConfirmedPeriod(newPeriod);
     setMonthPickerOpen(false);
     setTimeout(() => {
       if (pendingAction === 'csv') {
         csvInputRef.current?.click();
-      } else if (pendingAction === 'file') {
-        fileInputRef.current?.click();
-      } else if (pendingAction === 'camera') {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.capture = 'environment';
-        input.onchange = (e) => handleDocUpload((e.target as HTMLInputElement).files, 'CAMERA', 'INVOICE', period);
-        input.click();
       } else if (pendingAction === 'manual') {
-        setPeriod(period);
+        setPeriod(newPeriod);
         setShowForm(true);
       }
     }, 50);
@@ -606,7 +550,7 @@ export default function PPh23Page() {
           <CardContent className="p-5 flex flex-col h-full">
             <div className="flex items-start gap-3 mb-4">
               <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <FileUp className="h-5 w-5 text-emerald-600" />
+                <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
                 <p className="font-semibold text-sm">{t('inputModeUpload')}</p>
@@ -614,26 +558,6 @@ export default function PPh23Page() {
               </div>
             </div>
             <div className="space-y-2 flex-1">
-              <Button
-                size="sm"
-                className="w-full bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => openMonthPicker('file')}
-                disabled={uploading || !customerId}
-              >
-                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileUp className="h-3 w-3 mr-1" />}
-                {t('inputModeUploadBtn')}
-              </Button>
-              {cameraAvailable && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => openMonthPicker('camera')}
-                  disabled={uploading || !customerId}
-                >
-                  <Camera className="h-3 w-3 mr-1" />{t('inputCameraBtn')}
-                </Button>
-              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -672,28 +596,20 @@ export default function PPh23Page() {
               >
                 <Download className="h-3 w-3 mr-1" />{t('inputTemplateDownload')}
               </Button>
-              {confirmedPeriod && (pendingAction === 'file' || pendingAction === 'camera') && (
-                <p className="text-[10px] text-emerald-700 text-center">
-                  {t('monthPickerSelected', { period: confirmedPeriod })}
-                </p>
-              )}
-              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
-                onChange={e => handleDocUpload(e.target.files, 'WEB', 'INVOICE')} />
               <Button
-                variant="outline"
                 size="sm"
-                className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                className="w-full bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => openMonthPicker('csv')}
                 disabled={uploading || !customerId}
               >
-                <FileSpreadsheet className="h-3 w-3 mr-1" />
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileSpreadsheet className="h-3 w-3 mr-1" />}
                 {t('csvBulkUpload')}
               </Button>
               <input
                 ref={csvInputRef}
                 type="file"
                 className="hidden"
-                accept=".csv,text/csv"
+                accept=".csv,text/csv,.xlsx,.xls"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) void handleCsvImport(f);
@@ -701,7 +617,7 @@ export default function PPh23Page() {
                 }}
               />
               {confirmedPeriod && pendingAction === 'csv' && (
-                <p className="text-[10px] text-blue-700 text-center">
+                <p className="text-[10px] text-emerald-700 text-center">
                   {t('monthPickerSelected', { period: confirmedPeriod })}
                 </p>
               )}
@@ -711,12 +627,6 @@ export default function PPh23Page() {
                 <Sparkles className="h-3 w-3 text-emerald-500" />
                 {t('uploadHint')}
               </p>
-              {cameraAvailable && (
-                <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                  <Camera className="h-3 w-3 text-emerald-500" />
-                  {t('inputCameraHint')}
-                </p>
-              )}
               <p className="text-[10px] text-gray-500 font-mono">
                 PPh 23 / PPh 4(2) / PPh 26 / PPh 15 / PPh 22
               </p>
@@ -800,88 +710,6 @@ export default function PPh23Page() {
         </CardContent></Card>
       </div>
 
-      {/* OCR → Auto-create transactions + NPWP validation + DGT Form */}
-      {uploadedDocs.filter(d => d.ocr_status === 'COMPLETED' && d.ocr_result?.extractedData).length > 0 && (
-        <Card className="mb-4 border-blue-200">
-          <CardContent className="p-4">
-            <h3 className="font-bold text-sm mb-2 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-blue-600" />
-              AI {t('k37_b8e205')}
-            </h3>
-            <p className="text-[11px] text-gray-500 mb-3">
-              {t('k38_38bd8a')} &ldquo;{t('k39_7c6f9f')}&rdquo;{t('k40_7672d5')}
-            </p>
-            <div className="space-y-2">
-              {uploadedDocs.filter(d => d.ocr_status === 'COMPLETED' && d.ocr_result?.extractedData).map(doc => {
-                const ext = doc.ocr_result!.extractedData!;
-                const cpName = String(ext.counterpartyName || ext.vendorName || ext.customerName || ext.recipientName || '');
-                const cpNpwp = String(ext.counterpartyNpwp || ext.vendorNpwp || ext.npwp || '');
-                const amount = Number(ext.grossAmount || ext.dpp || ext.amount || ext.totalAmount || 0);
-                const isForeign = String(ext.country || '').length === 2 && String(ext.country || '') !== 'ID';
-                const hasNpwp = cpNpwp.replace(/\D/g, '').length >= 15;
-
-                return (
-                  <div key={doc.id} className="p-3 rounded-lg border bg-blue-50/50">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 text-xs space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{cpName || t('k41_3e472d')}</span>
-                          {hasNpwp && <Badge className="text-[8px] bg-green-100 text-green-700">NPWP ✓</Badge>}
-                          {!hasNpwp && !isForeign && <Badge className="text-[8px] bg-red-100 text-red-700">NPWP {t('k42_a245e6')}!</Badge>}
-                          {isForeign && <Badge className="text-[8px] bg-amber-100 text-amber-700">{t('k43_90ed66')}</Badge>}
-                        </div>
-                        {hasNpwp && <p className="font-mono text-[10px] text-gray-500">{cpNpwp}</p>}
-                        {amount > 0 && <p className="font-mono">DPP: {fmtRp(amount)}</p>}
-                        <p className="text-[10px] text-gray-400">{doc.file_name}</p>
-
-                        {/* NPWP missing warning — domestic company */}
-                        {!hasNpwp && !isForeign && (
-                          <div className="mt-1 p-2 bg-red-50 rounded border border-red-200 text-[10px] text-red-800">
-                            <p className="font-bold">⚠️ NPWP {t('k44_b63c09')} — {t('k45_eeb28a')}</p>
-                            <p className="mt-0.5">{t('k46_60751f')}</p>
-                          </div>
-                        )}
-
-                        {/* Foreign company — DGT Form required */}
-                        {isForeign && (
-                          <div className="mt-1 p-2 bg-amber-50 rounded border border-amber-200 text-[10px] text-amber-800">
-                            <p className="font-bold">🌍 {t('k47_3e209d')} — Tax Treaty {t('k48_924910')}</p>
-                            <ul className="mt-0.5 space-y-0.5">
-                              <li>• <b>DGT Form</b> (Directorate General of Taxes) — {t('k49_853bb3')}</li>
-                              <li>• <b>{t('k50_d59e63')}</b> — {t('k51_52cc75')}</li>
-                              <li>• {t('k52_7f17f7')}</li>
-                              <li>• {t('k53_b64454')} &ldquo;{t('k54_f47999')}&rdquo; {t('k55_129210')}</li>
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                      <Button size="sm" variant="outline"
-                        onClick={() => {
-                          // Auto-fill the transaction form from OCR data
-                          setShowForm(true);
-                          setFGrossAmount(String(amount || ''));
-                          setFDescription(`${doc.file_name} — ${cpName}`);
-                          if (ext.invoiceNumber) setFInvoiceNumber(String(ext.invoiceNumber));
-                          if (ext.invoiceDate) setFTransactionDate(String(ext.invoiceDate));
-                          // Try to find existing counterparty by name
-                          const matchedCp = counterparties.find(c =>
-                            c.name.toLowerCase().includes(cpName.toLowerCase()) ||
-                            (c.npwp && cpNpwp && c.npwp === cpNpwp.replace(/\D/g, ''))
-                          );
-                          if (matchedCp) setFCounterparty(matchedCp.id);
-                          showMsg('success', `"${cpName}" ${t('k56_ccb9ad')}`);
-                        }}>
-                        <ArrowRight className="h-3 w-3 mr-1" />{t('k39_7c6f9f')}
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* NPWP missing transactions warning banner */}
       {transactions.filter(t => !t.counterparty_npwp).length > 0 && (
         <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm flex items-start gap-2">
@@ -915,6 +743,56 @@ export default function PPh23Page() {
                 <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)}>
                   <X className="h-4 w-4" />
                 </Button>
+              </div>
+
+              {/* Mandatory invoice image — Phase 4 manual entry requires invoice photo */}
+              <div className="space-y-2 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 p-4">
+                <Label className="text-sm font-medium text-amber-900">
+                  {t('invoiceImageLabel')} <span className="text-red-600">*</span>
+                </Label>
+                <input
+                  ref={invoiceImageInputRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => setInvoiceImageFile(e.target.files?.[0] ?? null)}
+                  className="hidden"
+                />
+                {invoiceImageFile ? (
+                  <div className="flex items-center gap-3">
+                    {invoiceImageFile.type.startsWith('image/') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={URL.createObjectURL(invoiceImageFile)}
+                        alt="invoice preview"
+                        className="h-20 w-20 rounded border object-cover"
+                      />
+                    ) : (
+                      <div className="h-20 w-20 rounded border bg-white flex items-center justify-center">
+                        <FileText className="h-8 w-8 text-amber-600" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0 text-sm text-amber-900 truncate">{invoiceImageFile.name}</div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => invoiceImageInputRef.current?.click()}
+                    >
+                      <Camera className="mr-1 h-3 w-3" />
+                      {t('invoiceImagePickFile')}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => invoiceImageInputRef.current?.click()}
+                    className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    {t('invoiceImagePickFile')}
+                  </Button>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

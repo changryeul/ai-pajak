@@ -16,8 +16,8 @@ import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   Users, Plus, Loader2, CheckCircle, AlertTriangle, Save, X,
   Edit2, Trash2, Calculator, Sparkles, FileText,
-  Upload, Camera, Download, Shield, ChevronDown, ChevronRight,
-  Image, ArrowLeft,
+  Upload, Download, Shield, ChevronDown, ChevronRight,
+  ArrowLeft,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
@@ -713,15 +713,12 @@ function PPh21DataInputSection({
   onNavigateToMaster: () => void;
 }) {
   const tp = useTranslations('pph21Page');
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const excelInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [cameraAvailable, setCameraAvailable] = useState(false);
 
   // Month picker state — opens before upload to capture which tax month the data belongs to
   const now = new Date();
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'excel' | 'file' | 'camera' | null>(null);
   const [pickedYear, setPickedYear] = useState<number>(now.getFullYear());
   const [pickedMonth, setPickedMonth] = useState<number>(now.getMonth() + 1);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
@@ -733,8 +730,7 @@ function PPh21DataInputSection({
 
   const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-  const openMonthPicker = (action: 'excel' | 'file' | 'camera') => {
-    setPendingAction(action);
+  const openMonthPicker = () => {
     setMonthPickerOpen(true);
   };
 
@@ -742,90 +738,9 @@ function PPh21DataInputSection({
     const period = periodLabel(pickedYear, pickedMonth);
     setConfirmedPeriod(period);
     setMonthPickerOpen(false);
-    // Trigger the actual file input AFTER state settles
     setTimeout(() => {
-      if (pendingAction === 'excel') {
-        excelInputRef.current?.click();
-      } else if (pendingAction === 'file') {
-        fileInputRef.current?.click();
-      } else if (pendingAction === 'camera') {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.capture = 'environment';
-        input.onchange = (e) => handleUpload((e.target as HTMLInputElement).files, 'CAMERA', 'SALARY_SLIP', period);
-        input.click();
-      }
+      excelInputRef.current?.click();
     }, 50);
-  };
-  const [uploadedDocs, setUploadedDocs] = useState<Array<{
-    id: string; file_name: string; ocr_status: string;
-    ocr_result?: { extractedData?: Record<string, unknown>; confidence?: number };
-  }>>([]);
-
-  useEffect(() => {
-    if (!customerId) return;
-    fetch(`/api/documents?customerId=${customerId}`)
-      .then(r => r.json())
-      .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 20)); })
-      .catch(() => {});
-  }, [customerId]);
-
-  // Detect camera availability: show on mobile OR when videoinput device is connected
-  useEffect(() => {
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
-      setCameraAvailable(true);
-      return;
-    }
-    if (navigator.mediaDevices?.enumerateDevices) {
-      navigator.mediaDevices.enumerateDevices()
-        .then(devices => {
-          setCameraAvailable(devices.some(d => d.kind === 'videoinput'));
-        })
-        .catch(() => setCameraAvailable(false));
-    }
-  }, []);
-
-  const handleUpload = async (files: FileList | null, source: string, docType: string, period?: string) => {
-    if (!files || !customerId) return;
-    setUploading(true);
-    let count = 0;
-    const errors: string[] = [];
-    const taxPeriod = period || confirmedPeriod;
-    for (const file of Array.from(files)) {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('customerId', customerId);
-      fd.append('documentType', docType);
-      fd.append('uploadSource', source);
-      if (taxPeriod) fd.append('taxPeriod', taxPeriod);
-      try {
-        const res = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data.success) {
-          count++;
-          if (data.data?.id) fetch(`/api/documents/${data.data.id}/ocr`, { method: 'POST' }).catch(() => {});
-        } else {
-          errors.push(`${file.name}: ${data.error || data.message || `HTTP ${res.status}`}`);
-        }
-      } catch (e) {
-        errors.push(`${file.name}: ${(e as Error).message || 'network error'}`);
-      }
-    }
-    if (count > 0) {
-      showMsg('success', `${count}${tp('l3_4c0fb1')}`);
-      setTimeout(() => {
-        fetch(`/api/documents?customerId=${customerId}`)
-          .then(r => r.json())
-          .then(d => { if (d.success) setUploadedDocs((d.data || []).slice(0, 20)); })
-          .catch(() => {});
-      }, 2000);
-    }
-    if (errors.length > 0) {
-      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
-    }
-    setUploading(false);
   };
 
   const downloadTemplate = async () => {
@@ -1107,21 +1022,11 @@ function PPh21DataInputSection({
               </div>
             </div>
             <div className="space-y-2 flex-1">
-              <Button size="sm" onClick={() => openMonthPicker('file')} disabled={uploading}
-                className="w-full bg-emerald-600 hover:bg-emerald-700">
-                <Upload className="h-3 w-3 mr-1" />{tp('fileUploadBtn')}
-              </Button>
-              {cameraAvailable && (
-                <Button size="sm" variant="outline" disabled={uploading} className="w-full"
-                  onClick={() => openMonthPicker('camera')}>
-                  <Camera className="h-3 w-3 mr-1" />{tp('cameraCapture')}
-                </Button>
-              )}
               <Button size="sm" variant="outline" onClick={downloadTemplate} className="w-full">
                 <Download className="h-3 w-3 mr-1" />{tp('templateDownloadBtn')}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => openMonthPicker('excel')} disabled={uploading}
-                className="w-full text-emerald-700">
+              <Button size="sm" onClick={openMonthPicker} disabled={uploading}
+                className="w-full bg-emerald-600 hover:bg-emerald-700">
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
                 {tp('l27_c3feb8')}
               </Button>
@@ -1132,8 +1037,6 @@ function PPh21DataInputSection({
               )}
               <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
                 onChange={e => handleExcelUpload(e.target.files)} />
-              <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.xlsx,.xls,.csv" multiple
-                onChange={e => handleUpload(e.target.files, 'WEB', 'SALARY_SLIP')} />
             </div>
             <div className="mt-3 pt-3 border-t border-gray-100">
               <p className="text-[10px] text-gray-500 flex items-center gap-1">
@@ -1247,31 +1150,6 @@ function PPh21DataInputSection({
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
                 {tp('l47_b8a4a8')}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Uploaded documents */}
-      {uploadedDocs.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-bold text-sm mb-2 flex items-center gap-2">
-              <Image className="h-4 w-4" />{tp('uploadedDocs', { count: uploadedDocs.length })}
-            </h3>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {uploadedDocs.map(doc => (
-                <div key={doc.id} className="flex items-center gap-2 p-2 rounded border text-xs">
-                  <Badge className={
-                    doc.ocr_status === 'COMPLETED' ? 'text-[8px] bg-green-100 text-green-700' :
-                    doc.ocr_status === 'PROCESSING' ? 'text-[8px] bg-blue-100 text-blue-700' :
-                    'text-[8px] bg-gray-100 text-gray-600'
-                  }>
-                    {doc.ocr_status === 'COMPLETED' ? tp('ocrComplete') : doc.ocr_status === 'PROCESSING' ? tp('l51_95d1e4') : tp('l52_65905a')}
-                  </Badge>
-                  <span className="truncate">{doc.file_name}</span>
-                </div>
-              ))}
             </div>
           </CardContent>
         </Card>

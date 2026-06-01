@@ -4534,6 +4534,10 @@
     "backToSelection": "Kembali ke pilihan metode input"
   },
   "pph23Page": {
+    "invoiceImageLabel": "Foto Faktur (Wajib)",
+    "invoiceImageRequired": "Lampirkan foto faktur",
+    "invoiceImagePickFile": "Lampirkan foto faktur",
+    "invoiceImageUploadFailed": "Upload foto faktur gagal — transaksi tersimpan, harap unggah ulang",
     "pickMonthFirst": "Pilih bulan (taxPeriod) terlebih dahulu.",
     "csvUploadFailed": "Unggah massal CSV gagal",
     "csvRowPrefix": "Baris {row}",
