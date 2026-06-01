@@ -637,12 +637,12 @@ export default function PPh23Page() {
           </CardContent>
         </Card>
 
-        {/* Method 3: Manual */}
+        {/* Method 3: Manual (photo + direct entry) */}
         <Card className={`border-2 border-dashed ${showForm ? 'border-purple-400 shadow-sm' : 'border-purple-200 hover:border-purple-400 hover:shadow-sm'} transition-all`}>
           <CardContent className="p-5 flex flex-col h-full">
             <div className="flex items-start gap-3 mb-4">
               <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-                <Pencil className="h-5 w-5 text-purple-600" />
+                <Camera className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="font-semibold text-sm">{t('inputModeManual')}</p>
@@ -656,7 +656,7 @@ export default function PPh23Page() {
                 onClick={() => openMonthPicker('manual')}
                 disabled={!customerId}
               >
-                <Pencil className="h-3 w-3 mr-1" />{t('inputModeManualBtn')}
+                <Camera className="h-3 w-3 mr-1" />{t('inputModeManualBtn')}
               </Button>
               {confirmedPeriod && pendingAction === 'manual' && (
                 <p className="text-[10px] text-purple-700 text-center">
