@@ -83,12 +83,16 @@ export function CustomerAiChat() {
     }
   };
 
+  // Position FAB at top-right, below the dashboard top bar (~64-80px).
+  // Previous bottom-right placement was getting clipped on narrow viewports
+  // and could be hidden by sticky footers / chat docks. Top-right keeps the
+  // affordance visible without overlapping content.
   if (!isOpen) {
     return (
       <button
         onClick={openPanel}
         aria-label={unreadCount > 0 ? `AI 상담원 ${unreadCount}개 응답` : 'AI 상담원 열기'}
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 relative"
+        className="fixed top-20 right-6 z-50 p-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:scale-105 transition-all duration-300"
       >
         <MessageCircle className="h-6 w-6" />
         {unreadCount > 0 && (
@@ -109,7 +113,7 @@ export function CustomerAiChat() {
     t('statusAwaiting');
 
   return (
-    <div className="fixed z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden bottom-6 right-6 w-[380px] h-[560px]">
+    <div className="fixed top-20 right-6 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden w-[380px] max-w-[calc(100vw-3rem)] h-[560px] max-h-[calc(100vh-6rem)]">
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex items-start justify-between flex-shrink-0">
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-sm">{t('title')}</h3>
