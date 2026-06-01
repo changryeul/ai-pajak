@@ -159,6 +159,9 @@ export default function PPh23Page() {
   // Invoice image (mandatory for manual entry — Phase 4 simplification)
   const [invoiceImageFile, setInvoiceImageFile] = useState<File | null>(null);
   const invoiceImageInputRef = useRef<HTMLInputElement>(null);
+  // Separate ref for the camera-capture path so mobile users get the camera
+  // immediately, while the gallery/PC path stays available too.
+  const invoiceImageCameraRef = useRef<HTMLInputElement>(null);
 
   // Quick-add counterparty
   const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -750,6 +753,17 @@ export default function PPh23Page() {
                 <Label className="text-sm font-medium text-amber-900">
                   {t('invoiceImageLabel')} <span className="text-red-600">*</span>
                 </Label>
+                {/* Camera path: `capture` 속성으로 모바일은 카메라 즉시,
+                    데스크톱은 파일 선택으로 fallback */}
+                <input
+                  ref={invoiceImageCameraRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(e) => setInvoiceImageFile(e.target.files?.[0] ?? null)}
+                  className="hidden"
+                />
+                {/* File path: 갤러리/PDF 도 허용 */}
                 <input
                   ref={invoiceImageInputRef}
                   type="file"
@@ -772,26 +786,48 @@ export default function PPh23Page() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0 text-sm text-amber-900 truncate">{invoiceImageFile.name}</div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => invoiceImageCameraRef.current?.click()}
+                      >
+                        <Camera className="mr-1 h-3 w-3" />
+                        {t('invoiceImageTakePhoto')}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => invoiceImageInputRef.current?.click()}
+                      >
+                        <FileText className="mr-1 h-3 w-3" />
+                        {t('invoiceImagePickFile')}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      onClick={() => invoiceImageInputRef.current?.click()}
+                      onClick={() => invoiceImageCameraRef.current?.click()}
+                      className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
                     >
-                      <Camera className="mr-1 h-3 w-3" />
+                      <Camera className="mr-2 h-4 w-4" />
+                      {t('invoiceImageTakePhoto')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => invoiceImageInputRef.current?.click()}
+                      className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
                       {t('invoiceImagePickFile')}
                     </Button>
                   </div>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => invoiceImageInputRef.current?.click()}
-                    className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
-                  >
-                    <Camera className="mr-2 h-4 w-4" />
-                    {t('invoiceImagePickFile')}
-                  </Button>
                 )}
               </div>
 

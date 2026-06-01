@@ -4540,7 +4540,8 @@
   "pph23Page": {
     "invoiceImageLabel": "請求書写真（必須）",
     "invoiceImageRequired": "請求書写真を添付してください",
-    "invoiceImagePickFile": "請求書写真を添付",
+    "invoiceImagePickFile": "ファイル選択",
+    "invoiceImageTakePhoto": "写真を撮る",
     "invoiceImageUploadFailed": "請求書写真のアップロード失敗 — 取引は保存済み、再添付してください",
     "pickMonthFirst": "月 (taxPeriod) を先に選択してください。",
     "csvUploadFailed": "CSV 一括アップロード失敗",

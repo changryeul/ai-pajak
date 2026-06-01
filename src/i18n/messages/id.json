@@ -4540,7 +4540,8 @@
   "pph23Page": {
     "invoiceImageLabel": "Foto Faktur (Wajib)",
     "invoiceImageRequired": "Lampirkan foto faktur",
-    "invoiceImagePickFile": "Lampirkan foto faktur",
+    "invoiceImagePickFile": "Pilih file",
+    "invoiceImageTakePhoto": "Ambil foto",
     "invoiceImageUploadFailed": "Upload foto faktur gagal — transaksi tersimpan, harap unggah ulang",
     "pickMonthFirst": "Pilih bulan (taxPeriod) terlebih dahulu.",
     "csvUploadFailed": "Unggah massal CSV gagal",

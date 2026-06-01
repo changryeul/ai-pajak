@@ -4540,7 +4540,8 @@
   "pph23Page": {
     "invoiceImageLabel": "发票照片（必填）",
     "invoiceImageRequired": "请附上发票照片",
-    "invoiceImagePickFile": "附上发票照片",
+    "invoiceImagePickFile": "选择文件",
+    "invoiceImageTakePhoto": "拍照",
     "invoiceImageUploadFailed": "发票照片上传失败 — 交易已保存，请重新上传",
     "pickMonthFirst": "请先选择月份 (taxPeriod)。",
     "csvUploadFailed": "CSV 批量上传失败",

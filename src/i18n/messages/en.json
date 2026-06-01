@@ -4540,7 +4540,8 @@
   "pph23Page": {
     "invoiceImageLabel": "Invoice Photo (Required)",
     "invoiceImageRequired": "Please attach invoice photo",
-    "invoiceImagePickFile": "Attach invoice photo",
+    "invoiceImagePickFile": "Choose file",
+    "invoiceImageTakePhoto": "Take photo",
     "invoiceImageUploadFailed": "Invoice photo upload failed — transaction saved, please re-attach",
     "pickMonthFirst": "Please select the month (taxPeriod) first.",
     "csvUploadFailed": "CSV bulk upload failed",
