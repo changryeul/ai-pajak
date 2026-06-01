@@ -4350,7 +4350,11 @@
     "accountNo": "Account No.",
     "accountName": "Account Name",
     "totalDeduction": "Total Deduction",
-    "netPayAmount": "Net Pay"
+    "netPayAmount": "Net Pay",
+    "editHint": "点击编辑",
+    "editBanner": "点击任意字段进行编辑。移到其他字段时自动保存。",
+    "savedToast": "已保存",
+    "saveFailed": "保存失败"
   },
   "errorFallback": {
     "title": "Failed to load page",

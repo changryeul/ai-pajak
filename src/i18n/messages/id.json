@@ -4350,7 +4350,11 @@
     "accountNo": "No. Rekening",
     "accountName": "Nama Pemilik",
     "totalDeduction": "Total Potongan",
-    "netPayAmount": "Gaji Bersih"
+    "netPayAmount": "Gaji Bersih",
+    "editHint": "Klik untuk edit",
+    "editBanner": "Klik pada field manapun untuk mengedit. Otomatis tersimpan saat pindah field.",
+    "savedToast": "Tersimpan",
+    "saveFailed": "Gagal menyimpan"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",

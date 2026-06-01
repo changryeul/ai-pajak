@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Loader2, Plus, Save, ChevronDown, ChevronRight, Users,
-  DollarSign, AlertTriangle, CheckCircle, Calculator,
+  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -83,6 +83,10 @@ export function MonthlyPayslipTab({ customerId }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // Per-row "just saved" indicator (id → timestamp). Used to flash a green ✓
+  // next to the row for ~1.5s after a successful field edit, so the user sees
+  // their onBlur edit was persisted.
+  const [savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -136,10 +140,24 @@ export function MonthlyPayslipTab({ customerId }: Props) {
       if (data.success) {
         // Update locally
         setPayslips(prev => prev.map(p => p.id === id ? data.data : p));
+        // Mark this row as just-saved (UI flashes ✓ for ~1.5s)
+        setSavedAt(prev => ({ ...prev, [id]: Date.now() }));
+        setTimeout(() => {
+          setSavedAt(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+        }, 1500);
+        showMsg('success', tp('savedToast'));
         // Refresh summary
         loadPayslips();
+      } else {
+        showMsg('error', data.error || tp('saveFailed'));
       }
-    } catch { /* */ }
+    } catch {
+      showMsg('error', tp('saveFailed'));
+    }
   };
 
   // Month options (last 12 months)
@@ -231,7 +249,8 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                   {/* Summary row */}
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : ps.id)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    className="w-full p-4 flex items-center justify-between hover:bg-blue-50/40 transition-colors group"
+                    title={tp('editHint')}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
@@ -255,12 +274,30 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                         <p className="text-green-500 text-[10px]">{tp('netPay')}</p>
                         <p className="font-mono text-green-600 font-bold">{fmtRp(ps.net_salary)}</p>
                       </div>
+                      {/* Edit affordance: just-saved ✓ or pencil hint */}
+                      {savedAt[ps.id] ? (
+                        <span className="flex items-center gap-1 text-green-600 text-[11px] font-medium animate-pulse">
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          {tp('savedToast')}
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-gray-400 group-hover:text-blue-600 text-[11px] transition-colors">
+                          <Pencil className="h-3 w-3" />
+                          {tp('editHint')}
+                        </span>
+                      )}
                     </div>
                   </button>
 
                   {/* Expanded detail */}
                   {isExpanded && (
                     <div className="border-t p-4 bg-gray-50/50 space-y-4">
+                      {/* Edit hint banner */}
+                      <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2">
+                        <Pencil className="h-3.5 w-3.5 shrink-0" />
+                        <span>{tp('editBanner')}</span>
+                      </div>
+
                       {/* 근태 */}
                       <div>
                         <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('attendance')}</h4>

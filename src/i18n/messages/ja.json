@@ -4350,7 +4350,11 @@
     "accountNo": "Account No.",
     "accountName": "Account Name",
     "totalDeduction": "Total Deduction",
-    "netPayAmount": "Net Pay"
+    "netPayAmount": "Net Pay",
+    "editHint": "クリックして編集",
+    "editBanner": "フィールドをクリックして編集。別のフィールドに移動すると自動保存されます。",
+    "savedToast": "保存しました",
+    "saveFailed": "保存失敗"
   },
   "errorFallback": {
     "title": "Failed to load page",

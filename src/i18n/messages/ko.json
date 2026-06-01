@@ -4371,7 +4371,11 @@
     "accountNo": "계좌번호",
     "accountName": "예금주",
     "totalDeduction": "총 공제",
-    "netPayAmount": "실수령액"
+    "netPayAmount": "실수령액",
+    "editHint": "클릭하여 수정",
+    "editBanner": "각 필드를 클릭한 후 값을 변경하세요. 다른 필드로 이동하면 자동 저장됩니다.",
+    "savedToast": "저장됨",
+    "saveFailed": "저장 실패"
   },
   "errorFallback": {
     "title": "페이지를 불러올 수 없습니다",

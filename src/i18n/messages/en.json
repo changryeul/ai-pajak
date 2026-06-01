@@ -4350,7 +4350,11 @@
     "accountNo": "Account No.",
     "accountName": "Account Name",
     "totalDeduction": "Total Deduction",
-    "netPayAmount": "Net Pay"
+    "netPayAmount": "Net Pay",
+    "editHint": "Click to edit",
+    "editBanner": "Click any field to edit. Auto-saves when you move to another field.",
+    "savedToast": "Saved",
+    "saveFailed": "Save failed"
   },
   "errorFallback": {
     "title": "Failed to load page",
