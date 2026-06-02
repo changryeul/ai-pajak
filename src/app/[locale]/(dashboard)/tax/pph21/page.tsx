@@ -744,6 +744,7 @@ function PPh21DataInputSection({
   };
 
   const downloadTemplate = async () => {
+    try {
     const headers = ['employee_name', 'employee_npwp', 'employee_nik', 'ptkp_category', 'gross_salary', 'position_allowance', 'overtime_pay', 'meal_allowance', 'transport_allowance', 'other_allowances', 'bonus', 'thr', 'jht_employee', 'jp_employee', 'bpjs_kesehatan', 'other_deductions', 'worker_type'];
     const sample: (string | number)[] = ['John Doe', '01.234.567.8-901.000', '3201234567890001', 'TK/0', 15000000, 500000, 0, 300000, 200000, 0, 0, 0, 300000, 150000, 120000, 0, 'REGULAR'];
 
@@ -783,6 +784,9 @@ function PPh21DataInputSection({
     XLSX.utils.book_append_sheet(wb, wsGuide, '\uC548\uB0B4 / Petunjuk');
 
     XLSX.writeFile(wb, 'pph21_employee_template.xlsx');
+    } catch (err) {
+      showMsg('error', `${tp('templateDownloadFailed')}: ${err instanceof Error ? err.message : 'unknown'}`);
+    }
   };
 
   // Column mapping state
@@ -1022,7 +1026,7 @@ function PPh21DataInputSection({
               </div>
             </div>
             <div className="space-y-2 flex-1">
-              <Button size="sm" variant="outline" onClick={downloadTemplate} className="w-full">
+              <Button size="sm" variant="outline" onClick={() => { void downloadTemplate(); }} className="w-full">
                 <Download className="h-3 w-3 mr-1" />{tp('templateDownloadBtn')}
               </Button>
               <Button size="sm" onClick={openMonthPicker} disabled={uploading}
