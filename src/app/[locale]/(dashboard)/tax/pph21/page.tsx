@@ -781,7 +781,7 @@ function PPh21DataInputSection({
     ];
     const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
     wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
-    XLSX.utils.book_append_sheet(wb, wsGuide, '\uC548\uB0B4 / Petunjuk');
+    XLSX.utils.book_append_sheet(wb, wsGuide, '\uC548\uB0B4 - Petunjuk');
 
     XLSX.writeFile(wb, 'pph21_employee_template.xlsx');
     } catch (err) {

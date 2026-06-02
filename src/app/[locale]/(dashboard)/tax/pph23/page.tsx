@@ -210,7 +210,7 @@ export default function PPh23Page() {
       ];
       const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
       wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
-      XLSX.utils.book_append_sheet(wb, wsGuide, '안내 / Petunjuk');
+      XLSX.utils.book_append_sheet(wb, wsGuide, '안내 - Petunjuk');
 
       XLSX.writeFile(wb, 'pph23_template.xlsx');
       showMsg('success', t('templateComingSoon'));
