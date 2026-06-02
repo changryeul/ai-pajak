@@ -136,6 +136,9 @@ export default function PPh23Page() {
   const [showForm, setShowForm] = useState(false);
   const [expandedTx, setExpandedTx] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // Per-row "just saved" indicator for inline edit affordance (mirrors
+  // MonthlyPayslipTab.tsx). Cleared after 1.5s so the ✓ flash is transient.
+  const [savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   // Form state
   const [fCounterparty, setFCounterparty] = useState('');
@@ -320,6 +323,49 @@ export default function PPh23Page() {
       showMsg('error', t('k15_175c5f'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Inline edit — sends partial body to PUT /api/tax/pph23-transactions.
+  // Server response is { success: true } (no row), so we merge sent values
+  // into local state via snake_case mapping. gross/service edits also
+  // trigger a refetch since the server recalculates tax_rate + tax_amount.
+  const updateTransaction = async (id: string, updates: Record<string, unknown>) => {
+    try {
+      const res = await fetch('/api/tax/pph23-transactions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const mapped: Record<string, unknown> = {};
+        if (updates.grossAmount !== undefined) mapped.gross_amount = Number(updates.grossAmount);
+        if (updates.serviceType !== undefined) mapped.service_type = updates.serviceType;
+        if (updates.counterpartyName !== undefined) mapped.counterparty_name = updates.counterpartyName as string;
+        if (updates.counterpartyNpwp !== undefined) mapped.counterparty_npwp = (updates.counterpartyNpwp as string) || null;
+        if (updates.description !== undefined) mapped.description = (updates.description as string) || null;
+        if (updates.transactionDate !== undefined) mapped.transaction_date = updates.transactionDate as string;
+        setTransactions(prev => prev.map(tx => tx.id === id ? { ...tx, ...mapped } as Transaction : tx));
+        setSavedAt(prev => ({ ...prev, [id]: Date.now() }));
+        setTimeout(() => {
+          setSavedAt(prev => {
+            const n = { ...prev };
+            delete n[id];
+            return n;
+          });
+        }, 1500);
+        showMsg('success', t('savedToast'));
+        // grossAmount/serviceType 변경은 서버가 tax_rate + tax_amount 재계산 →
+        // refetch 해야 새 세액이 화면에 반영됨.
+        if (updates.grossAmount !== undefined || updates.serviceType !== undefined) {
+          loadData();
+        }
+      } else {
+        showMsg('error', t('saveFailed'));
+      }
+    } catch {
+      showMsg('error', t('saveFailed'));
     }
   };
 
@@ -1263,7 +1309,8 @@ export default function PPh23Page() {
                     <button
                       type="button"
                       onClick={() => setExpandedTx(isExpanded ? null : tx.id)}
-                      className="w-full p-3 flex items-center justify-between hover:bg-gray-50 text-left"
+                      className="w-full p-3 flex items-center justify-between hover:bg-blue-50/40 transition-colors group text-left"
+                      title={t('editHint')}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         {isExpanded ? <ChevronDown className="h-3 w-3 text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-400" />}
@@ -1291,20 +1338,131 @@ export default function PPh23Page() {
                           <p className="text-emerald-600 text-[10px]">PPh {(tx.tax_rate * 100).toFixed(0)}%</p>
                           <p className="font-mono font-bold text-emerald-700">{fmtRp(tx.tax_amount)}</p>
                         </div>
+                        {/* Edit affordance: just-saved ✓ flash, else pencil hint */}
+                        {savedAt[tx.id] ? (
+                          <span className="flex items-center gap-1 text-green-600 text-[11px] font-medium animate-pulse">
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            {t('savedToast')}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-gray-400 group-hover:text-blue-600 text-[11px] transition-colors">
+                            <Pencil className="h-3 w-3" />
+                            {t('editHint')}
+                          </span>
+                        )}
                       </div>
                     </button>
 
-                    {/* Expanded detail */}
+                    {/* Expanded detail — inline edit fields */}
                     {isExpanded && (
-                      <div className="border-t p-3 bg-gray-50/50 space-y-2">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      <div className="border-t p-3 bg-gray-50/50 space-y-3">
+                        {/* Edit hint banner */}
+                        <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2">
+                          <Pencil className="h-3.5 w-3.5 shrink-0" />
+                          <span>{t('editBanner')}</span>
+                        </div>
+
+                        {/* Editable fields — onBlur saves only when value changed */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           <div>
-                            <p className="text-gray-500">{t('k120_a55135')}</p>
-                            <p className="font-mono">{tx.counterparty_npwp || t('k121_42b3cf')}</p>
+                            <Label className="text-[10px] text-gray-400">{t('editFieldDate')}</Label>
+                            <Input
+                              type="date"
+                              className="h-8 text-xs"
+                              defaultValue={tx.transaction_date}
+                              onBlur={e => {
+                                if (e.target.value && e.target.value !== tx.transaction_date) {
+                                  updateTransaction(tx.id, { transactionDate: e.target.value });
+                                }
+                              }}
+                            />
                           </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">{t('colCounterparty')}</Label>
+                            <Input
+                              className="h-8 text-xs"
+                              defaultValue={tx.counterparty_name ?? ''}
+                              onBlur={e => {
+                                if (e.target.value !== (tx.counterparty_name ?? '')) {
+                                  updateTransaction(tx.id, { counterpartyName: e.target.value });
+                                }
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">NPWP</Label>
+                            <Input
+                              className="h-8 text-xs font-mono"
+                              defaultValue={tx.counterparty_npwp ?? ''}
+                              onBlur={e => {
+                                if (e.target.value !== (tx.counterparty_npwp ?? '')) {
+                                  updateTransaction(tx.id, { counterpartyNpwp: e.target.value });
+                                }
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">DPP ({t('colAmount')})</Label>
+                            <Input
+                              type="number"
+                              className="h-8 text-xs font-mono"
+                              defaultValue={tx.gross_amount}
+                              onBlur={e => {
+                                const newVal = Number(e.target.value);
+                                if (Number.isFinite(newVal) && newVal !== tx.gross_amount) {
+                                  // Send serviceType + npwp so PUT can recompute rate
+                                  updateTransaction(tx.id, {
+                                    grossAmount: newVal,
+                                    serviceType: tx.service_type,
+                                    counterpartyNpwp: tx.counterparty_npwp ?? '',
+                                  });
+                                }
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">{t('colTaxType')}</Label>
+                            <select
+                              className="h-8 text-xs w-full rounded border border-gray-300 px-2 bg-white"
+                              defaultValue={tx.service_type}
+                              onBlur={e => {
+                                if (e.target.value !== tx.service_type) {
+                                  updateTransaction(tx.id, {
+                                    serviceType: e.target.value,
+                                    grossAmount: tx.gross_amount,
+                                    counterpartyNpwp: tx.counterparty_npwp ?? '',
+                                  });
+                                }
+                              }}
+                            >
+                              {SERVICE_TYPES.map(s => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="md:col-span-3">
+                            <Label className="text-[10px] text-gray-400">{t('editFieldDescription')}</Label>
+                            <Input
+                              className="h-8 text-xs"
+                              defaultValue={tx.description ?? ''}
+                              onBlur={e => {
+                                if (e.target.value !== (tx.description ?? '')) {
+                                  updateTransaction(tx.id, { description: e.target.value });
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* e-Bupot read-only info */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs pt-2 border-t border-gray-200">
                           <div>
                             <p className="text-gray-500">{t('k122_6803af')}</p>
                             <p className="font-bold">{(tx.tax_rate * 100).toFixed(1)}%</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">PPh {t('k13_e2bf5c')}</p>
+                            <p className="font-mono font-bold text-emerald-700">{fmtRp(tx.tax_amount)}</p>
                           </div>
                           <div>
                             <p className="text-gray-500">e-Bupot {t('k123_5ca2f7')}</p>
@@ -1315,9 +1473,6 @@ export default function PPh23Page() {
                             <p>{tx.bukti_potong_date || '-'}</p>
                           </div>
                         </div>
-                        {tx.description && (
-                          <div className="text-xs"><p className="text-gray-500">{t('k83_4c70f7')}</p><p>{tx.description}</p></div>
-                        )}
 
                         {/* Tax determination reason */}
                         <div className="bg-indigo-50 rounded p-2 text-xs flex items-start gap-2">

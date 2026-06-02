@@ -3896,7 +3896,11 @@
     "finalResult": "Hasil Akhir",
     "wholesaleOutImported": "{count} VAT OUT diimpor",
     "wholesaleInImported": "{count} VAT IN diimpor",
-    "wholesalePpnFailed": "Import PPN wholesale gagal: {reason}"
+    "wholesalePpnFailed": "Import PPN wholesale gagal: {reason}",
+    "editHint": "Klik untuk edit",
+    "editBanner": "Klik pada field manapun untuk mengedit. Otomatis tersimpan saat pindah field.",
+    "savedToast": "Tersimpan",
+    "saveFailed": "Gagal menyimpan"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4754,7 +4758,13 @@
     "npwpMissing": "NPWP wajib",
     "dgtRequired": "DGT wajib",
     "totalCountLabel": "Menampilkan {count} item",
-    "parsedDataEmpty": "Belum ada transaksi. Tambah transaksi melalui unggah atau input manual di atas."
+    "parsedDataEmpty": "Belum ada transaksi. Tambah transaksi melalui unggah atau input manual di atas.",
+    "editHint": "Klik untuk edit",
+    "editBanner": "Klik pada field manapun untuk mengedit. Otomatis tersimpan saat pindah field.",
+    "savedToast": "Tersimpan",
+    "saveFailed": "Gagal menyimpan",
+    "editFieldDate": "Tanggal Transaksi",
+    "editFieldDescription": "Deskripsi"
   },
   "companyProfile": {
     "k0_6f2592": "Jasa",

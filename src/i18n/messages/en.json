@@ -3896,7 +3896,11 @@
     "finalResult": "Final Result",
     "wholesaleOutImported": "{count} VAT OUT imported",
     "wholesaleInImported": "{count} VAT IN imported",
-    "wholesalePpnFailed": "PPN wholesale import failed: {reason}"
+    "wholesalePpnFailed": "PPN wholesale import failed: {reason}",
+    "editHint": "Click to edit",
+    "editBanner": "Click any field to edit. Auto-saves when you move to another field.",
+    "savedToast": "Saved",
+    "saveFailed": "Save failed"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4754,7 +4758,13 @@
     "npwpMissing": "NPWP required",
     "dgtRequired": "DGT required",
     "totalCountLabel": "Showing {count} items",
-    "parsedDataEmpty": "No parsed transactions yet. Add transactions via upload or manual entry above."
+    "parsedDataEmpty": "No parsed transactions yet. Add transactions via upload or manual entry above.",
+    "editHint": "Click to edit",
+    "editBanner": "Click any field to edit. Auto-saves when you move to another field.",
+    "savedToast": "Saved",
+    "saveFailed": "Save failed",
+    "editFieldDate": "Transaction Date",
+    "editFieldDescription": "Description"
   },
   "companyProfile": {
     "k0_6f2592": "Services (Jasa)",

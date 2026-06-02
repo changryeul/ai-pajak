@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import {
   FileText, Loader2, CheckCircle, AlertTriangle, Check, X,
   DollarSign, TrendingUp, TrendingDown, Minus, Sparkles,
   ArrowUpRight, ArrowDownLeft,
-  Download, FileUp,
+  Download, FileUp, ChevronDown, ChevronRight, Pencil,
 } from 'lucide-react';
 import { useRef } from 'react';
 import { ScreenHeader } from '@/components/tax';
@@ -87,6 +87,10 @@ export default function PPNPage() {
   // Faktur data
   const [fakturs, setFakturs] = useState<FakturMonthly[]>([]);
   const [summary, setSummary] = useState({ outputTax: 0, inputTax: 0, netPpn: 0, status: 'NIHIL', keluaranCount: 0, masukanCount: 0 });
+
+  // Inline edit state (mirrors PPh21 MonthlyPayslipTab pattern)
+  const [expandedFakturId, setExpandedFakturId] = useState<string | null>(null);
+  const [savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   const period = `${year}-${String(month).padStart(2, '0')}`;
 
@@ -242,6 +246,53 @@ export default function PPNPage() {
   }, [customerId, period]);
 
   useEffect(() => { loadFakturs(); }, [loadFakturs]);
+
+  /**
+   * Inline edit — partial PATCH to PUT /api/tax/ppn-faktur-monthly. Server
+   * 응답은 { success: true } 만 — 보낸 값을 snake_case 로 매핑해 로컬 상태에
+   * 머지하고, dpp 가 바뀌면 ppn + dpp_nilai_lain 이 서버 재계산되므로 refetch.
+   */
+  const updateFaktur = async (id: string, updates: Record<string, unknown>) => {
+    try {
+      const res = await fetch('/api/tax/ppn-faktur-monthly', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const mapped: Record<string, unknown> = {};
+        if (updates.fakturNumber !== undefined) mapped.faktur_number = (updates.fakturNumber as string) || '';
+        if (updates.fakturDate !== undefined) mapped.faktur_date = updates.fakturDate as string;
+        if (updates.counterpartyName !== undefined) mapped.counterparty_name = updates.counterpartyName as string;
+        if (updates.counterpartyNpwp !== undefined) mapped.counterparty_npwp = updates.counterpartyNpwp as string;
+        if (updates.fakturType !== undefined) mapped.faktur_type = updates.fakturType as string;
+        if (updates.dpp !== undefined) mapped.dpp = Number(updates.dpp);
+        if (updates.ppn !== undefined) mapped.ppn = Number(updates.ppn);
+        if (updates.dppNilaiLain !== undefined) mapped.dpp_nilai_lain = Number(updates.dppNilaiLain);
+        if (updates.isLuxury !== undefined) mapped.is_luxury = updates.isLuxury === true;
+        setFakturs(prev => prev.map(f => f.id === id ? { ...f, ...mapped } as FakturMonthly : f));
+        setSavedAt(prev => ({ ...prev, [id]: Date.now() }));
+        setTimeout(() => {
+          setSavedAt(prev => {
+            const n = { ...prev };
+            delete n[id];
+            return n;
+          });
+        }, 1500);
+        showMsg('success', t('savedToast'));
+        // dpp 변경 시 server 가 ppn + dpp_nilai_lain 재계산 → refetch 로 정확한
+        // 값 동기화. fakturType 변경도 4-card 합계 재집계 위해 refetch.
+        if (updates.dpp !== undefined || updates.fakturType !== undefined) {
+          loadFakturs();
+        }
+      } else {
+        showMsg('error', t('saveFailed'));
+      }
+    } catch {
+      showMsg('error', t('saveFailed'));
+    }
+  };
 
   const filteredFakturs = filter === 'ALL' ? fakturs : fakturs.filter(f => f.faktur_type === (filter === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN'));
 
@@ -405,7 +456,7 @@ export default function PPNPage() {
             </div>
           </div>
 
-          {/* Faktur List */}
+          {/* Faktur List — inline edit (PPh21 패턴): 행 클릭 → expand → onBlur PUT */}
           {isLoading ? (
             <div className="text-center py-20"><Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-600" /></div>
           ) : filteredFakturs.length === 0 ? (
@@ -420,6 +471,7 @@ export default function PPNPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-gray-500 text-xs">
+                        <th className="text-left py-2.5 px-3 w-8"></th>
                         <th className="text-left py-2.5 px-3">{t('thFakturNo')}</th>
                         <th className="text-left py-2.5 px-3">{t('thDate')}</th>
                         <th className="text-center py-2.5 px-3">{t('thType')}</th>
@@ -428,27 +480,177 @@ export default function PPNPage() {
                         <th className="text-right py-2.5 px-3">{t('dppNilaiLain')}</th>
                         <th className="text-right py-2.5 px-3">PPN</th>
                         <th className="text-center py-2.5 px-3">Status</th>
+                        <th className="text-right py-2.5 px-3"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {filteredFakturs.map(f => (
-                        <tr key={f.id} className="hover:bg-gray-50">
-                          <td className="py-2 px-3 font-mono text-xs">{f.faktur_number || '—'}</td>
-                          <td className="py-2 px-3 text-xs text-gray-500">{f.faktur_date}</td>
-                          <td className="py-2 px-3 text-center">
-                            <Badge className={`text-[10px] ${f.faktur_type === 'KELUARAN' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                              {f.faktur_type === 'KELUARAN' ? 'OUT' : 'IN'}
-                            </Badge>
-                          </td>
-                          <td className="py-2 px-3 text-xs">{f.counterparty_name}</td>
-                          <td className="py-2 px-3 text-right font-mono text-xs">{fmt(f.dpp)}</td>
-                          <td className="py-2 px-3 text-right font-mono text-xs text-gray-500">{f.dpp_nilai_lain != null ? fmt(Number(f.dpp_nilai_lain)) : '—'}</td>
-                          <td className="py-2 px-3 text-right font-mono text-xs font-medium text-orange-600">{fmt(f.ppn)}</td>
-                          <td className="py-2 px-3 text-center">
-                            <Badge variant="outline" className="text-[10px]">{f.status}</Badge>
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredFakturs.map(f => {
+                        const isExpanded = expandedFakturId === f.id;
+                        return (
+                          <Fragment key={f.id}>
+                            <tr
+                              className="hover:bg-blue-50/40 group cursor-pointer transition-colors"
+                              onClick={() => setExpandedFakturId(isExpanded ? null : f.id)}
+                              title={t('editHint')}
+                            >
+                              <td className="py-2 px-3">
+                                {isExpanded
+                                  ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+                                  : <ChevronRight className="h-3.5 w-3.5 text-gray-400" />}
+                              </td>
+                              <td className="py-2 px-3 font-mono text-xs">{f.faktur_number || '—'}</td>
+                              <td className="py-2 px-3 text-xs text-gray-500">{f.faktur_date}</td>
+                              <td className="py-2 px-3 text-center">
+                                <Badge className={`text-[10px] ${f.faktur_type === 'KELUARAN' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                                  {f.faktur_type === 'KELUARAN' ? 'OUT' : 'IN'}
+                                </Badge>
+                              </td>
+                              <td className="py-2 px-3 text-xs">{f.counterparty_name}</td>
+                              <td className="py-2 px-3 text-right font-mono text-xs">{fmt(f.dpp)}</td>
+                              <td className="py-2 px-3 text-right font-mono text-xs text-gray-500">{f.dpp_nilai_lain != null ? fmt(Number(f.dpp_nilai_lain)) : '—'}</td>
+                              <td className="py-2 px-3 text-right font-mono text-xs font-medium text-orange-600">{fmt(f.ppn)}</td>
+                              <td className="py-2 px-3 text-center">
+                                <Badge variant="outline" className="text-[10px]">{f.status}</Badge>
+                              </td>
+                              <td className="py-2 px-3 text-right">
+                                {savedAt[f.id] ? (
+                                  <span className="inline-flex items-center gap-1 text-green-600 text-[11px] font-medium animate-pulse">
+                                    <CheckCircle className="h-3.5 w-3.5" />
+                                    {t('savedToast')}
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 text-gray-400 group-hover:text-blue-600 text-[11px] transition-colors">
+                                    <Pencil className="h-3 w-3" />
+                                    {t('editHint')}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                            {isExpanded && (
+                              <tr className="bg-gray-50/50">
+                                <td colSpan={10} className="p-4">
+                                  <div className="space-y-3">
+                                    {/* Edit banner */}
+                                    <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2">
+                                      <Pencil className="h-3.5 w-3.5 shrink-0" />
+                                      <span>{t('editBanner')}</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">{t('thType')}</Label>
+                                        <select
+                                          className="h-8 text-xs w-full rounded border border-gray-300 px-2 bg-white"
+                                          defaultValue={f.faktur_type}
+                                          onBlur={e => {
+                                            if (e.target.value !== f.faktur_type) {
+                                              updateFaktur(f.id, { fakturType: e.target.value });
+                                            }
+                                          }}
+                                        >
+                                          <option value="KELUARAN">KELUARAN (OUT)</option>
+                                          <option value="MASUKAN">MASUKAN (IN)</option>
+                                        </select>
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">{t('thFakturNo')}</Label>
+                                        <Input
+                                          className="h-8 text-xs font-mono"
+                                          defaultValue={f.faktur_number ?? ''}
+                                          onBlur={e => {
+                                            if (e.target.value !== (f.faktur_number ?? '')) {
+                                              updateFaktur(f.id, { fakturNumber: e.target.value });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">{t('thDate')}</Label>
+                                        <Input
+                                          type="date"
+                                          className="h-8 text-xs"
+                                          defaultValue={f.faktur_date}
+                                          onBlur={e => {
+                                            if (e.target.value && e.target.value !== f.faktur_date) {
+                                              updateFaktur(f.id, { fakturDate: e.target.value });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">{t('thCounterparty')}</Label>
+                                        <Input
+                                          className="h-8 text-xs"
+                                          defaultValue={f.counterparty_name ?? ''}
+                                          onBlur={e => {
+                                            if (e.target.value !== (f.counterparty_name ?? '')) {
+                                              updateFaktur(f.id, { counterpartyName: e.target.value });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">NPWP</Label>
+                                        <Input
+                                          className="h-8 text-xs font-mono"
+                                          defaultValue={f.counterparty_npwp ?? ''}
+                                          onBlur={e => {
+                                            if (e.target.value !== (f.counterparty_npwp ?? '')) {
+                                              updateFaktur(f.id, { counterpartyNpwp: e.target.value });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">DPP</Label>
+                                        <Input
+                                          type="number"
+                                          className="h-8 text-xs font-mono"
+                                          defaultValue={f.dpp}
+                                          onBlur={e => {
+                                            const newVal = Number(e.target.value);
+                                            if (Number.isFinite(newVal) && newVal !== Number(f.dpp)) {
+                                              // dpp 만 보내면 서버가 ppn + dpp_nilai_lain 재계산
+                                              updateFaktur(f.id, { dpp: newVal, isLuxury: f.is_luxury === true });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">{t('dppNilaiLain')}</Label>
+                                        <Input
+                                          type="number"
+                                          className="h-8 text-xs font-mono"
+                                          defaultValue={f.dpp_nilai_lain ?? 0}
+                                          onBlur={e => {
+                                            const newVal = Number(e.target.value);
+                                            if (Number.isFinite(newVal) && newVal !== Number(f.dpp_nilai_lain ?? 0)) {
+                                              updateFaktur(f.id, { dppNilaiLain: newVal });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">PPN</Label>
+                                        <Input
+                                          type="number"
+                                          className="h-8 text-xs font-mono"
+                                          defaultValue={f.ppn}
+                                          onBlur={e => {
+                                            const newVal = Number(e.target.value);
+                                            if (Number.isFinite(newVal) && newVal !== Number(f.ppn)) {
+                                              updateFaktur(f.id, { ppn: newVal });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

@@ -3914,7 +3914,11 @@
     "finalResult": "최종 결과",
     "wholesaleOutImported": "VAT OUT {count}건 import 됨",
     "wholesaleInImported": "VAT IN {count}건 import 됨",
-    "wholesalePpnFailed": "PPN wholesale import 실패: {reason}"
+    "wholesalePpnFailed": "PPN wholesale import 실패: {reason}",
+    "editHint": "클릭하여 수정",
+    "editBanner": "각 필드를 클릭한 후 값을 변경하세요. 다른 필드로 이동하면 자동 저장됩니다.",
+    "savedToast": "저장됨",
+    "saveFailed": "저장 실패"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4828,7 +4832,13 @@
     "npwpMissing": "NPWP 입력 필요",
     "dgtRequired": "DGT 필요",
     "totalCountLabel": "총 {count}건 표시",
-    "parsedDataEmpty": "아직 파싱된 거래가 없습니다. 위의 자료 업로드 또는 직접 입력으로 거래를 추가하세요."
+    "parsedDataEmpty": "아직 파싱된 거래가 없습니다. 위의 자료 업로드 또는 직접 입력으로 거래를 추가하세요.",
+    "editHint": "클릭하여 수정",
+    "editBanner": "각 필드를 클릭한 후 값을 변경하세요. 다른 필드로 이동하면 자동 저장됩니다.",
+    "savedToast": "저장됨",
+    "saveFailed": "저장 실패",
+    "editFieldDate": "거래일자",
+    "editFieldDescription": "설명"
   },
   "companyProfile": {
     "k0_6f2592": "서비스업 (Jasa)",

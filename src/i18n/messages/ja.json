@@ -3896,7 +3896,11 @@
     "finalResult": "Final Result",
     "wholesaleOutImported": "VAT OUT {count}件 取込",
     "wholesaleInImported": "VAT IN {count}件 取込",
-    "wholesalePpnFailed": "PPN wholesale 取込失敗: {reason}"
+    "wholesalePpnFailed": "PPN wholesale 取込失敗: {reason}",
+    "editHint": "クリックして編集",
+    "editBanner": "フィールドをクリックして編集。別のフィールドに移動すると自動保存されます。",
+    "savedToast": "保存しました",
+    "saveFailed": "保存失敗"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4754,7 +4758,13 @@
     "npwpMissing": "NPWP required",
     "dgtRequired": "DGT required",
     "totalCountLabel": "Showing {count} items",
-    "parsedDataEmpty": "No parsed transactions yet. Add transactions via upload or manual entry above."
+    "parsedDataEmpty": "No parsed transactions yet. Add transactions via upload or manual entry above.",
+    "editHint": "クリックして編集",
+    "editBanner": "フィールドをクリックして編集。別のフィールドに移動すると自動保存されます。",
+    "savedToast": "保存しました",
+    "saveFailed": "保存失敗",
+    "editFieldDate": "取引日",
+    "editFieldDescription": "説明"
   },
   "companyProfile": {
     "k0_6f2592": "Services (Jasa)",

@@ -119,6 +119,51 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   }
 }
 
+/**
+ * PUT /api/tax/ppn-faktur-monthly — inline edit (faktur 목록 행)
+ * 부분 update. dpp 변경 시 ppn / dpp_nilai_lain 자동 재계산 (UI 가 명시적으로
+ * 값을 주면 그 값을 우선). dppNilaiLain 재계산은 PMK 131/2024 (essential
+ * 2025+ → dpp × 11/12) 의 PPNCalculator.adjustDPP 와 동일 분기.
+ */
+async function handlePut(req: RequestWithSession): Promise<Response> {
+  try {
+    const body = await req.json();
+    const {
+      id, fakturNumber, fakturDate, counterpartyName, counterpartyNpwp,
+      dpp, ppn, dppNilaiLain, isLuxury, fakturType,
+    } = body;
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+
+    const update: Record<string, unknown> = {};
+    if (fakturNumber !== undefined) update.faktur_number = fakturNumber || null;
+    if (fakturDate !== undefined) update.faktur_date = fakturDate;
+    if (counterpartyName !== undefined) update.counterparty_name = counterpartyName;
+    if (counterpartyNpwp !== undefined) update.counterparty_npwp = counterpartyNpwp;
+    if (fakturType !== undefined) update.faktur_type = fakturType;
+
+    if (dpp !== undefined) {
+      const dppNum = Number(dpp);
+      update.dpp = dppNum;
+      if (ppn === undefined) {
+        update.ppn = Math.round(dppNum * PPN_DEFAULT_RATE);
+      }
+      if (dppNilaiLain === undefined) {
+        const dateStr = fakturDate || new Date().toISOString().slice(0, 10);
+        update.dpp_nilai_lain = PPNCalculator.adjustDPP(dppNum, new Date(dateStr), isLuxury === true);
+      }
+    }
+    if (ppn !== undefined) update.ppn = Math.round(Number(ppn));
+    if (dppNilaiLain !== undefined) update.dpp_nilai_lain = Math.round(Number(dppNilaiLain));
+    if (isLuxury !== undefined) update.is_luxury = isLuxury === true;
+
+    const { error } = await getSupabaseAdmin().from('ppn_faktur_monthly').update(update).eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+  }
+}
+
 async function handleDelete(req: RequestWithSession): Promise<Response> {
   try {
     const url = new URL(req.url);
@@ -132,4 +177,5 @@ async function handleDelete(req: RequestWithSession): Promise<Response> {
 
 export async function GET(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handleGet); }
 export async function POST(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handlePost); }
+export async function PUT(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handlePut); }
 export async function DELETE(request: NextRequest) { return composeMiddleware(requireAuth, blockPlatformAdmin)(request as RequestWithSession, handleDelete); }
