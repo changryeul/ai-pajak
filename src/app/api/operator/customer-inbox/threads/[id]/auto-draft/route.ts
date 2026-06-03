@@ -41,6 +41,19 @@ async function handle(req: RequestWithSession): Promise<Response> {
     );
     return NextResponse.json({ error: 'failed to clear draft' }, { status: 500 });
   }
+  // Phase 2.2: also soft-delete any active draft history rows so the dropdown
+  // hides them. Best effort — non-fatal if it fails.
+  const { error: draftErr } = await admin
+    .from('customer_ai_draft')
+    .update({ status: 'dismissed' })
+    .eq('thread_id', threadId)
+    .eq('status', 'active');
+  if (draftErr) {
+    loggers.api.warn(
+      { err: draftErr.message, threadId },
+      'auto-draft history dismiss failed (non-fatal)',
+    );
+  }
   return NextResponse.json({ data: { ok: true } });
 }
 

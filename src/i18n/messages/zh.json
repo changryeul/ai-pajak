@@ -10015,6 +10015,9 @@
     "aiDraftLoading": "正在生成草稿...",
     "autoDraftPillText": "AI 推荐已生成",
     "autoDraftAccept": "接受",
-    "autoDraftDismiss": "关闭"
+    "autoDraftDismiss": "关闭",
+    "draftHistoryToggle": "查看 {count} 个历史 draft",
+    "draftSourceManual": "手动 ✨",
+    "draftSourceAuto": "自动"
   }
 }

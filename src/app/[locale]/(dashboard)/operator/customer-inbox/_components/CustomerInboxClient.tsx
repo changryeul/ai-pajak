@@ -5,6 +5,15 @@ import { useTranslations } from 'next-intl';
 import { Loader2, Send, CheckCircle, MessageCircle, Sparkles } from 'lucide-react';
 import type { ThreadWithCustomerDTO, MessageDTO, ThreadStatus } from '@/types/customer-ai';
 
+// Phase 2.2: draft history DTO returned by GET /drafts.
+interface DraftDTO {
+  id: string;
+  draftText: string;
+  source: 'manual' | 'auto';
+  status: 'active' | 'dismissed' | 'applied';
+  generatedAt: string;
+}
+
 const POLL_MS = 5_000;
 
 function statusTone(status: ThreadStatus): string {
@@ -30,6 +39,7 @@ export function CustomerInboxClient() {
   const [sending, setSending] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [drafting, setDrafting] = useState(false);
+  const [drafts, setDrafts] = useState<DraftDTO[]>([]);
 
   const selectedThread = threads.find((th) => th.id === selectedId) ?? null;
 
@@ -54,6 +64,19 @@ export function CustomerInboxClient() {
     }
   }, []);
 
+  // Phase 2.2: draft history loader.
+  const loadDrafts = useCallback(async (threadId: string) => {
+    try {
+      const r = await fetch(`/api/operator/customer-inbox/threads/${threadId}/drafts`);
+      if (r.ok) {
+        const j = await r.json();
+        setDrafts(j.data ?? []);
+      }
+    } catch {
+      /* silent — next thread change re-fetches */
+    }
+  }, []);
+
   // initial
   useEffect(() => {
     setLoadingThreads(true);
@@ -72,10 +95,12 @@ export function CustomerInboxClient() {
   useEffect(() => {
     if (selectedId) {
       fetchMessages(selectedId);
+      loadDrafts(selectedId);
     } else {
       setMessages([]);
+      setDrafts([]);
     }
-  }, [selectedId, fetchMessages]);
+  }, [selectedId, fetchMessages, loadDrafts]);
 
   // polling messages of selected thread
   useEffect(() => {
@@ -117,11 +142,34 @@ export function CustomerInboxClient() {
       if (r.ok) {
         const j = await r.json();
         if (typeof j.data?.draft === 'string') setInput(j.data.draft);
+        // Phase 2.2: refresh history dropdown so the new draft pops to the top.
+        loadDrafts(selectedId);
       }
     } catch {
       /* silent — operator can retry */
     } finally {
       setDrafting(false);
+    }
+  };
+
+  // Phase 2.2: pick a draft (any from history) → put text in input.
+  const acceptDraft = (d: DraftDTO) => {
+    setInput(d.draftText);
+  };
+
+  // Phase 2.2: soft-delete a single draft row (status='dismissed').
+  const dismissDraft = async (id: string) => {
+    if (!selectedId) return;
+    // Optimistic hide
+    setDrafts((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, status: 'dismissed' } : d)),
+    );
+    try {
+      await fetch(`/api/operator/customer-inbox/threads/${selectedId}/drafts/${id}`, {
+        method: 'DELETE',
+      });
+    } finally {
+      loadDrafts(selectedId);
     }
   };
 
@@ -141,34 +189,10 @@ export function CustomerInboxClient() {
     }
   };
 
-  // Phase 2.1: auto-draft pill handlers
-  const acceptAutoDraft = () => {
-    if (!selectedThread?.auto_draft) return;
-    setInput(selectedThread.auto_draft);
-    // Locally hide pill — server keeps row until operator sends or dismisses.
-    setThreads((prev) =>
-      prev.map((th) =>
-        th.id === selectedId ? { ...th, auto_draft: null, auto_draft_at: null } : th,
-      ),
-    );
-  };
-
-  const dismissAutoDraft = async () => {
-    if (!selectedId) return;
-    // Optimistic clear
-    setThreads((prev) =>
-      prev.map((th) =>
-        th.id === selectedId ? { ...th, auto_draft: null, auto_draft_at: null } : th,
-      ),
-    );
-    try {
-      await fetch(`/api/operator/customer-inbox/threads/${selectedId}/auto-draft`, {
-        method: 'DELETE',
-      });
-    } catch {
-      /* silent — next poll re-syncs */
-    }
-  };
+  // Phase 2.2 supersedes Phase 2.1 pill handlers — drafts state is the
+  // source of truth, both ✨ and auto-trigger now write to customer_ai_draft.
+  // The Phase 2.1 auto_draft column is preserved server-side for backward
+  // compat but no longer drives UI.
 
   return (
     <div className="grid grid-cols-[260px_1fr_300px] gap-3 h-[700px]">
@@ -253,29 +277,79 @@ export function CustomerInboxClient() {
             </div>
             {selectedThread.status !== 'RESOLVED' && (
               <div className="border-t p-3 flex-shrink-0">
-                {/* Phase 2.1: auto-draft suggestion pill */}
-                {selectedThread.auto_draft && !drafting && (
-                  <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-purple-50 border border-purple-200 text-sm">
-                    <Sparkles className="h-4 w-4 text-purple-600 shrink-0" />
-                    <span className="text-purple-900 truncate flex-1">
-                      {t('autoDraftPillText')}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={acceptAutoDraft}
-                      className="px-2 py-1 rounded bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium"
-                    >
-                      {t('autoDraftAccept')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={dismissAutoDraft}
-                      className="px-2 py-1 rounded border border-purple-300 text-purple-700 hover:bg-purple-100 text-xs"
-                    >
-                      {t('autoDraftDismiss')}
-                    </button>
-                  </div>
-                )}
+                {/* Phase 2.2: latest draft pill (Phase 2.1 style) + history dropdown.
+                    Source of truth = drafts state; selectedThread.auto_draft kept
+                    for backward compat but no longer drives UI. */}
+                {(() => {
+                  const activeDrafts = drafts.filter((d) => d.status === 'active');
+                  const latest = activeDrafts[0];
+                  if (!latest && activeDrafts.length === 0) return null;
+                  return (
+                    <div className="mb-2 space-y-1">
+                      {latest && !drafting && (
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 border border-purple-200 text-sm">
+                          <Sparkles className="h-4 w-4 text-purple-600 shrink-0" />
+                          <span className="text-purple-900 truncate flex-1">
+                            {latest.draftText.slice(0, 80)}
+                            {latest.draftText.length > 80 ? '…' : ''}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => acceptDraft(latest)}
+                            className="px-2 py-1 rounded bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium"
+                          >
+                            {t('autoDraftAccept')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => dismissDraft(latest.id)}
+                            className="px-2 py-1 rounded border border-purple-300 text-purple-700 hover:bg-purple-100 text-xs"
+                          >
+                            {t('autoDraftDismiss')}
+                          </button>
+                        </div>
+                      )}
+                      {activeDrafts.length > 1 && (
+                        <details className="text-xs">
+                          <summary className="cursor-pointer text-purple-700 hover:text-purple-900 px-2 py-1 select-none">
+                            {t('draftHistoryToggle', { count: activeDrafts.length - 1 })}
+                          </summary>
+                          <ul className="mt-1 space-y-1 max-h-48 overflow-y-auto bg-white border border-purple-100 rounded p-2">
+                            {activeDrafts.slice(1).map((d) => (
+                              <li key={d.id} className="flex items-center gap-2 p-2 rounded hover:bg-purple-50">
+                                <span className="text-[10px] text-gray-400 shrink-0">
+                                  {new Date(d.generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <span className="text-[10px] text-gray-500 shrink-0 uppercase">
+                                  {d.source === 'manual' ? '✨' : t('draftSourceAuto')}
+                                </span>
+                                <span className="text-xs text-gray-700 flex-1 truncate">
+                                  {d.draftText.slice(0, 60)}
+                                  {d.draftText.length > 60 ? '…' : ''}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => acceptDraft(d)}
+                                  className="text-[10px] text-purple-600 hover:underline"
+                                >
+                                  {t('autoDraftAccept')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => dismissDraft(d.id)}
+                                  className="text-[10px] text-gray-400 hover:text-red-600"
+                                  aria-label={t('autoDraftDismiss')}
+                                >
+                                  ×
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      )}
+                    </div>
+                  );
+                })()}
                 <div className="flex gap-2">
                   <input
                     type="text"

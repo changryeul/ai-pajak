@@ -10015,6 +10015,9 @@
     "aiDraftLoading": "下書き作成中...",
     "autoDraftPillText": "AI 推奨あり",
     "autoDraftAccept": "受け入れる",
-    "autoDraftDismiss": "閉じる"
+    "autoDraftDismiss": "閉じる",
+    "draftHistoryToggle": "前の draft {count}件",
+    "draftSourceManual": "手動 ✨",
+    "draftSourceAuto": "自動"
   }
 }

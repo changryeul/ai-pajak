@@ -10015,6 +10015,9 @@
     "aiDraftLoading": "Drafting reply...",
     "autoDraftPillText": "AI draft available",
     "autoDraftAccept": "Accept",
-    "autoDraftDismiss": "Dismiss"
+    "autoDraftDismiss": "Dismiss",
+    "draftHistoryToggle": "Show {count} previous drafts",
+    "draftSourceManual": "Manual ✨",
+    "draftSourceAuto": "Auto"
   }
 }

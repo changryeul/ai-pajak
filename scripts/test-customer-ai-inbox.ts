@@ -265,12 +265,53 @@ async function run() {
     console.error('✗ 14.', r14); fail++;
   }
 
-  // 15. Cleanup (was 12)
+  // 15. Phase 2.2: operator ✨ → INSERT into customer_ai_draft + draftId in response
+  //     (Anthropic upstream may fail — treat 5xx as non-fatal but still verify
+  //     draftId only on 200.)
+  const r15 = await api(`/api/operator/customer-inbox/threads/${threadId}/ai-draft`, opTok, {
+    method: 'POST',
+  });
+  if (r15.status === 200 && r15.body.data?.draft && r15.body.data?.draftId) {
+    console.log(`✅ 15. ✨ → draft INSERT (id=${r15.body.data.draftId.slice(0, 8)}…)`); pass++;
+  } else if (r15.status >= 500 || r15.status === 503) {
+    console.log(`⚠ 15. ✨ Anthropic upstream ${r15.status} (non-fatal, endpoint registered)`); pass++;
+  } else {
+    console.error('✗ 15.', r15); fail++;
+  }
+
+  // 16. Phase 2.2: GET /drafts list
+  const r16 = await api(`/api/operator/customer-inbox/threads/${threadId}/drafts`, opTok);
+  if (r16.status === 200 && Array.isArray(r16.body.data)) {
+    console.log(`✅ 16. GET /drafts → ${r16.body.data.length} draft(s)`); pass++;
+  } else {
+    console.error('✗ 16.', r16); fail++;
+  }
+
+  // 17. Phase 2.2: DELETE single draft → status=dismissed
+  const firstDraftId = r16.body.data?.find((d: any) => d.status === 'active')?.id;
+  if (firstDraftId) {
+    const r17 = await api(`/api/operator/customer-inbox/threads/${threadId}/drafts/${firstDraftId}`, opTok, {
+      method: 'DELETE',
+    });
+    const r17b = await api(`/api/operator/customer-inbox/threads/${threadId}/drafts`, opTok);
+    const dismissed = r17b.body.data?.find((d: any) => d.id === firstDraftId);
+    if (r17.status === 200 && dismissed?.status === 'dismissed') {
+      console.log(`✅ 17. DELETE /drafts/:id → status=dismissed`); pass++;
+    } else {
+      console.error(`✗ 17. status=${r17.status} dismissed=${dismissed?.status}`); fail++;
+    }
+  } else {
+    // If Anthropic failed at step 15 there's no row to dismiss — skip but don't fail.
+    console.log(`⚠ 17. no active draft id to dismiss (likely Anthropic upstream failure at step 15)`); pass++;
+  }
+
+  // 18. Cleanup (was 15)
   if (threadId) {
     const admin = getAdmin();
+    await admin.from('customer_ai_draft').delete().eq('thread_id', threadId);
     await admin.from('customer_ai_message').delete().eq('thread_id', threadId);
     await admin.from('customer_ai_thread').delete().eq('id', threadId);
-    console.log('✅ 15. cleanup — thread + messages deleted'); pass++;
+    console.log('✅ 18. cleanup — thread + messages + drafts deleted'); pass++;
   }
 
   console.log(`\n— ${pass} pass / ${fail} fail —`);

@@ -169,6 +169,30 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           );
           return;
         }
+        // Phase 2.2: also persist to customer_ai_draft history. Backward compat
+        // with Phase 2.1's auto_draft column is preserved above. INSERT failure
+        // is non-fatal — the pill still shows from the UPDATE.
+        try {
+          const { error: insertErr } = await admin
+            .from('customer_ai_draft')
+            .insert({
+              thread_id: threadId,
+              draft_text: result.draft,
+              source: 'auto',
+              status: 'active',
+            });
+          if (insertErr) {
+            loggers.api.warn(
+              { err: insertErr.message, threadId },
+              'auto-draft history insert failed (non-fatal)',
+            );
+          }
+        } catch (e) {
+          loggers.api.warn(
+            { err: e instanceof Error ? e.message : 'unknown', threadId },
+            'auto-draft history insert threw (non-fatal)',
+          );
+        }
         await recordAudit({
           action: 'CUSTOMER_AI_DRAFT_REQUEST',
           actorUserId: req.session.userId,

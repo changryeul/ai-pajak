@@ -18,6 +18,7 @@ import { recordAudit } from '@/middleware/audit';
 import { loggers } from '@/lib/logger';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
 import { generateDraft } from '@/lib/customer-ai/draft';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -49,6 +50,27 @@ async function handle(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({ error: 'Failed to generate draft' }, { status: 500 });
   }
 
+  // Phase 2.2: persist the draft so it shows up in /drafts history.
+  // INSERT failure does not fail the request — the operator still sees the
+  // generated text, they just won't have history on this row.
+  const admin = getSupabaseAdmin();
+  const { data: row, error: insertErr } = await admin
+    .from('customer_ai_draft')
+    .insert({
+      thread_id: threadId,
+      draft_text: result.draft,
+      source: 'manual',
+      status: 'active',
+    })
+    .select('id, generated_at')
+    .single();
+  if (insertErr) {
+    loggers.api.error(
+      { err: insertErr.message, threadId },
+      'ai-draft history insert failed (non-fatal)',
+    );
+  }
+
   await recordAudit({
     action: 'CUSTOMER_AI_DRAFT_REQUEST',
     actorUserId: req.session.userId,
@@ -56,7 +78,14 @@ async function handle(req: RequestWithSession): Promise<Response> {
     details: { threadId, draftLength: result.draft.length, trigger: 'manual' },
   });
 
-  return NextResponse.json({ data: result });
+  return NextResponse.json({
+    data: {
+      draft: result.draft,
+      model: result.model,
+      draftId: row?.id ?? null,
+      generatedAt: row?.generated_at ?? null,
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {

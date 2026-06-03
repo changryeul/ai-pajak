@@ -10137,6 +10137,9 @@
     "aiDraftLoading": "AI 답변 작성 중...",
     "autoDraftPillText": "AI 추천 답변 있음",
     "autoDraftAccept": "수락",
-    "autoDraftDismiss": "닫기"
+    "autoDraftDismiss": "닫기",
+    "draftHistoryToggle": "이전 draft {count}건 보기",
+    "draftSourceManual": "수동 ✨",
+    "draftSourceAuto": "자동"
   }
 }

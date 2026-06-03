@@ -10015,6 +10015,9 @@
     "aiDraftLoading": "Membuat draft...",
     "autoDraftPillText": "Saran AI tersedia",
     "autoDraftAccept": "Terima",
-    "autoDraftDismiss": "Tutup"
+    "autoDraftDismiss": "Tutup",
+    "draftHistoryToggle": "Tampilkan {count} draft sebelumnya",
+    "draftSourceManual": "Manual ✨",
+    "draftSourceAuto": "Auto"
   }
 }
