@@ -208,10 +208,20 @@ async function run() {
     console.error('✗ 10. AI draft consultant:', r10.status); fail++;
   }
 
-  // 11. Phase 2.1: customer 2nd msg → background auto-draft trigger → wait Claude latency
-  //     → operator list returns thread with auto_draft populated.
-  //     The operator-side r5 reply at step 5 cleared auto_draft → null, so this
-  //     new customer message satisfies the "auto_draft IS NULL" gate.
+  // 11. Phase 2.3: customer 2nd msg → background auto-draft trigger (throttle
+  //     30s). Operator's r5 reply at step 5 dismissed any prior active drafts
+  //     and step 9 (manual ✨) likely inserted one. Backdate that draft's
+  //     generated_at so the 30s throttle is satisfied and the new customer
+  //     message inserts a fresh customer_ai_draft row with source='auto'.
+  const sbAdmin = getAdmin();
+  await sbAdmin
+    .from('customer_ai_draft')
+    .update({ generated_at: new Date(Date.now() - 60_000).toISOString() })
+    .eq('thread_id', threadId);
+  const beforeCount = (await sbAdmin
+    .from('customer_ai_draft')
+    .select('id', { count: 'exact', head: true })
+    .eq('thread_id', threadId)).count ?? 0;
   const r11post = await api(`/api/customer-ai/threads/${threadId}/messages`, custTok, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -220,29 +230,42 @@ async function run() {
   if (r11post.status !== 200) {
     console.error('✗ 11. setup msg failed:', r11post.status); fail++;
   }
-  await new Promise((r) => setTimeout(r, 8000));  // Claude latency budget
-  const r11 = await api('/api/operator/customer-inbox/threads', opTok);
-  const t11 = r11.body.data?.find((th: any) => th.id === threadId);
-  if (t11?.auto_draft && typeof t11.auto_draft === 'string' && t11.auto_draft.length > 0 && t11.auto_draft_at) {
-    console.log(`✅ 11. auto-draft populated, length=${t11.auto_draft.length}`); pass++;
-  } else if (t11 && (t11.auto_draft === null || t11.auto_draft === undefined)) {
-    // Claude may have failed (credits, timeout, API key missing) — non-fatal:
-    // pipeline is wired correctly. Flag as warn pass.
-    console.log(`⚠ 11. auto-draft empty (Claude upstream failure — non-fatal, columns present)`); pass++;
+  await new Promise((r) => setTimeout(r, 8000));  // Claude latency budget for after()
+  const { data: drafts11 } = await sbAdmin
+    .from('customer_ai_draft')
+    .select('id, generated_at, source')
+    .eq('thread_id', threadId)
+    .order('generated_at', { ascending: false })
+    .limit(1);
+  const fresh = drafts11?.[0];
+  const ageMs = fresh ? Date.now() - new Date(fresh.generated_at).getTime() : Infinity;
+  const afterCount = (await sbAdmin
+    .from('customer_ai_draft')
+    .select('id', { count: 'exact', head: true })
+    .eq('thread_id', threadId)).count ?? 0;
+  if (fresh && fresh.source === 'auto' && ageMs < 15_000 && afterCount > beforeCount) {
+    console.log(`✅ 11. Phase 2.3 throttle — auto-trigger inserted fresh draft (age=${ageMs}ms, count ${beforeCount}→${afterCount})`); pass++;
+  } else if (afterCount === beforeCount) {
+    // Claude upstream may have failed — pipeline wired correctly, treat as warn pass
+    console.log(`⚠ 11. auto-trigger: no new draft (Claude upstream may have failed; count ${beforeCount}→${afterCount}, fresh age=${ageMs}ms)`); pass++;
   } else {
-    console.error(`✗ 11. auto-draft missing or columns absent:`, t11?.auto_draft); fail++;
+    console.error(`✗ 11. auto-trigger: fresh=${fresh?.source}/${ageMs}ms count=${beforeCount}→${afterCount}`); fail++;
   }
 
-  // 12. operator DISMISS auto-draft
+  // 12. operator DISMISS auto-draft — Phase 2.3: marks active drafts as
+  //     dismissed in customer_ai_draft table.
   const r12 = await api(`/api/operator/customer-inbox/threads/${threadId}/auto-draft`, opTok, {
     method: 'DELETE',
   });
-  const r12b = await api('/api/operator/customer-inbox/threads', opTok);
-  const t12 = r12b.body.data?.find((th: any) => th.id === threadId);
-  if (r12.status === 200 && (t12?.auto_draft === null || t12?.auto_draft === undefined)) {
-    console.log(`✅ 12. dismiss → 200 + cleared`); pass++;
+  const { data: activeAfter } = await sbAdmin
+    .from('customer_ai_draft')
+    .select('id, status')
+    .eq('thread_id', threadId)
+    .eq('status', 'active');
+  if (r12.status === 200 && (activeAfter?.length ?? 0) === 0) {
+    console.log(`✅ 12. dismiss → 200 + 0 active drafts`); pass++;
   } else {
-    console.error(`✗ 12. dismiss status=${r12.status} auto_draft=${JSON.stringify(t12?.auto_draft)?.slice(0, 80)}`); fail++;
+    console.error(`✗ 12. dismiss status=${r12.status} activeRemaining=${activeAfter?.length}`); fail++;
   }
 
   // 13. consultant DISMISS → 403

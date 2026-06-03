@@ -27,8 +27,6 @@ interface RawThread {
   last_customer_message_at: string | null;
   last_operator_message_at: string | null;
   created_at: string;
-  auto_draft: string | null;
-  auto_draft_at: string | null;
   customer?: { id: string; full_name: string | null; company_name: string | null } | null;
 }
 
@@ -57,9 +55,6 @@ async function handleGet(_req: RequestWithSession): Promise<Response> {
     displayLabel: buildDisplayLabel(t.customer_id, t.context_kind, t.context_period),
     customerId: t.customer_id,
     customerName: t.customer?.company_name || t.customer?.full_name || '고객',
-    // Phase 2.1: auto-draft pill state for operator UI
-    auto_draft: t.auto_draft,
-    auto_draft_at: t.auto_draft_at,
   }));
 
   return NextResponse.json({ data: dto }, { headers: { 'Cache-Control': 'no-store' } });

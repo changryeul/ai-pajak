@@ -189,10 +189,9 @@ export function CustomerInboxClient() {
     }
   };
 
-  // Phase 2.2 supersedes Phase 2.1 pill handlers — drafts state is the
-  // source of truth, both ✨ and auto-trigger now write to customer_ai_draft.
-  // The Phase 2.1 auto_draft column is preserved server-side for backward
-  // compat but no longer drives UI.
+  // Phase 2.2/2.3 — drafts state is the single source of truth; both ✨ and
+  // the auto-trigger write to customer_ai_draft. The legacy auto_draft column
+  // (Phase 2.1) was dropped in Phase 2.3 migration 20260603000006.
 
   return (
     <div className="grid grid-cols-[260px_1fr_300px] gap-3 h-[700px]">
@@ -277,9 +276,8 @@ export function CustomerInboxClient() {
             </div>
             {selectedThread.status !== 'RESOLVED' && (
               <div className="border-t p-3 flex-shrink-0">
-                {/* Phase 2.2: latest draft pill (Phase 2.1 style) + history dropdown.
-                    Source of truth = drafts state; selectedThread.auto_draft kept
-                    for backward compat but no longer drives UI. */}
+                {/* Phase 2.2/2.3: latest draft pill + history dropdown.
+                    Source of truth = drafts state from customer_ai_draft. */}
                 {(() => {
                   const activeDrafts = drafts.filter((d) => d.status === 'active');
                   const latest = activeDrafts[0];

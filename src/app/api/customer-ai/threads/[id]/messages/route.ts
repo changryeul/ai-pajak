@@ -138,60 +138,39 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     updated_at: now,
   }).eq('id', threadId);
 
-  // Phase 2.1: auto-draft trigger. Only fire if no pending draft exists
-  // (state = NULL means it's the first customer message since the operator's
-  // last reply / since dismiss). Background work via next/server `after()` —
-  // customer response latency stays unchanged.
-  const { data: draftState } = await admin
-    .from('customer_ai_thread')
-    .select('auto_draft')
-    .eq('id', threadId)
+  // Phase 2.3: throttle 30s based on newest customer_ai_draft.generated_at.
+  // Phase 2.1's auto_draft column is dropped (migration 20260603000006).
+  // burst control: rapid customer messages within 30s reuse existing draft,
+  // avoiding Anthropic spam. Older active drafts are preserved (Phase 2.2
+  // dropdown shows them as history).
+  const THROTTLE_MS = 30_000;
+  const { data: lastDraft } = await admin
+    .from('customer_ai_draft')
+    .select('generated_at')
+    .eq('thread_id', threadId)
+    .order('generated_at', { ascending: false })
+    .limit(1)
     .maybeSingle();
-  if (draftState && draftState.auto_draft === null) {
+  const lastMs = lastDraft ? new Date(lastDraft.generated_at).getTime() : 0;
+  if (Date.now() - lastMs >= THROTTLE_MS) {
     after(async () => {
       try {
         const result = await generateDraft(threadId);
         if (!result) return;
-        // Race-safe update: only set if still NULL (another in-flight trigger
-        // might have already populated it).
-        const { error: upErr } = await admin
-          .from('customer_ai_thread')
-          .update({
-            auto_draft: result.draft,
-            auto_draft_at: new Date().toISOString(),
-          })
-          .eq('id', threadId)
-          .is('auto_draft', null);
-        if (upErr) {
+        const { error: insertErr } = await admin
+          .from('customer_ai_draft')
+          .insert({
+            thread_id: threadId,
+            draft_text: result.draft,
+            source: 'auto',
+            status: 'active',
+          });
+        if (insertErr) {
           loggers.api.warn(
-            { err: upErr.message, threadId },
-            'auto-draft update failed',
+            { err: insertErr.message, threadId },
+            'Phase 2.3 auto-draft INSERT failed',
           );
           return;
-        }
-        // Phase 2.2: also persist to customer_ai_draft history. Backward compat
-        // with Phase 2.1's auto_draft column is preserved above. INSERT failure
-        // is non-fatal — the pill still shows from the UPDATE.
-        try {
-          const { error: insertErr } = await admin
-            .from('customer_ai_draft')
-            .insert({
-              thread_id: threadId,
-              draft_text: result.draft,
-              source: 'auto',
-              status: 'active',
-            });
-          if (insertErr) {
-            loggers.api.warn(
-              { err: insertErr.message, threadId },
-              'auto-draft history insert failed (non-fatal)',
-            );
-          }
-        } catch (e) {
-          loggers.api.warn(
-            { err: e instanceof Error ? e.message : 'unknown', threadId },
-            'auto-draft history insert threw (non-fatal)',
-          );
         }
         await recordAudit({
           action: 'CUSTOMER_AI_DRAFT_REQUEST',
@@ -206,7 +185,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       } catch (e) {
         loggers.api.error(
           { err: e instanceof Error ? e.message : 'unknown', threadId },
-          'auto-draft background trigger failed',
+          'Phase 2.3 auto-draft trigger failed',
         );
       }
     });

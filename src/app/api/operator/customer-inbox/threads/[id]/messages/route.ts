@@ -123,11 +123,23 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     customer_unread_count: (thread.customer_unread_count ?? 0) + 1,
     status: 'RESPONDED',
     updated_at: now,
-    // Phase 2.1: operator just sent a reply → clear any pending auto-draft.
-    // Next customer message re-triggers the auto-draft helper.
-    auto_draft: null,
-    auto_draft_at: null,
   }).eq('id', threadId);
+
+  // Phase 2.3: operator just sent a reply → mark any active drafts as
+  // dismissed so the dropdown hides them. Next customer message re-triggers
+  // the auto-draft helper (30s throttle in customer messages route).
+  // Best effort — non-fatal if it fails.
+  const { error: draftDismissErr } = await admin
+    .from('customer_ai_draft')
+    .update({ status: 'dismissed' })
+    .eq('thread_id', threadId)
+    .eq('status', 'active');
+  if (draftDismissErr) {
+    loggers.api.warn(
+      { err: draftDismissErr.message, threadId },
+      'auto-draft dismiss after operator reply failed (non-fatal)',
+    );
+  }
 
   await recordAudit({
     action: 'CUSTOMER_AI_REPLY',

@@ -2,9 +2,9 @@
  * POST /api/operator/customer-inbox/threads/:id/ai-draft
  *
  * Operator-tier only. Generates a Claude-suggested reply draft based on the
- * thread context. On-demand, ephemeral (no DB persistence — the auto-trigger
- * in Phase 2.1 writes to `auto_draft` column; this endpoint does not, so
- * operator can re-roll without overwriting the pill state).
+ * thread context. Phase 2.2: inserts into customer_ai_draft with source=
+ * 'manual'. Phase 2.3: legacy auto_draft column is dropped — all draft
+ * state lives in customer_ai_draft now.
  *
  * Customer NEVER sees draft — endpoint is operator-only.
  */

@@ -29,7 +29,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const MIGRATIONS_DIR = join(__dirname, '..', 'supabase', 'migrations');
 
-interface Decl { table: string; columns: Set<string>; origin: string; }
+interface Decl { table: string; columns: Set<string>; dropped: Set<string>; origin: string; }
 
 function parseMigration(path: string, file: string): Decl[] {
   const sql = readFileSync(path, 'utf-8')
@@ -49,7 +49,7 @@ function parseMigration(path: string, file: string): Decl[] {
       const cm = trimmed.match(/^["`]?(\w+)["`]?\s+/);
       if (cm) columns.add(cm[1].toLowerCase());
     });
-    if (columns.size > 0) out.push({ table, columns, origin: file });
+    if (columns.size > 0) out.push({ table, columns, dropped: new Set(), origin: file });
   }
 
   const alterRe = /ALTER\s+TABLE\s+(?:ONLY\s+)?["`]?(\w+)["`]?\s+([\s\S]*?);/gi;
@@ -60,7 +60,11 @@ function parseMigration(path: string, file: string): Decl[] {
     const colRe = /ADD\s+COLUMN\s+(?:IF\s+NOT\s+EXISTS\s+)?["`]?(\w+)["`]?/gi;
     let cm: RegExpExecArray | null;
     while ((cm = colRe.exec(body)) !== null) columns.add(cm[1].toLowerCase());
-    if (columns.size > 0) out.push({ table, columns, origin: file });
+    const dropped = new Set<string>();
+    const dropRe = /DROP\s+COLUMN\s+(?:IF\s+EXISTS\s+)?["`]?(\w+)["`]?/gi;
+    let dm: RegExpExecArray | null;
+    while ((dm = dropRe.exec(body)) !== null) dropped.add(dm[1].toLowerCase());
+    if (columns.size > 0 || dropped.size > 0) out.push({ table, columns, dropped, origin: file });
   }
   return out;
 }
@@ -81,8 +85,16 @@ async function main() {
   for (const file of files) {
     for (const d of parseMigration(join(MIGRATIONS_DIR, file), file)) {
       const ex = merged.get(d.table);
-      if (ex) d.columns.forEach((c) => ex.columns.add(c));
-      else merged.set(d.table, { columns: d.columns, firstOrigin: d.origin });
+      if (ex) {
+        d.columns.forEach((c) => ex.columns.add(c));
+        // Apply drops in chronological order (files are sorted) so ADD-then-
+        // DROP across separate migrations correctly leaves the column out.
+        d.dropped.forEach((c) => ex.columns.delete(c));
+      } else {
+        const init = new Set(d.columns);
+        d.dropped.forEach((c) => init.delete(c));
+        merged.set(d.table, { columns: init, firstOrigin: d.origin });
+      }
     }
   }
   console.log(`parsed ${files.length} migrations -> ${merged.size} tables`);

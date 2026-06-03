@@ -1,10 +1,15 @@
 /**
  * DELETE /api/operator/customer-inbox/threads/:id/auto-draft
  *
- * Operator clicks "닫기" on the Phase 2.1 auto-draft pill → clears
- * `auto_draft` + `auto_draft_at` so the pill disappears for everyone.
+ * Operator clicks "닫기" on the auto-draft pill → marks all active drafts
+ * as `dismissed` so the dropdown hides them.
  *
- * Next customer message re-triggers the auto-draft helper.
+ * Phase 2.3 (commit dropping customer_ai_thread.auto_draft column): the
+ * legacy `UPDATE customer_ai_thread SET auto_draft = null` is gone. All
+ * draft state lives in customer_ai_draft table now.
+ *
+ * Next customer message re-triggers the auto-draft helper (subject to 30s
+ * throttle in the messages route).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -30,29 +35,17 @@ async function handle(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({ error: 'thread id must be uuid' }, { status: 400 });
   }
   const admin = getSupabaseAdmin();
-  const { error } = await admin
-    .from('customer_ai_thread')
-    .update({ auto_draft: null, auto_draft_at: null })
-    .eq('id', threadId);
-  if (error) {
-    loggers.api.error(
-      { err: error.message, threadId },
-      'auto-draft dismiss failed',
-    );
-    return NextResponse.json({ error: 'failed to clear draft' }, { status: 500 });
-  }
-  // Phase 2.2: also soft-delete any active draft history rows so the dropdown
-  // hides them. Best effort — non-fatal if it fails.
   const { error: draftErr } = await admin
     .from('customer_ai_draft')
     .update({ status: 'dismissed' })
     .eq('thread_id', threadId)
     .eq('status', 'active');
   if (draftErr) {
-    loggers.api.warn(
+    loggers.api.error(
       { err: draftErr.message, threadId },
-      'auto-draft history dismiss failed (non-fatal)',
+      'auto-draft dismiss failed',
     );
+    return NextResponse.json({ error: 'failed to clear draft' }, { status: 500 });
   }
   return NextResponse.json({ data: { ok: true } });
 }
