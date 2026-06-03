@@ -291,8 +291,9 @@ const navItems: NavSection[] = [
     labelKey: 'nav.masterArea',
     roles: masterRoles,
     items: [
-      { href: '/admin/master',                icon: TrendingUp, labelKey: 'nav.masterStats' },
-      { href: '/admin/master/custom-pricing', icon: Settings,   labelKey: 'nav.masterCustomPricing' },
+      { href: '/admin/master',                       icon: TrendingUp, labelKey: 'nav.masterStats' },
+      { href: '/admin/master/custom-pricing',        icon: Settings,   labelKey: 'nav.masterCustomPricing' },
+      { href: '/admin/master/luxury-classifications', icon: Sparkles,  labelKey: 'nav.masterLuxuryClassifications' },
     ],
   },
   {
