@@ -32,6 +32,7 @@ import {
   TrendingUp,
   MessageCircle,
   MessageSquare,
+  MessageSquareText,
   MessageSquareWarning,
   Sparkles,
   ChevronDown,
@@ -294,6 +295,7 @@ const navItems: NavSection[] = [
       { href: '/admin/master',                       icon: TrendingUp, labelKey: 'nav.masterStats' },
       { href: '/admin/master/custom-pricing',        icon: Settings,   labelKey: 'nav.masterCustomPricing' },
       { href: '/admin/master/luxury-classifications', icon: Sparkles,  labelKey: 'nav.masterLuxuryClassifications' },
+      { href: '/admin/master/customer-ai-templates',  icon: MessageSquareText, labelKey: 'nav.masterCustomerAiTemplates' },
     ],
   },
   {

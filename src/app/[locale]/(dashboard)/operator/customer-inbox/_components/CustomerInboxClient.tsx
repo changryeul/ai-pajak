@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2, Send, CheckCircle, MessageCircle, Sparkles } from 'lucide-react';
+import { Loader2, Send, CheckCircle, MessageCircle, Sparkles, MessageSquare } from 'lucide-react';
 import type { ThreadWithCustomerDTO, MessageDTO, ThreadStatus } from '@/types/customer-ai';
+import type { CustomerAiTemplateDTO } from '@/types/customer-ai-template';
 
 // Phase 2.2: draft history DTO returned by GET /drafts.
 interface DraftDTO {
@@ -40,6 +41,9 @@ export function CustomerInboxClient() {
   const [resolving, setResolving] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [drafts, setDrafts] = useState<DraftDTO[]>([]);
+  // Phase 2.4: snippet templates (managed by MASTER at
+  // /admin/master/customer-ai-templates). One-shot fetch on mount.
+  const [templates, setTemplates] = useState<CustomerAiTemplateDTO[]>([]);
 
   const selectedThread = threads.find((th) => th.id === selectedId) ?? null;
 
@@ -82,6 +86,16 @@ export function CustomerInboxClient() {
     setLoadingThreads(true);
     fetchThreads().finally(() => setLoadingThreads(false));
   }, [fetchThreads]);
+
+  // Phase 2.4: one-shot fetch of templates (rarely change; MASTER manages).
+  useEffect(() => {
+    fetch('/api/operator/customer-inbox/templates')
+      .then((r) => (r.ok ? r.json() : { data: [] }))
+      .then((j) => setTemplates((j.data ?? []) as CustomerAiTemplateDTO[]))
+      .catch(() => {
+        /* silent — dropdown just renders empty */
+      });
+  }, []);
 
   // polling threads
   useEffect(() => {
@@ -348,6 +362,40 @@ export function CustomerInboxClient() {
                     </div>
                   );
                 })()}
+                {/* Phase 2.4: template snippets dropdown — same vertical
+                    position as Phase 2.2 draft history (above input). Click
+                    a row to load text into the input (operator can still edit
+                    before sending). MASTER manages the list. */}
+                {templates.length > 0 && (
+                  <details className="mb-2 text-xs">
+                    <summary className="cursor-pointer text-emerald-700 hover:text-emerald-900 px-2 py-1 select-none inline-flex items-center gap-1">
+                      <MessageSquare className="h-3 w-3" />
+                      {t('templatesDropdownToggle', { count: templates.length })}
+                    </summary>
+                    <ul className="mt-1 space-y-1 max-h-48 overflow-y-auto bg-white border border-emerald-100 rounded p-2">
+                      {templates.map((tpl) => (
+                        <li
+                          key={tpl.id}
+                          onClick={() => setInput(tpl.body)}
+                          className="flex items-start gap-2 p-2 rounded hover:bg-emerald-50 cursor-pointer"
+                        >
+                          <span className="text-xs font-medium text-emerald-900 shrink-0">
+                            {tpl.title}
+                          </span>
+                          {tpl.category && (
+                            <span className="text-[10px] text-emerald-600 shrink-0">
+                              [{tpl.category}]
+                            </span>
+                          )}
+                          <span className="text-[10px] text-gray-500 flex-1 truncate">
+                            {tpl.body.slice(0, 60)}
+                            {tpl.body.length > 60 ? '…' : ''}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
                 <div className="flex gap-2">
                   <input
                     type="text"

@@ -44,6 +44,7 @@ const STEPS: Step[] = [
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },
   { name: 'coretax toggle (Track D)', file: 'test-coretax-toggle.ts' },
   { name: 'luxury classifications CRUD + RBAC', file: 'test-luxury-classifications.ts' },
+  { name: 'customer-ai templates CRUD + RBAC', file: 'test-customer-ai-templates.ts' },
   // --- Real-file importer regression (BINTANG JAYA) --------------------
   // These run against the real customer xlsx at ~/Downloads. In CI or fresh
   // checkouts the file is absent; the scripts exit 0 with a SKIPPED log so
