@@ -36,6 +36,7 @@ interface Transaction {
   tax_amount: number;
   bukti_potong_number: string | null;
   bukti_potong_date: string | null;
+  invoice_document_id?: string | null;
 }
 
 interface Summary {
@@ -165,6 +166,14 @@ export default function PPh23Page() {
   // Separate ref for the camera-capture path so mobile users get the camera
   // immediately, while the gallery/PC path stays available too.
   const invoiceImageCameraRef = useRef<HTMLInputElement>(null);
+
+  // Phase 5 — per-row invoice photo attach (wholesale post-import) ---------
+  // One pair of hidden inputs shared across all rows. pendingPhotoTxId
+  // tracks which row triggered the input so handlePhotoPicked knows where
+  // to POST the result.
+  const photoCameraInputRef = useRef<HTMLInputElement>(null);
+  const photoFileInputRef = useRef<HTMLInputElement>(null);
+  const pendingPhotoTxId = useRef<string | null>(null);
 
   // Quick-add counterparty
   const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -366,6 +375,50 @@ export default function PPh23Page() {
       }
     } catch {
       showMsg('error', t('saveFailed'));
+    }
+  };
+
+  // Phase 5 — per-row invoice photo attach (wholesale post-import) -------
+  const triggerInvoiceCamera = (txId: string) => {
+    pendingPhotoTxId.current = txId;
+    photoCameraInputRef.current?.click();
+  };
+  const triggerInvoiceFile = (txId: string) => {
+    pendingPhotoTxId.current = txId;
+    photoFileInputRef.current?.click();
+  };
+  const handlePhotoPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const txId = pendingPhotoTxId.current;
+    e.target.value = ''; // reset so picking the same file again still fires
+    if (!file || !txId) return;
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/tax/pph23-transactions/${txId}/invoice-photo`, {
+        method: 'POST',
+        body: fd,
+      });
+      const data = await res.json();
+      if (res.ok && data.data?.documentId) {
+        // Optimistic local update so the ✓ replaces the ⚠ immediately.
+        setTransactions(prev =>
+          prev.map(t => (t.id === txId ? { ...t, invoice_document_id: data.data.documentId } : t)),
+        );
+        setSavedAt(prev => ({ ...prev, [txId]: Date.now() }));
+        setTimeout(() => {
+          setSavedAt(prev => {
+            const n = { ...prev };
+            delete n[txId];
+            return n;
+          });
+        }, 1500);
+        showMsg('success', t('invoiceUploadSuccess'));
+      } else {
+        showMsg('error', `${t('invoiceUploadFailed')}: ${data.error || res.status}`);
+      }
+    } catch (err) {
+      showMsg('error', `${t('invoiceUploadFailed')}: ${err instanceof Error ? err.message : 'unknown'}`);
     }
   };
 
@@ -584,6 +637,24 @@ export default function PPh23Page() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
       <PageTitle title="PPh 23" />
+      {/* Phase 5 — hidden inputs for per-row invoice photo attach. Shared
+          across all rows; pendingPhotoTxId.current routes the picked file
+          to the right transaction. */}
+      <input
+        ref={photoCameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handlePhotoPicked}
+      />
+      <input
+        ref={photoFileInputRef}
+        type="file"
+        accept="image/*,.pdf"
+        className="hidden"
+        onChange={handlePhotoPicked}
+      />
       <ScreenHeader
         title={t('k20_5ee3c0')}
         step={1}
@@ -1213,13 +1284,14 @@ export default function PPh23Page() {
                   <th className="p-2 text-right">{t('colAmount')}</th>
                   <th className="p-2 text-right">{t('colRate')}</th>
                   <th className="p-2 text-center">{t('colStatus')}</th>
+                  <th className="p-2 text-center w-12">{t('colInvoicePhoto')}</th>
                   <th className="p-2 text-center">{t('colDetail')}</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="p-8 text-center text-sm text-slate-400">
+                    <td colSpan={10} className="p-8 text-center text-sm text-slate-400">
                       {t('parsedDataEmpty')}
                     </td>
                   </tr>
@@ -1257,6 +1329,42 @@ export default function PPh23Page() {
                             <Badge className="text-[9px] bg-red-100 text-red-700">{t('dgtRequired')}</Badge>
                           ) : (
                             <Badge className="text-[9px] bg-green-100 text-green-700">{t('statusNormal')}</Badge>
+                          )}
+                        </td>
+                        <td className="p-2 text-center">
+                          {tx.invoice_document_id ? (
+                            <span
+                              className="inline-flex items-center text-green-600"
+                              title={t('invoiceAttached')}
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </span>
+                          ) : (
+                            <details className="inline-block relative">
+                              <summary
+                                className="cursor-pointer inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 text-[11px] list-none"
+                                title={t('invoiceMissing')}
+                              >
+                                <AlertTriangle className="h-3.5 w-3.5" />
+                                <Camera className="h-3.5 w-3.5" />
+                              </summary>
+                              <div className="absolute right-0 mt-1 z-10 bg-white border border-amber-200 rounded shadow-lg p-2 w-44 text-left">
+                                <button
+                                  type="button"
+                                  onClick={() => triggerInvoiceCamera(tx.id)}
+                                  className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
+                                >
+                                  📷 {t('invoiceImageTakePhoto')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => triggerInvoiceFile(tx.id)}
+                                  className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
+                                >
+                                  📄 {t('invoiceImagePickFile')}
+                                </button>
+                              </div>
+                            </details>
                           )}
                         </td>
                         <td className="p-2 text-center">
