@@ -11,10 +11,14 @@ import { loggers } from '@/lib/logger';
  * Accepts FormData with 'file' (CSV) and 'customerId'.
  *
  * CSV columns (matching template):
- * employee_name, employee_npwp, employee_nik, ptkp_category, gross_salary,
- * position_allowance, overtime_pay, meal_allowance, transport_allowance,
- * other_allowances, bonus, thr, jht_employee, jp_employee, bpjs_kesehatan,
- * other_deductions, worker_type
+ * Required: employee_name, gross_salary
+ * Payroll-style: employee_npwp, employee_nik, ptkp_category, position_allowance,
+ *   overtime_pay, meal_allowance, transport_allowance, other_allowances, bonus,
+ *   thr, jht_employee, jp_employee, bpjs_kesehatan, other_deductions, worker_type
+ * HR record: employee_number, position, department, hire_date, resign_date,
+ *   birth_date, gender, marital_status, email, phone, address, bank_name,
+ *   bank_account_no, bank_account_name, emergency_contact_name,
+ *   emergency_contact_phone, notes
  */
 export async function POST(request: NextRequest) {
   try {
@@ -104,8 +108,31 @@ export async function POST(request: NextRequest) {
 
       let employeeId: string | null = null;
 
+      // HR record fields (Phase: employee master xlsx import). All optional —
+      // empty/missing cells become NULL. Date strings expected as YYYY-MM-DD;
+      // anything else passes through and the DB will reject if invalid.
+      const hrFields = {
+        employee_number: getVal(cols, 'employee_number') || null,
+        position: getVal(cols, 'position') || null,
+        department: getVal(cols, 'department') || null,
+        hire_date: getVal(cols, 'hire_date') || null,
+        resign_date: getVal(cols, 'resign_date') || null,
+        birth_date: getVal(cols, 'birth_date') || null,
+        gender: getVal(cols, 'gender') || null,
+        marital_status: getVal(cols, 'marital_status') || null,
+        email: getVal(cols, 'email') || null,
+        phone: getVal(cols, 'phone') || null,
+        address: getVal(cols, 'address') || null,
+        bank_name: getVal(cols, 'bank_name') || null,
+        bank_account_no: getVal(cols, 'bank_account_no') || null,
+        bank_account_name: getVal(cols, 'bank_account_name') || null,
+        emergency_contact_name: getVal(cols, 'emergency_contact_name') || null,
+        emergency_contact_phone: getVal(cols, 'emergency_contact_phone') || null,
+        notes: getVal(cols, 'notes') || null,
+      };
+
       if (existing) {
-        // Update master (HR record): identity fields only — keep monthly amounts on payslip side.
+        // Update master (HR record): identity fields + HR record — keep monthly amounts on payslip side.
         // gross_salary is also kept fresh as the latest base for new payslips.
         await admin.from('employee_payroll').update({
           employee_npwp: getVal(cols, 'employee_npwp') || null,
@@ -113,6 +140,7 @@ export async function POST(request: NextRequest) {
           ptkp_category: ptkp,
           gross_salary: grossSalary,
           worker_type: workerType,
+          ...hrFields,
         }).eq('id', existing.id);
         employeeId = existing.id;
         imported++;
@@ -131,6 +159,7 @@ export async function POST(request: NextRequest) {
           other_deductions: otherDeductions,
           worker_type: workerType,
           is_active: true,
+          ...hrFields,
         }).select('id').single();
         if (insertErr) {
           errors.push(`Row ${i + 1}: ${name} — ${insertErr.message}`);

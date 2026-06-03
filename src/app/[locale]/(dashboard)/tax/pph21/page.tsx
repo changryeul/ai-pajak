@@ -745,8 +745,25 @@ function PPh21DataInputSection({
 
   const downloadTemplate = async () => {
     try {
-    const headers = ['employee_name', 'employee_npwp', 'employee_nik', 'ptkp_category', 'gross_salary', 'position_allowance', 'overtime_pay', 'meal_allowance', 'transport_allowance', 'other_allowances', 'bonus', 'thr', 'jht_employee', 'jp_employee', 'bpjs_kesehatan', 'other_deductions', 'worker_type'];
-    const sample: (string | number)[] = ['John Doe', '01.234.567.8-901.000', '3201234567890001', 'TK/0', 15000000, 500000, 0, 300000, 200000, 0, 0, 0, 300000, 150000, 120000, 0, 'REGULAR'];
+    const headers = [
+      // Identity + payroll (required: employee_name + gross_salary)
+      'employee_name', 'employee_npwp', 'employee_nik', 'ptkp_category', 'gross_salary',
+      'position_allowance', 'overtime_pay', 'meal_allowance', 'transport_allowance',
+      'other_allowances', 'bonus', 'thr', 'jht_employee', 'jp_employee',
+      'bpjs_kesehatan', 'other_deductions', 'worker_type',
+      // HR record
+      'employee_number', 'position', 'department', 'hire_date', 'resign_date',
+      'birth_date', 'gender', 'marital_status', 'email', 'phone', 'address',
+      'bank_name', 'bank_account_no', 'bank_account_name',
+      'emergency_contact_name', 'emergency_contact_phone', 'notes',
+    ];
+    const sample: (string | number)[] = [
+      'John Doe', '01.234.567.8-901.000', '3201234567890001', 'TK/0', 15000000,
+      500000, 0, 300000, 200000, 0, 0, 0, 300000, 150000, 120000, 0, 'REGULAR',
+      'EMP-001', 'Manager', 'Finance', '2024-01-15', '', '1990-05-20', 'M',
+      'MARRIED', 'john@example.com', '+62 812 3456 7890', 'Jl. Sudirman No. 1',
+      'BCA', '1234567890', 'John Doe', 'Jane Doe', '+62 812 9876 5432', '',
+    ];
 
     const XLSX = await import('xlsx');
     const wb = XLSX.utils.book_new();
@@ -778,6 +795,24 @@ function PPh21DataInputSection({
       ['bpjs_kesehatan', 'BPJS \uAC74\uAC15\uBCF4\uD5D8'],
       ['other_deductions', '\uAE30\uD0C0 \uACF5\uC81C / Potongan lainnya'],
       ['worker_type', 'REGULAR / CONTRACT / DAILY / FREELANCER / COMMISSIONER'],
+      // HR record (optional \u2014 \uC9C1\uC6D0 master \uC77C\uAD04 \uB4F1\uB85D \uC6A9)
+      ['employee_number', '\uC0AC\uC6D0\uBC88\uD638 / Nomor karyawan'],
+      ['position', '\uC9C1\uCC45 / Jabatan'],
+      ['department', '\uBD80\uC11C / Departemen'],
+      ['hire_date', '\uC785\uC0AC\uC77C YYYY-MM-DD / Tanggal masuk'],
+      ['resign_date', '\uD1F4\uC0AC\uC77C YYYY-MM-DD / Tanggal keluar (\uC120\uD0DD)'],
+      ['birth_date', '\uC0DD\uB144\uC6D4\uC77C YYYY-MM-DD / Tanggal lahir'],
+      ['gender', 'M / F'],
+      ['marital_status', 'SINGLE / MARRIED / DIVORCED / WIDOWED'],
+      ['email', '\uC774\uBA54\uC77C'],
+      ['phone', '\uC804\uD654\uBC88\uD638'],
+      ['address', '\uC8FC\uC18C'],
+      ['bank_name', '\uC740\uD589\uBA85 / Nama bank'],
+      ['bank_account_no', '\uACC4\uC88C\uBC88\uD638 / Nomor rekening'],
+      ['bank_account_name', '\uC608\uAE08\uC8FC / Nama pemilik rekening'],
+      ['emergency_contact_name', '\uBE44\uC0C1\uC5F0\uB77D\uCC98 \uC774\uB984'],
+      ['emergency_contact_phone', '\uBE44\uC0C1\uC5F0\uB77D\uCC98 \uC804\uD654'],
+      ['notes', '\uBE44\uACE0 / Catatan'],
     ];
     const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
     wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
@@ -794,10 +829,16 @@ function PPh21DataInputSection({
   // trim). employee_name + gross_salary required; others optional.
   const TEMPLATE_REQUIRED_COLS = ['employee_name', 'gross_salary'] as const;
   const TEMPLATE_OPTIONAL_COLS = [
+    // Identity + payroll
     'employee_npwp', 'employee_nik', 'ptkp_category', 'position_allowance',
     'overtime_pay', 'meal_allowance', 'transport_allowance', 'other_allowances',
     'bonus', 'thr', 'jht_employee', 'jp_employee', 'bpjs_kesehatan',
     'other_deductions', 'worker_type',
+    // HR record (Phase: employee master xlsx)
+    'employee_number', 'position', 'department', 'hire_date', 'resign_date',
+    'birth_date', 'gender', 'marital_status', 'email', 'phone', 'address',
+    'bank_name', 'bank_account_no', 'bank_account_name',
+    'emergency_contact_name', 'emergency_contact_phone', 'notes',
   ] as const;
   const TEMPLATE_ALL_COLS = [...TEMPLATE_REQUIRED_COLS, ...TEMPLATE_OPTIONAL_COLS];
 
