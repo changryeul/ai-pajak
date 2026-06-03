@@ -771,15 +771,6 @@ export default function PPNPage() {
         </div>
       )}
 
-      {/* Document Upload + Filing Process */}
-      <PPNFilingSection
-        customerId={customerId || ''}
-        period={period}
-        summary={summary}
-        fakturCount={fakturs.length}
-        locale={locale}
-      />
-
       {/* PPN Refund Section */}
       <PPNRefundSection locale={locale} />
 
@@ -827,21 +818,6 @@ export default function PPNPage() {
       </Dialog>
     </div>
   );
-}
-
-// ══════════════════════════════════════════════════════
-// PPN Filing Process placeholder (camera + file upload + OCR doc list
-// removed in Phase 4 simplification — wholesale xlsx is the sole input).
-// Component kept as no-op shim to preserve parent layout + future hooks.
-// ══════════════════════════════════════════════════════
-function PPNFilingSection(_props: {
-  customerId: string;
-  period: string;
-  summary: { outputTax: number; inputTax: number; netPpn: number; status: string };
-  fakturCount: number;
-  locale: string;
-}) {
-  return null;
 }
 
 // ══════════════════════════════════════════════════════
