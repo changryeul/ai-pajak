@@ -52,6 +52,11 @@ const STEPS: Step[] = [
   // --- Inline-edit PUT contracts (2026-06-02 commit 8494873) -----------
   { name: 'pph23 PUT contract (inline edit)', file: 'verify-pph23-put-contract.ts' },
   { name: 'ppn PUT contract (inline edit)', file: 'verify-ppn-put-contract.ts' },
+  // --- Schema drift guard (2026-06-03 audit) ---------------------------
+  // Catches migration-history-vs-actual-schema drift early. The 2026-04-10
+  // batch incident lost 30+ columns + 1 entire table silently; this runs
+  // on every smoke pass so the next broken push is caught immediately.
+  { name: 'prod schema drift audit', file: 'verify-prod-schema-drift.ts' },
 ];
 
 interface Result {
