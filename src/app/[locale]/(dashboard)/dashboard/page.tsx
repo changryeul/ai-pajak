@@ -46,7 +46,6 @@ import { AssetsLiabilitiesCard } from '@/components/dashboard/AssetsLiabilitiesC
 import { usePageTitle } from '@/components/layout/PageTitle';
 
 const NextStepsWizard = dynamic(() => import('@/components/dashboard/NextStepsWizard').then(m => ({ default: m.NextStepsWizard })), { ssr: false });
-const SimpleMode = dynamic(() => import('@/components/dashboard/SimpleMode').then(m => ({ default: m.SimpleMode })), { ssr: false });
 
 // Lazy load heavy components
 const ClientList = dynamic(() => import('@/components/dashboard/ClientList').then(m => ({ default: m.ClientList })), { ssr: false });
