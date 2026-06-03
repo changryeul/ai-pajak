@@ -83,6 +83,9 @@ export default function PPNPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [filter, setFilter] = useState<FakturFilter>('ALL');
+  // Phase 3.3 followup — filter to only luxury rows for quick review after
+  // auto-classify (server-side substring match may have false positives).
+  const [showLuxuryOnly, setShowLuxuryOnly] = useState(false);
 
   // Faktur data
   const [fakturs, setFakturs] = useState<FakturMonthly[]>([]);
@@ -298,7 +301,9 @@ export default function PPNPage() {
     }
   };
 
-  const filteredFakturs = filter === 'ALL' ? fakturs : fakturs.filter(f => f.faktur_type === (filter === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN'));
+  const byTypeFakturs = filter === 'ALL' ? fakturs : fakturs.filter(f => f.faktur_type === (filter === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN'));
+  const filteredFakturs = showLuxuryOnly ? byTypeFakturs.filter(f => f.is_luxury === true) : byTypeFakturs;
+  const luxuryCount = fakturs.filter(f => f.is_luxury === true).length;
 
   const netStatus = summary.netPpn > 0 ? 'KURANG_BAYAR' : summary.netPpn < 0 ? 'LEBIH_BAYAR' : 'NIHIL';
   const statusConfig = {
@@ -449,7 +454,7 @@ export default function PPNPage() {
             </Card>
           </div>
 
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
             <div className="flex gap-2">
               {(['ALL', 'OUTPUT', 'INPUT'] as FakturFilter[]).map(f => (
                 <button key={f} onClick={() => setFilter(f)}
@@ -458,6 +463,15 @@ export default function PPNPage() {
                 </button>
               ))}
             </div>
+            {luxuryCount > 0 && (
+              <button
+                onClick={() => setShowLuxuryOnly(v => !v)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${showLuxuryOnly ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'}`}
+                title={t('luxuryFilterHint')}
+              >
+                💎 {showLuxuryOnly ? t('luxuryFilterShowingOnly', { count: luxuryCount }) : t('luxuryFilterShowOnly', { count: luxuryCount })}
+              </button>
+            )}
           </div>
 
           {/* Faktur List — inline edit (PPh21 패턴): 행 클릭 → expand → onBlur PUT */}
