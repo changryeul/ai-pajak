@@ -158,7 +158,11 @@ export default function PPNPage() {
       const d = data.data || {};
       const outMsg = t('wholesaleOutImported', { count: d.outInserted ?? 0 });
       const inMsg = t('wholesaleInImported', { count: d.inInserted ?? 0 });
-      showMsg('success', `${outMsg} / ${inMsg}`);
+      const luxuryCount = d.luxuryClassified ?? 0;
+      const luxuryMsg = luxuryCount > 0
+        ? ` · ${t('luxuryClassifiedToast', { count: luxuryCount })}`
+        : '';
+      showMsg('success', `${outMsg} / ${inMsg}${luxuryMsg}`);
 
       // Sync the page period selector to the imported month and refresh.
       const [py, pm] = importPeriod.split('-').map(Number);

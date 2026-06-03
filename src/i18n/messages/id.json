@@ -3745,6 +3745,7 @@
     "luxuryEssential": "Esensial",
     "luxuryToggleLabel": "Barang Mewah",
     "luxuryToggleHint": "PMK 131/2024 Lampiran A — Helikopter / Perhiasan / Wiski dll. dikenakan PPN penuh 12%. Barang esensial menggunakan DPP × 11/12 × 12% = efektif 11%.",
+    "luxuryClassifiedToast": "{count} baris diklasifikasikan sebagai Barang Mewah (atur ulang di tabel bila perlu)",
     "noData": "Tidak ada data",
     "fakturKeluaran": "Faktur Keluaran",
     "fakturMasukan": "Faktur Masukan",

@@ -3745,6 +3745,7 @@
     "luxuryEssential": "普通",
     "luxuryToggleLabel": "奢侈品 (Luxury)",
     "luxuryToggleHint": "PMK 131/2024 Lampiran A — 直升机 / 珠宝 / 威士忌等课税 12%。普通商品按 DPP × 11/12 × 12% = 实效 11%。",
+    "luxuryClassifiedToast": "已自动分类 {count} 行为奢侈品 (如需可在表格中切换)",
     "noData": "无数据",
     "fakturKeluaran": "Faktur Keluaran（销项）",
     "fakturMasukan": "Faktur Masukan（进项）",
