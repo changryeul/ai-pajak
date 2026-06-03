@@ -6,6 +6,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 export interface MonthlyItem {
   period: string; // YYYY-MM
@@ -237,4 +238,101 @@ export class AnnualAggregator {
       dataSource: 'MONTHLY_FILINGS',
     };
   }
+}
+
+/**
+ * Closing-wizard-friendly credit summary. Server-side only — uses the admin
+ * client so the operator/consultant variants of the closing wizard endpoint
+ * can call this without the browser RLS gate. Customers still hit the same
+ * code path because `customer_id` is bound to the session row that owns the
+ * closing session before we call here.
+ *
+ * Returns per-tax-type totals + a small breakdown of where the numbers came
+ * from so the UI can show "auto-detected" badges and source tables.
+ */
+export interface ClosingCreditSummary {
+  pph22: number;
+  pph23: number;
+  pph25: number;
+  pph26: number;
+  sources: {
+    pph22: { table: string; rowCount: number };
+    pph23: { table: string; rowCount: number };
+    pph25: { table: string; rowCount: number };
+    pph26: { table: string; rowCount: number };
+  };
+}
+
+export async function aggregateClosingCredits(params: {
+  customerId: string;
+  fiscalYear: number;
+}): Promise<ClosingCreditSummary> {
+  const sb = getSupabaseAdmin();
+  const yearPrefix = `${params.fiscalYear}-`;
+
+  const [pph22Res, pph23Res, pph26Res, pph25Res] = await Promise.all([
+    // PPh22 — `tax_calculation` fallback (consistent with AnnualAggregator).
+    sb
+      .from('tax_calculation')
+      .select('calculation_result')
+      .eq('customer_id', params.customerId)
+      .eq('tax_type', 'PPh22')
+      .like('tax_period', `${yearPrefix}%`),
+
+    // PPh23 — sum of withheld tax_amount per transaction.
+    sb
+      .from('pph23_transaction')
+      .select('tax_amount')
+      .eq('customer_id', params.customerId)
+      .like('tax_period', `${yearPrefix}%`),
+
+    // PPh26 — same shape as PPh23.
+    sb
+      .from('pph26_transaction')
+      .select('tax_amount')
+      .eq('customer_id', params.customerId)
+      .like('tax_period', `${yearPrefix}%`),
+
+    // PPh25 — monthly installments actually paid.
+    sb
+      .from('tax_monthly_payment')
+      .select('amount_paid')
+      .eq('customer_id', params.customerId)
+      .eq('tax_type', 'PPh25')
+      .like('tax_period', `${yearPrefix}%`),
+  ]);
+
+  let pph22Total = 0;
+  for (const r of pph22Res.data ?? []) {
+    const v = (r as { calculation_result?: { calculatedTax?: number } }).calculation_result;
+    pph22Total += Number(v?.calculatedTax ?? 0);
+  }
+
+  let pph23Total = 0;
+  for (const r of pph23Res.data ?? []) {
+    pph23Total += Number((r as { tax_amount?: number | string }).tax_amount ?? 0);
+  }
+
+  let pph26Total = 0;
+  for (const r of pph26Res.data ?? []) {
+    pph26Total += Number((r as { tax_amount?: number | string }).tax_amount ?? 0);
+  }
+
+  let pph25Total = 0;
+  for (const r of pph25Res.data ?? []) {
+    pph25Total += Number((r as { amount_paid?: number | string }).amount_paid ?? 0);
+  }
+
+  return {
+    pph22: Math.round(pph22Total),
+    pph23: Math.round(pph23Total),
+    pph25: Math.round(pph25Total),
+    pph26: Math.round(pph26Total),
+    sources: {
+      pph22: { table: 'tax_calculation', rowCount: (pph22Res.data ?? []).length },
+      pph23: { table: 'pph23_transaction', rowCount: (pph23Res.data ?? []).length },
+      pph25: { table: 'tax_monthly_payment', rowCount: (pph25Res.data ?? []).length },
+      pph26: { table: 'pph26_transaction', rowCount: (pph26Res.data ?? []).length },
+    },
+  };
 }

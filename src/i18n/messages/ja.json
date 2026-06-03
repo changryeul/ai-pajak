@@ -8892,7 +8892,12 @@
       },
       "subtotal": "税額控除合計",
       "prev": "戻る",
-      "next": "次へ"
+      "next": "次へ",
+      "autoDetected": "自動検出",
+      "autoDetectedHint": "以下の値は月次申告から自動入力されました。必要に応じて手動で修正できます。",
+      "autoDetectedBadge": "自動",
+      "autoFromTable": "{table} から {rowCount} 行",
+      "autoComputedAt": "計算時刻"
     },
     "calc": {
       "title": "2025年法人税 (PPh Badan) 計算",

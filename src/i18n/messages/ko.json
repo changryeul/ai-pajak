@@ -9014,7 +9014,12 @@
       },
       "subtotal": "세액 공제 합계",
       "prev": "이전",
-      "next": "다음"
+      "next": "다음",
+      "autoDetected": "자동 감지됨",
+      "autoDetectedHint": "아래 값은 월 신고 데이터에서 자동으로 채워졌습니다. 필요 시 수동으로 수정 가능합니다.",
+      "autoDetectedBadge": "자동 감지",
+      "autoFromTable": "{rowCount}개 row from {table}",
+      "autoComputedAt": "계산 시각"
     },
     "calc": {
       "title": "2025년 법인세 (PPh Badan) 계산",

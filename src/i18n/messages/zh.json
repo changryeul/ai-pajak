@@ -8892,7 +8892,12 @@
       },
       "subtotal": "税收抵免总额",
       "prev": "上一步",
-      "next": "下一步"
+      "next": "下一步",
+      "autoDetected": "自动检测",
+      "autoDetectedHint": "下方数值已从月度申报自动填写，您可以手动调整。",
+      "autoDetectedBadge": "自动",
+      "autoFromTable": "来自 {table} 的 {rowCount} 行",
+      "autoComputedAt": "计算时间"
     },
     "calc": {
       "title": "2025年企业所得税 (PPh Badan) 计算",

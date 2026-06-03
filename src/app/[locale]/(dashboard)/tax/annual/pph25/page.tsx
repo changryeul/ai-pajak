@@ -318,7 +318,14 @@ export default function Pph25ClosingPage() {
               />
             )}
             {step === 'credit' && (
-              <CreditStep t={t} data={data} onChange={updateData} onPrev={prev} onNext={next} />
+              <CreditStep
+                t={t}
+                data={data}
+                onChange={updateData}
+                onPrev={prev}
+                onNext={next}
+                sessionId={closing.session?.id ?? null}
+              />
             )}
             {step === 'calc' && (
               <CalcStep
@@ -961,40 +968,158 @@ function AdjustStep({
   );
 }
 
+interface AutoCredits {
+  pph22: number;
+  pph23: number;
+  pph25: number;
+  pph26: number;
+  sources: {
+    pph22: { table: string; rowCount: number };
+    pph23: { table: string; rowCount: number };
+    pph25: { table: string; rowCount: number };
+    pph26: { table: string; rowCount: number };
+  };
+  computedAt: string;
+}
+
 function CreditStep({
-  t, data, onChange, onPrev, onNext,
+  t, data, onChange, onPrev, onNext, sessionId,
 }: {
   t: T;
   data: WizardData;
   onChange: (patch: Partial<WizardData>) => void;
   onPrev: () => void;
   onNext: () => void;
+  sessionId: string | null;
 }) {
   const items: ('pph22' | 'pph23' | 'pph24' | 'pph25')[] = ['pph22', 'pph23', 'pph24', 'pph25'];
   const subtotal = items.reduce((s, k) => s + Number(data[k] ?? 0), 0);
+
+  // Auto-credits: GET on step entry, prefill only empty fields. User edits
+  // always win — we never overwrite a non-zero existing value.
+  const [autoCredits, setAutoCredits] = useState<AutoCredits | null>(null);
+  const [autoLoading, setAutoLoading] = useState<boolean>(false);
+  const prefilledRef = useRef(false);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    if (prefilledRef.current) return;
+    const ac = new AbortController();
+    setAutoLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(`/api/tax/annual-closing/${sessionId}/auto-credits`, {
+          signal: ac.signal,
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!json?.success || !json.data) return;
+        const a: AutoCredits = json.data;
+        setAutoCredits(a);
+
+        // User-input-wins: prefill only fields that are currently empty/zero.
+        const patch: Partial<WizardData> = {};
+        if (!Number(data.pph22 ?? 0) && a.pph22 > 0) patch.pph22 = a.pph22;
+        if (!Number(data.pph23 ?? 0) && a.pph23 > 0) patch.pph23 = a.pph23;
+        // pph24 has no monthly source — leave to manual.
+        if (!Number(data.pph25 ?? 0) && a.pph25 > 0) patch.pph25 = a.pph25;
+        if (Object.keys(patch).length > 0) onChange(patch);
+        prefilledRef.current = true;
+      } catch {
+        /* swallow — auto-credits is read-only convenience, never blocking */
+      } finally {
+        setAutoLoading(false);
+      }
+    })();
+    return () => ac.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
+
+  const matches = (k: 'pph22' | 'pph23' | 'pph25'): boolean => {
+    if (!autoCredits) return false;
+    const v = Number(data[k] ?? 0);
+    return v > 0 && v === autoCredits[k];
+  };
+
   return (
     <div>
       <p className="text-base font-bold text-slate-900">{t('credit.title')}</p>
       <p className="text-sm text-slate-500 mt-1">{t('credit.subtitle')}</p>
 
+      {autoCredits && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm mt-4">
+          <p className="font-semibold text-emerald-900">
+            <Sparkles className="inline-block h-4 w-4 mr-1 -mt-0.5" />
+            {t('credit.autoDetected')}
+            <span className="text-[11px] text-emerald-700 ml-2 font-normal">
+              {t('credit.autoComputedAt')}: {new Date(autoCredits.computedAt).toLocaleString()}
+            </span>
+          </p>
+          <ul className="mt-2 text-xs text-emerald-800 space-y-0.5">
+            <li>
+              PPh22 — {t('credit.autoFromTable', {
+                rowCount: autoCredits.sources.pph22.rowCount,
+                table: autoCredits.sources.pph22.table,
+              })}
+            </li>
+            <li>
+              PPh23 — {t('credit.autoFromTable', {
+                rowCount: autoCredits.sources.pph23.rowCount,
+                table: autoCredits.sources.pph23.table,
+              })}
+            </li>
+            <li>
+              PPh25 — {t('credit.autoFromTable', {
+                rowCount: autoCredits.sources.pph25.rowCount,
+                table: autoCredits.sources.pph25.table,
+              })}
+            </li>
+            <li>
+              PPh26 — {t('credit.autoFromTable', {
+                rowCount: autoCredits.sources.pph26.rowCount,
+                table: autoCredits.sources.pph26.table,
+              })}
+            </li>
+          </ul>
+          <p className="text-[11px] text-emerald-700 mt-2">{t('credit.autoDetectedHint')}</p>
+        </div>
+      )}
+      {autoLoading && !autoCredits && (
+        <p className="text-xs text-slate-400 mt-2">
+          <Loader2 className="inline h-3 w-3 animate-spin mr-1" />
+          ...
+        </p>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-        {items.map((k) => (
-          <div key={k} className="rounded-lg border border-slate-200 p-4">
-            <p className="text-sm font-bold text-slate-900">{t(`credit.${k}.label`)}</p>
-            <p className="text-xs text-slate-500 mt-1">{t(`credit.${k}.desc`)}</p>
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="0"
-              className="mt-3 text-right tabular-nums"
-              value={data[k] ? String(data[k]) : ''}
-              onChange={(e) => onChange({ [k]: parseNum(e.target.value) } as Partial<WizardData>)}
-            />
-            {data[k] ? (
-              <p className="text-[11px] text-slate-500 mt-1 text-right">{fmtRp(Number(data[k]))}</p>
-            ) : null}
-          </div>
-        ))}
+        {items.map((k) => {
+          const isAuto = (k === 'pph22' || k === 'pph23' || k === 'pph25') && matches(k);
+          return (
+            <div key={k} className="rounded-lg border border-slate-200 p-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-bold text-slate-900">{t(`credit.${k}.label`)}</p>
+                {isAuto && (
+                  <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[10px] font-medium">
+                    <Sparkles className="h-3 w-3 mr-0.5" />
+                    {t('credit.autoDetectedBadge')}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">{t(`credit.${k}.desc`)}</p>
+              <Input
+                type="text"
+                inputMode="numeric"
+                placeholder="0"
+                className="mt-3 text-right tabular-nums"
+                value={data[k] ? String(data[k]) : ''}
+                onChange={(e) => onChange({ [k]: parseNum(e.target.value) } as Partial<WizardData>)}
+              />
+              {data[k] ? (
+                <p className="text-[11px] text-slate-500 mt-1 text-right">{fmtRp(Number(data[k]))}</p>
+              ) : null}
+            </div>
+          );
+        })}
       </div>
 
       <div className="rounded-lg bg-slate-100 px-4 py-3 mt-5 flex items-center justify-between">

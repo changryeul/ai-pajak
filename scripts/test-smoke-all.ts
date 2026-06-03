@@ -57,6 +57,7 @@ const STEPS: Step[] = [
   { name: 'pph23 invoice photo attach', file: 'verify-pph23-invoice-photo.ts' },
   { name: 'SPT Masa PPN dpp_nilai_lain split', file: 'verify-spt-masa-ppn-split.ts' },
   { name: 'pph26 wholesale import contract', file: 'verify-pph26-import-contract.ts' },
+  { name: 'closing credit auto-fill', file: 'verify-closing-auto-credits.ts' },
   // --- Schema drift guard (2026-06-03 audit) ---------------------------
   // Catches migration-history-vs-actual-schema drift early. The 2026-04-10
   // batch incident lost 30+ columns + 1 entire table silently; this runs

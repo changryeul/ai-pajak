@@ -8892,7 +8892,12 @@
       },
       "subtotal": "Total Kredit Pajak",
       "prev": "Sebelumnya",
-      "next": "Selanjutnya"
+      "next": "Selanjutnya",
+      "autoDetected": "Terdeteksi Otomatis",
+      "autoDetectedHint": "Nilai di bawah ini diisi otomatis dari laporan bulanan Anda. Anda dapat menyesuaikannya secara manual.",
+      "autoDetectedBadge": "Otomatis",
+      "autoFromTable": "{rowCount} baris dari {table}",
+      "autoComputedAt": "Dihitung pada"
     },
     "calc": {
       "title": "Hitung PPh Badan 2025",

@@ -8892,7 +8892,12 @@
       },
       "subtotal": "Total Tax Credits",
       "prev": "Back",
-      "next": "Next"
+      "next": "Next",
+      "autoDetected": "Auto-detected",
+      "autoDetectedHint": "Values below were auto-filled from your monthly filings. You can adjust them manually.",
+      "autoDetectedBadge": "Auto",
+      "autoFromTable": "{rowCount} rows from {table}",
+      "autoComputedAt": "Computed at"
     },
     "calc": {
       "title": "Calculate 2025 corporate tax (PPh Badan)",
