@@ -23,7 +23,7 @@ import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
 import { fmtRp } from '@/lib/utils';
 import { PageTitle } from '@/components/layout/PageTitle';
-import { parseTabularFile, rowsToCsv, findBestHeaderRow } from '@/lib/tax/bulk-import/client-file-parser';
+import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
 
 interface Employee {
   id: string;
@@ -789,207 +789,76 @@ function PPh21DataInputSection({
     }
   };
 
-  // Column mapping state
-  const [mappingStep, setMappingStep] = useState<'idle' | 'mapping' | 'importing'>('idle');
-  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
-  const [csvPreview, setCsvPreview] = useState<string[][]>([]);
-  const [columnMappings, setColumnMappings] = useState<Array<{ sourceColumn: string; targetField: string; confidence: string }>>([]);
-  const [mappedFile, setMappedFile] = useState<File | null>(null);
+  // Strict template-only upload — see handleTemplateUpload below.
+  // Header cell must match a template column name exactly (case-insensitive
+  // trim). employee_name + gross_salary required; others optional.
+  const TEMPLATE_REQUIRED_COLS = ['employee_name', 'gross_salary'] as const;
+  const TEMPLATE_OPTIONAL_COLS = [
+    'employee_npwp', 'employee_nik', 'ptkp_category', 'position_allowance',
+    'overtime_pay', 'meal_allowance', 'transport_allowance', 'other_allowances',
+    'bonus', 'thr', 'jht_employee', 'jp_employee', 'bpjs_kesehatan',
+    'other_deductions', 'worker_type',
+  ] as const;
+  const TEMPLATE_ALL_COLS = [...TEMPLATE_REQUIRED_COLS, ...TEMPLATE_OPTIONAL_COLS];
 
-  const TARGET_FIELDS_LIST = [
-    { field: '', label: `— ${tp('l4_98adeb')} —` },
-    { field: 'employee_name', label: `${tp('l5_59ec33')} *` },
-    { field: 'employee_npwp', label: 'NPWP' },
-    { field: 'employee_nik', label: 'NIK' },
-    { field: 'ptkp_category', label: 'PTKP' },
-    { field: 'gross_salary', label: `${tp('l6_34d71f')} *` },
-    { field: 'position_allowance', label: tp('l7_8188f9') },
-    { field: 'overtime_pay', label: tp('l8_34c079') },
-    { field: 'meal_allowance', label: tp('l9_dfe00f') },
-    { field: 'transport_allowance', label: tp('l10_d0b2e2') },
-    { field: 'other_allowances', label: tp('l11_cafd07') },
-    { field: 'bonus', label: tp('l12_e7fffe') },
-    { field: 'thr', label: 'THR' },
-    { field: 'jht_employee', label: 'JHT' },
-    { field: 'jp_employee', label: 'JP' },
-    { field: 'bpjs_kesehatan', label: 'BPJS' },
-    { field: 'other_deductions', label: tp('l13_2289a4') },
-    { field: 'worker_type', label: tp('l14_67e774') },
-  ];
-
-  const handleExcelUpload = async (files: FileList | null) => {
+  /**
+   * Strict template-only upload.
+   * 헤더가 우리 템플릿 컬럼명과 정확히 (case-insensitive trim) 매칭되어야 함.
+   * employee_name + gross_salary 필수, 나머지 optional.
+   * mapping confirm UI / mapping memory 호출 X — 즉시 import.
+   * 필수 컬럼 누락 시 명시적 에러 toast + 진행 막힘.
+   */
+  const handleTemplateUpload = async (files: FileList | null) => {
     if (!files || !customerId) return;
     const file = files[0];
-    setMappedFile(file);
-
-    // Read CSV/Excel via shared helper (csv + xlsx + xls all supported).
-    // Then auto-detect header row to skip meta header rows like "YEAR/2023"
-    // or A-codes that appear above the real column names in customer files.
-    let headers: string[];
-    let preview: string[][];
+    setUploading(true);
     try {
       const parsed = await parseTabularFile(file);
       const allRows = [parsed.headers, ...parsed.dataRows];
 
-      // Auto-detect header — skip meta rows like 'YEAR/2023' or A-code rows
-      const PPH21_HINTS = [
-        /^(name|nama|이름|emp\s*id|employee)/i,
-        /^npwp$/i,
-        /^nik$/i,
-        /^(gaji|salary|gross|기본급)/i,
-        /^(tunjangan|allowance|수당)/i,
-        /^(tax\s*status|ptkp|status)$/i,
-        /^(status\s*pegawai|worker|jenis)/i,
-        /^(honorarium|honor|bonus|thr)/i,
-        /^(jht|jp|bpjs|kesehatan|pensiun)/i,
-      ];
-      const headerIdx = findBestHeaderRow(allRows, PPH21_HINTS);
-      headers = allRows[headerIdx];
-      const dataRows = allRows.slice(headerIdx + 1);
-      preview = dataRows.slice(0, 3);
-    } catch (err) {
-      showMsg('error', `${tp('l15_5d59d2')}: ${(err as Error).message}`);
-      return;
-    }
-
-    setCsvHeaders(headers);
-    setCsvPreview(preview);
-
-    // Check mapping memory first
-    try {
-      const memRes = await fetch(`/api/tax/employees/mapping?customerId=${customerId}&headers=${encodeURIComponent(JSON.stringify(headers))}`);
-      const memData = await memRes.json();
-      if (memData.success && memData.remembered && memData.data?.mappings) {
-        const saved = memData.data.mappings as Array<{ sourceColumn: string; targetField: string }>;
-        const autoMappings = headers.map(h => {
-          const s = saved.find(m => m.sourceColumn === h);
-          return { sourceColumn: h, targetField: s?.targetField || '', confidence: s ? 'HIGH' : 'NONE' };
-        });
-        setColumnMappings(autoMappings);
-        setMappingStep('mapping');
-        showMsg('success', `${tp('l16_3884de')} (${memData.data.used_count}${tp('l17_66d39a')}`);
-        return;
-      }
-    } catch { /* fallback to keyword mapping */ }
-
-    // No memory — auto-map using keyword matching (expanded with Indonesian payroll terms)
-    const KEYWORD_MAP: Record<string, string[]> = {
-      employee_name: ['nama', 'name', 'karyawan', 'pegawai', '이름', 'employee', 'emp_name'],
-      employee_npwp: ['npwp', 'tax_id', 'tax id'],
-      employee_nik: ['nik', 'ktp', 'no ktp', 'identitas'],
-      ptkp_category: ['ptkp', 'tax status', 'status pajak', 'kategori ptkp'],
-      gross_salary: ['gaji', 'salary', 'basic', 'pokok', 'base', '기본급', 'gross', 'gapok', 'gaji pokok', 'pendapatan', 'monthly salary'],
-      position_allowance: ['jabatan', 'position', '직책', 'tunjangan jabatan'],
-      overtime_pay: ['lembur', 'overtime', '초과', 'uang lembur'],
-      meal_allowance: ['makan', 'meal', '식대', 'tunjangan makan', 'uang makan'],
-      transport_allowance: ['transport', '교통', 'tunjangan transport', 'transportasi'],
-      other_allowances: ['tunjangan lain', 'tunjangan lainnya', 'allowance', '수당', 'honorarium', 'imbalan', 'tunjangan'],
-      bonus: ['bonus', '보너스', 'tantiem', 'gratifikasi'],
-      thr: ['thr', 'hari raya', 'tunjangan hari raya'],
-      jht_employee: ['jht', 'hari tua', 'jaminan hari tua', 'iuran jht'],
-      jp_employee: ['jp', 'pensiun', 'jaminan pensiun', 'iuran pensiun'],
-      bpjs_kesehatan: ['bpjs', 'kesehatan', 'bpjs kesehatan', 'asuransi kesehatan'],
-      other_deductions: ['potongan', 'deduction', '공제', 'pemotongan', 'iuran lain'],
-      worker_type: ['type', 'tipe', 'jenis', '유형', 'status pegawai', 'worker type', 'pegawai tetap'],
-    };
-
-    const usedTargets = new Set<string>();
-    const mappings = headers.map(h => {
-      const lower = h.toLowerCase();
-      for (const [field, keywords] of Object.entries(KEYWORD_MAP)) {
-        if (usedTargets.has(field)) continue;
-        if (keywords.some(kw => lower.includes(kw) || kw.includes(lower))) {
-          usedTargets.add(field);
-          return { sourceColumn: h, targetField: field, confidence: lower === keywords[0] ? 'HIGH' : 'MEDIUM' };
+      // Find header row by anchor 'employee_name'. Templates we generate
+      // place the header at row 0; tolerate a few meta rows above.
+      let headerIdx = 0;
+      for (let i = 0; i < Math.min(allRows.length, 5); i++) {
+        if (allRows[i].some((c) => c.trim().toLowerCase() === 'employee_name')) {
+          headerIdx = i;
+          break;
         }
       }
-      return { sourceColumn: h, targetField: '', confidence: 'NONE' };
-    });
+      const headers = allRows[headerIdx].map((h) => h.trim().toLowerCase());
+      const dataRows = allRows.slice(headerIdx + 1).filter((r) => r.some((c) => c !== ''));
 
-    const hasRequired = mappings.some(m => m.targetField === 'employee_name')
-      && mappings.some(m => m.targetField === 'gross_salary');
-    const matchedCount = mappings.filter(m => m.targetField).length;
-    const matchRate = matchedCount / Math.max(headers.length, 1);
+      // Strict required-column check
+      const missing = TEMPLATE_REQUIRED_COLS.filter((col) => !headers.includes(col));
+      if (missing.length > 0) {
+        showMsg('error', tp('templateHeaderMismatch', { missing: missing.join(', ') }));
+        setUploading(false);
+        return;
+      }
 
-    setColumnMappings(mappings);
+      // Build mapped CSV with template columns only (skip unknown columns)
+      const presentCols = TEMPLATE_ALL_COLS
+        .map((col) => ({ col, idx: headers.indexOf(col) }))
+        .filter((c) => c.idx >= 0);
+      const mappedHeaders = presentCols.map((c) => c.col);
+      const mappedRows = dataRows.map((row) => presentCols.map((c) => row[c.idx] ?? ''));
+      const mappedCsv = rowsToCsv(mappedHeaders, mappedRows);
 
-    if (hasRequired && matchRate >= 0.7) {
-      // 70%+ auto-mapped + both required matched → skip UI, import directly
-      showMsg('success', `${matchedCount}/${headers.length} 컬럼 자동 매핑됨. 바로 가져옵니다...`);
-      setMappingStep('mapping');
-      // Use setTimeout to ensure state updates before triggering import
-      setTimeout(() => handleConfirmMapping(), 100);
-    } else {
-      setMappingStep('mapping');
-    }
-  };
+      const blob = new Blob(['﻿' + mappedCsv], { type: 'text/csv' });
+      const fd = new FormData();
+      fd.append('file', blob, 'mapped.csv');
+      fd.append('customerId', customerId);
 
-  const handleConfirmMapping = async () => {
-    if (!mappedFile || !customerId) return;
-    setMappingStep('importing');
-    setUploading(true);
-
-    // Parse original CSV/XLSX, rebuild CSV with mapped headers, submit as CSV blob.
-    // Re-apply header detection so dataRows match the headers we mapped against
-    // (handleExcelUpload may have skipped meta rows like "YEAR/2023").
-    let dataRows: string[][];
-    try {
-      const parsed = await parseTabularFile(mappedFile);
-      const allRows = [parsed.headers, ...parsed.dataRows];
-      const PPH21_HINTS = [
-        /^(name|nama|이름|emp\s*id|employee)/i,
-        /^npwp$/i,
-        /^nik$/i,
-        /^(gaji|salary|gross|기본급)/i,
-        /^(tunjangan|allowance|수당)/i,
-        /^(tax\s*status|ptkp|status)$/i,
-        /^(status\s*pegawai|worker|jenis)/i,
-        /^(honorarium|honor|bonus|thr)/i,
-        /^(jht|jp|bpjs|kesehatan|pensiun)/i,
-      ];
-      const headerIdx = findBestHeaderRow(allRows, PPH21_HINTS);
-      dataRows = allRows.slice(headerIdx + 1).filter(r => r.some(c => c !== ''));
-    } catch (err) {
-      showMsg('error', tp('l20_ceee68') + `: ${(err as Error).message}`);
-      setMappingStep('mapping');
-      setUploading(false);
-      return;
-    }
-    const mappedHeaders = columnMappings.map(m => m.targetField || 'SKIP');
-    const mappedCsv = rowsToCsv(mappedHeaders, dataRows);
-    const blob = new Blob(['\uFEFF' + mappedCsv], { type: 'text/csv' });
-    const fd = new FormData();
-    fd.append('file', blob, 'mapped.csv');
-    fd.append('customerId', customerId);
-    if (confirmedPeriod) fd.append('taxPeriod', confirmedPeriod);
-
-    try {
       const res = await fetch('/api/tax/employees/import', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.success) {
         showMsg('success', `${data.data?.imported || 0}${tp('l18_2f5df1')}${data.data?.skipped ? `, ${data.data.skipped}${tp('l19_e2954a')}` : ''}`);
         onComplete();
-        setMappingStep('idle');
-
-        // Save mapping to memory for future auto-use
-        try {
-          await fetch('/api/tax/employees/mapping', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              customerId,
-              headers: csvHeaders,
-              mappings: columnMappings.filter(m => m.targetField),
-            }),
-          });
-        } catch { /* non-blocking */ }
       } else {
         showMsg('error', data.error || tp('l20_ceee68'));
-        setMappingStep('mapping');
       }
-    } catch {
-      showMsg('error', tp('l21_175c5f'));
-      setMappingStep('mapping');
+    } catch (err) {
+      showMsg('error', `${tp('l21_175c5f')}: ${err instanceof Error ? err.message : 'unknown'}`);
     } finally {
       setUploading(false);
     }
@@ -1040,7 +909,7 @@ function PPh21DataInputSection({
                 </p>
               )}
               <input ref={excelInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls"
-                onChange={e => handleExcelUpload(e.target.files)} />
+                onChange={e => handleTemplateUpload(e.target.files)} />
             </div>
             <div className="mt-3 pt-3 border-t border-gray-100">
               <p className="text-[10px] text-gray-500 flex items-center gap-1">
@@ -1077,87 +946,6 @@ function PPh21DataInputSection({
         </Card>
       </div>
 
-      {/* Column mapping confirmation */}
-      {mappingStep === 'mapping' && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-sm flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-blue-600" />
-                {tp('l38_f14ec9')} — AI{tp('l39_b33aa4')}
-              </h3>
-              <Button size="sm" variant="ghost" onClick={() => setMappingStep('idle')}>
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-            <p className="text-[11px] text-blue-700">
-              {tp('l40_2e3d2f')}
-            </p>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs border-collapse">
-                <thead>
-                  <tr className="bg-white">
-                    <th className="p-2 text-left border">{tp('excelColumn')}</th>
-                    <th className="p-2 text-left border">{tp('mappingTarget')}</th>
-                    <th className="p-2 text-center border">{tp('l43_fc4409')}</th>
-                    <th className="p-2 text-left border">{tp('l44_b12106')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {csvHeaders.map((header, i) => {
-                    const mapping = columnMappings[i];
-                    return (
-                      <tr key={i} className="border-b">
-                        <td className="p-2 border font-mono text-[11px]">{header}</td>
-                        <td className="p-1 border">
-                          <select
-                            value={mapping?.targetField || ''}
-                            onChange={e => {
-                              const next = [...columnMappings];
-                              next[i] = { ...next[i], targetField: e.target.value, confidence: e.target.value ? 'HIGH' : 'NONE' };
-                              setColumnMappings(next);
-                            }}
-                            className={`w-full h-7 px-1 text-[11px] border rounded ${
-                              mapping?.confidence === 'HIGH' ? 'bg-green-50 border-green-300' :
-                              mapping?.confidence === 'MEDIUM' ? 'bg-amber-50 border-amber-300' :
-                              mapping?.targetField ? 'bg-blue-50' : 'bg-gray-50'
-                            }`}>
-                            {TARGET_FIELDS_LIST.map(tf => (
-                              <option key={tf.field} value={tf.field}>{tf.label}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="p-2 border text-center">
-                          <Badge className={
-                            mapping?.confidence === 'HIGH' ? 'text-[8px] bg-green-100 text-green-700' :
-                            mapping?.confidence === 'MEDIUM' ? 'text-[8px] bg-amber-100 text-amber-700' :
-                            'text-[8px] bg-gray-100 text-gray-500'
-                          }>{mapping?.confidence || 'NONE'}</Badge>
-                        </td>
-                        <td className="p-2 border text-[10px] text-gray-500 font-mono">
-                          {csvPreview.slice(0, 2).map((row, ri) => row[i] || '').join(' | ')}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-gray-500">
-                {tp('l45_b43f85')} + {tp('l46_e3b66d')}
-              </p>
-              <Button size="sm" onClick={handleConfirmMapping}
-                disabled={uploading || !columnMappings.some(m => m.targetField === 'employee_name') || !columnMappings.some(m => m.targetField === 'gross_salary')}>
-                {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-                {tp('l47_b8a4a8')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Month picker dialog — must select a tax month before uploading */}
       <Dialog open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>

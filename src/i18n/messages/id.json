@@ -4393,6 +4393,7 @@
     "l19_e2954a": "orang dilewati",
     "l20_ceee68": "Impor gagal",
     "l21_175c5f": "Kesalahan server",
+    "templateHeaderMismatch": "Mohon gunakan template Excel. Kolom wajib hilang: {missing}",
     "l22_643eb4": "Pilih cara input data gaji",
     "l23_5c33c2": "Input data gaji karyawan melalui salah satu dari tiga metode yang paling nyaman",
     "l24_5c44c8": "Unduh Template",
