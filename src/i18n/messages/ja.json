@@ -4395,7 +4395,7 @@
     "l21_175c5f": "Server error",
     "templateHeaderMismatch": "Excel テンプレートを使用してください。必須列の不足: {missing}",
     "l22_643eb4": "Choose how to enter salary data",
-    "l23_5c33c2": "Enter employee salary data using whichever of the three methods is most convenient",
+    "l23_5c33c2": "2 つの方法のいずれかで従業員給与データを入力 (Excel テンプレートのダウンロード または 作成ファイルのアップロード)",
     "l24_5c44c8": "Download Template",
     "l25_5f1127": "Download the template, fill in employee salary data, and upload",
     "l26_f7bc58": "Excel テンプレートをダウンロード (.xlsx)",

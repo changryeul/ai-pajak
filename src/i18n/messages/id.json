@@ -4395,7 +4395,7 @@
     "l21_175c5f": "Kesalahan server",
     "templateHeaderMismatch": "Mohon gunakan template Excel. Kolom wajib hilang: {missing}",
     "l22_643eb4": "Pilih cara input data gaji",
-    "l23_5c33c2": "Input data gaji karyawan melalui salah satu dari tiga metode yang paling nyaman",
+    "l23_5c33c2": "Input data gaji karyawan menggunakan salah satu dari dua metode (unduh template Excel atau unggah file yang sudah diisi)",
     "l24_5c44c8": "Unduh Template",
     "l25_5f1127": "Unduh template, isi data gaji karyawan, lalu unggah",
     "l26_f7bc58": "Unduh template Excel (.xlsx)",
