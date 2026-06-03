@@ -479,6 +479,7 @@ export default function PPNPage() {
                         <th className="text-right py-2.5 px-3">DPP</th>
                         <th className="text-right py-2.5 px-3">{t('dppNilaiLain')}</th>
                         <th className="text-right py-2.5 px-3">PPN</th>
+                        <th className="text-center py-2.5 px-3">{t('luxuryHeader')}</th>
                         <th className="text-center py-2.5 px-3">Status</th>
                         <th className="text-right py-2.5 px-3"></th>
                       </tr>
@@ -510,6 +511,13 @@ export default function PPNPage() {
                               <td className="py-2 px-3 text-right font-mono text-xs text-gray-500">{f.dpp_nilai_lain != null ? fmt(Number(f.dpp_nilai_lain)) : '—'}</td>
                               <td className="py-2 px-3 text-right font-mono text-xs font-medium text-orange-600">{fmt(f.ppn)}</td>
                               <td className="py-2 px-3 text-center">
+                                {f.is_luxury === true ? (
+                                  <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-300">💎 LUXURY</Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-[10px] text-gray-500">{t('luxuryEssential')}</Badge>
+                                )}
+                              </td>
+                              <td className="py-2 px-3 text-center">
                                 <Badge variant="outline" className="text-[10px]">{f.status}</Badge>
                               </td>
                               <td className="py-2 px-3 text-right">
@@ -528,7 +536,7 @@ export default function PPNPage() {
                             </tr>
                             {isExpanded && (
                               <tr className="bg-gray-50/50">
-                                <td colSpan={10} className="p-4">
+                                <td colSpan={11} className="p-4">
                                   <div className="space-y-3">
                                     {/* Edit banner */}
                                     <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2">
@@ -643,6 +651,29 @@ export default function PPNPage() {
                                           }}
                                         />
                                       </div>
+                                    </div>
+                                    {/* Luxury toggle — PMK 131/2024.
+                                        Essential goods: dpp × 11/12 적용 = effective 11%.
+                                        Luxury items: full 12% PPN (HS code per PMK Lampiran A). */}
+                                    <div className="rounded-md border border-amber-200 bg-amber-50/40 p-3 flex items-center justify-between gap-3">
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium text-amber-900">{t('luxuryToggleLabel')}</p>
+                                        <p className="text-[11px] text-amber-700/80 mt-0.5">{t('luxuryToggleHint')}</p>
+                                      </div>
+                                      <label className="inline-flex items-center cursor-pointer gap-2">
+                                        <input
+                                          type="checkbox"
+                                          checked={f.is_luxury === true}
+                                          onChange={e => {
+                                            // 토글 시 dpp 같이 보내야 서버가 dpp_nilai_lain 재계산
+                                            updateFaktur(f.id, { isLuxury: e.target.checked, dpp: Number(f.dpp) });
+                                          }}
+                                          className="w-4 h-4 accent-amber-600"
+                                        />
+                                        <span className="text-xs font-medium text-amber-900">
+                                          {f.is_luxury === true ? '💎 LUXURY' : t('luxuryEssential')}
+                                        </span>
+                                      </label>
                                     </div>
                                   </div>
                                 </td>
