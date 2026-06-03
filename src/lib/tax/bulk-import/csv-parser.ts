@@ -86,6 +86,48 @@ export function validatePPh23Rows(parsed: ParseResult): ParseResult {
 }
 
 /**
+ * Validate PPh26 non-resident withholding rows.
+ *
+ * Required: transaction_date, income_type, gross_amount, counterparty_name.
+ * income_type must be one of DIVIDEND / INTEREST / ROYALTY / SERVICE / OTHER —
+ * matches the upstream wholesale importer's `classifyPph26TaxType` output.
+ * (Server's INCOME_TYPES const accepts dividend/interest/royalty/service/
+ * salary/pension/insurance/other lowercase; bulk path accepts the wider
+ * uppercase set and the route normalises to lowercase before insert.)
+ */
+export function validatePPh26Rows(parsed: ParseResult): ParseResult {
+  const requiredFields = ['transaction_date', 'income_type', 'gross_amount', 'counterparty_name'];
+  const validIncomeTypes = ['DIVIDEND', 'INTEREST', 'ROYALTY', 'SERVICE', 'OTHER'];
+
+  let validCount = 0;
+  let errorCount = 0;
+
+  for (const row of parsed.rows) {
+    row.errors = [];
+
+    for (const field of requiredFields) {
+      if (!row.data[field] || row.data[field].trim() === '') {
+        row.errors.push(`Missing: ${field}`);
+      }
+    }
+
+    if (row.data.income_type && !validIncomeTypes.includes(row.data.income_type.toUpperCase())) {
+      row.errors.push(`Invalid income_type: ${row.data.income_type}`);
+    }
+
+    const amount = parseFloat(row.data.gross_amount);
+    if (isNaN(amount) || amount <= 0) {
+      row.errors.push('gross_amount must be positive number');
+    }
+
+    row.isValid = row.errors.length === 0;
+    if (row.isValid) validCount++; else errorCount++;
+  }
+
+  return { ...parsed, validRows: validCount, errorRows: errorCount };
+}
+
+/**
  * Validate PPN faktur rows
  */
 export function validatePPNRows(parsed: ParseResult): ParseResult {
