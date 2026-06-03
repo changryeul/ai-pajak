@@ -48,6 +48,8 @@ const styles = StyleSheet.create({
   summaryValue: { fontSize: 11, fontWeight: 'bold', fontFamily: 'Courier', color: '#1a365d' },
   footer: { marginTop: 20, borderTopWidth: 1, borderTopColor: '#e2e8f0', paddingTop: 8 },
   footerText: { fontSize: 7, color: '#a0aec0' },
+  subSectionTitle: { fontSize: 9, fontWeight: 'bold', color: '#2b6cb0', marginTop: 8, marginBottom: 4 },
+  footnote: { fontSize: 7, color: '#4a5568', marginTop: 8, fontStyle: 'italic' },
 });
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
@@ -184,14 +186,72 @@ function SPTMasaPDFDocument({ data }: { data: SPTMasaPDFData }) {
           </View>
         )}
 
-        {/* PPN Detail */}
+        {/* PPN Detail — PMK 131/2024 split (Phase 3.x).
+            `b.splits` is optional so legacy filings still render.            */}
         {sptMasa.tax_type === 'PPN' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>B. RINCIAN PPN</Text>
-            <View style={styles.row}><Text style={styles.label}>PPN Keluaran (Penjualan)</Text><Text style={styles.value}>: {fmt(b.output_tax || 0)} ({b.sales_count || 0} faktur)</Text></View>
-            <View style={styles.row}><Text style={styles.label}>PPN Masukan (Pembelian)</Text><Text style={styles.value}>: {fmt(b.input_tax || 0)} ({b.purchase_count || 0} faktur)</Text></View>
-            <View style={styles.row}><Text style={styles.label}>Selisih (Net PPN)</Text><Text style={styles.value}>: {fmt(b.net_tax || 0)}</Text></View>
+
+            {/* B.1 PPN Keluaran (sales) */}
+            <Text style={styles.subSectionTitle}>B.1 PPN Keluaran (Penjualan)</Text>
+            {b.splits ? (
+              <>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Essential ({b.splits.sales_essential.count} faktur)</Text>
+                  <Text style={styles.value}>
+                    : DPP {fmt(b.splits.sales_essential.total_dpp)} · DPP Nilai Lain {fmt(b.splits.sales_essential.total_dpp_nilai_lain)} · PPN {fmt(b.splits.sales_essential.total_ppn)}
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Luxury ({b.splits.sales_luxury.count} faktur)</Text>
+                  <Text style={styles.value}>
+                    : DPP {fmt(b.splits.sales_luxury.total_dpp)} · PPN {fmt(b.splits.sales_luxury.total_ppn)}
+                  </Text>
+                </View>
+              </>
+            ) : null}
+            <View style={styles.row}>
+              <Text style={styles.label}>Total PPN Keluaran</Text>
+              <Text style={styles.value}>: {fmt(b.output_tax || 0)} ({b.sales_count || 0} faktur)</Text>
+            </View>
+
+            {/* B.2 PPN Masukan (purchases) */}
+            <Text style={styles.subSectionTitle}>B.2 PPN Masukan (Pembelian)</Text>
+            {b.splits ? (
+              <>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Essential ({b.splits.purchase_essential.count} faktur)</Text>
+                  <Text style={styles.value}>
+                    : DPP {fmt(b.splits.purchase_essential.total_dpp)} · DPP Nilai Lain {fmt(b.splits.purchase_essential.total_dpp_nilai_lain)} · PPN {fmt(b.splits.purchase_essential.total_ppn)}
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Luxury ({b.splits.purchase_luxury.count} faktur)</Text>
+                  <Text style={styles.value}>
+                    : DPP {fmt(b.splits.purchase_luxury.total_dpp)} · PPN {fmt(b.splits.purchase_luxury.total_ppn)}
+                  </Text>
+                </View>
+              </>
+            ) : null}
+            <View style={styles.row}>
+              <Text style={styles.label}>Total PPN Masukan</Text>
+              <Text style={styles.value}>: {fmt(b.input_tax || 0)} ({b.purchase_count || 0} faktur)</Text>
+            </View>
+
+            {/* B.3 Selisih (Net PPN) */}
+            <Text style={styles.subSectionTitle}>B.3 Selisih (Net PPN)</Text>
+            <View style={styles.row}>
+              <Text style={styles.label}>Net PPN</Text>
+              <Text style={styles.value}>
+                : {fmt(b.net_tax || 0)} {(b.net_tax ?? 0) > 0 ? '(KURANG BAYAR)' : (b.net_tax ?? 0) < 0 ? '(LEBIH BAYAR)' : '(NIHIL)'}
+              </Text>
+            </View>
             <View style={styles.row}><Text style={styles.label}>Status</Text><Text style={styles.value}>: {b.status || 'NIHIL'}</Text></View>
+
+            {/* Legal basis footnote (PMK 131/2024) */}
+            {b.legal_basis && (
+              <Text style={styles.footnote}>{b.legal_basis}</Text>
+            )}
           </View>
         )}
 

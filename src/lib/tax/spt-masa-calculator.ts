@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 /**
  * SPT Masa Calculator - Indonesian Monthly Tax Return
@@ -76,6 +77,29 @@ export interface SPTMasaBreakdown {
     dpp: number;
     ppn_amount: number;
   }>;
+
+  // PMK 131/2024 — 4-bucket split (sales/purchase × luxury/essential)
+  // Optional so legacy SPT Masa filings still render without crash.
+  splits?: PPNLuxurySplit;
+  legal_basis?: string;
+}
+
+/**
+ * PMK 131/2024 split — sales/purchase × luxury/essential.
+ * dpp_nilai_lain = essential 의 11/12 조정 후 DPP (luxury 는 dpp 그대로).
+ */
+export interface PPNLuxuryBucket {
+  count: number;
+  total_dpp: number;
+  total_dpp_nilai_lain: number;
+  total_ppn: number;
+}
+
+export interface PPNLuxurySplit {
+  sales_luxury: PPNLuxuryBucket;
+  sales_essential: PPNLuxuryBucket;
+  purchase_luxury: PPNLuxuryBucket;
+  purchase_essential: PPNLuxuryBucket;
 }
 
 export class SPTMasaCalculator {
@@ -390,104 +414,120 @@ export class SPTMasaCalculator {
   /**
    * Calculate PPN monthly summary
    *
-   * Aggregates all PPN calculations for a given month (sales - purchases)
-   * Deadline: End of month
+   * 2026-06-03 Phase 3.x upgrade — source switched from `tax_calculation`
+   * (legacy manual entries) to `ppn_faktur_monthly` (actual import flow).
+   *
+   * Output now includes a 4-bucket split (sales/purchase × luxury/essential)
+   * per PMK 131/2024, with both `dpp` and `dpp_nilai_lain` totals so the
+   * PDF can render the effective rate (essential: DPP × 11/12 × 12% = 11%).
+   *
+   * Backward-compat: `output_tax / input_tax / net_tax / sales_count /
+   * purchase_count` preserved — existing callers (route.ts response,
+   * legacy PDF render path) continue to work without changes.
+   *
+   * Deadline: End of following month.
    */
   static async calculatePPNMasa(params: {
     month: string; // 'YYYY-MM'
     customerId: string;
   }): Promise<SPTMasaResult> {
     const { month, customerId } = params;
-    const supabase = createClient();
+    // Server-side admin client — matches the pattern used by every other
+    // ppn_faktur_monthly call site (route.ts, bulk-import, export, etc.).
+    // The auth gate has already run in the route's middleware, so RLS-free
+    // read here is safe.
+    const supabase = getSupabaseAdmin();
 
-    // Fetch all PPN calculations for this month
-    const { data: calculations, error } = await supabase
-      .from('tax_calculation')
-      .select('*')
+    // NEW source: ppn_faktur_monthly (Phase 3.x import target).
+    const { data: fakturs, error } = await supabase
+      .from('ppn_faktur_monthly')
+      .select(
+        'faktur_type, dpp, dpp_nilai_lain, ppn, is_luxury, status, faktur_number, faktur_date, counterparty_name',
+      )
       .eq('customer_id', customerId)
-      .eq('tax_type', 'PPN')
-      .like('tax_period', `${month}%`)
-      .order('created_at', { ascending: true });
+      .eq('tax_period', month)
+      .order('faktur_date', { ascending: true });
 
     if (error) {
-      throw new Error(`Failed to fetch PPN calculations: ${error.message}`);
+      throw new Error(`Failed to fetch PPN fakturs: ${error.message}`);
     }
 
-    if (!calculations || calculations.length === 0) {
-      const deadline = this.getSubmissionDeadline(month, 'PPN');
-      return {
-        tax_type: 'PPN',
-        period: month,
-        total_gross_income: 0,
-        total_tax_withheld: 0,
-        total_net_payable: 0,
-        item_count: 0,
-        breakdown: {
-          output_tax: 0,
-          input_tax: 0,
-          net_tax: 0,
-          status: 'PAYABLE',
-          sales_count: 0,
-          purchase_count: 0,
-          sales_details: [],
-          purchase_details: []
-        },
-        submission_deadline: deadline,
-        legal_basis: 'UU HPP 2021 - Value Added Tax (PPN 11%/12%)'
-      };
-    }
+    const deadline = this.getSubmissionDeadline(month, 'PPN');
+    const LEGAL_BASIS =
+      'PMK 131/2024 — Essential: DPP × 11/12 × 12% = effective 11%; Luxury: DPP × 12%';
 
-    // Separate sales and purchases
-    const sales = calculations.filter(c => c.income_data.transaction_type === 'sale');
-    const purchases = calculations.filter(c => c.income_data.transaction_type === 'purchase');
+    // Initialize 4-bucket split.
+    const emptyBucket = (): PPNLuxuryBucket => ({
+      count: 0,
+      total_dpp: 0,
+      total_dpp_nilai_lain: 0,
+      total_ppn: 0,
+    });
+    const splits: PPNLuxurySplit = {
+      sales_luxury: emptyBucket(),
+      sales_essential: emptyBucket(),
+      purchase_luxury: emptyBucket(),
+      purchase_essential: emptyBucket(),
+    };
 
-    // Calculate output tax (sales)
-    let outputTax = 0;
     interface SaleDetail {
       invoice_number: string;
       customer_name: string;
       dpp: number;
       ppn_amount: number;
     }
-    const salesDetails: SaleDetail[] = [];
-    for (const sale of sales) {
-      const ppnAmount = sale.calculation_result.calculatedTax || 0;
-      outputTax += ppnAmount;
-
-      salesDetails.push({
-        invoice_number: sale.income_data.invoice_number || '',
-        customer_name: sale.income_data.customer_name || 'Unknown',
-        dpp: sale.income_data.dpp || 0,
-        ppn_amount: ppnAmount
-      });
-    }
-
-    // Calculate input tax (purchases)
-    let inputTax = 0;
     interface PurchaseDetail {
       invoice_number: string;
       supplier_name: string;
       dpp: number;
       ppn_amount: number;
     }
+    const salesDetails: SaleDetail[] = [];
     const purchaseDetails: PurchaseDetail[] = [];
-    for (const purchase of purchases) {
-      const ppnAmount = purchase.calculation_result.calculatedTax || 0;
-      inputTax += ppnAmount;
 
-      purchaseDetails.push({
-        invoice_number: purchase.income_data.invoice_number || '',
-        supplier_name: purchase.income_data.supplier_name || 'Unknown',
-        dpp: purchase.income_data.dpp || 0,
-        ppn_amount: ppnAmount
-      });
+    for (const f of fakturs ?? []) {
+      const side = f.faktur_type === 'KELUARAN' ? 'sales' : 'purchase';
+      const kind = f.is_luxury === true ? 'luxury' : 'essential';
+      const k = `${side}_${kind}` as keyof PPNLuxurySplit;
+      const dpp = Number(f.dpp) || 0;
+      // dpp_nilai_lain can be null for legacy rows — fall back to dpp.
+      const dppNilaiLain = Number(f.dpp_nilai_lain ?? f.dpp) || 0;
+      const ppn = Number(f.ppn) || 0;
+
+      splits[k].count += 1;
+      splits[k].total_dpp += dpp;
+      splits[k].total_dpp_nilai_lain += dppNilaiLain;
+      splits[k].total_ppn += ppn;
+
+      if (side === 'sales') {
+        salesDetails.push({
+          invoice_number: f.faktur_number || '',
+          customer_name: f.counterparty_name || 'Unknown',
+          dpp,
+          ppn_amount: ppn,
+        });
+      } else {
+        purchaseDetails.push({
+          invoice_number: f.faktur_number || '',
+          supplier_name: f.counterparty_name || 'Unknown',
+          dpp,
+          ppn_amount: ppn,
+        });
+      }
     }
 
-    // Calculate net tax (output - input)
+    const outputTax =
+      splits.sales_luxury.total_ppn + splits.sales_essential.total_ppn;
+    const inputTax =
+      splits.purchase_luxury.total_ppn + splits.purchase_essential.total_ppn;
+    // Signed net (positive = KURANG BAYAR, negative = LEBIH BAYAR).
     const netTax = outputTax - inputTax;
     const status: 'PAYABLE' | 'CREDITABLE' = netTax >= 0 ? 'PAYABLE' : 'CREDITABLE';
-
-    const deadline = this.getSubmissionDeadline(month, 'PPN');
+    const salesCount =
+      splits.sales_luxury.count + splits.sales_essential.count;
+    const purchaseCount =
+      splits.purchase_luxury.count + splits.purchase_essential.count;
+    const itemCount = salesCount + purchaseCount;
 
     return {
       tax_type: 'PPN',
@@ -495,19 +535,23 @@ export class SPTMasaCalculator {
       total_gross_income: outputTax,
       total_tax_withheld: inputTax,
       total_net_payable: Math.max(0, netTax), // Only payable if positive
-      item_count: calculations.length,
+      item_count: itemCount,
       breakdown: {
         output_tax: outputTax,
         input_tax: inputTax,
-        net_tax: Math.abs(netTax),
+        // Signed net so PDF B.3 can label KURANG BAYAR / LEBIH BAYAR / NIHIL.
+        net_tax: netTax,
         status,
-        sales_count: sales.length,
-        purchase_count: purchases.length,
+        sales_count: salesCount,
+        purchase_count: purchaseCount,
         sales_details: salesDetails,
-        purchase_details: purchaseDetails
+        purchase_details: purchaseDetails,
+        // NEW — PMK 131/2024 split.
+        splits,
+        legal_basis: LEGAL_BASIS,
       },
       submission_deadline: deadline,
-      legal_basis: 'UU HPP 2021 - Value Added Tax (PPN 11%/12%)'
+      legal_basis: LEGAL_BASIS,
     };
   }
 
