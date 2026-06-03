@@ -84,6 +84,8 @@ async function main() {
 
   try {
     // Seed 3 fakturs covering 2 of the 4 buckets we care about.
+    // NPWP added on the 2 essential sales so they land in lampiran A1
+    // (PKP). The MASUKAN row lands in B1 regardless of NPWP.
     const rows = [
       // 2 essential sales — dpp_nilai_lain ≠ dpp (PMK 11/12 adjust)
       {
@@ -93,6 +95,7 @@ async function main() {
         faktur_date: '2099-12-15',
         faktur_number: 'SMOKE-E1',
         counterparty_name: 'Essential Buyer 1',
+        counterparty_npwp: '1234567890123456',
         dpp: 1_200_000,
         dpp_nilai_lain: 1_100_000,
         ppn: 132_000,
@@ -106,6 +109,7 @@ async function main() {
         faktur_date: '2099-12-16',
         faktur_number: 'SMOKE-E2',
         counterparty_name: 'Essential Buyer 2',
+        counterparty_npwp: '1234567890123456',
         dpp: 2_400_000,
         dpp_nilai_lain: 2_200_000,
         ppn: 264_000,
@@ -120,6 +124,7 @@ async function main() {
         faktur_date: '2099-12-17',
         faktur_number: 'SMOKE-L1',
         counterparty_name: 'Luxury Supplier',
+        counterparty_npwp: '9876543210987654',
         dpp: 5_000_000,
         dpp_nilai_lain: 5_000_000,
         ppn: 600_000,
@@ -190,6 +195,46 @@ async function main() {
       pass++;
     } else {
       console.error(`x  4. legal_basis missing or wrong:`, legal);
+      fail++;
+    }
+
+    // 5. lampiran.a1_pkp_sales — KELUARAN with NPWP (seed 2 with '1234567890123456')
+    const a1 = data?.breakdown?.lampiran?.a1_pkp_sales;
+    if (
+      Array.isArray(a1) &&
+      a1.length >= 1 &&
+      a1.every((r: any) => r.counterparty_npwp && r.faktur_number)
+    ) {
+      console.log(`OK 5. a1_pkp_sales has ${a1.length} rows with NPWP`);
+      pass++;
+    } else {
+      console.error(`x  5. a1:`, a1);
+      fail++;
+    }
+
+    // 6. lampiran.a2_non_pkp_sales — KELUARAN without NPWP (seed has 0)
+    const a2 = data?.breakdown?.lampiran?.a2_non_pkp_sales;
+    if (Array.isArray(a2)) {
+      console.log(`OK 6. a2_non_pkp_sales array present (${a2.length} rows)`);
+      pass++;
+    } else {
+      console.error(`x  6. a2:`, a2);
+      fail++;
+    }
+
+    // 7. lampiran.b1_input_credit — MASUKAN (seed has 1 luxury purchase)
+    const b1 = data?.breakdown?.lampiran?.b1_input_credit;
+    if (Array.isArray(b1) && b1.length >= 1) {
+      const first = b1[0];
+      if (first.dpp && first.ppn && first.faktur_date) {
+        console.log(`OK 7. b1_input_credit has ${b1.length} rows with required fields`);
+        pass++;
+      } else {
+        console.error(`x  7. b1[0] missing fields:`, first);
+        fail++;
+      }
+    } else {
+      console.error(`x  7. b1:`, b1);
       fail++;
     }
   } finally {

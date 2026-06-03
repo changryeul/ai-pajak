@@ -82,6 +82,36 @@ export interface SPTMasaBreakdown {
   // Optional so legacy SPT Masa filings still render without crash.
   splits?: PPNLuxurySplit;
   legal_basis?: string;
+
+  // DJP Form 1111 lampiran (A1/A2/B1) — faktur-level detail rows.
+  // Optional so legacy filings still render. v1 covers:
+  //   A1 = KELUARAN with NPWP (PKP sales)
+  //   A2 = KELUARAN without NPWP (Non-PKP sales)
+  //   B1 = MASUKAN all (creditable assumed; B2/B3 deferred)
+  lampiran?: PPNLampiran;
+}
+
+/**
+ * Per-faktur row for DJP Form 1111 lampiran tables.
+ * Shape is shared by A1/A2/B1 — caller distinguishes by which array it's in.
+ */
+export interface FakturRow {
+  id: string;
+  faktur_number: string | null;
+  faktur_date: string;
+  counterparty_npwp: string | null;
+  counterparty_name: string | null;
+  dpp: number;
+  dpp_nilai_lain: number;
+  ppn: number;
+  ppnbm: number;
+  is_luxury: boolean;
+}
+
+export interface PPNLampiran {
+  a1_pkp_sales: FakturRow[];
+  a2_non_pkp_sales: FakturRow[];
+  b1_input_credit: FakturRow[];
 }
 
 /**
@@ -439,10 +469,13 @@ export class SPTMasaCalculator {
     const supabase = getSupabaseAdmin();
 
     // NEW source: ppn_faktur_monthly (Phase 3.x import target).
+    // Extra fields (id, counterparty_npwp, ppnbm) added for DJP Form 1111
+    // lampiran A1/A2/B1 row-level detail. ppnbm may be NULL on schemas
+    // that pre-date the luxury column — caller normalizes to 0.
     const { data: fakturs, error } = await supabase
       .from('ppn_faktur_monthly')
       .select(
-        'faktur_type, dpp, dpp_nilai_lain, ppn, is_luxury, status, faktur_number, faktur_date, counterparty_name',
+        'id, faktur_type, dpp, dpp_nilai_lain, ppn, ppnbm, is_luxury, status, faktur_number, faktur_date, counterparty_name, counterparty_npwp',
       )
       .eq('customer_id', customerId)
       .eq('tax_period', month)
@@ -516,6 +549,43 @@ export class SPTMasaCalculator {
       }
     }
 
+    // DJP Form 1111 lampiran — per-faktur detail for A1/A2/B1.
+    // A1 = KELUARAN with NPWP (≥15-digit) → PKP sales
+    // A2 = KELUARAN without NPWP → Non-PKP sales
+    // B1 = MASUKAN all (creditable assumed; B2/B3 deferred — needs schema)
+    const a1_pkp_sales: FakturRow[] = [];
+    const a2_non_pkp_sales: FakturRow[] = [];
+    const b1_input_credit: FakturRow[] = [];
+
+    const mapRow = (f: typeof fakturs[number]): FakturRow => ({
+      id: f.id,
+      faktur_number: f.faktur_number ?? null,
+      faktur_date: f.faktur_date,
+      counterparty_npwp: f.counterparty_npwp ?? null,
+      counterparty_name: f.counterparty_name ?? null,
+      dpp: Number(f.dpp) || 0,
+      dpp_nilai_lain: Number(f.dpp_nilai_lain ?? f.dpp) || 0,
+      ppn: Number(f.ppn) || 0,
+      ppnbm: Number(f.ppnbm) || 0,
+      is_luxury: f.is_luxury === true,
+    });
+
+    for (const f of fakturs ?? []) {
+      if (f.faktur_type === 'KELUARAN') {
+        const hasNpwp = (f.counterparty_npwp ?? '').trim().length >= 15;
+        (hasNpwp ? a1_pkp_sales : a2_non_pkp_sales).push(mapRow(f));
+      } else if (f.faktur_type === 'MASUKAN') {
+        b1_input_credit.push(mapRow(f));
+      }
+    }
+
+    // Sort by faktur_date ASC — DJP convention for lampiran tables.
+    const byDate = (x: FakturRow, y: FakturRow) =>
+      x.faktur_date.localeCompare(y.faktur_date);
+    a1_pkp_sales.sort(byDate);
+    a2_non_pkp_sales.sort(byDate);
+    b1_input_credit.sort(byDate);
+
     const outputTax =
       splits.sales_luxury.total_ppn + splits.sales_essential.total_ppn;
     const inputTax =
@@ -549,6 +619,12 @@ export class SPTMasaCalculator {
         // NEW — PMK 131/2024 split.
         splits,
         legal_basis: LEGAL_BASIS,
+        // NEW — DJP Form 1111 lampiran (faktur-level detail).
+        lampiran: {
+          a1_pkp_sales,
+          a2_non_pkp_sales,
+          b1_input_credit,
+        },
       },
       submission_deadline: deadline,
       legal_basis: LEGAL_BASIS,

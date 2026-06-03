@@ -14,7 +14,7 @@ import {
   StyleSheet,
   renderToBuffer,
 } from '@react-pdf/renderer';
-import type { SPTMasaResult } from '../spt-masa-calculator';
+import type { SPTMasaResult, FakturRow } from '../spt-masa-calculator';
 
 export interface SPTMasaPDFData {
   sptMasa: SPTMasaResult;
@@ -50,10 +50,99 @@ const styles = StyleSheet.create({
   footerText: { fontSize: 7, color: '#a0aec0' },
   subSectionTitle: { fontSize: 9, fontWeight: 'bold', color: '#2b6cb0', marginTop: 8, marginBottom: 4 },
   footnote: { fontSize: 7, color: '#4a5568', marginTop: 8, fontStyle: 'italic' },
+
+  // DJP Form 1111 lampiran (A1/A2/B1) — landscape pages. Keys are prefixed
+  // with `lampiran` to avoid colliding with the existing `tableRow` /
+  // `tableHeader` keys used by the summary tables above.
+  lampiranTitle: { fontSize: 11, fontWeight: 'bold', marginBottom: 6 },
+  lampiranSubtitle: { fontSize: 8, color: '#666', marginBottom: 12 },
+  lampiranRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#ccc',
+    paddingVertical: 3,
+  },
+  lampiranHeader: {
+    backgroundColor: '#f3f4f6',
+    fontWeight: 'bold',
+  },
+  lampiranTotal: {
+    backgroundColor: '#fef3c7',
+    fontWeight: 'bold',
+  },
+  lampiranTotalLabel: { fontSize: 8 },
+  colNo: { width: '4%', fontSize: 8, textAlign: 'center', paddingHorizontal: 2 },
+  colFaktur: { width: '17%', fontSize: 8, paddingHorizontal: 2 },
+  colDate: { width: '8%', fontSize: 8, textAlign: 'center', paddingHorizontal: 2 },
+  colNpwp: { width: '14%', fontSize: 8, paddingHorizontal: 2 },
+  colCounterparty: { width: '21%', fontSize: 8, paddingHorizontal: 2 },
+  colAmount: { width: '12%', fontSize: 8, textAlign: 'right', paddingHorizontal: 2 },
 });
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 function pct(n: number) { return `${(n * 100).toFixed(n * 100 % 1 === 0 ? 0 : 2)}%`; }
+// Lampiran tables use a tabular plain-number format (no "Rp " prefix) so
+// column widths stay tight in the landscape layout.
+function fmtPlain(n: number) { return n.toLocaleString('id-ID'); }
+
+/**
+ * DJP Form 1111 lampiran table — A1 / A2 / B1.
+ * Renders an 8-column table (No / Nomor Faktur / Tanggal / NPWP /
+ * Nama Lawan Transaksi / DPP / DPP Nilai Lain / PPN) followed by a
+ * TOTAL row tinted amber. `wrap={false}` on each row prevents a single
+ * row from being split across pages — react-pdf will move the whole row
+ * to the next page if it overflows.
+ */
+function LampiranSection({ title, rows }: { title: string; rows: FakturRow[] }) {
+  const totalDpp = rows.reduce((s, r) => s + r.dpp, 0);
+  const totalDppNilaiLain = rows.reduce((s, r) => s + r.dpp_nilai_lain, 0);
+  const totalPpn = rows.reduce((s, r) => s + r.ppn, 0);
+
+  return (
+    <View>
+      <Text style={styles.lampiranTitle}>{title}</Text>
+      <Text style={styles.lampiranSubtitle}>{rows.length} faktur</Text>
+
+      {/* Header row */}
+      <View style={[styles.lampiranRow, styles.lampiranHeader]} wrap={false}>
+        <Text style={styles.colNo}>No.</Text>
+        <Text style={styles.colFaktur}>Nomor Faktur</Text>
+        <Text style={styles.colDate}>Tanggal</Text>
+        <Text style={styles.colNpwp}>NPWP</Text>
+        <Text style={styles.colCounterparty}>Nama Lawan Transaksi</Text>
+        <Text style={styles.colAmount}>DPP</Text>
+        <Text style={styles.colAmount}>DPP Nilai Lain</Text>
+        <Text style={styles.colAmount}>PPN</Text>
+      </View>
+
+      {/* Data rows */}
+      {rows.map((r, i) => (
+        <View key={r.id} style={styles.lampiranRow} wrap={false}>
+          <Text style={styles.colNo}>{i + 1}</Text>
+          <Text style={styles.colFaktur}>{r.faktur_number || '—'}</Text>
+          <Text style={styles.colDate}>{r.faktur_date}</Text>
+          <Text style={styles.colNpwp}>{r.counterparty_npwp || '—'}</Text>
+          <Text style={styles.colCounterparty}>{r.counterparty_name || '—'}</Text>
+          <Text style={styles.colAmount}>{fmtPlain(r.dpp)}</Text>
+          <Text style={styles.colAmount}>{fmtPlain(r.dpp_nilai_lain)}</Text>
+          <Text style={styles.colAmount}>{fmtPlain(r.ppn)}</Text>
+        </View>
+      ))}
+
+      {/* Total row */}
+      <View style={[styles.lampiranRow, styles.lampiranTotal]} wrap={false}>
+        <Text style={[styles.colNo, styles.lampiranTotalLabel]}>—</Text>
+        <Text style={[styles.colFaktur, styles.lampiranTotalLabel]}>TOTAL ({rows.length} faktur)</Text>
+        <Text style={styles.colDate} />
+        <Text style={styles.colNpwp} />
+        <Text style={styles.colCounterparty} />
+        <Text style={styles.colAmount}>{fmtPlain(totalDpp)}</Text>
+        <Text style={styles.colAmount}>{fmtPlain(totalDppNilaiLain)}</Text>
+        <Text style={styles.colAmount}>{fmtPlain(totalPpn)}</Text>
+      </View>
+    </View>
+  );
+}
 
 function SPTMasaPDFDocument({ data }: { data: SPTMasaPDFData }) {
   const { sptMasa, customer } = data;
@@ -269,6 +358,35 @@ function SPTMasaPDFDocument({ data }: { data: SPTMasaPDFData }) {
           <Text style={styles.footerText}>Dokumen ini merupakan DRAFT dan belum dilaporkan ke DJP.</Text>
         </View>
       </Page>
+
+      {/* DJP Form 1111 lampiran (A1/A2/B1) — landscape pages with faktur-
+          level detail. Only emitted for PPN filings that include the new
+          lampiran shape; legacy filings fall through. A2 is skipped when
+          there are no Non-PKP sales to keep the PDF tight. */}
+      {sptMasa.tax_type === 'PPN' && b.lampiran && (
+        <>
+          <Page size="A4" style={styles.page} orientation="landscape">
+            <LampiranSection
+              title="LAMPIRAN A1 — Daftar Penyerahan Dalam Negeri kepada PKP"
+              rows={b.lampiran.a1_pkp_sales}
+            />
+          </Page>
+          {b.lampiran.a2_non_pkp_sales.length > 0 && (
+            <Page size="A4" style={styles.page} orientation="landscape">
+              <LampiranSection
+                title="LAMPIRAN A2 — Daftar Penyerahan Dalam Negeri kepada Non-PKP"
+                rows={b.lampiran.a2_non_pkp_sales}
+              />
+            </Page>
+          )}
+          <Page size="A4" style={styles.page} orientation="landscape">
+            <LampiranSection
+              title="LAMPIRAN B1 — Daftar Perolehan BKP/JKP yang Dapat Dikreditkan"
+              rows={b.lampiran.b1_input_credit}
+            />
+          </Page>
+        </>
+      )}
     </Document>
   );
 }
