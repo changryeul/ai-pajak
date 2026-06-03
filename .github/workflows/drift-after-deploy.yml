@@ -1,0 +1,70 @@
+name: Schema drift audit (after deploy)
+
+# Runs scripts/verify-prod-schema-drift.ts against prod ~90s after every push
+# to main, so a broken supabase db push (history written but schema partially
+# applied — the 2026-04-10 pattern) is caught immediately, not at the next
+# nightly smoke window.
+#
+# Lightweight (~25s probe + 90s deploy wait) — separate from the heavier
+# smoke.yml workflow which runs the full 24-step suite nightly.
+#
+# Failure surface: GitHub Actions UI marks the run red. GitHub auto-emails
+# the commit author by default (notification settings).
+#
+# Required secrets (same as smoke.yml — already configured):
+#   - NEXT_PUBLIC_SUPABASE_URL
+#   - NEXT_PUBLIC_SUPABASE_ANON_KEY
+#   - SUPABASE_SERVICE_ROLE_KEY
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'scripts/verify-prod-schema-drift.ts'
+      - '.github/workflows/drift-after-deploy.yml'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  drift-audit:
+    name: Drift audit (push to plus 90s probe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Vercel deploy typically completes within 60-90s of push. Wait first
+      # so the probe sees the new schema state.
+      - name: Wait for Vercel deploy to settle (90s)
+        run: sleep 90
+
+      - name: Write .env.production.local
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          {
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$NEXT_PUBLIC_SUPABASE_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
+          } > .env.production.local
+
+      - name: Run drift audit
+        env:
+          SEED_TARGET: prod
+        run: npx tsx scripts/verify-prod-schema-drift.ts
+
+      - name: Clean up secrets
+        if: always()
+        run: rm -f .env.production.local
