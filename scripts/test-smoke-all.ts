@@ -49,6 +49,9 @@ const STEPS: Step[] = [
   // the runner counts them as PASS. Marked optional defensively.
   { name: 'pph23 wholesale importer e2e (BINTANG JAYA)', file: 'validate-pph23-e2e.ts', optional: true },
   { name: 'ppn wholesale importer e2e (BINTANG JAYA)', file: 'validate-ppn-e2e.ts', optional: true },
+  // --- Inline-edit PUT contracts (2026-06-02 commit 8494873) -----------
+  { name: 'pph23 PUT contract (inline edit)', file: 'verify-pph23-put-contract.ts' },
+  { name: 'ppn PUT contract (inline edit)', file: 'verify-ppn-put-contract.ts' },
 ];
 
 interface Result {

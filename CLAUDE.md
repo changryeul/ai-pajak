@@ -338,7 +338,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs 17 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry, tax code rule CRUD + RBAC (Track B), customer-ai inbox end-to-end (Phase 1), coretax toggle (Track D), pph23 wholesale importer e2e (optional, real BINTANG JAYA xlsx), ppn wholesale importer e2e (optional, real BINTANG JAYA xlsx). The 2 importer steps are `optional: true` — they skip-with-exit-0 when the xlsx isn't present (CI / fresh checkout), so failures don't block the runner.
+- `npm run test:smoke:prod` — runs 19 steps in sequence, single PASS/FAIL summary. Covers supervisor P1, settings round-trip, 6-month trend, invoice lines Phase 1, invoice parser Phase 2, upload autoParse, invoice line review PATCH, RLS isolation, external consultant isolation, operator queue 11-state, billing 3-endpoint, monitoring/Sentry, tax code rule CRUD + RBAC (Track B), customer-ai inbox end-to-end (Phase 1), coretax toggle (Track D), pph23 wholesale importer e2e (optional, real BINTANG JAYA xlsx), ppn wholesale importer e2e (optional, real BINTANG JAYA xlsx), pph23 PUT contract (inline edit, 5 assertion), ppn PUT contract (inline edit, 8 assertion). The 2 importer steps are `optional: true` — they skip-with-exit-0 when the xlsx isn't present (CI / fresh checkout), so failures don't block the runner.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars). Requires repo secrets `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` / `ANTHROPIC_API_KEY` (optional `E2E_BASE_URL`).
 
@@ -368,6 +368,8 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/validate-pph21-bintang-jaya.ts` — offline PPh21 parser + auto-mapping 검증 (cleanCell 회귀 확인)
 - `SEED_TARGET=prod npx tsx scripts/validate-ppn-e2e.ts` — PPN wholesale (VAT OUT+IN) importer → POST → DB → cleanup
 - `SEED_TARGET=prod npx tsx scripts/validate-ppn-bintang-jaya.ts [sheet]` — offline PPN importer 검증 (sheet 2601 = OUT 6 + IN 19)
+- `SEED_TARGET=prod npx tsx scripts/verify-pph23-put-contract.ts` — PUT `/api/tax/pph23-transactions` inline-edit contract (description / counterparty / grossAmount-recalc / date / 400, 5 assertion, sentinel period 2026-99)
+- `SEED_TARGET=prod npx tsx scripts/verify-ppn-put-contract.ts` — PUT `/api/tax/ppn-faktur-monthly` inline-edit contract (counterparty / faktur no/date / dpp→ppn fallback / dpp→dpp_nilai_lain fallback / explicit-ppn-wins / explicit-dpp_nilai_lain-wins / luxury-no-adjust / 400, 8 assertion)
 
 Use `SEED_TARGET=prod` to run any of these against `.env.production.local`. Default is `.env.local` (local Supabase).
 ##gstack 
