@@ -8714,6 +8714,13 @@
           "detail": "PPh25分納算定基礎となる前年度資料整理。"
         }
       },
+      "pph23PhotoStatus": "[ja] PPh23 invoice photos {attached}/{total}",
+      "pph23PhotoMissingHint": "[ja] {count} 取引のinvoice写真がありません。添付推奨（クロージングは続行可能）。",
+      "pph23PhotoShowCounterparties": "[ja] 相手別に詳細表示",
+      "pph23PhotoOpenList": "[ja] PPh23ページで写真添付",
+      "pph23CounterpartyHeader": "[ja] 取引相手",
+      "pph23AttachedHeader": "[ja] 添付",
+      "pph23MissingAmountHeader": "[ja] 写真なし金額 (Rp)",
       "prev": "戻る",
       "genStatements": "財務諸表生成"
     },

@@ -8714,6 +8714,13 @@
           "detail": "整理作为PPh25分期缴纳计算基础的上年度资料。"
         }
       },
+      "pph23PhotoStatus": "[zh] PPh23 invoice photos {attached}/{total}",
+      "pph23PhotoMissingHint": "[zh] {count} 笔交易缺少invoice照片。建议附加（结算可继续进行）。",
+      "pph23PhotoShowCounterparties": "[zh] 按交易方查看详情",
+      "pph23PhotoOpenList": "[zh] 在PPh23页面附加照片",
+      "pph23CounterpartyHeader": "[zh] 交易方",
+      "pph23AttachedHeader": "[zh] 已附加",
+      "pph23MissingAmountHeader": "[zh] 无照片金额 (Rp)",
       "prev": "上一步",
       "genStatements": "生成财务报表"
     },

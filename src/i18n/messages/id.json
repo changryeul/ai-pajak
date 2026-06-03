@@ -8714,6 +8714,13 @@
           "detail": "Mengatur data tahun sebelumnya yang menjadi dasar perhitungan angsuran PPh25."
         }
       },
+      "pph23PhotoStatus": "Foto invoice PPh23 {attached}/{total}",
+      "pph23PhotoMissingHint": "{count} transaksi belum memiliki foto invoice. Disarankan untuk melampirkan (closing tetap bisa dilanjutkan).",
+      "pph23PhotoShowCounterparties": "Lihat detail per lawan transaksi",
+      "pph23PhotoOpenList": "Lampirkan foto di halaman PPh23",
+      "pph23CounterpartyHeader": "Lawan Transaksi",
+      "pph23AttachedHeader": "Terlampir",
+      "pph23MissingAmountHeader": "Nilai tanpa foto (Rp)",
       "prev": "Sebelumnya",
       "genStatements": "Buat Laporan Keuangan"
     },

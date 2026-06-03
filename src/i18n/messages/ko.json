@@ -8836,6 +8836,13 @@
           "detail": "PPh25 분납 산정 기초가 되는 전년도 자료 정리."
         }
       },
+      "pph23PhotoStatus": "PPh23 사진 첨부 {attached}/{total}",
+      "pph23PhotoMissingHint": "{count} 거래의 invoice 사진이 없습니다. 첨부 권장 (closing 진행은 가능).",
+      "pph23PhotoShowCounterparties": "상대방별 상세 보기",
+      "pph23PhotoOpenList": "PPh23 페이지에서 사진 첨부",
+      "pph23CounterpartyHeader": "상대방",
+      "pph23AttachedHeader": "첨부",
+      "pph23MissingAmountHeader": "사진 없는 금액 (Rp)",
       "prev": "이전",
       "genStatements": "재무제표 생성"
     },

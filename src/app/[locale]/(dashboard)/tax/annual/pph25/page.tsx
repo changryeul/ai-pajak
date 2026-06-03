@@ -284,6 +284,8 @@ export default function Pph25ClosingPage() {
                 progressPct={progressPct}
                 onPrev={prev}
                 onNext={next}
+                sessionId={closing.session?.id ?? null}
+                locale={locale}
               />
             )}
             {step === 'statements' && (
@@ -495,8 +497,24 @@ function BasicStep({
   );
 }
 
+interface PhotoStatusData {
+  total: number;
+  attached: number;
+  missing: number;
+  attachedPct: number;
+  counterparties: Array<{
+    name: string;
+    npwp: string | null;
+    total: number;
+    attached: number;
+    missing: number;
+    missingAmount: number;
+  }>;
+  computedAt: string;
+}
+
 function CollectStep({
-  t, uploaded, docMap, onUpload, onClassify, progressPct, onPrev, onNext,
+  t, uploaded, docMap, onUpload, onClassify, progressPct, onPrev, onNext, sessionId, locale,
 }: {
   t: T;
   uploaded: Set<DocId>;
@@ -506,8 +524,25 @@ function CollectStep({
   progressPct: number;
   onPrev: () => void;
   onNext: () => void;
+  sessionId: string | null;
+  locale: string;
 }) {
   const [classifying, setClassifying] = useState<Set<string>>(new Set());
+  const [photoStatus, setPhotoStatus] = useState<PhotoStatusData | null>(null);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    const ac = new AbortController();
+    fetch(`/api/tax/annual-closing/${sessionId}/pph23-photo-status`, { signal: ac.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j?.success && j.data) setPhotoStatus(j.data as PhotoStatusData);
+      })
+      .catch(() => {
+        /* swallow — photo status is read-only convenience, never blocking */
+      });
+    return () => ac.abort();
+  }, [sessionId]);
   const trigger = async (docId: string) => {
     setClassifying((s) => new Set(s).add(docId));
     try {
@@ -531,6 +566,79 @@ function CollectStep({
       <div className="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden">
         <div className="h-full bg-emerald-500 transition-all" style={{ width: `${progressPct}%` }} />
       </div>
+
+      {photoStatus && photoStatus.total > 0 && (
+        <div
+          className={`rounded border p-3 text-sm mt-4 ${
+            photoStatus.missing > 0
+              ? 'bg-amber-50 border-amber-300'
+              : 'bg-emerald-50 border-emerald-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <p className="font-bold">
+              {photoStatus.missing > 0 ? '⚠️ ' : '✅ '}
+              {t('collect.pph23PhotoStatus', { attached: photoStatus.attached, total: photoStatus.total })}
+            </p>
+            <span
+              className={`text-xs px-2 py-0.5 rounded ${
+                photoStatus.missing > 0
+                  ? 'bg-amber-200 text-amber-900'
+                  : 'bg-emerald-200 text-emerald-900'
+              }`}
+            >
+              {photoStatus.attachedPct}%
+            </span>
+          </div>
+          {photoStatus.missing > 0 && (
+            <>
+              <p className="text-xs text-amber-700 mt-1">
+                {t('collect.pph23PhotoMissingHint', { count: photoStatus.missing })}
+              </p>
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs text-amber-800 hover:text-amber-900">
+                  {t('collect.pph23PhotoShowCounterparties')}
+                </summary>
+                <table className="mt-2 w-full text-xs">
+                  <thead>
+                    <tr className="text-left text-amber-900">
+                      <th className="py-1">{t('collect.pph23CounterpartyHeader')}</th>
+                      <th className="py-1 text-right">{t('collect.pph23AttachedHeader')}</th>
+                      <th className="py-1 text-right">{t('collect.pph23MissingAmountHeader')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {photoStatus.counterparties
+                      .filter((c) => c.missing > 0)
+                      .map((c) => (
+                        <tr key={c.npwp ?? c.name} className="border-t border-amber-200">
+                          <td className="py-1">
+                            {c.name}
+                            {c.npwp ? (
+                              <span className="text-amber-600 text-[10px] ml-1">({c.npwp})</span>
+                            ) : null}
+                          </td>
+                          <td className="py-1 text-right tabular-nums">
+                            {c.attached}/{c.total}
+                          </td>
+                          <td className="py-1 text-right tabular-nums">
+                            {c.missingAmount.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </details>
+              <a
+                href={`/${locale}/tax/pph23`}
+                className="inline-block mt-2 text-xs text-amber-800 underline hover:text-amber-900"
+              >
+                {t('collect.pph23PhotoOpenList')} →
+              </a>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="space-y-3 mt-5">
         {DOCS.map((id) => {

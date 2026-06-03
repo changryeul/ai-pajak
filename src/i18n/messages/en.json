@@ -8714,6 +8714,13 @@
           "detail": "Organize previous year data that serves as the basis for PPh25 installment calculations."
         }
       },
+      "pph23PhotoStatus": "PPh23 invoice photos {attached}/{total}",
+      "pph23PhotoMissingHint": "{count} transactions are missing invoice photos. Attachment recommended (closing can still proceed).",
+      "pph23PhotoShowCounterparties": "Show details by counterparty",
+      "pph23PhotoOpenList": "Attach photos on PPh23 page",
+      "pph23CounterpartyHeader": "Counterparty",
+      "pph23AttachedHeader": "Attached",
+      "pph23MissingAmountHeader": "Amount without photo (Rp)",
       "prev": "Back",
       "genStatements": "Generate Financial Statements"
     },
