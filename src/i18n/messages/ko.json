@@ -206,6 +206,7 @@
     "teamManagement": "직원 관리",
     "pph21Label": "개인소득세 (PPh 21)",
     "withholdingTaxLabel": "원천세 (PPh 4(2), 15, 22, 23, 26)",
+    "whtImport": "원천세 일괄 import (한 시트)",
     "prepaidCorporateTax": "선납법인세 (PPh Final, 25)",
     "ppnLabel": "부가세 (PPN)",
     "docUpload": "자료 업로드",
@@ -10255,5 +10256,69 @@
     "placeholderTitle": "예: 납부 완료 안내",
     "placeholderBody": "안녕하세요. PPh 납부가 정상 처리되었습니다…",
     "placeholderCategory": "payment / document / guidance 등"
+  },
+  "whtImport": {
+    "pageTitle": "원천세 일괄 import (한 시트)",
+    "pageSubtitle": "한 달치 매입 invoice 를 한 xlsx 로 업로드 → PPh23 / PPh4(2) / PPh26 + PPN 자동 분류 후 일괄 적재",
+    "step": {
+      "upload": "업로드",
+      "preview": "미리보기 / 조정",
+      "import": "적재 결과"
+    },
+    "field": { "period": "신고월" },
+    "upload": {
+      "dropzone": "JTC 통합 매입 ledger xlsx 를 업로드하세요",
+      "fileTypes": "지원 형식: .xlsx, .xls"
+    },
+    "btn": {
+      "upload": "파일 선택",
+      "download": "템플릿 다운로드",
+      "back": "뒤로",
+      "import": "{count, plural, =0 {Import (선택된 행 없음)} other {# 행 적재}}",
+      "restart": "처음으로",
+      "cancel": "취소"
+    },
+    "col": {
+      "include": "✓",
+      "no": "No",
+      "vendor": "거래처",
+      "desc": "내역",
+      "date": "일자",
+      "classified": "분류",
+      "whtBase": "WHT 기준액 (O)",
+      "whtAmount": "WHT 금액 (P)",
+      "vat": "PPN (DPP / 세액)",
+      "warnings": "경고"
+    },
+    "type": {
+      "pph23_jasa": "PPh23 — Jasa (2%)",
+      "pph23_sewa": "PPh23 — Sewa (2%)",
+      "pph4_2_sewa": "PPh4(2) — T&B (10%)",
+      "pph26": "PPh26 (20%)",
+      "unknown": "분류 불가 — 수동 선택"
+    },
+    "stats": { "totalRows": "총 행수", "warnings": "경고" },
+    "warning": {
+      "npwpMissing": "NPWP 없음 — PPh26 후보일 수 있음",
+      "npwpInvalid": "NPWP 형식 오류",
+      "amountMismatch": "WHT 금액과 (기준액 × 세율) 불일치 > 5%",
+      "dualType": "K, L 모두 채워짐 — L (PPh4(2)) 우선",
+      "unknownType": "K, L 모두 비어있음 — 분류 불가"
+    },
+    "msg": {
+      "selectCustomerFirst": "고객을 먼저 선택해주세요",
+      "willImport": "{count} 행 적재 예정"
+    },
+    "result": {
+      "allOk": "적재 완료",
+      "partial": "일부 실패 — 아래 확인",
+      "subtitle": "{period} 신고기간",
+      "skipped": "스킵",
+      "failedRows": "{count} 건 실패",
+      "reason": "사유"
+    },
+    "error": {
+      "noRows": "데이터 행을 찾지 못했습니다 (헤더 검출 실패 또는 빈 파일)"
+    }
   }
 }

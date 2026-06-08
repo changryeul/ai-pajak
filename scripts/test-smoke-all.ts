@@ -61,6 +61,8 @@ const STEPS: Step[] = [
   { name: 'closing pph23 photo status', file: 'verify-closing-pph23-photo-status.ts' },
   // --- PPh21 JTC 24-column template (2026-06-08) -----------------------
   { name: 'pph21 JTC template contract', file: 'verify-pph21-jtc-template-contract.ts' },
+  // --- WHT one-sheet 통합 매입 ledger (2026-06-08) ---------------------
+  { name: 'wht onesheet import contract', file: 'verify-wht-onesheet-contract.ts' },
   // --- Schema drift guard (2026-06-03 audit) ---------------------------
   // Catches migration-history-vs-actual-schema drift early. The 2026-04-10
   // batch incident lost 30+ columns + 1 entire table silently; this runs

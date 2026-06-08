@@ -112,6 +112,7 @@ const navItems: NavSection[] = [
           { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus' },
           { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
           { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
+          { href: '/tax/wht-import', icon: FileSpreadsheet, labelKey: 'nav.whtImport' },
           { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
           { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
           { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue' },
@@ -207,6 +208,7 @@ const navItems: NavSection[] = [
       { href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling', children: [
         { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
         { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
+        { href: '/tax/wht-import', icon: FileSpreadsheet, labelKey: 'nav.whtImport' },
         { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
         { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
         { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.taxBilling' },
