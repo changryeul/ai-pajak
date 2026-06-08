@@ -72,6 +72,23 @@ export interface PPh21Data {
   month?: number;
   /** Cumulative PPh 21 tax paid Jan through previous month (for December reconciliation) */
   cumulative_tax_paid?: number;
+  /**
+   * Optional JTC 24-column template extension (PMK 66/2023 expanded inputs).
+   * When present, calculator switches to JTC formula: bruto = gaji + tunjangan
+   * + bonus_thr + natura; biaya_jabatan = min(5% × bruto, 6M annual);
+   * iuran_karyawan adds BPJS Kesehatan + JKP on top of JHT/JP.
+   *
+   * All amounts are MONTHLY (consistent with gross_salary). PENAMBAH (회사 부담)
+   * BPJS is NOT included in bruto in v1 — store-only for governance, future
+   * gross-up toggle.
+   */
+  jtc_detail?: {
+    tunjangan?: number;          // monthly
+    bonus_thr?: number;          // monthly amortization, or one-shot month
+    natura?: number;             // PMK 66/2023 taxable benefit, monthly
+    pengurang_bpjs_kesehatan?: number;
+    pengurang_jkp?: number;
+  };
 }
 
 export interface PPh21Calculation {
@@ -86,6 +103,16 @@ export interface PPh21Calculation {
   npwp_surcharge_applied?: boolean;
   /** Tax before surcharge (only set when surcharge applied) */
   tax_before_surcharge?: number;
+  /**
+   * Breakdown of deduction components (annual). Only populated when JTC
+   * detail was supplied or when callers want to surface the split. Always
+   * sums to `total_deductions`.
+   */
+  deduction_breakdown?: {
+    position_allowance: number;
+    employee_contributions: number; // BPJS Kes + JHT + JP + JKP
+    other_deductions: number;
+  };
 }
 
 export interface TaxBracketResult {

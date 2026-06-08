@@ -26,24 +26,42 @@ export class PPh21Calculator {
   }
 
   /**
-   * Calculate annual PPh 21 for an employee
+   * Calculate annual PPh 21 for an employee.
+   *
+   * When `data.jtc_detail` is supplied, switches to the JTC 24-column formula
+   * (PMK 66/2023): bruto = gaji + tunjangan + bonus_thr + natura;
+   * iuran_karyawan = BPJS Kes + JHT + JP + JKP (all employee-side).
+   * Otherwise falls back to legacy formula (gross_salary only + JHT + JP +
+   * other_deductions). Both paths share PTKP + progressive tax + NPWP surcharge.
    */
   static calculateAnnual(data: PPh21Data): PPh21Calculation {
-    // Calculate gross income (annual)
-    const grossIncome = data.gross_salary * 12;
+    const jtc = data.jtc_detail;
 
-    // Calculate deductions
-    const positionAllowanceAnnual = Math.min(
-      grossIncome * 0.05, // 5% of gross income
-      6_000_000 // Maximum Rp 6,000,000/year
-    );
+    // Monthly bruto components.
+    const monthlyBruto = jtc
+      ? data.gross_salary
+        + (jtc.tunjangan ?? 0)
+        + (jtc.bonus_thr ?? 0)
+        + (jtc.natura ?? 0)
+      : data.gross_salary;
 
+    const grossIncome = monthlyBruto * 12;
+
+    // Biaya jabatan: 5% of bruto, capped at 6M annual (= 500k/month).
+    const positionAllowanceAnnual = Math.min(grossIncome * 0.05, 6_000_000);
+
+    // Employee-side contributions (annual). JTC path adds BPJS Kes + JKP
+    // on top of JHT + JP; legacy path is JHT + JP only.
+    const bpjsKesAnnual = jtc ? (jtc.pengurang_bpjs_kesehatan ?? 0) * 12 : 0;
     const jhtAnnual = data.jht_employee * 12;
     const jpAnnual = data.jp_employee * 12;
+    const jkpAnnual = jtc ? (jtc.pengurang_jkp ?? 0) * 12 : 0;
+    const employeeContributionsAnnual = bpjsKesAnnual + jhtAnnual + jpAnnual + jkpAnnual;
+
     const otherDeductionsAnnual = data.other_deductions * 12;
 
     const totalDeductions =
-      positionAllowanceAnnual + jhtAnnual + jpAnnual + otherDeductionsAnnual;
+      positionAllowanceAnnual + employeeContributionsAnnual + otherDeductionsAnnual;
 
     // Calculate net income
     const netIncome = grossIncome - totalDeductions;
@@ -73,6 +91,11 @@ export class PPh21Calculator {
       tax_breakdown: breakdown,
       npwp_surcharge_applied: applyNpwpSurcharge,
       tax_before_surcharge: applyNpwpSurcharge ? taxAmount : undefined,
+      deduction_breakdown: {
+        position_allowance: positionAllowanceAnnual,
+        employee_contributions: employeeContributionsAnnual,
+        other_deductions: otherDeductionsAnnual,
+      },
     };
   }
 
