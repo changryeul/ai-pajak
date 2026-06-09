@@ -16,6 +16,28 @@ export interface ParsedTabular {
   dataRows: string[][];
   /** First few data rows for UI preview (≤3 rows). */
   preview: string[][];
+  /**
+   * Original 0-based file row index for each entry in `dataRows`. Index `i`
+   * here corresponds to `dataRows[i]`; convert to 1-based Excel row by +1.
+   * Populated only when `parseTabularFile` is called with
+   * `{ preserveRowIndices: true }`; otherwise `undefined` for back-compat.
+   */
+  originalRowIndices?: number[];
+  /**
+   * Original 0-based file row index of `headers`. Same opt-in as
+   * `originalRowIndices`. Useful when the importer scans for a header row
+   * that isn't `headers` (e.g. PPN's stacked OUT + IN sections).
+   */
+  headerOriginalIndex?: number;
+}
+
+export interface ParseTabularOptions {
+  /**
+   * When true, populate `originalRowIndices` on the returned ParsedTabular so
+   * downstream error reporting can cite the actual Excel row the user sees,
+   * rather than the post-filter compressed index.
+   */
+  preserveRowIndices?: boolean;
 }
 
 const STRIP_QUOTES = /['"]/g;
@@ -57,7 +79,10 @@ function isExcel(file: File): boolean {
  *
  * Throws on empty file or no data rows.
  */
-export async function parseTabularFile(file: File): Promise<ParsedTabular> {
+export async function parseTabularFile(
+  file: File,
+  opts: ParseTabularOptions = {},
+): Promise<ParsedTabular> {
   let rawRows: string[][];
 
   if (isExcel(file)) {
@@ -86,6 +111,10 @@ export async function parseTabularFile(file: File): Promise<ParsedTabular> {
     );
   }
 
+  // Capture leading-trim offset so we can map kept rows back to original
+  // file indices (Excel row = originalIndex + 1).
+  let leadingDrop = 0;
+
   // Drop fully empty trailing rows (Excel often pads).
   while (rawRows.length > 0 && rawRows[rawRows.length - 1].every((c) => c === '')) {
     rawRows.pop();
@@ -93,6 +122,7 @@ export async function parseTabularFile(file: File): Promise<ParsedTabular> {
   // Drop leading empty rows.
   while (rawRows.length > 0 && rawRows[0].every((c) => c === '')) {
     rawRows.shift();
+    leadingDrop++;
   }
 
   if (rawRows.length < 2) {
@@ -100,10 +130,25 @@ export async function parseTabularFile(file: File): Promise<ParsedTabular> {
   }
 
   const headers = rawRows[0];
-  const dataRows = rawRows.slice(1).filter((r) => r.some((c) => c !== ''));
+  const dataRows: string[][] = [];
+  const originalRowIndices: number[] = [];
+  // rawRows[k] originated at aoa index (leadingDrop + k); dataRows skip the
+  // header (rawRows[0]) so data slice starts at k=1.
+  for (let k = 1; k < rawRows.length; k++) {
+    const row = rawRows[k];
+    if (row.some((c) => c !== '')) {
+      dataRows.push(row);
+      originalRowIndices.push(leadingDrop + k);
+    }
+  }
   const preview = dataRows.slice(0, 3);
 
-  return { headers, dataRows, preview };
+  const result: ParsedTabular = { headers, dataRows, preview };
+  if (opts.preserveRowIndices) {
+    result.originalRowIndices = originalRowIndices;
+    result.headerOriginalIndex = leadingDrop;
+  }
+  return result;
 }
 
 /**

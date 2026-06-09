@@ -288,6 +288,70 @@ describe('importPpnWholesaleFile (end-to-end)', () => {
     // CSV row should still emit DPP correctly; PPN cell empty
     expect(lines[1]).toContain('1000000');
   });
+
+  // JTC official 13-col VAT template — silent quality regression.
+  // The template pre-numbers 4 slots per section; the user often fills only
+  // one. Empty NO=2,3,4 rows must NOT show up as `missing counterparty_name`
+  // errors. VAT IN section has no DPP NILAI LAIN column.
+  it('handles JTC 13-col template — 1 OUT data + 3 empty slots + 0 IN, no errors', async () => {
+    const JTC_OUT_HEADER = ['NO', 'NPWP', 'NAME', 'ADDRESS', 'INVOICE NO', 'DESC', 'EFAKTUR NO', 'EFAKTUR DATE', 'TAX BASE', 'DPP NILAI LAIN', 'TAX RATE', 'VAT', 'NOTES'];
+    const JTC_IN_HEADER  = ['NO', 'NPWP', 'NAME', 'ADDRESS', 'INVOICE NO', 'DESC', 'EFAKTUR NO', 'EFAKTUR DATE', 'TAX BASE', '',                  'TAX RATE', 'VAT', 'NOTES'];
+    const aoa: unknown[][] = [
+      ['NAME', ': PT JTC TEST'],
+      ['NPWP', ': 99.999.999.9-999.000'],
+      ['ADDRESS', ': Jakarta'],
+      ['PERIOD', ': FEBRUARY 2026'],
+      [''],
+      ['VAT OUT'],
+      JTC_OUT_HEADER,
+      [1, '01.000.001.0-001.000', 'pt angin ribut', 'jl. Suharto', 'k/2025/01', 'jualan kulit', '04000000', '2025-01-11', 8000000, 7333333, 0.12, 880000, ''],
+      [2, '', '', '', '', '', '', '', '', '', '', '', ''],
+      [3, '', '', '', '', '', '', '', '', '', '', '', ''],
+      [4, '', '', '', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', 'TOTAL VAT OUT', '', '', '', 880000, ''],
+      [''],
+      ['VAT IN'],
+      JTC_IN_HEADER,
+      [1, '', '', '', '', '', '', '', '', '', '', '', ''],
+      [2, '', '', '', '', '', '', '', '', '', '', '', ''],
+      [3, '', '', '', '', '', '', '', '', '', '', '', ''],
+      [4, '', '', '', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', 'VAT IN', '', '', '', 0, ''],
+      [''],
+      ['', '', '', '', '', '', '', 'CALCULATION:'],
+      ['', '', '', '', '', '', '', 'VAT PAYABLE', '', '', '', 880000, ''],
+    ];
+    const summary = await importPpnWholesaleFile(makeXlsxFile(aoa));
+    expect(summary.outImported).toBe(1);
+    expect(summary.inImported).toBe(0);
+    expect(summary.errors).toEqual([]);
+    expect(summary.skippedByValidation).toBe(0);
+    // OUT section: 3 empty slots + 1 TOTAL footer = 4 OUT skips.
+    // IN section: 4 empty slots + 1 VAT IN footer = 5 IN skips.
+    // Plus various blank rows and CALCULATION footer.
+    expect(summary.skippedFooters).toBeGreaterThanOrEqual(7);
+
+    const outLines = summary.outCsv.split('\n');
+    expect(outLines[1]).toContain('2025-01-11');
+    expect(outLines[1]).toContain('pt angin ribut');
+    expect(outLines[1]).toContain('8000000');
+    expect(outLines[1]).toContain('7333333');  // dpp_nilai_lain populated
+    expect(outLines[1]).toContain('880000');
+  });
+
+  // rowNumber must cite the original Excel row, not the post-filter
+  // compressed index. Regression for the row-index preservation fix.
+  it('reports errors with original Excel row numbers (1-based)', async () => {
+    const aoa: unknown[][] = [
+      [''],          // Excel row 1 — leading blank, dropped
+      [''],          // Excel row 2 — leading blank, dropped
+      OUT_HEADER,    // Excel row 3 — header
+      [1, 'NPWP-1', '', 'JKT', 'Sale', 'FK-1', 'INV-1', '2026-09-05', 100000, 0, 0.11, 11000], // row 4 — missing name
+    ];
+    const summary = await importPpnWholesaleFile(makeXlsxFile(aoa));
+    expect(summary.errors.length).toBe(1);
+    expect(summary.errors[0].rowNumber).toBe(4);   // not 2 (post-filter would have been)
+  });
 });
 
 describe('OTHER TAX BASE (DPP Nilai Lain) — Phase 3.1', () => {

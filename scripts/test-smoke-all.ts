@@ -63,6 +63,10 @@ const STEPS: Step[] = [
   { name: 'pph21 JTC template contract', file: 'verify-pph21-jtc-template-contract.ts' },
   // --- WHT one-sheet 통합 매입 ledger (2026-06-08) ---------------------
   { name: 'wht onesheet import contract', file: 'verify-wht-onesheet-contract.ts' },
+  // --- PPN JTC 13-col template robustness (2026-06-09) -----------------
+  // Empty-slot detection + original-Excel-row preservation. In-memory only,
+  // no DB, no fixture file → always runs.
+  { name: 'ppn JTC template contract', file: 'verify-ppn-jtc-template-contract.ts' },
   // --- Schema drift guard (2026-06-03 audit) ---------------------------
   // Catches migration-history-vs-actual-schema drift early. The 2026-04-10
   // batch incident lost 30+ columns + 1 entire table silently; this runs

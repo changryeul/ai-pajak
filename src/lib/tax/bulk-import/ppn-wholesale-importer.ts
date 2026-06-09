@@ -159,6 +159,25 @@ export function findVatInHeader(
  */
 const FOOTER_KEYWORDS = /^(total|nihil|kurang|lebih|overpaid|notes?|period|catatan)/i;
 
+/**
+ * Detect template-skeleton rows: NO column has a plain integer but every
+ * data column (NAME/NPWP/TAX BASE/EFAKTUR DATE/VAT) is blank. JTC's official
+ * VAT template pre-numbers 1..4 slots; if the user only fills slot 1, slots
+ * 2-4 are NOT validation errors — they're untouched template scaffolding.
+ */
+function isEmptySlotRow(row: string[], colMap: PpnColumnMap): boolean {
+  const no = colMap.no !== undefined ? (row[colMap.no] ?? '').toString().trim() : '';
+  if (!/^\d+$/.test(no)) return false;
+  const keys: (keyof PpnColumnMap)[] = ['name', 'npwp', 'tax_base', 'efaktur_date', 'vat'];
+  for (const k of keys) {
+    const idx = colMap[k];
+    if (idx === undefined) continue;
+    const v = (row[idx] ?? '').toString().trim();
+    if (v) return false;
+  }
+  return true;
+}
+
 function isFooterRow(row: string[], colMap: PpnColumnMap): boolean {
   const no = colMap.no !== undefined ? (row[colMap.no] ?? '').toString().trim() : '';
   const name = colMap.name !== undefined ? (row[colMap.name] ?? '').toString().trim() : '';
@@ -214,7 +233,7 @@ interface SectionResult {
 function processSection(
   dataRows: string[][],
   colMap: PpnColumnMap,
-  excelRowOffset: number,
+  excelRowNumbers: number[],
   section: 'OUT' | 'IN',
 ): SectionResult {
   const normalized: NormalizedPpnRow[] = [];
@@ -224,9 +243,9 @@ function processSection(
 
   for (let i = 0; i < dataRows.length; i++) {
     const row = dataRows[i];
-    const rowNumber = excelRowOffset + i;
+    const rowNumber = excelRowNumbers[i];
 
-    if (isFooterRow(row, colMap)) {
+    if (isFooterRow(row, colMap) || isEmptySlotRow(row, colMap)) {
       skippedFooters++;
       continue;
     }
@@ -304,8 +323,19 @@ function toCsv(rows: NormalizedPpnRow[]): string {
 // ── Main entry point ────────────────────────────────────────────────────
 
 export async function importPpnWholesaleFile(file: File): Promise<PpnWholesaleSummary> {
-  const parsed = await parseTabularFile(file);
+  const parsed = await parseTabularFile(file, { preserveRowIndices: true });
   const allRows: string[][] = [parsed.headers, ...parsed.dataRows];
+
+  // Build a parallel array mapping each allRows index → original 1-based
+  // Excel row. allRows[0] is the kept `headers` (originalIndex = headerOriginalIndex);
+  // allRows[1+i] is `dataRows[i]` (originalIndex = originalRowIndices[i]).
+  // Fall back to identity mapping when preserveRowIndices wasn't honored
+  // (defensive — opts is hard-coded above, but type-safety).
+  const allRowExcel: number[] = (() => {
+    const headerIdx = parsed.headerOriginalIndex ?? 0;
+    const dataIdx = parsed.originalRowIndices ?? parsed.dataRows.map((_, i) => i + 1);
+    return [headerIdx + 1, ...dataIdx.map((i) => i + 1)];
+  })();
 
   // Locate OUT header. lookahead=10 because customer files commonly stack
   // 4-6 meta rows (NAME / NPWP / ADDRESS / PERIOD / blank / VAT OUT title)
@@ -332,14 +362,15 @@ export async function importPpnWholesaleFile(file: File): Promise<PpnWholesaleSu
     ? Math.max(outHeaderIdx + 1, inHeaderIdx - 1)
     : allRows.length;
   const outDataRows = allRows.slice(outHeaderIdx + 1, outEndExclusive);
+  const outExcelRows = allRowExcel.slice(outHeaderIdx + 1, outEndExclusive);
 
-  // Excel row numbers are 1-based; allRows index 0 = excel row 1.
-  const outResult = processSection(outDataRows, outColMap, outHeaderIdx + 2, 'OUT');
+  const outResult = processSection(outDataRows, outColMap, outExcelRows, 'OUT');
 
   let inResult: SectionResult = { normalized: [], errors: [], skipped: 0, skippedFooters: 0 };
   if (inHeaderIdx !== null && inColMap) {
     const inDataRows = allRows.slice(inHeaderIdx + 1);
-    inResult = processSection(inDataRows, inColMap, inHeaderIdx + 2, 'IN');
+    const inExcelRows = allRowExcel.slice(inHeaderIdx + 1);
+    inResult = processSection(inDataRows, inColMap, inExcelRows, 'IN');
   }
 
   return {
