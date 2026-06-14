@@ -179,34 +179,20 @@ export default function PPNPage() {
   };
 
   const downloadPpnTemplate = async () => {
+    // The JTC 13-col VAT template that `importPpnWholesaleFile` consumes.
+    // Served from `public/templates/` so download + upload stay aligned.
     try {
-      const headers = ['faktur_type', 'faktur_number', 'faktur_date', 'counterparty_name', 'counterparty_npwp', 'description', 'dpp', 'ppn'];
-      const sample: (string | number)[] = ['OUTPUT', '0100002500000001', '2026-04-15', 'PT Buyer', '01.234.567.8-901.000', 'Jasa konsultasi', 10000000, 1100000];
-
-      const XLSX = await import('xlsx');
-      const wb = XLSX.utils.book_new();
-
-      const aoa: (string | number)[][] = [headers, sample];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      ws['!cols'] = headers.map(() => ({ wch: 20 }));
-      XLSX.utils.book_append_sheet(wb, ws, 'PPN Faktur 데이터');
-
-      const guideRows: string[][] = [
-        ['컬럼 / Column', '설명 / Keterangan'],
-        ['faktur_type', 'OUTPUT(매출/KELUARAN) 또는 INPUT(매입/MASUKAN) (필수)'],
-        ['faktur_number', '16자리 Faktur Pajak 번호 / Nomor Faktur Pajak (16 digit)'],
-        ['faktur_date', '발행일 YYYY-MM-DD / Tanggal faktur'],
-        ['counterparty_name', '거래처 이름 (필수) / Nama lawan transaksi (wajib)'],
-        ['counterparty_npwp', '거래처 NPWP (01.234.567.8-901.000)'],
-        ['description', '거래 내역 / Deskripsi barang atau jasa'],
-        ['dpp', 'DPP — 부가세 제외 금액 (필수, 숫자) / Dasar Pengenaan Pajak (wajib)'],
-        ['ppn', 'PPN 11% — DPP × 11% / PPN 11% dari DPP'],
-      ];
-      const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
-      wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
-      XLSX.utils.book_append_sheet(wb, wsGuide, '안내 - Petunjuk');
-
-      XLSX.writeFile(wb, 'ppn_template.xlsx');
+      const res = await fetch('/templates/ppn-jtc-template.xlsx');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ppn_template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
       showMsg('success', t('templateComingSoon'));
     } catch (err) {
       showMsg('error', `${t('templateDownloadFailed')}: ${err instanceof Error ? err.message : 'unknown'}`);
