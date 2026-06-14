@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
@@ -1295,86 +1295,223 @@ export default function PPh23Page() {
                 )}
                   {transactions.map((tx, i) => {
                     const isForeign = !tx.counterparty_npwp;
+                    const isExpanded = expandedTx === tx.id;
                     return (
-                      <tr key={tx.id} className={`border-t ${isForeign ? 'bg-red-50' : ''}`}>
-                        <td className="p-2">{i + 1}</td>
-                        <td className="p-2">
-                          <div className="font-medium text-xs">{tx.counterparty_name}</div>
-                          {isForeign && (
-                            <div className="text-[9px] text-red-600 mt-0.5">
-                              {t('foreignTag')}
-                            </div>
-                          )}
-                        </td>
-                        <td className="p-2 font-mono text-[11px]">
-                          {tx.counterparty_npwp || (
-                            <span className="text-red-500 text-[10px]">{t('npwpMissing')}</span>
-                          )}
-                        </td>
-                        <td className="p-2 text-xs">
-                          <Badge className="text-[9px] bg-indigo-100 text-indigo-700">{tx.service_type}</Badge>
-                        </td>
-                        <td className="p-2 text-xs">
-                          <Badge variant="outline" className="text-[9px]">{tx.service_type}</Badge>
-                        </td>
-                        <td className="p-2 text-right font-mono text-xs">{fmtRp(tx.gross_amount)}</td>
-                        <td className="p-2 text-right font-mono text-xs text-emerald-700 font-bold">
-                          {(tx.tax_rate * 100).toFixed(1)}%
-                        </td>
-                        <td className="p-2 text-center">
-                          {isForeign ? (
-                            <Badge className="text-[9px] bg-red-100 text-red-700">{t('dgtRequired')}</Badge>
-                          ) : (
-                            <Badge className="text-[9px] bg-green-100 text-green-700">{t('statusNormal')}</Badge>
-                          )}
-                        </td>
-                        <td className="p-2 text-center">
-                          {tx.invoice_document_id ? (
-                            <span
-                              className="inline-flex items-center text-green-600"
-                              title={t('invoiceAttached')}
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                            </span>
-                          ) : (
-                            <details className="inline-block relative">
-                              <summary
-                                className="cursor-pointer inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 text-[11px] list-none"
-                                title={t('invoiceMissing')}
-                              >
-                                <AlertTriangle className="h-3.5 w-3.5" />
-                                <Camera className="h-3.5 w-3.5" />
-                              </summary>
-                              <div className="absolute right-0 mt-1 z-10 bg-white border border-amber-200 rounded shadow-lg p-2 w-44 text-left">
-                                <button
-                                  type="button"
-                                  onClick={() => triggerInvoiceCamera(tx.id)}
-                                  className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
-                                >
-                                  📷 {t('invoiceImageTakePhoto')}
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => triggerInvoiceFile(tx.id)}
-                                  className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
-                                >
-                                  📄 {t('invoiceImagePickFile')}
-                                </button>
+                      <Fragment key={tx.id}>
+                        <tr className={`border-t ${isForeign ? 'bg-red-50' : ''} ${isExpanded ? 'bg-blue-50/40' : ''}`}>
+                          <td className="p-2">{i + 1}</td>
+                          <td className="p-2">
+                            <div className="font-medium text-xs">{tx.counterparty_name}</div>
+                            {isForeign && (
+                              <div className="text-[9px] text-red-600 mt-0.5">
+                                {t('foreignTag')}
                               </div>
-                            </details>
-                          )}
-                        </td>
-                        <td className="p-2 text-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-6 px-2 text-[10px]"
-                            onClick={() => setExpandedTx(expandedTx === tx.id ? null : tx.id)}
-                          >
-                            {t('colDetail')}
-                          </Button>
-                        </td>
-                      </tr>
+                            )}
+                          </td>
+                          <td className="p-2 font-mono text-[11px]">
+                            {tx.counterparty_npwp || (
+                              <span className="text-red-500 text-[10px]">{t('npwpMissing')}</span>
+                            )}
+                          </td>
+                          <td className="p-2 text-xs">
+                            <Badge className="text-[9px] bg-indigo-100 text-indigo-700">{tx.service_type}</Badge>
+                          </td>
+                          <td className="p-2 text-xs">
+                            <Badge variant="outline" className="text-[9px]">{tx.service_type}</Badge>
+                          </td>
+                          <td className="p-2 text-right font-mono text-xs">{fmtRp(tx.gross_amount)}</td>
+                          <td className="p-2 text-right font-mono text-xs text-emerald-700 font-bold">
+                            {(tx.tax_rate * 100).toFixed(1)}%
+                          </td>
+                          <td className="p-2 text-center">
+                            {isForeign ? (
+                              <Badge className="text-[9px] bg-red-100 text-red-700">{t('dgtRequired')}</Badge>
+                            ) : (
+                              <Badge className="text-[9px] bg-green-100 text-green-700">{t('statusNormal')}</Badge>
+                            )}
+                          </td>
+                          <td className="p-2 text-center">
+                            {tx.invoice_document_id ? (
+                              <span
+                                className="inline-flex items-center text-green-600"
+                                title={t('invoiceAttached')}
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </span>
+                            ) : (
+                              <details className="inline-block relative">
+                                <summary
+                                  className="cursor-pointer inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 text-[11px] list-none"
+                                  title={t('invoiceMissing')}
+                                >
+                                  <AlertTriangle className="h-3.5 w-3.5" />
+                                  <Camera className="h-3.5 w-3.5" />
+                                </summary>
+                                <div className="absolute right-0 mt-1 z-10 bg-white border border-amber-200 rounded shadow-lg p-2 w-44 text-left">
+                                  <button
+                                    type="button"
+                                    onClick={() => triggerInvoiceCamera(tx.id)}
+                                    className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
+                                  >
+                                    📷 {t('invoiceImageTakePhoto')}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => triggerInvoiceFile(tx.id)}
+                                    className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
+                                  >
+                                    📄 {t('invoiceImagePickFile')}
+                                  </button>
+                                </div>
+                              </details>
+                            )}
+                          </td>
+                          <td className="p-2 text-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2 text-[10px]"
+                              onClick={() => setExpandedTx(isExpanded ? null : tx.id)}
+                            >
+                              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                              <span className="ml-0.5">{t('colDetail')}</span>
+                            </Button>
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr className="bg-gray-50/60 border-t">
+                            <td colSpan={10} className="p-3">
+                              <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2 mb-3">
+                                <Pencil className="h-3.5 w-3.5 shrink-0" />
+                                <span>{t('editBanner')}</span>
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">{t('editFieldDate')}</Label>
+                                  <Input
+                                    type="date"
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.transaction_date}
+                                    onBlur={e => {
+                                      if (e.target.value && e.target.value !== tx.transaction_date) {
+                                        updateTransaction(tx.id, { transactionDate: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">{t('colCounterparty')}</Label>
+                                  <Input
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.counterparty_name ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.counterparty_name ?? '')) {
+                                        updateTransaction(tx.id, { counterpartyName: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">NPWP</Label>
+                                  <Input
+                                    className="h-8 text-xs font-mono"
+                                    defaultValue={tx.counterparty_npwp ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.counterparty_npwp ?? '')) {
+                                        updateTransaction(tx.id, { counterpartyNpwp: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">DPP ({t('colAmount')})</Label>
+                                  <Input
+                                    type="number"
+                                    className="h-8 text-xs font-mono"
+                                    defaultValue={tx.gross_amount}
+                                    onBlur={e => {
+                                      const newVal = Number(e.target.value);
+                                      if (Number.isFinite(newVal) && newVal !== tx.gross_amount) {
+                                        updateTransaction(tx.id, {
+                                          grossAmount: newVal,
+                                          serviceType: tx.service_type,
+                                          counterpartyNpwp: tx.counterparty_npwp ?? '',
+                                        });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">{t('colTaxType')}</Label>
+                                  <select
+                                    className="h-8 text-xs w-full rounded border border-gray-300 px-2 bg-white"
+                                    defaultValue={tx.service_type}
+                                    onBlur={e => {
+                                      if (e.target.value !== tx.service_type) {
+                                        updateTransaction(tx.id, {
+                                          serviceType: e.target.value,
+                                          grossAmount: tx.gross_amount,
+                                          counterpartyNpwp: tx.counterparty_npwp ?? '',
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    {SERVICE_TYPES.map(s => (
+                                      <option key={s.value} value={s.value}>{s.label}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="md:col-span-3">
+                                  <Label className="text-[10px] text-gray-400">{t('editFieldDescription')}</Label>
+                                  <Input
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.description ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.description ?? '')) {
+                                        updateTransaction(tx.id, { description: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs pt-3 border-t border-gray-200 mt-3">
+                                <div>
+                                  <p className="text-gray-500">{t('k122_6803af')}</p>
+                                  <p className="font-bold">{(tx.tax_rate * 100).toFixed(1)}%</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">PPh {t('k13_e2bf5c')}</p>
+                                  <p className="font-mono font-bold text-emerald-700">{fmtRp(tx.tax_amount)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">e-Bupot {t('k123_5ca2f7')}</p>
+                                  <p className="font-mono">{tx.bukti_potong_number || t('k124_ac6176')}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">e-Bupot {t('k125_2d95a4')}</p>
+                                  <p>{tx.bukti_potong_date || '-'}</p>
+                                </div>
+                              </div>
+                              <div className="bg-indigo-50 rounded p-2 text-xs flex items-start gap-2 mt-3">
+                                <Shield className="h-3 w-3 text-indigo-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="font-medium text-indigo-900">{t('k126_90cd85')}</p>
+                                  <p className="text-indigo-700">
+                                    {tx.service_type} — {tx.counterparty_npwp ? t('k127_76ed88') : 'NPWP ' + t('k107_7c649c')} {t('k122_6803af')} {(tx.tax_rate * 100).toFixed(1)}%
+                                    {!tx.counterparty_npwp && ' (Pasal 23(1a) 100% ' + t('k128_dfd2b7')}
+                                  </p>
+                                  <p className="text-indigo-500 text-[10px]">Pasal 23 UU PPh / PMK 141/PMK.03/2015</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-2 mt-2">
+                                <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => handleDelete(tx.id)}>
+                                  <X className="h-3 w-3 mr-1" />{t('k129_30e15a')}
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
                     );
                   })}
                 </tbody>
@@ -1383,225 +1520,6 @@ export default function PPh23Page() {
           {transactions.length > 0 && (
             <div className="mt-2 text-[10px] text-gray-400">
               {t('totalCountLabel', { count: transactions.length })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Transaction list */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <h3 className="font-bold text-sm flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              {period} {t('k116_c663ec')} ({transactions.length}{t('k30_bcbcd4')}
-            </h3>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-8"><Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" /></div>
-          ) : transactions.length === 0 ? (
-            <div className="text-center py-12 text-sm text-gray-400">
-              <Receipt className="h-10 w-10 mx-auto mb-2 opacity-30" />
-              {t('k117_0b6c6c')} &ldquo;{t('k118_85e500')}&rdquo; {t('k119_eeb60e')}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {transactions.map(tx => {
-                const isExpanded = expandedTx === tx.id;
-                return (
-                  <div key={tx.id} className="border rounded-lg overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setExpandedTx(isExpanded ? null : tx.id)}
-                      className="w-full p-3 flex items-center justify-between hover:bg-blue-50/40 transition-colors group text-left"
-                      title={t('editHint')}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {isExpanded ? <ChevronDown className="h-3 w-3 text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-400" />}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm truncate">{tx.counterparty_name}</span>
-                            <Badge className="text-[9px] bg-indigo-100 text-indigo-700">{tx.service_type}</Badge>
-                            {!tx.counterparty_npwp && <Badge className="text-[9px] bg-red-100 text-red-700">NO NPWP</Badge>}
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
-                            <span>{tx.transaction_date}</span>
-                            {tx.invoice_number && <span>· {tx.invoice_number}</span>}
-                            {tx.bukti_potong_number && (
-                              <Badge className="text-[9px] bg-green-100 text-green-700">{tx.bukti_potong_number}</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs flex-shrink-0">
-                        <div className="text-right">
-                          <p className="text-gray-500 text-[10px]">DPP</p>
-                          <p className="font-mono">{fmtRp(tx.gross_amount)}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-emerald-600 text-[10px]">PPh {(tx.tax_rate * 100).toFixed(0)}%</p>
-                          <p className="font-mono font-bold text-emerald-700">{fmtRp(tx.tax_amount)}</p>
-                        </div>
-                        {/* Edit affordance: just-saved ✓ flash, else pencil hint */}
-                        {savedAt[tx.id] ? (
-                          <span className="flex items-center gap-1 text-green-600 text-[11px] font-medium animate-pulse">
-                            <CheckCircle className="h-3.5 w-3.5" />
-                            {t('savedToast')}
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-gray-400 group-hover:text-blue-600 text-[11px] transition-colors">
-                            <Pencil className="h-3 w-3" />
-                            {t('editHint')}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-
-                    {/* Expanded detail — inline edit fields */}
-                    {isExpanded && (
-                      <div className="border-t p-3 bg-gray-50/50 space-y-3">
-                        {/* Edit hint banner */}
-                        <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2">
-                          <Pencil className="h-3.5 w-3.5 shrink-0" />
-                          <span>{t('editBanner')}</span>
-                        </div>
-
-                        {/* Editable fields — onBlur saves only when value changed */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          <div>
-                            <Label className="text-[10px] text-gray-400">{t('editFieldDate')}</Label>
-                            <Input
-                              type="date"
-                              className="h-8 text-xs"
-                              defaultValue={tx.transaction_date}
-                              onBlur={e => {
-                                if (e.target.value && e.target.value !== tx.transaction_date) {
-                                  updateTransaction(tx.id, { transactionDate: e.target.value });
-                                }
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-[10px] text-gray-400">{t('colCounterparty')}</Label>
-                            <Input
-                              className="h-8 text-xs"
-                              defaultValue={tx.counterparty_name ?? ''}
-                              onBlur={e => {
-                                if (e.target.value !== (tx.counterparty_name ?? '')) {
-                                  updateTransaction(tx.id, { counterpartyName: e.target.value });
-                                }
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-[10px] text-gray-400">NPWP</Label>
-                            <Input
-                              className="h-8 text-xs font-mono"
-                              defaultValue={tx.counterparty_npwp ?? ''}
-                              onBlur={e => {
-                                if (e.target.value !== (tx.counterparty_npwp ?? '')) {
-                                  updateTransaction(tx.id, { counterpartyNpwp: e.target.value });
-                                }
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-[10px] text-gray-400">DPP ({t('colAmount')})</Label>
-                            <Input
-                              type="number"
-                              className="h-8 text-xs font-mono"
-                              defaultValue={tx.gross_amount}
-                              onBlur={e => {
-                                const newVal = Number(e.target.value);
-                                if (Number.isFinite(newVal) && newVal !== tx.gross_amount) {
-                                  // Send serviceType + npwp so PUT can recompute rate
-                                  updateTransaction(tx.id, {
-                                    grossAmount: newVal,
-                                    serviceType: tx.service_type,
-                                    counterpartyNpwp: tx.counterparty_npwp ?? '',
-                                  });
-                                }
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-[10px] text-gray-400">{t('colTaxType')}</Label>
-                            <select
-                              className="h-8 text-xs w-full rounded border border-gray-300 px-2 bg-white"
-                              defaultValue={tx.service_type}
-                              onBlur={e => {
-                                if (e.target.value !== tx.service_type) {
-                                  updateTransaction(tx.id, {
-                                    serviceType: e.target.value,
-                                    grossAmount: tx.gross_amount,
-                                    counterpartyNpwp: tx.counterparty_npwp ?? '',
-                                  });
-                                }
-                              }}
-                            >
-                              {SERVICE_TYPES.map(s => (
-                                <option key={s.value} value={s.value}>{s.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="md:col-span-3">
-                            <Label className="text-[10px] text-gray-400">{t('editFieldDescription')}</Label>
-                            <Input
-                              className="h-8 text-xs"
-                              defaultValue={tx.description ?? ''}
-                              onBlur={e => {
-                                if (e.target.value !== (tx.description ?? '')) {
-                                  updateTransaction(tx.id, { description: e.target.value });
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* e-Bupot read-only info */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs pt-2 border-t border-gray-200">
-                          <div>
-                            <p className="text-gray-500">{t('k122_6803af')}</p>
-                            <p className="font-bold">{(tx.tax_rate * 100).toFixed(1)}%</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500">PPh {t('k13_e2bf5c')}</p>
-                            <p className="font-mono font-bold text-emerald-700">{fmtRp(tx.tax_amount)}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500">e-Bupot {t('k123_5ca2f7')}</p>
-                            <p className="font-mono">{tx.bukti_potong_number || t('k124_ac6176')}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500">e-Bupot {t('k125_2d95a4')}</p>
-                            <p>{tx.bukti_potong_date || '-'}</p>
-                          </div>
-                        </div>
-
-                        {/* Tax determination reason */}
-                        <div className="bg-indigo-50 rounded p-2 text-xs flex items-start gap-2">
-                          <Shield className="h-3 w-3 text-indigo-600 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="font-medium text-indigo-900">{t('k126_90cd85')}</p>
-                            <p className="text-indigo-700">
-                              {tx.service_type} — {tx.counterparty_npwp ? t('k127_76ed88') : 'NPWP ' + t('k107_7c649c')} {t('k122_6803af')} {(tx.tax_rate * 100).toFixed(1)}%
-                              {!tx.counterparty_npwp && ' (Pasal 23(1a) 100% ' + t('k128_dfd2b7')}
-                            </p>
-                            <p className="text-indigo-500 text-[10px]">Pasal 23 UU PPh / PMK 141/PMK.03/2015</p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2 pt-1">
-                          <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => handleDelete(tx.id)}>
-                            <X className="h-3 w-3 mr-1" />{t('k129_30e15a')}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
             </div>
           )}
         </CardContent>
