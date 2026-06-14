@@ -20,7 +20,7 @@ import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
 import { Download, FileSpreadsheet, Pencil } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
-import { importWholesaleFile } from '@/lib/tax/bulk-import/pph23-wholesale-importer';
+import { parseWHTOneSheet } from '@/lib/tax/bulk-import/wht-onesheet-parser';
 
 // ── Types ──
 interface Transaction {
@@ -190,38 +190,22 @@ export default function PPh23Page() {
     }
   };
 
-  // Template download — try/catch so silent XLSX failure surfaces as a toast
-  // instead of a false-positive success message.
+  // Standard WHT one-sheet template (PPh23 + PPh4(2) + PPh26 + PPN MASUKAN
+  // in one xlsx). Served from `public/templates/`, downloaded as a Blob so
+  // the filename stays clean across browsers.
   const downloadTemplate = async () => {
     try {
-      const headers = ['counterparty_name', 'counterparty_npwp', 'service_type', 'transaction_type', 'gross_amount', 'tax_rate', 'contract_no', 'invoice_no', 'dgt_form'];
-      const sample: (string | number)[] = ['PT Vendor', '01.234.567.8-901.000', 'PPh 23', 'service', 10000000, 2, 'CT-001', 'INV-001', 'N'];
-
-      const XLSX = await import('xlsx');
-      const wb = XLSX.utils.book_new();
-
-      const aoa: (string | number)[][] = [headers, sample];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      ws['!cols'] = headers.map(() => ({ wch: 20 }));
-      XLSX.utils.book_append_sheet(wb, ws, 'PPh23 거래 데이터');
-
-      const guideRows: string[][] = [
-        ['컬럼 / Column', '설명 / Keterangan'],
-        ['counterparty_name', '거래처(공급자) 이름 (필수) / Nama vendor (wajib)'],
-        ['counterparty_npwp', 'NPWP (선택, 형식: 01.234.567.8-901.000)'],
-        ['service_type', '서비스 종류: PPh 23 / Jasa Teknik / Jasa Manajemen / Sewa 등'],
-        ['transaction_type', '거래 유형: service / rent / royalty / dividend / interest'],
-        ['gross_amount', '거래 금액 (필수, 숫자, 부가세 제외) / Jumlah bruto (wajib)'],
-        ['tax_rate', '원천징수율 % (서비스 2%, 배당/이자/로열티 15%)'],
-        ['contract_no', '계약 번호 (선택) / Nomor kontrak (opsional)'],
-        ['invoice_no', '인보이스 번호 / Nomor faktur'],
-        ['dgt_form', 'P3B 적용 시 DGT 폼 제출 여부 (Y/N) / Form DGT untuk P3B'],
-      ];
-      const wsGuide = XLSX.utils.aoa_to_sheet(guideRows);
-      wsGuide['!cols'] = [{ wch: 22 }, { wch: 60 }];
-      XLSX.utils.book_append_sheet(wb, wsGuide, '안내 - Petunjuk');
-
-      XLSX.writeFile(wb, 'pph23_template.xlsx');
+      const res = await fetch('/templates/wht-onesheet-template-jtc.xlsx');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wht_onesheet_template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
       showMsg('success', t('templateComingSoon'));
     } catch (err) {
       showMsg('error', `${t('templateDownloadFailed')}: ${err instanceof Error ? err.message : 'unknown'}`);
@@ -546,9 +530,9 @@ export default function PPh23Page() {
   };
 
   /**
-   * CSV 일괄 업로드 — /api/tax/pph23-transactions/import 호출.
-   * OCR 흐름과 별개로 사용자가 작성한 CSV 를 직접 거래로 import.
-   * 부분 실패 (일부 행 검증 실패) 도 사용자에게 명확히 표시.
+   * 원천세 표준 템플릿 (WHT one-sheet) 일괄 업로드 — `/api/tax/wht-import`
+   * 호출. 한 파일에 PPh23 / PPh4(2) / PPh26 / PPN MASUKAN 거래가 섞여
+   * 있으면 서버가 자동 분기해 각 테이블에 insert.
    */
   const handleCsvImport = async (file: File | null, uploadPeriod?: string) => {
     if (!file || !customerId) return;
@@ -559,30 +543,45 @@ export default function PPh23Page() {
     }
     setUploading(true);
     try {
-      // Parse wholesale ledger (xlsx/csv) → extract PPh23-only rows → normalised CSV for the server.
-      let summary: Awaited<ReturnType<typeof importWholesaleFile>>;
+      // 1. 파싱 — `parseWHTOneSheet` 가 JTC 21-col layout 을 분류·정규화.
+      let summary;
       try {
-        summary = await importWholesaleFile(file);
+        const buf = await file.arrayBuffer();
+        summary = parseWHTOneSheet(buf);
       } catch (parseErr) {
         showMsg('error', t('wholesaleParseError', { reason: (parseErr as Error).message }));
         setUploading(false);
         return;
       }
 
-      if (summary.imported === 0) {
+      if (summary.totalRows === 0) {
         showMsg('error', t('wholesaleNoRowsImported', {
-          skippedByTaxType: summary.skippedByTaxType,
-          skippedByValidation: summary.skippedByValidation,
+          skippedByTaxType: 0,
+          skippedByValidation: 0,
         }));
         setUploading(false);
         return;
       }
 
-      const csvContent = summary.csvContent;
-      const res = await fetch('/api/tax/pph23-transactions/import', {
+      // 2. 분류된 행만 (`unknown` 제외) 서버로 전송 — `/api/tax/wht-import`
+      //    가 classified 타입을 보고 4 개 테이블 중 하나로 insert.
+      const rows = summary.rows
+        .filter((r) => r.classified !== 'unknown')
+        .map((r) => ({ ...r, include: true }));
+
+      if (rows.length === 0) {
+        showMsg('error', t('wholesaleNoRowsImported', {
+          skippedByTaxType: summary.totalRows,
+          skippedByValidation: 0,
+        }));
+        setUploading(false);
+        return;
+      }
+
+      const res = await fetch('/api/tax/wht-import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, taxPeriod: importPeriod, csvContent }),
+        body: JSON.stringify({ customerId, taxPeriod: importPeriod, rows }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) {
@@ -590,27 +589,25 @@ export default function PPh23Page() {
         return;
       }
       const d = data.data || {};
-      const inserted = d.insertedCount ?? 0;
-      const errorRows = d.errorRows ?? 0;
-      const total = d.totalRows ?? 0;
-      // Wholesale ledger 에서 PPh23 외 세금이 섞여 있던 경우, 성공 메시지에 skip 카운트를 덧붙여
-      // 한 banner 안에 두 정보(성공 + skip 안내)를 동시에 보여준다. (showMsg 는 단일 슬롯이라
-      // 별도 'info' toast 를 띄우면 직전 success 를 덮어쓴다 — 그래서 문자열 join.)
-      const skipNotice = summary.skippedByTaxType > 0
-        ? ` — ${t('wholesaleSkippedTaxType', { count: summary.skippedByTaxType })}`
+      const totalInserted = (d.insertedPph23 ?? 0) + (d.insertedPph42 ?? 0)
+        + (d.insertedPph26 ?? 0) + (d.insertedPpn ?? 0);
+      const skippedUnknown = summary.totalRows - rows.length;
+      const skipNotice = skippedUnknown > 0
+        ? ` — ${t('wholesaleSkippedTaxType', { count: skippedUnknown })}`
         : '';
-      if (errorRows > 0) {
-        const sample = (d.errors || []).slice(0, 3)
-          .map((e: { rowNumber: number; errors: string[] }) => `${t('csvRowPrefix', { row: e.rowNumber })}: ${e.errors.join(', ')}`)
+
+      const failedRows = Array.isArray(d.failed) ? d.failed.length : 0;
+      if (failedRows > 0) {
+        const sample = (d.failed || []).slice(0, 3)
+          .map((e: { rowNo: number; reason: string }) => `${t('csvRowPrefix', { row: e.rowNo })}: ${e.reason}`)
           .join(' / ');
         showMsg(
           'error',
-          `${t('csvImportPartial', { inserted, total, failed: errorRows, sample })}${(d.errors || []).length > 3 ? ' …' : ''}${skipNotice}`,
+          `${t('csvImportPartial', { inserted: totalInserted, total: rows.length, failed: failedRows, sample })}${(d.failed || []).length > 3 ? ' …' : ''}${skipNotice}`,
         );
       } else {
-        showMsg('success', `${t('csvImportDone', { inserted, total })}${skipNotice}`);
+        showMsg('success', `${t('csvImportDone', { inserted: totalInserted, total: rows.length })}${skipNotice}`);
       }
-      // 거래 목록 갱신
       if (importPeriod !== period) setPeriod(importPeriod);
       loadData();
     } catch (err) {

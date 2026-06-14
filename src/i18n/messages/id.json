@@ -205,7 +205,6 @@
     "teamManagement": "Manajemen Tim",
     "pph21Label": "PPh 21 (Karyawan)",
     "withholdingTaxLabel": "Pajak Pemotongan (PPh 4(2), 15, 22, 23, 26)",
-    "whtImport": "Impor WHT massal (satu sheet)",
     "prepaidCorporateTax": "Pajak Penghasilan Dimuka (PPh Final, 25)",
     "ppnLabel": "PPN",
     "docUpload": "Unggah Dokumen",
@@ -10052,74 +10051,5 @@
     "placeholderTitle": "mis. Konfirmasi Pembayaran",
     "placeholderBody": "Halo, pembayaran PPh Anda telah diproses…",
     "placeholderCategory": "payment / document / guidance, dll."
-  },
-  "whtImport": {
-    "pageTitle": "Impor WHT massal (satu sheet)",
-    "pageSubtitle": "Unggah invoice pembelian satu bulan dalam satu xlsx — diklasifikasikan otomatis ke PPh23 / PPh4(2) / PPh26 + PPN pendamping.",
-    "step": {
-      "upload": "Unggah",
-      "preview": "Pratinjau & sesuaikan",
-      "import": "Hasil impor"
-    },
-    "field": {
-      "period": "Masa pajak"
-    },
-    "upload": {
-      "dropzone": "Unggah JTC integrated purchase ledger xlsx",
-      "fileTypes": "Format yang didukung: .xlsx, .xls"
-    },
-    "btn": {
-      "upload": "Pilih file",
-      "download": "Unduh template",
-      "back": "Kembali",
-      "import": "{count, plural, =0 {Impor (tidak ada baris)} other {Impor # baris}}",
-      "restart": "Mulai ulang",
-      "cancel": "Batal"
-    },
-    "col": {
-      "include": "✓",
-      "no": "No",
-      "vendor": "Vendor",
-      "desc": "Deskripsi",
-      "date": "Tanggal",
-      "classified": "Klasifikasi",
-      "whtBase": "Dasar WHT (O)",
-      "whtAmount": "Jumlah WHT (P)",
-      "vat": "PPN (DPP / Tarif)",
-      "warnings": "Peringatan"
-    },
-    "type": {
-      "pph23_jasa": "PPh23 — Jasa (2%)",
-      "pph23_sewa": "PPh23 — Sewa (2%)",
-      "pph4_2_sewa": "PPh4(2) — Tanah/Bangunan (10%)",
-      "pph26": "PPh26 (20%)",
-      "unknown": "Tidak terklasifikasi — pilih manual"
-    },
-    "stats": {
-      "totalRows": "Total baris",
-      "warnings": "Peringatan"
-    },
-    "warning": {
-      "npwpMissing": "NPWP kosong — kandidat PPh26?",
-      "npwpInvalid": "Format NPWP tidak valid",
-      "amountMismatch": "Jumlah WHT vs (dasar × tarif) selisih > 5%",
-      "dualType": "K dan L keduanya diisi — L (PPh4(2)) yang dipakai",
-      "unknownType": "K dan L keduanya kosong — tidak dapat diklasifikasi"
-    },
-    "msg": {
-      "selectCustomerFirst": "Silakan pilih klien terlebih dahulu",
-      "willImport": "{count} baris akan diimpor"
-    },
-    "result": {
-      "allOk": "Impor selesai",
-      "partial": "Parsial — lihat di bawah",
-      "subtitle": "Masa pajak {period}",
-      "skipped": "Dilewati",
-      "failedRows": "{count} gagal",
-      "reason": "Alasan"
-    },
-    "error": {
-      "noRows": "Tidak ada baris data ditemukan (header tidak terdeteksi atau file kosong)"
-    }
   }
 }

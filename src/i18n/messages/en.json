@@ -205,7 +205,6 @@
     "teamManagement": "Team Management",
     "pph21Label": "Income Tax (PPh 21)",
     "withholdingTaxLabel": "Withholding Tax (PPh 4(2), 15, 22, 23, 26)",
-    "whtImport": "WHT bulk import (one sheet)",
     "prepaidCorporateTax": "Prepaid Corporate Tax (PPh Final, 25)",
     "ppnLabel": "VAT (PPN)",
     "docUpload": "Upload Documents",
@@ -10052,74 +10051,5 @@
     "placeholderTitle": "e.g. Payment Confirmation",
     "placeholderBody": "Hello, your PPh payment has been processed…",
     "placeholderCategory": "payment / document / guidance, etc."
-  },
-  "whtImport": {
-    "pageTitle": "WHT bulk import (one sheet)",
-    "pageSubtitle": "Upload one month of vendor invoices in a single xlsx — auto-classified into PPh23 / PPh4(2) / PPh26 + companion PPN.",
-    "step": {
-      "upload": "Upload",
-      "preview": "Preview & adjust",
-      "import": "Import results"
-    },
-    "field": {
-      "period": "Tax period"
-    },
-    "upload": {
-      "dropzone": "Upload the JTC integrated purchase ledger xlsx",
-      "fileTypes": "Supported: .xlsx, .xls"
-    },
-    "btn": {
-      "upload": "Choose file",
-      "download": "Download template",
-      "back": "Back",
-      "import": "{count, plural, =0 {Import (no rows selected)} other {Import # rows}}",
-      "restart": "Start over",
-      "cancel": "Cancel"
-    },
-    "col": {
-      "include": "✓",
-      "no": "No",
-      "vendor": "Vendor",
-      "desc": "Description",
-      "date": "Date",
-      "classified": "Classified",
-      "whtBase": "WHT base (O)",
-      "whtAmount": "WHT amount (P)",
-      "vat": "VAT (DPP / PPN)",
-      "warnings": "Warnings"
-    },
-    "type": {
-      "pph23_jasa": "PPh23 — Services (2%)",
-      "pph23_sewa": "PPh23 — Rental (2%)",
-      "pph4_2_sewa": "PPh4(2) — Land/Building (10%)",
-      "pph26": "PPh26 (20%)",
-      "unknown": "Unclassified — pick manually"
-    },
-    "stats": {
-      "totalRows": "Total rows",
-      "warnings": "Warnings"
-    },
-    "warning": {
-      "npwpMissing": "NPWP missing — PPh26 candidate?",
-      "npwpInvalid": "Invalid NPWP format",
-      "amountMismatch": "WHT amount vs (base × rate) drift > 5%",
-      "dualType": "K and L both filled — L (PPh4(2)) wins",
-      "unknownType": "K and L both empty — cannot classify"
-    },
-    "msg": {
-      "selectCustomerFirst": "Please select a customer first",
-      "willImport": "{count} rows will be imported"
-    },
-    "result": {
-      "allOk": "Import complete",
-      "partial": "Partial — see below",
-      "subtitle": "Tax period {period}",
-      "skipped": "Skipped",
-      "failedRows": "{count} failed",
-      "reason": "Reason"
-    },
-    "error": {
-      "noRows": "No data rows found (header not detected or empty file)"
-    }
   }
 }
