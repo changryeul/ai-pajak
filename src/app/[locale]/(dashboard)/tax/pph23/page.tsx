@@ -137,6 +137,13 @@ export default function PPh23Page() {
   const [showForm, setShowForm] = useState(false);
   const [expandedTx, setExpandedTx] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // Persistent breakdown of the last WHT one-sheet upload — survives until the
+  // user dismisses it. Surfaces inserts that went to other tables (PPh4(2),
+  // PPh26, PPN) which this page doesn't list, so users actually see the action.
+  const [lastImport, setLastImport] = useState<{
+    pph23: number; pph42: number; pph26: number; ppn: number;
+    failed: number; period: string; at: number;
+  } | null>(null);
   // Per-row "just saved" indicator for inline edit affordance (mirrors
   // MonthlyPayslipTab.tsx). Cleared after 1.5s so the ✓ flash is transient.
   const [savedAt, setSavedAt] = useState<Record<string, number>>({});
@@ -589,14 +596,23 @@ export default function PPh23Page() {
         return;
       }
       const d = data.data || {};
-      const totalInserted = (d.insertedPph23 ?? 0) + (d.insertedPph42 ?? 0)
-        + (d.insertedPph26 ?? 0) + (d.insertedPpn ?? 0);
+      const ipph23 = d.insertedPph23 ?? 0;
+      const ipph42 = d.insertedPph42 ?? 0;
+      const ipph26 = d.insertedPph26 ?? 0;
+      const ippn = d.insertedPpn ?? 0;
+      const totalInserted = ipph23 + ipph42 + ipph26 + ippn;
       const skippedUnknown = summary.totalRows - rows.length;
       const skipNotice = skippedUnknown > 0
         ? ` — ${t('wholesaleSkippedTaxType', { count: skippedUnknown })}`
         : '';
 
       const failedRows = Array.isArray(d.failed) ? d.failed.length : 0;
+      // Persist breakdown so the user can see inserts that went to other
+      // tables (PPh4(2), PPh26, PPN) — this page only lists PPh23.
+      setLastImport({
+        pph23: ipph23, pph42: ipph42, pph26: ipph26, ppn: ippn,
+        failed: failedRows, period: importPeriod, at: Date.now(),
+      });
       if (failedRows > 0) {
         const sample = (d.failed || []).slice(0, 3)
           .map((e: { rowNo: number; reason: string }) => `${t('csvRowPrefix', { row: e.rowNo })}: ${e.reason}`)
@@ -1249,6 +1265,59 @@ export default function PPh23Page() {
             e-Bupot {t('k115_2daf49')}
           </Button>
         </div>
+      )}
+
+      {/* WHT one-sheet import result — persists until dismissed so users see
+          inserts that went to tables this page doesn't list (PPh4(2)/PPh26/PPN). */}
+      {lastImport && (
+        <Card className="mb-4 border-emerald-200 bg-emerald-50/40">
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <h3 className="font-semibold text-sm text-emerald-900">
+                    원천세 일괄 업로드 완료 — {lastImport.period}
+                  </h3>
+                  <span className="text-[10px] text-emerald-700">
+                    {new Date(lastImport.at).toLocaleTimeString()}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <a href="/tax/pph23" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                    <p className="text-[10px] text-gray-500">PPh 23</p>
+                    <p className="font-mono font-bold text-emerald-700">{lastImport.pph23}</p>
+                  </a>
+                  <a href="/tax/pph23" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                    <p className="text-[10px] text-gray-500">PPh 4(2)</p>
+                    <p className="font-mono font-bold text-emerald-700">{lastImport.pph42}</p>
+                  </a>
+                  <a href="/tax/pph26" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                    <p className="text-[10px] text-gray-500">PPh 26</p>
+                    <p className="font-mono font-bold text-emerald-700">{lastImport.pph26}</p>
+                  </a>
+                  <a href="/tax/ppn" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                    <p className="text-[10px] text-gray-500">PPN MASUKAN</p>
+                    <p className="font-mono font-bold text-emerald-700">{lastImport.ppn}</p>
+                  </a>
+                </div>
+                {lastImport.failed > 0 && (
+                  <p className="mt-2 text-[11px] text-red-600">
+                    ⚠ 실패 {lastImport.failed} 건 — 콘솔에 상세 사유 출력
+                  </p>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-emerald-700 hover:text-emerald-900"
+                onClick={() => setLastImport(null)}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Parsed withholding data table — always visible so users can preview the schema */}
