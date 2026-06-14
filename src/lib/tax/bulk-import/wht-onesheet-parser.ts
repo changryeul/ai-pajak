@@ -232,6 +232,11 @@ export function classifyWHTRow(raw: WHTLedgerRow): ClassifiedRow {
     if (pphRaw !== '') {
       warnings.push('dualType'); // K and L both filled → user check
     }
+  } else if (/pph[\s\-]*26|pasal[\s\-]*26/.test(pphRaw)) {
+    // PPh26 wins over jasa/sewa keyword: "pph 26 jasa konsultan" → pph26.
+    // Foreign vendor 20% WHT (UU PPh Pasal 26).
+    classified = 'pph26';
+    expectedRate = 0.20;
   } else if (pphRaw.includes('jasa')) {
     classified = 'pph23_jasa';
     expectedRate = 0.02;
@@ -244,10 +249,15 @@ export function classifyWHTRow(raw: WHTLedgerRow): ClassifiedRow {
     warnings.push('unknownType');
   }
 
-  // NPWP validity → warn (might be PPh26 candidate)
+  // NPWP validity. PPh26 is for foreign vendors who typically have no
+  // Indonesian NPWP → skip the npwpMissing nudge for that class.
   if (raw.vendor.npwp !== '' && !isValidNpwp(raw.vendor.npwp)) {
     warnings.push('npwpInvalid');
-  } else if (raw.vendor.npwp === '' && classified !== 'unknown') {
+  } else if (
+    raw.vendor.npwp === '' &&
+    classified !== 'unknown' &&
+    classified !== 'pph26'
+  ) {
     warnings.push('npwpMissing');
   }
 

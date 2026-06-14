@@ -180,6 +180,35 @@ describe('classifyWHTRow', () => {
     expect(c.warnings).toContain('unknownType');
   });
 
+  it('K=PPh26 → pph26 @ 20% (foreign vendor)', () => {
+    const c = classifyWHTRow(rowBase({
+      type: { pphLabel: 'PPh26', pph42Label: '' },
+      wht: { base: 20000000, amount: 4000000 },
+    }));
+    expect(c.classified).toBe('pph26');
+    expect(c.expectedRate).toBe(0.20);
+    expect(c.warnings).not.toContain('unknownType');
+  });
+
+  it('K=pph 26 jasa konsultan → pph26 (priority over jasa keyword)', () => {
+    const c = classifyWHTRow(rowBase({
+      type: { pphLabel: 'pph 26 jasa konsultan', pph42Label: '' },
+      wht: { base: 10000000, amount: 2000000 },
+    }));
+    expect(c.classified).toBe('pph26');
+    expect(c.expectedRate).toBe(0.20);
+  });
+
+  it('K=PPh26 + no NPWP → no npwpMissing warning (foreign vendor expected)', () => {
+    const c = classifyWHTRow(rowBase({
+      vendor: { alamat: 'Singapore', nama: 'Global Tech Pte', npwp: '' },
+      type: { pphLabel: 'PPh26', pph42Label: '' },
+      wht: { base: 20000000, amount: 4000000 },
+    }));
+    expect(c.classified).toBe('pph26');
+    expect(c.warnings).not.toContain('npwpMissing');
+  });
+
   it('NPWP missing → npwpMissing warning', () => {
     const c = classifyWHTRow(rowBase({
       vendor: { alamat: '', nama: 'V', npwp: '' },
