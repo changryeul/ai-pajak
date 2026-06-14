@@ -1,20 +1,22 @@
 /**
  * Verify POST /api/tax/wht-import contract.
  *
- * Sends 4 synthesized ClassifiedRows (no xlsx parse — directly POSTed):
+ * Sends 5 synthesized ClassifiedRows (no xlsx parse — directly POSTed):
  *   A. PPh23 jasa  + PPN     (vendor with valid NPWP)
  *   B. PPh23 sewa   (no VAT) (vehicle rental)
  *   C. PPh4(2) sewa + PPN    (T&B rental)
  *   D. PPh23 jasa, NPWP missing (still classified, warning only)
+ *   E. PPh26 foreign vendor, no NPWP, 20% WHT (Pasal 26)
  *
  * Asserts:
  *   1. login + customer
  *   2. pre-cleanup sentinel '2099-08'
- *   3. POST 200 + insertedPph23=2 (A+D), insertedPph42=1 (C), insertedPpn=2 (A+C)
+ *   3. POST 200 + insertedPph23=3 (A+B+D), insertedPph42=1 (C), insertedPpn=2 (A+C), insertedPph26=1 (E)
  *   4. failed.length = 0
- *   5. DB read back: 3 pph23_transaction rows (A+B+D for sewa+jasa) + 1 [PPh4(2)] marker
+ *   5. DB read back: 4 pph23_transaction rows (3 pure + 1 [PPh4(2)] marker)
  *   6. DB read back: 2 ppn_faktur_monthly rows
- *   7. cleanup
+ *   7. DB read back: 1 pph26_transaction row @ 20% with empty NPWP
+ *   8. cleanup
  *
  *   SEED_TARGET=prod npx tsx scripts/verify-wht-onesheet-contract.ts
  */
@@ -177,6 +179,20 @@ async function main() {
       expectedAmount: 40_000,
       warnings: ['consider pph26'],
     }),
+    // E. PPh26 foreign vendor — 20% WHT, empty NPWP expected (Pasal 26).
+    mockRow({
+      no: 5,
+      vendor: { alamat: 'Singapore', nama: 'Global Tech Pte Ltd', npwp: '' },
+      invoice: { description: 'Cross-border IT consulting', invoiceNo: 'INV-E-005', fakturNo: '' },
+      dates: { invoice: '2099-08-25', due: null, payment: null },
+      vat: { dpp: 0, ppn: 0 },
+      wht: { base: 5_000_000, amount: 1_000_000 },
+      type: { pphLabel: 'PPh26', pph42Label: '' },
+      classified: 'pph26',
+      vatInsert: false,
+      expectedRate: 0.20,
+      expectedAmount: 1_000_000,
+    }),
   ];
 
   const importRes = await fetch(`${BASE_URL}/api/tax/wht-import`, {
@@ -193,7 +209,7 @@ async function main() {
     d?.insertedPph23 === 3 &&
     d?.insertedPph42 === 1 &&
     d?.insertedPpn === 2 &&
-    d?.insertedPph26 === 0
+    d?.insertedPph26 === 1
   ) {
     console.log(
       `✅ 3. POST 200 — pph23=${d.insertedPph23}, pph42=${d.insertedPph42}, ppn=${d.insertedPpn}, pph26=${d.insertedPph26}`,
@@ -258,9 +274,34 @@ async function main() {
     fail++;
   }
 
-  // 7. Cleanup
+  // 7. DB read back: 1 pph26_transaction row (E) — 20% rate, empty NPWP
+  const { data: pph26Rows } = await sbAdmin
+    .from('pph26_transaction')
+    .select('recipient_name,recipient_npwp,gross_amount,applied_rate,tax_amount,income_type')
+    .eq('customer_id', cust.id)
+    .eq('tax_period', PERIOD);
+
+  const pph26Count = pph26Rows?.length ?? 0;
+  const pph26Row = pph26Rows?.[0];
+  const pph26Ok =
+    pph26Count === 1 &&
+    pph26Row?.recipient_name === 'Global Tech Pte Ltd' &&
+    pph26Row?.recipient_npwp === null &&
+    Number(pph26Row?.gross_amount) === 5_000_000 &&
+    Number(pph26Row?.applied_rate) === 0.2 &&
+    Number(pph26Row?.tax_amount) === 1_000_000;
+  if (pph26Ok) {
+    console.log(`✅ 7. pph26_transaction row persisted (Global Tech Pte Ltd, 5M @ 20% = 1M, NPWP null)`);
+    pass++;
+  } else {
+    console.error(`✗ 7. expected 1 pph26 row matching foreign vendor contract, got count=${pph26Count}`);
+    console.error('   row:', pph26Row);
+    fail++;
+  }
+
+  // 8. Cleanup
   await cleanup();
-  console.log(`✅ 7. cleanup`);
+  console.log(`✅ 8. cleanup`);
   pass++;
 
   console.log(`\n— ${pass} pass / ${fail} fail —`);
