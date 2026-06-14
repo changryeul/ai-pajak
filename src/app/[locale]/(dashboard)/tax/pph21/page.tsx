@@ -757,26 +757,52 @@ function PPh21DataInputSection({
       'bank_name', 'bank_account_no', 'bank_account_name',
       'emergency_contact_name', 'emergency_contact_phone', 'notes',
     ];
-    const sample: (string | number)[] = [
-      'John Doe', '01.234.567.8-901.000', '3201234567890001', 'TK/0', 15000000,
+    // 3 \uC0D8\uD50C \u2014 \uC720\uD615\uBCC4 \uC785\uB825 \uC601\uC5ED \uC2DC\uAC01\uD654.
+    // \uC720\uD615 1 (REGULAR, Pegawai Tetap): \uC804\uCCB4 34 \uCEEC\uB7FC fillable.
+    // \uC720\uD615 2 (CONTRACT/DAILY, Pegawai Tidak Tetap) + \uC720\uD615 3 (FREELANCER/COMMISSIONER, Bukan Pegawai):
+    //   bpjs_kesehatan / jht_employee / jp_employee \u2192 \uBBF8\uC801\uC6A9 (BPJS \uC81C\uC678 \uB300\uC0C1). \uBE48 \uC140\uB85C \uB460.
+    const sampleType1: (string | number)[] = [
+      'John Doe (\uC720\uD6151 REGULAR)', '01.234.567.8-901.000', '3201234567890001', 'TK/0', 15000000,
       500000, 0, 300000, 200000, 0, 0, 0, 300000, 150000, 120000, 0, 'REGULAR',
       'EMP-001', 'Manager', 'Finance', '2024-01-15', '', '1990-05-20', 'M',
       'MARRIED', 'john@example.com', '+62 812 3456 7890', 'Jl. Sudirman No. 1',
       'BCA', '1234567890', 'John Doe', 'Jane Doe', '+62 812 9876 5432', '',
     ];
+    const sampleType2: (string | number)[] = [
+      'Budi (\uC720\uD6152 CONTRACT)', '', '3202000000000002', 'TK/0', 5000000,
+      0, 200000, 150000, 100000, 0, 0, 0, '', '', '', 0, 'CONTRACT',
+      'EMP-002', 'Field Worker', 'Operations', '2025-03-10', '', '1995-08-12', 'M',
+      'SINGLE', '', '', 'Jl. Mawar No. 5',
+      '', '', '', '', '', '6\uAC1C\uC6D4 \uB2E8\uAE30 \uACC4\uC57D',
+    ];
+    const sampleType3: (string | number)[] = [
+      'Sari (\uC720\uD6153 FREELANCER)', '02.345.678.9-002.000', '3203000000000003', 'TK/0', 3500000,
+      0, 0, 0, 0, 0, 0, 0, '', '', '', 0, 'FREELANCER',
+      'EMP-003', 'Designer', 'Marketing', '2026-01-20', '', '1992-11-30', 'F',
+      'SINGLE', '', '', 'Jl. Anggrek No. 7',
+      '', '', '', '', '', '\uD504\uB85C\uC81D\uD2B8 \uB2E8\uC704',
+    ];
 
     const XLSX = await import('xlsx');
     const wb = XLSX.utils.book_new();
 
-    // Sheet 1: Template (headers + 1 sample row)
-    const aoa: (string | number)[][] = [headers, sample];
+    // Sheet 1: Template \u2014 headers + 3 type-tagged sample rows
+    const aoa: (string | number)[][] = [headers, sampleType1, sampleType2, sampleType3];
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    // Set reasonable column widths
     ws['!cols'] = headers.map(() => ({ wch: 20 }));
     XLSX.utils.book_append_sheet(wb, ws, 'PPh21 \uC9C1\uC6D0 \uB370\uC774\uD130');
 
-    // Sheet 2: Guide (Korean+Indonesian short instructions)
+    // Sheet 2: Guide \u2014 \uB9E8 \uC704\uC5D0 \uC720\uD615\uBCC4 \uC785\uB825 \uC601\uC5ED \uB9E4\uD2B8\uB9AD\uC2A4 + \uCEEC\uB7FC \uC124\uBA85
     const guideRows: string[][] = [
+      ['\uD83D\uDCCB \uC720\uD615\uBCC4 \uC785\uB825 \uC601\uC5ED / Pengisian per Jenis Pegawai', ''],
+      ['\uC720\uD615 / Jenis', '\uC785\uB825 \uC601\uC5ED / Kolom yang berlaku'],
+      ['\uC720\uD615 1 (REGULAR \u2014 Pegawai Tetap, \uC815\uC9C1\uC6D0)',
+        '\uC804\uCCB4 34 \uCEEC\uB7FC \uBAA8\uB450 \uC785\uB825 \uAC00\uB2A5. BPJS(bpjs_kesehatan/jht_employee/jp_employee) \uD3EC\uD568.'],
+      ['\uC720\uD615 2 (CONTRACT / DAILY \u2014 Pegawai Tidak Tetap, \uBE44\uC815\uC9C1\uC6D0)',
+        'bpjs_kesehatan / jht_employee / jp_employee \uB294 \u274C \uBBF8\uC801\uC6A9 (\uBE44\uC6CC \uB450\uC138\uC694). \uB098\uBA38\uC9C0 31 \uCEEC\uB7FC\uB9CC \uC785\uB825.'],
+      ['\uC720\uD615 3 (FREELANCER / COMMISSIONER \u2014 Bukan Pegawai, \uC678\uBD80\uC778)',
+        '\uC720\uD615 2 \uC640 \uB3D9\uC77C \u2014 BPJS 3 \uCEEC\uB7FC \uBBF8\uC801\uC6A9. \uC784\uAE08/\uACF5\uC81C \uD56D\uBAA9 \uB300\uBD80\uBD84 0 \uB610\uB294 \uACF5\uB780.'],
+      ['', ''],
       ['\uCEEC\uB7FC / Column', '\uC124\uBA85 / Keterangan'],
       ['employee_name', '\uC9C1\uC6D0 \uC774\uB984 (\uD544\uC218) / Nama karyawan (wajib)'],
       ['employee_npwp', 'NPWP (\uC120\uD0DD, \uD615\uC2DD: 01.234.567.8-901.000)'],
@@ -790,9 +816,9 @@ function PPh21DataInputSection({
       ['other_allowances', '\uAE30\uD0C0 \uC218\uB2F9 / Tunjangan lainnya'],
       ['bonus', '\uBCF4\uB108\uC2A4 / Bonus'],
       ['thr', 'THR / Tunjangan Hari Raya'],
-      ['jht_employee', 'JHT \uADFC\uB85C\uC790 \uBD80\uB2F4 / Iuran JHT karyawan'],
-      ['jp_employee', 'JP \uADFC\uB85C\uC790 \uBD80\uB2F4 / Iuran JP karyawan'],
-      ['bpjs_kesehatan', 'BPJS \uAC74\uAC15\uBCF4\uD5D8'],
+      ['jht_employee', '\u26A0 \uC720\uD615 1 \uC804\uC6A9 / Hanya Tipe 1 \u2014 JHT \uADFC\uB85C\uC790 \uBD80\uB2F4 / Iuran JHT karyawan'],
+      ['jp_employee', '\u26A0 \uC720\uD615 1 \uC804\uC6A9 / Hanya Tipe 1 \u2014 JP \uADFC\uB85C\uC790 \uBD80\uB2F4 / Iuran JP karyawan'],
+      ['bpjs_kesehatan', '\u26A0 \uC720\uD615 1 \uC804\uC6A9 / Hanya Tipe 1 \u2014 BPJS \uAC74\uAC15\uBCF4\uD5D8 / BPJS Kesehatan'],
       ['other_deductions', '\uAE30\uD0C0 \uACF5\uC81C / Potongan lainnya'],
       ['worker_type', 'REGULAR / CONTRACT / DAILY / FREELANCER / COMMISSIONER'],
       // HR record (optional \u2014 \uC9C1\uC6D0 master \uC77C\uAD04 \uB4F1\uB85D \uC6A9)
