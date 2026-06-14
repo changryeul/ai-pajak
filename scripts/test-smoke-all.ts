@@ -51,7 +51,6 @@ const STEPS: Step[] = [
   // the runner counts them as PASS. Marked optional defensively.
   { name: 'pph23 wholesale importer e2e (BINTANG JAYA)', file: 'validate-pph23-e2e.ts', optional: true },
   { name: 'ppn wholesale importer e2e (BINTANG JAYA)', file: 'validate-ppn-e2e.ts', optional: true },
-  { name: 'pph21 employee import e2e (BINTANG JAYA)', file: 'validate-pph21-e2e.ts', optional: true },
   // --- Inline-edit PUT contracts (2026-06-02 commit 8494873) -----------
   { name: 'pph23 PUT contract (inline edit)', file: 'verify-pph23-put-contract.ts' },
   { name: 'ppn PUT contract (inline edit)', file: 'verify-ppn-put-contract.ts' },
@@ -60,8 +59,10 @@ const STEPS: Step[] = [
   { name: 'pph26 wholesale import contract', file: 'verify-pph26-import-contract.ts' },
   { name: 'closing credit auto-fill', file: 'verify-closing-auto-credits.ts' },
   { name: 'closing pph23 photo status', file: 'verify-closing-pph23-photo-status.ts' },
-  // --- PPh21 JTC 24-column template (2026-06-08) -----------------------
-  { name: 'pph21 JTC template contract', file: 'verify-pph21-jtc-template-contract.ts' },
+  // --- PPh21 strict 34-col app template (2026-06-14, supersedes JTC) ---
+  // In-memory template generation + multipart POST → DB read-back.
+  // No fixture dependency → always runs.
+  { name: 'pph21 strict template e2e', file: 'verify-pph21-strict-template.ts' },
   // --- WHT one-sheet 통합 매입 ledger (2026-06-08) ---------------------
   { name: 'wht onesheet import contract', file: 'verify-wht-onesheet-contract.ts' },
   // --- PPN JTC 13-col template robustness (2026-06-09) -----------------

@@ -235,7 +235,6 @@ const navItems: NavSection[] = [
       { href: '/customers', icon: Users, labelKey: 'nav.customers' },
       { href: '/tax/monthly-dashboard', icon: BarChart3, labelKey: 'nav.monthlyDashboard' },
       { href: '/tax/spt-masa', icon: Receipt, labelKey: 'nav.sptMasa' },
-      { href: '/tax/pph21-bulk', icon: Calculator, labelKey: 'nav.pph21Bulk' },
       { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
       { href: '/tax/multi-entity', icon: Settings, labelKey: 'nav.multiEntity' },
       { href: '/tax/report', icon: BarChart3, labelKey: 'nav.clientReport' },
