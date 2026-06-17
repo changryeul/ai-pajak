@@ -326,6 +326,59 @@ export default function PPh23Page() {
     }
   };
 
+  // Forward the just-saved edit to the customer ↔ AI 상담원 chat thread
+  // so the assigned operator sees the change inline in their inbox. Skipped
+  // for consultants (their session role !== CUSTOMER → 403 either way) and
+  // silently swallows failure — save UX must not depend on chat post.
+  const forwardEditToOperator = async (
+    txAfter: Transaction,
+    updates: Record<string, unknown>,
+  ) => {
+    if (isConsultant) return;
+    try {
+      const tRes = await fetch('/api/customer-ai/threads/find-or-create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contextKind: 'PPH23', contextPeriod: period }),
+      });
+      if (!tRes.ok) return;
+      const tj = await tRes.json().catch(() => ({}));
+      const threadId = tj.data?.id;
+      if (!threadId) return;
+
+      const LABEL: Record<string, string> = {
+        transactionDate: '거래일',
+        counterpartyName: '거래처명',
+        counterpartyNpwp: 'NPWP',
+        grossAmount: 'DPP',
+        serviceType: '서비스 종류',
+        description: '설명',
+      };
+      const lines: string[] = [];
+      for (const [k, v] of Object.entries(updates)) {
+        const label = LABEL[k];
+        if (!label) continue;
+        const display = k === 'grossAmount'
+          ? `Rp ${Number(v).toLocaleString('id-ID')}`
+          : String(v);
+        lines.push(`• ${label}: ${display}`);
+      }
+      if (lines.length === 0) return;
+      const content = [
+        `✏️ 원천세 거래 수정 — ${txAfter.counterparty_name || '(거래처 미상)'} (${period})`,
+        ...lines,
+      ].join('\n');
+
+      await fetch(`/api/customer-ai/threads/${threadId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+    } catch {
+      // silent
+    }
+  };
+
   // Inline edit — sends partial body to PUT /api/tax/pph23-transactions.
   // Server response is { success: true } (no row), so we merge sent values
   // into local state via snake_case mapping. gross/service edits also
@@ -346,6 +399,7 @@ export default function PPh23Page() {
         if (updates.counterpartyNpwp !== undefined) mapped.counterparty_npwp = (updates.counterpartyNpwp as string) || null;
         if (updates.description !== undefined) mapped.description = (updates.description as string) || null;
         if (updates.transactionDate !== undefined) mapped.transaction_date = updates.transactionDate as string;
+        const txAfter = transactions.find(t => t.id === id);
         setTransactions(prev => prev.map(tx => tx.id === id ? { ...tx, ...mapped } as Transaction : tx));
         setSavedAt(prev => ({ ...prev, [id]: Date.now() }));
         setTimeout(() => {
@@ -356,6 +410,10 @@ export default function PPh23Page() {
           });
         }, 1500);
         showMsg('success', t('savedToast'));
+        // 저장 내용을 customer ↔ AI 상담원 chat thread 에도 게시 (fire-and-forget)
+        if (txAfter) {
+          void forwardEditToOperator({ ...txAfter, ...mapped } as Transaction, updates);
+        }
         // grossAmount/serviceType 변경은 서버가 tax_rate + tax_amount 재계산 →
         // refetch 해야 새 세액이 화면에 반영됨.
         if (updates.grossAmount !== undefined || updates.serviceType !== undefined) {
