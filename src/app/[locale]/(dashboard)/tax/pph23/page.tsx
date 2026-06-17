@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { ScreenHeader } from '@/components/tax';
-import { Download, FileSpreadsheet, Pencil } from 'lucide-react';
+import { Download, FileSpreadsheet, Pencil, Clock } from 'lucide-react';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { parseWHTOneSheet } from '@/lib/tax/bulk-import/wht-onesheet-parser';
 
@@ -1383,7 +1383,7 @@ export default function PPh23Page() {
           ) : submissionRequest ? (
             <Card className="mb-4 border-amber-300 bg-amber-50">
               <CardContent className="p-3 flex items-center gap-2">
-                <Loader2 className="h-5 w-5 text-amber-600 flex-shrink-0 animate-spin" />
+                <Clock className="h-5 w-5 text-amber-600 flex-shrink-0" />
                 <div className="text-sm flex-1">
                   <p className="font-semibold text-amber-900">운영팀 검토 중 — {period}</p>
                   <p className="text-[11px] text-amber-700">
