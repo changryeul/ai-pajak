@@ -43,6 +43,15 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 
   let query = getSupabaseAdmin().from('pph23_transaction').select('*', { count: 'exact' }).eq('customer_id', cid).order('transaction_date', { ascending: false }).range(offset, offset + limit - 1);
   if (period) query = query.eq('tax_period', period);
+  // `regime=PPH4_2` 는 `/tax/pph42` 페이지 전용 부분 뷰. 같은 테이블의
+  // tax_regime='PPH4_2' AND tax_rate=0.10 (토지·건물 임대) 만 선별.
+  // 그 외 ?regime=PPH23 도 지원 — 명시 시 PPh4(2) 행 제외.
+  const regime = url.searchParams.get('regime');
+  if (regime === 'PPH4_2') {
+    query = query.eq('tax_regime', 'PPH4_2').eq('tax_rate', 0.10);
+  } else if (regime === 'PPH23') {
+    query = query.not('tax_regime', 'eq', 'PPH4_2');
+  }
 
   const { data, count } = await query;
 

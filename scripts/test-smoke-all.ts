@@ -63,6 +63,8 @@ const STEPS: Step[] = [
   // In-memory template generation + multipart POST → DB read-back.
   // No fixture dependency → always runs.
   { name: 'pph21 strict template e2e', file: 'verify-pph21-strict-template.ts' },
+  // --- PPh 4(2) partial view via regime filter (2026-06-17) -----------
+  { name: 'pph42 partial view (regime=PPH4_2)', file: 'verify-pph42-page.ts' },
   // --- WHT one-sheet 통합 매입 ledger (2026-06-08) ---------------------
   { name: 'wht onesheet import contract', file: 'verify-wht-onesheet-contract.ts' },
   // --- PPN JTC 13-col template robustness (2026-06-09) -----------------

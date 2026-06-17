@@ -1346,7 +1346,7 @@ export default function PPh23Page() {
                     <p className="text-[10px] text-gray-500">PPh 23</p>
                     <p className="font-mono font-bold text-emerald-700">{lastImport.pph23}</p>
                   </a>
-                  <a href="/tax/pph23" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                  <a href="/tax/pph42" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
                     <p className="text-[10px] text-gray-500">PPh 4(2)</p>
                     <p className="font-mono font-bold text-emerald-700">{lastImport.pph42}</p>
                   </a>
