@@ -144,6 +144,14 @@ export default function PPh23Page() {
     pph23: number; pph42: number; pph26: number; ppn: number;
     failed: number; period: string; at: number;
   } | null>(null);
+
+  // CUSTOMER submit-request status — localStorage marker per (customerId, period).
+  // SPT Masa 직접 생성 권한이 없는 CUSTOMER 가 "운영팀에 제출 요청" 을 누르면
+  // 여기에 requestedAt 을 적어 두고, `filingExists` 가 true 가 되면 자동 정리.
+  // 다기기 동기화는 옵션 B (서버 추적) 로 별도 작업 예정.
+  const [submissionRequest, setSubmissionRequest] = useState<{ requestedAt: string } | null>(null);
+  const [filingExists, setFilingExists] = useState(false);
+  const reqStorageKey = customerId ? `sptRequest:PPh23:${customerId}:${period}` : '';
   // Per-row "just saved" indicator for inline edit affordance (mirrors
   // MonthlyPayslipTab.tsx). Cleared after 1.5s so the ✓ flash is transient.
   const [savedAt, setSavedAt] = useState<Record<string, number>>({});
@@ -253,6 +261,40 @@ export default function PPh23Page() {
   }, [customerId, period]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // CUSTOMER 제출 요청 + filing 존재 상태 동기화 (period / customer 변경 시).
+  useEffect(() => {
+    if (!customerId) {
+      setSubmissionRequest(null);
+      setFilingExists(false);
+      return;
+    }
+    // localStorage 마커 읽기.
+    if (typeof window !== 'undefined' && reqStorageKey) {
+      try {
+        const raw = window.localStorage.getItem(reqStorageKey);
+        setSubmissionRequest(raw ? JSON.parse(raw) : null);
+      } catch {
+        setSubmissionRequest(null);
+      }
+    }
+    // filing 존재 여부 — 운영팀이 SPT Masa 생성했는지 확인.
+    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh23&period=${period}&status=DRAFT`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const filings = d?.data || d?.filings || [];
+        const exists = !!filings.find((f: { tax_type: string; tax_period: string }) =>
+          f.tax_type === 'PPh23' && f.tax_period === period,
+        );
+        setFilingExists(exists);
+        // filing 이 만들어졌으면 요청 마커는 임무 완료 → 정리.
+        if (exists && typeof window !== 'undefined' && reqStorageKey) {
+          window.localStorage.removeItem(reqStorageKey);
+          setSubmissionRequest(null);
+        }
+      })
+      .catch(() => { /* network/permission noise → 그냥 false 유지 */ });
+  }, [customerId, period, reqStorageKey]);
 
   // Add transaction
   const handleAddTransaction = async (e: React.FormEvent | null, closeAfter: boolean = false) => {
@@ -1325,6 +1367,48 @@ export default function PPh23Page() {
         </div>
       )}
 
+      {/* SPT Masa 제출 상태 배너 — CUSTOMER 가 어디까지 왔는지 한눈에. */}
+      {!isConsultant && customerId && (
+        <>
+          {filingExists ? (
+            <Card className="mb-4 border-emerald-300 bg-emerald-50">
+              <CardContent className="p-3 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="font-semibold text-emerald-900">SPT Masa 제출 완료 — {period}</p>
+                  <p className="text-[11px] text-emerald-700">운영팀이 SPT Masa 를 생성했습니다. 진행 상황은 운영팀 큐에서 확인할 수 있어요.</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : submissionRequest ? (
+            <Card className="mb-4 border-amber-300 bg-amber-50">
+              <CardContent className="p-3 flex items-center gap-2">
+                <Loader2 className="h-5 w-5 text-amber-600 flex-shrink-0 animate-spin" />
+                <div className="text-sm flex-1">
+                  <p className="font-semibold text-amber-900">운영팀 검토 중 — {period}</p>
+                  <p className="text-[11px] text-amber-700">
+                    요청 시간: {new Date(submissionRequest.requestedAt).toLocaleString()} · 운영팀이 검토 후 SPT Masa 를 생성합니다.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-amber-700 hover:text-amber-900 text-[11px]"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && reqStorageKey) {
+                      window.localStorage.removeItem(reqStorageKey);
+                    }
+                    setSubmissionRequest(null);
+                  }}
+                >
+                  요청 취소
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
+        </>
+      )}
+
       {/* WHT one-sheet import result — persists until dismissed so users see
           inserts that went to tables this page doesn't list (PPh4(2)/PPh26/PPN). */}
       {lastImport && (
@@ -1728,6 +1812,12 @@ export default function PPh23Page() {
                   });
                   if (mRes.ok) {
                     showMsg('success', `운영팀에 SPT Masa 제출 요청을 전달했습니다 — ${transactions.length} 건`);
+                    // localStorage 마커 + 화면 상태 즉시 갱신.
+                    const stamp = { requestedAt: new Date().toISOString() };
+                    if (typeof window !== 'undefined' && reqStorageKey) {
+                      try { window.localStorage.setItem(reqStorageKey, JSON.stringify(stamp)); } catch { /* quota */ }
+                    }
+                    setSubmissionRequest(stamp);
                   } else {
                     showMsg('error', t('sptRetryHint'));
                   }
