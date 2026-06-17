@@ -65,6 +65,8 @@ const STEPS: Step[] = [
   { name: 'pph21 strict template e2e', file: 'verify-pph21-strict-template.ts' },
   // --- PPh 4(2) partial view via regime filter (2026-06-17) -----------
   { name: 'pph42 partial view (regime=PPH4_2)', file: 'verify-pph42-page.ts' },
+  // --- Operator-initiated SPT Masa from chat thread (2026-06-17) -----
+  { name: 'operator spt-masa quick-create', file: 'verify-operator-spt-masa-create.ts' },
   // --- WHT one-sheet 통합 매입 ledger (2026-06-08) ---------------------
   { name: 'wht onesheet import contract', file: 'verify-wht-onesheet-contract.ts' },
   // --- PPN JTC 13-col template robustness (2026-06-09) -----------------
