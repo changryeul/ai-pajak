@@ -1696,14 +1696,50 @@ export default function PPh23Page() {
               if (!customerId) return;
               setSaving(true);
               try {
+                // 고객(CUSTOMER) 은 hard rule #3 (Tax Filing Actor ≠ Platform) 에
+                // 의해 SPT Masa 직접 생성 권한이 없음. 대신 customer ↔ AI 상담원
+                // chat 으로 제출 요청을 보내고, 운영팀(consultant) 이 확인 후 진짜
+                // filing 생성. consultant 세션은 기존대로 직접 POST.
+                if (!isConsultant) {
+                  const totalGross = transactions.reduce((s, tx) => s + Number(tx.gross_amount), 0);
+                  const totalTax = transactions.reduce((s, tx) => s + Number(tx.tax_amount), 0);
+                  const tRes = await fetch('/api/customer-ai/threads/find-or-create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contextKind: 'PPH23', contextPeriod: period }),
+                  });
+                  const tj = await tRes.json().catch(() => ({}));
+                  const threadId = tj.data?.id;
+                  if (!threadId) {
+                    showMsg('error', t('sptRetryHint'));
+                    return;
+                  }
+                  const content = [
+                    `📨 SPT Masa PPh 23 제출 요청 — ${period}`,
+                    `• 거래 ${transactions.length} 건`,
+                    `• 총 DPP: Rp ${totalGross.toLocaleString('id-ID')}`,
+                    `• 총 PPh: Rp ${totalTax.toLocaleString('id-ID')}`,
+                    `→ 검토 후 SPT Masa 생성 부탁드립니다.`,
+                  ].join('\n');
+                  const mRes = await fetch(`/api/customer-ai/threads/${threadId}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content }),
+                  });
+                  if (mRes.ok) {
+                    showMsg('success', `운영팀에 SPT Masa 제출 요청을 전달했습니다 — ${transactions.length} 건`);
+                  } else {
+                    showMsg('error', t('sptRetryHint'));
+                  }
+                  return;
+                }
+                // Consultant: 기존 직접 생성 흐름.
                 const res = await fetch('/api/tax/spt-masa', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
                 });
                 const data = await res.json().catch(() => ({}));
-                // 백엔드 success contract: HTTP 2xx + data.success===true.
-                // 어느 한쪽이라도 false 면 실패로 처리해 사용자가 명확히 인지.
                 if (res.ok && data.success === true) {
                   showMsg(
                     'success',
@@ -1729,7 +1765,7 @@ export default function PPh23Page() {
             }}
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-            {t('btnSubmitValidate')}
+            {isConsultant ? t('btnSubmitValidate') : '운영팀에 SPT Masa 제출 요청'}
           </Button>
         </div>
       )}
