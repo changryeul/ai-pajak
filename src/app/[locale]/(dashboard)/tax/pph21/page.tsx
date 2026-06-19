@@ -743,7 +743,8 @@ function PPh21DataInputSection({
     }, 50);
   };
 
-  const downloadTemplate = async () => {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  const _legacyDownloadTemplate = async () => {
     try {
     const headers = [
       // Identity + payroll (required: employee_name + gross_salary)
@@ -849,6 +850,30 @@ function PPh21DataInputSection({
       showMsg('error', `${tp('templateDownloadFailed')}: ${err instanceof Error ? err.message : 'unknown'}`);
     }
   };
+  /* eslint-enable @typescript-eslint/no-unused-vars */
+
+  /**
+   * Standard PPh21 template — served from `public/templates/` so the file
+   * users download stays in sync with what they later upload (no in-memory
+   * regeneration drift). Same pattern as `/tax/pph23` + `/tax/ppn`.
+   */
+  const downloadTemplate = async () => {
+    try {
+      const res = await fetch('/templates/pph21-template.xlsx');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pph21_employee_template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      showMsg('error', `${tp('templateDownloadFailed')}: ${err instanceof Error ? err.message : 'unknown'}`);
+    }
+  };
 
   // Strict template-only upload — see handleTemplateUpload below.
   // Header cell must match a template column name exactly (case-insensitive
@@ -869,11 +894,31 @@ function PPh21DataInputSection({
   const TEMPLATE_ALL_COLS = [...TEMPLATE_REQUIRED_COLS, ...TEMPLATE_OPTIONAL_COLS];
 
   /**
+   * Normalize a header cell so JTC-style variants ("BPJS Kesehatan\n_employee")
+   * collapse to a comparable form ("bpjs kesehatan _employee").
+   */
+  const normHeader = (h: string): string =>
+    h.toLowerCase().replace(/\s+/g, ' ').trim();
+
+  /**
+   * Aliases — when the canonical column name doesn't appear, accept these
+   * variants from the standard PPh21 template (`public/templates/pph21-template.xlsx`).
+   * Each entry is normalized via `normHeader`.
+   */
+  const TEMPLATE_HEADER_ALIASES: Record<string, string[]> = {
+    hire_date: ['join_date'],
+    bpjs_kesehatan: ['bpjs kesehatan _employee', 'bpjs kesehatan_employee', 'bpjs kesehatan'],
+    other_deductions: ['potong gaji _deduction from salary', 'potongan gaji'],
+    worker_type: ['tax method _gross/gross up', 'tax method', 'tax_method', 'employment status (pegawai tetap: 1, pegawai tidak tetap: 2, bukan pegawai: 3)'],
+    thr: ['t h r'],
+  };
+
+  /**
    * Strict template-only upload.
    * 헤더가 우리 템플릿 컬럼명과 정확히 (case-insensitive trim) 매칭되어야 함.
-   * employee_name + gross_salary 필수, 나머지 optional.
+   * `TEMPLATE_HEADER_ALIASES` 통해 표준 템플릿 양식 (join_date 등) 의
+   * 변형도 인식. employee_name + gross_salary 필수, 나머지 optional.
    * mapping confirm UI / mapping memory 호출 X — 즉시 import.
-   * 필수 컬럼 누락 시 명시적 에러 toast + 진행 막힘.
    */
   const handleTemplateUpload = async (files: FileList | null) => {
     if (!files || !customerId) return;
@@ -887,25 +932,41 @@ function PPh21DataInputSection({
       // place the header at row 0; tolerate a few meta rows above.
       let headerIdx = 0;
       for (let i = 0; i < Math.min(allRows.length, 5); i++) {
-        if (allRows[i].some((c) => c.trim().toLowerCase() === 'employee_name')) {
+        if (allRows[i].some((c) => normHeader(c) === 'employee_name')) {
           headerIdx = i;
           break;
         }
       }
-      const headers = allRows[headerIdx].map((h) => h.trim().toLowerCase());
+      const headers = allRows[headerIdx].map(normHeader);
       const dataRows = allRows.slice(headerIdx + 1).filter((r) => r.some((c) => c !== ''));
 
-      // Strict required-column check
-      const missing = TEMPLATE_REQUIRED_COLS.filter((col) => !headers.includes(col));
+      // Strict required-column check (uses normalized headers + alias support).
+      const findIdx = (target: string): number => {
+        let idx = headers.indexOf(target);
+        if (idx >= 0) return idx;
+        const alts = TEMPLATE_HEADER_ALIASES[target];
+        if (alts) {
+          for (const alt of alts) {
+            idx = headers.indexOf(normHeader(alt));
+            if (idx >= 0) return idx;
+          }
+        }
+        return -1;
+      };
+
+      const missing = TEMPLATE_REQUIRED_COLS.filter((col) => findIdx(col) < 0);
       if (missing.length > 0) {
         showMsg('error', tp('templateHeaderMismatch', { missing: missing.join(', ') }));
         setUploading(false);
         return;
       }
 
-      // Build mapped CSV with template columns only (skip unknown columns)
+      // Build mapped CSV with template columns only (skip unknown columns).
+      // alias hit 도 canonical column name 으로 CSV 헤더에 들어가 server side
+      // (`/api/tax/employees/import`) 가 `getVal(cols, 'hire_date')` 처럼 그대로
+      // 읽을 수 있게 한다.
       const presentCols = TEMPLATE_ALL_COLS
-        .map((col) => ({ col, idx: headers.indexOf(col) }))
+        .map((col) => ({ col, idx: findIdx(col) }))
         .filter((c) => c.idx >= 0);
       const mappedHeaders = presentCols.map((c) => c.col);
       const mappedRows = dataRows.map((row) => presentCols.map((c) => row[c.idx] ?? ''));
