@@ -263,22 +263,43 @@ export default function PPh23Page() {
   useEffect(() => { loadData(); }, [loadData]);
 
   // CUSTOMER 제출 요청 + filing 존재 상태 동기화 (period / customer 변경 시).
+  // 옵션 B (서버 추적) 우선: `/api/customer/spt-masa-request` 가 source of truth.
+  // localStorage 는 다른 기기에서 로그인한 경우의 optimistic 보조 (서버 응답이
+  // 도착하기 전에도 즉시 배너가 뜨도록).
   useEffect(() => {
     if (!customerId) {
       setSubmissionRequest(null);
       setFilingExists(false);
       return;
     }
-    // localStorage 마커 읽기.
+    // 1. localStorage 마커 (optimistic).
     if (typeof window !== 'undefined' && reqStorageKey) {
       try {
         const raw = window.localStorage.getItem(reqStorageKey);
-        setSubmissionRequest(raw ? JSON.parse(raw) : null);
-      } catch {
-        setSubmissionRequest(null);
-      }
+        if (raw) setSubmissionRequest(JSON.parse(raw));
+      } catch { /* ignore */ }
     }
-    // filing 존재 여부 — 운영팀이 SPT Masa 생성했는지 확인.
+    // 2. 서버 요청 row 조회 → reconcile.
+    fetch(`/api/customer/spt-masa-request?taxType=PPh23&period=${period}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const row = d?.data as { status: 'PENDING' | 'PROCESSED' | 'CANCELLED'; requested_at: string } | null;
+        if (row?.status === 'PENDING') {
+          setSubmissionRequest({ requestedAt: row.requested_at });
+          if (typeof window !== 'undefined' && reqStorageKey) {
+            window.localStorage.setItem(reqStorageKey, JSON.stringify({ requestedAt: row.requested_at }));
+          }
+        } else if (row?.status === 'CANCELLED') {
+          // 서버가 CANCELLED 면 localStorage 도 정리.
+          if (typeof window !== 'undefined' && reqStorageKey) {
+            window.localStorage.removeItem(reqStorageKey);
+          }
+          setSubmissionRequest(null);
+        }
+        // PROCESSED 는 filing 조회 결과에 맡김 (아래).
+      })
+      .catch(() => { /* silent */ });
+    // 3. filing 존재 여부.
     fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh23&period=${period}&status=DRAFT`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
@@ -287,13 +308,12 @@ export default function PPh23Page() {
           f.tax_type === 'PPh23' && f.tax_period === period,
         );
         setFilingExists(exists);
-        // filing 이 만들어졌으면 요청 마커는 임무 완료 → 정리.
         if (exists && typeof window !== 'undefined' && reqStorageKey) {
           window.localStorage.removeItem(reqStorageKey);
           setSubmissionRequest(null);
         }
       })
-      .catch(() => { /* network/permission noise → 그냥 false 유지 */ });
+      .catch(() => { /* silent */ });
   }, [customerId, period, reqStorageKey]);
 
   // Add transaction
@@ -1399,6 +1419,10 @@ export default function PPh23Page() {
                       window.localStorage.removeItem(reqStorageKey);
                     }
                     setSubmissionRequest(null);
+                    // 서버 row 도 CANCELLED 로 마크 (다기기 동기화).
+                    void fetch(`/api/customer/spt-masa-request?taxType=PPh23&period=${period}`, {
+                      method: 'DELETE',
+                    }).catch(() => { /* silent */ });
                   }}
                 >
                   요청 취소
@@ -1812,12 +1836,18 @@ export default function PPh23Page() {
                   });
                   if (mRes.ok) {
                     showMsg('success', `운영팀에 SPT Masa 제출 요청을 전달했습니다 — ${transactions.length} 건`);
-                    // localStorage 마커 + 화면 상태 즉시 갱신.
+                    // localStorage 마커 + 화면 상태 즉시 갱신 (optimistic).
                     const stamp = { requestedAt: new Date().toISOString() };
                     if (typeof window !== 'undefined' && reqStorageKey) {
                       try { window.localStorage.setItem(reqStorageKey, JSON.stringify(stamp)); } catch { /* quota */ }
                     }
                     setSubmissionRequest(stamp);
+                    // 서버 추적 row upsert — 다기기 동기화 source of truth.
+                    void fetch('/api/customer/spt-masa-request', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ taxType: 'PPh23', period, threadId }),
+                    }).catch(() => { /* silent — localStorage 만으로도 동작 */ });
                   } else {
                     showMsg('error', t('sptRetryHint'));
                   }

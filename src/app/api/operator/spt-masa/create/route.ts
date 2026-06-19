@@ -165,6 +165,22 @@ async function handle(req: RequestWithSession): Promise<Response> {
     filingId = ins?.id ?? null;
   }
 
+  // Mark any pending spt_masa_submission_request row as PROCESSED so the
+  // customer page banner flips from 🟡 검토 중 → 🟢 완료 on next load.
+  // No-op if the row doesn't exist or the table hasn't been migrated yet
+  // (best-effort — operator action still succeeded).
+  await admin
+    .from('spt_masa_submission_request')
+    .update({
+      status: 'PROCESSED',
+      processed_at: new Date().toISOString(),
+      filing_id: filingId,
+    })
+    .eq('customer_id', customerId)
+    .eq('tax_type', taxType)
+    .eq('tax_period', period)
+    .eq('status', 'PENDING');
+
   return NextResponse.json({
     success: true,
     filingId,

@@ -106,16 +106,36 @@ export default function PPh42Page() {
   useEffect(() => { loadData(); }, [loadData]);
 
   // Submit-request + filing 상태 동기화 — `/tax/pph23` 와 동일 로직, 같은
-  // localStorage 키 + 같은 `taxType=PPh23` filing 을 조회 (PPh4(2) 행도
-  // 같은 SPT Masa 안에 포함되므로).
+  // localStorage 키 + 같은 `taxType=PPh23` filing 을 조회 + 같은 서버 row.
+  // 옵션 B (서버 추적) 우선, localStorage 는 optimistic 보조.
   useEffect(() => {
     if (!customerId) { setSubmissionRequest(null); setFilingExists(false); return; }
+    // 1. localStorage (optimistic)
     if (typeof window !== 'undefined' && reqStorageKey) {
       try {
         const raw = window.localStorage.getItem(reqStorageKey);
-        setSubmissionRequest(raw ? JSON.parse(raw) : null);
-      } catch { setSubmissionRequest(null); }
+        if (raw) setSubmissionRequest(JSON.parse(raw));
+      } catch { /* ignore */ }
     }
+    // 2. 서버 요청 row
+    fetch(`/api/customer/spt-masa-request?taxType=PPh23&period=${period}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const row = d?.data as { status: 'PENDING' | 'PROCESSED' | 'CANCELLED'; requested_at: string } | null;
+        if (row?.status === 'PENDING') {
+          setSubmissionRequest({ requestedAt: row.requested_at });
+          if (typeof window !== 'undefined' && reqStorageKey) {
+            window.localStorage.setItem(reqStorageKey, JSON.stringify({ requestedAt: row.requested_at }));
+          }
+        } else if (row?.status === 'CANCELLED') {
+          if (typeof window !== 'undefined' && reqStorageKey) {
+            window.localStorage.removeItem(reqStorageKey);
+          }
+          setSubmissionRequest(null);
+        }
+      })
+      .catch(() => { /* silent */ });
+    // 3. filing 존재
     fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh23&period=${period}&status=DRAFT`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
@@ -358,6 +378,9 @@ export default function PPh42Page() {
                       window.localStorage.removeItem(reqStorageKey);
                     }
                     setSubmissionRequest(null);
+                    void fetch(`/api/customer/spt-masa-request?taxType=PPh23&period=${period}`, {
+                      method: 'DELETE',
+                    }).catch(() => { /* silent */ });
                   }}
                 >
                   요청 취소
@@ -726,6 +749,12 @@ export default function PPh42Page() {
                       try { window.localStorage.setItem(reqStorageKey, JSON.stringify(stamp)); } catch { /* quota */ }
                     }
                     setSubmissionRequest(stamp);
+                    // 서버 추적 row upsert — 다기기 동기화.
+                    void fetch('/api/customer/spt-masa-request', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ taxType: 'PPh23', period, threadId }),
+                    }).catch(() => { /* silent */ });
                   } else {
                     showMsg('error', t('saveFailed'));
                   }
