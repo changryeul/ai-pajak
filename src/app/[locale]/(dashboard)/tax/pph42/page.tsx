@@ -80,7 +80,9 @@ export default function PPh42Page() {
   const [saving, setSaving] = useState(false);
   const [submissionRequest, setSubmissionRequest] = useState<{ requestedAt: string } | null>(null);
   const [filingExists, setFilingExists] = useState(false);
-  const reqStorageKey = customerId ? `sptRequest:PPh23:${customerId}:${period}` : '';
+  // PPh4(2) 자체 SPT Masa 분리 — 키도 PPh42 로 별도. `/tax/pph23` 와는 다른
+  // filing/request 트래킹.
+  const reqStorageKey = customerId ? `sptRequest:PPh42:${customerId}:${period}` : '';
 
   const csvInputRef = useRef<HTMLInputElement>(null);
 
@@ -118,7 +120,7 @@ export default function PPh42Page() {
       } catch { /* ignore */ }
     }
     // 2. 서버 요청 row
-    fetch(`/api/customer/spt-masa-request?taxType=PPh23&period=${period}`)
+    fetch(`/api/customer/spt-masa-request?taxType=PPh42&period=${period}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         const row = d?.data as { status: 'PENDING' | 'PROCESSED' | 'CANCELLED'; requested_at: string } | null;
@@ -136,12 +138,12 @@ export default function PPh42Page() {
       })
       .catch(() => { /* silent */ });
     // 3. filing 존재
-    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh23&period=${period}&status=DRAFT`)
+    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh42&period=${period}&status=DRAFT`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         const filings = d?.data || d?.filings || [];
         const exists = !!filings.find((f: { tax_type: string; tax_period: string }) =>
-          f.tax_type === 'PPh23' && f.tax_period === period,
+          f.tax_type === 'PPh42' && f.tax_period === period,
         );
         setFilingExists(exists);
         if (exists && typeof window !== 'undefined' && reqStorageKey) {
@@ -354,8 +356,8 @@ export default function PPh42Page() {
               <CardContent className="p-3 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
                 <div className="text-sm">
-                  <p className="font-semibold text-emerald-900">SPT Masa 제출 완료 — {period}</p>
-                  <p className="text-[11px] text-emerald-700">PPh 23 + PPh 4(2) 가 한 SPT Masa 안에 포함됐습니다.</p>
+                  <p className="font-semibold text-emerald-900">PPh 4(2) SPT Masa 제출 완료 — {period}</p>
+                  <p className="text-[11px] text-emerald-700">토지·건물 임대 별도 filing 으로 생성됐습니다.</p>
                 </div>
               </CardContent>
             </Card>
@@ -378,7 +380,7 @@ export default function PPh42Page() {
                       window.localStorage.removeItem(reqStorageKey);
                     }
                     setSubmissionRequest(null);
-                    void fetch(`/api/customer/spt-masa-request?taxType=PPh23&period=${period}`, {
+                    void fetch(`/api/customer/spt-masa-request?taxType=PPh42&period=${period}`, {
                       method: 'DELETE',
                     }).catch(() => { /* silent */ });
                   }}
@@ -749,22 +751,22 @@ export default function PPh42Page() {
                       try { window.localStorage.setItem(reqStorageKey, JSON.stringify(stamp)); } catch { /* quota */ }
                     }
                     setSubmissionRequest(stamp);
-                    // 서버 추적 row upsert — 다기기 동기화.
+                    // 서버 추적 row upsert — 다기기 동기화. taxType=PPh42 별도.
                     void fetch('/api/customer/spt-masa-request', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ taxType: 'PPh23', period, threadId }),
+                      body: JSON.stringify({ taxType: 'PPh42', period, threadId }),
                     }).catch(() => { /* silent */ });
                   } else {
                     showMsg('error', t('saveFailed'));
                   }
                   return;
                 }
-                // CONSULTANT: 기존 직접 생성. PPh4(2) 도 PPh23 SPT Masa 하나에 포함.
+                // CONSULTANT: 기존 직접 생성. PPh4(2) 자체 SPT Masa filing.
                 const res = await fetch('/api/tax/spt-masa', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
+                  body: JSON.stringify({ customerId, taxType: 'PPh42', period }),
                 });
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success === true) {

@@ -529,64 +529,71 @@ export function CustomerInboxClient() {
                 <div className="flex justify-between"><dt className="text-slate-500">Unread (cust)</dt><dd>{selectedThread.customerUnreadCount}</dd></div>
               </dl>
             </section>
-            {/* SPT Masa quick-create — only when thread context maps to a filing type */}
-            {['PPH21', 'PPH23', 'PPN'].includes(selectedThread.contextKind) && /^\d{4}-\d{2}$/.test(selectedThread.contextPeriod) && (
-              <section>
-                <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">SPT Masa</h2>
-                <button
-                  type="button"
-                  disabled={creatingSpt}
-                  onClick={async () => {
-                    setCreatingSpt(true);
-                    setSptResult(null);
-                    try {
-                      const taxTypeMap: Record<string, string> = { PPH21: 'PPh21', PPH23: 'PPh23', PPN: 'PPN' };
-                      const taxType = taxTypeMap[selectedThread.contextKind];
-                      const res = await fetch('/api/operator/spt-masa/create', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          customerId: selectedThread.customerId,
-                          taxType,
-                          period: selectedThread.contextPeriod,
-                        }),
-                      });
-                      const j = await res.json().catch(() => ({}));
-                      if (res.ok && j.success) {
-                        setSptResult({ ok: true, text: `생성 완료 — Filing ${String(j.filingId).slice(0, 8)} (actor: ${j.actor?.consultantName ?? '?'})` });
-                        // 자동으로 customer 에게 알림 메시지 posting
-                        await fetch(`/api/operator/customer-inbox/threads/${selectedThread.id}/messages`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            content: `✅ SPT Masa ${taxType} ${selectedThread.contextPeriod} 생성 완료 — Filing ID ${String(j.filingId).slice(0, 8)}. 운영팀 큐에서 다음 단계 (eBilling/DJP) 진행합니다.`,
-                          }),
-                        }).catch(() => { /* silent */ });
-                        // refresh messages + pending requests (이 thread 의
-                        // request 가 PROCESSED 로 바뀌어 목록에서 사라짐)
-                        await fetchMessages(selectedThread.id);
-                        await fetchPendingRequests();
-                      } else {
-                        setSptResult({ ok: false, text: j.message || j.error || `HTTP ${res.status}` });
-                      }
-                    } catch (err) {
-                      setSptResult({ ok: false, text: err instanceof Error ? err.message : 'unknown' });
-                    } finally {
-                      setCreatingSpt(false);
-                    }
-                  }}
-                  className="w-full rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-2 text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-50"
-                >
-                  {creatingSpt ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
-                  이 요청 처리 → SPT Masa 생성
-                </button>
-                {sptResult && (
-                  <p className={`mt-1 text-[10px] ${sptResult.ok ? 'text-emerald-700' : 'text-red-600'}`}>
-                    {sptResult.text}
-                  </p>
-                )}
-              </section>
-            )}
+            {/* SPT Masa quick-create — pendingRequests 기반. 한 thread 에 PPh23 +
+                PPh42 등 여러 type 이 동시에 PENDING 이면 각각 별도 버튼. */}
+            {(() => {
+              const threadPending = pendingRequests.filter((r) =>
+                r.customerId === selectedThread.customerId && r.taxPeriod === selectedThread.contextPeriod,
+              );
+              if (threadPending.length === 0) return null;
+              return (
+                <section>
+                  <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">SPT Masa 생성</h2>
+                  <div className="space-y-1.5">
+                    {threadPending.map((req) => (
+                      <button
+                        key={req.id}
+                        type="button"
+                        disabled={creatingSpt}
+                        onClick={async () => {
+                          setCreatingSpt(true);
+                          setSptResult(null);
+                          try {
+                            const res = await fetch('/api/operator/spt-masa/create', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                customerId: req.customerId,
+                                taxType: req.taxType,
+                                period: req.taxPeriod,
+                              }),
+                            });
+                            const j = await res.json().catch(() => ({}));
+                            if (res.ok && j.success) {
+                              setSptResult({ ok: true, text: `${req.taxType} 생성 완료 — Filing ${String(j.filingId).slice(0, 8)} (actor: ${j.actor?.consultantName ?? '?'})` });
+                              await fetch(`/api/operator/customer-inbox/threads/${selectedThread.id}/messages`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  content: `✅ SPT Masa ${req.taxType} ${req.taxPeriod} 생성 완료 — Filing ID ${String(j.filingId).slice(0, 8)}. 운영팀 큐에서 다음 단계 (eBilling/DJP) 진행합니다.`,
+                                }),
+                              }).catch(() => { /* silent */ });
+                              await fetchMessages(selectedThread.id);
+                              await fetchPendingRequests();
+                            } else {
+                              setSptResult({ ok: false, text: j.message || j.error || `HTTP ${res.status}` });
+                            }
+                          } catch (err) {
+                            setSptResult({ ok: false, text: err instanceof Error ? err.message : 'unknown' });
+                          } finally {
+                            setCreatingSpt(false);
+                          }
+                        }}
+                        className="w-full rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-2 text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-50"
+                      >
+                        {creatingSpt ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
+                        {req.taxType} → SPT Masa 생성
+                      </button>
+                    ))}
+                  </div>
+                  {sptResult && (
+                    <p className={`mt-1 text-[10px] ${sptResult.ok ? 'text-emerald-700' : 'text-red-600'}`}>
+                      {sptResult.text}
+                    </p>
+                  )}
+                </section>
+              );
+            })()}
 
             {selectedThread.status !== 'RESOLVED' && (
               <button

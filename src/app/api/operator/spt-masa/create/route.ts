@@ -27,7 +27,7 @@ import { SPTMasaCalculator } from '@/lib/tax';
 
 interface Body {
   customerId?: string;
-  taxType?: 'PPh21' | 'PPh23' | 'PPN';
+  taxType?: 'PPh21' | 'PPh23' | 'PPh42' | 'PPN';
   period?: string;
 }
 
@@ -37,8 +37,8 @@ async function handle(req: RequestWithSession): Promise<Response> {
   if (!customerId || !taxType || !period) {
     return NextResponse.json({ error: 'customerId, taxType, period required' }, { status: 400 });
   }
-  if (!['PPh21', 'PPh23', 'PPN'].includes(taxType)) {
-    return NextResponse.json({ error: 'taxType must be PPh21, PPh23, or PPN' }, { status: 400 });
+  if (!['PPh21', 'PPh23', 'PPh42', 'PPN'].includes(taxType)) {
+    return NextResponse.json({ error: 'taxType must be PPh21, PPh23, PPh42, or PPN' }, { status: 400 });
   }
   if (!/^\d{4}-\d{2}$/.test(period)) {
     return NextResponse.json({ error: 'period must be YYYY-MM' }, { status: 400 });
@@ -112,6 +112,8 @@ async function handle(req: RequestWithSession): Promise<Response> {
       sptMasaResult = await SPTMasaCalculator.calculatePPh21Masa({ month: period, customerId });
     } else if (taxType === 'PPh23') {
       sptMasaResult = await SPTMasaCalculator.calculatePPh23Masa({ month: period, customerId });
+    } else if (taxType === 'PPh42') {
+      sptMasaResult = await SPTMasaCalculator.calculatePPh42Masa({ month: period, customerId });
     } else {
       sptMasaResult = await SPTMasaCalculator.calculatePPNMasa({ month: period, customerId });
     }

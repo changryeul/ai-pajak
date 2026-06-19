@@ -30,7 +30,7 @@ import { SPTMasaCalculator } from '@/lib/tax';
 
 interface SPTMasaRequest {
   customerId: string;
-  taxType: 'PPh21' | 'PPh23' | 'PPN';
+  taxType: 'PPh21' | 'PPh23' | 'PPh42' | 'PPN';
   period: string; // 'YYYY-MM'
 }
 
@@ -91,11 +91,11 @@ async function handler(request: RequestWithSession): Promise<Response> {
   }
 
   // Validate tax type
-  if (!['PPh21', 'PPh23', 'PPN'].includes(taxType)) {
+  if (!['PPh21', 'PPh23', 'PPh42', 'PPN'].includes(taxType)) {
     return NextResponse.json(
       {
         error: 'Invalid tax type',
-        message: 'Tax type must be PPh21, PPh23, or PPN',
+        message: 'Tax type must be PPh21, PPh23, PPh42, or PPN',
       },
       { status: 400 }
     );
@@ -184,11 +184,16 @@ async function handler(request: RequestWithSession): Promise<Response> {
         month: period,
         customerId,
       });
+    } else if (taxType === 'PPh42') {
+      sptMasaResult = await SPTMasaCalculator.calculatePPh42Masa({
+        month: period,
+        customerId,
+      });
     } else {
       return NextResponse.json(
         {
           error: 'Invalid tax type',
-          message: 'Tax type must be PPh21, PPh23, or PPN',
+          message: 'Tax type must be PPh21, PPh23, PPh42, or PPN',
         },
         { status: 400 }
       );
@@ -326,8 +331,10 @@ async function handler(request: RequestWithSession): Promise<Response> {
     loggers.tax.warn({ err: e, filingId: filing.id }, 'Operator queue auto-enqueue failed');
   }
 
-  // Check if overdue
-  const isOverdue = SPTMasaCalculator.isOverdue(period, taxType);
+  // Check if overdue. Calculator uses internal 'PPh4_2' label — map externally
+  // declared 'PPh42' to it for compatibility.
+  const internalTaxType = taxType === 'PPh42' ? 'PPh4_2' as const : taxType;
+  const isOverdue = SPTMasaCalculator.isOverdue(period, internalTaxType);
 
   // Prepare response
   const response: SPTMasaResponse = {

@@ -24,7 +24,7 @@ import { requireRole } from '@/middleware/rbac';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
-const VALID_TYPES = ['PPh21', 'PPh23', 'PPN'] as const;
+const VALID_TYPES = ['PPh21', 'PPh23', 'PPh42', 'PPN'] as const;
 type ValidType = typeof VALID_TYPES[number];
 
 function parseArgs(url: URL): { taxType: ValidType | null; period: string | null } {
@@ -45,7 +45,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   const url = new URL(req.url);
   const { taxType, period } = parseArgs(url);
   if (!taxType || !period) {
-    return NextResponse.json({ error: 'taxType (PPh21|PPh23|PPN) and period (YYYY-MM) required' }, { status: 400 });
+    return NextResponse.json({ error: 'taxType (PPh21|PPh23|PPh42|PPN) and period (YYYY-MM) required' }, { status: 400 });
   }
   const customerId = await getCustomerId(req.session.userId);
   if (!customerId) return NextResponse.json({ error: 'customer not found' }, { status: 404 });
@@ -64,7 +64,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 async function handlePost(req: RequestWithSession): Promise<Response> {
   const body = await req.json().catch(() => ({})) as { taxType?: ValidType; period?: string; threadId?: string };
   if (!body.taxType || !VALID_TYPES.includes(body.taxType)) {
-    return NextResponse.json({ error: 'taxType (PPh21|PPh23|PPN) required' }, { status: 400 });
+    return NextResponse.json({ error: 'taxType (PPh21|PPh23|PPh42|PPN) required' }, { status: 400 });
   }
   if (!body.period || !/^\d{4}-\d{2}$/.test(body.period)) {
     return NextResponse.json({ error: 'period must be YYYY-MM' }, { status: 400 });
