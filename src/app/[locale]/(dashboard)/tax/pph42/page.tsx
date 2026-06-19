@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   Loader2, Receipt, CheckCircle, AlertTriangle, X,
-  ChevronDown, ChevronRight, Building2, Download, FileSpreadsheet, Pencil, Shield,
+  ChevronDown, ChevronRight, Building2, Download, FileSpreadsheet, Pencil, Shield, Clock,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { PageTitle } from '@/components/layout/PageTitle';
@@ -73,6 +73,14 @@ export default function PPh42Page() {
     pph23: number; pph42: number; pph26: number; ppn: number;
     failed: number; period: string; at: number;
   } | null>(null);
+  // Submit / filing 상태 — `/tax/pph23` 와 같은 SPT Masa filing 공유 (PPh4(2)
+  // 행도 pph23_transaction 같은 테이블이라 한 period 의 PPh23 filing 안에 포함).
+  // localStorage 마커는 PPh23 키와 공유해 둘 페이지 어느 쪽에서 요청하든
+  // 양쪽 배너 동기화.
+  const [saving, setSaving] = useState(false);
+  const [submissionRequest, setSubmissionRequest] = useState<{ requestedAt: string } | null>(null);
+  const [filingExists, setFilingExists] = useState(false);
+  const reqStorageKey = customerId ? `sptRequest:PPh23:${customerId}:${period}` : '';
 
   const csvInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,6 +104,33 @@ export default function PPh42Page() {
   }, [customerId, period]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Submit-request + filing 상태 동기화 — `/tax/pph23` 와 동일 로직, 같은
+  // localStorage 키 + 같은 `taxType=PPh23` filing 을 조회 (PPh4(2) 행도
+  // 같은 SPT Masa 안에 포함되므로).
+  useEffect(() => {
+    if (!customerId) { setSubmissionRequest(null); setFilingExists(false); return; }
+    if (typeof window !== 'undefined' && reqStorageKey) {
+      try {
+        const raw = window.localStorage.getItem(reqStorageKey);
+        setSubmissionRequest(raw ? JSON.parse(raw) : null);
+      } catch { setSubmissionRequest(null); }
+    }
+    fetch(`/api/tax/filings?customerId=${customerId}&taxType=PPh23&period=${period}&status=DRAFT`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const filings = d?.data || d?.filings || [];
+        const exists = !!filings.find((f: { tax_type: string; tax_period: string }) =>
+          f.tax_type === 'PPh23' && f.tax_period === period,
+        );
+        setFilingExists(exists);
+        if (exists && typeof window !== 'undefined' && reqStorageKey) {
+          window.localStorage.removeItem(reqStorageKey);
+          setSubmissionRequest(null);
+        }
+      })
+      .catch(() => { /* silent */ });
+  }, [customerId, period, reqStorageKey]);
 
   // ── WHT standard template download (same file as /tax/pph23) ──
   const downloadTemplate = async () => {
@@ -289,6 +324,48 @@ export default function PPh42Page() {
             </select>
           )}
         </div>
+      )}
+
+      {/* SPT Masa 제출 상태 배너 — CUSTOMER 만, /tax/pph23 와 같은 filing 공유 */}
+      {!isConsultant && customerId && (
+        <>
+          {filingExists ? (
+            <Card className="mb-4 border-emerald-300 bg-emerald-50">
+              <CardContent className="p-3 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="font-semibold text-emerald-900">SPT Masa 제출 완료 — {period}</p>
+                  <p className="text-[11px] text-emerald-700">PPh 23 + PPh 4(2) 가 한 SPT Masa 안에 포함됐습니다.</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : submissionRequest ? (
+            <Card className="mb-4 border-amber-300 bg-amber-50">
+              <CardContent className="p-3 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                <div className="text-sm flex-1">
+                  <p className="font-semibold text-amber-900">운영팀 검토 중 — {period}</p>
+                  <p className="text-[11px] text-amber-700">
+                    요청 시간: {new Date(submissionRequest.requestedAt).toLocaleString()} · 운영팀이 검토 후 SPT Masa 를 생성합니다.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-amber-700 hover:text-amber-900 text-[11px]"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && reqStorageKey) {
+                      window.localStorage.removeItem(reqStorageKey);
+                    }
+                    setSubmissionRequest(null);
+                  }}
+                >
+                  요청 취소
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
+        </>
       )}
 
       {/* Period + summary */}
@@ -607,6 +684,78 @@ export default function PPh42Page() {
           )}
         </CardContent>
       </Card>
+
+      {/* Bottom submit action — CUSTOMER 는 운영팀 요청, CONSULTANT 는 직접 생성 */}
+      {transactions.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2 items-center">
+          <Button
+            size="sm"
+            disabled={saving}
+            onClick={async () => {
+              if (!customerId) return;
+              setSaving(true);
+              try {
+                if (!isConsultant) {
+                  // CUSTOMER: chat 요청 (PPh23 thread 공유)
+                  const totalGross = transactions.reduce((s, tx) => s + Number(tx.gross_amount), 0);
+                  const totalTax = transactions.reduce((s, tx) => s + Number(tx.tax_amount), 0);
+                  const tRes = await fetch('/api/customer-ai/threads/find-or-create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contextKind: 'PPH23', contextPeriod: period }),
+                  });
+                  const tj = await tRes.json().catch(() => ({}));
+                  const threadId = tj.data?.id;
+                  if (!threadId) { showMsg('error', t('saveFailed')); return; }
+                  const content = [
+                    `📨 SPT Masa PPh 4(2) 제출 요청 — ${period}`,
+                    `• 거래 ${transactions.length} 건 (토지·건물 임대)`,
+                    `• 총 DPP: Rp ${totalGross.toLocaleString('id-ID')}`,
+                    `• 총 PPh 4(2): Rp ${totalTax.toLocaleString('id-ID')}`,
+                    `→ 검토 후 SPT Masa 생성 부탁드립니다.`,
+                  ].join('\n');
+                  const mRes = await fetch(`/api/customer-ai/threads/${threadId}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content }),
+                  });
+                  if (mRes.ok) {
+                    showMsg('success', `운영팀에 SPT Masa 제출 요청을 전달했습니다 — ${transactions.length} 건`);
+                    const stamp = { requestedAt: new Date().toISOString() };
+                    if (typeof window !== 'undefined' && reqStorageKey) {
+                      try { window.localStorage.setItem(reqStorageKey, JSON.stringify(stamp)); } catch { /* quota */ }
+                    }
+                    setSubmissionRequest(stamp);
+                  } else {
+                    showMsg('error', t('saveFailed'));
+                  }
+                  return;
+                }
+                // CONSULTANT: 기존 직접 생성. PPh4(2) 도 PPh23 SPT Masa 하나에 포함.
+                const res = await fetch('/api/tax/spt-masa', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ customerId, taxType: 'PPh23', period }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success === true) {
+                  showMsg('success', `SPT Masa 생성 완료 (filing ${data.filingId?.slice(0, 8) ?? ''})`);
+                  loadData();
+                } else {
+                  showMsg('error', data.message || data.error || `HTTP ${res.status}`);
+                }
+              } catch (err) {
+                showMsg('error', err instanceof Error ? err.message : t('saveFailed'));
+              } finally {
+                setSaving(false);
+              }
+            }}
+          >
+            {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+            {isConsultant ? 'SPT Masa 생성' : '운영팀에 SPT Masa 제출 요청'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
