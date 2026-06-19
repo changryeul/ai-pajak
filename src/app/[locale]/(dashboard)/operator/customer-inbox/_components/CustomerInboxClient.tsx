@@ -43,6 +43,11 @@ export function CustomerInboxClient() {
   const [drafts, setDrafts] = useState<DraftDTO[]>([]);
   const [creatingSpt, setCreatingSpt] = useState(false);
   const [sptResult, setSptResult] = useState<{ ok: boolean; text: string } | null>(null);
+  // SPT Masa 검토 대기 요청 (옵션 B). 운영팀이 어디부터 손대야 할지 한눈에.
+  const [pendingRequests, setPendingRequests] = useState<Array<{
+    id: string; customerId: string; customerName: string; taxType: string;
+    taxPeriod: string; requestedAt: string; threadId: string | null; pendingSeconds: number | null;
+  }>>([]);
   // Phase 2.4: snippet templates (managed by MASTER at
   // /admin/master/customer-ai-templates). One-shot fetch on mount.
   const [templates, setTemplates] = useState<CustomerAiTemplateDTO[]>([]);
@@ -99,13 +104,28 @@ export function CustomerInboxClient() {
       });
   }, []);
 
-  // polling threads
+  // SPT Masa 검토 대기 요청 fetch + 폴링 (스레드 와 같은 주기).
+  const fetchPendingRequests = useCallback(async () => {
+    try {
+      const r = await fetch('/api/operator/spt-masa-requests?status=PENDING&limit=50');
+      if (r.ok) {
+        const j = await r.json();
+        setPendingRequests(j.data ?? []);
+      }
+    } catch { /* silent */ }
+  }, []);
+  useEffect(() => { void fetchPendingRequests(); }, [fetchPendingRequests]);
+
+  // polling threads + pending requests
   useEffect(() => {
     const id = setInterval(() => {
-      if (document.visibilityState === 'visible') fetchThreads();
+      if (document.visibilityState === 'visible') {
+        void fetchThreads();
+        void fetchPendingRequests();
+      }
     }, POLL_MS);
     return () => clearInterval(id);
-  }, [fetchThreads]);
+  }, [fetchThreads, fetchPendingRequests]);
 
   // load messages on thread select
   useEffect(() => {
@@ -210,6 +230,53 @@ export function CustomerInboxClient() {
   // (Phase 2.1) was dropped in Phase 2.3 migration 20260603000006.
 
   return (
+    <>
+      {/* SPT Masa 검토 대기 패널 — 옵션 B (spt_masa_submission_request) 활용 */}
+      {pendingRequests.length > 0 && (
+        <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-3">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-amber-200 text-amber-900 text-[10px] font-bold uppercase px-2 py-0.5">
+                SPT Masa 검토 대기
+              </span>
+              <span className="text-sm font-bold text-amber-900">{pendingRequests.length} 건</span>
+              <span className="text-[10px] text-amber-700">
+                · 가장 오래된 요청: {pendingRequests.length > 0
+                  ? new Date(Math.min(...pendingRequests.map((r) => new Date(r.requestedAt).getTime()))).toLocaleString()
+                  : '—'}
+              </span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {pendingRequests.slice(0, 12).map((req) => (
+              <button
+                key={req.id}
+                type="button"
+                onClick={() => { if (req.threadId) setSelectedId(req.threadId); }}
+                disabled={!req.threadId}
+                className="text-left rounded-lg border border-amber-200 bg-white px-3 py-2 hover:border-amber-400 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition"
+                title={req.threadId ? '클릭하면 thread 로 이동' : 'thread 미연결 — 직접 검색 필요'}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-slate-900 truncate">{req.customerName}</span>
+                  <span className="text-[9px] font-mono text-slate-400 flex-shrink-0">{req.taxType}/{req.taxPeriod}</span>
+                </div>
+                <div className="text-[10px] text-amber-700 mt-0.5">
+                  {req.pendingSeconds !== null && req.pendingSeconds > 3600
+                    ? `${Math.floor(req.pendingSeconds / 3600)}시간 대기 중`
+                    : req.pendingSeconds !== null
+                      ? `${Math.floor((req.pendingSeconds ?? 0) / 60)}분 대기 중`
+                      : '—'}
+                </div>
+              </button>
+            ))}
+          </div>
+          {pendingRequests.length > 12 && (
+            <p className="mt-2 text-[10px] text-amber-700">+{pendingRequests.length - 12} 건 더…</p>
+          )}
+        </div>
+      )}
+
     <div className="grid grid-cols-[260px_1fr_300px] gap-3 h-[700px]">
       {/* Left: thread list */}
       <aside className="rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col">
@@ -495,8 +562,10 @@ export function CustomerInboxClient() {
                             content: `✅ SPT Masa ${taxType} ${selectedThread.contextPeriod} 생성 완료 — Filing ID ${String(j.filingId).slice(0, 8)}. 운영팀 큐에서 다음 단계 (eBilling/DJP) 진행합니다.`,
                           }),
                         }).catch(() => { /* silent */ });
-                        // refresh messages
+                        // refresh messages + pending requests (이 thread 의
+                        // request 가 PROCESSED 로 바뀌어 목록에서 사라짐)
                         await fetchMessages(selectedThread.id);
+                        await fetchPendingRequests();
                       } else {
                         setSptResult({ ok: false, text: j.message || j.error || `HTTP ${res.status}` });
                       }
@@ -534,5 +603,6 @@ export function CustomerInboxClient() {
         )}
       </aside>
     </div>
+    </>
   );
 }

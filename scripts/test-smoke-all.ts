@@ -69,6 +69,7 @@ const STEPS: Step[] = [
   { name: 'operator spt-masa quick-create', file: 'verify-operator-spt-masa-create.ts' },
   // --- SPT Masa submission request 서버 추적 옵션 B (2026-06-19) ---------
   { name: 'spt masa submission request (옵션 B)', file: 'verify-spt-masa-request.ts' },
+  { name: 'operator spt-masa-requests list', file: 'verify-operator-spt-masa-requests-list.ts' },
   // --- WHT one-sheet 통합 매입 ledger (2026-06-08) ---------------------
   { name: 'wht onesheet import contract', file: 'verify-wht-onesheet-contract.ts' },
   // --- PPN JTC 13-col template robustness (2026-06-09) -----------------
