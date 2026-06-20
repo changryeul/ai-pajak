@@ -40,6 +40,13 @@ interface Employee {
   worker_type?: 'REGULAR' | 'CONTRACT' | 'DAILY' | 'FREELANCER' | 'COMMISSIONER' | null;
   // PMK 66/2023 — PKWTT (Pegawai Tetap, 1) / PKWT (Tidak Tetap, 2) / Consultant (Bukan Pegawai, 3)
   employment_status?: 'PKWTT' | 'PKWT' | 'Consultant' | string | null;
+  // Additional allowances + BPJS (master)
+  meal_allowance?: number | null;
+  transport_allowance?: number | null;
+  other_allowances?: number | null;
+  bpjs_kesehatan?: number | null;
+  bonus?: number | null;
+  thr?: number | null;
   // HR record (Phase C)
   hire_date?: string | null;
   resign_date?: string | null;
@@ -68,10 +75,14 @@ const emptyForm = {
   id: '',
   // Identity
   employeeName: '', employeeNpwp: '', employeeNik: '', ptkpCategory: 'TK0',
-  // Salary
+  // Salary baseline
   grossSalary: '', jhtEmployee: '', jpEmployee: '', otherDeductions: '',
+  // Allowances + BPJS — 표준 양식 col 8/10/11/12/14/15/26 매핑
+  positionAllowance: '', mealAllowance: '', transportAllowance: '', otherAllowance: '',
+  bpjsKesehatan: '', bonus: '', thr: '',
   // HR record
   employeeNumber: '', position: '', department: '', workerType: 'REGULAR',
+  employmentStatus: '', // PMK 66/2023 — PKWTT (1) / PKWT (2) / Consultant (3)
   hireDate: '', resignDate: '', birthDate: '', gender: '', maritalStatus: '',
   email: '', phone: '', address: '',
   bankName: '', bankAccountNo: '', bankAccountName: '',
@@ -164,10 +175,18 @@ export default function PPh21PayrollPage() {
       jhtEmployee: String(emp.jht_employee),
       jpEmployee: String(emp.jp_employee),
       otherDeductions: String(emp.other_deductions),
+      positionAllowance: emp.position_allowance != null ? String(emp.position_allowance) : '',
+      mealAllowance: emp.meal_allowance != null ? String(emp.meal_allowance) : '',
+      transportAllowance: emp.transport_allowance != null ? String(emp.transport_allowance) : '',
+      otherAllowance: emp.other_allowances != null ? String(emp.other_allowances) : '',
+      bpjsKesehatan: emp.bpjs_kesehatan != null ? String(emp.bpjs_kesehatan) : '',
+      bonus: emp.bonus != null ? String(emp.bonus) : '',
+      thr: emp.thr != null ? String(emp.thr) : '',
       employeeNumber: emp.employee_number || '',
       position: emp.position || '',
       department: emp.department || '',
       workerType: emp.worker_type || 'REGULAR',
+      employmentStatus: emp.employment_status || '',
       hireDate: emp.hire_date || '',
       resignDate: emp.resign_date || '',
       birthDate: emp.birth_date || '',
@@ -207,10 +226,18 @@ export default function PPh21PayrollPage() {
           jhtEmployee: parseFloat(form.jhtEmployee) || 0,
           jpEmployee: parseFloat(form.jpEmployee) || 0,
           otherDeductions: parseFloat(form.otherDeductions) || 0,
+          positionAllowance: parseFloat(form.positionAllowance) || 0,
+          mealAllowance: parseFloat(form.mealAllowance) || 0,
+          transportAllowance: parseFloat(form.transportAllowance) || 0,
+          otherAllowance: parseFloat(form.otherAllowance) || 0,
+          bpjsKesehatan: parseFloat(form.bpjsKesehatan) || 0,
+          bonus: parseFloat(form.bonus) || 0,
+          thr: parseFloat(form.thr) || 0,
           employeeNumber: form.employeeNumber,
           position: form.position,
           department: form.department,
           workerType: form.workerType,
+          employmentStatus: form.employmentStatus || null,
           hireDate: form.hireDate || null,
           resignDate: form.resignDate || null,
           birthDate: form.birthDate || null,
@@ -537,6 +564,18 @@ export default function PPh21PayrollPage() {
                   </Select>
                 </div>
                 <div>
+                  <Label className="text-xs">PMK 66/2023 Employment status</Label>
+                  <Select value={form.employmentStatus || '__'} onValueChange={v => setForm({ ...form, employmentStatus: v === '__' ? '' : v })}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__">—</SelectItem>
+                      <SelectItem value="PKWTT">PKWTT (1 — Pegawai Tetap / 정직원)</SelectItem>
+                      <SelectItem value="PKWT">PKWT (2 — Tidak Tetap / 비정직원)</SelectItem>
+                      <SelectItem value="Consultant">Consultant (3 — Bukan Pegawai / 외부)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
                   <Label className="text-xs">{tp('hrHireDate')}</Label>
                   <Input type="date" className="h-9" value={form.hireDate} onChange={e => setForm({ ...form, hireDate: e.target.value })} />
                 </div>
@@ -573,6 +612,34 @@ export default function PPh21PayrollPage() {
                 <div>
                   <Label className="text-xs">{tp('otherDeductions')}</Label>
                   <Input className="h-9 font-mono" type="number" value={form.otherDeductions} onChange={e => setForm({ ...form, otherDeductions: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Position allowance / 직책수당</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.positionAllowance} onChange={e => setForm({ ...form, positionAllowance: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Meal allowance / 식대</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.mealAllowance} onChange={e => setForm({ ...form, mealAllowance: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Transport allowance / 교통비</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.transportAllowance} onChange={e => setForm({ ...form, transportAllowance: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Other allowance / 기타수당</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.otherAllowance} onChange={e => setForm({ ...form, otherAllowance: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">BPJS Kesehatan (employee)</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.bpjsKesehatan} onChange={e => setForm({ ...form, bpjsKesehatan: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Bonus</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.bonus} onChange={e => setForm({ ...form, bonus: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">THR</Label>
+                  <Input className="h-9 font-mono" type="number" value={form.thr} onChange={e => setForm({ ...form, thr: e.target.value })} />
                 </div>
               </div>
             </section>
