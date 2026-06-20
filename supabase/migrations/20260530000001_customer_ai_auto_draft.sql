@@ -1,5 +1,5 @@
 -- Phase 2.1: auto-draft on customer message arrival
--- See docs/superpowers/specs/2026-05-30-customer-ai-chat-phase2-1-design.md
+-- Phase 2.1: customer_ai_thread 에 auto_draft 컬럼 추가 (background draft).
 
 ALTER TABLE customer_ai_thread
   ADD COLUMN auto_draft TEXT,
