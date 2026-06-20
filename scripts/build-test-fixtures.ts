@@ -19,62 +19,47 @@ const ROOT = join(__dirname, '..', 'public', 'test-data');
 mkdirSync(ROOT, { recursive: true });
 
 /* ─────────────────────────────────────────────────────────────────────── */
-/* PPh21 직원 등록 (34-col strict template + 5 employees)                */
+/* PPh21 직원 등록 (43-col 표준 양식 + 5 employees with Employment status)  */
+/*                                                                       */
+/* 표준 양식 = public/templates/pph21-template.xlsx (사용자가 2026-06-19 자  */
+/* 로 표준화 결정). Employment status (col 1) — 1:Pegawai Tetap, 2:Tidak   */
+/* Tetap, 3:Bukan Pegawai (PMK 66/2023 분류).                              */
 /* ─────────────────────────────────────────────────────────────────────── */
 function buildPph21(): void {
-  const headers = [
-    'employee_name','employee_npwp','employee_nik','ptkp_category','gross_salary',
-    'position_allowance','overtime_pay','meal_allowance','transport_allowance','other_allowances',
-    'bonus','thr','jht_employee','jp_employee','bpjs_kesehatan','other_deductions','worker_type',
-    'employee_number','position','department','hire_date','resign_date','birth_date','gender',
-    'marital_status','email','phone','address','bank_name','bank_account_no','bank_account_name',
-    'emergency_contact_name','emergency_contact_phone','notes',
-  ];
-  const samples: (string | number)[][] = [
-    ['Andi Wijaya',          '01.234.567.8-001.000', '3201111111110001', 'K/2', 15000000,
-     2500000, 0, 300000, 200000, 0, 0, 0, 300000, 150000, 150000, 0, 'REGULAR',
-     'EMP-001', 'Senior Engineer', 'IT', '2022-03-01', '', '1989-04-12', 'M',
-     'MARRIED', 'andi@example.com', '+62 811 1111 1111', 'Jl. Sudirman 10',
-     'BCA', '1111111111', 'Andi Wijaya', 'Wati', '+62 811 1111 1112', ''],
-    ['Sari Lestari',         '', '3202222222220002', 'TK/0', 8000000,
-     500000, 0, 300000, 200000, 0, 0, 0, 160000, 80000, 80000, 0, 'REGULAR',
-     'EMP-002', 'Analyst', 'HR', '2024-08-15', '', '1996-09-25', 'F',
-     'SINGLE', 'sari@example.com', '+62 812 2222 2222', 'Jl. Thamrin 5',
-     'BCA', '2222222222', 'Sari Lestari', 'Rini', '+62 812 2222 2223', ''],
-    ['Budi Hartono',         '02.345.678.9-002.000', '3203333333330003', 'K/1', 25000000,
-     4000000, 0, 300000, 200000, 0, 0, 2083333, 500000, 250000, 250000, 0, 'REGULAR',
-     'EMP-003', 'Director', 'Operations', '2020-01-15', '', '1982-11-08', 'M',
-     'MARRIED', 'budi@example.com', '+62 813 3333 3333', 'Jl. Gatot 88',
-     'Mandiri', '3333333333', 'Budi Hartono', 'Sri', '+62 813 3333 3334', ''],
-    ['Citra Wulandari',      '03.456.789.0-003.000', '3204444444440004', 'TK/1', 12000000,
-     1500000, 0, 300000, 200000, 0, 0, 0, 240000, 120000, 120000, 0, 'REGULAR',
-     'EMP-004', 'Marketing Manager', 'Marketing', '2023-05-20', '', '1992-06-30', 'F',
-     'SINGLE', 'citra@example.com', '+62 814 4444 4444', 'Jl. Cendana 22',
-     'BNI', '4444444444', 'Citra Wulandari', 'Eka', '+62 814 4444 4445', ''],
-    ['Dimas Pratama',        '04.567.890.1-004.000', '3205555555550005', 'K/0', 18000000,
-     2000000, 500000, 300000, 200000, 0, 0, 0, 360000, 180000, 180000, 0, 'REGULAR',
-     'EMP-005', 'Finance Manager', 'Finance', '2021-09-01', '', '1985-12-03', 'M',
-     'MARRIED', 'dimas@example.com', '+62 815 5555 5555', 'Jl. Asia Afrika 33',
-     'Mandiri', '5555555555', 'Dimas Pratama', 'Maya', '+62 815 5555 5556', ''],
+  // 표준 양식 base 그대로 읽어와서 헤더 + 안내 시트 보존
+  const baseBuf = readFileSync(join(__dirname, '..', 'public', 'templates', 'pph21-template.xlsx'));
+  const baseWb = XLSX.read(baseBuf, { type: 'buffer', cellDates: true });
+  const baseWs = baseWb.Sheets['PPh21'];
+  const baseAoa = XLSX.utils.sheet_to_json<unknown[]>(baseWs, { header: 1, defval: null }) as unknown[][];
+  const headers = baseAoa[0]; // 43 columns
+
+  // 5 employees:
+  //  Andi/Sari/Budi → Pegawai Tetap (1) — 정직원, BPJS 모두 적용
+  //  Citra          → Pegawai Tidak Tetap (2) — 단기 계약
+  //  Dimas          → Bukan Pegawai (3) — 외부 컨설턴트 / commission
+  // PMK 66/2023 분류 그대로 반영. Type 2/3 은 BPJS / JKK / JKM / JKP 비움.
+  const samples: (unknown[])[] = [
+    // col index:                          0          1                                          2                              3                       4               5      6                              7         8       9        10      11     12  13  14  15      16  17  18  19  20      21      22      23  24      25      26      27  28                  29           30           31  32           33   34                   35                    36                          37        38            39                40                        41                42
+    [/*employee_number*/'EMP-001', /*Employment status*/1, /*employee_name*/'Andi Wijaya',          /*npwp*/'01.234.567.8-001.000', /*nik*/'3201111111110001', /*ptkp*/'K/2', /*tax method*/'Gross',         /*gross_salary*/15000000, /*pos_all*/2500000, /*overtime*/0, /*meal*/300000, /*transport*/200000, /*other_all*/0,   /*natura*/'', /*bonus*/0, /*thr*/0,         /*pinjaman*/'', /*potong*/'', /*jkk*/100000, /*jkm*/30000, /*jht_co*/450000, /*jp_co*/300000, /*bpjs_co*/600000, /*jkp_co*/30000, /*jht_emp*/300000, /*jp_emp*/150000, /*bpjs_emp*/150000, /*jkp_emp*/0, /*position*/'Senior Engineer', /*dept*/'IT',         /*join*/'2022-03-01', /*resign*/'', /*birth*/'1989-04-12', /*gender*/'M', /*email*/'andi@example.com',  /*phone*/'+62 811 1111 1111', /*address*/'Jl. Sudirman 10',     /*bank*/'BCA',     /*acc_no*/'1111111111', /*acc_name*/'Andi Wijaya',     /*emerg_name*/'Wati',  /*emerg_phone*/'+62 811 1111 1112', /*notes*/''],
+    [          'EMP-002',                       1,                       'Sari Lestari',                            '',                              '3202222222220002', 'TK/0',          'Gross',                                  8000000,         500000,         0,         300000,           200000,            0,         '',           0,         0,                  '',             '',         60000,         18000,         240000,         160000,         320000,         16000,         160000,         80000,         80000,         0, 'Analyst',                       'HR',                       '2024-08-15',         '',                       '1996-09-25',           'F',         'sari@example.com',                       '+62 812 2222 2222',                       'Jl. Thamrin 5',                                'BCA',                       '2222222222',                              'Sari Lestari',                       'Rini',                       '+62 812 2222 2223',         ''],
+    [          'EMP-003',                       1,                       'Budi Hartono',                            '02.345.678.9-002.000',          '3203333333330003', 'K/1',           'Gross Up',                              25000000,         4000000,        0,         300000,           200000,            0,         '',     2083333,         0,                  '',             '',        150000,         50000,         750000,         500000,         1000000,        50000,         500000,         250000,         250000,         0, 'Director',                      'Operations',               '2020-01-15',         '',                       '1982-11-08',           'M',         'budi@example.com',                       '+62 813 3333 3333',                       'Jl. Gatot 88',                                 'Mandiri',                   '3333333333',                              'Budi Hartono',                       'Sri',                       '+62 813 3333 3334',         ''],
+    // Pegawai Tidak Tetap (2) — BPJS / JKK / JKM / JKP 미적용 (빈 칸)
+    [          'EMP-004',                       2,                       'Citra Wulandari',                         '03.456.789.0-003.000',          '3204444444440004', 'TK/1',          'Gross',                                  6000000,               0,        0,              0,                0,            0,         '',           0,         0,                  '',             '',            '',            '',             '',             '',              '',           '',             '',            '',              '',         '', 'Field Worker',                  'Operations',               '2026-04-10',         '',                       '1992-06-30',           'F',         'citra@example.com',                       '+62 814 4444 4444',                       'Jl. Cendana 22',                                  '',                       '',                                      'Citra Wulandari',                       'Eka',                       '+62 814 4444 4445',         '6개월 단기 계약'],
+    // Bukan Pegawai (3) — 외부 컨설턴트, 임금/공제 항목 거의 비움
+    [          'EMP-005',                       3,                       'Dimas Pratama',                           '04.567.890.1-004.000',          '3205555555550005', 'K/0',           'Gross',                                   3500000,               0,        0,              0,                0,            0,         '',           0,         0,                  '',             '',            '',            '',             '',             '',              '',           '',             '',            '',              '',         '', 'External Consultant',           'Project',                  '2026-05-15',         '',                       '1985-12-03',           'M',         'dimas@example.com',                       '+62 815 5555 5555',                       'Jl. Asia Afrika 33',                              '',                       '',                                      'Dimas Pratama',                       'Maya',                       '+62 815 5555 5556',         '프로젝트 단위 계약'],
   ];
 
+  // headers + 5 sample rows
+  const filledAoa: unknown[][] = [headers, ...samples];
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...samples], { cellDates: true });
-  ws['!cols'] = headers.map(() => ({ wch: 20 }));
-  XLSX.utils.book_append_sheet(wb, ws, 'PPh21 직원 데이터');
-
-  const guideRows: string[][] = [
-    ['컬럼 / Column', '설명 / Keterangan'],
-    ['employee_name', '직원 이름 (필수)'],
-    ['ptkp_category', 'TK/0, TK/1, K/0, K/1, K/2 ...'],
-    ['gross_salary', '월 기본급 (필수, 숫자)'],
-    ['worker_type', 'REGULAR / CONTRACT / DAILY / FREELANCER / COMMISSIONER'],
-    ['hire_date', '입사일 YYYY-MM-DD'],
-  ];
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(guideRows), '안내 - Petunjuk');
-
+  const ws = XLSX.utils.aoa_to_sheet(filledAoa, { cellDates: true });
+  XLSX.utils.book_append_sheet(wb, ws, 'PPh21');
+  // 안내 시트 그대로 복사
+  if (baseWb.Sheets['Petunjuk (Guideline)']) {
+    XLSX.utils.book_append_sheet(wb, baseWb.Sheets['Petunjuk (Guideline)'], 'Petunjuk (Guideline)');
+  }
   XLSX.writeFile(wb, join(ROOT, 'pph21-filled.xlsx'));
-  console.log('✓ pph21-filled.xlsx (5 employees)');
+  console.log('✓ pph21-filled.xlsx (5 employees: type 1×3 + 2×1 + 3×1, 43-col 표준 양식)');
 }
 
 /* ─────────────────────────────────────────────────────────────────────── */

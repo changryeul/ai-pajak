@@ -84,6 +84,16 @@ export async function POST(request: NextRequest) {
 
       const ptkp = getVal(cols, 'ptkp_category') || 'TK0';
       const workerType = getVal(cols, 'worker_type') || 'REGULAR';
+      // PMK 66/2023 Employment status (1/2/3) — 표준 양식 col 1.
+      //   1 = Pegawai Tetap        → PKWTT (정직원)
+      //   2 = Pegawai Tidak Tetap  → PKWT  (단기/비정직원)
+      //   3 = Bukan Pegawai        → Consultant (외부, e.g. commission/freelance)
+      // 빈 셀이면 NULL — 양식에 없는 사용자 데이터로 인한 데이터 손실 방지.
+      const empStatusRaw = getVal(cols, 'employment_status').trim();
+      const employmentStatus = empStatusRaw === '1' ? 'PKWTT'
+        : empStatusRaw === '2' ? 'PKWT'
+        : empStatusRaw === '3' ? 'Consultant'
+        : empStatusRaw || null;
 
       const positionAllowance = getNum(cols, 'position_allowance');
       const overtimePay = getNum(cols, 'overtime_pay');
@@ -113,6 +123,7 @@ export async function POST(request: NextRequest) {
       // anything else passes through and the DB will reject if invalid.
       const hrFields = {
         employee_number: getVal(cols, 'employee_number') || null,
+        employment_status: employmentStatus,
         position: getVal(cols, 'position') || null,
         department: getVal(cols, 'department') || null,
         hire_date: getVal(cols, 'hire_date') || null,

@@ -884,7 +884,7 @@ function PPh21DataInputSection({
     'employee_npwp', 'employee_nik', 'ptkp_category', 'position_allowance',
     'overtime_pay', 'meal_allowance', 'transport_allowance', 'other_allowances',
     'bonus', 'thr', 'jht_employee', 'jp_employee', 'bpjs_kesehatan',
-    'other_deductions', 'worker_type',
+    'other_deductions', 'worker_type', 'employment_status',
     // HR record (Phase: employee master xlsx)
     'employee_number', 'position', 'department', 'hire_date', 'resign_date',
     'birth_date', 'gender', 'marital_status', 'email', 'phone', 'address',
@@ -909,7 +909,12 @@ function PPh21DataInputSection({
     hire_date: ['join_date'],
     bpjs_kesehatan: ['bpjs kesehatan _employee', 'bpjs kesehatan_employee', 'bpjs kesehatan'],
     other_deductions: ['potong gaji _deduction from salary', 'potongan gaji'],
-    worker_type: ['tax method _gross/gross up', 'tax method', 'tax_method', 'employment status (pegawai tetap: 1, pegawai tidak tetap: 2, bukan pegawai: 3)'],
+    // tax method (gross/gross up) → worker_type 별도 의미는 아니지만 자리 매핑 위해
+    // 임시. 양식 사용자가 'tax_method' 컬럼 채우면 server 가 그대로 처리.
+    worker_type: ['tax method _gross/gross up', 'tax method', 'tax_method'],
+    // PMK 66/2023 Employment status 1/2/3 → employment_status (자체 컬럼).
+    // 서버 측 import 가 1→PKWTT, 2→PKWT, 3→Consultant 로 매핑.
+    employment_status: ['employment status (pegawai tetap: 1, pegawai tidak tetap: 2, bukan pegawai: 3)', 'employment_status'],
     thr: ['t h r'],
   };
 
