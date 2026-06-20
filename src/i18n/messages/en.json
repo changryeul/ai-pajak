@@ -3908,7 +3908,10 @@
     "editHint": "Click to edit",
     "editBanner": "Click any field to edit. Auto-saves when you move to another field.",
     "savedToast": "Saved",
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "deleteButton": "Delete",
+    "confirmDelete": "Delete this faktur?",
+    "deletedToast": "Deleted"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4357,7 +4360,10 @@
     "editHint": "Click to edit",
     "editBanner": "Click any field to edit. Auto-saves when you move to another field.",
     "savedToast": "Saved",
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "deleteButton": "Delete",
+    "confirmDelete": "Delete this payslip?",
+    "deletedToast": "Deleted"
   },
   "errorFallback": {
     "title": "Failed to load page",

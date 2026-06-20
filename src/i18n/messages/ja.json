@@ -3908,7 +3908,10 @@
     "editHint": "クリックして編集",
     "editBanner": "フィールドをクリックして編集。別のフィールドに移動すると自動保存されます。",
     "savedToast": "保存しました",
-    "saveFailed": "保存失敗"
+    "saveFailed": "保存失敗",
+    "deleteButton": "削除",
+    "confirmDelete": "このfakturを削除しますか？",
+    "deletedToast": "削除しました"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4357,7 +4360,10 @@
     "editHint": "クリックして編集",
     "editBanner": "フィールドをクリックして編集。別のフィールドに移動すると自動保存されます。",
     "savedToast": "保存しました",
-    "saveFailed": "保存失敗"
+    "saveFailed": "保存失敗",
+    "deleteButton": "削除",
+    "confirmDelete": "この給与明細を削除しますか？",
+    "deletedToast": "削除しました"
   },
   "errorFallback": {
     "title": "Failed to load page",

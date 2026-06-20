@@ -288,13 +288,13 @@ export default function PPNPage() {
   };
 
   const deleteFaktur = async (id: string) => {
-    if (!confirm(t('confirmDelete') || 'Delete this faktur?')) return;
+    if (!confirm(t('confirmDelete'))) return;
     try {
       const res = await fetch(`/api/tax/ppn-faktur-monthly?id=${id}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success !== false) {
         setExpandedFakturId(null);
-        showMsg('success', t('deletedToast') || 'Deleted');
+        showMsg('success', t('deletedToast'));
         loadFakturs();
       } else {
         showMsg('error', data.error || t('saveFailed'));
@@ -698,7 +698,7 @@ export default function PPNPage() {
                                     </div>
                                     <div className="flex gap-2 pt-2 mt-2">
                                       <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => deleteFaktur(f.id)}>
-                                        <X className="h-3 w-3 mr-1" />{t('deleteButton') || '삭제'}
+                                        <X className="h-3 w-3 mr-1" />{t('deleteButton')}
                                       </Button>
                                     </div>
                                   </div>

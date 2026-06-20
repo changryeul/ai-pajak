@@ -130,13 +130,13 @@ export function MonthlyPayslipTab({ customerId }: Props) {
   };
 
   const deletePayslip = async (id: string) => {
-    if (!confirm(tp('confirmDelete') || '이 급여명세를 삭제하시겠습니까?')) return;
+    if (!confirm(tp('confirmDelete'))) return;
     try {
       const res = await fetch(`/api/tax/monthly-payslip?id=${id}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success !== false) {
         setExpandedId(null);
-        showMsg('success', tp('deletedToast') || '삭제되었습니다');
+        showMsg('success', tp('deletedToast'));
         loadPayslips();
       } else {
         showMsg('error', data.error || tp('saveFailed'));
@@ -568,7 +568,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
 
                       <div className="flex gap-2 pt-2 mt-2">
                         <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => deletePayslip(ps.id)}>
-                          <X className="h-3 w-3 mr-1" />{tp('deleteButton') || '삭제'}
+                          <X className="h-3 w-3 mr-1" />{tp('deleteButton')}
                         </Button>
                       </div>
                     </div>

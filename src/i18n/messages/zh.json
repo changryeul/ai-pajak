@@ -3908,7 +3908,10 @@
     "editHint": "点击编辑",
     "editBanner": "点击任意字段进行编辑。移到其他字段时自动保存。",
     "savedToast": "已保存",
-    "saveFailed": "保存失败"
+    "saveFailed": "保存失败",
+    "deleteButton": "删除",
+    "confirmDelete": "删除此 faktur？",
+    "deletedToast": "已删除"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4357,7 +4360,10 @@
     "editHint": "点击编辑",
     "editBanner": "点击任意字段进行编辑。移到其他字段时自动保存。",
     "savedToast": "已保存",
-    "saveFailed": "保存失败"
+    "saveFailed": "保存失败",
+    "deleteButton": "删除",
+    "confirmDelete": "删除此工资单？",
+    "deletedToast": "已删除"
   },
   "errorFallback": {
     "title": "Failed to load page",

@@ -3926,7 +3926,10 @@
     "editHint": "클릭하여 수정",
     "editBanner": "각 필드를 클릭한 후 값을 변경하세요. 다른 필드로 이동하면 자동 저장됩니다.",
     "savedToast": "저장됨",
-    "saveFailed": "저장 실패"
+    "saveFailed": "저장 실패",
+    "deleteButton": "삭제",
+    "confirmDelete": "이 faktur 를 삭제하시겠습니까?",
+    "deletedToast": "삭제됨"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4375,7 +4378,10 @@
     "editHint": "클릭하여 수정",
     "editBanner": "각 필드를 클릭한 후 값을 변경하세요. 다른 필드로 이동하면 자동 저장됩니다.",
     "savedToast": "저장됨",
-    "saveFailed": "저장 실패"
+    "saveFailed": "저장 실패",
+    "deleteButton": "삭제",
+    "confirmDelete": "이 급여명세를 삭제하시겠습니까?",
+    "deletedToast": "삭제됨"
   },
   "errorFallback": {
     "title": "페이지를 불러올 수 없습니다",

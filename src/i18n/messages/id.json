@@ -3908,7 +3908,10 @@
     "editHint": "Klik untuk edit",
     "editBanner": "Klik pada field manapun untuk mengedit. Otomatis tersimpan saat pindah field.",
     "savedToast": "Tersimpan",
-    "saveFailed": "Gagal menyimpan"
+    "saveFailed": "Gagal menyimpan",
+    "deleteButton": "Hapus",
+    "confirmDelete": "Hapus faktur ini?",
+    "deletedToast": "Dihapus"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4357,7 +4360,10 @@
     "editHint": "Klik untuk edit",
     "editBanner": "Klik pada field manapun untuk mengedit. Otomatis tersimpan saat pindah field.",
     "savedToast": "Tersimpan",
-    "saveFailed": "Gagal menyimpan"
+    "saveFailed": "Gagal menyimpan",
+    "deleteButton": "Hapus",
+    "confirmDelete": "Hapus slip gaji ini?",
+    "deletedToast": "Dihapus"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",
