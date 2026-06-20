@@ -180,6 +180,45 @@ describe('classifyWHTRow', () => {
     expect(c.warnings).toContain('unknownType');
   });
 
+  it('K=Royalti → pph23_royalti @ 15%', () => {
+    const c = classifyWHTRow(rowBase({
+      type: { pphLabel: 'Royalti', pph42Label: '' },
+      wht: { base: 10000000, amount: 1500000 },
+    }));
+    expect(c.classified).toBe('pph23_royalti');
+    expect(c.expectedRate).toBe(0.15);
+  });
+
+  it('K=사용료 (한국어) → pph23_royalti @ 15%', () => {
+    const c = classifyWHTRow(rowBase({
+      type: { pphLabel: '사용료', pph42Label: '' },
+      wht: { base: 10000000, amount: 1500000 },
+    }));
+    expect(c.classified).toBe('pph23_royalti');
+  });
+
+  it('K=Dividen → pph23_royalti @ 15%', () => {
+    const c = classifyWHTRow(rowBase({
+      type: { pphLabel: 'Dividen', pph42Label: '' },
+    }));
+    expect(c.classified).toBe('pph23_royalti');
+    expect(c.expectedRate).toBe(0.15);
+  });
+
+  it('K=Bunga → pph23_royalti @ 15%', () => {
+    const c = classifyWHTRow(rowBase({
+      type: { pphLabel: 'Bunga deposito', pph42Label: '' },
+    }));
+    expect(c.classified).toBe('pph23_royalti');
+  });
+
+  it('K=Hadiah → pph23_royalti @ 15%', () => {
+    const c = classifyWHTRow(rowBase({
+      type: { pphLabel: 'Hadiah / penghargaan', pph42Label: '' },
+    }));
+    expect(c.classified).toBe('pph23_royalti');
+  });
+
   it('K=PPh26 → pph26 @ 20% (foreign vendor)', () => {
     const c = classifyWHTRow(rowBase({
       type: { pphLabel: 'PPh26', pph42Label: '' },

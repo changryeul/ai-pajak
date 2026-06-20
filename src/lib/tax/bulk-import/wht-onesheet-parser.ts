@@ -34,6 +34,7 @@ export interface WHTLedgerRow {
 export type ClassifiedType =
   | 'pph23_jasa'
   | 'pph23_sewa'
+  | 'pph23_royalti'   // PPh23 15% — royalti / dividen / bunga / hadiah / 사용료
   | 'pph4_2_sewa'
   | 'pph26'
   | 'unknown';
@@ -237,6 +238,11 @@ export function classifyWHTRow(raw: WHTLedgerRow): ClassifiedRow {
     // Foreign vendor 20% WHT (UU PPh Pasal 26).
     classified = 'pph26';
     expectedRate = 0.20;
+  } else if (/royalt|사용료|dividen|dividend|배당|bunga|interest|이자|hadiah|prize|상금|penghargaan/.test(pphRaw)) {
+    // PPh23 15% — royalti, dividen, bunga, hadiah (UU PPh Pasal 23).
+    // 사용료 / 배당 / 이자 / 상금 등 한국어도 인식.
+    classified = 'pph23_royalti';
+    expectedRate = 0.15;
   } else if (pphRaw.includes('jasa')) {
     classified = 'pph23_jasa';
     expectedRate = 0.02;
@@ -322,7 +328,7 @@ export function parseWHTOneSheet(buffer: ArrayBuffer): WHTParseSummary {
   const summary: WHTParseSummary = {
     rows: [],
     totalRows: 0,
-    byType: { pph23_jasa: 0, pph23_sewa: 0, pph4_2_sewa: 0, pph26: 0, unknown: 0 },
+    byType: { pph23_jasa: 0, pph23_sewa: 0, pph23_royalti: 0, pph4_2_sewa: 0, pph26: 0, unknown: 0 },
     warnings: [],
   };
 

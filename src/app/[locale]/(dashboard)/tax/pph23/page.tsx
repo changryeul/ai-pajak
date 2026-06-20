@@ -690,25 +690,16 @@ export default function PPh23Page() {
         return;
       }
 
-      // 2. 분류된 행만 (`unknown` 제외) 서버로 전송 — `/api/tax/wht-import`
-      //    가 classified 타입을 보고 4 개 테이블 중 하나로 insert.
-      const rows = summary.rows
-        .filter((r) => r.classified !== 'unknown')
-        .map((r) => ({ ...r, include: true }));
-
-      if (rows.length === 0) {
-        showMsg('error', t('wholesaleNoRowsImported', {
-          skippedByTaxType: summary.totalRows,
-          skippedByValidation: 0,
-        }));
-        setUploading(false);
-        return;
-      }
+      // 2. unknown 도 포함해 모든 파싱된 행을 서버로 전송. loose=true 로
+      //    classified='unknown' 행도 placeholder ([UNCLASSIFIED]) 로 insert
+      //    되도록 — 사용자가 페이지에서 직접 service_type 분류 + 검증은
+      //    제출 시점에 처리하는 워크플로우.
+      const rows = summary.rows.map((r) => ({ ...r, include: true }));
 
       const res = await fetch('/api/tax/wht-import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, taxPeriod: importPeriod, rows }),
+        body: JSON.stringify({ customerId, taxPeriod: importPeriod, rows, loose: true }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) {
@@ -720,10 +711,10 @@ export default function PPh23Page() {
       const ipph42 = d.insertedPph42 ?? 0;
       const ipph26 = d.insertedPph26 ?? 0;
       const ippn = d.insertedPpn ?? 0;
-      const totalInserted = ipph23 + ipph42 + ipph26 + ippn;
-      const skippedUnknown = summary.totalRows - rows.length;
-      const skipNotice = skippedUnknown > 0
-        ? ` — ${t('wholesaleSkippedTaxType', { count: skippedUnknown })}`
+      const iuncl = d.insertedUnclassified ?? 0;
+      const totalInserted = ipph23 + ipph42 + ipph26 + ippn + iuncl;
+      const skipNotice = iuncl > 0
+        ? ` — 미분류 ${iuncl} 건 (페이지에서 직접 분류 필요)`
         : '';
 
       const failedRows = Array.isArray(d.failed) ? d.failed.length : 0;

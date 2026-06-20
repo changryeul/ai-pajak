@@ -36,6 +36,10 @@ interface ImportBody {
   customerId?: string;
   taxPeriod?: string;
   rows?: Array<ClassifiedRow & { include?: boolean }>;
+  // loose=true → classified='unknown' 행도 placeholder 로 insert. 사용자가
+  // 페이지에서 service_type 을 직접 분류해 가는 워크플로우용. 검증은
+  // 제출(submit) 시점에 미루는 전략.
+  loose?: boolean;
 }
 
 interface ImportResult {
@@ -43,6 +47,7 @@ interface ImportResult {
   insertedPph26: number;
   insertedPph42: number;
   insertedPpn: number;
+  insertedUnclassified: number;
   skipped: number;
   failed: Array<{ rowNo: number; reason: string }>;
 }
@@ -97,7 +102,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({ success: false, error: 'invalid json' }, { status: 400 });
   }
 
-  const { customerId: reqCustomerId = '', taxPeriod = '', rows } = body;
+  const { customerId: reqCustomerId = '', taxPeriod = '', rows, loose = false } = body;
   if (!Array.isArray(rows)) {
     return NextResponse.json({ success: false, error: 'rows[] required' }, { status: 400 });
   }
@@ -117,6 +122,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     insertedPph26: 0,
     insertedPph42: 0,
     insertedPpn: 0,
+    insertedUnclassified: 0,
     skipped: 0,
     failed: [],
   };
@@ -233,6 +239,27 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         });
         if (error) throw error;
         result.insertedPph23++;
+      } else if (row.classified === 'pph23_royalti') {
+        // PPh23 15% (royalti / dividen / bunga / hadiah / 사용료).
+        const rate = 0.15;
+        const taxAmount = Math.round(taxBase * rate);
+        const { error } = await sb.from('pph23_transaction').insert({
+          customer_id: customerId,
+          tax_period: taxPeriod,
+          transaction_date: txDate,
+          description,
+          service_type: 'ROYALTI',
+          income_type: 'ROYALTI',
+          tax_regime: 'PPH23',
+          invoice_number: invoiceNo,
+          gross_amount: taxBase,
+          tax_rate: rate,
+          tax_amount: taxAmount,
+          counterparty_name: vendorName,
+          counterparty_npwp: vendorNpwp || null,
+        });
+        if (error) throw error;
+        result.insertedPph23++;
       } else if (row.classified === 'pph4_2_sewa') {
         const rate = 0.10;
         const taxAmount = Math.round(taxBase * rate);
@@ -276,6 +303,27 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         });
         if (error) throw error;
         result.insertedPph26++;
+      } else if (loose && taxBase > 0) {
+        // loose=true: classified='unknown' 도 placeholder 로 insert.
+        // 사용자가 페이지에서 service_type 을 직접 분류하기 위함. 검증
+        // (필수 필드, NPWP 형식 등) 은 제출 시점에 따로 검사.
+        const { error } = await sb.from('pph23_transaction').insert({
+          customer_id: customerId,
+          tax_period: taxPeriod,
+          transaction_date: txDate,
+          description: `[UNCLASSIFIED] ${description}`.trim(),
+          service_type: 'JASA_LAINNYA',
+          income_type: 'JASA_LAINNYA',
+          tax_regime: 'PPH23',
+          invoice_number: invoiceNo,
+          gross_amount: taxBase,
+          tax_rate: 0,
+          tax_amount: 0,
+          counterparty_name: vendorName,
+          counterparty_npwp: vendorNpwp || null,
+        });
+        if (error) throw error;
+        result.insertedUnclassified++;
       } else {
         result.skipped++;
       }
