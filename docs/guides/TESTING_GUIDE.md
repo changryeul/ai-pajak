@@ -1028,33 +1028,33 @@ CREATE INDEX IF NOT EXISTS idx_dsq_closing_session
 
 ## 14. 용어집 (인도네시아 세무 + 시스템)
 
-| 용어 | 의미 |
-|---|---|
-| **NPWP** | Nomor Pokok Wajib Pajak — 납세자 등록번호 (15자리) |
-| **NIK** | Nomor Induk Kependudukan — 주민등록번호 (개인) |
-| **DJP** | Direktorat Jenderal Pajak — 인도네시아 국세청 |
-| **Coretax** | DJP의 차세대 통합 세무 행정 시스템 (2025+) |
-| **SPT** | Surat Pemberitahuan — 세금 신고서 |
-| **SPT Masa** | 월간 세금 신고서 (PPh21/23/25/Final/PPN) |
-| **SPT Tahunan** | 연간 세금 신고서 (Badan/OP) |
-| **PPh21** | 급여 소득세 (직원) |
-| **PPh22** | 수입/구매 원천세 |
-| **PPh23** | 서비스 원천세 (PMK 141/2015 분류) |
-| **PPh4(2)** | Final tax (UMKM 0.5%, 임대료 등) |
-| **PPh25** | 분기 corporate income tax 선납 |
-| **PPh26** | 비거주자 원천세 |
-| **PPN** | Pajak Pertambahan Nilai — 부가가치세 |
-| **DPP** | Dasar Pengenaan Pajak — 과세 표준 |
-| **KAP** | Kode Akun Pajak — 세목 코드 (예: 411124 = PPh23) |
-| **KJS** | Kode Jenis Setoran — 납부 종류 코드 (예: 100 = Monthly) |
-| **NTPN** | Nomor Transaksi Penerimaan Negara — 납부 영수증 번호 (16자리) |
-| **BPE** | Bukti Penerimaan Elektronik — 전자 접수 증명 (DJP 발급) |
-| **ID Billing / Kode Billing** | DJP 발급 결제 식별 번호 (납부 시 사용) |
-| **POA** | Power of Attorney — 위임장 (어드바이저가 신고 대행 시 필수) |
-| **PMK 141/2015** | 재무부 규정 — PPh23 서비스 분류 |
-| **e-Bupot** | 전자 원천징수 영수증 시스템 |
-| **PKP** | Pengusaha Kena Pajak — VAT 등록 사업자 |
-| **UMKM** | Usaha Mikro, Kecil, Menengah — 소상공인. final tax 0.5% |
+| 용어                            | 의미                                                   |
+| ----------------------------- | ---------------------------------------------------- |
+| **NPWP**                      | Nomor Pokok Wajib Pajak — 납세자 등록번호 (15자리)            |
+| **NIK**                       | Nomor Induk Kependudukan — 주민등록번호 (개인)               |
+| **DJP**                       | Direktorat Jenderal Pajak — 인도네시아 국세청                |
+| **Coretax**                   | DJP의 차세대 통합 세무 행정 시스템 (2025+)                        |
+| **SPT**                       | Surat Pemberitahuan — 세금 신고서                         |
+| **SPT Masa**                  | 월간 세금 신고서 (PPh21/23/25/Final/PPN)                    |
+| **SPT Tahunan**               | 연간 세금 신고서 (Badan/OP)                                 |
+| **PPh21**                     | 급여 소득세 (직원)                                          |
+| **PPh22**                     | 수입/구매 원천세                                            |
+| **PPh23**                     | 서비스 원천세 (PMK 141/2015 분류)                            |
+| **PPh4(2)**                   | Final tax (UMKM 0.5%, 임대료 등)                         |
+| **PPh25**                     | 분기 corporate income tax 선납                           |
+| **PPh26**                     | 비거주자 원천세                                             |
+| **PPN**                       | Pajak Pertambahan Nilai — 부가가치세                      |
+| **DPP**                       | Dasar Pengenaan Pajak — 과세 표준                        |
+| **KAP**                       | Kode Akun Pajak — 세목 코드 (예: 411124 = PPh23)          |
+| **KJS**                       | Kode Jenis Setoran — 납부 종류 코드 (예: 100 = Monthly)     |
+| **NTPN**                      | Nomor Transaksi Penerimaan Negara — 납부 영수증 번호 (16자리) |
+| **BPE**                       | Bukti Penerimaan Elektronik — 전자 접수 증명 (DJP 발급)      |
+| **ID Billing / Kode Billing** | DJP 발급 결제 식별 번호 (납부 시 사용)                            |
+| **POA**                       | Power of Attorney — 위임장 (어드바이저가 신고 대행 시 필수)          |
+| **PMK 141/2015**              | 재무부 규정 — PPh23 서비스 분류                                |
+| **e-Bupot**                   | 전자 원천징수 영수증 시스템                                      |
+| **PKP**                       | Pengusaha Kena Pajak — VAT 등록 사업자                    |
+| **UMKM**                      | Usaha Mikro, Kecil, Menengah — 소상공인. final tax 0.5%  |
 
 ### 시스템 용어
 
