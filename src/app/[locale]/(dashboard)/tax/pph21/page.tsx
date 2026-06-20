@@ -38,6 +38,8 @@ interface Employee {
   other_deductions: number;
   is_active: boolean;
   worker_type?: 'REGULAR' | 'CONTRACT' | 'DAILY' | 'FREELANCER' | 'COMMISSIONER' | null;
+  // PMK 66/2023 — PKWTT (Pegawai Tetap, 1) / PKWT (Tidak Tetap, 2) / Consultant (Bukan Pegawai, 3)
+  employment_status?: 'PKWTT' | 'PKWT' | 'Consultant' | string | null;
   // HR record (Phase C)
   hire_date?: string | null;
   resign_date?: string | null;
@@ -251,6 +253,10 @@ export default function PPh21PayrollPage() {
     setIsSaving(true);
     try {
       const month = new Date().getMonth() + 1;
+      // employee_payroll.employment_status (PKWTT/PKWT/Consultant) 를
+      // calculator 가 기대하는 PMK 66/2023 숫자 코드 (1/2/3) 로 역매핑.
+      // 빈 값이면 undefined — calculator 는 그 경우 status 1 가정.
+      const STATUS_REVERSE: Record<string, 1 | 2 | 3> = { PKWTT: 1, PKWT: 2, Consultant: 3 };
       const res = await fetch('/api/tax/pph21-bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -267,6 +273,9 @@ export default function PPh21PayrollPage() {
             other_deductions: e.other_deductions,
             has_npwp: !!e.employee_npwp,
             month,
+            employment_status: e.employment_status
+              ? STATUS_REVERSE[e.employment_status as keyof typeof STATUS_REVERSE]
+              : undefined,
           })),
           period: 'monthly',
         }),
