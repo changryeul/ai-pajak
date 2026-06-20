@@ -65,7 +65,7 @@ interface Payslip {
   ter_rate: number;
   net_salary: number;
   status: string;
-  employee?: { id: string; employee_name: string; employee_npwp: string; ptkp_category: string; gross_salary: number };
+  employee?: { id: string; employee_name: string; employee_npwp: string; ptkp_category: string; gross_salary: number; employment_status?: string | null };
 }
 
 interface Props {
@@ -255,7 +255,25 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
                       <div className="text-left min-w-0">
-                        <p className="font-medium text-sm truncate">{ps.employee?.employee_name}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-medium text-sm truncate">{ps.employee?.employee_name}</p>
+                          {ps.employee?.employment_status && (
+                            <span
+                              className={`inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                                ps.employee.employment_status === 'PKWTT' ? 'bg-emerald-100 text-emerald-700' :
+                                ps.employee.employment_status === 'PKWT' ? 'bg-amber-100 text-amber-700' :
+                                'bg-purple-100 text-purple-700'
+                              }`}
+                              title={
+                                ps.employee.employment_status === 'PKWTT' ? 'Pegawai Tetap (1) — 정직원' :
+                                ps.employee.employment_status === 'PKWT' ? 'Pegawai Tidak Tetap (2) — 비정직원' :
+                                'Bukan Pegawai (3) — 외부'
+                              }
+                            >
+                              {ps.employee.employment_status}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[10px] text-gray-400">
                           {ps.employee?.ptkp_category} • {ps.employee?.employee_npwp || tp('noNpwp')}
                         </p>

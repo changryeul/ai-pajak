@@ -33,7 +33,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
       .from('monthly_payslip')
       .select(`
         *,
-        employee:employee_id(id, employee_name, employee_npwp, ptkp_category, gross_salary)
+        employee:employee_id(id, employee_name, employee_npwp, ptkp_category, gross_salary, employment_status)
       `)
       .eq('customer_id', customerId)
       .eq('period', period)
