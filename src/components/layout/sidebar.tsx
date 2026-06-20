@@ -112,7 +112,10 @@ const navItems: NavSection[] = [
           { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus' },
           { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
           { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
-          { href: '/tax/pph42', icon: Receipt, labelKey: 'nav.pph42Label' },
+          // PPh 4(2) 는 원천세 페이지에 [PPh4(2)] 접두사로 같이 표시되고, WHT
+          // 일괄 업로드 결과 panel 의 quick-jump 으로 접근 가능 → 사이드바
+          // 별도 항목은 제거 (2026-06-20). 페이지/API/SPT Masa filing 분리는
+          // 그대로 유지.
           { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
           { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
           { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue' },
