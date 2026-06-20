@@ -287,6 +287,23 @@ export default function PPNPage() {
     }
   };
 
+  const deleteFaktur = async (id: string) => {
+    if (!confirm(t('confirmDelete') || 'Delete this faktur?')) return;
+    try {
+      const res = await fetch(`/api/tax/ppn-faktur-monthly?id=${id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success !== false) {
+        setExpandedFakturId(null);
+        showMsg('success', t('deletedToast') || 'Deleted');
+        loadFakturs();
+      } else {
+        showMsg('error', data.error || t('saveFailed'));
+      }
+    } catch {
+      showMsg('error', t('saveFailed'));
+    }
+  };
+
   const byTypeFakturs = filter === 'ALL' ? fakturs : fakturs.filter(f => f.faktur_type === (filter === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN'));
   const filteredFakturs = showLuxuryOnly ? byTypeFakturs.filter(f => f.is_luxury === true) : byTypeFakturs;
   const luxuryCount = fakturs.filter(f => f.is_luxury === true).length;
@@ -678,6 +695,12 @@ export default function PPNPage() {
                                           {f.is_luxury === true ? '💎 LUXURY' : t('luxuryEssential')}
                                         </span>
                                       </label>
+                                    </div>
+                                    {/* Delete row */}
+                                    <div className="flex justify-end pt-1">
+                                      <Button size="sm" variant="ghost" className="text-red-500 text-xs h-7" onClick={() => deleteFaktur(f.id)}>
+                                        <X className="h-3 w-3 mr-1" />{t('deleteButton') || '삭제'}
+                                      </Button>
                                     </div>
                                   </div>
                                 </td>
