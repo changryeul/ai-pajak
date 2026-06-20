@@ -696,9 +696,8 @@ export default function PPNPage() {
                                         </span>
                                       </label>
                                     </div>
-                                    {/* Delete row */}
-                                    <div className="flex justify-end pt-1">
-                                      <Button size="sm" variant="ghost" className="text-red-500 text-xs h-7" onClick={() => deleteFaktur(f.id)}>
+                                    <div className="flex gap-2 pt-2 mt-2">
+                                      <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => deleteFaktur(f.id)}>
                                         <X className="h-3 w-3 mr-1" />{t('deleteButton') || '삭제'}
                                       </Button>
                                     </div>

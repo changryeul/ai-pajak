@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Loader2, Plus, Save, ChevronDown, ChevronRight, Users,
-  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil,
+  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -127,6 +127,23 @@ export function MonthlyPayslipTab({ customerId }: Props) {
       }
     } catch { showMsg('error', 'Failed'); }
     finally { setIsSaving(false); }
+  };
+
+  const deletePayslip = async (id: string) => {
+    if (!confirm(tp('confirmDelete') || '이 급여명세를 삭제하시겠습니까?')) return;
+    try {
+      const res = await fetch(`/api/tax/monthly-payslip?id=${id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success !== false) {
+        setExpandedId(null);
+        showMsg('success', tp('deletedToast') || '삭제되었습니다');
+        loadPayslips();
+      } else {
+        showMsg('error', data.error || tp('saveFailed'));
+      }
+    } catch {
+      showMsg('error', tp('saveFailed'));
+    }
   };
 
   const updatePayslip = async (id: string, updates: Partial<Payslip>) => {
@@ -547,6 +564,12 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                           <p className="text-green-600">{tp('netPayAmount')}</p>
                           <p className="font-bold text-sm text-green-700">{fmtRp(ps.net_salary)}</p>
                         </div>
+                      </div>
+
+                      <div className="flex gap-2 pt-2 mt-2">
+                        <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => deletePayslip(ps.id)}>
+                          <X className="h-3 w-3 mr-1" />{tp('deleteButton') || '삭제'}
+                        </Button>
                       </div>
                     </div>
                   )}
