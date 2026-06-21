@@ -1110,6 +1110,10 @@ function PPh21DataInputSection({
       const fd = new FormData();
       fd.append('file', blob, 'mapped.csv');
       fd.append('customerId', customerId);
+      // 2026-06-21 새 정책: taxPeriod 필수 — 월별 급여 자료라는 의미.
+      // monthPicker 에서 사용자가 확정한 period 가 있으면 사용, 없으면 현재 월.
+      const periodToUse = confirmedPeriod || periodLabel(pickedYear, pickedMonth);
+      fd.append('taxPeriod', periodToUse);
 
       const res = await fetch('/api/tax/employees/import', { method: 'POST', body: fd });
       const data = await res.json();
