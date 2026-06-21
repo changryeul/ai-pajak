@@ -4363,7 +4363,21 @@
     "saveFailed": "Gagal menyimpan",
     "deleteButton": "Hapus",
     "confirmDelete": "Hapus slip gaji ini?",
-    "deletedToast": "Dihapus"
+    "deletedToast": "Dihapus",
+    "tabSalaryData": "Data Gaji Bulanan",
+    "emptyHintNew": "Belum ada data gaji bulan ini. Unggah xlsx di atas.",
+    "submitButton": "Kirim Final",
+    "submitConfirm": "Kirim {count} baris gaji {period} sebagai final? Tidak dapat diedit setelahnya.",
+    "submittedToast": "{count} baris dikirim",
+    "submittedBadge": "Dikirim",
+    "draftBadge": "Draft",
+    "allSubmittedBadge": "Semua Dikirim",
+    "syncTitle": "Sinkronisasi Master Karyawan",
+    "syncBtn": "Sinkronkan sampai bulan lalu",
+    "syncDisabled": "Sudah disinkronkan sampai bulan lalu",
+    "syncSuccess": "{added} ditambahkan / {updated} riwayat gaji diperbarui (sampai {through})",
+    "syncFail": "Sinkronisasi gagal",
+    "syncStatus": "Sinkronisasi terakhir: {period}"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",
@@ -4544,7 +4558,8 @@
     "month12": "Des",
     "recommendedBadge": "Disarankan",
     "manualEntryHint": "Daftarkan setiap karyawan satu per satu (nama · NPWP · gaji · PTKP)",
-    "backToSelection": "Kembali ke pilihan metode input"
+    "backToSelection": "Kembali ke pilihan metode input",
+    "tabSalaryData": "Data Gaji Bulanan"
   },
   "pph23Page": {
     "invoiceImageLabel": "Foto Faktur (Wajib)",

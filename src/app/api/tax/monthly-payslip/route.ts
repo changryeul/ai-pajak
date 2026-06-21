@@ -29,15 +29,18 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     }
 
     const admin = getSupabaseAdmin();
+    // employee_id 는 nullable (2026-06-21 정책 변경 — sync 전에는 마스터 없음).
+    // payslip 자체의 employee_name/employee_npwp/ptkp_category 를 사용. FK join 은
+    // sync 후의 보조 정보 (employment_status, gross_salary).
     const { data, error } = await admin
       .from('monthly_payslip')
       .select(`
         *,
-        employee:employee_id(id, employee_name, employee_npwp, ptkp_category, gross_salary, employment_status)
+        employee:employee_id(id, gross_salary, employment_status)
       `)
       .eq('customer_id', customerId)
       .eq('period', period)
-      .order('created_at');
+      .order('employee_name');
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -59,112 +62,38 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   }
 }
 
-// Generate payslips from employee master for a period
+// 2026-06-21: 기존 "generate payslips from master" 흐름 제거.
+// 새 흐름은 월별 급여 자료 xlsx 업로드 (`/api/tax/employees/import`) 로 일원화.
+// POST 는 이제 "최종 제출" — 해당 월 모든 DRAFT 행을 SUBMITTED 로 flag.
 async function handlePost(req: RequestWithSession): Promise<Response> {
   try {
-    const { customerId, period } = await req.json();
+    const { customerId, period, action } = await req.json();
 
-    if (!customerId || !period) {
-      return NextResponse.json({ error: 'customerId and period required' }, { status: 400 });
+    if (!customerId || !period || action !== 'submit') {
+      return NextResponse.json({ error: 'customerId, period, action=submit required' }, { status: 400 });
     }
 
     const admin = getSupabaseAdmin();
-
-    // Check if already generated
-    const { data: existing } = await admin
+    const { count, error } = await admin
       .from('monthly_payslip')
-      .select('id')
+      .update({ status: 'SUBMITTED' }, { count: 'exact' })
       .eq('customer_id', customerId)
       .eq('period', period)
-      .limit(1);
+      .eq('status', 'DRAFT');
 
-    if (existing && existing.length > 0) {
-      return NextResponse.json({ error: 'Payslips for this month already exist', existingCount: existing.length }, { status: 409 });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Get active employees
-    const { data: employees } = await admin
-      .from('employee_payroll')
-      .select('*')
-      .eq('customer_id', customerId)
-      .eq('is_active', true);
-
-    if (!employees || employees.length === 0) {
-      return NextResponse.json({ error: 'No active employees' }, { status: 400 });
-    }
-
-    // BPJS rate/cap constants (2024)
-    const BPJS_KES_CAP = 12_000_000; // BPJS Kesehatan salary cap
-    const BPJS_JP_CAP = 10_042_300;  // BPJS JP salary cap (2024)
-
-    // Create payslip for each employee
-    const payslips = employees.map(emp => {
-      const gross = Number(emp.gross_salary || 0);
-      const bpjsKesBase = Math.min(gross, BPJS_KES_CAP);
-      const bpjsTkBase = Math.min(gross, BPJS_JP_CAP);
-
-      // Employer-paid BPJS (auto-calculated defaults)
-      const bpjsKesCompany = Math.round(bpjsKesBase * 0.04);
-      const jkkCompany = Math.round(bpjsTkBase * 0.0024);
-      const jkmCompany = Math.round(bpjsTkBase * 0.003);
-      const jhtCompany = Math.round(bpjsTkBase * 0.037);
-      const jpCompany = Math.round(bpjsTkBase * 0.02);
-
-      // Biaya Jabatan: 5% of gross, capped at 500k/month
-      const personalExpense = Math.min(Math.round(gross * 0.05), 500_000);
-
-      const positionAllowance = Number(emp.position_allowance || 0);
-      const otherAllowances = Number(emp.other_allowances || 0);
-      const jhtEmployee = Number(emp.jht_employee || 0);
-      const jpEmployee = Number(emp.jp_employee || 0);
-      const otherDeductions = Number(emp.other_deductions || 0);
-
-      return {
-        customer_id: customerId,
-        employee_id: emp.id,
-        period,
-        base_salary: gross,
-        base_salary_bpjs_kes: bpjsKesBase,
-        base_salary_bpjs_tk: bpjsTkBase,
-        jht_employee: jhtEmployee,
-        jp_employee: jpEmployee,
-        position_allowance: positionAllowance,
-        other_allowances: otherAllowances,
-        other_deductions: otherDeductions,
-        bpjs_kes_company: bpjsKesCompany,
-        jkk_company: jkkCompany,
-        jkm_company: jkmCompany,
-        jht_company: jhtCompany,
-        jp_company: jpCompany,
-        personal_expense: personalExpense,
-        bank_name: emp.bank_name || null,
-        bank_account_no: emp.bank_account_no || null,
-        bank_account_name: emp.bank_account_name || null,
-        total_gross: gross + positionAllowance + otherAllowances,
-        total_deduction: jhtEmployee + jpEmployee + otherDeductions,
-        status: 'DRAFT',
-      };
-    });
-
-    const { data: inserted, error: insertError } = await admin
-      .from('monthly_payslip')
-      .insert(payslips)
-      .select();
-
-    if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
-    }
-
-    loggers.api.info({ customerId, period, count: inserted?.length }, 'Payslips generated');
-
+    loggers.api.info({ customerId, period, submitted: count ?? 0 }, 'Payslips submitted');
     return NextResponse.json({
       success: true,
-      data: inserted,
-      message: `${inserted?.length} payslips generated`,
+      submitted: count ?? 0,
+      message: `${count ?? 0} payslips submitted`,
     });
   } catch (error) {
     loggers.api.error({ err: error }, 'Payslip POST error');
-    return NextResponse.json({ error: 'Failed to generate' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to submit' }, { status: 500 });
   }
 }
 
@@ -180,12 +109,17 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
 
     const admin = getSupabaseAdmin();
 
-    // Get current payslip + employee
+    // employee_id 가 null 일 수 있어 employee join 대신 payslip 자체의 ptkp_category 를 1차 사용.
     const { data: current } = await admin
       .from('monthly_payslip')
       .select('*, employee:employee_id(ptkp_category)')
       .eq('id', id)
       .single();
+
+    // SUBMITTED 행은 수정 불가
+    if (current?.status === 'SUBMITTED') {
+      return NextResponse.json({ error: 'Cannot edit submitted payslip' }, { status: 409 });
+    }
 
     if (!current) {
       return NextResponse.json({ error: 'Payslip not found' }, { status: 404 });
@@ -221,7 +155,7 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
       Number(merged.other_deductions || 0);
 
     // Calculate PPh 21 using TER method
-    const ptkpCategory = (current.employee?.ptkp_category || 'TK0') as PTKPCategory;
+    const ptkpCategory = (current.ptkp_category || current.employee?.ptkp_category || 'TK0') as PTKPCategory;
     const currentMonth = parseInt(current.period.split('-')[1]);
 
     const pphData: PPh21Data = {
@@ -329,7 +263,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  return composeMiddleware(requireAuth, blockPlatformAdmin, withAudit('PAYSLIP_GENERATE'))(request as RequestWithSession, handlePost);
+  return composeMiddleware(requireAuth, blockPlatformAdmin, withAudit('PAYSLIP_SUBMIT'))(request as RequestWithSession, handlePost);
 }
 
 export async function PUT(request: NextRequest) {

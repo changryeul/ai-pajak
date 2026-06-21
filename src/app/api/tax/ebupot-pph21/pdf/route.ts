@@ -22,13 +22,21 @@ export async function GET(request: NextRequest) {
     const admin = getSupabaseAdmin();
     const { data: ps } = await admin.from('monthly_payslip')
       .select('*, employee:employee_id(employee_name, employee_npwp, employee_nik, ptkp_category)')
+      // 2026-06-21: payslip 자체에도 employee_name/npwp/ptkp_category 가 있음 (sync 전)
       .eq('id', payslipId).single();
     if (!ps) return new NextResponse('Payslip not found', { status: 404 });
 
     const { data: customer } = await admin.from('customer').select('company_name, full_name, npwp').eq('id', ps.customer_id).single();
     const pemotong = customer?.company_name || customer?.full_name || '-';
     const pemotongNpwp = customer?.npwp || '-';
-    const emp = ps.employee as { employee_name: string; employee_npwp?: string; employee_nik?: string; ptkp_category?: string } | null;
+    const empJoined = ps.employee as { employee_name: string; employee_npwp?: string; employee_nik?: string; ptkp_category?: string } | null;
+    // sync 전엔 employee join 이 비어있어 payslip 자체의 컬럼을 fallback 으로
+    const emp = {
+      employee_name: empJoined?.employee_name || (ps.employee_name as string | undefined),
+      employee_npwp: empJoined?.employee_npwp || (ps.employee_npwp as string | undefined),
+      employee_nik: empJoined?.employee_nik,
+      ptkp_category: empJoined?.ptkp_category || (ps.ptkp_category as string | undefined),
+    };
     const bpNumber = generateBPNumber1721A1(ps.period, seq);
     const fmtRp = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
 

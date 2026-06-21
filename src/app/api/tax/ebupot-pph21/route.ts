@@ -30,7 +30,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     const admin = getSupabaseAdmin();
     const { data: payslips } = await admin
       .from('monthly_payslip')
-      .select('id, employee_id, period, pph21_tax, total_gross, net_salary, status, employee:employee_id(employee_name, employee_npwp)')
+      .select('id, employee_id, period, pph21_tax, total_gross, net_salary, status, employee_name, employee_npwp, employee:employee_id(employee_name, employee_npwp)')
       .eq('customer_id', customerId)
       .eq('period', period)
       .order('created_at');
@@ -68,7 +68,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     // Get payslips with PPh 21 > 0
     const { data: payslips } = await admin
       .from('monthly_payslip')
-      .select('id, pph21_tax, employee:employee_id(employee_name, employee_npwp)')
+      .select('id, pph21_tax, employee_name, employee_npwp, employee:employee_id(employee_name, employee_npwp)')
       .eq('customer_id', customerId)
       .eq('period', period)
       .gt('pph21_tax', 0)
@@ -88,7 +88,9 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       const ps = payslips[i];
       const bpNumber = generateBPNumber1721A1(period, i + 1);
       generated.push({
-        employeeName: (ps.employee as unknown as { employee_name: string })?.employee_name || 'Unknown',
+        employeeName: (ps.employee as unknown as { employee_name?: string })?.employee_name
+          || (ps as unknown as { employee_name?: string }).employee_name
+          || 'Unknown',
         bpNumber,
         pph21: Number(ps.pph21_tax),
       });

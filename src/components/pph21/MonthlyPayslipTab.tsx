@@ -65,7 +65,11 @@ interface Payslip {
   ter_rate: number;
   net_salary: number;
   status: string;
-  employee?: { id: string; employee_name: string; employee_npwp: string; ptkp_category: string; gross_salary: number; employment_status?: string | null };
+  // 2026-06-21: self-contained 직원 식별 정보 (sync 전엔 마스터 없음)
+  employee_name: string | null;
+  employee_npwp: string | null;
+  ptkp_category: string | null;
+  employee?: { id: string; gross_salary: number; employment_status?: string | null } | null;
 }
 
 interface Props {
@@ -109,23 +113,26 @@ export function MonthlyPayslipTab({ customerId }: Props) {
 
   useEffect(() => { loadPayslips(); }, [loadPayslips]);
 
-  const generatePayslips = async () => {
-    if (!confirm(tp('confirmGenerate', { period }))) return;
+  // 2026-06-21: "전체 직원 급여명세 생성" 흐름 제거. 대신 "최종 제출" (DRAFT → SUBMITTED).
+  const submitPayslips = async () => {
+    const draftCount = payslips.filter(p => p.status === 'DRAFT').length;
+    if (draftCount === 0) return;
+    if (!confirm(tp('submitConfirm', { period, count: draftCount }))) return;
     setIsSaving(true);
     try {
       const res = await fetch('/api/tax/monthly-payslip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, period }),
+        body: JSON.stringify({ customerId, period, action: 'submit' }),
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', data.message);
+        showMsg('success', tp('submittedToast', { count: data.submitted }));
         loadPayslips();
       } else {
-        showMsg('error', data.error);
+        showMsg('error', data.error || tp('saveFailed'));
       }
-    } catch { showMsg('error', 'Failed'); }
+    } catch { showMsg('error', tp('saveFailed')); }
     finally { setIsSaving(false); }
   };
 
@@ -196,12 +203,24 @@ export function MonthlyPayslipTab({ customerId }: Props) {
             </SelectContent>
           </Select>
         </div>
-        {payslips.length === 0 && (
-          <Button size="sm" onClick={generatePayslips} disabled={isSaving || !customerId}>
-            {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-            {tp('generateBtn', { period })}
-          </Button>
-        )}
+        {(() => {
+          const draftCount = payslips.filter(p => p.status === 'DRAFT').length;
+          const submittedCount = payslips.filter(p => p.status === 'SUBMITTED').length;
+          if (payslips.length === 0) return null;
+          if (draftCount === 0) {
+            return (
+              <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
+                ✓ {tp('allSubmittedBadge')} ({submittedCount})
+              </span>
+            );
+          }
+          return (
+            <Button size="sm" onClick={submitPayslips} disabled={isSaving || !customerId}>
+              {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+              {tp('submitButton')} ({draftCount})
+            </Button>
+          );
+        })()}
       </div>
 
       {/* Message */}
@@ -253,7 +272,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
           <CardContent className="p-12 text-center text-gray-400">
             <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p className="text-sm mb-1">{tp('emptyTitle', { period })}</p>
-            <p className="text-xs">{tp('emptyHint')}</p>
+            <p className="text-xs">{tp('emptyHintNew')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -273,7 +292,16 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                       {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
                       <div className="text-left min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="font-medium text-sm truncate">{ps.employee?.employee_name}</p>
+                          <p className="font-medium text-sm truncate">{ps.employee_name || tp('noNpwp')}</p>
+                          {ps.status === 'SUBMITTED' ? (
+                            <span className="inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-emerald-100 text-emerald-700">
+                              ✓ {tp('submittedBadge')}
+                            </span>
+                          ) : (
+                            <span className="inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-amber-100 text-amber-700">
+                              {tp('draftBadge')}
+                            </span>
+                          )}
                           {ps.employee?.employment_status && (
                             <span
                               className={`inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
@@ -292,7 +320,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
                           )}
                         </div>
                         <p className="text-[10px] text-gray-400">
-                          {ps.employee?.ptkp_category} • {ps.employee?.employee_npwp || tp('noNpwp')}
+                          {ps.ptkp_category} • {ps.employee_npwp || tp('noNpwp')}
                         </p>
                       </div>
                     </div>

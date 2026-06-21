@@ -96,6 +96,7 @@ export default function PPh21PayrollPage() {
   const router = useRouter();
   const tp = useTranslations('pph21Page');
   const tsc = useTranslations('taxScreen');
+  const tps = useTranslations('monthlyPayslip');
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,6 +106,9 @@ export default function PPh21PayrollPage() {
   const [form, setForm] = useState(emptyForm);
   const [activeTab, setActiveTab] = useState('monthly');
   const [payslipMode, setPayslipMode] = useState(false);
+  // 2026-06-21: 직원 마스터 sync 상태 (이전 달까지 sync 됐는지)
+  const [syncStatus, setSyncStatus] = useState<{ syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Group employees by worker_type for summary cards
   const workerSummary = useMemo(() => {
@@ -159,10 +163,46 @@ export default function PPh21PayrollPage() {
     finally { setIsLoading(false); }
   }, [customerId]);
 
+  const loadSyncStatus = useCallback(async () => {
+    if (!customerId) return;
+    try {
+      const res = await fetch(`/api/tax/employees/sync?customerId=${customerId}`);
+      const data = await res.json();
+      if (data.success) {
+        setSyncStatus({ syncedThrough: data.syncedThrough, pendingThrough: data.pendingThrough, hasPending: data.hasPending });
+      }
+    } catch { /* */ }
+  }, [customerId]);
+
+  const runSync = useCallback(async () => {
+    if (!customerId || isSyncing) return;
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/tax/employees/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', tps('syncSuccess', { added: data.added, updated: data.updated, through: data.through }));
+        await loadEmployees();
+        await loadSyncStatus();
+      } else {
+        showMsg('error', data.error || tps('syncFail'));
+      }
+    } catch {
+      showMsg('error', tps('syncFail'));
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [customerId, isSyncing, tps, loadEmployees, loadSyncStatus]);
+
   useEffect(() => {
     if (sessionLoading) return;
     loadEmployees();
-  }, [sessionLoading, loadEmployees]);
+    loadSyncStatus();
+  }, [sessionLoading, loadEmployees, loadSyncStatus]);
 
   const startEdit = (emp: Employee) => {
     setForm({
@@ -440,7 +480,7 @@ export default function PPh21PayrollPage() {
       >
         {!payslipMode && (
           <TabsList className="mb-4 flex-wrap">
-            <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabMonthlyPayslip')}</TabsTrigger>
+            <TabsTrigger value="monthly"><FileText className="h-3 w-3 mr-1" />{tp('tabSalaryData')}</TabsTrigger>
             <TabsTrigger value="master"><Users className="h-3 w-3 mr-1" />{tp('tabEmployeeMaster')}</TabsTrigger>
           </TabsList>
         )}
@@ -453,7 +493,20 @@ export default function PPh21PayrollPage() {
       {/* Actions */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold">{tp('employeeList')}</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {/* 2026-06-21: 직원 마스터 sync 버튼 — 이전 달까지 SUBMITTED 된 월별 급여 자료 → 마스터 갱신 */}
+          {syncStatus && (
+            syncStatus.hasPending ? (
+              <Button size="sm" variant="outline" onClick={runSync} disabled={isSyncing}>
+                {isSyncing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+                {tps('syncBtn')} → {syncStatus.pendingThrough}
+              </Button>
+            ) : (
+              <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-1">
+                ✓ {tps('syncDisabled')} ({syncStatus.syncedThrough})
+              </span>
+            )
+          )}
           <Button size="sm" variant="outline" onClick={calculateAll} disabled={isSaving || employees.length === 0}>
             <Calculator className="h-3 w-3 mr-1" />{tp('calculatePph21')}
           </Button>

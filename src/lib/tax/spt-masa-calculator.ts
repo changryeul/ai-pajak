@@ -235,8 +235,9 @@ export class SPTMasaCalculator {
       totalTaxableIncome += taxable;
 
       employeeDetails.push({
-        employee_name: ps.employee?.employee_name || 'Unknown',
-        employee_npwp: ps.employee?.employee_npwp || '',
+        // 2026-06-21: payslip 자체에도 employee_name/npwp 컬럼이 있어 sync 전에도 동작
+        employee_name: ps.employee?.employee_name || ps.employee_name || 'Unknown',
+        employee_npwp: ps.employee?.employee_npwp || ps.employee_npwp || '',
         gross_income: gross,
         tax_withheld: tax,
       });

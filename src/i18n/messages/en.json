@@ -4363,7 +4363,21 @@
     "saveFailed": "Save failed",
     "deleteButton": "Delete",
     "confirmDelete": "Delete this payslip?",
-    "deletedToast": "Deleted"
+    "deletedToast": "Deleted",
+    "tabSalaryData": "Monthly Salary Data",
+    "emptyHintNew": "No salary data for this month. Upload an xlsx above.",
+    "submitButton": "Submit Final",
+    "submitConfirm": "Submit {count} salary rows for {period} as final? Cannot edit after.",
+    "submittedToast": "{count} rows submitted",
+    "submittedBadge": "Submitted",
+    "draftBadge": "Draft",
+    "allSubmittedBadge": "All Submitted",
+    "syncTitle": "Employee Master Sync",
+    "syncBtn": "Sync through previous month",
+    "syncDisabled": "Already synced through previous month",
+    "syncSuccess": "{added} added / {updated} salary history updated (through {through})",
+    "syncFail": "Sync failed",
+    "syncStatus": "Last sync: {period}"
   },
   "errorFallback": {
     "title": "Failed to load page",
@@ -4544,7 +4558,8 @@
     "month12": "Dec",
     "recommendedBadge": "Recommended",
     "manualEntryHint": "Register each employee individually (name · NPWP · salary · PTKP)",
-    "backToSelection": "Back to method selection"
+    "backToSelection": "Back to method selection",
+    "tabSalaryData": "Monthly Salary Data"
   },
   "pph23Page": {
     "invoiceImageLabel": "Invoice Photo (Required)",

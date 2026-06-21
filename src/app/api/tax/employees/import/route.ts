@@ -83,17 +83,8 @@ export async function POST(request: NextRequest) {
       if (grossSalary <= 0) { errors.push(`Row ${i + 1}: ${name} — missing gross_salary`); skipped++; continue; }
 
       const ptkp = getVal(cols, 'ptkp_category') || 'TK0';
-      const workerType = getVal(cols, 'worker_type') || 'REGULAR';
-      // PMK 66/2023 Employment status (1/2/3) — 표준 양식 col 1.
-      //   1 = Pegawai Tetap        → PKWTT (정직원)
-      //   2 = Pegawai Tidak Tetap  → PKWT  (단기/비정직원)
-      //   3 = Bukan Pegawai        → Consultant (외부, e.g. commission/freelance)
-      // 빈 셀이면 NULL — 양식에 없는 사용자 데이터로 인한 데이터 손실 방지.
-      const empStatusRaw = getVal(cols, 'employment_status').trim();
-      const employmentStatus = empStatusRaw === '1' ? 'PKWTT'
-        : empStatusRaw === '2' ? 'PKWT'
-        : empStatusRaw === '3' ? 'Consultant'
-        : empStatusRaw || null;
+      // 2026-06-21: 양식의 employment_status / worker_type 등 HR 필드는 사용자가 직접
+      // 직원 마스터에서 입력하는 정책 (sync 가 자동 채우지 않음) → import 시 무시.
 
       const positionAllowance = getNum(cols, 'position_allowance');
       const overtimePay = getNum(cols, 'overtime_pay');
@@ -107,116 +98,76 @@ export async function POST(request: NextRequest) {
       const bpjsKesehatan = getNum(cols, 'bpjs_kesehatan');
       const otherDeductions = getNum(cols, 'other_deductions');
 
-      // Check duplicate by name + customer
-      const { data: existing } = await admin
-        .from('employee_payroll')
+      // 2026-06-21 새 정책:
+      //  - employee_payroll (직원 마스터) 자동 생성/업데이트 중단. sync 버튼으로만 갱신.
+      //  - monthly_payslip 만 생성. 직원 식별 정보 (name/npwp/ptkp) 는 payslip 자체에 저장.
+      //  - period 는 required (월별 급여 자료 라서).
+      if (!taxPeriod) {
+        errors.push(`Row ${i + 1}: ${name} — 월(taxPeriod) 정보가 필요합니다`);
+        skipped++;
+        continue;
+      }
+
+      const totalGross = grossSalary + overtimePay + mealAllowance + transportAllowance
+        + positionAllowance + otherAllowances + bonus + thr;
+      const totalDeduction = bpjsKesehatan + jhtEmployee + jpEmployee + otherDeductions;
+
+      // 같은 (customer_id, period, employee_name) 행이 있으면 update, 없으면 insert.
+      // employee_id 는 sync 전엔 null.
+      const { data: existingPayslip } = await admin
+        .from('monthly_payslip')
         .select('id')
         .eq('customer_id', customerId)
+        .eq('period', taxPeriod)
         .eq('employee_name', name)
-        .eq('is_active', true)
         .maybeSingle();
 
-      let employeeId: string | null = null;
-
-      // HR record fields (Phase: employee master xlsx import). All optional —
-      // empty/missing cells become NULL. Date strings expected as YYYY-MM-DD;
-      // anything else passes through and the DB will reject if invalid.
-      const hrFields = {
-        employee_number: getVal(cols, 'employee_number') || null,
-        employment_status: employmentStatus,
-        position: getVal(cols, 'position') || null,
-        department: getVal(cols, 'department') || null,
-        hire_date: getVal(cols, 'hire_date') || null,
-        resign_date: getVal(cols, 'resign_date') || null,
-        birth_date: getVal(cols, 'birth_date') || null,
-        gender: getVal(cols, 'gender') || null,
-        marital_status: getVal(cols, 'marital_status') || null,
-        email: getVal(cols, 'email') || null,
-        phone: getVal(cols, 'phone') || null,
-        address: getVal(cols, 'address') || null,
-        bank_name: getVal(cols, 'bank_name') || null,
-        bank_account_no: getVal(cols, 'bank_account_no') || null,
-        bank_account_name: getVal(cols, 'bank_account_name') || null,
-        emergency_contact_name: getVal(cols, 'emergency_contact_name') || null,
-        emergency_contact_phone: getVal(cols, 'emergency_contact_phone') || null,
-        notes: getVal(cols, 'notes') || null,
+      const payload = {
+        customer_id: customerId,
+        employee_id: null as string | null,
+        period: taxPeriod,
+        employee_name: name,
+        employee_npwp: getVal(cols, 'employee_npwp') || null,
+        ptkp_category: ptkp,
+        base_salary: grossSalary,
+        overtime_pay: overtimePay,
+        meal_allowance: mealAllowance,
+        transport_allowance: transportAllowance,
+        position_allowance: positionAllowance,
+        other_allowances: otherAllowances,
+        bonus,
+        thr,
+        jht_employee: jhtEmployee,
+        jp_employee: jpEmployee,
+        bpjs_kesehatan: bpjsKesehatan,
+        other_deductions: otherDeductions,
+        total_gross: totalGross,
+        total_deduction: totalDeduction,
+        status: 'DRAFT',
       };
 
-      if (existing) {
-        // Update master (HR record): identity fields + HR record — keep monthly amounts on payslip side.
-        // gross_salary is also kept fresh as the latest base for new payslips.
-        await admin.from('employee_payroll').update({
-          employee_npwp: getVal(cols, 'employee_npwp') || null,
-          employee_nik: getVal(cols, 'employee_nik') || null,
-          ptkp_category: ptkp,
-          gross_salary: grossSalary,
-          worker_type: workerType,
-          ...hrFields,
-        }).eq('id', existing.id);
-        employeeId = existing.id;
-        imported++;
-      } else {
-        const { data: inserted, error: insertErr } = await admin.from('employee_payroll').insert({
-          customer_id: customerId,
-          employee_name: name,
-          employee_npwp: getVal(cols, 'employee_npwp') || null,
-          employee_nik: getVal(cols, 'employee_nik') || null,
-          ptkp_category: ptkp,
-          gross_salary: grossSalary,
-          position_allowance: positionAllowance,
-          other_allowances: otherAllowances,
-          jht_employee: jhtEmployee,
-          jp_employee: jpEmployee,
-          other_deductions: otherDeductions,
-          worker_type: workerType,
-          is_active: true,
-          ...hrFields,
-        }).select('id').single();
-        if (insertErr) {
-          errors.push(`Row ${i + 1}: ${name} — ${insertErr.message}`);
+      if (existingPayslip) {
+        const { error: updErr } = await admin
+          .from('monthly_payslip')
+          .update(payload)
+          .eq('id', existingPayslip.id);
+        if (updErr) {
+          errors.push(`Row ${i + 1}: ${name} — payslip update: ${updErr.message}`);
           skipped++;
           continue;
         }
-        employeeId = inserted?.id ?? null;
-        imported++;
-      }
-
-      // If a tax period was supplied, mirror this row into monthly_payslip.
-      // employee_payroll holds the HR record; monthly_payslip holds the per-month salary detail.
-      if (taxPeriod && employeeId) {
-        const totalGross = grossSalary + overtimePay + mealAllowance + transportAllowance
-          + positionAllowance + otherAllowances + bonus + thr;
-        const totalDeduction = bpjsKesehatan + jhtEmployee + jpEmployee + otherDeductions;
-
-        const { error: payslipErr } = await admin
+      } else {
+        const { error: insErr } = await admin
           .from('monthly_payslip')
-          .upsert({
-            customer_id: customerId,
-            employee_id: employeeId,
-            period: taxPeriod,
-            base_salary: grossSalary,
-            overtime_pay: overtimePay,
-            meal_allowance: mealAllowance,
-            transport_allowance: transportAllowance,
-            position_allowance: positionAllowance,
-            other_allowances: otherAllowances,
-            bonus,
-            thr,
-            jht_employee: jhtEmployee,
-            jp_employee: jpEmployee,
-            bpjs_kesehatan: bpjsKesehatan,
-            other_deductions: otherDeductions,
-            total_gross: totalGross,
-            total_deduction: totalDeduction,
-            status: 'DRAFT',
-          }, { onConflict: 'employee_id,period' });
-
-        if (payslipErr) {
-          errors.push(`Row ${i + 1}: ${name} — payslip: ${payslipErr.message}`);
-        } else {
-          payslipsUpserted++;
+          .insert(payload);
+        if (insErr) {
+          errors.push(`Row ${i + 1}: ${name} — payslip insert: ${insErr.message}`);
+          skipped++;
+          continue;
         }
       }
+      payslipsUpserted++;
+      imported++;
     }
 
     loggers.api.info(

@@ -4363,7 +4363,21 @@
     "saveFailed": "保存失败",
     "deleteButton": "删除",
     "confirmDelete": "删除此工资单？",
-    "deletedToast": "已删除"
+    "deletedToast": "已删除",
+    "tabSalaryData": "月度工资数据",
+    "emptyHintNew": "本月暂无工资数据。请在上方上传 xlsx。",
+    "submitButton": "最终提交",
+    "submitConfirm": "将 {period} 的 {count} 条工资数据最终提交？提交后无法编辑。",
+    "submittedToast": "已提交 {count} 条",
+    "submittedBadge": "已提交",
+    "draftBadge": "草稿",
+    "allSubmittedBadge": "全部已提交",
+    "syncTitle": "员工主数据同步",
+    "syncBtn": "同步至上月",
+    "syncDisabled": "已同步至上月",
+    "syncSuccess": "新增 {added} 名 / 更新 {updated} 名工资历史（至 {through}）",
+    "syncFail": "同步失败",
+    "syncStatus": "最后同步：{period}"
   },
   "errorFallback": {
     "title": "Failed to load page",
@@ -4544,7 +4558,8 @@
     "month12": "Dec",
     "recommendedBadge": "Recommended",
     "manualEntryHint": "Register each employee individually (name · NPWP · salary · PTKP)",
-    "backToSelection": "Back to method selection"
+    "backToSelection": "Back to method selection",
+    "tabSalaryData": "月度工资数据"
   },
   "pph23Page": {
     "invoiceImageLabel": "发票照片（必填）",

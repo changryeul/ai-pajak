@@ -4363,7 +4363,21 @@
     "saveFailed": "保存失敗",
     "deleteButton": "削除",
     "confirmDelete": "この給与明細を削除しますか？",
-    "deletedToast": "削除しました"
+    "deletedToast": "削除しました",
+    "tabSalaryData": "月別給与データ",
+    "emptyHintNew": "今月の給与データがありません。上のxlsxをアップロードしてください。",
+    "submitButton": "最終提出",
+    "submitConfirm": "{period}の{count}件を最終提出しますか？提出後は編集できません。",
+    "submittedToast": "{count}件提出しました",
+    "submittedBadge": "提出済",
+    "draftBadge": "作成中",
+    "allSubmittedBadge": "全件提出済",
+    "syncTitle": "従業員マスター同期",
+    "syncBtn": "前月まで同期",
+    "syncDisabled": "前月まで同期済",
+    "syncSuccess": "{added}名追加 / {updated}名給与履歴更新（{through}まで）",
+    "syncFail": "同期失敗",
+    "syncStatus": "最終同期: {period}"
   },
   "errorFallback": {
     "title": "Failed to load page",
@@ -4544,7 +4558,8 @@
     "month12": "Dec",
     "recommendedBadge": "Recommended",
     "manualEntryHint": "Register each employee individually (name · NPWP · salary · PTKP)",
-    "backToSelection": "Back to method selection"
+    "backToSelection": "Back to method selection",
+    "tabSalaryData": "月別給与データ"
   },
   "pph23Page": {
     "invoiceImageLabel": "請求書写真（必須）",

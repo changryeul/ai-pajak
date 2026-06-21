@@ -4381,7 +4381,21 @@
     "saveFailed": "저장 실패",
     "deleteButton": "삭제",
     "confirmDelete": "이 급여명세를 삭제하시겠습니까?",
-    "deletedToast": "삭제됨"
+    "deletedToast": "삭제됨",
+    "tabSalaryData": "월별 급여 자료",
+    "emptyHintNew": "이번 달 급여 자료가 없습니다. 위 양식으로 xlsx 를 업로드하세요.",
+    "submitButton": "최종 제출",
+    "submitConfirm": "{period} 월 급여 자료 {count}건을 최종 제출하시겠습니까? 제출 후에는 수정할 수 없습니다.",
+    "submittedToast": "{count}건 최종 제출 완료",
+    "submittedBadge": "제출됨",
+    "draftBadge": "작성중",
+    "allSubmittedBadge": "전체 제출 완료",
+    "syncTitle": "직원 마스터 동기화",
+    "syncBtn": "이전 달까지 동기화",
+    "syncDisabled": "이전 달까지 모두 동기화 완료",
+    "syncSuccess": "{added}명 추가 / {updated}명 급여 이력 업데이트 ({through} 까지)",
+    "syncFail": "동기화 실패",
+    "syncStatus": "마지막 동기화: {period}"
   },
   "errorFallback": {
     "title": "페이지를 불러올 수 없습니다",
@@ -4607,7 +4621,8 @@
     "month12": "12월",
     "recommendedBadge": "추천",
     "manualEntryHint": "급여 명세 탭에서 이번 달 급여 내역을 직접 입력합니다",
-    "backToSelection": "입력 방법 선택으로 돌아가기"
+    "backToSelection": "입력 방법 선택으로 돌아가기",
+    "tabSalaryData": "월별 급여 자료"
   },
   "pph23Page": {
     "invoiceImageLabel": "인보이스 사진 (필수)",
