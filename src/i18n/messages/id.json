@@ -4373,8 +4373,8 @@
     "draftBadge": "Draft",
     "allSubmittedBadge": "Semua Dikirim",
     "syncTitle": "Sinkronisasi Master Karyawan",
-    "syncBtn": "Sinkronkan sampai bulan lalu",
-    "syncDisabled": "Sudah disinkronkan sampai bulan lalu",
+    "syncBtn": "Sinkronkan sampai bulan ini",
+    "syncDisabled": "Sudah disinkronkan sampai bulan ini",
     "syncSuccess": "{added} ditambahkan / {updated} riwayat gaji diperbarui (sampai {through})",
     "syncFail": "Sinkronisasi gagal",
     "syncStatus": "Sinkronisasi terakhir: {period}"

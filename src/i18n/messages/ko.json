@@ -4391,8 +4391,8 @@
     "draftBadge": "작성중",
     "allSubmittedBadge": "전체 제출 완료",
     "syncTitle": "직원 마스터 동기화",
-    "syncBtn": "이전 달까지 동기화",
-    "syncDisabled": "이전 달까지 모두 동기화 완료",
+    "syncBtn": "현재 달까지 동기화",
+    "syncDisabled": "현재 달까지 모두 동기화 완료",
     "syncSuccess": "{added}명 추가 / {updated}명 급여 이력 업데이트 ({through} 까지)",
     "syncFail": "동기화 실패",
     "syncStatus": "마지막 동기화: {period}"

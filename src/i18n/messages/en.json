@@ -4373,8 +4373,8 @@
     "draftBadge": "Draft",
     "allSubmittedBadge": "All Submitted",
     "syncTitle": "Employee Master Sync",
-    "syncBtn": "Sync through previous month",
-    "syncDisabled": "Already synced through previous month",
+    "syncBtn": "Sync through current month",
+    "syncDisabled": "Already synced through current month",
     "syncSuccess": "{added} added / {updated} salary history updated (through {through})",
     "syncFail": "Sync failed",
     "syncStatus": "Last sync: {period}"

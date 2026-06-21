@@ -31,11 +31,11 @@ interface SyncStatus {
   hasPending: boolean;              // sync 버튼 활성 여부
 }
 
-function previousPeriod(): string {
+function currentPeriod(): string {
+  // 2026-06-21 (사용자 결정): "현재 달도 포함해서 동기화" — 사용자가 그달
+  // 작업을 SUBMITTED 한 즉시 sync 가능하도록.
   const now = new Date();
-  // 현재 달의 1일 - 1일 = 이전 달
-  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  return `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
 async function getSyncStatus(customerId: string): Promise<SyncStatus> {
@@ -46,7 +46,7 @@ async function getSyncStatus(customerId: string): Promise<SyncStatus> {
     .eq('id', customerId)
     .single();
   const syncedThrough = (c?.employee_synced_through_period as string | null) ?? null;
-  const pendingThrough = previousPeriod();
+  const pendingThrough = currentPeriod();
   const hasPending = !syncedThrough || syncedThrough < pendingThrough;
   return { syncedThrough, pendingThrough, hasPending };
 }

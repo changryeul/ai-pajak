@@ -4373,8 +4373,8 @@
     "draftBadge": "作成中",
     "allSubmittedBadge": "全件提出済",
     "syncTitle": "従業員マスター同期",
-    "syncBtn": "前月まで同期",
-    "syncDisabled": "前月まで同期済",
+    "syncBtn": "今月まで同期",
+    "syncDisabled": "今月まで同期済",
     "syncSuccess": "{added}名追加 / {updated}名給与履歴更新（{through}まで）",
     "syncFail": "同期失敗",
     "syncStatus": "最終同期: {period}"

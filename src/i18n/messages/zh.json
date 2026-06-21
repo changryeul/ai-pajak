@@ -4373,8 +4373,8 @@
     "draftBadge": "草稿",
     "allSubmittedBadge": "全部已提交",
     "syncTitle": "员工主数据同步",
-    "syncBtn": "同步至上月",
-    "syncDisabled": "已同步至上月",
+    "syncBtn": "同步至本月",
+    "syncDisabled": "已同步至本月",
     "syncSuccess": "新增 {added} 名 / 更新 {updated} 名工资历史（至 {through}）",
     "syncFail": "同步失败",
     "syncStatus": "最后同步：{period}"
