@@ -85,6 +85,27 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // 2026-06-21: 최종 제출 시 운영팀에 자동 신고 요청 (spt_masa_submission_request 행).
+    // PPh23/PPh4(2) 와 동일 패턴. 사용자는 신고 이력에서 "처리 대기" 행으로 즉시 확인 가능.
+    // tax_filing 행 직접 생성은 Hard Rule #3 (consultant_id NOT NULL) 위반이라 운영팀이
+    // 처리 완료 시 생성한다.
+    const { error: reqErr } = await admin
+      .from('spt_masa_submission_request')
+      .upsert({
+        customer_id: customerId,
+        tax_type: 'PPh21',
+        tax_period: period,
+        status: 'PENDING',
+        requested_at: new Date().toISOString(),
+        requested_by_user_id: req.session.userId,
+        thread_id: null,
+        processed_at: null,
+        filing_id: null,
+      }, { onConflict: 'customer_id,tax_type,tax_period' });
+    if (reqErr) {
+      loggers.api.warn({ err: reqErr.message, customerId, period }, 'spt_masa_submission_request upsert failed');
+    }
+
     loggers.api.info({ customerId, period, submitted: count ?? 0 }, 'Payslips submitted');
     return NextResponse.json({
       success: true,

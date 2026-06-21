@@ -8332,7 +8332,8 @@
         "bpe": "缴款凭证已保管"
       }
     },
-    "footerNote": "※ 申报完成后，BPE 与缴纳 NTPN 将被安全保管。"
+    "footerNote": "※ 申报完成后，BPE 与缴纳 NTPN 将被安全保管。",
+    "pendingOperatorReview": "运营团队正在处理。完成后申报详情和文档将在此显示。"
   },
   "spt1771Page": {
     "pageTitle": "生成 SPT Tahunan",

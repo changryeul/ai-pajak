@@ -8332,7 +8332,8 @@
         "bpe": "Payment evidence archived"
       }
     },
-    "footerNote": "※ After filing is complete, BPE and payment NTPN are stored safely."
+    "footerNote": "※ After filing is complete, BPE and payment NTPN are stored safely.",
+    "pendingOperatorReview": "Operator team is processing. Filing details and documents will appear here once completed."
   },
   "spt1771Page": {
     "pageTitle": "Generate SPT Tahunan",

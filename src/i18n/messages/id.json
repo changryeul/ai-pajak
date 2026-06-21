@@ -8332,7 +8332,8 @@
         "bpe": "Bukti pembayaran tersimpan"
       }
     },
-    "footerNote": "※ Setelah pelaporan selesai, BPE dan NTPN pembayaran disimpan dengan aman."
+    "footerNote": "※ Setelah pelaporan selesai, BPE dan NTPN pembayaran disimpan dengan aman.",
+    "pendingOperatorReview": "Tim operator sedang memproses. Detail pelaporan dan dokumen akan muncul setelah selesai."
   },
   "spt1771Page": {
     "pageTitle": "Buat SPT Tahunan",

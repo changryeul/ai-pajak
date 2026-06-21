@@ -67,6 +67,8 @@ export function CompanyFilingsView() {
   const [closingRows, setClosingRows] = useState<Row[]>([]);
   // 2026-06-21: 실제 tax_filing 행 — 두 버튼 link 활성
   const [realRows, setRealRows] = useState<Row[]>([]);
+  // 2026-06-21: 사용자가 자료 정리 + 최종 제출했지만 운영팀 처리 전 — "처리 대기" 행
+  const [requestRows, setRequestRows] = useState<Row[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,6 +94,34 @@ export function CompanyFilingsView() {
           };
         });
         if (!cancelled) setRealRows(rows);
+      } catch { /* non-fatal */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/customer/spt-masa-request', { credentials: 'include' });
+        if (!res.ok) return;
+        const json = await res.json();
+        type ReqApi = { id: string; tax_type: string; tax_period: string; status: string; filing_id: string | null };
+        const rows = ((json?.data ?? []) as ReqApi[])
+          .filter((r) => r.status === 'PENDING' && !r.filing_id) // 운영팀 처리 전 + tax_filing 없음
+          .map((r): Row => ({
+            id: `req-${r.id}`,
+            kind: 'monthly',
+            period: r.tax_period,
+            type: r.tax_type === 'PPh42' ? 'PPh 4(2)' : r.tax_type,
+            status: 'aiReview',
+            payDeadline: '—',
+            fileDeadline: '—',
+            amount: '—',
+            ntpn: '—',
+            bpe: '—',
+          }));
+        if (!cancelled) setRequestRows(rows);
       } catch { /* non-fatal */ }
     })();
     return () => { cancelled = true; };
@@ -150,10 +180,12 @@ export function CompanyFilingsView() {
     bpe: t(`rows.${id}.bpe`),
   }));
 
-  // 실제 신고 행 (tax_filing) 우선 + 결산 + mock (placeholder)
-  const allRows: Row[] = [...realRows, ...closingRows, ...mockRows];
+  // 실제 신고 행 (tax_filing) 우선 + 처리 대기 (request) + 결산 + mock (placeholder)
+  const allRows: Row[] = [...realRows, ...requestRows, ...closingRows, ...mockRows];
   // uuid 형태이면 진짜 tax_filing 행 — 두 버튼이 동작
   const isRealFilingId = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  // req-* prefix 는 spt_masa_submission_request 행
+  const isRequestRow = (id: string) => id.startsWith('req-');
   const filteredRows = listTab === 'all' ? allRows : allRows.filter((r) => r.kind === listTab);
 
   const counts = {
@@ -322,6 +354,8 @@ export function CompanyFilingsView() {
                         onClick={() => {
                           if (isRealFilingId(row.id)) {
                             router.push(`/${locale}/filings/${row.id}`);
+                          } else if (isRequestRow(row.id)) {
+                            toast.info(t('pendingOperatorReview'));
                           } else {
                             toast.info(tc('comingSoon'));
                           }
@@ -336,6 +370,8 @@ export function CompanyFilingsView() {
                         onClick={() => {
                           if (isRealFilingId(row.id)) {
                             router.push(`/${locale}/filings/${row.id}#docs`);
+                          } else if (isRequestRow(row.id)) {
+                            toast.info(t('pendingOperatorReview'));
                           } else {
                             toast.info(tc('invoiceComing'));
                           }

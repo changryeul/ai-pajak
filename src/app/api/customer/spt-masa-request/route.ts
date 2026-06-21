@@ -43,12 +43,25 @@ async function getCustomerId(userId: string): Promise<string | null> {
 
 async function handleGet(req: RequestWithSession): Promise<Response> {
   const url = new URL(req.url);
+  const rawType = url.searchParams.get('taxType');
+  const rawPeriod = url.searchParams.get('period');
+  const customerId = await getCustomerId(req.session.userId);
+  if (!customerId) return NextResponse.json({ error: 'customer not found' }, { status: 404 });
+
+  // 2026-06-21: 인자 없이 호출 시 customer 의 모든 요청 list — 신고 이력 화면용.
+  if (!rawType && !rawPeriod) {
+    const { data } = await getSupabaseAdmin()
+      .from('spt_masa_submission_request')
+      .select('id, tax_type, tax_period, status, requested_at, processed_at, filing_id, thread_id')
+      .eq('customer_id', customerId)
+      .order('requested_at', { ascending: false });
+    return NextResponse.json({ data: data ?? [] });
+  }
+
   const { taxType, period } = parseArgs(url);
   if (!taxType || !period) {
     return NextResponse.json({ error: 'taxType (PPh21|PPh23|PPh42|PPN) and period (YYYY-MM) required' }, { status: 400 });
   }
-  const customerId = await getCustomerId(req.session.userId);
-  if (!customerId) return NextResponse.json({ error: 'customer not found' }, { status: 404 });
 
   const { data } = await getSupabaseAdmin()
     .from('spt_masa_submission_request')

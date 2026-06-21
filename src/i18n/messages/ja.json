@@ -8332,7 +8332,8 @@
         "bpe": "納付証憑保管"
       }
     },
-    "footerNote": "※ 申告完了後、BPE と納付 NTPN を安全に保管します。"
+    "footerNote": "※ 申告完了後、BPE と納付 NTPN を安全に保管します。",
+    "pendingOperatorReview": "運営チームが処理中です。完了後に申告内容と書類がここに表示されます。"
   },
   "spt1771Page": {
     "pageTitle": "SPT Tahunan 申告書作成",
