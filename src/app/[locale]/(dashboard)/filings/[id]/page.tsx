@@ -206,7 +206,7 @@ export default function FilingDetailPage({ params }: PageProps) {
   return (
     <div className="container mx-auto py-8 px-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8" id="docs-anchor">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.back()}>
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,8 +312,13 @@ export default function FilingDetailPage({ params }: PageProps) {
               )}
             </TabsContent>
 
-            <TabsContent value="documents" className="p-6">
-              <DocumentList taxFilingId={filing.id} />
+            <TabsContent value="documents" id="docs" className="p-6 space-y-6">
+              {/* 2026-06-21: 공식 문서 카드 grid — 신고 type 별 동적 */}
+              <OfficialDocumentsGrid filing={filing} formatCurrency={formatCurrency} />
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3">{t('filings.attachedDocuments')}</h4>
+                <DocumentList taxFilingId={filing.id} />
+              </div>
             </TabsContent>
 
             <TabsContent value="history" className="p-6">
@@ -399,6 +404,147 @@ export default function FilingDetailPage({ params }: PageProps) {
             />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 2026-06-21: 공식 문서 카드 grid — 신고 type 별 동적
+// ──────────────────────────────────────────────────────────────────────────
+function OfficialDocumentsGrid({
+  filing,
+  formatCurrency,
+}: {
+  filing: FilingDetail;
+  formatCurrency: (n: number) => string;
+}) {
+  const t = useTranslations();
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const flash = (type: 'success' | 'error', text: string) => {
+    setMsg({ type, text });
+    setTimeout(() => setMsg(null), 3000);
+  };
+
+  const downloadSPTMasaPDF = async () => {
+    setDownloading('spt-masa');
+    try {
+      const res = await fetch('/api/tax/spt-masa-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filingId: filing.id }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SPT_Masa_${filing.taxType}_${filing.taxPeriod}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      flash('success', t('filings.docs.downloadStarted'));
+    } catch (e) {
+      flash('error', e instanceof Error ? e.message : t('filings.docs.downloadFailed'));
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  // 신고 type 별 가용 문서 목록
+  const docs: Array<{
+    key: string;
+    title: string;
+    desc: string;
+    available: boolean;
+    onDownload?: () => void;
+    note?: string;
+  }> = [];
+
+  // SPT Masa PDF — 모든 월 신고 type 에 공통
+  const monthlyTypes = ['PPh21', 'PPh23', 'PPh4_2', 'PPh_FINAL', 'PPN'];
+  if (monthlyTypes.includes(filing.taxType)) {
+    docs.push({
+      key: 'spt-masa',
+      title: t('filings.docs.sptMasa.title'),
+      desc: t('filings.docs.sptMasa.desc', { period: filing.taxPeriod }),
+      available: true,
+      onDownload: downloadSPTMasaPDF,
+    });
+  }
+
+  // e-Bupot 1721-A1 (PPh21) — 직원별 개별 다운로드 필요 → 안내 카드
+  if (filing.taxType === 'PPh21') {
+    docs.push({
+      key: 'ebupot-pph21',
+      title: t('filings.docs.ebupotPph21.title'),
+      desc: t('filings.docs.ebupotPph21.desc'),
+      available: false,
+      note: t('filings.docs.ebupotPph21.note'),
+    });
+  }
+  if (filing.taxType === 'PPh23') {
+    docs.push({
+      key: 'ebupot-pph23',
+      title: t('filings.docs.ebupotPph23.title'),
+      desc: t('filings.docs.ebupotPph23.desc'),
+      available: false,
+      note: t('filings.docs.ebupotPph23.note'),
+    });
+  }
+  if (filing.taxType === 'SPT_TAHUNAN') {
+    docs.push({
+      key: 'spt-tahunan',
+      title: t('filings.docs.sptTahunan.title'),
+      desc: t('filings.docs.sptTahunan.desc'),
+      available: false,
+      note: t('filings.docs.sptTahunan.note'),
+    });
+  }
+
+  // 항상 노출: 납부 정보 카드 (taxDue / taxPaid 표시)
+  docs.push({
+    key: 'payment-info',
+    title: t('filings.docs.paymentInfo.title'),
+    desc: `${t('filings.taxDue')}: ${formatCurrency(filing.taxDue)}${filing.taxPaid > 0 ? ` · ${t('filings.taxPaid')}: ${formatCurrency(filing.taxPaid)}` : ''}`,
+    available: false,
+    note: filing.bpeNumber ? `BPE ${filing.bpeNumber}` : t('filings.docs.paymentInfo.notPaidYet'),
+  });
+
+  return (
+    <div>
+      <h4 className="font-medium text-gray-900 mb-3">{t('filings.docs.heading')}</h4>
+      {msg && (
+        <div className={`mb-3 p-2 rounded text-xs ${msg.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+          {msg.text}
+        </div>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {docs.map((d) => (
+          <div key={d.key} className="border rounded-lg p-4 bg-white hover:bg-slate-50 transition-colors">
+            <p className="text-sm font-semibold text-slate-900">{d.title}</p>
+            <p className="text-xs text-slate-500 mt-1">{d.desc}</p>
+            <div className="mt-3 flex items-center justify-between">
+              {d.available && d.onDownload ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={d.onDownload}
+                  disabled={downloading === d.key}
+                >
+                  {downloading === d.key ? '...' : t('filings.docs.downloadButton')}
+                </Button>
+              ) : (
+                <span className="text-[10px] text-slate-400">{d.note}</span>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

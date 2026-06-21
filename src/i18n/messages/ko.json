@@ -1424,7 +1424,37 @@
     "bpeReceived": "전자 영수증 수신됨",
     "bpeNumber": "BPE 번호",
     "acceptedAt": "승인일",
-    "downloadBpe": "영수증 다운로드 (BPE)"
+    "downloadBpe": "영수증 다운로드 (BPE)",
+    "attachedDocuments": "첨부 문서",
+    "docs": {
+      "heading": "공식 문서",
+      "downloadButton": "다운로드",
+      "downloadStarted": "다운로드 시작",
+      "downloadFailed": "다운로드 실패",
+      "sptMasa": {
+        "title": "SPT Masa PDF",
+        "desc": "{period} 월 신고 공식 양식"
+      },
+      "ebupotPph21": {
+        "title": "e-Bupot 1721-A1",
+        "desc": "PPh 21 직원별 원천징수 증빙",
+        "note": "직원 상세 화면에서 개별 다운로드"
+      },
+      "ebupotPph23": {
+        "title": "e-Bupot 2026",
+        "desc": "PPh 23 거래별 증빙",
+        "note": "거래 상세에서 개별 다운로드"
+      },
+      "sptTahunan": {
+        "title": "SPT Tahunan PDF",
+        "desc": "연간 신고서",
+        "note": "결산 wizard 에서 생성"
+      },
+      "paymentInfo": {
+        "title": "납부 정보",
+        "notPaidYet": "아직 납부 전"
+      }
+    }
   },
   "roles": {
     "customer": "고객",

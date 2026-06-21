@@ -1424,7 +1424,37 @@
     "bpeReceived": "Electronic Receipt Received",
     "bpeNumber": "BPE Number",
     "acceptedAt": "Accepted",
-    "downloadBpe": "Download Receipt (BPE)"
+    "downloadBpe": "Download Receipt (BPE)",
+    "attachedDocuments": "Attached Documents",
+    "docs": {
+      "heading": "Official Documents",
+      "downloadButton": "Download",
+      "downloadStarted": "Download started",
+      "downloadFailed": "Download failed",
+      "sptMasa": {
+        "title": "SPT Masa PDF",
+        "desc": "Official form for {period} monthly filing"
+      },
+      "ebupotPph21": {
+        "title": "e-Bupot 1721-A1",
+        "desc": "PPh 21 per-employee withholding receipt",
+        "note": "Download per employee from detail screen"
+      },
+      "ebupotPph23": {
+        "title": "e-Bupot 2026",
+        "desc": "PPh 23 per-transaction receipt",
+        "note": "Download per transaction from detail"
+      },
+      "sptTahunan": {
+        "title": "SPT Tahunan PDF",
+        "desc": "Annual filing form",
+        "note": "Generated from closing wizard"
+      },
+      "paymentInfo": {
+        "title": "Payment Info",
+        "notPaidYet": "Not paid yet"
+      }
+    }
   },
   "roles": {
     "customer": "Customer",

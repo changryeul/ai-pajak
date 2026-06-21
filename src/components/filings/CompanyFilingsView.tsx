@@ -65,6 +65,37 @@ export function CompanyFilingsView() {
   const locale = params.locale as string;
   const [listTab, setListTab] = useState<ListTab>('all');
   const [closingRows, setClosingRows] = useState<Row[]>([]);
+  // 2026-06-21: 실제 tax_filing 행 — 두 버튼 link 활성
+  const [realRows, setRealRows] = useState<Row[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/tax/filings?limit=50', { credentials: 'include' });
+        if (!res.ok) return;
+        const json = await res.json();
+        type FilingApi = { id: string; taxType: string; taxPeriod: string; status: string; taxDue: number; bpeNumber?: string | null };
+        const rows = ((json?.data ?? []) as FilingApi[]).map((f): Row => {
+          const isCompleted = f.status === 'FILED' || f.status === 'ACCEPTED' || f.status === 'COMPLETED' || f.status === 'SUBMITTED';
+          return {
+            id: f.id,
+            kind: 'monthly',
+            period: f.taxPeriod,
+            type: f.taxType,
+            status: isCompleted ? 'filed' : 'aiReview',
+            payDeadline: '—',
+            fileDeadline: '—',
+            amount: f.taxDue ? `Rp ${Number(f.taxDue).toLocaleString('id-ID')}` : '—',
+            ntpn: '—',
+            bpe: f.bpeNumber ?? '—',
+          };
+        });
+        if (!cancelled) setRealRows(rows);
+      } catch { /* non-fatal */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,8 +150,10 @@ export function CompanyFilingsView() {
     bpe: t(`rows.${id}.bpe`),
   }));
 
-  // 결산은 항상 우선 노출 — 실제 데이터(closingRows) + mock 행을 합쳐 보여준다.
-  const allRows: Row[] = [...closingRows, ...mockRows];
+  // 실제 신고 행 (tax_filing) 우선 + 결산 + mock (placeholder)
+  const allRows: Row[] = [...realRows, ...closingRows, ...mockRows];
+  // uuid 형태이면 진짜 tax_filing 행 — 두 버튼이 동작
+  const isRealFilingId = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   const filteredRows = listTab === 'all' ? allRows : allRows.filter((r) => r.kind === listTab);
 
   const counts = {
@@ -282,10 +315,32 @@ export function CompanyFilingsView() {
                   <td className="px-4 py-4 text-slate-600">{t('methodAuto')}</td>
                   <td className="px-4 py-4">
                     <div className="flex flex-col gap-1.5">
-                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => toast.info(tc('comingSoon'))}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        onClick={() => {
+                          if (isRealFilingId(row.id)) {
+                            router.push(`/${locale}/filings/${row.id}`);
+                          } else {
+                            toast.info(tc('comingSoon'));
+                          }
+                        }}
+                      >
                         {t('ctaDetail')}
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => toast.info(tc('invoiceComing'))}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        onClick={() => {
+                          if (isRealFilingId(row.id)) {
+                            router.push(`/${locale}/filings/${row.id}#docs`);
+                          } else {
+                            toast.info(tc('invoiceComing'));
+                          }
+                        }}
+                      >
                         {t('ctaDownload')}
                       </Button>
                     </div>

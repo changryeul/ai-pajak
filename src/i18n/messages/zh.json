@@ -1424,7 +1424,37 @@
     "bpeReceived": "已收到电子收据",
     "bpeNumber": "BPE编号",
     "acceptedAt": "接受时间",
-    "downloadBpe": "下载收据（BPE）"
+    "downloadBpe": "下载收据（BPE）",
+    "attachedDocuments": "附件文档",
+    "docs": {
+      "heading": "官方文档",
+      "downloadButton": "下载",
+      "downloadStarted": "开始下载",
+      "downloadFailed": "下载失败",
+      "sptMasa": {
+        "title": "SPT Masa PDF",
+        "desc": "{period} 月度申报正式表格"
+      },
+      "ebupotPph21": {
+        "title": "e-Bupot 1721-A1",
+        "desc": "PPh 21 员工预扣凭证",
+        "note": "从员工详情页单独下载"
+      },
+      "ebupotPph23": {
+        "title": "e-Bupot 2026",
+        "desc": "PPh 23 交易凭证",
+        "note": "从交易详情单独下载"
+      },
+      "sptTahunan": {
+        "title": "SPT Tahunan PDF",
+        "desc": "年度申报表",
+        "note": "由结算向导生成"
+      },
+      "paymentInfo": {
+        "title": "支付信息",
+        "notPaidYet": "尚未支付"
+      }
+    }
   },
   "roles": {
     "customer": "客户",

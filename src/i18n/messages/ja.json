@@ -1424,7 +1424,37 @@
     "bpeReceived": "電子受領書を受け取りました",
     "bpeNumber": "BPE番号",
     "acceptedAt": "承認日",
-    "downloadBpe": "受領書をダウンロード（BPE）"
+    "downloadBpe": "受領書をダウンロード（BPE）",
+    "attachedDocuments": "添付文書",
+    "docs": {
+      "heading": "公式文書",
+      "downloadButton": "ダウンロード",
+      "downloadStarted": "ダウンロードを開始しました",
+      "downloadFailed": "ダウンロードに失敗しました",
+      "sptMasa": {
+        "title": "SPT Masa PDF",
+        "desc": "{period}月申告の公式書式"
+      },
+      "ebupotPph21": {
+        "title": "e-Bupot 1721-A1",
+        "desc": "PPh 21 従業員別源泉徴収票",
+        "note": "従業員詳細画面から個別ダウンロード"
+      },
+      "ebupotPph23": {
+        "title": "e-Bupot 2026",
+        "desc": "PPh 23 取引別証憑",
+        "note": "取引詳細から個別ダウンロード"
+      },
+      "sptTahunan": {
+        "title": "SPT Tahunan PDF",
+        "desc": "年次申告書",
+        "note": "決算ウィザードで生成"
+      },
+      "paymentInfo": {
+        "title": "納付情報",
+        "notPaidYet": "未納付"
+      }
+    }
   },
   "roles": {
     "customer": "顧客",

@@ -1424,7 +1424,37 @@
     "bpeReceived": "Tanda Terima Elektronik Diterima",
     "bpeNumber": "Nomor BPE",
     "acceptedAt": "Diterima",
-    "downloadBpe": "Unduh Tanda Terima (BPE)"
+    "downloadBpe": "Unduh Tanda Terima (BPE)",
+    "attachedDocuments": "Dokumen Lampiran",
+    "docs": {
+      "heading": "Dokumen Resmi",
+      "downloadButton": "Unduh",
+      "downloadStarted": "Unduhan dimulai",
+      "downloadFailed": "Unduhan gagal",
+      "sptMasa": {
+        "title": "PDF SPT Masa",
+        "desc": "Formulir resmi pelaporan bulan {period}"
+      },
+      "ebupotPph21": {
+        "title": "e-Bupot 1721-A1",
+        "desc": "Bukti potong PPh 21 per karyawan",
+        "note": "Unduh per karyawan dari layar detail"
+      },
+      "ebupotPph23": {
+        "title": "e-Bupot 2026",
+        "desc": "Bukti potong PPh 23 per transaksi",
+        "note": "Unduh per transaksi dari detail"
+      },
+      "sptTahunan": {
+        "title": "PDF SPT Tahunan",
+        "desc": "Formulir pelaporan tahunan",
+        "note": "Dibuat dari wizard tutup buku"
+      },
+      "paymentInfo": {
+        "title": "Info Pembayaran",
+        "notPaidYet": "Belum dibayar"
+      }
+    }
   },
   "roles": {
     "customer": "Pelanggan",
