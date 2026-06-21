@@ -74,9 +74,11 @@ interface Payslip {
 
 interface Props {
   customerId: string;
+  /** 부모가 업로드/sync 완료 시 ++ 해 주면 payslip 재조회 트리거 */
+  reloadTrigger?: number;
 }
 
-export function MonthlyPayslipTab({ customerId }: Props) {
+export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   const tp = useTranslations('monthlyPayslip');
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -111,7 +113,7 @@ export function MonthlyPayslipTab({ customerId }: Props) {
     finally { setIsLoading(false); }
   }, [customerId, period]);
 
-  useEffect(() => { loadPayslips(); }, [loadPayslips]);
+  useEffect(() => { loadPayslips(); }, [loadPayslips, reloadTrigger]);
 
   // 2026-06-21: "전체 직원 급여명세 생성" 흐름 제거. 대신 "최종 제출" (DRAFT → SUBMITTED).
   const submitPayslips = async () => {

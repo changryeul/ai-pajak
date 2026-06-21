@@ -109,6 +109,8 @@ export default function PPh21PayrollPage() {
   // 2026-06-21: 직원 마스터 sync 상태 (이전 달까지 sync 됐는지)
   const [syncStatus, setSyncStatus] = useState<{ syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  // 월별 급여 자료 (MonthlyPayslipTab) 재조회 트리거 — 업로드 완료 시 +1
+  const [payslipReload, setPayslipReload] = useState(0);
 
   // Group employees by worker_type for summary cards
   const workerSummary = useMemo(() => {
@@ -458,7 +460,7 @@ export default function PPh21PayrollPage() {
         <div className="mb-6">
           <PPh21DataInputSection
             customerId={customerId}
-            onComplete={loadEmployees}
+            onComplete={() => { loadEmployees(); setPayslipReload(v => v + 1); }}
             showMsg={showMsg}
             onNavigateToMaster={() => { setActiveTab('monthly'); setPayslipMode(true); }}
           />
@@ -486,7 +488,7 @@ export default function PPh21PayrollPage() {
         )}
 
         <TabsContent value="monthly">
-          <MonthlyPayslipTab customerId={customerId} />
+          <MonthlyPayslipTab customerId={customerId} reloadTrigger={payslipReload} />
         </TabsContent>
 
         <TabsContent value="master">
