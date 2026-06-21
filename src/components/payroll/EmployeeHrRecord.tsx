@@ -626,6 +626,7 @@ function UploadCard({ customerId, onImported }: { customerId: string; onImported
 
 function SearchScreen({
   searchBy, setSearchBy, keyword, setKeyword, results, openDetail, openNew, loading, customerId, onImported, customerPicker,
+  syncStatus, isSyncing, syncMessage, runSync, tps,
 }: {
   searchBy: 'ID' | 'NAME';
   setSearchBy: (v: 'ID' | 'NAME') => void;
@@ -639,6 +640,11 @@ function SearchScreen({
   onImported: () => void;
   /** Consultant-only customer dropdown shown above the search box. Null for CUSTOMER role. */
   customerPicker: React.ReactNode | null;
+  syncStatus: { syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null;
+  isSyncing: boolean;
+  syncMessage: string;
+  runSync: () => void;
+  tps: (key: string, values?: Record<string, string | number | Date>) => string;
 }) {
   const t = useTranslations('employeeHr.search');
   return (
@@ -662,6 +668,39 @@ function SearchScreen({
         </section>
 
         {customerPicker}
+
+        {/* 2026-06-21: 직원 마스터 동기화 카드 */}
+        {syncStatus && (
+          <section className="rounded-3xl bg-white p-5 shadow-xl shadow-slate-200/70 ring-1 ring-slate-100">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h3 className="text-base font-black text-slate-900">{tps('syncTitle')}</h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  {syncStatus.syncedThrough
+                    ? tps('syncStatus', { period: syncStatus.syncedThrough })
+                    : '—'}
+                </p>
+              </div>
+              {syncStatus.hasPending ? (
+                <button
+                  type="button"
+                  onClick={runSync}
+                  disabled={isSyncing}
+                  className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-2.5 text-sm font-black text-white shadow-lg hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {isSyncing ? '...' : `${tps('syncBtn')} → ${syncStatus.pendingThrough}`}
+                </button>
+              ) : (
+                <span className="inline-flex items-center rounded-2xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+                  ✓ {tps('syncDisabled')} ({syncStatus.syncedThrough})
+                </span>
+              )}
+            </div>
+            {syncMessage && (
+              <p className="mt-3 text-xs text-slate-600">{syncMessage}</p>
+            )}
+          </section>
+        )}
 
         <UploadCard customerId={customerId} onImported={onImported} />
 
@@ -1159,6 +1198,7 @@ function DetailScreen({
 // ─────────────────────────────────────────────────────────────────────────────
 export default function EmployeeHrRecord() {
   const t = useTranslations('employeeHr');
+  const tps = useTranslations('monthlyPayslip');
   const {
     customerId,
     isConsultant,
@@ -1181,6 +1221,49 @@ export default function EmployeeHrRecord() {
   const [savedMessage, setSavedMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [changes, setChanges] = useState<ChangeLogEntry[]>([]);
+
+  // 2026-06-21: 직원 마스터 sync 상태 (이전 달까지 SUBMITTED → 마스터 자동 갱신)
+  const [syncStatus, setSyncStatus] = useState<{ syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
+  useEffect(() => {
+    if (!customerId) {
+      setSyncStatus(null);
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch(`/api/tax/employees/sync?customerId=${customerId}`);
+        const data = await res.json();
+        if (data.success) {
+          setSyncStatus({ syncedThrough: data.syncedThrough, pendingThrough: data.pendingThrough, hasPending: data.hasPending });
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [customerId, refreshTick]);
+  const runSync = async () => {
+    if (!customerId || isSyncing) return;
+    setIsSyncing(true);
+    setSyncMessage('');
+    try {
+      const res = await fetch('/api/tax/employees/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSyncMessage(tps('syncSuccess', { added: data.added, updated: data.updated, through: data.through }));
+        setRefreshTick(v => v + 1);
+      } else {
+        setSyncMessage(data.error || tps('syncFail'));
+      }
+    } catch {
+      setSyncMessage(tps('syncFail'));
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Pull change history whenever a non-new employee detail is opened (or after save).
   useEffect(() => {
@@ -1391,6 +1474,11 @@ export default function EmployeeHrRecord() {
         customerId={customerId}
         onImported={() => setRefreshTick((t) => t + 1)}
         customerPicker={customerPicker}
+        syncStatus={syncStatus}
+        isSyncing={isSyncing}
+        syncMessage={syncMessage}
+        runSync={runSync}
+        tps={tps}
       />
     );
   }
