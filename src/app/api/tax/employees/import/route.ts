@@ -42,6 +42,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'file and customerId required' }, { status: 400 });
     }
 
+    // 2026-06-21: 미래월 차단
+    if (taxPeriod) {
+      const now = new Date();
+      const currentYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      if (taxPeriod > currentYm) {
+        return NextResponse.json({ error: `미래월(${taxPeriod}) 자료는 업로드할 수 없습니다 (최대 ${currentYm})` }, { status: 400 });
+      }
+    }
+
     // Read CSV content
     const text = await file.text();
     const lines = text.split('\n').filter(l => l.trim());

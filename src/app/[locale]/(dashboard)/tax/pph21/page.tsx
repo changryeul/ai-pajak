@@ -854,10 +854,17 @@ function PPh21DataInputSection({
   const [pickedMonth, setPickedMonth] = useState<number>(now.getMonth() + 1);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
 
+  // 2026-06-21: 미래월 업로드 차단 — 현재 연/월까지만 선택 가능.
   const yearOptions = useMemo(() => {
     const cy = new Date().getFullYear();
-    return [cy - 1, cy, cy + 1];
+    return [cy - 1, cy];
   }, []);
+  const maxMonthForYear = (y: number) => {
+    const n = new Date();
+    if (y < n.getFullYear()) return 12;
+    if (y === n.getFullYear()) return n.getMonth() + 1;
+    return 0;
+  };
 
   const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
@@ -1239,7 +1246,7 @@ function PPh21DataInputSection({
               <Select value={String(pickedMonth)} onValueChange={v => setPickedMonth(Number(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                  {Array.from({ length: maxMonthForYear(pickedYear) }, (_, i) => i + 1).map(m => (
                     <SelectItem key={m} value={String(m)}>{tp(`month${m}` as 'month1')}</SelectItem>
                   ))}
                 </SelectContent>
