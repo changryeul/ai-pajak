@@ -3941,7 +3941,13 @@
     "saveFailed": "保存失败",
     "deleteButton": "删除",
     "confirmDelete": "删除此 faktur？",
-    "deletedToast": "已删除"
+    "deletedToast": "已删除",
+    "uploadModeLabel": "上传方式",
+    "uploadModeReplace": "覆盖（推荐）",
+    "uploadModeReplaceDesc": "删除此月所有现有行并用新文件替换。内联编辑也会丢失。",
+    "uploadModeAppend": "追加",
+    "uploadModeAppendDesc": "将新文件的行追加到现有数据。可能产生重复。",
+    "uploadModeReplacedToast": "已删除 {count} 条旧数据"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

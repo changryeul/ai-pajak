@@ -3959,7 +3959,13 @@
     "saveFailed": "저장 실패",
     "deleteButton": "삭제",
     "confirmDelete": "이 faktur 를 삭제하시겠습니까?",
-    "deletedToast": "삭제됨"
+    "deletedToast": "삭제됨",
+    "uploadModeLabel": "업로드 방식",
+    "uploadModeReplace": "덮어쓰기 (권장)",
+    "uploadModeReplaceDesc": "이 월의 기존 데이터를 모두 삭제하고 새 파일로 교체합니다. 수정한 inline edit 도 함께 사라집니다.",
+    "uploadModeAppend": "추가",
+    "uploadModeAppendDesc": "기존 데이터에 새 파일의 행을 추가합니다. 중복 가능성이 있습니다.",
+    "uploadModeReplacedToast": "기존 {count}건 삭제됨"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

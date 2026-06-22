@@ -3941,7 +3941,13 @@
     "saveFailed": "Gagal menyimpan",
     "deleteButton": "Hapus",
     "confirmDelete": "Hapus faktur ini?",
-    "deletedToast": "Dihapus"
+    "deletedToast": "Dihapus",
+    "uploadModeLabel": "Mode Unggah",
+    "uploadModeReplace": "Timpa (disarankan)",
+    "uploadModeReplaceDesc": "Hapus semua baris yang ada untuk bulan ini dan ganti dengan file baru. Inline edit akan hilang.",
+    "uploadModeAppend": "Tambah",
+    "uploadModeAppendDesc": "Tambah baris dari file baru ke data yang ada. Bisa menyebabkan duplikat.",
+    "uploadModeReplacedToast": "{count} baris lama dihapus"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

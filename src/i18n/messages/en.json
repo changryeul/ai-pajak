@@ -3941,7 +3941,13 @@
     "saveFailed": "Save failed",
     "deleteButton": "Delete",
     "confirmDelete": "Delete this faktur?",
-    "deletedToast": "Deleted"
+    "deletedToast": "Deleted",
+    "uploadModeLabel": "Upload Mode",
+    "uploadModeReplace": "Replace (recommended)",
+    "uploadModeReplaceDesc": "Delete all existing rows for this month and replace with the new file. Inline edits will be lost.",
+    "uploadModeAppend": "Append",
+    "uploadModeAppendDesc": "Add rows from the new file to existing data. May cause duplicates.",
+    "uploadModeReplacedToast": "{count} existing rows deleted"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

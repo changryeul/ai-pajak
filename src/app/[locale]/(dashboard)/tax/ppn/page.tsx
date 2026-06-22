@@ -102,6 +102,9 @@ export default function PPNPage() {
   const wholesaleInputRef = useRef<HTMLInputElement>(null);
   const [uploadingWholesale, setUploadingWholesale] = useState(false);
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  // 2026-06-22: 업로드 방식 — 'replace' 기존 행 삭제 후 새 파일로 교체 (default)
+  //               'append' 기존 행 유지 + 추가
+  const [uploadMode, setUploadMode] = useState<'replace' | 'append'>('replace');
   const [pickedYear, setPickedYear] = useState<number>(currentYear);
   const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
@@ -151,6 +154,7 @@ export default function PPNPage() {
           taxPeriod: importPeriod,
           outCsv: summary.outCsv,
           inCsv: summary.inCsv,
+          mode: uploadMode, // 'replace' | 'append'
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -165,7 +169,11 @@ export default function PPNPage() {
       const luxuryMsg = luxuryCount > 0
         ? ` · ${t('luxuryClassifiedToast', { count: luxuryCount })}`
         : '';
-      // 2026-06-22: parser 단계에서 skip 된 행 (footer/validation) + 첫 에러 3개 표시 — self-diagnose
+      // 2026-06-22: mode='replace' 시 삭제된 행 수 표시
+      const deletedMsg = d.mode === 'replace' && (d.deleted ?? 0) > 0
+        ? ` · ${t('uploadModeReplacedToast', { count: d.deleted })}`
+        : '';
+      // parser 단계에서 skip 된 행 (footer/validation) + 첫 에러 3개 표시 — self-diagnose
       const skipParts: string[] = [];
       if (summary.skippedFooters > 0) skipParts.push(`footer/notes ${summary.skippedFooters}`);
       if (summary.skippedByValidation > 0) skipParts.push(`validation ${summary.skippedByValidation}`);
@@ -174,7 +182,7 @@ export default function PPNPage() {
       const skipMsg = skipParts.length > 0 ? ` · ⚠️ skip: ${skipParts.join(', ')}` : '';
       const firstErrors = Array.isArray(summary.errors) ? summary.errors.slice(0, 3).map((e: { rowNumber: number; section: string; reason: string }) => `R${e.rowNumber}(${e.section}): ${e.reason}`).join(' / ') : '';
       const errorTail = firstErrors ? ` — ${firstErrors}` : '';
-      showMsg('success', `${outMsg} / ${inMsg}${luxuryMsg}${skipMsg}${errorTail}`);
+      showMsg('success', `${outMsg} / ${inMsg}${luxuryMsg}${deletedMsg}${skipMsg}${errorTail}`);
 
       // Sync the page period selector to the imported month and refresh.
       const [py, pm] = importPeriod.split('-').map(Number);
@@ -869,6 +877,38 @@ export default function PPNPage() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+          {/* 2026-06-22: 업로드 방식 — 덮어쓰기 / 추가 */}
+          <div className="border-t pt-3 space-y-2">
+            <Label className="text-xs font-semibold">{t('uploadModeLabel')}</Label>
+            <div className="space-y-1.5">
+              <label className="flex items-start gap-2 text-xs cursor-pointer">
+                <input
+                  type="radio"
+                  name="uploadMode"
+                  className="mt-0.5"
+                  checked={uploadMode === 'replace'}
+                  onChange={() => setUploadMode('replace')}
+                />
+                <div>
+                  <span className="font-semibold">{t('uploadModeReplace')}</span>
+                  <span className="block text-[10px] text-gray-500">{t('uploadModeReplaceDesc')}</span>
+                </div>
+              </label>
+              <label className="flex items-start gap-2 text-xs cursor-pointer">
+                <input
+                  type="radio"
+                  name="uploadMode"
+                  className="mt-0.5"
+                  checked={uploadMode === 'append'}
+                  onChange={() => setUploadMode('append')}
+                />
+                <div>
+                  <span className="font-semibold">{t('uploadModeAppend')}</span>
+                  <span className="block text-[10px] text-gray-500">{t('uploadModeAppendDesc')}</span>
+                </div>
+              </label>
             </div>
           </div>
           <DialogFooter>

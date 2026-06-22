@@ -3941,7 +3941,13 @@
     "saveFailed": "保存失敗",
     "deleteButton": "削除",
     "confirmDelete": "このfakturを削除しますか？",
-    "deletedToast": "削除しました"
+    "deletedToast": "削除しました",
+    "uploadModeLabel": "アップロード方法",
+    "uploadModeReplace": "上書き (推奨)",
+    "uploadModeReplaceDesc": "この月の既存データをすべて削除し、新しいファイルで置き換えます。インライン編集も消えます。",
+    "uploadModeAppend": "追加",
+    "uploadModeAppendDesc": "既存データに新しいファイルの行を追加します。重複の可能性があります。",
+    "uploadModeReplacedToast": "既存 {count} 件削除"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

@@ -39,6 +39,7 @@ interface RequestBody {
   taxPeriod: string;     // YYYY-MM
   outCsv?: string;       // KELUARAN
   inCsv?: string;        // MASUKAN
+  mode?: 'replace' | 'append'; // 2026-06-22: default 'append' (backward compat)
 }
 
 interface SectionError {
@@ -238,12 +239,28 @@ async function handle(req: RequestWithSession): Promise<Response> {
     );
   }
 
+  // 2026-06-22: mode='replace' 면 기존 행 삭제 후 insert
+  let deleted = 0;
+  if (body.mode === 'replace') {
+    const { count, error: delErr } = await sb
+      .from('ppn_faktur_monthly')
+      .delete({ count: 'exact' })
+      .eq('customer_id', customerId)
+      .eq('tax_period', taxPeriod);
+    if (delErr) {
+      return NextResponse.json({ success: false, error: `replace delete failed: ${delErr.message}` }, { status: 500 });
+    }
+    deleted = count ?? 0;
+  }
+
   const outResult = await processSection(body.outCsv, 'KELUARAN', customerId, taxPeriod);
   const inResult = await processSection(body.inCsv, 'MASUKAN', customerId, taxPeriod);
 
   return NextResponse.json({
     success: true,
     data: {
+      mode: body.mode ?? 'append',
+      deleted,
       outInserted: outResult.inserted,
       inInserted: inResult.inserted,
       luxuryClassified: outResult.luxuryCount + inResult.luxuryCount,
