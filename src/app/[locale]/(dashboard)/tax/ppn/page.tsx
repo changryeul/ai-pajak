@@ -165,7 +165,16 @@ export default function PPNPage() {
       const luxuryMsg = luxuryCount > 0
         ? ` · ${t('luxuryClassifiedToast', { count: luxuryCount })}`
         : '';
-      showMsg('success', `${outMsg} / ${inMsg}${luxuryMsg}`);
+      // 2026-06-22: parser 단계에서 skip 된 행 (footer/validation) + 첫 에러 3개 표시 — self-diagnose
+      const skipParts: string[] = [];
+      if (summary.skippedFooters > 0) skipParts.push(`footer/notes ${summary.skippedFooters}`);
+      if (summary.skippedByValidation > 0) skipParts.push(`validation ${summary.skippedByValidation}`);
+      const serverErrors = Array.isArray(d.errors) ? d.errors.length : 0;
+      if (serverErrors > 0) skipParts.push(`server-side ${serverErrors}`);
+      const skipMsg = skipParts.length > 0 ? ` · ⚠️ skip: ${skipParts.join(', ')}` : '';
+      const firstErrors = Array.isArray(summary.errors) ? summary.errors.slice(0, 3).map((e: { rowNumber: number; section: string; reason: string }) => `R${e.rowNumber}(${e.section}): ${e.reason}`).join(' / ') : '';
+      const errorTail = firstErrors ? ` — ${firstErrors}` : '';
+      showMsg('success', `${outMsg} / ${inMsg}${luxuryMsg}${skipMsg}${errorTail}`);
 
       // Sync the page period selector to the imported month and refresh.
       const [py, pm] = importPeriod.split('-').map(Number);
