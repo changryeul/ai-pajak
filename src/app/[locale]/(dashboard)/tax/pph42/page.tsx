@@ -134,6 +134,12 @@ export default function PPh42Page() {
             window.localStorage.removeItem(reqStorageKey);
           }
           setSubmissionRequest(null);
+        } else if (!row) {
+          // 2026-06-22: 서버에 row 없음 → localStorage stale 정리
+          if (typeof window !== 'undefined' && reqStorageKey) {
+            window.localStorage.removeItem(reqStorageKey);
+          }
+          setSubmissionRequest(null);
         }
       })
       .catch(() => { /* silent */ });

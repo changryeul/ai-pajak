@@ -295,6 +295,14 @@ export default function PPh23Page() {
             window.localStorage.removeItem(reqStorageKey);
           }
           setSubmissionRequest(null);
+        } else if (!row) {
+          // 2026-06-22: 서버에 row 자체가 없으면 (wipe 또는 신규 customer 등)
+          // localStorage 의 stale 마커 정리. 안 그러면 옛 요청 시간 배너가
+          // 계속 표시됨.
+          if (typeof window !== 'undefined' && reqStorageKey) {
+            window.localStorage.removeItem(reqStorageKey);
+          }
+          setSubmissionRequest(null);
         }
         // PROCESSED 는 filing 조회 결과에 맡김 (아래).
       })
@@ -648,6 +656,8 @@ export default function PPh23Page() {
   const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
   const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
+  // 2026-06-22: 업로드 방식 — PPN 페이지와 동일 패턴
+  const [uploadMode, setUploadMode] = useState<'replace' | 'append'>('replace');
 
   const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
@@ -699,7 +709,7 @@ export default function PPh23Page() {
       const res = await fetch('/api/tax/wht-import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, taxPeriod: importPeriod, rows, loose: true }),
+        body: JSON.stringify({ customerId, taxPeriod: importPeriod, rows, loose: true, mode: uploadMode }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) {
@@ -724,16 +734,20 @@ export default function PPh23Page() {
         pph23: ipph23, pph42: ipph42, pph26: ipph26, ppn: ippn,
         failed: failedRows, period: importPeriod, at: Date.now(),
       });
+      // 2026-06-22: replace 모드에서 삭제된 행 수 표시
+      const replacedMsg = uploadMode === 'replace' && (d.deleted ?? 0) > 0
+        ? ` · 기존 ${d.deleted}건 삭제`
+        : '';
       if (failedRows > 0) {
         const sample = (d.failed || []).slice(0, 3)
           .map((e: { rowNo: number; reason: string }) => `${t('csvRowPrefix', { row: e.rowNo })}: ${e.reason}`)
           .join(' / ');
         showMsg(
           'error',
-          `${t('csvImportPartial', { inserted: totalInserted, total: rows.length, failed: failedRows, sample })}${(d.failed || []).length > 3 ? ' …' : ''}${skipNotice}`,
+          `${t('csvImportPartial', { inserted: totalInserted, total: rows.length, failed: failedRows, sample })}${(d.failed || []).length > 3 ? ' …' : ''}${skipNotice}${replacedMsg}`,
         );
       } else {
-        showMsg('success', `${t('csvImportDone', { inserted: totalInserted, total: rows.length })}${skipNotice}`);
+        showMsg('success', `${t('csvImportDone', { inserted: totalInserted, total: rows.length })}${skipNotice}${replacedMsg}`);
       }
       if (importPeriod !== period) setPeriod(importPeriod);
       loadData();
@@ -1913,6 +1927,40 @@ export default function PPh23Page() {
               </Select>
             </div>
           </div>
+          {/* 2026-06-22: 업로드 방식 — csv 일괄 업로드일 때만 (manual entry 는 행 단위) */}
+          {pendingAction === 'csv' && (
+            <div className="border-t pt-3 space-y-2">
+              <Label className="text-xs font-semibold">업로드 방식</Label>
+              <div className="space-y-1.5">
+                <label className="flex items-start gap-2 text-xs cursor-pointer">
+                  <input
+                    type="radio"
+                    name="uploadMode"
+                    className="mt-0.5"
+                    checked={uploadMode === 'replace'}
+                    onChange={() => setUploadMode('replace')}
+                  />
+                  <div>
+                    <span className="font-semibold">덮어쓰기 (권장)</span>
+                    <span className="block text-[10px] text-gray-500">이 월의 기존 원천세·PPh4(2)·PPh26·PPN 행을 모두 삭제하고 새 파일로 교체합니다. 수정한 inline edit 도 함께 사라집니다.</span>
+                  </div>
+                </label>
+                <label className="flex items-start gap-2 text-xs cursor-pointer">
+                  <input
+                    type="radio"
+                    name="uploadMode"
+                    className="mt-0.5"
+                    checked={uploadMode === 'append'}
+                    onChange={() => setUploadMode('append')}
+                  />
+                  <div>
+                    <span className="font-semibold">추가</span>
+                    <span className="block text-[10px] text-gray-500">기존 데이터에 새 파일의 행을 추가합니다. 중복 가능성이 있습니다.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setMonthPickerOpen(false)}>
               {t('k113_d9de21')}

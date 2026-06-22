@@ -40,6 +40,10 @@ interface ImportBody {
   // 페이지에서 service_type 을 직접 분류해 가는 워크플로우용. 검증은
   // 제출(submit) 시점에 미루는 전략.
   loose?: boolean;
+  // 2026-06-22: mode='replace' → 같은 (customer, period) 의
+  // pph23_transaction / pph26_transaction / ppn_faktur_monthly 행 모두
+  // 삭제 후 insert. PPN 페이지와 동일 패턴.
+  mode?: 'replace' | 'append';
 }
 
 interface ImportResult {
@@ -102,7 +106,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({ success: false, error: 'invalid json' }, { status: 400 });
   }
 
-  const { customerId: reqCustomerId = '', taxPeriod = '', rows, loose = false } = body;
+  const { customerId: reqCustomerId = '', taxPeriod = '', rows, loose = false, mode = 'append' } = body;
   if (!Array.isArray(rows)) {
     return NextResponse.json({ success: false, error: 'rows[] required' }, { status: 400 });
   }
@@ -117,6 +121,32 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   const customerId = resolved.customerId;
 
   const sb = getSupabaseAdmin();
+
+  // 2026-06-22: mode='replace' → 같은 (customer, period) 의 행 모두 삭제
+  let deletedPph23 = 0;
+  let deletedPph26 = 0;
+  let deletedPpn = 0;
+  if (mode === 'replace') {
+    const del23 = await sb
+      .from('pph23_transaction')
+      .delete({ count: 'exact' })
+      .eq('customer_id', customerId)
+      .eq('tax_period', taxPeriod);
+    deletedPph23 = del23.count ?? 0;
+    const del26 = await sb
+      .from('pph26_transaction')
+      .delete({ count: 'exact' })
+      .eq('customer_id', customerId)
+      .eq('tax_period', taxPeriod);
+    deletedPph26 = del26.count ?? 0;
+    const delPpn = await sb
+      .from('ppn_faktur_monthly')
+      .delete({ count: 'exact' })
+      .eq('customer_id', customerId)
+      .eq('tax_period', taxPeriod);
+    deletedPpn = delPpn.count ?? 0;
+  }
+
   const result: ImportResult = {
     insertedPph23: 0,
     insertedPph26: 0,
@@ -341,7 +371,17 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     ...result,
   }, 'wht-import: done');
 
-  return NextResponse.json({ success: true, data: result });
+  return NextResponse.json({
+    success: true,
+    data: {
+      ...result,
+      mode,
+      deleted: deletedPph23 + deletedPph26 + deletedPpn,
+      deletedPph23,
+      deletedPph26,
+      deletedPpn,
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
