@@ -130,7 +130,7 @@ export default function PPNPage() {
     try {
       let summary: Awaited<ReturnType<typeof importPpnWholesaleFile>>;
       try {
-        summary = await importPpnWholesaleFile(file);
+        summary = await importPpnWholesaleFile(file, importPeriod);
       } catch (parseErr) {
         showMsg('error', t('wholesalePpnFailed', { reason: (parseErr as Error).message }));
         setUploadingWholesale(false);

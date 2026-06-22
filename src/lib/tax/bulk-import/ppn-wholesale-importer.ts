@@ -235,6 +235,10 @@ function processSection(
   colMap: PpnColumnMap,
   excelRowNumbers: number[],
   section: 'OUT' | 'IN',
+  // 2026-06-22: EFAKTUR DATE 가 비어있을 때 fallback. 실 운영 양식에서 e-Faktur
+  // 발급 전이거나 사용자가 빈 채로 올리는 경우 — parser 가 skip 하지 않고
+  // 이 fallback 으로 채워서 일단 들이고 inline edit 으로 수정 가능하게.
+  dateFallback?: Date,
 ): SectionResult {
   const normalized: NormalizedPpnRow[] = [];
   const errors: PpnRowError[] = [];
@@ -268,11 +272,18 @@ function processSection(
     }
 
     const dateRaw = getCell(row, colMap.efaktur_date);
-    const date = parseIndoDate(dateRaw);
+    let date: string | null = parseIndoDate(dateRaw);
     if (!date) {
-      skipped++;
-      errors.push({ rowNumber, section, reason: `invalid date format: ${dateRaw}` });
-      continue;
+      // 2026-06-22: dateRaw 가 비어있고 fallback 이 있으면 사용 (e-Faktur 미발급
+      // 또는 사용자가 채우지 못한 경우). 문자열은 있지만 파싱 실패한 경우엔
+      // 그대로 skip (사용자 오타 가능성).
+      if (!dateRaw && dateFallback) {
+        date = dateFallback.toISOString().slice(0, 10); // YYYY-MM-DD
+      } else {
+        skipped++;
+        errors.push({ rowNumber, section, reason: `invalid date format: ${dateRaw}` });
+        continue;
+      }
     }
 
     // VAT (PPN) — file value as-is when present; empty/zero handled server-side.
@@ -322,7 +333,12 @@ function toCsv(rows: NormalizedPpnRow[]): string {
 
 // ── Main entry point ────────────────────────────────────────────────────
 
-export async function importPpnWholesaleFile(file: File): Promise<PpnWholesaleSummary> {
+export async function importPpnWholesaleFile(file: File, taxPeriod?: string): Promise<PpnWholesaleSummary> {
+  // 2026-06-22: taxPeriod (YYYY-MM) 받으면 EFAKTUR DATE 빈 행의 fallback 으로 사용.
+  const dateFallback = taxPeriod && /^\d{4}-\d{2}$/.test(taxPeriod)
+    ? new Date(`${taxPeriod}-01T00:00:00Z`)
+    : undefined;
+
   const parsed = await parseTabularFile(file, { preserveRowIndices: true });
   const allRows: string[][] = [parsed.headers, ...parsed.dataRows];
 
@@ -364,13 +380,13 @@ export async function importPpnWholesaleFile(file: File): Promise<PpnWholesaleSu
   const outDataRows = allRows.slice(outHeaderIdx + 1, outEndExclusive);
   const outExcelRows = allRowExcel.slice(outHeaderIdx + 1, outEndExclusive);
 
-  const outResult = processSection(outDataRows, outColMap, outExcelRows, 'OUT');
+  const outResult = processSection(outDataRows, outColMap, outExcelRows, 'OUT', dateFallback);
 
   let inResult: SectionResult = { normalized: [], errors: [], skipped: 0, skippedFooters: 0 };
   if (inHeaderIdx !== null && inColMap) {
     const inDataRows = allRows.slice(inHeaderIdx + 1);
     const inExcelRows = allRowExcel.slice(inHeaderIdx + 1);
-    inResult = processSection(inDataRows, inColMap, inExcelRows, 'IN');
+    inResult = processSection(inDataRows, inColMap, inExcelRows, 'IN', dateFallback);
   }
 
   return {
