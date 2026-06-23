@@ -160,9 +160,14 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   for (const row of rows) {
     const rowNo = row?.no ?? 0;
     try {
-      // Skip if user unchecked or row was 'unknown'
+      // 2026-06-24 fix: loose=true 면 'unknown' 도 [UNCLASSIFIED] insert 분기에서
+      // 처리해야 하므로 여기서 미리 skip 하지 않는다. loose=false 일 때만 skip.
       const include = row.include !== false;
-      if (!include || row.classified === 'unknown') {
+      if (!include) {
+        result.skipped++;
+        continue;
+      }
+      if (row.classified === 'unknown' && !loose) {
         result.skipped++;
         continue;
       }
