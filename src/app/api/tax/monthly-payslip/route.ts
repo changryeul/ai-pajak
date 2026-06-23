@@ -18,6 +18,143 @@ import type { PTKPCategory } from '@/config/constants';
  * DELETE — Delete payslip
  */
 
+// 2026-06-24: import 시점에도 PUT 과 동일한 계산을 적용할 수 있도록 helper
+// 분리. 입력으로 payslip 의 모든 amount 필드 (snake_case) + period + ptkp 를
+// 받아서 PPh 21 TER + BPJS company + Biaya Jabatan + net_salary 까지 계산.
+export function computePayslipTotals(input: {
+  base_salary?: number;
+  overtime_pay?: number;
+  meal_allowance?: number;
+  transport_allowance?: number;
+  position_allowance?: number;
+  other_allowances?: number;
+  laptop_allowance?: number;
+  medical_allowance?: number;
+  tax_allowance?: number;
+  annual_leave_pay?: number;
+  bonus?: number;
+  thr?: number;
+  commission?: number;
+  severance_allowance?: number;
+  pkwt_compensation?: number;
+  bpjs_kesehatan?: number;
+  bpjs_ketenagakerjaan?: number;
+  jht_employee?: number;
+  jp_employee?: number;
+  loan_deduction?: number;
+  other_deductions?: number;
+  period: string;
+  ptkp_category?: string | null;
+}): {
+  total_gross: number;
+  total_deduction: number;
+  base_salary_bpjs_kes: number;
+  base_salary_bpjs_tk: number;
+  bpjs_kes_company: number;
+  jkk_company: number;
+  jkm_company: number;
+  jht_company: number;
+  jp_company: number;
+  personal_expense: number;
+  taxable_income: number;
+  pph21_tax: number;
+  ter_rate: number;
+  net_salary: number;
+} {
+  const totalGross =
+    Number(input.base_salary || 0) +
+    Number(input.overtime_pay || 0) +
+    Number(input.meal_allowance || 0) +
+    Number(input.transport_allowance || 0) +
+    Number(input.position_allowance || 0) +
+    Number(input.other_allowances || 0) +
+    Number(input.laptop_allowance || 0) +
+    Number(input.medical_allowance || 0) +
+    Number(input.tax_allowance || 0) +
+    Number(input.annual_leave_pay || 0) +
+    Number(input.bonus || 0) +
+    Number(input.thr || 0) +
+    Number(input.commission || 0) +
+    Number(input.severance_allowance || 0) +
+    Number(input.pkwt_compensation || 0);
+
+  const totalDeduction =
+    Number(input.bpjs_kesehatan || 0) +
+    Number(input.bpjs_ketenagakerjaan || 0) +
+    Number(input.jht_employee || 0) +
+    Number(input.jp_employee || 0) +
+    Number(input.loan_deduction || 0) +
+    Number(input.other_deductions || 0);
+
+  // PPh 21 TER
+  // 양식에서 'K/1', 'TK/0' 처럼 슬래시 포함된 값이 들어올 수 있어 정규화.
+  // 표준 enum 키는 TK0/TK1/.../K3/KI0/KI3 (슬래시 없음).
+  const normalizedPtkp = (input.ptkp_category || 'TK0')
+    .replace(/\//g, '')
+    .replace(/\s/g, '')
+    .toUpperCase();
+  const ptkpCategory = normalizedPtkp as PTKPCategory;
+  const currentMonth = parseInt(input.period.split('-')[1]);
+  const pphData: PPh21Data = {
+    employee_name: '',
+    employee_npwp: '',
+    employee_nik: '',
+    ptkp_category: ptkpCategory,
+    gross_salary: totalGross,
+    jht_employee: Number(input.jht_employee || 0),
+    jp_employee: Number(input.jp_employee || 0),
+    position_allowance: Number(input.position_allowance || 0),
+    other_deductions: Number(input.other_deductions || 0),
+    tax_period_start: `${input.period}-01`,
+    tax_period_end: `${input.period}-30`,
+    has_npwp: true,
+    month: currentMonth,
+  };
+
+  let pph21Tax = 0;
+  let terRate = 0;
+  try {
+    const calc = PPh21Calculator.calculateMonthlyTER(pphData);
+    pph21Tax = calc.tax_amount;
+    terRate = calc.ter_rate;
+  } catch (err) {
+    loggers.api.warn({ err, ptkpCategory }, 'PPh 21 TER calculation fallback');
+  }
+
+  // BPJS company + Biaya Jabatan
+  const BPJS_KES_CAP = 12_000_000;
+  const BPJS_JP_CAP = 10_042_300;
+  const baseForBpjs = Number(input.base_salary || 0);
+  const bpjsKesBase = Math.min(baseForBpjs, BPJS_KES_CAP);
+  const bpjsTkBase = Math.min(baseForBpjs, BPJS_JP_CAP);
+  const bpjsKesCompany = Math.round(bpjsKesBase * 0.04);
+  const jkkCompany = Math.round(bpjsTkBase * 0.0024);
+  const jkmCompany = Math.round(bpjsTkBase * 0.003);
+  const jhtCompany = Math.round(bpjsTkBase * 0.037);
+  const jpCompany = Math.round(bpjsTkBase * 0.02);
+  const personalExpense = Math.min(Math.round(totalGross * 0.05), 500_000);
+
+  const taxableIncome = Math.max(totalGross - totalDeduction - personalExpense, 0);
+  const netSalary = totalGross - totalDeduction - pph21Tax;
+
+  return {
+    total_gross: totalGross,
+    total_deduction: totalDeduction,
+    base_salary_bpjs_kes: bpjsKesBase,
+    base_salary_bpjs_tk: bpjsTkBase,
+    bpjs_kes_company: bpjsKesCompany,
+    jkk_company: jkkCompany,
+    jkm_company: jkmCompany,
+    jht_company: jhtCompany,
+    jp_company: jpCompany,
+    personal_expense: personalExpense,
+    taxable_income: taxableIncome,
+    pph21_tax: pph21Tax,
+    ter_rate: terRate,
+    net_salary: netSalary,
+  };
+}
+
 async function handleGet(req: RequestWithSession): Promise<Response> {
   try {
     const url = new URL(req.url);
@@ -146,100 +283,20 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
       return NextResponse.json({ error: 'Payslip not found' }, { status: 404 });
     }
 
-    // Merge updates
+    // Merge updates + ptkp fallback (sync 후엔 employee join 에서, sync 전엔 payslip 자체에서)
     const merged = { ...current, ...updates };
-
-    // Calculate totals
-    const totalGross =
-      Number(merged.base_salary || 0) +
-      Number(merged.overtime_pay || 0) +
-      Number(merged.meal_allowance || 0) +
-      Number(merged.transport_allowance || 0) +
-      Number(merged.position_allowance || 0) +
-      Number(merged.other_allowances || 0) +
-      Number(merged.laptop_allowance || 0) +
-      Number(merged.medical_allowance || 0) +
-      Number(merged.tax_allowance || 0) +
-      Number(merged.annual_leave_pay || 0) +
-      Number(merged.bonus || 0) +
-      Number(merged.thr || 0) +
-      Number(merged.commission || 0) +
-      Number(merged.severance_allowance || 0) +
-      Number(merged.pkwt_compensation || 0);
-
-    const totalDeduction =
-      Number(merged.bpjs_kesehatan || 0) +
-      Number(merged.bpjs_ketenagakerjaan || 0) +
-      Number(merged.jht_employee || 0) +
-      Number(merged.jp_employee || 0) +
-      Number(merged.loan_deduction || 0) +
-      Number(merged.other_deductions || 0);
-
-    // Calculate PPh 21 using TER method
-    const ptkpCategory = (current.ptkp_category || current.employee?.ptkp_category || 'TK0') as PTKPCategory;
-    const currentMonth = parseInt(current.period.split('-')[1]);
-
-    const pphData: PPh21Data = {
-      employee_name: '',
-      employee_npwp: '',
-      employee_nik: '',
-      ptkp_category: ptkpCategory,
-      gross_salary: totalGross,
-      jht_employee: Number(merged.jht_employee || 0),
-      jp_employee: Number(merged.jp_employee || 0),
-      position_allowance: Number(merged.position_allowance || 0),
-      other_deductions: Number(merged.other_deductions || 0),
-      tax_period_start: `${current.period}-01`,
-      tax_period_end: `${current.period}-30`,
-      has_npwp: true,
-      month: currentMonth,
-    };
-
-    let pph21Tax = 0;
-    let terRate = 0;
-    try {
-      const calc = PPh21Calculator.calculateMonthlyTER(pphData);
-      pph21Tax = calc.tax_amount;
-      terRate = calc.ter_rate;
-    } catch (err) {
-      loggers.api.warn({ err, ptkpCategory }, 'PPh 21 TER calculation fallback');
-    }
-
-    // Recalculate employer-paid BPJS + Biaya Jabatan based on merged base_salary
-    const BPJS_KES_CAP = 12_000_000;
-    const BPJS_JP_CAP = 10_042_300;
-    const baseForBpjs = Number(merged.base_salary || 0);
-    const bpjsKesBase = Math.min(baseForBpjs, BPJS_KES_CAP);
-    const bpjsTkBase = Math.min(baseForBpjs, BPJS_JP_CAP);
-    const bpjsKesCompany = Math.round(bpjsKesBase * 0.04);
-    const jkkCompany = Math.round(bpjsTkBase * 0.0024);
-    const jkmCompany = Math.round(bpjsTkBase * 0.003);
-    const jhtCompany = Math.round(bpjsTkBase * 0.037);
-    const jpCompany = Math.round(bpjsTkBase * 0.02);
-    const personalExpense = Math.min(Math.round(totalGross * 0.05), 500_000);
-
-    const taxableIncome = Math.max(totalGross - totalDeduction - personalExpense, 0);
-    const netSalary = totalGross - totalDeduction - pph21Tax;
+    const totals = computePayslipTotals({
+      ...merged,
+      period: current.period,
+      ptkp_category: current.ptkp_category || current.employee?.ptkp_category || 'TK0',
+    });
 
     // Update with calculated values
     const { data: updated, error: updateError } = await admin
       .from('monthly_payslip')
       .update({
         ...updates,
-        base_salary_bpjs_kes: bpjsKesBase,
-        base_salary_bpjs_tk: bpjsTkBase,
-        bpjs_kes_company: bpjsKesCompany,
-        jkk_company: jkkCompany,
-        jkm_company: jkmCompany,
-        jht_company: jhtCompany,
-        jp_company: jpCompany,
-        personal_expense: personalExpense,
-        total_gross: totalGross,
-        total_deduction: totalDeduction,
-        taxable_income: taxableIncome,
-        pph21_tax: pph21Tax,
-        ter_rate: terRate,
-        net_salary: netSalary,
+        ...totals,
       })
       .eq('id', id)
       .select()

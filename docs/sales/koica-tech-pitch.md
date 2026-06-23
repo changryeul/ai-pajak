@@ -425,20 +425,20 @@ composeMiddleware(
 
 ## 10. 기술 스택
 
-| 영역 | 스택 | 비고 |
-|---|---|---|
-| Frontend | **Next.js 16** (App Router) + React 19 + TypeScript strict | Turbopack 기본 |
-| Backend | **Vercel Fluid Compute** (Node.js 24 LTS) | 단일 함수 인스턴스 동시 처리 |
-| DB | **Supabase Postgres + RLS** | DB-level 권한 격리, 100+ 마이그레이션, drift CI guard |
-| AI | **Anthropic Claude Sonnet 4.6** (vision + streaming) + OpenAI | 6단계 graceful fallback |
-| PDF | **@react-pdf/renderer** | DJP 양식 출력 (canvas 외부화) |
-| Payment | **Midtrans (Snap)** | 3 가지 graceful-degrade billing surface |
-| DJP | **Coretax API** (정식 연동) | Circuit breaker + retry + idempotency |
-| Style | **shadcn/ui + Tailwind CSS 4 + Radix UI** | 일관성 + 접근성 |
-| Validation | **Zod 4 + React Hook Form** | 타입 안전 폼 |
-| State | **TanStack Query + Zustand** | 서버 / 클라이언트 분리 |
-| Logging | **Pino** (structured) + Sentry | console.log 금지 |
-| Type Safety | TypeScript strict + 100% type coverage | `any` 사용 금지 |
+| 영역          | 스택                                                            | 비고                                          |
+| ----------- | ------------------------------------------------------------- | ------------------------------------------- |
+| Frontend    | **Next.js 16** (App Router) + React 19 + TypeScript strict    | Turbopack 기본                                |
+| Backend     | **Vercel Fluid Compute** (Node.js 24 LTS)                     | 단일 함수 인스턴스 동시 처리                            |
+| DB          | **Supabase Postgres + RLS**                                   | DB-level 권한 격리, 100+ 마이그레이션, drift CI guard |
+| AI          | **Anthropic Claude Sonnet 4.6** (vision + streaming) + OpenAI | 6단계 graceful fallback                       |
+| PDF         | **@react-pdf/renderer**                                       | DJP 양식 출력 (canvas 외부화)                      |
+| Payment     | **Midtrans (Snap)**                                           | 3 가지 graceful-degrade billing surface       |
+| DJP         | **Coretax API** (정식 연동)                                       | Circuit breaker + retry + idempotency       |
+| Style       | **shadcn/ui + Tailwind CSS 4 + Radix UI**                     | 일관성 + 접근성                                   |
+| Validation  | **Zod 4 + React Hook Form**                                   | 타입 안전 폼                                     |
+| State       | **TanStack Query + Zustand**                                  | 서버 / 클라이언트 분리                               |
+| Logging     | **Pino** (structured) + Sentry                                | console.log 금지                              |
+| Type Safety | TypeScript strict + 100% type coverage                        | `any` 사용 금지                                 |
 
 **코드 규모** (2026-06-23 기준):
 - 100+ Supabase 마이그레이션

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { loggers } from '@/lib/logger';
+import { computePayslipTotals } from '@/app/api/tax/monthly-payslip/route';
 
 /**
  * POST /api/tax/employees/import
@@ -117,10 +118,6 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      const totalGross = grossSalary + overtimePay + mealAllowance + transportAllowance
-        + positionAllowance + otherAllowances + bonus + thr;
-      const totalDeduction = bpjsKesehatan + jhtEmployee + jpEmployee + otherDeductions;
-
       // 같은 (customer_id, period, employee_name) 행이 있으면 update, 없으면 insert.
       // employee_id 는 sync 전엔 null.
       const { data: existingPayslip } = await admin
@@ -131,13 +128,9 @@ export async function POST(request: NextRequest) {
         .eq('employee_name', name)
         .maybeSingle();
 
-      const payload = {
-        customer_id: customerId,
-        employee_id: null as string | null,
-        period: taxPeriod,
-        employee_name: name,
-        employee_npwp: getVal(cols, 'employee_npwp') || null,
-        ptkp_category: ptkp,
+      // 2026-06-24: PUT 과 동일한 helper 로 net_salary/pph21_tax/BPJS company
+      // 등 파생값 계산 후 함께 insert. 안 그러면 실수령 합계가 0 으로 표시됨.
+      const baseFields = {
         base_salary: grossSalary,
         overtime_pay: overtimePay,
         meal_allowance: mealAllowance,
@@ -150,8 +143,22 @@ export async function POST(request: NextRequest) {
         jp_employee: jpEmployee,
         bpjs_kesehatan: bpjsKesehatan,
         other_deductions: otherDeductions,
-        total_gross: totalGross,
-        total_deduction: totalDeduction,
+      };
+      const computed = computePayslipTotals({
+        ...baseFields,
+        period: taxPeriod,
+        ptkp_category: ptkp,
+      });
+
+      const payload = {
+        customer_id: customerId,
+        employee_id: null as string | null,
+        period: taxPeriod,
+        employee_name: name,
+        employee_npwp: getVal(cols, 'employee_npwp') || null,
+        ptkp_category: ptkp,
+        ...baseFields,
+        ...computed,
         status: 'DRAFT',
       };
 
