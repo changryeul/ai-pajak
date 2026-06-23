@@ -26,6 +26,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { requireRole } from '@/middleware/rbac';
+import { assignPendingBPNumbers } from '@/lib/tax/ebupot/pph23-bupot-service';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
@@ -376,6 +377,16 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     ...result,
   }, 'wht-import: done');
 
+  // 2026-06-24: 모든 PPh23 거래에 e-Bupot 번호 자동 부여 (사용자가 별도
+  // 버튼 안 눌러도 됨). PPh4(2) 도 pph23_transaction 테이블에 들어가므로
+  // 같이 처리됨. 실패해도 import 자체는 실패로 보지 않음.
+  let autoAssignedBP = 0;
+  try {
+    autoAssignedBP = await assignPendingBPNumbers(sb, customerId, taxPeriod);
+  } catch (e) {
+    loggers.api.warn({ err: e instanceof Error ? e.message : String(e) }, 'auto BP assignment failed');
+  }
+
   return NextResponse.json({
     success: true,
     data: {
@@ -385,6 +396,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       deletedPph23,
       deletedPph26,
       deletedPpn,
+      autoAssignedBP,
     },
   });
 }

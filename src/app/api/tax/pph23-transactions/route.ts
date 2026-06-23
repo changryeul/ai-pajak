@@ -6,6 +6,7 @@ import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { TaxResolutionEngine } from '@/lib/tax/tax-resolution-engine';
 import { SERVICE_TYPE_TO_CATEGORY, taxTypeToRegime, isDgtFormValid } from '@/lib/tax/withholding-helpers';
+import { assignPendingBPNumbers } from '@/lib/tax/ebupot/pph23-bupot-service';
 import type { ServiceCategory } from '@/types';
 
 const SERVICE_TYPES = {
@@ -239,6 +240,9 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         p_customer_id: customerId, p_tax_type: 'PPh23', p_tax_period: taxPeriod,
       });
     } catch { /* RPC may not exist yet */ }
+
+    // 2026-06-24: e-Bupot 번호 자동 부여 (best-effort)
+    try { await assignPendingBPNumbers(getSupabaseAdmin(), customerId, taxPeriod); } catch { /* non-fatal */ }
 
     return NextResponse.json({
       success: true,
