@@ -607,6 +607,29 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
               </Card>
             );
           })}
+          {/* 2026-06-24: 리스트 마지막에도 최종 제출 버튼 — 길어진 리스트에서
+              사용자가 위로 스크롤하지 않아도 되도록 */}
+          {(() => {
+            const draftCount = payslips.filter(p => p.status === 'DRAFT').length;
+            const submittedCount = payslips.filter(p => p.status === 'SUBMITTED').length;
+            if (draftCount === 0) {
+              return (
+                <div className="mt-4 flex justify-end">
+                  <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
+                    ✓ {tp('allSubmittedBadge')} ({submittedCount})
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <div className="mt-4 flex justify-end">
+                <Button onClick={submitPayslips} disabled={isSaving || !customerId}>
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+                  {tp('submitButton')} ({draftCount})
+                </Button>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
