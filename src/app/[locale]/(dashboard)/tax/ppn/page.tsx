@@ -324,7 +324,14 @@ export default function PPNPage() {
   };
 
   const byTypeFakturs = filter === 'ALL' ? fakturs : fakturs.filter(f => f.faktur_type === (filter === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN'));
-  const filteredFakturs = showLuxuryOnly ? byTypeFakturs.filter(f => f.is_luxury === true) : byTypeFakturs;
+  // 2026-06-24: KELUARAN(OUT) 먼저 → MASUKAN(IN), 같은 type 안에서는 faktur_date 오름차순
+  const sortedFakturs = [...byTypeFakturs].sort((a, b) => {
+    const typeOrder = (t: string) => (t === 'KELUARAN' ? 0 : 1);
+    const ot = typeOrder(a.faktur_type) - typeOrder(b.faktur_type);
+    if (ot !== 0) return ot;
+    return (a.faktur_date || '').localeCompare(b.faktur_date || '');
+  });
+  const filteredFakturs = showLuxuryOnly ? sortedFakturs.filter(f => f.is_luxury === true) : sortedFakturs;
 
   // 2026-06-24: 일괄 선택 + 삭제
   const tBulk = useTranslations('bulk');

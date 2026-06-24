@@ -120,7 +120,8 @@ const navItems: NavSection[] = [
           { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
           { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue' },
           { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord' },
-          { href: '/tax/tools', icon: Calculator, labelKey: 'nav.taxCalculator' },
+          // 2026-06-24: '세금예측/계산기' (/tax/tools) 사이드바 항목 제거.
+          // 페이지 자체는 보존 — 필요 시 deep-link 로 접근.
           { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
         ],
       },
