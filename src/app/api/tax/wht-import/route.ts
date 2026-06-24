@@ -341,8 +341,17 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         result.insertedPph26++;
       } else if (loose && taxBase > 0) {
         // loose=true: classified='unknown' 도 placeholder 로 insert.
-        // 사용자가 페이지에서 service_type 을 직접 분류하기 위함. 검증
-        // (필수 필드, NPWP 형식 등) 은 제출 시점에 따로 검사.
+        // 2026-06-24: 양식의 wht.amount (col P, PPh 21/23/26 금액) 이 채워져
+        // 있으면 실제 세율을 역산, 없으면 PPh23 의 가장 흔한 service 세율 2%
+        // default. 사용자가 페이지에서 service_type 을 정정하면 PUT 에서
+        // tax_rate / tax_amount 도 함께 재계산.
+        const whtAmount = Number(row.wht?.amount || 0);
+        const inferredRate = whtAmount > 0 && taxBase > 0
+          ? Math.round((whtAmount / taxBase) * 1000) / 1000   // 3자리 정밀도
+          : 0.02;
+        const inferredAmount = whtAmount > 0
+          ? Math.round(whtAmount)
+          : Math.round(taxBase * inferredRate);
         const { error } = await sb.from('pph23_transaction').insert({
           customer_id: customerId,
           tax_period: taxPeriod,
@@ -353,8 +362,8 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           tax_regime: 'PPH23',
           invoice_number: invoiceNo,
           gross_amount: taxBase,
-          tax_rate: 0,
-          tax_amount: 0,
+          tax_rate: inferredRate,
+          tax_amount: inferredAmount,
           counterparty_name: vendorName,
           counterparty_npwp: vendorNpwp || null,
         });

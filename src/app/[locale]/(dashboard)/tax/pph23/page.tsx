@@ -643,6 +643,8 @@ export default function PPh23Page() {
   });
 
   const pendingBP = transactions.filter(t => !t.bukti_potong_number).length;
+  // 2026-06-24: 인보이스 사진 미첨부 거래 — 인도네시아 세무 실무상 모든 거래에 첨부 필수
+  const pendingInvoice = transactions.filter(t => !t.invoice_document_id).length;
   const completedBP = transactions.filter(t => !!t.bukti_potong_number).length;
 
   // Document upload (csv only — file/camera removed in Phase 4 simplification)
@@ -1392,6 +1394,17 @@ export default function PPh23Page() {
         </div>
       )}
 
+      {/* 2026-06-24: 인보이스 미첨부 경고 — 인도네시아 세무 실무상 모든 거래에 인보이스 첨부 필수 */}
+      {transactions.length > 0 && pendingInvoice > 0 && (
+        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
+          <p className="text-xs text-red-800">
+            <b>{t('countItems', { count: pendingInvoice })}</b> 거래에 인보이스 사진이 미첨부입니다.
+            아래 거래 행을 펼쳐 인보이스를 첨부하세요. (모든 거래에 필수)
+          </p>
+        </div>
+      )}
+
       {/* SPT Masa 제출 상태 배너 — CUSTOMER 가 어디까지 왔는지 한눈에. */}
       {!isConsultant && customerId && (
         <>
@@ -1541,10 +1554,23 @@ export default function PPh23Page() {
                         <tr className={`border-t ${isForeign ? 'bg-red-50' : ''} ${isExpanded ? 'bg-blue-50/40' : ''}`}>
                           <td className="p-2">{i + 1}</td>
                           <td className="p-2">
-                            <div className="font-medium text-xs">{tx.counterparty_name}</div>
+                            <div className="flex items-center gap-1">
+                              {!tx.invoice_document_id && (
+                                <AlertTriangle
+                                  className="h-3.5 w-3.5 text-red-500 flex-shrink-0"
+                                  aria-label="인보이스 미첨부"
+                                />
+                              )}
+                              <div className="font-medium text-xs">{tx.counterparty_name}</div>
+                            </div>
                             {isForeign && (
                               <div className="text-[9px] text-red-600 mt-0.5">
                                 {t('foreignTag')}
+                              </div>
+                            )}
+                            {!tx.invoice_document_id && (
+                              <div className="text-[9px] text-red-600 mt-0.5">
+                                ⚠️ 인보이스 사진 미첨부
                               </div>
                             )}
                           </td>
