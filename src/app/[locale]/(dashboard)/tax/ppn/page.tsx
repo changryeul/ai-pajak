@@ -541,7 +541,7 @@ export default function PPNPage() {
                               <td className="py-2 px-3 font-mono text-xs">{f.faktur_number || '—'}</td>
                               <td className="py-2 px-3 text-xs text-gray-500">{f.faktur_date}</td>
                               <td className="py-2 px-3 text-center">
-                                <Badge className={`text-[10px] ${f.faktur_type === 'KELUARAN' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                                <Badge className={`text-[10px] ${f.faktur_type === 'KELUARAN' ? 'bg-rose-100 text-rose-700' : 'bg-green-100 text-green-700'}`}>
                                   {f.faktur_type === 'KELUARAN' ? 'OUT' : 'IN'}
                                 </Badge>
                               </td>
@@ -736,7 +736,7 @@ export default function PPNPage() {
             <Card className="border-0 shadow-sm">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100"><ArrowUpRight className="h-5 w-5 text-blue-600" /></div>
+                  <div className="p-2 rounded-lg bg-rose-100"><ArrowUpRight className="h-5 w-5 text-rose-600" /></div>
                   <div>
                     <p className="text-xs text-gray-500">{t('ppnKeluaran')}</p>
                     <p className="text-xl font-bold">{fmt(summary.outputTax)}</p>
