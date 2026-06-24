@@ -10277,5 +10277,12 @@
     "uploadFailed": "업로드 실패",
     "uploadDone": "PPh 4(2) {count} 건 추가됨",
     "hintRateNotice": "PPh 4(2) 토지·건물 임대는 항상 10% 최종원천세. 자세한 사유는 각 행의 상세에서 확인하세요."
+  },
+  "bulk": {
+    "bulkSelectedN": "{count}건 선택됨",
+    "bulkDelete": "선택 삭제",
+    "bulkDeleteConfirm": "선택된 {count}건을 삭제하시겠습니까?",
+    "bulkDeleteDone": "{count}건 삭제 완료",
+    "bulkDeletePartial": "{ok}건 삭제, {fail}건 실패"
   }
 }

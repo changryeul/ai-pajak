@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NumberInput } from '@/components/ui/number-input';
+import { useBulkSelect } from '@/hooks/useBulkSelect';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -646,6 +647,28 @@ export default function PPh23Page() {
   const pendingBP = transactions.filter(t => !t.bukti_potong_number).length;
   // 2026-06-24: 인보이스 사진 미첨부 거래 — 인도네시아 세무 실무상 모든 거래에 첨부 필수
   const pendingInvoice = transactions.filter(t => !t.invoice_document_id).length;
+  // 2026-06-24: 일괄 선택 + 삭제
+  const tBulk = useTranslations('bulk');
+  const sel = useBulkSelect(transactions.map(tx => tx.id));
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const bulkDelete = async () => {
+    if (sel.selectedCount === 0) return;
+    if (!confirm(tBulk('bulkDeleteConfirm', { count: sel.selectedCount }))) return;
+    setBulkBusy(true);
+    const ids = Array.from(sel.selectedIds);
+    const results = await Promise.allSettled(
+      ids.map(id => fetch(`/api/tax/pph23-transactions?id=${id}`, { method: 'DELETE' })),
+    );
+    const ok = results.filter(r => r.status === 'fulfilled').length;
+    const fail = results.length - ok;
+    showMsg(fail === 0 ? 'success' : 'error',
+      fail === 0
+        ? tBulk('bulkDeleteDone', { count: ok })
+        : tBulk('bulkDeletePartial', { ok, fail }));
+    sel.clear();
+    setBulkBusy(false);
+    loadData();
+  };
   const completedBP = transactions.filter(t => !!t.bukti_potong_number).length;
 
   // Document upload (csv only — file/camera removed in Phase 4 simplification)
@@ -1395,6 +1418,20 @@ export default function PPh23Page() {
         </div>
       )}
 
+      {/* 2026-06-24: 일괄 선택 삭제 액션 바 */}
+      {sel.selectedCount > 0 && (
+        <div className="mb-4 p-3 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-between">
+          <span className="text-xs text-slate-700">{tBulk('bulkSelectedN', { count: sel.selectedCount })}</span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" className="text-xs h-7" onClick={sel.clear}>전체 해제</Button>
+            <Button size="sm" variant="ghost" className="text-red-600 text-xs h-7" disabled={bulkBusy} onClick={bulkDelete}>
+              {bulkBusy ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <X className="h-3 w-3 mr-1" />}
+              {tBulk('bulkDelete')}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* 2026-06-24: 인보이스 미첨부 경고 — 인도네시아 세무 실무상 모든 거래에 인보이스 첨부 필수 */}
       {transactions.length > 0 && pendingInvoice > 0 && (
         <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2">
@@ -1527,6 +1564,16 @@ export default function PPh23Page() {
             <table className="min-w-full text-sm">
               <thead className="bg-slate-100">
                 <tr>
+                  <th className="p-2 text-center w-8">
+                    {transactions.length > 0 && (
+                      <input
+                        type="checkbox"
+                        checked={sel.isAllSelected}
+                        ref={el => { if (el) el.indeterminate = sel.isPartiallySelected; }}
+                        onChange={sel.toggleAll}
+                      />
+                    )}
+                  </th>
                   <th className="p-2 text-left">No</th>
                   <th className="p-2 text-left">{t('colCounterparty')}</th>
                   <th className="p-2 text-left">NPWP</th>
@@ -1542,7 +1589,7 @@ export default function PPh23Page() {
               <tbody>
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="p-8 text-center text-sm text-slate-400">
+                    <td colSpan={11} className="p-8 text-center text-sm text-slate-400">
                       {t('parsedDataEmpty')}
                     </td>
                   </tr>
@@ -1552,7 +1599,15 @@ export default function PPh23Page() {
                     const isExpanded = expandedTx === tx.id;
                     return (
                       <Fragment key={tx.id}>
-                        <tr className={`border-t ${isForeign ? 'bg-red-50' : ''} ${isExpanded ? 'bg-blue-50/40' : ''}`}>
+                        <tr className={`border-t ${isForeign ? 'bg-red-50' : ''} ${isExpanded ? 'bg-blue-50/40' : ''} ${sel.isSelected(tx.id) ? 'ring-2 ring-red-200' : ''}`}>
+                          <td className="p-2 text-center" onClick={e => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={sel.isSelected(tx.id)}
+                              onChange={() => sel.toggle(tx.id)}
+                              onClick={e => e.stopPropagation()}
+                            />
+                          </td>
                           <td className="p-2">{i + 1}</td>
                           <td className="p-2">
                             <div className="flex items-center gap-1">
@@ -1647,7 +1702,7 @@ export default function PPh23Page() {
                         </tr>
                         {isExpanded && (
                           <tr className="bg-gray-50/60 border-t">
-                            <td colSpan={10} className="p-3">
+                            <td colSpan={11} className="p-3">
                               <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2 mb-3">
                                 <Pencil className="h-3.5 w-3.5 shrink-0" />
                                 <span>{t('editBanner')}</span>

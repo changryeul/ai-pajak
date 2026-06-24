@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NumberInput } from '@/components/ui/number-input';
+import { useBulkSelect } from '@/hooks/useBulkSelect';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -94,6 +95,30 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   // next to the row for ~1.5s after a successful field edit, so the user sees
   // their onBlur edit was persisted.
   const [savedAt, setSavedAt] = useState<Record<string, number>>({});
+
+  // 2026-06-24: 일괄 선택 — SUBMITTED 행은 제외 (수정 불가)
+  const tBulk = useTranslations('bulk');
+  const selectableIds = payslips.filter(p => p.status !== 'SUBMITTED').map(p => p.id);
+  const sel = useBulkSelect(selectableIds);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const bulkDelete = async () => {
+    if (sel.selectedCount === 0) return;
+    if (!confirm(tBulk('bulkDeleteConfirm', { count: sel.selectedCount }))) return;
+    setBulkBusy(true);
+    const ids = Array.from(sel.selectedIds);
+    const results = await Promise.allSettled(
+      ids.map(id => fetch(`/api/tax/monthly-payslip?id=${id}`, { method: 'DELETE' })),
+    );
+    const ok = results.filter(r => r.status === 'fulfilled').length;
+    const fail = results.length - ok;
+    showMsg(fail === 0 ? 'success' : 'error',
+      fail === 0
+        ? tBulk('bulkDeleteDone', { count: ok })
+        : tBulk('bulkDeletePartial', { ok, fail }));
+    sel.clear();
+    setBulkBusy(false);
+    loadPayslips();
+  };
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -196,7 +221,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <Label className="text-sm whitespace-nowrap">{tp('periodLabel')}</Label>
           <Select value={period} onValueChange={setPeriod}>
@@ -205,6 +230,29 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
               {monthOptions.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
             </SelectContent>
           </Select>
+          {/* 2026-06-24: 일괄 선택 헤더 체크박스 + 삭제 */}
+          {selectableIds.length > 0 && (
+            <>
+              <label className="flex items-center gap-1 ml-3 text-xs cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sel.isAllSelected}
+                  ref={el => { if (el) el.indeterminate = sel.isPartiallySelected; }}
+                  onChange={sel.toggleAll}
+                />
+                <span className="text-gray-600">전체</span>
+              </label>
+              {sel.selectedCount > 0 && (
+                <>
+                  <span className="text-xs text-gray-600">{tBulk('bulkSelectedN', { count: sel.selectedCount })}</span>
+                  <Button size="sm" variant="ghost" className="text-red-600 text-xs h-7" disabled={bulkBusy} onClick={bulkDelete}>
+                    {bulkBusy ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <X className="h-3 w-3 mr-1" />}
+                    {tBulk('bulkDelete')}
+                  </Button>
+                </>
+              )}
+            </>
+          )}
         </div>
         {(() => {
           const draftCount = payslips.filter(p => p.status === 'DRAFT').length;
@@ -283,16 +331,27 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
           {payslips.map(ps => {
             const isExpanded = expandedId === ps.id;
             return (
-              <Card key={ps.id} className="border-0 shadow-sm">
+              <Card key={ps.id} className={`border-0 shadow-sm ${sel.isSelected(ps.id) ? 'ring-2 ring-red-200' : ''}`}>
                 <CardContent className="p-0">
-                  {/* Summary row */}
-                  <button
-                    onClick={() => setExpandedId(isExpanded ? null : ps.id)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-blue-50/40 transition-colors group"
-                    title={tp('editHint')}
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+                  <div className="flex items-stretch">
+                    {/* 2026-06-24: 체크박스 (SUBMITTED 행은 disabled) */}
+                    <div className="flex items-center px-3" onClick={e => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={sel.isSelected(ps.id)}
+                        disabled={ps.status === 'SUBMITTED'}
+                        onChange={() => sel.toggle(ps.id)}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                    {/* Summary row */}
+                    <button
+                      onClick={() => setExpandedId(isExpanded ? null : ps.id)}
+                      className="flex-1 p-4 flex items-center justify-between hover:bg-blue-50/40 transition-colors group"
+                      title={tp('editHint')}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
                       <div className="text-left min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <p className="font-medium text-sm truncate">{ps.employee_name || tp('noNpwp')}</p>
@@ -353,7 +412,8 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         </span>
                       )}
                     </div>
-                  </button>
+                    </button>
+                  </div>
 
                   {/* Expanded detail */}
                   {isExpanded && (

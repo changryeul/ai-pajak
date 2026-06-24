@@ -10155,5 +10155,12 @@
     "uploadFailed": "上传失败",
     "uploadDone": "已添加 {count} 笔 PPh 4(2)",
     "hintRateNotice": "PPh 4(2) 土地与建筑租赁始终为 10% 最终预提。详见各行明细。"
+  },
+  "bulk": {
+    "bulkSelectedN": "已选 {count} 项",
+    "bulkDelete": "删除所选",
+    "bulkDeleteConfirm": "删除所选 {count} 项？",
+    "bulkDeleteDone": "已删除 {count} 项",
+    "bulkDeletePartial": "已删除 {ok} 项，{fail} 项失败"
   }
 }

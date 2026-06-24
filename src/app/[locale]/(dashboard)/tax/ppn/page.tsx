@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NumberInput } from '@/components/ui/number-input';
+import { useBulkSelect } from '@/hooks/useBulkSelect';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -324,6 +325,29 @@ export default function PPNPage() {
 
   const byTypeFakturs = filter === 'ALL' ? fakturs : fakturs.filter(f => f.faktur_type === (filter === 'OUTPUT' ? 'KELUARAN' : 'MASUKAN'));
   const filteredFakturs = showLuxuryOnly ? byTypeFakturs.filter(f => f.is_luxury === true) : byTypeFakturs;
+
+  // 2026-06-24: 일괄 선택 + 삭제
+  const tBulk = useTranslations('bulk');
+  const sel = useBulkSelect(filteredFakturs.map(f => f.id));
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const bulkDeleteFakturs = async () => {
+    if (sel.selectedCount === 0) return;
+    if (!confirm(tBulk('bulkDeleteConfirm', { count: sel.selectedCount }))) return;
+    setBulkBusy(true);
+    const ids = Array.from(sel.selectedIds);
+    const results = await Promise.allSettled(
+      ids.map(id => fetch(`/api/tax/ppn-faktur-monthly?id=${id}`, { method: 'DELETE' })),
+    );
+    const ok = results.filter(r => r.status === 'fulfilled').length;
+    const fail = results.length - ok;
+    showMsg(fail === 0 ? 'success' : 'error',
+      fail === 0
+        ? tBulk('bulkDeleteDone', { count: ok })
+        : tBulk('bulkDeletePartial', { ok, fail }));
+    sel.clear();
+    setBulkBusy(false);
+    loadFakturs();
+  };
   const luxuryCount = fakturs.filter(f => f.is_luxury === true).length;
 
   const netStatus = summary.netPpn > 0 ? 'KURANG_BAYAR' : summary.netPpn < 0 ? 'LEBIH_BAYAR' : 'NIHIL';
@@ -495,6 +519,20 @@ export default function PPNPage() {
             )}
           </div>
 
+          {/* 2026-06-24: 일괄 선택 액션 바 */}
+          {sel.selectedCount > 0 && (
+            <div className="mb-3 p-2 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-between">
+              <span className="text-xs text-slate-700">{tBulk('bulkSelectedN', { count: sel.selectedCount })}</span>
+              <div className="flex gap-2">
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={sel.clear}>전체 해제</Button>
+                <Button size="sm" variant="ghost" className="text-red-600 text-xs h-7" disabled={bulkBusy} onClick={bulkDeleteFakturs}>
+                  {bulkBusy ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <X className="h-3 w-3 mr-1" />}
+                  {tBulk('bulkDelete')}
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Faktur List — inline edit (PPh21 패턴): 행 클릭 → expand → onBlur PUT */}
           {isLoading ? (
             <div className="text-center py-20"><Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-600" /></div>
@@ -510,6 +548,16 @@ export default function PPNPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-gray-500 text-xs">
+                        <th className="text-center py-2.5 px-3 w-8">
+                          {filteredFakturs.length > 0 && (
+                            <input
+                              type="checkbox"
+                              checked={sel.isAllSelected}
+                              ref={el => { if (el) el.indeterminate = sel.isPartiallySelected; }}
+                              onChange={sel.toggleAll}
+                            />
+                          )}
+                        </th>
                         <th className="text-left py-2.5 px-3 w-8"></th>
                         <th className="text-left py-2.5 px-3">{t('thFakturNo')}</th>
                         <th className="text-left py-2.5 px-3">{t('thDate')}</th>
@@ -529,10 +577,18 @@ export default function PPNPage() {
                         return (
                           <Fragment key={f.id}>
                             <tr
-                              className="hover:bg-blue-50/40 group cursor-pointer transition-colors"
+                              className={`hover:bg-blue-50/40 group cursor-pointer transition-colors ${sel.isSelected(f.id) ? 'ring-2 ring-red-200' : ''}`}
                               onClick={() => setExpandedFakturId(isExpanded ? null : f.id)}
                               title={t('editHint')}
                             >
+                              <td className="py-2 px-3 text-center" onClick={e => e.stopPropagation()}>
+                                <input
+                                  type="checkbox"
+                                  checked={sel.isSelected(f.id)}
+                                  onChange={() => sel.toggle(f.id)}
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </td>
                               <td className="py-2 px-3">
                                 {isExpanded
                                   ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
@@ -575,7 +631,7 @@ export default function PPNPage() {
                             </tr>
                             {isExpanded && (
                               <tr className="bg-gray-50/50">
-                                <td colSpan={11} className="p-4">
+                                <td colSpan={12} className="p-4">
                                   <div className="space-y-3">
                                     {/* Edit banner */}
                                     <div className="rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900 flex items-center gap-2">

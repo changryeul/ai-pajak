@@ -10155,5 +10155,12 @@
     "uploadFailed": "アップロード失敗",
     "uploadDone": "PPh 4(2) {count} 件追加",
     "hintRateNotice": "PPh 4(2) 土地・建物賃貸は常に 10% 最終源泉徴収。各行の詳細を確認。"
+  },
+  "bulk": {
+    "bulkSelectedN": "{count}件選択",
+    "bulkDelete": "選択削除",
+    "bulkDeleteConfirm": "選択した{count}件を削除しますか？",
+    "bulkDeleteDone": "{count}件削除しました",
+    "bulkDeletePartial": "{ok}件削除、{fail}件失敗"
   }
 }

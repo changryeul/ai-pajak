@@ -10155,5 +10155,12 @@
     "uploadFailed": "Upload gagal",
     "uploadDone": "{count} baris PPh 4(2) ditambahkan",
     "hintRateNotice": "PPh 4(2) sewa tanah/bangunan selalu 10% final. Lihat detail tiap baris."
+  },
+  "bulk": {
+    "bulkSelectedN": "{count} dipilih",
+    "bulkDelete": "Hapus terpilih",
+    "bulkDeleteConfirm": "Hapus {count} baris terpilih?",
+    "bulkDeleteDone": "{count} dihapus",
+    "bulkDeletePartial": "{ok} dihapus, {fail} gagal"
   }
 }

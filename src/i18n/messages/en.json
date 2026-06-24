@@ -10155,5 +10155,12 @@
     "uploadFailed": "Upload failed",
     "uploadDone": "{count} PPh 4(2) rows added",
     "hintRateNotice": "PPh 4(2) land/building rent always 10% final WHT. See each row's detail for context."
+  },
+  "bulk": {
+    "bulkSelectedN": "{count} selected",
+    "bulkDelete": "Delete selected",
+    "bulkDeleteConfirm": "Delete {count} selected rows?",
+    "bulkDeleteDone": "{count} deleted",
+    "bulkDeletePartial": "{ok} deleted, {fail} failed"
   }
 }
