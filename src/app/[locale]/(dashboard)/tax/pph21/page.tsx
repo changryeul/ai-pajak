@@ -104,8 +104,7 @@ export default function PPh21PayrollPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [activeTab, setActiveTab] = useState('monthly');
-  const [payslipMode, setPayslipMode] = useState(false);
+  // 2026-06-24: master 탭 제거 후 payslipMode / activeTab 의미 없어져 정리.
   // 2026-06-21: 직원 마스터 sync 상태 (이전 달까지 sync 됐는지)
   const [syncStatus, setSyncStatus] = useState<{ syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -368,11 +367,8 @@ export default function PPh21PayrollPage() {
     return <div className="container mx-auto py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" /></div>;
   }
 
-  // Map activeTab to step number (1-4) for header progress display
-  const tabToStep: Record<string, number> = {
-    monthly: 2, master: 1,
-  };
-  const currentStep = tabToStep[activeTab] || 1;
+  // Header progress step — 단일 화면이라 고정.
+  const currentStep = 2;
 
   // Worker-type cards definition
   const workerCards: Array<{
@@ -421,32 +417,21 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
-      {/* Back to selection (only in payslip fullscreen mode) */}
-      {payslipMode && (
-        <div className="mb-4">
-          <Button variant="outline" size="sm" onClick={() => setPayslipMode(false)}>
-            <ArrowLeft className="h-3 w-3 mr-1" />{tp('backToSelection')}
-          </Button>
-        </div>
-      )}
-
-      {/* Worker-type summary (hidden in payslip mode) */}
-      {!payslipMode && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          {workerCards.map(c => {
-            const g = workerSummary[c.key];
-            return (
-              <div key={c.key} className={`rounded-xl border p-3 ${c.color}`}>
-                <p className="text-gray-600 text-xs flex items-center gap-1">
-                  <Users className="h-3 w-3" />{c.label}
-                </p>
-                <p className="font-bold text-base mt-0.5">{tp('workerCount', { count: g.count })}</p>
-                <p className="text-[11px] text-gray-600 font-mono mt-0.5">{fmt(g.total)}</p>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* Worker-type summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        {workerCards.map(c => {
+          const g = workerSummary[c.key];
+          return (
+            <div key={c.key} className={`rounded-xl border p-3 ${c.color}`}>
+              <p className="text-gray-600 text-xs flex items-center gap-1">
+                <Users className="h-3 w-3" />{c.label}
+              </p>
+              <p className="font-bold text-base mt-0.5">{tp('workerCount', { count: g.count })}</p>
+              <p className="text-[11px] text-gray-600 font-mono mt-0.5">{fmt(g.total)}</p>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Message */}
       {message && (
@@ -455,17 +440,15 @@ export default function PPh21PayrollPage() {
         </div>
       )}
 
-      {/* Data input cards (hidden in payslip mode) */}
-      {!payslipMode && (
-        <div className="mb-6">
-          <PPh21DataInputSection
-            customerId={customerId}
-            onComplete={() => { loadEmployees(); setPayslipReload(v => v + 1); }}
-            showMsg={showMsg}
-            onNavigateToMaster={() => { setActiveTab('monthly'); setPayslipMode(true); }}
-          />
-        </div>
-      )}
+      {/* Data input cards */}
+      <div className="mb-6">
+        <PPh21DataInputSection
+          customerId={customerId}
+          onComplete={() => { loadEmployees(); setPayslipReload(v => v + 1); }}
+          showMsg={showMsg}
+          onNavigateToMaster={() => router.push(`/${locale}/tax/payroll/employees`)}
+        />
+      </div>
 
       {/* 2026-06-24: 직원 인사 기록 탭 제거 — 사이드바 메뉴
           (/tax/payroll/employees) 와 중복되어 사용자 혼란.
