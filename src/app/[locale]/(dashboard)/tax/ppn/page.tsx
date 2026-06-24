@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NumberInput } from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -648,14 +649,11 @@ export default function PPNPage() {
                                       </div>
                                       <div>
                                         <Label className="text-[10px] text-gray-400">DPP</Label>
-                                        <Input
-                                          type="number"
+                                        <NumberInput
                                           className="h-8 text-xs font-mono"
-                                          defaultValue={f.dpp}
-                                          onBlur={e => {
-                                            const newVal = Number(e.target.value);
+                                          value={f.dpp}
+                                          onCommit={newVal => {
                                             if (Number.isFinite(newVal) && newVal !== Number(f.dpp)) {
-                                              // dpp 만 보내면 서버가 ppn + dpp_nilai_lain 재계산
                                               updateFaktur(f.id, { dpp: newVal, isLuxury: f.is_luxury === true });
                                             }
                                           }}
@@ -663,12 +661,10 @@ export default function PPNPage() {
                                       </div>
                                       <div>
                                         <Label className="text-[10px] text-gray-400">{t('dppNilaiLain')}</Label>
-                                        <Input
-                                          type="number"
+                                        <NumberInput
                                           className="h-8 text-xs font-mono"
-                                          defaultValue={f.dpp_nilai_lain ?? 0}
-                                          onBlur={e => {
-                                            const newVal = Number(e.target.value);
+                                          value={f.dpp_nilai_lain ?? 0}
+                                          onCommit={newVal => {
                                             if (Number.isFinite(newVal) && newVal !== Number(f.dpp_nilai_lain ?? 0)) {
                                               updateFaktur(f.id, { dppNilaiLain: newVal });
                                             }
@@ -677,12 +673,10 @@ export default function PPNPage() {
                                       </div>
                                       <div>
                                         <Label className="text-[10px] text-gray-400">PPN</Label>
-                                        <Input
-                                          type="number"
+                                        <NumberInput
                                           className="h-8 text-xs font-mono"
-                                          defaultValue={f.ppn}
-                                          onBlur={e => {
-                                            const newVal = Number(e.target.value);
+                                          value={f.ppn}
+                                          onCommit={newVal => {
                                             if (Number.isFinite(newVal) && newVal !== Number(f.ppn)) {
                                               updateFaktur(f.id, { ppn: newVal });
                                             }

@@ -7,6 +7,7 @@ import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NumberInput } from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -1691,12 +1692,10 @@ export default function PPh23Page() {
                                 </div>
                                 <div>
                                   <Label className="text-[10px] text-gray-400">DPP ({t('colAmount')})</Label>
-                                  <Input
-                                    type="number"
+                                  <NumberInput
                                     className="h-8 text-xs font-mono"
-                                    defaultValue={tx.gross_amount}
-                                    onBlur={e => {
-                                      const newVal = Number(e.target.value);
+                                    value={tx.gross_amount}
+                                    onCommit={newVal => {
                                       if (Number.isFinite(newVal) && newVal !== tx.gross_amount) {
                                         updateTransaction(tx.id, {
                                           grossAmount: newVal,

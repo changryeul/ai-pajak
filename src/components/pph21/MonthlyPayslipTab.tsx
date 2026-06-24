@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NumberInput } from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -369,18 +370,18 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         <div className="grid grid-cols-3 gap-2">
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('workDays')}</Label>
-                            <Input type="number" className="h-8 text-xs" defaultValue={ps.working_days}
-                              onBlur={e => updatePayslip(ps.id, { working_days: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs" value={ps.working_days}
+                              onCommit={n => updatePayslip(ps.id, { working_days: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('absentDays')}</Label>
-                            <Input type="number" className="h-8 text-xs" defaultValue={ps.absent_days}
-                              onBlur={e => updatePayslip(ps.id, { absent_days: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs" value={ps.absent_days}
+                              onCommit={n => updatePayslip(ps.id, { absent_days: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('overtime')}</Label>
-                            <Input type="number" className="h-8 text-xs" defaultValue={ps.overtime_hours}
-                              onBlur={e => updatePayslip(ps.id, { overtime_hours: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs" value={ps.overtime_hours}
+                              onCommit={n => updatePayslip(ps.id, { overtime_hours: n })} />
                           </div>
                         </div>
                       </div>
@@ -391,53 +392,53 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('base')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.base_salary}
-                              onBlur={e => updatePayslip(ps.id, { base_salary: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.base_salary}
+                              onCommit={n => updatePayslip(ps.id, { base_salary: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('overtimePay')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.overtime_pay}
-                              onBlur={e => updatePayslip(ps.id, { overtime_pay: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.overtime_pay}
+                              onCommit={n => updatePayslip(ps.id, { overtime_pay: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('mealAllowance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.meal_allowance}
-                              onBlur={e => updatePayslip(ps.id, { meal_allowance: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.meal_allowance}
+                              onCommit={n => updatePayslip(ps.id, { meal_allowance: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('transportAllowance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.transport_allowance}
-                              onBlur={e => updatePayslip(ps.id, { transport_allowance: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.transport_allowance}
+                              onCommit={n => updatePayslip(ps.id, { transport_allowance: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('positionAllowance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.position_allowance}
-                              onBlur={e => updatePayslip(ps.id, { position_allowance: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.position_allowance}
+                              onCommit={n => updatePayslip(ps.id, { position_allowance: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('otherAllowance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.other_allowances}
-                              onBlur={e => updatePayslip(ps.id, { other_allowances: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.other_allowances}
+                              onCommit={n => updatePayslip(ps.id, { other_allowances: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('laptopAllowance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.laptop_allowance}
-                              onBlur={e => updatePayslip(ps.id, { laptop_allowance: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.laptop_allowance}
+                              onCommit={n => updatePayslip(ps.id, { laptop_allowance: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('medicalAllowance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.medical_allowance}
-                              onBlur={e => updatePayslip(ps.id, { medical_allowance: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.medical_allowance}
+                              onCommit={n => updatePayslip(ps.id, { medical_allowance: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('taxAllowance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.tax_allowance}
-                              onBlur={e => updatePayslip(ps.id, { tax_allowance: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.tax_allowance}
+                              onCommit={n => updatePayslip(ps.id, { tax_allowance: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('annualLeavePay')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.annual_leave_pay}
-                              onBlur={e => updatePayslip(ps.id, { annual_leave_pay: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.annual_leave_pay}
+                              onCommit={n => updatePayslip(ps.id, { annual_leave_pay: n })} />
                           </div>
                         </div>
                       </div>
@@ -448,13 +449,13 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('severance')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.severance_allowance}
-                              onBlur={e => updatePayslip(ps.id, { severance_allowance: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.severance_allowance}
+                              onCommit={n => updatePayslip(ps.id, { severance_allowance: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('pkwtCompensation')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.pkwt_compensation}
-                              onBlur={e => updatePayslip(ps.id, { pkwt_compensation: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.pkwt_compensation}
+                              onCommit={n => updatePayslip(ps.id, { pkwt_compensation: n })} />
                           </div>
                         </div>
                       </div>
@@ -465,18 +466,18 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         <div className="grid grid-cols-3 gap-2">
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('bonusSection')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.bonus}
-                              onBlur={e => updatePayslip(ps.id, { bonus: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.bonus}
+                              onCommit={n => updatePayslip(ps.id, { bonus: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('thr')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.thr}
-                              onBlur={e => updatePayslip(ps.id, { thr: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.thr}
+                              onCommit={n => updatePayslip(ps.id, { thr: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('commission')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.commission}
-                              onBlur={e => updatePayslip(ps.id, { commission: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.commission}
+                              onCommit={n => updatePayslip(ps.id, { commission: n })} />
                           </div>
                         </div>
                       </div>
@@ -487,33 +488,33 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('bpjsHealth')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.bpjs_kesehatan}
-                              onBlur={e => updatePayslip(ps.id, { bpjs_kesehatan: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.bpjs_kesehatan}
+                              onCommit={n => updatePayslip(ps.id, { bpjs_kesehatan: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('bpjsEmployment')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.bpjs_ketenagakerjaan}
-                              onBlur={e => updatePayslip(ps.id, { bpjs_ketenagakerjaan: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.bpjs_ketenagakerjaan}
+                              onCommit={n => updatePayslip(ps.id, { bpjs_ketenagakerjaan: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">JHT</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.jht_employee}
-                              onBlur={e => updatePayslip(ps.id, { jht_employee: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.jht_employee}
+                              onCommit={n => updatePayslip(ps.id, { jht_employee: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('pension')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.jp_employee}
-                              onBlur={e => updatePayslip(ps.id, { jp_employee: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.jp_employee}
+                              onCommit={n => updatePayslip(ps.id, { jp_employee: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('loanRepayment')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.loan_deduction}
-                              onBlur={e => updatePayslip(ps.id, { loan_deduction: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.loan_deduction}
+                              onCommit={n => updatePayslip(ps.id, { loan_deduction: n })} />
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('otherDeduction')}</Label>
-                            <Input type="number" className="h-8 text-xs font-mono" defaultValue={ps.other_deductions}
-                              onBlur={e => updatePayslip(ps.id, { other_deductions: Number(e.target.value) })} />
+                            <NumberInput className="h-8 text-xs font-mono" value={ps.other_deductions}
+                              onCommit={n => updatePayslip(ps.id, { other_deductions: n })} />
                           </div>
                         </div>
                       </div>
