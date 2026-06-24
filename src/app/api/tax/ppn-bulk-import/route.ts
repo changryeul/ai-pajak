@@ -98,9 +98,12 @@ async function processSection(
   // (users can override via inline-edit luxury toggle added in Phase 3.2).
   const sb = getSupabaseAdmin();
   const validRows = validated.rows.filter((r) => r.isValid);
+  // 2026-06-24: counterparty_name 은 brand 이름 (예: 'Topindo Lucky Sports')
+  // 이 사치 키워드와 false-match 되는 가장 큰 원인이므로 luxury 판단에서 제외.
+  // 품목 본질은 description 으로 판정.
   const luxuryFlags = await classifyLuxuryBatch(
     sb,
-    validRows.map((r) => `${r.data.description ?? ''} ${r.data.counterparty_name ?? ''}`),
+    validRows.map((r) => `${r.data.description ?? ''}`),
   );
 
   const inserts = validRows.map((r, i) => {
@@ -172,9 +175,16 @@ async function processSection(
  * v1 algorithm: simple substring, no NLP. False positives intentional — user
  * can override via the inline-edit luxury toggle (Phase 3.2).
  */
+// 2026-06-24: false-positive 방지를 위해 일반 명사 strong stop list.
+// PMK 131/2024 사치품의 '구분 단어' (jet, yacht, diamond 등) 외에 일반
+// 비즈니스 단어가 keyword 가 되면 "Topindo Lucky Sports" 같은 vendor
+// 이름이 골프공 거래도 luxury 로 분류해버린다.
 const LUXURY_STOP_WORDS = new Set([
   'premium', 'luxury', 'imported', 'private', 'fresh', 'large', 'small',
   'item', 'with', 'from', 'category', 'class', 'grade', 'special',
+  // 2026-06-24 추가 — vendor / description 에 흔히 등장하는 일반 단어
+  'sports', 'sport', 'course', 'package', 'years', 'equipment',
+  'price', 'property', 'membership', 'collectibles',
 ]);
 
 async function classifyLuxuryBatch(
@@ -198,11 +208,16 @@ async function classifyLuxuryBatch(
       .filter((w) => w.length >= 5 && !LUXURY_STOP_WORDS.has(w) && !/^\d+$/.test(w));
     words.forEach((w) => keywords.add(w));
   }
+  // 2026-06-24: word boundary regex 로 정확한 단어 매칭 (substring 차단)
+  // 'sports' 가 'sportswear' / 'Topindo Lucky Sports' 에 false 매칭 안 되도록.
+  const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const keywordRegexes = Array.from(keywords).map(
+    (kw) => new RegExp(`\\b${escapeRe(kw)}\\b`, 'i'),
+  );
   return texts.map((text) => {
-    const lower = (text || '').toLowerCase();
-    if (!lower) return false;
-    for (const kw of keywords) {
-      if (lower.includes(kw)) return true;
+    if (!text) return false;
+    for (const re of keywordRegexes) {
+      if (re.test(text)) return true;
     }
     return false;
   });
