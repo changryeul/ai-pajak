@@ -128,16 +128,25 @@ async function main() {
   console.log(`✅ 5. customer ${customerId}`);
   pass++;
 
-  // 6. Pre-cleanup.
-  const { count: pre } = await sbAdmin.from('employee_payroll').delete({ count: 'exact' })
+  // 6. Pre-cleanup — payslip decouple 이후 import 는 monthly_payslip 에만 씀.
+  // 양쪽 다 wipe (legacy employee_payroll 행도 남아있을 수 있어 안전망).
+  const { count: prePay } = await sbAdmin.from('monthly_payslip').delete({ count: 'exact' })
     .eq('customer_id', customerId).like('employee_name', `${SMOKE_PREFIX}%`);
-  console.log(`✅ 6. pre-cleanup ${pre ?? 0}`);
+  const { count: preEmp } = await sbAdmin.from('employee_payroll').delete({ count: 'exact' })
+    .eq('customer_id', customerId).like('employee_name', `${SMOKE_PREFIX}%`);
+  console.log(`✅ 6. pre-cleanup payslip=${prePay ?? 0} employee=${preEmp ?? 0}`);
   pass++;
 
   // 7. POST multipart.
+  // 2026-06-21: endpoint 가 taxPeriod 필수 (월별 급여 자료) — 이전 달을 쓰면
+  // pre-cleanup 와 충돌 없이 안전.
+  const now = new Date();
+  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const taxPeriod = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
   const fd = new FormData();
   fd.append('file', new Blob([csv], { type: 'text/csv' }), 'pph21-strict.csv');
   fd.append('customerId', customerId);
+  fd.append('taxPeriod', taxPeriod);
   const res = await fetch(`${BASE_URL}/api/tax/employees/import`, {
     method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
   });
@@ -152,25 +161,29 @@ async function main() {
     fail++;
   }
 
-  // 8. DB read-back — verify HR fields (position, department, hire_date) survived.
-  const { data: rows } = await sbAdmin.from('employee_payroll')
-    .select('employee_name, gross_salary, ptkp_category, position, department, hire_date')
-    .eq('customer_id', customerId).like('employee_name', `${SMOKE_PREFIX}%`).order('employee_name');
-  const hrSurvived = rows?.every((r) => r.position && r.department && r.hire_date) ?? false;
-  if (rows?.length === SAMPLES.length && hrSurvived) {
-    console.log(`✅ 8. DB ${rows.length} rows, HR fields (position/department/hire_date) intact`);
-    rows.forEach((r) => console.log(`   • ${r.employee_name.replace(SMOKE_PREFIX, '')} | ${r.ptkp_category} | ${rp(Number(r.gross_salary))} | ${r.position}/${r.department} | ${r.hire_date}`));
+  // 8. DB read-back from monthly_payslip — 2026-06-21 payslip decouple 정책상
+  // employee master 자동 생성은 멈췄고 import 는 payslip 만 씀. period 도 일치 확인.
+  const { data: rows } = await sbAdmin.from('monthly_payslip')
+    .select('employee_name, base_salary, ptkp_category, period, employee_npwp')
+    .eq('customer_id', customerId).eq('period', taxPeriod)
+    .like('employee_name', `${SMOKE_PREFIX}%`).order('employee_name');
+  const periodOk = rows?.every((r) => r.period === taxPeriod) ?? false;
+  if (rows?.length === SAMPLES.length && periodOk) {
+    console.log(`✅ 8. payslip ${rows.length} rows for period=${taxPeriod}`);
+    rows.forEach((r) => console.log(`   • ${r.employee_name.replace(SMOKE_PREFIX, '')} | ${r.ptkp_category} | ${rp(Number(r.base_salary))} | ${r.employee_npwp ?? '(no NPWP)'}`));
     pass++;
   } else {
-    console.error(`✗ 8. DB ${rows?.length}/${SAMPLES.length} rows, HR survived=${hrSurvived}`);
+    console.error(`✗ 8. payslip ${rows?.length}/${SAMPLES.length} rows, period match=${periodOk}`);
     fail++;
   }
 
-  // 9. Cleanup.
-  const { count: del } = await sbAdmin.from('employee_payroll').delete({ count: 'exact' })
+  // 9. Cleanup — payslip 우선, employee 도 안전망.
+  const { count: delPay } = await sbAdmin.from('monthly_payslip').delete({ count: 'exact' })
+    .eq('customer_id', customerId).like('employee_name', `${SMOKE_PREFIX}%`);
+  const { count: delEmp } = await sbAdmin.from('employee_payroll').delete({ count: 'exact' })
     .eq('customer_id', customerId).like('employee_name', `${SMOKE_PREFIX}%`);
   unlinkSync(tmpPath);
-  console.log(`✅ 9. cleanup ${del ?? 0} + tmp removed`);
+  console.log(`✅ 9. cleanup payslip=${delPay ?? 0} employee=${delEmp ?? 0} + tmp removed`);
   pass++;
 
   console.log(`\n— ${pass} pass / ${fail} fail —`);

@@ -95,12 +95,14 @@ async function main() {
   } else { console.error('✗ 5. got', sentinelPending.length, 'sentinel pending'); fail++; }
 
   // 6. taxType filter
+  // 2026-06-26: prod 에 sentinel customer 의 실 PPh21 PENDING 행이 함께 있을
+  // 수 있어 sentinel period 까지 filter (PERIOD_PEND_2 = '2099-09', 우리 seed 만 매칭).
   const r6 = await fetch(`${BASE_URL}/api/operator/spt-masa-requests?status=PENDING&taxType=PPh21&limit=200`, {
     headers: { Authorization: `Bearer ${operatorToken}` },
   });
   const j6 = await r6.json();
-  const sentinel6 = (j6.data ?? []).filter((r: { customerId: string; taxType: string }) =>
-    r.customerId === CUSTOMER_ID && r.taxType === 'PPh21',
+  const sentinel6 = (j6.data ?? []).filter((r: { customerId: string; taxType: string; taxPeriod: string }) =>
+    r.customerId === CUSTOMER_ID && r.taxType === 'PPh21' && r.taxPeriod === PERIOD_PEND_2,
   );
   if (r6.status === 200 && sentinel6.length === 1) {
     console.log('✅ 6. taxType=PPh21 filter → 1 sentinel'); pass++;
