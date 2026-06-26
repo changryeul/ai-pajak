@@ -213,6 +213,12 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
             faktur_date: txDate,
             counterparty_name: row.vendor?.nama || '',
             counterparty_npwp: vendorNpwp || null,
+            // 2026-06-26: WHT one-sheet 가 수집하지만 그동안 버려졌던 필드들.
+            // 이제 PPN 상세에서 surface + edit 가능.
+            counterparty_address: row.vendor?.alamat || null,
+            invoice_number: row.invoice?.invoiceNo || null,
+            description: row.invoice?.description || null,
+            notes: row.notes || null,
             dpp: row.vat?.dpp ?? 0,
             ppn: row.vat?.ppn ?? 0,
             is_luxury: false,
@@ -230,9 +236,18 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       // PPh dispatch
       const vendorName = row.vendor?.nama || '';
       const vendorNpwp = row.vendor?.npwp || '';
+      const vendorAddress = row.vendor?.alamat || null;
       const description = row.invoice?.description || row.notes || '';
       const invoiceNo = row.invoice?.invoiceNo || null;
       const taxBase = row.wht.base;
+      // 2026-06-26: WHT 양식이 수집하지만 PPh23/PPh4(2)/PPh26 상세에서 그동안
+      // 안 보이던 컬럼들. 마이그레이션 20260626000001 으로 컬럼 추가됨.
+      const pphExtras = {
+        counterparty_address: vendorAddress,
+        notes: row.notes || null,
+        invoice_date: row.dates?.invoice ?? null,
+        payment_date: row.dates?.payment ?? null,
+      };
 
       if (row.classified === 'pph23_jasa') {
         const rate = 0.02;
@@ -251,6 +266,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           tax_amount: taxAmount,
           counterparty_name: vendorName,
           counterparty_npwp: vendorNpwp || null,
+          ...pphExtras,
         });
         if (error) throw error;
         result.insertedPph23++;
@@ -272,6 +288,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           tax_amount: taxAmount,
           counterparty_name: vendorName,
           counterparty_npwp: vendorNpwp || null,
+          ...pphExtras,
         });
         if (error) throw error;
         result.insertedPph23++;
@@ -293,6 +310,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           tax_amount: taxAmount,
           counterparty_name: vendorName,
           counterparty_npwp: vendorNpwp || null,
+          ...pphExtras,
         });
         if (error) throw error;
         result.insertedPph23++;
@@ -315,6 +333,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           tax_amount: taxAmount,
           counterparty_name: vendorName,
           counterparty_npwp: vendorNpwp || null,
+          ...pphExtras,
         });
         if (error) throw error;
         result.insertedPph42++;
@@ -366,6 +385,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           tax_amount: inferredAmount,
           counterparty_name: vendorName,
           counterparty_npwp: vendorNpwp || null,
+          ...pphExtras,
         });
         if (error) throw error;
         result.insertedUnclassified++;

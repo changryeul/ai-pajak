@@ -125,6 +125,8 @@ async function processSection(
       faktur_date: r.data.faktur_date,
       counterparty_name: r.data.counterparty_name || null,
       counterparty_npwp: r.data.counterparty_npwp || null,
+      // 2026-06-26: PPN 양식에서 수집되지만 그동안 버려졌던 설명. 상세에서 surface.
+      description: r.data.description || null,
       dpp: dppNum,
       dpp_nilai_lain: dppNilaiLain,
       is_luxury: isLuxury,

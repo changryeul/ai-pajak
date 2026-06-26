@@ -446,9 +446,230 @@ export default function PPh21PayrollPage() {
           customerId={customerId}
           onComplete={() => { loadEmployees(); setPayslipReload(v => v + 1); }}
           showMsg={showMsg}
-          onNavigateToMaster={() => router.push(`/${locale}/tax/payroll/employees`)}
+          // 2026-06-26: '직원 직접 등록' 은 더 이상 별도 HR 페이지로 이동하지 않고
+          // 같은 페이지에서 Dialog 폼을 띄운다 — 사용자가 PPh21 흐름에서 벗어나지
+          // 않고 직원 1명을 추가할 수 있도록.
+          onOpenManualEntry={() => {
+            setForm(emptyForm);
+            setShowForm(true);
+          }}
         />
       </div>
+
+      {/* 2026-06-26: 인라인 직원 등록 Dialog — 표준 템플릿이 수집하는 모든 필드
+          (사번 / 고용형태 / NPWP / NIK / tax method / 급여 / 수당 / BPJS / HR 인사정보).
+          저장 후 자동 sync 호출로 현재 월 payslip 도 즉시 생성되어 리스트에 노출. */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{form.id ? '직원 정보 수정' : '직원 직접 등록'}</DialogTitle>
+            <DialogDescription>
+              템플릿에서 수집하는 모든 필드를 입력할 수 있습니다. 이름과 월 기본급은 필수.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            {/* 직원 식별 */}
+            <div>
+              <h4 className="text-xs font-bold text-gray-600 mb-2">직원 식별 / Identitas</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div>
+                  <Label className="text-[11px]">이름 / Nama <span className="text-red-500">*</span></Label>
+                  <Input value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">사번 / Employee No.</Label>
+                  <Input value={form.employeeNumber} onChange={e => setForm({ ...form, employeeNumber: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">NPWP</Label>
+                  <Input value={form.employeeNpwp} onChange={e => setForm({ ...form, employeeNpwp: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">NIK</Label>
+                  <Input value={form.employeeNik} onChange={e => setForm({ ...form, employeeNik: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">PTKP</Label>
+                  <Select value={form.ptkpCategory} onValueChange={v => setForm({ ...form, ptkpCategory: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {PTKP_OPTIONS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[11px]">고용형태 / Status (PMK 66/2023)</Label>
+                  <Select
+                    value={form.employmentStatus || 'PKWTT'}
+                    onValueChange={v => setForm({ ...form, employmentStatus: v })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PKWTT">PKWTT (Pegawai Tetap, 정직원)</SelectItem>
+                      <SelectItem value="PKWT">PKWT (Pegawai Tidak Tetap, 비정직원)</SelectItem>
+                      <SelectItem value="Consultant">Consultant (Bukan Pegawai, 외부)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[11px]">직군 / Tax Method (Worker Type)</Label>
+                  <Select value={form.workerType} onValueChange={v => setForm({ ...form, workerType: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="REGULAR">REGULAR (gross / TER)</SelectItem>
+                      <SelectItem value="CONTRACT">CONTRACT</SelectItem>
+                      <SelectItem value="DAILY">DAILY</SelectItem>
+                      <SelectItem value="FREELANCER">FREELANCER</SelectItem>
+                      <SelectItem value="COMMISSIONER">COMMISSIONER</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* 급여 / 수당 / BPJS */}
+            <div>
+              <h4 className="text-xs font-bold text-gray-600 mb-2">월 급여 · 수당 · 공제 / Gaji & Tunjangan</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div>
+                  <Label className="text-[11px]">기본급 / Gaji Pokok <span className="text-red-500">*</span></Label>
+                  <Input type="number" value={form.grossSalary} onChange={e => setForm({ ...form, grossSalary: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">직책수당 / Tunj. Jabatan</Label>
+                  <Input type="number" value={form.positionAllowance} onChange={e => setForm({ ...form, positionAllowance: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">식대 / Tunj. Makan</Label>
+                  <Input type="number" value={form.mealAllowance} onChange={e => setForm({ ...form, mealAllowance: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">교통비 / Tunj. Transport</Label>
+                  <Input type="number" value={form.transportAllowance} onChange={e => setForm({ ...form, transportAllowance: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">기타수당 / Tunj. Lainnya</Label>
+                  <Input type="number" value={form.otherAllowance} onChange={e => setForm({ ...form, otherAllowance: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">BPJS Kesehatan (employee)</Label>
+                  <Input type="number" value={form.bpjsKesehatan} onChange={e => setForm({ ...form, bpjsKesehatan: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">JHT (employee)</Label>
+                  <Input type="number" value={form.jhtEmployee} onChange={e => setForm({ ...form, jhtEmployee: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">JP (employee)</Label>
+                  <Input type="number" value={form.jpEmployee} onChange={e => setForm({ ...form, jpEmployee: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">기타 공제 / Potongan</Label>
+                  <Input type="number" value={form.otherDeductions} onChange={e => setForm({ ...form, otherDeductions: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">보너스 / Bonus</Label>
+                  <Input type="number" value={form.bonus} onChange={e => setForm({ ...form, bonus: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">THR</Label>
+                  <Input type="number" value={form.thr} onChange={e => setForm({ ...form, thr: e.target.value })} className="font-mono" />
+                </div>
+              </div>
+            </div>
+
+            {/* HR 인사정보 */}
+            <div>
+              <h4 className="text-xs font-bold text-gray-600 mb-2">HR 인사정보 / Data HR (선택)</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div>
+                  <Label className="text-[11px]">직책 / Position</Label>
+                  <Input value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">부서 / Department</Label>
+                  <Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">입사일 / Hire Date</Label>
+                  <Input type="date" value={form.hireDate} onChange={e => setForm({ ...form, hireDate: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">생년월일 / Birth Date</Label>
+                  <Input type="date" value={form.birthDate} onChange={e => setForm({ ...form, birthDate: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">성별 / Gender</Label>
+                  <Select value={form.gender || 'M'} onValueChange={v => setForm({ ...form, gender: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="M">M</SelectItem>
+                      <SelectItem value="F">F</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[11px]">결혼 / Marital</Label>
+                  <Select value={form.maritalStatus || 'SINGLE'} onValueChange={v => setForm({ ...form, maritalStatus: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SINGLE">SINGLE</SelectItem>
+                      <SelectItem value="MARRIED">MARRIED</SelectItem>
+                      <SelectItem value="DIVORCED">DIVORCED</SelectItem>
+                      <SelectItem value="WIDOWED">WIDOWED</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[11px]">이메일 / Email</Label>
+                  <Input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">전화 / Phone</Label>
+                  <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+                </div>
+                <div className="md:col-span-3">
+                  <Label className="text-[11px]">주소 / Address</Label>
+                  <Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">은행 / Bank</Label>
+                  <Input value={form.bankName} onChange={e => setForm({ ...form, bankName: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-[11px]">계좌번호 / Account No.</Label>
+                  <Input value={form.bankAccountNo} onChange={e => setForm({ ...form, bankAccountNo: e.target.value })} className="font-mono" />
+                </div>
+                <div>
+                  <Label className="text-[11px]">예금주 / Account Name</Label>
+                  <Input value={form.bankAccountName} onChange={e => setForm({ ...form, bankAccountName: e.target.value })} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowForm(false)} disabled={isSaving}>
+              취소
+            </Button>
+            <Button
+              onClick={async () => {
+                await saveEmployee();
+                // 저장 직후 sync 한 번 — 마스터에 직원이 들어왔으면 현재 월 payslip
+                // 도 즉시 생성해서 리스트에 떠 보이게.
+                if (customerId) {
+                  try { await runSync(); } catch { /* non-fatal */ }
+                }
+              }}
+              disabled={isSaving}
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+              저장
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* 2026-06-24: 직원 인사 기록 탭 제거 — 사이드바 메뉴
           (/tax/payroll/employees) 와 중복되어 사용자 혼란.
@@ -463,12 +684,13 @@ export default function PPh21PayrollPage() {
 // Sub-component: 3가지 자료 입력 방식
 // ══════════════════════════════════════════════════════
 function PPh21DataInputSection({
-  customerId, onComplete, showMsg, onNavigateToMaster,
+  customerId, onComplete, showMsg, onOpenManualEntry,
 }: {
   customerId: string;
   onComplete: () => void;
   showMsg: (type: 'success' | 'error', text: string) => void;
-  onNavigateToMaster: () => void;
+  /** 2026-06-26: 별도 HR 페이지로 navigate 대신 같은 페이지의 Dialog 를 연다. */
+  onOpenManualEntry: () => void;
 }) {
   const tp = useTranslations('pph21Page');
   const excelInputRef = useRef<HTMLInputElement>(null);
@@ -835,7 +1057,7 @@ function PPh21DataInputSection({
               </div>
             </div>
             <div className="space-y-2 flex-1">
-              <Button size="sm" onClick={onNavigateToMaster} className="w-full bg-purple-600 hover:bg-purple-700">
+              <Button size="sm" onClick={onOpenManualEntry} className="w-full bg-purple-600 hover:bg-purple-700">
                 <Users className="h-3 w-3 mr-1" />{tp('goToEmployeeMaster')}
               </Button>
             </div>

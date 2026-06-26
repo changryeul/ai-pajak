@@ -29,9 +29,13 @@ interface Transaction {
   id: string;
   counterparty_name: string;
   counterparty_npwp: string | null;
+  counterparty_address: string | null;
   service_type: string;
   description: string | null;
+  notes: string | null;
   invoice_number: string | null;
+  invoice_date: string | null;
+  payment_date: string | null;
   transaction_date: string;
   gross_amount: number;
   tax_rate: number;
@@ -39,6 +43,15 @@ interface Transaction {
   bukti_potong_number: string | null;
   bukti_potong_date: string | null;
   invoice_document_id?: string | null;
+  // Resolution / regime metadata (read-only display)
+  tax_regime?: string | null;
+  income_type?: string | null;
+  recipient_country?: string | null;
+  treaty_applied?: boolean | null;
+  is_final?: boolean | null;
+  npwp_surcharge_applied?: boolean | null;
+  rental_asset_type?: string | null;
+  interest_source?: string | null;
 }
 
 interface Summary {
@@ -471,6 +484,14 @@ export default function PPh23Page() {
         if (updates.counterpartyNpwp !== undefined) mapped.counterparty_npwp = (updates.counterpartyNpwp as string) || null;
         if (updates.description !== undefined) mapped.description = (updates.description as string) || null;
         if (updates.transactionDate !== undefined) mapped.transaction_date = updates.transactionDate as string;
+        // 2026-06-26: 신규 컬럼들도 클라이언트 캐시에 머지 (refetch 안 해도 즉시 반영).
+        if (updates.invoiceNumber !== undefined) mapped.invoice_number = (updates.invoiceNumber as string) || null;
+        if (updates.invoiceDate !== undefined) mapped.invoice_date = (updates.invoiceDate as string) || null;
+        if (updates.paymentDate !== undefined) mapped.payment_date = (updates.paymentDate as string) || null;
+        if (updates.counterpartyAddress !== undefined) mapped.counterparty_address = (updates.counterpartyAddress as string) || null;
+        if (updates.notes !== undefined) mapped.notes = (updates.notes as string) || null;
+        if (updates.buktiPotongNumber !== undefined) mapped.bukti_potong_number = (updates.buktiPotongNumber as string) || null;
+        if (updates.buktiPotongDate !== undefined) mapped.bukti_potong_date = (updates.buktiPotongDate as string) || null;
         const txAfter = transactions.find(t => t.id === id);
         setTransactions(prev => prev.map(tx => tx.id === id ? { ...tx, ...mapped } as Transaction : tx));
         setSavedAt(prev => ({ ...prev, [id]: Date.now() }));
@@ -1781,6 +1802,44 @@ export default function PPh23Page() {
                                     ))}
                                   </select>
                                 </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">인보이스 번호 / No. Invoice</Label>
+                                  <Input
+                                    className="h-8 text-xs font-mono"
+                                    defaultValue={tx.invoice_number ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.invoice_number ?? '')) {
+                                        updateTransaction(tx.id, { invoiceNumber: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">인보이스 일자 / Tgl Invoice</Label>
+                                  <Input
+                                    type="date"
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.invoice_date ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.invoice_date ?? '')) {
+                                        updateTransaction(tx.id, { invoiceDate: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">지급일 / Tgl Pembayaran</Label>
+                                  <Input
+                                    type="date"
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.payment_date ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.payment_date ?? '')) {
+                                        updateTransaction(tx.id, { paymentDate: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
                                 <div className="md:col-span-3">
                                   <Label className="text-[10px] text-gray-400">{t('editFieldDescription')}</Label>
                                   <Input
@@ -1793,6 +1852,92 @@ export default function PPh23Page() {
                                     }}
                                   />
                                 </div>
+                                <div className="md:col-span-3">
+                                  <Label className="text-[10px] text-gray-400">거래처 주소 / Alamat</Label>
+                                  <Input
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.counterparty_address ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.counterparty_address ?? '')) {
+                                        updateTransaction(tx.id, { counterpartyAddress: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div className="md:col-span-3">
+                                  <Label className="text-[10px] text-gray-400">메모 / Notes</Label>
+                                  <Input
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.notes ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.notes ?? '')) {
+                                        updateTransaction(tx.id, { notes: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">Bukti Potong No</Label>
+                                  <Input
+                                    className="h-8 text-xs font-mono"
+                                    defaultValue={tx.bukti_potong_number ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.bukti_potong_number ?? '')) {
+                                        updateTransaction(tx.id, { buktiPotongNumber: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] text-gray-400">Bukti Potong Date</Label>
+                                  <Input
+                                    type="date"
+                                    className="h-8 text-xs"
+                                    defaultValue={tx.bukti_potong_date ?? ''}
+                                    onBlur={e => {
+                                      if (e.target.value !== (tx.bukti_potong_date ?? '')) {
+                                        updateTransaction(tx.id, { buktiPotongDate: e.target.value });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              {/* Resolution / regime read-only badges */}
+                              <div className="flex flex-wrap gap-1.5 pt-3 border-t border-gray-200 mt-3">
+                                {tx.tax_regime && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    Regime: {tx.tax_regime}
+                                  </Badge>
+                                )}
+                                {tx.income_type && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    Income: {tx.income_type}
+                                  </Badge>
+                                )}
+                                {tx.recipient_country && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    Country: {tx.recipient_country}
+                                  </Badge>
+                                )}
+                                {tx.treaty_applied && (
+                                  <Badge className="text-[10px] bg-blue-100 text-blue-700">Treaty applied</Badge>
+                                )}
+                                {tx.is_final && (
+                                  <Badge className="text-[10px] bg-purple-100 text-purple-700">Final tax</Badge>
+                                )}
+                                {tx.npwp_surcharge_applied && (
+                                  <Badge className="text-[10px] bg-red-100 text-red-700">+100% (no NPWP)</Badge>
+                                )}
+                                {tx.rental_asset_type && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    Asset: {tx.rental_asset_type}
+                                  </Badge>
+                                )}
+                                {tx.interest_source && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    Source: {tx.interest_source}
+                                  </Badge>
+                                )}
                               </div>
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs pt-3 border-t border-gray-200 mt-3">
                                 <div>

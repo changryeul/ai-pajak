@@ -257,7 +257,13 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
 async function handlePut(req: RequestWithSession): Promise<Response> {
   try {
     const body = await req.json();
-    const { id, grossAmount, serviceType, counterpartyName, counterpartyNpwp, description, transactionDate } = body;
+    const {
+      id, grossAmount, serviceType, counterpartyName, counterpartyNpwp,
+      description, transactionDate,
+      // 2026-06-26: 신규 — 양식이 수집하지만 그동안 surface 안 되던 필드들.
+      invoiceNumber, counterpartyAddress, notes, invoiceDate, paymentDate,
+      buktiPotongNumber, buktiPotongDate,
+    } = body;
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
     const updateData: Record<string, unknown> = {};
@@ -275,6 +281,13 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
     if (counterpartyNpwp !== undefined) updateData.counterparty_npwp = counterpartyNpwp;
     if (description !== undefined) updateData.description = description;
     if (transactionDate) updateData.transaction_date = transactionDate;
+    if (invoiceNumber !== undefined) updateData.invoice_number = invoiceNumber || null;
+    if (counterpartyAddress !== undefined) updateData.counterparty_address = counterpartyAddress || null;
+    if (notes !== undefined) updateData.notes = notes || null;
+    if (invoiceDate !== undefined) updateData.invoice_date = invoiceDate || null;
+    if (paymentDate !== undefined) updateData.payment_date = paymentDate || null;
+    if (buktiPotongNumber !== undefined) updateData.bukti_potong_number = buktiPotongNumber || null;
+    if (buktiPotongDate !== undefined) updateData.bukti_potong_date = buktiPotongDate || null;
 
     const { error } = await getSupabaseAdmin().from('pph23_transaction').update(updateData).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

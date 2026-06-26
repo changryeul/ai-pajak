@@ -50,6 +50,10 @@ interface FakturMonthly {
   faktur_date: string;
   counterparty_name: string;
   counterparty_npwp: string;
+  counterparty_address: string | null;
+  invoice_number: string | null;
+  description: string | null;
+  notes: string | null;
   dpp: number;
   dpp_nilai_lain: number | null;  // PMK 131/2024 adjusted DPP (Phase 3.1)
   is_luxury: boolean | null;
@@ -283,6 +287,11 @@ export default function PPNPage() {
         if (updates.ppn !== undefined) mapped.ppn = Number(updates.ppn);
         if (updates.dppNilaiLain !== undefined) mapped.dpp_nilai_lain = Number(updates.dppNilaiLain);
         if (updates.isLuxury !== undefined) mapped.is_luxury = updates.isLuxury === true;
+        // 2026-06-26: 신규 — 양식이 수집하지만 그동안 surface 안 되던 필드.
+        if (updates.invoiceNumber !== undefined) mapped.invoice_number = (updates.invoiceNumber as string) || null;
+        if (updates.counterpartyAddress !== undefined) mapped.counterparty_address = (updates.counterpartyAddress as string) || null;
+        if (updates.description !== undefined) mapped.description = (updates.description as string) || null;
+        if (updates.notes !== undefined) mapped.notes = (updates.notes as string) || null;
         setFakturs(prev => prev.map(f => f.id === id ? { ...f, ...mapped } as FakturMonthly : f));
         setSavedAt(prev => ({ ...prev, [id]: Date.now() }));
         setTimeout(() => {
@@ -742,6 +751,57 @@ export default function PPNPage() {
                                           onCommit={newVal => {
                                             if (Number.isFinite(newVal) && newVal !== Number(f.ppn)) {
                                               updateFaktur(f.id, { ppn: newVal });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                    </div>
+                                    {/* 2026-06-26: 양식이 수집하는 나머지 필드 — 인보이스 번호 / 주소 / 설명 / 메모 */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-gray-200">
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">인보이스 번호 / No. Invoice</Label>
+                                        <Input
+                                          className="h-8 text-xs font-mono"
+                                          defaultValue={f.invoice_number ?? ''}
+                                          onBlur={e => {
+                                            if (e.target.value !== (f.invoice_number ?? '')) {
+                                              updateFaktur(f.id, { invoiceNumber: e.target.value });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-[10px] text-gray-400">거래처 주소 / Alamat</Label>
+                                        <Input
+                                          className="h-8 text-xs"
+                                          defaultValue={f.counterparty_address ?? ''}
+                                          onBlur={e => {
+                                            if (e.target.value !== (f.counterparty_address ?? '')) {
+                                              updateFaktur(f.id, { counterpartyAddress: e.target.value });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="md:col-span-2">
+                                        <Label className="text-[10px] text-gray-400">설명 / Deskripsi</Label>
+                                        <Input
+                                          className="h-8 text-xs"
+                                          defaultValue={f.description ?? ''}
+                                          onBlur={e => {
+                                            if (e.target.value !== (f.description ?? '')) {
+                                              updateFaktur(f.id, { description: e.target.value });
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="md:col-span-2">
+                                        <Label className="text-[10px] text-gray-400">메모 / Notes</Label>
+                                        <Input
+                                          className="h-8 text-xs"
+                                          defaultValue={f.notes ?? ''}
+                                          onBlur={e => {
+                                            if (e.target.value !== (f.notes ?? '')) {
+                                              updateFaktur(f.id, { notes: e.target.value });
                                             }
                                           }}
                                         />

@@ -23,6 +23,16 @@ interface QueueItem {
 const TAX_TYPES = ['PPh21', 'PPh23', 'PPN', 'PPh25'] as const;
 type TaxType = typeof TAX_TYPES[number];
 
+// Display label per bucket. PPh23 bucket aggregates PPh4(2)/22/23/26/15,
+// PPh25 bucket aggregates PPh25 + PPh Final UMKM. Labels reflect the
+// real composition so users don't think a row covers only one tax.
+const TAX_TYPE_LABEL: Record<TaxType, string> = {
+  PPh21: 'PPh 21',
+  PPh23: 'PPh 4(2) / 22 / 23 etc',
+  PPN: 'PPN',
+  PPh25: 'PPh 25 / Final',
+};
+
 // Filing deadline: 20th of following month for income/withholding taxes
 // PPN: last day of following month
 const getPayDeadline = (year: number, month: number, taxType: string): Date => {
@@ -192,7 +202,7 @@ export default function FilingStatusPage() {
 
                       return (
                         <tr key={row.taxType} className="border-t">
-                          <td className="p-2 font-medium">{row.taxType}</td>
+                          <td className="p-2 font-medium">{TAX_TYPE_LABEL[row.taxType]}</td>
                           <td className="p-2 text-right font-mono">{fmtRp(row.amount)}</td>
                           <td className="p-2">
                             <div className="text-xs">{fmtRp(row.paidAmount)}</div>

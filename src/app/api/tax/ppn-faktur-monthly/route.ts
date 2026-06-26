@@ -131,6 +131,8 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
     const {
       id, fakturNumber, fakturDate, counterpartyName, counterpartyNpwp,
       dpp, ppn, dppNilaiLain, isLuxury, fakturType,
+      // 2026-06-26: 신규 — 양식이 수집하지만 그동안 surface 안 되던 필드들.
+      invoiceNumber, counterpartyAddress, description, notes,
     } = body;
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
@@ -140,6 +142,10 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
     if (counterpartyName !== undefined) update.counterparty_name = counterpartyName;
     if (counterpartyNpwp !== undefined) update.counterparty_npwp = counterpartyNpwp;
     if (fakturType !== undefined) update.faktur_type = fakturType;
+    if (invoiceNumber !== undefined) update.invoice_number = invoiceNumber || null;
+    if (counterpartyAddress !== undefined) update.counterparty_address = counterpartyAddress || null;
+    if (description !== undefined) update.description = description || null;
+    if (notes !== undefined) update.notes = notes || null;
 
     if (dpp !== undefined) {
       const dppNum = Number(dpp);
