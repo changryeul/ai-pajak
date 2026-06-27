@@ -6998,6 +6998,8 @@
     "hasImportExportNote": "→ PPh 22及进口PPN义务，可能适用PPh 26",
     "hasRental": "租赁业务",
     "hasRentalNote": "→ 适用PPh 4(2) Final 10%",
+    "bizCategoryQuestion": "业务类别",
+    "bizCategoryHint": "用于自动应用代扣税类型（PPh 23 / 22 / 4(2) / PPN）。",
     "kbliAboutTitle": "什么是KBLI?",
     "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — 企业业务分类代码（5位）。用于税率确定和SPT申报,请**准确选择**。可选多项。",
     "kbliSearchLabel": "搜索KBLI（代码或描述）",

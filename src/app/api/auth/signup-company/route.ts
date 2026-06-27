@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       address,
       kbliCodes,
       primaryKbli,
+      businessCategory,
       taxProfile,
       jtcAgreement,
       signatureDataUrl,
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
       address?: string;
       kbliCodes?: string[];
       primaryKbli?: string;
+      businessCategory?: string | null;
       taxProfile?: {
         annualRevenue?: number;
         revenueYear?: number;
@@ -172,6 +174,9 @@ export async function POST(request: NextRequest) {
         company_name: companyName,
         npwp: npwpDigits,
         address: address || null,
+        // 2026-06-27: register/company step3 에서 받은 사업 카테고리 — completeness
+        // 가중치 2짜리 필수 항목이라 가입 직후 −17%p 를 막기 위함.
+        business_category: businessCategory || null,
         jtc_agreement_accepted: true,
         jtc_agreement_version: jtcAgreement.version || 'v1.0',
         jtc_agreement_accepted_at: new Date().toISOString(),

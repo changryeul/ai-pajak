@@ -7,9 +7,10 @@ import { useTranslations } from 'next-intl';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
 import {
   Building2, ArrowLeft, ArrowRight, ShieldCheck, FileCheck2,
-  Search, X, Loader2, CheckCircle,
+  Search, X, Loader2, CheckCircle, Camera, Sparkles,
 } from 'lucide-react';
 import { SignaturePad, type SignaturePadHandle } from '@/components/signature/SignaturePad';
+import { createClient } from '@/lib/supabase/client';
 
 interface KbliCode {
   code: string;
@@ -59,6 +60,37 @@ export default function CompanyRegisterPage() {
   const [representativeName, setRepresentativeName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  // 2026-06-27: NPWP 사진 → 회사명/NPWP/주소 자동 채움 (3 필드 한 번에).
+  // /company-profile 의 handleNpwpOcr 패턴을 가입 흐름으로 이식.
+  // /api/public/npwp-ocr 가 unauthenticated + rate-limited.
+  const ocrFileRef = useRef<HTMLInputElement>(null);
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [ocrMsg, setOcrMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const runNpwpOcr = async (file: File) => {
+    setOcrBusy(true);
+    setOcrMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/public/npwp-ocr', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok && data.success && (data.data?.npwp || data.data?.name)) {
+        if (data.data.npwp) setNpwp(formatNpwp(data.data.npwp));
+        if (data.data.name) setCompanyName((prev) => prev || data.data.name);
+        if (data.data.address) setAddress((prev) => prev || data.data.address);
+        const conf = Math.round((data.data.confidence || 0) * 100);
+        setOcrMsg({ type: 'ok', text: `NPWP 자동 인식 완료 (${conf}%)` });
+      } else if (res.status === 429) {
+        setOcrMsg({ type: 'err', text: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.' });
+      } else {
+        setOcrMsg({ type: 'err', text: 'NPWP 인식 실패 — 직접 입력해 주세요.' });
+      }
+    } catch {
+      setOcrMsg({ type: 'err', text: 'NPWP 인식 실패 — 직접 입력해 주세요.' });
+    } finally {
+      setOcrBusy(false);
+    }
+  };
 
   // Step 2: Tax profile
   const [annualRevenue, setAnnualRevenue] = useState('');
@@ -70,12 +102,16 @@ export default function CompanyRegisterPage() {
   const [hasImportExport, setHasImportExport] = useState(false);
   const [hasRentalBusiness, setHasRentalBusiness] = useState(false);
 
-  // Step 3: KBLI
+  // Step 3: KBLI + 사업 카테고리
   const [kbliSearch, setKbliSearch] = useState('');
   const [kbliResults, setKbliResults] = useState<KbliCode[]>([]);
   const [selectedKblis, setSelectedKblis] = useState<KbliCode[]>([]);
   const [primaryKbli, setPrimaryKbli] = useState<string | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  // 2026-06-27: business_category 는 /api/company-profile 의 completeness 가중치
+  // 2짜리 필수 항목인데 register 가 안 받아서 가입 직후 무조건 -17%p. step3 에
+  // 라디오 한 줄 추가로 흡수. KBLI 와 같은 step 에 둬서 step 수는 그대로.
+  const [businessCategory, setBusinessCategory] = useState<string>('');
 
   // Step 3: Terms
   const [agreeJtc, setAgreeJtc] = useState(false);
@@ -129,7 +165,7 @@ export default function CompanyRegisterPage() {
 
   const canProceedStep1 = companyName && isValidNpwp(npwp) && representativeName;
   const canProceedStep2 = true; // tax profile is optional but recommended
-  const canProceedStep3 = selectedKblis.length > 0 && primaryKbli;
+  const canProceedStep3 = selectedKblis.length > 0 && primaryKbli && !!businessCategory;
   // Step 4 — required consents AND signature must be present.
   // Credit-analysis consent is optional, so it is intentionally excluded.
   const canProceedStep4 = agreeJtc && agreeData && agreeTaxFiling && hasSignature;
@@ -163,6 +199,7 @@ export default function CompanyRegisterPage() {
           address,
           kbliCodes: selectedKblis.map(k => k.code),
           primaryKbli,
+          businessCategory: businessCategory || null,
           taxProfile: {
             annualRevenue: annualRevenue ? Number(annualRevenue) : undefined,
             revenueYear: revenueYear ? Number(revenueYear) : undefined,
@@ -188,6 +225,22 @@ export default function CompanyRegisterPage() {
       if (!res.ok || !data.success) {
         setError(data.error || t('errSignupFailed'));
         return;
+      }
+
+      // 2026-06-27: INDIVIDUAL flow 와 동일하게 자동 로그인 후 company-profile
+      // 로 직접 안내. 그래야 사용자가 가입 직후 회사 정보 30+ 추가 필드를
+      // 채우러 자연스럽게 진입함. signIn 실패 시에는 기존 success 화면으로
+      // fallback (사용자가 수동 로그인).
+      try {
+        const supabase = createClient();
+        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (!signInErr) {
+          router.push(`/${locale}/company-profile?welcome=1`);
+          router.refresh();
+          return;
+        }
+      } catch {
+        /* fall through to success card */
       }
 
       setSuccess(true);
@@ -264,6 +317,50 @@ export default function CompanyRegisterPage() {
             {/* Step 1: Company info */}
             {step === 1 && (
               <>
+                {/* NPWP OCR — 사진 한 장이면 회사명·NPWP·주소 자동 채움 */}
+                <div className="rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/40 p-3">
+                  <div className="flex items-start gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900">NPWP 사진으로 자동 채우기 (선택)</p>
+                      <p className="text-[11px] text-gray-600 mt-0.5">
+                        법인 NPWP 카드 사진 한 장 → 회사명·NPWP·주소 자동 인식.
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => ocrFileRef.current?.click()}
+                          disabled={ocrBusy}
+                          className="h-8 text-xs"
+                        >
+                          {ocrBusy ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Camera className="h-3 w-3 mr-1" />}
+                          NPWP 사진 업로드
+                        </Button>
+                        <input
+                          ref={ocrFileRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) void runNpwpOcr(f);
+                            if (e.target) e.target.value = '';
+                          }}
+                        />
+                        {ocrMsg && (
+                          <span className={`text-[11px] font-medium ${ocrMsg.type === 'ok' ? 'text-emerald-700' : 'text-red-600'}`}>
+                            {ocrMsg.text}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-xs font-medium text-gray-700">{t('fieldCompanyName')}</label>
                   <Input value={companyName} onChange={e => setCompanyName(e.target.value)}
@@ -399,9 +496,52 @@ export default function CompanyRegisterPage() {
               </>
             )}
 
-            {/* Step 3: KBLI */}
+            {/* Step 3: KBLI + 사업 카테고리 */}
             {step === 3 && (
               <>
+                {/* 카테고리 — completeness 가중치 2짜리 필수 항목 */}
+                <div>
+                  <label className="text-xs font-medium text-gray-700">
+                    {t('bizCategoryQuestion')} <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-[11px] text-gray-500 mt-0.5">{t('bizCategoryHint')}</p>
+                  <div className="mt-2 grid grid-cols-2 gap-1.5">
+                    {[
+                      { v: 'SERVICE',           ko: '서비스',        id: 'Jasa',                tax: 'PPh 23 2%' },
+                      { v: 'TRADING',           ko: '도소매',        id: 'Perdagangan',         tax: 'PPh 22' },
+                      { v: 'MANUFACTURING',     ko: '제조',          id: 'Manufaktur',          tax: 'PPh 22' },
+                      { v: 'CONSTRUCTION',      ko: '건설',          id: 'Konstruksi',          tax: 'PPh 4(2)' },
+                      { v: 'REAL_ESTATE',       ko: '부동산',        id: 'Real Estat',          tax: 'PPh 4(2) 2.5%' },
+                      { v: 'FNB_RESTAURANT',    ko: '식음료(매장)',  id: 'Restoran',            tax: 'PB1' },
+                      { v: 'FNB_CATERING',      ko: '케이터링',      id: 'Katering',            tax: 'PPh 23 2%' },
+                      { v: 'TRANSPORTATION',    ko: '운송',          id: 'Transportasi',        tax: 'PPh 15' },
+                      { v: 'MINING',            ko: '광업',          id: 'Pertambangan',        tax: 'PPh 22 Mining' },
+                      { v: 'DIGITAL_PLATFORM',  ko: '디지털 플랫폼', id: 'Platform Digital',    tax: 'PPN PMSE' },
+                      { v: 'OTHER',             ko: '기타',          id: 'Lainnya',             tax: '—' },
+                    ].map((c) => {
+                      const active = businessCategory === c.v;
+                      return (
+                        <button
+                          key={c.v}
+                          type="button"
+                          onClick={() => setBusinessCategory(c.v)}
+                          className={`text-left p-2 rounded-lg border text-[11px] transition ${
+                            active
+                              ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200'
+                              : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/40'
+                          }`}
+                        >
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-semibold text-gray-900">{c.ko}</span>
+                            <span className="text-gray-500">/ {c.id}</span>
+                          </div>
+                          <p className="text-[10px] text-emerald-700 mt-0.5">{c.tax}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
                   <p className="font-medium">{t('kbliAboutTitle')}</p>
                   <p className="mt-1">

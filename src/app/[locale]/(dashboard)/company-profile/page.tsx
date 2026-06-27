@@ -2,8 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
+import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,9 +114,22 @@ export default function CompanyProfilePage() {
     { value: 'OTHER', label: t('k24_7f598d'), icon: Building2, desc: '', taxNote: '' },
   ];
   const { session } = useSession();
+  // 2026-06-27: consultant 가 picker 로 다른 고객을 봐도 항상 첫 active assignment
+  // 만 로드되던 문제 해결. CUSTOMER role 은 session.customerId 그대로.
+  const {
+    customerId: effectiveCustomerId,
+    isConsultant,
+    customers,
+    selectedCustomerId,
+    setSelectedCustomerId,
+  } = useEffectiveCustomerId({ companyOnly: true });
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+  // 2026-06-27: register/company 가 가입 직후 ?welcome=1 로 보낸다.
+  // 이 페이지에 처음 진입한 사용자에게 한 줄 환영 + 가이드.
+  const searchParams = useSearchParams();
+  const isWelcome = searchParams?.get('welcome') === '1';
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -138,14 +152,19 @@ export default function CompanyProfilePage() {
 
   const loadProfile = useCallback(async () => {
     if (!session?.customerId && !session?.consultantId) return;
+    // consultant 면 picker 의 customerId 가 도착해야 의미가 있음
+    if (isConsultant && !effectiveCustomerId) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/company-profile');
+      const url = effectiveCustomerId
+        ? `/api/company-profile?customerId=${effectiveCustomerId}`
+        : '/api/company-profile';
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success) setProfile(data.data);
     } catch { /* */ }
     finally { setLoading(false); }
-  }, [session]);
+  }, [session, isConsultant, effectiveCustomerId]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
@@ -203,11 +222,15 @@ export default function CompanyProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
-      // 1. 프로필 저장
+      // 1. 프로필 저장 — consultant 인 경우 picker 의 customerId 를 body 에 명시.
+      // (server PUT 은 body.id 있을 때 그 customer 의 profile 을 update.)
+      const payload = effectiveCustomerId
+        ? { ...profile, id: effectiveCustomerId }
+        : profile;
       const res = await fetch('/api/company-profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!data.success) {
@@ -296,6 +319,42 @@ export default function CompanyProfilePage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
+      {/* 2026-06-27: consultant 면 picker 노출 — 어느 고객의 회사 프로필을
+          보고/수정 중인지 명확하게. CUSTOMER role 은 안 보임. */}
+      {isConsultant && customers.length > 0 && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <label className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            고객 선택
+          </label>
+          <select
+            value={selectedCustomerId}
+            onChange={(e) => setSelectedCustomerId(e.target.value)}
+            className="flex-1 max-w-md rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+          >
+            {customers.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.company_name || c.full_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {isWelcome && (
+        <div className="mb-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 p-4">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm flex-shrink-0">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-gray-900">가입을 환영합니다 — 회사 정보 보완</p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                가입에서 받은 항목 외에 30+ 추가 필드를 채우면 세무 자동화 정확도가 올라갑니다.
+                지금 100%까지 채우거나, 나중에 사이드바 → 계정 → 회사 정보 에서 마저 입력해도 됩니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <SimpleHeader completeness={completeness} onSave={handleSave} saving={saving} />
       <SimpleCompletenessCard completeness={completeness} />
       <SimpleBasicInfo

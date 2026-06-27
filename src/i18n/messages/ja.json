@@ -6998,6 +6998,8 @@
     "hasImportExportNote": "→ PPh 22および輸入PPN義務、PPh 26適用の可能性",
     "hasRental": "賃貸事業",
     "hasRentalNote": "→ PPh 4(2) Final 10%適用",
+    "bizCategoryQuestion": "事業カテゴリ",
+    "bizCategoryHint": "源泉徴収税の種類（PPh 23 / 22 / 4(2) / PPN）の自動適用に使用されます。",
     "kbliAboutTitle": "KBLIとは？",
     "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — 法人の事業種別分類コード（5桁）。税率決定やSPT作成に使用されるため、**正確に選択**してください。複数選択可能です。",
     "kbliSearchLabel": "KBLI検索（コードまたは説明）",

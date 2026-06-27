@@ -7097,6 +7097,8 @@
     "hasImportExportNote": "→ PPh 22 및 수입 PPN 의무, PPh 26 적용 가능",
     "hasRental": "임대 사업",
     "hasRentalNote": "→ PPh 4(2) Final 10% 적용",
+    "bizCategoryQuestion": "사업 카테고리 (Kategori Usaha)",
+    "bizCategoryHint": "세목(PPh 23 / PPh 22 / PPh 4(2) / PPN) 자동 적용에 사용됩니다.",
     "kbliAboutTitle": "KBLI란?",
     "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — 법인의 사업 업종 분류 코드(5자리)입니다. 세율 결정과 SPT 작성에 사용되므로 **정확하게 선택**해주세요. 여러 개 선택 가능합니다.",
     "kbliSearchLabel": "업종 검색 (코드 또는 설명)",

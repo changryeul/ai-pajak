@@ -6998,6 +6998,8 @@
     "hasImportExportNote": "→ PPh 22 and import PPN obligations; PPh 26 may apply",
     "hasRental": "Rental business",
     "hasRentalNote": "→ PPh 4(2) Final 10% applies",
+    "bizCategoryQuestion": "Business Category",
+    "bizCategoryHint": "Used to auto-apply withholding tax types (PPh 23 / 22 / 4(2) / PPN).",
     "kbliAboutTitle": "What is KBLI?",
     "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — 5-digit business classification code. Used for tax rate determination and SPT filing; **choose accurately**. Multiple selections allowed.",
     "kbliSearchLabel": "Search KBLI (code or description)",

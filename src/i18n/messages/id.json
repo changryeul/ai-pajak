@@ -6998,6 +6998,8 @@
     "hasImportExportNote": "→ Kewajiban PPh 22 dan PPN impor, PPh 26 dapat berlaku",
     "hasRental": "Usaha persewaan",
     "hasRentalNote": "→ PPh 4(2) Final 10% berlaku",
+    "bizCategoryQuestion": "Kategori Usaha",
+    "bizCategoryHint": "Digunakan untuk menentukan jenis pajak otomatis (PPh 23 / 22 / 4(2) / PPN).",
     "kbliAboutTitle": "Apa itu KBLI?",
     "kbliAbout": "Klasifikasi Baku Lapangan Usaha Indonesia — kode 5 digit klasifikasi jenis usaha perusahaan. Digunakan untuk menentukan tarif pajak dan pengisian SPT, **pilih dengan akurat**. Bisa pilih lebih dari satu.",
     "kbliSearchLabel": "Cari KBLI (kode atau deskripsi)",

@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3, Sparkles } from 'lucide-react';
+import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3, Sparkles, ArrowRight } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { TaxAdvisoryPanel } from '@/components/dashboard/TaxAdvisoryPanel';
 
@@ -28,6 +28,102 @@ interface CompanyInfo {
   business_category?: string;
   annual_revenue?: number;
   is_pkp?: boolean;
+  // 2026-06-27: 완성도 배너에 필요. /api/company-profile 가 항상 응답에 포함.
+  profile_completeness?: number;
+  legal_form?: string;
+  established_year?: number;
+}
+
+/**
+ * LinkedIn-style 회사 프로필 완성도 배너.
+ * V2 도입 시 dashboard/page.tsx 의 동명 함수가 dead 가 되어 노출되지 않던
+ * 진입점을 복원. 100% 미만일 때만 렌더, '+N% 항목 입력' CTA 가 모두
+ * /company-profile 로 점프.
+ */
+function ProfileCompletenessBanner({
+  completeness,
+  locale,
+  companyInfo,
+}: {
+  completeness: number;
+  locale: string;
+  companyInfo: CompanyInfo;
+}) {
+  const tc = useTranslations('dashboardCompany');
+  const isReady = completeness >= 80;
+
+  const nextItems: Array<{ label: string; boost: string }> = [];
+  if (!companyInfo.npwp) nextItems.push({ label: tc('enterNpwp'), boost: '+14%' });
+  if (!companyInfo.business_category) nextItems.push({ label: tc('selectBusinessType'), boost: '+17%' });
+  if (!companyInfo.annual_revenue || companyInfo.annual_revenue <= 0) nextItems.push({ label: tc('enterRevenue'), boost: '+9%' });
+
+  const gradient = isReady
+    ? 'from-emerald-50 via-teal-50 to-cyan-50 border-emerald-200'
+    : completeness >= 50
+    ? 'from-amber-50 via-orange-50 to-yellow-50 border-amber-200'
+    : 'from-red-50 via-rose-50 to-pink-50 border-red-200';
+  const progressColor = isReady ? 'bg-emerald-500' : completeness >= 50 ? 'bg-amber-500' : 'bg-red-500';
+  const ringColor = isReady ? '#10b981' : completeness >= 50 ? '#f59e0b' : '#ef4444';
+
+  return (
+    <div className={`p-5 rounded-2xl border-2 bg-gradient-to-br ${gradient}`}>
+      <div className="flex items-start gap-4">
+        <div className="relative h-14 w-14 flex-shrink-0 flex items-center justify-center">
+          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#e5e7eb" strokeWidth="5" />
+            <circle cx="28" cy="28" r="24" fill="none"
+              stroke={ringColor}
+              strokeWidth="5"
+              strokeDasharray={`${(completeness / 100) * 150.8} 150.8`}
+              strokeLinecap="round"
+              className="transition-all duration-700" />
+          </svg>
+          <span className="text-sm font-bold text-gray-800">{completeness}%</span>
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <p className="font-bold text-sm text-gray-900">
+                {isReady ? tc('profileAlmostDone') : tc('completeProfile')}
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {isReady ? tc('profileReadyHint') : tc('profileNotReadyHint')}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/company-profile`}
+              className={`flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition-colors ${
+                isReady ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
+              }`}
+            >
+              {tc('completeProfileBtn')}
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
+          <div className="h-2 bg-white/70 rounded-full overflow-hidden mt-3">
+            <div className={`h-full ${progressColor} transition-all duration-700 ease-out`} style={{ width: `${completeness}%` }} />
+          </div>
+
+          {nextItems.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {nextItems.map((item, i) => (
+                <Link
+                  key={i}
+                  href={`/${locale}/company-profile`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/80 hover:bg-white border border-gray-200 rounded-full text-[11px] font-medium text-gray-700 hover:border-gray-300 transition-all"
+                >
+                  <span className="text-indigo-700 font-bold">{item.boost}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const UNPAID_STATUSES = ['EBILLING_GENERATED', 'PAYMENT_PENDING'];
@@ -109,8 +205,21 @@ export function CorporateDashboardV2({
 
   const companyName = companyInfo?.company_name || session.fullName || '—';
 
+  // 2026-06-27: 회사 프로필 완성도 < 100 일 때만 배너 노출. 가입 직후
+  // ≈61% 부터 시작해서 사용자가 /company-profile 로 가야 한다는 신호.
+  const completeness = companyInfo?.profile_completeness ?? 0;
+
   return (
     <div className="space-y-6">
+      {/* Profile completeness banner — only when there is real room to fill */}
+      {companyInfo && completeness < 100 && (
+        <ProfileCompletenessBanner
+          completeness={completeness}
+          locale={locale}
+          companyInfo={companyInfo}
+        />
+      )}
+
       {/* Hero Header — emerald/teal for corporate (mirrors the register/company colorway) */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-green-800 p-6 md:p-8 text-white">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
