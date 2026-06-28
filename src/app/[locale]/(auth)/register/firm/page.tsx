@@ -21,8 +21,9 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Loader2, Briefcase, User, Building2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Briefcase } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { RegisterTypeTabs } from '@/components/auth/RegisterTypeTabs';
 
 interface Step1Data {
   firmName: string;
@@ -119,6 +120,7 @@ export default function FirmRegisterPage() {
       <div className="w-full max-w-md">
         <Card className="rounded-2xl border-0 shadow-lg overflow-hidden">
           <CardContent className="p-6 md:p-8">
+            {step === 1 && <RegisterTypeTabs active="firm" />}
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center shadow-sm">
@@ -197,23 +199,6 @@ export default function FirmRegisterPage() {
                 >
                   {t('auth.next')}
                 </Button>
-
-                <div className="pt-3 mt-2 border-t border-gray-100 grid grid-cols-2 gap-2">
-                  <Link
-                    href={`/${locale}/register`}
-                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition text-xs text-gray-700"
-                  >
-                    <User className="h-4 w-4 text-blue-600" />
-                    {t('firmSignupPage.switchIndividual')}
-                  </Link>
-                  <Link
-                    href={`/${locale}/register/company`}
-                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition text-xs text-gray-700"
-                  >
-                    <Building2 className="h-4 w-4 text-emerald-600" />
-                    {t('auth.companySignup')}
-                  </Link>
-                </div>
 
                 <p className="text-center text-sm text-gray-600 pt-2">
                   {t('auth.alreadyHaveAccount')}{' '}

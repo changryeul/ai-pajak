@@ -26,8 +26,9 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Loader2, User, Building2, Briefcase, Camera, Sparkles } from 'lucide-react';
+import { ArrowLeft, Loader2, User, Camera, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { RegisterTypeTabs } from '@/components/auth/RegisterTypeTabs';
 
 type IdType = 'NPWP' | 'NIK';
 
@@ -187,6 +188,9 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <Card className="rounded-2xl border-0 shadow-lg overflow-hidden">
           <CardContent className="p-6 md:p-8">
+            {/* 2026-06-28: step1 에서만 3-tab picker — 사용자가 회원가입 누르면
+                3 종(개인/법인/외부 세무 사무소) 모두 보고 선택할 수 있도록. */}
+            {step === 1 && <RegisterTypeTabs active="individual" />}
             <div className="mb-6">
               <h1 className="text-xl font-bold text-gray-900">
                 {step === 1 ? t('auth.serviceSignup') : t('auth.setPassword')}
@@ -326,24 +330,6 @@ export default function RegisterPage() {
                 <Button type="submit" className="w-full h-11">
                   {t('auth.next')}
                 </Button>
-
-                {/* Secondary routes for non-INDIVIDUAL signup */}
-                <div className="pt-3 mt-2 border-t border-gray-100 grid grid-cols-2 gap-2">
-                  <Link
-                    href={`/${locale}/register/company`}
-                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition text-xs text-gray-700"
-                  >
-                    <Building2 className="h-4 w-4 text-emerald-600" />
-                    {t('auth.companySignup')}
-                  </Link>
-                  <Link
-                    href={`/${locale}/register/firm`}
-                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition text-xs text-gray-700"
-                  >
-                    <Briefcase className="h-4 w-4 text-purple-600" />
-                    {t('auth.firmSignup')}
-                  </Link>
-                </div>
 
                 <p className="text-center text-sm text-gray-600 pt-2">
                   {t('auth.alreadyHaveAccount')}{' '}

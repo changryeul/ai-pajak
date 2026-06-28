@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
@@ -11,6 +10,7 @@ import {
 } from 'lucide-react';
 import { SignaturePad, type SignaturePadHandle } from '@/components/signature/SignaturePad';
 import { createClient } from '@/lib/supabase/client';
+import { RegisterTypeTabs } from '@/components/auth/RegisterTypeTabs';
 
 interface KbliCode {
   code: string;
@@ -288,6 +288,9 @@ export default function CompanyRegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100 p-4 py-10">
       <div className="max-w-2xl mx-auto">
+        {/* 2026-06-28: step1 에서만 3-tab picker — 사용자가 회원가입 누르면
+            3 종 모두 보고 선택할 수 있도록. step2+ 에선 wizard 흐름 보존. */}
+        {step === 1 && <RegisterTypeTabs active="company" />}
         {/* Header */}
         <div className="text-center mb-6">
           <div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-sm">
@@ -750,16 +753,15 @@ export default function CompanyRegisterPage() {
           </CardContent>
 
           <CardFooter className="flex justify-between gap-3">
+            {/* step1 에서 picker 가 이미 노출되므로 footer 의 "← 개인 가입으로"
+                는 step2+ 에서만 의미 있음. step1 에서는 빈 공간으로 두어 next
+                버튼이 오른쪽 정렬되도록 함. */}
             {step > 1 ? (
               <Button variant="outline" onClick={() => setStep(step - 1)} disabled={isSubmitting}>
                 <ArrowLeft className="h-4 w-4 mr-1" />{t('previousCta')}
               </Button>
             ) : (
-              <Link href={`/${locale}/register`}>
-                <Button variant="ghost">
-                  <ArrowLeft className="h-4 w-4 mr-1" />{t('goToIndividual')}
-                </Button>
-              </Link>
+              <span />
             )}
 
             {step < 5 ? (
