@@ -79,6 +79,10 @@ export type FooterCopy = {
 export type LandingContent = {
   nav: { product: string; start: string; difference: string; faq: string };
   login: string;
+  // 2026-06-28: 가입 진입 CTA — header / hero / start section.
+  signupCta: string;
+  signupIndividualCta: string;
+  signupCompanyCta: string;
   viewPricing: string;
   chips: string;
   heroTop: string;

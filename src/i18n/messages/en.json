@@ -4822,6 +4822,11 @@
     "editFieldDescription": "Description"
   },
   "companyProfile": {
+    "welcomeTitle": "Welcome — complete your company profile",
+    "welcomeBody": "Beyond what we collected during signup, filling 30+ more fields boosts tax automation accuracy. Finish it now to reach 100%, or come back later via Sidebar → Account → Company Info.",
+    "savedGoDashboardNow": "Go to dashboard now",
+    "savedNextItems": "Next suggested: {items}",
+    "savedContinueLater": "You can finish this later from Sidebar → Account → Company Info.",
     "k0_6f2592": "Services (Jasa)",
     "k1_677110": "Consulting, legal, accounting, etc.",
     "k2_3f6978": "Subject to withholding tax",
@@ -6970,6 +6975,7 @@
     "successTitle": "Registration complete",
     "successLinkSent": "A confirmation link has been sent to {email}.",
     "successAdvisor": "A tax advisor will contact you shortly.",
+    "successAutoSigninFailed": "Auto sign-in failed — please log in again with the same email/password.",
     "successLoginCta": "Go to login page",
     "heading": "Corporate Customer Signup",
     "subheading": "Manage your taxes with Jakarta Tax Consulting",

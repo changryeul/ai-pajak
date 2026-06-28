@@ -57,7 +57,7 @@ export default function DashboardPage() {
   const t = useTranslations();
   const params = useParams();
   const locale = params.locale as string;
-  const { session, isLoading } = useSession();
+  const { session, isLoading, refetch: refetchSession } = useSession();
   usePageTitle('Dasbor');
 
   // Operator-tier landing redirect.
@@ -141,7 +141,13 @@ export default function DashboardPage() {
     );
   }
 
-  return <CustomerDashboardWithOnboarding session={session} locale={locale} />;
+  return (
+    <CustomerDashboardWithOnboarding
+      session={session}
+      locale={locale}
+      refetchSession={refetchSession}
+    />
+  );
 }
 
 // Customer Dashboard branching — corporate/personal split + INDIVIDUAL fallback.
@@ -149,13 +155,15 @@ export default function DashboardPage() {
 //   - 분기: customer_type 으로 V2 (COMPANY) / V3 (INDIVIDUAL).
 //   - 첫 frame race fix: customerType 미도착 (setup-account 진행 중) 일 때
 //     INDIVIDUAL 구버전 `<CustomerDashboard>` 가 잘못 보이던 깜빡임 차단.
-//     setup-account 가 끝나면 useSession 이 refetch 되어 정확한 분기로 진입.
+//     setup-account 가 끝나면 refetchSession() 호출로 새 customerId 반영.
 function CustomerDashboardWithOnboarding({
   session,
   locale,
+  refetchSession,
 }: {
   session: { customerId?: string; customerType?: 'INDIVIDUAL' | 'COMPANY'; fullName?: string };
   locale: string;
+  refetchSession: () => Promise<void>;
 }) {
   const [setupInFlight, setSetupInFlight] = useState(false);
 
@@ -169,15 +177,18 @@ function CustomerDashboardWithOnboarding({
     }
   }, []);
 
-  // Ensure customer record + role exists (fallback for email-verified users)
+  // Ensure customer record + role exists (fallback for email-verified users).
+  // 2026-06-28: setup-account 가 끝나면 useSession.refetch() 호출 — 새로 만들어진
+  // customerId/customerType 가 즉시 반영되어 사용자가 새로고침 없이 V2/V3 진입.
   useEffect(() => {
     if (!session.customerId) {
       setSetupInFlight(true);
       fetch('/api/auth/setup-account', { method: 'POST', credentials: 'include' })
+        .then(() => refetchSession())
         .catch(() => {})
         .finally(() => setSetupInFlight(false));
     }
-  }, [session.customerId]);
+  }, [session.customerId, refetchSession]);
 
   if (session.customerType === 'COMPANY') {
     return <CorporateDashboardV2 session={session} locale={locale} />;

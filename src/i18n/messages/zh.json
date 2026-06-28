@@ -4822,6 +4822,11 @@
     "editFieldDescription": "说明"
   },
   "companyProfile": {
+    "welcomeTitle": "欢迎 — 请完善公司信息",
+    "welcomeBody": "除注册时提供的项目外,再填写30+附加字段可提高税务自动化的准确度。现在补全至100%,或稍后通过侧边栏 → 账户 → 公司信息再次填写。",
+    "savedGoDashboardNow": "立即前往仪表板",
+    "savedNextItems": "下一项建议: {items}",
+    "savedContinueLater": "您可以稍后通过 侧边栏 → 账户 → 公司信息 继续填写。",
     "k0_6f2592": "Services (Jasa)",
     "k1_677110": "Consulting, legal, accounting, etc.",
     "k2_3f6978": "Subject to withholding tax",
@@ -6970,6 +6975,7 @@
     "successTitle": "注册完成",
     "successLinkSent": "确认链接已发送到{email}。",
     "successAdvisor": "税务顾问稍后会联系您。",
+    "successAutoSigninFailed": "自动登录失败 — 请使用相同的邮箱/密码再次登录。",
     "successLoginCta": "前往登录页面",
     "heading": "企业客户注册",
     "subheading": "与Jakarta Tax Consulting一起管理您的税务",

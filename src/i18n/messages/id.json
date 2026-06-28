@@ -4822,6 +4822,11 @@
     "editFieldDescription": "Deskripsi"
   },
   "companyProfile": {
+    "welcomeTitle": "Selamat datang — lengkapi profil perusahaan",
+    "welcomeBody": "Selain data saat pendaftaran, mengisi 30+ kolom tambahan meningkatkan akurasi otomasi pajak. Lengkapi sekarang hingga 100%, atau kembali nanti melalui Sidebar → Akun → Info Perusahaan.",
+    "savedGoDashboardNow": "Buka dasbor sekarang",
+    "savedNextItems": "Saran berikutnya: {items}",
+    "savedContinueLater": "Anda dapat melanjutkan nanti dari Sidebar → Akun → Info Perusahaan.",
     "k0_6f2592": "Jasa",
     "k1_677110": "Konsultan, hukum, akuntansi, dll.",
     "k2_3f6978": "Dikenakan PPh potongan",
@@ -6970,6 +6975,7 @@
     "successTitle": "Pendaftaran berhasil",
     "successLinkSent": "Tautan konfirmasi telah dikirim ke email ({email}).",
     "successAdvisor": "Konsultan pajak akan segera menghubungi Anda.",
+    "successAutoSigninFailed": "Login otomatis gagal — silakan masuk lagi dengan email/kata sandi yang sama.",
     "successLoginCta": "Ke halaman login",
     "heading": "Pendaftaran Pelanggan Korporat",
     "subheading": "Kelola pajak Anda bersama Jakarta Tax Consulting",

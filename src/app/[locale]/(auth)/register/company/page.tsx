@@ -53,6 +53,9 @@ export default function CompanyRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  // 2026-06-28: signup 은 성공했지만 자동 로그인이 silent 실패한 경우.
+  // success 카드에 "수동 로그인 필요" 한 줄을 추가로 노출.
+  const [autoSigninFailed, setAutoSigninFailed] = useState(false);
 
   // Step 1: Company info
   const [companyName, setCompanyName] = useState('');
@@ -231,10 +234,12 @@ export default function CompanyRegisterPage() {
       // 로 직접 안내. 그래야 사용자가 가입 직후 회사 정보 30+ 추가 필드를
       // 채우러 자연스럽게 진입함. signIn 실패 시에는 기존 success 화면으로
       // fallback (사용자가 수동 로그인).
+      let signinOk = false;
       try {
         const supabase = createClient();
         const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
         if (!signInErr) {
+          signinOk = true;
           router.push(`/${locale}/company-profile?welcome=1`);
           router.refresh();
           return;
@@ -243,6 +248,8 @@ export default function CompanyRegisterPage() {
         /* fall through to success card */
       }
 
+      // 2026-06-28: silent 실패 신호를 success 카드에 명시.
+      if (!signinOk) setAutoSigninFailed(true);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Server error');
@@ -263,6 +270,11 @@ export default function CompanyRegisterPage() {
             <CardDescription className="mt-2 text-xs">
               <p>{t('successLinkSent', { email })}</p>
               <p className="mt-1">{t('successAdvisor')}</p>
+              {autoSigninFailed && (
+                <p className="mt-2 rounded-md bg-amber-50 border border-amber-200 px-2 py-1.5 text-amber-800">
+                  {t('successAutoSigninFailed')}
+                </p>
+              )}
             </CardDescription>
           </CardHeader>
           <CardFooter>

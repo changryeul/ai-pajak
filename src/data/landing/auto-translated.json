@@ -738,6 +738,9 @@
         "faq": "FAQ"
       },
       "login": "로그인",
+      "signupCta": "회원가입",
+      "signupIndividualCta": "개인 가입",
+      "signupCompanyCta": "법인 가입",
       "viewPricing": "요금제 확인하기",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "복잡한 세무신고,",
@@ -1775,6 +1778,9 @@
         "faq": "FAQ"
       },
       "login": "Log In",
+      "signupCta": "Sign Up",
+      "signupIndividualCta": "Individual Signup",
+      "signupCompanyCta": "Company Signup",
       "viewPricing": "View Pricing",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "Tax filing, simplified.",
@@ -2812,6 +2818,9 @@
         "faq": "FAQ"
       },
       "login": "Masuk",
+      "signupCta": "Daftar",
+      "signupIndividualCta": "Daftar Perorangan",
+      "signupCompanyCta": "Daftar Badan",
       "viewPricing": "Lihat Paket Harga",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "Urusan pajak yang rumit,",
@@ -3849,6 +3858,9 @@
         "faq": "FAQ"
       },
       "login": "登录",
+      "signupCta": "注册",
+      "signupIndividualCta": "个人注册",
+      "signupCompanyCta": "企业注册",
       "viewPricing": "查看套餐",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "繁琐的税务申报，",
@@ -4886,6 +4898,9 @@
         "faq": "FAQ"
       },
       "login": "ログイン",
+      "signupCta": "新規登録",
+      "signupIndividualCta": "個人登録",
+      "signupCompanyCta": "法人登録",
       "viewPricing": "料金プランを見る",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "複雑な税務申告も、",

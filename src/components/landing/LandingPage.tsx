@@ -55,6 +55,19 @@ export default function LandingPage({ locale }: { locale: string }) {
     router.push(loginUrl);
   };
 
+  // 2026-06-28: 가입 진입 — landing CTA 가 그동안 모두 /billing 으로만 보내서
+  // 사용자가 /login → /register 까지 손수 찾아야 했음.
+  const goRegisterIndividual = () => {
+    router.push(`/${locale}/register`);
+  };
+  const goRegisterCompany = () => {
+    router.push(`/${locale}/register/company`);
+  };
+  const goRegisterByPersona = () => {
+    if (persona === 'corporate') goRegisterCompany();
+    else goRegisterIndividual();
+  };
+
   const onLangChange = (newLocale: string) => {
     router.push(`/${newLocale}`);
   };
@@ -105,6 +118,12 @@ export default function LandingPage({ locale }: { locale: string }) {
             >
               {content.login}
             </button>
+            <button
+              onClick={goRegisterByPersona}
+              className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-700"
+            >
+              {content.signupCta}
+            </button>
           </div>
         </div>
       </header>
@@ -137,12 +156,18 @@ export default function LandingPage({ locale }: { locale: string }) {
                 </span>
               ))}
             </div>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-wrap gap-3">
               <button
-                onClick={goLogin}
+                onClick={goRegisterIndividual}
                 className="rounded-full bg-emerald-600 px-7 py-3 text-sm font-black text-white transition hover:bg-emerald-700"
               >
-                {content.login} →
+                {content.signupIndividualCta} →
+              </button>
+              <button
+                onClick={goRegisterCompany}
+                className="rounded-full bg-slate-950 px-7 py-3 text-sm font-black text-white transition hover:bg-slate-800"
+              >
+                {content.signupCompanyCta} →
               </button>
               <button
                 onClick={() => goTo('pricing')}
@@ -460,6 +485,15 @@ export default function LandingPage({ locale }: { locale: string }) {
                   }`}
                 >
                   {content.corporateBtn}
+                </button>
+              </div>
+              {/* 2026-06-28: 선택한 persona 에 맞춰 가입 페이지로 바로 진입. */}
+              <div className="mt-4">
+                <button
+                  onClick={goRegisterByPersona}
+                  className="rounded-full bg-emerald-600 px-7 py-3 text-sm font-black text-white transition hover:bg-emerald-700"
+                >
+                  {persona === 'corporate' ? content.signupCompanyCta : content.signupIndividualCta} →
                 </button>
               </div>
               <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">

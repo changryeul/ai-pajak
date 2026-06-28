@@ -136,6 +136,9 @@ export default function CompanyProfilePage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic', 'business', 'income']));
+  // 2026-06-28: 저장 후 사용자 동선 명확화 — 완성도 < 80% 일 때 토스트만 띄우고
+  // 머무는 대신 지속 노출되는 "지금 대시보드로 이동" CTA 배너.
+  const [showPostSaveCta, setShowPostSaveCta] = useState(false);
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -251,13 +254,15 @@ export default function CompanyProfilePage() {
         setProfile(data.data);
       }
 
-      // 3. 완성도 80% 이상이면 대시보드로 이동 안내
+      // 3. 완성도 80% 이상이면 대시보드로 자동 이동 안내,
+      //    미만이면 지속 노출되는 post-save CTA 배너 표시.
       const completeness = data.data?.profile_completeness || taxData.data?.profile?.profile_completeness || 0;
       if (completeness >= 80) {
         showMsg('success', t('k44_489111'));
         setTimeout(() => router.push(`/${locale}/dashboard`), 2000);
       } else {
         showMsg('success', `${t('k45_a50494')} ${completeness}%). ${t('k46_b1a005')}`);
+        setShowPostSaveCta(true);
       }
     } catch {
       showMsg('error', t('k47_175c5f'));
@@ -346,12 +351,30 @@ export default function CompanyProfilePage() {
               <Building2 className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm text-gray-900">가입을 환영합니다 — 회사 정보 보완</p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                가입에서 받은 항목 외에 30+ 추가 필드를 채우면 세무 자동화 정확도가 올라갑니다.
-                지금 100%까지 채우거나, 나중에 사이드바 → 계정 → 회사 정보 에서 마저 입력해도 됩니다.
-              </p>
+              <p className="font-bold text-sm text-gray-900">{t('welcomeTitle')}</p>
+              <p className="text-xs text-gray-600 mt-0.5">{t('welcomeBody')}</p>
             </div>
+          </div>
+        </div>
+      )}
+      {showPostSaveCta && (
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-gray-900">
+                {nextItems.length > 0
+                  ? t('savedNextItems', { items: nextItems.map(n => n.label).slice(0, 3).join(' · ') })
+                  : t('savedContinueLater')}
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">{t('savedContinueLater')}</p>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => router.push(`/${locale}/dashboard`)}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {t('savedGoDashboardNow')}
+            </Button>
           </div>
         </div>
       )}
