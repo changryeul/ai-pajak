@@ -60,7 +60,10 @@ export default function RegisterMandatePage() {
         return;
       }
 
-      router.push(`/${locale}/dashboard`);
+      // 2026-06-28: INDIVIDUAL 도 가입 끝나면 dashboard 가 아니라 my-profile
+      // welcome=1 로 안내 — 회사 가입 흐름과 동일한 폭 (NPWP/주소/PTKP/Coretax
+      // 정보 등을 채울 진입점이 첫 화면이어야 함).
+      router.push(`/${locale}/my-profile?welcome=1`);
     } catch {
       setError(t('errors.serverError'));
     } finally {

@@ -19,14 +19,14 @@
  * (PMK 112/2022 gradually unified NPWP ↔ NIK for individuals).
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Loader2, User, Building2, Briefcase } from 'lucide-react';
+import { ArrowLeft, Loader2, User, Building2, Briefcase, Camera, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 type IdType = 'NPWP' | 'NIK';
@@ -68,6 +68,42 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // 2026-06-28: NPWP/NIK 사진 → 이름 + 식별번호 자동 채움.
+  // /api/public/npwp-ocr 가 회사 가입에서 쓰는 동일 endpoint (rate-limited).
+  const ocrFileRef = useRef<HTMLInputElement>(null);
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [ocrMsg, setOcrMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const runOcr = async (file: File) => {
+    setOcrBusy(true);
+    setOcrMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/public/npwp-ocr', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok && data.success && (data.data?.npwp || data.data?.nik || data.data?.name)) {
+        const picked: IdType = data.data.npwp ? 'NPWP' : 'NIK';
+        const digits = (picked === 'NPWP' ? data.data.npwp : data.data.nik) || '';
+        setBasics((prev) => ({
+          ...prev,
+          fullName: prev.fullName || data.data.name || '',
+          idType: picked,
+          idNumber: String(digits).replace(/\D/g, '').slice(0, picked === 'NPWP' ? 15 : 16),
+        }));
+        const conf = Math.round((data.data.confidence || 0) * 100);
+        setOcrMsg({ type: 'ok', text: `자동 인식 완료 (${conf}%)` });
+      } else if (res.status === 429) {
+        setOcrMsg({ type: 'err', text: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.' });
+      } else {
+        setOcrMsg({ type: 'err', text: '인식 실패 — 직접 입력해 주세요.' });
+      }
+    } catch {
+      setOcrMsg({ type: 'err', text: '인식 실패 — 직접 입력해 주세요.' });
+    } finally {
+      setOcrBusy(false);
+    }
+  };
 
   function validateStep1(): string | null {
     if (!basics.fullName.trim()) return t('auth.errMissingName');
@@ -175,6 +211,48 @@ export default function RegisterPage() {
 
             {step === 1 ? (
               <form onSubmit={step1Submit} className="space-y-4">
+                {/* NPWP/NIK 사진 자동 채움 */}
+                <div className="rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/40 p-3">
+                  <div className="flex items-start gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900">NPWP/NIK 사진으로 자동 채우기 (선택)</p>
+                      <p className="text-[11px] text-gray-600 mt-0.5">사진 한 장 → 이름·식별번호 자동 인식.</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => ocrFileRef.current?.click()}
+                          disabled={ocrBusy}
+                          className="h-8 text-xs"
+                        >
+                          {ocrBusy ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Camera className="h-3 w-3 mr-1" />}
+                          사진 업로드
+                        </Button>
+                        <input
+                          ref={ocrFileRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) void runOcr(f);
+                            if (e.target) e.target.value = '';
+                          }}
+                        />
+                        {ocrMsg && (
+                          <span className={`text-[11px] font-medium ${ocrMsg.type === 'ok' ? 'text-emerald-700' : 'text-red-600'}`}>
+                            {ocrMsg.text}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <Input
                   name="fullName"
                   type="text"

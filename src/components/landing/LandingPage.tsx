@@ -45,7 +45,9 @@ export default function LandingPage({ locale }: { locale: string }) {
   const personaData = content.personas[persona];
   const moduleData = content.modules[activeModule] ?? content.modules[0];
   const selectedPlan = content.pricing.find((p) => p.id === activePlan) ?? content.pricing[0];
-  const loginUrl = `/${locale}/billing`;
+  // 2026-06-28: 로그인 버튼은 /login 으로 직결. 이전에는 /billing 으로 보내
+  // 미들웨어가 한 번 우회해서 /login 으로 보냈는데 굳이 그럴 이유 없음.
+  const loginUrl = `/${locale}/login`;
 
   const goTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });

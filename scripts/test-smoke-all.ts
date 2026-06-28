@@ -76,6 +76,10 @@ const STEPS: Step[] = [
   // Empty-slot detection + original-Excel-row preservation. In-memory only,
   // no DB, no fixture file → always runs.
   { name: 'ppn JTC template contract', file: 'verify-ppn-jtc-template-contract.ts' },
+  // --- COMPANY signup → company-profile completeness (2026-06-28) -------
+  // signup-company endpoint → DB row → /api/company-profile GET → cleanup.
+  // 회사 가입 트랙이 깨지면 즉시 fail. business_category 신규 컬럼도 함께 검증.
+  { name: 'company signup e2e (completeness ≥ 60%)', file: 'verify-company-signup-flow.ts' },
   // --- Schema drift guard (2026-06-03 audit) ---------------------------
   // Catches migration-history-vs-actual-schema drift early. The 2026-04-10
   // batch incident lost 30+ columns + 1 entire table silently; this runs

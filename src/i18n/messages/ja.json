@@ -1536,6 +1536,7 @@
     "passwordMismatch": "パスワードが一致しません",
     "serverError": "サーバーエラーが発生しました",
     "networkError": "ネットワークエラー、接続を確認してください",
+    "autoSigninFailedRetry": "自動ログインに失敗しました — ログインページへ移動します。",
     "pageNotFoundTitle": "ページが見つかりません",
     "pageNotFoundDescription": "お探しのページは存在しないか、移動されました。",
     "backToDashboard": "ダッシュボードに戻る"
@@ -5804,6 +5805,8 @@
     "confirmDelete": "Are you sure you want to delete this document?"
   },
   "myProfile": {
+    "welcomeTitle": "ようこそ — マイプロフィールを補完してください",
+    "welcomeBody": "登録時に受け取った項目以外に住所・PTKP・Coretax 認証情報を埋めると、SPT 自動化の精度が向上します。今補完するか、後でサイドバー → マイプロフィールから入力してもOK。",
     "pageTitle": "My Profile",
     "pageDescription": "Manage your personal information registered at sign-up. You can add or remove fields as needed.",
     "profileCompleteness": "Profile completeness",

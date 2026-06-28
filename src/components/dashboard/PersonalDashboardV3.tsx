@@ -33,7 +33,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CheckCircle, MessageCircle, Sparkles } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle, MessageCircle, Sparkles, User } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { buildDashboardTrend, type TrendFiling } from '@/lib/tax/trend-from-filings';
 import { detectAuditRisks, type AuditRisk } from '@/lib/audit/risk-detector';
@@ -97,6 +97,12 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileSnapshot | null>(null);
+  // 2026-06-28: /api/customer/profile 가 함께 반환하는 completion 점수 (0..100).
+  // 100 미만일 때만 상단에 LinkedIn-style 안내 배너 노출 → /my-profile 로 점프.
+  const [profileCompletion, setProfileCompletion] = useState<{
+    score: number;
+    firstMissing: string | null;
+  } | null>(null);
   const [filings, setFilings] = useState<Filing[]>([]);
   const [nationality, setNationality] = useState<Nationality>('KR');
   const [taxRule, setTaxRule] = useState<Nationality>('KR');
@@ -127,6 +133,10 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           if (p.tax_residence_country) setTaxRule(p.tax_residence_country);
           setDependents(dependentsFromPtkp(p.ptkp_status));
           setSpouseMode(isJointPtkp(p.ptkp_status) ? 'joint' : 'separate');
+        }
+        const comp = j?.data?.completion;
+        if (comp && typeof comp.score === 'number') {
+          setProfileCompletion({ score: comp.score, firstMissing: comp.firstMissing ?? null });
         }
       }
       if (filingsRes.ok) {
@@ -283,6 +293,86 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* 0. 2026-06-28: 프로필 완성도 배너 — INDIVIDUAL 도 회사와 동일한 폭의 안내.
+          /api/customer/profile 의 completion.score 기준, 100 미만일 때만 노출. */}
+      {profileCompletion && profileCompletion.score < 100 && (() => {
+        const score = profileCompletion.score;
+        const isReady = score >= 80;
+        const gradient = isReady
+          ? 'from-emerald-50 via-teal-50 to-cyan-50 border-emerald-200'
+          : score >= 50
+          ? 'from-amber-50 via-orange-50 to-yellow-50 border-amber-200'
+          : 'from-red-50 via-rose-50 to-pink-50 border-red-200';
+        const progressColor = isReady ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500';
+        const ringColor = isReady ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
+        const MISSING_LABEL: Record<string, string> = {
+          name: '이름 입력',
+          id: 'NPWP/NIK 입력',
+          email: '이메일 입력',
+          phone: '전화번호 입력',
+          taxCredentials: 'Coretax/DJP 계정 입력',
+        };
+        const missingLabel = profileCompletion.firstMissing
+          ? MISSING_LABEL[profileCompletion.firstMissing] ?? '추가 항목 입력'
+          : null;
+        return (
+          <div className={`p-5 rounded-2xl border-2 bg-gradient-to-br ${gradient}`}>
+            <div className="flex items-start gap-4">
+              <div className="relative h-14 w-14 flex-shrink-0 flex items-center justify-center">
+                <svg className="absolute inset-0 -rotate-90" viewBox="0 0 56 56">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="#e5e7eb" strokeWidth="5" />
+                  <circle cx="28" cy="28" r="24" fill="none"
+                    stroke={ringColor}
+                    strokeWidth="5"
+                    strokeDasharray={`${(score / 100) * 150.8} 150.8`}
+                    strokeLinecap="round"
+                    className="transition-all duration-700" />
+                </svg>
+                <span className="text-sm font-bold text-gray-800">{score}%</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <p className="font-bold text-sm text-gray-900 flex items-center gap-1">
+                      <User className="h-4 w-4" />
+                      {isReady ? '프로필 거의 완성 — 100%까지 마무리하세요' : '내 정보를 완성하세요'}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      {isReady
+                        ? '신고는 시작할 수 있지만, 100%면 모든 세무 자동화가 활성화됩니다.'
+                        : '몇 가지 정보만 더 입력하면 SPT 자동 작성이 가능합니다.'}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/${locale}/my-profile`}
+                    className={`flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition-colors ${
+                      isReady ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
+                    }`}
+                  >
+                    프로필 완성
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+                <div className="h-2 bg-white/70 rounded-full overflow-hidden mt-3">
+                  <div className={`h-full ${progressColor} transition-all duration-700 ease-out`} style={{ width: `${score}%` }} />
+                </div>
+                {missingLabel && (
+                  <div className="mt-3">
+                    <Link
+                      href={`/${locale}/my-profile`}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/80 hover:bg-white border border-gray-200 rounded-full text-[11px] font-medium text-gray-700"
+                    >
+                      <span className="text-indigo-700 font-bold">+20%</span>
+                      {missingLabel}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 1. Header (keynote v2: 국적/세법기준 필터 삭제) */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t('headerTitle')}</h1>

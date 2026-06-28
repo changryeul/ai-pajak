@@ -1536,6 +1536,7 @@
     "passwordMismatch": "Passwords do not match",
     "serverError": "Server error occurred",
     "networkError": "Network error, check your connection",
+    "autoSigninFailedRetry": "Auto sign-in failed — redirecting to login page.",
     "pageNotFoundTitle": "Page not found",
     "pageNotFoundDescription": "The page you're looking for isn't available or has been moved.",
     "backToDashboard": "Back to Dashboard"
@@ -5804,6 +5805,8 @@
     "confirmDelete": "Are you sure you want to delete this document?"
   },
   "myProfile": {
+    "welcomeTitle": "Welcome — complete your profile",
+    "welcomeBody": "Beyond what we collected during signup, filling address / PTKP / Coretax credentials boosts SPT automation accuracy. Finish now or come back later via Sidebar → My Profile.",
     "pageTitle": "My Profile",
     "pageDescription": "Manage your personal information registered at sign-up. You can add or remove fields as needed.",
     "profileCompleteness": "Profile completeness",

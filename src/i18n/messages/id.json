@@ -1536,6 +1536,7 @@
     "passwordMismatch": "Kata sandi tidak cocok",
     "serverError": "Terjadi kesalahan server",
     "networkError": "Kesalahan jaringan, periksa koneksi Anda",
+    "autoSigninFailedRetry": "Login otomatis gagal — mengarahkan ke halaman login.",
     "pageNotFoundTitle": "Halaman tidak ditemukan",
     "pageNotFoundDescription": "Halaman yang Anda cari tidak tersedia atau telah dipindahkan.",
     "backToDashboard": "Kembali ke Dasbor"
@@ -5804,6 +5805,8 @@
     "confirmDelete": "Apakah Anda yakin ingin menghapus dokumen ini?"
   },
   "myProfile": {
+    "welcomeTitle": "Selamat datang — lengkapi profil Anda",
+    "welcomeBody": "Selain data saat pendaftaran, mengisi alamat / PTKP / kredensial Coretax meningkatkan akurasi otomasi SPT. Lengkapi sekarang atau kembali nanti melalui Sidebar → Profil Saya.",
     "pageTitle": "Profil Saya",
     "pageDescription": "Kelola informasi pribadi yang Anda daftarkan saat pendaftaran. Anda dapat menambah atau menghapus kolom sesuai kebutuhan.",
     "profileCompleteness": "Kelengkapan profil",

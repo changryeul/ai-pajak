@@ -98,10 +98,14 @@ export default function FirmRegisterPage() {
         password,
       });
       if (signInError) {
-        router.push(`/${locale}/login`);
+        // 2026-06-28: signIn silent 실패 시 사용자에게 명시.
+        setError(t('errors.autoSigninFailedRetry'));
+        setTimeout(() => router.push(`/${locale}/login`), 1500);
         return;
       }
-      router.push(`/${locale}/dashboard`);
+      // 2026-06-28: 컨설턴트 첫 진입은 ERP 대시보드 (고객/세션 작업이 핵심).
+      // ?welcome=1 시그널로 첫 진입 안내 가능.
+      router.push(`/${locale}/consultant-erp/dashboard?welcome=1`);
       router.refresh();
     } catch {
       setError(t('errors.serverError'));

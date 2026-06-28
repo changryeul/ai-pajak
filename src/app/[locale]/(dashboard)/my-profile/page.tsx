@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
@@ -80,6 +80,9 @@ export default function MyProfilePage() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+  // 2026-06-28: register/mandate 가 ?welcome=1 로 보냄 → 한 줄 환영 + 가이드.
+  const searchParams = useSearchParams();
+  const isWelcome = searchParams?.get('welcome') === '1';
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -240,6 +243,20 @@ export default function MyProfilePage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
+      {/* 2026-06-28: register/mandate 직후 안내 배너 */}
+      {isWelcome && (
+        <div className="mb-4 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-sky-50 p-4">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm flex-shrink-0">
+              <User className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-gray-900">{t('welcomeTitle')}</p>
+              <p className="text-xs text-gray-600 mt-0.5">{t('welcomeBody')}</p>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

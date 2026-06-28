@@ -1536,6 +1536,7 @@
     "passwordMismatch": "密码不匹配",
     "serverError": "服务器错误",
     "networkError": "网络错误，请检查您的连接",
+    "autoSigninFailedRetry": "自动登录失败 — 正在跳转至登录页面。",
     "pageNotFoundTitle": "页面未找到",
     "pageNotFoundDescription": "您查找的页面不存在或已被移动。",
     "backToDashboard": "返回仪表板"
@@ -5833,6 +5834,8 @@
     "pph25GeneralLabel": "PPh 25 General"
   },
   "myProfile": {
+    "welcomeTitle": "欢迎 — 请完善我的信息",
+    "welcomeBody": "除注册时提供的项目外,填写地址、PTKP、Coretax 凭据可提升 SPT 自动化的准确度。现在补全,或稍后通过 侧边栏 → 我的信息 再次填写。",
     "pageTitle": "My Profile",
     "pageDescription": "Manage your personal information registered at sign-up. You can add or remove fields as needed.",
     "profileCompleteness": "Profile completeness",
