@@ -47,8 +47,17 @@ async function main() {
   const sbAnon = createClient(SUPABASE_URL, SUPABASE_ANON);
   let pass = 0, fail = 0;
 
-  // Pre-cleanup any stale sentinel customer rows (best-effort).
-  await sbAdmin.from('customer').delete().like('email', `${SENTINEL_PREFIX}%`);
+  // Pre-cleanup any stale sentinel customer rows. 2026-06-28: customer 에는
+  // subscription FK 가 걸려있어서 단순 delete 가 silent fail 함 — 자식 테이블을
+  // 먼저 비우고 그 다음 customer 를 지운다. 실 운영시 자동 생성되는 자식 행:
+  //   - subscription (signup-company 가 자동 생성)
+  //   - 그 외 (customer_subscription / consultant / note 등) 은 trigger 없음.
+  const { data: stale } = await sbAdmin.from('customer').select('id').like('email', `${SENTINEL_PREFIX}%`);
+  const staleIds = (stale ?? []).map((r) => r.id);
+  if (staleIds.length > 0) {
+    await sbAdmin.from('subscription').delete().in('customer_id', staleIds);
+    await sbAdmin.from('customer').delete().in('id', staleIds);
+  }
 
   // 1. POST /api/auth/signup-company
   const signupRes = await fetch(`${BASE_URL}/api/auth/signup-company`, {
@@ -117,8 +126,9 @@ async function main() {
     }
   }
 
-  // 4. Cleanup — auth user + customer row.
+  // 4. Cleanup — subscription → customer → auth user (FK order).
   if (cust?.id) {
+    await sbAdmin.from('subscription').delete().eq('customer_id', cust.id);
     await sbAdmin.from('customer').delete().eq('id', cust.id);
   }
   // auth user lookup by email — admin API doesn't expose direct getByEmail, use listUsers.

@@ -17,7 +17,7 @@ async function createAuthUser(
   email: string,
   password: string,
   metadata: Record<string, unknown>,
-): Promise<{ userId: string; error?: string }> {
+): Promise<{ userId: string; error?: string; errorCode?: string }> {
   const admin = getSupabaseAdmin();
 
   // Try admin API first (no email sent → no rate limit)
@@ -53,16 +53,16 @@ async function createAuthUser(
   if (signUpError) {
     const msg = signUpError.message;
     if (msg.includes('already') || msg.includes('registered')) {
-      return { userId: '', error: 'Email sudah terdaftar' };
+      return { userId: '', error: 'Email sudah terdaftar', errorCode: 'EMAIL_TAKEN' };
     }
     if (msg.includes('rate')) {
-      return { userId: '', error: 'Coba lagi beberapa saat lagi' };
+      return { userId: '', error: 'Coba lagi beberapa saat lagi', errorCode: 'RATE_LIMIT' };
     }
-    return { userId: '', error: msg };
+    return { userId: '', error: msg, errorCode: 'UNKNOWN' };
   }
 
   if (!signUpData.user?.id) {
-    return { userId: '', error: 'Gagal membuat akun' };
+    return { userId: '', error: 'Gagal membuat akun', errorCode: 'CREATE_USER_FAILED' };
   }
 
   // Defensive guard: with email confirmations enabled, signUp may return a
@@ -72,7 +72,7 @@ async function createAuthUser(
   const verify = await admin.auth.admin.getUserById(signUpData.user.id);
   if (verify.error || !verify.data?.user) {
     loggers.api.warn({ userId: signUpData.user.id }, 'Signup: signUp returned unresolved user id (likely existing email)');
-    return { userId: '', error: 'Email sudah terdaftar' };
+    return { userId: '', error: 'Email sudah terdaftar', errorCode: 'EMAIL_TAKEN' };
   }
 
   return { userId: signUpData.user.id };
@@ -106,31 +106,31 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!email || !password || !fullName || !accountType) {
       return NextResponse.json(
-        { error: 'email, password, fullName, accountType are required' },
+        { error: 'email, password, fullName, accountType are required', errorCode: 'MISSING_REQUIRED' },
         { status: 400 }
       );
     }
     if (!['INDIVIDUAL', 'TAX_PARTNER'].includes(accountType)) {
       return NextResponse.json(
-        { error: 'accountType must be INDIVIDUAL or TAX_PARTNER' },
+        { error: 'accountType must be INDIVIDUAL or TAX_PARTNER', errorCode: 'MISSING_REQUIRED' },
         { status: 400 }
       );
     }
     if (password.length < 8) {
       return NextResponse.json(
-        { error: 'Kata sandi minimal 8 karakter' },
+        { error: 'Kata sandi minimal 8 karakter', errorCode: 'PASSWORD_TOO_SHORT' },
         { status: 400 }
       );
     }
     if (accountType === 'TAX_PARTNER' && !firmName) {
       return NextResponse.json(
-        { error: 'Nama kantor konsultan wajib diisi' },
+        { error: 'Nama kantor konsultan wajib diisi', errorCode: 'MISSING_REQUIRED' },
         { status: 400 }
       );
     }
 
     // Create auth user (admin first → signUp fallback)
-    const { userId, error: authError } = await createAuthUser(email, password, {
+    const { userId, error: authError, errorCode: authErrorCode } = await createAuthUser(email, password, {
       full_name: fullName,
       phone: phone || null,
       account_type: accountType,
@@ -141,8 +141,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (authError) {
-      const status = authError.includes('terdaftar') ? 409 : authError.includes('Coba lagi') ? 429 : 500;
-      return NextResponse.json({ error: authError }, { status });
+      const status = authErrorCode === 'EMAIL_TAKEN' ? 409 : authErrorCode === 'RATE_LIMIT' ? 429 : 500;
+      return NextResponse.json({ error: authError, errorCode: authErrorCode || 'UNKNOWN' }, { status });
     }
 
     // Create DB records via admin client (PostgREST — always works)

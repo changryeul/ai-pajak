@@ -37,6 +37,8 @@ function isValidNpwp(formatted: string): boolean {
 
 export default function CompanyRegisterPage() {
   const t = useTranslations('companyRegister');
+  // 가입 errorCode → 5 locale 메시지 매핑 (errors.signup.* namespace).
+  const tSignupErr = useTranslations('errors.signup');
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
@@ -226,7 +228,12 @@ export default function CompanyRegisterPage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setError(data.error || t('errSignupFailed'));
+        const code = data.errorCode as string | undefined;
+        let localized: string | null = null;
+        if (code) {
+          try { localized = tSignupErr(code as 'UNKNOWN'); } catch { /* unknown code → fall through */ }
+        }
+        setError(localized || data.error || t('errSignupFailed'));
         return;
       }
 

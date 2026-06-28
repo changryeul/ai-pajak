@@ -1537,6 +1537,18 @@
     "serverError": "Server error occurred",
     "networkError": "Network error, check your connection",
     "autoSigninFailedRetry": "Auto sign-in failed — redirecting to login page.",
+    "signup": {
+      "EMAIL_TAKEN": "This email is already registered. Try signing in with the same email/password, or reset your password.",
+      "NPWP_TAKEN": "This NPWP is already registered. Sign in with the same NPWP or contact support.",
+      "RATE_LIMIT": "Too many requests. Please try again in a moment.",
+      "JTC_AGREEMENT_REQUIRED": "You must accept the JTC service agreement to sign up.",
+      "INVALID_NPWP_DIGITS": "NPWP must be 15 numeric digits.",
+      "PASSWORD_TOO_SHORT": "Password must be at least 8 characters.",
+      "MISSING_REQUIRED": "Required fields are missing.",
+      "CREATE_USER_FAILED": "Account creation failed. Please try again in a moment.",
+      "CUSTOMER_INSERT_FAILED": "Failed to save customer data. Please try again in a moment.",
+      "UNKNOWN": "Signup error occurred. Please try again in a moment."
+    },
     "pageNotFoundTitle": "Page not found",
     "pageNotFoundDescription": "The page you're looking for isn't available or has been moved.",
     "backToDashboard": "Back to Dashboard"

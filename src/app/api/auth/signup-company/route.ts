@@ -60,23 +60,23 @@ export async function POST(request: NextRequest) {
       signatureDataUrl?: string | null;
     };
 
-    // Validation
+    // Validation — errorCode 는 클라이언트가 5 locale 매핑에 사용한다.
     if (!email || !password || !fullName || !companyName || !npwp) {
       return NextResponse.json(
-        { error: 'email, password, fullName, companyName, npwp are required' },
+        { error: 'email, password, fullName, companyName, npwp are required', errorCode: 'MISSING_REQUIRED' },
         { status: 400 }
       );
     }
     if (password.length < 8) {
-      return NextResponse.json({ error: 'Kata sandi minimal 8 karakter' }, { status: 400 });
+      return NextResponse.json({ error: 'Kata sandi minimal 8 karakter', errorCode: 'PASSWORD_TOO_SHORT' }, { status: 400 });
     }
     if (!jtcAgreement?.accepted) {
-      return NextResponse.json({ error: 'Persetujuan syarat JTC diperlukan' }, { status: 400 });
+      return NextResponse.json({ error: 'Persetujuan syarat JTC diperlukan', errorCode: 'JTC_AGREEMENT_REQUIRED' }, { status: 400 });
     }
 
     const npwpDigits = npwp.replace(/\D/g, '');
     if (npwpDigits.length !== 15) {
-      return NextResponse.json({ error: 'NPWP harus 15 digit angka' }, { status: 400 });
+      return NextResponse.json({ error: 'NPWP harus 15 digit angka', errorCode: 'INVALID_NPWP_DIGITS' }, { status: 400 });
     }
 
     const admin = getSupabaseAdmin();
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existingNpwp) {
-      return NextResponse.json({ error: 'NPWP sudah terdaftar' }, { status: 409 });
+      return NextResponse.json({ error: 'NPWP sudah terdaftar', errorCode: 'NPWP_TAKEN' }, { status: 409 });
     }
 
     // Try admin.createUser first (no email → no rate limit)
@@ -136,12 +136,12 @@ export async function POST(request: NextRequest) {
         loggers.api.error({ err: signUpError }, 'Company signup: signUp failed');
         const msg = signUpError.message;
         if (msg.includes('already') || msg.includes('registered')) {
-          return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 });
+          return NextResponse.json({ error: 'Email sudah terdaftar', errorCode: 'EMAIL_TAKEN' }, { status: 409 });
         }
         if (msg.includes('rate')) {
-          return NextResponse.json({ error: 'Coba lagi beberapa saat lagi' }, { status: 429 });
+          return NextResponse.json({ error: 'Coba lagi beberapa saat lagi', errorCode: 'RATE_LIMIT' }, { status: 429 });
         }
-        return NextResponse.json({ error: msg }, { status: 500 });
+        return NextResponse.json({ error: msg, errorCode: 'UNKNOWN' }, { status: 500 });
       }
 
       // Defensive guard — see /api/auth/signup for context on the synthetic
@@ -152,14 +152,14 @@ export async function POST(request: NextRequest) {
         const verify = await admin.auth.admin.getUserById(candidateUserId);
         if (verify.error || !verify.data?.user) {
           loggers.api.warn({ userId: candidateUserId }, 'Company signup: signUp returned unresolved user id (likely existing email)');
-          return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 });
+          return NextResponse.json({ error: 'Email sudah terdaftar', errorCode: 'EMAIL_TAKEN' }, { status: 409 });
         }
         userId = candidateUserId;
       }
     }
 
     if (!userId) {
-      return NextResponse.json({ error: 'Gagal membuat akun' }, { status: 500 });
+      return NextResponse.json({ error: 'Gagal membuat akun', errorCode: 'CREATE_USER_FAILED' }, { status: 500 });
     }
 
     // Create customer record via admin DB client
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
         loggers.api.error({ err: e, userId }, 'Company signup: auth rollback failed'),
       );
       return NextResponse.json(
-        { error: custError?.message || 'Gagal menyimpan data pelanggan' },
+        { error: custError?.message || 'Gagal menyimpan data pelanggan', errorCode: 'CUSTOMER_INSERT_FAILED' },
         { status: 500 }
       );
     }

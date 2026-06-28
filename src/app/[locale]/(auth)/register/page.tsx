@@ -160,7 +160,10 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setError(data.error || t('errors.serverError'));
+        // errorCode 있으면 locale 메시지 우선, 없으면 서버 error 텍스트 (보통 indonesian).
+        const code = data.errorCode as string | undefined;
+        const localized = code ? t(`errors.signup.${code}` as 'errors.signup.UNKNOWN') : null;
+        setError(localized || data.error || t('errors.serverError'));
         return;
       }
       // Sign in client-side so the session cookie is set before the

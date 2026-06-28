@@ -1537,6 +1537,18 @@
     "serverError": "Terjadi kesalahan server",
     "networkError": "Kesalahan jaringan, periksa koneksi Anda",
     "autoSigninFailedRetry": "Login otomatis gagal — mengarahkan ke halaman login.",
+    "signup": {
+      "EMAIL_TAKEN": "Email sudah terdaftar. Silakan masuk dengan email/kata sandi yang sama, atau atur ulang kata sandi.",
+      "NPWP_TAKEN": "NPWP sudah terdaftar. Silakan masuk dengan NPWP yang sama atau hubungi admin.",
+      "RATE_LIMIT": "Terlalu banyak permintaan. Coba lagi dalam beberapa saat.",
+      "JTC_AGREEMENT_REQUIRED": "Persetujuan syarat layanan JTC diperlukan untuk mendaftar.",
+      "INVALID_NPWP_DIGITS": "NPWP harus 15 digit angka.",
+      "PASSWORD_TOO_SHORT": "Kata sandi minimal 8 karakter.",
+      "MISSING_REQUIRED": "Kolom wajib belum diisi.",
+      "CREATE_USER_FAILED": "Gagal membuat akun. Silakan coba lagi dalam beberapa saat.",
+      "CUSTOMER_INSERT_FAILED": "Gagal menyimpan data pelanggan. Silakan coba lagi dalam beberapa saat.",
+      "UNKNOWN": "Terjadi kesalahan saat pendaftaran. Silakan coba lagi dalam beberapa saat."
+    },
     "pageNotFoundTitle": "Halaman tidak ditemukan",
     "pageNotFoundDescription": "Halaman yang Anda cari tidak tersedia atau telah dipindahkan.",
     "backToDashboard": "Kembali ke Dasbor"

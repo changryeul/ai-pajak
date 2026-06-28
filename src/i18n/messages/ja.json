@@ -1537,6 +1537,18 @@
     "serverError": "サーバーエラーが発生しました",
     "networkError": "ネットワークエラー、接続を確認してください",
     "autoSigninFailedRetry": "自動ログインに失敗しました — ログインページへ移動します。",
+    "signup": {
+      "EMAIL_TAKEN": "既に登録済みのメールアドレスです。同じメール/パスワードでログインするか、パスワードを再設定してください。",
+      "NPWP_TAKEN": "既に登録済みのNPWPです。同じNPWPでログインするか、管理者にお問い合わせください。",
+      "RATE_LIMIT": "リクエストが多すぎます。しばらくしてから再度お試しください。",
+      "JTC_AGREEMENT_REQUIRED": "JTC サービス規約への同意が必要です。",
+      "INVALID_NPWP_DIGITS": "NPWP は 15 桁の数字である必要があります。",
+      "PASSWORD_TOO_SHORT": "パスワードは 8 文字以上である必要があります。",
+      "MISSING_REQUIRED": "必須項目が未入力です。",
+      "CREATE_USER_FAILED": "アカウント作成に失敗しました。しばらくしてから再度お試しください。",
+      "CUSTOMER_INSERT_FAILED": "顧客情報の保存に失敗しました。しばらくしてから再度お試しください。",
+      "UNKNOWN": "登録処理中にエラーが発生しました。しばらくしてから再度お試しください。"
+    },
     "pageNotFoundTitle": "ページが見つかりません",
     "pageNotFoundDescription": "お探しのページは存在しないか、移動されました。",
     "backToDashboard": "ダッシュボードに戻る"

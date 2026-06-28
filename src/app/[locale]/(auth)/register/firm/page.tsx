@@ -90,7 +90,9 @@ export default function FirmRegisterPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setError(data.error || t('errors.serverError'));
+        const code = data.errorCode as string | undefined;
+        const localized = code ? t(`errors.signup.${code}` as 'errors.signup.UNKNOWN') : null;
+        setError(localized || data.error || t('errors.serverError'));
         return;
       }
       const supabase = createClient();

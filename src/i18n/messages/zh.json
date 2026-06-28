@@ -1537,6 +1537,18 @@
     "serverError": "服务器错误",
     "networkError": "网络错误，请检查您的连接",
     "autoSigninFailedRetry": "自动登录失败 — 正在跳转至登录页面。",
+    "signup": {
+      "EMAIL_TAKEN": "该邮箱已注册。请使用相同邮箱/密码登录,或重置密码。",
+      "NPWP_TAKEN": "该 NPWP 已注册。请使用相同 NPWP 登录或联系管理员。",
+      "RATE_LIMIT": "请求过多。请稍后再试。",
+      "JTC_AGREEMENT_REQUIRED": "必须同意 JTC 服务条款才能注册。",
+      "INVALID_NPWP_DIGITS": "NPWP 必须为 15 位数字。",
+      "PASSWORD_TOO_SHORT": "密码长度至少 8 个字符。",
+      "MISSING_REQUIRED": "必填字段未填写。",
+      "CREATE_USER_FAILED": "创建账户失败。请稍后再试。",
+      "CUSTOMER_INSERT_FAILED": "保存客户信息失败。请稍后再试。",
+      "UNKNOWN": "注册过程中出错。请稍后再试。"
+    },
     "pageNotFoundTitle": "页面未找到",
     "pageNotFoundDescription": "您查找的页面不存在或已被移动。",
     "backToDashboard": "返回仪表板"

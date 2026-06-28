@@ -1537,6 +1537,18 @@
     "serverError": "서버 오류가 발생했습니다",
     "networkError": "네트워크 오류, 연결을 확인하세요",
     "autoSigninFailedRetry": "자동 로그인에 실패했습니다 — 로그인 페이지로 이동합니다.",
+    "signup": {
+      "EMAIL_TAKEN": "이미 가입된 이메일입니다. 같은 이메일/비밀번호로 로그인하거나 비밀번호 재설정을 시도하세요.",
+      "NPWP_TAKEN": "이미 가입된 NPWP입니다. 같은 NPWP로 로그인하거나 관리자에게 문의하세요.",
+      "RATE_LIMIT": "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+      "JTC_AGREEMENT_REQUIRED": "JTC 서비스 약관에 동의해야 가입할 수 있습니다.",
+      "INVALID_NPWP_DIGITS": "NPWP는 15자리 숫자여야 합니다.",
+      "PASSWORD_TOO_SHORT": "비밀번호는 최소 8자 이상이어야 합니다.",
+      "MISSING_REQUIRED": "필수 입력 항목이 비어 있습니다.",
+      "CREATE_USER_FAILED": "계정 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      "CUSTOMER_INSERT_FAILED": "고객 정보 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      "UNKNOWN": "가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+    },
     "pageNotFoundTitle": "페이지를 찾을 수 없습니다",
     "pageNotFoundDescription": "찾으시는 페이지가 존재하지 않거나 이동되었습니다.",
     "backToDashboard": "대시보드로 돌아가기"
