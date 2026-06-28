@@ -9511,6 +9511,8 @@
     "treatyOkHint": "PPh26 {count}건 모두 treaty 적용 검토 완료"
   },
   "consultantErp": {
+    "welcomeTitle": "세무 사무소 가입을 환영합니다",
+    "welcomeBody": "여기는 컨설턴트 ERP 대시보드입니다. 고객을 등록하고 5단계 워크플로우 (자료 업로드 → 파싱 → 계산 → 결재 → Coretax) 로 신고를 처리하세요. 우선 좌측 '고객' 메뉴에서 첫 고객을 등록해 보세요.",
     "pageTitleDashboard": "고객별 업무 현황판",
     "pageTitleWork": "5단계 신고 워크플로우",
     "pageTitleLegality": "고객 법인 기본자료 보관함",

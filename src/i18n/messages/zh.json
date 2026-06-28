@@ -9389,6 +9389,8 @@
     "treatyOkHint": "PPh26 {count}笔交易均已完成协定适用审核"
   },
   "consultantErp": {
+    "welcomeTitle": "税务事务所注册完成",
+    "welcomeBody": "这里是您的顾问 ERP 仪表板。请注册客户并通过 5 步流程 (上传 → 解析 → 计算 → 审批 → Coretax) 处理申报。请先从左侧 '客户' 菜单添加第一位客户。",
     "pageTitleDashboard": "客户业务现况板",
     "pageTitleWork": "5 步申报流程",
     "pageTitleLegality": "法务资料保管库",
