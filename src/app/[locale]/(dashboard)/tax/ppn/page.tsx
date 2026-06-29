@@ -622,10 +622,12 @@ export default function PPNPage() {
                               <td className="py-2 px-3 text-right font-mono text-xs text-gray-500">{f.dpp_nilai_lain != null ? fmt(Number(f.dpp_nilai_lain)) : '—'}</td>
                               <td className="py-2 px-3 text-right font-mono text-xs font-medium text-orange-600">{fmt(f.ppn)}</td>
                               <td className="py-2 px-3 text-center">
+                                {/* 2026-06-29: essential 도 emerald 도트 + 라벨로 가시화 — 이전엔
+                                    회색 outline 이라 "체크 안 됨" 처럼 보인다는 사용자 피드백. */}
                                 {f.is_luxury === true ? (
-                                  <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-300">💎 LUXURY</Badge>
+                                  <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-300">💎 LUXURY · 12%</Badge>
                                 ) : (
-                                  <Badge variant="outline" className="text-[10px] text-gray-500">{t('luxuryEssential')}</Badge>
+                                  <Badge className="text-[10px] bg-emerald-100 text-emerald-800 border-emerald-300">{t('luxuryEssential')} · 11%</Badge>
                                 )}
                               </td>
                               <td className="py-2 px-3 text-center">
@@ -807,28 +809,49 @@ export default function PPNPage() {
                                         />
                                       </div>
                                     </div>
-                                    {/* Luxury toggle — PMK 131/2024.
-                                        Essential goods: dpp × 11/12 적용 = effective 11%.
-                                        Luxury items: full 12% PPN (HS code per PMK Lampiran A). */}
-                                    <div className="rounded-md border border-amber-200 bg-amber-50/40 p-3 flex items-center justify-between gap-3">
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-amber-900">{t('luxuryToggleLabel')}</p>
-                                        <p className="text-[11px] text-amber-700/80 mt-0.5">{t('luxuryToggleHint')}</p>
+                                    {/* PPN 카테고리 — PMK 131/2024 (2026-06-29 UI 개편).
+                                        이전: 단일 checkbox (essential 일 때 "체크 안 됨" 이 직관적이지 않음).
+                                        신규: 일반/사치품 2-radio — 현재 선택이 항상 명시적으로 보임.
+                                        Essential: dpp × 11/12 → effective 11%.
+                                        Luxury:    dpp 전체 × 12%. */}
+                                    <div className="rounded-md border border-amber-200 bg-amber-50/40 p-3">
+                                      <div className="flex items-center justify-between gap-3 mb-2">
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-xs font-medium text-amber-900">{t('luxuryToggleLabel')}</p>
+                                          <p className="text-[11px] text-amber-700/80 mt-0.5">{t('luxuryToggleHint')}</p>
+                                        </div>
                                       </div>
-                                      <label className="inline-flex items-center cursor-pointer gap-2">
-                                        <input
-                                          type="checkbox"
-                                          checked={f.is_luxury === true}
-                                          onChange={e => {
-                                            // 토글 시 dpp 같이 보내야 서버가 dpp_nilai_lain 재계산
-                                            updateFaktur(f.id, { isLuxury: e.target.checked, dpp: Number(f.dpp) });
-                                          }}
-                                          className="w-4 h-4 accent-amber-600"
-                                        />
-                                        <span className="text-xs font-medium text-amber-900">
-                                          {f.is_luxury === true ? '💎 LUXURY' : t('luxuryEssential')}
-                                        </span>
-                                      </label>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        {([
+                                          { value: false, label: t('luxuryEssential'), hint: '11%', accent: 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200', dotColor: 'bg-emerald-500' },
+                                          { value: true,  label: '💎 LUXURY',         hint: '12%', accent: 'border-amber-500 bg-amber-100 ring-1 ring-amber-300',  dotColor: 'bg-amber-500'  },
+                                        ] as const).map((opt) => {
+                                          const isSelected = (f.is_luxury === true) === opt.value;
+                                          return (
+                                            <button
+                                              key={String(opt.value)}
+                                              type="button"
+                                              onClick={() => {
+                                                if (isSelected) return;
+                                                // 토글 시 dpp 같이 보내야 서버가 ppn + dpp_nilai_lain 재계산
+                                                updateFaktur(f.id, { isLuxury: opt.value, dpp: Number(f.dpp) });
+                                              }}
+                                              className={`flex items-center justify-between gap-2 p-2 rounded-lg border text-xs transition ${
+                                                isSelected
+                                                  ? opt.accent + ' font-bold'
+                                                  : 'border-gray-200 bg-white hover:border-gray-300'
+                                              }`}
+                                              aria-pressed={isSelected}
+                                            >
+                                              <span className="flex items-center gap-2">
+                                                <span className={`h-2 w-2 rounded-full ${isSelected ? opt.dotColor : 'bg-gray-300'}`} />
+                                                {opt.label}
+                                              </span>
+                                              <span className="text-[10px] text-gray-500 font-mono">{opt.hint}</span>
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
                                     </div>
                                     <div className="flex gap-2 pt-2 mt-2">
                                       <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => deleteFaktur(f.id)}>

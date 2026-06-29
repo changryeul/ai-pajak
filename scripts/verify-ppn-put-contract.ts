@@ -96,13 +96,16 @@ async function main() {
     console.log(`✅ 2. faktur no/date updated`); pass++;
   } else { console.error('✗ 2.', j2, row2?.faktur_number, row2?.faktur_date); fail++; }
 
-  // 3. PUT dpp without ppn → server: ppn = round(dpp × 0.12)
-  const r3 = await put({ id: fakturId, dpp: 2000000 });
+  // 3. PUT dpp without ppn (essential row, 2026) → PMK 131/2024 정합:
+  //    adjustedDPP = 2M × 11/12 = 1,833,333; ppn = 12% × adjusted = 220,000.
+  //    (이전 expectation 240,000 = 12% × original 2M 은 11/12 보정 미적용
+  //     상태였던 PPNCalculator 버그를 가정한 값 — 2026-06-29 fix 후 갱신.)
+  const r3 = await put({ id: fakturId, dpp: 2000000, fakturDate: '2026-03-15' });
   const j3 = await r3.json();
   const row3 = await readRow();
-  const expectedPpn3 = Math.round(2000000 * 0.12); // 240,000
+  const expectedPpn3 = Math.round(Math.round(2000000 * (11 / 12)) * 0.12); // 220,000
   if (j3.success && Number(row3.dpp) === 2000000 && Number(row3.ppn) === expectedPpn3) {
-    console.log(`✅ 3. dpp→${row3.dpp} + ppn fallback=${row3.ppn} (12%)`); pass++;
+    console.log(`✅ 3. dpp→${row3.dpp} + ppn fallback=${row3.ppn} (essential 11% effective)`); pass++;
   } else { console.error(`✗ 3. expected ppn=${expectedPpn3}, got dpp=${row3?.dpp} ppn=${row3?.ppn}`); fail++; }
 
   // 4. PUT dpp without dppNilaiLain → adjustDPP (essential 2026 → ×11/12)
