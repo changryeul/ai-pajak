@@ -389,7 +389,7 @@ export default function PPNPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-5xl">
+    <div className="container mx-auto py-8 px-4 max-w-7xl">
       <PageTitle title="PPN" />
       <ScreenHeader
         title="e-Faktur & PPN"
@@ -621,13 +621,14 @@ export default function PPNPage() {
                               <td className="py-2 px-3 text-right font-mono text-xs">{fmt(f.dpp)}</td>
                               <td className="py-2 px-3 text-right font-mono text-xs text-gray-500">{f.dpp_nilai_lain != null ? fmt(Number(f.dpp_nilai_lain)) : '—'}</td>
                               <td className="py-2 px-3 text-right font-mono text-xs font-medium text-orange-600">{fmt(f.ppn)}</td>
-                              <td className="py-2 px-3 text-center">
+                              <td className="py-2 px-3 text-center whitespace-nowrap">
                                 {/* 2026-06-29: essential 도 emerald 도트 + 라벨로 가시화 — 이전엔
-                                    회색 outline 이라 "체크 안 됨" 처럼 보인다는 사용자 피드백. */}
+                                    회색 outline 이라 "체크 안 됨" 처럼 보인다는 사용자 피드백.
+                                    행은 좁으니 % suffix 는 detail 패널에서만 표시. */}
                                 {f.is_luxury === true ? (
-                                  <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-300">💎 LUXURY · 12%</Badge>
+                                  <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-300">💎 12%</Badge>
                                 ) : (
-                                  <Badge className="text-[10px] bg-emerald-100 text-emerald-800 border-emerald-300">{t('luxuryEssential')} · 11%</Badge>
+                                  <Badge className="text-[10px] bg-emerald-100 text-emerald-800 border-emerald-300">{t('luxuryEssential')} 11%</Badge>
                                 )}
                               </td>
                               <td className="py-2 px-3 text-center">
