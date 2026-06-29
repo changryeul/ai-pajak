@@ -137,14 +137,15 @@ export class PPNCalculator {
     // 2. Adjust DPP if needed (PMK 131/2024)
     const adjustedDPP = this.adjustDPP(dpp, transactionDate, isLuxury);
 
-    // 3. Get applicable rate
-    const rate = this.calculateEffectivePPNRate(transactionDate, isLuxury);
-
-    // 4. Calculate PPN
-    const ppnAmount = Math.round(adjustedDPP * rate);
+    // 3. PPN = statutory rate × adjusted DPP (DJP SPT Masa PPN form rule).
+    // 2026-06-29: essential 의 11/12 이중 적용 버그 fix (calculateSimple 참고).
+    const year = transactionDate.getFullYear();
+    const statutoryRate = year < 2025 ? 0.11 : 0.12;
+    const ppnAmount = Math.round(adjustedDPP * statutoryRate);
+    // Reported `ppn_rate` is the effective rate vs ORIGINAL dpp.
+    const effectiveRate = this.calculateEffectivePPNRate(transactionDate, isLuxury);
 
     // 5. Determine legal basis
-    const year = transactionDate.getFullYear();
     let legalBasis: string;
     if (year < 2025) {
       legalBasis = 'UU HPP 2021 - PPN 11%';
@@ -157,7 +158,7 @@ export class PPNCalculator {
     return {
       original_dpp: dpp,
       adjusted_dpp: adjustedDPP,
-      ppn_rate: rate,
+      ppn_rate: effectiveRate,
       ppn_amount: ppnAmount,
       total_with_ppn: adjustedDPP + ppnAmount,
       is_luxury_item: isLuxury,
@@ -166,7 +167,18 @@ export class PPNCalculator {
   }
 
   /**
-   * Calculate PPN without DB lookup (for known luxury status)
+   * Calculate PPN without DB lookup (for known luxury status).
+   *
+   * 2026-06-29 FIX — PMK 131/2024 정합:
+   *   DJP SPT Masa PPN form: PPN = statutory 12% × DPP Nilai Lain (adjusted DPP).
+   *   - Essential 2025+: adjustedDPP = DPP × 11/12, then 12% × adjusted = DPP × 11%.
+   *   - Luxury 2025+:    adjustedDPP = DPP,         then 12% × adjusted = DPP × 12%.
+   *   - Pre-2025:        adjustedDPP = DPP,         then 11% × adjusted = DPP × 11%.
+   *
+   * 이전 버그: calculateEffectivePPNRate() 가 essential 에 0.11 (effective on
+   * original DPP) 을 돌려주는데, 이를 adjustedDPP 에 곱해서 dpp × 11/12 × 11%
+   * = dpp × 10.08% 로 11/12 조정이 이중 적용되던 버그.
+   * → essential 2025+ 에서는 statutory 12% 를 사용해 calc.
    */
   static calculateSimple(
     dpp: number,
@@ -174,13 +186,19 @@ export class PPNCalculator {
     isLuxury: boolean = false
   ): Omit<PPNCalculation, 'legal_basis'> {
     const adjustedDPP = this.adjustDPP(dpp, transactionDate, isLuxury);
-    const rate = this.calculateEffectivePPNRate(transactionDate, isLuxury);
-    const ppnAmount = Math.round(adjustedDPP * rate);
+    const year = transactionDate.getFullYear();
+    // Statutory rate to multiply against adjustedDPP. Pre-2025 = 11% (no
+    // adjustment, single statutory). 2025+ = 12% statutory (DJP form rule).
+    const statutoryRate = year < 2025 ? 0.11 : 0.12;
+    const ppnAmount = Math.round(adjustedDPP * statutoryRate);
+    // Reported `ppn_rate` is the effective rate vs ORIGINAL dpp (for UX),
+    // not the statutory rate used in the line above.
+    const effectiveRate = this.calculateEffectivePPNRate(transactionDate, isLuxury);
 
     return {
       original_dpp: dpp,
       adjusted_dpp: adjustedDPP,
-      ppn_rate: rate,
+      ppn_rate: effectiveRate,
       ppn_amount: ppnAmount,
       total_with_ppn: adjustedDPP + ppnAmount,
       is_luxury_item: isLuxury

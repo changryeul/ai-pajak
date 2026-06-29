@@ -120,12 +120,16 @@ describe('PPNCalculator', () => {
       const date2025 = new Date('2025-06-15');
       const result = PPNCalculator.calculateSimple(120_000_000, date2025, false);
 
-      // Adjusted DPP = 120M * (11/12) = 110M
-      // PPN = 110M * 11% = 12.1M
+      // PMK 131/2024 DJP SPT Masa PPN form:
+      //   Adjusted DPP (Nilai Lain) = 120M × 11/12 = 110M
+      //   PPN = statutory 12% × adjusted = 110M × 12% = 13.2M
+      //   Effective rate vs original = 13.2M / 120M = 11%
+      // (이전 12.1M expectation 은 effective 11% 가 adjusted 110M 에 잘못
+      //  곱해지던 버그 결과였음 — 2026-06-29 수정.)
       expect(result.original_dpp).toBe(120_000_000);
       expect(result.adjusted_dpp).toBe(110_000_000);
       expect(result.ppn_rate).toBe(0.11);
-      expect(result.ppn_amount).toBe(12_100_000);
+      expect(result.ppn_amount).toBe(13_200_000);
       expect(result.is_luxury_item).toBe(false);
     });
 
