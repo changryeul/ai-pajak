@@ -622,14 +622,22 @@ export default function PPNPage() {
                               <td className="py-2 px-3 text-right font-mono text-xs text-gray-500">{f.dpp_nilai_lain != null ? fmt(Number(f.dpp_nilai_lain)) : '—'}</td>
                               <td className="py-2 px-3 text-right font-mono text-xs font-medium text-orange-600">{fmt(f.ppn)}</td>
                               <td className="py-2 px-3 text-center whitespace-nowrap">
-                                {/* 2026-06-29: essential 도 emerald 도트 + 라벨로 가시화 — 이전엔
-                                    회색 outline 이라 "체크 안 됨" 처럼 보인다는 사용자 피드백.
-                                    행은 좁으니 % suffix 는 detail 패널에서만 표시. */}
-                                {f.is_luxury === true ? (
-                                  <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-300">💎 12%</Badge>
-                                ) : (
-                                  <Badge className="text-[10px] bg-emerald-100 text-emerald-800 border-emerald-300">{t('luxuryEssential')} 11%</Badge>
-                                )}
+                                {/* 2026-06-29: 효과율을 실제 ppn/dpp 로 계산 — luxury 가 무조건
+                                    12% 라는 가정은 PMK 131/2024 메인만 맞고, DPP Nilai Lain
+                                    특수 케이스 (travel agent ~1.2%, 중고차 ~1.1%, 건설 1.1~2.65%
+                                    등) 에서 거짓말이 됨. is_luxury 는 카테고리 라벨로만 사용. */}
+                                {(() => {
+                                  const dpp = Number(f.dpp) || 0;
+                                  const ppn = Number(f.ppn) || 0;
+                                  const effPct = dpp > 0 ? Math.round((ppn / dpp) * 1000) / 10 : 0;
+                                  const label = f.is_luxury === true
+                                    ? `💎 ${effPct}%`
+                                    : `${t('luxuryEssential')} ${effPct}%`;
+                                  const cls = f.is_luxury === true
+                                    ? 'text-[10px] bg-amber-100 text-amber-800 border-amber-300'
+                                    : 'text-[10px] bg-emerald-100 text-emerald-800 border-emerald-300';
+                                  return <Badge className={cls}>{label}</Badge>;
+                                })()}
                               </td>
                               <td className="py-2 px-3 text-center">
                                 <Badge variant="outline" className="text-[10px]">{f.status}</Badge>
@@ -810,50 +818,74 @@ export default function PPNPage() {
                                         />
                                       </div>
                                     </div>
-                                    {/* PPN 카테고리 — PMK 131/2024 (2026-06-29 UI 개편).
-                                        이전: 단일 checkbox (essential 일 때 "체크 안 됨" 이 직관적이지 않음).
-                                        신규: 일반/사치품 2-radio — 현재 선택이 항상 명시적으로 보임.
-                                        Essential: dpp × 11/12 → effective 11%.
-                                        Luxury:    dpp 전체 × 12%. */}
-                                    <div className="rounded-md border border-amber-200 bg-amber-50/40 p-3">
-                                      <div className="flex items-center justify-between gap-3 mb-2">
-                                        <div className="flex-1 min-w-0">
-                                          <p className="text-xs font-medium text-amber-900">{t('luxuryToggleLabel')}</p>
-                                          <p className="text-[11px] text-amber-700/80 mt-0.5">{t('luxuryToggleHint')}</p>
+                                    {/* PPN 카테고리 — PMK 131/2024 메인 (essential/luxury) 만 토글로 노출.
+                                        DPP Nilai Lain 특수 케이스 (travel agent / 중고차 / 건설업 1.1~2.65% /
+                                        PPnBM 등) 는 토글 표준 분기 밖이라, 실 ppn 효과율을 함께 보여주고
+                                        토글 결과와 ±0.5%p 이상 차이나면 "수동 조정값" 안내를 띄움. */}
+                                    {(() => {
+                                      const dpp = Number(f.dpp) || 0;
+                                      const ppn = Number(f.ppn) || 0;
+                                      const effPct = dpp > 0 ? Math.round((ppn / dpp) * 1000) / 10 : 0;
+                                      // 토글 기준 expected — essential 11.0, luxury 12.0.
+                                      const expected = f.is_luxury === true ? 12 : 11;
+                                      const isSpecial = dpp > 0 && Math.abs(effPct - expected) >= 0.5;
+                                      return (
+                                        <div className="rounded-md border border-amber-200 bg-amber-50/40 p-3">
+                                          <div className="flex items-center justify-between gap-3 mb-2">
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-medium text-amber-900">{t('luxuryToggleLabel')}</p>
+                                              <p className="text-[11px] text-amber-700/80 mt-0.5">{t('luxuryToggleHint')}</p>
+                                            </div>
+                                            <span className="text-[10px] font-mono text-gray-600 whitespace-nowrap">
+                                              현재 효과율: <span className="font-bold text-gray-900">{effPct}%</span>
+                                            </span>
+                                          </div>
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {([
+                                              { value: false, label: t('luxuryEssential'), hint: 'PMK 131/2024 · 11%', accent: 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200', dotColor: 'bg-emerald-500' },
+                                              { value: true,  label: '💎 LUXURY',         hint: 'PMK 131/2024 · 12%', accent: 'border-amber-500 bg-amber-100 ring-1 ring-amber-300',  dotColor: 'bg-amber-500'  },
+                                            ] as const).map((opt) => {
+                                              const isSelected = (f.is_luxury === true) === opt.value;
+                                              return (
+                                                <button
+                                                  key={String(opt.value)}
+                                                  type="button"
+                                                  onClick={() => {
+                                                    if (isSelected) return;
+                                                    // 토글 시 dpp 같이 보내야 서버가 ppn + dpp_nilai_lain 재계산.
+                                                    // 주의: 특수 DPP Nilai Lain 케이스는 이 동작이 표준값으로 덮어쓰므로
+                                                    //       토글 후 ppn / dpp_nilai_lain 을 다시 수동 입력해야 함.
+                                                    if (isSpecial && !confirm('현재 효과율(' + effPct + '%) 이 PMK 131/2024 표준과 달라 보입니다 (특수 DPP Nilai Lain 가능성).\n토글하면 표준 ' + (opt.value ? '12%' : '11%') + ' 로 덮어씁니다. 계속할까요?')) {
+                                                      return;
+                                                    }
+                                                    updateFaktur(f.id, { isLuxury: opt.value, dpp: Number(f.dpp) });
+                                                  }}
+                                                  className={`flex items-center justify-between gap-2 p-2 rounded-lg border text-xs transition ${
+                                                    isSelected
+                                                      ? opt.accent + ' font-bold'
+                                                      : 'border-gray-200 bg-white hover:border-gray-300'
+                                                  }`}
+                                                  aria-pressed={isSelected}
+                                                >
+                                                  <span className="flex items-center gap-2">
+                                                    <span className={`h-2 w-2 rounded-full ${isSelected ? opt.dotColor : 'bg-gray-300'}`} />
+                                                    {opt.label}
+                                                  </span>
+                                                  <span className="text-[10px] text-gray-500 font-mono">{opt.hint}</span>
+                                                </button>
+                                              );
+                                            })}
+                                          </div>
+                                          {isSpecial && (
+                                            <p className="mt-2 text-[11px] text-amber-800 bg-amber-100/60 border border-amber-200 rounded px-2 py-1">
+                                              ⚠ 현재 효과율 {effPct}% 가 표준 ({expected}%) 와 다릅니다.
+                                              DPP Nilai Lain 특수 케이스 (travel agent / 중고차 / 건설업 등) 면
+                                              위 토글로 덮어쓰지 말고 DPP / DPP Nilai Lain / PPN 칸을 직접 수정하세요.
+                                            </p>
+                                          )}
                                         </div>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {([
-                                          { value: false, label: t('luxuryEssential'), hint: '11%', accent: 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200', dotColor: 'bg-emerald-500' },
-                                          { value: true,  label: '💎 LUXURY',         hint: '12%', accent: 'border-amber-500 bg-amber-100 ring-1 ring-amber-300',  dotColor: 'bg-amber-500'  },
-                                        ] as const).map((opt) => {
-                                          const isSelected = (f.is_luxury === true) === opt.value;
-                                          return (
-                                            <button
-                                              key={String(opt.value)}
-                                              type="button"
-                                              onClick={() => {
-                                                if (isSelected) return;
-                                                // 토글 시 dpp 같이 보내야 서버가 ppn + dpp_nilai_lain 재계산
-                                                updateFaktur(f.id, { isLuxury: opt.value, dpp: Number(f.dpp) });
-                                              }}
-                                              className={`flex items-center justify-between gap-2 p-2 rounded-lg border text-xs transition ${
-                                                isSelected
-                                                  ? opt.accent + ' font-bold'
-                                                  : 'border-gray-200 bg-white hover:border-gray-300'
-                                              }`}
-                                              aria-pressed={isSelected}
-                                            >
-                                              <span className="flex items-center gap-2">
-                                                <span className={`h-2 w-2 rounded-full ${isSelected ? opt.dotColor : 'bg-gray-300'}`} />
-                                                {opt.label}
-                                              </span>
-                                              <span className="text-[10px] text-gray-500 font-mono">{opt.hint}</span>
-                                            </button>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
+                                      );
+                                    })()}
                                     <div className="flex gap-2 pt-2 mt-2">
                                       <Button size="sm" variant="ghost" className="text-red-500 text-xs" onClick={() => deleteFaktur(f.id)}>
                                         <X className="h-3 w-3 mr-1" />{t('deleteButton')}
