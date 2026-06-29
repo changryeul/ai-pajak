@@ -73,21 +73,26 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       return NextResponse.json({ error: 'customerId, taxPeriod, fakturType, dpp required' }, { status: 400 });
     }
 
+    // 2026-06-29 PMK 131/2024 정합:
+    //   essential (default) → ppn = DPP × 11/12 × 12% = DPP × 11%
+    //   luxury               → ppn = DPP × 12%
+    // ppn/dpp_nilai_lain 모두 body 우선, 없으면 PPNCalculator.calculateSimple
+    // 로 함께 일관 계산.
+    const isLuxury = isLuxuryFromBody === true;
+    const fakturDateResolved = fakturDate || new Date().toISOString().slice(0, 10);
+    const calc = PPNCalculator.calculateSimple(
+      Number(dpp),
+      new Date(fakturDateResolved),
+      isLuxury,
+    );
     const ppnNum = Number(ppnFromBody);
     const ppn = Number.isFinite(ppnNum) && ppnNum > 0
       ? Math.round(ppnNum)
-      : Math.round(Number(dpp) * PPN_DEFAULT_RATE);
-
-    // PMK 131/2024 metadata — Phase 3.1.
-    // is_luxury default false (safer for taxpayer: effective 11%).
-    // dpp_nilai_lain: trust body when present (UI may pre-compute), else
-    // derive via PPNCalculator.adjustDPP (essential 2025+ → dpp × 11/12).
-    const isLuxury = isLuxuryFromBody === true;
+      : calc.ppn_amount;
     const dppNilaiLainNum = Number(dppNilaiLainFromBody);
-    const fakturDateResolved = fakturDate || new Date().toISOString().slice(0, 10);
     const dppNilaiLain = Number.isFinite(dppNilaiLainNum) && dppNilaiLainNum > 0
       ? Math.round(dppNilaiLainNum)
-      : PPNCalculator.adjustDPP(Number(dpp), new Date(fakturDateResolved), isLuxury);
+      : calc.adjusted_dpp;
 
     // Get counterparty info if provided
     let cpName = counterpartyName || '';
@@ -147,20 +152,32 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
     if (description !== undefined) update.description = description || null;
     if (notes !== undefined) update.notes = notes || null;
 
-    if (dpp !== undefined) {
-      const dppNum = Number(dpp);
-      update.dpp = dppNum;
-      if (ppn === undefined) {
-        update.ppn = Math.round(dppNum * PPN_DEFAULT_RATE);
-      }
-      if (dppNilaiLain === undefined) {
-        const dateStr = fakturDate || new Date().toISOString().slice(0, 10);
-        update.dpp_nilai_lain = PPNCalculator.adjustDPP(dppNum, new Date(dateStr), isLuxury === true);
-      }
+    // 2026-06-29 PMK 131/2024 정합:
+    //   essential → ppn = adjustedDPP × 12% = DPP × 11/12 × 12% = DPP × 11%
+    //   luxury    → ppn = DPP × 12%
+    // dpp 또는 isLuxury 중 하나만 바뀌어도 ppn + dpp_nilai_lain 모두
+    // PPNCalculator.calculateSimple 로 함께 재계산 (사용자가 ppn/dpp_nilai_lain
+    // 을 명시적으로 보낸 경우는 그 값을 우선).
+    const luxuryChanged = isLuxury !== undefined;
+    const dppChanged = dpp !== undefined;
+    if (luxuryChanged) update.is_luxury = isLuxury === true;
+    if (dppChanged || luxuryChanged) {
+      // current row 조회 — dpp 또는 isLuxury 한쪽만 왔을 때 나머지를 채움.
+      const { data: current } = await getSupabaseAdmin()
+        .from('ppn_faktur_monthly')
+        .select('dpp, is_luxury, faktur_date')
+        .eq('id', id)
+        .single();
+      const effectiveDpp = dppChanged ? Number(dpp) : Number(current?.dpp ?? 0);
+      const effectiveLuxury = luxuryChanged ? isLuxury === true : current?.is_luxury === true;
+      const dateStr = fakturDate || current?.faktur_date || new Date().toISOString().slice(0, 10);
+      const calc = PPNCalculator.calculateSimple(effectiveDpp, new Date(dateStr), effectiveLuxury);
+      if (dppChanged) update.dpp = effectiveDpp;
+      if (ppn === undefined) update.ppn = calc.ppn_amount;
+      if (dppNilaiLain === undefined) update.dpp_nilai_lain = calc.adjusted_dpp;
     }
     if (ppn !== undefined) update.ppn = Math.round(Number(ppn));
     if (dppNilaiLain !== undefined) update.dpp_nilai_lain = Math.round(Number(dppNilaiLain));
-    if (isLuxury !== undefined) update.is_luxury = isLuxury === true;
 
     const { error } = await getSupabaseAdmin().from('ppn_faktur_monthly').update(update).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -92,27 +92,23 @@ async function processSection(
   // the correct type via the explicit insert below.
   const validated = validatePPNRows(parsed);
 
-  // Phase 3.3 — auto-classify luxury rows from luxury_item_classifications.
-  // Pre-fetch the LUXURY keyword set once per section, then substring-match
-  // each row's description + counterparty_name. False positives intentional
-  // (users can override via inline-edit luxury toggle added in Phase 3.2).
+  // 2026-06-29: 자동 luxury 분류 OFF — 사용자가 false-positive 에 짜증나는
+  // 사례가 누적되어 정책 변경. 모든 import 행은 essential (일반) 로 들어가고,
+  // 사치품은 inline-edit 토글로 사용자가 명시적으로 표시한다.
+  // 이전: classifyLuxuryBatch(description) → 키워드 substring 매칭.
+  // 이전 stop-list 강화에도 한계가 명확해 단순 default false 가 더 안전.
   const sb = getSupabaseAdmin();
   const validRows = validated.rows.filter((r) => r.isValid);
-  // 2026-06-24: counterparty_name 은 brand 이름 (예: 'Topindo Lucky Sports')
-  // 이 사치 키워드와 false-match 되는 가장 큰 원인이므로 luxury 판단에서 제외.
-  // 품목 본질은 description 으로 판정.
-  const luxuryFlags = await classifyLuxuryBatch(
-    sb,
-    validRows.map((r) => `${r.data.description ?? ''}`),
-  );
 
-  const inserts = validRows.map((r, i) => {
+  const inserts = validRows.map((r) => {
     const dppNum = parseFloat(r.data.dpp);
     let ppnNum = parseFloat(r.data.ppn ?? '');
     if (!Number.isFinite(ppnNum) || ppnNum === 0) {
-      ppnNum = Math.round(dppNum * PPN_DEFAULT_RATE);
+      // Essential 기본 → PMK 131/2024 effective 11% × dpp.
+      // (luxury 면 12% × dpp 인데 default false 라 그쪽 분기 안 탐.)
+      ppnNum = Math.round(dppNum * 0.11);
     }
-    const isLuxury = luxuryFlags[i];
+    const isLuxury = false;
     const dppNilaiLainFromFile = parseFloat(r.data.dpp_nilai_lain ?? '');
     const dppNilaiLain = Number.isFinite(dppNilaiLainFromFile) && dppNilaiLainFromFile > 0
       ? Math.round(dppNilaiLainFromFile)
@@ -134,7 +130,7 @@ async function processSection(
     };
   });
 
-  const luxuryCount = luxuryFlags.filter(Boolean).length;
+  const luxuryCount = 0;
   let inserted = 0;
   const errors: SectionError[] = [];
 

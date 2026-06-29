@@ -80,6 +80,9 @@ const STEPS: Step[] = [
   // signup-company endpoint → DB row → /api/company-profile GET → cleanup.
   // 회사 가입 트랙이 깨지면 즉시 fail. business_category 신규 컬럼도 함께 검증.
   { name: 'company signup e2e (completeness ≥ 60%)', file: 'verify-company-signup-flow.ts' },
+  // --- PPN luxury 토글 시 ppn/dpp_nilai_lain 재계산 (2026-06-29) -------
+  // PMK 131/2024: essential=11% / luxury=12%. UI 토글이 ppn 도 같이 재계산 보장.
+  { name: 'ppn luxury toggle (PMK 131/2024)', file: 'verify-ppn-luxury-toggle.ts' },
   // --- Schema drift guard (2026-06-03 audit) ---------------------------
   // Catches migration-history-vs-actual-schema drift early. The 2026-04-10
   // batch incident lost 30+ columns + 1 entire table silently; this runs
