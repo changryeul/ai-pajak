@@ -3960,7 +3960,14 @@
     "uploadModeReplaceDesc": "この月の既存データをすべて削除し、新しいファイルで置き換えます。インライン編集も消えます。",
     "uploadModeAppend": "追加",
     "uploadModeAppendDesc": "既存データに新しいファイルの行を追加します。重複の可能性があります。",
-    "uploadModeReplacedToast": "既存 {count} 件削除"
+    "uploadModeReplacedToast": "既存 {count} 件削除",
+    "labelInvoiceNumber": "インボイス番号",
+    "labelCounterpartyAddress": "取引先住所",
+    "labelDescription": "説明",
+    "labelNotes": "メモ",
+    "currentEffRate": "現在の実効率:",
+    "luxuryConfirmToggle": "現在の実効率 ({eff}%) が PMK 131/2024 標準と異なります (特殊 DPP Nilai Lain の可能性)。\n切り替えると標準 {target}% で上書きされます。続行しますか?",
+    "luxurySpecialWarning": "⚠ 現在の実効率 {eff}% が標準 ({expected}%) と異なります。DPP Nilai Lain 特殊ケース (旅行代理店 / 中古車 / 建設業 等) の場合は、上のトグルで上書きせず DPP / DPP Nilai Lain / PPN 欄を直接編集してください。"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4832,7 +4839,42 @@
     "savedToast": "保存しました",
     "saveFailed": "保存失敗",
     "editFieldDate": "取引日",
-    "editFieldDescription": "説明"
+    "editFieldDescription": "説明",
+    "invoiceMissingWarnBody": " 件の取引にインボイス写真が添付されていません。下の取引行を展開して添付してください。（全取引で必須）",
+    "invoiceMissingBadge": "⚠️ インボイス写真未添付",
+    "invoiceMissingAria": "インボイス写真未添付",
+    "sptSubmittedTitle": "SPT Masa 提出完了 — {period}",
+    "sptSubmittedBody": "運営チームが SPT Masa を作成しました。進捗は運営キューで確認できます。",
+    "sptPendingTitle": "運営チーム レビュー中 — {period}",
+    "sptPendingBody": "リクエスト時刻: {ts} · 運営チームがレビュー後、SPT Masa を作成します。",
+    "sptCancelRequest": "リクエストを取り消す",
+    "bulkUploadDoneTitle": "源泉税 一括アップロード完了 — {period}",
+    "bulkUploadFailedLine": "⚠ 失敗 {failed} 件 — 詳細はコンソール出力",
+    "bulkUnclassifiedSuffix": " — 未分類 {count} 件（ページで手動分類が必要）",
+    "bulkReplacedSuffix": " · 既存 {deleted} 件を削除",
+    "labelInvoiceNumber": "インボイス番号",
+    "labelInvoiceDate": "インボイス日付",
+    "labelPaymentDate": "支払日",
+    "labelCounterpartyAddress": "取引先住所",
+    "labelNotes": "メモ",
+    "submitToOperator": "運営チームに SPT Masa 提出をリクエスト",
+    "submitToOperatorSent": "運営チームに SPT Masa 提出リクエストを送信しました — {count} 件",
+    "uploadMode": "アップロード方式",
+    "uploadModeReplaceLabel": "上書き（推奨）",
+    "uploadModeReplaceDesc": "この月の既存 源泉税・PPh4(2)・PPh26・PPN 行をすべて削除し、新しいファイルで置き換えます。インライン編集も失われます。",
+    "uploadModeAppendLabel": "追加",
+    "uploadModeAppendDesc": "既存データに新しいファイルの行を追加します。重複の可能性があります。",
+    "chatEditTitle": "✏️ 源泉税 取引 修正 — {counterparty} ({period})",
+    "chatEditCounterpartyFallback": "（取引先不明）",
+    "chatFieldDate": "取引日",
+    "chatFieldCounterpartyName": "取引先名",
+    "chatFieldServiceType": "サービス種類",
+    "chatFieldDescription": "説明",
+    "chatSubmitTitle": "📨 SPT Masa PPh 23 提出リクエスト — {period}",
+    "chatSubmitLineCount": "• 取引 {count} 件",
+    "chatSubmitLineDpp": "• DPP合計: Rp {amount}",
+    "chatSubmitLinePph": "• PPh合計: Rp {amount}",
+    "chatSubmitLineFooter": "→ レビュー後 SPT Masa 作成をお願いします。"
   },
   "companyProfile": {
     "welcomeTitle": "ようこそ — 会社情報を補完してください",
@@ -10186,6 +10228,7 @@
     "bulkDelete": "選択削除",
     "bulkDeleteConfirm": "選択した{count}件を削除しますか？",
     "bulkDeleteDone": "{count}件削除しました",
-    "bulkDeletePartial": "{ok}件削除、{fail}件失敗"
+    "bulkDeletePartial": "{ok}件削除、{fail}件失敗",
+    "deselectAll": "すべて解除"
   }
 }

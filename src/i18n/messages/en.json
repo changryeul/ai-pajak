@@ -3960,7 +3960,14 @@
     "uploadModeReplaceDesc": "Delete all existing rows for this month and replace with the new file. Inline edits will be lost.",
     "uploadModeAppend": "Append",
     "uploadModeAppendDesc": "Add rows from the new file to existing data. May cause duplicates.",
-    "uploadModeReplacedToast": "{count} existing rows deleted"
+    "uploadModeReplacedToast": "{count} existing rows deleted",
+    "labelInvoiceNumber": "Invoice No.",
+    "labelCounterpartyAddress": "Address",
+    "labelDescription": "Description",
+    "labelNotes": "Notes",
+    "currentEffRate": "Current effective rate:",
+    "luxuryConfirmToggle": "Current effective rate ({eff}%) differs from PMK 131/2024 standard (possible special DPP Nilai Lain case).\nToggling will overwrite it to the standard {target}%. Continue?",
+    "luxurySpecialWarning": "⚠ Current effective rate {eff}% differs from standard ({expected}%). If this is a special DPP Nilai Lain case (travel agent / used car / construction, etc.), don't use the toggle above — edit the DPP / DPP Nilai Lain / PPN fields directly."
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4832,7 +4839,42 @@
     "savedToast": "Saved",
     "saveFailed": "Save failed",
     "editFieldDate": "Transaction Date",
-    "editFieldDescription": "Description"
+    "editFieldDescription": "Description",
+    "invoiceMissingWarnBody": " transactions have no invoice photo attached. Expand each row below and attach the invoice. (Required for every transaction)",
+    "invoiceMissingBadge": "⚠️ Invoice photo missing",
+    "invoiceMissingAria": "Invoice photo missing",
+    "sptSubmittedTitle": "SPT Masa submitted — {period}",
+    "sptSubmittedBody": "The operations team has created the SPT Masa. Track progress in the operations queue.",
+    "sptPendingTitle": "Under operations review — {period}",
+    "sptPendingBody": "Requested at: {ts} · The operations team will create the SPT Masa after review.",
+    "sptCancelRequest": "Cancel request",
+    "bulkUploadDoneTitle": "Withholding tax bulk upload complete — {period}",
+    "bulkUploadFailedLine": "⚠ {failed} failed — details logged to console",
+    "bulkUnclassifiedSuffix": " — {count} unclassified (needs manual classification on page)",
+    "bulkReplacedSuffix": " · {deleted} existing rows deleted",
+    "labelInvoiceNumber": "Invoice No.",
+    "labelInvoiceDate": "Invoice Date",
+    "labelPaymentDate": "Payment Date",
+    "labelCounterpartyAddress": "Address",
+    "labelNotes": "Notes",
+    "submitToOperator": "Request SPT Masa from operations team",
+    "submitToOperatorSent": "Request sent to operations team — {count} transactions",
+    "uploadMode": "Upload mode",
+    "uploadModeReplaceLabel": "Replace (Recommended)",
+    "uploadModeReplaceDesc": "Deletes all existing WHT · PPh4(2) · PPh26 · PPN rows for this month and replaces them with the new file. Inline edits will also be lost.",
+    "uploadModeAppendLabel": "Append",
+    "uploadModeAppendDesc": "Adds rows from the new file to existing data. May produce duplicates.",
+    "chatEditTitle": "✏️ Withholding transaction updated — {counterparty} ({period})",
+    "chatEditCounterpartyFallback": "(counterparty unknown)",
+    "chatFieldDate": "Transaction date",
+    "chatFieldCounterpartyName": "Counterparty name",
+    "chatFieldServiceType": "Service type",
+    "chatFieldDescription": "Description",
+    "chatSubmitTitle": "📨 SPT Masa PPh 23 request — {period}",
+    "chatSubmitLineCount": "• {count} transactions",
+    "chatSubmitLineDpp": "• Total DPP: Rp {amount}",
+    "chatSubmitLinePph": "• Total PPh: Rp {amount}",
+    "chatSubmitLineFooter": "→ Please create SPT Masa after review."
   },
   "companyProfile": {
     "welcomeTitle": "Welcome — complete your company profile",
@@ -10186,6 +10228,7 @@
     "bulkDelete": "Delete selected",
     "bulkDeleteConfirm": "Delete {count} selected rows?",
     "bulkDeleteDone": "{count} deleted",
-    "bulkDeletePartial": "{ok} deleted, {fail} failed"
+    "bulkDeletePartial": "{ok} deleted, {fail} failed",
+    "deselectAll": "Deselect all"
   }
 }

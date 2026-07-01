@@ -3960,7 +3960,14 @@
     "uploadModeReplaceDesc": "删除此月所有现有行并用新文件替换。内联编辑也会丢失。",
     "uploadModeAppend": "追加",
     "uploadModeAppendDesc": "将新文件的行追加到现有数据。可能产生重复。",
-    "uploadModeReplacedToast": "已删除 {count} 条旧数据"
+    "uploadModeReplacedToast": "已删除 {count} 条旧数据",
+    "labelInvoiceNumber": "发票编号",
+    "labelCounterpartyAddress": "交易方地址",
+    "labelDescription": "说明",
+    "labelNotes": "备注",
+    "currentEffRate": "当前实际税率:",
+    "luxuryConfirmToggle": "当前实际税率 ({eff}%) 与 PMK 131/2024 标准不符 (可能是特殊 DPP Nilai Lain 案例)。\n切换将覆盖为标准 {target}%。是否继续?",
+    "luxurySpecialWarning": "⚠ 当前实际税率 {eff}% 与标准 ({expected}%) 不符。如果这是特殊 DPP Nilai Lain 案例 (旅行代理 / 二手车 / 建筑业 等),请不要使用上面的切换,而是直接编辑 DPP / DPP Nilai Lain / PPN 字段。"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4832,7 +4839,42 @@
     "savedToast": "已保存",
     "saveFailed": "保存失败",
     "editFieldDate": "交易日期",
-    "editFieldDescription": "说明"
+    "editFieldDescription": "说明",
+    "invoiceMissingWarnBody": " 笔交易未附发票照片。请展开下方交易行并附上发票。（所有交易必填）",
+    "invoiceMissingBadge": "⚠️ 未附发票照片",
+    "invoiceMissingAria": "未附发票照片",
+    "sptSubmittedTitle": "SPT Masa 已提交 — {period}",
+    "sptSubmittedBody": "运营团队已创建 SPT Masa。可以在运营队列中跟踪进度。",
+    "sptPendingTitle": "运营团队审核中 — {period}",
+    "sptPendingBody": "请求时间: {ts} · 运营团队将在审核后创建 SPT Masa。",
+    "sptCancelRequest": "取消请求",
+    "bulkUploadDoneTitle": "预扣税批量上传完成 — {period}",
+    "bulkUploadFailedLine": "⚠ 失败 {failed} 件 — 详细原因输出到控制台",
+    "bulkUnclassifiedSuffix": " — 未分类 {count} 件（需要在页面手动分类）",
+    "bulkReplacedSuffix": " · 已删除 {deleted} 条旧数据",
+    "labelInvoiceNumber": "发票编号",
+    "labelInvoiceDate": "发票日期",
+    "labelPaymentDate": "支付日期",
+    "labelCounterpartyAddress": "交易方地址",
+    "labelNotes": "备注",
+    "submitToOperator": "向运营团队请求生成 SPT Masa",
+    "submitToOperatorSent": "已向运营团队发送 SPT Masa 请求 — {count} 笔",
+    "uploadMode": "上传方式",
+    "uploadModeReplaceLabel": "覆盖（推荐）",
+    "uploadModeReplaceDesc": "删除本月所有现有 预扣税·PPh4(2)·PPh26·PPN 行,并用新文件替换。inline edit 也会一并丢失。",
+    "uploadModeAppendLabel": "追加",
+    "uploadModeAppendDesc": "将新文件的行追加到现有数据。可能产生重复。",
+    "chatEditTitle": "✏️ 预扣税交易修改 — {counterparty} ({period})",
+    "chatEditCounterpartyFallback": "（交易方未知）",
+    "chatFieldDate": "交易日期",
+    "chatFieldCounterpartyName": "交易方名称",
+    "chatFieldServiceType": "服务类型",
+    "chatFieldDescription": "说明",
+    "chatSubmitTitle": "📨 SPT Masa PPh 23 请求 — {period}",
+    "chatSubmitLineCount": "• {count} 笔交易",
+    "chatSubmitLineDpp": "• 总 DPP: Rp {amount}",
+    "chatSubmitLinePph": "• 总 PPh: Rp {amount}",
+    "chatSubmitLineFooter": "→ 请审核后创建 SPT Masa。"
   },
   "companyProfile": {
     "welcomeTitle": "欢迎 — 请完善公司信息",
@@ -10186,6 +10228,7 @@
     "bulkDelete": "删除所选",
     "bulkDeleteConfirm": "删除所选 {count} 项？",
     "bulkDeleteDone": "已删除 {count} 项",
-    "bulkDeletePartial": "已删除 {ok} 项，{fail} 项失败"
+    "bulkDeletePartial": "已删除 {ok} 项，{fail} 项失败",
+    "deselectAll": "全部取消"
   }
 }

@@ -540,7 +540,7 @@ export default function PPNPage() {
             <div className="mb-3 p-2 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-between">
               <span className="text-xs text-slate-700">{tBulk('bulkSelectedN', { count: sel.selectedCount })}</span>
               <div className="flex gap-2">
-                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={sel.clear}>전체 해제</Button>
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={sel.clear}>{tBulk('deselectAll')}</Button>
                 <Button size="sm" variant="ghost" className="text-red-600 text-xs h-7" disabled={bulkBusy} onClick={bulkDeleteFakturs}>
                   {bulkBusy ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <X className="h-3 w-3 mr-1" />}
                   {tBulk('bulkDelete')}
@@ -770,7 +770,7 @@ export default function PPNPage() {
                                     {/* 2026-06-26: 양식이 수집하는 나머지 필드 — 인보이스 번호 / 주소 / 설명 / 메모 */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-gray-200">
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">인보이스 번호 / No. Invoice</Label>
+                                        <Label className="text-[10px] text-gray-400">{t('labelInvoiceNumber')}</Label>
                                         <Input
                                           className="h-8 text-xs font-mono"
                                           defaultValue={f.invoice_number ?? ''}
@@ -782,7 +782,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">거래처 주소 / Alamat</Label>
+                                        <Label className="text-[10px] text-gray-400">{t('labelCounterpartyAddress')}</Label>
                                         <Input
                                           className="h-8 text-xs"
                                           defaultValue={f.counterparty_address ?? ''}
@@ -794,7 +794,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div className="md:col-span-2">
-                                        <Label className="text-[10px] text-gray-400">설명 / Deskripsi</Label>
+                                        <Label className="text-[10px] text-gray-400">{t('labelDescription')}</Label>
                                         <Input
                                           className="h-8 text-xs"
                                           defaultValue={f.description ?? ''}
@@ -806,7 +806,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div className="md:col-span-2">
-                                        <Label className="text-[10px] text-gray-400">메모 / Notes</Label>
+                                        <Label className="text-[10px] text-gray-400">{t('labelNotes')}</Label>
                                         <Input
                                           className="h-8 text-xs"
                                           defaultValue={f.notes ?? ''}
@@ -837,7 +837,7 @@ export default function PPNPage() {
                                               <p className="text-[11px] text-amber-700/80 mt-0.5">{t('luxuryToggleHint')}</p>
                                             </div>
                                             <span className="text-[10px] font-mono text-gray-600 whitespace-nowrap">
-                                              현재 효과율: <span className="font-bold text-gray-900">{effPct}%</span>
+                                              {t('currentEffRate')} <span className="font-bold text-gray-900">{effPct}%</span>
                                             </span>
                                           </div>
                                           <div className="grid grid-cols-2 gap-2">
@@ -855,7 +855,7 @@ export default function PPNPage() {
                                                     // 토글 시 dpp 같이 보내야 서버가 ppn + dpp_nilai_lain 재계산.
                                                     // 주의: 특수 DPP Nilai Lain 케이스는 이 동작이 표준값으로 덮어쓰므로
                                                     //       토글 후 ppn / dpp_nilai_lain 을 다시 수동 입력해야 함.
-                                                    if (isSpecial && !confirm('현재 효과율(' + effPct + '%) 이 PMK 131/2024 표준과 달라 보입니다 (특수 DPP Nilai Lain 가능성).\n토글하면 표준 ' + (opt.value ? '12%' : '11%') + ' 로 덮어씁니다. 계속할까요?')) {
+                                                    if (isSpecial && !confirm(t('luxuryConfirmToggle', { eff: effPct, target: opt.value ? '12' : '11' }))) {
                                                       return;
                                                     }
                                                     updateFaktur(f.id, { isLuxury: opt.value, dpp: Number(f.dpp) });
@@ -878,9 +878,7 @@ export default function PPNPage() {
                                           </div>
                                           {isSpecial && (
                                             <p className="mt-2 text-[11px] text-amber-800 bg-amber-100/60 border border-amber-200 rounded px-2 py-1">
-                                              ⚠ 현재 효과율 {effPct}% 가 표준 ({expected}%) 와 다릅니다.
-                                              DPP Nilai Lain 특수 케이스 (travel agent / 중고차 / 건설업 등) 면
-                                              위 토글로 덮어쓰지 말고 DPP / DPP Nilai Lain / PPN 칸을 직접 수정하세요.
+                                              {t('luxurySpecialWarning', { eff: effPct, expected })}
                                             </p>
                                           )}
                                         </div>

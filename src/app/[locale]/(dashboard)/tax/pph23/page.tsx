@@ -432,12 +432,12 @@ export default function PPh23Page() {
       if (!threadId) return;
 
       const LABEL: Record<string, string> = {
-        transactionDate: '거래일',
-        counterpartyName: '거래처명',
+        transactionDate: t('chatFieldDate'),
+        counterpartyName: t('chatFieldCounterpartyName'),
         counterpartyNpwp: 'NPWP',
         grossAmount: 'DPP',
-        serviceType: '서비스 종류',
-        description: '설명',
+        serviceType: t('chatFieldServiceType'),
+        description: t('chatFieldDescription'),
       };
       const lines: string[] = [];
       for (const [k, v] of Object.entries(updates)) {
@@ -450,7 +450,10 @@ export default function PPh23Page() {
       }
       if (lines.length === 0) return;
       const content = [
-        `✏️ 원천세 거래 수정 — ${txAfter.counterparty_name || '(거래처 미상)'} (${period})`,
+        t('chatEditTitle', {
+          counterparty: txAfter.counterparty_name || t('chatEditCounterpartyFallback'),
+          period,
+        }),
         ...lines,
       ].join('\n');
 
@@ -771,7 +774,7 @@ export default function PPh23Page() {
       const iuncl = d.insertedUnclassified ?? 0;
       const totalInserted = ipph23 + ipph42 + ipph26 + ippn + iuncl;
       const skipNotice = iuncl > 0
-        ? ` — 미분류 ${iuncl} 건 (페이지에서 직접 분류 필요)`
+        ? t('bulkUnclassifiedSuffix', { count: iuncl })
         : '';
 
       const failedRows = Array.isArray(d.failed) ? d.failed.length : 0;
@@ -783,7 +786,7 @@ export default function PPh23Page() {
       });
       // 2026-06-22: replace 모드에서 삭제된 행 수 표시
       const replacedMsg = uploadMode === 'replace' && (d.deleted ?? 0) > 0
-        ? ` · 기존 ${d.deleted}건 삭제`
+        ? t('bulkReplacedSuffix', { deleted: d.deleted })
         : '';
       if (failedRows > 0) {
         const sample = (d.failed || []).slice(0, 3)
@@ -1444,7 +1447,7 @@ export default function PPh23Page() {
         <div className="mb-4 p-3 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-between">
           <span className="text-xs text-slate-700">{tBulk('bulkSelectedN', { count: sel.selectedCount })}</span>
           <div className="flex gap-2">
-            <Button size="sm" variant="ghost" className="text-xs h-7" onClick={sel.clear}>전체 해제</Button>
+            <Button size="sm" variant="ghost" className="text-xs h-7" onClick={sel.clear}>{tBulk('deselectAll')}</Button>
             <Button size="sm" variant="ghost" className="text-red-600 text-xs h-7" disabled={bulkBusy} onClick={bulkDelete}>
               {bulkBusy ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <X className="h-3 w-3 mr-1" />}
               {tBulk('bulkDelete')}
@@ -1458,8 +1461,7 @@ export default function PPh23Page() {
         <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
           <p className="text-xs text-red-800">
-            <b>{t('countItems', { count: pendingInvoice })}</b> 거래에 인보이스 사진이 미첨부입니다.
-            아래 거래 행을 펼쳐 인보이스를 첨부하세요. (모든 거래에 필수)
+            <b>{t('countItems', { count: pendingInvoice })}</b>{t('invoiceMissingWarnBody')}
           </p>
         </div>
       )}
@@ -1472,8 +1474,8 @@ export default function PPh23Page() {
               <CardContent className="p-3 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
                 <div className="text-sm">
-                  <p className="font-semibold text-emerald-900">SPT Masa 제출 완료 — {period}</p>
-                  <p className="text-[11px] text-emerald-700">운영팀이 SPT Masa 를 생성했습니다. 진행 상황은 운영팀 큐에서 확인할 수 있어요.</p>
+                  <p className="font-semibold text-emerald-900">{t('sptSubmittedTitle', { period })}</p>
+                  <p className="text-[11px] text-emerald-700">{t('sptSubmittedBody')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -1482,9 +1484,9 @@ export default function PPh23Page() {
               <CardContent className="p-3 flex items-center gap-2">
                 <Clock className="h-5 w-5 text-amber-600 flex-shrink-0" />
                 <div className="text-sm flex-1">
-                  <p className="font-semibold text-amber-900">운영팀 검토 중 — {period}</p>
+                  <p className="font-semibold text-amber-900">{t('sptPendingTitle', { period })}</p>
                   <p className="text-[11px] text-amber-700">
-                    요청 시간: {new Date(submissionRequest.requestedAt).toLocaleString()} · 운영팀이 검토 후 SPT Masa 를 생성합니다.
+                    {t('sptPendingBody', { ts: new Date(submissionRequest.requestedAt).toLocaleString() })}
                   </p>
                 </div>
                 <Button
@@ -1502,7 +1504,7 @@ export default function PPh23Page() {
                     }).catch(() => { /* silent */ });
                   }}
                 >
-                  요청 취소
+                  {t('sptCancelRequest')}
                 </Button>
               </CardContent>
             </Card>
@@ -1520,7 +1522,7 @@ export default function PPh23Page() {
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600" />
                   <h3 className="font-semibold text-sm text-emerald-900">
-                    원천세 일괄 업로드 완료 — {lastImport.period}
+                    {t('bulkUploadDoneTitle', { period: lastImport.period })}
                   </h3>
                   <span className="text-[10px] text-emerald-700">
                     {new Date(lastImport.at).toLocaleTimeString()}
@@ -1546,7 +1548,7 @@ export default function PPh23Page() {
                 </div>
                 {lastImport.failed > 0 && (
                   <p className="mt-2 text-[11px] text-red-600">
-                    ⚠ 실패 {lastImport.failed} 건 — 콘솔에 상세 사유 출력
+                    {t('bulkUploadFailedLine', { failed: lastImport.failed })}
                   </p>
                 )}
               </div>
@@ -1635,7 +1637,7 @@ export default function PPh23Page() {
                               {!tx.invoice_document_id && (
                                 <AlertTriangle
                                   className="h-3.5 w-3.5 text-red-500 flex-shrink-0"
-                                  aria-label="인보이스 미첨부"
+                                  aria-label={t('invoiceMissingAria')}
                                 />
                               )}
                               <div className="font-medium text-xs">{tx.counterparty_name}</div>
@@ -1647,7 +1649,7 @@ export default function PPh23Page() {
                             )}
                             {!tx.invoice_document_id && (
                               <div className="text-[9px] text-red-600 mt-0.5">
-                                ⚠️ 인보이스 사진 미첨부
+                                {t('invoiceMissingBadge')}
                               </div>
                             )}
                           </td>
@@ -1803,7 +1805,7 @@ export default function PPh23Page() {
                                   </select>
                                 </div>
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">인보이스 번호 / No. Invoice</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('labelInvoiceNumber')}</Label>
                                   <Input
                                     className="h-8 text-xs font-mono"
                                     defaultValue={tx.invoice_number ?? ''}
@@ -1815,7 +1817,7 @@ export default function PPh23Page() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">인보이스 일자 / Tgl Invoice</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('labelInvoiceDate')}</Label>
                                   <Input
                                     type="date"
                                     className="h-8 text-xs"
@@ -1828,7 +1830,7 @@ export default function PPh23Page() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">지급일 / Tgl Pembayaran</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('labelPaymentDate')}</Label>
                                   <Input
                                     type="date"
                                     className="h-8 text-xs"
@@ -1853,7 +1855,7 @@ export default function PPh23Page() {
                                   />
                                 </div>
                                 <div className="md:col-span-3">
-                                  <Label className="text-[10px] text-gray-400">거래처 주소 / Alamat</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('labelCounterpartyAddress')}</Label>
                                   <Input
                                     className="h-8 text-xs"
                                     defaultValue={tx.counterparty_address ?? ''}
@@ -1865,7 +1867,7 @@ export default function PPh23Page() {
                                   />
                                 </div>
                                 <div className="md:col-span-3">
-                                  <Label className="text-[10px] text-gray-400">메모 / Notes</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('labelNotes')}</Label>
                                   <Input
                                     className="h-8 text-xs"
                                     defaultValue={tx.notes ?? ''}
@@ -2053,11 +2055,11 @@ export default function PPh23Page() {
                     return;
                   }
                   const content = [
-                    `📨 SPT Masa PPh 23 제출 요청 — ${period}`,
-                    `• 거래 ${transactions.length} 건`,
-                    `• 총 DPP: Rp ${totalGross.toLocaleString('id-ID')}`,
-                    `• 총 PPh: Rp ${totalTax.toLocaleString('id-ID')}`,
-                    `→ 검토 후 SPT Masa 생성 부탁드립니다.`,
+                    t('chatSubmitTitle', { period }),
+                    t('chatSubmitLineCount', { count: transactions.length }),
+                    t('chatSubmitLineDpp', { amount: totalGross.toLocaleString('id-ID') }),
+                    t('chatSubmitLinePph', { amount: totalTax.toLocaleString('id-ID') }),
+                    t('chatSubmitLineFooter'),
                   ].join('\n');
                   const mRes = await fetch(`/api/customer-ai/threads/${threadId}/messages`, {
                     method: 'POST',
@@ -2065,7 +2067,7 @@ export default function PPh23Page() {
                     body: JSON.stringify({ content }),
                   });
                   if (mRes.ok) {
-                    showMsg('success', `운영팀에 SPT Masa 제출 요청을 전달했습니다 — ${transactions.length} 건`);
+                    showMsg('success', t('submitToOperatorSent', { count: transactions.length }));
                     // localStorage 마커 + 화면 상태 즉시 갱신 (optimistic).
                     const stamp = { requestedAt: new Date().toISOString() };
                     if (typeof window !== 'undefined' && reqStorageKey) {
@@ -2115,7 +2117,7 @@ export default function PPh23Page() {
             }}
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-            {isConsultant ? t('btnSubmitValidate') : '운영팀에 SPT Masa 제출 요청'}
+            {isConsultant ? t('btnSubmitValidate') : t('submitToOperator')}
           </Button>
         </div>
       )}
@@ -2155,7 +2157,7 @@ export default function PPh23Page() {
           {/* 2026-06-22: 업로드 방식 — csv 일괄 업로드일 때만 (manual entry 는 행 단위) */}
           {pendingAction === 'csv' && (
             <div className="border-t pt-3 space-y-2">
-              <Label className="text-xs font-semibold">업로드 방식</Label>
+              <Label className="text-xs font-semibold">{t('uploadMode')}</Label>
               <div className="space-y-1.5">
                 <label className="flex items-start gap-2 text-xs cursor-pointer">
                   <input
@@ -2166,8 +2168,8 @@ export default function PPh23Page() {
                     onChange={() => setUploadMode('replace')}
                   />
                   <div>
-                    <span className="font-semibold">덮어쓰기 (권장)</span>
-                    <span className="block text-[10px] text-gray-500">이 월의 기존 원천세·PPh4(2)·PPh26·PPN 행을 모두 삭제하고 새 파일로 교체합니다. 수정한 inline edit 도 함께 사라집니다.</span>
+                    <span className="font-semibold">{t('uploadModeReplaceLabel')}</span>
+                    <span className="block text-[10px] text-gray-500">{t('uploadModeReplaceDesc')}</span>
                   </div>
                 </label>
                 <label className="flex items-start gap-2 text-xs cursor-pointer">
@@ -2179,8 +2181,8 @@ export default function PPh23Page() {
                     onChange={() => setUploadMode('append')}
                   />
                   <div>
-                    <span className="font-semibold">추가</span>
-                    <span className="block text-[10px] text-gray-500">기존 데이터에 새 파일의 행을 추가합니다. 중복 가능성이 있습니다.</span>
+                    <span className="font-semibold">{t('uploadModeAppendLabel')}</span>
+                    <span className="block text-[10px] text-gray-500">{t('uploadModeAppendDesc')}</span>
                   </div>
                 </label>
               </div>

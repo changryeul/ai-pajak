@@ -3960,7 +3960,14 @@
     "uploadModeReplaceDesc": "Hapus semua baris yang ada untuk bulan ini dan ganti dengan file baru. Inline edit akan hilang.",
     "uploadModeAppend": "Tambah",
     "uploadModeAppendDesc": "Tambah baris dari file baru ke data yang ada. Bisa menyebabkan duplikat.",
-    "uploadModeReplacedToast": "{count} baris lama dihapus"
+    "uploadModeReplacedToast": "{count} baris lama dihapus",
+    "labelInvoiceNumber": "No. Invoice",
+    "labelCounterpartyAddress": "Alamat",
+    "labelDescription": "Deskripsi",
+    "labelNotes": "Catatan",
+    "currentEffRate": "Tarif efektif saat ini:",
+    "luxuryConfirmToggle": "Tarif efektif saat ini ({eff}%) berbeda dari standar PMK 131/2024 (kemungkinan kasus khusus DPP Nilai Lain).\nMengaktifkan toggle akan menimpanya menjadi standar {target}%. Lanjutkan?",
+    "luxurySpecialWarning": "⚠ Tarif efektif saat ini {eff}% berbeda dari standar ({expected}%). Jika ini kasus khusus DPP Nilai Lain (travel agent / mobil bekas / konstruksi dll.), jangan gunakan toggle di atas — edit kolom DPP / DPP Nilai Lain / PPN secara langsung."
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4832,7 +4839,42 @@
     "savedToast": "Tersimpan",
     "saveFailed": "Gagal menyimpan",
     "editFieldDate": "Tanggal Transaksi",
-    "editFieldDescription": "Deskripsi"
+    "editFieldDescription": "Deskripsi",
+    "invoiceMissingWarnBody": " transaksi belum melampirkan foto faktur. Perluas baris di bawah dan lampirkan faktur. (Wajib untuk semua transaksi)",
+    "invoiceMissingBadge": "⚠️ Foto faktur belum dilampirkan",
+    "invoiceMissingAria": "Foto faktur belum dilampirkan",
+    "sptSubmittedTitle": "SPT Masa terkirim — {period}",
+    "sptSubmittedBody": "Tim operasi telah membuat SPT Masa. Anda dapat memantau progres di antrian tim operasi.",
+    "sptPendingTitle": "Sedang direview tim operasi — {period}",
+    "sptPendingBody": "Waktu permintaan: {ts} · Tim operasi akan membuat SPT Masa setelah review.",
+    "sptCancelRequest": "Batalkan permintaan",
+    "bulkUploadDoneTitle": "Unggah massal PPh potongan selesai — {period}",
+    "bulkUploadFailedLine": "⚠ {failed} gagal — detail alasan tercetak di konsol",
+    "bulkUnclassifiedSuffix": " — {count} tidak terklasifikasi (perlu klasifikasi manual di halaman)",
+    "bulkReplacedSuffix": " · {deleted} baris lama dihapus",
+    "labelInvoiceNumber": "No. Invoice",
+    "labelInvoiceDate": "Tgl Invoice",
+    "labelPaymentDate": "Tgl Pembayaran",
+    "labelCounterpartyAddress": "Alamat",
+    "labelNotes": "Catatan",
+    "submitToOperator": "Kirim permintaan SPT Masa ke tim operasi",
+    "submitToOperatorSent": "Permintaan SPT Masa terkirim ke tim operasi — {count} transaksi",
+    "uploadMode": "Mode Unggah",
+    "uploadModeReplaceLabel": "Timpa (Disarankan)",
+    "uploadModeReplaceDesc": "Menghapus seluruh baris PPh potongan · PPh4(2) · PPh26 · PPN bulan ini dan menggantinya dengan file baru. Edit inline yang telah dilakukan juga akan hilang.",
+    "uploadModeAppendLabel": "Tambah",
+    "uploadModeAppendDesc": "Menambahkan baris dari file baru ke data yang ada. Berpotensi menghasilkan duplikat.",
+    "chatEditTitle": "✏️ Perubahan transaksi PPh potongan — {counterparty} ({period})",
+    "chatEditCounterpartyFallback": "(mitra tidak diketahui)",
+    "chatFieldDate": "Tanggal transaksi",
+    "chatFieldCounterpartyName": "Nama mitra",
+    "chatFieldServiceType": "Jenis jasa",
+    "chatFieldDescription": "Deskripsi",
+    "chatSubmitTitle": "📨 Permintaan SPT Masa PPh 23 — {period}",
+    "chatSubmitLineCount": "• {count} transaksi",
+    "chatSubmitLineDpp": "• Total DPP: Rp {amount}",
+    "chatSubmitLinePph": "• Total PPh: Rp {amount}",
+    "chatSubmitLineFooter": "→ Mohon dibuatkan SPT Masa setelah review."
   },
   "companyProfile": {
     "welcomeTitle": "Selamat datang — lengkapi profil perusahaan",
@@ -10186,6 +10228,7 @@
     "bulkDelete": "Hapus terpilih",
     "bulkDeleteConfirm": "Hapus {count} baris terpilih?",
     "bulkDeleteDone": "{count} dihapus",
-    "bulkDeletePartial": "{ok} dihapus, {fail} gagal"
+    "bulkDeletePartial": "{ok} dihapus, {fail} gagal",
+    "deselectAll": "Batal pilih semua"
   }
 }
