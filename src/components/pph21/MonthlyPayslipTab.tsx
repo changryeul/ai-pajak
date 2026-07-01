@@ -253,7 +253,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                   ref={el => { if (el) el.indeterminate = sel.isPartiallySelected; }}
                   onChange={sel.toggleAll}
                 />
-                <span className="text-gray-600">전체</span>
+                <span className="text-gray-600">{tp('selectAll')}</span>
               </label>
               {sel.selectedCount > 0 && (
                 <>
@@ -385,9 +385,9 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                                 'bg-purple-100 text-purple-700'
                               }`}
                               title={
-                                ps.employee.employment_status === 'PKWTT' ? 'Pegawai Tetap (1) — 정직원' :
-                                ps.employee.employment_status === 'PKWT' ? 'Pegawai Tidak Tetap (2) — 비정직원' :
-                                'Bukan Pegawai (3) — 외부'
+                                ps.employee.employment_status === 'PKWTT' ? 'Pegawai Tetap (1)' :
+                                ps.employee.employment_status === 'PKWT' ? 'Pegawai Tidak Tetap (2)' :
+                                'Bukan Pegawai (3)'
                               }
                             >
                               {ps.employee.employment_status}
@@ -441,10 +441,10 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                           상세에 안 보여서 사용자가 어느 직원인지 즉시 못 알아보던 정보.
                           payslip 자체에서 우선, 없으면 employee join 에서 fallback. */}
                       <div className="rounded-md border border-slate-200 bg-white p-3">
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">직원 정보 / Info Pegawai</h4>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secEmployeeInfo')}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                           <div>
-                            <p className="text-[10px] text-gray-400">사번 / Employee No.</p>
+                            <p className="text-[10px] text-gray-400">{tp('fieldEmployeeNo')}</p>
                             <p className="font-mono">{ps.employee?.employee_number || '—'}</p>
                           </div>
                           <div>
@@ -460,39 +460,32 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                             <p className="font-mono">{ps.ptkp_category || ps.employee?.ptkp_category || '—'}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">고용형태 / Status</p>
+                            <p className="text-[10px] text-gray-400">{tp('fieldEmploymentStatus')}</p>
                             <p>
                               {ps.employee?.employment_status || '—'}
-                              {ps.employee?.employment_status && (
-                                <span className="text-[10px] text-gray-400 ml-1">
-                                  {ps.employee.employment_status === 'PKWTT' ? '(정직원)' :
-                                   ps.employee.employment_status === 'PKWT' ? '(비정직원)' :
-                                   ps.employee.employment_status === 'Consultant' ? '(외부)' : ''}
-                                </span>
-                              )}
                             </p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">직군 / Tax Method</p>
+                            <p className="text-[10px] text-gray-400">{tp('fieldTaxMethod')}</p>
                             <p>{ps.employee?.worker_type || '—'}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">직책 / Position</p>
+                            <p className="text-[10px] text-gray-400">{tp('fieldPosition')}</p>
                             <p>{ps.employee?.position || '—'}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">부서 / Department</p>
+                            <p className="text-[10px] text-gray-400">{tp('fieldDepartment')}</p>
                             <p>{ps.employee?.department || '—'}</p>
                           </div>
                           {ps.employee?.hire_date && (
                             <div>
-                              <p className="text-[10px] text-gray-400">입사일 / Hire Date</p>
+                              <p className="text-[10px] text-gray-400">{tp('fieldHireDate')}</p>
                               <p className="font-mono">{ps.employee.hire_date}</p>
                             </div>
                           )}
                           {ps.employee?.resign_date && (
                             <div>
-                              <p className="text-[10px] text-gray-400">퇴사일 / Resign Date</p>
+                              <p className="text-[10px] text-gray-400">{tp('fieldResignDate')}</p>
                               <p className="font-mono">{ps.employee.resign_date}</p>
                             </div>
                           )}

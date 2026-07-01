@@ -462,23 +462,23 @@ export default function PPh21PayrollPage() {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{form.id ? '직원 정보 수정' : '직원 직접 등록'}</DialogTitle>
+            <DialogTitle>{form.id ? tp('dialogTitleEdit') : tp('dialogTitleCreate')}</DialogTitle>
             <DialogDescription>
-              템플릿에서 수집하는 모든 필드를 입력할 수 있습니다. 이름과 월 기본급은 필수.
+              {tp('dialogDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 py-2">
             {/* 직원 식별 */}
             <div>
-              <h4 className="text-xs font-bold text-gray-600 mb-2">직원 식별 / Identitas</h4>
+              <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secIdentity')}</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 <div>
-                  <Label className="text-[11px]">이름 / Nama <span className="text-red-500">*</span></Label>
+                  <Label className="text-[11px]">{tp('fieldName')} <span className="text-red-500">*</span></Label>
                   <Input value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">사번 / Employee No.</Label>
+                  <Label className="text-[11px]">{tp('fieldEmployeeNo')}</Label>
                   <Input value={form.employeeNumber} onChange={e => setForm({ ...form, employeeNumber: e.target.value })} />
                 </div>
                 <div>
@@ -499,21 +499,21 @@ export default function PPh21PayrollPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-[11px]">고용형태 / Status (PMK 66/2023)</Label>
+                  <Label className="text-[11px]">{tp('fieldEmploymentStatusPMK')}</Label>
                   <Select
                     value={form.employmentStatus || 'PKWTT'}
                     onValueChange={v => setForm({ ...form, employmentStatus: v })}
                   >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="PKWTT">PKWTT (Pegawai Tetap, 정직원)</SelectItem>
-                      <SelectItem value="PKWT">PKWT (Pegawai Tidak Tetap, 비정직원)</SelectItem>
-                      <SelectItem value="Consultant">Consultant (Bukan Pegawai, 외부)</SelectItem>
+                      <SelectItem value="PKWTT">PKWTT (Pegawai Tetap)</SelectItem>
+                      <SelectItem value="PKWT">PKWT (Pegawai Tidak Tetap)</SelectItem>
+                      <SelectItem value="Consultant">Consultant (Bukan Pegawai)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-[11px]">직군 / Tax Method (Worker Type)</Label>
+                  <Label className="text-[11px]">{tp('fieldWorkerType')}</Label>
                   <Select value={form.workerType} onValueChange={v => setForm({ ...form, workerType: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -530,26 +530,26 @@ export default function PPh21PayrollPage() {
 
             {/* 급여 / 수당 / BPJS */}
             <div>
-              <h4 className="text-xs font-bold text-gray-600 mb-2">월 급여 · 수당 · 공제 / Gaji & Tunjangan</h4>
+              <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secSalaryAllowance')}</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 <div>
-                  <Label className="text-[11px]">기본급 / Gaji Pokok <span className="text-red-500">*</span></Label>
+                  <Label className="text-[11px]">{tp('fieldGajiPokok')} <span className="text-red-500">*</span></Label>
                   <Input type="number" value={form.grossSalary} onChange={e => setForm({ ...form, grossSalary: e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-[11px]">직책수당 / Tunj. Jabatan</Label>
+                  <Label className="text-[11px]">{tp('fieldTunjJabatan')}</Label>
                   <Input type="number" value={form.positionAllowance} onChange={e => setForm({ ...form, positionAllowance: e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-[11px]">식대 / Tunj. Makan</Label>
+                  <Label className="text-[11px]">{tp('fieldTunjMakan')}</Label>
                   <Input type="number" value={form.mealAllowance} onChange={e => setForm({ ...form, mealAllowance: e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-[11px]">교통비 / Tunj. Transport</Label>
+                  <Label className="text-[11px]">{tp('fieldTunjTransport')}</Label>
                   <Input type="number" value={form.transportAllowance} onChange={e => setForm({ ...form, transportAllowance: e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-[11px]">기타수당 / Tunj. Lainnya</Label>
+                  <Label className="text-[11px]">{tp('fieldTunjLainnya')}</Label>
                   <Input type="number" value={form.otherAllowance} onChange={e => setForm({ ...form, otherAllowance: e.target.value })} className="font-mono" />
                 </div>
                 <div>
@@ -565,11 +565,11 @@ export default function PPh21PayrollPage() {
                   <Input type="number" value={form.jpEmployee} onChange={e => setForm({ ...form, jpEmployee: e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-[11px]">기타 공제 / Potongan</Label>
+                  <Label className="text-[11px]">{tp('fieldPotongan')}</Label>
                   <Input type="number" value={form.otherDeductions} onChange={e => setForm({ ...form, otherDeductions: e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-[11px]">보너스 / Bonus</Label>
+                  <Label className="text-[11px]">{tp('fieldBonus')}</Label>
                   <Input type="number" value={form.bonus} onChange={e => setForm({ ...form, bonus: e.target.value })} className="font-mono" />
                 </div>
                 <div>
@@ -581,26 +581,26 @@ export default function PPh21PayrollPage() {
 
             {/* HR 인사정보 */}
             <div>
-              <h4 className="text-xs font-bold text-gray-600 mb-2">HR 인사정보 / Data HR (선택)</h4>
+              <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secHRInfo')}</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 <div>
-                  <Label className="text-[11px]">직책 / Position</Label>
+                  <Label className="text-[11px]">{tp('fieldPosition')}</Label>
                   <Input value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">부서 / Department</Label>
+                  <Label className="text-[11px]">{tp('fieldDepartment')}</Label>
                   <Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">입사일 / Hire Date</Label>
+                  <Label className="text-[11px]">{tp('fieldHireDate')}</Label>
                   <Input type="date" value={form.hireDate} onChange={e => setForm({ ...form, hireDate: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">생년월일 / Birth Date</Label>
+                  <Label className="text-[11px]">{tp('fieldBirthDate')}</Label>
                   <Input type="date" value={form.birthDate} onChange={e => setForm({ ...form, birthDate: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">성별 / Gender</Label>
+                  <Label className="text-[11px]">{tp('fieldGender')}</Label>
                   <Select value={form.gender || 'M'} onValueChange={v => setForm({ ...form, gender: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -610,7 +610,7 @@ export default function PPh21PayrollPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-[11px]">결혼 / Marital</Label>
+                  <Label className="text-[11px]">{tp('fieldMarital')}</Label>
                   <Select value={form.maritalStatus || 'SINGLE'} onValueChange={v => setForm({ ...form, maritalStatus: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -622,27 +622,27 @@ export default function PPh21PayrollPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-[11px]">이메일 / Email</Label>
+                  <Label className="text-[11px]">{tp('fieldEmail')}</Label>
                   <Input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">전화 / Phone</Label>
+                  <Label className="text-[11px]">{tp('fieldPhone')}</Label>
                   <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
                 </div>
                 <div className="md:col-span-3">
-                  <Label className="text-[11px]">주소 / Address</Label>
+                  <Label className="text-[11px]">{tp('fieldAddress')}</Label>
                   <Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">은행 / Bank</Label>
+                  <Label className="text-[11px]">{tp('fieldBank')}</Label>
                   <Input value={form.bankName} onChange={e => setForm({ ...form, bankName: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-[11px]">계좌번호 / Account No.</Label>
+                  <Label className="text-[11px]">{tp('fieldAccountNo')}</Label>
                   <Input value={form.bankAccountNo} onChange={e => setForm({ ...form, bankAccountNo: e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <Label className="text-[11px]">예금주 / Account Name</Label>
+                  <Label className="text-[11px]">{tp('fieldAccountName')}</Label>
                   <Input value={form.bankAccountName} onChange={e => setForm({ ...form, bankAccountName: e.target.value })} />
                 </div>
               </div>
@@ -651,7 +651,7 @@ export default function PPh21PayrollPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)} disabled={isSaving}>
-              취소
+              {tp('btnCancel')}
             </Button>
             <Button
               onClick={async () => {
@@ -665,7 +665,7 @@ export default function PPh21PayrollPage() {
               disabled={isSaving}
             >
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
-              저장
+              {tp('btnSave')}
             </Button>
           </DialogFooter>
         </DialogContent>
