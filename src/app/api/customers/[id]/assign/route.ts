@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import {
-  assignConsultant,
-  unassignConsultant,
-} from '@/lib/services/customer-service';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { unassignConsultant } from '@/lib/services/customer-service';
 import { loggers } from '@/lib/logger';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 
@@ -61,8 +59,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Verify customer exists
-    const { data: customer } = await supabase
+    // Verify customer + consultant with admin client. Middleware has already
+    // confirmed the caller is in allowedRoles (advisor / supervisor / admin),
+    // so RLS-scoped reads are unnecessary and would 404 for supervisors on
+    // pre-assignment customers (they have no consultant edge to see them yet).
+    const admin = getSupabaseAdmin();
+    const { data: customer } = await admin
       .from('customer')
       .select('id')
       .eq('id', customerId)
@@ -75,8 +77,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Verify consultant exists and is active
-    const { data: consultant } = await supabase
+    const { data: consultant } = await admin
       .from('consultant')
       .select('id, full_name, is_active')
       .eq('id', consultantId)
@@ -96,7 +97,40 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    await assignConsultant(customerId, consultantId, user.id);
+    // Inline the assignment with the admin client for the same reason as the
+    // customer/consultant lookups above. The service helper uses an RLS-scoped
+    // client which would fail for supervisors on unassigned customers.
+    const { data: existing } = await admin
+      .from('customer_consultant')
+      .select('id, is_active')
+      .eq('customer_id', customerId)
+      .eq('consultant_id', consultantId)
+      .maybeSingle();
+
+    if (existing?.is_active) {
+      return NextResponse.json(
+        { success: false, error: 'Consultant is already assigned to this customer' },
+        { status: 409 },
+      );
+    }
+
+    if (existing) {
+      const { error: updErr } = await admin
+        .from('customer_consultant')
+        .update({ is_active: true, updated_at: new Date().toISOString() })
+        .eq('id', existing.id);
+      if (updErr) throw new Error(`Failed to reactivate assignment: ${updErr.message}`);
+    } else {
+      const { error: insErr } = await admin
+        .from('customer_consultant')
+        .insert({
+          customer_id: customerId,
+          consultant_id: consultantId,
+          assigned_by_user_id: user.id,
+          is_active: true,
+        });
+      if (insErr) throw new Error(`Failed to assign consultant: ${insErr.message}`);
+    }
 
     return NextResponse.json({
       success: true,
