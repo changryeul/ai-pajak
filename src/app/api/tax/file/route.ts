@@ -136,7 +136,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
   // 4. Valid POA exists (requireValidPOA)
   const supabase = createAdminClient();
 
-  // Get consultant information
+  // Get consultant information (with tax_partner partner_type for P4 gate)
   const { data: consultant, error: consultantError } = await supabase
     .from('consultant')
     .select(
@@ -147,6 +147,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
       tax_partner:tax_partner_id (
         id,
         name,
+        partner_type,
         tax_license_number
       )
     `
@@ -165,6 +166,37 @@ async function handler(request: RequestWithPOA): Promise<Response> {
       },
       { status: 404 }
     );
+  }
+
+  // P4 gate: EXTERNAL tax_partner (세무컨설팅 법인) 은 자체 신고이므로,
+  // 자기 tenant 안에 활성 세무사 (tax_advisor.is_verified=true) 가 최소 1명
+  // 있어야 SPT 제출 가능. JTC 는 default 대행자 라이선스를 가지므로 skip.
+  const partner = Array.isArray(consultant.tax_partner)
+    ? consultant.tax_partner[0]
+    : consultant.tax_partner;
+  const partnerType = (partner as { partner_type?: string } | null)?.partner_type;
+
+  if (partnerType === 'EXTERNAL') {
+    const { count: advisorCount } = await supabase
+      .from('tax_advisor')
+      .select('id, consultant!inner(tax_partner_id)', { count: 'exact', head: true })
+      .eq('is_verified', true)
+      .eq('consultant.tax_partner_id', consultant.tax_partner_id);
+
+    if (!advisorCount || advisorCount < 1) {
+      loggers.tax.warn(
+        { userId: session.userId, taxPartnerId: consultant.tax_partner_id },
+        'P4 gate: no verified tax_advisor in tenant',
+      );
+      return NextResponse.json(
+        {
+          error: 'Verified tax advisor required',
+          errorCode: 'NO_VERIFIED_TAX_ADVISOR',
+          message: '귀 회사에 자격증 소지자(세무사) 등록이 확인되지 않아 SPT 를 제출할 수 없습니다.',
+        },
+        { status: 403 },
+      );
+    }
   }
 
   // Get customer information
@@ -194,35 +226,62 @@ async function handler(request: RequestWithPOA): Promise<Response> {
     .eq('consultant_id', consultant.id)
     .single();
 
-  // Create tax filing record
-  const { data: taxFiling, error: filingError } = await supabase
-    .from('tax_filing')
-    .insert({
-      customer_id: customerId,
-      consultant_id: consultant.id,
-      tax_advisor_id: taxAdvisor?.id || null,
-      tax_type: taxType,
-      tax_period: taxPeriod,
-      status: 'FILED',
-      tax_data: {
-        ...taxData,
-        filingNumber,
-        poaId: poa.id,
-        poaNumber: poa.poa_number,
-        notes,
-      },
-      filed_at: new Date().toISOString(),
-    })
-    .select('id, status, filed_at, tax_data')
-    .single();
+  // Create tax filing record.
+  // P4: tax_partner_id 를 신고 주체 근거로 함께 저장. 마이그 20260703000001 가
+  // prod 에 반영되기 전에는 컬럼이 없을 수 있으므로 PGRST204 감지 후 재시도.
+  const baseRow = {
+    customer_id: customerId,
+    consultant_id: consultant.id,
+    tax_advisor_id: taxAdvisor?.id || null,
+    tax_type: taxType,
+    tax_period: taxPeriod,
+    status: 'FILED',
+    tax_data: {
+      ...taxData,
+      filingNumber,
+      poaId: poa.id,
+      poaNumber: poa.poa_number,
+      notes,
+    },
+    filed_at: new Date().toISOString(),
+  };
 
-  if (filingError) {
+  const rowWithPartner = { ...baseRow, tax_partner_id: consultant.tax_partner_id };
+
+  let taxFiling: { id: string; status: string; filed_at: string; tax_data: Record<string, unknown> } | null = null;
+  let filingError: { message: string; code?: string } | null = null;
+
+  {
+    const first = await supabase
+      .from('tax_filing')
+      .insert(rowWithPartner)
+      .select('id, status, filed_at, tax_data')
+      .single();
+    if (first.error?.code === 'PGRST204' || /tax_partner_id/.test(first.error?.message || '')) {
+      loggers.tax.warn(
+        { err: first.error },
+        'tax_filing.tax_partner_id column missing on prod — retrying without it',
+      );
+      const retry = await supabase
+        .from('tax_filing')
+        .insert(baseRow)
+        .select('id, status, filed_at, tax_data')
+        .single();
+      taxFiling = retry.data;
+      filingError = retry.error;
+    } else {
+      taxFiling = first.data;
+      filingError = first.error;
+    }
+  }
+
+  if (filingError || !taxFiling) {
     loggers.tax.error({ err: filingError, customerId, taxType }, 'Failed to create tax filing');
 
     return NextResponse.json(
       {
         error: 'Tax filing creation failed',
-        message: filingError.message,
+        message: filingError?.message,
         detail:
           'Database validation failed. Please check POA status and filing data.',
       },

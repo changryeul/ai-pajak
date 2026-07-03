@@ -166,6 +166,7 @@
     "poaManage": "委任状管理",
     "operatorSection": "税務オペレーター",
     "operatorDashboard": "ダッシュボード",
+    "unassignedCustomers": "未割り当ての顧客",
     "submissionQueue": "提出キュー",
     "approvals": "承認待ち",
     "workloadManagement": "業務割当/回収",

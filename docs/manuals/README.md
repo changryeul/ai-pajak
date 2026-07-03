@@ -7,12 +7,14 @@
 
 | 나는 누구인가 | 읽을 매뉴얼 |
 |---|---|
-| 인도네시아에 법인(PT)을 운영 중이고, 매월 세금 신고가 필요하다 | [법인 납세자](./01-corporate-customer.md) |
-| 인도네시아에서 근로·사업 활동 중이고, 매년 SPT Pribadi를 내야 한다 | [개인 납세자](./03-individual-customer.md) |
-| JTC가 아닌 **다른 세무 사무소 소속**이며, AI Pajak을 도구로 사용해 여러 고객을 대행한다 | [외부 세무 사무소](./02-external-consultant.md) |
+| 인도네시아에 법인(PT)을 운영 중이고, 매월 세금 신고가 필요하다 (JTC 대행) | [법인 납세자](./01-corporate-customer.md) |
+| 인도네시아에서 근로·사업 활동 중이고, 매년 SPT Pribadi를 내야 한다 (JTC 대행) | [개인 납세자](./03-individual-customer.md) |
+| **세무 컨설팅 법인** 이며, AI Pajak 을 도구로 자기 회사 직원 + 자기 클라이언트의 세무를 **self-service** 로 처리한다 (JTC 개입 없음) | [세무 컨설팅 법인](./02-external-consultant.md) |
 | **JTC 내부 소속** 세무사·컨설턴트다 | [JTC 세무사](./05-jtc-consultant.md) |
 | JTC 운영팀에서 제출 큐를 처리한다 (Operator / Supervisor / Master) | [운영팀](./04-tax-operator.md) |
 | 플랫폼·인프라·사용자·청구를 관리한다 (세무 데이터는 보지 않는다) | [플랫폼 관리자](./06-platform-admin.md) |
+
+> 🗺️ 역할·조직 전체 구조는 [`docs/guides/roles.md`](../guides/roles.md) 에서 한눈에 볼 수 있습니다.
 
 ---
 
@@ -21,14 +23,14 @@
 1. **[01 — 법인 납세자](./01-corporate-customer.md)**
    가입, 회사 프로필 설정, 월 PPh21/PPh23/PPN/Final 신고, 회계 연동(Accurate/Jurnal), 요금제(UMKM/Basic/Pro), POA 관리
 
-2. **[02 — 외부 세무 사무소](./02-external-consultant.md)**
-   사무소 가입, 고객 등록·격리, 월 구독(Starter/Growth/Enterprise), 일괄 PPh21, 팀 관리, Tier 업그레이드
+2. **[02 — 세무 컨설팅 법인 (Self-Service Tenant)](./02-external-consultant.md)**
+   회사 가입 (`/register/firm`), 자기 회사 직원 + 자기 클라이언트 관리, 자기 이름으로 SPT 제출 (JTC 개입 없음), 월 구독(Starter/Growth/Enterprise), 일괄 PPh21, 팀 관리, Tier 업그레이드
 
 3. **[03 — 개인 납세자](./03-individual-customer.md)**
    SPT Pribadi 양식 선택(1770SS/1770S/1770), A1 OCR 업로드, PTKP 자동 계산, 환급 신청, 건당 결제
 
-4. **[04 — 운영팀](./04-tax-operator.md)**
-   djp_submission_queue 10단계 워크플로우, Operator/Supervisor/Master 권한, 업무 분배, 마스터 대시보드, 맞춤 가격
+4. **[04 — 운영팀 (JTC only)](./04-tax-operator.md)**
+   djp_submission_queue 11단계 워크플로우, Operator/Supervisor/Master 권한, 업무 분배, 마스터 대시보드, 맞춤 가격, **미배정 고객 배정** (2026-07-03 P1)
 
 5. **[05 — JTC 세무사](./05-jtc-consultant.md)**
    고객 배정, 월·연 신고 작성, 일괄 PPh21, 이상 탐지, 이전가격, 팀 관리(ADVISOR 전용)
@@ -58,9 +60,9 @@
 | 법인 | UMKM (최대 직원 10, 매출 소기업) | Rp 500,000 |
 | 법인 | Basic (직원 50, 원천세 100, PPN 200) | Rp 1,500,000 |
 | 법인 | Pro (직원 1000, 원천세 200, PPN 500) | Rp 3,000,000 |
-| 외부 사무소 | Starter (고객 10) | Rp 1,000,000 |
-| 외부 사무소 | Growth (고객 50, 일괄 처리) | Rp 3,000,000 |
-| 외부 사무소 | Enterprise (무제한) | Rp 8,000,000 |
+| 세무 컨설팅 법인 | Starter (고객 10) | Rp 1,000,000 |
+| 세무 컨설팅 법인 | Growth (고객 50, 일괄 처리) | Rp 3,000,000 |
+| 세무 컨설팅 법인 | Enterprise (무제한) | Rp 8,000,000 |
 | 개인 | SPT 1770SS (건당) | Rp 100,000 |
 | 개인 | SPT 1770S (건당) | Rp 200,000 |
 | 개인 | SPT 1770 (건당) | Rp 300,000 |
@@ -74,8 +76,8 @@ Pro·Enterprise 한도를 넘는 규모는 **맞춤 견적(Custom Pricing Quote)
 CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 코드와 권한이 이 규칙을 따릅니다.
 
 1. **PLATFORM_ADMIN은 고객 세무 데이터에 접근할 수 없다** — 미들웨어와 RLS 이중 차단
-2. **CONSULTANT_JTC는 JTC 소속이어야 한다** — FK 제약 + RLS
-3. **세무 신고 제출 권한은 TAX_ADVISOR_JTC에게만 있다** — Tax Filing Actor ≠ Platform
+2. **컨설턴트는 등록된 `tax_partner` (JTC 또는 세무 컨설팅 법인) 에 반드시 소속** — FK 제약 + `get_consultant_tax_partner_id()` RLS. 두 tenant 간 데이터는 완전 격리
+3. **세무 신고 제출 권한은 `TAX_ADVISOR_JTC` 에게만 있다** — Tax Filing Actor ≠ Platform. 세무 컨설팅 법인이 자기 이름으로 신고하려면 tenant 안에 자격증 소지자 최소 1명 필요 (2026-07-03 P4)
 4. **청구 수집자와 서비스 제공자는 분리된다** — 결제는 SYSTEM/MASTER, 서비스는 세무사
 5. **모든 쓰기 조치는 감사 로그에 기록된다** — `withAudit` 미들웨어 자동 적용
 
@@ -140,11 +142,15 @@ CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 �
 
 ### 역할 코드 요약
 
+> ⚠ **네이밍 주의**: `CONSULTANT_JTC` 와 `TAX_ADVISOR_JTC` 는 이름에 `_JTC` 접미사가 붙어 있지만, 실제로는 **JTC 뿐 아니라 세무 컨설팅 법인 (EXTERNAL tax_partner) 직원도 같은 role 을 씁니다**. 소속은 `consultant.tax_partner_id` 로만 결정. 이름 rename 은 로드맵 P3 예정.
+
 | 코드 | 이름 | 주요 권한 |
 |---|---|---|
-| `CUSTOMER` | 고객 | 본인 신고 데이터만 |
-| `CONSULTANT_JTC` | JTC 일반 세무사 | 배정 고객 신고 작성 |
-| `TAX_ADVISOR_JTC` | JTC 선임 세무사 | 최종 제출 권한, 팀 관리 |
+| `CUSTOMER` (INDIVIDUAL) | 개인 고객 | 자기 SPT 개인 신고 |
+| `CUSTOMER` (COMPANY, 일반) | 일반 법인 고객 | 자기 월 신고 + 결산 (JTC 대행) |
+| `CUSTOMER` (COMPANY, 세무 컨설팅) | 세무 컨설팅 법인 고객 | 위 + 자기 클라이언트 관리 (self-service) |
+| `CONSULTANT_JTC` | 컨설턴트 (JTC 또는 세무 컨설팅 법인 소속) | 배정 고객 신고 작성 |
+| `TAX_ADVISOR_JTC` | 세무사 자격증 소지자 (JTC 또는 세무 컨설팅 법인 소속) | 최종 제출 권한, 팀 관리 |
 | `TAX_OPERATOR` | 운영자 | 큐 검토·처리 |
 | `TAX_OPERATOR_LEAD` | 운영 리드 | 운영자 + 추가 책임 |
 | `TAX_OPERATOR_SUPERVISOR` | 운영 수퍼바이저 | 승인, 분배, 통계 |
@@ -158,7 +164,7 @@ CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 �
 |---|---|
 | `PLATFORM_OWNER` | AI Pajak 소유사 |
 | `PLATFORM` | 플랫폼 운영 조직 |
-| `TAX_PARTNER` | 세무 법인 (JTC 또는 외부) |
+| `TAX_PARTNER` | 세무 법인 — JTC (내부, `is_platform_partner=true`) 또는 EXTERNAL (세무 컨설팅 법인, self-service tenant) |
 
 ---
 
@@ -167,6 +173,7 @@ CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 �
 | 날짜 | 버전 | 변경 내용 |
 |---|---|---|
 | 2026-04-11 | v1.0 | 6개 역할 매뉴얼 초안 작성 (시나리오형). 법인·외부·개인·운영·JTC·플랫폼 관리자 |
+| 2026-07-03 | v2.0 | **P0 도메인 모델 교정**. "외부 세무 사무소" → "세무 컨설팅 법인 (Self-Service Tenant)" 리네이밍. 세무 컨설팅 법인의 관리 대상 = 자기 직원 + 자기 클라이언트 둘 다 명시. JTC 개입 없이 자체 세무사가 자기 이름으로 신고. 미배정 큐 워크플로우 (P1), 자격증 소지자 검증 게이트 (P4) 추가. 상세 개요: [`docs/guides/roles.md`](../guides/roles.md) |
 
 ---
 

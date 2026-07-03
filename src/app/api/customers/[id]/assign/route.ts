@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const userRole = { role };
 
     // Only TAX_ADVISOR_JTC and PLATFORM_ADMIN can assign consultants
-    const allowedRoles = ['TAX_ADVISOR_JTC', 'PLATFORM_ADMIN'];
+    const allowedRoles = ['TAX_ADVISOR_JTC', 'TAX_OPERATOR_SUPERVISOR', 'PLATFORM_ADMIN'];
     if (!allowedRoles.includes(userRole.role)) {
       return NextResponse.json(
         { success: false, error: 'Only tax advisors and platform admins can assign consultants' },
@@ -161,7 +161,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const userRole = { role };
 
     // Only TAX_ADVISOR_JTC and PLATFORM_ADMIN can unassign consultants
-    const allowedRoles = ['TAX_ADVISOR_JTC', 'PLATFORM_ADMIN'];
+    const allowedRoles = ['TAX_ADVISOR_JTC', 'TAX_OPERATOR_SUPERVISOR', 'PLATFORM_ADMIN'];
     if (!allowedRoles.includes(userRole.role)) {
       return NextResponse.json(
         { success: false, error: 'Only tax advisors and platform admins can unassign consultants' },

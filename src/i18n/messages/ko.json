@@ -166,6 +166,7 @@
     "poaManage": "위임장 관리",
     "operatorSection": "상담원",
     "operatorDashboard": "Dashboard",
+    "unassignedCustomers": "미배정 고객",
     "submissionQueue": "제출 대기열",
     "approvals": "승인 대기",
     "workloadManagement": "업무 배정/회수",

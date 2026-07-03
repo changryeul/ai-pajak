@@ -128,6 +128,15 @@ body: { itemId: "...", action: "review" | "submit_for_approval" | "approve" | "r
 
 ## 5. Supervisor 전용 기능
 
+### 5.0. 미배정 고객 (`/operator/unassigned-customers`) — 2026-07-03 P1
+
+가입은 완료했으나 아직 담당 컨설턴트가 없는 개인·일반법인 고객을 여기서 배정합니다.
+
+- **표시 대상**: `customer_consultant.is_active=true` 행이 없는 customer (개인·일반법인). 세무 컨설팅 법인 소속 클라이언트는 자체 등록 시 assignment 가 함께 생기므로 자동 제외.
+- **배정 액션**: 카드마다 "컨설턴트 선택" 드롭다운 → **배정** 버튼. 성공 시 목록에서 즉시 제거되고 담당 컨설턴트 대시보드에 곧바로 노출됨.
+- **API**: `GET /api/operator/unassigned-customers` (Supervisor+Master only) → `POST /api/customers/[id]/assign` (Supervisor 도 이제 허용).
+- **작업 원칙**: 라운드로빈 자동 배정은 채택하지 않음. 각 컨설턴트의 실 workload 를 Supervisor 가 눈으로 보고 판단.
+
 ### 5.1. 업무 분배 (`/operator/workload`)
 - 미배정 PENDING 건을 운영자별로 수동 분배
 - 자동 배정 규칙 설정: 균등 분배 / 난이도별 / 특정 고객 전담

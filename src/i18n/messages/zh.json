@@ -166,6 +166,7 @@
     "poaManage": "管理委托书",
     "operatorSection": "税务操作员",
     "operatorDashboard": "仪表板",
+    "unassignedCustomers": "未分配客户",
     "submissionQueue": "提交队列",
     "approvals": "待审批",
     "workloadManagement": "工作分配/回收",

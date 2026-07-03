@@ -3,10 +3,10 @@
 > **대상**: Jakarta Tax Consulting(JTC) 내부 소속 **세무사·컨설턴트**
 >
 > **두 가지 역할**:
-> - **CONSULTANT_JTC** — 일반 JTC 세무사. 배정된 고객의 월·연 신고 작성
-> - **TAX_ADVISOR_JTC** — JTC 선임 세무사. 실제 DJP 제출 권한 보유 (Hard Rule 3), 팀 관리 권한
+> - **CONSULTANT_JTC** — 일반 세무사. 배정된 고객의 월·연 신고 작성
+> - **TAX_ADVISOR_JTC** — 선임 세무사 (자격증 소지자). 실제 DJP 제출 권한 보유 (Hard Rule 3), 팀 관리 권한
 >
-> **외부 세무사무소**(Phase B 합류 사무소)와는 다른 역할입니다. 본 매뉴얼은 **JTC 직원 전용**입니다.
+> ⚠ **네이밍 주의**: 두 role 은 이름에 `_JTC` 접미사가 붙어 있지만, **세무 컨설팅 법인 (EXTERNAL tax_partner) 직원도 같은 role 을 씁니다**. 소속은 `consultant.tax_partner_id` 로만 결정. 본 매뉴얼은 **JTC 내부 직원 관점** — 세무 컨설팅 법인 직원의 매뉴얼은 [`02-external-consultant.md`](./02-external-consultant.md). Role name rename (`_JTC` 접미사 제거) 은 로드맵 P3 예정.
 
 ## 1. JTC 세무사의 책임 범위
 

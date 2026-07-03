@@ -37,6 +37,7 @@ import {
   Sparkles,
   ChevronDown,
   User,
+  UserPlus,
   Bell,
   Newspaper,
   ShieldCheck,
@@ -270,6 +271,7 @@ const navItems: NavSection[] = [
     roles: supervisorRoles,
     items: [
       { href: '/operator/dashboard',  icon: Headphones,    labelKey: 'nav.operatorDashboard' },
+      { href: '/operator/unassigned-customers', icon: UserPlus, labelKey: 'nav.unassignedCustomers' },
       { href: '/operator/workload',   icon: ListChecks,    labelKey: 'nav.workloadManagement' },
       { href: '/operator/approvals',  icon: CheckCircle,   labelKey: 'nav.approvals' },
       { href: '/operator/team',       icon: Users,         labelKey: 'nav.operatorTeam' },

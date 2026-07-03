@@ -166,6 +166,7 @@
     "poaManage": "Manage POA",
     "operatorSection": "Tax Operator",
     "operatorDashboard": "Dashboard",
+    "unassignedCustomers": "Unassigned Customers",
     "submissionQueue": "Submission Queue",
     "approvals": "Approval Queue",
     "workloadManagement": "Work Assignment",
