@@ -6,7 +6,7 @@
 >
 > **한 줄 요약**: 본인 회사(세무컨설팅 법인) 안의 직원 + 자기 클라이언트를 격리된 공간에서 관리하고, 매월 구독료를 내며, 고객 수에 따라 Starter/Growth/Enterprise 3단계 요금제를 선택합니다.
 >
-> ⚠ **문서 용어**: 프로덕션 코드/DB 에는 아직 "external tax_partner", "consultant plan" 같은 이전 이름이 남아 있습니다. 의미상 "**세무컨설팅 법인 = EXTERNAL tax_partner**" 로 읽어주세요. 리네이밍은 로드맵 P3/P5 에서 진행 예정.
+> 📌 **문서 용어**: 프로덕션 코드/DB 에는 `tax_partner.partner_type='EXTERNAL'`, `tax_partner_subscription`, `CONS-` 주문 접두사 등 기존 이름이 그대로 유지됩니다. 사람 대상 문서에서는 **세무컨설팅 법인 = EXTERNAL tax_partner** 로 읽어주세요. (Role name `_JTC` 접미사 제거는 P3 로 2026-07-05 완료.)
 
 ## 1. AI Pajak은 세무컨설팅 법인에게 무엇을 제공하는가
 
