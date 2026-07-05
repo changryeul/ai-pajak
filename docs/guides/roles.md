@@ -67,14 +67,14 @@
 
 ### 그룹 B — 세무 사무소 직원 (컨설턴트)
 
-Role 이름에 `_JTC` 접미사가 붙어 있지만 **실제로는 JTC 뿐 아니라 세무컨설팅 법인 (EXTERNAL) 직원도 같은 role 을 씁니다**. 소속은 `consultant.tax_partner_id` FK 로만 결정.
+두 role 모두 **JTC 뿐 아니라 세무컨설팅 법인 (EXTERNAL) 직원도 함께 사용**합니다. 소속은 `consultant.tax_partner_id` FK 로만 결정.
 
-> ⚠ **로드맵 P3 (예정)**: `_JTC` 접미사가 오해를 유발하므로 `CONSULTANT` / `TAX_ADVISOR` 로 rename 예정.
+> 📌 **P3 완료 (2026-07-05)**: 옛 이름 `CONSULTANT_JTC` / `TAX_ADVISOR_JTC` 의 `_JTC` 접미사가 오해를 유발해 아래 이름으로 rename 완료 (마이그 `20260705000001_role_rename_consultant_tax_advisor.sql`).
 
-| Role                | 등급            | 주된 역할                |
-| ------------------- | ------------- | -------------------- |
-| **CONSULTANT**  | 실무 컨설턴트       | 고객 자료 수집·파싱·계산·초안 작성 |
-| **TAX_ADVISOR** | 세무사 (자격증 소지자) | 승인 + SPT 최종 제출       |
+| Role | 등급 | 주된 역할 |
+| --- | --- | --- |
+| **CONSULTANT** | 실무 컨설턴트 | 고객 자료 수집·파싱·계산·초안 작성 |
+| **TAX_ADVISOR** | 세무사 (자격증 소지자) | 승인 + SPT 최종 제출 |
 
 두 role 모두 JTC 소속 (내부 직원) 이거나 세무컨설팅 법인 (EXTERNAL) 소속 직원일 수 있습니다.
 
@@ -121,7 +121,7 @@ SYSTEM                             → 웹훅 뒤에서만 돎, UI 없음
 
 ## 4. 헷갈리기 쉬운 6가지 함정
 
-1. **"CONSULTANT = JTC 소속" 아님** — 세무컨설팅 법인 (EXTERNAL) 직원도 같은 role. `tax_partner_id` 로만 구분. → P3 에서 rename 예정.
+1. **"CONSULTANT = JTC 소속" 아님** — 세무컨설팅 법인 (EXTERNAL) 직원도 같은 role. `tax_partner_id` 로만 구분. (P3 로 `_JTC` 접미사 제거 완료, 2026-07-05)
 2. **PLATFORM_ADMIN ≠ MASTER** — 관리자 이름이지만 세무 데이터 손도 못 댐. 진짜 최고 권한은 `TAX_OPERATOR_MASTER`.
 3. **CUSTOMER 하나에 3가지 얼굴** — INDIVIDUAL / COMPANY(일반) / COMPANY(세무컨설팅). 마지막은 tax_partner 로도 함께 연결됨.
 4. **세무컨설팅 법인은 JTC 를 안 거침** — 자체 처리. 운영팀 큐에 안 올라감. 자기 이름으로 신고.
@@ -172,7 +172,7 @@ Seed 스크립트:
 | **P0** | `roles.md` + external-consultant 매뉴얼 재작성 (이 문서) | ✅ 완료 |
 | **P1** | 개인/일반법인 가입 → 미배정 큐 진입 + Supervisor 배정 UI | ✅ 완료 (2026-07-03) — `/operator/unassigned-customers`, `GET /api/operator/unassigned-customers`, `POST /api/customers/[id]/assign` 에 SUPERVISOR 허용 |
 | ~~P2~~ | ~~법인 다중 사용자 (`company_member`)~~ | **스코프 아웃** |
-| **P3** | Role name `_JTC` suffix 제거 (`CONSULTANT` / `TAX_ADVISOR` 로 통일) | 대기 |
+| **P3** | Role name `_JTC` suffix 제거 (`CONSULTANT` / `TAX_ADVISOR` 로 통일) | ✅ 완료 (2026-07-05) — 마이그 `20260705000001_role_rename_consultant_tax_advisor.sql` + 179 파일 grep-replace + Vercel/Supabase 동시 배포. Drift 0 · P1 회귀 3/3 PASS 검증 |
 | **P4** | `tax_filing.tax_partner_id` 컬럼 + 세무컨설팅 법인 자격증 소지자 검증 | ✅ 완료 (2026-07-03) — 마이그 `20260703000001_tax_filing_tax_partner_id.sql` + `/api/tax/file` gate. 마이그 배포는 사용자 push 대기 |
 | **P5** | 매뉴얼 최종 정리 | ✅ 완료 (2026-07-03) — `docs/manuals/README.md`, `04-tax-operator.md` (§5.0 미배정 큐), `05-jtc-consultant.md` (naming 노트) 반영 |
 

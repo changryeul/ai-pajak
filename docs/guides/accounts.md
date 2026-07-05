@@ -63,7 +63,7 @@
 | Eddy External Consultant | external.consultant@mitrapajak.com | CONSULTANT | PT Mitra Pajak **Sentosa** | 1 |
 | Firm Rep | repro.firm.*@example.com | TAX_ADVISOR | PT **Repro Firm** | 0 |
 
-> ⚠ **네이밍 함정**: role 이름에 `_JTC` 접미사가 붙어도 위 3명은 **모두 EXTERNAL tenant 소속**. 소속은 `consultant.tax_partner_id` 로만 결정. Rename 은 로드맵 P3.
+> 📌 **네이밍**: 위 3명은 role 이 `CONSULTANT` / `TAX_ADVISOR` 이지만 **모두 EXTERNAL tenant 소속**. 소속은 `consultant.tax_partner_id` 로만 결정. (`_JTC` 접미사는 P3 로 2026-07-05 제거됨.)
 
 ---
 

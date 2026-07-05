@@ -142,7 +142,7 @@ CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 �
 
 ### 역할 코드 요약
 
-> ⚠ **네이밍 주의**: `CONSULTANT` 와 `TAX_ADVISOR` 는 이름에 `_JTC` 접미사가 붙어 있지만, 실제로는 **JTC 뿐 아니라 세무 컨설팅 법인 (EXTERNAL tax_partner) 직원도 같은 role 을 씁니다**. 소속은 `consultant.tax_partner_id` 로만 결정. 이름 rename 은 로드맵 P3 예정.
+> 📌 **네이밍**: `CONSULTANT` 와 `TAX_ADVISOR` 는 **JTC 뿐 아니라 세무 컨설팅 법인 (EXTERNAL tax_partner) 직원도 함께 사용**합니다. 소속은 `consultant.tax_partner_id` 로만 결정. (P3 로 `_JTC` 접미사 제거 완료, 2026-07-05.)
 
 | 코드 | 이름 | 주요 권한 |
 |---|---|---|
