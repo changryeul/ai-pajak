@@ -6,8 +6,8 @@
 -- ============================================
 -- Test user emails and expected roles:
 -- - customer.test@example.com -> CUSTOMER
--- - consultant.test@jakartatax.co.id -> CONSULTANT_JTC
--- - advisor.test@jakartatax.co.id -> TAX_ADVISOR_JTC
+-- - consultant.test@jakartatax.co.id -> CONSULTANT
+-- - advisor.test@jakartatax.co.id -> TAX_ADVISOR
 -- - admin.test@aipajak.com -> PLATFORM_ADMIN
 -- ============================================
 

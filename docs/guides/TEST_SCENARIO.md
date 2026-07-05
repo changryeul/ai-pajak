@@ -32,7 +32,7 @@ npx tsx scripts/build-test-fixtures.ts
 |---|---|---|
 | CUSTOMER (COMPANY) | `company.test@example.com` | `TestPassword123!` |
 | TAX_OPERATOR | `operator.test@aipajak.com` | `TestPassword123!` |
-| CONSULTANT_JTC | `consultant.test@jakartatax.co.id` | `TestPassword123!` |
+| CONSULTANT | `consultant.test@jakartatax.co.id` | `TestPassword123!` |
 
 ---
 

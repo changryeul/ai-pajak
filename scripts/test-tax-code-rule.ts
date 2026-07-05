@@ -1,14 +1,14 @@
 /**
  * Smoke test for Tax Code Rule (Track B + Track C):
  *   1.  MASTER GET → 200, 7 rows, expected category set
- *   2.  CONSULTANT_JTC GET → 403 (Track A narrow gate)
+ *   2.  CONSULTANT GET → 403 (Track A narrow gate)
  *   3.  PLATFORM_ADMIN GET → 403 (blockPlatformAdmin)
  *   4.  MASTER PATCH PPh21.review_note → 200, value applied
  *   5.  re-GET → updated_by/updated_at reflect MASTER
  *   6.  MASTER PATCH revert → 200
  *   7.  SUPERVISOR PATCH → 403
  *   8.  TAX_OPERATOR PATCH → 403
- *   9.  CONSULTANT_JTC PATCH → 403
+ *   9.  CONSULTANT PATCH → 403
  *   10. PLATFORM_ADMIN PATCH → 403
  *   11. MASTER PATCH empty body → 400
  *   12. MASTER PATCH non-existent uuid → 404

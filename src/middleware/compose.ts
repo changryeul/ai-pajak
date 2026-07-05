@@ -31,7 +31,7 @@ export type Middleware = (
  *   return composeMiddleware(
  *     requireAuth,                          // 1. Check authentication
  *     blockPlatformAdmin,                   // 2. Block platform admin
- *     requireRole(UserRole.TAX_ADVISOR_JTC),// 3. Require tax advisor role
+ *     requireRole(UserRole.TAX_ADVISOR),// 3. Require tax advisor role
  *     withAudit('TAX_FILING_SUBMIT')        // 4. Create audit trail
  *   )(request as RequestWithSession, async (req) => {
  *     // Handler implementation
@@ -112,7 +112,7 @@ export const taxDataRead = () =>
   composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC)
+    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR)
   );
 
 /**
@@ -122,7 +122,7 @@ export const taxDataWrite = (auditAction: string) =>
   composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.CONSULTANT, UserRole.TAX_ADVISOR),
     withAudit(auditAction)
   );
 
@@ -134,7 +134,7 @@ export const taxFilingSubmit = (auditAction: string) =>
   composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.TAX_ADVISOR),
     requireValidPOA(),              // ← POA validation
     withAudit(auditAction)
   );

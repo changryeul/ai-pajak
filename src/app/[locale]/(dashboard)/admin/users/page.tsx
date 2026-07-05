@@ -30,8 +30,8 @@ export default function AdminUsersPage() {
 
   const roleConfig: Record<string, { label: string; color: string; gradient: string }> = {
     CUSTOMER: { label: t('customer'), color: 'bg-blue-100 text-blue-700', gradient: 'from-blue-500 to-indigo-600' },
-    CONSULTANT_JTC: { label: t('consultant'), color: 'bg-green-100 text-green-700', gradient: 'from-green-500 to-emerald-600' },
-    TAX_ADVISOR_JTC: { label: t('taxAdvisor'), color: 'bg-purple-100 text-purple-700', gradient: 'from-purple-500 to-violet-600' },
+    CONSULTANT: { label: t('consultant'), color: 'bg-green-100 text-green-700', gradient: 'from-green-500 to-emerald-600' },
+    TAX_ADVISOR: { label: t('taxAdvisor'), color: 'bg-purple-100 text-purple-700', gradient: 'from-purple-500 to-violet-600' },
     PLATFORM_ADMIN: { label: t('admin'), color: 'bg-orange-100 text-orange-700', gradient: 'from-orange-500 to-red-500' },
     UNKNOWN: { label: 'Unknown', color: 'bg-gray-100 text-gray-500', gradient: 'from-gray-400 to-gray-500' },
   };
@@ -208,8 +208,8 @@ export default function AdminUsersPage() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="CUSTOMER">{t('customerOption')}</SelectItem>
-                    <SelectItem value="CONSULTANT_JTC">{t('consultantOption')}</SelectItem>
-                    <SelectItem value="TAX_ADVISOR_JTC">{t('taxAdvisorOption')}</SelectItem>
+                    <SelectItem value="CONSULTANT">{t('consultantOption')}</SelectItem>
+                    <SelectItem value="TAX_ADVISOR">{t('taxAdvisorOption')}</SelectItem>
                     <SelectItem value="TAX_OPERATOR">{t('operatorOption')}</SelectItem>
                     <SelectItem value="TAX_OPERATOR_LEAD">Operator Lead</SelectItem>
                     <SelectItem value="TAX_OPERATOR_SUPERVISOR">Operator Supervisor</SelectItem>
@@ -253,8 +253,8 @@ export default function AdminUsersPage() {
           <SelectContent>
             <SelectItem value="all">{t('allRoles')}</SelectItem>
             <SelectItem value="CUSTOMER">{t('customer')}</SelectItem>
-            <SelectItem value="CONSULTANT_JTC">{t('consultant')}</SelectItem>
-            <SelectItem value="TAX_ADVISOR_JTC">{t('taxAdvisor')}</SelectItem>
+            <SelectItem value="CONSULTANT">{t('consultant')}</SelectItem>
+            <SelectItem value="TAX_ADVISOR">{t('taxAdvisor')}</SelectItem>
             <SelectItem value="PLATFORM_ADMIN">{t('admin')}</SelectItem>
           </SelectContent>
         </Select>
@@ -314,8 +314,8 @@ export default function AdminUsersPage() {
                           <SelectTrigger className="w-[160px] text-xs h-8"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="CUSTOMER">{t('customer')}</SelectItem>
-                            <SelectItem value="CONSULTANT_JTC">{t('consultant')}</SelectItem>
-                            <SelectItem value="TAX_ADVISOR_JTC">{t('taxAdvisor')}</SelectItem>
+                            <SelectItem value="CONSULTANT">{t('consultant')}</SelectItem>
+                            <SelectItem value="TAX_ADVISOR">{t('taxAdvisor')}</SelectItem>
                             <SelectItem value="PLATFORM_ADMIN">{t('admin')}</SelectItem>
                           </SelectContent>
                         </Select>

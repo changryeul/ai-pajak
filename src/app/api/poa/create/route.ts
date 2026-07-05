@@ -15,7 +15,7 @@ import { loggers } from '@/lib/logger';
  * 1. CUSTOMER creates POA request
  * 2. Document must be uploaded first
  * 3. Initial status is DRAFT (awaiting signatures)
- * 4. TAX_ADVISOR_JTC will review and sign later
+ * 4. TAX_ADVISOR will review and sign later
  * 5. All actions are audit logged
  *
  * This is Step 1 of POA workflow:

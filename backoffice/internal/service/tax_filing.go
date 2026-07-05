@@ -56,7 +56,7 @@ func (s *TaxFilingService) UpdateStatus(ctx context.Context, filingID uuid.UUID,
 
 	oldStatus := filing.Status
 
-	// HARD RULE #3: Only TAX_ADVISOR_JTC can submit filings
+	// HARD RULE #3: Only TAX_ADVISOR can submit filings
 	if newStatus == model.FilingFiled && session.Role != model.RoleTaxAdvisorJTC {
 		return nil, fmt.Errorf("only tax advisors can submit filings")
 	}

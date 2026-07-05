@@ -51,7 +51,7 @@ const roles = [
     ],
   },
   {
-    role: 'CONSULTANT_JTC',
+    role: 'CONSULTANT',
     email: 'consultant.test@jakartatax.co.id',
     pw: 'TestPassword123!',
     pages: [

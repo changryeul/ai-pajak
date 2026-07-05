@@ -58,7 +58,7 @@ test.describe('CUSTOMER Role Tests', () => {
     const response = await request.post('/api/poa/create', {
       headers: createAuthHeaders(customerToken),
       data: {
-        taxPartnerId: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        taxPartnerId: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         scope: 'ALL_TAX_TYPES',
         validFrom: '2025-01-01',
         validTo: '2025-12-31',
@@ -141,7 +141,7 @@ test.describe('CUSTOMER Role Tests', () => {
 
     const body = await response.json();
     expect(body.error).toBe('Forbidden');
-    expect(body.requiredRoles).toContain('TAX_ADVISOR_JTC');
+    expect(body.requiredRoles).toContain('TAX_ADVISOR');
     expect(body.currentRole).toBe('CUSTOMER');
   });
 
@@ -183,7 +183,7 @@ test.describe('CUSTOMER Role Tests', () => {
         idempotencyKey: 'test-billing-001',
         customerId: TEST_USERS.CUSTOMER.customerId,
         taxFilingId: 'test-filing-001',
-        taxPartnerId: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        taxPartnerId: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         serviceType: 'TAX_FILING',
         description: 'Test billing',
         amountBase: 500_000,

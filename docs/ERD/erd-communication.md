@@ -340,7 +340,7 @@ Customers and consultants can configure:
 **Consultant Access (JTC):**
 - Assigned customer messages
 - Can view unassigned messages (for assignment)
-- Can view all messages if TAX_ADVISOR_JTC role
+- Can view all messages if TAX_ADVISOR role
 
 **Platform Admin:**
 - **NO ACCESS** to message content

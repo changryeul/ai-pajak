@@ -7,7 +7,7 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 export const dynamic = 'force-dynamic';
 
 // Operator workbench is restricted to back-office staff. CUSTOMER /
-// CONSULTANT_JTC / TAX_ADVISOR_JTC / PLATFORM_ADMIN have no business here.
+// CONSULTANT / TAX_ADVISOR / PLATFORM_ADMIN have no business here.
 const ALLOWED_ROLES = [
   'TAX_OPERATOR',
   'TAX_OPERATOR_LEAD',

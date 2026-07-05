@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['CONSULTANT_JTC', 'TAX_ADVISOR_JTC'].includes(role || '')) {
+    if (!['CONSULTANT', 'TAX_ADVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Only consultants can connect' }, { status: 403 });
     }
 

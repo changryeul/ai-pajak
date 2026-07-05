@@ -7,7 +7,7 @@
  *   5. OPERATOR POST reply → 200, customer_unread=1, status='RESPONDED'
  *   6. CUSTOMER GET messages → 200, sees op msg with displaySender='AI 상담원'
  *      (persona masking — real operator email NEVER returned)
- *   7. CONSULTANT_JTC POST find-or-create → 403 (RBAC)
+ *   7. CONSULTANT POST find-or-create → 403 (RBAC)
  *   8. PLATFORM_ADMIN GET threads → 403 (blockPlatformAdmin)
  *   9. OPERATOR POST resolve → 200, status='RESOLVED'
  *   10. Cleanup — delete test thread + cascading messages
@@ -163,7 +163,7 @@ async function run() {
     console.error('✗ 6.', r6); fail++;
   }
 
-  // 7. CONSULTANT_JTC find-or-create → 403
+  // 7. CONSULTANT find-or-create → 403
   const r7 = await api('/api/customer-ai/threads/find-or-create', consTok, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -198,7 +198,7 @@ async function run() {
     console.error('✗ 9.', r9); fail++;
   }
 
-  // 10. CONSULTANT_JTC AI draft → 403 (operator-tier only)
+  // 10. CONSULTANT AI draft → 403 (operator-tier only)
   const r10 = await api(`/api/operator/customer-inbox/threads/${threadId}/ai-draft`, consTok, {
     method: 'POST',
   });

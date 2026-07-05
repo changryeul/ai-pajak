@@ -6,12 +6,12 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 export const dynamic = 'force-dynamic';
 
 // Consultant ERP is for tax-firm staff:
-//   - CONSULTANT_JTC / TAX_ADVISOR_JTC: 직원용 5단계 워크플로우
+//   - CONSULTANT / TAX_ADVISOR: 직원용 5단계 워크플로우
 //   - TAX_OPERATOR_SUPERVISOR: 팀장용 (supervisor sub-tree 에 별도 layout)
 // CUSTOMER / PLATFORM_ADMIN / TAX_OPERATOR(LEAD/MASTER) 는 차단.
 const ALLOWED_ROLES = [
-  'CONSULTANT_JTC',
-  'TAX_ADVISOR_JTC',
+  'CONSULTANT',
+  'TAX_ADVISOR',
   'TAX_OPERATOR_SUPERVISOR',
 ];
 

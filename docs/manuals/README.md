@@ -77,7 +77,7 @@ CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 �
 
 1. **PLATFORM_ADMIN은 고객 세무 데이터에 접근할 수 없다** — 미들웨어와 RLS 이중 차단
 2. **컨설턴트는 등록된 `tax_partner` (JTC 또는 세무 컨설팅 법인) 에 반드시 소속** — FK 제약 + `get_consultant_tax_partner_id()` RLS. 두 tenant 간 데이터는 완전 격리
-3. **세무 신고 제출 권한은 `TAX_ADVISOR_JTC` 에게만 있다** — Tax Filing Actor ≠ Platform. 세무 컨설팅 법인이 자기 이름으로 신고하려면 tenant 안에 자격증 소지자 최소 1명 필요 (2026-07-03 P4)
+3. **세무 신고 제출 권한은 `TAX_ADVISOR` 에게만 있다** — Tax Filing Actor ≠ Platform. 세무 컨설팅 법인이 자기 이름으로 신고하려면 tenant 안에 자격증 소지자 최소 1명 필요 (2026-07-03 P4)
 4. **청구 수집자와 서비스 제공자는 분리된다** — 결제는 SYSTEM/MASTER, 서비스는 세무사
 5. **모든 쓰기 조치는 감사 로그에 기록된다** — `withAudit` 미들웨어 자동 적용
 
@@ -142,15 +142,15 @@ CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 �
 
 ### 역할 코드 요약
 
-> ⚠ **네이밍 주의**: `CONSULTANT_JTC` 와 `TAX_ADVISOR_JTC` 는 이름에 `_JTC` 접미사가 붙어 있지만, 실제로는 **JTC 뿐 아니라 세무 컨설팅 법인 (EXTERNAL tax_partner) 직원도 같은 role 을 씁니다**. 소속은 `consultant.tax_partner_id` 로만 결정. 이름 rename 은 로드맵 P3 예정.
+> ⚠ **네이밍 주의**: `CONSULTANT` 와 `TAX_ADVISOR` 는 이름에 `_JTC` 접미사가 붙어 있지만, 실제로는 **JTC 뿐 아니라 세무 컨설팅 법인 (EXTERNAL tax_partner) 직원도 같은 role 을 씁니다**. 소속은 `consultant.tax_partner_id` 로만 결정. 이름 rename 은 로드맵 P3 예정.
 
 | 코드 | 이름 | 주요 권한 |
 |---|---|---|
 | `CUSTOMER` (INDIVIDUAL) | 개인 고객 | 자기 SPT 개인 신고 |
 | `CUSTOMER` (COMPANY, 일반) | 일반 법인 고객 | 자기 월 신고 + 결산 (JTC 대행) |
 | `CUSTOMER` (COMPANY, 세무 컨설팅) | 세무 컨설팅 법인 고객 | 위 + 자기 클라이언트 관리 (self-service) |
-| `CONSULTANT_JTC` | 컨설턴트 (JTC 또는 세무 컨설팅 법인 소속) | 배정 고객 신고 작성 |
-| `TAX_ADVISOR_JTC` | 세무사 자격증 소지자 (JTC 또는 세무 컨설팅 법인 소속) | 최종 제출 권한, 팀 관리 |
+| `CONSULTANT` | 컨설턴트 (JTC 또는 세무 컨설팅 법인 소속) | 배정 고객 신고 작성 |
+| `TAX_ADVISOR` | 세무사 자격증 소지자 (JTC 또는 세무 컨설팅 법인 소속) | 최종 제출 권한, 팀 관리 |
 | `TAX_OPERATOR` | 운영자 | 큐 검토·처리 |
 | `TAX_OPERATOR_LEAD` | 운영 리드 | 운영자 + 추가 책임 |
 | `TAX_OPERATOR_SUPERVISOR` | 운영 수퍼바이저 | 승인, 분배, 통계 |

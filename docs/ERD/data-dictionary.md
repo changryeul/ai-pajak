@@ -597,8 +597,8 @@ Complete reference for all database tables, columns, data types, constraints, an
 ```sql
 CREATE TYPE user_role_type AS ENUM (
     'CUSTOMER',
-    'CONSULTANT_JTC',
-    'TAX_ADVISOR_JTC',
+    'CONSULTANT',
+    'TAX_ADVISOR',
     'PLATFORM_ADMIN',
     'SYSTEM'
 );

@@ -16,7 +16,7 @@ import { TEST_USERS, TEST_BILLING } from './fixtures/users';
  * - Access customer tax data
  *
  * HARD RULE #2: Billing authority ≠ Tax filing authority
- * - Tax filing: TAX_ADVISOR_JTC
+ * - Tax filing: TAX_ADVISOR
  * - Billing creation: SYSTEM
  */
 

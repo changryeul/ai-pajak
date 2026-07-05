@@ -35,8 +35,8 @@ const anon = createClient(
 );
 
 const NON_CUSTOMER_ROLES = new Set([
-  'CONSULTANT_JTC',
-  'TAX_ADVISOR_JTC',
+  'CONSULTANT',
+  'TAX_ADVISOR',
   'TAX_OPERATOR',
   'TAX_OPERATOR_LEAD',
   'TAX_OPERATOR_SUPERVISOR',

@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       customerId = customer.id;
     }
     // Consultants/Advisors see POAs for their tax partner
-    else if (userRole.role === 'CONSULTANT_JTC' || userRole.role === 'TAX_ADVISOR_JTC') {
+    else if (userRole.role === 'CONSULTANT' || userRole.role === 'TAX_ADVISOR') {
       const { data: consultant } = await supabase
         .from('consultant')
         .select('tax_partner_id')

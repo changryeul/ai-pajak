@@ -56,7 +56,7 @@ export default function PPh42Page() {
   const locale = params.locale as string;
   const t = useTranslations('pph42Page');
   const { session } = useSession();
-  const isConsultant = session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
+  const isConsultant = session?.role === 'CONSULTANT' || session?.role === 'TAX_ADVISOR';
 
   const { customerId, customers, selectedCustomerId, setSelectedCustomerId } = useEffectiveCustomerId();
 

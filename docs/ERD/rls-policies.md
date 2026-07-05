@@ -171,8 +171,8 @@ WITH CHECK (
 | Role | Own Data | Assigned Customer | All Customers |
 |------|----------|-------------------|---------------|
 | CUSTOMER | Yes | - | No |
-| CONSULTANT_JTC | - | Yes | No |
-| TAX_ADVISOR_JTC | - | Yes | No |
+| CONSULTANT | - | Yes | No |
+| TAX_ADVISOR | - | Yes | No |
 | PLATFORM_ADMIN | **No** | **No** | **No** |
 | SYSTEM | - | - | Yes* |
 
@@ -183,8 +183,8 @@ WITH CHECK (
 | Role | View | Create | Update | File to DJP |
 |------|------|--------|--------|-------------|
 | CUSTOMER | Own | Draft | Draft only | No |
-| CONSULTANT_JTC | Assigned | Yes | Yes | No |
-| TAX_ADVISOR_JTC | Assigned | Yes | Yes | Yes |
+| CONSULTANT | Assigned | Yes | Yes | No |
+| TAX_ADVISOR | Assigned | Yes | Yes | Yes |
 | PLATFORM_ADMIN | **No** | **No** | **No** | **No** |
 
 ### Audit Log Access
@@ -192,8 +192,8 @@ WITH CHECK (
 | Role | View | Create | Delete |
 |------|------|--------|--------|
 | CUSTOMER | Own | No | No |
-| CONSULTANT_JTC | Assigned | No | No |
-| TAX_ADVISOR_JTC | Assigned | No | No |
+| CONSULTANT | Assigned | No | No |
+| TAX_ADVISOR | Assigned | No | No |
 | PLATFORM_ADMIN | **No** | No | No |
 | SYSTEM | - | Yes | No |
 

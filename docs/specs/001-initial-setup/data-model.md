@@ -62,8 +62,8 @@ Supabase Auth와 연동되는 사용자 테이블.
 ```sql
 CREATE TYPE user_role AS ENUM (
   'CUSTOMER',           -- 고객
-  'CONSULTANT_JTC',     -- JTC 컨설턴트 (계산만)
-  'TAX_ADVISOR_JTC',    -- JTC 세무사 (계산+신고)
+  'CONSULTANT',     -- JTC 컨설턴트 (계산만)
+  'TAX_ADVISOR',    -- JTC 세무사 (계산+신고)
   'PLATFORM_ADMIN',     -- 플랫폼 관리자
   'SYSTEM'              -- 시스템 (빌링만)
 );
@@ -470,7 +470,7 @@ function isValidPOA(poa: POA, customer_id: string, tax_type: string): boolean {
 ```typescript
 function canFileTax(user: User, poa: POA): boolean {
   return (
-    user.role === 'TAX_ADVISOR_JTC' &&
+    user.role === 'TAX_ADVISOR' &&
     user.can_file_tax === true &&
     isValidPOA(poa, ...)
   );

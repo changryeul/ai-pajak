@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     });
 
     // For consultant-like roles, create consultant record linked to JTC tax_partner
-    if (['TAX_ADVISOR_JTC', 'CONSULTANT_JTC'].includes(inv.role)) {
+    if (['TAX_ADVISOR', 'CONSULTANT'].includes(inv.role)) {
       const { data: jtc } = await admin
         .from('tax_partner')
         .select('id')

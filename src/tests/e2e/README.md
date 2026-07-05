@@ -128,8 +128,8 @@ npm run test:seed
 
 Test users required:
 - `customer.test@example.com` (CUSTOMER)
-- `consultant.test@jakartatax.co.id` (CONSULTANT_JTC)
-- `advisor.test@jakartatax.co.id` (TAX_ADVISOR_JTC)
+- `consultant.test@jakartatax.co.id` (CONSULTANT)
+- `advisor.test@jakartatax.co.id` (TAX_ADVISOR)
 - `admin.test@aipajak.com` (PLATFORM_ADMIN)
 
 ### 4. Run Tests
@@ -167,8 +167,8 @@ tests/e2e/
 ├── fixtures/
 │   └── users.ts                 # Test user fixtures
 ├── customer.spec.ts             # CUSTOMER role tests
-├── consultant.spec.ts           # CONSULTANT_JTC role tests
-├── tax-advisor.spec.ts          # TAX_ADVISOR_JTC role tests
+├── consultant.spec.ts           # CONSULTANT role tests
+├── tax-advisor.spec.ts          # TAX_ADVISOR role tests
 ├── platform-admin.spec.ts       # 🚨 PLATFORM_ADMIN blocking tests
 ├── system.spec.ts               # SYSTEM role tests
 ├── audit.spec.ts                # Audit trail verification tests
@@ -196,13 +196,13 @@ tests/e2e/
 - ❌ Calculate tax
 - ❌ File tax
 
-### CONSULTANT_JTC
+### CONSULTANT
 
 ```typescript
 {
   email: 'consultant.test@jakartatax.co.id',
   password: 'TestPassword123!',
-  role: 'CONSULTANT_JTC',
+  role: 'CONSULTANT',
   consultantId: 'test-consultant-uuid-001',
 }
 ```
@@ -212,13 +212,13 @@ tests/e2e/
 - ❌ File tax
 - ❌ Sign POA
 
-### TAX_ADVISOR_JTC
+### TAX_ADVISOR
 
 ```typescript
 {
   email: 'advisor.test@jakartatax.co.id',
   password: 'TestPassword123!',
-  role: 'TAX_ADVISOR_JTC',
+  role: 'TAX_ADVISOR',
   consultantId: 'test-advisor-uuid-001',
 }
 ```

@@ -25,7 +25,7 @@ import { loggers } from '@/lib/logger';
  *   return composeMiddleware(
  *     requireAuth,
  *     blockPlatformAdmin,
- *     requireRole(UserRole.TAX_ADVISOR_JTC),
+ *     requireRole(UserRole.TAX_ADVISOR),
  *     requireValidPOA(),  // ← Validates POA before handler
  *     withAudit('TAX_FILING_SUBMIT')
  *   )(request, handler);

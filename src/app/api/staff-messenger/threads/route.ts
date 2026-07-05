@@ -4,7 +4,7 @@
  * Supervisor 시점: 산하 operator list + 각 operator 와의 thread summary.
  * Operator 시점: 본인과 대화한 supervisor list.
  *
- * 모든 권한 검사는 composeMiddleware + RLS. CUSTOMER / CONSULTANT_JTC /
+ * 모든 권한 검사는 composeMiddleware + RLS. CUSTOMER / CONSULTANT /
  * PLATFORM_ADMIN 은 requireRole 미들웨어가 차단.
  */
 

@@ -38,8 +38,8 @@ test.describe('Billing Invoice Tests', () => {
 
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
   });
 
@@ -144,8 +144,8 @@ test.describe('Billing Creation Tests (SYSTEM Only)', () => {
 
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
 
     systemServiceKey = getSystemServiceKey();

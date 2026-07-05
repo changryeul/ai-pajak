@@ -12,11 +12,11 @@ import { UserRole } from '@/types/auth';
  *
  * @example
  * // Only tax advisors can file tax
- * requireRole(UserRole.TAX_ADVISOR_JTC)
+ * requireRole(UserRole.TAX_ADVISOR)
  *
  * @example
  * // Customers and consultants can view data
- * requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC)
+ * requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR)
  */
 export function requireRole(...allowedRoles: UserRole[]) {
   return async (

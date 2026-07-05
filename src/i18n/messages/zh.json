@@ -195,8 +195,8 @@
     "settings": "设置",
     "role": {
       "CUSTOMER": "纳税人",
-      "CONSULTANT_JTC": "税务顾问",
-      "TAX_ADVISOR_JTC": "税务师",
+      "CONSULTANT": "税务顾问",
+      "TAX_ADVISOR": "税务师",
       "PLATFORM_ADMIN": "平台管理员",
       "TAX_OPERATOR": "税务操作员",
       "TAX_OPERATOR_LEAD": "操作员组长",
@@ -924,8 +924,8 @@
     "roleLabel": {
       "TAX_OPERATOR": "后台客服",
       "TAX_OPERATOR_SUPERVISOR": "后台主管",
-      "TAX_ADVISOR_JTC": "税务顾问 (Tax Advisor)",
-      "CONSULTANT_JTC": "顾问"
+      "TAX_ADVISOR": "税务顾问 (Tax Advisor)",
+      "CONSULTANT": "顾问"
     },
     "errors": {
       "noToken": "缺少邀请令牌",
@@ -2593,7 +2593,7 @@
     "noMatchFound": "未找到匹配",
     "registerNew": "注册新交易对方",
     "selectCustomer": "选择客户...",
-    "djpSubmitInfo": "仅TAX_ADVISOR_JTC角色可提交至DJP",
+    "djpSubmitInfo": "仅TAX_ADVISOR角色可提交至DJP",
     "djpSubmitDesc": "创建草稿后，税务顾问将审核并提交至DJP。",
     "csvImportErrors": "({count}条错误)",
     "csvImportMoreErrors": "... +{count}条"
@@ -4171,7 +4171,7 @@
     "operator_audience": "JTC Operations (TAX_OPERATOR, SUPERVISOR, MASTER)",
     "jtc_title": "JTC Tax Consultant",
     "jtc_desc": "Client assignment · Bulk PPh21 · Anomaly detection · Transfer pricing · Team mgmt",
-    "jtc_audience": "JTC internal CONSULTANT_JTC, TAX_ADVISOR_JTC",
+    "jtc_audience": "JTC internal CONSULTANT, TAX_ADVISOR",
     "admin_title": "Platform Admin",
     "admin_desc": "Users · Infrastructure · Monitoring · Audit logs · Tax rates (no tax data access)",
     "admin_audience": "PLATFORM_ADMIN",
@@ -6174,8 +6174,8 @@
     "roles": {
       "TAX_OPERATOR": "Back-office Operator",
       "TAX_OPERATOR_SUPERVISOR": "Back-office Supervisor",
-      "TAX_ADVISOR_JTC": "Tax Advisor",
-      "CONSULTANT_JTC": "Consultant"
+      "TAX_ADVISOR": "Tax Advisor",
+      "CONSULTANT": "Consultant"
     }
   },
   "manualDetail": {

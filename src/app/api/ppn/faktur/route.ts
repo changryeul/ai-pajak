@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
   )(request as RequestWithSession, handleList);
 }
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('FAKTUR_CREATE'),
   )(request as RequestWithSession, handleCreate);
 }

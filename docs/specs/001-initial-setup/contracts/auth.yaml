@@ -272,7 +272,7 @@ components:
           type: string
         role:
           type: string
-          enum: [CUSTOMER, CONSULTANT_JTC, TAX_ADVISOR_JTC, PLATFORM_ADMIN, SYSTEM]
+          enum: [CUSTOMER, CONSULTANT, TAX_ADVISOR, PLATFORM_ADMIN, SYSTEM]
         npwp:
           type: string
         created_at:

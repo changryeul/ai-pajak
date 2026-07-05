@@ -40,8 +40,8 @@ test.describe('SPT 1770 SS (Simple Employee Form)', () => {
   test.beforeAll(async ({ request }) => {
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
 
     customerToken = await loginAs(
@@ -206,8 +206,8 @@ test.describe('SPT 1770 S (Standard Employee Form)', () => {
   test.beforeAll(async ({ request }) => {
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
   });
 
@@ -329,8 +329,8 @@ test.describe('SPT 1770 (Business/Freelancer Form)', () => {
   test.beforeAll(async ({ request }) => {
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
   });
 
@@ -441,8 +441,8 @@ test.describe('SPT Form Access Control', () => {
 
     consultantToken = await loginAs(
       request,
-      TEST_USERS.CONSULTANT_JTC.email,
-      TEST_USERS.CONSULTANT_JTC.password
+      TEST_USERS.CONSULTANT.email,
+      TEST_USERS.CONSULTANT.password
     );
   });
 

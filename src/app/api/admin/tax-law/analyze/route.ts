@@ -6,7 +6,7 @@ import { loggers } from '@/lib/logger';
 /**
  * AI 기반 세법 문서 자동 분석 API
  *
- * RBAC: TAX_ADVISOR_JTC만 접근 가능
+ * RBAC: TAX_ADVISOR만 접근 가능
  *
  * 기능:
  * 1. 법령 문서(텍스트)를 Claude AI로 분석
@@ -29,18 +29,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2. 권한 확인 (TAX_ADVISOR_JTC만 가능)
+    // 2. 권한 확인 (TAX_ADVISOR만 가능)
     const { data: userRole } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', session.user.id)
       .single();
 
-    if (!userRole || userRole.role !== 'TAX_ADVISOR_JTC') {
+    if (!userRole || userRole.role !== 'TAX_ADVISOR') {
       return NextResponse.json(
         {
           error: 'Forbidden',
-          message: 'Only licensed tax advisors (TAX_ADVISOR_JTC) can analyze tax laws',
+          message: 'Only licensed tax advisors (TAX_ADVISOR) can analyze tax laws',
         },
         { status: 403 }
       );
@@ -152,7 +152,7 @@ export async function GET(_req: NextRequest) {
       .eq('user_id', session.user.id)
       .single();
 
-    if (!userRole || userRole.role !== 'TAX_ADVISOR_JTC') {
+    if (!userRole || userRole.role !== 'TAX_ADVISOR') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

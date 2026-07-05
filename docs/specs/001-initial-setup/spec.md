@@ -49,8 +49,8 @@ AI Pajak은 **SPT Masa + SPT Tahunan 통합 자동화** 플랫폼입니다:
 | Role | Tax Calculation | Tax Filing | Customer Data |
 |------|----------------|------------|---------------|
 | **CUSTOMER** | Own only | via JTC only | Own only |
-| **CONSULTANT_JTC** | Assigned clients | ❌ | Assigned clients |
-| **TAX_ADVISOR_JTC** | All JTC clients | ⭕ (with POA) | All JTC clients |
+| **CONSULTANT** | Assigned clients | ❌ | Assigned clients |
+| **TAX_ADVISOR** | All JTC clients | ⭕ (with POA) | All JTC clients |
 | **PLATFORM_ADMIN** | ❌ | ❌ | ❌ (anonymized only) |
 | **SYSTEM** | ❌ | ❌ | Billing only |
 

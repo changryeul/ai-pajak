@@ -278,7 +278,7 @@ Multi-role authorization system linking users to organizations and permissions.
 ### Business Rules
 - **Multi-Role Support**: One user can have multiple active roles
 - **Organization Context**: Roles tied to specific organizations (Tax Partner, Platform)
-- **Role Types**: CUSTOMER, CONSULTANT_JTC, TAX_ADVISOR_JTC, PLATFORM_ADMIN, SYSTEM
+- **Role Types**: CUSTOMER, CONSULTANT, TAX_ADVISOR, PLATFORM_ADMIN, SYSTEM
 - **Active Management**: Roles can be activated/deactivated without deletion
 
 ### Schema
@@ -298,8 +298,8 @@ Multi-role authorization system linking users to organizations and permissions.
 | Role | Description | Organization Required | Access Level |
 |------|-------------|----------------------|--------------|
 | `CUSTOMER` | End user customer | No | Own data only |
-| `CONSULTANT_JTC` | JTC consultant | Yes (TAX_PARTNER) | Assigned cases |
-| `TAX_ADVISOR_JTC` | Licensed tax advisor | Yes (TAX_PARTNER) | All JTC cases |
+| `CONSULTANT` | JTC consultant | Yes (TAX_PARTNER) | Assigned cases |
+| `TAX_ADVISOR` | Licensed tax advisor | Yes (TAX_PARTNER) | All JTC cases |
 | `PLATFORM_ADMIN` | Platform administrator | Yes (PLATFORM) | No tax data access |
 | `SYSTEM` | System/automation | No | Full access (limited use) |
 
@@ -310,7 +310,7 @@ Multi-role authorization system linking users to organizations and permissions.
 - FOREIGN KEY INDEX on `user_id`
 
 ### Constraints
-- CHECK: `role IN ('CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC', 'PLATFORM_ADMIN', 'SYSTEM')`
+- CHECK: `role IN ('CUSTOMER', 'CONSULTANT', 'TAX_ADVISOR', 'PLATFORM_ADMIN', 'SYSTEM')`
 - CHECK: `organization_type IN ('TAX_PARTNER', 'PLATFORM', NULL)`
 - CHECK: If `organization_id IS NOT NULL`, then `organization_type IS NOT NULL`
 
@@ -421,8 +421,8 @@ Tax consultants employed by Jakarta Tax Consulting to process customer tax filin
 
 ### RLS Policies
 - **SELECT**: Own profile or JTC organization members
-- **INSERT**: SYSTEM or TAX_ADVISOR_JTC role
-- **UPDATE**: Own profile or TAX_ADVISOR_JTC (employment status)
+- **INSERT**: SYSTEM or TAX_ADVISOR role
+- **UPDATE**: Own profile or TAX_ADVISOR (employment status)
 - **DELETE**: SYSTEM only (prefer is_active = FALSE)
 
 ### Cross-References
@@ -480,7 +480,7 @@ Licensed tax advisors who can review and approve tax filings.
 
 ### RLS Policies
 - **SELECT**: JTC organization members, customers (limited fields)
-- **INSERT**: SYSTEM or TAX_ADVISOR_JTC (senior advisors)
+- **INSERT**: SYSTEM or TAX_ADVISOR (senior advisors)
 - **UPDATE**: SYSTEM (license verification)
 - **DELETE**: SYSTEM only
 

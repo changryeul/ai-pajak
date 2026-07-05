@@ -391,8 +391,8 @@ export default function PPh21PayrollPage() {
         aiSteps={[tsc('stepAiProcess'), tsc('stepTaxCalc'), tsc('stepIdBillingGen')]}
       />
 
-      {/* Consultant customer picker — visible only for CONSULTANT_JTC /
-          TAX_ADVISOR_JTC. CUSTOMER role keeps the existing UI unchanged. */}
+      {/* Consultant customer picker — visible only for CONSULTANT /
+          TAX_ADVISOR. CUSTOMER role keeps the existing UI unchanged. */}
       {isConsultant && (
         <div className="mb-5 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <label htmlFor="pph21-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">

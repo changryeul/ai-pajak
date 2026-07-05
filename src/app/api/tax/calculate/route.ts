@@ -14,13 +14,13 @@ import { PPhFinalCalculator, EntityType, IncomeType } from '@/lib/tax';
  * Tax Calculation Endpoint
  *
  * HARD RULES ENFORCED:
- * 1. CONSULTANT_JTC and TAX_ADVISOR_JTC can calculate taxes
+ * 1. CONSULTANT and TAX_ADVISOR can calculate taxes
  * 2. PLATFORM_ADMIN is blocked from accessing tax data
  * 3. All calculations are audit logged
  * 4. Calculation does NOT submit to DJP (read-only operation)
  *
  * This endpoint performs tax calculations for customers.
- * It does NOT submit filings - only TAX_ADVISOR_JTC can submit via /api/tax/file.
+ * It does NOT submit filings - only TAX_ADVISOR can submit via /api/tax/file.
  *
  * CACHING POLICY:
  * - Calculation results are DRAFT data (임시 데이터)
@@ -546,7 +546,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
  * MIDDLEWARE STACK (4 layers):
  * 1. requireAuth - Must be logged in
  * 2. blockPlatformAdmin - Platform admin blocked (Hard Rule #1)
- * 3. requireRole - CONSULTANT_JTC or TAX_ADVISOR_JTC allowed
+ * 3. requireRole - CONSULTANT or TAX_ADVISOR allowed
  * 4. withAudit - Audit trail created (Hard Rule #5)
  *
  * Note: No POA validation required for calculation (read-only operation)
@@ -556,7 +556,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.CONSULTANT, UserRole.TAX_ADVISOR),
     withAudit('TAX_CALCULATION')
   )(request as RequestWithSession, handler);
 }

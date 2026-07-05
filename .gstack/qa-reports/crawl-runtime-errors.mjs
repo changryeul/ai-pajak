@@ -22,7 +22,7 @@ const roles = [
     '/ko/tax/pph21', '/ko/tax/pph23', '/ko/tax/ppn', '/ko/tax/billing',
     '/ko/tax/annual', '/ko/tax/ebupot', '/ko/filings', '/ko/reports', '/ko/counterparties',
   ]},
-  { role: 'CONSULTANT_JTC', email: 'consultant.test@jakartatax.co.id', pw: 'TestPassword123!', pages: [
+  { role: 'CONSULTANT', email: 'consultant.test@jakartatax.co.id', pw: 'TestPassword123!', pages: [
     '/ko/dashboard', '/ko/customers', '/ko/filings', '/ko/tax/monthly-dashboard',
     '/ko/tax/anomaly', '/ko/tax/transfer-pricing',
   ]},

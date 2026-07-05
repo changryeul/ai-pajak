@@ -59,8 +59,8 @@ VAT 11% 별도. Pro·Enterprise 한도를 초과하는 고객은 **마스터의 
 | 역할 | 설명 | 비고 |
 |---|---|---|
 | `CUSTOMER` | 개인(INDIVIDUAL) 또는 법인(COMPANY) 납세자 | 본인 데이터만 |
-| `CONSULTANT_JTC` | JTC 또는 EXTERNAL `tax_partner` 소속 일반 컨설턴트 | 배정 고객만 |
-| `TAX_ADVISOR_JTC` | 선임 세무사 | 신고 최종 제출 권한 |
+| `CONSULTANT` | JTC 또는 EXTERNAL `tax_partner` 소속 일반 컨설턴트 | 배정 고객만 |
+| `TAX_ADVISOR` | 선임 세무사 | 신고 최종 제출 권한 |
 | `TAX_OPERATOR` | 백오피스 일반 운영자 | 큐 검토·처리 |
 | `TAX_OPERATOR_SUPERVISOR` | 운영 수퍼바이저 | 승인·분배·통계 |
 | `TAX_OPERATOR_MASTER` | 운영 마스터 | 플랫폼 통계, 맞춤 가격 발행 |
@@ -177,8 +177,8 @@ SEED_TARGET=prod npx tsx scripts/test-onboarding-flow.ts       # 첫 로그인 �
 |---|---|---|
 | CUSTOMER (개인) | customer.test@example.com | seed-test-users |
 | CUSTOMER (법인) | company.test@example.com | seed-test-users + seed-company-customer |
-| CONSULTANT_JTC (JTC 내부) | consultant.test@jakartatax.co.id | seed-test-users |
-| TAX_ADVISOR_JTC | advisor.test@jakartatax.co.id | seed-test-users |
+| CONSULTANT (JTC 내부) | consultant.test@jakartatax.co.id | seed-test-users |
+| TAX_ADVISOR | advisor.test@jakartatax.co.id | seed-test-users |
 | CONSULTANT (외부 — PT Mitra Pajak Sentosa) | external.consultant@mitrapajak.com | seed-master-and-external |
 | TAX_OPERATOR | operator.test@aipajak.com | seed-master-and-external |
 | TAX_OPERATOR_SUPERVISOR | supervisor.test@aipajak.com | seed-master-and-external |

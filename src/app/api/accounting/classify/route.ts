@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['CONSULTANT_JTC', 'TAX_ADVISOR_JTC'].includes(role || '')) {
+    if (!['CONSULTANT', 'TAX_ADVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

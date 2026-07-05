@@ -18,7 +18,7 @@ export async function DELETE(
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['TAX_ADVISOR_JTC', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
+    if (!['TAX_ADVISOR', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

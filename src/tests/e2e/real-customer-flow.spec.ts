@@ -300,8 +300,8 @@ test.describe.serial('Real Customer Full Flow', () => {
   test('10. Consultant can access customer profile', async ({ request }) => {
     const consultantToken = await loginAs(
       request,
-      TEST_USERS.CONSULTANT_JTC.email,
-      TEST_USERS.CONSULTANT_JTC.password
+      TEST_USERS.CONSULTANT.email,
+      TEST_USERS.CONSULTANT.password
     );
 
     // Consultant accesses customer profile by ID
@@ -439,8 +439,8 @@ test.describe('UMKM Expiry Scenario', () => {
     // Use consultant token (has auth, can call determine-tax)
     const token = await loginAs(
       request,
-      TEST_USERS.CONSULTANT_JTC.email,
-      TEST_USERS.CONSULTANT_JTC.password
+      TEST_USERS.CONSULTANT.email,
+      TEST_USERS.CONSULTANT.password
     );
 
     // We need a customer ID for determine-tax. Use the test customer.
@@ -473,8 +473,8 @@ test.describe('UMKM Expiry Scenario', () => {
   test('Individual with 500M exemption note (revenue < 4.8B)', async ({ request }) => {
     const token = await loginAs(
       request,
-      TEST_USERS.CONSULTANT_JTC.email,
-      TEST_USERS.CONSULTANT_JTC.password
+      TEST_USERS.CONSULTANT.email,
+      TEST_USERS.CONSULTANT.password
     );
 
     const customerId = TEST_USERS.CUSTOMER.customerId;
@@ -507,8 +507,8 @@ test.describe('UMKM Expiry Scenario', () => {
 test('High revenue company always gets GENERAL_25', async ({ request }) => {
   const token = await loginAs(
     request,
-    TEST_USERS.CONSULTANT_JTC.email,
-    TEST_USERS.CONSULTANT_JTC.password
+    TEST_USERS.CONSULTANT.email,
+    TEST_USERS.CONSULTANT.password
   );
 
   const response = await request.post('/api/company-profile/determine-tax', {

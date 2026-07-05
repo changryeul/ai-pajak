@@ -16,7 +16,7 @@
  *   client mount of the /dashboard tree. Loop becomes structurally
  *   impossible.
  *
- * Other roles (CUSTOMER / CONSULTANT_JTC / TAX_ADVISOR_JTC / PLATFORM_ADMIN
+ * Other roles (CUSTOMER / CONSULTANT / TAX_ADVISOR / PLATFORM_ADMIN
  * / signed-out) pass through unchanged — the existing client page renders
  * its own role-aware dashboard.
  */

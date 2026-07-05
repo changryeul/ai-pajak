@@ -113,7 +113,7 @@ export class BulkFilingService {
           customer_id: f.customer_id,
           tax_filing_id: f.id,
           actor_user_id: advisorUserId,
-          actor_role: 'TAX_ADVISOR_JTC',
+          actor_role: 'TAX_ADVISOR',
           activity_type: 'CREATE',
           tax_type: request.taxType,
           tax_period: period,

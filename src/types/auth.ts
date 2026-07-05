@@ -18,8 +18,10 @@
 
 export enum UserRole {
   CUSTOMER = 'CUSTOMER',
-  CONSULTANT_JTC = 'CONSULTANT_JTC',
-  TAX_ADVISOR_JTC = 'TAX_ADVISOR_JTC',
+  // P3 (2026-07-05): _JTC suffix 제거. 두 role 은 JTC 뿐 아니라 EXTERNAL
+  // tax_partner (세무컨설팅 법인) 직원도 함께 사용. 소속은 consultant.tax_partner_id 로만 판정.
+  CONSULTANT = 'CONSULTANT',
+  TAX_ADVISOR = 'TAX_ADVISOR',
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
   // Operator hierarchy (3 tiers):
   //   TAX_OPERATOR             - 상담원: per-customer queue work

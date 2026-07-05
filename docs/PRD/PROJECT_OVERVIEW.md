@@ -125,8 +125,8 @@ ai-pajak/
 ```typescript
 enum UserRole {
   CUSTOMER           // End user
-  CONSULTANT_JTC     // Tax consultant
-  TAX_ADVISOR_JTC    // Licensed tax advisor
+  CONSULTANT     // Tax consultant
+  TAX_ADVISOR    // Licensed tax advisor
   PLATFORM_ADMIN     // Platform management (NO tax data access)
   SYSTEM             // Billing operations only
 }
@@ -137,8 +137,8 @@ enum UserRole {
 | Role | Tax Data | Tax Filing | POA | Billing | Platform Admin |
 |------|----------|-----------|-----|---------|----------------|
 | CUSTOMER | Own only | ❌ No | Create/Sign | Own only | ❌ No |
-| CONSULTANT_JTC | Assigned | ❌ No | Sign Partner | ❌ No | ❌ No |
-| TAX_ADVISOR_JTC | All JTC | ✅ Yes | Sign Partner | ❌ No | ❌ No |
+| CONSULTANT | Assigned | ❌ No | Sign Partner | ❌ No | ❌ No |
+| TAX_ADVISOR | All JTC | ✅ Yes | Sign Partner | ❌ No | ❌ No |
 | PLATFORM_ADMIN | ❌ **BLOCKED** | ❌ No | View only | View only | ✅ Yes |
 | SYSTEM | ❌ No | ❌ No | ❌ No | ✅ Full | ❌ No |
 
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,                      // 1. Authentication
     blockPlatformAdmin,               // 2. Block platform admin
-    requireRole(UserRole.TAX_ADVISOR_JTC), // 3. Role check
+    requireRole(UserRole.TAX_ADVISOR), // 3. Role check
     withAudit('TAX_FILING_SUBMIT')    // 4. Audit trail
   )(request as RequestWithSession, handler);
 }

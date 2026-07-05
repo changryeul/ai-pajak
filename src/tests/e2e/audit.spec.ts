@@ -24,8 +24,8 @@ test.describe('Audit Trail Verification Tests', () => {
   test.beforeAll(async ({ request }) => {
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
 
     customerToken = await loginAs(
@@ -78,7 +78,7 @@ test.describe('Audit Trail Verification Tests', () => {
     expect(audit.timestamp).toBeTruthy();
 
     // Audit log should link to:
-    // - Actor (TAX_ADVISOR_JTC)
+    // - Actor (TAX_ADVISOR)
     // - Customer
     // - Tax filing
     // - Activity type (TAX_FILING_SUBMIT)
@@ -90,7 +90,7 @@ test.describe('Audit Trail Verification Tests', () => {
     const response = await request.post('/api/poa/create', {
       headers: createAuthHeaders(customerToken),
       data: {
-        taxPartnerId: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        taxPartnerId: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         scope: 'ALL_TAX_TYPES',
         validFrom: '2025-01-01',
         validTo: '2025-12-31',
@@ -199,10 +199,10 @@ test.describe('Audit Trail Verification Tests', () => {
     // Filing response should include actor information
     expect(body.submittedBy.userId).toBeTruthy();
     expect(body.submittedBy.consultantId).toBe(
-      TEST_USERS.TAX_ADVISOR_JTC.consultantId
+      TEST_USERS.TAX_ADVISOR.consultantId
     );
     expect(body.submittedBy.taxPartnerId).toBe(
-      TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId
+      TEST_USERS.TAX_ADVISOR.taxPartnerId
     );
 
     // This information should be in audit log

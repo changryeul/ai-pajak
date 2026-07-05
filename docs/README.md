@@ -7,7 +7,8 @@
 
 ## 문서 안내
 
-- [사용자·역할·조직 정리](guides/roles.md) — 조직 3종 + 역할 9개 한눈 요약
+- [사용자·역할·조직 정리](guides/roles.md) — 조직 3종 + 역할 9개 이론·설계
+- [계정·역할 지도 (실사)](guides/accounts.md) — 지금 프로덕션에 실제로 있는 계정 인벤토리
 - [아키텍처](guides/architecture.md) · [Resilience 패턴](guides/resilience-patterns.md)
 - [역할별 사용 매뉴얼](manuals/README.md) — 고객·컨설턴트·운영팀·관리자별 상세
 - [설정 · 테스트 가이드](guides/SETUP.md) · [테스트 시나리오](guides/TEST_SCENARIO.md)

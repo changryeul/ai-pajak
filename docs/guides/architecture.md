@@ -241,8 +241,8 @@ Customer                   System                    Midtrans
 | Role | Tax Data | Customer Data | Billing | Admin |
 |------|----------|---------------|---------|-------|
 | CUSTOMER | Own only | Own only | Own only | ❌ |
-| CONSULTANT_JTC | Calculate only | With POA | ❌ | ❌ |
-| TAX_ADVISOR_JTC | Full (with POA) | With POA | ❌ | ❌ |
+| CONSULTANT | Calculate only | With POA | ❌ | ❌ |
+| TAX_ADVISOR | Full (with POA) | With POA | ❌ | ❌ |
 | PLATFORM_ADMIN | ❌ | ❌ (aggregated only) | View | ✅ |
 | SYSTEM | ❌ | ❌ | Create | ✅ |
 

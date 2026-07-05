@@ -6,8 +6,8 @@
  * Creates test users for RBAC E2E tests:
  * - CUSTOMER (INDIVIDUAL) — 개인 고객
  * - CUSTOMER (COMPANY)    — 법인 고객
- * - CONSULTANT_JTC
- * - TAX_ADVISOR_JTC
+ * - CONSULTANT
+ * - TAX_ADVISOR
  * - PLATFORM_ADMIN
  */
 
@@ -60,7 +60,7 @@ const TEST_USERS = [
     password: 'TestPassword123!',
     user_metadata: {
       full_name: 'Jane Smith Consultant',
-      role: 'CONSULTANT_JTC',
+      role: 'CONSULTANT',
     },
   },
   {
@@ -68,7 +68,7 @@ const TEST_USERS = [
     password: 'TestPassword123!',
     user_metadata: {
       full_name: 'Bob Johnson Tax Advisor',
-      role: 'TAX_ADVISOR_JTC',
+      role: 'TAX_ADVISOR',
     },
   },
   {
@@ -275,7 +275,7 @@ async function createTestData() {
     console.log('✅ Company customer record created: PT Example Indonesia');
   }
 
-  // Create consultant record for CONSULTANT_JTC user
+  // Create consultant record for CONSULTANT user
   const consultantId = '00000000-0000-0000-0000-000000000020';
   const { error: consultantError } = await supabase.from('consultant').upsert({
     id: consultantId,
@@ -293,7 +293,7 @@ async function createTestData() {
     console.log('✅ Consultant record created: Jane Smith Consultant');
   }
 
-  // Create consultant record for TAX_ADVISOR_JTC user (consultant is required before tax_advisor)
+  // Create consultant record for TAX_ADVISOR user (consultant is required before tax_advisor)
   const advisorConsultantId = '00000000-0000-0000-0000-000000000021';
   const { error: advisorConsultantError } = await supabase.from('consultant').upsert({
     id: advisorConsultantId,

@@ -77,7 +77,7 @@ export default function BillingPage() {
   // Consultants (including external tax-firm reps) see their own tier
   // subscription, not a corporate SaaS plan. JTC internal consultants hit
   // a 403 from /api/billing/consultant-plan and the view shows an info banner.
-  if (!sessionLoading && session && hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC)) {
+  if (!sessionLoading && session && hasRole(session, UserRole.CONSULTANT, UserRole.TAX_ADVISOR)) {
     return (
       <div className="container mx-auto px-4 py-8">
         <PageTitle title="Tagihan" />

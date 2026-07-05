@@ -506,7 +506,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
  * - Service role key must be protected in secrets vault
  *
  * HARD RULE #2: Billing authority ≠ Tax filing authority
- * - Tax filing: TAX_ADVISOR_JTC
+ * - Tax filing: TAX_ADVISOR
  * - Billing creation: SYSTEM
  * - These are separate operations with separate permissions
  */

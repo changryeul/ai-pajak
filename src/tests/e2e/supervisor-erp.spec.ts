@@ -83,8 +83,8 @@ test.describe('Supervisor ERP — API access control', () => {
       expect(json.success).toBe(true);
     });
 
-    test(`CONSULTANT_JTC 403 on ${path}`, async ({ page }) => {
-      await loginAs(page, 'CONSULTANT_JTC');
+    test(`CONSULTANT 403 on ${path}`, async ({ page }) => {
+      await loginAs(page, 'CONSULTANT');
       const res = await page.request.get(`${BASE_URL}${path}`);
       expect(res.status()).toBe(403);
     });
@@ -115,7 +115,7 @@ test.describe('Supervisor ERP — reassign endpoint', () => {
   });
 
   test('consultant 403 on reassign', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     const res = await page.request.post(
       `${BASE_URL}/api/consultant-erp/supervisor/team/reassign`,
       {

@@ -121,7 +121,7 @@ export default function CustomerDetailPage() {
   // Role guard: only consultants may view customer detail pages
   useEffect(() => {
     if (sessionLoading || !session) return;
-    const isConsultant = hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC);
+    const isConsultant = hasRole(session, UserRole.CONSULTANT, UserRole.TAX_ADVISOR);
     if (!isConsultant) {
       router.replace(`/${locale}/dashboard`);
     }

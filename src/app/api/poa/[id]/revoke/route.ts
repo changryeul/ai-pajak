@@ -125,7 +125,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Tax Advisor rejecting a pending POA
-    if (userRole.role === 'TAX_ADVISOR_JTC') {
+    if (userRole.role === 'TAX_ADVISOR') {
       // Verify they work for the tax partner
       const { data: consultant } = await supabase
         .from('consultant')
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         customer_id: poa.customer_id,
         actor_user_id: user.id,
         actor_organization_id: consultant.tax_partner_id,
-        actor_role: 'TAX_ADVISOR_JTC',
+        actor_role: 'TAX_ADVISOR',
         activity_type: activityType,
         activity_details: {
           poa_id: poaId,

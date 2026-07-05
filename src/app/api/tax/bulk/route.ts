@@ -10,7 +10,7 @@ import type { BulkFilingRequest } from '@/lib/bulk-filing';
 
 /**
  * POST /api/tax/bulk - Create bulk draft filings
- * Only TAX_ADVISOR_JTC can use this
+ * Only TAX_ADVISOR can use this
  */
 async function handleBulkCreate(request: RequestWithSession): Promise<Response> {
   const { session } = request;
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('TAX_ADVISOR_JTC' as UserRole),
+    requireRole('TAX_ADVISOR' as UserRole),
     withAudit('BULK_FILING_CREATE'),
   )(request as RequestWithSession, handleBulkCreate);
 }
@@ -79,6 +79,6 @@ export async function GET(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
   )(request as RequestWithSession, handleGetCustomers);
 }

@@ -16,7 +16,7 @@ test.describe('RLS Security - Tax Data Access', () => {
 
   test.beforeAll(async ({ request }) => {
     adminToken = await loginAs(request, TEST_USERS.PLATFORM_ADMIN.email, TEST_USERS.PLATFORM_ADMIN.password);
-    consultantToken = await loginAs(request, TEST_USERS.CONSULTANT_JTC.email, TEST_USERS.CONSULTANT_JTC.password);
+    consultantToken = await loginAs(request, TEST_USERS.CONSULTANT.email, TEST_USERS.CONSULTANT.password);
   });
 
   test('❌ PLATFORM_ADMIN blocked from PPh23 transactions', async ({ request }) => {

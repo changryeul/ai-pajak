@@ -125,7 +125,7 @@ async function handleDeleteNote(req: RequestWithSession): Promise<Response> {
   return NextResponse.json({ success: true });
 }
 
-const allowedRoles: UserRole[] = ['CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole, 'CUSTOMER' as UserRole];
+const allowedRoles: UserRole[] = ['CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole, 'CUSTOMER' as UserRole];
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole)
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole)
   )(request as RequestWithSession, (req) => handleCreateNote(req, id));
 }
 
@@ -150,7 +150,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole)
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole)
   )(request as RequestWithSession, handleUpdateNote);
 }
 
@@ -159,6 +159,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole)
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole)
   )(request as RequestWithSession, handleDeleteNote);
 }

@@ -11,9 +11,9 @@ This directory contains the complete database schema, migrations, and Row Level 
   ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
   │ CUSTOMER        │ customer.test@example.com        │  TestPassword123!│                                                                                                        
   ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
-  │ CONSULTANT_JTC  │ consultant.test@jakartatax.co.id │ TestPassword123! │                                                                                                        
+  │ CONSULTANT  │ consultant.test@jakartatax.co.id │ TestPassword123! │                                                                                                        
   ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
-  │ TAX_ADVISOR_JTC │ advisor.test@jakartatax.co.id    │ TestPassword123! │                                                                                                        
+  │ TAX_ADVISOR │ advisor.test@jakartatax.co.id    │ TestPassword123! │                                                                                                        
   ├─────────────────┼──────────────────────────────────┼──────────────────┤                                                                                                        
   │ PLATFORM_ADMIN  │ admin.test@aipajak.com           │ TestPassword123! │                                                                                                        
   └─────────────────┴──────────────────────────────────┴──────────────────
@@ -128,8 +128,8 @@ Customer ──> Tax Filing ──> Tax Document
 
 **Role-Based Access**:
 - `CUSTOMER`: Own data only
-- `CONSULTANT_JTC`: Assigned cases only
-- `TAX_ADVISOR_JTC`: All JTC cases
+- `CONSULTANT`: Assigned cases only
+- `TAX_ADVISOR`: All JTC cases
 - `PLATFORM_ADMIN`: Platform management, NO tax data access
 - `SYSTEM`: Billing and system operations
 
@@ -206,8 +206,8 @@ SET request.jwt.claims.role = 'CUSTOMER';
 SET request.jwt.claims.sub = '<customer_user_id>';
 SELECT * FROM tax_filing; -- Should return only customer's filings
 
--- Test 3: CONSULTANT_JTC should only see assigned cases
-SET request.jwt.claims.role = 'CONSULTANT_JTC';
+-- Test 3: CONSULTANT should only see assigned cases
+SET request.jwt.claims.role = 'CONSULTANT';
 SET request.jwt.claims.sub = '<consultant_user_id>';
 SELECT * FROM tax_filing; -- Should return only assigned filings
 
@@ -227,8 +227,8 @@ INSERT INTO billing_transaction (
 | Role              | Tax Filing | Tax Documents | Customer Data | Billing | Audit Logs |
 |-------------------|------------|---------------|---------------|---------|------------|
 | CUSTOMER          | Own only   | Own only      | Own only      | Own     | Own (read) |
-| CONSULTANT_JTC    | Assigned   | Assigned      | Assigned      | No      | Write      |
-| TAX_ADVISOR_JTC   | All JTC    | All JTC       | All JTC       | No      | Write      |
+| CONSULTANT    | Assigned   | Assigned      | Assigned      | No      | Write      |
+| TAX_ADVISOR   | All JTC    | All JTC       | All JTC       | No      | Write      |
 | PLATFORM_ADMIN    | **NO**     | **NO**        | Anonymized    | All     | Read only  |
 | SYSTEM            | No         | No            | No            | All     | Write      |
 

@@ -162,7 +162,7 @@ async function seedExternalPartner() {
   const consultantUserId = await findOrCreateUser(
     EXT_CONSULTANT_EMAIL,
     EXT_CONSULTANT_NAME,
-    'CONSULTANT_JTC', // role name preserved for backward compat per Phase B-1 doc
+    'CONSULTANT', // role name preserved for backward compat per Phase B-1 doc
   );
 
   const { error: cErr } = await supabase.from('consultant').upsert(
@@ -237,7 +237,7 @@ async function main() {
     console.log(`  - ${u.email} / ${PASSWORD} (${u.role})`);
   }
   console.log('\nExternal sub-tenant:');
-  console.log(`  - ${EXT_CONSULTANT_EMAIL} / ${PASSWORD} (CONSULTANT_JTC of PT Mitra Pajak Sentosa)`);
+  console.log(`  - ${EXT_CONSULTANT_EMAIL} / ${PASSWORD} (CONSULTANT of PT Mitra Pajak Sentosa)`);
   console.log(`  - sample customer: ${EXT_CUSTOMER_NAME} (no auth user)`);
 }
 

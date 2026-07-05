@@ -13,7 +13,7 @@ import { loggers } from '@/lib/logger';
  *
  * HARD RULES ENFORCED:
  * 1. CUSTOMER signs first (status: DRAFT → PENDING_SIGNATURE)
- * 2. TAX_ADVISOR_JTC signs second (status: PENDING_SIGNATURE → ACTIVE)
+ * 2. TAX_ADVISOR signs second (status: PENDING_SIGNATURE → ACTIVE)
  * 3. Only assigned tax advisor can sign for tax partner
  * 4. POA becomes ACTIVE only after both signatures
  * 5. All signing actions are audit logged
@@ -22,7 +22,7 @@ import { loggers } from '@/lib/logger';
  * 1. Customer creates POA
  * 2. Customer signs POA (this endpoint, role: CUSTOMER)
  * 3. Tax Advisor reviews POA
- * 4. Tax Advisor signs POA (this endpoint, role: TAX_ADVISOR_JTC)
+ * 4. Tax Advisor signs POA (this endpoint, role: TAX_ADVISOR)
  *
  * @route POST /api/poa/sign
  */
@@ -225,8 +225,8 @@ async function handler(request: RequestWithSession): Promise<Response> {
         ? customer.full_name
         : customer.company_name || customer.full_name;
   }
-  // Handle TAX_ADVISOR_JTC signing
-  else if (session.role === UserRole.TAX_ADVISOR_JTC) {
+  // Handle TAX_ADVISOR signing
+  else if (session.role === UserRole.TAX_ADVISOR) {
     // Get tax advisor information
     const { data: advisor, error: advisorError } = await supabase
       .from('consultant')
@@ -325,7 +325,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     return NextResponse.json(
       {
         error: 'Unauthorized role',
-        message: 'Only CUSTOMER or TAX_ADVISOR_JTC can sign POA',
+        message: 'Only CUSTOMER or TAX_ADVISOR can sign POA',
         yourRole: session.role,
       },
       { status: 403 }
@@ -350,7 +350,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
     customer_id: poa.customer_id,
     actor_user_id: session.userId,
     actor_organization_id:
-      session.role === UserRole.TAX_ADVISOR_JTC ? poa.tax_partner_id : null,
+      session.role === UserRole.TAX_ADVISOR ? poa.tax_partner_id : null,
     actor_role: session.role,
     activity_type: 'POA_SIGN',
     activity_details: {
@@ -433,7 +433,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
  *
  * MIDDLEWARE STACK (3 layers):
  * 1. requireAuth - Must be logged in
- * 2. requireRole - CUSTOMER or TAX_ADVISOR_JTC allowed
+ * 2. requireRole - CUSTOMER or TAX_ADVISOR allowed
  * 3. withAudit - Audit trail created
  *
  * Note: Same endpoint handles both customer and tax advisor signatures
@@ -442,7 +442,7 @@ async function handler(request: RequestWithSession): Promise<Response> {
 export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
-    requireRole(UserRole.CUSTOMER, UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.CUSTOMER, UserRole.TAX_ADVISOR),
     withAudit('POA_SIGN')
   )(request as RequestWithSession, handler);
 }

@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     await recordAudit({
       action: 'BILLING_CREATE',
       actorUserId: user.id,
-      actorRole: 'CONSULTANT_JTC',
+      actorRole: 'CONSULTANT',
       details: {
         scope: 'CONSULTANT_TIER_SUBSCRIBE',
         tierId: tier.id,

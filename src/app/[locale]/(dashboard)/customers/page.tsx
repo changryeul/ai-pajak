@@ -75,12 +75,12 @@ export default function CustomersPage() {
   const locale = params.locale as string;
   const { session, isLoading: sessionLoading } = useSession();
 
-  // Role guard: only consultants (CONSULTANT_JTC, TAX_ADVISOR_JTC) may view this page.
+  // Role guard: only consultants (CONSULTANT, TAX_ADVISOR) may view this page.
   // Corporate and individual customers are redirected to their dashboard.
   useEffect(() => {
     if (sessionLoading) return;
     if (!session) return;
-    const isConsultant = hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC);
+    const isConsultant = hasRole(session, UserRole.CONSULTANT, UserRole.TAX_ADVISOR);
     if (!isConsultant) {
       router.replace(`/${locale}/dashboard`);
     }

@@ -20,7 +20,7 @@ import type { EFilingRequest, SPTType } from '@/lib/djp/types';
  * Tax Filing Submission
  *
  * HARD RULES ENFORCED:
- * 1. Only TAX_ADVISOR_JTC can submit tax filings
+ * 1. Only TAX_ADVISOR can submit tax filings
  * 2. PLATFORM_ADMIN is blocked from accessing tax data
  * 3. Active POA is required
  * 4. All actions are audit logged
@@ -132,7 +132,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
   // SECURITY: Safe because middleware has already verified:
   // 1. User authentication (requireAuth)
   // 2. Platform admin blocked (blockPlatformAdmin)
-  // 3. Role is TAX_ADVISOR_JTC (requireRole)
+  // 3. Role is TAX_ADVISOR (requireRole)
   // 4. Valid POA exists (requireValidPOA)
   const supabase = createAdminClient();
 
@@ -464,7 +464,7 @@ async function handler(request: RequestWithPOA): Promise<Response> {
  * MIDDLEWARE STACK (5 layers):
  * 1. requireAuth - Must be logged in
  * 2. blockPlatformAdmin - Platform admin blocked (Hard Rule #1)
- * 3. requireRole - Only TAX_ADVISOR_JTC allowed (Hard Rule #4)
+ * 3. requireRole - Only TAX_ADVISOR allowed (Hard Rule #4)
  * 4. requireValidPOA - Active POA required (Hard Rule #6)
  * 5. withAudit - Audit trail created (Hard Rule #5)
  *
@@ -476,7 +476,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.TAX_ADVISOR),
     requireValidPOA(),
     withAudit('TAX_FILING_SUBMIT')
   )(request as RequestWithSession, handler as unknown as (req: RequestWithSession) => Promise<Response>);

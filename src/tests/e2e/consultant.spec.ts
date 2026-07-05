@@ -3,30 +3,30 @@ import { loginAs, createAuthHeaders } from './auth/login.helper';
 import { TEST_USERS, TEST_TAX_FILING } from './fixtures/users';
 
 /**
- * CONSULTANT_JTC Role E2E Tests
+ * CONSULTANT Role E2E Tests
  *
- * CONSULTANT_JTC Permissions (✅ ALLOWED):
+ * CONSULTANT Permissions (✅ ALLOWED):
  * - Calculate tax for assigned customers
  * - Upload documents
  * - View assigned customer tax filings
  * - Create draft tax filings
  *
- * CONSULTANT_JTC Restrictions (❌ FORBIDDEN):
- * - File tax (requires TAX_ADVISOR_JTC)
+ * CONSULTANT Restrictions (❌ FORBIDDEN):
+ * - File tax (requires TAX_ADVISOR)
  * - Sign POA
  * - Access unassigned customers
  * - Create billing
  */
 
-test.describe('CONSULTANT_JTC Role Tests', () => {
+test.describe('CONSULTANT Role Tests', () => {
   let consultantToken: string;
 
   test.beforeAll(async ({ request }) => {
     // Login as consultant
     consultantToken = await loginAs(
       request,
-      TEST_USERS.CONSULTANT_JTC.email,
-      TEST_USERS.CONSULTANT_JTC.password
+      TEST_USERS.CONSULTANT.email,
+      TEST_USERS.CONSULTANT.password
     );
   });
 
@@ -60,7 +60,7 @@ test.describe('CONSULTANT_JTC Role Tests', () => {
     expect(body.calculation.netTaxDue).toBeGreaterThanOrEqual(0);
     expect(body.breakdown.taxBrackets).toBeTruthy();
     expect(body.calculatedBy.consultantId).toBe(
-      TEST_USERS.CONSULTANT_JTC.consultantId
+      TEST_USERS.CONSULTANT.consultantId
     );
   });
 
@@ -113,14 +113,14 @@ test.describe('CONSULTANT_JTC Role Tests', () => {
       data: TEST_TAX_FILING,
     });
 
-    // CRITICAL: Only TAX_ADVISOR_JTC can file tax
+    // CRITICAL: Only TAX_ADVISOR can file tax
     expect(response.status()).toBe(403);
 
     const body = await response.json();
     expect(body.error).toBe('Forbidden');
     expect(body.message).toContain('You do not have permission');
-    expect(body.requiredRoles).toContain('TAX_ADVISOR_JTC');
-    expect(body.currentRole).toBe('CONSULTANT_JTC');
+    expect(body.requiredRoles).toContain('TAX_ADVISOR');
+    expect(body.currentRole).toBe('CONSULTANT');
   });
 
   test('❌ Consultant CANNOT sign POA', async ({ request }) => {
@@ -133,14 +133,14 @@ test.describe('CONSULTANT_JTC Role Tests', () => {
       },
     });
 
-    // Only CUSTOMER or TAX_ADVISOR_JTC can sign
+    // Only CUSTOMER or TAX_ADVISOR can sign
     expect(response.status()).toBe(403);
 
     const body = await response.json();
     expect(body.error).toBe('Forbidden');
     expect(body.message).toContain('You do not have permission');
-    expect(body.requiredRoles).toContain('TAX_ADVISOR_JTC');
-    expect(body.currentRole).toBe('CONSULTANT_JTC');
+    expect(body.requiredRoles).toContain('TAX_ADVISOR');
+    expect(body.currentRole).toBe('CONSULTANT');
   });
 
   test('❌ Consultant CANNOT access unassigned customer data', async ({ request }) => {
@@ -169,7 +169,7 @@ test.describe('CONSULTANT_JTC Role Tests', () => {
     const response = await request.post('/api/poa/create', {
       headers: createAuthHeaders(consultantToken),
       data: {
-        taxPartnerId: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        taxPartnerId: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         scope: 'ALL_TAX_TYPES',
         validFrom: '2025-01-01',
         validTo: '2025-12-31',
@@ -202,7 +202,7 @@ test.describe('CONSULTANT_JTC Role Tests', () => {
         idempotencyKey: 'test-billing-002',
         customerId: TEST_USERS.CUSTOMER.customerId,
         taxFilingId: 'test-filing-002',
-        taxPartnerId: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        taxPartnerId: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         serviceType: 'TAX_FILING',
         description: 'Test billing',
         amountBase: 500_000,

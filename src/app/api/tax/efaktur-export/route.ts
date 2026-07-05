@@ -11,7 +11,7 @@
  *
  * Reference: DJP e-Faktur Desktop v4.0 Import CSV Specification
  *
- * Auth: CONSULTANT_JTC / TAX_ADVISOR_JTC
+ * Auth: CONSULTANT / TAX_ADVISOR
  */
 
 import { NextRequest, NextResponse } from 'next/server';

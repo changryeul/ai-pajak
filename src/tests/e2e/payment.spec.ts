@@ -45,7 +45,7 @@ test.describe('Payment Flow Tests', () => {
       .from('billing_transaction')
       .insert({
         customer_id: TEST_USERS.CUSTOMER.customerId,
-        tax_partner_id: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        tax_partner_id: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         invoice_number: `INV-TEST-${Date.now()}`,
         service_type: 'TAX_FILING',
         description: 'E2E Test Payment Transaction',
@@ -164,8 +164,8 @@ test.describe('Payment Flow Tests', () => {
     const { data: otherTransaction } = await supabaseAdmin
       .from('billing_transaction')
       .insert({
-        customer_id: TEST_USERS.CONSULTANT_JTC.consultantId, // Different customer
-        tax_partner_id: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        customer_id: TEST_USERS.CONSULTANT.consultantId, // Different customer
+        tax_partner_id: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         invoice_number: `INV-OTHER-${Date.now()}`,
         service_type: 'TAX_FILING',
         description: 'Other customer transaction',
@@ -206,7 +206,7 @@ test.describe('Payment Flow Tests', () => {
       .from('billing_transaction')
       .insert({
         customer_id: TEST_USERS.CUSTOMER.customerId,
-        tax_partner_id: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        tax_partner_id: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         invoice_number: `INV-PAID-${Date.now()}`,
         service_type: 'TAX_FILING',
         description: 'Already paid transaction',
@@ -251,7 +251,7 @@ test.describe('Payment Flow Tests', () => {
       .from('billing_transaction')
       .insert({
         customer_id: TEST_USERS.CUSTOMER.customerId,
-        tax_partner_id: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        tax_partner_id: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         invoice_number: `INV-CANCEL-${Date.now()}`,
         service_type: 'TAX_FILING',
         description: 'Cancelled transaction',

@@ -195,8 +195,8 @@
     "settings": "Pengaturan",
     "role": {
       "CUSTOMER": "Wajib Pajak",
-      "CONSULTANT_JTC": "Konsultan Pajak",
-      "TAX_ADVISOR_JTC": "Kuasa Hukum Pajak",
+      "CONSULTANT": "Konsultan Pajak",
+      "TAX_ADVISOR": "Kuasa Hukum Pajak",
       "PLATFORM_ADMIN": "Admin Platform",
       "TAX_OPERATOR": "Operator Pajak",
       "TAX_OPERATOR_LEAD": "Ketua Operator",
@@ -924,8 +924,8 @@
     "roleLabel": {
       "TAX_OPERATOR": "Operator back-office",
       "TAX_OPERATOR_SUPERVISOR": "Supervisor back-office",
-      "TAX_ADVISOR_JTC": "Tax Advisor",
-      "CONSULTANT_JTC": "Konsultan"
+      "TAX_ADVISOR": "Tax Advisor",
+      "CONSULTANT": "Konsultan"
     },
     "errors": {
       "noToken": "Token undangan tidak ada",
@@ -2593,7 +2593,7 @@
     "noMatchFound": "Tidak ditemukan",
     "registerNew": "Daftar lawan transaksi baru",
     "selectCustomer": "Pilih klien...",
-    "djpSubmitInfo": "Hanya role TAX_ADVISOR_JTC yang bisa lapor ke DJP",
+    "djpSubmitInfo": "Hanya role TAX_ADVISOR yang bisa lapor ke DJP",
     "djpSubmitDesc": "Setelah DRAFT dibuat, penasihat pajak akan meninjau dan melapor ke DJP.",
     "csvImportErrors": "({count} kesalahan)",
     "csvImportMoreErrors": "... +{count} lagi"
@@ -4171,7 +4171,7 @@
     "operator_audience": "Tim Operasional JTC (TAX_OPERATOR, SUPERVISOR, MASTER)",
     "jtc_title": "Konsultan Pajak JTC",
     "jtc_desc": "Penugasan klien · PPh21 massal · Deteksi anomali · Transfer pricing · Manajemen tim",
-    "jtc_audience": "Internal JTC CONSULTANT_JTC, TAX_ADVISOR_JTC",
+    "jtc_audience": "Internal JTC CONSULTANT, TAX_ADVISOR",
     "admin_title": "Admin Platform",
     "admin_desc": "Pengguna · Infrastruktur · Monitoring · Log audit · Tarif pajak (tanpa akses data pajak)",
     "admin_audience": "PLATFORM_ADMIN",
@@ -6174,8 +6174,8 @@
     "roles": {
       "TAX_OPERATOR": "Operator Back-office",
       "TAX_OPERATOR_SUPERVISOR": "Supervisor Back-office",
-      "TAX_ADVISOR_JTC": "Penasihat Pajak",
-      "CONSULTANT_JTC": "Konsultan"
+      "TAX_ADVISOR": "Penasihat Pajak",
+      "CONSULTANT": "Konsultan"
     }
   },
   "manualDetail": {

@@ -29,7 +29,7 @@ export interface UseEffectiveCustomerIdResult {
    * picked / been auto-assigned yet).
    */
   customerId: string;
-  /** True for CONSULTANT_JTC / TAX_ADVISOR_JTC. Caller renders the picker. */
+  /** True for CONSULTANT / TAX_ADVISOR. Caller renders the picker. */
   isConsultant: boolean;
   /** Customer list for the consultant picker. Empty for CUSTOMER role. */
   customers: CustomerListEntry[];
@@ -44,7 +44,7 @@ export interface UseEffectiveCustomerIdResult {
  * consultant-vs-customer divergence in one place.
  *
  * - CUSTOMER role: `customerId` is `session.customerId`.
- * - CONSULTANT_JTC / TAX_ADVISOR_JTC: the hook fetches the consultant's
+ * - CONSULTANT / TAX_ADVISOR: the hook fetches the consultant's
  *   assigned customer list, auto-selects the first one, and exposes
  *   `setSelectedCustomerId` so the page can render a picker.
  *
@@ -59,8 +59,8 @@ export function useEffectiveCustomerId(
   const { session, isLoading: isSessionLoading } = useSession();
 
   const isConsultant =
-    session?.role === UserRole.CONSULTANT_JTC ||
-    session?.role === UserRole.TAX_ADVISOR_JTC;
+    session?.role === UserRole.CONSULTANT ||
+    session?.role === UserRole.TAX_ADVISOR;
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [customers, setCustomers] = useState<CustomerListEntry[]>([]);

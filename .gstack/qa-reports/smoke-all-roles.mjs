@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Cross-role login + dashboard render smoke. Covers the 4 main roles
-// (INDIVIDUAL / COMPANY / CONSULTANT_JTC / TAX_OPERATOR) in Korean locale
+// (INDIVIDUAL / COMPANY / CONSULTANT / TAX_OPERATOR) in Korean locale
 // to catch regressions in role-specific dashboards after recent churn.
 
 import { chromium } from 'playwright';
@@ -13,7 +13,7 @@ const accounts = [
     expectUrlPart: '/dashboard', expectBodyAny: ['결혼 상태', '최근 3년 신고'] },
   { role: 'CUSTOMER (COMPANY)',    email: 'company.test@example.com',  pw: 'TestPassword123!',
     expectUrlPart: '/dashboard', expectBodyAny: ['회사', '월 SPT', 'PPh 21', 'PPN', 'PT'] },
-  { role: 'CONSULTANT_JTC',        email: 'consultant.test@jakartatax.co.id', pw: 'TestPassword123!',
+  { role: 'CONSULTANT',        email: 'consultant.test@jakartatax.co.id', pw: 'TestPassword123!',
     expectUrlPart: '/dashboard', expectBodyAny: ['고객', '세무', 'pendingFilings', 'Client', '월신고'] },
   { role: 'TAX_OPERATOR',          email: 'operator.test@aipajak.com', pw: 'TestPassword123!',
     expectUrlPart: '/operator', expectBodyAny: ['Queue', 'DJP', 'Review', '큐', '운영'] },

@@ -137,8 +137,8 @@ AI Pajak는 **기술 플랫폼**이며, 세무 신고의 법적 주체는 제휴
 | 역할 | 설명 |
 |---|---|
 | CUSTOMER (개인/법인) | 납세자 — 본인 데이터만 |
-| CONSULTANT_JTC | JTC 또는 외부 사무소 컨설턴트 — 배정 고객만 |
-| TAX_ADVISOR_JTC | 선임 세무사 — 신고 최종 제출 권한 |
+| CONSULTANT | JTC 또는 외부 사무소 컨설턴트 — 배정 고객만 |
+| TAX_ADVISOR | 선임 세무사 — 신고 최종 제출 권한 |
 | TAX_OPERATOR / SUPERVISOR / MASTER | 운영팀 (처리 / 승인·배분 / 플랫폼 통계·가격) |
 | PLATFORM_ADMIN | 플랫폼 관리자 — **세무 데이터 접근 불가** |
 | SYSTEM | 결제 자동화 전용 |

@@ -3,8 +3,8 @@
 > **대상**: Jakarta Tax Consulting(JTC) 내부 소속 **세무사·컨설턴트**
 >
 > **두 가지 역할**:
-> - **CONSULTANT_JTC** — 일반 세무사. 배정된 고객의 월·연 신고 작성
-> - **TAX_ADVISOR_JTC** — 선임 세무사 (자격증 소지자). 실제 DJP 제출 권한 보유 (Hard Rule 3), 팀 관리 권한
+> - **CONSULTANT** — 일반 세무사. 배정된 고객의 월·연 신고 작성
+> - **TAX_ADVISOR** — 선임 세무사 (자격증 소지자). 실제 DJP 제출 권한 보유 (Hard Rule 3), 팀 관리 권한
 >
 > ⚠ **네이밍 주의**: 두 role 은 이름에 `_JTC` 접미사가 붙어 있지만, **세무 컨설팅 법인 (EXTERNAL tax_partner) 직원도 같은 role 을 씁니다**. 소속은 `consultant.tax_partner_id` 로만 결정. 본 매뉴얼은 **JTC 내부 직원 관점** — 세무 컨설팅 법인 직원의 매뉴얼은 [`02-external-consultant.md`](./02-external-consultant.md). Role name rename (`_JTC` 접미사 제거) 은 로드맵 P3 예정.
 
@@ -16,20 +16,20 @@ JTC는 AI Pajak 플랫폼 **운영사**이자 **가장 큰 세무 법인 고객*
 - 고객이 입력한 데이터의 정확성 검증
 - 특수 상황(이전가격, 다중 엔티티, 이상 거래) 조사·대응
 - 고객과의 직접 소통 (WhatsApp, 이메일, 현장 미팅)
-- `CONSULTANT_JTC` 는 **제출 준비**까지, **실제 DJP 제출**은 `TAX_ADVISOR_JTC` 또는 운영팀이 수행 (Hard Rule 3 — Tax Filing Actor ≠ Platform)
+- `CONSULTANT` 는 **제출 준비**까지, **실제 DJP 제출**은 `TAX_ADVISOR` 또는 운영팀이 수행 (Hard Rule 3 — Tax Filing Actor ≠ Platform)
 
 ## 2. 계정과 역할 부여
 
 ### 2.1. 계정 생성
-JTC 세무사 계정은 **TAX_ADVISOR_JTC 또는 PLATFORM_ADMIN**이 생성합니다. 일반 회원가입으로는 JTC 역할을 얻을 수 없습니다.
+JTC 세무사 계정은 **TAX_ADVISOR 또는 PLATFORM_ADMIN**이 생성합니다. 일반 회원가입으로는 JTC 역할을 얻을 수 없습니다.
 
 - 초대 이메일 수신 → 링크 클릭 → 비밀번호 설정 → 로그인
 - 시스템이 자동으로 `consultant` 테이블에 레코드를 만들고 `tax_partner_id`를 **JTC 내부 파트너**로 연결
 - **2FA 필수** — 고객 데이터 접근 계정이므로 첫 로그인 시 TOTP 등록 요구
 
-### 2.2. CONSULTANT_JTC vs TAX_ADVISOR_JTC
+### 2.2. CONSULTANT vs TAX_ADVISOR
 
-| 기능 | CONSULTANT_JTC | TAX_ADVISOR_JTC |
+| 기능 | CONSULTANT | TAX_ADVISOR |
 |---|:-:|:-:|
 | 고객 배정·조회 | ✓ | ✓ |
 | 월·연 신고 작성 | ✓ | ✓ |
@@ -64,7 +64,7 @@ JTC 세무사 계정은 **TAX_ADVISOR_JTC 또는 PLATFORM_ADMIN**이 생성합�
 - **다중 엔티티** (`/tax/multi-entity`) — 그룹사 통합 조회
 - **클라이언트 보고** (`/tax/report`) — 고객별 정기 리포트 생성
 
-**관리** (TAX_ADVISOR_JTC 전용)
+**관리** (TAX_ADVISOR 전용)
 - **팀 관리** (`/admin/team`) — JTC 세무사·컨설턴트 초대·비활성화
 
 **계정**
@@ -94,7 +94,7 @@ JTC 세무사 계정은 **TAX_ADVISOR_JTC 또는 PLATFORM_ADMIN**이 생성합�
 3. **PPh21**: 고객사 급여 대장 업로드 또는 Accurate 연동에서 자동 가져오기 → 검토 → 제출 준비
 4. **PPh23**: 거래 내역에서 원천세 대상 건만 자동 필터링 → NPWP 누락 확인 → 제출 준비
 5. **PPN**: Faktur Pajak 업로드 또는 Mekari Jurnal 동기 → 매출·매입 분류 → 계산 → 제출 준비
-6. 모든 항목에서 **"제출 준비"**가 완료되면 **CONSULTANT_JTC**는 "검토 요청" 으로 TAX_ADVISOR_JTC에게, TAX_ADVISOR_JTC는 바로 **"운영팀 큐로 제출"** 가능
+6. 모든 항목에서 **"제출 준비"**가 완료되면 **CONSULTANT**는 "검토 요청" 으로 TAX_ADVISOR에게, TAX_ADVISOR는 바로 **"운영팀 큐로 제출"** 가능
 7. 큐 상태는 **제출 현황** 에서 실시간 추적 (DATA_REVIEW → APPROVED → ... → COMPLETED)
 
 ### 4.3. 플로우 C — 일괄 PPh21 (여러 고객 한 번에)
@@ -133,13 +133,13 @@ JTC 세무사 계정은 **TAX_ADVISOR_JTC 또는 PLATFORM_ADMIN**이 생성합�
 4. 시스템이 **Arm's Length Range** 계산 (OECD 가이드라인 기반)
 5. 결과 PDF 생성 → 고객 보고서로 첨부
 
-## 5. 팀 관리 (TAX_ADVISOR_JTC 전용)
+## 5. 팀 관리 (TAX_ADVISOR 전용)
 
 `/admin/team` 에서 JTC 내부 세무사·컨설턴트를 관리합니다.
 
 ### 5.1. 팀원 초대
 1. **팀 관리 → 팀원 초대**
-2. 이메일 입력, 역할 선택 (CONSULTANT_JTC 또는 TAX_ADVISOR_JTC)
+2. 이메일 입력, 역할 선택 (CONSULTANT 또는 TAX_ADVISOR)
 3. 초대 메일 발송 → 초대 링크 클릭 → 비밀번호 설정
 4. 자동으로 JTC 내부 `tax_partner_id` 에 연결되며 `consultant` 레코드 생성
 
@@ -174,7 +174,7 @@ PDF로 생성 후 이메일 자동 발송 또는 앱 내 고객 메시지로 전
 ### 7.1. Hard Rule 준수
 1. **PLATFORM_ADMIN은 고객 데이터에 접근 불가** — JTC 세무사가 유일한 고객 데이터 접근 계정
 2. **Consultant는 JTC 소속** — 이 규칙은 FK로 강제됨
-3. **Tax Filing Actor ≠ Platform** — 실제 DJP 제출은 TAX_ADVISOR_JTC 또는 운영팀
+3. **Tax Filing Actor ≠ Platform** — 실제 DJP 제출은 TAX_ADVISOR 또는 운영팀
 4. **Billing Collector ≠ Service Provider** — 결제 처리는 SYSTEM 역할이 담당
 5. **모든 쓰기 조치에 감사 로그** — `withAudit` 미들웨어 자동 기록
 
@@ -190,8 +190,8 @@ PDF로 생성 후 이메일 자동 발송 또는 앱 내 고객 메시지로 전
 
 ## 8. 자주 묻는 질문
 
-**Q. CONSULTANT_JTC인데 신고 제출 버튼이 회색입니다.**
-A. 최종 제출 권한은 TAX_ADVISOR_JTC에게만 있습니다. **"검토 요청"** 으로 상신하면 선임 세무사가 최종 제출합니다.
+**Q. CONSULTANT인데 신고 제출 버튼이 회색입니다.**
+A. 최종 제출 권한은 TAX_ADVISOR에게만 있습니다. **"검토 요청"** 으로 상신하면 선임 세무사가 최종 제출합니다.
 
 **Q. 담당 고객이 아닌데 고객 목록에 나타납니다.**
 A. `customer_consultant` 배정 기록이 남아 있어서입니다. 팀 관리에서 이관하거나 배정을 해제해달라고 요청하세요.
@@ -205,7 +205,7 @@ A. `/tax/transfer-pricing` 하단에 JTC 표준 TP 보고서 템플릿 링크가
 **Q. 이상 탐지에서 false positive가 너무 많습니다.**
 A. **설정 → 이상 탐지 민감도** 에서 임계값 조정 가능. 과거 확인된 케이스는 자동으로 화이트리스트에 추가됩니다.
 
-**Q. 팀 관리에서 다른 TAX_ADVISOR_JTC를 비활성화할 수 있나요?**
+**Q. 팀 관리에서 다른 TAX_ADVISOR를 비활성화할 수 있나요?**
 A. 동료 TAX_ADVISOR를 비활성화하려면 최소 2명의 다른 ADVISOR 동의가 필요합니다 (권한 남용 방지). 단독 실행 시 거부됩니다.
 
 ## 9. 관련 문서와 리소스

@@ -121,8 +121,8 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   if (userRoles && userRoles.length > 0) {
     // Pick best role (prefer TAX_ADVISOR > CONSULTANT > CUSTOMER > others)
     const roleOrder: UserRole[] = [
-      UserRole.TAX_ADVISOR_JTC,
-      UserRole.CONSULTANT_JTC,
+      UserRole.TAX_ADVISOR,
+      UserRole.CONSULTANT,
       UserRole.TAX_OPERATOR_SUPERVISOR,
       UserRole.TAX_OPERATOR_LEAD,
       UserRole.TAX_OPERATOR,
@@ -152,7 +152,7 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   if (consultant) {
     return {
       userId,
-      role: UserRole.CONSULTANT_JTC,
+      role: UserRole.CONSULTANT,
       organizationId: consultant.tax_partner_id,
       organizationType: OrganizationType.TAX_PARTNER,
       email: userEmail!,
@@ -188,11 +188,11 @@ export function isCustomer(session: SessionContext): boolean {
 }
 
 export function isJTCConsultant(session: SessionContext): boolean {
-  return session.role === UserRole.CONSULTANT_JTC;
+  return session.role === UserRole.CONSULTANT;
 }
 
 export function isJTCTaxAdvisor(session: SessionContext): boolean {
-  return session.role === UserRole.TAX_ADVISOR_JTC;
+  return session.role === UserRole.TAX_ADVISOR;
 }
 
 export function isPlatformAdmin(session: SessionContext): boolean {
@@ -215,10 +215,10 @@ export function canAccessTaxData(session: SessionContext): boolean {
 /**
  * CRITICAL: Determine if session can file tax
  *
- * ONLY TAX_ADVISOR_JTC can file tax
+ * ONLY TAX_ADVISOR can file tax
  */
 export function canFileTax(session: SessionContext): boolean {
-  return session.role === UserRole.TAX_ADVISOR_JTC;
+  return session.role === UserRole.TAX_ADVISOR;
 }
 
 /**

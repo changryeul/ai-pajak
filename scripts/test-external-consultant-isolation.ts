@@ -93,7 +93,7 @@ async function createFirm(label: string): Promise<FirmCtx> {
   // user_roles
   await admin.from('user_roles').insert({
     user_id: userId,
-    role: 'TAX_ADVISOR_JTC',
+    role: 'TAX_ADVISOR',
     organization_id: partner.id,
     organization_type: 'TAX_PARTNER',
     is_active: true,

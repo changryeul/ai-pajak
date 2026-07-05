@@ -78,8 +78,8 @@ This document tracks the implementation status of all API endpoints in the AI Pa
 
 ### Access Control
 - CUSTOMER: Own record only
-- CONSULTANT_JTC: Assigned customers only
-- TAX_ADVISOR_JTC: Assigned customers only
+- CONSULTANT: Assigned customers only
+- TAX_ADVISOR: Assigned customers only
 - **PLATFORM_ADMIN: Blocked from GET /api/customers/[id]**
 
 ---
@@ -139,7 +139,7 @@ This document tracks the implementation status of all API endpoints in the AI Pa
 ### Access Control
 - **PLATFORM_ADMIN: Blocked**
 - CUSTOMER: Own audit logs only
-- CONSULTANT_JTC: Assigned customers' logs only
+- CONSULTANT: Assigned customers' logs only
 
 ---
 
@@ -217,7 +217,7 @@ composeMiddleware(
 composeMiddleware(
   requireAuth,
   blockPlatformAdmin,  // CRITICAL: Block platform admin
-  requireRole(CUSTOMER, CONSULTANT_JTC, TAX_ADVISOR_JTC),
+  requireRole(CUSTOMER, CONSULTANT, TAX_ADVISOR),
   withAudit('ACTIVITY_TYPE')
 )
 ```

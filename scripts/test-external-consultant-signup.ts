@@ -100,7 +100,7 @@ async function run() {
   // 5. Create user_roles entry
   const { error: roleError } = await admin.from('user_roles').insert({
     user_id: userId,
-    role: 'TAX_ADVISOR_JTC',
+    role: 'TAX_ADVISOR',
     organization_id: partner.id,
     organization_type: 'TAX_PARTNER',
     is_active: true,

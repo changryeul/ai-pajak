@@ -35,7 +35,7 @@ export default function ClientReportPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isConsultant = session?.role === UserRole.CONSULTANT_JTC || session?.role === UserRole.TAX_ADVISOR_JTC;
+  const isConsultant = session?.role === UserRole.CONSULTANT || session?.role === UserRole.TAX_ADVISOR;
 
   const fetchCustomers = useCallback(async () => {
     try {

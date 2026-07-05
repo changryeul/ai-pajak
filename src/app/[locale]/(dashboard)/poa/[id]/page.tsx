@@ -69,7 +69,7 @@ export default function POADetailPage() {
     !!session.customerId &&
     session.customerId === (poa as POADetail & { customer_id?: string }).customer_id;
   const isAdvisorRole =
-    session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
+    session?.role === 'CONSULTANT' || session?.role === 'TAX_ADVISOR';
 
   const fetchPOA = useCallback(async () => {
     try {

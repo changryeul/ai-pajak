@@ -7,7 +7,7 @@ info:
 
     **중요 규칙**:
     - 모든 DJP 신고는 Jakarta Tax Consulting 명의로 제출됩니다.
-    - TAX_ADVISOR_JTC만 신고 권한이 있습니다.
+    - TAX_ADVISOR만 신고 권한이 있습니다.
     - 유효한 POA(위임장) 없이는 신고할 수 없습니다.
     - PLATFORM_ADMIN은 세무 데이터에 접근할 수 없습니다.
 
@@ -156,7 +156,7 @@ paths:
       tags:
         - Tax Filing
       description: |
-        **제한**: TAX_ADVISOR_JTC만 제출 가능
+        **제한**: TAX_ADVISOR만 제출 가능
         **요구사항**: 유효한 POA 필요
         **귀속**: Jakarta Tax Consulting 명의로 제출
       parameters:
@@ -175,7 +175,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: TAX_ADVISOR_JTC만 제출 가능
+          description: TAX_ADVISOR만 제출 가능
           content:
             application/json:
               schema:
@@ -233,7 +233,7 @@ paths:
       tags:
         - Tax Filing
       description: |
-        **제한**: TAX_ADVISOR_JTC만 제출 가능
+        **제한**: TAX_ADVISOR만 제출 가능
         **최대**: 35건 동시 제출
       requestBody:
         required: true

@@ -397,8 +397,8 @@ export default function PPNPage() {
         aiSteps={[tsc('stepDataCollect'), tsc('stepVatCalc'), tsc('stepFilingRefund')]}
       />
 
-      {/* Consultant customer picker — only shown for CONSULTANT_JTC /
-          TAX_ADVISOR_JTC. CUSTOMER role keeps the existing UI unchanged. */}
+      {/* Consultant customer picker — only shown for CONSULTANT /
+          TAX_ADVISOR. CUSTOMER role keeps the existing UI unchanged. */}
       {isConsultant && (
         <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <label htmlFor="ppn-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">

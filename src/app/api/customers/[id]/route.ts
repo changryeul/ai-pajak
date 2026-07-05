@@ -58,7 +58,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Check access
     // Consultants can only view their assigned customers
-    if (userRole.role === 'CONSULTANT_JTC' || userRole.role === 'TAX_ADVISOR_JTC') {
+    if (userRole.role === 'CONSULTANT' || userRole.role === 'TAX_ADVISOR') {
       const { data: consultant } = await supabase
         .from('consultant')
         .select('id')
@@ -156,7 +156,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const userRole = { role };
 
     // Check access
-    const canUpdate = ['CONSULTANT_JTC', 'TAX_ADVISOR_JTC', 'PLATFORM_ADMIN'];
+    const canUpdate = ['CONSULTANT', 'TAX_ADVISOR', 'PLATFORM_ADMIN'];
     if (!canUpdate.includes(userRole.role)) {
       // Customers can update their own record
       if (userRole.role === 'CUSTOMER') {

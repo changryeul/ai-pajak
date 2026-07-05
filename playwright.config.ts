@@ -17,8 +17,8 @@ process.env.TEST_SUPABASE_SERVICE_ROLE_KEY = process.env.TEST_SUPABASE_SERVICE_R
  *
  * Role-Based Access Control (RBAC) Testing
  * - CUSTOMER: Can create POA, cannot file tax
- * - CONSULTANT_JTC: Can calculate tax, cannot file tax
- * - TAX_ADVISOR_JTC: Can file tax (with active POA only)
+ * - CONSULTANT: Can calculate tax, cannot file tax
+ * - TAX_ADVISOR: Can file tax (with active POA only)
  * - PLATFORM_ADMIN: Cannot access tax data
  * - SYSTEM: Can create billing, cannot access tax data
  */

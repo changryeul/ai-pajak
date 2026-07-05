@@ -2,7 +2,7 @@
  * Smoke test for the Consultant ERP P1 happy path.
  *
  * Walks one session through:
- *   1. CONSULTANT_JTC creates a session for company.test
+ *   1. CONSULTANT creates a session for company.test
  *   2. Uploads 5 document metadata rows (all 5 required slots)
  *   3. SUBMIT  → status PENDING_APPROVAL
  *   4. SUPERVISOR approves → status APPROVED
@@ -13,7 +13,7 @@
  *   SEED_TARGET=prod npx tsx scripts/test-consultant-erp-flow.ts
  *
  * Requirements: the 20260516000001_consultant_erp.sql migration must be applied
- * AND a CONSULTANT_JTC must have an active customer_consultant assignment for
+ * AND a CONSULTANT must have an active customer_consultant assignment for
  * company.test@example.com.
  */
 
@@ -68,7 +68,7 @@ async function run() {
   // ── Step 0: collect tokens + customerId ──
   const consultantTok = await login('consultant.test@jakartatax.co.id');
   if (!consultantTok) {
-    console.error('   ✗ Cannot log in as CONSULTANT_JTC. Aborting.');
+    console.error('   ✗ Cannot log in as CONSULTANT. Aborting.');
     process.exit(1);
   }
   console.log('✅ consultant logged in');

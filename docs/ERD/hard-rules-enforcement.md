@@ -196,7 +196,7 @@ RETURNS BOOLEAN AS $$
         SELECT 1
         FROM user_roles
         WHERE user_id = auth.uid()
-        AND role IN ('CONSULTANT_JTC', 'TAX_ADVISOR_JTC')
+        AND role IN ('CONSULTANT', 'TAX_ADVISOR')
         AND is_active = true
     );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;

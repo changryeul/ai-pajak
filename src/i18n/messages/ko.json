@@ -195,8 +195,8 @@
     "settings": "설정",
     "role": {
       "CUSTOMER": "납세자",
-      "CONSULTANT_JTC": "세무 컨설턴트",
-      "TAX_ADVISOR_JTC": "세무사",
+      "CONSULTANT": "세무 컨설턴트",
+      "TAX_ADVISOR": "세무사",
       "PLATFORM_ADMIN": "플랫폼 관리자",
       "TAX_OPERATOR": "세무 상담원",
       "TAX_OPERATOR_LEAD": "상담원 팀장",
@@ -924,8 +924,8 @@
     "roleLabel": {
       "TAX_OPERATOR": "백오피스 상담원",
       "TAX_OPERATOR_SUPERVISOR": "백오피스 수퍼바이저",
-      "TAX_ADVISOR_JTC": "세무사 (Tax Advisor)",
-      "CONSULTANT_JTC": "컨설턴트"
+      "TAX_ADVISOR": "세무사 (Tax Advisor)",
+      "CONSULTANT": "컨설턴트"
     },
     "errors": {
       "noToken": "초대 토큰이 없습니다",
@@ -2594,7 +2594,7 @@
     "noMatchFound": "검색 결과 없음",
     "registerNew": "새 거래 상대방 등록",
     "selectCustomer": "고객 선택...",
-    "djpSubmitInfo": "DJP 제출은 TAX_ADVISOR_JTC 역할만 가능합니다",
+    "djpSubmitInfo": "DJP 제출은 TAX_ADVISOR 역할만 가능합니다",
     "djpSubmitDesc": "DRAFT 생성 후 세무사가 검토하여 DJP에 제출합니다.",
     "csvImportErrors": "({count}건 오류)",
     "csvImportMoreErrors": "... +{count}건"
@@ -4189,7 +4189,7 @@
     "operator_audience": "JTC 운영팀 (TAX_OPERATOR, SUPERVISOR, MASTER)",
     "jtc_title": "JTC 세무사",
     "jtc_desc": "고객 배정 · 일괄 PPh21 · 이상 탐지 · 이전가격 · 팀 관리",
-    "jtc_audience": "JTC 내부 CONSULTANT_JTC, TAX_ADVISOR_JTC",
+    "jtc_audience": "JTC 내부 CONSULTANT, TAX_ADVISOR",
     "admin_title": "플랫폼 관리자",
     "admin_desc": "사용자 · 인프라 · 모니터링 · 감사 로그 · 세율 설정 (세무 데이터 접근 불가)",
     "admin_audience": "PLATFORM_ADMIN",
@@ -6273,8 +6273,8 @@
     "roles": {
       "TAX_OPERATOR": "백오피스 상담원",
       "TAX_OPERATOR_SUPERVISOR": "백오피스 수퍼바이저",
-      "TAX_ADVISOR_JTC": "세무사 (Tax Advisor)",
-      "CONSULTANT_JTC": "컨설턴트"
+      "TAX_ADVISOR": "세무사 (Tax Advisor)",
+      "CONSULTANT": "컨설턴트"
     }
   },
   "manualDetail": {

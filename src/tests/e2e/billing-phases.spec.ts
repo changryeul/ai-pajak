@@ -174,8 +174,8 @@ test.describe('Billing — Consultant tier (EXTERNAL)', () => {
   test('❌ POST /api/billing/consultant-plan rejects JTC consultant (internal)', async ({ request }) => {
     const jtcToken = await loginAs(
       request,
-      TEST_USERS.CONSULTANT_JTC.email,
-      TEST_USERS.CONSULTANT_JTC.password,
+      TEST_USERS.CONSULTANT.email,
+      TEST_USERS.CONSULTANT.password,
     );
 
     const res = await request.post('/api/billing/consultant-plan', {

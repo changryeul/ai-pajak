@@ -72,8 +72,8 @@ AI Pajak은 인도네시아 세무 신고 자동화 플랫폼입니다. 사용�
 |---|---|
 | ① 개인 고객 | `CUSTOMER` + `customer_type='INDIVIDUAL'` |
 | ② 법인 고객 | `CUSTOMER` + `customer_type='COMPANY'` |
-| ③ 상담사 | `CONSULTANT_JTC` (JTC + 외부) / `TAX_OPERATOR` / `TAX_OPERATOR_LEAD` / `TAX_OPERATOR_SUPERVISOR` / `TAX_OPERATOR_MASTER` |
-| ④ 어드바이저 | `TAX_ADVISOR_JTC` |
+| ③ 상담사 | `CONSULTANT` (JTC + 외부) / `TAX_OPERATOR` / `TAX_OPERATOR_LEAD` / `TAX_OPERATOR_SUPERVISOR` / `TAX_OPERATOR_MASTER` |
+| ④ 어드바이저 | `TAX_ADVISOR` |
 | ⑤ 어드민 | `PLATFORM_ADMIN` |
 
 > **시스템(`SYSTEM`)**: 자동 결제 처리용 service-role. 사용자 계정 아니라 시나리오에서 제외.

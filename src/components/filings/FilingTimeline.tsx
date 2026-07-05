@@ -100,8 +100,8 @@ export function FilingTimeline({ events }: FilingTimelineProps) {
   const getRoleLabel = (role: string) => {
     const roleMap: Record<string, string> = {
       CUSTOMER: t('roles.customer'),
-      CONSULTANT_JTC: t('roles.consultant'),
-      TAX_ADVISOR_JTC: t('roles.taxAdvisor'),
+      CONSULTANT: t('roles.consultant'),
+      TAX_ADVISOR: t('roles.taxAdvisor'),
       PLATFORM_ADMIN: t('roles.admin'),
     };
     return roleMap[role] || role;

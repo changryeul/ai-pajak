@@ -133,7 +133,7 @@ export function useSession(): UseSessionReturn {
         if (operator) {
           fullName = operator.name;
         }
-      } else if (userRole.role === UserRole.CONSULTANT_JTC || userRole.role === UserRole.TAX_ADVISOR_JTC) {
+      } else if (userRole.role === UserRole.CONSULTANT || userRole.role === UserRole.TAX_ADVISOR) {
         const { data: consultant } = await supabase
           .from('consultant')
           .select('id, full_name')
@@ -225,5 +225,5 @@ export function canAccessTaxData(session: ClientSessionContext | null): boolean 
  */
 export function canFileTax(session: ClientSessionContext | null): boolean {
   if (!session) return false;
-  return session.role === UserRole.TAX_ADVISOR_JTC;
+  return session.role === UserRole.TAX_ADVISOR;
 }

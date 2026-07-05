@@ -18,15 +18,15 @@
 | 역할 | 이메일 | 비밀번호 | 설명 |
 |------|--------|----------|------|
 | CUSTOMER | customer.test@example.com | TestPassword123! | 납세자 (개인) |
-| CONSULTANT_JTC | consultant.test@jakartatax.co.id | TestPassword123! | 세무 컨설턴트 |
-| TAX_ADVISOR_JTC | advisor.test@jakartatax.co.id | TestPassword123! | 세무사 (Production에서 수퍼바이저 겸용) |
+| CONSULTANT | consultant.test@jakartatax.co.id | TestPassword123! | 세무 컨설턴트 |
+| TAX_ADVISOR | advisor.test@jakartatax.co.id | TestPassword123! | 세무사 (Production에서 수퍼바이저 겸용) |
 | PLATFORM_ADMIN | admin.test@aipajak.com | TestPassword123! | 플랫폼 관리자 |
 | TAX_OPERATOR_SUPERVISOR | supervisor.test@jakartatax.co.id | TestPassword123! | 상담원 감독관 |
 | TAX_OPERATOR | operator1.test@jakartatax.co.id | TestPassword123! | 상담원 1 (Lee) |
 | TAX_OPERATOR | operator2.test@jakartatax.co.id | TestPassword123! | 상담원 2 (Park) |
 | TAX_OPERATOR | operator3.test@jakartatax.co.id | TestPassword123! | 상담원 3 (Choi) |
 
-> **Production 참고:** advisor 계정은 TAX_ADVISOR_JTC + TAX_OPERATOR_SUPERVISOR 2개 역할 보유. 로그인 후 사이드바 역할 뱃지 클릭으로 전환 가능.
+> **Production 참고:** advisor 계정은 TAX_ADVISOR + TAX_OPERATOR_SUPERVISOR 2개 역할 보유. 로그인 후 사이드바 역할 뱃지 클릭으로 전환 가능.
 
 ---
 

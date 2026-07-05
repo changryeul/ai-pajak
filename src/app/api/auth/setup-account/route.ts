@@ -12,7 +12,7 @@ type AccountType = 'INDIVIDUAL' | 'COMPANY' | 'TAX_PARTNER';
  *
  *   INDIVIDUAL → customer(INDIVIDUAL) + CUSTOMER role + FREE subscription
  *   COMPANY    → customer(COMPANY, company_name) + CUSTOMER role + FREE subscription
- *   TAX_PARTNER → tax_partner + consultant(self, PARTNER) + TAX_ADVISOR_JTC role
+ *   TAX_PARTNER → tax_partner + consultant(self, PARTNER) + TAX_ADVISOR role
  *
  * Idempotent — safe to call multiple times.
  * Falls back to INDIVIDUAL if accountType is missing (backward compat).
@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .eq('is_active', true);
     const NON_CUSTOMER_ROLES = new Set([
-      'CONSULTANT_JTC',
-      'TAX_ADVISOR_JTC',
+      'CONSULTANT',
+      'TAX_ADVISOR',
       'TAX_OPERATOR',
       'TAX_OPERATOR_LEAD',
       'TAX_OPERATOR_SUPERVISOR',
@@ -289,18 +289,18 @@ async function setupTaxPartner(
     consultantId = newConsultant.id;
   }
 
-  // 2. Assign TAX_ADVISOR_JTC role (tax partner owners have full advisor privileges)
+  // 2. Assign TAX_ADVISOR role (tax partner owners have full advisor privileges)
   const { data: existingRole } = await admin
     .from('user_roles')
     .select('id')
     .eq('user_id', userId)
-    .eq('role', 'TAX_ADVISOR_JTC')
+    .eq('role', 'TAX_ADVISOR')
     .maybeSingle();
 
   if (!existingRole) {
     await admin.from('user_roles').insert({
       user_id: userId,
-      role: 'TAX_ADVISOR_JTC',
+      role: 'TAX_ADVISOR',
       organization_id: taxPartnerId,
       organization_type: 'TAX_PARTNER',
       is_active: true,
@@ -315,7 +315,7 @@ async function setupTaxPartner(
       accountType: 'TAX_PARTNER',
       taxPartnerId,
       consultantId,
-      role: 'TAX_ADVISOR_JTC',
+      role: 'TAX_ADVISOR',
       firmName: firmName || `${fullName}'s Firm`,
     },
   });

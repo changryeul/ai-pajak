@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['CONSULTANT_JTC', 'TAX_ADVISOR_JTC', 'TAX_OPERATOR', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
+    if (!['CONSULTANT', 'TAX_ADVISOR', 'TAX_OPERATOR', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Only staff can create document requests' }, { status: 403 });
     }
 

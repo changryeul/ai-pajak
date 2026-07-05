@@ -47,7 +47,7 @@ export default function PricingPage() {
   const [subState, setSubState] = useState<SubscriptionState | null>(null);
   const [consultantState, setConsultantState] = useState<ConsultantState | null>(null);
   const isConsultant =
-    session?.role === UserRole.CONSULTANT_JTC || session?.role === UserRole.TAX_ADVISOR_JTC;
+    session?.role === UserRole.CONSULTANT || session?.role === UserRole.TAX_ADVISOR;
   const [tab, setTab] = useState<'CORPORATE' | 'INDIVIDUAL' | 'CONSULTANT'>(
     session?.customerType === 'INDIVIDUAL' ? 'INDIVIDUAL'
     : isConsultant ? 'CONSULTANT'

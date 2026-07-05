@@ -22,10 +22,10 @@
 ### 1.2. 직접 하지 않는 일 (다른 역할의 몫)
 | 일 | 담당 |
 |---|---|
-| 고객 세무 데이터 입력·열람 | CUSTOMER / CONSULTANT_JTC / 외부 컨설턴트 |
+| 고객 세무 데이터 입력·열람 | CUSTOMER / CONSULTANT / 외부 컨설턴트 |
 | 신고 제출 큐 처리 | TAX_OPERATOR, SUPERVISOR |
 | 플랫폼 수익·맞춤 가격 | TAX_OPERATOR_MASTER |
-| 실제 DJP 제출 | TAX_ADVISOR_JTC, 운영팀 |
+| 실제 DJP 제출 | TAX_ADVISOR, 운영팀 |
 
 ## 2. 계정과 로그인
 

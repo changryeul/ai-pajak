@@ -137,7 +137,7 @@ export default function PPh23Page() {
   const params = useParams();
   const locale = params.locale as string;
 
-  const isConsultant = session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
+  const isConsultant = session?.role === 'CONSULTANT' || session?.role === 'TAX_ADVISOR';
 
   // State
   const [period, setPeriod] = useState(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);

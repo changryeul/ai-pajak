@@ -52,7 +52,7 @@ async function handleGetFiling(
           { status: 403 }
         );
       }
-    } else if (role === 'CONSULTANT_JTC') {
+    } else if (role === 'CONSULTANT') {
       const { data: assignment } = await getSupabaseAdmin()
         .from('customer_consultant')
         .select('id')
@@ -268,7 +268,7 @@ export async function GET(
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin, // CRITICAL: Block platform admin from accessing tax data
-    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('TAX_FILING_VIEW')
   )(request as RequestWithSession, (req: RequestWithSession) => handleGetFiling(req, context));
 }
@@ -279,7 +279,7 @@ export async function PATCH(
 ) {
   return composeMiddleware(
     requireAuth,
-    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('TAX_FILING_UPDATE')
   )(request as RequestWithSession, (req: RequestWithSession) => handleUpdateFiling(req, context));
 }

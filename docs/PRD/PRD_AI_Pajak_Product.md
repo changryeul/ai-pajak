@@ -48,8 +48,8 @@ AI Pajak는 인도네시아 납세자(개인·법인)와 세무사무소가 한 
 |---|---|---|
 | `CUSTOMER` (INDIVIDUAL) | 개인 납세자 | 본인 데이터 |
 | `CUSTOMER` (COMPANY) | 법인 납세자 | 본인 회사 데이터 |
-| `CONSULTANT_JTC` | JTC 또는 외부 사무소 컨설턴트 | 배정된 고객 |
-| `TAX_ADVISOR_JTC` | 선임 세무사 | 소속 사무소 고객 + **신고 최종 제출 권한** |
+| `CONSULTANT` | JTC 또는 외부 사무소 컨설턴트 | 배정된 고객 |
+| `TAX_ADVISOR` | 선임 세무사 | 소속 사무소 고객 + **신고 최종 제출 권한** |
 | `TAX_OPERATOR` | 백오피스 운영자 | 처리 큐 |
 | `TAX_OPERATOR_SUPERVISOR` | 운영 수퍼바이저 | 승인·배분·통계 |
 | `TAX_OPERATOR_MASTER` | 운영 마스터 | 플랫폼 통계·맞춤 가격 |

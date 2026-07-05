@@ -261,7 +261,7 @@ CREATE INDEX idx_legality_customer_cat ON legality_document(customer_id, categor
 ### Phase 0 — 골격 (0.5일)
 - 6 마이그레이션 + RLS
 - `(dashboard)/consultant-erp/{dashboard,work,legality,counterparty}/page.tsx` 빈 골격
-- 사이드바에 4 메뉴 (CONSULTANT_JTC + TAX_OPERATOR_SUPERVISOR 에만 표시)
+- 사이드바에 4 메뉴 (CONSULTANT + TAX_OPERATOR_SUPERVISOR 에만 표시)
 - `requireConsultantOrSupervisor` 미들웨어
 
 **산출**: 빈 페이지 4개 + DB 마이그레이션 적용. e2e smoke test 1개 (CONSULTANT 로그인 → 4 페이지 모두 200).
@@ -482,7 +482,7 @@ legality.requiredBadge, legality.optionalBadge, legality.validUntilLabel
 - [ ] `consultant_session` RLS 정책
 - [ ] `(dashboard)/consultant-erp/` 4 페이지 골격
 - [ ] `middleware/requireConsultantOrSupervisor.ts`
-- [ ] `sidebar.tsx`에 4 메뉴 (CONSULTANT_JTC + TAX_OPERATOR_SUPERVISOR 노출)
+- [ ] `sidebar.tsx`에 4 메뉴 (CONSULTANT + TAX_OPERATOR_SUPERVISOR 노출)
 - [ ] e2e smoke: CONSULTANT 로그인 → 4 페이지 200
 - [ ] CLAUDE.md "Consultant ERP" 섹션 추가
 

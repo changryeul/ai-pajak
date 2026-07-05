@@ -3,29 +3,29 @@ import { loginAs, createAuthHeaders } from './auth/login.helper';
 import { TEST_USERS, TEST_POA, TEST_POA_PENDING, TEST_POA_UNSIGNED_DRAFT, TEST_SCOPE_MISMATCH_CUSTOMER, getUniqueTaxFiling } from './fixtures/users';
 
 /**
- * TAX_ADVISOR_JTC Role E2E Tests
+ * TAX_ADVISOR Role E2E Tests
  *
- * TAX_ADVISOR_JTC Permissions (✅ ALLOWED):
+ * TAX_ADVISOR Permissions (✅ ALLOWED):
  * - Calculate tax
  * - File tax (REQUIRES ACTIVE POA)
  * - Sign POA
  * - View all JTC customer filings
  *
- * TAX_ADVISOR_JTC Restrictions (❌ FORBIDDEN):
+ * TAX_ADVISOR Restrictions (❌ FORBIDDEN):
  * - File tax WITHOUT active POA (CRITICAL TEST)
  * - Access customers from other tax partners
  * - Create billing
  */
 
-test.describe('TAX_ADVISOR_JTC Role Tests', () => {
+test.describe('TAX_ADVISOR Role Tests', () => {
   let advisorToken: string;
 
   test.beforeAll(async ({ request }) => {
     // Login as tax advisor
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
   });
 
@@ -48,7 +48,7 @@ test.describe('TAX_ADVISOR_JTC Role Tests', () => {
     const body = await response.json();
     expect(body.success).toBe(true);
     expect(body.calculatedBy.consultantId).toBe(
-      TEST_USERS.TAX_ADVISOR_JTC.consultantId
+      TEST_USERS.TAX_ADVISOR.consultantId
     );
   });
 
@@ -170,7 +170,7 @@ test.describe('TAX_ADVISOR_JTC Role Tests', () => {
     expect(body.success).toBe(true);
     expect(body.previousStatus).toBe('PENDING_SIGNATURE');
     expect(body.newStatus).toBe('ACTIVE');
-    expect(body.signer.role).toBe('TAX_ADVISOR_JTC');
+    expect(body.signer.role).toBe('TAX_ADVISOR');
     expect(body.poa.taxPartner.signedAt).toBeTruthy();
   });
 
@@ -251,7 +251,7 @@ test.describe('TAX_ADVISOR_JTC Role Tests', () => {
         idempotencyKey: 'test-billing-003',
         customerId: TEST_USERS.CUSTOMER.customerId,
         taxFilingId: 'test-filing-003',
-        taxPartnerId: TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId,
+        taxPartnerId: TEST_USERS.TAX_ADVISOR.taxPartnerId,
         serviceType: 'TAX_FILING',
         description: 'Test billing',
         amountBase: 500_000,
@@ -290,10 +290,10 @@ test.describe('TAX_ADVISOR_JTC Role Tests', () => {
     // Verify submitter details
     expect(body.submittedBy.userId).toBeTruthy();
     expect(body.submittedBy.consultantId).toBe(
-      TEST_USERS.TAX_ADVISOR_JTC.consultantId
+      TEST_USERS.TAX_ADVISOR.consultantId
     );
     expect(body.submittedBy.taxPartnerId).toBe(
-      TEST_USERS.TAX_ADVISOR_JTC.taxPartnerId
+      TEST_USERS.TAX_ADVISOR.taxPartnerId
     );
     expect(body.submittedBy.taxPartnerName).toBeTruthy();
 

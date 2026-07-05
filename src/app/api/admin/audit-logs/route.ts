@@ -9,7 +9,7 @@ async function checkAdmin(userId: string): Promise<boolean> {
 }
 
 /**
- * GET /api/admin/audit-logs?page=1&limit=50&activityType=TAX_FILING_SUBMIT&actorRole=TAX_ADVISOR_JTC
+ * GET /api/admin/audit-logs?page=1&limit=50&activityType=TAX_FILING_SUBMIT&actorRole=TAX_ADVISOR
  */
 export async function GET(request: NextRequest) {
   try {

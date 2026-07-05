@@ -8,10 +8,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  *
  * Lookup order:
  *   1. user_roles (handle multiple rows via priority)
- *   2. consultant table → CONSULTANT_JTC
+ *   2. consultant table → CONSULTANT
  *   3. customer table → CUSTOMER
  *
- * @returns role string (e.g. 'TAX_ADVISOR_JTC') or null if no role found
+ * @returns role string (e.g. 'TAX_ADVISOR') or null if no role found
  */
 export async function resolveUserRole(
   supabase: SupabaseClient,
@@ -26,8 +26,8 @@ export async function resolveUserRole(
   if (roles && roles.length > 0) {
     const priority = [
       'TAX_OPERATOR_MASTER',
-      'TAX_ADVISOR_JTC',
-      'CONSULTANT_JTC',
+      'TAX_ADVISOR',
+      'CONSULTANT',
       'TAX_OPERATOR_SUPERVISOR',
       'TAX_OPERATOR_LEAD',
       'TAX_OPERATOR',
@@ -45,7 +45,7 @@ export async function resolveUserRole(
     .select('id')
     .eq('user_id', userId)
     .maybeSingle();
-  if (consultant) return 'CONSULTANT_JTC';
+  if (consultant) return 'CONSULTANT';
 
   const { data: customer } = await supabase
     .from('customer')

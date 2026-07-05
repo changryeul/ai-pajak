@@ -71,8 +71,8 @@ interface NavSection {
   items: NavItem[];
 }
 
-const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
-const consultantRoles = [UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC];
+const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR];
+const consultantRoles = [UserRole.CONSULTANT, UserRole.TAX_ADVISOR];
 // 3-tier operator hierarchy (Phase K-1):
 //   TAX_OPERATOR             - 상담원
 //   TAX_OPERATOR_SUPERVISOR  - 수퍼바이저 (approvals, queue distribution)
@@ -338,7 +338,7 @@ const navItems: NavSection[] = [
       { href: '/company-profile', icon: Building2, labelKey: 'nav.companyProfile', roles: consultantRoles },
       { href: '/counterparties', icon: Users, labelKey: 'nav.counterparties', roles: consultantRoles },
       { href: '/settings/integrations', icon: Activity, labelKey: 'nav.integrations', descKey: 'navDesc.integrations', roles: consultantRoles },
-      { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR_JTC] },
+      { href: '/admin/team', icon: Users, labelKey: 'nav.teamManagement', roles: [UserRole.TAX_ADVISOR] },
       { href: '/settings', icon: Settings, labelKey: 'nav.settings', roles: [...consultantRoles, UserRole.PLATFORM_ADMIN] },
       { href: '/help', icon: Lightbulb, labelKey: 'nav.help', roles: [...consultantRoles, UserRole.PLATFORM_ADMIN] },
     ],
@@ -437,8 +437,8 @@ export function Sidebar() {
               <div className={cn(
                 'inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium',
                 userRole === UserRole.CUSTOMER && 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200',
-                userRole === UserRole.CONSULTANT_JTC && 'bg-gradient-to-r from-green-50 to-emerald-100 text-green-700 border border-green-200',
-                userRole === UserRole.TAX_ADVISOR_JTC && 'bg-gradient-to-r from-purple-50 to-violet-100 text-purple-700 border border-purple-200',
+                userRole === UserRole.CONSULTANT && 'bg-gradient-to-r from-green-50 to-emerald-100 text-green-700 border border-green-200',
+                userRole === UserRole.TAX_ADVISOR && 'bg-gradient-to-r from-purple-50 to-violet-100 text-purple-700 border border-purple-200',
                 userRole === UserRole.PLATFORM_ADMIN && 'bg-gradient-to-r from-orange-50 to-amber-100 text-orange-700 border border-orange-200',
               )}>
                 {t(`nav.role.${userRole}`)}

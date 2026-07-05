@@ -135,4 +135,4 @@ export async function POST(request: NextRequest) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _typeGuard = UserRole.CONSULTANT_JTC;
+const _typeGuard = UserRole.CONSULTANT;

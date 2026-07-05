@@ -473,8 +473,8 @@ Comprehensive audit trail for all tax-related activities, ensuring legal complia
 | Role | Description |
 |------|-------------|
 | `CUSTOMER` | Customer accessing own data |
-| `CONSULTANT_JTC` | JTC consultant processing case |
-| `TAX_ADVISOR_JTC` | JTC tax advisor reviewing case |
+| `CONSULTANT` | JTC consultant processing case |
+| `TAX_ADVISOR` | JTC tax advisor reviewing case |
 
 ### Indexes
 - PRIMARY KEY on `id`
@@ -487,7 +487,7 @@ Comprehensive audit trail for all tax-related activities, ensuring legal complia
 
 ### Constraints
 - CHECK: `activity_type IN ('CREATE', 'UPDATE', 'REVIEW', 'FILE', 'DOWNLOAD', 'DELETE', 'VIEW')`
-- CHECK: `actor_role IN ('CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC')`
+- CHECK: `actor_role IN ('CUSTOMER', 'CONSULTANT', 'TAX_ADVISOR')`
 - CHECK: `actor_organization_id NOT IN (SELECT id FROM platform)` (Hard Rule 3)
 
 ### Triggers

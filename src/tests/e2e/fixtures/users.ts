@@ -40,8 +40,8 @@ const testData = loadTestData();
 /**
  * Role Hierarchy:
  * 1. CUSTOMER - Can create POA, cannot file tax
- * 2. CONSULTANT_JTC - Can calculate tax, cannot file tax
- * 3. TAX_ADVISOR_JTC - Can file tax (with active POA)
+ * 2. CONSULTANT - Can calculate tax, cannot file tax
+ * 3. TAX_ADVISOR - Can file tax (with active POA)
  * 4. PLATFORM_ADMIN - Cannot access tax data (CRITICAL TEST)
  * 5. SYSTEM - Can create billing, cannot access tax data
  */
@@ -62,12 +62,12 @@ export const TEST_USERS = {
   },
 
   /**
-   * CONSULTANT_JTC - Jakarta Tax Consulting consultant
+   * CONSULTANT - Jakarta Tax Consulting consultant
    */
-  CONSULTANT_JTC: {
+  CONSULTANT: {
     email: 'consultant.test@jakartatax.co.id',
     password: 'TestPassword123!',
-    role: 'CONSULTANT_JTC',
+    role: 'CONSULTANT',
     get consultantId() {
       return testData.consultantId || '00000000-0000-0000-0000-000000000020';
     },
@@ -78,12 +78,12 @@ export const TEST_USERS = {
   },
 
   /**
-   * TAX_ADVISOR_JTC - Licensed tax advisor
+   * TAX_ADVISOR - Licensed tax advisor
    */
-  TAX_ADVISOR_JTC: {
+  TAX_ADVISOR: {
     email: 'advisor.test@jakartatax.co.id',
     password: 'TestPassword123!',
-    role: 'TAX_ADVISOR_JTC',
+    role: 'TAX_ADVISOR',
     get consultantId() {
       return testData.taxAdvisorConsultantId || '00000000-0000-0000-0000-000000000021';
     },
@@ -187,7 +187,7 @@ export const TEST_USERS = {
   EXTERNAL_CONSULTANT: {
     email: 'external.consultant@mitrapajak.com',
     password: 'TestPassword123!',
-    role: 'CONSULTANT_JTC',
+    role: 'CONSULTANT',
     fullName: 'Eddy External Consultant',
     partnerId: '00000000-0000-0000-0000-000000000040',
     partnerName: 'PT Mitra Pajak Sentosa',

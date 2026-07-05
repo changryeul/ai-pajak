@@ -1298,8 +1298,8 @@ export type Database = {
       transaction_type: "SUBSCRIPTION" | "TAX_SERVICE"
       user_role_type:
         | "CUSTOMER"
-        | "CONSULTANT_JTC"
-        | "TAX_ADVISOR_JTC"
+        | "CONSULTANT"
+        | "TAX_ADVISOR"
         | "PLATFORM_ADMIN"
         | "SYSTEM"
     }
@@ -1492,8 +1492,8 @@ export const Constants = {
       transaction_type: ["SUBSCRIPTION", "TAX_SERVICE"],
       user_role_type: [
         "CUSTOMER",
-        "CONSULTANT_JTC",
-        "TAX_ADVISOR_JTC",
+        "CONSULTANT",
+        "TAX_ADVISOR",
         "PLATFORM_ADMIN",
         "SYSTEM",
       ],

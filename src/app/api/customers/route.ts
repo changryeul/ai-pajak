@@ -4,7 +4,7 @@
  * GET  /api/customers — List customers
  * POST /api/customers — Create a new customer
  *
- * Only accessible by CONSULTANT_JTC and TAX_ADVISOR_JTC roles.
+ * Only accessible by CONSULTANT and TAX_ADVISOR roles.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -160,7 +160,7 @@ async function handleGetCustomers(req: RequestWithSession): Promise<Response> {
 export async function GET(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole)
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole)
   )(request as RequestWithSession, handleGetCustomers);
 }
 
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('CUSTOMER_CREATE')
   )(request as RequestWithSession, handleCreateCustomer);
 }

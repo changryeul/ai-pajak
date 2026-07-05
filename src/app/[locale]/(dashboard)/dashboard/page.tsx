@@ -131,12 +131,12 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  if (hasRole(session, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC)) {
+  if (hasRole(session, UserRole.CONSULTANT, UserRole.TAX_ADVISOR)) {
     return (
       <ConsultantDashboard
         session={session}
         locale={locale}
-        isTaxAdvisor={session.role === UserRole.TAX_ADVISOR_JTC}
+        isTaxAdvisor={session.role === UserRole.TAX_ADVISOR}
       />
     );
   }

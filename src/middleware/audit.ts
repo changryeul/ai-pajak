@@ -98,7 +98,7 @@ export async function recordAudit(input: {
  *   return composeMiddleware(
  *     requireAuth,
  *     blockPlatformAdmin,
- *     requireRole(UserRole.TAX_ADVISOR_JTC),
+ *     requireRole(UserRole.TAX_ADVISOR),
  *     withAudit('TAX_FILING_SUBMIT')  // ← persists to audit_log
  *   )(request, handler);
  * }

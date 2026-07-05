@@ -89,7 +89,7 @@ erDiagram
     USER_ROLES {
         uuid id PK
         uuid user_id FK
-        varchar role "CUSTOMER | CONSULTANT_JTC | TAX_ADVISOR_JTC | PLATFORM_ADMIN | SYSTEM"
+        varchar role "CUSTOMER | CONSULTANT | TAX_ADVISOR | PLATFORM_ADMIN | SYSTEM"
         uuid organization_id FK "nullable, points to TAX_PARTNER or PLATFORM"
         varchar organization_type "TAX_PARTNER | PLATFORM | NULL"
         boolean is_active
@@ -149,7 +149,7 @@ erDiagram
         uuid tax_filing_id FK "nullable"
         uuid actor_user_id FK "WHO did it"
         uuid actor_organization_id FK "WHICH organization"
-        varchar actor_role "CONSULTANT_JTC | TAX_ADVISOR_JTC | CUSTOMER"
+        varchar actor_role "CONSULTANT | TAX_ADVISOR | CUSTOMER"
         varchar activity_type "CREATE | UPDATE | REVIEW | FILE | DOWNLOAD | DELETE"
         varchar tax_type
         varchar tax_period
@@ -261,8 +261,8 @@ The ERD enforces strict separation between three legal entities:
 | Role | Tax Filing | Tax Documents | POA | Customer Data | Billing | Audit Logs |
 |------|-----------|---------------|-----|---------------|---------|------------|
 | CUSTOMER | Own only | Own only | Own (manage) | Own only | Own only | Own only (read) |
-| CONSULTANT_JTC | Assigned cases | Assigned cases | Partner POAs | Assigned cases | No | Write |
-| TAX_ADVISOR_JTC | All JTC cases | All JTC cases | Partner POAs | All JTC cases | No | Write |
+| CONSULTANT | Assigned cases | Assigned cases | Partner POAs | Assigned cases | No | Write |
+| TAX_ADVISOR | All JTC cases | All JTC cases | Partner POAs | All JTC cases | No | Write |
 | PLATFORM_ADMIN | **NO ACCESS** | **NO ACCESS** | View only | Anonymized only | All | Read only |
 | SYSTEM | No | No | No | No | All | Write |
 

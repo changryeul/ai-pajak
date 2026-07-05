@@ -14,7 +14,7 @@ async function handleProfitability(req: RequestWithSession): Promise<Response> {
   const url = new URL(req.url);
   const { role, userId } = req.session;
 
-  if (role !== 'CONSULTANT_JTC' && role !== 'TAX_ADVISOR_JTC') {
+  if (role !== 'CONSULTANT' && role !== 'TAX_ADVISOR') {
     return NextResponse.json({ error: 'Consultants only' }, { status: 403 });
   }
 

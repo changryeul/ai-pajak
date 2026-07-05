@@ -42,11 +42,11 @@ export default function TeamManagementPage() {
   const [inviteTeam, setInviteTeam] = useState<string>('none');
   const [inviteFullName, setInviteFullName] = useState('');
 
-  const isMaster = session?.role === 'TAX_ADVISOR_JTC';
+  const isMaster = session?.role === 'TAX_ADVISOR';
   const isSupervisor = session?.role === 'TAX_OPERATOR_SUPERVISOR';
 
   const availableRoles = isMaster
-    ? ['TAX_OPERATOR', 'TAX_OPERATOR_SUPERVISOR', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC']
+    ? ['TAX_OPERATOR', 'TAX_OPERATOR_SUPERVISOR', 'CONSULTANT', 'TAX_ADVISOR']
     : isSupervisor
       ? ['TAX_OPERATOR']
       : [];

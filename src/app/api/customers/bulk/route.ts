@@ -22,7 +22,7 @@
  * Returns:
  *   { success, data: { total, created, skipped, errors: [{row, field, message}] } }
  *
- * Auth: CONSULTANT_JTC / TAX_ADVISOR_JTC only.
+ * Auth: CONSULTANT / TAX_ADVISOR only.
  * Each created customer is automatically linked to the caller's consultant.
  */
 
@@ -256,7 +256,7 @@ async function handleBulkCreate(req: RequestWithSession): Promise<Response> {
 export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('CUSTOMER_BULK_IMPORT')
   )(request as RequestWithSession, handleBulkCreate);
 }

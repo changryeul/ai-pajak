@@ -111,8 +111,8 @@ export async function GET(request: NextRequest) {
       total: users.length,
       byRole: {
         CUSTOMER: users.filter(u => u.role === 'CUSTOMER').length,
-        CONSULTANT_JTC: users.filter(u => u.role === 'CONSULTANT_JTC').length,
-        TAX_ADVISOR_JTC: users.filter(u => u.role === 'TAX_ADVISOR_JTC').length,
+        CONSULTANT: users.filter(u => u.role === 'CONSULTANT').length,
+        TAX_ADVISOR: users.filter(u => u.role === 'TAX_ADVISOR').length,
         PLATFORM_ADMIN: users.filter(u => u.role === 'PLATFORM_ADMIN').length,
       },
       active: users.filter(u => u.isActive).length,

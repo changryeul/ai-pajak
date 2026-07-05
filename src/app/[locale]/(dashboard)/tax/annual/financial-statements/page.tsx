@@ -96,7 +96,7 @@ export default function FinancialStatementsPage() {
     finally { setDrillLoading(false); }
   };
 
-  const isConsultant = session?.role === 'CONSULTANT_JTC' || session?.role === 'TAX_ADVISOR_JTC';
+  const isConsultant = session?.role === 'CONSULTANT' || session?.role === 'TAX_ADVISOR';
 
   useEffect(() => {
     if (isConsultant) {

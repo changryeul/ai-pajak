@@ -65,12 +65,12 @@ test.describe('CUSTOMER Dashboard', () => {
 
 test.describe('CONSULTANT Dashboard', () => {
   test('should show consultant dashboard', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('should show consultant sidebar items', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     const sidebar = page.locator('aside').first();
     // Consultant sees the SPT / annual filing section — match id + en + ko labels
     await expect(sidebar.getByText(/Pelaporan Tahunan|SPT Tahunan|Annual Filing/i).first()).toBeVisible({ timeout: 10000 });

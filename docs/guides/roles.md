@@ -1,8 +1,9 @@
-# 사용자·역할·조직 정리
+# 사용자·역할·조직 정리 (이론·설계)
 
 > AI Pajak 의 조직(Organization) 3종, 역할(Role) 9개, 그리고 각 역할이 실제로 무엇을 볼 수 있고 못 보는지 한눈에.
 >
 > 원본 정의: `src/types/auth.ts` (`UserRole`, `OrganizationType`), `CLAUDE.md` §RBAC & Auth.
+> **실제 프로덕션 계정 실사**는 [`accounts.md`](./accounts.md) 참고.
 > 상세 역할별 사용 매뉴얼: `docs/manuals/`.
 > 이 문서는 **P0 (2026-07-03 도메인 모델 교정)** 이후 버전입니다.
 
@@ -62,7 +63,7 @@
   - **(a) 자기 회사 직원의 세무** — 자체 급여 신고 PPh21 등
   - **(b) 자기 클라이언트의 세무 대행** — 자기 회사가 관리하는 다른 회사·개인들의 신고
 - **처리 주체**: 위 두 대상 모두 **자체 처리**. JTC 는 개입하지 않음. SPT 는 자기 이름 (세무컨설팅 법인 이름) 으로 제출.
-- **자격 요건**: 자기 안에 세무사 자격증 소지자 (`TAX_ADVISOR_JTC` role) 최소 1명 필요 (P4 에서 검증 강제 예정).
+- **자격 요건**: 자기 안에 세무사 자격증 소지자 (`TAX_ADVISOR` role) 최소 1명 필요 (P4 에서 검증 강제 예정).
 
 ### 그룹 B — 세무 사무소 직원 (컨설턴트)
 
@@ -70,10 +71,10 @@ Role 이름에 `_JTC` 접미사가 붙어 있지만 **실제로는 JTC 뿐 아�
 
 > ⚠ **로드맵 P3 (예정)**: `_JTC` 접미사가 오해를 유발하므로 `CONSULTANT` / `TAX_ADVISOR` 로 rename 예정.
 
-| Role | 등급 | 주된 역할 |
-|---|---|---|
-| **CONSULTANT_JTC** | 실무 컨설턴트 | 고객 자료 수집·파싱·계산·초안 작성 |
-| **TAX_ADVISOR_JTC** | 세무사 (자격증 소지자) | 승인 + SPT 최종 제출 |
+| Role                | 등급            | 주된 역할                |
+| ------------------- | ------------- | -------------------- |
+| **CONSULTANT**  | 실무 컨설턴트       | 고객 자료 수집·파싱·계산·초안 작성 |
+| **TAX_ADVISOR** | 세무사 (자격증 소지자) | 승인 + SPT 최종 제출       |
 
 두 role 모두 JTC 소속 (내부 직원) 이거나 세무컨설팅 법인 (EXTERNAL) 소속 직원일 수 있습니다.
 
@@ -105,9 +106,9 @@ Role 이름에 `_JTC` 접미사가 붙어 있지만 **실제로는 JTC 뿐 아�
 CUSTOMER (INDIVIDUAL)              → 자기 SPT 개인 신고 화면
 CUSTOMER (COMPANY, 일반)          → 자기 월 신고 + 결산 화면 (JTC 가 실 처리)
 CUSTOMER (COMPANY, 세무컨설팅)   → 위 + 자기 클라이언트 관리 + 자기 사무소 직원 관리
-CONSULTANT_JTC (JTC 소속)        → JTC 담당 개인·일반법인 고객
-CONSULTANT_JTC (EXTERNAL 소속)   → 그 세무컨설팅 법인의 클라이언트·직원  ← 같은 role, 데이터만 격리
-TAX_ADVISOR_JTC                    → 위와 동일 + SPT 최종 제출 버튼
+CONSULTANT (JTC 소속)        → JTC 담당 개인·일반법인 고객
+CONSULTANT (EXTERNAL 소속)   → 그 세무컨설팅 법인의 클라이언트·직원  ← 같은 role, 데이터만 격리
+TAX_ADVISOR                    → 위와 동일 + SPT 최종 제출 버튼
 TAX_OPERATOR                       → JTC 처리 큐만 (EXTERNAL 는 안 나옴)
 TAX_OPERATOR_LEAD                  → 위와 동일
 TAX_OPERATOR_SUPERVISOR            → 위 + 승인 + 팀장 ERP
@@ -120,7 +121,7 @@ SYSTEM                             → 웹훅 뒤에서만 돎, UI 없음
 
 ## 4. 헷갈리기 쉬운 6가지 함정
 
-1. **"CONSULTANT_JTC = JTC 소속" 아님** — 세무컨설팅 법인 (EXTERNAL) 직원도 같은 role. `tax_partner_id` 로만 구분. → P3 에서 rename 예정.
+1. **"CONSULTANT = JTC 소속" 아님** — 세무컨설팅 법인 (EXTERNAL) 직원도 같은 role. `tax_partner_id` 로만 구분. → P3 에서 rename 예정.
 2. **PLATFORM_ADMIN ≠ MASTER** — 관리자 이름이지만 세무 데이터 손도 못 댐. 진짜 최고 권한은 `TAX_OPERATOR_MASTER`.
 3. **CUSTOMER 하나에 3가지 얼굴** — INDIVIDUAL / COMPANY(일반) / COMPANY(세무컨설팅). 마지막은 tax_partner 로도 함께 연결됨.
 4. **세무컨설팅 법인은 JTC 를 안 거침** — 자체 처리. 운영팀 큐에 안 올라감. 자기 이름으로 신고.
@@ -134,8 +135,8 @@ SYSTEM                             → 웹훅 뒤에서만 돎, UI 없음
 | # | Hard rule | 강제 지점 | 관련 role |
 |---|---|---|---|
 | 1 | PLATFORM_ADMIN cannot access customer tax data | 미들웨어 `blockPlatformAdmin` + RLS | PLATFORM_ADMIN |
-| 2 | Consultant must belong to a registered tax_partner (**JTC 또는 EXTERNAL**) | FK + `get_consultant_tax_partner_id()` RLS | CONSULTANT_JTC, TAX_ADVISOR_JTC |
-| 3 | Tax Filing Actor ≠ Platform | `requireRole` on 제출 endpoint | TAX_ADVISOR_JTC (JTC 또는 EXTERNAL) |
+| 2 | Consultant must belong to a registered tax_partner (**JTC 또는 EXTERNAL**) | FK + `get_consultant_tax_partner_id()` RLS | CONSULTANT, TAX_ADVISOR |
+| 3 | Tax Filing Actor ≠ Platform | `requireRole` on 제출 endpoint | TAX_ADVISOR (JTC 또는 EXTERNAL) |
 | 4 | Billing Collector ≠ Service Provider | `requireRole(SYSTEM)` on billing ops | SYSTEM |
 | 5 | Audit Trail Required | `withAudit` 미들웨어 | 모든 role |
 
@@ -147,9 +148,9 @@ SYSTEM                             → 웹훅 뒤에서만 돎, UI 없음
 |---|---|---|
 | 개인 고객 UX | customer.test@example.com | CUSTOMER · INDIVIDUAL |
 | 일반 법인 UX | company.test@example.com | CUSTOMER · COMPANY (일반, JTC 대행) |
-| JTC 내부 컨설턴트 | consultant.test@jakartatax.co.id | CONSULTANT_JTC · JTC |
-| JTC 내부 시니어 | advisor.test@jakartatax.co.id | TAX_ADVISOR_JTC · JTC |
-| **세무컨설팅 법인 소속 컨설턴트** | external.consultant@mitrapajak.com | CONSULTANT_JTC · EXTERNAL (PT Mitra Pajak Sentosa) |
+| JTC 내부 컨설턴트 | consultant.test@jakartatax.co.id | CONSULTANT · JTC |
+| JTC 내부 시니어 | advisor.test@jakartatax.co.id | TAX_ADVISOR · JTC |
+| **세무컨설팅 법인 소속 컨설턴트** | external.consultant@mitrapajak.com | CONSULTANT · EXTERNAL (PT Mitra Pajak Sentosa) |
 | 운영팀 큐 | operator.test@aipajak.com | TAX_OPERATOR · JTC |
 | 승인 흐름 | supervisor.test@aipajak.com | TAX_OPERATOR_SUPERVISOR · JTC |
 | 최고 권한 | master.test@aipajak.com | TAX_OPERATOR_MASTER · JTC |

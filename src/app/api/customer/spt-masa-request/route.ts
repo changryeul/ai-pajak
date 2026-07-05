@@ -132,7 +132,7 @@ async function handleDelete(req: RequestWithSession): Promise<Response> {
 const stack = composeMiddleware(
   requireAuth,
   blockPlatformAdmin,
-  requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC),
+  requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR),
 );
 
 export async function GET(request: NextRequest) {

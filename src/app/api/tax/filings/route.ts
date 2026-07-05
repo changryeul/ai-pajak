@@ -33,7 +33,7 @@ interface CreateFilingRequest {
  *
  * Allowed roles:
  * - CUSTOMER: Can create drafts and request review for their own filings
- * - CONSULTANT_JTC/TAX_ADVISOR_JTC: Can create filings for any customer
+ * - CONSULTANT/TAX_ADVISOR: Can create filings for any customer
  */
 async function handleCreateFiling(request: RequestWithSession): Promise<Response> {
   const { session } = request;
@@ -294,7 +294,7 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
           pagination: { page, limit, total: 0, totalPages: 0 },
         });
       }
-    } else if (role === 'CONSULTANT_JTC') {
+    } else if (role === 'CONSULTANT') {
       // Consultants can see filings for their assigned customers
       const { data: assignedCustomers } = await getSupabaseAdmin()
         .from('customer_consultant')
@@ -313,7 +313,7 @@ async function handleGetFilings(req: RequestWithSession): Promise<Response> {
         });
       }
     }
-    // TAX_ADVISOR_JTC and PLATFORM_ADMIN can see all filings
+    // TAX_ADVISOR and PLATFORM_ADMIN can see all filings
 
     // Apply filters
     if (taxType) {
@@ -401,7 +401,7 @@ export async function GET(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('TAX_FILING_VIEW')
   )(request as RequestWithSession, handleGetFilings);
 }
@@ -410,7 +410,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CUSTOMER' as UserRole, 'CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CUSTOMER' as UserRole, 'CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('TAX_FILING_CREATE')
   )(request as RequestWithSession, handleCreateFiling);
 }

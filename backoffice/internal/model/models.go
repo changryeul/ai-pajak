@@ -12,8 +12,8 @@ type UserRole string
 
 const (
 	RoleCustomer      UserRole = "CUSTOMER"
-	RoleConsultantJTC UserRole = "CONSULTANT_JTC"
-	RoleTaxAdvisorJTC UserRole = "TAX_ADVISOR_JTC"
+	RoleConsultantJTC UserRole = "CONSULTANT"
+	RoleTaxAdvisorJTC UserRole = "TAX_ADVISOR"
 	RolePlatformAdmin UserRole = "PLATFORM_ADMIN"
 	RoleSystem        UserRole = "SYSTEM"
 )

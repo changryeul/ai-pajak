@@ -204,7 +204,7 @@ export async function middleware(request: NextRequest) {
   // guarantees an operator-tier user is never served a /dashboard tree HTML.
   // CRITICAL: the role we pick here MUST match what (dashboard)/operator/
   // layout.tsx + resolveUserRole pick, otherwise dual-role users (e.g. a
-  // tester with both TAX_ADVISOR_JTC and TAX_OPERATOR_SUPERVISOR active)
+  // tester with both TAX_ADVISOR and TAX_OPERATOR_SUPERVISOR active)
   // ping-pong forever between the two paths and Chrome eventually triggers
   // its "Throttling navigation" protection, leaving the page blank.
   //
@@ -219,8 +219,8 @@ export async function middleware(request: NextRequest) {
     const userRoles = new Set((roleRows ?? []).map((r) => r.role as string));
     const PRIORITY = [
       'TAX_OPERATOR_MASTER',
-      'TAX_ADVISOR_JTC',
-      'CONSULTANT_JTC',
+      'TAX_ADVISOR',
+      'CONSULTANT',
       'TAX_OPERATOR_SUPERVISOR',
       'TAX_OPERATOR_LEAD',
       'TAX_OPERATOR',
@@ -238,7 +238,7 @@ export async function middleware(request: NextRequest) {
     if (effective === 'TAX_OPERATOR') {
       return NextResponse.redirect(new URL(`/${locale}/operator/my-work`, request.url));
     }
-    // TAX_ADVISOR_JTC, CONSULTANT_JTC, CUSTOMER, PLATFORM_ADMIN, null → fall
+    // TAX_ADVISOR, CONSULTANT, CUSTOMER, PLATFORM_ADMIN, null → fall
     // through to the regular /dashboard tree (which renders the role-aware
     // client dashboards).
   }

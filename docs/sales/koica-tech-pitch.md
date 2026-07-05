@@ -331,8 +331,8 @@ PENDING → DATA_REVIEW → PENDING_APPROVAL → APPROVED
 | Role | 권한 | 세무 데이터 |
 |---|---|---|
 | CUSTOMER (INDIVIDUAL / COMPANY) | 본인 데이터 R/W | ✅ |
-| CONSULTANT_JTC | 배정된 customer R/W | ✅ |
-| TAX_ADVISOR_JTC | 모든 JTC customer R/W | ✅ |
+| CONSULTANT | 배정된 customer R/W | ✅ |
+| TAX_ADVISOR | 모든 JTC customer R/W | ✅ |
 | TAX_OPERATOR | 운영 큐 R/W | ✅ (직무 범위) |
 | TAX_OPERATOR_SUPERVISOR | 운영 큐 + 결재 | ✅ (직무 범위) |
 | TAX_OPERATOR_MASTER | + 가격 / 통계 / governance | ✅ (직무 범위) |
@@ -345,7 +345,7 @@ PENDING → DATA_REVIEW → PENDING_APPROVAL → APPROVED
 composeMiddleware(
   requireAuth,
   blockPlatformAdmin,
-  requireRole(UserRole.TAX_ADVISOR_JTC),
+  requireRole(UserRole.TAX_ADVISOR),
   withAudit('ACTION_NAME'),
 )
 ```

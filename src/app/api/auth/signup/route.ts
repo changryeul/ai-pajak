@@ -248,11 +248,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Grant TAX_ADVISOR_JTC role (name preserved for backward compat;
+      // Grant TAX_ADVISOR role (name preserved for backward compat;
       // role now covers both JTC staff and external consulting firm reps).
       await admin.from('user_roles').insert({
         user_id: userId,
-        role: 'TAX_ADVISOR_JTC',
+        role: 'TAX_ADVISOR',
         organization_id: partner.id,
         organization_type: 'TAX_PARTNER',
         is_active: true,

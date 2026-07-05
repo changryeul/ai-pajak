@@ -133,8 +133,8 @@ test.describe('SPT 1771 Corporate Tax Return', () => {
     // Login as tax advisor
     advisorToken = await loginAs(
       request,
-      TEST_USERS.TAX_ADVISOR_JTC.email,
-      TEST_USERS.TAX_ADVISOR_JTC.password
+      TEST_USERS.TAX_ADVISOR.email,
+      TEST_USERS.TAX_ADVISOR.password
     );
   });
 

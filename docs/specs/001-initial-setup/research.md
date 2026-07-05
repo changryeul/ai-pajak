@@ -235,7 +235,7 @@
 app.use(
   requireAuth,
   blockPlatformAdmin,  // Constitution III
-  requireRole(['CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC']),
+  requireRole(['CUSTOMER', 'CONSULTANT', 'TAX_ADVISOR']),
   withAudit
 );
 

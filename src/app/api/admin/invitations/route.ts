@@ -6,7 +6,7 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { sendEmail } from '@/lib/notifications/email-service';
 import { loggers } from '@/lib/logger';
 
-type StaffRole = 'TAX_OPERATOR' | 'TAX_OPERATOR_SUPERVISOR' | 'TAX_ADVISOR_JTC' | 'CONSULTANT_JTC';
+type StaffRole = 'TAX_OPERATOR' | 'TAX_OPERATOR_SUPERVISOR' | 'TAX_ADVISOR' | 'CONSULTANT';
 
 /**
  * GET /api/admin/invitations
@@ -17,13 +17,13 @@ type StaffRole = 'TAX_OPERATOR' | 'TAX_OPERATOR_SUPERVISOR' | 'TAX_ADVISOR_JTC' 
  *   → Create invitation + send email
  *
  * Permission matrix:
- *   - TAX_ADVISOR_JTC (Master): can invite any role
+ *   - TAX_ADVISOR (Master): can invite any role
  *   - TAX_OPERATOR_SUPERVISOR: can invite TAX_OPERATOR only
  *   - Others: forbidden
  */
 function canInvite(inviterRole: string, targetRole: StaffRole): boolean {
-  if (inviterRole === 'TAX_ADVISOR_JTC') {
-    return ['TAX_OPERATOR', 'TAX_OPERATOR_SUPERVISOR', 'TAX_ADVISOR_JTC', 'CONSULTANT_JTC'].includes(targetRole);
+  if (inviterRole === 'TAX_ADVISOR') {
+    return ['TAX_OPERATOR', 'TAX_OPERATOR_SUPERVISOR', 'TAX_ADVISOR', 'CONSULTANT'].includes(targetRole);
   }
   if (inviterRole === 'TAX_OPERATOR_SUPERVISOR') {
     return targetRole === 'TAX_OPERATOR';
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['TAX_ADVISOR_JTC', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
+    if (!['TAX_ADVISOR', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['TAX_ADVISOR_JTC', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
+    if (!['TAX_ADVISOR', 'TAX_OPERATOR_SUPERVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -155,8 +155,8 @@ export async function POST(request: NextRequest) {
     // accept-invitation page itself is locale-aware, so the recipient lands on
     // their preferred language.
     const roleLabel =
-      targetRole === 'TAX_ADVISOR_JTC' ? 'Tax Advisor' :
-      targetRole === 'CONSULTANT_JTC' ? 'Consultant' :
+      targetRole === 'TAX_ADVISOR' ? 'Tax Advisor' :
+      targetRole === 'CONSULTANT' ? 'Consultant' :
       targetRole === 'TAX_OPERATOR_SUPERVISOR' ? 'Back-office Supervisor' :
       'Back-office Operator';
 

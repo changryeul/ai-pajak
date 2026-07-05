@@ -6,7 +6,7 @@
  *
  * Asserts:
  *   - Each endpoint returns 200 + success + rows[] for supervisor
- *   - Each endpoint returns 403 for CONSULTANT_JTC
+ *   - Each endpoint returns 403 for CONSULTANT
  *   - customers rows carry the required fields (customerId,
  *     consultantName, riskScore, deadline)
  *   - calendar.daysToDeadline is a finite number

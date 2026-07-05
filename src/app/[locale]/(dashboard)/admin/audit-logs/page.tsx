@@ -35,8 +35,8 @@ const activityColors: Record<string, string> = {
 
 const roleColors: Record<string, string> = {
   CUSTOMER: 'bg-blue-50 text-blue-600',
-  CONSULTANT_JTC: 'bg-green-50 text-green-600',
-  TAX_ADVISOR_JTC: 'bg-purple-50 text-purple-600',
+  CONSULTANT: 'bg-green-50 text-green-600',
+  TAX_ADVISOR: 'bg-purple-50 text-purple-600',
   PLATFORM_ADMIN: 'bg-orange-50 text-orange-600',
   SYSTEM: 'bg-gray-50 text-gray-600',
 };
@@ -111,8 +111,8 @@ export default function AuditLogsPage() {
           <SelectContent>
             <SelectItem value="all">{t('allRoles')}</SelectItem>
             <SelectItem value="CUSTOMER">Customer</SelectItem>
-            <SelectItem value="CONSULTANT_JTC">Consultant</SelectItem>
-            <SelectItem value="TAX_ADVISOR_JTC">Tax Advisor</SelectItem>
+            <SelectItem value="CONSULTANT">Consultant</SelectItem>
+            <SelectItem value="TAX_ADVISOR">Tax Advisor</SelectItem>
             <SelectItem value="PLATFORM_ADMIN">Admin</SelectItem>
             <SelectItem value="SYSTEM">System</SelectItem>
           </SelectContent>

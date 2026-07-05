@@ -23,8 +23,8 @@ paths:
       description: |
         역할별 접근 권한:
         - CUSTOMER: 본인만 조회
-        - CONSULTANT_JTC: 배정된 고객만 조회
-        - TAX_ADVISOR_JTC: 모든 JTC 고객 조회
+        - CONSULTANT: 배정된 고객만 조회
+        - TAX_ADVISOR: 모든 JTC 고객 조회
         - PLATFORM_ADMIN: ❌ 차단
       parameters:
         - $ref: '#/components/parameters/PageParam'

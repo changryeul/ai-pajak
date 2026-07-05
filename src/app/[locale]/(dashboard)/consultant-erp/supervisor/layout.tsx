@@ -5,8 +5,8 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 
 export const dynamic = 'force-dynamic';
 
-// /consultant-erp/supervisor/* — team-lead only. CONSULTANT_JTC /
-// TAX_ADVISOR_JTC pass the parent layout but should NOT see the supervisor
+// /consultant-erp/supervisor/* — team-lead only. CONSULTANT /
+// TAX_ADVISOR pass the parent layout but should NOT see the supervisor
 // console (PDF p.11/11 menus + reassign + quality view etc).
 const ALLOWED_ROLES = ['TAX_OPERATOR_SUPERVISOR'];
 

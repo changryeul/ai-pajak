@@ -28,7 +28,7 @@ const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // Sentinel — far future month so it can't collide with real-data filings.
 const PERIOD = '2099-12';
-// Use a CONSULTANT_JTC login. The route's handler queries the `consultant`
+// Use a CONSULTANT login. The route's handler queries the `consultant`
 // table by session.userId regardless of role, so a plain CUSTOMER login
 // 404s with "Consultant not found" (pre-existing handler quirk, not in
 // scope of this spec). consultant.test is pre-assigned to PT Example

@@ -20,8 +20,8 @@ async function loginAs(page: Page, role: keyof typeof TEST_USERS) {
 const ERP_PAGES = ['dashboard', 'work', 'legality', 'counterparty'] as const;
 
 test.describe('Consultant ERP — P0 skeleton', () => {
-  test('CONSULTANT_JTC can open all 4 ERP pages', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+  test('CONSULTANT can open all 4 ERP pages', async ({ page }) => {
+    await loginAs(page, 'CONSULTANT');
     for (const slug of ERP_PAGES) {
       const res = await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/${slug}`, {
         waitUntil: 'domcontentloaded',
@@ -32,8 +32,8 @@ test.describe('Consultant ERP — P0 skeleton', () => {
     }
   });
 
-  test('TAX_ADVISOR_JTC can open all 4 ERP pages', async ({ page }) => {
-    await loginAs(page, 'TAX_ADVISOR_JTC');
+  test('TAX_ADVISOR can open all 4 ERP pages', async ({ page }) => {
+    await loginAs(page, 'TAX_ADVISOR');
     for (const slug of ERP_PAGES) {
       const res = await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/${slug}`, {
         waitUntil: 'domcontentloaded',
@@ -46,7 +46,7 @@ test.describe('Consultant ERP — P0 skeleton', () => {
 
 test.describe('Consultant ERP — page content checks', () => {
   test('dashboard page renders board section', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/dashboard`, {
       waitUntil: 'networkidle',
       timeout: 30000,
@@ -56,7 +56,7 @@ test.describe('Consultant ERP — page content checks', () => {
   });
 
   test('work page renders 5-step navigator hint', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/work`, {
       waitUntil: 'networkidle',
       timeout: 30000,
@@ -66,7 +66,7 @@ test.describe('Consultant ERP — page content checks', () => {
   });
 
   test('counterparty page renders search panel', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/counterparty`, {
       waitUntil: 'networkidle',
       timeout: 30000,
@@ -76,7 +76,7 @@ test.describe('Consultant ERP — page content checks', () => {
   });
 
   test('legality page renders vault sections', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/legality`, {
       waitUntil: 'networkidle',
       timeout: 30000,
@@ -108,7 +108,7 @@ test.describe('Consultant ERP — API access control', () => {
 
 test.describe('Consultant ERP — board mode discriminator', () => {
   test('consultant board returns CONSULTANT mode', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     const res = await page.request.get(`${BASE_URL}/api/consultant-erp/sessions/board`);
     expect(res.status()).toBe(200);
     const json = await res.json();
@@ -161,7 +161,7 @@ test.describe('Consultant ERP — supervisor UI rendering', () => {
   });
 
   test('consultant dashboard does NOT show supervisor heading', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/dashboard`, {
       waitUntil: 'networkidle',
       timeout: 30000,
@@ -172,7 +172,7 @@ test.describe('Consultant ERP — supervisor UI rendering', () => {
   });
 
   test('work page renders ErpWorkflow start card for consultants', async ({ page }) => {
-    await loginAs(page, 'CONSULTANT_JTC');
+    await loginAs(page, 'CONSULTANT');
     await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/work`, {
       waitUntil: 'networkidle',
       timeout: 30000,

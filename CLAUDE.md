@@ -86,7 +86,7 @@ API routes live at `src/app/api/` (not locale-prefixed).
 API routes use `composeMiddleware()` from `src/middleware/compose.ts` to chain middleware left-to-right:
 
 ```typescript
-composeMiddleware(requireAuth, blockPlatformAdmin, requireRole(UserRole.TAX_ADVISOR_JTC), withAudit('ACTION'))
+composeMiddleware(requireAuth, blockPlatformAdmin, requireRole(UserRole.TAX_ADVISOR), withAudit('ACTION'))
 ```
 
 Pre-built stacks in `compose.ts`: `taxDataRead()`, `taxDataWrite(action)`, `taxFilingSubmit(action)`, `billingOperation(action)`, `platformAdminOperation()`, `customerOperation(action?)`.
@@ -98,7 +98,7 @@ Available middleware: `requireAuth`, `blockPlatformAdmin`, `requireRole(…roles
 ### RBAC & Auth
 Roles defined in `src/types/auth.ts`:
 - `CUSTOMER` (`customer.customer_type` = `INDIVIDUAL` | `COMPANY`) — tax data access
-- `CONSULTANT_JTC`, `TAX_ADVISOR_JTC` — JTC internal AND external tax-firm consultants share these role names; the actual partner is determined by `consultant.tax_partner_id` joined to `tax_partner.partner_type` (`JTC` vs `EXTERNAL`)
+- `CONSULTANT`, `TAX_ADVISOR` — JTC internal AND external tax-firm consultants share these role names; the actual partner is determined by `consultant.tax_partner_id` joined to `tax_partner.partner_type` (`JTC` vs `EXTERNAL`)
 - `PLATFORM_ADMIN` — platform management only, **never** tax data
 - `TAX_OPERATOR`, `TAX_OPERATOR_LEAD`, `TAX_OPERATOR_SUPERVISOR`, `TAX_OPERATOR_MASTER` — operational roles. MASTER is the top tier (Phase K-1.3): platform-wide stats, custom pricing, special-service quotes
 - `SYSTEM` — billing operations only
@@ -158,7 +158,7 @@ async function handleCreate(req: RequestWithSession): Promise<Response> { /* ...
 export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth, blockPlatformAdmin,
-    requireRole(UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.TAX_ADVISOR),
     withAudit('ACTION_NAME')
   )(request as RequestWithSession, handleCreate);
 }
@@ -251,7 +251,7 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 - **데이터 모델**: 10 테이블 (`consultant_session` + 5 자식 / `counterparty_master` + 2 자식 / `legality_document`) + 5 ENUM. 마이그레이션 2종:
   - `20260516000001_consultant_erp.sql` — 테이블 + RLS
   - `20260516000002_consultant_erp_storage.sql` — bucket `consultant-erp-docs` (20MB private) + storage RLS
-- **미들웨어**: `requireConsultantOrSupervisor` — CONSULTANT_JTC / TAX_ADVISOR_JTC / TAX_OPERATOR_SUPERVISOR 만 통과, 그 외 403.
+- **미들웨어**: `requireConsultantOrSupervisor` — CONSULTANT / TAX_ADVISOR / TAX_OPERATOR_SUPERVISOR 만 통과, 그 외 403.
 - **API** (`/api/consultant-erp/`, 13+ endpoint):
   - `sessions/board` · `sessions` · `sessions/[id]` · `sessions/[id]/documents` · `sessions/[id]/documents/upload` (multipart) · `sessions/[id]/parsing` · `sessions/[id]/parse-rows` · `sessions/[id]/parse-rows/message` · `sessions/[id]/calc` · `sessions/[id]/approval` · `sessions/[id]/coretax-record`
   - `counterparty` · `counterparty/[id]` · `counterparty/match` · `counterparty/[id]/candidates`
@@ -298,7 +298,7 @@ The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/pa
 
 1. **PLATFORM_ADMIN cannot access customer tax data** — enforced by `blockPlatformAdmin` middleware + RLS
 2. **Consultant must belong to a registered tax_partner** — FK constraint + RLS scoped via `get_consultant_tax_partner_id()`. JTC and EXTERNAL partners are isolated from each other (Phase B-1, never cross-tenant).
-3. **Tax Filing Actor ≠ Platform** — only `TAX_ADVISOR_JTC` can submit filings (Phase B-2.1 relaxed this to "any active consultant from any tax_partner" so external firms can also file for their own customers)
+3. **Tax Filing Actor ≠ Platform** — only `TAX_ADVISOR` can submit filings (Phase B-2.1 relaxed this to "any active consultant from any tax_partner" so external firms can also file for their own customers)
 4. **Billing Collector ≠ Service Provider** — `SYSTEM` role only for billing ops
 5. **Audit Trail Required** — `withAudit` middleware on all write operations
 
@@ -317,9 +317,9 @@ The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/pa
 |------|------|-------|----------|
 | CUSTOMER | INDIVIDUAL (개인) | customer.test@example.com | TestPassword123! |
 | CUSTOMER | COMPANY (법인) | company.test@example.com | TestPassword123! |
-| CONSULTANT_JTC (JTC 내부) | — | consultant.test@jakartatax.co.id | TestPassword123! |
-| TAX_ADVISOR_JTC (JTC 내부) | — | advisor.test@jakartatax.co.id | TestPassword123! |
-| CONSULTANT_JTC (EXTERNAL — PT Mitra Pajak Sentosa) | — | external.consultant@mitrapajak.com | TestPassword123! |
+| CONSULTANT (JTC 내부) | — | consultant.test@jakartatax.co.id | TestPassword123! |
+| TAX_ADVISOR (JTC 내부) | — | advisor.test@jakartatax.co.id | TestPassword123! |
+| CONSULTANT (EXTERNAL — PT Mitra Pajak Sentosa) | — | external.consultant@mitrapajak.com | TestPassword123! |
 | TAX_OPERATOR | — | operator.test@aipajak.com | TestPassword123! |
 | TAX_OPERATOR_SUPERVISOR | — | supervisor.test@aipajak.com | TestPassword123! |
 | TAX_OPERATOR_MASTER | — | master.test@aipajak.com | TestPassword123! |

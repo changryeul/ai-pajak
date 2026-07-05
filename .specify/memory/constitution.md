@@ -88,12 +88,12 @@ AI Pajak은 모든 시스템 설계, 구현, 사용자 커뮤니케이션에서 
 | 역할 | 세금 계산 | 세금 신고 |
 |------|-----------|-----------|
 | CUSTOMER | 본인 데이터 조회 | JTC를 통해서만 |
-| CONSULTANT_JTC | 전체 (배정된 고객) | 불가 |
-| TAX_ADVISOR_JTC | 전체 (모든 JTC 고객) | 가능 (유효한 POA 필요) |
+| CONSULTANT | 전체 (배정된 고객) | 불가 |
+| TAX_ADVISOR | 전체 (모든 JTC 고객) | 가능 (유효한 POA 필요) |
 | PLATFORM_ADMIN | 불가 | 불가 |
 | SYSTEM | 불가 | 불가 (빌링만 가능) |
 
-**시행 방법**: 라이선스를 보유한 세무사이며 유효한 POA가 있는 TAX_ADVISOR_JTC 역할만 DJP에 신고를 제출할 수 있습니다.
+**시행 방법**: 라이선스를 보유한 세무사이며 유효한 POA가 있는 TAX_ADVISOR 역할만 DJP에 신고를 제출할 수 있습니다.
 
 **근거**: 공인 세무사(Brevet 보유자)만이 고객을 대신하여 법적으로 신고할 수 있습니다.
 
@@ -136,7 +136,7 @@ AI Pajak은 모든 시스템 설계, 구현, 사용자 커뮤니케이션에서 
 
 ### 테스트 표준
 
-- E2E 테스트는 반드시 5가지 역할 유형 (CUSTOMER, CONSULTANT_JTC, TAX_ADVISOR_JTC, PLATFORM_ADMIN, SYSTEM) 모두를 다루어야 합니다
+- E2E 테스트는 반드시 5가지 역할 유형 (CUSTOMER, CONSULTANT, TAX_ADVISOR, PLATFORM_ADMIN, SYSTEM) 모두를 다루어야 합니다
 - 보안 테스트는 반드시 PLATFORM_ADMIN이 세무 엔드포인트에서 차단되는지 검증해야 합니다
 - POA 검증 테스트는 반드시 유효한 POA 없이 신고가 실패하는지 검증해야 합니다
 

@@ -134,7 +134,7 @@ async function handleGetBPE(
           { status: 403 }
         );
       }
-    } else if (role === 'CONSULTANT_JTC' || role === 'TAX_ADVISOR_JTC') {
+    } else if (role === 'CONSULTANT' || role === 'TAX_ADVISOR') {
       const { data: consultant } = await getSupabaseAdmin()
         .from('consultant')
         .select('id')
@@ -245,8 +245,8 @@ export async function GET(
     blockPlatformAdmin, // Block platform admin from accessing tax documents
     requireRole(
       'CUSTOMER' as UserRole,
-      'CONSULTANT_JTC' as UserRole,
-      'TAX_ADVISOR_JTC' as UserRole
+      'CONSULTANT' as UserRole,
+      'TAX_ADVISOR' as UserRole
     ),
     withAudit('BPE_DOWNLOAD')
   )(request as RequestWithSession, (req: RequestWithSession) => handleGetBPE(req, context));

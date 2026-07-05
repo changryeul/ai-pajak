@@ -150,9 +150,9 @@ async function handler(request: RequestWithSession): Promise<Response> {
 
   // Calculate tax partner metrics
   const consultantRoleCount =
-    userRoles?.filter((ur) => ur.role === UserRole.CONSULTANT_JTC).length || 0;
+    userRoles?.filter((ur) => ur.role === UserRole.CONSULTANT).length || 0;
   const taxAdvisorRoleCount =
-    userRoles?.filter((ur) => ur.role === UserRole.TAX_ADVISOR_JTC).length || 0;
+    userRoles?.filter((ur) => ur.role === UserRole.TAX_ADVISOR).length || 0;
 
   const taxPartnerMetrics = {
     totalTaxPartners: taxPartners?.length || 0,

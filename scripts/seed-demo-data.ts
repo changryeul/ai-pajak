@@ -101,7 +101,7 @@ async function main() {
   const consultantUserId = await findOrCreateUser(
     'demo.consultant@mitrapajak.com',
     'Sarah Kim (Demo)',
-    'CONSULTANT_JTC',
+    'CONSULTANT',
   );
 
   const { error: cErr } = await supabase.from('consultant').upsert({

@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: data || [] });
     }
 
-    if (['CONSULTANT_JTC', 'TAX_ADVISOR_JTC'].includes(role || '')) {
+    if (['CONSULTANT', 'TAX_ADVISOR'].includes(role || '')) {
       const admin = getSupabaseAdmin();
       const url = new URL(request.url);
       const customerFilter = url.searchParams.get('customerId');
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC'].includes(role || '')) {
+    if (!['CUSTOMER', 'CONSULTANT', 'TAX_ADVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -246,7 +246,7 @@ export async function PUT(request: NextRequest) {
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (!['CUSTOMER', 'CONSULTANT_JTC', 'TAX_ADVISOR_JTC'].includes(role || '')) {
+    if (!['CUSTOMER', 'CONSULTANT', 'TAX_ADVISOR'].includes(role || '')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

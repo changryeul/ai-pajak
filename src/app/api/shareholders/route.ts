@@ -27,7 +27,7 @@ async function resolveCustomerIdForRequest(
     const own = await getCustomerId(supabase, userId);
     return { customerId: own };
   }
-  if (role === 'CONSULTANT_JTC' || role === 'TAX_ADVISOR_JTC') {
+  if (role === 'CONSULTANT' || role === 'TAX_ADVISOR') {
     if (!providedCustomerId) return { customerId: null, error: 'customerId required for consultants' };
     // Verify consultant has access to this customer
     const { data: consultant } = await admin.from('consultant').select('id').eq('user_id', userId).maybeSingle();

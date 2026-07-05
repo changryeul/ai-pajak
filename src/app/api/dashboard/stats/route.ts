@@ -40,7 +40,7 @@ async function handleGetStats(request: RequestWithSession): Promise<Response> {
   const { role, userId } = session;
 
   try {
-    if (role === UserRole.CONSULTANT_JTC || role === UserRole.TAX_ADVISOR_JTC) {
+    if (role === UserRole.CONSULTANT || role === UserRole.TAX_ADVISOR) {
       return NextResponse.json({
         success: true,
         data: await getConsultantStats(userId),

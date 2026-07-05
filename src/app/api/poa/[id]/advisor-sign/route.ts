@@ -52,7 +52,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .eq('is_active', true)
       .single();
 
-    if (!userRole || userRole.role !== 'TAX_ADVISOR_JTC') {
+    if (!userRole || userRole.role !== 'TAX_ADVISOR') {
       return NextResponse.json(
         { success: false, error: 'Only tax advisors can sign as tax partner' },
         { status: 403 }
@@ -106,12 +106,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       customer_id: poa.customer_id,
       actor_user_id: user.id,
       actor_organization_id: consultant.tax_partner_id,
-      actor_role: 'TAX_ADVISOR_JTC',
+      actor_role: 'TAX_ADVISOR',
       activity_type: 'POA_ACTIVATED',
       activity_details: {
         poa_id: poaId,
         poa_number: signedPOA.poa_number,
-        signer_role: 'TAX_ADVISOR_JTC',
+        signer_role: 'TAX_ADVISOR',
         signer_name: consultant.full_name,
         old_status: 'PENDING_SIGNATURE',
         new_status: 'ACTIVE',

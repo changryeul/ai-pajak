@@ -45,7 +45,7 @@ async function handleExportXml(req: RequestWithSession): Promise<Response> {
       if (!customer || filing.customer_id !== customer.id) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
-    } else if (role === UserRole.CONSULTANT_JTC || role === UserRole.TAX_ADVISOR_JTC) {
+    } else if (role === UserRole.CONSULTANT || role === UserRole.TAX_ADVISOR) {
       const { data: consultant } = await admin.from('consultant').select('id').eq('user_id', userId).single();
       if (!consultant) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT_JTC, UserRole.TAX_ADVISOR_JTC),
+    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR),
     withAudit('SPT_XML_EXPORT')
   )(request as RequestWithSession, handleExportXml);
 }

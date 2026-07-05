@@ -40,9 +40,9 @@ export async function GET() {
       customerInfo = customer;
     }
 
-    // Try to get consultant info if role is CONSULTANT_JTC or TAX_ADVISOR_JTC
+    // Try to get consultant info if role is CONSULTANT or TAX_ADVISOR
     let consultantInfo = null;
-    if (userRole?.role === 'CONSULTANT_JTC' || userRole?.role === 'TAX_ADVISOR_JTC') {
+    if (userRole?.role === 'CONSULTANT' || userRole?.role === 'TAX_ADVISOR') {
       const { data: consultant } = await supabase
         .from('consultant')
         .select('id, full_name, email, phone, license_number, is_active')
@@ -131,7 +131,7 @@ export async function PUT(request: NextRequest) {
           { status: 500 }
         );
       }
-    } else if (userRole?.role === 'CONSULTANT_JTC' || userRole?.role === 'TAX_ADVISOR_JTC') {
+    } else if (userRole?.role === 'CONSULTANT' || userRole?.role === 'TAX_ADVISOR') {
       const { error: updateError } = await supabase
         .from('consultant')
         .update({

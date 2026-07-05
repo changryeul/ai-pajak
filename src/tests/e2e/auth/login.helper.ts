@@ -78,7 +78,7 @@ async function ensureUserExists(
 }
 
 /**
- * Login as a regular user (CUSTOMER, CONSULTANT_JTC, TAX_ADVISOR_JTC, PLATFORM_ADMIN)
+ * Login as a regular user (CUSTOMER, CONSULTANT, TAX_ADVISOR, PLATFORM_ADMIN)
  *
  * @param request - Playwright APIRequestContext
  * @param email - User email

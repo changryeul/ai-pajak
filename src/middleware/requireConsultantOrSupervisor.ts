@@ -3,7 +3,7 @@
  *
  * Used by Consultant ERP endpoints (`/api/consultant-erp/*`) to restrict
  * access to roles that can drive a session through its 5-step workflow:
- *   • CONSULTANT_JTC, TAX_ADVISOR_JTC — create sessions, upload, submit
+ *   • CONSULTANT, TAX_ADVISOR — create sessions, upload, submit
  *   • TAX_OPERATOR_SUPERVISOR — approve/reject sessions for their tax_partner
  *
  * Other roles (CUSTOMER, TAX_OPERATOR, TAX_OPERATOR_LEAD, TAX_OPERATOR_MASTER,
@@ -22,8 +22,8 @@ import { NextResponse } from 'next/server';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 
 const ALLOWED_ROLES = new Set<UserRole>([
-  UserRole.CONSULTANT_JTC,
-  UserRole.TAX_ADVISOR_JTC,
+  UserRole.CONSULTANT,
+  UserRole.TAX_ADVISOR,
   UserRole.TAX_OPERATOR_SUPERVISOR,
 ]);
 

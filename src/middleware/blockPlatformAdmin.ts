@@ -25,7 +25,7 @@ import { loggers } from '@/lib/logger';
  *   return composeMiddleware(
  *     requireAuth,
  *     blockPlatformAdmin,  // ← CRITICAL
- *     requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT_JTC)
+ *     requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT)
  *   )(request, handler);
  * }
  */

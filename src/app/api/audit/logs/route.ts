@@ -54,7 +54,7 @@ async function handleGetLogs(req: RequestWithSession): Promise<Response> {
           data: { logs: [], pagination: { page, limit, total: 0 } },
         });
       }
-    } else if (role === 'CONSULTANT_JTC' || role === 'TAX_ADVISOR_JTC') {
+    } else if (role === 'CONSULTANT' || role === 'TAX_ADVISOR') {
       // Consultants can see logs for their assigned customers
       if (customerId) {
         // Verify consultant has access to this customer

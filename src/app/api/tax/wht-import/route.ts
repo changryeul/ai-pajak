@@ -59,8 +59,8 @@ interface ImportResult {
 
 const PPH23_SUPERVISOR_OK = [
   UserRole.CUSTOMER,
-  UserRole.CONSULTANT_JTC,
-  UserRole.TAX_ADVISOR_JTC,
+  UserRole.CONSULTANT,
+  UserRole.TAX_ADVISOR,
   UserRole.TAX_OPERATOR,
   UserRole.TAX_OPERATOR_SUPERVISOR,
   UserRole.TAX_OPERATOR_MASTER,

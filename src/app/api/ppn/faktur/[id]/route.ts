@@ -35,7 +35,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('FAKTUR_APPROVE'),
   )(request as RequestWithSession, (req) => handleApprove(req, context));
 }
@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole('CONSULTANT_JTC' as UserRole, 'TAX_ADVISOR_JTC' as UserRole),
+    requireRole('CONSULTANT' as UserRole, 'TAX_ADVISOR' as UserRole),
     withAudit('FAKTUR_VOID'),
   )(request as RequestWithSession, (req) => handleVoid(req, context));
 }

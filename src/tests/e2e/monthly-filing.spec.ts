@@ -20,8 +20,8 @@ test.describe('Monthly Filing Flow', () => {
   test.beforeAll(async ({ request }) => {
     consultantToken = await loginAs(
       request,
-      TEST_USERS.CONSULTANT_JTC.email,
-      TEST_USERS.CONSULTANT_JTC.password
+      TEST_USERS.CONSULTANT.email,
+      TEST_USERS.CONSULTANT.password
     );
   });
 

@@ -113,7 +113,7 @@ SPT 1771 생성 (법인)
 
 세금 계산
 
-**Required Role:** CONSULTANT_JTC, TAX_ADVISOR_JTC
+**Required Role:** CONSULTANT, TAX_ADVISOR
 
 **Request:**
 ```json
@@ -132,7 +132,7 @@ SPT 1771 생성 (법인)
 
 세금 신고 제출
 
-**Required Role:** TAX_ADVISOR_JTC (Active POA required)
+**Required Role:** TAX_ADVISOR (Active POA required)
 
 ---
 
@@ -371,7 +371,7 @@ OCR 처리 요청
 {
   "error": "Forbidden",
   "message": "You do not have permission to perform this action",
-  "requiredRoles": ["TAX_ADVISOR_JTC"],
+  "requiredRoles": ["TAX_ADVISOR"],
   "currentRole": "CUSTOMER"
 }
 ```

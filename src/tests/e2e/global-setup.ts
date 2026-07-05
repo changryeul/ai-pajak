@@ -44,7 +44,7 @@ const TEST_USERS = [
   {
     email: 'consultant.test@jakartatax.co.id',
     password: 'TestPassword123!',
-    role: 'CONSULTANT_JTC',
+    role: 'CONSULTANT',
     fullName: 'Jane Smith Consultant',
     consultantData: {
       phone: '+62-812-1111111',
@@ -53,7 +53,7 @@ const TEST_USERS = [
   {
     email: 'advisor.test@jakartatax.co.id',
     password: 'TestPassword123!',
-    role: 'TAX_ADVISOR_JTC',
+    role: 'TAX_ADVISOR',
     fullName: 'Bob Johnson Tax Advisor',
     consultantData: {
       phone: '+62-812-2222222',
@@ -237,7 +237,7 @@ async function globalSetup() {
         }
       }
 
-      if ((user.role === 'CONSULTANT_JTC' || user.role === 'TAX_ADVISOR_JTC') && user.consultantData) {
+      if ((user.role === 'CONSULTANT' || user.role === 'TAX_ADVISOR') && user.consultantData) {
         // Create or update consultant
         const { data: existingConsultant } = await supabaseAdmin
           .from('consultant')
@@ -274,14 +274,14 @@ async function globalSetup() {
           }
         }
 
-        if (user.role === 'CONSULTANT_JTC') {
+        if (user.role === 'CONSULTANT') {
           consultantId = currentConsultantId;
         } else {
           taxAdvisorConsultantId = currentConsultantId;
         }
 
-        // Create tax_advisor record for TAX_ADVISOR_JTC
-        if (user.role === 'TAX_ADVISOR_JTC' && user.taxAdvisorData) {
+        // Create tax_advisor record for TAX_ADVISOR
+        if (user.role === 'TAX_ADVISOR' && user.taxAdvisorData) {
           const { data: existingAdvisor } = await supabaseAdmin
             .from('tax_advisor')
             .select('id')

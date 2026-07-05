@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       const { data: cust } = await admin.from('customer').select('id').eq('user_id', userId).maybeSingle();
       const { data: cons } = await admin.from('consultant').select('id').eq('user_id', userId).maybeSingle();
       if (cust) roles.push(UserRole.CUSTOMER);
-      if (cons) roles.push(UserRole.CONSULTANT_JTC);
+      if (cons) roles.push(UserRole.CONSULTANT);
     }
 
     if (roles.length === 0) {
@@ -55,12 +55,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Pick primary role (prefer consultant/advisor over customer)
-    const role = roles.find(r => r === UserRole.TAX_ADVISOR_JTC)
-      || roles.find(r => r === UserRole.CONSULTANT_JTC)
+    const role = roles.find(r => r === UserRole.TAX_ADVISOR)
+      || roles.find(r => r === UserRole.CONSULTANT)
       || roles.find(r => r === UserRole.CUSTOMER)
       || roles[0];
 
-    const isConsultant = role === UserRole.CONSULTANT_JTC || role === UserRole.TAX_ADVISOR_JTC;
+    const isConsultant = role === UserRole.CONSULTANT || role === UserRole.TAX_ADVISOR;
 
     // Determine scope: CUSTOMER sees own data, CONSULTANT sees assigned clients
     let customerIds: string[] = [];

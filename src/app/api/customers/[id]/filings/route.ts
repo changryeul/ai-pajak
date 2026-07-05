@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Check access
-    if (userRole.role === 'CONSULTANT_JTC' || userRole.role === 'TAX_ADVISOR_JTC') {
+    if (userRole.role === 'CONSULTANT' || userRole.role === 'TAX_ADVISOR') {
       const { data: consultant } = await supabase
         .from('consultant')
         .select('id')
