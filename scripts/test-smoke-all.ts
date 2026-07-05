@@ -39,6 +39,11 @@ const STEPS: Step[] = [
   { name: 'operator queue 11-state flow', file: 'test-operator-queue-flow.ts', optional: true },
   { name: 'billing 3-endpoint smoke', file: 'test-billing-flow.ts', optional: true },
   { name: 'monitoring/Sentry flow', file: 'test-monitoring-flow.ts', optional: true },
+  // --- P1 미배정 고객 큐 (2026-07-03) ---------------------------------
+  // SUPERVISOR only endpoint contract (unauth 401, consultant 403, supervisor 200 + shape).
+  // Signup 후 customer_consultant 없이 남은 개인·일반법인 고객을 SUPERVISOR 가
+  // 배정할 수 있어야 하는 흐름. 회귀가 깨지면 새 가입자가 큐에서 실종됨.
+  { name: 'unassigned customers queue (P1)', file: 'test-unassigned-customers.ts' },
   // --- Admin / config governance ---------------------------------------
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },

@@ -9,16 +9,18 @@
  *  2. CONSULTANT 세션 → GET unassigned-customers → 403
  *  3. Unauth → 401
  *
- * 이 스크립트는 실행 중인 dev/prod 서버가 필요 (기본 http://localhost:3000).
- * ENV: E2E_BASE_URL, SEED_TARGET (prod → .env.production.local, else .env.local)
+ * ENV: TEST_BASE_URL (override), SEED_TARGET (prod → .env.production.local + prod URL).
  */
 import { config as loadEnv } from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 
-const seedTarget = process.env.SEED_TARGET === 'prod' ? '.env.production.local' : '.env.local';
-loadEnv({ path: seedTarget });
+const envFile = process.env.SEED_TARGET === 'prod' ? '.env.production.local' : '.env.local';
+loadEnv({ path: envFile });
 
-const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:3000';
+const BASE_URL =
+  process.env.TEST_BASE_URL
+  || process.env.E2E_BASE_URL
+  || (envFile === '.env.production.local' ? 'https://ai-pajak.vercel.app' : 'http://localhost:3000');
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
