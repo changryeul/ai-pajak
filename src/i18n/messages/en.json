@@ -252,6 +252,7 @@
     "consultantErpWork": "ERP Workflow",
     "consultantErpLegality": "Legality Vault",
     "consultantErpCounterparty": "Counterparty Master",
+    "firmAdmin": "Firm Admin", "firmAdminStaff": "Staff", "firmAdminClients": "Clients", "firmAdminBilling": "Billing",
     "supervisorErp": "Supervisor ERP",
     "supervisorCustomers": "Customers",
     "supervisorRevisions": "Revisions",
@@ -9768,6 +9769,7 @@
     "stackedSingleYearHint": "By-tax-type view shows {year} only. Change the year selector above.",
     "stackedTitle": "{year} Quarterly Tax-Type Breakdown"
   },
+    "firmAdmin": "Firm Admin", "firmAdminStaff": "Staff", "firmAdminClients": "Clients", "firmAdminBilling": "Billing",
   "supervisorErp": {
     "pageTitleCustomers": "Customers Overview",
     "pageDescCustomers": "Monthly / annual filing progress for all team customers. Sort by clicking column headers.",

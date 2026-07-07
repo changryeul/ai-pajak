@@ -252,6 +252,7 @@
     "consultantErpWork": "ERP 业务处理",
     "consultantErpLegality": "法务资料",
     "consultantErpCounterparty": "共同交易方 DB",
+    "firmAdmin": "税务咨询公司管理", "firmAdminStaff": "员工管理", "firmAdminClients": "客户管理", "firmAdminBilling": "计费管理",
     "supervisorErp": "Supervisor ERP",
     "supervisorCustomers": "客户进度",
     "supervisorRevisions": "修订历史",
@@ -9768,6 +9769,7 @@
     "stackedSingleYearHint": "按税目视图仅显示 {year} 年。请在上方切换年度。",
     "stackedTitle": "{year} 年季度税目构成"
   },
+    "firmAdmin": "税务咨询公司管理", "firmAdminStaff": "员工管理", "firmAdminClients": "客户管理", "firmAdminBilling": "计费管理",
   "supervisorErp": {
     "pageTitleCustomers": "客户进度概览",
     "pageDescCustomers": "查看团队所有客户的月度/年度申报进度。点击列标题可排序。",

@@ -252,6 +252,7 @@
     "consultantErpWork": "ERP 業務処理",
     "consultantErpLegality": "リーガル資料",
     "consultantErpCounterparty": "共同取引先DB",
+    "firmAdmin": "税務コンサル法人管理", "firmAdminStaff": "スタッフ管理", "firmAdminClients": "クライアント管理", "firmAdminBilling": "請求・課金",
     "supervisorErp": "Supervisor ERP",
     "supervisorCustomers": "顧客別進行状況",
     "supervisorRevisions": "修正/再提出",
@@ -9768,6 +9769,7 @@
     "stackedSingleYearHint": "税目別ビューは {year} 年のみ表示。年度は上で切り替えてください。",
     "stackedTitle": "{year} 年四半期別の税目構成"
   },
+    "firmAdmin": "税務コンサル法人管理", "firmAdminStaff": "スタッフ管理", "firmAdminClients": "クライアント管理", "firmAdminBilling": "請求・課金",
   "supervisorErp": {
     "pageTitleCustomers": "顧客別進行状況",
     "pageDescCustomers": "チームの全顧客の月次/年次申告進捗。列ヘッダーをクリックして並べ替え。",

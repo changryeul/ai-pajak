@@ -252,6 +252,7 @@
     "consultantErpWork": "Pemrosesan ERP",
     "consultantErpLegality": "Berkas Legalitas",
     "consultantErpCounterparty": "DB Mitra Bersama",
+    "firmAdmin": "Admin Firma", "firmAdminStaff": "Staf", "firmAdminClients": "Klien", "firmAdminBilling": "Tagihan",
     "supervisorErp": "ERP Supervisor",
     "supervisorCustomers": "Pelanggan",
     "supervisorRevisions": "Revisi",
@@ -9768,6 +9769,7 @@
     "stackedSingleYearHint": "Tampilan per jenis pajak hanya menampilkan {year}. Ganti tahun di atas.",
     "stackedTitle": "Komposisi Pajak Triwulanan {year}"
   },
+    "firmAdmin": "Admin Firma", "firmAdminStaff": "Staf", "firmAdminClients": "Klien", "firmAdminBilling": "Tagihan",
   "supervisorErp": {
     "pageTitleCustomers": "Ringkasan Pelanggan",
     "pageDescCustomers": "Progres pelaporan bulanan / tahunan untuk semua pelanggan tim. Urutkan dengan mengklik judul kolom.",

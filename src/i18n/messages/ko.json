@@ -252,6 +252,7 @@
     "consultantErpWork": "ERP 업무처리",
     "consultantErpLegality": "ERP 리갈리티 자료",
     "consultantErpCounterparty": "ERP 공동 거래처 DB",
+    "firmAdmin": "세무컨설팅 법인 관리", "firmAdminStaff": "직원 관리", "firmAdminClients": "클라이언트 관리", "firmAdminBilling": "청구·구독",
     "supervisorErp": "Supervisor ERP",
     "supervisorCustomers": "고객별 진행현황",
     "supervisorRevisions": "수정/재상신 이력",
@@ -9890,6 +9891,7 @@
     "stackedSingleYearHint": "세목별 보기는 {year}년 데이터만 표시합니다. 연도 선택은 위에서 변경하세요.",
     "stackedTitle": "{year}년 분기별 세목 구성"
   },
+    "firmAdmin": "세무컨설팅 법인 관리", "firmAdminStaff": "직원 관리", "firmAdminClients": "클라이언트 관리", "firmAdminBilling": "청구·구독",
   "supervisorErp": {
     "pageTitleCustomers": "고객별 진행현황",
     "pageDescCustomers": "내 팀 고객의 월신고/연신고 진행률을 확인합니다. 고객명, 담당, 진행업무는 클릭해서 정렬할 수 있습니다.",

@@ -188,6 +188,17 @@ const navItems: NavSection[] = [
       { href: '/consultant-erp/counterparty', icon: Users, labelKey: 'nav.consultantErpCounterparty' },
     ],
   },
+  // ── Firm Admin (세무컨설팅 법인 관리자, P6.2 신설) ──
+  {
+    section: 'firm-admin',
+    labelKey: 'nav.firmAdmin',
+    roles: [UserRole.FIRM_ADMIN],
+    items: [
+      { href: '/consultant-erp/firm-admin/staff',    icon: Users,      labelKey: 'nav.firmAdminStaff' },
+      { href: '/consultant-erp/firm-admin/clients',  icon: Building2,  labelKey: 'nav.firmAdminClients' },
+      { href: '/consultant-erp/firm-admin/billing',  icon: CreditCard, labelKey: 'nav.firmAdminBilling' },
+    ],
+  },
   // ── Supervisor ERP (팀장용, supervisor-only) ──
   {
     section: 'supervisor-erp',
