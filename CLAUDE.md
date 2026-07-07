@@ -78,7 +78,8 @@ API routes live at `src/app/api/` (not locale-prefixed).
 - Customer-side: `dashboard`, `tax` (filings/intake), `filings`, `submissions`, `billing`, `documents`, `invoice-capture` (OCR), `assets`, `counterparties`, `company-profile`, `my-profile`, `poa`, `reports`, `chat` (AI 챗봇), `news`, `marketplace`, `referral`, `notifications`, `settings`, `help`
 - Consultant-side: `customers`, `customers/[id]`
 - Operator-side: `operator/*` — 운영팀 큐 UI (review/approval/ebilling/payment/DJP/BPE)
-- Admin-side: `admin/*` — `monitoring` (observability), `master/*` (TAX_OPERATOR_MASTER governance)
+- Admin-side: `admin/*` — `monitoring` (observability), `master/*` (master governance — 신고운영은 TAX_OPERATOR_MASTER, 사업운영 통계·커스텀 가격은 PLATFORM_MASTER 도 허용)
+- Firm-admin-side (P6.2): `consultant-erp/firm-admin/*` — `staff`/`clients`/`billing` (FIRM_ADMIN 전용, EXTERNAL 세무컨설팅 법인 관리자 스캐폴딩)
 
 **Customer dashboard 진입은 `customer.customer_type`(INDIVIDUAL/COMPANY)에 따라 자동 분기**합니다. 같은 `/dashboard` URL이라도 INDIVIDUAL은 개인 SPT 위주 (1770SS/S/1770), COMPANY는 월 신고/결산 wizard 위주의 화면을 받습니다. 이 분기는 server component에서 customer 행을 읽어 결정합니다.
 
@@ -99,13 +100,17 @@ Available middleware: `requireAuth`, `blockPlatformAdmin`, `requireRole(…roles
 Roles defined in `src/types/auth.ts`:
 - `CUSTOMER` (`customer.customer_type` = `INDIVIDUAL` | `COMPANY`) — tax data access
 - `CONSULTANT`, `TAX_ADVISOR` — JTC internal AND external tax-firm consultants share these role names; the actual partner is determined by `consultant.tax_partner_id` joined to `tax_partner.partner_type` (`JTC` vs `EXTERNAL`)
-- `PLATFORM_ADMIN` — platform management only, **never** tax data
-- `TAX_OPERATOR`, `TAX_OPERATOR_LEAD`, `TAX_OPERATOR_SUPERVISOR`, `TAX_OPERATOR_MASTER` — operational roles. MASTER is the top tier (Phase K-1.3): platform-wide stats, custom pricing, special-service quotes
+- `PLATFORM_ADMIN` — platform **technical** management only (dev/server/logs/webhooks), **never** tax data
+- `PLATFORM_MASTER` (P6.1, 2026-07-07) — MonoFlip **business** master: platform-wide stats, pricing/plans, custom pricing, EXTERNAL firm onboarding. Never tax filing operations.
+- `TAX_OPERATOR`, `TAX_OPERATOR_LEAD`, `TAX_OPERATOR_SUPERVISOR`, `TAX_OPERATOR_MASTER` — JTC 신고운영 roles. MASTER is the filing-operations top tier (P6.3 narrowed): Coretax toggle, Tax Code Rule, luxury classifications. 요금·상품·계약은 PLATFORM_MASTER 소관.
+- `FIRM_ADMIN` (P6.2, 2026-07-07) — EXTERNAL 세무컨설팅 법인 관리자: 자기 tenant 안에서 직원 초대·비활성화, TAX_ADVISOR 임명, 클라이언트 배정, 청구·구독 관리. `requireFirmAdmin` 미들웨어 (FIRM_ADMIN role + active consultant row + EXTERNAL partner 3중 검증).
 - `SYSTEM` — billing operations only
+
+**MonoFlip/JTC 분리 (P6, 2026-07-07)**: MonoFlip = 플랫폼 운영사 (PLATFORM_MASTER/PLATFORM_ADMIN), JTC = 세무신고 대행 실무 주체 (CONSULTANT/TAX_ADVISOR/TAX_OPERATOR_*). 상담원은 JTC 직원이지 MonoFlip 직원이 아님 — UI 카피도 "JTC 소속 신고 상담원" 으로 표기. 상세: `docs/guides/domain-model-corrections-20260707.md`, `docs/guides/roles.md`.
 
 Organizations: `PLATFORM_OWNER`, `PLATFORM`, `TAX_PARTNER` (`src/types/auth.ts` → `OrganizationType`).
 
-Multi-tenancy: a single `tax_partner` row can be `JTC` (internal, `is_platform_partner=true`) or `EXTERNAL` (independent tax firm, Phase B-1). RLS scopes consultant data via `get_consultant_tax_partner_id()` so external firms only see their own customers, never JTC's. `customer.user_id` is nullable since Phase B-2 to allow consultants to register customers without an auth user.
+Multi-tenancy: a single `tax_partner` row can be `JTC` (default filing partner, `is_default_filing_partner=true` — P6.3 renamed from `is_platform_partner`) or `EXTERNAL` (independent tax firm, Phase B-1). RLS scopes consultant data via `get_consultant_tax_partner_id()` so external firms only see their own customers, never JTC's. `customer.user_id` is nullable since Phase B-2 to allow consultants to register customers without an auth user.
 
 Auth enforced at **two levels**: API middleware (first gate) + Supabase RLS (final gate).
 
@@ -215,7 +220,7 @@ Three pricing surfaces, each with its own config + endpoint + DB table:
 
 All three follow the same **graceful-degrade** pattern: if the Midtrans Snap call fails (or no PG is configured), the PENDING_PAYMENT row is preserved and the response includes `snapToken: null` + `snapError`. The user can retry from the in-app billing page later. The single Midtrans webhook (`/api/webhooks/midtrans`) routes by order ID prefix to the correct table.
 
-**Master governance** (`TAX_OPERATOR_MASTER` only): `/admin/master` shows MRR/plan distribution/Pro-exceeding customers; `/admin/master/custom-pricing` issues `custom_pricing_quote` rows for customers that need bespoke pricing (Pro 한도 초과, 세무조사, 이전가격 등).
+**Master governance**: `/admin/master` shows MRR/plan distribution/Pro-exceeding customers; `/admin/master/custom-pricing` issues `custom_pricing_quote` rows for customers that need bespoke pricing (Pro 한도 초과, 세무조사, 이전가격 등). P6.1 부터 사업운영 성격의 `stats`/`custom-pricing` 은 `PLATFORM_MASTER` 도 허용, 신고운영 성격 (Coretax toggle, Tax Code Rule, luxury) 은 `TAX_OPERATOR_MASTER` 전용.
 
 **`MIDTRANS_IS_PRODUCTION`** must be set to `'true'` explicitly to point at the real Midtrans endpoints. Default is sandbox — `NODE_ENV` is intentionally NOT used as the signal because Vercel always sets it to `production`.
 
@@ -320,14 +325,15 @@ The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/pa
 | CONSULTANT (JTC 내부) | — | consultant.test@jakartatax.co.id | TestPassword123! |
 | TAX_ADVISOR (JTC 내부) | — | advisor.test@jakartatax.co.id | TestPassword123! |
 | CONSULTANT (EXTERNAL — PT Mitra Pajak Sentosa) | — | external.consultant@mitrapajak.com | TestPassword123! |
+| FIRM_ADMIN (EXTERNAL — PT Mitra Pajak Sentosa) | — | firmadmin.test@mitrapajak.com | TestPassword123! |
 | TAX_OPERATOR | — | operator.test@aipajak.com | TestPassword123! |
 | TAX_OPERATOR_SUPERVISOR | — | supervisor.test@aipajak.com | TestPassword123! |
-| TAX_OPERATOR_MASTER | — | master.test@aipajak.com | TestPassword123! |
+| TAX_OPERATOR_MASTER + PLATFORM_MASTER (겸직) | — | master.test@aipajak.com | TestPassword123! |
 | PLATFORM_ADMIN | — | admin.test@aipajak.com | TestPassword123! |
 
 Seed scripts:
 - `npm run db:seed-test-users` — JTC customers + consultants + admin
-- `SEED_TARGET=prod npx tsx scripts/seed-master-and-external.ts` — Operator team + EXTERNAL tax_partner + its consultant
+- `SEED_TARGET=prod npx tsx scripts/seed-master-and-external.ts` — Operator team (master.test 겸직 포함) + EXTERNAL tax_partner + its consultant + FIRM_ADMIN
 - `SEED_TARGET=prod npx tsx scripts/seed-company-customer.ts` — patches `company.test@example.com` to a COMPANY customer (works around `listUsers` pagination on populated DBs)
 - `SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts` — seeds two approved ID Billing rows (PPh21 5M / PPh23 2M) in `EBILLING_GENERATED` for the INDIVIDUAL test customer so `/tax/billing` shows the design-spec demo
 

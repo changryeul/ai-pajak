@@ -97,7 +97,7 @@ user_roles.role='CUSTOMER' 이지만 customer 테이블에 매칭 없음. 오늘
 |---|---|---|
 | **TAX_OPERATOR** | 16 | operator.test@aipajak.com |
 | **TAX_OPERATOR_SUPERVISOR** | 5 | supervisor.test@aipajak.com |
-| **TAX_OPERATOR_MASTER** | 1 | master.test@aipajak.com |
+| **TAX_OPERATOR_MASTER** | 1 | master.test@aipajak.com (P6.1 부터 PLATFORM_MASTER 겸직) |
 | ~~TAX_OPERATOR_LEAD~~ | 0 | deprecated, 신규 부여 없음 |
 
 **⚠ 주의**: 운영팀 22명 중 상당수는 seed 또는 데모 계정으로 추정. 실 사람 카운트는 이보다 훨씬 적을 것.
@@ -137,9 +137,10 @@ user_roles.role='CUSTOMER' 이지만 customer 테이블에 매칭 없음. 오늘
 | JTC 내부 컨설턴트 | consultant.test@jakartatax.co.id | TestPassword123! |
 | JTC 내부 시니어 | advisor.test@jakartatax.co.id | TestPassword123! |
 | 세무 컨설팅 법인 소속 | external.consultant@mitrapajak.com | TestPassword123! |
+| 세무 컨설팅 법인 관리자 (P6.5 신설) | firmadmin.test@mitrapajak.com | TestPassword123! |
 | 운영팀 큐 | operator.test@aipajak.com | TestPassword123! |
 | 승인 흐름 | supervisor.test@aipajak.com | TestPassword123! |
-| 최고 권한 | master.test@aipajak.com | TestPassword123! |
+| 최고 권한 (TAX_OPERATOR_MASTER + PLATFORM_MASTER 겸직) | master.test@aipajak.com | TestPassword123! |
 | 관리자 (세무 X) | admin.test@aipajak.com | TestPassword123! |
 
 ---

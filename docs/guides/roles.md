@@ -179,6 +179,7 @@ SYSTEM                          → 웹훅 뒤, UI 없음
 | JTC 상담원 | consultant.test@jakartatax.co.id | CONSULTANT · JTC |
 | JTC 세무사 | advisor.test@jakartatax.co.id | TAX_ADVISOR · JTC |
 | 세무컨설팅 법인 컨설턴트 | external.consultant@mitrapajak.com | CONSULTANT · EXTERNAL |
+| 세무컨설팅 법인 관리자 (ERP 관리자) | firmadmin.test@mitrapajak.com | FIRM_ADMIN · EXTERNAL (PT Mitra Pajak Sentosa) |
 | JTC 상담 운영자 | operator.test@aipajak.com | TAX_OPERATOR · JTC |
 | JTC 수퍼바이저 | supervisor.test@aipajak.com | TAX_OPERATOR_SUPERVISOR · JTC |
 | **JTC 신고운영 마스터 + MonoFlip 마스터** (겸직) | master.test@aipajak.com | TAX_OPERATOR_MASTER + PLATFORM_MASTER |
@@ -187,7 +188,7 @@ SYSTEM                          → 웹훅 뒤, UI 없음
 비밀번호는 모두 `TestPassword123!`.
 
 **신규 시나리오** (P6.2 이후):
-- FIRM_ADMIN 테스트 계정 신설 필요 — 예: `firmadmin.test@mitrapajak.com`
+- ✅ FIRM_ADMIN 테스트 계정 신설 완료 (P6.5, 2026-07-07) — `firmadmin.test@mitrapajak.com`, `seed-master-and-external.ts` 로 seed (FIRM_ADMIN role + PT Mitra consultant row)
 
 ---
 
@@ -206,7 +207,7 @@ SYSTEM                          → 웹훅 뒤, UI 없음
 
 ---
 
-## 9. 로드맵 (P0~P5 완료, P6 착수 중)
+## 9. 로드맵 (P0~P6 완료)
 
 | Phase | 범위 | 상태 |
 |---|---|---|
@@ -216,14 +217,14 @@ SYSTEM                          → 웹훅 뒤, UI 없음
 | **P3** | `_JTC` suffix 제거 (CONSULTANT / TAX_ADVISOR 통일) | ✅ 완료 (2026-07-05) |
 | **P4** | `tax_filing.tax_partner_id` + 세무컨설팅 법인 자격증 게이트 | ✅ 완료 (2026-07-03) |
 | **P5** | 매뉴얼 정리 v1 | ✅ 완료 (2026-07-03) |
-| **P6.0** | **roles.md 목표 모델 재작성 (이 문서)** | ✅ 진행 중 (2026-07-07) |
+| **P6.0** | **roles.md 목표 모델 재작성 (이 문서)** | ✅ 완료 (2026-07-07) |
 | **P6.1** | `PLATFORM_MASTER` role 신설 (마이그 + enum + 미들웨어) | ✅ 완료 (2026-07-07) — 마이그 `20260707000001`, `blockPlatformAdmin` 확장, `/admin/master/stats`+`custom-pricing` PLATFORM_MASTER 허용, master.test 겸직 부여 |
 | **P6.2** | `FIRM_ADMIN` role 신설 + ERP 관리자 UI 스캐폴딩 | ✅ 완료 (2026-07-07) — 마이그 `20260707000002`, `requireFirmAdmin` 미들웨어, 3 페이지 뼈대 + 사이드바 + 5-로케일 i18n |
 | **P6.3** | `TAX_OPERATOR_MASTER` 좁힘 + `is_platform_partner` → `is_default_filing_partner` rename | ✅ 완료 (2026-07-07) — 마이그 `20260707000003` + 13 파일 grep-replace. TAX_OPERATOR_MASTER 는 문서상 §2 그룹B 로 이미 좁혀서 명시 |
-| **P6.4** | 매뉴얼 6개 재작성 (모노플립 마스터·ERP 관리자 신설, JTC 카피 정정) | ⏳ 대기 |
-| **P6.5** | `master.test` 계정 겸직 세팅 + memory/CLAUDE.md 정합 | ⏳ 대기 |
+| **P6.4** | 매뉴얼 재작성 (신규 07-firm-admin, 08-platform-master + 기존 4개 정정) | ✅ 완료 (2026-07-07) — `docs/manuals/README.md` 목차 + 01/04/06 정정 + 신규 07/08 신설 |
+| **P6.5** | `master.test` 계정 겸직 세팅 + memory/CLAUDE.md 정합 | ✅ 완료 (2026-07-07) — 겸직은 P6.1 때 prod 반영 확인, seed 스크립트 multi-role 지원 + FIRM_ADMIN 테스트 계정 (`firmadmin.test@mitrapajak.com`) prod seed + CLAUDE.md RBAC/계정 표 정합 |
 
-**P6 총 예상**: 5~6일.
+**P6 완료** (2026-07-07): 모노플립/JTC 분리 role 재편 마감. 남은 후속은 firm-admin 화면 실기능 (P6.2 스캐폴딩의 다음 iteration) 뿐.
 
 ---
 

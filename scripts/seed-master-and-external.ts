@@ -4,11 +4,12 @@
  * Run with: npx tsx scripts/seed-master-and-external.ts
  *
  * Creates:
- * - master.test@aipajak.com           — TAX_OPERATOR_MASTER (Phase K-1.3)
+ * - master.test@aipajak.com           — TAX_OPERATOR_MASTER + PLATFORM_MASTER 겸직 (P6.1)
  * - operator.test@aipajak.com         — TAX_OPERATOR
  * - supervisor.test@aipajak.com       — TAX_OPERATOR_SUPERVISOR
  * - PT Mitra Pajak Sentosa            — EXTERNAL tax_partner (Phase B-1)
  * - external.consultant@mitrapajak.com — consultant of PT Mitra Pajak Sentosa
+ * - firmadmin.test@mitrapajak.com     — FIRM_ADMIN of PT Mitra Pajak Sentosa (P6.5)
  * - external.customer@mitrapajak.com  — sample COMPANY customer scoped to PT Mitra
  *
  * Idempotent: re-running upserts existing rows.
@@ -43,17 +44,20 @@ const PASSWORD = 'TestPassword123!';
 interface TestUser {
   email: string;
   fullName: string;
-  role: string;
+  roles: string[]; // 첫 번째가 primary (user_metadata.role)
 }
 
 const OPERATOR_USERS: TestUser[] = [
-  { email: 'operator.test@aipajak.com',   fullName: 'Olivia Operator',   role: 'TAX_OPERATOR' },
-  { email: 'supervisor.test@aipajak.com', fullName: 'Sam Supervisor',    role: 'TAX_OPERATOR_SUPERVISOR' },
-  { email: 'master.test@aipajak.com',     fullName: 'Mia Master',        role: 'TAX_OPERATOR_MASTER' },
+  { email: 'operator.test@aipajak.com',   fullName: 'Olivia Operator',   roles: ['TAX_OPERATOR'] },
+  { email: 'supervisor.test@aipajak.com', fullName: 'Sam Supervisor',    roles: ['TAX_OPERATOR_SUPERVISOR'] },
+  // P6.1 (2026-07-07): master.test 는 JTC 신고운영 마스터 + MonoFlip 마스터 겸직
+  { email: 'master.test@aipajak.com',     fullName: 'Mia Master',        roles: ['TAX_OPERATOR_MASTER', 'PLATFORM_MASTER'] },
 ];
 
 const EXT_CONSULTANT_EMAIL  = 'external.consultant@mitrapajak.com';
 const EXT_CONSULTANT_NAME   = 'Eddy External Consultant';
+const FIRM_ADMIN_EMAIL      = 'firmadmin.test@mitrapajak.com';
+const FIRM_ADMIN_NAME       = 'Fira Firm Admin';
 const EXT_CUSTOMER_EMAIL    = 'external.customer@mitrapajak.com';
 const EXT_CUSTOMER_NAME     = 'PT Klien Eksternal';
 
@@ -61,6 +65,7 @@ const EXT_CUSTOMER_NAME     = 'PT Klien Eksternal';
 const EXTERNAL_PARTNER_ID    = '00000000-0000-0000-0000-000000000040';
 const EXTERNAL_CONSULTANT_ID = '00000000-0000-0000-0000-000000000041';
 const EXTERNAL_CUSTOMER_ID   = '00000000-0000-0000-0000-000000000042';
+const FIRM_ADMIN_CONSULTANT_ID = '00000000-0000-0000-0000-000000000043';
 
 // JTC platform_id from seed-test-users.ts
 const PLATFORM_ID = '00000000-0000-0000-0000-000000000002';
@@ -85,7 +90,7 @@ async function findUserIdBySignIn(email: string): Promise<string | null> {
   return data.user.id;
 }
 
-async function findOrCreateUser(email: string, fullName: string, role: string) {
+async function findOrCreateUser(email: string, fullName: string, roles: string[]) {
   let userId: string | null = null;
 
   // Try create first — if email already exists, fall back to sign-in lookup.
@@ -93,7 +98,7 @@ async function findOrCreateUser(email: string, fullName: string, role: string) {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { full_name: fullName, role },
+    user_metadata: { full_name: fullName, role: roles[0] },
   });
   if (error) {
     if ((error as { code?: string }).code === 'email_exists') {
@@ -112,19 +117,21 @@ async function findOrCreateUser(email: string, fullName: string, role: string) {
     console.log(`✅ Created auth user: ${email}`);
   }
 
-  // Upsert user_roles
+  // Upsert user_roles (겸직 지원 — master.test 는 2 role)
   await supabase.from('user_roles').delete().eq('user_id', userId);
-  const { error: roleErr } = await supabase.from('user_roles').insert({
-    user_id: userId,
-    role,
-    is_active: true,
-    organization_id: null,
-    organization_type: null,
-  });
+  const { error: roleErr } = await supabase.from('user_roles').insert(
+    roles.map((role) => ({
+      user_id: userId,
+      role,
+      is_active: true,
+      organization_id: null,
+      organization_type: null,
+    })),
+  );
   if (roleErr) {
     console.error(`   ⚠️  user_roles error:`, roleErr.message);
   } else {
-    console.log(`   ✅ role=${role}`);
+    console.log(`   ✅ roles=${roles.join(', ')}`);
   }
 
   return userId;
@@ -133,7 +140,7 @@ async function findOrCreateUser(email: string, fullName: string, role: string) {
 async function seedOperatorTeam() {
   console.log('\n🌱 Operator team (Operator / Supervisor / Master)...');
   for (const u of OPERATOR_USERS) {
-    await findOrCreateUser(u.email, u.fullName, u.role);
+    await findOrCreateUser(u.email, u.fullName, u.roles);
   }
 }
 
@@ -162,7 +169,7 @@ async function seedExternalPartner() {
   const consultantUserId = await findOrCreateUser(
     EXT_CONSULTANT_EMAIL,
     EXT_CONSULTANT_NAME,
-    'CONSULTANT', // role name preserved for backward compat per Phase B-1 doc
+    ['CONSULTANT'], // role name preserved for backward compat per Phase B-1 doc
   );
 
   const { error: cErr } = await supabase.from('consultant').upsert(
@@ -181,6 +188,32 @@ async function seedExternalPartner() {
     return;
   }
   console.log('✅ consultant upserted (linked to PT Mitra)');
+
+  // P6.5 (2026-07-07): FIRM_ADMIN — 세무컨설팅 법인 관리자.
+  // requireFirmAdmin 게이트 요건: FIRM_ADMIN role + active consultant row
+  // + EXTERNAL tax_partner 연결. consultant row 로 tenant 소속을 표현한다.
+  const firmAdminUserId = await findOrCreateUser(
+    FIRM_ADMIN_EMAIL,
+    FIRM_ADMIN_NAME,
+    ['FIRM_ADMIN'],
+  );
+
+  const { error: faErr } = await supabase.from('consultant').upsert(
+    {
+      id: FIRM_ADMIN_CONSULTANT_ID,
+      tax_partner_id: EXTERNAL_PARTNER_ID,
+      user_id: firmAdminUserId,
+      full_name: FIRM_ADMIN_NAME,
+      email: FIRM_ADMIN_EMAIL,
+      is_active: true,
+    },
+    { onConflict: 'id' },
+  );
+  if (faErr) {
+    console.error('❌ firm admin consultant upsert error:', faErr.message);
+    return;
+  }
+  console.log('✅ firm admin upserted (FIRM_ADMIN of PT Mitra)');
 
   // Sample COMPANY customer under this external partner — no auth user needed
   // (Phase B-2 made customer.user_id nullable)
@@ -234,10 +267,11 @@ async function main() {
   console.log('\n✨ Done.\n');
   console.log('Operator team accounts:');
   for (const u of OPERATOR_USERS) {
-    console.log(`  - ${u.email} / ${PASSWORD} (${u.role})`);
+    console.log(`  - ${u.email} / ${PASSWORD} (${u.roles.join(' + ')})`);
   }
   console.log('\nExternal sub-tenant:');
   console.log(`  - ${EXT_CONSULTANT_EMAIL} / ${PASSWORD} (CONSULTANT of PT Mitra Pajak Sentosa)`);
+  console.log(`  - ${FIRM_ADMIN_EMAIL} / ${PASSWORD} (FIRM_ADMIN of PT Mitra Pajak Sentosa)`);
   console.log(`  - sample customer: ${EXT_CUSTOMER_NAME} (no auth user)`);
 }
 
