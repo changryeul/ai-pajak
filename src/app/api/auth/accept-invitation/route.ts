@@ -101,22 +101,30 @@ export async function POST(request: NextRequest) {
 
     const userId = authUser.user.id;
 
-    // Assign role
+    // Assign role. Firm-scoped invitations tie the role to the tax_partner
+    // (same pattern as /api/auth/signup TAX_PARTNER branch).
     await admin.from('user_roles').insert({
       user_id: userId,
       role: inv.role,
       is_active: true,
+      ...(inv.tax_partner_id
+        ? { organization_id: inv.tax_partner_id, organization_type: 'TAX_PARTNER' }
+        : {}),
     });
 
-    // For consultant-like roles, create consultant record linked to JTC tax_partner
-    if (['TAX_ADVISOR', 'CONSULTANT'].includes(inv.role)) {
-      const { data: jtc } = await admin
-        .from('tax_partner')
-        .select('id')
-        .ilike('name', '%jakarta tax%')
-        .maybeSingle();
-
-      const taxPartnerId = jtc?.id;
+    // For consultant-like roles, create consultant record. Firm-scoped
+    // invitations (P6, FIRM_ADMIN 발행) carry tax_partner_id; legacy JTC
+    // invitations fall back to the JTC name lookup.
+    if (['TAX_ADVISOR', 'CONSULTANT', 'FIRM_ADMIN'].includes(inv.role)) {
+      let taxPartnerId: string | null = inv.tax_partner_id ?? null;
+      if (!taxPartnerId) {
+        const { data: jtc } = await admin
+          .from('tax_partner')
+          .select('id')
+          .ilike('name', '%jakarta tax%')
+          .maybeSingle();
+        taxPartnerId = jtc?.id ?? null;
+      }
       if (taxPartnerId) {
         await admin.from('consultant').insert({
           user_id: userId,

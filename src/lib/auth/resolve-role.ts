@@ -27,6 +27,7 @@ export async function resolveUserRole(
     const priority = [
       'TAX_OPERATOR_MASTER',
       'TAX_ADVISOR',
+      'FIRM_ADMIN',
       'CONSULTANT',
       'TAX_OPERATOR_SUPERVISOR',
       'TAX_OPERATOR_LEAD',

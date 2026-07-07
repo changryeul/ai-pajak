@@ -119,9 +119,12 @@ export async function getSessionContext(): Promise<SessionContext | null> {
     .eq('is_active', true);
 
   if (userRoles && userRoles.length > 0) {
-    // Pick best role (prefer TAX_ADVISOR > CONSULTANT > CUSTOMER > others)
+    // Pick best role (prefer TAX_ADVISOR > FIRM_ADMIN > CONSULTANT > others).
+    // FIRM_ADMIN 은 TAX_ADVISOR 아래 — 자격증 founder (TAX_ADVISOR 겸직) 는
+    // 신고 권한을 유지하고, 전용 FIRM_ADMIN 계정은 단일 role 이라 그대로 해석.
     const roleOrder: UserRole[] = [
       UserRole.TAX_ADVISOR,
+      UserRole.FIRM_ADMIN,
       UserRole.CONSULTANT,
       UserRole.TAX_OPERATOR_SUPERVISOR,
       UserRole.TAX_OPERATOR_LEAD,
