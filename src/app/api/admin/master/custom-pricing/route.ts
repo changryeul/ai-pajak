@@ -28,10 +28,10 @@ import { recordAudit } from '@/middleware/audit';
 const VALID_SERVICE_TYPES = ['CORPORATE_PLAN', 'TAX_AUDIT', 'TRANSFER_PRICING', 'ADVISORY', 'OTHER'];
 const VALID_STATUSES = ['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CANCELED'];
 
-async function requireMaster(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
-  const role = await resolveUserRole(supabase, userId);
-  return role === 'TAX_OPERATOR_MASTER';
-}
+// P6.1: 커스텀 가격 발행은 사업(요금) 영역이므로 PLATFORM_MASTER 주 담당.
+// TAX_OPERATOR_MASTER 는 겸직/하위호환용 유지. 각 handler 는 resolveUserRole
+// 를 직접 호출해서 audit 에도 실 role 을 남긴다.
+// (구 requireMaster helper 폐기)
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!await requireMaster(supabase, user.id)) {
+    const role = await resolveUserRole(supabase, user.id);
+    if (role !== 'PLATFORM_MASTER' && role !== 'TAX_OPERATOR_MASTER') {
       return NextResponse.json({ error: 'Master role required' }, { status: 403 });
     }
 
@@ -79,7 +80,8 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!await requireMaster(supabase, user.id)) {
+    const role = await resolveUserRole(supabase, user.id);
+    if (role !== 'PLATFORM_MASTER' && role !== 'TAX_OPERATOR_MASTER') {
       return NextResponse.json({ error: 'Master role required' }, { status: 403 });
     }
 
@@ -157,7 +159,7 @@ export async function POST(request: NextRequest) {
     await recordAudit({
       action: 'BILLING_CREATE',
       actorUserId: user.id,
-      actorRole: 'TAX_OPERATOR_MASTER',
+      actorRole: role,
       customerId,
       details: {
         scope: 'MASTER_CUSTOM_PRICING_CREATE',
@@ -186,7 +188,8 @@ export async function PATCH(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!await requireMaster(supabase, user.id)) {
+    const role = await resolveUserRole(supabase, user.id);
+    if (role !== 'PLATFORM_MASTER' && role !== 'TAX_OPERATOR_MASTER') {
       return NextResponse.json({ error: 'Master role required' }, { status: 403 });
     }
 
@@ -246,7 +249,7 @@ export async function PATCH(request: NextRequest) {
     await recordAudit({
       action: 'BILLING_UPDATE',
       actorUserId: user.id,
-      actorRole: 'TAX_OPERATOR_MASTER',
+      actorRole: role,
       customerId: data?.customer_id ?? null,
       details: {
         scope: 'MASTER_CUSTOM_PRICING_UPDATE',

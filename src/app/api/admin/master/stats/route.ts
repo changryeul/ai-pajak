@@ -1,8 +1,8 @@
 /**
- * Master stats API — Phase K-3.2
+ * Master stats API — Phase K-3.2, updated P6.1 (2026-07-07)
  *
  * GET /api/admin/master/stats
- *   → platform-wide metrics for TAX_OPERATOR_MASTER:
+ *   → platform-wide business metrics:
  *     - total customers (by type and plan)
  *     - MRR (monthly recurring revenue) from active subscriptions
  *     - plan distribution
@@ -10,7 +10,10 @@
  *     - Pro-exceeding customers (candidates for custom quotes)
  *     - AI/processing volume snapshot
  *
- * Requires TAX_OPERATOR_MASTER role.
+ * P6.1: Access widened from TAX_OPERATOR_MASTER (JTC 신고운영) to also allow
+ * PLATFORM_MASTER (MonoFlip 사업운영). Business metrics belong to MonoFlip's
+ * business scope, not JTC's tax filing scope, so they should live under the
+ * platform master. TAX_OPERATOR_MASTER kept during migration for continuity.
  */
 
 import { NextResponse } from 'next/server';
@@ -28,9 +31,11 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const role = await resolveUserRole(supabase, user.id);
-    if (role !== 'TAX_OPERATOR_MASTER') {
+    // P6.1: PLATFORM_MASTER (MonoFlip 사업운영) 도 통계 조회 허용. TAX_OPERATOR_MASTER
+    // 는 하위호환 유지 (겸직 계정용).
+    if (role !== 'TAX_OPERATOR_MASTER' && role !== 'PLATFORM_MASTER') {
       return NextResponse.json(
-        { error: 'Master role required' },
+        { error: 'Master role required (PLATFORM_MASTER or TAX_OPERATOR_MASTER)' },
         { status: 403 }
       );
     }

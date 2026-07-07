@@ -5,13 +5,18 @@ import { loggers } from '@/lib/logger';
 /**
  * CRITICAL SECURITY MIDDLEWARE
  *
- * Blocks PLATFORM_ADMIN from accessing tax data endpoints
+ * Blocks MonoFlip platform roles (PLATFORM_ADMIN + PLATFORM_MASTER) from
+ * accessing tax data endpoints.
+ *
+ * P6.1 (2026-07-07): PLATFORM_MASTER 추가. MonoFlip 사업 최고권한도 세무
+ * 실무 데이터 접근 불가 — 세무신고 대행 자격 없음.
  *
  * This is enforced at TWO levels:
  * 1. API level (this middleware)
  * 2. Database level (RLS policies)
  *
- * HARD RULE #1: PLATFORM_ADMIN can NEVER access customer tax data
+ * HARD RULE #1 + #6: MonoFlip 사이드 role (ADMIN/MASTER) can NEVER access
+ * customer tax data or perform tax filing actions.
  *
  * Use this middleware on ALL endpoints that handle:
  * - tax_filing
@@ -29,33 +34,37 @@ import { loggers } from '@/lib/logger';
  *   )(request, handler);
  * }
  */
+const MONOFLIP_ROLES: UserRole[] = [UserRole.PLATFORM_ADMIN, UserRole.PLATFORM_MASTER];
+
 export async function blockPlatformAdmin(
   request: RequestWithSession,
   handler: (req: RequestWithSession) => Promise<Response>
 ): Promise<Response> {
   const { session } = request;
 
-  if (session.role === UserRole.PLATFORM_ADMIN) {
+  if (MONOFLIP_ROLES.includes(session.role)) {
     // Security logging
     loggers.api.warn({
       userId: session.userId,
       email: session.email,
+      role: session.role,
       url: request.url,
       method: request.method,
       ipAddress: request.headers.get('x-forwarded-for') ||
                  request.headers.get('x-real-ip') ||
                  'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
-    }, 'SECURITY: PLATFORM_ADMIN attempted to access tax data');
+    }, 'SECURITY: MonoFlip role attempted to access tax data');
 
     return NextResponse.json(
       {
         error: 'Forbidden',
-        message: 'Platform administrators cannot access tax data',
+        message: 'MonoFlip platform roles cannot access tax data',
         detail:
           'This endpoint contains sensitive customer tax information. ' +
-          'Platform administrators do not have access to customer tax data. ' +
-          'Only Jakarta Tax Consulting personnel can access tax data.',
+          'MonoFlip platform administrators and business masters do not have ' +
+          'access to customer tax data. Only JTC (Jakarta Tax Consulting) ' +
+          'personnel or the customer themselves can access tax data.',
       },
       { status: 403 }
     );

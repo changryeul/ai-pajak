@@ -23,6 +23,9 @@ export enum UserRole {
   CONSULTANT = 'CONSULTANT',
   TAX_ADVISOR = 'TAX_ADVISOR',
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
+  // P6.1 (2026-07-07): MonoFlip 사업운영 최고권한. 요금·상품·통계·EXTERNAL 입점
+  // 관리. 세무신고 실무 (Coretax·tax_filing insert) 는 절대 불가 (blockPlatformAdmin).
+  PLATFORM_MASTER = 'PLATFORM_MASTER',
   // Operator hierarchy (3 tiers):
   //   TAX_OPERATOR             - 상담원: per-customer queue work
   //   TAX_OPERATOR_SUPERVISOR  - 수퍼바이저: team approvals, queue distribution
