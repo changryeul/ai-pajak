@@ -361,6 +361,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-staff-workflow.ts` — supervisor → operator 배정/평가 흐름
 - `SEED_TARGET=prod npx tsx scripts/test-monitoring-flow.ts` — Sentry / circuit breaker / monitoring dashboard 신호
 - `npx tsx scripts/test-advisory-flow.ts` — `/api/customer/advisory` PKP/UMKM/Tax Treaty 응답 shape + INDIVIDUAL/COMPANY/unauth 3-way 검증
+- `SEED_TARGET=prod npx tsx scripts/test-firm-admin-flow.ts` — FIRM_ADMIN staff/clients/billing 3 endpoint contract (RBAC 403 + invite lifecycle + reassign round-trip, 14 assertions)
 - `SEED_TARGET=prod npx tsx scripts/test-supervisor-erp-p1.ts` — supervisor 11 endpoint × consultant 403 contract (24 assertions)
 - `SEED_TARGET=prod npx tsx scripts/test-supervisor-settings-roundtrip.ts` — `tax_partner.settings` JSONB persist 검증 (flip → restore)
 - `SEED_TARGET=prod npx tsx scripts/seed-and-verify-trend.ts` — 2 MONTHLY 세션 seed → 6-point trend → cleanup
