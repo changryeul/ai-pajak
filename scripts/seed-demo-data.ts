@@ -90,7 +90,7 @@ async function main() {
     name: 'PT Mitra Pajak Demo',
     legal_name: 'PT Mitra Pajak Demo',
     partner_type: 'EXTERNAL',
-    is_platform_partner: false,
+    is_default_filing_partner: false,
     is_active: true,
   }, { onConflict: 'id' });
   if (tpErr) console.error('   ❌ tax_partner:', tpErr.message);

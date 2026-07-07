@@ -77,7 +77,7 @@ async function handle(req: RequestWithSession): Promise<Response> {
       .from('tax_partner')
       .select('id')
       .eq('partner_type', 'JTC')
-      .eq('is_platform_partner', true)
+      .eq('is_default_filing_partner', true)
       .limit(1);
     const jtcPartnerId = (jtcPartners as { id: string }[] | null)?.[0]?.id;
     if (jtcPartnerId) {

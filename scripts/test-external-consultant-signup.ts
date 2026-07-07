@@ -67,7 +67,7 @@ async function run() {
       name: firmName,
       legal_name: firmName,
       partner_type: 'EXTERNAL',
-      is_platform_partner: false,
+      is_default_filing_partner: false,
       tax_license_number: firmLicense,
       email,
       is_active: true,
@@ -114,7 +114,7 @@ async function run() {
   // 6. Verify the full chain
   const { data: verifyConsultant } = await admin
     .from('consultant')
-    .select('id, tax_partner_id, full_name, tax_partner:tax_partner_id(name, partner_type, is_platform_partner)')
+    .select('id, tax_partner_id, full_name, tax_partner:tax_partner_id(name, partner_type, is_default_filing_partner)')
     .eq('user_id', userId)
     .single();
   console.log('\n📊 Verification:');

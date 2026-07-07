@@ -183,7 +183,7 @@ async function seedCompany() {
 async function seedIndividual() {
   console.log(`${SEP}\n▶ customer.test (INDIVIDUAL) — period ${PERIOD}\n${SEP}`);
   // 필요한 FK: jtc tax_partner + platform_owner
-  const { data: jtc } = await admin.from('tax_partner').select('id').eq('partner_type', 'JTC').eq('is_platform_partner', true).limit(1).maybeSingle();
+  const { data: jtc } = await admin.from('tax_partner').select('id').eq('partner_type', 'JTC').eq('is_default_filing_partner', true).limit(1).maybeSingle();
   const { data: platform } = await admin.from('platform_owner').select('id').limit(1).maybeSingle();
   if (!jtc?.id || !platform?.id) {
     console.log(`  ✗ billing skipped — jtc or platform_owner missing`);

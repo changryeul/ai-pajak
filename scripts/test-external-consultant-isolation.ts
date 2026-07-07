@@ -68,7 +68,7 @@ async function createFirm(label: string): Promise<FirmCtx> {
       name: firmName,
       legal_name: firmName,
       partner_type: 'EXTERNAL',
-      is_platform_partner: false,
+      is_default_filing_partner: false,
       email,
       is_active: true,
     })

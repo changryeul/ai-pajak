@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
           name: firmName,
           legal_name: firmName,
           partner_type: 'EXTERNAL',
-          is_platform_partner: false,
+          is_default_filing_partner: false,
           tax_license_number: firmRegistrationNumber || null,
           email,
           phone: phone || null,

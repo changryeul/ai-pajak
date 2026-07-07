@@ -35,7 +35,7 @@
 
 | Type | 이름 | 상태 | 특징 |
 |---|---|---|---|
-| **JTC** | Jakarta Tax Consulting | ✅ 유일 default 대행자 | `is_platform_partner=true`. 개인·일반법인 고객 신고 담당. |
+| **JTC** | Jakarta Tax Consulting | ✅ 유일 default 대행자 | `is_default_filing_partner=true`. 개인·일반법인 고객 신고 담당. |
 | **EXTERNAL** | PT Mitra Pajak Sentosa | ✅ 초기 seed | 격리 검증용. Eddy External Consultant 소속. |
 | **EXTERNAL** | PT Mitra Pajak Demo | ⚠ 확인 필요 | Sarah Kim 이 3명 고객 담당. seed 인지 실 데이터인지 확인 필요. |
 | **EXTERNAL** | PT Repro Firm | ⚠ 스모크 잔재 의심 | Firm Rep (repro.firm.*@example.com) 하나만. load=0. |

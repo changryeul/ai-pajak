@@ -22,7 +22,7 @@
 
 | # | 지금 (2026-07-05 완료) | 원본 문서 정정 |
 |---|---|---|
-| **1** | JTC 가 "default 대행자 겸 플랫폼 파트너" (`is_platform_partner=true`) 로 반쯤 겹침 | **모노플립 = 플랫폼 owner, JTC = 대행자만**. 완전 분리. `is_platform_partner` 개념 재정의 필요. |
+| **1** | JTC 가 "default 대행자 겸 플랫폼 파트너" (옛 `is_platform_partner=true`) 로 반쯤 겹침 | **모노플립 = 플랫폼 owner, JTC = 대행자만**. 완전 분리. 컬럼 rename → `is_default_filing_partner` (P6.3 완료). |
 | **2** | `TAX_OPERATOR_MASTER` 하나가 플랫폼 통계 + 커스텀 가격 + Coretax 토글 + Tax Rule 편집 모두 관리 | 두 개로 쪼갬: **JTC_OPERATION_MASTER** (Coretax·신고 실무 최상) + **PLATFORM_MASTER** (요금·상품·계약, 모노플립 사업 최상) |
 | **3** | `PLATFORM_ADMIN` = 세무 X 관리자 하나 (기술관리자 성격) | 두 개로 쪼갬: **PLATFORM_ADMIN** (기술관리자 유지) + **PLATFORM_MASTER** (사업운영자 신설) |
 | **4** | 세무컨설팅 법인 (EXTERNAL tax_partner) 안에 `CONSULTANT` + `TAX_ADVISOR` 만 | **FIRM_ADMIN 신설** — 직원배정·고객관리·업무배정·청구관리 (ERP 관리자 화면 담당) |
@@ -118,7 +118,7 @@
 - **Q2**: `FIRM_ADMIN` 이 자기 회사 안의 `TAX_ADVISOR` 를 임명·해임할 수 있나? (자격증 소지자 검증과 관계)
 - **Q3**: 지금 프로덕션의 `master.test@aipajak.com` (`TAX_OPERATOR_MASTER`) 을 어떻게 나눌까? `PLATFORM_MASTER` 도 겸직?
 - **Q4**: 사이드바 · UI 카피에 "AI Pajak 운영팀" 이라는 표현이 몇 군데 있음 → "JTC 신고 상담원" 으로 일괄 치환할까?
-- **Q5**: `tax_partner.is_platform_partner=true` (JTC 만) 컬럼 의미 재정의 필요. 유지·삭제·이름 변경?
+- **Q5**: `tax_partner.is_platform_partner=true` (JTC 만) 컬럼 의미 재정의 필요. 유지·삭제·이름 변경? → **답 (2026-07-07)**: `is_default_filing_partner` 로 rename. P6.3 마이그 `20260707000003` 로 완료.
 
 ---
 

@@ -47,7 +47,7 @@
 | **TAX_PARTNER** | 세무 사무소 (2 종 병존) | ① **JTC** (default filing partner) ② **EXTERNAL** (세무컨설팅 법인) |
 
 ### `tax_partner` 두 종류
-- **JTC** — `partner_type='JTC'`, `is_default_filing_partner=true` (P6 rename, 기존 `is_platform_partner`). **한 행만** 존재. 개인·일반법인 고객의 default 대행자.
+- **JTC** — `partner_type='JTC'`, `is_default_filing_partner=true` (P6.3 rename, 기존 이름은 `is_platform_partner`). **한 행만** 존재. 개인·일반법인 고객의 default 대행자.
 - **EXTERNAL** — `partner_type='EXTERNAL'`. 세무컨설팅 법인 자체 등록으로 생기는 독립 tenant. Self-service.
 
 두 tenant 간 데이터는 RLS (`get_consultant_tax_partner_id()`) 로 완벽 격리.
@@ -217,9 +217,9 @@ SYSTEM                          → 웹훅 뒤, UI 없음
 | **P4** | `tax_filing.tax_partner_id` + 세무컨설팅 법인 자격증 게이트 | ✅ 완료 (2026-07-03) |
 | **P5** | 매뉴얼 정리 v1 | ✅ 완료 (2026-07-03) |
 | **P6.0** | **roles.md 목표 모델 재작성 (이 문서)** | ✅ 진행 중 (2026-07-07) |
-| **P6.1** | `PLATFORM_MASTER` role 신설 (마이그 + enum + 미들웨어) | ⏳ 대기 |
-| **P6.2** | `FIRM_ADMIN` role 신설 + ERP 관리자 UI 스캐폴딩 | ⏳ 대기 |
-| **P6.3** | `TAX_OPERATOR_MASTER` 좁힘 + `is_platform_partner` → `is_default_filing_partner` rename | ⏳ 대기 |
+| **P6.1** | `PLATFORM_MASTER` role 신설 (마이그 + enum + 미들웨어) | ✅ 완료 (2026-07-07) — 마이그 `20260707000001`, `blockPlatformAdmin` 확장, `/admin/master/stats`+`custom-pricing` PLATFORM_MASTER 허용, master.test 겸직 부여 |
+| **P6.2** | `FIRM_ADMIN` role 신설 + ERP 관리자 UI 스캐폴딩 | ✅ 완료 (2026-07-07) — 마이그 `20260707000002`, `requireFirmAdmin` 미들웨어, 3 페이지 뼈대 + 사이드바 + 5-로케일 i18n |
+| **P6.3** | `TAX_OPERATOR_MASTER` 좁힘 + `is_platform_partner` → `is_default_filing_partner` rename | ✅ 완료 (2026-07-07) — 마이그 `20260707000003` + 13 파일 grep-replace. TAX_OPERATOR_MASTER 는 문서상 §2 그룹B 로 이미 좁혀서 명시 |
 | **P6.4** | 매뉴얼 6개 재작성 (모노플립 마스터·ERP 관리자 신설, JTC 카피 정정) | ⏳ 대기 |
 | **P6.5** | `master.test` 계정 겸직 세팅 + memory/CLAUDE.md 정합 | ⏳ 대기 |
 
@@ -233,7 +233,7 @@ SYSTEM                          → 웹훅 뒤, UI 없음
 - **Q2 FIRM_ADMIN**: 컨설턴트 초대·자격증 임명·고객 배정·청구 관리 모두 가능
 - **Q3 master.test**: PLATFORM_MASTER + TAX_OPERATOR_MASTER 겸직
 - **Q4 UI 카피**: §8 표 그대로 일괄 치환
-- **Q5 컬럼 rename**: `is_platform_partner` → `is_default_filing_partner`
+- **Q5 컬럼 rename**: `is_default_filing_partner` → `is_default_filing_partner`
 
 ---
 

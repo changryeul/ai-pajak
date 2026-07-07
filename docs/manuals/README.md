@@ -164,7 +164,7 @@ CLAUDE.md에 정의된 **협상 불가능한 보안 원칙**입니다. 모든 �
 |---|---|
 | `PLATFORM_OWNER` | AI Pajak 소유사 |
 | `PLATFORM` | 플랫폼 운영 조직 |
-| `TAX_PARTNER` | 세무 법인 — JTC (내부, `is_platform_partner=true`) 또는 EXTERNAL (세무 컨설팅 법인, self-service tenant) |
+| `TAX_PARTNER` | 세무 법인 — JTC (내부, `is_default_filing_partner=true`) 또는 EXTERNAL (세무 컨설팅 법인, self-service tenant) |
 
 ---
 

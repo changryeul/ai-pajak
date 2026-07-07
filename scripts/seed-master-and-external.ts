@@ -147,7 +147,7 @@ async function seedExternalPartner() {
       name: 'PT Mitra Pajak Sentosa',
       legal_name: 'PT Mitra Pajak Sentosa',
       partner_type: 'EXTERNAL',
-      is_platform_partner: false,
+      is_default_filing_partner: false,
       is_active: true,
     },
     { onConflict: 'id' },

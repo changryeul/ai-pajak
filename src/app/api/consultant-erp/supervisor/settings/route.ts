@@ -115,7 +115,7 @@ async function getPlatformPartner() {
   let { data } = await admin
     .from('tax_partner')
     .select('id, name, legal_name, npwp, email, phone, address, partner_type, is_active, settings')
-    .eq('is_platform_partner', true)
+    .eq('is_default_filing_partner', true)
     .eq('is_active', true)
     .limit(1)
     .maybeSingle();

@@ -22,20 +22,33 @@ const admin = createClient(
 const APPLY = process.argv.includes('--apply');
 const EMAIL = 'master.test@aipajak.com';
 
-async function main() {
-  const { data: users, error: listErr } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-  if (listErr) {
-    console.error('listUsers failed:', listErr.message);
-    console.error('Falling back to email search via SQL raw not available; aborting.');
-    process.exit(1);
+async function findUserIdByExistingRole(): Promise<string | null> {
+  // listUsers 가 prod 에서 500 나는 이슈 (populated DB pagination) 우회.
+  // master.test 는 기존에 TAX_OPERATOR_MASTER 를 이미 갖고 있으므로 그 row
+  // 에서 user_id 를 찾는다.
+  const { data: existingMaster } = await admin
+    .from('user_roles')
+    .select('user_id')
+    .eq('role', 'TAX_OPERATOR_MASTER')
+    .eq('is_active', true);
+  if (!existingMaster || existingMaster.length === 0) return null;
+  // 후보 uid 별로 email 확인
+  for (const row of existingMaster) {
+    const { data: profile } = await admin.auth.admin.getUserById(row.user_id);
+    if (profile?.user?.email === EMAIL) return row.user_id;
   }
-  const user = (users?.users || []).find(u => u.email === EMAIL);
-  if (!user) {
-    console.error(`user ${EMAIL} not found in auth.users`);
+  return null;
+}
+
+async function main() {
+  const uid = await findUserIdByExistingRole();
+  if (!uid) {
+    console.error(`master.test with TAX_OPERATOR_MASTER not found via role-back-lookup`);
     process.exit(1);
   }
 
-  console.log(`[user] ${EMAIL}  uid=${user.id}`);
+  console.log(`[user] ${EMAIL}  uid=${uid}`);
+  const user = { id: uid } as { id: string };
 
   const { data: existing } = await admin
     .from('user_roles')

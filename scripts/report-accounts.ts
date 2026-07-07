@@ -18,11 +18,11 @@ async function main() {
   // (1) tax_partner 목록
   const { data: partners } = await admin
     .from('tax_partner')
-    .select('id, name, partner_type, is_platform_partner, is_active')
+    .select('id, name, partner_type, is_default_filing_partner, is_active')
     .order('partner_type');
   console.log('=== TAX PARTNER 목록 ===');
   (partners || []).forEach(p => {
-    console.log(`   [${p.partner_type}${p.is_platform_partner ? '·default' : ''}] ${p.name}  ${p.is_active ? '' : '(비활성)'}`);
+    console.log(`   [${p.partner_type}${p.is_default_filing_partner ? '·default' : ''}] ${p.name}  ${p.is_active ? '' : '(비활성)'}`);
   });
 
   // (2) user_roles 전체
