@@ -1,8 +1,10 @@
-# 플랫폼 관리자(Platform Admin) 매뉴얼
+# 플랫폼 관리자 (MonoFlip 기술 관리자, PLATFORM_ADMIN) 매뉴얼
 
-> **대상**: AI Pajak의 **플랫폼·인프라·사용자·청구 관리**를 담당하는 `PLATFORM_ADMIN` 계정 보유자
+> **대상**: AI Pajak 의 **플랫폼·인프라·사용자·청구 관리**를 담당하는 `PLATFORM_ADMIN` 계정 보유자 (MonoFlip 기술팀)
 >
-> **매우 중요한 제약**: 플랫폼 관리자는 **고객의 세무 데이터에 접근할 수 없습니다.** 이것은 협상 불가능한 보안 규칙입니다 (CLAUDE.md Hard Rule #1).
+> **매우 중요한 제약**: 플랫폼 관리자는 **고객의 세무 데이터에 접근할 수 없습니다.** 이것은 협상 불가능한 보안 규칙입니다 (Hard Rule #1 + #6 — P6.1 신설).
+>
+> **PLATFORM_MASTER 와의 차이**: MonoFlip 사업 운영 최고권한 (요금·상품·통계·계약) 은 **[PLATFORM_MASTER](./08-platform-master.md)** 별도 role 입니다. PLATFORM_ADMIN 은 **기술관리자** (개발·서버·로그·장애·결제웹훅) 성격.
 >
 > - 볼 수 있는 것: 사용자 계정, 역할, 조직, 구독, 결제 상태, 시스템 상태, 감사 로그, AI 사용량, 세율 설정
 > - 볼 수 없는 것: 고객 NPWP 상세 데이터, 신고서 내용, 급여 정보, 재무 데이터, Faktur Pajak 내용

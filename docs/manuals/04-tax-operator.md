@@ -1,11 +1,11 @@
-# 운영팀(Tax Operator) 매뉴얼
+# JTC 신고 운영팀 매뉴얼
 
-> **대상**: AI Pajak 백오피스에서 고객이 제출한 세무 신고 건을 **DJP에 실제로 제출**하는 업무를 담당하는 **JTC 운영팀** 구성원
+> **대상**: AI Pajak 백오피스에서 고객이 제출한 세무 신고 건을 **DJP에 실제로 제출**하는 업무를 담당하는 **JTC 소속 신고 상담원** 구성원. MonoFlip 운영팀 아님. Coretax 접속 자격 있는 JTC 소속만.
 >
 > **세 가지 레벨**:
 > - **TAX_OPERATOR** — 큐 처리, 자료 검토 (주니어/상담원)
 > - **TAX_OPERATOR_SUPERVISOR** — 승인 권한, 업무 분배, 팀 통계
-> - **TAX_OPERATOR_MASTER** — 플랫폼 전체 통계, 맞춤 가격 발행, 특수 서비스(세무조사·TP) 견적
+> - **TAX_OPERATOR_MASTER** — 🔒 Coretax API 토글, Tax Code Rule 편집, Luxury Classification 편집 (JTC 신고운영 최고권한). ⚠ P6.1 (2026-07-07) 이후 **플랫폼 통계·요금·상품·커스텀 견적은 PLATFORM_MASTER** 로 이관됨 — [`08-platform-master.md`](./08-platform-master.md) 참조.
 
 ## 1. 운영팀이 담당하는 것
 

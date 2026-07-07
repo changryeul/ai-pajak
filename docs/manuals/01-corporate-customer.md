@@ -6,7 +6,7 @@
 
 ## 1. AI Pajak이 무엇을 해 주는가
 
-AI Pajak은 Jakarta Tax Consulting(JTC)이 운영하는 **인도네시아 세무 자동화 플랫폼**입니다. 법인 고객은 이 시스템에서 다음을 한 곳에서 처리합니다.
+AI Pajak 은 **MonoFlip 이 운영하는 인도네시아 세무 자동화 플랫폼** 입니다. 법인 고객이 자료를 입력·업로드하면 **Jakarta Tax Consulting (JTC) 소속 세무사·상담원이 대신 세무신고를 처리** 합니다 (Assisted DIY Filing 모델). 법인 고객은 이 시스템에서 다음을 한 곳에서 처리합니다.
 
 - 매월 원천세(PPh21/23/4(2))와 부가세(PPN) 신고
 - 급여 계산서(Payslip) 자동 생성 및 BPJS 계산
