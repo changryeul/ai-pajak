@@ -135,6 +135,13 @@ function parseMigration(path: string, file: string): ParseResult {
     const dropColRe = /DROP\s+COLUMN\s+(?:IF\s+EXISTS\s+)?["`]?(\w+)["`]?/gi;
     while ((cm = dropColRe.exec(body)) !== null) decl.dropped.add(cm[1].toLowerCase());
 
+    // RENAME COLUMN old TO new = drop(old) + add(new)  (P6.3 rename 대응)
+    const renameColRe = /RENAME\s+(?:COLUMN\s+)?["`]?(\w+)["`]?\s+TO\s+["`]?(\w+)["`]?/gi;
+    while ((cm = renameColRe.exec(body)) !== null) {
+      decl.dropped.add(cm[1].toLowerCase());
+      decl.columns.add(cm[2].toLowerCase());
+    }
+
     // CHECK constraints (and any DROP CONSTRAINT)
     let chk: RegExpExecArray | null;
     const checkAddRe = new RegExp(CHECK_ADD_RE.source, CHECK_ADD_RE.flags);
