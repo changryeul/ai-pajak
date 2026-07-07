@@ -175,8 +175,9 @@ Seed 스크립트:
 | **P3** | Role name `_JTC` suffix 제거 (`CONSULTANT` / `TAX_ADVISOR` 로 통일) | ✅ 완료 (2026-07-05) — 마이그 `20260705000001_role_rename_consultant_tax_advisor.sql` + 179 파일 grep-replace + Vercel/Supabase 동시 배포. Drift 0 · P1 회귀 3/3 PASS 검증 |
 | **P4** | `tax_filing.tax_partner_id` 컬럼 + 세무컨설팅 법인 자격증 소지자 검증 | ✅ 완료 (2026-07-03) — 마이그 `20260703000001_tax_filing_tax_partner_id.sql` + `/api/tax/file` gate. 마이그 배포는 사용자 push 대기 |
 | **P5** | 매뉴얼 최종 정리 | ✅ 완료 (2026-07-03) — `docs/manuals/README.md`, `04-tax-operator.md` (§5.0 미배정 큐), `05-jtc-consultant.md` (naming 노트) 반영 |
+| **P6** | **모노플립/JTC 분리 + `PLATFORM_MASTER` / `FIRM_ADMIN` 신설** | ⏸ 대기 (2026-07-07 지시) — 참조: [`domain-model-corrections-20260707.md`](./domain-model-corrections-20260707.md). 별도 세션에서 착수. |
 
-**총 예상**: 3.5일.
+**P0~P5 총 소요**: 3.5일. **P6 예상**: 5~6일.
 
 ---
 
