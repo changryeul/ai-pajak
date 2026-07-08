@@ -61,3 +61,4 @@ public/logo.old.*
 
 # Claude Code per-machine settings — token cache, not for repo
 .claude/settings.local.json
+.gstack/
