@@ -93,14 +93,14 @@ export default function RegisterPage() {
           idNumber: String(digits).replace(/\D/g, '').slice(0, picked === 'NPWP' ? 15 : 16),
         }));
         const conf = Math.round((data.data.confidence || 0) * 100);
-        setOcrMsg({ type: 'ok', text: `자동 인식 완료 (${conf}%)` });
+        setOcrMsg({ type: 'ok', text: t('registerOcr.done', { conf }) });
       } else if (res.status === 429) {
-        setOcrMsg({ type: 'err', text: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.' });
+        setOcrMsg({ type: 'err', text: t('registerOcr.tooMany') });
       } else {
-        setOcrMsg({ type: 'err', text: '인식 실패 — 직접 입력해 주세요.' });
+        setOcrMsg({ type: 'err', text: t('registerOcr.failed') });
       }
     } catch {
-      setOcrMsg({ type: 'err', text: '인식 실패 — 직접 입력해 주세요.' });
+      setOcrMsg({ type: 'err', text: t('registerOcr.failed') });
     } finally {
       setOcrBusy(false);
     }
@@ -225,8 +225,8 @@ export default function RegisterPage() {
                       <Sparkles className="h-4 w-4 text-emerald-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-900">NPWP/NIK 사진으로 자동 채우기 (선택)</p>
-                      <p className="text-[11px] text-gray-600 mt-0.5">사진 한 장 → 이름·식별번호 자동 인식.</p>
+                      <p className="text-xs font-semibold text-gray-900">{t('registerOcr.titleIndividual')}</p>
+                      <p className="text-[11px] text-gray-600 mt-0.5">{t('registerOcr.descIndividual')}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <Button
                           type="button"
@@ -237,7 +237,7 @@ export default function RegisterPage() {
                           className="h-8 text-xs"
                         >
                           {ocrBusy ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Camera className="h-3 w-3 mr-1" />}
-                          사진 업로드
+                          {t('registerOcr.upload')}
                         </Button>
                         <input
                           ref={ocrFileRef}

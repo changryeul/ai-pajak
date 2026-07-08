@@ -329,7 +329,7 @@ export default function CompanyProfilePage() {
       {isConsultant && customers.length > 0 && (
         <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <label className="text-xs font-bold uppercase tracking-wide text-slate-500">
-            고객 선택
+            {t('customerPicker')}
           </label>
           <select
             value={selectedCustomerId}

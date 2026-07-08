@@ -84,14 +84,14 @@ export default function CompanyRegisterPage() {
         if (data.data.name) setCompanyName((prev) => prev || data.data.name);
         if (data.data.address) setAddress((prev) => prev || data.data.address);
         const conf = Math.round((data.data.confidence || 0) * 100);
-        setOcrMsg({ type: 'ok', text: `NPWP 자동 인식 완료 (${conf}%)` });
+        setOcrMsg({ type: 'ok', text: t('ocrDone', { conf }) });
       } else if (res.status === 429) {
-        setOcrMsg({ type: 'err', text: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.' });
+        setOcrMsg({ type: 'err', text: t('ocrTooMany') });
       } else {
-        setOcrMsg({ type: 'err', text: 'NPWP 인식 실패 — 직접 입력해 주세요.' });
+        setOcrMsg({ type: 'err', text: t('ocrFailed') });
       }
     } catch {
-      setOcrMsg({ type: 'err', text: 'NPWP 인식 실패 — 직접 입력해 주세요.' });
+      setOcrMsg({ type: 'err', text: t('ocrFailed') });
     } finally {
       setOcrBusy(false);
     }
@@ -346,9 +346,9 @@ export default function CompanyRegisterPage() {
                       <Sparkles className="h-4 w-4 text-emerald-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-900">NPWP 사진으로 자동 채우기 (선택)</p>
+                      <p className="text-xs font-semibold text-gray-900">{t('ocrTitle')}</p>
                       <p className="text-[11px] text-gray-600 mt-0.5">
-                        법인 NPWP 카드 사진 한 장 → 회사명·NPWP·주소 자동 인식.
+                        {t('ocrDesc')}
                       </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <Button
@@ -360,7 +360,7 @@ export default function CompanyRegisterPage() {
                           className="h-8 text-xs"
                         >
                           {ocrBusy ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Camera className="h-3 w-3 mr-1" />}
-                          NPWP 사진 업로드
+                          {t('ocrUpload')}
                         </Button>
                         <input
                           ref={ocrFileRef}
@@ -529,17 +529,17 @@ export default function CompanyRegisterPage() {
                   <p className="text-[11px] text-gray-500 mt-0.5">{t('bizCategoryHint')}</p>
                   <div className="mt-2 grid grid-cols-2 gap-1.5">
                     {[
-                      { v: 'SERVICE',           ko: '서비스',        id: 'Jasa',                tax: 'PPh 23 2%' },
-                      { v: 'TRADING',           ko: '도소매',        id: 'Perdagangan',         tax: 'PPh 22' },
-                      { v: 'MANUFACTURING',     ko: '제조',          id: 'Manufaktur',          tax: 'PPh 22' },
-                      { v: 'CONSTRUCTION',      ko: '건설',          id: 'Konstruksi',          tax: 'PPh 4(2)' },
-                      { v: 'REAL_ESTATE',       ko: '부동산',        id: 'Real Estat',          tax: 'PPh 4(2) 2.5%' },
-                      { v: 'FNB_RESTAURANT',    ko: '식음료(매장)',  id: 'Restoran',            tax: 'PB1' },
-                      { v: 'FNB_CATERING',      ko: '케이터링',      id: 'Katering',            tax: 'PPh 23 2%' },
-                      { v: 'TRANSPORTATION',    ko: '운송',          id: 'Transportasi',        tax: 'PPh 15' },
-                      { v: 'MINING',            ko: '광업',          id: 'Pertambangan',        tax: 'PPh 22 Mining' },
-                      { v: 'DIGITAL_PLATFORM',  ko: '디지털 플랫폼', id: 'Platform Digital',    tax: 'PPN PMSE' },
-                      { v: 'OTHER',             ko: '기타',          id: 'Lainnya',             tax: '—' },
+                      { v: 'SERVICE',           id: 'Jasa',                tax: 'PPh 23 2%' },
+                      { v: 'TRADING',           id: 'Perdagangan',         tax: 'PPh 22' },
+                      { v: 'MANUFACTURING',     id: 'Manufaktur',          tax: 'PPh 22' },
+                      { v: 'CONSTRUCTION',      id: 'Konstruksi',          tax: 'PPh 4(2)' },
+                      { v: 'REAL_ESTATE',       id: 'Real Estat',          tax: 'PPh 4(2) 2.5%' },
+                      { v: 'FNB_RESTAURANT',    id: 'Restoran',            tax: 'PB1' },
+                      { v: 'FNB_CATERING',      id: 'Katering',            tax: 'PPh 23 2%' },
+                      { v: 'TRANSPORTATION',    id: 'Transportasi',        tax: 'PPh 15' },
+                      { v: 'MINING',            id: 'Pertambangan',        tax: 'PPh 22 Mining' },
+                      { v: 'DIGITAL_PLATFORM',  id: 'Platform Digital',    tax: 'PPN PMSE' },
+                      { v: 'OTHER',             id: 'Lainnya',             tax: '—' },
                     ].map((c) => {
                       const active = businessCategory === c.v;
                       return (
@@ -554,8 +554,8 @@ export default function CompanyRegisterPage() {
                           }`}
                         >
                           <div className="flex items-baseline gap-1.5">
-                            <span className="font-semibold text-gray-900">{c.ko}</span>
-                            <span className="text-gray-500">/ {c.id}</span>
+                            <span className="font-semibold text-gray-900">{t(`cat_${c.v}`)}</span>
+                            {t(`cat_${c.v}`) !== c.id && <span className="text-gray-500">/ {c.id}</span>}
                           </div>
                           <p className="text-[10px] text-emerald-700 mt-0.5">{c.tax}</p>
                         </button>

@@ -298,7 +298,7 @@ export default function SPTMasaPage() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(rows);
     ws['!cols'] = (rows[0] || []).map(() => ({ wch: 22 }));
-    XLSX.utils.book_append_sheet(wb, ws, `${taxType} 데이터`);
+    XLSX.utils.book_append_sheet(wb, ws, taxType);
 
     XLSX.writeFile(wb, `template_${taxType}_${period}.xlsx`);
   };

@@ -5066,7 +5066,8 @@
     "parentCompany": "Parent Company Name",
     "selectAllApplicable": "Select all applicable items. Determines applicability of PPh 21/22/23/26/4(2) and PPN.",
     "saveAndPrepare": "Save and Prepare Filing",
-    "saveDesc": "On save, the tax regime is auto-determined. Once all required fields are filled, you'll be redirected to the dashboard."
+    "saveDesc": "On save, the tax regime is auto-determined. Once all required fields are filled, you'll be redirected to the dashboard.",
+    "customerPicker": "Select customer"
   },
   "pphFinal": {
     "pageTitle": "Annual Settlement — PPh Final UMKM",
@@ -5905,7 +5906,8 @@
     "missingDocs": "Some documents are missing. Please check the AI guidance below.",
     "submitFailed": "Submission failed",
     "serverError": "Server error",
-    "confirmDelete": "Are you sure you want to delete this document?"
+    "confirmDelete": "Are you sure you want to delete this document?",
+    "bulkUploadFailed": "{count} file(s) failed to upload: {files}"
   },
   "myProfile": {
     "welcomeTitle": "Welcome — complete your profile",
@@ -6220,7 +6222,8 @@
   "pph26Page": {
     "title": "PPh 26 (Non-Resident)",
     "preparing": "Coming Soon",
-    "description": "PPh 26 Non-Resident feature is currently under development."
+    "description": "PPh 26 Non-Resident feature is currently under development.",
+    "bulkUploadButton": "Bulk upload file (Excel/CSV)"
   },
   "pph22Page": {
     "title": "PPh 22 (Import Tax)",
@@ -6512,7 +6515,9 @@
     "greeting": "Hi! I'm AI Tax Assistant",
     "askAnything": "Ask anything about Indonesian tax",
     "clearChat": "Clear chat",
-    "inputPlaceholder": "Ask about tax..."
+    "inputPlaceholder": "Ask about tax...",
+    "fabUnread": "{count} AI replies received",
+    "fabOpen": "Open AI chat"
   },
   "transferPricing": {
     "methodCupDesc": "Comparable price between independent firms",
@@ -7141,7 +7146,24 @@
     "previousCta": "Previous",
     "goToIndividual": "Switch to Individual Signup",
     "nextCta": "Next",
-    "submitCta": "Complete Registration"
+    "submitCta": "Complete Registration",
+    "ocrTitle": "Auto-fill from NPWP photo (optional)",
+    "ocrDesc": "One photo of the company NPWP card → auto-detects company name, NPWP, and address.",
+    "ocrUpload": "Upload NPWP photo",
+    "ocrDone": "NPWP detected ({conf}%)",
+    "ocrTooMany": "Too many requests. Please try again shortly.",
+    "ocrFailed": "NPWP detection failed — please enter it manually.",
+    "cat_SERVICE": "Services",
+    "cat_TRADING": "Wholesale & retail",
+    "cat_MANUFACTURING": "Manufacturing",
+    "cat_CONSTRUCTION": "Construction",
+    "cat_REAL_ESTATE": "Real estate",
+    "cat_FNB_RESTAURANT": "Restaurant",
+    "cat_FNB_CATERING": "Catering",
+    "cat_TRANSPORTATION": "Transportation",
+    "cat_MINING": "Mining",
+    "cat_DIGITAL_PLATFORM": "Digital platform",
+    "cat_OTHER": "Other"
   },
   "consultantBilling": {
     "headerTitle": "Consultant Firm Subscription",
@@ -7419,7 +7441,18 @@
     "aiForeignNote": "Verify reporting obligations for any new foreign assets.",
     "startFilingCta": "Start Filing",
     "viewProgressCta": "View Progress",
-    "sampleDataNotice": "Sample data — charts populate once you submit your first SPT Tahunan."
+    "sampleDataNotice": "Sample data — charts populate once you submit your first SPT Tahunan.",
+    "missingName": "Enter your name",
+    "missingId": "Enter NPWP/NIK",
+    "missingEmail": "Enter email",
+    "missingPhone": "Enter phone number",
+    "missingTaxCredentials": "Enter Coretax/DJP account",
+    "missingOther": "Enter remaining details",
+    "profileAlmostDone": "Profile almost done — finish it to 100%",
+    "profileCompleteMe": "Complete your profile",
+    "profileReadyDesc": "You can start filing, but at 100% all tax automation is enabled.",
+    "profileNotReadyDesc": "A few more details enable automatic SPT preparation.",
+    "profileCta": "Complete profile"
   },
   "auditSimV2": {
     "sev": {
@@ -10279,7 +10312,9 @@
     "send": "Send",
     "emptyState": "Send your first message to the AI Consultant",
     "loading": "Loading...",
-    "errorSend": "Send failed. Try again."
+    "errorSend": "Send failed. Try again.",
+    "fabUnread": "{count} replies from AI consultant",
+    "fabOpen": "Open AI consultant"
   },
   "operatorCustomerInbox": {
     "title": "Customer Inbox",
@@ -10373,7 +10408,27 @@
     "noClassifiedRows": "No classified rows — check WHT template format",
     "uploadFailed": "Upload failed",
     "uploadDone": "{count} PPh 4(2) rows added",
-    "hintRateNotice": "PPh 4(2) land/building rent always 10% final WHT. See each row's detail for context."
+    "hintRateNotice": "PPh 4(2) land/building rent always 10% final WHT. See each row's detail for context.",
+    "chatFieldDate": "Transaction date",
+    "chatFieldCounterpartyName": "Counterparty",
+    "chatFieldDescription": "Description",
+    "chatEditTitle": "✏️ PPh 4(2) transaction edit — {counterparty} ({period})",
+    "chatUnknownCounterparty": "(unknown counterparty)",
+    "doneBannerTitle": "PPh 4(2) SPT Masa filed — {period}",
+    "doneBannerDesc": "Created as a separate land/building rental filing.",
+    "pendingBannerTitle": "Under review by operations team — {period}",
+    "pendingBannerDesc": "Requested at {time} · the operations team will review and create the SPT Masa.",
+    "cancelRequest": "Cancel request",
+    "hintHere": "PPh 4(2) ← here",
+    "chatSubmitTitle": "📨 SPT Masa PPh 4(2) request — {period}",
+    "chatSubmitLineCount": "• {count} transactions (land/building rental)",
+    "chatSubmitLineDpp": "• Total DPP: Rp {amount}",
+    "chatSubmitLinePph": "• Total PPh 4(2): Rp {amount}",
+    "chatSubmitLineFooter": "→ Please review and create the SPT Masa.",
+    "submitToOperatorSent": "Request sent to operations team — {count} transactions",
+    "sptCreated": "SPT Masa created (filing {filingId})",
+    "createSptButton": "Create SPT Masa",
+    "requestSptButton": "Request SPT Masa filing"
   },
   "bulk": {
     "bulkSelectedN": "{count} selected",
@@ -10414,5 +10469,24 @@
     "deactivateConfirm": "Suspend {name}? Its consultants will lose service access.",
     "activated": "Tenant resumed",
     "deactivated": "Tenant suspended"
+  },
+  "registerOcr": {
+    "titleIndividual": "Auto-fill from NPWP/NIK photo (optional)",
+    "descIndividual": "One photo → auto-detects name and ID number.",
+    "upload": "Upload photo",
+    "done": "Detected ({conf}%)",
+    "tooMany": "Too many requests. Please try again shortly.",
+    "failed": "Detection failed — please enter it manually."
+  },
+  "registerTabs": {
+    "individual": "Individual",
+    "company": "Company",
+    "firm": "Tax consulting firm"
+  },
+  "profileCompletion": {
+    "percentDone": "{percent}% complete"
+  },
+  "clientList": {
+    "npwpMissing": "Not registered"
   }
 }

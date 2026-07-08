@@ -5140,7 +5140,8 @@
     "parentCompany": "모회사명",
     "selectAllApplicable": "해당되는 항목을 모두 선택하세요. 세목(PPh 21/22/23/26/4(2), PPN) 적용 여부를 판단합니다.",
     "saveAndPrepare": "저장 및 신고 준비",
-    "saveDesc": "저장 시 세금 체제가 자동 판정됩니다. 필수 정보가 모두 입력되면 대시보드로 이동합니다."
+    "saveDesc": "저장 시 세금 체제가 자동 판정됩니다. 필수 정보가 모두 입력되면 대시보드로 이동합니다.",
+    "customerPicker": "고객 선택"
   },
   "pphFinal": {
     "pageTitle": "연 결산 — PPh Final UMKM",
@@ -6004,7 +6005,8 @@
     "missingDocs": "부족한 자료가 있습니다. 아래 AI 안내를 확인해 주세요.",
     "submitFailed": "제출 실패",
     "serverError": "서버 오류",
-    "confirmDelete": "이 자료를 삭제하시겠습니까?"
+    "confirmDelete": "이 자료를 삭제하시겠습니까?",
+    "bulkUploadFailed": "{count}개 파일 업로드 실패: {files}"
   },
   "myProfile": {
     "welcomeTitle": "가입을 환영합니다 — 내 정보 보완",
@@ -6319,7 +6321,8 @@
   "pph26Page": {
     "title": "PPh 26 (비거주자)",
     "preparing": "준비 중",
-    "description": "PPh 26 Non-Resident 기능은 현재 개발 중입니다."
+    "description": "PPh 26 Non-Resident 기능은 현재 개발 중입니다.",
+    "bulkUploadButton": "파일 일괄 업로드 (Excel/CSV)"
   },
   "pph22Page": {
     "title": "PPh 22 (수입세)",
@@ -6611,7 +6614,9 @@
     "greeting": "안녕하세요! AI 세금 어시스턴트입니다",
     "askAnything": "인도네시아 세금에 대해 무엇이든 물어보세요",
     "clearChat": "대화 삭제",
-    "inputPlaceholder": "세금에 대해 물어보세요..."
+    "inputPlaceholder": "세금에 대해 물어보세요...",
+    "fabUnread": "AI 응답 {count}개 도착",
+    "fabOpen": "AI 챗 열기"
   },
   "transferPricing": {
     "methodCupDesc": "독립기업 간 비교가격",
@@ -7263,7 +7268,24 @@
     "previousCta": "이전",
     "goToIndividual": "개인 가입으로",
     "nextCta": "다음",
-    "submitCta": "가입 완료"
+    "submitCta": "가입 완료",
+    "ocrTitle": "NPWP 사진으로 자동 채우기 (선택)",
+    "ocrDesc": "법인 NPWP 카드 사진 한 장 → 회사명·NPWP·주소 자동 인식.",
+    "ocrUpload": "NPWP 사진 업로드",
+    "ocrDone": "NPWP 자동 인식 완료 ({conf}%)",
+    "ocrTooMany": "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+    "ocrFailed": "NPWP 인식 실패 — 직접 입력해 주세요.",
+    "cat_SERVICE": "서비스",
+    "cat_TRADING": "도소매",
+    "cat_MANUFACTURING": "제조",
+    "cat_CONSTRUCTION": "건설",
+    "cat_REAL_ESTATE": "부동산",
+    "cat_FNB_RESTAURANT": "식음료(매장)",
+    "cat_FNB_CATERING": "케이터링",
+    "cat_TRANSPORTATION": "운송",
+    "cat_MINING": "광업",
+    "cat_DIGITAL_PLATFORM": "디지털 플랫폼",
+    "cat_OTHER": "기타"
   },
   "consultantBilling": {
     "headerTitle": "세무 사무소 구독",
@@ -7541,7 +7563,18 @@
     "aiForeignNote": "해외 자산 증가 시 신고 여부를 반드시 확인하세요.",
     "startFilingCta": "신고 시작하기",
     "viewProgressCta": "신고 현황",
-    "sampleDataNotice": "샘플 데이터입니다. 첫 SPT Tahunan 제출 후 실제 값으로 채워집니다."
+    "sampleDataNotice": "샘플 데이터입니다. 첫 SPT Tahunan 제출 후 실제 값으로 채워집니다.",
+    "missingName": "이름 입력",
+    "missingId": "NPWP/NIK 입력",
+    "missingEmail": "이메일 입력",
+    "missingPhone": "전화번호 입력",
+    "missingTaxCredentials": "Coretax/DJP 계정 입력",
+    "missingOther": "추가 항목 입력",
+    "profileAlmostDone": "프로필 거의 완성 — 100%까지 마무리하세요",
+    "profileCompleteMe": "내 정보를 완성하세요",
+    "profileReadyDesc": "신고는 시작할 수 있지만, 100%면 모든 세무 자동화가 활성화됩니다.",
+    "profileNotReadyDesc": "몇 가지 정보만 더 입력하면 SPT 자동 작성이 가능합니다.",
+    "profileCta": "프로필 완성"
   },
   "auditSimV2": {
     "sev": {
@@ -10401,7 +10434,9 @@
     "send": "전송",
     "emptyState": "AI 상담원에게 첫 메시지를 보내보세요",
     "loading": "불러오는 중...",
-    "errorSend": "전송 실패. 다시 시도해주세요."
+    "errorSend": "전송 실패. 다시 시도해주세요.",
+    "fabUnread": "AI 상담원 {count}개 응답",
+    "fabOpen": "AI 상담원 열기"
   },
   "operatorCustomerInbox": {
     "title": "고객 상담",
@@ -10495,7 +10530,27 @@
     "noClassifiedRows": "분류된 행이 없습니다 — WHT 표준 양식인지 확인하세요",
     "uploadFailed": "업로드 실패",
     "uploadDone": "PPh 4(2) {count} 건 추가됨",
-    "hintRateNotice": "PPh 4(2) 토지·건물 임대는 항상 10% 최종원천세. 자세한 사유는 각 행의 상세에서 확인하세요."
+    "hintRateNotice": "PPh 4(2) 토지·건물 임대는 항상 10% 최종원천세. 자세한 사유는 각 행의 상세에서 확인하세요.",
+    "chatFieldDate": "거래일",
+    "chatFieldCounterpartyName": "거래처명",
+    "chatFieldDescription": "설명",
+    "chatEditTitle": "✏️ PPh 4(2) 거래 수정 — {counterparty} ({period})",
+    "chatUnknownCounterparty": "(거래처 미상)",
+    "doneBannerTitle": "PPh 4(2) SPT Masa 제출 완료 — {period}",
+    "doneBannerDesc": "토지·건물 임대 별도 filing 으로 생성됐습니다.",
+    "pendingBannerTitle": "운영팀 검토 중 — {period}",
+    "pendingBannerDesc": "요청 시간: {time} · 운영팀이 검토 후 SPT Masa 를 생성합니다.",
+    "cancelRequest": "요청 취소",
+    "hintHere": "PPh 4(2) ← 여기",
+    "chatSubmitTitle": "📨 SPT Masa PPh 4(2) 제출 요청 — {period}",
+    "chatSubmitLineCount": "• 거래 {count} 건 (토지·건물 임대)",
+    "chatSubmitLineDpp": "• 총 DPP: Rp {amount}",
+    "chatSubmitLinePph": "• 총 PPh 4(2): Rp {amount}",
+    "chatSubmitLineFooter": "→ 검토 후 SPT Masa 생성 부탁드립니다.",
+    "submitToOperatorSent": "운영팀에 SPT Masa 제출 요청을 전달했습니다 — {count} 건",
+    "sptCreated": "SPT Masa 생성 완료 (filing {filingId})",
+    "createSptButton": "SPT Masa 생성",
+    "requestSptButton": "운영팀에 SPT Masa 제출 요청"
   },
   "bulk": {
     "bulkSelectedN": "{count}건 선택됨",
@@ -10536,5 +10591,24 @@
     "deactivateConfirm": "{name} 입점을 중지할까요? 소속 컨설턴트의 서비스 이용이 제한됩니다.",
     "activated": "입점을 재개했습니다",
     "deactivated": "입점을 중지했습니다"
+  },
+  "registerOcr": {
+    "titleIndividual": "NPWP/NIK 사진으로 자동 채우기 (선택)",
+    "descIndividual": "사진 한 장 → 이름·식별번호 자동 인식.",
+    "upload": "사진 업로드",
+    "done": "자동 인식 완료 ({conf}%)",
+    "tooMany": "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+    "failed": "인식 실패 — 직접 입력해 주세요."
+  },
+  "registerTabs": {
+    "individual": "개인 가입",
+    "company": "법인 가입",
+    "firm": "외부 세무 사무소"
+  },
+  "profileCompletion": {
+    "percentDone": "{percent}% 완료"
+  },
+  "clientList": {
+    "npwpMissing": "미등록"
   }
 }

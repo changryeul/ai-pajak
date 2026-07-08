@@ -201,7 +201,7 @@ export function ClientList({ consultantId, limit = 10, showSearch = true }: Clie
                     <p className="text-xs text-gray-500">
                       NPWP: {client.npwp
                         ? client.npwp.replace(/(\d{2})(\d{3})(\d{3})(\d{1})(\d{3})(\d{3})/, '$1.$2.$3.$4-$5.$6')
-                        : '미등록'}
+                        : t('clientList.npwpMissing')}
                     </p>
                   </div>
                 </div>

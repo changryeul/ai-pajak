@@ -5066,7 +5066,8 @@
     "parentCompany": "Nama Perusahaan Induk",
     "selectAllApplicable": "Pilih semua yang berlaku. Menentukan berlakunya PPh 21/22/23/26/4(2) dan PPN.",
     "saveAndPrepare": "Simpan dan Siapkan Pelaporan",
-    "saveDesc": "Saat disimpan, rezim pajak ditentukan otomatis. Ketika semua kolom wajib terisi, Anda akan diarahkan ke dashboard."
+    "saveDesc": "Saat disimpan, rezim pajak ditentukan otomatis. Ketika semua kolom wajib terisi, Anda akan diarahkan ke dashboard.",
+    "customerPicker": "Pilih klien"
   },
   "pphFinal": {
     "pageTitle": "Tutup Buku Tahunan — PPh Final UMKM",
@@ -5905,7 +5906,8 @@
     "missingDocs": "Beberapa dokumen belum lengkap. Silakan periksa panduan AI di bawah.",
     "submitFailed": "Gagal mengirim",
     "serverError": "Kesalahan server",
-    "confirmDelete": "Apakah Anda yakin ingin menghapus dokumen ini?"
+    "confirmDelete": "Apakah Anda yakin ingin menghapus dokumen ini?",
+    "bulkUploadFailed": "{count} file gagal diunggah: {files}"
   },
   "myProfile": {
     "welcomeTitle": "Selamat datang — lengkapi profil Anda",
@@ -6220,7 +6222,8 @@
   "pph26Page": {
     "title": "PPh 26 (Non-Residen)",
     "preparing": "Sedang Disiapkan",
-    "description": "Fitur PPh 26 Non-Resident sedang dalam pengembangan."
+    "description": "Fitur PPh 26 Non-Resident sedang dalam pengembangan.",
+    "bulkUploadButton": "Unggah file massal (Excel/CSV)"
   },
   "pph22Page": {
     "title": "PPh 22 (Pajak Impor)",
@@ -6512,7 +6515,9 @@
     "greeting": "Halo! Saya Asisten Pajak AI",
     "askAnything": "Tanyakan apapun tentang pajak Indonesia",
     "clearChat": "Hapus percakapan",
-    "inputPlaceholder": "Tanyakan tentang pajak..."
+    "inputPlaceholder": "Tanyakan tentang pajak...",
+    "fabUnread": "{count} balasan AI diterima",
+    "fabOpen": "Buka chat AI"
   },
   "transferPricing": {
     "methodCupDesc": "Harga pembanding antar perusahaan independen",
@@ -7141,7 +7146,24 @@
     "previousCta": "Sebelumnya",
     "goToIndividual": "Ke Pendaftaran Perorangan",
     "nextCta": "Berikutnya",
-    "submitCta": "Selesaikan Pendaftaran"
+    "submitCta": "Selesaikan Pendaftaran",
+    "ocrTitle": "Isi otomatis dari foto NPWP (opsional)",
+    "ocrDesc": "Satu foto kartu NPWP badan → nama perusahaan, NPWP, dan alamat terdeteksi otomatis.",
+    "ocrUpload": "Unggah foto NPWP",
+    "ocrDone": "NPWP terdeteksi ({conf}%)",
+    "ocrTooMany": "Terlalu banyak permintaan. Coba lagi sebentar lagi.",
+    "ocrFailed": "Gagal mendeteksi NPWP — silakan isi manual.",
+    "cat_SERVICE": "Jasa",
+    "cat_TRADING": "Perdagangan",
+    "cat_MANUFACTURING": "Manufaktur",
+    "cat_CONSTRUCTION": "Konstruksi",
+    "cat_REAL_ESTATE": "Real Estat",
+    "cat_FNB_RESTAURANT": "Restoran",
+    "cat_FNB_CATERING": "Katering",
+    "cat_TRANSPORTATION": "Transportasi",
+    "cat_MINING": "Pertambangan",
+    "cat_DIGITAL_PLATFORM": "Platform Digital",
+    "cat_OTHER": "Lainnya"
   },
   "consultantBilling": {
     "headerTitle": "Langganan Firma Pajak",
@@ -7419,7 +7441,18 @@
     "aiForeignNote": "Periksa kewajiban pelaporan untuk aset luar negeri yang bertambah.",
     "startFilingCta": "Mulai Pelaporan",
     "viewProgressCta": "Lihat Kemajuan",
-    "sampleDataNotice": "Data contoh — grafik akan terisi otomatis setelah SPT Tahunan pertama dikirim."
+    "sampleDataNotice": "Data contoh — grafik akan terisi otomatis setelah SPT Tahunan pertama dikirim.",
+    "missingName": "Isi nama",
+    "missingId": "Isi NPWP/NIK",
+    "missingEmail": "Isi email",
+    "missingPhone": "Isi nomor telepon",
+    "missingTaxCredentials": "Isi akun Coretax/DJP",
+    "missingOther": "Isi data lainnya",
+    "profileAlmostDone": "Profil hampir lengkap — selesaikan hingga 100%",
+    "profileCompleteMe": "Lengkapi data Anda",
+    "profileReadyDesc": "Pelaporan sudah bisa dimulai, tetapi di 100% semua otomatisasi pajak aktif.",
+    "profileNotReadyDesc": "Beberapa data lagi dan SPT dapat disusun otomatis.",
+    "profileCta": "Lengkapi profil"
   },
   "auditSimV2": {
     "sev": {
@@ -10279,7 +10312,9 @@
     "send": "Kirim",
     "emptyState": "Kirim pesan pertama ke Konsultan AI",
     "loading": "Memuat...",
-    "errorSend": "Gagal mengirim. Coba lagi."
+    "errorSend": "Gagal mengirim. Coba lagi.",
+    "fabUnread": "{count} balasan dari konsultan AI",
+    "fabOpen": "Buka konsultan AI"
   },
   "operatorCustomerInbox": {
     "title": "Kotak Pelanggan",
@@ -10373,7 +10408,27 @@
     "noClassifiedRows": "Tidak ada baris terklasifikasi — cek format template WHT",
     "uploadFailed": "Upload gagal",
     "uploadDone": "{count} baris PPh 4(2) ditambahkan",
-    "hintRateNotice": "PPh 4(2) sewa tanah/bangunan selalu 10% final. Lihat detail tiap baris."
+    "hintRateNotice": "PPh 4(2) sewa tanah/bangunan selalu 10% final. Lihat detail tiap baris.",
+    "chatFieldDate": "Tanggal transaksi",
+    "chatFieldCounterpartyName": "Lawan transaksi",
+    "chatFieldDescription": "Keterangan",
+    "chatEditTitle": "✏️ Perubahan transaksi PPh 4(2) — {counterparty} ({period})",
+    "chatUnknownCounterparty": "(lawan transaksi tidak diketahui)",
+    "doneBannerTitle": "SPT Masa PPh 4(2) terkirim — {period}",
+    "doneBannerDesc": "Dibuat sebagai pelaporan sewa tanah/bangunan terpisah.",
+    "pendingBannerTitle": "Sedang ditinjau tim operasi — {period}",
+    "pendingBannerDesc": "Diminta pada {time} · tim operasi akan meninjau dan membuat SPT Masa.",
+    "cancelRequest": "Batalkan permintaan",
+    "hintHere": "PPh 4(2) ← di sini",
+    "chatSubmitTitle": "📨 Permintaan SPT Masa PPh 4(2) — {period}",
+    "chatSubmitLineCount": "• {count} transaksi (sewa tanah/bangunan)",
+    "chatSubmitLineDpp": "• Total DPP: Rp {amount}",
+    "chatSubmitLinePph": "• Total PPh 4(2): Rp {amount}",
+    "chatSubmitLineFooter": "→ Mohon ditinjau dan dibuatkan SPT Masa.",
+    "submitToOperatorSent": "Permintaan SPT Masa terkirim ke tim operasi — {count} transaksi",
+    "sptCreated": "SPT Masa dibuat (pelaporan {filingId})",
+    "createSptButton": "Buat SPT Masa",
+    "requestSptButton": "Minta pembuatan SPT Masa"
   },
   "bulk": {
     "bulkSelectedN": "{count} dipilih",
@@ -10414,5 +10469,24 @@
     "deactivateConfirm": "Tangguhkan {name}? Konsultannya akan kehilangan akses layanan.",
     "activated": "Tenant dilanjutkan",
     "deactivated": "Tenant ditangguhkan"
+  },
+  "registerOcr": {
+    "titleIndividual": "Isi otomatis dari foto NPWP/NIK (opsional)",
+    "descIndividual": "Satu foto → nama dan nomor identitas terdeteksi otomatis.",
+    "upload": "Unggah foto",
+    "done": "Terdeteksi ({conf}%)",
+    "tooMany": "Terlalu banyak permintaan. Coba lagi sebentar lagi.",
+    "failed": "Gagal mendeteksi — silakan isi manual."
+  },
+  "registerTabs": {
+    "individual": "Perorangan",
+    "company": "Badan usaha",
+    "firm": "Kantor konsultan pajak"
+  },
+  "profileCompletion": {
+    "percentDone": "{percent}% selesai"
+  },
+  "clientList": {
+    "npwpMissing": "Belum terdaftar"
   }
 }

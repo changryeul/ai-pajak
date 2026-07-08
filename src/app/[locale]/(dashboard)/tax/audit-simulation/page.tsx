@@ -130,7 +130,7 @@ export default function AuditSimulationPage() {
     setStage('chat');
     setDone(false);
     setMessages([
-      { role: 'system', content: `시나리오: ${t(AUDIT_SCENARIOS.find((s) => s.id === scenario)!.labelKey)}` },
+      { role: 'system', content: `Scenario: ${t(AUDIT_SCENARIOS.find((s) => s.id === scenario)!.labelKey)}` },
       { role: 'auditor', content: INITIAL_QUESTIONS[scenario] },
     ]);
   }, [scenario, t]);

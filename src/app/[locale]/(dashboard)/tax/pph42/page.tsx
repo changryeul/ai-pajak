@@ -245,11 +245,11 @@ export default function PPh42Page() {
       const threadId = (await tRes.json().catch(() => ({}))).data?.id;
       if (!threadId) return;
       const LABEL: Record<string, string> = {
-        transactionDate: '거래일',
-        counterpartyName: '거래처명',
+        transactionDate: t('chatFieldDate'),
+        counterpartyName: t('chatFieldCounterpartyName'),
         counterpartyNpwp: 'NPWP',
         grossAmount: 'DPP',
-        description: '설명',
+        description: t('chatFieldDescription'),
       };
       const lines: string[] = [];
       for (const [k, v] of Object.entries(updates)) {
@@ -262,7 +262,10 @@ export default function PPh42Page() {
       }
       if (lines.length === 0) return;
       const content = [
-        `✏️ PPh 4(2) 거래 수정 — ${txAfter.counterparty_name || '(거래처 미상)'} (${period})`,
+        t('chatEditTitle', {
+          counterparty: txAfter.counterparty_name || t('chatUnknownCounterparty'),
+          period,
+        }),
         ...lines,
       ].join('\n');
       await fetch(`/api/customer-ai/threads/${threadId}/messages`, {
@@ -362,8 +365,8 @@ export default function PPh42Page() {
               <CardContent className="p-3 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
                 <div className="text-sm">
-                  <p className="font-semibold text-emerald-900">PPh 4(2) SPT Masa 제출 완료 — {period}</p>
-                  <p className="text-[11px] text-emerald-700">토지·건물 임대 별도 filing 으로 생성됐습니다.</p>
+                  <p className="font-semibold text-emerald-900">{t('doneBannerTitle', { period })}</p>
+                  <p className="text-[11px] text-emerald-700">{t('doneBannerDesc')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -372,9 +375,11 @@ export default function PPh42Page() {
               <CardContent className="p-3 flex items-center gap-2">
                 <Clock className="h-5 w-5 text-amber-600 flex-shrink-0" />
                 <div className="text-sm flex-1">
-                  <p className="font-semibold text-amber-900">운영팀 검토 중 — {period}</p>
+                  <p className="font-semibold text-amber-900">{t('pendingBannerTitle', { period })}</p>
                   <p className="text-[11px] text-amber-700">
-                    요청 시간: {new Date(submissionRequest.requestedAt).toLocaleString()} · 운영팀이 검토 후 SPT Masa 를 생성합니다.
+                    {t('pendingBannerDesc', {
+                      time: new Date(submissionRequest.requestedAt).toLocaleString(),
+                    })}
                   </p>
                 </div>
                 <Button
@@ -391,7 +396,7 @@ export default function PPh42Page() {
                     }).catch(() => { /* silent */ });
                   }}
                 >
-                  요청 취소
+                  {t('cancelRequest')}
                 </Button>
               </CardContent>
             </Card>
@@ -457,7 +462,7 @@ export default function PPh42Page() {
                     <p className="font-mono font-bold text-emerald-700">{lastImport.pph23}</p>
                   </a>
                   <a href={`/${locale}/tax/pph42`} className="rounded border-2 border-purple-400 bg-white px-3 py-2">
-                    <p className="text-[10px] text-purple-700 font-bold">PPh 4(2) ← 여기</p>
+                    <p className="text-[10px] text-purple-700 font-bold">{t('hintHere')}</p>
                     <p className="font-mono font-bold text-purple-700">{lastImport.pph42}</p>
                   </a>
                   <a href={`/${locale}/tax/pph26`} className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
@@ -739,11 +744,11 @@ export default function PPh42Page() {
                   const threadId = tj.data?.id;
                   if (!threadId) { showMsg('error', t('saveFailed')); return; }
                   const content = [
-                    `📨 SPT Masa PPh 4(2) 제출 요청 — ${period}`,
-                    `• 거래 ${transactions.length} 건 (토지·건물 임대)`,
-                    `• 총 DPP: Rp ${totalGross.toLocaleString('id-ID')}`,
-                    `• 총 PPh 4(2): Rp ${totalTax.toLocaleString('id-ID')}`,
-                    `→ 검토 후 SPT Masa 생성 부탁드립니다.`,
+                    t('chatSubmitTitle', { period }),
+                    t('chatSubmitLineCount', { count: transactions.length }),
+                    t('chatSubmitLineDpp', { amount: totalGross.toLocaleString('id-ID') }),
+                    t('chatSubmitLinePph', { amount: totalTax.toLocaleString('id-ID') }),
+                    t('chatSubmitLineFooter'),
                   ].join('\n');
                   const mRes = await fetch(`/api/customer-ai/threads/${threadId}/messages`, {
                     method: 'POST',
@@ -751,7 +756,7 @@ export default function PPh42Page() {
                     body: JSON.stringify({ content }),
                   });
                   if (mRes.ok) {
-                    showMsg('success', `운영팀에 SPT Masa 제출 요청을 전달했습니다 — ${transactions.length} 건`);
+                    showMsg('success', t('submitToOperatorSent', { count: transactions.length }));
                     const stamp = { requestedAt: new Date().toISOString() };
                     if (typeof window !== 'undefined' && reqStorageKey) {
                       try { window.localStorage.setItem(reqStorageKey, JSON.stringify(stamp)); } catch { /* quota */ }
@@ -776,7 +781,7 @@ export default function PPh42Page() {
                 });
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success === true) {
-                  showMsg('success', `SPT Masa 생성 완료 (filing ${data.filingId?.slice(0, 8) ?? ''})`);
+                  showMsg('success', t('sptCreated', { filingId: data.filingId?.slice(0, 8) ?? '' }));
                   loadData();
                 } else {
                   showMsg('error', data.message || data.error || `HTTP ${res.status}`);
@@ -789,7 +794,7 @@ export default function PPh42Page() {
             }}
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-            {isConsultant ? 'SPT Masa 생성' : '운영팀에 SPT Masa 제출 요청'}
+            {isConsultant ? t('createSptButton') : t('requestSptButton')}
           </Button>
         </div>
       )}

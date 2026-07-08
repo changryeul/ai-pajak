@@ -29,7 +29,7 @@ interface Props {
  * each pointer event; reading toDataURL every time would stall low-end mobile.
  */
 export const SignaturePad = forwardRef<SignaturePadHandle, Props>(function SignaturePad(
-  { width = 600, height = 150, onChange, clearLabel = '서명 지우기' },
+  { width = 600, height = 150, onChange, clearLabel = 'Clear' },
   ref,
 ) {
   const padRef = useRef<SignatureCanvas | null>(null);

@@ -306,14 +306,14 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
         const progressColor = isReady ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500';
         const ringColor = isReady ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
         const MISSING_LABEL: Record<string, string> = {
-          name: '이름 입력',
-          id: 'NPWP/NIK 입력',
-          email: '이메일 입력',
-          phone: '전화번호 입력',
-          taxCredentials: 'Coretax/DJP 계정 입력',
+          name: t('missingName'),
+          id: t('missingId'),
+          email: t('missingEmail'),
+          phone: t('missingPhone'),
+          taxCredentials: t('missingTaxCredentials'),
         };
         const missingLabel = profileCompletion.firstMissing
-          ? MISSING_LABEL[profileCompletion.firstMissing] ?? '추가 항목 입력'
+          ? MISSING_LABEL[profileCompletion.firstMissing] ?? t('missingOther')
           : null;
         return (
           <div className={`p-5 rounded-2xl border-2 bg-gradient-to-br ${gradient}`}>
@@ -335,12 +335,12 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
                   <div>
                     <p className="font-bold text-sm text-gray-900 flex items-center gap-1">
                       <User className="h-4 w-4" />
-                      {isReady ? '프로필 거의 완성 — 100%까지 마무리하세요' : '내 정보를 완성하세요'}
+                      {isReady ? t('profileAlmostDone') : t('profileCompleteMe')}
                     </p>
                     <p className="text-xs text-gray-600 mt-0.5">
                       {isReady
-                        ? '신고는 시작할 수 있지만, 100%면 모든 세무 자동화가 활성화됩니다.'
-                        : '몇 가지 정보만 더 입력하면 SPT 자동 작성이 가능합니다.'}
+                        ? t('profileReadyDesc')
+                        : t('profileNotReadyDesc')}
                     </p>
                   </div>
                   <Link
@@ -349,7 +349,7 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
                       isReady ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
                     }`}
                   >
-                    프로필 완성
+                    {t('profileCta')}
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>

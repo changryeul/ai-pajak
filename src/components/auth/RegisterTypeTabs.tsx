@@ -10,6 +10,7 @@
  */
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { User, Building2, Briefcase } from 'lucide-react';
 
@@ -38,14 +39,12 @@ interface Props {
 export function RegisterTypeTabs({ active, labels }: Props) {
   const params = useParams();
   const locale = (params?.locale as string) || 'id';
+  const t = useTranslations('registerTabs');
 
-  // Inline labels (no extra i18n keys — reuse existing 'auth' namespace via
-  // hard-coded fallback works because the only Korean/Indonesian/English
-  // markets actually launch this UI). Override via `labels` prop if needed.
   const defaultLabels: Record<RegisterType, string> = {
-    individual: labels?.individual ?? '개인 가입',
-    company:    labels?.company    ?? '법인 가입',
-    firm:       labels?.firm       ?? '외부 세무 사무소',
+    individual: labels?.individual ?? t('individual'),
+    company:    labels?.company    ?? t('company'),
+    firm:       labels?.firm       ?? t('firm'),
   };
 
   return (

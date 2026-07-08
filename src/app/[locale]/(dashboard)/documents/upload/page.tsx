@@ -148,7 +148,7 @@ export default function DocumentUploadPage() {
       setTimeout(loadData, 2000);
     }
     if (errors.length > 0) {
-      showMsg('error', `${errors.length}개 파일 업로드 실패: ${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}`);
+      showMsg('error', t('bulkUploadFailed', { count: errors.length, files: `${errors.slice(0, 2).join(' / ')}${errors.length > 2 ? ' …' : ''}` }));
     } else if (successCount === 0) {
       showMsg('error', t('uploadFailed'));
     }

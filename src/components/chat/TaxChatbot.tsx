@@ -134,7 +134,7 @@ export function TaxChatbot() {
     return (
       <button
         onClick={() => { setIsOpen(true); setUnreadCount(0); }}
-        aria-label={unreadCount > 0 ? `AI 응답 ${unreadCount}개 도착` : 'AI 챗 열기'}
+        aria-label={unreadCount > 0 ? t('fabUnread', { count: unreadCount }) : t('fabOpen')}
         className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 relative"
       >
         <MessageCircle className="h-6 w-6" />

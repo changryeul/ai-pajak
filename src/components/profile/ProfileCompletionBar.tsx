@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
  *   100  → emerald (완료)
  */
 export function ProfileCompletionBar({ score, label, hint }: Props) {
+  const t = useTranslations('profileCompletion');
   const clamped = Math.max(0, Math.min(100, Math.round(score)));
   const colour =
     clamped === 100 ? 'bg-emerald-500'
@@ -42,7 +44,7 @@ export function ProfileCompletionBar({ score, label, hint }: Props) {
         />
       </div>
       <div className="text-xs mt-1 text-gray-600">
-        {clamped}% 완료{hint && ` — ${hint}`}
+        {t('percentDone', { percent: clamped })}{hint && ` — ${hint}`}
       </div>
     </div>
   );

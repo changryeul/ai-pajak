@@ -143,7 +143,7 @@ export default function Pph26Page() {
             ) : (
               <FileSpreadsheet className="h-3 w-3 mr-1" />
             )}
-            파일 일괄 업로드 (Excel/CSV)
+            {t('bulkUploadButton')}
           </Button>
 
           <p className="text-[10px] text-gray-500 mt-2 font-mono">
