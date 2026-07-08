@@ -89,7 +89,10 @@ const supervisorRoles = [
   UserRole.TAX_OPERATOR_SUPERVISOR,
   UserRole.TAX_OPERATOR_MASTER,
 ];
-const masterRoles = [UserRole.TAX_OPERATOR_MASTER];
+// P6: 마스터 2원화 — 사업운영 메뉴는 PLATFORM_MASTER 도, 신고운영 메뉴는
+// TAX_OPERATOR_MASTER 만 (항목별 roles 로 분리).
+const masterRoles = [UserRole.TAX_OPERATOR_MASTER, UserRole.PLATFORM_MASTER];
+const filingMasterOnly = [UserRole.TAX_OPERATOR_MASTER];
 
 const navItems: NavSection[] = [
   {
@@ -309,10 +312,13 @@ const navItems: NavSection[] = [
     labelKey: 'nav.masterArea',
     roles: masterRoles,
     items: [
+      // 사업운영 (MonoFlip) — 두 마스터 모두
       { href: '/admin/master',                       icon: TrendingUp, labelKey: 'nav.masterStats' },
+      { href: '/admin/master/tenants',               icon: Building2,  labelKey: 'nav.masterTenants' },
       { href: '/admin/master/custom-pricing',        icon: Settings,   labelKey: 'nav.masterCustomPricing' },
-      { href: '/admin/master/luxury-classifications', icon: Sparkles,  labelKey: 'nav.masterLuxuryClassifications' },
-      { href: '/admin/master/customer-ai-templates',  icon: MessageSquareText, labelKey: 'nav.masterCustomerAiTemplates' },
+      // 신고운영 (JTC) — TAX_OPERATOR_MASTER 전용
+      { href: '/admin/master/luxury-classifications', icon: Sparkles,  labelKey: 'nav.masterLuxuryClassifications', roles: filingMasterOnly },
+      { href: '/admin/master/customer-ai-templates',  icon: MessageSquareText, labelKey: 'nav.masterCustomerAiTemplates', roles: filingMasterOnly },
     ],
   },
   {

@@ -272,7 +272,8 @@
     "opMessenger": "メッセンジャー",
     "customerInbox": "顧客対応",
     "masterArea": "マスター領域",
-    "pph42Label": "PPh 4(2) — 土地・建物賃貸"
+    "pph42Label": "PPh 4(2) — 土地・建物賃貸",
+    "masterTenants": "マスター — テナント管理"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10381,5 +10382,37 @@
     "bulkDeleteDone": "{count}件削除しました",
     "bulkDeletePartial": "{ok}件削除、{fail}件失敗",
     "deselectAll": "すべて解除"
+  },
+  "masterTenants": {
+    "title": "ERPテナント管理",
+    "subtitle": "EXTERNAL税務コンサルティング法人 — 入店状況・停止/再開（モノフリップ事業運営）",
+    "loadError": "読み込みに失敗しました",
+    "retry": "再試行",
+    "saveFailed": "保存に失敗しました",
+    "sumTotal": "全テナント",
+    "sumActive": "有効",
+    "sumWithSub": "購読中",
+    "sumClients": "管理クライアント",
+    "tableTitle": "テナント一覧",
+    "empty": "登録されたEXTERNALテナントはありません。",
+    "colTenant": "テナント",
+    "colLicense": "ライセンス",
+    "colStaff": "職員",
+    "colAdmin": "管理者",
+    "colClients": "クライアント",
+    "colSubscription": "サブスク",
+    "colSince": "入店日",
+    "colStatus": "状態",
+    "colActions": "操作",
+    "adminYes": "あり",
+    "adminNo": "未指定",
+    "active": "有効",
+    "inactive": "停止",
+    "activate": "再開",
+    "deactivate": "停止",
+    "activateConfirm": "{name} の入店を再開しますか？",
+    "deactivateConfirm": "{name} の入店を停止しますか？所属コンサルタントのサービス利用が制限されます。",
+    "activated": "入店を再開しました",
+    "deactivated": "入店を停止しました"
   }
 }

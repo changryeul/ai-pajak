@@ -114,7 +114,7 @@ export default function CustomPricingPage() {
   // Role guard: master-only
   useEffect(() => {
     if (sessionLoading || !session) return;
-    if (!hasRole(session, UserRole.TAX_OPERATOR_MASTER)) {
+    if (!hasRole(session, UserRole.TAX_OPERATOR_MASTER, UserRole.PLATFORM_MASTER)) {
       router.replace(`/${locale}/dashboard`);
     }
   }, [session, sessionLoading, router, locale]);

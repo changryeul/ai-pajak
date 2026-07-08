@@ -38,6 +38,7 @@ const STEPS: Step[] = [
   // --- Firm admin (P6 follow-up) ---------------------------------------
   { name: 'firm-admin staff/clients/billing (14 asserts)', file: 'test-firm-admin-flow.ts' },
   { name: 'firm signup → FIRM_ADMIN bootstrap (7 asserts)', file: 'test-firm-signup-admin-invite.ts' },
+  { name: 'master tenants GET/PATCH (8 asserts)', file: 'test-master-tenants.ts' },
   // --- Operator + billing flows ----------------------------------------
   { name: 'operator queue 11-state flow', file: 'test-operator-queue-flow.ts', optional: true },
   { name: 'billing 3-endpoint smoke', file: 'test-billing-flow.ts', optional: true },

@@ -272,7 +272,8 @@
     "opMessenger": "Messenger",
     "customerInbox": "Customer Inbox",
     "masterArea": "Master Area",
-    "pph42Label": "PPh 4(2) — Land & Building Rent"
+    "pph42Label": "PPh 4(2) — Land & Building Rent",
+    "masterTenants": "Master — Tenants"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10381,5 +10382,37 @@
     "bulkDeleteDone": "{count} deleted",
     "bulkDeletePartial": "{ok} deleted, {fail} failed",
     "deselectAll": "Deselect all"
+  },
+  "masterTenants": {
+    "title": "ERP Tenant Management",
+    "subtitle": "EXTERNAL tax consulting firms — onboarding status, suspend/resume (MonoFlip business ops)",
+    "loadError": "Failed to load",
+    "retry": "Retry",
+    "saveFailed": "Save failed",
+    "sumTotal": "Total tenants",
+    "sumActive": "Active",
+    "sumWithSub": "Subscribed",
+    "sumClients": "Managed clients",
+    "tableTitle": "Tenants",
+    "empty": "No EXTERNAL tenants registered.",
+    "colTenant": "Tenant",
+    "colLicense": "License",
+    "colStaff": "Staff",
+    "colAdmin": "Admin",
+    "colClients": "Clients",
+    "colSubscription": "Subscription",
+    "colSince": "Since",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "adminYes": "Yes",
+    "adminNo": "None",
+    "active": "Active",
+    "inactive": "Suspended",
+    "activate": "Resume",
+    "deactivate": "Suspend",
+    "activateConfirm": "Resume {name}?",
+    "deactivateConfirm": "Suspend {name}? Its consultants will lose service access.",
+    "activated": "Tenant resumed",
+    "deactivated": "Tenant suspended"
   }
 }

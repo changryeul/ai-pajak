@@ -272,7 +272,8 @@
     "opMessenger": "메신저",
     "customerInbox": "고객 상담",
     "masterArea": "마스터 영역",
-    "pph42Label": "PPh 4(2) — 토지·건물 임대"
+    "pph42Label": "PPh 4(2) — 토지·건물 임대",
+    "masterTenants": "마스터 — 테넌트 관리"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10503,5 +10504,37 @@
     "bulkDeleteDone": "{count}건 삭제 완료",
     "bulkDeletePartial": "{ok}건 삭제, {fail}건 실패",
     "deselectAll": "전체 해제"
+  },
+  "masterTenants": {
+    "title": "ERP 테넌트 관리",
+    "subtitle": "EXTERNAL 세무컨설팅 법인 입점 현황 · 중지/재개 (모노플립 사업운영)",
+    "loadError": "불러오기 실패",
+    "retry": "다시 시도",
+    "saveFailed": "저장 실패",
+    "sumTotal": "전체 테넌트",
+    "sumActive": "활성",
+    "sumWithSub": "구독 중",
+    "sumClients": "총 관리 클라이언트",
+    "tableTitle": "테넌트 목록",
+    "empty": "등록된 EXTERNAL 테넌트가 없습니다.",
+    "colTenant": "테넌트",
+    "colLicense": "라이선스",
+    "colStaff": "직원",
+    "colAdmin": "관리자",
+    "colClients": "클라이언트",
+    "colSubscription": "구독",
+    "colSince": "입점일",
+    "colStatus": "상태",
+    "colActions": "동작",
+    "adminYes": "있음",
+    "adminNo": "미지정",
+    "active": "활성",
+    "inactive": "중지",
+    "activate": "재개",
+    "deactivate": "중지",
+    "activateConfirm": "{name} 입점을 재개할까요?",
+    "deactivateConfirm": "{name} 입점을 중지할까요? 소속 컨설턴트의 서비스 이용이 제한됩니다.",
+    "activated": "입점을 재개했습니다",
+    "deactivated": "입점을 중지했습니다"
   }
 }

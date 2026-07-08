@@ -272,7 +272,8 @@
     "opMessenger": "消息",
     "customerInbox": "客户咨询",
     "masterArea": "主管区域",
-    "pph42Label": "PPh 4(2) — 土地与建筑租赁"
+    "pph42Label": "PPh 4(2) — 土地与建筑租赁",
+    "masterTenants": "主管 — 租户管理"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10381,5 +10382,37 @@
     "bulkDeleteDone": "已删除 {count} 项",
     "bulkDeletePartial": "已删除 {ok} 项，{fail} 项失败",
     "deselectAll": "全部取消"
+  },
+  "masterTenants": {
+    "title": "ERP 租户管理",
+    "subtitle": "EXTERNAL 税务咨询公司 — 入驻状态·暂停/恢复（MonoFlip 业务运营）",
+    "loadError": "加载失败",
+    "retry": "重试",
+    "saveFailed": "保存失败",
+    "sumTotal": "全部租户",
+    "sumActive": "启用",
+    "sumWithSub": "订阅中",
+    "sumClients": "管理客户",
+    "tableTitle": "租户列表",
+    "empty": "尚无 EXTERNAL 租户。",
+    "colTenant": "租户",
+    "colLicense": "执照",
+    "colStaff": "员工",
+    "colAdmin": "管理员",
+    "colClients": "客户",
+    "colSubscription": "订阅",
+    "colSince": "入驻日",
+    "colStatus": "状态",
+    "colActions": "操作",
+    "adminYes": "有",
+    "adminNo": "未指定",
+    "active": "启用",
+    "inactive": "暂停",
+    "activate": "恢复",
+    "deactivate": "暂停",
+    "activateConfirm": "要恢复 {name} 的入驻吗？",
+    "deactivateConfirm": "要暂停 {name} 的入驻吗？其顾问将无法使用服务。",
+    "activated": "已恢复入驻",
+    "deactivated": "已暂停入驻"
   }
 }

@@ -272,7 +272,8 @@
     "opMessenger": "Pesan",
     "customerInbox": "Kotak Pelanggan",
     "masterArea": "Area Master",
-    "pph42Label": "PPh 4(2) — Sewa Tanah & Bangunan"
+    "pph42Label": "PPh 4(2) — Sewa Tanah & Bangunan",
+    "masterTenants": "Master — Tenant"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10381,5 +10382,37 @@
     "bulkDeleteDone": "{count} dihapus",
     "bulkDeletePartial": "{ok} dihapus, {fail} gagal",
     "deselectAll": "Batal pilih semua"
+  },
+  "masterTenants": {
+    "title": "Manajemen Tenant ERP",
+    "subtitle": "Kantor konsultan pajak EXTERNAL — status onboarding, tangguhkan/lanjutkan (operasi bisnis MonoFlip)",
+    "loadError": "Gagal memuat",
+    "retry": "Coba lagi",
+    "saveFailed": "Gagal menyimpan",
+    "sumTotal": "Total tenant",
+    "sumActive": "Aktif",
+    "sumWithSub": "Berlangganan",
+    "sumClients": "Klien dikelola",
+    "tableTitle": "Daftar Tenant",
+    "empty": "Belum ada tenant EXTERNAL.",
+    "colTenant": "Tenant",
+    "colLicense": "Lisensi",
+    "colStaff": "Staf",
+    "colAdmin": "Admin",
+    "colClients": "Klien",
+    "colSubscription": "Langganan",
+    "colSince": "Bergabung",
+    "colStatus": "Status",
+    "colActions": "Aksi",
+    "adminYes": "Ada",
+    "adminNo": "Belum",
+    "active": "Aktif",
+    "inactive": "Ditangguhkan",
+    "activate": "Lanjutkan",
+    "deactivate": "Tangguhkan",
+    "activateConfirm": "Lanjutkan {name}?",
+    "deactivateConfirm": "Tangguhkan {name}? Konsultannya akan kehilangan akses layanan.",
+    "activated": "Tenant dilanjutkan",
+    "deactivated": "Tenant ditangguhkan"
   }
 }
