@@ -197,10 +197,13 @@
       "CUSTOMER": "Taxpayer",
       "CONSULTANT": "Tax Consultant",
       "TAX_ADVISOR": "Tax Advisor",
-      "PLATFORM_ADMIN": "Platform Admin",
+      "PLATFORM_ADMIN": "MonoFlip System Admin",
       "TAX_OPERATOR": "Tax Operator",
       "TAX_OPERATOR_LEAD": "Operator Lead",
-      "TAX_OPERATOR_SUPERVISOR": "Operator Supervisor"
+      "TAX_OPERATOR_SUPERVISOR": "Operator Supervisor",
+      "FIRM_ADMIN": "Firm Admin",
+      "PLATFORM_MASTER": "MonoFlip Master",
+      "TAX_OPERATOR_MASTER": "JTC Filing Operations Master"
     },
     "accurateIntegration": "Accurate Integration",
     "teamManagement": "Team Management",

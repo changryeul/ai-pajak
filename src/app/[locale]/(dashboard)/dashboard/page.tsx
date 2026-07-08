@@ -79,11 +79,15 @@ export default function DashboardPage() {
     UserRole.TAX_OPERATOR_SUPERVISOR,
     UserRole.TAX_OPERATOR_MASTER,
   );
+  // FIRM_ADMIN (P6) 도 customer dashboard 가 아니라 firm-admin 홈으로.
+  const isFirmAdmin = !!session && hasRole(session, UserRole.FIRM_ADMIN);
   useEffect(() => {
-    if (isLoading || !session || !isOperatorTier || operatorRedirectedRef.current) return;
+    if (isLoading || !session || (!isOperatorTier && !isFirmAdmin) || operatorRedirectedRef.current) return;
     operatorRedirectedRef.current = true;
     let target: string;
-    if (session.role === UserRole.TAX_OPERATOR_MASTER) {
+    if (isFirmAdmin) {
+      target = `/${locale}/consultant-erp/firm-admin/staff`;
+    } else if (session.role === UserRole.TAX_OPERATOR_MASTER) {
       target = `/${locale}/admin/master`;
     } else if (
       session.role === UserRole.TAX_OPERATOR_LEAD ||
@@ -96,7 +100,7 @@ export default function DashboardPage() {
     if (typeof window !== 'undefined') {
       window.location.replace(target);
     }
-  }, [isLoading, session, isOperatorTier, locale]);
+  }, [isLoading, session, isOperatorTier, isFirmAdmin, locale]);
 
   if (isLoading) {
     return <DashboardSkeleton />;

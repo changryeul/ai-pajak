@@ -47,6 +47,8 @@ export async function POST(request: NextRequest) {
       'TAX_OPERATOR_SUPERVISOR',
       'TAX_OPERATOR_MASTER',
       'PLATFORM_ADMIN',
+      'PLATFORM_MASTER',
+      'FIRM_ADMIN',
       'SYSTEM',
     ]);
     if (existingRoles?.some((r) => NON_CUSTOMER_ROLES.has(r.role))) {

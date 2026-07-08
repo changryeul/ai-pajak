@@ -197,10 +197,13 @@
       "CUSTOMER": "Wajib Pajak",
       "CONSULTANT": "Konsultan Pajak",
       "TAX_ADVISOR": "Kuasa Hukum Pajak",
-      "PLATFORM_ADMIN": "Admin Platform",
+      "PLATFORM_ADMIN": "Admin Sistem MonoFlip",
       "TAX_OPERATOR": "Operator Pajak",
       "TAX_OPERATOR_LEAD": "Ketua Operator",
-      "TAX_OPERATOR_SUPERVISOR": "Supervisor Operator"
+      "TAX_OPERATOR_SUPERVISOR": "Supervisor Operator",
+      "FIRM_ADMIN": "Admin Kantor Konsultan",
+      "PLATFORM_MASTER": "Master MonoFlip",
+      "TAX_OPERATOR_MASTER": "Master Operasional Pelaporan JTC"
     },
     "accurateIntegration": "Integrasi Accurate",
     "teamManagement": "Manajemen Tim",

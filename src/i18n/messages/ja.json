@@ -197,10 +197,13 @@
       "CUSTOMER": "納税者",
       "CONSULTANT": "税務コンサルタント",
       "TAX_ADVISOR": "税理士",
-      "PLATFORM_ADMIN": "プラットフォーム管理者",
+      "PLATFORM_ADMIN": "モノフリップシステム管理者",
       "TAX_OPERATOR": "税務オペレーター",
       "TAX_OPERATOR_LEAD": "オペレーターリーダー",
-      "TAX_OPERATOR_SUPERVISOR": "オペレータースーパーバイザー"
+      "TAX_OPERATOR_SUPERVISOR": "オペレータースーパーバイザー",
+      "FIRM_ADMIN": "税務コンサルティング法人管理者",
+      "PLATFORM_MASTER": "モノフリップマスター",
+      "TAX_OPERATOR_MASTER": "JTC申告運営マスター"
     },
     "accurateIntegration": "Accurate 連携",
     "teamManagement": "チーム管理",

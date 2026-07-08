@@ -232,6 +232,15 @@ async function run() {
   });
   check(dup.status === 409, '14. duplicate consultant email → 409', dup.status);
 
+  // ── 15. setup-account ghost guard ──
+  // FIRM_ADMIN 이 /dashboard 를 밟아도 CUSTOMER role/row 가 자동 생성되면 안 됨
+  const setup = await api('/api/auth/setup-account', faTok, { method: 'POST', body: {} });
+  check(
+    setup.status === 200 && setup.body?.skipped === true,
+    '15. setup-account → skipped (ghost CUSTOMER 방지)',
+    setup,
+  );
+
   // Cleanup
   await admin.from('staff_invitation').delete().eq('email', SENTINEL_EMAIL);
 

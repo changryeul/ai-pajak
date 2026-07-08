@@ -197,10 +197,13 @@
       "CUSTOMER": "납세자",
       "CONSULTANT": "세무 컨설턴트",
       "TAX_ADVISOR": "세무사",
-      "PLATFORM_ADMIN": "플랫폼 관리자",
+      "PLATFORM_ADMIN": "모노플립 시스템 관리자",
       "TAX_OPERATOR": "세무 상담원",
       "TAX_OPERATOR_LEAD": "상담원 팀장",
-      "TAX_OPERATOR_SUPERVISOR": "상담원 감독관"
+      "TAX_OPERATOR_SUPERVISOR": "상담원 감독관",
+      "FIRM_ADMIN": "세무컨설팅 법인 관리자",
+      "PLATFORM_MASTER": "모노플립 마스터",
+      "TAX_OPERATOR_MASTER": "JTC 신고운영 마스터"
     },
     "accurateIntegration": "Accurate 연동",
     "teamManagement": "직원 관리",

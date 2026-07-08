@@ -197,10 +197,13 @@
       "CUSTOMER": "纳税人",
       "CONSULTANT": "税务顾问",
       "TAX_ADVISOR": "税务师",
-      "PLATFORM_ADMIN": "平台管理员",
+      "PLATFORM_ADMIN": "MonoFlip 系统管理员",
       "TAX_OPERATOR": "税务操作员",
       "TAX_OPERATOR_LEAD": "操作员组长",
-      "TAX_OPERATOR_SUPERVISOR": "操作员主管"
+      "TAX_OPERATOR_SUPERVISOR": "操作员主管",
+      "FIRM_ADMIN": "税务咨询公司管理员",
+      "PLATFORM_MASTER": "MonoFlip 主管",
+      "TAX_OPERATOR_MASTER": "JTC 申报运营主管"
     },
     "accurateIntegration": "Accurate 集成",
     "teamManagement": "团队管理",
