@@ -25,6 +25,9 @@ npx vitest run src/lib/tax/spt-1770ss/calculator.test.ts
 
 # E2E (requires running dev server + Supabase)
 npm run test:e2e                    # All Playwright tests
+
+# Single spec against prod (accounts pre-seeded; skips local seeding)
+E2E_SKIP_GLOBAL_SETUP=1 BASE_URL=https://ai-pajak.vercel.app npx playwright test firm-admin.spec.ts
 npm run test:e2e:customer           # Customer role only
 npm run test:e2e:consultant         # Consultant role only
 npm run test:e2e:tax-advisor        # Tax advisor role only

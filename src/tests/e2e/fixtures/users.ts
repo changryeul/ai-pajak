@@ -192,6 +192,21 @@ export const TEST_USERS = {
     partnerId: '00000000-0000-0000-0000-000000000040',
     partnerName: 'PT Mitra Pajak Sentosa',
   },
+
+  /**
+   * FIRM_ADMIN - 세무컨설팅 법인 관리자 (P6.2/P6.5).
+   * PT Mitra Pajak Sentosa 소속 — /consultant-erp/firm-admin/* 전용.
+   *
+   * Seeded by scripts/seed-master-and-external.ts.
+   */
+  FIRM_ADMIN: {
+    email: 'firmadmin.test@mitrapajak.com',
+    password: 'TestPassword123!',
+    role: 'FIRM_ADMIN',
+    fullName: 'Fira Firm Admin',
+    partnerId: '00000000-0000-0000-0000-000000000040',
+    partnerName: 'PT Mitra Pajak Sentosa',
+  },
 };
 
 /**

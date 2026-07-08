@@ -73,6 +73,13 @@ const TEST_USERS = [
 ];
 
 async function globalSetup() {
+  // E2E_SKIP_GLOBAL_SETUP=1 → seed 없이 spec 만 실행 (이미 seed 된 prod/원격
+  // 환경에 BASE_URL 만 바꿔 특정 spec 을 돌릴 때 사용).
+  if (process.env.E2E_SKIP_GLOBAL_SETUP === '1') {
+    console.log('\n⏭️  E2E_SKIP_GLOBAL_SETUP=1 — seed/fixture 생성 생략\n');
+    return;
+  }
+
   console.log('\n✅ Environment variables loaded:');
   console.log(`   SUPABASE_URL: ${supabaseUrl}`);
   console.log(`   ANON_KEY: ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '***' : 'MISSING'}\n`);
