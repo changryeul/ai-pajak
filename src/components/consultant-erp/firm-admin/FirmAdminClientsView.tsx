@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ interface WorkloadRow {
 }
 
 export function FirmAdminClientsView() {
+  const t = useTranslations('firmAdmin');
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [workload, setWorkload] = useState<WorkloadRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,17 +48,17 @@ export function FirmAdminClientsView() {
       const r = await fetch('/api/firm-admin/clients');
       const j = await r.json();
       if (!r.ok) {
-        setError(typeof j.error === 'string' ? j.error : '불러오기 실패');
+        setError(typeof j.error === 'string' ? j.error : t('loadFailed'));
       } else {
         setClients(j.data.clients);
         setWorkload(j.data.workload);
       }
     } catch {
-      setError('네트워크 오류');
+      setError(t('networkError'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -65,7 +67,8 @@ export function FirmAdminClientsView() {
   const reassign = async (client: ClientRow, consultantId: string) => {
     const target = workload.find((w) => w.consultantId === consultantId);
     if (!target || consultantId === client.consultantId) return;
-    if (!window.confirm(`${client.name} 담당을 ${target.fullName} (으)로 변경할까요?`)) return;
+    if (!window.confirm(t('reassignConfirm', { client: client.name, consultant: target.fullName })))
+      return;
     setBusy(true);
     try {
       const r = await fetch('/api/firm-admin/clients', {
@@ -75,9 +78,9 @@ export function FirmAdminClientsView() {
       });
       const j = await r.json();
       if (!r.ok) {
-        toast.error(typeof j.error === 'string' ? j.error : '재배정 실패');
+        toast.error(typeof j.error === 'string' ? j.error : t('reassignFailed'));
       } else {
-        toast.success(`${client.name} → ${target.fullName} 재배정 완료`);
+        toast.success(t('reassignDone', { client: client.name, consultant: target.fullName }));
         void load();
       }
     } finally {
@@ -99,7 +102,7 @@ export function FirmAdminClientsView() {
           {error}
           <div className="mt-3">
             <Button variant="outline" size="sm" onClick={() => void load()}>
-              다시 시도
+              {t('retry')}
             </Button>
           </div>
         </CardContent>
@@ -113,13 +116,13 @@ export function FirmAdminClientsView() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-emerald-600" />
-            직원별 워크로드
+            {t('workloadTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {workload.length === 0 ? (
             <div className="rounded-md bg-slate-50 py-6 text-center text-sm text-slate-400">
-              활성 직원이 없습니다. 직원 관리에서 먼저 초대하세요.
+              {t('noActiveStaff')}
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -131,7 +134,9 @@ export function FirmAdminClientsView() {
                   <p className="truncate text-sm font-medium text-slate-800">{w.fullName}</p>
                   <p className="mt-1 text-2xl font-bold tabular-nums text-indigo-600">
                     {w.clientCount}
-                    <span className="ml-1 text-xs font-normal text-slate-400">클라이언트</span>
+                    <span className="ml-1 text-xs font-normal text-slate-400">
+                      {t('clientsUnit')}
+                    </span>
                   </p>
                 </div>
               ))}
@@ -144,25 +149,25 @@ export function FirmAdminClientsView() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-indigo-600" />
-            전체 클라이언트
+            {t('allClientsTitle')}
             <Badge variant="secondary">{clients.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {clients.length === 0 ? (
             <div className="rounded-md bg-slate-50 py-8 text-center text-sm text-slate-400">
-              아직 배정된 클라이언트가 없습니다.
+              {t('emptyClients')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs text-slate-500">
-                    <th className="py-2 pr-3">클라이언트</th>
-                    <th className="py-2 pr-3">유형</th>
-                    <th className="py-2 pr-3">NPWP</th>
-                    <th className="py-2 pr-3 text-right">신고</th>
-                    <th className="py-2">담당 직원</th>
+                    <th className="py-2 pr-3">{t('colClient')}</th>
+                    <th className="py-2 pr-3">{t('colType')}</th>
+                    <th className="py-2 pr-3">{t('colNpwp')}</th>
+                    <th className="py-2 pr-3 text-right">{t('colFilings')}</th>
+                    <th className="py-2">{t('colConsultant')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,7 +186,7 @@ export function FirmAdminClientsView() {
                               : undefined
                           }
                         >
-                          {c.customerType === 'COMPANY' ? '법인' : '개인'}
+                          {c.customerType === 'COMPANY' ? t('company') : t('individual')}
                         </Badge>
                       </td>
                       <td className="py-2.5 pr-3 text-xs tabular-nums text-slate-500">
@@ -195,7 +200,7 @@ export function FirmAdminClientsView() {
                           onValueChange={(v) => void reassign(c, v)}
                         >
                           <SelectTrigger className="h-8 w-48">
-                            <SelectValue placeholder="미배정" />
+                            <SelectValue placeholder={t('unassigned')} />
                           </SelectTrigger>
                           <SelectContent>
                             {workload.map((w) => (

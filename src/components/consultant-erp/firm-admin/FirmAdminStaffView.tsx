@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,13 +45,9 @@ interface InvitationRow {
   createdAt: string;
 }
 
-const ROLE_LABEL: Record<string, string> = {
-  TAX_ADVISOR: '세무사',
-  CONSULTANT: '컨설턴트',
-  FIRM_ADMIN: '관리자',
-};
-
 export function FirmAdminStaffView() {
+  const t = useTranslations('firmAdmin');
+  const locale = useLocale();
   const [staff, setStaff] = useState<StaffRow[]>([]);
   const [invitations, setInvitations] = useState<InvitationRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +59,13 @@ export function FirmAdminStaffView() {
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState<'CONSULTANT' | 'TAX_ADVISOR'>('CONSULTANT');
 
+  const roleLabel = (role: string) =>
+    role === 'TAX_ADVISOR'
+      ? t('roleAdvisorShort')
+      : role === 'FIRM_ADMIN'
+        ? t('roleAdminShort')
+        : t('roleConsultant');
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -69,17 +73,17 @@ export function FirmAdminStaffView() {
       const r = await fetch('/api/firm-admin/staff');
       const j = await r.json();
       if (!r.ok) {
-        setError(typeof j.error === 'string' ? j.error : '불러오기 실패');
+        setError(typeof j.error === 'string' ? j.error : t('loadFailed'));
       } else {
         setStaff(j.data.staff);
         setInvitations(j.data.invitations);
       }
     } catch {
-      setError('네트워크 오류');
+      setError(t('networkError'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -100,9 +104,9 @@ export function FirmAdminStaffView() {
       });
       const j = await r.json();
       if (!r.ok) {
-        toast.error(typeof j.error === 'string' ? j.error : '초대 실패');
+        toast.error(typeof j.error === 'string' ? j.error : t('inviteFailed'));
       } else {
-        toast.success(`${inviteEmail} 로 초대 메일을 보냈습니다`);
+        toast.success(t('inviteSuccess', { email: inviteEmail }));
         setInviteOpen(false);
         setInviteEmail('');
         setInviteName('');
@@ -128,7 +132,7 @@ export function FirmAdminStaffView() {
       });
       const j = await r.json();
       if (!r.ok) {
-        toast.error(typeof j.error === 'string' ? j.error : '저장 실패');
+        toast.error(typeof j.error === 'string' ? j.error : t('saveFailed'));
       } else {
         toast.success(successMsg);
         void load();
@@ -139,7 +143,7 @@ export function FirmAdminStaffView() {
   };
 
   const cancelInvitation = async (invitationId: string, email: string) => {
-    if (!window.confirm(`${email} 초대를 취소할까요?`)) return;
+    if (!window.confirm(t('cancelConfirm', { email }))) return;
     setBusy(true);
     try {
       const r = await fetch(`/api/firm-admin/staff?invitationId=${invitationId}`, {
@@ -147,9 +151,9 @@ export function FirmAdminStaffView() {
       });
       const j = await r.json();
       if (!r.ok) {
-        toast.error(typeof j.error === 'string' ? j.error : '취소 실패');
+        toast.error(typeof j.error === 'string' ? j.error : t('cancelFailed'));
       } else {
-        toast.success('초대를 취소했습니다');
+        toast.success(t('cancelDone'));
         void load();
       }
     } finally {
@@ -171,7 +175,7 @@ export function FirmAdminStaffView() {
           {error}
           <div className="mt-3">
             <Button variant="outline" size="sm" onClick={() => void load()}>
-              다시 시도
+              {t('retry')}
             </Button>
           </div>
         </CardContent>
@@ -186,8 +190,7 @@ export function FirmAdminStaffView() {
       {advisorCount === 0 && (
         <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <ShieldCheck className="mr-1 inline h-4 w-4" />
-          활성 세무사(TAX_ADVISOR)가 없습니다 — 자기 이름 신고를 위해 최소 1명이 필요합니다
-          (Hard Rule #3).
+          {t('advisorZeroBanner')}
         </div>
       )}
 
@@ -195,29 +198,29 @@ export function FirmAdminStaffView() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-indigo-600" />
-            활성 직원 목록
+            {t('staffListTitle')}
             <Badge variant="secondary">{staff.length}</Badge>
           </CardTitle>
           <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
                 <UserPlus className="mr-1 h-4 w-4" />
-                직원 초대
+                {t('inviteButton')}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>직원 초대</DialogTitle>
+                <DialogTitle>{t('inviteDialogTitle')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
                 <Input
                   type="email"
-                  placeholder="이메일 (필수)"
+                  placeholder={t('inviteEmailPlaceholder')}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
                 <Input
-                  placeholder="이름 (선택)"
+                  placeholder={t('inviteNamePlaceholder')}
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
                 />
@@ -229,16 +232,14 @@ export function FirmAdminStaffView() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="CONSULTANT">컨설턴트</SelectItem>
-                    <SelectItem value="TAX_ADVISOR">세무사 (자격증 소지자)</SelectItem>
+                    <SelectItem value="CONSULTANT">{t('roleConsultant')}</SelectItem>
+                    <SelectItem value="TAX_ADVISOR">{t('roleAdvisor')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button className="w-full" disabled={busy || !inviteEmail} onClick={() => void invite()}>
-                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : '초대 메일 보내기'}
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : t('inviteSend')}
                 </Button>
-                <p className="text-xs text-slate-400">
-                  초대 링크는 7일간 유효하며, 수락 시 자동으로 우리 법인 소속으로 등록됩니다.
-                </p>
+                <p className="text-xs text-slate-400">{t('inviteHint')}</p>
               </div>
             </DialogContent>
           </Dialog>
@@ -246,19 +247,19 @@ export function FirmAdminStaffView() {
         <CardContent>
           {staff.length === 0 ? (
             <div className="rounded-md bg-slate-50 py-8 text-center text-sm text-slate-400">
-              아직 등록된 직원이 없습니다. 우측 상단에서 초대하세요.
+              {t('emptyStaff')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs text-slate-500">
-                    <th className="py-2 pr-3">이름</th>
-                    <th className="py-2 pr-3">이메일</th>
-                    <th className="py-2 pr-3">역할</th>
-                    <th className="py-2 pr-3 text-right">담당 클라이언트</th>
-                    <th className="py-2 pr-3">상태</th>
-                    <th className="py-2 text-right">동작</th>
+                    <th className="py-2 pr-3">{t('colName')}</th>
+                    <th className="py-2 pr-3">{t('colEmail')}</th>
+                    <th className="py-2 pr-3">{t('colRole')}</th>
+                    <th className="py-2 pr-3 text-right">{t('colClients')}</th>
+                    <th className="py-2 pr-3">{t('colStatus')}</th>
+                    <th className="py-2 text-right">{t('colActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -267,7 +268,7 @@ export function FirmAdminStaffView() {
                       <td className="py-2.5 pr-3 font-medium text-slate-800">
                         {s.fullName}
                         {s.isSelf && (
-                          <span className="ml-1 text-xs text-indigo-500">(나)</span>
+                          <span className="ml-1 text-xs text-indigo-500">{t('me')}</span>
                         )}
                       </td>
                       <td className="py-2.5 pr-3 text-slate-500">{s.email}</td>
@@ -283,21 +284,21 @@ export function FirmAdminStaffView() {
                                   : undefined
                             }
                           >
-                            {ROLE_LABEL[s.role] ?? s.role}
+                            {roleLabel(s.role)}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-slate-400">로그인 계정 없음</span>
+                          <span className="text-xs text-slate-400">{t('noLogin')}</span>
                         )}
                       </td>
                       <td className="py-2.5 pr-3 text-right tabular-nums">{s.clientCount}</td>
                       <td className="py-2.5 pr-3">
                         {s.isActive ? (
                           <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50">
-                            활성
+                            {t('active')}
                           </Badge>
                         ) : (
                           <Badge variant="secondary" className="text-slate-500">
-                            비활성
+                            {t('inactive')}
                           </Badge>
                         )}
                       </td>
@@ -309,16 +310,16 @@ export function FirmAdminStaffView() {
                               size="sm"
                               disabled={busy}
                               onClick={() =>
-                                window.confirm(`${s.fullName} 을(를) 세무사로 임명할까요?`) &&
+                                window.confirm(t('appointConfirm', { name: s.fullName })) &&
                                 void patch(
                                   s.consultantId,
                                   { role: 'TAX_ADVISOR' },
-                                  '세무사로 임명했습니다',
+                                  t('appointDone'),
                                 )
                               }
                             >
                               <ShieldCheck className="mr-1 h-3.5 w-3.5 text-emerald-600" />
-                              세무사 임명
+                              {t('appoint')}
                             </Button>
                           )}
                           {s.hasLogin && s.role === 'TAX_ADVISOR' && (
@@ -327,15 +328,15 @@ export function FirmAdminStaffView() {
                               size="sm"
                               disabled={busy}
                               onClick={() =>
-                                window.confirm(`${s.fullName} 의 세무사 임명을 해제할까요?`) &&
+                                window.confirm(t('dismissConfirm', { name: s.fullName })) &&
                                 void patch(
                                   s.consultantId,
                                   { role: 'CONSULTANT' },
-                                  '세무사 임명을 해제했습니다',
+                                  t('dismissDone'),
                                 )
                               }
                             >
-                              임명 해제
+                              {t('dismiss')}
                             </Button>
                           )}
                           {!s.isSelf && (
@@ -346,17 +347,17 @@ export function FirmAdminStaffView() {
                               onClick={() =>
                                 window.confirm(
                                   s.isActive
-                                    ? `${s.fullName} 을(를) 비활성화할까요?`
-                                    : `${s.fullName} 을(를) 다시 활성화할까요?`,
+                                    ? t('deactivateConfirm', { name: s.fullName })
+                                    : t('activateConfirm', { name: s.fullName }),
                                 ) &&
                                 void patch(
                                   s.consultantId,
                                   { isActive: !s.isActive },
-                                  s.isActive ? '비활성화했습니다' : '활성화했습니다',
+                                  s.isActive ? t('deactivateDone') : t('activateDone'),
                                 )
                               }
                             >
-                              {s.isActive ? '비활성화' : '활성화'}
+                              {s.isActive ? t('deactivate') : t('activate')}
                             </Button>
                           )}
                         </div>
@@ -374,14 +375,14 @@ export function FirmAdminStaffView() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-slate-500" />
-            대기중 초대
+            {t('pendingInvites')}
             <Badge variant="secondary">{invitations.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {invitations.length === 0 ? (
             <div className="rounded-md bg-slate-50 py-6 text-center text-sm text-slate-400">
-              대기중인 초대가 없습니다.
+              {t('emptyInvites')}
             </div>
           ) : (
             <ul className="divide-y">
@@ -390,16 +391,16 @@ export function FirmAdminStaffView() {
                   <div>
                     <span className="font-medium text-slate-800">{i.email}</span>
                     <span className="ml-2 text-xs text-slate-500">
-                      {ROLE_LABEL[i.role] ?? i.role}
+                      {roleLabel(i.role)}
                       {i.fullName ? ` · ${i.fullName}` : ''}
                     </span>
                     {i.expired ? (
                       <Badge variant="secondary" className="ml-2 text-red-600">
-                        만료됨
+                        {t('expired')}
                       </Badge>
                     ) : (
                       <span className="ml-2 text-xs text-slate-400">
-                        ~{new Date(i.expiresAt).toLocaleDateString('ko-KR')}
+                        ~{new Date(i.expiresAt).toLocaleDateString(locale)}
                       </span>
                     )}
                   </div>
@@ -410,7 +411,7 @@ export function FirmAdminStaffView() {
                     onClick={() => void cancelInvitation(i.invitationId, i.email)}
                   >
                     <XCircle className="mr-1 h-4 w-4 text-slate-400" />
-                    취소
+                    {t('cancel')}
                   </Button>
                 </li>
               ))}
