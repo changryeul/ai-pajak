@@ -7003,7 +7003,10 @@
     "repNamePlaceholder": "대표자/책임자 이름",
     "note": "가입 후 팀 세무사를 추가하고 첫 고객을 초대할 수 있습니다.",
     "switchIndividual": "개인 가입",
-    "errMissingFirm": "사무소명을 입력해 주세요."
+    "errMissingFirm": "사무소명을 입력해 주세요.",
+    "adminEmailPlaceholder": "관리자 계정 이메일 (선택)",
+    "adminEmailHint": "법인 관리 (직원 초대·클라이언트 배정·청구) 전용 계정입니다. 대표 이메일과 달라야 하며, 초대 링크가 발송됩니다. 나중에 직원 관리에서도 초대할 수 있습니다.",
+    "errAdminEmailSameAsRep": "관리자 계정 이메일은 대표 이메일과 달라야 합니다."
   },
   "taxAnomaly": {
     "taxYear": "과세 연도",

@@ -6904,7 +6904,10 @@
     "repNamePlaceholder": "Director / Authorized representative name",
     "note": "After signup you can add team consultants and invite your first client.",
     "switchIndividual": "Individual signup",
-    "errMissingFirm": "Please enter the firm name."
+    "errMissingFirm": "Please enter the firm name.",
+    "adminEmailPlaceholder": "Firm admin account email (optional)",
+    "adminEmailHint": "A dedicated account for firm administration (staff invites, client assignment, billing). Must differ from the representative email; an invitation link will be sent. You can also invite later from Staff Management.",
+    "errAdminEmailSameAsRep": "The admin account email must differ from the representative email."
   },
   "taxAnomaly": {
     "taxYear": "Tax Year",

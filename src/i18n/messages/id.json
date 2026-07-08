@@ -6904,7 +6904,10 @@
     "repNamePlaceholder": "Nama Direktur / Penanggung Jawab",
     "note": "Setelah pendaftaran, Anda dapat menambah konsultan tim dan mengundang klien pertama.",
     "switchIndividual": "Daftar Pribadi",
-    "errMissingFirm": "Mohon isi nama kantor."
+    "errMissingFirm": "Mohon isi nama kantor.",
+    "adminEmailPlaceholder": "Email akun admin kantor (opsional)",
+    "adminEmailHint": "Akun khusus untuk administrasi kantor (undang staf, penetapan klien, tagihan). Harus berbeda dari email perwakilan; tautan undangan akan dikirim. Anda juga bisa mengundang nanti dari Manajemen Staf.",
+    "errAdminEmailSameAsRep": "Email akun admin harus berbeda dari email perwakilan."
   },
   "taxAnomaly": {
     "taxYear": "Tahun Pajak",

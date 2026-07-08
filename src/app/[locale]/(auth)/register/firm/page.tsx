@@ -31,6 +31,7 @@ interface Step1Data {
   fullName: string;
   email: string;
   phone: string;
+  adminEmail: string;
 }
 
 export default function FirmRegisterPage() {
@@ -46,6 +47,7 @@ export default function FirmRegisterPage() {
     fullName: '',
     email: '',
     phone: '',
+    adminEmail: '',
   });
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -57,6 +59,10 @@ export default function FirmRegisterPage() {
     if (!basics.fullName.trim()) return t('auth.errMissingName');
     if (!basics.email.trim() || !basics.email.includes('@')) return t('auth.errInvalidEmail');
     if (!basics.phone.trim()) return t('auth.errMissingPhone');
+    const adminEmail = basics.adminEmail.trim();
+    if (adminEmail && !adminEmail.includes('@')) return t('auth.errInvalidEmail');
+    if (adminEmail && adminEmail === basics.email.trim())
+      return t('firmSignupPage.errAdminEmailSameAsRep');
     return null;
   }
 
@@ -86,6 +92,7 @@ export default function FirmRegisterPage() {
           accountType: 'TAX_PARTNER',
           firmName: basics.firmName.trim(),
           firmRegistrationNumber: basics.firmRegistrationNumber.trim() || undefined,
+          adminEmail: basics.adminEmail.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -190,6 +197,18 @@ export default function FirmRegisterPage() {
                   value={basics.phone}
                   onChange={(e) => setBasics({ ...basics, phone: e.target.value })}
                 />
+                <div>
+                  <Input
+                    name="adminEmail"
+                    type="email"
+                    placeholder={t('firmSignupPage.adminEmailPlaceholder')}
+                    value={basics.adminEmail}
+                    onChange={(e) => setBasics({ ...basics, adminEmail: e.target.value })}
+                  />
+                  <p className="mt-1 text-[11px] text-gray-400 leading-relaxed">
+                    {t('firmSignupPage.adminEmailHint')}
+                  </p>
+                </div>
 
                 <p className="text-xs text-gray-500 leading-relaxed">
                   * {t('firmSignupPage.note')}

@@ -6904,7 +6904,10 @@
     "repNamePlaceholder": "代表者/責任者氏名",
     "note": "登録後、チームの税理士を追加し、最初の顧問先を招待できます。",
     "switchIndividual": "個人登録",
-    "errMissingFirm": "事務所名を入力してください。"
+    "errMissingFirm": "事務所名を入力してください。",
+    "adminEmailPlaceholder": "管理者アカウントのメール（任意）",
+    "adminEmailHint": "法人管理（職員招待・クライアント割当・請求）専用のアカウントです。代表メールと異なる必要があり、招待リンクが送信されます。後から職員管理でも招待できます。",
+    "errAdminEmailSameAsRep": "管理者アカウントのメールは代表メールと異なる必要があります。"
   },
   "taxAnomaly": {
     "taxYear": "課税年度",

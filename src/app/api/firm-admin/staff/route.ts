@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { randomBytes } from 'crypto';
 import { z } from 'zod';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
@@ -8,7 +7,7 @@ import { withAudit } from '@/middleware/audit';
 import { requireFirmAdmin, RequestWithFirmAdmin } from '@/middleware/requireFirmAdmin';
 import { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { sendEmail } from '@/lib/notifications/email-service';
+import { createAndEmailFirmInvitation } from '@/lib/firm-admin/invitation';
 import { loggers } from '@/lib/logger';
 
 /**
@@ -128,101 +127,17 @@ async function handleInvite(req: RequestWithSession): Promise<Response> {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
   const { email, fullName, role } = parsed.data;
-  const admin = getSupabaseAdmin();
 
-  // 이미 이 법인 (또는 다른 법인) 소속 consultant 인 이메일 차단.
-  // NOTE: auth.admin.listUsers 는 populated prod 에서 500 이라 쓰지 않는다 —
-  // 기존 auth 계정과 겹치면 accept 시점의 createUser 가 email_exists 로 막는다.
-  const { data: existingConsultant } = await admin
-    .from('consultant')
-    .select('id, tax_partner_id')
-    .eq('email', email)
-    .maybeSingle();
-  if (existingConsultant) {
-    return NextResponse.json(
-      { error: 'This email already belongs to a consultant' },
-      { status: 409 },
-    );
-  }
-
-  const { data: pending } = await admin
-    .from('staff_invitation')
-    .select('id')
-    .eq('email', email)
-    .is('accepted_at', null)
-    .is('cancelled_at', null)
-    .maybeSingle();
-  if (pending) {
-    return NextResponse.json(
-      { error: 'A pending invitation already exists for this email' },
-      { status: 409 },
-    );
-  }
-
-  const { data: firm } = await admin
-    .from('tax_partner')
-    .select('name')
-    .eq('id', firmTaxPartnerId)
-    .single();
-
-  const token = randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-
-  const { data: inv, error: insErr } = await admin
-    .from('staff_invitation')
-    .insert({
-      email,
-      role,
-      full_name: fullName || null,
-      invited_by: req.session.userId,
-      inviter_role: 'FIRM_ADMIN',
-      token,
-      expires_at: expiresAt,
-      tax_partner_id: firmTaxPartnerId,
-    })
-    .select('id, email, role, expires_at')
-    .single();
-  if (insErr || !inv) {
-    loggers.api.error({ err: insErr }, 'firm-admin invitation insert failed');
-    return NextResponse.json({ error: 'Failed to create invitation' }, { status: 500 });
-  }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
-  const acceptUrl = `${appUrl}/ko/invite/accept?token=${token}`;
-  const roleLabel =
-    role === 'TAX_ADVISOR' ? 'Tax Advisor' : role === 'FIRM_ADMIN' ? 'Firm Admin' : 'Consultant';
-  const firmName = firm?.name ?? 'your tax consulting firm';
-
-  try {
-    await sendEmail({
-      to: email,
-      subject: `[AI Pajak] You have been invited to ${firmName} as ${roleLabel}`,
-      html: `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(135deg, #4338ca, #a21caf); color: white; padding: 30px; border-radius: 12px 12px 0 0;">
-    <h1 style="margin: 0; font-size: 24px;">You're invited to ${firmName}</h1>
-    <p style="margin: 10px 0 0; opacity: 0.9;">Join as ${roleLabel} on AI Pajak ERP</p>
-  </div>
-  <div style="border: 1px solid #e5e7eb; border-top: none; padding: 30px; border-radius: 0 0 12px 12px;">
-    <p>Hello${fullName ? ' ' + fullName : ''},</p>
-    <p>You have been invited to <b>${firmName}</b> as <b>${roleLabel}</b>.</p>
-    <p>Click the button below to create your account. The invitation expires in <b>7 days</b>.</p>
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="${acceptUrl}" style="display: inline-block; background: #4338ca; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-        Accept invitation
-      </a>
-    </div>
-    <p style="font-size: 12px; color: #6b7280;">Or copy this link into your browser:</p>
-    <p style="font-size: 11px; color: #6b7280; word-break: break-all;">${acceptUrl}</p>
-    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-    <p style="font-size: 11px; color: #9ca3af;">If you did not request this email, please ignore it.</p>
-  </div>
-</div>
-      `,
-      text: `${firmName} ${roleLabel} invitation on AI Pajak\n\nAccept link: ${acceptUrl}\n\nExpires in 7 days.`,
-    });
-  } catch (emailErr) {
-    loggers.api.warn({ err: emailErr, email }, 'Firm invitation email failed (row kept)');
+  const result = await createAndEmailFirmInvitation({
+    email,
+    fullName,
+    role,
+    taxPartnerId: firmTaxPartnerId,
+    invitedBy: req.session.userId,
+    inviterRole: 'FIRM_ADMIN',
+  });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
   loggers.api.info(
@@ -230,7 +145,15 @@ async function handleInvite(req: RequestWithSession): Promise<Response> {
     'Firm staff invitation created',
   );
   return NextResponse.json(
-    { success: true, data: { invitationId: inv.id, email: inv.email, role: inv.role, expiresAt: inv.expires_at } },
+    {
+      success: true,
+      data: {
+        invitationId: result.invitationId,
+        email: result.email,
+        role: result.role,
+        expiresAt: result.expiresAt,
+      },
+    },
     { status: 201 },
   );
 }

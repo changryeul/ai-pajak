@@ -6904,7 +6904,10 @@
     "repNamePlaceholder": "负责人/代表姓名",
     "note": "注册后可添加团队税务师并邀请首个客户。",
     "switchIndividual": "个人注册",
-    "errMissingFirm": "请输入事务所名称。"
+    "errMissingFirm": "请输入事务所名称。",
+    "adminEmailPlaceholder": "管理员账号邮箱（选填）",
+    "adminEmailHint": "用于公司管理（邀请员工、分配客户、账单）的专用账号。必须与代表邮箱不同，系统将发送邀请链接。之后也可在员工管理中邀请。",
+    "errAdminEmailSameAsRep": "管理员账号邮箱必须与代表邮箱不同。"
   },
   "taxAnomaly": {
     "taxYear": "税务年度",

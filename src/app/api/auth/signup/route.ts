@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { createAndEmailFirmInvitation } from '@/lib/firm-admin/invitation';
 import { loggers } from '@/lib/logger';
 
 /**
@@ -89,6 +90,7 @@ export async function POST(request: NextRequest) {
       accountType,
       firmName,
       firmRegistrationNumber,
+      adminEmail,
       npwp,
       nik,
     } = body as {
@@ -99,6 +101,8 @@ export async function POST(request: NextRequest) {
       accountType: 'INDIVIDUAL' | 'TAX_PARTNER';
       firmName?: string;
       firmRegistrationNumber?: string;
+      /** 선택: 법인 관리자 (FIRM_ADMIN) 전용 계정으로 초대할 이메일 (P6 follow-up) */
+      adminEmail?: string;
       npwp?: string;
       nik?: string;
     };
@@ -147,6 +151,7 @@ export async function POST(request: NextRequest) {
 
     // Create DB records via admin client (PostgREST — always works)
     const admin = getSupabaseAdmin();
+    let adminInviteSent = false;
 
     if (accountType === 'INDIVIDUAL') {
       // Normalise NPWP/NIK to digits only so later validation + matching
@@ -257,13 +262,35 @@ export async function POST(request: NextRequest) {
         organization_type: 'TAX_PARTNER',
         is_active: true,
       });
+
+      // P6 follow-up: 관리자 전용 계정 초대 (선택).
+      // 대표가 TAX_ADVISOR + FIRM_ADMIN 을 한 계정에 겸직하면 세션 role 해석
+      // 에서 TAX_ADVISOR 가 우선되어 firm-admin 화면이 막히므로, FIRM_ADMIN
+      // 은 별도 이메일 계정으로 초대하는 모델이다. 실패해도 가입은 성공 —
+      // 나중에 직원 관리에서 다시 초대 가능.
+      if (adminEmail && adminEmail.includes('@') && adminEmail !== email) {
+        const invite = await createAndEmailFirmInvitation({
+          email: adminEmail,
+          role: 'FIRM_ADMIN',
+          taxPartnerId: partner.id,
+          invitedBy: userId,
+          inviterRole: 'TAX_ADVISOR',
+        });
+        if (!invite.ok) {
+          loggers.api.warn(
+            { userId, adminEmail, reason: invite.error },
+            'Signup: firm admin invitation failed (signup still ok)',
+          );
+        }
+        adminInviteSent = invite.ok;
+      }
     }
 
     loggers.api.info({ userId, accountType, email }, 'Signup completed');
 
     return NextResponse.json({
       success: true,
-      data: { userId, email, accountType },
+      data: { userId, email, accountType, adminInviteSent },
       message: accountType === 'INDIVIDUAL'
         ? 'Pendaftaran perorangan berhasil'
         : 'Pendaftaran kantor konsultan berhasil',

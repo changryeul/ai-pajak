@@ -37,6 +37,7 @@ const STEPS: Step[] = [
   { name: 'external consultant isolation', file: 'test-external-consultant-isolation.ts', optional: true },
   // --- Firm admin (P6 follow-up) ---------------------------------------
   { name: 'firm-admin staff/clients/billing (14 asserts)', file: 'test-firm-admin-flow.ts' },
+  { name: 'firm signup → FIRM_ADMIN bootstrap (7 asserts)', file: 'test-firm-signup-admin-invite.ts' },
   // --- Operator + billing flows ----------------------------------------
   { name: 'operator queue 11-state flow', file: 'test-operator-queue-flow.ts', optional: true },
   { name: 'billing 3-endpoint smoke', file: 'test-billing-flow.ts', optional: true },
