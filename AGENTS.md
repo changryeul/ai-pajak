@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+This file provides guidance to Codex and other coding agents when working with code in this repository. It is a mirror of `CLAUDE.md` — when updating one, copy the change to the other (only this header differs).
 
 ## Language
 
@@ -25,6 +25,9 @@ npx vitest run src/lib/tax/spt-1770ss/calculator.test.ts
 
 # E2E (requires running dev server + Supabase)
 npm run test:e2e                    # All Playwright tests
+
+# Single spec against prod (accounts pre-seeded; skips local seeding)
+E2E_SKIP_GLOBAL_SETUP=1 BASE_URL=https://ai-pajak.vercel.app npx playwright test firm-admin.spec.ts
 npm run test:e2e:customer           # Customer role only
 npm run test:e2e:consultant         # Consultant role only
 npm run test:e2e:tax-advisor        # Tax advisor role only
@@ -78,7 +81,8 @@ API routes live at `src/app/api/` (not locale-prefixed).
 - Customer-side: `dashboard`, `tax` (filings/intake), `filings`, `submissions`, `billing`, `documents`, `invoice-capture` (OCR), `assets`, `counterparties`, `company-profile`, `my-profile`, `poa`, `reports`, `chat` (AI 챗봇), `news`, `marketplace`, `referral`, `notifications`, `settings`, `help`
 - Consultant-side: `customers`, `customers/[id]`
 - Operator-side: `operator/*` — 운영팀 큐 UI (review/approval/ebilling/payment/DJP/BPE)
-- Admin-side: `admin/*` — `monitoring` (observability), `master/*` (TAX_OPERATOR_MASTER governance)
+- Admin-side: `admin/*` — `monitoring` (observability), `master/*` (master governance — 신고운영은 TAX_OPERATOR_MASTER, 사업운영 통계·커스텀 가격은 PLATFORM_MASTER 도 허용)
+- Firm-admin-side (P6.2): `consultant-erp/firm-admin/*` — `staff`/`clients`/`billing` (FIRM_ADMIN 전용, EXTERNAL 세무컨설팅 법인 관리자 스캐폴딩)
 
 **Customer dashboard 진입은 `customer.customer_type`(INDIVIDUAL/COMPANY)에 따라 자동 분기**합니다. 같은 `/dashboard` URL이라도 INDIVIDUAL은 개인 SPT 위주 (1770SS/S/1770), COMPANY는 월 신고/결산 wizard 위주의 화면을 받습니다. 이 분기는 server component에서 customer 행을 읽어 결정합니다.
 
@@ -99,13 +103,17 @@ Available middleware: `requireAuth`, `blockPlatformAdmin`, `requireRole(…roles
 Roles defined in `src/types/auth.ts`:
 - `CUSTOMER` (`customer.customer_type` = `INDIVIDUAL` | `COMPANY`) — tax data access
 - `CONSULTANT`, `TAX_ADVISOR` — JTC internal AND external tax-firm consultants share these role names; the actual partner is determined by `consultant.tax_partner_id` joined to `tax_partner.partner_type` (`JTC` vs `EXTERNAL`)
-- `PLATFORM_ADMIN` — platform management only, **never** tax data
-- `TAX_OPERATOR`, `TAX_OPERATOR_LEAD`, `TAX_OPERATOR_SUPERVISOR`, `TAX_OPERATOR_MASTER` — operational roles. MASTER is the top tier (Phase K-1.3): platform-wide stats, custom pricing, special-service quotes
+- `PLATFORM_ADMIN` — platform **technical** management only (dev/server/logs/webhooks), **never** tax data
+- `PLATFORM_MASTER` (P6.1, 2026-07-07) — MonoFlip **business** master: platform-wide stats, pricing/plans, custom pricing, EXTERNAL firm onboarding. Never tax filing operations.
+- `TAX_OPERATOR`, `TAX_OPERATOR_LEAD`, `TAX_OPERATOR_SUPERVISOR`, `TAX_OPERATOR_MASTER` — JTC 신고운영 roles. MASTER is the filing-operations top tier (P6.3 narrowed): Coretax toggle, Tax Code Rule, luxury classifications. 요금·상품·계약은 PLATFORM_MASTER 소관.
+- `FIRM_ADMIN` (P6.2, 2026-07-07) — EXTERNAL 세무컨설팅 법인 관리자: 자기 tenant 안에서 직원 초대·비활성화, TAX_ADVISOR 임명, 클라이언트 배정, 청구·구독 관리. `requireFirmAdmin` 미들웨어 (FIRM_ADMIN role + active consultant row + EXTERNAL partner 3중 검증).
 - `SYSTEM` — billing operations only
+
+**MonoFlip/JTC 분리 (P6, 2026-07-07)**: MonoFlip = 플랫폼 운영사 (PLATFORM_MASTER/PLATFORM_ADMIN), JTC = 세무신고 대행 실무 주체 (CONSULTANT/TAX_ADVISOR/TAX_OPERATOR_*). 상담원은 JTC 직원이지 MonoFlip 직원이 아님 — UI 카피도 "JTC 소속 신고 상담원" 으로 표기. 상세: `docs/guides/domain-model-corrections-20260707.md`, `docs/guides/roles.md`.
 
 Organizations: `PLATFORM_OWNER`, `PLATFORM`, `TAX_PARTNER` (`src/types/auth.ts` → `OrganizationType`).
 
-Multi-tenancy: a single `tax_partner` row can be `JTC` (internal, `is_platform_partner=true`) or `EXTERNAL` (independent tax firm, Phase B-1). RLS scopes consultant data via `get_consultant_tax_partner_id()` so external firms only see their own customers, never JTC's. `customer.user_id` is nullable since Phase B-2 to allow consultants to register customers without an auth user.
+Multi-tenancy: a single `tax_partner` row can be `JTC` (default filing partner, `is_default_filing_partner=true` — P6.3 renamed from `is_platform_partner`) or `EXTERNAL` (independent tax firm, Phase B-1). RLS scopes consultant data via `get_consultant_tax_partner_id()` so external firms only see their own customers, never JTC's. `customer.user_id` is nullable since Phase B-2 to allow consultants to register customers without an auth user.
 
 Auth enforced at **two levels**: API middleware (first gate) + Supabase RLS (final gate).
 
@@ -215,7 +223,7 @@ Three pricing surfaces, each with its own config + endpoint + DB table:
 
 All three follow the same **graceful-degrade** pattern: if the Midtrans Snap call fails (or no PG is configured), the PENDING_PAYMENT row is preserved and the response includes `snapToken: null` + `snapError`. The user can retry from the in-app billing page later. The single Midtrans webhook (`/api/webhooks/midtrans`) routes by order ID prefix to the correct table.
 
-**Master governance** (`TAX_OPERATOR_MASTER` only): `/admin/master` shows MRR/plan distribution/Pro-exceeding customers; `/admin/master/custom-pricing` issues `custom_pricing_quote` rows for customers that need bespoke pricing (Pro 한도 초과, 세무조사, 이전가격 등).
+**Master governance**: `/admin/master` shows MRR/plan distribution/Pro-exceeding customers; `/admin/master/custom-pricing` issues `custom_pricing_quote` rows for customers that need bespoke pricing (Pro 한도 초과, 세무조사, 이전가격 등). P6.1 부터 사업운영 성격의 `stats`/`custom-pricing` 은 `PLATFORM_MASTER` 도 허용, 신고운영 성격 (Coretax toggle, Tax Code Rule, luxury) 은 `TAX_OPERATOR_MASTER` 전용.
 
 **`MIDTRANS_IS_PRODUCTION`** must be set to `'true'` explicitly to point at the real Midtrans endpoints. Default is sandbox — `NODE_ENV` is intentionally NOT used as the signal because Vercel always sets it to `production`.
 
@@ -256,14 +264,14 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
   - `sessions/board` · `sessions` · `sessions/[id]` · `sessions/[id]/documents` · `sessions/[id]/documents/upload` (multipart) · `sessions/[id]/parsing` · `sessions/[id]/parse-rows` · `sessions/[id]/parse-rows/message` · `sessions/[id]/calc` · `sessions/[id]/approval` · `sessions/[id]/coretax-record`
   - `counterparty` · `counterparty/[id]` · `counterparty/match` · `counterparty/[id]/candidates`
   - `legality` (multipart upload) · `legality/[id]` · `legality/[id]/download` (signed URL 5분)
-- **AI 파싱**: `src/lib/consultant-erp/Codex-parser.ts` — Anthropic SDK (Codex Sonnet 4.6 streaming, 20MB까지 PDF/이미지/Excel/CSV 지원). API key 미설정 / storage miss / JSON parse 실패 시 6단계 graceful fallback → mock 결과로 복구 (`mock-parser.ts`).
+- **AI 파싱**: `src/lib/consultant-erp/claude-parser.ts` — Anthropic SDK (Claude Sonnet 4.6 streaming, 20MB까지 PDF/이미지/Excel/CSV 지원). API key 미설정 / storage miss / JSON parse 실패 시 6단계 graceful fallback → mock 결과로 복구 (`mock-parser.ts`).
 - **룰 엔진**: `src/lib/consultant-erp/parse-row-rules.ts` — slot별 critical/warning/info 룰. `client-message-builder.ts` 가 ko/id markdown 으로 고객 확인요청 메시지를 모아 생성.
 - **자동계산**: `src/lib/consultant-erp/calc-engine.ts` — PPH21_TER / WITHHOLDING / CORP_TAX_MONTHLY (PPh Final ↔ PPh25 듀얼 케이스) / PPN_NET / BANK_RECON.
 - **공동 거래처 DB**: cross-tenant 공유 (`counterparty_master_read` 정책으로 모든 active consultant read, 등록·갱신은 consultant 행 필요). `counterparty-matcher.ts` 의 `matchByNpwp()` 가 NPWP exact 매칭으로 suggested PPh + trust score 반환.
 - **운영팀 큐 / 결산 wizard 와 책임 분리**: ERP 세션은 자체 완결 (Coretax 외부 처리 후 수기 기록), `djp_submission_queue` 와 별도 트리거.
 - **인보이스 라인 파싱 (2단계)**: `WITHHOLDING_INVOICE` / `VAT_IN_OUT` 슬롯 문서에서 line-item을 추출해 `consultant_session_invoice_line` 에 적재.
   - **Phase 1 (read path)**: 마이그레이션 `20260518000001_consultant_session_invoice_line.sql` — 21컬럼, `(document_id, line_no)` UNIQUE, session 단위 RLS. `/api/consultant-erp/sessions/[id]` 응답에 `invoiceLines` (≤500) 포함.
-  - **Phase 2 (AI 파서)**: `src/lib/consultant-erp/invoice-line-parser.ts` — Codex Sonnet 4.6 vision, `Codex-parser.ts` 와 동일한 6단계 graceful-fallback. `POST /api/consultant-erp/sessions/[id]/parse-invoice` (auth=consultantOrSupervisor + audit + slot 가드 + 재실행시 lines 삭제 후 insert → drift 0). UI는 직원용 `ErpWorkflow` slot 카드 + 봉인 `SupervisorApprovalDetail` 양쪽 모두 노출.
+  - **Phase 2 (AI 파서)**: `src/lib/consultant-erp/invoice-line-parser.ts` — Claude Sonnet 4.6 vision, `claude-parser.ts` 와 동일한 6단계 graceful-fallback. `POST /api/consultant-erp/sessions/[id]/parse-invoice` (auth=consultantOrSupervisor + audit + slot 가드 + 재실행시 lines 삭제 후 insert → drift 0). UI는 직원용 `ErpWorkflow` slot 카드 + 봉인 `SupervisorApprovalDetail` 양쪽 모두 노출.
   - **자동 트리거 (autoParse)**: `/sessions/[id]/documents/upload` 가 새 form field `autoParse=true` 를 받으면 invoice 슬롯 업로드 직후 `parseInvoiceLines` 를 sync 실행. 실패는 업로드를 rollback 하지 않고 응답 `data.parse.{inserted, mode, confidence, reason}` 으로 보고. `ErpWorkflow` 가 invoice 슬롯에 자동으로 `autoParse=true` 부여 — 직원은 "업로드 + 파싱"이 한 클릭.
   - **라인별 검토 토글**: `PATCH /api/consultant-erp/sessions/[id]/invoice-lines/[lineId]` (body `{is_reviewed?, reviewer_note?}`, refine 으로 둘 다 비면 400, reviewer_note 500자 cap). 두 화면(`SupervisorApprovalDetail` + `ErpWorkflow`)에서 ✓ 컬럼 + emerald row tint + "N 검토완료" 카운트 badge + description 셀 옆 ✎/+ 노트 인라인 편집 (`window.prompt`)을 공유. note 가 있으면 italic emerald "📝 …" 로 description 아래 표시. 헤더 우측 "전체 ✓ / 전체 해제" 버튼이 `Promise.allSettled` 로 PATCH 병렬 + no-op skip (이미 원하는 상태인 라인은 건너뜀 → audit log 깨끗) — 큰 invoice 일괄 처리.
 - **회귀**: `npx tsx scripts/test-consultant-erp-flow.ts` — 세션 생성 → 자료 → 결재 → Coretax → 거래처 + 리갈리티 list 까지 끝-끝. e2e: `consultant-erp.spec.ts` 9 tests (4 페이지 접근 + content + 3 access control).
@@ -320,14 +328,15 @@ The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/pa
 | CONSULTANT (JTC 내부) | — | consultant.test@jakartatax.co.id | TestPassword123! |
 | TAX_ADVISOR (JTC 내부) | — | advisor.test@jakartatax.co.id | TestPassword123! |
 | CONSULTANT (EXTERNAL — PT Mitra Pajak Sentosa) | — | external.consultant@mitrapajak.com | TestPassword123! |
+| FIRM_ADMIN (EXTERNAL — PT Mitra Pajak Sentosa) | — | firmadmin.test@mitrapajak.com | TestPassword123! |
 | TAX_OPERATOR | — | operator.test@aipajak.com | TestPassword123! |
 | TAX_OPERATOR_SUPERVISOR | — | supervisor.test@aipajak.com | TestPassword123! |
-| TAX_OPERATOR_MASTER | — | master.test@aipajak.com | TestPassword123! |
+| TAX_OPERATOR_MASTER + PLATFORM_MASTER (겸직) | — | master.test@aipajak.com | TestPassword123! |
 | PLATFORM_ADMIN | — | admin.test@aipajak.com | TestPassword123! |
 
 Seed scripts:
 - `npm run db:seed-test-users` — JTC customers + consultants + admin
-- `SEED_TARGET=prod npx tsx scripts/seed-master-and-external.ts` — Operator team + EXTERNAL tax_partner + its consultant
+- `SEED_TARGET=prod npx tsx scripts/seed-master-and-external.ts` — Operator team (master.test 겸직 포함) + EXTERNAL tax_partner + its consultant + FIRM_ADMIN
 - `SEED_TARGET=prod npx tsx scripts/seed-company-customer.ts` — patches `company.test@example.com` to a COMPANY customer (works around `listUsers` pagination on populated DBs)
 - `SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts` — seeds two approved ID Billing rows (PPh21 5M / PPh23 2M) in `EBILLING_GENERATED` for the INDIVIDUAL test customer so `/tax/billing` shows the design-spec demo
 
@@ -338,7 +347,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs **~34 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), operator queue 11-state, billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 JTC template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), SPT Masa PPN split, closing credit auto-fill, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
+- `npm run test:smoke:prod` — runs **~40 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue 11-state, billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars).
 - `.github/workflows/drift-after-deploy.yml` — runs the schema drift audit on every push, waits 90s for Vercel to settle, then probes the prod DB. Complements the daily smoke by catching broken migration pushes within minutes instead of up to 24h.
@@ -355,6 +364,9 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-staff-workflow.ts` — supervisor → operator 배정/평가 흐름
 - `SEED_TARGET=prod npx tsx scripts/test-monitoring-flow.ts` — Sentry / circuit breaker / monitoring dashboard 신호
 - `npx tsx scripts/test-advisory-flow.ts` — `/api/customer/advisory` PKP/UMKM/Tax Treaty 응답 shape + INDIVIDUAL/COMPANY/unauth 3-way 검증
+- `SEED_TARGET=prod npx tsx scripts/test-firm-admin-flow.ts` — FIRM_ADMIN staff/clients/billing 3 endpoint contract (RBAC 403 + invite lifecycle + reassign round-trip, 14 assertions)
+- `SEED_TARGET=prod npx tsx scripts/test-firm-signup-admin-invite.ts` — 세무법인 셀프 가입 → adminEmail 초대 → 수락 → firm-admin 접근 골든패스 (7 assertions, sentinel firm 생성 후 완전 삭제)
+- `SEED_TARGET=prod npx tsx scripts/test-master-tenants.ts` — Master ERP 테넌트 관리 GET/PATCH (RBAC + sentinel 테넌트 중지/재개 round-trip + 404/400, 8 assertions)
 - `SEED_TARGET=prod npx tsx scripts/test-supervisor-erp-p1.ts` — supervisor 11 endpoint × consultant 403 contract (24 assertions)
 - `SEED_TARGET=prod npx tsx scripts/test-supervisor-settings-roundtrip.ts` — `tax_partner.settings` JSONB persist 검증 (flip → restore)
 - `SEED_TARGET=prod npx tsx scripts/seed-and-verify-trend.ts` — 2 MONTHLY 세션 seed → 6-point trend → cleanup
