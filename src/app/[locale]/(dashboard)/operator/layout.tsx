@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
+import { checkOperatorMfaGate } from '@/lib/security/operator-mfa';
 
 // Force dynamic — role check must run on every request.
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,17 @@ export default async function OperatorLayout({
     // hit the operator API endpoints directly (those have their own role
     // gating via composeMiddleware), but the UI is hidden.
     redirect(`/${locale}/dashboard`);
+  }
+
+  // 2FA enforcement (system_setting security.operator_mfa_required).
+  // When the policy is on, operator-tier staff need a verified TOTP factor
+  // AND an aal2 session to use the workbench.
+  const mfaGate = await checkOperatorMfaGate(supabase);
+  if (mfaGate === 'enroll') {
+    redirect(`/${locale}/settings?mfa=required`);
+  }
+  if (mfaGate === 'challenge') {
+    redirect(`/${locale}/login?mfa=challenge`);
   }
 
   return <>{children}</>;

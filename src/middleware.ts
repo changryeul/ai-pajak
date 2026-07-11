@@ -195,7 +195,18 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    // Exception: an aal1 session with a verified TOTP factor must be able to
+    // stay on /login to complete the 2FA challenge (operator MFA enforcement
+    // bounces such sessions to /login?mfa=challenge). getAuthenticatorAssuranceLevel
+    // reads the session JWT locally — no extra network call.
+    let pendingMfaChallenge = false;
+    if (pathWithoutLocale.startsWith('/login')) {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      pendingMfaChallenge = aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2';
+    }
+    if (!pendingMfaChallenge) {
+      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    }
   }
 
   // Operator-tier /dashboard landing — fastest possible cutoff.

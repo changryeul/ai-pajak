@@ -1,24 +1,96 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Shield, Clock, FileCheck, Zap } from 'lucide-react';
+import { Shield, Clock, FileCheck, Zap, KeyRound } from 'lucide-react';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
 import { createClient } from '@/lib/supabase/client';
 import { TrustBadges } from '@/components/trust/TrustBadges';
 
+// useSearchParams (?mfa=challenge) needs a Suspense boundary for prerender.
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
+  );
+}
+
+function LoginPageInner() {
   const t = useTranslations();
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = params.locale as string;
 
   const [identifier, setIdentifier] = useState(''); // email or NPWP
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // MFA challenge step — shown when the password session is aal1 but the
+  // account has a verified TOTP factor (nextLevel aal2). Also entered
+  // directly via ?mfa=challenge (operator layout bounces aal1 sessions here).
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+
+  // If an already-authenticated aal1 session lands here with ?mfa=challenge,
+  // resolve the pending factor and open the challenge step directly.
+  useEffect(() => {
+    if (searchParams.get('mfa') !== 'challenge') return;
+    const supabase = createClient();
+    (async () => {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.nextLevel !== 'aal2' || aal.currentLevel === 'aal2') return;
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const totp = factors?.totp?.find((f) => f.status === 'verified');
+      if (totp) setMfaFactorId(totp.id);
+    })();
+  }, [searchParams]);
+
+  const handleMfaVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaFactorId || mfaCode.length !== 6) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      const supabase = createClient();
+      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: mfaFactorId,
+      });
+      if (challengeError || !challenge) {
+        setError(t('auth.mfaInvalidCode'));
+        return;
+      }
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: mfaFactorId,
+        challengeId: challenge.id,
+        code: mfaCode,
+      });
+      if (verifyError) {
+        setError(t('auth.mfaInvalidCode'));
+        setMfaCode('');
+        return;
+      }
+      router.push(`/${locale}/dashboard`);
+      router.refresh();
+    } catch {
+      setError(t('errors.serverError'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMfaCancel = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setMfaFactorId(null);
+    setMfaCode('');
+    setPassword('');
+    setError('');
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +123,18 @@ export default function LoginPage() {
       if (signInError) {
         setError(t('auth.loginError'));
         return;
+      }
+
+      // 2FA: if a verified TOTP factor exists, the password session is only
+      // aal1 — require the code before entering the app.
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+        const { data: factors } = await supabase.auth.mfa.listFactors();
+        const totp = factors?.totp?.find((f) => f.status === 'verified');
+        if (totp) {
+          setMfaFactorId(totp.id);
+          return;
+        }
       }
 
       router.push(`/${locale}/dashboard`);
@@ -118,9 +202,56 @@ export default function LoginPage() {
               <span className="text-2xl font-bold text-white">AI</span>
             </div>
             <CardTitle className="text-2xl">{t('common.appName')}</CardTitle>
-            <CardDescription>{t('auth.login')}</CardDescription>
+            <CardDescription>{mfaFactorId ? t('auth.mfaChallengeTitle') : t('auth.login')}</CardDescription>
           </CardHeader>
 
+          {mfaFactorId ? (
+          <form onSubmit={handleMfaVerify}>
+            <CardContent className="space-y-4">
+              {error && (
+                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex items-start gap-3 rounded-lg bg-emerald-50 p-3">
+                <KeyRound className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-emerald-800">{t('auth.mfaChallengeDesc')}</p>
+              </div>
+
+              <Input
+                label={t('auth.mfaCodeLabel')}
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
+                autoFocus
+                required
+              />
+            </CardContent>
+
+            <CardFooter className="flex flex-col gap-4">
+              <Button
+                type="submit"
+                className="w-full h-11 bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-emerald-700 hover:to-emerald-700 shadow-lg shadow-emerald-500/25"
+                disabled={isLoading || mfaCode.length !== 6}
+              >
+                {isLoading ? t('common.loading') : t('auth.mfaVerify')}
+              </Button>
+
+              <button
+                type="button"
+                onClick={handleMfaCancel}
+                className="text-center text-sm text-gray-500 hover:text-gray-700 hover:underline"
+              >
+                {t('auth.mfaUseAnotherAccount')}
+              </button>
+            </CardFooter>
+          </form>
+          ) : (
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
               {error && (
@@ -174,6 +305,7 @@ export default function LoginPage() {
               </p>
             </CardFooter>
           </form>
+          )}
         </Card>
 
         {/* Trust badges below form */}

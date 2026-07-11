@@ -212,7 +212,7 @@ body: { itemId: "...", action: "review" | "submit_for_approval" | "approve" | "r
 
 - 운영팀 모든 조치는 `audit_log` 테이블에 자동 기록. `activity_type`, `actor_user_id`, `activity_details`, IP, User-Agent, 타임스탬프가 함께 저장됩니다.
 - 감사 로그는 PLATFORM_ADMIN과 MASTER만 조회 가능합니다.
-- 운영팀 계정은 **2FA 필수**입니다 (정책 강제 예정).
+- 운영팀 계정은 **2FA 필수**입니다. MASTER가 `/operator/settings`의 "운영팀 2FA" 카드로 정책을 켜면, 운영팀 계정은 TOTP 미등록 시 설정 페이지(`/settings?mfa=required`)로, 등록됐지만 이번 세션에서 코드 확인을 안 했으면 로그인 챌린지로 자동 이동합니다. 등록은 설정 → 2단계 인증 → 인증 앱 설정.
 - 비밀번호 정책: 8자 이상 + 대/소/숫자/특수문자
 
 ## 9. 자주 묻는 질문

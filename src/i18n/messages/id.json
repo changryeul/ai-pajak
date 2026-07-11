@@ -117,7 +117,13 @@
     "errNpwpDigits": "NPWP harus 15 digit (saat ini: {have}).",
     "errNikDigits": "NIK harus 16 digit (saat ini: {have}).",
     "npwpDigitsRequired": "NPWP: 15 digit",
-    "nikDigitsRequired": "NIK: 16 digit"
+    "nikDigitsRequired": "NIK: 16 digit",
+    "mfaChallengeTitle": "Autentikasi dua faktor",
+    "mfaChallengeDesc": "Masukkan kode 6 digit dari aplikasi autentikator Anda (mis. Google Authenticator).",
+    "mfaCodeLabel": "Kode verifikasi",
+    "mfaVerify": "Verifikasi",
+    "mfaInvalidCode": "Kode verifikasi tidak valid. Silakan coba lagi.",
+    "mfaUseAnotherAccount": "Masuk dengan akun lain"
   },
   "nav": {
     "dashboard": "Dasbor",
@@ -535,7 +541,11 @@
       "coretaxValueOff": "Mode manual",
       "coretaxToggle": "Toggle",
       "manageTarget": "Cakupan",
-      "manageTargetValue": "Form + Tax Code + Rule"
+      "manageTargetValue": "Form + Tax Code + Rule",
+      "mfaPolicy": "2FA Operator",
+      "mfaPolicyOn": "Wajib (diberlakukan)",
+      "mfaPolicyOff": "Disarankan (tidak diberlakukan)",
+      "mfaPolicyToggle": "Alihkan"
     },
     "badan": {
       "current": "Standar saat ini",
@@ -7828,6 +7838,10 @@
         "notMe": "Bukan saya"
       },
       "empty": "Belum ada riwayat login."
+    },
+    "mfaRequiredBanner": {
+      "title": "Autentikasi dua faktor diperlukan",
+      "desc": "Akun tim operasional wajib menggunakan 2FA. Selesaikan pendaftaran melalui 'Atur aplikasi autentikator' di bawah untuk mengakses ruang kerja operator."
     }
   },
   "billingPage": {

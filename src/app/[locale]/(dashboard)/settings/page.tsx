@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,11 +14,24 @@ const STEP_KEYS: ('password' | 'twoFactor' | 'recentLogin')[] = [
   'password', 'twoFactor', 'recentLogin',
 ];
 
+// useSearchParams (?mfa=required) needs a Suspense boundary for prerender.
 export default function SecurityPage() {
+  return (
+    <Suspense>
+      <SecurityPageInner />
+    </Suspense>
+  );
+}
+
+function SecurityPageInner() {
   const t = useTranslations('securityPage');
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const locale = params.locale as string;
+  // Operator MFA enforcement funnel — operator/admin layouts redirect
+  // un-enrolled operator-tier staff to /settings?mfa=required.
+  const mfaRequired = searchParams.get('mfa') === 'required';
 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -200,6 +213,17 @@ export default function SecurityPage() {
         )}>
           {message.type === 'success' ? <Check className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
           {message.text}
+        </div>
+      )}
+
+      {/* Operator MFA enforcement banner */}
+      {mfaRequired && !mfaEnabled && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 mb-6">
+          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-amber-900">{t('mfaRequiredBanner.title')}</p>
+            <p className="text-sm text-amber-800 mt-0.5">{t('mfaRequiredBanner.desc')}</p>
+          </div>
         </div>
       )}
 

@@ -14,6 +14,7 @@ import { PageTitle } from '@/components/layout/PageTitle';
 import { TaxCodeRulesTable } from './_components/TaxCodeRulesTable';
 import { TaxCodeRuleAuditTimeline } from './_components/TaxCodeRuleAuditTimeline';
 import { CoretaxStatusCard } from './_components/CoretaxStatusCard';
+import { MfaPolicyCard } from './_components/MfaPolicyCard';
 import type { TaxCodeRule } from '@/types/tax-code-rule';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loadAuditRows } from '@/lib/tax-code-rule/audit-log';
@@ -63,6 +64,18 @@ export default async function OperatorSettingsPage() {
     updatedBy: coretaxRow?.updated_by ?? null,
   };
 
+  // Operator 2FA enforcement toggle — same kv pattern as coretax.
+  const { data: mfaRow } = await admin
+    .from('system_setting')
+    .select('value, updated_by, updated_at')
+    .eq('key', 'security.operator_mfa_required')
+    .single();
+  const mfaConfig = {
+    enabled: (mfaRow?.value as { enabled?: boolean } | undefined)?.enabled === true,
+    updatedAt: mfaRow?.updated_at ?? null,
+    updatedBy: mfaRow?.updated_by ?? null,
+  };
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-[1400px]">
       <PageTitle title={t('pageTitle')} />
@@ -78,11 +91,12 @@ export default async function OperatorSettingsPage() {
         </span>
       </div>
 
-      {/* ── 4-card header strip ── */}
+      {/* ── header card strip ── */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-6">
         <Header label={t('header.fiscalYear')} value="2025" />
         <Header label={t('header.platform')} value="Coretax DJP" />
         <CoretaxStatusCard initial={coretaxConfig} canEdit={canEdit} />
+        <MfaPolicyCard initial={mfaConfig} canEdit={canEdit} />
         <Header label={t('header.manageTarget')} value={t('header.manageTargetValue')} />
       </div>
 

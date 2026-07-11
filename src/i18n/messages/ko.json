@@ -117,7 +117,13 @@
     "errNpwpDigits": "NPWP는 15자리 숫자입니다 (현재: {have}자리).",
     "errNikDigits": "NIK는 16자리 숫자입니다 (현재: {have}자리).",
     "npwpDigitsRequired": "NPWP 15자리",
-    "nikDigitsRequired": "NIK 16자리"
+    "nikDigitsRequired": "NIK 16자리",
+    "mfaChallengeTitle": "2단계 인증",
+    "mfaChallengeDesc": "인증 앱(Google Authenticator 등)에 표시된 6자리 코드를 입력하세요.",
+    "mfaCodeLabel": "인증 코드",
+    "mfaVerify": "확인",
+    "mfaInvalidCode": "인증 코드가 올바르지 않습니다. 다시 시도해 주세요.",
+    "mfaUseAnotherAccount": "다른 계정으로 로그인"
   },
   "nav": {
     "dashboard": "대시보드",
@@ -535,7 +541,11 @@
       "coretaxValueOff": "수동 처리",
       "coretaxToggle": "토글",
       "manageTarget": "관리대상",
-      "manageTargetValue": "Form + Tax Code + Rule"
+      "manageTargetValue": "Form + Tax Code + Rule",
+      "mfaPolicy": "운영팀 2FA",
+      "mfaPolicyOn": "필수 (강제 중)",
+      "mfaPolicyOff": "권장 (미강제)",
+      "mfaPolicyToggle": "토글"
     },
     "badan": {
       "current": "현재 기준",
@@ -7950,6 +7960,10 @@
         "notMe": "내 활동 아님"
       },
       "empty": "표시할 로그인 기록이 없습니다."
+    },
+    "mfaRequiredBanner": {
+      "title": "2단계 인증 등록이 필요합니다",
+      "desc": "운영팀 계정은 2단계 인증(2FA)이 필수입니다. 아래 '인증 앱 설정'으로 등록을 완료해야 운영 화면을 사용할 수 있습니다."
     }
   },
   "billingPage": {

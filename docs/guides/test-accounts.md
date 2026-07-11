@@ -35,18 +35,18 @@ SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts       # 개인 고�
 
 비밀번호는 **전 계정 공통: `TestPassword123!`**
 
-| # | 역할 | 이메일 | 소속 (tenant) | 로그인 후 착지 |
-|---|---|---|---|---|
-| 1 | CUSTOMER (INDIVIDUAL 개인) | customer.test@example.com | — | `/dashboard` (개인 SPT 대시보드) |
-| 2 | CUSTOMER (COMPANY 법인) | company.test@example.com | — | `/dashboard` (월 신고·결산 대시보드) |
-| 3 | CONSULTANT (JTC 내부) | consultant.test@jakartatax.co.id | JTC | `/dashboard` (컨설턴트 뷰) |
-| 4 | TAX_ADVISOR (JTC 내부, 세무사) | advisor.test@jakartatax.co.id | JTC | `/dashboard` (컨설턴트 뷰) |
-| 5 | CONSULTANT (EXTERNAL) | external.consultant@mitrapajak.com | PT Mitra Pajak Sentosa | `/dashboard` (컨설턴트 뷰) |
-| 6 | FIRM_ADMIN (EXTERNAL 법인 관리자) | firmadmin.test@mitrapajak.com | PT Mitra Pajak Sentosa | `/consultant-erp/firm-admin/staff` |
-| 7 | TAX_OPERATOR (운영팀 상담원) | operator.test@aipajak.com | JTC 운영팀 | `/operator/my-work` |
-| 8 | TAX_OPERATOR_SUPERVISOR (운영팀 팀장) | supervisor.test@aipajak.com | JTC 운영팀 | `/operator/dashboard` |
-| 9 | TAX_OPERATOR_MASTER **+ PLATFORM_MASTER 겸직** | master.test@aipajak.com | JTC 운영팀 / MonoFlip | `/admin/master` |
-| 10 | PLATFORM_ADMIN (기술 관리자) | admin.test@aipajak.com | MonoFlip | `/dashboard` → `/admin/monitoring` 메뉴 사용 |
+| #   | 역할                                           | 이메일                                | 소속 (tenant)            | 로그인 후 착지                                 |
+| --- | -------------------------------------------- | ---------------------------------- | ---------------------- | ---------------------------------------- |
+| 1   | CUSTOMER (INDIVIDUAL 개인)                     | customer.test@example.com          | —                      | `/dashboard` (개인 SPT 대시보드)               |
+| 2   | CUSTOMER (COMPANY 법인)                        | company.test@example.com           | —                      | `/dashboard` (월 신고·결산 대시보드)              |
+| 3   | CONSULTANT (JTC 내부)                          | consultant.test@jakartatax.co.id   | JTC                    | `/dashboard` (컨설턴트 뷰)                    |
+| 4   | TAX_ADVISOR (JTC 내부, 세무사)                    | advisor.test@jakartatax.co.id      | JTC                    | `/dashboard` (컨설턴트 뷰)                    |
+| 5   | CONSULTANT (EXTERNAL)                        | external.consultant@mitrapajak.com | PT Mitra Pajak Sentosa | `/dashboard` (컨설턴트 뷰)                    |
+| 6   | FIRM_ADMIN (EXTERNAL 법인 관리자)                 | firmadmin.test@mitrapajak.com      | PT Mitra Pajak Sentosa | `/consultant-erp/firm-admin/staff`       |
+| 7   | TAX_OPERATOR (운영팀 상담원)                       | operator.test@aipajak.com          | JTC 운영팀                | `/operator/my-work`                      |
+| 8   | TAX_OPERATOR_SUPERVISOR (운영팀 팀장)             | supervisor.test@aipajak.com        | JTC 운영팀                | `/operator/dashboard`                    |
+| 9   | TAX_OPERATOR_MASTER **+ PLATFORM_MASTER 겸직** | master.test@aipajak.com            | JTC 운영팀 / MonoFlip     | `/admin/master`                          |
+| 10  | PLATFORM_ADMIN (기술 관리자)                      | admin.test@aipajak.com             | MonoFlip               | `/dashboard` → `/admin/monitoring` 메뉴 사용 |
 
 착지 분기는 `src/middleware.ts`(edge, 운영팀 tier)와 `(dashboard)/dashboard/page.tsx`(FIRM_ADMIN 포함)가 담당합니다. 착지가 어긋나거나 `/dashboard ↔ /operator` 핑퐁이 생기면 그 두 파일의 PRIORITY 목록 불일치를 의심하세요.
 
@@ -146,6 +146,8 @@ SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts       # 개인 고�
 
 **차단 확인**: `approve`/`reject`/`reassign` 버튼이 **없어야 함** (팀장 전용). `/consultant-erp/supervisor/*`, `/admin/master/*` 403.
 
+**⚠️ 2FA 강제 정책**: master가 `/operator/settings`의 "운영팀 2FA" 토글을 켜면 운영팀 계정(7·8·9)은 TOTP 미등록 시 `/settings?mfa=required`로 튕깁니다. **켠 상태로는 운영팀 계정 브라우저 e2e가 실패**하니 테스트 전에 토글 상태를 확인하세요 (기본 off).
+
 **자동 회귀**: `operator-queue-workflow.spec.ts` (e2e) / `scripts/test-operator-queue-flow.ts` (11-state 전이 전체).
 
 ---
@@ -171,8 +173,9 @@ SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts       # 개인 고�
 
 **신고운영 (TAX_OPERATOR_MASTER 소관)**:
 1. `/operator/settings` §3 — Coretax API 토글 on/off (DB `system_setting` round-trip, 60초 캐시)
-2. Tax Code Rule 인라인 편집 → 저장 → §5 audit timeline 에 diff 기록 확인
-3. PPN luxury 분류 관리
+2. `/operator/settings` — "운영팀 2FA" 토글 (운영팀 2FA 강제 정책, 계정 7·8·9에 적용. 테스트 후 반드시 원상복구)
+3. Tax Code Rule 인라인 편집 → 저장 → §5 audit timeline 에 diff 기록 확인
+4. PPN luxury 분류 관리
 
 **사업운영 (PLATFORM_MASTER 소관)**:
 4. `/admin/master` — MRR·플랜 분포·Pro 한도 초과 고객 통계
@@ -181,7 +184,7 @@ SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts       # 개인 고�
 
 **차단 확인**: 두 MASTER 모두 **고객 세무 데이터 원장에는 직접 접근 불가**여야 함. 신고운영 메뉴(Coretax 등)와 사업운영 메뉴(요금 등)가 서로 소관이 분리되어 있는지 (일반 운영 계정 7로 열면 403).
 
-**자동 회귀**: `scripts/test-tax-code-rule.ts` (18 asserts), `test-coretax-toggle.ts`, `test-master-tenants.ts` (8 asserts), `test-custom-pricing-flow.ts`.
+**자동 회귀**: `scripts/test-tax-code-rule.ts` (18 asserts), `test-coretax-toggle.ts`, `test-operator-mfa-toggle.ts` (6 asserts), `test-master-tenants.ts` (8 asserts), `test-custom-pricing-flow.ts`.
 
 ---
 
@@ -213,7 +216,7 @@ SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts       # 개인 고�
 수동 테스트 전후로 아래를 돌리면 서버 계약 회귀를 즉시 잡습니다.
 
 ```bash
-npm run test:smoke:prod        # ~40 steps 통합 회귀 (prod) — 가장 먼저 실행
+npm run test:smoke:prod        # ~41 steps 통합 회귀 (prod) — 가장 먼저 실행
 npm run test:e2e               # Playwright 전체 (로컬 dev 서버 + Supabase 필요)
 
 # 특정 spec 만 prod 에 (계정 시드 완료 상태 가정)

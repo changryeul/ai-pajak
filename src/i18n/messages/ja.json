@@ -117,7 +117,13 @@
     "errNpwpDigits": "NPWPは15桁必要です(現在: {have}桁)。",
     "errNikDigits": "NIKは16桁必要です(現在: {have}桁)。",
     "npwpDigitsRequired": "NPWP 15桁",
-    "nikDigitsRequired": "NIK 16桁"
+    "nikDigitsRequired": "NIK 16桁",
+    "mfaChallengeTitle": "2段階認証",
+    "mfaChallengeDesc": "認証アプリ（Google Authenticatorなど）に表示された6桁のコードを入力してください。",
+    "mfaCodeLabel": "認証コード",
+    "mfaVerify": "確認",
+    "mfaInvalidCode": "認証コードが正しくありません。もう一度お試しください。",
+    "mfaUseAnotherAccount": "別のアカウントでログイン"
   },
   "nav": {
     "dashboard": "ダッシュボード",
@@ -535,7 +541,11 @@
       "coretaxValueOff": "手動処理",
       "coretaxToggle": "切替",
       "manageTarget": "管理対象",
-      "manageTargetValue": "Form + Tax Code + Rule"
+      "manageTargetValue": "Form + Tax Code + Rule",
+      "mfaPolicy": "運営チーム2FA",
+      "mfaPolicyOn": "必須（強制中）",
+      "mfaPolicyOff": "推奨（未強制）",
+      "mfaPolicyToggle": "切替"
     },
     "badan": {
       "current": "現在の基準",
@@ -7828,6 +7838,10 @@
         "notMe": "身に覚えなし"
       },
       "empty": "表示するログイン履歴がありません。"
+    },
+    "mfaRequiredBanner": {
+      "title": "2段階認証の登録が必要です",
+      "desc": "運営チームのアカウントは2段階認証（2FA）が必須です。下の「認証アプリ設定」から登録を完了すると運営画面を利用できます。"
     }
   },
   "billingPage": {

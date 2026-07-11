@@ -52,6 +52,7 @@ const STEPS: Step[] = [
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },
   { name: 'coretax toggle (Track D)', file: 'test-coretax-toggle.ts' },
+  { name: 'operator MFA toggle (2FA 강제)', file: 'test-operator-mfa-toggle.ts' },
   { name: 'luxury classifications CRUD + RBAC', file: 'test-luxury-classifications.ts' },
   { name: 'customer-ai templates CRUD + RBAC', file: 'test-customer-ai-templates.ts' },
   // --- Real-file importer regression (BINTANG JAYA) --------------------

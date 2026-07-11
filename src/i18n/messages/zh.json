@@ -117,7 +117,13 @@
     "errNpwpDigits": "NPWP必须为15位数字(当前:{have}位)。",
     "errNikDigits": "NIK必须为16位数字(当前:{have}位)。",
     "npwpDigitsRequired": "NPWP 15位",
-    "nikDigitsRequired": "NIK 16位"
+    "nikDigitsRequired": "NIK 16位",
+    "mfaChallengeTitle": "两步验证",
+    "mfaChallengeDesc": "请输入身份验证器应用（如 Google Authenticator）中显示的6位验证码。",
+    "mfaCodeLabel": "验证码",
+    "mfaVerify": "验证",
+    "mfaInvalidCode": "验证码不正确，请重试。",
+    "mfaUseAnotherAccount": "使用其他账号登录"
   },
   "nav": {
     "dashboard": "仪表盘",
@@ -535,7 +541,11 @@
       "coretaxValueOff": "手动处理",
       "coretaxToggle": "切换",
       "manageTarget": "管理对象",
-      "manageTargetValue": "Form + Tax Code + Rule"
+      "manageTargetValue": "Form + Tax Code + Rule",
+      "mfaPolicy": "运营团队2FA",
+      "mfaPolicyOn": "必须（强制中）",
+      "mfaPolicyOff": "建议（未强制）",
+      "mfaPolicyToggle": "切换"
     },
     "badan": {
       "current": "当前标准",
@@ -7828,6 +7838,10 @@
         "notMe": "非本人操作"
       },
       "empty": "暂无登录记录。"
+    },
+    "mfaRequiredBanner": {
+      "title": "需要注册两步验证",
+      "desc": "运营团队账号必须启用两步验证（2FA）。请通过下方「设置身份验证器应用」完成注册后才能使用运营界面。"
     }
   },
   "billingPage": {

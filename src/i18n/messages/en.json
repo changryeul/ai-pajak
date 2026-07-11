@@ -117,7 +117,13 @@
     "errNpwpDigits": "NPWP must be 15 digits (currently: {have}).",
     "errNikDigits": "NIK must be 16 digits (currently: {have}).",
     "npwpDigitsRequired": "NPWP: 15 digits",
-    "nikDigitsRequired": "NIK: 16 digits"
+    "nikDigitsRequired": "NIK: 16 digits",
+    "mfaChallengeTitle": "Two-factor authentication",
+    "mfaChallengeDesc": "Enter the 6-digit code from your authenticator app (e.g. Google Authenticator).",
+    "mfaCodeLabel": "Verification code",
+    "mfaVerify": "Verify",
+    "mfaInvalidCode": "Invalid verification code. Please try again.",
+    "mfaUseAnotherAccount": "Sign in with a different account"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -535,7 +541,11 @@
       "coretaxValueOff": "Manual mode",
       "coretaxToggle": "Toggle",
       "manageTarget": "Scope",
-      "manageTargetValue": "Form + Tax Code + Rule"
+      "manageTargetValue": "Form + Tax Code + Rule",
+      "mfaPolicy": "Operator 2FA",
+      "mfaPolicyOn": "Required (enforced)",
+      "mfaPolicyOff": "Recommended (not enforced)",
+      "mfaPolicyToggle": "Toggle"
     },
     "badan": {
       "current": "Current standard",
@@ -7828,6 +7838,10 @@
         "notMe": "Not me"
       },
       "empty": "No login activity to display."
+    },
+    "mfaRequiredBanner": {
+      "title": "Two-factor authentication required",
+      "desc": "Operations team accounts require 2FA. Complete enrollment via 'Set up authenticator app' below to access the operator workspace."
     }
   },
   "billingPage": {
