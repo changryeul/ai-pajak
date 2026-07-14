@@ -178,6 +178,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (updateError) {
+      // No row for this id → PostgREST cannot coerce .single() (PGRST116).
+      // That is a bad customer id, not a server fault — return 404.
+      if (updateError.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
+      }
       loggers.api.error({ err: updateError }, 'Tax regime save failed');
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
