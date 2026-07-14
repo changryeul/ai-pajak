@@ -556,7 +556,11 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           lifestyle mismatch / asset drop / income dip / foreign assets /
           debt-exceeds-asset. 샘플 데이터일 때는 기존 단일 anomaly 메시지로
           대체 표시 (실제 데이터 없을 때는 경고 대신 "실데이터 필요" 톤 유지). */}
-      {detectedRisks.length > 0 ? (
+      {/* 샘플 데이터(신규 고객, 실 신고 0건)일 때는 이상 감지·자금출처·AI
+          코멘트 카드를 숨긴다 — 실제 값이 아닌 데모 수치로 "세무 검토 필요"
+          같은 경고를 신규 고객에게 보여주지 않기 위함. 감사위험 카드가 이미
+          같은 방식(sample → 빈 배열)으로 동작하므로 일관성도 맞춘다. */}
+      {!isSampleData && (detectedRisks.length > 0 ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4">
           <p className="font-semibold text-red-800 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
@@ -618,9 +622,10 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
             {t('riskDetectionClearBody')}
           </p>
         </div>
-      )}
+      ))}
 
       {/* 9b. Fund source checklist */}
+      {!isSampleData && (
       <div className="rounded-xl border border-blue-200 bg-white p-4">
         <p className="font-semibold text-blue-800 flex items-center gap-2">
           <MessageCircle className="h-4 w-4" />
@@ -647,8 +652,10 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           ))}
         </div>
       </div>
+      )}
 
       {/* 10a. AI comment */}
+      {!isSampleData && (
       <Card className="border-0 shadow-sm">
         <CardContent className="p-5 space-y-2">
           <p className="font-semibold text-gray-900 flex items-center gap-2">
@@ -669,6 +676,7 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
           </ul>
         </CardContent>
       </Card>
+      )}
 
       {/* AI Tax Advisory — only renders cards with actual signal for individuals */}
       <TaxAdvisoryPanel />
