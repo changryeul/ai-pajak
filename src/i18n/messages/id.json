@@ -7354,7 +7354,9 @@
     "nationalityKR": "Korea",
     "nationalityUS": "Amerika Serikat",
     "nationalityJP": "Jepang",
-    "nationalityLockedHint": "Diisi saat pelaporan — ubah di layar SPT"
+    "nationalityLockedHint": "Diisi saat pelaporan — ubah di layar SPT",
+    "welcomeTitle": "Pendaftaran selesai 🎉",
+    "welcomeBody": "Silakan periksa detail profil Anda di bawah ini terlebih dahulu. Konsultan Jakarta Tax Consulting akan segera membantu pelaporan pertama Anda."
   },
   "filingHistory": {
     "pageTitle": "Laporan pajak",

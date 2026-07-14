@@ -7354,7 +7354,9 @@
     "nationalityKR": "韩国",
     "nationalityUS": "美国",
     "nationalityJP": "日本",
-    "nationalityLockedHint": "申报时填写 — 在 SPT 页面修改"
+    "nationalityLockedHint": "申报时填写 — 在 SPT 页面修改",
+    "welcomeTitle": "注册已完成 🎉",
+    "welcomeBody": "请先确认下方的个人资料。Jakarta Tax Consulting 顾问将很快协助您完成首次申报。"
   },
   "filingHistory": {
     "pageTitle": "税务报告",

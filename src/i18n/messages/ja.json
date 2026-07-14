@@ -7354,7 +7354,9 @@
     "nationalityKR": "韓国",
     "nationalityUS": "アメリカ",
     "nationalityJP": "日本",
-    "nationalityLockedHint": "申告時に入力 — 変更は SPT 画面で"
+    "nationalityLockedHint": "申告時に入力 — 変更は SPT 画面で",
+    "welcomeTitle": "登録が完了しました 🎉",
+    "welcomeBody": "まず下記のプロフィール情報をご確認ください。Jakarta Tax Consulting の担当者がまもなく初回申告をサポートします。"
   },
   "filingHistory": {
     "pageTitle": "税務レポート",

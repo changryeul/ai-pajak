@@ -7476,7 +7476,9 @@
     "nationalityKR": "한국",
     "nationalityUS": "미국",
     "nationalityJP": "일본",
-    "nationalityLockedHint": "신고 시 입력한 값 — 수정은 SPT 입력 화면에서"
+    "nationalityLockedHint": "신고 시 입력한 값 — 수정은 SPT 입력 화면에서",
+    "welcomeTitle": "가입이 완료되었습니다 🎉",
+    "welcomeBody": "먼저 아래 프로필 정보를 확인해 주세요. Jakarta Tax Consulting 상담원이 곧 첫 신고를 도와드립니다."
   },
   "filingHistory": {
     "pageTitle": "세금 보고서",
