@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { loggers } from '@/lib/logger';
 import { computePayslipTotals } from '@/app/api/tax/monthly-payslip/route';
+import { loadRateOverrides } from '@/lib/tax/rate-provider';
 
 /**
  * POST /api/tax/employees/import
@@ -79,6 +80,8 @@ export async function POST(request: NextRequest) {
     };
 
     const admin = getSupabaseAdmin();
+    // Warm DB rate overrides once before the row loop (PTKP/bracket/surcharge).
+    await loadRateOverrides();
     let imported = 0;
     let skipped = 0;
     let payslipsUpserted = 0;

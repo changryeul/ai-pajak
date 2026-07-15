@@ -6,6 +6,7 @@ import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { PPh21Calculator } from '@/lib/tax/pph21-calculator';
+import { loadRateOverrides } from '@/lib/tax/rate-provider';
 import type { RequestWithSession } from '@/types/auth';
 import type { PPh21Data } from '@/types';
 import type { PTKPCategory } from '@/config/constants';
@@ -284,6 +285,10 @@ async function handlePut(req: RequestWithSession): Promise<Response> {
     if (!id) {
       return NextResponse.json({ error: 'id required' }, { status: 400 });
     }
+
+    // Warm DB rate overrides so computePayslipTotals picks up any admin-set
+    // PTKP / bracket / surcharge changes (falls back to TS constants if none).
+    await loadRateOverrides();
 
     const admin = getSupabaseAdmin();
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { invalidateRateCache } from '@/lib/tax/rate-provider';
 
 /**
  * GET /api/admin/tax-rates?category=PPH21_BRACKET
@@ -95,6 +96,9 @@ export async function PUT(request: NextRequest) {
       .eq('id', id);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    // Drop this instance's rate cache so PPh21 picks up the edit within ~60s
+    // across all instances (immediately on this one).
+    invalidateRateCache();
     return NextResponse.json({ success: true, message: 'Rate updated' });
   } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 });

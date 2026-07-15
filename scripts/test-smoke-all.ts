@@ -75,6 +75,7 @@ const STEPS: Step[] = [
   // No fixture dependency → always runs.
   { name: 'pph21 strict template e2e', file: 'verify-pph21-strict-template.ts' },
   { name: 'pph21 payslip NPWP surcharge', file: 'verify-payslip-npwp-surcharge.ts' },
+  { name: 'pph21 rate-provider DB overrides', file: 'verify-rate-provider-overrides.ts' },
   // --- PPh 4(2) partial view via regime filter (2026-06-17) -----------
   { name: 'pph42 partial view (regime=PPH4_2)', file: 'verify-pph42-page.ts' },
   // --- Operator-initiated SPT Masa from chat thread (2026-06-17) -----

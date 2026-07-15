@@ -1,5 +1,6 @@
 import { PPH21_BRACKETS, PTKP, type PTKPCategory } from '@/config/constants';
 import { getTERCategory, lookupTERRate } from '@/config/pph21-ter-rates';
+import { resolvePTKP, resolveBrackets, resolveNpwpSurcharge } from '@/lib/tax/rate-provider';
 import type { PPh21Data, PPh21Calculation, PPh21TERCalculation, TaxBracketResult } from '@/types';
 
 /**
@@ -66,8 +67,8 @@ export class PPh21Calculator {
     // Calculate net income
     const netIncome = grossIncome - totalDeductions;
 
-    // Get PTKP based on category
-    const ptkpAmount = PTKP[data.ptkp_category];
+    // Get PTKP based on category (DB override if configured, else TS constant)
+    const ptkpAmount = resolvePTKP(data.ptkp_category, PTKP[data.ptkp_category]);
 
     // Calculate taxable income (PKP - Penghasilan Kena Pajak)
     const taxableIncome = Math.max(0, netIncome - ptkpAmount);
@@ -78,7 +79,7 @@ export class PPh21Calculator {
     // Apply NPWP surcharge if applicable (Pasal 21(5a) UU PPh)
     const applyNpwpSurcharge = this.shouldApplyNpwpSurcharge(data);
     const finalTaxAmount = applyNpwpSurcharge
-      ? Math.round(taxAmount * (1 + NPWP_SURCHARGE_RATE))
+      ? Math.round(taxAmount * (1 + resolveNpwpSurcharge(NPWP_SURCHARGE_RATE)))
       : taxAmount;
 
     return {
@@ -142,7 +143,7 @@ export class PPh21Calculator {
 
     // Apply NPWP surcharge (20% higher) per Pasal 21(5a)
     if (applyNpwpSurcharge) {
-      taxAmount = Math.round(taxAmount * (1 + NPWP_SURCHARGE_RATE));
+      taxAmount = Math.round(taxAmount * (1 + resolveNpwpSurcharge(NPWP_SURCHARGE_RATE)));
     }
 
     return {
@@ -183,7 +184,9 @@ export class PPh21Calculator {
     let totalTax = 0;
     const breakdown: TaxBracketResult[] = [];
 
-    for (const bracket of PPH21_BRACKETS) {
+    // DB override if a full valid ladder is configured, else TS constants.
+    const brackets = resolveBrackets(PPH21_BRACKETS);
+    for (const bracket of brackets) {
       if (remainingIncome <= 0) break;
 
       const bracketRange = bracket.max - bracket.min;
