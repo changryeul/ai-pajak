@@ -45,6 +45,7 @@ export function computePayslipTotals(input: {
   other_deductions?: number;
   period: string;
   ptkp_category?: string | null;
+  employee_npwp?: string | null;
 }): {
   total_gross: number;
   total_deduction: number;
@@ -93,11 +94,20 @@ export function computePayslipTotals(input: {
     .replace(/\//g, '')
     .replace(/\s/g, '')
     .toUpperCase();
-  const ptkpCategory = normalizedPtkp as PTKPCategory;
+  // 알 수 없는 값이 그대로 넘어가면 getTERCategory 가 undefined 를 반환해
+  // 세율 0(과세 누락)으로 이어지므로, 유효 키가 아니면 TK0 로 보정한다.
+  const VALID_PTKP = new Set([
+    'TK0', 'TK1', 'TK2', 'TK3', 'K0', 'K1', 'K2', 'K3', 'KI0', 'KI1', 'KI2', 'KI3',
+  ]);
+  const ptkpCategory = (VALID_PTKP.has(normalizedPtkp) ? normalizedPtkp : 'TK0') as PTKPCategory;
+  // NPWP 없는 직원은 Pasal 21(5a) 에 따라 20% 가산. payslip 레코드의 실제
+  // employee_npwp 로 판정한다 (과거엔 has_npwp:true 하드코딩으로 가산이
+  // 절대 적용되지 않아 무-NPWP 직원 세율이 20% 낮게 나오던 버그).
+  const empNpwp = (input.employee_npwp ?? '').trim();
   const currentMonth = parseInt(input.period.split('-')[1]);
   const pphData: PPh21Data = {
     employee_name: '',
-    employee_npwp: '',
+    employee_npwp: empNpwp,
     employee_nik: '',
     ptkp_category: ptkpCategory,
     gross_salary: totalGross,
@@ -107,7 +117,7 @@ export function computePayslipTotals(input: {
     other_deductions: Number(input.other_deductions || 0),
     tax_period_start: `${input.period}-01`,
     tax_period_end: `${input.period}-30`,
-    has_npwp: true,
+    has_npwp: empNpwp.length > 0,
     month: currentMonth,
   };
 
@@ -118,7 +128,12 @@ export function computePayslipTotals(input: {
     pph21Tax = calc.tax_amount;
     terRate = calc.ter_rate;
   } catch (err) {
-    loggers.api.warn({ err, ptkpCategory }, 'PPh 21 TER calculation fallback');
+    // ptkp 보정으로 정상 입력에선 도달 불가. 도달했다면 세금 0 이 저장되므로
+    // warn 이 아닌 error 로 올려 모니터링/Sentry 에 반드시 노출한다.
+    loggers.api.error(
+      { err, ptkpCategory, normalizedPtkp, period: input.period },
+      'PPh 21 TER calculation failed — payslip saved with tax=0, needs review',
+    );
   }
 
   // BPJS company + Biaya Jabatan

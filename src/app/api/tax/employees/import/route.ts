@@ -148,6 +148,7 @@ export async function POST(request: NextRequest) {
         ...baseFields,
         period: taxPeriod,
         ptkp_category: ptkp,
+        employee_npwp: getVal(cols, 'employee_npwp') || null,
       });
 
       const payload = {
