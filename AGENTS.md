@@ -128,7 +128,8 @@ Annual SPT (개인/법인 연간):
 
 Monthly SPT Masa (월 신고) and withholding:
 - `spt-masa/`, `spt-masa-calculator.ts` — monthly SPT Masa generation + PDF
-- `pph21-calculator.ts` — employee withholding (개정 2024 brackets)
+- `pph21-calculator.ts` — employee withholding (개정 2024 brackets). PTKP/누진 브래킷/무-NPWP 20% 가산은 `rate-provider.ts` 를 통해 resolve — 하드코딩 TS 상수가 항상 fallback, `tax_rate_config` DB row 가 override (60s cache, sane-range 검증 실패 시 TS 상수로 자동 복귀). MASTER 가 `/admin/tax-rates` 에서 편집하면 배포 없이 ~60초 내 반영. 계산 전 `loadRateOverrides()` warm, 편집 후 `invalidateRateCache()`. TER 125구간은 하드코딩 유지.
+- `rate-provider.ts` — 위 DB-override loader (resolvePTKP / resolveBrackets / resolveNpwpSurcharge)
 - `pph22-calculator.ts` — import withholding
 - `pph23-calculator.ts` — service withholding
 - `pph26-calculator.ts` — non-resident withholding
@@ -348,7 +349,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs **~41 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue 11-state, billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
+- `npm run test:smoke:prod` — runs **~44 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue 11-state, billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, 신규고객 배정 라이프사이클, PPh21 payslip 무-NPWP 가산 회귀, tax rate provider override round-trip, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars).
 - `.github/workflows/drift-after-deploy.yml` — runs the schema drift audit on every push, waits 90s for Vercel to settle, then probes the prod DB. Complements the daily smoke by catching broken migration pushes within minutes instead of up to 24h.
@@ -362,6 +363,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-operator-queue-flow.ts` — 운영팀 11-state 워크플로우 전체 전이
 - `SEED_TARGET=prod npx tsx scripts/test-closing-bpe-sync.ts` — 결산 wizard ↔ operator queue ↔ BPE 동기화
 - `SEED_TARGET=prod npx tsx scripts/test-onboarding-flow.ts` — 신규 가입 → 첫 신고까지 골든 패스
+- `SEED_TARGET=prod npx tsx scripts/test-new-customer-assignment.ts` — 신규고객 생성 → 미배정 큐 등장 → supervisor 배정 → 큐 제거 → DB edge active 라이프사이클 (prod sentinel, 자동 cleanup)
 - `SEED_TARGET=prod npx tsx scripts/test-staff-workflow.ts` — supervisor → operator 배정/평가 흐름
 - `SEED_TARGET=prod npx tsx scripts/test-monitoring-flow.ts` — Sentry / circuit breaker / monitoring dashboard 신호
 - `npx tsx scripts/test-advisory-flow.ts` — `/api/customer/advisory` PKP/UMKM/Tax Treaty 응답 shape + INDIVIDUAL/COMPANY/unauth 3-way 검증
@@ -381,6 +383,8 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-operator-mfa-toggle.ts` — 운영팀 2FA 강제 토글 GET/PATCH RBAC + DB round-trip (총 6 assertion, flip 후 반드시 revert)
 - `SEED_TARGET=prod npx tsx scripts/validate-pph23-e2e.ts` — PPh23 wholesale importer → POST → DB → cleanup (BINTANG JAYA real xlsx; auto-skip if file absent)
 - `SEED_TARGET=prod npx tsx scripts/verify-pph21-strict-template.ts` — PPh21 strict 34-col app template generated in-memory → multipart POST → DB read-back (HR fields preserved) → cleanup. `[STRICT-PPH21-E2E]` sentinel prefix. No fixture dependency (2026-06-14 JTC 양식 retirement)
+- `SEED_TARGET=prod npx tsx scripts/verify-payslip-npwp-surcharge.ts` — payslip PPh21 무-NPWP 20% 가산 offline 회귀 (computePayslipTotals 에 employee_npwp 배선, 5 asserts)
+- `SEED_TARGET=prod npx tsx scripts/verify-rate-provider-overrides.ts` — `tax_rate_config` PTKP override → PPh21 반영 → 복원 round-trip (4 asserts)
 - `SEED_TARGET=prod npx tsx scripts/validate-pph23-bintang-jaya.ts [sheet]` — offline PPh23 importer pipeline 검증 (sheet 2601~2604)
 - `SEED_TARGET=prod npx tsx scripts/validate-pph21-bintang-jaya.ts` — offline PPh21 parser + auto-mapping 검증 (cleanCell 회귀 확인)
 - `SEED_TARGET=prod npx tsx scripts/validate-ppn-e2e.ts` — PPN wholesale (VAT OUT+IN) importer → POST → DB → cleanup
