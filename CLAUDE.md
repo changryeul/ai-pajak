@@ -191,6 +191,16 @@ Role gating:
 
 Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `extra` payload depends on the action (`ebillingCode`, `rejectedReason`, `failedReason`).
 
+### ID Billing 발행 보드 (v19 트랙 2, 2026-07-23)
+수퍼바이저 승인완료 건만 발행대상으로 이관되는 발행 보드 — **JTC 운영팀 + 외부 세무법인(ERP) 상담원 공용** (tenant = `tax_partner` 분리, 운영팀은 JTC 기본 파트너 스코프).
+
+- **테이블**: `id_billing_issuance` (발행완료 리스트, `BIL-YYYYMM-NNN` 파트너별 일련번호, ISSUED→SENT→PAID/CANCELLED) + `id_billing_workbook_log` (작성본 생성 이력 + 항목 스냅샷 = **발행 게이트**). 마이그레이션 `20260723000002`.
+- **발행 게이트 3중 (백엔드 강제)**: 소스 APPROVED + 작성본 생성 이력 존재 + 미발행. 프론트 플래그는 신뢰하지 않는다.
+- **발행대상 소스 2종**: ① `consultant_session` APPROVED + saved calc (calc kind → 세목 매핑은 `src/lib/id-billing/kap-kjs.ts`, CORP_TAX_MONTHLY 는 `basis.selectedCase` 로 PPh25/PPh Final 하나만 표시) ② `djp_submission_queue` APPROVED (발행 시 EBILLING_GENERATED 전이 — 기존 상태기계 재사용).
+- **작성본 xlsx**: 빈 양식이 아닌 승인완료 계산값이 채워진 4시트 (README / Coretax_Ready / Company_Summary / Tax_Code_Reference). Tax_Code_Reference 는 Track B `tax_code_rule` DB 우선.
+- **API**: `/api/id-billing/{board,workbook,issue,send}` — `requireBillingIssuer` 미들웨어 (CONSULTANT/TAX_ADVISOR/TAX_OPERATOR 4계). send 는 Resend best-effort, 실패 시 미전송 유지(재시도 가능).
+- **UI**: 공용 `IdBillingBoard` 컴포넌트 — `/consultant-erp/billing` (상담원) + `/operator/billing-issuance` (운영팀) 두 진입점. 수동 완료처리 버튼 없음 (완료는 향후 Coretax NTPN 자동수집).
+
 ### Tax Filing UI Wizard (Zustand Store)
 `src/stores/tax-filing-store.ts` — persisted zustand store with 5-step wizard:
 1. `select-customer` → 2. `income-data` → 3. `deductions` → 4. `documents` → 5. `review`
@@ -351,7 +361,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs **~44 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue (Coretax 납부=신고 8-state + legacy 액션 400 계약), billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, 신규고객 배정 라이프사이클, PPh21 payslip 무-NPWP 가산 회귀, tax rate provider override round-trip, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
+- `npm run test:smoke:prod` — runs **~45 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue (Coretax 납부=신고 8-state + legacy 액션 400 계약), billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, 신규고객 배정 라이프사이클, PPh21 payslip 무-NPWP 가산 회귀, tax rate provider override round-trip, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars).
 - `.github/workflows/drift-after-deploy.yml` — runs the schema drift audit on every push, waits 90s for Vercel to settle, then probes the prod DB. Complements the daily smoke by catching broken migration pushes within minutes instead of up to 24h.
@@ -366,6 +376,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-closing-bpe-sync.ts` — 결산 wizard ↔ operator queue ↔ BPE 동기화
 - `SEED_TARGET=prod npx tsx scripts/test-onboarding-flow.ts` — 신규 가입 → 첫 신고까지 골든 패스
 - `SEED_TARGET=prod npx tsx scripts/test-new-customer-assignment.ts` — 신규고객 생성 → 미배정 큐 등장 → supervisor 배정 → 큐 제거 → DB edge active 라이프사이클 (prod sentinel, 자동 cleanup)
+- `SEED_TARGET=prod npx tsx scripts/test-id-billing-flow.ts` — ID Billing 발행 보드 계약 (RBAC 403/200 + 작성본 게이트 400 + xlsx 4시트 파싱 검증 + BIL- 일련번호 + 중복 404 + 큐 EBILLING_GENERATED 전이 + tenant 분리, 11 asserts, `[IDBILL-E2E]` sentinel)
 - `SEED_TARGET=prod npx tsx scripts/test-staff-workflow.ts` — supervisor → operator 배정/평가 흐름
 - `SEED_TARGET=prod npx tsx scripts/test-monitoring-flow.ts` — Sentry / circuit breaker / monitoring dashboard 신호
 - `npx tsx scripts/test-advisory-flow.ts` — `/api/customer/advisory` PKP/UMKM/Tax Treaty 응답 shape + INDIVIDUAL/COMPANY/unauth 3-way 검증
