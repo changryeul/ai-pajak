@@ -49,6 +49,8 @@ const STEPS: Step[] = [
   // 배정할 수 있어야 하는 흐름. 회귀가 깨지면 새 가입자가 큐에서 실종됨.
   { name: 'unassigned customers queue (P1)', file: 'test-unassigned-customers.ts' },
   { name: 'new-customer assignment lifecycle', file: 'test-new-customer-assignment.ts' },
+  // v19 트랙 2 — ID Billing 발행 보드 (승인 게이트 + 작성본 xlsx + tenant 분리)
+  { name: 'id-billing issuance board flow', file: 'test-id-billing-flow.ts' },
   // --- Admin / config governance ---------------------------------------
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },

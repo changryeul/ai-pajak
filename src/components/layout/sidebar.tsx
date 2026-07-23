@@ -187,6 +187,7 @@ const navItems: NavSection[] = [
     items: [
       { href: '/consultant-erp/dashboard', icon: LayoutDashboard, labelKey: 'nav.consultantErpDashboard' },
       { href: '/consultant-erp/work', icon: ClipboardList, labelKey: 'nav.consultantErpWork' },
+      { href: '/consultant-erp/billing', icon: CreditCard, labelKey: 'nav.consultantErpIdBilling' },
       { href: '/consultant-erp/legality', icon: Shield, labelKey: 'nav.consultantErpLegality' },
       { href: '/consultant-erp/counterparty', icon: Users, labelKey: 'nav.consultantErpCounterparty' },
     ],
@@ -270,6 +271,7 @@ const navItems: NavSection[] = [
       { href: '/operator/review-case',      icon: FileText,      labelKey: 'nav.opReview' },
       { href: '/operator/approval-request', icon: CheckCircle,   labelKey: 'nav.opApproval' },
       { href: '/operator/coretax',          icon: Receipt,       labelKey: 'nav.opCoretax' },
+      { href: '/operator/billing-issuance', icon: CreditCard,    labelKey: 'nav.opIdBilling' },
       { href: '/operator/messenger',        icon: MessageSquare, labelKey: 'nav.opMessenger' },
       { href: '/operator/customer-inbox',   icon: MessageCircle, labelKey: 'nav.customerInbox' },
       { href: '/operator/history',          icon: ClipboardList, labelKey: 'nav.opHistory' },
@@ -288,6 +290,7 @@ const navItems: NavSection[] = [
       { href: '/operator/unassigned-customers', icon: UserPlus, labelKey: 'nav.unassignedCustomers' },
       { href: '/operator/workload',   icon: ListChecks,    labelKey: 'nav.workloadManagement' },
       { href: '/operator/approvals',  icon: CheckCircle,   labelKey: 'nav.approvals' },
+      { href: '/operator/billing-issuance', icon: CreditCard, labelKey: 'nav.opIdBilling' },
       { href: '/operator/team',       icon: Users,         labelKey: 'nav.operatorTeam' },
       { href: '/operator/statistics', icon: TrendingUp,    labelKey: 'nav.operatorStatistics' },
       { href: '/operator/cases',      icon: ClipboardList, labelKey: 'nav.allCases' },

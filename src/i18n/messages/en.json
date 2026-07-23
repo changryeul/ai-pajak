@@ -279,7 +279,9 @@
     "customerInbox": "Customer Inbox",
     "masterArea": "Master Area",
     "pph42Label": "PPh 4(2) — Land & Building Rent",
-    "masterTenants": "Master — Tenants"
+    "masterTenants": "Master — Tenants",
+    "consultantErpIdBilling": "ID Billing Issuance",
+    "opIdBilling": "ID Billing Issuance"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10508,5 +10510,50 @@
   },
   "clientList": {
     "npwpMissing": "Not registered"
+  },
+  "idBilling": {
+    "pageTitle": "ID Billing Issuance",
+    "pageDesc": "Only supervisor-approved cases arrive here. Download the per-company Coretax workbook, register it in Coretax, then issue. After payment the NTPN is auto-generated in Coretax.",
+    "targetCount": "{count} companies pending",
+    "readyCount": "{count} ready to issue",
+    "issuedCount": "{count} issued",
+    "workbookBoxTitle": "Coretax input workbook (filled)",
+    "workbookBoxDesc": "Download the file pre-filled with each company's tax type, KAP/KJS, period, tax base/DPP and amount for Coretax entry. This is a filled workbook based on approved calculations — not an empty template.",
+    "downloadAll": "Download workbook for all targets",
+    "openCoretax": "Open Coretax",
+    "targetsTitle": "Pending issuance",
+    "companiesUnit": "{count} companies",
+    "noTargets": "No issuance targets right now. Supervisor-approved cases will appear here.",
+    "sourceErp": "ERP session",
+    "sourceQueue": "Monthly queue",
+    "statusReady": "Ready",
+    "statusNeedsWorkbook": "Workbook required",
+    "emailPlaceholder": "Customer email",
+    "itemPeriod": "Period",
+    "itemRate": "Rate",
+    "itemBase": "Base",
+    "itemAmount": "Tax",
+    "total": "Total",
+    "downloadWorkbook": "Download workbook",
+    "issueBtn": "Issue",
+    "issuedTitle": "Issued list",
+    "rowsUnit": "{count} rows",
+    "noIssued": "Nothing issued yet.",
+    "colCompany": "Company",
+    "colTax": "Tax",
+    "colPeriod": "Period",
+    "colAmount": "Amount",
+    "colSend": "Send",
+    "colNtpn": "NTPN / Completion",
+    "sendBtn": "Send to customer",
+    "sentBadge": "Sent",
+    "ntpnAuto": "Auto-generated in Coretax after payment",
+    "issuedFootnote": "There is no manual completion — once the Coretax API is integrated, NTPN auto-collection will complete these rows.",
+    "workbookDownloaded": "Workbook downloaded. Issuance is now enabled.",
+    "issued": "{name} moved to the issued list.",
+    "sentOk": "ID Billing sent to the customer.",
+    "sendFailed": "Send failed. Please retry shortly.",
+    "noEmail": "Cannot send — customer has no email.",
+    "networkError": "A network error occurred."
   }
 }

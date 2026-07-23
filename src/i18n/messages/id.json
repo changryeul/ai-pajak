@@ -279,7 +279,9 @@
     "customerInbox": "Kotak Pelanggan",
     "masterArea": "Area Master",
     "pph42Label": "PPh 4(2) — Sewa Tanah & Bangunan",
-    "masterTenants": "Master — Tenant"
+    "masterTenants": "Master — Tenant",
+    "consultantErpIdBilling": "Penerbitan ID Billing",
+    "opIdBilling": "Penerbitan ID Billing"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10508,5 +10510,50 @@
   },
   "clientList": {
     "npwpMissing": "Belum terdaftar"
+  },
+  "idBilling": {
+    "pageTitle": "Penerbitan ID Billing",
+    "pageDesc": "Hanya kasus yang disetujui supervisor yang masuk ke sini. Unduh workbook Coretax per perusahaan, daftarkan di Coretax, lalu terbitkan. Setelah pembayaran, NTPN dibuat otomatis di Coretax.",
+    "targetCount": "{count} perusahaan menunggu",
+    "readyCount": "{count} siap terbit",
+    "issuedCount": "{count} diterbitkan",
+    "workbookBoxTitle": "Workbook input Coretax (terisi)",
+    "workbookBoxDesc": "Unduh file yang sudah terisi jenis pajak, KAP/KJS, masa, DPP dan jumlah pajak tiap perusahaan untuk input Coretax. Ini workbook terisi berdasarkan kalkulasi yang disetujui — bukan template kosong.",
+    "downloadAll": "Unduh workbook semua target",
+    "openCoretax": "Buka Coretax",
+    "targetsTitle": "Menunggu penerbitan",
+    "companiesUnit": "{count} perusahaan",
+    "noTargets": "Tidak ada target penerbitan saat ini. Kasus yang disetujui supervisor akan muncul di sini.",
+    "sourceErp": "Sesi ERP",
+    "sourceQueue": "Antrean bulanan",
+    "statusReady": "Siap",
+    "statusNeedsWorkbook": "Perlu workbook",
+    "emailPlaceholder": "Email klien",
+    "itemPeriod": "Masa",
+    "itemRate": "Tarif",
+    "itemBase": "DPP",
+    "itemAmount": "Pajak",
+    "total": "Total",
+    "downloadWorkbook": "Unduh workbook",
+    "issueBtn": "Terbitkan",
+    "issuedTitle": "Daftar diterbitkan",
+    "rowsUnit": "{count} baris",
+    "noIssued": "Belum ada yang diterbitkan.",
+    "colCompany": "Perusahaan",
+    "colTax": "Pajak",
+    "colPeriod": "Masa",
+    "colAmount": "Jumlah",
+    "colSend": "Kirim",
+    "colNtpn": "NTPN / Penyelesaian",
+    "sendBtn": "Kirim ke klien",
+    "sentBadge": "Terkirim",
+    "ntpnAuto": "Dibuat otomatis di Coretax setelah pembayaran",
+    "issuedFootnote": "Tidak ada penyelesaian manual — setelah integrasi API Coretax, pengumpulan NTPN otomatis akan menyelesaikan baris ini.",
+    "workbookDownloaded": "Workbook diunduh. Penerbitan sekarang aktif.",
+    "issued": "{name} pindah ke daftar diterbitkan.",
+    "sentOk": "ID Billing terkirim ke klien.",
+    "sendFailed": "Gagal mengirim. Coba lagi sebentar.",
+    "noEmail": "Tidak bisa kirim — klien tidak punya email.",
+    "networkError": "Terjadi kesalahan jaringan."
   }
 }
