@@ -17,7 +17,7 @@ import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { requireConsultantOrSupervisor } from '@/middleware/requireConsultantOrSupervisor';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { resolveConsultantContext } from '@/lib/consultant-erp/session-helpers';
+import { ensureSessionAccess, resolveConsultantContext } from '@/lib/consultant-erp/session-helpers';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 
 const schema = z.object({
@@ -51,14 +51,11 @@ async function handlePatch(req: RequestWithSession): Promise<Response> {
     .maybeSingle();
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  // tenant 검증 — 요청이 속한 세션의 tax_partner 가 자기 파트너여야 한다.
-  const { data: session } = await admin
-    .from('consultant_session')
-    .select('tax_partner_id')
-    .eq('id', row.session_id)
-    .single();
-  if (session?.tax_partner_id !== ctx.taxPartnerId) {
-    return NextResponse.json({ error: 'Forbidden — different tax partner' }, { status: 403 });
+  // 세션 접근 검증 — ensureSessionAccess 와 동일 규칙 (supervisor 는 파트너
+  // 무관 통과, ERP 전반의 기존 컨벤션과 정렬).
+  const guard = await ensureSessionAccess({ sessionId: row.session_id, ctx });
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.error }, { status: guard.status });
   }
 
   const { data, error } = await admin
