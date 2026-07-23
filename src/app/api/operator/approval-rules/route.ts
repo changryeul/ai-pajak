@@ -48,7 +48,7 @@ export async function GET() {
   const { count: totalItems } = await admin
     .from('djp_submission_queue')
     .select('id', { count: 'exact', head: true })
-    .in('status', ['APPROVED', 'PENDING_APPROVAL', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED']);
+    .in('status', ['APPROVED', 'PENDING_APPROVAL', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'COMPLETED']);
 
   const { count: autoApprovedCount } = await admin
     .from('djp_submission_queue')

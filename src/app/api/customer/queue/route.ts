@@ -56,7 +56,6 @@ export async function GET(request: NextRequest) {
     const summary = {
       total: all.length,
       paymentPending: all.filter(i => i.status === 'PAYMENT_PENDING').length,
-      paymentUploaded: all.filter(i => i.status === 'PAYMENT_UPLOADED').length,
       completed: all.filter(i => i.status === 'COMPLETED').length,
       inProgress: all.filter(i => !['COMPLETED', 'FAILED', 'PAYMENT_PENDING'].includes(i.status)).length,
     };

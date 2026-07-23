@@ -56,7 +56,7 @@ E2E tests live in `src/tests/e2e/` (Playwright, 60s timeout, 2 workers locally).
 - **Next.js 16** (App Router) + **TypeScript** strict + **React 19**
 - **Supabase** (PostgreSQL + Auth + RLS) — `@supabase/ssr` for cookie-based sessions
 - **shadcn/ui** + **Tailwind CSS 4** + **Radix UI** primitives
-- **next-intl** for i18n — 5 locales: `id` (default), `en`, `ko`, `ja`, `zh`
+- **next-intl** for i18n — 3 locales: `id` (default), `en`, `ko` (2026-07-23 ja/zh 제거)
 - **Midtrans** for payments, **Resend** for email
 - **Anthropic SDK + OpenAI** for AI features (OCR, document processing)
 - **Sentry** for error monitoring (API error capture, circuit breaker alerts, Web Vitals), **pino** for structured logging (all server code)
@@ -173,21 +173,23 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-### Operator Filing Workflow
-The `djp_submission_queue` table tracks an 11-state operator workflow extended in `20260401000001_workflow_v2.sql`:
+### Operator Filing Workflow (Coretax era — 납부 = 신고, 2026-07-23)
+현행 Coretax 체계에서는 고객이 ID Billing 을 납부하면 NTPN 이 Coretax 안에서 자동 생성되고 **납부가 신고의 역할까지 수행**한다. 구방식의 납부증빙 업로드 → 운영팀 검증 → DJP 제출 → BPE 수령 4개 상태(`PAYMENT_UPLOADED`/`PAYMENT_VERIFIED`/`DJP_SUBMITTED`/`BPE_UPLOADED`)는 `20260723000001_coretax_payment_is_filing.sql` 에서 제거됐다. `djp_submission_queue` 상태기계:
 
 ```
-PENDING → DATA_REVIEW → PENDING_APPROVAL → APPROVED → EBILLING_GENERATED
-→ PAYMENT_PENDING → PAYMENT_UPLOADED → PAYMENT_VERIFIED → DJP_SUBMITTED
-→ BPE_UPLOADED → COMPLETED (or FAILED from any state)
+PENDING → (PENDING_DOCS ↔) DATA_REVIEW → PENDING_APPROVAL → APPROVED
+→ EBILLING_GENERATED → PAYMENT_PENDING (고객 전송·납부대기 = 실질 종료 상태)
+→ COMPLETED (향후 Coretax API 연동의 NTPN 자동수집 전용 — 수동 UI 버튼 없음)
+   (or FAILED from any state)
 ```
 
 Role gating:
-- **Operator**: `review`, `request-approval`, `generate-ebilling`, `notify-customer`, `verify-payment`, `submit-djp`, `upload-bpe`, `complete`
+- **Operator**: `review`, `request-approval`, `generate-ebilling`, `notify-customer`
 - **Supervisor only**: `approve`, `reject` (on `PENDING_APPROVAL`), `reassign`
-- **Customer side**: the `PAYMENT_PENDING → PAYMENT_UPLOADED` transition is NOT in the operator API. The customer uploads payment proof via `POST /api/customer/payment-proof` (UI at `/tax/billing`), which is the only state machine transition initiated by a non-operator.
+- **Customer side**: 납부증빙/BPE 업로드 없음. `/api/customer/payment-proof` 및 `/api/customer/bpe-upload` 는 삭제됨. 고객은 `/tax/billing` 에서 ID Billing 확인·출력 후 은행에서 납부하면 끝.
+- 결산(연 SPT Tahunan)은 별도: `closing_submission` 테이블은 자체 status enum 으로 BPE 를 계속 추적하며(연 신고는 실제 제출 + BPE 수령 필요), operator coretax `record-completion` 이 queue → COMPLETED + closing_submission BPE 동기화를 수행한다.
 
-Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `extra` payload depends on the action (`ebillingCode`, `bpeNumber`, `bpeDate`, `rejectedReason`, `failedReason`).
+Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `extra` payload depends on the action (`ebillingCode`, `rejectedReason`, `failedReason`).
 
 ### Tax Filing UI Wizard (Zustand Store)
 `src/stores/tax-filing-store.ts` — persisted zustand store with 5-step wizard:
@@ -251,7 +253,7 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 
 ### i18n
 - Config: `src/config/constants.ts` (LOCALES, DEFAULT_LOCALE)
-- Message files: `src/i18n/messages/{ko,en,id,ja,zh}.json` (flat JSON per locale, not nested folders)
+- Message files: `src/i18n/messages/{ko,en,id}.json` (flat JSON per locale, not nested folders)
 - Use `useTranslations()` from `next-intl` in components
 - Auto-translate helper: `scripts/i18n-auto-translate.ts` (Anthropic SDK; namespace-scoped, dry-run by default)
 
@@ -292,7 +294,7 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 
 ### Landing Page (public `/`)
 The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/page.tsx`) that delegates to a single client component (`src/components/landing/LandingPage.tsx`) wired to a separate data layer:
-- `src/data/landing/` — types, modules (6), pricing (10), and `auto-translated.json` (5 locales, one bundle each)
+- `src/data/landing/` — types, modules (6), pricing (10), and `auto-translated.json` (3 locales, one bundle each)
 - `getLandingContent(locale)` in `translations.ts` returns a fully-resolved `LandingContent` per locale, falling back to ko
 - Translation pipeline: `scripts/translate-landing.ts` (Anthropic SDK streaming, disk cache at `scripts/.translate-cache/`, sanitize + 3-retry) regenerates `auto-translated.json` whenever the ko source data changes
 - `scripts/sync-individual-pricing-labels.ts` mirrors the landing's `pricing.typeLabel/description` into the `pricingPlans.SPT_1770SS / SPT_1770S / SPT_1770` i18n namespace so the landing and `/pricing` show the same plan names ("Personal Simple/Standard/Complex"). Internal plan ids stay `SPT_1770SS/S/1770` for DB/Midtrans compatibility.
@@ -343,13 +345,13 @@ Seed scripts:
 - `SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts` — seeds two approved ID Billing rows (PPh21 5M / PPh23 2M) in `EBILLING_GENERATED` for the INDIVIDUAL test customer so `/tax/billing` shows the design-spec demo
 
 Landing / i18n maintenance scripts:
-- `npx tsx scripts/translate-landing.ts` — regenerate `src/data/landing/auto-translated.json` (en/id/zh/ja) via Anthropic SDK. Disk cache at `scripts/.translate-cache/` so re-runs only re-call failed parts.
-- `npx tsx scripts/sync-individual-pricing-labels.ts` — push the landing's `pricing.typeLabel/description` into the `pricingPlans.SPT_1770*` i18n namespace (5 locales). Re-run whenever individual pricing copy changes.
+- `npx tsx scripts/translate-landing.ts` — regenerate `src/data/landing/auto-translated.json` (en/id) via Anthropic SDK. Disk cache at `scripts/.translate-cache/` so re-runs only re-call failed parts.
+- `npx tsx scripts/sync-individual-pricing-labels.ts` — push the landing's `pricing.typeLabel/description` into the `pricingPlans.SPT_1770*` i18n namespace (3 locales). Re-run whenever individual pricing copy changes.
 
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs **~44 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue 11-state, billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, 신규고객 배정 라이프사이클, PPh21 payslip 무-NPWP 가산 회귀, tax rate provider override round-trip, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
+- `npm run test:smoke:prod` — runs **~44 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue (Coretax 납부=신고 8-state + legacy 액션 400 계약), billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, 신규고객 배정 라이프사이클, PPh21 payslip 무-NPWP 가산 회귀, tax rate provider override round-trip, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars).
 - `.github/workflows/drift-after-deploy.yml` — runs the schema drift audit on every push, waits 90s for Vercel to settle, then probes the prod DB. Complements the daily smoke by catching broken migration pushes within minutes instead of up to 24h.
@@ -360,7 +362,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-external-consultant-isolation.ts` — external consultant이 JTC 데이터를 절대 못 보는지 end-to-end
 - `SEED_TARGET=prod npx tsx scripts/test-billing-flow.ts` — 3 billing endpoints smoke test, graceful-degrade 허용
 - `SEED_TARGET=prod npx tsx scripts/test-custom-pricing-flow.ts` — Master custom pricing quote 발행 → 고객 수락 흐름
-- `SEED_TARGET=prod npx tsx scripts/test-operator-queue-flow.ts` — 운영팀 11-state 워크플로우 전체 전이
+- `SEED_TARGET=prod npx tsx scripts/test-operator-queue-flow.ts` — 운영팀 워크플로우 전이 (Coretax 8-state) + legacy 액션 400 거부 계약
 - `SEED_TARGET=prod npx tsx scripts/test-closing-bpe-sync.ts` — 결산 wizard ↔ operator queue ↔ BPE 동기화
 - `SEED_TARGET=prod npx tsx scripts/test-onboarding-flow.ts` — 신규 가입 → 첫 신고까지 골든 패스
 - `SEED_TARGET=prod npx tsx scripts/test-new-customer-assignment.ts` — 신규고객 생성 → 미배정 큐 등장 → supervisor 배정 → 큐 제거 → DB edge active 라이프사이클 (prod sentinel, 자동 cleanup)

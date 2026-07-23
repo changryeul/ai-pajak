@@ -47,10 +47,6 @@ const STATUS_CLASS: Record<string, string> = {
   APPROVED: 'bg-emerald-100 text-emerald-700',
   EBILLING_GENERATED: 'bg-blue-100 text-blue-700',
   PAYMENT_PENDING: 'bg-amber-100 text-amber-700',
-  PAYMENT_UPLOADED: 'bg-blue-100 text-blue-700',
-  PAYMENT_VERIFIED: 'bg-emerald-100 text-emerald-700',
-  DJP_SUBMITTED: 'bg-blue-100 text-blue-700',
-  BPE_UPLOADED: 'bg-cyan-100 text-cyan-700',
   COMPLETED: 'bg-emerald-100 text-emerald-700',
 };
 

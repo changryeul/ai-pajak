@@ -96,7 +96,7 @@ function yearStatus(filings: Filing[], year: number): YearStatus {
     return { kind: 'empty', sptShort: null, taxPayable: null };
   }
   const s = hit.status.toUpperCase();
-  const isDone = ['ACCEPTED', 'PAID', 'COMPLETED', 'BPE_UPLOADED', 'DJP_SUBMITTED', 'FILED'].includes(s);
+  const isDone = ['ACCEPTED', 'PAID', 'COMPLETED', 'FILED'].includes(s);
   return {
     kind: isDone ? 'done' : 'inprogress',
     sptShort: sptShortName(hit.tax_type),

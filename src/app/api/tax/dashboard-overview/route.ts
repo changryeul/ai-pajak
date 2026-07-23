@@ -159,22 +159,20 @@ export async function GET(request: NextRequest) {
     // Expected tax for this month (sum of calculated tax)
     const expectedTax = calcs.reduce((sum, c) => sum + (c.calculation_result?.calculatedTax || 0), 0);
 
-    // Submitted count (this year)
-    const submittedCount = queue.filter(q =>
-      q.status === 'COMPLETED' || q.status === 'DJP_SUBMITTED' || q.status === 'BPE_UPLOADED'
-    ).length;
+    // Submitted count (this year) — Coretax era: 납부 = 신고, COMPLETED 만 집계
+    const submittedCount = queue.filter(q => q.status === 'COMPLETED').length;
 
     // ── Work Queue (always return 4 items with real counts) ──
     const draftCalcs = calcs.filter(c => c.source === 'CUSTOMER_OCR').length;
     const pendingBilling = queue.filter(q => q.status === 'APPROVED' || q.status === 'PENDING_APPROVAL').length;
-    const readyForSubmit = queue.filter(q => q.status === 'PAYMENT_VERIFIED').length;
+    const awaitingPayment = queue.filter(q => q.status === 'PAYMENT_PENDING').length;
 
     // Client maps `id` + `count` → localized title/desc/action via i18n keys.
     const workQueue: Array<{ id: string; priority: string; count: number }> = [
       { id: 'missing-docs', priority: calcsWithoutNpwp > 0 ? 'HIGH'   : 'LOW', count: calcsWithoutNpwp },
       { id: 'ai-review',    priority: draftCalcs      > 0 ? 'HIGH'   : 'LOW', count: draftCalcs },
       { id: 'billing',      priority: pendingBilling  > 0 ? 'MEDIUM' : 'LOW', count: pendingBilling },
-      { id: 'e-filing',     priority: readyForSubmit  > 0 ? 'MEDIUM' : 'LOW', count: readyForSubmit },
+      { id: 'e-filing',     priority: awaitingPayment > 0 ? 'MEDIUM' : 'LOW', count: awaitingPayment },
     ];
 
     // ── Upcoming Deadlines (next 30 days) ──
@@ -286,7 +284,7 @@ export async function GET(request: NextRequest) {
 
     // ── Recent Submissions ──
     const recentSubmissions = queue
-      .filter(q => q.status === 'COMPLETED' || q.status === 'BPE_UPLOADED' || q.status === 'DJP_SUBMITTED')
+      .filter(q => q.status === 'COMPLETED')
       .slice(0, 5)
       .map(q => {
         const cust = customers.find(c => c.id === q.customer_id);

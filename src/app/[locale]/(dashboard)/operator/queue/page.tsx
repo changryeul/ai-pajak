@@ -61,6 +61,9 @@ interface Pagination {
   totalPages: number;
 }
 
+// Coretax era: 납부 = 신고 — PAYMENT_UPLOADED/PAYMENT_VERIFIED/DJP_SUBMITTED/
+// BPE_UPLOADED 4개 구방식 상태 제거. PAYMENT_PENDING(고객 전송·납부대기)이
+// 실질 종료 상태이며 COMPLETED 는 향후 Coretax 연동의 자동완료 전용.
 const ALL_STATUSES = [
   'PENDING',
   'DATA_REVIEW',
@@ -68,10 +71,6 @@ const ALL_STATUSES = [
   'APPROVED',
   'EBILLING_GENERATED',
   'PAYMENT_PENDING',
-  'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED',
-  'DJP_SUBMITTED',
-  'BPE_UPLOADED',
   'COMPLETED',
   'FAILED',
 ] as const;
@@ -101,10 +100,6 @@ export default function OperatorQueuePage() {
     APPROVED:           { label: t('statusApproved'),          color: 'text-emerald-700', bg: 'bg-emerald-100',  icon: CheckCircle },
     EBILLING_GENERATED: { label: t('statusEbillingGenerated'), color: 'text-indigo-700',  bg: 'bg-indigo-100',   icon: Building2 },
     PAYMENT_PENDING:    { label: t('statusPaymentPending'),    color: 'text-yellow-700',  bg: 'bg-yellow-100',   icon: Clock },
-    PAYMENT_UPLOADED:   { label: t('statusPaymentUploaded'),   color: 'text-cyan-700',    bg: 'bg-cyan-100',     icon: Upload },
-    PAYMENT_VERIFIED:   { label: t('statusPaymentVerified'),   color: 'text-purple-700',  bg: 'bg-purple-100',   icon: CheckCircle },
-    DJP_SUBMITTED:      { label: t('statusDjpSubmitted'),      color: 'text-amber-700',   bg: 'bg-amber-100',    icon: Upload },
-    BPE_UPLOADED:       { label: t('statusBpeUploaded'),       color: 'text-teal-700',    bg: 'bg-teal-100',     icon: Upload },
     COMPLETED:          { label: t('statusCompleted'),         color: 'text-green-700',   bg: 'bg-green-100',    icon: CheckCircle },
     FAILED:             { label: t('statusFailed'),            color: 'text-red-700',     bg: 'bg-red-100',      icon: AlertCircle },
   };
@@ -115,10 +110,8 @@ export default function OperatorQueuePage() {
     PENDING_APPROVAL:   { label: t('actionApprove'),           action: 'approve',           color: 'bg-emerald-600 hover:bg-emerald-700' },
     APPROVED:           { label: t('actionGenerateEbilling'),  action: 'generate-ebilling', color: 'bg-indigo-600 hover:bg-indigo-700' },
     EBILLING_GENERATED: { label: t('actionNotifyCustomer'),    action: 'notify-customer',   color: 'bg-yellow-600 hover:bg-yellow-700' },
-    PAYMENT_UPLOADED:   { label: t('actionVerifyPayment'),     action: 'verify-payment',    color: 'bg-purple-600 hover:bg-purple-700' },
-    PAYMENT_VERIFIED:   { label: t('actionSubmitDjp'),         action: 'submit-djp',        color: 'bg-amber-600 hover:bg-amber-700' },
-    DJP_SUBMITTED:      { label: t('actionUploadBpe'),         action: 'upload-bpe',        color: 'bg-teal-600 hover:bg-teal-700' },
-    BPE_UPLOADED:       { label: t('actionComplete'),          action: 'complete',          color: 'bg-green-600 hover:bg-green-700' },
+    // PAYMENT_PENDING 이후는 고객 납부 대기 — Coretax 가 NTPN 을 자동 생성하므로
+    // 운영팀 수동 액션 없음 (완료 전이는 향후 Coretax 연동 자동화 전용).
   };
 
   const [items, setItems] = useState<QueueItem[]>([]);
@@ -140,15 +133,11 @@ export default function OperatorQueuePage() {
   const [editState, setEditState] = useState<{
     itemId: string;
     ebillingCode: string;
-    bpeNumber: string;
-    bpeDate: string;
     notes: string;
     failedReason: string;
   }>({
     itemId: '',
     ebillingCode: '',
-    bpeNumber: '',
-    bpeDate: '',
     notes: '',
     failedReason: '',
   });
@@ -233,13 +222,11 @@ export default function OperatorQueuePage() {
 
   const handleAction = async (itemId: string, action: string) => {
     // For actions that need input, expand the row instead
-    if (action === 'generate-ebilling' || action === 'upload-bpe') {
+    if (action === 'generate-ebilling') {
       setExpandedId(itemId);
       setEditState({
         itemId,
         ebillingCode: '',
-        bpeNumber: '',
-        bpeDate: '',
         notes: '',
         failedReason: '',
       });
@@ -282,11 +269,6 @@ export default function OperatorQueuePage() {
     if (action === 'generate-ebilling') {
       if (!editState.ebillingCode) return;
       extra.ebillingCode = editState.ebillingCode;
-    }
-    if (action === 'upload-bpe') {
-      if (!editState.bpeNumber || !editState.bpeDate) return;
-      extra.bpeNumber = editState.bpeNumber;
-      extra.bpeDate = editState.bpeDate;
     }
     if (editState.notes) extra.notes = editState.notes;
     executeAction(editState.itemId, action, extra);
@@ -751,48 +733,6 @@ export default function OperatorQueuePage() {
                                     <Building2 className="h-3 w-3 mr-1" />
                                   )}
                                   {t('actionGenerateEbilling')}
-                                </Button>
-                              </div>
-                            )}
-
-                            {/* BPE input for DJP_SUBMITTED status */}
-                            {item.status === 'DJP_SUBMITTED' && (
-                              <div className="space-y-2">
-                                <div>
-                                  <label className="text-xs font-medium text-gray-700 block mb-1">
-                                    {t('bpeNumberRequired')}
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder={t('enterBpeNumberPlaceholder')}
-                                    value={editState.itemId === item.id ? editState.bpeNumber : ''}
-                                    onChange={(e) => setEditState(prev => ({ ...prev, itemId: item.id, bpeNumber: e.target.value }))}
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-xs font-medium text-gray-700 block mb-1">
-                                    {t('bpeDateRequired')}
-                                  </label>
-                                  <input
-                                    type="date"
-                                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                    value={editState.itemId === item.id ? editState.bpeDate : ''}
-                                    onChange={(e) => setEditState(prev => ({ ...prev, itemId: item.id, bpeDate: e.target.value }))}
-                                  />
-                                </div>
-                                <Button
-                                  size="sm"
-                                  className="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs"
-                                  disabled={actionLoading === item.id || !editState.bpeNumber || !editState.bpeDate}
-                                  onClick={() => handleExpandedSubmit('upload-bpe')}
-                                >
-                                  {actionLoading === item.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                  ) : (
-                                    <Upload className="h-3 w-3 mr-1" />
-                                  )}
-                                  {t('actionUploadBpe')}
                                 </Button>
                               </div>
                             )}

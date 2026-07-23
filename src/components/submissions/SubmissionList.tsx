@@ -11,8 +11,8 @@ type FilterKey = (typeof FILTER_KEYS)[number];
 
 function filterItems(items: QueueItem[], filter: FilterKey): QueueItem[] {
   if (filter === 'all') return items;
-  if (filter === 'in_progress') return items.filter(i => !['COMPLETED', 'FAILED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED'].includes(i.status));
-  if (filter === 'payment') return items.filter(i => ['PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED'].includes(i.status));
+  if (filter === 'in_progress') return items.filter(i => !['COMPLETED', 'FAILED', 'PAYMENT_PENDING'].includes(i.status));
+  if (filter === 'payment') return items.filter(i => i.status === 'PAYMENT_PENDING');
   if (filter === 'completed') return items.filter(i => ['COMPLETED', 'FAILED'].includes(i.status));
   return items;
 }

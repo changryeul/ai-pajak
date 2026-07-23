@@ -1611,7 +1611,10 @@
     "statusFailed": "Failed",
     "taxType": "Tax Type",
     "period": "Period",
-    "amount": "Amount"
+    "amount": "Amount",
+    "coretaxPayTitle": "Payment guide — Coretax auto filing",
+    "coretaxPayDesc": "Pay the issued ID Billing at a bank/ATM/internet banking. Once paid, the NTPN is generated automatically in Coretax and the payment itself completes the filing — no separate submission needed.",
+    "inProgressLabel": "In progress"
   },
   "poa": {
     "createTitle": "Create Power of Attorney",
@@ -5864,7 +5867,8 @@
     "v2BpeNumberPlaceholder": "BPE number (optional)",
     "v2BpeUploaded": "BPE Received",
     "v2BpePreview": "Preview BPE",
-    "bpeUploadSuccess": "BPE uploaded successfully"
+    "bpeUploadSuccess": "BPE uploaded successfully",
+    "v2CoretaxAutoNote": "After payment, the NTPN is auto-generated in Coretax."
   },
   "documentUpload": {
     "pageTitle": "Document Upload",

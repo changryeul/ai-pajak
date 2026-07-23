@@ -5,12 +5,10 @@ import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PaymentProofUploader } from '@/components/payment/PaymentProofUploader';
 import {
   CreditCard,
   Clock,
   CheckCircle,
-  Upload,
   FileText,
   Loader2,
   RefreshCw,
@@ -18,6 +16,7 @@ import {
   ChevronUp,
   AlertCircle,
   Receipt,
+  Info,
 } from 'lucide-react';
 
 interface QueueItem {
@@ -46,7 +45,6 @@ interface QueueData {
   summary: {
     total: number;
     paymentPending: number;
-    paymentUploaded: number;
     completed: number;
     inProgress: number;
   };
@@ -57,7 +55,6 @@ export default function PaymentsPage() {
   const [data, setData] = useState<QueueData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [uploadingId, setUploadingId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -82,10 +79,6 @@ export default function PaymentsPage() {
       APPROVED: { label: t('statusApproved'), color: 'text-emerald-700', bg: 'bg-emerald-100', icon: CheckCircle },
       EBILLING_GENERATED: { label: t('statusEbilling'), color: 'text-indigo-700', bg: 'bg-indigo-100', icon: Receipt },
       PAYMENT_PENDING: { label: t('statusPaymentNeeded'), color: 'text-red-700', bg: 'bg-red-100', icon: AlertCircle },
-      PAYMENT_UPLOADED: { label: t('statusProofUploaded'), color: 'text-cyan-700', bg: 'bg-cyan-100', icon: Upload },
-      PAYMENT_VERIFIED: { label: t('statusPaymentVerified'), color: 'text-purple-700', bg: 'bg-purple-100', icon: CheckCircle },
-      DJP_SUBMITTED: { label: t('statusDjpSubmitted'), color: 'text-amber-700', bg: 'bg-amber-100', icon: FileText },
-      BPE_UPLOADED: { label: t('statusBpeUploaded'), color: 'text-teal-700', bg: 'bg-teal-100', icon: FileText },
       COMPLETED: { label: t('statusCompleted'), color: 'text-green-700', bg: 'bg-green-100', icon: CheckCircle },
       FAILED: { label: t('statusFailed'), color: 'text-red-700', bg: 'bg-red-100', icon: AlertCircle },
     };
@@ -134,8 +127,8 @@ export default function PaymentsPage() {
             <p className="text-2xl font-bold">{data.summary.paymentPending}</p>
           </div>
           <div className="bg-white/10 rounded-xl p-3 text-center">
-            <p className="text-xs text-cyan-200">{t('proofSubmitted')}</p>
-            <p className="text-2xl font-bold">{data.summary.paymentUploaded}</p>
+            <p className="text-xs text-blue-200">{t('inProgressLabel')}</p>
+            <p className="text-2xl font-bold">{data.summary.inProgress}</p>
           </div>
           <div className="bg-white/10 rounded-xl p-3 text-center">
             <p className="text-xs text-emerald-200">{t('completed')}</p>
@@ -229,44 +222,16 @@ export default function PaymentsPage() {
                       )}
                     </div>
 
-                    {/* Payment proof upload (only for PAYMENT_PENDING) */}
+                    {/* Coretax: 납부 = 신고. ID Billing 납부 안내 (PAYMENT_PENDING) */}
                     {isPaymentPending && (
-                      <div className="bg-white rounded-lg border-2 border-red-200 p-4">
-                        <h3 className="text-sm font-semibold text-red-700 mb-3 flex items-center gap-2">
-                          <Upload className="h-4 w-4" />
-                          {t('uploadPaymentProof')}
+                      <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                        <h3 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                          <Info className="h-4 w-4" />
+                          {t('coretaxPayTitle')}
                         </h3>
-                        {uploadingId === item.id ? (
-                          <PaymentProofUploader
-                            queueItemId={item.id}
-                            amount={item.amount}
-                            onSuccess={() => {
-                              setUploadingId(null);
-                              loadData();
-                            }}
-                          />
-                        ) : (
-                          <Button
-                            onClick={() => setUploadingId(item.id)}
-                            className="w-full bg-red-600 hover:bg-red-700"
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            {t('startUpload')}
-                          </Button>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Uploaded proof info */}
-                    {item.payment_proof_url && (
-                      <div className="bg-emerald-50 rounded-lg border border-emerald-200 p-3">
-                        <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          {t('proofSubmittedInfo')}
+                        <p className="text-sm text-blue-700 leading-relaxed">
+                          {t('coretaxPayDesc')}
                         </p>
-                        {item.payment_amount && (
-                          <p className="text-sm mt-1">Rp {item.payment_amount.toLocaleString('id-ID')} — {item.payment_date}</p>
-                        )}
                       </div>
                     )}
                   </div>

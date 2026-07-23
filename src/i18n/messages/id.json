@@ -1611,7 +1611,10 @@
     "statusFailed": "Gagal",
     "taxType": "Jenis Pajak",
     "period": "Periode",
-    "amount": "Jumlah"
+    "amount": "Jumlah",
+    "coretaxPayTitle": "Panduan pembayaran — pelaporan otomatis Coretax",
+    "coretaxPayDesc": "Bayar ID Billing yang diterbitkan melalui bank/ATM/internet banking. Setelah pembayaran, NTPN dibuat otomatis di Coretax dan pembayaran itu sendiri menyelesaikan pelaporan — tanpa proses lapor terpisah.",
+    "inProgressLabel": "Sedang diproses"
   },
   "poa": {
     "createTitle": "Buat Surat Kuasa",
@@ -5864,7 +5867,8 @@
     "v2BpeNumberPlaceholder": "Nomor BPE (opsional)",
     "v2BpeUploaded": "BPE Diterima",
     "v2BpePreview": "Pratinjau BPE",
-    "bpeUploadSuccess": "BPE berhasil diunggah"
+    "bpeUploadSuccess": "BPE berhasil diunggah",
+    "v2CoretaxAutoNote": "Setelah pembayaran, NTPN dibuat otomatis di Coretax."
   },
   "documentUpload": {
     "pageTitle": "Unggah Dokumen",

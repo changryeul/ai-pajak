@@ -47,10 +47,6 @@ const STATUS_CLASS: Record<string, string> = {
   APPROVED:           'bg-emerald-100 text-emerald-700',
   EBILLING_GENERATED: 'bg-blue-100 text-blue-700',
   PAYMENT_PENDING:    'bg-amber-100 text-amber-700',
-  PAYMENT_UPLOADED:   'bg-blue-100 text-blue-700',
-  PAYMENT_VERIFIED:   'bg-emerald-100 text-emerald-700',
-  DJP_SUBMITTED:      'bg-blue-100 text-blue-700',
-  BPE_UPLOADED:       'bg-cyan-100 text-cyan-700',
 };
 
 type FilterKey = 'ALL' | 'APPROVAL' | 'CORETAX' | 'DOCS_PENDING';
@@ -95,14 +91,14 @@ export default function MyWorkPage() {
 
   const filtered = useMemo(() => {
     if (filter === 'APPROVAL') return items.filter(i => i.status === 'PENDING_APPROVAL');
-    if (filter === 'CORETAX') return items.filter(i => ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'].includes(i.status));
+    if (filter === 'CORETAX') return items.filter(i => ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING'].includes(i.status));
     if (filter === 'DOCS_PENDING') return items.filter(i => i.status === 'PENDING_DOCS');
     return items;
   }, [items, filter]);
 
   const counts = useMemo(() => ({
     APPROVAL: items.filter(i => i.status === 'PENDING_APPROVAL').length,
-    CORETAX: items.filter(i => ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'].includes(i.status)).length,
+    CORETAX: items.filter(i => ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING'].includes(i.status)).length,
     DOCS_PENDING: items.filter(i => i.status === 'PENDING_DOCS').length,
   }), [items]);
 
@@ -144,7 +140,7 @@ export default function MyWorkPage() {
           ) : (
             <ul className="space-y-3">
               {filtered.map(c => {
-                const nextKey = ['PENDING','PENDING_DOCS','DATA_REVIEW','PENDING_APPROVAL','APPROVED','EBILLING_GENERATED','PAYMENT_PENDING','PAYMENT_UPLOADED','PAYMENT_VERIFIED','DJP_SUBMITTED','BPE_UPLOADED'].includes(c.status) ? c.status as 'PENDING' : 'default';
+                const nextKey = ['PENDING','PENDING_DOCS','DATA_REVIEW','PENDING_APPROVAL','APPROVED','EBILLING_GENERATED','PAYMENT_PENDING'].includes(c.status) ? c.status as 'PENDING' : 'default';
                 return (
                   <CaseCard key={c.id} c={c} onPick={pickCase}
                     statusLabel={tStatus(c.status as 'PENDING')}

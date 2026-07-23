@@ -149,68 +149,26 @@ export async function notifyWorkflowStatusChange(
             type: 'PAYMENT_DUE',
             priority: 'HIGH',
             title: `Permintaan pembayaran: ${queueItem.tax_type} ${period}`,
-            message: `e-Billing untuk pajak ${queueItem.tax_type} ${period} sebesar ${amountStr} telah diterbitkan. Mohon bayar dan unggah bukti pembayaran.`,
+            message: `e-Billing untuk pajak ${queueItem.tax_type} ${period} sebesar ${amountStr} telah diterbitkan. Setelah pembayaran, NTPN dibuat otomatis di Coretax dan pelaporan dianggap selesai.`,
             data: { ...baseData, ebillingCode: queueItem.ebilling_code },
           });
         }
         break;
       }
 
-      case 'PAYMENT_UPLOADED': {
-        // Notify operator for verification (English)
-        if (operatorUserId) {
-          await svc.sendNotification({
-            userId: operatorUserId,
-            type: 'FILING_STATUS',
-            priority: 'MEDIUM',
-            title: `Payment proof submitted: ${customerName} ${queueItem.tax_type}`,
-            message: `${customerName} uploaded payment proof for ${queueItem.tax_type} ${period}. Please verify.`,
-            data: baseData,
-          });
-        }
-        break;
-      }
-
-      case 'PAYMENT_VERIFIED': {
-        // Notify customer (Bahasa Indonesia)
-        if (customer?.user_id) {
-          await svc.sendNotification({
-            userId: customer.user_id,
-            type: 'PAYMENT_RECEIVED',
-            priority: 'LOW',
-            title: `Pembayaran terverifikasi: ${queueItem.tax_type} ${period}`,
-            message: `Pembayaran ${queueItem.tax_type} ${period} telah diverifikasi. Pelaporan DJP sedang diproses.`,
-            data: baseData,
-          });
-        }
-        break;
-      }
-
-      case 'DJP_SUBMITTED': {
-        // Notify customer (Bahasa Indonesia)
-        if (customer?.user_id) {
-          await svc.sendNotification({
-            userId: customer.user_id,
-            type: 'FILING_STATUS',
-            priority: 'MEDIUM',
-            title: `Terkirim ke DJP: ${queueItem.tax_type} ${period}`,
-            message: `Pelaporan pajak ${queueItem.tax_type} ${period} telah dikirim ke DJP.`,
-            data: baseData,
-          });
-        }
-        break;
-      }
+      // Coretax era: 납부 = 신고 — PAYMENT_UPLOADED / PAYMENT_VERIFIED /
+      // DJP_SUBMITTED 상태와 해당 알림은 제거됐다.
 
       case 'COMPLETED': {
-        // Notify customer with BPE info (Bahasa Indonesia)
+        // Notify customer (Bahasa Indonesia)
         if (customer?.user_id) {
           await svc.sendNotification({
             userId: customer.user_id,
             type: 'FILING_STATUS',
             priority: 'HIGH',
             title: `Pelaporan selesai: ${queueItem.tax_type} ${period}`,
-            message: `Pelaporan pajak ${queueItem.tax_type} ${period} telah selesai. Nomor BPE: ${queueItem.bpe_number || '-'}`,
-            data: { ...baseData, bpeNumber: queueItem.bpe_number },
+            message: `Pembayaran ${queueItem.tax_type} ${period} telah dikonfirmasi dan pelaporan selesai.`,
+            data: baseData,
           });
         }
         break;

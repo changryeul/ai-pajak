@@ -117,12 +117,14 @@ test.describe('Operator queue workflow — 11 states', () => {
     }
   });
 
-  // Combined into a single test because these 11 states form one
-  // sequential state machine. Splitting into separate Playwright tests
-  // would cause retry-isolation problems: if test 2 retries
-  // independently of test 1's side effects, the DB row is in the wrong
-  // state and the transition fails.
-  test('✅ full 11-state walk-through: review → reject → re-approve → customer payment-proof → verify-payment → submit-djp', async ({ request }) => {
+  // Combined into a single test because these states form one sequential
+  // state machine. Splitting into separate Playwright tests would cause
+  // retry-isolation problems: if test 2 retries independently of test 1's
+  // side effects, the DB row is in the wrong state and the transition fails.
+  //
+  // Coretax era (2026-07): 납부 = 신고 — the walk ends at PAYMENT_PENDING and
+  // the legacy verify-payment/submit-djp actions must be rejected with 400.
+  test('✅ full state walk-through: review → reject → re-approve → PAYMENT_PENDING + legacy actions rejected', async ({ request }) => {
     // ── Phase 1: review → request-approval → reject (G2 regression) ──
     const r1 = await callQueueAction(request, supervisorToken, {
       id: queueItemId,
@@ -160,7 +162,7 @@ test.describe('Operator queue workflow — 11 states', () => {
     });
     expect(notify.json.data?.status).toBe('PAYMENT_PENDING');
 
-    // ── Phase 3: customer payment proof (G2 column-mismatch regression) ──
+    // ── Phase 3: legacy customer payment-proof endpoint is gone (404) ──
     const proofRes = await request.post('/api/customer/payment-proof', {
       headers: createAuthHeaders(companyToken),
       data: {
@@ -170,32 +172,28 @@ test.describe('Operator queue workflow — 11 states', () => {
         paymentProofUrl: 'https://example.com/e2e-receipt.pdf',
       },
     });
-    expect(proofRes.status()).toBe(200);
+    expect(proofRes.status()).toBe(404);
 
-    const { data: proofRow } = await supabaseAdmin
+    // ── Phase 4: legacy operator actions are rejected with 400 ──
+    for (const legacyAction of ['verify-payment', 'submit-djp', 'upload-bpe']) {
+      const res = await callQueueAction(request, supervisorToken, {
+        id: queueItemId,
+        action: legacyAction,
+        ...(legacyAction === 'upload-bpe'
+          ? { bpeNumber: 'BPE-E2E', bpeDate: new Date().toISOString().slice(0, 10) }
+          : {}),
+      });
+      expect(res.status, `legacy action ${legacyAction} must be rejected`).toBe(400);
+    }
+
+    // Row stays at PAYMENT_PENDING — the Coretax-era terminal state until
+    // future NTPN auto-collection completes it.
+    const { data: finalRow } = await supabaseAdmin
       .from('djp_submission_queue')
-      .select('status, payment_proof_url, payment_amount')
+      .select('status')
       .eq('id', queueItemId)
       .single();
-    expect(proofRow?.status).toBe('PAYMENT_UPLOADED');
-    expect(proofRow?.payment_proof_url).toBe('https://example.com/e2e-receipt.pdf');
-    expect(Number(proofRow?.payment_amount)).toBe(1_000_000);
-
-    // ── Phase 4: verify-payment → submit-djp ──
-    const verify = await callQueueAction(request, supervisorToken, {
-      id: queueItemId,
-      action: 'verify-payment',
-    });
-    expect(verify.status).toBe(200);
-    expect(verify.json.data?.status).toBe('PAYMENT_VERIFIED');
-
-    const submit = await callQueueAction(request, supervisorToken, {
-      id: queueItemId,
-      action: 'submit-djp',
-    });
-    // Accept 200 (transitioned) OR 500 (DJP stub error) — either way G2's
-    // ownership check is not the blocker, which is what we care about here.
-    expect([200, 500]).toContain(submit.status);
+    expect(finalRow?.status).toBe('PAYMENT_PENDING');
   });
 });
 

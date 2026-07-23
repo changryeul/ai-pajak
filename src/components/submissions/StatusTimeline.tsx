@@ -4,11 +4,11 @@ import { useTranslations } from 'next-intl';
 import { CheckCircle, Clock, FileText, CreditCard, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Coretax era: 납부 = 신고 — 접수 → ID Billing → 납부대기 → 완료 4단계.
 const STEPS = [
   { key: 'received', icon: FileText, tKey: 'submissions.stepReceived' as const },
   { key: 'ebilling', icon: CreditCard, tKey: 'submissions.stepEbilling' as const },
   { key: 'payment', icon: Clock, tKey: 'submissions.stepPayment' as const },
-  { key: 'verified', icon: CheckCircle, tKey: 'submissions.stepVerified' as const },
   { key: 'completed', icon: Send, tKey: 'submissions.stepCompleted' as const },
 ] as const;
 
@@ -19,11 +19,7 @@ const STATUS_TO_STEP: Record<string, number> = {
   APPROVED: 0,
   EBILLING_GENERATED: 1,
   PAYMENT_PENDING: 2,
-  PAYMENT_UPLOADED: 3,
-  PAYMENT_VERIFIED: 3,
-  DJP_SUBMITTED: 4,
-  BPE_UPLOADED: 4,
-  COMPLETED: 4,
+  COMPLETED: 3,
   FAILED: -1,
 };
 
@@ -42,7 +38,7 @@ export function StatusTimeline({ status }: StatusTimelineProps) {
         const Icon = step.icon;
         const isActive = i === currentStep && !isFailed;
         const isCompleted = i < currentStep && !isFailed;
-        const isCompletedFinal = currentStep === 4 && i === 4 && status === 'COMPLETED';
+        const isCompletedFinal = currentStep === 3 && i === 3 && status === 'COMPLETED';
         const stepStatus = (isCompleted || isCompletedFinal) ? 'completed' : isActive ? 'active' : 'pending';
 
         return (

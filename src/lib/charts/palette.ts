@@ -92,10 +92,6 @@ export const QUEUE_STATUS_COLORS: Record<string, string> = {
   APPROVED: '#56B4E9',            // sky blue
   EBILLING_GENERATED: '#CC79A7',  // reddish purple
   PAYMENT_PENDING: '#F0E442',     // yellow
-  PAYMENT_UPLOADED: '#76B7B2',    // teal (medium luminance, distinct from sky/bluish-green)
-  PAYMENT_VERIFIED: '#7F3C8D',    // dark purple
-  DJP_SUBMITTED: '#F4A261',       // light orange
-  BPE_UPLOADED: '#2A9D8F',        // dark teal
   COMPLETED: '#009E73',           // bluish green — terminal positive
   FAILED: '#D55E00',              // vermillion — terminal negative
 };

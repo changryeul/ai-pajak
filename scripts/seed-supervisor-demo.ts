@@ -328,7 +328,7 @@ async function seedCases(
     //   - PENDING_APPROVAL  → 4건 + reviewRequired:3 (검토 필요한 상태로 노출)
     //   - APPROVED 이상     → 4건 모두 자동확인 + reviewRequired:0 (검토 완료로 노출)
     //   - 그 외(PENDING/PENDING_DOCS/DATA_REVIEW) → null
-    const APPROVED_OR_LATER = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'];
+    const APPROVED_OR_LATER = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'COMPLETED'];
     let reviewSummary: Record<string, unknown> | null = null;
     if (c.status === 'PENDING_APPROVAL') {
       reviewSummary = {

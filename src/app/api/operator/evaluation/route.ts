@@ -5,8 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 const ACTIVE_STATUSES = [
   'PENDING', 'PENDING_DOCS', 'DATA_REVIEW', 'PENDING_APPROVAL',
-  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED',
+  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING',
 ];
 
 interface Weights { processing: number; accuracy: number; speed: number; approval: number; satisfaction: number }

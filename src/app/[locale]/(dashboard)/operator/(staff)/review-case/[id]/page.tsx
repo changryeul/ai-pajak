@@ -207,7 +207,7 @@ export default function ReviewCasePage() {
   const statusCls = STATUS_CLASS[d.case.status] ?? 'bg-slate-100 text-slate-600';
   const customerName = d.customer?.company_name || d.customer?.full_name || '—';
   const canRequestApproval = d.reviewRequired === 0 && ['PENDING', 'PENDING_DOCS', 'DATA_REVIEW'].includes(d.case.status);
-  const canCoretax = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'].includes(d.case.status);
+  const canCoretax = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING'].includes(d.case.status);
 
   return (
     <div>
@@ -393,7 +393,7 @@ export default function ReviewCasePage() {
               <ActionButton color="slate" disabled={d.case.status !== 'EBILLING_GENERATED' && d.case.status !== 'PAYMENT_PENDING'}
                 onClick={() => router.push(`/${locale}/operator/coretax`)}
                 icon={<CheckCircle2 className="h-3.5 w-3.5" />} label={t('actionRecordBilling')} />
-              <ActionButton color="violet" disabled={!['PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED'].includes(d.case.status)}
+              <ActionButton color="violet" disabled={d.case.status !== 'PAYMENT_PENDING'}
                 onClick={() => router.push(`/${locale}/operator/coretax`)}
                 icon={<FileText className="h-3.5 w-3.5" />} label={t('actionRecordCompletion')} />
             </div>

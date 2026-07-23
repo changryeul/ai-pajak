@@ -3,12 +3,17 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { evaluateAutoApproval } from '@/lib/ai/auto-approval-engine';
 import { notifyWorkflowStatusChange } from '@/lib/notifications/operator-workflow-notifications';
-import { submitQueueItemToDJP } from '@/lib/djp/operator-djp-submit';
 import { loggers } from '@/lib/logger';
 
 const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
+// Coretax era (2026-07): 납부 = 신고. 고객이 ID Billing 을 납부하면 NTPN 이
+// Coretax 안에서 자동 생성되고 별도 신고 절차가 없다. 따라서 구방식의
+// PAYMENT_UPLOADED → PAYMENT_VERIFIED → DJP_SUBMITTED → BPE_UPLOADED 4개
+// 상태와 해당 operator 액션은 제거됐다. PAYMENT_PENDING(고객 전송·납부대기)이
+// 당분간의 실질 종료 상태이며, COMPLETED 전이는 향후 Coretax API 연동 시
+// NTPN 자동 수집이 호출하는 것을 전제로 남겨둔다 (operator UI 버튼 없음).
 type QueueStatus =
   | 'PENDING'
   | 'DATA_REVIEW'
@@ -16,10 +21,6 @@ type QueueStatus =
   | 'APPROVED'
   | 'EBILLING_GENERATED'
   | 'PAYMENT_PENDING'
-  | 'PAYMENT_UPLOADED'
-  | 'PAYMENT_VERIFIED'
-  | 'DJP_SUBMITTED'
-  | 'BPE_UPLOADED'
   | 'COMPLETED'
   | 'FAILED';
 
@@ -30,10 +31,7 @@ const STATUS_TRANSITIONS: Record<string, { from: QueueStatus | QueueStatus[] | '
   'reject':            { from: 'PENDING_APPROVAL',   to: 'DATA_REVIEW' },
   'generate-ebilling': { from: 'APPROVED',           to: 'EBILLING_GENERATED' },
   'notify-customer':   { from: 'EBILLING_GENERATED', to: 'PAYMENT_PENDING' },
-  'verify-payment':    { from: 'PAYMENT_UPLOADED',   to: 'PAYMENT_VERIFIED' },
-  'submit-djp':        { from: 'PAYMENT_VERIFIED',   to: 'DJP_SUBMITTED' },
-  'upload-bpe':        { from: 'DJP_SUBMITTED',      to: 'BPE_UPLOADED' },
-  'complete':          { from: 'BPE_UPLOADED',        to: 'COMPLETED' },
+  'complete':          { from: 'PAYMENT_PENDING',    to: 'COMPLETED' },
   'fail':              { from: 'any',                 to: 'FAILED' },
 };
 
@@ -160,10 +158,9 @@ export async function GET(request: NextRequest) {
  * Body:
  * - id: queue item ID
  * - action: review | request-approval | approve | reject | generate-ebilling |
- *           notify-customer | verify-payment | submit-djp | upload-bpe | complete | fail
+ *           notify-customer | complete | fail
+ *   (complete 는 향후 Coretax 연동의 NTPN 자동수집 전용 — operator UI 에는 없음)
  * - ebillingCode: required for generate-ebilling
- * - bpeNumber: required for upload-bpe
- * - bpeDate: required for upload-bpe
  * - notes: optional notes
  * - approvalNotes: optional for approve
  * - rejectedReason: required for reject
@@ -176,7 +173,7 @@ export async function PUT(request: NextRequest) {
 
   const body = await request.json();
   const {
-    id, action, ebillingCode, bpeNumber, bpeDate,
+    id, action, ebillingCode,
     notes, approvalNotes, rejectedReason, failedReason,
     targetOperatorId, reassignmentReason,
   } = body;
@@ -208,12 +205,6 @@ export async function PUT(request: NextRequest) {
   if (action === 'generate-ebilling' && !ebillingCode) {
     return NextResponse.json(
       { error: 'ebillingCode is required for generate-ebilling action' },
-      { status: 400 }
-    );
-  }
-  if (action === 'upload-bpe' && (!bpeNumber || !bpeDate)) {
-    return NextResponse.json(
-      { error: 'bpeNumber and bpeDate are required for upload-bpe action' },
       { status: 400 }
     );
   }
@@ -381,38 +372,7 @@ export async function PUT(request: NextRequest) {
     updatePayload.approved_at = null;
     updatePayload.approval_notes = null;
   }
-  if (action === 'verify-payment') {
-    updatePayload.payment_verified_by = user!.id;
-    updatePayload.payment_verified_at = now;
-  }
-
-  // DJP submission: queue E_FILING job
-  if (action === 'submit-djp') {
-    const djpResult = await submitQueueItemToDJP(admin, {
-      id,
-      customer_id: item.customer_id,
-      tax_type: item.tax_type,
-      tax_period_month: item.tax_period_month,
-      tax_period_year: item.tax_period_year,
-      amount: item.amount || 0,
-      operator_id: item.operator_id,
-    }, user!.id);
-
-    if (!djpResult.success) {
-      return NextResponse.json(
-        { error: `DJP submission failed: ${djpResult.error}` },
-        { status: 500 }
-      );
-    }
-
-    updatePayload.djp_job_id = djpResult.jobId;
-    updatePayload.tax_filing_id = djpResult.taxFilingId;
-    updatePayload.submitted_to_djp_at = now;
-  }
-
   if (ebillingCode) updatePayload.ebilling_code = ebillingCode;
-  if (bpeNumber) updatePayload.bpe_number = bpeNumber;
-  if (bpeDate) updatePayload.bpe_date = bpeDate;
   if (notes) updatePayload.notes = notes;
   if (failedReason) updatePayload.failed_reason = failedReason;
 

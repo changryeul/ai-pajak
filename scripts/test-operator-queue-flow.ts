@@ -4,8 +4,8 @@
  *   2. supervisor.test calls /api/operator/queue PUT with action=review,
  *      then request-approval, then reject (to verify the reject action
  *      that the page UI was missing).
- *   3. Customer (company.test) uploads payment proof via the
- *      /api/customer/payment-proof endpoint to verify the column-name fix.
+ *   3. Walk to PAYMENT_PENDING (Coretax era 실질 종료 상태) and assert the
+ *      legacy verify-payment action is rejected with 400 (납부 = 신고).
  *
  * Run with: SEED_TARGET=prod npx tsx scripts/test-operator-queue-flow.ts
  *
@@ -140,46 +140,26 @@ async function main() {
   const r5 = await callQueueAction(supervisorToken, { id: queueItemId, action: 'notify-customer' });
   console.log(`   notify-customer → status=${r5.json.data?.status ?? '—'}`);
 
-  // ─── Step 5: customer uploads payment proof — this exercises the
-  //     payment-proof fix (updated_by removed, audit_log columns corrected)
-  console.log('\n━━ 5. company.test → /api/customer/payment-proof (PAYMENT_PENDING → PAYMENT_UPLOADED) ━━');
-  const customerToken = await login('company.test@example.com');
-  if (!customerToken) return;
-  const proofRes = await fetch(`${baseUrl}/api/customer/payment-proof`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${customerToken}` },
-    body: JSON.stringify({
-      queueItemId,
-      paymentAmount: 1_000_000,
-      paymentDate: new Date().toISOString().slice(0, 10),
-      paymentProofUrl: 'https://example.com/receipt-test.pdf',
-    }),
-  });
-  const proofJson = await proofRes.json();
-  console.log(`   ${proofRes.status}  →  ${JSON.stringify(proofJson).slice(0, 200)}`);
+  // ─── Step 5: Coretax era 계약 검증 — 구방식 액션은 400 으로 거부돼야 한다 ───
+  console.log('\n━━ 5. 구방식 legacy 액션 거부 검증 (verify-payment → 400) ━━');
+  const legacyRes = await callQueueAction(supervisorToken, { id: queueItemId, action: 'verify-payment' });
+  if (legacyRes.status === 400) {
+    console.log(`   ✓ verify-payment 거부됨 (${legacyRes.status}): ${legacyRes.json.error ?? ''}`);
+  } else {
+    console.error(`   ❌ verify-payment 가 거부되지 않음 — status ${legacyRes.status}`);
+    process.exit(1);
+  }
 
-  // ─── Verify final DB state ───
+  // ─── Verify final DB state — PAYMENT_PENDING 이 실질 종료 상태 ───
   const { data: finalRow } = await admin
     .from('djp_submission_queue')
-    .select('id, status, payment_proof_url, payment_amount')
+    .select('id, status, ebilling_code')
     .eq('id', queueItemId)
     .maybeSingle();
-  console.log(`\n📊 final row: status=${finalRow?.status}, proof=${finalRow?.payment_proof_url}, amount=${finalRow?.payment_amount}`);
-
-  // Was an audit_log row inserted?
-  const { data: auditRows } = await admin
-    .from('audit_log')
-    .select('activity_type, activity_details')
-    .eq('actor_user_id', (await admin.auth.admin.getUserById(
-      (await admin.from('customer').select('user_id').eq('id', customer.id).single()).data?.user_id || ''
-    )).data?.user?.id || '')
-    .order('created_at', { ascending: false })
-    .limit(3);
-  if (auditRows && auditRows.length > 0) {
-    console.log(`\n📝 latest audit_log rows for company.test:`);
-    auditRows.forEach((r) => console.log(`   - ${r.activity_type}: ${JSON.stringify(r.activity_details).slice(0, 80)}`));
-  } else {
-    console.log('\n📝 no audit_log rows found (insert may have silently failed)');
+  console.log(`\n📊 final row: status=${finalRow?.status}, ebilling=${finalRow?.ebilling_code}`);
+  if (finalRow?.status !== 'PAYMENT_PENDING') {
+    console.error(`   ❌ expected PAYMENT_PENDING, got ${finalRow?.status}`);
+    process.exit(1);
   }
 
   // ─── Cleanup ───

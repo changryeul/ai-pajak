@@ -6,11 +6,10 @@ const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPER
 
 const ACTIVE_STATUSES = [
   'PENDING', 'PENDING_DOCS', 'DATA_REVIEW', 'PENDING_APPROVAL',
-  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED',
+  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING',
 ] as const;
 
-const CORETAX_READY_STATUSES = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'];
+const CORETAX_READY_STATUSES = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING'];
 
 const PRIORITY_RANK: Record<string, number> = { URGENT: 0, HIGH: 1, NORMAL: 2, LOW: 3 };
 
@@ -35,7 +34,7 @@ interface CaseRow {
 
 const approvalState = (status: string): '미요청' | '요청중' | '승인됨' | '반려' => {
   if (status === 'PENDING_APPROVAL') return '요청중';
-  if (['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'].includes(status)) return '승인됨';
+  if (['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'COMPLETED'].includes(status)) return '승인됨';
   if (status === 'FAILED') return '반려';
   return '미요청';
 };
@@ -60,12 +59,8 @@ const nextAction = (status: string): string => {
     case 'DATA_REVIEW':        return 'Review the flagged items or request missing documents.';
     case 'PENDING_APPROVAL':   return 'Waiting for supervisor approval.';
     case 'APPROVED':           return 'Start Coretax processing. Record the ID Billing issuance.';
-    case 'EBILLING_GENERATED': return "Waiting for the customer's NTPN submission.";
-    case 'PAYMENT_PENDING':    return 'Waiting for the customer to submit NTPN or upload payment proof.';
-    case 'PAYMENT_UPLOADED':   return 'Verify the NTPN and submit the filing.';
-    case 'PAYMENT_VERIFIED':   return 'Submit the filing in Coretax.';
-    case 'DJP_SUBMITTED':      return 'Upload the BPE.';
-    case 'BPE_UPLOADED':       return 'Finalize the filing as completed.';
+    case 'EBILLING_GENERATED': return 'Send the ID Billing to the customer.';
+    case 'PAYMENT_PENDING':    return 'Waiting for the customer to pay. NTPN is auto-generated in Coretax after payment.';
     default:                   return 'Proceed with the next step.';
   }
 };

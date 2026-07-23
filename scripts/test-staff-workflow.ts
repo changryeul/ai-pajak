@@ -24,8 +24,7 @@ const admin = createClient(url, key, { auth: { persistSession: false } });
 
 const ACTIVE_STATUSES = [
   'PENDING', 'PENDING_DOCS', 'DATA_REVIEW', 'PENDING_APPROVAL',
-  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED',
+  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING',
 ];
 
 function ok(msg: string) { console.log(`  ✓ ${msg}`); }
@@ -64,7 +63,7 @@ async function main() {
     urgent: items.filter(i => i.priority === 'URGENT').length,
     needsReview: items.reduce((s, i) => s + (((i.review_summary ?? null) as { reviewRequired?: number } | null)?.reviewRequired ?? 0), 0),
     awaitingApproval: items.filter(i => i.status === 'PENDING_APPROVAL').length,
-    coretaxReady: items.filter(i => ['APPROVED','EBILLING_GENERATED','PAYMENT_PENDING','PAYMENT_UPLOADED','PAYMENT_VERIFIED','DJP_SUBMITTED'].includes(i.status)).length,
+    coretaxReady: items.filter(i => ['APPROVED','EBILLING_GENERATED','PAYMENT_PENDING'].includes(i.status)).length,
   };
   ok(`KPI urgent=${kpi.urgent} needsReview=${kpi.needsReview} awaitingApproval=${kpi.awaitingApproval} coretaxReady=${kpi.coretaxReady}`);
   if (kpi.urgent < 1) fail('expected ≥ 1 URGENT case (C-002)');

@@ -6,8 +6,7 @@ const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPER
 
 const ACTIVE_STATUSES = [
   'PENDING', 'PENDING_DOCS', 'DATA_REVIEW', 'PENDING_APPROVAL',
-  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED',
+  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING',
 ];
 
 interface ReviewItem {
@@ -155,7 +154,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
       },
       approval: {
         state: caseRow.status === 'PENDING_APPROVAL' ? '요청중'
-             : ['APPROVED','EBILLING_GENERATED','PAYMENT_PENDING','PAYMENT_UPLOADED','PAYMENT_VERIFIED','DJP_SUBMITTED','BPE_UPLOADED','COMPLETED'].includes(caseRow.status) ? '승인됨'
+             : ['APPROVED','EBILLING_GENERATED','PAYMENT_PENDING','COMPLETED'].includes(caseRow.status) ? '승인됨'
              : caseRow.status === 'FAILED' ? '반려'
              : '미요청',
         supervisor: caseRow.supervisor_id ? opMap.get(caseRow.supervisor_id) ?? null : null,

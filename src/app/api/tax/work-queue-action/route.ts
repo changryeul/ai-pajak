@@ -172,56 +172,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Action 4: Submit filings (mark as submitted + generate XML)
-    // ──────────────────────────────────────────────────────────
-    if (action === 'submit-filing') {
-      // Find filings ready to submit
-      const { data: items } = await admin
-        .from('djp_submission_queue')
-        .select('id, customer_id, tax_type, tax_period_month, tax_period_year, amount, status')
-        .eq('status', 'PAYMENT_VERIFIED');
-
-      if (!items || items.length === 0) {
-        return NextResponse.json({
-          success: true,
-          messageKey: 'actionResult.submitNothing',
-          data: { submitted: 0 },
-        });
-      }
-
-      let submitted = 0;
-      const results: Array<{ id: string; tax_type: string; period: string; submitted_at: string }> = [];
-
-      for (const item of items) {
-        const submittedAt = new Date().toISOString();
-        const period = `${item.tax_period_year}-${String(item.tax_period_month).padStart(2, '0')}`;
-
-        const { error: updateError } = await admin
-          .from('djp_submission_queue')
-          .update({
-            status: 'DJP_SUBMITTED',
-            submitted_at: submittedAt,
-            updated_at: submittedAt,
-            updated_by: user.id,
-          })
-          .eq('id', item.id);
-
-        if (!updateError) {
-          submitted++;
-          results.push({ id: item.id, tax_type: item.tax_type, period, submitted_at: submittedAt });
-        }
-      }
-
-      loggers.api.info({ submitted, userId: user.id }, 'Filings submitted');
-
-      return NextResponse.json({
-        success: true,
-        messageKey: 'actionResult.submitDone',
-        messageParams: { count: submitted },
-        data: { submitted, results },
-      });
-    }
+    // Coretax era (2026-07): 납부 = 신고. 'submit-filing' 일괄 액션은 구방식
+    // (PAYMENT_VERIFIED → DJP_SUBMITTED) 이므로 제거됐다.
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (error) {

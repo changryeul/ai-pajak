@@ -53,14 +53,9 @@ const getFileDeadline = (year: number, month: number, taxType: string): Date => 
   return new Date(y, nextMonth - 1, 20);
 };
 
-const FILED_STATUSES = ['DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'];
-const PAID_STATUSES = [
-  'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED',
-  'DJP_SUBMITTED',
-  'BPE_UPLOADED',
-  'COMPLETED',
-];
+// Coretax era: 납부 = 신고 — COMPLETED 가 곧 납부이자 신고 완료.
+const FILED_STATUSES = ['COMPLETED'];
+const PAID_STATUSES = ['COMPLETED'];
 
 export default function FilingStatusPage() {
   const t = useTranslations('filingStatus');

@@ -1611,7 +1611,10 @@
     "statusFailed": "실패",
     "taxType": "세금 유형",
     "period": "기간",
-    "amount": "금액"
+    "amount": "금액",
+    "coretaxPayTitle": "납부 안내 — Coretax 자동 신고",
+    "coretaxPayDesc": "발급된 ID Billing으로 은행/ATM/인터넷뱅킹에서 납부하세요. 납부가 완료되면 NTPN이 Coretax에 자동 생성되며, 별도 신고 절차 없이 납부가 신고를 대신합니다.",
+    "inProgressLabel": "진행중"
   },
   "poa": {
     "createTitle": "위임장 생성",
@@ -5963,7 +5966,8 @@
     "v2BpeNumberPlaceholder": "BPE 번호 (선택)",
     "v2BpeUploaded": "BPE 수령",
     "v2BpePreview": "BPE 미리보기",
-    "bpeUploadSuccess": "BPE가 업로드되었습니다"
+    "bpeUploadSuccess": "BPE가 업로드되었습니다",
+    "v2CoretaxAutoNote": "납부 후 NTPN은 Coretax에서 자동 생성됩니다."
   },
   "documentUpload": {
     "pageTitle": "자료 업로드",

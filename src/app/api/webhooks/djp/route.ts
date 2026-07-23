@@ -183,19 +183,8 @@ async function handleFilingAccepted(
     })
     .eq('id', job.id);
 
-  // Update operator queue if linked
-  if (job.tax_filing_id) {
-    await getSupabaseAdmin()
-      .from('djp_submission_queue')
-      .update({
-        bpe_number: bpeNumber,
-        bpe_date: bpeDate,
-        status: 'BPE_UPLOADED',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('tax_filing_id', job.tax_filing_id)
-      .eq('status', 'DJP_SUBMITTED');
-  }
+  // Coretax era: 납부 = 신고. 월 신고 큐는 DJP_SUBMITTED/BPE_UPLOADED 상태를
+  // 더 이상 쓰지 않으므로 queue 상태 갱신 없음 (tax_filing 의 BPE 기록만 유지).
 
   // Send notification
   await sendFilingNotification(job.tax_filing_id, 'accepted', bpeNumber);

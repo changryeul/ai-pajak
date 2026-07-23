@@ -49,7 +49,7 @@ describe('chart palette', () => {
     expect(new Set(colors).size).toBe(types.length);
   });
 
-  it('QUEUE_STATUS_COLORS — all 12 statuses mapped + unique', () => {
+  it('QUEUE_STATUS_COLORS — all 8 statuses mapped + unique', () => {
     const statuses = [
       'PENDING',
       'DATA_REVIEW',
@@ -57,10 +57,6 @@ describe('chart palette', () => {
       'APPROVED',
       'EBILLING_GENERATED',
       'PAYMENT_PENDING',
-      'PAYMENT_UPLOADED',
-      'PAYMENT_VERIFIED',
-      'DJP_SUBMITTED',
-      'BPE_UPLOADED',
       'COMPLETED',
       'FAILED',
     ];
@@ -71,7 +67,7 @@ describe('chart palette', () => {
       expect(c).toMatch(HEX);
       colors.push(normalize(c));
     }
-    // All 12 distinct.
+    // All 8 distinct.
     expect(new Set(colors).size).toBe(statuses.length);
   });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  CreditCard, Loader2, CheckCircle, AlertTriangle, Upload, FileText,
-  Camera, Send, Printer,
+  CreditCard, Loader2, CheckCircle, AlertTriangle, FileText,
+  Send, Printer,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -37,19 +37,17 @@ interface BillingItem {
 
 const currentYear = new Date().getFullYear();
 
-// Statuses that appear in the billing center (supervisor-approved)
+// Statuses that appear in the billing center (supervisor-approved).
+// Coretax era: 납부 = 신고 — ID Billing 납부 후 NTPN 은 Coretax 에서 자동
+// 생성되므로 납부증빙/BPE 업로드 단계가 없다.
 const VISIBLE_STATUSES = [
   'APPROVED',
   'EBILLING_GENERATED',
   'PAYMENT_PENDING',
-  'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED',
-  'DJP_SUBMITTED',
-  'BPE_UPLOADED',
   'COMPLETED',
 ];
 
-// Statuses where customer still needs to act (submit NTPN + proof)
+// Statuses where customer still needs to act (pay the ID Billing)
 const NEEDS_ACTION_STATUSES = ['EBILLING_GENERATED', 'PAYMENT_PENDING'];
 
 export default function TaxBillingPage() {
@@ -64,12 +62,9 @@ export default function TaxBillingPage() {
   const t = useTranslations('taxBilling');
   const tsc = useTranslations('taxScreen');
 
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-
   const [year, setYear] = useState(currentYear);
   const [items, setItems] = useState<BillingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   // Company label for the 회사 column. For COMPANY customers this is the
   // registered company_name; for INDIVIDUAL (who normally shouldn't see this
@@ -89,12 +84,9 @@ export default function TaxBillingPage() {
     return () => { alive = false; };
   }, []);
 
-  // Per-row NTPN input state
+  // Per-row NTPN input state (납부 기록용 — Coretax 연동 전 과도기)
   const [ntpnInput, setNtpnInput] = useState<Record<string, string>>({});
   const [submittingNtpn, setSubmittingNtpn] = useState<string | null>(null);
-  // Per-row BPE upload state (customer uploads BPE PDF received by email)
-  const [bpeNumberInput, setBpeNumberInput] = useState<Record<string, string>>({});
-  const [uploadingBpe, setUploadingBpe] = useState<string | null>(null);
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -125,48 +117,6 @@ export default function TaxBillingPage() {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
-
-  const handleUploadProof = async (itemId: string, files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setUploading(itemId);
-    try {
-      const fd = new FormData();
-      fd.append('file', files[0]);
-      fd.append('customerId', customerId);
-      fd.append('documentType', 'RECEIPT');
-      fd.append('uploadSource', 'WEB');
-
-      const uploadRes = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-      const uploadData = await uploadRes.json().catch(() => ({}));
-
-      if (!uploadRes.ok || !uploadData.success) {
-        showMsg(
-          'error',
-          `${files[0].name}: ${uploadData.error || uploadData.message || `HTTP ${uploadRes.status}`}`,
-        );
-        return;
-      }
-
-      try {
-        await fetch('/api/customer/payment-proof', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            queueItemId: itemId,
-            fileUrl: uploadData.data?.signedUrl || uploadData.data?.path,
-          }),
-        });
-      } catch {
-        /* */
-      }
-      showMsg('success', t('proofUploadSuccess'));
-      loadItems();
-    } catch {
-      showMsg('error', t('serverError'));
-    } finally {
-      setUploading(null);
-    }
-  };
 
   const handleSubmitNtpn = async (item: BillingItem) => {
     const ntpn = ntpnInput[item.id] || '';
@@ -204,53 +154,6 @@ export default function TaxBillingPage() {
       showMsg('error', t('serverError'));
     } finally {
       setSubmittingNtpn(null);
-    }
-  };
-
-  const handleUploadBpe = async (itemId: string, files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setUploadingBpe(itemId);
-    try {
-      const fd = new FormData();
-      fd.append('file', files[0]);
-      fd.append('customerId', customerId);
-      fd.append('documentType', 'BPE');
-      fd.append('uploadSource', 'WEB');
-
-      const uploadRes = await fetch('/api/documents/upload', { method: 'POST', body: fd });
-      const uploadData = await uploadRes.json();
-
-      if (!uploadData.success) {
-        showMsg('error', t('uploadFailed'));
-        return;
-      }
-
-      const fileUrl = uploadData.data?.signedUrl || uploadData.data?.path;
-      const res = await fetch('/api/customer/bpe-upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          queueItemId: itemId,
-          bpeFileUrl: fileUrl,
-          bpeNumber: bpeNumberInput[itemId]?.trim() || null,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showMsg('success', t('bpeUploadSuccess'));
-        setBpeNumberInput((prev) => {
-          const next = { ...prev };
-          delete next[itemId];
-          return next;
-        });
-        loadItems();
-      } else {
-        showMsg('error', data.error || t('uploadFailed'));
-      }
-    } catch {
-      showMsg('error', t('serverError'));
-    } finally {
-      setUploadingBpe(null);
     }
   };
 
@@ -459,48 +362,10 @@ export default function TaxBillingPage() {
                           )}
                         </td>
 
-                        {/* 증빙 — stacked: 파일 업로드 / 사진 촬영 / 제출 */}
+                        {/* 납부 확정 — Coretax: 납부하면 NTPN 자동 생성, 별도 증빙 업로드 없음 */}
                         <td className="px-4 py-6 align-top">
                           {needsAction && !isPaid ? (
                             <div className="flex flex-col gap-2 w-[130px] ml-auto">
-                              <label>
-                                <span className="inline-flex w-full items-center justify-center h-8 px-3 text-[11px] font-medium rounded-md bg-white border border-gray-200 text-gray-700 cursor-pointer hover:bg-gray-50">
-                                  {uploading === item.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                  ) : (
-                                    <Upload className="h-3 w-3 mr-1" />
-                                  )}
-                                  {t('v2UploadFile')}
-                                </span>
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  accept="image/*,.pdf"
-                                  ref={(el) => {
-                                    fileInputRefs.current[item.id] = el;
-                                  }}
-                                  onChange={(e) => handleUploadProof(item.id, e.target.files)}
-                                  disabled={uploading === item.id}
-                                />
-                              </label>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-3 text-[11px] font-medium rounded-md bg-white border-gray-200 hover:bg-gray-50"
-                                disabled={uploading === item.id}
-                                onClick={() => {
-                                  const input = document.createElement('input');
-                                  input.type = 'file';
-                                  input.accept = 'image/*';
-                                  input.capture = 'environment';
-                                  input.onchange = (e) =>
-                                    handleUploadProof(item.id, (e.target as HTMLInputElement).files);
-                                  input.click();
-                                }}
-                              >
-                                <Camera className="h-3 w-3 mr-1" />
-                                {t('v2UploadPhoto')}
-                              </Button>
                               <Button
                                 size="sm"
                                 className="h-8 px-3 text-[11px] font-medium rounded-md bg-slate-400 text-white hover:bg-slate-500 disabled:opacity-60"
@@ -517,57 +382,16 @@ export default function TaxBillingPage() {
                                 )}
                                 {t('v2BtnSubmit')}
                               </Button>
+                              <p className="text-[10px] text-gray-400 leading-snug text-right">
+                                {t('v2CoretaxAutoNote')}
+                              </p>
                             </div>
-                          ) : item.status === 'DJP_SUBMITTED' ? (
-                            <div className="flex flex-col gap-2 w-[160px] ml-auto">
-                              <p className="text-[10px] text-purple-700">{t('v2BpeUploadHint')}</p>
-                              <Input
-                                className="h-8 text-[11px] font-mono rounded-md border-gray-200"
-                                placeholder={t('v2BpeNumberPlaceholder')}
-                                value={bpeNumberInput[item.id] || ''}
-                                maxLength={50}
-                                onChange={(e) =>
-                                  setBpeNumberInput((prev) => ({
-                                    ...prev,
-                                    [item.id]: e.target.value,
-                                  }))
-                                }
-                              />
-                              <label>
-                                <span className="inline-flex w-full items-center justify-center h-8 px-3 text-[11px] font-medium rounded-md border border-purple-200 bg-purple-50 text-purple-800 cursor-pointer hover:bg-purple-100">
-                                  {uploadingBpe === item.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                  ) : (
-                                    <Upload className="h-3 w-3 mr-1" />
-                                  )}
-                                  {t('v2UploadBpe')}
-                                </span>
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  accept=".pdf,image/*"
-                                  onChange={(e) => handleUploadBpe(item.id, e.target.files)}
-                                  disabled={uploadingBpe === item.id}
-                                />
-                              </label>
-                            </div>
-                          ) : item.bpe_file_url || item.status === 'BPE_UPLOADED' || item.status === 'COMPLETED' ? (
+                          ) : item.status === 'COMPLETED' ? (
                             <div className="flex flex-col items-end gap-1.5">
                               <div className="text-[11px] text-emerald-700 flex items-center gap-1">
                                 <CheckCircle className="h-3 w-3" />
-                                {item.status === 'COMPLETED' ? t('filingComplete') : t('v2BpeUploaded')}
+                                {t('filingComplete')}
                               </div>
-                              {item.bpe_file_url && (
-                                <a
-                                  href={item.bpe_file_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[11px] text-blue-600 hover:underline flex items-center gap-1"
-                                >
-                                  <FileText className="h-2.5 w-2.5" />
-                                  {t('v2BpePreview')}
-                                </a>
-                              )}
                             </div>
                           ) : (
                             <span className="text-[11px] text-gray-400 block text-right">—</span>

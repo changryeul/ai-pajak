@@ -8,8 +8,7 @@ const OPERATOR_ROLES = ['TAX_OPERATOR', 'TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPER
 
 const ACTIVE_STATUSES = [
   'PENDING', 'PENDING_DOCS', 'DATA_REVIEW', 'PENDING_APPROVAL',
-  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED',
-  'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED',
+  'APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING',
 ];
 
 const CHECKLIST_KEYS = [
@@ -114,13 +113,14 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
     id: l.id, step: l.step, action: l.action, value: l.value, actor: l.actor_label, at: l.created_at,
   }));
 
-  // 4단계 진행 상태 도출.
+  // 4단계 진행 상태 도출. Coretax era: 납부 = 신고 — 월 신고는 PAYMENT_PENDING
+  // 이후 COMPLETED 로만 전이 (BPE 기록은 결산/연 SPT 케이스에서만 사용).
   const status = caseRow.status;
-  const approved = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'].includes(status);
-  const billingIssued = !!caseRow.ebilling_code || ['EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'].includes(status);
-  const paymentVerified = ['PAYMENT_VERIFIED', 'DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'].includes(status);
-  const submitted = ['DJP_SUBMITTED', 'BPE_UPLOADED', 'COMPLETED'].includes(status);
-  const bpeReflected = ['BPE_UPLOADED', 'COMPLETED'].includes(status) || !!caseRow.bpe_number;
+  const approved = ['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'COMPLETED'].includes(status);
+  const billingIssued = !!caseRow.ebilling_code || ['EBILLING_GENERATED', 'PAYMENT_PENDING', 'COMPLETED'].includes(status);
+  const paymentVerified = status === 'COMPLETED';
+  const submitted = status === 'COMPLETED';
+  const bpeReflected = status === 'COMPLETED' || !!caseRow.bpe_number;
 
   const stepStates = {
     access:    { state: '진행가능' },
@@ -236,7 +236,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   switch (action) {
     case 'record-billing': {
-      if (!['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'PAYMENT_UPLOADED', 'PAYMENT_VERIFIED', 'DJP_SUBMITTED'].includes(caseRow.status)) {
+      if (!['APPROVED', 'EBILLING_GENERATED', 'PAYMENT_PENDING'].includes(caseRow.status)) {
         return NextResponse.json({ error: 'ID Billing can only be recorded after supervisor approval.' }, { status: 400 });
       }
       let billingId = (body.billingId as string | undefined)?.trim();
