@@ -7,11 +7,9 @@ const OG_LOCALE: Record<string, string> = {
   ko: 'ko_KR',
   en: 'en_US',
   id: 'id_ID',
-  ja: 'ja_JP',
-  zh: 'zh_CN',
 };
 
-const ALL_LOCALES = ['ko', 'en', 'id', 'ja', 'zh'] as const;
+const ALL_LOCALES = ['ko', 'en', 'id'] as const;
 
 export async function generateMetadata({
   params,

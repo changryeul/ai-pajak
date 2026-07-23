@@ -132,7 +132,7 @@ export function ConsultantTierWidget() {
             </div>
             {data.subscription?.valid_until && (
               <p className="text-[10px] text-gray-400 mt-0.5">
-                {t('nextPayment')}: {new Date(data.subscription.valid_until).toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'en' ? 'en-US' : locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : 'id-ID')}
+                {t('nextPayment')}: {new Date(data.subscription.valid_until).toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'en' ? 'en-US' : 'id-ID')}
               </p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">

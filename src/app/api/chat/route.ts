@@ -51,8 +51,6 @@ function getLanguageName(code: string): string {
     id: 'Indonesian (Bahasa Indonesia)',
     en: 'English',
     ko: 'Korean (한국어)',
-    ja: 'Japanese (日本語)',
-    zh: 'Chinese (中文)',
   };
   return map[code] || 'the user\'s language';
 }
@@ -127,7 +125,7 @@ function extractFollowups(reply: string): { body: string; followups: string[] } 
 
 /**
  * POST /api/chat
- * Body: { messages: [{ role, content }], language?: 'id'|'en'|'ko'|'ja'|'zh' }
+ * Body: { messages: [{ role, content }], language?: 'id'|'en'|'ko' }
  * Returns: { success, reply, followups: string[] }
  */
 export async function POST(request: NextRequest) {

@@ -296,8 +296,6 @@ Rules:
 const LANG_LABEL: Record<string, string> = {
   en: 'English (marketing-grade, concise, natural)',
   id: 'Bahasa Indonesia (natural marketing tone)',
-  zh: 'Simplified Chinese (Mainland China, marketing tone)',
-  ja: 'Japanese (natural marketing tone, polite form)',
 };
 
 const CACHE_DIR = path.resolve(__dirname, '.translate-cache');

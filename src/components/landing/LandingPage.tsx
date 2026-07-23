@@ -10,8 +10,6 @@ const SUPPORTED_LOCALES: { code: SupportedLocale; label: string }[] = [
   { code: 'ko', label: '한국어' },
   { code: 'en', label: 'English' },
   { code: 'id', label: 'Bahasa Indonesia' },
-  { code: 'zh', label: '中文' },
-  { code: 'ja', label: '日本語' },
 ];
 
 const REQUIRED_LABELS = new Set(['필수', 'Required', 'Wajib', '必填', '必須']);

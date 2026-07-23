@@ -1,7 +1,7 @@
 /**
  * scripts/i18n-auto-translate.ts
  *
- * pph25Closing 등 지정 namespace 에서 한국어가 4 locale (en/id/ja/zh) 에 그대로
+ * pph25Closing 등 지정 namespace 에서 한국어가 2 locale (en/id) 에 그대로
  * 남은 키들을 Anthropic SDK 로 일괄 번역.
  *
  * 사용:
@@ -24,7 +24,7 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const ROOT = path.resolve(__dirname, '..');
 const I18N_DIR = path.join(ROOT, 'src/i18n/messages');
-const TARGET_LOCALES = ['en', 'id', 'ja', 'zh'] as const;
+const TARGET_LOCALES = ['en', 'id'] as const;
 type Locale = (typeof TARGET_LOCALES)[number];
 
 const NAMESPACE_HINTS: Record<string, string> = {
@@ -81,7 +81,7 @@ function hasKorean(s: string): boolean {
 function buildPrompt(namespace: string, items: Array<{ key: string; ko: string }>): string {
   const hint = NAMESPACE_HINTS[namespace] ?? '';
   const lines = items.map((it) => `  "${it.key}": ${JSON.stringify(it.ko)}`);
-  return `당신은 인도네시아 세무 SaaS 다국어 번역가입니다. 아래 한국어 라벨을 영어(en), 인도네시아어(id), 일본어(ja), 중국어 간체(zh) 4 언어로 번역하세요.
+  return `당신은 인도네시아 세무 SaaS 다국어 번역가입니다. 아래 한국어 라벨을 영어(en), 인도네시아어(id) 2 언어로 번역하세요.
 
 컨텍스트: ${hint || '인도네시아 세무 SaaS UI 라벨.'}
 
@@ -99,7 +99,7 @@ ${lines.join(',\n')}
 
 응답 형식: 위 키 그대로 사용한 단일 JSON 객체만. 코드펜스 없이 순수 JSON.
 {
-  "<키 이름>": { "en": "...", "id": "...", "ja": "...", "zh": "..." },
+  "<키 이름>": { "en": "...", "id": "..." },
   ...
 }`;
 }
@@ -108,8 +108,6 @@ interface ParsedTranslation {
   [key: string]: {
     en?: string;
     id?: string;
-    ja?: string;
-    zh?: string;
   };
 }
 
@@ -161,8 +159,6 @@ async function main() {
   const flatByLocale: Record<Locale, Record<string, string>> = {
     en: flatten(data.en[args.namespace] ?? {}),
     id: flatten(data.id[args.namespace] ?? {}),
-    ja: flatten(data.ja[args.namespace] ?? {}),
-    zh: flatten(data.zh[args.namespace] ?? {}),
   };
 
   const targets: Array<{ key: string; ko: string }> = [];
@@ -217,7 +213,7 @@ async function main() {
           let suspicious = false;
           for (const l of TARGET_LOCALES) {
             const v = tr[l];
-            if (typeof v === 'string' && hasKorean(v) && l !== 'ja') {
+            if (typeof v === 'string' && hasKorean(v)) {
               suspicious = true;
               break;
             }

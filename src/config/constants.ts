@@ -4,15 +4,13 @@ export const APP_NAME = 'AI PAJAK';
 export const APP_DESCRIPTION = 'AI-Powered Tax Filing System for Indonesia';
 
 // Supported locales
-export const LOCALES = ['id', 'en', 'ko', 'ja', 'zh'] as const;
+export const LOCALES = ['id', 'en', 'ko'] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const LOCALE_NAMES: Record<Locale, string> = {
   id: 'Bahasa Indonesia',
   en: 'English',
   ko: '한국어',
-  ja: '日本語',
-  zh: '中文',
 };
 
 export const DEFAULT_LOCALE: Locale = 'id';

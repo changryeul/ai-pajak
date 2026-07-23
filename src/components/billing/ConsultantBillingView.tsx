@@ -187,8 +187,6 @@ export function ConsultantBillingView() {
                   {new Date(data.subscription.valid_until).toLocaleDateString(
                     locale === 'ko' ? 'ko-KR'
                     : locale === 'en' ? 'en-US'
-                    : locale === 'ja' ? 'ja-JP'
-                    : locale === 'zh' ? 'zh-CN'
                     : 'id-ID',
                   )}
                 </p>

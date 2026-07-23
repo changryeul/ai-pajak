@@ -1,4 +1,4 @@
-export type SupportedLocale = 'ko' | 'en' | 'id' | 'ja' | 'zh';
+export type SupportedLocale = 'ko' | 'en' | 'id';
 
 export type Persona = {
   label: string;

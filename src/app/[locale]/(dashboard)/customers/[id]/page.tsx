@@ -275,7 +275,7 @@ export default function CustomerDetailPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : 'id-ID', {
+    return new Date(dateStr).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'id-ID', {
       year: 'numeric', month: 'short', day: 'numeric',
     });
   };

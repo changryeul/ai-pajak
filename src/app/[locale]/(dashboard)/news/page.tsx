@@ -63,7 +63,6 @@ export default function NewsPage() {
   const getSummary = (article: NewsArticle) => {
     if (locale === 'ko') return article.summary_ko || article.summary_en || article.summary_id;
     if (locale === 'en') return article.summary_en || article.summary_id;
-    if (locale === 'ja' || locale === 'zh') return article.summary_en || article.summary_ko || article.summary_id;
     return article.summary_id || article.summary_en; // Indonesian default
   };
   const [articles, setArticles] = useState<NewsArticle[]>([]);

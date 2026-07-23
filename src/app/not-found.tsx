@@ -12,8 +12,8 @@ import { FileQuestion, ArrowLeft } from 'lucide-react';
  * is used when the /[locale] prefix matches but a child route does not.
  */
 
-type Locale = 'id' | 'en' | 'ko' | 'ja' | 'zh';
-const LOCALES: readonly Locale[] = ['id', 'en', 'ko', 'ja', 'zh'];
+type Locale = 'id' | 'en' | 'ko';
+const LOCALES: readonly Locale[] = ['id', 'en', 'ko'];
 
 const COPY: Record<Locale, { title: string; description: string; back: string }> = {
   id: {
@@ -30,16 +30,6 @@ const COPY: Record<Locale, { title: string; description: string; back: string }>
     title: '페이지를 찾을 수 없습니다',
     description: '요청하신 페이지가 존재하지 않거나 이동되었습니다.',
     back: '대시보드로 돌아가기',
-  },
-  ja: {
-    title: 'ページが見つかりません',
-    description: 'お探しのページは存在しないか、移動された可能性があります。',
-    back: 'ダッシュボードに戻る',
-  },
-  zh: {
-    title: '未找到页面',
-    description: '您访问的页面不存在或已被移动。',
-    back: '返回仪表板',
   },
 };
 

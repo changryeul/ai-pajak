@@ -18,7 +18,7 @@ const auto = require('../src/data/landing/auto-translated.json');
 
 const ROOT = path.resolve(__dirname, '..');
 const I18N_DIR = path.join(ROOT, 'src/i18n/messages');
-const LANGS = ['ko', 'en', 'id', 'zh', 'ja'] as const;
+const LANGS = ['ko', 'en', 'id'] as const;
 const MAPPING: Record<string, string> = {
   SPT_1770SS: 'p-simple',
   SPT_1770S: 'p-standard',

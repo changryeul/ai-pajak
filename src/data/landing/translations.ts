@@ -21,8 +21,6 @@ const contents: Record<SupportedLocale, LandingContent> = {
   ko: buildContent(bundle.ko),
   en: buildContent(bundle.en),
   id: buildContent(bundle.id),
-  zh: buildContent(bundle.zh),
-  ja: buildContent(bundle.ja),
 };
 
 export function getLandingContent(locale: string): LandingContent {
