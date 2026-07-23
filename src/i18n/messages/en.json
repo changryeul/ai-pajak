@@ -9685,7 +9685,16 @@
       "ppnInputLabel": "Input DPP",
       "bankSubmittedLabel": "Submitted Documents Total",
       "bankTotalLabel": "Bank Statement Total",
-      "bankCompute": "Reconcile"
+      "bankCompute": "Reconcile",
+      "consultantOverrideLabel": "Override",
+      "consultantOverridePlaceholder": "Using AI value",
+      "consultantOverrideSave": "Save",
+      "consultantOverrideClear": "Revert",
+      "overrideDiffNote": "Differs from the AI value ({ai}) — shown as a comparison on the supervisor screen.",
+      "rrReasonPlaceholder": "Describe what you are unsure about for supervisor review",
+      "rrSubmitBtn": "Request review",
+      "rrStatusOpen": "Open",
+      "rrStatusAnswered": "Answered"
     },
     "parseReview": {
       "title": "3-2. Document Parsing Review",
@@ -10240,7 +10249,26 @@
       "actionStep2": "Verify evidence-needed candidates",
       "actionStep3": "Process pending candidates",
       "actionStep4": "Maintain completed data"
-    }
+    },
+    "diffHeading": "Customer Input / AI Calculation / Consultant Handling / Final Value",
+    "diffColItem": "Item",
+    "diffColCustomer": "Customer input",
+    "diffColAi": "AI calc",
+    "diffColConsultant": "Consultant",
+    "diffColFinal": "Final",
+    "diffApprovedBadge": "Approved",
+    "diffFootnote": "If the consultant value is empty, the AI value is adopted. The final value is locked at approval.",
+    "rrHeading": "Consultant review requests",
+    "rrOpenBadge": "{count} awaiting comment",
+    "rrAllAnswered": "All answered",
+    "rrApproveBlocked": "Approval is blocked while review requests await your comment. Leave a comment on each item first.",
+    "rrEmpty": "No review requests — the data arrives pre-reviewed by the consultant.",
+    "rrStatusOpen": "Open",
+    "rrStatusAnswered": "Answered",
+    "rrCommentPlaceholder": "Write your review comment (kept as audit evidence)",
+    "rrAnswerBtn": "Save comment",
+    "rrAnswered": "Comment saved.",
+    "rrAnswerFailed": "Failed to save the comment."
   },
   "messenger": {
     "title": "Messenger",

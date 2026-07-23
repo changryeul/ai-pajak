@@ -49,9 +49,23 @@ interface Calc {
   id: string;
   kind: string;
   amount: number;
+  customer_input_amount: number | null;
+  ai_amount: number | null;
+  consultant_amount: number | null;
+  approved_amount: number | null;
   confidence: number | null;
   source_summary: string | null;
   rationale_summary: string | null;
+}
+interface ReviewRequest {
+  id: string;
+  calc_kind: string | null;
+  item_label: string;
+  reason: string;
+  status: 'OPEN' | 'ANSWERED' | 'RESOLVED';
+  supervisor_comment: string | null;
+  answered_at: string | null;
+  created_at: string;
 }
 interface ParseRow {
   id: string;
@@ -110,6 +124,7 @@ interface Resp {
   coretax: { id_billing: string | null; ntpn: string | null; bpe_file_path: string | null } | null;
   trend?: TrendPoint[];
   invoiceLines?: InvoiceLine[];
+  reviewRequests?: ReviewRequest[];
 }
 
 const SEVERITY_STYLE = {
@@ -131,6 +146,9 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   const [parsingDocId, setParsingDocId] = useState<string | null>(null);
   const [reviewingLineId, setReviewingLineId] = useState<string | null>(null);
   const [bulkReviewBusy, setBulkReviewBusy] = useState(false);
+  // v13 §4 — 검토요청 의견 입력 상태
+  const [rrComment, setRrComment] = useState<Record<string, string>>({});
+  const [rrBusy, setRrBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -305,6 +323,33 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
   }
 
   const { session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals, trend, invoiceLines } = data;
+  const reviewRequests = data.reviewRequests ?? [];
+  const openRequests = reviewRequests.filter((r) => r.status === 'OPEN');
+
+  const answerRequest = async (id: string) => {
+    const commentText = (rrComment[id] ?? '').trim();
+    if (!commentText) return;
+    setRrBusy(id);
+    try {
+      const r = await fetch(`/api/consultant-erp/supervisor/review-requests/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ supervisorComment: commentText, status: 'ANSWERED' }),
+      });
+      const j = await r.json();
+      if (j.success) {
+        toast.success(t('rrAnswered'));
+        setRrComment((prev) => ({ ...prev, [id]: '' }));
+        load();
+      } else {
+        toast.error(j.error ?? 'error');
+      }
+    } catch {
+      toast.error(t('rrAnswerFailed'));
+    } finally {
+      setRrBusy(null);
+    }
+  };
 
   const invoiceDocs = documents.filter(
     (d) => d.slot === 'WITHHOLDING_INVOICE' || d.slot === 'VAT_IN_OUT',
@@ -390,29 +435,121 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
         />
       </section>
 
-      {/* Auto-calc results */}
+      {/* v13 §4 — 고객 입력값 / AI 계산값 / 상담원 처리값 / 최종값 비교 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <p className="text-sm font-black text-slate-950 mb-3">{t('calcsHeading')}</p>
+        <p className="text-sm font-black text-slate-950 mb-3">{t('diffHeading')}</p>
         {calcs.length === 0 ? (
           <p className="text-xs text-slate-400">—</p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {calcs.map((c) => (
-              <div key={c.id} className="rounded-xl border border-slate-200 p-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold text-slate-700">{c.kind}</p>
-                  {c.confidence != null && (
-                    <span
-                      className="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
-                      style={{ backgroundColor: '#D0F0E5', color: '#00684D' }}
-                    >
-                      {t('calcConfidence')} {c.confidence}
-                    </span>
-                  )}
+          <div className="overflow-auto">
+            <table className="w-full min-w-[640px] text-xs">
+              <thead>
+                <tr className="text-left text-[10px] uppercase tracking-wide text-slate-400">
+                  <th className="px-2 py-2">{t('diffColItem')}</th>
+                  <th className="px-2 py-2 text-right">{t('diffColCustomer')}</th>
+                  <th className="px-2 py-2 text-right">{t('diffColAi')}</th>
+                  <th className="px-2 py-2 text-right">{t('diffColConsultant')}</th>
+                  <th className="px-2 py-2 text-right">{t('diffColFinal')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {calcs.map((c) => {
+                  const aiVal = c.ai_amount ?? c.amount;
+                  const edited = c.consultant_amount != null && Number(c.consultant_amount) !== Number(aiVal);
+                  const finalVal = c.approved_amount ?? c.amount;
+                  return (
+                    <tr key={c.id} className="border-t border-slate-100">
+                      <td className="px-2 py-2.5">
+                        <p className="font-bold text-slate-700">{c.kind}</p>
+                        {c.rationale_summary && <p className="text-[10px] text-slate-400">{c.rationale_summary}</p>}
+                      </td>
+                      <td className="px-2 py-2.5 text-right text-slate-500">
+                        {c.customer_input_amount != null ? fmtRp(Number(c.customer_input_amount)) : '—'}
+                      </td>
+                      <td className="px-2 py-2.5 text-right text-slate-700">{fmtRp(Number(aiVal))}</td>
+                      <td className={`px-2 py-2.5 text-right ${edited ? 'font-bold text-amber-700' : 'text-slate-400'}`}>
+                        {c.consultant_amount != null ? fmtRp(Number(c.consultant_amount)) : '—'}
+                      </td>
+                      <td className="px-2 py-2.5 text-right font-black text-emerald-700">
+                        {fmtRp(Number(finalVal))}
+                        {c.approved_amount != null && (
+                          <span className="ml-1 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">
+                            {t('diffApprovedBadge')}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p className="mt-2 text-[10px] text-slate-400">{t('diffFootnote')}</p>
+          </div>
+        )}
+      </section>
+
+      {/* v13 §4 — 상담원 수퍼바이저 검토요청 */}
+      <section className="rounded-2xl border border-violet-200 bg-violet-50/50 p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-black text-slate-950">{t('rrHeading')}</p>
+          {openRequests.length > 0 ? (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+              {t('rrOpenBadge', { count: openRequests.length })}
+            </span>
+          ) : (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+              {t('rrAllAnswered')}
+            </span>
+          )}
+        </div>
+        {openRequests.length > 0 && (
+          <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+            {t('rrApproveBlocked')}
+          </p>
+        )}
+        {reviewRequests.length === 0 ? (
+          <p className="text-xs text-slate-400">{t('rrEmpty')}</p>
+        ) : (
+          <div className="space-y-2.5">
+            {reviewRequests.map((r) => (
+              <div key={r.id} className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">
+                      {r.item_label}
+                      {r.calc_kind && <span className="ml-1.5 text-[10px] font-normal text-slate-400">({r.calc_kind})</span>}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-slate-600">{r.reason}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    r.status === 'OPEN' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    {r.status === 'OPEN' ? t('rrStatusOpen') : t('rrStatusAnswered')}
+                  </span>
                 </div>
-                <p className="text-2xl font-black text-emerald-700 mt-2">{fmtRp(Number(c.amount))}</p>
-                {c.source_summary && <p className="text-[10px] text-slate-500 mt-1">{c.source_summary}</p>}
-                {c.rationale_summary && <p className="text-[10px] text-slate-400 mt-0.5">{c.rationale_summary}</p>}
+                {r.status === 'OPEN' ? (
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      className="h-8 flex-1 rounded-lg border border-slate-200 px-2.5 text-[11px] outline-none focus:border-violet-300"
+                      placeholder={t('rrCommentPlaceholder')}
+                      value={rrComment[r.id] ?? ''}
+                      onChange={(e) => setRrComment((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                    />
+                    <button
+                      className="h-8 rounded-lg bg-violet-600 px-3 text-[11px] font-bold text-white hover:bg-violet-700 disabled:opacity-50"
+                      disabled={rrBusy === r.id || !(rrComment[r.id] ?? '').trim()}
+                      onClick={() => answerRequest(r.id)}
+                    >
+                      {rrBusy === r.id ? '…' : t('rrAnswerBtn')}
+                    </button>
+                  </div>
+                ) : (
+                  r.supervisor_comment && (
+                    <p className="mt-2 rounded-lg bg-violet-50 px-2.5 py-1.5 text-[11px] text-violet-800">
+                      💬 {r.supervisor_comment}
+                    </p>
+                  )
+                )}
               </div>
             ))}
           </div>
@@ -747,7 +884,8 @@ export function SupervisorApprovalDetail({ sessionId }: { sessionId: string }) {
         <div className="mt-3 grid grid-cols-2 gap-2">
           <Button
             onClick={() => decide('APPROVE')}
-            disabled={!!busy || session.status !== 'PENDING_APPROVAL'}
+            disabled={!!busy || session.status !== 'PENDING_APPROVAL' || openRequests.length > 0}
+            title={openRequests.length > 0 ? t('rrApproveBlocked') : undefined}
             style={{ backgroundColor: '#009E73' }}
             className="min-h-11 text-white"
           >

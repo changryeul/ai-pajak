@@ -51,6 +51,8 @@ const STEPS: Step[] = [
   { name: 'new-customer assignment lifecycle', file: 'test-new-customer-assignment.ts' },
   // v19 트랙 2 — ID Billing 발행 보드 (승인 게이트 + 작성본 xlsx + tenant 분리)
   { name: 'id-billing issuance board flow', file: 'test-id-billing-flow.ts' },
+  // v13 트랙 3 — 승인대기 리모델 (4-값 분리 + 검토요청 게이트 + 승인값 스탬프)
+  { name: 'approval remodel (4-value + review requests)', file: 'test-approval-remodel.ts' },
   // --- Admin / config governance ---------------------------------------
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },

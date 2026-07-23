@@ -9685,7 +9685,16 @@
       "ppnInputLabel": "Input DPP",
       "bankSubmittedLabel": "Total Dokumen yang Diserahkan",
       "bankTotalLabel": "Total Rekening Koran",
-      "bankCompute": "Rekonsiliasi"
+      "bankCompute": "Rekonsiliasi",
+      "consultantOverrideLabel": "Nilai olah",
+      "consultantOverridePlaceholder": "Memakai nilai AI",
+      "consultantOverrideSave": "Simpan",
+      "consultantOverrideClear": "Batalkan",
+      "overrideDiffNote": "Berbeda dari nilai AI ({ai}) — ditampilkan sebagai perbandingan di layar supervisor.",
+      "rrReasonPlaceholder": "Tuliskan bagian yang belum yakin untuk ditinjau supervisor",
+      "rrSubmitBtn": "Minta tinjauan",
+      "rrStatusOpen": "Menunggu",
+      "rrStatusAnswered": "Dijawab"
     },
     "parseReview": {
       "title": "3-2. Tinjauan Parsing Dokumen",
@@ -10240,7 +10249,26 @@
       "actionStep2": "Verifikasi kandidat bukti",
       "actionStep3": "Proses kandidat tertunda",
       "actionStep4": "Pemeliharaan data selesai"
-    }
+    },
+    "diffHeading": "Input Klien / Kalkulasi AI / Proses Konsultan / Nilai Final",
+    "diffColItem": "Item",
+    "diffColCustomer": "Input klien",
+    "diffColAi": "Kalkulasi AI",
+    "diffColConsultant": "Konsultan",
+    "diffColFinal": "Final",
+    "diffApprovedBadge": "Disetujui",
+    "diffFootnote": "Jika nilai konsultan kosong, nilai AI dipakai. Nilai final dikunci saat persetujuan.",
+    "rrHeading": "Permintaan tinjauan konsultan",
+    "rrOpenBadge": "{count} menunggu komentar",
+    "rrAllAnswered": "Semua dijawab",
+    "rrApproveBlocked": "Persetujuan diblokir selama masih ada permintaan tinjauan tanpa komentar. Beri komentar dulu pada tiap item.",
+    "rrEmpty": "Tidak ada permintaan tinjauan — data sudah ditinjau konsultan.",
+    "rrStatusOpen": "Menunggu",
+    "rrStatusAnswered": "Dijawab",
+    "rrCommentPlaceholder": "Tulis komentar tinjauan (disimpan sebagai bukti audit)",
+    "rrAnswerBtn": "Simpan komentar",
+    "rrAnswered": "Komentar tersimpan.",
+    "rrAnswerFailed": "Gagal menyimpan komentar."
   },
   "messenger": {
     "title": "Pesan",

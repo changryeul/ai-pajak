@@ -9807,7 +9807,16 @@
       "ppnInputLabel": "Input DPP",
       "bankSubmittedLabel": "제출자료 합계",
       "bankTotalLabel": "통장 합계",
-      "bankCompute": "대사"
+      "bankCompute": "대사",
+      "consultantOverrideLabel": "처리값",
+      "consultantOverridePlaceholder": "AI 값 채택 중",
+      "consultantOverrideSave": "저장",
+      "consultantOverrideClear": "철회",
+      "overrideDiffNote": "AI 계산값({ai})과 다릅니다 — 수퍼바이저 화면에 비교 표시됩니다.",
+      "rrReasonPlaceholder": "확신 없는 부분을 적어 수퍼바이저 검토요청",
+      "rrSubmitBtn": "검토요청",
+      "rrStatusOpen": "대기",
+      "rrStatusAnswered": "의견 완료"
     },
     "parseReview": {
       "title": "3-2. 자료 파싱 검토",
@@ -10362,7 +10371,26 @@
       "actionStep2": "증빙 필요 후보 확인",
       "actionStep3": "검토대기 후보 처리",
       "actionStep4": "완료 데이터 유지관리"
-    }
+    },
+    "diffHeading": "고객 입력값 / AI 계산값 / 상담원 처리값 / 최종값 비교",
+    "diffColItem": "항목",
+    "diffColCustomer": "고객 입력값",
+    "diffColAi": "AI 계산값",
+    "diffColConsultant": "상담원 처리값",
+    "diffColFinal": "최종값",
+    "diffApprovedBadge": "승인됨",
+    "diffFootnote": "상담원 처리값이 비어 있으면 AI 계산값이 채택됩니다. 최종값은 승인 시 고정됩니다.",
+    "rrHeading": "상담원 수퍼바이저 검토요청",
+    "rrOpenBadge": "의견 대기 {count}건",
+    "rrAllAnswered": "모두 의견 완료",
+    "rrApproveBlocked": "의견이 달리지 않은 검토요청이 있어 승인할 수 없습니다. 각 항목에 의견을 남긴 뒤 승인하세요.",
+    "rrEmpty": "상담원이 올린 검토요청이 없습니다 — 검토완료 데이터 전제로 승인 판단하세요.",
+    "rrStatusOpen": "의견 대기",
+    "rrStatusAnswered": "의견 완료",
+    "rrCommentPlaceholder": "검토의견 입력 (분쟁·평가 근거로 기록됩니다)",
+    "rrAnswerBtn": "의견 저장",
+    "rrAnswered": "검토의견을 남겼습니다.",
+    "rrAnswerFailed": "의견 저장에 실패했습니다."
   },
   "messenger": {
     "title": "메신저",

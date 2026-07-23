@@ -15,6 +15,10 @@ interface CalcRow {
   session_id: string;
   kind: CalcKind;
   amount: number;
+  customer_input_amount: number | null;
+  ai_amount: number | null;
+  consultant_amount: number | null;
+  approved_amount: number | null;
   basis: Record<string, unknown>;
   source_summary: string | null;
   rationale_summary: string | null;
@@ -22,6 +26,15 @@ interface CalcRow {
   consultant_memo: string | null;
   is_saved: boolean;
   computed_at: string;
+}
+
+interface ReviewRequestRow {
+  id: string;
+  calc_kind: string | null;
+  item_label: string;
+  reason: string;
+  status: 'OPEN' | 'ANSWERED' | 'RESOLVED';
+  supervisor_comment: string | null;
 }
 
 const fmtRp = (n: number) =>
@@ -33,6 +46,11 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
   const [loading, setLoading] = useState(true);
   const [busyKind, setBusyKind] = useState<CalcKind | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // v13 §4 — 상담원 처리값 조정 + 수퍼바이저 검토요청
+  const [requests, setRequests] = useState<ReviewRequestRow[]>([]);
+  const [overrideVal, setOverrideVal] = useState<Record<string, string>>({});
+  const [rrReason, setRrReason] = useState<Record<string, string>>({});
+  const [rrBusy, setRrBusy] = useState<string | null>(null);
 
   const [pph21Gross, setPph21Gross] = useState('');
   const [whGross, setWhGross] = useState('');
@@ -51,16 +69,63 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch(`/api/consultant-erp/sessions/${sessionId}/calc`);
+      const [r, rr] = await Promise.all([
+        fetch(`/api/consultant-erp/sessions/${sessionId}/calc`),
+        fetch(`/api/consultant-erp/sessions/${sessionId}/review-requests`),
+      ]);
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? 'load failed');
       setRows(j.data ?? []);
+      const jr = await rr.json().catch(() => null);
+      if (rr.ok && jr?.success) setRequests(jr.data ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'failed');
     } finally {
       setLoading(false);
     }
   }, [sessionId]);
+
+  const adjustConsultantAmount = async (kind: CalcKind, value: number | null) => {
+    setRrBusy(`adj-${kind}`);
+    setError(null);
+    try {
+      const r = await fetch(`/api/consultant-erp/sessions/${sessionId}/calc`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind, consultantAmount: value }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(typeof j.error === 'string' ? j.error : 'adjust failed');
+      setOverrideVal((prev) => ({ ...prev, [kind]: '' }));
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'adjust error');
+    } finally {
+      setRrBusy(null);
+    }
+  };
+
+  const requestReview = async (kind: CalcKind, title: string) => {
+    const reason = (rrReason[kind] ?? '').trim();
+    if (!reason) return;
+    setRrBusy(`rr-${kind}`);
+    setError(null);
+    try {
+      const r = await fetch(`/api/consultant-erp/sessions/${sessionId}/review-requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ calcKind: kind, itemLabel: title, reason }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(typeof j.error === 'string' ? j.error : 'request failed');
+      setRrReason((prev) => ({ ...prev, [kind]: '' }));
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'request error');
+    } finally {
+      setRrBusy(null);
+    }
+  };
 
   useEffect(() => {
     void load();
@@ -87,6 +152,76 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
 
   const findRow = (k: CalcKind) => rows.find((r) => r.kind === k);
 
+  // v13 §4 — 카드 공통 푸터: 상담원 처리값 조정 + 수퍼바이저 검토요청.
+  const cardFooter = (kind: CalcKind, title: string) => {
+    const row = findRow(kind);
+    if (!row) return null;
+    const kindRequests = requests.filter((q) => q.calc_kind === kind);
+    return (
+      <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+        {/* 상담원 처리값 */}
+        <div className="flex items-center gap-1.5">
+          <span className="shrink-0 text-[10px] font-bold text-slate-500">{t('calc.consultantOverrideLabel')}</span>
+          <Input
+            className="h-7 flex-1 text-[11px]"
+            type="number"
+            placeholder={row.consultant_amount != null ? String(row.consultant_amount) : t('calc.consultantOverridePlaceholder')}
+            value={overrideVal[kind] ?? ''}
+            onChange={(e) => setOverrideVal((prev) => ({ ...prev, [kind]: e.target.value }))}
+          />
+          <Button
+            size="sm" variant="outline" className="h-7 px-2 text-[10px]"
+            disabled={rrBusy === `adj-${kind}` || !(overrideVal[kind] ?? '').trim()}
+            onClick={() => adjustConsultantAmount(kind, Number(overrideVal[kind]))}
+          >
+            {t('calc.consultantOverrideSave')}
+          </Button>
+          {row.consultant_amount != null && (
+            <Button
+              size="sm" variant="ghost" className="h-7 px-2 text-[10px] text-slate-400"
+              disabled={rrBusy === `adj-${kind}`}
+              onClick={() => adjustConsultantAmount(kind, null)}
+            >
+              {t('calc.consultantOverrideClear')}
+            </Button>
+          )}
+        </div>
+        {row.consultant_amount != null && row.ai_amount != null && Number(row.consultant_amount) !== Number(row.ai_amount) && (
+          <p className="text-[10px] text-amber-700">
+            {t('calc.overrideDiffNote', { ai: fmtRp(Number(row.ai_amount)) })}
+          </p>
+        )}
+        {/* 수퍼바이저 검토요청 */}
+        <div className="flex items-center gap-1.5">
+          <Input
+            className="h-7 flex-1 text-[11px]"
+            placeholder={t('calc.rrReasonPlaceholder')}
+            value={rrReason[kind] ?? ''}
+            onChange={(e) => setRrReason((prev) => ({ ...prev, [kind]: e.target.value }))}
+          />
+          <Button
+            size="sm" variant="outline" className="h-7 px-2 text-[10px] border-violet-200 text-violet-700 hover:bg-violet-50"
+            disabled={rrBusy === `rr-${kind}` || !(rrReason[kind] ?? '').trim()}
+            onClick={() => requestReview(kind, title)}
+          >
+            {t('calc.rrSubmitBtn')}
+          </Button>
+        </div>
+        {kindRequests.map((q) => (
+          <div key={q.id} className="rounded-lg bg-violet-50 px-2 py-1.5 text-[10px]">
+            <span className={`mr-1.5 rounded-full px-1.5 py-0.5 font-bold ${q.status === 'OPEN' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}`}>
+              {q.status === 'OPEN' ? t('calc.rrStatusOpen') : t('calc.rrStatusAnswered')}
+            </span>
+            <span className="text-slate-600">{q.reason}</span>
+            {q.supervisor_comment && (
+              <p className="mt-1 text-violet-800">💬 {q.supervisor_comment}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Card>
       <CardContent className="p-6 space-y-5">
@@ -106,7 +241,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
 
         <div className="grid gap-4 md:grid-cols-2">
           {/* PPh 21 TER */}
-          <CalcCard title={t('calc.kind.PPH21_TER')} row={findRow('PPH21_TER')}>
+          <CalcCard title={t('calc.kind.PPH21_TER')} row={findRow('PPH21_TER')} footer={cardFooter('PPH21_TER', t('calc.kind.PPH21_TER'))}>
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-600">{t('calc.pph21GrossLabel')}</label>
               <Input
@@ -126,7 +261,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
           </CalcCard>
 
           {/* Withholding summary */}
-          <CalcCard title={t('calc.kind.WITHHOLDING_SUMMARY')} row={findRow('WITHHOLDING_SUMMARY')}>
+          <CalcCard title={t('calc.kind.WITHHOLDING_SUMMARY')} row={findRow('WITHHOLDING_SUMMARY')} footer={cardFooter('WITHHOLDING_SUMMARY', t('calc.kind.WITHHOLDING_SUMMARY'))}>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-bold text-slate-600">{t('calc.whTotalLabel')}</label>
@@ -163,7 +298,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
 
           {/* Corp tax dual case — full width */}
           <div className="md:col-span-2">
-            <CalcCard title={t('calc.kind.CORP_TAX_MONTHLY')} row={findRow('CORP_TAX_MONTHLY')}>
+            <CalcCard title={t('calc.kind.CORP_TAX_MONTHLY')} row={findRow('CORP_TAX_MONTHLY')} footer={cardFooter('CORP_TAX_MONTHLY', t('calc.kind.CORP_TAX_MONTHLY'))}>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-600">{t('calc.corpEstablishedLabel')}</label>
@@ -253,7 +388,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
           </div>
 
           {/* PPN net */}
-          <CalcCard title={t('calc.kind.PPN_NET')} row={findRow('PPN_NET')}>
+          <CalcCard title={t('calc.kind.PPN_NET')} row={findRow('PPN_NET')} footer={cardFooter('PPN_NET', t('calc.kind.PPN_NET'))}>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-bold text-slate-600">{t('calc.ppnOutputLabel')}</label>
@@ -288,7 +423,7 @@ export function CalcCardsPanel({ sessionId }: { sessionId: string }) {
           </CalcCard>
 
           {/* Bank recon */}
-          <CalcCard title={t('calc.kind.BANK_RECON')} row={findRow('BANK_RECON')}>
+          <CalcCard title={t('calc.kind.BANK_RECON')} row={findRow('BANK_RECON')} footer={cardFooter('BANK_RECON', t('calc.kind.BANK_RECON'))}>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-bold text-slate-600">{t('calc.bankSubmittedLabel')}</label>
@@ -335,11 +470,14 @@ function CalcCard({
   title,
   row,
   children,
+  footer,
 }: {
   title: string;
   row: CalcRow | undefined;
   children: React.ReactNode;
+  footer?: React.ReactNode;
 }) {
+  const edited = row?.consultant_amount != null;
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex items-center justify-between mb-3">
@@ -353,9 +491,12 @@ function CalcCard({
       </div>
       {row && (
         <div className="mb-3 rounded-lg bg-slate-50 p-3 text-xs">
-          <p className="text-2xl font-black text-emerald-700">
+          <p className={`text-2xl font-black ${edited ? 'text-amber-700' : 'text-emerald-700'}`}>
             {fmtRp(Number(row.amount ?? 0))}
           </p>
+          {edited && row.ai_amount != null && (
+            <p className="text-[10px] text-slate-400 line-through">{fmtRp(Number(row.ai_amount))}</p>
+          )}
           {row.source_summary && (
             <p className="mt-1 text-slate-600">{row.source_summary}</p>
           )}
@@ -365,6 +506,7 @@ function CalcCard({
         </div>
       )}
       {children}
+      {footer}
     </div>
   );
 }

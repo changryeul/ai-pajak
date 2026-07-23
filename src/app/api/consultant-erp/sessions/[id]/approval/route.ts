@@ -60,7 +60,27 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
 
   const admin = getSupabaseAdmin();
 
-  // Build snapshot at decision time
+  // v13 §4: 상담원이 올린 검토요청에 수퍼바이저 의견이 달리기 전(OPEN)에는
+  // 승인할 수 없다 — "검토요청 항목 의견 작성 → 승인완료" 순서 강제.
+  if (action === 'APPROVE') {
+    const { count: openCount } = await admin
+      .from('consultant_review_request')
+      .select('id', { count: 'exact', head: true })
+      .eq('session_id', sessionId)
+      .eq('status', 'OPEN');
+    if ((openCount ?? 0) > 0) {
+      return NextResponse.json(
+        {
+          error: `Cannot approve: ${openCount} review request(s) still await supervisor comment`,
+          errorKey: 'openReviewRequests',
+          openCount,
+        },
+        { status: 400 },
+      );
+    }
+  }
+
+  // Build snapshot at decision time (4-값 포함)
   const { data: sessionRow } = await admin
     .from('consultant_session')
     .select('*')
@@ -68,7 +88,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     .single();
   const { data: calcs } = await admin
     .from('consultant_session_calc')
-    .select('kind, amount, source_summary, confidence')
+    .select('kind, amount, customer_input_amount, ai_amount, consultant_amount, source_summary, confidence')
     .eq('session_id', sessionId);
   const { data: docs } = await admin
     .from('consultant_session_document')
@@ -114,7 +134,29 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
   }
   await admin.from('consultant_session').update(patch).eq('id', sessionId);
 
-return NextResponse.json({ success: true, data: { newStatus, newStep } });
+  // 최종 승인값 스탬프 (4-값 분리 저장의 4번째 값) — 승인 시점의 유효값을
+  // approved_amount 로 고정. REJECT/WITHDRAW 시에는 초기화.
+  if (action === 'APPROVE') {
+    const { data: savedCalcs } = await admin
+      .from('consultant_session_calc')
+      .select('id, amount')
+      .eq('session_id', sessionId)
+      .eq('is_saved', true);
+    const now = new Date().toISOString();
+    for (const c of savedCalcs ?? []) {
+      await admin
+        .from('consultant_session_calc')
+        .update({ approved_amount: c.amount, approved_at: now })
+        .eq('id', c.id);
+    }
+  } else if (action === 'REJECT' || action === 'WITHDRAW') {
+    await admin
+      .from('consultant_session_calc')
+      .update({ approved_amount: null, approved_at: null })
+      .eq('session_id', sessionId);
+  }
+
+  return NextResponse.json({ success: true, data: { newStatus, newStep } });
 }
 
 export async function POST(request: NextRequest) {

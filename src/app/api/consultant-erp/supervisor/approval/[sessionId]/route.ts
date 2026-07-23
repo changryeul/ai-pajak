@@ -52,7 +52,7 @@ async function handleGet(
     consultant = data;
   }
 
-  const [docsRes, calcsRes, approvalsRes, coretaxRes] = await Promise.all([
+  const [docsRes, calcsRes, approvalsRes, coretaxRes, reviewReqRes] = await Promise.all([
     admin
       .from('consultant_session_document')
       .select('*')
@@ -69,6 +69,12 @@ async function handleGet(
       .select('*')
       .eq('session_id', sessionId)
       .maybeSingle(),
+    // v13 §4 — 상담원 수퍼바이저 검토요청 (OPEN 이 남아 있으면 승인 불가)
+    admin
+      .from('consultant_review_request')
+      .select('id, calc_kind, item_label, reason, status, supervisor_comment, answered_at, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true }),
   ]);
 
   // Parse rows (the findings panel)
@@ -154,6 +160,7 @@ async function handleGet(
       coretax: coretaxRes.data ?? null,
       trend,
       invoiceLines,
+      reviewRequests: reviewReqRes.data ?? [],
     },
   });
 }
