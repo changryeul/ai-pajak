@@ -49,7 +49,7 @@ const OPERATOR = [
 
 const log: string[] = [];
 function say(m: string) { log.push(m); console.log(m); }
-async function q<T = unknown>(fn: () => Promise<{ data: T; error: unknown }>): Promise<T> {
+async function q<T = unknown>(fn: () => PromiseLike<{ data: T; error: unknown }>): Promise<T> {
   const { data, error } = await fn();
   if (error) throw new Error(JSON.stringify(error));
   return data;
