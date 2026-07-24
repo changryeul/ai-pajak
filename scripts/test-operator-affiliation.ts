@@ -31,11 +31,11 @@ let pass = 0;
 function ok(m: string) { pass++; console.log(`  ✓ ${m}`); }
 function fail(m: string): never { console.error(`  ✗ ${m}`); process.exit(1); }
 
-async function login(email: string): Promise<string> {
+async function login(email: string): Promise<{ token: string; userId: string }> {
   const c = createClient(url, anonKey, { auth: { persistSession: false } });
   const { data, error } = await c.auth.signInWithPassword({ email, password: 'TestPassword123!' });
   if (error || !data.session) fail(`login failed: ${email}`);
-  return data.session.access_token;
+  return { token: data.session.access_token, userId: data.user!.id };
 }
 async function api(token: string, method: string, p: string, body?: unknown) {
   const res = await fetch(`${baseUrl}${p}`, {
@@ -48,11 +48,28 @@ async function api(token: string, method: string, p: string, body?: unknown) {
 
 async function main() {
   console.log(`🧪 operator affiliation smoke on ${baseUrl}\n`);
-  const cleanup: { operatorId?: string } = {};
+  const cleanup: { operatorId?: string; ensuredMeRow?: boolean; meRowId?: string } = {};
 
   try {
-    const supervisorToken = await login('supervisor.test@aipajak.com');
-    const consultantToken = await login('consultant.test@jakartatax.co.id');
+    const sup = await login('supervisor.test@aipajak.com');
+    const supervisorToken = sup.token;
+    const con = await login('consultant.test@jakartatax.co.id');
+    const consultantToken = con.token;
+
+    // supervisor.test 의 tax_operators row 보장 (affiliation 은 tax_operators
+    // 기반 — supervisor.test 는 평가/배정 보조테이블에 row 가 없을 수 있다).
+    const { data: existingMe } = await admin.from('tax_operators').select('id').eq('user_id', sup.userId).maybeSingle();
+    if (!existingMe) {
+      const { data: made } = await admin.from('tax_operators').insert({
+        user_id: sup.userId,
+        employee_id: `AFFILSUP${Date.now().toString().slice(-5)}`,
+        name: `${SENTINEL} Supervisor`, role: 'tax_operator_supervisor', status: 'active',
+        max_clients: 50, work_state: 'available',
+      }).select('id').single();
+      cleanup.ensuredMeRow = true;
+      cleanup.meRowId = made?.id;
+      ok('ensured supervisor.test tax_operators row (sentinel)');
+    }
 
     // ── 1. GET RBAC ──
     const g = await api(supervisorToken, 'GET', '/api/consultant-erp/supervisor/affiliation');
@@ -99,11 +116,11 @@ async function main() {
     ok('duplicate open request → 409');
 
     // ── 4. 받는 쪽 아닌 사람 결재 403 — master 로 시도 (다른 supervisor role) ──
-    const masterToken = await login('master.test@aipajak.com');
-    const d0 = await api(masterToken, 'PATCH', `/api/consultant-erp/supervisor/affiliation/${transferId}`, { action: 'APPROVE' });
+    const master = await login('master.test@aipajak.com');
+    const d0 = await api(master.token, 'PATCH', `/api/consultant-erp/supervisor/affiliation/${transferId}`, { action: 'APPROVE' });
     // master 는 to_supervisor 가 아니므로 403 (또는 tax_operators row 없으면 403)
-    if (d0.status !== 403) fail(`non-receiver decide expected 403, got ${d0.status}`);
-    ok('non-receiving supervisor decide → 403');
+    if (d0.status !== 403) fail(`non-supervisor-role decide expected 403, got ${d0.status}`);
+    ok('non-receiving/other-role decide → 403');
 
     // ── 5. 받는 쪽(me) 승인 → 소속 변경 ──
     const d1 = await api(supervisorToken, 'PATCH', `/api/consultant-erp/supervisor/affiliation/${transferId}`, { action: 'APPROVE' });
@@ -119,6 +136,10 @@ async function main() {
       await admin.from('operator_affiliation_transfer').delete().eq('operator_id', cleanup.operatorId);
       await admin.from('operator_client_assignments').delete().eq('operator_id', cleanup.operatorId);
       await admin.from('tax_operators').delete().eq('id', cleanup.operatorId);
+    }
+    if (cleanup.ensuredMeRow && cleanup.meRowId) {
+      await admin.from('operator_affiliation_transfer').delete().eq('to_supervisor_id', cleanup.meRowId);
+      await admin.from('tax_operators').delete().eq('id', cleanup.meRowId);
     }
     console.log('   sentinel rows removed');
   }
