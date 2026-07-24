@@ -176,14 +176,53 @@ const TER_TABLES: Record<TERCategory, TERBracket[]> = {
   C: TER_CATEGORY_C,
 };
 
+/** Canonical PTKP keys (no slash), matching PTKP in constants.ts. */
+const VALID_PTKP = new Set<PTKPCategory>([
+  'TK0', 'TK1', 'TK2', 'TK3', 'K0', 'K1', 'K2', 'K3', 'KI0', 'KI1', 'KI2', 'KI3',
+]);
+
 /**
- * Determine TER category based on PTKP status.
+ * Normalize a raw PTKP status string to a canonical PTKPCategory.
  *
- * Category A: TK/0, TK/1, K/0 (and KI/0 mapped to base)
- * Category B: TK/2, TK/3, K/1, K/2 (and KI/1, KI/2)
- * Category C: K/3 (and KI/3)
+ * Handles the many ways HR data writes tax status:
+ *   'TK/0', 'TK 0', 'tk-0', 'K/1', 'K/I/1', 'KI 1', 'k1' → TK0 / K1 / KI1 …
+ *   'TK' / 'K' / 'KI' (no dependant digit) → TK0 / K0 / KI0
+ *
+ * Falls back to 'TK0' for genuinely unrecognizable input — the conservative
+ * choice, because 'TK0' has the LOWEST PTKP and therefore never *under*-taxes.
+ * (The old code let unknown values reach getTERCategory as undefined, which
+ * silently produced a 0% rate = missing tax.)
  */
-export function getTERCategory(ptkpCategory: PTKPCategory): TERCategory {
+export function normalizePtkpCategory(raw?: string | null): PTKPCategory {
+  if (!raw) return 'TK0';
+  // Strip everything but letters+digits, uppercase → 'K/I/1' → 'KI1', 'TK/2' → 'TK2'
+  const s = String(raw).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (VALID_PTKP.has(s as PTKPCategory)) return s as PTKPCategory;
+  // Prefix without dependant count → 0 dependants
+  if (s === 'TK') return 'TK0';
+  if (s === 'K') return 'K0';
+  if (s === 'KI') return 'KI0';
+  // Prefix + single digit (defensive re-parse, e.g. stray characters removed)
+  const m = s.match(/^(KI|TK|K)([0-9])$/);
+  if (m && VALID_PTKP.has((m[1] + m[2]) as PTKPCategory)) {
+    return (m[1] + m[2]) as PTKPCategory;
+  }
+  return 'TK0';
+}
+
+/**
+ * Determine TER category based on PTKP status (PMK 168/2023 Lampiran).
+ *
+ * Category A: TK/0, TK/1, K/0 (PTKP 54M / 58.5M)
+ * Category B: TK/2, TK/3, K/1, K/2 (PTKP 63M / 67.5M)
+ * Category C: K/3 (PTKP 72M)
+ * KI (married, spouse's income combined) maps to the same dependant-count
+ * category as the K status (KI/n → K/n's TER category).
+ *
+ * Input is normalized first, so slashed/loose values ('K/1', 'tk 2') and
+ * unknown values are all handled safely (never returns undefined).
+ */
+export function getTERCategory(ptkpCategory: PTKPCategory | string | null | undefined): TERCategory {
   const categoryMap: Record<PTKPCategory, TERCategory> = {
     TK0: 'A',
     TK1: 'A',
@@ -193,14 +232,14 @@ export function getTERCategory(ptkpCategory: PTKPCategory): TERCategory {
     K1: 'B',
     K2: 'B',
     K3: 'C',
-    // KI (married, spouse working) → map to underlying marital status
+    // KI (married, spouse working) → same dependant-count category as K
     KI0: 'A',
     KI1: 'B',
     KI2: 'B',
     KI3: 'C',
   };
 
-  return categoryMap[ptkpCategory];
+  return categoryMap[normalizePtkpCategory(ptkpCategory)];
 }
 
 /**

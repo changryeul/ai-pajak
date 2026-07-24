@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { loggers } from '@/lib/logger';
 import { computePayslipTotals } from '@/app/api/tax/monthly-payslip/route';
+import { normalizePtkpCategory } from '@/config/pph21-ter-rates';
 import { loadRateOverrides } from '@/lib/tax/rate-provider';
 
 /**
@@ -95,7 +96,10 @@ export async function POST(request: NextRequest) {
       const grossSalary = getNum(cols, 'gross_salary');
       if (grossSalary <= 0) { errors.push(`Row ${i + 1}: ${name} — missing gross_salary`); skipped++; continue; }
 
-      const ptkp = getVal(cols, 'ptkp_category') || 'TK0';
+      // 정규화: 양식에 'K/1', 'TK 2' 등 다양한 표기가 들어와도 canonical
+      // PTKP 키로 저장 → TER 카테고리 판정이 어긋나 세율 0(과세 누락)/오산되던
+      // 문제 방지. (payslip 경로와 동일한 정규화를 공용 함수로 통일.)
+      const ptkp = normalizePtkpCategory(getVal(cols, 'ptkp_category'));
       // 2026-06-21: 양식의 employment_status / worker_type 등 HR 필드는 사용자가 직접
       // 직원 마스터에서 입력하는 정책 (sync 가 자동 채우지 않음) → import 시 무시.
 

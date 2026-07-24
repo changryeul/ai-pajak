@@ -6,10 +6,10 @@ import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { PPh21Calculator } from '@/lib/tax/pph21-calculator';
+import { normalizePtkpCategory } from '@/config/pph21-ter-rates';
 import { loadRateOverrides } from '@/lib/tax/rate-provider';
 import type { RequestWithSession } from '@/types/auth';
 import type { PPh21Data } from '@/types';
-import type { PTKPCategory } from '@/config/constants';
 
 /**
  * Monthly Payslip API
@@ -88,19 +88,9 @@ export function computePayslipTotals(input: {
     Number(input.loan_deduction || 0) +
     Number(input.other_deductions || 0);
 
-  // PPh 21 TER
-  // 양식에서 'K/1', 'TK/0' 처럼 슬래시 포함된 값이 들어올 수 있어 정규화.
-  // 표준 enum 키는 TK0/TK1/.../K3/KI0/KI3 (슬래시 없음).
-  const normalizedPtkp = (input.ptkp_category || 'TK0')
-    .replace(/\//g, '')
-    .replace(/\s/g, '')
-    .toUpperCase();
-  // 알 수 없는 값이 그대로 넘어가면 getTERCategory 가 undefined 를 반환해
-  // 세율 0(과세 누락)으로 이어지므로, 유효 키가 아니면 TK0 로 보정한다.
-  const VALID_PTKP = new Set([
-    'TK0', 'TK1', 'TK2', 'TK3', 'K0', 'K1', 'K2', 'K3', 'KI0', 'KI1', 'KI2', 'KI3',
-  ]);
-  const ptkpCategory = (VALID_PTKP.has(normalizedPtkp) ? normalizedPtkp : 'TK0') as PTKPCategory;
+  // PPh 21 TER — PTKP status 정규화 (슬래시/공백/별칭 처리 + 미지값 방어)를
+  // 공용 함수로 통일. import 경로와 동일 규칙 → 계산 일관성.
+  const ptkpCategory = normalizePtkpCategory(input.ptkp_category);
   // NPWP 없는 직원은 Pasal 21(5a) 에 따라 20% 가산. payslip 레코드의 실제
   // employee_npwp 로 판정한다 (과거엔 has_npwp:true 하드코딩으로 가산이
   // 절대 적용되지 않아 무-NPWP 직원 세율이 20% 낮게 나오던 버그).
@@ -132,7 +122,7 @@ export function computePayslipTotals(input: {
     // ptkp 보정으로 정상 입력에선 도달 불가. 도달했다면 세금 0 이 저장되므로
     // warn 이 아닌 error 로 올려 모니터링/Sentry 에 반드시 노출한다.
     loggers.api.error(
-      { err, ptkpCategory, normalizedPtkp, period: input.period },
+      { err, ptkpCategory, rawPtkp: input.ptkp_category, period: input.period },
       'PPh 21 TER calculation failed — payslip saved with tax=0, needs review',
     );
   }
