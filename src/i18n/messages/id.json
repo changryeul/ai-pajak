@@ -4940,7 +4940,13 @@
     "chatSubmitLineCount": "• {count} transaksi",
     "chatSubmitLineDpp": "• Total DPP: Rp {amount}",
     "chatSubmitLinePph": "• Total PPh: Rp {amount}",
-    "chatSubmitLineFooter": "→ Mohon dibuatkan SPT Masa setelah review."
+    "chatSubmitLineFooter": "→ Mohon dibuatkan SPT Masa setelah review.",
+    "viewEvidence": "Lihat bukti",
+    "evidenceModalTitle": "Bukti",
+    "evidenceNone": "Tidak ada bukti terkait transaksi ini.",
+    "evidenceOpenNewTab": "Buka di tab baru",
+    "loading": "Memuat...",
+    "serverError": "Terjadi kesalahan server."
   },
   "companyProfile": {
     "welcomeTitle": "Selamat datang — lengkapi profil perusahaan",

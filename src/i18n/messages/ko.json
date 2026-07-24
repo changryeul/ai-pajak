@@ -5014,7 +5014,13 @@
     "chatSubmitLineCount": "• 거래 {count} 건",
     "chatSubmitLineDpp": "• 총 DPP: Rp {amount}",
     "chatSubmitLinePph": "• 총 PPh: Rp {amount}",
-    "chatSubmitLineFooter": "→ 검토 후 SPT Masa 생성 부탁드립니다."
+    "chatSubmitLineFooter": "→ 검토 후 SPT Masa 생성 부탁드립니다.",
+    "viewEvidence": "증빙 보기",
+    "evidenceModalTitle": "증빙 보기",
+    "evidenceNone": "이 거래에 연결된 증빙이 없습니다.",
+    "evidenceOpenNewTab": "새 탭에서 열기",
+    "loading": "로딩 중...",
+    "serverError": "서버 오류가 발생했습니다."
   },
   "companyProfile": {
     "welcomeTitle": "가입을 환영합니다 — 회사 정보 보완",

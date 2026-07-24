@@ -4940,7 +4940,13 @@
     "chatSubmitLineCount": "• {count} transactions",
     "chatSubmitLineDpp": "• Total DPP: Rp {amount}",
     "chatSubmitLinePph": "• Total PPh: Rp {amount}",
-    "chatSubmitLineFooter": "→ Please create SPT Masa after review."
+    "chatSubmitLineFooter": "→ Please create SPT Masa after review.",
+    "viewEvidence": "View evidence",
+    "evidenceModalTitle": "Evidence",
+    "evidenceNone": "No evidence linked to this transaction.",
+    "evidenceOpenNewTab": "Open in new tab",
+    "loading": "Loading...",
+    "serverError": "A server error occurred."
   },
   "companyProfile": {
     "welcomeTitle": "Welcome — complete your company profile",

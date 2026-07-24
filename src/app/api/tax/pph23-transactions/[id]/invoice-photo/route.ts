@@ -167,3 +167,70 @@ export async function POST(request: NextRequest) {
     withAudit('PPH23_INVOICE_ATTACH'),
   )(request as RequestWithSession, handle);
 }
+
+/**
+ * GET /api/tax/pph23-transactions/[id]/invoice-photo (v19 §6 — 트랙 6)
+ *
+ * 증빙 보기 — 거래에 첨부된 인보이스 사진의 서명 URL(5분) + 메타를 반환.
+ * 증빙 보기 전용 (요청 모달과 분리). 미첨부면 404.
+ */
+async function handleGet(req: RequestWithSession): Promise<Response> {
+  const txId = getTxId(req as unknown as NextRequest);
+  if (!txId || !UUID_RE.test(txId)) {
+    return NextResponse.json({ error: 'transaction id must be uuid' }, { status: 400 });
+  }
+  const admin = getSupabaseAdmin();
+
+  const { data: tx } = await admin
+    .from('pph23_transaction')
+    .select('id, customer_id, invoice_document_id, counterparty_name, invoice_number')
+    .eq('id', txId)
+    .maybeSingle();
+  if (!tx) return NextResponse.json({ error: 'transaction not found' }, { status: 404 });
+
+  if (req.session.role === UserRole.CUSTOMER) {
+    const { data: ownCust } = await admin
+      .from('customer').select('id').eq('user_id', req.session.userId).maybeSingle();
+    if (!ownCust || ownCust.id !== tx.customer_id) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+    }
+  }
+
+  if (!tx.invoice_document_id) {
+    return NextResponse.json({ error: 'no invoice photo attached', errorKey: 'noEvidence' }, { status: 404 });
+  }
+
+  const { data: doc } = await admin
+    .from('document')
+    .select('id, file_path, file_name, mime_type, metadata')
+    .eq('id', tx.invoice_document_id)
+    .maybeSingle();
+  if (!doc?.file_path) return NextResponse.json({ error: 'document missing' }, { status: 404 });
+
+  const bucket = (doc.metadata as { storage_bucket?: string } | null)?.storage_bucket || BUCKET;
+  const { data: signed, error: signErr } = await admin.storage
+    .from(bucket)
+    .createSignedUrl(doc.file_path, 300);
+  if (signErr || !signed?.signedUrl) {
+    return NextResponse.json({ error: 'could not sign url' }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    data: {
+      documentId: doc.id,
+      fileName: doc.file_name,
+      mimeType: doc.mime_type,
+      signedUrl: signed.signedUrl,
+      counterpartyName: tx.counterparty_name,
+      invoiceNumber: tx.invoice_number,
+    },
+  });
+}
+
+export async function GET(request: NextRequest) {
+  return composeMiddleware(
+    requireAuth,
+    blockPlatformAdmin,
+    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR),
+  )(request as RequestWithSession, handleGet);
+}

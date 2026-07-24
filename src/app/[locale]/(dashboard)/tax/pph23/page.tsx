@@ -152,6 +152,17 @@ export default function PPh23Page() {
   const [showForm, setShowForm] = useState(false);
   const [expandedTx, setExpandedTx] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // v19 §6 — 증빙 보기 전용 모달 (요청 모달과 분리).
+  const [evidence, setEvidence] = useState<{
+    loading: boolean;
+    txId: string;
+    signedUrl?: string;
+    fileName?: string;
+    mimeType?: string;
+    counterpartyName?: string;
+    invoiceNumber?: string;
+    error?: string;
+  } | null>(null);
   // Persistent breakdown of the last WHT one-sheet upload — survives until the
   // user dismisses it. Surfaces inserts that went to other tables (PPh4(2),
   // PPh26, PPN) which this page doesn't list, so users actually see the action.
@@ -520,6 +531,22 @@ export default function PPh23Page() {
       }
     } catch {
       showMsg('error', t('saveFailed'));
+    }
+  };
+
+  // v19 §6 — 증빙 보기: 서명 URL 로 인보이스 사진/PDF 미리보기.
+  const openEvidence = async (txId: string) => {
+    setEvidence({ loading: true, txId });
+    try {
+      const res = await fetch(`/api/tax/pph23-transactions/${txId}/invoice-photo`);
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setEvidence({ loading: false, txId, error: json.error || `HTTP ${res.status}` });
+        return;
+      }
+      setEvidence({ loading: false, txId, ...json.data });
+    } catch {
+      setEvidence({ loading: false, txId, error: t('serverError') });
     }
   };
 
@@ -1677,12 +1704,14 @@ export default function PPh23Page() {
                           </td>
                           <td className="p-2 text-center">
                             {tx.invoice_document_id ? (
-                              <span
-                                className="inline-flex items-center text-green-600"
-                                title={t('invoiceAttached')}
+                              <button
+                                type="button"
+                                onClick={() => openEvidence(tx.id)}
+                                className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 hover:underline"
+                                title={t('viewEvidence')}
                               >
                                 <CheckCircle className="h-4 w-4" />
-                              </span>
+                              </button>
                             ) : (
                               <details className="inline-block relative">
                                 <summary
@@ -2199,6 +2228,59 @@ export default function PPh23Page() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* v19 §6 — 증빙 보기 전용 모달 */}
+      {evidence && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setEvidence(null)}
+        >
+          <div
+            className="w-full max-w-2xl rounded-2xl bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b px-5 py-3">
+              <div>
+                <h2 className="text-base font-bold text-gray-900">{t('evidenceModalTitle')}</h2>
+                {(evidence.counterpartyName || evidence.invoiceNumber) && (
+                  <p className="text-xs text-gray-500">
+                    {evidence.counterpartyName}{evidence.invoiceNumber ? ` · ${evidence.invoiceNumber}` : ''}
+                  </p>
+                )}
+              </div>
+              <button className="text-gray-400 hover:text-gray-700" onClick={() => setEvidence(null)}>✕</button>
+            </div>
+            <div className="p-5">
+              {evidence.loading ? (
+                <div className="py-16 text-center text-sm text-gray-400">{t('loading')}</div>
+              ) : evidence.error ? (
+                <div className="rounded-lg border border-dashed border-gray-200 py-14 text-center text-sm text-gray-400">
+                  {evidence.error === 'no invoice photo attached' ? t('evidenceNone') : evidence.error}
+                </div>
+              ) : evidence.signedUrl ? (
+                <div className="space-y-3">
+                  {evidence.mimeType?.startsWith('image/') ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={evidence.signedUrl} alt={evidence.fileName || 'invoice'} className="mx-auto max-h-[60vh] rounded-lg object-contain" />
+                  ) : evidence.mimeType === 'application/pdf' ? (
+                    <iframe src={evidence.signedUrl} title="invoice" className="h-[60vh] w-full rounded-lg border" />
+                  ) : (
+                    <p className="text-sm text-gray-500">{evidence.fileName}</p>
+                  )}
+                  <a
+                    href={evidence.signedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+                  >
+                    {t('evidenceOpenNewTab')} ↗
+                  </a>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
