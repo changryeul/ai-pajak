@@ -282,7 +282,8 @@
     "masterTenants": "Master — Tenants",
     "consultantErpIdBilling": "ID Billing Issuance",
     "opIdBilling": "ID Billing Issuance",
-    "supervisorBillingHandover": "ID Billing Handover"
+    "supervisorBillingHandover": "ID Billing Handover",
+    "supervisorAffiliation": "Operator Affiliation"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10290,7 +10291,31 @@
     "handoverNotSent": "Not sent",
     "handoverPaid": "Paid",
     "handoverAwaitingNtpn": "Awaiting Coretax",
-    "handoverFootnote": "NTPN is auto-generated in Coretax after the customer pays (payment = filing)."
+    "handoverFootnote": "NTPN is auto-generated in Coretax after the customer pays (payment = filing).",
+    "affTitle": "Operator Affiliation",
+    "affDesc": "Move an operator to another supervisor group. Follows request → receiving supervisor approval → client scope → audit.",
+    "affIncomingTitle": "Transfer requests awaiting your approval",
+    "affNewTitle": "New transfer request",
+    "affSelectOperator": "Select operator",
+    "affSelectSupervisor": "Target supervisor",
+    "affNoSupervisor": "Unassigned",
+    "affReasonPlaceholder": "Reason for transfer",
+    "affRequestBtn": "Request transfer",
+    "affRequested": "Transfer request sent.",
+    "affApproved": "Transfer approved. {n} clients to reassign.",
+    "affRejected": "Transfer request rejected.",
+    "affApproveBtn": "Approve",
+    "affRejectBtn": "Reject",
+    "affWorkflowNote": "Affiliation changes only after the receiving supervisor approves.",
+    "affTeamTitle": "Team affiliation",
+    "affColOperator": "Operator",
+    "affColSupervisor": "Supervisor",
+    "affColState": "State",
+    "affMode": {
+      "WITH_CLIENTS": "Move with clients",
+      "OPERATOR_ONLY": "Operator only (keep clients)",
+      "REASSIGN_CLIENTS": "Move + reassign clients"
+    }
   },
   "messenger": {
     "title": "Messenger",

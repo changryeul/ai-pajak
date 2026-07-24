@@ -282,7 +282,8 @@
     "masterTenants": "마스터 — 테넌트 관리",
     "consultantErpIdBilling": "ID Billing 발행",
     "opIdBilling": "ID Billing 발행",
-    "supervisorBillingHandover": "ID Billing 이관현황"
+    "supervisorBillingHandover": "ID Billing 이관현황",
+    "supervisorAffiliation": "상담원 소속관리"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10412,7 +10413,31 @@
     "handoverNotSent": "미전송",
     "handoverPaid": "납부확인",
     "handoverAwaitingNtpn": "Coretax 자동생성 대기",
-    "handoverFootnote": "NTPN은 고객 납부 후 Coretax에서 자동 생성됩니다 (납부 = 신고)."
+    "handoverFootnote": "NTPN은 고객 납부 후 Coretax에서 자동 생성됩니다 (납부 = 신고).",
+    "affTitle": "상담원 소속관리",
+    "affDesc": "상담원을 다른 수퍼바이저 그룹으로 이동합니다. 이동 요청 → 상대 수퍼바이저 승인 → 고객 처리범위 → 감사 순서를 따릅니다.",
+    "affIncomingTitle": "승인 대기 이동 요청",
+    "affNewTitle": "이동 요청",
+    "affSelectOperator": "상담원 선택",
+    "affSelectSupervisor": "이동할 수퍼바이저",
+    "affNoSupervisor": "미소속",
+    "affReasonPlaceholder": "이동 사유",
+    "affRequestBtn": "이동 요청",
+    "affRequested": "이동 요청을 보냈습니다.",
+    "affApproved": "이동을 승인했습니다. 재배정 고객 {n}명.",
+    "affRejected": "이동 요청을 반려했습니다.",
+    "affApproveBtn": "승인",
+    "affRejectBtn": "반려",
+    "affWorkflowNote": "상대 수퍼바이저가 승인해야 소속이 변경됩니다.",
+    "affTeamTitle": "팀 소속 현황",
+    "affColOperator": "상담원",
+    "affColSupervisor": "소속 수퍼바이저",
+    "affColState": "상태",
+    "affMode": {
+      "WITH_CLIENTS": "상담원+고객 함께 이동",
+      "OPERATOR_ONLY": "상담원만 이동(고객 유지)",
+      "REASSIGN_CLIENTS": "상담원 이동+고객 재배정"
+    }
   },
   "messenger": {
     "title": "메신저",

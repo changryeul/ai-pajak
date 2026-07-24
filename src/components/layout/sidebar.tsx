@@ -41,6 +41,7 @@ import {
   Bell,
   Newspaper,
   ShieldCheck,
+  ArrowRightLeft,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -211,6 +212,7 @@ const navItems: NavSection[] = [
     items: [
       { href: '/consultant-erp/supervisor/approval', icon: ClipboardList, labelKey: 'nav.supervisorApproval' },
       { href: '/consultant-erp/supervisor/team', icon: Users, labelKey: 'nav.supervisorTeam' },
+      { href: '/consultant-erp/supervisor/affiliation', icon: ArrowRightLeft, labelKey: 'nav.supervisorAffiliation' },
       { href: '/consultant-erp/supervisor/customers', icon: Users, labelKey: 'nav.supervisorCustomers' },
       { href: '/consultant-erp/supervisor/revisions', icon: ClipboardList, labelKey: 'nav.supervisorRevisions' },
       { href: '/consultant-erp/supervisor/calendar', icon: BarChart3, labelKey: 'nav.supervisorCalendar' },

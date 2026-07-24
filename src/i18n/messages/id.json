@@ -282,7 +282,8 @@
     "masterTenants": "Master — Tenant",
     "consultantErpIdBilling": "Penerbitan ID Billing",
     "opIdBilling": "Penerbitan ID Billing",
-    "supervisorBillingHandover": "Serah Terima ID Billing"
+    "supervisorBillingHandover": "Serah Terima ID Billing",
+    "supervisorAffiliation": "Afiliasi Konsultan"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10290,7 +10291,31 @@
     "handoverNotSent": "Belum kirim",
     "handoverPaid": "Dibayar",
     "handoverAwaitingNtpn": "Menunggu Coretax",
-    "handoverFootnote": "NTPN dibuat otomatis di Coretax setelah klien membayar (pembayaran = pelaporan)."
+    "handoverFootnote": "NTPN dibuat otomatis di Coretax setelah klien membayar (pembayaran = pelaporan).",
+    "affTitle": "Afiliasi Konsultan",
+    "affDesc": "Pindahkan konsultan ke grup supervisor lain. Mengikuti alur permintaan → persetujuan supervisor penerima → cakupan klien → audit.",
+    "affIncomingTitle": "Permintaan transfer menunggu persetujuan Anda",
+    "affNewTitle": "Permintaan transfer baru",
+    "affSelectOperator": "Pilih konsultan",
+    "affSelectSupervisor": "Supervisor tujuan",
+    "affNoSupervisor": "Belum ada",
+    "affReasonPlaceholder": "Alasan transfer",
+    "affRequestBtn": "Minta transfer",
+    "affRequested": "Permintaan transfer terkirim.",
+    "affApproved": "Transfer disetujui. {n} klien untuk dialihkan.",
+    "affRejected": "Permintaan transfer ditolak.",
+    "affApproveBtn": "Setujui",
+    "affRejectBtn": "Tolak",
+    "affWorkflowNote": "Afiliasi berubah hanya setelah supervisor penerima menyetujui.",
+    "affTeamTitle": "Afiliasi tim",
+    "affColOperator": "Konsultan",
+    "affColSupervisor": "Supervisor",
+    "affColState": "Status",
+    "affMode": {
+      "WITH_CLIENTS": "Pindah dengan klien",
+      "OPERATOR_ONLY": "Konsultan saja (klien tetap)",
+      "REASSIGN_CLIENTS": "Pindah + alihkan klien"
+    }
   },
   "messenger": {
     "title": "Pesan",
