@@ -206,6 +206,14 @@ Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `ex
 - **검토요청** (`consultant_review_request`): 상담원이 확신 없는 항목만 올림 (`POST /sessions/[id]/review-requests`), 수퍼바이저가 의견 작성 (`PATCH /supervisor/review-requests/[id]`, supervisor 전용). **OPEN 요청이 남아 있으면 세션 APPROVE 가 400** (errorKey `openReviewRequests`) — v13의 "의견 작성 → 승인" 순서를 백엔드가 강제.
 - UI: supervisor 승인대기 상세에 4-값 비교 테이블 + 검토요청 박스, consultant `CalcCardsPanel` 카드별 처리값 저장/철회 + 검토요청 작성.
 
+### 자동배정 엔진 (v13 트랙 4, 2026-07-24)
+신규 고객을 tax_operator 에게 자동 배정하는 스코어링 엔진 (v13 §5 "자동배정 원칙", 미배정 큐는 fallback).
+- **순수 엔진** `src/lib/operator/assignment-engine.ts`: 7기준 중 스키마 데이터가 있는 4개만 가중 — sticky(기존이력) 40 / headroom(업무량 여유) 20 / quality(승인통과율·정확도) 25 / specialty(세목 전문성) 15. 언어·위험도는 `unappliedCriteria` 로 명시(no silent caps). eligibility: `status=active` + `auto_assign_enabled` + `work_state≠offline` + `load<max_clients`.
+- **실행 헬퍼** `src/lib/operator/assign-customer.ts`: 엔진으로 customer→operator 배정 (`operator_client_assignments`) + 감사(`operator_assignment_log`: method/score/breakdown/미적용기준). 이미 배정된 고객은 idempotent skip, 전원 만석/오프라인이면 overflow.
+- **스키마** (마이그레이션 `20260724000001`): `tax_operators.specialties TEXT[]` (세목 전문성 입력) + `operator_assignment_log`.
+- `POST /api/operator/auto-assign` (supervisor): 미배정 고객 + 미배정 큐 아이템 둘 다 처리. 세목 전문성/언어/위험도 데이터가 채워지면 엔진 가중치만 확장하면 됨(구조 고정).
+
+
 ### Tax Filing UI Wizard (Zustand Store)
 `src/stores/tax-filing-store.ts` — persisted zustand store with 5-step wizard:
 1. `select-customer` → 2. `income-data` → 3. `deductions` → 4. `documents` → 5. `review`
@@ -366,7 +374,7 @@ Landing / i18n maintenance scripts:
 Verification / regression scripts (회귀 검증):
 
 **Integrated runner** (use this first — covers everything below + roll-up):
-- `npm run test:smoke:prod` — runs **~46 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue (Coretax 납부=신고 8-state + legacy 액션 400 계약), billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, 신규고객 배정 라이프사이클, PPh21 payslip 무-NPWP 가산 회귀, tax rate provider override round-trip, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
+- `npm run test:smoke:prod` — runs **~47 steps** in sequence (`scripts/test-smoke-all.ts` is the authoritative list), single PASS/FAIL summary. Coverage families: supervisor ERP (P1 + settings + 6-month trend), invoice lines (Phase 1 read + Phase 2 parser + upload autoParse + line review PATCH), tenant isolation (RLS + external consultant), firm-admin + firm signup bootstrap + master tenants (P6), unassigned customers queue, operator queue (Coretax 납부=신고 8-state + legacy 액션 400 계약), billing 3-endpoint + monitoring, Track B/D governance (Tax Code Rule + Coretax toggle + operator MFA toggle + luxury classifications + customer-ai templates), customer-ai inbox, importers (pph23/ppn/pph26/wht onesheet/pph21 strict template), inline-edit PUT contracts (pph23/ppn), invoice photo traceability (pph23 attach + closing pph23 photo status), PPh4(2) partial view + SPT Masa 요청 (옵션 B) + operator quick-create, SPT Masa PPN split, closing credit auto-fill, company signup e2e, PPN luxury toggle, 신규고객 배정 라이프사이클, PPh21 payslip 무-NPWP 가산 회귀, tax rate provider override round-trip, and `prod schema drift audit` (catches columns silently missing from prod). Steps marked `optional: true` (RLS, billing, monitoring, BINTANG JAYA importer e2e) skip-with-exit-0 when fixtures or env vars are absent — failures there do NOT block the runner.
 - `npm run test:smoke` — same against local Supabase (requires `supabase start`).
 - `.github/workflows/smoke.yml` — runs `npm run test:smoke:prod` on `workflow_dispatch` and daily at 23:00 UTC (06:00 WIB). Catches drift that lands WITHOUT a commit (rotated API keys, RLS edits in Supabase UI, expired Vercel env vars).
 - `.github/workflows/drift-after-deploy.yml` — runs the schema drift audit on every push, waits 90s for Vercel to settle, then probes the prod DB. Complements the daily smoke by catching broken migration pushes within minutes instead of up to 24h.
@@ -383,6 +391,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-new-customer-assignment.ts` — 신규고객 생성 → 미배정 큐 등장 → supervisor 배정 → 큐 제거 → DB edge active 라이프사이클 (prod sentinel, 자동 cleanup)
 - `SEED_TARGET=prod npx tsx scripts/test-id-billing-flow.ts` — ID Billing 발행 보드 계약 (RBAC 403/200 + 작성본 게이트 400 + xlsx 4시트 파싱 검증 + BIL- 일련번호 + 중복 404 + 큐 EBILLING_GENERATED 전이 + tenant 분리, 11 asserts, `[IDBILL-E2E]` sentinel)
 - `SEED_TARGET=prod npx tsx scripts/test-approval-remodel.ts` — 승인대기 리모델 계약 (4-값 분리 + 처리값 PATCH + OPEN 검토요청 APPROVE 400 게이트 + 의견 PATCH RBAC + approved_amount 스탬프 + detail 4-값 포함, 10 asserts, `[APPRV-E2E]` sentinel)
+- `SEED_TARGET=prod npx tsx scripts/test-auto-assignment.ts` — 자동배정 엔진 계약 (RBAC 403/200 + 스코어 배정 or overflow + operator_assignment_log 감사 + unappliedCriteria[language,risk] + idempotent 재실행, `[AUTOASSIGN-E2E]` sentinel). 순수 엔진 유닛은 `assignment-engine.test.ts` 12 cases.
 - `SEED_TARGET=prod npx tsx scripts/test-staff-workflow.ts` — supervisor → operator 배정/평가 흐름
 - `SEED_TARGET=prod npx tsx scripts/test-monitoring-flow.ts` — Sentry / circuit breaker / monitoring dashboard 신호
 - `npx tsx scripts/test-advisory-flow.ts` — `/api/customer/advisory` PKP/UMKM/Tax Treaty 응답 shape + INDIVIDUAL/COMPANY/unauth 3-way 검증
