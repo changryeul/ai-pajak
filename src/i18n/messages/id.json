@@ -10448,7 +10448,11 @@
     "loading": "Memuat...",
     "errorSend": "Gagal mengirim. Coba lagi.",
     "fabUnread": "{count} balasan dari konsultan AI",
-    "fabOpen": "Buka konsultan AI"
+    "fabOpen": "Buka konsultan AI",
+    "dateToday": "Hari ini",
+    "dateYesterday": "Kemarin",
+    "read": "Dibaca",
+    "sent": "Terkirim"
   },
   "operatorCustomerInbox": {
     "title": "Kotak Pelanggan",
@@ -10468,7 +10472,11 @@
     "draftHistoryToggle": "Tampilkan {count} draft sebelumnya",
     "draftSourceManual": "Manual ✨",
     "draftSourceAuto": "Auto",
-    "templatesDropdownToggle": "Tampilkan {count} template"
+    "templatesDropdownToggle": "Tampilkan {count} template",
+    "dateToday": "Hari ini",
+    "dateYesterday": "Kemarin",
+    "read": "Dibaca",
+    "sent": "Terkirim"
   },
   "customerAiTemplates": {
     "title": "Manajemen Template Balasan AI",

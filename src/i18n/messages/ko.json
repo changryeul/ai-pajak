@@ -10570,7 +10570,11 @@
     "loading": "불러오는 중...",
     "errorSend": "전송 실패. 다시 시도해주세요.",
     "fabUnread": "AI 상담원 {count}개 응답",
-    "fabOpen": "AI 상담원 열기"
+    "fabOpen": "AI 상담원 열기",
+    "dateToday": "오늘",
+    "dateYesterday": "어제",
+    "read": "읽음",
+    "sent": "전송됨"
   },
   "operatorCustomerInbox": {
     "title": "고객 상담",
@@ -10590,7 +10594,11 @@
     "draftHistoryToggle": "이전 draft {count}건 보기",
     "draftSourceManual": "수동 ✨",
     "draftSourceAuto": "자동",
-    "templatesDropdownToggle": "템플릿 {count}건 보기"
+    "templatesDropdownToggle": "템플릿 {count}건 보기",
+    "dateToday": "오늘",
+    "dateYesterday": "어제",
+    "read": "읽음",
+    "sent": "전송됨"
   },
   "customerAiTemplates": {
     "title": "AI 답변 템플릿 관리",

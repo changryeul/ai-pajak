@@ -3,11 +3,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { MessageCircle, X, Send, Loader2, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Bot, User, Check, CheckCheck } from 'lucide-react';
 import { detectContext } from '@/lib/customer-ai/context';
 import type { ThreadDTO, MessageDTO } from '@/types/customer-ai';
 
 const POLL_MS = 5_000;
+
+/** YYYY-MM-DD in local time — for grouping messages into date sections. */
+function dayKey(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 export function CustomerAiChat() {
   const t = useTranslations('customerAiChat');
@@ -136,26 +142,49 @@ export function CustomerAiChat() {
         {!loading && messages.length === 0 && (
           <div className="text-center text-xs text-gray-400 py-8">{t('emptyState')}</div>
         )}
-        {messages.map((m) => (
-          <div key={m.id} className={`flex gap-2 ${m.senderRole === 'customer' ? 'justify-end' : ''}`}>
-            {m.senderRole === 'operator' && (
-              <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
-                <Bot className="h-3.5 w-3.5 text-white" />
+        {messages.map((m, i) => {
+          // v19 §7 — 날짜 구분선 (오늘/어제/날짜).
+          const prev = i > 0 ? messages[i - 1] : null;
+          const showDate = !prev || dayKey(prev.createdAt) !== dayKey(m.createdAt);
+          const today = dayKey(new Date().toISOString());
+          const yesterday = dayKey(new Date(Date.now() - 86_400_000).toISOString());
+          const k = dayKey(m.createdAt);
+          const dateLabel = k === today ? t('dateToday') : k === yesterday ? t('dateYesterday') : k;
+          const isMine = m.senderRole === 'customer';
+          return (
+            <div key={m.id}>
+              {showDate && (
+                <div className="flex justify-center my-2">
+                  <span className="rounded-full bg-gray-200/80 px-2.5 py-0.5 text-[10px] font-medium text-gray-500">{dateLabel}</span>
+                </div>
+              )}
+              <div className={`flex gap-2 ${isMine ? 'justify-end' : ''}`}>
+                {m.senderRole === 'operator' && (
+                  <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
+                    <Bot className="h-3.5 w-3.5 text-white" />
+                  </div>
+                )}
+                <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${isMine ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md' : 'bg-gray-100 text-gray-800 rounded-bl-md'}`}>
+                  <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+                  <p className={`text-[10px] mt-1 flex items-center gap-1 ${isMine ? 'justify-end text-blue-200' : 'text-gray-400'}`}>
+                    {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {/* 내가 보낸 메시지 읽음 표시 — operator 가 읽으면 파란 ✓✓ */}
+                    {isMine && (
+                      m.operatorReadAt
+                        ? <CheckCheck className="h-3 w-3 text-sky-300" aria-label={t('read')} />
+                        : <Check className="h-3 w-3 text-blue-200/70" aria-label={t('sent')} />
+                    )}
+                  </p>
+                </div>
+                {isMine && (
+                  <div className="p-1.5 bg-gray-200 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
+                    <User className="h-3.5 w-3.5 text-gray-600" />
+                  </div>
+                )}
               </div>
-            )}
-            <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${m.senderRole === 'customer' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md' : 'bg-gray-100 text-gray-800 rounded-bl-md'}`}>
-              <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
-              <p className={`text-[10px] mt-1 ${m.senderRole === 'customer' ? 'text-blue-200' : 'text-gray-400'}`}>
-                {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
             </div>
-            {m.senderRole === 'customer' && (
-              <div className="p-1.5 bg-gray-200 rounded-lg h-7 w-7 flex items-center justify-center flex-shrink-0">
-                <User className="h-3.5 w-3.5 text-gray-600" />
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
         <div ref={endRef} />
       </div>
 

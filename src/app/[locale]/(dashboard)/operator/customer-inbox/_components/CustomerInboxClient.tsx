@@ -2,8 +2,14 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2, Send, CheckCircle, MessageCircle, Sparkles, MessageSquare } from 'lucide-react';
+import { Loader2, Send, CheckCircle, MessageCircle, Sparkles, MessageSquare, Check, CheckCheck } from 'lucide-react';
 import type { ThreadWithCustomerDTO, MessageDTO, ThreadStatus } from '@/types/customer-ai';
+
+/** YYYY-MM-DD in local time — 날짜 구분선 그룹핑. */
+function dayKey(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 import type { CustomerAiTemplateDTO } from '@/types/customer-ai-template';
 
 // Phase 2.2: draft history DTO returned by GET /drafts.
@@ -345,17 +351,39 @@ export function CustomerInboxClient() {
                   <Loader2 className="h-4 w-4 mx-auto animate-spin" />
                 </div>
               )}
-              {messages.map((m) => (
-                <div key={m.id} className={`flex gap-2 ${m.senderRole === 'operator' ? 'justify-end' : ''}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm ${m.senderRole === 'operator' ? 'bg-emerald-100 text-emerald-900 rounded-br-md' : 'bg-blue-100 text-blue-900 rounded-bl-md'}`}>
-                    <p className="text-[9px] font-bold uppercase tracking-wide opacity-60 mb-0.5">{m.displaySender}</p>
-                    <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
-                    <p className="text-[10px] mt-1 opacity-60">
-                      {new Date(m.createdAt).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit' })}
-                    </p>
+              {messages.map((m, i) => {
+                const prev = i > 0 ? messages[i - 1] : null;
+                const showDate = !prev || dayKey(prev.createdAt) !== dayKey(m.createdAt);
+                const today = dayKey(new Date().toISOString());
+                const yesterday = dayKey(new Date(Date.now() - 86_400_000).toISOString());
+                const k = dayKey(m.createdAt);
+                const dateLabel = k === today ? t('dateToday') : k === yesterday ? t('dateYesterday') : k;
+                const isMine = m.senderRole === 'operator';
+                return (
+                  <div key={m.id}>
+                    {showDate && (
+                      <div className="flex justify-center my-2">
+                        <span className="rounded-full bg-slate-200/80 px-2.5 py-0.5 text-[10px] font-medium text-slate-500">{dateLabel}</span>
+                      </div>
+                    )}
+                    <div className={`flex gap-2 ${isMine ? 'justify-end' : ''}`}>
+                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm ${isMine ? 'bg-emerald-100 text-emerald-900 rounded-br-md' : 'bg-blue-100 text-blue-900 rounded-bl-md'}`}>
+                        <p className="text-[9px] font-bold uppercase tracking-wide opacity-60 mb-0.5">{m.displaySender}</p>
+                        <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+                        <p className="text-[10px] mt-1 flex items-center gap-1 opacity-60">
+                          {new Date(m.createdAt).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit' })}
+                          {/* 내가(운영팀) 보낸 메시지 읽음 — 고객이 읽으면 파란 ✓✓ */}
+                          {isMine && (
+                            m.customerReadAt
+                              ? <CheckCheck className="h-3 w-3 text-sky-500" aria-label={t('read')} />
+                              : <Check className="h-3 w-3 text-emerald-500/60" aria-label={t('sent')} />
+                          )}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             {selectedThread.status !== 'RESOLVED' && (
               <div className="border-t p-3 flex-shrink-0">

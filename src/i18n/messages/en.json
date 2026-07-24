@@ -10448,7 +10448,11 @@
     "loading": "Loading...",
     "errorSend": "Send failed. Try again.",
     "fabUnread": "{count} replies from AI consultant",
-    "fabOpen": "Open AI consultant"
+    "fabOpen": "Open AI consultant",
+    "dateToday": "Today",
+    "dateYesterday": "Yesterday",
+    "read": "Read",
+    "sent": "Sent"
   },
   "operatorCustomerInbox": {
     "title": "Customer Inbox",
@@ -10468,7 +10472,11 @@
     "draftHistoryToggle": "Show {count} previous drafts",
     "draftSourceManual": "Manual ✨",
     "draftSourceAuto": "Auto",
-    "templatesDropdownToggle": "Show {count} templates"
+    "templatesDropdownToggle": "Show {count} templates",
+    "dateToday": "Today",
+    "dateYesterday": "Yesterday",
+    "read": "Read",
+    "sent": "Sent"
   },
   "customerAiTemplates": {
     "title": "AI Reply Template Management",
