@@ -72,11 +72,18 @@ function toInput(r: Record<string, unknown>) {
   };
 }
 
-// 재계산 결과 중 저장 대상 필드.
-const RECALC_FIELDS = [
+// 재계산 결과 중 저장 대상. 금액 필드는 Rp 정수 반올림 비교/저장,
+// ter_rate 는 0~1 소수라 반올림 금지(0.08 → round 하면 0 이 되는 버그).
+const MONEY_FIELDS = [
   'total_gross', 'total_deduction', 'taxable_income', 'personal_expense',
-  'pph21_tax', 'ter_rate', 'net_salary',
+  'pph21_tax', 'net_salary',
 ] as const;
+const RECALC_FIELDS = [...MONEY_FIELDS, 'ter_rate'] as const;
+
+/** 필드별 정규화: 금액은 반올림, rate 는 소수 6자리 유지. */
+function normField(field: string, v: number): number {
+  return field === 'ter_rate' ? Math.round(Number(v || 0) * 1e6) / 1e6 : Math.round(Number(v || 0));
+}
 
 async function main() {
   console.log(`🧮 payslip recompute — mode=${APPLY ? 'APPLY' : 'DRY-RUN'} · status=${INCLUDE_SUBMITTED ? 'ALL' : 'DRAFT'}` +
@@ -108,11 +115,11 @@ async function main() {
       continue;
     }
 
-    // 변경 여부 — 반올림 후 비교.
+    // 변경 여부 — 필드별 정규화 후 비교 (금액 정수 / rate 소수).
     const diffs: string[] = [];
     for (const f of RECALC_FIELDS) {
-      const oldV = Math.round(Number(r[f] ?? 0));
-      const newV = Math.round(Number((result as Record<string, number>)[f] ?? 0));
+      const oldV = normField(f, Number(r[f] ?? 0));
+      const newV = normField(f, Number((result as Record<string, number>)[f] ?? 0));
       if (oldV !== newV) diffs.push(f);
     }
 
@@ -127,7 +134,7 @@ async function main() {
 
     if (APPLY) {
       const patch: Record<string, number> = {};
-      for (const f of RECALC_FIELDS) patch[f] = Math.round(Number((result as Record<string, number>)[f] ?? 0));
+      for (const f of RECALC_FIELDS) patch[f] = normField(f, Number((result as Record<string, number>)[f] ?? 0));
       const { error: upErr } = await admin
         .from('monthly_payslip')
         .update({ ...patch, updated_at: new Date().toISOString() })
