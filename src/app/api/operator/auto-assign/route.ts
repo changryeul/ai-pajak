@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { assignCustomerToOperator } from '@/lib/operator/assign-customer';
 
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
@@ -25,18 +26,40 @@ async function getSupervisorUser() {
 }
 
 /**
- * POST /api/operator/auto-assign
+ * POST /api/operator/auto-assign  (v13 §5 — 트랙 4)
  *
- * Auto-assign unassigned PENDING queue items to operators.
- * Algorithm:
- * 1. Sticky: if customer has existing operator with capacity → assign
- * 2. Round-robin: assign to operator with fewest active items
- * 3. Overflow: if all operators at capacity → leave unassigned
+ * ① 미배정 고객(operator_client_assignments 없음)을 스코어링 엔진으로
+ *    tax_operator 에게 배정 (7기준 중 데이터 있는 것 반영, 감사 기록).
+ * ② 미배정 PENDING 큐 아이템을 고객의 담당 operator 로 sticky 배정
+ *    (없으면 스코어 최상위). 모두 만석/오프라인이면 overflow(미배정 큐 유지).
  */
 export async function POST() {
   const auth = await getSupervisorUser();
   if ('error' in auth && auth.error) return auth.error;
-  const { admin } = auth;
+  const { admin, user } = auth;
+
+  // ── ① 미배정 고객 자동배정 (customer → operator) ──
+  const { data: activeAssignments } = await admin
+    .from('operator_client_assignments')
+    .select('customer_id')
+    .eq('is_active', true);
+  const assignedCustomerIds = new Set((activeAssignments ?? []).map(a => a.customer_id));
+
+  // 배정 대상: 큐에 항목이 있는데 아직 담당 operator 배정이 없는 고객.
+  const { data: queuedCustomers } = await admin
+    .from('djp_submission_queue')
+    .select('customer_id')
+    .not('status', 'in', '("COMPLETED","FAILED")');
+  const unassignedCustomers = Array.from(
+    new Set((queuedCustomers ?? []).map(q => q.customer_id).filter((id): id is string => !!id && !assignedCustomerIds.has(id))),
+  );
+
+  const customerResults: Array<{ customerId: string; operatorId: string | null; method: string; score: number | null }> = [];
+  for (const customerId of unassignedCustomers) {
+    const r = await assignCustomerToOperator(admin, customerId, { triggeredBy: 'SUPERVISOR', actorUserId: user!.id });
+    customerResults.push({ customerId, operatorId: r.operatorId, method: r.method, score: r.score });
+  }
+  const customersAssigned = customerResults.filter(r => r.operatorId && r.method !== 'overflow').length;
 
   // 1. Get unassigned PENDING items
   const { data: unassigned, error: uaError } = await admin
@@ -53,7 +76,7 @@ export async function POST() {
   if (!unassigned || unassigned.length === 0) {
     return NextResponse.json({
       success: true,
-      data: { assigned: 0, overflow: 0, details: [] },
+      data: { customersAssigned, customerResults, assigned: 0, overflow: 0, details: [] },
     });
   }
 
@@ -67,6 +90,8 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       data: {
+        customersAssigned,
+        customerResults,
         assigned: 0,
         overflow: unassigned.length,
         details: unassigned.map(item => ({
@@ -184,6 +209,6 @@ export async function POST() {
 
   return NextResponse.json({
     success: true,
-    data: { assigned: assignedCount, overflow: overflowCount, details },
+    data: { customersAssigned, customerResults, assigned: assignedCount, overflow: overflowCount, details },
   });
 }

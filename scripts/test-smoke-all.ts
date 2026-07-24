@@ -53,6 +53,8 @@ const STEPS: Step[] = [
   { name: 'id-billing issuance board flow', file: 'test-id-billing-flow.ts' },
   // v13 트랙 3 — 승인대기 리모델 (4-값 분리 + 검토요청 게이트 + 승인값 스탬프)
   { name: 'approval remodel (4-value + review requests)', file: 'test-approval-remodel.ts' },
+  // v13 트랙 4 — 자동배정 엔진 (스코어 배정 + 감사 + overflow fallback)
+  { name: 'auto-assignment engine (scored + audit)', file: 'test-auto-assignment.ts' },
   // --- Admin / config governance ---------------------------------------
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },
