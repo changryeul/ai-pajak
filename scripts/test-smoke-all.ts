@@ -59,6 +59,8 @@ const STEPS: Step[] = [
   { name: 'supervisor handover + evaluation (§7/§8)', file: 'test-supervisor-handover-eval.ts' },
   // v13 트랙 5-C — 상담원 소속관리 (이동 요청 → 승인 워크플로우)
   { name: 'operator affiliation transfer (§6)', file: 'test-operator-affiliation.ts' },
+  // v19 트랙 6 — PPN Coretax 대조 (고객 제출 vs Coretax 출력)
+  { name: 'ppn coretax reconciliation (§9)', file: 'test-ppn-coretax-recon.ts' },
   // --- Admin / config governance ---------------------------------------
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },

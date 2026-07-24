@@ -61,8 +61,22 @@ interface FakturMonthly {
   status: string;
 }
 
-type TabId = 'faktur' | 'reconciliation';
+type TabId = 'faktur' | 'reconciliation' | 'coretax';
 type FakturFilter = 'ALL' | 'OUTPUT' | 'INPUT';
+
+interface ReconRow {
+  id: string;
+  faktur_type: string;
+  faktur_number: string | null;
+  dpp: number;
+  ppn: number;
+  coretax_dpp: number | null;
+  coretax_ppn: number | null;
+  recon_status: string;
+  recon_source: string;
+  counterparty_name: string | null;
+}
+interface ReconSummary { total: number; match: number; diff: number; missingCoretax: number; missingCustomer: number; pending: number; reconciledAt: string | null; }
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
@@ -114,11 +128,79 @@ export default function PPNPage() {
   const [pickedYear, setPickedYear] = useState<number>(currentYear);
   const [pickedMonth, setPickedMonth] = useState<number>(currentMonth);
   const [confirmedPeriod, setConfirmedPeriod] = useState<string | null>(null);
+  // v19 §9 — Coretax 대조
+  const [reconRows, setReconRows] = useState<ReconRow[]>([]);
+  const [reconSummary, setReconSummary] = useState<ReconSummary | null>(null);
+  const [reconBusy, setReconBusy] = useState(false);
   const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
   const periodLabel = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
   const openMonthPicker = () => {
     setMonthPickerOpen(true);
+  };
+
+  // v19 §9 — Coretax 대조 결과 조회.
+  const loadRecon = useCallback(async () => {
+    if (!customerId) return;
+    try {
+      const res = await fetch(`/api/tax/ppn-reconcile?customerId=${customerId}&taxPeriod=${period}`);
+      const json = await res.json();
+      if (json.success) { setReconRows(json.data.rows ?? []); setReconSummary(json.data.summary ?? null); }
+    } catch { /* silent */ }
+  }, [customerId, period]);
+
+  useEffect(() => { if (activeTab === 'coretax') loadRecon(); }, [activeTab, loadRecon]);
+
+  // Coretax 출력 xlsx 업로드 → 클라 파싱 → 대조 실행.
+  const handleCoretaxUpload = async (file: File | null) => {
+    if (!file || !customerId) return;
+    setReconBusy(true);
+    setMessage(null);
+    try {
+      const XLSX = await import('xlsx');
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
+      // 휴리스틱 컬럼 매핑 — Coretax 출력 헤더 변형 흡수.
+      const pick = (r: Record<string, unknown>, keys: string[]): string => {
+        for (const k of Object.keys(r)) {
+          const kl = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (keys.some(want => kl.includes(want))) return String(r[k] ?? '');
+        }
+        return '';
+      };
+      const num = (s: string) => Number(String(s).replace(/[^0-9.-]/g, '')) || 0;
+      const coretaxFaktur = rows.map(r => {
+        const typeRaw = pick(r, ['jenis', 'type', 'faktur']).toUpperCase();
+        const fakturType = typeRaw.includes('MASUK') || typeRaw.includes('INPUT') ? 'MASUKAN' : 'KELUARAN';
+        return {
+          fakturType: fakturType as 'KELUARAN' | 'MASUKAN',
+          fakturNumber: pick(r, ['nomorfaktur', 'fakturnumber', 'nofaktur', 'nomor']),
+          dpp: num(pick(r, ['dpp', 'taxbase', 'dasarpengenaan'])),
+          ppn: num(pick(r, ['ppn', 'vat', 'pajakpertambahan'])),
+        };
+      }).filter(f => f.fakturNumber);
+      if (coretaxFaktur.length === 0) {
+        setMessage({ type: 'error', text: t('coretaxParseEmpty') });
+        return;
+      }
+      const res = await fetch('/api/tax/ppn-reconcile', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxPeriod: period, coretaxFaktur }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setMessage({ type: 'success', text: t('coretaxReconDone', { n: coretaxFaktur.length }) });
+        loadRecon();
+      } else {
+        setMessage({ type: 'error', text: json.error || t('serverError') });
+      }
+    } catch {
+      setMessage({ type: 'error', text: t('coretaxParseError') });
+    } finally {
+      setReconBusy(false);
+    }
   };
 
   /**
@@ -377,6 +459,7 @@ export default function PPNPage() {
   const tabs: Array<{ id: TabId; label: string; icon: typeof FileText }> = [
     { id: 'faktur', label: t('tabFaktur'), icon: FileText },
     { id: 'reconciliation', label: t('tabReconciliation'), icon: DollarSign },
+    { id: 'coretax', label: t('tabCoretaxRecon'), icon: FileText },
   ];
 
   if (!session) {
@@ -1013,6 +1096,93 @@ export default function PPNPage() {
               <p>{t('infoDesc')}</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Tab 3: Coretax 대조 (v19 §9) */}
+      {activeTab === 'coretax' && (
+        <div className="space-y-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="pt-4">
+              <p className="text-sm font-semibold text-gray-900">{t('coretaxReconTitle')}</p>
+              <p className="mt-1 text-xs text-gray-500">{t('coretaxReconDesc')}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-bold text-cyan-800 hover:bg-cyan-100">
+                  {reconBusy ? '…' : `📥 ${t('coretaxUpload')}`}
+                  <input type="file" accept=".xlsx,.xls,.csv" className="hidden" disabled={reconBusy || !customerId}
+                    onChange={(e) => handleCoretaxUpload(e.target.files?.[0] ?? null)} />
+                </label>
+                <span className="text-[11px] text-gray-400">{t('coretaxReconPeriod', { period })}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {reconSummary && (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+              {([
+                ['match', reconSummary.match, 'text-emerald-700 bg-emerald-50'],
+                ['diff', reconSummary.diff, 'text-rose-700 bg-rose-50'],
+                ['missingCoretax', reconSummary.missingCoretax, 'text-amber-700 bg-amber-50'],
+                ['missingCustomer', reconSummary.missingCustomer, 'text-purple-700 bg-purple-50'],
+                ['total', reconSummary.total, 'text-gray-700 bg-gray-50'],
+              ] as const).map(([key, val, cls]) => (
+                <div key={key} className={`rounded-xl p-3 text-center ${cls}`}>
+                  <p className="text-[10px] font-bold uppercase">{t(`coretaxStat_${key}`)}</p>
+                  <p className="text-xl font-black">{val}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <Card className="border-0 shadow-sm">
+            <CardContent className="pt-4 overflow-auto">
+              {reconRows.length === 0 ? (
+                <p className="py-10 text-center text-sm text-gray-400">{t('coretaxReconEmpty')}</p>
+              ) : (
+                <table className="min-w-[820px] w-full text-xs">
+                  <thead>
+                    <tr className="text-left text-[10px] uppercase tracking-wide text-gray-400">
+                      <th className="px-2 py-2">{t('coretaxColStatus')}</th>
+                      <th className="px-2 py-2">{t('coretaxColType')}</th>
+                      <th className="px-2 py-2">{t('coretaxColFaktur')}</th>
+                      <th className="px-2 py-2">{t('coretaxColParty')}</th>
+                      <th className="px-2 py-2 text-right">{t('coretaxColCustDpp')}</th>
+                      <th className="px-2 py-2 text-right">{t('coretaxColCoretaxDpp')}</th>
+                      <th className="px-2 py-2 text-right">{t('coretaxColCustPpn')}</th>
+                      <th className="px-2 py-2 text-right">{t('coretaxColCoretaxPpn')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reconRows.map((r) => {
+                      const badge: Record<string, string> = {
+                        MATCH: 'bg-emerald-100 text-emerald-700', DIFF: 'bg-rose-100 text-rose-700',
+                        MISSING_CORETAX: 'bg-amber-100 text-amber-700', MISSING_CUSTOMER: 'bg-purple-100 text-purple-700',
+                        PENDING: 'bg-gray-100 text-gray-500',
+                      };
+                      const highlight = r.recon_status === 'DIFF' || r.recon_status.startsWith('MISSING');
+                      return (
+                        <tr key={r.id} className={`border-t border-gray-100 ${highlight ? 'bg-rose-50/30' : ''}`}>
+                          <td className="px-2 py-2">
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${badge[r.recon_status] ?? ''}`}>
+                              {t(`coretaxStatus_${r.recon_status}`)}
+                            </span>
+                          </td>
+                          <td className="px-2 py-2">{r.faktur_type === 'KELUARAN' ? t('output') : t('input')}</td>
+                          <td className="px-2 py-2 font-mono text-[10px]">{r.faktur_number ?? '—'}</td>
+                          <td className="px-2 py-2">{r.counterparty_name ?? '—'}</td>
+                          <td className="px-2 py-2 text-right">{fmt(Number(r.dpp))}</td>
+                          <td className={`px-2 py-2 text-right ${r.recon_status === 'DIFF' ? 'font-bold text-rose-600' : ''}`}>{r.coretax_dpp != null ? fmt(Number(r.coretax_dpp)) : '—'}</td>
+                          <td className="px-2 py-2 text-right">{fmt(Number(r.ppn))}</td>
+                          <td className={`px-2 py-2 text-right ${r.recon_status === 'DIFF' ? 'font-bold text-rose-600' : ''}`}>{r.coretax_ppn != null ? fmt(Number(r.coretax_ppn)) : '—'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+              <p className="mt-3 text-[10px] text-gray-400">{t('coretaxReconFootnote')}</p>
+            </CardContent>
+          </Card>
         </div>
       )}
 
