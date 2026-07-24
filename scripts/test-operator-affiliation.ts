@@ -60,14 +60,16 @@ async function main() {
     // 기반 — supervisor.test 는 평가/배정 보조테이블에 row 가 없을 수 있다).
     const { data: existingMe } = await admin.from('tax_operators').select('id').eq('user_id', sup.userId).maybeSingle();
     if (!existingMe) {
-      const { data: made } = await admin.from('tax_operators').insert({
+      const { data: made, error: meErr } = await admin.from('tax_operators').insert({
         user_id: sup.userId,
         employee_id: `AFFILSUP${Date.now().toString().slice(-5)}`,
-        name: `${SENTINEL} Supervisor`, role: 'tax_operator_supervisor', status: 'active',
+        name: `${SENTINEL} Supervisor`, email: 'supervisor.test@aipajak.com',
+        role: 'tax_operator_supervisor', status: 'active',
         max_clients: 50, work_state: 'available',
       }).select('id').single();
+      if (meErr || !made) fail(`ensure supervisor row failed: ${meErr?.message}`);
       cleanup.ensuredMeRow = true;
-      cleanup.meRowId = made?.id;
+      cleanup.meRowId = made.id;
       ok('ensured supervisor.test tax_operators row (sentinel)');
     }
 
@@ -90,13 +92,14 @@ async function main() {
     if (!otherSup) fail('need a second supervisor for transfer target');
 
     // ── sentinel operator (meId 소속에서 시작) ──
-    const { data: op } = await admin.from('tax_operators').insert({
+    const { data: op, error: opErr } = await admin.from('tax_operators').insert({
       employee_id: `AFFIL${Date.now().toString().slice(-6)}`,
-      name: `${SENTINEL} Operator`, role: 'tax_operator', status: 'active',
+      name: `${SENTINEL} Operator`, email: `affil-op-${Date.now()}@example.com`,
+      role: 'tax_operator', status: 'active',
       max_clients: 10, work_state: 'available', auto_assign_enabled: true,
       supervisor_id: otherSup.id,
     }).select('id').single();
-    if (!op) fail('sentinel operator insert failed');
+    if (opErr || !op) fail(`sentinel operator insert failed: ${opErr?.message}`);
     cleanup.operatorId = op.id;
     ok(`sentinel operator created (belongs to ${otherSup.name})`);
 
