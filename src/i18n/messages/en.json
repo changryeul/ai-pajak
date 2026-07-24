@@ -281,7 +281,8 @@
     "pph42Label": "PPh 4(2) — Land & Building Rent",
     "masterTenants": "Master — Tenants",
     "consultantErpIdBilling": "ID Billing Issuance",
-    "opIdBilling": "ID Billing Issuance"
+    "opIdBilling": "ID Billing Issuance",
+    "supervisorBillingHandover": "ID Billing Handover"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10268,7 +10269,28 @@
     "rrCommentPlaceholder": "Write your review comment (kept as audit evidence)",
     "rrAnswerBtn": "Save comment",
     "rrAnswered": "Comment saved.",
-    "rrAnswerFailed": "Failed to save the comment."
+    "rrAnswerFailed": "Failed to save the comment.",
+    "handoverTitle": "ID Billing Handover",
+    "handoverDesc": "Track cases that moved to issuance after supervisor approval, and issued cases. Issue/send is done on the billing board.",
+    "handoverRefresh": "Refresh",
+    "handoverPendingTitle": "Pending issuance (approved, not issued)",
+    "handoverPendingEmpty": "No pending targets.",
+    "handoverIssuedTitle": "Issued",
+    "handoverIssuedEmpty": "Nothing issued yet.",
+    "handoverColCompany": "Company",
+    "handoverColPeriod": "Period",
+    "handoverColApprover": "Approving supervisor",
+    "handoverColConsultant": "Consultant",
+    "handoverColTax": "Est. tax",
+    "handoverColTaxType": "Tax",
+    "handoverColAmount": "Amount",
+    "handoverColSend": "Send",
+    "handoverColNtpn": "NTPN",
+    "handoverSent": "Sent",
+    "handoverNotSent": "Not sent",
+    "handoverPaid": "Paid",
+    "handoverAwaitingNtpn": "Awaiting Coretax",
+    "handoverFootnote": "NTPN is auto-generated in Coretax after the customer pays (payment = filing)."
   },
   "messenger": {
     "title": "Messenger",

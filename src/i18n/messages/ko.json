@@ -281,7 +281,8 @@
     "pph42Label": "PPh 4(2) — 토지·건물 임대",
     "masterTenants": "마스터 — 테넌트 관리",
     "consultantErpIdBilling": "ID Billing 발행",
-    "opIdBilling": "ID Billing 발행"
+    "opIdBilling": "ID Billing 발행",
+    "supervisorBillingHandover": "ID Billing 이관현황"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10390,7 +10391,28 @@
     "rrCommentPlaceholder": "검토의견 입력 (분쟁·평가 근거로 기록됩니다)",
     "rrAnswerBtn": "의견 저장",
     "rrAnswered": "검토의견을 남겼습니다.",
-    "rrAnswerFailed": "의견 저장에 실패했습니다."
+    "rrAnswerFailed": "의견 저장에 실패했습니다.",
+    "handoverTitle": "ID Billing 이관현황",
+    "handoverDesc": "수퍼바이저 승인완료 후 발행대상으로 넘어간 건과 발행완료 건을 추적합니다. 발행·전송은 발행 보드에서 처리합니다.",
+    "handoverRefresh": "새로고침",
+    "handoverPendingTitle": "발행대상 (승인완료·미발행)",
+    "handoverPendingEmpty": "발행대상이 없습니다.",
+    "handoverIssuedTitle": "발행완료",
+    "handoverIssuedEmpty": "발행완료 항목이 없습니다.",
+    "handoverColCompany": "회사명",
+    "handoverColPeriod": "기간",
+    "handoverColApprover": "승인 수퍼바이저",
+    "handoverColConsultant": "담당 상담원",
+    "handoverColTax": "예상 세액",
+    "handoverColTaxType": "세목",
+    "handoverColAmount": "금액",
+    "handoverColSend": "고객전송",
+    "handoverColNtpn": "NTPN 상태",
+    "handoverSent": "전송완료",
+    "handoverNotSent": "미전송",
+    "handoverPaid": "납부확인",
+    "handoverAwaitingNtpn": "Coretax 자동생성 대기",
+    "handoverFootnote": "NTPN은 고객 납부 후 Coretax에서 자동 생성됩니다 (납부 = 신고)."
   },
   "messenger": {
     "title": "메신저",

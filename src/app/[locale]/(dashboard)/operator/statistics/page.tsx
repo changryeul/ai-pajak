@@ -29,7 +29,9 @@ interface OperatorScore {
   avg_minutes: number | null;
   scores: Scores;
   rank: number;
-  incentive_amount: number;
+  suggested_incentive_amount: number;
+  reject_rate: number | null;
+  approval_pass_rate: number | null;
   evaluation_label: 'EXCELLENT' | 'PAYABLE' | 'IMPROVE' | 'HOLD';
 }
 
@@ -37,11 +39,12 @@ interface EvaluationData {
   operators: OperatorScore[];
   weights: Weights;
   incentive: Incentive;
+  disclaimer?: string;
   summary: {
     evaluatedCount: number;
     topOperator: { name: string; employee_id: string; score: number } | null;
     avgScore: number;
-    totalIncentive: number;
+    totalSuggestedIncentive: number;
     weightSum: number;
   };
 }
@@ -116,11 +119,18 @@ export default function StatisticsPage() {
         </div>
       </div>
 
+      {/* v13 §7 — 자동 상벌 결정 금지 고지 */}
+      {data.disclaimer && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[12px] font-medium text-amber-800">
+          ⚖️ {data.disclaimer}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
         <Kpi label={t('kpi.evaluated')} value={t('personSuffix', { n: data.summary.evaluatedCount })} />
         <Kpi label={t('kpi.topOperator')} value={data.summary.topOperator?.name ?? '—'} />
         <Kpi label={t('kpi.avgScore')} value={t('scoreSuffix', { n: data.summary.avgScore })} />
-        <Kpi label={t('kpi.totalIncentive')} value={fmtRp(data.summary.totalIncentive)} />
+        <Kpi label={t('kpi.totalIncentive')} value={fmtRp(data.summary.totalSuggestedIncentive)} />
         <Kpi label={t('kpi.weightSum')} value={t('percentSuffix', { n: data.summary.weightSum })} />
       </div>
 
@@ -207,7 +217,7 @@ export default function StatisticsPage() {
                     <td className="px-2 py-2 text-right">{o.scores.accuracy}%</td>
                     <td className="px-2 py-2 text-right">{o.scores.approval}</td>
                     <td className="px-2 py-2 text-right">{o.scores.satisfaction}</td>
-                    <td className="px-2 py-2 text-right font-bold">{o.incentive_amount === 0 ? 'Rp 0' : fmtRp(o.incentive_amount)}</td>
+                    <td className="px-2 py-2 text-right font-bold">{o.suggested_incentive_amount === 0 ? 'Rp 0' : fmtRp(o.suggested_incentive_amount)}</td>
                     <td className="px-2 py-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${EVAL_CLS[o.evaluation_label]}`}>{evalLabel(o.evaluation_label)}</span></td>
                   </tr>
                 );
@@ -224,7 +234,7 @@ export default function StatisticsPage() {
             <div key={o.id} className="rounded-xl border border-slate-100 p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-black text-slate-900">{o.rank}. {o.name} <span className="text-xs font-normal text-slate-400">{o.employee_id}</span></p>
-                <p className="text-xs font-bold text-slate-700">{t('scoreSuffix', { n: o.scores.total })} · {o.incentive_amount === 0 ? 'Rp 0' : fmtRp(o.incentive_amount)}</p>
+                <p className="text-xs font-bold text-slate-700">{t('scoreSuffix', { n: o.scores.total })} · {o.suggested_incentive_amount === 0 ? 'Rp 0' : fmtRp(o.suggested_incentive_amount)}</p>
               </div>
               <div className="h-2 rounded-full bg-slate-100">
                 <div className="h-2 rounded-full bg-slate-900" style={{ width: `${Math.min(o.scores.total, 100)}%` }} />

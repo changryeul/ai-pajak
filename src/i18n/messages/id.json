@@ -281,7 +281,8 @@
     "pph42Label": "PPh 4(2) — Sewa Tanah & Bangunan",
     "masterTenants": "Master — Tenant",
     "consultantErpIdBilling": "Penerbitan ID Billing",
-    "opIdBilling": "Penerbitan ID Billing"
+    "opIdBilling": "Penerbitan ID Billing",
+    "supervisorBillingHandover": "Serah Terima ID Billing"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10268,7 +10269,28 @@
     "rrCommentPlaceholder": "Tulis komentar tinjauan (disimpan sebagai bukti audit)",
     "rrAnswerBtn": "Simpan komentar",
     "rrAnswered": "Komentar tersimpan.",
-    "rrAnswerFailed": "Gagal menyimpan komentar."
+    "rrAnswerFailed": "Gagal menyimpan komentar.",
+    "handoverTitle": "Serah Terima ID Billing",
+    "handoverDesc": "Lacak kasus yang masuk ke penerbitan setelah disetujui supervisor, dan kasus yang sudah diterbitkan. Penerbitan/pengiriman dilakukan di papan billing.",
+    "handoverRefresh": "Muat ulang",
+    "handoverPendingTitle": "Menunggu penerbitan (disetujui, belum terbit)",
+    "handoverPendingEmpty": "Tidak ada target menunggu.",
+    "handoverIssuedTitle": "Diterbitkan",
+    "handoverIssuedEmpty": "Belum ada yang diterbitkan.",
+    "handoverColCompany": "Perusahaan",
+    "handoverColPeriod": "Masa",
+    "handoverColApprover": "Supervisor penyetuju",
+    "handoverColConsultant": "Konsultan",
+    "handoverColTax": "Est. pajak",
+    "handoverColTaxType": "Pajak",
+    "handoverColAmount": "Jumlah",
+    "handoverColSend": "Kirim",
+    "handoverColNtpn": "NTPN",
+    "handoverSent": "Terkirim",
+    "handoverNotSent": "Belum kirim",
+    "handoverPaid": "Dibayar",
+    "handoverAwaitingNtpn": "Menunggu Coretax",
+    "handoverFootnote": "NTPN dibuat otomatis di Coretax setelah klien membayar (pembayaran = pelaporan)."
   },
   "messenger": {
     "title": "Pesan",

@@ -48,10 +48,19 @@ export async function GET() {
   const opIds = operators.map(o => o.id);
   const loadMap = new Map<string, number>();
   const completedMap = new Map<string, number>();
+  // v13 §7 실측: 담당 케이스별 총계 + 반려 경험(rejected_reason not null) 카운트로
+  // 반려율/승인통과율을 실제 이력에서 계산한다 (시드 approval_quality_score 보완).
+  const handledMap = new Map<string, number>();
+  const rejectedMap = new Map<string, number>();
   if (opIds.length > 0) {
-    const { data: queue } = await admin.from('djp_submission_queue').select('operator_id, status').in('operator_id', opIds);
+    const { data: queue } = await admin
+      .from('djp_submission_queue')
+      .select('operator_id, status, rejected_reason')
+      .in('operator_id', opIds);
     for (const q of queue ?? []) {
       if (!q.operator_id) continue;
+      handledMap.set(q.operator_id, (handledMap.get(q.operator_id) ?? 0) + 1);
+      if (q.rejected_reason) rejectedMap.set(q.operator_id, (rejectedMap.get(q.operator_id) ?? 0) + 1);
       if (ACTIVE_STATUSES.includes(q.status)) loadMap.set(q.operator_id, (loadMap.get(q.operator_id) ?? 0) + 1);
       else if (q.status === 'COMPLETED') completedMap.set(q.operator_id, (completedMap.get(q.operator_id) ?? 0) + 1);
     }
@@ -69,8 +78,15 @@ export async function GET() {
     const accuracy = Number(o.accuracy_pct ?? 0);                          // 정확도
     const speedRaw = o.avg_processing_minutes ?? 60;
     const speed = Math.round((bestTime / Math.max(speedRaw, 1)) * 100);   // 처리속도
-    const approval = Number(o.approval_quality_score ?? 0);                // Supervisor 승인품질
     const satisfaction = Number(o.customer_satisfaction_score ?? 0);       // 고객응대
+
+    // v13 §7 실측 승인품질: 담당 케이스 중 반려를 겪지 않은 비율(=승인통과율).
+    // 이력이 없으면(handled=0) 시드 approval_quality_score 로 폴백.
+    const handled = handledMap.get(o.id) ?? 0;
+    const rejected = rejectedMap.get(o.id) ?? 0;
+    const rejectRate = handled > 0 ? Math.round((rejected / handled) * 1000) / 10 : null;
+    const approvalPassRate = handled > 0 ? Math.round(((handled - rejected) / handled) * 1000) / 10 : null;
+    const approval = approvalPassRate ?? Number(o.approval_quality_score ?? 0); // Supervisor 승인품질(실측 우선)
 
     const weighted =
       processing * (weights.processing / 100) +
@@ -87,6 +103,9 @@ export async function GET() {
       work_state: o.work_state,
       active_load: loadMap.get(o.id) ?? 0,
       completed_count: completed,
+      handled_count: handled,
+      reject_rate: rejectRate,               // 실측 반려율(%) — 이력 없으면 null
+      approval_pass_rate: approvalPassRate,  // 실측 승인통과율(%) — 이력 없으면 null
       avg_minutes: o.avg_processing_minutes,
       accuracy,
       approval,
@@ -108,10 +127,12 @@ export async function GET() {
     if (r.scores.total >= 90) label = 'EXCELLENT';
     else if (r.scores.total >= incentive.minScore) label = 'PAYABLE';
     else if (r.scores.total >= incentive.improvementThreshold) label = 'IMPROVE';
-    return { ...r, rank: idx + 1, incentive_amount: pay, evaluation_label: label };
+    // v13 §7: 시스템은 상벌을 자동 결정하지 않는다 — 금액은 '제안값',
+    // 라벨은 '근거 지표'일 뿐 최종 판단은 수퍼바이저/관리자 몫.
+    return { ...r, rank: idx + 1, suggested_incentive_amount: pay, evaluation_label: label };
   });
 
-  const totalIncentive = enriched.reduce((s, r) => s + r.incentive_amount, 0);
+  const totalIncentive = enriched.reduce((s, r) => s + r.suggested_incentive_amount, 0);
   const avgScore = enriched.length > 0
     ? Math.round((enriched.reduce((s, r) => s + r.scores.total, 0) / enriched.length) * 10) / 10
     : 0;
@@ -124,11 +145,14 @@ export async function GET() {
       operators: enriched,
       weights,
       incentive,
+      // v13 §7: 자동 상벌 결정 금지 — 아래는 제안값/근거지표이며 최종 판단은 사람.
+      isSuggestionOnly: true,
+      disclaimer: 'AI Pajak은 상벌 후보를 자동 결정하지 않습니다. 순위·근거지표·제안 금액을 제공하고 최종 판단은 수퍼바이저/관리자가 합니다.',
       summary: {
         evaluatedCount: enriched.length,
         topOperator: top ? { name: top.name, employee_id: top.employee_id, score: top.scores.total } : null,
         avgScore,
-        totalIncentive,
+        totalSuggestedIncentive: totalIncentive,
         weightSum,
       },
     },

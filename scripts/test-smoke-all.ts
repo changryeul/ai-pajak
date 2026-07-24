@@ -55,6 +55,8 @@ const STEPS: Step[] = [
   { name: 'approval remodel (4-value + review requests)', file: 'test-approval-remodel.ts' },
   // v13 트랙 4 — 자동배정 엔진 (스코어 배정 + 감사 + overflow fallback)
   { name: 'auto-assignment engine (scored + audit)', file: 'test-auto-assignment.ts' },
+  // v13 트랙 5 A+B — ID Billing 이관현황 + 평가 실측/제안값
+  { name: 'supervisor handover + evaluation (§7/§8)', file: 'test-supervisor-handover-eval.ts' },
   // --- Admin / config governance ---------------------------------------
   { name: 'tax code rule CRUD + RBAC (Track B)', file: 'test-tax-code-rule.ts' },
   { name: 'customer-ai inbox end-to-end (Phase 1)', file: 'test-customer-ai-inbox.ts' },
