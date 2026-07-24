@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { createAndEmailFirmInvitation } from '@/lib/firm-admin/invitation';
+import { assignCustomerToOperator } from '@/lib/operator/assign-customer';
 import { loggers } from '@/lib/logger';
 
 /**
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
       // (e.g., KYC checks against uploaded documents) have a single canonical form.
       const cleanNpwp = npwp ? npwp.replace(/\D/g, '') : '';
       const cleanNik = nik ? nik.replace(/\D/g, '') : '';
-      const { error: custError } = await admin.from('customer').insert({
+      const { data: newCustomer, error: custError } = await admin.from('customer').insert({
         user_id: userId,
         customer_type: 'INDIVIDUAL',
         full_name: fullName,
@@ -169,7 +170,7 @@ export async function POST(request: NextRequest) {
         // INDIVIDUAL customers walk through 3-step onboarding
         // (/register → /register/terms → /register/mandate).
         onboarding_step: 1,
-      });
+      }).select('id').single();
 
       if (custError) {
         // Roll back the auth user so the email can be reused. Without this
@@ -187,6 +188,18 @@ export async function POST(request: NextRequest) {
         role: 'CUSTOMER',
         is_active: true,
       });
+
+      // v13 §5 — 접수 즉시 자동배정 (신규 개인 고객 → JTC tax_operator).
+      // best-effort: 배정 실패(전원 만석/오프라인)해도 가입은 성공, 미배정
+      // 큐로 남아 supervisor 의 auto-assign 이 나중에 처리한다.
+      if (newCustomer?.id) {
+        try {
+          const r = await assignCustomerToOperator(admin, newCustomer.id, { triggeredBy: 'AUTO' });
+          loggers.api.info({ customerId: newCustomer.id, method: r.method, operatorId: r.operatorId }, 'Signup: auto-assignment');
+        } catch (e) {
+          loggers.api.warn({ err: e, customerId: newCustomer.id }, 'Signup: auto-assignment failed (left unassigned)');
+        }
+      }
     } else if (accountType === 'TAX_PARTNER') {
       // Look up the AI Pajak platform id (needed for tax_partner.platform_id FK)
       const { data: platform } = await admin
