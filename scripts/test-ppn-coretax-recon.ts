@@ -28,7 +28,7 @@ const baseUrl = process.env.E2E_BASE_URL || 'https://ai-pajak.vercel.app';
 const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 
 const SENTINEL = '[PPNRECON-E2E]';
-const PERIOD = '2026-99'; // sentinel period, never real
+const PERIOD = '2099-12'; // sentinel period (미래, faktur_date 유효)
 let pass = 0;
 function ok(m: string) { pass++; console.log(`  ✓ ${m}`); }
 function fail(m: string): never { console.error(`  ✗ ${m}`); process.exit(1); }
@@ -61,11 +61,13 @@ async function main() {
     cleanup.customerId = customer.id;
 
     // 고객 제출 faktur 3건.
-    await admin.from('ppn_faktur_monthly').insert([
-      { customer_id: customer.id, tax_period: PERIOD, faktur_type: 'KELUARAN', faktur_number: 'FP001', dpp: 1_000_000, ppn: 110_000, status: 'APPROVED', recon_source: 'CUSTOMER' },
-      { customer_id: customer.id, tax_period: PERIOD, faktur_type: 'KELUARAN', faktur_number: 'FP002', dpp: 2_000_000, ppn: 220_000, status: 'APPROVED', recon_source: 'CUSTOMER' },
-      { customer_id: customer.id, tax_period: PERIOD, faktur_type: 'MASUKAN', faktur_number: 'FP003', dpp: 500_000, ppn: 55_000, status: 'APPROVED', recon_source: 'CUSTOMER' },
+    const fdate = '2099-12-15';
+    const { error: seedErr } = await admin.from('ppn_faktur_monthly').insert([
+      { customer_id: customer.id, tax_period: PERIOD, faktur_date: fdate, faktur_type: 'KELUARAN', faktur_number: 'FP001', dpp: 1_000_000, ppn: 110_000, status: 'APPROVED', recon_source: 'CUSTOMER' },
+      { customer_id: customer.id, tax_period: PERIOD, faktur_date: fdate, faktur_type: 'KELUARAN', faktur_number: 'FP002', dpp: 2_000_000, ppn: 220_000, status: 'APPROVED', recon_source: 'CUSTOMER' },
+      { customer_id: customer.id, tax_period: PERIOD, faktur_date: fdate, faktur_type: 'MASUKAN', faktur_number: 'FP003', dpp: 500_000, ppn: 55_000, status: 'APPROVED', recon_source: 'CUSTOMER' },
     ]);
+    if (seedErr) fail(`faktur seed failed: ${seedErr.message}`);
     ok('sentinel customer + 3 submitted faktur ready');
 
     const supervisorToken = await login('supervisor.test@aipajak.com');

@@ -107,8 +107,11 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
 
   // Coretax 전용 행 삽입.
   if (result.coretaxOnly.length > 0) {
+    // faktur_date 는 NOT NULL — Coretax 전용 행은 대조 기간 1일로 채운다
+    // (Coretax 출력에 개별 일자가 없을 수 있어 기간 기준 placeholder).
+    const fallbackDate = /^\d{4}-\d{2}$/.test(taxPeriod) ? `${taxPeriod}-01` : now.slice(0, 10);
     await admin.from('ppn_faktur_monthly').insert(result.coretaxOnly.map(c => ({
-      customer_id: cid, tax_period: taxPeriod,
+      customer_id: cid, tax_period: taxPeriod, faktur_date: fallbackDate,
       faktur_type: c.fakturType, faktur_number: c.fakturNumber,
       dpp: 0, ppn: 0, coretax_dpp: c.coretaxDpp, coretax_ppn: c.coretaxPpn,
       recon_status: 'MISSING_CUSTOMER', recon_source: 'CORETAX',
