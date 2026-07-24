@@ -8,7 +8,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-AI Pajak — Indonesian tax filing automation platform for Jakarta Tax Consulting (JTC). Supports SPT forms 1770SS, 1770S, 1770, 1771. Written in Korean (README/docs) but the code is in English.
+AI Pajak — Indonesian tax filing platform. **두 개의 제품이 하나의 공통 플랫폼(로그인·AI·결제·OCR·세무 규정/계산 엔진) 위에 올라간 구조** (상세: `docs/guides/product-identity.md`, 2026-07-24 확정):
+- **Assisted DIY** — 일반 개인/법인 납세자가 직접 올리고 **JTC 운영팀**이 검토·승인·발행으로 품질 보증.
+- **세무법인 ERP** — 외부 세무법인(EXTERNAL tenant)이 자기 고객을 처리하는 업무 시스템. **운영팀 전혀 미개입** (RLS 격리).
+
+**버전(로그인 후 화면) 6개**: ①개인 고객 ②법인 고객 ③운영팀 상담원 ④운영팀 Supervisor ⑤운영팀 Master(JTC 신고운영) ⑥ERP(Admin/Staff 권한 차등, 화면 90%+ 동일).
+**제품 role 7개**: CUSTOMER(INDIVIDUAL/COMPANY)=①②, TAX_OPERATOR=③, TAX_OPERATOR_SUPERVISOR(+LEAD)=④, TAX_OPERATOR_MASTER=⑤, FIRM_ADMIN=ERP Admin, CONSULTANT/TAX_ADVISOR=ERP Staff.
+**플랫폼 인프라 role(제품 아님)**: PLATFORM_MASTER(MFG 사업운영 — TAX_OPERATOR_MASTER 와 **분리 유지**), PLATFORM_ADMIN(기술), SYSTEM(billing).
+
+⚠️ **결정 ① (목표 정의, 후속 마이그레이션)**: `CONSULTANT`/`TAX_ADVISOR` 는 **EXTERNAL ERP 전용**이 목표. 현재 JTC 소속 consultant 4명(담당 16건)이 남아 있어 코드가 목표와 다름 — 신규 기능은 consultant=EXTERNAL/JTC=operator 전제로 설계하되 기존 JTC consultant 데이터를 깨지 않도록 주의.
+
+SPT forms 1770SS, 1770S, 1770, 1771. Written in Korean (README/docs) but the code is in English.
 
 ## Commands
 
