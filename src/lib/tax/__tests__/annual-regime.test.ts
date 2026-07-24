@@ -32,7 +32,7 @@ describe('determineAnnualRegime (Phase 4)', () => {
       const result = determineAnnualRegime({ ...baseInput, establishedYear: null });
       expect(result.regime).toBe('NOT_DETERMINED');
       expect(result.route).toBe(null);
-      expect(result.warnings?.[0]).toContain('설립 연도');
+      expect(result.warnings?.[0]).toContain('establishment year');
     });
 
     it('should return NOT_DETERMINED when legalForm is missing', () => {
@@ -96,7 +96,7 @@ describe('determineAnnualRegime (Phase 4)', () => {
         establishedYear: 2022, // 4 years → exceeded PT 3-year limit
       });
       expect(result.regime).toBe('PPH25');
-      expect(result.reason).toContain('3년');
+      expect(result.reason).toContain('exceeds the UMKM');
     });
 
     it('should return PPh Final for PT at year 2 (within limit)', () => {
@@ -135,7 +135,7 @@ describe('determineAnnualRegime (Phase 4)', () => {
         establishedYear: 2024, // 2 years, 1 remaining
       });
       expect(result.warnings).toBeDefined();
-      expect(result.warnings?.some(w => w.includes('마지막'))).toBe(true);
+      expect(result.warnings?.some(w => w.includes('final year'))).toBe(true);
     });
   });
 
@@ -146,7 +146,7 @@ describe('determineAnnualRegime (Phase 4)', () => {
         annualRevenue: UMKM_REVENUE_THRESHOLD + 1,
       });
       expect(result.regime).toBe('PPH25');
-      expect(result.reason).toContain('임계값');
+      expect(result.reason).toContain('threshold');
     });
 
     it('should return PPh 25 when prior year revenue exceeded threshold', () => {

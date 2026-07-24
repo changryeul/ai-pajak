@@ -91,7 +91,8 @@ describe('suggestConsultantTier', () => {
 
   it('returns reason string with tier name', () => {
     const r = suggestConsultantTier(8);
-    expect(r.reason).toContain('Starter');
+    // reason 은 i18n 조립용 machine-readable 문자열 (tier=STARTER;clients=8;limit=10)
+    expect(r.reason).toContain('STARTER');
     expect(r.reason).toContain('8');
   });
 

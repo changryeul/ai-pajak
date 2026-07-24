@@ -587,7 +587,7 @@ describe('TaxResolutionEngine', () => {
       expect(result.taxType).toBe('PPh23');
       expect(result.rate).toBe(0.15);
       expect(result.ruleId).toBe('CATEGORY_DIVIDEND_FALLBACK');
-      expect(result.reason).toContain('법인/개인 구분 미입력');
+      expect(result.reason.toLowerCase()).toContain('recipient type');
     });
   });
 
@@ -862,7 +862,7 @@ describe('TaxResolutionEngine', () => {
       });
       expect(result.taxType).toBe('PPh23');
       expect(result.rate).toBe(0.15);
-      expect(result.reason).toContain('채권');
+      expect(result.reason).toContain('Bond interest');
     });
   });
 

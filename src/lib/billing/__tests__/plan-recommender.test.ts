@@ -146,7 +146,8 @@ describe('suggestPlanForCustomer', () => {
     expect(rec.plan).toBeNull();
     expect(rec.exceedsAllPlans).toBe(true);
     expect(rec.exceedingDimensions).toContain('employees');
-    expect(rec.reason).toContain('맞춤');
+    // 고객 대면 문구는 인니어 (CLAUDE.md 서버 응답 언어 정책)
+    expect(rec.reason).toContain('penawaran khusus');
   });
 
   it('identifies all exceeding dimensions for custom quote', () => {
