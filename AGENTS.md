@@ -222,7 +222,7 @@ Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `ex
 - **§6 원천세 증빙 전용 뷰어**: `GET /api/tax/pph23-transactions/[id]/invoice-photo` 가 서명 URL(5분) 반환, pph23 페이지의 첨부됨(CheckCircle) 클릭 → 이미지/PDF 미리보기 모달 (요청 모달과 분리).
 - **§9 PPN Coretax 대조** (마이그레이션 `20260724000003`): `ppn_faktur_monthly` +coretax_dpp/coretax_ppn/recon_status/recon_source. 순수 매칭은 `src/lib/tax/ppn-reconcile.ts` (faktur type+번호, MATCH/DIFF/MISSING_CORETAX/MISSING_CUSTOMER). `POST/GET /api/tax/ppn-reconcile` — Coretax faktur JSON 받아 고객 행에 값+상태 기록 + Coretax 전용은 `recon_source=CORETAX` 행 삽입(재실행 시 선삭제 → drift 0). PPN 페이지 'Coretax 대조' 탭에서 xlsx 업로드→클라 SheetJS 파싱→POST.
 - **§9 PPh25/Final 단일표시**: 이미 충족 (`determineRegime` 단일 반환) — 코드 변경 없음.
-- **§7 WhatsApp 메신저 리스킨**: 미착수 (사용자 미선택).
+- **§7 WhatsApp형 메신저 리스킨**: `CustomerAiChat`(고객 FAB) + `CustomerInboxClient`(운영팀 인박스) 양쪽에 날짜 구분선(오늘/어제/날짜) + 내가 보낸 메시지 읽음 ✓✓(상대가 읽으면 파란 CheckCheck, 아니면 회색 Check). 고객측 `operatorReadAt` / 운영팀측 `customerReadAt` 기준 — DTO 기존 필드 재사용, 서버 변경 0.
 
 
 
