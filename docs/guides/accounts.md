@@ -44,16 +44,21 @@
 
 ---
 
-## 2. 컨설턴트 (consultant) — 7명, 모두 활성
+## 2. 컨설턴트 (consultant)
 
-### 2.1. JTC 내부 (4명)
+> **product-identity 결정 ① (2026-07-24) 반영**: `consultant` 테이블·`CONSULTANT`/`TAX_ADVISOR`
+> role 은 **EXTERNAL 세무법인 전용**. JTC 신고 실무자는 전부 `TAX_OPERATOR` 계열로 이전되었습니다.
+> 아래 "JTC 내부 (구)" 4명은 모두 consultant 은퇴(is_active=false) 처리되었고, 신규 JTC
+> consultant INSERT 는 `forbid_jtc_consultant` 트리거가 차단합니다. 이전 상세: [[project-2026-07-24-jtc-consultant-migration-exec]].
 
-| 이름 | 이메일 | Role | 담당 고객 수 | 성격 |
+### 2.1. JTC 내부 (구 consultant → operator 이전 완료)
+
+| 이름 | 이메일 | 이전 후 Role | 담당 고객 | 처리 |
 |---|---|---|---|---|
-| **Tommy Lee** | iamtommylee66@gmail.com | TAX_ADVISOR | **13** | ⭐ 실 컨설턴트 (오늘 대량 배정) |
-| **CR Lee** (사용자님) | crlee123@gmail.com | TAX_ADVISOR + CUSTOMER | 2 | 👤 소유주 겸 세무사. 개인 customer 로도 등록됨 |
-| Test Consultant | consultant.test@jakartatax.co.id | CONSULTANT | 1 | 🧪 테스트 계정 |
-| Test Tax Advisor | advisor.test@jakartatax.co.id | TAX_ADVISOR | 0 | 🧪 테스트 계정 |
+| **Tommy Lee** | iamtommylee66@gmail.com | TAX_OPERATOR | 13 (operator_client_assignments 로 이관) | consultant 은퇴 |
+| **CR Lee** (사용자님) | crlee123@gmail.com | TAX_OPERATOR(supervisor) + CUSTOMER | 2 이관 | consultant 은퇴, CUSTOMER 유지 |
+| Test Consultant | consultant.test@jakartatax.co.id | (폐기) | — | 계정·consultant·배정 완전 삭제 |
+| Test Tax Advisor | advisor.test@jakartatax.co.id | TAX_OPERATOR_SUPERVISOR | 0 | consultant 은퇴, supervisor 로 존속 |
 
 ### 2.2. EXTERNAL (3명 — 각 세무 컨설팅 법인 소속)
 
@@ -128,15 +133,15 @@ user_roles.role='CUSTOMER' 이지만 customer 테이블에 매칭 없음. 오늘
 
 ---
 
-## 7. 테스트 계정 (변경 없음, 참조용)
+## 7. 테스트 계정 (결정 ① 반영, 참조용)
 
 | 시나리오 | 이메일 | 비밀번호 |
 |---|---|---|
 | 개인 고객 UX | customer.test@example.com | TestPassword123! |
 | 법인 고객 UX | company.test@example.com | TestPassword123! |
-| JTC 내부 컨설턴트 | consultant.test@jakartatax.co.id | TestPassword123! |
-| JTC 내부 시니어 | advisor.test@jakartatax.co.id | TestPassword123! |
-| 세무 컨설팅 법인 소속 | external.consultant@mitrapajak.com | TestPassword123! |
+| ~~JTC 내부 컨설턴트~~ (폐기, 결정 ①) | ~~consultant.test@jakartatax.co.id~~ | — |
+| JTC 신고실무 (구 advisor → supervisor) | advisor.test@jakartatax.co.id | TestPassword123! |
+| 세무 컨설팅 법인 소속 (ERP Staff) | external.consultant@mitrapajak.com | TestPassword123! |
 | 세무 컨설팅 법인 관리자 (P6.5 신설) | firmadmin.test@mitrapajak.com | TestPassword123! |
 | 운영팀 큐 | operator.test@aipajak.com | TestPassword123! |
 | 승인 흐름 | supervisor.test@aipajak.com | TestPassword123! |

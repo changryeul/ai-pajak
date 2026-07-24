@@ -91,7 +91,7 @@ async function main() {
   }
 
   // 3. PUT { isLuxury: true } — dpp 동반 안 보냄 (UI 가 토글만 보낼 때 reproduce).
-  const consultantToken = await login('consultant.test@jakartatax.co.id', 'TestPassword123!');
+  const consultantToken = await login('company.test@example.com', 'TestPassword123!');
   const putRes = await fetch(`${BASE_URL}/api/tax/ppn-faktur-monthly`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${consultantToken}` },

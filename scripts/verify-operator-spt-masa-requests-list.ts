@@ -49,7 +49,7 @@ async function main() {
     .in('tax_period', [PERIOD_PEND_1, PERIOD_PEND_2, PERIOD_PROC]);
 
   // 1. CONSULTANT GET → 403
-  const consultantToken = await login('consultant.test@jakartatax.co.id', 'TestPassword123!');
+  const consultantToken = await login('external.consultant@mitrapajak.com', 'TestPassword123!');
   const r1 = await fetch(`${BASE_URL}/api/operator/spt-masa-requests?status=PENDING`, {
     headers: { Authorization: `Bearer ${consultantToken}` },
   });

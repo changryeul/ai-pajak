@@ -51,7 +51,7 @@ async function run() {
   if (!supTok) process.exit(1);
   console.log('✅ supervisor logged in');
 
-  const consTok = await login('consultant.test@jakartatax.co.id');
+  const consTok = await login('external.consultant@mitrapajak.com');
   if (!consTok) process.exit(1);
   console.log('✅ consultant logged in');
 

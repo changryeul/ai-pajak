@@ -66,13 +66,14 @@ async function main() {
   const cleanup: { sessionId?: string; calcId?: string; queueId?: string; customerId?: string } = {};
 
   try {
-    // ── 0. 준비: JTC 파트너 / 컨설턴트 / sentinel customer + APPROVED 세션 ──
-    const { data: jtc } = await admin.from('tax_partner').select('id').eq('is_default_filing_partner', true).single();
-    if (!jtc) fail('JTC default partner not found');
-
+    // ── 0. 준비: EXTERNAL 파트너 / 컨설턴트 / sentinel customer + APPROVED 세션 ──
+    // (결정 ①) JTC 소속 consultant 폐지. ID Billing 발행 보드는 공용 컴포넌트로
+    // EXTERNAL consultant(Eddy @ PT Mitra Pajak Sentosa)도 사용 → EXTERNAL 테넌트로 검증.
+    const EXTERNAL_PARTNER_ID = '00000000-0000-0000-0000-000000000040';
     const { data: consultantUser } = await admin.from('consultant')
-      .select('id, user_id, tax_partner_id').eq('tax_partner_id', jtc.id).eq('is_active', true).limit(1).single();
-    if (!consultantUser) fail('active JTC consultant not found');
+      .select('id, user_id, tax_partner_id').eq('tax_partner_id', EXTERNAL_PARTNER_ID).eq('is_active', true).limit(1).single();
+    if (!consultantUser) fail('active EXTERNAL consultant not found');
+    const jtc = { id: EXTERNAL_PARTNER_ID };
 
     const { data: customer, error: custErr } = await admin.from('customer').insert({
       customer_type: 'COMPANY',
@@ -118,7 +119,7 @@ async function main() {
     if (r1.status !== 403) fail(`customer board expected 403, got ${r1.status}`);
     ok('RBAC: customer → 403');
 
-    const consultantToken = await login('consultant.test@jakartatax.co.id');
+    const consultantToken = await login('external.consultant@mitrapajak.com');
     const r2 = await api(consultantToken, 'GET', '/api/id-billing/board');
     if (r2.status !== 200) fail(`consultant board expected 200, got ${r2.status}: ${JSON.stringify(r2.json).slice(0, 200)}`);
     ok('RBAC: JTC consultant → 200');
@@ -201,15 +202,18 @@ async function main() {
     if (qAfter?.ebilling_code !== '820IDBILLE2E01') fail(`ebilling_code mismatch: ${qAfter?.ebilling_code}`);
     ok('operator issue → queue APPROVED → EBILLING_GENERATED + billing code 기록');
 
-    // ── 8. tenant 분리 — external consultant 보드에 JTC sentinel 없음 ──
+    // ── 8. scope 분리 — 운영팀(OPERATOR_QUEUE) sentinel 이 EXTERNAL 보드에 안 샘 ──
+    // (결정 ①) ERP 세션 sentinel 은 external.consultant(Eddy) 자신의 EXTERNAL 테넌트
+    // 데이터라 보이는 게 정상이다. 검증 대상은 "운영팀 스코프(OPERATOR_QUEUE)가
+    // EXTERNAL consultant 보드로 새지 않는가" — JTC 운영팀 발행 아이템은 operator 전용.
     const externalToken = await login('external.consultant@mitrapajak.com');
     const r11 = await api(externalToken, 'GET', '/api/id-billing/board');
     if (r11.status !== 200) fail(`external board expected 200, got ${r11.status}`);
-    const leaked = boardTargets(r11.json).some(t => t.customer?.name?.includes(SENTINEL));
-    const issuedLeak = (((r11.json?.data as Record<string, unknown>)?.issued ?? []) as Array<{ customer_name: string }>)
-      .some(x => x.customer_name?.includes(SENTINEL));
-    if (leaked || issuedLeak) fail('tenant isolation broken — JTC sentinel visible to EXTERNAL consultant');
-    ok('tenant isolation: EXTERNAL consultant sees no JTC sentinel data');
+    const queueLeak = boardTargets(r11.json).some(t => t.sourceId === queueRow.id);
+    const issuedQueueLeak = (((r11.json?.data as Record<string, unknown>)?.issued ?? []) as Array<{ ebilling_code?: string }>)
+      .some(x => x.ebilling_code === '820IDBILLE2E01');
+    if (queueLeak || issuedQueueLeak) fail('scope isolation broken — operator-queue sentinel visible to EXTERNAL consultant');
+    ok('scope isolation: EXTERNAL consultant sees no operator-queue (JTC) sentinel');
 
     console.log(`\n✅ ${pass} assertions passed`);
   } finally {

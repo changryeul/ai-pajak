@@ -72,7 +72,7 @@ async function run() {
   const masterTok = await login('master.test@aipajak.com');
   const supTok = await login('supervisor.test@aipajak.com');
   const opTok = await login('operator.test@aipajak.com');
-  const consTok = await login('consultant.test@jakartatax.co.id');
+  const consTok = await login('external.consultant@mitrapajak.com');
   if (!masterTok || !supTok || !opTok || !consTok) process.exit(1);
   console.log('✅ all 4 actors logged in\n');
 

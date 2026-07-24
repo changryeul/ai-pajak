@@ -22,8 +22,8 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const base = process.env.E2E_BASE_URL || 'https://ai-pajak.vercel.app';
 
 const CUSTOMER_ID = '00000000-0000-0000-0000-000000000011';
-const CONSULTANT_ID = 'e9d88904-dd85-4082-800e-698a529aa69d';
-const TAX_PARTNER_ID = '00000000-0000-0000-0000-000000000003';
+const CONSULTANT_ID = '00000000-0000-0000-0000-000000000041';
+const TAX_PARTNER_ID = '00000000-0000-0000-0000-000000000040';
 
 const admin = createClient(url, serviceKey);
 

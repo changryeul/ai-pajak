@@ -55,22 +55,10 @@ const TEST_USERS = [
       customer_type: 'COMPANY',
     },
   },
-  {
-    email: 'consultant.test@jakartatax.co.id',
-    password: 'TestPassword123!',
-    user_metadata: {
-      full_name: 'Jane Smith Consultant',
-      role: 'CONSULTANT',
-    },
-  },
-  {
-    email: 'advisor.test@jakartatax.co.id',
-    password: 'TestPassword123!',
-    user_metadata: {
-      full_name: 'Bob Johnson Tax Advisor',
-      role: 'TAX_ADVISOR',
-    },
-  },
+  // NOTE (product-identity 결정 ①, 2026-07-24): JTC 소속 CONSULTANT/TAX_ADVISOR 는
+  // 더 이상 생성하지 않는다. JTC 신고 실무는 TAX_OPERATOR 계열로 수행하며,
+  // 운영팀 + EXTERNAL(mitrapajak) consultant/firm-admin 은 seed-master-and-external.ts 가 시딩한다.
+  // consultant 테이블에 JTC(default filing partner) row INSERT 는 forbid_jtc_consultant 트리거가 차단한다.
   {
     email: 'admin.test@aipajak.com',
     password: 'TestPassword123!',
@@ -169,10 +157,10 @@ async function createTestData() {
   const { data: users } = await supabase.auth.admin.listUsers();
   const customerUser = users?.users?.find(u => u.email === 'customer.test@example.com');
   const companyUser = users?.users?.find(u => u.email === 'company.test@example.com');
-  const consultantUser = users?.users?.find(u => u.email === 'consultant.test@jakartatax.co.id');
-  const advisorUser = users?.users?.find(u => u.email === 'advisor.test@jakartatax.co.id');
+  // POA 서명자(JTC 측)는 운영팀 master 로 대체 (결정 ①: JTC consultant 폐지).
+  const masterUser = users?.users?.find(u => u.email === 'master.test@aipajak.com');
 
-  if (!customerUser || !companyUser || !consultantUser || !advisorUser) {
+  if (!customerUser || !companyUser) {
     console.error('❌ Users not found');
     return;
   }
@@ -275,100 +263,10 @@ async function createTestData() {
     console.log('✅ Company customer record created: PT Example Indonesia');
   }
 
-  // Create consultant record for CONSULTANT user
-  const consultantId = '00000000-0000-0000-0000-000000000020';
-  const { error: consultantError } = await supabase.from('consultant').upsert({
-    id: consultantId,
-    tax_partner_id: taxPartnerId,
-    user_id: consultantUser.id,
-    full_name: 'Jane Smith Consultant',
-    email: 'consultant.test@jakartatax.co.id',
-    employment_start_date: '2024-01-01',
-    is_active: true,
-  }, { onConflict: 'id' });
-
-  if (consultantError) {
-    console.error('❌ Consultant creation error:', consultantError.message);
-  } else {
-    console.log('✅ Consultant record created: Jane Smith Consultant');
-  }
-
-  // Create consultant record for TAX_ADVISOR user (consultant is required before tax_advisor)
-  const advisorConsultantId = '00000000-0000-0000-0000-000000000021';
-  const { error: advisorConsultantError } = await supabase.from('consultant').upsert({
-    id: advisorConsultantId,
-    tax_partner_id: taxPartnerId,
-    user_id: advisorUser.id,
-    full_name: 'Bob Johnson Tax Advisor',
-    email: 'advisor.test@jakartatax.co.id',
-    employment_start_date: '2024-01-01',
-    is_active: true,
-  }, { onConflict: 'id' });
-
-  if (advisorConsultantError) {
-    console.error('❌ Advisor consultant record creation error:', advisorConsultantError.message);
-  } else {
-    console.log('✅ Advisor consultant record created: Bob Johnson Tax Advisor');
-  }
-
-  // Create tax_advisor record (linked to consultant)
-  const taxAdvisorId = '00000000-0000-0000-0000-000000000030';
-  const { error: advisorError } = await supabase.from('tax_advisor').upsert({
-    id: taxAdvisorId,
-    consultant_id: advisorConsultantId,
-    license_number: 'BREVET-A-12345',
-    license_type: 'Brevet A',
-    is_verified: true,
-  }, { onConflict: 'id' });
-
-  if (advisorError) {
-    console.error('❌ Tax advisor creation error:', advisorError.message);
-  } else {
-    console.log('✅ Tax advisor record created: Bob Johnson Tax Advisor');
-  }
-
-  // Delete existing assignments before creating new ones
-  await supabase.from('customer_consultant')
-    .delete()
-    .in('customer_id', [customerId, companyCustomerId]);
-
-  // Create customer-consultant assignment (개인 고객)
-  const { error: assignmentError } = await supabase.from('customer_consultant').insert({
-    customer_id: customerId,
-    consultant_id: consultantId,
-    is_active: true,
-  });
-
-  if (assignmentError) {
-    console.error('❌ Assignment error:', assignmentError.message);
-  } else {
-    console.log('✅ Individual Customer-Consultant assignment created');
-  }
-
-  // Create customer-advisor assignment (개인 고객)
-  const { error: advisorAssignmentError } = await supabase.from('customer_consultant').insert({
-    customer_id: customerId,
-    consultant_id: advisorConsultantId,
-    is_active: true,
-  });
-
-  if (advisorAssignmentError) {
-    console.error('❌ Advisor assignment error:', advisorAssignmentError.message);
-  } else {
-    console.log('✅ Individual Customer-Advisor assignment created');
-  }
-
-  // Create company customer-consultant assignments (법인 고객)
-  const { error: companyAssignmentError } = await supabase.from('customer_consultant').insert([
-    { customer_id: companyCustomerId, consultant_id: consultantId, is_active: true },
-    { customer_id: companyCustomerId, consultant_id: advisorConsultantId, is_active: true },
-  ]);
-
-  if (companyAssignmentError) {
-    console.error('❌ Company assignment error:', companyAssignmentError.message);
-  } else {
-    console.log('✅ Company Customer-Consultant/Advisor assignments created');
-  }
+  // (결정 ①) JTC consultant / tax_advisor / customer_consultant 시딩 제거.
+  //   - JTC consultant INSERT 는 forbid_jtc_consultant 트리거가 차단.
+  //   - JTC 고객↔실무자 연결은 이제 operator_client_assignments (자동배정 엔진) 로 수행.
+  //   - EXTERNAL consultant/firm-admin 은 seed-master-and-external.ts 담당.
 
   // Delete existing POAs before creating new ones
   await supabase.from('power_of_attorney')
@@ -389,7 +287,8 @@ async function createTestData() {
     status: 'ACTIVE',
     customer_signed_at: '2025-01-15T10:00:00Z',
     tax_partner_signed_at: '2025-01-15T14:00:00Z',
-    tax_partner_signed_by_user_id: advisorUser.id,
+    // JTC 측 서명자는 운영팀 master (결정 ①). master 미시딩 시 null 허용.
+    tax_partner_signed_by_user_id: masterUser?.id ?? null,
   }, { onConflict: 'id' });
 
   if (poaError) {

@@ -57,10 +57,12 @@ async function main() {
   const cleanup: { sessionId?: string; customerId?: string } = {};
 
   try {
-    const { data: jtc } = await admin.from('tax_partner').select('id').eq('is_default_filing_partner', true).single();
+    // (결정 ①) JTC consultant 폐지 → ERP 승인 흐름은 EXTERNAL(Eddy @ PT Mitra Pajak Sentosa) 테넌트로 검증.
+    const EXTERNAL_PARTNER_ID = '00000000-0000-0000-0000-000000000040';
+    const jtc = { id: EXTERNAL_PARTNER_ID };
     const { data: consultantRow } = await admin.from('consultant')
-      .select('id, user_id').eq('tax_partner_id', jtc!.id).eq('is_active', true).limit(1).single();
-    if (!consultantRow) fail('active JTC consultant not found');
+      .select('id, user_id').eq('tax_partner_id', EXTERNAL_PARTNER_ID).eq('is_active', true).limit(1).single();
+    if (!consultantRow) fail('active EXTERNAL consultant not found');
 
     const { data: customer } = await admin.from('customer').insert({
       customer_type: 'COMPANY',
@@ -86,7 +88,7 @@ async function main() {
     cleanup.sessionId = session.id;
     ok(`sentinel session ready (${session.id.slice(0, 8)}…)`);
 
-    const consultantToken = await login('consultant.test@jakartatax.co.id');
+    const consultantToken = await login('external.consultant@mitrapajak.com');
     const supervisorToken = await login('supervisor.test@aipajak.com');
 
     // ── 1. calc POST → ai_amount 분리 ──

@@ -5,13 +5,14 @@
  * request in the AI chat inbox and can process it inline with one click.
  * Body: `{ customerId, taxType: 'PPh21'|'PPh23'|'PPN', period: 'YYYY-MM' }`
  *
- * HARD RULE #3 alignment: the recorded filing actor remains a CONSULTANT —
- * the operator never appears as the `consultant_id` on `tax_filing`. The
- * endpoint resolves the customer's assigned consultant (active
- * `customer_consultant` row) and falls back to the platform's JTC default
- * consultant if no explicit assignment exists. The operator is recorded via
- * the standard audit log (`withAudit('OPERATOR_CREATE_SPT_MASA')`) for
- * traceability.
+ * Filing actor (product-identity 결정 ①): if the customer has an assigned
+ * EXTERNAL consultant (active `customer_consultant`), that consultant is
+ * recorded on `tax_filing.consultant_id`. For JTC operator-managed customers
+ * there is no consultant (JTC 실무 = TAX_OPERATOR), so `consultant_id` is left
+ * NULL (nullable since migration 20251223000029) and the OPERATOR is the actor,
+ * recorded via the standard audit log (`withAudit('OPERATOR_CREATE_SPT_MASA')`)
+ * and the response `actor.initiatorUserId`. HARD RULE #3 is preserved: the
+ * operator is a JTC filing actor, never PLATFORM_ADMIN (blockPlatformAdmin gate).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -71,29 +72,9 @@ async function handle(req: RequestWithSession): Promise<Response> {
       if (cc) { consultantId = cc.id; consultantName = cc.full_name; }
     }
   }
-  // 2) Fallback: JTC default active consultant.
-  if (!consultantId) {
-    const { data: jtcPartners } = await admin
-      .from('tax_partner')
-      .select('id')
-      .eq('partner_type', 'JTC')
-      .eq('is_default_filing_partner', true)
-      .limit(1);
-    const jtcPartnerId = (jtcPartners as { id: string }[] | null)?.[0]?.id;
-    if (jtcPartnerId) {
-      const { data: c } = await admin
-        .from('consultant')
-        .select('id, full_name')
-        .eq('tax_partner_id', jtcPartnerId)
-        .eq('is_active', true)
-        .limit(1);
-      const fallback = (c as { id: string; full_name: string }[] | null)?.[0];
-      if (fallback) { consultantId = fallback.id; consultantName = fallback.full_name; }
-    }
-  }
-  if (!consultantId) {
-    return NextResponse.json({ error: 'No active consultant available to record as filing actor' }, { status: 500 });
-  }
+  // 2) (결정 ①) JTC operator-managed customers have no assigned consultant.
+  //    Leave consultantId = null → the OPERATOR is the filing actor (recorded on
+  //    the audit row + response actor below). No JTC-consultant fallback, no 500.
 
   // Verify the customer exists.
   const { data: customer } = await admin

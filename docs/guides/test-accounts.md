@@ -39,9 +39,7 @@ SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts       # 개인 고�
 | --- | -------------------------------------------- | ---------------------------------- | ---------------------- | ---------------------------------------- |
 | 1   | CUSTOMER (INDIVIDUAL 개인)                     | customer.test@example.com          | —                      | `/dashboard` (개인 SPT 대시보드)               |
 | 2   | CUSTOMER (COMPANY 법인)                        | company.test@example.com           | —                      | `/dashboard` (월 신고·결산 대시보드)              |
-| 3   | CONSULTANT (JTC 내부)                          | consultant.test@jakartatax.co.id   | JTC                    | `/dashboard` (컨설턴트 뷰)                    |
-| 4   | TAX_ADVISOR (JTC 내부, 세무사)                    | advisor.test@jakartatax.co.id      | JTC                    | `/dashboard` (컨설턴트 뷰)                    |
-| 5   | CONSULTANT (EXTERNAL)                        | external.consultant@mitrapajak.com | PT Mitra Pajak Sentosa | `/dashboard` (컨설턴트 뷰)                    |
+| 5   | CONSULTANT (EXTERNAL, ERP Staff)             | external.consultant@mitrapajak.com | PT Mitra Pajak Sentosa | `/dashboard` (컨설턴트 뷰)                    |
 | 6   | FIRM_ADMIN (EXTERNAL 법인 관리자)                 | firmadmin.test@mitrapajak.com      | PT Mitra Pajak Sentosa | `/consultant-erp/firm-admin/staff`       |
 | 7   | TAX_OPERATOR (운영팀 상담원)                       | operator.test@aipajak.com          | JTC 운영팀                | `/operator/my-work`                      |
 | 8   | TAX_OPERATOR_SUPERVISOR (운영팀 팀장)             | supervisor.test@aipajak.com        | JTC 운영팀                | `/operator/dashboard`                    |
@@ -85,32 +83,19 @@ SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts       # 개인 고�
 
 ---
 
-### 3-3. consultant.test@jakartatax.co.id — JTC 내부 컨설턴트
+### 3-3 / 3-4. (폐지) JTC 내부 CONSULTANT / TAX_ADVISOR
 
-**핵심 흐름** (매뉴얼: [`05-jtc-consultant.md`](../manuals/05-jtc-consultant.md))
-1. 로그인 → `/customers` — **JTC 소속 고객만** 목록에 보여야 함
-2. `/customers/[id]` — 프로필/신고/POA/노트/활동 탭
-3. Consultant ERP: 세션 생성 → 자료 업로드 (invoice 슬롯은 업로드 즉시 자동 파싱) → 파싱 결과 검토 → 자동계산 → 결재 요청 → Coretax 수기 기록
-4. 고객 전용 페이지 (예: `/tax/pph23`) 진입 시 customer picker 가 자동으로 뜨는지
-
-**차단 확인**: `/consultant-erp/supervisor/*` 전 메뉴 403 (팀장 전용). EXTERNAL 법인 고객이 목록에 절대 보이면 안 됨.
-
-**자동 회귀**: `consultant.spec.ts`, `consultant-erp.spec.ts` (e2e) / `npx tsx scripts/test-consultant-erp-flow.ts`.
+> **product-identity 결정 ① (2026-07-24)**: `CONSULTANT`/`TAX_ADVISOR` role 과 `consultant`
+> 테이블은 **EXTERNAL 세무법인 전용**입니다. JTC 신고 실무는 전부 `TAX_OPERATOR` 계열이 수행합니다.
+> 따라서 옛 `consultant.test@jakartatax.co.id`(폐기) / `advisor.test@jakartatax.co.id`
+> (consultant 은퇴 후 supervisor 로 존속) 는 더 이상 JTC 컨설턴트 테스트 계정이 아닙니다.
+> - JTC 컨설턴트 흐름 → **운영팀 계정**(operator.test / supervisor.test / master.test)으로 검증.
+> - ERP(consultant) 흐름 → **EXTERNAL 계정**(external.consultant, 3-5)으로 검증.
+> - 신규 JTC consultant INSERT 는 `forbid_jtc_consultant` 트리거가 DB 레벨에서 차단합니다.
 
 ---
 
-### 3-4. advisor.test@jakartatax.co.id — JTC 세무사 (TAX_ADVISOR)
-
-컨설턴트(3-3)와 화면은 동일하고 **신고 제출 권한**이 추가됩니다.
-1. 3-3 흐름 재확인
-2. 세무 신고 제출 (filing submit) — TAX_ADVISOR 만 통과하는 엔드포인트가 정상 동작하는지
-3. POA(위임장) 유효성 게이트: POA 없는 고객으로 제출 시도 → 차단 확인
-
-**자동 회귀**: `tax-advisor.spec.ts` (e2e).
-
----
-
-### 3-5. external.consultant@mitrapajak.com — 외부 사무소 컨설턴트 (EXTERNAL)
+### 3-5. external.consultant@mitrapajak.com — 외부 사무소 컨설턴트 (EXTERNAL, ERP Staff)
 
 **이 계정의 존재 이유는 테넌트 격리 검증**입니다 (매뉴얼: [`02-external-consultant.md`](../manuals/02-external-consultant.md)).
 1. 로그인 → `/customers` — **PT Mitra Pajak Sentosa 고객만** 보여야 함

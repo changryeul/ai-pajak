@@ -377,8 +377,7 @@ The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/pa
 |------|------|-------|----------|
 | CUSTOMER | INDIVIDUAL (개인) | customer.test@example.com | TestPassword123! |
 | CUSTOMER | COMPANY (법인) | company.test@example.com | TestPassword123! |
-| CONSULTANT (JTC 내부) | — | consultant.test@jakartatax.co.id | TestPassword123! |
-| TAX_ADVISOR (JTC 내부) | — | advisor.test@jakartatax.co.id | TestPassword123! |
+| ~~CONSULTANT (JTC 내부)~~ | 폐기 (결정 ①) | ~~consultant.test@jakartatax.co.id~~ | — |
 | CONSULTANT (EXTERNAL — PT Mitra Pajak Sentosa) | — | external.consultant@mitrapajak.com | TestPassword123! |
 | FIRM_ADMIN (EXTERNAL — PT Mitra Pajak Sentosa) | — | firmadmin.test@mitrapajak.com | TestPassword123! |
 | TAX_OPERATOR | — | operator.test@aipajak.com | TestPassword123! |
@@ -386,8 +385,10 @@ The marketing landing at `/[locale]` is a Server Component (`src/app/[locale]/pa
 | TAX_OPERATOR_MASTER + PLATFORM_MASTER (겸직) | — | master.test@aipajak.com | TestPassword123! |
 | PLATFORM_ADMIN | — | admin.test@aipajak.com | TestPassword123! |
 
+> **product-identity 결정 ① (2026-07-24)**: `CONSULTANT`/`TAX_ADVISOR` = EXTERNAL 세무법인 전용. JTC 신고 실무는 `TAX_OPERATOR` 계열. 옛 `consultant.test@jakartatax.co.id` 폐기, `advisor.test@jakartatax.co.id` 는 consultant 은퇴 후 `TAX_OPERATOR_SUPERVISOR` 로 존속. 신규 JTC consultant INSERT 는 `forbid_jtc_consultant` 트리거가 차단. 상세: `docs/01-plan/features/jtc-consultant-to-operator-migration.md`.
+
 Seed scripts:
-- `npm run db:seed-test-users` — JTC customers + consultants + admin
+- `npm run db:seed-test-users` — 개인/법인 customer + admin (JTC consultant 생성 없음 — 결정 ①)
 - `SEED_TARGET=prod npx tsx scripts/seed-master-and-external.ts` — Operator team (master.test 겸직 포함) + EXTERNAL tax_partner + its consultant + FIRM_ADMIN
 - `SEED_TARGET=prod npx tsx scripts/seed-company-customer.ts` — patches `company.test@example.com` to a COMPANY customer (works around `listUsers` pagination on populated DBs)
 - `SEED_TARGET=prod npx tsx scripts/seed-individual-billing.ts` — seeds two approved ID Billing rows (PPh21 5M / PPh23 2M) in `EBILLING_GENERATED` for the INDIVIDUAL test customer so `/tax/billing` shows the design-spec demo

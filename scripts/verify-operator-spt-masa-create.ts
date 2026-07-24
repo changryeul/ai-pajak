@@ -4,7 +4,7 @@
  *   1. CONSULTANT POST → 403 (operator-only)
  *   2. CUSTOMER  POST → 403
  *   3. OPERATOR  POST → 200 + filingId + actor.consultantName
- *   4. tax_filing row exists with status=DRAFT and consultant_id != null
+ *   4. tax_filing row exists with status=DRAFT (consultant_id null for JTC operator-managed; 결정 ①)
  *   5. operator second POST (same period) → updates existing row (no dup)
  *   6. cleanup
  *
@@ -54,7 +54,7 @@ async function main() {
     .eq('customer_id', CUSTOMER_ID).eq('tax_type', 'PPh23').eq('tax_period', PERIOD);
 
   // 1. CONSULTANT POST → 403
-  const consultantToken = await login('consultant.test@jakartatax.co.id', 'TestPassword123!');
+  const consultantToken = await login('external.consultant@mitrapajak.com', 'TestPassword123!');
   const r1 = await post(consultantToken, { customerId: CUSTOMER_ID, taxType: 'PPh23', period: PERIOD });
   if (r1.status === 403) { console.log(`✅ 1. CONSULTANT POST → 403`); pass++; }
   else { console.error(`✗ 1. CONSULTANT POST → status=${r1.status}`); fail++; }
@@ -65,26 +65,28 @@ async function main() {
   if (r2.status === 403) { console.log(`✅ 2. CUSTOMER POST → 403`); pass++; }
   else { console.error(`✗ 2. CUSTOMER POST → status=${r2.status}`); fail++; }
 
-  // 3. OPERATOR POST → 200 + filingId + actor
+  // 3. OPERATOR POST → 200 + filingId + operator recorded as actor.
+  //    (결정 ①) JTC 고객(...011)은 assigned consultant 가 없으므로 operator 가 actor.
+  //    consultant_id 는 null, actor.initiatorUserId 에 operator 가 기록된다.
   const operatorToken = await login('operator.test@aipajak.com', 'TestPassword123!');
   const r3 = await post(operatorToken, { customerId: CUSTOMER_ID, taxType: 'PPh23', period: PERIOD });
-  if (r3.status === 200 && r3.json.success && r3.json.filingId && r3.json.actor?.consultantName) {
-    console.log(`✅ 3. OPERATOR POST → filing ${String(r3.json.filingId).slice(0, 8)} (actor: ${r3.json.actor.consultantName})`);
+  if (r3.status === 200 && r3.json.success && r3.json.filingId && r3.json.actor?.initiatorUserId) {
+    console.log(`✅ 3. OPERATOR POST → filing ${String(r3.json.filingId).slice(0, 8)} (actor initiator: ${String(r3.json.actor.initiatorUserId).slice(0, 8)}, consultant: ${r3.json.actor.consultantName ?? 'null (operator-managed)'})`);
     pass++;
   } else {
     console.error(`✗ 3. OPERATOR POST → status=${r3.status}`, r3.json);
     fail++;
   }
 
-  // 4. tax_filing row exists
+  // 4. tax_filing DRAFT row exists (consultant_id null for JTC operator-managed customer).
   const { data: rows } = await sbAdmin.from('tax_filing')
     .select('id, consultant_id, status')
     .eq('customer_id', CUSTOMER_ID).eq('tax_type', 'PPh23').eq('tax_period', PERIOD);
-  if (rows && rows.length === 1 && rows[0].status === 'DRAFT' && rows[0].consultant_id) {
-    console.log(`✅ 4. tax_filing row DRAFT + consultant_id set`);
+  if (rows && rows.length === 1 && rows[0].status === 'DRAFT') {
+    console.log(`✅ 4. tax_filing row DRAFT (consultant_id=${rows[0].consultant_id ?? 'null, operator actor'})`);
     pass++;
   } else {
-    console.error(`✗ 4. expected 1 DRAFT row with consultant_id, got`, rows);
+    console.error(`✗ 4. expected 1 DRAFT row, got`, rows);
     fail++;
   }
 

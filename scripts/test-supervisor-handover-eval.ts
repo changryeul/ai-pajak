@@ -41,7 +41,7 @@ async function main() {
   console.log(`🧪 supervisor handover + evaluation smoke on ${baseUrl}\n`);
 
   const supervisorToken = await login('supervisor.test@aipajak.com');
-  const consultantToken = await login('consultant.test@jakartatax.co.id');
+  const consultantToken = await login('external.consultant@mitrapajak.com');
 
   // ── 1. 이관현황 ──
   const h = await api(supervisorToken, '/api/consultant-erp/supervisor/billing-handover');

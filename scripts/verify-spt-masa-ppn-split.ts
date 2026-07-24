@@ -28,15 +28,14 @@ const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // Sentinel — far future month so it can't collide with real-data filings.
 const PERIOD = '2099-12';
-// Use a CONSULTANT login. The route's handler queries the `consultant`
-// table by session.userId regardless of role, so a plain CUSTOMER login
-// 404s with "Consultant not found" (pre-existing handler quirk, not in
-// scope of this spec). consultant.test is pre-assigned to PT Example
-// Indonesia in prod seeds.
-const TEST_EMAIL = 'consultant.test@jakartatax.co.id';
+// Actor = EXTERNAL consultant (product-identity 결정 ①: JTC consultant 폐지).
+// The route's handler queries the `consultant` table by session.userId and
+// requires a customer_consultant assignment, so we create a sentinel EXTERNAL
+// COMPANY customer and assign Eddy to it — self-contained, isolation-safe.
+const TEST_EMAIL = 'external.consultant@mitrapajak.com';
 const TEST_PASSWORD = 'TestPassword123!';
-// Target COMPANY customer pre-assigned to consultant.test (seed UUID).
-const TARGET_CUSTOMER_ID = '00000000-0000-0000-0000-000000000011';
+const EXTERNAL_CONSULTANT_ID = '00000000-0000-0000-0000-000000000041'; // Eddy @ PT Mitra Pajak Sentosa
+const SENTINEL = '[SPT-MASA-PPN-SPLIT]';
 
 async function main() {
   const sbAnon = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -52,13 +51,32 @@ async function main() {
   }
   const token = auth.session.access_token;
 
-  const { data: cust } = await sbAdmin
+  // Create sentinel EXTERNAL COMPANY customer + assign Eddy so the handler's
+  // consultant-lookup + assignment-check pass (mirrors test-approval-remodel).
+  const { data: cust, error: custErr } = await sbAdmin
     .from('customer')
+    .insert({
+      customer_type: 'COMPANY',
+      full_name: `${SENTINEL} PT PPN Split`,
+      company_name: `${SENTINEL} PT PPN Split`,
+      npwp: `99${Date.now().toString().slice(-13)}`.slice(0, 15),
+      email: `sptmasa-ppn-${Date.now()}@example.com`,
+      is_pkp: true,
+    })
     .select('id, customer_type')
-    .eq('id', TARGET_CUSTOMER_ID)
-    .maybeSingle();
-  if (!cust) {
-    console.error('x target customer not found:', TARGET_CUSTOMER_ID);
+    .single();
+  if (custErr || !cust) {
+    console.error('x sentinel customer create:', custErr?.message);
+    process.exit(1);
+  }
+  const { error: assignErr } = await sbAdmin.from('customer_consultant').insert({
+    customer_id: cust.id,
+    consultant_id: EXTERNAL_CONSULTANT_ID,
+    is_active: true,
+  });
+  if (assignErr) {
+    console.error('x assign Eddy → sentinel:', assignErr.message);
+    await sbAdmin.from('customer').delete().eq('id', cust.id);
     process.exit(1);
   }
 
@@ -253,6 +271,9 @@ async function main() {
       .eq('tax_type', 'PPN')
       .eq('tax_period_year', 2099)
       .eq('tax_period_month', 12);
+    // Remove sentinel EXTERNAL customer + its Eddy assignment.
+    await sbAdmin.from('customer_consultant').delete().eq('customer_id', cust.id);
+    await sbAdmin.from('customer').delete().eq('id', cust.id);
   }
 
   console.log(`\n-- ${pass} pass / ${fail} fail --`);

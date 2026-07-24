@@ -53,7 +53,7 @@ async function main() {
   try {
     const sup = await login('supervisor.test@aipajak.com');
     const supervisorToken = sup.token;
-    const con = await login('consultant.test@jakartatax.co.id');
+    const con = await login('external.consultant@mitrapajak.com');
     const consultantToken = con.token;
 
     // supervisor.test 의 tax_operators row 보장 (affiliation 은 tax_operators
