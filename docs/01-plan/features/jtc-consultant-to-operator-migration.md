@@ -1,6 +1,14 @@
 # 마이그레이션 계획: JTC consultant → operator (CONSULTANT/TAX_ADVISOR = EXTERNAL 전용)
 
-작성: 2026-07-24 · 상태: **계획(미착수)** · 근거: `docs/guides/product-identity.md` 결정 ①
+작성: 2026-07-24 · 상태: **Phase 1-6 완료 (e2e 재편만 후속)** · 근거: `docs/guides/product-identity.md` 결정 ①
+
+> **실행 요약 (2026-07-24, 커밋 3547a6a→3f70d38):**
+> - Phase 1-3: 데이터 이관 완료. active JTC consultant **0**. CR Lee/Tommy Lee→operator, advisor.test→supervisor, consultant.test→무력화.
+>   - ⚠️ consultant.test **auth 완전삭제는 불가** — `audit_log.actor_user_id` 513행이 참조. "감사 보존" 원칙상 **무력화(role 비활성+consultant row 삭제→requireAuth 401, 접근 0)** 로 종결. deleteUser 는 의도적으로 미실행.
+> - Phase 4: `forbid_jtc_consultant` 트리거 적용+검증.
+> - Phase 5: smoke 19건 재편 + **app 버그 1건 수정**(operator SPT Masa create 가 active JTC consultant 강제→500; consultant_id=null 허용으로 수정). seed-test-users JTC 생성 제거. docs 반영.
+> - Phase 6: 전체 smoke GREEN (RLS 격리·external 격리·auto-assign 무변경 확인).
+> - **미완**: e2e(`global-setup.ts`/`fixtures/users.ts`)가 JTC consultant 를 생성 → 트리거 충돌. CI 데일리 미포함이라 후속 재편 대상(EXTERNAL 파트너 시딩 추가 필요).
 
 ## 0. 목표와 원칙
 
