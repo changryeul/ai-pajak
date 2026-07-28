@@ -49,7 +49,7 @@ test.describe('Supervisor ERP — page rendering', () => {
   for (const { slug, title } of SUPERVISOR_PAGES) {
     test(`supervisor can open /${slug} and sees the page title`, async ({ page }) => {
       await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
-      const res = await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/supervisor/${slug}`, {
+      const res = await page.goto(`${BASE_URL}/${LOCALE}/operator/supervisor/${slug}`, {
         waitUntil: 'networkidle',
         timeout: 30000,
       });
@@ -63,15 +63,15 @@ test.describe('Supervisor ERP — page rendering', () => {
 test.describe('Supervisor ERP — API access control', () => {
   // GET endpoints with their expected supervisor + consultant outcomes.
   const ENDPOINTS = [
-    '/api/consultant-erp/supervisor/customers',
-    '/api/consultant-erp/supervisor/revisions',
-    '/api/consultant-erp/supervisor/calendar',
-    '/api/consultant-erp/supervisor/team',
-    '/api/consultant-erp/supervisor/team-members',
-    '/api/consultant-erp/supervisor/legality',
-    '/api/consultant-erp/supervisor/coretax',
-    '/api/consultant-erp/supervisor/quality',
-    '/api/consultant-erp/supervisor/settings',
+    '/api/operator/supervisor/customers',
+    '/api/operator/supervisor/revisions',
+    '/api/operator/supervisor/calendar',
+    '/api/operator/supervisor/team',
+    '/api/operator/supervisor/team-members',
+    '/api/operator/supervisor/legality',
+    '/api/operator/supervisor/coretax',
+    '/api/operator/supervisor/quality',
+    '/api/operator/supervisor/settings',
   ] as const;
 
   for (const path of ENDPOINTS) {
@@ -103,7 +103,7 @@ test.describe('Supervisor ERP — reassign endpoint', () => {
   test('supervisor: invalid sessionId returns 404', async ({ page }) => {
     await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
     const res = await page.request.post(
-      `${BASE_URL}/api/consultant-erp/supervisor/team/reassign`,
+      `${BASE_URL}/api/operator/supervisor/team/reassign`,
       {
         data: {
           sessionId: '00000000-0000-4000-8000-000000000000',
@@ -117,7 +117,7 @@ test.describe('Supervisor ERP — reassign endpoint', () => {
   test('consultant 403 on reassign', async ({ page }) => {
     await loginAs(page, 'CONSULTANT');
     const res = await page.request.post(
-      `${BASE_URL}/api/consultant-erp/supervisor/team/reassign`,
+      `${BASE_URL}/api/operator/supervisor/team/reassign`,
       {
         data: {
           sessionId: '00000000-0000-4000-8000-000000000000',
@@ -132,7 +132,7 @@ test.describe('Supervisor ERP — reassign endpoint', () => {
 test.describe('Supervisor ERP — approval case detail', () => {
   test('supervisor can open the approval queue page', async ({ page }) => {
     await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
-    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/supervisor/approval`, {
+    await page.goto(`${BASE_URL}/${LOCALE}/operator/supervisor/approval`, {
       waitUntil: 'networkidle',
       timeout: 30000,
     });
@@ -146,7 +146,7 @@ test.describe('Supervisor ERP — approval case detail', () => {
   test('supervisor case detail returns 404 for unknown id', async ({ page }) => {
     await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
     const res = await page.request.get(
-      `${BASE_URL}/api/consultant-erp/supervisor/approval/00000000-0000-4000-8000-000000000000`,
+      `${BASE_URL}/api/operator/supervisor/approval/00000000-0000-4000-8000-000000000000`,
     );
     expect(res.status()).toBe(404);
   });
@@ -155,7 +155,7 @@ test.describe('Supervisor ERP — approval case detail', () => {
 test.describe('Supervisor ERP — settings page interactions', () => {
   test('settings page shows the 5 tabs', async ({ page }) => {
     await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
-    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/supervisor/settings`, {
+    await page.goto(`${BASE_URL}/${LOCALE}/operator/supervisor/settings`, {
       waitUntil: 'networkidle',
       timeout: 30000,
     });
@@ -168,7 +168,7 @@ test.describe('Supervisor ERP — settings page interactions', () => {
 
   test('settings 회사정보 tab pre-populates the company NPWP', async ({ page }) => {
     await loginAs(page, 'TAX_OPERATOR_SUPERVISOR');
-    await page.goto(`${BASE_URL}/${LOCALE}/consultant-erp/supervisor/settings`, {
+    await page.goto(`${BASE_URL}/${LOCALE}/operator/supervisor/settings`, {
       waitUntil: 'networkidle',
       timeout: 30000,
     });

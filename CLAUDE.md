@@ -225,9 +225,9 @@ Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `ex
 - **접수 즉시 자동배정** (v13 §5): `/api/auth/signup` INDIVIDUAL 가입 시 customer insert 직후 `assignCustomerToOperator(AUTO)` best-effort 호출 → JTC tax_operator 스코어 배정. 실패해도 가입 성공(미배정 큐 fallback). COMPANY/EXTERNAL 경로는 별도.
 
 ### Supervisor: 이관현황 · 평가 실측 · 소속관리 (v13 트랙 5, 2026-07-24)
-- **§8 ID Billing 이관현황** (`/consultant-erp/supervisor/billing-handover`, `GET /api/consultant-erp/supervisor/billing-handover`): 발행대상(승인완료 미발행, 승인 수퍼바이저·담당 상담원 표시) + 발행완료(전송·NTPN 상태) read-only 추적. 트랙 2 `id_billing_issuance` 재사용, 발행 액션은 발행 보드에 위임.
+- **§8 ID Billing 이관현황** (`/operator/supervisor/billing-handover`, `GET /api/operator/supervisor/billing-handover`): 발행대상(승인완료 미발행, 승인 수퍼바이저·담당 상담원 표시) + 발행완료(전송·NTPN 상태) read-only 추적. 트랙 2 `id_billing_issuance` 재사용, 발행 액션은 발행 보드에 위임.
 - **§7 평가 실측 + 자동 상벌 금지**: `/api/operator/evaluation` 이 담당 케이스의 `rejected_reason` 이력에서 반려율/승인통과율을 실측(`reject_rate`/`approval_pass_rate`, 이력 없으면 시드 폴백). 인센티브는 `suggested_incentive_amount` + `isSuggestionOnly:true` + `disclaimer` (v13 §7 "상벌 자동 결정 안 함"). statistics 페이지에 고지 배너.
-- **§6 소속관리** (마이그레이션 `20260724000002`): `tax_operators.supervisor_id`(소속) + `operator_affiliation_transfer`(이동 요청→**받는 쪽 수퍼바이저** 승인→감사, `client_mode` 3옵션 WITH_CLIENTS/OPERATOR_ONLY/REASSIGN_CLIENTS, open-per-operator UNIQUE). `GET/POST /supervisor/affiliation` + `PATCH /supervisor/affiliation/[id]`. REASSIGN_CLIENTS 승인 시 활성 배정 해제 → 다음 auto-assign 재배정 대상. UI `/consultant-erp/supervisor/affiliation`.
+- **§6 소속관리** (마이그레이션 `20260724000002`): `tax_operators.supervisor_id`(소속) + `operator_affiliation_transfer`(이동 요청→**받는 쪽 수퍼바이저** 승인→감사, `client_mode` 3옵션 WITH_CLIENTS/OPERATOR_ONLY/REASSIGN_CLIENTS, open-per-operator UNIQUE). `GET/POST /supervisor/affiliation` + `PATCH /supervisor/affiliation/[id]`. REASSIGN_CLIENTS 승인 시 활성 배정 해제 → 다음 auto-assign 재배정 대상. UI `/operator/supervisor/affiliation`.
 
 ### v19 트랙 6 — 원천세 증빙 뷰어 · PPN Coretax 대조 (2026-07-24)
 - **§6 원천세 증빙 전용 뷰어**: `GET /api/tax/pph23-transactions/[id]/invoice-photo` 가 서명 URL(5분) 반환, pph23 페이지의 첨부됨(CheckCircle) 클릭 → 이미지/PDF 미리보기 모달 (요청 모달과 분리).
@@ -327,8 +327,8 @@ Each Coretax invocation is logged step-by-step to `coretax_step_log` (request/re
 ### Supervisor ERP (팀장용 — PDF 11/11 메뉴)
 세무 사무소 팀장(supervisor) 전용 ERP. 직원용 ERP 위에 read-only 집계 + 1~2개 write endpoint 만 얹은 구조 — 새 DB 0개. 사이드바에서 supervisor 에게만 노출되는 9 링크 + Dashboard role-aware 분기. 상세 메모리: `2026-05-17 Supervisor ERP 완료`.
 
-- **라우팅**: 모두 `/consultant-erp/supervisor/*` — `approval` (+ `[sessionId]` 케이스 상세) · `team` · `customers` · `revisions` · `legality` · `calendar` · `coretax` · `quality` · `settings`.
-- **API**: `/api/consultant-erp/supervisor/{approval/[id], team, team-members, team/reassign, customers, revisions, calendar, legality, coretax, quality, settings}` — 핸들러 첫 줄에서 `req.session.role !== TAX_OPERATOR_SUPERVISOR → 403` 강제 (consultant 도 `requireConsultantOrSupervisor` 는 통과하지만 supervisor only).
+- **라우팅**: 모두 `/operator/supervisor/*` — `approval` (+ `[sessionId]` 케이스 상세) · `team` · `customers` · `revisions` · `legality` · `calendar` · `coretax` · `quality` · `settings`.
+- **API**: `/api/operator/supervisor/{approval/[id], team, team-members, team/reassign, customers, revisions, calendar, legality, coretax, quality, settings}` — 핸들러 첫 줄에서 `req.session.role !== TAX_OPERATOR_SUPERVISOR → 403` 강제 (consultant 도 `requireConsultantOrSupervisor` 는 통과하지만 supervisor only).
 - **데이터 helper**: `src/lib/consultant-erp/supervisor-views.ts` — 모든 supervisor 집계 함수 한 파일. Risk score 0..50 휴리스틱 (status 기본점 + 미충족 필수 슬롯 ×2 + 마감 임박 가산). MONTHLY 마감=다음달 20일, ANNUAL=다음해 4/30.
 - **승인 케이스 상세 (PDF p.2-5)**: `GET /supervisor/approval/[sessionId]` 가 `{session, customer, consultant, documents, calcs, parseRows, parseCounts, approvals, coretax, trend, invoiceLines}` 통합 반환. MONTHLY 세션은 6개월 트렌드 (`buildCustomerTrend`) 포함.
 - **설정 persistence**: `tax_partner.settings JSONB` (마이그레이션 `20260517000001_tax_partner_settings.sql`) — GET은 stored ⊕ `DEFAULT_APPROVAL`/`DEFAULT_CHANNELS` 머지, PATCH은 sibling 키 보존 partial-merge.

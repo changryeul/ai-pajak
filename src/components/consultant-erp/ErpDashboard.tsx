@@ -330,7 +330,7 @@ function TeamMembersStrip() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/consultant-erp/supervisor/team-members')
+    fetch('/api/operator/supervisor/team-members')
       .then((r) => r.json())
       .then((j) => {
         if (cancelled) return;

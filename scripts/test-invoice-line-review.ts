@@ -129,7 +129,7 @@ async function loginSupervisor() {
 
     console.log('3️⃣  GET approval → line reflected');
     const g = await fetch(
-      `${base}/api/consultant-erp/supervisor/approval/${sessionId}`,
+      `${base}/api/operator/supervisor/approval/${sessionId}`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
     const gj = await g.json();

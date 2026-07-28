@@ -47,7 +47,7 @@ async function login() {
 
   console.log('2️⃣  GET /supervisor/approval/:sessionId');
   const detailRes = await fetch(
-    `${base}/api/consultant-erp/supervisor/approval/${sessionId}`,
+    `${base}/api/operator/supervisor/approval/${sessionId}`,
     { headers: { Authorization: `Bearer ${token}` } },
   );
   if (!detailRes.ok) throw new Error(`detail ${detailRes.status}`);

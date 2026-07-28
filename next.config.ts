@@ -86,6 +86,25 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Legacy → new namespace: the JTC 운영팀 Supervisor console moved out of the
+  // EXTERNAL ERP tree (/consultant-erp/supervisor/*) into the operator surface
+  // (/operator/supervisor/*). Temporary safety net for stale bookmarks/links;
+  // remove once no traffic hits the old paths.
+  async redirects() {
+    return [
+      {
+        source: '/:locale/consultant-erp/supervisor/:path*',
+        destination: '/:locale/operator/supervisor/:path*',
+        permanent: false,
+      },
+      {
+        source: '/consultant-erp/supervisor/:path*',
+        destination: '/operator/supervisor/:path*',
+        permanent: false,
+      },
+    ];
+  },
+
   // Webpack configuration for handling specific modules
   webpack: (config, { webpack }) => {
     // Handle canvas module for PDF generation (if needed)

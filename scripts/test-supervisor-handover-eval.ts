@@ -44,7 +44,7 @@ async function main() {
   const consultantToken = await login('external.consultant@mitrapajak.com');
 
   // ── 1. 이관현황 ──
-  const h = await api(supervisorToken, '/api/consultant-erp/supervisor/billing-handover');
+  const h = await api(supervisorToken, '/api/operator/supervisor/billing-handover');
   if (h.status !== 200) fail(`handover supervisor expected 200, got ${h.status}: ${JSON.stringify(h.json).slice(0, 150)}`);
   const hd = h.json?.data as Record<string, unknown>;
   if (!Array.isArray(hd?.pending) || !Array.isArray(hd?.issued) || !hd?.summary) {
@@ -52,7 +52,7 @@ async function main() {
   }
   ok(`handover 200 — pending=${(hd.pending as unknown[]).length}, issued=${(hd.issued as unknown[]).length}`);
 
-  const hc = await api(consultantToken, '/api/consultant-erp/supervisor/billing-handover');
+  const hc = await api(consultantToken, '/api/operator/supervisor/billing-handover');
   if (hc.status !== 403) fail(`handover consultant expected 403, got ${hc.status}`);
   ok('handover consultant → 403 (supervisor only)');
 

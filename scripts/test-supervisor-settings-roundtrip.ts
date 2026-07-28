@@ -28,7 +28,7 @@ async function login() {
 }
 
 async function api(token: string, method: 'GET' | 'PATCH', body?: unknown) {
-  const r = await fetch(`${base}/api/consultant-erp/supervisor/settings`, {
+  const r = await fetch(`${base}/api/operator/supervisor/settings`, {
     method,
     headers: {
       Authorization: `Bearer ${token}`,

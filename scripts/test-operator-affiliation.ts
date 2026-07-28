@@ -74,7 +74,7 @@ async function main() {
     }
 
     // ── 1. GET RBAC ──
-    const g = await api(supervisorToken, 'GET', '/api/consultant-erp/supervisor/affiliation');
+    const g = await api(supervisorToken, 'GET', '/api/operator/supervisor/affiliation');
     if (g.status !== 200) fail(`GET supervisor expected 200, got ${g.status}: ${JSON.stringify(g.json).slice(0, 150)}`);
     const gd = g.json?.data as Record<string, unknown>;
     if (!Array.isArray(gd?.team) || !Array.isArray(gd?.supervisors)) fail('affiliation shape unexpected');
@@ -82,7 +82,7 @@ async function main() {
     const meId = gd.meId as string | null;
     ok(`GET 200 — team=${(gd.team as unknown[]).length}, supervisors=${supervisors.length}, meId=${meId?.slice(0, 8)}…`);
 
-    const gc = await api(consultantToken, 'GET', '/api/consultant-erp/supervisor/affiliation');
+    const gc = await api(consultantToken, 'GET', '/api/operator/supervisor/affiliation');
     if (gc.status !== 403) fail(`GET consultant expected 403, got ${gc.status}`);
     ok('GET consultant → 403');
 
@@ -104,7 +104,7 @@ async function main() {
     ok(`sentinel operator created (belongs to ${otherSup.name})`);
 
     // ── 2. 이동 요청: otherSup → me (내가 받는 쪽) ──
-    const c1 = await api(supervisorToken, 'POST', '/api/consultant-erp/supervisor/affiliation', {
+    const c1 = await api(supervisorToken, 'POST', '/api/operator/supervisor/affiliation', {
       operatorId: op.id, toSupervisorId: meId, clientMode: 'REASSIGN_CLIENTS', reason: `${SENTINEL} 이동 검증`,
     });
     if (c1.status !== 201) fail(`create expected 201, got ${c1.status}: ${JSON.stringify(c1.json).slice(0, 150)}`);
@@ -112,7 +112,7 @@ async function main() {
     ok(`transfer requested (${transferId.slice(0, 8)}…) REASSIGN_CLIENTS`);
 
     // ── 3. 중복 요청 409 ──
-    const c2 = await api(supervisorToken, 'POST', '/api/consultant-erp/supervisor/affiliation', {
+    const c2 = await api(supervisorToken, 'POST', '/api/operator/supervisor/affiliation', {
       operatorId: op.id, toSupervisorId: meId, clientMode: 'WITH_CLIENTS', reason: 'dup',
     });
     if (c2.status !== 409) fail(`duplicate expected 409, got ${c2.status}`);
@@ -120,13 +120,13 @@ async function main() {
 
     // ── 4. 받는 쪽 아닌 사람 결재 403 — master 로 시도 (다른 supervisor role) ──
     const master = await login('master.test@aipajak.com');
-    const d0 = await api(master.token, 'PATCH', `/api/consultant-erp/supervisor/affiliation/${transferId}`, { action: 'APPROVE' });
+    const d0 = await api(master.token, 'PATCH', `/api/operator/supervisor/affiliation/${transferId}`, { action: 'APPROVE' });
     // master 는 to_supervisor 가 아니므로 403 (또는 tax_operators row 없으면 403)
     if (d0.status !== 403) fail(`non-supervisor-role decide expected 403, got ${d0.status}`);
     ok('non-receiving/other-role decide → 403');
 
     // ── 5. 받는 쪽(me) 승인 → 소속 변경 ──
-    const d1 = await api(supervisorToken, 'PATCH', `/api/consultant-erp/supervisor/affiliation/${transferId}`, { action: 'APPROVE' });
+    const d1 = await api(supervisorToken, 'PATCH', `/api/operator/supervisor/affiliation/${transferId}`, { action: 'APPROVE' });
     if (d1.status !== 200) fail(`approve expected 200, got ${d1.status}: ${JSON.stringify(d1.json).slice(0, 150)}`);
     const { data: opAfter } = await admin.from('tax_operators').select('supervisor_id').eq('id', op.id).single();
     if (opAfter?.supervisor_id !== meId) fail(`supervisor_id not updated: ${opAfter?.supervisor_id}`);

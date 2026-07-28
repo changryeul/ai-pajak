@@ -138,11 +138,11 @@ async function main() {
     ok('APPROVE blocked (400 openReviewRequests) while request is OPEN');
 
     // ── 5. 의견 작성 — consultant 403, supervisor 200 ──
-    const r5a = await api(consultantToken, 'PATCH', `/api/consultant-erp/supervisor/review-requests/${rrId}`, {
+    const r5a = await api(consultantToken, 'PATCH', `/api/operator/supervisor/review-requests/${rrId}`, {
       supervisorComment: 'should fail',
     });
     if (r5a.status !== 403) fail(`consultant PATCH expected 403, got ${r5a.status}`);
-    const r5b = await api(supervisorToken, 'PATCH', `/api/consultant-erp/supervisor/review-requests/${rrId}`, {
+    const r5b = await api(supervisorToken, 'PATCH', `/api/operator/supervisor/review-requests/${rrId}`, {
       supervisorComment: 'NIK-only 직원은 TER A 카테고리로 처리하는 것이 맞습니다. 승인 진행합니다.',
     });
     if (r5b.status !== 200) fail(`supervisor PATCH expected 200, got ${r5b.status}: ${JSON.stringify(r5b.json).slice(0, 150)}`);
@@ -163,7 +163,7 @@ async function main() {
     ok(`APPROVED — approved_amount=${overridden} 스탬프 (상담원 처리값 채택)`);
 
     // ── 7. supervisor detail 에 reviewRequests + 4-값 ──
-    const r7 = await api(supervisorToken, 'GET', `/api/consultant-erp/supervisor/approval/${session.id}`);
+    const r7 = await api(supervisorToken, 'GET', `/api/operator/supervisor/approval/${session.id}`);
     if (r7.status !== 200) fail(`detail expected 200, got ${r7.status}`);
     const detail = r7.json?.data as Record<string, unknown>;
     const rrList = (detail.reviewRequests ?? []) as Array<Record<string, unknown>>;

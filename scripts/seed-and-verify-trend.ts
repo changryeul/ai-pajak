@@ -97,7 +97,7 @@ function periodDate(monthsAgo: number): string {
     console.log('3️⃣  Login + GET approval detail');
     const token = await loginSupervisor();
     const r = await fetch(
-      `${base}/api/consultant-erp/supervisor/approval/${sessionIds[0]}`,
+      `${base}/api/operator/supervisor/approval/${sessionIds[0]}`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
     if (!r.ok) throw new Error(`detail ${r.status} ${await r.text()}`);

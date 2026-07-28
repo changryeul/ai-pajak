@@ -5,15 +5,14 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 
 export const dynamic = 'force-dynamic';
 
-// Consultant ERP is for tax-firm staff:
+// Consultant ERP is EXTERNAL tax-firm only (운영팀 미개입 — 결정 ①):
 //   - CONSULTANT / TAX_ADVISOR: 직원용 5단계 워크플로우
-//   - TAX_OPERATOR_SUPERVISOR: 팀장용 (supervisor sub-tree 에 별도 layout)
 //   - FIRM_ADMIN: 세무컨설팅 법인 관리자 (firm-admin sub-tree 에 별도 layout)
-// CUSTOMER / PLATFORM_ADMIN / TAX_OPERATOR(LEAD/MASTER) 는 차단.
+// 운영팀(TAX_OPERATOR/LEAD/SUPERVISOR/MASTER) · CUSTOMER · PLATFORM_ADMIN 는 차단.
+// Supervisor 콘솔은 /operator/supervisor/* 로 분리됨 (더 이상 여기 없음).
 const ALLOWED_ROLES = [
   'CONSULTANT',
   'TAX_ADVISOR',
-  'TAX_OPERATOR_SUPERVISOR',
   'FIRM_ADMIN',
 ];
 

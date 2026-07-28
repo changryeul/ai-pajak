@@ -1,8 +1,8 @@
 /**
  * Smoke test for supervisor ERP P1 endpoints:
- *   - /api/consultant-erp/supervisor/customers
- *   - /api/consultant-erp/supervisor/revisions
- *   - /api/consultant-erp/supervisor/calendar
+ *   - /api/operator/supervisor/customers
+ *   - /api/operator/supervisor/revisions
+ *   - /api/operator/supervisor/calendar
  *
  * Asserts:
  *   - Each endpoint returns 200 + success + rows[] for supervisor
@@ -57,7 +57,7 @@ async function run() {
 
   // ── 1. /customers ──
   console.log('\n━━ 1. GET /supervisor/customers ━━');
-  const r1 = await api('/api/consultant-erp/supervisor/customers', supTok);
+  const r1 = await api('/api/operator/supervisor/customers', supTok);
   if (r1.status !== 200 || !r1.body.success || !Array.isArray(r1.body.data?.rows)) {
     console.error('   ✗ wrong shape', r1);
     fail++;
@@ -81,7 +81,7 @@ async function run() {
     }
   }
 
-  const r1c = await api('/api/consultant-erp/supervisor/customers', consTok);
+  const r1c = await api('/api/operator/supervisor/customers', consTok);
   if (r1c.status !== 403) {
     console.error('   ✗ expected 403 for consultant, got', r1c.status, r1c.body);
     fail++;
@@ -92,7 +92,7 @@ async function run() {
 
   // ── 2. /revisions ──
   console.log('\n━━ 2. GET /supervisor/revisions ━━');
-  const r2 = await api('/api/consultant-erp/supervisor/revisions', supTok);
+  const r2 = await api('/api/operator/supervisor/revisions', supTok);
   if (r2.status !== 200 || !r2.body.success || !Array.isArray(r2.body.data?.rows)) {
     console.error('   ✗ wrong shape', r2);
     fail++;
@@ -100,7 +100,7 @@ async function run() {
     console.log(`   ✅ ${r2.body.data.rows.length} events`);
     pass++;
   }
-  const r2c = await api('/api/consultant-erp/supervisor/revisions', consTok);
+  const r2c = await api('/api/operator/supervisor/revisions', consTok);
   if (r2c.status !== 403) {
     console.error('   ✗ expected 403 for consultant', r2c.status);
     fail++;
@@ -111,7 +111,7 @@ async function run() {
 
   // ── 3. /calendar ──
   console.log('\n━━ 3. GET /supervisor/calendar ━━');
-  const r3 = await api('/api/consultant-erp/supervisor/calendar?withinDays=60', supTok);
+  const r3 = await api('/api/operator/supervisor/calendar?withinDays=60', supTok);
   if (r3.status !== 200 || !r3.body.success || !Array.isArray(r3.body.data?.rows)) {
     console.error('   ✗ wrong shape', r3);
     fail++;
@@ -126,7 +126,7 @@ async function run() {
       }
     }
   }
-  const r3c = await api('/api/consultant-erp/supervisor/calendar', consTok);
+  const r3c = await api('/api/operator/supervisor/calendar', consTok);
   if (r3c.status !== 403) {
     console.error('   ✗ expected 403 for consultant', r3c.status);
     fail++;
@@ -137,7 +137,7 @@ async function run() {
 
   // ── 4. /team-members ──
   console.log('\n━━ 4. GET /supervisor/team-members ━━');
-  const rTM = await api('/api/consultant-erp/supervisor/team-members', supTok);
+  const rTM = await api('/api/operator/supervisor/team-members', supTok);
   if (rTM.status !== 200 || !rTM.body.success || !Array.isArray(rTM.body.data?.rows)) {
     console.error('   ✗ wrong shape', rTM);
     fail++;
@@ -164,7 +164,7 @@ async function run() {
       }
     }
   }
-  const rTMc = await api('/api/consultant-erp/supervisor/team-members', consTok);
+  const rTMc = await api('/api/operator/supervisor/team-members', consTok);
   if (rTMc.status !== 403) {
     console.error('   ✗ consultant should be 403', rTMc.status);
     fail++;
@@ -175,7 +175,7 @@ async function run() {
 
   // ── 5b. /settings ──
   console.log('\n━━ 5. GET /supervisor/settings ━━');
-  const rS = await api('/api/consultant-erp/supervisor/settings', supTok);
+  const rS = await api('/api/operator/supervisor/settings', supTok);
   if (rS.status !== 200 || !rS.body.success) {
     console.error('   ✗ failed', rS);
     fail++;
@@ -195,7 +195,7 @@ async function run() {
       pass++;
     }
   }
-  const rSc = await api('/api/consultant-erp/supervisor/settings', consTok);
+  const rSc = await api('/api/operator/supervisor/settings', consTok);
   if (rSc.status !== 403) {
     console.error('   ✗ consultant should be 403', rSc.status);
     fail++;
@@ -206,7 +206,7 @@ async function run() {
 
   // ── 6. /coretax ──
   console.log('\n━━ 6. GET /supervisor/coretax ━━');
-  const rCT = await api('/api/consultant-erp/supervisor/coretax', supTok);
+  const rCT = await api('/api/operator/supervisor/coretax', supTok);
   if (rCT.status !== 200 || !rCT.body.success || !Array.isArray(rCT.body.data?.rows)) {
     console.error('   ✗ wrong shape', rCT);
     fail++;
@@ -222,7 +222,7 @@ async function run() {
       pass++;
     }
   }
-  const rCTc = await api('/api/consultant-erp/supervisor/coretax', consTok);
+  const rCTc = await api('/api/operator/supervisor/coretax', consTok);
   if (rCTc.status !== 403) {
     console.error('   ✗ consultant should be 403', rCTc.status);
     fail++;
@@ -233,7 +233,7 @@ async function run() {
 
   // ── 7. /team ──
   console.log('\n━━ 7. GET /supervisor/team ━━');
-  const rT = await api('/api/consultant-erp/supervisor/team', supTok);
+  const rT = await api('/api/operator/supervisor/team', supTok);
   if (rT.status !== 200 || !rT.body.success) {
     console.error('   ✗ failed', rT);
     fail++;
@@ -253,7 +253,7 @@ async function run() {
       pass++;
     }
   }
-  const rTc = await api('/api/consultant-erp/supervisor/team', consTok);
+  const rTc = await api('/api/operator/supervisor/team', consTok);
   if (rTc.status !== 403) {
     console.error('   ✗ consultant should be 403', rTc.status);
     fail++;
@@ -264,7 +264,7 @@ async function run() {
 
   // ── 7b. /team/reassign — invalid sessionId should 404 ──
   console.log('\n━━ 7b. POST /supervisor/team/reassign (404 for fake id) ━━');
-  const rR = await fetch(`${baseUrl}/api/consultant-erp/supervisor/team/reassign`, {
+  const rR = await fetch(`${baseUrl}/api/operator/supervisor/team/reassign`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${supTok}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -279,7 +279,7 @@ async function run() {
     console.log('   ✅ fake sessionId → 404');
     pass++;
   }
-  const rRc = await fetch(`${baseUrl}/api/consultant-erp/supervisor/team/reassign`, {
+  const rRc = await fetch(`${baseUrl}/api/operator/supervisor/team/reassign`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${consTok}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -297,7 +297,7 @@ async function run() {
 
   // ── 8. /quality ──
   console.log('\n━━ 8. GET /supervisor/quality ━━');
-  const rQ = await api('/api/consultant-erp/supervisor/quality', supTok);
+  const rQ = await api('/api/operator/supervisor/quality', supTok);
   if (rQ.status !== 200 || !rQ.body.success) {
     console.error('   ✗ failed', rQ);
     fail++;
@@ -317,7 +317,7 @@ async function run() {
       pass++;
     }
   }
-  const rQc = await api('/api/consultant-erp/supervisor/quality', consTok);
+  const rQc = await api('/api/operator/supervisor/quality', consTok);
   if (rQc.status !== 403) {
     console.error('   ✗ consultant should be 403', rQc.status);
     fail++;
@@ -328,7 +328,7 @@ async function run() {
 
   // ── 9. /legality ──
   console.log('\n━━ 9. GET /supervisor/legality ━━');
-  const rL = await api('/api/consultant-erp/supervisor/legality', supTok);
+  const rL = await api('/api/operator/supervisor/legality', supTok);
   if (rL.status !== 200 || !rL.body.success) {
     console.error('   ✗ failed', rL);
     fail++;
@@ -348,7 +348,7 @@ async function run() {
       pass++;
     }
   }
-  const rLc = await api('/api/consultant-erp/supervisor/legality', consTok);
+  const rLc = await api('/api/operator/supervisor/legality', consTok);
   if (rLc.status !== 403) {
     console.error('   ✗ consultant should be 403', rLc.status);
     fail++;
@@ -367,7 +367,7 @@ async function run() {
   if (!sessionId) {
     console.log('   ⏭️  no session in board, skip');
   } else {
-    const rA = await api(`/api/consultant-erp/supervisor/approval/${sessionId}`, supTok);
+    const rA = await api(`/api/operator/supervisor/approval/${sessionId}`, supTok);
     if (rA.status !== 200 || !rA.body.success) {
       console.error('   ✗ approval detail failed', rA);
       fail++;
@@ -390,7 +390,7 @@ async function run() {
         pass++;
       }
     }
-    const rAc = await api(`/api/consultant-erp/supervisor/approval/${sessionId}`, consTok);
+    const rAc = await api(`/api/operator/supervisor/approval/${sessionId}`, consTok);
     if (rAc.status !== 403) {
       console.error('   ✗ consultant should be 403', rAc.status);
       fail++;

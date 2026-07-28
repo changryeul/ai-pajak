@@ -159,7 +159,7 @@ async function loginSupervisor() {
 
     console.log('4️⃣  GET /supervisor/approval/:sessionId');
     const r = await fetch(
-      `${base}/api/consultant-erp/supervisor/approval/${sessionId}`,
+      `${base}/api/operator/supervisor/approval/${sessionId}`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
     if (!r.ok) throw new Error(`detail ${r.status}: ${await r.text()}`);
