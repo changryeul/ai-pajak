@@ -36,7 +36,27 @@ export interface Pph21Detail {
 export const TAX_VIEW_TO_TYPE: Record<string, string> = {
   pph21: 'PPh21',
   withholding: 'PPh23',
+  ppn: 'PPN',
 };
+
+export interface PpnRow {
+  id: string;
+  fakturType: 'KELUARAN' | 'MASUKAN';
+  fakturNumber: string | null;
+  fakturDate: string | null;
+  counterpartyName: string;
+  counterpartyNpwp: string | null;
+  dpp: number;
+  ppn: number;
+  isLuxury: boolean;
+  reconStatus: string | null;
+  flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
+}
+export interface PpnDetail {
+  queueId: string; customerId: string; period: string; status: string;
+  summary: { fakturCount: number; totalDpp: number; totalPpn: number; incompleteCount: number };
+  rows: PpnRow[];
+}
 
 export interface WithholdingRow {
   id: string;
