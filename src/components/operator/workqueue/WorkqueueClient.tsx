@@ -6,8 +6,17 @@ import { CustomerWorklist } from './CustomerWorklist';
 import { Pph21ReviewPanel } from './Pph21ReviewPanel';
 import { WithholdingReviewPanel } from './WithholdingReviewPanel';
 import { PpnReviewPanel } from './PpnReviewPanel';
+import { UmkmReviewPanel } from './UmkmReviewPanel';
 import { RequestDrawer } from './RequestDrawer';
 import { STATUS_LABEL_MAP, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
+
+// taxView → 우측 상세 패널. 새 세목 추가 시 여기에 한 줄만 등록.
+const PANEL_BY_VIEW: Partial<Record<TaxView, typeof Pph21ReviewPanel>> = {
+  pph21: Pph21ReviewPanel,
+  withholding: WithholdingReviewPanel,
+  ppn: PpnReviewPanel,
+  umkm: UmkmReviewPanel,
+};
 
 const now = new Date();
 const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -88,11 +97,10 @@ export function WorkqueueClient() {
               <CustomerWorklist items={filtered} selectedId={selectedId} onSelect={setSelectedId} counts={counts} />
               <div>
                 {selectedId
-                  ? (taxView === 'withholding'
-                      ? <WithholdingReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />
-                      : taxView === 'ppn'
-                        ? <PpnReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />
-                        : <Pph21ReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />)
+                  ? (() => {
+                      const Panel = PANEL_BY_VIEW[taxView] ?? Pph21ReviewPanel;
+                      return <Panel key={selectedId} queueId={selectedId} onChanged={load} />;
+                    })()
                   : <div className={styles.card}><div className={styles.body}>왼쪽에서 고객 업무를 선택하세요.</div></div>}
               </div>
             </div>
