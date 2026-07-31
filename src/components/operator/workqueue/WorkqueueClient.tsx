@@ -5,6 +5,7 @@ import { WorkqueueSidebar } from './WorkqueueSidebar';
 import { CustomerWorklist } from './CustomerWorklist';
 import { Pph21ReviewPanel } from './Pph21ReviewPanel';
 import { WithholdingReviewPanel } from './WithholdingReviewPanel';
+import { PpnReviewPanel } from './PpnReviewPanel';
 import { RequestDrawer } from './RequestDrawer';
 import { STATUS_LABEL_MAP, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
 
@@ -89,7 +90,9 @@ export function WorkqueueClient() {
                 {selectedId
                   ? (taxView === 'withholding'
                       ? <WithholdingReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />
-                      : <Pph21ReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />)
+                      : taxView === 'ppn'
+                        ? <PpnReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />
+                        : <Pph21ReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />)
                   : <div className={styles.card}><div className={styles.body}>왼쪽에서 고객 업무를 선택하세요.</div></div>}
               </div>
             </div>

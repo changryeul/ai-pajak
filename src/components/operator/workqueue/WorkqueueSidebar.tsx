@@ -37,7 +37,7 @@ export function WorkqueueSidebar({ counts, statusFilter, onStatusFilter, taxView
         {viewBtn('pph21', '개인소득세 (PPh 21)')}
         {viewBtn('withholding', '원천세 (PPh 4(2), 15, 22, 23, 26)')}
         {viewBtn('umkm', '선납법인세 (PPh Final, 25)', true)}
-        {viewBtn('ppn', '부가세 (PPN)', true)}
+        {viewBtn('ppn', '부가세 (PPN)')}
         {viewBtn('annual', '연 신고 (SPT)', true)}
         {viewBtn('employees', '직원 인사 기록', true)}
       </div>
