@@ -9,13 +9,13 @@ v19 목업 사이드바 "부가세 (PPN)" 뷰(현재 스텁·준비중)를 활�
 ## 아키텍처 원칙 (원천세와 동일)
 
 - **업무 단위** = `djp_submission_queue` row (customer × tax_type='PPN' × month). 신규 상태 테이블 0.
-- **상세** = `ppn_faktur_monthly` 을 (customer_id, tax_period='YYYY-MM') 으로 집계. faktur_type OUT/IN 함께, 필터 제공.
+- **상세** = `ppn_faktur_monthly` 을 (customer_id, tax_period='YYYY-MM') 으로 집계. faktur_type KELUARAN(매출)/MASUKAN(매입) 함께, 필터 제공.
 - **재사용**: 요청 엔드포인트(`POST /api/operator/workqueue/[queueId]/request`), `RequestDrawer`, quick-create(tax_type='PPN' 이미 VALID_TAX_TYPES 포함).
 - 기존 세목 뷰(PPh21/원천세) 회귀 없음. WorkqueueClient 는 이미 taxView 구동이라 매핑 1줄 + 패널 분기만 추가.
 
 ## 데이터 모델 (확인 완료)
 
-`ppn_faktur_monthly` 컬럼: `id, customer_id, tax_period('YYYY-MM'), faktur_type('OUT'|'IN'), faktur_number, faktur_date, counterparty_id, counterparty_name, counterparty_npwp, dpp, dpp_nilai_lain, is_luxury, ppn, coretax_dpp, coretax_ppn, recon_status('MATCH'|'DIFF'|'MISSING_CORETAX'|'MISSING_CUSTOMER'|'PENDING'|null), recon_source, reconciled_at`. prod 48행 실데이터.
+`ppn_faktur_monthly` 컬럼: `id, customer_id, tax_period('YYYY-MM'), faktur_type('KELUARAN'=매출|'MASUKAN'=매입), faktur_number, faktur_date, counterparty_id, counterparty_name, counterparty_npwp, dpp, dpp_nilai_lain, is_luxury, ppn, coretax_dpp, coretax_ppn, recon_status('MATCH'|'DIFF'|'MISSING_CORETAX'|'MISSING_CUSTOMER'|'PENDING'|null), recon_source, reconciled_at`. prod 48행 실데이터.
 
 `recon_status` 의미: MATCH(일치), DIFF(DPP/PPN 값 불일치), MISSING_CORETAX(Coretax에 없음), MISSING_CUSTOMER(고객자료에 없음 = Coretax 전용행), PENDING/null(아직 대조 안 함).
 
@@ -49,11 +49,11 @@ function evaluatePpnFlags(input): { level: 'red'|'amber'|'green'; issues: string
 - 각 행 `evaluatePpnFlags` 적용.
 - 응답 `{ success, data: { queueId, customerId, period, status, summary, rows } }`.
   - `summary`: `{ fakturCount, totalDpp, totalPpn, incompleteCount(red) }`.
-  - `row`: `{ id, fakturType('OUT'|'IN'), fakturNumber, fakturDate, counterpartyName, counterpartyNpwp, dpp, ppn, isLuxury, reconStatus, flags }`.
+  - `row`: `{ id, fakturType('KELUARAN'|'MASUKAN'), fakturNumber, fakturDate, counterpartyName, counterpartyNpwp, dpp, ppn, isLuxury, reconStatus, flags }`.
 - `Cache-Control: no-store`.
 
 ### 3. 패널 — `PpnReviewPanel.tsx` + `PpnReviewTable.tsx`
-- WithholdingReviewPanel 구조 미러. 요약 4카드(faktur 수 / 총 DPP / 총 PPN / 미완료). 필터: faktur_type(전체/매출 OUT/매입 IN) + recon status(전체/MATCH/DIFF/MISSING/미대조). 표 컬럼: 상태 badge / 방향(OUT→"매출"·IN→"매입") / faktur 번호 / 거래처 / NPWP / DPP / PPN / **Coretax 대조**(recon_status badge: MATCH green "일치" / DIFF red "불일치" / MISSING_* amber "누락" / PENDING·null gray "미대조") / 이슈 badge / [요청].
+- WithholdingReviewPanel 구조 미러. 요약 4카드(faktur 수 / 총 DPP / 총 PPN / 미완료). 필터: faktur_type(전체/매출 KELUARAN/매입 MASUKAN) + recon status(전체/MATCH/DIFF/MISSING/미대조). 표 컬럼: 상태 badge / 방향(KELUARAN→"매출"·MASUKAN→"매입") / faktur 번호 / 거래처 / NPWP / DPP / PPN / **Coretax 대조**(recon_status badge: MATCH green "일치" / DIFF red "불일치" / MISSING_* amber "누락" / PENDING·null gray "미대조") / 이슈 badge / [요청].
 - [요청] → 기존 RequestModal 패턴(메시지 기본값 = 거래처명 + flags.label) → `/workqueue/[id]/request` → PENDING_DOCS.
 - 증빙 미리보기 없음(PPN faktur 에 photo 메커니즘 없음).
 
@@ -74,6 +74,6 @@ PPh26(0행)·22·15, UMKM(선납법인세/PPh25), 연신고(SPT), 직원인사, 
 
 ## 알려진 확인 지점 (구현 중)
 
-1. faktur_type 실제 값이 'OUT'/'IN' 인지 확인(prod 행 sample).
+1. faktur_type 실제 값 = 'KELUARAN'(매출)/'MASUKAN'(매입) 확인 완료. recon_status 전부 'PENDING'(대조 전).
 2. recon_status 에 'PENDING' 실사용 여부(없으면 null 만 처리해도 무방 — flags 는 이미 안전).
 3. WorkqueueClient 패널 분기 3-way(pph21/withholding/ppn) 가독성.
