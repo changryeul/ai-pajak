@@ -38,7 +38,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   const { data: payslips, error: payslipError } = await admin
     .from('monthly_payslip')
-    .select('id, employee_id, period, total_gross, thr, bonus, bpjs_kesehatan, bpjs_ketenagakerjaan, ter_rate, pph21_tax, status')
+    .select('id, employee_id, period, total_gross, thr, bonus, bpjs_kesehatan, bpjs_ketenagakerjaan, ter_rate, pph21_tax, status, employee_name, employee_npwp, ptkp_category')
     .eq('customer_id', q.customer_id).eq('period', period);
   if (payslipError) {
     loggers.api.warn({ err: payslipError, queueId, customerId: q.customer_id, period }, 'monthly_payslip query failed');
@@ -56,9 +56,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   const rows = (payslips ?? []).map(p => {
     const emp = empMap[p.employee_id];
-    const ptkp = normalizePtkpCategory(emp?.ptkp_category ?? 'TK0');
+    // Prefer the employee_payroll master, fall back to the payslip's self-contained
+    // fields (pre-sync payslips carry name/NPWP/PTKP inline — 2026-06-21).
+    const name = emp?.employee_name ?? p.employee_name ?? '—';
+    const npwp = emp?.employee_npwp ?? p.employee_npwp ?? null;
+    const ptkp = normalizePtkpCategory(emp?.ptkp_category ?? p.ptkp_category ?? 'TK0');
     const flags = evaluatePph21EmployeeFlags({
-      employeeNpwp: emp?.employee_npwp ?? null,
+      employeeNpwp: npwp,
       bpjsKesehatan: Number(p.bpjs_kesehatan ?? 0),
       bpjsKetenagakerjaan: Number(p.bpjs_ketenagakerjaan ?? 0),
       payslipStatus: p.status ?? 'DRAFT',
@@ -66,8 +70,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
     return {
       payslipId: p.id,
       employeeId: p.employee_id,
-      name: emp?.employee_name ?? '—',
-      npwp: emp?.employee_npwp ?? null,
+      name,
+      npwp,
       ptkp,
       terCategory: getTERCategory(ptkp),
       totalGross: Number(p.total_gross ?? 0),
