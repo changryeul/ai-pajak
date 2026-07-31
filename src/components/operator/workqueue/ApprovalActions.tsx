@@ -13,6 +13,7 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
   const [state, setState] = useState<ApprovalState | null>(null);
   const [busy, setBusy] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [reassigning, setReassigning] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -61,6 +62,10 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
         {(status === 'PENDING' || status === 'DATA_REVIEW' || status === 'PENDING_DOCS') && (
           <button className={`${styles.btn} ${styles.purple}`} disabled={busy} onClick={() => act('request-approval')}>고객 검토완료</button>
         )}
+
+        {canApprove && status !== 'APPROVED' && (
+          <button className={styles.btn} disabled={busy} onClick={() => setReassigning(true)}>재배정</button>
+        )}
       </div>
 
       {rejecting && (
@@ -69,6 +74,60 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
           onSubmit={async (reason) => { setRejecting(false); await act('reject', { rejectedReason: reason }); }}
         />
       )}
+
+      {reassigning && (
+        <ReassignModal
+          onClose={() => setReassigning(false)}
+          onSubmit={async (targetOperatorId, reassignmentReason) => {
+            setReassigning(false);
+            await act('reassign', { targetOperatorId, reassignmentReason });
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ReassignModal({ onClose, onSubmit }:
+  { onClose: () => void; onSubmit: (targetOperatorId: string, reason: string) => void }) {
+  const [operators, setOperators] = useState<Array<{ id: string; name: string }>>([]);
+  const [target, setTarget] = useState('');
+  const [reason, setReason] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/operator/workqueue/operators');
+        const j = await r.json();
+        if (j.success) setOperators(j.data.operators as Array<{ id: string; name: string }>);
+      } catch { /* dropdown just stays empty */ }
+    })();
+  }, []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <h2>담당 상담원 재배정</h2>
+        <div className={styles.mb}>
+          <label>재배정 대상 상담원
+            <select value={target} onChange={e => setTarget(e.target.value)}>
+              <option value="">상담원 선택</option>
+              {operators.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+          </label>
+          <label>재배정 사유<textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="예: 담당자 휴가로 재배정" /></label>
+        </div>
+        <div className={styles.mf}>
+          <button className={styles.btn} onClick={onClose}>취소</button>
+          <button className={`${styles.btn} ${styles.blue}`} disabled={!target || !reason.trim()}
+            onClick={() => onSubmit(target, reason.trim())}>재배정</button>
+        </div>
+      </div>
     </div>
   );
 }

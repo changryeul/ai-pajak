@@ -21,7 +21,10 @@ const PANEL_BY_VIEW: Partial<Record<TaxView, typeof Pph21ReviewPanel>> = {
 const now = new Date();
 const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-export function WorkqueueClient() {
+const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
+
+export function WorkqueueClient({ role }: { role?: string }) {
+  const isSupervisor = !!role && SUPERVISOR_ROLES.includes(role);
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const [taxView, setTaxView] = useState<TaxView>('pph21');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
@@ -85,10 +88,13 @@ export function WorkqueueClient() {
           taxView={taxView} onTaxView={(v) => { setSelectedId(null); setTaxView(v); }} />
         <main>
           <div className={styles.top}>
-            <div className={styles.role}><button className={`${styles.pill} ${styles.active}`}>상담원</button></div>
+            <div className={styles.role}>
+              <button className={`${styles.pill} ${styles.active}`}>{isSupervisor ? '수퍼바이저' : '상담원'}</button>
+            </div>
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
               <input placeholder="고객명, NPWP, 담당자 검색" />
+              <a className={styles.btn} href="../dashboard" title="일반 대시보드로 나가기">← 나가기</a>
             </div>
           </div>
           <section className={styles.content}>
