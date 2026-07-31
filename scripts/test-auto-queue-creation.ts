@@ -35,7 +35,8 @@ async function login(email: string): Promise<string | null> {
   return data.session.access_token;
 }
 
-async function cleanup(admin: ReturnType<typeof createClient>, customerId: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function cleanup(admin: any, customerId: string) {
   await admin.from('djp_submission_queue').delete()
     .eq('customer_id', customerId).eq('tax_type', 'PPh23')
     .eq('tax_period_month', SENTINEL_MONTH).eq('tax_period_year', SENTINEL_YEAR);
