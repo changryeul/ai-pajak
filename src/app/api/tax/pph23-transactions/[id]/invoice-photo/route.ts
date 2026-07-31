@@ -231,6 +231,11 @@ export async function GET(request: NextRequest) {
   return composeMiddleware(
     requireAuth,
     blockPlatformAdmin,
-    requireRole(UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR),
+    // Operators view withholding evidence from the workqueue review panel.
+    requireRole(
+      UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR,
+      UserRole.TAX_OPERATOR, UserRole.TAX_OPERATOR_LEAD,
+      UserRole.TAX_OPERATOR_SUPERVISOR, UserRole.TAX_OPERATOR_MASTER,
+    ),
   )(request as RequestWithSession, handleGet);
 }

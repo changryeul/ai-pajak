@@ -31,3 +31,29 @@ export interface Pph21Detail {
   summary: { employeeCount: number; totalGross: number; totalPph21: number; incompleteCount: number };
   rows: Pph21Row[];
 }
+
+// taxView(사이드바) → djp_submission_queue.tax_type
+export const TAX_VIEW_TO_TYPE: Record<string, string> = {
+  pph21: 'PPh21',
+  withholding: 'PPh23',
+};
+
+export interface WithholdingRow {
+  id: string;
+  regime: 'PPH23' | 'PPH4_2';
+  counterpartyName: string;
+  counterpartyNpwp: string | null;
+  transactionDate: string | null;
+  description: string;
+  incomeType: string;
+  grossAmount: number;
+  taxRate: number;
+  taxAmount: number;
+  hasInvoicePhoto: boolean;
+  flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
+}
+export interface WithholdingDetail {
+  queueId: string; customerId: string; period: string; status: string;
+  summary: { txnCount: number; totalGross: number; totalTax: number; incompleteCount: number };
+  rows: WithholdingRow[];
+}
