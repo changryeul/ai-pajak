@@ -10709,6 +10709,10 @@
     "ppnTitle": "VAT (PPN)",
     "ppnFakturCount": "Fakturs",
     "ppnTotalDpp": "Total DPP",
-    "ppnTotalPpn": "Total PPN"
+    "ppnTotalPpn": "Total PPN",
+    "umkmTitle": "Prepaid Corporate Tax (PPh Final / 25)",
+    "umkmRecordCount": "Payment Records",
+    "umkmTotalDue": "Total Due",
+    "umkmTotalPaid": "Total Paid"
   }
 }

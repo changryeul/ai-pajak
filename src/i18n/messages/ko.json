@@ -10831,6 +10831,10 @@
     "ppnTitle": "부가세 (PPN)",
     "ppnFakturCount": "faktur 수",
     "ppnTotalDpp": "총 DPP",
-    "ppnTotalPpn": "총 PPN"
+    "ppnTotalPpn": "총 PPN",
+    "umkmTitle": "선납법인세 (PPh Final / 25)",
+    "umkmRecordCount": "납부 레코드",
+    "umkmTotalDue": "총 납부할 세액",
+    "umkmTotalPaid": "총 납부액"
   }
 }

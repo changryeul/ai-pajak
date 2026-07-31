@@ -10709,6 +10709,10 @@
     "ppnTitle": "PPN",
     "ppnFakturCount": "Faktur",
     "ppnTotalDpp": "Total DPP",
-    "ppnTotalPpn": "Total PPN"
+    "ppnTotalPpn": "Total PPN",
+    "umkmTitle": "PPh Final / PPh 25",
+    "umkmRecordCount": "Catatan Bayar",
+    "umkmTotalDue": "Total Terutang",
+    "umkmTotalPaid": "Total Dibayar"
   }
 }
