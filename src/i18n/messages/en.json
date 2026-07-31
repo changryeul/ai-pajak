@@ -10705,6 +10705,10 @@
     "whTitle": "Withholding Tax (PPh 23 · 4(2))",
     "whTxnCount": "Transactions",
     "whTotalGross": "Total Gross",
-    "whTotalTax": "Total Withheld"
+    "whTotalTax": "Total Withheld",
+    "ppnTitle": "VAT (PPN)",
+    "ppnFakturCount": "Fakturs",
+    "ppnTotalDpp": "Total DPP",
+    "ppnTotalPpn": "Total PPN"
   }
 }

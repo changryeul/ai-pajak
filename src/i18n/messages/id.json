@@ -10705,6 +10705,10 @@
     "whTitle": "Pajak Potong (PPh 23 · 4(2))",
     "whTxnCount": "Transaksi",
     "whTotalGross": "Total Bruto",
-    "whTotalTax": "Total Dipotong"
+    "whTotalTax": "Total Dipotong",
+    "ppnTitle": "PPN",
+    "ppnFakturCount": "Faktur",
+    "ppnTotalDpp": "Total DPP",
+    "ppnTotalPpn": "Total PPN"
   }
 }

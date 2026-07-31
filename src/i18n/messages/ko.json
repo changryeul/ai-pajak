@@ -10827,6 +10827,10 @@
     "whTitle": "원천세 (PPh 23 · 4(2))",
     "whTxnCount": "거래 수",
     "whTotalGross": "총 지급액",
-    "whTotalTax": "원천세 합계"
+    "whTotalTax": "원천세 합계",
+    "ppnTitle": "부가세 (PPN)",
+    "ppnFakturCount": "faktur 수",
+    "ppnTotalDpp": "총 DPP",
+    "ppnTotalPpn": "총 PPN"
   }
 }
