@@ -4,8 +4,9 @@ import styles from './workqueue.module.css';
 import { WorkqueueSidebar } from './WorkqueueSidebar';
 import { CustomerWorklist } from './CustomerWorklist';
 import { Pph21ReviewPanel } from './Pph21ReviewPanel';
+import { WithholdingReviewPanel } from './WithholdingReviewPanel';
 import { RequestDrawer } from './RequestDrawer';
-import { STATUS_LABEL_MAP, type QueueListItem, type StatusFilter, type TaxView } from './types';
+import { STATUS_LABEL_MAP, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
 
 const now = new Date();
 const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -27,14 +28,14 @@ export function WorkqueueClient() {
       setError(null);
       try {
         const [y, m] = period.split('-');
-        const r = await fetch(`/api/operator/queue?taxType=PPh21&year=${y}&month=${Number(m)}&limit=200`);
+        const r = await fetch(`/api/operator/queue?taxType=${TAX_VIEW_TO_TYPE[taxView]}&year=${y}&month=${Number(m)}&limit=200`);
         const j = await r.json();
         if (active && j.success) setItems(j.data.items as QueueListItem[]);
         else if (active && !j.success) setError('목록을 불러오지 못했습니다.');
       } catch { if (active) setError('목록을 불러오지 못했습니다.'); }
     })();
     return () => { active = false; };
-  }, [period]);
+  }, [period, taxView]);
 
   // One-shot refresh handed to Pph21ReviewPanel as onChanged (no active flag —
   // it's not tied to an effect lifecycle). Catches so onChanged={load} never
@@ -43,12 +44,12 @@ export function WorkqueueClient() {
     setError(null);
     try {
       const [y, m] = period.split('-');
-      const r = await fetch(`/api/operator/queue?taxType=PPh21&year=${y}&month=${Number(m)}&limit=200`);
+      const r = await fetch(`/api/operator/queue?taxType=${TAX_VIEW_TO_TYPE[taxView]}&year=${y}&month=${Number(m)}&limit=200`);
       const j = await r.json();
       if (j.success) setItems(j.data.items as QueueListItem[]);
       else setError('목록을 불러오지 못했습니다.');
     } catch { setError('목록을 불러오지 못했습니다.'); }
-  }, [period]);
+  }, [period, taxView]);
 
   const counts = useMemo(() => {
     const c = { all: items.length, unreviewed: 0, inReview: 0, request: 0, reviewed: 0 };
@@ -71,7 +72,7 @@ export function WorkqueueClient() {
     <div className={styles.root}>
       <div className={styles.app}>
         <WorkqueueSidebar counts={counts} statusFilter={statusFilter} onStatusFilter={setStatusFilter}
-          taxView={taxView} onTaxView={setTaxView} />
+          taxView={taxView} onTaxView={(v) => { setSelectedId(null); setTaxView(v); }} />
         <main>
           <div className={styles.top}>
             <div className={styles.role}><button className={`${styles.pill} ${styles.active}`}>상담원</button></div>
@@ -86,7 +87,9 @@ export function WorkqueueClient() {
               <CustomerWorklist items={filtered} selectedId={selectedId} onSelect={setSelectedId} counts={counts} />
               <div>
                 {selectedId
-                  ? <Pph21ReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />
+                  ? (taxView === 'withholding'
+                      ? <WithholdingReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />
+                      : <Pph21ReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />)
                   : <div className={styles.card}><div className={styles.body}>왼쪽에서 고객 업무를 선택하세요.</div></div>}
               </div>
             </div>
