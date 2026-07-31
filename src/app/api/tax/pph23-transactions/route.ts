@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 import { TaxResolutionEngine } from '@/lib/tax/tax-resolution-engine';
 import { SERVICE_TYPE_TO_CATEGORY, taxTypeToRegime, isDgtFormValid } from '@/lib/tax/withholding-helpers';
 import { assignPendingBPNumbers } from '@/lib/tax/ebupot/pph23-bupot-service';
@@ -243,6 +244,9 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
 
     // 2026-06-24: e-Bupot 번호 자동 부여 (best-effort)
     try { await assignPendingBPNumbers(getSupabaseAdmin(), customerId, taxPeriod); } catch { /* non-fatal */ }
+
+    // 고객 원천세 거래 입력 → 담당 상담원 업무함에 PPh23 큐 자동 노출 (best-effort).
+    await ensureQueueForActivity(getSupabaseAdmin(), customerId, 'PPh23', taxPeriod);
 
     return NextResponse.json({
       success: true,

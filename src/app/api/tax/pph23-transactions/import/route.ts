@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 import { loggers } from '@/lib/logger';
 import { parseCSV, validatePPh23Rows, type ParsedRow } from '@/lib/tax/bulk-import/csv-parser';
 import type { RequestWithSession } from '@/types/auth';
@@ -166,6 +167,9 @@ async function handle(req: RequestWithSession): Promise<Response> {
       errors: r.errors,
       data: r.data,
     }));
+
+  // 고객 원천세 일괄 임포트 → 담당 상담원 업무함에 PPh23 큐 자동 노출 (best-effort).
+  if (insertError == null) await ensureQueueForActivity(sb, customerId, 'PPh23', taxPeriod);
 
   return NextResponse.json({
     success: insertError == null,

@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 import { loggers } from '@/lib/logger';
 import { PPh21Calculator } from '@/lib/tax/pph21-calculator';
 import { normalizePtkpCategory } from '@/config/pph21-ter-rates';
@@ -255,6 +256,10 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     }
 
     loggers.api.info({ customerId, period, submitted: count ?? 0 }, 'Payslips submitted');
+
+    // 고객 급여명세 제출 → 담당 상담원 업무함에 PPh21 큐 자동 노출 (best-effort).
+    await ensureQueueForActivity(admin, customerId, 'PPh21', period);
+
     return NextResponse.json({
       success: true,
       submitted: count ?? 0,
