@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { PpnReviewTable } from './PpnReviewTable';
+import { AiPreReviewBox } from './AiPreReviewBox';
 import type { PpnDetail, PpnRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -69,6 +70,8 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
           <div className={styles.metric2}><small>{t('ppnTotalPpn')}</small><b>{rp(s.totalPpn)}</b></div>
           <div className={styles.metric2}><small>미완료</small><b>{s.incompleteCount}건</b></div>
         </div>
+
+        <AiPreReviewBox queueId={queueId} taxView="ppn" period={detail.period} summary={s} rows={detail.rows} />
 
         <div className={styles.toolbar}>
           <div>

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { UmkmReviewTable } from './UmkmReviewTable';
+import { AiPreReviewBox } from './AiPreReviewBox';
 import type { UmkmDetail, UmkmRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -62,6 +63,8 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
           <div className={styles.metric2}><small>{t('umkmTotalPaid')}</small><b>{rp(s.totalPaid)}</b></div>
           <div className={styles.metric2}><small>미완료</small><b>{s.incompleteCount}건</b></div>
         </div>
+
+        <AiPreReviewBox queueId={queueId} taxView="umkm" period={detail.period} summary={s} rows={detail.rows} />
 
         <div className={styles.toolbar}>
           <div>

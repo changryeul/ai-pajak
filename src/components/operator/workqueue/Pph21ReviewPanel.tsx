@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { EmployeeReviewTable } from './EmployeeReviewTable';
 import { CustomerMirrorToggle } from './CustomerMirrorToggle';
+import { AiPreReviewBox } from './AiPreReviewBox';
 import type { Pph21Detail, Pph21Row } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -80,6 +81,10 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
           <div className={styles.metric2}><small>PPh 21 합계</small><b>{rp(s.totalPph21)}</b></div>
           <div className={styles.metric2}><small>미완료</small><b>{s.incompleteCount}건</b></div>
         </div>
+
+        {!mirror && (
+          <AiPreReviewBox queueId={queueId} taxView="pph21" period={detail.period} summary={s} rows={detail.rows} />
+        )}
 
         {mirror ? <CustomerMirrorToggle customerId={detail.customerId} /> : (
           <>

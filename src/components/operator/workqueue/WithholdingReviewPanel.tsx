@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { WithholdingReviewTable } from './WithholdingReviewTable';
+import { AiPreReviewBox } from './AiPreReviewBox';
 import type { WithholdingDetail, WithholdingRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -73,6 +74,8 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
           <div className={styles.metric2}><small>{t('whTotalTax')}</small><b>{rp(s.totalTax)}</b></div>
           <div className={styles.metric2}><small>미완료</small><b>{s.incompleteCount}건</b></div>
         </div>
+
+        <AiPreReviewBox queueId={queueId} taxView="withholding" period={detail.period} summary={s} rows={detail.rows} />
 
         <div className={styles.toolbar}>
           <div>
