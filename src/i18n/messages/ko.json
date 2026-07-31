@@ -10797,5 +10797,31 @@
     "sendFailed": "전송에 실패했습니다. 잠시 후 다시 시도하세요.",
     "noEmail": "고객 이메일이 없어 전송할 수 없습니다.",
     "networkError": "네트워크 오류가 발생했습니다."
+  },
+  "operatorWorkqueue": {
+    "title": "고객 업무함",
+    "pph21Title": "개인소득세 (PPh 21)",
+    "reviewStart": "검토 시작",
+    "requestApproval": "승인 요청",
+    "mirrorOn": "고객이 보는 그대로 보기",
+    "mirrorOff": "검토 표로",
+    "statusUnreviewed": "미검토",
+    "statusInReview": "검토중",
+    "statusRequest": "수정작업중",
+    "statusReviewed": "검토완료",
+    "colEmployee": "직원",
+    "colNpwp": "NPWP",
+    "colPtkp": "PTKP",
+    "colGross": "총 지급",
+    "colBpjs": "BPJS",
+    "colThr": "THR/보너스",
+    "colTer": "TER",
+    "colPph21": "PPH21",
+    "colIssue": "이슈",
+    "colRequest": "요청",
+    "request": "요청",
+    "empty": "해당 조건의 고객 업무가 없습니다.",
+    "selectPrompt": "왼쪽에서 고객 업무를 선택하세요.",
+    "colStatus": "상태"
   }
 }

@@ -41,6 +41,7 @@ const STEPS: Step[] = [
   { name: 'master tenants GET/PATCH (8 asserts)', file: 'test-master-tenants.ts' },
   // --- Operator + billing flows ----------------------------------------
   { name: 'operator queue flow (Coretax 8-state + legacy 400)', file: 'test-operator-queue-flow.ts', optional: true },
+  { name: 'workqueue PPh21 (quick-create + detail + request + RBAC)', file: 'test-workqueue-pph21.ts' },
   { name: 'billing 3-endpoint smoke', file: 'test-billing-flow.ts', optional: true },
   { name: 'monitoring/Sentry flow', file: 'test-monitoring-flow.ts', optional: true },
   // --- P1 미배정 고객 큐 (2026-07-03) ---------------------------------

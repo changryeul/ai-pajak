@@ -37,6 +37,8 @@ const STATUS_TRANSITIONS: Record<string, { from: QueueStatus | QueueStatus[] | '
 
 const SUPERVISOR_ACTIONS = ['approve', 'reject', 'reassign'];
 
+const VALID_TAX_TYPES = ['PPh21', 'PPh23', 'PPN', 'PPh_FINAL', 'PPh4_2', 'PPh15', 'PPh22', 'PPh26'];
+
 async function getOperatorUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -487,4 +489,71 @@ export async function PUT(request: NextRequest) {
       reasons: autoApprovalResult.reasons,
     } : undefined,
   });
+}
+
+/**
+ * POST /api/operator/queue
+ *
+ * Quick-create a djp_submission_queue row for (customerId, taxType, month, year).
+ * Idempotent: if a row already exists for that unique tuple, return it
+ * (created:false) instead of erroring.
+ */
+export async function POST(request: NextRequest) {
+  const auth = await getOperatorUser();
+  if ('error' in auth && auth.error) return auth.error;
+  const { user, admin } = auth;
+
+  const body = await request.json();
+  const { customerId, taxType, month, year } = body as {
+    customerId?: string; taxType?: string; month?: number; year?: number;
+  };
+  if (!customerId || !taxType || !month || !year) {
+    return NextResponse.json({ error: 'customerId, taxType, month, year are required' }, { status: 400 });
+  }
+
+  // Lightweight input validation to prevent junk rows.
+  if (!VALID_TAX_TYPES.includes(taxType)) {
+    return NextResponse.json({ error: 'invalid taxType' }, { status: 400 });
+  }
+  if (!Number.isInteger(month) || month < 1 || month > 12 ||
+      !Number.isInteger(year) || year < 2000 || year > 2100) {
+    return NextResponse.json({ error: 'invalid period' }, { status: 400 });
+  }
+
+  // existing?
+  const { data: existing } = await admin
+    .from('djp_submission_queue')
+    .select('*')
+    .eq('customer_id', customerId).eq('tax_type', taxType)
+    .eq('tax_period_month', month).eq('tax_period_year', year)
+    .maybeSingle();
+  if (existing) return NextResponse.json({ success: true, data: existing, created: false });
+
+  const { data: opProfile } = await admin
+    .from('tax_operators').select('id').eq('user_id', user!.id).maybeSingle();
+
+  const { data: created, error } = await admin
+    .from('djp_submission_queue')
+    .insert({
+      customer_id: customerId, tax_type: taxType,
+      tax_period_month: month, tax_period_year: year,
+      operator_id: opProfile?.id ?? null, status: 'PENDING',
+    })
+    .select('*').single();
+  if (error) {
+    // Concurrent insert lost the race on UNIQUE(customer_id,tax_type,month,year).
+    // Re-select the winning row and return it idempotently (200, created:false).
+    if (error.code === '23505') {
+      const { data: raced } = await admin
+        .from('djp_submission_queue')
+        .select('*')
+        .eq('customer_id', customerId).eq('tax_type', taxType)
+        .eq('tax_period_month', month).eq('tax_period_year', year)
+        .maybeSingle();
+      if (raced) return NextResponse.json({ success: true, data: raced, created: false });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true, data: created, created: true });
 }

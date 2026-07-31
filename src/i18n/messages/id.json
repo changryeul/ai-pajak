@@ -10675,5 +10675,31 @@
     "sendFailed": "Gagal mengirim. Coba lagi sebentar.",
     "noEmail": "Tidak bisa kirim — klien tidak punya email.",
     "networkError": "Terjadi kesalahan jaringan."
+  },
+  "operatorWorkqueue": {
+    "title": "Antrean Kerja Pelanggan",
+    "pph21Title": "Pajak Penghasilan Orang Pribadi (PPh 21)",
+    "reviewStart": "Mulai tinjau",
+    "requestApproval": "Minta persetujuan",
+    "mirrorOn": "Lihat seperti pelanggan",
+    "mirrorOff": "Kembali ke tabel tinjauan",
+    "statusUnreviewed": "Belum ditinjau",
+    "statusInReview": "Sedang ditinjau",
+    "statusRequest": "Sedang direvisi",
+    "statusReviewed": "Sudah ditinjau",
+    "colEmployee": "Karyawan",
+    "colNpwp": "NPWP",
+    "colPtkp": "PTKP",
+    "colGross": "Total bruto",
+    "colBpjs": "BPJS",
+    "colThr": "THR/Bonus",
+    "colTer": "TER",
+    "colPph21": "PPH21",
+    "colIssue": "Masalah",
+    "colRequest": "Minta",
+    "request": "Minta",
+    "empty": "Tidak ada pekerjaan pelanggan untuk filter ini.",
+    "selectPrompt": "Pilih tugas pelanggan dari kiri.",
+    "colStatus": "Status"
   }
 }
