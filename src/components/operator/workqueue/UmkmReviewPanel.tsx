@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { UmkmReviewTable } from './UmkmReviewTable';
 import { AiPreReviewBox } from './AiPreReviewBox';
+import { ApprovalActions } from './ApprovalActions';
 import type { UmkmDetail, UmkmRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -26,16 +27,6 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
   }, [queueId]);
   useEffect(() => { load(); }, [load]);
 
-  const act = async (action: string) => {
-    try {
-      await fetch('/api/operator/queue', {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: queueId, action }),
-      });
-      await load(); onChanged();
-    } catch { setError('상태 변경에 실패했습니다.'); }
-  };
-
   const rows = useMemo(() => (detail?.rows ?? []).filter(r =>
     !statusF || r.paymentStatus === statusF), [detail, statusF]);
 
@@ -52,9 +43,7 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
     <div className={styles.card}>
       <div className={styles.head}>
         <div><h1>{t('umkmTitle')}</h1><p>{detail.period} 귀속분 · 선납법인세 월 납부 검토</p></div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-          <button className={`${styles.btn} ${styles.purple}`} onClick={() => act('request-approval')}>고객 검토완료</button>
-        </div>
+        <ApprovalActions queueId={queueId} onChanged={load} />
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>

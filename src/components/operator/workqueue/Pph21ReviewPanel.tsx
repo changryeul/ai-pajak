@@ -5,6 +5,7 @@ import styles from './workqueue.module.css';
 import { EmployeeReviewTable } from './EmployeeReviewTable';
 import { CustomerMirrorToggle } from './CustomerMirrorToggle';
 import { AiPreReviewBox } from './AiPreReviewBox';
+import { ApprovalActions } from './ApprovalActions';
 import type { Pph21Detail, Pph21Row } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -32,15 +33,6 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
 
   useEffect(() => { load(); }, [load]);
 
-  const act = async (action: string) => {
-    try {
-      await fetch('/api/operator/queue', {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: queueId, action }),
-      });
-      await load(); onChanged();
-    } catch { setError('상태 변경에 실패했습니다.'); }
-  };
 
   const rows = useMemo(() => {
     const list = (detail?.rows ?? []).filter(r =>
@@ -72,6 +64,7 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
           <button className={styles.btn} onClick={() => setMirror(m => !m)}>
             {mirror ? t('mirrorOff') : t('mirrorOn')}
           </button>
+          <ApprovalActions queueId={queueId} onChanged={load} />
         </div>
       </div>
       <div className={styles.body}>
@@ -100,7 +93,6 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
               </div>
               <div>
                 <button className={`${styles.btn} ${styles.blue}`} onClick={() => setRequestTarget('BULK')}>일괄 요청</button>
-                <button className={`${styles.btn} ${styles.purple}`} onClick={() => act('request-approval')}>고객 검토완료</button>
               </div>
             </div>
 

@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { PpnReviewTable } from './PpnReviewTable';
 import { AiPreReviewBox } from './AiPreReviewBox';
+import { ApprovalActions } from './ApprovalActions';
 import type { PpnDetail, PpnRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -27,16 +28,6 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
   }, [queueId]);
   useEffect(() => { load(); }, [load]);
 
-  const act = async (action: string) => {
-    try {
-      await fetch('/api/operator/queue', {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: queueId, action }),
-      });
-      await load(); onChanged();
-    } catch { setError('상태 변경에 실패했습니다.'); }
-  };
-
   const matchRecon = (status: string | null): boolean => {
     if (!recon) return true;
     if (recon === 'MISSING') return status === 'MISSING_CORETAX' || status === 'MISSING_CUSTOMER';
@@ -59,9 +50,7 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
     <div className={styles.card}>
       <div className={styles.head}>
         <div><h1>{t('ppnTitle')}</h1><p>{detail.period} 귀속분 · 부가세 faktur 검토</p></div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-          <button className={`${styles.btn} ${styles.purple}`} onClick={() => act('request-approval')}>고객 검토완료</button>
-        </div>
+        <ApprovalActions queueId={queueId} onChanged={load} />
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>
