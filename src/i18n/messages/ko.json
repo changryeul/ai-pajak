@@ -10823,6 +10823,10 @@
     "request": "요청",
     "empty": "해당 조건의 고객 업무가 없습니다.",
     "selectPrompt": "왼쪽에서 고객 업무를 선택하세요.",
-    "colStatus": "상태"
+    "colStatus": "상태",
+    "whTitle": "원천세 (PPh 23 · 4(2))",
+    "whTxnCount": "거래 수",
+    "whTotalGross": "총 지급액",
+    "whTotalTax": "원천세 합계"
   }
 }

@@ -10701,6 +10701,10 @@
     "request": "Minta",
     "empty": "Tidak ada pekerjaan pelanggan untuk filter ini.",
     "selectPrompt": "Pilih tugas pelanggan dari kiri.",
-    "colStatus": "Status"
+    "colStatus": "Status",
+    "whTitle": "Pajak Potong (PPh 23 · 4(2))",
+    "whTxnCount": "Transaksi",
+    "whTotalGross": "Total Bruto",
+    "whTotalTax": "Total Dipotong"
   }
 }

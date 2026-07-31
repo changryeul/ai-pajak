@@ -10701,6 +10701,10 @@
     "request": "Request",
     "empty": "No customer work matches this filter.",
     "selectPrompt": "Select a customer task from the left.",
-    "colStatus": "Status"
+    "colStatus": "Status",
+    "whTitle": "Withholding Tax (PPh 23 · 4(2))",
+    "whTxnCount": "Transactions",
+    "whTotalGross": "Total Gross",
+    "whTotalTax": "Total Withheld"
   }
 }
