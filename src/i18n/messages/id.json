@@ -283,7 +283,8 @@
     "consultantErpIdBilling": "Penerbitan ID Billing",
     "opIdBilling": "Penerbitan ID Billing",
     "supervisorBillingHandover": "Serah Terima ID Billing",
-    "supervisorAffiliation": "Afiliasi Konsultan"
+    "supervisorAffiliation": "Afiliasi Konsultan",
+    "opWorkqueue": "Antrean Kerja Pelanggan"
   },
   "employeeHr": {
     "uploadSection": {

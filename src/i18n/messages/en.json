@@ -283,7 +283,8 @@
     "consultantErpIdBilling": "ID Billing Issuance",
     "opIdBilling": "ID Billing Issuance",
     "supervisorBillingHandover": "ID Billing Handover",
-    "supervisorAffiliation": "Operator Affiliation"
+    "supervisorAffiliation": "Operator Affiliation",
+    "opWorkqueue": "Customer Workqueue"
   },
   "employeeHr": {
     "uploadSection": {

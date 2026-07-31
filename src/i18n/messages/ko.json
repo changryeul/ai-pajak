@@ -283,7 +283,8 @@
     "consultantErpIdBilling": "ID Billing 발행",
     "opIdBilling": "ID Billing 발행",
     "supervisorBillingHandover": "ID Billing 이관현황",
-    "supervisorAffiliation": "상담원 소속관리"
+    "supervisorAffiliation": "상담원 소속관리",
+    "opWorkqueue": "상담원 업무함"
   },
   "employeeHr": {
     "uploadSection": {

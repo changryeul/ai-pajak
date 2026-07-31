@@ -270,6 +270,7 @@ const navItems: NavSection[] = [
     section: 'operator-staff',
     roles: [UserRole.TAX_OPERATOR],
     items: [
+      { href: '/operator/workqueue',        icon: LayoutDashboard, labelKey: 'nav.opWorkqueue' },
       { href: '/operator/my-work',          icon: ListChecks,    labelKey: 'nav.opMyWork' },
       { href: '/operator/review-case',      icon: FileText,      labelKey: 'nav.opReview' },
       { href: '/operator/approval-request', icon: CheckCircle,   labelKey: 'nav.opApproval' },
