@@ -45,6 +45,7 @@ const STEPS: Step[] = [
   { name: 'workqueue withholding (quick-create + detail + request + RBAC)', file: 'test-workqueue-withholding.ts' },
   { name: 'workqueue PPN (quick-create + detail + request + RBAC)', file: 'test-workqueue-ppn.ts' },
   { name: 'workqueue UMKM (quick-create + detail + request + RBAC)', file: 'test-workqueue-umkm.ts' },
+  { name: 'auto-queue creation (customer write → queue row)', file: 'test-auto-queue-creation.ts' },
   { name: 'billing 3-endpoint smoke', file: 'test-billing-flow.ts', optional: true },
   { name: 'monitoring/Sentry flow', file: 'test-monitoring-flow.ts', optional: true },
   // --- P1 미배정 고객 큐 (2026-07-03) ---------------------------------
