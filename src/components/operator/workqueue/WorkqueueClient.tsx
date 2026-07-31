@@ -86,7 +86,7 @@ export function WorkqueueClient() {
               <CustomerWorklist items={filtered} selectedId={selectedId} onSelect={setSelectedId} counts={counts} />
               <div>
                 {selectedId
-                  ? <Pph21ReviewPanel queueId={selectedId} onChanged={load} />
+                  ? <Pph21ReviewPanel key={selectedId} queueId={selectedId} onChanged={load} />
                   : <div className={styles.card}><div className={styles.body}>왼쪽에서 고객 업무를 선택하세요.</div></div>}
               </div>
             </div>
