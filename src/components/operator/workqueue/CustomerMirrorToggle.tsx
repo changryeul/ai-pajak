@@ -1,5 +1,13 @@
 'use client';
-// TEMPORARY stub — Task 9 replaces this with the real MonthlyPayslipTab embed.
-export function CustomerMirrorToggle({ customerId: _customerId }: { customerId: string }) {
-  return <div style={{ padding: 12 }}>고객 화면 미러 (준비 중)</div>;
+import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
+
+export function CustomerMirrorToggle({ customerId }: { customerId: string }) {
+  return (
+    <div style={{ marginTop: 4 }}>
+      <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
+        고객이 자기 화면에서 보는 급여명세입니다 (읽기 전용 미러).
+      </p>
+      <MonthlyPayslipTab customerId={customerId} />
+    </div>
+  );
 }
