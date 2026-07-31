@@ -37,7 +37,26 @@ export const TAX_VIEW_TO_TYPE: Record<string, string> = {
   pph21: 'PPh21',
   withholding: 'PPh23',
   ppn: 'PPN',
+  umkm: 'PPh_FINAL',
 };
+
+export interface UmkmRow {
+  id: string;
+  taxType: 'PPh_FINAL' | 'PPh25';
+  amountDue: number;
+  amountPaid: number;
+  penaltyAmount: number;
+  kodeBilling: string | null;
+  paymentStatus: string | null;
+  paymentDeadline: string | null;
+  reportingDeadline: string | null;
+  flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
+}
+export interface UmkmDetail {
+  queueId: string; customerId: string; period: string; status: string;
+  summary: { recordCount: number; totalDue: number; totalPaid: number; totalPenalty: number; incompleteCount: number };
+  rows: UmkmRow[];
+}
 
 export interface PpnRow {
   id: string;
