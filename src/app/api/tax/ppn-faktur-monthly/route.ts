@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 import { PPNCalculator } from '@/lib/tax/ppn-calculator';
 
 /**
@@ -118,6 +119,10 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     }).select().single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // 고객 PPN faktur 입력 → 담당 상담원 업무함에 PPN 큐 자동 노출 (best-effort).
+    await ensureQueueForActivity(getSupabaseAdmin(), customerId, 'PPN', taxPeriod);
+
     return NextResponse.json({ success: true, data });
   } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 });

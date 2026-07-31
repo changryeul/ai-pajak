@@ -29,6 +29,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 import { loggers } from '@/lib/logger';
 import { parseCSV, validatePPNRows } from '@/lib/tax/bulk-import/csv-parser';
 import { PPNCalculator } from '@/lib/tax/ppn-calculator';
@@ -268,6 +269,9 @@ async function handle(req: RequestWithSession): Promise<Response> {
 
   const outResult = await processSection(body.outCsv, 'KELUARAN', customerId, taxPeriod);
   const inResult = await processSection(body.inCsv, 'MASUKAN', customerId, taxPeriod);
+
+  // 고객 PPN 일괄 임포트 → 담당 상담원 업무함에 PPN 큐 자동 노출 (best-effort).
+  await ensureQueueForActivity(getSupabaseAdmin(), customerId, 'PPN', taxPeriod);
 
   return NextResponse.json({
     success: true,

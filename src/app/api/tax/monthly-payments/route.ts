@@ -5,6 +5,7 @@ import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 
 /**
  * GET /api/tax/monthly-payments?customerId=xxx&year=2025
@@ -130,6 +131,16 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
           .eq('id', paymentId);
 
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+        // 선납법인세(PPh Final/25) 납부 기록 → 담당 상담원 업무함에 자동 노출 (best-effort).
+        const { data: paidRow } = await getSupabaseAdmin()
+          .from('tax_monthly_payment')
+          .select('customer_id, tax_type, tax_period')
+          .eq('id', paymentId).maybeSingle();
+        if (paidRow && (paidRow.tax_type === 'PPh_FINAL' || paidRow.tax_type === 'PPh25')) {
+          await ensureQueueForActivity(getSupabaseAdmin(), paidRow.customer_id, 'PPh_FINAL', paidRow.tax_period);
+        }
+
         return NextResponse.json({ success: true, message: 'Payment updated' });
       }
 
