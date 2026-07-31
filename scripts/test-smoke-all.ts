@@ -48,6 +48,7 @@ const STEPS: Step[] = [
   { name: 'auto-queue creation (customer write → queue row)', file: 'test-auto-queue-creation.ts' },
   { name: 'workqueue AI pre-review (shape + RBAC + graceful)', file: 'test-workqueue-ai-review.ts' },
   { name: 'workqueue approval loop (request→approve/reject + canApprove + 403)', file: 'test-workqueue-approval-loop.ts' },
+  { name: 'workqueue reassign (operators list + supervisor reassign + 403/400)', file: 'test-workqueue-reassign.ts' },
   { name: 'billing 3-endpoint smoke', file: 'test-billing-flow.ts', optional: true },
   { name: 'monitoring/Sentry flow', file: 'test-monitoring-flow.ts', optional: true },
   // --- P1 미배정 고객 큐 (2026-07-03) ---------------------------------

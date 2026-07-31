@@ -187,8 +187,10 @@ export async function PUT(request: NextRequest) {
     );
   }
 
+  // `reassign` is a special action with no status transition — it is handled
+  // separately below, so it is allowed past the transition guard.
   const transition = STATUS_TRANSITIONS[action];
-  if (!transition) {
+  if (!transition && action !== 'reassign') {
     return NextResponse.json(
       { error: `Unknown action: ${action}` },
       { status: 400 }
