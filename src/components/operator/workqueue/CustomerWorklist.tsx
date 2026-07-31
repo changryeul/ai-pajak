@@ -1,10 +1,14 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { STATUS_LABEL_MAP, type QueueListItem } from './types';
 
-const LABEL_KO: Record<string, [string, string]> = {
-  unreviewed: ['미검토', 'red'], inReview: ['검토중', 'amber'],
-  request: ['수정작업중', 'red'], reviewed: ['검토완료', 'green'],
+const LABEL_CLS: Record<string, string> = {
+  unreviewed: 'red', inReview: 'amber', request: 'red', reviewed: 'green',
+};
+const LABEL_KEY: Record<string, string> = {
+  unreviewed: 'statusUnreviewed', inReview: 'statusInReview',
+  request: 'statusRequest', reviewed: 'statusReviewed',
 };
 
 interface Props {
@@ -15,10 +19,11 @@ interface Props {
 }
 
 export function CustomerWorklist({ items, selectedId, onSelect, counts }: Props) {
+  const t = useTranslations('operatorWorkqueue');
   return (
     <aside className={styles.qpanel}>
       <div className={styles.card}>
-        <div className={styles.head}><div><h1>고객 업무함</h1></div></div>
+        <div className={styles.head}><div><h1>{t('title')}</h1></div></div>
         <div className={styles.body}>
           <div className={styles.metrics}>
             <div className={styles.metric}><small>미검토</small><b>{counts.unreviewed}</b></div>
@@ -27,10 +32,11 @@ export function CustomerWorklist({ items, selectedId, onSelect, counts }: Props)
             <div className={styles.metric}><small>기간</small><b>월</b></div>
           </div>
           <div className={styles.qlist}>
-            {items.length === 0 && <div className={styles.body}>해당 조건의 고객 업무가 없습니다.</div>}
+            {items.length === 0 && <div className={styles.body}>{t('empty')}</div>}
             {items.map(it => {
               const lbl = STATUS_LABEL_MAP[it.status];
-              const [text, cls] = LABEL_KO[lbl] ?? ['기타', 'gray'];
+              const cls = LABEL_CLS[lbl] ?? 'gray';
+              const text = LABEL_KEY[lbl] ? t(LABEL_KEY[lbl]) : '기타';
               const isActive = selectedId === it.id;
               return (
                 <div key={it.id}

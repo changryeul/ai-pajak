@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { EmployeeReviewTable } from './EmployeeReviewTable';
 import { CustomerMirrorToggle } from './CustomerMirrorToggle';
@@ -9,6 +10,7 @@ const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const LEVEL_ORDER: Record<string, number> = { red: 0, amber: 1, green: 2 };
 
 export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
+  const t = useTranslations('operatorWorkqueue');
   const [detail, setDetail] = useState<Pph21Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mirror, setMirror] = useState(false);
@@ -64,10 +66,10 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
   return (
     <div className={styles.card}>
       <div className={styles.head}>
-        <div><h1>개인소득세 (PPh 21)</h1><p>{detail.period} 귀속분 · 고객 제출자료 전체 검토</p></div>
+        <div><h1>{t('pph21Title')}</h1><p>{detail.period} 귀속분 · 고객 제출자료 전체 검토</p></div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
           <button className={styles.btn} onClick={() => setMirror(m => !m)}>
-            {mirror ? '검토 표로' : '고객이 보는 그대로 보기'}
+            {mirror ? t('mirrorOff') : t('mirrorOn')}
           </button>
         </div>
       </div>

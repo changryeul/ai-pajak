@@ -10675,5 +10675,31 @@
     "sendFailed": "Send failed. Please retry shortly.",
     "noEmail": "Cannot send — customer has no email.",
     "networkError": "A network error occurred."
+  },
+  "operatorWorkqueue": {
+    "title": "Customer Workqueue",
+    "pph21Title": "Individual Income Tax (PPh 21)",
+    "reviewStart": "Start review",
+    "requestApproval": "Request approval",
+    "mirrorOn": "View as customer sees it",
+    "mirrorOff": "Back to review table",
+    "statusUnreviewed": "Unreviewed",
+    "statusInReview": "In review",
+    "statusRequest": "Revision in progress",
+    "statusReviewed": "Reviewed",
+    "colEmployee": "Employee",
+    "colNpwp": "NPWP",
+    "colPtkp": "PTKP",
+    "colGross": "Gross pay",
+    "colBpjs": "BPJS",
+    "colThr": "THR/Bonus",
+    "colTer": "TER",
+    "colPph21": "PPH21",
+    "colIssue": "Issue",
+    "colRequest": "Request",
+    "request": "Request",
+    "empty": "No customer work matches this filter.",
+    "selectPrompt": "Select a customer task from the left.",
+    "colStatus": "Status"
   }
 }

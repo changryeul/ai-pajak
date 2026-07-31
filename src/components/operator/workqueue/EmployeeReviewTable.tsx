@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import type { Pph21Row } from './types';
 
@@ -14,12 +15,13 @@ interface Props {
 }
 
 export function EmployeeReviewTable({ rows, selectedId, onSelect, onRequest }: Props) {
+  const t = useTranslations('operatorWorkqueue');
   return (
     <div className={styles.tbl}>
       <table>
         <thead><tr>
-          <th>상태</th><th>직원</th><th>NPWP</th><th>PTKP</th><th className={styles.money}>총 지급</th>
-          <th>BPJS</th><th>THR/보너스</th><th>TER</th><th className={styles.money}>PPH21</th><th>이슈</th><th>요청</th>
+          <th>{t('colStatus')}</th><th>{t('colEmployee')}</th><th>{t('colNpwp')}</th><th>{t('colPtkp')}</th><th className={styles.money}>{t('colGross')}</th>
+          <th>{t('colBpjs')}</th><th>{t('colThr')}</th><th>{t('colTer')}</th><th className={styles.money}>{t('colPph21')}</th><th>{t('colIssue')}</th><th>{t('colRequest')}</th>
         </tr></thead>
         <tbody>
           {rows.map(r => (
