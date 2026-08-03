@@ -247,7 +247,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(`/${locale}/operator/dashboard`, request.url));
     }
     if (effective === 'TAX_OPERATOR') {
-      return NextResponse.redirect(new URL(`/${locale}/operator/my-work`, request.url));
+      // 상담원 홈 = 통합 업무함 (2026-08-03, 구 my-work 대체).
+      return NextResponse.redirect(new URL(`/${locale}/operator/workqueue`, request.url));
     }
     // TAX_ADVISOR, CONSULTANT, CUSTOMER, PLATFORM_ADMIN, null → fall
     // through to the regular /dashboard tree (which renders the role-aware

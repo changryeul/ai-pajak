@@ -23,10 +23,13 @@ async function loginAsEmp001(page: Page) {
   await inputs.first().fill(user.email);
   await page.fill('input[type="password"]', user.password);
   await page.click('button[type="submit"]');
-  // /dashboard 가 EMP001을 /operator/my-work 로 리다이렉트.
-  await page.waitForURL(/\/operator\/(my-work|dashboard)/, { timeout: 20000 });
+  // /dashboard 가 EMP001을 /operator/workqueue (통합 업무함, 2026-08-03) 로 리다이렉트.
+  await page.waitForURL(/\/operator\/(workqueue|dashboard)/, { timeout: 20000 });
   // 첫 fetch 안정화.
   await page.waitForTimeout(1500);
+  // 이하 테스트는 구 my-work 페이지 자체의 렌더 회귀를 잡으므로 직접 이동.
+  await page.goto(`${BASE_URL}/${LOCALE}/operator/my-work`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  await page.waitForURL(/\/operator\/my-work/, { timeout: 15000 });
 }
 
 test.describe('상담원 페이지 렌더링', () => {

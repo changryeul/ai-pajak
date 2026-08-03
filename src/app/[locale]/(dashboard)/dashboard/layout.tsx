@@ -50,7 +50,8 @@ export default async function DashboardSegmentLayout({
     ) {
       redirect(`/${locale}/operator/dashboard`);
     } else if (role === 'TAX_OPERATOR') {
-      redirect(`/${locale}/operator/my-work`);
+      // MUST match middleware.ts /dashboard branch (핑퐁 방지).
+      redirect(`/${locale}/operator/workqueue`);
     }
   }
 

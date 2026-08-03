@@ -95,7 +95,8 @@ export default function DashboardPage() {
     ) {
       target = `/${locale}/operator/dashboard`;
     } else {
-      target = `/${locale}/operator/my-work`;
+      // MUST match middleware.ts /dashboard branch (핑퐁 방지).
+      target = `/${locale}/operator/workqueue`;
     }
     if (typeof window !== 'undefined') {
       window.location.replace(target);
