@@ -107,9 +107,11 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
-  // Supervisors see all items; operators see only their own
+  // Supervisors see all items; operators see their own PLUS unassigned
+  // (operator_id IS NULL) items — auto-created queue rows for customers with
+  // no active assignment must not silently disappear from every workqueue.
   if (operatorProfileId) {
-    query = query.eq('operator_id', operatorProfileId);
+    query = query.or(`operator_id.eq.${operatorProfileId},operator_id.is.null`);
   }
 
   if (status) query = query.eq('status', status);
@@ -242,6 +244,9 @@ export async function PUT(request: NextRequest) {
   // tax_operators.id FK) directly to `user.id` (auth.users.id) — two
   // different tables, so the check was always true and **every** non-
   // supervisor action was rejected. Resolve via the tax_operators row.
+  // An unassigned item (operator_id NULL) is claimed by the first operator
+  // who acts on it — mirrors the GET visibility rule above.
+  let claimOperatorId: string | null = null;
   if (!SUPERVISOR_ROLES.includes(role)) {
     const { data: opProfile } = await admin
       .from('tax_operators')
@@ -249,12 +254,13 @@ export async function PUT(request: NextRequest) {
       .eq('user_id', user!.id)
       .maybeSingle();
 
-    if (!opProfile || item.operator_id !== opProfile.id) {
+    if (!opProfile || (item.operator_id !== null && item.operator_id !== opProfile.id)) {
       return NextResponse.json(
         { error: 'You are not assigned to this queue item' },
         { status: 403 }
       );
     }
+    if (item.operator_id === null) claimOperatorId = opProfile.id;
   }
 
   // Handle reassignment (special action — no status change)
@@ -362,6 +368,7 @@ export async function PUT(request: NextRequest) {
     status: transition.to,
     updated_at: now,
   };
+  if (claimOperatorId) updatePayload.operator_id = claimOperatorId;
 
   // Action-specific fields
   if (action === 'approve') {

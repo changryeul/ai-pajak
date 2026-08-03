@@ -29,6 +29,7 @@ import { requireRole } from '@/middleware/rbac';
 import { assignPendingBPNumbers } from '@/lib/tax/ebupot/pph23-bupot-service';
 import { withAudit } from '@/middleware/audit';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 import { loggers } from '@/lib/logger';
 import { UserRole, type RequestWithSession } from '@/types/auth';
 import type { ClassifiedRow, ClassifiedType } from '@/lib/tax/bulk-import/wht-onesheet-parser';
@@ -414,6 +415,16 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     autoAssignedBP = await assignPendingBPNumbers(sb, customerId, taxPeriod);
   } catch (e) {
     loggers.api.warn({ err: e instanceof Error ? e.message : String(e) }, 'auto BP assignment failed');
+  }
+
+  // 고객 원천세 일괄 임포트 → 담당 상담원 업무함 큐 자동 생성 (best-effort).
+  // PPh4(2)/PPh26 도 pph23_transaction 에 들어가 원천세 패널(PPh23 큐)에서
+  // 함께 검토되므로 PPh23 큐 하나로 묶는다.
+  if (result.insertedPph23 + result.insertedPph26 + result.insertedPph42 + result.insertedUnclassified > 0) {
+    await ensureQueueForActivity(sb, customerId, 'PPh23', taxPeriod);
+  }
+  if (result.insertedPpn > 0) {
+    await ensureQueueForActivity(sb, customerId, 'PPN', taxPeriod);
   }
 
   return NextResponse.json({

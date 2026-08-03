@@ -5,6 +5,7 @@ import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import { withAudit } from '@/middleware/audit';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { ensureQueueForActivity } from '@/lib/operator/ensure-queue-item';
 import { parseCSV, validatePPh23Rows, validatePPNRows, validatePPh21Rows } from '@/lib/tax/bulk-import/csv-parser';
 
 const PPN_RATE = 0.11;
@@ -100,6 +101,11 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     } catch (err) {
       errors.push({ row: row.rowNumber, error: 'Database insert failed' });
     }
+  }
+
+  // 고객 일괄 임포트 → 담당 상담원 업무함 큐 자동 생성 (best-effort).
+  if (insertedCount > 0 && (type === 'PPh23' || type === 'PPN')) {
+    await ensureQueueForActivity(getSupabaseAdmin(), customerId, type, taxPeriod);
   }
 
   return NextResponse.json({

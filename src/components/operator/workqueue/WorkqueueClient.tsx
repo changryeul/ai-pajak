@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams } from 'next/navigation';
 import styles from './workqueue.module.css';
 import { WorkqueueSidebar } from './WorkqueueSidebar';
 import { CustomerWorklist } from './CustomerWorklist';
@@ -24,6 +25,8 @@ const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padSta
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
 export function WorkqueueClient({ role }: { role?: string }) {
+  const params = useParams<{ locale?: string }>();
+  const locale = params?.locale ?? 'id';
   const isSupervisor = !!role && SUPERVISOR_ROLES.includes(role);
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const [taxView, setTaxView] = useState<TaxView>('pph21');
@@ -94,7 +97,7 @@ export function WorkqueueClient({ role }: { role?: string }) {
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
               <input placeholder="고객명, NPWP, 담당자 검색" />
-              <a className={styles.btn} href="../dashboard" title="일반 대시보드로 나가기">← 나가기</a>
+              <a className={styles.btn} href={`/${locale}/operator`} title="운영팀 대시보드로 나가기">← 나가기</a>
             </div>
           </div>
           <section className={styles.content}>

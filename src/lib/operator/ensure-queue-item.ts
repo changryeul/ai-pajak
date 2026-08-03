@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { assignCustomerToOperator } from './assign-customer';
 
 const AUTO_QUEUE_TAX_TYPES = new Set(['PPh21', 'PPh23', 'PPN', 'PPh_FINAL']);
 
@@ -48,12 +49,23 @@ export async function ensureQueueForActivity(
       .order('assigned_date', { ascending: false })
       .limit(1).maybeSingle();
 
+    // v13 §5: 미배정 고객이면 자동배정 엔진으로 담당 상담원을 먼저 잡는다
+    // (best-effort — overflow/실패 시 미배정(null)으로 큐 생성, 상담원 화면
+    // 미배정 노출 + first-action claim 이 fallback).
+    let operatorId: string | null = assign?.operator_id ?? null;
+    if (!operatorId) {
+      try {
+        const res = await assignCustomerToOperator(admin, customerId, { triggeredBy: 'AUTO', taxType });
+        operatorId = res.operatorId ?? null;
+      } catch { /* keep null */ }
+    }
+
     const { error } = await admin
       .from('djp_submission_queue')
       .insert({
         customer_id: customerId, tax_type: taxType,
         tax_period_month: month, tax_period_year: year,
-        operator_id: assign?.operator_id ?? null, status: 'PENDING',
+        operator_id: operatorId, status: 'PENDING',
       });
     if (error) {
       // 23505 = UNIQUE race, treat as already-exists (idempotent).

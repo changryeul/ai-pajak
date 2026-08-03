@@ -1,8 +1,11 @@
 'use client';
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import styles from './workqueue.module.css';
 
 export function RequestDrawer() {
+  const params = useParams<{ locale?: string }>();
+  const locale = params?.locale ?? 'id';
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -16,7 +19,8 @@ export function RequestDrawer() {
           <p style={{ fontSize: 13, color: '#6b7280' }}>
             직원 행의 [요청] 버튼으로 고객에게 자료 요청을 보냅니다. 대화 이력은 고객 인박스에서 확인하세요.
           </p>
-          <a className={`${styles.btn} ${styles.blue}`} href="../customer-inbox">고객 인박스 열기</a>
+          {/* 새 탭으로 열어 업무함 화면을 잃지 않는다. */}
+          <a className={`${styles.btn} ${styles.blue}`} href={`/${locale}/operator/customer-inbox`} target="_blank" rel="noreferrer">고객 인박스 열기</a>
         </div>
       </div>
     </>
