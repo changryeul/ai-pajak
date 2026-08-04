@@ -124,7 +124,7 @@ async function handleComplianceScore(req: RequestWithSession): Promise<Response>
         documentCount: docCount || 0,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to calculate compliance score' }, { status: 500 });
   }
 }

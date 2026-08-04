@@ -60,7 +60,7 @@ export default function MonthlyPaymentsPage() {
   const t = useTranslations();
   const tm = useTranslations('monthlyPayments');
   const tt = useTranslations('taxTypes');
-  const { session } = useSession();
+  const { session: _session } = useSession();
   const {
     customerId,
     isConsultant,
@@ -112,7 +112,7 @@ export default function MonthlyPaymentsPage() {
       if (!data.success) {
         alert(data.error || 'Failed to generate schedule');
       }
-    } catch (err) {
+    } catch {
       alert('Network error. Please try again.');
     }
     loadPayments();
@@ -466,9 +466,7 @@ function CounterpartiesTab({ customerId }: { customerId?: string }) {
   const [form, setForm] = useState({ name: '', npwp: '', address: '', type: 'VENDOR' });
   const [search, setSearch] = useState('');
 
-  useEffect(() => { loadList(); }, [customerId]);
-
-  const loadList = async () => {
+  const loadList = useCallback(async () => {
     setIsLoading(true);
     try {
       const p = new URLSearchParams();
@@ -478,7 +476,9 @@ function CounterpartiesTab({ customerId }: { customerId?: string }) {
       if (d.success) setList(d.data.counterparties);
     } catch { /* */ }
     finally { setIsLoading(false); }
-  };
+  }, [customerId]);
+
+  useEffect(() => { loadList(); }, [loadList]);
 
   const handleSave = async () => {
     if (!form.name) return;

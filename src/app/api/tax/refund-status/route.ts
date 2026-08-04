@@ -88,7 +88,7 @@ async function handleRefundStatus(req: RequestWithSession): Promise<Response> {
         totalRefunds: refundItems.length,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to get refund status' }, { status: 500 });
   }
 }

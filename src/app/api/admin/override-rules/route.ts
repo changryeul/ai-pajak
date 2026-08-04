@@ -10,7 +10,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
  * PUT  /api/admin/override-rules — Update rule
  */
 
-async function checkAdmin(request: NextRequest) {
+async function checkAdmin(_request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -25,7 +25,7 @@ async function checkAdmin(request: NextRequest) {
   return user;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

@@ -60,7 +60,7 @@ interface RegistryHit {
 
 export default function CounterpartiesPage() {
   const t = useTranslations('counterparties');
-  const { session } = useSession();
+  const { session: _session } = useSession();
   const [list, setList] = useState<Counterparty[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -154,7 +154,7 @@ export default function CounterpartiesPage() {
       return () => clearTimeout(timer);
     }
     setSearchResults([]);
-  }, [formNpwp, formName]);
+  }, [formNpwp, formName, t]);
 
   const autofillFromRegistry = (hit: RegistryHit) => {
     setFormName(hit.name);

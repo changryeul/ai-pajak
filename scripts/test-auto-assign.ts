@@ -141,7 +141,7 @@ async function main() {
     console.log(`   ✅ assigned: ${body.data.assigned}, overflow: ${body.data.overflow}`);
     console.log('   details:');
     for (const d of body.data.details || []) {
-      const cust = customers.find((c) =>
+      const _cust = customers.find((_c) =>
         insertedIds.some((id) => id === d.queueItemId)
       );
       console.log(

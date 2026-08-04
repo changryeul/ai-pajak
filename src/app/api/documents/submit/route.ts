@@ -236,8 +236,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function nextMonth(period: string): string {
-  const [y, m] = period.split('-').map(Number);
-  if (m === 12) return `${y + 1}-01-01`;
-  return `${y}-${String(m + 1).padStart(2, '0')}-01`;
-}

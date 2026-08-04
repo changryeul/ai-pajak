@@ -33,11 +33,6 @@ interface Recommendation {
   legalBasis: string;
 }
 
-const PTKP_AMOUNTS: Record<string, number> = {
-  'TK/0': 54000000, 'TK/1': 58500000, 'TK/2': 63000000, 'TK/3': 67500000,
-  'K/0': 58500000, 'K/1': 63000000, 'K/2': 67500000, 'K/3': 72000000,
-  'K/I/0': 112500000, 'K/I/1': 117000000, 'K/I/2': 121500000, 'K/I/3': 126000000,
-};
 
 
 function calculateTax(taxableIncome: number): number {

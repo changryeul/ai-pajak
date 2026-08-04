@@ -99,7 +99,7 @@ export default function TaxRatesAdmin() {
     finally { setIsSaving(false); }
   };
 
-  const visibleRates = selectedCategory ? (grouped[selectedCategory] || []) : rates;
+  const _visibleRates = selectedCategory ? (grouped[selectedCategory] || []) : rates;
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">

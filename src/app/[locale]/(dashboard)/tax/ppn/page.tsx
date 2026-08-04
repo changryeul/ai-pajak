@@ -25,23 +25,6 @@ import { ScreenHeader } from '@/components/tax';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { importPpnWholesaleFile } from '@/lib/tax/bulk-import/ppn-wholesale-importer';
 
-interface Faktur {
-  id: string;
-  serial_number: string | null;
-  transaction_type: 'OUTPUT' | 'INPUT';
-  faktur_date: string;
-  tax_period: string;
-  buyer_name: string;
-  buyer_npwp: string;
-  seller_name: string;
-  seller_npwp: string;
-  dpp: number;
-  ppn_amount: number;
-  ppnbm_amount: number;
-  total_amount: number;
-  status: string;
-  items: Array<{ description: string; quantity: number; unit_price: number; dpp: number; ppn_amount: number }>;
-}
 
 interface FakturMonthly {
   id: string;
@@ -1270,7 +1253,7 @@ export default function PPNPage() {
 // ══════════════════════════════════════════════════════
 // PPN 환급 신청 (Restitusi PPN)
 // ══════════════════════════════════════════════════════
-function PPNRefundSection({ locale }: { locale: string }) {
+function PPNRefundSection({ locale: _locale }: { locale: string }) {
   const [showRefund, setShowRefund] = useState(false);
   const t = useTranslations('ppnPage');
   const [refundStep, setRefundStep] = useState(1);

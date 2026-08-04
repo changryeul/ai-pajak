@@ -26,7 +26,7 @@ interface Customer {
 }
 
 export default function SPT1770SSPage() {
-  const t = useTranslations('tax');
+  const _t = useTranslations('tax');
   const tp = useTranslations('sptPages');
   const params = useParams();
   const router = useRouter();

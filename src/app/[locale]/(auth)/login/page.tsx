@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -164,7 +165,7 @@ function LoginPageInner() {
 
         <div className="max-w-lg relative z-10">
           <div className="flex items-center gap-3 mb-8">
-            <img src="/logo.png" alt="AI Pajak" className="h-12 brightness-0 invert" />
+            <Image src="/logo.png" alt="AI Pajak" width={134} height={48} className="h-12 w-auto brightness-0 invert" />
           </div>
 
           <h1 className="text-4xl font-bold leading-tight mb-4">

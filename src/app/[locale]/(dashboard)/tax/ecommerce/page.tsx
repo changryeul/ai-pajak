@@ -13,7 +13,7 @@ export default function EcommercePage() {
   const [platform, setPlatform] = useState<EcommercePlatform>('SHOPEE');
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState<EcommerceMonthlySummary | null>(null);
-  const [orderCount, setOrderCount] = useState(0);
+  const [_orderCount, setOrderCount] = useState(0);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

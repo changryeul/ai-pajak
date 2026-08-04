@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get actor emails for display
-    const actorIds = [...new Set((logs || []).map(l => l.actor_user_id).filter(Boolean))];
+    const _actorIds = [...new Set((logs || []).map(l => l.actor_user_id).filter(Boolean))];
     const { data: users } = await getSupabaseAdmin().auth.admin.listUsers({ perPage: 100 });
     const emailMap = new Map((users?.users || []).map(u => [u.id, u.email]));
 

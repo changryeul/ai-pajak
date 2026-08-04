@@ -267,7 +267,7 @@ Status SPT: **${status}** ${calc.difference !== 0 ? `sebesar Rp ${Math.abs(calc.
 
 ## 2. Analisis Penghasilan
 
-${input.incomeSources.map((s, i) => `- **${s.employerName}**: Bruto Rp ${s.grossIncome.toLocaleString('id-ID')}, PPh dipotong Rp ${s.taxWithheld.toLocaleString('id-ID')}`).join('\n')}
+${input.incomeSources.map((s, _i) => `- **${s.employerName}**: Bruto Rp ${s.grossIncome.toLocaleString('id-ID')}, PPh dipotong Rp ${s.taxWithheld.toLocaleString('id-ID')}`).join('\n')}
 
 ## 3. Rekomendasi Tindakan
 

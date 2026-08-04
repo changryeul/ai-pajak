@@ -94,7 +94,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         'Cache-Control': 'no-store',
       },
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'PDF generation failed' }, { status: 500 });
   }
 }

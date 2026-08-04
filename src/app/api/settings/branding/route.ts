@@ -97,7 +97,7 @@ export async function PUT(request: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Branding updated' });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update branding' }, { status: 500 });
   }
 }

@@ -224,9 +224,7 @@ export function NextStepsWizard({ customerId }: { customerId?: string }) {
             {steps.map((step, index) => {
               const isComplete = status[step.id];
               const isCurrent = index === currentStepIndex;
-              const isFuture = index > currentStepIndex;
-              const Icon = step.icon;
-
+                            
               return (
                 <div
                   key={step.id}

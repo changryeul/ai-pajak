@@ -15,7 +15,7 @@ import Anthropic from '@anthropic-ai/sdk';
 async function handlePredict(req: RequestWithSession): Promise<Response> {
   try {
     const body = await req.json();
-    const { customerId, currentMonthlyIncome, ptkpStatus = 'TK/0', taxYear, growthRate = 0 } = body;
+    const { customerId: _customerId, currentMonthlyIncome, ptkpStatus = 'TK/0', taxYear, growthRate = 0 } = body;
 
     if (!currentMonthlyIncome || !taxYear) {
       return NextResponse.json({ error: 'currentMonthlyIncome and taxYear required' }, { status: 400 });
@@ -119,7 +119,7 @@ Format: bullet points, masing-masing 1 kalimat.` }],
         aiInsights,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Prediction failed' }, { status: 500 });
   }
 }

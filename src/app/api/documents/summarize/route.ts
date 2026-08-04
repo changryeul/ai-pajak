@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         actionItems: [],
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Summarization failed' }, { status: 500 });
   }
 }

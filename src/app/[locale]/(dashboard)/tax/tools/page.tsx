@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl';
 
 type ActiveTool = 'predict' | 'cashflow' | 'summarize' | 'customs' | 'regional' | 'benchmark' | null;
 
-function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
 
 export default function TaxToolsPage() {
   const tp = useTranslations('pages');

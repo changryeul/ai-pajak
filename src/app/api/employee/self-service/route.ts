@@ -69,7 +69,7 @@ export async function GET() {
         requiredActions: getRequiredActions(customer),
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to get employee data' }, { status: 500 });
   }
 }
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Data updated successfully' });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update data' }, { status: 500 });
   }
 }

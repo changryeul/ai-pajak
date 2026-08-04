@@ -17,18 +17,6 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { fmtRp } from '@/lib/utils';
 
-interface MonthlyStatus {
-  taxType: string;
-  period: string;
-  transactionCount: number;
-  totalTax: number;
-  bupotGenerated: number;
-  bupotPending: number;
-  sptMasaFiled: boolean;
-  paymentStatus: string; // UNPAID, PAID, OVERDUE
-  paymentDeadline: string;
-  reportingDeadline: string;
-}
 
 const TAX_TYPES = [
   { key: 'PPh21', label: 'PPh 21', icon: FileText, gradient: 'from-blue-500 to-indigo-600', descKey: 'descPPh21' },
@@ -188,7 +176,7 @@ export default function MonthlyDashboardPage() {
   const totalDue = payments.reduce((s, p) => s + (p.amount_due || 0), 0);
   const paidCount = payments.filter(p => p.status === 'PAID').length;
   const overdueCount = payments.filter(p => p.status === 'OVERDUE').length;
-  const pendingCount = payments.filter(p => p.status === 'UNPAID').length;
+  const _pendingCount = payments.filter(p => p.status === 'UNPAID').length;
   const sptFiledCount = payments.filter(p => p.spt_masa_filed).length;
 
   return (

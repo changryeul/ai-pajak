@@ -192,7 +192,7 @@ export const useTaxFilingStore = create<TaxFilingState>()(
       })),
 
       clearError: (field) => set((state) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+         
         const { [field]: _removed, ...rest } = state.errors;
         return { errors: rest };
       }),

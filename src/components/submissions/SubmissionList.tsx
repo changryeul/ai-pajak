@@ -5,9 +5,7 @@ import { useTranslations } from 'next-intl';
 import { SubmissionCard, type QueueItem } from './SubmissionCard';
 import { Loader2, Inbox } from 'lucide-react';
 
-const FILTER_KEYS = ['all', 'in_progress', 'payment', 'completed'] as const;
-
-type FilterKey = (typeof FILTER_KEYS)[number];
+type FilterKey = 'all' | 'in_progress' | 'payment' | 'completed';
 
 function filterItems(items: QueueItem[], filter: FilterKey): QueueItem[] {
   if (filter === 'all') return items;

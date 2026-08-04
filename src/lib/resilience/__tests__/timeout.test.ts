@@ -116,9 +116,7 @@ describe('Timeout Utilities', () => {
     });
 
     it('should throw after max retries exceeded', async () => {
-      let callCount = 0;
       const fn = vi.fn().mockImplementation(() => {
-        callCount++;
         return Promise.reject(new TimeoutError('timeout', 1000));
       });
 

@@ -7,7 +7,7 @@ import type { RequestWithSession } from '@/types/auth';
 /**
  * GET /api/admin/cron — List all cron settings
  */
-async function handleGet(req: RequestWithSession): Promise<Response> {
+async function handleGet(_req: RequestWithSession): Promise<Response> {
   try {
     const admin = getSupabaseAdmin();
     const { data, error } = await admin

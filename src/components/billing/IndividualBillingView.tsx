@@ -18,7 +18,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import {
@@ -69,10 +68,7 @@ function sptColor(id: Plan['id']) {
 export function IndividualBillingView() {
   const t = useTranslations('individualBilling');
   const tPlans = useTranslations('pricingPlans');
-  const router = useRouter();
-  const params = useParams();
-  const locale = params.locale as string;
-
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [catalog, setCatalog] = useState<CatalogResponse | null>(null);

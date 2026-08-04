@@ -98,7 +98,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         // For now, store as calculation record
         insertedCount++; // placeholder — PPh21 bulk already handled by /api/tax/pph21-bulk
       }
-    } catch (err) {
+    } catch {
       errors.push({ row: row.rowNumber, error: 'Database insert failed' });
     }
   }

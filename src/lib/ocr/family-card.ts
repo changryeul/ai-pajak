@@ -68,8 +68,7 @@ Hard rules — these prevent downstream data-quality bugs:
 
 Do not invent family members that are not printed on the page. If the table shows only 3 rows, return exactly 3 members.`;
 
-const KK_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
-type KKMediaType = (typeof KK_MEDIA_TYPES)[number];
+type KKMediaType = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
 
 /**
  * Extract a KartuKeluargaData object from a KK image using Claude's

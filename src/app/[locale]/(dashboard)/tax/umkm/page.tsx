@@ -20,8 +20,8 @@ import { PageTitle } from '@/components/layout/PageTitle';
 const UMKM_RATE = 0.005;          // PPh Final 0.5%
 const EXEMPTION_INDIVIDUAL = 500_000_000; // Rp 500.000.000 — 개인(OP)만 비과세
 const THRESHOLD = 4_800_000_000;  // Rp 4.800.000.000 annual revenue threshold
-const CORPORATE_RATE = 0.22;      // PPh Badan 22%
-const SME_DISCOUNT = 0.50;        // 50% discount for revenue < 50B
+      // PPh Badan 22%
+        // 50% discount for revenue < 50B
 
 // PP 55/2022 UMKM 적용 기간 (정확)
 function getMaxUmkmYears(legalForm: string): number {
@@ -50,7 +50,7 @@ interface RegimeResult {
 }
 
 export default function CorporateTaxPage() {
-  const { session } = useSession();
+  const { session: _session } = useSession();
   const {
     customerId,
     isConsultant,
@@ -64,7 +64,7 @@ export default function CorporateTaxPage() {
 
   // Wizard state
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
   const [showDontKnow, setShowDontKnow] = useState(false);
 
   // Company profile (pre-loaded if available)
@@ -89,7 +89,7 @@ export default function CorporateTaxPage() {
   });
 
   // Result
-  const [result, setResult] = useState<RegimeResult | null>(null);
+  const [_result, _setResult] = useState<RegimeResult | null>(null);
 
   // Load company profile
   useEffect(() => {

@@ -25,7 +25,7 @@ interface Customer {
 }
 
 export default function SPT1771Page() {
-  const t = useTranslations('tax');
+  const _t = useTranslations('tax');
   const tp = useTranslations('sptPages');
   const params = useParams();
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function SPT1771Page() {
       // Consultant/Advisor: fetch customer list
       fetchCustomers();
     }
-  }, [sessionLoading, session]);
+  }, [sessionLoading, session, isCustomer]);
 
   const fetchOwnCustomer = async (customerId: string) => {
     try {

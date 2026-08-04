@@ -11,7 +11,7 @@ async function checkAdmin(userId: string): Promise<boolean> {
  * GET /api/admin/consultants - List all consultants with stats
  * PUT /api/admin/consultants - Update consultant/advisor info
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

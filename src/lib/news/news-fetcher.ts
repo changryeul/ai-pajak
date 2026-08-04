@@ -40,26 +40,6 @@ export interface ProcessedArticle {
   publishedAt: string;
 }
 
-const AI_PROMPT = `You are an Indonesian tax news analyst. You MUST respond in valid JSON format.
-
-Given the article title (and description if available), generate:
-
-{
-  "summary_id": "2-3 sentence summary in Indonesian (Bahasa Indonesia). Explain what this news means for Indonesian taxpayers.",
-  "summary_ko": "2-3 sentence summary in Korean (한국어). ALWAYS write in Korean. Explain what this news means.",
-  "summary_en": "2-3 sentence summary in English.",
-  "impact_analysis": "1-2 sentences in Korean (한국어) about how this affects businesses/individuals in Indonesia. Start with the specific impact.",
-  "category": "one of: PPh21, PPh23, PPN, UMKM, TP, SPT, REGULATION, GENERAL",
-  "tags": ["3-5 relevant keywords in Indonesian"],
-  "regulation_number": "PMK/PP/UU number if mentioned (e.g. PMK 123/PMK.03/2026), or null",
-  "importance": "CRITICAL if new law/major change, HIGH if new regulation, NORMAL for regular news, LOW for commentary"
-}
-
-CRITICAL RULES:
-- summary_ko MUST be written in Korean (한국어), never in Indonesian or English
-- impact_analysis MUST be written in Korean (한국어)
-- Even if input is just a title, generate meaningful summaries based on your tax knowledge
-- Respond ONLY with the JSON object, no markdown`;
 
 /**
  * Process multiple articles in a single AI call (batch mode)

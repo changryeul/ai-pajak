@@ -53,7 +53,7 @@ const NEEDS_ACTION_STATUSES = ['EBILLING_GENERATED', 'PAYMENT_PENDING'];
 export default function TaxBillingPage() {
   const { session } = useSession();
   const {
-    customerId,
+    customerId: _customerId,
     isConsultant,
     customers,
     selectedCustomerId,

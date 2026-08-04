@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -201,7 +202,7 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center mb-10">
           <Link href={`/${locale}`}>
-            <img src="/logo.png" alt="AI Pajak" className="h-10 mx-auto mb-4" />
+            <Image src="/logo.png" alt="AI Pajak" width={112} height={40} className="h-10 w-auto mx-auto mb-4" />
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{t('title')}</h1>
           <p className="text-gray-500 mt-2 max-w-xl mx-auto">

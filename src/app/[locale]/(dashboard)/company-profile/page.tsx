@@ -315,11 +315,7 @@ export default function CompanyProfilePage() {
   );
 
   const completeness = profile.profile_completeness || 0;
-  const isComplete = completeness >= 100;
-  const isReady = completeness >= 80;
   const nextItems = getNextItems(profile);
-  const progressColor = isComplete ? 'bg-green-500' : isReady ? 'bg-emerald-500' : completeness >= 50 ? 'bg-amber-500' : 'bg-red-500';
-  const progressBg = isComplete ? 'from-green-50 to-emerald-50 border-green-200' : isReady ? 'from-emerald-50 to-teal-50 border-emerald-200' : completeness >= 50 ? 'from-amber-50 to-orange-50 border-amber-200' : 'from-red-50 to-rose-50 border-red-200';
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">

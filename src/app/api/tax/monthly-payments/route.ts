@@ -234,7 +234,7 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
       default:
         return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }

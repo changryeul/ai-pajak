@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
       total = count || 0;
     }
 
-    const totalPages = Math.ceil(total / validLimit);
+    const _totalPages = Math.ceil(total / validLimit);
 
     interface TaxFilingInfo {
       id: string;

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +39,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 export default function AnnualSimulationPage() {
   const t = useTranslations('annualSimulation');
   const tsc = useTranslations('taxScreen');
-  const { session } = useSession();
+  const { session: _session } = useSession();
   const {
     customerId,
     isConsultant,
@@ -48,8 +47,6 @@ export default function AnnualSimulationPage() {
     selectedCustomerId,
     setSelectedCustomerId,
   } = useEffectiveCustomerId();
-  const params = useParams();
-  const locale = params.locale as string;
   const currentYear = new Date().getFullYear();
 
   const [year, setYear] = useState(currentYear);

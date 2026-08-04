@@ -140,7 +140,7 @@ export default function CustomPricingPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, t]);
 
   useEffect(() => {
     loadQuotes();

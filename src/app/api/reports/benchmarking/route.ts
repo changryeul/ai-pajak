@@ -24,7 +24,7 @@ const BENCHMARKS: Record<string, { avgEffectiveRate: number; avgDeductionRatio: 
 async function handleBenchmark(req: RequestWithSession): Promise<Response> {
   const url = new URL(req.url);
   const industry = url.searchParams.get('industry') || 'RETAIL';
-  const revenue = parseInt(url.searchParams.get('revenue') || '0');
+  const _revenue = parseInt(url.searchParams.get('revenue') || '0');
   const effectiveRate = parseFloat(url.searchParams.get('effectiveRate') || '0');
   const deductionRatio = parseFloat(url.searchParams.get('deductionRatio') || '0');
 

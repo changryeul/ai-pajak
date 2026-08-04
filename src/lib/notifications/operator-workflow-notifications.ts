@@ -39,7 +39,7 @@ export async function notifyWorkflowStatusChange(
   admin: SupabaseClient,
   params: StatusChangeParams
 ): Promise<void> {
-  const { queueItem, previousStatus, newStatus, action, actorUserId, autoApproved } = params;
+  const { queueItem, previousStatus, newStatus, action: _action, actorUserId: _actorUserId, autoApproved } = params;
   const svc = new NotificationService(admin);
 
   try {

@@ -29,7 +29,7 @@ async function checkAdmin(userId: string): Promise<boolean> {
  * GET /api/admin/ai-usage - Get rate limits config + usage stats
  * PUT /api/admin/ai-usage - Update rate limits
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

@@ -49,7 +49,7 @@ export function validateNPWPCheckDigit(npwp: string): boolean {
   if (clean.length !== 15) return false;
 
   // Extract components
-  const identity = clean.slice(0, 9);
+  const _identity = clean.slice(0, 9);
   const branch = clean.slice(9, 12);
   const checkDigit = parseInt(clean.slice(12, 15), 10);
 

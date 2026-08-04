@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,12 +42,7 @@ export default function MonthlyPaymentDetailPage() {
     fakturType: 'KELUARAN', dpp: '', fakturNumber: '',
   });
 
-  useEffect(() => {
-    loadData();
-    loadCounterparties();
-  }, [taxType, period]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
       const endpoint = taxType === 'PPN' ? '/api/tax/ppn-faktur-monthly' : '/api/tax/pph23-transactions';
@@ -58,14 +53,19 @@ export default function MonthlyPaymentDetailPage() {
       if (d.success) setData(d.data);
     } catch { /* */ }
     finally { setIsLoading(false); }
-  };
+  }, [taxType, period, session?.customerId]);
 
-  const loadCounterparties = async () => {
+  const loadCounterparties = useCallback(async () => {
     if (!session?.customerId) return;
     const res = await fetch(`/api/tax/counterparties?customerId=${session.customerId}`);
     const d = await res.json();
     if (d.success) setCounterparties(d.data.counterparties);
-  };
+  }, [session?.customerId]);
+
+  useEffect(() => {
+    loadData();
+    loadCounterparties();
+  }, [loadData, loadCounterparties]);
 
   const handleSubmit = async () => {
     const endpoint = taxType === 'PPN' ? '/api/tax/ppn-faktur-monthly' : '/api/tax/pph23-transactions';

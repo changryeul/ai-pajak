@@ -157,7 +157,7 @@ export function calculateSummary(params: {
   const totalTaxBeforeCredits = taxDue;
 
   // Part G: Calculate tax credits with PPh 24 limit
-  const totalForeignTaxPaid = foreignIncome.reduce(
+  const _totalForeignTaxPaid = foreignIncome.reduce(
     (sum, fi) => sum + fi.foreignTaxPaid,
     0
   );

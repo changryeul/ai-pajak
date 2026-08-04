@@ -27,8 +27,7 @@ const supabaseAdmin = createClient(
 
 test.describe('Billing Invoice Tests', () => {
   let customerToken: string;
-  let advisorToken: string;
-
+  
   test.beforeAll(async ({ request }) => {
     customerToken = await loginAs(
       request,

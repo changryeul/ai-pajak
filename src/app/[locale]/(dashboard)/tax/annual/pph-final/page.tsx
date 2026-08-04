@@ -31,7 +31,7 @@ export default function PPhFinalAnnualPage() {
 
   const [step, setStep] = useState(1);
   const [year, setYear] = useState(currentYear - 1);
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [npwp, setNpwp] = useState('');
   const [umkmStartYear, setUmkmStartYear] = useState(0);
@@ -84,16 +84,7 @@ export default function PPhFinalAnnualPage() {
   const isBalanced = difference === 0;
 
   // Cumulative exemption tracking per month
-  const getMonthlyTax = (monthIdx: number): number => {
-    const cumulativeRevBefore = monthlyRevenue.slice(0, monthIdx).reduce((s, v) => s + v, 0);
-    const cumulativeRevAfter = cumulativeRevBefore + monthlyRevenue[monthIdx];
-    const exemptBefore = Math.min(cumulativeRevBefore, EXEMPTION);
-    const exemptAfter = Math.min(cumulativeRevAfter, EXEMPTION);
-    const newExempt = exemptAfter - exemptBefore;
-    const taxable = monthlyRevenue[monthIdx] - newExempt;
-    return Math.round(Math.max(taxable, 0) * UMKM_RATE);
-  };
-
+  
   const exemptionFormatted = fmtRp(EXEMPTION);
 
   const docItems = [

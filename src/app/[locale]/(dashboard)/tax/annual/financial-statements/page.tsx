@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,8 +63,6 @@ interface FSData {
 export default function FinancialStatementsPage() {
   const t = useTranslations('financialStatements');
   const { session } = useSession();
-  const params = useParams();
-  const locale = params.locale as string;
   const currentYear = new Date().getFullYear();
 
   const [year, setYear] = useState(currentYear - 1);
@@ -103,7 +100,7 @@ export default function FinancialStatementsPage() {
       fetch('/api/customers').then(r => r.json()).then(d => {
         const list = d.customers || [];
         setCustomers(list);
-        if (list.length > 0 && !customerId) setCustomerId(list[0].id);
+        if (list.length > 0) setCustomerId(prev => prev || list[0].id);
       }).catch(() => {});
     } else if (session?.customerId) {
       setCustomerId(session.customerId);

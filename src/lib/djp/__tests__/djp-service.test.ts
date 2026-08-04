@@ -367,7 +367,7 @@ describe('Filing Status Updates', () => {
     djp_error_message?: string;
   }
 
-  function createAcceptedUpdate(bpeNumber: string, bpeDate: string): FilingStatusUpdate {
+  function createAcceptedUpdate(bpeNumber: string, _bpeDate: string): FilingStatusUpdate {
     return {
       status: 'FILED',
       djp_submission_status: 'ACCEPTED',

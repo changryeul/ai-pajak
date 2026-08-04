@@ -218,7 +218,7 @@ function CustomerDashboardWithOnboarding({
 // Customer Dashboard
 function CustomerDashboard({
   session,
-  locale,
+  locale: _locale,
 }: {
   session: { customerId?: string; fullName?: string };
   locale: string;

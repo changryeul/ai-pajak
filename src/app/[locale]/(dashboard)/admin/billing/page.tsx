@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,9 +22,7 @@ export default function AdminBillingPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions'>('overview');
   const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => { loadData(); }, [activeTab]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
       if (activeTab === 'overview') {
@@ -38,7 +36,9 @@ export default function AdminBillingPage() {
       }
     } catch { /* */ }
     finally { setIsLoading(false); }
-  };
+  }, [activeTab]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const processRefund = async (txId: string) => {
     const res = await fetch('/api/admin/billing', {

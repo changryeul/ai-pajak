@@ -128,7 +128,7 @@ export function SPT1770SSPreview({
     } finally {
       setIsValidating(false);
     }
-  }, [data]);
+  }, [data, validationKey]);
 
   const handleDownload = async () => {
     if (!onDownloadPDF) return;

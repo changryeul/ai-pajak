@@ -17,7 +17,7 @@ import type { RequestWithSession } from '@/types/auth';
  */
 async function handleExportXml(req: RequestWithSession): Promise<Response> {
   try {
-    const { filingId, format } = await req.json() as { filingId: string; format?: string };
+    const { filingId, format: _format } = await req.json() as { filingId: string; format?: string };
 
     if (!filingId) {
       return NextResponse.json({ error: 'filingId is required' }, { status: 400 });

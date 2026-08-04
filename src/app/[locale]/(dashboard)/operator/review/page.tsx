@@ -58,7 +58,7 @@ export default function OperatorReviewPage() {
   const params = useParams();
   const locale = params.locale as string;
   const customerId = searchParams.get('customerId') || '';
-  const queueId = searchParams.get('queueId') || '';
+  const _queueId = searchParams.get('queueId') || '';
 
   const [customerName, setCustomerName] = useState('');
   const [documents, setDocuments] = useState<Document[]>([]);

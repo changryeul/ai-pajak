@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { Button } from '@/components/ui/button';
@@ -67,13 +67,13 @@ export function CustomerProfileCard({ initial }: Props) {
   const phoneRef = useRef<HTMLInputElement>(null);
   const credRef = useRef<HTMLInputElement>(null);
 
-  const fieldRefs: Record<Field, React.RefObject<HTMLInputElement | null>> = {
+  const fieldRefs: Record<Field, React.RefObject<HTMLInputElement | null>> = useMemo(() => ({
     name: nameRef,
     id: idRef,
     email: emailRef,
     phone: phoneRef,
     taxCredentials: credRef,
-  };
+  }), []);
 
   const scrollToFirstMissing = useCallback(() => {
     if (!completion.firstMissing) return;

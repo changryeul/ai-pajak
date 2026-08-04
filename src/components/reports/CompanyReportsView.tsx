@@ -82,7 +82,7 @@ export function CompanyReportsView() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [t]);
 
   const counts: Record<Tab, number> = {
     monthly: 1,

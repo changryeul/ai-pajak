@@ -132,8 +132,7 @@ export default function ReferralPage() {
                   { step: 2, icon: Users, title: t('referral.step2'), desc: t('referral.step2Desc', { reward: data.rewards.refereeReward }) },
                   { step: 3, icon: DollarSign, title: t('referral.step3'), desc: t('referral.step3Desc', { reward: data.rewards.referrerReward }) },
                 ].map(item => {
-                  const Icon = item.icon;
-                  return (
+                                    return (
                     <div key={item.step} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-bold text-pink-700">{item.step}</span>

@@ -45,7 +45,7 @@ export function InvoiceCaptureFlow() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [_selectedFile, setSelectedFile] = useState<File | null>(null);
   const [classification, setClassification] = useState<ClassificationData | null>(null);
   const [resolution, setResolution] = useState<ResolutionData | null>(null);
   const [savedResult, setSavedResult] = useState<SavedResult | null>(null);
@@ -206,6 +206,7 @@ export function InvoiceCaptureFlow() {
         {previewUrl && (
           <Card className="border-0 shadow-sm overflow-hidden">
             <CardContent className="p-0">
+              {/* eslint-disable-next-line @next/next/no-img-element -- blob 미리보기 URL, next/image 부적합 */}
               <img src={previewUrl} alt="Invoice preview" className="w-full max-h-48 object-contain bg-gray-50" />
             </CardContent>
           </Card>

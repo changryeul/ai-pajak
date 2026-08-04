@@ -39,13 +39,13 @@ interface GettingStartedGuideProps {
   userName?: string;
 }
 
-export function GettingStartedGuide({ customerId, userName }: GettingStartedGuideProps) {
+export function GettingStartedGuide({ customerId: _customerId, userName: _userName }: GettingStartedGuideProps) {
   const t = useTranslations();
   const params = useParams();
   const locale = params.locale as string;
   const [dismissed, setDismissed] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
-  const [isChecking, setIsChecking] = useState(true);
+  const [_isChecking, setIsChecking] = useState(true);
 
   const steps: GuideStep[] = [
     {

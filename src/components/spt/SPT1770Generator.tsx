@@ -160,17 +160,17 @@ export function SPT1770Generator({
     setTaxCredits((prev) => ({ ...prev, [field]: numValue }));
   };
 
-  const getTotalBusinessRevenue = () => {
+  const getTotalBusinessRevenue = useCallback(() => {
     return businessIncome.reduce((sum, b) => sum + (b.grossRevenue || 0), 0);
-  };
+  }, [businessIncome]);
 
-  const getTotalOtherIncome = () => {
+  const getTotalOtherIncome = useCallback(() => {
     return Object.values(otherIncome).reduce((a, b) => a + b, 0);
-  };
+  }, [otherIncome]);
 
-  const getTotalTaxCredits = () => {
+  const getTotalTaxCredits = useCallback(() => {
     return Object.values(taxCredits).reduce((a, b) => a + b, 0);
-  };
+  }, [taxCredits]);
 
   const generateSPT = useCallback(async () => {
     // Validate business income
@@ -240,6 +240,9 @@ export function SPT1770Generator({
     otherIncome,
     taxCredits,
     onComplete,
+    getTotalOtherIncome,
+    getTotalTaxCredits,
+    t,
   ]);
 
   const handleDownloadPDF = useCallback(async () => {
@@ -310,6 +313,9 @@ export function SPT1770Generator({
     businessIncome,
     otherIncome,
     taxCredits,
+    getTotalOtherIncome,
+    getTotalTaxCredits,
+    t,
   ]);
 
   if (step === 'preview' && sptData) {

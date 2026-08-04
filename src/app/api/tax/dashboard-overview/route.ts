@@ -15,7 +15,7 @@ import { UserRole } from '@/types/auth';
  * - Client status (consultant only)
  * - Recent submissions
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Auth via Supabase server client (cookie-based)
     const supabase = await createClient();
@@ -107,8 +107,8 @@ export async function GET(request: NextRequest) {
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
     const period = `${year}-${String(month).padStart(2, '0')}`;
-    const nextMonth = new Date(year, month, 1);
-    const nextMonthEnd = new Date(year, month + 1, 0);
+    const _nextMonth = new Date(year, month, 1);
+    const _nextMonthEnd = new Date(year, month + 1, 0);
 
     // Parallel data fetching
     const [queueData, calcData, filingData, customerData] = await Promise.all([

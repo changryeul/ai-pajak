@@ -147,7 +147,7 @@ export default function PPh23Page() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<Summary>({ totalGross: 0, totalTax: 0, transactionCount: 0 });
   const [counterparties, setCounterparties] = useState<Counterparty[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [generatingBP, setGeneratingBP] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -181,7 +181,7 @@ export default function PPh23Page() {
   const reqStorageKey = customerId ? `sptRequest:PPh23:${customerId}:${period}` : '';
   // Per-row "just saved" indicator for inline edit affordance (mirrors
   // MonthlyPayslipTab.tsx). Cleared after 1.5s so the ✓ flash is transient.
-  const [savedAt, setSavedAt] = useState<Record<string, number>>({});
+  const [_savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   // Form state
   const [fCounterparty, setFCounterparty] = useState('');
@@ -260,7 +260,7 @@ export default function PPh23Page() {
       fetch('/api/customers').then(r => r.json()).then(d => {
         const list = d.customers || [];
         setCustomers(list);
-        if (list.length > 0 && !customerId) setCustomerId(list[0].id);
+        if (list.length > 0) setCustomerId(prev => prev || list[0].id);
       }).catch(() => {});
     } else if (session?.customerId) {
       setCustomerId(session.customerId);

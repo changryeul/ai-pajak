@@ -28,7 +28,7 @@ export function EmployeeReviewTable({ rows, selectedId, onSelect, onRequest }: P
             <tr key={r.payslipId}
               className={selectedId === r.employeeId ? styles.sel : ''}
               role="button" tabIndex={0}
-              aria-selected={selectedId === r.employeeId}
+              aria-pressed={selectedId === r.employeeId}
               onClick={() => onSelect(r.employeeId)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {

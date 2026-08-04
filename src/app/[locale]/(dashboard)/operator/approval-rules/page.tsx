@@ -40,7 +40,7 @@ interface Statistics {
 
 export default function ApprovalRulesPage() {
   const t = useTranslations('operator');
-  const [rule, setRule] = useState<ApprovalRule | null>(null);
+  const [_rule, setRule] = useState<ApprovalRule | null>(null);
   const [stats, setStats] = useState<Statistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

@@ -134,5 +134,5 @@ export async function POST(request: NextRequest) {
   )(request as unknown as RequestWithSession, handlePost);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const _typeGuard = UserRole.CONSULTANT;

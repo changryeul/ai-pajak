@@ -96,6 +96,7 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
             <div className={styles.mb}>
               {photo.isPdf
                 ? <iframe src={photo.url} title="증빙" style={{ width: '100%', height: 480, border: 0, borderRadius: 8 }} />
+                // eslint-disable-next-line @next/next/no-img-element -- 5분 서명 URL, next/image 부적합
                 : <img src={photo.url} alt="증빙" style={{ maxWidth: '100%', borderRadius: 8 }} />}
             </div>
             <div className={styles.mf}><button className={styles.btn} onClick={() => setPhoto(null)}>닫기</button></div>

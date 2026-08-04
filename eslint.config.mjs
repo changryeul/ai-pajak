@@ -30,6 +30,22 @@ const REACT_COMPILER_NOISE_DEMOTED = {
   },
 };
 
+// Unused-vars: allow the universal "_-prefix means intentionally unused"
+// convention — deliberate discards (unused destructure slots, required-but-
+// ignored callback params, kept-for-reference locals like _legacy*) are named
+// with a leading underscore instead of carrying eslint-disable comments.
+const UNUSED_VARS_UNDERSCORE_CONVENTION = {
+  rules: {
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      argsIgnorePattern: "^_",
+      varsIgnorePattern: "^_",
+      caughtErrorsIgnorePattern: "^_",
+      destructuredArrayIgnorePattern: "^_",
+      ignoreRestSiblings: true,
+    }],
+  },
+};
+
 // scripts/ are operational smoke/seed tools, not product code. Their JSON
 // assertions read ad-hoc API payloads where a full type per response shape
 // adds churn without safety (tsc still type-checks them on build). Demote
@@ -45,6 +61,7 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   REACT_COMPILER_NOISE_DEMOTED,
+  UNUSED_VARS_UNDERSCORE_CONVENTION,
   SCRIPTS_JSON_ANY_DEMOTED,
   // Override default ignores of eslint-config-next.
   globalIgnores([
@@ -53,6 +70,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // gstack QA tooling artifacts — not project code
+    ".gstack/**",
   ]),
 ]);
 

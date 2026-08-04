@@ -100,7 +100,7 @@ export default function AccountingSettingsPage() {
     } else if (oauthStatus === 'error') {
       showMsg('error', oauthMessage || t('oauthFailed'));
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleOneClickOAuth = async () => {
     if (!selectedCustomer) {

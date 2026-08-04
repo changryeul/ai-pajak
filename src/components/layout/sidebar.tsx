@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -69,19 +70,12 @@ interface NavSection {
   items: NavItem[];
 }
 
-const taxRoles = [UserRole.CUSTOMER, UserRole.CONSULTANT, UserRole.TAX_ADVISOR];
 const consultantRoles = [UserRole.CONSULTANT, UserRole.TAX_ADVISOR];
 // 3-tier operator hierarchy (Phase K-1):
 //   TAX_OPERATOR             - 상담원
 //   TAX_OPERATOR_SUPERVISOR  - 수퍼바이저 (approvals, queue distribution)
 //   TAX_OPERATOR_MASTER      - 마스터 (platform-wide stats, custom pricing)
 // TAX_OPERATOR_LEAD kept in operatorRoles for legacy users but should not be assigned to new users.
-const operatorRoles = [
-  UserRole.TAX_OPERATOR,
-  UserRole.TAX_OPERATOR_LEAD,
-  UserRole.TAX_OPERATOR_SUPERVISOR,
-  UserRole.TAX_OPERATOR_MASTER,
-];
 const supervisorRoles = [
   UserRole.TAX_OPERATOR_LEAD,
   UserRole.TAX_OPERATOR_SUPERVISOR,
@@ -445,7 +439,7 @@ export function Sidebar() {
           {/* Logo (non-ops roles) */}
           <div className="flex h-16 items-center justify-between px-6">
             <Link href={`/${locale}/dashboard`} className="flex items-center gap-2" onClick={close}>
-              <img src="/logo.png" alt="AI Pajak" className="h-9" />
+              <Image src="/logo.png" alt="AI Pajak" width={100} height={36} className="h-9 w-auto" />
             </Link>
             <button onClick={close} className="lg:hidden rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
               <X className="h-5 w-5" />

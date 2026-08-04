@@ -96,7 +96,7 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
   const locale = (params?.locale as string) || 'id';
 
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<ProfileSnapshot | null>(null);
+  const [_profile, setProfile] = useState<ProfileSnapshot | null>(null);
   // 2026-06-28: /api/customer/profile 가 함께 반환하는 completion 점수 (0..100).
   // 100 미만일 때만 상단에 LinkedIn-style 안내 배너 노출 → /my-profile 로 점프.
   const [profileCompletion, setProfileCompletion] = useState<{
@@ -104,10 +104,10 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
     firstMissing: string | null;
   } | null>(null);
   const [filings, setFilings] = useState<Filing[]>([]);
-  const [nationality, setNationality] = useState<Nationality>('KR');
-  const [taxRule, setTaxRule] = useState<Nationality>('KR');
-  const [spouseMode, setSpouseMode] = useState<'joint' | 'separate'>('separate');
-  const [dependents, setDependents] = useState(0);
+  const [_nationality, setNationality] = useState<Nationality>('KR');
+  const [_taxRule, setTaxRule] = useState<Nationality>('KR');
+  const [_spouseMode, setSpouseMode] = useState<'joint' | 'separate'>('separate');
+  const [_dependents, setDependents] = useState(0);
   const [fundSources, setFundSources] = useState<Record<string, boolean>>({});
 
   // Load profile + filings

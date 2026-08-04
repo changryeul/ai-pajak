@@ -111,7 +111,7 @@ interface ActivityLog {
 
 export default function CustomerDetailPage() {
   const t = useTranslations('customers');
-  const tc = useTranslations('common');
+  const _tc = useTranslations('common');
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;

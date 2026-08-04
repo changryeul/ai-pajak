@@ -58,7 +58,6 @@ interface SectionResult {
 // Fallback rate when file's VAT cell is empty/zero. 0.12 = current Indonesian
 // PMK 131/2024 standard rate. If the calculation should use 11% or 0, the file
 // already carries the right value — the fallback only fires when missing.
-const PPN_DEFAULT_RATE = 0.12;
 const MAX_ROWS_PER_SECTION = 500;
 
 async function processSection(
@@ -164,62 +163,6 @@ async function processSection(
     });
 
   return { inserted, errors, luxuryCount };
-}
-
-/**
- * Phase 3.3: auto-classify each text input against luxury_item_classifications.
- * Pre-fetches LUXURY rows once, extracts distinct ≥5-char tokens (excluding
- * stop words), then substring-matches each text. Returns a boolean per input.
- *
- * v1 algorithm: simple substring, no NLP. False positives intentional — user
- * can override via the inline-edit luxury toggle (Phase 3.2).
- */
-// 2026-06-24: false-positive 방지를 위해 일반 명사 strong stop list.
-// PMK 131/2024 사치품의 '구분 단어' (jet, yacht, diamond 등) 외에 일반
-// 비즈니스 단어가 keyword 가 되면 "Topindo Lucky Sports" 같은 vendor
-// 이름이 골프공 거래도 luxury 로 분류해버린다.
-const LUXURY_STOP_WORDS = new Set([
-  'premium', 'luxury', 'imported', 'private', 'fresh', 'large', 'small',
-  'item', 'with', 'from', 'category', 'class', 'grade', 'special',
-  // 2026-06-24 추가 — vendor / description 에 흔히 등장하는 일반 단어
-  'sports', 'sport', 'course', 'package', 'years', 'equipment',
-  'price', 'property', 'membership', 'collectibles',
-]);
-
-async function classifyLuxuryBatch(
-  sb: ReturnType<typeof getSupabaseAdmin>,
-  texts: string[],
-): Promise<boolean[]> {
-  if (texts.length === 0) return [];
-  const { data: luxuryRows, error } = await sb
-    .from('luxury_item_classifications')
-    .select('item_name')
-    .eq('category', 'LUXURY');
-  if (error || !luxuryRows || luxuryRows.length === 0) {
-    return texts.map(() => false);
-  }
-  const keywords = new Set<string>();
-  for (const row of luxuryRows) {
-    const words = String(row.item_name)
-      .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .split(/\s+/)
-      .filter((w) => w.length >= 5 && !LUXURY_STOP_WORDS.has(w) && !/^\d+$/.test(w));
-    words.forEach((w) => keywords.add(w));
-  }
-  // 2026-06-24: word boundary regex 로 정확한 단어 매칭 (substring 차단)
-  // 'sports' 가 'sportswear' / 'Topindo Lucky Sports' 에 false 매칭 안 되도록.
-  const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const keywordRegexes = Array.from(keywords).map(
-    (kw) => new RegExp(`\\b${escapeRe(kw)}\\b`, 'i'),
-  );
-  return texts.map((text) => {
-    if (!text) return false;
-    for (const re of keywordRegexes) {
-      if (re.test(text)) return true;
-    }
-    return false;
-  });
 }
 
 async function handle(req: RequestWithSession): Promise<Response> {

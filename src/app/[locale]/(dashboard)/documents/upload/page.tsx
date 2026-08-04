@@ -1,16 +1,14 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
-import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Upload, Camera, Image, FileText, Loader2, CheckCircle, AlertTriangle,
+  Upload, Camera, Image as ImageIcon, FileText, Loader2, CheckCircle, AlertTriangle,
   X, Send, Eye, Trash2, Sparkles,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -45,10 +43,6 @@ const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
 
 export default function DocumentUploadPage() {
-  const { session } = useSession();
-  const router = useRouter();
-  const params = useParams();
-  const locale = params.locale as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations('documentUpload');
@@ -340,7 +334,7 @@ export default function DocumentUploadPage() {
               disabled={uploading}
               className="flex flex-col items-center gap-3 p-6 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer"
             >
-              <Image className="h-8 w-8 text-emerald-600" />
+              <ImageIcon className="h-8 w-8 text-emerald-600" />
               <div className="text-center">
                 <p className="font-medium text-sm text-emerald-900">{t('photoUpload')}</p>
                 <p className="text-[11px] text-emerald-600">{t('photoUploadDesc')}</p>
@@ -521,6 +515,7 @@ export default function DocumentUploadPage() {
             </div>
             <div className="p-4">
               {previewDoc.mime_type?.startsWith('image/') ? (
+                // eslint-disable-next-line @next/next/no-img-element -- 서명 URL 미리보기, next/image 부적합
                 <img src={previewDoc.file_url!} alt={previewDoc.file_name} className="max-w-full mx-auto rounded" />
               ) : previewDoc.mime_type === 'application/pdf' ? (
                 <iframe src={previewDoc.file_url!} className="w-full h-[60vh] rounded" />

@@ -28,8 +28,7 @@ let testTransactionId: string;
 
 test.describe('Payment Flow Tests', () => {
   let customerToken: string;
-  let systemServiceKey: string;
-
+  
   test.beforeAll(async ({ request }) => {
     // Login as customer
     customerToken = await loginAs(

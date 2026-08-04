@@ -96,7 +96,7 @@ export default function SPTMasaPage() {
   const [resolution, setResolution] = useState<{ rate: number; reason: string } | null>(null);
 
   // CSV Upload
-  const [showUpload, setShowUpload] = useState(false);
+  const [_showUpload, _setShowUpload] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ totalRows: number; insertedCount: number; errorRows: number; errors?: Array<{ row: number; error: string }> } | null>(null);
 
   // Counterparty search

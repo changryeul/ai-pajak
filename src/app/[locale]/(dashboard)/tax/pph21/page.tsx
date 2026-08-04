@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,22 +85,19 @@ const emptyForm = {
 
 export default function PPh21PayrollPage() {
   const { session, isLoading: sessionLoading } = useSession();
-  const params = useParams();
-  const locale = params.locale as string;
-  const router = useRouter();
   const tp = useTranslations('pph21Page');
   const tsc = useTranslations('taxScreen');
   const tps = useTranslations('monthlyPayslip');
 
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   // 2026-06-24: master 탭 제거 후 payslipMode / activeTab 의미 없어져 정리.
   // 2026-06-21: 직원 마스터 sync 상태 (이전 달까지 sync 됐는지)
-  const [syncStatus, setSyncStatus] = useState<{ syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null>(null);
+  const [_syncStatus, setSyncStatus] = useState<{ syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   // 월별 급여 자료 (MonthlyPayslipTab) 재조회 트리거 — 업로드 완료 시 +1
   const [payslipReload, setPayslipReload] = useState(0);
@@ -123,9 +119,6 @@ export default function PPh21PayrollPage() {
     }
     return groups;
   }, [employees]);
-
-  // TER calculation results
-  const [calcResults, setCalcResults] = useState<Record<string, { taxAmount: number; terRate: number }>>({});
 
   // Consultant/customer-aware customerId. PPh 21 needs employee/payroll
   // data which only COMPANY customers have, so we filter the consultant's
@@ -200,47 +193,7 @@ export default function PPh21PayrollPage() {
     loadSyncStatus();
   }, [sessionLoading, loadEmployees, loadSyncStatus]);
 
-  const startEdit = (emp: Employee) => {
-    setForm({
-      id: emp.id,
-      employeeName: emp.employee_name,
-      employeeNpwp: emp.employee_npwp || '',
-      employeeNik: emp.employee_nik || '',
-      ptkpCategory: emp.ptkp_category,
-      grossSalary: String(emp.gross_salary),
-      jhtEmployee: String(emp.jht_employee),
-      jpEmployee: String(emp.jp_employee),
-      otherDeductions: String(emp.other_deductions),
-      positionAllowance: emp.position_allowance != null ? String(emp.position_allowance) : '',
-      mealAllowance: emp.meal_allowance != null ? String(emp.meal_allowance) : '',
-      transportAllowance: emp.transport_allowance != null ? String(emp.transport_allowance) : '',
-      otherAllowance: emp.other_allowances != null ? String(emp.other_allowances) : '',
-      bpjsKesehatan: emp.bpjs_kesehatan != null ? String(emp.bpjs_kesehatan) : '',
-      bonus: emp.bonus != null ? String(emp.bonus) : '',
-      thr: emp.thr != null ? String(emp.thr) : '',
-      employeeNumber: emp.employee_number || '',
-      position: emp.position || '',
-      department: emp.department || '',
-      workerType: emp.worker_type || 'REGULAR',
-      employmentStatus: emp.employment_status || '',
-      hireDate: emp.hire_date || '',
-      resignDate: emp.resign_date || '',
-      birthDate: emp.birth_date || '',
-      gender: emp.gender || '',
-      maritalStatus: emp.marital_status || '',
-      email: emp.email || '',
-      phone: emp.phone || '',
-      address: emp.address || '',
-      bankName: emp.bank_name || '',
-      bankAccountNo: emp.bank_account_no || '',
-      bankAccountName: emp.bank_account_name || '',
-      emergencyContactName: emp.emergency_contact_name || '',
-      emergencyContactPhone: emp.emergency_contact_phone || '',
-      notes: emp.notes || '',
-    });
-    setShowForm(true);
-  };
-
+  
   const saveEmployee = async () => {
     if (!customerId || !form.employeeName || !form.grossSalary) {
       showMsg('error', tp('nameAndSalaryRequired'));
@@ -303,61 +256,9 @@ export default function PPh21PayrollPage() {
     finally { setIsSaving(false); }
   };
 
-  const deleteEmployee = async (id: string) => {
-    if (!confirm(tp('deactivateConfirm'))) return;
-    try {
-      const res = await fetch(`/api/tax/employees?id=${id}`, { method: 'DELETE' });
-      if ((await res.json()).success) { showMsg('success', tp('employeeDeactivated')); loadEmployees(); }
-    } catch { /* */ }
-  };
-
+  
   // Calculate TER for all employees
-  const calculateAll = async () => {
-    setIsSaving(true);
-    try {
-      const month = new Date().getMonth() + 1;
-      // employee_payroll.employment_status (PKWTT/PKWT/Consultant) 를
-      // calculator 가 기대하는 PMK 66/2023 숫자 코드 (1/2/3) 로 역매핑.
-      // 빈 값이면 undefined — calculator 는 그 경우 status 1 가정.
-      const STATUS_REVERSE: Record<string, 1 | 2 | 3> = { PKWTT: 1, PKWT: 2, Consultant: 3 };
-      const res = await fetch('/api/tax/pph21-bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          employees: employees.map(e => ({
-            employee_name: e.employee_name,
-            employee_npwp: e.employee_npwp || '',
-            employee_nik: e.employee_nik || '',
-            ptkp_category: e.ptkp_category,
-            gross_salary: e.gross_salary,
-            jht_employee: e.jht_employee,
-            jp_employee: e.jp_employee,
-            position_allowance: e.position_allowance,
-            other_deductions: e.other_deductions,
-            has_npwp: !!e.employee_npwp,
-            month,
-            employment_status: e.employment_status
-              ? STATUS_REVERSE[e.employment_status as keyof typeof STATUS_REVERSE]
-              : undefined,
-          })),
-          period: 'monthly',
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        const results: Record<string, { taxAmount: number; terRate: number }> = {};
-        (data.data.results || []).forEach((r: { employee_name: string; tax_amount: number; effective_rate: number }, i: number) => {
-          if (employees[i]) {
-            results[employees[i].id] = { taxAmount: r.tax_amount, terRate: r.effective_rate };
-          }
-        });
-        setCalcResults(results);
-        showMsg('success', tp('calculationComplete', { count: employees.length }));
-      }
-    } catch { showMsg('error', 'Calculation failed'); }
-    finally { setIsSaving(false); }
-  };
-
+  
   if (!session) {
     return <div className="container mx-auto py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" /></div>;
   }
@@ -725,7 +626,7 @@ function PPh21DataInputSection({
     }, 50);
   };
 
-  /* eslint-disable @typescript-eslint/no-unused-vars */
+   
   const _legacyDownloadTemplate = async () => {
     try {
     const headers = [
@@ -832,7 +733,7 @@ function PPh21DataInputSection({
       showMsg('error', `${tp('templateDownloadFailed')}: ${err instanceof Error ? err.message : 'unknown'}`);
     }
   };
-  /* eslint-enable @typescript-eslint/no-unused-vars */
+   
 
   /**
    * Standard PPh21 template — served from `public/templates/` so the file

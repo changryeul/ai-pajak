@@ -11,7 +11,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
  * Revenue from subscription/billing vs time spent (estimated).
  */
 async function handleProfitability(req: RequestWithSession): Promise<Response> {
-  const url = new URL(req.url);
+  const _url = new URL(req.url);
   const { role, userId } = req.session;
 
   if (role !== 'CONSULTANT' && role !== 'TAX_ADVISOR') {
@@ -106,7 +106,7 @@ async function handleProfitability(req: RequestWithSession): Promise<Response> {
     };
 
     return NextResponse.json({ success: true, data: { clients: clientStats, summary } });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to generate profitability report' }, { status: 500 });
   }
 }

@@ -53,7 +53,7 @@ export default function AnomalyDetectionPage() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
-  const { session, isLoading: isSessionLoading } = useSession();
+  const { session: _session, isLoading: isSessionLoading } = useSession();
   const t = useTranslations('pages');
   const tp = useTranslations('sptPages');
   const tk = useTranslations('killer');

@@ -241,7 +241,7 @@ async function setupTaxPartner(
   fullName: string,
   phone: string | null,
   firmName?: string,
-  firmRegistrationNumber?: string
+  _firmRegistrationNumber?: string
 ) {
   // 1. Create tax_partner (idempotent by user_id via consultant lookup)
   const { data: existingConsultant } = await admin

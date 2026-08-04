@@ -379,6 +379,7 @@ function SecurityPageInner() {
             <p className="text-sm font-semibold text-slate-900">{t('twoFactor.verifyTitle')}</p>
             <p className="text-xs text-slate-500 mt-1">{t('twoFactor.verifyDesc')}</p>
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 mt-4">
+              {/* eslint-disable-next-line @next/next/no-img-element -- data-URI QR, next/image 부적합 */}
               <img src={mfaSetup.qrCode} alt="2FA QR" className="w-48 h-48 bg-white rounded-md border" />
               <div className="flex flex-col gap-3">
                 <p className="text-xs text-slate-500">

@@ -16,7 +16,7 @@ import { sendTelegram } from '@/lib/notifications/telegram-service';
  * Finds all items with status EBILLING_GENERATED or PAYMENT_PENDING
  * and sends reminders to the customer.
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const admin = getSupabaseAdmin();
 

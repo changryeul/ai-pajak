@@ -13,8 +13,7 @@ import { TEST_USERS } from './fixtures/users';
 
 test.describe('SPT 1770 SS (Simple Employee Form)', () => {
   let advisorToken: string;
-  let customerToken: string;
-
+  
   const createValid1770SSRequest = (customerId: string, taxYear: number = 2024) => ({
     customerId,
     taxYear,

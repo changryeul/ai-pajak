@@ -58,7 +58,6 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
 // PMK 131/2024: 2025-01-01 부터 statutory rate 12% (essential 은 DPP × 11/12 후
 // 12% 적용 = effective 11%). UI 가 ppn 을 직접 계산해서 보내면 그 값을 우선
 // 사용하고, 없을 때만 fallback 으로 12% 적용 (bulk-import 와 동일 패턴).
-const PPN_DEFAULT_RATE = 0.12;
 
 async function handlePost(req: RequestWithSession): Promise<Response> {
   try {
