@@ -41,9 +41,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       .order('employee_name', { ascending: true })
       .limit(500),
     admin.from('employee_change_log')
-      .select('id, employee_id, section, field, old_value, new_value, created_at')
+      .select('id, employee_id, section, field, old_value, new_value, changed_at')
       .eq('customer_id', q.customer_id)
-      .order('created_at', { ascending: false })
+      .order('changed_at', { ascending: false })
       .limit(10),
   ]);
 
@@ -80,7 +80,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
     field: c.field,
     oldValue: c.old_value,
     newValue: c.new_value,
-    changedAt: c.created_at,
+    changedAt: c.changed_at,
   }));
 
   const summary = {
