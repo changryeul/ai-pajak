@@ -10,6 +10,12 @@ const LABEL_KEY: Record<string, string> = {
   unreviewed: 'statusUnreviewed', inReview: 'statusInReview',
   request: 'statusRequest', reviewed: 'statusReviewed',
 };
+// djp_submission_queue.tax_type → 카드 표기 (미지 타입은 raw 표기)
+const TAX_TYPE_LABELS: Record<string, string> = {
+  PPh21: 'PPh 21', PPh23: '원천세', PPN: 'PPN', PPh_FINAL: 'PPh Final',
+  PPh25: 'PPh 25', PPh4_2: 'PPh 4(2)', PPh15: 'PPh 15', PPh22: 'PPh 22',
+  PPh26: 'PPh 26', SPT_TAHUNAN: '연 신고(SPT)',
+};
 
 interface Props {
   items: QueueListItem[];
@@ -55,7 +61,11 @@ export function CustomerWorklist({ items, selectedId, onSelect, counts }: Props)
                     <b>{it.customer?.customer_name ?? '—'}</b>
                     <span className={`${styles.badge} ${styles[cls]}`}>{text}</span>
                   </div>
-                  <span>{it.customer?.npwp ?? 'NPWP 없음'} · PPh 21 · {it.tax_period_year}-{String(it.tax_period_month).padStart(2, '0')}</span>
+                  <span>{it.customer?.npwp ?? 'NPWP 없음'} · {TAX_TYPE_LABELS[it.tax_type] ?? it.tax_type} · {
+                    it.tax_type === 'SPT_TAHUNAN'
+                      ? `${it.tax_period_year} 회계연도`
+                      : `${it.tax_period_year}-${String(it.tax_period_month).padStart(2, '0')}`
+                  }</span>
                 </div>
               );
             })}
