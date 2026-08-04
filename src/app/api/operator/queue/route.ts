@@ -25,7 +25,8 @@ type QueueStatus =
   | 'FAILED';
 
 const STATUS_TRANSITIONS: Record<string, { from: QueueStatus | QueueStatus[] | 'any'; to: QueueStatus }> = {
-  'review':            { from: 'PENDING',            to: 'DATA_REVIEW' },
+  // PENDING_DOCS ↔ DATA_REVIEW: 자료요청 후 고객이 보완하면 검토 재개.
+  'review':            { from: ['PENDING', 'PENDING_DOCS'], to: 'DATA_REVIEW' },
   'request-approval':  { from: 'DATA_REVIEW',        to: 'PENDING_APPROVAL' },
   'approve':           { from: 'PENDING_APPROVAL',   to: 'APPROVED' },
   'reject':            { from: 'PENDING_APPROVAL',   to: 'DATA_REVIEW' },

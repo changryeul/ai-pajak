@@ -12,6 +12,7 @@ interface ApprovalState {
 export function ApprovalActions({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const [state, setState] = useState<ApprovalState | null>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState(false);
   const [reassigning, setReassigning] = useState(false);
 
@@ -24,15 +25,34 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
   }, [queueId]);
   useEffect(() => { load(); }, [load]);
 
+  // 실패를 조용히 삼키지 않는다 — 상태기계 400 등을 상담원에게 그대로 보인다.
+  const call = async (action: string, extra?: Record<string, unknown>): Promise<boolean> => {
+    const r = await fetch('/api/operator/queue', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: queueId, action, ...extra }),
+    });
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+      setError((j as { error?: string }).error || `요청 실패 (${r.status})`);
+      return false;
+    }
+    return true;
+  };
+
   const act = async (action: string, extra?: Record<string, unknown>) => {
     setBusy(true);
+    setError(null);
     try {
-      await fetch('/api/operator/queue', {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: queueId, action, ...extra }),
-      });
+      // 자동 큐 생성 항목은 PENDING(또는 자료요청 후 PENDING_DOCS) 에서 시작 —
+      // 검토완료 요청 전에 검토 시작(review) 전이를 선행한다.
+      if (action === 'request-approval' && (state?.status === 'PENDING' || state?.status === 'PENDING_DOCS')) {
+        if (!(await call('review'))) { await load(); return; }
+      }
+      await call(action, extra);
       await load();
       onChanged();
+    } catch {
+      setError('네트워크 오류 — 다시 시도해주세요.');
     } finally { setBusy(false); }
   };
 
@@ -43,6 +63,9 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
       {rejectedReason && (
         <div className={styles.blocked} style={{ maxWidth: 360 }}>반려 사유: {rejectedReason}</div>
+      )}
+      {error && (
+        <div className={styles.blocked} style={{ maxWidth: 360 }}>{error}</div>
       )}
 
       <div style={{ display: 'flex', gap: 8 }}>
