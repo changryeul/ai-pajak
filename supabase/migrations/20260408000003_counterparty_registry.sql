@@ -1,3 +1,6 @@
+-- gin_trgm_ops 인덱스에 필요 — hosted 는 이미 활성, 로컬 fresh replay 용 idempotent guard.
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 -- Global Counterparty Registry — 거래 상대방 공유 지식베이스
 -- 한 고객이 등록한 거래처 정보를 다른 고객이 재사용할 수 있도록 NPWP 기반 글로벌 레지스트리 생성.
 -- 기존 tax_counterparty는 유지 (customer-scoped 관계 기록), registry_id로 레지스트리 참조.
