@@ -38,7 +38,35 @@ export const TAX_VIEW_TO_TYPE: Record<string, string> = {
   withholding: 'PPh23',
   ppn: 'PPN',
   umkm: 'PPh_FINAL',
+  annual: 'SPT_TAHUNAN',
 };
+
+export interface AnnualDocRow {
+  id: string;
+  docType: string;
+  fileName: string;
+  uploadedAt: string;
+  sizeBytes: number | null;
+}
+export interface AnnualDetail {
+  queueId: string; customerId: string; fiscalYear: number; status: string;
+  summary: {
+    closingType: 'UMKM' | 'PPH25' | null;
+    serviceLabel: string | null;
+    fiscalYear: number;
+    currentStep: string | null;
+    sessionStatus: string | null;
+    signedStatementsUploaded: boolean;
+    documentCount: number;
+    submissionStatus: string | null;
+    submissionChannel: string | null;
+    submittedAt: string | null;
+    bpeNumber: string | null;
+    ntpn: string | null;
+  };
+  flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
+  rows: AnnualDocRow[];
+}
 
 export interface UmkmRow {
   id: string;

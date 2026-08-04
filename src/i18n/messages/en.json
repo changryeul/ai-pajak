@@ -10713,6 +10713,7 @@
     "umkmTitle": "Prepaid Corporate Tax (PPh Final / 25)",
     "umkmRecordCount": "Payment Records",
     "umkmTotalDue": "Total Due",
-    "umkmTotalPaid": "Total Paid"
+    "umkmTotalPaid": "Total Paid",
+    "annualTitle": "Annual Return (SPT Tahunan)"
   }
 }

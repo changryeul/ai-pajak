@@ -37,7 +37,7 @@ const STATUS_TRANSITIONS: Record<string, { from: QueueStatus | QueueStatus[] | '
 
 const SUPERVISOR_ACTIONS = ['approve', 'reject', 'reassign'];
 
-const VALID_TAX_TYPES = ['PPh21', 'PPh23', 'PPN', 'PPh_FINAL', 'PPh4_2', 'PPh15', 'PPh22', 'PPh26'];
+const VALID_TAX_TYPES = ['PPh21', 'PPh23', 'PPN', 'PPh_FINAL', 'PPh4_2', 'PPh15', 'PPh22', 'PPh26', 'SPT_TAHUNAN'];
 
 async function getOperatorUser() {
   const supabase = await createClient();

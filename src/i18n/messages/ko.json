@@ -10835,6 +10835,7 @@
     "umkmTitle": "선납법인세 (PPh Final / 25)",
     "umkmRecordCount": "납부 레코드",
     "umkmTotalDue": "총 납부할 세액",
-    "umkmTotalPaid": "총 납부액"
+    "umkmTotalPaid": "총 납부액",
+    "annualTitle": "연 신고 (SPT Tahunan)"
   }
 }

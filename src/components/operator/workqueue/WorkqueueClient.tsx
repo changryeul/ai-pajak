@@ -8,6 +8,7 @@ import { Pph21ReviewPanel } from './Pph21ReviewPanel';
 import { WithholdingReviewPanel } from './WithholdingReviewPanel';
 import { PpnReviewPanel } from './PpnReviewPanel';
 import { UmkmReviewPanel } from './UmkmReviewPanel';
+import { AnnualReviewPanel } from './AnnualReviewPanel';
 import { RequestDrawer } from './RequestDrawer';
 import { STATUS_LABEL_MAP, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
 
@@ -17,6 +18,7 @@ const PANEL_BY_VIEW: Partial<Record<TaxView, typeof Pph21ReviewPanel>> = {
   withholding: WithholdingReviewPanel,
   ppn: PpnReviewPanel,
   umkm: UmkmReviewPanel,
+  annual: AnnualReviewPanel,
 };
 
 const now = new Date();
@@ -35,6 +37,14 @@ export function WorkqueueClient({ role }: { role?: string }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // 연 신고(annual)는 회계연도 단위라 월 필터를 걸지 않는다 (큐 행은 모두
+  // month=12). 나머지 세목은 (year, month) 귀속월 필터.
+  const listUrl = useCallback(() => {
+    const [y, m] = period.split('-');
+    const base = `/api/operator/queue?taxType=${TAX_VIEW_TO_TYPE[taxView]}&year=${y}&limit=200`;
+    return taxView === 'annual' ? base : `${base}&month=${Number(m)}`;
+  }, [period, taxView]);
+
   // NOTE: limit=200 — counts and the status filter are computed client-side over
   // this single page of results. A period with >200 PPh21 queue items would
   // under-count (no silent cap: this is the documented MVP ceiling).
@@ -43,15 +53,14 @@ export function WorkqueueClient({ role }: { role?: string }) {
     (async () => {
       setError(null);
       try {
-        const [y, m] = period.split('-');
-        const r = await fetch(`/api/operator/queue?taxType=${TAX_VIEW_TO_TYPE[taxView]}&year=${y}&month=${Number(m)}&limit=200`);
+        const r = await fetch(listUrl());
         const j = await r.json();
         if (active && j.success) setItems(j.data.items as QueueListItem[]);
         else if (active && !j.success) setError('목록을 불러오지 못했습니다.');
       } catch { if (active) setError('목록을 불러오지 못했습니다.'); }
     })();
     return () => { active = false; };
-  }, [period, taxView]);
+  }, [listUrl]);
 
   // One-shot refresh handed to Pph21ReviewPanel as onChanged (no active flag —
   // it's not tied to an effect lifecycle). Catches so onChanged={load} never
@@ -59,13 +68,12 @@ export function WorkqueueClient({ role }: { role?: string }) {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [y, m] = period.split('-');
-      const r = await fetch(`/api/operator/queue?taxType=${TAX_VIEW_TO_TYPE[taxView]}&year=${y}&month=${Number(m)}&limit=200`);
+      const r = await fetch(listUrl());
       const j = await r.json();
       if (j.success) setItems(j.data.items as QueueListItem[]);
       else setError('목록을 불러오지 못했습니다.');
     } catch { setError('목록을 불러오지 못했습니다.'); }
-  }, [period, taxView]);
+  }, [listUrl]);
 
   const counts = useMemo(() => {
     const c = { all: items.length, unreviewed: 0, inReview: 0, request: 0, reviewed: 0 };
