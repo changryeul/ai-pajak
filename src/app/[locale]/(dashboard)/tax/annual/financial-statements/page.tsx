@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   BookOpen, Loader2, CheckCircle, AlertTriangle, Sparkles,
-  FileText, DollarSign, TrendingUp, TrendingDown, ArrowRight, RefreshCw, Download, X,
+  FileText, DollarSign, TrendingUp, RefreshCw, Download, X,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 

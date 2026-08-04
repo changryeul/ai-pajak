@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   FileText, Receipt, Loader2, CheckCircle, AlertTriangle,
-  Plus, DollarSign, Globe, Shield, ClipboardList, Send,
+  Plus, DollarSign, Shield, ClipboardList, Send,
   Sparkles, BarChart3, Upload, Download, Trash2, UserPlus, Camera,
 } from 'lucide-react';
 import { generateTemplate } from '@/lib/tax/bulk-import/csv-parser';

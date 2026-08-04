@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { loginAs, createAuthHeaders } from './auth/login.helper';
-import { TEST_USERS, TEST_BILLING } from './fixtures/users';
+import { TEST_USERS } from './fixtures/users';
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import * as path from 'path';

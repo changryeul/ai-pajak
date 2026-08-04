@@ -13,9 +13,6 @@ import {
   getPTKPDescription,
 } from './calculator';
 import type {
-  SPT1770SData,
-  SPT1770SOtherIncome,
-  SPT1770STaxCredits,
   SpouseIncomeData,
 } from './types';
 import type { TaxpayerData, PTKPStatus, IncomeSource1721A1 } from '../shared/types';

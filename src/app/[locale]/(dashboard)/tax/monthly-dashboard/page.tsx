@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useSession } from '@/hooks/useSession';
 import {
   Loader2, CheckCircle, AlertTriangle, Clock, FileText,
-  Receipt, DollarSign, Shield, TrendingUp, ArrowRight,
-  Sparkles, Calendar, BarChart3, PieChart, CalendarClock, Wallet,
+  Receipt, DollarSign, Shield, ArrowRight,
+  Calendar, BarChart3, CalendarClock, Wallet,
   Upload, Building2, Landmark, FileCheck2, ChevronDown, Users,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';

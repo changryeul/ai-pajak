@@ -6,7 +6,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { PTKP_RATES, TAX_BRACKETS, POSITION_COST, PENSION_CONTRIBUTION } from '@/lib/tax/shared/constants';
+import { PTKP_RATES, TAX_BRACKETS, POSITION_COST } from '@/lib/tax/shared/constants';
 import type { PTKPStatus, IncomeSource1721A1 } from '@/lib/tax/shared/types';
 
 export type Severity = 'ERROR' | 'WARNING' | 'INFO';

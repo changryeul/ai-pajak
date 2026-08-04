@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
-  Users, Plus, Search, Edit2, Trash2, Building2, User, Briefcase,
-  Loader2, X, Check, AlertTriangle,
+  Users, Plus, Search, Edit2, Building2, User, Briefcase,
+  Loader2, Check, AlertTriangle,
 } from 'lucide-react';
 
 interface Counterparty {

@@ -5,7 +5,6 @@
 
 import { describe, it, expect } from 'vitest';
 import { PPh26Calculator } from '../pph26-calculator';
-import { PPH26_STANDARD_RATE } from '@/config/constants';
 import type { PPh26Data } from '@/types';
 
 describe('PPh26Calculator', () => {

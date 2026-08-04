@@ -11,8 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   Store, CheckCircle, AlertTriangle, ArrowRight, ArrowLeft,
-  Loader2, Shield, Calendar, DollarSign, FileText, Sparkles,
-  Download, HelpCircle, Upload, Camera, FolderOpen, BookOpen,
+  Shield, Calendar, DollarSign, FileText, Sparkles,
+  HelpCircle, Upload, FolderOpen, BookOpen,
   ClipboardList,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';

@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
-  Sparkles, Loader2, Save, DollarSign, Users, Zap,
-  MessageCircle, FileText, ShieldCheck, TrendingUp, AlertTriangle,
+  Sparkles, Loader2, Save, DollarSign, MessageCircle, FileText, ShieldCheck, TrendingUp, AlertTriangle,
   Brain, Camera, BarChart3,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';

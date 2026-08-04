@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
-  Loader2, CheckCircle, AlertTriangle, FileText, Upload, Camera,
-  Sparkles, Send, Eye, Users, DollarSign, Shield, X,
+  Loader2, CheckCircle, AlertTriangle, FileText, Sparkles, Send, Eye, X,
   ClipboardList, MessageCircle, Plus,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';

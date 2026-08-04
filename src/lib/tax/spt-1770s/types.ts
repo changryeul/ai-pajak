@@ -34,8 +34,6 @@ import type {
   TaxpayerData,
   PTKPStatus,
   IncomeSource1721A1,
-  OtherIncomeData,
-  TaxCreditsData,
   AssetDeclaration,
   LiabilityDeclaration,
   TaxStatus,

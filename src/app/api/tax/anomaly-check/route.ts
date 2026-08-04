@@ -1,4 +1,3 @@
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
 import { loggers } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
@@ -7,8 +6,6 @@ import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { detectAnomalies, type AnomalyDetectionInput } from '@/lib/ai/anomaly-detector';
-import { PTKP_RATES } from '@/lib/tax/shared/constants';
-import type { PTKPStatus } from '@/lib/tax/shared/types';
 
 /**
  * POST /api/tax/anomaly-check

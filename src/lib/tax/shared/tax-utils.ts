@@ -5,7 +5,7 @@
  */
 
 import { TAX_BRACKETS, PTKP_RATES, PTKP_DESCRIPTIONS, SPT_DEADLINES, CORPORATE_TAX } from './constants';
-import type { PTKPStatus, TaxStatus, BaseTaxSummary } from './types';
+import type { PTKPStatus, TaxStatus } from './types';
 
 // ============================================================================
 // TAX CALCULATION UTILITIES

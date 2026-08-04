@@ -24,10 +24,8 @@ import type {
   AssetDeclaration,
   LiabilityDeclaration,
   ValidationResult,
-  TaxStatus,
 } from '../shared/types';
 import {
-  PTKP_RATES,
   LOSS_CARRYFORWARD,
 } from '../shared/constants';
 import {

@@ -21,12 +21,10 @@ import type {
   PTKPStatus,
   IncomeSource1721A1,
   ValidationResult,
-  TaxStatus,
   AssetDeclaration,
   LiabilityDeclaration,
 } from '../shared/types';
 import {
-  PTKP_RATES,
   calculateProgressiveTax,
   getTaxBracketDetails,
   calculateTaxStatus,

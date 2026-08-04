@@ -21,7 +21,6 @@ import {
   AlertCircle,
   FileText,
   ArrowRight,
-  Upload,
   Building2,
   Loader2,
   RefreshCw,

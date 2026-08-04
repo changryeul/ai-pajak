@@ -5,7 +5,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   calculateSPT1770,
-  calculateSummary,
   validateSPT1770,
   calculateBusinessIncome,
   calculatePembukuanIncome,
@@ -18,7 +17,7 @@ import {
   isBookkeepingRequired,
   formatRupiah,
 } from './index';
-import type { TaxpayerData, PTKPStatus, DepreciationCategory } from '../shared/types';
+import type { TaxpayerData } from '../shared/types';
 import type { BusinessIncomeInput, DepreciationAssetInput } from './index';
 
 // ============================================================================

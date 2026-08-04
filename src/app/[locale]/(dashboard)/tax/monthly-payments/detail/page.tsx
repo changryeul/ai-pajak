@@ -10,8 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
 import {
-  ArrowLeft, Plus, Loader2, FileText, Users, DollarSign,
-  TrendingUp, TrendingDown, Minus, Receipt, AlertTriangle,
+  ArrowLeft, Plus, Loader2, Receipt, AlertTriangle,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

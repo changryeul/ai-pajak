@@ -9,7 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { CreditCard, FileText, TrendingUp, Calendar, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { CreditCard, FileText, TrendingUp, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, type Subscription, type Invoice, type UsageMetrics, PRICING_PLANS } from '@/lib/billing/types';
 import { PageTitle } from '@/components/layout/PageTitle';

@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Loader2, Plus, Receipt, FileText, DollarSign, CheckCircle,
+  Loader2, Plus, FileText, DollarSign, CheckCircle,
   AlertTriangle, Sparkles, X, ChevronDown, ChevronRight,
   Calculator, Shield, Camera,
 } from 'lucide-react';

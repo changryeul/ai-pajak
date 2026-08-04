@@ -15,8 +15,7 @@ import {
   Building2, Save, Loader2, CheckCircle, AlertTriangle,
   Sparkles, HelpCircle, ChevronDown, ChevronRight,
   Factory, Utensils, Home, Ship, Pickaxe, Globe,
-  Briefcase, Users, DollarSign, Shield, Camera, FileText,
-  Trophy,
+  Briefcase, Users, DollarSign, Shield, Camera,
 } from 'lucide-react';
 import { ShareholderSection } from '@/components/company/ShareholderSection';
 

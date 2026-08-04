@@ -8,8 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Sparkles, Loader2, CheckCircle, ArrowRight, Shield,
-  Globe, Building2, FileText, AlertTriangle, Zap,
+  Sparkles, Loader2, AlertTriangle, Zap,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

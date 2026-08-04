@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Card, CardHeader, CardTitle, CardDescription, CardContent,
+  Card, CardHeader, CardTitle, CardContent,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,10 +13,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useSession } from '@/hooks/useSession';
-import { UserRole } from '@/types/auth';
 import {
   ArrowLeft, Loader2, ShieldAlert, AlertTriangle, AlertCircle,
-  Info, CheckCircle, Sparkles, Shield,
+  CheckCircle, Sparkles, Shield,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

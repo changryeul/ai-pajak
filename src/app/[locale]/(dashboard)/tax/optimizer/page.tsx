@@ -9,10 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Sparkles, Calculator, TrendingDown, CheckCircle, ArrowRight,
-  Loader2, DollarSign, Users, Building2, Shield,
+  Sparkles, TrendingDown, Loader2, DollarSign, Users, Building2,
 } from 'lucide-react';
-import { cn, fmtRp } from '@/lib/utils';
+import { fmtRp } from '@/lib/utils';
 import { CHART_ACCENT_POSITIVE } from '@/lib/charts/palette';
 import { TrendBadge } from '@/components/ui/TrendBadge';
 

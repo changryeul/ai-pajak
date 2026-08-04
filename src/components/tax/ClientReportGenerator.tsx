@@ -22,7 +22,6 @@ import type { PTKPStatus } from '@/lib/tax/shared/types';
 import {
   FileText,
   Loader2,
-  Download,
   Printer,
   Sparkles,
   User,

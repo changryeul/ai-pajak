@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Store, Calculator, CheckCircle, AlertTriangle, ArrowRight,
-  ArrowLeft, Sparkles, Shield, HelpCircle, Loader2,
-  Building2, DollarSign, Calendar,
+  ArrowLeft, Shield, HelpCircle, Building2, DollarSign, Calendar,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { useTranslations } from 'next-intl';

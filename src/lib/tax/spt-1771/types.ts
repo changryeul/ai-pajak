@@ -36,7 +36,6 @@ import type {
   CorporateIdentity,
   TaxStatus,
   DepreciationCategory,
-  FiscalAdjustmentData,
   RelatedPartyTransaction,
 } from '../shared/types';
 

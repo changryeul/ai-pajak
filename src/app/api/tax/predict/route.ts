@@ -1,10 +1,8 @@
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
-import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { PTKP_RATES, TAX_BRACKETS } from '@/lib/tax/shared/constants';
 import type { PTKPStatus } from '@/lib/tax/shared/types';
 import Anthropic from '@anthropic-ai/sdk';

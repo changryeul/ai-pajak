@@ -4,7 +4,7 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { requireRole } from '@/middleware/rbac';
 import { UserRole, RequestWithSession } from '@/types/auth';
-import { circuitBreakers, getCircuitBreakerHealth } from '@/lib/resilience/circuit-breaker';
+import { getCircuitBreakerHealth } from '@/lib/resilience/circuit-breaker';
 
 /**
  * GET /api/admin/monitoring

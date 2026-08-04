@@ -5,10 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Newspaper, ExternalLink, Loader2, Filter, AlertTriangle,
+  Newspaper, ExternalLink, Loader2, AlertTriangle,
   Sparkles, Clock, Tag, ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

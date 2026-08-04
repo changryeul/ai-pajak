@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
-  Users, Search, Loader2, Building2, FileText, Clock,
+  Users, Search, Loader2, Building2, Clock,
   CheckCircle, AlertCircle,
 } from 'lucide-react';
 

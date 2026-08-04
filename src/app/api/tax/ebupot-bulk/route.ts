@@ -3,7 +3,6 @@ import { composeMiddleware } from '@/middleware/compose';
 import { requireAuth } from '@/middleware/auth';
 import { blockPlatformAdmin } from '@/middleware/blockPlatformAdmin';
 import type { RequestWithSession } from '@/types/auth';
-import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { PPh21Calculator } from '@/lib/tax/pph21-calculator';
 import type { PPh21Data } from '@/types';
 

@@ -8,7 +8,6 @@ import { ClassificationReview } from './ClassificationReview';
 import {
   Camera, Upload, Loader2, CheckCircle, RotateCcw, Plus, ArrowRight, ImageIcon,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 type Step = 'capture' | 'review' | 'saved';
 

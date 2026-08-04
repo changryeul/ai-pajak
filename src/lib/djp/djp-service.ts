@@ -16,7 +16,7 @@
 import crypto from 'crypto';
 import { DJP_API } from '@/config/constants';
 import { circuitBreakers } from '@/lib/resilience/circuit-breaker';
-import { fetchWithTimeoutAndRetry, serviceTimeouts } from '@/lib/resilience/timeout';
+import { fetchWithTimeoutAndRetry } from '@/lib/resilience/timeout';
 import { loggers } from '@/lib/logger';
 import {
   DJPAuthToken,

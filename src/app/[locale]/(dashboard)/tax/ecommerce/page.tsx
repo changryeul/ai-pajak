@@ -1,11 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { ShoppingCart, Upload, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { ShoppingCart, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { parseEcommerceCSV, calculateMonthlySummary, type EcommercePlatform, type EcommerceMonthlySummary } from '@/lib/ecommerce';
 import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
 import { useTranslations } from 'next-intl';

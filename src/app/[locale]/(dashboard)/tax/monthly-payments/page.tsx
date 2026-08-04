@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +19,7 @@ import { fmtRp } from '@/lib/utils';
 import {
   CreditCard, AlertTriangle, CheckCircle, Clock, Loader2,
   DollarSign, FileText, Calendar, ChevronRight, Sparkles,
-  TrendingUp, Shield, Receipt, Users, Plus, Search, Edit2, Building2, User, Briefcase,
+  TrendingUp, Shield, Receipt, Users, Plus, Search, Building2, User, Briefcase,
 } from 'lucide-react';
 
 interface Payment {

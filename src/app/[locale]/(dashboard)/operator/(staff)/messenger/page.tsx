@@ -232,7 +232,7 @@ function OperatorMessengerInner() {
         setReasonCode('');
       } else {
         // surface the server error inline; cheap toast — keep one line
-        // eslint-disable-next-line no-alert
+         
         alert(j?.error ?? 'Send failed');
       }
     } finally {

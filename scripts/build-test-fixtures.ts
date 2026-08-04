@@ -11,8 +11,8 @@
  *   npx tsx scripts/build-test-fixtures.ts
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { mkdirSync, readFileSync } from 'fs';
+import { join } from 'path';
 import XLSX from 'xlsx';
 
 const ROOT = join(__dirname, '..', 'public', 'test-data');

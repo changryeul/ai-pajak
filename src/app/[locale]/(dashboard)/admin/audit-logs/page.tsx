@@ -2,15 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Shield, Loader2, ChevronLeft, ChevronRight, Clock,
-  User, FileText, AlertTriangle, Eye, Calendar,
-} from 'lucide-react';
+  } from 'lucide-react';
 
 interface AuditLog {
   id: string; activity_type: string; actor_user_id: string; actor_role: string;

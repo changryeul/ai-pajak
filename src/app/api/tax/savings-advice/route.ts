@@ -1,4 +1,3 @@
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limiter';
 import { loggers } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { composeMiddleware } from '@/middleware/compose';

@@ -3,25 +3,20 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
-  Users, Plus, Loader2, CheckCircle, AlertTriangle, Save, X,
-  Edit2, Trash2, Calculator, Sparkles, FileText,
-  Upload, Download, Shield, ChevronDown, ChevronRight,
-  ArrowLeft,
+  Users, Loader2, CheckCircle, AlertTriangle, Save, Sparkles, FileText,
+  Upload, Download,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
-import { fmtRp } from '@/lib/utils';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { parseTabularFile, rowsToCsv } from '@/lib/tax/bulk-import/client-file-parser';
 

@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
-  Loader2, Plus, Search, Users, Globe, FileText, Trash2,
-  CheckCircle, AlertTriangle, X, Sparkles, Building2,
+  Loader2, Plus, Users, Globe, FileText, CheckCircle, AlertTriangle, X, Sparkles, Building2,
 } from 'lucide-react';
 
 interface License {

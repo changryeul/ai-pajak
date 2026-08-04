@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   CreditCard, DollarSign, TrendingUp, Users, Loader2,
-  RefreshCw, BarChart3, Receipt, ArrowUpRight,
+  RefreshCw, BarChart3, Receipt,
 } from 'lucide-react';
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }

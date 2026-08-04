@@ -8,10 +8,9 @@ import { Input } from '@/components/ui/input';
 import { NumberInput } from '@/components/ui/number-input';
 import { useBulkSelect } from '@/hooks/useBulkSelect';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Loader2, Plus, Save, ChevronDown, ChevronRight, Users,
+  Loader2, Save, ChevronDown, ChevronRight, Users,
   DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';

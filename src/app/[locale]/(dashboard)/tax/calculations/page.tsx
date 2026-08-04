@@ -11,7 +11,7 @@ import { TaxResolutionBadge } from '@/components/invoice/TaxResolutionBadge';
 import {
   Loader2, Inbox, Camera, Trash2, FileText, Sparkles, Plus,
 } from 'lucide-react';
-import { cn, fmtRp } from '@/lib/utils';
+import { fmtRp } from '@/lib/utils';
 
 interface TaxCalculation {
   id: string;

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Loader2, BarChart3, AlertTriangle, TrendingUp, TrendingDown,
-  CheckCircle, Lightbulb, FileText, ArrowRight, Sparkles, DollarSign,
+  CheckCircle, Lightbulb, FileText, Sparkles, DollarSign,
 } from 'lucide-react';
 import { cn, fmtRp } from '@/lib/utils';
 

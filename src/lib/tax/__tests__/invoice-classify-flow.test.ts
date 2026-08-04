@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TaxResolutionEngine } from '../tax-resolution-engine';
-import type { TransactionContext, ServiceCategory } from '@/types';
+import type { ServiceCategory } from '@/types';
 
 /**
  * Invoice Classification → Tax Resolution Flow Tests

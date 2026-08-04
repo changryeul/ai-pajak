@@ -6,7 +6,7 @@
  */
 
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { getOAuthConfig, getRedirectUri } from './oauth-config';
+import { getOAuthConfig } from './oauth-config';
 import type { AccountingProviderId } from './types';
 import { loggers } from '@/lib/logger';
 

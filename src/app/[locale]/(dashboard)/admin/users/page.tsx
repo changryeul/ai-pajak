@@ -9,8 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import {
-  Users, Search, Loader2, Shield, UserCheck, UserX, KeyRound,
-  ChevronDown, ChevronUp, Mail, Calendar, Building2, User, Plus, X,
+  Users, Search, Loader2, UserCheck, UserX, KeyRound,
+  ChevronDown, ChevronUp, Mail, User, Plus, X,
 } from 'lucide-react';
 
 interface UserItem {

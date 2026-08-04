@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Shield, Plus, Save, Loader2, CheckCircle, AlertTriangle,
-  Trash2, Power, Edit2, Sparkles, X,
+  Power, Edit2, Sparkles, X,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

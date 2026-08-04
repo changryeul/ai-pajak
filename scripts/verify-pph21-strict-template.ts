@@ -12,7 +12,7 @@
  *   SEED_TARGET=prod npx tsx scripts/verify-pph21-strict-template.ts
  */
 
-import { writeFileSync, readFileSync, unlinkSync, existsSync } from 'fs';
+import { readFileSync, unlinkSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { config as loadEnv } from 'dotenv';

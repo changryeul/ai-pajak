@@ -23,7 +23,6 @@ import {
   Send,
   Lock,
   ShieldAlert,
-  User as UserIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ClientSessionContext } from '@/hooks/useSession';
@@ -182,7 +181,7 @@ export function SupervisorMessengerView({ session }: Props) {
         // refresh thread last/unread
         void loadThreads();
       } else {
-        // eslint-disable-next-line no-alert
+         
         alert(j?.error ?? 'Send failed');
       }
     } finally {

@@ -18,7 +18,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import {
   Loader2, Receipt, CheckCircle, AlertTriangle, X,
   ChevronDown, ChevronRight, Building2, Download, FileSpreadsheet, Pencil, Shield, Clock,
