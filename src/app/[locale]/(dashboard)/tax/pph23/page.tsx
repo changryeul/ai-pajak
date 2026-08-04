@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent } from '@/components/ui/card';
@@ -1556,22 +1557,22 @@ export default function PPh23Page() {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <a href="/tax/pph23" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                  <Link href={`/${locale}/tax/pph23`} className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
                     <p className="text-[10px] text-gray-500">PPh 23</p>
                     <p className="font-mono font-bold text-emerald-700">{lastImport.pph23}</p>
-                  </a>
-                  <a href="/tax/pph42" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                  </Link>
+                  <Link href={`/${locale}/tax/pph42`} className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
                     <p className="text-[10px] text-gray-500">PPh 4(2)</p>
                     <p className="font-mono font-bold text-emerald-700">{lastImport.pph42}</p>
-                  </a>
-                  <a href="/tax/pph26" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                  </Link>
+                  <Link href={`/${locale}/tax/pph26`} className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
                     <p className="text-[10px] text-gray-500">PPh 26</p>
                     <p className="font-mono font-bold text-emerald-700">{lastImport.pph26}</p>
-                  </a>
-                  <a href="/tax/ppn" className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
+                  </Link>
+                  <Link href={`/${locale}/tax/ppn`} className="rounded border border-emerald-200 bg-white px-3 py-2 hover:border-emerald-400 transition-colors">
                     <p className="text-[10px] text-gray-500">PPN MASUKAN</p>
                     <p className="font-mono font-bold text-emerald-700">{lastImport.ppn}</p>
-                  </a>
+                  </Link>
                 </div>
                 {lastImport.failed > 0 && (
                   <p className="mt-2 text-[11px] text-red-600">
@@ -2411,10 +2412,10 @@ function FilingSteps({
                   <p className="text-indigo-700">ID Billing {t('k152_d85864')}</p>
                 </div>
               </div>
-              <a href={`/${locale}/tax/monthly-payments`}
+              <Link href={`/${locale}/tax/monthly-payments`}
                 className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">
                 {t('k153_d76082')}
-              </a>
+              </Link>
             </div>
           )}
         </div>

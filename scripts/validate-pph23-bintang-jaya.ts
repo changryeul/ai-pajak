@@ -48,7 +48,7 @@ if (!ws) {
 
 // Replicate parseTabularFile() output shape
 const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '', raw: true });
-let rawRows = aoa.map((row) => row.map(cleanCell));
+const rawRows = aoa.map((row) => row.map(cleanCell));
 while (rawRows.length > 0 && rawRows[rawRows.length - 1].every((c) => c === '')) rawRows.pop();
 while (rawRows.length > 0 && rawRows[0].every((c) => c === '')) rawRows.shift();
 

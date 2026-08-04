@@ -30,10 +30,22 @@ const REACT_COMPILER_NOISE_DEMOTED = {
   },
 };
 
+// scripts/ are operational smoke/seed tools, not product code. Their JSON
+// assertions read ad-hoc API payloads where a full type per response shape
+// adds churn without safety (tsc still type-checks them on build). Demote
+// no-explicit-any to warning there — src/ keeps it as an error.
+const SCRIPTS_JSON_ANY_DEMOTED = {
+  files: ["scripts/**/*.ts"],
+  rules: {
+    "@typescript-eslint/no-explicit-any": "warn",
+  },
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   REACT_COMPILER_NOISE_DEMOTED,
+  SCRIPTS_JSON_ANY_DEMOTED,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

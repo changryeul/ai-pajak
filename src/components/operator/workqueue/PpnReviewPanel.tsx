@@ -28,14 +28,15 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
   }, [queueId]);
   useEffect(() => { load(); }, [load]);
 
-  const matchRecon = (status: string | null): boolean => {
-    if (!recon) return true;
-    if (recon === 'MISSING') return status === 'MISSING_CORETAX' || status === 'MISSING_CUSTOMER';
-    if (recon === 'PENDING') return !status || status === 'PENDING';
-    return status === recon;
-  };
-  const rows = useMemo(() => (detail?.rows ?? []).filter(r =>
-    (!dir || r.fakturType === dir) && matchRecon(r.reconStatus)), [detail, dir, recon]); // eslint-disable-line react-hooks/exhaustive-deps
+  const rows = useMemo(() => {
+    const matchRecon = (status: string | null): boolean => {
+      if (!recon) return true;
+      if (recon === 'MISSING') return status === 'MISSING_CORETAX' || status === 'MISSING_CUSTOMER';
+      if (recon === 'PENDING') return !status || status === 'PENDING';
+      return status === recon;
+    };
+    return (detail?.rows ?? []).filter(r => (!dir || r.fakturType === dir) && matchRecon(r.reconStatus));
+  }, [detail, dir, recon]);
 
   if (error) return (
     <div className={styles.card}><div className={styles.body}>
