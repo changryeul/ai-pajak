@@ -30,7 +30,7 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   // ── 발행완료 (id_billing_issuance) ──
   const { data: issuedRows } = await admin
     .from('id_billing_issuance')
-    .select('id, serial_no, customer_id, session_id, tax_type, tax_period, amount, status, customer_email, sent_at, created_at')
+    .select('id, serial_no, customer_id, session_id, tax_type, tax_period, amount, status, customer_email, sent_at, ntpn, created_at')
     .eq('tax_partner_id', partnerId)
     .order('created_at', { ascending: false })
     .limit(300);
@@ -86,7 +86,8 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     amount: Number(r.amount),
     billingStatus: 'ISSUED' as const,
     sendStatus: r.status === 'SENT' || r.status === 'PAID' ? 'SENT' : 'NOT_SENT',
-    ntpnStatus: r.status === 'PAID' ? 'PAID' : 'AWAITING_CORETAX', // 납부 후 Coretax 자동생성
+    ntpnStatus: r.status === 'PAID' ? 'PAID' : 'AWAITING_CORETAX', // 수동 납부확인 (Coretax API 보류)
+    ntpn: r.ntpn ?? null,
     createdAt: r.created_at,
   }));
 

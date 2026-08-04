@@ -10797,7 +10797,12 @@
     "sentOk": "고객에게 ID Billing을 전송했습니다.",
     "sendFailed": "전송에 실패했습니다. 잠시 후 다시 시도하세요.",
     "noEmail": "고객 이메일이 없어 전송할 수 없습니다.",
-    "networkError": "네트워크 오류가 발생했습니다."
+    "networkError": "네트워크 오류가 발생했습니다.",
+    "markPaidBtn": "납부확인",
+    "paidBadge": "납부완료",
+    "promptNtpn": "{serial} 납부확인 — Coretax 에 표시된 NTPN 을 입력하세요",
+    "invalidNtpn": "NTPN 이 너무 짧습니다 (8자 이상)",
+    "paidOk": "납부확인 완료 — NTPN 기록됨"
   },
   "operatorWorkqueue": {
     "title": "고객 업무함",

@@ -10675,7 +10675,12 @@
     "sentOk": "ID Billing terkirim ke klien.",
     "sendFailed": "Gagal mengirim. Coba lagi sebentar.",
     "noEmail": "Tidak bisa kirim — klien tidak punya email.",
-    "networkError": "Terjadi kesalahan jaringan."
+    "networkError": "Terjadi kesalahan jaringan.",
+    "markPaidBtn": "Konfirmasi bayar",
+    "paidBadge": "Lunas",
+    "promptNtpn": "Konfirmasi pembayaran {serial} — masukkan NTPN dari Coretax",
+    "invalidNtpn": "NTPN terlalu pendek (min 8 karakter)",
+    "paidOk": "Pembayaran dikonfirmasi — NTPN tercatat"
   },
   "operatorWorkqueue": {
     "title": "Antrean Kerja Pelanggan",

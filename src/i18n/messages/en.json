@@ -10675,7 +10675,12 @@
     "sentOk": "ID Billing sent to the customer.",
     "sendFailed": "Send failed. Please retry shortly.",
     "noEmail": "Cannot send — customer has no email.",
-    "networkError": "A network error occurred."
+    "networkError": "A network error occurred.",
+    "markPaidBtn": "Confirm payment",
+    "paidBadge": "Paid",
+    "promptNtpn": "{serial} payment confirmation — enter the NTPN shown in Coretax",
+    "invalidNtpn": "NTPN too short (min 8 chars)",
+    "paidOk": "Payment confirmed — NTPN recorded"
   },
   "operatorWorkqueue": {
     "title": "Customer Workqueue",

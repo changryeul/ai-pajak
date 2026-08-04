@@ -79,6 +79,8 @@ export interface IssuedRow {
   status: string;
   customer_email: string | null;
   sent_at: string | null;
+  ntpn: string | null;
+  paid_at: string | null;
   created_at: string;
 }
 
@@ -204,7 +206,7 @@ export async function buildBillingBoard(
   // ── 발행완료 리스트 ─────────────────────────────────────────
   const { data: issuedRows } = await admin
     .from('id_billing_issuance')
-    .select('id, serial_no, customer_id, tax_type, tax_period, amount, billing_code, status, customer_email, sent_at, created_at')
+    .select('id, serial_no, customer_id, tax_type, tax_period, amount, billing_code, status, customer_email, sent_at, ntpn, paid_at, created_at')
     .eq('tax_partner_id', scope.taxPartnerId)
     .order('created_at', { ascending: false })
     .limit(200);
@@ -221,7 +223,8 @@ export async function buildBillingBoard(
     customer_name: issuedCustMap.get(r.customer_id) ?? '—',
     tax_type: r.tax_type, tax_period: r.tax_period, amount: Number(r.amount),
     billing_code: r.billing_code, status: r.status,
-    customer_email: r.customer_email, sent_at: r.sent_at, created_at: r.created_at,
+    customer_email: r.customer_email, sent_at: r.sent_at,
+    ntpn: r.ntpn ?? null, paid_at: r.paid_at ?? null, created_at: r.created_at,
   }));
 
   return { targets, issued };

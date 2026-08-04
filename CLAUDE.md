@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
 ```
 PENDING → (PENDING_DOCS ↔) DATA_REVIEW → PENDING_APPROVAL → APPROVED
 → EBILLING_GENERATED → PAYMENT_PENDING (고객 전송·납부대기 = 실질 종료 상태)
-→ COMPLETED (향후 Coretax API 연동의 NTPN 자동수집 전용 — 수동 UI 버튼 없음)
+→ COMPLETED (Coretax API 보류(2026-08-04) — 발행 보드 「납부확인」에서 operator 가 NTPN 수동 입력 시 전이. 향후 API 연동 시 자동수집으로 대체)
    (or FAILED from any state)
 ```
 
@@ -208,8 +208,8 @@ Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `ex
 - **발행 게이트 3중 (백엔드 강제)**: 소스 APPROVED + 작성본 생성 이력 존재 + 미발행. 프론트 플래그는 신뢰하지 않는다.
 - **발행대상 소스 2종**: ① `consultant_session` APPROVED + saved calc (calc kind → 세목 매핑은 `src/lib/id-billing/kap-kjs.ts`, CORP_TAX_MONTHLY 는 `basis.selectedCase` 로 PPh25/PPh Final 하나만 표시) ② `djp_submission_queue` APPROVED (발행 시 EBILLING_GENERATED 전이 — 기존 상태기계 재사용).
 - **작성본 xlsx**: 빈 양식이 아닌 승인완료 계산값이 채워진 4시트 (README / Coretax_Ready / Company_Summary / Tax_Code_Reference). Tax_Code_Reference 는 Track B `tax_code_rule` DB 우선.
-- **API**: `/api/id-billing/{board,workbook,issue,send}` — `requireBillingIssuer` 미들웨어 (CONSULTANT/TAX_ADVISOR/TAX_OPERATOR 4계). send 는 Resend best-effort, 실패 시 미전송 유지(재시도 가능).
-- **UI**: 공용 `IdBillingBoard` 컴포넌트 — `/consultant-erp/billing` (상담원) + `/operator/billing-issuance` (운영팀) 두 진입점. 수동 완료처리 버튼 없음 (완료는 향후 Coretax NTPN 자동수집).
+- **API**: `/api/id-billing/{board,workbook,issue,send}` — `requireBillingIssuer` 미들웨어 (CONSULTANT/TAX_ADVISOR/TAX_OPERATOR 4계). send 는 Resend best-effort, 실패 시 미전송 유지(재시도 가능). paid(납부확인) 는 NTPN 수동 입력 → issuance PAID + 소스 큐 COMPLETED 동기화 (마이그레이션 `20260804000001` ntpn/paid_at, Coretax API 보류 결정).
+- **UI**: 공용 `IdBillingBoard` 컴포넌트 — `/consultant-erp/billing` (상담원) + `/operator/billing-issuance` (운영팀) 두 진입점. 발행완료 리스트에 「납부확인」 버튼 — NTPN 입력 → PAID 배지 + NTPN 표시 (Coretax API 보류 기간의 수동 마감 경로).
 
 ### 승인대기 리모델 — 4-값 분리 + 검토요청 (v13 트랙 3, 2026-07-23)
 - **4-값 분리 저장** (`consultant_session_calc`, 마이그레이션 `20260723000003`): `customer_input_amount`(고객 입력) / `ai_amount`(AI 계산) / `consultant_amount`(상담원 처리) / `approved_amount`(최종 승인, APPROVE 시 스탬프). 기존 `amount` = **유효값**(consultant ?? ai) 의미 유지 — 발행 보드 등 하위 소비자 변경 없음. 처리값 조정(PATCH `/sessions/[id]/calc`)이나 재계산 시 `approved_amount` 초기화 → 재승인 대상.
@@ -411,7 +411,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-closing-bpe-sync.ts` — 결산 wizard ↔ operator queue ↔ BPE 동기화
 - `SEED_TARGET=prod npx tsx scripts/test-onboarding-flow.ts` — 신규 가입 → 첫 신고까지 골든 패스
 - `SEED_TARGET=prod npx tsx scripts/test-new-customer-assignment.ts` — 신규고객 생성 → 미배정 큐 등장 → supervisor 배정 → 큐 제거 → DB edge active 라이프사이클 (prod sentinel, 자동 cleanup)
-- `SEED_TARGET=prod npx tsx scripts/test-id-billing-flow.ts` — ID Billing 발행 보드 계약 (RBAC 403/200 + 작성본 게이트 400 + xlsx 4시트 파싱 검증 + BIL- 일련번호 + 중복 404 + 큐 EBILLING_GENERATED 전이 + tenant 분리, 11 asserts, `[IDBILL-E2E]` sentinel)
+- `SEED_TARGET=prod npx tsx scripts/test-id-billing-flow.ts` — ID Billing 발행 보드 계약 (RBAC 403/200 + 작성본 게이트 400 + xlsx 4시트 파싱 검증 + BIL- 일련번호 + 중복 404 + 큐 EBILLING_GENERATED 전이 + 납부확인(NTPN 400/PAID/큐 COMPLETED 동기화/중복 400) + tenant 분리, 14 asserts, `[IDBILL-E2E]` sentinel)
 - `SEED_TARGET=prod npx tsx scripts/test-approval-remodel.ts` — 승인대기 리모델 계약 (4-값 분리 + 처리값 PATCH + OPEN 검토요청 APPROVE 400 게이트 + 의견 PATCH RBAC + approved_amount 스탬프 + detail 4-값 포함, 10 asserts, `[APPRV-E2E]` sentinel)
 - `SEED_TARGET=prod npx tsx scripts/test-signup-auto-assign.ts` — 회원가입→접수 즉시 자동배정 골든패스 (signup API → customer 생성 → operator_client_assignments 배정 or overflow + operator_assignment_log triggered_by=AUTO). auth 계정 생성/삭제 포함 → smoke optional. sentinel 이메일 prefix `signup-autoassign-e2e`.
 - `SEED_TARGET=prod npx tsx scripts/test-workqueue-annual.ts` — 연 신고(SPT Tahunan) 워크큐 계약 (quick-create SPT_TAHUNAN + 세션 미연결 red → 결산세션/문서/제출 연결 후 green shape + 연도단위 목록 + RBAC 403, 13 asserts, `[WQ-ANNUAL-E2E]` sentinel, fiscal 2099)

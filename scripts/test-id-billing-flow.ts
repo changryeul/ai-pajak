@@ -202,6 +202,38 @@ async function main() {
     if (qAfter?.ebilling_code !== '820IDBILLE2E01') fail(`ebilling_code mismatch: ${qAfter?.ebilling_code}`);
     ok('operator issue → queue APPROVED → EBILLING_GENERATED + billing code 기록');
 
+    // ── 7.5 납부확인 (Coretax API 보류 — NTPN 수동 입력, 2026-08-04) ──────
+    const { data: issRow } = await admin.from('id_billing_issuance')
+      .select('id').eq('queue_item_id', queueRow.id).single();
+    if (!issRow) fail('issuance row for queue sentinel not found');
+    const rBad = await api(operatorToken, 'POST', '/api/id-billing/paid', {
+      issuanceId: issRow.id, ntpn: 'x',
+    });
+    if (rBad.status !== 400) fail(`paid with short NTPN expected 400, got ${rBad.status}`);
+    ok('paid: short NTPN rejected with 400');
+
+    const rPaid = await api(operatorToken, 'POST', '/api/id-billing/paid', {
+      issuanceId: issRow.id, ntpn: 'E2E1234567890123',
+    });
+    if (rPaid.status !== 200) fail(`paid expected 200, got ${rPaid.status}: ${JSON.stringify(rPaid.json).slice(0, 200)}`);
+    const { data: issPaid } = await admin.from('id_billing_issuance')
+      .select('status, ntpn, paid_at').eq('id', issRow.id).single();
+    if (issPaid?.status !== 'PAID' || issPaid?.ntpn !== 'E2E1234567890123' || !issPaid?.paid_at) {
+      fail(`issuance not PAID/ntpn: ${JSON.stringify(issPaid)}`);
+    }
+    const { data: qPaid } = await admin.from('djp_submission_queue')
+      .select('status, ntpn, completed_at').eq('id', queueRow.id).single();
+    if (qPaid?.status !== 'COMPLETED' || qPaid?.ntpn !== 'E2E1234567890123') {
+      fail(`queue not synced to COMPLETED+ntpn: ${JSON.stringify(qPaid)}`);
+    }
+    ok('paid: issuance PAID + queue COMPLETED + NTPN 기록');
+
+    const rDup = await api(operatorToken, 'POST', '/api/id-billing/paid', {
+      issuanceId: issRow.id, ntpn: 'E2E1234567890123',
+    });
+    if (rDup.status !== 400) fail(`double paid expected 400, got ${rDup.status}`);
+    ok('paid: already-paid rejected with 400');
+
     // ── 8. scope 분리 — 운영팀(OPERATOR_QUEUE) sentinel 이 EXTERNAL 보드에 안 샘 ──
     // (결정 ①) ERP 세션 sentinel 은 external.consultant(Eddy) 자신의 EXTERNAL 테넌트
     // 데이터라 보이는 게 정상이다. 검증 대상은 "운영팀 스코프(OPERATOR_QUEUE)가

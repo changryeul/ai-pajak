@@ -37,7 +37,8 @@ interface BillingTarget {
 interface IssuedRow {
   id: string; serial_no: string; customer_name: string; tax_type: string;
   tax_period: string; amount: number; billing_code: string | null;
-  status: string; customer_email: string | null; sent_at: string | null; created_at: string;
+  status: string; customer_email: string | null; sent_at: string | null;
+  ntpn: string | null; paid_at: string | null; created_at: string;
 }
 
 export default function IdBillingBoard() {
@@ -150,6 +151,30 @@ export default function IdBillingBoard() {
         const reason = json.data?.skipped?.[0]?.reason;
         showMsg('err', reason === 'no-email' ? t('noEmail') : (json.error || t('sendFailed')));
       }
+      load();
+    } catch {
+      showMsg('err', t('networkError'));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // Coretax API 보류 (2026-08-04): 운영자가 Coretax 에서 납부 확인 후 NTPN 을
+  // 직접 입력해 PAID + (큐 소스면) COMPLETED 로 마감한다.
+  const markPaid = async (row: IssuedRow) => {
+    const ntpn = window.prompt(t('promptNtpn', { serial: row.serial_no }))?.trim();
+    if (!ntpn) return;
+    if (ntpn.length < 8) { showMsg('err', t('invalidNtpn')); return; }
+    setBusy(`paid-${row.id}`);
+    try {
+      const res = await fetch('/api/id-billing/paid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ issuanceId: row.id, ntpn }),
+      });
+      const json = await res.json();
+      if (json.success) showMsg('ok', t('paidOk'));
+      else showMsg('err', json.error || t('networkError'));
       load();
     } catch {
       showMsg('err', t('networkError'));
@@ -332,7 +357,18 @@ export default function IdBillingBoard() {
                       )}
                     </td>
                     <td className="px-2 py-2.5">
-                      <Badge className="bg-cyan-100 text-[10px] text-cyan-700">{t('ntpnAuto')}</Badge>
+                      {row.status === 'PAID' ? (
+                        <div>
+                          <Badge className="bg-emerald-100 text-[10px] text-emerald-700">{t('paidBadge')}</Badge>
+                          {row.ntpn && <p className="mt-1 font-mono text-[10px] text-gray-500">{row.ntpn}</p>}
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" className="h-6 px-2 text-[10px]"
+                          disabled={busy === `paid-${row.id}`}
+                          onClick={() => markPaid(row)}>
+                          {busy === `paid-${row.id}` ? <Loader2 className="h-3 w-3 animate-spin" /> : t('markPaidBtn')}
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
