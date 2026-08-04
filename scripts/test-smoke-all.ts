@@ -46,6 +46,7 @@ const STEPS: Step[] = [
   { name: 'workqueue PPN (quick-create + detail + request + RBAC)', file: 'test-workqueue-ppn.ts' },
   { name: 'workqueue UMKM (quick-create + detail + request + RBAC)', file: 'test-workqueue-umkm.ts' },
   { name: 'workqueue annual SPT (quick-create + closing link + RBAC)', file: 'test-workqueue-annual.ts' },
+  { name: 'workqueue employee HR (master flags + change log + RBAC)', file: 'test-workqueue-employees.ts' },
   { name: 'auto-queue creation (customer write → queue row)', file: 'test-auto-queue-creation.ts' },
   { name: 'workqueue AI pre-review (shape + RBAC + graceful)', file: 'test-workqueue-ai-review.ts' },
   { name: 'workqueue approval loop (request→approve/reject + canApprove + 403)', file: 'test-workqueue-approval-loop.ts' },

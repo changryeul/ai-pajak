@@ -9,6 +9,7 @@ import { WithholdingReviewPanel } from './WithholdingReviewPanel';
 import { PpnReviewPanel } from './PpnReviewPanel';
 import { UmkmReviewPanel } from './UmkmReviewPanel';
 import { AnnualReviewPanel } from './AnnualReviewPanel';
+import { EmployeeHrPanel } from './EmployeeHrPanel';
 import { RequestDrawer } from './RequestDrawer';
 import { STATUS_LABEL_MAP, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
 
@@ -19,6 +20,7 @@ const PANEL_BY_VIEW: Partial<Record<TaxView, typeof Pph21ReviewPanel>> = {
   ppn: PpnReviewPanel,
   umkm: UmkmReviewPanel,
   annual: AnnualReviewPanel,
+  employees: EmployeeHrPanel,
 };
 
 const now = new Date();

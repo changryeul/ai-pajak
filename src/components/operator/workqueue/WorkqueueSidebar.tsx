@@ -39,7 +39,7 @@ export function WorkqueueSidebar({ counts, statusFilter, onStatusFilter, taxView
         {viewBtn('umkm', '선납법인세 (PPh Final, 25)')}
         {viewBtn('ppn', '부가세 (PPN)')}
         {viewBtn('annual', '연 신고 (SPT)')}
-        {viewBtn('employees', '직원 인사 기록', true)}
+        {viewBtn('employees', '직원 인사 기록')}
       </div>
       <div className={styles.st}>상담원 처리업무</div>
       <div className={styles.sub}>

@@ -39,7 +39,39 @@ export const TAX_VIEW_TO_TYPE: Record<string, string> = {
   ppn: 'PPN',
   umkm: 'PPh_FINAL',
   annual: 'SPT_TAHUNAN',
+  // 직원 마스터는 고객 단위 — worklist 는 PPh21 큐 행을 공유한다.
+  employees: 'PPh21',
 };
+
+export interface EmployeeHrRow {
+  id: string;
+  name: string;
+  employeeNumber: string | null;
+  npwp: string | null;
+  nik: string | null;
+  ptkp: string | null;
+  hireDate: string | null;
+  isActive: boolean;
+  grossSalary: number;
+  position: string | null;
+  department: string | null;
+  flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
+}
+export interface EmployeeHrChange {
+  id: string;
+  employeeName: string;
+  section: string;
+  field: string;
+  oldValue: string | null;
+  newValue: string | null;
+  changedAt: string;
+}
+export interface EmployeeHrDetail {
+  queueId: string; customerId: string; period: string; status: string;
+  summary: { employeeCount: number; activeCount: number; noNpwpCount: number; issueCount: number };
+  rows: EmployeeHrRow[];
+  changeLog: EmployeeHrChange[];
+}
 
 export interface AnnualDocRow {
   id: string;

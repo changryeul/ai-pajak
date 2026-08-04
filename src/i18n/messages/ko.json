@@ -10836,6 +10836,7 @@
     "umkmRecordCount": "납부 레코드",
     "umkmTotalDue": "총 납부할 세액",
     "umkmTotalPaid": "총 납부액",
-    "annualTitle": "연 신고 (SPT Tahunan)"
+    "annualTitle": "연 신고 (SPT Tahunan)",
+    "employeesTitle": "직원 인사 기록"
   }
 }
