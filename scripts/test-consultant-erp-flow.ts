@@ -66,7 +66,8 @@ async function run() {
   let fail = 0;
 
   // ── Step 0: collect tokens + customerId ──
-  const consultantTok = await login('consultant.test@jakartatax.co.id');
+  // 결정 ① (2026-07-24): consultant = EXTERNAL 전용 — JTC consultant.test 는 폐기.
+  const consultantTok = await login('external.consultant@mitrapajak.com');
   if (!consultantTok) {
     console.error('   ✗ Cannot log in as CONSULTANT. Aborting.');
     process.exit(1);
