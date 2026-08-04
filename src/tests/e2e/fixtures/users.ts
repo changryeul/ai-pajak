@@ -16,6 +16,7 @@ function loadTestData(): {
   consultantId?: string;
   taxAdvisorConsultantId?: string;
   taxPartnerId?: string;
+  e2ePartnerId?: string;
   platformId?: string;
   activePoaId?: string;
   draftPoaId?: string;
@@ -62,7 +63,10 @@ export const TEST_USERS = {
   },
 
   /**
-   * CONSULTANT - Jakarta Tax Consulting consultant
+   * CONSULTANT — 결정 ① (2026-07-24) 이후 EXTERNAL 전용.
+   * global-setup 이 'PT Mitra Pajak E2E' EXTERNAL 파트너를 만들어 소속시킨다
+   * (JTC 소속 consultant INSERT 는 forbid_jtc_consultant 트리거가 차단).
+   * 이메일은 legacy 표기 — 로컬 e2e 전용 계정이며 prod 의 consultant.test 는 폐기됨.
    */
   CONSULTANT: {
     email: 'consultant.test@jakartatax.co.id',
@@ -73,12 +77,12 @@ export const TEST_USERS = {
     },
     fullName: 'Jane Smith Consultant',
     get taxPartnerId() {
-      return testData.taxPartnerId || '00000000-0000-0000-0000-000000000003';
+      return testData.e2ePartnerId || testData.taxPartnerId || '00000000-0000-0000-0000-000000000003';
     },
   },
 
   /**
-   * TAX_ADVISOR - Licensed tax advisor
+   * TAX_ADVISOR — Licensed tax advisor (EXTERNAL, 결정 ① — CONSULTANT 주석 참조)
    */
   TAX_ADVISOR: {
     email: 'advisor.test@jakartatax.co.id',
@@ -89,7 +93,7 @@ export const TEST_USERS = {
     },
     fullName: 'Bob Johnson Tax Advisor',
     get taxPartnerId() {
-      return testData.taxPartnerId || '00000000-0000-0000-0000-000000000003';
+      return testData.e2ePartnerId || testData.taxPartnerId || '00000000-0000-0000-0000-000000000003';
     },
     licenseNumber: 'BREVET-A-12345',
   },

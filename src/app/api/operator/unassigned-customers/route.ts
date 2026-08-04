@@ -12,9 +12,11 @@ const SUPERVISOR_ROLES = ['TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
  * (i.e., waiting in the JTC assignment queue). Only visible to supervisors,
  * since they are the ones who pick a consultant for each new intake.
  *
- * Filter: customer with no row in customer_consultant where is_active=true.
- * External-tenant clients are excluded implicitly because the sign-up flow of
- * a self-service tax_partner creates the consultant assignment inline.
+ * Filter: customer with no active assignment in EITHER customer_consultant
+ * (EXTERNAL tenant staff) OR operator_client_assignments (JTC operator model,
+ * 결정 ① 이후 JTC 실무 배정 테이블). External-tenant clients are excluded
+ * implicitly because the sign-up flow of a self-service tax_partner creates
+ * the consultant assignment inline.
  */
 export async function GET(_request: NextRequest) {
   try {
@@ -39,16 +41,25 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    const { data: assignedRows, error: assignedErr } = await admin
-      .from('customer_consultant')
-      .select('customer_id')
-      .eq('is_active', true);
+    const [
+      { data: assignedRows, error: assignedErr },
+      { data: operatorRows, error: operatorErr },
+    ] = await Promise.all([
+      admin.from('customer_consultant').select('customer_id').eq('is_active', true),
+      admin.from('operator_client_assignments').select('customer_id').eq('is_active', true),
+    ]);
 
     if (assignedErr) {
       throw new Error(`Failed to load assignments: ${assignedErr.message}`);
     }
+    if (operatorErr) {
+      throw new Error(`Failed to load operator assignments: ${operatorErr.message}`);
+    }
 
-    const assignedIds = new Set((assignedRows || []).map(r => r.customer_id));
+    const assignedIds = new Set([
+      ...(assignedRows || []).map(r => r.customer_id),
+      ...(operatorRows || []).map(r => r.customer_id),
+    ]);
 
     const { data: customers, error: custErr } = await admin
       .from('customer')

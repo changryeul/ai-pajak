@@ -1,6 +1,11 @@
 # 마이그레이션 계획: JTC consultant → operator (CONSULTANT/TAX_ADVISOR = EXTERNAL 전용)
 
-작성: 2026-07-24 · 상태: **Phase 1-6 완료 (e2e 재편만 후속)** · 근거: `docs/guides/product-identity.md` 결정 ①
+작성: 2026-07-24 · 상태: **완료 (2026-08-04 e2e 재편 + 잔재 정리로 종결)** · 근거: `docs/guides/product-identity.md` 결정 ①
+
+> **후속 완료 (2026-08-04):**
+> - e2e 재편: `global-setup.ts` 가 'PT Mitra Pajak E2E' EXTERNAL 파트너를 find-or-create 해 consultant/advisor 계정·POA 를 그 소속으로 생성 — `forbid_jtc_consultant` 트리거와 충돌 해소. `fixtures/users.ts` 에 `e2ePartnerId` 반영.
+> - Phase 2 잔재 정리: 은퇴 JTC consultant 를 가리키던 active `customer_consultant` 15행(Tommy Lee 13/CR Lee 2) 비활성화 (`scripts/retire-jtc-customer-consultant.ts`, operator 백필 확인 후 --apply).
+> - 미배정 고객 큐(`/api/operator/unassigned-customers`)가 `operator_client_assignments` 도 배정으로 인정하도록 수정 — JTC operator 모델 정합.
 
 > **실행 요약 (2026-07-24, 커밋 3547a6a→3f70d38):**
 > - Phase 1-3: 데이터 이관 완료. active JTC consultant **0**. CR Lee/Tommy Lee→operator, advisor.test→supervisor, consultant.test→무력화.

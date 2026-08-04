@@ -122,6 +122,42 @@ async function globalSetup() {
     }
 
     const platformId = platform.id;
+
+    // 결정 ① (2026-07-24): CONSULTANT/TAX_ADVISOR 는 EXTERNAL 전용 —
+    // forbid_jtc_consultant 트리거가 JTC(default filing partner) 소속
+    // consultant INSERT 를 차단한다. e2e consultant/advisor 계정은 전용
+    // EXTERNAL 파트너에 소속시킨다 (find-or-create, 멱등).
+    let e2ePartnerId: string;
+    const { data: existingE2ePartner } = await supabaseAdmin
+      .from('tax_partner')
+      .select('id')
+      .eq('name', 'PT Mitra Pajak E2E')
+      .maybeSingle();
+    if (existingE2ePartner) {
+      e2ePartnerId = existingE2ePartner.id;
+      console.log(`✅ Found e2e EXTERNAL partner: ${e2ePartnerId}`);
+    } else {
+      const { data: newPartner, error: partnerErr } = await supabaseAdmin
+        .from('tax_partner')
+        .insert({
+          platform_id: platformId,
+          name: 'PT Mitra Pajak E2E',
+          legal_name: 'PT Mitra Pajak E2E (Playwright fixtures)',
+          tax_license_number: 'E2E-LIC-0001',
+          npwp: '0199999999999901',
+          email_domain: 'jakartatax.co.id',
+          partnership_start_date: '2025-01-01',
+          partner_type: 'EXTERNAL',
+          is_active: true,
+        })
+        .select('id')
+        .single();
+      if (partnerErr || !newPartner) {
+        throw new Error(`Failed to create e2e EXTERNAL partner: ${partnerErr?.message}`);
+      }
+      e2ePartnerId = newPartner.id;
+      console.log(`✅ Created e2e EXTERNAL partner: ${e2ePartnerId}`);
+    }
     console.log(`✅ Found platform: ${platformId}`);
 
     // Store created IDs for later use
@@ -262,7 +298,8 @@ async function globalSetup() {
             .from('consultant')
             .insert({
               user_id: userId,
-              tax_partner_id: taxPartnerId,
+              // 결정 ①: consultant 는 EXTERNAL 파트너 소속으로만 생성 가능.
+              tax_partner_id: e2ePartnerId,
               full_name: user.fullName,
               email: user.email,
               phone: user.consultantData.phone,
@@ -326,9 +363,12 @@ async function globalSetup() {
         .single();
 
       if (!existingRole) {
+        // 결정 ①: consultant 계열 role 의 조직은 EXTERNAL e2e 파트너.
         const organizationId = user.role === 'PLATFORM_ADMIN'
           ? platformId
-          : (user.role === 'CUSTOMER' ? null : taxPartnerId);
+          : user.role === 'CUSTOMER' ? null
+          : (user.role === 'CONSULTANT' || user.role === 'TAX_ADVISOR') ? e2ePartnerId
+          : taxPartnerId;
 
         const organizationType = user.role === 'PLATFORM_ADMIN'
           ? 'PLATFORM'
@@ -430,7 +470,7 @@ async function globalSetup() {
           .insert({
             poa_number: 'POA-TEST-2025-001',
             customer_id: customerId,
-            tax_partner_id: taxPartnerId,
+            tax_partner_id: e2ePartnerId,
             scope: 'ALL_TAX_TYPES',
             valid_from: '2025-01-01',
             valid_to: '2026-12-31',
@@ -480,7 +520,7 @@ async function globalSetup() {
           .insert({
             poa_number: 'POA-TEST-2025-002',
             customer_id: customerId,
-            tax_partner_id: taxPartnerId,
+            tax_partner_id: e2ePartnerId,
             scope: 'ALL_TAX_TYPES',
             valid_from: '2025-01-01',
             valid_to: '2026-12-31',
@@ -525,7 +565,7 @@ async function globalSetup() {
           .insert({
             poa_number: 'POA-TEST-2025-003',
             customer_id: customerId,
-            tax_partner_id: taxPartnerId,
+            tax_partner_id: e2ePartnerId,
             scope: 'ALL_TAX_TYPES',
             valid_from: '2025-01-01',
             valid_to: '2026-12-31',
@@ -621,7 +661,7 @@ async function globalSetup() {
             .insert({
               poa_number: 'POA-TEST-PPH23-ONLY',
               customer_id: scopeMismatchCustomerId,
-              tax_partner_id: taxPartnerId,
+              tax_partner_id: e2ePartnerId,
               scope: 'PPh23_ONLY',
               valid_from: '2025-01-01',
               valid_to: '2026-12-31',
@@ -673,7 +713,7 @@ async function globalSetup() {
           .insert({
             poa_number: 'POA-TEST-2025-004',
             customer_id: customerId,
-            tax_partner_id: taxPartnerId,
+            tax_partner_id: e2ePartnerId,
             scope: 'ALL_TAX_TYPES',
             valid_from: '2025-01-01',
             valid_to: '2026-12-31',
@@ -694,6 +734,7 @@ async function globalSetup() {
       consultantId,
       taxAdvisorConsultantId,
       taxPartnerId,
+      e2ePartnerId,
       platformId,
       activePoaId,
       draftPoaId,
