@@ -115,7 +115,10 @@ export function WorkqueueClient({ role }: { role?: string }) {
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
               <input placeholder="고객명, NPWP 검색" value={search} onChange={e => setSearch(e.target.value)} />
-              <a className={styles.btn} href={`/${locale}/operator`} title="운영팀 대시보드로 나가기">← 나가기</a>
+              {/* /operator 인덱스 페이지는 없다 — 역할별 실제 홈으로 나간다. */}
+              <a className={styles.btn}
+                href={`/${locale}/operator/${isSupervisor ? 'dashboard' : 'my-work'}`}
+                title="운영팀 대시보드로 나가기">← 나가기</a>
             </div>
           </div>
           <section className={styles.content}>

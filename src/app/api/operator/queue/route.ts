@@ -16,6 +16,7 @@ const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_O
 // NTPN 자동 수집이 호출하는 것을 전제로 남겨둔다 (operator UI 버튼 없음).
 type QueueStatus =
   | 'PENDING'
+  | 'PENDING_DOCS'
   | 'DATA_REVIEW'
   | 'PENDING_APPROVAL'
   | 'APPROVED'
