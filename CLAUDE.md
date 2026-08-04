@@ -84,6 +84,7 @@ All pages are under `src/app/[locale]/` with route groups:
 - `(auth)/` — login, register, forgot-password (redirect to dashboard if authenticated)
 - `(dashboard)/` — see below
 - `(public)/` — public pages
+- `(fullscreen)/` — full-bleed 화면 (사이드바 없는 자체 레이아웃). 현재 `operator/workqueue` (상담원 통합 업무함) 하나.
 
 API routes live at `src/app/api/` (not locale-prefixed).
 
@@ -200,6 +201,17 @@ Role gating:
 - 결산(연 SPT Tahunan)은 별도: `closing_submission` 테이블은 자체 status enum 으로 BPE 를 계속 추적하며(연 신고는 실제 제출 + BPE 수령 필요), operator coretax `record-completion` 이 queue → COMPLETED + closing_submission BPE 동기화를 수행한다.
 
 Operator API: `PUT /api/operator/queue` with `{ id, action, ...extra }`. The `extra` payload depends on the action (`ebillingCode`, `rejectedReason`, `failedReason`).
+
+### 상담원 통합 업무함 (Counselor Workqueue, 2026-07-31~08-04)
+`/operator/workqueue` — `(fullscreen)` 그룹의 full-bleed 화면. **신규 테이블 0** — `djp_submission_queue` 를 그대로 재사용하고, 세목별 검토 패널만 얹은 구조 (v19 검토 6뷰 전부 라이브).
+
+- **뷰 6종** (`WorkqueueSidebar` → `TAX_VIEW_TO_TYPE` in `src/components/operator/workqueue/types.ts`): `pph21`(PPh21) / `withholding`(PPh23+4(2)) / `ppn`(PPN, Coretax recon 배지) / `umkm`(PPh Final 월납부) / `annual`(SPT_TAHUNAN, 연도단위 목록) / `employees`(직원 인사 마스터 — PPh21 큐 행 공유, 고객 단위).
+- **패널 레지스트리**: `WorkqueueClient.tsx` 의 `PANEL_BY_VIEW` 맵 — 세목 추가 시 Panel/Table 컴포넌트 + flags 헬퍼 + API 서브라우트를 등록하는 "골든패턴". 이슈 검출 규칙은 `src/lib/operator/{pph21,withholding,ppn,umkm,annual-review,employee-hr}-flags.ts` (green/amber/red).
+- **API**: `GET/PUT /api/operator/workqueue` (worklist) + `/api/operator/workqueue/[queueId]/{pph21,withholding,ppn,umkm,annual,employees,approval,request,ai-review}`.
+- **자동 큐 생성**: 고객 자료 write(payslip/pph23/ppn/월납부 import 포함)가 `ensureQueueForActivity` (`src/lib/operator/ensure-queue-item.ts`) 를 best-effort 호출 → 해당 (customer, tax_type, period) 큐 행 자동 생성 + 담당 operator 배정 (없으면 auto-assign fallback). 워크큐가 self-populate 되므로 새 자료-write endpoint 를 만들면 이 훅을 잊지 말 것.
+- **가시성**: 미배정 큐 항목도 상담원 GET 에 노출되고, 첫 액션 시 자동 claim (2026-08-03 fix).
+- **AI 사전검토**: `ai-review` 서브라우트 + `AiPreReviewBox` — 온디맨드 Claude 요약(위험도/이슈/추천), API key 없으면 rule 기반 fallback (`src/lib/operator/ai-prereview.ts`).
+- **승인 루프**: `ApprovalActions` — 검토완료 → 수퍼바이저 승인/반려(사유 배너) → 재작업. 기존 queue PUT 액션 재사용. supervisor 는 여기서 재배정도 수행.
 
 ### ID Billing 발행 보드 (v19 트랙 2, 2026-07-23)
 수퍼바이저 승인완료 건만 발행대상으로 이관되는 발행 보드 — **JTC 운영팀 + 외부 세무법인(ERP) 상담원 공용** (tenant = `tax_partner` 분리, 운영팀은 JTC 기본 파트너 스코프).

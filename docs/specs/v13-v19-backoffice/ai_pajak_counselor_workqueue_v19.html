@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI Pajak 상담원 업무함 v10</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--nav:#101827;--nav2:#1f2937;--navtxt:#d1d5db;--blue:#2563eb;--bs:#eff6ff;--red:#dc2626;--rs:#fef2f2;--amber:#d97706;--as:#fffbeb;--green:#16a34a;--gs:#ecfdf5;--purple:#7c3aed;--ps:#f5f3ff;--cyan:#0891b2;--cs:#ecfeff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}.app{display:grid;grid-template-columns:292px minmax(0,1fr);min-height:100vh}
+.side{background:var(--nav);color:var(--navtxt);height:100vh;position:sticky;top:0;overflow:auto;padding:18px 14px}.brand{display:flex;gap:10px;align-items:center;color:#fff;font-size:21px;font-weight:900;margin-bottom:22px}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#22c55e);display:grid;place-items:center}
+.st{font-size:11px;color:#9ca3af;margin:18px 10px 7px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}.nav{width:100%;border:0;background:transparent;color:var(--navtxt);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 11px;border-radius:10px;text-align:left;font:inherit;cursor:pointer}.nav:hover,.nav.active{background:var(--nav2);color:#fff}.sub{margin-left:8px;padding-left:8px;border-left:1px solid #253044}
+.cnt{min-width:38px;height:26px;line-height:26px;border-radius:999px;background:#fff;color:#111827;font-size:15px;font-weight:1000;text-align:center;box-shadow:0 0 0 2px rgba(255,255,255,.2)}.cnt.red{background:#fee2e2;color:#7f1d1d}.cnt.amber{background:#fef3c7;color:#78350f}.cnt.green{background:#dcfce7;color:#14532d}.cnt.purple{background:#ede9fe;color:#4c1d95}.cnt.blue{background:#dbeafe;color:#1e3a8a}
+.acct{margin-top:22px;padding:14px;border:1px solid #253044;border-radius:14px;background:rgba(255,255,255,.03)}.acct b{display:block;color:#fff}.acct span{display:block;color:#9ca3af;font-size:12px;margin-top:4px}
+.top{position:sticky;top:0;z-index:3;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:13px 22px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}.role{display:flex;gap:8px}.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:900;cursor:pointer}.pill.active{background:var(--gs);border-color:#bbf7d0;color:#15803d}
+.tools{display:grid;grid-template-columns:150px minmax(240px,1fr) 150px 160px;gap:8px}input,select,textarea{border:1px solid var(--line);border-radius:10px;background:#fff;padding:9px 11px;font:inherit;min-width:0}textarea{min-height:88px;resize:vertical}
+.content{padding:22px}.grid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:18px;align-items:start}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.head h1{margin:0;font-size:22px}.head p{margin:6px 0 0;color:var(--muted);line-height:1.45}
+.body{padding:18px}.badge{display:inline-flex;align-items:center;border-radius:99px;font-size:12px;font-weight:900;padding:5px 10px;white-space:nowrap}.blue{background:var(--bs);color:#1d4ed8}.red{background:var(--rs);color:#b91c1c}.amber{background:var(--as);color:#b45309}.green{background:var(--gs);color:#15803d}.purple{background:var(--ps);color:#6d28d9}.cyan{background:var(--cs);color:#0e7490}.gray{background:#f3f4f6;color:#4b5563}.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.qpanel{position:sticky;top:86px}.current{border:1px solid #bfdbfe;background:#eff6ff;border-radius:16px;padding:14px 14px;margin-bottom:10px;color:#1e40af}.current b{display:block;font-size:22px;line-height:1.1}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}.metric{border:1px solid var(--line);border-radius:12px;background:#fff;padding:7px 6px;cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;min-height:42px}.metric:hover{outline:2px solid #bfdbfe;background:#eff6ff}.metric small{color:var(--muted);font-weight:900;font-size:11px;white-space:nowrap}.metric b{font-size:17px}
+.qlist{display:grid;gap:8px;max-height:370px;overflow:auto;padding-right:2px}.cust{border:1px solid var(--line);border-radius:15px;background:#fff;padding:12px;cursor:pointer}.cust:hover,.cust.active{outline:2px solid #bfdbfe;background:#eff6ff}.cust .ct{display:flex;justify-content:space-between;gap:8px}.cust b{display:block;font-size:14px}.cust span{display:block;color:var(--muted);font-size:12px;margin-top:3px}.mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.pager{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:10px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px}.panel h3{margin:0 0 9px;font-size:16px}.req{display:grid;gap:8px}.reqi{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fafafa;font-size:13px}.reqi b{display:block}.reqi span{color:var(--muted)}
+.m4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:15px}.metric2{border:1px solid var(--line);border-radius:15px;background:#fff;padding:13px}.metric2 small{display:block;color:var(--muted);font-weight:900}.metric2 b{font-size:20px}.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.toolbar>div{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:900;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn.blue{border-color:#bfdbfe;background:var(--bs);color:#1d4ed8}.btn.green{border-color:#bbf7d0;background:var(--gs);color:#15803d}.btn.purple{border-color:#ddd6fe;background:var(--ps);color:#6d28d9}.btn.red{border-color:#fecaca;background:var(--rs);color:#b91c1c}.btn.cyan{border-color:#a5f3fc;background:var(--cs);color:#0e7490}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff;margin-top:10px}table{border-collapse:collapse;width:100%;min-width:1100px}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}th{background:#f9fafb;color:#4b5563;text-transform:uppercase;font-size:12px;letter-spacing:.03em}tr:hover{background:#f8fafc}tr.sel{background:#eef2ff}.money{text-align:right;font-variant-numeric:tabular-nums}.name b{display:block}.name span{font-size:12px;color:var(--muted)}
+.section{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:16px;background:#fff}.section h3{margin:0;padding:14px 16px;background:#f9fafb;border-bottom:1px solid var(--line);font-size:16px}.field{display:grid;grid-template-columns:230px minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line)}.field.need{background:var(--as)}.field.flag{background:var(--rs)}.field label{font-weight:900}.hint{font-size:12px;color:var(--muted);margin-top:3px}
+.detail{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.di{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}.di label{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-bottom:5px}.ai{border:1px solid #bfdbfe;background:var(--bs);border-radius:16px;padding:14px;margin-top:14px;color:#1e3a8a}.ai b{display:block;color:#1d4ed8;margin-bottom:8px}.ai ul{margin:0;padding-left:20px}.calc{border:1px solid #bbf7d0;background:var(--gs);border-radius:16px;padding:14px;margin-top:14px;color:#14532d}.calc b{display:block;margin-bottom:8px}.formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#fff;border:1px solid #bbf7d0;border-radius:10px;padding:10px;margin-top:8px;overflow:auto}.blocked{border:1px solid #fecaca;background:var(--rs);color:#991b1b;border-radius:14px;padding:12px;font-size:13px;line-height:1.45;margin-bottom:12px}
+.evidence-link{border:0;background:transparent;color:#1d4ed8;font-weight:900;text-decoration:underline;cursor:pointer;padding:0;text-align:left}.coretax-box{border:1px solid #a5f3fc;background:var(--cs);border-radius:16px;padding:14px;margin:12px 0;color:#0e7490}.coretax-box b{display:block;margin-bottom:7px;color:#155e75}.coretax-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.float{position:fixed;right:22px;bottom:22px;border:0;border-radius:999px;background:#111827;color:#fff;padding:13px 17px;font-weight:900;cursor:pointer;box-shadow:0 12px 40px rgba(15,23,42,.24);z-index:7}.drawer{position:fixed;right:20px;bottom:78px;width:min(430px,calc(100vw - 40px));max-height:70vh;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 80px rgba(15,23,42,.25);display:none;z-index:8;overflow:hidden}.drawer.open{display:block}.dh{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.db{padding:14px;display:grid;gap:12px;max-height:50vh;overflow:auto}.df{padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px}.msg{border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.45;background:#f3f4f6}.msg.agent{background:var(--bs);color:#1e3a8a}.msg.supervisor{background:var(--ps);color:#4c1d95}
+.modalbg{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;place-items:center;z-index:9;padding:20px}.modalbg.open{display:grid}.modal{width:min(650px,100%);background:#fff;border-radius:18px;overflow:hidden}.modal h2{margin:0;padding:18px 20px;border-bottom:1px solid var(--line)}.mb{padding:20px;display:grid;gap:12px}.mf{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:end;gap:8px}.toast{position:fixed;right:22px;bottom:22px;background:#111827;color:#fff;padding:13px 16px;border-radius:12px;display:none;z-index:10}.toast.show{display:block}
+@media(max-width:1180px){.grid{grid-template-columns:1fr}.qpanel{position:static}.m4{grid-template-columns:repeat(2,1fr)}}@media(max-width:850px){.app{grid-template-columns:1fr}.side{height:auto;position:relative}.top{position:relative;grid-template-columns:1fr}.tools{grid-template-columns:1fr}.detail{grid-template-columns:1fr}.m4{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+
+.billing-mode .grid{grid-template-columns:minmax(0,1fr)}
+.billing-mode .qpanel{display:none}
+.billing-board{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.billing-col{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.04);overflow:hidden}
+.billing-col-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f9fafb}
+.billing-col-head h2{margin:0;font-size:20px}
+.billing-col-body{padding:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.billing-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:11px;display:grid;gap:8px;min-width:0}
+.billing-card:hover{outline:2px solid #bfdbfe;background:#f8fbff}
+.billing-card-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.billing-card-title b{font-size:13px;line-height:1.25}
+.billing-card-row{display:grid;grid-template-columns:76px minmax(0,1fr);gap:6px;align-items:center;font-size:11px}
+.billing-card-row label{color:var(--muted);font-weight:900;font-size:10px}
+.billing-card input{width:100%}
+.billing-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.billing-card .btn{padding:6px 7px;font-size:11px}.billing-card .badge{font-size:10px;padding:4px 7px}.billing-card input{padding:7px 8px;font-size:11px}
+@media(max-width:1280px){.billing-col-body{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:1050px){.billing-board{grid-template-columns:1fr}.billing-col-body{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.billing-col-body{grid-template-columns:1fr}}
+
+
+.billing-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.billing-target-card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:13px;display:grid;gap:10px}
+.billing-target-card:hover{outline:2px solid #bfdbfe;background:#f8fbff}
+.billing-company-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.billing-company-head b{font-size:15px;line-height:1.25}
+.billing-email-row{display:grid;grid-template-columns:58px minmax(0,1fr);gap:6px;align-items:center;font-size:11px}
+.billing-email-row label{font-weight:900;color:var(--muted)}
+.tax-item{border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;padding:9px;display:grid;gap:7px}
+.tax-item-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.tax-item-head b{font-size:12px}
+.tax-item-meta{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:11px;color:#4b5563}
+.doc-list{display:grid;gap:5px}
+.doc-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;font-size:11px;border-top:1px dashed #e5e7eb;padding-top:5px}
+.doc-row span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hidden-file{display:none}
+.billing-issued-table{width:100%;min-width:900px}
+.billing-issued-table th,.billing-issued-table td{font-size:12px;padding:9px}
+.billing-issued-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff}
+.btn.disabled,.btn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:1400px){.billing-target-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.billing-target-grid{grid-template-columns:1fr}}
+
+
+.evidence-modal{width:min(760px,100%);background:#fff;border-radius:18px;overflow:hidden}
+.evidence-list{display:grid;gap:10px}
+.evidence-card{border:1px solid var(--line);border-radius:14px;background:#f9fafb;padding:12px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}
+.evidence-icon{width:38px;height:38px;border-radius:10px;background:#eef2ff;display:grid;place-items:center;font-size:20px}
+.evidence-card b{display:block;font-size:14px}
+.evidence-card span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.evidence-preview-box{border:1px dashed #cbd5e1;border-radius:14px;background:#f8fafc;padding:16px;text-align:center;color:#475569}
+.wa-drawer{background:#efeae2}
+.wa-chat{background:#efeae2;padding:12px;display:grid;gap:8px;max-height:48vh;overflow:auto}
+.wa-date{justify-self:center;background:rgba(255,255,255,.8);color:#54656f;font-size:11px;border-radius:8px;padding:4px 9px;margin:4px 0}
+.wa-bubble{max-width:78%;border-radius:8px;padding:7px 9px;box-shadow:0 1px 1px rgba(0,0,0,.08);font-size:13px;line-height:1.35}
+.wa-bubble.me{justify-self:end;background:#d9fdd3;border-top-right-radius:2px}
+.wa-bubble.them{justify-self:start;background:#fff;border-top-left-radius:2px}
+.wa-meta{display:flex;justify-content:flex-end;gap:4px;align-items:center;color:#667781;font-size:10px;margin-top:3px}
+.wa-read{color:#34b7f1;font-weight:900}
+.wa-input{background:#f0f2f5}
+.wa-input input{border-radius:999px}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">AI</div><div>AI Pajak</div></div>
+    <div class="st">상담원 업무함</div>
+    <button class="nav active" data-filter=""><span>📌 전체 고객 업무함</span><span class="cnt blue">128</span></button>
+    <button class="nav" data-filter="unreviewed"><span>🔴 미검토 고객</span><span class="cnt red">31</span></button>
+    <button class="nav" data-filter="inReview"><span>🟡 검토중</span><span class="cnt amber">44</span></button>
+    <button class="nav" data-filter="request"><span>💬 수정작업중</span><span class="cnt red">18</span></button>
+    <button class="nav" data-filter="reviewed"><span>🟢 검토완료</span><span class="cnt green">22</span></button>
+    <div class="st">고객 입력자료 검토</div>
+    <div class="sub">
+      <button class="nav active view" data-view="pph21"><span>개인소득세 (PPh 21)</span></button>
+      <button class="nav view" data-view="withholding"><span>원천세 (PPh 4(2), 15, 22, 23, 26)</span></button>
+      <button class="nav view" data-view="umkm"><span>선납법인세 (PPh Final, 25)</span></button>
+      <button class="nav view" data-view="ppn"><span>부가세 (PPN)</span></button>
+      <button class="nav view" data-view="annual"><span>연 신고 (SPT)</span></button>
+      <button class="nav view" data-view="employees"><span>직원 인사 기록</span></button>
+    </div>
+    <div class="st">상담원 처리업무</div>
+    <div class="sub">
+      <button class="nav view" data-view="billing"><span>ID Billing 발행</span><span class="cnt purple">12</span></button>
+    </div>
+    <div class="acct"><b>상담원 김민수</b><span>JTC Tax Operator</span></div>
+  </aside>
+  <main>
+    <div class="top">
+      <div class="role"><button class="pill active">상담원</button><button class="pill">수퍼바이저</button></div>
+      <div class="tools">
+        <input type="month" id="period" value="2026-07"/>
+        <input id="search" placeholder="고객명, NPWP, 담당자 검색"/>
+        <select id="statusFilter"><option value="">전체 상태</option><option value="unreviewed">미검토</option><option value="inReview">검토중</option><option value="request">수정작업중</option><option value="reviewed">검토완료</option><option value="billing">ID Billing 발행대기</option><option value="paid">납부확인</option><option value="completed">신고완료</option></select>
+        <select id="sort"><option value="priority">상태 우선순 정렬</option><option value="deadline">마감일 빠른순</option><option value="name">고객명 가나다순</option><option value="taxdesc">세액 높은순</option><option value="updated">최근 업데이트순</option></select>
+      </div>
+      <select><option>한국어</option><option>English</option><option>Bahasa Indonesia</option></select>
+    </div>
+    <section class="content"><div class="grid"><aside class="qpanel"><div class="card"><div class="head"><div><h1>고객 업무함</h1></div></div><div class="body">
+      <div id="current" class="current"></div>
+      <div class="metrics"><div class="metric" data-quick="unreviewed"><small>미검토</small><b>31</b></div><div class="metric" data-quick="request"><small>수정중</small><b>18</b></div><div class="metric" data-quick="billing"><small>ID Billing</small><b>12</b></div><div class="metric" data-quick="completed"><small>신고완료</small><b>14</b></div></div>
+      <div id="queue" class="qlist"></div><div class="pager"><span>1–20 / 128 고객</span><span>‹ 이전 · 다음 ›</span></div>
+      <div class="panel"><h3>요청 현황</h3><div id="embeddedRequests" class="req"></div></div>
+    </div></div></aside><div id="page"></div></div></section>
+  </main>
+</div>
+<button class="float" id="messengerButton">💬 메신저 / 요청함</button>
+<div id="drawer" class="drawer"><div class="dh"><b id="drawerTitle">메신저 / 요청함</b><button class="btn" id="closeDrawer">닫기</button></div><div class="db"><div id="drawerRequests" class="req"></div><div id="messages" class="req"></div></div><div class="df"><input id="chat" placeholder="메시지" style="flex:1"/><button class="btn blue" id="send">전송</button></div></div>
+<div id="modalBg" class="modalbg"><div class="modal"><h2>요청</h2><div class="mb"><label>고객 화면 위치<input id="modalField" readonly/></label><label>고객에게 보낼 메시지<textarea id="modalMsg"></textarea></label><label>내부 메모<textarea id="modalMemo" placeholder="상담원/수퍼바이저에게만 보이는 메모"></textarea></label></div><div class="mf"><button class="btn" id="cancelModal">취소</button><button class="btn blue" id="saveModal">고객에게 표시</button></div></div></div>
+
+<div id="evidenceModalBg" class="modalbg">
+  <div class="evidence-modal">
+    <h2 id="evidenceTitle" style="margin:0;padding:18px 20px;border-bottom:1px solid var(--line)">증빙 보기</h2>
+    <div class="mb">
+      <div id="evidencePreview" class="evidence-preview-box">거래 증빙을 선택하면 이 영역에서 미리보기로 표시됩니다.</div>
+      <div id="evidenceList" class="evidence-list"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" id="closeEvidenceModal">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script>
+const CORETAX_URL="https://coretaxdjp.pajak.go.id/";
+const FILLED_CORETAX_TEMPLATE="ai_pajak_coretax_id_billing_filled_v15.xlsx";
+const statusMeta={unreviewed:["미검토","red",1],inReview:["검토중","amber",2],request:["수정작업중","red",0],reviewed:["검토완료","green",5],billing:["ID Billing 발행대기","purple",3],paid:["납부확인","blue",4],completed:["신고완료","green",9]};
+const customers=[
+{id:1,name:"PT Example Indonesia",npwp:"0123456789012000",pic:"Mr. Lee",status:"request",tax:"PPh 21",deadline:"2026-08-20",amount:16053,updated:"2026-07-22 08:55"},
+{id:2,name:"PT Sura Indonesia",npwp:"019876543211000",pic:"Ms. Sari",status:"unreviewed",tax:"PPN",deadline:"2026-08-31",amount:26400000,updated:"2026-07-22 08:41"},
+{id:3,name:"PT Jungshim Indonesia",npwp:"017771234500000",pic:"Mr. Sim",status:"billing",tax:"PPh 23",deadline:"2026-08-20",amount:3200000,updated:"2026-07-21 17:20"},
+{id:4,name:"PT GNI Equipment",npwp:"018881234500000",pic:"Pak Andi",status:"inReview",tax:"PPh 26",deadline:"2026-08-20",amount:0,updated:"2026-07-21 15:11"},
+{id:5,name:"PT Indokor Furniture",npwp:"016661234500000",pic:"Ms. Rina",status:"reviewed",tax:"PPh 25",deadline:"2026-08-15",amount:5800000,updated:"2026-07-21 14:45"},
+{id:6,name:"PT Mono Retail",npwp:"015551234500000",pic:"Mr. Budi",status:"paid",tax:"PPN",deadline:"2026-08-31",amount:11200000,updated:"2026-07-21 10:03"},
+{id:7,name:"PT Basilliea Indonesia",npwp:"014441234500000",pic:"Ms. Hana",status:"completed",tax:"PPh 21",deadline:"2026-08-20",amount:780000,updated:"2026-07-20 18:40"},
+{id:8,name:"PT Starlink Cikarang",npwp:"013331234500000",pic:"Pak Dedi",status:"unreviewed",tax:"PPh 23",deadline:"2026-08-20",amount:2400000,updated:"2026-07-20 11:20"},
+{id:9,name:"PT Korea Trading",npwp:"012221234500000",pic:"Ms. Dewi",status:"request",tax:"PPh 21",deadline:"2026-08-20",amount:210000,updated:"2026-07-20 09:33"},
+{id:10,name:"PT Cikarang Service",npwp:"011111234500000",pic:"Mr. Park",status:"billing",tax:"PPh 25",deadline:"2026-08-15",amount:9300000,updated:"2026-07-19 17:08"}];
+const employees=[
+{id:1,name:"Dofan Moerlyandi",status:"작성중",npwp:"70.505.712.3-016.000",ptkp:"K/2",gross:6421080,bpjs:"입력완료",bonus:"없음",ter:"B",tax:16053,issue:"검토 필요",level:"amber"},
+{id:2,name:"Farah Dwi Khairani Putri",status:"작성중",npwp:"NPWP 없음",ptkp:"TK/0",gross:4230000,bpjs:"입력완료",bonus:"없음",ter:"A",tax:0,issue:"NPWP 확인 필요",level:"red"},
+{id:3,name:"M. Amir Hamzah",status:"완료",npwp:"70.285.252.6-009.000",ptkp:"K/1",gross:5995436,bpjs:"입력완료",bonus:"없음",ter:"B",tax:0,issue:"확인 완료",level:"green"},
+{id:4,name:"M. Fadli Sahavin",status:"완료",npwp:"71.823.180.6-435.000",ptkp:"TK/0",gross:4356329,bpjs:"입력완료",bonus:"없음",ter:"A",tax:0,issue:"확인 완료",level:"green"},
+{id:5,name:"Muhamad Kholid",status:"작성중",npwp:"NPWP 없음",ptkp:"K/2",gross:4286349,bpjs:"미입력",bonus:"없음",ter:"B",tax:0,issue:"NPWP·BPJS 필요",level:"red"},
+{id:6,name:"Rudi Bachtiar",status:"작성중",npwp:"NPWP 없음",ptkp:"K/2",gross:4506349,bpjs:"입력완료",bonus:"없음",ter:"B",tax:0,issue:"NPWP 확인 필요",level:"red"},
+{id:7,name:"Suriyo",status:"작성중",npwp:"NPWP 없음",ptkp:"K/2",gross:4706349,bpjs:"미입력",bonus:"없음",ter:"B",tax:0,issue:"NPWP·BPJS 필요",level:"red"}];
+const withholdingRows=[
+{level:"amber",stage:"검토",date:"2026-07-03",vendor:"PT ABC Consulting",npwp:"01.234.567.8-011.000",invoice:"INV/ABC/0726/001",desc:"세무 자문 서비스",dpp:15000000,type:"PPh 23",code:"411124-104",rate:"2%",tax:300000,evidence:"Invoice, 계약서, BAST",status:"계약서 확인 필요"},
+{level:"green",stage:"완료",date:"2026-07-05",vendor:"PT Office Tower",npwp:"02.222.333.4-011.000",invoice:"RENT/07/2026",desc:"사무실 임대료",dpp:25000000,type:"PPh 4(2)",code:"411128-403",rate:"10%",tax:2500000,evidence:"임대계약서, Invoice, 송금증",status:"확인 완료"},
+{level:"red",stage:"요청",date:"2026-07-11",vendor:"Global IT Pte Ltd",npwp:"해외거래처",invoice:"SG-IT-2026-88",desc:"해외 소프트웨어 유지보수",dpp:42000000,type:"PPh 26",code:"411127-100",rate:"20% / Treaty 검토",tax:8400000,evidence:"Invoice, 송금신청서",status:"DGT Form 필요"},
+{level:"amber",stage:"검토",date:"2026-07-15",vendor:"PT Logistik Nusantara",npwp:"03.333.444.5-012.000",invoice:"LOG/2026/07/045",desc:"화물 운송 서비스",dpp:8800000,type:"PPh 15 가능",code:"미확정",rate:"검토",tax:0,evidence:"Invoice, Delivery Order",status:"거래성격 확인 필요"}];
+const ppnSales=[
+{status:"일치",level:"green",date:"2026-07-02",fp:"010.009-26.12345678",party:"PT Nusantara Retail",npwp:"04.111.222.3-011.000",customerDpp:120000000,coretaxDpp:120000000,customerVat:13200000,coretaxVat:13200000},
+{status:"일치",level:"green",date:"2026-07-09",fp:"010.009-26.12345679",party:"PT Korea Trading",npwp:"05.333.444.5-011.000",customerDpp:180000000,coretaxDpp:180000000,customerVat:19800000,coretaxVat:19800000},
+{status:"Coretax 누락",level:"red",date:"2026-07-20",fp:"010.009-26.12345680",party:"PT Cikarang Service",npwp:"06.555.666.7-011.000",customerDpp:120000000,coretaxDpp:0,customerVat:13200000,coretaxVat:0}];
+const ppnPurchases=[
+{status:"일치",level:"green",date:"2026-07-04",fp:"011.009-26.22345678",party:"PT Supplier A",npwp:"07.111.222.3-011.000",customerDpp:90000000,coretaxDpp:90000000,customerVat:9900000,coretaxVat:9900000,credit:"공제가능"},
+{status:"일치",level:"green",date:"2026-07-13",fp:"011.009-26.22345679",party:"PT Supplier B",npwp:"08.333.444.5-011.000",customerDpp:60000000,coretaxDpp:60000000,customerVat:6600000,coretaxVat:6600000,credit:"공제가능"},
+{status:"고객 자료 번호 오류",level:"red",date:"2026-07-18",fp:"번호 오류",party:"PT ABC Indonesia",npwp:"09.555.666.7-011.000",customerDpp:30000000,coretaxDpp:30000000,customerVat:3300000,coretaxVat:3300000,credit:"검토필요"}];
+
+
+
+const billingTargets=[
+{id:101,name:"PT Jungshim Indonesia",review:"수퍼바이저 승인완료",email:"finance@jungshim.co.id",templateDownloaded:false,items:[
+  {id:"101-1",tax:"PPh 23",period:"2026-07",amount:3000000,billingType:"411124-104",base:150000000,rate:"2%"},
+  {id:"101-2",tax:"PPh 4(2)",period:"2026-07",amount:2500000,billingType:"411128-403",base:25000000,rate:"10%"}
+]},
+{id:102,name:"PT Cikarang Service",review:"수퍼바이저 승인완료",email:"tax@cikarangservice.co.id",templateDownloaded:false,items:[
+  {id:"102-1",tax:"PPh 25",period:"2026-07",amount:5800000,billingType:"411126-100",base:5800000,rate:"100%"}
+]},
+{id:103,name:"PT Indokor Furniture",review:"수퍼바이저 승인완료",email:"admin@indokor.co.id",templateDownloaded:false,items:[
+  {id:"103-1",tax:"PPN",period:"2026-07",amount:26400000,billingType:"411211-100",base:240000000,rate:"11%"}
+]},
+{id:104,name:"PT Global Parts",review:"수퍼바이저 승인완료",email:"tax@globalparts.co.id",templateDownloaded:false,items:[
+  {id:"104-1",tax:"PPh 21",period:"2026-07",amount:780000,billingType:"411121-100",base:780000,rate:"100%"}
+]},
+{id:105,name:"PT Bekasi Consulting",review:"수퍼바이저 승인완료",email:"finance@bekasiconsulting.co.id",templateDownloaded:false,items:[
+  {id:"105-1",tax:"PPh 23",period:"2026-07",amount:990000,billingType:"411124-104",base:49500000,rate:"2%"},
+  {id:"105-2",tax:"PPh 21",period:"2026-07",amount:540000,billingType:"411121-100",base:540000,rate:"100%"}
+]},
+{id:106,name:"PT Starlink Cikarang",review:"수퍼바이저 승인완료",email:"admin@starlinkcikarang.co.id",templateDownloaded:false,items:[
+  {id:"106-1",tax:"PPh 23",period:"2026-07",amount:2400000,billingType:"411124-104",base:120000000,rate:"2%"}
+]}
+];
+const billingIssued=[
+{id:201,no:"BIL-202607-001",name:"PT Mono Retail",tax:"PPN",period:"2026-07",amount:11200000,email:"finance@monoretail.co.id",sent:"전송완료",ntpn:""},
+{id:202,no:"BIL-202607-002",name:"PT Korea Trading",tax:"PPh 21",period:"2026-07",amount:210000,email:"tax@koreatrading.co.id",sent:"미전송",ntpn:""},
+{id:203,no:"BIL-202607-003",name:"PT Sura Indonesia",tax:"PPN",period:"2026-07",amount:26400000,email:"tax@sura.co.id",sent:"전송완료",ntpn:""}
+];
+const state={view:"pph21",selectedCustomer:1,selectedEmployee:1,selectedField:"",requests:[{customer:1,field:"PPh 21 / Farah Dwi Khairani Putri / NPWP",msg:"해당 직원의 NPWP 또는 NIK 확인자료를 입력해 주세요.",status:"요청중",requestedAt:"2026-07-22 08:42",requestedBy:"상담원 김민수"},{customer:1,field:"PPh 21 / Muhamad Kholid / BPJS",msg:"2026년 7월 BPJS 납부내역을 업로드해 주세요.",status:"요청중",requestedAt:"2026-07-22 08:45",requestedBy:"상담원 김민수"}],messages:[{customer:1,from:"AI 상담원",type:"agent",text:"7월 PPh 21 검토 중 NPWP와 BPJS 보완이 필요한 직원이 있습니다."},{customer:1,from:"고객",type:"customer",text:"확인했습니다. 직원자료를 다시 확인해 보겠습니다."}]};
+function money(n){return "Rp "+Number(n).toLocaleString("id-ID")}function customer(){return customers.find(c=>c.id===state.selectedCustomer)||customers[0]}function label(s){return statusMeta[s]?.[0]||s}function color(s){return statusMeta[s]?.[1]||"blue"}function period(){return document.getElementById("period").value||"2026-07"}function lev(l){return l==="green"?"green":l==="red"?"red":"amber"}function lvlText(l){return l==="green"?"완료":l==="red"?"요청":"검토"}
+function renderQueue(){const q=document.getElementById("search").value.toLowerCase();const f=document.getElementById("statusFilter").value;const sort=document.getElementById("sort").value;let list=customers.filter(c=>(!f||c.status===f)&&(c.name.toLowerCase().includes(q)||c.npwp.includes(q)||c.pic.toLowerCase().includes(q)));list.sort((a,b)=>{if(sort==="deadline")return a.deadline.localeCompare(b.deadline);if(sort==="name")return a.name.localeCompare(b.name);if(sort==="taxdesc")return b.amount-a.amount;if(sort==="updated")return b.updated.localeCompare(a.updated);return (statusMeta[a.status]?.[2]||8)-(statusMeta[b.status]?.[2]||8)||a.deadline.localeCompare(b.deadline)});const c=customer();document.getElementById("current").innerHTML=`<b>${c.name}</b>`;document.getElementById("queue").innerHTML=list.map(c=>`<div class="cust ${c.id===state.selectedCustomer?'active':''}" data-id="${c.id}"><div class="ct"><div><b>${c.name}</b><span>${c.npwp} · 담당 ${c.pic}</span></div><span class="badge ${color(c.status)}">${label(c.status)}</span></div><div class="mini"><span class="badge gray">${c.tax}</span><span class="badge amber">마감 ${c.deadline}</span><span class="badge blue">${money(c.amount)}</span></div></div>`).join("")||`<div class="reqi"><b>검색 결과 없음</b><span>검색어 또는 상태필터를 조정하세요.</span></div>`;document.querySelectorAll(".cust").forEach(el=>el.addEventListener("click",()=>{state.selectedCustomer=Number(el.dataset.id);renderAll();toast(customer().name+" 선택됨")}));renderEmbeddedRequests()}
+function renderEmbeddedRequests(){const c=customer();const reqs=state.requests.filter(r=>r.customer===c.id);document.getElementById("embeddedRequests").innerHTML=reqs.length?reqs.map(r=>`<div class="reqi"><b>${r.field}</b><span>${r.status} · ${r.requestedAt} · ${r.requestedBy}<br>${r.msg}</span></div>`).join(""):`<div class="reqi"><b>요청 없음</b><span>현재 고객에게 보낸 요청이 없습니다.</span></div>`}
+function pageShell(title,body,statusExtra=""){const c=customer();document.getElementById("page").innerHTML=`<div class="card"><div class="head"><div><h1>${title}</h1><p>${c.name} · ${period()} 귀속분 · 고객 제출자료 전체 검토</p><div class="badges"><span class="badge blue">${period()}</span><span class="badge ${color(c.status)}">${label(c.status)}</span>${statusExtra}</div></div></div><div class="body">${body}</div></div>`}
+function renderPage(){if(["billing","ntpn","completed","employees"].includes(state.view)){renderTask();return}if(state.view==="pph21"){renderPph21();return}if(state.view==="withholding"){renderWithholding();return}if(state.view==="umkm"){renderCit();return}if(state.view==="ppn"){renderPpn();return}renderAnnual()}
+function renderPph21(blockedMsg=""){const gross=employees.reduce((a,e)=>a+e.gross,0);const tax=employees.reduce((a,e)=>a+e.tax,0);const issues=employees.filter(e=>e.level!=="green").length;const selected=employees.find(e=>e.id===state.selectedEmployee)||employees[0];const rows=[...employees].sort((a,b)=>({red:0,amber:1,green:2}[a.level])-({red:0,amber:1,green:2}[b.level]));pageShell("개인소득세 (PPh 21)",`${blockedMsg?`<div class="blocked"><b>수퍼바이저 승인완료 불가</b><br>${blockedMsg}</div>`:""}<div class="m4"><div class="metric2"><small>직원 수</small><b>${employees.length}명</b></div><div class="metric2"><small>총 지급</small><b>${money(gross)}</b></div><div class="metric2"><small>PPh 21 합계</small><b>${money(tax)}</b></div><div class="metric2"><small>미완료</small><b>${issues}건</b></div></div><div class="toolbar"><div><input id="empSearch" placeholder="직원명 검색"><select id="empStatus"><option value="">전체 상태</option><option value="red">요청 필요</option><option value="amber">검토 필요</option><option value="green">확인 완료</option></select></div><div><button class="btn blue" id="bulkReq">일괄 요청</button><button class="btn purple" id="reviewDone">고객 검토완료</button></div></div><div class="tbl"><table id="empTable"><thead><tr><th>상태</th><th>직원</th><th>NPWP</th><th>PTKP</th><th>총 지급</th><th>BPJS</th><th>THR/보너스</th><th>TER</th><th>PPh21</th><th>이슈</th><th>요청</th></tr></thead><tbody>${rows.map(e=>`<tr data-name="${e.name.toLowerCase()}" data-level="${e.level}" class="${e.id===state.selectedEmployee?'sel':''}" data-emp="${e.id}"><td><span class="badge ${lev(e.level)}">${lvlText(e.level)}</span></td><td class="name"><b>${e.name}</b><span>${e.status}</span></td><td>${e.npwp}</td><td>${e.ptkp}</td><td class="money">${money(e.gross)}</td><td>${e.bpjs}</td><td>${e.bonus}</td><td>Kategori ${e.ter}</td><td class="money">${money(e.tax)}</td><td>${e.issue}</td><td><button class="btn blue reqBtn" data-field="PPh 21 / ${e.name}">요청</button></td></tr>`).join("")}</tbody></table></div><div class="section"><h3>선택 직원 상세보기: ${selected.name}</h3><div class="body"><div class="detail"><div class="di"><label>상태</label><b>${selected.status}</b></div><div class="di"><label>NPWP</label><b>${selected.npwp}</b></div><div class="di"><label>PTKP / TER</label><b>${selected.ptkp} · ${selected.ter}</b></div><div class="di"><label>총 지급</label><b>${money(selected.gross)}</b></div><div class="di"><label>BPJS</label><b>${selected.bpjs}</b></div><div class="di"><label>PPh 21</label><b>${money(selected.tax)}</b></div></div><div class="ai"><b>직원별 AI 분석</b><ul><li>${selected.issue}</li><li>요청 버튼은 고객 화면의 해당 직원 행에 요청으로 표시됩니다.</li></ul></div></div></div>`,`<span class="badge red">미완료 ${issues}건</span>`);document.querySelectorAll("#empTable tbody tr").forEach(tr=>tr.addEventListener("click",()=>{state.selectedEmployee=Number(tr.dataset.emp);renderPph21()}));document.querySelectorAll(".reqBtn").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();openRequest(btn.dataset.field)}));document.getElementById("bulkReq").addEventListener("click",()=>openRequest("PPh 21 / 직원자료 일괄 보완"));document.getElementById("reviewDone").addEventListener("click",tryReviewDone);document.getElementById("empSearch").addEventListener("input",filterEmployees);document.getElementById("empStatus").addEventListener("change",filterEmployees)}
+function filterEmployees(){const q=document.getElementById("empSearch").value.toLowerCase();const f=document.getElementById("empStatus").value;document.querySelectorAll("#empTable tbody tr").forEach(tr=>{tr.style.display=(tr.dataset.name.includes(q)&&(!f||tr.dataset.level===f))?"":"none"})}
+function renderWithholding(blockedMsg=""){const total=withholdingRows.reduce((a,r)=>a+r.tax,0);pageShell("원천세 (PPh 4(2), 15, 22, 23, 26)",`${blockedMsg?`<div class="blocked"><b>수퍼바이저 승인완료 불가</b><br>${blockedMsg}</div>`:""}<div class="m4"><div class="metric2"><small>거래 건수</small><b>${withholdingRows.length}건</b></div><div class="metric2"><small>DPP 합계</small><b>${money(withholdingRows.reduce((a,r)=>a+r.dpp,0))}</b></div><div class="metric2"><small>원천세 합계</small><b>${money(total)}</b></div><div class="metric2"><small>요청/검토</small><b>${withholdingRows.filter(r=>r.level!=="green").length}건</b></div></div><div class="tbl"><table><thead><tr><th>상태</th><th>거래일</th><th>거래처</th><th>NPWP</th><th>증빙번호</th><th>거래내용</th><th>DPP</th><th>세목</th><th>코드</th><th>세율</th><th>세액</th><th>증빙</th><th>이슈</th><th>요청</th></tr></thead><tbody>${withholdingRows.map(r=>`<tr><td><span class="badge ${lev(r.level)}">${r.stage}</span></td><td>${r.date}</td><td>${r.vendor}</td><td>${r.npwp}</td><td>${r.invoice}</td><td>${r.desc}</td><td class="money">${money(r.dpp)}</td><td>${r.type}</td><td>${r.code}</td><td>${r.rate}</td><td class="money">${money(r.tax)}</td><td><button class="evidence-link" onclick="openEvidence('원천세 증빙 / ${r.vendor} / ${r.invoice}', '${r.evidence}')">${r.evidence}</button></td><td>${r.status}</td><td><button class="btn blue reqBtn" data-field="원천세 / ${r.vendor} / ${r.invoice}">요청</button></td></tr>`).join("")}</tbody></table></div><div class="ai"><b>AI 분석 코멘트</b><ul><li>개인소득세처럼 상태를 거래 리스트 맨 앞에 표시합니다.</li><li>증빙 항목은 클릭해서 거래별 증빙 목록을 확인할 수 있습니다.</li></ul></div><div class="toolbar" style="margin-top:14px"><div></div><div><button class="btn purple" id="reviewDone">고객 검토완료</button></div></div>`);document.querySelectorAll(".reqBtn").forEach(btn=>btn.addEventListener("click",()=>openRequest(btn.dataset.field)));document.getElementById("reviewDone").addEventListener("click",tryReviewDone)}
+function renderCit(blockedMsg=""){const companyYear=6, annualRevenue=5000000000, pph25Tax=5800000;pageShell("선납법인세 (PPh Final, 25)",`${blockedMsg?`<div class="blocked"><b>수퍼바이저 승인완료 불가</b><br>${blockedMsg}</div>`:""}<div class="m4"><div class="metric2"><small>판단 결과</small><b>PPh 25</b></div><div class="metric2"><small>당월 법인세</small><b>${money(pph25Tax)}</b></div><div class="metric2"><small>운영연수</small><b>${companyYear}년차</b></div><div class="metric2"><small>누적 연 매출</small><b>${money(annualRevenue)}</b></div></div><div class="section"><h3>고객 제출자료 및 판단</h3><div class="tbl"><table><thead><tr><th>항목</th><th>고객 제출값</th><th>판단/계산 근거</th><th>상태</th><th>요청</th></tr></thead><tbody><tr><td>회사 운영연수</td><td>${companyYear}년차</td><td>PT의 PPh Final 적용기간 초과</td><td><span class="badge green">확인</span></td><td><button class="btn blue reqBtn" data-field="선납법인세 / 회사 운영연수">요청</button></td></tr><tr><td>누적 연 매출</td><td class="money">${money(annualRevenue)}</td><td>일반 법인세 선납 방식 검토 대상</td><td><span class="badge green">확인</span></td><td><button class="btn blue reqBtn" data-field="선납법인세 / 누적 연 매출">요청</button></td></tr><tr><td>전년도 법인세 기준</td><td class="money">${money(69600000)}</td><td>PPh 25 월 선납세액 산정 기준</td><td><span class="badge amber">증빙확인</span></td><td><button class="btn blue reqBtn" data-field="선납법인세 / 전년도 법인세 신고서">요청</button></td></tr><tr><td>당월 납부 세목</td><td>PPh 25</td><td>PPh Final 해당 없음 — 해당 세금만 표시</td><td><span class="badge green">적용</span></td><td></td></tr><tr><td>당월 납부 세액</td><td class="money">${money(pph25Tax)}</td><td>전년도 법인세 Rp 69.600.000 ÷ 12</td><td><span class="badge green">확정대상</span></td><td></td></tr></tbody></table></div></div><div class="calc"><b>선납법인세 판단 및 계산 로직</b><div class="formula">판단 결과: PPh 25<br>사유: PT 운영 ${companyYear}년차이며 PPh Final 적용 대상이 아니므로 PPh 25만 표시<br>당월 납부세액 = 전년도 법인세 Rp 69.600.000 ÷ 12 = ${money(pph25Tax)}</div></div><div class="toolbar" style="margin-top:14px"><div></div><div><button class="btn purple" id="reviewDone">고객 검토완료</button></div></div>`);document.querySelectorAll(".reqBtn").forEach(btn=>btn.addEventListener("click",()=>openRequest(btn.dataset.field)));document.getElementById("reviewDone").addEventListener("click",tryReviewDone)}
+function renderPpn(blockedMsg=""){const out=ppnSales.reduce((a,r)=>a+r.coretaxVat,0),inp=ppnPurchases.reduce((a,r)=>a+(r.credit==="공제가능"?r.coretaxVat:0),0),pending=ppnPurchases.filter(r=>r.credit!=="공제가능").reduce((a,r)=>a+r.coretaxVat,0),pay=out-inp;pageShell("부가세 (PPN)",`${blockedMsg?`<div class="blocked"><b>수퍼바이저 승인완료 불가</b><br>${blockedMsg}</div>`:""}<div class="coretax-box"><b>Coretax 자료 대조 방식</b>PPN은 고객이 올린 Excel/요약자료와 Coretax에서 출력한 매출·매입 Faktur 리스트를 대조해서 검토합니다. 개별 Faktur Pajak PDF나 Invoice는 차이가 발생한 거래에 한해 요청합니다.<div class="coretax-actions"><a class="btn cyan" href="${CORETAX_URL}" target="_blank" rel="noopener noreferrer">Coretax 접속</a><button class="btn blue" onclick="toast('Coretax 매출/매입 자료 업로드 영역입니다.')">Coretax 자료 업로드</button><button class="btn green" onclick="toast('고객 제출자료와 Coretax 자료 대조를 실행했습니다.')">대조 실행</button><button class="btn purple" onclick="toast('대조 결과를 저장했습니다.')">대조 결과 저장</button></div></div><div class="m4"><div class="metric2"><small>Coretax 매출 PPN</small><b>${money(out)}</b></div><div class="metric2"><small>공제가능 매입 PPN</small><b>${money(inp)}</b></div><div class="metric2"><small>검토중 매입 PPN</small><b>${money(pending)}</b></div><div class="metric2"><small>납부 예상액</small><b>${money(pay)}</b></div></div><div class="section"><h3>매출 PPN 대조</h3><div class="tbl"><table><thead><tr><th>상태</th><th>일자</th><th>Faktur 번호</th><th>거래처</th><th>NPWP</th><th>고객 DPP</th><th>Coretax DPP</th><th>고객 PPN</th><th>Coretax PPN</th><th>요청</th></tr></thead><tbody>${ppnSales.map(r=>`<tr><td><span class="badge ${lev(r.level)}">${r.status}</span></td><td>${r.date}</td><td>${r.fp}</td><td>${r.party}</td><td>${r.npwp}</td><td class="money">${money(r.customerDpp)}</td><td class="money">${money(r.coretaxDpp)}</td><td class="money">${money(r.customerVat)}</td><td class="money">${money(r.coretaxVat)}</td><td><button class="btn blue reqBtn" data-field="PPN 매출 / ${r.party} / ${r.fp}">요청</button></td></tr>`).join("")}</tbody></table></div></div><div class="section"><h3>매입 PPN 대조</h3><div class="tbl"><table><thead><tr><th>상태</th><th>일자</th><th>Faktur 번호</th><th>거래처</th><th>NPWP</th><th>고객 DPP</th><th>Coretax DPP</th><th>고객 PPN</th><th>Coretax PPN</th><th>공제상태</th><th>요청</th></tr></thead><tbody>${ppnPurchases.map(r=>`<tr><td><span class="badge ${lev(r.level)}">${r.status}</span></td><td>${r.date}</td><td>${r.fp}</td><td>${r.party}</td><td>${r.npwp}</td><td class="money">${money(r.customerDpp)}</td><td class="money">${money(r.coretaxDpp)}</td><td class="money">${money(r.customerVat)}</td><td class="money">${money(r.coretaxVat)}</td><td><span class="badge ${r.credit==="공제가능"?"green":"red"}">${r.credit}</span></td><td><button class="btn blue reqBtn" data-field="PPN 매입 / ${r.party} / ${r.fp}">요청</button></td></tr>`).join("")}</tbody></table></div></div><div class="calc"><b>부가세 계산 로직</b><div class="formula">매출세액 = Coretax 매출 PPN 합계 ${money(out)}<br>공제가능 매입세액 = Coretax 매입 PPN 중 공제가능 확정분 ${money(inp)}<br>검토중 매입세액 = ${money(pending)} → 확정 전 계산 제외<br>납부 예상액 = ${money(out)} - ${money(inp)} = ${money(pay)}</div></div><div class="toolbar" style="margin-top:14px"><div></div><div><button class="btn purple" id="reviewDone">고객 검토완료</button></div></div>`);document.querySelectorAll(".reqBtn").forEach(btn=>btn.addEventListener("click",()=>openRequest(btn.dataset.field)));document.getElementById("reviewDone").addEventListener("click",tryReviewDone)}
+function renderAnnual(blockedMsg=""){pageShell("연 신고 (SPT)",`${blockedMsg?`<div class="blocked"><b>수퍼바이저 승인완료 불가</b><br>${blockedMsg}</div>`:""}<div class="section" style="margin-top:0"><h3>고객 제출자료</h3><div class="field flag"><div><label>재무제표</label><div class="hint">미업로드</div></div><div>요청 필요</div><div><button class="btn blue reqBtn" data-field="연 신고 / 재무제표">요청</button></div></div><div class="field need"><div><label>시산표</label><div class="hint">업로드 완료</div></div><div>COA 매핑 검토 필요</div><div><button class="btn blue reqBtn" data-field="연 신고 / 시산표">요청</button></div></div></div><div class="toolbar" style="margin-top:14px"><div></div><div><button class="btn purple" id="reviewDone">고객 검토완료</button></div></div>`);document.querySelectorAll(".reqBtn").forEach(btn=>btn.addEventListener("click",()=>openRequest(btn.dataset.field)));document.getElementById("reviewDone").addEventListener("click",tryReviewDone)}
+
+
+
+function companyReady(company){return company.review==="수퍼바이저 승인완료" && company.templateDownloaded;}
+function billingTargetTotal(company){return company.items.reduce((a,i)=>a+i.amount,0);}
+function billingReadyCount(){return billingTargets.filter(companyReady).length;}
+function downloadCompanyTemplate(id){
+  const company=billingTargets.find(x=>x.id===id);
+  if(company){company.templateDownloaded=true;}
+  const a=document.createElement("a");
+  a.href=FILLED_CORETAX_TEMPLATE;
+  a.download=`AI_Pajak_Coretax_ID_Billing_${company?company.name.replaceAll(" ","_"):"Company"}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  renderBillingBoard();
+  toast("해당 회사의 세금 계산내용이 채워진 Coretax 입력 준비파일을 다운로드했습니다.");
+}
+function renderBillingBoard(){
+  document.body.classList.add("billing-mode");
+  document.getElementById("page").innerHTML=`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>ID Billing 발행</h1>
+          <p>수퍼바이저 승인완료 건만 ID Billing 발행대상으로 넘어옵니다. 회사별 세금 계산내용이 채워진 Coretax 입력 준비파일을 다운로드한 뒤 Coretax에 등록합니다. 고객 납부 후 NTPN은 Coretax에 자동 생성되며, 향후 Coretax 연동 시 자동 수집합니다.</p>
+          <div class="badges">
+            <span class="badge purple">발행대상 ${billingTargets.length}개 회사</span>
+            <span class="badge green">발행가능 ${billingReadyCount()}개 회사</span>
+            <span class="badge blue">발행완료 ${billingIssued.length}건</span>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="coretax-box">
+          <b>Coretax 입력 준비파일</b>
+          발행대상 회사의 세목, KAP/KJS, 기간, DPP/Tax Base, 세액이 채워진 파일을 다운로드하여 Coretax 입력 또는 공식 업로드 양식 변환에 사용합니다.
+          <div class="coretax-actions">
+            <a class="btn cyan" href="${FILLED_CORETAX_TEMPLATE}" download>전체 발행대상 작성본 다운로드</a>
+            <a class="btn blue" href="${CORETAX_URL}" target="_blank" rel="noopener noreferrer">Coretax 접속</a>
+          </div>
+        </div>
+        <div class="billing-board">
+          <section class="billing-col">
+            <div class="billing-col-head">
+              <h2>발행대상</h2>
+              <span class="badge purple">${billingTargets.length}개 회사</span>
+            </div>
+            <div class="billing-col-body" style="display:block">
+              <div class="billing-target-grid">
+                ${billingTargets.length ? billingTargets.map(company=>`
+                  <div class="billing-target-card" data-target="${company.id}">
+                    <div class="billing-company-head">
+                      <b>${company.name}</b>
+                      <span class="badge ${companyReady(company)?"green":"amber"}">${companyReady(company)?"발행가능":"작성본 필요"}</span>
+                    </div>
+                    <div class="billing-email-row">
+                      <label>이메일</label>
+                      <input value="${company.email}" onchange="updateTargetEmail(${company.id}, this.value)" />
+                    </div>
+                    <div class="billing-email-row">
+                      <label>총액</label>
+                      <div>${money(billingTargetTotal(company))}</div>
+                    </div>
+                    ${company.items.map(item=>`
+                      <div class="tax-item">
+                        <div class="tax-item-head">
+                          <b>${item.tax}</b>
+                          <span class="badge blue">${item.billingType}</span>
+                        </div>
+                        <div class="tax-item-meta">
+                          <div>기간 ${item.period}</div>
+                          <div>세율 ${item.rate}</div>
+                          <div>Base ${money(item.base)}</div>
+                          <div>세액 ${money(item.amount)}</div>
+                        </div>
+                      </div>`).join("")}
+                    <div class="billing-actions">
+                      <button class="btn blue" onclick="downloadCompanyTemplate(${company.id})">작성본 다운로드</button>
+                      <button class="btn green ${companyReady(company)?"":"disabled"}" ${companyReady(company)?"":"disabled"} onclick="issueCompanyBilling(${company.id})">발행하기</button>
+                    </div>
+                  </div>`).join("") : `<div class="reqi"><b>발행대상 없음</b><span>현재 ID Billing 발행대상 고객이 없습니다.</span></div>`}
+              </div>
+            </div>
+          </section>
+
+          <section class="billing-col">
+            <div class="billing-col-head">
+              <h2>발행완료 리스트</h2>
+              <span class="badge green">${billingIssued.length}건</span>
+            </div>
+            <div class="billing-col-body" style="display:block">
+              <div class="billing-issued-wrap">
+                <table class="billing-issued-table">
+                  <thead>
+                    <tr><th>No.</th><th>회사명</th><th>세금</th><th>기간</th><th>금액</th><th>전송</th><th>NTPN / 완료상태</th></tr>
+                  </thead>
+                  <tbody>
+                    ${billingIssued.length ? billingIssued.map((row,index)=>`
+                      <tr>
+                        <td>${index+1}</td>
+                        <td><b>${row.name}</b><br><span style="color:var(--muted);font-size:11px">${row.no}</span></td>
+                        <td>${row.tax}</td>
+                        <td>${row.period}</td>
+                        <td class="money">${money(row.amount)}</td>
+                        <td><button class="btn blue" onclick="sendBillingEmail(${row.id})">${row.sent}</button></td>
+                        <td><span class="badge cyan">납부 후 Coretax 자동생성</span><br><span style="color:var(--muted);font-size:11px">향후 Coretax 연동 시 자동완료</span></td>
+                      </tr>`).join("") : `<tr><td colspan="7">발행완료 항목이 없습니다.</td></tr>`}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>`;
+}
+function updateTargetEmail(id,value){
+  const item=billingTargets.find(x=>x.id===id);
+  if(item){item.email=value;toast("고객 이메일이 수정되었습니다.");}
+}
+function issueCompanyBilling(id){
+  const idx=billingTargets.findIndex(x=>x.id===id);
+  if(idx<0)return;
+  const company=billingTargets[idx];
+  if(!companyReady(company)){
+    toast("수퍼바이저 승인완료 후 작성본 다운로드가 완료되어야 발행할 수 있습니다.");
+    return;
+  }
+  billingTargets.splice(idx,1);
+  company.items.forEach(item=>{
+    billingIssued.unshift({
+      id:Date.now()+Math.floor(Math.random()*10000),
+      no:`BIL-${item.period.replace("-","")}-${String(billingIssued.length+1).padStart(3,"0")}`,
+      name:company.name,
+      tax:item.tax,
+      period:item.period,
+      amount:item.amount,
+      email:company.email,
+      sent:"미전송",
+      ntpn:""
+    });
+  });
+  renderBillingBoard();
+  toast(`${company.name} ID Billing이 발행완료 리스트로 이동했습니다.`);
+}
+function sendBillingEmail(id){
+  const item=billingIssued.find(x=>x.id===id);
+  if(item){item.sent="전송완료";renderBillingBoard();toast("고객에게 ID Billing을 전송했습니다.");}
+}
+function completeByNtpn(id){
+  const idx=billingIssued.findIndex(x=>x.id===id);
+  if(idx<0)return;
+  const item=billingIssued[idx];
+  billingIssued.splice(idx,1);
+  const matched=customers.find(c=>c.name===item.name);
+  if(matched){matched.status="completed";matched.updated="2026-07-22 17:05";}
+  renderBillingBoard();
+  renderQueue();
+  toast(`${item.name} ${item.tax} 완료 처리되었습니다. NTPN은 Coretax 자동생성 후 향후 연동 시 수집합니다.`);
+}
+
+function renderTask(){if(state.view==="billing"){renderBillingBoard();return;}document.body.classList.remove("billing-mode");const c=customer();const titles={billing:"ID Billing 발행",ntpn:"NTPN / 납부 확인",completed:"신고 완료 처리",employees:"직원 인사 기록"};pageShell(titles[state.view]||"상담원 처리업무",`<div class="m4"><div class="metric2"><small>대상 고객</small><b>${c.name.replace("PT ","")}</b></div><div class="metric2"><small>세목</small><b>${c.tax}</b></div><div class="metric2"><small>세액</small><b>${money(c.amount)}</b></div><div class="metric2"><small>상태</small><b>${label(c.status)}</b></div></div><div class="section"><h3>처리 단계</h3><div class="field"><div><label>1. 검토 완료 여부</label><div class="hint">고객 입력자료 검토 메뉴에서 확정</div></div><div>${["reviewed","billing","paid","completed"].includes(c.status)?"완료":"미완료"}</div><div></div></div><div class="field"><div><label>2. ID Billing 발행</label><div class="hint">Coretax 수동 처리 후 업로드</div></div><div>${["billing","paid","completed"].includes(c.status)?"대상":"대기"}</div><div><button class="btn purple" id="toBilling">ID Billing 등록</button></div></div><div class="field"><div><label>3. NTPN 확인</label><div class="hint">고객 납부 후 번호 확인</div></div><div>${["paid","completed"].includes(c.status)?"확인 가능":"대기"}</div><div><button class="btn blue" id="toPaid">NTPN 입력</button></div></div><div class="field"><div><label>4. 신고 완료</label><div class="hint">BPE 반영 후 고객에게 완료 표시</div></div><div>${c.status==="completed"?"완료":"대기"}</div><div><button class="btn green" id="toComplete">신고완료 처리</button></div></div></div>`);document.getElementById("toBilling").addEventListener("click",()=>setStatus("billing"));document.getElementById("toPaid").addEventListener("click",()=>setStatus("paid"));document.getElementById("toComplete").addEventListener("click",()=>setStatus("completed"))}
+function hasOpenItems(){const openReq=state.requests.some(r=>r.customer===state.selectedCustomer&&r.status!=="완료");if(openReq)return true;if(state.view==="pph21")return employees.some(e=>e.level!=="green");if(state.view==="withholding")return withholdingRows.some(r=>r.level!=="green");if(state.view==="ppn")return ppnSales.some(r=>r.level!=="green")||ppnPurchases.some(r=>r.level!=="green");if(state.view==="umkm")return true;if(state.view==="annual")return true;return false}
+function tryReviewDone(){if(hasOpenItems()){const msg="아직 완료되지 않은 직원/거래/대조결과 또는 고객에게 보낸 요청이 남아 있습니다. 모든 항목을 완료 처리한 후 수퍼바이저 승인완료가 가능합니다.";if(state.view==="pph21")renderPph21(msg);else if(state.view==="withholding")renderWithholding(msg);else if(state.view==="ppn")renderPpn(msg);else if(state.view==="umkm")renderCit(msg);else renderAnnual(msg);toast("미완료 항목이 남아 있어 수퍼바이저 승인완료 처리할 수 없습니다.");return}setStatus("reviewed")}
+function setStatus(s){const c=customer();c.status=s;c.updated="2026-07-22 10:35";renderAll();toast(`${c.name} 상태가 '${label(s)}'로 변경되었습니다.`)}
+function openEvidence(title,files){
+  const list=String(files).split(",").map(x=>x.trim()).filter(Boolean);
+  document.getElementById("evidenceTitle").textContent=title;
+  document.getElementById("evidencePreview").innerHTML=`<b>${title}</b><br><span style="font-size:12px;color:#64748b">아래 증빙을 클릭하면 미리보기 영역에 표시됩니다. 실제 서비스에서는 업로드된 원본 파일/PDF/이미지를 이 영역에서 바로 보여줍니다.</span>`;
+  document.getElementById("evidenceList").innerHTML=list.length ? list.map((f,i)=>`
+    <div class="evidence-card" onclick="previewEvidence('${String(title).replace(/'/g,"\\'")}', '${String(f).replace(/'/g,"\\'")}')">
+      <div class="evidence-icon">${f.toLowerCase().includes("pdf")||f.toLowerCase().includes("invoice")?"📄":f.toLowerCase().includes("계약")||f.toLowerCase().includes("contract")?"📑":"🧾"}</div>
+      <div><b>${f}</b><span>원천세 거래 증빙 · 클릭하여 미리보기</span></div>
+      <button class="btn blue">보기</button>
+    </div>`).join("") : `<div class="reqi"><b>증빙 없음</b><span>이 거래에 연결된 증빙자료가 없습니다.</span></div>`;
+  document.getElementById("evidenceModalBg").classList.add("open");
+}
+function previewEvidence(title,file){
+  document.getElementById("evidencePreview").innerHTML=`<b>${file}</b><br><br><div style="font-size:13px;line-height:1.6">거래: ${title}<br>상태: 연결된 증빙 확인 가능<br><br>실제 서비스에서는 이곳에 PDF/이미지/원본파일 미리보기가 표시됩니다.</div>`;
+}
+
+function openRequest(field){state.selectedField=field;document.querySelector("#modalBg h2").textContent="요청";document.getElementById("modalField").value=field;document.getElementById("modalMsg").value=`${field} 항목 확인 또는 보완이 필요합니다. 고객 화면의 해당 항목에서 내용을 수정하거나 관련 자료를 업로드해 주세요.`;document.getElementById("modalMemo").value="";document.getElementById("modalBg").classList.add("open")}
+function saveRequest(){const c=customer();const now="2026-07-22 10:35";const msg=document.getElementById("modalMsg").value;state.requests.unshift({customer:c.id,field:state.selectedField,msg,status:"요청중",requestedAt:now,requestedBy:"상담원 김민수"});state.messages.push({customer:c.id,from:"상담원 김민수",type:"agent",text:msg});c.status="request";closeModal();renderAll();toast("고객 화면과 메신저에 요청이 표시되었습니다.")}
+function closeModal(){document.getElementById("modalBg").classList.remove("open");document.querySelector("#modalBg h2").textContent="요청"}function renderMessenger(){
+  const c=customer();
+  const reqs=state.requests.filter(r=>r.customer===c.id);
+  const msgs=state.messages.filter(m=>m.customer===c.id);
+  document.getElementById("drawerTitle").textContent=`${c.name}`;
+  const drawer=document.getElementById("drawer");
+  drawer.classList.add("wa-drawer");
+  document.getElementById("drawerRequests").innerHTML=reqs.length?`<div class="reqi" style="background:#fff"><b>요청 ${reqs.length}건</b><span>${reqs.map(r=>r.field).join(" · ")}</span></div>`:"";
+  document.getElementById("messages").className="wa-chat";
+  document.getElementById("messages").innerHTML=[
+    `<div class="wa-date">오늘</div>`,
+    ...msgs.map((m,i)=>{
+      const mine=m.type==="agent" || m.from==="상담원 김민수";
+      const time=i%2===0?"10:18":"10:21";
+      return `<div class="wa-bubble ${mine?"me":"them"}">
+        <div>${m.text}</div>
+        <div class="wa-meta"><span>${time}</span>${mine?`<span class="wa-read">✓✓</span>`:""}</div>
+      </div>`;
+    })
+  ].join("") || `<div class="wa-date">오늘</div><div class="wa-bubble them"><div>대화 내역이 없습니다.</div><div class="wa-meta"><span>10:00</span></div></div>`;
+  document.querySelector(".df")?.classList.add("wa-input");
+}
+function toggleDrawer(){document.getElementById("drawer").classList.toggle("open");renderMessenger()}function sendMessage(){const input=document.getElementById("chat");if(!input.value.trim())return;state.messages.push({customer:state.selectedCustomer,from:"상담원 김민수",type:"agent",text:input.value.trim()});input.value="";renderMessenger();toast("메시지를 보냈습니다.")}function renderAll(){renderQueue();renderPage();renderMessenger()}function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+document.getElementById("search").addEventListener("input",renderQueue);document.getElementById("statusFilter").addEventListener("change",renderQueue);document.getElementById("sort").addEventListener("change",renderAll);document.getElementById("period").addEventListener("change",renderPage);document.getElementById("messengerButton").addEventListener("click",toggleDrawer);document.getElementById("closeDrawer").addEventListener("click",toggleDrawer);document.getElementById("send").addEventListener("click",sendMessage);document.getElementById("cancelModal").addEventListener("click",closeModal);document.getElementById("saveModal").addEventListener("click",saveRequest);document.getElementById("modalBg").addEventListener("click",e=>{if(e.target.id==="modalBg")closeModal()});document.querySelectorAll("[data-quick]").forEach(el=>el.addEventListener("click",()=>{document.getElementById("statusFilter").value=el.dataset.quick;renderQueue()}));document.querySelectorAll("[data-filter]").forEach(el=>el.addEventListener("click",()=>{document.querySelectorAll("[data-filter]").forEach(x=>x.classList.remove("active"));el.classList.add("active");document.getElementById("statusFilter").value=el.dataset.filter;renderQueue()}));document.querySelectorAll(".view").forEach(el=>el.addEventListener("click",()=>{document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));el.classList.add("active");state.view=el.dataset.view;renderPage()}));
+
+document.getElementById("closeEvidenceModal").addEventListener("click",()=>document.getElementById("evidenceModalBg").classList.remove("open"));
+document.getElementById("evidenceModalBg").addEventListener("click",e=>{if(e.target.id==="evidenceModalBg")document.getElementById("evidenceModalBg").classList.remove("open")});
+renderAll();
+</script>
+</body>
+</html>
