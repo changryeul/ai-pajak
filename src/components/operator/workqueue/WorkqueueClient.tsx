@@ -35,6 +35,7 @@ export function WorkqueueClient({ role }: { role?: string }) {
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const [taxView, setTaxView] = useState<TaxView>('pph21');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
+  const [search, setSearch] = useState('');
   const [items, setItems] = useState<QueueListItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -89,10 +90,17 @@ export function WorkqueueClient({ role }: { role?: string }) {
     return c;
   }, [items]);
 
-  const filtered = useMemo(
-    () => statusFilter ? items.filter(it => STATUS_LABEL_MAP[it.status] === statusFilter) : items,
-    [items, statusFilter],
-  );
+  // 검색은 로드된 200건 안에서 클라이언트 필터 (고객명 / NPWP). 상태 필터와 AND.
+  const filtered = useMemo(() => {
+    let list = statusFilter ? items.filter(it => STATUS_LABEL_MAP[it.status] === statusFilter) : items;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(it =>
+        (it.customer?.customer_name ?? '').toLowerCase().includes(q) ||
+        (it.customer?.npwp ?? '').toLowerCase().includes(q));
+    }
+    return list;
+  }, [items, statusFilter, search]);
 
   return (
     <div className={styles.root}>
@@ -106,7 +114,7 @@ export function WorkqueueClient({ role }: { role?: string }) {
             </div>
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
-              <input placeholder="고객명, NPWP, 담당자 검색" />
+              <input placeholder="고객명, NPWP 검색" value={search} onChange={e => setSearch(e.target.value)} />
               <a className={styles.btn} href={`/${locale}/operator`} title="운영팀 대시보드로 나가기">← 나가기</a>
             </div>
           </div>
