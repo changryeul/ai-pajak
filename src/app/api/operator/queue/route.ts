@@ -127,12 +127,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Enrich with customer data
+  // Enrich with customer data. NOTE: customer has no customer_name column —
+  // COMPANY uses company_name, INDIVIDUAL uses full_name. Keep the response
+  // field name customer_name (frontend contract).
   const customerIds = [...new Set((rawItems || []).map(i => i.customer_id).filter(Boolean))];
-  const customerMap: Record<string, { id: string; customer_name: string; npwp: string; customer_type: string }> = {};
+  const customerMap: Record<string, { id: string; customer_name: string; npwp: string | null; customer_type: string }> = {};
   if (customerIds.length > 0) {
-    const { data: customers } = await admin.from('customer').select('id, customer_name, npwp, customer_type').in('id', customerIds);
-    for (const c of customers || []) customerMap[c.id] = c;
+    const { data: customers } = await admin
+      .from('customer').select('id, full_name, company_name, npwp, customer_type').in('id', customerIds);
+    for (const c of customers || []) {
+      customerMap[c.id] = {
+        id: c.id,
+        customer_name: (c.customer_type === 'COMPANY' ? c.company_name : c.full_name) || c.full_name || c.company_name || '—',
+        npwp: c.npwp ?? null,
+        customer_type: c.customer_type,
+      };
+    }
   }
 
   const items = (rawItems || []).map(item => ({
