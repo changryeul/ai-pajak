@@ -411,7 +411,7 @@ Verification / regression scripts (회귀 검증):
 - `SEED_TARGET=prod npx tsx scripts/test-closing-bpe-sync.ts` — 결산 wizard ↔ operator queue ↔ BPE 동기화
 - `SEED_TARGET=prod npx tsx scripts/test-onboarding-flow.ts` — 신규 가입 → 첫 신고까지 골든 패스
 - `SEED_TARGET=prod npx tsx scripts/test-new-customer-assignment.ts` — 신규고객 생성 → 미배정 큐 등장 → supervisor 배정 → 큐 제거 → DB edge active 라이프사이클 (prod sentinel, 자동 cleanup)
-- `SEED_TARGET=prod npx tsx scripts/test-id-billing-flow.ts` — ID Billing 발행 보드 계약 (RBAC 403/200 + 작성본 게이트 400 + xlsx 4시트 파싱 검증 + BIL- 일련번호 + 중복 404 + 큐 EBILLING_GENERATED 전이 + 납부확인(NTPN 400/PAID/큐 COMPLETED 동기화/중복 400) + tenant 분리, 14 asserts, `[IDBILL-E2E]` sentinel)
+- `SEED_TARGET=prod npx tsx scripts/test-id-billing-flow.ts` — ID Billing 발행 보드 계약 (RBAC 403/200 + 작성본 게이트 400 + xlsx 4시트 파싱 검증 + BIL- 일련번호 + 중복 404 + 큐 EBILLING_GENERATED 전이 + 납부확인(NTPN 400/PAID/큐 COMPLETED 동기화/중복 400) + tenant 분리, 15 asserts, `[IDBILL-E2E]` sentinel)
 - `SEED_TARGET=prod npx tsx scripts/test-approval-remodel.ts` — 승인대기 리모델 계약 (4-값 분리 + 처리값 PATCH + OPEN 검토요청 APPROVE 400 게이트 + 의견 PATCH RBAC + approved_amount 스탬프 + detail 4-값 포함, 10 asserts, `[APPRV-E2E]` sentinel)
 - `SEED_TARGET=prod npx tsx scripts/test-signup-auto-assign.ts` — 회원가입→접수 즉시 자동배정 골든패스 (signup API → customer 생성 → operator_client_assignments 배정 or overflow + operator_assignment_log triggered_by=AUTO). auth 계정 생성/삭제 포함 → smoke optional. sentinel 이메일 prefix `signup-autoassign-e2e`.
 - `SEED_TARGET=prod npx tsx scripts/test-workqueue-annual.ts` — 연 신고(SPT Tahunan) 워크큐 계약 (quick-create SPT_TAHUNAN + 세션 미연결 red → 결산세션/문서/제출 연결 후 green shape + 연도단위 목록 + RBAC 403, 13 asserts, `[WQ-ANNUAL-E2E]` sentinel, fiscal 2099)
