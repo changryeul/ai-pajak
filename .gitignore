@@ -63,3 +63,7 @@ public/logo.old.*
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
 .gstack/
+
+# MS Office lock files
+~$*
+**/~$*
