@@ -197,6 +197,10 @@ export async function buildBillingBoard(
       .select('id, full_name, company_name, npwp, email')
       .in('id', Array.from(customerIds));
     const custMap = new Map((customers ?? []).map(c => [c.id, c]));
+    // 고객 행이 사라진 고아 소스는 발행대상에서 제외 (빈 이름 카드 방지).
+    for (let i = targets.length - 1; i >= 0; i--) {
+      if (!custMap.has(targets[i].customer.id)) targets.splice(i, 1);
+    }
     for (const t of targets) {
       const c = custMap.get(t.customer.id);
       if (c) t.customer = { id: c.id, name: c.company_name || c.full_name || '—', npwp: c.npwp, email: c.email };
