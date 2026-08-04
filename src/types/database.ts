@@ -293,48 +293,6 @@ export type Database = {
         }
         Relationships: []
       }
-      dynamic_tax_rates: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          effective_from: string
-          effective_until: string | null
-          is_active: boolean | null
-          legal_basis: string
-          pph21_brackets: Json
-          ppn_statutory_rate: number
-          ptkp: Json
-          updated_at: string | null
-          year: number
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          effective_from: string
-          effective_until?: string | null
-          is_active?: boolean | null
-          legal_basis: string
-          pph21_brackets: Json
-          ppn_statutory_rate: number
-          ptkp: Json
-          updated_at?: string | null
-          year: number
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          effective_from?: string
-          effective_until?: string | null
-          is_active?: boolean | null
-          legal_basis?: string
-          pph21_brackets?: Json
-          ppn_statutory_rate?: number
-          ptkp?: Json
-          updated_at?: string | null
-          year?: number
-        }
-        Relationships: []
-      }
       klu_codes: {
         Row: {
           category: string | null
@@ -660,59 +618,6 @@ export type Database = {
             columns: ["tax_partner_id"]
             isOneToOne: false
             referencedRelation: "tax_partner"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      revenue_split: {
-        Row: {
-          accounting_status:
-            | Database["public"]["Enums"]["accounting_status"]
-            | null
-          amount: number
-          billing_transaction_id: string
-          created_at: string | null
-          description: string | null
-          id: string
-          recipient_organization_id: string
-          recipient_type: Database["public"]["Enums"]["revenue_recipient_type"]
-          transferred_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          accounting_status?:
-            | Database["public"]["Enums"]["accounting_status"]
-            | null
-          amount: number
-          billing_transaction_id: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          recipient_organization_id: string
-          recipient_type: Database["public"]["Enums"]["revenue_recipient_type"]
-          transferred_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          accounting_status?:
-            | Database["public"]["Enums"]["accounting_status"]
-            | null
-          amount?: number
-          billing_transaction_id?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          recipient_organization_id?: string
-          recipient_type?: Database["public"]["Enums"]["revenue_recipient_type"]
-          transferred_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "revenue_split_billing_transaction_id_fkey"
-            columns: ["billing_transaction_id"]
-            isOneToOne: false
-            referencedRelation: "billing_transaction"
             referencedColumns: ["id"]
           },
         ]

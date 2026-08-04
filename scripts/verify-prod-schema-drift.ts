@@ -56,6 +56,7 @@ interface ParseResult {
   decls: Decl[];
   indexCreates: IndexDecl[];      // global by name (Postgres)
   indexDrops: { name: string; origin: string }[];
+  tableDrops: string[];           // DROP TABLE targets (public schema)
 }
 
 // Capture schema (optional) + table so we can skip non-public schemas
@@ -71,6 +72,9 @@ const INDEX_DROP_RE = /DROP\s+INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+EXISTS\s+)?(?:
 // Inside ALTER TABLE body:
 const CHECK_ADD_RE = /ADD\s+CONSTRAINT\s+["`]?(\w+)["`]?\s+CHECK\b/gi;
 const CONSTRAINT_DROP_RE = /DROP\s+CONSTRAINT\s+(?:IF\s+EXISTS\s+)?["`]?(\w+)["`]?/gi;
+
+// DROP TABLE [IF EXISTS] [public.]name [, name…] [CASCADE]
+const TABLE_DROP_RE = /DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?([^;]+);/gi;
 
 function stripComments(sql: string): string {
   return sql.replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -178,7 +182,17 @@ function parseMigration(path: string, file: string): ParseResult {
     indexDrops.push({ name: m[1].toLowerCase(), origin: file });
   }
 
-  return { decls: Array.from(declMap.values()), indexCreates, indexDrops };
+  // DROP TABLE — remove the table from the expected set (20260804000003 cleanup)
+  const tableDrops: string[] = [];
+  for (const dm of sql.matchAll(new RegExp(TABLE_DROP_RE.source, TABLE_DROP_RE.flags))) {
+    for (const raw of dm[1].split(',')) {
+      const name = raw.trim().replace(/\bCASCADE\b|\bRESTRICT\b/gi, '').trim()
+        .replace(/^public\./i, '').replace(/["`]/g, '');
+      if (/^\w+$/.test(name)) tableDrops.push(name.toLowerCase());
+    }
+  }
+
+  return { decls: Array.from(declMap.values()), indexCreates, indexDrops, tableDrops };
 }
 
 async function probeColumn(sb: SupabaseClient, table: string, col: string): Promise<{ ok: boolean }> {
@@ -218,7 +232,7 @@ async function main() {
   const expectedIndexes = new Map<string, { table: string; origin: string }>();
 
   for (const file of files) {
-    const { decls, indexCreates, indexDrops } = parseMigration(join(MIGRATIONS_DIR, file), file);
+    const { decls, indexCreates, indexDrops, tableDrops } = parseMigration(join(MIGRATIONS_DIR, file), file);
     for (const d of decls) {
       let ex = merged.get(d.table);
       if (!ex) {
@@ -245,6 +259,12 @@ async function main() {
     }
     for (const i of indexDrops) {
       expectedIndexes.delete(i.name);
+    }
+    for (const t of tableDrops) {
+      merged.delete(t);
+      for (const [name, info] of expectedIndexes.entries()) {
+        if (info.table === t) expectedIndexes.delete(name);
+      }
     }
   }
   console.log(`parsed ${files.length} migrations -> ${merged.size} tables`);
