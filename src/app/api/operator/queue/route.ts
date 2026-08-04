@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { evaluateAutoApproval } from '@/lib/ai/auto-approval-engine';
+import { computeQueueAmount } from '@/lib/operator/queue-amount';
 import { notifyWorkflowStatusChange } from '@/lib/notifications/operator-workflow-notifications';
 import { loggers } from '@/lib/logger';
 
@@ -398,6 +399,14 @@ export async function PUT(request: NextRequest) {
   if (ebillingCode) updatePayload.ebilling_code = ebillingCode;
   if (notes) updatePayload.notes = notes;
   if (failedReason) updatePayload.failed_reason = failedReason;
+
+  // 자동 큐 생성 행은 amount 가 null — 검토완료/승인 시점에 소스 데이터로
+  // 세액을 스탬프해야 ID Billing 발행대상(amount>0)에 뜬다.
+  if ((action === 'request-approval' || action === 'approve') && !(Number(item.amount) > 0)) {
+    const computed = await computeQueueAmount(
+      admin, item.customer_id, item.tax_type, item.tax_period_month, item.tax_period_year);
+    if (computed && computed > 0) updatePayload.amount = computed;
+  }
 
   // Completion timestamp
   if (transition.to === 'COMPLETED' || transition.to === 'FAILED') {
