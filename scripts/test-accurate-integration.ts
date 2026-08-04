@@ -173,8 +173,10 @@ async function main() {
     `status=${callbackRes.status}`
   );
 
-  // ── 3. 레거시 엔드포인트 호환 ──
-  console.log('\n━━ 3. 레거시 엔드포인트 호환 ━━');
+  // ── 3. 레거시 엔드포인트 제거 확인 ──
+  // /api/integrations/* 구세대 라우트는 2026-08-04 소스 정비에서 삭제됨
+  // (document.metadata 저장 패턴 — /api/accounting/* 로 대체). 404 가 정상.
+  console.log('\n━━ 3. 레거시 엔드포인트 제거 확인 ━━');
 
   const legacyRes = await fetch(`${baseUrl}/api/integrations/accurate`, {
     method: 'POST',
@@ -182,18 +184,9 @@ async function main() {
     body: JSON.stringify({ action: 'list-databases', customerId: COMPANY_CUSTOMER_ID }),
   });
   check(
-    'POST /api/integrations/accurate 레거시 라우트 존재',
-    legacyRes.status !== 404,
+    'POST /api/integrations/accurate 레거시 라우트 제거됨 (404)',
+    legacyRes.status === 404,
     `status=${legacyRes.status}`
-  );
-
-  const legacyCallbackRes = await fetch(`${baseUrl}/api/integrations/accurate/callback?code=test&state=fake`, {
-    redirect: 'manual',
-  });
-  check(
-    'GET /api/integrations/accurate/callback 레거시 콜백 존재',
-    legacyCallbackRes.status !== 404,
-    `status=${legacyCallbackRes.status}`
   );
 
   // ── 4. UI 페이지 존재 ──
