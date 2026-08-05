@@ -8,6 +8,7 @@ import { ApprovalActions } from './ApprovalActions';
 import type { PpnDetail, PpnRow } from './types';
 import { parseCoretaxFakturFile } from '@/lib/tax/coretax-faktur-parse';
 import { RowDetailModal, type FieldDef } from './RowDetailModal';
+import { RequestChatModal } from './RequestChatModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 
@@ -177,36 +178,19 @@ const PPN_FIELDS: FieldDef[] = [
 
 function RequestModal({ row, queueId, onClose, onSent }:
   { row: PpnRow; queueId: string; onClose: () => void; onSent: () => void }) {
-  const [msg, setMsg] = useState(`${row.counterpartyName} faktur의 ${row.flags.label} 관련 자료를 확인 부탁드립니다.`);
-  const [sending, setSending] = useState(false);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-  const send = async () => {
-    setSending(true);
-    try {
-      await fetch(`/api/operator/workqueue/${queueId}/request`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ employeeId: row.id, message: msg }),
-      });
-      onSent();
-    } finally { setSending(false); }
-  };
   return (
-    <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>고객에게 요청</h2>
-        <div className={styles.mb}>
-          <label>대상 faktur<input readOnly value={row.fakturNumber ?? row.counterpartyName} /></label>
-          <label>고객에게 보낼 메시지<textarea value={msg} onChange={e => setMsg(e.target.value)} /></label>
-        </div>
-        <div className={styles.mf}>
-          <button className={styles.btn} onClick={onClose}>취소</button>
-          <button className={`${styles.btn} ${styles.blue}`} onClick={send} disabled={sending}>고객에게 표시</button>
-        </div>
-      </div>
-    </div>
+    <RequestChatModal
+      toLabel={row.counterpartyName}
+      contextLabel={`부가세 (PPN) · ${row.flags.label}`}
+      defaultMessage={`${row.counterpartyName} faktur의 ${row.flags.label} 관련 자료를 확인 부탁드립니다.`}
+      onSend={async (message) => {
+        await fetch(`/api/operator/workqueue/${queueId}/request`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ employeeId: row.id, message }),
+        });
+        onSent();
+      }}
+      onClose={onClose}
+    />
   );
 }

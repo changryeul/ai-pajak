@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
+import { RequestChatModal } from './RequestChatModal';
 import { UmkmReviewTable } from './UmkmReviewTable';
 import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
@@ -82,36 +83,19 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
 function RequestModal({ row, queueId, onClose, onSent }:
   { row: UmkmRow; queueId: string; onClose: () => void; onSent: () => void }) {
   const taxText = row.taxType === 'PPh25' ? 'PPh 25' : 'PPh Final';
-  const [msg, setMsg] = useState(`${taxText} 선납분의 ${row.flags.label} 관련 자료를 확인 부탁드립니다.`);
-  const [sending, setSending] = useState(false);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-  const send = async () => {
-    setSending(true);
-    try {
-      await fetch(`/api/operator/workqueue/${queueId}/request`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ employeeId: row.id, message: msg }),
-      });
-      onSent();
-    } finally { setSending(false); }
-  };
   return (
-    <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>고객에게 요청</h2>
-        <div className={styles.mb}>
-          <label>대상<input readOnly value={taxText} /></label>
-          <label>고객에게 보낼 메시지<textarea value={msg} onChange={e => setMsg(e.target.value)} /></label>
-        </div>
-        <div className={styles.mf}>
-          <button className={styles.btn} onClick={onClose}>취소</button>
-          <button className={`${styles.btn} ${styles.blue}`} onClick={send} disabled={sending}>고객에게 표시</button>
-        </div>
-      </div>
-    </div>
+    <RequestChatModal
+      toLabel={taxText}
+      contextLabel={`선납법인세 · ${row.flags.label}`}
+      defaultMessage={`${taxText} 선납분의 ${row.flags.label} 관련 자료를 확인 부탁드립니다.`}
+      onSend={async (message) => {
+        await fetch(`/api/operator/workqueue/${queueId}/request`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ employeeId: row.id, message }),
+        });
+        onSent();
+      }}
+      onClose={onClose}
+    />
   );
 }

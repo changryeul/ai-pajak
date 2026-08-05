@@ -91,3 +91,24 @@
 .requestNote{border:1px solid #ddd6fe;background:#f5f3ff;color:#5b21b6;border-radius:10px;padding:7px 11px;font-size:12px;max-width:360px;text-align:left}
 
 .modalWide{max-width:640px;width:min(640px,94vw)}.modalSub{margin:2px 0 10px;color:#64748b;font-size:12px}.reviewedNote{border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;border-radius:10px;padding:7px 11px;font-size:12px;margin-bottom:10px}.fieldGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 12px;max-height:46vh;overflow-y:auto;padding-right:4px}.fieldItem{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:800;color:#334155}.fieldItem input{font-weight:600}.roInput{background:#f8fafc !important;color:#94a3b8}.editDot{display:inline-block;width:9px;height:9px;border-radius:99px;margin-left:6px;vertical-align:1px}.editCounselor{background:#8b5cf6}.editSup{background:#f97316}
+
+/* ── WhatsApp 스타일 요청 모달 (요청 11·18·23) ── */
+.waModal{background:#fff;border-radius:16px;width:min(460px,94vw);overflow:hidden;box-shadow:0 24px 64px rgba(15,23,42,.35);display:flex;flex-direction:column}
+.waHead{display:flex;align-items:center;gap:10px;background:#075e54;color:#fff;padding:12px 14px}
+.waAvatar{width:38px;height:38px;border-radius:99px;background:#128c7e;display:grid;place-items:center;font-weight:900;font-size:16px;flex:none}
+.waWho{display:flex;flex-direction:column;min-width:0;flex:1}
+.waWho b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.waWho span{font-size:10.5px;opacity:.85}
+.waClose{border:0;background:transparent;color:#fff;font-size:22px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:6px}
+.waClose:hover{background:rgba(255,255,255,.15)}
+.waBody{background:#e5ddd5;padding:16px 14px 10px;min-height:180px}
+.waContext{margin:0 auto 12px;width:fit-content;max-width:90%;background:#d5eaf0;color:#0b6478;font-size:11px;font-weight:800;padding:4px 12px;border-radius:8px;box-shadow:0 1px 1px rgba(0,0,0,.08);text-align:center}
+.waBubbleOut{margin-left:auto;max-width:88%;background:#dcf8c6;border-radius:12px 2px 12px 12px;padding:8px 10px 6px;box-shadow:0 1px 1px rgba(0,0,0,.12);position:relative}
+.waBubbleOut textarea{width:100%;border:0 !important;background:transparent !important;padding:0 !important;font:inherit;font-size:13.5px;line-height:1.5;resize:vertical;min-height:72px;outline:none}
+.waMeta{display:block;text-align:right;font-size:10px;color:#7a9c6e;margin-top:2px}
+.waHint{text-align:right;font-size:10px;color:#8a8378;margin-top:8px}
+.waFoot{display:flex;align-items:center;justify-content:space-between;background:#f0f0f0;padding:10px 12px}
+.waCancel{border:0;background:transparent;color:#64748b;font-weight:800;font-size:13px;cursor:pointer;padding:6px 10px;border-radius:8px}
+.waCancel:hover{background:#e2e8f0}
+.waSend{width:44px;height:44px;border-radius:99px;border:0;background:#00a884;color:#fff;font-size:17px;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.waSend:disabled{opacity:.5;cursor:not-allowed}

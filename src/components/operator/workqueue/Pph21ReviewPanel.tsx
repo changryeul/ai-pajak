@@ -7,6 +7,7 @@ import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { Pph21Detail, Pph21Row } from './types';
 import { RowDetailModal, type FieldDef } from './RowDetailModal';
+import { RequestChatModal } from './RequestChatModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const LEVEL_ORDER: Record<string, number> = { red: 0, amber: 1, green: 2 };
@@ -138,42 +139,22 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
 function RequestModal({ target, queueId, onClose, onSent }:
   { target: Pph21Row | 'BULK'; queueId: string; onClose: () => void; onSent: () => void }) {
   const isBulk = target === 'BULK';
-  const defaultMsg = isBulk
-    ? '직원 자료 일괄 보완을 부탁드립니다.'
-    : `${(target as Pph21Row).name}님의 ${(target as Pph21Row).flags.label} 관련 자료를 확인 부탁드립니다.`;
-  const [msg, setMsg] = useState(defaultMsg);
-  const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  const send = async () => {
-    setSending(true);
-    try {
-      await fetch(`/api/operator/workqueue/${queueId}/request`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ employeeId: isBulk ? undefined : (target as Pph21Row).employeeId, message: msg }),
-      });
-      onSent();
-    } finally { setSending(false); }
-  };
-
+  const row = isBulk ? null : (target as Pph21Row);
   return (
-    <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>고객에게 요청</h2>
-        <div className={styles.mb}>
-          <label>대상<input readOnly value={isBulk ? '직원 자료 일괄' : (target as Pph21Row).name} /></label>
-          <label>고객에게 보낼 메시지<textarea value={msg} onChange={e => setMsg(e.target.value)} /></label>
-        </div>
-        <div className={styles.mf}>
-          <button className={styles.btn} onClick={onClose}>취소</button>
-          <button className={`${styles.btn} ${styles.blue}`} onClick={send} disabled={sending}>고객에게 표시</button>
-        </div>
-      </div>
-    </div>
+    <RequestChatModal
+      toLabel={isBulk ? '직원 자료 일괄' : row!.name}
+      contextLabel={isBulk ? '개인소득세 (PPh 21) · 일괄 요청' : `개인소득세 (PPh 21) · ${row!.flags.label}`}
+      defaultMessage={isBulk
+        ? '직원 자료 일괄 보완을 부탁드립니다.'
+        : `${row!.name}님의 ${row!.flags.label} 관련 자료를 확인 부탁드립니다.`}
+      onSend={async (message) => {
+        await fetch(`/api/operator/workqueue/${queueId}/request`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ employeeId: isBulk ? undefined : row!.employeeId, message }),
+        });
+        onSent();
+      }}
+      onClose={onClose}
+    />
   );
 }
