@@ -11,10 +11,15 @@
 import { chromium, type Page } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
+import { mkdirSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 config({ path: '.env.production.local' });
 
-const BASE = 'https://ai-pajak.vercel.app';
-const SHOTS = '/private/tmp/claude-501/-Users-winwaysystems-mywork-ai-pajak-ai-pajak/a1810b8c-3c72-431d-a650-b9023ecc65ee/scratchpad/rehearsal';
+const BASE = process.env.E2E_BASE_URL || 'https://ai-pajak.vercel.app';
+// 스크린샷 저장 위치 — CI 에선 REHEARSAL_SHOTS_DIR 로 지정해 artifact 업로드.
+const SHOTS = process.env.REHEARSAL_SHOTS_DIR || join(tmpdir(), 'golden-path-rehearsal');
+mkdirSync(SHOTS, { recursive: true });
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!);

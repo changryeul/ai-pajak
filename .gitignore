@@ -67,3 +67,6 @@ public/logo.old.*
 # MS Office lock files
 ~$*
 **/~$*
+
+# vitest coverage output
+coverage/

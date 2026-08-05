@@ -72,6 +72,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // gstack QA tooling artifacts — not project code
     ".gstack/**",
+    // vitest coverage output
+    "coverage/**",
   ]),
 ]);
 

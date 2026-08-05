@@ -1,0 +1,52 @@
+# Nightly golden-path browser rehearsal against prod.
+#
+# The API-level smoke (smoke.yml) cannot see UI-flow defects — the 2026-08-04
+# rehearsal caught three real ones (PENDING dead-end, unstamped amount, orphan
+# issuance targets) that smoke 62/62 missed. This promotes that rehearsal to a
+# nightly gate: customer PPh23 entry → auto queue+assign → operator review →
+# supervisor approve → issuance board workbook → issue → NTPN paid → COMPLETED.
+#
+# Sentinel data (company.test PPh23 2026-09, [REHEARSAL] prefix) is cleaned up
+# pre/post by the script itself — idempotent, safe to re-run.
+
+name: Golden Path Rehearsal
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 22 * * *'   # 05:30 WIB, 30min before the daily API smoke
+
+jobs:
+  rehearsal:
+    name: Browser golden path (prod)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Install Playwright chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Run rehearsal
+        run: npx tsx scripts/test-golden-path-rehearsal.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REHEARSAL_SHOTS_DIR: ${{ github.workspace }}/rehearsal-shots
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rehearsal-screenshots
+          path: rehearsal-shots/
+          retention-days: 14
+          if-no-files-found: ignore
