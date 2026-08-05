@@ -1,10 +1,15 @@
 'use client';
 import styles from './workqueue.module.css';
-import type { PpnRow } from './types';
+import { reviewStateText, type PpnRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
-const lvlText = (l: string) => (l === 'green' ? '완료' : l === 'red' ? '요청' : '검토');
 const dirText = (t: string) => (t === 'MASUKAN' ? '매입' : '매출');
+// 수정요청 20번 — 부가세 요율 표기. dpp 대비 실효 요율(반올림 %); 사치품은 12%.
+const rateText = (r: { dpp: number; ppn: number; isLuxury: boolean }): string => {
+  if (r.dpp <= 0) return '—';
+  const pct = Math.round((r.ppn / r.dpp) * 100);
+  return r.isLuxury ? `${pct}% (사치품)` : `${pct}%`;
+};
 
 // recon_status → [표시문구, badge 색 클래스]
 function reconBadge(status: string | null): [string, string] {
@@ -28,7 +33,7 @@ export function PpnReviewTable({ rows, onRequest }: Props) {
       <table>
         <thead><tr>
           <th>상태</th><th>방향</th><th>faktur 번호</th><th>거래처</th><th>NPWP</th>
-          <th className={styles.money}>DPP</th><th className={styles.money}>PPN</th>
+          <th className={styles.money}>DPP</th><th className={styles.money}>PPN</th><th>요율</th>
           <th>Coretax 대조</th><th>이슈</th><th>요청</th>
         </tr></thead>
         <tbody>
@@ -36,13 +41,14 @@ export function PpnReviewTable({ rows, onRequest }: Props) {
             const [reconText, reconCls] = reconBadge(r.reconStatus);
             return (
               <tr key={r.id}>
-                <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{lvlText(r.flags.level)}</span></td>
+                <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
                 <td>{dirText(r.fakturType)}</td>
                 <td className={styles.name}><b>{r.fakturNumber ?? '번호 없음'}</b><span>{r.fakturDate ?? ''}</span></td>
                 <td>{r.counterpartyName}</td>
                 <td>{r.counterpartyNpwp ?? 'NPWP 없음'}</td>
                 <td className={styles.money}>{rp(r.dpp)}</td>
                 <td className={styles.money}>{rp(r.ppn)}</td>
+                <td>{rateText(r)}</td>
                 <td><span className={`${styles.badge} ${styles[reconCls]}`}>{reconText}</span></td>
                 <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{r.flags.label}</span></td>
                 <td><button className={`${styles.btn} ${styles.blue}`} onClick={() => onRequest(r)}>요청</button></td>

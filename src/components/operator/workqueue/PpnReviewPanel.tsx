@@ -120,6 +120,21 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
         </div>
 
         <PpnReviewTable rows={rows} onRequest={setRequestRow} />
+
+        {/* 수정요청 22번 — 이슈로 표기된 건만 이슈 내용을 간단히 요약 */}
+        {rows.some(r => r.flags.level === 'red') && (
+          <div className={styles.issueSummary}>
+            <b>이슈 요약</b>
+            <ul>
+              {rows.filter(r => r.flags.level === 'red').map(r => (
+                <li key={r.id}>
+                  <span className={styles.issueWho}>{r.fakturNumber ?? r.counterpartyName}</span>
+                  {r.flags.issues.join(' · ')}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {requestRow && (

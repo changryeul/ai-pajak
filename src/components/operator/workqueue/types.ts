@@ -156,3 +156,8 @@ export interface WithholdingDetail {
   summary: { txnCount: number; totalGross: number; totalTax: number; incompleteCount: number };
   rows: WithholdingRow[];
 }
+
+// 검토 상태 표기 (수정요청 7·14·20번): 완료 / 미확인 / 이슈.
+// green = 확인 완료, amber = 아직 확인 안 됨, red = 이슈 있음.
+export const reviewStateText = (level: string): string =>
+  level === 'green' ? '완료' : level === 'red' ? '이슈' : '미확인';

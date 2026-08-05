@@ -1,9 +1,8 @@
 'use client';
 import styles from './workqueue.module.css';
-import type { UmkmRow } from './types';
+import { reviewStateText, type UmkmRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
-const lvlText = (l: string) => (l === 'green' ? '완료' : l === 'red' ? '요청' : '검토');
 const taxText = (t: string) => (t === 'PPh25' ? 'PPh 25' : 'PPh Final');
 
 // status → [표시문구, badge 색]
@@ -36,7 +35,7 @@ export function UmkmReviewTable({ rows, onRequest }: Props) {
             const [stText, stCls] = statusBadge(r.paymentStatus);
             return (
               <tr key={r.id}>
-                <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{lvlText(r.flags.level)}</span></td>
+                <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
                 <td className={styles.name}><b>{taxText(r.taxType)}</b></td>
                 <td>{r.paymentDeadline ?? '—'}</td>
                 <td>{r.reportingDeadline ?? '—'}</td>

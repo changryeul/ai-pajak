@@ -1,9 +1,8 @@
 'use client';
 import styles from './workqueue.module.css';
-import type { WithholdingRow } from './types';
+import { reviewStateText, type WithholdingRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
-const lvlText = (l: string) => (l === 'green' ? '완료' : l === 'red' ? '요청' : '검토');
 const regimeText = (r: string) => (r === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23');
 const pct = (r: number) => `${(r * 100).toFixed(1)}%`;
 
@@ -25,7 +24,7 @@ export function WithholdingReviewTable({ rows, onRequest, onViewPhoto }: Props) 
         <tbody>
           {rows.map(r => (
             <tr key={r.id}>
-              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{lvlText(r.flags.level)}</span></td>
+              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
               <td className={styles.name}><b>{r.counterpartyName}</b><span>{r.incomeType}</span></td>
               <td>{r.counterpartyNpwp ?? 'NPWP 없음'}</td>
               <td>{regimeText(r.regime)}</td>

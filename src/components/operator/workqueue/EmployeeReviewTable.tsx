@@ -1,10 +1,9 @@
 'use client';
 import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
-import type { Pph21Row } from './types';
+import { reviewStateText, type Pph21Row } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
-const lvlText = (l: string) => (l === 'green' ? '완료' : l === 'red' ? '요청' : '검토');
 const subText = (s: string) => (s === 'FINALIZED' || s === 'FILED' ? '완료' : '작성중');
 
 interface Props {
@@ -37,7 +36,7 @@ export function EmployeeReviewTable({ rows, selectedId, onSelect, onRequest }: P
                 }
               }}
               style={{ cursor: 'pointer' }}>
-              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{lvlText(r.flags.level)}</span></td>
+              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
               <td className={styles.name}><b>{r.name}</b><span>{subText(r.payslipStatus)}</span></td>
               <td>{r.npwp ?? 'NPWP 없음'}</td>
               <td>{r.ptkp}</td>
