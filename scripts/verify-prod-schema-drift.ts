@@ -208,7 +208,16 @@ interface SchemaAuditResult {
   policies: Array<{ table: string; name: string }>;
   indexes: Array<{ table: string; name: string }>;
   check_constraints: Array<{ table: string; name: string }>;
+  tables?: string[];          // schema_audit v2 (20260805000001)
+  rls_disabled?: string[];    // schema_audit v2
 }
+
+// Tables allowed to run without ROW LEVEL SECURITY. Everything else with RLS
+// off is treated as drift (2026-08-04: two operator tables shipped RLS-less
+// and were readable via the anon key until a manual audit caught them).
+const RLS_OFF_WHITELIST = new Set([
+  'chart_of_accounts', // static COA reference data; FK parent of journal rows
+]);
 
 function stripSchemaPrefix(t: string): string {
   return t.replace(/^public\./, '').replace(/^"public"\./, '').toLowerCase();
@@ -344,7 +353,32 @@ async function main() {
     }
   }
   console.log(`probed ${polProbes} policies / ${idxProbes} indexes / ${chkProbes} checks via schema_audit()`);
-  console.log(`drift: ${driftedCols.length} cols, ${missingTables.length} tables, ${driftedPolicies.length} pol, ${driftedIndexes.length} idx, ${driftedChecks.length} chk\n`);
+
+  // ------- RLS coverage (schema_audit v2) -------
+  const rlsViolations: string[] = (audit.rls_disabled ?? [])
+    .map((t) => t.toLowerCase())
+    .filter((t) => !RLS_OFF_WHITELIST.has(t));
+  if (audit.rls_disabled === undefined) {
+    console.log('rls check: SKIPPED (schema_audit v1 — apply 20260805000001)');
+  } else {
+    console.log(`rls check: ${(audit.rls_disabled ?? []).length} tables RLS-off, ${rlsViolations.length} outside whitelist`);
+  }
+
+  // ------- types/database.ts subset check (declared types must exist) -------
+  const typesDrift: string[] = [];
+  let declaredTypeTables = 0;
+  if (audit.tables) {
+    const prodTables = new Set(audit.tables.map((t) => t.toLowerCase()));
+    const typesSrc = readFileSync(join(__dirname, '..', 'src', 'types', 'database.ts'), 'utf-8');
+    const declared = [...typesSrc.matchAll(/^ {6}([a-z_][a-z0-9_]*): \{\n {8}Row: \{/gm)].map((m) => m[1]);
+    declaredTypeTables = declared.length;
+    for (const t of declared) {
+      if (!prodTables.has(t)) typesDrift.push(t);
+    }
+    console.log(`types check: ${declaredTypeTables} tables declared in types/database.ts, ${typesDrift.length} missing on prod`);
+  }
+
+  console.log(`drift: ${driftedCols.length} cols, ${missingTables.length} tables, ${driftedPolicies.length} pol, ${driftedIndexes.length} idx, ${driftedChecks.length} chk, ${rlsViolations.length} rls, ${typesDrift.length} types\n`);
 
   if (missingTables.length > 0) {
     console.error('MISSING TABLES:');
@@ -403,10 +437,20 @@ async function main() {
     }
   }
 
+  if (rlsViolations.length > 0) {
+    console.error('\nRLS DISABLED (not whitelisted — enable ROW LEVEL SECURITY or whitelist):');
+    rlsViolations.forEach((t) => console.error(`  - ${t}`));
+  }
+  if (typesDrift.length > 0) {
+    console.error('\nDEAD TYPES (declared in src/types/database.ts but not on prod):');
+    typesDrift.forEach((t) => console.error(`  - ${t}`));
+  }
+
   const totalDrift = driftedCols.length + missingTables.length
-    + driftedPolicies.length + driftedIndexes.length + driftedChecks.length;
+    + driftedPolicies.length + driftedIndexes.length + driftedChecks.length
+    + rlsViolations.length + typesDrift.length;
   if (totalDrift === 0) {
-    console.log(`PASS - no drift (${colProbes} cols, ${polProbes} pol, ${idxProbes} idx, ${chkProbes} chk)\n`);
+    console.log(`PASS - no drift (${colProbes} cols, ${polProbes} pol, ${idxProbes} idx, ${chkProbes} chk, rls+types ok)\n`);
     process.exit(0);
   }
   console.error('\nFAIL - drift detected. Generate a resync migration.\n');
