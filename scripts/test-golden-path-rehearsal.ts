@@ -94,14 +94,18 @@ async function main() {
   await card.click();
   await opPage.waitForTimeout(2500);
   await opPage.screenshot({ path: `${SHOTS}/2-operator-panel.png` });
-  // 고객 검토완료 (request-approval)
-  const reqBtn = opPage.getByRole('button', { name: '고객 검토완료' });
-  if (!(await reqBtn.count())) { friction.push('PENDING 상태에서 고객 검토완료 버튼 없음'); }
+  // 승인요청 (request-approval) — 2026-08-05 리모델: 버튼 → 코멘트 모달 → 보내기
+  const reqBtn = opPage.getByRole('button', { name: '승인요청', exact: true });
+  if (!(await reqBtn.count())) { friction.push('PENDING 상태에서 승인요청 버튼 없음'); }
   await reqBtn.click();
+  await opPage.waitForTimeout(600);
+  await opPage.locator('textarea').last().fill('[REHEARSAL] 검토 완료 — 승인 부탁드립니다.');
+  await opPage.getByRole('button', { name: '승인요청 보내기' }).click();
   await opPage.waitForTimeout(2500);
-  const { data: afterReq } = await admin.from('djp_submission_queue').select('status').eq('id', qrow.id).single();
-  console.log('STEP 2b: after 고객 검토완료 →', afterReq?.status);
-  if (afterReq?.status !== 'PENDING_APPROVAL') friction.push(`고객 검토완료 클릭 후 상태=${afterReq?.status} (PENDING_APPROVAL 기대 — PENDING→직행 안되면 UX 이슈)`);
+  const { data: afterReq } = await admin.from('djp_submission_queue').select('status, notes').eq('id', qrow.id).single();
+  console.log('STEP 2b: after 승인요청 →', afterReq?.status);
+  if (afterReq?.status !== 'PENDING_APPROVAL') friction.push(`승인요청 후 상태=${afterReq?.status} (PENDING_APPROVAL 기대)`);
+  if (!afterReq?.notes?.includes('[REHEARSAL]')) friction.push('승인요청 코멘트가 queue.notes 에 저장되지 않음');
   await opPage.screenshot({ path: `${SHOTS}/3-operator-after-request.png` });
 
   // ── 3. 수퍼바이저: 승인 ──

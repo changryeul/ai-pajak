@@ -7,6 +7,7 @@ interface ApprovalState {
   rejectedReason: string | null;
   approvedAt: string | null;
   canApprove: boolean;
+  requestNote?: string | null;
 }
 
 export function ApprovalActions({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
@@ -15,6 +16,7 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
   const [error, setError] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState(false);
   const [reassigning, setReassigning] = useState(false);
+  const [requesting, setRequesting] = useState(false); // 승인요청 코멘트 모달 (요청 9·17)
 
   const load = useCallback(async () => {
     try {
@@ -57,7 +59,7 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
   };
 
   if (!state) return null;
-  const { status, rejectedReason, canApprove } = state;
+  const { status, rejectedReason, canApprove, requestNote } = state;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
@@ -68,8 +70,13 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
         <div className={styles.blocked} style={{ maxWidth: 360 }}>{error}</div>
       )}
 
+      {/* 수퍼바이저에게 남긴 승인요청 코멘트 — 승인 판단 컨텍스트 (요청 9) */}
+      {status === 'PENDING_APPROVAL' && requestNote && (
+        <div className={styles.requestNote}>상담원 요청: {requestNote}</div>
+      )}
+
       <div style={{ display: 'flex', gap: 8 }}>
-        {status === 'APPROVED' && <span className={`${styles.badge} ${styles.green}`}>✅ 승인 완료</span>}
+        {status === 'APPROVED' && <span className={`${styles.badge} ${styles.green}`}>✅ 승인완료</span>}
 
         {status === 'PENDING_APPROVAL' && canApprove && (
           <>
@@ -83,13 +90,23 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
         )}
 
         {(status === 'PENDING' || status === 'DATA_REVIEW' || status === 'PENDING_DOCS') && (
-          <button className={`${styles.btn} ${styles.purple}`} disabled={busy} onClick={() => act('request-approval')}>고객 검토완료</button>
+          <button className={`${styles.btn} ${styles.purple}`} disabled={busy} onClick={() => setRequesting(true)}>승인요청</button>
         )}
 
         {canApprove && status !== 'APPROVED' && (
           <button className={styles.btn} disabled={busy} onClick={() => setReassigning(true)}>재배정</button>
         )}
       </div>
+
+      {requesting && (
+        <RequestApprovalModal
+          onClose={() => setRequesting(false)}
+          onSubmit={async (note) => {
+            setRequesting(false);
+            await act('request-approval', note ? { notes: note } : undefined);
+          }}
+        />
+      )}
 
       {rejecting && (
         <RejectModal
@@ -107,6 +124,32 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
           }}
         />
       )}
+    </div>
+  );
+}
+
+function RequestApprovalModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (note: string) => void }) {
+  const [note, setNote] = useState('');
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <h2>수퍼바이저에게 승인요청</h2>
+        <div className={styles.mb}>
+          <label>요청 내용 (선택)
+            <textarea value={note} onChange={e => setNote(e.target.value)}
+              placeholder="예: 8월 급여 검토 완료했습니다. TER 재계산 2건 반영 — 승인 부탁드립니다." />
+          </label>
+        </div>
+        <div className={styles.mf}>
+          <button className={styles.btn} onClick={onClose}>취소</button>
+          <button className={`${styles.btn} ${styles.purple}`} onClick={() => onSubmit(note.trim())}>승인요청 보내기</button>
+        </div>
+      </div>
     </div>
   );
 }

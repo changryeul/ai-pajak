@@ -87,3 +87,5 @@
 .taxtabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 
 .issueSummary{margin-top:12px;border:1px solid #fecaca;background:#fef2f2;border-radius:12px;padding:10px 14px;font-size:12px}.issueSummary b{color:#b91c1c}.issueSummary ul{margin:6px 0 0;padding-left:16px}.issueSummary li{margin:2px 0}.issueWho{font-weight:800;margin-right:6px}
+
+.requestNote{border:1px solid #ddd6fe;background:#f5f3ff;color:#5b21b6;border-radius:10px;padding:7px 11px;font-size:12px;max-width:360px;text-align:left}

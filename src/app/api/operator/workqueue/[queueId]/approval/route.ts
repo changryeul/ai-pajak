@@ -20,7 +20,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
   const admin = getSupabaseAdmin();
   const { data: q } = await admin
     .from('djp_submission_queue')
-    .select('id, status, rejected_reason, approved_at, approval_notes')
+    .select('id, status, rejected_reason, approved_at, approval_notes, notes')
     .eq('id', queueId).maybeSingle();
   if (!q) return NextResponse.json({ error: 'Queue item not found' }, { status: 404 });
 
@@ -31,6 +31,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       rejectedReason: q.rejected_reason ?? null,
       approvedAt: q.approved_at ?? null,
       approvalNotes: q.approval_notes ?? null,
+      requestNote: q.notes ?? null,
       canApprove: SUPERVISOR_ROLES.includes(roleRow.role),
     },
   }, { headers: { 'Cache-Control': 'no-store' } });
