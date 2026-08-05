@@ -31,9 +31,9 @@ env:
 
 jobs:
   smoke:
-    name: Prod smoke (12 steps)
+    name: Prod smoke (integrated runner)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
