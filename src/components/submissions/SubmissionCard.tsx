@@ -1,11 +1,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { StatusTimeline } from './StatusTimeline';
-import { Upload, Download, AlertTriangle } from 'lucide-react';
+import { Receipt, Download, AlertTriangle } from 'lucide-react';
 import { cn, fmtRp } from '@/lib/utils';
 
 export interface QueueItem {
@@ -30,7 +32,6 @@ export interface QueueItem {
 
 interface SubmissionCardProps {
   item: QueueItem;
-  onUploadPayment?: (itemId: string) => void;
 }
 
 const TAX_COLORS: Record<string, string> = {
@@ -41,7 +42,8 @@ const TAX_COLORS: Record<string, string> = {
 };
 
 
-export function SubmissionCard({ item, onUploadPayment }: SubmissionCardProps) {
+export function SubmissionCard({ item }: SubmissionCardProps) {
+  const locale = (useParams()?.locale as string) || 'id';
   const t = useTranslations('killer');
   const period = `${item.tax_period_year}-${String(item.tax_period_month).padStart(2, '0')}`;
 
@@ -86,9 +88,11 @@ export function SubmissionCard({ item, onUploadPayment }: SubmissionCardProps) {
           </div>
 
           <div className="flex gap-2">
-            {item.status === 'PAYMENT_PENDING' && onUploadPayment && (
-              <Button size="sm" variant="default" className="h-7 text-xs" onClick={() => onUploadPayment(item.id)}>
-                <Upload className="h-3 w-3 mr-1" />{t('submissions.uploadPayment')}
+            {item.status === 'PAYMENT_PENDING' && (
+              <Button size="sm" variant="default" className="h-7 text-xs" asChild>
+                <Link href={`/${locale}/tax/billing`}>
+                  <Receipt className="h-3 w-3 mr-1" />{t('submissions.viewBilling')}
+                </Link>
               </Button>
             )}
             {item.bpe_number && (

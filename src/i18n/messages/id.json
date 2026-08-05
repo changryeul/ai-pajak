@@ -3482,7 +3482,8 @@
       "stepEbilling": "e-Billing",
       "stepPayment": "Pembayaran",
       "stepVerified": "Terverifikasi",
-      "stepCompleted": "Selesai"
+      "stepCompleted": "Selesai",
+      "viewBilling": "Lihat ID Billing"
     },
     "invoice": {
       "title": "Pelaporan Foto",

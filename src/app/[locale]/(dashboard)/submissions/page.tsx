@@ -42,11 +42,6 @@ export default function SubmissionsPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const handleUploadPayment = (itemId: string) => {
-    // TODO: Open payment proof upload dialog
-    alert(`${t('submissions.uploadPayment')}: ${itemId}`);
-  };
-
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       {/* Header */}
@@ -90,7 +85,7 @@ export default function SubmissionsPage() {
       </div>
 
       {/* Submission List */}
-      <SubmissionList items={items} isLoading={isLoading} onUploadPayment={handleUploadPayment} />
+      <SubmissionList items={items} isLoading={isLoading} />
     </div>
   );
 }

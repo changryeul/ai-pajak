@@ -18,10 +18,9 @@ function filterItems(items: QueueItem[], filter: FilterKey): QueueItem[] {
 interface SubmissionListProps {
   items: QueueItem[];
   isLoading: boolean;
-  onUploadPayment?: (itemId: string) => void;
 }
 
-export function SubmissionList({ items, isLoading, onUploadPayment }: SubmissionListProps) {
+export function SubmissionList({ items, isLoading }: SubmissionListProps) {
   const t = useTranslations('killer');
   const [filter, setFilter] = useState<FilterKey>('all');
   const filtered = filterItems(items, filter);
@@ -70,7 +69,7 @@ export function SubmissionList({ items, isLoading, onUploadPayment }: Submission
       ) : (
         <div className="space-y-3">
           {filtered.map(item => (
-            <SubmissionCard key={item.id} item={item} onUploadPayment={onUploadPayment} />
+            <SubmissionCard key={item.id} item={item} />
           ))}
         </div>
       )}

@@ -3482,7 +3482,8 @@
       "stepEbilling": "e-Billing",
       "stepPayment": "Payment",
       "stepVerified": "Verified",
-      "stepCompleted": "Completed"
+      "stepCompleted": "Completed",
+      "viewBilling": "View ID Billing"
     },
     "invoice": {
       "title": "Photo Filing",

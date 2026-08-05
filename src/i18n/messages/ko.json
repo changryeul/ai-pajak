@@ -3483,7 +3483,8 @@
       "stepEbilling": "e-Billing",
       "stepPayment": "납부 대기",
       "stepVerified": "검증",
-      "stepCompleted": "완료"
+      "stepCompleted": "완료",
+      "viewBilling": "ID Billing 확인"
     },
     "invoice": {
       "title": "사진 신고",
