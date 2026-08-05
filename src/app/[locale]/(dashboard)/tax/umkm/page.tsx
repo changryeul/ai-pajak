@@ -110,6 +110,27 @@ export default function CorporateTaxPage() {
       .catch(() => {});
   }, [customerId]);
 
+  // 제출 = 서버 기록 → 상담원 워크큐(선납법인세 뷰) 전달.
+  // (2026-08-05 수정요청 25번: 이전엔 alert 스텁이라 아무것도 저장되지 않았음)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitMonthlyTax = async (taxType: 'PPh_FINAL' | 'PPh25', monthIdx: number, amountDue: number, revenue?: number) => {
+    if (!customerId || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const taxPeriod = `${currentYear}-${String(monthIdx + 1).padStart(2, '0')}`;
+      const res = await fetch('/api/tax/monthly-payments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'record-monthly-tax', customerId, taxType, taxPeriod, amountDue, revenue }),
+      });
+      const d = await res.json();
+      alert(d.success ? t('submitDone') : (d.error || t('submitFail')));
+    } catch {
+      alert(t('submitFail'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Auto-determine regime
   const determineRegime = (): RegimeResult => {
     const revenue = Number(annualRevenue) || 0;
@@ -775,10 +796,8 @@ export default function CorporateTaxPage() {
                   </Card>
                   <Button
                     className="bg-green-600 hover:bg-green-700 text-white self-stretch px-6"
-                    disabled={selectedRev <= 0}
-                    onClick={() => {
-                      alert(`${t('submitBtn')}: ${MONTHS[selectedMonthIdx]} ${fmtRp(selectedTax)}`);
-                    }}
+                    disabled={selectedRev <= 0 || isSubmitting}
+                    onClick={() => submitMonthlyTax('PPh_FINAL', selectedMonthIdx, selectedTax, selectedRev)}
                   >
                     {t('submitBtn')}
                   </Button>
@@ -809,10 +828,8 @@ export default function CorporateTaxPage() {
                     </Card>
                     <Button
                       className="bg-green-600 hover:bg-green-700 text-white self-stretch px-6"
-                      disabled={monthly <= 0}
-                      onClick={() => {
-                        alert(`${t('submitBtn')}: ${fmtRp(monthly)}`);
-                      }}
+                      disabled={monthly <= 0 || isSubmitting}
+                      onClick={() => submitMonthlyTax('PPh25', selectedMonthIdx, monthly)}
                     >
                       {t('submitBtn')}
                     </Button>

@@ -114,6 +114,75 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
         return NextResponse.json({ success: true, data: { created: schedule.length } });
       }
 
+      case 'record-monthly-tax': {
+        // /tax/umkm 마법사 제출 — 고객이 입력한 월 매출/세액을 서버에 기록하고
+        // 담당 상담원 워크큐(선납법인세 뷰)로 전달. (2026-08-05 수정요청 25번:
+        // 기존 제출 버튼이 alert 스텁이라 고객 입력이 어디에도 저장되지 않았음)
+        const { taxType, taxPeriod, amountDue, revenue } = body;
+        let customerId = body.customerId as string | undefined;
+        if (req.session.role === 'CUSTOMER') {
+          // 고객은 항상 본인 customer 로 강제 (임의 customerId 차단)
+          const { data: own } = await getSupabaseAdmin()
+            .from('customer').select('id').eq('user_id', req.session.userId).maybeSingle();
+          customerId = own?.id;
+        }
+        if (!customerId) return NextResponse.json({ error: 'customerId required' }, { status: 400 });
+        if (taxType !== 'PPh_FINAL' && taxType !== 'PPh25') {
+          return NextResponse.json({ error: 'taxType must be PPh_FINAL or PPh25' }, { status: 400 });
+        }
+        if (typeof taxPeriod !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(taxPeriod)) {
+          return NextResponse.json({ error: 'taxPeriod must be YYYY-MM' }, { status: 400 });
+        }
+        const due = Number(amountDue);
+        if (!Number.isFinite(due) || due < 0) {
+          return NextResponse.json({ error: 'amountDue must be a non-negative number' }, { status: 400 });
+        }
+
+        const [yStr, mStr] = taxPeriod.split('-');
+        const py = Number(yStr); const pm = Number(mStr);
+        const note = revenue != null
+          ? `[고객입력] 매출 Rp ${Number(revenue).toLocaleString('id-ID')} → 세액 Rp ${due.toLocaleString('id-ID')}`
+          : `[고객입력] 세액 Rp ${due.toLocaleString('id-ID')}`;
+
+        const admin = getSupabaseAdmin();
+        const { data: existing } = await admin
+          .from('tax_monthly_payment')
+          .select('id, status')
+          .eq('customer_id', customerId).eq('tax_type', taxType).eq('tax_period', taxPeriod)
+          .maybeSingle();
+
+        let rowId: string;
+        if (existing) {
+          // 납부 상태/NTPN 은 건드리지 않고 고객 입력값만 갱신
+          const { error } = await admin.from('tax_monthly_payment')
+            .update({ amount_due: due, notes: note })
+            .eq('id', existing.id);
+          if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+          rowId = existing.id;
+        } else {
+          const { data: inserted, error } = await admin.from('tax_monthly_payment')
+            .insert({
+              customer_id: customerId,
+              tax_type: taxType,
+              tax_period: taxPeriod,
+              tax_year: py,
+              amount_due: due,
+              status: 'UNPAID',
+              notes: note,
+              payment_deadline: getPaymentDeadline(taxType, py, pm),
+              reporting_deadline: getReportingDeadline(taxType, py, pm),
+            })
+            .select('id').single();
+          if (error || !inserted) return NextResponse.json({ error: error?.message ?? 'insert failed' }, { status: 500 });
+          rowId = inserted.id;
+        }
+
+        // 자료 write → 선납법인세 큐 자동 생성/배정 (best-effort, PPh25 도 앵커는 PPh_FINAL)
+        await ensureQueueForActivity(admin, customerId, 'PPh_FINAL', taxPeriod);
+
+        return NextResponse.json({ success: true, data: { id: rowId } });
+      }
+
       case 'update-payment': {
         const { paymentId, ntpn, amountPaid, paymentDate, paymentMethod, kodeBilling } = body;
         if (!paymentId) return NextResponse.json({ error: 'paymentId required' }, { status: 400 });

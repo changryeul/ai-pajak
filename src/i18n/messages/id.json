@@ -5651,7 +5651,10 @@
     "regimeGeneralDescNotRegistered": "Tidak terdaftar UMKM. PPh Badan umum 22% berlaku.",
     "regimeGeneralDescWithTax": "PPh Badan tahun lalu {tax} - Kredit pajak {credits} = Bulanan {monthly}.",
     "regimeGeneralDescNoTax": "Masukkan data SPT Tahunan tahun sebelumnya untuk perhitungan cicilan bulanan yang akurat.",
-    "regimeGeneralBasis": "Pasal 25 UU PPh — (PPh Badan tahun lalu - Kredit pajak) / 12"
+    "regimeGeneralBasis": "Pasal 25 UU PPh — (PPh Badan tahun lalu - Kredit pajak) / 12",
+    "submitDone": "Tersimpan — dikirim ke konsultan pajak untuk ditinjau.",
+    "submitFail": "Gagal menyimpan. Silakan coba lagi.",
+    "submitBtn": "Kirim untuk ditinjau"
   },
   "financialStatements": {
     "pageTitle": "Laporan Keuangan",

@@ -5522,7 +5522,9 @@
     "regimeGeneralDescNotRegistered": "UMKM 미등록. 일반 PPh Badan 22% 적용.",
     "regimeGeneralDescWithTax": "전년 PPh Badan {tax} - 세액공제 {credits} = 월 {monthly}.",
     "regimeGeneralDescNoTax": "전년 SPT Tahunan 데이터를 입력하면 정확한 월 분할액을 계산합니다.",
-    "regimeGeneralBasis": "Pasal 25 UU PPh — (전년 PPh Badan - 세액공제) ÷ 12"
+    "regimeGeneralBasis": "Pasal 25 UU PPh — (전년 PPh Badan - 세액공제) ÷ 12",
+    "submitDone": "저장 완료 — 상담원 검토함으로 전달되었습니다.",
+    "submitFail": "저장에 실패했습니다. 다시 시도해 주세요."
   },
   "pph25": {
     "pageTitle": "연 결산 — PPh 25 (일반 법인세 22%)",

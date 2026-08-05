@@ -5651,7 +5651,10 @@
     "regimeGeneralDescNotRegistered": "Not registered as UMKM. General PPh Badan 22% applies.",
     "regimeGeneralDescWithTax": "Prior year PPh Badan {tax} - Tax credits {credits} = Monthly {monthly}.",
     "regimeGeneralDescNoTax": "Enter previous year SPT Tahunan data for accurate monthly installment calculation.",
-    "regimeGeneralBasis": "Pasal 25 UU PPh — (Prior year PPh Badan - Tax credits) / 12"
+    "regimeGeneralBasis": "Pasal 25 UU PPh — (Prior year PPh Badan - Tax credits) / 12",
+    "submitDone": "Saved — sent to your tax counselor for review.",
+    "submitFail": "Save failed. Please try again.",
+    "submitBtn": "Submit for review"
   },
   "financialStatements": {
     "pageTitle": "Financial Statements (Laporan Keuangan)",
