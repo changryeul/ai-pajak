@@ -27,6 +27,13 @@ jobs:
       - name: TypeScript Check
         run: npx tsc --noEmit
 
+      # 2026-08-05: error-free baseline established (431 problems -> 33
+      # intentional warnings). Gate errors hard; cap warnings at the
+      # documented baseline so creep breaks CI — raise consciously if a
+      # new intentional demotion is added in eslint.config.mjs.
+      - name: ESLint
+        run: npx eslint . --max-warnings 33
+
   # ─── Unit Tests ───
   test:
     name: Unit Tests
