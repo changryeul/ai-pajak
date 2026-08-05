@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 import { EmployeeReviewTable } from './EmployeeReviewTable';
-import { CustomerMirrorToggle } from './CustomerMirrorToggle';
 import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { Pph21Detail, Pph21Row } from './types';
@@ -15,7 +14,6 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
   const t = useTranslations('operatorWorkqueue');
   const [detail, setDetail] = useState<Pph21Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mirror, setMirror] = useState(false);
   const [empSearch, setEmpSearch] = useState('');
   const [empStatus, setEmpStatus] = useState<'' | 'red' | 'amber' | 'green'>('');
   const [selectedEmp, setSelectedEmp] = useState<string | null>(null);
@@ -60,12 +58,7 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
     <div className={styles.card}>
       <div className={styles.head}>
         <div><h1>{t('pph21Title')}</h1><p>{detail.period} 귀속분 · 고객 제출자료 전체 검토</p></div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-          <button className={styles.btn} onClick={() => setMirror(m => !m)}>
-            {mirror ? t('mirrorOff') : t('mirrorOn')}
-          </button>
-          <ApprovalActions queueId={queueId} onChanged={load} />
-        </div>
+        <ApprovalActions queueId={queueId} onChanged={load} />
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>
@@ -75,12 +68,9 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
           <div className={styles.metric2}><small>미완료</small><b>{s.incompleteCount}건</b></div>
         </div>
 
-        {!mirror && (
-          <AiPreReviewBox queueId={queueId} taxView="pph21" period={detail.period} summary={s} rows={detail.rows} />
-        )}
+        <AiPreReviewBox queueId={queueId} taxView="pph21" period={detail.period} summary={s} rows={detail.rows} />
 
-        {mirror ? <CustomerMirrorToggle customerId={detail.customerId} /> : (
-          <>
+        <>
             <div className={styles.toolbar}>
               <div>
                 <input placeholder="직원명 검색" value={empSearch} onChange={e => setEmpSearch(e.target.value)} />
@@ -90,9 +80,6 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
                   <option value="amber">검토 필요</option>
                   <option value="green">확인 완료</option>
                 </select>
-              </div>
-              <div>
-                <button className={`${styles.btn} ${styles.blue}`} onClick={() => setRequestTarget('BULK')}>일괄 요청</button>
               </div>
             </div>
 
@@ -121,8 +108,7 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
                 </div>
               </div>
             )}
-          </>
-        )}
+        </>
       </div>
 
       {requestTarget && (
