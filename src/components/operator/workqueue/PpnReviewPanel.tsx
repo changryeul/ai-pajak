@@ -6,6 +6,7 @@ import { PpnReviewTable } from './PpnReviewTable';
 import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { PpnDetail, PpnRow } from './types';
+import { parseCoretaxFakturFile } from '@/lib/tax/coretax-faktur-parse';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 
@@ -16,6 +17,9 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
   const [dir, setDir] = useState<'' | 'KELUARAN' | 'MASUKAN'>('');
   const [recon, setRecon] = useState<'' | 'MATCH' | 'DIFF' | 'MISSING' | 'PENDING'>('');
   const [requestRow, setRequestRow] = useState<PpnRow | null>(null);
+  // 수정요청 21번 — Coretax xlsx 업로드→대조 (고객 PPN 페이지와 동일 파서/API 재사용)
+  const [reconBusy, setReconBusy] = useState(false);
+  const [reconMsg, setReconMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -37,6 +41,34 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
     };
     return (detail?.rows ?? []).filter(r => (!dir || r.fakturType === dir) && matchRecon(r.reconStatus));
   }, [detail, dir, recon]);
+
+  const runCoretaxRecon = useCallback(async (file: File) => {
+    if (!detail) return;
+    setReconBusy(true);
+    setReconMsg(null);
+    try {
+      const coretaxFaktur = await parseCoretaxFakturFile(file);
+      if (coretaxFaktur.length === 0) { setReconMsg('파일에서 faktur 를 찾지 못했습니다.'); return; }
+      const r = await fetch('/api/tax/ppn-reconcile', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: detail.customerId, taxPeriod: detail.period, coretaxFaktur }),
+      });
+      const j = await r.json();
+      if (j.success) { setReconMsg(`대조 완료 — Coretax ${coretaxFaktur.length}건 반영`); await load(); }
+      else setReconMsg(j.error || '대조에 실패했습니다.');
+    } catch {
+      setReconMsg('파일을 읽지 못했습니다 (.xlsx 형식 확인).');
+    } finally {
+      setReconBusy(false);
+    }
+  }, [detail, load]);
+
+  // 업로드/대조 상태 표시 — 대조된 행 수 기준 (파일 업로드 여부가 한눈에 보이게)
+  const reconStateLabel = useMemo(() => {
+    if (reconMsg) return reconMsg;
+    const done = (detail?.rows ?? []).filter(r => r.reconStatus && r.reconStatus !== 'PENDING').length;
+    return done > 0 ? `대조됨 ${done}건` : '미대조 (Coretax 자료 없음)';
+  }, [detail, reconMsg]);
 
   if (error) return (
     <div className={styles.card}><div className={styles.body}>
@@ -77,6 +109,13 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
               <option value="MISSING">누락</option>
               <option value="PENDING">미대조</option>
             </select>
+            {/* 수정요청 21번: 상담원이 Coretax 출력 xlsx 를 여기서 직접 올려 대조 */}
+            <label className={`${styles.btn} ${styles.blue} ${reconBusy ? styles.disabled : ''}`}>
+              {reconBusy ? '대조 중…' : 'Coretax에서 부가세 자료 가져오기'}
+              <input type="file" accept=".xlsx,.xls" style={{ display: 'none' }} disabled={reconBusy}
+                onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) runCoretaxRecon(f); }} />
+            </label>
+            <span className={styles.reconState}>{reconStateLabel}</span>
           </div>
         </div>
 

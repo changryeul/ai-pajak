@@ -24,6 +24,7 @@ import { useRef } from 'react';
 import { ScreenHeader } from '@/components/tax';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { importPpnWholesaleFile } from '@/lib/tax/bulk-import/ppn-wholesale-importer';
+import { parseCoretaxFakturFile } from '@/lib/tax/coretax-faktur-parse';
 
 
 interface FakturMonthly {
@@ -140,30 +141,7 @@ export default function PPNPage() {
     setReconBusy(true);
     setMessage(null);
     try {
-      const XLSX = await import('xlsx');
-      const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, { type: 'array' });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
-      // 휴리스틱 컬럼 매핑 — Coretax 출력 헤더 변형 흡수.
-      const pick = (r: Record<string, unknown>, keys: string[]): string => {
-        for (const k of Object.keys(r)) {
-          const kl = k.toLowerCase().replace(/[^a-z0-9]/g, '');
-          if (keys.some(want => kl.includes(want))) return String(r[k] ?? '');
-        }
-        return '';
-      };
-      const num = (s: string) => Number(String(s).replace(/[^0-9.-]/g, '')) || 0;
-      const coretaxFaktur = rows.map(r => {
-        const typeRaw = pick(r, ['jenis', 'type', 'faktur']).toUpperCase();
-        const fakturType = typeRaw.includes('MASUK') || typeRaw.includes('INPUT') ? 'MASUKAN' : 'KELUARAN';
-        return {
-          fakturType: fakturType as 'KELUARAN' | 'MASUKAN',
-          fakturNumber: pick(r, ['nomorfaktur', 'fakturnumber', 'nofaktur', 'nomor']),
-          dpp: num(pick(r, ['dpp', 'taxbase', 'dasarpengenaan'])),
-          ppn: num(pick(r, ['ppn', 'vat', 'pajakpertambahan'])),
-        };
-      }).filter(f => f.fakturNumber);
+      const coretaxFaktur = await parseCoretaxFakturFile(file);
       if (coretaxFaktur.length === 0) {
         setMessage({ type: 'error', text: t('coretaxParseEmpty') });
         return;
