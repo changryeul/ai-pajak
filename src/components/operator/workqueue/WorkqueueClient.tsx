@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import styles from './workqueue.module.css';
 import { WorkqueueSidebar } from './WorkqueueSidebar';
 import { CustomerWorklist } from './CustomerWorklist';
@@ -28,9 +29,26 @@ const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padSta
 
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
+// 상단 가로 세목 탭 (수정요청 4번). '직원 인사 기록'은 메뉴에서 제외(5번) —
+// PANEL_BY_VIEW/API 는 유지하므로 후속(개인소득세 팝업 등)에서 재사용 가능.
+const TAX_TABS: Array<{ key: TaxView; label: string }> = [
+  { key: 'pph21', label: '개인소득세' },
+  { key: 'withholding', label: '원천세' },
+  { key: 'umkm', label: '선납법인세' },
+  { key: 'ppn', label: '부가세' },
+  { key: 'annual', label: '연 신고' },
+];
+
 export function WorkqueueClient({ role }: { role?: string }) {
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale ?? 'id';
+  const router = useRouter();
+  // 수정요청 13번 — 워크큐에 로그아웃 경로가 없었음
+  const handleLogout = async () => {
+    await createClient().auth.signOut();
+    router.push(`/${locale}/login`);
+    router.refresh();
+  };
   const isSupervisor = !!role && SUPERVISOR_ROLES.includes(role);
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const [taxView, setTaxView] = useState<TaxView>('pph21');
@@ -105,26 +123,36 @@ export function WorkqueueClient({ role }: { role?: string }) {
   return (
     <div className={styles.root}>
       <div className={styles.app}>
-        <WorkqueueSidebar counts={counts} statusFilter={statusFilter} onStatusFilter={setStatusFilter}
-          taxView={taxView} onTaxView={(v) => { setSelectedId(null); setTaxView(v); }} />
+        <WorkqueueSidebar counts={counts} statusFilter={statusFilter} onStatusFilter={setStatusFilter} />
         <main>
           <div className={styles.top}>
             <div className={styles.role}>
               <button className={`${styles.pill} ${styles.active}`}>{isSupervisor ? '수퍼바이저' : '상담원'}</button>
             </div>
+            {/* 수정요청 4번 — 세목 전환 탭을 상단 가로 배치 */}
+            <div className={styles.taxtabs} role="tablist" aria-label="세목">
+              {TAX_TABS.map(tab => (
+                <button key={tab.key} role="tab" aria-selected={taxView === tab.key}
+                  className={`${styles.pill} ${taxView === tab.key ? styles.active : ''}`}
+                  onClick={() => { setSelectedId(null); setTaxView(tab.key); }}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
               <input placeholder="고객명, NPWP 검색" value={search} onChange={e => setSearch(e.target.value)} />
-              {/* /operator 인덱스 페이지는 없다 — 역할별 실제 홈으로 나간다. */}
+              {/* 수정요청 1·13번 — 나가기 대신 홈/로그아웃 (역할별 실제 홈) */}
               <a className={styles.btn}
                 href={`/${locale}/operator/${isSupervisor ? 'dashboard' : 'my-work'}`}
-                title="운영팀 대시보드로 나가기">← 나가기</a>
+                title="운영팀 대시보드">🏠</a>
+              <button className={styles.btn} onClick={handleLogout} title="로그아웃">로그아웃</button>
             </div>
           </div>
           <section className={styles.content}>
             {error && <div className={styles.blocked}>{error}</div>}
             <div className={styles.grid}>
-              <CustomerWorklist items={filtered} selectedId={selectedId} onSelect={setSelectedId} counts={counts} />
+              <CustomerWorklist items={filtered} selectedId={selectedId} onSelect={setSelectedId} />
               <div>
                 {selectedId
                   ? (() => {

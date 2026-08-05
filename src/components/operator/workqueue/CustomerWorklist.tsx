@@ -21,22 +21,15 @@ interface Props {
   items: QueueListItem[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  counts: { all: number; unreviewed: number; inReview: number; request: number; reviewed: number };
 }
 
-export function CustomerWorklist({ items, selectedId, onSelect, counts }: Props) {
+export function CustomerWorklist({ items, selectedId, onSelect }: Props) {
   const t = useTranslations('operatorWorkqueue');
   return (
     <aside className={styles.qpanel}>
       <div className={styles.card}>
         <div className={styles.head}><div><h1>{t('title')}</h1></div></div>
         <div className={styles.body}>
-          <div className={styles.metrics}>
-            <div className={styles.metric}><small>미검토</small><b>{counts.unreviewed}</b></div>
-            <div className={styles.metric}><small>수정중</small><b>{counts.request}</b></div>
-            <div className={styles.metric}><small>전체</small><b>{counts.all}</b></div>
-            <div className={styles.metric}><small>기간</small><b>월</b></div>
-          </div>
           <div className={styles.qlist}>
             {items.length === 0 && <div className={styles.body}>{t('empty')}</div>}
             {items.map(it => {
