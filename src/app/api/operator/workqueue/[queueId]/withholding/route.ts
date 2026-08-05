@@ -29,19 +29,22 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   const { data: txns } = await admin
     .from('pph23_transaction')
-    .select('id, counterparty_id, counterparty_name, counterparty_npwp, tax_regime, transaction_date, description, income_type, service_type, gross_amount, tax_rate, tax_amount, invoice_document_id')
+    .select('id, counterparty_id, counterparty_name, counterparty_npwp, tax_regime, transaction_date, description, income_type, service_type, invoice_number, gross_amount, tax_rate, tax_amount, invoice_document_id, operator_reviewed_at, operator_edits')
     .eq('customer_id', q.customer_id).eq('tax_period', period)
     .order('transaction_date', { ascending: true });
 
   const rows = (txns ?? []).map(t => {
     const hasInvoicePhoto = t.invoice_document_id != null;
-    const flags = evaluateWithholdingFlags({
+    let flags = evaluateWithholdingFlags({
       counterpartyNpwp: t.counterparty_npwp ?? null,
       counterpartyId: t.counterparty_id ?? null,
       taxAmount: Number(t.tax_amount ?? 0),
       taxRate: Number(t.tax_rate ?? 0),
       hasInvoicePhoto,
     });
+    if (t.operator_reviewed_at) {
+      flags = { ...flags, level: 'green' as const, label: flags.level === 'green' ? '확인 완료' : `확인됨 · ${flags.label}` };
+    }
     return {
       id: t.id,
       regime: t.tax_regime === 'PPH4_2' ? 'PPH4_2' : 'PPH23',
@@ -54,6 +57,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       taxRate: Number(t.tax_rate ?? 0),
       taxAmount: Number(t.tax_amount ?? 0),
       hasInvoicePhoto,
+      invoiceNumber: t.invoice_number ?? null,
+      serviceType: t.service_type ?? null,
+      reviewedAt: t.operator_reviewed_at ?? null,
+      operatorEdits: (t.operator_edits as Record<string, unknown> | null) ?? null,
       flags,
     };
   });

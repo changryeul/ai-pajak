@@ -89,3 +89,5 @@
 .issueSummary{margin-top:12px;border:1px solid #fecaca;background:#fef2f2;border-radius:12px;padding:10px 14px;font-size:12px}.issueSummary b{color:#b91c1c}.issueSummary ul{margin:6px 0 0;padding-left:16px}.issueSummary li{margin:2px 0}.issueWho{font-weight:800;margin-right:6px}
 
 .requestNote{border:1px solid #ddd6fe;background:#f5f3ff;color:#5b21b6;border-radius:10px;padding:7px 11px;font-size:12px;max-width:360px;text-align:left}
+
+.modalWide{max-width:640px;width:min(640px,94vw)}.modalSub{margin:2px 0 10px;color:#64748b;font-size:12px}.reviewedNote{border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;border-radius:10px;padding:7px 11px;font-size:12px;margin-bottom:10px}.fieldGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 12px;max-height:46vh;overflow-y:auto;padding-right:4px}.fieldItem{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:800;color:#334155}.fieldItem input{font-weight:600}.roInput{background:#f8fafc !important;color:#94a3b8}.editDot{display:inline-block;width:9px;height:9px;border-radius:99px;margin-left:6px;vertical-align:1px}.editCounselor{background:#8b5cf6}.editSup{background:#f97316}

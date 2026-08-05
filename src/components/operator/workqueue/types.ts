@@ -20,10 +20,19 @@ export interface QueueListItem {
   customer: { id: string; customer_name: string; npwp: string | null; customer_type: string } | null;
 }
 
+// 팝업 상세의 수정 이력 항목 (row-review PATCH 가 누적)
+export interface OperatorEditEntry { from: unknown; to: unknown; by: string; role: 'COUNSELOR' | 'SUPERVISOR'; at: string }
+export type OperatorEdits = Record<string, OperatorEditEntry>;
+
 export interface Pph21Row {
   payslipId: string; employeeId: string; name: string; npwp: string | null;
   ptkp: string; terCategory: string; totalGross: number; bpjs: number; thr: number;
   pph21: number; payslipStatus: string;
+  baseSalary: number; mealAllowance: number; transportAllowance: number;
+  positionAllowance: number; otherAllowances: number; bonusOnly: number; thrOnly: number;
+  bpjsKesehatan: number; jhtEmployee: number; jpEmployee: number; otherDeductions: number;
+  reviewedAt: string | null;
+  operatorEdits: OperatorEdits | null;
   flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
 }
 export interface Pph21Detail {
@@ -129,6 +138,8 @@ export interface PpnRow {
   ppn: number;
   isLuxury: boolean;
   reconStatus: string | null;
+  reviewedAt: string | null;
+  operatorEdits: OperatorEdits | null;
   flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
 }
 export interface PpnDetail {
@@ -149,6 +160,10 @@ export interface WithholdingRow {
   taxRate: number;
   taxAmount: number;
   hasInvoicePhoto: boolean;
+  invoiceNumber: string | null;
+  serviceType: string | null;
+  reviewedAt: string | null;
+  operatorEdits: OperatorEdits | null;
   flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };
 }
 export interface WithholdingDetail {

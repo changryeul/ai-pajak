@@ -104,6 +104,8 @@ const STEPS: Step[] = [
   { name: 'pph21 rate-provider DB overrides', file: 'verify-rate-provider-overrides.ts' },
   // --- /tax/umkm 제출 → 서버 기록 → 선납법인세 큐 (2026-08-05 수정요청 25번) ---
   { name: 'umkm record-monthly-tax contract', file: 'verify-umkm-record-contract.ts' },
+  // --- 워크큐 팝업 '저장 및 확인' + 수정이력 (2026-08-05 수정요청 10·15·24) ---
+  { name: 'workqueue row-review contract', file: 'verify-workqueue-row-review.ts' },
   // --- PPh 4(2) partial view via regime filter (2026-06-17) -----------
   { name: 'pph42 partial view (regime=PPH4_2)', file: 'verify-pph42-page.ts' },
   // --- Operator-initiated SPT Masa from chat thread (2026-06-17) -----

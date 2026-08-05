@@ -29,17 +29,20 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   const { data: fakturs } = await admin
     .from('ppn_faktur_monthly')
-    .select('id, faktur_type, faktur_number, faktur_date, counterparty_name, counterparty_npwp, dpp, ppn, is_luxury, recon_status')
+    .select('id, faktur_type, faktur_number, faktur_date, counterparty_name, counterparty_npwp, dpp, ppn, is_luxury, recon_status, operator_reviewed_at, operator_edits')
     .eq('customer_id', q.customer_id).eq('tax_period', period)
     .order('faktur_type', { ascending: true })
     .order('faktur_date', { ascending: true });
 
   const rows = (fakturs ?? []).map(f => {
-    const flags = evaluatePpnFlags({
+    let flags = evaluatePpnFlags({
       reconStatus: f.recon_status ?? null,
       fakturNumber: f.faktur_number ?? null,
       counterpartyNpwp: f.counterparty_npwp ?? null,
     });
+    if (f.operator_reviewed_at) {
+      flags = { ...flags, level: 'green' as const, label: flags.level === 'green' ? '확인 완료' : `확인됨 · ${flags.label}` };
+    }
     return {
       id: f.id,
       fakturType: f.faktur_type === 'MASUKAN' ? 'MASUKAN' : 'KELUARAN',
@@ -51,6 +54,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       ppn: Number(f.ppn ?? 0),
       isLuxury: !!f.is_luxury,
       reconStatus: f.recon_status ?? null,
+      reviewedAt: f.operator_reviewed_at ?? null,
+      operatorEdits: (f.operator_edits as Record<string, unknown> | null) ?? null,
       flags,
     };
   });

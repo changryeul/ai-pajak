@@ -85,7 +85,7 @@ async function main() {
   const opPage = await (await browser.newContext()).newPage();
   await login(opPage, 'operator.test@aipajak.com');
   console.log('STEP 2: operator landed on', opPage.url().includes('workqueue') ? 'workqueue ✓' : `UNEXPECTED ${opPage.url()}`);
-  await opPage.getByRole('button', { name: /원천세/ }).click();
+  await opPage.getByRole('tab', { name: /원천세/ }).click();
   await opPage.fill('input[type="month"]', '2026-09');
   await opPage.waitForTimeout(2500);
   await opPage.screenshot({ path: `${SHOTS}/1-operator-worklist.png` });
@@ -112,7 +112,7 @@ async function main() {
   const svPage = await (await browser.newContext()).newPage();
   await login(svPage, 'supervisor.test@aipajak.com');
   await svPage.goto(`${BASE}/ko/operator/workqueue`, { waitUntil: 'domcontentloaded' });
-  await svPage.getByRole('button', { name: /원천세/ }).click();
+  await svPage.getByRole('tab', { name: /원천세/ }).click();
   await svPage.fill('input[type="month"]', '2026-09');
   await svPage.waitForTimeout(2500);
   await svPage.locator('[class*="cust"]').first().click();

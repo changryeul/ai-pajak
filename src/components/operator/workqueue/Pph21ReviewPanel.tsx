@@ -6,9 +6,28 @@ import { EmployeeReviewTable } from './EmployeeReviewTable';
 import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { Pph21Detail, Pph21Row } from './types';
+import { RowDetailModal, type FieldDef } from './RowDetailModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const LEVEL_ORDER: Record<string, number> = { red: 0, amber: 1, green: 2 };
+
+// 팝업 편집 필드 (요청 10). putKey = monthly_payslip 컬럼명 — 저장 시 서버가
+// computePayslipTotals 로 총액/PPh21 재계산.
+const PPH21_FIELDS: FieldDef[] = [
+  { key: 'baseSalary', label: '기본급', type: 'number', putKey: 'base_salary' },
+  { key: 'mealAllowance', label: '식대', type: 'number', putKey: 'meal_allowance' },
+  { key: 'transportAllowance', label: '교통비', type: 'number', putKey: 'transport_allowance' },
+  { key: 'positionAllowance', label: '직책수당', type: 'number', putKey: 'position_allowance' },
+  { key: 'otherAllowances', label: '기타수당', type: 'number', putKey: 'other_allowances' },
+  { key: 'bonusOnly', label: '보너스', type: 'number', putKey: 'bonus' },
+  { key: 'thrOnly', label: 'THR', type: 'number', putKey: 'thr' },
+  { key: 'bpjsKesehatan', label: 'BPJS 건강', type: 'number', putKey: 'bpjs_kesehatan' },
+  { key: 'jhtEmployee', label: 'JHT (직원)', type: 'number', putKey: 'jht_employee' },
+  { key: 'jpEmployee', label: 'JP (직원)', type: 'number', putKey: 'jp_employee' },
+  { key: 'otherDeductions', label: '기타공제', type: 'number', putKey: 'other_deductions' },
+  { key: 'totalGross', label: '총 지급 (자동계산)', type: 'number', readOnly: true },
+  { key: 'pph21', label: 'PPh 21 (자동계산)', type: 'number', readOnly: true },
+];
 
 export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
@@ -16,7 +35,7 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
   const [error, setError] = useState<string | null>(null);
   const [empSearch, setEmpSearch] = useState('');
   const [empStatus, setEmpStatus] = useState<'' | 'red' | 'amber' | 'green'>('');
-  const [selectedEmp, setSelectedEmp] = useState<string | null>(null);
+  const [detailRow, setDetailRow] = useState<Pph21Row | null>(null); // 팝업 상세 (요청 10)
   const [requestTarget, setRequestTarget] = useState<Pph21Row | 'BULK' | null>(null);
 
   const load = useCallback(async () => {
@@ -39,9 +58,6 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
     return [...list].sort((a, b) => LEVEL_ORDER[a.flags.level] - LEVEL_ORDER[b.flags.level]);
   }, [detail, empStatus, empSearch]);
 
-  const selected = useMemo(
-    () => detail?.rows.find(r => r.employeeId === selectedEmp) ?? detail?.rows[0] ?? null,
-    [detail, selectedEmp]);
 
   if (error) return (
     <div className={styles.card}>
@@ -83,33 +99,31 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
               </div>
             </div>
 
-            <EmployeeReviewTable rows={rows} selectedId={selected?.employeeId ?? null}
-              onSelect={setSelectedEmp} onRequest={setRequestTarget} />
+            <EmployeeReviewTable rows={rows} selectedId={detailRow?.employeeId ?? null}
+              onSelect={(employeeId) => {
+                const row = rows.find(r => r.employeeId === employeeId);
+                if (row) setDetailRow(row);
+              }} onRequest={setRequestTarget} />
 
-            {selected && (
-              <div className={styles.section}>
-                <h3>선택 직원 상세보기: {selected.name}</h3>
-                <div className={styles.body}>
-                  <div className={styles.detail}>
-                    <div className={styles.di}><label>상태</label><b>{selected.payslipStatus === 'FINALIZED' || selected.payslipStatus === 'FILED' ? '완료' : '작성중'}</b></div>
-                    <div className={styles.di}><label>NPWP</label><b>{selected.npwp ?? 'NPWP 없음'}</b></div>
-                    <div className={styles.di}><label>PTKP / TER</label><b>{selected.ptkp} · {selected.terCategory}</b></div>
-                    <div className={styles.di}><label>총 지급</label><b>{rp(selected.totalGross)}</b></div>
-                    <div className={styles.di}><label>BPJS</label><b>{selected.bpjs > 0 ? '입력완료' : '미입력'}</b></div>
-                    <div className={styles.di}><label>PPh 21</label><b>{rp(selected.pph21)}</b></div>
-                  </div>
-                  <div className={styles.ai}>
-                    <b>직원별 AI 분석</b>
-                    <ul>
-                      <li>{selected.flags.label}</li>
-                      <li>요청 버튼은 고객 화면의 해당 직원 행에 요청으로 표시됩니다.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
         </>
       </div>
+
+      {detailRow && (
+        <RowDetailModal
+          title={`직원 상세: ${detailRow.name}`}
+          subtitle={`${detail.period} 귀속 · PTKP ${detailRow.ptkp} · TER ${detailRow.terCategory} · PPh21 ${rp(detailRow.pph21)}`}
+          rowId={detailRow.payslipId}
+          queueId={queueId}
+          putUrl="/api/tax/monthly-payslip"
+          fields={PPH21_FIELDS}
+          values={detailRow as unknown as Record<string, unknown>}
+          operatorEdits={detailRow.operatorEdits}
+          reviewedAt={detailRow.reviewedAt}
+          aiNote={{ label: detailRow.flags.label, issues: detailRow.flags.issues }}
+          onClose={() => setDetailRow(null)}
+          onSaved={async () => { setDetailRow(null); await load(); onChanged(); }}
+        />
+      )}
 
       {requestTarget && (
         <RequestModal key={requestTarget === 'BULK' ? 'bulk' : requestTarget.employeeId}

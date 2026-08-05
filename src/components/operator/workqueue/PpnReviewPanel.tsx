@@ -7,6 +7,7 @@ import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { PpnDetail, PpnRow } from './types';
 import { parseCoretaxFakturFile } from '@/lib/tax/coretax-faktur-parse';
+import { RowDetailModal, type FieldDef } from './RowDetailModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 
@@ -17,6 +18,7 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
   const [dir, setDir] = useState<'' | 'KELUARAN' | 'MASUKAN'>('');
   const [recon, setRecon] = useState<'' | 'MATCH' | 'DIFF' | 'MISSING' | 'PENDING'>('');
   const [requestRow, setRequestRow] = useState<PpnRow | null>(null);
+  const [detailRow, setDetailRow] = useState<PpnRow | null>(null); // 더블클릭 상세 (요청 24)
   // 수정요청 21번 — Coretax xlsx 업로드→대조 (고객 PPN 페이지와 동일 파서/API 재사용)
   const [reconBusy, setReconBusy] = useState(false);
   const [reconMsg, setReconMsg] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
           </div>
         </div>
 
-        <PpnReviewTable rows={rows} onRequest={setRequestRow} />
+        <PpnReviewTable rows={rows} onRequest={setRequestRow} onOpenDetail={setDetailRow} />
 
         {/* 수정요청 22번 — 이슈로 표기된 건만 이슈 내용을 간단히 요약 */}
         {rows.some(r => r.flags.level === 'red') && (
@@ -137,6 +139,23 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
         )}
       </div>
 
+      {detailRow && (
+        <RowDetailModal
+          title={`faktur 상세: ${detailRow.fakturNumber ?? detailRow.counterpartyName}`}
+          subtitle={`${detailRow.fakturType === 'MASUKAN' ? '매입' : '매출'} · ${detailRow.isLuxury ? '사치품 12%' : '일반 11%'} · DPP 수정 시 PPN 자동 재계산`}
+          rowId={detailRow.id}
+          queueId={queueId}
+          putUrl="/api/tax/ppn-faktur-monthly"
+          fields={PPN_FIELDS}
+          values={detailRow as unknown as Record<string, unknown>}
+          operatorEdits={detailRow.operatorEdits}
+          reviewedAt={detailRow.reviewedAt}
+          aiNote={{ label: detailRow.flags.label, issues: detailRow.flags.issues }}
+          onClose={() => setDetailRow(null)}
+          onSaved={async () => { setDetailRow(null); await load(); onChanged(); }}
+        />
+      )}
+
       {requestRow && (
         <RequestModal key={requestRow.id} row={requestRow} queueId={queueId}
           onClose={() => setRequestRow(null)}
@@ -145,6 +164,16 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
     </div>
   );
 }
+
+// 팝업 편집 필드 (요청 24) — PUT /api/tax/ppn-faktur-monthly (camelCase, PPN 재계산)
+const PPN_FIELDS: FieldDef[] = [
+  { key: 'fakturNumber', label: 'faktur 번호', type: 'text' },
+  { key: 'fakturDate', label: 'faktur 일자', type: 'date' },
+  { key: 'counterpartyName', label: '거래처명', type: 'text' },
+  { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text' },
+  { key: 'dpp', label: 'DPP (PPN 자동 재계산)', type: 'number' },
+  { key: 'ppn', label: 'PPN (직접 수정 시 우선)', type: 'number' },
+];
 
 function RequestModal({ row, queueId, onClose, onSent }:
   { row: PpnRow; queueId: string; onClose: () => void; onSent: () => void }) {

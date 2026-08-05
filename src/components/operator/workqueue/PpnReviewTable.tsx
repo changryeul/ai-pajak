@@ -25,9 +25,10 @@ function reconBadge(status: string | null): [string, string] {
 interface Props {
   rows: PpnRow[];
   onRequest: (row: PpnRow) => void;
+  onOpenDetail?: (row: PpnRow) => void; // 더블클릭 상세 팝업 (요청 24)
 }
 
-export function PpnReviewTable({ rows, onRequest }: Props) {
+export function PpnReviewTable({ rows, onRequest, onOpenDetail }: Props) {
   return (
     <div className={styles.tbl}>
       <table>
@@ -40,7 +41,7 @@ export function PpnReviewTable({ rows, onRequest }: Props) {
           {rows.map(r => {
             const [reconText, reconCls] = reconBadge(r.reconStatus);
             return (
-              <tr key={r.id}>
+              <tr key={r.id} onDoubleClick={() => onOpenDetail?.(r)} title="더블클릭: 상세 수정" style={{ cursor: onOpenDetail ? 'pointer' : undefined }}>
                 <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
                 <td>{dirText(r.fakturType)}</td>
                 <td className={styles.name}><b>{r.fakturNumber ?? '번호 없음'}</b><span>{r.fakturDate ?? ''}</span></td>

@@ -6,6 +6,7 @@ import { WithholdingReviewTable } from './WithholdingReviewTable';
 import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { WithholdingDetail, WithholdingRow } from './types';
+import { RowDetailModal, type FieldDef } from './RowDetailModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 
@@ -16,6 +17,7 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
   const [regime, setRegime] = useState<'' | 'PPH23' | 'PPH4_2'>('');
   const [statusF, setStatusF] = useState<'' | 'red' | 'green'>('');
   const [requestRow, setRequestRow] = useState<WithholdingRow | null>(null);
+  const [detailRow, setDetailRow] = useState<WithholdingRow | null>(null); // 더블클릭 상세 (요청 15)
   const [photo, setPhoto] = useState<{ url: string; isPdf: boolean } | null>(null);
 
   const load = useCallback(async () => {
@@ -81,8 +83,26 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
           </div>
         </div>
 
-        <WithholdingReviewTable rows={rows} onRequest={setRequestRow} onViewPhoto={viewPhoto} />
+        <WithholdingReviewTable rows={rows} onRequest={setRequestRow} onViewPhoto={viewPhoto} onOpenDetail={setDetailRow} />
       </div>
+
+      {detailRow && (
+        <RowDetailModal
+          title={`원천세 거래 상세: ${detailRow.counterpartyName}`}
+          subtitle={`${detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23'} · 세율 ${(detailRow.taxRate * 100).toFixed(1)}% · 세액 자동 재계산`}
+          rowId={detailRow.id}
+          queueId={queueId}
+          putUrl="/api/tax/pph23-transactions"
+          putExtra={{ serviceType: detailRow.serviceType ?? undefined, counterpartyNpwp: detailRow.counterpartyNpwp ?? undefined }}
+          fields={WHT_FIELDS}
+          values={detailRow as unknown as Record<string, unknown>}
+          operatorEdits={detailRow.operatorEdits}
+          reviewedAt={detailRow.reviewedAt}
+          aiNote={{ label: detailRow.flags.label, issues: detailRow.flags.issues }}
+          onClose={() => setDetailRow(null)}
+          onSaved={async () => { setDetailRow(null); await load(); onChanged(); }}
+        />
+      )}
 
       {requestRow && (
         <RequestModal key={requestRow.id} row={requestRow} queueId={queueId}
@@ -106,6 +126,17 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
     </div>
   );
 }
+
+// 팝업 편집 필드 (요청 15) — PUT /api/tax/pph23-transactions (camelCase, 세액 재계산 포함)
+const WHT_FIELDS: FieldDef[] = [
+  { key: 'counterpartyName', label: '거래처명', type: 'text' },
+  { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text' },
+  { key: 'description', label: '거래 내용', type: 'text' },
+  { key: 'invoiceNumber', label: '인보이스 번호', type: 'text' },
+  { key: 'transactionDate', label: '거래일', type: 'date' },
+  { key: 'grossAmount', label: '총 지급액 (세액 자동 재계산)', type: 'number' },
+  { key: 'taxAmount', label: '세액 (자동계산)', type: 'number', readOnly: true },
+];
 
 function RequestModal({ row, queueId, onClose, onSent }:
   { row: WithholdingRow; queueId: string; onClose: () => void; onSent: () => void }) {

@@ -10,9 +10,10 @@ interface Props {
   rows: WithholdingRow[];
   onRequest: (row: WithholdingRow) => void;
   onViewPhoto: (row: WithholdingRow) => void;
+  onOpenDetail?: (row: WithholdingRow) => void; // 더블클릭 상세 팝업 (요청 15)
 }
 
-export function WithholdingReviewTable({ rows, onRequest, onViewPhoto }: Props) {
+export function WithholdingReviewTable({ rows, onRequest, onViewPhoto, onOpenDetail }: Props) {
   return (
     <div className={styles.tbl}>
       <table>
@@ -23,7 +24,7 @@ export function WithholdingReviewTable({ rows, onRequest, onViewPhoto }: Props) 
         </tr></thead>
         <tbody>
           {rows.map(r => (
-            <tr key={r.id}>
+            <tr key={r.id} onDoubleClick={() => onOpenDetail?.(r)} title="더블클릭: 상세 수정" style={{ cursor: onOpenDetail ? 'pointer' : undefined }}>
               <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
               <td className={styles.name}><b>{r.counterpartyName}</b><span>{r.incomeType}</span></td>
               <td>{r.counterpartyNpwp ?? 'NPWP 없음'}</td>
