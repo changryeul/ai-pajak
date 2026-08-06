@@ -57,8 +57,39 @@ export function CustomerInboxClient() {
   // Phase 2.4: snippet templates (managed by MASTER at
   // /admin/master/customer-ai-templates). One-shot fetch on mount.
   const [templates, setTemplates] = useState<CustomerAiTemplateDTO[]>([]);
+  // 수정요청 12번 (2026-08-06): 우측 pane = 상담원↔수퍼바이저의 '고객별' 지시 이력.
+  // operator_message INTERNAL 채널 재사용 — 고객 컨텍스트 없이는 입력 자체가 불가
+  // (고객 무관 잡담은 개인 메신저로).
+  const [internalNotes, setInternalNotes] = useState<Array<{
+    id: string; sender_role: string; body: string; created_at: string;
+  }>>([]);
+  const [noteInput, setNoteInput] = useState('');
+  const [noteSending, setNoteSending] = useState(false);
 
   const selectedThread = threads.find((th) => th.id === selectedId) ?? null;
+
+  const fetchInternalNotes = useCallback(async (customerId: string) => {
+    const r = await fetch(`/api/operator/messages?customerId=${customerId}&channel=INTERNAL&limit=50`);
+    if (r.ok) {
+      const j = await r.json();
+      setInternalNotes(j.data?.messages ?? []);
+    }
+  }, []);
+
+  const sendInternalNote = async () => {
+    if (!selectedThread || !noteInput.trim() || noteSending) return;
+    setNoteSending(true);
+    try {
+      const r = await fetch('/api/operator/messages', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: selectedThread.customerId, channel: 'INTERNAL', body: noteInput.trim() }),
+      });
+      if (r.ok) {
+        setNoteInput('');
+        await fetchInternalNotes(selectedThread.customerId);
+      }
+    } finally { setNoteSending(false); }
+  };
 
   const fetchThreads = useCallback(async () => {
     const r = await fetch('/api/operator/customer-inbox/threads');
@@ -141,8 +172,14 @@ export function CustomerInboxClient() {
     } else {
       setMessages([]);
       setDrafts([]);
+      setInternalNotes([]);
     }
   }, [selectedId, fetchMessages, loadDrafts]);
+
+  // 12번 — 선택 고객의 내부 지시 이력 로드
+  useEffect(() => {
+    if (selectedThread) void fetchInternalNotes(selectedThread.customerId);
+  }, [selectedThread, fetchInternalNotes]);
 
   // polling messages of selected thread
   useEffect(() => {
@@ -536,26 +573,49 @@ export function CustomerInboxClient() {
         ) : (
           <>
             <section>
-              <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">{t('customerInfoHeader')}</h2>
-              <p className="text-sm font-semibold text-slate-900">{selectedThread.customerName}</p>
-              <p className="text-[10px] font-mono text-slate-400 mt-0.5">{selectedThread.customerId.slice(0, 13)}…</p>
+              <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">{selectedThread.customerName}</h2>
+              <p className="text-[10px] text-slate-400">{selectedThread.contextKind} · {selectedThread.contextPeriod} · {selectedThread.status}</p>
             </section>
-            <section>
-              <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">{t('metadataHeader')}</h2>
-              <dl className="space-y-1.5 text-xs">
-                <div className="flex justify-between"><dt className="text-slate-500">Kind</dt><dd className="font-bold">{selectedThread.contextKind}</dd></div>
-                <div className="flex justify-between"><dt className="text-slate-500">Period</dt><dd className="font-mono">{selectedThread.contextPeriod}</dd></div>
-                <div className="flex justify-between">
-                  <dt className="text-slate-500">Status</dt>
-                  <dd>
-                    <span className={`inline-block rounded-full border px-1.5 py-0.5 text-[9px] font-bold ${statusTone(selectedThread.status)}`}>
-                      {selectedThread.status}
-                    </span>
-                  </dd>
-                </div>
-                <div className="flex justify-between"><dt className="text-slate-500">Unread (me)</dt><dd>{selectedThread.operatorUnreadCount}</dd></div>
-                <div className="flex justify-between"><dt className="text-slate-500">Unread (cust)</dt><dd>{selectedThread.customerUnreadCount}</dd></div>
-              </dl>
+
+            {/* 수정요청 12번 — 이 고객에 대한 상담원↔수퍼바이저 지시/의견 이력.
+                고객과 무관한 대화는 이 창에서 불가 (고객 선택이 전제). */}
+            <section className="flex-1 min-h-0 flex flex-col">
+              <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">상담 지시 이력 (상담원 ↔ 수퍼바이저)</h2>
+              <div className="flex-1 min-h-[140px] overflow-y-auto space-y-2 pr-1">
+                {internalNotes.length === 0 && (
+                  <p className="text-[11px] text-slate-400">이 고객에 대한 내부 지시/의견이 아직 없습니다.</p>
+                )}
+                {internalNotes.map((n) => {
+                  const isSup = n.sender_role === 'SUPERVISOR';
+                  return (
+                    <div key={n.id} className={`rounded-xl border px-2.5 py-1.5 text-xs ${isSup ? 'border-orange-200 bg-orange-50' : 'border-violet-200 bg-violet-50'}`}>
+                      <div className="flex justify-between items-center mb-0.5">
+                        <b className={isSup ? 'text-orange-700' : 'text-violet-700'}>{isSup ? '수퍼바이저' : '상담원'}</b>
+                        <span className="text-[9px] text-slate-400">{formatTs(n.created_at)}</span>
+                      </div>
+                      <p className="whitespace-pre-wrap text-slate-700">{n.body}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-2 flex gap-1.5">
+                <input
+                  value={noteInput}
+                  onChange={(e) => setNoteInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) void sendInternalNote(); }}
+                  placeholder="이 고객 관련 지시/의견 기록…"
+                  className="flex-1 min-w-0 rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => void sendInternalNote()}
+                  disabled={noteSending || !noteInput.trim()}
+                  className="rounded-xl bg-slate-800 text-white px-2.5 disabled:opacity-40"
+                  aria-label="지시 기록"
+                >
+                  {noteSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                </button>
+              </div>
             </section>
             {/* SPT Masa quick-create — pendingRequests 기반. 한 thread 에 PPh23 +
                 PPh42 등 여러 type 이 동시에 PENDING 이면 각각 별도 버튼. */}

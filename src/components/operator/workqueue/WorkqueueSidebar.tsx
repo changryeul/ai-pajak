@@ -39,6 +39,11 @@ export function WorkqueueSidebar({ counts, statusFilter, onStatusFilter }: Props
         <span className={styles.ico} aria-hidden="true">🧾</span>
         <span className={styles.lbl}>ID Billing 발행</span>
       </a>
+      {/* 수정요청 12번 — 하단 플로팅 '고객 인박스 열기' 대신 사이드 메뉴로 */}
+      <a className={styles.nav} href="../customer-inbox" title="고객 인박스">
+        <span className={styles.ico} aria-hidden="true">💬</span>
+        <span className={styles.lbl}>고객 인박스</span>
+      </a>
     </aside>
   );
 }

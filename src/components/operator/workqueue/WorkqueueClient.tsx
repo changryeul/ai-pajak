@@ -11,7 +11,6 @@ import { PpnReviewPanel } from './PpnReviewPanel';
 import { UmkmReviewPanel } from './UmkmReviewPanel';
 import { AnnualReviewPanel } from './AnnualReviewPanel';
 import { EmployeeHrPanel } from './EmployeeHrPanel';
-import { RequestDrawer } from './RequestDrawer';
 import { STATUS_LABEL_MAP, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
 
 // taxView → 우측 상세 패널. 새 세목 추가 시 여기에 한 줄만 등록.
@@ -165,7 +164,6 @@ export function WorkqueueClient({ role }: { role?: string }) {
           </section>
         </main>
       </div>
-      <RequestDrawer />
     </div>
   );
 }
