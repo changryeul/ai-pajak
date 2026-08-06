@@ -23,7 +23,7 @@ mkdirSync(SHOTS, { recursive: true });
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-const CID = '00000000-0000-0000-0000-000000000011';
+const CID = '00000000-0000-4000-8000-000000000011';
 const PERIOD = '2026-09';
 const NTPN = 'REHRSL1234567890';
 const friction: string[] = [];

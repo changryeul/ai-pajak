@@ -1,7 +1,7 @@
 /**
  * End-to-end trend verification on prod with seed-then-cleanup:
  *  1. Seed 2 MONTHLY consultant_session rows (current month + previous month)
- *     for PT Example Indonesia (00000000-0000-0000-0000-000000000011)
+ *     for PT Example Indonesia (00000000-0000-4000-8000-000000000011)
  *  2. Seed one consultant_session_calc per session
  *  3. GET /supervisor/approval/:sessionId
  *  4. Assert trend.length=6, last 2 periods have totalCalc > 0, others 0
@@ -18,7 +18,7 @@ const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const base = process.env.E2E_BASE_URL || 'https://ai-pajak.vercel.app';
 
-const CUSTOMER_ID = '00000000-0000-0000-0000-000000000011'; // PT Example Indonesia
+const CUSTOMER_ID = '00000000-0000-4000-8000-000000000011'; // PT Example Indonesia
 const CONSULTANT_ID = '00000000-0000-0000-0000-000000000041';
 const TAX_PARTNER_ID = '00000000-0000-0000-0000-000000000040';
 

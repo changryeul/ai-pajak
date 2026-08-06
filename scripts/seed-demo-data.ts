@@ -35,9 +35,9 @@ const PLATFORM_ID = '00000000-0000-0000-0000-000000000002';
 // Fixed UUIDs for idempotent upserts
 const DEMO_PARTNER_ID    = '00000000-0000-0000-0000-d00000000001';
 const DEMO_CONSULTANT_ID = '00000000-0000-0000-0000-d00000000002';
-const DEMO_CUSTOMER_1_ID = '00000000-0000-0000-0000-d00000000010'; // PT Maju Jaya
-const DEMO_CUSTOMER_2_ID = '00000000-0000-0000-0000-d00000000011'; // CV Berkah Sentosa
-const DEMO_CUSTOMER_3_ID = '00000000-0000-0000-0000-d00000000012'; // Budi Santoso
+const DEMO_CUSTOMER_1_ID = '00000000-0000-4000-8000-d00000000010'; // PT Maju Jaya
+const DEMO_CUSTOMER_2_ID = '00000000-0000-4000-8000-d00000000011'; // CV Berkah Sentosa
+const DEMO_CUSTOMER_3_ID = '00000000-0000-4000-8000-d00000000012'; // Budi Santoso
 
 async function findOrCreateUser(email: string, fullName: string, role: string) {
   // Try to create; if exists, sign in to get user_id

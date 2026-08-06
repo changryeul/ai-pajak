@@ -200,7 +200,7 @@ test.describe('Firm Admin — write contracts', () => {
     await loginAs(page, 'FIRM_ADMIN');
     const res = await page.request.post(`${BASE_URL}/api/firm-admin/clients`, {
       data: {
-        customerId: '00000000-0000-0000-0000-000000000042',
+        customerId: '00000000-0000-4000-8000-000000000042',
         consultantId: '00000000-0000-0000-0000-00000000dead',
       },
     });

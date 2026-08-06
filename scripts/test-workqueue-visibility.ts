@@ -35,7 +35,7 @@ console.log(`🌐 ${baseUrl}\n`);
 
 const PASSWORD = 'TestPassword123!';
 const SENTINEL = '[WQVIS-E2E]';
-const CUSTOMER_ID = '00000000-0000-0000-0000-000000000011'; // company.test
+const CUSTOMER_ID = '00000000-0000-4000-8000-000000000011'; // company.test
 const PERIOD = '2027-01';
 const P_MONTH = 1;
 const P_YEAR = 2027;

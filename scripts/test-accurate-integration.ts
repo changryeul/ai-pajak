@@ -34,7 +34,7 @@ console.log(`🌐 ${baseUrl}\n`);
 const PASSWORD = 'TestPassword123!';
 const admin = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
-const COMPANY_CUSTOMER_ID = '00000000-0000-0000-0000-000000000011';
+const COMPANY_CUSTOMER_ID = '00000000-0000-4000-8000-000000000011';
 
 async function login(email: string): Promise<string | null> {
   const c = createClient(url, anonKey, { auth: { autoRefreshToken: false, persistSession: false } });

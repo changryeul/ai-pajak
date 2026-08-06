@@ -234,7 +234,7 @@ async function createTestData() {
   }
 
   // Create COMPANY customer record (법인 고객 테스트용)
-  const companyCustomerId = '00000000-0000-0000-0000-000000000011';
+  const companyCustomerId = '00000000-0000-4000-8000-000000000011';
   const { error: companyError } = await supabase.from('customer').upsert({
     id: companyCustomerId,
     user_id: companyUser.id,

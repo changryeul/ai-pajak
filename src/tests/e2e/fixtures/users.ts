@@ -177,7 +177,7 @@ export const TEST_USERS = {
     role: 'CUSTOMER',
     customerType: 'COMPANY' as const,
     fullName: 'PT Example Indonesia',
-    customerId: '00000000-0000-0000-0000-000000000011',
+    customerId: '00000000-0000-4000-8000-000000000011',
     npwp: '0123456789012000',
   },
 

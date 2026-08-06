@@ -30,7 +30,7 @@ const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const CUSTOMER_EMAIL = 'company.test@example.com';
 const OPERATOR_EMAIL = 'operator.test@aipajak.com';
 const TEST_PASSWORD = 'TestPassword123!';
-const CUSTOMER_ID = '00000000-0000-0000-0000-000000000011';
+const CUSTOMER_ID = '00000000-0000-4000-8000-000000000011';
 const PERIOD = '2099-06';
 const PERIOD_2 = '2099-07';
 

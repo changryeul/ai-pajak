@@ -23,7 +23,7 @@ loadEnv({ path: envFile });
 
 const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-const COMPANY_ID = '00000000-0000-0000-0000-000000000011';
+const COMPANY_ID = '00000000-0000-4000-8000-000000000011';
 const INDIVIDUAL_ID = '880308b0-a346-442a-9ee4-ec347034a6b2';
 const PERIOD = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; })();
 const CLEANUP_ONLY = process.argv.includes('--cleanup');

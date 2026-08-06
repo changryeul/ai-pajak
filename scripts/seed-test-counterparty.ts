@@ -11,7 +11,7 @@ const supabase = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } },
 );
 
-const CUSTOMER_ID = '00000000-0000-0000-0000-000000000011';
+const CUSTOMER_ID = '00000000-0000-4000-8000-000000000011';
 
 async function main() {
   const counterparties = [

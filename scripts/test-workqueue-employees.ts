@@ -24,7 +24,7 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 console.log(`🌐 ${baseUrl}\n`);
 
 const PASSWORD = 'TestPassword123!';
-const CUSTOMER_ID = '00000000-0000-0000-0000-000000000011'; // company.test
+const CUSTOMER_ID = '00000000-0000-4000-8000-000000000011'; // company.test
 const SENTINEL = '[WQ-EMP-E2E]';
 const S_MONTH = 11;
 const S_YEAR = 2099;
