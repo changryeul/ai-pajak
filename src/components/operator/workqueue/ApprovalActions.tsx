@@ -20,6 +20,7 @@ export function ApprovalActions({ queueId, hasIssues = false, onChanged }:
   const [rejecting, setRejecting] = useState(false);
   const [reassigning, setReassigning] = useState(false);
   const [requesting, setRequesting] = useState(false); // 승인요청 코멘트 모달 (요청 9·17)
+  const [excepting, setExcepting] = useState(false);    // 예외 발행 사유 모달 (요청 26)
 
   const load = useCallback(async () => {
     try {
@@ -61,8 +62,32 @@ export function ApprovalActions({ queueId, hasIssues = false, onChanged }:
     } finally { setBusy(false); }
   };
 
+  // 수정요청 26 — 승인 없이 예외 발행. 워크큐 큐 = OPERATOR_QUEUE, sourceId = queueId.
+  const doExceptionIssue = async (reason: string) => {
+    setExcepting(false);
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await fetch('/api/id-billing/issue', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceKind: 'OPERATOR_QUEUE', sourceId: queueId, exception: true, exceptionReason: reason }),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+        setError((j as { error?: string }).error || `예외 발행 실패 (${r.status})`);
+        return;
+      }
+      await load();
+      onChanged();
+    } catch {
+      setError('네트워크 오류 — 다시 시도해주세요.');
+    } finally { setBusy(false); }
+  };
+
   if (!state) return null;
   const { status, rejectedReason, canApprove, requestNote } = state;
+  // 아직 발행되지 않은(승인 전/승인대기) 상태에서만 예외 발행 노출.
+  const canException = ['PENDING', 'PENDING_DOCS', 'DATA_REVIEW', 'PENDING_APPROVAL'].includes(status);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
@@ -101,6 +126,12 @@ export function ApprovalActions({ queueId, hasIssues = false, onChanged }:
         {canApprove && status !== 'APPROVED' && (
           <button className={styles.btn} disabled={busy} onClick={() => setReassigning(true)}>재배정</button>
         )}
+
+        {/* 수정요청 26 — 승인 없이 예외 발행 (사유 필수 + 감사 + 수퍼바이저 통지) */}
+        {canException && (
+          <button className={`${styles.btn} ${styles.amber}`} disabled={busy}
+            onClick={() => setExcepting(true)} title="수퍼바이저 승인 없이 발행 (사유 기록·통지)">예외 발행</button>
+        )}
       </div>
 
       {/* 수정요청 29·32·35 — 승인요청도 고객요청과 동일한 WhatsApp 스타일 모달 */}
@@ -122,6 +153,13 @@ export function ApprovalActions({ queueId, hasIssues = false, onChanged }:
         <RejectModal
           onClose={() => setRejecting(false)}
           onSubmit={async (reason) => { setRejecting(false); await act('reject', { rejectedReason: reason }); }}
+        />
+      )}
+
+      {excepting && (
+        <ExceptionIssueModal
+          onClose={() => setExcepting(false)}
+          onSubmit={doExceptionIssue}
         />
       )}
 
@@ -176,6 +214,37 @@ function ReassignModal({ onClose, onSubmit }:
           <button className={styles.btn} onClick={onClose}>취소</button>
           <button className={`${styles.btn} ${styles.blue}`} disabled={!target || !reason.trim()}
             onClick={() => onSubmit(target, reason.trim())}>재배정</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 수정요청 26 — 예외 발행 사유 모달. 사유는 감사기록·수퍼바이저 통지에 각인.
+function ExceptionIssueModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: string) => void }) {
+  const [reason, setReason] = useState('');
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <h2>승인 없이 예외 발행</h2>
+        <div className={styles.blocked} style={{ marginBottom: 10 }}>
+          수퍼바이저 승인 없이 ID Billing 을 발행합니다. 사유가 기록되고 수퍼바이저에게 통지됩니다.
+        </div>
+        <div className={styles.mb}>
+          <label>예외 발행 사유 (필수, 5자 이상)
+            <textarea value={reason} onChange={e => setReason(e.target.value)}
+              placeholder="예: 고객 마감 임박 요청 — 담당 수퍼바이저 부재로 선발행 후 사후 보고." />
+          </label>
+        </div>
+        <div className={styles.mf}>
+          <button className={styles.btn} onClick={onClose}>취소</button>
+          <button className={`${styles.btn} ${styles.amber}`} disabled={reason.trim().length < 5}
+            onClick={() => onSubmit(reason.trim())}>예외 발행</button>
         </div>
       </div>
     </div>

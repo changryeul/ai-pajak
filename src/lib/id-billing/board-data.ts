@@ -66,6 +66,8 @@ export interface BillingTarget {
   totalAmount: number;
   workbookGeneratedAt: string | null;
   canIssue: boolean;
+  isException?: boolean;      // 수정요청 #26 — 승인 전 예외 발행 대상
+  sourceStatus?: string;      // 예외 대상의 원 소스 상태 (감사/표시용)
 }
 
 export interface IssuedRow {
@@ -232,6 +234,62 @@ export async function buildBillingBoard(
   }));
 
   return { targets, issued };
+}
+
+/**
+ * 예외 발행 대상 (수정요청 #26) — 워크큐 큐 항목 하나를 상태와 무관하게(승인 전 포함)
+ * 발행 대상으로 해석한다. 정상 발행보드(buildBillingBoard)는 APPROVED 만 노출하지만,
+ * 예외 경로는 상담원이 이미 특정 (고객, 세목, 기간) 큐를 보고 판단하므로 그 큐를 직접 조회.
+ *
+ * 게이트: 미발행(중복 방지) + 세액>0. 작성본(workbook) 이력은 요구하지 않는다
+ * (예외 발행의 취지 = 승인·준비 절차 우회). null = 발행 불가(없음/이미 발행/세액 0/스코프 밖).
+ */
+export async function buildExceptionQueueTarget(
+  admin: SupabaseClient,
+  scope: IssuerScope,
+  queueId: string,
+): Promise<BillingTarget | null> {
+  if (!scope.isOperator) return null; // 큐 발행은 JTC 운영팀 스코프 전용
+
+  const { data: alreadyIssued } = await admin
+    .from('id_billing_issuance')
+    .select('id')
+    .eq('queue_item_id', queueId)
+    .limit(1);
+  if ((alreadyIssued ?? []).length > 0) return null;
+
+  const { data: q } = await admin
+    .from('djp_submission_queue')
+    .select('id, customer_id, tax_type, tax_period_month, tax_period_year, amount, status')
+    .eq('id', queueId)
+    .maybeSingle();
+  if (!q) return null;
+
+  const amount = Number(q.amount ?? 0);
+  if (amount <= 0) return null;
+
+  const { data: c } = await admin
+    .from('customer')
+    .select('id, full_name, company_name, npwp, email')
+    .eq('id', q.customer_id)
+    .maybeSingle();
+  if (!c) return null;
+
+  const codes = kapKjsForTaxType(q.tax_type);
+  return {
+    sourceKind: 'OPERATOR_QUEUE',
+    sourceId: q.id,
+    customer: { id: c.id, name: c.company_name || c.full_name || '—', npwp: c.npwp, email: c.email },
+    items: [{
+      taxType: q.tax_type, period: period(q.tax_period_year, q.tax_period_month),
+      kap: codes.kap, kjs: codes.kjs, taxBase: null, rateLabel: '—', amount,
+    }],
+    totalAmount: amount,
+    workbookGeneratedAt: null,
+    canIssue: true,
+    isException: true,
+    sourceStatus: q.status,
+  };
 }
 
 /** BIL-YYYYMM-NNN 일련번호 — 파트너별 당월 카운트 기반. */
