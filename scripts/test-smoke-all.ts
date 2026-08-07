@@ -65,6 +65,8 @@ const STEPS: Step[] = [
   { name: 'signup → auto-assignment golden path', file: 'test-signup-auto-assign.ts', optional: true },
   // v19 트랙 2 — ID Billing 발행 보드 (승인 게이트 + 작성본 xlsx + tenant 분리)
   { name: 'id-billing issuance board flow', file: 'test-id-billing-flow.ts' },
+  // 수정요청 #26 — 승인 없이 예외 발행 (워크큐 트리거, 게이트 우회 + 각인 + 큐 전이)
+  { name: 'id-billing exception issuance (#26, 9 asserts)', file: 'test-id-billing-exception.ts' },
   // v13 트랙 3 — 승인대기 리모델 (4-값 분리 + 검토요청 게이트 + 승인값 스탬프)
   { name: 'approval remodel (4-value + review requests)', file: 'test-approval-remodel.ts' },
   // v13 트랙 4 — 자동배정 엔진 (스코어 배정 + 감사 + overflow fallback)
