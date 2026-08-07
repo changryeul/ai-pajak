@@ -113,7 +113,13 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
       {detailRow && (
         <RowDetailModal
           title={`직원 상세: ${detailRow.name}`}
-          subtitle={`${detail.period} 귀속 · PTKP ${detailRow.ptkp} · TER ${detailRow.terCategory} · PPh21 ${rp(detailRow.pph21)}`}
+          subtitle={`${detail.period} 귀속 · PTKP ${detailRow.ptkp} · TER ${detailRow.terCategory}`}
+          summary={[
+            { label: '총 지급', value: rp(detailRow.totalGross) },
+            { label: 'PPh 21', value: rp(detailRow.pph21) },
+            { label: 'PTKP', value: String(detailRow.ptkp) },
+            { label: 'TER 구간', value: String(detailRow.terCategory) },
+          ]}
           rowId={detailRow.payslipId}
           queueId={queueId}
           putUrl="/api/tax/monthly-payslip"

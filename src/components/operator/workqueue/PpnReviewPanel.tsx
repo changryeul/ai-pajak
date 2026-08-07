@@ -144,7 +144,13 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
       {detailRow && (
         <RowDetailModal
           title={`faktur 상세: ${detailRow.fakturNumber ?? detailRow.counterpartyName}`}
-          subtitle={`${detailRow.fakturType === 'MASUKAN' ? '매입' : '매출'} · ${detailRow.isLuxury ? '사치품 12%' : '일반 11%'} · DPP 수정 시 PPN 자동 재계산`}
+          subtitle={`${detailRow.fakturType === 'MASUKAN' ? '매입' : '매출'} · DPP 수정 시 PPN 자동 재계산`}
+          summary={[
+            { label: 'DPP', value: rp(detailRow.dpp) },
+            { label: 'PPN', value: rp(detailRow.ppn) },
+            { label: '구분', value: detailRow.fakturType === 'MASUKAN' ? '매입' : '매출' },
+            { label: '요율', value: detailRow.isLuxury ? '사치품 12%' : '일반 11%' },
+          ]}
           rowId={detailRow.id}
           queueId={queueId}
           putUrl="/api/tax/ppn-faktur-monthly"

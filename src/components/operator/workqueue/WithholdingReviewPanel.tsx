@@ -91,7 +91,13 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
       {detailRow && (
         <RowDetailModal
           title={`원천세 거래 상세: ${detailRow.counterpartyName}`}
-          subtitle={`${detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23'} · 세율 ${(detailRow.taxRate * 100).toFixed(1)}% · 세액 자동 재계산`}
+          subtitle={`${detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23'} · 세액 자동 재계산`}
+          summary={[
+            { label: '총 지급액', value: rp(detailRow.grossAmount) },
+            { label: '세액', value: rp(detailRow.taxAmount) },
+            { label: '세율', value: `${(detailRow.taxRate * 100).toFixed(1)}%` },
+            { label: '거래처 NPWP', value: detailRow.counterpartyNpwp || '—' },
+          ]}
           rowId={detailRow.id}
           queueId={queueId}
           putUrl="/api/tax/pph23-transactions"

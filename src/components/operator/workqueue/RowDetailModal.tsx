@@ -22,6 +22,9 @@ export interface FieldDef {
 interface Props {
   title: string;
   subtitle?: string;
+  // 읽기 요약 (수정요청 31·34·37): 고객이 보는 핵심 값들을 편집 그리드 위에
+  // 강조 카드로 먼저 보여준다. label/value 쌍, value 는 이미 포맷된 문자열.
+  summary?: Array<{ label: string; value: string }>;
   rowId: string;
   queueId: string;
   putUrl: string;                       // 저장용 기존 PUT 엔드포인트
@@ -36,7 +39,7 @@ interface Props {
 }
 
 export function RowDetailModal({
-  title, subtitle, rowId, queueId, putUrl, putExtra, fields, values,
+  title, subtitle, summary, rowId, queueId, putUrl, putExtra, fields, values,
   operatorEdits, reviewedAt, aiNote, onClose, onSaved,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, string>>(() => {
@@ -111,6 +114,17 @@ export function RowDetailModal({
         {subtitle && <p className={styles.modalSub}>{subtitle}</p>}
         {reviewedAt && <div className={styles.reviewedNote}>✅ 확인 완료 ({new Date(reviewedAt).toLocaleString('ko-KR')}) — 다시 저장하면 갱신됩니다.</div>}
 
+        {summary && summary.length > 0 && (
+          <div className={styles.detailSummary}>
+            {summary.map((s, i) => (
+              <div key={i} className={styles.detailSummaryItem}>
+                <small>{s.label}</small><b>{s.value}</b>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className={styles.editGridLabel}>제출 자료 수정</div>
         <div className={styles.fieldGrid}>
           {fields.map(f => (
             <label key={f.key} className={styles.fieldItem}>
