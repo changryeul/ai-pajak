@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import styles from './workqueue.module.css';
+import { RequestChatModal } from './RequestChatModal';
 
 interface ApprovalState {
   status: string;
@@ -10,7 +11,9 @@ interface ApprovalState {
   requestNote?: string | null;
 }
 
-export function ApprovalActions({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
+// hasIssues (수정요청 30·33·36): 리스트에 이슈(red) 행이 있으면 승인요청을 막는다.
+export function ApprovalActions({ queueId, hasIssues = false, onChanged }:
+  { queueId: string; hasIssues?: boolean; onChanged: () => void }) {
   const [state, setState] = useState<ApprovalState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +93,9 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
         )}
 
         {(status === 'PENDING' || status === 'DATA_REVIEW' || status === 'PENDING_DOCS') && (
-          <button className={`${styles.btn} ${styles.purple}`} disabled={busy} onClick={() => setRequesting(true)}>승인요청</button>
+          hasIssues
+            ? <span className={`${styles.badge} ${styles.red}`} title="이슈 항목을 먼저 처리한 뒤 승인요청할 수 있습니다">⚠️ 이슈 처리 후 승인요청</span>
+            : <button className={`${styles.btn} ${styles.purple}`} disabled={busy} onClick={() => setRequesting(true)}>승인요청</button>
         )}
 
         {canApprove && status !== 'APPROVED' && (
@@ -98,10 +103,15 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
         )}
       </div>
 
+      {/* 수정요청 29·32·35 — 승인요청도 고객요청과 동일한 WhatsApp 스타일 모달 */}
       {requesting && (
-        <RequestApprovalModal
+        <RequestChatModal
+          toLabel="수퍼바이저"
+          subtitle="승인요청 메시지가 수퍼바이저 승인 화면에 표시됩니다"
+          contextLabel="수퍼바이저에게 승인요청"
+          defaultMessage="검토를 완료했습니다. 승인 부탁드립니다."
           onClose={() => setRequesting(false)}
-          onSubmit={async (note) => {
+          onSend={async (note) => {
             setRequesting(false);
             await act('request-approval', note ? { notes: note } : undefined);
           }}
@@ -124,32 +134,6 @@ export function ApprovalActions({ queueId, onChanged }: { queueId: string; onCha
           }}
         />
       )}
-    </div>
-  );
-}
-
-function RequestApprovalModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (note: string) => void }) {
-  const [note, setNote] = useState('');
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-  return (
-    <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>수퍼바이저에게 승인요청</h2>
-        <div className={styles.mb}>
-          <label>요청 내용 (선택)
-            <textarea value={note} onChange={e => setNote(e.target.value)}
-              placeholder="예: 8월 급여 검토 완료했습니다. TER 재계산 2건 반영 — 승인 부탁드립니다." />
-          </label>
-        </div>
-        <div className={styles.mf}>
-          <button className={styles.btn} onClick={onClose}>취소</button>
-          <button className={`${styles.btn} ${styles.purple}`} onClick={() => onSubmit(note.trim())}>승인요청 보내기</button>
-        </div>
-      </div>
     </div>
   );
 }

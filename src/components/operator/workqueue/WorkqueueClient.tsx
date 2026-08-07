@@ -28,14 +28,23 @@ const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padSta
 
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
-// 상단 가로 세목 탭 (수정요청 4번). '직원 인사 기록'은 메뉴에서 제외(5번) —
-// PANEL_BY_VIEW/API 는 유지하므로 후속(개인소득세 팝업 등)에서 재사용 가능.
-const TAX_TABS: Array<{ key: TaxView; label: string }> = [
-  { key: 'pph21', label: '개인소득세' },
-  { key: 'withholding', label: '원천세' },
-  { key: 'umkm', label: '선납법인세' },
-  { key: 'ppn', label: '부가세' },
-  { key: 'annual', label: '연 신고' },
+// 세목 탭 (수정요청 4번 → 27번: 사이드바로 이동). '직원 인사 기록'은 메뉴에서
+// 제외(5번) — PANEL_BY_VIEW/API 는 유지하므로 후속(개인소득세 팝업 등)에서 재사용.
+const TAX_TABS: Array<{ key: TaxView; label: string; icon: string }> = [
+  { key: 'pph21', label: '개인소득세', icon: '🧑‍💼' },
+  { key: 'withholding', label: '원천세', icon: '✂️' },
+  { key: 'umkm', label: '선납법인세', icon: '🏢' },
+  { key: 'ppn', label: '부가세', icon: '🧾' },
+  { key: 'annual', label: '연 신고', icon: '📅' },
+];
+
+// 상태 필터 (수정요청 27번: 사이드바 → 상단 가로). all 은 key='' (필터 해제).
+const STATUS_TABS: Array<{ key: StatusFilter; icon: string; label: string; cls: string; countKey: 'all' | 'unreviewed' | 'inReview' | 'request' | 'reviewed' }> = [
+  { key: '', icon: '📌', label: '전체', cls: 'blue', countKey: 'all' },
+  { key: 'unreviewed', icon: '🔴', label: '미검토', cls: 'red', countKey: 'unreviewed' },
+  { key: 'inReview', icon: '🟡', label: '검토중', cls: 'amber', countKey: 'inReview' },
+  { key: 'request', icon: '💬', label: '수정작업중', cls: 'red', countKey: 'request' },
+  { key: 'reviewed', icon: '🟢', label: '검토완료', cls: 'green', countKey: 'reviewed' },
 ];
 
 export function WorkqueueClient({ role }: { role?: string }) {
@@ -122,19 +131,21 @@ export function WorkqueueClient({ role }: { role?: string }) {
   return (
     <div className={styles.root}>
       <div className={styles.app}>
-        <WorkqueueSidebar counts={counts} statusFilter={statusFilter} onStatusFilter={setStatusFilter} />
+        <WorkqueueSidebar taxTabs={TAX_TABS} taxView={taxView}
+          onTaxView={(v) => { setSelectedId(null); setTaxView(v); }} />
         <main>
           <div className={styles.top}>
             <div className={styles.role}>
               <button className={`${styles.pill} ${styles.active}`}>{isSupervisor ? '수퍼바이저' : '상담원'}</button>
             </div>
-            {/* 수정요청 4번 — 세목 전환 탭을 상단 가로 배치 */}
-            <div className={styles.taxtabs} role="tablist" aria-label="세목">
-              {TAX_TABS.map(tab => (
-                <button key={tab.key} role="tab" aria-selected={taxView === tab.key}
-                  className={`${styles.pill} ${taxView === tab.key ? styles.active : ''}`}
-                  onClick={() => { setSelectedId(null); setTaxView(tab.key); }}>
-                  {tab.label}
+            {/* 수정요청 27번 — 상태 필터를 상단 가로 배치 (세목 탭은 사이드바로 이동) */}
+            <div className={styles.taxtabs} role="tablist" aria-label="검토 상태">
+              {STATUS_TABS.map(tab => (
+                <button key={tab.key || 'all'} role="tab" aria-selected={statusFilter === tab.key}
+                  className={`${styles.pill} ${statusFilter === tab.key ? styles.active : ''}`}
+                  onClick={() => setStatusFilter(tab.key)}>
+                  <span aria-hidden="true">{tab.icon}</span> {tab.label}
+                  <span className={`${styles.topcnt} ${styles[tab.cls]}`}>{counts[tab.countKey]}</span>
                 </button>
               ))}
             </div>

@@ -86,7 +86,8 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
     <div className={styles.card}>
       <div className={styles.head}>
         <div><h1>{t('ppnTitle')}</h1><p>{detail.period} 귀속분 · 부가세 faktur 검토</p></div>
-        <ApprovalActions queueId={queueId} onChanged={load} />
+        <ApprovalActions queueId={queueId} onChanged={load}
+          hasIssues={(detail.rows ?? []).some(r => r.flags.level === 'red')} />
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>

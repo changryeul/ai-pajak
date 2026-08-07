@@ -75,7 +75,8 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
     <div className={styles.card}>
       <div className={styles.head}>
         <div><h1>{t('pph21Title')}</h1><p>{detail.period} 귀속분 · 고객 제출자료 전체 검토</p></div>
-        <ApprovalActions queueId={queueId} onChanged={load} />
+        <ApprovalActions queueId={queueId} onChanged={load}
+          hasIssues={(detail.rows ?? []).some(r => r.flags.level === 'red')} />
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>

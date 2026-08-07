@@ -8,8 +8,9 @@ import styles from './workqueue.module.css';
  * 그 안에서 바로 편집 → 전송. 실제 발송은 기존 /request POST 그대로
  * (고객 화면 해당 행 + 메신저에 표시).
  */
-export function RequestChatModal({ toLabel, contextLabel, defaultMessage, onSend, onClose }: {
+export function RequestChatModal({ toLabel, subtitle, contextLabel, defaultMessage, onSend, onClose }: {
   toLabel: string;
+  subtitle?: string;      // 헤더 보조문구 (기본 = 고객 요청 안내). 승인요청 등 재사용 시 교체.
   contextLabel?: string;
   defaultMessage: string;
   onSend: (message: string) => Promise<void>;
@@ -42,7 +43,7 @@ export function RequestChatModal({ toLabel, contextLabel, defaultMessage, onSend
           <div className={styles.waAvatar}>{toLabel.slice(0, 1)}</div>
           <div className={styles.waWho}>
             <b>{toLabel}</b>
-            <span>고객 화면의 해당 항목에 요청으로 표시됩니다</span>
+            <span>{subtitle ?? '고객 화면의 해당 항목에 요청으로 표시됩니다'}</span>
           </div>
           <button className={styles.waClose} onClick={onClose} aria-label="닫기">×</button>
         </div>
