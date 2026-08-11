@@ -15,19 +15,19 @@ const LEVEL_ORDER: Record<string, number> = { red: 0, amber: 1, green: 2 };
 // 팝업 편집 필드 (요청 10). putKey = monthly_payslip 컬럼명 — 저장 시 서버가
 // computePayslipTotals 로 총액/PPh21 재계산.
 const PPH21_FIELDS: FieldDef[] = [
-  { key: 'baseSalary', label: '기본급', type: 'number', putKey: 'base_salary' },
-  { key: 'mealAllowance', label: '식대', type: 'number', putKey: 'meal_allowance' },
-  { key: 'transportAllowance', label: '교통비', type: 'number', putKey: 'transport_allowance' },
-  { key: 'positionAllowance', label: '직책수당', type: 'number', putKey: 'position_allowance' },
-  { key: 'otherAllowances', label: '기타수당', type: 'number', putKey: 'other_allowances' },
-  { key: 'bonusOnly', label: '보너스', type: 'number', putKey: 'bonus' },
-  { key: 'thrOnly', label: 'THR', type: 'number', putKey: 'thr' },
-  { key: 'bpjsKesehatan', label: 'BPJS 건강', type: 'number', putKey: 'bpjs_kesehatan' },
-  { key: 'jhtEmployee', label: 'JHT (직원)', type: 'number', putKey: 'jht_employee' },
-  { key: 'jpEmployee', label: 'JP (직원)', type: 'number', putKey: 'jp_employee' },
-  { key: 'otherDeductions', label: '기타공제', type: 'number', putKey: 'other_deductions' },
-  { key: 'totalGross', label: '총 지급 (자동계산)', type: 'number', readOnly: true },
-  { key: 'pph21', label: 'PPh 21 (자동계산)', type: 'number', readOnly: true },
+  { key: 'baseSalary', label: '기본급', type: 'number', putKey: 'base_salary', section: '기본급 + 수당' },
+  { key: 'mealAllowance', label: '식대', type: 'number', putKey: 'meal_allowance', section: '기본급 + 수당' },
+  { key: 'transportAllowance', label: '교통비', type: 'number', putKey: 'transport_allowance', section: '기본급 + 수당' },
+  { key: 'positionAllowance', label: '직책수당', type: 'number', putKey: 'position_allowance', section: '기본급 + 수당' },
+  { key: 'otherAllowances', label: '기타수당', type: 'number', putKey: 'other_allowances', section: '기본급 + 수당' },
+  { key: 'bonusOnly', label: '보너스', type: 'number', putKey: 'bonus', section: '보너스' },
+  { key: 'thrOnly', label: 'THR', type: 'number', putKey: 'thr', section: '보너스' },
+  { key: 'bpjsKesehatan', label: 'BPJS 건강', type: 'number', putKey: 'bpjs_kesehatan', section: '공제' },
+  { key: 'jhtEmployee', label: 'JHT (직원)', type: 'number', putKey: 'jht_employee', section: '공제' },
+  { key: 'jpEmployee', label: 'JP (직원)', type: 'number', putKey: 'jp_employee', section: '공제' },
+  { key: 'otherDeductions', label: '기타공제', type: 'number', putKey: 'other_deductions', section: '공제' },
+  { key: 'totalGross', label: '총 지급', type: 'number', readOnly: true, section: '자동 계산' },
+  { key: 'pph21', label: 'PPh 21', type: 'number', readOnly: true, section: '자동 계산' },
 ];
 
 export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {

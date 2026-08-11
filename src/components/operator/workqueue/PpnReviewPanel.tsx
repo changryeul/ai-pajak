@@ -175,12 +175,12 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
 
 // 팝업 편집 필드 (요청 24) — PUT /api/tax/ppn-faktur-monthly (camelCase, PPN 재계산)
 const PPN_FIELDS: FieldDef[] = [
-  { key: 'fakturNumber', label: 'faktur 번호', type: 'text' },
-  { key: 'fakturDate', label: 'faktur 일자', type: 'date' },
-  { key: 'counterpartyName', label: '거래처명', type: 'text' },
-  { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text' },
-  { key: 'dpp', label: 'DPP (PPN 자동 재계산)', type: 'number' },
-  { key: 'ppn', label: 'PPN (직접 수정 시 우선)', type: 'number' },
+  { key: 'fakturNumber', label: 'faktur 번호', type: 'text', section: 'Faktur 정보' },
+  { key: 'fakturDate', label: 'faktur 일자', type: 'date', section: 'Faktur 정보' },
+  { key: 'counterpartyName', label: '거래처명', type: 'text', section: 'Faktur 정보' },
+  { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text', section: 'Faktur 정보' },
+  { key: 'dpp', label: 'DPP (PPN 자동 재계산)', type: 'number', section: '금액' },
+  { key: 'ppn', label: 'PPN (직접 수정 시 우선)', type: 'number', section: '금액' },
 ];
 
 function RequestModal({ row, queueId, onClose, onSent }:

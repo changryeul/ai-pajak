@@ -137,13 +137,13 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
 
 // 팝업 편집 필드 (요청 15) — PUT /api/tax/pph23-transactions (camelCase, 세액 재계산 포함)
 const WHT_FIELDS: FieldDef[] = [
-  { key: 'counterpartyName', label: '거래처명', type: 'text' },
-  { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text' },
-  { key: 'description', label: '거래 내용', type: 'text' },
-  { key: 'invoiceNumber', label: '인보이스 번호', type: 'text' },
-  { key: 'transactionDate', label: '거래일', type: 'date' },
-  { key: 'grossAmount', label: '총 지급액 (세액 자동 재계산)', type: 'number' },
-  { key: 'taxAmount', label: '세액 (자동계산)', type: 'number', readOnly: true },
+  { key: 'counterpartyName', label: '거래처명', type: 'text', section: '거래 정보' },
+  { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text', section: '거래 정보' },
+  { key: 'description', label: '거래 내용', type: 'text', section: '거래 정보' },
+  { key: 'invoiceNumber', label: '인보이스 번호', type: 'text', section: '거래 정보' },
+  { key: 'transactionDate', label: '거래일', type: 'date', section: '거래 정보' },
+  { key: 'grossAmount', label: '총 지급액 (세액 자동 재계산)', type: 'number', section: '금액' },
+  { key: 'taxAmount', label: '세액 (자동계산)', type: 'number', readOnly: true, section: '금액' },
 ];
 
 function RequestModal({ row, queueId, onClose, onSent }:

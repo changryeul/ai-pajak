@@ -1,15 +1,17 @@
 'use client';
 import { useMemo, useState } from 'react';
+import { Pencil } from 'lucide-react';
 import styles from './workqueue.module.css';
 import type { OperatorEdits } from './types';
 
 /**
- * 워크큐 행 상세 팝업 (수정요청 10·15·24, 2026-08-05).
+ * 워크큐 행 상세 팝업 (수정요청 10·15·24, 2026-08-05 / 40·41·42 재디자인 2026-08-10).
  *
+ * 고객 입력 화면과 동일한 디자인: 파란 편집 안내 배너 + 읽기 정보 카드 +
+ * 섹션(h4) 별 소형 입력 그리드. 저장/확인·AI분석·수정 색점은 유지.
  * - 필드 수정 → 기존 검증된 고객측 PUT(재계산 포함)으로 저장
  * - '저장 및 확인' → row-review PATCH 로 확인 스탬프 + 수정 이력 누적
- * - operatorEdits 가 있는 필드는 색 점으로 표시: 상담원(보라)/수퍼바이저(주황)
- *   → 수퍼바이저가 상담원이 뭘 고쳤는지, 상담원이 수퍼바이저 수정을 한눈에 확인
+ * - operatorEdits 색 점: 상담원(보라)/수퍼바이저(주황)
  */
 export interface FieldDef {
   key: string;            // row 객체의 값 키 (표시/diff 용)
@@ -17,13 +19,14 @@ export interface FieldDef {
   type: 'number' | 'text' | 'date';
   putKey?: string;        // PUT body 의 키 (기본 = key)
   readOnly?: boolean;
+  section?: string;       // 섹션 그룹 헤더 (수정요청 40·41·42). 없으면 '항목'.
 }
 
 interface Props {
   title: string;
   subtitle?: string;
-  // 읽기 요약 (수정요청 31·34·37): 고객이 보는 핵심 값들을 편집 그리드 위에
-  // 강조 카드로 먼저 보여준다. label/value 쌍, value 는 이미 포맷된 문자열.
+  // 읽기 정보 카드 (수정요청 31·34·37 → 40·41·42): 고객 화면 상단의 정보 카드처럼
+  // 핵심/식별 값을 편집 그리드 위에 먼저 보여준다. value 는 이미 포맷된 문자열.
   summary?: Array<{ label: string; value: string }>;
   rowId: string;
   queueId: string;
@@ -62,6 +65,18 @@ export function RowDetailModal({
     }
     return changed;
   }, [fields, values, draft]);
+
+  // 섹션 그룹핑 (입력 순서 보존)
+  const sections = useMemo(() => {
+    const order: string[] = [];
+    const map = new Map<string, FieldDef[]>();
+    for (const f of fields) {
+      const s = f.section ?? '항목';
+      if (!map.has(s)) { map.set(s, []); order.push(s); }
+      map.get(s)!.push(f);
+    }
+    return order.map(s => ({ title: s, fields: map.get(s)! }));
+  }, [fields]);
 
   const saveAndConfirm = async () => {
     setBusy(true); setError(null);
@@ -109,52 +124,96 @@ export function RowDetailModal({
 
   return (
     <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <div className={`${styles.modal} ${styles.modalWide}`} onClick={e => e.stopPropagation()}>
-        <h2>{title}</h2>
-        {subtitle && <p className={styles.modalSub}>{subtitle}</p>}
-        {reviewedAt && <div className={styles.reviewedNote}>✅ 확인 완료 ({new Date(reviewedAt).toLocaleString('ko-KR')}) — 다시 저장하면 갱신됩니다.</div>}
-
-        {summary && summary.length > 0 && (
-          <div className={styles.detailSummary}>
-            {summary.map((s, i) => (
-              <div key={i} className={styles.detailSummaryItem}>
-                <small>{s.label}</small><b>{s.value}</b>
-              </div>
-            ))}
+      <div className="flex max-h-[90vh] w-[min(940px,95vw)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        onClick={e => e.stopPropagation()}>
+        {/* 헤더 */}
+        <div className="flex items-start justify-between gap-3 border-b border-gray-100 px-5 py-4">
+          <div>
+            <h2 className="text-base font-black text-slate-900">{title}</h2>
+            {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
           </div>
-        )}
-
-        <div className={styles.editGridLabel}>제출 자료 수정</div>
-        <div className={styles.fieldGrid}>
-          {fields.map(f => (
-            <label key={f.key} className={styles.fieldItem}>
-              <span>{f.label}{editDot(f.key)}</span>
-              <input
-                type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
-                value={draft[f.key]}
-                readOnly={f.readOnly}
-                className={f.readOnly ? styles.roInput : undefined}
-                onChange={e => setDraft(d => ({ ...d, [f.key]: e.target.value }))}
-              />
-            </label>
-          ))}
+          <button onClick={onClose} aria-label="닫기"
+            className="rounded-md p-1 text-xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">×</button>
         </div>
 
-        {aiNote && (
-          <div className={styles.ai} style={{ marginTop: 10 }}>
-            <b>AI 분석</b>
-            <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>
-              <li>{aiNote.label}</li>
-              {aiNote.issues.map((i, n) => <li key={n}>{i}</li>)}
-            </ul>
+        {/* 본문 (스크롤) */}
+        <div className="flex-1 space-y-4 overflow-y-auto bg-gray-50/50 p-5">
+          {/* 편집 안내 배너 — 고객 화면과 동일 */}
+          <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900">
+            <Pencil className="h-3.5 w-3.5 shrink-0" />
+            <span>각 필드를 클릭한 후 값을 변경하세요. 저장 및 확인 시 반영됩니다.</span>
           </div>
-        )}
 
-        {error && <div className={styles.blocked} style={{ marginTop: 10 }}>{error}</div>}
+          {reviewedAt && (
+            <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
+              ✅ 확인 완료 ({new Date(reviewedAt).toLocaleString('ko-KR')}) — 다시 저장하면 갱신됩니다.
+            </div>
+          )}
 
-        <div className={styles.mf}>
-          <button className={styles.btn} onClick={onClose} disabled={busy}>닫기</button>
-          <button className={`${styles.btn} ${styles.green}`} onClick={saveAndConfirm} disabled={busy}>
+          {/* 읽기 정보 카드 (고객 화면 상단 정보 블록과 동일한 톤) */}
+          {summary && summary.length > 0 && (
+            <div className="rounded-lg border border-slate-200 bg-white p-3">
+              <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+                {summary.map((s, i) => (
+                  <div key={i}>
+                    <p className="text-[10px] text-gray-400">{s.label}</p>
+                    <p className="font-mono font-semibold text-slate-800">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 섹션별 편집 그리드 */}
+          {sections.map(sec => (
+            <div key={sec.title} className="rounded-lg border border-gray-100 bg-white p-3">
+              <h4 className="mb-2 text-xs font-bold text-gray-600">{sec.title}</h4>
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                {sec.fields.map(f => (
+                  <div key={f.key}>
+                    <label className="flex items-center text-[10px] text-gray-400">
+                      {f.label}{editDot(f.key)}
+                    </label>
+                    <input
+                      type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
+                      value={draft[f.key]}
+                      readOnly={f.readOnly}
+                      className={`h-8 w-full rounded-md border px-2 text-xs ${f.type === 'number' ? 'font-mono' : ''} ${
+                        f.readOnly
+                          ? 'border-gray-100 bg-gray-50 text-gray-500'
+                          : 'border-gray-200 focus:border-blue-400 focus:outline-none'
+                      }`}
+                      onChange={e => setDraft(d => ({ ...d, [f.key]: e.target.value }))}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {aiNote && (
+            <div className="rounded-lg border border-violet-100 bg-violet-50/50 p-3 text-xs">
+              <b className="text-violet-900">AI 분석</b>
+              <ul className="mt-1 list-disc pl-5 text-slate-700">
+                <li>{aiNote.label}</li>
+                {aiNote.issues.map((i, n) => <li key={n}>{i}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>
+          )}
+        </div>
+
+        {/* 푸터 */}
+        <div className="flex justify-end gap-2 border-t border-gray-100 bg-white px-5 py-3">
+          <button onClick={onClose} disabled={busy}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-gray-50 disabled:opacity-50">
+            닫기
+          </button>
+          <button onClick={saveAndConfirm} disabled={busy}
+            className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
             {busy ? '저장 중…' : dirty.length > 0 ? `저장 및 확인 (${dirty.length}개 수정)` : '저장 및 확인'}
           </button>
         </div>
