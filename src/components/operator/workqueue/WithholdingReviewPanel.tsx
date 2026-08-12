@@ -90,6 +90,7 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
 
       {detailRow && (
         <RowDetailModal
+          key={detailRow.id}
           title={`원천세 거래 상세: ${detailRow.counterpartyName}`}
           subtitle={`${detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23'} · 세액 자동 재계산`}
           summary={[
@@ -98,6 +99,15 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
             { label: '세율', value: `${(detailRow.taxRate * 100).toFixed(1)}%` },
             { label: '거래처 NPWP', value: detailRow.counterpartyNpwp || '—' },
           ]}
+          basisNote={{
+            heading: '세율 결정 근거',
+            body: `${detailRow.serviceType ?? (detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23')} — ${
+              detailRow.counterpartyNpwp ? '표준' : 'NPWP 없음'} 세율 ${(detailRow.taxRate * 100).toFixed(1)}%${
+              detailRow.counterpartyNpwp ? '' : ' (Pasal 23(1a) 100% 가산)'}`,
+            legal: detailRow.regime === 'PPH4_2'
+              ? 'PPh Pasal 4 ayat (2) — PP 관련 규정'
+              : 'Pasal 23 UU PPh / PMK 141/PMK.03/2015',
+          }}
           rowId={detailRow.id}
           queueId={queueId}
           putUrl="/api/tax/pph23-transactions"

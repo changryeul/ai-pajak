@@ -146,6 +146,7 @@ export interface PpnDetail {
   queueId: string; customerId: string; period: string; status: string;
   summary: { fakturCount: number; totalDpp: number; totalPpn: number; incompleteCount: number };
   rows: PpnRow[];
+  coretax?: { id: string | null; hint: string | null }; // 수정요청 48·49 — Coretax 접속 자격증명
 }
 
 export interface WithholdingRow {

@@ -61,7 +61,7 @@ export interface BillingItem {
 export interface BillingTarget {
   sourceKind: 'ERP_SESSION' | 'OPERATOR_QUEUE';
   sourceId: string;
-  customer: { id: string; name: string; npwp: string | null; email: string | null };
+  customer: { id: string; name: string; npwp: string | null; email: string | null; coretaxId?: string | null; coretaxHint?: string | null };
   items: BillingItem[];
   totalAmount: number;
   workbookGeneratedAt: string | null;
@@ -196,7 +196,7 @@ export async function buildBillingBoard(
   if (customerIds.size > 0) {
     const { data: customers } = await admin
       .from('customer')
-      .select('id, full_name, company_name, npwp, email')
+      .select('id, full_name, company_name, npwp, email, coretax_id, coretax_password_hint')
       .in('id', Array.from(customerIds));
     const custMap = new Map((customers ?? []).map(c => [c.id, c]));
     // 고객 행이 사라진 고아 소스는 발행대상에서 제외 (빈 이름 카드 방지).
@@ -205,7 +205,11 @@ export async function buildBillingBoard(
     }
     for (const t of targets) {
       const c = custMap.get(t.customer.id);
-      if (c) t.customer = { id: c.id, name: c.company_name || c.full_name || '—', npwp: c.npwp, email: c.email };
+      // 수정요청 52 — Coretax 접속용 자격증명(ID + 힌트) 동봉
+      if (c) t.customer = {
+        id: c.id, name: c.company_name || c.full_name || '—', npwp: c.npwp, email: c.email,
+        coretaxId: c.coretax_id ?? null, coretaxHint: c.coretax_password_hint ?? null,
+      };
     }
   }
 

@@ -9,7 +9,9 @@ const subText = (s: string) => (s === 'FINALIZED' || s === 'FILED' ? '완료' : 
 interface Props {
   rows: Pph21Row[];
   selectedId: string | null;
-  onSelect: (employeeId: string) => void;
+  // 수정요청 45 — payslipId(고유)로 선택. employeeId 는 미등록 직원이 null/중복이라
+  // 어느 행을 눌러도 같은(첫) 행이 잡히던 버그의 원인이었음.
+  onSelect: (payslipId: string) => void;
   onRequest: (row: Pph21Row) => void;
 }
 
@@ -25,14 +27,14 @@ export function EmployeeReviewTable({ rows, selectedId, onSelect, onRequest }: P
         <tbody>
           {rows.map(r => (
             <tr key={r.payslipId}
-              className={selectedId === r.employeeId ? styles.sel : ''}
+              className={selectedId === r.payslipId ? styles.sel : ''}
               role="button" tabIndex={0}
-              aria-pressed={selectedId === r.employeeId}
-              onClick={() => onSelect(r.employeeId)}
+              aria-pressed={selectedId === r.payslipId}
+              onClick={() => onSelect(r.payslipId)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   if (e.key === ' ') e.preventDefault();
-                  onSelect(r.employeeId);
+                  onSelect(r.payslipId);
                 }
               }}
               style={{ cursor: 'pointer' }}>

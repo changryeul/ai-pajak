@@ -230,21 +230,33 @@ function ExceptionIssueModal({ onClose, onSubmit }: { onClose: () => void; onSub
   }, [onClose]);
   return (
     <div className={`${styles.modalbg} ${styles.open}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>승인 없이 예외 발행</h2>
-        <div className={styles.blocked} style={{ marginBottom: 10 }}>
-          수퍼바이저 승인 없이 ID Billing 을 발행합니다. 사유가 기록되고 수퍼바이저에게 통지됩니다.
+      <div className="w-[min(460px,94vw)] overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
+        {/* 헤더 — amber 경고 톤 */}
+        <div className="flex items-center gap-2 border-b border-amber-100 bg-amber-50 px-5 py-4">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-amber-100 text-amber-700">⚠️</span>
+          <div>
+            <h2 className="text-base font-black text-amber-900">승인 없이 예외 발행</h2>
+            <p className="text-[11px] text-amber-700">수퍼바이저 승인을 건너뛰고 즉시 발행합니다</p>
+          </div>
         </div>
-        <div className={styles.mb}>
-          <label>예외 발행 사유 (필수, 5자 이상)
-            <textarea value={reason} onChange={e => setReason(e.target.value)}
+        <div className="space-y-3 px-5 py-4">
+          <p className="rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-xs text-amber-800">
+            사유가 발행 기록에 남고 수퍼바이저에게 자동 통지됩니다.
+          </p>
+          <div>
+            <label className="mb-1 block text-xs font-bold text-slate-700">예외 발행 사유 <span className="text-red-500">*</span> <span className="font-normal text-slate-400">(5자 이상)</span></label>
+            <textarea value={reason} onChange={e => setReason(e.target.value)} rows={3}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-400 focus:outline-none"
               placeholder="예: 고객 마감 임박 요청 — 담당 수퍼바이저 부재로 선발행 후 사후 보고." />
-          </label>
+          </div>
         </div>
-        <div className={styles.mf}>
-          <button className={styles.btn} onClick={onClose}>취소</button>
-          <button className={`${styles.btn} ${styles.amber}`} disabled={reason.trim().length < 5}
-            onClick={() => onSubmit(reason.trim())}>예외 발행</button>
+        <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-3">
+          <button onClick={onClose}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-gray-50">취소</button>
+          <button disabled={reason.trim().length < 5} onClick={() => onSubmit(reason.trim())}
+            className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40">
+            예외 발행
+          </button>
         </div>
       </div>
     </div>

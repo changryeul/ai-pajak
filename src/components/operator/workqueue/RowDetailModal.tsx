@@ -1,6 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { Pencil } from 'lucide-react';
+import { Pencil, Shield } from 'lucide-react';
 import styles from './workqueue.module.css';
 import type { OperatorEdits } from './types';
 
@@ -36,6 +36,8 @@ interface Props {
   values: Record<string, unknown>;
   operatorEdits?: OperatorEdits | null;
   reviewedAt?: string | null;
+  // 세율 결정 근거 카드 (수정요청 46·47) — 고객 화면과 동일한 인디고 Shield 박스.
+  basisNote?: { heading: string; body: string; legal?: string } | null;
   aiNote?: { label: string; issues: string[] } | null;
   onClose: () => void;
   onSaved: () => void;
@@ -43,7 +45,7 @@ interface Props {
 
 export function RowDetailModal({
   title, subtitle, summary, rowId, queueId, putUrl, putExtra, fields, values,
-  operatorEdits, reviewedAt, aiNote, onClose, onSaved,
+  operatorEdits, reviewedAt, basisNote, aiNote, onClose, onSaved,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, string>>(() => {
     const d: Record<string, string> = {};
@@ -190,6 +192,17 @@ export function RowDetailModal({
               </div>
             </div>
           ))}
+
+          {basisNote && (
+            <div className="flex items-start gap-2 rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-xs">
+              <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-600" />
+              <div>
+                <p className="font-bold text-indigo-900">{basisNote.heading}</p>
+                <p className="text-indigo-700">{basisNote.body}</p>
+                {basisNote.legal && <p className="text-[10px] text-indigo-500">{basisNote.legal}</p>}
+              </div>
+            </div>
+          )}
 
           {aiNote && (
             <div className="rounded-lg border border-violet-100 bg-violet-50/50 p-3 text-xs">

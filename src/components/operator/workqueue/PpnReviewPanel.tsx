@@ -11,6 +11,48 @@ import { RowDetailModal, type FieldDef } from './RowDetailModal';
 import { RequestChatModal } from './RequestChatModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
+const CORETAX_URL = 'https://coretaxdjp.pajak.go.id/';
+
+// 수정요청 49·52 — 값 + 카피 버튼 칩 (고객 Coretax 자격증명 복사용)
+function CopyChip({ label, value }: { label: string; value: string | null }) {
+  const [copied, setCopied] = useState(false);
+  const v = value?.trim();
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs">
+      <span className="text-gray-400">{label}</span>
+      <span className="font-mono font-semibold text-slate-800">{v || '—'}</span>
+      {v && (
+        <button type="button" title="복사"
+          onClick={async () => { try { await navigator.clipboard.writeText(v); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch { /* clipboard 차단 시 무시 */ } }}
+          className="rounded px-1 text-[11px] font-bold text-blue-600 hover:bg-blue-50">
+          {copied ? '복사됨' : '복사'}
+        </button>
+      )}
+    </span>
+  );
+}
+
+// 수정요청 48·49 — Coretax 포털 접속 + 자격증명 + 대조 파일 업로드
+function CoretaxAccessBar({ coretax, reconBusy, onFile }:
+  { coretax?: { id: string | null; hint: string | null }; reconBusy: boolean; onFile: (f: File) => void }) {
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50/40 p-3">
+      <a href={CORETAX_URL} target="_blank" rel="noopener noreferrer"
+        className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">
+        Coretax 접속 ↗
+      </a>
+      <CopyChip label="ID" value={coretax?.id ?? null} />
+      <CopyChip label="PW 힌트" value={coretax?.hint ?? null} />
+      <span className="mx-1 h-5 w-px bg-blue-200" />
+      <label className={`rounded-lg border border-blue-300 bg-white px-3 py-2 text-xs font-bold text-blue-700 ${reconBusy ? 'opacity-50' : 'cursor-pointer hover:bg-blue-50'}`}>
+        {reconBusy ? '대조 중…' : '대조 파일 업로드'}
+        <input type="file" accept=".xlsx,.xls" style={{ display: 'none' }} disabled={reconBusy}
+          onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onFile(f); }} />
+      </label>
+      <span className="text-[11px] text-slate-500">Coretax 접속 → 부가세 자료 다운로드 → 파일 업로드로 대조</span>
+    </div>
+  );
+}
 
 export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
@@ -113,15 +155,12 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
               <option value="MISSING">누락</option>
               <option value="PENDING">미대조</option>
             </select>
-            {/* 수정요청 21번: 상담원이 Coretax 출력 xlsx 를 여기서 직접 올려 대조 */}
-            <label className={`${styles.btn} ${styles.blue} ${reconBusy ? styles.disabled : ''}`}>
-              {reconBusy ? '대조 중…' : 'Coretax에서 부가세 자료 가져오기'}
-              <input type="file" accept=".xlsx,.xls" style={{ display: 'none' }} disabled={reconBusy}
-                onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) runCoretaxRecon(f); }} />
-            </label>
             <span className={styles.reconState}>{reconStateLabel}</span>
           </div>
         </div>
+
+        {/* 수정요청 48·49 — Coretax 접속(포털 새 탭) + 고객 자격증명(카피) + 대조 파일 업로드 */}
+        <CoretaxAccessBar coretax={detail.coretax} reconBusy={reconBusy} onFile={runCoretaxRecon} />
 
         <PpnReviewTable rows={rows} onRequest={setRequestRow} onOpenDetail={setDetailRow} />
 
@@ -143,6 +182,7 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
 
       {detailRow && (
         <RowDetailModal
+          key={detailRow.id}
           title={`faktur 상세: ${detailRow.fakturNumber ?? detailRow.counterpartyName}`}
           subtitle={`${detailRow.fakturType === 'MASUKAN' ? '매입' : '매출'} · DPP 수정 시 PPN 자동 재계산`}
           summary={[
@@ -151,6 +191,13 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
             { label: '구분', value: detailRow.fakturType === 'MASUKAN' ? '매입' : '매출' },
             { label: '요율', value: detailRow.isLuxury ? '사치품 12%' : '일반 11%' },
           ]}
+          basisNote={{
+            heading: '요율 결정 근거',
+            body: detailRow.isLuxury
+              ? '사치품(barang mewah) — PPN 12%'
+              : '일반 재화·용역 — PPN 11%',
+            legal: 'UU PPN / PMK 131/2024',
+          }}
           rowId={detailRow.id}
           queueId={queueId}
           putUrl="/api/tax/ppn-faktur-monthly"

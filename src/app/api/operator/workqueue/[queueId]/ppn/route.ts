@@ -27,6 +27,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   const period = `${q.tax_period_year}-${String(q.tax_period_month).padStart(2, '0')}`; // YYYY-MM
 
+  // 수정요청 48·49 — Coretax 접속용 고객 자격증명 (ID + 비밀번호 힌트만; 원문 PW 미저장)
+  const { data: cust } = await admin
+    .from('customer')
+    .select('coretax_id, coretax_password_hint')
+    .eq('id', q.customer_id).maybeSingle();
+
   const { data: fakturs } = await admin
     .from('ppn_faktur_monthly')
     .select('id, faktur_type, faktur_number, faktur_date, counterparty_name, counterparty_npwp, dpp, ppn, is_luxury, recon_status, operator_reviewed_at, operator_edits')
@@ -69,6 +75,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   return NextResponse.json({
     success: true,
-    data: { queueId: q.id, customerId: q.customer_id, period, status: q.status, summary, rows },
+    data: {
+      queueId: q.id, customerId: q.customer_id, period, status: q.status, summary, rows,
+      coretax: { id: cust?.coretax_id ?? null, hint: cust?.coretax_password_hint ?? null },
+    },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

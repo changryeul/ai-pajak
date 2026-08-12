@@ -101,9 +101,9 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
               </div>
             </div>
 
-            <EmployeeReviewTable rows={rows} selectedId={detailRow?.employeeId ?? null}
-              onSelect={(employeeId) => {
-                const row = rows.find(r => r.employeeId === employeeId);
+            <EmployeeReviewTable rows={rows} selectedId={detailRow?.payslipId ?? null}
+              onSelect={(payslipId) => {
+                const row = rows.find(r => r.payslipId === payslipId);
                 if (row) setDetailRow(row);
               }} onRequest={setRequestTarget} />
 
@@ -112,6 +112,7 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
 
       {detailRow && (
         <RowDetailModal
+          key={detailRow.payslipId}
           title={`직원 상세: ${detailRow.name}`}
           subtitle={`${detail.period} 귀속 · PTKP ${detailRow.ptkp} · TER ${detailRow.terCategory}`}
           summary={[

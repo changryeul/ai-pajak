@@ -21,6 +21,24 @@ import { fmtRp } from '@/lib/utils';
 
 const CORETAX_URL = 'https://coretaxdjp.pajak.go.id/';
 
+// 수정요청 52 — 값 + 카피 버튼 칩 (고객 Coretax 자격증명 복사용)
+function CopyText({ label, value }: { label: string; value: string | null }) {
+  const [copied, setCopied] = useState(false);
+  const v = value?.trim();
+  if (!v) return null;
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-[11px]">
+      <span className="text-gray-400">{label}</span>
+      <span className="font-mono font-semibold text-gray-800">{v}</span>
+      <button type="button" title="복사"
+        onClick={async () => { try { await navigator.clipboard.writeText(v); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch { /* clipboard 차단 시 무시 */ } }}
+        className="rounded px-1 font-bold text-blue-600 hover:bg-blue-50">
+        {copied ? '복사됨' : '복사'}
+      </button>
+    </span>
+  );
+}
+
 interface BillingItem {
   taxType: string; period: string; kap: string; kjs: string;
   taxBase: number | null; rateLabel: string; amount: number;
@@ -28,7 +46,7 @@ interface BillingItem {
 interface BillingTarget {
   sourceKind: 'ERP_SESSION' | 'OPERATOR_QUEUE';
   sourceId: string;
-  customer: { id: string; name: string; npwp: string | null; email: string | null };
+  customer: { id: string; name: string; npwp: string | null; email: string | null; coretaxId?: string | null; coretaxHint?: string | null };
   items: BillingItem[];
   totalAmount: number;
   workbookGeneratedAt: string | null;
@@ -262,6 +280,14 @@ export default function IdBillingBoard() {
                     {target.canIssue ? t('statusReady') : t('statusNeedsWorkbook')}
                   </Badge>
                 </div>
+
+                {/* 수정요청 52 — Coretax 접속 자격증명(ID + 비밀번호 힌트, 카피) */}
+                {(target.customer.coretaxId || target.customer.coretaxHint) && (
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <CopyText label="Coretax ID" value={target.customer.coretaxId ?? null} />
+                    <CopyText label="PW 힌트" value={target.customer.coretaxHint ?? null} />
+                  </div>
+                )}
 
                 <div className="mt-2 flex items-center gap-1.5">
                   <Mail className="h-3 w-3 shrink-0 text-gray-400" />
