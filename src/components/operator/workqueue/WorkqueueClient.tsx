@@ -66,12 +66,14 @@ export function WorkqueueClient({ role }: { role?: string }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // 연 신고(annual)는 회계연도 단위라 월 필터를 걸지 않는다 (큐 행은 모두
-  // month=12). 나머지 세목은 (year, month) 귀속월 필터.
+  const monthNum = Number(period.split('-')[1]);
+
+  // 수정요청 55 — 검색이 세목/월 범위에만 걸려 다른 월 고객을 못 찾던 문제.
+  // 서버는 연 단위(taxType+year)로 로드하고, 선택 월 좁힘은 클라이언트에서 —
+  // 검색어가 있으면 월 제한을 풀어 그 해 전체에서 고객명/NPWP 로 찾는다.
   const listUrl = useCallback(() => {
-    const [y, m] = period.split('-');
-    const base = `/api/operator/queue?taxType=${TAX_VIEW_TO_TYPE[taxView]}&year=${y}&limit=200`;
-    return taxView === 'annual' ? base : `${base}&month=${Number(m)}`;
+    const [y] = period.split('-');
+    return `/api/operator/queue?taxType=${TAX_VIEW_TO_TYPE[taxView]}&year=${y}&limit=200`;
   }, [period, taxView]);
 
   // NOTE: limit=200 — counts and the status filter are computed client-side over
@@ -104,9 +106,14 @@ export function WorkqueueClient({ role }: { role?: string }) {
     } catch { setError('목록을 불러오지 못했습니다.'); }
   }, [listUrl]);
 
+  // 카운트/기본 목록은 선택 월 기준 (연신고는 연 단위라 전체).
+  const monthScoped = useMemo(
+    () => (taxView === 'annual' ? items : items.filter(it => it.tax_period_month === monthNum)),
+    [items, monthNum, taxView]);
+
   const counts = useMemo(() => {
-    const c = { all: items.length, unreviewed: 0, inReview: 0, request: 0, reviewed: 0 };
-    for (const it of items) {
+    const c = { all: monthScoped.length, unreviewed: 0, inReview: 0, request: 0, reviewed: 0 };
+    for (const it of monthScoped) {
       const lbl = STATUS_LABEL_MAP[it.status];
       if (lbl === 'unreviewed') c.unreviewed++;
       else if (lbl === 'inReview') c.inReview++;
@@ -114,19 +121,21 @@ export function WorkqueueClient({ role }: { role?: string }) {
       else if (lbl === 'reviewed') c.reviewed++;
     }
     return c;
-  }, [items]);
+  }, [monthScoped]);
 
-  // 검색은 로드된 200건 안에서 클라이언트 필터 (고객명 / NPWP). 상태 필터와 AND.
+  // 검색어가 있으면 그 해 전체(items)에서, 없으면 선택 월(monthScoped)에서 필터.
+  // 상태 필터와 AND. (고객명 / NPWP)
   const filtered = useMemo(() => {
-    let list = statusFilter ? items.filter(it => STATUS_LABEL_MAP[it.status] === statusFilter) : items;
     const q = search.trim().toLowerCase();
+    let list = q ? items : monthScoped;
+    if (statusFilter) list = list.filter(it => STATUS_LABEL_MAP[it.status] === statusFilter);
     if (q) {
       list = list.filter(it =>
         (it.customer?.customer_name ?? '').toLowerCase().includes(q) ||
         (it.customer?.npwp ?? '').toLowerCase().includes(q));
     }
     return list;
-  }, [items, statusFilter, search]);
+  }, [items, monthScoped, statusFilter, search]);
 
   return (
     <div className={styles.root}>
@@ -151,11 +160,9 @@ export function WorkqueueClient({ role }: { role?: string }) {
             </div>
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
-              <input placeholder="고객명, NPWP 검색" value={search} onChange={e => setSearch(e.target.value)} />
-              {/* 수정요청 1·13번 — 나가기 대신 홈/로그아웃 (역할별 실제 홈) */}
-              <a className={styles.btn}
-                href={`/${locale}/operator/${isSupervisor ? 'dashboard' : 'my-work'}`}
-                title="운영팀 대시보드">🏠</a>
+              <input placeholder="고객명, NPWP 검색 (연 단위)" value={search} onChange={e => setSearch(e.target.value)} />
+              {/* 수정요청 54 — 집(🏠) 버튼은 예전 대시보드 화면으로 이동해 혼란 → 제거.
+                  워크큐/발행보드/고객인박스 이동은 좌측 레일에서 처리. */}
               <button className={styles.btn} onClick={handleLogout} title="로그아웃">로그아웃</button>
             </div>
           </div>
