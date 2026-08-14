@@ -25,16 +25,20 @@ const CORETAX_URL = 'https://coretaxdjp.pajak.go.id/';
 function CopyText({ label, value }: { label: string; value: string | null }) {
   const [copied, setCopied] = useState(false);
   const v = value?.trim();
-  if (!v) return null;
+  // 수정요청 52 — 값이 없어도 항상 표시(미등록). 있으면 복사 버튼 노출.
   return (
     <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-[11px]">
       <span className="text-gray-400">{label}</span>
-      <span className="font-mono font-semibold text-gray-800">{v}</span>
-      <button type="button" title="복사"
-        onClick={async () => { try { await navigator.clipboard.writeText(v); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch { /* clipboard 차단 시 무시 */ } }}
-        className="rounded px-1 font-bold text-blue-600 hover:bg-blue-50">
-        {copied ? '복사됨' : '복사'}
-      </button>
+      {v
+        ? <span className="font-mono font-semibold text-gray-800">{v}</span>
+        : <span className="italic text-gray-400">미등록</span>}
+      {v && (
+        <button type="button" title="복사"
+          onClick={async () => { try { await navigator.clipboard.writeText(v); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch { /* clipboard 차단 시 무시 */ } }}
+          className="rounded px-1 font-bold text-blue-600 hover:bg-blue-50">
+          {copied ? '복사됨' : '복사'}
+        </button>
+      )}
     </span>
   );
 }
@@ -281,13 +285,11 @@ export default function IdBillingBoard() {
                   </Badge>
                 </div>
 
-                {/* 수정요청 52 — Coretax 접속 자격증명(ID + 비밀번호 힌트, 카피) */}
-                {(target.customer.coretaxId || target.customer.coretaxHint) && (
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <CopyText label="Coretax ID" value={target.customer.coretaxId ?? null} />
-                    <CopyText label="PW 힌트" value={target.customer.coretaxHint ?? null} />
-                  </div>
-                )}
+                {/* 수정요청 52 — Coretax 접속 자격증명(ID + 비밀번호 힌트, 카피). 미등록이어도 항상 표시. */}
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <CopyText label="Coretax ID" value={target.customer.coretaxId ?? null} />
+                  <CopyText label="PW 힌트" value={target.customer.coretaxHint ?? null} />
+                </div>
 
                 <div className="mt-2 flex items-center gap-1.5">
                   <Mail className="h-3 w-3 shrink-0 text-gray-400" />

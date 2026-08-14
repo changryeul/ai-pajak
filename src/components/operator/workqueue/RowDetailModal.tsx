@@ -38,6 +38,8 @@ interface Props {
   reviewedAt?: string | null;
   // 세율 결정 근거 카드 (수정요청 46·47) — 고객 화면과 동일한 인디고 Shield 박스.
   basisNote?: { heading: string; body: string; legal?: string } | null;
+  // 세액 산출근거 (수정요청 46) — 숫자 산출식 (예: 총지급액 × 세율 = 세액).
+  calcNote?: { heading: string; formula: string; result: string } | null;
   aiNote?: { label: string; issues: string[] } | null;
   onClose: () => void;
   onSaved: () => void;
@@ -45,7 +47,7 @@ interface Props {
 
 export function RowDetailModal({
   title, subtitle, summary, rowId, queueId, putUrl, putExtra, fields, values,
-  operatorEdits, reviewedAt, basisNote, aiNote, onClose, onSaved,
+  operatorEdits, reviewedAt, basisNote, calcNote, aiNote, onClose, onSaved,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, string>>(() => {
     const d: Record<string, string> = {};
@@ -192,6 +194,14 @@ export function RowDetailModal({
               </div>
             </div>
           ))}
+
+          {calcNote && (
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs">
+              <p className="font-bold text-emerald-900">{calcNote.heading}</p>
+              <p className="mt-0.5 font-mono text-emerald-800">{calcNote.formula}</p>
+              <p className="mt-0.5 font-mono text-base font-black text-emerald-700">= {calcNote.result}</p>
+            </div>
+          )}
 
           {basisNote && (
             <div className="flex items-start gap-2 rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-xs">

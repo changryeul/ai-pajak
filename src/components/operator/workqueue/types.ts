@@ -28,9 +28,25 @@ export interface Pph21Row {
   payslipId: string; employeeId: string; name: string; npwp: string | null;
   ptkp: string; terCategory: string; totalGross: number; bpjs: number; thr: number;
   pph21: number; payslipStatus: string;
-  baseSalary: number; mealAllowance: number; transportAllowance: number;
-  positionAllowance: number; otherAllowances: number; bonusOnly: number; thrOnly: number;
-  bpjsKesehatan: number; jhtEmployee: number; jpEmployee: number; otherDeductions: number;
+  // 직원 정보 (읽기 카드 — 수정요청 45 고객화면 parity)
+  employeeNumber: string | null; nik: string | null; employmentStatus: string | null;
+  workerType: string | null; position: string | null; department: string | null;
+  // 근태
+  workingDays: number; absentDays: number; overtimeHours: number;
+  // 기본급 + 수당
+  baseSalary: number; overtimePay: number; mealAllowance: number; transportAllowance: number;
+  positionAllowance: number; otherAllowances: number; laptopAllowance: number;
+  medicalAllowance: number; taxAllowance: number; annualLeavePay: number;
+  // 특수 지급
+  severanceAllowance: number; pkwtCompensation: number;
+  // 보너스
+  bonusOnly: number; thrOnly: number; commission: number;
+  // 공제
+  bpjsKesehatan: number; bpjsKetenagakerjaan: number; jhtEmployee: number; jpEmployee: number;
+  loanDeduction: number; otherDeductions: number;
+  // 자동 계산 / 회사 부담
+  netSalary: number; bpjsKesCompany: number; jkkCompany: number; jkmCompany: number;
+  jhtCompany: number; jpCompany: number;
   reviewedAt: string | null;
   operatorEdits: OperatorEdits | null;
   flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };

@@ -20,7 +20,9 @@ function CopyChip({ label, value }: { label: string; value: string | null }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs">
       <span className="text-gray-400">{label}</span>
-      <span className="font-mono font-semibold text-slate-800">{v || '—'}</span>
+      {v
+        ? <span className="font-mono font-semibold text-slate-800">{v}</span>
+        : <span className="italic text-gray-400">미등록</span>}
       {v && (
         <button type="button" title="복사"
           onClick={async () => { try { await navigator.clipboard.writeText(v); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch { /* clipboard 차단 시 무시 */ } }}
@@ -191,6 +193,11 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
             { label: '구분', value: detailRow.fakturType === 'MASUKAN' ? '매입' : '매출' },
             { label: '요율', value: detailRow.isLuxury ? '사치품 12%' : '일반 11%' },
           ]}
+          calcNote={{
+            heading: 'PPN 산출근거',
+            formula: `DPP ${rp(detailRow.dpp)} × ${detailRow.isLuxury ? '12' : '11'}%`,
+            result: rp(detailRow.ppn),
+          }}
           basisNote={{
             heading: '요율 결정 근거',
             body: detailRow.isLuxury

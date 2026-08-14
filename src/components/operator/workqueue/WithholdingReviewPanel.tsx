@@ -99,6 +99,11 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
             { label: '세율', value: `${(detailRow.taxRate * 100).toFixed(1)}%` },
             { label: '거래처 NPWP', value: detailRow.counterpartyNpwp || '—' },
           ]}
+          calcNote={{
+            heading: '세액 산출근거',
+            formula: `총지급액 ${rp(detailRow.grossAmount)} × ${(detailRow.taxRate * 100).toFixed(1)}%`,
+            result: rp(detailRow.taxAmount),
+          }}
           basisNote={{
             heading: '세율 결정 근거',
             body: `${detailRow.serviceType ?? (detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23')} — ${

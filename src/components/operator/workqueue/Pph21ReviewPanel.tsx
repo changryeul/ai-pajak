@@ -14,20 +14,47 @@ const LEVEL_ORDER: Record<string, number> = { red: 0, amber: 1, green: 2 };
 
 // 팝업 편집 필드 (요청 10). putKey = monthly_payslip 컬럼명 — 저장 시 서버가
 // computePayslipTotals 로 총액/PPh21 재계산.
+// 수정요청 45 — 고객 급여명세 입력 화면과 동일한 전체 섹션 구성.
 const PPH21_FIELDS: FieldDef[] = [
+  // 근태
+  { key: 'workingDays', label: '근무일', type: 'number', putKey: 'working_days', section: '근태' },
+  { key: 'absentDays', label: '결근일', type: 'number', putKey: 'absent_days', section: '근태' },
+  { key: 'overtimeHours', label: '초과근무 (시간)', type: 'number', putKey: 'overtime_hours', section: '근태' },
+  // 기본급 + 수당
   { key: 'baseSalary', label: '기본급', type: 'number', putKey: 'base_salary', section: '기본급 + 수당' },
+  { key: 'overtimePay', label: '초과근무 수당', type: 'number', putKey: 'overtime_pay', section: '기본급 + 수당' },
   { key: 'mealAllowance', label: '식대', type: 'number', putKey: 'meal_allowance', section: '기본급 + 수당' },
   { key: 'transportAllowance', label: '교통비', type: 'number', putKey: 'transport_allowance', section: '기본급 + 수당' },
   { key: 'positionAllowance', label: '직책수당', type: 'number', putKey: 'position_allowance', section: '기본급 + 수당' },
-  { key: 'otherAllowances', label: '기타수당', type: 'number', putKey: 'other_allowances', section: '기본급 + 수당' },
+  { key: 'otherAllowances', label: '기타 수당', type: 'number', putKey: 'other_allowances', section: '기본급 + 수당' },
+  { key: 'laptopAllowance', label: '노트북 수당', type: 'number', putKey: 'laptop_allowance', section: '기본급 + 수당' },
+  { key: 'medicalAllowance', label: '의료 수당', type: 'number', putKey: 'medical_allowance', section: '기본급 + 수당' },
+  { key: 'taxAllowance', label: '세금 수당 (Gross-up)', type: 'number', putKey: 'tax_allowance', section: '기본급 + 수당' },
+  { key: 'annualLeavePay', label: '연차 수당', type: 'number', putKey: 'annual_leave_pay', section: '기본급 + 수당' },
+  // 특수 지급
+  { key: 'severanceAllowance', label: '퇴직금 (Pesangon)', type: 'number', putKey: 'severance_allowance', section: '특수 지급 (퇴직/계약 종료)' },
+  { key: 'pkwtCompensation', label: 'PKWT 계약 보상', type: 'number', putKey: 'pkwt_compensation', section: '특수 지급 (퇴직/계약 종료)' },
+  // 보너스
   { key: 'bonusOnly', label: '보너스', type: 'number', putKey: 'bonus', section: '보너스' },
-  { key: 'thrOnly', label: 'THR', type: 'number', putKey: 'thr', section: '보너스' },
+  { key: 'thrOnly', label: 'THR (명절)', type: 'number', putKey: 'thr', section: '보너스' },
+  { key: 'commission', label: '커미션', type: 'number', putKey: 'commission', section: '보너스' },
+  // 공제
   { key: 'bpjsKesehatan', label: 'BPJS 건강', type: 'number', putKey: 'bpjs_kesehatan', section: '공제' },
-  { key: 'jhtEmployee', label: 'JHT (직원)', type: 'number', putKey: 'jht_employee', section: '공제' },
-  { key: 'jpEmployee', label: 'JP (직원)', type: 'number', putKey: 'jp_employee', section: '공제' },
-  { key: 'otherDeductions', label: '기타공제', type: 'number', putKey: 'other_deductions', section: '공제' },
+  { key: 'bpjsKetenagakerjaan', label: 'BPJS 고용', type: 'number', putKey: 'bpjs_ketenagakerjaan', section: '공제' },
+  { key: 'jhtEmployee', label: 'JHT', type: 'number', putKey: 'jht_employee', section: '공제' },
+  { key: 'jpEmployee', label: 'JP (연금)', type: 'number', putKey: 'jp_employee', section: '공제' },
+  { key: 'loanDeduction', label: '대출 상환', type: 'number', putKey: 'loan_deduction', section: '공제' },
+  { key: 'otherDeductions', label: '기타 공제', type: 'number', putKey: 'other_deductions', section: '공제' },
+  // 자동 계산
   { key: 'totalGross', label: '총 지급', type: 'number', readOnly: true, section: '자동 계산' },
   { key: 'pph21', label: 'PPh 21', type: 'number', readOnly: true, section: '자동 계산' },
+  { key: 'netSalary', label: '실수령', type: 'number', readOnly: true, section: '자동 계산' },
+  // 회사 부담 BPJS (자동)
+  { key: 'bpjsKesCompany', label: 'BPJS KES 4%', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
+  { key: 'jkkCompany', label: 'JKK', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
+  { key: 'jkmCompany', label: 'JKM', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
+  { key: 'jhtCompany', label: 'JHT 3.70%', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
+  { key: 'jpCompany', label: 'JP 2.00%', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
 ];
 
 export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
@@ -114,12 +141,16 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
         <RowDetailModal
           key={detailRow.payslipId}
           title={`직원 상세: ${detailRow.name}`}
-          subtitle={`${detail.period} 귀속 · PTKP ${detailRow.ptkp} · TER ${detailRow.terCategory}`}
+          subtitle={`${detail.period} 귀속 · 직원 정보`}
           summary={[
-            { label: '총 지급', value: rp(detailRow.totalGross) },
-            { label: 'PPh 21', value: rp(detailRow.pph21) },
+            { label: '사번', value: detailRow.employeeNumber || '—' },
+            { label: 'NPWP', value: detailRow.npwp || '—' },
+            { label: 'NIK', value: detailRow.nik || '—' },
             { label: 'PTKP', value: String(detailRow.ptkp) },
-            { label: 'TER 구간', value: String(detailRow.terCategory) },
+            { label: '고용형태', value: detailRow.employmentStatus || '—' },
+            { label: '직군 (Tax Method)', value: detailRow.workerType || '—' },
+            { label: '직책', value: detailRow.position || '—' },
+            { label: '부서', value: detailRow.department || '—' },
           ]}
           rowId={detailRow.payslipId}
           queueId={queueId}
