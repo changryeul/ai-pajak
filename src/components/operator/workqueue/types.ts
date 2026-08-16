@@ -68,6 +68,15 @@ export const TAX_VIEW_TO_TYPE: Record<string, string> = {
   employees: 'PPh21',
 };
 
+// 세목 탭 (수정요청 58 — 워크큐/발행보드/인박스 공용 사이드바에서 동일하게 사용).
+export const TAX_TABS: Array<{ key: TaxView; label: string; icon: string }> = [
+  { key: 'pph21', label: '개인소득세', icon: '🧑‍💼' },
+  { key: 'withholding', label: '원천세', icon: '✂️' },
+  { key: 'umkm', label: '선납법인세', icon: '🏢' },
+  { key: 'ppn', label: '부가세', icon: '🧾' },
+  { key: 'annual', label: '연 신고', icon: '📅' },
+];
+
 export interface EmployeeHrRow {
   id: string;
   name: string;
@@ -151,6 +160,7 @@ export interface PpnRow {
   counterpartyName: string;
   counterpartyNpwp: string | null;
   dpp: number;
+  dppNilaiLain: number;   // 수정요청 60 — 고객 PPN 화면 parity
   ppn: number;
   isLuxury: boolean;
   reconStatus: string | null;
@@ -179,6 +189,13 @@ export interface WithholdingRow {
   hasInvoicePhoto: boolean;
   invoiceNumber: string | null;
   serviceType: string | null;
+  // 수정요청 59 — 고객 PPh23 화면 parity
+  counterpartyAddress: string | null;
+  invoiceDate: string | null;
+  paymentDate: string | null;
+  notes: string | null;
+  buktiPotongNumber: string | null;
+  buktiPotongDate: string | null;
   reviewedAt: string | null;
   operatorEdits: OperatorEdits | null;
   flags: { level: 'red' | 'amber' | 'green'; issues: string[]; label: string };

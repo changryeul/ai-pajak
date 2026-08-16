@@ -285,9 +285,13 @@ export default function IdBillingBoard() {
                   </Badge>
                 </div>
 
-                {/* 수정요청 52 — Coretax 접속 자격증명(ID + 비밀번호 힌트, 카피). 미등록이어도 항상 표시. */}
+                {/* 수정요청 52 — 고객별 Coretax 접속 링크 + ID/PW 힌트(카피). 미등록이어도 항상 표시. */}
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  <CopyText label="Coretax ID" value={target.customer.coretaxId ?? null} />
+                  <a href={CORETAX_URL} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-md border border-cyan-300 bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-800 hover:bg-cyan-100">
+                    <ExternalLink className="mr-1 h-3 w-3" />Coretax 접속
+                  </a>
+                  <CopyText label="ID" value={target.customer.coretaxId ?? null} />
                   <CopyText label="PW 힌트" value={target.customer.coretaxHint ?? null} />
                 </div>
 

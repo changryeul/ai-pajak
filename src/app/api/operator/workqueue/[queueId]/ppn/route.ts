@@ -35,7 +35,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   const { data: fakturs } = await admin
     .from('ppn_faktur_monthly')
-    .select('id, faktur_type, faktur_number, faktur_date, counterparty_name, counterparty_npwp, dpp, ppn, is_luxury, recon_status, operator_reviewed_at, operator_edits')
+    .select('id, faktur_type, faktur_number, faktur_date, counterparty_name, counterparty_npwp, dpp, dpp_nilai_lain, ppn, is_luxury, recon_status, operator_reviewed_at, operator_edits')
     .eq('customer_id', q.customer_id).eq('tax_period', period)
     .order('faktur_type', { ascending: true })
     .order('faktur_date', { ascending: true });
@@ -57,6 +57,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       counterpartyName: f.counterparty_name ?? '—',
       counterpartyNpwp: f.counterparty_npwp ?? null,
       dpp: Number(f.dpp ?? 0),
+      dppNilaiLain: Number(f.dpp_nilai_lain ?? 0),
       ppn: Number(f.ppn ?? 0),
       isLuxury: !!f.is_luxury,
       reconStatus: f.recon_status ?? null,

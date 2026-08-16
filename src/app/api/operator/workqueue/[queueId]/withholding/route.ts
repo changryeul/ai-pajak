@@ -29,7 +29,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
 
   const { data: txns } = await admin
     .from('pph23_transaction')
-    .select('id, counterparty_id, counterparty_name, counterparty_npwp, tax_regime, transaction_date, description, income_type, service_type, invoice_number, gross_amount, tax_rate, tax_amount, invoice_document_id, operator_reviewed_at, operator_edits')
+    .select('id, counterparty_id, counterparty_name, counterparty_npwp, counterparty_address, tax_regime, transaction_date, description, notes, income_type, service_type, invoice_number, invoice_date, payment_date, bukti_potong_number, bukti_potong_date, gross_amount, tax_rate, tax_amount, invoice_document_id, operator_reviewed_at, operator_edits')
     .eq('customer_id', q.customer_id).eq('tax_period', period)
     .order('transaction_date', { ascending: true });
 
@@ -59,6 +59,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       hasInvoicePhoto,
       invoiceNumber: t.invoice_number ?? null,
       serviceType: t.service_type ?? null,
+      // 수정요청 59 — 고객 PPh23 화면 parity 필드
+      counterpartyAddress: t.counterparty_address ?? null,
+      invoiceDate: t.invoice_date ?? null,
+      paymentDate: t.payment_date ?? null,
+      notes: t.notes ?? null,
+      buktiPotongNumber: t.bukti_potong_number ?? null,
+      buktiPotongDate: t.bukti_potong_date ?? null,
       reviewedAt: t.operator_reviewed_at ?? null,
       operatorEdits: (t.operator_edits as Record<string, unknown> | null) ?? null,
       flags,

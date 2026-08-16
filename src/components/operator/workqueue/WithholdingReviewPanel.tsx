@@ -94,10 +94,12 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
           title={`원천세 거래 상세: ${detailRow.counterpartyName}`}
           subtitle={`${detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23'} · 세액 자동 재계산`}
           summary={[
-            { label: '총 지급액', value: rp(detailRow.grossAmount) },
-            { label: '세액', value: rp(detailRow.taxAmount) },
+            { label: 'Regime', value: detailRow.regime === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23' },
+            { label: 'Income', value: detailRow.incomeType || detailRow.serviceType || '—' },
             { label: '세율', value: `${(detailRow.taxRate * 100).toFixed(1)}%` },
-            { label: '거래처 NPWP', value: detailRow.counterpartyNpwp || '—' },
+            { label: 'PPh 세액', value: rp(detailRow.taxAmount) },
+            { label: 'e-Bupot 번호', value: detailRow.buktiPotongNumber || '—' },
+            { label: 'e-Bupot 일자', value: detailRow.buktiPotongDate || '—' },
           ]}
           calcNote={{
             heading: '세액 산출근거',
@@ -151,12 +153,24 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
 }
 
 // 팝업 편집 필드 (요청 15) — PUT /api/tax/pph23-transactions (camelCase, 세액 재계산 포함)
+// 수정요청 59 — 고객 PPh23 입력 화면과 동일한 필드/섹션.
 const WHT_FIELDS: FieldDef[] = [
+  // 거래 정보
+  { key: 'transactionDate', label: '거래일자', type: 'date', section: '거래 정보' },
   { key: 'counterpartyName', label: '거래처명', type: 'text', section: '거래 정보' },
   { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text', section: '거래 정보' },
-  { key: 'description', label: '거래 내용', type: 'text', section: '거래 정보' },
-  { key: 'invoiceNumber', label: '인보이스 번호', type: 'text', section: '거래 정보' },
-  { key: 'transactionDate', label: '거래일', type: 'date', section: '거래 정보' },
+  { key: 'serviceType', label: '세목', type: 'text', section: '거래 정보' },
+  { key: 'counterpartyAddress', label: '거래처 주소', type: 'text', section: '거래 정보' },
+  // 인보이스 / 지급
+  { key: 'invoiceNumber', label: '인보이스 번호', type: 'text', section: '인보이스 · 지급' },
+  { key: 'invoiceDate', label: '인보이스 일자', type: 'date', section: '인보이스 · 지급' },
+  { key: 'paymentDate', label: '지급일', type: 'date', section: '인보이스 · 지급' },
+  { key: 'description', label: '설명', type: 'text', section: '인보이스 · 지급' },
+  { key: 'notes', label: '메모', type: 'text', section: '인보이스 · 지급' },
+  // 증빙 (Bukti Potong)
+  { key: 'buktiPotongNumber', label: 'Bukti Potong 번호', type: 'text', section: '증빙 (Bukti Potong)' },
+  { key: 'buktiPotongDate', label: 'Bukti Potong 일자', type: 'date', section: '증빙 (Bukti Potong)' },
+  // 금액
   { key: 'grossAmount', label: '총 지급액 (세액 자동 재계산)', type: 'number', section: '금액' },
   { key: 'taxAmount', label: '세액 (자동계산)', type: 'number', readOnly: true, section: '금액' },
 ];

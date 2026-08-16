@@ -234,6 +234,7 @@ const PPN_FIELDS: FieldDef[] = [
   { key: 'counterpartyName', label: '거래처명', type: 'text', section: 'Faktur 정보' },
   { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text', section: 'Faktur 정보' },
   { key: 'dpp', label: 'DPP (PPN 자동 재계산)', type: 'number', section: '금액' },
+  { key: 'dppNilaiLain', label: 'DPP Nilai Lain', type: 'number', section: '금액' },
   { key: 'ppn', label: 'PPN (직접 수정 시 우선)', type: 'number', section: '금액' },
 ];
 

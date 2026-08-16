@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import styles from './workqueue.module.css';
-import { WorkqueueSidebar } from './WorkqueueSidebar';
+import { OperatorRail } from './OperatorRail';
 import { CustomerWorklist } from './CustomerWorklist';
 import { Pph21ReviewPanel } from './Pph21ReviewPanel';
 import { WithholdingReviewPanel } from './WithholdingReviewPanel';
@@ -11,7 +11,7 @@ import { PpnReviewPanel } from './PpnReviewPanel';
 import { UmkmReviewPanel } from './UmkmReviewPanel';
 import { AnnualReviewPanel } from './AnnualReviewPanel';
 import { EmployeeHrPanel } from './EmployeeHrPanel';
-import { STATUS_LABEL_MAP, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
+import { STATUS_LABEL_MAP, TAX_TABS, TAX_VIEW_TO_TYPE, type QueueListItem, type StatusFilter, type TaxView } from './types';
 
 // taxView → 우측 상세 패널. 새 세목 추가 시 여기에 한 줄만 등록.
 const PANEL_BY_VIEW: Partial<Record<TaxView, typeof Pph21ReviewPanel>> = {
@@ -27,16 +27,6 @@ const now = new Date();
 const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
-
-// 세목 탭 (수정요청 4번 → 27번: 사이드바로 이동). '직원 인사 기록'은 메뉴에서
-// 제외(5번) — PANEL_BY_VIEW/API 는 유지하므로 후속(개인소득세 팝업 등)에서 재사용.
-const TAX_TABS: Array<{ key: TaxView; label: string; icon: string }> = [
-  { key: 'pph21', label: '개인소득세', icon: '🧑‍💼' },
-  { key: 'withholding', label: '원천세', icon: '✂️' },
-  { key: 'umkm', label: '선납법인세', icon: '🏢' },
-  { key: 'ppn', label: '부가세', icon: '🧾' },
-  { key: 'annual', label: '연 신고', icon: '📅' },
-];
 
 // 상태 필터 (수정요청 27번: 사이드바 → 상단 가로). all 은 key='' (필터 해제).
 const STATUS_TABS: Array<{ key: StatusFilter; icon: string; label: string; cls: string; countKey: 'all' | 'unreviewed' | 'inReview' | 'request' | 'reviewed' }> = [
@@ -60,6 +50,12 @@ export function WorkqueueClient({ role }: { role?: string }) {
   const isSupervisor = !!role && SUPERVISOR_ROLES.includes(role);
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const [taxView, setTaxView] = useState<TaxView>('pph21');
+  // 수정요청 58 — 발행보드/인박스 사이드바에서 세목 클릭 시 ?view=key 로 진입 → 해당 뷰로.
+  // useSearchParams 대신 mount 시 location 읽기 (Suspense wrapper 불필요).
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get('view');
+    if (v && (TAX_TABS.some(t => t.key === v))) setTaxView(v as TaxView);
+  }, []);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [search, setSearch] = useState('');
   const [items, setItems] = useState<QueueListItem[]>([]);
@@ -140,7 +136,7 @@ export function WorkqueueClient({ role }: { role?: string }) {
   return (
     <div className={styles.root}>
       <div className={styles.app}>
-        <WorkqueueSidebar taxTabs={TAX_TABS} taxView={taxView}
+        <OperatorRail active="workqueue" taxView={taxView}
           onTaxView={(v) => { setSelectedId(null); setTaxView(v); }} />
         <main>
           <div className={styles.top}>
