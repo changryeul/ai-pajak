@@ -33,9 +33,16 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
     .select('coretax_id, coretax_password_hint')
     .eq('id', q.customer_id).maybeSingle();
 
+  // 수정요청 63 — 고객 PPN 환급신청(Restitusi)을 상담원에게 노출
+  const { data: refundReqs } = await admin
+    .from('ppn_refund_request')
+    .select('id, tax_period, refund_amount, refund_reason, status, requested_at')
+    .eq('customer_id', q.customer_id)
+    .order('requested_at', { ascending: false });
+
   const { data: fakturs } = await admin
     .from('ppn_faktur_monthly')
-    .select('id, faktur_type, faktur_number, faktur_date, counterparty_name, counterparty_npwp, dpp, dpp_nilai_lain, ppn, is_luxury, recon_status, operator_reviewed_at, operator_edits')
+    .select('id, faktur_type, faktur_number, faktur_date, counterparty_name, counterparty_npwp, counterparty_address, invoice_number, description, notes, dpp, dpp_nilai_lain, ppn, is_luxury, recon_status, operator_reviewed_at, operator_edits')
     .eq('customer_id', q.customer_id).eq('tax_period', period)
     .order('faktur_type', { ascending: true })
     .order('faktur_date', { ascending: true });
@@ -56,6 +63,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       fakturDate: f.faktur_date ?? null,
       counterpartyName: f.counterparty_name ?? '—',
       counterpartyNpwp: f.counterparty_npwp ?? null,
+      // 수정요청 61 — 고객 PPN 화면 parity 필드
+      counterpartyAddress: f.counterparty_address ?? null,
+      invoiceNumber: f.invoice_number ?? null,
+      description: f.description ?? null,
+      notes: f.notes ?? null,
       dpp: Number(f.dpp ?? 0),
       dppNilaiLain: Number(f.dpp_nilai_lain ?? 0),
       ppn: Number(f.ppn ?? 0),
@@ -79,6 +91,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
     data: {
       queueId: q.id, customerId: q.customer_id, period, status: q.status, summary, rows,
       coretax: { id: cust?.coretax_id ?? null, hint: cust?.coretax_password_hint ?? null },
+      refundRequests: (refundReqs ?? []).map(r => ({
+        id: r.id, taxPeriod: r.tax_period, amount: Number(r.refund_amount ?? 0),
+        reason: r.refund_reason ?? null, status: r.status, requestedAt: r.requested_at,
+      })),
     },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

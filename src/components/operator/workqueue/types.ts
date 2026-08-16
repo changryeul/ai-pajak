@@ -159,6 +159,10 @@ export interface PpnRow {
   fakturDate: string | null;
   counterpartyName: string;
   counterpartyNpwp: string | null;
+  counterpartyAddress: string | null;  // 수정요청 61
+  invoiceNumber: string | null;        // 수정요청 61
+  description: string | null;          // 수정요청 61
+  notes: string | null;                // 수정요청 61
   dpp: number;
   dppNilaiLain: number;   // 수정요청 60 — 고객 PPN 화면 parity
   ppn: number;
@@ -173,6 +177,8 @@ export interface PpnDetail {
   summary: { fakturCount: number; totalDpp: number; totalPpn: number; incompleteCount: number };
   rows: PpnRow[];
   coretax?: { id: string | null; hint: string | null }; // 수정요청 48·49 — Coretax 접속 자격증명
+  // 수정요청 63 — 고객 PPN 환급신청(Restitusi)
+  refundRequests?: Array<{ id: string; taxPeriod: string; amount: number; reason: string | null; status: string; requestedAt: string }>;
 }
 
 export interface WithholdingRow {

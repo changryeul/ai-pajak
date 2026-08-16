@@ -56,6 +56,114 @@ function CoretaxAccessBar({ coretax, reconBusy, onFile }:
   );
 }
 
+// 수정요청 63 — 고객 환급신청 목록 + 처리완료 버튼
+function RefundRequestsCard({ requests, onChanged }:
+  { requests: NonNullable<PpnDetail['refundRequests']>; onChanged: () => void }) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const mark = async (id: string, status: 'PROCESSED' | 'CANCELLED') => {
+    setBusy(id);
+    try {
+      await fetch('/api/operator/ppn-refund-request', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+      onChanged();
+    } finally { setBusy(null); }
+  };
+  const statusLabel: Record<string, string> = { PENDING: '신청됨', PROCESSED: '처리완료', CANCELLED: '취소' };
+  return (
+    <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
+      <div className="mb-2 text-xs font-black text-emerald-900">💸 고객 PPN 환급신청 (Restitusi) — {requests.length}건</div>
+      <div className="flex flex-col gap-2">
+        {requests.map(r => (
+          <div key={r.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-100 bg-white px-3 py-2 text-xs">
+            <span className="font-bold text-slate-800">{r.taxPeriod}</span>
+            <span className="font-mono text-emerald-700">Rp {r.amount.toLocaleString('id-ID')}</span>
+            {r.reason && <span className="text-slate-500">· {r.reason}</span>}
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${r.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : r.status === 'PROCESSED' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+              {statusLabel[r.status] ?? r.status}
+            </span>
+            {r.status === 'PENDING' && (
+              <span className="ml-auto flex gap-1">
+                <button disabled={busy === r.id} onClick={() => mark(r.id, 'PROCESSED')}
+                  className="rounded-md border border-emerald-300 bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">처리완료</button>
+                <button disabled={busy === r.id} onClick={() => mark(r.id, 'CANCELLED')}
+                  className="rounded-md border border-gray-200 px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-gray-50 disabled:opacity-50">취소</button>
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 수정요청 64 — 누적 미환급 부가세 원장 + 이번달 납부액 산출(상담원 수동입력)
+interface CarryoverData {
+  period: string; salesPpn: number; purchasePpn: number; monthNet: number;
+  openingCredit: number; payable: number; closingCredit: number; saved: boolean;
+}
+function CarryoverCard({ queueId }: { queueId: string }) {
+  const [data, setData] = useState<CarryoverData | null>(null);
+  const [opening, setOpening] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const load = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/operator/workqueue/${queueId}/ppn-carryover`);
+      const j = await r.json();
+      if (j.success) { setData(j.data as CarryoverData); setOpening(String(j.data.openingCredit ?? 0)); }
+    } catch { /* keep */ }
+  }, [queueId]);
+  useEffect(() => { load(); }, [load]);
+  const save = async () => {
+    setBusy(true); setMsg(null);
+    try {
+      const r = await fetch(`/api/operator/workqueue/${queueId}/ppn-carryover`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ openingCredit: Number(opening || 0) }),
+      });
+      const j = await r.json();
+      if (j.success) { setData(j.data as CarryoverData); setMsg('저장됨'); }
+      else setMsg(j.error || '저장 실패');
+    } catch { setMsg('네트워크 오류'); }
+    finally { setBusy(false); }
+  };
+  if (!data) return null;
+  return (
+    <div className="mt-2 rounded-xl border border-indigo-200 bg-indigo-50/40 p-3 text-xs">
+      <div className="mb-2 text-xs font-black text-indigo-900">📊 누적 미환급 부가세 · 이번달 납부액 ({data.period})</div>
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+        <div><p className="text-[10px] text-gray-400">매출 PPN</p><p className="font-mono font-semibold">{rp(data.salesPpn)}</p></div>
+        <div><p className="text-[10px] text-gray-400">매입 PPN</p><p className="font-mono font-semibold">{rp(data.purchasePpn)}</p></div>
+        <div><p className="text-[10px] text-gray-400">이번달 (매출−매입)</p><p className={`font-mono font-bold ${data.monthNet >= 0 ? 'text-red-600' : 'text-emerald-600'}`}>{rp(data.monthNet)}</p></div>
+        <div>
+          <label className="text-[10px] text-gray-400">이월 누적 미환급액 (Coretax 입력)</label>
+          <input type="number" value={opening} onChange={e => setOpening(e.target.value)}
+            className="h-8 w-full rounded-md border border-indigo-200 px-2 font-mono text-xs focus:border-indigo-400 focus:outline-none" />
+        </div>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-indigo-100 pt-2">
+        <span className="text-[11px]">이번달 <b>납부액(ID Billing 대상)</b>: <b className="font-mono text-red-700">{rp(data.payable)}</b></span>
+        <span className="text-[11px]">이월 후 잔여 미환급: <b className="font-mono text-emerald-700">{rp(data.closingCredit)}</b></span>
+        <span className="ml-auto flex items-center gap-2">
+          {msg && <span className="text-[11px] text-slate-500">{msg}</span>}
+          <button disabled={busy} onClick={save}
+            className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">
+            {busy ? '저장 중…' : '계산·저장'}
+          </button>
+        </span>
+      </div>
+      {data.payable > 0 && (
+        <p className="mt-1.5 text-[11px] text-red-700">→ 납부액 {rp(data.payable)} 을 ID Billing 발행 보드에서 발행하세요.</p>
+      )}
+      {data.payable === 0 && data.monthNet <= 0 && (
+        <p className="mt-1.5 text-[11px] text-emerald-700">→ 이번달 환급(크레딧). 누적 미환급액에 합산됨.</p>
+      )}
+    </div>
+  );
+}
+
 export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
   const [detail, setDetail] = useState<PpnDetail | null>(null);
@@ -164,6 +272,14 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
         {/* 수정요청 48·49 — Coretax 접속(포털 새 탭) + 고객 자격증명(카피) + 대조 파일 업로드 */}
         <CoretaxAccessBar coretax={detail.coretax} reconBusy={reconBusy} onFile={runCoretaxRecon} />
 
+        {/* 수정요청 63 — 고객 PPN 환급신청(Restitusi) 노출 + 처리 */}
+        {(detail.refundRequests ?? []).length > 0 && (
+          <RefundRequestsCard requests={detail.refundRequests ?? []} onChanged={load} />
+        )}
+
+        {/* 수정요청 64 — 누적 미환급 부가세 + 이번달 납부액 산출 */}
+        <CarryoverCard queueId={queueId} />
+
         <PpnReviewTable rows={rows} onRequest={setRequestRow} onOpenDetail={setDetailRow} />
 
         {/* 수정요청 22번 — 이슈로 표기된 건만 이슈 내용을 간단히 요약 */}
@@ -228,11 +344,19 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
 }
 
 // 팝업 편집 필드 (요청 24) — PUT /api/tax/ppn-faktur-monthly (camelCase, PPN 재계산)
+// 수정요청 61 — 고객 PPN 입력 화면과 동일한 필드/섹션.
 const PPN_FIELDS: FieldDef[] = [
+  // Faktur 정보
   { key: 'fakturNumber', label: 'faktur 번호', type: 'text', section: 'Faktur 정보' },
   { key: 'fakturDate', label: 'faktur 일자', type: 'date', section: 'Faktur 정보' },
   { key: 'counterpartyName', label: '거래처명', type: 'text', section: 'Faktur 정보' },
   { key: 'counterpartyNpwp', label: '거래처 NPWP', type: 'text', section: 'Faktur 정보' },
+  { key: 'counterpartyAddress', label: '거래처 주소', type: 'text', section: 'Faktur 정보' },
+  // 인보이스 · 설명
+  { key: 'invoiceNumber', label: '인보이스 번호', type: 'text', section: '인보이스 · 설명' },
+  { key: 'description', label: '설명', type: 'text', section: '인보이스 · 설명' },
+  { key: 'notes', label: '메모', type: 'text', section: '인보이스 · 설명' },
+  // 금액
   { key: 'dpp', label: 'DPP (PPN 자동 재계산)', type: 'number', section: '금액' },
   { key: 'dppNilaiLain', label: 'DPP Nilai Lain', type: 'number', section: '금액' },
   { key: 'ppn', label: 'PPN (직접 수정 시 우선)', type: 'number', section: '금액' },

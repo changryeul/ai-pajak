@@ -1533,8 +1533,20 @@ function PPNRefundSection({ locale: _locale }: { locale: string }) {
                   (refundStep === 2 && (!agreedFees || !agreedAudit)) ||
                   (refundStep === 3 && (!refundPeriod || !refundReason))
                 }
-                onClick={() => {
+                onClick={async () => {
                   if (refundStep === 3) {
+                    // 수정요청 63 — 신청을 서버에 저장(운영팀 워크큐에서 확인 가능).
+                    const now = new Date();
+                    const curPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    const taxPeriod = /^\d{4}-\d{2}$/.test(refundPeriod.trim()) ? refundPeriod.trim() : curPeriod;
+                    const reason = [refundReason, refundPeriod && !/^\d{4}-\d{2}$/.test(refundPeriod.trim()) ? `(기간: ${refundPeriod})` : '']
+                      .filter(Boolean).join(' ');
+                    try {
+                      await fetch('/api/tax/ppn-refund-request', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ taxPeriod, refundAmount: estimatedRefund, refundReason: reason }),
+                      });
+                    } catch { /* 저장 실패해도 UI 는 완료 표시 — 재신청 가능 */ }
                     setSubmitted(true);
                   }
                   setRefundStep(refundStep + 1);
