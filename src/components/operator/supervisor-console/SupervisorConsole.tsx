@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import styles from './console.module.css';
@@ -374,6 +374,31 @@ const DETAIL_MAP: Record<string, { ep: string; cols: Array<{ key: string; label:
   PPh4_2: { ep: 'withholding', cols: [{ key: 'counterpartyName', label: '거래처' }, { key: 'grossAmount', label: '지급액', money: true }, { key: 'taxAmount', label: '세액', money: true }] },
   PPN: { ep: 'ppn', cols: [{ key: 'fakturNumber', label: 'Faktur' }, { key: 'dpp', label: 'DPP', money: true }, { key: 'ppn', label: 'PPN', money: true }] },
 };
+// 승인 미러 — 세목별 고객 입력 폼 전체 필드 (섹션). 상세 API row 의 키를 그대로 읽음.
+type MirrorField = { key: string; label: string; money?: boolean };
+type MirrorSection = { title: string; fields: MirrorField[] };
+const MIRROR_SECTIONS: Record<string, MirrorSection[]> = {
+  pph21: [
+    { title: '직원 정보', fields: [{ key: 'employeeNumber', label: '사번' }, { key: 'npwp', label: 'NPWP' }, { key: 'nik', label: 'NIK' }, { key: 'ptkp', label: 'PTKP' }, { key: 'employmentStatus', label: '고용형태' }, { key: 'workerType', label: '직군' }, { key: 'position', label: '직책' }, { key: 'department', label: '부서' }] },
+    { title: '근태', fields: [{ key: 'workingDays', label: '근무일' }, { key: 'absentDays', label: '결근일' }, { key: 'overtimeHours', label: '초과근무(시간)' }] },
+    { title: '기본급 + 수당', fields: [{ key: 'baseSalary', label: '기본급', money: true }, { key: 'overtimePay', label: '초과근무수당', money: true }, { key: 'mealAllowance', label: '식대', money: true }, { key: 'transportAllowance', label: '교통비', money: true }, { key: 'positionAllowance', label: '직책수당', money: true }, { key: 'otherAllowances', label: '기타수당', money: true }, { key: 'laptopAllowance', label: '노트북', money: true }, { key: 'medicalAllowance', label: '의료', money: true }, { key: 'taxAllowance', label: '세금(Gross-up)', money: true }, { key: 'annualLeavePay', label: '연차', money: true }] },
+    { title: '특수 지급', fields: [{ key: 'severanceAllowance', label: '퇴직금', money: true }, { key: 'pkwtCompensation', label: 'PKWT 보상', money: true }] },
+    { title: '보너스', fields: [{ key: 'bonusOnly', label: '보너스', money: true }, { key: 'thrOnly', label: 'THR', money: true }, { key: 'commission', label: '커미션', money: true }] },
+    { title: '공제', fields: [{ key: 'bpjsKesehatan', label: 'BPJS 건강', money: true }, { key: 'bpjsKetenagakerjaan', label: 'BPJS 고용', money: true }, { key: 'jhtEmployee', label: 'JHT', money: true }, { key: 'jpEmployee', label: 'JP', money: true }, { key: 'loanDeduction', label: '대출상환', money: true }, { key: 'otherDeductions', label: '기타공제', money: true }] },
+    { title: '자동 계산', fields: [{ key: 'totalGross', label: '총지급', money: true }, { key: 'pph21', label: 'PPh21', money: true }, { key: 'netSalary', label: '실수령', money: true }] },
+  ],
+  withholding: [
+    { title: '거래 정보', fields: [{ key: 'transactionDate', label: '거래일자' }, { key: 'counterpartyName', label: '거래처명' }, { key: 'counterpartyNpwp', label: 'NPWP' }, { key: 'serviceType', label: '세목' }, { key: 'counterpartyAddress', label: '거래처 주소' }] },
+    { title: '인보이스 · 지급', fields: [{ key: 'invoiceNumber', label: '인보이스 번호' }, { key: 'invoiceDate', label: '인보이스 일자' }, { key: 'paymentDate', label: '지급일' }, { key: 'description', label: '설명' }, { key: 'notes', label: '메모' }] },
+    { title: '증빙 · 금액', fields: [{ key: 'buktiPotongNumber', label: 'Bukti Potong 번호' }, { key: 'buktiPotongDate', label: 'Bukti Potong 일자' }, { key: 'grossAmount', label: '총지급액', money: true }, { key: 'taxAmount', label: '세액', money: true }] },
+  ],
+  ppn: [
+    { title: 'Faktur 정보', fields: [{ key: 'fakturNumber', label: 'faktur 번호' }, { key: 'fakturDate', label: 'faktur 일자' }, { key: 'counterpartyName', label: '거래처명' }, { key: 'counterpartyNpwp', label: 'NPWP' }, { key: 'counterpartyAddress', label: '거래처 주소' }] },
+    { title: '인보이스 · 설명', fields: [{ key: 'invoiceNumber', label: '인보이스 번호' }, { key: 'description', label: '설명' }, { key: 'notes', label: '메모' }] },
+    { title: '금액', fields: [{ key: 'dpp', label: 'DPP', money: true }, { key: 'dppNilaiLain', label: 'DPP Nilai Lain', money: true }, { key: 'ppn', label: 'PPN', money: true }] },
+  ],
+};
+
 function ApprovalView({ d, onChanged }: { d: ConsoleData; onChanged: () => void }) {
   const [sel, setSel] = useState<ApprovalItem | null>(null);
   return (
@@ -413,6 +438,7 @@ function ApprovalDetail({ item, onClose, onDecided }: { item: ApprovalItem; onCl
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
   const [err, setErr] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   useEffect(() => {
     if (cfg) fetch(`/api/operator/workqueue/${item.id}/${cfg.ep}`).then(r => r.json()).then(j => { if (j.success) setDetail(j.data); }).catch(() => {});
@@ -460,19 +486,44 @@ function ApprovalDetail({ item, onClose, onDecided }: { item: ApprovalItem; onCl
               </div>
               <div className={styles.tableWrap}>
                 <table>
-                  <thead><tr>{cfg.cols.map(c => <th key={c.key}>{c.label}</th>)}<th>상태</th></tr></thead>
+                  <thead><tr>{cfg.cols.map(c => <th key={c.key}>{c.label}</th>)}<th>상태</th><th></th></tr></thead>
                   <tbody>
                     {rows.slice(0, 50).map((r, i) => {
-                      const edited = r.operatorEdits && Object.keys(r.operatorEdits as object).length > 0;
+                      const edits = (r.operatorEdits as Record<string, unknown> | null) ?? null;
+                      const edited = edits && Object.keys(edits).length > 0;
                       const flags = r.flags as { level?: string; label?: string } | undefined;
+                      const sections = MIRROR_SECTIONS[cfg.ep] ?? [];
                       return (
-                        <tr key={i} style={edited ? { background: '#fff7ed' } : undefined}>
-                          {cfg.cols.map(c => <td key={c.key}>{c.money ? rp(Number(r[c.key] ?? 0)) : String(r[c.key] ?? '—')}</td>)}
-                          <td><span className={`${styles.badge} ${flags?.level === 'red' ? styles.red : flags?.level === 'amber' ? styles.amber : styles.green}`}>{flags?.label ?? '—'}</span></td>
-                        </tr>
+                        <Fragment key={i}>
+                          <tr style={edited ? { background: '#fff7ed' } : undefined}>
+                            {cfg.cols.map(c => <td key={c.key}>{c.money ? rp(Number(r[c.key] ?? 0)) : String(r[c.key] ?? '—')}</td>)}
+                            <td><span className={`${styles.badge} ${flags?.level === 'red' ? styles.red : flags?.level === 'amber' ? styles.amber : styles.green}`}>{flags?.label ?? '—'}</span></td>
+                            <td>{sections.length > 0 && <button className={styles.mirrorRowBtn} onClick={() => setExpanded(expanded === i ? null : i)}>{expanded === i ? '접기' : '전체 필드'}</button>}</td>
+                          </tr>
+                          {expanded === i && sections.map(sec => (
+                            <tr key={sec.title}>
+                              <td colSpan={cfg.cols.length + 2} style={{ padding: 0 }}>
+                                <div className={styles.formSection}>
+                                  <div className={styles.formSectionTitle}>{sec.title}</div>
+                                  <div className={styles.formGrid}>
+                                    {sec.fields.map(f => {
+                                      const isEdited = !!edits && f.key in edits;
+                                      return (
+                                        <div key={f.key} className={`${styles.formCell} ${isEdited ? styles.edited : ''}`}>
+                                          <span>{f.label}{isEdited ? ' ✎' : ''}</span>
+                                          <b>{f.money ? rp(Number(r[f.key] ?? 0)) : String(r[f.key] ?? '—')}</b>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </Fragment>
                       );
                     })}
-                    {rows.length === 0 && <tr><td colSpan={cfg.cols.length + 1} style={{ color: '#94a3b8' }}>불러오는 중 또는 데이터 없음</td></tr>}
+                    {rows.length === 0 && <tr><td colSpan={cfg.cols.length + 2} style={{ color: '#94a3b8' }}>불러오는 중 또는 데이터 없음</td></tr>}
                   </tbody>
                 </table>
               </div>

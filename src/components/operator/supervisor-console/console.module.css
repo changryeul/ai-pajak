@@ -95,5 +95,15 @@
 .metric{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}
 .metric span{font-size:11px;color:var(--muted);font-weight:900}.metric b{display:block;margin-top:4px;font-size:16px}
 @media(max-width:1200px){.evalCards{grid-template-columns:1fr}}
+/* 승인 미러 — 고객 입력 폼 전체 필드 재현 (목업 form-section 이식) */
+.formSection{border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#fff;margin-top:10px}
+.formSectionTitle{background:#f8fafc;padding:11px 13px;border-bottom:1px solid var(--line);font-weight:1000;font-size:13px}
+.formGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line)}
+.formCell{background:#fff;padding:10px}
+.formCell span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-bottom:4px}
+.formCell b{font-size:13px}
+.formCell.edited{background:#fff7ed}.formCell.edited span{color:#9a3412}
+.mirrorRowBtn{border:0;background:#eff6ff;color:#1d4ed8;border-radius:8px;padding:5px 9px;font-weight:900;cursor:pointer;font-size:11px;font-family:inherit}
+@media(max-width:1200px){.formGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1200px){.grid.kpi{grid-template-columns:repeat(2,1fr)}.grid.two,.assignmentLayout{grid-template-columns:1fr}.grid.three{grid-template-columns:1fr}}
 @media(max-width:780px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.grid.kpi{grid-template-columns:1fr}.transferForm{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
