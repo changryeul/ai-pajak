@@ -38,6 +38,7 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
   const [view, setView] = useState<View>('dashboard');
   const [data, setData] = useState<ConsoleData | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [showReport, setShowReport] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -98,6 +99,7 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
           <div className={styles.topbar}>
             <div className={styles.title}><h1>{meta.title}</h1><p>{meta.desc}</p></div>
             <div className={styles.topActions}>
+              {data && <button className={`${styles.btn} ${styles.blue}`} onClick={() => setShowReport(true)}>📄 월간 리포트</button>}
               <a className={styles.btn} href={`/${locale}/operator/workqueue`}>← 업무함</a>
               <button className={styles.btn} onClick={logout}>로그아웃</button>
             </div>
@@ -113,7 +115,78 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
             : <AuditView d={data} />}
         </main>
       </div>
+      {showReport && data && <ReportModal name={name} d={data} onClose={() => setShowReport(false)} />}
       {toast && <div className={styles.toast}>{toast}</div>}
+    </div>
+  );
+}
+
+// ── 월간 리포트 모달 ──
+function ReportModal({ name, d, onClose }: { name?: string; d: ConsoleData; onClose: () => void }) {
+  const now = new Date();
+  const ym = `${now.getFullYear()}년 ${now.getMonth() + 1}월`;
+  const rejects = d.audit.filter(a => /reject|반려|REJECT/i.test(a.activity)).length;
+  const comment = `${ym} 운영 요약: 자동배정 원칙에 따라 신규 고객 ${d.kpis.autoAssigned}건이 자동 배정되었고, 배정/변경 ${d.kpis.changes}건이 발생했습니다. 승인대기 ${d.approvalPending.length}건이 검토 대기 중이며, 오프라인 상담원은 ${d.kpis.excludedOffline}명입니다. 팀 상담원 ${d.team.length}명 기준 상위 품질점수 상담원은 ${d.ranking[0]?.name ?? '—'} 입니다.`;
+  return (
+    <div className={styles.modalBg} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <h2>AI Pajak 월간 수퍼바이저 리포트</h2>
+        <div className={styles.modalBody}>
+          <div className={styles.reportCover}>
+            <h3>{ym} 수퍼바이저 운영 리포트</h3>
+            <p>{name || '수퍼바이저'} 기준 · 팀 성과/상담원 순위/승인 요약 포함</p>
+          </div>
+          <div className={styles.reportGrid}>
+            <div className={styles.reportKpi}><span>자동배정 완료</span><b>{d.kpis.autoAssigned}</b></div>
+            <div className={styles.reportKpi}><span>배정/변경</span><b>{d.kpis.changes}</b></div>
+            <div className={styles.reportKpi}><span>승인대기</span><b>{d.approvalPending.length}</b></div>
+            <div className={styles.reportKpi}><span>팀 상담원</span><b>{d.team.length}</b></div>
+          </div>
+
+          <div className={styles.reportSection}>
+            <h4>1. 팀 성과 비교</h4>
+            <div className={styles.tableWrap}>
+              <table>
+                <thead><tr><th>상담원</th><th>담당</th><th>정원</th><th>품질</th><th>자동배정</th></tr></thead>
+                <tbody>
+                  {d.team.map(t => <tr key={t.id}><td><b>{t.name}</b></td><td>{t.load}</td><td>{t.maxClients}</td><td>{t.score.toFixed(0)}</td><td>{t.autoAssign ? 'ON' : 'OFF'}</td></tr>)}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className={styles.reportSection}>
+            <h4>2. 상담원 순위</h4>
+            <div className={styles.rs}>
+              <div className={styles.rankCard}>
+                {d.ranking.map((r, i) => (
+                  <div key={r.id} className={styles.rankRow}><div className={styles.avatar}>{i + 1}</div><div><b>{r.name}</b><div style={{ color: '#64748b', fontSize: 12 }}>담당 {r.load}건</div></div><div className={styles.score}>{r.score.toFixed(0)}</div></div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.reportSection}>
+            <h4>3. 승인 / 반려 요약</h4>
+            <div className={styles.rs}>
+              <ul>
+                <li>승인대기: {d.approvalPending.length}건</li>
+                <li>최근 반려(감사 기준): {rejects}건</li>
+                <li>총 감사 이벤트(최근): {d.audit.length}건</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className={styles.reportSection}>
+            <h4>4. 운영 코멘트</h4>
+            <div className={styles.rs}><p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#334155' }}>{comment}</p></div>
+          </div>
+        </div>
+        <div className={styles.modalFooter}>
+          <button className={styles.btn} onClick={onClose}>닫기</button>
+          <button className={`${styles.btn} ${styles.blue}`} onClick={() => window.print()}>인쇄 / PDF</button>
+        </div>
+      </div>
     </div>
   );
 }
