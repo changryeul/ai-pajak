@@ -39,7 +39,6 @@ import {
   UserPlus,
   Bell,
   ShieldCheck,
-  ArrowRightLeft,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -201,15 +200,14 @@ const navItems: NavSection[] = [
     labelKey: 'nav.supervisorErp',
     roles: [UserRole.TAX_OPERATOR_SUPERVISOR],
     items: [
-      { href: '/operator/supervisor/approval', icon: ClipboardList, labelKey: 'nav.supervisorApproval' },
-      { href: '/operator/supervisor/team', icon: Users, labelKey: 'nav.supervisorTeam' },
-      { href: '/operator/supervisor/affiliation', icon: ArrowRightLeft, labelKey: 'nav.supervisorAffiliation' },
+      // v13 통합 콘솔 — 승인/팀/소속/이관현황/평가/배정/감사를 이 안에서 처리 (2026-08-19)
+      { href: '/operator/supervisor-console', icon: LayoutDashboard, labelKey: 'nav.supervisorConsole' },
+      // 콘솔이 아직 커버하지 않는 화면만 개별 유지
       { href: '/operator/supervisor/customers', icon: Users, labelKey: 'nav.supervisorCustomers' },
       { href: '/operator/supervisor/revisions', icon: ClipboardList, labelKey: 'nav.supervisorRevisions' },
       { href: '/operator/supervisor/calendar', icon: BarChart3, labelKey: 'nav.supervisorCalendar' },
       { href: '/operator/supervisor/legality', icon: Shield, labelKey: 'nav.supervisorLegality' },
       { href: '/operator/supervisor/coretax', icon: Receipt, labelKey: 'nav.supervisorCoretax' },
-      { href: '/operator/supervisor/billing-handover', icon: CreditCard, labelKey: 'nav.supervisorBillingHandover' },
       { href: '/operator/supervisor/quality', icon: ShieldCheck, labelKey: 'nav.supervisorQuality' },
       { href: '/operator/supervisor/settings', icon: Shield, labelKey: 'nav.supervisorSettings' },
     ],

@@ -274,6 +274,7 @@
     "supervisorTeam": "Team",
     "supervisorQuality": "Quality",
     "supervisorLegality": "Legality",
+    "supervisorConsole": "Supervisor Console",
     "supervisorApproval": "Approval",
     "opMessenger": "Messenger",
     "customerInbox": "Customer Inbox",
