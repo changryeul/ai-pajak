@@ -86,5 +86,14 @@
 .reportSection ul{margin:0;padding-left:18px;color:#334155;font-size:13px;line-height:1.7}
 @media print{.sidebar,.topbar,.modalFooter{display:none!important}.modalBg{position:static;background:#fff;padding:0}.modal{box-shadow:none;max-height:none}}
 @media(max-width:780px){.reportGrid{grid-template-columns:1fr 1fr}}
+/* 평가 메트릭 카드 (목업 eval-metrics 이식) */
+.evalCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.evalCard{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px}
+.evalCard .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.evalCard .top b{font-size:15px}
+.evalMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.metric{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}
+.metric span{font-size:11px;color:var(--muted);font-weight:900}.metric b{display:block;margin-top:4px;font-size:16px}
+@media(max-width:1200px){.evalCards{grid-template-columns:1fr}}
 @media(max-width:1200px){.grid.kpi{grid-template-columns:repeat(2,1fr)}.grid.two,.assignmentLayout{grid-template-columns:1fr}.grid.three{grid-template-columns:1fr}}
 @media(max-width:780px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.grid.kpi{grid-template-columns:1fr}.transferForm{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}

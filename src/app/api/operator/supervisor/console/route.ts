@@ -57,7 +57,7 @@ export async function GET(_req: NextRequest) {
   // 상담원(operator) 마스터
   const { data: ops } = await admin
     .from('tax_operators')
-    .select('id, name, work_state, status, max_clients, approval_quality_score, accuracy_pct, specialties, auto_assign_enabled');
+    .select('id, name, work_state, status, max_clients, approval_quality_score, accuracy_pct, specialties, auto_assign_enabled, supervisor_id');
   const opById = new Map((ops ?? []).map(o => [o.id, o]));
 
   // 활성 배정
@@ -118,6 +118,20 @@ export async function GET(_req: NextRequest) {
   }));
   const ranking = [...team].sort((a, b) => b.score - a.score).slice(0, 6);
 
+  // 팀 비교 (supervisor_id 로 그룹) — 인원/평균 품질/총 담당
+  const bySup = new Map<string, { name: string; count: number; scoreSum: number; load: number }>();
+  for (const o of ops ?? []) {
+    const supId = o.supervisor_id ?? 'none';
+    const supName = o.supervisor_id ? (opById.get(o.supervisor_id)?.name ?? '미지정') : '미지정';
+    const g = bySup.get(supId) ?? { name: supName, count: 0, scoreSum: 0, load: 0 };
+    g.count += 1; g.scoreSum += Number(o.approval_quality_score ?? 0);
+    g.load += loadByOp.get(o.id) ?? 0;
+    bySup.set(supId, g);
+  }
+  const teamCompare = [...bySup.values()]
+    .map(g => ({ team: g.name, members: g.count, avgScore: g.count ? Math.round(g.scoreSum / g.count) : 0, totalLoad: g.load }))
+    .sort((a, b) => b.avgScore - a.avgScore);
+
   // 승인대기 (djp PENDING_APPROVAL)
   const { data: pendingQ } = await admin
     .from('djp_submission_queue')
@@ -163,7 +177,7 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    data: { kpis, assignedCustomers, history, team, ranking, approvalPending, audit,
+    data: { kpis, assignedCustomers, history, team, ranking, teamCompare, approvalPending, audit,
       operators: team.map(t => ({ id: t.id, name: t.name })) },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

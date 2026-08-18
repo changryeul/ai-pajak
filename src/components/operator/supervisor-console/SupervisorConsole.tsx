@@ -11,6 +11,7 @@ interface ConsoleData {
   history: Array<{ name: string; operator: string; method: string; at: string }>;
   team: Array<{ id: string; name: string; workState: string; load: number; maxClients: number; score: number; autoAssign: boolean }>;
   ranking: Array<{ id: string; name: string; score: number; load: number }>;
+  teamCompare: Array<{ team: string; members: number; avgScore: number; totalLoad: number }>;
   operators: Array<{ id: string; name: string }>;
   approvalPending: Array<{ id: string; company: string; taxType: string; period: string; amount: number }>;
   audit: Array<{ activity: string; role: string; taxType: string | null; company: string; at: string }>;
@@ -225,8 +226,18 @@ function DashboardView({ d }: { d: ConsoleData }) {
           </div>
         </div>
         <div className={styles.card}>
-          <div className={styles.cardHead}><div><h2>상담원 순위</h2><p>품질점수 기준</p></div></div>
+          <div className={styles.cardHead}><div><h2>상담원 순위 · 팀비교</h2><p>품질점수 기준</p></div></div>
           <div className={styles.cardBody}>
+            {d.teamCompare.length > 0 && (
+              <div className={styles.tableWrap} style={{ marginBottom: 12 }}>
+                <table>
+                  <thead><tr><th>팀(수퍼바이저)</th><th>인원</th><th>평균 품질</th><th>총 담당</th></tr></thead>
+                  <tbody>
+                    {d.teamCompare.map((t, i) => <tr key={i}><td><b>{t.team}</b></td><td>{t.members}</td><td>{t.avgScore}</td><td>{t.totalLoad}</td></tr>)}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <div className={styles.rankCard}>
               {d.ranking.map((r, i) => (
                 <div key={r.id} className={styles.rankRow}>
@@ -524,6 +535,21 @@ function EvaluationView() {
       <div className={styles.cardHead}><div><h2>상담원 평가</h2><p>{data.disclaimer || '반려율·승인통과율 실측. 인센티브는 제안값이며 자동 상벌 없음.'}</p></div>
         {data.isSuggestionOnly && <span className={`${styles.badge} ${styles.amber}`}>제안값</span>}</div>
       <div className={styles.cardBody}>
+        {rows.length > 0 && (
+          <div className={styles.evalCards}>
+            {rows.slice(0, 3).map((r, i) => (
+              <div key={i} className={styles.evalCard}>
+                <div className={styles.top}><b>{r.name}</b><span className={styles.score}>{r.scores.total.toFixed(0)}</span></div>
+                <div className={styles.evalMetrics}>
+                  <div className={styles.metric}><span>정확도</span><b>{r.scores.accuracy.toFixed(0)}</b></div>
+                  <div className={styles.metric}><span>속도</span><b>{r.scores.speed.toFixed(0)}</b></div>
+                  <div className={styles.metric}><span>승인품질</span><b>{r.scores.approval.toFixed(0)}</b></div>
+                  <div className={styles.metric}><span>고객응대</span><b>{r.scores.satisfaction.toFixed(0)}</b></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <div className={styles.tableWrap}>
           <table>
             <thead><tr><th>상담원</th><th>총점</th><th>반려율</th><th>승인통과율</th><th>정확도</th><th>속도</th><th>제안 인센티브</th></tr></thead>
