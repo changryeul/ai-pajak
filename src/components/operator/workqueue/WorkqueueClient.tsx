@@ -157,8 +157,11 @@ export function WorkqueueClient({ role }: { role?: string }) {
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
               <input placeholder="고객명, NPWP 검색 (연 단위)" value={search} onChange={e => setSearch(e.target.value)} />
-              {/* 수정요청 54 — 집(🏠) 버튼은 예전 대시보드 화면으로 이동해 혼란 → 제거.
-                  워크큐/발행보드/고객인박스 이동은 좌측 레일에서 처리. */}
+              {/* 수정요청 54 — 집(🏠) 버튼은 예전 대시보드 화면으로 이동해 혼란 → 제거. */}
+              {isSupervisor && (
+                <a className={styles.btn} href={`/${locale}/operator/supervisor-console`}
+                  title="수퍼바이저 콘솔">🛡️ 콘솔</a>
+              )}
               <button className={styles.btn} onClick={handleLogout} title="로그아웃">로그아웃</button>
             </div>
           </div>

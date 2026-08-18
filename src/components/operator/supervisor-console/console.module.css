@@ -1,0 +1,66 @@
+/* AI Pajak 수퍼바이저 콘솔 v13 — 목업 디자인 이식 (2026-08-18) */
+.root{
+  --bg:#f4f7fb;--panel:#fff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
+  --blue:#2563eb;--blue2:#dbeafe;--green:#16a34a;--green2:#dcfce7;--amber:#d97706;--amber2:#fef3c7;
+  --red:#dc2626;--red2:#fee2e2;--purple:#7c3aed;--purple2:#ede9fe;--cyan:#0891b2;--cyan2:#cffafe;
+  --shadow:0 10px 28px rgba(15,23,42,.08);--radius:18px;
+  background:var(--bg);color:var(--ink);font-family:Inter,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  min-height:100vh;
+}
+.root *{box-sizing:border-box}
+.app{display:grid;grid-template-columns:286px minmax(0,1fr);min-height:100vh}
+.sidebar{background:#101827;color:#fff;padding:18px;position:sticky;top:0;height:100vh;overflow:auto}
+.logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+.logoMark{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#60a5fa,#8b5cf6);display:grid;place-items:center;font-weight:900;color:#fff}
+.logo b{font-size:17px}.logo span{font-size:12px;color:#a8b3c7}
+.loginCard{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px;margin:10px 0 18px}
+.loginCard b{display:block;font-size:14px}.loginCard span{display:block;color:#cbd5e1;font-size:12px;margin-top:3px}
+.navSection{color:#94a3b8;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin:18px 8px 8px}
+.nav{width:100%;border:0;border-radius:13px;background:transparent;color:#dbeafe;text-align:left;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font-weight:800;font-family:inherit}
+.nav:hover{background:rgba(255,255,255,.08)}.nav.active{background:#1d4ed8;color:#fff}
+.cnt{font-size:11px;border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.13);color:#fff}
+.main{padding:20px;display:grid;gap:16px;align-content:start}
+.topbar{display:flex;justify-content:space-between;gap:16px;align-items:center}
+.title h1{font-size:25px;margin:0}.title p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.topActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 12px;font-weight:900;font-size:12px;cursor:pointer;color:#0f172a;text-decoration:none;display:inline-flex;gap:6px;align-items:center;justify-content:center;font-family:inherit}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.08)}
+.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.green{background:var(--green);border-color:var(--green);color:#fff}
+.btn.ghost{background:#f8fafc}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.cardHead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}
+.cardHead h2{font-size:17px;margin:0}.cardHead p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.cardBody{padding:16px 18px}
+.grid{display:grid;gap:14px}.grid.kpi{grid-template-columns:repeat(4,minmax(0,1fr))}.grid.two{grid-template-columns:1.25fr .75fr}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpiCard{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}
+.kpiLabel{color:var(--muted);font-size:12px;font-weight:900}.kpiValue{font-size:28px;font-weight:1000;margin-top:8px}.kpiSub{font-size:12px;color:var(--muted);margin-top:7px}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}
+.badge.blue{background:var(--blue2);color:#1d4ed8}.badge.green{background:var(--green2);color:#166534}.badge.amber{background:var(--amber2);color:#92400e}.badge.red{background:var(--red2);color:#991b1b}.badge.purple{background:var(--purple2);color:#5b21b6}.badge.cyan{background:var(--cyan2);color:#155e75}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:15px;background:#fff}
+.root table{border-collapse:collapse;width:100%;min-width:820px}
+.root th,.root td{border-bottom:1px solid var(--line);padding:11px 12px;text-align:left;font-size:12px;vertical-align:top}
+.root th{background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+.root td b{font-size:13px}
+.money{font-variant-numeric:tabular-nums;font-weight:900}
+.rankCard{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff;display:grid;gap:10px}
+.rankRow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center}
+.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#dbeafe;color:#1d4ed8;font-weight:1000;font-size:12px}
+.score{font-size:20px;font-weight:1000}
+.assignmentLayout{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+.customerCard{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px;display:grid;gap:10px}
+.customerCard.active{outline:2px solid #bfdbfe;background:#f8fbff}
+.customerMeta{display:flex;gap:6px;flex-wrap:wrap}
+.assignmentRule{border:1px solid var(--line);border-radius:14px;background:#f8fafc;padding:12px;display:grid;gap:8px}
+.assignmentRule b{font-size:13px}.assignmentRule p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}
+.assignPanel{display:grid;gap:12px}
+.transferForm{display:grid;grid-template-columns:1fr 1fr;gap:10px}.transferForm .full{grid-column:1/-1}
+.timeline{display:grid;gap:10px}.log{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;align-items:flex-start}.logTime{color:var(--muted);font-size:11px;font-weight:900}.logBody{border-left:3px solid #bfdbfe;padding-left:10px;font-size:12px}
+.autoFlow{display:grid;gap:10px}.autoStep{border:1px solid var(--line);background:#f8fafc;border-radius:14px;padding:12px}.autoStep b{font-size:13px}.autoStep p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+.staffPill{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px;margin-top:8px;background:#f8fafc}
+.statusDot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:#22c55e}.statusDot.off{background:#94a3b8}.statusDot.rest{background:#f59e0b}
+.root textarea,.root input,.root select{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%;background:#fff}
+.toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:12px 14px;border-radius:13px;z-index:80;font-weight:900;font-size:13px;max-width:360px}
+.placeholder{padding:40px;text-align:center;color:var(--muted);font-size:13px}
+@media(max-width:1200px){.grid.kpi{grid-template-columns:repeat(2,1fr)}.grid.two,.assignmentLayout{grid-template-columns:1fr}.grid.three{grid-template-columns:1fr}}
+@media(max-width:780px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.grid.kpi{grid-template-columns:1fr}.transferForm{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
