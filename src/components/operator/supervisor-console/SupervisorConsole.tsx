@@ -106,7 +106,7 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
           {!data ? <div className={styles.card}><div className={styles.placeholder}>불러오는 중…</div></div>
             : view === 'dashboard' ? <DashboardView d={data} />
             : view === 'assignment' ? <AssignmentView d={data} onAuto={runAutoAssign} onReassigned={async (m) => { showToast(m); await load(); }} />
-            : view === 'approval' ? <ApprovalView d={data} locale={locale} />
+            : view === 'approval' ? <ApprovalView d={data} onChanged={load} />
             : view === 'evaluation' ? <EvaluationView />
             : view === 'affiliation' ? <AffiliationView onToast={showToast} />
             : view === 'billing' ? <BillingView locale={locale} />
@@ -281,26 +281,145 @@ function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: (
   );
 }
 
-// ── 승인대기 ──
-function ApprovalView({ d, locale }: { d: ConsoleData; locale: string }) {
+// ── 승인대기 + 승인 상세(고객화면 미러) ──
+type ApprovalItem = ConsoleData['approvalPending'][number];
+// 세목 → 워크큐 상세 endpoint + 미러 컬럼
+const DETAIL_MAP: Record<string, { ep: string; cols: Array<{ key: string; label: string; money?: boolean }> }> = {
+  PPh21: { ep: 'pph21', cols: [{ key: 'name', label: '직원' }, { key: 'totalGross', label: '총지급', money: true }, { key: 'pph21', label: 'PPh21', money: true }] },
+  PPh23: { ep: 'withholding', cols: [{ key: 'counterpartyName', label: '거래처' }, { key: 'grossAmount', label: '지급액', money: true }, { key: 'taxAmount', label: '세액', money: true }] },
+  PPh4_2: { ep: 'withholding', cols: [{ key: 'counterpartyName', label: '거래처' }, { key: 'grossAmount', label: '지급액', money: true }, { key: 'taxAmount', label: '세액', money: true }] },
+  PPN: { ep: 'ppn', cols: [{ key: 'fakturNumber', label: 'Faktur' }, { key: 'dpp', label: 'DPP', money: true }, { key: 'ppn', label: 'PPN', money: true }] },
+};
+function ApprovalView({ d, onChanged }: { d: ConsoleData; onChanged: () => void }) {
+  const [sel, setSel] = useState<ApprovalItem | null>(null);
   return (
-    <div className={styles.card}>
-      <div className={styles.cardHead}><div><h2>승인대기 고객</h2><p>상담원 검토완료 → 수퍼바이저 최종 승인 대상. 승인/반려는 워크큐 검토화면에서 처리합니다.</p></div></div>
-      <div className={styles.cardBody}>
-        <div className={styles.tableWrap}>
-          <table>
-            <thead><tr><th>고객</th><th>세목</th><th>귀속</th><th>세액</th><th></th></tr></thead>
-            <tbody>
-              {d.approvalPending.map(a => (
-                <tr key={a.id}>
-                  <td><b>{a.company}</b></td><td>{a.taxType}</td><td>{a.period}</td>
-                  <td className={styles.money}>{rp(a.amount)}</td>
-                  <td><a className={styles.btn} href={`/${locale}/operator/workqueue`}>워크큐에서 승인 →</a></td>
-                </tr>
-              ))}
-              {d.approvalPending.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>승인대기 건이 없습니다</td></tr>}
-            </tbody>
-          </table>
+    <>
+      <div className={styles.card}>
+        <div className={styles.cardHead}><div><h2>승인대기 리스트</h2><p>상담원 검토완료 → 수퍼바이저 최종 승인 대상. 행을 클릭하면 고객화면 미러 상세가 열립니다.</p></div></div>
+        <div className={styles.cardBody}>
+          <div className={styles.tableWrap}>
+            <table>
+              <thead><tr><th>고객</th><th>세목</th><th>귀속</th><th>세액</th><th></th></tr></thead>
+              <tbody>
+                {d.approvalPending.map(a => (
+                  <tr key={a.id} role="button" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => setSel(a)}>
+                    <td><b>{a.company}</b></td><td>{a.taxType}</td><td>{a.period}</td>
+                    <td className={styles.money}>{rp(a.amount)}</td>
+                    <td><span className={`${styles.badge} ${styles.blue}`}>상세 열기 →</span></td>
+                  </tr>
+                ))}
+                {d.approvalPending.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>승인대기 건이 없습니다</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {sel && <ApprovalDetail item={sel} onClose={() => setSel(null)} onDecided={() => { setSel(null); onChanged(); }} />}
+    </>
+  );
+}
+
+interface DetailResp { rows?: Array<Record<string, unknown>>; summary?: Record<string, number> }
+interface ApprovalState { status: string; requestNote?: string | null; canApprove: boolean; rejectedReason?: string | null }
+function ApprovalDetail({ item, onClose, onDecided }: { item: ApprovalItem; onClose: () => void; onDecided: () => void }) {
+  const cfg = DETAIL_MAP[item.taxType];
+  const [detail, setDetail] = useState<DetailResp | null>(null);
+  const [appr, setAppr] = useState<ApprovalState | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState('');
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (cfg) fetch(`/api/operator/workqueue/${item.id}/${cfg.ep}`).then(r => r.json()).then(j => { if (j.success) setDetail(j.data); }).catch(() => {});
+    fetch(`/api/operator/workqueue/${item.id}/approval`).then(r => r.json()).then(j => { if (j.success) setAppr(j.data as ApprovalState); }).catch(() => {});
+  }, [item.id, cfg]);
+
+  const decide = async (action: 'approve' | 'reject', rejectedReason?: string) => {
+    setBusy(true); setErr(null);
+    try {
+      const r = await fetch('/api/operator/queue', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, action, ...(rejectedReason ? { rejectedReason } : {}) }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { setErr((j as { error?: string }).error || `실패 (${r.status})`); return; }
+      onDecided();
+    } catch { setErr('네트워크 오류'); }
+    finally { setBusy(false); }
+  };
+
+  const rows = detail?.rows ?? [];
+  const editedCount = rows.filter(r => r.operatorEdits && Object.keys(r.operatorEdits as object).length > 0).length;
+
+  return (
+    <div className={styles.modalBg} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <h2>{item.company} · {item.taxType} · {item.period}</h2>
+        <div className={styles.modalBody}>
+          <div className={styles.assignmentRule}>
+            <p>아래는 고객이 입력한 자료를 고객 화면과 같은 구조로 보여주는 미러입니다. 상세자료·상담원 수정값을 비교하고, 세금 계산이 맞다고 판단될 때만 승인완료를 누르세요.</p>
+          </div>
+
+          {appr?.requestNote && (
+            <div className={styles.reviewRequestBox}>
+              <b>상담원 검토요청</b>
+              <p>{appr.requestNote}</p>
+            </div>
+          )}
+          {appr?.rejectedReason && <div className={styles.assignmentRule}><b>이전 반려사유</b><p>{appr.rejectedReason}</p></div>}
+
+          {cfg ? (
+            <div className={styles.customerUi}>
+              <div className={styles.customerUiHead}>
+                <div><h3>{item.taxType} 고객 입력화면 미러</h3><p>{rows.length}건 · 상담원 수정 {editedCount}건 (표시된 값 기준)</p></div>
+              </div>
+              <div className={styles.tableWrap}>
+                <table>
+                  <thead><tr>{cfg.cols.map(c => <th key={c.key}>{c.label}</th>)}<th>상태</th></tr></thead>
+                  <tbody>
+                    {rows.slice(0, 50).map((r, i) => {
+                      const edited = r.operatorEdits && Object.keys(r.operatorEdits as object).length > 0;
+                      const flags = r.flags as { level?: string; label?: string } | undefined;
+                      return (
+                        <tr key={i} style={edited ? { background: '#fff7ed' } : undefined}>
+                          {cfg.cols.map(c => <td key={c.key}>{c.money ? rp(Number(r[c.key] ?? 0)) : String(r[c.key] ?? '—')}</td>)}
+                          <td><span className={`${styles.badge} ${flags?.level === 'red' ? styles.red : flags?.level === 'amber' ? styles.amber : styles.green}`}>{flags?.label ?? '—'}</span></td>
+                        </tr>
+                      );
+                    })}
+                    {rows.length === 0 && <tr><td colSpan={cfg.cols.length + 1} style={{ color: '#94a3b8' }}>불러오는 중 또는 데이터 없음</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : <div className={styles.assignmentRule}><p>이 세목({item.taxType})은 표 미러가 아직 없습니다. 워크큐 상세에서 확인하세요.</p></div>}
+
+          {err && <div className={styles.assignmentRule} style={{ borderColor: '#fecaca', background: '#fef2f2' }}><p>{err}</p></div>}
+
+          {rejecting && (
+            <div className={styles.reviewRequestBox}>
+              <b>상담원에게 반려</b>
+              <p>반려 사유를 입력하면 해당 건은 상담원 업무함으로 돌아가고, 감사로그에 기록됩니다.</p>
+              <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="반려 사유" />
+            </div>
+          )}
+        </div>
+        <div className={styles.modalFooter}>
+          <button className={styles.btn} onClick={onClose} disabled={busy}>닫기</button>
+          {appr?.canApprove && appr.status === 'PENDING_APPROVAL' ? (
+            rejecting ? (
+              <>
+                <button className={styles.btn} onClick={() => setRejecting(false)} disabled={busy}>취소</button>
+                <button className={`${styles.btn} ${styles.red}`} disabled={busy || reason.trim().length < 1} onClick={() => decide('reject', reason.trim())}>반려 확정</button>
+              </>
+            ) : (
+              <>
+                <button className={styles.btn} onClick={() => setRejecting(true)} disabled={busy}>반려</button>
+                <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={() => decide('approve')}>승인완료</button>
+              </>
+            )
+          ) : <span className={`${styles.badge} ${styles.amber}`}>{appr?.status === 'APPROVED' ? '승인완료' : '승인 권한/상태 아님'}</span>}
         </div>
       </div>
     </div>
