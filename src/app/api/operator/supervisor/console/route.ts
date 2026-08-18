@@ -118,6 +118,41 @@ export async function GET(_req: NextRequest) {
   }));
   const ranking = [...team].sort((a, b) => b.score - a.score).slice(0, 6);
 
+  // 승인대기 (djp PENDING_APPROVAL)
+  const { data: pendingQ } = await admin
+    .from('djp_submission_queue')
+    .select('id, customer_id, tax_type, tax_period_month, tax_period_year, amount')
+    .eq('status', 'PENDING_APPROVAL')
+    .order('created_at', { ascending: false })
+    .limit(30);
+  const pendCustIds = [...new Set((pendingQ ?? []).map(r => r.customer_id))];
+  const pendCustName = new Map<string, string>();
+  if (pendCustIds.length) {
+    const { data: cs } = await admin.from('customer').select('id, full_name, company_name').in('id', pendCustIds);
+    for (const c of cs ?? []) pendCustName.set(c.id, c.company_name || c.full_name || '—');
+  }
+  const approvalPending = (pendingQ ?? []).map(r => ({
+    id: r.id, company: pendCustName.get(r.customer_id) ?? '—', taxType: r.tax_type,
+    period: `${r.tax_period_year}-${String(r.tax_period_month).padStart(2, '0')}`, amount: Number(r.amount ?? 0),
+  }));
+
+  // 감사로그 (audit_log 최근)
+  const { data: auditRows } = await admin
+    .from('audit_log')
+    .select('id, activity_type, actor_role, tax_type, customer_id, created_at')
+    .order('created_at', { ascending: false })
+    .limit(20);
+  const audCustIds = [...new Set((auditRows ?? []).map(a => a.customer_id).filter(Boolean))];
+  const audCustName = new Map<string, string>();
+  if (audCustIds.length) {
+    const { data: cs } = await admin.from('customer').select('id, full_name, company_name').in('id', audCustIds);
+    for (const c of cs ?? []) audCustName.set(c.id, c.company_name || c.full_name || '—');
+  }
+  const audit = (auditRows ?? []).map(a => ({
+    activity: a.activity_type, role: a.actor_role, taxType: a.tax_type,
+    company: a.customer_id ? (audCustName.get(a.customer_id) ?? '—') : '—', at: a.created_at,
+  }));
+
   const offline = team.filter(t => t.workState === 'offline').length;
   const kpis = {
     pendingManual: 0, // 신규는 즉시 자동배정 — 수동 대기 없음(원칙)
@@ -128,7 +163,7 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    data: { kpis, assignedCustomers, history, team, ranking,
+    data: { kpis, assignedCustomers, history, team, ranking, approvalPending, audit,
       operators: team.map(t => ({ id: t.id, name: t.name })) },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

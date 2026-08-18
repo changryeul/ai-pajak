@@ -12,6 +12,8 @@ interface ConsoleData {
   team: Array<{ id: string; name: string; workState: string; load: number; maxClients: number; score: number; autoAssign: boolean }>;
   ranking: Array<{ id: string; name: string; score: number; load: number }>;
   operators: Array<{ id: string; name: string }>;
+  approvalPending: Array<{ id: string; company: string; taxType: string; period: string; amount: number }>;
+  audit: Array<{ activity: string; role: string; taxType: string | null; company: string; at: string }>;
 }
 type View = 'dashboard' | 'approval' | 'evaluation' | 'affiliation' | 'assignment' | 'billing' | 'audit';
 
@@ -104,7 +106,11 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
           {!data ? <div className={styles.card}><div className={styles.placeholder}>불러오는 중…</div></div>
             : view === 'dashboard' ? <DashboardView d={data} />
             : view === 'assignment' ? <AssignmentView d={data} onAuto={runAutoAssign} onReassigned={async (m) => { showToast(m); await load(); }} />
-            : <PlaceholderView title={meta.title} />}
+            : view === 'approval' ? <ApprovalView d={data} locale={locale} />
+            : view === 'evaluation' ? <EvaluationView />
+            : view === 'affiliation' ? <AffiliationView onToast={showToast} />
+            : view === 'billing' ? <BillingView locale={locale} />
+            : <AuditView d={data} />}
         </main>
       </div>
       {toast && <div className={styles.toast}>{toast}</div>}
@@ -275,12 +281,204 @@ function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: (
   );
 }
 
-// ── 아직 미연동 뷰 ──
-function PlaceholderView({ title }: { title: string }) {
+// ── 승인대기 ──
+function ApprovalView({ d, locale }: { d: ConsoleData; locale: string }) {
   return (
     <div className={styles.card}>
-      <div className={styles.cardHead}><div><h2>{title}</h2><p>이 뷰는 다음 단계에서 실데이터로 연동됩니다.</p></div></div>
-      <div className={styles.placeholder}>준비 중 — 기존 화면은 /operator/supervisor 에서 계속 사용할 수 있습니다.</div>
+      <div className={styles.cardHead}><div><h2>승인대기 고객</h2><p>상담원 검토완료 → 수퍼바이저 최종 승인 대상. 승인/반려는 워크큐 검토화면에서 처리합니다.</p></div></div>
+      <div className={styles.cardBody}>
+        <div className={styles.tableWrap}>
+          <table>
+            <thead><tr><th>고객</th><th>세목</th><th>귀속</th><th>세액</th><th></th></tr></thead>
+            <tbody>
+              {d.approvalPending.map(a => (
+                <tr key={a.id}>
+                  <td><b>{a.company}</b></td><td>{a.taxType}</td><td>{a.period}</td>
+                  <td className={styles.money}>{rp(a.amount)}</td>
+                  <td><a className={styles.btn} href={`/${locale}/operator/workqueue`}>워크큐에서 승인 →</a></td>
+                </tr>
+              ))}
+              {d.approvalPending.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>승인대기 건이 없습니다</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
+
+// ── lazy fetch 훅 ──
+function useLazy<T>(url: string): { data: T | null; err: string | null; reload: () => void } {
+  const [data, setData] = useState<T | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const reload = useCallback(() => {
+    setErr(null);
+    fetch(url).then(r => r.json()).then(j => { if (j.success) setData(j.data as T); else setErr(j.error || '불러오지 못했습니다.'); })
+      .catch(() => setErr('네트워크 오류'));
+  }, [url]);
+  useEffect(() => { reload(); }, [reload]);
+  return { data, err, reload };
+}
+
+// ── 상담원 평가 ──
+interface EvalRow { name: string; reject_rate: number | null; approval_pass_rate: number | null; scores: { total: number; accuracy: number; speed: number; approval: number; satisfaction: number }; suggested_incentive_amount?: number; evaluation_label?: string }
+function EvaluationView() {
+  const { data, err } = useLazy<{ operators: EvalRow[]; disclaimer?: string; isSuggestionOnly?: boolean }>('/api/operator/evaluation');
+  if (err) return <ErrCard msg={err} />;
+  if (!data) return <LoadingCard />;
+  const rows = data.operators ?? [];
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardHead}><div><h2>상담원 평가</h2><p>{data.disclaimer || '반려율·승인통과율 실측. 인센티브는 제안값이며 자동 상벌 없음.'}</p></div>
+        {data.isSuggestionOnly && <span className={`${styles.badge} ${styles.amber}`}>제안값</span>}</div>
+      <div className={styles.cardBody}>
+        <div className={styles.tableWrap}>
+          <table>
+            <thead><tr><th>상담원</th><th>총점</th><th>반려율</th><th>승인통과율</th><th>정확도</th><th>속도</th><th>제안 인센티브</th></tr></thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i}>
+                  <td><b>{r.name}</b> {r.evaluation_label && <span className={`${styles.badge} ${styles.green}`}>{r.evaluation_label}</span>}</td>
+                  <td><b>{r.scores.total.toFixed(0)}</b></td>
+                  <td>{r.reject_rate == null ? '—' : r.reject_rate.toFixed(1) + '%'}</td>
+                  <td>{r.approval_pass_rate == null ? '—' : r.approval_pass_rate.toFixed(1) + '%'}</td>
+                  <td>{r.scores.accuracy.toFixed(0)}</td><td>{r.scores.speed.toFixed(0)}</td>
+                  <td className={styles.money}>{r.suggested_incentive_amount ? rp(r.suggested_incentive_amount) : '—'}</td>
+                </tr>
+              ))}
+              {rows.length === 0 && <tr><td colSpan={7} style={{ color: '#94a3b8' }}>평가 데이터 없음</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 상담원 소속관리 ──
+interface Transfer { id: string; operatorName: string; fromSupervisorName: string | null; toSupervisorName: string; clientMode: string; reason: string | null; status: string; direction: string; createdAt: string }
+function AffiliationView({ onToast }: { onToast: (m: string) => void }) {
+  const { data, err, reload } = useLazy<{ incoming: Transfer[]; transfers: Transfer[] }>('/api/operator/supervisor/affiliation');
+  const decide = async (id: string, action: 'APPROVE' | 'REJECT') => {
+    try {
+      const r = await fetch(`/api/operator/supervisor/affiliation/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, comment: action === 'APPROVE' ? '승인' : '반려' }),
+      });
+      const j = await r.json();
+      onToast(j.success ? (action === 'APPROVE' ? '이동 승인됨' : '반려됨') : (j.error || '실패'));
+      reload();
+    } catch { onToast('네트워크 오류'); }
+  };
+  if (err) return <ErrCard msg={err} />;
+  if (!data) return <LoadingCard />;
+  return (
+    <>
+      <div className={styles.card}>
+        <div className={styles.cardHead}><div><h2>소속 이동 요청 (수신)</h2><p>받는 쪽 수퍼바이저가 승인합니다.</p></div></div>
+        <div className={styles.cardBody} style={{ display: 'grid', gap: 10 }}>
+          {data.incoming.map(t => (
+            <div key={t.id} className={styles.assignmentRule}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                <b>{t.operatorName}</b><span className={`${styles.badge} ${styles.amber}`}>{t.status}</span>
+              </div>
+              <p>{t.fromSupervisorName ?? '—'} → {t.toSupervisorName} · {t.clientMode} · {t.reason ?? ''}</p>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button className={`${styles.btn} ${styles.green}`} onClick={() => decide(t.id, 'APPROVE')}>승인</button>
+                <button className={styles.btn} onClick={() => decide(t.id, 'REJECT')}>반려</button>
+              </div>
+            </div>
+          ))}
+          {data.incoming.length === 0 && <div className={styles.placeholder}>수신 대기 요청이 없습니다</div>}
+        </div>
+      </div>
+      <div className={styles.card}>
+        <div className={styles.cardHead}><div><h2>이동 이력</h2></div></div>
+        <div className={styles.cardBody}>
+          <div className={styles.tableWrap}>
+            <table>
+              <thead><tr><th>상담원</th><th>방향</th><th>모드</th><th>상태</th><th>일시</th></tr></thead>
+              <tbody>
+                {data.transfers.map(t => (
+                  <tr key={t.id}><td><b>{t.operatorName}</b></td><td>{t.direction === 'incoming' ? '수신' : '발신'}</td><td>{t.clientMode}</td><td>{t.status}</td><td>{timeOf(t.createdAt)}</td></tr>
+                ))}
+                {data.transfers.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>이력 없음</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── ID Billing 이관현황 ──
+interface HandoverPending { company: string; approver: string; consultant: string }
+interface HandoverIssued { serialNo: string; company: string; amount: number; sendStatus: string; ntpnStatus: string }
+function BillingView({ locale }: { locale: string }) {
+  const { data, err } = useLazy<{ pending: HandoverPending[]; issued: HandoverIssued[] }>('/api/operator/supervisor/billing-handover');
+  if (err) return <ErrCard msg={err} />;
+  if (!data) return <LoadingCard />;
+  return (
+    <>
+      <div className={styles.card}>
+        <div className={styles.cardHead}><div><h2>발행대상 (승인완료 · 미발행)</h2><p>발행은 발행 보드에서 처리합니다.</p></div>
+          <a className={`${styles.btn} ${styles.blue}`} href={`/${locale}/operator/billing-issuance`}>발행 보드 →</a></div>
+        <div className={styles.cardBody}>
+          <div className={styles.tableWrap}>
+            <table>
+              <thead><tr><th>고객</th><th>승인 수퍼바이저</th><th>담당 상담원</th></tr></thead>
+              <tbody>
+                {data.pending.map((p, i) => <tr key={i}><td><b>{p.company}</b></td><td>{p.approver}</td><td>{p.consultant}</td></tr>)}
+                {data.pending.length === 0 && <tr><td colSpan={3} style={{ color: '#94a3b8' }}>발행대상 없음</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div className={styles.card}>
+        <div className={styles.cardHead}><div><h2>발행완료</h2></div></div>
+        <div className={styles.cardBody}>
+          <div className={styles.tableWrap}>
+            <table>
+              <thead><tr><th>일련번호</th><th>고객</th><th>세액</th><th>전송</th><th>NTPN</th></tr></thead>
+              <tbody>
+                {data.issued.map((r, i) => (
+                  <tr key={i}><td>{r.serialNo}</td><td><b>{r.company}</b></td><td className={styles.money}>{rp(r.amount)}</td>
+                    <td><span className={`${styles.badge} ${r.sendStatus === 'SENT' ? styles.green : styles.amber}`}>{r.sendStatus === 'SENT' ? '전송됨' : '미전송'}</span></td>
+                    <td><span className={`${styles.badge} ${r.ntpnStatus === 'PAID' ? styles.green : styles.amber}`}>{r.ntpnStatus === 'PAID' ? '납부' : '대기'}</span></td></tr>
+                ))}
+                {data.issued.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>발행완료 없음</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── 감사로그 ──
+function AuditView({ d }: { d: ConsoleData }) {
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardHead}><div><h2>전체 이력 / 감사로그</h2><p>최근 활동</p></div></div>
+      <div className={styles.cardBody}>
+        <div className={styles.tableWrap}>
+          <table>
+            <thead><tr><th>활동</th><th>역할</th><th>세목</th><th>고객</th><th>일시</th></tr></thead>
+            <tbody>
+              {d.audit.map((a, i) => (
+                <tr key={i}><td><b>{a.activity}</b></td><td>{a.role}</td><td>{a.taxType ?? '—'}</td><td>{a.company}</td><td>{timeOf(a.at)}</td></tr>
+              ))}
+              {d.audit.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>감사 이력 없음</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoadingCard() { return <div className={styles.card}><div className={styles.placeholder}>불러오는 중…</div></div>; }
+function ErrCard({ msg }: { msg: string }) { return <div className={styles.card}><div className={styles.placeholder}>{msg}</div></div>; }
