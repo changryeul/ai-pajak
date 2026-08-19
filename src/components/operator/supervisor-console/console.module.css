@@ -43,6 +43,9 @@
 .root th{background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
 .root td b{font-size:13px}
 .money{font-variant-numeric:tabular-nums;font-weight:900}
+.progress{height:9px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:5px;min-width:80px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#22c55e);border-radius:999px}
+.periodInput{border:1px solid var(--line);border-radius:11px;padding:8px 10px;font-weight:900;font-size:12px;background:#fff;width:auto}
 .rankCard{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff;display:grid;gap:10px}
 .rankRow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center}
 .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#dbeafe;color:#1d4ed8;font-weight:1000;font-size:12px}

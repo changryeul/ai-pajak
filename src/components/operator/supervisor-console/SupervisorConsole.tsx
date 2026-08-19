@@ -7,11 +7,12 @@ import styles from './console.module.css';
 // ── 타입 ─────────────────────────────────────────────
 interface ConsoleData {
   kpis: { pendingManual: number; autoAssigned: number; excludedOffline: number; changes: number };
+  dashKpis: { completed: number; completedRank: number; pendingApproval: number; rejectRate: number; avgMinutes: number };
   assignedCustomers: Array<{ customerId: string; name: string; operator: string; method: string; taxTypes: string[]; assignedAt: string | null }>;
   history: Array<{ name: string; operator: string; method: string; at: string }>;
-  team: Array<{ id: string; name: string; workState: string; load: number; maxClients: number; score: number; autoAssign: boolean }>;
-  ranking: Array<{ id: string; name: string; score: number; load: number }>;
-  teamCompare: Array<{ team: string; members: number; avgScore: number; totalLoad: number }>;
+  team: Array<{ id: string; name: string; load: number; maxClients: number; score: number; autoAssign: boolean }>;
+  ranking: Array<{ id: string; name: string; taxLabel: string; approvalPass: number; rejectRate: number; score: number; load: number }>;
+  teamCompare: Array<{ team: string; supervisor: string; members: number; completed: number; pendingApproval: number; rejectRate: number; avgMinutes: number; teamScore: number; rank: number }>;
   operators: Array<{ id: string; name: string }>;
   approvalPending: Array<{ id: string; company: string; taxType: string; period: string; amount: number }>;
   audit: Array<{ activity: string; role: string; taxType: string | null; company: string; at: string }>;
@@ -40,6 +41,8 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
   const [data, setData] = useState<ConsoleData | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const nowP = new Date();
+  const [period, setPeriod] = useState(`${nowP.getFullYear()}-${String(nowP.getMonth() + 1).padStart(2, '0')}`);
 
   const load = useCallback(async () => {
     try {
@@ -100,6 +103,11 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
           <div className={styles.topbar}>
             <div className={styles.title}><h1>{meta.title}</h1><p>{meta.desc}</p></div>
             <div className={styles.topActions}>
+              {/* 수정요청 2 — 기간 표시/선택 */}
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 900, color: '#475569' }}>
+                기간
+                <input type="month" className={styles.periodInput} value={period} onChange={e => setPeriod(e.target.value)} />
+              </label>
               {data && <button className={`${styles.btn} ${styles.blue}`} onClick={() => setShowReport(true)}>📄 월간 리포트</button>}
               <a className={styles.btn} href={`/${locale}/operator/workqueue`}>← 업무함</a>
               <button className={styles.btn} onClick={logout}>로그아웃</button>
@@ -194,55 +202,55 @@ function ReportModal({ name, d, onClose }: { name?: string; d: ConsoleData; onCl
 
 // ── 대시보드 ──
 function DashboardView({ d }: { d: ConsoleData }) {
+  const k = d.dashKpis;
+  const maxScore = Math.max(1, ...d.teamCompare.map(t => t.teamScore));
   return (
     <>
+      {/* 수정요청 3 — PPT KPI 4박스 */}
       <div className={`${styles.grid} ${styles.kpi}`}>
-        <Kpi label="배정 대기" value={String(d.kpis.pendingManual)} sub="수동 배정대기 없음" />
-        <Kpi label="자동배정 완료 고객" value={String(d.kpis.autoAssigned)} sub="신규 고객 자동배정 원칙" />
-        <Kpi label="자동배정 제외" value={String(d.kpis.excludedOffline)} sub="오프라인" />
-        <Kpi label="배정/변경" value={String(d.kpis.changes)} sub="배정/변경 이력" />
+        <Kpi label="처리완료" value={String(k.completed)} sub={`전체 팀 중 ${k.completedRank}위`} />
+        <Kpi label="승인대기" value={String(k.pendingApproval)} sub="수퍼바이저 확인 필요" />
+        <Kpi label="반려율" value={`${k.rejectRate}%`} sub="팀 반려율" />
+        <Kpi label="평균 처리시간" value={String(k.avgMinutes)} sub="목표 25분 이내" />
       </div>
       <div className={`${styles.grid} ${styles.two}`}>
+        {/* 수정요청 4 — 팀 성과 비교 */}
         <div className={styles.card}>
-          <div className={styles.cardHead}><div><h2>팀 성과</h2><p>상담원별 담당 고객 · 승인 품질</p></div></div>
+          <div className={styles.cardHead}><div><h2>팀 성과 비교</h2><p>처리량과 품질지표를 함께 비교합니다.</p></div></div>
           <div className={styles.cardBody}>
             <div className={styles.tableWrap}>
               <table>
-                <thead><tr><th>상담원</th><th>상태</th><th>담당 고객</th><th>정원</th><th>품질점수</th><th>자동배정</th></tr></thead>
+                <thead><tr><th>팀</th><th>수퍼바이저</th><th>상담원</th><th>처리완료</th><th>승인대기</th><th>반려율</th><th>평균시간</th><th>팀점수</th></tr></thead>
                 <tbody>
-                  {d.team.map(t => (
-                    <tr key={t.id}>
-                      <td><b>{t.name}</b></td>
-                      <td><span className={styles.statusDot + ' ' + (t.workState === 'offline' ? styles.off : t.workState === 'rest' ? styles.rest : '')} />{t.workState}</td>
-                      <td>{t.load}</td><td>{t.maxClients}</td>
-                      <td><b>{t.score.toFixed(0)}</b></td>
-                      <td>{t.autoAssign ? <span className={`${styles.badge} ${styles.green}`}>ON</span> : <span className={`${styles.badge} ${styles.red}`}>OFF</span>}</td>
+                  {d.teamCompare.map((t, i) => (
+                    <tr key={i}>
+                      <td><b>{t.team}</b> <span className={`${styles.badge} ${t.rank === 1 ? styles.green : t.rank === 2 ? styles.amber : styles.red}`}>#{t.rank}</span></td>
+                      <td>{t.supervisor}</td><td>{t.members}</td><td>{t.completed}</td><td>{t.pendingApproval}</td>
+                      <td>{t.rejectRate}%</td><td>{t.avgMinutes}</td>
+                      <td>
+                        <b>{t.teamScore}</b>
+                        <div className={styles.progress}><i style={{ width: `${Math.round((t.teamScore / maxScore) * 100)}%` }} /></div>
+                      </td>
                     </tr>
                   ))}
-                  {d.team.length === 0 && <tr><td colSpan={6} style={{ color: '#94a3b8' }}>팀 상담원 데이터 없음</td></tr>}
+                  {d.teamCompare.length === 0 && <tr><td colSpan={8} style={{ color: '#94a3b8' }}>팀 데이터 없음</td></tr>}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
+        {/* 수정요청 5 — 상담원 순위 */}
         <div className={styles.card}>
-          <div className={styles.cardHead}><div><h2>상담원 순위 · 팀비교</h2><p>품질점수 기준</p></div></div>
+          <div className={styles.cardHead}><div><h2>상담원 순위</h2><p>상벌 후보 메뉴 없이 순위·근거지표로 판단합니다.</p></div></div>
           <div className={styles.cardBody}>
-            {d.teamCompare.length > 0 && (
-              <div className={styles.tableWrap} style={{ marginBottom: 12 }}>
-                <table>
-                  <thead><tr><th>팀(수퍼바이저)</th><th>인원</th><th>평균 품질</th><th>총 담당</th></tr></thead>
-                  <tbody>
-                    {d.teamCompare.map((t, i) => <tr key={i}><td><b>{t.team}</b></td><td>{t.members}</td><td>{t.avgScore}</td><td>{t.totalLoad}</td></tr>)}
-                  </tbody>
-                </table>
-              </div>
-            )}
             <div className={styles.rankCard}>
               {d.ranking.map((r, i) => (
                 <div key={r.id} className={styles.rankRow}>
                   <div className={styles.avatar}>{i + 1}</div>
-                  <div><b>{r.name}</b><div style={{ color: '#64748b', fontSize: 12 }}>담당 {r.load}건</div></div>
+                  <div>
+                    <b>{r.name}</b>
+                    <div style={{ color: '#64748b', fontSize: 12 }}>{r.taxLabel} · 승인통과 {r.approvalPass.toFixed(0)}% · 반려율 {r.rejectRate}%</div>
+                  </div>
                   <div className={styles.score}>{r.score.toFixed(0)}</div>
                 </div>
               ))}
@@ -586,21 +594,7 @@ function EvaluationView() {
       <div className={styles.cardHead}><div><h2>상담원 평가</h2><p>{data.disclaimer || '반려율·승인통과율 실측. 인센티브는 제안값이며 자동 상벌 없음.'}</p></div>
         {data.isSuggestionOnly && <span className={`${styles.badge} ${styles.amber}`}>제안값</span>}</div>
       <div className={styles.cardBody}>
-        {rows.length > 0 && (
-          <div className={styles.evalCards}>
-            {rows.slice(0, 3).map((r, i) => (
-              <div key={i} className={styles.evalCard}>
-                <div className={styles.top}><b>{r.name}</b><span className={styles.score}>{r.scores.total.toFixed(0)}</span></div>
-                <div className={styles.evalMetrics}>
-                  <div className={styles.metric}><span>정확도</span><b>{r.scores.accuracy.toFixed(0)}</b></div>
-                  <div className={styles.metric}><span>속도</span><b>{r.scores.speed.toFixed(0)}</b></div>
-                  <div className={styles.metric}><span>승인품질</span><b>{r.scores.approval.toFixed(0)}</b></div>
-                  <div className={styles.metric}><span>고객응대</span><b>{r.scores.satisfaction.toFixed(0)}</b></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* 수정요청 7 — 상단 상담원별 박스 삭제, 순위 표만 유지 */}
         <div className={styles.tableWrap}>
           <table>
             <thead><tr><th>상담원</th><th>총점</th><th>반려율</th><th>승인통과율</th><th>정확도</th><th>속도</th><th>제안 인센티브</th></tr></thead>
@@ -731,14 +725,15 @@ function BillingView({ locale }: { locale: string }) {
 function AuditView({ d }: { d: ConsoleData }) {
   return (
     <div className={styles.card}>
-      <div className={styles.cardHead}><div><h2>전체 이력 / 감사로그</h2><p>최근 활동</p></div></div>
+      <div className={styles.cardHead}><div><h2>전체 이력 / 감사로그</h2><p>시간 순서대로 이벤트를 보여줍니다 (최신순).</p></div></div>
       <div className={styles.cardBody}>
+        {/* 수정요청 11 — 시간 먼저 + 시간순 + 고객명 */}
         <div className={styles.tableWrap}>
           <table>
-            <thead><tr><th>활동</th><th>역할</th><th>세목</th><th>고객</th><th>일시</th></tr></thead>
+            <thead><tr><th>시간</th><th>고객</th><th>활동</th><th>역할</th><th>세목</th></tr></thead>
             <tbody>
               {d.audit.map((a, i) => (
-                <tr key={i}><td><b>{a.activity}</b></td><td>{a.role}</td><td>{a.taxType ?? '—'}</td><td>{a.company}</td><td>{timeOf(a.at)}</td></tr>
+                <tr key={i}><td>{timeOf(a.at)}</td><td><b>{a.company}</b></td><td>{a.activity}</td><td>{a.role}</td><td>{a.taxType ?? '—'}</td></tr>
               ))}
               {d.audit.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>감사 이력 없음</td></tr>}
             </tbody>

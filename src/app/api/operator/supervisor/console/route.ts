@@ -57,7 +57,7 @@ export async function GET(_req: NextRequest) {
   // 상담원(operator) 마스터
   const { data: ops } = await admin
     .from('tax_operators')
-    .select('id, name, work_state, status, max_clients, approval_quality_score, accuracy_pct, specialties, auto_assign_enabled, supervisor_id');
+    .select('id, name, work_state, status, max_clients, approval_quality_score, accuracy_pct, avg_processing_minutes, specialties, auto_assign_enabled, supervisor_id');
   const opById = new Map((ops ?? []).map(o => [o.id, o]));
 
   // 활성 배정
@@ -111,26 +111,76 @@ export async function GET(_req: NextRequest) {
   // 팀: 상담원별 활성 배정 수(load)
   const loadByOp = new Map<string, number>();
   for (const a of assigns ?? []) loadByOp.set(a.operator_id, (loadByOp.get(a.operator_id) ?? 0) + 1);
-  const team = (ops ?? []).map(o => ({
-    id: o.id, name: o.name, workState: o.work_state ?? 'active',
-    load: loadByOp.get(o.id) ?? 0, maxClients: o.max_clients ?? 0,
-    score: Number(o.approval_quality_score ?? 0), autoAssign: !!o.auto_assign_enabled,
-  }));
-  const ranking = [...team].sort((a, b) => b.score - a.score).slice(0, 6);
 
-  // 팀 비교 (supervisor_id 로 그룹) — 인원/평균 품질/총 담당
-  const bySup = new Map<string, { name: string; count: number; scoreSum: number; load: number }>();
-  for (const o of ops ?? []) {
-    const supId = o.supervisor_id ?? 'none';
-    const supName = o.supervisor_id ? (opById.get(o.supervisor_id)?.name ?? '미지정') : '미지정';
-    const g = bySup.get(supId) ?? { name: supName, count: 0, scoreSum: 0, load: 0 };
-    g.count += 1; g.scoreSum += Number(o.approval_quality_score ?? 0);
-    g.load += loadByOp.get(o.id) ?? 0;
+  // PPT 대시보드 지표 — 큐(operator_id/status/rejected_reason)로 처리완료·승인대기·반려 집계
+  const { data: allQ } = await admin
+    .from('djp_submission_queue')
+    .select('operator_id, status, rejected_reason');
+  const mByOp = new Map<string, { completed: number; pendingApproval: number; handled: number; rejected: number }>();
+  for (const q of allQ ?? []) {
+    if (!q.operator_id) continue;
+    const m = mByOp.get(q.operator_id) ?? { completed: 0, pendingApproval: 0, handled: 0, rejected: 0 };
+    m.handled += 1;
+    if (q.status === 'COMPLETED') m.completed += 1;
+    if (q.status === 'PENDING_APPROVAL') m.pendingApproval += 1;
+    if (q.rejected_reason) m.rejected += 1;
+    mByOp.set(q.operator_id, m);
+  }
+  const opMetric = (id: string) => mByOp.get(id) ?? { completed: 0, pendingApproval: 0, handled: 0, rejected: 0 };
+  const rejRate = (m: { handled: number; rejected: number }) => m.handled > 0 ? Math.round((m.rejected / m.handled) * 1000) / 10 : 0;
+
+  // 상담원 단위 (순위 · 세목 · 승인통과율 · 반려율)
+  const opStats = (ops ?? []).map(o => {
+    const m = opMetric(o.id);
+    return {
+      id: o.id, name: o.name, supervisorId: o.supervisor_id ?? null,
+      workState: o.work_state ?? 'active', load: loadByOp.get(o.id) ?? 0, maxClients: o.max_clients ?? 0,
+      autoAssign: !!o.auto_assign_enabled,
+      taxLabel: Array.isArray(o.specialties) && o.specialties.length ? o.specialties.join(',') : '—',
+      approvalPass: Number(o.approval_quality_score ?? 0),   // 승인통과율(품질점수 기반)
+      rejectRate: rejRate(m), completed: m.completed, pendingApproval: m.pendingApproval,
+      avgMinutes: Number(o.avg_processing_minutes ?? 0),
+      score: Number(o.approval_quality_score ?? 0),
+    };
+  });
+  const team = opStats;  // (assignment/기타 뷰 호환용)
+  const ranking = [...opStats].sort((a, b) => b.score - a.score).slice(0, 10)
+    .map(o => ({ id: o.id, name: o.name, taxLabel: o.taxLabel, approvalPass: o.approvalPass, rejectRate: o.rejectRate, score: o.score, load: o.load }));
+
+  // 팀 성과 비교 (supervisor_id 그룹) — PPT: 처리완료/승인대기/반려율/평균시간/팀점수
+  const bySup = new Map<string, { name: string; members: number; scoreSum: number; minSum: number; completed: number; pendingApproval: number; handled: number; rejected: number }>();
+  for (const o of opStats) {
+    const supId = o.supervisorId ?? 'none';
+    const supName = o.supervisorId ? (opById.get(o.supervisorId)?.name ?? '미지정') : '미지정';
+    const m = opMetric(o.id);
+    const g = bySup.get(supId) ?? { name: supName, members: 0, scoreSum: 0, minSum: 0, completed: 0, pendingApproval: 0, handled: 0, rejected: 0 };
+    g.members += 1; g.scoreSum += o.score; g.minSum += o.avgMinutes;
+    g.completed += m.completed; g.pendingApproval += m.pendingApproval; g.handled += m.handled; g.rejected += m.rejected;
     bySup.set(supId, g);
   }
   const teamCompare = [...bySup.values()]
-    .map(g => ({ team: g.name, members: g.count, avgScore: g.count ? Math.round(g.scoreSum / g.count) : 0, totalLoad: g.load }))
-    .sort((a, b) => b.avgScore - a.avgScore);
+    .map(g => ({
+      team: g.name, supervisor: g.name, members: g.members,
+      completed: g.completed, pendingApproval: g.pendingApproval,
+      rejectRate: g.handled > 0 ? Math.round((g.rejected / g.handled) * 1000) / 10 : 0,
+      avgMinutes: g.members ? Math.round(g.minSum / g.members) : 0,
+      teamScore: g.members ? Math.round(g.scoreSum / g.members) : 0,
+    }))
+    .sort((a, b) => b.teamScore - a.teamScore)
+    .map((t, i) => ({ ...t, rank: i + 1 }));
+
+  // KPI (PPT): 처리완료 / 승인대기 / 반려율 / 평균처리시간
+  const totalCompleted = [...mByOp.values()].reduce((s, m) => s + m.completed, 0);
+  const totalHandled = [...mByOp.values()].reduce((s, m) => s + m.handled, 0);
+  const totalRejected = [...mByOp.values()].reduce((s, m) => s + m.rejected, 0);
+  const avgMin = opStats.length ? Math.round(opStats.reduce((s, o) => s + o.avgMinutes, 0) / opStats.length) : 0;
+  const dashKpis = {
+    completed: totalCompleted,
+    completedRank: teamCompare.length ? 1 : 0,   // 표시용(전체 기준)
+    pendingApproval: (allQ ?? []).filter(q => q.status === 'PENDING_APPROVAL').length,
+    rejectRate: totalHandled > 0 ? Math.round((totalRejected / totalHandled) * 1000) / 10 : 0,
+    avgMinutes: avgMin,
+  };
 
   // 승인대기 (djp PENDING_APPROVAL)
   const { data: pendingQ } = await admin
@@ -177,7 +227,7 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    data: { kpis, assignedCustomers, history, team, ranking, teamCompare, approvalPending, audit,
+    data: { kpis, dashKpis, assignedCustomers, history, team, ranking, teamCompare, approvalPending, audit,
       operators: team.map(t => ({ id: t.id, name: t.name })) },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
