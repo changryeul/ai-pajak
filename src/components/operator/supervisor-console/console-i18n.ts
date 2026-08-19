@@ -1,0 +1,189 @@
+// 수정요청 #1 (8/19) — 수퍼바이저 콘솔 언어팩 (ko/en/id).
+// 목업(.key/.html)의 자체 i18n 방식과 동일: 콘솔 내부 사전 + 상단 언어 드롭다운.
+// 데이터값(이름·금액·날짜)은 로케일 무관이라 번역하지 않음.
+
+export type Lang = 'ko' | 'en' | 'id';
+export const LANGS: Array<{ v: Lang; label: string }> = [
+  { v: 'ko', label: '한국어' },
+  { v: 'en', label: 'English' },
+  { v: 'id', label: 'Bahasa Indonesia' },
+];
+
+type Dict = Record<string, string>;
+
+const ko: Dict = {
+  brandTitle: 'AI Pajak Supervisor', brandSub: 'JTC 내부 관리 콘솔',
+  roleMaster: 'Master · 승인권한', roleSup: '팀 관리 · 승인권한',
+  secMain: 'MAIN', secPeople: 'PEOPLE', secProcess: 'PROCESS',
+  navDashboard: '대시보드', navApproval: '승인대기', navEvaluation: '상담원 평가',
+  navAffiliation: '상담원 소속관리', navAssignment: '고객 배정관리', navBilling: 'ID Billing 이관현황', navAudit: '전체 이력 / 감사로그',
+  badgeTeamCompare: '팀비교', badgeRank: '순위', badgeRun: '실행', badgeLog: 'log',
+  period: '기간', report: '월간 리포트', backWorkqueue: '← 업무함', logout: '로그아웃', loading: '불러오는 중…',
+  // view meta
+  dashTitle: '대시보드', dashDesc: '팀 성과·상담원 순위 한눈에',
+  apprTitle: '승인대기', apprDesc: '상담원 승인요청 검토',
+  evalTitle: '상담원 평가', evalDesc: '반려율·승인통과율 실측 (제안값)',
+  affTitle: '상담원 소속관리', affDesc: '소속 이동 요청/승인',
+  asgTitle: '고객 배정관리', asgDesc: '신규 자동배정 + 수동 변경',
+  billTitle: 'ID Billing 이관현황', billDesc: '발행대상/발행완료 추적',
+  audTitle: '전체 이력 / 감사로그', audDesc: '배정·승인·발행 감사',
+  // dashboard
+  kpiCompleted: '처리완료', kpiCompletedSub: '전체 팀 중 {n}위', kpiPending: '승인대기', kpiPendingSub: '수퍼바이저 확인 필요',
+  kpiReject: '반려율', kpiRejectSub: '팀 반려율', kpiAvg: '평균 처리시간', kpiAvgSub: '목표 25분 이내',
+  teamPerfTitle: '팀 성과 비교', teamPerfDesc: '처리량과 품질지표를 함께 비교합니다.',
+  colTeam: '팀', colSupervisor: '수퍼바이저', colCounselor: '상담원', colCompleted: '처리완료', colPending: '승인대기',
+  colReject: '반려율', colAvgTime: '평균시간', colTeamScore: '팀점수', noTeam: '팀 데이터 없음',
+  rankTitle: '상담원 순위', rankDesc: '상벌 후보 메뉴 없이 순위·근거지표로 판단합니다.', rankApprovalPass: '승인통과', rankReject: '반려율', noRank: '순위 데이터 없음',
+  // approval
+  apprListTitle: '승인대기 리스트', apprListDesc: '상담원 검토완료 → 수퍼바이저 최종 승인 대상. 행을 클릭하면 고객화면 미러 상세가 열립니다.',
+  colCustomer: '고객', colTaxType: '세목', colPeriod: '귀속', colAmount: '세액', openDetail: '상세 열기 →', noApproval: '승인대기 건이 없습니다',
+  apprPrinciple: '아래는 고객이 입력한 자료를 고객 화면과 같은 구조로 보여주는 미러입니다. 상세자료·상담원 수정값을 비교하고, 세금 계산이 맞다고 판단될 때만 승인완료를 누르세요.',
+  reviewReq: '상담원 검토요청', prevReject: '이전 반려사유', mirrorTitle: '{tax} 고객 입력화면 미러', mirrorSub: '{rows}건 · 상담원 수정 {edited}건 (표시된 값 기준)',
+  colStatus: '상태', allFields: '전체 필드', collapse: '접기', noMirror: '이 세목({tax})은 표 미러가 아직 없습니다. 워크큐 상세에서 확인하세요.',
+  rejectTitle: '상담원에게 반려', rejectBody: '반려 사유를 입력하면 해당 건은 상담원 업무함으로 돌아가고, 감사로그에 기록됩니다.', rejectPlaceholder: '반려 사유',
+  close: '닫기', reject: '반려', rejectConfirm: '반려 확정', cancel: '취소', approve: '승인완료', noAuth: '승인 권한/상태 아님', loadingOrEmpty: '불러오는 중 또는 데이터 없음',
+  // evaluation
+  evalHeadTitle: '상담원 평가', evalDefaultDisclaimer: '반려율·승인통과율 실측. 인센티브는 제안값이며 자동 상벌 없음.', evalSuggestBadge: '제안값',
+  colScore: '총점', colRejectRate: '반려율', colApprovalPass: '승인통과율', colAccuracy: '정확도', colSpeed: '속도', colIncentive: '제안 인센티브', noEval: '평가 데이터 없음',
+  // affiliation
+  affInTitle: '소속 이동 요청 (수신)', affInDesc: '받는 쪽 수퍼바이저가 승인합니다.', noIncoming: '수신 대기 요청이 없습니다',
+  affHistTitle: '이동 이력', colDirection: '방향', colMode: '모드', dirIn: '수신', dirOut: '발신', colDate: '일시', noAffHist: '이력 없음', approveWord: '승인',
+  // billing handover
+  billPendTitle: '발행대상 (승인완료 · 미발행)', billPendDesc: '발행은 발행 보드에서 처리합니다.', billBoard: '발행 보드 →',
+  colApprover: '승인 수퍼바이저', noBillPend: '발행대상 없음', billIssuedTitle: '발행완료', colSerial: '일련번호', colSend: '전송', colNtpn: 'NTPN',
+  sent: '전송됨', notSent: '미전송', paid: '납부', awaiting: '대기', noBillIssued: '발행완료 없음',
+  // audit
+  audHeadTitle: '전체 이력 / 감사로그', audHeadDesc: '시간 순서대로 이벤트를 보여줍니다 (최신순).', colTime: '시간', colActivity: '활동', colRole: '역할', noAudit: '감사 이력 없음',
+  // assignment
+  asgRulesTitle: '신규 고객 자동배정 원칙', asgRulesDesc: '신규 고객은 접수 즉시 시스템이 자동으로 팀과 상담원을 배정합니다.', asgRun: '신규 접수 자동배정 실행',
+  asgRule1: '1. 기존 상담이력 우선', asgRule1Desc: '이전 상담원이 있고 자동배정 제외 대상이 아니면 기존 상담원에게 자동 배정합니다.',
+  asgRule2: '2. 팀 자동 결정', asgRule2Desc: '기존 이력이 없으면 고객 언어·세목·위험도·팀 업무량 기준으로 수퍼바이저 그룹을 정합니다.',
+  asgRule3: '3. 상담원 자동 결정', asgRule3Desc: '팀 내 로그인 상태·담당 고객 수·승인대기 수·전문 세목·품질점수로 상담원을 정합니다.',
+  asgRule4: '4. 수퍼바이저 예외 변경', asgRule4Desc: '자동배정 후 필요 시에만 수퍼바이저가 팀/상담원을 변경하고 사유를 남깁니다.',
+  asgDoneTitle: '자동배정 완료 고객', asgDoneDesc: '필요 건만 수퍼바이저가 수동으로 변경', normal: '정상', autoAssigned: '자동배정', manualChange: '수동변경', noAssigned: '배정된 고객이 없습니다',
+  asgManualTitle: '팀/상담원 수동변경', asgManualDesc: '변경 사유는 감사로그에 남습니다.', curAssign: '현재 배정', selectCounselor: '상담원 선택', changeReason: '변경 사유', confirmChange: '변경 확정', selectCustomerFirst: '왼쪽에서 고객을 선택하세요',
+  asgHistTitle: '배정/변경 이력', asgHistDesc: '최근 배정·변경 감사', colMethod: '배정 방식', noAsgHist: '이력 없음',
+  // report
+  reportTitle: 'AI Pajak 월간 수퍼바이저 리포트', reportCover: '{ym} 수퍼바이저 운영 리포트', reportCoverSub: '{name} 기준 · 팀 성과/상담원 순위/승인 요약 포함',
+  rkCompleted: '자동배정 완료', rkChanges: '배정/변경', rkPending: '승인대기', rkTeam: '팀 상담원',
+  rsTeamPerf: '1. 팀 성과 비교', rsRank: '2. 상담원 순위', rsApproval: '3. 승인 / 반려 요약', rsComment: '4. 운영 코멘트',
+  print: '인쇄 / PDF', rankDuty: '담당 {n}건',
+  toastAutoDone: '신규 접수 자동배정 실행 완료', toastAutoFail: '자동배정 실패', toastNet: '네트워크 오류',
+  toastChangeDone: '변경 완료', toastChangeFail: '변경 실패', toastNeedFields: '고객·상담원·사유를 입력하세요',
+};
+
+const en: Dict = {
+  brandTitle: 'AI Pajak Supervisor', brandSub: 'JTC Internal Console',
+  roleMaster: 'Master · Approver', roleSup: 'Team Lead · Approver',
+  secMain: 'MAIN', secPeople: 'PEOPLE', secProcess: 'PROCESS',
+  navDashboard: 'Dashboard', navApproval: 'Approvals', navEvaluation: 'Counselor Eval',
+  navAffiliation: 'Team Affiliation', navAssignment: 'Customer Assignment', navBilling: 'ID Billing Handover', navAudit: 'Audit Log',
+  badgeTeamCompare: 'Compare', badgeRank: 'Rank', badgeRun: 'Run', badgeLog: 'log',
+  period: 'Period', report: 'Monthly Report', backWorkqueue: '← Workqueue', logout: 'Logout', loading: 'Loading…',
+  dashTitle: 'Dashboard', dashDesc: 'Team performance & counselor ranking at a glance',
+  apprTitle: 'Approvals', apprDesc: 'Review counselor approval requests',
+  evalTitle: 'Counselor Evaluation', evalDesc: 'Measured reject/approval rates (suggestion only)',
+  affTitle: 'Team Affiliation', affDesc: 'Affiliation transfer requests/approvals',
+  asgTitle: 'Customer Assignment', asgDesc: 'New auto-assign + manual change',
+  billTitle: 'ID Billing Handover', billDesc: 'Track issuance targets/completed',
+  audTitle: 'Audit Log', audDesc: 'Assignment/approval/issuance audit',
+  kpiCompleted: 'Completed', kpiCompletedSub: '#{n} of all teams', kpiPending: 'Pending Approval', kpiPendingSub: 'Needs supervisor check',
+  kpiReject: 'Reject Rate', kpiRejectSub: 'Team reject rate', kpiAvg: 'Avg Handling Time', kpiAvgSub: 'Target within 25 min',
+  teamPerfTitle: 'Team Performance Comparison', teamPerfDesc: 'Compares throughput and quality metrics.',
+  colTeam: 'Team', colSupervisor: 'Supervisor', colCounselor: 'Counselors', colCompleted: 'Completed', colPending: 'Pending',
+  colReject: 'Reject %', colAvgTime: 'Avg Time', colTeamScore: 'Team Score', noTeam: 'No team data',
+  rankTitle: 'Counselor Ranking', rankDesc: 'Ranked by evidence metrics; no auto reward/penalty.', rankApprovalPass: 'Pass', rankReject: 'Reject', noRank: 'No ranking data',
+  apprListTitle: 'Pending Approval List', apprListDesc: 'Counselor-reviewed → supervisor final approval. Click a row for the customer-screen mirror.',
+  colCustomer: 'Customer', colTaxType: 'Tax', colPeriod: 'Period', colAmount: 'Amount', openDetail: 'Open detail →', noApproval: 'No pending approvals',
+  apprPrinciple: 'Below mirrors the customer input screen. Compare the details and counselor edits, and approve only when the tax calculation is correct.',
+  reviewReq: 'Counselor Review Request', prevReject: 'Previous rejection', mirrorTitle: '{tax} Customer Input Mirror', mirrorSub: '{rows} rows · {edited} counselor edits (by shown values)',
+  colStatus: 'Status', allFields: 'All fields', collapse: 'Collapse', noMirror: 'No table mirror for {tax} yet. Check in the workqueue detail.',
+  rejectTitle: 'Reject to counselor', rejectBody: 'Entering a reason returns the item to the counselor workqueue and logs it in the audit trail.', rejectPlaceholder: 'Rejection reason',
+  close: 'Close', reject: 'Reject', rejectConfirm: 'Confirm reject', cancel: 'Cancel', approve: 'Approve', noAuth: 'No approval permission/state', loadingOrEmpty: 'Loading or no data',
+  evalHeadTitle: 'Counselor Evaluation', evalDefaultDisclaimer: 'Measured reject/approval rates. Incentives are suggestions; no auto reward/penalty.', evalSuggestBadge: 'Suggestion',
+  colScore: 'Total', colRejectRate: 'Reject %', colApprovalPass: 'Pass %', colAccuracy: 'Accuracy', colSpeed: 'Speed', colIncentive: 'Suggested Incentive', noEval: 'No evaluation data',
+  affInTitle: 'Affiliation Requests (Incoming)', affInDesc: 'The receiving supervisor approves.', noIncoming: 'No incoming requests',
+  affHistTitle: 'Transfer History', colDirection: 'Direction', colMode: 'Mode', dirIn: 'In', dirOut: 'Out', colDate: 'Time', noAffHist: 'No history', approveWord: 'Approve',
+  billPendTitle: 'Issuance Targets (Approved · Not Issued)', billPendDesc: 'Issue from the billing board.', billBoard: 'Billing Board →',
+  colApprover: 'Approver', noBillPend: 'No targets', billIssuedTitle: 'Issued', colSerial: 'Serial No', colSend: 'Sent', colNtpn: 'NTPN',
+  sent: 'Sent', notSent: 'Not sent', paid: 'Paid', awaiting: 'Awaiting', noBillIssued: 'None issued',
+  audHeadTitle: 'Audit Log', audHeadDesc: 'Events in time order (latest first).', colTime: 'Time', colActivity: 'Activity', colRole: 'Role', noAudit: 'No audit history',
+  asgRulesTitle: 'New Customer Auto-assign Rules', asgRulesDesc: 'New customers are auto-assigned to a team and counselor on intake.', asgRun: 'Run auto-assign for new intake',
+  asgRule1: '1. Prior counselor first', asgRule1Desc: 'If a prior counselor exists and is eligible, auto-assign to them.',
+  asgRule2: '2. Team auto-decision', asgRule2Desc: 'Otherwise pick the supervisor group by customer language, tax type, risk and team workload.',
+  asgRule3: '3. Counselor auto-decision', asgRule3Desc: 'Pick a counselor by login state, load, pending approvals, specialty and quality score.',
+  asgRule4: '4. Supervisor exception', asgRule4Desc: 'Only when needed, the supervisor changes the team/counselor and leaves a reason.',
+  asgDoneTitle: 'Auto-assigned Customers', asgDoneDesc: 'Supervisor changes only where needed', normal: 'Normal', autoAssigned: 'Auto', manualChange: 'Manual', noAssigned: 'No assigned customers',
+  asgManualTitle: 'Manual Team/Counselor Change', asgManualDesc: 'Change reason is kept in the audit log.', curAssign: 'Current', selectCounselor: 'Select counselor', changeReason: 'Change reason', confirmChange: 'Confirm change', selectCustomerFirst: 'Select a customer on the left',
+  asgHistTitle: 'Assignment/Change History', asgHistDesc: 'Recent assignment/change audit', colMethod: 'Method', noAsgHist: 'No history',
+  reportTitle: 'AI Pajak Monthly Supervisor Report', reportCover: '{ym} Supervisor Operations Report', reportCoverSub: 'Basis {name} · team performance/ranking/approval summary',
+  rkCompleted: 'Auto-assigned', rkChanges: 'Changes', rkPending: 'Pending', rkTeam: 'Team counselors',
+  rsTeamPerf: '1. Team Performance', rsRank: '2. Counselor Ranking', rsApproval: '3. Approval / Rejection', rsComment: '4. Operations Comment',
+  print: 'Print / PDF', rankDuty: '{n} assigned',
+  toastAutoDone: 'Auto-assign for new intake done', toastAutoFail: 'Auto-assign failed', toastNet: 'Network error',
+  toastChangeDone: 'Change done', toastChangeFail: 'Change failed', toastNeedFields: 'Enter customer/counselor/reason',
+};
+
+const id: Dict = {
+  brandTitle: 'AI Pajak Supervisor', brandSub: 'Konsol Internal JTC',
+  roleMaster: 'Master · Penyetuju', roleSup: 'Ketua Tim · Penyetuju',
+  secMain: 'UTAMA', secPeople: 'ORANG', secProcess: 'PROSES',
+  navDashboard: 'Dasbor', navApproval: 'Persetujuan', navEvaluation: 'Evaluasi Konsultan',
+  navAffiliation: 'Afiliasi Tim', navAssignment: 'Penugasan Klien', navBilling: 'Serah ID Billing', navAudit: 'Log Audit',
+  badgeTeamCompare: 'Banding', badgeRank: 'Peringkat', badgeRun: 'Jalankan', badgeLog: 'log',
+  period: 'Periode', report: 'Laporan Bulanan', backWorkqueue: '← Antrean', logout: 'Keluar', loading: 'Memuat…',
+  dashTitle: 'Dasbor', dashDesc: 'Kinerja tim & peringkat konsultan sekilas',
+  apprTitle: 'Persetujuan', apprDesc: 'Tinjau permintaan persetujuan konsultan',
+  evalTitle: 'Evaluasi Konsultan', evalDesc: 'Tingkat penolakan/kelulusan terukur (saran saja)',
+  affTitle: 'Afiliasi Tim', affDesc: 'Permintaan/persetujuan perpindahan afiliasi',
+  asgTitle: 'Penugasan Klien', asgDesc: 'Penugasan otomatis baru + perubahan manual',
+  billTitle: 'Serah Terima ID Billing', billDesc: 'Lacak target/terbit',
+  audTitle: 'Log Audit', audDesc: 'Audit penugasan/persetujuan/penerbitan',
+  kpiCompleted: 'Selesai', kpiCompletedSub: '#{n} dari semua tim', kpiPending: 'Menunggu Persetujuan', kpiPendingSub: 'Perlu cek supervisor',
+  kpiReject: 'Tingkat Tolak', kpiRejectSub: 'Tingkat tolak tim', kpiAvg: 'Rata Waktu Proses', kpiAvgSub: 'Target dalam 25 mnt',
+  teamPerfTitle: 'Perbandingan Kinerja Tim', teamPerfDesc: 'Membandingkan throughput dan metrik kualitas.',
+  colTeam: 'Tim', colSupervisor: 'Supervisor', colCounselor: 'Konsultan', colCompleted: 'Selesai', colPending: 'Menunggu',
+  colReject: 'Tolak %', colAvgTime: 'Rata Waktu', colTeamScore: 'Skor Tim', noTeam: 'Tidak ada data tim',
+  rankTitle: 'Peringkat Konsultan', rankDesc: 'Peringkat berdasarkan metrik; tanpa reward/penalti otomatis.', rankApprovalPass: 'Lulus', rankReject: 'Tolak', noRank: 'Tidak ada data',
+  apprListTitle: 'Daftar Menunggu Persetujuan', apprListDesc: 'Ditinjau konsultan → persetujuan akhir supervisor. Klik baris untuk mirror layar klien.',
+  colCustomer: 'Klien', colTaxType: 'Pajak', colPeriod: 'Periode', colAmount: 'Jumlah', openDetail: 'Buka detail →', noApproval: 'Tidak ada yang menunggu',
+  apprPrinciple: 'Di bawah adalah mirror layar input klien. Bandingkan detail dan editan konsultan, setujui hanya bila perhitungan pajak benar.',
+  reviewReq: 'Permintaan Tinjauan Konsultan', prevReject: 'Alasan penolakan sebelumnya', mirrorTitle: 'Mirror Input Klien {tax}', mirrorSub: '{rows} baris · {edited} editan konsultan',
+  colStatus: 'Status', allFields: 'Semua kolom', collapse: 'Tutup', noMirror: 'Belum ada mirror tabel untuk {tax}. Cek di detail antrean.',
+  rejectTitle: 'Tolak ke konsultan', rejectBody: 'Alasan penolakan mengembalikan item ke antrean konsultan dan dicatat di audit.', rejectPlaceholder: 'Alasan penolakan',
+  close: 'Tutup', reject: 'Tolak', rejectConfirm: 'Konfirmasi tolak', cancel: 'Batal', approve: 'Setujui', noAuth: 'Tanpa izin/status persetujuan', loadingOrEmpty: 'Memuat atau tidak ada data',
+  evalHeadTitle: 'Evaluasi Konsultan', evalDefaultDisclaimer: 'Tingkat tolak/lulus terukur. Insentif adalah saran; tanpa reward/penalti otomatis.', evalSuggestBadge: 'Saran',
+  colScore: 'Total', colRejectRate: 'Tolak %', colApprovalPass: 'Lulus %', colAccuracy: 'Akurasi', colSpeed: 'Kecepatan', colIncentive: 'Saran Insentif', noEval: 'Tidak ada data',
+  affInTitle: 'Permintaan Afiliasi (Masuk)', affInDesc: 'Supervisor penerima menyetujui.', noIncoming: 'Tidak ada permintaan masuk',
+  affHistTitle: 'Riwayat Perpindahan', colDirection: 'Arah', colMode: 'Mode', dirIn: 'Masuk', dirOut: 'Keluar', colDate: 'Waktu', noAffHist: 'Tidak ada riwayat', approveWord: 'Setujui',
+  billPendTitle: 'Target Penerbitan (Disetujui · Belum Terbit)', billPendDesc: 'Terbitkan dari billing board.', billBoard: 'Billing Board →',
+  colApprover: 'Penyetuju', noBillPend: 'Tidak ada target', billIssuedTitle: 'Terbit', colSerial: 'No Seri', colSend: 'Kirim', colNtpn: 'NTPN',
+  sent: 'Terkirim', notSent: 'Belum', paid: 'Dibayar', awaiting: 'Menunggu', noBillIssued: 'Belum ada',
+  audHeadTitle: 'Log Audit', audHeadDesc: 'Peristiwa urut waktu (terbaru dulu).', colTime: 'Waktu', colActivity: 'Aktivitas', colRole: 'Peran', noAudit: 'Tidak ada riwayat audit',
+  asgRulesTitle: 'Aturan Penugasan Otomatis Klien Baru', asgRulesDesc: 'Klien baru otomatis ditugaskan ke tim dan konsultan saat masuk.', asgRun: 'Jalankan penugasan otomatis',
+  asgRule1: '1. Riwayat konsultan diutamakan', asgRule1Desc: 'Jika ada konsultan sebelumnya dan memenuhi syarat, tugaskan otomatis ke mereka.',
+  asgRule2: '2. Penentuan tim otomatis', asgRule2Desc: 'Jika tidak, pilih grup supervisor berdasarkan bahasa, jenis pajak, risiko, dan beban tim.',
+  asgRule3: '3. Penentuan konsultan otomatis', asgRule3Desc: 'Pilih konsultan berdasarkan status login, beban, antrean persetujuan, spesialisasi, dan skor kualitas.',
+  asgRule4: '4. Pengecualian supervisor', asgRule4Desc: 'Hanya bila perlu, supervisor mengubah tim/konsultan dan meninggalkan alasan.',
+  asgDoneTitle: 'Klien Ditugaskan Otomatis', asgDoneDesc: 'Supervisor mengubah hanya bila perlu', normal: 'Normal', autoAssigned: 'Otomatis', manualChange: 'Manual', noAssigned: 'Tidak ada klien',
+  asgManualTitle: 'Ubah Tim/Konsultan Manual', asgManualDesc: 'Alasan perubahan dicatat di audit.', curAssign: 'Saat ini', selectCounselor: 'Pilih konsultan', changeReason: 'Alasan perubahan', confirmChange: 'Konfirmasi', selectCustomerFirst: 'Pilih klien di kiri',
+  asgHistTitle: 'Riwayat Penugasan/Perubahan', asgHistDesc: 'Audit penugasan/perubahan terbaru', colMethod: 'Metode', noAsgHist: 'Tidak ada riwayat',
+  reportTitle: 'Laporan Bulanan Supervisor AI Pajak', reportCover: 'Laporan Operasional Supervisor {ym}', reportCoverSub: 'Basis {name} · kinerja tim/peringkat/ringkasan persetujuan',
+  rkCompleted: 'Ditugaskan otomatis', rkChanges: 'Perubahan', rkPending: 'Menunggu', rkTeam: 'Konsultan tim',
+  rsTeamPerf: '1. Kinerja Tim', rsRank: '2. Peringkat Konsultan', rsApproval: '3. Persetujuan / Penolakan', rsComment: '4. Komentar Operasional',
+  print: 'Cetak / PDF', rankDuty: '{n} klien',
+  toastAutoDone: 'Penugasan otomatis selesai', toastAutoFail: 'Penugasan gagal', toastNet: 'Kesalahan jaringan',
+  toastChangeDone: 'Perubahan selesai', toastChangeFail: 'Perubahan gagal', toastNeedFields: 'Isi klien/konsultan/alasan',
+};
+
+const DICTS: Record<Lang, Dict> = { ko, en, id };
+
+export function makeT(lang: Lang) {
+  const d = DICTS[lang] ?? ko;
+  return (key: string, vars?: Record<string, string | number>) => {
+    let s = d[key] ?? ko[key] ?? key;
+    if (vars) for (const k of Object.keys(vars)) s = s.replace(`{${k}}`, String(vars[k]));
+    return s;
+  };
+}
+export type T = ReturnType<typeof makeT>;
