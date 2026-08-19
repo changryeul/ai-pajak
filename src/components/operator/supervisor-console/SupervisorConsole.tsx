@@ -449,7 +449,7 @@ function ApprovalView({ d, onChanged }: { d: ConsoleData; onChanged: () => void 
               role="button" tabIndex={0} onClick={() => setSelCust(g.customerId)}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
                 <b>{g.company}</b>
-                {g.note && <span className={`${styles.badge} ${styles.amber}`}>{g.note.slice(0, 24)}</span>}
+                {g.note && <span className={`${styles.badge} ${styles.amber}`}>{String(g.note).slice(0, 24)}</span>}
               </div>
               <div style={{ color: '#64748b', fontSize: 12 }}>
                 {g.items.map(it => it.taxType).join(', ')} · {g.period} · {g.counselor}

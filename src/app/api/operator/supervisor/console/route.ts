@@ -200,7 +200,7 @@ export async function GET(_req: NextRequest) {
     id: r.id, customerId: r.customer_id, company: pendCustName.get(r.customer_id) ?? '—',
     npwp: pendCustNpwp.get(r.customer_id) ?? null, counselor: r.operator_id ? (opById.get(r.operator_id)?.name ?? '—') : '—',
     taxType: r.tax_type, period: `${r.tax_period_year}-${String(r.tax_period_month).padStart(2, '0')}`,
-    amount: Number(r.amount ?? 0), note: r.notes ?? r.review_summary ?? null,
+    amount: Number(r.amount ?? 0), note: typeof r.notes === 'string' && r.notes ? r.notes : null,
   }));
 
   // 감사로그 (audit_log 최근)
