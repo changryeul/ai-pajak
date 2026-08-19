@@ -182,22 +182,25 @@ export async function GET(_req: NextRequest) {
     avgMinutes: avgMin,
   };
 
-  // 승인대기 (djp PENDING_APPROVAL)
+  // 승인대기 (djp PENDING_APPROVAL) — 고객 단위 그룹핑용 customerId/npwp/상담원 포함
   const { data: pendingQ } = await admin
     .from('djp_submission_queue')
-    .select('id, customer_id, tax_type, tax_period_month, tax_period_year, amount')
+    .select('id, customer_id, operator_id, tax_type, tax_period_month, tax_period_year, amount, notes, review_summary')
     .eq('status', 'PENDING_APPROVAL')
     .order('created_at', { ascending: false })
-    .limit(30);
+    .limit(50);
   const pendCustIds = [...new Set((pendingQ ?? []).map(r => r.customer_id))];
   const pendCustName = new Map<string, string>();
+  const pendCustNpwp = new Map<string, string | null>();
   if (pendCustIds.length) {
-    const { data: cs } = await admin.from('customer').select('id, full_name, company_name').in('id', pendCustIds);
-    for (const c of cs ?? []) pendCustName.set(c.id, c.company_name || c.full_name || '—');
+    const { data: cs } = await admin.from('customer').select('id, full_name, company_name, npwp').in('id', pendCustIds);
+    for (const c of cs ?? []) { pendCustName.set(c.id, c.company_name || c.full_name || '—'); pendCustNpwp.set(c.id, c.npwp ?? null); }
   }
   const approvalPending = (pendingQ ?? []).map(r => ({
-    id: r.id, company: pendCustName.get(r.customer_id) ?? '—', taxType: r.tax_type,
-    period: `${r.tax_period_year}-${String(r.tax_period_month).padStart(2, '0')}`, amount: Number(r.amount ?? 0),
+    id: r.id, customerId: r.customer_id, company: pendCustName.get(r.customer_id) ?? '—',
+    npwp: pendCustNpwp.get(r.customer_id) ?? null, counselor: r.operator_id ? (opById.get(r.operator_id)?.name ?? '—') : '—',
+    taxType: r.tax_type, period: `${r.tax_period_year}-${String(r.tax_period_month).padStart(2, '0')}`,
+    amount: Number(r.amount ?? 0), note: r.notes ?? r.review_summary ?? null,
   }));
 
   // 감사로그 (audit_log 최근)

@@ -15,7 +15,7 @@ interface ConsoleData {
   ranking: Array<{ id: string; name: string; taxLabel: string; approvalPass: number; rejectRate: number; score: number; load: number }>;
   teamCompare: Array<{ team: string; supervisor: string; members: number; completed: number; pendingApproval: number; rejectRate: number; avgMinutes: number; teamScore: number; rank: number }>;
   operators: Array<{ id: string; name: string }>;
-  approvalPending: Array<{ id: string; company: string; taxType: string; period: string; amount: number }>;
+  approvalPending: Array<{ id: string; customerId: string; company: string; npwp: string | null; counselor: string; taxType: string; period: string; amount: number; note: string | null }>;
   audit: Array<{ activity: string; role: string; taxType: string | null; company: string; at: string }>;
 }
 type View = 'dashboard' | 'approval' | 'evaluation' | 'affiliation' | 'assignment' | 'billing' | 'audit';
@@ -411,39 +411,97 @@ const MIRROR_SECTIONS: Record<string, MirrorSection[]> = {
   ],
 };
 
+// PPT 승인대기 — 4 세목 탭
+const APPR_TABS: Array<{ key: string; label: string; types: string[] }> = [
+  { key: 'pph21', label: 'PPh 21', types: ['PPh21'] },
+  { key: 'wht', label: 'Withholding', types: ['PPh23', 'PPh4_2', 'PPh15', 'PPh22', 'PPh26'] },
+  { key: 'cit', label: 'PPh 25', types: ['PPh25', 'PPh_FINAL'] },
+  { key: 'ppn', label: 'PPN', types: ['PPN'] },
+];
+type ApprGroup = { customerId: string; company: string; npwp: string | null; counselor: string; period: string; note: string | null; items: ApprovalItem[] };
+
 function ApprovalView({ d, onChanged }: { d: ConsoleData; onChanged: () => void }) {
   const t = useT();
-  const [sel, setSel] = useState<ApprovalItem | null>(null);
+  const groups = useMemo(() => {
+    const m = new Map<string, ApprGroup>();
+    for (const a of d.approvalPending) {
+      const g = m.get(a.customerId) ?? { customerId: a.customerId, company: a.company, npwp: a.npwp, counselor: a.counselor, period: a.period, note: a.note, items: [] as ApprovalItem[] };
+      g.items.push(a);
+      if (a.note && !g.note) g.note = a.note;
+      m.set(a.customerId, g);
+    }
+    return [...m.values()];
+  }, [d.approvalPending]);
+  const [selCust, setSelCust] = useState<string | null>(groups[0]?.customerId ?? null);
+  const [tab, setTab] = useState('pph21');
+  const cur = groups.find(g => g.customerId === selCust) ?? null;
+  const tabTypes = APPR_TABS.find(x => x.key === tab)?.types ?? [];
+  const curItem = cur?.items.find(it => tabTypes.includes(it.taxType)) ?? null;
+
   return (
-    <>
+    <div className={styles.assignmentLayout}>
+      {/* 좌: 승인대기 리스트 (고객 단위) */}
       <div className={styles.card}>
-        <div className={styles.cardHead}><div><h2>{t('apprListTitle')}</h2><p>{t('apprListDesc')}</p></div></div>
-        <div className={styles.cardBody}>
-          <div className={styles.tableWrap}>
-            <table>
-              <thead><tr><th>{t('colCustomer')}</th><th>{t('colTaxType')}</th><th>{t('colPeriod')}</th><th>{t('colAmount')}</th><th></th></tr></thead>
-              <tbody>
-                {d.approvalPending.map(a => (
-                  <tr key={a.id} role="button" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => setSel(a)}>
-                    <td><b>{a.company}</b></td><td>{a.taxType}</td><td>{a.period}</td>
-                    <td className={styles.money}>{rp(a.amount)}</td>
-                    <td><span className={`${styles.badge} ${styles.blue}`}>{t('openDetail')}</span></td>
-                  </tr>
-                ))}
-                {d.approvalPending.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>{t('noApproval')}</td></tr>}
-              </tbody>
-            </table>
-          </div>
+        <div className={styles.cardHead}><div><h2>{t('apprListTitle')}</h2><p>{t('apprListDesc')}</p></div><span className={styles.cnt} style={{ background: '#dbeafe', color: '#1d4ed8' }}>{groups.length}</span></div>
+        <div className={styles.cardBody} style={{ display: 'grid', gap: 10 }}>
+          {groups.map(g => (
+            <div key={g.customerId} className={`${styles.customerCard} ${selCust === g.customerId ? styles.active : ''}`}
+              role="button" tabIndex={0} onClick={() => setSelCust(g.customerId)}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
+                <b>{g.company}</b>
+                {g.note && <span className={`${styles.badge} ${styles.amber}`}>{g.note.slice(0, 24)}</span>}
+              </div>
+              <div style={{ color: '#64748b', fontSize: 12 }}>
+                {g.items.map(it => it.taxType).join(', ')} · {g.period} · {g.counselor}
+              </div>
+            </div>
+          ))}
+          {groups.length === 0 && <div className={styles.placeholder}>{t('noApproval')}</div>}
         </div>
       </div>
-      {sel && <ApprovalDetail item={sel} onClose={() => setSel(null)} onDecided={() => { setSel(null); onChanged(); }} />}
-    </>
+
+      {/* 우: 선택 고객 상세 (4 세목 탭) */}
+      <div style={{ display: 'grid', gap: 14, alignContent: 'start' }}>
+        {cur ? (
+          <>
+            <div className={styles.card}>
+              <div className={styles.cardHead}>
+                <div><h2>{cur.company}</h2><p>NPWP {cur.npwp ?? '—'} · {cur.period} · {cur.counselor}</p></div>
+                <span className={`${styles.badge} ${styles.amber}`}>{t('supPending')}</span>
+              </div>
+              <div className={styles.cardBody}>
+                <div className={styles.assignmentRule}><p>{t('apprPrinciple')}</p></div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+                  {APPR_TABS.map(x => {
+                    const has = cur.items.some(it => x.types.includes(it.taxType));
+                    return (
+                      <button key={x.key} onClick={() => setTab(x.key)}
+                        className={`${styles.btn} ${tab === x.key ? styles.blue : ''}`}
+                        style={{ opacity: has ? 1 : 0.5 }}>{x.label}{has ? '' : ' ·'}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            {curItem
+              ? <ApprovalTaxWork key={curItem.id} item={curItem} onDecided={onChanged} />
+              : <div className={styles.card}><div className={styles.placeholder}>{t('noTaxWork')}</div></div>}
+          </>
+        ) : <div className={styles.card}><div className={styles.placeholder}>{t('selectCustomerFirst')}</div></div>}
+      </div>
+    </div>
   );
 }
 
 interface DetailResp { rows?: Array<Record<string, unknown>>; summary?: Record<string, number> }
 interface ApprovalState { status: string; requestNote?: string | null; canApprove: boolean; rejectedReason?: string | null }
-function ApprovalDetail({ item, onClose, onDecided }: { item: ApprovalItem; onClose: () => void; onDecided: () => void }) {
+// 세목별 요약 KPI 매핑
+const SUMMARY_MAP: Record<string, Array<{ k: string; label: string; money?: boolean }>> = {
+  pph21: [{ k: 'employeeCount', label: 'kEmployees' }, { k: 'totalGross', label: 'kTotalPay', money: true }, { k: 'totalPph21', label: 'colAmount', money: true }],
+  withholding: [{ k: 'txnCount', label: 'kCount' }, { k: 'totalGross', label: 'kTotalPay', money: true }, { k: 'totalTax', label: 'colAmount', money: true }],
+  ppn: [{ k: 'fakturCount', label: 'kCount' }, { k: 'totalDpp', label: 'kTotalPay', money: true }, { k: 'totalPpn', label: 'colAmount', money: true }],
+};
+function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: () => void }) {
   const t = useT();
   const cfg = DETAIL_MAP[item.taxType];
   const [detail, setDetail] = useState<DetailResp | null>(null);
@@ -475,23 +533,40 @@ function ApprovalDetail({ item, onClose, onDecided }: { item: ApprovalItem; onCl
 
   const rows = detail?.rows ?? [];
   const editedCount = rows.filter(r => r.operatorEdits && Object.keys(r.operatorEdits as object).length > 0).length;
+  const summary = detail?.summary ?? {};
+  const summaryCells = cfg ? (SUMMARY_MAP[cfg.ep] ?? []) : [];
 
   return (
-    <div className={styles.modalBg} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>{item.company} · {item.taxType} · {item.period}</h2>
-        <div className={styles.modalBody}>
-          <div className={styles.assignmentRule}><p>{t('apprPrinciple')}</p></div>
+    <div className={styles.card}>
+      <div className={styles.cardBody} style={{ display: 'grid', gap: 12 }}>
+          {/* 고객 입력 요약 */}
+          {summaryCells.length > 0 && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <b style={{ fontSize: 14 }}>{t('summaryTitle')}</b>
+                <span className={`${styles.badge} ${styles.green}`}>{t('confirmedData')}</span>
+              </div>
+              <div className={`${styles.grid} ${styles.three}`}>
+                {summaryCells.map(c => (
+                  <div key={c.k} className={styles.kpiCard} style={{ padding: 12 }}>
+                    <div className={styles.kpiLabel}>{t(c.label)}</div>
+                    <div style={{ fontSize: 18, fontWeight: 1000, marginTop: 4 }}>{c.money ? rp(Number(summary[c.k] ?? 0)) : String(summary[c.k] ?? 0)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {appr?.requestNote && (
-            <div className={styles.reviewRequestBox}><b>{t('reviewReq')}</b><p>{appr.requestNote}</p></div>
+            <div className={styles.reviewRequestBox}><b>{t('reviewReqTitle')}</b><p style={{ color: '#78350f', fontSize: 12 }}>{t('reviewReqDesc')}</p><p>{appr.requestNote}</p></div>
           )}
           {appr?.rejectedReason && <div className={styles.assignmentRule}><b>{t('prevReject')}</b><p>{appr.rejectedReason}</p></div>}
 
           {cfg ? (
             <div className={styles.customerUi}>
               <div className={styles.customerUiHead}>
-                <div><h3>{t('mirrorTitle', { tax: item.taxType })}</h3><p>{t('mirrorSub', { rows: rows.length, edited: editedCount })}</p></div>
+                <div><h3>{t('mirrorScreenTitle', { tax: item.taxType })}</h3><p>{t('mirrorSub', { rows: rows.length, edited: editedCount })}</p></div>
+                <span className={`${styles.badge} ${styles.green}`}>{t('counselorReviewed')}</span>
               </div>
               <div className={styles.tableWrap}>
                 <table>
@@ -548,23 +623,23 @@ function ApprovalDetail({ item, onClose, onDecided }: { item: ApprovalItem; onCl
               <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder={t('rejectPlaceholder')} />
             </div>
           )}
-        </div>
-        <div className={styles.modalFooter}>
-          <button className={styles.btn} onClick={onClose} disabled={busy}>{t('close')}</button>
-          {appr?.canApprove && appr.status === 'PENDING_APPROVAL' ? (
-            rejecting ? (
-              <>
-                <button className={styles.btn} onClick={() => setRejecting(false)} disabled={busy}>{t('cancel')}</button>
-                <button className={`${styles.btn} ${styles.red}`} disabled={busy || reason.trim().length < 1} onClick={() => decide('reject', reason.trim())}>{t('rejectConfirm')}</button>
-              </>
-            ) : (
-              <>
-                <button className={styles.btn} onClick={() => setRejecting(true)} disabled={busy}>{t('reject')}</button>
-                <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={() => decide('approve')}>{t('approve')}</button>
-              </>
-            )
-          ) : <span className={`${styles.badge} ${styles.amber}`}>{appr?.status === 'APPROVED' ? t('approve') : t('noAuth')}</span>}
-        </div>
+
+          {/* 수퍼바이저 최종 판단 (인라인) */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
+            {appr?.canApprove && appr.status === 'PENDING_APPROVAL' ? (
+              rejecting ? (
+                <>
+                  <button className={styles.btn} onClick={() => setRejecting(false)} disabled={busy}>{t('cancel')}</button>
+                  <button className={`${styles.btn} ${styles.red}`} disabled={busy || reason.trim().length < 1} onClick={() => decide('reject', reason.trim())}>{t('rejectConfirm')}</button>
+                </>
+              ) : (
+                <>
+                  <button className={styles.btn} onClick={() => setRejecting(true)} disabled={busy}>{t('reject')}</button>
+                  <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={() => decide('approve')}>{t('approve')}</button>
+                </>
+              )
+            ) : <span className={`${styles.badge} ${styles.amber}`}>{appr?.status === 'APPROVED' ? t('approve') : t('noAuth')}</span>}
+          </div>
       </div>
     </div>
   );
