@@ -39,12 +39,23 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
   const issuedSessionIds = new Set((issuedRows ?? []).map(r => r.session_id).filter(Boolean));
   const { data: approvedSessions } = await admin
     .from('consultant_session')
-    .select('id, customer_id, tax_period, supervisor_id, consultant_id, total_estimated_tax')
+    .select('id, customer_id, tax_period, supervisor_id, consultant_id, total_estimated_tax, updated_at')
     .eq('tax_partner_id', partnerId)
     .eq('status', 'APPROVED')
     .order('updated_at', { ascending: false })
     .limit(300);
   const pendingSessions = (approvedSessions ?? []).filter(s => !issuedSessionIds.has(s.id));
+
+  // 발행완료 행의 승인수퍼바이저/상담원/승인시간 — 원본 세션 조인 (session_id 있는 건만).
+  const issuedSessById = new Map<string, { supervisorId: string | null; consultantId: string | null; approvedAt: string | null }>();
+  const issuedSessIds = Array.from(issuedSessionIds);
+  if (issuedSessIds.length > 0) {
+    const { data: iss } = await admin
+      .from('consultant_session')
+      .select('id, supervisor_id, consultant_id, updated_at')
+      .in('id', issuedSessIds);
+    for (const s of iss ?? []) issuedSessById.set(s.id, { supervisorId: s.supervisor_id, consultantId: s.consultant_id, approvedAt: s.updated_at });
+  }
 
   // ── 조인용 참조 수집 ──
   const customerIds = new Set<string>();
@@ -54,6 +65,10 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     customerIds.add(s.customer_id);
     if (s.consultant_id) consultantIds.add(s.consultant_id);
     if (s.supervisor_id) consultantIds.add(s.supervisor_id);
+  }
+  for (const v of issuedSessById.values()) {
+    if (v.consultantId) consultantIds.add(v.consultantId);
+    if (v.supervisorId) consultantIds.add(v.supervisorId);
   }
 
   const custMap = new Map<string, string>();
@@ -73,23 +88,30 @@ async function handleGet(req: RequestWithSession): Promise<Response> {
     taxPeriod: String(s.tax_period ?? '').slice(0, 7),
     approver: s.supervisor_id ? (nameMap.get(s.supervisor_id) ?? '—') : '—',
     consultant: s.consultant_id ? (nameMap.get(s.consultant_id) ?? '—') : '—',
+    approvedAt: s.updated_at ?? null,
     estimatedTax: Number(s.total_estimated_tax ?? 0),
     billingStatus: 'TARGET' as const,   // 발행대상
   }));
 
-  const issued = (issuedRows ?? []).map(r => ({
-    id: r.id,
-    serialNo: r.serial_no,
-    company: custMap.get(r.customer_id) ?? '—',
-    taxType: r.tax_type,
-    taxPeriod: r.tax_period,
-    amount: Number(r.amount),
-    billingStatus: 'ISSUED' as const,
-    sendStatus: r.status === 'SENT' || r.status === 'PAID' ? 'SENT' : 'NOT_SENT',
-    ntpnStatus: r.status === 'PAID' ? 'PAID' : 'AWAITING_CORETAX', // 수동 납부확인 (Coretax API 보류)
-    ntpn: r.ntpn ?? null,
-    createdAt: r.created_at,
-  }));
+  const issued = (issuedRows ?? []).map(r => {
+    const sess = r.session_id ? issuedSessById.get(r.session_id) : null;
+    return {
+      id: r.id,
+      serialNo: r.serial_no,
+      company: custMap.get(r.customer_id) ?? '—',
+      taxType: r.tax_type,
+      taxPeriod: r.tax_period,
+      amount: Number(r.amount),
+      approver: sess?.supervisorId ? (nameMap.get(sess.supervisorId) ?? '—') : '—',
+      consultant: sess?.consultantId ? (nameMap.get(sess.consultantId) ?? '—') : '—',
+      approvedAt: sess?.approvedAt ?? null,
+      billingStatus: 'ISSUED' as const,
+      sendStatus: r.status === 'SENT' || r.status === 'PAID' ? 'SENT' : 'NOT_SENT',
+      ntpnStatus: r.status === 'PAID' ? 'PAID' : 'AWAITING_CORETAX', // 수동 납부확인 (Coretax API 보류)
+      ntpn: r.ntpn ?? null,
+      createdAt: r.created_at,
+    };
+  });
 
   return NextResponse.json({
     success: true,

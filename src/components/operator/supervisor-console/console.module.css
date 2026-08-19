@@ -62,6 +62,11 @@
 .autoFlow{display:grid;gap:10px}.autoStep{border:1px solid var(--line);background:#f8fafc;border-radius:14px;padding:12px}.autoStep b{font-size:13px}.autoStep p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
 .staffPill{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px;margin-top:8px;background:#f8fafc}
 .statusDot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:#22c55e}.statusDot.off{background:#94a3b8}.statusDot.rest{background:#f59e0b}
+.statusDot.online{background:#22c55e}.statusDot.busy{background:#f59e0b}.statusDot.offline{background:#94a3b8}
+.supervisorGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.supervisorCard{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px}
+.supervisorCard h2{font-size:15px}
+@media(max-width:1200px){.supervisorGrid{grid-template-columns:1fr}}
 .root textarea,.root input,.root select{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%;background:#fff}
 .toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:12px 14px;border-radius:13px;z-index:80;font-weight:900;font-size:13px;max-width:360px}
 .placeholder{padding:40px;text-align:center;color:var(--muted);font-size:13px}

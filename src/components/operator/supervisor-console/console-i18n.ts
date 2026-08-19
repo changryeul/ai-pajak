@@ -85,6 +85,16 @@ const ko: Dict = {
   print: '인쇄 / PDF', rankDuty: '담당 {n}건',
   toastAutoDone: '신규 접수 자동배정 실행 완료', toastAutoFail: '자동배정 실패', toastNet: '네트워크 오류',
   toastChangeDone: '변경 완료', toastChangeFail: '변경 실패', toastNeedFields: '고객·상담원·사유를 입력하세요',
+  // #9 배정 KPI · #8 소속관리 로스터/협의함 · #10 이관현황 (PPT)
+  asgKpiWaiting: '배정대기', asgKpiWaitingSub: '수동 배정대기 없음', asgKpiAuto: '자동배정 완료 고객', asgKpiAutoSub: '신규 고객 자동배정 원칙',
+  asgKpiExcluded: '자동배정 제외', asgKpiExcludedSub: '오프라인', asgKpiManual: '수동변경', asgKpiManualSub: '배정/변경 이력',
+  affStaffCount: '상담원 {n}명', customer: '고객', supPendingShort: '승인대기', transferRequest: '이동요청',
+  coordinationBox: '수퍼바이저 협의 요청함', affiliationDesc: '이동요청 생성·승인·소속 변경·감사로그까지 작동합니다.',
+  requester: '요청자', target: '대상', current: '현재', changeTo: '변경', customerScope: '고객 처리범위', reason: '사유', status: '상태', action: '실행',
+  noStaff: '상담원이 없습니다', affReqSent: '이동요청 전송됨',
+  ws_active: '온라인', ws_busy: '자리비움', ws_offline: '오프라인',
+  mode_WITH_CLIENTS: '고객과 함께 이동', mode_OPERATOR_ONLY: '상담원만 이동', mode_REASSIGN_CLIENTS: '고객 재배정',
+  billFlow: '승인완료 후 ID Billing 발행으로 이관된 흐름을 추적합니다.', sortBy: '정렬', approvedTime: '승인시간', billIssued: '발행완료', billTarget: '발행대상',
 };
 
 const en: Dict = {
@@ -152,6 +162,15 @@ const en: Dict = {
   print: 'Print / PDF', rankDuty: '{n} assigned',
   toastAutoDone: 'Auto-assign for new intake done', toastAutoFail: 'Auto-assign failed', toastNet: 'Network error',
   toastChangeDone: 'Change done', toastChangeFail: 'Change failed', toastNeedFields: 'Enter customer/counselor/reason',
+  asgKpiWaiting: 'Waiting', asgKpiWaitingSub: 'No manual queue', asgKpiAuto: 'Auto-assigned Customers', asgKpiAutoSub: 'New customer auto-assignment',
+  asgKpiExcluded: 'Auto-excluded', asgKpiExcludedSub: 'Offline', asgKpiManual: 'Manually changed', asgKpiManualSub: 'Assignment history',
+  affStaffCount: '{n} counselors', customer: 'Customer', supPendingShort: 'Pending', transferRequest: 'Transfer Request',
+  coordinationBox: 'Supervisor Coordination Requests', affiliationDesc: 'Transfer request creation, approval, reassignment, and audit logging are supported.',
+  requester: 'Requester', target: 'Target', current: 'Current', changeTo: 'Change To', customerScope: 'Customer Scope', reason: 'Reason', status: 'Status', action: 'Action',
+  noStaff: 'No counselors', affReqSent: 'Transfer request sent',
+  ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline',
+  mode_WITH_CLIENTS: 'Move with clients', mode_OPERATOR_ONLY: 'Operator only', mode_REASSIGN_CLIENTS: 'Reassign clients',
+  billFlow: 'Track cases moved to ID Billing issuance after approval.', sortBy: 'Sort', approvedTime: 'Approval Time', billIssued: 'Issued', billTarget: 'Target',
 };
 
 const id: Dict = {
@@ -219,6 +238,15 @@ const id: Dict = {
   print: 'Cetak / PDF', rankDuty: '{n} klien',
   toastAutoDone: 'Penugasan otomatis selesai', toastAutoFail: 'Penugasan gagal', toastNet: 'Kesalahan jaringan',
   toastChangeDone: 'Perubahan selesai', toastChangeFail: 'Perubahan gagal', toastNeedFields: 'Isi klien/konsultan/alasan',
+  asgKpiWaiting: 'Menunggu', asgKpiWaitingSub: 'Tidak ada antrean manual', asgKpiAuto: 'Pelanggan Tertugas Otomatis', asgKpiAutoSub: 'Penugasan otomatis pelanggan baru',
+  asgKpiExcluded: 'Dikecualikan otomatis', asgKpiExcludedSub: 'Offline', asgKpiManual: 'Diubah manual', asgKpiManualSub: 'Riwayat penugasan',
+  affStaffCount: '{n} konsultan', customer: 'Pelanggan', supPendingShort: 'Menunggu', transferRequest: 'Permintaan Pindah',
+  coordinationBox: 'Kotak Permintaan Koordinasi Supervisor', affiliationDesc: 'Pembuatan permintaan pindah, persetujuan, penugasan ulang, dan log audit didukung.',
+  requester: 'Pemohon', target: 'Target', current: 'Saat ini', changeTo: 'Ubah ke', customerScope: 'Cakupan Pelanggan', reason: 'Alasan', status: 'Status', action: 'Aksi',
+  noStaff: 'Tidak ada konsultan', affReqSent: 'Permintaan pindah terkirim',
+  ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline',
+  mode_WITH_CLIENTS: 'Pindah dengan klien', mode_OPERATOR_ONLY: 'Hanya operator', mode_REASSIGN_CLIENTS: 'Tugaskan ulang klien',
+  billFlow: 'Lacak kasus yang dipindahkan ke penerbitan ID Billing setelah persetujuan.', sortBy: 'Urutkan', approvedTime: 'Waktu Persetujuan', billIssued: 'Terbit', billTarget: 'Target',
 };
 
 const DICTS: Record<Lang, Dict> = { ko, en, id };

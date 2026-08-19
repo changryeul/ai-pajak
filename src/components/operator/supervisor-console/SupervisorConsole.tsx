@@ -15,6 +15,8 @@ interface ConsoleData {
   ranking: Array<{ id: string; name: string; taxLabel: string; approvalPass: number; rejectRate: number; score: number; load: number }>;
   teamCompare: Array<{ team: string; supervisor: string; members: number; completed: number; pendingApproval: number; rejectRate: number; avgMinutes: number; teamScore: number; rank: number }>;
   operators: Array<{ id: string; name: string }>;
+  roster: Array<{ supervisorId: string | null; supervisor: string; staff: Array<{ id: string; name: string; workState: string; customers: number; pending: number; specialty: string }> }>;
+  supervisorOptions: Array<{ id: string; name: string }>;
   approvalPending: Array<{ id: string; customerId: string; company: string; npwp: string | null; counselor: string; taxType: string; period: string; amount: number; note: string | null }>;
   audit: Array<{ activity: string; role: string; taxType: string | null; company: string; at: string }>;
 }
@@ -130,7 +132,7 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
             : view === 'assignment' ? <AssignmentView d={data} onAuto={runAutoAssign} onReassigned={async (m) => { showToast(m); await load(); }} />
             : view === 'approval' ? <ApprovalView d={data} onChanged={load} />
             : view === 'evaluation' ? <EvaluationView />
-            : view === 'affiliation' ? <AffiliationView onToast={showToast} />
+            : view === 'affiliation' ? <AffiliationView d={data} onToast={showToast} onChanged={load} />
             : view === 'billing' ? <BillingView locale={locale} />
             : <AuditView d={data} />}
         </main>
@@ -300,6 +302,14 @@ function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: (
   };
   return (
     <>
+      {/* #9 PPT — 배정 KPI 4 (배정대기 / 자동배정 완료 / 자동배정 제외 / 수동변경) */}
+      <div className={`${styles.grid} ${styles.kpi}`}>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiWaiting')}</div><div className={styles.kpiValue}>{d.kpis.pendingManual}</div><div className={styles.kpiSub}>{t('asgKpiWaitingSub')}</div></div>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiAuto')}</div><div className={styles.kpiValue}>{d.assignedCustomers.length}</div><div className={styles.kpiSub}>{t('asgKpiAutoSub')}</div></div>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiExcluded')}</div><div className={styles.kpiValue}>{d.kpis.excludedOffline}</div><div className={styles.kpiSub}>{t('asgKpiExcludedSub')}</div></div>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiManual')}</div><div className={styles.kpiValue}>{d.kpis.changes}</div><div className={styles.kpiSub}>{t('asgKpiManualSub')}</div></div>
+      </div>
+
       <div className={styles.card}>
         <div className={styles.cardHead}>
           <div><h2>{t('asgRulesTitle')}</h2><p>{t('asgRulesDesc')}</p></div>
@@ -696,9 +706,17 @@ function EvaluationView() {
 
 // ── 상담원 소속관리 ──
 interface Transfer { id: string; operatorName: string; fromSupervisorName: string | null; toSupervisorName: string; clientMode: string; reason: string | null; status: string; direction: string; createdAt: string }
-function AffiliationView({ onToast }: { onToast: (m: string) => void }) {
+const CLIENT_MODES = ['WITH_CLIENTS', 'OPERATOR_ONLY', 'REASSIGN_CLIENTS'] as const;
+// #8 소속관리 — PPT: 수퍼바이저별 상담원 로스터(이동요청) + 협의 요청함 테이블(승인/거절)
+function AffiliationView({ d, onToast, onChanged }: { d: ConsoleData; onToast: (m: string) => void; onChanged: () => void }) {
   const t = useT();
   const { data, err, reload } = useLazy<{ incoming: Transfer[]; transfers: Transfer[] }>('/api/operator/supervisor/affiliation');
+  const [xfer, setXfer] = useState<{ operatorId: string; name: string } | null>(null);
+  const [toSup, setToSup] = useState('');
+  const [mode, setMode] = useState<typeof CLIENT_MODES[number]>('OPERATOR_ONLY');
+  const [reason, setReason] = useState('');
+  const [busy, setBusy] = useState(false);
+
   const decide = async (id: string, action: 'APPROVE' | 'REJECT') => {
     try {
       const r = await fetch(`/api/operator/supervisor/affiliation/${id}`, {
@@ -707,95 +725,173 @@ function AffiliationView({ onToast }: { onToast: (m: string) => void }) {
       });
       const j = await r.json();
       onToast(j.success ? (action === 'APPROVE' ? t('toastChangeDone') : t('reject')) : (j.error || t('toastChangeFail')));
-      reload();
+      reload(); onChanged();
     } catch { onToast(t('toastNet')); }
   };
-  if (err) return <ErrCard msg={t('toastNet')} />;
-  if (!data) return <LoadingCard />;
+  const submitXfer = async () => {
+    if (!xfer || !toSup || reason.trim().length < 2) { onToast(t('toastNeedFields')); return; }
+    setBusy(true);
+    try {
+      const r = await fetch('/api/operator/supervisor/affiliation', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operatorId: xfer.operatorId, toSupervisorId: toSup, clientMode: mode, reason: reason.trim() }),
+      });
+      const j = await r.json();
+      onToast(j.success ? t('affReqSent') : (typeof j.error === 'string' ? j.error : t('toastChangeFail')));
+      if (j.success) { setXfer(null); setToSup(''); setReason(''); setMode('OPERATOR_ONLY'); reload(); }
+    } catch { onToast(t('toastNet')); }
+    finally { setBusy(false); }
+  };
+
   return (
     <>
-      <div className={styles.card}>
-        <div className={styles.cardHead}><div><h2>{t('affInTitle')}</h2><p>{t('affInDesc')}</p></div></div>
-        <div className={styles.cardBody} style={{ display: 'grid', gap: 10 }}>
-          {data.incoming.map(tr => (
-            <div key={tr.id} className={styles.assignmentRule}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <b>{tr.operatorName}</b><span className={`${styles.badge} ${styles.amber}`}>{tr.status}</span>
+      {/* 수퍼바이저별 상담원 로스터 */}
+      <div className={styles.supervisorGrid}>
+        {d.roster.map(g => (
+          <div key={g.supervisorId ?? 'none'} className={styles.supervisorCard}>
+            <h2 style={{ margin: 0 }}>{g.supervisor}</h2>
+            <p style={{ color: '#64748b', fontSize: 12, margin: '2px 0 8px' }}>{t('affStaffCount', { n: g.staff.length })}</p>
+            {g.staff.map(c => (
+              <div key={c.id} className={styles.staffPill}>
+                <span>
+                  <b><i className={`${styles.statusDot} ${c.workState === 'offline' ? styles.offline : c.workState === 'busy' ? styles.busy : styles.online}`} />{c.name}</b><br />
+                  <small>{t(`ws_${c.workState}` as string) || c.workState} · {t('customer')} {c.customers} · {t('supPendingShort')} {c.pending} · {c.specialty}</small>
+                </span>
+                <button className={`${styles.btn} ${styles.blue}`} onClick={() => { setXfer({ operatorId: c.id, name: c.name }); setToSup(''); setReason(''); }}>{t('transferRequest')}</button>
               </div>
-              <p>{tr.fromSupervisorName ?? '—'} → {tr.toSupervisorName} · {tr.clientMode} · {tr.reason ?? ''}</p>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button className={`${styles.btn} ${styles.green}`} onClick={() => decide(tr.id, 'APPROVE')}>{t('approveWord')}</button>
-                <button className={styles.btn} onClick={() => decide(tr.id, 'REJECT')}>{t('reject')}</button>
-              </div>
+            ))}
+            {g.staff.length === 0 && <div className={styles.placeholder}>{t('noStaff')}</div>}
+          </div>
+        ))}
+        {d.roster.length === 0 && <div className={styles.placeholder}>{t('noStaff')}</div>}
+      </div>
+
+      {/* 협의 요청함 (나에게 온 이동요청) */}
+      <div className={styles.card} style={{ marginTop: 14 }}>
+        <div className={styles.cardHead}><div><h2>{t('coordinationBox')}</h2><p>{t('affiliationDesc')}</p></div></div>
+        <div className={styles.cardBody}>
+          {err && <div className={styles.placeholder}>{t('toastNet')}</div>}
+          {!data && !err && <div className={styles.placeholder}>{t('loading')}</div>}
+          {data && (
+            <div className={styles.tableWrap}>
+              <table>
+                <thead><tr><th>{t('requester')}</th><th>{t('target')}</th><th>{t('current')}</th><th>{t('changeTo')}</th><th>{t('customerScope')}</th><th>{t('reason')}</th><th>{t('status')}</th><th>{t('action')}</th></tr></thead>
+                <tbody>
+                  {data.incoming.map(tr => (
+                    <tr key={tr.id}>
+                      <td>{tr.fromSupervisorName ?? '—'}</td><td><b>{tr.operatorName}</b></td>
+                      <td>{tr.fromSupervisorName ?? '—'}</td><td>{tr.toSupervisorName}</td>
+                      <td>{tr.clientMode}</td><td>{tr.reason ?? '—'}</td>
+                      <td><span className={`${styles.badge} ${styles.amber}`}>{tr.status}</span></td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        <button className={`${styles.btn} ${styles.green}`} onClick={() => decide(tr.id, 'APPROVE')}>{t('approveWord')}</button>{' '}
+                        <button className={`${styles.btn} ${styles.red}`} onClick={() => decide(tr.id, 'REJECT')}>{t('reject')}</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {data.incoming.length === 0 && <tr><td colSpan={8} style={{ color: '#94a3b8' }}>{t('noIncoming')}</td></tr>}
+                </tbody>
+              </table>
             </div>
-          ))}
-          {data.incoming.length === 0 && <div className={styles.placeholder}>{t('noIncoming')}</div>}
+          )}
         </div>
       </div>
-      <div className={styles.card}>
-        <div className={styles.cardHead}><div><h2>{t('affHistTitle')}</h2></div></div>
-        <div className={styles.cardBody}>
-          <div className={styles.tableWrap}>
-            <table>
-              <thead><tr><th>{t('colCounselor')}</th><th>{t('colDirection')}</th><th>{t('colMode')}</th><th>{t('colStatus')}</th><th>{t('colDate')}</th></tr></thead>
-              <tbody>
-                {data.transfers.map(tr => (
-                  <tr key={tr.id}><td><b>{tr.operatorName}</b></td><td>{tr.direction === 'incoming' ? t('dirIn') : t('dirOut')}</td><td>{tr.clientMode}</td><td>{tr.status}</td><td>{timeOf(tr.createdAt)}</td></tr>
-                ))}
-                {data.transfers.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>{t('noAffHist')}</td></tr>}
-              </tbody>
-            </table>
+
+      {/* 이동요청 모달 */}
+      {xfer && (
+        <div className={styles.modalBg} onClick={() => setXfer(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2>{t('transferRequest')} · {xfer.name}</h2>
+            <div className={styles.modalBody} style={{ display: 'grid', gap: 12 }}>
+              <label>{t('changeTo')}
+                <select value={toSup} onChange={e => setToSup(e.target.value)}>
+                  <option value="">{t('selectCounselor')}</option>
+                  {d.supervisorOptions.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </label>
+              <label>{t('customerScope')}
+                <select value={mode} onChange={e => setMode(e.target.value as typeof CLIENT_MODES[number])}>
+                  {CLIENT_MODES.map(m => <option key={m} value={m}>{t(`mode_${m}` as string) || m}</option>)}
+                </select>
+              </label>
+              <label>{t('reason')}<textarea rows={4} value={reason} onChange={e => setReason(e.target.value)} /></label>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btn} onClick={() => setXfer(null)}>{t('cancel')}</button>
+              <button className={`${styles.btn} ${styles.blue}`} disabled={busy} onClick={submitXfer}>{t('transferRequest')}</button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
 
-// ── ID Billing 이관현황 ──
-interface HandoverPending { company: string; approver: string; consultant: string }
-interface HandoverIssued { serialNo: string; company: string; amount: number; sendStatus: string; ntpnStatus: string }
+// ── #10 ID Billing 이관현황 (PPT: 단일 테이블 + 고객/승인수퍼바이저/상담원 정렬) ──
+interface HandoverPending { company: string; taxPeriod: string; approver: string; consultant: string; approvedAt: string | null }
+interface HandoverIssued { serialNo: string; company: string; taxType: string; taxPeriod: string; amount: number; approver: string; consultant: string; approvedAt: string | null; sendStatus: string; ntpnStatus: string; ntpn: string | null }
+type BillRow = { company: string; taxType: string; period: string; approver: string; approvedAt: string | null; consultant: string; billing: 'TARGET' | 'ISSUED'; sent: string; ntpn: string; ntpnValue: string | null };
+type BillSort = 'company' | 'approver' | 'consultant';
 function BillingView({ locale }: { locale: string }) {
   const t = useT();
   const { data, err } = useLazy<{ pending: HandoverPending[]; issued: HandoverIssued[] }>('/api/operator/supervisor/billing-handover');
+  const [sortKey, setSortKey] = useState<BillSort>('company');
   if (err) return <ErrCard msg={t('toastNet')} />;
   if (!data) return <LoadingCard />;
+
+  const rows: BillRow[] = [
+    ...data.issued.map<BillRow>(r => ({
+      company: r.company, taxType: r.taxType || '—', period: r.taxPeriod || '—',
+      approver: r.approver, approvedAt: r.approvedAt, consultant: r.consultant,
+      billing: 'ISSUED', sent: r.sendStatus === 'SENT' ? t('sent') : t('notSent'),
+      ntpn: r.ntpnStatus === 'PAID' ? t('paid') : t('awaiting'), ntpnValue: r.ntpn,
+    })),
+    ...data.pending.map<BillRow>(p => ({
+      company: p.company, taxType: '—', period: p.taxPeriod || '—',
+      approver: p.approver, approvedAt: p.approvedAt, consultant: p.consultant,
+      billing: 'TARGET', sent: '—', ntpn: '—', ntpnValue: null,
+    })),
+  ].sort((a, b) => (a[sortKey] || '').localeCompare(b[sortKey] || '', 'ko'));
+
+  const sortBtn = (k: BillSort, label: string) => (
+    <button className={`${styles.btn} ${sortKey === k ? styles.blue : ''}`} onClick={() => setSortKey(k)}>{label}</button>
+  );
   return (
-    <>
-      <div className={styles.card}>
-        <div className={styles.cardHead}><div><h2>{t('billPendTitle')}</h2><p>{t('billPendDesc')}</p></div>
-          <a className={`${styles.btn} ${styles.blue}`} href={`/${locale}/operator/billing-issuance`}>{t('billBoard')}</a></div>
-        <div className={styles.cardBody}>
-          <div className={styles.tableWrap}>
-            <table>
-              <thead><tr><th>{t('colCustomer')}</th><th>{t('colApprover')}</th><th>{t('colCounselor')}</th></tr></thead>
-              <tbody>
-                {data.pending.map((p, i) => <tr key={i}><td><b>{p.company}</b></td><td>{p.approver}</td><td>{p.consultant}</td></tr>)}
-                {data.pending.length === 0 && <tr><td colSpan={3} style={{ color: '#94a3b8' }}>{t('noBillPend')}</td></tr>}
-              </tbody>
-            </table>
-          </div>
+    <div className={styles.card}>
+      <div className={styles.cardHead}>
+        <div><h2>{t('billTitle')}</h2><p>{t('billFlow')}</p></div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#64748b', fontWeight: 800 }}>{t('sortBy')}:</span>
+          {sortBtn('company', t('colCustomer'))}
+          {sortBtn('approver', t('colApprover'))}
+          {sortBtn('consultant', t('colCounselor'))}
+          <a className={`${styles.btn} ${styles.blue}`} href={`/${locale}/operator/billing-issuance`}>{t('billBoard')}</a>
         </div>
       </div>
-      <div className={styles.card}>
-        <div className={styles.cardHead}><div><h2>{t('billIssuedTitle')}</h2></div></div>
-        <div className={styles.cardBody}>
-          <div className={styles.tableWrap}>
-            <table>
-              <thead><tr><th>{t('colSerial')}</th><th>{t('colCustomer')}</th><th>{t('colAmount')}</th><th>{t('colSend')}</th><th>{t('colNtpn')}</th></tr></thead>
-              <tbody>
-                {data.issued.map((r, i) => (
-                  <tr key={i}><td>{r.serialNo}</td><td><b>{r.company}</b></td><td className={styles.money}>{rp(r.amount)}</td>
-                    <td><span className={`${styles.badge} ${r.sendStatus === 'SENT' ? styles.green : styles.amber}`}>{r.sendStatus === 'SENT' ? t('sent') : t('notSent')}</span></td>
-                    <td><span className={`${styles.badge} ${r.ntpnStatus === 'PAID' ? styles.green : styles.amber}`}>{r.ntpnStatus === 'PAID' ? t('paid') : t('awaiting')}</span></td></tr>
-                ))}
-                {data.issued.length === 0 && <tr><td colSpan={5} style={{ color: '#94a3b8' }}>{t('noBillIssued')}</td></tr>}
-              </tbody>
-            </table>
-          </div>
+      <div className={styles.cardBody}>
+        <div className={styles.tableWrap}>
+          <table>
+            <thead><tr>
+              <th>{t('colCustomer')}</th><th>{t('colTaxType')}</th><th>{t('period')}</th>
+              <th>{t('colApprover')}</th><th>{t('approvedTime')}</th><th>{t('colCounselor')}</th>
+              <th>ID Billing</th><th>{t('colSend')}</th><th>NTPN</th>
+            </tr></thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i}>
+                  <td><b>{r.company}</b></td><td>{r.taxType}</td><td>{r.period}</td>
+                  <td>{r.approver}</td><td>{r.approvedAt ? timeOf(r.approvedAt) : '—'}</td><td>{r.consultant}</td>
+                  <td><span className={`${styles.badge} ${r.billing === 'ISSUED' ? styles.green : styles.amber}`}>{r.billing === 'ISSUED' ? t('billIssued') : t('billTarget')}</span></td>
+                  <td>{r.sent === '—' ? '—' : <span className={`${styles.badge} ${r.sent === t('sent') ? styles.green : styles.amber}`}>{r.sent}</span>}</td>
+                  <td>{r.ntpnValue ? <span className={`${styles.badge} ${styles.cyan}`}>{r.ntpnValue}</span> : (r.ntpn === '—' ? '—' : <span className={`${styles.badge} ${r.ntpn === t('paid') ? styles.green : styles.amber}`}>{r.ntpn}</span>)}</td>
+                </tr>
+              ))}
+              {rows.length === 0 && <tr><td colSpan={9} style={{ color: '#94a3b8' }}>{t('noBillIssued')}</td></tr>}
+            </tbody>
+          </table>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

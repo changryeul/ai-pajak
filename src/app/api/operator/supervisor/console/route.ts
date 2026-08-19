@@ -57,7 +57,7 @@ export async function GET(_req: NextRequest) {
   // 상담원(operator) 마스터
   const { data: ops } = await admin
     .from('tax_operators')
-    .select('id, name, work_state, status, max_clients, approval_quality_score, accuracy_pct, avg_processing_minutes, specialties, auto_assign_enabled, supervisor_id');
+    .select('id, name, role, work_state, status, max_clients, approval_quality_score, accuracy_pct, avg_processing_minutes, specialties, auto_assign_enabled, supervisor_id');
   const opById = new Map((ops ?? []).map(o => [o.id, o]));
 
   // 활성 배정
@@ -133,7 +133,7 @@ export async function GET(_req: NextRequest) {
   const opStats = (ops ?? []).map(o => {
     const m = opMetric(o.id);
     return {
-      id: o.id, name: o.name, supervisorId: o.supervisor_id ?? null,
+      id: o.id, name: o.name, role: o.role ?? 'tax_operator', supervisorId: o.supervisor_id ?? null,
       workState: o.work_state ?? 'active', load: loadByOp.get(o.id) ?? 0, maxClients: o.max_clients ?? 0,
       autoAssign: !!o.auto_assign_enabled,
       taxLabel: Array.isArray(o.specialties) && o.specialties.length ? o.specialties.join(',') : '—',
@@ -220,6 +220,20 @@ export async function GET(_req: NextRequest) {
     company: a.customer_id ? (audCustName.get(a.customer_id) ?? '—') : '—', at: a.created_at,
   }));
 
+  // 소속관리(#8) — 수퍼바이저별 상담원 로스터 (staff = tax_operator 만). 지표: 고객수(load)/승인대기/전문세목.
+  const rosterMap = new Map<string, { supervisorId: string | null; supervisor: string; staff: Array<{ id: string; name: string; workState: string; customers: number; pending: number; specialty: string }> }>();
+  for (const o of opStats) {
+    if (o.role !== 'tax_operator') continue;
+    const key = o.supervisorId ?? 'none';
+    const supName = o.supervisorId ? (opById.get(o.supervisorId)?.name ?? '미지정') : '미지정';
+    if (!rosterMap.has(key)) rosterMap.set(key, { supervisorId: o.supervisorId, supervisor: supName, staff: [] });
+    rosterMap.get(key)!.staff.push({ id: o.id, name: o.name, workState: o.workState, customers: o.load, pending: o.pendingApproval, specialty: o.taxLabel });
+  }
+  const roster = [...rosterMap.values()].sort((a, b) => a.supervisor.localeCompare(b.supervisor));
+  const supervisorOptions = opStats
+    .filter(o => o.role === 'tax_operator_supervisor' || o.role === 'tax_operator_lead')
+    .map(o => ({ id: o.id, name: o.name }));
+
   const offline = team.filter(t => t.workState === 'offline').length;
   const kpis = {
     pendingManual: 0, // 신규는 즉시 자동배정 — 수동 대기 없음(원칙)
@@ -231,6 +245,7 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json({
     success: true,
     data: { kpis, dashKpis, assignedCustomers, history, team, ranking, teamCompare, approvalPending, audit,
+      roster, supervisorOptions,
       operators: team.map(t => ({ id: t.id, name: t.name })) },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
