@@ -1,9 +1,16 @@
 'use client';
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { LayoutDashboard, ClipboardCheck, Star, Users, UserCog, Receipt, ScrollText } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import styles from './console.module.css';
 import { makeT, LANGS, type Lang, type T } from './console-i18n';
+
+const VIEW_ICON: Record<string, React.ReactNode> = {
+  dashboard: <LayoutDashboard size={18} />, approval: <ClipboardCheck size={18} />,
+  evaluation: <Star size={18} />, affiliation: <Users size={18} />, assignment: <UserCog size={18} />,
+  billing: <Receipt size={18} />, audit: <ScrollText size={18} />,
+};
 
 // ── 타입 ─────────────────────────────────────────────
 interface ConsoleData {
@@ -78,8 +85,10 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
   };
 
   const navBtn = (v: View, label: string, count?: number | string) => (
-    <button className={`${styles.nav} ${view === v ? styles.active : ''}`} onClick={() => setView(v)}>
-      <span>{label}</span>{count != null && <span className={styles.cnt}>{count}</span>}
+    <button className={`${styles.nav} ${view === v ? styles.active : ''}`} onClick={() => setView(v)} title={label}>
+      <span className={styles.navIco}>{VIEW_ICON[v]}</span>
+      <span className={styles.navLbl}>{label}</span>
+      {count != null && <span className={styles.cnt}>{count}</span>}
     </button>
   );
 
@@ -123,8 +132,7 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
                 {t('period')}
                 <input type="month" className={styles.periodInput} value={period} onChange={e => setPeriod(e.target.value)} />
               </label>
-              {data && <button className={`${styles.btn} ${styles.blue}`} onClick={() => setShowReport(true)}>📄 {t('report')}</button>}
-              <a className={styles.btn} href={`/${locale}/operator/workqueue`}>{t('backWorkqueue')}</a>
+              {data && <button className={`${styles.btn} ${styles.blue}`} onClick={() => setShowReport(true)}>📄 {t('report', { view: t(VIEW_KEYS[view].t) })}</button>}
               <button className={styles.btn} onClick={logout}>{t('logout')}</button>
             </div>
           </div>
@@ -139,27 +147,45 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
             : <AuditView d={data} />}
         </main>
       </div>
-      {showReport && data && <ReportModal name={name} d={data} onClose={() => setShowReport(false)} />}
+      {showReport && data && <ReportModal name={name} d={data} view={view} onClose={() => setShowReport(false)} />}
       {toast && <div className={styles.toast}>{toast}</div>}
     </div>
     </TCtx.Provider>
   );
 }
 
-// ── 월간 리포트 모달 ──
-function ReportModal({ name, d, onClose }: { name?: string; d: ConsoleData; onClose: () => void }) {
+// ── 월간 리포트 모달 (#20 — 뷰별 내용) ──
+// 뷰별 요약 라인: 현재 보고 있는 메뉴에 맞춘 핵심 지표를 리포트 상단에 요약.
+function reportLead(t: T, view: View, d: ConsoleData): string {
+  switch (view) {
+    case 'dashboard': return t('rlDashboard', { completed: d.dashKpis.completed, pending: d.dashKpis.pendingApproval, reject: d.dashKpis.rejectRate, avg: d.dashKpis.avgMinutes });
+    case 'approval': return t('rlApproval', { n: d.approvalPending.length });
+    case 'evaluation': return t('rlEvaluation', { top: d.ranking[0]?.name ?? '—', score: d.ranking[0]?.score?.toFixed(0) ?? '—' });
+    case 'affiliation': return t('rlAffiliation', { teams: d.roster.length, staff: d.roster.reduce((s, g) => s + g.staff.length, 0) });
+    case 'assignment': return t('rlAssignment', { auto: d.assignedCustomers.length, manual: d.kpis.changes, excluded: d.kpis.excludedOffline });
+    case 'billing': return t('rlBilling');
+    case 'audit': return t('rlAudit', { n: d.audit.length });
+    default: return '';
+  }
+}
+function ReportModal({ name, d, view, onClose }: { name?: string; d: ConsoleData; view: View; onClose: () => void }) {
   const t = useT();
   const now = new Date();
   const ym = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}`;
   const rejects = d.audit.filter(a => /reject|반려|REJECT/i.test(a.activity)).length;
+  const viewLabel = t(VIEW_KEYS[view].t);
   return (
     <div className={styles.modalBg} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>{t('reportTitle')}</h2>
+        <h2>{viewLabel} · {t('reportTitle')}</h2>
         <div className={styles.modalBody}>
           <div className={styles.reportCover}>
-            <h3>{t('reportCover', { ym })}</h3>
+            <h3>{viewLabel} — {t('reportCover', { ym })}</h3>
             <p>{t('reportCoverSub', { name: name || t('navDashboard') })}</p>
+          </div>
+          <div className={styles.reportSection}>
+            <h4>{t('rsThisMenu', { view: viewLabel })}</h4>
+            <div className={styles.rs}><p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#334155' }}>{reportLead(t, view, d)}</p></div>
           </div>
           <div className={styles.reportGrid}>
             <div className={styles.reportKpi}><span>{t('rkCompleted')}</span><b>{d.dashKpis.completed}</b></div>
@@ -348,42 +374,45 @@ function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: (
           </div>
         </div>
 
-        <div className={styles.card}>
-          <div className={styles.cardHead}><div><h2>{t('asgManualTitle')}</h2><p>{t('asgManualDesc')}</p></div></div>
-          <div className={styles.cardBody} style={{ display: 'grid', gap: 12 }}>
-            {selCust ? (
-              <>
-                <div className={styles.assignmentRule}><b>{selCust.name}</b><p>{t('curAssign')}: {selCust.operator}</p></div>
-                <label>{t('colCounselor')}
-                  <select value={op} onChange={e => setOp(e.target.value)}>
-                    <option value="">{t('selectCounselor')}</option>
-                    {d.operators.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
-                  </select>
-                </label>
-                <label>{t('changeReason')}<textarea value={reason} onChange={e => setReason(e.target.value)} placeholder={t('changeReason')} /></label>
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={submit}>{t('confirmChange')}</button>
-                </div>
-              </>
-            ) : <div className={styles.placeholder}>{t('selectCustomerFirst')}</div>}
+        {/* #19 — 우측 컬럼: 수동변경 + (그 아래로 이동한) 배정/변경 이력 */}
+        <div style={{ display: 'grid', gap: 14, alignContent: 'start' }}>
+          <div className={styles.card}>
+            <div className={styles.cardHead}><div><h2>{t('asgManualTitle')}</h2><p>{t('asgManualDesc')}</p></div></div>
+            <div className={styles.cardBody} style={{ display: 'grid', gap: 12 }}>
+              {selCust ? (
+                <>
+                  <div className={styles.assignmentRule}><b>{selCust.name}</b><p>{t('curAssign')}: {selCust.operator}</p></div>
+                  <label>{t('colCounselor')}
+                    <select value={op} onChange={e => setOp(e.target.value)}>
+                      <option value="">{t('selectCounselor')}</option>
+                      {d.operators.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                    </select>
+                  </label>
+                  <label>{t('changeReason')}<textarea value={reason} onChange={e => setReason(e.target.value)} placeholder={t('changeReason')} /></label>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={submit}>{t('confirmChange')}</button>
+                  </div>
+                </>
+              ) : <div className={styles.placeholder}>{t('selectCustomerFirst')}</div>}
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div className={styles.card}>
-        <div className={styles.cardHead}><div><h2>{t('asgHistTitle')}</h2><p>{t('asgHistDesc')}</p></div></div>
-        <div className={styles.cardBody}>
-          <div className={styles.tableWrap}>
-            <table>
-              <thead><tr><th>{t('colCustomer')}</th><th>{t('colCounselor')}</th><th>{t('colMethod')}</th><th>{t('colDate')}</th></tr></thead>
-              <tbody>
-                {d.history.map((h, i) => {
-                  const b = methodInfo(h.method);
-                  return <tr key={i}><td><b>{h.name}</b></td><td>{h.operator}</td><td><span className={`${styles.badge} ${styles[b.c]}`}>{t(b.k)}</span></td><td>{timeOf(h.at)}</td></tr>;
-                })}
-                {d.history.length === 0 && <tr><td colSpan={4} style={{ color: '#94a3b8' }}>{t('noAsgHist')}</td></tr>}
-              </tbody>
-            </table>
+          <div className={styles.card}>
+            <div className={styles.cardHead}><div><h2>{t('asgHistTitle')}</h2><p>{t('asgHistDesc')}</p></div></div>
+            <div className={styles.cardBody}>
+              <div className={styles.tableWrap}>
+                <table>
+                  <thead><tr><th>{t('colCustomer')}</th><th>{t('colCounselor')}</th><th>{t('colMethod')}</th><th>{t('colDate')}</th></tr></thead>
+                  <tbody>
+                    {d.history.map((h, i) => {
+                      const b = methodInfo(h.method);
+                      return <tr key={i}><td><b>{h.name}</b></td><td>{h.operator}</td><td><span className={`${styles.badge} ${styles[b.c]}`}>{t(b.k)}</span></td><td>{timeOf(h.at)}</td></tr>;
+                    })}
+                    {d.history.length === 0 && <tr><td colSpan={4} style={{ color: '#94a3b8' }}>{t('noAsgHist')}</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -459,7 +488,7 @@ function ApprovalView({ d, onChanged }: { d: ConsoleData; onChanged: () => void 
   const curItem = cur?.items.find(it => tabTypes.includes(it.taxType)) ?? null;
 
   return (
-    <div className={styles.assignmentLayout}>
+    <div className={styles.approvalLayout}>
       {/* 좌: 승인대기 리스트 (고객 단위) */}
       <div className={styles.card}>
         <div className={styles.cardHead}><div><h2>{t('apprListTitle')}</h2><p>{t('apprListDesc')}</p></div><span className={styles.cnt} style={{ background: '#dbeafe', color: '#1d4ed8' }}>{groups.length}</span></div>
@@ -838,13 +867,15 @@ function useLazy<TD>(url: string): { data: TD | null; err: string | null; reload
 }
 
 // ── 상담원 평가 ──
-interface EvalRow { name: string; reject_rate: number | null; approval_pass_rate: number | null; scores: { total: number; accuracy: number; speed: number; approval: number; satisfaction: number }; suggested_incentive_amount?: number; evaluation_label?: string }
+interface EvalRow { name: string; reject_rate: number | null; approval_pass_rate: number | null; completed_count?: number; avg_minutes?: number | null; scores: { total: number; accuracy: number; speed: number; approval: number; satisfaction: number }; suggested_incentive_amount?: number; evaluation_label?: string }
+interface Incentive { monthlyPool: number; perPoint: number; maxPerPerson: number; minScore: number; improvementThreshold: number }
 function EvaluationView() {
   const t = useT();
-  const { data, err } = useLazy<{ operators: EvalRow[]; disclaimer?: string; isSuggestionOnly?: boolean }>('/api/operator/evaluation');
+  const { data, err } = useLazy<{ operators: EvalRow[]; disclaimer?: string; isSuggestionOnly?: boolean; incentive?: Incentive }>('/api/operator/evaluation');
   if (err) return <ErrCard msg={t('toastNet')} />;
   if (!data) return <LoadingCard />;
   const rows = data.operators ?? [];
+  const inc = data.incentive;
   return (
     <div className={styles.card}>
       <div className={styles.cardHead}><div><h2>{t('evalHeadTitle')}</h2><p>{data.disclaimer || t('evalDefaultDisclaimer')}</p></div>
@@ -852,11 +883,13 @@ function EvaluationView() {
       <div className={styles.cardBody}>
         <div className={styles.tableWrap}>
           <table>
-            <thead><tr><th>{t('colCounselor')}</th><th>{t('colScore')}</th><th>{t('colRejectRate')}</th><th>{t('colApprovalPass')}</th><th>{t('colAccuracy')}</th><th>{t('colSpeed')}</th><th>{t('colIncentive')}</th></tr></thead>
+            <thead><tr><th>{t('colCounselor')}</th><th>{t('colProcessed')}</th><th>{t('colAvgTime')}</th><th>{t('colScore')}</th><th>{t('colRejectRate')}</th><th>{t('colApprovalPass')}</th><th>{t('colAccuracy')}</th><th>{t('colSpeed')}</th><th>{t('colIncentive')}</th></tr></thead>
             <tbody>
               {rows.map((r, i) => (
                 <tr key={i}>
                   <td><b>{r.name}</b> {r.evaluation_label && <span className={`${styles.badge} ${styles.green}`}>{r.evaluation_label}</span>}</td>
+                  <td>{r.completed_count ?? 0}</td>
+                  <td>{r.avg_minutes != null ? `${r.avg_minutes}${t('minUnit')}` : '—'}</td>
                   <td><b>{r.scores.total.toFixed(0)}</b></td>
                   <td>{r.reject_rate == null ? '—' : r.reject_rate.toFixed(1) + '%'}</td>
                   <td>{r.approval_pass_rate == null ? '—' : r.approval_pass_rate.toFixed(1) + '%'}</td>
@@ -864,10 +897,19 @@ function EvaluationView() {
                   <td className={styles.money}>{r.suggested_incentive_amount ? rp(r.suggested_incentive_amount) : '—'}</td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td colSpan={7} style={{ color: '#94a3b8' }}>{t('noEval')}</td></tr>}
+              {rows.length === 0 && <tr><td colSpan={9} style={{ color: '#94a3b8' }}>{t('noEval')}</td></tr>}
             </tbody>
           </table>
         </div>
+        {/* #18 — 제안 인센티브 산출근거 */}
+        {inc && (
+          <div className={styles.reviewRequestBox} style={{ borderColor: '#bfdbfe', background: '#eff6ff', marginTop: 12 }}>
+            <b>{t('incentiveBasisTitle')}</b>
+            <p style={{ color: '#1e3a5f', fontSize: 12, margin: '4px 0 0', lineHeight: 1.7 }}>
+              {t('incentiveBasisBody', { perPoint: rp(inc.perPoint), minScore: inc.minScore, maxPerPerson: rp(inc.maxPerPerson), pool: rp(inc.monthlyPool) })}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

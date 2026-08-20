@@ -141,7 +141,8 @@ export function WorkqueueClient({ role }: { role?: string }) {
         <main>
           <div className={styles.top}>
             <div className={styles.role}>
-              <button className={`${styles.pill} ${styles.active}`}>{isSupervisor ? '수퍼바이저' : '상담원'}</button>
+              {/* 수정요청 8/20 #21 — 이 화면은 상담원 업무함. 수퍼바이저가 봐도 화면 정체성은 '상담원'. */}
+              <button className={`${styles.pill} ${styles.active}`}>상담원 업무함</button>
             </div>
             {/* 수정요청 27번 — 상태 필터를 상단 가로 배치 (세목 탭은 사이드바로 이동) */}
             <div className={styles.taxtabs} role="tablist" aria-label="검토 상태">

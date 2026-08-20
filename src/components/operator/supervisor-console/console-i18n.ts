@@ -33,7 +33,7 @@ const ko: Dict = {
   navDashboard: '대시보드', navApproval: '승인대기', navEvaluation: '상담원 평가',
   navAffiliation: '상담원 소속관리', navAssignment: '고객 배정관리', navBilling: 'ID Billing 이관현황', navAudit: '전체 이력 / 감사로그',
   badgeTeamCompare: '팀비교', badgeRank: '순위', badgeRun: '실행', badgeLog: 'log',
-  period: '기간', report: '월간 리포트', backWorkqueue: '← 업무함', logout: '로그아웃', loading: '불러오는 중…',
+  period: '기간', report: '{view} 리포트', backWorkqueue: '← 업무함', logout: '로그아웃', loading: '불러오는 중…',
   // view meta
   dashTitle: '대시보드', dashDesc: '팀 성과·상담원 순위 한눈에',
   apprTitle: '승인대기', apprDesc: '상담원 승인요청 검토',
@@ -110,6 +110,18 @@ const ko: Dict = {
   counselorMemo: '상담원 메모',
   fourValTitle: '고객 입력값 / AI 계산값 / 상담원 처리값 / 최종값 비교',
   fvItem: '항목', fvCustomer: '고객 입력', fvAi: 'AI 계산', fvConsultant: '상담원 처리', fvApproved: '최종 승인값', fvPending: '승인 대기',
+  // #18 평가 · #20 뷰별 리포트
+  colProcessed: '처리건수', minUnit: '분',
+  incentiveBasisTitle: '제안 인센티브 산출근거',
+  incentiveBasisBody: '점수 × {perPoint} (최소 {minScore}점 이상 지급, 1인 최대 {maxPerPerson}, 월 재원 {pool}). 자동 상벌 없음 — 참고용 제안값.',
+  rsThisMenu: '이 메뉴({view}) 요약',
+  rlDashboard: '처리완료 {completed}건 · 승인대기 {pending}건 · 반려율 {reject}% · 평균 처리시간 {avg}분.',
+  rlApproval: '수퍼바이저 승인대기 {n}건 — 세목별 상세 검토 후 승인/반려.',
+  rlEvaluation: '이달 상담원 순위 1위: {top} ({score}점). 인센티브는 제안값(자동 상벌 없음).',
+  rlAffiliation: '{teams}개 팀 · 상담원 {staff}명. 소속 이동요청은 받는 쪽 수퍼바이저 승인.',
+  rlAssignment: '자동배정 완료 {auto}건 · 수동변경 {manual}건 · 자동배정 제외 {excluded}건.',
+  rlBilling: '승인완료 → ID Billing 발행대상/발행완료 이관 흐름. 발행은 발행 보드에서 처리.',
+  rlAudit: '최근 감사 이벤트 {n}건 (배정·승인·발행).',
 };
 
 const en: Dict = {
@@ -134,7 +146,7 @@ const en: Dict = {
   navDashboard: 'Dashboard', navApproval: 'Approvals', navEvaluation: 'Counselor Eval',
   navAffiliation: 'Team Affiliation', navAssignment: 'Customer Assignment', navBilling: 'ID Billing Handover', navAudit: 'Audit Log',
   badgeTeamCompare: 'Compare', badgeRank: 'Rank', badgeRun: 'Run', badgeLog: 'log',
-  period: 'Period', report: 'Monthly Report', backWorkqueue: '← Workqueue', logout: 'Logout', loading: 'Loading…',
+  period: 'Period', report: '{view} Report', backWorkqueue: '← Workqueue', logout: 'Logout', loading: 'Loading…',
   dashTitle: 'Dashboard', dashDesc: 'Team performance & counselor ranking at a glance',
   apprTitle: 'Approvals', apprDesc: 'Review counselor approval requests',
   evalTitle: 'Counselor Evaluation', evalDesc: 'Measured reject/approval rates (suggestion only)',
@@ -200,6 +212,17 @@ const en: Dict = {
   counselorMemo: 'Counselor memo',
   fourValTitle: 'Customer Input / AI / Counselor / Final Comparison',
   fvItem: 'Item', fvCustomer: 'Customer Input', fvAi: 'AI', fvConsultant: 'Counselor', fvApproved: 'Final Approved', fvPending: 'Pending',
+  colProcessed: 'Processed', minUnit: 'm',
+  incentiveBasisTitle: 'Suggested Incentive Basis',
+  incentiveBasisBody: 'Score × {perPoint} (paid at {minScore}+ pts, max {maxPerPerson}/person, monthly pool {pool}). No automatic reward/penalty — advisory only.',
+  rsThisMenu: 'This menu ({view}) summary',
+  rlDashboard: 'Completed {completed} · Pending {pending} · Reject {reject}% · Avg {avg} min.',
+  rlApproval: '{n} cases awaiting supervisor approval — review each tax type then approve/reject.',
+  rlEvaluation: 'Top counselor: {top} ({score} pts). Incentive is advisory (no auto reward/penalty).',
+  rlAffiliation: '{teams} teams · {staff} counselors. Transfers approved by the receiving supervisor.',
+  rlAssignment: 'Auto-assigned {auto} · Manual changes {manual} · Excluded {excluded}.',
+  rlBilling: 'Approved → ID Billing target/issued handover. Issue from the billing board.',
+  rlAudit: '{n} recent audit events (assignment/approval/issuance).',
 };
 
 const id: Dict = {
@@ -224,7 +247,7 @@ const id: Dict = {
   navDashboard: 'Dasbor', navApproval: 'Persetujuan', navEvaluation: 'Evaluasi Konsultan',
   navAffiliation: 'Afiliasi Tim', navAssignment: 'Penugasan Klien', navBilling: 'Serah ID Billing', navAudit: 'Log Audit',
   badgeTeamCompare: 'Banding', badgeRank: 'Peringkat', badgeRun: 'Jalankan', badgeLog: 'log',
-  period: 'Periode', report: 'Laporan Bulanan', backWorkqueue: '← Antrean', logout: 'Keluar', loading: 'Memuat…',
+  period: 'Periode', report: 'Laporan {view}', backWorkqueue: '← Antrean', logout: 'Keluar', loading: 'Memuat…',
   dashTitle: 'Dasbor', dashDesc: 'Kinerja tim & peringkat konsultan sekilas',
   apprTitle: 'Persetujuan', apprDesc: 'Tinjau permintaan persetujuan konsultan',
   evalTitle: 'Evaluasi Konsultan', evalDesc: 'Tingkat penolakan/kelulusan terukur (saran saja)',
@@ -290,6 +313,17 @@ const id: Dict = {
   counselorMemo: 'Memo konsultan',
   fourValTitle: 'Perbandingan Input Pelanggan / AI / Konsultan / Final',
   fvItem: 'Item', fvCustomer: 'Input Pelanggan', fvAi: 'AI', fvConsultant: 'Konsultan', fvApproved: 'Final Disetujui', fvPending: 'Menunggu',
+  colProcessed: 'Diproses', minUnit: 'm',
+  incentiveBasisTitle: 'Dasar Perhitungan Insentif',
+  incentiveBasisBody: 'Skor × {perPoint} (dibayar mulai {minScore} poin, maks {maxPerPerson}/orang, dana bulanan {pool}). Tanpa reward/penalti otomatis — hanya usulan.',
+  rsThisMenu: 'Ringkasan menu ini ({view})',
+  rlDashboard: 'Selesai {completed} · Menunggu {pending} · Tolak {reject}% · Rata {avg} mnt.',
+  rlApproval: '{n} kasus menunggu persetujuan supervisor — tinjau tiap jenis pajak lalu setujui/tolak.',
+  rlEvaluation: 'Konsultan teratas: {top} ({score} poin). Insentif hanya usulan (tanpa reward/penalti otomatis).',
+  rlAffiliation: '{teams} tim · {staff} konsultan. Perpindahan disetujui supervisor penerima.',
+  rlAssignment: 'Otomatis {auto} · Perubahan manual {manual} · Dikecualikan {excluded}.',
+  rlBilling: 'Disetujui → handover target/terbit ID Billing. Terbitkan dari billing board.',
+  rlAudit: '{n} peristiwa audit terbaru (penugasan/persetujuan/penerbitan).',
 };
 
 const DICTS: Record<Lang, Dict> = { ko, en, id };

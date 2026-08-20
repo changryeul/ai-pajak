@@ -8,8 +8,15 @@
   min-height:100vh;
 }
 .root *{box-sizing:border-box}
-.app{display:grid;grid-template-columns:286px minmax(0,1fr);min-height:100vh}
-.sidebar{background:#101827;color:#fff;padding:18px;position:sticky;top:0;height:100vh;overflow:auto}
+.app{display:grid;grid-template-columns:84px minmax(0,1fr);min-height:100vh}
+/* #12 — 최소화 아이콘 레일, 커서 올리면 펼쳐짐 */
+.sidebar{background:#101827;color:#fff;padding:14px 12px;position:sticky;top:0;height:100vh;overflow-x:hidden;overflow-y:auto;width:84px;transition:width .18s ease;z-index:50}
+.sidebar:hover{width:252px;box-shadow:6px 0 28px rgba(2,6,23,.35)}
+.navIco{display:grid;place-items:center;min-width:24px}
+.navLbl{white-space:nowrap;overflow:hidden;flex:1}
+.sidebar:not(:hover) .navLbl,.sidebar:not(:hover) .cnt,.sidebar:not(:hover) .navSection,.sidebar:not(:hover) .loginCard,.sidebar:not(:hover) .logo b,.sidebar:not(:hover) .logo span{display:none}
+.sidebar:not(:hover) .nav{justify-content:center;padding:12px 0}
+.sidebar:not(:hover) .logo{justify-content:center;margin-bottom:12px}
 .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
 .logoMark{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#60a5fa,#8b5cf6);display:grid;place-items:center;font-weight:900;color:#fff}
 .logo b{font-size:17px}.logo span{font-size:12px;color:#a8b3c7}
@@ -51,6 +58,9 @@
 .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#dbeafe;color:#1d4ed8;font-weight:1000;font-size:12px}
 .score{font-size:20px;font-weight:1000}
 .assignmentLayout{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+/* #13 — 승인대기: 리스트(좌) 폭 축소, 핵심은 우측 상세 */
+.approvalLayout{display:grid;grid-template-columns:minmax(220px,.36fr) 1.64fr;gap:14px;align-items:start}
+@media(max-width:1100px){.approvalLayout{grid-template-columns:1fr}}
 .customerCard{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px;display:grid;gap:10px}
 .customerCard.active{outline:2px solid #bfdbfe;background:#f8fbff}
 .customerMeta{display:flex;gap:6px;flex-wrap:wrap}
@@ -114,4 +124,4 @@
 .mirrorRowBtn{border:0;background:#eff6ff;color:#1d4ed8;border-radius:8px;padding:5px 9px;font-weight:900;cursor:pointer;font-size:11px;font-family:inherit}
 @media(max-width:1200px){.formGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1200px){.grid.kpi{grid-template-columns:repeat(2,1fr)}.grid.two,.assignmentLayout{grid-template-columns:1fr}.grid.three{grid-template-columns:1fr}}
-@media(max-width:780px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.grid.kpi{grid-template-columns:1fr}.transferForm{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
+@media(max-width:780px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;width:auto}.sidebar .navLbl,.sidebar .cnt,.sidebar .navSection,.sidebar .loginCard,.sidebar .logo b,.sidebar .logo span{display:revert}.grid.kpi{grid-template-columns:1fr}.transferForm{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
