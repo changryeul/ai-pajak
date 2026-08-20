@@ -29,6 +29,8 @@ const timeOf = (iso: string | null) => iso ? new Date(iso).toLocaleString('ko-KR
 const TCtx = createContext<T>(makeT('ko'));
 const useT = () => useContext(TCtx);
 const methodInfo = (m: string) => m === 'AUTO' ? { c: 'green', k: 'autoAssigned' } : { c: 'amber', k: 'manualChange' };
+// workState 라벨 — 사전에 있으면 번역, 없으면 원문(ws_ 접두 노출 방지).
+const wsLabel = (t: T, ws: string) => { const s = t(`ws_${ws}`); return s.startsWith('ws_') ? ws : s; };
 
 const VIEW_KEYS: Record<View, { t: string; d: string }> = {
   dashboard: { t: 'dashTitle', d: 'dashDesc' },
@@ -754,8 +756,8 @@ function AffiliationView({ d, onToast, onChanged }: { d: ConsoleData; onToast: (
             {g.staff.map(c => (
               <div key={c.id} className={styles.staffPill}>
                 <span>
-                  <b><i className={`${styles.statusDot} ${c.workState === 'offline' ? styles.offline : c.workState === 'busy' ? styles.busy : styles.online}`} />{c.name}</b><br />
-                  <small>{t(`ws_${c.workState}` as string) || c.workState} · {t('customer')} {c.customers} · {t('supPendingShort')} {c.pending} · {c.specialty}</small>
+                  <b><i className={`${styles.statusDot} ${c.workState === 'offline' ? styles.offline : (c.workState === 'busy' || c.workState === 'away') ? styles.busy : styles.online}`} />{c.name}</b><br />
+                  <small>{wsLabel(t, c.workState)} · {t('customer')} {c.customers} · {t('supPendingShort')} {c.pending} · {c.specialty}</small>
                 </span>
                 <button className={`${styles.btn} ${styles.blue}`} onClick={() => { setXfer({ operatorId: c.id, name: c.name }); setToSup(''); setReason(''); }}>{t('transferRequest')}</button>
               </div>

@@ -92,7 +92,7 @@ const ko: Dict = {
   coordinationBox: '수퍼바이저 협의 요청함', affiliationDesc: '이동요청 생성·승인·소속 변경·감사로그까지 작동합니다.',
   requester: '요청자', target: '대상', current: '현재', changeTo: '변경', customerScope: '고객 처리범위', reason: '사유', status: '상태', action: '실행',
   noStaff: '상담원이 없습니다', affReqSent: '이동요청 전송됨',
-  ws_active: '온라인', ws_busy: '자리비움', ws_offline: '오프라인',
+  ws_active: '온라인', ws_busy: '자리비움', ws_offline: '오프라인', ws_available: '온라인', ws_online: '온라인', ws_away: '자리비움',
   mode_WITH_CLIENTS: '고객과 함께 이동', mode_OPERATOR_ONLY: '상담원만 이동', mode_REASSIGN_CLIENTS: '고객 재배정',
   billFlow: '승인완료 후 ID Billing 발행으로 이관된 흐름을 추적합니다.', sortBy: '정렬', approvedTime: '승인시간', billIssued: '발행완료', billTarget: '발행대상',
 };
@@ -168,7 +168,7 @@ const en: Dict = {
   coordinationBox: 'Supervisor Coordination Requests', affiliationDesc: 'Transfer request creation, approval, reassignment, and audit logging are supported.',
   requester: 'Requester', target: 'Target', current: 'Current', changeTo: 'Change To', customerScope: 'Customer Scope', reason: 'Reason', status: 'Status', action: 'Action',
   noStaff: 'No counselors', affReqSent: 'Transfer request sent',
-  ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline',
+  ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline', ws_available: 'Online', ws_online: 'Online', ws_away: 'Away',
   mode_WITH_CLIENTS: 'Move with clients', mode_OPERATOR_ONLY: 'Operator only', mode_REASSIGN_CLIENTS: 'Reassign clients',
   billFlow: 'Track cases moved to ID Billing issuance after approval.', sortBy: 'Sort', approvedTime: 'Approval Time', billIssued: 'Issued', billTarget: 'Target',
 };
@@ -244,7 +244,7 @@ const id: Dict = {
   coordinationBox: 'Kotak Permintaan Koordinasi Supervisor', affiliationDesc: 'Pembuatan permintaan pindah, persetujuan, penugasan ulang, dan log audit didukung.',
   requester: 'Pemohon', target: 'Target', current: 'Saat ini', changeTo: 'Ubah ke', customerScope: 'Cakupan Pelanggan', reason: 'Alasan', status: 'Status', action: 'Aksi',
   noStaff: 'Tidak ada konsultan', affReqSent: 'Permintaan pindah terkirim',
-  ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline',
+  ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline', ws_available: 'Online', ws_online: 'Online', ws_away: 'Away',
   mode_WITH_CLIENTS: 'Pindah dengan klien', mode_OPERATOR_ONLY: 'Hanya operator', mode_REASSIGN_CLIENTS: 'Tugaskan ulang klien',
   billFlow: 'Lacak kasus yang dipindahkan ke penerbitan ID Billing setelah persetujuan.', sortBy: 'Urutkan', approvedTime: 'Waktu Persetujuan', billIssued: 'Terbit', billTarget: 'Target',
 };
