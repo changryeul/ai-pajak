@@ -107,6 +107,9 @@ const ko: Dict = {
   custReqTitle: '고객 추가요청', custReqBody: '고객에게 추가 확인이 필요한 사유를 적어주세요.', custReqPlaceholder: '고객 추가요청 사유', custReqTag: '고객 추가요청', custReqConfirm: '고객 추가요청 전송',
   finalDecision: '수퍼바이저 최종 판단', finalDecisionSub: '승인완료 시에만 ID Billing 발행대상으로 이동합니다.',
   rejectToCounselor: '상담원에게 반려', needCustReq: '고객 추가요청 필요', approveDone: '승인완료',
+  counselorMemo: '상담원 메모',
+  fourValTitle: '고객 입력값 / AI 계산값 / 상담원 처리값 / 최종값 비교',
+  fvItem: '항목', fvCustomer: '고객 입력', fvAi: 'AI 계산', fvConsultant: '상담원 처리', fvApproved: '최종 승인값', fvPending: '승인 대기',
 };
 
 const en: Dict = {
@@ -194,6 +197,9 @@ const en: Dict = {
   custReqTitle: 'Customer Follow-up', custReqBody: 'Describe what needs to be confirmed with the customer.', custReqPlaceholder: 'Reason for customer follow-up', custReqTag: 'Customer follow-up', custReqConfirm: 'Send customer follow-up',
   finalDecision: 'Supervisor Final Decision', finalDecisionSub: 'Only approved cases move to ID Billing issuance.',
   rejectToCounselor: 'Reject to Counselor', needCustReq: 'Needs Customer Follow-up', approveDone: 'Approve',
+  counselorMemo: 'Counselor memo',
+  fourValTitle: 'Customer Input / AI / Counselor / Final Comparison',
+  fvItem: 'Item', fvCustomer: 'Customer Input', fvAi: 'AI', fvConsultant: 'Counselor', fvApproved: 'Final Approved', fvPending: 'Pending',
 };
 
 const id: Dict = {
@@ -281,6 +287,9 @@ const id: Dict = {
   custReqTitle: 'Tindak Lanjut Pelanggan', custReqBody: 'Jelaskan yang perlu dikonfirmasi dengan pelanggan.', custReqPlaceholder: 'Alasan tindak lanjut pelanggan', custReqTag: 'Tindak lanjut pelanggan', custReqConfirm: 'Kirim tindak lanjut',
   finalDecision: 'Keputusan Akhir Supervisor', finalDecisionSub: 'Hanya kasus yang disetujui yang menuju penerbitan ID Billing.',
   rejectToCounselor: 'Tolak ke Konsultan', needCustReq: 'Perlu Tindak Lanjut Pelanggan', approveDone: 'Setujui',
+  counselorMemo: 'Memo konsultan',
+  fourValTitle: 'Perbandingan Input Pelanggan / AI / Konsultan / Final',
+  fvItem: 'Item', fvCustomer: 'Input Pelanggan', fvAi: 'AI', fvConsultant: 'Konsultan', fvApproved: 'Final Disetujui', fvPending: 'Menunggu',
 };
 
 const DICTS: Record<Lang, Dict> = { ko, en, id };

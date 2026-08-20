@@ -515,6 +515,12 @@ function ApprovalView({ d, onChanged }: { d: ConsoleData; onChanged: () => void 
 
 interface DetailResp { rows?: Array<Record<string, unknown>>; summary?: Record<string, number> }
 interface ApprovalState { status: string; requestNote?: string | null; canApprove: boolean; rejectedReason?: string | null }
+interface FourValue { kind: string; customerInput: number | null; ai: number | null; consultant: number | null; approved: number | null }
+interface ReviewReq { id: string; calcKind: string | null; itemLabel: string; reason: string; status: string; supervisorComment: string | null }
+interface ApprovalExtra { session: { id: string; status: string; period: string } | null; fourValues: FourValue[]; reviewRequests: ReviewReq[] }
+const KIND_LABEL: Record<string, string> = {
+  PPH21_TER: 'PPh 21', WITHHOLDING_SUMMARY: 'Withholding', CORP_TAX_MONTHLY: 'PPh 25', PPN_NET: 'PPN', BANK_RECON: 'Bank',
+};
 // 세목별 요약 KPI 매핑
 const SUMMARY_MAP: Record<string, Array<{ k: string; label: string; money?: boolean }>> = {
   pph21: [{ k: 'employeeCount', label: 'kEmployees' }, { k: 'totalGross', label: 'kTotalPay', money: true }, { k: 'totalPph21', label: 'colAmount', money: true }],
@@ -583,11 +589,35 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
   const [reason, setReason] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
+  // ERP(consultant_session) 파이프라인 보강 — 4-값 비교 + 검토요청 카드
+  const [extra, setExtra] = useState<ApprovalExtra | null>(null);
+  const [commentFor, setCommentFor] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
+  const loadExtra = useCallback(() => {
+    const qs = new URLSearchParams({ customerId: item.customerId, taxType: item.taxType, period: item.period });
+    fetch(`/api/operator/supervisor/console/approval-extra?${qs}`).then(r => r.json()).then(j => { if (j.success) setExtra(j.data as ApprovalExtra); }).catch(() => {});
+  }, [item.customerId, item.taxType, item.period]);
 
   useEffect(() => {
     if (cfg) fetch(`/api/operator/workqueue/${item.id}/${cfg.ep}`).then(r => r.json()).then(j => { if (j.success) setDetail(j.data); }).catch(() => {});
     fetch(`/api/operator/workqueue/${item.id}/approval`).then(r => r.json()).then(j => { if (j.success) setAppr(j.data as ApprovalState); }).catch(() => {});
-  }, [item.id, cfg]);
+    loadExtra();
+  }, [item.id, cfg, loadExtra]);
+
+  const submitComment = async (id: string) => {
+    if (commentText.trim().length < 1) return;
+    setBusy(true); setErr(null);
+    try {
+      const r = await fetch(`/api/operator/supervisor/review-requests/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ supervisorComment: commentText.trim(), status: 'ANSWERED' }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { setErr((j as { error?: string }).error || `(${r.status})`); return; }
+      setCommentFor(null); setCommentText(''); loadExtra();
+    } catch { setErr(t('toastNet')); }
+    finally { setBusy(false); }
+  };
 
   const decide = async (action: 'approve' | 'reject', rejectedReason?: string) => {
     setBusy(true); setErr(null);
@@ -638,7 +668,42 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
             </div>
           )}
 
-          {appr?.requestNote && (
+          {/* 상담원 수퍼바이저 검토요청 (PPT: 카드 + 의견 작성/회신) — ERP 세션 매칭 시 */}
+          {extra && extra.reviewRequests.length > 0 ? (
+            <div className={styles.reviewRequestBox}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <b>{t('reviewReqTitle')}</b>
+                <span className={styles.cnt} style={{ background: '#fde68a', color: '#78350f' }}>{extra.reviewRequests.length}</span>
+              </div>
+              <p style={{ color: '#78350f', fontSize: 12 }}>{t('reviewReqDesc')}</p>
+              <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+                {extra.reviewRequests.map(rr => (
+                  <div key={rr.id} style={{ border: '1px solid #fcd34d', borderRadius: 12, background: '#fff', padding: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
+                      <b style={{ fontSize: 13 }}>{rr.itemLabel}</b>
+                      {rr.calcKind && <span className={`${styles.badge} ${styles.amber}`}>{KIND_LABEL[rr.calcKind] ?? rr.calcKind}</span>}
+                    </div>
+                    <p style={{ color: '#92400e', fontSize: 12, margin: '6px 0 0' }}>{t('counselorMemo')}: {rr.reason}</p>
+                    {rr.supervisorComment && <p style={{ color: '#065f46', fontSize: 12, margin: '6px 0 0' }}>💬 {rr.supervisorComment}</p>}
+                    {commentFor === rr.id ? (
+                      <div style={{ marginTop: 8 }}>
+                        <textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder={t('writeComment')} />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 6 }}>
+                          <button className={styles.btn} onClick={() => { setCommentFor(null); setCommentText(''); }} disabled={busy}>{t('cancel')}</button>
+                          <button className={`${styles.btn} ${styles.green}`} disabled={busy || commentText.trim().length < 1} onClick={() => submitComment(rr.id)}>{t('replyCounselor')}</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+                        <span className={`${styles.badge} ${rr.status === 'ANSWERED' ? styles.green : styles.amber}`}>{rr.status}</span>
+                        <button className={`${styles.btn} ${styles.blue}`} onClick={() => { setCommentFor(rr.id); setCommentText(rr.supervisorComment ?? ''); }}>{t('writeComment')}</button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : appr?.requestNote && (
             <div className={styles.reviewRequestBox}><b>{t('reviewReqTitle')}</b><p style={{ color: '#78350f', fontSize: 12 }}>{t('reviewReqDesc')}</p><p>{appr.requestNote}</p></div>
           )}
           {appr?.rejectedReason && <div className={styles.assignmentRule}><b>{t('prevReject')}</b><p>{appr.rejectedReason}</p></div>}
@@ -696,6 +761,29 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
               </div>
             </div>
           ) : <div className={styles.assignmentRule}><p>{t('noMirror', { tax: item.taxType })}</p></div>}
+
+          {/* 고객 입력값 / AI 계산값 / 상담원 처리값 / 최종값 비교 (PPT) — ERP 세션 매칭 시 */}
+          {extra && extra.fourValues.length > 0 && (
+            <div>
+              <b style={{ fontSize: 14 }}>{t('fourValTitle')}</b>
+              <div className={styles.tableWrap} style={{ marginTop: 8 }}>
+                <table>
+                  <thead><tr><th>{t('fvItem')}</th><th>{t('fvCustomer')}</th><th>{t('fvAi')}</th><th>{t('fvConsultant')}</th><th>{t('fvApproved')}</th></tr></thead>
+                  <tbody>
+                    {extra.fourValues.map((fv, i) => (
+                      <tr key={i}>
+                        <td><b>{KIND_LABEL[fv.kind] ?? fv.kind}</b></td>
+                        <td className={styles.money}>{fv.customerInput != null ? rp(fv.customerInput) : '—'}</td>
+                        <td className={styles.money}>{fv.ai != null ? rp(fv.ai) : '—'}</td>
+                        <td className={styles.money} style={{ background: '#fff7ed' }}>{fv.consultant != null ? rp(fv.consultant) : '—'}</td>
+                        <td className={styles.money} style={{ background: '#f0fdf4', fontWeight: 800 }}>{fv.approved != null ? rp(fv.approved) : t('fvPending')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {err && <div className={styles.assignmentRule} style={{ borderColor: '#fecaca', background: '#fef2f2' }}><p>{err}</p></div>}
 
