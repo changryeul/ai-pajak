@@ -395,9 +395,17 @@ function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: (
 type ApprovalItem = ConsoleData['approvalPending'][number];
 const DETAIL_MAP: Record<string, { ep: string; cols: Array<{ key: string; label: string; money?: boolean }> }> = {
   PPh21: { ep: 'pph21', cols: [{ key: 'name', label: '직원' }, { key: 'totalGross', label: '총지급', money: true }, { key: 'pph21', label: 'PPh21', money: true }] },
-  PPh23: { ep: 'withholding', cols: [{ key: 'counterpartyName', label: '거래처' }, { key: 'grossAmount', label: '지급액', money: true }, { key: 'taxAmount', label: '세액', money: true }] },
-  PPh4_2: { ep: 'withholding', cols: [{ key: 'counterpartyName', label: '거래처' }, { key: 'grossAmount', label: '지급액', money: true }, { key: 'taxAmount', label: '세액', money: true }] },
+  // 원천세 거래리스트 — PPT: 일자/거래처/NPWP/증빙번호/거래내용/DPP/세율/세액
+  PPh23: { ep: 'withholding', cols: [{ key: 'transactionDate', label: '일자' }, { key: 'counterpartyName', label: '거래처' }, { key: 'counterpartyNpwp', label: 'NPWP' }, { key: 'buktiPotongNumber', label: '증빙번호' }, { key: 'description', label: '거래내용' }, { key: 'grossAmount', label: 'DPP', money: true }, { key: 'taxRate', label: '세율' }, { key: 'taxAmount', label: '세액', money: true }] },
+  PPh4_2: { ep: 'withholding', cols: [{ key: 'transactionDate', label: '일자' }, { key: 'counterpartyName', label: '거래처' }, { key: 'counterpartyNpwp', label: 'NPWP' }, { key: 'buktiPotongNumber', label: '증빙번호' }, { key: 'description', label: '거래내용' }, { key: 'grossAmount', label: 'DPP', money: true }, { key: 'taxRate', label: '세율' }, { key: 'taxAmount', label: '세액', money: true }] },
   PPN: { ep: 'ppn', cols: [{ key: 'fakturNumber', label: 'Faktur' }, { key: 'dpp', label: 'DPP', money: true }, { key: 'ppn', label: 'PPN', money: true }] },
+  // 선납법인세 — umkm(tax_monthly_payment) 실납부 데이터
+  PPh25: { ep: 'umkm', cols: [{ key: 'taxType', label: '세목' }, { key: 'amountDue', label: '당월 세액', money: true }, { key: 'kodeBilling', label: 'Kode Billing' }, { key: 'paymentStatus', label: '납부상태' }] },
+  PPh_FINAL: { ep: 'umkm', cols: [{ key: 'taxType', label: '세목' }, { key: 'amountDue', label: '당월 세액', money: true }, { key: 'kodeBilling', label: 'Kode Billing' }, { key: 'paymentStatus', label: '납부상태' }] },
+};
+// 세목별 상세 화면 제목 (PPT 헤더)
+const SECTION_TITLE: Record<string, { tk: string }> = {
+  pph21: { tk: 'secPph21' }, withholding: { tk: 'secWht' }, ppn: { tk: 'secPpn' }, umkm: { tk: 'secCit' },
 };
 type MirrorField = { key: string; label: string; money?: boolean };
 type MirrorSection = { title: string; fields: MirrorField[] };
@@ -512,14 +520,66 @@ const SUMMARY_MAP: Record<string, Array<{ k: string; label: string; money?: bool
   pph21: [{ k: 'employeeCount', label: 'kEmployees' }, { k: 'totalGross', label: 'kTotalPay', money: true }, { k: 'totalPph21', label: 'colAmount', money: true }],
   withholding: [{ k: 'txnCount', label: 'kCount' }, { k: 'totalGross', label: 'kTotalPay', money: true }, { k: 'totalTax', label: 'colAmount', money: true }],
   ppn: [{ k: 'fakturCount', label: 'kCount' }, { k: 'totalDpp', label: 'kTotalPay', money: true }, { k: 'totalPpn', label: 'colAmount', money: true }],
+  umkm: [{ k: 'recordCount', label: 'kCount' }, { k: 'totalDue', label: 'kTotalDue', money: true }, { k: 'totalPaid', label: 'kTotalPaid', money: true }],
 };
+// PPN 매출/매입 Coretax 대조 (PPT: 매출 PPN 대조 + 매입 PPN 대조 + 부가세 계산 로직)
+type PpnRow = Record<string, unknown>;
+function reconBadge(t: T, s: string | null): { c: string; label: string } {
+  if (s === 'MATCH') return { c: 'green', label: t('reconMatch') };
+  if (s === 'DIFF') return { c: 'red', label: t('reconDiff') };
+  if (s === 'MISSING_CORETAX' || s === 'MISSING_CUSTOMER') return { c: 'amber', label: t('reconMissing') };
+  return { c: 'green', label: t('reconNormal') };
+}
+function PpnReconView({ rows }: { rows: PpnRow[] }) {
+  const t = useT();
+  const out = rows.filter(r => r.fakturType === 'KELUARAN');
+  const inp = rows.filter(r => r.fakturType === 'MASUKAN');
+  const outPpn = out.reduce((s, r) => s + Number(r.ppn ?? 0), 0);
+  const inCreditable = inp.filter(r => r.reconStatus !== 'DIFF' && r.reconStatus !== 'MISSING_CORETAX').reduce((s, r) => s + Number(r.ppn ?? 0), 0);
+  const payable = outPpn - inCreditable;
+  const reconTable = (title: string, list: PpnRow[]) => (
+    <div className={styles.card} style={{ boxShadow: 'none' }}>
+      <div className={styles.cardHead}><div><h2 style={{ fontSize: 14 }}>{title}</h2></div></div>
+      <div className={styles.cardBody}>
+        <div className={styles.tableWrap}>
+          <table>
+            <thead><tr><th>{t('colDate')}</th><th>FAKTUR</th><th>{t('colCounterparty')}</th><th>{t('custDpp')}</th><th>{t('coretaxDpp')}</th><th>{t('custPpn')}</th><th>{t('coretaxPpn')}</th><th>{t('reconResult')}</th></tr></thead>
+            <tbody>
+              {list.map((r, i) => { const b = reconBadge(t, (r.reconStatus as string) ?? null); return (
+                <tr key={i}>
+                  <td>{String(r.fakturDate ?? '—')}</td><td>{String(r.fakturNumber ?? '—')}</td><td><b>{String(r.counterpartyName ?? '—')}</b></td>
+                  <td className={styles.money}>{rp(Number(r.dpp ?? 0))}</td>
+                  <td className={styles.money}>{r.coretaxDpp != null ? rp(Number(r.coretaxDpp)) : '—'}</td>
+                  <td className={styles.money}>{rp(Number(r.ppn ?? 0))}</td>
+                  <td className={styles.money}>{r.coretaxPpn != null ? rp(Number(r.coretaxPpn)) : '—'}</td>
+                  <td><span className={`${styles.badge} ${styles[b.c]}`}>{b.label}</span></td>
+                </tr>
+              ); })}
+              {list.length === 0 && <tr><td colSpan={8} style={{ color: '#94a3b8' }}>—</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{ display: 'grid', gap: 12 }}>
+      {reconTable(t('ppnOut'), out)}
+      {reconTable(t('ppnIn'), inp)}
+      <div className={styles.reviewRequestBox} style={{ borderColor: '#bfdbfe', background: '#eff6ff' }}>
+        <b>{t('vatCalcTitle')}</b>
+        <p style={{ color: '#1e3a5f', fontSize: 13 }}>{t('vatCalcBody', { out: rp(outPpn), input: rp(inCreditable), payable: rp(payable) })}</p>
+      </div>
+    </div>
+  );
+}
 function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: () => void }) {
   const t = useT();
   const cfg = DETAIL_MAP[item.taxType];
   const [detail, setDetail] = useState<DetailResp | null>(null);
   const [appr, setAppr] = useState<ApprovalState | null>(null);
   const [busy, setBusy] = useState(false);
-  const [rejecting, setRejecting] = useState(false);
+  const [mode, setMode] = useState<'reject' | 'custreq' | null>(null);
   const [reason, setReason] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -548,9 +608,18 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
   const summary = detail?.summary ?? {};
   const summaryCells = cfg ? (SUMMARY_MAP[cfg.ep] ?? []) : [];
 
+  const secTitle = cfg ? SECTION_TITLE[cfg.ep] : null;
+
   return (
     <div className={styles.card}>
       <div className={styles.cardBody} style={{ display: 'grid', gap: 12 }}>
+          {/* 세목별 상세 화면 제목 (PPT 헤더) */}
+          {secTitle && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+              <div><h3 style={{ margin: 0, fontSize: 15 }}>{t(secTitle.tk)}</h3><p style={{ margin: '2px 0 0', color: '#64748b', fontSize: 12 }}>{t('secSub')}</p></div>
+              <span className={`${styles.badge} ${styles.green}`}>{t('counselorReviewed')}</span>
+            </div>
+          )}
           {/* 고객 입력 요약 */}
           {summaryCells.length > 0 && (
             <div>
@@ -574,7 +643,9 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
           )}
           {appr?.rejectedReason && <div className={styles.assignmentRule}><b>{t('prevReject')}</b><p>{appr.rejectedReason}</p></div>}
 
-          {cfg ? (
+          {cfg && cfg.ep === 'ppn' ? (
+            <PpnReconView rows={rows} />
+          ) : cfg ? (
             <div className={styles.customerUi}>
               <div className={styles.customerUiHead}>
                 <div><h3>{t('mirrorScreenTitle', { tax: item.taxType })}</h3><p>{t('mirrorSub', { rows: rows.length, edited: editedCount })}</p></div>
@@ -628,29 +699,37 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
 
           {err && <div className={styles.assignmentRule} style={{ borderColor: '#fecaca', background: '#fef2f2' }}><p>{err}</p></div>}
 
-          {rejecting && (
+          {mode && (
             <div className={styles.reviewRequestBox}>
-              <b>{t('rejectTitle')}</b>
-              <p>{t('rejectBody')}</p>
-              <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder={t('rejectPlaceholder')} />
+              <b>{mode === 'reject' ? t('rejectTitle') : t('custReqTitle')}</b>
+              <p>{mode === 'reject' ? t('rejectBody') : t('custReqBody')}</p>
+              <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder={mode === 'reject' ? t('rejectPlaceholder') : t('custReqPlaceholder')} />
             </div>
           )}
 
-          {/* 수퍼바이저 최종 판단 (인라인) */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
-            {appr?.canApprove && appr.status === 'PENDING_APPROVAL' ? (
-              rejecting ? (
-                <>
-                  <button className={styles.btn} onClick={() => setRejecting(false)} disabled={busy}>{t('cancel')}</button>
-                  <button className={`${styles.btn} ${styles.red}`} disabled={busy || reason.trim().length < 1} onClick={() => decide('reject', reason.trim())}>{t('rejectConfirm')}</button>
-                </>
-              ) : (
-                <>
-                  <button className={styles.btn} onClick={() => setRejecting(true)} disabled={busy}>{t('reject')}</button>
-                  <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={() => decide('approve')}>{t('approve')}</button>
-                </>
-              )
-            ) : <span className={`${styles.badge} ${styles.amber}`}>{appr?.status === 'APPROVED' ? t('approve') : t('noAuth')}</span>}
+          {/* 수퍼바이저 최종 판단 (인라인) — PPT: 상담원에게 반려 / 고객 추가요청 필요 / 승인완료 */}
+          <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
+            <b style={{ fontSize: 14 }}>{t('finalDecision')}</b>
+            <p style={{ margin: '2px 0 10px', color: '#64748b', fontSize: 12 }}>{t('finalDecisionSub')}</p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              {appr?.canApprove && appr.status === 'PENDING_APPROVAL' ? (
+                mode ? (
+                  <>
+                    <button className={styles.btn} onClick={() => { setMode(null); setReason(''); }} disabled={busy}>{t('cancel')}</button>
+                    <button className={`${styles.btn} ${mode === 'reject' ? styles.red : styles.amber}`} disabled={busy || reason.trim().length < 1}
+                      onClick={() => decide('reject', mode === 'reject' ? reason.trim() : `[${t('custReqTag')}] ${reason.trim()}`)}>
+                      {mode === 'reject' ? t('rejectConfirm') : t('custReqConfirm')}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className={`${styles.btn} ${styles.red}`} onClick={() => setMode('reject')} disabled={busy}>{t('rejectToCounselor')}</button>
+                    <button className={`${styles.btn} ${styles.amber}`} onClick={() => setMode('custreq')} disabled={busy}>{t('needCustReq')}</button>
+                    <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={() => decide('approve')}>{t('approveDone')}</button>
+                  </>
+                )
+              ) : <span className={`${styles.badge} ${styles.amber}`}>{appr?.status === 'APPROVED' ? t('approve') : t('noAuth')}</span>}
+            </div>
           </div>
       </div>
     </div>

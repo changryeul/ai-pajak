@@ -95,6 +95,18 @@ const ko: Dict = {
   ws_active: '온라인', ws_busy: '자리비움', ws_offline: '오프라인', ws_available: '온라인', ws_online: '온라인', ws_away: '자리비움',
   mode_WITH_CLIENTS: '고객과 함께 이동', mode_OPERATOR_ONLY: '상담원만 이동', mode_REASSIGN_CLIENTS: '고객 재배정',
   billFlow: '승인완료 후 ID Billing 발행으로 이관된 흐름을 추적합니다.', sortBy: '정렬', approvedTime: '승인시간', billIssued: '발행완료', billTarget: '발행대상',
+  // 승인대기 세목별 상세 (PPT)
+  secPph21: '개인소득세 / PPh 21 고객 입력화면', secWht: '원천세 / PPh 4(2), 15, 22, 23, 26 고객 입력화면',
+  secPpn: '부가세 / PPN 고객 입력화면', secCit: '선납법인세 / PPh 25 고객 입력화면',
+  secSub: '고객이 입력한 자료를 고객 화면과 같은 구조로 보여주는 미러 화면입니다.',
+  kTotalDue: '납부할 세액', kTotalPaid: '납부완료',
+  colCounterparty: '거래처', custDpp: '고객 DPP', coretaxDpp: 'CORETAX DPP', custPpn: '고객 PPN', coretaxPpn: 'CORETAX PPN', reconResult: '대조결과',
+  reconMatch: '정상', reconDiff: '차이', reconMissing: '누락', reconNormal: '정상',
+  ppnOut: '매출 PPN 대조', ppnIn: '매입 PPN 대조',
+  vatCalcTitle: '부가세 계산 로직', vatCalcBody: '매출 PPN {out} − 공제가능 매입 PPN {input} = 납부할 PPN {payable}',
+  custReqTitle: '고객 추가요청', custReqBody: '고객에게 추가 확인이 필요한 사유를 적어주세요.', custReqPlaceholder: '고객 추가요청 사유', custReqTag: '고객 추가요청', custReqConfirm: '고객 추가요청 전송',
+  finalDecision: '수퍼바이저 최종 판단', finalDecisionSub: '승인완료 시에만 ID Billing 발행대상으로 이동합니다.',
+  rejectToCounselor: '상담원에게 반려', needCustReq: '고객 추가요청 필요', approveDone: '승인완료',
 };
 
 const en: Dict = {
@@ -171,6 +183,17 @@ const en: Dict = {
   ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline', ws_available: 'Online', ws_online: 'Online', ws_away: 'Away',
   mode_WITH_CLIENTS: 'Move with clients', mode_OPERATOR_ONLY: 'Operator only', mode_REASSIGN_CLIENTS: 'Reassign clients',
   billFlow: 'Track cases moved to ID Billing issuance after approval.', sortBy: 'Sort', approvedTime: 'Approval Time', billIssued: 'Issued', billTarget: 'Target',
+  secPph21: 'Personal Income Tax / PPh 21 — Customer Input', secWht: 'Withholding / PPh 4(2), 15, 22, 23, 26 — Customer Input',
+  secPpn: 'VAT / PPN — Customer Input', secCit: 'Prepaid CIT / PPh 25 — Customer Input',
+  secSub: 'A mirror of what the customer entered, in the same layout as their screen.',
+  kTotalDue: 'Tax Due', kTotalPaid: 'Paid',
+  colCounterparty: 'Counterparty', custDpp: 'Customer DPP', coretaxDpp: 'CORETAX DPP', custPpn: 'Customer PPN', coretaxPpn: 'CORETAX PPN', reconResult: 'Result',
+  reconMatch: 'Match', reconDiff: 'Diff', reconMissing: 'Missing', reconNormal: 'Normal',
+  ppnOut: 'Output VAT Reconciliation', ppnIn: 'Input VAT Reconciliation',
+  vatCalcTitle: 'VAT Calculation', vatCalcBody: 'Output VAT {out} − creditable input VAT {input} = payable VAT {payable}',
+  custReqTitle: 'Customer Follow-up', custReqBody: 'Describe what needs to be confirmed with the customer.', custReqPlaceholder: 'Reason for customer follow-up', custReqTag: 'Customer follow-up', custReqConfirm: 'Send customer follow-up',
+  finalDecision: 'Supervisor Final Decision', finalDecisionSub: 'Only approved cases move to ID Billing issuance.',
+  rejectToCounselor: 'Reject to Counselor', needCustReq: 'Needs Customer Follow-up', approveDone: 'Approve',
 };
 
 const id: Dict = {
@@ -247,6 +270,17 @@ const id: Dict = {
   ws_active: 'Online', ws_busy: 'Away', ws_offline: 'Offline', ws_available: 'Online', ws_online: 'Online', ws_away: 'Away',
   mode_WITH_CLIENTS: 'Pindah dengan klien', mode_OPERATOR_ONLY: 'Hanya operator', mode_REASSIGN_CLIENTS: 'Tugaskan ulang klien',
   billFlow: 'Lacak kasus yang dipindahkan ke penerbitan ID Billing setelah persetujuan.', sortBy: 'Urutkan', approvedTime: 'Waktu Persetujuan', billIssued: 'Terbit', billTarget: 'Target',
+  secPph21: 'PPh Orang Pribadi / PPh 21 — Input Pelanggan', secWht: 'Pemotongan / PPh 4(2), 15, 22, 23, 26 — Input Pelanggan',
+  secPpn: 'PPN — Input Pelanggan', secCit: 'PPh Badan Dibayar Dimuka / PPh 25 — Input Pelanggan',
+  secSub: 'Cermin data yang diinput pelanggan, dengan tata letak yang sama seperti layar mereka.',
+  kTotalDue: 'Pajak Terutang', kTotalPaid: 'Dibayar',
+  colCounterparty: 'Lawan Transaksi', custDpp: 'DPP Pelanggan', coretaxDpp: 'DPP CORETAX', custPpn: 'PPN Pelanggan', coretaxPpn: 'PPN CORETAX', reconResult: 'Hasil',
+  reconMatch: 'Cocok', reconDiff: 'Selisih', reconMissing: 'Hilang', reconNormal: 'Normal',
+  ppnOut: 'Rekonsiliasi PPN Keluaran', ppnIn: 'Rekonsiliasi PPN Masukan',
+  vatCalcTitle: 'Perhitungan PPN', vatCalcBody: 'PPN Keluaran {out} − PPN Masukan dapat dikreditkan {input} = PPN terutang {payable}',
+  custReqTitle: 'Tindak Lanjut Pelanggan', custReqBody: 'Jelaskan yang perlu dikonfirmasi dengan pelanggan.', custReqPlaceholder: 'Alasan tindak lanjut pelanggan', custReqTag: 'Tindak lanjut pelanggan', custReqConfirm: 'Kirim tindak lanjut',
+  finalDecision: 'Keputusan Akhir Supervisor', finalDecisionSub: 'Hanya kasus yang disetujui yang menuju penerbitan ID Billing.',
+  rejectToCounselor: 'Tolak ke Konsultan', needCustReq: 'Perlu Tindak Lanjut Pelanggan', approveDone: 'Setujui',
 };
 
 const DICTS: Record<Lang, Dict> = { ko, en, id };
