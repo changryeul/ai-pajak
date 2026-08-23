@@ -16,10 +16,12 @@ import type { OperatorEdits } from './types';
 export interface FieldDef {
   key: string;            // row 객체의 값 키 (표시/diff 용)
   label: string;
-  type: 'number' | 'text' | 'date';
+  type: 'number' | 'text' | 'date' | 'select';
   putKey?: string;        // PUT body 의 키 (기본 = key)
   readOnly?: boolean;
   section?: string;       // 섹션 그룹 헤더 (수정요청 40·41·42). 없으면 '항목'.
+  options?: Array<{ value: string; label: string }>;  // type='select'
+  boolValue?: boolean;    // select 값이 boolean 이면 PUT 시 true/false 로 변환 (예: 사치품 여부)
 }
 
 interface Props {
@@ -41,13 +43,15 @@ interface Props {
   // 세액 산출근거 (수정요청 46) — 숫자 산출식 (예: 총지급액 × 세율 = 세액).
   calcNote?: { heading: string; formula: string; result: string } | null;
   aiNote?: { label: string; issues: string[] } | null;
+  // #64 — 저장 전 값 검증. 문구를 반환하면 AI 재확인(confirm)으로 되묻는다.
+  warn?: (draft: Record<string, string>) => string | null;
   onClose: () => void;
   onSaved: () => void;
 }
 
 export function RowDetailModal({
   title, subtitle, summary, rowId, queueId, putUrl, putExtra, fields, values,
-  operatorEdits, reviewedAt, basisNote, calcNote, aiNote, onClose, onSaved,
+  operatorEdits, reviewedAt, basisNote, calcNote, aiNote, warn, onClose, onSaved,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, string>>(() => {
     const d: Record<string, string> = {};
@@ -63,7 +67,9 @@ export function RowDetailModal({
       if (f.readOnly) continue;
       const orig = values[f.key] == null ? '' : String(values[f.key]);
       if (draft[f.key] !== orig) {
-        const to = f.type === 'number' ? Number(draft[f.key] || 0) : draft[f.key];
+        const to = f.type === 'number' ? Number(draft[f.key] || 0)
+          : (f.type === 'select' && f.boolValue) ? draft[f.key] === 'true'
+          : draft[f.key];
         changed.push({ field: f.key, putKey: f.putKey ?? f.key, from: values[f.key] ?? null, to, type: f.type });
       }
     }
@@ -83,6 +89,11 @@ export function RowDetailModal({
   }, [fields]);
 
   const saveAndConfirm = async () => {
+    // #64 — 잘못된 값(예: 표준 요율 벗어난 PPN) 저장 시 AI 재확인.
+    if (dirty.length > 0 && warn) {
+      const w = warn(draft);
+      if (w && !window.confirm(w)) return;
+    }
     setBusy(true); setError(null);
     try {
       if (dirty.length > 0) {
@@ -178,6 +189,16 @@ export function RowDetailModal({
                     <label className="flex items-center text-[10px] text-gray-400">
                       {f.label}{editDot(f.key)}
                     </label>
+                    {f.type === 'select' ? (
+                      <select
+                        value={draft[f.key]}
+                        disabled={f.readOnly}
+                        className="h-8 w-full rounded-md border border-gray-200 px-2 text-xs focus:border-blue-400 focus:outline-none"
+                        onChange={e => setDraft(d => ({ ...d, [f.key]: e.target.value }))}
+                      >
+                        {(f.options ?? []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                    ) : (
                     <input
                       type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
                       value={draft[f.key]}
@@ -189,6 +210,7 @@ export function RowDetailModal({
                       }`}
                       onChange={e => setDraft(d => ({ ...d, [f.key]: e.target.value }))}
                     />
+                    )}
                   </div>
                 ))}
               </div>

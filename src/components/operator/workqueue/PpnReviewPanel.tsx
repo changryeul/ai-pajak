@@ -328,6 +328,7 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
           values={detailRow as unknown as Record<string, unknown>}
           operatorEdits={detailRow.operatorEdits}
           reviewedAt={detailRow.reviewedAt}
+          warn={ppnRateWarn}
           aiNote={{ label: detailRow.flags.label, issues: detailRow.flags.issues }}
           onClose={() => setDetailRow(null)}
           onSaved={async () => { setDetailRow(null); await load(); onChanged(); }}
@@ -357,10 +358,27 @@ const PPN_FIELDS: FieldDef[] = [
   { key: 'description', label: '설명', type: 'text', section: '인보이스 · 설명' },
   { key: 'notes', label: '메모', type: 'text', section: '인보이스 · 설명' },
   // 금액
+  // 수정요청 64 — 사치품 여부 항목(11%/12% 결정). is_luxury 로 PUT → PPN 자동 재계산.
+  { key: 'isLuxury', label: '사치품 여부', type: 'select', boolValue: true, section: '금액',
+    options: [{ value: 'false', label: '일반 (11%)' }, { value: 'true', label: '사치품 (12%)' }] },
   { key: 'dpp', label: 'DPP (PPN 자동 재계산)', type: 'number', section: '금액' },
   { key: 'dppNilaiLain', label: 'DPP Nilai Lain', type: 'number', section: '금액' },
   { key: 'ppn', label: 'PPN (직접 수정 시 우선)', type: 'number', section: '금액' },
 ];
+
+// 수정요청 64 — 상담원이 표준 요율을 벗어난 PPN 을 저장하려 하면 AI 재확인.
+// 사치품 여부에 따라 기대 요율(11%/12%) 대비 ±1%p 초과 시 되묻는다.
+function ppnRateWarn(draft: Record<string, string>): string | null {
+  const dpp = Number(draft.dpp || 0);
+  const ppn = Number(draft.ppn || 0);
+  if (dpp <= 0 || ppn <= 0) return null;
+  const expectedPct = draft.isLuxury === 'true' ? 12 : 11;
+  const actualPct = (ppn / dpp) * 100;
+  if (Math.abs(actualPct - expectedPct) <= 1) return null;
+  return `⚠️ AI 확인: 입력한 PPN(Rp ${ppn.toLocaleString('id-ID')})은 DPP 대비 약 ${actualPct.toFixed(1)}% 로, `
+    + `${draft.isLuxury === 'true' ? '사치품' : '일반'} 표준 요율 ${expectedPct}% 와 다릅니다.\n`
+    + `요율/사치품 여부를 잘못 입력했을 수 있습니다. 이대로 저장할까요?`;
+}
 
 function RequestModal({ row, queueId, onClose, onSent }:
   { row: PpnRow; queueId: string; onClose: () => void; onSent: () => void }) {
