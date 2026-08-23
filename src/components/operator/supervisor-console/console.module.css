@@ -19,6 +19,7 @@
 .sidebar:not(:hover) .logo{justify-content:center;margin-bottom:12px}
 .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
 .logoMark{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#60a5fa,#8b5cf6);display:grid;place-items:center;font-weight:900;color:#fff}
+.logoImg{height:34px;width:auto;max-width:160px;object-fit:contain;flex-shrink:0}
 .logo b{font-size:17px}.logo span{font-size:12px;color:#a8b3c7}
 .loginCard{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px;margin:10px 0 18px}
 .loginCard b{display:block;font-size:14px}.loginCard span{display:block;color:#cbd5e1;font-size:12px;margin-top:3px}

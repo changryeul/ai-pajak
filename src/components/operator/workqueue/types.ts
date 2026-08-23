@@ -166,6 +166,8 @@ export interface PpnRow {
   dpp: number;
   dppNilaiLain: number;   // 수정요청 60 — 고객 PPN 화면 parity
   ppn: number;
+  coretaxDpp: number | null;   // 수정요청 61(8/23) — Coretax 다운로드 엑셀 대조값
+  coretaxPpn: number | null;
   isLuxury: boolean;
   reconStatus: string | null;
   reviewedAt: string | null;

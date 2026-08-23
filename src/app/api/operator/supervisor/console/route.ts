@@ -247,9 +247,35 @@ export async function GET(_req: NextRequest) {
     changes: (logs ?? []).filter(l => l.method && l.method !== 'AUTO').length,
   };
 
+  // #43(8/23) — 배정 상단 박스: 오늘/이번달 자동배정 · 금월 수동변경 · 전월대비·전년대비 순증
+  const now = new Date();
+  const ymOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  const todayStr = now.toISOString().slice(0, 10);
+  const curYm = ymOf(now);
+  const prevYm = ymOf(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+  const lastYearYm = ymOf(new Date(now.getFullYear() - 1, now.getMonth(), 1));
+  const { data: allLogs } = await admin
+    .from('operator_assignment_log').select('method, created_at').limit(3000);
+  let todayAuto = 0, monthAuto = 0, monthManual = 0, monthTotal = 0, prevMonthTotal = 0, lastYearTotal = 0;
+  for (const l of allLogs ?? []) {
+    const d = String(l.created_at); const dYm = d.slice(0, 7); const dDay = d.slice(0, 10);
+    if (dYm === curYm) {
+      monthTotal++;
+      if (l.method === 'AUTO') { monthAuto++; if (dDay === todayStr) todayAuto++; }
+      else monthManual++;
+    }
+    if (dYm === prevYm) prevMonthTotal++;
+    if (dYm === lastYearYm) lastYearTotal++;
+  }
+  const assignStats = {
+    todayAuto, monthAuto, monthManual,
+    momNet: monthTotal - prevMonthTotal,   // 전월대비 순증
+    yoyNet: monthTotal - lastYearTotal,    // 전년대비 순증
+  };
+
   return NextResponse.json({
     success: true,
-    data: { kpis, dashKpis, assignedCustomers, history, team, ranking, teamCompare, approvalPending, audit,
+    data: { kpis, assignStats, dashKpis, assignedCustomers, history, team, ranking, teamCompare, approvalPending, audit,
       roster, supervisorOptions,
       // #34 — 수동변경 드롭다운은 상담원(tax_operator)만. 수퍼바이저 제외.
       operators: opStats.filter(o => o.role === 'tax_operator').map(o => ({ id: o.id, name: o.name })) },

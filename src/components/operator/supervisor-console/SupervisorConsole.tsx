@@ -15,6 +15,7 @@ const VIEW_ICON: Record<string, React.ReactNode> = {
 // ── 타입 ─────────────────────────────────────────────
 interface ConsoleData {
   kpis: { pendingManual: number; autoAssigned: number; excludedOffline: number; changes: number };
+  assignStats: { todayAuto: number; monthAuto: number; monthManual: number; momNet: number; yoyNet: number };
   dashKpis: { completed: number; completedRank: number; pendingApproval: number; rejectRate: number; avgMinutes: number };
   assignedCustomers: Array<{ customerId: string; name: string; operator: string; method: string; taxTypes: string[]; assignedAt: string | null }>;
   history: Array<{ name: string; operator: string; method: string; at: string }>;
@@ -90,7 +91,9 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
         {/* ── 사이드바 ── */}
         <aside className={styles.sidebar}>
           <div className={styles.logo}>
-            <div className={styles.logoMark}>SP</div>
+            {/* 수정요청 41(8/23) — AI Pajak 공식 로고 */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="AI Pajak" className={styles.logoImg} />
             <div><b>{t('brandTitle')}</b><span>{t('brandSub')}</span></div>
           </div>
           <div className={styles.loginCard}>
@@ -244,10 +247,12 @@ function AssignmentView({ d, onReassigned }: { d: ConsoleData; onReassigned: (m:
   };
   return (
     <>
-      {/* #38 — 배정대기/자동배정제외(항상 0) 삭제. 자동배정완료·수동변경 KPI + 팀별/상담원별 배정 고객 수. */}
+      {/* #43(8/23) — 상단 박스 4: 자동배정(오늘/이번달) · 금월 수동변경 · 전월대비 순증 · 전년대비 순증 */}
       <div className={`${styles.grid} ${styles.kpi}`}>
-        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiAuto')}</div><div className={styles.kpiValue}>{d.assignedCustomers.length}</div><div className={styles.kpiSub}>{t('asgKpiAutoSub')}</div></div>
-        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiManual')}</div><div className={styles.kpiValue}>{d.kpis.changes}</div><div className={styles.kpiSub}>{t('asgKpiManualSub')}</div></div>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgBoxAuto')}</div><div className={styles.kpiValue} style={{ fontSize: 22 }}>{t('asgBoxAutoVal', { today: d.assignStats.todayAuto, month: d.assignStats.monthAuto })}</div><div className={styles.kpiSub}>{t('asgBoxAutoSub')}</div></div>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgBoxManual')}</div><div className={styles.kpiValue}>{d.assignStats.monthManual}</div><div className={styles.kpiSub}>{t('asgKpiManualSub')}</div></div>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgBoxMom')}</div><div className={styles.kpiValue} style={{ color: d.assignStats.momNet >= 0 ? '#059669' : '#dc2626' }}>{d.assignStats.momNet >= 0 ? '+' : ''}{d.assignStats.momNet}</div><div className={styles.kpiSub}>{t('asgBoxMomSub')}</div></div>
+        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgBoxYoy')}</div><div className={styles.kpiValue} style={{ color: d.assignStats.yoyNet >= 0 ? '#059669' : '#dc2626' }}>{d.assignStats.yoyNet >= 0 ? '+' : ''}{d.assignStats.yoyNet}</div><div className={styles.kpiSub}>{t('asgBoxYoySub')}</div></div>
       </div>
 
       {/* #38 — 팀별/상담원별 배정 고객 수 (수동변경 판단용) */}
@@ -815,7 +820,7 @@ function useLazy<TD>(url: string): { data: TD | null; err: string | null; reload
 }
 
 // ── 상담원 평가 ──
-interface EvalRow { name: string; reject_rate: number | null; approval_pass_rate: number | null; completed_count?: number; avg_minutes?: number | null; scores: { total: number; accuracy: number; speed: number; approval: number; satisfaction: number }; suggested_incentive_amount?: number; evaluation_label?: string }
+interface EvalRow { name: string; rank?: number; reject_rate: number | null; approval_pass_rate: number | null; completed_count?: number; avg_minutes?: number | null; scores: { total: number; accuracy: number; speed: number; approval: number; satisfaction: number }; suggested_incentive_amount?: number; evaluation_label?: string }
 interface Incentive { monthlyPool: number; perPoint: number; maxPerPerson: number; minScore: number; improvementThreshold: number }
 function EvaluationView() {
   const t = useT();
@@ -847,10 +852,11 @@ function EvaluationView() {
       <div className={styles.cardBody}>
         <div className={styles.tableWrap}>
           <table>
-            <thead><tr><th>{t('colCounselor')}</th><th>{t('colProcessed')}</th><th>{t('colAvgTime')}</th><th>{t('colScore')}</th><th>{t('colRejectRate')}</th><th>{t('colApprovalPass')}</th><th>{t('colAccuracy')}</th><th>{t('colSpeed')}</th><th>{t('colIncentive')}</th></tr></thead>
+            <thead><tr><th>{t('colRank')}</th><th>{t('colCounselor')}</th><th>{t('colProcessed')}</th><th>{t('colAvgTime')}</th><th>{t('colScore')}</th><th>{t('colRejectRate')}</th><th>{t('colApprovalPass')}</th><th>{t('colAccuracy')}</th><th>{t('colSpeed')}</th><th>{t('colIncentive')}</th></tr></thead>
             <tbody>
               {rows.map((r, i) => (
                 <tr key={i}>
+                  <td><b style={{ fontSize: 15 }}>{r.rank ?? i + 1}</b></td>
                   <td><b>{r.name}</b> {r.evaluation_label && <span className={`${styles.badge} ${styles.green}`}>{r.evaluation_label}</span>}</td>
                   <td>{r.completed_count ?? 0}</td>
                   <td>{r.avg_minutes != null ? `${r.avg_minutes}${t('minUnit')}` : '—'}</td>
@@ -861,7 +867,7 @@ function EvaluationView() {
                   <td className={styles.money}>{r.suggested_incentive_amount ? rp(r.suggested_incentive_amount) : '—'}</td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td colSpan={9} style={{ color: '#94a3b8' }}>{t('noEval')}</td></tr>}
+              {rows.length === 0 && <tr><td colSpan={10} style={{ color: '#94a3b8' }}>{t('noEval')}</td></tr>}
             </tbody>
           </table>
         </div>

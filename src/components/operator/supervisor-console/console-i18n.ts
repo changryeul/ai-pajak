@@ -129,6 +129,10 @@ const ko: Dict = {
   editIncentive: '산출근거 편집', incPerPoint: '점당 단가(Rp)', incMinScore: '지급 최소점수', incMaxPerson: '1인 최대(Rp)', incPool: '월 재원(Rp)',
   incEditNote: '저장하면 전 상담원 제안 인센티브가 이 정책으로 재계산됩니다. 자동 상벌은 아니며 최종 결정은 수퍼바이저 몫.',
   affMoved: '소속 이동 완료',
+  // 8/23
+  colRank: '순위',
+  asgBoxAuto: '자동배정 완료 고객', asgBoxAutoVal: '오늘 {today}명 / 이번달 {month}명', asgBoxAutoSub: '신규 고객 자동배정',
+  asgBoxManual: '금월 수동변경', asgBoxMom: '전월대비 순증', asgBoxMomSub: '이번달 − 전월 배정 건수', asgBoxYoy: '전년대비 순증', asgBoxYoySub: '이번달 − 전년 동월',
 };
 
 const en: Dict = {
@@ -236,6 +240,9 @@ const en: Dict = {
   editIncentive: 'Edit basis', incPerPoint: 'Per point (Rp)', incMinScore: 'Min score', incMaxPerson: 'Max/person (Rp)', incPool: 'Monthly pool (Rp)',
   incEditNote: 'Saving recomputes every counselor suggestion with this policy. Advisory only — final decision is the supervisor’s.',
   affMoved: 'Affiliation moved',
+  colRank: 'Rank',
+  asgBoxAuto: 'Auto-assigned Customers', asgBoxAutoVal: 'Today {today} / This month {month}', asgBoxAutoSub: 'New customer auto-assignment',
+  asgBoxManual: 'Manual changes (MTD)', asgBoxMom: 'MoM net increase', asgBoxMomSub: 'This month − last month', asgBoxYoy: 'YoY net increase', asgBoxYoySub: 'This month − same month last year',
 };
 
 const id: Dict = {
@@ -343,6 +350,9 @@ const id: Dict = {
   editIncentive: 'Edit dasar', incPerPoint: 'Per poin (Rp)', incMinScore: 'Skor min', incMaxPerson: 'Maks/orang (Rp)', incPool: 'Dana bulanan (Rp)',
   incEditNote: 'Menyimpan menghitung ulang usulan setiap konsultan dengan kebijakan ini. Hanya usulan — keputusan akhir supervisor.',
   affMoved: 'Afiliasi dipindahkan',
+  colRank: 'Peringkat',
+  asgBoxAuto: 'Pelanggan Tertugas Otomatis', asgBoxAutoVal: 'Hari ini {today} / Bulan ini {month}', asgBoxAutoSub: 'Penugasan otomatis pelanggan baru',
+  asgBoxManual: 'Perubahan manual (bulan ini)', asgBoxMom: 'Kenaikan bersih MoM', asgBoxMomSub: 'Bulan ini − bulan lalu', asgBoxYoy: 'Kenaikan bersih YoY', asgBoxYoySub: 'Bulan ini − bulan sama tahun lalu',
 };
 
 const DICTS: Record<Lang, Dict> = { ko, en, id };

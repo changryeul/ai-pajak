@@ -13,6 +13,57 @@ import { RequestChatModal } from './RequestChatModal';
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const CORETAX_URL = 'https://coretaxdjp.pajak.go.id/';
 
+// 수정요청 61(8/23) — 고객 업로드 엑셀 ↔ Coretax 다운로드 엑셀 대조 내용을 상담원에게 노출.
+function reconResult(r: PpnRow): { text: string; cls: string } {
+  switch (r.reconStatus) {
+    case 'MATCH': return { text: '일치', cls: 'green' };
+    case 'DIFF': return { text: '불일치', cls: 'red' };
+    case 'MISSING_CORETAX': return { text: 'Coretax 누락', cls: 'amber' };
+    case 'MISSING_CUSTOMER': return { text: '고객자료 누락', cls: 'amber' };
+    default: return { text: '미대조', cls: 'gray' };
+  }
+}
+function ReconCompareCard({ rows }: { rows: PpnRow[] }) {
+  const hasCoretax = rows.some(r => r.coretaxDpp != null || r.coretaxPpn != null);
+  const section = (title: string, list: PpnRow[]) => list.length === 0 ? null : (
+    <div className="mb-2">
+      <div className="mb-1 text-[11px] font-black text-slate-600">{title}</div>
+      <div className={styles.tbl}>
+        <table>
+          <thead><tr>
+            <th>일자</th><th>FAKTUR</th><th>거래처</th>
+            <th className={styles.money}>고객 DPP</th><th className={styles.money}>CORETAX DPP</th>
+            <th className={styles.money}>고객 PPN</th><th className={styles.money}>CORETAX PPN</th><th>대조결과</th>
+          </tr></thead>
+          <tbody>
+            {list.map(r => { const res = reconResult(r); return (
+              <tr key={r.id}>
+                <td>{r.fakturDate ?? '—'}</td><td>{r.fakturNumber ?? '—'}</td><td>{r.counterpartyName}</td>
+                <td className={styles.money}>{rp(r.dpp)}</td>
+                <td className={styles.money}>{r.coretaxDpp != null ? rp(r.coretaxDpp) : '—'}</td>
+                <td className={styles.money}>{rp(r.ppn)}</td>
+                <td className={styles.money}>{r.coretaxPpn != null ? rp(r.coretaxPpn) : '—'}</td>
+                <td><span className={`${styles.badge} ${styles[res.cls]}`}>{res.text}</span></td>
+              </tr>
+            ); })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+  return (
+    <div className={styles.card ?? ''} style={{ border: '1px solid #e2e8f0', borderRadius: 14, background: '#fff', padding: 12, marginBottom: 10 }}>
+      <div className="mb-2 text-xs font-black text-slate-800">🔎 고객 엑셀 ↔ Coretax 엑셀 대조</div>
+      {!hasCoretax && (
+        <p className="mb-2 text-[11px] text-amber-700">아직 Coretax 대조 파일이 업로드되지 않았습니다. 위 &quot;대조 파일 업로드&quot;로 Coretax 다운로드 엑셀을 올리면 CORETAX 값이 채워집니다. (아래는 고객 업로드 엑셀 값)</p>
+      )}
+      {section('매출 (Keluaran)', rows.filter(r => r.fakturType === 'KELUARAN'))}
+      {section('매입 (Masukan)', rows.filter(r => r.fakturType === 'MASUKAN'))}
+      {rows.length === 0 && <p className="text-[11px] text-slate-400">고객이 업로드한 부가세 자료가 없습니다.</p>}
+    </div>
+  );
+}
+
 // 수정요청 49·52 — 값 + 카피 버튼 칩 (고객 Coretax 자격증명 복사용)
 function CopyChip({ label, value }: { label: string; value: string | null }) {
   const [copied, setCopied] = useState(false);
@@ -271,6 +322,9 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
 
         {/* 수정요청 48·49 — Coretax 접속(포털 새 탭) + 고객 자격증명(카피) + 대조 파일 업로드 */}
         <CoretaxAccessBar coretax={detail.coretax} reconBusy={reconBusy} onFile={runCoretaxRecon} />
+
+        {/* 수정요청 61(8/23) — 고객 업로드 엑셀 ↔ Coretax 다운로드 엑셀 대조 내용 노출 */}
+        <ReconCompareCard rows={rows} />
 
         {/* 수정요청 63 — 고객 PPN 환급신청(Restitusi) 노출 + 처리 */}
         {(detail.refundRequests ?? []).length > 0 && (
