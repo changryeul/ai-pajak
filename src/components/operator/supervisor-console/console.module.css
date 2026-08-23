@@ -59,6 +59,8 @@
 .score{font-size:20px;font-weight:1000}
 .assignmentLayout{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
 /* #13 — 승인대기: 리스트(좌) 폭 축소, 핵심은 우측 상세 */
+.searchRow{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #f1f5f9;background:#fff;padding:9px 11px;cursor:pointer;font-family:inherit;font-size:13px}
+.searchRow:last-child{border-bottom:0}.searchRow:hover{background:#eff6ff}
 .approvalLayout{display:grid;grid-template-columns:minmax(220px,.36fr) 1.64fr;gap:14px;align-items:start}
 @media(max-width:1100px){.approvalLayout{grid-template-columns:1fr}}
 .customerCard{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px;display:grid;gap:10px}

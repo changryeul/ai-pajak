@@ -56,7 +56,6 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
   const [view, setView] = useState<View>('dashboard');
   const [data, setData] = useState<ConsoleData | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [showReport, setShowReport] = useState(false);
   const nowP = new Date();
   const [period, setPeriod] = useState(`${nowP.getFullYear()}-${String(nowP.getMonth() + 1).padStart(2, '0')}`);
   // 초기 언어 = URL 로케일(ko/en/id) 우선, 그 외는 한국어(내부 콘솔).
@@ -75,14 +74,6 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
   const showToast = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2600); };
   const logout = async () => { await createClient().auth.signOut(); router.push(`/${locale}/login`); router.refresh(); };
 
-  const runAutoAssign = async () => {
-    try {
-      const r = await fetch('/api/operator/auto-assign', { method: 'POST' });
-      const j = await r.json();
-      showToast(j.success ? t('toastAutoDone') : (j.error || t('toastAutoFail')));
-      await load();
-    } catch { showToast(t('toastNet')); }
-  };
 
   const navBtn = (v: View, label: string, count?: number | string) => (
     <button className={`${styles.nav} ${view === v ? styles.active : ''}`} onClick={() => setView(v)} title={label}>
@@ -132,115 +123,24 @@ export function SupervisorConsole({ name, role }: { name?: string; role?: string
                 {t('period')}
                 <input type="month" className={styles.periodInput} value={period} onChange={e => setPeriod(e.target.value)} />
               </label>
-              {data && <button className={`${styles.btn} ${styles.blue}`} onClick={() => setShowReport(true)}>📄 {t('report', { view: t(VIEW_KEYS[view].t) })}</button>}
+              {/* 수정요청 8/21 #23,24,27,29,33,39,40 — 월간 리포트 전 뷰 삭제 */}
               <button className={styles.btn} onClick={logout}>{t('logout')}</button>
             </div>
           </div>
 
           {!data ? <div className={styles.card}><div className={styles.placeholder}>{t('loading')}</div></div>
             : view === 'dashboard' ? <DashboardView d={data} />
-            : view === 'assignment' ? <AssignmentView d={data} onAuto={runAutoAssign} onReassigned={async (m) => { showToast(m); await load(); }} />
-            : view === 'approval' ? <ApprovalView d={data} onChanged={load} />
+            : view === 'assignment' ? <AssignmentView d={data} onReassigned={async (m) => { showToast(m); await load(); }} />
+            : view === 'approval' ? <ApprovalView d={data} onChanged={async () => { showToast(t('toastChangeDone')); await load(); }} />
             : view === 'evaluation' ? <EvaluationView />
             : view === 'affiliation' ? <AffiliationView d={data} onToast={showToast} onChanged={load} />
             : view === 'billing' ? <BillingView locale={locale} />
             : <AuditView d={data} />}
         </main>
       </div>
-      {showReport && data && <ReportModal name={name} d={data} view={view} onClose={() => setShowReport(false)} />}
       {toast && <div className={styles.toast}>{toast}</div>}
     </div>
     </TCtx.Provider>
-  );
-}
-
-// ── 월간 리포트 모달 (#20 — 뷰별 내용) ──
-// 뷰별 요약 라인: 현재 보고 있는 메뉴에 맞춘 핵심 지표를 리포트 상단에 요약.
-function reportLead(t: T, view: View, d: ConsoleData): string {
-  switch (view) {
-    case 'dashboard': return t('rlDashboard', { completed: d.dashKpis.completed, pending: d.dashKpis.pendingApproval, reject: d.dashKpis.rejectRate, avg: d.dashKpis.avgMinutes });
-    case 'approval': return t('rlApproval', { n: d.approvalPending.length });
-    case 'evaluation': return t('rlEvaluation', { top: d.ranking[0]?.name ?? '—', score: d.ranking[0]?.score?.toFixed(0) ?? '—' });
-    case 'affiliation': return t('rlAffiliation', { teams: d.roster.length, staff: d.roster.reduce((s, g) => s + g.staff.length, 0) });
-    case 'assignment': return t('rlAssignment', { auto: d.assignedCustomers.length, manual: d.kpis.changes, excluded: d.kpis.excludedOffline });
-    case 'billing': return t('rlBilling');
-    case 'audit': return t('rlAudit', { n: d.audit.length });
-    default: return '';
-  }
-}
-function ReportModal({ name, d, view, onClose }: { name?: string; d: ConsoleData; view: View; onClose: () => void }) {
-  const t = useT();
-  const now = new Date();
-  const ym = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const rejects = d.audit.filter(a => /reject|반려|REJECT/i.test(a.activity)).length;
-  const viewLabel = t(VIEW_KEYS[view].t);
-  return (
-    <div className={styles.modalBg} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2>{viewLabel} · {t('reportTitle')}</h2>
-        <div className={styles.modalBody}>
-          <div className={styles.reportCover}>
-            <h3>{viewLabel} — {t('reportCover', { ym })}</h3>
-            <p>{t('reportCoverSub', { name: name || t('navDashboard') })}</p>
-          </div>
-          <div className={styles.reportSection}>
-            <h4>{t('rsThisMenu', { view: viewLabel })}</h4>
-            <div className={styles.rs}><p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#334155' }}>{reportLead(t, view, d)}</p></div>
-          </div>
-          <div className={styles.reportGrid}>
-            <div className={styles.reportKpi}><span>{t('rkCompleted')}</span><b>{d.dashKpis.completed}</b></div>
-            <div className={styles.reportKpi}><span>{t('rkChanges')}</span><b>{d.kpis.changes}</b></div>
-            <div className={styles.reportKpi}><span>{t('rkPending')}</span><b>{d.approvalPending.length}</b></div>
-            <div className={styles.reportKpi}><span>{t('rkTeam')}</span><b>{d.team.length}</b></div>
-          </div>
-
-          <div className={styles.reportSection}>
-            <h4>{t('rsTeamPerf')}</h4>
-            <div className={styles.tableWrap}>
-              <table>
-                <thead><tr><th>{t('colTeam')}</th><th>{t('colSupervisor')}</th><th>{t('colCompleted')}</th><th>{t('colReject')}</th><th>{t('colTeamScore')}</th></tr></thead>
-                <tbody>
-                  {d.teamCompare.map((tc, i) => <tr key={i}><td><b>{tc.team}</b></td><td>{tc.supervisor}</td><td>{tc.completed}</td><td>{tc.rejectRate}%</td><td>{tc.teamScore}</td></tr>)}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className={styles.reportSection}>
-            <h4>{t('rsRank')}</h4>
-            <div className={styles.rs}>
-              <div className={styles.rankCard}>
-                {d.ranking.map((r, i) => (
-                  <div key={r.id} className={styles.rankRow}><div className={styles.avatar}>{i + 1}</div><div><b>{r.name}</b><div style={{ color: '#64748b', fontSize: 12 }}>{t('rankDuty', { n: r.load })}</div></div><div className={styles.score}>{r.score.toFixed(0)}</div></div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.reportSection}>
-            <h4>{t('rsApproval')}</h4>
-            <div className={styles.rs}>
-              <ul>
-                <li>{t('rkPending')}: {d.approvalPending.length}</li>
-                <li>{t('colReject')}: {rejects}</li>
-                <li>{t('audHeadTitle')}: {d.audit.length}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className={styles.reportSection}>
-            <h4>{t('rsComment')}</h4>
-            <div className={styles.rs}><p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#334155' }}>
-              {`${ym} — ${t('kpiCompleted')} ${d.dashKpis.completed}, ${t('rkChanges')} ${d.kpis.changes}, ${t('rkPending')} ${d.approvalPending.length}, ${t('rankTitle')} #1 ${d.ranking[0]?.name ?? '—'}.`}
-            </p></div>
-          </div>
-        </div>
-        <div className={styles.modalFooter}>
-          <button className={styles.btn} onClick={onClose}>{t('close')}</button>
-          <button className={`${styles.btn} ${styles.blue}`} onClick={() => window.print()}>{t('print')}</button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -307,13 +207,27 @@ function Kpi({ label, value, sub }: { label: string; value: string; sub: string 
 
 // ── 고객 배정관리 ──
 const RULE_KEYS = [1, 2, 3, 4];
-function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: () => void; onReassigned: (m: string) => void }) {
+function AssignmentView({ d, onReassigned }: { d: ConsoleData; onReassigned: (m: string) => void }) {
   const t = useT();
   const [sel, setSel] = useState<string | null>(d.assignedCustomers[0]?.customerId ?? null);
   const [op, setOp] = useState('');
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
-  const selCust = d.assignedCustomers.find(c => c.customerId === sel) ?? null;
+  // #36 — 고객명 직접 검색해 배정 변경 대상 선택
+  const [q, setQ] = useState('');
+  const [results, setResults] = useState<Array<{ customerId: string; name: string; operator: string | null }>>([]);
+  const [pickedName, setPickedName] = useState<string | null>(null);
+  const runSearch = async (val: string) => {
+    setQ(val);
+    if (val.trim().length < 1) { setResults([]); return; }
+    try {
+      const r = await fetch(`/api/operator/supervisor/console/customer-search?q=${encodeURIComponent(val.trim())}`);
+      const j = await r.json();
+      if (j.success) setResults(j.data.customers);
+    } catch { /* keep */ }
+  };
+  const selCust = d.assignedCustomers.find(c => c.customerId === sel)
+    ?? (sel && pickedName ? { name: pickedName, operator: '—' } : null);
   const RULES = RULE_KEYS.map(n => ({ n: t(`asgRule${n}` as string) || '', tt: t(`asgRule${n}Desc` as string) || '' }));
   const submit = async () => {
     if (!sel || !op || reason.trim().length < 1) { onReassigned(t('toastNeedFields')); return; }
@@ -330,18 +244,34 @@ function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: (
   };
   return (
     <>
-      {/* #9 PPT — 배정 KPI 4 (배정대기 / 자동배정 완료 / 자동배정 제외 / 수동변경) */}
+      {/* #38 — 배정대기/자동배정제외(항상 0) 삭제. 자동배정완료·수동변경 KPI + 팀별/상담원별 배정 고객 수. */}
       <div className={`${styles.grid} ${styles.kpi}`}>
-        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiWaiting')}</div><div className={styles.kpiValue}>{d.kpis.pendingManual}</div><div className={styles.kpiSub}>{t('asgKpiWaitingSub')}</div></div>
         <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiAuto')}</div><div className={styles.kpiValue}>{d.assignedCustomers.length}</div><div className={styles.kpiSub}>{t('asgKpiAutoSub')}</div></div>
-        <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiExcluded')}</div><div className={styles.kpiValue}>{d.kpis.excludedOffline}</div><div className={styles.kpiSub}>{t('asgKpiExcludedSub')}</div></div>
         <div className={styles.kpiCard}><div className={styles.kpiLabel}>{t('asgKpiManual')}</div><div className={styles.kpiValue}>{d.kpis.changes}</div><div className={styles.kpiSub}>{t('asgKpiManualSub')}</div></div>
+      </div>
+
+      {/* #38 — 팀별/상담원별 배정 고객 수 (수동변경 판단용) */}
+      <div className={styles.card}>
+        <div className={styles.cardHead}><div><h2>{t('asgLoadTitle')}</h2><p>{t('asgLoadDesc')}</p></div></div>
+        <div className={styles.cardBody}>
+          <div className={styles.tableWrap}>
+            <table>
+              <thead><tr><th>{t('colTeam')}</th><th>{t('colCounselor')}</th><th>{t('asgLoadCount')}</th></tr></thead>
+              <tbody>
+                {d.roster.flatMap(g => g.staff.map(s => (
+                  <tr key={s.id}><td>{g.supervisor}</td><td><b>{s.name}</b></td><td>{s.customers}</td></tr>
+                )))}
+                {d.roster.every(g => g.staff.length === 0) && <tr><td colSpan={3} style={{ color: '#94a3b8' }}>{t('noStaff')}</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
+          {/* #37 — 모든 고객은 기본 자동배정. "신규 접수 자동배정 실행" 버튼 삭제. */}
           <div><h2>{t('asgRulesTitle')}</h2><p>{t('asgRulesDesc')}</p></div>
-          <button className={`${styles.btn} ${styles.blue}`} onClick={onAuto}>{t('asgRun')}</button>
         </div>
         <div className={styles.cardBody}>
           <div className={`${styles.grid} ${styles.three}`}>
@@ -379,6 +309,22 @@ function AssignmentView({ d, onAuto, onReassigned }: { d: ConsoleData; onAuto: (
           <div className={styles.card}>
             <div className={styles.cardHead}><div><h2>{t('asgManualTitle')}</h2><p>{t('asgManualDesc')}</p></div></div>
             <div className={styles.cardBody} style={{ display: 'grid', gap: 12 }}>
+              {/* #36 — 고객명 직접 검색 */}
+              <div style={{ position: 'relative' }}>
+                <label>{t('searchCustomer')}
+                  <input value={q} onChange={e => runSearch(e.target.value)} placeholder={t('searchCustomerPh')} />
+                </label>
+                {results.length > 0 && (
+                  <div style={{ marginTop: 6, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
+                    {results.map(r => (
+                      <button key={r.customerId} className={styles.searchRow}
+                        onClick={() => { setSel(r.customerId); setPickedName(r.name); setResults([]); setQ(''); }}>
+                        <b>{r.name}</b>{r.operator ? <span style={{ color: '#64748b', fontSize: 11 }}> · {t('curAssign')} {r.operator}</span> : null}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               {selCust ? (
                 <>
                   <div className={styles.assignmentRule}><b>{selCust.name}</b><p>{t('curAssign')}: {selCust.operator}</p></div>
@@ -483,6 +429,11 @@ function ApprovalView({ d, onChanged }: { d: ConsoleData; onChanged: () => void 
   }, [d.approvalPending]);
   const [selCust, setSelCust] = useState<string | null>(groups[0]?.customerId ?? null);
   const [tab, setTab] = useState('pph21');
+  // #26 — 승인/반려 후 해당 고객이 목록에서 빠지면 다음 고객으로 자동 이동(빈 화면·오해 방지).
+  useEffect(() => {
+    if (groups.length === 0) { if (selCust !== null) setSelCust(null); return; }
+    if (!groups.some(g => g.customerId === selCust)) setSelCust(groups[0].customerId);
+  }, [groups, selCust]);
   const cur = groups.find(g => g.customerId === selCust) ?? null;
   const tabTypes = APPR_TABS.find(x => x.key === tab)?.types ?? [];
   const curItem = cur?.items.find(it => tabTypes.includes(it.taxType)) ?? null;
@@ -614,7 +565,7 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
   const [detail, setDetail] = useState<DetailResp | null>(null);
   const [appr, setAppr] = useState<ApprovalState | null>(null);
   const [busy, setBusy] = useState(false);
-  const [mode, setMode] = useState<'reject' | 'custreq' | null>(null);
+  const [mode, setMode] = useState<'reject' | null>(null);
   const [reason, setReason] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -818,13 +769,13 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
 
           {mode && (
             <div className={styles.reviewRequestBox}>
-              <b>{mode === 'reject' ? t('rejectTitle') : t('custReqTitle')}</b>
-              <p>{mode === 'reject' ? t('rejectBody') : t('custReqBody')}</p>
-              <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder={mode === 'reject' ? t('rejectPlaceholder') : t('custReqPlaceholder')} />
+              <b>{t('rejectTitle')}</b>
+              <p>{t('rejectBody')}</p>
+              <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder={t('rejectPlaceholder')} />
             </div>
           )}
 
-          {/* 수퍼바이저 최종 판단 (인라인) — PPT: 상담원에게 반려 / 고객 추가요청 필요 / 승인완료 */}
+          {/* 수퍼바이저 최종 판단 (인라인) — #25: 상담원에게 반려 / 승인완료 (고객추가요청 버튼 삭제) */}
           <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
             <b style={{ fontSize: 14 }}>{t('finalDecision')}</b>
             <p style={{ margin: '2px 0 10px', color: '#64748b', fontSize: 12 }}>{t('finalDecisionSub')}</p>
@@ -833,15 +784,12 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
                 mode ? (
                   <>
                     <button className={styles.btn} onClick={() => { setMode(null); setReason(''); }} disabled={busy}>{t('cancel')}</button>
-                    <button className={`${styles.btn} ${mode === 'reject' ? styles.red : styles.amber}`} disabled={busy || reason.trim().length < 1}
-                      onClick={() => decide('reject', mode === 'reject' ? reason.trim() : `[${t('custReqTag')}] ${reason.trim()}`)}>
-                      {mode === 'reject' ? t('rejectConfirm') : t('custReqConfirm')}
-                    </button>
+                    <button className={`${styles.btn} ${styles.red}`} disabled={busy || reason.trim().length < 1}
+                      onClick={() => decide('reject', reason.trim())}>{t('rejectConfirm')}</button>
                   </>
                 ) : (
                   <>
                     <button className={`${styles.btn} ${styles.red}`} onClick={() => setMode('reject')} disabled={busy}>{t('rejectToCounselor')}</button>
-                    <button className={`${styles.btn} ${styles.amber}`} onClick={() => setMode('custreq')} disabled={busy}>{t('needCustReq')}</button>
                     <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={() => decide('approve')}>{t('approveDone')}</button>
                   </>
                 )
@@ -871,7 +819,23 @@ interface EvalRow { name: string; reject_rate: number | null; approval_pass_rate
 interface Incentive { monthlyPool: number; perPoint: number; maxPerPerson: number; minScore: number; improvementThreshold: number }
 function EvaluationView() {
   const t = useT();
-  const { data, err } = useLazy<{ operators: EvalRow[]; disclaimer?: string; isSuggestionOnly?: boolean; incentive?: Incentive }>('/api/operator/evaluation');
+  const { data, err, reload } = useLazy<{ operators: EvalRow[]; disclaimer?: string; isSuggestionOnly?: boolean; incentive?: Incentive }>('/api/operator/evaluation');
+  // #28 — 인센티브 산출근거(정책) 편집 → 수퍼바이저가 결정
+  const [pol, setPol] = useState<Incentive | null>(null);
+  const [editInc, setEditInc] = useState(false);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { if (data?.incentive) setPol(data.incentive); }, [data]);
+  const savePol = async () => {
+    if (!pol) return;
+    setBusy(true);
+    try {
+      await fetch('/api/operator/evaluation-settings', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ incentive: pol }),
+      });
+      setEditInc(false); reload();
+    } finally { setBusy(false); }
+  };
+  const setPolField = (k: keyof Incentive, v: number) => setPol(p => p ? { ...p, [k]: v } : p);
   if (err) return <ErrCard msg={t('toastNet')} />;
   if (!data) return <LoadingCard />;
   const rows = data.operators ?? [];
@@ -901,13 +865,32 @@ function EvaluationView() {
             </tbody>
           </table>
         </div>
-        {/* #18 — 제안 인센티브 산출근거 */}
-        {inc && (
+        {/* #18 산출근거 + #28 편집 */}
+        {inc && pol && (
           <div className={styles.reviewRequestBox} style={{ borderColor: '#bfdbfe', background: '#eff6ff', marginTop: 12 }}>
-            <b>{t('incentiveBasisTitle')}</b>
-            <p style={{ color: '#1e3a5f', fontSize: 12, margin: '4px 0 0', lineHeight: 1.7 }}>
-              {t('incentiveBasisBody', { perPoint: rp(inc.perPoint), minScore: inc.minScore, maxPerPerson: rp(inc.maxPerPerson), pool: rp(inc.monthlyPool) })}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <b>{t('incentiveBasisTitle')}</b>
+              {!editInc && <button className={`${styles.btn} ${styles.blue}`} onClick={() => setEditInc(true)}>{t('editIncentive')}</button>}
+            </div>
+            {editInc ? (
+              <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+                <div className={`${styles.grid} ${styles.two}`}>
+                  <label>{t('incPerPoint')}<input type="number" value={pol.perPoint} onChange={e => setPolField('perPoint', Number(e.target.value))} /></label>
+                  <label>{t('incMinScore')}<input type="number" value={pol.minScore} onChange={e => setPolField('minScore', Number(e.target.value))} /></label>
+                  <label>{t('incMaxPerson')}<input type="number" value={pol.maxPerPerson} onChange={e => setPolField('maxPerPerson', Number(e.target.value))} /></label>
+                  <label>{t('incPool')}<input type="number" value={pol.monthlyPool} onChange={e => setPolField('monthlyPool', Number(e.target.value))} /></label>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                  <button className={styles.btn} disabled={busy} onClick={() => { setEditInc(false); setPol(inc); }}>{t('cancel')}</button>
+                  <button className={`${styles.btn} ${styles.green}`} disabled={busy} onClick={savePol}>{t('confirmChange')}</button>
+                </div>
+                <p style={{ color: '#64748b', fontSize: 11, margin: 0 }}>{t('incEditNote')}</p>
+              </div>
+            ) : (
+              <p style={{ color: '#1e3a5f', fontSize: 12, margin: '4px 0 0', lineHeight: 1.7 }}>
+                {t('incentiveBasisBody', { perPoint: rp(inc.perPoint), minScore: inc.minScore, maxPerPerson: rp(inc.maxPerPerson), pool: rp(inc.monthlyPool) })}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -917,14 +900,12 @@ function EvaluationView() {
 
 // ── 상담원 소속관리 ──
 interface Transfer { id: string; operatorName: string; fromSupervisorName: string | null; toSupervisorName: string; clientMode: string; reason: string | null; status: string; direction: string; createdAt: string }
-const CLIENT_MODES = ['WITH_CLIENTS', 'OPERATOR_ONLY', 'REASSIGN_CLIENTS'] as const;
 // #8 소속관리 — PPT: 수퍼바이저별 상담원 로스터(이동요청) + 협의 요청함 테이블(승인/거절)
 function AffiliationView({ d, onToast, onChanged }: { d: ConsoleData; onToast: (m: string) => void; onChanged: () => void }) {
   const t = useT();
   const { data, err, reload } = useLazy<{ incoming: Transfer[]; transfers: Transfer[] }>('/api/operator/supervisor/affiliation');
   const [xfer, setXfer] = useState<{ operatorId: string; name: string } | null>(null);
   const [toSup, setToSup] = useState('');
-  const [mode, setMode] = useState<typeof CLIENT_MODES[number]>('OPERATOR_ONLY');
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -939,17 +920,18 @@ function AffiliationView({ d, onToast, onChanged }: { d: ConsoleData; onToast: (
       reload(); onChanged();
     } catch { onToast(t('toastNet')); }
   };
+  // #30/#32 — 요청→승인 대신 콘솔에서 즉시 소속 이동.
   const submitXfer = async () => {
-    if (!xfer || !toSup || reason.trim().length < 2) { onToast(t('toastNeedFields')); return; }
+    if (!xfer || !toSup) { onToast(t('toastNeedFields')); return; }
     setBusy(true);
     try {
-      const r = await fetch('/api/operator/supervisor/affiliation', {
+      const r = await fetch('/api/operator/supervisor/console/move-operator', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ operatorId: xfer.operatorId, toSupervisorId: toSup, clientMode: mode, reason: reason.trim() }),
+        body: JSON.stringify({ operatorId: xfer.operatorId, toSupervisorId: toSup, reason: reason.trim() || undefined }),
       });
       const j = await r.json();
-      onToast(j.success ? t('affReqSent') : (typeof j.error === 'string' ? j.error : t('toastChangeFail')));
-      if (j.success) { setXfer(null); setToSup(''); setReason(''); setMode('OPERATOR_ONLY'); reload(); }
+      onToast(j.success ? t('affMoved') : (typeof j.error === 'string' ? j.error : t('toastChangeFail')));
+      if (j.success) { setXfer(null); setToSup(''); setReason(''); reload(); onChanged(); }
     } catch { onToast(t('toastNet')); }
     finally { setBusy(false); }
   };
@@ -1016,16 +998,11 @@ function AffiliationView({ d, onToast, onChanged }: { d: ConsoleData; onToast: (
             <div className={styles.modalBody} style={{ display: 'grid', gap: 12 }}>
               <label>{t('changeTo')}
                 <select value={toSup} onChange={e => setToSup(e.target.value)}>
-                  <option value="">{t('selectCounselor')}</option>
+                  <option value="">{t('selectSupervisor')}</option>
                   {d.supervisorOptions.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </label>
-              <label>{t('customerScope')}
-                <select value={mode} onChange={e => setMode(e.target.value as typeof CLIENT_MODES[number])}>
-                  {CLIENT_MODES.map(m => <option key={m} value={m}>{t(`mode_${m}` as string) || m}</option>)}
-                </select>
-              </label>
-              <label>{t('reason')}<textarea rows={4} value={reason} onChange={e => setReason(e.target.value)} /></label>
+              <label>{t('reason')}<textarea rows={3} value={reason} onChange={e => setReason(e.target.value)} placeholder={t('reason')} /></label>
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.btn} onClick={() => setXfer(null)}>{t('cancel')}</button>

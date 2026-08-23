@@ -92,7 +92,12 @@ export async function GET(_req: NextRequest) {
   const methodByCust = new Map<string, string>();
   for (const l of logs ?? []) if (!methodByCust.has(l.customer_id)) methodByCust.set(l.customer_id, l.method);
 
-  const assignedCustomers = (assigns ?? []).slice(0, 30).map(a => ({
+  // #35 — 고객별 활성배정은 1건이 원칙. 중복 active row 가 있어도 고객당 1개만 노출.
+  const seenCust = new Set<string>();
+  const assignedCustomers = (assigns ?? []).filter(a => {
+    if (seenCust.has(a.customer_id)) return false;
+    seenCust.add(a.customer_id); return true;
+  }).slice(0, 30).map(a => ({
     customerId: a.customer_id,
     name: custById.get(a.customer_id)?.name ?? '—',
     operator: opById.get(a.operator_id)?.name ?? '—',
@@ -246,6 +251,7 @@ export async function GET(_req: NextRequest) {
     success: true,
     data: { kpis, dashKpis, assignedCustomers, history, team, ranking, teamCompare, approvalPending, audit,
       roster, supervisorOptions,
-      operators: team.map(t => ({ id: t.id, name: t.name })) },
+      // #34 — 수동변경 드롭다운은 상담원(tax_operator)만. 수퍼바이저 제외.
+      operators: opStats.filter(o => o.role === 'tax_operator').map(o => ({ id: o.id, name: o.name })) },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

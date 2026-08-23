@@ -122,6 +122,13 @@ const ko: Dict = {
   rlAssignment: '자동배정 완료 {auto}건 · 수동변경 {manual}건 · 자동배정 제외 {excluded}건.',
   rlBilling: '승인완료 → ID Billing 발행대상/발행완료 이관 흐름. 발행은 발행 보드에서 처리.',
   rlAudit: '최근 감사 이벤트 {n}건 (배정·승인·발행).',
+  // 8/21
+  selectSupervisor: '수퍼바이저 선택',
+  asgLoadTitle: '팀별 · 상담원별 배정 고객 수', asgLoadDesc: '수동 변경 판단용 현황.', asgLoadCount: '배정 고객 수',
+  searchCustomer: '고객명 검색', searchCustomerPh: '회사명 / 이름 / NPWP 입력',
+  editIncentive: '산출근거 편집', incPerPoint: '점당 단가(Rp)', incMinScore: '지급 최소점수', incMaxPerson: '1인 최대(Rp)', incPool: '월 재원(Rp)',
+  incEditNote: '저장하면 전 상담원 제안 인센티브가 이 정책으로 재계산됩니다. 자동 상벌은 아니며 최종 결정은 수퍼바이저 몫.',
+  affMoved: '소속 이동 완료',
 };
 
 const en: Dict = {
@@ -223,6 +230,12 @@ const en: Dict = {
   rlAssignment: 'Auto-assigned {auto} · Manual changes {manual} · Excluded {excluded}.',
   rlBilling: 'Approved → ID Billing target/issued handover. Issue from the billing board.',
   rlAudit: '{n} recent audit events (assignment/approval/issuance).',
+  selectSupervisor: 'Select supervisor',
+  asgLoadTitle: 'Assigned customers by team · counselor', asgLoadDesc: 'For manual reassignment decisions.', asgLoadCount: 'Customers',
+  searchCustomer: 'Search customer', searchCustomerPh: 'Company / name / NPWP',
+  editIncentive: 'Edit basis', incPerPoint: 'Per point (Rp)', incMinScore: 'Min score', incMaxPerson: 'Max/person (Rp)', incPool: 'Monthly pool (Rp)',
+  incEditNote: 'Saving recomputes every counselor suggestion with this policy. Advisory only — final decision is the supervisor’s.',
+  affMoved: 'Affiliation moved',
 };
 
 const id: Dict = {
@@ -324,6 +337,12 @@ const id: Dict = {
   rlAssignment: 'Otomatis {auto} · Perubahan manual {manual} · Dikecualikan {excluded}.',
   rlBilling: 'Disetujui → handover target/terbit ID Billing. Terbitkan dari billing board.',
   rlAudit: '{n} peristiwa audit terbaru (penugasan/persetujuan/penerbitan).',
+  selectSupervisor: 'Pilih supervisor',
+  asgLoadTitle: 'Pelanggan per tim · konsultan', asgLoadDesc: 'Untuk keputusan penugasan ulang manual.', asgLoadCount: 'Pelanggan',
+  searchCustomer: 'Cari pelanggan', searchCustomerPh: 'Perusahaan / nama / NPWP',
+  editIncentive: 'Edit dasar', incPerPoint: 'Per poin (Rp)', incMinScore: 'Skor min', incMaxPerson: 'Maks/orang (Rp)', incPool: 'Dana bulanan (Rp)',
+  incEditNote: 'Menyimpan menghitung ulang usulan setiap konsultan dengan kebijakan ini. Hanya usulan — keputusan akhir supervisor.',
+  affMoved: 'Afiliasi dipindahkan',
 };
 
 const DICTS: Record<Lang, Dict> = { ko, en, id };
