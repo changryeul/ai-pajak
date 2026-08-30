@@ -5025,7 +5025,11 @@
     "loading": "Memuat...",
     "serverError": "Terjadi kesalahan server.",
     "requiredMissingBlock": "Tidak dapat menyimpan: kolom wajib kosong",
-    "requiredMissingBadge": "Wajib kosong"
+    "requiredMissingBadge": "Wajib kosong",
+    "finalSubmit": "Kirim final",
+    "missingModalTitle": "Ada kolom wajib yang kosong",
+    "missingModalDesc": "Tidak dapat mengirim — kolom wajib di bawah ini masih kosong. Lengkapi lalu kirim lagi.",
+    "confirmOk": "OK"
   },
   "companyProfile": {
     "welcomeTitle": "Selamat datang — lengkapi profil perusahaan",

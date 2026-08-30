@@ -5025,7 +5025,11 @@
     "loading": "Loading...",
     "serverError": "A server error occurred.",
     "requiredMissingBlock": "Cannot save: required fields are empty",
-    "requiredMissingBadge": "Missing"
+    "requiredMissingBadge": "Missing",
+    "finalSubmit": "Final submit",
+    "missingModalTitle": "Required fields missing",
+    "missingModalDesc": "Cannot submit — the required fields below are empty. Fill them in and submit again.",
+    "confirmOk": "OK"
   },
   "companyProfile": {
     "welcomeTitle": "Welcome — complete your company profile",

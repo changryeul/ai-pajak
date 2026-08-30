@@ -699,7 +699,6 @@ export default function PPNPage() {
                         <th className="text-right py-2.5 px-3">{t('dppNilaiLain')}</th>
                         <th className="text-right py-2.5 px-3">PPN{reqStar('ppn')}</th>
                         <th className="text-center py-2.5 px-3">{t('luxuryHeader')}</th>
-                        <th className="text-center py-2.5 px-3">Status</th>
                         <th className="text-right py-2.5 px-3"></th>
                       </tr>
                     </thead>
@@ -758,9 +757,6 @@ export default function PPNPage() {
                                     : 'text-[10px] bg-emerald-100 text-emerald-800 border-emerald-300';
                                   return <Badge className={cls}>{label}</Badge>;
                                 })()}
-                              </td>
-                              <td className="py-2 px-3 text-center">
-                                <Badge variant="outline" className="text-[10px]">{f.status}</Badge>
                               </td>
                               <td className="py-2 px-3 text-right">
                                 {savedAt[f.id] ? (

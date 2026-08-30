@@ -206,6 +206,20 @@ export default function PPh23Page() {
     }
     return n;
   };
+  // 2026-08-30 — 제출 시 전 거래의 필수항목 누락 라벨 수집 (팝업 표시용).
+  const [missingModal, setMissingModal] = useState<string[] | null>(null);
+  const collectMissing = (): string[] => {
+    const out: string[] = [];
+    for (const tx of transactions) {
+      const miss = reqMissing({
+        counterparty_name: tx.counterparty_name, counterparty_npwp: tx.counterparty_npwp,
+        transaction_date: tx.transaction_date, gross_amount: tx.gross_amount,
+        invoice_number: tx.invoice_number, bukti_potong_number: tx.bukti_potong_number,
+      });
+      for (const m of miss) out.push(`${tx.counterparty_name || '—'} · ${m.label}`);
+    }
+    return out;
+  };
   const [fCounterparty, setFCounterparty] = useState('');
   const [fServiceType, setFServiceType] = useState('JASA_KONSULTAN');
   const [fGrossAmount, setFGrossAmount] = useState('');
@@ -2111,9 +2125,10 @@ export default function PPh23Page() {
             size="sm"
             disabled={saving || transactions.length === 0}
             onClick={async () => {
-              const needsCheckCount = transactions.filter(tx => !tx.counterparty_npwp).length;
-              if (needsCheckCount > 0) {
-                showMsg('error', t('statusNeedsCheck') + ': ' + needsCheckCount);
+              // 필수항목 누락이면 팝업(모달)으로 안내 후 제출 차단 (PPh21 과 동일 UX).
+              const miss = collectMissing();
+              if (miss.length > 0) {
+                setMissingModal(miss);
                 return;
               }
               if (!customerId) return;
@@ -2200,11 +2215,36 @@ export default function PPh23Page() {
             }}
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-            {isConsultant ? t('btnSubmitValidate') : t('submitToOperator')}
+            {isConsultant ? t('btnSubmitValidate') : t('finalSubmit')}
           </Button>
         </div>
       )}
 
+
+      {/* 필수항목 누락 경고 모달 — 확인 눌러야 닫힘 (PPh21 과 동일 UX) */}
+      <Dialog open={missingModal !== null} onOpenChange={(o) => { if (!o) setMissingModal(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />{t('missingModalTitle')}
+            </DialogTitle>
+            <DialogDescription>{t('missingModalDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-64 overflow-y-auto rounded-lg border border-red-200 bg-red-50 p-3">
+            <ul className="space-y-1 text-sm text-red-800">
+              {(missingModal ?? []).map((m, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setMissingModal(null)}>{t('confirmOk')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Month picker dialog — opens before any input action */}
       <Dialog open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
