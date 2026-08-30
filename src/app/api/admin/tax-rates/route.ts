@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
-    if (role?.role !== 'PLATFORM_ADMIN') {
+    if (!['PLATFORM_ADMIN', 'TAX_OPERATOR_MASTER'].includes(role?.role ?? '')) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
-    if (role?.role !== 'PLATFORM_ADMIN') {
+    if (!['PLATFORM_ADMIN', 'TAX_OPERATOR_MASTER'].includes(role?.role ?? '')) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 

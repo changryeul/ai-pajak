@@ -12,6 +12,7 @@
  */
 
 import type { PTKPCategory } from '@/config/constants';
+import { resolveTER } from '@/lib/tax/rate-provider';
 
 export type TERCategory = 'A' | 'B' | 'C';
 
@@ -246,7 +247,8 @@ export function getTERCategory(ptkpCategory: PTKPCategory | string | null | unde
  * Look up TER rate for a given category and gross monthly income.
  */
 export function lookupTERRate(category: TERCategory, grossMonthly: number): number {
-  const brackets = TER_TABLES[category];
+  // DB 편집본(마스터 /admin/tax-rates) 우선, TS 표는 fallback (2026-08-30)
+  const brackets = resolveTER(category, TER_TABLES[category]);
 
   for (const bracket of brackets) {
     if (grossMonthly >= bracket.min && grossMonthly < bracket.max) {

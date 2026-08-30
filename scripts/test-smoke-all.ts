@@ -106,6 +106,8 @@ const STEPS: Step[] = [
   // --- PPh21 전수 재계산 감사: 저장값 ≡ 엔진 (2026-08-30) ------------------
   { name: 'pph21 payslip recalc audit (all rows)', file: 'verify-payslip-recalc-audit.ts' },
   { name: 'pph21 rate-provider DB overrides', file: 'verify-rate-provider-overrides.ts' },
+  // --- TER 세율표 DB 편집 (마스터 /admin/tax-rates, 2026-08-30) -----------
+  { name: 'pph21 TER override round-trip', file: 'verify-ter-override-roundtrip.ts' },
   // --- /tax/umkm 제출 → 서버 기록 → 선납법인세 큐 (2026-08-05 수정요청 25번) ---
   { name: 'umkm record-monthly-tax contract', file: 'verify-umkm-record-contract.ts' },
   // --- 워크큐 팝업 '저장 및 확인' + 수정이력 (2026-08-05 수정요청 10·15·24) ---

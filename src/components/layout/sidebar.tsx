@@ -316,6 +316,8 @@ const navItems: NavSection[] = [
       { href: '/admin/master/custom-pricing',        icon: Settings,   labelKey: 'nav.masterCustomPricing' },
       // 신고운영 (JTC) — TAX_OPERATOR_MASTER 전용
       { href: '/admin/master/luxury-classifications', icon: Sparkles,  labelKey: 'nav.masterLuxuryClassifications', roles: filingMasterOnly },
+      // 2026-08-30: TER 세율표 편입 — 신고운영 MASTER 가 세율표 열람·수정
+      { href: '/admin/tax-rates',                     icon: Settings,   labelKey: 'nav.taxRates', roles: filingMasterOnly },
       { href: '/admin/master/customer-ai-templates',  icon: MessageSquareText, labelKey: 'nav.masterCustomerAiTemplates', roles: filingMasterOnly },
     ],
   },
