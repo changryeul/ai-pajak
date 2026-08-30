@@ -1815,7 +1815,7 @@ export default function PPh23Page() {
                               </div>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">{t('editFieldDate')}</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('editFieldDate')}{reqStar('transaction_date')}</Label>
                                   <Input
                                     type="date"
                                     className="h-8 text-xs"
@@ -1828,7 +1828,7 @@ export default function PPh23Page() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">{t('colCounterparty')}</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('colCounterparty')}{reqStar('counterparty_name')}</Label>
                                   <Input
                                     className="h-8 text-xs"
                                     defaultValue={tx.counterparty_name ?? ''}
@@ -1840,7 +1840,7 @@ export default function PPh23Page() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">NPWP</Label>
+                                  <Label className="text-[10px] text-gray-400">NPWP{reqStar('counterparty_npwp')}</Label>
                                   <Input
                                     className="h-8 text-xs font-mono"
                                     defaultValue={tx.counterparty_npwp ?? ''}
@@ -1852,7 +1852,7 @@ export default function PPh23Page() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">DPP ({t('colAmount')})</Label>
+                                  <Label className="text-[10px] text-gray-400">DPP ({t('colAmount')}){reqStar('gross_amount')}</Label>
                                   <NumberInput
                                     className="h-8 text-xs font-mono"
                                     value={tx.gross_amount}
@@ -1888,7 +1888,7 @@ export default function PPh23Page() {
                                   </select>
                                 </div>
                                 <div>
-                                  <Label className="text-[10px] text-gray-400">{t('labelInvoiceNumber')}</Label>
+                                  <Label className="text-[10px] text-gray-400">{t('labelInvoiceNumber')}{reqStar('invoice_number')}</Label>
                                   <Input
                                     className="h-8 text-xs font-mono"
                                     defaultValue={tx.invoice_number ?? ''}
