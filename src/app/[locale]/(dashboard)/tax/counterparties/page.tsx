@@ -22,6 +22,8 @@ interface Counterparty {
   kbli_code?: string; qualification_grade?: string;
   country?: string; is_resident?: boolean;
   has_cod?: boolean; vendor_is_property_owner?: boolean;
+  // 2026-08-30 — 거래(원천세/부가세)에서 자동 수집된 파생 상대방
+  derived?: boolean; source?: string;
 }
 
 export default function CounterpartiesPage() {
@@ -112,6 +114,20 @@ export default function CounterpartiesPage() {
       loadData();
     } catch { /* */ }
     finally { setIsSaving(false); }
+  };
+
+  // 2026-08-30 — 거래에서 자동 수집된 파생 상대방을 master 로 등록(승격)
+  const [promotingId, setPromotingId] = useState<string | null>(null);
+  const promote = async (cp: Counterparty) => {
+    setPromotingId(cp.id);
+    try {
+      await fetch('/api/tax/counterparties', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, name: cp.name, npwp: cp.npwp || '', address: cp.address || '', type: cp.type || 'VENDOR' }),
+      });
+      loadData();
+    } catch { /* */ }
+    finally { setPromotingId(null); }
   };
 
   const filtered = counterparties.filter(cp =>
@@ -319,6 +335,12 @@ export default function CounterpartiesPage() {
                             <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />Related
                           </Badge>
                         )}
+                        {/* 2026-08-30 — 거래에서 자동 수집(미등록) */}
+                        {cp.derived && (
+                          <Badge className="text-[10px] bg-slate-100 text-slate-600">
+                            {cp.source === 'PPN' ? '부가세 거래' : '원천세 거래'}
+                          </Badge>
+                        )}
                       </div>
                       <div className="flex items-center gap-4 text-xs text-gray-500 mt-0.5">
                         {cp.npwp && <span className="font-mono">{cp.npwp}</span>}
@@ -326,9 +348,15 @@ export default function CounterpartiesPage() {
                         {cp.phone && <span>{cp.phone}</span>}
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => startEdit(cp)}>
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
+                    {cp.derived ? (
+                      <Button variant="outline" size="sm" className="text-xs" disabled={promotingId === cp.id} onClick={() => promote(cp)}>
+                        {promotingId === cp.id ? '…' : tc('registerNew')}
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(cp)}>
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
