@@ -3,8 +3,13 @@ import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, u
 import { useParams, useRouter } from 'next/navigation';
 import { LayoutDashboard, ClipboardCheck, Star, Users, UserCog, Receipt, ScrollText } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
 import styles from './console.module.css';
 import { makeT, LANGS, type Lang, type T } from './console-i18n';
+
+// 승인대기 상세(미러) 세목 ep → 필수항목 config formKey
+const EP_TO_FORM: Record<string, string> = { pph21: 'payslip', withholding: 'pph23', ppn: 'ppn', umkm: '' };
+const normReqKey = (k: string) => k.toLowerCase().replace(/_/g, '');
 
 const VIEW_ICON: Record<string, React.ReactNode> = {
   dashboard: <LayoutDashboard size={18} />, approval: <ClipboardCheck size={18} />,
@@ -567,6 +572,10 @@ function PpnReconView({ rows }: { rows: PpnRow[] }) {
 function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: () => void }) {
   const t = useT();
   const cfg = DETAIL_MAP[item.taxType];
+  // 필수항목 별표 (MASTER 설정). config snake_case ↔ 미러 key camelCase 정규화 매칭.
+  const { requiredKeys } = useRequiredFields(cfg ? (EP_TO_FORM[cfg.ep] ?? '') : '');
+  const reqSet = new Set((requiredKeys ?? []).map(normReqKey));
+  const isReq = (k: string) => reqSet.has(normReqKey(k));
   const [detail, setDetail] = useState<DetailResp | null>(null);
   const [appr, setAppr] = useState<ApprovalState | null>(null);
   const [busy, setBusy] = useState(false);
@@ -703,7 +712,7 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
               </div>
               <div className={styles.tableWrap}>
                 <table>
-                  <thead><tr>{cfg.cols.map(c => <th key={c.key}>{c.label}</th>)}<th>{t('colStatus')}</th><th></th></tr></thead>
+                  <thead><tr>{cfg.cols.map(c => <th key={c.key}>{c.label}{isReq(c.key) && <span style={{ color: '#ef4444', fontWeight: 800 }}> *</span>}</th>)}<th>{t('colStatus')}</th><th></th></tr></thead>
                   <tbody>
                     {rows.slice(0, 50).map((r, i) => {
                       const edits = (r.operatorEdits as Record<string, unknown> | null) ?? null;
@@ -727,7 +736,7 @@ function ApprovalTaxWork({ item, onDecided }: { item: ApprovalItem; onDecided: (
                                       const isEdited = !!edits && f.key in edits;
                                       return (
                                         <div key={f.key} className={`${styles.formCell} ${isEdited ? styles.edited : ''}`}>
-                                          <span>{f.label}{isEdited ? ' ✎' : ''}</span>
+                                          <span>{f.label}{isReq(f.key) && <span style={{ color: '#ef4444', fontWeight: 800 }}> *</span>}{isEdited ? ' ✎' : ''}</span>
                                           <b>{f.money ? rp(Number(r[f.key] ?? 0)) : String(r[f.key] ?? '—')}</b>
                                         </div>
                                       );
