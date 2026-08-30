@@ -205,6 +205,16 @@ export default function PPh23Page() {
   const [resolutionPreview, setResolutionPreview] = useState<TaxResolutionResult | null>(null);
   const [resolvingTax, setResolvingTax] = useState(false);
 
+  // 2026-08-30 — 기기 감지: 모바일/패드=카메라 촬영, PC=파일 선택.
+  // iPadOS 13+ 는 UA 가 Mac 으로 보고되므로 pointer:coarse(터치) 로 태블릿까지 포함.
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  useEffect(() => {
+    const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+    const coarse = typeof window !== 'undefined' && window.matchMedia
+      ? window.matchMedia('(pointer: coarse)').matches : false;
+    setIsMobileDevice(/Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua) || coarse);
+  }, []);
+
   // Invoice image (mandatory for manual entry — Phase 4 simplification)
   const [invoiceImageFile, setInvoiceImageFile] = useState<File | null>(null);
   const invoiceImageInputRef = useRef<HTMLInputElement>(null);
@@ -1137,46 +1147,43 @@ export default function PPh23Page() {
                     )}
                     <div className="flex-1 min-w-0 text-sm text-amber-900 truncate">{invoiceImageFile.name}</div>
                     <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => invoiceImageCameraRef.current?.click()}
-                      >
-                        <Camera className="mr-1 h-3 w-3" />
-                        {t('invoiceImageTakePhoto')}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => invoiceImageInputRef.current?.click()}
-                      >
-                        <FileText className="mr-1 h-3 w-3" />
-                        {t('invoiceImagePickFile')}
-                      </Button>
+                      {isMobileDevice ? (
+                        <Button type="button" variant="outline" size="sm" onClick={() => invoiceImageCameraRef.current?.click()}>
+                          <Camera className="mr-1 h-3 w-3" />
+                          {t('invoiceImageTakePhoto')}
+                        </Button>
+                      ) : (
+                        <Button type="button" variant="outline" size="sm" onClick={() => invoiceImageInputRef.current?.click()}>
+                          <FileText className="mr-1 h-3 w-3" />
+                          {t('invoiceImagePickFile')}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => invoiceImageCameraRef.current?.click()}
-                      className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
-                    >
-                      <Camera className="mr-2 h-4 w-4" />
-                      {t('invoiceImageTakePhoto')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => invoiceImageInputRef.current?.click()}
-                      className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      {t('invoiceImagePickFile')}
-                    </Button>
+                  /* 2026-08-30 — 기기별 단일 버튼: 모바일/패드=촬영, PC=파일선택 */
+                  <div>
+                    {isMobileDevice ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => invoiceImageCameraRef.current?.click()}
+                        className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
+                      >
+                        <Camera className="mr-2 h-4 w-4" />
+                        {t('invoiceImageTakePhoto')}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => invoiceImageInputRef.current?.click()}
+                        className="w-full border-amber-300 text-amber-900 hover:bg-amber-100"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        {t('invoiceImagePickFile')}
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -1732,20 +1739,24 @@ export default function PPh23Page() {
                                   <Camera className="h-3.5 w-3.5" />
                                 </summary>
                                 <div className="absolute right-0 mt-1 z-10 bg-white border border-amber-200 rounded shadow-lg p-2 w-44 text-left">
-                                  <button
-                                    type="button"
-                                    onClick={() => triggerInvoiceCamera(tx.id)}
-                                    className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
-                                  >
-                                    📷 {t('invoiceImageTakePhoto')}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => triggerInvoiceFile(tx.id)}
-                                    className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
-                                  >
-                                    📄 {t('invoiceImagePickFile')}
-                                  </button>
+                                  {/* 2026-08-30 — 기기별: 모바일/패드=촬영, PC=파일선택 */}
+                                  {isMobileDevice ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => triggerInvoiceCamera(tx.id)}
+                                      className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
+                                    >
+                                      📷 {t('invoiceImageTakePhoto')}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => triggerInvoiceFile(tx.id)}
+                                      className="block w-full text-left px-2 py-1.5 text-xs text-amber-900 hover:bg-amber-50 rounded"
+                                    >
+                                      📄 {t('invoiceImagePickFile')}
+                                    </button>
+                                  )}
                                 </div>
                               </details>
                             )}
