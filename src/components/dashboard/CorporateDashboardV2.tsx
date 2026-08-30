@@ -10,6 +10,7 @@ import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3,
 import { fmtRp } from '@/lib/utils';
 import { TaxAdvisoryPanel } from '@/components/dashboard/TaxAdvisoryPanel';
 import { MonthlyFilingMiniWidget } from '@/components/dashboard/MonthlyFilingMiniWidget';
+import { PlanUpgradeBanner } from '@/components/billing/PlanUpgradeBanner';
 
 interface QueueItem {
   id: string;
@@ -215,6 +216,8 @@ export function CorporateDashboardV2({
 
   return (
     <div className="space-y-6">
+      {/* 2026-08-30 — 요금제-데이터 초과 시 업그레이드 유도 */}
+      <PlanUpgradeBanner />
       {/* Profile completeness banner — only when there is real room to fill */}
       {companyInfo && completeness < 100 && (
         <ProfileCompletenessBanner
