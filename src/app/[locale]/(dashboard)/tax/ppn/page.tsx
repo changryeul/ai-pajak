@@ -351,6 +351,34 @@ export default function PPNPage() {
     } catch { showMsg('error', t('ppnSubmitFailed')); }
   };
 
+  // 2026-08-30: 해당 월 부가세 신고내역 전체를 엑셀로 다운로드 (전 세금계산서 × 전 항목).
+  const downloadExcelPpn = async () => {
+    if (fakturs.length === 0) return;
+    const XLSX = await import('xlsx');
+    const num = (v: unknown) => Number(v) || 0;
+    const str = (v: unknown) => (v == null ? '' : String(v));
+    const rows = fakturs.map(f => ({
+      '기간': period,
+      '구분': f.faktur_type === 'KELUARAN' ? '매출(OUT)' : '매입(IN)',
+      '세금계산서번호': str(f.faktur_number),
+      '일자': str(f.faktur_date),
+      '거래처': str(f.counterparty_name),
+      'NPWP': str(f.counterparty_npwp),
+      '주소': str(f.counterparty_address),
+      '품목/설명': str(f.description),
+      'DPP': num(f.dpp),
+      'DPP(Nilai Lain)': num(f.dpp_nilai_lain),
+      'PPN': num(f.ppn),
+      '사치품': f.is_luxury ? 'Y' : '',
+      '메모': str(f.notes),
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0] ?? {}).map(() => ({ wch: 16 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `PPN ${period}`);
+    XLSX.writeFile(wb, `ppn-${period}.xlsx`);
+  };
+
   // Load faktur data
   const loadFakturs = useCallback(async () => {
     if (!customerId) return;
@@ -1019,8 +1047,8 @@ export default function PPNPage() {
             </Card>
           )}
 
-          {/* 최종 제출 — 운영팀 신고 요청 (PPh23/21 과 동일 패턴) */}
-          {ppnSubmitReq ? (
+          {/* 최종 제출 — 운영팀 신고 요청 (PPh23/21 과 동일 패턴) + 엑셀 다운로드 */}
+          {ppnSubmitReq && (
             <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm text-emerald-800">
                 <CheckCircle className="h-4 w-4 shrink-0" />
@@ -1028,14 +1056,18 @@ export default function PPNPage() {
               </div>
               <Button variant="outline" size="sm" onClick={cancelPpnSubmit}>{t('ppnSubmitCancel')}</Button>
             </div>
-          ) : (
-            <div className="mt-4 flex justify-end">
+          )}
+          <div className="mt-4 flex justify-end items-center gap-2">
+            <Button variant="outline" onClick={downloadExcelPpn} disabled={fakturs.length === 0}>
+              <Download className="h-4 w-4 mr-1" />{t('ppnDownloadExcel')}
+            </Button>
+            {!ppnSubmitReq && (
               <Button onClick={submitPpnToOperator} disabled={submittingPpn || !customerId || fakturs.length === 0}>
                 {submittingPpn ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
                 {t('ppnSubmitBtn')}
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 

@@ -4034,7 +4034,7 @@
     "serverError": "Terjadi kesalahan server.",
     "requiredMissingBlock": "Tidak dapat menyimpan: kolom wajib kosong",
     "requiredMissingBadge": "Wajib kosong",
-    "ppnSubmitBtn": "Kirim ke tim operator",
+    "ppnSubmitBtn": "Kirim final",
     "ppnSubmitConfirm": "Minta tim operator melaporkan PPN {period}?",
     "ppnSubmitDone": "Terkirim ke tim operator",
     "ppnSubmitFailed": "Gagal mengirim permintaan",
@@ -4042,7 +4042,8 @@
     "ppnSubmittedBanner": "Terkirim ke tim operator — menunggu",
     "ppnSubmitCancel": "Batalkan",
     "ppnSubmitCancelConfirm": "Batalkan permintaan pengiriman?",
-    "ppnSubmitCancelled": "Permintaan dibatalkan"
+    "ppnSubmitCancelled": "Permintaan dibatalkan",
+    "ppnDownloadExcel": "Unduh Excel"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

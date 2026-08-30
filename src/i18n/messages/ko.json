@@ -4052,7 +4052,7 @@
     "serverError": "서버 오류가 발생했습니다.",
     "requiredMissingBlock": "필수항목이 비어 있어 저장할 수 없습니다",
     "requiredMissingBadge": "필수 누락",
-    "ppnSubmitBtn": "운영팀에 최종 제출",
+    "ppnSubmitBtn": "최종 제출",
     "ppnSubmitConfirm": "{period} 부가세 신고를 운영팀에 제출 요청할까요?",
     "ppnSubmitDone": "운영팀에 제출 요청되었습니다",
     "ppnSubmitFailed": "제출 요청 실패",
@@ -4060,7 +4060,8 @@
     "ppnSubmittedBanner": "운영팀에 제출 요청됨 — 처리 대기 중",
     "ppnSubmitCancel": "요청 취소",
     "ppnSubmitCancelConfirm": "제출 요청을 취소할까요?",
-    "ppnSubmitCancelled": "제출 요청이 취소되었습니다"
+    "ppnSubmitCancelled": "제출 요청이 취소되었습니다",
+    "ppnDownloadExcel": "엑셀 다운로드"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
