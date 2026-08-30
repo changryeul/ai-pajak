@@ -186,7 +186,9 @@ export default function PPh23Page() {
   const [_savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   // Form state
-  const { missing: reqMissing } = useRequiredFields('pph23');
+  const { missing: reqMissing, requiredKeys: reqKeysP23 } = useRequiredFields('pph23');
+  const reqStar = (k: string) => new Set((reqKeysP23 ?? []).map(x => x.toLowerCase().replace(/_/g, ''))).has(k.toLowerCase().replace(/_/g, ''))
+    ? <span className="text-red-500 font-bold"> *</span> : null;
   const [fCounterparty, setFCounterparty] = useState('');
   const [fServiceType, setFServiceType] = useState('JASA_KONSULTAN');
   const [fGrossAmount, setFGrossAmount] = useState('');
@@ -1190,7 +1192,7 @@ export default function PPh23Page() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs">{t('k64_587e34')} *</Label>
+                  <Label className="text-xs">{t('k64_587e34')}{reqStar('counterparty_name')}</Label>
                   {counterparties.length > 0 ? (
                     <Select value={fCounterparty} onValueChange={setFCounterparty}>
                       <SelectTrigger><SelectValue placeholder={t('k65_7d5e07')} /></SelectTrigger>
@@ -1283,16 +1285,16 @@ export default function PPh23Page() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">{t('k80_b6c7a9')} *</Label>
+                  <Label className="text-xs">{t('k80_b6c7a9')}{reqStar('gross_amount')}</Label>
                   <Input type="number" value={fGrossAmount} onChange={e => setFGrossAmount(e.target.value)}
                     placeholder="100000000" className="font-mono" required />
                 </div>
                 <div>
-                  <Label className="text-xs">{t('k81_ba7c2c')}</Label>
+                  <Label className="text-xs">{t('k81_ba7c2c')}{reqStar('transaction_date')}</Label>
                   <Input type="date" value={fTransactionDate} onChange={e => setFTransactionDate(e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs">{t('k82_d6e98c')}</Label>
+                  <Label className="text-xs">{t('k82_d6e98c')}{reqStar('invoice_number')}</Label>
                   <Input value={fInvoiceNumber} onChange={e => setFInvoiceNumber(e.target.value)} placeholder="INV/2026/03/001" />
                 </div>
                 <div>

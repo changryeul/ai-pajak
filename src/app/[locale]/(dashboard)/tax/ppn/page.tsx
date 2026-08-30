@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
 import {
   FileText, Loader2, CheckCircle, AlertTriangle, Check, X,
   DollarSign, TrendingUp, TrendingDown, Minus, Sparkles,
@@ -97,6 +98,10 @@ export default function PPNPage() {
 
   // Inline edit state (mirrors PPh21 MonthlyPayslipTab pattern)
   const [expandedFakturId, setExpandedFakturId] = useState<string | null>(null);
+  // 2026-08-30 — MASTER 지정 필수항목 별표(정규화 매칭)
+  const { requiredKeys: reqKeysPpn } = useRequiredFields('ppn');
+  const reqStar = (k: string) => new Set((reqKeysPpn ?? []).map(x => x.toLowerCase().replace(/_/g, ''))).has(k.toLowerCase().replace(/_/g, ''))
+    ? <span className="text-red-500 font-bold"> *</span> : null;
   const [savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   const period = `${year}-${String(month).padStart(2, '0')}`;
@@ -726,7 +731,7 @@ export default function PPNPage() {
                                         </select>
                                       </div>
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">{t('thFakturNo')}</Label>
+                                        <Label className="text-[10px] text-gray-400">{t('thFakturNo')}{reqStar('faktur_number')}</Label>
                                         <Input
                                           className="h-8 text-xs font-mono"
                                           defaultValue={f.faktur_number ?? ''}
@@ -738,7 +743,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">{t('thDate')}</Label>
+                                        <Label className="text-[10px] text-gray-400">{t('thDate')}{reqStar('faktur_date')}</Label>
                                         <Input
                                           type="date"
                                           className="h-8 text-xs"
@@ -751,7 +756,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">{t('thCounterparty')}</Label>
+                                        <Label className="text-[10px] text-gray-400">{t('thCounterparty')}{reqStar('counterparty_name')}</Label>
                                         <Input
                                           className="h-8 text-xs"
                                           defaultValue={f.counterparty_name ?? ''}
@@ -763,7 +768,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">NPWP</Label>
+                                        <Label className="text-[10px] text-gray-400">NPWP{reqStar('counterparty_npwp')}</Label>
                                         <Input
                                           className="h-8 text-xs font-mono"
                                           defaultValue={f.counterparty_npwp ?? ''}
@@ -775,7 +780,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">DPP</Label>
+                                        <Label className="text-[10px] text-gray-400">DPP{reqStar('dpp')}</Label>
                                         <NumberInput
                                           className="h-8 text-xs font-mono"
                                           value={f.dpp}
@@ -799,7 +804,7 @@ export default function PPNPage() {
                                         />
                                       </div>
                                       <div>
-                                        <Label className="text-[10px] text-gray-400">PPN</Label>
+                                        <Label className="text-[10px] text-gray-400">PPN{reqStar('ppn')}</Label>
                                         <NumberInput
                                           className="h-8 text-xs font-mono"
                                           value={f.ppn}
