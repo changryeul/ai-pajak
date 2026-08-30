@@ -105,7 +105,6 @@ const navItems: NavSection[] = [
         customerTypes: ['COMPANY'],
         children: [
           { href: '/tax/monthly-board', icon: BarChart3, labelKey: 'nav.monthlyBoard' },
-          { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus' },
           { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
           { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },
           // PPh 4(2) 는 원천세 페이지에 [PPh4(2)] 접두사로 같이 표시되고, WHT
@@ -114,6 +113,8 @@ const navItems: NavSection[] = [
           // 그대로 유지.
           { href: '/tax/umkm', icon: Shield, labelKey: 'nav.prepaidCorporateTax' },
           { href: '/tax/ppn', icon: Calculator, labelKey: 'nav.ppnLabel' },
+          // 2026-08-30: 신고현황을 부가세 아래로 이동 (사용자 요청)
+          { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus' },
           { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue' },
           { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord' },
           // 2026-06-24: '세금예측/계산기' (/tax/tools) 사이드바 항목 제거.
