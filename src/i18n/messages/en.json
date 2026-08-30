@@ -4033,7 +4033,16 @@
     "input": "Input",
     "serverError": "A server error occurred.",
     "requiredMissingBlock": "Cannot save: required fields are empty",
-    "requiredMissingBadge": "Missing"
+    "requiredMissingBadge": "Missing",
+    "ppnSubmitBtn": "Submit to operator team",
+    "ppnSubmitConfirm": "Request the operator team to file {period} VAT?",
+    "ppnSubmitDone": "Submitted to the operator team",
+    "ppnSubmitFailed": "Submit request failed",
+    "ppnSubmitNoData": "No VAT data to submit",
+    "ppnSubmittedBanner": "Submitted to operator team — pending",
+    "ppnSubmitCancel": "Cancel request",
+    "ppnSubmitCancelConfirm": "Cancel the submit request?",
+    "ppnSubmitCancelled": "Submit request cancelled"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

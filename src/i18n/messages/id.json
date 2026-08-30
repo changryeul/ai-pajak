@@ -4033,7 +4033,16 @@
     "input": "Masukan",
     "serverError": "Terjadi kesalahan server.",
     "requiredMissingBlock": "Tidak dapat menyimpan: kolom wajib kosong",
-    "requiredMissingBadge": "Wajib kosong"
+    "requiredMissingBadge": "Wajib kosong",
+    "ppnSubmitBtn": "Kirim ke tim operator",
+    "ppnSubmitConfirm": "Minta tim operator melaporkan PPN {period}?",
+    "ppnSubmitDone": "Terkirim ke tim operator",
+    "ppnSubmitFailed": "Gagal mengirim permintaan",
+    "ppnSubmitNoData": "Tidak ada data PPN untuk dikirim",
+    "ppnSubmittedBanner": "Terkirim ke tim operator — menunggu",
+    "ppnSubmitCancel": "Batalkan",
+    "ppnSubmitCancelConfirm": "Batalkan permintaan pengiriman?",
+    "ppnSubmitCancelled": "Permintaan dibatalkan"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

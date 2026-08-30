@@ -19,7 +19,7 @@ import {
   FileText, Loader2, CheckCircle, AlertTriangle, Check, X,
   DollarSign, TrendingUp, TrendingDown, Minus, Sparkles,
   ArrowUpRight, ArrowDownLeft,
-  Download, FileUp, ChevronDown, ChevronRight, Pencil,
+  Download, FileUp, ChevronDown, ChevronRight, Pencil, Send,
 } from 'lucide-react';
 import { useRef } from 'react';
 import { ScreenHeader } from '@/components/tax';
@@ -87,6 +87,9 @@ export default function PPNPage() {
   const [month, setMonth] = useState(currentMonth);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // 2026-08-30: 부가세 최종 제출(운영팀 신고 요청) 상태 — PPh23/21 과 동일 패턴.
+  const [ppnSubmitReq, setPpnSubmitReq] = useState<{ requestedAt: string } | null>(null);
+  const [submittingPpn, setSubmittingPpn] = useState(false);
   const [filter, setFilter] = useState<FakturFilter>('ALL');
   // Phase 3.3 followup — filter to only luxury rows for quick review after
   // auto-classify (server-side substring match may have false positives).
@@ -298,6 +301,54 @@ export default function PPNPage() {
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3000);
+  };
+
+  // 부가세 제출 요청 상태 로드 (서버가 source of truth — 기기 간 동기화).
+  useEffect(() => {
+    if (!customerId) { setPpnSubmitReq(null); return; }
+    let cancelled = false;
+    fetch(`/api/customer/spt-masa-request?taxType=PPN&period=${period}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        if (cancelled) return;
+        const row = json?.data;
+        setPpnSubmitReq(row && row.status === 'PENDING' ? { requestedAt: row.requested_at } : null);
+      })
+      .catch(() => { /* best-effort */ });
+    return () => { cancelled = true; };
+  }, [customerId, period]);
+
+  // 운영팀에 최종 제출(신고 요청). SPT Masa 직접 생성 권한이 없는 CUSTOMER 는
+  // 요청만 올리고, 운영팀이 확인 후 실제 신고를 생성한다 (Hard Rule #3).
+  const submitPpnToOperator = async () => {
+    if (!customerId || submittingPpn) return;
+    if (fakturs.length === 0) { showMsg('error', t('ppnSubmitNoData')); return; }
+    if (!confirm(t('ppnSubmitConfirm', { period }))) return;
+    setSubmittingPpn(true);
+    try {
+      const res = await fetch('/api/customer/spt-masa-request', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taxType: 'PPN', period }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success !== false) {
+        setPpnSubmitReq({ requestedAt: new Date().toISOString() });
+        showMsg('success', t('ppnSubmitDone'));
+      } else {
+        showMsg('error', data.error || t('ppnSubmitFailed'));
+      }
+    } catch { showMsg('error', t('ppnSubmitFailed')); }
+    finally { setSubmittingPpn(false); }
+  };
+
+  const cancelPpnSubmit = async () => {
+    if (!customerId) return;
+    if (!confirm(t('ppnSubmitCancelConfirm'))) return;
+    try {
+      await fetch(`/api/customer/spt-masa-request?taxType=PPN&period=${period}`, { method: 'DELETE' });
+      setPpnSubmitReq(null);
+      showMsg('success', t('ppnSubmitCancelled'));
+    } catch { showMsg('error', t('ppnSubmitFailed')); }
   };
 
   // Load faktur data
@@ -970,6 +1021,24 @@ export default function PPNPage() {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* 최종 제출 — 운영팀 신고 요청 (PPh23/21 과 동일 패턴) */}
+          {ppnSubmitReq ? (
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm text-emerald-800">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                <span>{t('ppnSubmittedBanner')}</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={cancelPpnSubmit}>{t('ppnSubmitCancel')}</Button>
+            </div>
+          ) : (
+            <div className="mt-4 flex justify-end">
+              <Button onClick={submitPpnToOperator} disabled={submittingPpn || !customerId || fakturs.length === 0}>
+                {submittingPpn ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+                {t('ppnSubmitBtn')}
+              </Button>
+            </div>
           )}
         </div>
       )}
