@@ -10771,6 +10771,11 @@
     "pph21Todo1": "Upload this month's payroll data.",
     "withholdingTodo1": "Upload this month's withholding transactions (skip if none).",
     "prepaidTodo1": "Enter and submit this month's revenue.",
-    "ppnTodo1": "Upload this month's sales/purchase faktur."
+    "ppnTodo1": "Upload this month's sales/purchase faktur.",
+    "miniPendingCount": "{n} filings in progress — tap for details",
+    "mini_pph21": "PPh 21",
+    "mini_withholding": "Withholding",
+    "mini_prepaid": "Prepaid Corp",
+    "mini_ppn": "PPN"
   }
 }

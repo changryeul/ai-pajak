@@ -18,6 +18,8 @@ import {
   Users, Receipt, Shield, Calculator, Info, ArrowRight,
 } from 'lucide-react';
 
+import { deadlineOf, ddayText, defaultFilingPeriod } from '@/lib/tax/monthly-board-shared';
+
 const GUIDE_SEEN_KEY = 'monthlyBoardGuideSeen';
 
 interface TaxState {
@@ -45,24 +47,7 @@ const TAX_META = {
   ppn: { icon: Calculator, color: '#f59e0b', href: '/tax/ppn', payDay: 0, reportDay: 0 }, // 0 = 익월 말일
 } as const;
 
-function defaultPeriod(): string {
-  // 신고 대상은 통상 지난달 귀속분
-  const d = new Date();
-  d.setMonth(d.getMonth() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
 
-/** 귀속월 기준 마감일 (익월 day일; day=0 → 익월 말일). */
-function deadlineOf(period: string, day: number): Date {
-  const [y, m] = period.split('-').map(Number);
-  return day === 0 ? new Date(y, m + 1, 0) : new Date(y, m, day);
-}
-function ddayText(dl: Date): { text: string; urgent: boolean; passed: boolean } {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const diff = Math.round((dl.getTime() - today.getTime()) / 86_400_000);
-  if (diff < 0) return { text: `D+${-diff}`, urgent: false, passed: true };
-  return { text: diff === 0 ? 'D-DAY' : `D-${diff}`, urgent: diff <= 3, passed: false };
-}
 
 export default function MonthlyBoardPage() {
   const t = useTranslations('monthlyBoard');
@@ -71,7 +56,7 @@ export default function MonthlyBoardPage() {
   const { customerId, isConsultant, customers, selectedCustomerId, setSelectedCustomerId } =
     useEffectiveCustomerId({ companyOnly: true });
 
-  const [period, setPeriod] = useState(defaultPeriod());
+  const [period, setPeriod] = useState(defaultFilingPeriod());
   const [data, setData] = useState<BoardData | null>(null);
   const [loading, setLoading] = useState(true);
   // 첫 방문 = 가이드 모드 (모든 설명 펼침)

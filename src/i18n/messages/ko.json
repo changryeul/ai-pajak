@@ -10892,6 +10892,11 @@
     "pph21Todo1": "이번 달 직원 급여자료를 올려주세요.",
     "withholdingTodo1": "이번 달 원천세 거래를 올려주세요. (지급 거래가 없으면 건너뜁니다)",
     "prepaidTodo1": "이번 달 매출을 입력하고 제출해 주세요.",
-    "ppnTodo1": "이번 달 매출·매입 faktur 를 올려주세요."
+    "ppnTodo1": "이번 달 매출·매입 faktur 를 올려주세요.",
+    "miniPendingCount": "진행 중인 신고 {n}건 — 눌러서 상세 보기",
+    "mini_pph21": "PPh 21",
+    "mini_withholding": "원천세",
+    "mini_prepaid": "선납법인세",
+    "mini_ppn": "PPN"
   }
 }

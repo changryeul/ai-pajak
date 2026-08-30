@@ -10771,6 +10771,11 @@
     "pph21Todo1": "Unggah data gaji bulan ini.",
     "withholdingTodo1": "Unggah transaksi pemotongan bulan ini (lewati jika tidak ada).",
     "prepaidTodo1": "Masukkan dan kirim omzet bulan ini.",
-    "ppnTodo1": "Unggah faktur penjualan/pembelian bulan ini."
+    "ppnTodo1": "Unggah faktur penjualan/pembelian bulan ini.",
+    "miniPendingCount": "{n} pelaporan berjalan — ketuk untuk detail",
+    "mini_pph21": "PPh 21",
+    "mini_withholding": "Pemotongan",
+    "mini_prepaid": "Angsuran",
+    "mini_ppn": "PPN"
   }
 }

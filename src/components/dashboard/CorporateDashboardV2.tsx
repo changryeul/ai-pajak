@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3, Sparkles, ArrowRight } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { TaxAdvisoryPanel } from '@/components/dashboard/TaxAdvisoryPanel';
+import { MonthlyFilingMiniWidget } from '@/components/dashboard/MonthlyFilingMiniWidget';
 
 interface QueueItem {
   id: string;
@@ -293,6 +294,9 @@ export function CorporateDashboardV2({
           </CardContent>
         </Card>
       </div>
+
+      {/* 이번 달 신고 보드 미니 위젯 — 클릭 시 /tax/monthly-board (2026-08-30) */}
+      {session.customerId && <MonthlyFilingMiniWidget customerId={session.customerId} locale={locale} />}
 
       {/* Monthly Trend — 세금별 별도 박스 (수정요청 2026-08-10: 소형 멀티플 + 선납법인세 추가) */}
       <div>
