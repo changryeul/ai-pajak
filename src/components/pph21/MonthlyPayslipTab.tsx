@@ -10,9 +10,10 @@ import { useBulkSelect } from '@/hooks/useBulkSelect';
 import { useRequiredFields } from '@/hooks/useRequiredFields';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EmployeeFormDialog } from '@/components/pph21/EmployeeFormDialog';
 import {
   Loader2, Save, ChevronDown, ChevronRight, Users,
-  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X,
+  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X, UserCog,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -231,6 +232,23 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
     } catch {
       showMsg('error', tp('saveFailed'));
     }
+  };
+
+  // 2026-08-30: 급여 상세에서 "직원정보 전체 수정" — 공용 EmployeeFormDialog 로
+  // 모든 필드를 편집. ps.employee 는 일부 필드만 있으므로 전체 행을 GET 으로 가져온다.
+  const [empDialogOpen, setEmpDialogOpen] = useState(false);
+  const [empDialogRow, setEmpDialogRow] = useState<Record<string, unknown> | null>(null);
+  const openFullEmployeeEdit = async (employeeId: string) => {
+    try {
+      const res = await fetch(`/api/tax/employees/${employeeId}`);
+      const data = await res.json();
+      if (data.success) {
+        setEmpDialogRow(data.data as Record<string, unknown>);
+        setEmpDialogOpen(true);
+      } else {
+        showMsg('error', data.error || tp('saveFailed'));
+      }
+    } catch { showMsg('error', tp('saveFailed')); }
   };
 
   // 2026-08-30: 급여 상세에서 직원 마스터(employee_payroll) 필드 인라인 수정.
@@ -509,7 +527,12 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                       <div className="rounded-md border border-slate-200 bg-white p-3">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="text-xs font-bold text-gray-600">{tp('secEmployeeInfo')}</h4>
-                          {!ps.employee?.id && (
+                          {ps.employee?.id ? (
+                            <Button size="sm" variant="outline" className="h-7 text-[11px]"
+                              onClick={() => openFullEmployeeEdit(ps.employee!.id)}>
+                              <UserCog className="h-3.5 w-3.5 mr-1" />{tp('editFullEmployee')}
+                            </Button>
+                          ) : (
                             <span className="text-[10px] text-amber-600">{tp('employeeMasterUnlinked')}</span>
                           )}
                         </div>
@@ -883,6 +906,15 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
           })()}
         </div>
       )}
+
+      {/* 직원정보 전체 수정 — 공용 다이얼로그. 정보성 편집(계산 무관). */}
+      <EmployeeFormDialog
+        open={empDialogOpen}
+        onOpenChange={setEmpDialogOpen}
+        customerId={customerId}
+        employee={empDialogRow}
+        onSaved={loadPayslips}
+      />
     </div>
   );
 }

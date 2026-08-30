@@ -4,14 +4,14 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
+import { EmployeeFormDialog } from '@/components/pph21/EmployeeFormDialog';
 import {
-  Users, Loader2, CheckCircle, AlertTriangle, Save, Sparkles, FileText,
+  Users, Loader2, CheckCircle, AlertTriangle, Sparkles, FileText,
   Upload, Download, Pencil, Trash2, Plus,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
@@ -61,44 +61,22 @@ interface Employee {
   notes?: string | null;
 }
 
-const PTKP_OPTIONS = ['TK0','TK1','TK2','TK3','K0','K1','K2','K3','KI0','KI1','KI2','KI3'];
-
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
-
-const emptyForm = {
-  id: '',
-  // Identity
-  employeeName: '', employeeNpwp: '', employeeNik: '', ptkpCategory: 'TK0',
-  // Salary baseline
-  grossSalary: '', jhtEmployee: '', jpEmployee: '', otherDeductions: '',
-  // Allowances + BPJS — 표준 양식 col 8/10/11/12/14/15/26 매핑
-  positionAllowance: '', mealAllowance: '', transportAllowance: '', otherAllowance: '',
-  bpjsKesehatan: '', bonus: '', thr: '',
-  // HR record
-  employeeNumber: '', position: '', department: '', workerType: 'REGULAR',
-  employmentStatus: '', // PMK 66/2023 — PKWTT (1) / PKWT (2) / Consultant (3)
-  hireDate: '', resignDate: '', birthDate: '', gender: '', maritalStatus: '',
-  email: '', phone: '', address: '',
-  bankName: '', bankAccountNo: '', bankAccountName: '',
-  emergencyContactName: '', emergencyContactPhone: '', notes: '',
-};
 
 export default function PPh21PayrollPage() {
   const { session, isLoading: sessionLoading } = useSession();
   const tp = useTranslations('pph21Page');
   const tsc = useTranslations('taxScreen');
-  const tps = useTranslations('monthlyPayslip');
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [_isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(emptyForm);
+  // null → 신규 추가, Employee → 편집. EmployeeFormDialog 가 폼 상태를 자체 관리.
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   // 2026-06-24: master 탭 제거 후 payslipMode / activeTab 의미 없어져 정리.
   // 2026-06-21: 직원 마스터 sync 상태 (이전 달까지 sync 됐는지)
   const [_syncStatus, setSyncStatus] = useState<{ syncedThrough: string | null; pendingThrough: string | null; hasPending: boolean } | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
   // 월별 급여 자료 (MonthlyPayslipTab) 재조회 트리거 — 업로드 완료 시 +1
   const [payslipReload, setPayslipReload] = useState(0);
 
@@ -163,141 +141,16 @@ export default function PPh21PayrollPage() {
     } catch { /* */ }
   }, [customerId]);
 
-  const runSync = useCallback(async () => {
-    if (!customerId || isSyncing) return;
-    setIsSyncing(true);
-    try {
-      const res = await fetch('/api/tax/employees/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showMsg('success', tps('syncSuccess', { added: data.added, updated: data.updated, through: data.through }));
-        await loadEmployees();
-        await loadSyncStatus();
-      } else {
-        showMsg('error', data.error || tps('syncFail'));
-      }
-    } catch {
-      showMsg('error', tps('syncFail'));
-    } finally {
-      setIsSyncing(false);
-    }
-  }, [customerId, isSyncing, tps, loadEmployees, loadSyncStatus]);
-
   useEffect(() => {
     if (sessionLoading) return;
     loadEmployees();
     loadSyncStatus();
   }, [sessionLoading, loadEmployees, loadSyncStatus]);
 
-  
-  const saveEmployee = async () => {
-    if (!customerId || !form.employeeName || !form.grossSalary) {
-      showMsg('error', tp('nameAndSalaryRequired'));
-      return;
-    }
-    setIsSaving(true);
-    try {
-      const res = await fetch('/api/tax/employees', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: form.id || undefined,
-          customerId,
-          employeeName: form.employeeName,
-          employeeNpwp: form.employeeNpwp,
-          employeeNik: form.employeeNik,
-          ptkpCategory: form.ptkpCategory,
-          grossSalary: parseFloat(form.grossSalary) || 0,
-          jhtEmployee: parseFloat(form.jhtEmployee) || 0,
-          jpEmployee: parseFloat(form.jpEmployee) || 0,
-          otherDeductions: parseFloat(form.otherDeductions) || 0,
-          positionAllowance: parseFloat(form.positionAllowance) || 0,
-          mealAllowance: parseFloat(form.mealAllowance) || 0,
-          transportAllowance: parseFloat(form.transportAllowance) || 0,
-          otherAllowance: parseFloat(form.otherAllowance) || 0,
-          bpjsKesehatan: parseFloat(form.bpjsKesehatan) || 0,
-          bonus: parseFloat(form.bonus) || 0,
-          thr: parseFloat(form.thr) || 0,
-          employeeNumber: form.employeeNumber,
-          position: form.position,
-          department: form.department,
-          workerType: form.workerType,
-          employmentStatus: form.employmentStatus || null,
-          hireDate: form.hireDate || null,
-          resignDate: form.resignDate || null,
-          birthDate: form.birthDate || null,
-          gender: form.gender,
-          maritalStatus: form.maritalStatus,
-          email: form.email,
-          phone: form.phone,
-          address: form.address,
-          bankName: form.bankName,
-          bankAccountNo: form.bankAccountNo,
-          bankAccountName: form.bankAccountName,
-          emergencyContactName: form.emergencyContactName,
-          emergencyContactPhone: form.emergencyContactPhone,
-          notes: form.notes,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showMsg('success', form.id ? tp('employeeUpdated') : tp('employeeAdded'));
-        setShowForm(false);
-        setForm(emptyForm);
-        loadEmployees();
-      } else {
-        showMsg('error', data.error || 'Failed');
-      }
-    } catch { showMsg('error', 'Error'); }
-    finally { setIsSaving(false); }
-  };
-
-  // 2026-08-30: 등록된 직원(인사 마스터)을 편집 모드로 연다.
-  // DB row(snake_case) → Dialog form(camelCase) 매핑. 저장은 기존 saveEmployee
-  // (POST with id → update + 변경이력 diff) 를 그대로 재사용.
+  // 2026-08-30: 등록된 직원(인사 마스터)을 편집 모드로 연다. 폼 상태·저장은
+  // 공용 EmployeeFormDialog 가 담당하므로 여기선 대상 직원만 넘긴다.
   const openEditEmployee = (emp: Employee) => {
-    const s = (v: unknown) => (v == null ? '' : String(v));
-    setForm({
-      id: emp.id,
-      employeeName: s(emp.employee_name),
-      employeeNpwp: s(emp.employee_npwp),
-      employeeNik: s(emp.employee_nik),
-      ptkpCategory: emp.ptkp_category || 'TK0',
-      grossSalary: s(emp.gross_salary),
-      jhtEmployee: s(emp.jht_employee),
-      jpEmployee: s(emp.jp_employee),
-      otherDeductions: s(emp.other_deductions),
-      positionAllowance: s(emp.position_allowance),
-      mealAllowance: s(emp.meal_allowance),
-      transportAllowance: s(emp.transport_allowance),
-      otherAllowance: s(emp.other_allowances),
-      bpjsKesehatan: s(emp.bpjs_kesehatan),
-      bonus: s(emp.bonus),
-      thr: s(emp.thr),
-      employeeNumber: s(emp.employee_number),
-      position: s(emp.position),
-      department: s(emp.department),
-      workerType: emp.worker_type || 'REGULAR',
-      employmentStatus: s(emp.employment_status),
-      hireDate: s(emp.hire_date),
-      resignDate: s(emp.resign_date),
-      birthDate: s(emp.birth_date),
-      gender: s(emp.gender),
-      maritalStatus: s(emp.marital_status),
-      email: s(emp.email),
-      phone: s(emp.phone),
-      address: s(emp.address),
-      bankName: s(emp.bank_name),
-      bankAccountNo: s(emp.bank_account_no),
-      bankAccountName: s(emp.bank_account_name),
-      emergencyContactName: s(emp.emergency_contact_name),
-      emergencyContactPhone: s(emp.emergency_contact_phone),
-      notes: s(emp.notes),
-    });
+    setEditingEmployee(emp);
     setShowForm(true);
   };
 
@@ -415,7 +268,7 @@ export default function PPh21PayrollPage() {
           // 같은 페이지에서 Dialog 폼을 띄운다 — 사용자가 PPh21 흐름에서 벗어나지
           // 않고 직원 1명을 추가할 수 있도록.
           onOpenManualEntry={() => {
-            setForm(emptyForm);
+            setEditingEmployee(null);
             setShowForm(true);
           }}
         />
@@ -433,7 +286,7 @@ export default function PPh21PayrollPage() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => { setForm(emptyForm); setShowForm(true); }}
+            onClick={() => { setEditingEmployee(null); setShowForm(true); }}
             disabled={!customerId}
           >
             <Plus className="h-4 w-4 mr-1" />{tp('newEmployee')}
@@ -479,220 +332,16 @@ export default function PPh21PayrollPage() {
         )}
       </div>
 
-      {/* 2026-06-26: 인라인 직원 등록 Dialog — 표준 템플릿이 수집하는 모든 필드
-          (사번 / 고용형태 / NPWP / NIK / tax method / 급여 / 수당 / BPJS / HR 인사정보).
-          저장 후 자동 sync 호출로 현재 월 payslip 도 즉시 생성되어 리스트에 노출. */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{form.id ? tp('dialogTitleEdit') : tp('dialogTitleCreate')}</DialogTitle>
-            <DialogDescription>
-              {tp('dialogDescription')}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-5 py-2">
-            {/* 직원 식별 */}
-            <div>
-              <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secIdentity')}</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                <div>
-                  <Label className="text-[11px]">{tp('fieldName')} <span className="text-red-500">*</span></Label>
-                  <Input value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldEmployeeNo')}</Label>
-                  <Input value={form.employeeNumber} onChange={e => setForm({ ...form, employeeNumber: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">NPWP</Label>
-                  <Input value={form.employeeNpwp} onChange={e => setForm({ ...form, employeeNpwp: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">NIK</Label>
-                  <Input value={form.employeeNik} onChange={e => setForm({ ...form, employeeNik: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">PTKP</Label>
-                  <Select value={form.ptkpCategory} onValueChange={v => setForm({ ...form, ptkpCategory: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {PTKP_OPTIONS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldEmploymentStatusPMK')}</Label>
-                  <Select
-                    value={form.employmentStatus || 'PKWTT'}
-                    onValueChange={v => setForm({ ...form, employmentStatus: v })}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PKWTT">PKWTT (Pegawai Tetap)</SelectItem>
-                      <SelectItem value="PKWT">PKWT (Pegawai Tidak Tetap)</SelectItem>
-                      <SelectItem value="Consultant">Consultant (Bukan Pegawai)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldWorkerType')}</Label>
-                  <Select value={form.workerType} onValueChange={v => setForm({ ...form, workerType: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="REGULAR">REGULAR (gross / TER)</SelectItem>
-                      <SelectItem value="CONTRACT">CONTRACT</SelectItem>
-                      <SelectItem value="DAILY">DAILY</SelectItem>
-                      <SelectItem value="FREELANCER">FREELANCER</SelectItem>
-                      <SelectItem value="COMMISSIONER">COMMISSIONER</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            {/* 급여 / 수당 / BPJS */}
-            <div>
-              <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secSalaryAllowance')}</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                <div>
-                  <Label className="text-[11px]">{tp('fieldGajiPokok')} <span className="text-red-500">*</span></Label>
-                  <Input type="number" value={form.grossSalary} onChange={e => setForm({ ...form, grossSalary: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldTunjJabatan')}</Label>
-                  <Input type="number" value={form.positionAllowance} onChange={e => setForm({ ...form, positionAllowance: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldTunjMakan')}</Label>
-                  <Input type="number" value={form.mealAllowance} onChange={e => setForm({ ...form, mealAllowance: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldTunjTransport')}</Label>
-                  <Input type="number" value={form.transportAllowance} onChange={e => setForm({ ...form, transportAllowance: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldTunjLainnya')}</Label>
-                  <Input type="number" value={form.otherAllowance} onChange={e => setForm({ ...form, otherAllowance: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">BPJS Kesehatan (employee)</Label>
-                  <Input type="number" value={form.bpjsKesehatan} onChange={e => setForm({ ...form, bpjsKesehatan: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">JHT (employee)</Label>
-                  <Input type="number" value={form.jhtEmployee} onChange={e => setForm({ ...form, jhtEmployee: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">JP (employee)</Label>
-                  <Input type="number" value={form.jpEmployee} onChange={e => setForm({ ...form, jpEmployee: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldPotongan')}</Label>
-                  <Input type="number" value={form.otherDeductions} onChange={e => setForm({ ...form, otherDeductions: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldBonus')}</Label>
-                  <Input type="number" value={form.bonus} onChange={e => setForm({ ...form, bonus: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">THR</Label>
-                  <Input type="number" value={form.thr} onChange={e => setForm({ ...form, thr: e.target.value })} className="font-mono" />
-                </div>
-              </div>
-            </div>
-
-            {/* HR 인사정보 */}
-            <div>
-              <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secHRInfo')}</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                <div>
-                  <Label className="text-[11px]">{tp('fieldPosition')}</Label>
-                  <Input value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldDepartment')}</Label>
-                  <Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldHireDate')}</Label>
-                  <Input type="date" value={form.hireDate} onChange={e => setForm({ ...form, hireDate: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldBirthDate')}</Label>
-                  <Input type="date" value={form.birthDate} onChange={e => setForm({ ...form, birthDate: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldGender')}</Label>
-                  <Select value={form.gender || 'M'} onValueChange={v => setForm({ ...form, gender: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="M">M</SelectItem>
-                      <SelectItem value="F">F</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldMarital')}</Label>
-                  <Select value={form.maritalStatus || 'SINGLE'} onValueChange={v => setForm({ ...form, maritalStatus: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SINGLE">SINGLE</SelectItem>
-                      <SelectItem value="MARRIED">MARRIED</SelectItem>
-                      <SelectItem value="DIVORCED">DIVORCED</SelectItem>
-                      <SelectItem value="WIDOWED">WIDOWED</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldEmail')}</Label>
-                  <Input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldPhone')}</Label>
-                  <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
-                </div>
-                <div className="md:col-span-3">
-                  <Label className="text-[11px]">{tp('fieldAddress')}</Label>
-                  <Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldBank')}</Label>
-                  <Input value={form.bankName} onChange={e => setForm({ ...form, bankName: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldAccountNo')}</Label>
-                  <Input value={form.bankAccountNo} onChange={e => setForm({ ...form, bankAccountNo: e.target.value })} className="font-mono" />
-                </div>
-                <div>
-                  <Label className="text-[11px]">{tp('fieldAccountName')}</Label>
-                  <Input value={form.bankAccountName} onChange={e => setForm({ ...form, bankAccountName: e.target.value })} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowForm(false)} disabled={isSaving}>
-              {tp('btnCancel')}
-            </Button>
-            <Button
-              onClick={async () => {
-                await saveEmployee();
-                // 저장 직후 sync 한 번 — 마스터에 직원이 들어왔으면 현재 월 payslip
-                // 도 즉시 생성해서 리스트에 떠 보이게.
-                if (customerId) {
-                  try { await runSync(); } catch { /* non-fatal */ }
-                }
-              }}
-              disabled={isSaving}
-            >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
-              {tp('btnSave')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* 2026-08-30: 직원 등록/수정 — 공용 EmployeeFormDialog 로 추출.
+          직원목록 페이지 · 급여 상세와 동일 컴포넌트 재사용. */}
+      <EmployeeFormDialog
+        open={showForm}
+        onOpenChange={setShowForm}
+        customerId={customerId}
+        employee={editingEmployee as unknown as Record<string, unknown> | null}
+        onSaved={() => { loadEmployees(); setPayslipReload(v => v + 1); }}
+        syncAfterSave
+      />
 
       {/* 2026-06-24: 직원 인사 기록 탭 제거 — 사이드바 메뉴
           (/tax/payroll/employees) 와 중복되어 사용자 혼란.

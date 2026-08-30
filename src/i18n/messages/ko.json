@@ -287,7 +287,8 @@
     "supervisorAffiliation": "상담원 소속관리",
     "opWorkqueue": "상담원 업무함",
     "annualFilingCompany": "SPT BADAN (연신고)",
-    "monthlyBoard": "월신고 보드·안내"
+    "monthlyBoard": "월신고 보드·안내",
+    "employeeDirectory": "직원 목록"
   },
   "employeeHr": {
     "uploadSection": {
@@ -4533,7 +4534,8 @@
     "taxMethodGrossHint": "PPh21을 직원 급여에서 차감합니다.",
     "taxMethodGrossUpHint": "회사가 PPh21을 부담 → 세액수당이 gross-up 자동 산출됩니다.",
     "fieldWorkerType": "직군",
-    "employeeMasterUnlinked": "직원 마스터 미연결 — 편집하려면 먼저 동기화하세요"
+    "employeeMasterUnlinked": "직원 마스터 미연결 — 편집하려면 먼저 동기화하세요",
+    "editFullEmployee": "직원정보 전체 수정"
   },
   "errorFallback": {
     "title": "페이지를 불러올 수 없습니다",
@@ -4791,7 +4793,14 @@
     "fieldAccountNo": "계좌번호",
     "fieldAccountName": "예금주",
     "btnCancel": "취소",
-    "btnSave": "저장"
+    "btnSave": "저장",
+    "directoryTitle": "직원 목록",
+    "directoryBannerTitle": "직원 목록 변경은 세금 신고와 무관합니다",
+    "directoryBannerBody": "여기서 직원 정보를 추가·수정·삭제해도 이미 제출했거나 작성 중인 세금 신고 금액에는 영향을 주지 않습니다. 실제 신고 데이터는 각 월 급여명세(개인소득세 화면)에서 관리됩니다. 이 화면은 직원 정보를 정리·보관하는 명부입니다.",
+    "directorySearchPlaceholder": "이름 · 사번 · NPWP 검색",
+    "filterAllTypes": "전체 직군",
+    "filterAllStatus": "전체 고용형태",
+    "directoryCount": "{count}명"
   },
   "pph23Page": {
     "invoiceImageLabel": "인보이스 사진 (필수)",

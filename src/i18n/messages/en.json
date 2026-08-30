@@ -287,7 +287,8 @@
     "supervisorAffiliation": "Operator Affiliation",
     "opWorkqueue": "Customer Workqueue",
     "annualFilingCompany": "SPT Badan (Annual Filing)",
-    "monthlyBoard": "Filing Board & Guide"
+    "monthlyBoard": "Filing Board & Guide",
+    "employeeDirectory": "Employee Directory"
   },
   "employeeHr": {
     "uploadSection": {
@@ -4515,7 +4516,8 @@
     "taxMethodGrossHint": "PPh21 is deducted from the employee salary.",
     "taxMethodGrossUpHint": "Company bears PPh21 → tax allowance is grossed up automatically.",
     "fieldWorkerType": "Worker Type",
-    "employeeMasterUnlinked": "No linked employee master — sync first to edit"
+    "employeeMasterUnlinked": "No linked employee master — sync first to edit",
+    "editFullEmployee": "Edit full employee info"
   },
   "errorFallback": {
     "title": "Failed to load page",
@@ -4728,7 +4730,14 @@
     "fieldAccountNo": "Account No.",
     "fieldAccountName": "Account Name",
     "btnCancel": "Cancel",
-    "btnSave": "Save"
+    "btnSave": "Save",
+    "directoryTitle": "Employee Directory",
+    "directoryBannerTitle": "Editing the directory does not affect tax filing",
+    "directoryBannerBody": "Adding, editing, or removing employees here does not change any submitted or in-progress tax filing amounts. Actual filing data is managed per month in each payslip (Personal Income Tax screen). This screen is just a directory for keeping employee records organized.",
+    "directorySearchPlaceholder": "Search name · staff no · NPWP",
+    "filterAllTypes": "All worker types",
+    "filterAllStatus": "All employment types",
+    "directoryCount": "{count}"
   },
   "pph23Page": {
     "invoiceImageLabel": "Invoice Photo (Required)",

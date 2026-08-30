@@ -142,6 +142,12 @@ const navItems: NavSection[] = [
           { href: '/counterparties', icon: Users, labelKey: 'nav.counterpartyInput' },
         ],
       },
+      // 직원목록 — 신고관리와 같은 레벨의 단독 메뉴 (인사 명부, 정보성).
+      // 2026-08-30 사용자 요청. 세금 신고와 무관한 직원 정보 보관/정리 화면.
+      {
+        href: '/tax/employees', icon: Users, labelKey: 'nav.employeeDirectory',
+        customerTypes: ['COMPANY'],
+      },
       // 계정
       {
         href: '#', icon: User, labelKey: 'nav.account',

@@ -287,7 +287,8 @@
     "supervisorAffiliation": "Afiliasi Konsultan",
     "opWorkqueue": "Antrean Kerja Pelanggan",
     "annualFilingCompany": "SPT Badan (Tahunan)",
-    "monthlyBoard": "Papan & Panduan Lapor"
+    "monthlyBoard": "Papan & Panduan Lapor",
+    "employeeDirectory": "Daftar Karyawan"
   },
   "employeeHr": {
     "uploadSection": {
@@ -4515,7 +4516,8 @@
     "taxMethodGrossHint": "PPh21 dipotong dari gaji karyawan.",
     "taxMethodGrossUpHint": "Perusahaan menanggung PPh21 → tunjangan pajak dihitung gross-up otomatis.",
     "fieldWorkerType": "Jenis Pekerja",
-    "employeeMasterUnlinked": "Master karyawan belum tertaut — sinkron dulu untuk mengedit"
+    "employeeMasterUnlinked": "Master karyawan belum tertaut — sinkron dulu untuk mengedit",
+    "editFullEmployee": "Ubah semua data karyawan"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",
@@ -4728,7 +4730,14 @@
     "fieldAccountNo": "No. Rekening",
     "fieldAccountName": "Nama Pemilik Rekening",
     "btnCancel": "Batal",
-    "btnSave": "Simpan"
+    "btnSave": "Simpan",
+    "directoryTitle": "Daftar Karyawan",
+    "directoryBannerTitle": "Perubahan daftar karyawan tidak memengaruhi pelaporan pajak",
+    "directoryBannerBody": "Menambah, mengubah, atau menghapus karyawan di sini tidak mengubah jumlah pelaporan pajak yang sudah dikirim maupun yang sedang disusun. Data pelaporan sebenarnya dikelola per bulan di slip gaji masing-masing (layar PPh Pribadi). Layar ini hanya direktori untuk merapikan data karyawan.",
+    "directorySearchPlaceholder": "Cari nama · no. staf · NPWP",
+    "filterAllTypes": "Semua jenis pekerja",
+    "filterAllStatus": "Semua status karyawan",
+    "directoryCount": "{count}"
   },
   "pph23Page": {
     "invoiceImageLabel": "Foto Faktur (Wajib)",
