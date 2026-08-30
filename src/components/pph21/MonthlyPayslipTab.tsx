@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -249,6 +249,60 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
         showMsg('error', data.error || tp('saveFailed'));
       }
     } catch { showMsg('error', tp('saveFailed')); }
+  };
+
+  // 2026-08-30: 이 급여명세에 연결된 직원 마스터 id 를 보장한다.
+  // 자체완결 payslip(직접 import 등)은 마스터 링크가 없을 수 있으므로, 없으면
+  // payslip 의 자체 신원(이름/NPWP/PTKP/총급여)으로 마스터를 생성 후 연결한다.
+  // → 직원정보 편집이 마스터 유무와 무관하게 항상 가능해진다 (정보성 편집).
+  // payslip.id → 진행 중/완료된 마스터 생성 Promise. 연속 편집 시 중복 생성 방지.
+  const ensuringRef = useRef<Map<string, Promise<string | null>>>(new Map());
+  const ensureEmployeeId = (ps: Payslip): Promise<string | null> => {
+    if (ps.employee?.id) return Promise.resolve(ps.employee.id);
+    const existing = ensuringRef.current.get(ps.id);
+    if (existing) return existing;
+    const p = createAndLinkEmployee(ps);
+    ensuringRef.current.set(ps.id, p);
+    return p;
+  };
+  const createAndLinkEmployee = async (ps: Payslip): Promise<string | null> => {
+    try {
+      const createRes = await fetch('/api/tax/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId,
+          employeeName: ps.employee_name || tp('noNpwp'),
+          grossSalary: Number(ps.total_gross || ps.base_salary || 0),
+          employeeNpwp: ps.employee_npwp || undefined,
+          ptkpCategory: ps.ptkp_category || undefined,
+        }),
+      });
+      const cd = await createRes.json();
+      if (!cd.success || !cd.data?.id) { showMsg('error', cd.error || tp('saveFailed')); return null; }
+      const newId = cd.data.id as string;
+      // payslip 에 링크 (PUT 은 ...updates 스프레드라 employee_id 를 받는다)
+      await fetch('/api/tax/monthly-payslip', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: ps.id, employee_id: newId }),
+      });
+      return newId;
+    } catch { showMsg('error', tp('saveFailed')); return null; }
+  };
+
+  // 인라인 직원정보 편집 진입점 — 마스터 보장 후 PATCH.
+  const commitEmployeeField = async (ps: Payslip, field: string, value: string) => {
+    if (ps.status === 'SUBMITTED') return;
+    const empId = await ensureEmployeeId(ps);
+    if (!empId) return;
+    await updateEmployeeMaster(empId, { [field]: value });
+  };
+
+  // "직원정보 전체 수정" — 마스터 보장 후 전체 폼을 연다.
+  const openFullEmployeeEditForPayslip = async (ps: Payslip) => {
+    const empId = await ensureEmployeeId(ps);
+    if (empId) await openFullEmployeeEdit(empId);
   };
 
   // 2026-08-30: 급여 상세에서 직원 마스터(employee_payroll) 필드 인라인 수정.
@@ -527,21 +581,16 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                       <div className="rounded-md border border-slate-200 bg-white p-3">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="text-xs font-bold text-gray-600">{tp('secEmployeeInfo')}</h4>
-                          {ps.employee?.id ? (
-                            <Button size="sm" variant="outline" className="h-7 text-[11px]"
-                              onClick={() => openFullEmployeeEdit(ps.employee!.id)}>
-                              <UserCog className="h-3.5 w-3.5 mr-1" />{tp('editFullEmployee')}
-                            </Button>
-                          ) : (
-                            <span className="text-[10px] text-amber-600">{tp('employeeMasterUnlinked')}</span>
-                          )}
+                          <Button size="sm" variant="outline" className="h-7 text-[11px]"
+                            disabled={ps.status === 'SUBMITTED'}
+                            onClick={() => openFullEmployeeEditForPayslip(ps)}>
+                            <UserCog className="h-3.5 w-3.5 mr-1" />{tp('editFullEmployee')}
+                          </Button>
                         </div>
                         {(() => {
-                          const empId = ps.employee?.id;
-                          const disabled = !empId || ps.status === 'SUBMITTED';
+                          const disabled = ps.status === 'SUBMITTED';
                           const commit = (field: string, value: string) => {
-                            if (!empId) return;
-                            updateEmployeeMaster(empId, { [field]: value });
+                            commitEmployeeField(ps, field, value);
                           };
                           const cellCls = 'h-8 text-xs';
                           return (
