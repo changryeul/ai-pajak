@@ -12,7 +12,7 @@ import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import {
   Users, Loader2, CheckCircle, AlertTriangle, Save, Sparkles, FileText,
-  Upload, Download,
+  Upload, Download, Pencil, Trash2, Plus,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
@@ -256,15 +256,84 @@ export default function PPh21PayrollPage() {
     finally { setIsSaving(false); }
   };
 
-  
+  // 2026-08-30: 등록된 직원(인사 마스터)을 편집 모드로 연다.
+  // DB row(snake_case) → Dialog form(camelCase) 매핑. 저장은 기존 saveEmployee
+  // (POST with id → update + 변경이력 diff) 를 그대로 재사용.
+  const openEditEmployee = (emp: Employee) => {
+    const s = (v: unknown) => (v == null ? '' : String(v));
+    setForm({
+      id: emp.id,
+      employeeName: s(emp.employee_name),
+      employeeNpwp: s(emp.employee_npwp),
+      employeeNik: s(emp.employee_nik),
+      ptkpCategory: emp.ptkp_category || 'TK0',
+      grossSalary: s(emp.gross_salary),
+      jhtEmployee: s(emp.jht_employee),
+      jpEmployee: s(emp.jp_employee),
+      otherDeductions: s(emp.other_deductions),
+      positionAllowance: s(emp.position_allowance),
+      mealAllowance: s(emp.meal_allowance),
+      transportAllowance: s(emp.transport_allowance),
+      otherAllowance: s(emp.other_allowances),
+      bpjsKesehatan: s(emp.bpjs_kesehatan),
+      bonus: s(emp.bonus),
+      thr: s(emp.thr),
+      employeeNumber: s(emp.employee_number),
+      position: s(emp.position),
+      department: s(emp.department),
+      workerType: emp.worker_type || 'REGULAR',
+      employmentStatus: s(emp.employment_status),
+      hireDate: s(emp.hire_date),
+      resignDate: s(emp.resign_date),
+      birthDate: s(emp.birth_date),
+      gender: s(emp.gender),
+      maritalStatus: s(emp.marital_status),
+      email: s(emp.email),
+      phone: s(emp.phone),
+      address: s(emp.address),
+      bankName: s(emp.bank_name),
+      bankAccountNo: s(emp.bank_account_no),
+      bankAccountName: s(emp.bank_account_name),
+      emergencyContactName: s(emp.emergency_contact_name),
+      emergencyContactPhone: s(emp.emergency_contact_phone),
+      notes: s(emp.notes),
+    });
+    setShowForm(true);
+  };
+
+  const deleteEmployee = async (emp: Employee) => {
+    if (!window.confirm(tp('deactivateConfirm'))) return;
+    try {
+      const res = await fetch(`/api/tax/employees?id=${emp.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', tp('employeeDeactivated'));
+        loadEmployees();
+      } else {
+        showMsg('error', data.error || 'Failed');
+      }
+    } catch { showMsg('error', 'Error'); }
+  };
+
+
   // Calculate TER for all employees
-  
+
   if (!session) {
     return <div className="container mx-auto py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" /></div>;
   }
 
   // Header progress step — 단일 화면이라 고정.
   const currentStep = 2;
+
+  // worker_type → 표시 라벨 (COMMISSIONER 등 라벨 없는 유형은 REGULAR 로 폴백).
+  const workerLabel = (t?: string | null) => {
+    switch (t) {
+      case 'CONTRACT': return tp('workerContract');
+      case 'FREELANCER': return tp('workerFreelancer');
+      case 'DAILY': return tp('workerDaily');
+      default: return tp('workerRegular');
+    }
+  };
 
   // Worker-type cards definition
   const workerCards: Array<{
@@ -350,6 +419,64 @@ export default function PPh21PayrollPage() {
             setShowForm(true);
           }}
         />
+      </div>
+
+      {/* 2026-08-30: 등록된 직원(인사 마스터) 편집 리스트 — 각 행 클릭/편집 시
+          기존 Dialog 를 edit 모드로 열고, 삭제(비활성화)도 여기서 수행.
+          #44 거래데이터 삭제 후에도 남는 직원 명부를 여기서 직접 수정/정리. */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+            <Users className="h-4 w-4 text-blue-600" />
+            {tp('employeeList')} <span className="text-slate-400 font-normal">({employees.length})</span>
+          </h3>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { setForm(emptyForm); setShowForm(true); }}
+            disabled={!customerId}
+          >
+            <Plus className="h-4 w-4 mr-1" />{tp('newEmployee')}
+          </Button>
+        </div>
+        {employees.length === 0 ? (
+          <div className="rounded-xl border border-dashed p-6 text-center text-sm text-slate-400">
+            {tp('noEmployees')}
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {employees.map(emp => (
+              <div
+                key={emp.id}
+                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 hover:bg-blue-50/40 transition-colors"
+              >
+                <button
+                  onClick={() => openEditEmployee(emp)}
+                  className="flex-1 flex items-center gap-3 min-w-0 text-left"
+                  title={tp('dialogTitleEdit')}
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{emp.employee_name}</p>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {emp.employee_number ? `${emp.employee_number} · ` : ''}
+                      {emp.position || workerLabel(emp.worker_type)}
+                      {emp.employee_npwp ? ` · ${emp.employee_npwp}` : ''}
+                    </p>
+                  </div>
+                  <span className="ml-auto text-xs font-mono text-slate-600 whitespace-nowrap">{fmt(Number(emp.gross_salary) || 0)}</span>
+                </button>
+                <div className="flex items-center gap-1">
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditEmployee(emp)} title={tp('dialogTitleEdit')}>
+                    <Pencil className="h-4 w-4 text-slate-500" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => deleteEmployee(emp)} title={tp('deactivateConfirm')}>
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 2026-06-26: 인라인 직원 등록 Dialog — 표준 템플릿이 수집하는 모든 필드
