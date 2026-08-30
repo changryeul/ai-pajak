@@ -12,7 +12,7 @@ import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
 import { EmployeeFormDialog } from '@/components/pph21/EmployeeFormDialog';
 import {
   Users, Loader2, CheckCircle, AlertTriangle, Sparkles, FileText,
-  Upload, Download, Pencil, Trash2, Plus,
+  Upload, Download,
 } from 'lucide-react';
 import { MonthlyPayslipTab } from '@/components/pph21/MonthlyPayslipTab';
 import { ScreenHeader } from '@/components/tax';
@@ -147,46 +147,12 @@ export default function PPh21PayrollPage() {
     loadSyncStatus();
   }, [sessionLoading, loadEmployees, loadSyncStatus]);
 
-  // 2026-08-30: 등록된 직원(인사 마스터)을 편집 모드로 연다. 폼 상태·저장은
-  // 공용 EmployeeFormDialog 가 담당하므로 여기선 대상 직원만 넘긴다.
-  const openEditEmployee = (emp: Employee) => {
-    setEditingEmployee(emp);
-    setShowForm(true);
-  };
-
-  const deleteEmployee = async (emp: Employee) => {
-    if (!window.confirm(tp('deactivateConfirm'))) return;
-    try {
-      const res = await fetch(`/api/tax/employees?id=${emp.id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        showMsg('success', tp('employeeDeactivated'));
-        loadEmployees();
-      } else {
-        showMsg('error', data.error || 'Failed');
-      }
-    } catch { showMsg('error', 'Error'); }
-  };
-
-
-  // Calculate TER for all employees
-
   if (!session) {
     return <div className="container mx-auto py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" /></div>;
   }
 
   // Header progress step — 단일 화면이라 고정.
   const currentStep = 2;
-
-  // worker_type → 표시 라벨 (COMMISSIONER 등 라벨 없는 유형은 REGULAR 로 폴백).
-  const workerLabel = (t?: string | null) => {
-    switch (t) {
-      case 'CONTRACT': return tp('workerContract');
-      case 'FREELANCER': return tp('workerFreelancer');
-      case 'DAILY': return tp('workerDaily');
-      default: return tp('workerRegular');
-    }
-  };
 
   // Worker-type cards definition
   const workerCards: Array<{
@@ -274,63 +240,8 @@ export default function PPh21PayrollPage() {
         />
       </div>
 
-      {/* 2026-08-30: 등록된 직원(인사 마스터) 편집 리스트 — 각 행 클릭/편집 시
-          기존 Dialog 를 edit 모드로 열고, 삭제(비활성화)도 여기서 수행.
-          #44 거래데이터 삭제 후에도 남는 직원 명부를 여기서 직접 수정/정리. */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-            <Users className="h-4 w-4 text-blue-600" />
-            {tp('employeeList')} <span className="text-slate-400 font-normal">({employees.length})</span>
-          </h3>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => { setEditingEmployee(null); setShowForm(true); }}
-            disabled={!customerId}
-          >
-            <Plus className="h-4 w-4 mr-1" />{tp('newEmployee')}
-          </Button>
-        </div>
-        {employees.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-6 text-center text-sm text-slate-400">
-            {tp('noEmployees')}
-          </div>
-        ) : (
-          <div className="space-y-1.5">
-            {employees.map(emp => (
-              <div
-                key={emp.id}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 hover:bg-blue-50/40 transition-colors"
-              >
-                <button
-                  onClick={() => openEditEmployee(emp)}
-                  className="flex-1 flex items-center gap-3 min-w-0 text-left"
-                  title={tp('dialogTitleEdit')}
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{emp.employee_name}</p>
-                    <p className="text-[11px] text-slate-500 truncate">
-                      {emp.employee_number ? `${emp.employee_number} · ` : ''}
-                      {emp.position || workerLabel(emp.worker_type)}
-                      {emp.employee_npwp ? ` · ${emp.employee_npwp}` : ''}
-                    </p>
-                  </div>
-                  <span className="ml-auto text-xs font-mono text-slate-600 whitespace-nowrap">{fmt(Number(emp.gross_salary) || 0)}</span>
-                </button>
-                <div className="flex items-center gap-1">
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditEmployee(emp)} title={tp('dialogTitleEdit')}>
-                    <Pencil className="h-4 w-4 text-slate-500" />
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => deleteEmployee(emp)} title={tp('deactivateConfirm')}>
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* 2026-08-30: 직원 목록은 별도 '직원 목록' 메뉴(/tax/employees)로 분리.
+          PPh21 화면은 월별 급여 신고에만 집중 (사용자 요청). */}
 
       {/* 2026-08-30: 직원 등록/수정 — 공용 EmployeeFormDialog 로 추출.
           직원목록 페이지 · 급여 상세와 동일 컴포넌트 재사용. */}

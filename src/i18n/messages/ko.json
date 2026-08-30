@@ -4800,7 +4800,8 @@
     "directorySearchPlaceholder": "이름 · 사번 · NPWP 검색",
     "filterAllTypes": "전체 직군",
     "filterAllStatus": "전체 고용형태",
-    "directoryCount": "{count}명"
+    "directoryCount": "{count}명",
+    "downloadCsvTemplate": "CSV 다운로드 (PPh21 양식)"
   },
   "pph23Page": {
     "invoiceImageLabel": "인보이스 사진 (필수)",

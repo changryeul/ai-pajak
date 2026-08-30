@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { EmployeeFormDialog } from '@/components/pph21/EmployeeFormDialog';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
-import { Users, Loader2, Pencil, Trash2, Plus, Info, Search } from 'lucide-react';
+import { Users, Loader2, Pencil, Trash2, Plus, Info, Search, Download } from 'lucide-react';
 
 interface EmployeeRow {
   id: string;
@@ -26,6 +26,77 @@ const WORKER_TYPES = ['REGULAR', 'CONTRACT', 'DAILY', 'FREELANCER', 'COMMISSIONE
 const EMPLOYMENT_STATUSES = ['PKWTT', 'PKWT', 'Consultant'];
 
 function fmt(n: number) { return `Rp ${n.toLocaleString('id-ID')}`; }
+
+// 표준 PPh21 43-컬럼 템플릿(`public/templates/pph21-template.xlsx`)과 동일한 헤더.
+// 다운로드 CSV 를 그대로 다시 업로드하면 import 로 왕복되도록 순서·명칭 일치.
+const PPH21_TEMPLATE_HEADERS = [
+  'employee_number',
+  'Employment status\r\n(Pegawai Tetap: 1, Pegawai Tidak Tetap: 2, Bukan Pegawai: 3)',
+  'employee_name', 'employee_npwp', 'employee_nik', 'ptkp_category',
+  'tax method\r\n_gross/gross up', 'gross_salary', 'position_allowance', 'overtime_pay',
+  'meal_allowance', 'transport_allowance', 'other_allowances', 'natura_fasilitas bkn uang',
+  'bonus', 'THR', 'pinjaman gaji\r\n_loan from salary', 'potong gaji\r\n_deduction from salary',
+  'jkk', 'jkm', 'jht_company', 'jp_company', 'bpjs kesehatan\r\n_company', 'JKP_company',
+  'jht_employee', 'jp_employee', 'bpjs kesehatan\r\n_employee', 'JKP_employee',
+  'position', 'department', 'join_date', 'resign_date', 'birth_date', 'gender',
+  'email', 'phone', 'address', 'bank_name', 'bank_account_no', 'bank_account_name',
+  'emergency_contact_name', 'emergency_contact_phone', 'notes',
+];
+
+// 각 템플릿 헤더 → employee_payroll 행에서 값을 뽑아내는 매퍼.
+// 행에 없는 항목(overtime_pay/natura/loan 등)은 빈 값으로 둔다.
+function employmentStatusNum(s: unknown): string {
+  return s === 'PKWTT' ? '1' : s === 'PKWT' ? '2' : s === 'Consultant' ? '3' : '';
+}
+function taxMethodLabel(m: unknown): string {
+  return String(m || '').toUpperCase() === 'GROSS_UP' ? 'Gross up' : m ? 'Gross' : '';
+}
+function templateValue(header: string, e: EmployeeRow): string {
+  const v = (k: string) => { const x = e[k]; return x == null ? '' : String(x); };
+  switch (header) {
+    case 'employee_number': return v('employee_number');
+    case 'Employment status\r\n(Pegawai Tetap: 1, Pegawai Tidak Tetap: 2, Bukan Pegawai: 3)':
+      return employmentStatusNum(e.employment_status);
+    case 'employee_name': return v('employee_name');
+    case 'employee_npwp': return v('employee_npwp');
+    case 'employee_nik': return v('employee_nik');
+    case 'ptkp_category': return v('ptkp_category');
+    case 'tax method\r\n_gross/gross up': return taxMethodLabel(e.pph21_method);
+    case 'gross_salary': return v('gross_salary');
+    case 'position_allowance': return v('position_allowance');
+    case 'meal_allowance': return v('meal_allowance');
+    case 'transport_allowance': return v('transport_allowance');
+    case 'other_allowances': return v('other_allowance');
+    case 'bonus': return v('bonus');
+    case 'THR': return v('thr');
+    case 'jht_company': return v('jht_company');
+    case 'jp_company': return v('jp_company');
+    case 'bpjs kesehatan\r\n_company': return v('bpjs_kes_company');
+    case 'jht_employee': return v('jht_employee');
+    case 'jp_employee': return v('jp_employee');
+    case 'bpjs kesehatan\r\n_employee': return v('bpjs_kesehatan');
+    case 'position': return v('position');
+    case 'department': return v('department');
+    case 'join_date': return v('hire_date');
+    case 'resign_date': return v('resign_date');
+    case 'birth_date': return v('birth_date');
+    case 'gender': return v('gender');
+    case 'email': return v('email');
+    case 'phone': return v('phone');
+    case 'address': return v('address');
+    case 'bank_name': return v('bank_name');
+    case 'bank_account_no': return v('bank_account_no');
+    case 'bank_account_name': return v('bank_account_name');
+    case 'emergency_contact_name': return v('emergency_contact_name');
+    case 'emergency_contact_phone': return v('emergency_contact_phone');
+    case 'notes': return v('notes');
+    // 템플릿엔 있으나 마스터에 없는 항목 → 빈 값
+    default: return '';
+  }
+}
+function csvCell(s: string): string {
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
 
 export default function EmployeeDirectoryPage() {
   const tp = useTranslations('pph21Page');
@@ -70,6 +141,23 @@ export default function EmployeeDirectoryPage() {
     });
   }, [employees, query, typeFilter, statusFilter]);
 
+  // PPh21 템플릿 형식 CSV 다운로드 — 현재 로드된 전체 직원 명부를 43-컬럼으로 내보냄.
+  const exportCsv = () => {
+    if (employees.length === 0) return;
+    const headerLine = PPH21_TEMPLATE_HEADERS.map(csvCell).join(',');
+    const bodyLines = employees.map(e =>
+      PPH21_TEMPLATE_HEADERS.map(h => csvCell(templateValue(h, e))).join(','));
+    const csv = '﻿' + [headerLine, ...bodyLines].join('\r\n'); // BOM for Excel
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `pph21-employees-${stamp}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const deleteEmployee = async (emp: EmployeeRow) => {
     if (!window.confirm(tp('deactivateConfirm'))) return;
     try {
@@ -89,9 +177,14 @@ export default function EmployeeDirectoryPage() {
           <Users className="h-5 w-5 text-blue-600" />{tp('directoryTitle')}
           <span className="text-slate-400 font-normal text-base">({employees.length})</span>
         </h1>
-        <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }} disabled={!customerId}>
-          <Plus className="h-4 w-4 mr-1" />{tp('newEmployee')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={exportCsv} disabled={employees.length === 0}>
+            <Download className="h-4 w-4 mr-1" />{tp('downloadCsvTemplate')}
+          </Button>
+          <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }} disabled={!customerId}>
+            <Plus className="h-4 w-4 mr-1" />{tp('newEmployee')}
+          </Button>
+        </div>
       </div>
 
       {/* 정보성 안내 — 명부 변경은 세금 신고와 무관 */}

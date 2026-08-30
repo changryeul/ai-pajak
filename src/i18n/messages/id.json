@@ -4737,7 +4737,8 @@
     "directorySearchPlaceholder": "Cari nama · no. staf · NPWP",
     "filterAllTypes": "Semua jenis pekerja",
     "filterAllStatus": "Semua status karyawan",
-    "directoryCount": "{count}"
+    "directoryCount": "{count}",
+    "downloadCsvTemplate": "Unduh CSV (format PPh21)"
   },
   "pph23Page": {
     "invoiceImageLabel": "Foto Faktur (Wajib)",

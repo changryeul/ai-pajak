@@ -4737,7 +4737,8 @@
     "directorySearchPlaceholder": "Search name · staff no · NPWP",
     "filterAllTypes": "All worker types",
     "filterAllStatus": "All employment types",
-    "directoryCount": "{count}"
+    "directoryCount": "{count}",
+    "downloadCsvTemplate": "Download CSV (PPh21 format)"
   },
   "pph23Page": {
     "invoiceImageLabel": "Invoice Photo (Required)",
