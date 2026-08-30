@@ -134,7 +134,7 @@
     "submissions": "Submissions",
     "invoiceCapture": "Invoice Capture",
     "taxNews": "Tax News",
-    "monthlyFiling": "Monthly Filing",
+    "monthlyFiling": "SPT Masa (Monthly Filing)",
     "annualFiling": "Annual Filing (SPT)",
     "withholdingTax": "Withholding Tax (PPh 23/4(2))",
     "corporateIncome": "Corporate Income (PPh 25/UMKM)",
@@ -285,7 +285,8 @@
     "opIdBilling": "ID Billing Issuance",
     "supervisorBillingHandover": "ID Billing Handover",
     "supervisorAffiliation": "Operator Affiliation",
-    "opWorkqueue": "Customer Workqueue"
+    "opWorkqueue": "Customer Workqueue",
+    "annualFilingCompany": "SPT Badan (Annual Filing)"
   },
   "employeeHr": {
     "uploadSection": {

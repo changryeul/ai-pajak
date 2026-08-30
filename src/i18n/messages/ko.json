@@ -134,7 +134,7 @@
     "submissions": "제출 현황",
     "invoiceCapture": "사진→자동신고",
     "taxNews": "세금 뉴스",
-    "monthlyFiling": "월 신고",
+    "monthlyFiling": "SPT MASA (월신고)",
     "annualFiling": "연 신고 (SPT)",
     "withholdingTax": "원천세 (PPh 23/4(2))",
     "corporateIncome": "법인소득세 (PPh 25/UMKM)",
@@ -285,7 +285,8 @@
     "opIdBilling": "ID Billing 발행",
     "supervisorBillingHandover": "ID Billing 이관현황",
     "supervisorAffiliation": "상담원 소속관리",
-    "opWorkqueue": "상담원 업무함"
+    "opWorkqueue": "상담원 업무함",
+    "annualFilingCompany": "SPT BADAN (연신고)"
   },
   "employeeHr": {
     "uploadSection": {

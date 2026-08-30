@@ -122,7 +122,7 @@ const navItems: NavSection[] = [
       },
       // 연 신고
       {
-        href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFiling',
+        href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFilingCompany',
         customerTypes: ['COMPANY'],
         children: [
           { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.closingWork' },

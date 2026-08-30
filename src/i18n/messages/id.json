@@ -134,7 +134,7 @@
     "submissions": "Status Pengajuan",
     "invoiceCapture": "Tangkap Faktur",
     "taxNews": "Berita Pajak",
-    "monthlyFiling": "Pelaporan Bulanan",
+    "monthlyFiling": "SPT Masa (Bulanan)",
     "annualFiling": "Pelaporan Tahunan (SPT)",
     "withholdingTax": "PPh 23/4(2)",
     "corporateIncome": "PPh 25/UMKM",
@@ -285,7 +285,8 @@
     "opIdBilling": "Penerbitan ID Billing",
     "supervisorBillingHandover": "Serah Terima ID Billing",
     "supervisorAffiliation": "Afiliasi Konsultan",
-    "opWorkqueue": "Antrean Kerja Pelanggan"
+    "opWorkqueue": "Antrean Kerja Pelanggan",
+    "annualFilingCompany": "SPT Badan (Tahunan)"
   },
   "employeeHr": {
     "uploadSection": {
