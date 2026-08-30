@@ -28,7 +28,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -474,18 +474,18 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
             <p className="font-semibold text-gray-900 mb-3">{t('domesticAssetTrend')}</p>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={domesticAssetSeries}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <BarChart data={domesticAssetSeries}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" vertical={false} />
                   <XAxis dataKey="year" fontSize={12} />
                   <YAxis fontSize={12} />
-                  <Tooltip />
+                  <Tooltip cursor={{ fill: 'rgba(148,163,184,0.10)' }} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="building" name={t('serBuilding')} stroke="#f59e0b" />
-                  <Line type="monotone" dataKey="vehicle" name={t('serVehicle')} stroke="#16a34a" />
-                  <Line type="monotone" dataKey="stocks" name={t('serStocks')} stroke="#dc2626" />
-                  <Line type="monotone" dataKey="land" name={t('serLand')} stroke="#f97316" />
-                  <Line type="monotone" dataKey="cash" name={t('serCash')} stroke="#2563eb" />
-                </LineChart>
+                  <Bar dataKey="building" name={t('serBuilding')} fill="#f59e0b" radius={[3, 3, 0, 0]} maxBarSize={16} />
+                  <Bar dataKey="vehicle" name={t('serVehicle')} fill="#16a34a" radius={[3, 3, 0, 0]} maxBarSize={16} />
+                  <Bar dataKey="stocks" name={t('serStocks')} fill="#dc2626" radius={[3, 3, 0, 0]} maxBarSize={16} />
+                  <Bar dataKey="land" name={t('serLand')} fill="#f97316" radius={[3, 3, 0, 0]} maxBarSize={16} />
+                  <Bar dataKey="cash" name={t('serCash')} fill="#2563eb" radius={[3, 3, 0, 0]} maxBarSize={16} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -496,15 +496,15 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
             <p className="font-semibold text-gray-900 mb-3">{t('domesticLiabilityTrend')}</p>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={domesticLiabilitySeries}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <BarChart data={domesticLiabilitySeries}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" vertical={false} />
                   <XAxis dataKey="year" fontSize={12} />
                   <YAxis fontSize={12} />
-                  <Tooltip />
+                  <Tooltip cursor={{ fill: 'rgba(148,163,184,0.10)' }} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="loan" name={t('serLoan')} stroke="#991b1b" />
-                  <Line type="monotone" dataKey="credit" name={t('serCredit')} stroke="#2563eb" />
-                </LineChart>
+                  <Bar dataKey="loan" name={t('serLoan')} fill="#991b1b" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                  <Bar dataKey="credit" name={t('serCredit')} fill="#2563eb" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -518,16 +518,16 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
             <p className="font-semibold text-gray-900 mb-3">{t('foreignAssetTrend')}</p>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={foreignAssetSeries}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <BarChart data={foreignAssetSeries}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" vertical={false} />
                   <XAxis dataKey="year" fontSize={12} />
                   <YAxis fontSize={12} />
-                  <Tooltip />
+                  <Tooltip cursor={{ fill: 'rgba(148,163,184,0.10)' }} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="property" name={t('serForeignRealEstate')} stroke="#f59e0b" />
-                  <Line type="monotone" dataKey="stocks" name={t('serForeignStocks')} stroke="#16a34a" />
-                  <Line type="monotone" dataKey="cash" name={t('serForeignCash')} stroke="#2563eb" />
-                </LineChart>
+                  <Bar dataKey="property" name={t('serForeignRealEstate')} fill="#f59e0b" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                  <Bar dataKey="stocks" name={t('serForeignStocks')} fill="#16a34a" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                  <Bar dataKey="cash" name={t('serForeignCash')} fill="#2563eb" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -538,14 +538,14 @@ export function PersonalDashboardV3({ customerId, customerName }: Props) {
             <p className="font-semibold text-gray-900 mb-3">{t('foreignLiabilityTrend')}</p>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={foreignLiabilitySeries}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <BarChart data={foreignLiabilitySeries}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" vertical={false} />
                   <XAxis dataKey="year" fontSize={12} />
                   <YAxis fontSize={12} />
-                  <Tooltip />
+                  <Tooltip cursor={{ fill: 'rgba(148,163,184,0.10)' }} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="loan" name={t('serForeignLoan')} stroke="#4f46e5" />
-                </LineChart>
+                  <Bar dataKey="loan" name={t('serForeignLoan')} fill="#4f46e5" radius={[3, 3, 0, 0]} maxBarSize={24} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
