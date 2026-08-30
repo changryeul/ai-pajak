@@ -286,7 +286,8 @@
     "supervisorBillingHandover": "Serah Terima ID Billing",
     "supervisorAffiliation": "Afiliasi Konsultan",
     "opWorkqueue": "Antrean Kerja Pelanggan",
-    "annualFilingCompany": "SPT Badan (Tahunan)"
+    "annualFilingCompany": "SPT Badan (Tahunan)",
+    "monthlyBoard": "Papan & Panduan Lapor"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10731,5 +10732,45 @@
     "umkmTotalPaid": "Total Dibayar",
     "annualTitle": "SPT Tahunan",
     "employeesTitle": "Data Kepegawaian"
+  },
+  "monthlyBoard": {
+    "title": "Papan Lapor Bulan Ini",
+    "subtitle": "Progres dan langkah berikutnya untuk 4 pelaporan bulanan",
+    "showGuide": "Lihat panduan",
+    "loading": "Memuat…",
+    "introTitle": "Baru pertama lapor bulanan?",
+    "introBody": "Perusahaan melaporkan dan membayar 4 pajak di bawah ini setiap bulan.\nAlurnya selalu sama: ① unggah data (Anda) → ② ditinjau konsultan → ③ disetujui supervisor → ④ terima ID Billing → ⑤ bayar di bank.\nAnda hanya melakukan ① dan ⑤ — sisanya ditangani konsultan JTC. Ikuti [Tugas sekarang] di tiap kartu.",
+    "stepData": "Data",
+    "stepReview": "Tinjauan",
+    "stepApprove": "Persetujuan",
+    "stepBilling": "ID Billing",
+    "stepPay": "Bayar",
+    "notApplicable": "Tidak berlaku (bukan PKP)",
+    "allDone": "Selesai bulan ini ✓",
+    "payBy": "Bayar sblm",
+    "whatIsThis": "Apa ini?",
+    "todoLabel": "Tugas sekarang:",
+    "todoDone": "Semua selesai untuk bulan ini.",
+    "todoWait": "Konsultan sedang meninjau — kami beri tahu jika ada yang perlu dilengkapi.",
+    "todoPay": "Bayar di bank (ATM/e-banking) dengan kode ID Billing.",
+    "goEnter": "Unggah data",
+    "goBilling": "Lihat ID Billing",
+    "legend": "Tahapan: unggah data (Anda) → tinjauan konsultan (JTC) → persetujuan → ID Billing → bayar di bank (Anda). Jatuh tempo bayar: gaji & pemotongan tgl 10, angsuran badan tgl 15, PPN akhir bulan berikutnya.",
+    "pph21Name": "PPh 21 Karyawan",
+    "pph21Short": "Pajak penghasilan yang dipotong dari gaji karyawan",
+    "pph21Guide": "Wajib lapor tiap bulan jika membayar gaji.\n• Apa: slip gaji bulan ini (gaji, tunjangan, BPJS)\n• Cara: unduh template Excel di layar Gaji, isi lalu unggah — pajak dihitung otomatis.\n• Jatuh tempo: bayar tgl 10, lapor tgl 20 bulan berikutnya",
+    "withholdingName": "Pemotongan (PPh 23·4(2) dll.)",
+    "withholdingShort": "Pajak yang dipotong saat membayar jasa, sewa, dll.",
+    "withholdingGuide": "Jika membayar jasa, sewa, atau bunga, potong sebagian dan laporkan.\n• Apa: transaksi pembayaran bulan ini + foto invoice\n• Cara: input satu per satu atau unggah Excel di layar Pemotongan\n• Jatuh tempo: bayar tgl 10, lapor tgl 20\n• Bulan tanpa transaksi tidak perlu unggah.",
+    "prepaidName": "Angsuran Badan (PPh Final·PPh 25)",
+    "prepaidShort": "Cicilan bulanan pajak badan tahunan",
+    "prepaidGuide": "Pajak badan dicicil tiap bulan, bukan sekali setahun.\n• UMKM (omzet ≤ 4,8 M): omzet bulanan × 0,5% (PPh Final)\n• Umum: angsuran bulanan berdasar tahun lalu (PPh 25)\n• Cara: masukkan omzet bulan ini di layar Angsuran lalu kirim.\n• Jatuh tempo: bayar tgl 15 bulan berikutnya",
+    "ppnName": "PPN",
+    "ppnShort": "PPN keluaran/masukan untuk PKP",
+    "ppnGuide": "Hanya untuk perusahaan berstatus PKP.\n• Apa: faktur penjualan (Keluaran) dan pembelian (Masukan) bulan ini\n• Cara: unggah Excel di layar PPN; bayar selisih keluaran dikurangi masukan\n• Jatuh tempo: bayar & lapor akhir bulan berikutnya",
+    "pph21Todo1": "Unggah data gaji bulan ini.",
+    "withholdingTodo1": "Unggah transaksi pemotongan bulan ini (lewati jika tidak ada).",
+    "prepaidTodo1": "Masukkan dan kirim omzet bulan ini.",
+    "ppnTodo1": "Unggah faktur penjualan/pembelian bulan ini."
   }
 }

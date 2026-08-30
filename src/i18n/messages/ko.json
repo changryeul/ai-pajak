@@ -286,7 +286,8 @@
     "supervisorBillingHandover": "ID Billing 이관현황",
     "supervisorAffiliation": "상담원 소속관리",
     "opWorkqueue": "상담원 업무함",
-    "annualFilingCompany": "SPT BADAN (연신고)"
+    "annualFilingCompany": "SPT BADAN (연신고)",
+    "monthlyBoard": "월신고 보드·안내"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10852,5 +10853,45 @@
     "umkmTotalPaid": "총 납부액",
     "annualTitle": "연 신고 (SPT Tahunan)",
     "employeesTitle": "직원 인사 기록"
+  },
+  "monthlyBoard": {
+    "title": "이번 달 신고 보드",
+    "subtitle": "매달 해야 할 신고 4가지의 진행 상황과 다음 할 일을 한눈에",
+    "showGuide": "안내 다시 보기",
+    "loading": "불러오는 중…",
+    "introTitle": "월신고, 처음이신가요?",
+    "introBody": "인도네시아 법인은 매달 아래 4가지 세금을 신고·납부합니다.\n각 세금마다 흐름은 같습니다: ① 자료 올리기(회사가 할 일) → ② 상담원 검토 → ③ 수퍼바이저 승인 → ④ ID Billing 수령 → ⑤ 은행 납부.\n회사가 직접 하는 일은 ①자료 올리기와 ⑤납부 두 가지뿐이고, 나머지는 JTC 상담원이 처리합니다. 각 카드의 [지금 할 일]을 따라가면 됩니다.",
+    "stepData": "자료입력",
+    "stepReview": "상담원 검토",
+    "stepApprove": "승인",
+    "stepBilling": "ID Billing",
+    "stepPay": "납부",
+    "notApplicable": "해당 없음 (PKP 아님)",
+    "allDone": "이번 달 완료 ✓",
+    "payBy": "납부",
+    "whatIsThis": "이게 뭔가요?",
+    "todoLabel": "지금 할 일:",
+    "todoDone": "이번 달 처리가 모두 끝났습니다.",
+    "todoWait": "상담원이 검토 중입니다 — 요청이 오면 알림으로 알려드립니다.",
+    "todoPay": "ID Billing 번호로 은행(ATM/인터넷뱅킹)에서 납부해 주세요.",
+    "goEnter": "자료 올리기",
+    "goBilling": "ID Billing 보기",
+    "legend": "단계 안내: 자료입력(회사) → 상담원 검토(JTC) → 승인(수퍼바이저) → ID Billing 수령 → 은행 납부(회사). 납부 마감은 급여·원천세 익월 10일, 선납법인세 익월 15일, 부가세 익월 말일입니다.",
+    "pph21Name": "개인소득세 (PPh 21)",
+    "pph21Short": "직원 급여에서 원천징수하는 소득세",
+    "pph21Guide": "직원에게 급여를 주는 회사라면 매달 신고합니다.\n• 무엇을: 이번 달 직원 급여명세 (급여·수당·BPJS)\n• 어떻게: 급여 화면에서 표준 엑셀 양식을 내려받아 채워 올리면 세액이 자동 계산됩니다.\n• 마감: 납부 익월 10일 / 신고 익월 20일",
+    "withholdingName": "원천세 (PPh 23·4(2) 등)",
+    "withholdingShort": "용역비·임대료 등을 지급할 때 떼는 세금",
+    "withholdingGuide": "다른 회사나 개인에게 용역비, 임대료, 이자 등을 지급했다면 그 금액의 일부를 원천징수해 신고합니다.\n• 무엇을: 이번 달 지급 거래 내역 + 인보이스 사진\n• 어떻게: 원천세 화면에서 건별 입력 또는 엑셀 일괄 업로드\n• 마감: 납부 익월 10일 / 신고 익월 20일\n• 지급 거래가 없는 달은 올릴 것이 없습니다.",
+    "prepaidName": "선납법인세 (PPh Final·PPh 25)",
+    "prepaidShort": "연간 법인세를 매달 미리 내는 것",
+    "prepaidGuide": "법인세를 연말에 한 번에 내지 않고 매달 나눠 냅니다.\n• UMKM(연매출 48억 루피아 이하): 월 매출 × 0.5% (PPh Final)\n• 일반 법인: 작년 세액 기준 월 분납 (PPh 25)\n• 어떻게: 선납법인세 화면에서 이번 달 매출을 입력하고 [제출]하면 상담원 검토로 넘어갑니다.\n• 마감: 납부 익월 15일",
+    "ppnName": "부가세 (PPN)",
+    "ppnShort": "PKP 사업자의 매출·매입 부가세",
+    "ppnGuide": "PKP(과세사업자)로 등록된 회사만 해당합니다.\n• 무엇을: 이번 달 매출(Keluaran)·매입(Masukan) 세금계산서(faktur)\n• 어떻게: 부가세 화면에서 엑셀 일괄 업로드, 매출 부가세에서 매입 부가세를 뺀 차액을 납부\n• 마감: 납부·신고 모두 익월 말일",
+    "pph21Todo1": "이번 달 직원 급여자료를 올려주세요.",
+    "withholdingTodo1": "이번 달 원천세 거래를 올려주세요. (지급 거래가 없으면 건너뜁니다)",
+    "prepaidTodo1": "이번 달 매출을 입력하고 제출해 주세요.",
+    "ppnTodo1": "이번 달 매출·매입 faktur 를 올려주세요."
   }
 }

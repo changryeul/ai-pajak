@@ -104,6 +104,7 @@ const navItems: NavSection[] = [
         href: '#', icon: Receipt, labelKey: 'nav.monthlyFiling',
         customerTypes: ['COMPANY'],
         children: [
+          { href: '/tax/monthly-board', icon: BarChart3, labelKey: 'nav.monthlyBoard' },
           { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus' },
           { href: '/tax/pph21', icon: FileText, labelKey: 'nav.pph21Label' },
           { href: '/tax/pph23', icon: Receipt, labelKey: 'nav.withholdingTaxLabel' },

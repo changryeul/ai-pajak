@@ -286,7 +286,8 @@
     "supervisorBillingHandover": "ID Billing Handover",
     "supervisorAffiliation": "Operator Affiliation",
     "opWorkqueue": "Customer Workqueue",
-    "annualFilingCompany": "SPT Badan (Annual Filing)"
+    "annualFilingCompany": "SPT Badan (Annual Filing)",
+    "monthlyBoard": "Filing Board & Guide"
   },
   "employeeHr": {
     "uploadSection": {
@@ -10731,5 +10732,45 @@
     "umkmTotalPaid": "Total Paid",
     "annualTitle": "Annual Return (SPT Tahunan)",
     "employeesTitle": "Employee HR Records"
+  },
+  "monthlyBoard": {
+    "title": "This Month's Filing Board",
+    "subtitle": "Progress and next actions for the 4 monthly filings at a glance",
+    "showGuide": "Show guide",
+    "loading": "Loading…",
+    "introTitle": "New to monthly filing?",
+    "introBody": "Indonesian companies file and pay the 4 taxes below every month.\nEvery tax follows the same flow: ① upload data (you) → ② counselor review → ③ supervisor approval → ④ receive ID Billing → ⑤ pay at bank.\nYou only do ① and ⑤ — JTC counselors handle the rest. Just follow each card's [To do now].",
+    "stepData": "Data",
+    "stepReview": "Review",
+    "stepApprove": "Approval",
+    "stepBilling": "ID Billing",
+    "stepPay": "Payment",
+    "notApplicable": "N/A (not PKP)",
+    "allDone": "Done this month ✓",
+    "payBy": "Pay by",
+    "whatIsThis": "What is this?",
+    "todoLabel": "To do now:",
+    "todoDone": "Everything is done for this month.",
+    "todoWait": "Your counselor is reviewing — we'll notify you if anything is needed.",
+    "todoPay": "Pay at your bank (ATM/e-banking) using the ID Billing code.",
+    "goEnter": "Upload data",
+    "goBilling": "View ID Billing",
+    "legend": "Steps: upload data (you) → counselor review (JTC) → approval → ID Billing → bank payment (you). Payment deadlines: payroll & withholding by the 10th, prepaid corporate tax by the 15th, VAT by end of the following month.",
+    "pph21Name": "Employee Income Tax (PPh 21)",
+    "pph21Short": "Income tax withheld from employee salaries",
+    "pph21Guide": "File monthly if you pay salaries.\n• What: this month's payroll (salary, allowances, BPJS)\n• How: download the Excel template on the Payroll screen, fill and upload — tax is calculated automatically.\n• Due: pay by the 10th, report by the 20th of the following month",
+    "withholdingName": "Withholding Tax (PPh 23·4(2) etc.)",
+    "withholdingShort": "Tax withheld when paying services, rent, etc.",
+    "withholdingGuide": "If you paid service fees, rent, or interest, withhold part of it and file.\n• What: this month's payment transactions + invoice photos\n• How: enter one by one or bulk-upload Excel on the Withholding screen\n• Due: pay by the 10th, report by the 20th\n• Nothing to upload in months with no such payments.",
+    "prepaidName": "Prepaid Corporate Tax (PPh Final·PPh 25)",
+    "prepaidShort": "Monthly prepayment of annual corporate tax",
+    "prepaidGuide": "Corporate tax is prepaid monthly instead of once a year.\n• UMKM (revenue ≤ 4.8B IDR): monthly revenue × 0.5% (PPh Final)\n• Regular: monthly installment based on last year (PPh 25)\n• How: enter this month's revenue on the Prepaid screen and submit.\n• Due: pay by the 15th of the following month",
+    "ppnName": "VAT (PPN)",
+    "ppnShort": "Output/input VAT for PKP businesses",
+    "ppnGuide": "Only for PKP-registered companies.\n• What: this month's sales (Keluaran) and purchase (Masukan) tax invoices\n• How: bulk-upload Excel on the VAT screen; pay output minus input VAT\n• Due: pay & report by the end of the following month",
+    "pph21Todo1": "Upload this month's payroll data.",
+    "withholdingTodo1": "Upload this month's withholding transactions (skip if none).",
+    "prepaidTodo1": "Enter and submit this month's revenue.",
+    "ppnTodo1": "Upload this month's sales/purchase faktur."
   }
 }
