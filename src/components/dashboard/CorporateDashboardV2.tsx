@@ -6,7 +6,6 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3, Sparkles, ArrowRight } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { TaxAdvisoryPanel } from '@/components/dashboard/TaxAdvisoryPanel';
@@ -310,8 +309,8 @@ export function CorporateDashboardV2({
           {([
             { key: 'pph21', label: t('trendPph21'), color: '#3b82f6' },
             { key: 'withholding', label: t('trendWithholding'), color: '#10b981' },
-            { key: 'ppn', label: t('trendPpn'), color: '#f59e0b' },
             { key: 'prepaid', label: t('trendPrepaid'), color: '#8b5cf6' },
+            { key: 'ppn', label: t('trendPpn'), color: '#f59e0b' },
           ] as const).map((series) => {
             const total = chartData.reduce((sum, d) => sum + (d[series.key] ?? 0), 0);
             return (
@@ -420,15 +419,6 @@ export function CorporateDashboardV2({
       {/* AI Tax Advisory — PKP / UMKM transition / Tax Treaty */}
       <TaxAdvisoryPanel />
 
-      {/* CTAs — mirror to personal dashboard */}
-      <div className="flex gap-3">
-        <Button asChild className="bg-gray-800 hover:bg-gray-900 text-white">
-          <Link href={`/${locale}/tax/monthly-dashboard`}>{t('ctaMonthlyFiling')}</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href={`/${locale}/tax/filing-status`}>{tCta('viewProgressCta')}</Link>
-        </Button>
-      </div>
     </div>
   );
 }
