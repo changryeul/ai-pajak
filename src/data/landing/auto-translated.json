@@ -479,7 +479,7 @@
         "group": "법인 월관리",
         "badge": "월 선납",
         "typeLabel": "UMKM 월관리",
-        "price": "Rp 750,000",
+        "price": "Rp 300,000",
         "description": "소규모 법인 / Final Tax 중심",
         "meta": [
           "1개월 선납",
@@ -515,7 +515,7 @@
         "group": "법인 월관리",
         "badge": "월 선납",
         "typeLabel": "Basic 월관리",
-        "price": "Rp 1,500,000",
+        "price": "Rp 600,000",
         "description": "일반 법인 기본 세무 운영",
         "meta": [
           "1개월 선납",
@@ -551,7 +551,7 @@
         "group": "법인 월관리",
         "badge": "월 선납",
         "typeLabel": "Pro 월관리",
-        "price": "Rp 2,500,000",
+        "price": "Rp 1,200,000",
         "description": "월별 세무 운영 강화",
         "meta": [
           "1개월 선납",
@@ -588,7 +588,7 @@
         "group": "법인 월관리",
         "badge": "월 선납",
         "typeLabel": "Enterprise 맞춤 월관리",
-        "price": "Rp 3,500,000",
+        "price": "Rp 2,500,000",
         "description": "대량/맞춤 운영",
         "meta": [
           "1개월 선납",
@@ -738,9 +738,6 @@
         "faq": "FAQ"
       },
       "login": "로그인",
-      "signupCta": "회원가입",
-      "signupIndividualCta": "개인 가입",
-      "signupCompanyCta": "법인 가입",
       "viewPricing": "요금제 확인하기",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "복잡한 세무신고,",
@@ -1519,7 +1516,7 @@
         "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "UMKM Monthly Management",
-        "price": "Rp 750,000",
+        "price": "Rp 300,000",
         "description": "Small-scale entities / Final Tax-focused",
         "meta": [
           "1-month prepaid",
@@ -1555,7 +1552,7 @@
         "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "Basic Monthly Management",
-        "price": "Rp 1,500,000",
+        "price": "Rp 600,000",
         "description": "Essential tax operations for standard corporations",
         "meta": [
           "1-month prepaid",
@@ -1591,7 +1588,7 @@
         "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "Pro Monthly Management",
-        "price": "Rp 2,500,000",
+        "price": "Rp 1,200,000",
         "description": "Enhanced monthly tax operations",
         "meta": [
           "1-month prepaid",
@@ -1628,7 +1625,7 @@
         "group": "Corporate Monthly Management",
         "badge": "Monthly Prepaid",
         "typeLabel": "Enterprise Custom Monthly Management",
-        "price": "Rp 3,500,000",
+        "price": "Rp 2,500,000",
         "description": "High-volume / fully customized operations",
         "meta": [
           "1-month prepaid",
@@ -1778,9 +1775,6 @@
         "faq": "FAQ"
       },
       "login": "Log In",
-      "signupCta": "Sign Up",
-      "signupIndividualCta": "Individual Signup",
-      "signupCompanyCta": "Company Signup",
       "viewPricing": "View Pricing",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "Tax filing, simplified.",
@@ -2559,7 +2553,7 @@
         "group": "Pengelolaan Bulanan Badan",
         "badge": "monthly prepaid",
         "typeLabel": "Pengelolaan Bulanan UMKM",
-        "price": "Rp 750,000",
+        "price": "Rp 300,000",
         "description": "Badan skala kecil / berbasis Final Tax",
         "meta": [
           "Prabayar 1 bulan",
@@ -2595,7 +2589,7 @@
         "group": "Pengelolaan Bulanan Badan",
         "badge": "monthly prepaid",
         "typeLabel": "Pengelolaan Bulanan Basic",
-        "price": "Rp 1,500,000",
+        "price": "Rp 600,000",
         "description": "Operasional pajak dasar untuk badan umum",
         "meta": [
           "Prabayar 1 bulan",
@@ -2631,7 +2625,7 @@
         "group": "Pengelolaan Bulanan Badan",
         "badge": "monthly prepaid",
         "typeLabel": "Pengelolaan Bulanan Pro",
-        "price": "Rp 2,500,000",
+        "price": "Rp 1,200,000",
         "description": "Operasional pajak bulanan yang lebih kuat",
         "meta": [
           "Prabayar 1 bulan",
@@ -2668,7 +2662,7 @@
         "group": "Pengelolaan Bulanan Badan",
         "badge": "monthly prepaid",
         "typeLabel": "Pengelolaan Bulanan Enterprise Khusus",
-        "price": "Rp 3,500,000",
+        "price": "Rp 2,500,000",
         "description": "Operasional skala besar / kustom",
         "meta": [
           "Prabayar 1 bulan",
@@ -2818,9 +2812,6 @@
         "faq": "FAQ"
       },
       "login": "Masuk",
-      "signupCta": "Daftar",
-      "signupIndividualCta": "Daftar Perorangan",
-      "signupCompanyCta": "Daftar Badan",
       "viewPricing": "Lihat Paket Harga",
       "chips": "Indonesia Tax Filing Automation",
       "heroTop": "Urusan pajak yang rumit,",

@@ -41,7 +41,7 @@ export interface CorporatePlan {
 
 export const UMKM_PLAN: CorporatePlan = {
   id: 'UMKM',
-  priceIdr: 500_000,
+  priceIdr: 300_000,
   billingCycle: 'MONTHLY',
   limits: {
     employees: 10,
@@ -53,7 +53,7 @@ export const UMKM_PLAN: CorporatePlan = {
 
 export const BASIC_PLAN: CorporatePlan = {
   id: 'BASIC',
-  priceIdr: 1_500_000,
+  priceIdr: 600_000,
   billingCycle: 'MONTHLY',
   limits: {
     employees: 50,
@@ -65,7 +65,7 @@ export const BASIC_PLAN: CorporatePlan = {
 
 export const PRO_PLAN: CorporatePlan = {
   id: 'PRO',
-  priceIdr: 3_000_000,
+  priceIdr: 1_200_000,
   billingCycle: 'MONTHLY',
   limits: {
     employees: 1_000,

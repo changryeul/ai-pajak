@@ -93,7 +93,7 @@ export const pricingKO: LandingPlan[] = [
     group: '법인 월관리',
     badge: '월 선납',
     typeLabel: 'UMKM 월관리',
-    price: 'Rp 750,000',
+    price: 'Rp 300,000',
     description: '소규모 법인 / Final Tax 중심',
     meta: ['1개월 선납', '12개월 선납 시 10% 할인 가능', '연결산 별도'],
     items: [
@@ -119,7 +119,7 @@ export const pricingKO: LandingPlan[] = [
     group: '법인 월관리',
     badge: '월 선납',
     typeLabel: 'Basic 월관리',
-    price: 'Rp 1,500,000',
+    price: 'Rp 600,000',
     description: '일반 법인 기본 세무 운영',
     meta: ['1개월 선납', '12개월 선납 시 10% 할인 가능', '연결산 별도'],
     items: [
@@ -145,7 +145,7 @@ export const pricingKO: LandingPlan[] = [
     group: '법인 월관리',
     badge: '월 선납',
     typeLabel: 'Pro 월관리',
-    price: 'Rp 2,500,000',
+    price: 'Rp 1,200,000',
     description: '월별 세무 운영 강화',
     meta: ['1개월 선납', '12개월 선납 시 10% 할인 가능', '연결산 별도'],
     items: [
@@ -172,7 +172,7 @@ export const pricingKO: LandingPlan[] = [
     group: '법인 월관리',
     badge: '월 선납',
     typeLabel: 'Enterprise 맞춤 월관리',
-    price: 'Rp 3,500,000',
+    price: 'Rp 2,500,000',
     description: '대량/맞춤 운영',
     meta: ['1개월 선납', '사용량 기반 과금', '연결산 별도'],
     items: [
