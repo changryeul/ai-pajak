@@ -103,6 +103,8 @@ const STEPS: Step[] = [
   // No fixture dependency → always runs.
   { name: 'pph21 strict template e2e', file: 'verify-pph21-strict-template.ts' },
   { name: 'pph21 payslip NPWP surcharge', file: 'verify-payslip-npwp-surcharge.ts' },
+  // --- PPh21 전수 재계산 감사: 저장값 ≡ 엔진 (2026-08-30) ------------------
+  { name: 'pph21 payslip recalc audit (all rows)', file: 'verify-payslip-recalc-audit.ts' },
   { name: 'pph21 rate-provider DB overrides', file: 'verify-rate-provider-overrides.ts' },
   // --- /tax/umkm 제출 → 서버 기록 → 선납법인세 큐 (2026-08-05 수정요청 25번) ---
   { name: 'umkm record-monthly-tax contract', file: 'verify-umkm-record-contract.ts' },
