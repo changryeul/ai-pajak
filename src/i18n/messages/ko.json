@@ -6811,7 +6811,11 @@
     "aiUnpaidWarning": "미납 세액 {amount} — 가산세 전에 납부하세요",
     "aiUpcomingCount": "예정된 신고 {count}건",
     "aiAllClear": "모든 신고가 정상입니다 — 긴급 조치 없음",
-    "ctaMonthlyFiling": "월 신고하기"
+    "ctaMonthlyFiling": "월 신고하기",
+    "trendPph21": "개인소득세 (PPh 21)",
+    "trendWithholding": "원천세 (PPh 23·26·22·15·4(2))",
+    "trendPpn": "부가세 (PPN)",
+    "trendPrepaid": "선납법인세 (PPh Final·25)"
   },
   "filingStatus": {
     "pageTitle": "월 신고 현황",

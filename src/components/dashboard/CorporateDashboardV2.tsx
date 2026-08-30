@@ -191,16 +191,20 @@ export function CorporateDashboardV2({
     const pph21 = monthItems
       .filter((i) => i.tax_type?.startsWith('PPh21') || i.tax_type === 'PPh21')
       .reduce((s, i) => s + (i.amount || 0), 0);
+    // 원천세 — 선납법인세(PPh_FINAL·PPh25)는 별도 박스로 분리 (2026-08-10 요청)
     const withholding = monthItems
       .filter((i) =>
-        ['PPh23', 'PPh26', 'PPh22', 'PPh15', 'PPh_FINAL', 'PPh4_2'].some((t) => i.tax_type?.includes(t)),
+        ['PPh23', 'PPh26', 'PPh22', 'PPh15', 'PPh4_2'].some((t) => i.tax_type?.includes(t)),
       )
       .reduce((s, i) => s + (i.amount || 0), 0);
-    const ppnOutput = monthItems
+    const prepaid = monthItems
+      .filter((i) => i.tax_type === 'PPh_FINAL' || i.tax_type === 'PPh25')
+      .reduce((s, i) => s + (i.amount || 0), 0);
+    // PPN — 큐 납부액 실데이터만. (기존 매입 = 매출×0.7 근사치는 허구라 제거)
+    const ppn = monthItems
       .filter((i) => i.tax_type?.includes('PPN'))
       .reduce((s, i) => s + (i.amount || 0), 0);
-    const ppnInput = ppnOutput * 0.7; // approximation — backend aggregation TBD
-    return { month: label, pph21, withholding, output: ppnOutput, input: ppnInput };
+    return { month: label, pph21, withholding, ppn, prepaid };
   });
 
   const companyName = companyInfo?.company_name || session.fullName || '—';
@@ -291,80 +295,50 @@ export function CorporateDashboardV2({
         </Card>
       </div>
 
-      {/* Monthly Trend */}
-      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
-        <div className="p-5 bg-gradient-to-r from-indigo-100 via-blue-50 to-sky-50">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-sm">
-              <TrendingUp className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <div className="font-semibold text-gray-900">{t('trendTitle')}</div>
-              <div className="text-xs text-gray-500">{t('trendSubtitle')}</div>
-            </div>
+      {/* Monthly Trend — 세금별 별도 박스 (수정요청 2026-08-10: 소형 멀티플 + 선납법인세 추가) */}
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-sm">
+            <TrendingUp className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">{t('trendTitle')}</div>
+            <div className="text-xs text-gray-500">{t('trendSubtitle')}</div>
           </div>
         </div>
-        <CardContent className="p-6">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-2 w-2 rounded-full bg-blue-500" />
-                <p className="text-sm font-semibold text-gray-800">PPh 21</p>
-              </div>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={chartData}>
-                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} width={60} tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}K`)} />
-                    <Tooltip formatter={(value) => fmtRp(Number(value))} cursor={{ fill: 'rgba(59,130,246,0.08)' }} />
-                    <Bar dataKey="pph21" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                <p className="text-sm font-semibold text-gray-800">{t('withholding')}</p>
-              </div>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={chartData}>
-                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} width={60} tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}K`)} />
-                    <Tooltip formatter={(value) => fmtRp(Number(value))} cursor={{ fill: 'rgba(16,185,129,0.08)' }} />
-                    <Bar dataKey="withholding" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <p className="text-sm font-semibold text-gray-800">{t('ppnSalesVsPurchase')}</p>
-                <span className="text-[10px] text-gray-500 flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />{t('ppnOutput')}
-                </span>
-                <span className="text-[10px] text-gray-500 flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-violet-500" />{t('ppnInput')}
-                </span>
-              </div>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={chartData}>
-                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} width={60} tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}K`)} />
-                    <Tooltip formatter={(value) => fmtRp(Number(value))} cursor={{ fill: 'rgba(148,163,184,0.10)' }} />
-                    <Bar dataKey="output" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={18} />
-                    <Bar dataKey="input" fill="#8b5cf6" radius={[4, 4, 0, 0]} maxBarSize={18} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {([
+            { key: 'pph21', label: t('trendPph21'), color: '#3b82f6' },
+            { key: 'withholding', label: t('trendWithholding'), color: '#10b981' },
+            { key: 'ppn', label: t('trendPpn'), color: '#f59e0b' },
+            { key: 'prepaid', label: t('trendPrepaid'), color: '#8b5cf6' },
+          ] as const).map((series) => {
+            const total = chartData.reduce((sum, d) => sum + (d[series.key] ?? 0), 0);
+            return (
+              <Card key={series.key} className="rounded-2xl border-0 shadow-sm overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: series.color }} />
+                    <p className="text-sm font-semibold text-gray-800 truncate" title={series.label}>{series.label}</p>
+                  </div>
+                  <p className="mt-0.5 mb-2 text-[11px] text-gray-500 font-mono">{fmtRp(total)} <span className="font-sans">/ 6mo</span></p>
+                  <div className="h-[160px]">
+                    <ResponsiveContainer width="100%" height={160}>
+                      <BarChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                        <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} width={44} axisLine={false} tickLine={false}
+                          tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v > 0 ? `${(v / 1000).toFixed(0)}K` : '0')} />
+                        <Tooltip formatter={(value) => [fmtRp(Number(value)), series.label]} cursor={{ fill: 'rgba(148,163,184,0.10)' }} />
+                        <Bar dataKey={series.key} fill={series.color} radius={[4, 4, 0, 0]} maxBarSize={24} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Company Info — compact grid */}
       <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">

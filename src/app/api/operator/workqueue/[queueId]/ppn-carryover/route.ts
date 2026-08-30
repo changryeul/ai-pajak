@@ -22,7 +22,7 @@ function compute(openingCredit: number, monthNet: number) {
   return { payable: 0, closingCredit: openingCredit + -monthNet };
 }
 
-async function auth(request: NextRequest) {
+async function auth(_request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };

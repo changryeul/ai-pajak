@@ -6713,7 +6713,11 @@
     "aiUnpaidWarning": "{amount} unpaid — settle soon to avoid penalties",
     "aiUpcomingCount": "{count} upcoming filings",
     "aiAllClear": "All filings clear — no urgent action",
-    "ctaMonthlyFiling": "Monthly Filing"
+    "ctaMonthlyFiling": "Monthly Filing",
+    "trendPph21": "Employee Income Tax (PPh 21)",
+    "trendWithholding": "Withholding (PPh 23·26·22·15·4(2))",
+    "trendPpn": "VAT (PPN)",
+    "trendPrepaid": "Prepaid Corporate Tax (PPh Final·25)"
   },
   "filingStatus": {
     "pageTitle": "Monthly Filing Status",

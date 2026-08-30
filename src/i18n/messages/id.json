@@ -6713,7 +6713,11 @@
     "aiUnpaidWarning": "Pajak belum dibayar {amount} — segera lunasi",
     "aiUpcomingCount": "{count} pelaporan yang akan datang",
     "aiAllClear": "Semua pelaporan bersih — tidak ada tindakan mendesak",
-    "ctaMonthlyFiling": "Pelaporan Bulanan"
+    "ctaMonthlyFiling": "Pelaporan Bulanan",
+    "trendPph21": "PPh 21 Karyawan",
+    "trendWithholding": "Pemotongan (PPh 23·26·22·15·4(2))",
+    "trendPpn": "PPN",
+    "trendPrepaid": "Angsuran Badan (PPh Final·25)"
   },
   "filingStatus": {
     "pageTitle": "Status Pelaporan Bulanan",
