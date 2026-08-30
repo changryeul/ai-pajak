@@ -4519,7 +4519,10 @@
     "employeeMasterUnlinked": "Master karyawan belum tertaut — sinkron dulu untuk mengedit",
     "editFullEmployee": "Ubah semua data karyawan",
     "secEmployeeInfoHint": "Data karyawan di sini hanya disimpan untuk pelaporan ini — terpisah dari Daftar Karyawan (master).",
-    "andNMore": "+{count} lagi"
+    "andNMore": "+{count} lagi",
+    "requiredMissingModalTitle": "Ada kolom wajib yang kosong",
+    "requiredMissingModalDesc": "Tidak dapat mengirim — kolom wajib di bawah ini masih kosong. Lengkapi lalu kirim lagi.",
+    "confirmOk": "OK"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",

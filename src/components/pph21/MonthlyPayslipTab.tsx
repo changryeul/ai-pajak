@@ -10,6 +10,7 @@ import { useBulkSelect } from '@/hooks/useBulkSelect';
 import { useRequiredFields } from '@/hooks/useRequiredFields';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import {
   Loader2, Save, ChevronDown, ChevronRight, Users,
   DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X,
@@ -151,6 +152,8 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // 필수항목 누락 경고 — 놓치지 않게 모달 팝업으로 (확인 눌러야 닫힘).
+  const [missingModal, setMissingModal] = useState<string[] | null>(null);
   // Per-row "just saved" indicator (id → timestamp). Used to flash a green ✓
   // next to the row for ~1.5s after a successful field edit, so the user sees
   // their onBlur edit was persisted.
@@ -213,7 +216,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
       for (const lbl of payslipMissing(ps)) bad.push(`${ps.employee_name || tp('noNpwp')} · ${lbl}`);
     }
     if (bad.length > 0) {
-      showMsg('error', `${tp('requiredMissingBlock')} — ${bad.slice(0, 6).join(', ')}${bad.length > 6 ? ` ${tp('andNMore', { count: bad.length - 6 })}` : ''}`);
+      setMissingModal(bad);
       return;
     }
 
@@ -230,9 +233,8 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
         showMsg('success', tp('submittedToast', { count: data.submitted }));
         loadPayslips();
       } else if (data.errorKey === 'requiredFieldsMissing') {
-        // 서버 단 필수항목 강제 (클라이언트 우회 방어)의 백스톱 메시지
-        const list = Array.isArray(data.missing) ? data.missing.slice(0, 6).join(', ') : '';
-        showMsg('error', `${tp('requiredMissingBlock')}${list ? ` — ${list}` : ''}${data.missingCount > 6 ? ` ${tp('andNMore', { count: data.missingCount - 6 })}` : ''}`);
+        // 서버 단 필수항목 강제 (클라이언트 우회 방어) → 동일 모달로 표시
+        setMissingModal(Array.isArray(data.missing) ? data.missing : []);
         loadPayslips();
       } else {
         showMsg('error', data.error || tp('saveFailed'));
@@ -910,6 +912,31 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
           })()}
         </div>
       )}
+
+      {/* 필수항목 누락 경고 모달 — 확인 눌러야 닫힘 (제출 차단 사유 명확히 안내) */}
+      <Dialog open={missingModal !== null} onOpenChange={(o) => { if (!o) setMissingModal(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />{tp('requiredMissingModalTitle')}
+            </DialogTitle>
+            <DialogDescription>{tp('requiredMissingModalDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-64 overflow-y-auto rounded-lg border border-red-200 bg-red-50 p-3">
+            <ul className="space-y-1 text-sm text-red-800">
+              {(missingModal ?? []).map((m, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setMissingModal(null)}>{tp('confirmOk')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
