@@ -60,6 +60,7 @@ interface NavItem {
   roles?: UserRole[];
   customerTypes?: CustomerType[]; // Filter by customer type (INDIVIDUAL/COMPANY)
   children?: NavItem[];
+  comingSoon?: boolean; // 2026-08-30 — '준비중' 뱃지 + 비활성(내용 미노출)
 }
 
 interface NavSection {
@@ -122,12 +123,13 @@ const navItems: NavSection[] = [
       },
       // 연 신고
       {
+        // 2026-08-30 — SPT Badan(연신고) 메뉴·서브메뉴 준비중 처리(내용 미노출)
         href: '#', icon: FileSpreadsheet, labelKey: 'nav.annualFilingCompany',
-        customerTypes: ['COMPANY'],
+        customerTypes: ['COMPANY'], comingSoon: true,
         children: [
-          { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.closingWork' },
-          { href: '/tax/ebupot', icon: FileText, labelKey: 'nav.ebupotIssue' },
-          { href: '/tax/spt-1771', icon: FileSpreadsheet, labelKey: 'nav.sptGeneration' },
+          { href: '/tax/annual', icon: FileSpreadsheet, labelKey: 'nav.closingWork', comingSoon: true },
+          { href: '/tax/ebupot', icon: FileText, labelKey: 'nav.ebupotIssue', comingSoon: true },
+          { href: '/tax/spt-1771', icon: FileSpreadsheet, labelKey: 'nav.sptGeneration', comingSoon: true },
         ],
       },
       // 신고관리 (사용자 명시 3개만)
@@ -527,6 +529,9 @@ export function Sidebar() {
                       >
                         <Icon className="h-[18px] w-[18px]" />
                         <span className="flex-1 text-left">{t(item.labelKey)}</span>
+                        {item.comingSoon && (
+                          <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">준비중</span>
+                        )}
                         <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', isExpanded && 'rotate-180')} />
                       </button>
                       {isExpanded && (
@@ -541,6 +546,22 @@ export function Sidebar() {
                             );
                             const childActive = !longerSiblingMatches && (pathname === childHref || pathname.startsWith(`${childHref}/`));
                             const ChildIcon = child.icon;
+                            // 2026-08-30 — 준비중 서브메뉴는 비활성(내용 미노출)
+                            if (child.comingSoon) {
+                              return (
+                                <li key={child.href}>
+                                  <span
+                                    aria-disabled="true"
+                                    className="flex cursor-not-allowed items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-400"
+                                    title="준비중"
+                                  >
+                                    <ChildIcon className="h-3.5 w-3.5" />
+                                    <span className="flex-1">{t(child.labelKey)}</span>
+                                    <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">준비중</span>
+                                  </span>
+                                </li>
+                              );
+                            }
                             return (
                               <li key={child.href}>
                                 <Link
