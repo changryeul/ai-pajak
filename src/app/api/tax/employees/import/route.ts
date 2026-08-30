@@ -100,8 +100,17 @@ export async function POST(request: NextRequest) {
       // PTKP 키로 저장 → TER 카테고리 판정이 어긋나 세율 0(과세 누락)/오산되던
       // 문제 방지. (payslip 경로와 동일한 정규화를 공용 함수로 통일.)
       const ptkp = normalizePtkpCategory(getVal(cols, 'ptkp_category'));
-      // 2026-06-21: 양식의 employment_status / worker_type 등 HR 필드는 사용자가 직접
-      // 직원 마스터에서 입력하는 정책 (sync 가 자동 채우지 않음) → import 시 무시.
+      // 2026-08-30 (Model B): 인사 정보는 payslip(신고 데이터) 자체에 저장한다.
+      // 마스터(직원목록)와 무관하게 신고별로 독립 보관·편집. 아래서 payload 에 포함.
+      // employment status 는 표준 양식이 '1/2/3' 숫자(또는 PKWTT/PKWT/Consultant)로 온다.
+      const empStatusCol = headers.find(h => h.includes('employment status'));
+      const empStatusRaw = empStatusCol ? (cols[colMap[empStatusCol]] || '').replace(/['"]/g, '').trim() : '';
+      const employmentStatus =
+        empStatusRaw === '1' ? 'PKWTT' :
+        empStatusRaw === '2' ? 'PKWT' :
+        empStatusRaw === '3' ? 'Consultant' :
+        (empStatusRaw || null);
+      const hireDate = getVal(cols, 'join_date') || getVal(cols, 'hire_date') || null;
 
       const positionAllowance = getNum(cols, 'position_allowance');
       const overtimePay = getNum(cols, 'overtime_pay');
@@ -165,6 +174,15 @@ export async function POST(request: NextRequest) {
         employee_name: name,
         employee_npwp: getVal(cols, 'employee_npwp') || null,
         ptkp_category: ptkp,
+        // Model B: 인사 정보를 payslip 에 자체 저장 (마스터와 독립)
+        employee_number: getVal(cols, 'employee_number') || null,
+        employee_nik: getVal(cols, 'employee_nik') || null,
+        employment_status: employmentStatus,
+        worker_type: getVal(cols, 'worker_type') || null,
+        position: getVal(cols, 'position') || null,
+        department: getVal(cols, 'department') || null,
+        hire_date: hireDate,
+        resign_date: getVal(cols, 'resign_date') || null,
         ...baseFields,
         ...computed,
         status: 'DRAFT',

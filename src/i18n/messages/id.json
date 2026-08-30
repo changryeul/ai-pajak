@@ -4517,7 +4517,8 @@
     "taxMethodGrossUpHint": "Perusahaan menanggung PPh21 → tunjangan pajak dihitung gross-up otomatis.",
     "fieldWorkerType": "Jenis Pekerja",
     "employeeMasterUnlinked": "Master karyawan belum tertaut — sinkron dulu untuk mengedit",
-    "editFullEmployee": "Ubah semua data karyawan"
+    "editFullEmployee": "Ubah semua data karyawan",
+    "secEmployeeInfoHint": "Data karyawan di sini hanya disimpan untuk pelaporan ini — terpisah dari Daftar Karyawan (master)."
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",

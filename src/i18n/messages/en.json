@@ -4517,7 +4517,8 @@
     "taxMethodGrossUpHint": "Company bears PPh21 → tax allowance is grossed up automatically.",
     "fieldWorkerType": "Worker Type",
     "employeeMasterUnlinked": "No linked employee master — sync first to edit",
-    "editFullEmployee": "Edit full employee info"
+    "editFullEmployee": "Edit full employee info",
+    "secEmployeeInfoHint": "Employee info here is saved to this filing only — independent of the Employee Directory (master)."
   },
   "errorFallback": {
     "title": "Failed to load page",

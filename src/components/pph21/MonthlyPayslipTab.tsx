@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,9 @@ import { useBulkSelect } from '@/hooks/useBulkSelect';
 import { useRequiredFields } from '@/hooks/useRequiredFields';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { EmployeeFormDialog } from '@/components/pph21/EmployeeFormDialog';
 import {
   Loader2, Save, ChevronDown, ChevronRight, Users,
-  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X, UserCog,
+  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -73,6 +72,15 @@ interface Payslip {
   employee_name: string | null;
   employee_npwp: string | null;
   ptkp_category: string | null;
+  // 2026-08-30 (Model B): 인사 정보를 payslip 이 자체 보유 — 마스터와 독립, 신고별 편집.
+  employee_number?: string | null;
+  employee_nik?: string | null;
+  employment_status?: string | null;
+  worker_type?: string | null;
+  position?: string | null;
+  department?: string | null;
+  hire_date?: string | null;
+  resign_date?: string | null;
   employee?: {
     id: string;
     gross_salary: number;
@@ -234,96 +242,14 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
     }
   };
 
-  // 2026-08-30: 급여 상세에서 "직원정보 전체 수정" — 공용 EmployeeFormDialog 로
-  // 모든 필드를 편집. ps.employee 는 일부 필드만 있으므로 전체 행을 GET 으로 가져온다.
-  const [empDialogOpen, setEmpDialogOpen] = useState(false);
-  const [empDialogRow, setEmpDialogRow] = useState<Record<string, unknown> | null>(null);
-  const openFullEmployeeEdit = async (employeeId: string) => {
-    try {
-      const res = await fetch(`/api/tax/employees/${employeeId}`);
-      const data = await res.json();
-      if (data.success) {
-        setEmpDialogRow(data.data as Record<string, unknown>);
-        setEmpDialogOpen(true);
-      } else {
-        showMsg('error', data.error || tp('saveFailed'));
-      }
-    } catch { showMsg('error', tp('saveFailed')); }
-  };
-
-  // 2026-08-30: 이 급여명세에 연결된 직원 마스터 id 를 보장한다.
-  // 자체완결 payslip(직접 import 등)은 마스터 링크가 없을 수 있으므로, 없으면
-  // payslip 의 자체 신원(이름/NPWP/PTKP/총급여)으로 마스터를 생성 후 연결한다.
-  // → 직원정보 편집이 마스터 유무와 무관하게 항상 가능해진다 (정보성 편집).
-  // payslip.id → 진행 중/완료된 마스터 생성 Promise. 연속 편집 시 중복 생성 방지.
-  const ensuringRef = useRef<Map<string, Promise<string | null>>>(new Map());
-  const ensureEmployeeId = (ps: Payslip): Promise<string | null> => {
-    if (ps.employee?.id) return Promise.resolve(ps.employee.id);
-    const existing = ensuringRef.current.get(ps.id);
-    if (existing) return existing;
-    const p = createAndLinkEmployee(ps);
-    ensuringRef.current.set(ps.id, p);
-    return p;
-  };
-  const createAndLinkEmployee = async (ps: Payslip): Promise<string | null> => {
-    try {
-      const createRes = await fetch('/api/tax/employees', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerId,
-          employeeName: ps.employee_name || tp('noNpwp'),
-          grossSalary: Number(ps.total_gross || ps.base_salary || 0),
-          employeeNpwp: ps.employee_npwp || undefined,
-          ptkpCategory: ps.ptkp_category || undefined,
-        }),
-      });
-      const cd = await createRes.json();
-      if (!cd.success || !cd.data?.id) { showMsg('error', cd.error || tp('saveFailed')); return null; }
-      const newId = cd.data.id as string;
-      // payslip 에 링크 (PUT 은 ...updates 스프레드라 employee_id 를 받는다)
-      await fetch('/api/tax/monthly-payslip', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: ps.id, employee_id: newId }),
-      });
-      return newId;
-    } catch { showMsg('error', tp('saveFailed')); return null; }
-  };
-
-  // 인라인 직원정보 편집 진입점 — 마스터 보장 후 PATCH.
-  const commitEmployeeField = async (ps: Payslip, field: string, value: string) => {
+  // 2026-08-30 (Model B): 급여 상세의 직원 정보는 payslip(신고 데이터) 자체 필드다.
+  // 직원목록(마스터)과 완전 분리 — 여기서의 편집은 payslip PUT 으로만 저장되고
+  // 마스터에는 전혀 영향을 주지 않는다. (인사정보는 계산에 미사용, 신고별 스냅샷)
+  const commitEmployeeField = (ps: Payslip, field: keyof Payslip, value: string) => {
     if (ps.status === 'SUBMITTED') return;
-    const empId = await ensureEmployeeId(ps);
-    if (!empId) return;
-    await updateEmployeeMaster(empId, { [field]: value });
-  };
-
-  // "직원정보 전체 수정" — 마스터 보장 후 전체 폼을 연다.
-  const openFullEmployeeEditForPayslip = async (ps: Payslip) => {
-    const empId = await ensureEmployeeId(ps);
-    if (empId) await openFullEmployeeEdit(empId);
-  };
-
-  // 2026-08-30: 급여 상세에서 직원 마스터(employee_payroll) 필드 인라인 수정.
-  // payslip PUT 이 아니라 employee PATCH 로 보내야 형제 필드를 덮어쓰지 않음.
-  const updateEmployeeMaster = async (employeeId: string, patch: Record<string, unknown>) => {
-    try {
-      const res = await fetch(`/api/tax/employees/${employeeId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(patch),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showMsg('success', tp('savedToast'));
-        loadPayslips(); // ps.employee join 갱신
-      } else {
-        showMsg('error', data.error || tp('saveFailed'));
-      }
-    } catch {
-      showMsg('error', tp('saveFailed'));
-    }
+    const current = (ps[field] ?? '') as string;
+    if (value === current) return;
+    updatePayslip(ps.id, { [field]: value || null } as Partial<Payslip>);
   };
 
   const updatePayslip = async (id: string, updates: Partial<Payslip>) => {
@@ -515,22 +441,25 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                               <span className="font-bold">*</span>{tp('requiredMissingBadge')} {m.length}
                             </span>
                           ) : null; })()}
-                          {ps.employee?.employment_status && (
+                          {(() => {
+                            const es = ps.employment_status ?? ps.employee?.employment_status;
+                            return es ? (
                             <span
                               className={`inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-                                ps.employee.employment_status === 'PKWTT' ? 'bg-emerald-100 text-emerald-700' :
-                                ps.employee.employment_status === 'PKWT' ? 'bg-amber-100 text-amber-700' :
+                                es === 'PKWTT' ? 'bg-emerald-100 text-emerald-700' :
+                                es === 'PKWT' ? 'bg-amber-100 text-amber-700' :
                                 'bg-purple-100 text-purple-700'
                               }`}
                               title={
-                                ps.employee.employment_status === 'PKWTT' ? 'Pegawai Tetap (1)' :
-                                ps.employee.employment_status === 'PKWT' ? 'Pegawai Tidak Tetap (2)' :
+                                es === 'PKWTT' ? 'Pegawai Tetap (1)' :
+                                es === 'PKWT' ? 'Pegawai Tidak Tetap (2)' :
                                 'Bukan Pegawai (3)'
                               }
                             >
-                              {ps.employee.employment_status}
+                              {es}
                             </span>
-                          )}
+                            ) : null;
+                          })()}
                         </div>
                         <p className="text-[10px] text-gray-400">
                           {ps.ptkp_category} • {ps.employee_npwp || tp('noNpwp')}
@@ -579,50 +508,56 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                           상세에 안 보여서 사용자가 어느 직원인지 즉시 못 알아보던 정보.
                           payslip 자체에서 우선, 없으면 employee join 에서 fallback. */}
                       <div className="rounded-md border border-slate-200 bg-white p-3">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="mb-2">
                           <h4 className="text-xs font-bold text-gray-600">{tp('secEmployeeInfo')}</h4>
-                          <Button size="sm" variant="outline" className="h-7 text-[11px]"
-                            disabled={ps.status === 'SUBMITTED'}
-                            onClick={() => openFullEmployeeEditForPayslip(ps)}>
-                            <UserCog className="h-3.5 w-3.5 mr-1" />{tp('editFullEmployee')}
-                          </Button>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{tp('secEmployeeInfoHint')}</p>
                         </div>
                         {(() => {
                           const disabled = ps.status === 'SUBMITTED';
-                          const commit = (field: string, value: string) => {
+                          // Model B: 모든 편집은 payslip(신고 데이터) 컬럼에 직접 저장.
+                          const commit = (field: keyof Payslip, value: string) => {
                             commitEmployeeField(ps, field, value);
                           };
+                          // payslip 값 우선, 없으면 legacy 마스터 join 표시용 fallback.
+                          const num = ps.employee_number ?? ps.employee?.employee_number ?? '';
+                          const nik = ps.employee_nik ?? ps.employee?.employee_nik ?? '';
+                          const pos = ps.position ?? ps.employee?.position ?? '';
+                          const dept = ps.department ?? ps.employee?.department ?? '';
+                          const hire = ps.hire_date ?? ps.employee?.hire_date ?? '';
+                          const resign = ps.resign_date ?? ps.employee?.resign_date ?? '';
+                          const empStatus = ps.employment_status ?? ps.employee?.employment_status ?? '';
+                          const wtype = ps.worker_type ?? ps.employee?.worker_type ?? 'REGULAR';
                           const cellCls = 'h-8 text-xs';
                           return (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldEmployeeNo')}</p>
-                            <Input className={cellCls + ' font-mono'} defaultValue={ps.employee?.employee_number || ''} disabled={disabled}
-                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.employee_number || '')) commit('employeeNumber', v); }} />
+                            <Input className={cellCls + ' font-mono'} defaultValue={num} disabled={disabled}
+                              onBlur={e => commit('employee_number', e.target.value.trim())} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">NPWP{reqStar('employee_npwp')}</p>
-                            <Input className={cellCls + ' font-mono'} defaultValue={ps.employee?.employee_npwp || ps.employee_npwp || ''} disabled={disabled}
-                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.employee_npwp || '')) commit('employeeNpwp', v); }} />
+                            <Input className={cellCls + ' font-mono'} defaultValue={ps.employee_npwp || ''} disabled={disabled}
+                              onBlur={e => commit('employee_npwp', e.target.value.trim())} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">NIK{reqStar('NIK')}</p>
-                            <Input className={cellCls + ' font-mono'} defaultValue={ps.employee?.employee_nik || ''} disabled={disabled}
-                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.employee_nik || '')) commit('employeeNik', v); }} />
+                            <Input className={cellCls + ' font-mono'} defaultValue={nik} disabled={disabled}
+                              onBlur={e => commit('employee_nik', e.target.value.trim())} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">PTKP{reqStar('ptkp')}</p>
                             <select className="h-8 w-full rounded border border-gray-300 px-1 text-xs bg-white font-mono"
-                              value={ps.employee?.ptkp_category || ps.ptkp_category || 'TK0'} disabled={disabled}
-                              onChange={e => commit('ptkpCategory', e.target.value)}>
+                              value={ps.ptkp_category || 'TK0'} disabled={disabled}
+                              onChange={e => commit('ptkp_category', e.target.value)}>
                               {['TK0','TK1','TK2','TK3','K0','K1','K2','K3','KI0','KI1','KI2','KI3'].map(o => <option key={o} value={o}>{o}</option>)}
                             </select>
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldEmploymentStatus')}{reqStar('employment_status')}</p>
                             <select className="h-8 w-full rounded border border-gray-300 px-1 text-xs bg-white"
-                              value={ps.employee?.employment_status || ''} disabled={disabled}
-                              onChange={e => commit('employmentStatus', e.target.value)}>
+                              value={empStatus} disabled={disabled}
+                              onChange={e => commit('employment_status', e.target.value)}>
                               <option value="">—</option>
                               <option value="PKWTT">Pegawai Tetap (1)</option>
                               <option value="PKWT">Pegawai Tidak Tetap (2)</option>
@@ -632,30 +567,30 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldWorkerType')}</p>
                             <select className="h-8 w-full rounded border border-gray-300 px-1 text-xs bg-white"
-                              value={ps.employee?.worker_type || 'REGULAR'} disabled={disabled}
-                              onChange={e => commit('workerType', e.target.value)}>
+                              value={wtype} disabled={disabled}
+                              onChange={e => commit('worker_type', e.target.value)}>
                               {['REGULAR','CONTRACT','DAILY','FREELANCER','COMMISSIONER'].map(o => <option key={o} value={o}>{o}</option>)}
                             </select>
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldPosition')}</p>
-                            <Input className={cellCls} defaultValue={ps.employee?.position || ''} disabled={disabled}
-                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.position || '')) commit('position', v); }} />
+                            <Input className={cellCls} defaultValue={pos} disabled={disabled}
+                              onBlur={e => commit('position', e.target.value.trim())} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldDepartment')}</p>
-                            <Input className={cellCls} defaultValue={ps.employee?.department || ''} disabled={disabled}
-                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.department || '')) commit('department', v); }} />
+                            <Input className={cellCls} defaultValue={dept} disabled={disabled}
+                              onBlur={e => commit('department', e.target.value.trim())} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldHireDate')}</p>
-                            <Input type="date" className={cellCls + ' font-mono'} defaultValue={ps.employee?.hire_date || ''} disabled={disabled}
-                              onBlur={e => { const v = e.target.value; if (v !== (ps.employee?.hire_date || '')) commit('hireDate', v); }} />
+                            <Input type="date" className={cellCls + ' font-mono'} defaultValue={hire} disabled={disabled}
+                              onBlur={e => commit('hire_date', e.target.value)} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldResignDate')}</p>
-                            <Input type="date" className={cellCls + ' font-mono'} defaultValue={ps.employee?.resign_date || ''} disabled={disabled}
-                              onBlur={e => { const v = e.target.value; if (v !== (ps.employee?.resign_date || '')) commit('resignDate', v); }} />
+                            <Input type="date" className={cellCls + ' font-mono'} defaultValue={resign} disabled={disabled}
+                              onBlur={e => commit('resign_date', e.target.value)} />
                           </div>
                         </div>
                           );
@@ -956,14 +891,6 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
         </div>
       )}
 
-      {/* 직원정보 전체 수정 — 공용 다이얼로그. 정보성 편집(계산 무관). */}
-      <EmployeeFormDialog
-        open={empDialogOpen}
-        onOpenChange={setEmpDialogOpen}
-        customerId={customerId}
-        employee={empDialogRow}
-        onSaved={loadPayslips}
-      />
     </div>
   );
 }
