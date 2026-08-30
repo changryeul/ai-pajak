@@ -4513,7 +4513,9 @@
     "taxMethodGross": "Gross — ditanggung karyawan",
     "taxMethodGrossUp": "Gross-up — ditanggung perusahaan (tunjangan otomatis)",
     "taxMethodGrossHint": "PPh21 dipotong dari gaji karyawan.",
-    "taxMethodGrossUpHint": "Perusahaan menanggung PPh21 → tunjangan pajak dihitung gross-up otomatis."
+    "taxMethodGrossUpHint": "Perusahaan menanggung PPh21 → tunjangan pajak dihitung gross-up otomatis.",
+    "fieldWorkerType": "Jenis Pekerja",
+    "employeeMasterUnlinked": "Master karyawan belum tertaut — sinkron dulu untuk mengedit"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",

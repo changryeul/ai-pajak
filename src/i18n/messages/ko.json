@@ -4531,7 +4531,9 @@
     "taxMethodGross": "Gross — 직원 부담(급여서 차감)",
     "taxMethodGrossUp": "Gross-up — 회사 부담(세액수당 자동)",
     "taxMethodGrossHint": "PPh21을 직원 급여에서 차감합니다.",
-    "taxMethodGrossUpHint": "회사가 PPh21을 부담 → 세액수당이 gross-up 자동 산출됩니다."
+    "taxMethodGrossUpHint": "회사가 PPh21을 부담 → 세액수당이 gross-up 자동 산출됩니다.",
+    "fieldWorkerType": "직군",
+    "employeeMasterUnlinked": "직원 마스터 미연결 — 편집하려면 먼저 동기화하세요"
   },
   "errorFallback": {
     "title": "페이지를 불러올 수 없습니다",

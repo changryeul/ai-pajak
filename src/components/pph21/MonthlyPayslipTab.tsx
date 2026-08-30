@@ -233,6 +233,27 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
     }
   };
 
+  // 2026-08-30: 급여 상세에서 직원 마스터(employee_payroll) 필드 인라인 수정.
+  // payslip PUT 이 아니라 employee PATCH 로 보내야 형제 필드를 덮어쓰지 않음.
+  const updateEmployeeMaster = async (employeeId: string, patch: Record<string, unknown>) => {
+    try {
+      const res = await fetch(`/api/tax/employees/${employeeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('success', tp('savedToast'));
+        loadPayslips(); // ps.employee join 갱신
+      } else {
+        showMsg('error', data.error || tp('saveFailed'));
+      }
+    } catch {
+      showMsg('error', tp('saveFailed'));
+    }
+  };
+
   const updatePayslip = async (id: string, updates: Partial<Payslip>) => {
     try {
       const res = await fetch('/api/tax/monthly-payslip', {
@@ -486,55 +507,87 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                           상세에 안 보여서 사용자가 어느 직원인지 즉시 못 알아보던 정보.
                           payslip 자체에서 우선, 없으면 employee join 에서 fallback. */}
                       <div className="rounded-md border border-slate-200 bg-white p-3">
-                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('secEmployeeInfo')}</h4>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-xs font-bold text-gray-600">{tp('secEmployeeInfo')}</h4>
+                          {!ps.employee?.id && (
+                            <span className="text-[10px] text-amber-600">{tp('employeeMasterUnlinked')}</span>
+                          )}
+                        </div>
+                        {(() => {
+                          const empId = ps.employee?.id;
+                          const disabled = !empId || ps.status === 'SUBMITTED';
+                          const commit = (field: string, value: string) => {
+                            if (!empId) return;
+                            updateEmployeeMaster(empId, { [field]: value });
+                          };
+                          const cellCls = 'h-8 text-xs';
+                          return (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldEmployeeNo')}</p>
-                            <p className="font-mono">{ps.employee?.employee_number || '—'}</p>
+                            <Input className={cellCls + ' font-mono'} defaultValue={ps.employee?.employee_number || ''} disabled={disabled}
+                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.employee_number || '')) commit('employeeNumber', v); }} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">NPWP{reqStar('employee_npwp')}</p>
-                            <p className="font-mono">{ps.employee_npwp || ps.employee?.employee_npwp || '—'}</p>
+                            <Input className={cellCls + ' font-mono'} defaultValue={ps.employee?.employee_npwp || ps.employee_npwp || ''} disabled={disabled}
+                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.employee_npwp || '')) commit('employeeNpwp', v); }} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">NIK{reqStar('NIK')}</p>
-                            <p className="font-mono">{ps.employee?.employee_nik || '—'}</p>
+                            <Input className={cellCls + ' font-mono'} defaultValue={ps.employee?.employee_nik || ''} disabled={disabled}
+                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.employee_nik || '')) commit('employeeNik', v); }} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">PTKP{reqStar('ptkp')}</p>
-                            <p className="font-mono">{ps.ptkp_category || ps.employee?.ptkp_category || '—'}</p>
+                            <select className="h-8 w-full rounded border border-gray-300 px-1 text-xs bg-white font-mono"
+                              value={ps.employee?.ptkp_category || ps.ptkp_category || 'TK0'} disabled={disabled}
+                              onChange={e => commit('ptkpCategory', e.target.value)}>
+                              {['TK0','TK1','TK2','TK3','K0','K1','K2','K3','KI0','KI1','KI2','KI3'].map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">{tp('fieldEmploymentStatus')}</p>
-                            <p>
-                              {ps.employee?.employment_status || '—'}
-                            </p>
+                            <p className="text-[10px] text-gray-400">{tp('fieldEmploymentStatus')}{reqStar('employment_status')}</p>
+                            <select className="h-8 w-full rounded border border-gray-300 px-1 text-xs bg-white"
+                              value={ps.employee?.employment_status || ''} disabled={disabled}
+                              onChange={e => commit('employmentStatus', e.target.value)}>
+                              <option value="">—</option>
+                              <option value="PKWTT">Pegawai Tetap (1)</option>
+                              <option value="PKWT">Pegawai Tidak Tetap (2)</option>
+                              <option value="Consultant">Bukan Pegawai (3)</option>
+                            </select>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">{tp('fieldTaxMethod')}</p>
-                            <p>{ps.employee?.worker_type || '—'}</p>
+                            <p className="text-[10px] text-gray-400">{tp('fieldWorkerType')}</p>
+                            <select className="h-8 w-full rounded border border-gray-300 px-1 text-xs bg-white"
+                              value={ps.employee?.worker_type || 'REGULAR'} disabled={disabled}
+                              onChange={e => commit('workerType', e.target.value)}>
+                              {['REGULAR','CONTRACT','DAILY','FREELANCER','COMMISSIONER'].map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldPosition')}</p>
-                            <p>{ps.employee?.position || '—'}</p>
+                            <Input className={cellCls} defaultValue={ps.employee?.position || ''} disabled={disabled}
+                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.position || '')) commit('position', v); }} />
                           </div>
                           <div>
                             <p className="text-[10px] text-gray-400">{tp('fieldDepartment')}</p>
-                            <p>{ps.employee?.department || '—'}</p>
+                            <Input className={cellCls} defaultValue={ps.employee?.department || ''} disabled={disabled}
+                              onBlur={e => { const v = e.target.value.trim(); if (v !== (ps.employee?.department || '')) commit('department', v); }} />
                           </div>
-                          {ps.employee?.hire_date && (
-                            <div>
-                              <p className="text-[10px] text-gray-400">{tp('fieldHireDate')}</p>
-                              <p className="font-mono">{ps.employee.hire_date}</p>
-                            </div>
-                          )}
-                          {ps.employee?.resign_date && (
-                            <div>
-                              <p className="text-[10px] text-gray-400">{tp('fieldResignDate')}</p>
-                              <p className="font-mono">{ps.employee.resign_date}</p>
-                            </div>
-                          )}
+                          <div>
+                            <p className="text-[10px] text-gray-400">{tp('fieldHireDate')}</p>
+                            <Input type="date" className={cellCls + ' font-mono'} defaultValue={ps.employee?.hire_date || ''} disabled={disabled}
+                              onBlur={e => { const v = e.target.value; if (v !== (ps.employee?.hire_date || '')) commit('hireDate', v); }} />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400">{tp('fieldResignDate')}</p>
+                            <Input type="date" className={cellCls + ' font-mono'} defaultValue={ps.employee?.resign_date || ''} disabled={disabled}
+                              onBlur={e => { const v = e.target.value; if (v !== (ps.employee?.resign_date || '')) commit('resignDate', v); }} />
+                          </div>
                         </div>
+                          );
+                        })()}
                       </div>
 
                       {/* 2026-08-30 — 세금 방식(Gross/Gross-up) 결정. 필수. */}

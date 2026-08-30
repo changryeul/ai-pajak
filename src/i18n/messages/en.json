@@ -4513,7 +4513,9 @@
     "taxMethodGross": "Gross — borne by employee",
     "taxMethodGrossUp": "Gross-up — borne by company (auto allowance)",
     "taxMethodGrossHint": "PPh21 is deducted from the employee salary.",
-    "taxMethodGrossUpHint": "Company bears PPh21 → tax allowance is grossed up automatically."
+    "taxMethodGrossUpHint": "Company bears PPh21 → tax allowance is grossed up automatically.",
+    "fieldWorkerType": "Worker Type",
+    "employeeMasterUnlinked": "No linked employee master — sync first to edit"
   },
   "errorFallback": {
     "title": "Failed to load page",
