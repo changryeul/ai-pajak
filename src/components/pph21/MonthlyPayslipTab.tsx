@@ -228,6 +228,11 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
       if (data.success) {
         showMsg('success', tp('submittedToast', { count: data.submitted }));
         loadPayslips();
+      } else if (data.errorKey === 'requiredFieldsMissing') {
+        // 서버 단 필수항목 강제 (클라이언트 우회 방어)의 백스톱 메시지
+        const list = Array.isArray(data.missing) ? data.missing.slice(0, 6).join(', ') : '';
+        showMsg('error', `${tp('requiredMissingBlock')}${list ? ` — ${list}` : ''}${data.missingCount > 6 ? ` 외 ${data.missingCount - 6}건` : ''}`);
+        loadPayslips();
       } else {
         showMsg('error', data.error || tp('saveFailed'));
       }

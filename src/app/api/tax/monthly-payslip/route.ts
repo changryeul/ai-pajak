@@ -240,6 +240,63 @@ async function handlePost(req: RequestWithSession): Promise<Response> {
     }
 
     const admin = getSupabaseAdmin();
+
+    // 2026-08-30: 서버 단 필수항목 강제 — 클라이언트 우회(직접 API 호출) 방어.
+    // MASTER 가 required_field_config(payslip)에 지정한 항목이 비어 있으면 제출 거부.
+    const { data: reqCfg } = await admin
+      .from('required_field_config')
+      .select('field_key, label, is_required')
+      .eq('form_key', 'payslip')
+      .eq('is_required', true);
+    const requiredFields = reqCfg ?? [];
+    if (requiredFields.length > 0) {
+      const { data: drafts } = await admin
+        .from('monthly_payslip')
+        .select('*')
+        .eq('customer_id', customerId)
+        .eq('period', period)
+        .eq('status', 'DRAFT');
+      const norm = (k: string) => k.toLowerCase().replace(/_/g, '');
+      // 정규화 키 → payslip 컬럼 값 (클라이언트 payslipMissing 과 동일 매핑).
+      const valOf = (row: Record<string, unknown>, k: string): unknown => {
+        switch (norm(k)) {
+          case 'employeename': return row.employee_name;
+          case 'employeenpwp': return row.employee_npwp;
+          case 'ptkp': return row.ptkp_category;
+          case 'basesalary': return row.base_salary;
+          case 'nik': return row.employee_nik;
+          case 'taxmethod': return row.tax_method;
+          case 'employmentstatus': return row.employment_status;
+          case 'employeenumber': return row.employee_number;
+          case 'workertype': return row.worker_type;
+          case 'position': return row.position;
+          case 'department': return row.department;
+          case 'hiredate': return row.hire_date;
+          case 'resigndate': return row.resign_date;
+          default: return undefined; // payslip 에 없는 키는 평가 불가 → 건너뜀
+        }
+      };
+      const missing: string[] = [];
+      for (const ps of drafts ?? []) {
+        for (const f of requiredFields) {
+          const v = valOf(ps as Record<string, unknown>, f.field_key);
+          if (v === undefined) continue;
+          if (v == null || v === '' || (typeof v === 'number' && v === 0)) {
+            const name = (ps as Record<string, unknown>).employee_name || '(unknown)';
+            missing.push(`${name} · ${f.label || f.field_key}`);
+          }
+        }
+      }
+      if (missing.length > 0) {
+        return NextResponse.json({
+          error: 'Required fields missing',
+          errorKey: 'requiredFieldsMissing',
+          missing: missing.slice(0, 20),
+          missingCount: missing.length,
+        }, { status: 400 });
+      }
+    }
+
     const { count, error } = await admin
       .from('monthly_payslip')
       .update({ status: 'SUBMITTED' }, { count: 'exact' })
