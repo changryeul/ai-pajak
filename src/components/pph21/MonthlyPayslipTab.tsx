@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NumberInput } from '@/components/ui/number-input';
 import { useBulkSelect } from '@/hooks/useBulkSelect';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -94,6 +95,11 @@ interface Props {
 
 export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   const tp = useTranslations('monthlyPayslip');
+  // 2026-08-30 — MASTER 지정 필수항목 별표. config snake_case ↔ 라벨 key 정규화 매칭.
+  const { requiredKeys } = useRequiredFields('payslip');
+  const reqSet = new Set((requiredKeys ?? []).map(k => k.toLowerCase().replace(/_/g, '')));
+  const reqStar = (k: string) => reqSet.has(k.toLowerCase().replace(/_/g, ''))
+    ? <span className="text-red-500 font-bold"> *</span> : null;
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
   const [period, setPeriod] = useState(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
@@ -366,7 +372,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
                       <div className="text-left min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="font-medium text-sm truncate">{ps.employee_name || tp('noNpwp')}</p>
+                          <p className="font-medium text-sm truncate">{ps.employee_name || tp('noNpwp')}{reqStar('employee_name')}</p>
                           {ps.status === 'SUBMITTED' ? (
                             <span className="inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-emerald-100 text-emerald-700">
                               ✓ {tp('submittedBadge')}
@@ -447,15 +453,15 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                             <p className="font-mono">{ps.employee?.employee_number || '—'}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">NPWP</p>
+                            <p className="text-[10px] text-gray-400">NPWP{reqStar('employee_npwp')}</p>
                             <p className="font-mono">{ps.employee_npwp || ps.employee?.employee_npwp || '—'}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">NIK</p>
+                            <p className="text-[10px] text-gray-400">NIK{reqStar('NIK')}</p>
                             <p className="font-mono">{ps.employee?.employee_nik || '—'}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-gray-400">PTKP</p>
+                            <p className="text-[10px] text-gray-400">PTKP{reqStar('ptkp')}</p>
                             <p className="font-mono">{ps.ptkp_category || ps.employee?.ptkp_category || '—'}</p>
                           </div>
                           <div>
@@ -518,7 +524,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('baseSalary')}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           <div>
-                            <Label className="text-[10px] text-gray-400">{tp('base')}</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('base')}{reqStar('base_salary')}</Label>
                             <NumberInput className="h-8 text-xs font-mono" value={ps.base_salary}
                               onCommit={n => updatePayslip(ps.id, { base_salary: n })} />
                           </div>
