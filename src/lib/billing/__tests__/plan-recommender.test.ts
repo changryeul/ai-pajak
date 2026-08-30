@@ -26,36 +26,36 @@ describe('corporate-pricing constants', () => {
   });
 
   it('UMKM plan matches business spec', () => {
-    expect(UMKM_PLAN.priceIdr).toBe(500_000);
+    expect(UMKM_PLAN.priceIdr).toBe(300_000);
     expect(UMKM_PLAN.limits.employees).toBe(10);
     expect(UMKM_PLAN.limits.withholdingPerMonth).toBe(30);
     expect(UMKM_PLAN.limits.ppnPerMonth).toBe(0); // UMKM not PKP
   });
 
   it('Basic plan matches business spec', () => {
-    expect(BASIC_PLAN.priceIdr).toBe(1_500_000);
+    expect(BASIC_PLAN.priceIdr).toBe(600_000);
     expect(BASIC_PLAN.limits.employees).toBe(50);
     expect(BASIC_PLAN.limits.withholdingPerMonth).toBe(100);
     expect(BASIC_PLAN.limits.ppnPerMonth).toBe(200);
   });
 
   it('Pro plan matches business spec', () => {
-    expect(PRO_PLAN.priceIdr).toBe(3_000_000);
+    expect(PRO_PLAN.priceIdr).toBe(1_200_000);
     expect(PRO_PLAN.limits.employees).toBe(1000);
     expect(PRO_PLAN.limits.withholdingPerMonth).toBe(200);
     expect(PRO_PLAN.limits.ppnPerMonth).toBe(500);
   });
 
   it('formatPlanPrice displays full IDR digits without abbreviation', () => {
-    expect(formatPlanPrice(UMKM_PLAN)).toBe('Rp 500.000');
-    expect(formatPlanPrice(BASIC_PLAN)).toBe('Rp 1.500.000');
-    expect(formatPlanPrice(PRO_PLAN)).toBe('Rp 3.000.000');
+    expect(formatPlanPrice(UMKM_PLAN)).toBe('Rp 300.000');
+    expect(formatPlanPrice(BASIC_PLAN)).toBe('Rp 600.000');
+    expect(formatPlanPrice(PRO_PLAN)).toBe('Rp 1.200.000');
   });
 
   it('priceWithVat adds 11% PPN', () => {
-    expect(priceWithVat(UMKM_PLAN)).toBe(555_000);
-    expect(priceWithVat(BASIC_PLAN)).toBe(1_665_000);
-    expect(priceWithVat(PRO_PLAN)).toBe(3_330_000);
+    expect(priceWithVat(UMKM_PLAN)).toBe(333_000);
+    expect(priceWithVat(BASIC_PLAN)).toBe(666_000);
+    expect(priceWithVat(PRO_PLAN)).toBe(1_332_000);
   });
 
   it('getCorporatePlan looks up by id', () => {
