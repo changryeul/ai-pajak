@@ -1670,12 +1670,12 @@ export default function PPh23Page() {
                     )}
                   </th>
                   <th className="p-2 text-left">No</th>
-                  <th className="p-2 text-left">{t('colCounterparty')}</th>
-                  <th className="p-2 text-left">NPWP</th>
+                  <th className="p-2 text-left">{t('colCounterparty')}{reqStar('counterparty_name')}</th>
+                  <th className="p-2 text-left">NPWP{reqStar('counterparty_npwp')}</th>
                   <th className="p-2 text-left">{t('colTaxType')}</th>
                   <th className="p-2 text-left">{t('colTxType')}</th>
-                  <th className="p-2 text-right">{t('colAmount')}</th>
-                  <th className="p-2 text-right">{t('colRate')}</th>
+                  <th className="p-2 text-right">{t('colAmount')}{reqStar('gross_amount')}</th>
+                  <th className="p-2 text-right">{t('colRate')}{reqStar('tax_rate')}</th>
                   <th className="p-2 text-center">{t('colStatus')}</th>
                   <th className="p-2 text-center w-12">{t('colInvoicePhoto')}</th>
                   <th className="p-2 text-center">{t('colDetail')}</th>

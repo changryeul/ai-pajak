@@ -640,13 +640,13 @@ export default function PPNPage() {
                           )}
                         </th>
                         <th className="text-left py-2.5 px-3 w-8"></th>
-                        <th className="text-left py-2.5 px-3">{t('thFakturNo')}</th>
-                        <th className="text-left py-2.5 px-3">{t('thDate')}</th>
+                        <th className="text-left py-2.5 px-3">{t('thFakturNo')}{reqStar('faktur_number')}</th>
+                        <th className="text-left py-2.5 px-3">{t('thDate')}{reqStar('faktur_date')}</th>
                         <th className="text-center py-2.5 px-3">{t('thType')}</th>
-                        <th className="text-left py-2.5 px-3">{t('thCounterparty')}</th>
-                        <th className="text-right py-2.5 px-3">DPP</th>
+                        <th className="text-left py-2.5 px-3">{t('thCounterparty')}{reqStar('counterparty_name')}</th>
+                        <th className="text-right py-2.5 px-3">DPP{reqStar('dpp')}</th>
                         <th className="text-right py-2.5 px-3">{t('dppNilaiLain')}</th>
-                        <th className="text-right py-2.5 px-3">PPN</th>
+                        <th className="text-right py-2.5 px-3">PPN{reqStar('ppn')}</th>
                         <th className="text-center py-2.5 px-3">{t('luxuryHeader')}</th>
                         <th className="text-center py-2.5 px-3">Status</th>
                         <th className="text-right py-2.5 px-3"></th>
