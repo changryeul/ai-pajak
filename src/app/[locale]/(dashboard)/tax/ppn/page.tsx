@@ -102,6 +102,22 @@ export default function PPNPage() {
   const { requiredKeys: reqKeysPpn } = useRequiredFields('ppn');
   const reqStar = (k: string) => new Set((reqKeysPpn ?? []).map(x => x.toLowerCase().replace(/_/g, ''))).has(k.toLowerCase().replace(/_/g, ''))
     ? <span className="text-red-500 font-bold"> *</span> : null;
+  // 2026-08-30 — faktur 행별 필수항목 누락 개수 (리스트 표시용)
+  const fakturMissingCount = (f: { faktur_number?: string | null; faktur_date?: string | null; counterparty_name?: string | null; counterparty_npwp?: string | null; dpp?: number | null; ppn?: number | null }): number => {
+    const norm = (k: string) => k.toLowerCase().replace(/_/g, '');
+    const val: Record<string, unknown> = {
+      faktur_number: f.faktur_number, faktur_date: f.faktur_date, counterparty_name: f.counterparty_name,
+      counterparty_npwp: f.counterparty_npwp, dpp: f.dpp, ppn: f.ppn,
+    };
+    let n = 0;
+    for (const k of (reqKeysPpn ?? [])) {
+      const mk = Object.keys(val).find(vk => norm(vk) === norm(k));
+      if (!mk) continue;
+      const v = val[mk];
+      if (v == null || v === '' || (typeof v === 'number' && v === 0)) n++;
+    }
+    return n;
+  };
   const [savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   const period = `${year}-${String(month).padStart(2, '0')}`;
@@ -659,7 +675,11 @@ export default function PPNPage() {
                                   ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                                   : <ChevronRight className="h-3.5 w-3.5 text-gray-400" />}
                               </td>
-                              <td className="py-2 px-3 font-mono text-xs">{f.faktur_number || '—'}</td>
+                              <td className="py-2 px-3 font-mono text-xs">{f.faktur_number || '—'}{fakturMissingCount(f) > 0 && (
+                                <span className="ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 align-middle" title={t('requiredMissingBlock')}>
+                                  <span>*</span>{t('requiredMissingBadge')} {fakturMissingCount(f)}
+                                </span>
+                              )}</td>
                               <td className="py-2 px-3 text-xs text-gray-500">{f.faktur_date}</td>
                               <td className="py-2 px-3 text-center">
                                 <Badge className={`text-[10px] ${f.faktur_type === 'KELUARAN' ? 'bg-rose-100 text-rose-700' : 'bg-green-100 text-green-700'}`}>

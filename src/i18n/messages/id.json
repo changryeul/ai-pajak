@@ -4029,7 +4029,9 @@
     "coretaxColCoretaxPpn": "PPN Coretax",
     "output": "Keluaran",
     "input": "Masukan",
-    "serverError": "Terjadi kesalahan server."
+    "serverError": "Terjadi kesalahan server.",
+    "requiredMissingBlock": "Tidak dapat menyimpan: kolom wajib kosong",
+    "requiredMissingBadge": "Wajib kosong"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4504,7 +4506,9 @@
     "fieldPosition": "Jabatan",
     "fieldDepartment": "Departemen",
     "fieldHireDate": "Tanggal Masuk",
-    "fieldResignDate": "Tanggal Keluar"
+    "fieldResignDate": "Tanggal Keluar",
+    "requiredMissingBlock": "Tidak dapat mengirim: kolom wajib kosong",
+    "requiredMissingBadge": "Wajib kosong"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",
@@ -4982,7 +4986,9 @@
     "evidenceNone": "Tidak ada bukti terkait transaksi ini.",
     "evidenceOpenNewTab": "Buka di tab baru",
     "loading": "Memuat...",
-    "serverError": "Terjadi kesalahan server."
+    "serverError": "Terjadi kesalahan server.",
+    "requiredMissingBlock": "Tidak dapat menyimpan: kolom wajib kosong",
+    "requiredMissingBadge": "Wajib kosong"
   },
   "companyProfile": {
     "welcomeTitle": "Selamat datang — lengkapi profil perusahaan",
@@ -5126,7 +5132,8 @@
     "selectAllApplicable": "Pilih semua yang berlaku. Menentukan berlakunya PPh 21/22/23/26/4(2) dan PPN.",
     "saveAndPrepare": "Simpan dan Siapkan Pelaporan",
     "saveDesc": "Saat disimpan, rezim pajak ditentukan otomatis. Ketika semua kolom wajib terisi, Anda akan diarahkan ke dashboard.",
-    "customerPicker": "Pilih klien"
+    "customerPicker": "Pilih klien",
+    "requiredMissingBlock": "Tidak dapat menyimpan: kolom wajib kosong"
   },
   "pphFinal": {
     "pageTitle": "Tutup Buku Tahunan — PPh Final UMKM",

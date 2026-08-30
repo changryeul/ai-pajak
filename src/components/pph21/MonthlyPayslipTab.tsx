@@ -96,10 +96,32 @@ interface Props {
 export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   const tp = useTranslations('monthlyPayslip');
   // 2026-08-30 — MASTER 지정 필수항목 별표. config snake_case ↔ 라벨 key 정규화 매칭.
-  const { requiredKeys } = useRequiredFields('payslip');
+  const { requiredKeys, fields: reqFields } = useRequiredFields('payslip');
   const reqSet = new Set((requiredKeys ?? []).map(k => k.toLowerCase().replace(/_/g, '')));
   const reqStar = (k: string) => reqSet.has(k.toLowerCase().replace(/_/g, ''))
     ? <span className="text-red-500 font-bold"> *</span> : null;
+  // 2026-08-30 — 급여 행별 필수항목 누락 판정 (제출 차단 + 리스트 표시 공용)
+  const payslipMissing = (ps: Payslip): string[] => {
+    const norm = (k: string) => k.toLowerCase().replace(/_/g, '');
+    const valOf = (k: string): unknown => {
+      switch (norm(k)) {
+        case 'employeename': return ps.employee_name;
+        case 'employeenpwp': return ps.employee_npwp || ps.employee?.employee_npwp;
+        case 'ptkp': return ps.ptkp_category || ps.employee?.ptkp_category;
+        case 'basesalary': return ps.base_salary;
+        case 'nik': return ps.employee?.employee_nik;
+        default: return undefined;
+      }
+    };
+    const labelOf = (k: string) => reqFields.find(f => norm(f.fieldKey) === norm(k))?.label ?? k;
+    const bad: string[] = [];
+    for (const k of (requiredKeys ?? [])) {
+      const v = valOf(k);
+      if (v === undefined) continue;
+      if (v == null || v === '' || (typeof v === 'number' && v === 0)) bad.push(labelOf(k));
+    }
+    return bad;
+  };
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
   const [period, setPeriod] = useState(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
@@ -163,6 +185,17 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   const submitPayslips = async () => {
     const draftCount = payslips.filter(p => p.status === 'DRAFT').length;
     if (draftCount === 0) return;
+
+    // 2026-08-30 — MASTER 지정 필수항목 미입력이면 제출 차단.
+    const bad: string[] = [];
+    for (const ps of payslips.filter(p => p.status === 'DRAFT')) {
+      for (const lbl of payslipMissing(ps)) bad.push(`${ps.employee_name || tp('noNpwp')} · ${lbl}`);
+    }
+    if (bad.length > 0) {
+      showMsg('error', `${tp('requiredMissingBlock')} — ${bad.slice(0, 6).join(', ')}${bad.length > 6 ? ` 외 ${bad.length - 6}건` : ''}`);
+      return;
+    }
+
     if (!confirm(tp('submitConfirm', { period, count: draftCount }))) return;
     setIsSaving(true);
     try {
@@ -382,6 +415,12 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                               {tp('draftBadge')}
                             </span>
                           )}
+                          {/* 2026-08-30 — 필수항목 누락 표시 */}
+                          {(() => { const m = payslipMissing(ps); return m.length > 0 ? (
+                            <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-red-100 text-red-700" title={`${tp('requiredMissingBlock')}: ${m.join(', ')}`}>
+                              <span className="font-bold">*</span>{tp('requiredMissingBadge')} {m.length}
+                            </span>
+                          ) : null; })()}
                           {ps.employee?.employment_status && (
                             <span
                               className={`inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold ${

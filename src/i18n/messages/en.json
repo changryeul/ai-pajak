@@ -4029,7 +4029,9 @@
     "coretaxColCoretaxPpn": "Coretax PPN",
     "output": "Output",
     "input": "Input",
-    "serverError": "A server error occurred."
+    "serverError": "A server error occurred.",
+    "requiredMissingBlock": "Cannot save: required fields are empty",
+    "requiredMissingBadge": "Missing"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
@@ -4504,7 +4506,9 @@
     "fieldPosition": "Position",
     "fieldDepartment": "Department",
     "fieldHireDate": "Hire Date",
-    "fieldResignDate": "Resign Date"
+    "fieldResignDate": "Resign Date",
+    "requiredMissingBlock": "Cannot submit: required fields are empty",
+    "requiredMissingBadge": "Missing"
   },
   "errorFallback": {
     "title": "Failed to load page",
@@ -4982,7 +4986,9 @@
     "evidenceNone": "No evidence linked to this transaction.",
     "evidenceOpenNewTab": "Open in new tab",
     "loading": "Loading...",
-    "serverError": "A server error occurred."
+    "serverError": "A server error occurred.",
+    "requiredMissingBlock": "Cannot save: required fields are empty",
+    "requiredMissingBadge": "Missing"
   },
   "companyProfile": {
     "welcomeTitle": "Welcome — complete your company profile",
@@ -5126,7 +5132,8 @@
     "selectAllApplicable": "Select all applicable items. Determines applicability of PPh 21/22/23/26/4(2) and PPN.",
     "saveAndPrepare": "Save and Prepare Filing",
     "saveDesc": "On save, the tax regime is auto-determined. Once all required fields are filled, you'll be redirected to the dashboard.",
-    "customerPicker": "Select customer"
+    "customerPicker": "Select customer",
+    "requiredMissingBlock": "Cannot save: required fields are empty"
   },
   "pphFinal": {
     "pageTitle": "Annual Settlement — PPh Final UMKM",

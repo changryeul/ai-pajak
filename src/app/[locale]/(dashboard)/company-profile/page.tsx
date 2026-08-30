@@ -226,6 +226,12 @@ export default function CompanyProfilePage() {
 
   const handleSave = async () => {
     if (!profile) return;
+    // 2026-08-30 — MASTER 지정 필수항목 미입력이면 저장 차단.
+    const missing = reqMissing(profile as unknown as Record<string, unknown>);
+    if (missing.length > 0) {
+      showMsg('error', `${t('requiredMissingBlock')} — ${missing.map(m => m.label).join(', ')}`);
+      return;
+    }
     setSaving(true);
     try {
       // 1. 프로필 저장 — consultant 인 경우 picker 의 customerId 를 body 에 명시.

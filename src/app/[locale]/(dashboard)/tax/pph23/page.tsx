@@ -189,6 +189,23 @@ export default function PPh23Page() {
   const { missing: reqMissing, requiredKeys: reqKeysP23 } = useRequiredFields('pph23');
   const reqStar = (k: string) => new Set((reqKeysP23 ?? []).map(x => x.toLowerCase().replace(/_/g, ''))).has(k.toLowerCase().replace(/_/g, ''))
     ? <span className="text-red-500 font-bold"> *</span> : null;
+  // 2026-08-30 — 거래 행별 필수항목 누락 개수 (리스트 표시용)
+  const txMissingCount = (tx: { counterparty_name?: string | null; counterparty_npwp?: string | null; transaction_date?: string | null; gross_amount?: number | null; invoice_number?: string | null; bukti_potong_number?: string | null }): number => {
+    const norm = (k: string) => k.toLowerCase().replace(/_/g, '');
+    const val: Record<string, unknown> = {
+      counterparty_name: tx.counterparty_name, counterparty_npwp: tx.counterparty_npwp,
+      transaction_date: tx.transaction_date, gross_amount: tx.gross_amount,
+      invoice_number: tx.invoice_number, bukti_potong_number: tx.bukti_potong_number,
+    };
+    let n = 0;
+    for (const k of (reqKeysP23 ?? [])) {
+      const mk = Object.keys(val).find(vk => norm(vk) === norm(k));
+      if (!mk) continue;
+      const v = val[mk];
+      if (v == null || v === '' || (typeof v === 'number' && v === 0)) n++;
+    }
+    return n;
+  };
   const [fCounterparty, setFCounterparty] = useState('');
   const [fServiceType, setFServiceType] = useState('JASA_KONSULTAN');
   const [fGrossAmount, setFGrossAmount] = useState('');
@@ -373,6 +390,15 @@ export default function PPh23Page() {
     // Mandatory invoice image — Phase 4 manual entry rule
     if (!invoiceImageFile) {
       showMsg('error', t('invoiceImageRequired'));
+      return;
+    }
+    // 2026-08-30 — MASTER 지정 필수항목 미입력이면 저장 차단.
+    const missing = reqMissing({
+      counterparty_name: fCounterparty, transaction_date: fTransactionDate,
+      gross_amount: Number(fGrossAmount || 0), invoice_number: fInvoiceNumber,
+    });
+    if (missing.length > 0) {
+      showMsg('error', `${t('requiredMissingBlock')} — ${missing.map(m => m.label).join(', ')}`);
       return;
     }
     setSaving(true);
@@ -1687,6 +1713,11 @@ export default function PPh23Page() {
                                 />
                               )}
                               <div className="font-medium text-xs">{tx.counterparty_name}</div>
+                              {txMissingCount(tx) > 0 && (
+                                <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-red-100 text-red-700" title={t('requiredMissingBlock')}>
+                                  <span>*</span>{t('requiredMissingBadge')} {txMissingCount(tx)}
+                                </span>
+                              )}
                             </div>
                             {isForeign && (
                               <div className="text-[9px] text-red-600 mt-0.5">
