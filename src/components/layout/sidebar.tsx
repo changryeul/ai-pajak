@@ -116,10 +116,8 @@ const navItems: NavSection[] = [
           // 2026-08-30: 신고현황을 부가세 아래로 이동 (사용자 요청)
           { href: '/tax/filing-status', icon: BarChart3, labelKey: 'nav.filingStatus' },
           { href: '/tax/billing', icon: CreditCard, labelKey: 'nav.idBillingIssue' },
-          { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord' },
-          // 2026-06-24: '세금예측/계산기' (/tax/tools) 사이드바 항목 제거.
-          // 페이지 자체는 보존 — 필요 시 deep-link 로 접근.
-          { href: '/tax/anomaly', icon: Activity, labelKey: 'nav.anomalyDetection' },
+          // 2026-08-30: '직원 인사 기록'(/tax/payroll/employees) · '이상 감지 (AI)'(/tax/anomaly)
+          // 사이드바 항목 제거 (사용자 요청). 페이지 자체는 보존 — 필요 시 deep-link.
         ],
       },
       // 연 신고
@@ -231,7 +229,7 @@ const navItems: NavSection[] = [
         { href: '/tax/annual/financial-statements', icon: BookOpen, labelKey: 'nav.financialStatements' },
         { href: '/tax/spt-tahunan', icon: FileText, labelKey: 'nav.sptPribadi' },
       ]},
-      { href: '/tax/payroll/employees', icon: Users, labelKey: 'nav.employeeHrRecord' },
+      // 2026-08-30: '직원 인사 기록' 사이드바 항목 제거 (사용자 요청). 페이지는 보존.
       { href: '/filings', icon: ClipboardList, labelKey: 'nav.filings' },
       { href: '/invoice-capture', icon: Camera, labelKey: 'nav.invoiceCapture' },
       { href: '/documents/upload', icon: Upload, labelKey: 'nav.docUpload' },
