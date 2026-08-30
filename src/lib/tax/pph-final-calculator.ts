@@ -11,7 +11,19 @@ import { loggers } from '@/lib/logger';
  * 3. PP 9/2022: Construction services with SBU grade differentiation
  */
 
-export type EntityType = 'INDIVIDUAL' | 'PT' | 'CV' | 'FIRMA' | 'KOPERASI';
+export type EntityType = 'INDIVIDUAL' | 'PERSEROAN_PERORANGAN' | 'PT' | 'CV' | 'FIRMA' | 'KOPERASI';
+
+// PP 20/2026 (2026-04-22): 개인·1인개인회사는 0.5% 영구, 협동조합 4년,
+// PT/CV/FIRMA 는 경과 수혜자 한정(3/4/4년). 영구는 Infinity.
+const NEW_COMPANY_FALLBACK_YEARS = 3;
+const PPH_FINAL_PERIOD_LIMITS: Record<EntityType, number> = {
+  INDIVIDUAL: Number.POSITIVE_INFINITY,
+  PERSEROAN_PERORANGAN: Number.POSITIVE_INFINITY,
+  PT: 3,
+  CV: 4,
+  FIRMA: 4,
+  KOPERASI: 4,
+};
 
 export type IncomeType =
   | 'RENTAL'                    // Sewa tanah/bangunan
@@ -124,15 +136,16 @@ export class PPhFinalCalculator {
       );
     }
 
-    // 3. Check revenue threshold for full exemption (< Rp 500M)
-    if (revenue < 500_000_000) {
+    // 3. Rp 500M 면세는 개인(Orang Pribadi) 전용. (UU HPP 7/2021 · PP 55/2022 jo. PP 20/2026)
+    //    법인/협동조합 등 entity 는 500M 면세 없이 0.5% 적용 → step 5 로 falls through.
+    if (entityType === 'INDIVIDUAL' && revenue < 500_000_000) {
       return {
         tax_type: 'PPh_FINAL_UMKM',
         base_amount: revenue,
         tax_rate: 0,
         tax_amount: 0,
         is_tax_exempt: true,
-        legal_basis: 'PP 23/2018 Pasal 2 ayat (1) - Revenue < Rp 500M fully exempt',
+        legal_basis: 'UU HPP 7/2021 jo. PP 20/2026 - individual revenue < Rp 500M/year exempt (individuals only)',
         details: {
           revenue,
           entity_type: entityType,
@@ -351,15 +364,7 @@ export class PPhFinalCalculator {
     const millisecondsPerYear = 365.25 * 24 * 60 * 60 * 1000;
     const yearsElapsed = (now.getTime() - businessStartDate.getTime()) / millisecondsPerYear;
 
-    const limits: Record<EntityType, number> = {
-      INDIVIDUAL: 7,
-      PT: 3,
-      CV: 4,
-      FIRMA: 4,
-      KOPERASI: 4
-    };
-
-    const periodLimit = limits[entityType];
+    const periodLimit = PPH_FINAL_PERIOD_LIMITS[entityType] ?? NEW_COMPANY_FALLBACK_YEARS;
     const isWithinLimit = yearsElapsed <= periodLimit;
 
     return {
@@ -394,14 +399,7 @@ export class PPhFinalCalculator {
    * Helper: Get period limit for entity type
    */
   static getPeriodLimit(entityType: EntityType): number {
-    const limits: Record<EntityType, number> = {
-      INDIVIDUAL: 7,
-      PT: 3,
-      CV: 4,
-      FIRMA: 4,
-      KOPERASI: 4
-    };
-    return limits[entityType];
+    return PPH_FINAL_PERIOD_LIMITS[entityType] ?? NEW_COMPANY_FALLBACK_YEARS;
   }
 
   /**

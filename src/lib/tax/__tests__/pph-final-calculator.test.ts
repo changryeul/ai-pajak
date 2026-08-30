@@ -196,8 +196,11 @@ describe('PPhFinalCalculator', () => {
       expect(PPhFinalCalculator.getUMKMLimit()).toBe(4_800_000_000);
     });
 
-    it('getPeriodLimit returns correct values per entity type', () => {
-      expect(PPhFinalCalculator.getPeriodLimit('INDIVIDUAL')).toBe(7);
+    it('getPeriodLimit returns correct values per entity type (PP 20/2026)', () => {
+      // PP 20/2026: individuals & 1인 개인회사 are permanent (no time limit).
+      expect(PPhFinalCalculator.getPeriodLimit('INDIVIDUAL')).toBe(Infinity);
+      expect(PPhFinalCalculator.getPeriodLimit('PERSEROAN_PERORANGAN')).toBe(Infinity);
+      // Grandfathered corporate forms keep their original windows.
       expect(PPhFinalCalculator.getPeriodLimit('PT')).toBe(3);
       expect(PPhFinalCalculator.getPeriodLimit('CV')).toBe(4);
       expect(PPhFinalCalculator.getPeriodLimit('FIRMA')).toBe(4);

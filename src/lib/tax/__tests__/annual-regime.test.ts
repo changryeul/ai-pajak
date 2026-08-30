@@ -25,6 +25,10 @@ describe('determineAnnualRegime (Phase 4)', () => {
     annualRevenue: 1_000_000_000, // 1B IDR
     npwpPph25Elected: false,
     isUmkm: true,
+    // PP 20/2026: PT/CV/Firma need a pre-2026 UMKM start to be grandfathered.
+    // baseInput models an existing beneficiary so the period-limit rules below
+    // keep exercising the PT/CV branches.
+    umkmStartYear: 2024,
   };
 
   describe('NOT_DETERMINED (missing data)', () => {
@@ -78,11 +82,67 @@ describe('determineAnnualRegime (Phase 4)', () => {
       expect(result.regime).toBe('PPH_FINAL');
     });
 
-    it('should return PPh Final for UD (eligible, 7 year limit)', () => {
+    it('should return PPh Final for UD (PP 20/2026 — permanent)', () => {
       const result = determineAnnualRegime({
         ...baseInput,
         legalForm: 'UD',
-        establishedYear: 2020, // 6 years → within UD 7-year limit
+        establishedYear: 2015, // 11 years → still eligible (no time limit)
+      });
+      expect(result.regime).toBe('PPH_FINAL');
+      expect(result.umkmYearsRemaining).toBeUndefined(); // permanent
+    });
+  });
+
+  describe('PP 20/2026 eligibility gate (mengubah PP 55/2022)', () => {
+    it('should return PPh 25 for a NEW PT (no pre-2026 UMKM start → excluded)', () => {
+      const result = determineAnnualRegime({
+        ...baseInput,
+        legalForm: 'PT',
+        establishedYear: 2026,
+        umkmStartYear: null, // not a grandfathered beneficiary
+      });
+      expect(result.regime).toBe('PPH25');
+      expect(result.reason).toContain('PP 20/2026');
+    });
+
+    it('should return PPh 25 for a NEW CV (excluded, not grandfathered)', () => {
+      const result = determineAnnualRegime({
+        ...baseInput,
+        legalForm: 'CV',
+        establishedYear: 2026,
+        umkmStartYear: 2026, // started at/after cutoff → not grandfathered
+      });
+      expect(result.regime).toBe('PPH25');
+      expect(result.reason).toContain('PP 20/2026');
+    });
+
+    it('should GRANDFATHER an existing PT (pre-2026 UMKM start) until period ends', () => {
+      const result = determineAnnualRegime({
+        ...baseInput,
+        legalForm: 'PT',
+        establishedYear: 2025,
+        umkmStartYear: 2025, // existing beneficiary, within 3-year PT window
+      });
+      expect(result.regime).toBe('PPH_FINAL');
+    });
+
+    it('should treat INDIVIDUAL as permanently eligible (no year limit)', () => {
+      const result = determineAnnualRegime({
+        ...baseInput,
+        legalForm: 'INDIVIDUAL',
+        establishedYear: 2010, // 16 years → still eligible
+        umkmStartYear: null,
+      });
+      expect(result.regime).toBe('PPH_FINAL');
+      expect(result.umkmYearsRemaining).toBeUndefined();
+    });
+
+    it('should treat PERSEROAN_PERORANGAN (1인 개인회사) as permanently eligible', () => {
+      const result = determineAnnualRegime({
+        ...baseInput,
+        legalForm: 'PERSEROAN_PERORANGAN',
+        establishedYear: 2018,
+        umkmStartYear: null,
       });
       expect(result.regime).toBe('PPH_FINAL');
     });
@@ -236,8 +296,10 @@ describe('getMaxUmkmYears (Phase 4)', () => {
     expect(getMaxUmkmYears('KOPERASI')).toBe(4);
   });
 
-  it('should return 7 for UD (individual)', () => {
-    expect(getMaxUmkmYears('UD')).toBe(7);
+  it('should return Infinity for UD/INDIVIDUAL (PP 20/2026 — permanent)', () => {
+    expect(getMaxUmkmYears('UD')).toBe(Infinity);
+    expect(getMaxUmkmYears('INDIVIDUAL')).toBe(Infinity);
+    expect(getMaxUmkmYears('PERSEROAN_PERORANGAN')).toBe(Infinity);
   });
 
   it('should be case-insensitive', () => {

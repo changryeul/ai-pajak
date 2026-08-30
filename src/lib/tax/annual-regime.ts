@@ -57,20 +57,46 @@ export interface AnnualRegimeResult {
   route: '/tax/annual/pph-final' | '/tax/annual/pph25' | null;
 }
 
-const UMKM_ELIGIBLE_LEGAL_FORMS = new Set(['PT', 'CV', 'UD', 'FIRMA', 'KOPERASI']);
+// ── PP 20/2026 (2026-04-22, mengubah PP 55/2022) ─────────────────────────────
+// UMKM PPh Final 0.5% 적격 유형이 축소됨:
+//   - 신규 적격: 개인(INDIVIDUAL/UD) · 1인 개인회사(PERSEROAN_PERORANGAN) · 협동조합(KOPERASI)
+//   - 배제: PT · CV · FIRMA · BUMDes → 일반 법인세(PPh 25) 의무
+//   - 개인/1인개인회사: 0.5% 영구(7년 시한 폐지). 협동조합: 4년 유지.
+//   - 경과규정: PP 20/2026 시행(2026) 이전 이미 0.5% 를 쓰던 PT/CV/FIRMA 는
+//     기존 시한(PT 3년/CV·FIRMA 4년) 종료까지 유지, 그 후 PPh 25.
+export const PP20_2026_CUTOFF_YEAR = 2026; // 시행 2026-04-22
+const UMKM_ELIGIBLE_ALWAYS = new Set(['INDIVIDUAL', 'UD', 'PERSEROAN_PERORANGAN', 'KOPERASI']);
+const UMKM_GRANDFATHER_ONLY = new Set(['PT', 'CV', 'FIRMA']);
+const PERMANENT = Number.POSITIVE_INFINITY;
 
 /**
- * Map legal form to maximum UMKM PPh Final years per PP 55/2022.
- * PT: 3 years, CV/Firma: 4 years, individual (UD): 7 years, Koperasi: 4 years.
+ * PP 20/2026 적격 여부. PT/CV/FIRMA 는 2026 이전 시작한 기존 수혜자만(경과규정).
+ */
+export function isUmkmFinalEligible(legalForm?: string | null, umkmStartYear?: number | null): boolean {
+  if (!legalForm) return false;
+  const lf = legalForm.toUpperCase();
+  if (UMKM_ELIGIBLE_ALWAYS.has(lf)) return true;
+  if (UMKM_GRANDFATHER_ONLY.has(lf)) {
+    return !!umkmStartYear && umkmStartYear < PP20_2026_CUTOFF_YEAR; // 경과 인정
+  }
+  return false;
+}
+
+/**
+ * PP 20/2026 기준 UMKM PPh Final 최대 연수.
+ * 개인(UD/INDIVIDUAL)·1인개인회사: 영구(∞). 협동조합: 4년.
+ * PT: 3년 / CV·FIRMA: 4년 (경과 수혜자에 한해 계산에 사용).
  */
 export function getMaxUmkmYears(legalForm?: string | null): number {
   if (!legalForm) return NEW_COMPANY_EXEMPTION_YEARS;
   switch (legalForm.toUpperCase()) {
-    case 'PT': return 3;
-    case 'CV':
-    case 'FIRMA':
+    case 'INDIVIDUAL':
+    case 'UD':
+    case 'PERSEROAN_PERORANGAN': return PERMANENT;
     case 'KOPERASI': return 4;
-    case 'UD': return 7;
+    case 'PT': return 3;         // 경과 수혜자 전용
+    case 'CV':
+    case 'FIRMA': return 4;      // 경과 수혜자 전용
     default: return NEW_COMPANY_EXEMPTION_YEARS;
   }
 }
@@ -114,20 +140,30 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
     };
   }
 
-  // Rule 5: Non-UMKM eligible legal form → PPh 25
-  if (!UMKM_ELIGIBLE_LEGAL_FORMS.has(input.legalForm.toUpperCase())) {
+  // Rule 5: PP 20/2026 — 적격 유형이 아니면 PPh 25.
+  // PT/CV/FIRMA 는 원칙 배제, 2026 이전 시작한 기존 수혜자만 경과 인정.
+  if (!isUmkmFinalEligible(input.legalForm, input.umkmStartYear)) {
+    const lf = input.legalForm.toUpperCase();
+    const excludedByPp20 = UMKM_GRANDFATHER_ONLY.has(lf);
     return {
       regime: 'PPH25',
       title: 'PPh 25 — standard corporate income tax',
-      reason: `${input.legalForm} is not eligible for UMKM PPh Final.`,
-      legalBasis: 'PP 55/2022 — legal form not eligible for UMKM Final',
+      reason: excludedByPp20
+        ? `${input.legalForm} is no longer eligible for UMKM PPh Final 0.5% under PP 20/2026 (effective 2026-04-22) — must use the standard corporate tax (PPh 25/PPh Badan).`
+        : `${input.legalForm} is not eligible for UMKM PPh Final.`,
+      legalBasis: excludedByPp20
+        ? 'PP 20/2026 (mengubah PP 55/2022) — PT/CV/Firma dikecualikan dari PPh Final 0,5%'
+        : 'PP 55/2022 jo. PP 20/2026 — legal form not eligible',
       yearsOperating,
+      warnings: excludedByPp20
+        ? ['PP 20/2026: PT·CV·Firma는 0.5% Final 대상에서 제외되어 일반 법인세(PPh 25)로 전환됩니다. (기존 수혜자는 기존 시한까지 경과 인정)']
+        : undefined,
       route: '/tax/annual/pph25',
     };
   }
 
-  // Rule 4: Beyond UMKM max years → PPh 25
-  if (yearsOperating >= maxYears) {
+  // Rule 4: Beyond UMKM max years → PPh 25. (개인/1인개인회사는 maxYears=∞ → 영구, 미해당)
+  if (Number.isFinite(maxYears) && yearsOperating >= maxYears) {
     return {
       regime: 'PPH25',
       title: 'PPh 25 — standard corporate income tax',
@@ -153,15 +189,19 @@ export function determineAnnualRegime(input: AnnualRegimeInput): AnnualRegimeRes
   }
 
   // Rule 2: Within UMKM period + no threshold exceed → PPh Final
-  const umkmYearsRemaining = maxYears - yearsOperating;
+  // 개인/1인개인회사는 maxYears=∞ → 영구(잔여연수 무의미).
+  const permanent = !Number.isFinite(maxYears);
+  const umkmYearsRemaining = permanent ? undefined : maxYears - yearsOperating;
   return {
     regime: 'PPH_FINAL',
     title: 'PPh Final UMKM 0.5%',
-    reason: `Year ${yearsOperating} of operation (${input.legalForm}). UMKM applies (revenue under Rp 4.8B), so only 0.5% of monthly revenue is prepaid. ${umkmYearsRemaining} year(s) remaining.`,
-    legalBasis: 'PP 55/2022 — UMKM PPh Final 0.5%',
+    reason: permanent
+      ? `${input.legalForm} — UMKM PPh Final 0.5% applies permanently while revenue stays under Rp 4.8B (PP 20/2026: no time limit for individuals/sole proprietorships).`
+      : `Year ${yearsOperating} of operation (${input.legalForm}). UMKM applies (revenue under Rp 4.8B), so only 0.5% of monthly revenue is prepaid. ${umkmYearsRemaining} year(s) remaining.`,
+    legalBasis: 'PP 55/2022 jo. PP 20/2026 — UMKM PPh Final 0,5%',
     yearsOperating,
     umkmYearsRemaining,
-    warnings: umkmYearsRemaining <= 1
+    warnings: umkmYearsRemaining != null && umkmYearsRemaining <= 1
       ? [`This is the final year of UMKM eligibility — PPh 25 takes over automatically from next year.`]
       : undefined,
     route: '/tax/annual/pph-final',

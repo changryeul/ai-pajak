@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
+import { isUmkmFinalEligible, getMaxUmkmYears } from '@/lib/tax/annual-regime';
 
 /**
  * POST /api/company-profile/determine-tax
@@ -37,16 +38,24 @@ function determineTaxRegime(profile: Record<string, unknown>): TaxDetermination 
   // All copy is English. Indonesian tax-law references (PP, PMK, SBU codes)
   // remain in their statutory form.
   if (isUmkm && revenue > 0 && revenue < 4_800_000_000) {
-    // Check UMKM period limit
-    const maxYears = ['PT'].includes(legalForm) ? 3 : ['CV', 'FIRMA'].includes(legalForm) ? 4 : 7;
-    const yearsUsed = umkmStartYear > 0 ? currentYear - umkmStartYear : 0;
-
-    if (yearsUsed < maxYears) {
-      regime = 'UMKM_FINAL';
-      reason = `PP 55/2022 applies: annual revenue Rp ${Math.round(revenue).toLocaleString('id-ID')} (< Rp 4,800,000,000); ${legalForm || 'entity'} — year ${yearsUsed} of ${maxYears}-year UMKM eligibility.`;
-    } else {
+    // PP 20/2026 (2026-04-22): 적격 유형 게이트 — PT/CV/Firma 배제(기존 수혜자만 경과 인정),
+    // 개인/1인개인회사는 영구, 협동조합 4년.
+    if (!isUmkmFinalEligible(legalForm, umkmStartYear || null)) {
       regime = 'GENERAL_25';
-      reason = `UMKM PPh Final period expired: ${legalForm} exceeded the ${maxYears}-year limit (${umkmStartYear}~${currentYear}). Standard PPh Badan 22% applies.`;
+      reason = `PP 20/2026 (mengubah PP 55/2022): ${legalForm || 'entity'} is no longer eligible for UMKM PPh Final 0.5% — standard corporate tax (PPh Badan 22%) applies. (PT/CV/Firma excluded; existing beneficiaries grandfathered until their period ends.)`;
+    } else {
+      const maxYears = getMaxUmkmYears(legalForm);
+      const permanent = !Number.isFinite(maxYears);
+      const yearsUsed = umkmStartYear > 0 ? currentYear - umkmStartYear : 0;
+      if (permanent || yearsUsed < maxYears) {
+        regime = 'UMKM_FINAL';
+        reason = permanent
+          ? `PP 20/2026: ${legalForm} — UMKM PPh Final 0.5% applies permanently while revenue stays under Rp 4,800,000,000 (no time limit for individuals/sole proprietorships).`
+          : `PP 55/2022 jo. PP 20/2026: annual revenue Rp ${Math.round(revenue).toLocaleString('id-ID')} (< Rp 4,800,000,000); ${legalForm} — year ${yearsUsed} of ${maxYears}-year UMKM eligibility.`;
+      } else {
+        regime = 'GENERAL_25';
+        reason = `UMKM PPh Final period expired: ${legalForm} exceeded the ${maxYears}-year limit (${umkmStartYear}~${currentYear}). Standard PPh Badan 22% applies.`;
+      }
     }
   } else if (revenue >= 4_800_000_000) {
     regime = 'GENERAL_25';
