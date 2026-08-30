@@ -113,13 +113,23 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   // 2026-08-30 — 급여 행별 필수항목 누락 판정 (제출 차단 + 리스트 표시 공용)
   const payslipMissing = (ps: Payslip): string[] => {
     const norm = (k: string) => k.toLowerCase().replace(/_/g, '');
+    // Model B: 인사정보가 payslip 자체 컬럼 → payslip 값 우선, 없으면 legacy 마스터 join.
+    // MASTER 가 지정할 수 있는 payslip 필수항목 전부 커버 (누락 시 제출 차단 위해).
     const valOf = (k: string): unknown => {
       switch (norm(k)) {
         case 'employeename': return ps.employee_name;
-        case 'employeenpwp': return ps.employee_npwp || ps.employee?.employee_npwp;
-        case 'ptkp': return ps.ptkp_category || ps.employee?.ptkp_category;
+        case 'employeenpwp': return ps.employee_npwp ?? ps.employee?.employee_npwp;
+        case 'ptkp': return ps.ptkp_category ?? ps.employee?.ptkp_category;
         case 'basesalary': return ps.base_salary;
-        case 'nik': return ps.employee?.employee_nik;
+        case 'nik': return ps.employee_nik ?? ps.employee?.employee_nik;
+        case 'taxmethod': return ps.tax_method;
+        case 'employmentstatus': return ps.employment_status ?? ps.employee?.employment_status;
+        case 'employeenumber': return ps.employee_number ?? ps.employee?.employee_number;
+        case 'workertype': return ps.worker_type ?? ps.employee?.worker_type;
+        case 'position': return ps.position ?? ps.employee?.position;
+        case 'department': return ps.department ?? ps.employee?.department;
+        case 'hiredate': return ps.hire_date ?? ps.employee?.hire_date;
+        case 'resigndate': return ps.resign_date ?? ps.employee?.resign_date;
         default: return undefined;
       }
     };
