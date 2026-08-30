@@ -203,8 +203,8 @@ feature 브랜치 생성  →  작업  →  tsc/lint/build 통과  →  push  �
 - [ ] 개발용 DB 완전 분리 + `.env.local` 표준화 (최우선)
 - [ ] GitHub `main` 브랜치 보호 (PR 필수 + CI 통과 + 리뷰 1인)
 - [ ] Vercel Preview 배포 활성화 (PR별 URL)
-- [ ] `package.json`에 `engines.node` + `.nvmrc`로 Node 20 고정
-- [ ] `README.md`/`readme.md` 중복 정리
+- [x] ~~Node 버전 고정~~ — `package.json engines.node: ">=20"` + `.nvmrc`(20) 완료
+- [x] ~~README 중복~~ — 실제로는 단일 파일(대소문자 무시 FS 착시), 정리 불필요
 
 ---
 
