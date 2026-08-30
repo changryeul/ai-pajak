@@ -288,7 +288,8 @@
     "opWorkqueue": "Customer Workqueue",
     "annualFilingCompany": "SPT Badan (Annual Filing)",
     "monthlyBoard": "Filing Board & Guide",
-    "employeeDirectory": "Employee Directory"
+    "employeeDirectory": "Employee Directory",
+    "comingSoon": "Coming soon"
   },
   "employeeHr": {
     "uploadSection": {
@@ -4522,7 +4523,9 @@
     "andNMore": "+{count} more",
     "requiredMissingModalTitle": "Required fields missing",
     "requiredMissingModalDesc": "Cannot submit — the required fields below are empty. Fill them in and submit again.",
-    "confirmOk": "OK"
+    "confirmOk": "OK",
+    "autoLabel": "(auto)",
+    "downloadExcel": "Download Excel"
   },
   "errorFallback": {
     "title": "Failed to load page",
@@ -10809,5 +10812,10 @@
     "mini_withholding": "Withholding",
     "mini_prepaid": "Prepaid Corp",
     "mini_ppn": "PPN"
+  },
+  "requiredFields": {
+    "bannerTitle": "{count} required field(s) are empty",
+    "bannerHint": "Fields marked (*) are required. Please fill them in for an accurate filing.",
+    "markTitle": "Required"
   }
 }

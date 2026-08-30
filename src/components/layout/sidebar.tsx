@@ -536,7 +536,7 @@ export function Sidebar() {
                         <Icon className="h-[18px] w-[18px]" />
                         <span className="flex-1 text-left">{t(item.labelKey)}</span>
                         {item.comingSoon && (
-                          <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">준비중</span>
+                          <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">{t('nav.comingSoon')}</span>
                         )}
                         <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', isExpanded && 'rotate-180')} />
                       </button>
@@ -559,11 +559,11 @@ export function Sidebar() {
                                   <span
                                     aria-disabled="true"
                                     className="flex cursor-not-allowed items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-400"
-                                    title="준비중"
+                                    title={t('nav.comingSoon')}
                                   >
                                     <ChildIcon className="h-3.5 w-3.5" />
                                     <span className="flex-1">{t(child.labelKey)}</span>
-                                    <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">준비중</span>
+                                    <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">{t('nav.comingSoon')}</span>
                                   </span>
                                 </li>
                               );

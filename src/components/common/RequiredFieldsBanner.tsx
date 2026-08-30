@@ -1,5 +1,6 @@
 'use client';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { RequiredFieldDef } from '@/hooks/useRequiredFields';
 
 /**
@@ -7,12 +8,13 @@ import type { RequiredFieldDef } from '@/hooks/useRequiredFields';
  * MASTER 가 지정한 필수항목 중 비어 있는 것을 상단에 모아 보여준다.
  */
 export function RequiredFieldsBanner({ missing }: { missing: RequiredFieldDef[] }) {
+  const t = useTranslations('requiredFields');
   if (missing.length === 0) return null;
   return (
     <div className="mb-4 rounded-xl border-2 border-amber-300 bg-amber-50 p-4">
       <div className="flex items-center gap-2 text-sm font-bold text-amber-800">
         <AlertTriangle className="h-4 w-4" />
-        필수 입력 항목 {missing.length}개가 비어 있습니다
+        {t('bannerTitle', { count: missing.length })}
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {missing.map(f => (
@@ -21,13 +23,14 @@ export function RequiredFieldsBanner({ missing }: { missing: RequiredFieldDef[] 
           </span>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-amber-700">별표(*) 항목은 필수입니다. 정확한 신고를 위해 입력해 주세요.</p>
+      <p className="mt-2 text-[11px] text-amber-700">{t('bannerHint')}</p>
     </div>
   );
 }
 
 /** 라벨 옆 필수 별표. */
 export function RequiredMark({ required }: { required: boolean }) {
+  const t = useTranslations('requiredFields');
   if (!required) return null;
-  return <span className="ml-0.5 font-bold text-red-500" title="필수 항목">*</span>;
+  return <span className="ml-0.5 font-bold text-red-500" title={t('markTitle')}>*</span>;
 }

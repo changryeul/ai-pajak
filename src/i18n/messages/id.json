@@ -288,7 +288,8 @@
     "opWorkqueue": "Antrean Kerja Pelanggan",
     "annualFilingCompany": "SPT Badan (Tahunan)",
     "monthlyBoard": "Papan & Panduan Lapor",
-    "employeeDirectory": "Daftar Karyawan"
+    "employeeDirectory": "Daftar Karyawan",
+    "comingSoon": "Segera hadir"
   },
   "employeeHr": {
     "uploadSection": {
@@ -4522,7 +4523,9 @@
     "andNMore": "+{count} lagi",
     "requiredMissingModalTitle": "Ada kolom wajib yang kosong",
     "requiredMissingModalDesc": "Tidak dapat mengirim — kolom wajib di bawah ini masih kosong. Lengkapi lalu kirim lagi.",
-    "confirmOk": "OK"
+    "confirmOk": "OK",
+    "autoLabel": "(otomatis)",
+    "downloadExcel": "Unduh Excel"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",
@@ -10809,5 +10812,10 @@
     "mini_withholding": "Pemotongan",
     "mini_prepaid": "Angsuran",
     "mini_ppn": "PPN"
+  },
+  "requiredFields": {
+    "bannerTitle": "{count} kolom wajib masih kosong",
+    "bannerHint": "Kolom bertanda (*) wajib diisi. Lengkapi untuk pelaporan yang akurat.",
+    "markTitle": "Wajib"
   }
 }

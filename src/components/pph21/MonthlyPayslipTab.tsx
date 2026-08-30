@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import {
   Loader2, Save, ChevronDown, ChevronRight, Users,
-  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X,
+  DollarSign, AlertTriangle, CheckCircle, Calculator, Pencil, X, Download,
 } from 'lucide-react';
 import { fmtRp } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -243,6 +243,55 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
     finally { setIsSaving(false); }
   };
 
+  // 2026-08-30: 해당 월 신고내역 전체를 엑셀로 다운로드 (모든 직원 × 전 항목).
+  const downloadExcel = async () => {
+    if (payslips.length === 0) return;
+    const XLSX = await import('xlsx');
+    const n = (v: unknown) => Number(v) || 0;
+    const s = (v: unknown) => (v == null ? '' : String(v));
+    const rows = payslips.map(ps => ({
+      '기간': period,
+      '직원명': s(ps.employee_name),
+      'NPWP': s(ps.employee_npwp ?? ps.employee?.employee_npwp),
+      'NIK': s(ps.employee_nik ?? ps.employee?.employee_nik),
+      'PTKP': s(ps.ptkp_category ?? ps.employee?.ptkp_category),
+      '고용형태': s(ps.employment_status ?? ps.employee?.employment_status),
+      '직군': s(ps.worker_type ?? ps.employee?.worker_type),
+      '사번': s(ps.employee_number ?? ps.employee?.employee_number),
+      '직책': s(ps.position ?? ps.employee?.position),
+      '부서': s(ps.department ?? ps.employee?.department),
+      '입사일': s(ps.hire_date ?? ps.employee?.hire_date),
+      '퇴사일': s(ps.resign_date ?? ps.employee?.resign_date),
+      '세금방식': (s(ps.tax_method) || 'GROSS').toUpperCase(),
+      '기본급': n(ps.base_salary),
+      '초과근무수당': n(ps.overtime_pay),
+      '식대': n(ps.meal_allowance),
+      '교통비': n(ps.transport_allowance),
+      '직책수당': n(ps.position_allowance),
+      '기타수당': n(ps.other_allowances),
+      '상여': n(ps.bonus),
+      'THR': n(ps.thr),
+      'BPJS건강(직원)': n(ps.bpjs_kesehatan),
+      'JHT(직원)': n(ps.jht_employee),
+      'JP(직원)': n(ps.jp_employee),
+      '기타공제': n(ps.other_deductions),
+      '근무일수': n(ps.working_days),
+      '결근일수': n(ps.absent_days),
+      '초과근무시간': n(ps.overtime_hours),
+      '총지급액': n(ps.total_gross),
+      '총공제액': n(ps.total_deduction),
+      'PPh21세액': n(ps.pph21_tax),
+      'TER요율(%)': n(ps.ter_rate),
+      '실수령액': n(ps.net_salary),
+      '상태': s(ps.status),
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0] ?? {}).map(() => ({ wch: 14 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `PPh21 ${period}`);
+    XLSX.writeFile(wb, `pph21-${period}.xlsx`);
+  };
+
   const deletePayslip = async (id: string) => {
     if (!confirm(tp('confirmDelete'))) return;
     try {
@@ -348,18 +397,22 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
           const draftCount = payslips.filter(p => p.status === 'DRAFT').length;
           const submittedCount = payslips.filter(p => p.status === 'SUBMITTED').length;
           if (payslips.length === 0) return null;
-          if (draftCount === 0) {
-            return (
-              <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
-                ✓ {tp('allSubmittedBadge')} ({submittedCount})
-              </span>
-            );
-          }
           return (
-            <Button size="sm" onClick={submitPayslips} disabled={isSaving || !customerId}>
-              {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
-              {tp('submitButton')} ({draftCount})
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={downloadExcel} disabled={payslips.length === 0}>
+                <Download className="h-4 w-4 mr-1" />{tp('downloadExcel')}
+              </Button>
+              {draftCount === 0 ? (
+                <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
+                  ✓ {tp('allSubmittedBadge')} ({submittedCount})
+                </span>
+              ) : (
+                <Button size="sm" onClick={submitPayslips} disabled={isSaving || !customerId}>
+                  {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+                  {tp('submitButton')} ({draftCount})
+                </Button>
+              )}
+            </div>
           );
         })()}
       </div>
@@ -704,7 +757,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                               onCommit={n => updatePayslip(ps.id, { medical_allowance: n })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">{tp('taxAllowance')}{(ps.tax_method || 'GROSS').toUpperCase() === 'GROSS_UP' && <span className="ml-1 text-[9px] text-indigo-500">(자동)</span>}</Label>
+                            <Label className="text-[10px] text-gray-400">{tp('taxAllowance')}{(ps.tax_method || 'GROSS').toUpperCase() === 'GROSS_UP' && <span className="ml-1 text-[9px] text-indigo-500">{tp('autoLabel')}</span>}</Label>
                             {(ps.tax_method || 'GROSS').toUpperCase() === 'GROSS_UP' ? (
                               <div className="flex h-8 items-center rounded border border-indigo-200 bg-indigo-50/40 px-2 text-xs font-mono text-indigo-700">
                                 {fmtRp(ps.tax_allowance)}
@@ -892,21 +945,21 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
           {(() => {
             const draftCount = payslips.filter(p => p.status === 'DRAFT').length;
             const submittedCount = payslips.filter(p => p.status === 'SUBMITTED').length;
-            if (draftCount === 0) {
-              return (
-                <div className="mt-4 flex justify-end">
+            return (
+              <div className="mt-4 flex justify-end items-center gap-2">
+                <Button variant="outline" onClick={downloadExcel} disabled={payslips.length === 0}>
+                  <Download className="h-4 w-4 mr-1" />{tp('downloadExcel')}
+                </Button>
+                {draftCount === 0 ? (
                   <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
                     ✓ {tp('allSubmittedBadge')} ({submittedCount})
                   </span>
-                </div>
-              );
-            }
-            return (
-              <div className="mt-4 flex justify-end">
-                <Button onClick={submitPayslips} disabled={isSaving || !customerId}>
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
-                  {tp('submitButton')} ({draftCount})
-                </Button>
+                ) : (
+                  <Button onClick={submitPayslips} disabled={isSaving || !customerId}>
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+                    {tp('submitButton')} ({draftCount})
+                  </Button>
+                )}
               </div>
             );
           })()}
