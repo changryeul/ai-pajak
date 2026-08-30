@@ -7,6 +7,7 @@ import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { Pph21Detail, Pph21Row } from './types';
 import { RowDetailModal, type FieldDef } from './RowDetailModal';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
 import { RequestChatModal } from './RequestChatModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -59,6 +60,7 @@ const PPH21_FIELDS: FieldDef[] = [
 
 export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
+  const { requiredKeys } = useRequiredFields('payslip');
   const [detail, setDetail] = useState<Pph21Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [empSearch, setEmpSearch] = useState('');
@@ -156,6 +158,7 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
           queueId={queueId}
           putUrl="/api/tax/monthly-payslip"
           fields={PPH21_FIELDS}
+          requiredKeys={requiredKeys}
           values={detailRow as unknown as Record<string, unknown>}
           operatorEdits={detailRow.operatorEdits}
           reviewedAt={detailRow.reviewedAt}

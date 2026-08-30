@@ -7,12 +7,14 @@ import { AiPreReviewBox } from './AiPreReviewBox';
 import { ApprovalActions } from './ApprovalActions';
 import type { WithholdingDetail, WithholdingRow } from './types';
 import { RowDetailModal, type FieldDef } from './RowDetailModal';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
 import { RequestChatModal } from './RequestChatModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 
 export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
+  const { requiredKeys } = useRequiredFields('pph23');
   const [detail, setDetail] = useState<WithholdingDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [regime, setRegime] = useState<'' | 'PPH23' | 'PPH4_2'>('');
@@ -120,6 +122,7 @@ export function WithholdingReviewPanel({ queueId, onChanged }: { queueId: string
           putUrl="/api/tax/pph23-transactions"
           putExtra={{ serviceType: detailRow.serviceType ?? undefined, counterpartyNpwp: detailRow.counterpartyNpwp ?? undefined }}
           fields={WHT_FIELDS}
+          requiredKeys={requiredKeys}
           values={detailRow as unknown as Record<string, unknown>}
           operatorEdits={detailRow.operatorEdits}
           reviewedAt={detailRow.reviewedAt}

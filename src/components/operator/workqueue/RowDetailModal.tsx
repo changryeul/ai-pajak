@@ -45,14 +45,21 @@ interface Props {
   aiNote?: { label: string; issues: string[] } | null;
   // #64 — 저장 전 값 검증. 문구를 반환하면 AI 재확인(confirm)으로 되묻는다.
   warn?: (draft: Record<string, string>) => string | null;
+  // 2026-08-30 — MASTER 지정 필수항목(별표). config 는 snake_case, FieldDef.key 는
+  // camelCase 라 정규화(소문자+언더스코어 제거)로 매칭한다.
+  requiredKeys?: string[];
   onClose: () => void;
   onSaved: () => void;
 }
 
+const normKey = (k: string) => k.toLowerCase().replace(/_/g, '');
+
 export function RowDetailModal({
-  title, subtitle, summary, rowId, queueId, putUrl, putExtra, fields, values,
+  title, subtitle, summary, rowId, queueId, putUrl, putExtra, fields, values, requiredKeys,
   operatorEdits, reviewedAt, basisNote, calcNote, aiNote, warn, onClose, onSaved,
 }: Props) {
+  const reqSet = new Set((requiredKeys ?? []).map(normKey));
+  const isReq = (key: string) => reqSet.has(normKey(key));
   const [draft, setDraft] = useState<Record<string, string>>(() => {
     const d: Record<string, string> = {};
     for (const f of fields) d[f.key] = values[f.key] == null ? '' : String(values[f.key]);
@@ -187,7 +194,7 @@ export function RowDetailModal({
                 {sec.fields.map(f => (
                   <div key={f.key}>
                     <label className="flex items-center text-[10px] text-gray-400">
-                      {f.label}{editDot(f.key)}
+                      {f.label}{isReq(f.key) && <span className="ml-0.5 font-bold text-red-500" title="필수 항목">*</span>}{editDot(f.key)}
                     </label>
                     {f.type === 'select' ? (
                       <select

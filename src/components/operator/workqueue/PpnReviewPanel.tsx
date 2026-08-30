@@ -8,6 +8,7 @@ import { ApprovalActions } from './ApprovalActions';
 import type { PpnDetail, PpnRow } from './types';
 import { parseCoretaxFakturFile } from '@/lib/tax/coretax-faktur-parse';
 import { RowDetailModal, type FieldDef } from './RowDetailModal';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
 import { RequestChatModal } from './RequestChatModal';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -217,6 +218,7 @@ function CarryoverCard({ queueId }: { queueId: string }) {
 
 export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
+  const { requiredKeys } = useRequiredFields('ppn');
   const [detail, setDetail] = useState<PpnDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dir, setDir] = useState<'' | 'KELUARAN' | 'MASUKAN'>('');
@@ -379,6 +381,7 @@ export function PpnReviewPanel({ queueId, onChanged }: { queueId: string; onChan
           queueId={queueId}
           putUrl="/api/tax/ppn-faktur-monthly"
           fields={PPN_FIELDS}
+          requiredKeys={requiredKeys}
           values={detailRow as unknown as Record<string, unknown>}
           operatorEdits={detailRow.operatorEdits}
           reviewedAt={detailRow.reviewedAt}
