@@ -4508,7 +4508,12 @@
     "fieldHireDate": "Hire Date",
     "fieldResignDate": "Resign Date",
     "requiredMissingBlock": "Cannot submit: required fields are empty",
-    "requiredMissingBadge": "Missing"
+    "requiredMissingBadge": "Missing",
+    "taxMethodLabel": "Tax method (Gross / Gross-up)",
+    "taxMethodGross": "Gross — borne by employee",
+    "taxMethodGrossUp": "Gross-up — borne by company (auto allowance)",
+    "taxMethodGrossHint": "PPh21 is deducted from the employee salary.",
+    "taxMethodGrossUpHint": "Company bears PPh21 → tax allowance is grossed up automatically."
   },
   "errorFallback": {
     "title": "Failed to load page",

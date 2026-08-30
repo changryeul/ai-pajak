@@ -4508,7 +4508,12 @@
     "fieldHireDate": "Tanggal Masuk",
     "fieldResignDate": "Tanggal Keluar",
     "requiredMissingBlock": "Tidak dapat mengirim: kolom wajib kosong",
-    "requiredMissingBadge": "Wajib kosong"
+    "requiredMissingBadge": "Wajib kosong",
+    "taxMethodLabel": "Metode pajak (Gross / Gross-up)",
+    "taxMethodGross": "Gross — ditanggung karyawan",
+    "taxMethodGrossUp": "Gross-up — ditanggung perusahaan (tunjangan otomatis)",
+    "taxMethodGrossHint": "PPh21 dipotong dari gaji karyawan.",
+    "taxMethodGrossUpHint": "Perusahaan menanggung PPh21 → tunjangan pajak dihitung gross-up otomatis."
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",

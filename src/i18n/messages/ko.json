@@ -4526,7 +4526,12 @@
     "fieldHireDate": "입사일",
     "fieldResignDate": "퇴사일",
     "requiredMissingBlock": "필수항목이 비어 있어 제출할 수 없습니다",
-    "requiredMissingBadge": "필수 누락"
+    "requiredMissingBadge": "필수 누락",
+    "taxMethodLabel": "세금 방식 (Gross / Gross-up)",
+    "taxMethodGross": "Gross — 직원 부담(급여서 차감)",
+    "taxMethodGrossUp": "Gross-up — 회사 부담(세액수당 자동)",
+    "taxMethodGrossHint": "PPh21을 직원 급여에서 차감합니다.",
+    "taxMethodGrossUpHint": "회사가 PPh21을 부담 → 세액수당이 gross-up 자동 산출됩니다."
   },
   "errorFallback": {
     "title": "페이지를 불러올 수 없습니다",

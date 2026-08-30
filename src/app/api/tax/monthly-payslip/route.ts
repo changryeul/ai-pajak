@@ -48,9 +48,11 @@ export function computePayslipTotals(input: {
   period: string;
   ptkp_category?: string | null;
   employee_npwp?: string | null;
+  tax_method?: string | null; // GROSS | GROSS_UP (2026-08-30)
 }): {
   total_gross: number;
   total_deduction: number;
+  tax_allowance: number;      // GROSS_UP 시 자동 gross-up 산출값
   base_salary_bpjs_kes: number;
   base_salary_bpjs_tk: number;
   bpjs_kes_company: number;
@@ -64,7 +66,8 @@ export function computePayslipTotals(input: {
   ter_rate: number;
   net_salary: number;
 } {
-  const totalGross =
+  // tax_allowance(세액수당) 제외한 총지급 — Gross-up 시 세액수당을 재산출하므로 분리.
+  const grossExclTaxAllowance =
     Number(input.base_salary || 0) +
     Number(input.overtime_pay || 0) +
     Number(input.meal_allowance || 0) +
@@ -73,13 +76,13 @@ export function computePayslipTotals(input: {
     Number(input.other_allowances || 0) +
     Number(input.laptop_allowance || 0) +
     Number(input.medical_allowance || 0) +
-    Number(input.tax_allowance || 0) +
     Number(input.annual_leave_pay || 0) +
     Number(input.bonus || 0) +
     Number(input.thr || 0) +
     Number(input.commission || 0) +
     Number(input.severance_allowance || 0) +
     Number(input.pkwt_compensation || 0);
+  const isGrossUp = String(input.tax_method).toUpperCase() === 'GROSS_UP';
 
   const totalDeduction =
     Number(input.bpjs_kesehatan || 0) +
@@ -97,36 +100,49 @@ export function computePayslipTotals(input: {
   // 절대 적용되지 않아 무-NPWP 직원 세율이 20% 낮게 나오던 버그).
   const empNpwp = (input.employee_npwp ?? '').trim();
   const currentMonth = parseInt(input.period.split('-')[1]);
-  const pphData: PPh21Data = {
-    employee_name: '',
-    employee_npwp: empNpwp,
-    employee_nik: '',
-    ptkp_category: ptkpCategory,
-    gross_salary: totalGross,
-    jht_employee: Number(input.jht_employee || 0),
-    jp_employee: Number(input.jp_employee || 0),
-    position_allowance: Number(input.position_allowance || 0),
-    other_deductions: Number(input.other_deductions || 0),
-    tax_period_start: `${input.period}-01`,
-    tax_period_end: `${input.period}-30`,
-    has_npwp: empNpwp.length > 0,
-    month: currentMonth,
+  // 주어진 총지급에 대한 PPh21(월 TER) 계산 헬퍼.
+  const pphFor = (gross: number): { tax: number; ter: number } => {
+    const pphData: PPh21Data = {
+      employee_name: '', employee_npwp: empNpwp, employee_nik: '',
+      ptkp_category: ptkpCategory, gross_salary: gross,
+      jht_employee: Number(input.jht_employee || 0), jp_employee: Number(input.jp_employee || 0),
+      position_allowance: Number(input.position_allowance || 0), other_deductions: Number(input.other_deductions || 0),
+      tax_period_start: `${input.period}-01`, tax_period_end: `${input.period}-30`,
+      has_npwp: empNpwp.length > 0, month: currentMonth,
+    };
+    try {
+      const calc = PPh21Calculator.calculateMonthlyTER(pphData);
+      return { tax: calc.tax_amount, ter: calc.ter_rate };
+    } catch (err) {
+      loggers.api.error({ err, ptkpCategory, rawPtkp: input.ptkp_category, period: input.period },
+        'PPh 21 TER calculation failed — payslip saved with tax=0, needs review');
+      return { tax: 0, ter: 0 };
+    }
   };
 
+  // Gross vs Gross-up 방식 결정.
+  //  - GROSS: 직원 부담. 세액수당은 사용자가 입력한 값 그대로, 세액은 총지급 기준.
+  //  - GROSS_UP: 회사 부담. 세액수당(tunjangan pajak)을 반복해법으로 gross-up 산출
+  //    → 세액수당 ≈ PPh21(총지급+세액수당). 실수령은 세전 총지급-공제로 보존됨.
+  let effectiveTaxAllowance: number;
   let pph21Tax = 0;
   let terRate = 0;
-  try {
-    const calc = PPh21Calculator.calculateMonthlyTER(pphData);
-    pph21Tax = calc.tax_amount;
-    terRate = calc.ter_rate;
-  } catch (err) {
-    // ptkp 보정으로 정상 입력에선 도달 불가. 도달했다면 세금 0 이 저장되므로
-    // warn 이 아닌 error 로 올려 모니터링/Sentry 에 반드시 노출한다.
-    loggers.api.error(
-      { err, ptkpCategory, rawPtkp: input.ptkp_category, period: input.period },
-      'PPh 21 TER calculation failed — payslip saved with tax=0, needs review',
-    );
+  if (isGrossUp) {
+    let a = 0;
+    for (let i = 0; i < 10; i++) {
+      const r = pphFor(grossExclTaxAllowance + a);
+      if (Math.abs(r.tax - a) < 1) { a = r.tax; break; }
+      a = r.tax;
+    }
+    effectiveTaxAllowance = Math.round(a);
+    const r = pphFor(grossExclTaxAllowance + effectiveTaxAllowance);
+    pph21Tax = r.tax; terRate = r.ter;
+  } else {
+    effectiveTaxAllowance = Number(input.tax_allowance || 0);
+    const r = pphFor(grossExclTaxAllowance + effectiveTaxAllowance);
+    pph21Tax = r.tax; terRate = r.ter;
   }
+  const totalGross = grossExclTaxAllowance + effectiveTaxAllowance;
 
   // BPJS company + Biaya Jabatan
   const BPJS_KES_CAP = 12_000_000;
@@ -147,6 +163,7 @@ export function computePayslipTotals(input: {
   return {
     total_gross: totalGross,
     total_deduction: totalDeduction,
+    tax_allowance: effectiveTaxAllowance,
     base_salary_bpjs_kes: bpjsKesBase,
     base_salary_bpjs_tk: bpjsTkBase,
     bpjs_kes_company: bpjsKesCompany,

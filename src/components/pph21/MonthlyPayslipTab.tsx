@@ -53,6 +53,7 @@ interface Payslip {
   laptop_allowance: number;
   medical_allowance: number;
   tax_allowance: number;
+  tax_method?: string;  // GROSS | GROSS_UP (2026-08-30)
   annual_leave_pay: number;
   // Phase 3: Special payments
   severance_allowance: number;
@@ -536,6 +537,24 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         </div>
                       </div>
 
+                      {/* 2026-08-30 — 세금 방식(Gross/Gross-up) 결정. 필수. */}
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('taxMethodLabel')}{reqStar('tax_method')}</h4>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <select
+                            className="h-8 w-56 rounded border border-gray-300 px-2 text-xs bg-white"
+                            value={(ps.tax_method || 'GROSS').toUpperCase()}
+                            onChange={e => updatePayslip(ps.id, { tax_method: e.target.value })}
+                          >
+                            <option value="GROSS">{tp('taxMethodGross')}</option>
+                            <option value="GROSS_UP">{tp('taxMethodGrossUp')}</option>
+                          </select>
+                          <span className="text-[10px] text-gray-400">
+                            {(ps.tax_method || 'GROSS').toUpperCase() === 'GROSS_UP' ? tp('taxMethodGrossUpHint') : tp('taxMethodGrossHint')}
+                          </span>
+                        </div>
+                      </div>
+
                       {/* 근태 */}
                       <div>
                         <h4 className="text-xs font-bold text-gray-600 mb-2">{tp('attendance')}</h4>
@@ -603,9 +622,15 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                               onCommit={n => updatePayslip(ps.id, { medical_allowance: n })} />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-gray-400">{tp('taxAllowance')}</Label>
-                            <NumberInput className="h-8 text-xs font-mono" value={ps.tax_allowance}
-                              onCommit={n => updatePayslip(ps.id, { tax_allowance: n })} />
+                            <Label className="text-[10px] text-gray-400">{tp('taxAllowance')}{(ps.tax_method || 'GROSS').toUpperCase() === 'GROSS_UP' && <span className="ml-1 text-[9px] text-indigo-500">(자동)</span>}</Label>
+                            {(ps.tax_method || 'GROSS').toUpperCase() === 'GROSS_UP' ? (
+                              <div className="flex h-8 items-center rounded border border-indigo-200 bg-indigo-50/40 px-2 text-xs font-mono text-indigo-700">
+                                {fmtRp(ps.tax_allowance)}
+                              </div>
+                            ) : (
+                              <NumberInput className="h-8 text-xs font-mono" value={ps.tax_allowance}
+                                onCommit={n => updatePayslip(ps.id, { tax_allowance: n })} />
+                            )}
                           </div>
                           <div>
                             <Label className="text-[10px] text-gray-400">{tp('annualLeavePay')}</Label>
