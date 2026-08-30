@@ -182,7 +182,8 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
+    // 에러는 놓치기 쉬우니 더 오래 표시 (필수항목 누락 경고 등).
+    setTimeout(() => setMessage(null), type === 'error' ? 6000 : 3000);
   };
 
   const loadPayslips = useCallback(async () => {
@@ -361,14 +362,16 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
         })()}
       </div>
 
-      {/* Message */}
+      {/* Message — 화면 고정 토스트. 제출 버튼이 목록 하단에 있어 상단 인라인
+          경고가 스크롤 밖으로 벗어나던 문제 해결 (fixed + 최상위 z-index). */}
       {message && (
         <div className={cn(
-          'p-3 rounded-xl text-sm flex items-center gap-2',
-          message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'
+          'fixed top-4 left-1/2 -translate-x-1/2 z-[100] max-w-[92vw] shadow-lg',
+          'px-4 py-3 rounded-xl text-sm flex items-center gap-2',
+          message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-300 text-red-800'
         )}>
-          {message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
-          {message.text}
+          {message.type === 'success' ? <CheckCircle className="h-4 w-4 shrink-0" /> : <AlertTriangle className="h-4 w-4 shrink-0" />}
+          <span>{message.text}</span>
         </div>
       )}
 
