@@ -149,7 +149,7 @@ export function EmployeeFormDialog({ open, onOpenChange, customerId, employee, o
       });
       const data = await res.json();
       if (!data.success) {
-        setError(data.error || 'Failed');
+        setError(data.error || tp('saveFailed'));
         return;
       }
       // Best-effort sync so a newly added employee shows up in the current month.
@@ -165,7 +165,7 @@ export function EmployeeFormDialog({ open, onOpenChange, customerId, employee, o
       onOpenChange(false);
       onSaved?.();
     } catch {
-      setError('Error');
+      setError(tp('genericError'));
     } finally {
       setIsSaving(false);
     }

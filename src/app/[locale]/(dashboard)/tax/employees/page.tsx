@@ -164,8 +164,8 @@ export default function EmployeeDirectoryPage() {
       const res = await fetch(`/api/tax/employees?id=${emp.id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) { showMsg('success', tp('employeeDeactivated')); loadEmployees(); }
-      else showMsg('error', data.error || 'Failed');
-    } catch { showMsg('error', 'Error'); }
+      else showMsg('error', data.error || tp('saveFailed'));
+    } catch { showMsg('error', tp('genericError')); }
   };
 
   return (
@@ -199,7 +199,7 @@ export default function EmployeeDirectoryPage() {
       {/* Consultant customer picker */}
       {isConsultant && (
         <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <label htmlFor="emp-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">Customer</label>
+          <label htmlFor="emp-customer" className="text-xs font-bold uppercase tracking-wide text-slate-500">{tp('customerLabel')}</label>
           {customers.length === 0 ? (
             <span className="text-xs text-slate-400">—</span>
           ) : (

@@ -4518,7 +4518,8 @@
     "fieldWorkerType": "Worker Type",
     "employeeMasterUnlinked": "No linked employee master — sync first to edit",
     "editFullEmployee": "Edit full employee info",
-    "secEmployeeInfoHint": "Employee info here is saved to this filing only — independent of the Employee Directory (master)."
+    "secEmployeeInfoHint": "Employee info here is saved to this filing only — independent of the Employee Directory (master).",
+    "andNMore": "+{count} more"
   },
   "errorFallback": {
     "title": "Failed to load page",
@@ -4739,7 +4740,10 @@
     "filterAllTypes": "All worker types",
     "filterAllStatus": "All employment types",
     "directoryCount": "{count}",
-    "downloadCsvTemplate": "Download CSV (PPh21 format)"
+    "downloadCsvTemplate": "Download CSV (PPh21 format)",
+    "saveFailed": "Save failed",
+    "genericError": "An error occurred",
+    "customerLabel": "Customer"
   },
   "pph23Page": {
     "invoiceImageLabel": "Invoice Photo (Required)",

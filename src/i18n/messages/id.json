@@ -4518,7 +4518,8 @@
     "fieldWorkerType": "Jenis Pekerja",
     "employeeMasterUnlinked": "Master karyawan belum tertaut — sinkron dulu untuk mengedit",
     "editFullEmployee": "Ubah semua data karyawan",
-    "secEmployeeInfoHint": "Data karyawan di sini hanya disimpan untuk pelaporan ini — terpisah dari Daftar Karyawan (master)."
+    "secEmployeeInfoHint": "Data karyawan di sini hanya disimpan untuk pelaporan ini — terpisah dari Daftar Karyawan (master).",
+    "andNMore": "+{count} lagi"
   },
   "errorFallback": {
     "title": "Gagal memuat halaman",
@@ -4739,7 +4740,10 @@
     "filterAllTypes": "Semua jenis pekerja",
     "filterAllStatus": "Semua status karyawan",
     "directoryCount": "{count}",
-    "downloadCsvTemplate": "Unduh CSV (format PPh21)"
+    "downloadCsvTemplate": "Unduh CSV (format PPh21)",
+    "saveFailed": "Gagal menyimpan",
+    "genericError": "Terjadi kesalahan",
+    "customerLabel": "Pelanggan"
   },
   "pph23Page": {
     "invoiceImageLabel": "Foto Faktur (Wajib)",

@@ -212,7 +212,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
       for (const lbl of payslipMissing(ps)) bad.push(`${ps.employee_name || tp('noNpwp')} · ${lbl}`);
     }
     if (bad.length > 0) {
-      showMsg('error', `${tp('requiredMissingBlock')} — ${bad.slice(0, 6).join(', ')}${bad.length > 6 ? ` 외 ${bad.length - 6}건` : ''}`);
+      showMsg('error', `${tp('requiredMissingBlock')} — ${bad.slice(0, 6).join(', ')}${bad.length > 6 ? ` ${tp('andNMore', { count: bad.length - 6 })}` : ''}`);
       return;
     }
 
@@ -231,7 +231,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
       } else if (data.errorKey === 'requiredFieldsMissing') {
         // 서버 단 필수항목 강제 (클라이언트 우회 방어)의 백스톱 메시지
         const list = Array.isArray(data.missing) ? data.missing.slice(0, 6).join(', ') : '';
-        showMsg('error', `${tp('requiredMissingBlock')}${list ? ` — ${list}` : ''}${data.missingCount > 6 ? ` 외 ${data.missingCount - 6}건` : ''}`);
+        showMsg('error', `${tp('requiredMissingBlock')}${list ? ` — ${list}` : ''}${data.missingCount > 6 ? ` ${tp('andNMore', { count: data.missingCount - 6 })}` : ''}`);
         loadPayslips();
       } else {
         showMsg('error', data.error || tp('saveFailed'));
