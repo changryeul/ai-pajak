@@ -20,6 +20,8 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useSession, hasRole } from '@/hooks/useSession';
 import { UserRole } from '@/types/auth';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
+import { RequiredFieldsBanner } from '@/components/common/RequiredFieldsBanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,6 +90,7 @@ export default function MyProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [preview, setPreview] = useState<TaxPreview | null>(null);
+  const { missing: reqMissing } = useRequiredFields('my_profile');
   // keynote v2 slide-21: "이미 신고시 입력한 정보가 있을 경우 여기서 보여주기만 하면 됨"
   // — load 시점에 nationality가 이미 저장되어 있으면 해당 세션에서 read-only 처리.
   const [nationalityLocked, setNationalityLocked] = useState(false);
@@ -243,6 +246,7 @@ export default function MyProfilePage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
+      <RequiredFieldsBanner missing={reqMissing({ full_name: form.full_name, npwp: form.npwp, address: form.address, ptkp_status: form.ptkp_status })} />
       {/* 2026-06-28: register/mandate 직후 안내 배너 */}
       {isWelcome && (
         <div className="mb-4 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-sky-50 p-4">

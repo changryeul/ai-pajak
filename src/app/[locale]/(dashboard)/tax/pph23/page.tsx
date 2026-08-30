@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
+import { RequiredFieldsBanner } from '@/components/common/RequiredFieldsBanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -184,6 +186,7 @@ export default function PPh23Page() {
   const [_savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   // Form state
+  const { missing: reqMissing } = useRequiredFields('pph23');
   const [fCounterparty, setFCounterparty] = useState('');
   const [fServiceType, setFServiceType] = useState('JASA_KONSULTAN');
   const [fGrossAmount, setFGrossAmount] = useState('');
@@ -1088,6 +1091,12 @@ export default function PPh23Page() {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
+
+              {/* 2026-08-30 — MASTER 지정 필수항목 입력유도 */}
+              <RequiredFieldsBanner missing={reqMissing({
+                counterparty_name: fCounterparty, transaction_date: fTransactionDate,
+                gross_amount: Number(fGrossAmount || 0), invoice_number: fInvoiceNumber,
+              })} />
 
               {/* Mandatory invoice image — Phase 4 manual entry requires invoice photo */}
               <div className="space-y-2 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 p-4">

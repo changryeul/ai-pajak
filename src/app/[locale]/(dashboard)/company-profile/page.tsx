@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
+import { RequiredFieldsBanner } from '@/components/common/RequiredFieldsBanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,6 +137,8 @@ export default function CompanyProfilePage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic', 'business', 'income']));
+  // 2026-08-30 — MASTER 지정 필수항목 입력유도
+  const { missing: reqMissing } = useRequiredFields('company_profile');
   // 2026-06-28: 저장 후 사용자 동선 명확화 — 완성도 < 80% 일 때 토스트만 띄우고
   // 머무는 대신 지속 노출되는 "지금 대시보드로 이동" CTA 배너.
   const [showPostSaveCta, setShowPostSaveCta] = useState(false);
@@ -375,6 +379,7 @@ export default function CompanyProfilePage() {
       )}
       <SimpleHeader completeness={completeness} onSave={handleSave} saving={saving} />
       <SimpleCompletenessCard completeness={completeness} />
+      <RequiredFieldsBanner missing={reqMissing(profile as unknown as Record<string, unknown>)} />
       <SimpleBasicInfo
         profile={profile}
         updateField={updateField}

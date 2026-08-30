@@ -38,6 +38,7 @@ export default async function OperatorSettingsPage() {
   }
 
   const canEdit = role === 'TAX_OPERATOR_MASTER';
+  const pageLocale = await getLocale();
 
   // Fetch tax code rules. RLS policy `tax_code_rule_read` USING (true)
   // permits any authenticated session — exercise it instead of bypassing
@@ -156,6 +157,18 @@ export default async function OperatorSettingsPage() {
         </div>
         <p className="text-sm text-slate-600 mb-4">{t('rules.intro')}</p>
         <TaxCodeRulesTable initialRules={rules} canEdit={canEdit} />
+      </section>
+
+      {/* ── 필수항목 관리 (2026-08-30) — MASTER 가 고객 데이터 필수항목 선택/추가/삭제 ── */}
+      <section className="rounded-2xl bg-white p-5 shadow-sm mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">필수항목 관리</h2>
+            <p className="text-sm text-slate-600 mt-1">고객 데이터 폼(회사/개인 프로필·원천세·부가세·급여)의 필수항목을 선택·추가·삭제합니다. 고객 화면에 별표(*) + 미입력 시 입력유도.</p>
+          </div>
+          <a href={`/${pageLocale}/admin/master/required-fields`}
+            className="flex-shrink-0 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700">필수항목 설정 →</a>
+        </div>
       </section>
 
       {/* ── §4 + §5 ── */}
