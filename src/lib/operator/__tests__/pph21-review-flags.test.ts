@@ -29,6 +29,22 @@ describe('evaluatePph21EmployeeFlags', () => {
     expect(r.label).toBe('NPWP·BPJS 필요');
   });
 
+  it('does NOT flag BPJS when company bears it (Gross-up) — employee 0, company > 0', () => {
+    const r = evaluatePph21EmployeeFlags({
+      ...base, bpjsKesehatan: 0, bpjsKetenagakerjaan: 0, jhtEmployee: 0, jpEmployee: 0, bpjsCompany: 331845,
+    });
+    expect(r.issues).not.toContain('BPJS');
+    expect(r.level).toBe('amber'); // NPWP 있고 BPJS 인정 → DRAFT 검토 필요
+  });
+
+  it('flags BPJS only when neither employee nor company BPJS exists', () => {
+    const r = evaluatePph21EmployeeFlags({
+      ...base, bpjsKesehatan: 0, bpjsKetenagakerjaan: 0, jhtEmployee: 0, jpEmployee: 0, bpjsCompany: 0,
+    });
+    expect(r.issues).toContain('BPJS');
+    expect(r.label).toBe('BPJS 필요');
+  });
+
   it('marks FINALIZED clean payslip as green 확인 완료', () => {
     const r = evaluatePph21EmployeeFlags({ ...base, payslipStatus: 'FINALIZED' });
     expect(r.level).toBe('green');

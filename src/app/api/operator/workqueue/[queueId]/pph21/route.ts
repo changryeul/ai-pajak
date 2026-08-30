@@ -67,6 +67,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       employeeNpwp: npwp,
       bpjsKesehatan: Number(p.bpjs_kesehatan ?? 0),
       bpjsKetenagakerjaan: Number(p.bpjs_ketenagakerjaan ?? 0),
+      jhtEmployee: Number(p.jht_employee ?? 0),
+      jpEmployee: Number(p.jp_employee ?? 0),
+      // Gross-up(회사부담) 시 직원부담 0이어도 회사부담분이 채워짐 → BPJS 설정된 것으로 인정
+      bpjsCompany: Number(p.bpjs_kes_company ?? 0) + Number(p.jkk_company ?? 0)
+        + Number(p.jkm_company ?? 0) + Number(p.jht_company ?? 0) + Number(p.jp_company ?? 0),
       payslipStatus: p.status ?? 'DRAFT',
     });
     // '저장 및 확인' 된 행은 완료(green) — 이슈 내용은 label 로 계속 노출 (요청 10)
@@ -81,7 +86,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ que
       ptkp,
       terCategory: getTERCategory(ptkp),
       totalGross: Number(p.total_gross ?? 0),
-      bpjs: Number(p.bpjs_kesehatan ?? 0) + Number(p.bpjs_ketenagakerjaan ?? 0),
+      // BPJS 입력완료 판정 — 직원부담 + 회사부담(Gross-up) 합. 회사부담분이 있으면 입력완료.
+      bpjs: Number(p.bpjs_kesehatan ?? 0) + Number(p.bpjs_ketenagakerjaan ?? 0)
+        + Number(p.jht_employee ?? 0) + Number(p.jp_employee ?? 0)
+        + Number(p.bpjs_kes_company ?? 0) + Number(p.jkk_company ?? 0) + Number(p.jkm_company ?? 0)
+        + Number(p.jht_company ?? 0) + Number(p.jp_company ?? 0),
       thr: Number(p.thr ?? 0) + Number(p.bonus ?? 0),
       pph21: Number(p.pph21_tax ?? 0),
       payslipStatus: p.status ?? 'DRAFT',
