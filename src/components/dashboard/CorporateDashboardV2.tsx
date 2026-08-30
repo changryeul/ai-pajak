@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building2, Wallet, AlertTriangle, CalendarClock, TrendingUp, BarChart3, Sparkles, ArrowRight } from 'lucide-react';
@@ -313,12 +313,12 @@ export function CorporateDashboardV2({
               </div>
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={chartData}>
+                  <BarChart data={chartData}>
                     <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} width={60} tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}K`)} />
-                    <Tooltip formatter={(value) => fmtRp(Number(value))} />
-                    <Line type="monotone" dataKey="pph21" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3 }} />
-                  </LineChart>
+                    <Tooltip formatter={(value) => fmtRp(Number(value))} cursor={{ fill: 'rgba(59,130,246,0.08)' }} />
+                    <Bar dataKey="pph21" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -330,12 +330,12 @@ export function CorporateDashboardV2({
               </div>
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={chartData}>
+                  <BarChart data={chartData}>
                     <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} width={60} tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}K`)} />
-                    <Tooltip formatter={(value) => fmtRp(Number(value))} />
-                    <Line type="monotone" dataKey="withholding" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
-                  </LineChart>
+                    <Tooltip formatter={(value) => fmtRp(Number(value))} cursor={{ fill: 'rgba(16,185,129,0.08)' }} />
+                    <Bar dataKey="withholding" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -352,13 +352,13 @@ export function CorporateDashboardV2({
               </div>
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={chartData}>
+                  <BarChart data={chartData}>
                     <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} width={60} tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}K`)} />
-                    <Tooltip formatter={(value) => fmtRp(Number(value))} />
-                    <Line type="monotone" dataKey="output" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="input" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 3 }} />
-                  </LineChart>
+                    <Tooltip formatter={(value) => fmtRp(Number(value))} cursor={{ fill: 'rgba(148,163,184,0.10)' }} />
+                    <Bar dataKey="output" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                    <Bar dataKey="input" fill="#8b5cf6" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
