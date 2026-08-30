@@ -246,7 +246,8 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
   // 직원목록(마스터)과 완전 분리 — 여기서의 편집은 payslip PUT 으로만 저장되고
   // 마스터에는 전혀 영향을 주지 않는다. (인사정보는 계산에 미사용, 신고별 스냅샷)
   const commitEmployeeField = (ps: Payslip, field: keyof Payslip, value: string) => {
-    if (ps.status === 'SUBMITTED') return;
+    // 직원정보는 정보성(금액 무관)이라 제출(SUBMITTED) 후에도 편집 허용 —
+    // 급여/수당 등 금액 필드와 동일하게 항상 편집 가능.
     const current = (ps[field] ?? '') as string;
     if (value === current) return;
     updatePayslip(ps.id, { [field]: value || null } as Partial<Payslip>);
@@ -513,7 +514,8 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                           <p className="text-[10px] text-gray-400 mt-0.5">{tp('secEmployeeInfoHint')}</p>
                         </div>
                         {(() => {
-                          const disabled = ps.status === 'SUBMITTED';
+                          // 금액 필드와 마찬가지로 제출 후에도 직원정보는 편집 가능 (정보성).
+                          const disabled = false;
                           // Model B: 모든 편집은 payslip(신고 데이터) 컬럼에 직접 저장.
                           const commit = (field: keyof Payslip, value: string) => {
                             commitEmployeeField(ps, field, value);
