@@ -6,6 +6,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useSession } from '@/hooks/useSession';
+
+// SPT Masa PDF 즉석 생성 가능한 월 세목 (endpoint 지원)
+const MONTHLY_PDF_TYPES = ['PPh21', 'PPh23', 'PPh4_2', 'PPh_FINAL', 'PPN'];
 
 interface ClosingRow {
   kind: 'CLOSING';
@@ -47,6 +51,9 @@ interface Row {
   amount: string;
   ntpn: string;
   bpe: string;
+  // 2026-08-30 — 월신고 상세/다운로드용 (SPT Masa PDF by customer+type+period)
+  taxTypeRaw?: string;   // PPh21 | PPh23 | PPh4_2 | PPh_FINAL | PPN | PPh25 ...
+  periodYm?: string;     // YYYY-MM
 }
 
 const ROW_KEYS: ('pph21' | 'ppn' | 'sptBadan' | 'pph25')[] = ['pph21', 'ppn', 'sptBadan', 'pph25'];
@@ -63,12 +70,18 @@ export function CompanyFilingsView() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const { session } = useSession();
+  const customerId = session?.customerId ?? null;
   const [listTab, setListTab] = useState<ListTab>('all');
   const [closingRows, setClosingRows] = useState<Row[]>([]);
   // 2026-06-21: 실제 tax_filing 행 — 두 버튼 link 활성
   const [realRows, setRealRows] = useState<Row[]>([]);
   // 2026-06-21: 사용자가 자료 정리 + 최종 제출했지만 운영팀 처리 전 — "처리 대기" 행
   const [requestRows, setRequestRows] = useState<Row[]>([]);
+  // 2026-08-30: 실제 월신고 (djp_submission_queue) — 상세보기 + SPT Masa PDF 다운로드
+  const [queueRows, setQueueRows] = useState<Row[]>([]);
+  const [detailRow, setDetailRow] = useState<Row | null>(null);
+  const [dl, setDl] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,9 +104,44 @@ export function CompanyFilingsView() {
             amount: f.taxDue ? `Rp ${Number(f.taxDue).toLocaleString('id-ID')}` : '—',
             ntpn: '—',
             bpe: f.bpeNumber ?? '—',
+            taxTypeRaw: f.taxType,
+            periodYm: /^\d{4}-\d{2}/.test(f.taxPeriod) ? f.taxPeriod.slice(0, 7) : undefined,
           };
         });
         if (!cancelled) setRealRows(rows);
+      } catch { /* non-fatal */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // 2026-08-30 — 실제 월신고(djp_submission_queue) → 행. 상세보기 + SPT Masa PDF 다운로드.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/customer/queue', { credentials: 'include' });
+        if (!res.ok) return;
+        const json = await res.json();
+        type QItem = { id: string; tax_type: string; tax_period_month: number; tax_period_year: number; amount: number | null; status: string; bpe_number: string | null };
+        const items = (json?.data?.items ?? json?.data ?? []) as QItem[];
+        const rows = items
+          .filter((q) => q.tax_type !== 'SPT_TAHUNAN')
+          .map((q): Row => {
+            const ym = `${q.tax_period_year}-${String(q.tax_period_month).padStart(2, '0')}`;
+            const completed = ['COMPLETED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'APPROVED'].includes(q.status);
+            return {
+              id: `q-${q.id}`,
+              kind: 'monthly',
+              period: ym,
+              type: q.tax_type === 'PPh4_2' ? 'PPh 4(2)' : q.tax_type,
+              status: completed ? 'filed' : 'aiReview',
+              payDeadline: '—', fileDeadline: '—',
+              amount: q.amount ? `Rp ${Number(q.amount).toLocaleString('id-ID')}` : '—',
+              ntpn: '—', bpe: q.bpe_number ?? '—',
+              taxTypeRaw: q.tax_type, periodYm: ym,
+            };
+          });
+        if (!cancelled) setQueueRows(rows);
       } catch { /* non-fatal */ }
     })();
     return () => { cancelled = true; };
@@ -180,8 +228,13 @@ export function CompanyFilingsView() {
     bpe: t(`rows.${id}.bpe`),
   }));
 
-  // 실제 신고 행 (tax_filing) 우선 + 처리 대기 (request) + 결산 + mock (placeholder)
-  const allRows: Row[] = [...realRows, ...requestRows, ...closingRows, ...mockRows];
+  // 실제 월신고 = tax_filing + djp_submission_queue (period+type 중복 제거, tax_filing 우선)
+  const seenMonthly = new Set(realRows.map((r) => `${r.taxTypeRaw}|${r.periodYm}`));
+  const dedupQueue = queueRows.filter((r) => !seenMonthly.has(`${r.taxTypeRaw}|${r.periodYm}`));
+  const realMonthly = [...realRows, ...dedupQueue];
+  // 실데이터가 있으면 mock(placeholder)은 숨김
+  const hasReal = realMonthly.length > 0 || requestRows.length > 0 || closingRows.length > 0;
+  const allRows: Row[] = [...realMonthly, ...requestRows, ...closingRows, ...(hasReal ? [] : mockRows)];
   // uuid 형태이면 진짜 tax_filing 행 — 두 버튼이 동작
   const isRealFilingId = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   // req-* prefix 는 spt_masa_submission_request 행
@@ -193,6 +246,28 @@ export function CompanyFilingsView() {
     complete: allRows.filter((r) => r.status === 'filed').length,
     inProgress: allRows.filter((r) => r.status !== 'filed').length,
     total: 'Rp 34,500,000',
+  };
+
+  // 2026-08-30 — 월신고 SPT Masa PDF 다운로드 (customer + type + period 즉석 생성)
+  const canDownloadMonthly = (r: Row) => !!(customerId && r.periodYm && r.taxTypeRaw && MONTHLY_PDF_TYPES.includes(r.taxTypeRaw));
+  const downloadMonthlyPdf = async (r: Row) => {
+    if (!canDownloadMonthly(r)) { toast.info(tc('comingSoon')); return; }
+    setDl(r.id);
+    try {
+      const res = await fetch('/api/tax/spt-masa-pdf', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxType: r.taxTypeRaw, period: r.periodYm }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `SPT_Masa_${r.taxTypeRaw}_${r.periodYm}.pdf`; a.click();
+      URL.revokeObjectURL(url);
+      toast.success(t('ctaDownload'));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'PDF');
+    } finally { setDl(null); }
   };
 
   const renderStatus = (status: RowStatus) => {
@@ -354,6 +429,8 @@ export function CompanyFilingsView() {
                         onClick={() => {
                           if (isRealFilingId(row.id)) {
                             router.push(`/${locale}/filings/${row.id}`);
+                          } else if (row.taxTypeRaw && row.periodYm) {
+                            setDetailRow(row); // 월신고 상세 (모달)
                           } else if (isRequestRow(row.id)) {
                             toast.info(t('pendingOperatorReview'));
                           } else {
@@ -367,9 +444,12 @@ export function CompanyFilingsView() {
                         size="sm"
                         variant="outline"
                         className="h-8 text-xs"
+                        disabled={dl === row.id}
                         onClick={() => {
                           if (isRealFilingId(row.id)) {
                             router.push(`/${locale}/filings/${row.id}#docs`);
+                          } else if (canDownloadMonthly(row)) {
+                            void downloadMonthlyPdf(row);
                           } else if (isRequestRow(row.id)) {
                             toast.info(t('pendingOperatorReview'));
                           } else {
@@ -377,7 +457,7 @@ export function CompanyFilingsView() {
                           }
                         }}
                       >
-                        {t('ctaDownload')}
+                        {dl === row.id ? '…' : t('ctaDownload')}
                       </Button>
                     </div>
                   </td>
@@ -392,6 +472,36 @@ export function CompanyFilingsView() {
       <div className="rounded-xl bg-blue-50 border border-blue-100 px-5 py-4">
         <p className="text-xs text-slate-600 leading-relaxed">{t('footerNote')}</p>
       </div>
+
+      {/* 2026-08-30 — 월신고 상세 모달 */}
+      {detailRow && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setDetailRow(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">{detailRow.type}</h3>
+                <p className="text-sm text-slate-500">{detailRow.period}</p>
+              </div>
+              <button onClick={() => setDetailRow(null)} className="rounded-md p-1 text-xl leading-none text-gray-400 hover:bg-gray-100">×</button>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div><p className="text-[11px] text-gray-400">{t('columns.status')}</p><div className="mt-0.5">{renderStatus(detailRow.status)}</div></div>
+              <div><p className="text-[11px] text-gray-400">{t('columns.amount')}</p><p className="font-semibold tabular-nums text-slate-900">{detailRow.amount}</p></div>
+              <div><p className="text-[11px] text-gray-400">NTPN</p><p className="font-mono text-xs text-slate-700">{detailRow.ntpn}</p></div>
+              <div><p className="text-[11px] text-gray-400">BPE</p><p className="text-xs text-slate-700">{detailRow.bpe}</p></div>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setDetailRow(null)}>{tc('close')}</Button>
+              {canDownloadMonthly(detailRow) && (
+                <Button size="sm" className="bg-slate-900 text-white hover:bg-slate-800" disabled={dl === detailRow.id}
+                  onClick={() => downloadMonthlyPdf(detailRow)}>
+                  {dl === detailRow.id ? '…' : t('ctaDownload')}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

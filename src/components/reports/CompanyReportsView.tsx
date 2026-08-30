@@ -6,6 +6,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useSession } from '@/hooks/useSession';
+
+const MONTHLY_PDF_TYPES = ['PPh21', 'PPh23', 'PPh4_2', 'PPh_FINAL', 'PPN'];
 
 interface ClosingApiRow {
   kind: 'CLOSING';
@@ -31,6 +34,8 @@ interface ReportRow {
   amount: string;
   summary: string;
   status: 'complete' | 'inProgress' | 'aiReview' | 'signedUploaded';
+  taxTypeRaw?: string;   // 월신고 PDF 생성용
+  periodYm?: string;     // YYYY-MM
 }
 
 const RISK_ITEMS: ('umkm' | 'benefit' | 'omission' | 'tpDoc')[] = ['umkm', 'benefit', 'omission', 'tpDoc'];
@@ -41,8 +46,68 @@ export function CompanyReportsView() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const { session } = useSession();
+  const customerId = session?.customerId ?? null;
   const [tab, setTab] = useState<Tab>('aiRisk');
   const [closingReportRows, setClosingReportRows] = useState<ReportRow[]>([]);
+  const [monthlyReportRows, setMonthlyReportRows] = useState<ReportRow[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  // 2026-08-30 — 실제 월신고(djp_submission_queue) → 월별 보고서 행 + 미리보기/PDF
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/customer/queue', { credentials: 'include' });
+        if (!res.ok) return;
+        const json = await res.json();
+        type QItem = { id: string; tax_type: string; tax_period_month: number; tax_period_year: number; amount: number | null; status: string };
+        const items = (json?.data?.items ?? json?.data ?? []) as QItem[];
+        const rows = items
+          .filter((q) => MONTHLY_PDF_TYPES.includes(q.tax_type))
+          .map((q): ReportRow => {
+            const ym = `${q.tax_period_year}-${String(q.tax_period_month).padStart(2, '0')}`;
+            const done = ['COMPLETED', 'EBILLING_GENERATED', 'PAYMENT_PENDING', 'APPROVED'].includes(q.status);
+            return {
+              id: `q-${q.id}`,
+              name: `SPT Masa ${q.tax_type === 'PPh4_2' ? 'PPh 4(2)' : q.tax_type} ${ym}`,
+              period: ym,
+              date: '—',
+              amount: q.amount ? `Rp ${Number(q.amount).toLocaleString('id-ID')}` : '—',
+              summary: `SPT Masa ${q.tax_type === 'PPh4_2' ? 'PPh 4(2)' : q.tax_type}`,
+              status: done ? 'complete' : 'aiReview',
+              taxTypeRaw: q.tax_type, periodYm: ym,
+            };
+          });
+        if (!cancelled) setMonthlyReportRows(rows);
+      } catch { /* non-fatal */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // SPT Masa PDF — 미리보기(새 탭) / 다운로드
+  const genPdf = async (r: ReportRow, mode: 'preview' | 'download') => {
+    if (!(customerId && r.periodYm && r.taxTypeRaw)) { toast.info(tc('comingSoon')); return; }
+    setBusy(r.id + mode);
+    try {
+      const res = await fetch('/api/tax/spt-masa-pdf', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, taxType: r.taxTypeRaw, period: r.periodYm }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (mode === 'preview') {
+        window.open(url, '_blank');
+      } else {
+        const a = document.createElement('a');
+        a.href = url; a.download = `SPT_Masa_${r.taxTypeRaw}_${r.periodYm}.pdf`; a.click();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'PDF');
+    } finally { setBusy(null); }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -84,25 +149,21 @@ export function CompanyReportsView() {
     return () => { cancelled = true; };
   }, [t]);
 
+  // 실제 월신고가 있으면 그것을, 없으면 mock(placeholder) 1행
+  const monthlyRows: ReportRow[] = monthlyReportRows.length > 0 ? monthlyReportRows : [{
+    id: 'monthly', name: t('rows.monthly.name'), period: t('rows.monthly.period'),
+    date: t('rows.monthly.date'), amount: t('rows.monthly.amount'), summary: t('rows.monthly.summary'), status: 'complete',
+  }];
+
   const counts: Record<Tab, number> = {
-    monthly: 1,
+    monthly: monthlyRows.length,
     annual: 1 + closingReportRows.length,
     financial: 1,
     aiRisk: 4,
   };
 
   const rowsByTab: Record<Tab, ReportRow[]> = {
-    monthly: [
-      {
-        id: 'monthly',
-        name: t('rows.monthly.name'),
-        period: t('rows.monthly.period'),
-        date: t('rows.monthly.date'),
-        amount: t('rows.monthly.amount'),
-        summary: t('rows.monthly.summary'),
-        status: 'complete',
-      },
-    ],
+    monthly: monthlyRows,
     annual: [
       ...closingReportRows,
       {
@@ -249,11 +310,13 @@ export function CompanyReportsView() {
                   <td className="px-4 py-4 text-slate-600 max-w-md">{row.summary}</td>
                   <td className="px-4 py-4">
                     <div className="flex flex-col gap-1.5">
-                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => toast.info(tc('comingSoon'))}>
-                        {t('ctaPreview')}
+                      <Button size="sm" variant="outline" className="h-8 text-xs" disabled={busy === row.id + 'preview'}
+                        onClick={() => (row.taxTypeRaw && row.periodYm) ? void genPdf(row, 'preview') : toast.info(tc('comingSoon'))}>
+                        {busy === row.id + 'preview' ? '…' : t('ctaPreview')}
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => toast.info(tc('invoiceComing'))}>
-                        {t('ctaPdf')}
+                      <Button size="sm" variant="outline" className="h-8 text-xs" disabled={busy === row.id + 'download'}
+                        onClick={() => (row.taxTypeRaw && row.periodYm) ? void genPdf(row, 'download') : toast.info(tc('invoiceComing'))}>
+                        {busy === row.id + 'download' ? '…' : t('ctaPdf')}
                       </Button>
                     </div>
                   </td>
