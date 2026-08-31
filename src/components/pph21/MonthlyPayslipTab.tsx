@@ -501,7 +501,7 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
                         {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
                       <div className="text-left min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="font-medium text-sm truncate">{ps.employee_name || tp('noNpwp')}{reqStar('employee_name')}</p>
+                          <p className="font-medium text-sm truncate">{ps.employee_name || tp('noNpwp')}</p>
                           {ps.status === 'SUBMITTED' ? (
                             <span className="inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-emerald-100 text-emerald-700">
                               ✓ {tp('submittedBadge')}
