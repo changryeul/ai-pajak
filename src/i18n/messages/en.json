@@ -10634,7 +10634,11 @@
     "submitToOperatorSent": "Request sent to operations team — {count} transactions",
     "sptCreated": "SPT Masa created (filing {filingId})",
     "createSptButton": "Create SPT Masa",
-    "requestSptButton": "Request SPT Masa filing"
+    "requestSptButton": "Request SPT Masa filing",
+    "finalSubmit": "Final submit",
+    "missingModalTitle": "Required fields missing",
+    "missingModalDesc": "Cannot submit — the required fields below are empty. Fill them in and submit again.",
+    "confirmOk": "OK"
   },
   "bulk": {
     "bulkSelectedN": "{count} selected",

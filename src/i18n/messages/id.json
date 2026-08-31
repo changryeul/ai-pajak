@@ -10634,7 +10634,11 @@
     "submitToOperatorSent": "Permintaan SPT Masa terkirim ke tim operasi — {count} transaksi",
     "sptCreated": "SPT Masa dibuat (pelaporan {filingId})",
     "createSptButton": "Buat SPT Masa",
-    "requestSptButton": "Minta pembuatan SPT Masa"
+    "requestSptButton": "Minta pembuatan SPT Masa",
+    "finalSubmit": "Kirim final",
+    "missingModalTitle": "Ada kolom wajib yang kosong",
+    "missingModalDesc": "Tidak dapat mengirim — kolom wajib di bawah ini masih kosong. Lengkapi lalu kirim lagi.",
+    "confirmOk": "OK"
   },
   "bulk": {
     "bulkSelectedN": "{count} dipilih",

@@ -10755,7 +10755,11 @@
     "submitToOperatorSent": "운영팀에 SPT Masa 제출 요청을 전달했습니다 — {count} 건",
     "sptCreated": "SPT Masa 생성 완료 (filing {filingId})",
     "createSptButton": "SPT Masa 생성",
-    "requestSptButton": "운영팀에 SPT Masa 제출 요청"
+    "requestSptButton": "운영팀에 SPT Masa 제출 요청",
+    "finalSubmit": "최종 제출",
+    "missingModalTitle": "필수 항목 누락",
+    "missingModalDesc": "아래 필수 항목이 비어 있어 제출할 수 없습니다. 항목을 채운 뒤 다시 제출해 주세요.",
+    "confirmOk": "확인"
   },
   "bulk": {
     "bulkSelectedN": "{count}건 선택됨",

@@ -22,10 +22,12 @@ import {
   Loader2, Receipt, CheckCircle, AlertTriangle, X,
   ChevronDown, ChevronRight, Building2, Download, FileSpreadsheet, Pencil, Shield, Clock,
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { fmtRp } from '@/lib/utils';
 import { PageTitle } from '@/components/layout/PageTitle';
 import { parseWHTOneSheet } from '@/lib/tax/bulk-import/wht-onesheet-parser';
 import { useEffectiveCustomerId } from '@/hooks/useEffectiveCustomerId';
+import { useRequiredFields } from '@/hooks/useRequiredFields';
 
 interface Transaction {
   id: string;
@@ -65,6 +67,22 @@ export default function PPh42Page() {
   });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
+  // 2026-08-31 — PPh4(2) 도 다른 세목과 동일 UX: 필수항목 누락 팝업.
+  // 거래는 pph23_transaction 을 공유하므로 required 설정도 'pph23' 재사용.
+  const { missing: reqMissing } = useRequiredFields('pph23');
+  const [missingModal, setMissingModal] = useState<string[] | null>(null);
+  const collectMissing = (): string[] => {
+    const out: string[] = [];
+    for (const tx of transactions) {
+      const miss = reqMissing({
+        counterparty_name: tx.counterparty_name, counterparty_npwp: tx.counterparty_npwp,
+        transaction_date: tx.transaction_date, gross_amount: tx.gross_amount,
+        invoice_number: tx.invoice_number, bukti_potong_number: tx.bukti_potong_number,
+      });
+      for (const m of miss) out.push(`${tx.counterparty_name || '—'} · ${m.label}`);
+    }
+    return out;
+  };
   const [uploading, setUploading] = useState(false);
   const [expandedTx, setExpandedTx] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -728,6 +746,9 @@ export default function PPh42Page() {
             disabled={saving}
             onClick={async () => {
               if (!customerId) return;
+              // 필수항목 누락이면 팝업(모달)으로 안내 후 제출 차단 (다른 세목과 동일).
+              const miss = collectMissing();
+              if (miss.length > 0) { setMissingModal(miss); return; }
               setSaving(true);
               try {
                 if (!isConsultant) {
@@ -793,10 +814,35 @@ export default function PPh42Page() {
             }}
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-            {isConsultant ? t('createSptButton') : t('requestSptButton')}
+            {isConsultant ? t('createSptButton') : t('finalSubmit')}
           </Button>
         </div>
       )}
+
+      {/* 필수항목 누락 경고 모달 — 확인 눌러야 닫힘 (다른 세목과 동일 UX) */}
+      <Dialog open={missingModal !== null} onOpenChange={(o) => { if (!o) setMissingModal(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />{t('missingModalTitle')}
+            </DialogTitle>
+            <DialogDescription>{t('missingModalDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-64 overflow-y-auto rounded-lg border border-red-200 bg-red-50 p-3">
+            <ul className="space-y-1 text-sm text-red-800">
+              {(missingModal ?? []).map((m, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setMissingModal(null)}>{t('confirmOk')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
