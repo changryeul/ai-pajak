@@ -329,8 +329,10 @@ export function MonthlyPayslipTab({ customerId, reloadTrigger }: Props) {
       });
       const data = await res.json();
       if (data.success) {
-        // Update locally
-        setPayslips(prev => prev.map(p => p.id === id ? data.data : p));
+        // 병합 반영: PUT 응답에는 employee 조인이 빠져 있으므로 통째 교체하면
+        // 마스터 조인에 의존하던 필드가 순간 '누락'으로 잘못 떴다가 loadPayslips
+        // 후에야 복구됨. 기존 행에 변경 컬럼만 덮어써 조인·기타 필드를 보존한다.
+        setPayslips(prev => prev.map(p => p.id === id ? { ...p, ...data.data } : p));
         // Mark this row as just-saved (UI flashes ✓ for ~1.5s)
         setSavedAt(prev => ({ ...prev, [id]: Date.now() }));
         setTimeout(() => {
