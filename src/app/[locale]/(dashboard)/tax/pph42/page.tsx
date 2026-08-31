@@ -71,6 +71,12 @@ export default function PPh42Page() {
   // 거래는 pph23_transaction 을 공유하므로 required 설정도 'pph23' 재사용.
   const { missing: reqMissing } = useRequiredFields('pph23');
   const [missingModal, setMissingModal] = useState<string[] | null>(null);
+  // 2026-08-31 — 행별 필수항목 누락 개수 (리스트 배지용, 채우면 사라짐).
+  const txMissingCount = (tx: Transaction): number => reqMissing({
+    counterparty_name: tx.counterparty_name, counterparty_npwp: tx.counterparty_npwp,
+    transaction_date: tx.transaction_date, gross_amount: tx.gross_amount,
+    invoice_number: tx.invoice_number, bukti_potong_number: tx.bukti_potong_number,
+  }).length;
   const collectMissing = (): string[] => {
     const out: string[] = [];
     for (const tx of transactions) {
@@ -591,7 +597,14 @@ export default function PPh42Page() {
                           <td className="p-2">{i + 1}</td>
                           <td className="p-2 font-mono text-xs">{tx.transaction_date}</td>
                           <td className="p-2">
-                            <div className="font-medium text-xs">{tx.counterparty_name}</div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium text-xs">{tx.counterparty_name}</span>
+                              {txMissingCount(tx) > 0 && (
+                                <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold bg-red-100 text-red-700" title={t('requiredMissingBlock')}>
+                                  <span>*</span>{t('requiredMissingBadge')} {txMissingCount(tx)}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="p-2 font-mono text-[11px]">{tx.counterparty_npwp || <span className="text-gray-400">—</span>}</td>
                           <td className="p-2 text-xs text-gray-700 truncate max-w-[200px]">{cleanDesc || '—'}</td>

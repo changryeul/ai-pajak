@@ -10695,7 +10695,9 @@
     "finalSubmit": "Final submit",
     "missingModalTitle": "Required fields missing",
     "missingModalDesc": "Cannot submit — the required fields below are empty. Fill them in and submit again.",
-    "confirmOk": "OK"
+    "confirmOk": "OK",
+    "requiredMissingBlock": "Required fields missing",
+    "requiredMissingBadge": "Missing"
   },
   "bulk": {
     "bulkSelectedN": "{count} selected",

@@ -10695,7 +10695,9 @@
     "finalSubmit": "Kirim final",
     "missingModalTitle": "Ada kolom wajib yang kosong",
     "missingModalDesc": "Tidak dapat mengirim — kolom wajib di bawah ini masih kosong. Lengkapi lalu kirim lagi.",
-    "confirmOk": "OK"
+    "confirmOk": "OK",
+    "requiredMissingBlock": "Kolom wajib kosong",
+    "requiredMissingBadge": "Kurang"
   },
   "bulk": {
     "bulkSelectedN": "{count} dipilih",
