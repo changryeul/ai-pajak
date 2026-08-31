@@ -3,15 +3,24 @@
 export const APP_NAME = 'AI PAJAK';
 export const APP_DESCRIPTION = 'AI-Powered Tax Filing System for Indonesia';
 
-// Supported locales
-export const LOCALES = ['id', 'en', 'ko'] as const;
+// Supported locales (routing-level — every locale that can appear in the URL).
+// 정책(2026-08-31 복원): 고객(개인/법인) 화면은 5개 언어, 상담사·어드바이저·
+// 마스터·운영팀 화면은 3개 언어만 노출한다. 라우팅은 5개 모두 허용하고,
+// 스위처에서 CUSTOMER_LOCALES / STAFF_LOCALES 로 노출을 분리한다.
+export const LOCALES = ['id', 'en', 'ko', 'zh', 'ja'] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const LOCALE_NAMES: Record<Locale, string> = {
   id: 'Bahasa Indonesia',
   en: 'English',
   ko: '한국어',
+  zh: '中文',
+  ja: '日本語',
 };
+
+// 고객(개인/법인): 5개 언어 / 직원(상담사·어드바이저·마스터·운영팀): 3개 언어
+export const CUSTOMER_LOCALES = ['ko', 'en', 'id', 'zh', 'ja'] as const;
+export const STAFF_LOCALES = ['id', 'en', 'ko'] as const;
 
 export const DEFAULT_LOCALE: Locale = 'id';
 

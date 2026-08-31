@@ -19,7 +19,7 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { ChevronDown, Search } from 'lucide-react';
-import { LOCALE_NAMES, LOCALES, type Locale } from '@/config/constants';
+import { LOCALE_NAMES, STAFF_LOCALES, type Locale } from '@/config/constants';
 import { UserRole } from '@/types/auth';
 import type { ClientSessionContext } from '@/hooks/useSession';
 import { cn } from '@/lib/utils';
@@ -89,7 +89,7 @@ export function OpsSidebarHeader({ session }: Props) {
             <>
               <div className="fixed inset-0 z-30" onClick={() => setLangOpen(false)} />
               <div className="absolute z-40 mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 py-1 shadow-lg">
-                {LOCALES.map((loc) => (
+                {STAFF_LOCALES.map((loc) => (
                   <button
                     key={loc}
                     type="button"

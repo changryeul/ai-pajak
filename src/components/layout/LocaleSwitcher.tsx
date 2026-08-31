@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { Globe, ChevronDown } from 'lucide-react';
-import { LOCALE_NAMES, LOCALES, type Locale } from '@/config/constants';
+import { LOCALE_NAMES, CUSTOMER_LOCALES, type Locale } from '@/config/constants';
 import { cn } from '@/lib/utils';
 
 interface LocaleSwitcherProps {
@@ -23,12 +23,15 @@ interface LocaleSwitcherProps {
   variant?: 'default' | 'compact';
   /** When true, the popover opens to the LEFT of the trigger (useful in the top-right corner of auth pages). */
   alignLeft?: boolean;
+  /** 노출할 로케일 목록. 기본은 고객용 5개(CUSTOMER_LOCALES). 운영/직원 화면은 STAFF_LOCALES 를 넘긴다. */
+  locales?: readonly Locale[];
 }
 
 export function LocaleSwitcher({
   className,
   variant = 'default',
   alignLeft = false,
+  locales = CUSTOMER_LOCALES,
 }: LocaleSwitcherProps) {
   const params = useParams();
   const router = useRouter();
@@ -72,7 +75,7 @@ export function LocaleSwitcher({
               alignLeft ? 'right-0' : 'left-0',
             )}
           >
-            {LOCALES.map((locale) => (
+            {locales.map((locale) => (
               <button
                 key={locale}
                 type="button"

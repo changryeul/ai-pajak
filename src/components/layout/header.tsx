@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { Bell, Globe, User, ChevronDown, Menu } from 'lucide-react';
-import { LOCALE_NAMES, LOCALES, type Locale } from '@/config/constants';
+import { LOCALE_NAMES, CUSTOMER_LOCALES, STAFF_LOCALES, type Locale } from '@/config/constants';
 import { cn } from '@/lib/utils';
 import { useMobileSidebar } from './mobile-sidebar';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useSession } from '@/hooks/useSession';
 
 interface HeaderProps {
   userEmail?: string;
@@ -18,6 +19,9 @@ export function Header({ userEmail, userName }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const currentLocale = params.locale as Locale;
+  const { session } = useSession();
+  // 정책: 개인/법인 고객은 5개 언어, 그 외(상담사·어드바이저·마스터·운영팀)는 3개.
+  const availableLocales = session?.role === 'CUSTOMER' ? CUSTOMER_LOCALES : STAFF_LOCALES;
 
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -70,7 +74,7 @@ export function Header({ userEmail, userName }: HeaderProps) {
                 onClick={() => setIsLangOpen(false)}
               />
               <div className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
-                {LOCALES.map((locale) => (
+                {availableLocales.map((locale) => (
                   <button
                     key={locale}
                     onClick={() => handleLocaleChange(locale)}
