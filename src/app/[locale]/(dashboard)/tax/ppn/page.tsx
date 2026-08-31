@@ -102,7 +102,7 @@ export default function PPNPage() {
   // Inline edit state (mirrors PPh21 MonthlyPayslipTab pattern)
   const [expandedFakturId, setExpandedFakturId] = useState<string | null>(null);
   // 2026-08-30 — MASTER 지정 필수항목 별표(정규화 매칭)
-  const { requiredKeys: reqKeysPpn } = useRequiredFields('ppn');
+  const { requiredKeys: reqKeysPpn, fields: reqFieldsPpn } = useRequiredFields('ppn');
   const reqStar = (k: string) => new Set((reqKeysPpn ?? []).map(x => x.toLowerCase().replace(/_/g, ''))).has(k.toLowerCase().replace(/_/g, ''))
     ? <span className="text-red-500 font-bold"> *</span> : null;
   // 2026-08-30 — faktur 행별 필수항목 누락 개수 (리스트 표시용)
@@ -121,6 +121,26 @@ export default function PPNPage() {
     }
     return n;
   };
+  // 2026-08-31 — 최종 제출 시 전 세금계산서의 필수항목 누락 라벨 수집 (팝업용).
+  const collectMissingPpn = (): string[] => {
+    const norm = (k: string) => k.toLowerCase().replace(/_/g, '');
+    const labelOf = (k: string) => (reqFieldsPpn ?? []).find(fd => norm(fd.fieldKey) === norm(k))?.label ?? k;
+    const out: string[] = [];
+    for (const f of fakturs) {
+      const val: Record<string, unknown> = {
+        faktur_number: f.faktur_number, faktur_date: f.faktur_date, counterparty_name: f.counterparty_name,
+        counterparty_npwp: f.counterparty_npwp, dpp: f.dpp, ppn: f.ppn,
+      };
+      for (const k of (reqKeysPpn ?? [])) {
+        const mk = Object.keys(val).find(vk => norm(vk) === norm(k));
+        if (!mk) continue;
+        const v = val[mk];
+        if (v == null || v === '' || (typeof v === 'number' && v === 0)) out.push(`${f.counterparty_name || '—'} · ${labelOf(k)}`);
+      }
+    }
+    return out;
+  };
+  const [missingModal, setMissingModal] = useState<string[] | null>(null);
   const [savedAt, setSavedAt] = useState<Record<string, number>>({});
 
   const period = `${year}-${String(month).padStart(2, '0')}`;
@@ -323,6 +343,9 @@ export default function PPNPage() {
   const submitPpnToOperator = async () => {
     if (!customerId || submittingPpn) return;
     if (fakturs.length === 0) { showMsg('error', t('ppnSubmitNoData')); return; }
+    // 필수항목 누락이면 팝업(모달)으로 안내 후 제출 차단 (PPh21/23 과 동일 UX).
+    const miss = collectMissingPpn();
+    if (miss.length > 0) { setMissingModal(miss); return; }
     if (!confirm(t('ppnSubmitConfirm', { period }))) return;
     setSubmittingPpn(true);
     try {
@@ -339,16 +362,6 @@ export default function PPNPage() {
       }
     } catch { showMsg('error', t('ppnSubmitFailed')); }
     finally { setSubmittingPpn(false); }
-  };
-
-  const cancelPpnSubmit = async () => {
-    if (!customerId) return;
-    if (!confirm(t('ppnSubmitCancelConfirm'))) return;
-    try {
-      await fetch(`/api/customer/spt-masa-request?taxType=PPN&period=${period}`, { method: 'DELETE' });
-      setPpnSubmitReq(null);
-      showMsg('success', t('ppnSubmitCancelled'));
-    } catch { showMsg('error', t('ppnSubmitFailed')); }
   };
 
   // 2026-08-30: 해당 월 부가세 신고내역 전체를 엑셀로 다운로드 (전 세금계산서 × 전 항목).
@@ -1049,12 +1062,9 @@ export default function PPNPage() {
 
           {/* 최종 제출 — 운영팀 신고 요청 (PPh23/21 과 동일 패턴) + 엑셀 다운로드 */}
           {ppnSubmitReq && (
-            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-sm text-emerald-800">
-                <CheckCircle className="h-4 w-4 shrink-0" />
-                <span>{t('ppnSubmittedBanner')}</span>
-              </div>
-              <Button variant="outline" size="sm" onClick={cancelPpnSubmit}>{t('ppnSubmitCancel')}</Button>
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center gap-2 text-sm text-emerald-800">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              <span>{t('ppnSubmittedBanner')}</span>
             </div>
           )}
           <div className="mt-4 flex justify-end items-center gap-2">
@@ -1271,6 +1281,31 @@ export default function PPNPage() {
 
       {/* PPN Refund Section */}
       <PPNRefundSection locale={locale} />
+
+      {/* 필수항목 누락 경고 모달 — 확인 눌러야 닫힘 (PPh21/23 과 동일 UX) */}
+      <Dialog open={missingModal !== null} onOpenChange={(o) => { if (!o) setMissingModal(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />{t('missingModalTitle')}
+            </DialogTitle>
+            <DialogDescription>{t('missingModalDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-64 overflow-y-auto rounded-lg border border-red-200 bg-red-50 p-3">
+            <ul className="space-y-1 text-sm text-red-800">
+              {(missingModal ?? []).map((m, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setMissingModal(null)}>{t('confirmOk')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Month picker dialog — opens before any input action */}
       <Dialog open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>

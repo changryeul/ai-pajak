@@ -4043,7 +4043,10 @@
     "ppnSubmitCancel": "Batalkan",
     "ppnSubmitCancelConfirm": "Batalkan permintaan pengiriman?",
     "ppnSubmitCancelled": "Permintaan dibatalkan",
-    "ppnDownloadExcel": "Unduh Excel"
+    "ppnDownloadExcel": "Unduh Excel",
+    "missingModalTitle": "Ada kolom wajib yang kosong",
+    "missingModalDesc": "Tidak dapat mengirim — kolom wajib di bawah ini masih kosong. Lengkapi lalu kirim lagi.",
+    "confirmOk": "OK"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",

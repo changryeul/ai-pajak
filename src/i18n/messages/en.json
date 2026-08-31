@@ -4043,7 +4043,10 @@
     "ppnSubmitCancel": "Cancel request",
     "ppnSubmitCancelConfirm": "Cancel the submit request?",
     "ppnSubmitCancelled": "Submit request cancelled",
-    "ppnDownloadExcel": "Download Excel"
+    "ppnDownloadExcel": "Download Excel",
+    "missingModalTitle": "Required fields missing",
+    "missingModalDesc": "Cannot submit — the required fields below are empty. Fill them in and submit again.",
+    "confirmOk": "OK"
   },
   "monthlyDashboard": {
     "headerLabel": "Monthly Tax Dashboard",
