@@ -1575,23 +1575,6 @@ export default function PPh23Page() {
                     {t('sptPendingBody', { ts: new Date(submissionRequest.requestedAt).toLocaleString() })}
                   </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-amber-700 hover:text-amber-900 text-[11px]"
-                  onClick={() => {
-                    if (typeof window !== 'undefined' && reqStorageKey) {
-                      window.localStorage.removeItem(reqStorageKey);
-                    }
-                    setSubmissionRequest(null);
-                    // 서버 row 도 CANCELLED 로 마크 (다기기 동기화).
-                    void fetch(`/api/customer/spt-masa-request?taxType=PPh23&period=${period}`, {
-                      method: 'DELETE',
-                    }).catch(() => { /* silent */ });
-                  }}
-                >
-                  {t('sptCancelRequest')}
-                </Button>
               </CardContent>
             </Card>
           ) : null}
