@@ -12,6 +12,7 @@ const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 
 export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
+  const tw = useTranslations('workqueue');
   const [detail, setDetail] = useState<UmkmDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [statusF, setStatusF] = useState<'' | 'UNPAID' | 'PAID' | 'OVERDUE' | 'PARTIAL'>('');
@@ -23,9 +24,9 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
       const r = await fetch(`/api/operator/workqueue/${queueId}/umkm`);
       const j = await r.json();
       if (j.success) setDetail(j.data as UmkmDetail);
-      else setError('상세 자료를 불러오지 못했습니다.');
-    } catch { setError('상세 자료를 불러오지 못했습니다.'); }
-  }, [queueId]);
+      else setError(tw('loadDetailFailed'));
+    } catch { setError(tw('loadDetailFailed')); }
+  }, [queueId, tw]);
   useEffect(() => { load(); }, [load]);
 
   const rows = useMemo(() => (detail?.rows ?? []).filter(r =>
@@ -34,24 +35,24 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
   if (error) return (
     <div className={styles.card}><div className={styles.body}>
       <div className={styles.blocked}>{error}</div>
-      <button className={styles.btn} onClick={() => load()}>다시 시도</button>
+      <button className={styles.btn} onClick={() => load()}>{tw('retry')}</button>
     </div></div>
   );
-  if (!detail) return <div className={styles.card}><div className={styles.body}>불러오는 중…</div></div>;
+  if (!detail) return <div className={styles.card}><div className={styles.body}>{tw('loading')}</div></div>;
   const s = detail.summary;
 
   return (
     <div className={styles.card}>
       <div className={styles.head}>
-        <div><h1>{t('umkmTitle')}</h1><p>{detail.period} 귀속분 · 선납법인세 월 납부 검토</p></div>
+        <div><h1>{t('umkmTitle')}</h1><p>{tw('subUmkm', { period: detail.period })}</p></div>
         <ApprovalActions queueId={queueId} onChanged={load} />
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>
-          <div className={styles.metric2}><small>{t('umkmRecordCount')}</small><b>{s.recordCount}건</b></div>
+          <div className={styles.metric2}><small>{t('umkmRecordCount')}</small><b>{tw('unitCases', { count: s.recordCount })}</b></div>
           <div className={styles.metric2}><small>{t('umkmTotalDue')}</small><b>{rp(s.totalDue)}</b></div>
           <div className={styles.metric2}><small>{t('umkmTotalPaid')}</small><b>{rp(s.totalPaid)}</b></div>
-          <div className={styles.metric2}><small>미완료</small><b>{s.incompleteCount}건</b></div>
+          <div className={styles.metric2}><small>{tw('incomplete')}</small><b>{tw('unitCases', { count: s.incompleteCount })}</b></div>
         </div>
 
         <AiPreReviewBox queueId={queueId} taxView="umkm" period={detail.period} summary={s} rows={detail.rows} />
@@ -59,11 +60,11 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
         <div className={styles.toolbar}>
           <div>
             <select value={statusF} onChange={e => setStatusF(e.target.value as '' | 'UNPAID' | 'PAID' | 'OVERDUE' | 'PARTIAL')}>
-              <option value="">전체 납부상태</option>
-              <option value="UNPAID">미납</option>
-              <option value="OVERDUE">연체</option>
-              <option value="PARTIAL">부분납</option>
-              <option value="PAID">완납</option>
+              <option value="">{tw('filterAllPaymentStatus')}</option>
+              <option value="UNPAID">{tw('unpaid')}</option>
+              <option value="OVERDUE">{tw('overdue')}</option>
+              <option value="PARTIAL">{tw('partial')}</option>
+              <option value="PAID">{tw('paid')}</option>
             </select>
           </div>
         </div>
@@ -82,12 +83,13 @@ export function UmkmReviewPanel({ queueId, onChanged }: { queueId: string; onCha
 
 function RequestModal({ row, queueId, onClose, onSent }:
   { row: UmkmRow; queueId: string; onClose: () => void; onSent: () => void }) {
+  const tw = useTranslations('workqueue');
   const taxText = row.taxType === 'PPh25' ? 'PPh 25' : 'PPh Final';
   return (
     <RequestChatModal
       toLabel={taxText}
-      contextLabel={`선납법인세 · ${row.flags.label}`}
-      defaultMessage={`${taxText} 선납분의 ${row.flags.label} 관련 자료를 확인 부탁드립니다.`}
+      contextLabel={tw('reqCtxUmkm', { label: row.flags.label })}
+      defaultMessage={tw('reqMsgUmkm', { taxText, label: row.flags.label })}
       onSend={async (message) => {
         await fetch(`/api/operator/workqueue/${queueId}/request`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },

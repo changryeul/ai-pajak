@@ -1,10 +1,9 @@
 'use client';
 import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
-import { reviewStateText, type Pph21Row } from './types';
+import { type Pph21Row } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
-const subText = (s: string) => (s === 'FINALIZED' || s === 'FILED' ? '완료' : '작성중');
 
 interface Props {
   rows: Pph21Row[];
@@ -17,6 +16,10 @@ interface Props {
 
 export function EmployeeReviewTable({ rows, selectedId, onSelect, onRequest }: Props) {
   const t = useTranslations('operatorWorkqueue');
+  const tw = useTranslations('workqueue');
+  const reviewText = (level: string) =>
+    level === 'green' ? tw('reviewDone') : level === 'red' ? tw('reviewIssue') : tw('reviewUnconfirmed');
+  const subText = (s: string) => (s === 'FINALIZED' || s === 'FILED' ? tw('statusDone') : tw('statusDraft'));
   return (
     <div className={styles.tbl}>
       <table>
@@ -38,18 +41,18 @@ export function EmployeeReviewTable({ rows, selectedId, onSelect, onRequest }: P
                 }
               }}
               style={{ cursor: 'pointer' }}>
-              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
+              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewText(r.flags.level)}</span></td>
               <td className={styles.name}><b>{r.name}</b><span>{subText(r.payslipStatus)}</span></td>
-              <td>{r.npwp ?? 'NPWP 없음'}</td>
+              <td>{r.npwp ?? tw('noNpwp')}</td>
               <td>{r.ptkp}</td>
               <td className={styles.money}>{rp(r.totalGross)}</td>
-              <td>{r.bpjs > 0 ? '입력완료' : '미입력'}</td>
-              <td>{r.thr > 0 ? rp(r.thr) : '없음'}</td>
+              <td>{r.bpjs > 0 ? tw('entered') : tw('notEntered')}</td>
+              <td>{r.thr > 0 ? rp(r.thr) : tw('none')}</td>
               <td>Kategori {r.terCategory}</td>
               <td className={styles.money}>{rp(r.pph21)}</td>
               <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{r.flags.label}</span></td>
               <td><button className={`${styles.btn} ${styles.blue}`}
-                onClick={(e) => { e.stopPropagation(); onRequest(r); }}>요청</button></td>
+                onClick={(e) => { e.stopPropagation(); onRequest(r); }}>{tw('request')}</button></td>
             </tr>
           ))}
         </tbody>

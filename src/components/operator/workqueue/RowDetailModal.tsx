@@ -1,5 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Pencil, Shield } from 'lucide-react';
 import styles from './workqueue.module.css';
 import type { OperatorEdits } from './types';
@@ -58,6 +59,7 @@ export function RowDetailModal({
   title, subtitle, summary, rowId, queueId, putUrl, putExtra, fields, values, requiredKeys,
   operatorEdits, reviewedAt, basisNote, calcNote, aiNote, warn, onClose, onSaved,
 }: Props) {
+  const tw = useTranslations('workqueue');
   const reqSet = new Set((requiredKeys ?? []).map(normKey));
   const isReq = (key: string) => reqSet.has(normKey(key));
   const [draft, setDraft] = useState<Record<string, string>>(() => {
@@ -88,12 +90,12 @@ export function RowDetailModal({
     const order: string[] = [];
     const map = new Map<string, FieldDef[]>();
     for (const f of fields) {
-      const s = f.section ?? '항목';
+      const s = f.section ?? tw('sectionDefault');
       if (!map.has(s)) { map.set(s, []); order.push(s); }
       map.get(s)!.push(f);
     }
     return order.map(s => ({ title: s, fields: map.get(s)! }));
-  }, [fields]);
+  }, [fields, tw]);
 
   const saveAndConfirm = async () => {
     // #64 — 잘못된 값(예: 표준 요율 벗어난 PPN) 저장 시 AI 재확인.
@@ -130,7 +132,7 @@ export function RowDetailModal({
       }
       onSaved();
     } catch {
-      setError('네트워크 오류 — 다시 시도해주세요.');
+      setError(tw('networkError'));
     } finally { setBusy(false); }
   };
 
@@ -140,7 +142,7 @@ export function RowDetailModal({
     const sup = e.role === 'SUPERVISOR';
     return (
       <span className={`${styles.editDot} ${sup ? styles.editSup : styles.editCounselor}`}
-        title={`${sup ? '수퍼바이저' : '상담원'} 수정: ${e.from ?? '—'} → ${e.to ?? '—'}`} />
+        title={tw('editDotTitle', { who: sup ? tw('supervisor') : tw('editDotCounselor'), from: String(e.from ?? '—'), to: String(e.to ?? '—') })} />
     );
   };
 
@@ -154,7 +156,7 @@ export function RowDetailModal({
             <h2 className="text-base font-black text-slate-900">{title}</h2>
             {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
           </div>
-          <button onClick={onClose} aria-label="닫기"
+          <button onClick={onClose} aria-label={tw('close')}
             className="rounded-md p-1 text-xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">×</button>
         </div>
 
@@ -163,12 +165,12 @@ export function RowDetailModal({
           {/* 편집 안내 배너 — 고객 화면과 동일 */}
           <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50/60 px-3 py-2 text-[11px] text-blue-900">
             <Pencil className="h-3.5 w-3.5 shrink-0" />
-            <span>각 필드를 클릭한 후 값을 변경하세요. 저장 및 확인 시 반영됩니다.</span>
+            <span>{tw('editFieldsHint')}</span>
           </div>
 
           {reviewedAt && (
             <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
-              ✅ 확인 완료 ({new Date(reviewedAt).toLocaleString('ko-KR')}) — 다시 저장하면 갱신됩니다.
+              ✅ {tw('reviewedAtNote', { time: new Date(reviewedAt).toLocaleString('ko-KR') })}
             </div>
           )}
 
@@ -194,7 +196,7 @@ export function RowDetailModal({
                 {sec.fields.map(f => (
                   <div key={f.key}>
                     <label className="flex items-center text-[10px] text-gray-400">
-                      {f.label}{isReq(f.key) && <span className="ml-0.5 font-bold text-red-500" title="필수 항목">*</span>}{editDot(f.key)}
+                      {f.label}{isReq(f.key) && <span className="ml-0.5 font-bold text-red-500" title={tw('requiredField')}>*</span>}{editDot(f.key)}
                     </label>
                     {f.type === 'select' ? (
                       <select
@@ -245,7 +247,7 @@ export function RowDetailModal({
 
           {aiNote && (
             <div className="rounded-lg border border-violet-100 bg-violet-50/50 p-3 text-xs">
-              <b className="text-violet-900">AI 분석</b>
+              <b className="text-violet-900">{tw('aiAnalysis')}</b>
               <ul className="mt-1 list-disc pl-5 text-slate-700">
                 <li>{aiNote.label}</li>
                 {aiNote.issues.map((i, n) => <li key={n}>{i}</li>)}
@@ -262,11 +264,11 @@ export function RowDetailModal({
         <div className="flex justify-end gap-2 border-t border-gray-100 bg-white px-5 py-3">
           <button onClick={onClose} disabled={busy}
             className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-gray-50 disabled:opacity-50">
-            닫기
+            {tw('close')}
           </button>
           <button onClick={saveAndConfirm} disabled={busy}
             className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
-            {busy ? '저장 중…' : dirty.length > 0 ? `저장 및 확인 (${dirty.length}개 수정)` : '저장 및 확인'}
+            {busy ? tw('saving') : dirty.length > 0 ? tw('saveAndConfirmCount', { count: dirty.length }) : tw('saveAndConfirm')}
           </button>
         </div>
       </div>

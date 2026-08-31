@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
 
 /**
@@ -16,6 +17,7 @@ export function RequestChatModal({ toLabel, subtitle, contextLabel, defaultMessa
   onSend: (message: string) => Promise<void>;
   onClose: () => void;
 }) {
+  const tw = useTranslations('workqueue');
   const [msg, setMsg] = useState(defaultMessage);
   const [sending, setSending] = useState(false);
 
@@ -43,9 +45,9 @@ export function RequestChatModal({ toLabel, subtitle, contextLabel, defaultMessa
           <div className={styles.waAvatar}>{toLabel.slice(0, 1)}</div>
           <div className={styles.waWho}>
             <b>{toLabel}</b>
-            <span>{subtitle ?? '고객 화면의 해당 항목에 요청으로 표시됩니다'}</span>
+            <span>{subtitle ?? tw('chatDefaultSubtitle')}</span>
           </div>
-          <button className={styles.waClose} onClick={onClose} aria-label="닫기">×</button>
+          <button className={styles.waClose} onClick={onClose} aria-label={tw('close')}>×</button>
         </div>
 
         {/* 대화 영역 */}
@@ -56,17 +58,17 @@ export function RequestChatModal({ toLabel, subtitle, contextLabel, defaultMessa
               value={msg}
               onChange={e => setMsg(e.target.value)}
               rows={4}
-              aria-label="고객에게 보낼 메시지"
+              aria-label={tw('chatMessageAria')}
             />
             <span className={styles.waMeta}>{hhmm} ✓</span>
           </div>
-          <div className={styles.waHint}>말풍선을 눌러 내용을 수정할 수 있습니다</div>
+          <div className={styles.waHint}>{tw('chatEditHint')}</div>
         </div>
 
         {/* 입력줄 스타일 푸터 */}
         <div className={styles.waFoot}>
-          <button className={styles.waCancel} onClick={onClose} disabled={sending}>취소</button>
-          <button className={styles.waSend} onClick={send} disabled={sending || !msg.trim()} aria-label="보내기">
+          <button className={styles.waCancel} onClick={onClose} disabled={sending}>{tw('cancel')}</button>
+          <button className={styles.waSend} onClick={send} disabled={sending || !msg.trim()} aria-label={tw('send')}>
             {sending ? '…' : '➤'}
           </button>
         </div>

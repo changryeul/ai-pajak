@@ -104,7 +104,7 @@ export default function OverrideRulesAdmin() {
 
   const saveRule = async () => {
     if (!form.name || !form.resultRate || !form.resultReason || !form.resultLegalBasis) {
-      showMsg('error', 'Name, Rate, Reason, Legal Basis are required');
+      showMsg('error', t('validationRequired'));
       return;
     }
 
@@ -135,14 +135,14 @@ export default function OverrideRulesAdmin() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', editingId ? 'Rule updated' : 'Rule created');
+        showMsg('success', editingId ? t('ruleUpdated') : t('ruleCreated'));
         setShowForm(false);
         setEditingId(null);
         loadRules();
       } else {
-        showMsg('error', data.error || 'Failed');
+        showMsg('error', data.error || t('failed'));
       }
-    } catch { showMsg('error', 'Error saving'); }
+    } catch { showMsg('error', t('errorSaving')); }
     finally { setIsSaving(false); }
   };
 
@@ -155,10 +155,10 @@ export default function OverrideRulesAdmin() {
       });
       const data = await res.json();
       if (data.success) {
-        showMsg('success', `Rule ${rule.is_active ? 'deactivated' : 'activated'}`);
+        showMsg('success', rule.is_active ? t('ruleDeactivated') : t('ruleActivated'));
         loadRules();
       }
-    } catch { showMsg('error', 'Error'); }
+    } catch { showMsg('error', t('error')); }
   };
 
   return (
@@ -169,7 +169,7 @@ export default function OverrideRulesAdmin() {
         <div className="relative z-10 flex items-center justify-between">
           <div>
             <p className="text-violet-200 text-sm flex items-center gap-2">
-              <Shield className="h-4 w-4" />Admin — Tax Override Rules
+              <Shield className="h-4 w-4" />{t('headerBadge')}
             </p>
             <h1 className="text-2xl md:text-3xl font-bold mt-1">{t('pageTitle')}</h1>
             <p className="text-violet-200 mt-2 text-sm">
@@ -177,7 +177,7 @@ export default function OverrideRulesAdmin() {
             </p>
           </div>
           <Button onClick={startCreate} className="bg-white/20 hover:bg-white/30 text-white border-0">
-            <Plus className="h-4 w-4 mr-1" />New Rule
+            <Plus className="h-4 w-4 mr-1" />{t('newRule')}
           </Button>
         </div>
       </div>
@@ -196,15 +196,15 @@ export default function OverrideRulesAdmin() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-violet-600" />
-              {editingId ? 'Edit Rule' : 'New Override Rule'}
+              {editingId ? t('editRule') : t('newOverrideRule')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Basic Info */}
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
-                <Label className="text-xs">Rule Name *</Label>
-                <Input className="h-9" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g., Related Party Service Override" />
+                <Label className="text-xs">{t('ruleNameLabel')}</Label>
+                <Input className="h-9" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t('ruleNamePlaceholder')} />
               </div>
               <div>
                 <Label className="text-xs">{t('priorityLabel')}</Label>
@@ -212,8 +212,8 @@ export default function OverrideRulesAdmin() {
               </div>
             </div>
             <div>
-              <Label className="text-xs">Description</Label>
-              <Input className="h-9" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Optional description" />
+              <Label className="text-xs">{t('descriptionLabel')}</Label>
+              <Input className="h-9" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder={t('descriptionPlaceholder')} />
             </div>
 
             {/* Conditions */}
@@ -221,52 +221,52 @@ export default function OverrideRulesAdmin() {
               <p className="text-xs font-semibold text-gray-600 mb-2">{t('conditionsHeader')}</p>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs">Service Category</Label>
+                  <Label className="text-xs">{t('serviceCategoryLabel')}</Label>
                   <Select value={form.conditionServiceCategory} onValueChange={v => setForm({ ...form, conditionServiceCategory: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Any" /></SelectTrigger>
+                    <SelectTrigger className="h-9"><SelectValue placeholder={t('anyPlaceholder')} /></SelectTrigger>
                     <SelectContent>
-                      {SERVICE_CATEGORIES.map(c => <SelectItem key={c || 'any'} value={c || 'any'}>{c || '(Any)'}</SelectItem>)}
+                      {SERVICE_CATEGORIES.map(c => <SelectItem key={c || 'any'} value={c || 'any'}>{c || t('anyOption')}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Recipient Type</Label>
+                  <Label className="text-xs">{t('recipientTypeLabel')}</Label>
                   <Select value={form.conditionRecipientType} onValueChange={v => setForm({ ...form, conditionRecipientType: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Any" /></SelectTrigger>
+                    <SelectTrigger className="h-9"><SelectValue placeholder={t('anyPlaceholder')} /></SelectTrigger>
                     <SelectContent>
-                      {RECIPIENT_TYPES.map(r => <SelectItem key={r || 'any'} value={r || 'any'}>{r || '(Any)'}</SelectItem>)}
+                      {RECIPIENT_TYPES.map(r => <SelectItem key={r || 'any'} value={r || 'any'}>{r || t('anyOption')}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label className="text-xs">{t('countryLabel')}</Label>
-                  <Input className="h-9" value={form.conditionCountry} onChange={e => setForm({ ...form, conditionCountry: e.target.value.toUpperCase() })} placeholder="e.g., KR" />
+                  <Input className="h-9" value={form.conditionCountry} onChange={e => setForm({ ...form, conditionCountry: e.target.value.toUpperCase() })} placeholder={t('countryPlaceholder')} />
                 </div>
                 <div>
-                  <Label className="text-xs">Vendor = Owner</Label>
+                  <Label className="text-xs">{t('vendorIsOwnerLabel')}</Label>
                   <Select value={form.conditionVendorIsOwner} onValueChange={v => setForm({ ...form, conditionVendorIsOwner: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Any" /></SelectTrigger>
+                    <SelectTrigger className="h-9"><SelectValue placeholder={t('anyPlaceholder')} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="any">(Any)</SelectItem>
-                      <SelectItem value="true">Yes</SelectItem>
-                      <SelectItem value="false">No</SelectItem>
+                      <SelectItem value="any">{t('anyOption')}</SelectItem>
+                      <SelectItem value="true">{t('yes')}</SelectItem>
+                      <SelectItem value="false">{t('no')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Related Party</Label>
+                  <Label className="text-xs">{t('relatedPartyLabel')}</Label>
                   <Select value={form.conditionIsRelatedParty} onValueChange={v => setForm({ ...form, conditionIsRelatedParty: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Any" /></SelectTrigger>
+                    <SelectTrigger className="h-9"><SelectValue placeholder={t('anyPlaceholder')} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="any">(Any)</SelectItem>
-                      <SelectItem value="true">Yes</SelectItem>
-                      <SelectItem value="false">No</SelectItem>
+                      <SelectItem value="any">{t('anyOption')}</SelectItem>
+                      <SelectItem value="true">{t('yes')}</SelectItem>
+                      <SelectItem value="false">{t('no')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">KBLI Pattern</Label>
-                  <Input className="h-9 font-mono" value={form.conditionKbliPattern} onChange={e => setForm({ ...form, conditionKbliPattern: e.target.value })} placeholder="e.g., 41%" />
+                  <Label className="text-xs">{t('kbliPatternLabel')}</Label>
+                  <Input className="h-9 font-mono" value={form.conditionKbliPattern} onChange={e => setForm({ ...form, conditionKbliPattern: e.target.value })} placeholder={t('kbliPlaceholder')} />
                 </div>
               </div>
             </div>
@@ -276,7 +276,7 @@ export default function OverrideRulesAdmin() {
               <p className="text-xs font-semibold text-violet-700 mb-2">{t('resultHeader')}</p>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs">Tax Type *</Label>
+                  <Label className="text-xs">{t('taxTypeLabel')}</Label>
                   <Select value={form.resultTaxType} onValueChange={v => setForm({ ...form, resultTaxType: v })}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -286,37 +286,37 @@ export default function OverrideRulesAdmin() {
                 </div>
                 <div>
                   <Label className="text-xs">{t('rateLabel')}</Label>
-                  <Input className="h-9 font-mono" value={form.resultRate} onChange={e => setForm({ ...form, resultRate: e.target.value })} placeholder="e.g., 0.10 for 10%" />
+                  <Input className="h-9 font-mono" value={form.resultRate} onChange={e => setForm({ ...form, resultRate: e.target.value })} placeholder={t('ratePlaceholder')} />
                 </div>
                 <div>
-                  <Label className="text-xs">Final Tax</Label>
+                  <Label className="text-xs">{t('finalTaxLabel')}</Label>
                   <Select value={form.resultIsFinal} onValueChange={v => setForm({ ...form, resultIsFinal: v })}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="true">Yes (Final)</SelectItem>
-                      <SelectItem value="false">No (Creditable)</SelectItem>
+                      <SelectItem value="true">{t('yesFinal')}</SelectItem>
+                      <SelectItem value="false">{t('noCreditable')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="mt-3">
                 <Label className="text-xs">{t('reasonLabel')}</Label>
-                <Input className="h-9" value={form.resultReason} onChange={e => setForm({ ...form, resultReason: e.target.value })} placeholder="e.g., Related party — treated as rental" />
+                <Input className="h-9" value={form.resultReason} onChange={e => setForm({ ...form, resultReason: e.target.value })} placeholder={t('reasonPlaceholder')} />
               </div>
               <div className="mt-2">
                 <Label className="text-xs">{t('legalBasisLabel')}</Label>
-                <Input className="h-9" value={form.resultLegalBasis} onChange={e => setForm({ ...form, resultLegalBasis: e.target.value })} placeholder="e.g., PP 34/2017 Pasal 4(2)" />
+                <Input className="h-9" value={form.resultLegalBasis} onChange={e => setForm({ ...form, resultLegalBasis: e.target.value })} placeholder={t('legalBasisPlaceholder')} />
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex gap-2 justify-end">
               <Button size="sm" variant="ghost" onClick={() => { setShowForm(false); setEditingId(null); }}>
-                <X className="h-3 w-3 mr-1" />Cancel
+                <X className="h-3 w-3 mr-1" />{t('cancel')}
               </Button>
               <Button size="sm" onClick={saveRule} disabled={isSaving} className="bg-violet-600 hover:bg-violet-700">
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-                {editingId ? 'Update' : 'Create'}
+                {editingId ? t('update') : t('create')}
               </Button>
             </div>
           </CardContent>
@@ -330,7 +330,7 @@ export default function OverrideRulesAdmin() {
         <div className="text-center py-12 text-gray-400">
           <Shield className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm">{t('noRules')}</p>
-          <Button size="sm" variant="outline" className="mt-3" onClick={startCreate}><Plus className="h-3 w-3 mr-1" />Add First Rule</Button>
+          <Button size="sm" variant="outline" className="mt-3" onClick={startCreate}><Plus className="h-3 w-3 mr-1" />{t('addFirstRule')}</Button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -346,19 +346,19 @@ export default function OverrideRulesAdmin() {
                       <span className="font-semibold text-sm">{rule.name}</span>
                       <Badge variant="outline" className="text-xs">{rule.result_tax_type}</Badge>
                       <Badge variant="outline" className="text-xs font-mono">{pct(rule.result_rate)}</Badge>
-                      {rule.result_is_final && <Badge className="text-[10px] bg-amber-100 text-amber-700">Final</Badge>}
-                      {!rule.is_active && <Badge variant="secondary" className="text-[10px]">Inactive</Badge>}
+                      {rule.result_is_final && <Badge className="text-[10px] bg-amber-100 text-amber-700">{t('badgeFinal')}</Badge>}
+                      {!rule.is_active && <Badge variant="secondary" className="text-[10px]">{t('badgeInactive')}</Badge>}
                     </div>
                     {rule.description && <p className="text-xs text-gray-500 mb-2">{rule.description}</p>}
 
                     {/* Conditions */}
                     <div className="flex flex-wrap gap-1.5 mb-2">
-                      {rule.condition_service_category && <Badge variant="outline" className="text-[10px]">Category: {rule.condition_service_category}</Badge>}
-                      {rule.condition_recipient_type && <Badge variant="outline" className="text-[10px]">Recipient: {rule.condition_recipient_type}</Badge>}
-                      {rule.condition_vendor_is_owner !== null && <Badge variant="outline" className="text-[10px]">Owner: {rule.condition_vendor_is_owner ? 'Yes' : 'No'}</Badge>}
-                      {rule.condition_is_related_party !== null && <Badge variant="outline" className="text-[10px]">Related: {rule.condition_is_related_party ? 'Yes' : 'No'}</Badge>}
-                      {rule.condition_kbli_pattern && <Badge variant="outline" className="text-[10px] font-mono">KBLI: {rule.condition_kbli_pattern}</Badge>}
-                      {rule.condition_country && <Badge variant="outline" className="text-[10px]">Country: {rule.condition_country}</Badge>}
+                      {rule.condition_service_category && <Badge variant="outline" className="text-[10px]">{t('categoryBadge', { value: rule.condition_service_category })}</Badge>}
+                      {rule.condition_recipient_type && <Badge variant="outline" className="text-[10px]">{t('recipientBadge', { value: rule.condition_recipient_type })}</Badge>}
+                      {rule.condition_vendor_is_owner !== null && <Badge variant="outline" className="text-[10px]">{t('ownerBadge', { value: rule.condition_vendor_is_owner ? t('yes') : t('no') })}</Badge>}
+                      {rule.condition_is_related_party !== null && <Badge variant="outline" className="text-[10px]">{t('relatedBadge', { value: rule.condition_is_related_party ? t('yes') : t('no') })}</Badge>}
+                      {rule.condition_kbli_pattern && <Badge variant="outline" className="text-[10px] font-mono">{t('kbliBadge', { value: rule.condition_kbli_pattern })}</Badge>}
+                      {rule.condition_country && <Badge variant="outline" className="text-[10px]">{t('countryBadge', { value: rule.condition_country })}</Badge>}
                     </div>
 
                     <p className="text-xs text-gray-600">{rule.result_reason}</p>

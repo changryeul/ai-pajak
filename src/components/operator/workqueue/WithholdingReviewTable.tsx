@@ -1,6 +1,7 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import styles from './workqueue.module.css';
-import { reviewStateText, type WithholdingRow } from './types';
+import { type WithholdingRow } from './types';
 
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const regimeText = (r: string) => (r === 'PPH4_2' ? 'PPh 4(2)' : 'PPh 23');
@@ -14,20 +15,23 @@ interface Props {
 }
 
 export function WithholdingReviewTable({ rows, onRequest, onViewPhoto, onOpenDetail }: Props) {
+  const tw = useTranslations('workqueue');
+  const reviewText = (level: string) =>
+    level === 'green' ? tw('reviewDone') : level === 'red' ? tw('reviewIssue') : tw('reviewUnconfirmed');
   return (
     <div className={styles.tbl}>
       <table>
         <thead><tr>
-          <th>상태</th><th>거래처</th><th>NPWP</th><th>세목</th><th>거래일</th>
-          <th className={styles.money}>총 지급</th><th>세율</th><th className={styles.money}>세액</th>
-          <th>증빙</th><th>이슈</th><th>요청</th>
+          <th>{tw('colStatus')}</th><th>{tw('colCounterparty')}</th><th>{tw('colNpwp')}</th><th>{tw('colTaxType')}</th><th>{tw('colTxnDate')}</th>
+          <th className={styles.money}>{tw('colGross')}</th><th>{tw('colTaxRate')}</th><th className={styles.money}>{tw('colTax')}</th>
+          <th>{tw('colEvidence')}</th><th>{tw('colIssue')}</th><th>{tw('request')}</th>
         </tr></thead>
         <tbody>
           {rows.map(r => (
-            <tr key={r.id} onDoubleClick={() => onOpenDetail?.(r)} title="더블클릭: 상세 수정" style={{ cursor: onOpenDetail ? 'pointer' : undefined }}>
-              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewStateText(r.flags.level)}</span></td>
+            <tr key={r.id} onDoubleClick={() => onOpenDetail?.(r)} title={tw('dblClickEdit')} style={{ cursor: onOpenDetail ? 'pointer' : undefined }}>
+              <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{reviewText(r.flags.level)}</span></td>
               <td className={styles.name}><b>{r.counterpartyName}</b><span>{r.incomeType}</span></td>
-              <td>{r.counterpartyNpwp ?? 'NPWP 없음'}</td>
+              <td>{r.counterpartyNpwp ?? tw('noNpwp')}</td>
               <td>{regimeText(r.regime)}</td>
               <td>{r.transactionDate ?? '—'}</td>
               <td className={styles.money}>{rp(r.grossAmount)}</td>
@@ -35,11 +39,11 @@ export function WithholdingReviewTable({ rows, onRequest, onViewPhoto, onOpenDet
               <td className={styles.money}>{rp(r.taxAmount)}</td>
               <td>
                 {r.hasInvoicePhoto
-                  ? <button className={styles.btn} onClick={() => onViewPhoto(r)}>첨부됨</button>
-                  : <span style={{ color: '#9ca3af' }}>미첨부</span>}
+                  ? <button className={styles.btn} onClick={() => onViewPhoto(r)}>{tw('attached')}</button>
+                  : <span style={{ color: '#9ca3af' }}>{tw('notAttached')}</span>}
               </td>
               <td><span className={`${styles.badge} ${styles[r.flags.level]}`}>{r.flags.label}</span></td>
-              <td><button className={`${styles.btn} ${styles.blue}`} onClick={() => onRequest(r)}>요청</button></td>
+              <td><button className={`${styles.btn} ${styles.blue}`} onClick={() => onRequest(r)}>{tw('request')}</button></td>
             </tr>
           ))}
         </tbody>

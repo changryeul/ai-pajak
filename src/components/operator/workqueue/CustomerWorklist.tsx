@@ -10,11 +10,11 @@ const LABEL_KEY: Record<string, string> = {
   unreviewed: 'statusUnreviewed', inReview: 'statusInReview',
   request: 'statusRequest', reviewed: 'statusReviewed',
 };
-// djp_submission_queue.tax_type → 카드 표기 (미지 타입은 raw 표기)
+// djp_submission_queue.tax_type → 카드 표기 (기술 용어는 그대로, 한국어 라벨은 i18n 으로)
 const TAX_TYPE_LABELS: Record<string, string> = {
-  PPh21: 'PPh 21', PPh23: '원천세', PPN: 'PPN', PPh_FINAL: 'PPh Final',
+  PPh21: 'PPh 21', PPN: 'PPN', PPh_FINAL: 'PPh Final',
   PPh25: 'PPh 25', PPh4_2: 'PPh 4(2)', PPh15: 'PPh 15', PPh22: 'PPh 22',
-  PPh26: 'PPh 26', SPT_TAHUNAN: '연 신고(SPT)',
+  PPh26: 'PPh 26',
 };
 
 interface Props {
@@ -25,6 +25,12 @@ interface Props {
 
 export function CustomerWorklist({ items, selectedId, onSelect }: Props) {
   const t = useTranslations('operatorWorkqueue');
+  const tw = useTranslations('workqueue');
+  const taxTypeLabel = (type: string) => {
+    if (type === 'PPh23') return tw('taxTypeWithholding');
+    if (type === 'SPT_TAHUNAN') return tw('taxTypeAnnual');
+    return TAX_TYPE_LABELS[type] ?? type;
+  };
   return (
     <aside className={styles.qpanel}>
       <div className={styles.card}>
@@ -35,7 +41,7 @@ export function CustomerWorklist({ items, selectedId, onSelect }: Props) {
             {items.map(it => {
               const lbl = STATUS_LABEL_MAP[it.status];
               const cls = LABEL_CLS[lbl] ?? 'gray';
-              const text = LABEL_KEY[lbl] ? t(LABEL_KEY[lbl]) : '기타';
+              const text = LABEL_KEY[lbl] ? t(LABEL_KEY[lbl]) : tw('other');
               const isActive = selectedId === it.id;
               return (
                 <div key={it.id}
@@ -54,9 +60,9 @@ export function CustomerWorklist({ items, selectedId, onSelect }: Props) {
                     <b>{it.customer?.customer_name ?? '—'}</b>
                     <span className={`${styles.badge} ${styles[cls]}`}>{text}</span>
                   </div>
-                  <span>{it.customer?.npwp ?? 'NPWP 없음'} · {TAX_TYPE_LABELS[it.tax_type] ?? it.tax_type} · {
+                  <span>{it.customer?.npwp ?? tw('noNpwp')} · {taxTypeLabel(it.tax_type)} · {
                     it.tax_type === 'SPT_TAHUNAN'
-                      ? `${it.tax_period_year} 회계연도`
+                      ? tw('fiscalYearLabel', { year: it.tax_period_year })
                       : `${it.tax_period_year}-${String(it.tax_period_month).padStart(2, '0')}`
                   }</span>
                 </div>

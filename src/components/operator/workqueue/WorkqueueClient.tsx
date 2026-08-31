@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import styles from './workqueue.module.css';
@@ -29,17 +30,18 @@ const DEFAULT_PERIOD = `${now.getFullYear()}-${String(now.getMonth() + 1).padSta
 const SUPERVISOR_ROLES = ['TAX_OPERATOR_LEAD', 'TAX_OPERATOR_SUPERVISOR', 'TAX_OPERATOR_MASTER'];
 
 // 상태 필터 (수정요청 27번: 사이드바 → 상단 가로). all 은 key='' (필터 해제).
-const STATUS_TABS: Array<{ key: StatusFilter; icon: string; label: string; cls: string; countKey: 'all' | 'unreviewed' | 'inReview' | 'request' | 'reviewed' }> = [
-  { key: '', icon: '📌', label: '전체', cls: 'blue', countKey: 'all' },
-  { key: 'unreviewed', icon: '🔴', label: '미검토', cls: 'red', countKey: 'unreviewed' },
-  { key: 'inReview', icon: '🟡', label: '검토중', cls: 'amber', countKey: 'inReview' },
-  { key: 'request', icon: '💬', label: '수정작업중', cls: 'red', countKey: 'request' },
-  { key: 'reviewed', icon: '🟢', label: '검토완료', cls: 'green', countKey: 'reviewed' },
+const STATUS_TABS: Array<{ key: StatusFilter; icon: string; labelKey: string; cls: string; countKey: 'all' | 'unreviewed' | 'inReview' | 'request' | 'reviewed' }> = [
+  { key: '', icon: '📌', labelKey: 'tabAll', cls: 'blue', countKey: 'all' },
+  { key: 'unreviewed', icon: '🔴', labelKey: 'statusUnreviewed', cls: 'red', countKey: 'unreviewed' },
+  { key: 'inReview', icon: '🟡', labelKey: 'statusInReview', cls: 'amber', countKey: 'inReview' },
+  { key: 'request', icon: '💬', labelKey: 'statusRequest', cls: 'red', countKey: 'request' },
+  { key: 'reviewed', icon: '🟢', labelKey: 'statusReviewed', cls: 'green', countKey: 'reviewed' },
 ];
 
 export function WorkqueueClient({ role }: { role?: string }) {
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale ?? 'id';
+  const tw = useTranslations('workqueue');
   const router = useRouter();
   // 수정요청 13번 — 워크큐에 로그아웃 경로가 없었음
   const handleLogout = async () => {
@@ -83,11 +85,11 @@ export function WorkqueueClient({ role }: { role?: string }) {
         const r = await fetch(listUrl());
         const j = await r.json();
         if (active && j.success) setItems(j.data.items as QueueListItem[]);
-        else if (active && !j.success) setError('목록을 불러오지 못했습니다.');
-      } catch { if (active) setError('목록을 불러오지 못했습니다.'); }
+        else if (active && !j.success) setError(tw('loadListFailed'));
+      } catch { if (active) setError(tw('loadListFailed')); }
     })();
     return () => { active = false; };
-  }, [listUrl]);
+  }, [listUrl, tw]);
 
   // One-shot refresh handed to Pph21ReviewPanel as onChanged (no active flag —
   // it's not tied to an effect lifecycle). Catches so onChanged={load} never
@@ -98,9 +100,9 @@ export function WorkqueueClient({ role }: { role?: string }) {
       const r = await fetch(listUrl());
       const j = await r.json();
       if (j.success) setItems(j.data.items as QueueListItem[]);
-      else setError('목록을 불러오지 못했습니다.');
-    } catch { setError('목록을 불러오지 못했습니다.'); }
-  }, [listUrl]);
+      else setError(tw('loadListFailed'));
+    } catch { setError(tw('loadListFailed')); }
+  }, [listUrl, tw]);
 
   // 카운트/기본 목록은 선택 월 기준 (연신고는 연 단위라 전체).
   const monthScoped = useMemo(
@@ -142,28 +144,28 @@ export function WorkqueueClient({ role }: { role?: string }) {
           <div className={styles.top}>
             <div className={styles.role}>
               {/* 수정요청 8/20 #21 — 이 화면은 상담원 업무함. 수퍼바이저가 봐도 화면 정체성은 '상담원'. */}
-              <button className={`${styles.pill} ${styles.active}`}>상담원 업무함</button>
+              <button className={`${styles.pill} ${styles.active}`}>{tw('counselorWorkqueue')}</button>
             </div>
             {/* 수정요청 27번 — 상태 필터를 상단 가로 배치 (세목 탭은 사이드바로 이동) */}
-            <div className={styles.taxtabs} role="tablist" aria-label="검토 상태">
+            <div className={styles.taxtabs} role="tablist" aria-label={tw('ariaReviewStatus')}>
               {STATUS_TABS.map(tab => (
                 <button key={tab.key || 'all'} role="tab" aria-selected={statusFilter === tab.key}
                   className={`${styles.pill} ${statusFilter === tab.key ? styles.active : ''}`}
                   onClick={() => setStatusFilter(tab.key)}>
-                  <span aria-hidden="true">{tab.icon}</span> {tab.label}
+                  <span aria-hidden="true">{tab.icon}</span> {tw(tab.labelKey)}
                   <span className={`${styles.topcnt} ${styles[tab.cls]}`}>{counts[tab.countKey]}</span>
                 </button>
               ))}
             </div>
             <div className={styles.tools}>
               <input type="month" value={period} onChange={e => setPeriod(e.target.value)} />
-              <input placeholder="고객명, NPWP 검색 (연 단위)" value={search} onChange={e => setSearch(e.target.value)} />
+              <input placeholder={tw('searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
               {/* 수정요청 54 — 집(🏠) 버튼은 예전 대시보드 화면으로 이동해 혼란 → 제거. */}
               {isSupervisor && (
                 <a className={styles.btn} href={`/${locale}/operator/supervisor-console`}
-                  title="수퍼바이저 콘솔">🛡️ 콘솔</a>
+                  title={tw('supervisorConsoleTitle')}>🛡️ {tw('console')}</a>
               )}
-              <button className={styles.btn} onClick={handleLogout} title="로그아웃">로그아웃</button>
+              <button className={styles.btn} onClick={handleLogout} title={tw('logout')}>{tw('logout')}</button>
             </div>
           </div>
           <section className={styles.content}>
@@ -176,7 +178,7 @@ export function WorkqueueClient({ role }: { role?: string }) {
                       const Panel = PANEL_BY_VIEW[taxView] ?? Pph21ReviewPanel;
                       return <Panel key={selectedId} queueId={selectedId} onChanged={load} />;
                     })()
-                  : <div className={styles.card}><div className={styles.body}>왼쪽에서 고객 업무를 선택하세요.</div></div>}
+                  : <div className={styles.card}><div className={styles.body}>{tw('selectPrompt')}</div></div>}
               </div>
             </div>
           </section>

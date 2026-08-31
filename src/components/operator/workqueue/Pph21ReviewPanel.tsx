@@ -13,53 +13,65 @@ import { RequestChatModal } from './RequestChatModal';
 const rp = (n: number) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const LEVEL_ORDER: Record<string, number> = { red: 0, amber: 1, green: 2 };
 
+type TW = (key: string, values?: Record<string, string | number>) => string;
+
 // 팝업 편집 필드 (요청 10). putKey = monthly_payslip 컬럼명 — 저장 시 서버가
 // computePayslipTotals 로 총액/PPh21 재계산.
 // 수정요청 45 — 고객 급여명세 입력 화면과 동일한 전체 섹션 구성.
-const PPH21_FIELDS: FieldDef[] = [
-  // 근태
-  { key: 'workingDays', label: '근무일', type: 'number', putKey: 'working_days', section: '근태' },
-  { key: 'absentDays', label: '결근일', type: 'number', putKey: 'absent_days', section: '근태' },
-  { key: 'overtimeHours', label: '초과근무 (시간)', type: 'number', putKey: 'overtime_hours', section: '근태' },
-  // 기본급 + 수당
-  { key: 'baseSalary', label: '기본급', type: 'number', putKey: 'base_salary', section: '기본급 + 수당' },
-  { key: 'overtimePay', label: '초과근무 수당', type: 'number', putKey: 'overtime_pay', section: '기본급 + 수당' },
-  { key: 'mealAllowance', label: '식대', type: 'number', putKey: 'meal_allowance', section: '기본급 + 수당' },
-  { key: 'transportAllowance', label: '교통비', type: 'number', putKey: 'transport_allowance', section: '기본급 + 수당' },
-  { key: 'positionAllowance', label: '직책수당', type: 'number', putKey: 'position_allowance', section: '기본급 + 수당' },
-  { key: 'otherAllowances', label: '기타 수당', type: 'number', putKey: 'other_allowances', section: '기본급 + 수당' },
-  { key: 'laptopAllowance', label: '노트북 수당', type: 'number', putKey: 'laptop_allowance', section: '기본급 + 수당' },
-  { key: 'medicalAllowance', label: '의료 수당', type: 'number', putKey: 'medical_allowance', section: '기본급 + 수당' },
-  { key: 'taxAllowance', label: '세금 수당 (Gross-up)', type: 'number', putKey: 'tax_allowance', section: '기본급 + 수당' },
-  { key: 'annualLeavePay', label: '연차 수당', type: 'number', putKey: 'annual_leave_pay', section: '기본급 + 수당' },
-  // 특수 지급
-  { key: 'severanceAllowance', label: '퇴직금 (Pesangon)', type: 'number', putKey: 'severance_allowance', section: '특수 지급 (퇴직/계약 종료)' },
-  { key: 'pkwtCompensation', label: 'PKWT 계약 보상', type: 'number', putKey: 'pkwt_compensation', section: '특수 지급 (퇴직/계약 종료)' },
-  // 보너스
-  { key: 'bonusOnly', label: '보너스', type: 'number', putKey: 'bonus', section: '보너스' },
-  { key: 'thrOnly', label: 'THR (명절)', type: 'number', putKey: 'thr', section: '보너스' },
-  { key: 'commission', label: '커미션', type: 'number', putKey: 'commission', section: '보너스' },
-  // 공제
-  { key: 'bpjsKesehatan', label: 'BPJS 건강', type: 'number', putKey: 'bpjs_kesehatan', section: '공제' },
-  { key: 'bpjsKetenagakerjaan', label: 'BPJS 고용', type: 'number', putKey: 'bpjs_ketenagakerjaan', section: '공제' },
-  { key: 'jhtEmployee', label: 'JHT', type: 'number', putKey: 'jht_employee', section: '공제' },
-  { key: 'jpEmployee', label: 'JP (연금)', type: 'number', putKey: 'jp_employee', section: '공제' },
-  { key: 'loanDeduction', label: '대출 상환', type: 'number', putKey: 'loan_deduction', section: '공제' },
-  { key: 'otherDeductions', label: '기타 공제', type: 'number', putKey: 'other_deductions', section: '공제' },
-  // 자동 계산
-  { key: 'totalGross', label: '총 지급', type: 'number', readOnly: true, section: '자동 계산' },
-  { key: 'pph21', label: 'PPh 21', type: 'number', readOnly: true, section: '자동 계산' },
-  { key: 'netSalary', label: '실수령', type: 'number', readOnly: true, section: '자동 계산' },
-  // 회사 부담 BPJS (자동)
-  { key: 'bpjsKesCompany', label: 'BPJS KES 4%', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
-  { key: 'jkkCompany', label: 'JKK', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
-  { key: 'jkmCompany', label: 'JKM', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
-  { key: 'jhtCompany', label: 'JHT 3.70%', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
-  { key: 'jpCompany', label: 'JP 2.00%', type: 'number', readOnly: true, section: '회사 부담 BPJS (자동 계산)' },
-];
+const buildPph21Fields = (tw: TW): FieldDef[] => {
+  const secAttendance = tw('secAttendance');
+  const secBasePay = tw('secBasePayAllowances');
+  const secSpecial = tw('secSpecialPay');
+  const secBonus = tw('secBonus');
+  const secDeductions = tw('secDeductions');
+  const secAuto = tw('secAutoCalc');
+  const secCompany = tw('secCompanyBpjs');
+  return [
+    // 근태
+    { key: 'workingDays', label: tw('fWorkingDays'), type: 'number', putKey: 'working_days', section: secAttendance },
+    { key: 'absentDays', label: tw('fAbsentDays'), type: 'number', putKey: 'absent_days', section: secAttendance },
+    { key: 'overtimeHours', label: tw('fOvertimeHours'), type: 'number', putKey: 'overtime_hours', section: secAttendance },
+    // 기본급 + 수당
+    { key: 'baseSalary', label: tw('fBaseSalary'), type: 'number', putKey: 'base_salary', section: secBasePay },
+    { key: 'overtimePay', label: tw('fOvertimePay'), type: 'number', putKey: 'overtime_pay', section: secBasePay },
+    { key: 'mealAllowance', label: tw('fMealAllowance'), type: 'number', putKey: 'meal_allowance', section: secBasePay },
+    { key: 'transportAllowance', label: tw('fTransportAllowance'), type: 'number', putKey: 'transport_allowance', section: secBasePay },
+    { key: 'positionAllowance', label: tw('fPositionAllowance'), type: 'number', putKey: 'position_allowance', section: secBasePay },
+    { key: 'otherAllowances', label: tw('fOtherAllowances'), type: 'number', putKey: 'other_allowances', section: secBasePay },
+    { key: 'laptopAllowance', label: tw('fLaptopAllowance'), type: 'number', putKey: 'laptop_allowance', section: secBasePay },
+    { key: 'medicalAllowance', label: tw('fMedicalAllowance'), type: 'number', putKey: 'medical_allowance', section: secBasePay },
+    { key: 'taxAllowance', label: tw('fTaxAllowance'), type: 'number', putKey: 'tax_allowance', section: secBasePay },
+    { key: 'annualLeavePay', label: tw('fAnnualLeavePay'), type: 'number', putKey: 'annual_leave_pay', section: secBasePay },
+    // 특수 지급
+    { key: 'severanceAllowance', label: tw('fSeveranceAllowance'), type: 'number', putKey: 'severance_allowance', section: secSpecial },
+    { key: 'pkwtCompensation', label: tw('fPkwtCompensation'), type: 'number', putKey: 'pkwt_compensation', section: secSpecial },
+    // 보너스
+    { key: 'bonusOnly', label: tw('fBonus'), type: 'number', putKey: 'bonus', section: secBonus },
+    { key: 'thrOnly', label: tw('fThr'), type: 'number', putKey: 'thr', section: secBonus },
+    { key: 'commission', label: tw('fCommission'), type: 'number', putKey: 'commission', section: secBonus },
+    // 공제
+    { key: 'bpjsKesehatan', label: tw('fBpjsKesehatan'), type: 'number', putKey: 'bpjs_kesehatan', section: secDeductions },
+    { key: 'bpjsKetenagakerjaan', label: tw('fBpjsKetenagakerjaan'), type: 'number', putKey: 'bpjs_ketenagakerjaan', section: secDeductions },
+    { key: 'jhtEmployee', label: 'JHT', type: 'number', putKey: 'jht_employee', section: secDeductions },
+    { key: 'jpEmployee', label: tw('fJp'), type: 'number', putKey: 'jp_employee', section: secDeductions },
+    { key: 'loanDeduction', label: tw('fLoanDeduction'), type: 'number', putKey: 'loan_deduction', section: secDeductions },
+    { key: 'otherDeductions', label: tw('fOtherDeductions'), type: 'number', putKey: 'other_deductions', section: secDeductions },
+    // 자동 계산
+    { key: 'totalGross', label: tw('fTotalGross'), type: 'number', readOnly: true, section: secAuto },
+    { key: 'pph21', label: 'PPh 21', type: 'number', readOnly: true, section: secAuto },
+    { key: 'netSalary', label: tw('fNetSalary'), type: 'number', readOnly: true, section: secAuto },
+    // 회사 부담 BPJS (자동)
+    { key: 'bpjsKesCompany', label: 'BPJS KES 4%', type: 'number', readOnly: true, section: secCompany },
+    { key: 'jkkCompany', label: 'JKK', type: 'number', readOnly: true, section: secCompany },
+    { key: 'jkmCompany', label: 'JKM', type: 'number', readOnly: true, section: secCompany },
+    { key: 'jhtCompany', label: 'JHT 3.70%', type: 'number', readOnly: true, section: secCompany },
+    { key: 'jpCompany', label: 'JP 2.00%', type: 'number', readOnly: true, section: secCompany },
+  ];
+};
 
 export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
+  const tw = useTranslations('workqueue');
   const { requiredKeys } = useRequiredFields('payslip');
   const [detail, setDetail] = useState<Pph21Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +86,9 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
       const r = await fetch(`/api/operator/workqueue/${queueId}/pph21`);
       const j = await r.json();
       if (j.success) setDetail(j.data as Pph21Detail);
-      else setError('상세 자료를 불러오지 못했습니다.');
-    } catch { setError('상세 자료를 불러오지 못했습니다.'); }
-  }, [queueId]);
+      else setError(tw('loadDetailFailed'));
+    } catch { setError(tw('loadDetailFailed')); }
+  }, [queueId, tw]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -93,26 +105,26 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
     <div className={styles.card}>
       <div className={styles.body}>
         <div className={styles.blocked}>{error}</div>
-        <button className={styles.btn} onClick={() => load()}>다시 시도</button>
+        <button className={styles.btn} onClick={() => load()}>{tw('retry')}</button>
       </div>
     </div>
   );
-  if (!detail) return <div className={styles.card}><div className={styles.body}>불러오는 중…</div></div>;
+  if (!detail) return <div className={styles.card}><div className={styles.body}>{tw('loading')}</div></div>;
   const s = detail.summary;
 
   return (
     <div className={styles.card}>
       <div className={styles.head}>
-        <div><h1>{t('pph21Title')}</h1><p>{detail.period} 귀속분 · 고객 제출자료 전체 검토</p></div>
+        <div><h1>{t('pph21Title')}</h1><p>{tw('subPph21', { period: detail.period })}</p></div>
         <ApprovalActions queueId={queueId} onChanged={load}
           hasIssues={(detail.rows ?? []).some(r => r.flags.level === 'red')} />
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>
-          <div className={styles.metric2}><small>직원 수</small><b>{s.employeeCount}명</b></div>
-          <div className={styles.metric2}><small>총 지급</small><b>{rp(s.totalGross)}</b></div>
-          <div className={styles.metric2}><small>PPh 21 합계</small><b>{rp(s.totalPph21)}</b></div>
-          <div className={styles.metric2}><small>미완료</small><b>{s.incompleteCount}건</b></div>
+          <div className={styles.metric2}><small>{tw('metricEmployeeCount')}</small><b>{tw('unitPeople', { count: s.employeeCount })}</b></div>
+          <div className={styles.metric2}><small>{tw('metricTotalGross')}</small><b>{rp(s.totalGross)}</b></div>
+          <div className={styles.metric2}><small>{tw('metricTotalPph21')}</small><b>{rp(s.totalPph21)}</b></div>
+          <div className={styles.metric2}><small>{tw('incomplete')}</small><b>{tw('unitCases', { count: s.incompleteCount })}</b></div>
         </div>
 
         <AiPreReviewBox queueId={queueId} taxView="pph21" period={detail.period} summary={s} rows={detail.rows} />
@@ -120,12 +132,12 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
         <>
             <div className={styles.toolbar}>
               <div>
-                <input placeholder="직원명 검색" value={empSearch} onChange={e => setEmpSearch(e.target.value)} />
+                <input placeholder={tw('searchEmployeePlaceholder')} value={empSearch} onChange={e => setEmpSearch(e.target.value)} />
                 <select value={empStatus} onChange={e => setEmpStatus(e.target.value as '' | 'red' | 'amber' | 'green')}>
-                  <option value="">전체 상태</option>
-                  <option value="red">요청 필요</option>
-                  <option value="amber">검토 필요</option>
-                  <option value="green">확인 완료</option>
+                  <option value="">{tw('filterAll')}</option>
+                  <option value="red">{tw('needsRequest')}</option>
+                  <option value="amber">{tw('needsReview')}</option>
+                  <option value="green">{tw('confirmed')}</option>
                 </select>
               </div>
             </div>
@@ -142,22 +154,22 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
       {detailRow && (
         <RowDetailModal
           key={detailRow.payslipId}
-          title={`직원 상세: ${detailRow.name}`}
-          subtitle={`${detail.period} 귀속 · 직원 정보`}
+          title={tw('detailEmployeeTitle', { name: detailRow.name })}
+          subtitle={tw('detailEmployeeSubtitle', { period: detail.period })}
           summary={[
-            { label: '사번', value: detailRow.employeeNumber || '—' },
+            { label: tw('fEmployeeNumber'), value: detailRow.employeeNumber || '—' },
             { label: 'NPWP', value: detailRow.npwp || '—' },
             { label: 'NIK', value: detailRow.nik || '—' },
             { label: 'PTKP', value: String(detailRow.ptkp) },
-            { label: '고용형태', value: detailRow.employmentStatus || '—' },
-            { label: '직군 (Tax Method)', value: detailRow.workerType || '—' },
-            { label: '직책', value: detailRow.position || '—' },
-            { label: '부서', value: detailRow.department || '—' },
+            { label: tw('fEmploymentType'), value: detailRow.employmentStatus || '—' },
+            { label: tw('fWorkerType'), value: detailRow.workerType || '—' },
+            { label: tw('fPosition'), value: detailRow.position || '—' },
+            { label: tw('fDepartment'), value: detailRow.department || '—' },
           ]}
           rowId={detailRow.payslipId}
           queueId={queueId}
           putUrl="/api/tax/monthly-payslip"
-          fields={PPH21_FIELDS}
+          fields={buildPph21Fields(tw)}
           requiredKeys={requiredKeys}
           values={detailRow as unknown as Record<string, unknown>}
           operatorEdits={detailRow.operatorEdits}
@@ -180,15 +192,16 @@ export function Pph21ReviewPanel({ queueId, onChanged }: { queueId: string; onCh
 
 function RequestModal({ target, queueId, onClose, onSent }:
   { target: Pph21Row | 'BULK'; queueId: string; onClose: () => void; onSent: () => void }) {
+  const tw = useTranslations('workqueue');
   const isBulk = target === 'BULK';
   const row = isBulk ? null : (target as Pph21Row);
   return (
     <RequestChatModal
-      toLabel={isBulk ? '직원 자료 일괄' : row!.name}
-      contextLabel={isBulk ? '개인소득세 (PPh 21) · 일괄 요청' : `개인소득세 (PPh 21) · ${row!.flags.label}`}
+      toLabel={isBulk ? tw('bulkEmployeeData') : row!.name}
+      contextLabel={isBulk ? tw('reqCtxPph21Bulk') : tw('reqCtxPph21', { label: row!.flags.label })}
       defaultMessage={isBulk
-        ? '직원 자료 일괄 보완을 부탁드립니다.'
-        : `${row!.name}님의 ${row!.flags.label} 관련 자료를 확인 부탁드립니다.`}
+        ? tw('reqMsgPph21Bulk')
+        : tw('reqMsgPph21', { name: row!.name, label: row!.flags.label })}
       onSend={async (message) => {
         await fetch(`/api/operator/workqueue/${queueId}/request`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },

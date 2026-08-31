@@ -14,6 +14,7 @@ import type { EmployeeHrDetail, EmployeeHrRow } from './types';
  */
 export function EmployeeHrPanel({ queueId, onChanged }: { queueId: string; onChanged: () => void }) {
   const t = useTranslations('operatorWorkqueue');
+  const tw = useTranslations('workqueue');
   const [detail, setDetail] = useState<EmployeeHrDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeF, setActiveF] = useState<'' | 'active' | 'inactive' | 'issues'>('');
@@ -25,9 +26,9 @@ export function EmployeeHrPanel({ queueId, onChanged }: { queueId: string; onCha
       const r = await fetch(`/api/operator/workqueue/${queueId}/employees`);
       const j = await r.json();
       if (j.success) setDetail(j.data as EmployeeHrDetail);
-      else setError('상세 자료를 불러오지 못했습니다.');
-    } catch { setError('상세 자료를 불러오지 못했습니다.'); }
-  }, [queueId]);
+      else setError(tw('loadDetailFailed'));
+    } catch { setError(tw('loadDetailFailed')); }
+  }, [queueId, tw]);
   useEffect(() => { load(); }, [load]);
 
   const rows = useMemo(() => (detail?.rows ?? []).filter(r => {
@@ -40,10 +41,10 @@ export function EmployeeHrPanel({ queueId, onChanged }: { queueId: string; onCha
   if (error) return (
     <div className={styles.card}><div className={styles.body}>
       <div className={styles.blocked}>{error}</div>
-      <button className={styles.btn} onClick={() => load()}>다시 시도</button>
+      <button className={styles.btn} onClick={() => load()}>{tw('retry')}</button>
     </div></div>
   );
-  if (!detail) return <div className={styles.card}><div className={styles.body}>불러오는 중…</div></div>;
+  if (!detail) return <div className={styles.card}><div className={styles.body}>{tw('loading')}</div></div>;
   const s = detail.summary;
 
   return (
@@ -51,15 +52,15 @@ export function EmployeeHrPanel({ queueId, onChanged }: { queueId: string; onCha
       <div className={styles.head}>
         <div>
           <h1>{t('employeesTitle')}</h1>
-          <p>직원 마스터 정합성 검토 — PPh21 급여 계산의 입력 (PTKP · NPWP · NIK · 급여)</p>
+          <p>{tw('empHrSubtitle')}</p>
         </div>
       </div>
       <div className={styles.body}>
         <div className={styles.m4}>
-          <div className={styles.metric2}><small>전체 직원</small><b>{s.employeeCount}명</b></div>
-          <div className={styles.metric2}><small>재직</small><b>{s.activeCount}명</b></div>
-          <div className={styles.metric2}><small>무-NPWP (가산 대상)</small><b>{s.noNpwpCount}명</b></div>
-          <div className={styles.metric2}><small>이슈</small><b>{s.issueCount}건</b></div>
+          <div className={styles.metric2}><small>{tw('metricTotalEmployees')}</small><b>{tw('unitPeople', { count: s.employeeCount })}</b></div>
+          <div className={styles.metric2}><small>{tw('active')}</small><b>{tw('unitPeople', { count: s.activeCount })}</b></div>
+          <div className={styles.metric2}><small>{tw('metricNoNpwp')}</small><b>{tw('unitPeople', { count: s.noNpwpCount })}</b></div>
+          <div className={styles.metric2}><small>{tw('metricIssues')}</small><b>{tw('unitCases', { count: s.issueCount })}</b></div>
         </div>
 
         <AiPreReviewBox queueId={queueId} taxView="employees" period={detail.period}
@@ -68,10 +69,10 @@ export function EmployeeHrPanel({ queueId, onChanged }: { queueId: string; onCha
         <div className={styles.toolbar}>
           <div>
             <select value={activeF} onChange={e => setActiveF(e.target.value as '' | 'active' | 'inactive' | 'issues')}>
-              <option value="">전체 직원</option>
-              <option value="active">재직만</option>
-              <option value="inactive">퇴사/비활성만</option>
-              <option value="issues">이슈만</option>
+              <option value="">{tw('filterAllEmployees')}</option>
+              <option value="active">{tw('filterActiveOnly')}</option>
+              <option value="inactive">{tw('filterInactiveOnly')}</option>
+              <option value="issues">{tw('filterIssuesOnly')}</option>
             </select>
           </div>
         </div>
@@ -80,12 +81,12 @@ export function EmployeeHrPanel({ queueId, onChanged }: { queueId: string; onCha
 
         {detail.changeLog.length > 0 && (
           <div className={styles.panel}>
-            <h3>최근 인사 변경 이력</h3>
+            <h3>{tw('recentHrChanges')}</h3>
             <div className={styles.req}>
               {detail.changeLog.map(c => (
                 <div key={c.id} className={styles.reqi}>
                   <b>{c.employeeName} · {c.section}/{c.field}</b>
-                  <span>{c.oldValue ?? '(없음)'} → {c.newValue ?? '(없음)'} · {c.changedAt?.slice(0, 10)}</span>
+                  <span>{c.oldValue ?? tw('noneParen')} → {c.newValue ?? tw('noneParen')} · {c.changedAt?.slice(0, 10)}</span>
                 </div>
               ))}
             </div>
@@ -104,11 +105,12 @@ export function EmployeeHrPanel({ queueId, onChanged }: { queueId: string; onCha
 
 function RequestModal({ row, queueId, onClose, onSent }:
   { row: EmployeeHrRow; queueId: string; onClose: () => void; onSent: () => void }) {
+  const tw = useTranslations('workqueue');
   return (
     <RequestChatModal
       toLabel={row.name}
-      contextLabel={`직원 인사 기록 · ${row.flags.label}`}
-      defaultMessage={`직원 "${row.name}" 인사 기록의 "${row.flags.label}" 항목 확인·보완을 부탁드립니다.`}
+      contextLabel={tw('reqCtxEmployee', { label: row.flags.label })}
+      defaultMessage={tw('reqMsgEmployee', { name: row.name, label: row.flags.label })}
       onSend={async (message) => {
         await fetch(`/api/operator/workqueue/${queueId}/request`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },

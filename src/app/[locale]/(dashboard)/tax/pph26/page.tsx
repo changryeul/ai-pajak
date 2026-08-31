@@ -37,7 +37,7 @@ export default function Pph26Page() {
   const handleWholesaleUpload = async (file: File | null) => {
     if (!file) return;
     if (!customerId) {
-      showMsg('error', 'Customer not selected');
+      showMsg('error', t('customerNotSelected'));
       return;
     }
     setUploading(true);
@@ -46,13 +46,16 @@ export default function Pph26Page() {
       try {
         summary = await importPph26WholesaleFile(file);
       } catch (parseErr) {
-        showMsg('error', `Parse failed: ${(parseErr as Error).message}`);
+        showMsg('error', t('parseFailed', { msg: (parseErr as Error).message }));
         return;
       }
       if (summary.imported === 0) {
         showMsg(
           'error',
-          `0 rows imported (${summary.skippedByTaxType} non-PPh26 / ${summary.skippedByValidation} invalid)`,
+          t('zeroRowsImported', {
+            nonType: summary.skippedByTaxType,
+            invalid: summary.skippedByValidation,
+          }),
         );
         return;
       }
@@ -63,16 +66,16 @@ export default function Pph26Page() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) {
-        showMsg('error', `Import failed: ${data.error || `HTTP ${res.status}`}`);
+        showMsg('error', t('importFailed', { error: data.error || `HTTP ${res.status}` }));
         return;
       }
       const inserted = data.data?.insertedCount ?? 0;
       const total = data.data?.totalRows ?? 0;
       const skipNote =
-        summary.skippedByTaxType > 0 ? ` — ${summary.skippedByTaxType} non-PPh26 skipped` : '';
-      showMsg('success', `${inserted}/${total} PPh 26 transactions imported${skipNote}`);
+        summary.skippedByTaxType > 0 ? t('skipNote', { count: summary.skippedByTaxType }) : '';
+      showMsg('success', t('importSuccess', { inserted, total, skipNote }));
     } catch (err) {
-      showMsg('error', err instanceof Error ? err.message : 'unknown error');
+      showMsg('error', err instanceof Error ? err.message : t('unknownError'));
     } finally {
       setUploading(false);
     }
@@ -102,16 +105,15 @@ export default function Pph26Page() {
               <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <p className="font-semibold text-sm">Wholesale Upload (Excel/CSV)</p>
+              <p className="font-semibold text-sm">{t('wholesaleUploadTitle')}</p>
               <p className="text-[11px] text-gray-500 mt-0.5">
-                Bulk import non-resident transactions from your wholesale ledger. PPh26 rows are
-                kept; other tax types (PPh23 / PPh4(2) / PPh21) are skipped automatically.
+                {t('wholesaleUploadDesc')}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 mb-3">
-            <label className="text-xs font-medium text-gray-700">Tax Period:</label>
+            <label className="text-xs font-medium text-gray-700">{t('taxPeriodLabel')}</label>
             <input
               type="month"
               value={period}
@@ -147,7 +149,7 @@ export default function Pph26Page() {
           </Button>
 
           <p className="text-[10px] text-gray-500 mt-2 font-mono">
-            Flat 20% applied · Treaty rate not handled in v1 (use single-entry UI for treaty cases)
+            {t('flatRateNote')}
           </p>
 
           {message && (
