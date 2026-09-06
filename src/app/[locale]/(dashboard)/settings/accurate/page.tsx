@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { getAppUrl } from '@/lib/app-url';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +54,7 @@ export default function AccountingSettingsPage() {
   useParams();
   const searchParams = useSearchParams();
   const t = useTranslations('accurateSettings');
+  const appUrl = getAppUrl();
   const initialProvider = (searchParams.get('provider') === 'MEKARI' ? 'MEKARI' : 'ACCURATE') as ProviderId;
 
   const PROVIDERS: { id: ProviderId; name: string; requiresDb: boolean; hint: string }[] = [
@@ -442,13 +444,13 @@ export default function AccountingSettingsPage() {
                   </li>
                   <li>{t('accurateStep2')}</li>
                   <li>
-                    <b>{t('accurateStep3Register')}</b> — Name: <code className="bg-white px-1">AI Pajak</code>, Redirect URI: <code className="bg-white px-1">https://ai-pajak.vercel.app/api/accounting/callback</code>
+                    <b>{t('accurateStep3Register')}</b> — Name: <code className="bg-white px-1">AI Pajak</code>, Redirect URI: <code className="bg-white px-1">{appUrl}/api/accounting/callback</code>
                   </li>
                   <li>{t('accurateStep4')}</li>
                   <li>
                     {t('accurateStep5')}
                     <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] break-all border">
-                      https://account.accurate.id/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback&amp;scope=item_view+sales_invoice_view+purchase_invoice_view
+                      https://account.accurate.id/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri={appUrl}/api/accounting/callback&amp;scope=item_view+sales_invoice_view+purchase_invoice_view
                     </div>
                   </li>
                   <li>{t('accurateStep6')}</li>
@@ -458,7 +460,7 @@ export default function AccountingSettingsPage() {
 {`curl -X POST https://account.accurate.id/oauth/token \\
   -d "grant_type=authorization_code" \\
   -d "code=YOUR_CODE" \\
-  -d "redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback" \\
+  -d "redirect_uri=${appUrl}/api/accounting/callback" \\
   -d "client_id=YOUR_CLIENT_ID" \\
   -d "client_secret=YOUR_CLIENT_SECRET"`}
                     </div>
@@ -487,7 +489,7 @@ export default function AccountingSettingsPage() {
                   </li>
                   <li>
                     {t('mekariStep3')} — Name: <code className="bg-white px-1">AI Pajak</code>, Redirect URI:{' '}
-                    <code className="bg-white px-1">https://ai-pajak.vercel.app/api/accounting/callback</code>
+                    <code className="bg-white px-1">{appUrl}/api/accounting/callback</code>
                   </li>
                   <li>
                     {t('mekariStep4')} <code className="bg-white px-1">sales_invoice:read</code>, <code className="bg-white px-1">purchase_invoice:read</code>, <code className="bg-white px-1">contact:read</code>
@@ -496,7 +498,7 @@ export default function AccountingSettingsPage() {
                   <li>
                     {t('mekariStep6')}
                     <div className="mt-1 bg-white p-2 rounded font-mono text-[10px] break-all border">
-                      https://api.mekari.com/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback&amp;scope=sales_invoice:read+purchase_invoice:read+contact:read
+                      https://api.mekari.com/oauth/authorize?response_type=code&amp;client_id=<b>YOUR_CLIENT_ID</b>&amp;redirect_uri={appUrl}/api/accounting/callback&amp;scope=sales_invoice:read+purchase_invoice:read+contact:read
                     </div>
                   </li>
                   <li>{t('mekariStep7')}</li>
@@ -507,7 +509,7 @@ export default function AccountingSettingsPage() {
   -H "Content-Type: application/x-www-form-urlencoded" \\
   -d "grant_type=authorization_code" \\
   -d "code=YOUR_CODE" \\
-  -d "redirect_uri=https://ai-pajak.vercel.app/api/accounting/callback" \\
+  -d "redirect_uri=${appUrl}/api/accounting/callback" \\
   -d "client_id=YOUR_CLIENT_ID" \\
   -d "client_secret=YOUR_CLIENT_SECRET"`}
                     </div>

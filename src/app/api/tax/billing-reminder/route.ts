@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
 import { sendTelegram } from '@/lib/notifications/telegram-service';
+import { getAppUrl } from '@/lib/app-url';
 
 /**
  * POST /api/tax/billing-reminder
@@ -52,7 +53,7 @@ export async function POST(_request: NextRequest) {
       if (!customer) continue;
 
       const customerName = customer.company_name || customer.full_name;
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
+      const appUrl = getAppUrl();
 
       // Customer-facing copy is in Indonesian. Once `customer.locale` exists
       // we can branch per recipient.

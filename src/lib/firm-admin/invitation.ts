@@ -2,6 +2,7 @@ import { randomBytes } from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendEmail } from '@/lib/notifications/email-service';
 import { loggers } from '@/lib/logger';
+import { getAppUrl } from '@/lib/app-url';
 
 /**
  * Firm-scoped staff invitation (P6 follow-up).
@@ -95,7 +96,7 @@ export async function createAndEmailFirmInvitation(
     return { ok: false, status: 500, error: 'Failed to create invitation' };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
+  const appUrl = getAppUrl();
   const acceptUrl = `${appUrl}/ko/invite/accept?token=${token}`;
   const roleLabel = ROLE_LABEL[role];
   const firmName = firm?.name ?? 'your tax consulting firm';

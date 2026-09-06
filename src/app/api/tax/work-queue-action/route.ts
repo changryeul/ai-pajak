@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
 import { loggers } from '@/lib/logger';
+import { getAppUrl } from '@/lib/app-url';
 
 /**
  * POST /api/tax/work-queue-action
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
         const customerName = cust.company_name || cust.full_name;
         // Customer-facing copy is in Indonesian (target audience). When customer
         // table grows a locale column we can branch on it.
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
+        const appUrl = getAppUrl();
         const message = `📋 *Permintaan Dokumen - AI Pajak*\n\nHalo ${customerName},\n\nUntuk pelaporan pajak bulan ini kami memerlukan dokumen berikut:\n\n• Mutasi rekening bank\n• Faktur pajak masukan\n• Data penggajian\n\nSilakan unggah melalui tautan berikut:\n${appUrl}/documents\n\n_AI Pajak_`;
 
         // WhatsApp

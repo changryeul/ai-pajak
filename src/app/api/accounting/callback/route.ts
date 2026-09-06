@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { exchangeCodeForToken } from '@/lib/accounting/oauth-config';
 import { getProvider, type AccountingProviderId } from '@/lib/accounting';
+import { getAppUrl } from '@/lib/app-url';
 
 /**
  * GET /api/accounting/callback?code=...&state=...
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
   const errorParam = url.searchParams.get('error');
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
+  const appUrl = getAppUrl();
 
   // Helper to build redirect with status
   const buildRedirect = (provider: string, status: 'success' | 'error', message?: string) => {

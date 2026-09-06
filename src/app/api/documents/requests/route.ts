@@ -5,6 +5,7 @@ import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { loggers } from '@/lib/logger';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
 import { sendDocRequestTelegram } from '@/lib/notifications/telegram-service';
+import { getAppUrl } from '@/lib/app-url';
 
 /**
  * GET /api/documents/requests?customerId=...&period=...
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
       try {
         await sendWhatsApp({
           to: customer.phone_number,
-          text: `📋 *${title}*\n\nHalo ${customerName},\n\n${reqMessage || 'Dokumen berikut diperlukan:'}\n\n${docList}\n\nSilakan unggah di:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload\n\n_AI Pajak_`,
+          text: `📋 *${title}*\n\nHalo ${customerName},\n\n${reqMessage || 'Dokumen berikut diperlukan:'}\n\n${docList}\n\nSilakan unggah di:\n${getAppUrl()}/documents/upload\n\n_AI Pajak_`,
         });
         await admin.from('document_request')
           .update({ whatsapp_sent_at: new Date().toISOString() })

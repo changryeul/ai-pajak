@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendDeadlineReminder } from '@/lib/notifications/email-service';
+import { getAppUrl } from '@/lib/app-url';
 
 /**
  * POST /api/notifications/deadline-reminder
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
         taxPeriod: payment.tax_period,
         dueDate: payment.payment_deadline,
         daysUntilDue: daysLeft,
-        filingUrl: `https://ai-pajak.vercel.app/id/tax/spt-masa`,
+        filingUrl: `${getAppUrl()}/id/tax/spt-masa`,
       });
       sent++;
     } catch {

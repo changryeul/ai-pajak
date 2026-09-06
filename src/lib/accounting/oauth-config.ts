@@ -3,6 +3,7 @@
  * Client ID/Secret come from Vercel environment variables.
  */
 import type { AccountingProviderId } from './types';
+import { getAppUrl } from '@/lib/app-url';
 
 export interface OAuthConfig {
   providerId: AccountingProviderId;
@@ -58,7 +59,7 @@ export function getOAuthConfig(provider: AccountingProviderId): OAuthConfig {
  * Must match the URI registered in the provider's OAuth app settings.
  */
 export function getRedirectUri(): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
+  const appUrl = getAppUrl();
   return `${appUrl}/api/accounting/callback`;
 }
 

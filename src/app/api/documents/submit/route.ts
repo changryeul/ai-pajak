@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { loggers } from '@/lib/logger';
 import { sendWhatsApp } from '@/lib/notifications/whatsapp-service';
 import { sendDocRequestTelegram } from '@/lib/notifications/telegram-service';
+import { getAppUrl } from '@/lib/app-url';
 
 /**
  * POST /api/documents/submit
@@ -181,7 +182,7 @@ export async function POST(request: NextRequest) {
           try {
             await sendWhatsApp({
               to: customer.phone_number,
-              text: `📋 *Permintaan dokumen tambahan ${period}*\n\n${reqMessage}\n\n${missingList}\n\nSilakan unggah di:\n${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload\n\n_AI Pajak_`,
+              text: `📋 *Permintaan dokumen tambahan ${period}*\n\n${reqMessage}\n\n${missingList}\n\nSilakan unggah di:\n${getAppUrl()}/documents/upload\n\n_AI Pajak_`,
             });
             await admin.from('document_request')
               .update({ sent_via_whatsapp: true, whatsapp_sent_at: new Date().toISOString() })

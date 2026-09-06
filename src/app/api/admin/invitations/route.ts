@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { resolveUserRole } from '@/lib/auth/resolve-role';
 import { sendEmail } from '@/lib/notifications/email-service';
 import { loggers } from '@/lib/logger';
+import { getAppUrl } from '@/lib/app-url';
 
 type StaffRole = 'TAX_OPERATOR' | 'TAX_OPERATOR_SUPERVISOR' | 'TAX_ADVISOR' | 'CONSULTANT';
 
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send invitation email
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app';
+    const appUrl = getAppUrl();
     const acceptUrl = `${appUrl}/ko/invite/accept?token=${token}`;
 
     // Email copy is English so any future staff (KR/EN/ID) can read it. The

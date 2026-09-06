@@ -9,6 +9,7 @@
  */
 
 import { loggers } from '@/lib/logger';
+import { getAppUrl } from '@/lib/app-url';
 
 const TELEGRAM_API = 'https://api.telegram.org';
 
@@ -76,7 +77,7 @@ export async function sendDeadlineReminderTelegram(
 ): Promise<TelegramResult> {
   const emoji = daysLeft <= 3 ? '🚨' : daysLeft <= 7 ? '⚠️' : 'ℹ️';
   // Customer-facing Telegram messages in Bahasa Indonesia.
-  const text = `${emoji} *Pengingat tenggat ${taxType}*\n\nHalo ${customerName},\n\nTenggat pelaporan *${taxType}* tinggal *${daysLeft} hari* lagi.\nTenggat: ${deadline}\n\n[Buka AI Pajak](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/tax/monthly-dashboard)\n\n_AI Pajak × JTC_`;
+  const text = `${emoji} *Pengingat tenggat ${taxType}*\n\nHalo ${customerName},\n\nTenggat pelaporan *${taxType}* tinggal *${daysLeft} hari* lagi.\nTenggat: ${deadline}\n\n[Buka AI Pajak](${getAppUrl()}/tax/monthly-dashboard)\n\n_AI Pajak × JTC_`;
   return sendTelegram({ chatId, text });
 }
 
@@ -90,7 +91,7 @@ export async function sendDocRequestTelegram(
   documents: Array<{ description: string }>
 ): Promise<TelegramResult> {
   const docList = documents.map(d => `• ${d.description}`).join('\n');
-  const text = `📋 *${title}*\n\nHalo ${customerName},\n\nDokumen berikut diperlukan:\n\n${docList}\n\n[Unggah dokumen](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/documents/upload)\n\n_AI Pajak_`;
+  const text = `📋 *${title}*\n\nHalo ${customerName},\n\nDokumen berikut diperlukan:\n\n${docList}\n\n[Unggah dokumen](${getAppUrl()}/documents/upload)\n\n_AI Pajak_`;
   return sendTelegram({ chatId, text });
 }
 
@@ -104,6 +105,6 @@ export async function sendFilingCompleteTelegram(
   period: string,
   bpeNumber?: string
 ): Promise<TelegramResult> {
-  const text = `✅ *Pelaporan ${taxType} selesai*\n\nHalo ${customerName},\n\nPelaporan *${period}* ${taxType} telah selesai.${bpeNumber ? `\nBPE: ${bpeNumber}` : ''}\n\n[Lihat detail](${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'}/submissions)\n\n_AI Pajak × JTC_`;
+  const text = `✅ *Pelaporan ${taxType} selesai*\n\nHalo ${customerName},\n\nPelaporan *${period}* ${taxType} telah selesai.${bpeNumber ? `\nBPE: ${bpeNumber}` : ''}\n\n[Lihat detail](${getAppUrl()}/submissions)\n\n_AI Pajak × JTC_`;
   return sendTelegram({ chatId, text });
 }
