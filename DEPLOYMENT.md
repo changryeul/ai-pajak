@@ -1,257 +1,155 @@
-# AI PAJAK Deployment Guide
+# DEPLOYMENT — 프로덕션 배포 핸드오프 (AWS Singapore)
 
-This guide covers deploying AI PAJAK to Vercel with all required configurations.
+AI Pajak를 **AWS(싱가폴)** 프로덕션으로 배포·운영하기 위한 인수인계 문서입니다.
+운영 담당자(AWS 서버 운영)가 이 문서만 보고 배포·운영할 수 있도록 작성했습니다.
 
-## Prerequisites
+- 개발 온보딩: [`ONBOARDING.md`](./ONBOARDING.md)
+- 아키텍처 상세: [`CLAUDE.md`](./CLAUDE.md)
+- 문서: 한국어 / 코드·설정: 영어
 
-- [Vercel account](https://vercel.com)
-- [Supabase project](https://supabase.com)
-- [Midtrans account](https://midtrans.com) (for payments)
-- [Resend account](https://resend.com) (for emails)
-- [Sentry account](https://sentry.io) (optional, for error tracking)
-- [Upstash account](https://upstash.com) (optional, for rate limiting)
+---
 
-## Quick Start
-
-### 1. Import Project to Vercel
-
-```bash
-# Using Vercel CLI
-npm i -g vercel
-vercel link
-vercel deploy
-```
-
-Or import directly from GitHub at [vercel.com/new](https://vercel.com/new).
-
-### 2. Configure Environment Variables
-
-Set these environment variables in your Vercel project settings:
-
-#### Required Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | `https://xxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | `eyJ...` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | `eyJ...` |
-| `NEXT_PUBLIC_APP_URL` | Production URL | `https://app.aipajak.com` |
-
-#### Payment (Midtrans)
-
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | Client key from Midtrans |
-| `MIDTRANS_SERVER_KEY` | Server key from Midtrans |
-| `MIDTRANS_MERCHANT_ID` | Merchant ID |
-
-#### Email (Resend)
-
-| Variable | Description |
-|----------|-------------|
-| `RESEND_API_KEY` | Resend API key |
-| `EMAIL_FROM` | Sender email address |
-| `EMAIL_SUPPORT` | Support email address |
-
-#### AI Services (Optional)
-
-| Variable | Description |
-|----------|-------------|
-| `OPENAI_API_KEY` | OpenAI API key for GPT-4 Vision OCR |
-| `ANTHROPIC_API_KEY` | Anthropic API key for Claude |
-
-#### Security
-
-| Variable | Description |
-|----------|-------------|
-| `TWO_FACTOR_ENCRYPTION_KEY` | 32-byte encryption key for 2FA |
-| `SESSION_SECRET` | Session signing secret |
-| `CRON_SECRET` | Secret for cron job authentication |
-
-#### Error Tracking (Sentry)
-
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SENTRY_DSN` | Sentry DSN |
-| `SENTRY_ORG` | Sentry organization |
-| `SENTRY_PROJECT` | Sentry project name |
-| `SENTRY_AUTH_TOKEN` | Sentry auth token for source maps |
-
-#### Rate Limiting (Upstash)
-
-| Variable | Description |
-|----------|-------------|
-| `UPSTASH_REDIS_REST_URL` | Upstash Redis URL |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis token |
-
-### 3. Configure Supabase
-
-#### Enable Required Extensions
-
-```sql
--- Enable UUID generation
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Enable Row Level Security
-ALTER TABLE your_table ENABLE ROW LEVEL SECURITY;
-```
-
-#### Set Up Webhooks
-
-Configure Supabase webhooks to point to your Vercel deployment:
-
-1. Database webhooks for real-time sync
-2. Auth webhooks for user events
-
-### 4. Configure Midtrans Webhooks
-
-In your Midtrans dashboard, set the notification URL to:
+## 0. 아키텍처 한눈에
 
 ```
-https://your-domain.vercel.app/api/webhooks/midtrans
+[사용자] ──HTTPS──▶ [Next.js 16 웹앱 (AWS)] ──▶ [Supabase Cloud (PG+Auth+RLS)]
+                          │                         (DB는 AWS 자체호스팅 아님. 매니지드 유지)
+                          ├──▶ Anthropic / OpenAI (AI·OCR)
+                          ├──▶ Midtrans (결제)
+                          ├──▶ Resend (이메일) · Upstash (rate limit) · Sentry (에러)
+                          └──▶ DJP/Coretax (세무당국, 선택)
 ```
 
-## Deployment Architecture
+- **웹 티어만 AWS에서 실행**하고, **DB는 Supabase Cloud를 그대로 사용**합니다 (Supabase 자체호스팅 불필요).
+- Next.js는 **SSR 서버앱**입니다 (정적 사이트 아님). Node 20 런타임에서 `next build` → `next start`.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         Vercel                               │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │   Next.js   │  │    API      │  │    Cron Jobs        │  │
-│  │   Pages     │  │   Routes    │  │  (Vercel Cron)      │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-│         │                │                    │              │
-│         └────────────────┼────────────────────┘              │
-│                          │                                   │
-└──────────────────────────│───────────────────────────────────┘
-                           │
-         ┌─────────────────┼─────────────────┐
-         │                 │                 │
-         ▼                 ▼                 ▼
-   ┌──────────┐     ┌──────────┐     ┌──────────┐
-   │ Supabase │     │ Midtrans │     │  Resend  │
-   │ Database │     │ Payment  │     │  Email   │
-   │ + Auth   │     │          │     │          │
-   └──────────┘     └──────────┘     └──────────┘
-```
+---
 
-## Region Configuration
+## 1. 배포 방식 — 권장: AWS Amplify Hosting
 
-The app is configured to deploy to `sin1` (Singapore) for optimal latency to Indonesia.
+Vercel과 가장 유사해 이전 부담이 가장 적습니다. (컨테이너/EC2 대안은 §6)
 
-To change the region, update `vercel.json`:
+### 1-1. Amplify 앱 생성
+1. AWS Console → **Amplify** → **Host web app** → GitHub 연결 → `changryeul/ai-pajak` · 브랜치 `main`
+2. 리전: **ap-southeast-1 (Singapore)**
+3. 빌드 설정: 저장소 루트의 [`amplify.yml`](./amplify.yml) 자동 인식 (Next.js SSR 자동 감지)
+4. **환경변수**(§3)를 Amplify → App settings → Environment variables 에 등록
+5. 서비스 역할(IAM)은 Amplify 기본 SSR 역할 사용
 
-```json
-{
-  "regions": ["sin1"]
-}
-```
+### 1-2. 빌드 사양
+- Node **20** (Amplify build image에서 `nvm use 20` 또는 `amplify.yml`의 명시 버전)
+- `npm ci && npm run build` / 산출물: `.next`
+- `amplify.yml`에 포함됨
 
-## Cron Jobs
+---
 
-The following cron jobs are configured:
+## 2. 프로덕션 Supabase (신규 프로젝트 권장)
 
-| Job | Schedule | Description |
-|-----|----------|-------------|
-| `/api/cron/deadline-reminders` | Daily 8 AM | Send tax deadline reminders |
-| `/api/cron/payment-reminders` | Daily 9 AM | Send payment reminders |
-| `/api/cron/cleanup-expired-tokens` | Daily midnight | Clean up expired tokens |
+현재 앱은 개발/스테이징 Supabase(`hqcjeenfhlaxwteqzzcf`)를 써 왔습니다.
+**프로덕션은 깨끗한 새 프로젝트로 분리**하는 것을 권장합니다.
 
-## Function Configuration
+1. supabase.com → **New project** (조직/리전 **Singapore**, 강력한 DB 비밀번호)
+2. 마이그레이션 전체 적용 — 두 방법 중 하나:
+   - **CLI**: `supabase link --project-ref <PROD_REF>` → `supabase db push`
+   - **Management API**(현재 방식): 각 `supabase/migrations/*.sql`을 순서대로
+     `POST https://api.supabase.com/v1/projects/<PROD_REF>/database/query` (헤더 `Authorization: Bearer <SUPABASE_ACCESS_TOKEN>`)
+     ※ 레이트리밋 있으니 요청 사이 지연 필요
+3. 시드(운영 계정/기준데이터) — 필요한 것만. 테스트 계정은 프로덕션에 넣지 말 것.
+4. **Auth 설정** (Supabase 대시보드 → Authentication → URL Configuration):
+   - **Site URL** = 새 프로덕션 도메인 (§5)
+   - **Redirect URLs** 허용목록에 새 도메인 추가
+5. 새 프로젝트의 `NEXT_PUBLIC_SUPABASE_URL` / `anon` / `service_role` 를 §3 환경변수에 반영
 
-Long-running API routes have extended timeouts:
+> ⚠️ 마이그레이션 파일과 실제 prod 스키마가 어긋나지 않게 유지. 배포 후 `npm run test:smoke:prod`(대상 env를 prod로)로 drift 확인.
 
-| Route | Max Duration | Memory |
-|-------|--------------|--------|
-| `/api/tax/spt/**` | 60s | Default |
-| `/api/documents/[id]/ocr` | 120s | 1024 MB |
-| `/api/webhooks/**` | 30s | Default |
-| `/api/djp/**` | 60s | Default |
+---
 
-## Security Features
+## 3. 환경변수 (프로덕션)
 
-### Headers
+`.env.example` 이 전체 키의 소스입니다. 프로덕션에서 채워야 할 핵심:
 
-All responses include security headers:
+**필수 (앱 구동)**
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` — 신규 prod Supabase
+- `NEXT_PUBLIC_APP_URL` — **새 프로덕션 도메인** (예: `https://app.example.com`) — 이메일/알림/콜백 링크의 기준
+- `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` — AI·OCR
+- `TWO_FACTOR_ENCRYPTION_KEY`(`openssl rand -base64 32`), `SESSION_SECRET`, `CRON_SECRET`(`openssl rand -hex 32`)
 
-- `X-Content-Type-Options: nosniff`
-- `X-XSS-Protection: 1; mode=block`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- `Strict-Transport-Security: max-age=31536000; includeSubDomains`
-- `Content-Security-Policy` (configured for Midtrans, Supabase, Sentry)
+**결제 (실서비스 전환 시 필수)**
+- `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY`, `MIDTRANS_SERVER_KEY`, `MIDTRANS_MERCHANT_ID`
+- `MIDTRANS_IS_PRODUCTION=true` ← **실결제 켜는 스위치. 이 값이 'true'일 때만 실제 과금.**
 
-### API Security
+**부가 (없어도 graceful-degrade)**
+- `RESEND_API_KEY` / `EMAIL_FROM` / `EMAIL_SUPPORT` — 이메일
+- `UPSTASH_REDIS_REST_URL` / `_TOKEN` — rate limit (없으면 인메모리 폴백)
+- `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_*` — 에러 추적
+- `DJP_API_*`, `ACCURATE_*` / `JURNAL_*` (회계연동, redirect URI는 §5), `SUPABASE_ACCESS_TOKEN`(마이그레이션용, 안전 보관)
 
-- Rate limiting via Upstash Redis
-- Request ID tracking for debugging
-- CORS configured for allowed origins
-- Webhook signature verification
+> 시크릿 전달은 **평문 금지**. 1Password/Doppler/AWS Secrets Manager 등으로. Amplify는 env를 자체 암호화 저장.
 
-## Monitoring
+---
 
-### Sentry Integration
+## 4. 배포 파이프라인 / 마이그레이션 규칙
 
-Error tracking is automatically configured when `NEXT_PUBLIC_SENTRY_DSN` is set.
+- **코드 배포**: `main` 머지 → Amplify 자동 빌드/배포. (GitHub 브랜치 보호로 PR+CI 통과 필요 — 이미 설정됨)
+- **DB 마이그레이션은 배포로 자동 적용되지 않음** — 스키마 변경 시 사람이 prod Supabase에 §2-2 방법으로 적용. "누가 언제 적용했는지" 팀 공유.
+- **CI**: `.github/workflows/ci.yml`(tsc·eslint·vitest·build) — Amplify로 옮기면 CI의 Vercel 배포 스텝은 제거/무시.
+- **회귀 검증**: `npm run test:smoke:prod` (대상 env를 새 prod로) — ~65 스텝.
 
-Source maps are uploaded during build when `SENTRY_AUTH_TOKEN` is configured.
+---
 
-### Logs
+## 5. 도메인/URL 변경 (AWS 이전과 함께 처리 권장)
 
-View logs in the Vercel dashboard or use the CLI:
+새 도메인은 **AWS(Amplify) 배포에 연결**합니다 (기존 Vercel에 붙였다 다시 옮기면 이중 작업).
 
-```bash
-vercel logs your-deployment-url
-```
+1. Amplify → Domain management → 커스텀 도메인 추가 (ACM 인증서 자동 발급) 또는 Route53 연결
+2. `NEXT_PUBLIC_APP_URL` = 새 도메인 으로 설정 → 이메일/알림/콜백 링크 대부분 자동 반영
+3. **Supabase Auth**: Site URL + Redirect URLs 허용목록에 새 도메인 (§2-4)
+4. **결제/연동 콜백** 재등록:
+   - Midtrans 대시보드 finish/callback URL
+   - 회계연동(Accurate/Mekari/Jurnal) redirect URI — 제공사 콘솔에 새 도메인으로 등록
+5. **코드 내 하드코딩 잔재** (env 미설정 시 폴백 값) — 새 도메인으로 정리 권장:
+   - `src/app/api/notifications/deadline-reminder/route.ts` — 하드코딩 URL(폴백 아님) 있음
+   - `src/app/[locale]/(dashboard)/settings/accurate/page.tsx` — 안내 문구의 redirect URI 표기
+   - 그 외 다수 파일이 `process.env.NEXT_PUBLIC_APP_URL || 'https://ai-pajak.vercel.app'` 패턴 → env만 세팅하면 동작하나, 폴백 문자열도 정리하면 깔끔
 
-## Troubleshooting
+> **URL 변경은 AWS 이전과 논리적으로 분리 가능하지만, 함께 처리하는 게 맞습니다.** Supabase Auth 리다이렉트·결제/연동 콜백·`NEXT_PUBLIC_APP_URL`이 한꺼번에 새 도메인으로 맞춰져야 로그인·결제·이메일이 정상 동작하기 때문입니다.
 
-### Build Failures
+---
 
-1. Check that all required environment variables are set
-2. Verify Node.js version matches (18.x recommended)
-3. Clear cache: `vercel --force`
+## 6. 대안 배포 방식 (Amplify 대신)
 
-### Runtime Errors
+컨테이너를 선호하면 (ECS/Fargate·App Runner):
+- `next.config.ts` 에 `output: 'standalone'` 추가 → 경량 이미지
+- `Dockerfile`(멀티스테이지: deps → build → runner, `node:20-alpine`, `next start`) 필요
+- ECR 푸시 → ECS/Fargate 또는 App Runner. ALB + ACM(SSL) + Route53.
+- 환경변수는 Task Definition/Secrets Manager로 주입.
 
-1. Check Vercel function logs
-2. Verify Supabase connection
-3. Check Sentry for detailed error reports
+> 이 방식으로 갈 경우 Dockerfile·standalone 설정을 추가해 드릴 수 있습니다(현재는 Amplify 기준이라 미포함).
 
-### Webhook Issues
+EC2 직접 운영: `npm ci && npm run build` → `pm2 start "npm start"` → nginx 리버스 프록시 + certbot. 가장 수동적.
 
-1. Verify webhook URL is correct
-2. Check signature verification
-3. Ensure webhook secret is configured
+---
 
-## Rollback
+## 7. Go-Live 체크리스트
 
-To rollback to a previous deployment:
+- [ ] 새 prod Supabase 생성 + 마이그레이션 전체 적용 + drift 0 확인
+- [ ] Amplify 앱 생성 + GitHub 연결 + `amplify.yml` 빌드 성공
+- [ ] 환경변수 전부 등록 (특히 `NEXT_PUBLIC_APP_URL` = 새 도메인)
+- [ ] 커스텀 도메인 연결 + SSL(ACM) 발급
+- [ ] Supabase Auth Site URL/Redirect URLs = 새 도메인
+- [ ] **`MIDTRANS_IS_PRODUCTION=true`** + Midtrans 실키 + 콜백 URL (실결제 시)
+- [ ] 회계연동 redirect URI 재등록 (사용 시)
+- [ ] 운영팀 2FA 정책(`system_setting.security.operator_mfa_required`) 확인
+- [ ] `npm run test:smoke:prod`(새 prod 대상) 통과
+- [ ] 로그인 → 개인/법인/운영팀 각 1건 스모크 (브라우저)
+- [ ] Sentry 에러 수집 확인
 
-```bash
-# List deployments
-vercel list
+---
 
-# Promote a previous deployment
-vercel promote <deployment-url>
-```
+## 8. 운영 담당자에게 넘길 접근권한
 
-## Preview Deployments
-
-Every pull request automatically creates a preview deployment.
-
-Preview URLs follow the pattern:
-```
-https://ai-pajak-<hash>-<team>.vercel.app
-```
-
-## Production Checklist
-
-- [ ] All environment variables configured
-- [ ] Supabase Row Level Security enabled
-- [ ] Midtrans webhook URL configured
-- [ ] Custom domain configured
-- [ ] SSL certificate active
-- [ ] Error tracking (Sentry) configured
-- [ ] Rate limiting (Upstash) configured
-- [ ] Backup strategy in place
-- [ ] Monitoring alerts configured
+- [ ] GitHub `changryeul/ai-pajak` collaborator (또는 소유권 이전)
+- [ ] 새 prod Supabase 프로젝트 소유권/멤버
+- [ ] AWS 계정 내 Amplify/Route53/ACM 권한 (담당자 계정)
+- [ ] 프로덕션 시크릿 (안전 채널)
+- [ ] 외부 서비스 콘솔 (Midtrans/Resend/Sentry/Anthropic/OpenAI) 접근 또는 키

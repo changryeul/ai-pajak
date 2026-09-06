@@ -1,0 +1,22 @@
+# AWS Amplify Hosting build spec — Next.js 16 (SSR)
+# 문서: DEPLOYMENT.md §1. 환경변수는 Amplify Console 에서 주입.
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm use 20 || nvm install 20
+        - node -v
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    # Next.js SSR: Amplify 가 .next 를 인식해 SSR/ISR 컴퓨트로 배포
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
